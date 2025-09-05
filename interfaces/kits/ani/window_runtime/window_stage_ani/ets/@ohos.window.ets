@@ -717,6 +717,30 @@ export enum RectType {
   RELATIVE_TO_PARENT_WINDOW = 1
 }
 
+export interface SubWindowOptions {
+    title: string;
+    decorEnabled: boolean;
+    isModal?: boolean;
+    isTopmost?: boolean;
+    modalityType?: ModalityType;
+    windowRect?: Rect;
+    maximizeSupported?: boolean;
+    zLevel?: int;
+    outlineEnabled?: boolean;
+}
+
+export class SubWindowOptionsInternal implements SubWindowOptions {
+    title: string;
+    decorEnabled: boolean;
+    isModal?: boolean;
+    isTopmost?: boolean;
+    modalityType?: ModalityType;
+    windowRect?: Rect;
+    maximizeSupported?: boolean;
+    zLevel?: int;
+    outlineEnabled?: boolean;
+}
+
 export interface StatusBarProperty {
   contentColor: string;
 }
