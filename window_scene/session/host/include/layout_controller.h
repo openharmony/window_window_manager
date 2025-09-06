@@ -76,7 +76,6 @@ private:
     GetSystemConfigFunc getSystemConfigFunc_;
 
     void AdjustRectByLimits(WindowLimits limits, float ratio, bool isDecor, float vpr, WSRect& rect);
-    void AdjustRectByLimits(WindowLimits limits, float ratio, const WindowDecoration& decoration, WSRect& rect);
     WindowLimits GetWindowLimits() const;
 };
 } // namespace OHOS::Rosen

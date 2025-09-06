@@ -152,6 +152,7 @@ public:
     void StopMoving();
     void SetLastDragEndRect(const WSRect& rect) { lastDragEndRect_ = rect; }
     WSRect GetLastDragEndRect() const { return lastDragEndRect_; }
+    void SetWindowDecoration(const WindowDecoration& decoration) { decoration_ = decoration; }
 
 private:
     struct MoveDragProperty {
@@ -279,7 +280,6 @@ private:
         const sptr<WindowSessionProperty> property);
     void ResSchedReportData(int32_t type, bool onOffTag);
     void NotifyWindowInputPidChange(bool isServerPid);
-    void SetWindowDecoration(const WindowDecoration& decoration) { decoration_ = decoration; }
 
     /*
      * Cross Display Move Drag
