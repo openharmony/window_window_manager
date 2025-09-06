@@ -424,9 +424,9 @@ public:
     /**
      * @brief Sets the content aspect ratio of window.
      *
-     * @param ratio The aspect ratio of window content (width divided by height)
-     * @param isPersistent Whether to persist the aspect ratio setting
-     * @param needUpdateRect Whether to update the window rect after setting aspect ratio
+     * @param ratio The aspect ratio of window content (width divided by height).
+     * @param isPersistent Whether to persist the aspect ratio setting.
+     * @param needUpdateRect Whether to update the window rect after setting aspect ratio.
      * @return WMError::WM_OK on success, or appropriate error code on failure.
      */
     virtual WMError SetContentAspectRatio(

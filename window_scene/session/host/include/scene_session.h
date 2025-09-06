@@ -521,6 +521,7 @@ public:
      */
     void SetWatermarkEnabled(const std::string& watermarkName, bool isEnabled);
 
+    bool IsDecorEnable() const;
     bool IsAppSession() const;
     bool IsAppOrLowerSystemSession() const;
     bool IsSystemSessionAboveApp() const;
@@ -669,6 +670,15 @@ public:
     WMError NotifyDisableDelegatorChange() override;
     virtual void SetRecentSessionState(RecentSessionInfo& info, const SessionState& state) {}
     void RegisterGetStartWindowConfigFunc(GetStartWindowTypeFunc&& func);
+
+    /*
+     * Window Decor
+     */
+    int32_t GetCustomDecorHeight() const;
+    void SetCustomDecorHeight(int32_t height) override;
+    WSError SetDecorVisible(bool isVisible) override;
+    bool IsDecorVisible() const;
+    WindowDecoration GetWindowDecoration() const;
 
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) override;
@@ -1247,6 +1257,14 @@ private:
     virtual void RemoveSurfaceNodeFromScreen() {}
     void SetParentRect();
     WSRect GetGlobalOrWinRect();
+
+    /*
+     * Window Decor
+     */
+    mutable std::mutex customDecorHeightMutex_;
+    int32_t customDecorHeight_ = 0;
+    bool isDecorVisible_ = true;
+    // guarded by customDecorHeightMutex_
 
     ForceHideState forceHideState_ { ForceHideState::NOT_HIDDEN };
     int32_t oriPosYBeforeRaisedByKeyboard_ = 0;

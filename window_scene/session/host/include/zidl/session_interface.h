@@ -197,9 +197,9 @@ public:
     /**
      * @brief Sets the content aspect ratio of window.
      *
-     * @param ratio The aspect ratio of window content (width divided by height)
-     * @param isPersistent Whether to persist the aspect ratio setting
-     * @param needUpdateRect Whether to update the window rect after setting aspect ratio
+     * @param ratio The aspect ratio of window content (width divided by height).
+     * @param isPersistent Whether to persist the aspect ratio setting.
+     * @param needUpdateRect Whether to update the window rect after setting aspect ratio.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError SetContentAspectRatio(
@@ -375,8 +375,9 @@ public:
      * @brief Set whether the window decoration is visible.
      *
      * @param isVisible True means the window decoration is visible, false means the opposite.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError SetDecorVisible(bool isVisible) { return WSError::WS_OK; }
+    virtual WSError SetDecorVisible(bool isVisible) { return WSError::WS_DO_NOTHING; }
 
     virtual WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) { return WMError::WM_OK; }
