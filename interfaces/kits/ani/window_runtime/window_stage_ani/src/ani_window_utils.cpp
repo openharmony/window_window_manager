@@ -1074,8 +1074,7 @@ ani_object AniWindowUtils::CreateWindowsProperties(ani_env* env, const WindowPro
     std::string windowName = window->GetWindowName();
     ani_string aniWindowName;
     if (ANI_OK == GetAniString(env, windowName, &aniWindowName)) {
-        CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>name", nullptr,
-        static_cast<ani_boolean>(aniWindowName));
+        CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>name", nullptr, aniWindowName);
     }
     CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>focusable", nullptr,
         static_cast<ani_boolean>(windowPropertyInfo.isFocusable));
