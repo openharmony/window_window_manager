@@ -81,7 +81,7 @@ public:
         const char* method, const char* signature, ...);
     static ani_status GetAniString(ani_env* env, const std::string& str, ani_string* result);
     static void* GetAbilityContext(ani_env *env, ani_object aniObj);
-    static ani_object CreateWindowsProperties(ani_env* env, const sptr<Window>& window);
+    static ani_object CreateWindowsProperties(ani_env* env, const WindowPropertyInfo& windowPropertyInfo);
     static ani_object CreateProperties(ani_env* env, const sptr<Window>& window);
     static uint32_t GetColorFromAni(ani_env* env, const char* name,
         uint32_t defaultColor, bool& flag, const ani_object& aniObject);
@@ -130,40 +130,6 @@ public:
      * @return Corresponding WmErrorCode or defaultCode if unmapped.
      */
     static WmErrorCode ToErrorCode(WMError error, WmErrorCode defaultCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-
-private:
-    static void SetSystemPropertiesWindowRect(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesDrawableRect(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowType(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowIsLayoutFullScreen(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowIsFullScreen(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowTouchable(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowFousable(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowIsPrivacyMode(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowIsKeepScreenOn(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowBrightness(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowIsTransparent(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowIsRoundCorner(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowDimBehindValue(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowId(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesDisplayId(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowName(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
 };
 }
 }
