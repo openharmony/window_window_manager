@@ -1250,7 +1250,7 @@ HWTEST_F(SceneSessionManagerTest9, CheckClickFocusIsDownThroughFullScreen_FocusC
 
     sptr<SceneSessionMocker> focusedSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
     focusedSession->zOrder_ = 2;
-    EXPECT_CAll(*focusedSession, IsBlockingFocusFullScreenSystemPanel()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*focusedSession, IsBlockingFocusFullScreenSystemPanel()).WillRepeatedly(Return(true));
 
     bool ret = ssm_->CheckClickFocusIsDownThroughFullScreen(focusedSession, sceneSession, FocusChangeReason::DEFAULT);
     EXPECT_EQ(ret, false);
