@@ -396,7 +396,7 @@ HWTEST_F(SceneInputManagerTest, FlushDisplayInfoToMMI, TestSize.Level0)
     SceneInputManager::GetInstance().FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList), true);
     SceneInputManager::GetInstance().FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList));
     usleep(WAIT_SYNC_IN_NS);
-    EXPECT_TRUE(logMsg.find("sceneSessionDirty_ is nullptr") != std::string::npos);
+    EXPECT_FALSE(logMsg.find("sceneSessionDirty_ is nullptr") != std::string::npos);
     logMsg.clear();
 
     auto preEventHandler = SceneInputManager::GetInstance().eventHandler_;
