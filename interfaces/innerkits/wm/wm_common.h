@@ -1788,9 +1788,22 @@ struct WindowLimits {
         float minRatio, float vpRatio) : maxWidth_(maxWidth), maxHeight_(maxHeight), minWidth_(minWidth),
         minHeight_(minHeight), maxRatio_(maxRatio), minRatio_(minRatio), vpRatio_(vpRatio) {}
 
+    void Trim(uint32_t trimWidth, uint32_t trimHeight)
+    {
+        minWidth_ -= trimWidth;
+        maxWidth_ -= trimWidth;
+        minHeight_ -= trimHeight;
+        maxHeight_ -= trimHeight;
+    }
+
     bool IsEmpty() const
     {
         return (maxWidth_ == 0 || minWidth_ == 0 || maxHeight_ == 0 || minHeight_ == 0);
+    }
+
+    bool IsValid() const
+    {
+        return minWidth_ <= maxWidth_ && minHeight_ <= maxHeight_;
     }
 
     std::string ToString() const

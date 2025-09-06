@@ -505,6 +505,7 @@ void MoveDragController::CalcDragTargetRect(const std::shared_ptr<MMI::PointerEv
                                             SizeChangeReason reason)
 {
     if (reason == SizeChangeReason::DRAG_START) {
+        // TODO：感觉可以在这里调整窗口大小
         moveDragProperty_.targetRect_ = moveDragProperty_.originalRect_;
         TLOGD(WmsLogTag::WMS_LAYOUT, "drag rect:%{public}s", moveDragProperty_.targetRect_.ToString().c_str());
         return;
@@ -580,6 +581,7 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
         default:
             return false;
     }
+    // TODO：这里会触发拖拽 rect 更新，也可以在这里再去根据屏幕比例调整窗口
     CalcDragTargetRect(pointerEvent, reason);
     ProcessSessionRectChange(reason);
     return true;

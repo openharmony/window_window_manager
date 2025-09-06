@@ -1474,13 +1474,8 @@ WSError SceneSession::SetAspectRatio(float ratio)
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        float vpr = 1.5f; // 1.5f: default virtual pixel ratio
-        auto display = DisplayManager::GetInstance().GetDefaultDisplay();
-        if (display) {
-            vpr = display->GetVirtualPixelRatio();
-            TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s vpr=%{public}f", where, vpr);
-        }
-        WSError ret = CheckAspectRatioValid(session, ratio, vpr);
+        const WindowDecoration& decoration = session->GetWindowDecoration();
+        WSError ret = CheckAspectRatioValid2(session, ratio, decoration);
         if (ret != WSError::WS_OK) {
             return ret;
         }
@@ -1492,7 +1487,7 @@ WSError SceneSession::SetAspectRatio(float ratio)
         WSRect adjustedRect = session->GetSessionRect();
         TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s Before adjusting, the id:%{public}d, the current rect:%{public}s, "
             "ratio:%{public}f", where, session->GetPersistentId(), adjustedRect.ToString().c_str(), ratio);
-        if (session->layoutController_->AdjustRectByAspectRatio(adjustedRect, session->IsDecorEnable())) {
+        if (session->layoutController_->AdjustRectByAspectRatio(adjustedRect, decoration)) {
             TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s After adjusting, the id:%{public}d, the adjusted rect:%{public}s",
                 where, session->GetPersistentId(), adjustedRect.ToString().c_str());
             session->NotifySessionRectChange(adjustedRect, SizeChangeReason::RESIZE);
@@ -3303,13 +3298,13 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
             const auto decoration = GetWindowDecoration();
             moveDragController_->SetWindowDecoration(decoration);
             WSRect adjustedRect = GetSessionRect();
-            TLOGNI(WmsLogTag::WMS_LAYOUT,
-                   "%{public}s Before adjusting, the id:%{public}d, the current rect:%{public}s",
-                   where, GetPersistentId(), adjustedRect.ToString().c_str());
+            TLOGI(WmsLogTag::WMS_LAYOUT,
+                  "Before adjusting, the id:%{public}d, the current rect:%{public}s",
+                  where, GetPersistentId(), adjustedRect.ToString().c_str());
             if (layoutController_->AdjustRectByAspectRatio(adjustedRect, decoration)) {
-                TLOGNI(WmsLogTag::WMS_LAYOUT,
-                       "%{public}s After adjusting, the id:%{public}d, the adjusted rect:%{public}s",
-                       where, GetPersistentId(), adjustedRect.ToString().c_str());
+                TLOGI(WmsLogTag::WMS_LAYOUT,
+                      "After adjusting, the id:%{public}d, the adjusted rect:%{public}s",
+                      GetPersistentId(), adjustedRect.ToString().c_str());
                 NotifySessionRectChange(adjustedRect, SizeChangeReason::RESIZE);
             }
         }
