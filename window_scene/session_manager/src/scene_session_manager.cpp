@@ -16746,8 +16746,8 @@ WSError SceneSessionManager::CloneWindow(int32_t fromPersistentId, int32_t toPer
         NodeId nodeId = INVALID_NODEID;
         if (fromPersistentId >= 0) { // if fromPersistentId < 0, excute CloneWindow(0) to cancel cloneWindow
             if (auto fromSceneSession = GetSceneSession(fromPersistentId)) {
-                if (auto leashWinShadowSurfaceNode = fromSceneSession->GetLeashWinShadowSurfaceNode()) {
-                    nodeId = leashWinShadowSurfaceNode->GetId();
+                if (auto surfaceNode = fromSceneSession->GetSurfaceNode()) {
+                    nodeId = surfaceNode->GetId();
                 }
             } else {
                 TLOGNE(WmsLogTag::WMS_PC, "Session is nullptr, id: %{public}d", fromPersistentId);
