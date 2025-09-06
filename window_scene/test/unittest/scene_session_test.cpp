@@ -2345,7 +2345,7 @@ HWTEST_F(SceneSessionTest, CloneWindow, TestSize.Level1)
     bool needOffScreen = false;
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    sceneSession->SetSurfaceNode(surfaceNode);
+    sceneSession->GetLeashWinShadowSurfaceNode(surfaceNode);
     sceneSession->CloneWindow(surfaceNodeId, needOffScreen);
     EXPECT_TRUE(logMsg.find("cloned") != std::string::npos);
 }
