@@ -11972,7 +11972,7 @@ void SceneSessionManager::UpdateRootSceneSessionAvoidArea(int32_t persistentId, 
         AvoidArea avoidArea = rootSceneSession_->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidAreaType));
         if (avoidAreaType == static_cast<T>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR) &&
             !CheckAvoidAreaForAINavigationBar(
-                isAINavigationBarVisible_[rootSceneSession_->GetSessionProperty()->GetDisplayId], avoidArea,
+                isAINavigationBarVisible_[rootSceneSession_->GetSessionProperty()->GetDisplayId()], avoidArea,
                 rootSceneSession_->GetSessionRect().height_)) {
             continue;
         }
