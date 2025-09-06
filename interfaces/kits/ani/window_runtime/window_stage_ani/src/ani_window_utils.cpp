@@ -1052,12 +1052,11 @@ ani_object AniWindowUtils::CreateWindowsProperties(ani_env* env, const WindowPro
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     static const char* clsName = "@ohos.window.window.WindowPropertiesInternal";
     ani_object aniSystemProperties;
-
     NewAniObjectNoParams(env, clsName, &aniSystemProperties);
     CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>windowRect", nullptr,
-            CreateAniRect(env, windowPropertyInfo.windowRect));
+        CreateAniRect(env, windowPropertyInfo.windowRect));
     CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>drawableRect", nullptr,
-            CreateAniRect(env, windowPropertyInfo.drawableRect));
+        CreateAniRect(env, windowPropertyInfo.drawableRect));
     WindowType aniWindowType = windowPropertyInfo.type;
     if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(aniWindowType) != 0) {
         env->Object_SetFieldByName_Int(aniSystemProperties, "typeInternal",
@@ -1071,7 +1070,7 @@ ani_object AniWindowUtils::CreateWindowsProperties(ani_env* env, const WindowPro
         static_cast<ani_boolean>(windowPropertyInfo.isFullScreen));
     CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>touchable", nullptr,
         static_cast<ani_boolean>(windowPropertyInfo.isTouchable));
-    std::string windowName = window->GetWindowName();
+    std::string windowName = windowPropertyInfo.name;
     ani_string aniWindowName;
     if (ANI_OK == GetAniString(env, windowName, &aniWindowName)) {
         CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>name", nullptr, aniWindowName);
@@ -1094,12 +1093,10 @@ ani_object AniWindowUtils::CreateWindowsProperties(ani_env* env, const WindowPro
         static_cast<ani_int>(windowPropertyInfo.id));
     CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>displayId", nullptr,
         static_cast<ani_long>(windowPropertyInfo.displayId));
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] get properties end");
     if (aniSystemProperties == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] AniSystemProperties is nullptr");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-
     return aniSystemProperties;
 }
 
