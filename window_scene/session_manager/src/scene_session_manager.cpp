@@ -12137,9 +12137,13 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
         bool isNeedUpdate = true;
         {
             std::unique_lock<std::shared_mutex> lock(currAINavigationBarAreaMapMutex_);
-            isNeedUpdate = currAINavigationBarAreaMap_.count(displayId) == 0 ||
+            if (isAINavigationBarVisible_.find(displayId) == isAINavigationBarVisible_.end()) {
+                isAINavigationBarVisible_[displayId] = false;
+            }
+            isNeedUpdate = isAINavigationBarVisible_[displayId] != isVisible;
+                           currAINavigationBarAreaMap_.count(displayId) == 0 ||
                            currAINavigationBarAreaMap_[displayId] != barArea ||
-                           isAINavigationBarVisible_[displayId] != isVisible;
+                           
             if (isNeedUpdate) {
                 isAINavigationBarVisible_[displayId] = isVisible;
                 currAINavigationBarAreaMap_[displayId] = barArea;
