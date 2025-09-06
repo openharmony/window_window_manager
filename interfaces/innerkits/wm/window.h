@@ -2200,9 +2200,6 @@ public:
     virtual WMError NapiSetUIContentByName(const std::string& contentName, napi_env env, napi_value storage,
         BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
         AppExecFwk::Ability* ability = nullptr) { return WMError::WM_OK; }
-    virtual WMError NapiSetUIContentByName(const std::string& contentName, ani_env* env, ani_object storage,
-        BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
-        AppExecFwk::Ability* ability = nullptr) { return WMError::WM_OK; }
     virtual WMError AniSetUIContentByName(const std::string& contentName, ani_env* env, ani_object storage,
         BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
         AppExecFwk::Ability* ability = nullptr) { return WMError::WM_OK; }
