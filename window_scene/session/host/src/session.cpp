@@ -29,6 +29,7 @@
 #include "proxy/include/window_info.h"
 
 #include "common/include/session_permission.h"
+#include "fold_screen_state_internel.h"
 #include "rs_adapter.h"
 #include "session_coordinate_helper.h"
 #include "session_helper.h"
@@ -75,6 +76,7 @@ const std::map<SessionState, bool> DETACH_MAP = {
     { SessionState::STATE_INACTIVE, true },
     { SessionState::STATE_BACKGROUND, true },
 };
+const uint32_t ROTATION_LANDSCAPE_INVERTED = 3;
 } // namespace
 
 std::shared_ptr<AppExecFwk::EventHandler> Session::mainHandler_;
@@ -2750,7 +2752,12 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
         return;
     }
     auto key = GetSessionSnapshotStatus(reason);
-    auto rotate = WSSnapshotHelper::GetDisplayOrientation(currentRotation_);
+    auto rotation = currentRotation_;
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
+        WSSnapshotHelper::GetInstance()->GetScreenStatus() == SCREEN_FOLDED) {
+        rotation = ROTATION_LANDSCAPE_INVERTED;
+    }
+    auto rotate = WSSnapshotHelper::GetDisplayOrientation(rotation);
     if (persistentPixelMap) {
         key = defaultStatus;
         rotate = DisplayOrientation::PORTRAIT;
@@ -2944,6 +2951,10 @@ SnapshotStatus Session::GetSessionSnapshotStatus(BackgroundReason reason) const
         snapshotScreen = SCREEN_EXPAND;
     }
     uint32_t orientation = WSSnapshotHelper::GetOrientation(currentRotation_);
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
+        WSSnapshotHelper::GetInstance()->GetScreenStatus() == SCREEN_FOLDED) {
+        orientation = 1;
+    }
     return std::make_pair(snapshotScreen, orientation);
 }
 
@@ -2959,6 +2970,10 @@ uint32_t Session::GetLastOrientation() const
 {
     if (!SupportSnapshotAllSessionStatus()) {
         return SNAPSHOT_PORTRAIT;
+    }
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
+        WSSnapshotHelper::GetInstance()->GetScreenStatus() == SCREEN_FOLDED) {
+        return ROTATION_LANDSCAPE_INVERTED;
     }
     return static_cast<uint32_t>(WSSnapshotHelper::GetDisplayOrientation(currentRotation_));
 }
