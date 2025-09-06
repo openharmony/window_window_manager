@@ -1050,11 +1050,6 @@ ani_status AniWindowUtils::GetAniString(ani_env* env, const std::string& str, an
 ani_object AniWindowUtils::CreateWindowsProperties(ani_env* env, const WindowPropertyInfo& windowPropertyInfo)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "window is nullptr or get invalid param");
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-    }
-
     static const char* clsName = "@ohos.window.window.WindowPropertiesInternal";
     ani_object aniSystemProperties;
 
@@ -1071,7 +1066,7 @@ ani_object AniWindowUtils::CreateWindowsProperties(ani_env* env, const WindowPro
         env->Object_SetFieldByName_Int(aniSystemProperties, "typeInternal", ani_int(aniWindowType));
     }
     CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>isLayoutFullScreen", nullptr,
-        static_cast<ani_boolean>(windowPropertyInfo.isLayotFullScreen));
+        static_cast<ani_boolean>(windowPropertyInfo.isLayoutFullScreen));
     CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>isFullScreen", nullptr,
         static_cast<ani_boolean>(windowPropertyInfo.isFullScreen));
     CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>touchable", nullptr,
@@ -1100,8 +1095,7 @@ ani_object AniWindowUtils::CreateWindowsProperties(ani_env* env, const WindowPro
         static_cast<ani_int>(windowPropertyInfo.id));
     CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>displayId", nullptr,
         static_cast<ani_long>(windowPropertyInfo.displayId));
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] Window [%{public}u, %{public}s] get properties end", window->GetWindowId(),
-        window->GetWindowName().c_str());
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] get properties end");
     if (aniSystemProperties == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] AniSystemProperties is nullptr");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
