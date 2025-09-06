@@ -1065,34 +1065,31 @@ ani_object AniWindowUtils::CreateWindowsProperties(ani_env* env, const WindowPro
         env->Object_SetFieldByName_Int(aniSystemProperties, "typeInternal", ani_int(aniWindowType));
     }
     CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>isLayoutFullScreen", nullptr,
-        static_cast<ani_boolean>(windowPropertyInfo.isLayoutFullScreen));
+        ani_boolean(windowPropertyInfo.isLayoutFullScreen));
     CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>isFullScreen", nullptr,
-        static_cast<ani_boolean>(windowPropertyInfo.isFullScreen));
+        ani_boolean(windowPropertyInfo.isFullScreen));
     CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>touchable", nullptr,
-        static_cast<ani_boolean>(windowPropertyInfo.isTouchable));
+        ani_boolean(windowPropertyInfo.isTouchable));
     std::string windowName = windowPropertyInfo.name;
     ani_string aniWindowName;
     if (ANI_OK == GetAniString(env, windowName, &aniWindowName)) {
         CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>name", nullptr, aniWindowName);
     }
     CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>focusable", nullptr,
-        static_cast<ani_boolean>(windowPropertyInfo.isFocusable));
+        ani_boolean(windowPropertyInfo.isFocusable));
     CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>isPrivacyMode", nullptr,
-        static_cast<ani_boolean>(windowPropertyInfo.isPrivacyMode));
+        ani_boolean(windowPropertyInfo.isPrivacyMode));
     CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>isKeepScreenOn", nullptr,
-        static_cast<ani_boolean>(windowPropertyInfo.isKeepScreenOn));
+        ani_boolean(windowPropertyInfo.isKeepScreenOn));
     CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>brightness", nullptr,
-        static_cast<ani_float>(windowPropertyInfo.brightness));
+        ani_float(windowPropertyInfo.brightness));
     CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>isTransparent", nullptr,
-        static_cast<ani_boolean>(windowPropertyInfo.isTransparent));
-    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>isRoundCorner", nullptr,
-        static_cast<ani_boolean>(false));
-    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>dimBehindValue", nullptr,
-        static_cast<ani_int>(0));
-    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>id", nullptr,
-        static_cast<ani_int>(windowPropertyInfo.id));
-    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>displayId", nullptr,
-        static_cast<ani_long>(windowPropertyInfo.displayId));
+        ani_boolean(windowPropertyInfo.isTransparent));
+    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>isRoundCorner", nullptr, ani_boolean(false));
+    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>dimBehindValue", nullptr, ani_int(0));
+    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>id", nullptr, ani_int(windowPropertyInfo.id));
+    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>displayIdInternal", nullptr,
+        ani_long(windowPropertyInfo.displayId));
     if (aniSystemProperties == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] AniSystemProperties is nullptr");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
