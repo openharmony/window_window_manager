@@ -104,49 +104,7 @@ bool AdjustRectByAspectRatio(WSRect& rect,
                              float aspectRatio,
                              WindowLimits limits,
                              const WindowDecoration& decoration,
-                             const int tolerancePx = 2)
-{
-    if (MathHelper::NearZero(aspectRatio)) {
-        // Aspect ratio is zero, skip adjustment
-        return false;
-    }
-
-    const uint32_t decorW = decoration.Horizontal();
-    const uint32_t decorH = decoration.Vertical();
-
-    // Trim limits by decoration
-    limits.Trim(decorW, decorH);
-    if (!limits.IsValid()) {
-        return false;
-    }
-
-    // Width-prioritized aspect ratio adjustment
-    uint32_t minW = std::max(limits.minWidth_, static_cast<uint32_t>(std::ceil(limits.minHeight_ * aspectRatio)));
-    uint32_t maxW = std::min(limits.maxWidth_, static_cast<uint32_t>(std::floor(limits.maxHeight_ * aspectRatio)));
-    if (minW > maxW) {
-        // Aspect ratio conflicts with limits
-        return false;
-    }
-
-    WSRect originalRect = rect;
-    // Available rect (excluding decoration)
-    uint32_t availW = static_cast<uint32_t>(rect.width_) - decorW;
-    uint32_t targetW = std::clamp(availW, minW, maxW);
-    uint32_t targetH = static_cast<uint32_t>(std::round(static_cast<float>(targetW) / aspectRatio));
-    targetH = std::clamp(targetH, limits.minHeight_, limits.maxHeight_);
-
-    // Add back decorations
-    rect.width_ = static_cast<int32_t>(targetW + decorW);
-    rect.height_ = static_cast<int32_t>(targetH + decorH);
-
-    // Tolerance: <= tolerancePx pixels is considered no adjustment
-    if (std::abs(originalRect.width_ - rect.width_) <= tolerancePx &&
-        std::abs(originalRect.height_ - rect.height_) <= tolerancePx) {
-        rect = originalRect;
-        return false;
-    }
-    return true;
-}
+                             const int tolerancePx = 2);
 } // namespace SessionUtils
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_UTILS_H

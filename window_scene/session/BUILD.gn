@@ -121,6 +121,7 @@ ohos_shared_library("scene_session") {
     "host/src/session.cpp",
     "host/src/session_change_recorder.cpp",
     "host/src/session_coordinate_helper.cpp",
+    "host/src/session_utils.cpp",
     "host/src/sub_session.cpp",
     "host/src/system_session.cpp",
     "host/src/ui_extension/host_data_handler.cpp",
