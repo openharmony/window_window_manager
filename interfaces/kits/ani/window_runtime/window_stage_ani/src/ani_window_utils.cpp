@@ -1047,174 +1047,7 @@ ani_status AniWindowUtils::GetAniString(ani_env* env, const std::string& str, an
     return env->String_NewUTF8(str.c_str(), static_cast<ani_size>(str.size()), result);
 }
 
-void AniWindowUtils::SetSystemPropertiesWindowRect(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    Rect rect = window->GetRect();
-    ani_object aniWindowRect = CreateAniRect(env, rect);
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>windowRect", nullptr, aniWindowRect);
-}
-
-void AniWindowUtils::SetSystemPropertiesDrawableRect(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    Ace::UIContent* uiContent = window->GetUIContent();
-    Rect drawableRect = g_emptyRect;
-    if (uiContent == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] uicontent is nullptr");
-    } else {
-        uiContent->GetWindowPaintSize(drawableRect);
-    }
-
-    ani_object aniDrawableRect = CreateAniRect(env, drawableRect);
-    if (aniDrawableRect == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] GetDrawableRect failed!");
-        return;
-    }
-
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>drawableRect", nullptr, aniDrawableRect);
-}
-
-void AniWindowUtils::SetSystemPropertiesWindowType(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    WindowType aniWindowType = window->GetType();
-    if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(aniWindowType) != 0) {
-        env->Object_SetFieldByName_Int(systemProperties, "typeInternal",
-            ani_int(NATIVE_JS_TO_WINDOW_TYPE_MAP.at(aniWindowType)));
-    } else {
-        env->Object_SetFieldByName_Int(systemProperties, "typeInternal", ani_int(aniWindowType));
-    }
-}
-
-void AniWindowUtils::SetSystemPropertiesWindowIsLayoutFullScreen(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    bool isLayotFullScreen = window->IsLayoutFullScreen();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>isLayoutFullScreen", nullptr,
-        static_cast<ani_boolean>(isLayotFullScreen));
-}
-
-
-void AniWindowUtils::SetSystemPropertiesWindowIsFullScreen(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    bool isFullScreen = window->IsFullScreen();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>isFullScreen", nullptr,
-        static_cast<ani_boolean>(isFullScreen));
-}
-
-void AniWindowUtils::SetSystemPropertiesWindowTouchable(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    bool windowTouchable = window->GetTouchable();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>touchable", nullptr,
-        static_cast<ani_boolean>(windowTouchable));
-}
-
-void AniWindowUtils::SetSystemPropertiesWindowFousable(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    bool windowFousable = window->GetFocusable();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>focusable", nullptr,
-        static_cast<ani_boolean>(windowFousable));
-}
-
-void AniWindowUtils::SetSystemPropertiesWindowIsPrivacyMode(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
-    bool windowIsPrivacyMode = window->IsPrivacyMode();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>isPrivacyMode", nullptr,
-        static_cast<ani_boolean>(windowIsPrivacyMode));
-}
-
-void AniWindowUtils::SetSystemPropertiesWindowIsKeepScreenOn(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
-    bool windowIsKeepScreenOn = window->IsKeepScreenOn();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>isKeepScreenOn", nullptr,
-        static_cast<ani_boolean>(windowIsKeepScreenOn));
-}
-
-void AniWindowUtils::SetSystemPropertiesWindowBrightness(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
-    float windowBrightness = window->GetBrightness();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>brightness", nullptr,
-        static_cast<ani_float>(windowBrightness));
-}
-
-
-void AniWindowUtils::SetSystemPropertiesWindowIsTransparent(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
-    bool isTransparent = window->IsTransparent();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>isTransparent", nullptr,
-        static_cast<ani_boolean>(isTransparent));
-}
-
-
-void AniWindowUtils::SetSystemPropertiesWindowIsRoundCorner(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
-    bool windowIsRoundCorner {false};
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>isRoundCorner", nullptr,
-        static_cast<ani_boolean>(windowIsRoundCorner));
-}
-
-
-void AniWindowUtils::SetSystemPropertiesWindowDimBehindValue(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
-    int windowDimBehindValue {0};
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>dimBehindValue", nullptr,
-        static_cast<ani_int>(windowDimBehindValue));
-}
-
-
-void AniWindowUtils::SetSystemPropertiesWindowId(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
-    uint32_t windowId = window->GetWindowId();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>id", nullptr,
-        static_cast<ani_int>(windowId));
-}
-
-void AniWindowUtils::SetSystemPropertiesDisplayId(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
-    uint32_t displayId = window->GetDisplayId();
-    env->Object_SetFieldByName_Long(systemProperties, "displayIdInternal", ani_long(displayId));
-}
-
-void AniWindowUtils::SetSystemPropertiesWindowName(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
-    std::string windowName = window->GetWindowName();
-    ani_string aniWindowName;
-    if (ANI_OK != GetAniString(env, windowName, &aniWindowName)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "get ANI string failed");
-        return;
-    }
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>name", nullptr, aniWindowName);
-}
-
-ani_object AniWindowUtils::CreateWindowsProperties(ani_env* env, const sptr<Window>& window)
+ani_object AniWindowUtils::CreateWindowsProperties(ani_env* env, const WindowPropertyInfo& windowPropertyInfo)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     if (window == nullptr) {
@@ -1226,23 +1059,47 @@ ani_object AniWindowUtils::CreateWindowsProperties(ani_env* env, const sptr<Wind
     ani_object aniSystemProperties;
 
     NewAniObjectNoParams(env, clsName, &aniSystemProperties);
-    SetSystemPropertiesWindowRect(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesDrawableRect(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowType(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowIsLayoutFullScreen(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowIsFullScreen(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowTouchable(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowFousable(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowIsPrivacyMode(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowIsKeepScreenOn(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowBrightness(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowIsTransparent(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowIsRoundCorner(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowDimBehindValue(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesDisplayId(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowId(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowName(env, window, aniSystemProperties, clsName);
-
+    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>windowRect", nullptr,
+            CreateAniRect(env, windowPropertyInfo.windowRect));
+    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>drawableRect", nullptr,
+            CreateAniRect(env, windowPropertyInfo.drawableRect));
+    WindowType aniWindowType = windowPropertyInfo.type;
+    if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(aniWindowType) != 0) {
+        env->Object_SetFieldByName_Int(aniSystemProperties, "typeInternal",
+            ani_int(NATIVE_JS_TO_WINDOW_TYPE_MAP.at(aniWindowType)));
+    } else {
+        env->Object_SetFieldByName_Int(aniSystemProperties, "typeInternal", ani_int(aniWindowType));
+    }
+    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>isLayoutFullScreen", nullptr,
+        static_cast<ani_boolean>(windowPropertyInfo.isLayotFullScreen));
+    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>isFullScreen", nullptr,
+        static_cast<ani_boolean>(windowPropertyInfo.isFullScreen));
+    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>touchable", nullptr,
+        static_cast<ani_boolean>(windowPropertyInfo.isTouchable));
+    std::string windowName = window->GetWindowName();
+    ani_string aniWindowName;
+    if (ANI_OK == GetAniString(env, windowName, &aniWindowName)) {
+        CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>name", nullptr,
+        static_cast<ani_boolean>(aniWindowName));
+    }
+    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>focusable", nullptr,
+        static_cast<ani_boolean>(windowPropertyInfo.isFocusable));
+    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>isPrivacyMode", nullptr,
+        static_cast<ani_boolean>(windowPropertyInfo.isPrivacyMode));
+    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>isKeepScreenOn", nullptr,
+        static_cast<ani_boolean>(windowPropertyInfo.isKeepScreenOn));
+    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>brightness", nullptr,
+        static_cast<ani_float>(windowPropertyInfo.brightness));
+    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>isTransparent", nullptr,
+        static_cast<ani_boolean>(windowPropertyInfo.isTransparent));
+    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>isRoundCorner", nullptr,
+        static_cast<ani_boolean>(false));
+    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>dimBehindValue", nullptr,
+        static_cast<ani_int>(0));
+    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>id", nullptr,
+        static_cast<ani_int>(windowPropertyInfo.id));
+    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>displayId", nullptr,
+        static_cast<ani_long>(windowPropertyInfo.displayId));
     TLOGI(WmsLogTag::DEFAULT, "[ANI] Window [%{public}u, %{public}s] get properties end", window->GetWindowId(),
         window->GetWindowName().c_str());
     if (aniSystemProperties == nullptr) {
