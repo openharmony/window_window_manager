@@ -197,13 +197,13 @@ public:
     /**
      * @brief Sets the content aspect ratio of window.
      *
-     * @param ratio Indicates the value of the aspect ratio (width divided by height).
-     * @param isPersistent Indicates whether to persist the aspect ratio across sessions.
-     * @param needUpdateRect Indicates whether to update the window rectangle after setting the aspect ratio.
+     * @param ratio The aspect ratio of window content (width divided by height)
+     * @param isPersistent Whether to persist the aspect ratio setting
+     * @param needUpdateRect Whether to update the window rect after setting aspect ratio
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError SetContentAspectRatio(
-        float ratio, bool isPersistent, bool needUpdateRect) { return WSError::WS_OK; }
+        float ratio, bool isPersistent, bool needUpdateRect) { return WSError::WS_DO_NOTHING; }
 
     virtual WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) { return WSError::WS_OK; }
     virtual WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) { return WSError::WS_OK; }

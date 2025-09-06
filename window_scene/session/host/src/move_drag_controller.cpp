@@ -585,60 +585,6 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
     return true;
 }
 
-/** @note @window.drag */
-bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    const WSRect& originalRect, const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig, const WindowDecoration& decoration)
-{
-    if (!CheckDragEventLegal(pointerEvent, property)) {
-        return false;
-    }
-    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
-    switch (pointerEvent->GetPointerAction()) {
-        case MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN:
-        case MMI::PointerEvent::POINTER_ACTION_DOWN: {
-            if (!EventDownInit(pointerEvent, originalRect, property, sysConfig, decoration)) {
-                return false;
-            }
-            reason = SizeChangeReason::DRAG_START;
-            ResSchedReportData(OHOS::ResourceSchedule::ResType::RES_TYPE_RESIZE_WINDOW, true);
-            break;
-        }
-        case MMI::PointerEvent::POINTER_ACTION_MOVE: {
-            if (moveDragIsInterrupted_) {
-                MoveDragInterrupted();
-                return true;
-            }
-            reason = SizeChangeReason::DRAG;
-            break;
-        }
-        case MMI::PointerEvent::POINTER_ACTION_UP:
-        case MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
-        case MMI::PointerEvent::POINTER_ACTION_CANCEL: {
-            if (!hasPointDown_) {
-                return true;
-            }
-            auto screenRect = GetScreenRectById(moveDragStartDisplayId_);
-            if (moveDragIsInterrupted_ || screenRect == WSRect{-1, -1, -1, -1}) {
-                MoveDragInterrupted();
-                return true;
-            }
-            reason = SizeChangeReason::DRAG_END;
-            SetStartDragFlag(false);
-            hasPointDown_ = false;
-            moveDragEndDisplayId_ = GetTargetRect(TargetRectCoordinate::GLOBAL).IsOverlap(screenRect) ?
-                moveDragStartDisplayId_ : static_cast<uint64_t>(pointerEvent->GetTargetDisplayId());
-            ResSchedReportData(OHOS::ResourceSchedule::ResType::RES_TYPE_RESIZE_WINDOW, false);
-            NotifyWindowInputPidChange(isStartDrag_);
-            break;
-        }
-        default:
-            return false;
-    }
-    CalcDragTargetRect(pointerEvent, reason);
-    ProcessSessionRectChange(reason);
-    return true;
-}
-
 void MoveDragController::MoveDragInterrupted(bool resetPosition)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "Screen anomaly, MoveDrag has been interrupted, id:%{public}d", persistentId_);
@@ -1051,8 +997,6 @@ bool MoveDragController::CalcMoveTargetRect(const std::shared_ptr<MMI::PointerEv
 bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     const WSRect& originalRect, const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig)
 {
-    // TODO: 传递 windowDecoration
-    // TODO: 根据 aspectRatio_ 修改 rect
     const auto& sourceType = pointerEvent->GetSourceType();
     if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
         pointerEvent->GetButtonId() != MMI::PointerEvent::MOUSE_BUTTON_LEFT) {

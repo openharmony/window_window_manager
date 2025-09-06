@@ -458,7 +458,17 @@ enum class WindowUIType : uint8_t {
  * @brief Used to map from WMError to WmErrorCode.
  */
 extern const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP;
-WmErrorCode ConvertErrorToCode(WMError error, WmErrorCode defaultCode = WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+
+/**
+ * @brief Convert a WMError to its corresponding WmErrorCode.
+ *
+ * If the WMError is not found in the mapping, returns the given default code.
+ *
+ * @param error WMError value to convert.
+ * @param defaultCode Value to return if mapping is not found (default: WM_ERROR_STATE_ABNORMALLY).
+ * @return Corresponding WmErrorCode or defaultCode if unmapped.
+ */
+WmErrorCode ConvertErrorToCode(WMError error, WmErrorCode defaultCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
 
 /**
  * @brief Enumerates flag of window.

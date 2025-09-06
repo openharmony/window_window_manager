@@ -1504,6 +1504,9 @@ WSError SceneSession::SetAspectRatio(float ratio)
 WSError SceneSession::SetContentAspectRatio(float ratio, bool isPersistent, bool needUpdateRect)
 {
     PostTask([weakThis = wptr(this), ratio, isPersistent, needUpdateRect, where = __func__] {
+        TLOGD(WmsLogTag::WMS_LAYOUT,
+            "[angus] %{public}s: ratio: %{public}f, isPersistent: %{public}d, needUpdateRect: %{public}d",
+            where, ratio, isPersistent, needUpdateRect);
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
@@ -3296,10 +3299,24 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
             TLOGD(WmsLogTag::WMS_LAYOUT, "moveDragController_ is null");
             return Session::TransferPointerEvent(pointerEvent, needNotifyClient, isExecuteDelayRaise);
         }
+        if (isPointDown) {
+            const auto decoration = GetWindowDecoration();
+            moveDragController_->SetWindowDecoration(decoration);
+            WSRect adjustedRect = GetSessionRect();
+            TLOGNI(WmsLogTag::WMS_LAYOUT,
+                   "%{public}s Before adjusting, the id:%{public}d, the current rect:%{public}s",
+                   where, GetPersistentId(), adjustedRect.ToString().c_str());
+            if (layoutController_->AdjustRectByAspectRatio(adjustedRect, decoration)) {
+                TLOGNI(WmsLogTag::WMS_LAYOUT,
+                       "%{public}s After adjusting, the id:%{public}d, the adjusted rect:%{public}s",
+                       where, GetPersistentId(), adjustedRect.ToString().c_str());
+                NotifySessionRectChange(adjustedRect, SizeChangeReason::RESIZE);
+            }
+        }
         moveDragController_->SetScale(GetScaleX(), GetScaleY()); // need scale ratio to calculate translate
         SetParentRect();
         if (IsDraggable() &&
-            moveDragController_->ConsumeDragEvent(pointerEvent, GetGlobalOrWinRect(), property, systemConfig_, GetWindowDecoration())) {
+            moveDragController_->ConsumeDragEvent(pointerEvent, GetGlobalOrWinRect(), property, systemConfig_)) {
             auto surfaceNode = GetSurfaceNode();
             moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
             PresentFocusIfNeed(pointerEvent->GetPointerAction());

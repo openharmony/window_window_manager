@@ -174,25 +174,32 @@ void LayoutController::AdjustRectByLimits(
     const int32_t decorH = static_cast<int32_t>(decoration.Vertical());
     rect.width_ -= decorW;
     rect.height_ -= decorH;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[angus] rect1: %{public}s", rect.ToString().c_str());
     limits.minWidth_ -= decorW;
     limits.maxWidth_ -= decorW;
     limits.minHeight_ -= decorH;
     limits.maxHeight_ -= decorH;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[angus] limits1: %{public}s", limits.ToString().c_str());
     if (static_cast<uint32_t>(rect.height_) > limits.maxHeight_) {
         rect.height_ = static_cast<int32_t>(limits.maxHeight_);
         rect.width_ = floor(rect.height_ * ratio);
+        TLOGI(WmsLogTag::WMS_LAYOUT, "[angus] rect2: %{public}s", rect.ToString().c_str());
     } else if (static_cast<uint32_t>(rect.width_) > limits.maxWidth_) {
         rect.width_ = static_cast<int32_t>(limits.maxWidth_);
         rect.height_ = floor(rect.width_ / ratio);
+        TLOGI(WmsLogTag::WMS_LAYOUT, "[angus] rect3: %{public}s", rect.ToString().c_str());
     } else if (static_cast<uint32_t>(rect.width_) < limits.minWidth_) {
         rect.width_ = static_cast<int32_t>(limits.minWidth_);
         rect.height_ = ceil(rect.width_ / ratio);
+        TLOGI(WmsLogTag::WMS_LAYOUT, "[angus] rect4: %{public}s", rect.ToString().c_str());
     } else if (static_cast<uint32_t>(rect.height_) < limits.minHeight_) {
         rect.height_ = static_cast<int32_t>(limits.minHeight_);
         rect.width_ = ceil(rect.height_ * ratio);
+        TLOGI(WmsLogTag::WMS_LAYOUT, "[angus] rect5: %{public}s", rect.ToString().c_str());
     }
     rect.width_ += decorW;
     rect.height_ += decorH;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[angus] rect6: %{public}s", rect.ToString().c_str());
 }
 
 WindowLimits LayoutController::GetWindowLimits() const
@@ -270,11 +277,13 @@ bool LayoutController::AdjustRectByAspectRatio(WSRect& rect, bool isDecorEnable)
 
 bool LayoutController::AdjustRectByAspectRatio(WSRect& rect, const WindowDecoration& decoration)
 {
-    if (sessionProperty_->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING ||
-        !WindowHelper::IsMainWindow(sessionProperty_->GetWindowType())) {
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[angus] before adjust rect: %{public}s, decoration: %{public}s",
+        rect.ToString().c_str(), decoration.ToString().c_str());
+    if (MathHelper::NearZero(aspectRatio_)) {
         return false;
     }
-    if (MathHelper::NearZero(aspectRatio_)) {
+    if (sessionProperty_->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING ||
+        !WindowHelper::IsMainWindow(sessionProperty_->GetWindowType())) {
         return false;
     }
     WSRect originalRect = rect;
@@ -288,6 +297,7 @@ bool LayoutController::AdjustRectByAspectRatio(WSRect& rect, const WindowDecorat
         rect.height_ = layoutWidth / aspectRatio_ + decorH;
     }
     AdjustRectByLimits(GetWindowLimits(), aspectRatio_, decoration, rect);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[angus] after adjust rect: %{public}s", rect.ToString().c_str());
     constexpr int tolerancePx = 2; // 2: tolerance delta pixel value, unit: px
     if (std::abs(originalRect.width_ - rect.width_) <= tolerancePx &&
         std::abs(originalRect.height_ - rect.height_) <= tolerancePx) {
