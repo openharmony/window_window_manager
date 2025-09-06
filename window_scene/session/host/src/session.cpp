@@ -42,6 +42,7 @@
 #include "session/host/include/pc_fold_screen_manager.h"
 #include "perform_reporter.h"
 #include "session/host/include/scene_persistent_storage.h"
+#include "display_manager.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -4992,14 +4993,31 @@ int32_t Session::GetCustomDecorHeight() const
 
 WindowDecoration Session::GetWindowDecoration() const
 {
-    auto getTopDecorInPx = [&]() {
+    auto getTopDecorInPx = [&, where = __func__]() -> uint32_t {
         if (!IsDecorVisible() || !IsDecorEnable()) {
+            TLOGW(WmsLogTag::WMS_DECOR, "[angus] %{public}s: decor not visible or not enable", where);
             return 0;
         }
+        auto displyId = GetDisplayId();
+        auto display = DisplayManager::GetInstance().GetDisplayById(displyId);
+        if (!display) {
+            TLOGW(WmsLogTag::WMS_DECOR, "[angus] %{public}s: display is null, id: %{public}" PRIu64,
+                where, displyId);
+            return 0;
+        }
+        float vpr = display->GetVirtualPixelRatio();
         std::lock_guard lock(customDecorHeightMutex_);
         auto decorHeight = customDecorHeight_ != 0 ? customDecorHeight_ : WINDOW_TITLE_BAR_HEIGHT;
-        return decorHeight * vpr_;
+        TLOGD(WmsLogTag::WMS_DECOR,
+            "[angus] %{public}s: decorHeight: %{public}d, vpr: %{public}f", where, decorHeight, vpr);
+        return static_cast<uint32_t>(decorHeight * vpr);
     };
-    return { 0, getTopDecorInPx(), 0, 0 };
+    // Currently only the top decoration (title bar) has height.
+    // Left, right, and bottom are set to 0 by default.
+    // If future specifications introduce additional decorations,
+    // this return value should be updated accordingly.
+    WindowDecoration decoration{0, getTopDecorInPx(), 0, 0};
+    TLOGI(WmsLogTag::WMS_DECOR, "[angus] decoration: %{public}s", decoration.ToString().c_str());
+    return decoration;
 }
 } // namespace OHOS::Rosen

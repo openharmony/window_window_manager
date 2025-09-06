@@ -422,15 +422,15 @@ public:
     virtual WMError ResetAspectRatio() = 0;
 
     /**
-     * @brief Set content aspect ratio of this window
+     * @brief Sets the content aspect ratio of window.
      *
-     * @param ratio the aspect ratio of window content
-     * @param isPersistent whether to persist the aspect ratio setting
-     * @param needUpdateRect whether to update the window rect after setting aspect ratio
-     * @return WMError
+     * @param ratio The aspect ratio of window content (width divided by height)
+     * @param isPersistent Whether to persist the aspect ratio setting
+     * @param needUpdateRect Whether to update the window rect after setting aspect ratio
+     * @return WMError::WM_OK on success, or appropriate error code on failure.
      */
     virtual WMError SetContentAspectRatio(
-        float ratio, bool isPersistent, bool needUpdateRect) { return WMError::WM_OK; }
+        float ratio, bool isPersistent, bool needUpdateRect) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     virtual KeyboardAnimationConfig GetKeyboardAnimationConfig() = 0;
     virtual void SetNeedDefaultAnimation(bool needDefaultAnimation) = 0;

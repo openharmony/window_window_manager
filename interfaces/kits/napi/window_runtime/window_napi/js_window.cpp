@@ -875,21 +875,21 @@ napi_value JsWindow::SetHandwritingFlag(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetAspectRatio(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetAspectRatio(env, info) : nullptr;
 }
 
 napi_value JsWindow::ResetAspectRatio(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnResetAspectRatio(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetContentAspectRatio(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetContentAspectRatio(env, info) : nullptr;
 }
@@ -1292,6 +1292,16 @@ napi_valuetype GetType(napi_env env, napi_value value)
     napi_valuetype res = napi_undefined;
     napi_typeof(env, value, &res);
     return res;
+}
+
+template <typename T>
+bool ConvertFromOptionalJsValue(napi_env env, napi_value jsValue, T& value, const T& defaultValue)
+{
+    if (GetType(env, jsValue) == napi_undefined) {
+        value = defaultValue;
+        return true;
+    }
+    return ConvertFromJsValue(env, jsValue, value);
 }
 
 napi_value JsWindow::OnShow(napi_env env, napi_callback_info info)
@@ -6953,14 +6963,16 @@ napi_value JsWindow::OnSetContentAspectRatio(napi_env env, napi_callback_info in
     }
 
     bool isPersistent = false;
-    if (argc >= TWO_PARAMS_SIZE && !ConvertFromJsValue(env, argv[INDEX_ONE], isPersistent)) {
+    if (argc >= TWO_PARAMS_SIZE &&
+        !ConvertFromOptionalJsValue(env, argv[INDEX_ONE], isPersistent, false)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to isPersistent");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setContentAspectRatio]msg: Failed to convert parameter to isPersistent");
     }
 
     bool needUpdateRect = false;
-    if (argc == THREE_PARAMS_SIZE && !ConvertFromJsValue(env, argv[INDEX_TWO], needUpdateRect)) {
+    if (argc == THREE_PARAMS_SIZE &&
+        !ConvertFromOptionalJsValue(env, argv[INDEX_TWO], needUpdateRect, false)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to needUpdateRect");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setContentAspectRatio]msg: Failed to convert parameter to needUpdateRect");
