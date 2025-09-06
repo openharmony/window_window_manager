@@ -12142,7 +12142,7 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
             }
             isNeedUpdate = isAINavigationBarVisible_[displayId] != isVisible;
                            currAINavigationBarAreaMap_.count(displayId) == 0 ||
-                           currAINavigationBarAreaMap_[displayId] != barArea ||
+                           currAINavigationBarAreaMap_[displayId] != barArea;
                            
             if (isNeedUpdate) {
                 isAINavigationBarVisible_[displayId] = isVisible;
