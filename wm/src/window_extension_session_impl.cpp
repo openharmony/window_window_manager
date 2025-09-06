@@ -705,12 +705,6 @@ WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentI
     return SetUIContentInner(contentInfo, env, storage, token, ability, false, EnvironmentType::NAPI);
 }
 
-WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
-    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
-{
-    return SetUIContentInner(contentInfo, env, storage, token, ability, false, EnvironmentType::ANI);
-}
-
 WMError WindowExtensionSessionImpl::AniSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
     BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
@@ -722,13 +716,6 @@ WMError WindowExtensionSessionImpl::NapiSetUIContentByName(const std::string& co
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "name: %{public}s", contentName.c_str());
     return SetUIContentInner(contentName, env, storage, token, ability, true, EnvironmentType::NAPI);
-}
-
-WMError WindowExtensionSessionImpl::NapiSetUIContentByName(const std::string& contentName, ani_env* env,
-    ani_object storage, BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
-{
-    TLOGI(WmsLogTag::WMS_UIEXT, "name: %{public}s", contentName.c_str());
-    return SetUIContentInner(contentName, env, storage, token, ability, true, EnvironmentType::ANI);
 }
 
 WMError WindowExtensionSessionImpl::AniSetUIContentByName(const std::string& contentName, ani_env* env,
