@@ -2832,7 +2832,13 @@ ani_object AniWindow::GetWindowPropertiesSync(ani_env* env)
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] windowToken_ is nullptr");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    auto objValue = AniWindowUtils::CreateWindowsProperties(env, windowToken_);
+    WindowPropertyInfo windowPropertyInfo;
+    WMError ret = windowToken_->GetWindowPropertyInfo(windowPropertyInfo);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "get window properties failed");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    auto objValue = AniWindowUtils::CreateWindowsProperties(env, windowPropertyInfo);
     if (objValue == nullptr) {
         return AniWindowUtils::AniThrowError(env, WMError::WM_ERROR_NULLPTR, "[ANI] Window get properties failed");
     }
