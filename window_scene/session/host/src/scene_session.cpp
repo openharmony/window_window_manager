@@ -2271,7 +2271,7 @@ WSError SceneSession::HandleLayoutAvoidAreaUpdate(AvoidAreaType avoidAreaType)
         // code below aims to check if ai bar avoid area reaches window rect's bottom
         // it should not be removed until unexpected window rect update issues were solved
         if (avoidAreaType == AvoidAreaType::TYPE_NAVIGATION_INDICATOR && isAINavigationBarAvoidAreaValid_ &&
-            !isAINavigationBarAvoidAreaValid_(area, GetSessionRect().height_)) {
+            !isAINavigationBarAvoidAreaValid_(GetSessionProperty()->GetDisplayId(), area, GetSessionRect().height_)) {
             TLOGE(WmsLogTag::WMS_IMMS, "ai bar avoid area dose not reach the bottom of the rect");
             return WSError::WS_OK;
         }
@@ -2287,7 +2287,8 @@ WSError SceneSession::HandleLayoutAvoidAreaUpdate(AvoidAreaType avoidAreaType)
             // code below aims to check if ai bar avoid area reaches window rect's bottom
             // it should not be removed until unexpected window rect update issues were solved
             if (type == AvoidAreaType::TYPE_NAVIGATION_INDICATOR && isAINavigationBarAvoidAreaValid_ &&
-                !isAINavigationBarAvoidAreaValid_(area, GetSessionRect().height_)) {
+                !isAINavigationBarAvoidAreaValid_(GetSessionProperty()->GetDisplayId(),
+                    area, GetSessionRect().height_)) {
                 TLOGE(WmsLogTag::WMS_IMMS, "ai bar avoid area dose not reach the bottom "
                     "of the rect while traversing all avoid area type");
                 continue;
@@ -2911,7 +2912,8 @@ WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
             // it should not be removed until unexpected window rect update issues were solved
             if (type == AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
                 if (session->isAINavigationBarAvoidAreaValid_ &&
-                    !session->isAINavigationBarAvoidAreaValid_(area, session->GetSessionRect().height_)) {
+                    !session->isAINavigationBarAvoidAreaValid_(session->GetSessionProperty()->GetDisplayId(),
+                        area, session->GetSessionRect().height_)) {
                     continue;
                 }
             }
@@ -3461,6 +3463,7 @@ void SceneSession::NotifySessionDisplayIdChange(uint64_t displayId)
         }
         if (session->sessionDisplayIdChangeFunc_) {
             session->sessionDisplayIdChangeFunc_(displayId);
+            session->HandleLayoutAvoidAreaUpdate();
         }
     }, __func__);
 }
