@@ -67,7 +67,12 @@ void ScenePersistentStorage::InitDir(std::string dir)
     saveDir_ = dir;
     std::filesystem::path fileDir {saveDir_};
     if (!std::filesystem::exists(fileDir)) {
-        std::filesystem::create_directories(fileDir);
+        std::error_code errorCode;
+        if (!std::filesystem::create_directories(fileDir, errorCode)) {
+            TLOGE(WmsLogTag::DEFAULT, "Create dir failed, errorCode: %{public}d, msg: %{public}s",
+                errorCode.value(), errorCode.message().c_str());
+            abort();
+        }
         std::filesystem::permissions(fileDir, std::filesystem::perms::owner_read | std::filesystem::perms::owner_write |
             std::filesystem::perms::group_read | std::filesystem::perms::group_write);
     }
