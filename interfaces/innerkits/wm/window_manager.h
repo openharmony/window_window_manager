@@ -910,6 +910,16 @@ public:
     WMError SetWindowLayoutMode(WindowLayoutMode mode);
 
     /**
+     * @brief global coordinates converted to relative coordinates.
+     *
+     * @param rect global coordinates.
+     * @param newRect relative coordinates.
+     * @param newDisplayId newDisplayId.
+     * @return WM_OK means converted, others means not converted.
+     */
+    WMError IsChangedPosition(const Rect& rect, Rect& newRect, DisplayId& newDisplayId);
+
+    /**
      * @brief Get accessibility window info.
      *
      * @param infos WindowInfos used for Accessibility.

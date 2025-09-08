@@ -10863,6 +10863,26 @@ WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessi
     return taskScheduler_->PostSyncTask(task, "GetAccessibilityWindowInfo");
 }
 
+WMError SceneSessionManager::IsChangedPosition(const Rect& rect, Rect& newRect, DisplayId& newDisplayId)
+{
+    newRect.posX_ = rect.posX_;
+    newRect.width_ = rect.width_;
+    newRect.height_ = rect.height_;
+    SuperFoldStatus foldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
+    TLOGD(WmsLogTag::WMS_LAYOUT, "foldStatus=%{public}d", foldStatus);
+    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
+        PcFoldScreenManager::GetInstance().GetDisplayRects();
+    if (foldStatus == SuperFoldStatus::HALF_FOLDED &&
+        rect.posY_ > (defaultDisplayRect.height_ + foldCreaseRect.height_)) {
+            newRect.posY_ = rect.posY_ - defaultDisplayRect.height_ - foldCreaseRect.height_;
+            newDisplayId = VIRTUAL_DISPLAY_ID;
+            return WMError::WM_OK;
+    } else {
+        newRect.posY_ = rect.posY_;
+        return WMError::WM_DO_NOTHING;
+    }
+}
+
 static bool CheckUnreliableWindowType(WindowType windowType)
 {
     if (windowType == WindowType::WINDOW_TYPE_APP_SUB_WINDOW ||

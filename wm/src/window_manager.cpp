@@ -1691,6 +1691,15 @@ WMError WindowManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessibility
     return ret;
 }
 
+WMError WindowManager::IsChangedPosition(const Rect& rect, Rect& newRect, DisplayId& newDisplayId)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().IsChangedPosition(rect, newRect, newDisplayId);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "change failed.");
+    }
+    return ret;
+}
+
 WMError WindowManager::GetUnreliableWindowInfo(int32_t windowId,
     std::vector<sptr<UnreliableWindowInfo>>& infos) const
 {

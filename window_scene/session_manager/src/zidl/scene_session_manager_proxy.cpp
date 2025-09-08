@@ -2698,6 +2698,52 @@ WSError SceneSessionManagerProxy::GetHostGlobalScaledRect(int32_t hostWindowId, 
     return static_cast<WSError>(reply.ReadInt32());
 }
 
+WMError SceneSessionManagerProxy::IsChangedPosition(const Rect& rect, Rect& newRect, DisplayId& newDisplayId)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write interface token failed.");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(rect.posX_)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write posX_ failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(rect.posY_)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write posY_ failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(rect.width_)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write width_ failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(rect.height_)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write height_ failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "remote is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GLOBAL_COORDINATE_TO_RELATIVE_COORDINATE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "SendRequest GetFreeMultiWindowEnableState failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    auto posX = reply.ReadInt32();
+    auto posY = reply.ReadInt32();
+    auto width = reply.ReadUint32();
+    auto height = reply.ReadUint32();
+    newRect = {posX, posY, width, height};
+    newDisplayId = reply.ReadUint64();
+    return static_cast<WMError>(reply.ReadInt32());
+}
+
 WSError SceneSessionManagerProxy::GetFreeMultiWindowEnableState(bool& enable)
 {
     TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "in");

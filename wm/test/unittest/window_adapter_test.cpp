@@ -158,6 +158,22 @@ HWTEST_F(WindowAdapterTest, GetAccessibilityWindowInfo, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsChangedPosition
+ * @tc.desc: WindowAdapter/IsChangedPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, IsChangedPosition, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    Rect rect;
+    Rect newRect;
+    DisplayId newDisplayId = 0;
+    rect = { 100, 2000, 400, 600 };
+    newRect = { 0, 100, 200, 300 };
+    EXPECT_EQ(WMError::WM_OK, windowAdapter.IsChangedPosition(rect, newRect, newDisplayId));
+}
+
+/**
  * @tc.name: GetGlobalWindowMode
  * @tc.desc: WindowAdapter/GetGlobalWindowMode
  * @tc.type: FUNC
