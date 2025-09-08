@@ -1105,6 +1105,14 @@ struct WindowLimits {
         maxHeight_ -= trimHeight;
     }
 
+    void Expand(uint32_t expandWidth, uint32_t expandHeight)
+    {
+        minWidth_ += expandWidth;
+        maxWidth_ += expandWidth;
+        minHeight_ += expandHeight;
+        maxHeight_ += expandHeight;
+    }
+
     bool IsEmpty() const
     {
         return (maxHeight_ == 0 || minHeight_ == 0 || maxWidth_ == 0 || minWidth_ == 0);

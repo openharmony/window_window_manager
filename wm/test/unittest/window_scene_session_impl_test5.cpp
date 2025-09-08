@@ -2274,6 +2274,8 @@ HWTEST_F(WindowSceneSessionImplTest5, UpdateImmersiveBySwitchMode, TestSize.Leve
     window->UpdateImmersiveBySwitchMode(false);
     EXPECT_EQ(window->enableImmersiveMode_, true);
 }
+
+// TODO：补充 SetContentAspectRatio 测试用例
 }
 } // namespace Rosen
 } // namespace OHOS

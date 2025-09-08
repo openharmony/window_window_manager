@@ -2737,12 +2737,6 @@ public:
     virtual WMError SetAspectRatio(float ratio) { return WMError::WM_OK; }
 
     /**
-     * @brief Unset aspect ratio
-     * @return WMError
-     */
-    virtual WMError ResetAspectRatio() { return WMError::WM_OK; }
-
-    /**
      * @brief Sets the content aspect ratio of window.
      *
      * @param ratio The aspect ratio of window content (width divided by height).
@@ -2752,6 +2746,12 @@ public:
      */
     virtual WMError SetContentAspectRatio(
         float ratio, bool isPersistent, bool needUpdateRect) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Unset aspect ratio
+     * @return WMError
+     */
+    virtual WMError ResetAspectRatio() { return WMError::WM_OK; }
 
     /**
      * @brief Get keyboard animation config

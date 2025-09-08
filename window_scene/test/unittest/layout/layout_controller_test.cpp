@@ -176,6 +176,10 @@ HWTEST_F(LayoutControllerTest, SetSystemConfigFunc, TestSize.Level1)
     layoutController_->getSystemConfigFunc_();
     EXPECT_EQ(layoutController_->GetSessionRect(), rect);
 }
+
+// TODO: 补充 AdjustRectByAspectRatio 方法测试用例
+
+// TODO: 补充 GetWindowLimits 方法测试用例
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

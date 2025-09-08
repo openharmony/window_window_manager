@@ -114,8 +114,8 @@ public:
     static napi_value SetSnapshotSkip(napi_env env, napi_callback_info info);
     static napi_value RaiseToAppTop(napi_env env, napi_callback_info info);
     static napi_value SetAspectRatio(napi_env env, napi_callback_info info);
-    static napi_value ResetAspectRatio(napi_env env, napi_callback_info info);
     static napi_value SetContentAspectRatio(napi_env env, napi_callback_info info);
+    static napi_value ResetAspectRatio(napi_env env, napi_callback_info info);
     static napi_value Minimize(napi_env env, napi_callback_info info);
     static napi_value RaiseAboveTarget(napi_env env, napi_callback_info info);
     static napi_value RaiseMainWindowAboveTarget(napi_env env, napi_callback_info info);
