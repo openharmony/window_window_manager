@@ -192,6 +192,8 @@ napi_value AnimationTypeInit(napi_env env)
         CreateJsValue(env, static_cast<uint32_t>(AnimationType::FADE_IN_OUT)));
     napi_set_named_property(env, objValue, "FADE_IN",
         CreateJsValue(env, static_cast<uint32_t>(AnimationType::FADE_IN)));
+    napi_set_named_property(env, objValue, "SEE_THE_WORLD",
+        CreateJsValue(env, static_cast<uint32_t>(AnimationType::SEE_THE_WORLD)));
     return objValue;
 }
 
