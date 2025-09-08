@@ -17,39 +17,85 @@
 
 namespace OHOS::Rosen {
 namespace SessionUtils {
-bool AdjustRectByAspectRatio(WSRect& rect,
-                             float aspectRatio,
-                             WindowLimits limits,
-                             const WindowDecoration& decoration,
-                             const int tolerancePx)
+WindowLimits AdjustLimitsByAspectRatio(const WindowLimits& limits,
+                                       const WindowDecoration& decoration,
+                                       float aspectRatio)
 {
     if (MathHelper::NearZero(aspectRatio)) {
         // Aspect ratio is zero, skip adjustment
-        return false;
+        return limits;
     }
 
     const uint32_t decorW = decoration.Horizontal();
     const uint32_t decorH = decoration.Vertical();
 
     // Trim limits by decoration
-    limits.Trim(decorW, decorH);
-    if (!limits.IsValid()) {
-        return false;
+    WindowLimits adjustedLimits = limits;
+    adjustedLimits.Trim(decorW, decorH);
+    if (!adjustedLimits.IsValid()) {
+        return limits;
+    }
+
+    // Pre-calc aspect ratio constraints
+    const uint32_t minWByH = static_cast<uint32_t>(std::ceil(adjustedLimits.minHeight_ * aspectRatio));
+    const uint32_t minHByW = static_cast<uint32_t>(std::ceil(adjustedLimits.minWidth_ / aspectRatio));
+    const uint32_t maxHByW = static_cast<uint32_t>(std::floor(adjustedLimits.maxWidth_ / aspectRatio));
+    const uint32_t maxWByH = static_cast<uint32_t>(std::floor(adjustedLimits.maxHeight_ * aspectRatio));
+
+    // Adjust constraints to satisfy aspect ratio.
+    if (adjustedLimits.minWidth_ < minWByH) {
+        adjustedLimits.minWidth_ = minWByH;
+    } else {
+        adjustedLimits.minHeight_ = minHByW;
+    }
+
+    if (adjustedLimits.maxWidth_ > maxWByH) {
+        adjustedLimits.maxWidth_ = maxWByH;
+    } else {
+        adjustedLimits.maxHeight_ = maxHByW;
+    }
+
+    // Add back decorations
+    adjustedLimits.Expand(decorW, decorH);
+    return adjustedLimits.IsValid() ? adjustedLimits : limits;
+}
+
+WSRect AdjustRectByAspectRatio(const WSRect& rect,
+                               const WindowLimits& limits,
+                               const WindowDecoration& decoration,
+                               float aspectRatio,
+                               int tolerancePx)
+{
+    if (MathHelper::NearZero(aspectRatio)) {
+        // Aspect ratio is zero, skip adjustment
+        return rect;
+    }
+
+    const uint32_t decorW = decoration.Horizontal();
+    const uint32_t decorH = decoration.Vertical();
+
+    // Trim limits by decoration
+    WindowLimits adjustedLimits = limits;
+    adjustedLimits.Trim(decorW, decorH);
+    if (!adjustedLimits.IsValid()) {
+        return rect;
     }
 
     // Width-prioritized aspect ratio adjustment
-    uint32_t minW = std::max(limits.minWidth_, static_cast<uint32_t>(std::ceil(limits.minHeight_ * aspectRatio)));
-    uint32_t maxW = std::min(limits.maxWidth_, static_cast<uint32_t>(std::floor(limits.maxHeight_ * aspectRatio)));
+    uint32_t minWByH = static_cast<uint32_t>(std::ceil(adjustedLimits.minHeight_ * aspectRatio));
+    uint32_t maxWByH = static_cast<uint32_t>(std::floor(adjustedLimits.maxHeight_ * aspectRatio));
+    uint32_t minW = std::max(adjustedLimits.minWidth_, minWByH);
+    uint32_t maxW = std::min(adjustedLimits.maxWidth_, maxWByH);
     if (minW > maxW) {
         // Aspect ratio conflicts with limits
-        return false;
+        return rect;
     }
 
     // Available rect (excluding decoration)
     uint32_t availW = static_cast<uint32_t>(rect.width_) - decorW;
     uint32_t targetW = std::clamp(availW, minW, maxW);
     uint32_t targetH = static_cast<uint32_t>(std::round(static_cast<float>(targetW) / aspectRatio));
-    targetH = std::clamp(targetH, limits.minHeight_, limits.maxHeight_);
+    targetH = std::clamp(targetH, adjustedLimits.minHeight_, adjustedLimits.maxHeight_);
 
     WSRect adjustedRect = rect;
     // Add back decorations
@@ -59,10 +105,9 @@ bool AdjustRectByAspectRatio(WSRect& rect,
     // Tolerance: <= tolerancePx pixels is considered no adjustment
     if (std::abs(rect.width_ - adjustedRect.width_) <= tolerancePx &&
         std::abs(rect.height_ - adjustedRect.height_) <= tolerancePx) {
-        return false;
+        return rect;
     }
-    rect = adjustedRect;
-    return true;
+    return adjustedRect;
 }
 } // namespace SessionUtils
 } // namespace OHOS::Rosen

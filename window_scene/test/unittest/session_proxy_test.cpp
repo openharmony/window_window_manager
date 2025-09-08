@@ -2063,6 +2063,10 @@ HWTEST_F(SessionProxyTest, GetAppHookWindowInfoFromServer, TestSize.Level1)
     MockMessageParcel::ClearAllErrorFlag();
     GTEST_LOG_(INFO) << "SessionProxyTest: GetAppHookWindowInfoFromServer end";
 }
+
+// TODO: 补充 SetContentAspectRatio 测试用例
+
+// TODO: 补充 SetDecorVisible 测试用例
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -148,41 +148,24 @@ WindowLimits LayoutController::GetWindowLimits() const
         return limits;
     }
     float vpr = display->GetVirtualPixelRatio();
-    int32_t minW;
-    int32_t maxW;
-    int32_t minH;
-    int32_t maxH;
-    SessionUtils::CalcFloatWindowRectLimits(limits,
-        getSystemConfigFunc_().maxFloatingWindowSize_, vpr, minW, maxW, minH, maxH);
-    limits.minWidth_ = static_cast<uint32_t>(minW);
-    limits.maxWidth_ = static_cast<uint32_t>(maxW);
-    limits.minHeight_ = static_cast<uint32_t>(minH);
-    limits.maxHeight_ = static_cast<uint32_t>(maxH);
+    SessionUtils::CalcFloatWindowRectLimits(limits, getSystemConfigFunc_().maxFloatingWindowSize_, vpr);
     return limits;
 }
 
-bool LayoutController::AdjustRectByAspectRatio(WSRect& rect, const WindowDecoration& decoration)
+WSRect LayoutController::AdjustRectByAspectRatio(const WSRect& rect, const WindowDecoration& decoration)
 {
     auto windowId = GetSessionPersistentId();
     auto mode = sessionProperty_->GetWindowMode();
     auto type = sessionProperty_->GetWindowType();
     if (mode != WindowMode::WINDOW_MODE_FLOATING || !WindowHelper::IsMainWindow(type)) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "Skip adjustment, windowId: %{public}d, mode:%{public}u, type:%{public}u",
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Skip adjustment, windowId: %{public}d, mode: %{public}u, type: %{public}u",
             windowId, static_cast<uint32_t>(mode), static_cast<uint32_t>(type));
-        return false;
+        return rect;
     }
-    TLOGD(WmsLogTag::WMS_LAYOUT,
-        "Before adjustment, windowId: %{public}d, rect: %{public}s, aspectRatio:%{public}f, decoration:%{public}s",
-        windowId, rect.ToString().c_str(), aspectRatio_, decoration.ToString().c_str());
-    bool hasAdjusted = SessionUtils::AdjustRectByAspectRatio(rect, aspectRatio_, GetWindowLimits(), decoration);
-    if (hasAdjusted) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "After adjustment, windowId: %{public}d, rect: %{public}s",
-            windowId, rect.ToString().c_str());
-    } else {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "No adjustment needed, windowId: %{public}d, rect: %{public}s",
-            windowId, rect.ToString().c_str());
-    }
-    return hasAdjusted;
+    WSRect adjustedRect = SessionUtils::AdjustRectByAspectRatio(rect, GetWindowLimits(), decoration, aspectRatio_);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "After adjustment, windowId: %{public}d, rect: %{public}s",
+        windowId, adjustedRect.ToString().c_str());
+    return adjustedRect;
 }
 
 void LayoutController::SetScale(float scaleX, float scaleY, float pivotX, float pivotY)

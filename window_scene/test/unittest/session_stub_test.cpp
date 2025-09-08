@@ -2022,6 +2022,10 @@ HWTEST_F(SessionStubTest, HandleConnect003, Function | SmallTest | Level2)
     result = session_->HandleConnect(data, reply);
     EXPECT_EQ(result, ERR_NONE);
 }
+
+// TODO：补充 HandleSetContentAspectRatio 测试用例
+
+// TODO：补充 HandleSetDecorVisible 测试用例
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

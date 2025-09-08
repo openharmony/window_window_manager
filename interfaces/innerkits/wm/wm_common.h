@@ -462,10 +462,8 @@ extern const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP;
 /**
  * @brief Convert a WMError to its corresponding WmErrorCode.
  *
- * If the WMError is not found in the mapping, returns the given default code.
- *
  * @param error WMError value to convert.
- * @param defaultCode Value to return if mapping is not found (default: WM_ERROR_STATE_ABNORMALLY).
+ * @param defaultCode Value to return if mapping is not found.
  * @return Corresponding WmErrorCode or defaultCode if unmapped.
  */
 WmErrorCode ConvertErrorToCode(WMError error, WmErrorCode defaultCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
@@ -1794,6 +1792,14 @@ struct WindowLimits {
         maxWidth_ -= trimWidth;
         minHeight_ -= trimHeight;
         maxHeight_ -= trimHeight;
+    }
+
+    void Expand(uint32_t expandWidth, uint32_t expandHeight)
+    {
+        minWidth_ += expandWidth;
+        maxWidth_ += expandWidth;
+        minHeight_ += expandHeight;
+        maxHeight_ += expandHeight;
     }
 
     bool IsEmpty() const

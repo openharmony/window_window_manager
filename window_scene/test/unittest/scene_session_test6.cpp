@@ -1273,6 +1273,15 @@ HWTEST_F(SceneSessionTest6, SetSupportEnterWaterfallMode, Function | SmallTest |
     session->SetSupportEnterWaterfallMode(true);
     EXPECT_TRUE(session->sessionStage_ != nullptr);
 }
+
+// TODO：补充 CheckAspectRatioValid 测试用例
+
+// TODO: 补充 SetContentAspectRatio 测试用例
+
+
+// TODO：补充 GetWindowDecoration 测试用例
+
+// TODO: 新增 session_utils.h 对应的测试类和测试用例
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -603,6 +603,8 @@ HWTEST_F(MoveDragControllerTest, CalcFreeformTranslateLimits01, TestSize.Level0)
     moveDragController->CalcFreeformTranslateLimits(type);
 }
 
+// TODO：修改 CalcFixedAspectRatioTranslateLimits 测试用例
+
 /**
  * @tc.name: CalcFixedAspectRatioTranslateLimits01
  * @tc.desc: test function : CalcFixedAspectRatioTranslateLimits01
@@ -1795,6 +1797,8 @@ HWTEST_F(MoveDragControllerTest, UpdateSubWindowGravityWhenFollow01, TestSize.Le
     modifier = surfaceNode->GetModifierByType(ModifierNG::RSModifierType::CLIP_TO_FRAME);
     EXPECT_NE(modifier, nullptr);
 }
+
+// TODO: 补充 CalcDragTargetRect 测试用例
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

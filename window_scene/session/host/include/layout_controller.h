@@ -42,7 +42,7 @@ public:
     WSRect ConvertRelativeRectToGlobal(const WSRect& relativeRect, DisplayId currentDisplayId) const;
     WSRect ConvertGlobalRectToRelative(const WSRect& globalRect, DisplayId targetDisplayId) const;
     int32_t GetSessionPersistentId() const;
-    bool AdjustRectByAspectRatio(WSRect& rect, const WindowDecoration& decoration);
+    WSRect AdjustRectByAspectRatio(const WSRect& rect, const WindowDecoration& decoration);
     float GetAspectRatio() const { return aspectRatio_; }
     void SetAspectRatio(float ratio) { aspectRatio_ = ratio; }
     float GetScaleX() const { return scaleX_; }

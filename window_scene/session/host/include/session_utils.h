@@ -24,37 +24,15 @@ namespace SessionUtils {
 constexpr const char* SESSION_NAME_MARK_HEAD = "#";
 constexpr const char* SESSION_NAME_SEPARATOR = ":";
 
-inline float ToLayoutWidth(const int32_t winWidth, float vpr)
+inline void CalcFloatWindowRectLimits(WindowLimits& limits, uint32_t maxFloatingWindowSize, float vpr)
 {
-    return winWidth - 2 * WINDOW_FRAME_WIDTH * vpr; // 2: left and right edge
-}
+    uint32_t maxWidth = (limits.maxWidth_ == 0 || limits.maxWidth_ >= INT32_MAX) ? INT32_MAX : limits.maxWidth_;
+    uint32_t maxHeight = (limits.maxHeight_ == 0 || limits.maxHeight_ >= INT32_MAX) ? INT32_MAX : limits.maxHeight_;
 
-inline float ToLayoutHeight(const int32_t winHeight, float vpr)
-{
-    return winHeight - (WINDOW_FRAME_WIDTH + WINDOW_TITLE_BAR_HEIGHT) * vpr;
-}
-
-inline float ToWinWidth(const int32_t layoutWidth, float vpr)
-{
-    return layoutWidth + 2 * WINDOW_FRAME_WIDTH * vpr; // 2: left and right edge
-}
-
-inline float ToWinHeight(const int32_t layoutHeight, float vpr)
-{
-    return layoutHeight + (WINDOW_FRAME_WIDTH + WINDOW_TITLE_BAR_HEIGHT) * vpr;
-}
-
-inline void CalcFloatWindowRectLimits(const WindowLimits& limits, uint32_t maxFloatingWindowSize, float vpr,
-    int32_t& minWidth, int32_t& maxWidth, int32_t& minHeight, int32_t& maxHeight)
-{
-    minWidth = limits.minWidth_;
-    maxWidth = (limits.maxWidth_ == 0 || limits.maxWidth_ >= INT32_MAX) ? INT32_MAX : limits.maxWidth_;
-    minHeight = limits.minHeight_;
-    maxHeight = (limits.maxHeight_ == 0 || limits.maxHeight_ >= INT32_MAX) ? INT32_MAX : limits.maxHeight_;
-    minWidth = std::max(minWidth, static_cast<int32_t>(MIN_FLOATING_WIDTH * vpr));
-    maxWidth = std::min(maxWidth, static_cast<int32_t>(maxFloatingWindowSize * vpr));
-    minHeight = std::max(minHeight, static_cast<int32_t>(MIN_FLOATING_HEIGHT * vpr));
-    maxHeight = std::min(maxHeight, static_cast<int32_t>(maxFloatingWindowSize * vpr));
+    limits.minWidth_ = std::max(limits.minWidth_, static_cast<uint32_t>(MIN_FLOATING_WIDTH * vpr));
+    limits.maxWidth_ = std::min(maxWidth, static_cast<uint32_t>(maxFloatingWindowSize * vpr));
+    limits.minHeight_ = std::max(limits.minHeight_, static_cast<uint32_t>(MIN_FLOATING_HEIGHT * vpr));
+    limits.maxHeight_ = std::min(maxHeight, static_cast<uint32_t>(maxFloatingWindowSize * vpr));
 }
 
 inline std::string ConvertSessionName(const std::string& bundleName, const std::string& name,
@@ -88,23 +66,34 @@ inline std::string GetAppLockKey(const std::string& bundleName, const int32_t ap
 }
 
 /**
- * Adjust the given rect to respect aspect ratio and window limits.
- * Width is prioritized when maintaining aspect ratio.
+ * @brief Adjust window size limits to satisfy the specified aspect ratio,
+ *        taking window decoration into account.
  *
- * Note: If aspectRatio is zero, the function returns immediately without modifying rect.
- *
- * @param rect        [in/out] Rectangle to adjust; updated if adjustment occurs
- * @param aspectRatio Desired width/height ratio
- * @param limits      Minimum and maximum width/height constraints
- * @param decoration  Window decoration (borders, title bar, etc.)
- * @param tolerancePx Pixel tolerance to ignore minor adjustments (default 2 pixels)
- * @return true if rect was adjusted, false if no adjustment was needed
+ * @param limits      Original window size limits including decoration.
+ * @param decoration  Window decoration sizes (horizontal + vertical).
+ * @param aspectRatio Desired content aspect ratio (width / height).
+ * @return A new WindowLimits structure with aspect ratio constraints applied.
  */
-bool AdjustRectByAspectRatio(WSRect& rect,
-                             float aspectRatio,
-                             WindowLimits limits,
-                             const WindowDecoration& decoration,
-                             const int tolerancePx = 2);
+WindowLimits AdjustLimitsByAspectRatio(const WindowLimits& limits,
+                                       const WindowDecoration& decoration,
+                                       float aspectRatio);
+
+/**
+ * @brief Adjust a window rectangle to satisfy both the specified aspect ratio
+ *        and the given size limits, considering decoration sizes.
+ *
+ * @param rect        Original window rectangle including decoration.
+ * @param limits      Window size limits including decoration.
+ * @param decoration  Window decoration sizes (horizontal + vertical).
+ * @param aspectRatio Desired content aspect ratio (width / height).
+ * @param tolerancePx Pixel tolerance used to skip small adjustments.
+ * @return A new WSRect adjusted to satisfy aspect ratio and size constraints.
+ */
+WSRect AdjustRectByAspectRatio(const WSRect& rect,
+                               const WindowLimits& limits,
+                               const WindowDecoration& decoration,
+                               float aspectRatio,
+                               int tolerancePx = 2);
 } // namespace SessionUtils
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_UTILS_H
