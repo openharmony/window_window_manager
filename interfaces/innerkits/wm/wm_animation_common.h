@@ -75,7 +75,7 @@ enum class AnimationType : uint32_t {
     /**
      * Window animation type see the world
      */
-    SEE_THE_WORLD = 999,
+    SEE_THE_WORLD = 100,
     /**
      * End type
      */
