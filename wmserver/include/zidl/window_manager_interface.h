@@ -257,6 +257,10 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WMError IsChangedPosition(const Rect& rect, Rect& newRect, DisplayId& newDisplayId)
+    {
+        return WMError::WM_OK;
+    }
     virtual WSError GetHostWindowRect(int32_t hostWindowId, Rect& rect)
     {
         return WSError::WS_OK;

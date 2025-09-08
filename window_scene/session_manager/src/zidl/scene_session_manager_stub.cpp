@@ -87,6 +87,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleSetGestureNavigationEnabled(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_INFO):
             return HandleGetAccessibilityWindowInfo(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GLOBAL_COORDINATE_TO_RELATIVE_COORDINATE):
+            return HandleIsChangedPosition(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_UNRELIABLE_WINDOW_INFO):
             return HandleGetUnreliableWindowInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REGISTER_SESSION_LISTENER):
@@ -909,6 +911,29 @@ int SceneSessionManagerStub::HandleSetGestureNavigationEnabled(MessageParcel& da
     }
     const WMError &ret = SetGestureNavigationEnabled(enable);
     reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleIsChangedPosition(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t posX_ = INVALID_WINDOW_ID;
+    int32_t posY_ = INVALID_WINDOW_ID;
+    uint32_t width_ = 0;
+    uint32_t height_ = 0;
+    if (!data.ReadInt32(posX_) || !data.ReadInt32(posY_) || !data.WriteUint32(width_) || !data.WriteUint32(height_)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read window infos failed.");
+        return ERR_TRANSACTION_FAILED;
+    }
+    Rect rect = { posX_, posY_, width_, height_ };
+    Rect newRect;
+    DisplayId newDisplayId;
+    WMError errCode = IsChangedPosition(rect, newRect, newDisplayId);
+    reply.WriteInt32(static_cast<int32_t>(newRect.posX_));
+    reply.WriteInt32(static_cast<int32_t>(newRect.posY_));
+    reply.WriteUint32(static_cast<uint32_t>(newRect.width_));
+    reply.WriteUint32(static_cast<uint32_t>(newRect.height_));
+    reply.WriteUint64(static_cast<uint64_t>(newDisplayId));
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 

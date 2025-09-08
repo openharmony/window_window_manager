@@ -1673,6 +1673,22 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetGestureNavigationEnabled, TestSiz
 }
 
 /**
+ * @tc.name: HandleIsChangedPosition
+ * @tc.desc: test HandleIsChangedPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleIsChangedPosition, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteBool(false);
+
+    int res = stub_->HandleIsChangedPosition(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleGetAccessibilityWindowInfo
  * @tc.desc: test HandleGetAccessibilityWindowInfo
  * @tc.type: FUNC

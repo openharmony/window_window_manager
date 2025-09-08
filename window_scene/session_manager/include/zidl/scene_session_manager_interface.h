@@ -149,6 +149,7 @@ public:
         TRANS_ID_SET_IMAGE_FOR_RECENT,
         TRANS_ID_REGISTER_WINDOW_PROPERTY_CHANGE_AGENT,
         TRANS_ID_UNREGISTER_WINDOW_PROPERTY_CHANGE_AGENT,
+        TRANS_ID_GLOBAL_COORDINATE_TO_RELATIVE_COORDINATE,
         TRANS_ID_GET_HOST_GLOBAL_SCALE_RECT,
         TRANS_ID_ANIMATE_TO_WINDOW,
         TRANS_ID_CREATE_UI_EFFECT_CONTROLLER,
@@ -284,6 +285,10 @@ public:
         return WMError::WM_OK;
     }
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override
+    {
+        return WMError::WM_OK;
+    }
+    virtual WMError IsChangedPosition(const Rect& rect, Rect& newRect, DisplayId& newDisplayId) override
     {
         return WMError::WM_OK;
     }
