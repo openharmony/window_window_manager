@@ -121,6 +121,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindowStage::SetDefaultDensityEnabled)},
         ani_native_function {"getMainWindowSync", "l:C{@ohos.window.window.Window}",
             reinterpret_cast<void *>(WindowGetMainWindow)},
+        ani_native_function {"setImageForRecentSync", "lli:",
+            reinterpret_cast<void *>(AniWindowStage::SetImageForRecent)},
         ani_native_function {"createSubWindowSync", "lC{std.core.String}:C{@ohos.window.window.Window}",
             reinterpret_cast<void *>(CreateSubWindow)},
         ani_native_function {"onSync", nullptr,
