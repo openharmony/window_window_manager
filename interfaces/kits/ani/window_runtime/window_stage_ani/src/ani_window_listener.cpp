@@ -27,8 +27,11 @@ using namespace AbilityRuntime;
 
 AniWindowListener::~AniWindowListener()
 {
-    ani_status ret = env_->GlobalReference_Delete(aniCallback_);
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]~AniWindowListener ret:%{public}d", static_cast<int32_t>(ret));
+    ani_status ret = ANI_OK;
+    if (env_ != nullptr && aniCallback_ != nullptr) {
+        ret = env_->GlobalReference_Delete(aniCallback_);
+    }
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]~AniWindowListener ret: %{public}u", ret);
 }
 
 void AniWindowListener::OnLastStrongRef(const void *)
