@@ -2023,9 +2023,82 @@ HWTEST_F(SessionStubTest, HandleConnect003, Function | SmallTest | Level2)
     EXPECT_EQ(result, ERR_NONE);
 }
 
-// TODO：补充 HandleSetContentAspectRatio 测试用例
+/**
+ * @tc.name: HandleSetContentAspectRatioCases
+ * @tc.desc: Verify HandleSetContentAspectRatio with invalid and valid inputs
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetContentAspectRatioCases, TestSize.Level1)
+{
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CONTENT_ASPECT_RATIO);
+    MessageOption option;
+    float ratio = 1.5f;
+    bool isPersistent = true;
+    bool needUpdateRect = false;
 
-// TODO：补充 HandleSetDecorVisible 测试用例
+    // Case 1: Missing ratio
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+
+    // Case 2: Missing isPersistent and needUpdateRect
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        data.WriteFloat(ratio);
+        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+
+    // Case 3: Missing needUpdateRect
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        data.WriteFloat(ratio);
+        data.WriteBool(isPersistent);
+        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+
+    // Case 4: Success
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        data.WriteFloat(ratio);
+        data.WriteBool(isPersistent);
+        data.WriteBool(needUpdateRect);
+        EXPECT_CALL(*session_, SetContentAspectRatio(ratio, isPersistent, needUpdateRect)).Times(1);
+        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_NONE);
+    }
+}
+
+/**
+ * @tc.name: HandleSetDecorVisibleCases
+ * @tc.desc: Verify HandleSetDecorVisible with invalid and valid inputs
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetDecorVisibleCases, TestSize.Level1)
+{
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DECOR_VISIBLE);
+    MessageOption option;
+
+    // Case 1: Missing isVisible
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+
+    // Case 2: Success
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        bool isVisible = true;
+        data.WriteBool(isVisible);
+        EXPECT_CALL(*session_, SetDecorVisible(isVisible)).Times(1);
+        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_NONE);
+    }
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -800,12 +800,16 @@ struct WSScreenRelativeRect {
  * @brief Represents the window decoration thickness (non-drawable area).
  *        In general, the top decoration includes the title bar.
  */
-struct WindowDecoration
-{
+struct WindowDecoration {
     uint32_t left = 0;
     uint32_t top = 0;
     uint32_t right = 0;
     uint32_t bottom = 0;
+
+    bool operator==(const WindowDecoration& other) const
+    {
+        return left == other.left && top == other.top && right == other.right && bottom == other.bottom;
+    }
 
     /**
      * @brief Calculate the total horizontal decoration.

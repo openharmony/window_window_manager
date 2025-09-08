@@ -57,8 +57,6 @@ public:
     void SetSystemConfigFunc(GetSystemConfigFunc&& func);
 
 private:
-    WindowLimits GetWindowLimits() const;
-
     float scaleX_ = 1.0f;
     float scaleY_ = 1.0f;
     float pivotX_ = 0.0f;

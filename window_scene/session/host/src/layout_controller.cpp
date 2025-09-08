@@ -138,22 +138,12 @@ int32_t LayoutController::GetSessionPersistentId() const
     return sessionProperty_->GetPersistentId();
 }
 
-WindowLimits LayoutController::GetWindowLimits() const
-{
-    auto limits = sessionProperty_->GetWindowLimits();
-    auto displayId = sessionProperty_->GetDisplayId();
-    auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
-    if (!display) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "display is null, displayId: %{public}" PRIu64, displayId);
-        return limits;
-    }
-    float vpr = display->GetVirtualPixelRatio();
-    SessionUtils::CalcFloatWindowRectLimits(limits, getSystemConfigFunc_().maxFloatingWindowSize_, vpr);
-    return limits;
-}
-
 WSRect LayoutController::AdjustRectByAspectRatio(const WSRect& rect, const WindowDecoration& decoration)
 {
+    if (sessionProperty_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionProperty is null");
+        return rect;
+    }
     auto windowId = GetSessionPersistentId();
     auto mode = sessionProperty_->GetWindowMode();
     auto type = sessionProperty_->GetWindowType();
@@ -162,7 +152,16 @@ WSRect LayoutController::AdjustRectByAspectRatio(const WSRect& rect, const Windo
             windowId, static_cast<uint32_t>(mode), static_cast<uint32_t>(type));
         return rect;
     }
-    WSRect adjustedRect = SessionUtils::AdjustRectByAspectRatio(rect, GetWindowLimits(), decoration, aspectRatio_);
+    auto displayId = sessionProperty_->GetDisplayId();
+    auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
+    if (!display) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "display is null, displayId: %{public}" PRIu64, displayId);
+        return rect;
+    }
+    float vpr = display->GetVirtualPixelRatio();
+    auto limits = sessionProperty_->GetWindowLimits();
+    SessionUtils::CalcFloatWindowRectLimits(limits, getSystemConfigFunc_().maxFloatingWindowSize_, vpr);
+    WSRect adjustedRect = SessionUtils::AdjustRectByAspectRatio(rect, limits, decoration, aspectRatio_);
     TLOGD(WmsLogTag::WMS_LAYOUT, "After adjustment, windowId: %{public}d, rect: %{public}s",
         windowId, adjustedRect.ToString().c_str());
     return adjustedRect;

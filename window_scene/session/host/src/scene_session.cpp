@@ -1396,31 +1396,6 @@ WSError SceneSession::GetGlobalMaximizeMode(MaximizeMode& mode)
     }, __func__);
 }
 
-static WSError CheckAspectRatioValid(float ratio, WindowLimits limits, const WindowDecoration& decoration)
-{
-    if (MathHelper::NearZero(ratio)) {
-        return WSError::WS_OK;
-    }
-
-    limits.Trim(decoration.Horizontal(), decoration.Vertical());
-    if (!limits.IsValid()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "The window limits is invalid: %{public}s", limits.ToString().c_str());
-        return WSError::WS_ERROR_INVALID_WINDOW;
-    }
-
-    float minRatio = limits.maxHeight_ > 0 ?
-        static_cast<float>(limits.minWidth_) / static_cast<float>(limits.maxHeight_) : 0.0f;
-    float maxRatio = limits.minHeight_ > 0 ?
-        static_cast<float>(limits.maxWidth_) / static_cast<float>(limits.minHeight_) : FLT_MAX;
-    if (MathHelper::LessNotEqual(ratio, minRatio) || MathHelper::GreatNotEqual(ratio, maxRatio)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT,
-            "The aspectRatio(%{public}f) is not in valid range: [%{public}f, %{public}f]",
-            ratio, minRatio, maxRatio);
-        return WSError::WS_ERROR_INVALID_PARAM;
-    }
-    return WSError::WS_OK;
-}
-
 /** @note @window.layout */
 WSError SceneSession::SetAspectRatio(float ratio)
 {
@@ -1429,8 +1404,9 @@ WSError SceneSession::SetAspectRatio(float ratio)
 
 WSError SceneSession::SetContentAspectRatio(float ratio, bool isPersistent, bool needUpdateRect)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "ratio: %{public}f, isPersistent: %{public}d, needUpdateRect: %{public}d",
-        ratio, isPersistent, needUpdateRect);
+    TLOGI(WmsLogTag::WMS_LAYOUT,
+        "windowId: %{public}d, ratio: %{public}f, isPersistent: %{public}d, needUpdateRect: %{public}d",
+        session->GetPersistentId(), ratio, isPersistent, needUpdateRect);
     return PostSyncTask([weakThis = wptr(this), ratio, isPersistent, needUpdateRect, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
@@ -1438,15 +1414,15 @@ WSError SceneSession::SetContentAspectRatio(float ratio, bool isPersistent, bool
             return WSError::WS_ERROR_NULLPTR;
         }
         auto property = session->GetSessionProperty();
-        if (property == nullptr) {
+        if (!property) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: property is null", where);
             return WSError::WS_ERROR_NULLPTR;
         }
         WindowLimits limits = property->GetWindowLimits();
         WindowDecoration decoration = session->GetWindowDecoration();
-        WSError ret = CheckAspectRatioValid(ratio, limits, decoration);
-        if (ret != WSError::WS_OK) {
-            return ret;
+        if (!IsAspectRatioValid(ratio, limits, decoration)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s: Invalid ratio: %{public}f", where, ratio);
+            return WSError::WS_ERROR_INVALID_PARAM;
         }
         session->Session::SetAspectRatio(ratio);
         if (session->moveDragController_) {
@@ -1460,10 +1436,11 @@ WSError SceneSession::SetContentAspectRatio(float ratio, bool isPersistent, bool
             WSRect adjustedRect = session->layoutController_->AdjustRectByAspectRatio(originalRect, decoration);
             if (adjustedRect != originalRect) {
                 session->NotifySessionRectChange(adjustedRect, SizeChangeReason::RESIZE);
+                TLOGNI(WmsLogTag::WMS_LAYOUT,
+                    "%{public}s: windowId: %{public}d, originalRect: %{public}s, adjustedRect: %{public}s",
+                    where, session->GetPersistentId(),
+                    originalRect.ToString().c_str(), adjustedRect.ToString().c_str());
             }
-            TLOGNI(WmsLogTag::WMS_LAYOUT,
-                "%{public}s: windowId: %{public}d, originalRect: %{public}s, adjustedRect: %{public}s",
-                where, session->GetPersistentId(), originalRect.ToString().c_str(), adjustedRect.ToString().c_str());
         }
         return WSError::WS_OK;
     }, __func__);
@@ -8358,20 +8335,21 @@ WindowDecoration SceneSession::GetWindowDecoration() const
 {
     auto getTopDecorInPx = [&, where = __func__]() -> uint32_t {
         if (!IsDecorVisible() || !IsDecorEnable()) {
-            TLOGW(WmsLogTag::WMS_DECOR, "%{public}s: Decor not visible or not enable", where);
+            TLOGW(WmsLogTag::WMS_DECOR, "%{public}s: decor not visible or not enable", where);
             return 0;
         }
         auto displayId = GetDisplayId();
         auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
         if (!display) {
-            TLOGW(WmsLogTag::WMS_DECOR, "%{public}s: Display is null, displayId: %{public}" PRIu64, where, displayId);
+            TLOGW(WmsLogTag::WMS_DECOR, "%{public}s: display is null, displayId: %{public}" PRIu64, where, displayId);
             return 0;
         }
         float vpr = display->GetVirtualPixelRatio();
+        constexpr int32_t defaultTopDecorHeightVp = 37;
         std::lock_guard lock(customDecorHeightMutex_);
-        auto decorHeight = customDecorHeight_ != 0 ? customDecorHeight_ : WINDOW_TITLE_BAR_HEIGHT;
-        TLOGD(WmsLogTag::WMS_DECOR, "%{public}s: decorHeight: %{public}d, vpr: %{public}f", where, decorHeight, vpr);
-        return static_cast<uint32_t>(decorHeight * vpr);
+        auto decorHeightVp = customDecorHeight_ != 0 ? customDecorHeight_ : defaultTopDecorHeightVp;
+        TLOGD(WmsLogTag::WMS_DECOR, "%{public}s: decorHeight: %{public}d, vpr: %{public}f", where, decorHeightVp, vpr);
+        return static_cast<uint32_t>(decorHeightVp * vpr);
     };
     // Only the top decoration (title bar) currently has height. Left, right, and bottom are set to 0 by default.
     // If future specifications introduce additional decorations, this return value should be updated accordingly.

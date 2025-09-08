@@ -15,14 +15,41 @@
 
 #include "session_utils.h"
 
+#include "window_manager_hilog.h"
+
 namespace OHOS::Rosen {
 namespace SessionUtils {
+bool IsAspectRatioValid(float aspectRatio, const WindowLimits& limits, const WindowDecoration& decoration)
+{
+    if (MathHelper::NearZero(aspectRatio)) {
+        return true;
+    }
+
+    WindowLimits contentLimits = limits;
+    contentLimits.Trim(decoration.Horizontal(), decoration.Vertical());
+    if (!contentLimits.IsValid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid limits: %{public}s", contentLimits.ToString().c_str());
+        return false;
+    }
+
+    float minRatio = contentLimits.maxHeight_ > 0 ?
+        static_cast<float>(contentLimits.minWidth_) / static_cast<float>(contentLimits.maxHeight_) : 0.0f;
+    float maxRatio = contentLimits.minHeight_ > 0 ?
+        static_cast<float>(contentLimits.maxWidth_) / static_cast<float>(contentLimits.minHeight_) : FLT_MAX;
+
+    if (MathHelper::LessNotEqual(aspectRatio, minRatio) || MathHelper::GreatNotEqual(aspectRatio, maxRatio)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid aspectRatio: %{public}f, valid range: [%{public}f, %{public}f]",
+            aspectRatio, minRatio, maxRatio);
+        return false;
+    }
+    return true;
+}
+
 WindowLimits AdjustLimitsByAspectRatio(const WindowLimits& limits,
                                        const WindowDecoration& decoration,
                                        float aspectRatio)
 {
     if (MathHelper::NearZero(aspectRatio)) {
-        // Aspect ratio is zero, skip adjustment
         return limits;
     }
 
@@ -67,7 +94,6 @@ WSRect AdjustRectByAspectRatio(const WSRect& rect,
                                int tolerancePx)
 {
     if (MathHelper::NearZero(aspectRatio)) {
-        // Aspect ratio is zero, skip adjustment
         return rect;
     }
 
