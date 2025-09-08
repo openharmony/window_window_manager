@@ -6935,7 +6935,7 @@ napi_value JsWindow::OnResetAspectRatio(napi_env env, napi_callback_info info)
 napi_value JsWindow::OnSetContentAspectRatio(napi_env env, napi_callback_info info)
 {
     const std::string errMsgPrefix = "[window][setContentAspectRatio]msg: ";
-    auto logAndThrowError = [env, where = __func__, errMsgPrefix](WmErrorCode code, const char* msg) {
+    auto logAndThrowError = [env, where = __func__, errMsgPrefix](WmErrorCode code, const std::string& msg) {
         TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: %{public}s", where, msg.c_str());
         return NapiThrowError(env, code, errMsgPrefix + msg);
     };
@@ -6959,17 +6959,17 @@ napi_value JsWindow::OnSetContentAspectRatio(napi_env env, napi_callback_info in
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], aspectRatio)) {
         return logAndThrowError(WmErrorCode::WM_ERROR_INVALID_PARAM, "Failed to convert parameter to aspectRatio");
     }
-    if (aspectRatio <= 0.0) {
+    if (MathHelper::LessNotEqual(aspectRatio, 0.0) || MathHelper::NearZero(aspectRatio)) {
         return logAndThrowError(WmErrorCode::WM_ERROR_INVALID_PARAM, "Invalid aspectRatio value");
     }
 
-    bool isPersistent = false;
-    if (argc >= TWO_PARAMS_SIZE && !ConvertFromOptionalJsValue(env, argv[INDEX_ONE], isPersistent, false)) {
+    bool isPersistent = true;
+    if (argc >= TWO_PARAMS_SIZE && !ConvertFromOptionalJsValue(env, argv[INDEX_ONE], isPersistent, true)) {
         return logAndThrowError(WmErrorCode::WM_ERROR_INVALID_PARAM, "Failed to convert parameter to isPersistent");
     }
 
-    bool needUpdateRect = false;
-    if (argc == THREE_PARAMS_SIZE && !ConvertFromOptionalJsValue(env, argv[INDEX_TWO], needUpdateRect, false)) {
+    bool needUpdateRect = true;
+    if (argc == THREE_PARAMS_SIZE && !ConvertFromOptionalJsValue(env, argv[INDEX_TWO], needUpdateRect, true)) {
         return logAndThrowError(WmErrorCode::WM_ERROR_INVALID_PARAM, "Failed to convert parameter to needUpdateRect");
     }
 

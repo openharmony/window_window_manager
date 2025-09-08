@@ -58,6 +58,7 @@ group("unittest") {
     ":ws_session_stage_stub_test",
     ":ws_session_stub_mock_test",
     ":ws_session_stub_property_test",
+    ":ws_session_utils_test",
     ":ws_ssmgr_specific_window_test",
     ":ws_sub_session_lifecycle_test",
     ":ws_system_session_lifecycle_test",
@@ -1570,6 +1571,24 @@ ohos_unittest("ws_session_coordinate_helper_test") {
   ]
 
   sources = [ "session_coordinate_helper_test.cpp" ]
+
+  cflags_cc = [ "-Wno-thread-safety" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = test_external_deps
+}
+
+ohos_unittest("ws_session_utils_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [
+    "${window_base_path}/test/common/utils/include/",
+    "${window_base_path}/window_scene/session/host/include/"
+    "${window_base_path}/window_scene/test/mock/",
+  ]
+
+  sources = [ "session_utils_test.cpp" ]
 
   cflags_cc = [ "-Wno-thread-safety" ]
 

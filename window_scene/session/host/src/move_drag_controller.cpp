@@ -1166,7 +1166,7 @@ void MoveDragController::CalcFreeformTranslateLimits(AreaType type)
 void MoveDragController::CalcFixedAspectRatioTranslateLimits(AreaType type)
 {
     if (MathHelper::NearZero(aspectRatio_)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "aspectRatio is 0");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "aspectRatio is near 0, id:%{public}d", persistentId_);
         return;
     }
 

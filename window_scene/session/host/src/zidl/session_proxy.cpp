@@ -1684,7 +1684,8 @@ WSError SessionProxy::SetContentAspectRatio(
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to send request, error = %{public}d", sendRet);
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    return WSError::WS_OK;
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
 }
 
 WSError SessionProxy::UpdateWindowSceneAfterCustomAnimation(bool isAdd)

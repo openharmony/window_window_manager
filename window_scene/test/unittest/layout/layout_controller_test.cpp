@@ -177,9 +177,47 @@ HWTEST_F(LayoutControllerTest, SetSystemConfigFunc, TestSize.Level1)
     EXPECT_EQ(layoutController_->GetSessionRect(), rect);
 }
 
-// TODO: 补充 AdjustRectByAspectRatio 方法测试用例
+/**
+ * @tc.name: TestAdjustRectByAspectRatioAbnormalCases
+ * @tc.desc: Verify AdjustRectByAspectRatio handles abnormal cases correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutControllerTest, TestAdjustRectByAspectRatioAbnormalCases, TestSize.Level1)
+{
+    WSRect rect{10, 20, 200, 200};
+    WindowDecoration decor{0, 0, 0, 0};
 
-// TODO: 补充 GetWindowLimits 方法测试用例
+    // Case 1: sessionProperty is null
+    layoutController_->sessionProperty_ = nullptr;
+    EXPECT_EQ(layoutController_->AdjustRectByAspectRatio(rect, decor), rect);
+
+    auto prop = sptr<WindowSessionProperty>::MakeSptr();
+    layoutController_->sessionProperty_ = prop;
+
+    // Case 2: mode != FLOATING
+    prop->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
+    EXPECT_EQ(layoutController_->AdjustRectByAspectRatio(rect, decor), rect);
+
+    // Case 3: Not main window
+    prop->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    prop->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    EXPECT_EQ(layoutController_->AdjustRectByAspectRatio(rect, decor), rect);
+
+    prop->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+
+    // Case 4: display is null
+    prop->SetDisplayId(DISPLAY_ID_INVALID);
+    EXPECT_EQ(layoutController_->AdjustRectByAspectRatio(rect, decor), rect);
+
+    // Case 5: Success
+    auto displayManager = DisplayManager::GetInstance();
+    auto displayInfo = sptr<DisplayInfo>::MakeSptr();
+    displayInfo->SetDisplayId(1);
+    displayManager.pImpl_->UpdateDisplayInfoLocked(displayInfo);
+    layoutController_->aspectRatio_ = 2.0f;
+    prop->SetDisplayId(1);
+    EXPECT_NE(layoutController_->AdjustRectByAspectRatio(rect, decor), rect);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

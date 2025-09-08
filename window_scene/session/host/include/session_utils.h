@@ -66,6 +66,16 @@ inline std::string GetAppLockKey(const std::string& bundleName, const int32_t ap
 }
 
 /**
+ * @brief Check if the aspect ratio is valid within the given window limits and decoration.
+ *
+ * @param ratio      The aspect ratio to check (width / height).
+ * @param limits     The window size limits including decoration.
+ * @param decoration The window decoration sizes (horizontal + vertical).
+ * @return True if the aspect ratio is valid, false otherwise.
+ */
+bool IsAspectRatioValid(float ratio, const WindowLimits& limits, const WindowDecoration& decoration);
+
+/**
  * @brief Adjust window size limits to satisfy the specified aspect ratio,
  *        taking window decoration into account.
  *

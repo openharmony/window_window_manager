@@ -1268,7 +1268,8 @@ int SessionStub::HandleSetContentAspectRatio(MessageParcel& data, MessageParcel&
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read needUpdateRect");
         return ERR_INVALID_DATA;
     }
-    SetContentAspectRatio(ratio, isPersistent, needUpdateRect);
+    WSError ret = SetContentAspectRatio(ratio, isPersistent, needUpdateRect);
+    reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
 
