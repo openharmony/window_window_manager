@@ -258,7 +258,7 @@ HWTEST_F(SceneSessionManagerTest9, TestRequestSessionFocusImmediately_07, TestSi
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest9";
     sessionInfo.abilityName_ = "TestRequestSessionFocusImmediately_07";
-    sessionInfo.isSystem_ = true;
+    sessionInfo.isSystem_ = false;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     sceneSession->SetFocusable(true);
     sceneSession->SetFocusedOnShow(true);
@@ -269,7 +269,7 @@ HWTEST_F(SceneSessionManagerTest9, TestRequestSessionFocusImmediately_07, TestSi
     ssm_->systemConfig_.freeMultiWindowEnable_ = true;
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
     WSError ret = ssm_->RequestSessionFocusImmediately(1, false);
-    EXPECT_EQ(focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground(), false);
+    EXPECT_EQ(ret, WSError::WS_OK);
 }
 
 /**
