@@ -125,7 +125,6 @@ SessionManager& SessionManager::GetInstance()
 sptr<SessionManager> SessionManager::GetInstance(const int32_t userId)
 {
     sptr<SessionManager> instance = nullptr;
-
     if (userId <= INVALID_USER_ID) {
         instance = &SessionManager::GetInstance();
         return instance;
@@ -329,13 +328,8 @@ void SessionManager::RegisterSMSRecoverListener()
             TLOGE(WmsLogTag::WMS_SCB, "Get mock sms proxy failed");
             return;
         }
-    }
-    TLOGI(WmsLogTag::WMS_RECOVER, "begin register listener");
-    sptr<SessionManager> sm(this);
-    smsRecoverListener_ = sptr<SessionManagerServiceRecoverListener>::MakeSptr(sm);
-    {
+        smsRecoverListener_ = sptr<SessionManagerServiceRecoverListener>::MakeSptr(this);
         TLOGD(WmsLogTag::WMS_RECOVER, "Register recover listener, userId_: %{public}d", userId_);
-        std::lock_guard<std::mutex> lock(mockSessionManagerServiceMutex_);
         mockSessionManagerServiceProxy_->RegisterSMSRecoverListener(smsRecoverListener_, userId_);
     }
     {

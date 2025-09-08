@@ -45,7 +45,7 @@ private:
 };
 
 class SessionManager : public RefBase {
-WM_DECLARE_SINGLE_INSTANCE_BASE(SessionManager);
+    WM_DECLARE_SINGLE_INSTANCE_BASE(SessionManager);
 
 public:
     static sptr<SessionManager> GetInstance(const int32_t userId);
