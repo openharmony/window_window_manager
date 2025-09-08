@@ -73,6 +73,10 @@ enum class AnimationType : uint32_t {
      */
     FADE_IN = 1,
     /**
+     * Window animation type see the world
+     */
+    SEE_THE_WORLD = 999,
+    /**
      * End type
      */
     END,
