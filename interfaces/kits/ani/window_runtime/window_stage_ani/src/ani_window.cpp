@@ -1101,8 +1101,8 @@ ani_int AniWindow::GetSubWindowZLevel(ani_env* env, ani_object obj, ani_long nat
     using namespace OHOS::Rosen;
     TLOGI(WmsLogTag::WMS_HIERARCHY, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-    if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] windowToken_ is nullptr");
+    if (aniWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] aniWindow is nullptr");
         return ANI_ERROR;
     }
     return aniWindow->OnGetSubWindowZLevel(env);
@@ -1130,7 +1130,7 @@ ani_boolean AniWindow::IsFocused(ani_env* env, ani_object obj, ani_long nativeOb
     using namespace OHOS::Rosen;
     TLOGI(WmsLogTag::WMS_FOCUS, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-    if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
+    if (aniWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "[ANI] aniWindow is nullptr");
         return ANI_ERROR;
     }
@@ -3551,8 +3551,8 @@ static void SetWindowTopmost(ani_env* env, ani_object obj, ani_long nativeObj, a
     using namespace OHOS::Rosen;
     TLOGI(WmsLogTag::WMS_HIERARCHY, "[ANI] start");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-    if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] windowToken is null");
+    if (aniWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] aniWindow is null");
         return;
     }
     aniWindow->SetWindowTopmost(env, isWindowTopmost);
@@ -3826,8 +3826,8 @@ static ani_int WindowSetRaiseByClickEnabled(ani_env* env, ani_object obj,
     using namespace OHOS::Rosen;
     TLOGI(WmsLogTag::WMS_FOCUS, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-    if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "[ANI] windowToken_ is nullptr");
+    if (aniWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "[ANI] aniWindow is nullptr");
         return ANI_ERROR;
     }
     aniWindow->SetRaiseByClickEnabled(env, enable);
@@ -3841,8 +3841,8 @@ static ani_int WindowSetExclusivelyHighlighted(ani_env* env, ani_object obj,
     using namespace OHOS::Rosen;
     TLOGI(WmsLogTag::WMS_FOCUS, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-    if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "[ANI] windowToken_ is nullptr");
+    if (aniWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "[ANI] aniWindow is nullptr");
         return ANI_ERROR;
     }
     aniWindow->SetExclusivelyHighlighted(env, exclusivelyHighlighted);
