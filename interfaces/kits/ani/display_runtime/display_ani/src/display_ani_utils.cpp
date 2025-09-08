@@ -171,17 +171,17 @@ ani_status DisplayAniUtils::CvtDisplay(sptr<Display> display, ani_env* env, ani_
     auto hdrFormats = info->GetHdrFormats();
     auto supportedRefreshRates = info->GetSupportedRefreshRate();
     if (colorSpaces.size() != 0) {
-        ani_array_int colorSpacesAni;
+        ani_array colorSpacesAni;
         CreateAniArrayInt(env, colorSpaces.size(), &colorSpacesAni, colorSpaces);
         env->Object_SetFieldByName_Ref(obj, "<property>colorSpaces", static_cast<ani_ref>(colorSpacesAni));
     }
     if (hdrFormats.size() != 0) {
-        ani_array_int hdrFormatsAni;
+        ani_array hdrFormatsAni;
         CreateAniArrayInt(env, hdrFormats.size(), &hdrFormatsAni, hdrFormats);
         env->Object_SetFieldByName_Ref(obj, "<property>hdrFormats", static_cast<ani_ref>(hdrFormatsAni));
     }
     if (supportedRefreshRates.size() != 0) {
-        ani_array_int supportedRefreshRatesAni;
+        ani_array supportedRefreshRatesAni;
         CreateAniArrayInt(env, hdrFormats.size(), &supportedRefreshRatesAni, supportedRefreshRates);
         env->Object_SetFieldByName_Ref(obj, "<property>supportedRefreshRates",
             static_cast<ani_ref>(supportedRefreshRatesAni));
@@ -189,25 +189,77 @@ ani_status DisplayAniUtils::CvtDisplay(sptr<Display> display, ani_env* env, ani_
     return ANI_OK;
 }
 
-void DisplayAniUtils::CreateAniArrayInt(ani_env* env, ani_size size, ani_array_int *aniArray, std::vector<uint32_t> vec)
+void DisplayAniUtils::CreateAniArrayInt(ani_env* env, ani_size size, ani_array *aniArray, std::vector<uint32_t> vec)
 {
-    if (ANI_OK != env->Array_New_Int(size, aniArray)) {
-        TLOGE(WmsLogTag::DMS, "[ANI] create colorSpace array error");
+    ani_ref undefinedRef {};
+    if (ANI_OK != env->GetUndefined(&undefinedRef)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] GetUndefined error");
+        return;
+    }
+    if (ANI_OK != env->Array_New(size, undefinedRef, aniArray)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] create colorSpace aniArray error");
+        return;
     }
     ani_int* aniArrayBuf = reinterpret_cast<ani_int *>(vec.data());
-    if (ANI_OK != env->Array_SetRegion_Int(*aniArray, 0, size, aniArrayBuf)) {
-        TLOGE(WmsLogTag::DMS, "[ANI] Array set region int error");
+    ani_class intCls {};
+    ani_method intCtor {};
+    if (ANI_OK != env->FindClass("std.core.Int", &intCls)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Find std.core.Int error");
+        return;
+    }
+    if (ANI_OK != env->Class_FindMethod(intCls, "<ctor>", "i:", &intCtor)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Find Int Ctor error");
+        return;
+    }
+    for (ani_size i = 0; i < size; ++i) {
+        ani_object intObj {};
+        if (ANI_OK != env->Object_New(intCls, intCtor, &intObj, aniArrayBuf[i])) {
+            TLOGE(WmsLogTag::DMS, "[ANI] Object_New error");
+            return;
+        }
+        if (ANI_OK != env->Array_Set(*aniArray, i, intObj)) {
+            TLOGE(WmsLogTag::DMS, "[ANI] Array_Set int error");
+            return;
+        }
     }
 }
 
 void DisplayAniUtils::CreateAniArrayDouble(ani_env* env, ani_size size,
-    ani_array_double *aniArray, std::vector<float> vec)
+    ani_array *aniArray, std::vector<float> vec)
 {
-    env->Array_New_Double(size, aniArray);
+    ani_ref undefinedRef {};
+    if (ANI_OK != env->GetUndefined(&undefinedRef)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] GetUndefined error");
+        return;
+    }
+    if (ANI_OK != env->Array_New(size, undefinedRef, aniArray)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] create colorSpace array error");
+        return;
+    }
     std::vector<double> vecDoubles;
     std::copy(vec.begin(), vec.end(), std::back_inserter(vecDoubles));
     ani_double* aniArrayBuf = reinterpret_cast<ani_double *>(vecDoubles.data());
-    env->Array_SetRegion_Double(*aniArray, 0, size, aniArrayBuf);
+    ani_class doubleCls {};
+    ani_method doubleCtor {};
+    if (ANI_OK != env->FindClass("std.core.Double", &doubleCls)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Find std.core.Double error");
+        return;
+    }
+    if (ANI_OK != env->Class_FindMethod(doubleCls, "<ctor>", "d:", &doubleCtor)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Find Double Ctor error");
+        return;
+    }
+    for (ani_size i = 0; i < size; ++i) {
+        ani_object doubleObj {};
+        if (ANI_OK != env->Object_New(doubleCls, doubleCtor, &doubleObj, aniArrayBuf[i])) {
+            TLOGE(WmsLogTag::DMS, "[ANI] Object_New error");
+            return;
+        }
+        if (ANI_OK != env->Array_Set(*aniArray, i, doubleObj)) {
+            TLOGE(WmsLogTag::DMS, "[ANI] Array_Set int error");
+            return;
+        }
+    }
 }
 
 ani_status DisplayAniUtils::GetStdString(ani_env *env, ani_string ani_str, std::string &result)

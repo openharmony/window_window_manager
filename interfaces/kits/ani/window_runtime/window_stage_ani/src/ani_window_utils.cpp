@@ -601,18 +601,13 @@ ani_object AniWindowUtils::CreateAniWindowLayoutInfo(ani_env* env, const WindowL
 ani_object AniWindowUtils::CreateAniWindowLayoutInfoArray(ani_env* env,
     const std::vector<sptr<WindowLayoutInfo>>& infos)
 {
-    ani_class cls;
-    if (env->FindClass("@ohos.window.window.WindowLayoutInfoInternal", &cls) != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] class not found");
-        return AniWindowUtils::CreateAniUndefined(env);
-    }
-    ani_array_ref windowLayoutInfoArray = nullptr;
-    if (env->Array_New_Ref(cls, infos.size(), CreateAniUndefined(env), &windowLayoutInfoArray) != ANI_OK) {
+    ani_array windowLayoutInfoArray = nullptr;
+    if (env->Array_New(infos.size(), CreateAniUndefined(env), &windowLayoutInfoArray) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] create array failed");
         return AniWindowUtils::CreateAniUndefined(env);
     }
     for (size_t i = 0; i < infos.size(); i++) {
-        if (env->Array_Set_Ref(windowLayoutInfoArray, i, CreateAniWindowLayoutInfo(env, *infos[i])) != ANI_OK) {
+        if (env->Array_Set(windowLayoutInfoArray, i, CreateAniWindowLayoutInfo(env, *infos[i])) != ANI_OK) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] create windowLayoutInfoArray failed");
             return AniWindowUtils::CreateAniUndefined(env);
         }
@@ -661,18 +656,13 @@ ani_object AniWindowUtils::CreateAniWindowInfo(ani_env* env, const WindowVisibil
 ani_object AniWindowUtils::CreateAniWindowInfoArray(ani_env* env,
     const std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
-    ani_class cls;
-    if (env->FindClass("@ohos.window.window.WindowInfoInternal", &cls) != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] class not found");
-        return AniWindowUtils::CreateAniUndefined(env);
-    }
-    ani_array_ref windowInfoArray = nullptr;
-    if (env->Array_New_Ref(cls, infos.size(), CreateAniUndefined(env), &windowInfoArray) != ANI_OK) {
+    ani_array windowInfoArray = nullptr;
+    if (env->Array_New(infos.size(), CreateAniUndefined(env), &windowInfoArray) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] create array failed");
         return AniWindowUtils::CreateAniUndefined(env);
     }
     for (size_t i = 0; i < infos.size(); i++) {
-        if (env->Array_Set_Ref(windowInfoArray, i, CreateAniWindowInfo(env, *infos[i])) != ANI_OK) {
+        if (env->Array_Set(windowInfoArray, i, CreateAniWindowInfo(env, *infos[i])) != ANI_OK) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] CreateAniWindowInfo failed");
             return AniWindowUtils::CreateAniUndefined(env);
         }
@@ -683,18 +673,14 @@ ani_object AniWindowUtils::CreateAniWindowInfoArray(ani_env* env,
 ani_object AniWindowUtils::CreateAniWindowArray(ani_env* env, std::vector<ani_ref>& windows)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    ani_array_ref windowArray = nullptr;
-    ani_class windowCls;
-    if (env->FindClass("@ohos.window.window.WindowInternal", &windowCls) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
-        return AniWindowUtils::CreateAniUndefined(env);
-    }
-    if (env->Array_New_Ref(windowCls, windows.size(), CreateAniUndefined(env), &windowArray) != ANI_OK) {
+    ani_array windowArray = nullptr;
+
+    if (env->Array_New(windows.size(), CreateAniUndefined(env), &windowArray) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] create array fail");
         return AniWindowUtils::CreateAniUndefined(env);
     }
     for (size_t i = 0; i < windows.size(); i++) {
-        if (env->Array_Set_Ref(windowArray, i, windows[i]) != ANI_OK) {
+        if (env->Array_Set(windowArray, i, windows[i]) != ANI_OK) {
             TLOGE(WmsLogTag::DEFAULT, "[ANI] set window array failed");
             return AniWindowUtils::CreateAniUndefined(env);
         }
@@ -812,18 +798,14 @@ ani_object AniWindowUtils::CreateAniSystemBarTintState(ani_env* env, DisplayId d
         return AniWindowUtils::CreateAniUndefined(env);
     }
     CallAniMethodVoid(env, state, aniClass, "<set>displayId", nullptr, static_cast<ani_long>(displayId));
-    ani_array_ref regionTintArray = nullptr;
-    ani_class regionTintCls;
-    if (env->FindClass("@ohos.window.window.SystemBarRegionTintInternal", &regionTintCls) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
-        return AniWindowUtils::CreateAniUndefined(env);
-    }
-    if (env->Array_New_Ref(regionTintCls, tints.size(), CreateAniUndefined(env), &regionTintArray) != ANI_OK) {
+    ani_array regionTintArray = nullptr;
+
+    if (env->Array_New(tints.size(), CreateAniUndefined(env), &regionTintArray) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] create array failed");
         return AniWindowUtils::CreateAniUndefined(env);
     }
     for (size_t i = 0; i < tints.size(); i++) {
-        if (env->Array_Set_Ref(regionTintArray, i, CreateAniSystemBarRegionTint(env, tints[i])) != ANI_OK) {
+        if (env->Array_Set(regionTintArray, i, CreateAniSystemBarRegionTint(env, tints[i])) != ANI_OK) {
             TLOGE(WmsLogTag::DEFAULT, "[ANI] create region tint failed");
             return AniWindowUtils::CreateAniUndefined(env);
         }
