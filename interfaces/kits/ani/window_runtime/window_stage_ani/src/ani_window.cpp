@@ -21,6 +21,7 @@
 
 #include "ani.h"
 #include "ani_err_utils.h"
+#include "ani_transition_controller.h"
 #include "ani_window_utils.h"
 #include "interop_js/arkts_esvalue.h"
 #include "interop_js/arkts_interop_js_api.h"
@@ -2766,6 +2767,75 @@ void AniWindow::OnKeepKeyboardOnFocus(ani_env* env, ani_boolean keepKeyboardFlag
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), keepKeyboardFlag);
 }
 
+ani_object AniWindow::GetTransitionController(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    TLOGI(WmsLogTag::WMS_ANIMATION, "[ANI] In");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] AniWindow is null");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    return aniWindow->OnGetTransitionController(env, obj);
+}
+
+ani_object AniWindow::OnGetTransitionController(ani_env* env, ani_object obj)
+{
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Not system app, permission denied");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
+
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Window is null");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+
+    if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Unexpected window type: %{public}d", windowToken_->GetType());
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
+
+    if (aniTransControllerObj_ == nullptr) {
+        WmErrorCode ret = CreateTransitionController(env, obj);
+        if (ret != WmErrorCode::WM_OK) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "CreateTransitionController failed, error code: %{public}d", ret);
+            return AniWindowUtils::AniThrowError(env, ret);
+        }
+    }
+    return aniTransControllerObj_;
+}
+
+WmErrorCode AniWindow::CreateTransitionController(ani_env* env, ani_object obj)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "windowToken_ is null");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+
+    if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Unexpected window type: %{public}d", windowToken_->GetType());
+        return WmErrorCode::WM_ERROR_INVALID_CALLING;
+    }
+
+    auto windowName = windowToken_->GetWindowName();
+    ani_ref aniWindowObj = GetAniRef();
+    if (aniWindowObj == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Find ani window %{public}s object failed", windowName.c_str());
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+
+    sptr<AniTransitionController> transController = AniTransitionController::CreateAniTransitionController(env,
+        aniWindowObj, windowToken_);
+    if (transController == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "transition controller create failed");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->RegisterAnimationTransitionController(transController));
+    aniTransControllerObj_ = transController->GetAniTransControllerObj();
+    TLOGI(WmsLogTag::WMS_ANIMATION, "Transition controller create success for window %{public}s", windowName.c_str());
+    return ret;
+}
+
 ani_object AniWindow::SetImmersiveModeEnabledState(ani_env* env, bool enable)
 {
     if (windowToken_ == nullptr) {
@@ -4415,6 +4485,8 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(SetGestureBackEnabled)},
         ani_native_function {"setSingleFrameComposerEnabled", "lz:",
             reinterpret_cast<void *>(SetSingleFrameComposerEnabled)},
+        ani_native_function {"getTransitionControllerSync", "l:C{@ohos.window.window.TransitionController}",
+            reinterpret_cast<void *>(AniWindow::GetTransitionController)},
         ani_native_function {"nativeTransferStatic", "C{std.interop.ESValue}:C{std.core.Object}",
             reinterpret_cast<void *>(AniWindow::NativeTransferStatic)},
         ani_native_function {"nativeTransferDynamic", "l:C{std.interop.ESValue}",

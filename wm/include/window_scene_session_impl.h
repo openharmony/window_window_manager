@@ -413,7 +413,7 @@ private:
     bool userLimitsSet_ = false;
     bool forceLimits_ = false;
     bool enableDefaultAnimation_ = true;
-    sptr<IAnimationTransitionController> animationTransitionController_;
+    std::vector<sptr<IAnimationTransitionController>> animationTransitionControllers_;
     uint32_t setSameSystembarPropertyCnt_ = 0;
     std::atomic<bool> isDefaultDensityEnabled_ = false;
     std::atomic<uint32_t> getAvoidAreaCnt_ = 0;

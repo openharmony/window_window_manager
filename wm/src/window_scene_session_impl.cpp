@@ -1651,7 +1651,9 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
     }
     uint32_t animationFlag = property_->GetAnimationFlag();
     if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
-        animationTransitionController_->AnimationForHidden();
+        for (auto animationTransitionController : animationTransitionControllers_) {
+            animationTransitionController->AnimationForHidden();
+        }
         RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     }
     NotifyWindowStatusChange(GetWindowMode());
@@ -4801,9 +4803,12 @@ WMError WindowSceneSessionImpl::RegisterAnimationTransitionController(
         TLOGE(WmsLogTag::WMS_SYSTEM, "listener is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    animationTransitionController_ = listener;
+    if (std::find(animationTransitionControllers_.begin(), animationTransitionControllers_.end(), listener) ==
+            animationTransitionControllers_.end()) {
+        animationTransitionControllers_.push_back(listener);
+    }
     wptr<WindowSessionProperty> propertyWeak(property_);
-    wptr<IAnimationTransitionController> animationTransitionControllerWeak(animationTransitionController_);
+    wptr<IAnimationTransitionController> animationTransitionControllerWeak(listener);
 
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->SetNextFrameLayoutCallback([propertyWeak, animationTransitionControllerWeak]() {
@@ -4857,10 +4862,10 @@ void WindowSceneSessionImpl::AdjustWindowAnimationFlag(bool withAnimation)
     // use custom animation when transitionController exists; else use default animation
     WindowType winType = property_->GetWindowType();
     bool isAppWindow = WindowHelper::IsAppWindow(winType);
-    if (withAnimation && !isAppWindow && animationTransitionController_) {
+    if (withAnimation && !isAppWindow && !animationTransitionControllers_.empty()) {
         // use custom animation
         property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
-    } else if ((isAppWindow && enableDefaultAnimation_) || (withAnimation && !animationTransitionController_)) {
+    } else if ((isAppWindow && enableDefaultAnimation_) || (withAnimation && animationTransitionControllers_.empty())) {
         // use default animation
         property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::DEFAULT));
     } else {
