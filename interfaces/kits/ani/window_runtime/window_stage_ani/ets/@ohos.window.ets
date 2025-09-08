@@ -1393,8 +1393,45 @@ export interface TransitionContext {
 }
 
 export interface TransitionController {
-    animationForShown(context: window.TransitionContext): void;
-    animationForHidden(context: window.TransitionContext): void;
+    animationForShown: (context: window.TransitionContext) => void;
+    animationForHidden: (context: window.TransitionContext) => void;
+}
+
+export native function transContextFinalizerCallback(nativeObj: long): void;
+let transContextFinalizerRegister = new FinalizationRegistry<long>(transContextFinalizerCallback);
+export class TransitionContextInternal implements TransitionContext {
+    toWindow: Window;
+    private nativeObj: long = 0;
+
+    setNativeObj(nativeObj: long): void {
+        if (!this.nativeObj) {
+          transContextFinalizerRegister.register(this, nativeObj);
+        }
+        this.nativeObj = nativeObj;
+    }
+
+    private native completeTransitionSync(nativeObj: long, shouldHide: boolean): void;
+
+    public completeTransition(isCompleted: boolean): void {
+        this.completeTransitionSync(this.nativeObj, isCompleted);
+    }
+}
+
+export native function transControllerFinalizerCallback(nativeObj: long): void;
+let transControllerFinalizerRegister = new FinalizationRegistry<long>(transControllerFinalizerCallback);
+export class TransitionControllerInternal implements TransitionController {
+    static { loadLibrary('windowstageani_module.z') }
+    private nativeObj: long = 0;
+
+    setNativeObj(nativeObj: long): void {
+        if (!this.nativeObj) {
+          transControllerFinalizerRegister.register(this, nativeObj);
+        }
+        this.nativeObj = nativeObj;
+    }
+
+    animationForShown: (context: window.TransitionContext) => void;
+    animationForHidden: (context: window.TransitionContext) => void;
 }
 
 /**
@@ -2251,6 +2288,8 @@ export class WindowInternal implements Window {
     private native setWindowShadowRadius(nativeObj: long, radius: double): void;
     private native setTouchableAreas(nativeObj: long, rects: Array<Rect>): void;
     private native setCornerRadiusSync(nativeObj: long, cornerRadius: double): void;
+    private native getTransitionControllerSync(nativeObj: long): TransitionController;
+
     private native setWindowColorSpaceSync(nativeObj: long, colorSpace: int): void;
     private native setPreferredOrientationSync(nativeObj: long, orientation: int): void;
     private native getPreferredOrientation(nativeObj: long): int;
@@ -3289,6 +3328,9 @@ export class WindowInternal implements Window {
     public setWindowShadowRadius(radius: double): void {
       this.setWindowShadowRadius(this.nativeObj, radius);
     }
+    public getTransitionController(): TransitionController {
+      return this.getTransitionControllerSync(this.nativeObj);
+    }
 
     public on<T>(type: string, callback: Callback<T>): void {
       this.onSync(this.nativeObj, type, callback);
@@ -3671,6 +3713,7 @@ export interface Window {
     isGestureBackEnabled(): boolean;
     setGestureBackEnabled(enabled: boolean): Promise<void>;
     setSingleFrameComposerEnabled(enabled: boolean): Promise<void>;
+    getTransitionController(): TransitionController;
     on<T>(type: string, callback: Callback<T>): void;
     on<T>(type: 'noInteractionDetected', timeout: long, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;

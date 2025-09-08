@@ -19,6 +19,7 @@
 #include "ani_window_manager.h"
 #include "ani_window_stage.h"
 #include "ani_window_utils.h"
+#include "ani_transition_controller.h"
 #include "permission.h"
 #include "window_manager_hilog.h"
 #include "window_scene.h"
@@ -141,6 +142,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
     *result = ANI_VERSION_1;
     AniWindowManager::AniWindowManagerInit(env);
+    OHOS::Rosen::ANI_Transition_Controller_Constructor(vm, result);
     OHOS::Rosen::ANI_Window_Constructor(vm, result);
     return ANI_OK;
 }

@@ -100,6 +100,7 @@ public:
     static void SetWindowCornerRadius(ani_env* env, ani_object obj, ani_long nativeObj, ani_double cornerRadius);
     static void SetWindowShadowRadius(ani_env* env, ani_object obj, ani_long nativeObj, ani_double radius);
     static void Finalizer(ani_env* env, ani_long nativeObj);
+    static ani_object GetTransitionController(ani_env* env, ani_object obj, ani_long nativeObj);
 
     void SetFollowParentWindowLayoutEnabled(ani_env* env, ani_boolean enabled);
     void SetWindowDelayRaiseOnDrag(ani_env* env, ani_boolean isEnabled);
@@ -226,9 +227,16 @@ private:
     WMError SetSystemBarPropertiesByFlags(std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags,
         std::map<WindowType, SystemBarProperty>& systemBarProperties, sptr<Window> windowToken);
 
+    /*
+     * animation
+     */
+    WmErrorCode CreateTransitionController(ani_env* env, ani_object obj);
+    ani_object OnGetTransitionController(ani_env* env, ani_object obj);
+
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<AniWindowRegisterManager> registerManager_ = nullptr;
     ani_ref aniRef_ = nullptr;
+    ani_object aniTransControllerObj_ = nullptr;
 };
 
 /* window obj stored in ANI */
