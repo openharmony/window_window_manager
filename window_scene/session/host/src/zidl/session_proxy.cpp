@@ -1651,8 +1651,7 @@ WSError SessionProxy::SetAspectRatio(float ratio)
 }
 
 /** @note @window.layout */
-WSError SessionProxy::SetContentAspectRatio(
-    float ratio, bool isPersistent, bool needUpdateRect)
+WSError SessionProxy::SetContentAspectRatio(float ratio, bool isPersistent, bool needUpdateRect)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
@@ -1673,11 +1672,11 @@ WSError SessionProxy::SetContentAspectRatio(
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("remote is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option;
     int sendRet = remote->SendRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CONTENT_ASPECT_RATIO), data, reply, option);
     if (sendRet != ERR_NONE) {

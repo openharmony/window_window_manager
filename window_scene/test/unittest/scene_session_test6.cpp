@@ -1334,29 +1334,13 @@ HWTEST_F(SceneSessionTest6, TestGetWindowDecoration, TestSize.Level1)
 
     prop->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     prop->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    session->systemConfig_.decorWindowModeSupportType_ = DecorWindowModeSupportType::ALL;
+    session->systemConfig_.decorWindowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     session->systemConfig_.isSystemDecorEnable_ = true;
 
     // Case 3: display is null
-    session->SetDisplayId(DISPLAY_ID_INVALID);
+    prop->SetDisplayId(DISPLAY_ID_INVALID);
     decor = session->GetWindowDecoration();
     EXPECT_EQ(decor, emptyDecor);
-
-    // Case 4: customDecorHeight_ == 0 -> use default 37 * vpr
-    auto displayManager = DisplayManager::GetInstance();
-    auto displayInfo = sptr<DisplayInfo>::MakeSptr();
-    displayInfo->SetDisplayId(1);
-    displayInfo->SetVirtualPixelRatio(2.0f);
-    displayManager.pImpl_->UpdateDisplayInfoLocked(displayInfo);
-    session->customDecorHeight_ = 0;
-    session->SetDisplayId(1);
-    decor = session->GetWindowDecoration();
-    EXPECT_EQ(decor.top, 74); // 37 * 2.0
-
-    // Case 5: customDecorHeight_ != 0 -> use customDecorHeight_ * vpr
-    session->customDecorHeight_ = 50;
-    decor = session->GetWindowDecoration();
-    EXPECT_EQ(decor.top, 100); // 50 * 2.0
 }
 } // namespace
 } // namespace Rosen

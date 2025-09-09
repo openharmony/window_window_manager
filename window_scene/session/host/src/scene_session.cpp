@@ -1406,7 +1406,7 @@ WSError SceneSession::SetContentAspectRatio(float ratio, bool isPersistent, bool
 {
     TLOGI(WmsLogTag::WMS_LAYOUT,
         "windowId: %{public}d, ratio: %{public}f, isPersistent: %{public}d, needUpdateRect: %{public}d",
-        session->GetPersistentId(), ratio, isPersistent, needUpdateRect);
+        GetPersistentId(), ratio, isPersistent, needUpdateRect);
     return PostSyncTask([weakThis = wptr(this), ratio, isPersistent, needUpdateRect, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
@@ -1420,7 +1420,7 @@ WSError SceneSession::SetContentAspectRatio(float ratio, bool isPersistent, bool
         }
         WindowLimits limits = property->GetWindowLimits();
         WindowDecoration decoration = session->GetWindowDecoration();
-        if (!IsAspectRatioValid(ratio, limits, decoration)) {
+        if (!SessionUtils::IsAspectRatioValid(ratio, limits, decoration)) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s: Invalid ratio: %{public}f", where, ratio);
             return WSError::WS_ERROR_INVALID_PARAM;
         }

@@ -2030,6 +2030,7 @@ HWTEST_F(SessionStubTest, HandleConnect003, Function | SmallTest | Level2)
  */
 HWTEST_F(SessionStubTest, HandleSetContentAspectRatioCases, TestSize.Level1)
 {
+    sptr<SessionStubMocker> session = sptr<SessionStubMocker>::MakeSptr();
     uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CONTENT_ASPECT_RATIO);
     MessageOption option;
     float ratio = 1.5f;
@@ -2040,7 +2041,7 @@ HWTEST_F(SessionStubTest, HandleSetContentAspectRatioCases, TestSize.Level1)
     {
         MessageParcel data;
         MessageParcel reply;
-        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+        EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
     }
 
     // Case 2: Missing isPersistent and needUpdateRect
@@ -2048,7 +2049,7 @@ HWTEST_F(SessionStubTest, HandleSetContentAspectRatioCases, TestSize.Level1)
         MessageParcel data;
         MessageParcel reply;
         data.WriteFloat(ratio);
-        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+        EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
     }
 
     // Case 3: Missing needUpdateRect
@@ -2057,7 +2058,7 @@ HWTEST_F(SessionStubTest, HandleSetContentAspectRatioCases, TestSize.Level1)
         MessageParcel reply;
         data.WriteFloat(ratio);
         data.WriteBool(isPersistent);
-        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+        EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
     }
 
     // Case 4: Success
@@ -2067,8 +2068,8 @@ HWTEST_F(SessionStubTest, HandleSetContentAspectRatioCases, TestSize.Level1)
         data.WriteFloat(ratio);
         data.WriteBool(isPersistent);
         data.WriteBool(needUpdateRect);
-        EXPECT_CALL(*session_, SetContentAspectRatio(ratio, isPersistent, needUpdateRect)).Times(1);
-        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_NONE);
+        EXPECT_CALL(*session, SetContentAspectRatio(ratio, isPersistent, needUpdateRect)).Times(1);
+        EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_NONE);
     }
 }
 
@@ -2079,6 +2080,7 @@ HWTEST_F(SessionStubTest, HandleSetContentAspectRatioCases, TestSize.Level1)
  */
 HWTEST_F(SessionStubTest, HandleSetDecorVisibleCases, TestSize.Level1)
 {
+    sptr<SessionStubMocker> session = sptr<SessionStubMocker>::MakeSptr();
     uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DECOR_VISIBLE);
     MessageOption option;
 
@@ -2086,7 +2088,7 @@ HWTEST_F(SessionStubTest, HandleSetDecorVisibleCases, TestSize.Level1)
     {
         MessageParcel data;
         MessageParcel reply;
-        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+        EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
     }
 
     // Case 2: Success
@@ -2095,8 +2097,8 @@ HWTEST_F(SessionStubTest, HandleSetDecorVisibleCases, TestSize.Level1)
         MessageParcel reply;
         bool isVisible = true;
         data.WriteBool(isVisible);
-        EXPECT_CALL(*session_, SetDecorVisible(isVisible)).Times(1);
-        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_NONE);
+        EXPECT_CALL(*session, SetDecorVisible(isVisible)).Times(1);
+        EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_NONE);
     }
 }
 } // namespace

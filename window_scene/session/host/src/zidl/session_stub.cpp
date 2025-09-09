@@ -1258,12 +1258,12 @@ int SessionStub::HandleSetContentAspectRatio(MessageParcel& data, MessageParcel&
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read ratio");
         return ERR_INVALID_DATA;
     }
-    bool isPersistent = false;
+    bool isPersistent = true;
     if (!data.ReadBool(isPersistent)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read isPersistent");
         return ERR_INVALID_DATA;
     }
-    bool needUpdateRect = false;
+    bool needUpdateRect = true;
     if (!data.ReadBool(needUpdateRect)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read needUpdateRect");
         return ERR_INVALID_DATA;

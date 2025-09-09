@@ -6959,9 +6959,6 @@ napi_value JsWindow::OnSetContentAspectRatio(napi_env env, napi_callback_info in
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], aspectRatio)) {
         return logAndThrowError(WmErrorCode::WM_ERROR_INVALID_PARAM, "Failed to convert parameter to aspectRatio");
     }
-    if (MathHelper::LessNotEqual(aspectRatio, 0.0) || MathHelper::NearZero(aspectRatio)) {
-        return logAndThrowError(WmErrorCode::WM_ERROR_INVALID_PARAM, "Invalid aspectRatio value");
-    }
 
     bool isPersistent = true;
     if (argc >= TWO_PARAMS_SIZE && !ConvertFromOptionalJsValue(env, argv[INDEX_ONE], isPersistent, true)) {
