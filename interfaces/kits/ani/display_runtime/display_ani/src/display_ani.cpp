@@ -475,14 +475,21 @@ ani_status DisplayAni::ClassBindNativeFunctions(ani_env* env, ani_class displayC
             reinterpret_cast<void *>(DisplayAni::RegisterCallback)},
         ani_native_function {"syncOff", nullptr,
             reinterpret_cast<void *>(DisplayAni::UnRegisterCallback)},
+    };
+    auto ret = env->Class_BindNativeMethods(displayCls, methods.data(), methods.size());
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] bind class methods fail %{public}u", ret);
+        return ANI_NOT_FOUND;
+    }
+    std::array staticMethods = {
         ani_native_function {"nativeTransferStatic", "C{std.interop.ESValue}C{std.core.Object}:z",
             reinterpret_cast<void *>(DisplayAni::TransferStatic)},
         ani_native_function {"nativeTransferDynamic", "l:C{std.interop.ESValue}",
             reinterpret_cast<void *>(DisplayAni::TransferDynamic)},
     };
-    auto ret = env->Class_BindNativeMethods(displayCls, methods.data(), methods.size());
+    ret = env->Class_BindStaticNativeMethods(displayCls, staticMethods.data(), staticMethods.size());
     if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DMS, "[ANI] bind class fail %{public}u", ret);
+        TLOGE(WmsLogTag::DMS, "[ANI] bind class static methods fail %{public}u", ret);
         return ANI_NOT_FOUND;
     }
     return ANI_OK;

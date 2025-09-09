@@ -128,14 +128,23 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindowStage::RegisterWindowCallback)},
         ani_native_function {"offSync", nullptr,
             reinterpret_cast<void *>(AniWindowStage::UnregisterWindowCallback)},
+    };
+    for (auto method : methods) {
+        if ((ret = env->Class_BindNativeMethods(cls, &method, 1u)) != ANI_OK) {
+            TLOGE(WmsLogTag::DEFAULT, "[ANI] bind window method fail %{public}u, %{public}s, %{public}s",
+                ret, method.name, method.signature);
+            return ANI_NOT_FOUND;
+        }
+    }
+    std::array staticMethods = {
         ani_native_function {"nativeTransferStatic", "C{std.interop.ESValue}:C{std.core.Object}",
             reinterpret_cast<void *>(AniWindowStage::NativeTransferStatic)},
         ani_native_function {"nativeTransferDynamic", "l:C{std.interop.ESValue}",
             reinterpret_cast<void *>(AniWindowStage::NativeTransferDynamic)},
     };
-    for (auto method : methods) {
-        if ((ret = env->Class_BindNativeMethods(cls, &method, 1u)) != ANI_OK) {
-            TLOGE(WmsLogTag::DEFAULT, "[ANI] bind window method fail %{public}u, %{public}s, %{public}s",
+    for (auto method : staticMethods) {
+        if ((ret = env->Class_BindStaticNativeMethods(cls, &method, 1u)) != ANI_OK) {
+            TLOGE(WmsLogTag::DEFAULT, "[ANI] bind window static method fail %{public}u, %{public}s, %{public}s",
                 ret, method.name, method.signature);
             return ANI_NOT_FOUND;
         }
