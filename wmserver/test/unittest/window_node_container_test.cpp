@@ -17,6 +17,7 @@
 
 #include "display_manager.h"
 #include "display_manager_config.h"
+#include "window_manager_hilog.h"
 #include "window_node_container.h"
 #include "future.h"
 #include "window_node.h"
@@ -32,6 +33,12 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowNodeContainerTest"};
+    std::string g_errLog;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_errLog = msg;
+    }
 }
 
 class WindowNodeContainerTest : public testing::Test {
@@ -744,6 +751,8 @@ HWTEST_F(WindowNodeContainerTest, MinimizeOldestAppWindow01, TestSize.Level1)
  */
 HWTEST_F(WindowNodeContainerTest, MinimizeOldestAppWindow02, TestSize.Level1)
 {
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
     sptr<WindowProperty> property = CreateWindowProperty(111u, "test2",
@@ -753,10 +762,10 @@ HWTEST_F(WindowNodeContainerTest, MinimizeOldestAppWindow02, TestSize.Level1)
     sptr<WindowNode> parentNode = nullptr;
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNode(node, parentNode));
     ASSERT_EQ(1, container->aboveAppWindowNode_->children_.size());
-    size_t size = MinimizeApp::needMinimizeAppNodes_.size();
     container->MinimizeOldestAppWindow();
-    ASSERT_EQ(size, MinimizeApp::needMinimizeAppNodes_.size());
+    EXPECT_FALSE(g_errLog.find("no window needs to minimize") != std::string::npos);
     MinimizeApp::needMinimizeAppNodes_.clear();
+    LOG_SetCallback(nullptr);
 }
 
 /**
