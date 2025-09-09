@@ -105,6 +105,11 @@ public:
     WMError EnterKioskMode(const sptr<IRemoteObject>& token) override;
     WMError ExitKioskMode(const sptr<IRemoteObject>& token) override;
     WSError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    WMError SetPipEnableByScreenId(int32_t screenId, bool enabled) override;
+    WMError UnsetPipEnableByScreenId(int32_t screenId) override;
+
+    WMError RegisterPipChgListenerByScreenId(int32_t screenId, const sptr<IPipChangeListener>& listener) override;
+    WMError UnregisterPipChgListenerByScreenId(int32_t screenId) override;
 };
 } // namespace OHOS::Rosen
 

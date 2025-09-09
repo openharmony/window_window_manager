@@ -3844,6 +3844,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
 
         if (IsPiPForbidden(property, type)) {
             TLOGNE(WmsLogTag::WMS_PIP, "forbid pip");
+            NotifyMulScreenPipStart(property, type);
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
         ClosePipWindowIfExist(type);
@@ -4048,7 +4049,45 @@ bool SceneSessionManager::IsPiPForbidden(const sptr<WindowSessionProperty>& prop
         TLOGI(WmsLogTag::WMS_PIP, "screen name %{public}s", screenName.c_str());
         return true;
     }
+
+    if (type == WindowType::WINDOW_TYPE_PIP && !GetPipDeviceCollaborationPolicy(screenId)) {
+        return true;
+    }
     return false;
+}
+
+void SceneSessionManager::NotifyMulScreenPipStart(const sptr<WindowSessionProperty>& property, WindowType type)
+{
+    sptr<SceneSession> parentSession = GetSceneSession(property->GetParentPersistentId());
+    if (parentSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "invalid parentSession");
+        return;
+    }
+    sptr<WindowSessionProperty> parentProperty = parentSession->GetSessionProperty();
+    if (parentProperty == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "invalid parentProperty");
+        return;
+    }
+    DisplayId screenId = parentProperty->GetDisplayId();
+    if (screenId == SCREEN_ID_INVALID) {
+        TLOGE(WmsLogTag::WMS_PIP, "invalid screenId");
+        return;
+    }
+
+    int32_t windowId = parentSession->GetWindowId();
+    TLOGI(WmsLogTag::WMS_PIP, "Notify MulScreen, type:%{public}d, %{public}d, screenId:%{public}" PRIu64,
+        type, windowId, screenId);
+    if (type != WindowType::WINDOW_TYPE_PIP || GetPipDeviceCollaborationPolicy(screenId)) {
+        return;
+    }
+
+    std::shared_lock<std::shared_mutex> lock(pipChgListenerMapMutex_);
+    auto iter = pipChgListenerMap_.find(screenId);
+    if (iter != pipChgListenerMap_.end()) {
+        if (iter->second != nullptr) {
+            iter->second->OnPipStart(windowId);
+        }
+    }
 }
 
 WSError SceneSessionManager::IsFloatingBallValid(const sptr<SceneSession>& parentSession)
@@ -17493,6 +17532,54 @@ WMError SceneSessionManager::GetPiPSettingSwitchStatus(bool& switchStatus)
 {
     std::lock_guard<std::mutex> lock(pipSettingSwitchMutex_);
     switchStatus = pipSwitchStatus_;
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::SetPipEnableByScreenId(int32_t screenId, bool isEnabled)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "SetPipEnableByScreenId: %{public}d, isEnable: %{public}d", screenId, isEnabled);
+    std::unique_lock<std::shared_mutex> lock(screenPipEnabledMapLock_);
+    screenPipEnabledMap_.insert_or_assign(screenId, isEnabled);
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::UnsetPipEnableByScreenId(int32_t screenId)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "UnsetPipEnableByScreenId: %{public}d", screenId);
+    std::unique_lock<std::shared_mutex> lock(screenPipEnabledMapLock_);
+    screenPipEnabledMap_.erase(screenId);
+    return WMError::WM_OK;
+}
+
+bool SceneSessionManager::GetPipDeviceCollaborationPolicy(int32_t screenId)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "GetPipDeviceCollaborationPolicy: %{public}d", screenId);
+    std::shared_lock<std::shared_mutex> lock(screenPipEnabledMapLock_);
+    auto iter = screenPipEnabledMap_.find(screenId);
+    if (iter == screenPipEnabledMap_.end()) {
+        return true; // 默认支持
+    }
+    return iter->second;
+}
+
+WMError SceneSessionManager::RegisterPipChgListenerByScreenId(int32_t screenId,
+    const sptr<IPipChangeListener>& listener)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "RegisterPipChgListenerByScreenId: %{public}d", screenId);
+    if (listener == nullptr) {
+        TLOGNE(WmsLogTag::WMS_LIFE, "listener is nullptr");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    std::unique_lock<std::shared_mutex> lock(pipChgListenerMapMutex_);
+    pipChgListenerMap_.insert_or_assign(screenId, listener);
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::UnregisterPipChgListenerByScreenId(int32_t screenId)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "UnregisterPipChgListenerByScreenId: %{public}d", screenId);
+    std::unique_lock<std::shared_mutex> lock(pipChgListenerMapMutex_);
+    pipChgListenerMap_.erase(screenId);
     return WMError::WM_OK;
 }
 

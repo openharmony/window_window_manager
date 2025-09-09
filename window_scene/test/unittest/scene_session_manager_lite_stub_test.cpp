@@ -19,6 +19,7 @@
 #include "iremote_object_mocker.h"
 #include "session_manager/include/zidl/scene_session_manager_lite_stub.h"
 #include "session_manager/include/zidl/session_router_stack_listener_stub.h"
+#include "session_manager/include/zidl/pip_change_listener_stub.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -301,6 +302,14 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WSError::WS_OK;
     }
+
+    WMError SetPipEnableByScreenId(int32_t screenId, bool enabled) override { return WMError::WM_OK; }
+    WMError UnsetPipEnableByScreenId(int32_t screenId) override { return WMError::WM_OK; }
+    WMError RegisterPipChgListenerByScreenId(int32_t screenId, const sptr<IPipChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+    WMError UnregisterPipChgListenerByScreenId(int32_t screenId) override { return WMError::WM_OK; }
 };
 
 class SceneSessionManagerLiteStubTest : public testing::Test {
@@ -1316,6 +1325,123 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleSendPointerEventForHover, Functi
     pointerEvent->WriteToParcel(data);
     res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleSendPointerEventForHover(data, reply);
     EXPECT_EQ(ERR_NONE, res);
+}
+
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnRegPipChgListener_ReadIntFailed, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(sceneSessionManagerLiteStub_->HandleUnRegisterPipChgListener(data, reply), ERR_INVALID_DATA);
+}
+
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnRegPipChgListener_Success, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(
+    ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_PIP_CHG_LISTENER);
+    data.WriteInt32(1);
+    auto result = sceneSessionManagerLiteStub_->
+    SceneSessionManagerLiteStub::ProcessRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(result, ERR_NONE);
+}
+
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleRegPipChgListener_ReadIntFailed, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(sceneSessionManagerLiteStub_->HandleRegisterPipChgListener(data, reply), ERR_INVALID_DATA);
+}
+
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleRegPipChgListener_ReadListenerFailed, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(1);
+    EXPECT_EQ(sceneSessionManagerLiteStub_->HandleRegisterPipChgListener(data, reply), ERR_INVALID_DATA);
+}
+
+class MockPipChgListener : public PipChangeListenerStub {
+public:
+    void OnPipStart(int32_t windowId) override {};
+};
+
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleRegPipChgListener_NullListenerFailed, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(1);
+
+    data.WriteRemoteObject(nullptr);
+    EXPECT_EQ(sceneSessionManagerLiteStub_->HandleRegisterPipChgListener(data, reply), ERR_INVALID_DATA);
+}
+
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleRegPipChgListener_Success, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInt32(1);
+    sptr<IPipChangeListener> listener = sptr<MockPipChgListener>::MakeSptr();
+    data.WriteRemoteObject(listener->AsObject());
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_PIP_CHG_LISTENER);
+    auto result = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::ProcessRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(result, ERR_NONE);
+}
+
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnsetPipEnableByScreenId_Success, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInt32(1);
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_UNSET_PIP_ENABLED_BY_SCREENID);
+    auto result = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::ProcessRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(result, ERR_NONE);
+}
+
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnsetPipEnableByScreenId_ReadIntFailed, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(sceneSessionManagerLiteStub_->HandleUnsetPipEnableByScreenId(data, reply), ERR_INVALID_DATA);
+}
+
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetPipEnableByScreenId_Success, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInt32(1);
+    data.WriteBool(true);
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_SET_PIP_ENABLED_BY_SCREENID);
+    auto result = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::ProcessRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(result, ERR_NONE);
+}
+
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetPipEnableByScreenId_ReadIntFailed, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(sceneSessionManagerLiteStub_->HandleSetPipEnableByScreenId(data, reply), ERR_INVALID_DATA);
+}
+
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetPipEnableByScreenId_ReadBoolFailed, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(1);
+    EXPECT_EQ(sceneSessionManagerLiteStub_->HandleSetPipEnableByScreenId(data, reply), ERR_INVALID_DATA);
 }
 } // namespace
 } // namespace Rosen
