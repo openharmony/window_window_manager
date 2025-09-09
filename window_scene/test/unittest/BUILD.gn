@@ -1584,7 +1584,7 @@ ohos_unittest("ws_session_utils_test") {
 
   include_dirs = [
     "${window_base_path}/test/common/utils/include/",
-    "${window_base_path}/window_scene/session/host/include/"
+    "${window_base_path}/window_scene/session/host/include/",
     "${window_base_path}/window_scene/test/mock/",
   ]
 

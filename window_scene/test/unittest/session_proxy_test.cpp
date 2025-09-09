@@ -2134,15 +2134,6 @@ HWTEST_F(SessionProxyTest, TestSetDecorVisible, TestSize.Level1)
 
     // Case 4: Failed to send request
     mockRemote->sendRequestResult_ = ERR_TRANSACTION_FAILED;
-        sessionProxy->SetDecorVisible(isVisible));
-    MockMessageParcel::SetWriteBoolErrorFlag(false);
-
-    // Case 3: remote is nullptr
-    sptr<SessionProxy> nullProxy = sptr<SessionProxy>::MakeSptr(nullptr);
-    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, nullProxy->SetDecorVisible(isVisible));
-
-    // Case 4: Failed to send request
-    mockRemote->sendRequestResult_ = ERR_TRANSACTION_FAILED;
     sptr<SessionProxy> failProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
     EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, failProxy->SetDecorVisible(isVisible));
 

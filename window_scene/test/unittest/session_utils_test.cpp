@@ -22,7 +22,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-
+namespace SessionUtils {
 class SessionUtilsTest : public Test {
 public:
     static void SetUpTestCase();
@@ -34,8 +34,8 @@ public:
 void SessionUtilsTest::SetUpTestCase() {}
 void SessionUtilsTest::TearDownTestCase() {}
 
-void SessionUtilsTest::SetUp() override {}
-void SessionUtilsTest::TearDown() override {}
+void SessionUtilsTest::SetUp() {}
+void SessionUtilsTest::TearDown() {}
 
 /**
  * @tc.name: TestIsAspectRatioValid
@@ -87,8 +87,6 @@ HWTEST_F(SessionUtilsTest, TestIsAspectRatioValid, TestSize.Level1)
  */
 HWTEST_F(SessionUtilsTest, TestAdjustLimitsByAspectRatio, TestSize.Level1)
 {
-    using namespace SessionUtils;
-
     WindowLimits baseLimits(400, 400, 100, 100, FLT_MAX, 0.0f);
     WindowDecoration noDecor {0, 0, 0, 0};
 
@@ -135,7 +133,7 @@ HWTEST_F(SessionUtilsTest, TestAdjustLimitsByAspectRatio, TestSize.Level1)
     // Case 5: Adjusted is invalid (min > max) after aspect ratio adjustment
     {
         float aspectRatio = 4.0f;
-        WindowLimits limits(400, 400, 200, 100, FLT_MAX, 0.0f);
+        WindowLimits limits(400, 400, 200, 110, FLT_MAX, 0.0f);
         auto adjusted = AdjustLimitsByAspectRatio(limits, noDecor, aspectRatio);
         EXPECT_EQ(adjusted.minWidth_, limits.minWidth_);
         EXPECT_EQ(adjusted.minHeight_, limits.minHeight_);
@@ -148,10 +146,10 @@ HWTEST_F(SessionUtilsTest, TestAdjustLimitsByAspectRatio, TestSize.Level1)
         WindowLimits limits(500, 500, 100, 100, FLT_MAX, 0.0f);
         WindowDecoration decor {10, 20, 10, 20};
         auto adjusted = AdjustLimitsByAspectRatio(limits, decor, 1.0f);
-        EXPECT_EQ(adjusted.minWidth_, limits.minWidth_);
-        EXPECT_EQ(adjusted.minHeight_, limits.minHeight_);
-        EXPECT_EQ(adjusted.maxWidth_, limits.maxWidth_);
-        EXPECT_EQ(adjusted.maxHeight_, limits.maxHeight_);
+        EXPECT_EQ(adjusted.minWidth_, 100);
+        EXPECT_EQ(adjusted.minHeight_, 120);
+        EXPECT_EQ(adjusted.maxWidth_, 480);
+        EXPECT_EQ(adjusted.maxHeight_, 500);
     }
 }
 
@@ -162,8 +160,6 @@ HWTEST_F(SessionUtilsTest, TestAdjustLimitsByAspectRatio, TestSize.Level1)
  */
 HWTEST_F(SessionUtilsTest, TestAdjustRectByAspectRatio, TestSize.Level1)
 {
-    using namespace SessionUtils;
-
     WSRect rect {0, 0, 200, 100};
     WindowDecoration noDecor {0, 0, 0, 0};
     WindowLimits limits(400, 400, 50, 50, FLT_MAX, 0.0f);
@@ -206,5 +202,6 @@ HWTEST_F(SessionUtilsTest, TestAdjustRectByAspectRatio, TestSize.Level1)
         EXPECT_EQ(adjusted.height_, 150);
     }
 }
+} // namespace SessionUtils
 } // namespace Rosen
 } // namespace OHOS

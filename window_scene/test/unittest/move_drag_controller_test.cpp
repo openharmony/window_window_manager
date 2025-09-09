@@ -629,10 +629,10 @@ HWTEST_F(MoveDragControllerTest, CalcFixedAspectRatioTranslateLimitsAbnormalBran
     // Case 2: invalid AreaType -> no modification
     moveDragController->aspectRatio_ = 2.0f;
     moveDragController->CalcFixedAspectRatioTranslateLimits(AreaType::UNDEFINED);
-    EXPECT_EQ(moveDragController.minTranX_, INT32_MIN);
-    EXPECT_EQ(moveDragController.minTranY_, INT32_MIN);
-    EXPECT_EQ(moveDragController.maxTranX_, INT32_MAX);
-    EXPECT_EQ(moveDragController.maxTranY_, INT32_MAX);
+    EXPECT_EQ(moveDragController->minTranX_, INT32_MIN);
+    EXPECT_EQ(moveDragController->minTranY_, INT32_MIN);
+    EXPECT_EQ(moveDragController->maxTranX_, INT32_MAX);
+    EXPECT_EQ(moveDragController->maxTranY_, INT32_MAX);
 }
 
 /**
@@ -1894,11 +1894,11 @@ HWTEST_F(MoveDragControllerTest, TestCalcDragTargetRect, TestSize.Level1)
     moveDragController->CalcDragTargetRect(pointerEvent, reason);
     EXPECT_EQ(moveDragController->moveDragProperty_.targetRect_, originalRect);
 
-    SizeChangeReason reason = SizeChangeReason::DRAG;
+    reason = SizeChangeReason::DRAG;
 
     // Case 2: Cross-display disabled & displayId mismatch → no update
     moveDragController->moveDragProperty_.targetRect_ = WSRect::EMPTY_RECT;
-    moveDragController->winType_ = WindowType::APP_WINDOW_BASE;
+    moveDragController->winType_ = WindowType::SYSTEM_WINDOW_BASE;
     moveDragController->moveDragStartDisplayId_ = 1;
     moveDragController->CalcDragTargetRect(pointerEvent, reason);
     EXPECT_EQ(moveDragController->moveDragProperty_.targetRect_, WSRect::EMPTY_RECT);

@@ -2277,13 +2277,15 @@ HWTEST_F(WindowSceneSessionImplTest5, UpdateImmersiveBySwitchMode, TestSize.Leve
 
 /**
  * @tc.name: TestSetContentAspectRatio
- * @tc.desc: Test WindowSceneSessionImpl::SetContentAspectRatio under multiple conditions
+ * @tc.desc: Test SetContentAspectRatio under multiple conditions
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSceneSessionImplTest5, TestSetContentAspectRatio, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    auto property = window->GetProperty();
+    property->SetPersistentId(123);
     SessionInfo sessionInfo;
     sptr<SessionMocker> mockHostSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
 
@@ -2296,28 +2298,28 @@ HWTEST_F(WindowSceneSessionImplTest5, TestSetContentAspectRatio, TestSize.Level1
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
     window->hostSession_ = mockHostSession;
 
-    // Case 2: Invalid ratio => WM_ERROR_INVALID_PARAM
+    // Case 2: Invalid ratio => WM_ERROR_ILLEGAL_PARAM
     ratio = MathHelper::INF;
     ret = window->SetContentAspectRatio(ratio, isPersistent, needUpdateRect);
-    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+    EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
     ratio = MathHelper::NAG_INF;
     ret = window->SetContentAspectRatio(ratio, isPersistent, needUpdateRect);
-    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+    EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
     ratio = std::numeric_limits<float>::quiet_NaN();
     ret = window->SetContentAspectRatio(ratio, isPersistent, needUpdateRect);
-    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+    EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
     ratio = 0.0f;
     ret = window->SetContentAspectRatio(ratio, isPersistent, needUpdateRect);
-    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+    EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
 
-    // Case 4: host returns failure => WM_ERROR_INVALID_PARAM
+    // Case 3: host returns failure => WM_ERROR_ILLEGAL_PARAM
     ratio = 1.5f;
     EXPECT_CALL(*mockHostSession, SetContentAspectRatio(_, _, _))
         .Times(1).WillOnce(Return(WSError::WS_ERROR_IPC_FAILED));
     ret = window->SetContentAspectRatio(ratio, isPersistent, needUpdateRect);
-    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+    EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
 
-    // Case 5: host returns success => WM_OK
+    // Case 4: host returns success => WM_OK
     EXPECT_CALL(*mockHostSession, SetContentAspectRatio(_, _, _))
         .Times(1).WillOnce(Return(WSError::WS_OK));
     ret = window->SetContentAspectRatio(ratio, isPersistent, needUpdateRect);

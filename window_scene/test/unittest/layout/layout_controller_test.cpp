@@ -210,12 +210,13 @@ HWTEST_F(LayoutControllerTest, TestAdjustRectByAspectRatioAbnormalCases, TestSiz
     EXPECT_EQ(layoutController_->AdjustRectByAspectRatio(rect, decor), rect);
 
     // Case 5: Success
-    auto displayManager = DisplayManager::GetInstance();
-    auto displayInfo = sptr<DisplayInfo>::MakeSptr();
-    displayInfo->SetDisplayId(1);
-    displayManager.pImpl_->UpdateDisplayInfoLocked(displayInfo);
+    DisplayManager::GetInstance().GetDisplayByScreen(0);
     layoutController_->aspectRatio_ = 2.0f;
-    prop->SetDisplayId(1);
+    prop->SetDisplayId(0);
+    layoutController_->SetSystemConfigFunc([] {
+        SystemSessionConfig systemConfig;
+        return systemConfig;
+    });
     EXPECT_NE(layoutController_->AdjustRectByAspectRatio(rect, decor), rect);
 }
 } // namespace
