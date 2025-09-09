@@ -4153,8 +4153,6 @@ WMError WindowSceneSessionImpl::SetWindowMode(WindowMode mode)
     } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
         hostSession->OnSessionEvent(SessionEvent::EVENT_SPLIT_SECONDARY);
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Success, windowId: %{public}u, mode: %{public}u",
-        GetWindowId(), static_cast<uint32_t>(mode));
     return WMError::WM_OK;
 }
 
