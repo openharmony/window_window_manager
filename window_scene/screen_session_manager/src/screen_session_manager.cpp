@@ -7993,6 +7993,11 @@ SuperFoldStatus ScreenSessionManager::GetSuperFoldStatus()
 
 float ScreenSessionManager::GetSuperRotation()
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied! calling: %{public}s, pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return -1.f;
+    }
     DmsXcollie dmsXcollie("DMS:GetSuperRotation", XCOLLIE_TIMEOUT_10S);
     if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         return -1.f;
@@ -11295,7 +11300,7 @@ void ScreenSessionManager::OnScreenModeChange(ScreenModeChangeEvent screenModeCh
 
 void ScreenSessionManager::NotifyScreenMaskAppear()
 {
-    if (!SessionPermission::IsSystemCalling()) {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "Permission Denied.calling: %{public}s, pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return;
@@ -11319,6 +11324,11 @@ bool ScreenSessionManager::GetKeyboardState()
 DMError ScreenSessionManager::GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
     ScreenId& screenId, DMRect& screenArea)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "Permission Denied!  calling: %{public}s, calling pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
     TLOGI(WmsLogTag::DMS, "displayId:%{public}" PRIu64 ",displayArea:%{public}d,%{public}d,%{public}d,%{public}d",
         displayId, displayArea.posX_, displayArea.posY_, displayArea.width_, displayArea.height_);
     auto displayInfo = GetDisplayInfoById(displayId);
@@ -11348,7 +11358,18 @@ DMError ScreenSessionManager::GetScreenAreaOfDisplayArea(DisplayId displayId, co
         }
         displayRegion.height_ = screenRegion.height_;
     } else if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() && GetFoldDisplayMode() == FoldDisplayMode::FULL) {
-        switch (displayInfo->GetRotation()) {
+        SetDisplayRegionAndAreaFixed(displayInfo->GetRotation(), displayRegion, displayAreaFixed);
+    }
+    CalculateRotatedDisplay(displayInfo->GetRotation(), screenRegion, displayRegion, displayAreaFixed);
+    CalculateScreenArea(displayRegion, displayAreaFixed, screenRegion, screenArea);
+    TLOGI(WmsLogTag::DMS, "screenId:%{public}" PRIu64 ",screenArea:%{public}d,%{public}d,%{public}d,%{public}d",
+        screenId, screenArea.posX_, screenArea.posY_, screenArea.width_, screenArea.height_);
+    return DMError::DM_OK;
+}
+void ScreenSessionManager::SetDisplayRegionAndAreaFixed(Rotation rotation, DMRect& displayRegion,
+    DMRect& displayAreaFixed)
+{
+    switch (rotation) {
         case Rotation::ROTATION_0:
             displayRegion.posX_ = FULL_STATUS_OFFSET_X;
             displayAreaFixed.posX_ += FULL_STATUS_OFFSET_X;
@@ -11359,13 +11380,7 @@ DMError ScreenSessionManager::GetScreenAreaOfDisplayArea(DisplayId displayId, co
             break;
         default:
             break;
-        }
     }
-    CalculateRotatedDisplay(displayInfo->GetRotation(), screenRegion, displayRegion, displayAreaFixed);
-    CalculateScreenArea(displayRegion, displayAreaFixed, screenRegion, screenArea);
-    TLOGI(WmsLogTag::DMS, "screenId:%{public}" PRIu64 ",screenArea:%{public}d,%{public}d,%{public}d,%{public}d",
-        screenId, screenArea.posX_, screenArea.posY_, screenArea.width_, screenArea.height_);
-    return DMError::DM_OK;
 }
 
 void ScreenSessionManager::CalculateRotatedDisplay(Rotation rotation, const DMRect& screenRegion,
