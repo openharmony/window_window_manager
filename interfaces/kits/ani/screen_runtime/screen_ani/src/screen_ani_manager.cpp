@@ -698,10 +698,6 @@ ani_status ScreenManagerAni::ClassBindNativeFunctions(ani_env* env, ani_class sc
     std::array methods = {
         ani_native_function {"setDensityDpiInternal", "d:",
             reinterpret_cast<void *>(ScreenAni::SetDensityDpi)},
-        ani_native_function {"nativeTransferStatic", "C{std.interop.ESValue}C{std.core.Object}:z",
-            reinterpret_cast<void *>(ScreenAni::TransferStatic)},
-        ani_native_function {"nativeTransferDynamic", "l:C{std.interop.ESValue}",
-            reinterpret_cast<void *>(ScreenAni::TransferDynamic)},
         ani_native_function {"setScreenActiveModeInternal", nullptr,
             reinterpret_cast<void *>(ScreenAni::SetScreenActiveMode)},
         ani_native_function {"setOrientationInternal", nullptr,
@@ -709,7 +705,18 @@ ani_status ScreenManagerAni::ClassBindNativeFunctions(ani_env* env, ani_class sc
     };
     ani_status ret = env->Class_BindNativeMethods(screenCls, methods.data(), methods.size());
     if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DMS, "[ANI] bind namespace fail %{public}u", ret);
+        TLOGE(WmsLogTag::DMS, "[ANI] bind namespace methods fail %{public}u", ret);
+        return ANI_NOT_FOUND;
+    }
+    std::array staticMethods = {
+        ani_native_function {"nativeTransferStatic", "C{std.interop.ESValue}C{std.core.Object}:z",
+            reinterpret_cast<void *>(ScreenAni::TransferStatic)},
+        ani_native_function {"nativeTransferDynamic", "l:C{std.interop.ESValue}",
+            reinterpret_cast<void *>(ScreenAni::TransferDynamic)},
+    };
+    ret = env->Class_BindStaticNativeMethods(screenCls, staticMethods.data(), staticMethods.size());
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] bind namespace static methods fail %{public}u", ret);
         return ANI_NOT_FOUND;
     }
     return ANI_OK;
