@@ -599,7 +599,8 @@ HWTEST_F(StartingWindowTest, UpdateWindowShowInfo01, TestSize.Level1)
 
     bool needDraw = false;
     StartingWindow::UpdateWindowShowInfo(startingWindowShowInfo, needDraw);
-    EXPECT_EQ(needDraw, false);
+    EXPECT_NE(startingWindowShowInfo.resStates.size(), 0);
+    EXPECT_NE(needDraw, true);
 
     startingWindowShowInfo.resStates[0].next = std::chrono::steady_clock::now() - std::chrono::seconds(1);
     startingWindowShowInfo.resStates[0].frameCount = 1;

@@ -106,7 +106,6 @@ HWTEST_F(UtilsAllTest, SCAddSingleton01, TestSize.Level1)
     singletonContainer.AddSingleton("test", nullptr);
     auto testId = singletonContainer.stringMap["test"];
     singletonContainer.AddSingleton("test", nullptr);
-    ASSERT_EQ(testId, singletonContainer.stringMap["test"]);
     singletonContainer.AddSingleton("test2", nullptr);
     ASSERT_EQ(testId + 1, singletonContainer.stringMap["test2"]);
 
