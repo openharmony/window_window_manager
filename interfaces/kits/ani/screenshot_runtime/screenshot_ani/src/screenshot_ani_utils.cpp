@@ -58,7 +58,7 @@ ani_object ScreenshotAniUtils::CreateRectObject(ani_env* env)
         return nullptr;
     }
     ani_method aniCtor;
-    auto ret = env->Class_FindMethod(aniClass, "<ctor>", ":V", &aniCtor);
+    auto ret = env->Class_FindMethod(aniClass, "<ctor>", ":", &aniCtor);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] Class_FindMethod failed");
         return nullptr;
@@ -91,7 +91,7 @@ ani_object ScreenshotAniUtils::CreateScreenshotPickInfo(ani_env* env, std::uniqu
         return nullptr;
     }
     ani_method aniCtor;
-    auto ret = env->Class_FindMethod(aniClass, "<ctor>", ":V", &aniCtor);
+    auto ret = env->Class_FindMethod(aniClass, "<ctor>", ":", &aniCtor);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] Class_FindMethod failed");
         return nullptr;
