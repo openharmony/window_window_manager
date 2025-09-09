@@ -327,6 +327,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::ApplyFeatureConfig);
     BindNativeFunction(env, exportObj, "notifySessionTransferToTargetScreenEvent", moduleName,
         JsSceneSessionManager::NotifySessionTransferToTargetScreenEvent);
+    BindNativeFunction(env, exportObj, "getPipDeviceCollaborationPolicy", moduleName,
+        JsSceneSessionManager::GetPipDeviceCollaborationPolicy);
     return NapiGetUndefined(env);
 }
 
@@ -5315,5 +5317,35 @@ napi_value JsSceneSessionManager::OnSetPiPSettingSwitchStatus(napi_env env, napi
     }
     SceneSessionManager::GetInstance().SetPiPSettingSwitchStatus(switchStatus);
     return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::GetPipDeviceCollaborationPolicy(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "in");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetPipDeviceCollaborationPolicy(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::OnGetPipDeviceCollaborationPolicy(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_ONE;
+    napi_value argv[ARGC_ONE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_PIP, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t screenId = -1;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], screenId)) {
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter to screenId, %{public}d", screenId);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    TLOGI(WmsLogTag::WMS_PIP, "screenId  %{public}d", screenId);
+    bool isPipEnabled = SceneSessionManager::GetInstance().GetPipDeviceCollaborationPolicy(screenId);
+    return CreateJsValue(env, isPipEnabled);
 }
 } // namespace OHOS::Rosen

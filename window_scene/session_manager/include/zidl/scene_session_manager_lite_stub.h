@@ -97,6 +97,10 @@ private:
     int HandleEnterKioskMode(MessageParcel& data, MessageParcel& reply);
     int HandleExitKioskMode(MessageParcel& data, MessageParcel& reply);
     int HandleSendPointerEventForHover(MessageParcel& data, MessageParcel& reply);
+    int HandleSetPipEnableByScreenId(MessageParcel& data, MessageParcel& reply);
+    int HandleUnsetPipEnableByScreenId(MessageParcel& data, MessageParcel& reply);
+    int HandleRegisterPipChgListener(MessageParcel& data, MessageParcel& reply);
+    int HandleUnRegisterPipChgListener(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };

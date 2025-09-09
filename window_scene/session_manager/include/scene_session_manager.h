@@ -59,6 +59,7 @@
 #include "wm_single_instance.h"
 #include "zidl/session_lifecycle_listener_interface.h"
 #include "zidl/session_router_stack_listener.h"
+#include "zidl/pip_change_listener.h"
 
 namespace OHOS::AAFwk {
 class SessionInfo;
@@ -651,6 +652,11 @@ public:
     WMError GetPiPSettingSwitchStatus(bool& switchStatus) override;
     void SetPiPSettingSwitchStatus(bool switchStatus);
     void SetStartPiPFailedListener(NotifyStartPiPFailedFunc&& func);
+    bool GetPipDeviceCollaborationPolicy(int32_t screenId);
+    WMError SetPipEnableByScreenId(int32_t screenId, bool enabled);
+    WMError UnsetPipEnableByScreenId(int32_t screenId);
+    WMError RegisterPipChgListenerByScreenId(int32_t screenId, const sptr<IPipChangeListener>& listener);
+    WMError UnregisterPipChgListenerByScreenId(int32_t screenId);
 
      /*
      * FloatingBall Window
@@ -1364,11 +1370,16 @@ private:
     std::mutex pipSettingSwitchMutex_;
     uint64_t pipWindowSurfaceId_ = 0;
     bool pipSwitchStatus_ = true;
+    std::shared_mutex screenPipEnabledMapLock_;
+    std::unordered_map<int32_t, bool> screenPipEnabledMap_;
+    std::shared_mutex pipChgListenerMapMutex_;
+    std::map<int32_t, sptr<IPipChangeListener>> pipChgListenerMap_;
     bool CheckPiPPriority(const PiPTemplateInfo& pipTemplateInfo, DisplayId displayId = 0);
     bool IsEnablePiPCreate(const sptr<WindowSessionProperty>& property);
     bool IsPiPForbidden(const sptr<WindowSessionProperty>& property, const WindowType& type);
     bool IsLastPiPWindowVisible(uint64_t surfaceId, WindowVisibilityState lastVisibilityState);
     void NotifyPiPWindowVisibleChange(bool isScreenLocked);
+    void NotifyMulScreenPipStart(const sptr<WindowSessionProperty>& property, WindowType type);
 
     /*
      * Floating ball
