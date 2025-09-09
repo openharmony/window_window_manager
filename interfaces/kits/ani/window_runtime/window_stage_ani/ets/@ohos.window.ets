@@ -1997,7 +1997,7 @@ export class WindowStageInternal implements WindowStage {
     static { loadLibrary('windowstageani_module.z') }
 
     private nativeObj: long = 0;
-    setNativeObj(nativeObj: long):void {
+    setNativeObj(nativeObj: long): void {
         this.nativeObj = nativeObj;
     }
 
@@ -2122,9 +2122,16 @@ export class WindowStageInternal implements WindowStage {
     }
 
     public setWindowModal(isModal: boolean): Promise<void> {
-        this.setWindowModal(this.nativeObj, isModal);
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+            taskpool.execute((): void => {
+                this.setWindowModal(this.nativeObj, isModal);
+            }).then((ret: NullishType): void => {
+                resolve(undefined);
+            }).catch((err: NullishType): void => {
+                reject(err as BusinessError);
+            });
+        });
     }
-
     public setCustomDensity(density: double): void {
         this.setCustomDensitySync(this.nativeObj, density);
     }
@@ -2481,24 +2488,24 @@ export class WindowInternal implements Window {
     }
 
     public startMoving(): Promise<void> {
-      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute((): void => {
           this.startMoving(this.nativeObj);
-        }).then((ret: NullishType) :void => {
+        }).then((ret: NullishType): void => {
             resolve(undefined);
-        }).catch((err: NullishType) :void => {
+        }).catch((err: NullishType): void => {
             reject(err as BusinessError);
         });
       });
     }
 
     public startMoving(offsetX: int, offsetY: int): Promise<void> {
-      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute((): void => {
           this.startMoveWindowWithCoordinate(this.nativeObj, offsetX, offsetY);
-        }).then((ret: NullishType) :void => {
+        }).then((ret: NullishType): void => {
             resolve(undefined);
-        }).catch((err: NullishType) :void => {
+        }).catch((err: NullishType): void => {
             reject(err as BusinessError);
         });
       });
@@ -2526,12 +2533,12 @@ export class WindowInternal implements Window {
     }
 
     public minimize(): Promise<void> {
-      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute((): void => {
           this.minimize(this.nativeObj);
-        }).then((ret: NullishType) :void => {
+        }).then((ret: NullishType): void => {
             resolve(undefined);
-        }).catch((err: NullishType) :void => {
+        }).catch((err: NullishType): void => {
             reject(err as BusinessError);
         });
       });
@@ -2548,7 +2555,7 @@ export class WindowInternal implements Window {
     }
 
     public maximize(presentation?: MaximizePresentation): Promise<void> {
-      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute((): void => {
           if (presentation == undefined) {
             this.maximize(this.nativeObj, MaximizePresentation.ENTER_IMMERSIVE as int);
@@ -2556,33 +2563,33 @@ export class WindowInternal implements Window {
           else {
             this.maximize(this.nativeObj, presentation as int);
           }
-        }).then((ret: NullishType) :void => {
+        }).then((ret: NullishType): void => {
             resolve(undefined);
-        }).catch((err: NullishType) :void => {
+        }).catch((err: NullishType): void => {
             reject(err as BusinessError);
         });
       });
     }
     
     public resize(width: int, height: int): Promise<void> {
-      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.resize(this.nativeObj, width, height);
-        }).then((ret: NullishType) :void => {
+        }).then((ret: NullishType): void => {
             resolve(undefined);
-        }).catch((err: NullishType) :void => {
+        }).catch((err: NullishType): void => {
             reject(err as BusinessError);
         });
       });
     }
 
     public moveWindowTo(x: int, y: int): Promise<void> {
-      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.moveWindowTo(this.nativeObj, x, y);
-        }).then((ret: NullishType) :void => {
+        }).then((ret: NullishType): void => {
             resolve(undefined);
-        }).catch((err: NullishType) :void => {
+        }).catch((err: NullishType): void => {
             reject(err as BusinessError);
         });
       });
@@ -2614,12 +2621,12 @@ export class WindowInternal implements Window {
     }
 
     public setHandwritingFlag(enable: boolean): Promise<void> {
-        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
             taskpool.execute((): void => {
                 this.setHandwritingFlag(this.nativeObj, enable);
-            }).then((ret: NullishType) :void => {
+            }).then((ret: NullishType): void => {
                 resolve(undefined);
-            }).catch((err: NullishType) :void => {
+            }).catch((err: NullishType): void => {
                 reject(err as BusinessError);
             });
         });
@@ -2637,12 +2644,12 @@ export class WindowInternal implements Window {
     }
 
     public setBackgroundColor(color: string): Promise<void> {
-        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
             taskpool.execute((): void => {
                 this.setWindowBackgroundColor(this.nativeObj, color);
-            }).then((ret: NullishType) :void => {
+            }).then((ret: NullishType): void => {
                 resolve(undefined);
-            }).catch((err: NullishType) :void => {
+            }).catch((err: NullishType): void => {
                 reject(err as BusinessError);
             });
         });
@@ -2731,12 +2738,12 @@ export class WindowInternal implements Window {
     }
 
     public setWindowLayoutFullScreen(isLayoutFullScreen: boolean): Promise<void> {
-        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
             taskpool.execute((): void => {
                 this.setWindowLayoutFullScreen(this.nativeObj, isLayoutFullScreen);
-            }).then((ret: NullishType) :void => {
+            }).then((ret: NullishType): void => {
                 resolve(undefined);
-            }).catch((err: NullishType) :void => {
+            }).catch((err: NullishType): void => {
                 reject(err as BusinessError);
             });
         });
@@ -2787,12 +2794,12 @@ export class WindowInternal implements Window {
     }
 
     public setWindowSystemBarProperties(systemBarProperties: SystemBarProperties): Promise<void> {
-        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
             taskpool.execute((): void => {
                 this.setWindowSystemBarProperties(this.nativeObj, systemBarProperties);
-            }).then((ret: NullishType) :void => {
+            }).then((ret: NullishType): void => {
                 resolve(undefined);
-            }).catch((err: NullishType) :void => {
+            }).catch((err: NullishType): void => {
                 reject(err as BusinessError);
             });
         });
@@ -2809,16 +2816,16 @@ export class WindowInternal implements Window {
     }
 
     public setSpecificSystemBarEnabled(name: String, enable: boolean, enableAnimation?: boolean): Promise<void> {
-        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
             taskpool.execute((): void => {
                 if (enableAnimation == undefined) {
                     this.setSpecificSystemBarEnabled(this.nativeObj, name, enable, false);
                 } else {
                     this.setSpecificSystemBarEnabled(this.nativeObj, name, enable, enableAnimation);
                 }
-            }).then((ret: NullishType) :void => {
+            }).then((ret: NullishType): void => {
                 resolve(undefined);
-            }).catch((err: NullishType) :void => {
+            }).catch((err: NullishType): void => {
                 reject(err as BusinessError);
             });
         });
@@ -3011,7 +3018,7 @@ export class WindowInternal implements Window {
     }
 
     public setWindowKeepScreenOn(isKeepScreenOn: boolean): Promise<void> {
-        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
             taskpool.execute((): void => {
                 this.setWindowKeepScreenOnSync(this.nativeObj, isKeepScreenOn);
             }).then((ret: NullishType): void => {
@@ -3033,7 +3040,7 @@ export class WindowInternal implements Window {
     }
 
     public setWindowSystemBarEnable(names: Array<'status' | 'navigation'>): Promise<void> {
-        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
             taskpool.execute((): void => {
                 this.setWindowSystemBarEnableSync(this.nativeObj, names);
             }).then((ret: NullishType) => {
@@ -3724,7 +3731,7 @@ export function CreateWindowStageApi(scene: long): WindowStage { return CreateWi
 export native function CreateWindow(window: long): WindowInternal;
 
 let nativeObj: long;
-export function setNativeObj(nativeObject: long):void {
+export function setNativeObj(nativeObject: long): void {
     hilog.info(DOMAIN, TAG, 'setNativeObj, nativeObject:' + nativeObject);
     nativeObj = nativeObject;
 }
