@@ -2828,6 +2828,92 @@ HWTEST_F(DisplayManagerTest, NotifyScreenshot, TestSize.Level1)
     EXPECT_TRUE(g_errLog.find("NotifyScreenshot trigger") != std::string::npos);
     g_errLog.clear();
 }
+
+/**
+ * @tc.name: UpdateDisplayIdFromAms_Null_AbilityToken
+ * @tc.desc: Test UpdateDisplayIdFromAms with null abilityToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, UpdateDisplayIdFromAms_Null_AbilityToken, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    DisplayId displayId = 0;
+    wptr<IRemoteObject> abilityToken = nullptr;
+    SingletonContainer::Get<DisplayManager>().UpdateDisplayIdFromAms(displayId, abilityToken);
+    EXPECT_TRUE(g_errLog.find("abilityToken is nullptr") != std::string::npos);
+    g_errLog.clear();
+ 
+    sptr<IRemoteObject> obj;
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_, nullptr);
+        obj = SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_->AsObject();
+    } else {
+        ASSERT_NE(SingletonContainer::Get<DisplayManagerAdapter>().displayManagerServiceProxy_, nullptr);
+        obj = SingletonContainer::Get<DisplayManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    }
+    abilityToken = obj;
+    displayId = -1;
+    SingletonContainer::Get<DisplayManager>().UpdateDisplayIdFromAms(displayId, abilityToken);
+    EXPECT_TRUE(g_errLog.find("display id invalid") != std::string::npos);
+    g_errLog.clear();
+}
+ 
+/**
+ * @tc.name: UpdateDisplayIdFromAms_displayIdList_empty
+ * @tc.desc: Test UpdateDisplayIdFromAms with empty displayIdList
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, UpdateDisplayIdFromAms_displayIdList_empty, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    DisplayManager displayManager;
+    displayManager.displayIdList_.clear();
+    DisplayId displayId = 123;
+    sptr<IRemoteObject> obj;
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_, nullptr);
+        obj = SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_->AsObject();
+    } else {
+        ASSERT_NE(SingletonContainer::Get<DisplayManagerAdapter>().displayManagerServiceProxy_, nullptr);
+        obj = SingletonContainer::Get<DisplayManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    }
+    wptr<IRemoteObject> abilityToken = obj;
+    displayManager.UpdateDisplayIdFromAms(displayId, abilityToken);
+    EXPECT_TRUE(g_errLog.find("displayIdList_ is empty") != std::string::npos);
+    EXPECT_EQ(displayManager.GetCallingAbilityDisplayId(), displayId);
+    g_errLog.clear();
+}
+ 
+/**
+ * @tc.name: UpdateDisplayIdFromAms_Success
+ * @tc.desc: Test UpdateDisplayIdFromAms success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, UpdateDisplayIdFromAms_Success, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    DisplayManager displayManager;
+    displayManager.displayIdList_.clear();
+    sptr<IRemoteObject> obj;
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_, nullptr);
+        obj = SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_->AsObject();
+    } else {
+        ASSERT_NE(SingletonContainer::Get<DisplayManagerAdapter>().displayManagerServiceProxy_, nullptr);
+        obj = SingletonContainer::Get<DisplayManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    }
+    wptr<IRemoteObject> abilityToken = obj;
+    displayManager.displayIdList_.emplace_back(abilityToken, 111);
+    displayManager.displayIdList_.emplace_back(abilityToken, 222);
+    displayManager.displayIdList_.emplace_back(abilityToken, 333);
+    DisplayId displayId2 = 123;
+    displayManager.UpdateDisplayIdFromAms(displayId2, abilityToken);
+    EXPECT_EQ(displayManager.GetCallingAbilityDisplayId(), displayId2);
+    g_errLog.clear();
+}
 }
 } // namespace Rosen
 } // namespace OHOS
