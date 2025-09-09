@@ -110,7 +110,7 @@ public:
     void SetIsAppSupportPhoneInPc(bool isSupportPhone);
     void SetIsPcAppInPad(bool isPcAppInLargeScreenDevice);
     void SetIsAtomicService(bool isAtomicService);
-    
+
     /*
      * Window Immersive
      */
@@ -580,7 +580,7 @@ private:
     bool focusable_ { true };
     bool focusableOnShow_ { true };
     bool isExclusivelyHighlighted_ { true };
-    
+
     /*
      * Window Lifecycle
      */
@@ -589,7 +589,7 @@ private:
     std::string ancoRealBundleName_  = "";
     MissionInfo missionInfo_;
     mutable std::mutex missionInfoMutex_;
-    
+
     /*
      * Window Property
      */
@@ -612,7 +612,7 @@ private:
 
     bool isShowDecorInFreeMultiWindow_ { true };
 };
- 
+
 class CompatibleModeProperty : public Parcelable {
 public:
     void SetIsAdaptToImmersive(bool isAdaptToImmersive);
@@ -966,6 +966,11 @@ struct SystemSessionConfig : public Parcelable {
     bool IsPcOrPcMode() const
     {
         return IsPcWindow() || (IsPadWindow() && IsFreeMultiWindowMode());
+    }
+
+    bool isSupportPCMode() const
+    {
+        return IsPcWindow() || IsFreeMultiWindowMode();
     }
 };
 } // namespace Rosen
