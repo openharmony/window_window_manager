@@ -617,7 +617,7 @@ int SceneSessionManagerLiteStub::HandleMoveSessionsToBackground(MessageParcel& d
 
 int SceneSessionManagerLiteStub::HandleGetFocusSessionInfo(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "run");
+    TLOGD(WmsLogTag::WMS_FOCUS, "run");
     uint64_t displayId = 0;
     if (!data.ReadUint64(displayId)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Failed to read displayId");
