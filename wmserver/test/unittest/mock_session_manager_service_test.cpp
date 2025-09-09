@@ -19,6 +19,7 @@
 #include "display_manager.h"
 #include "window_agent.h"
 #include "window_impl.h"
+#include "window_manager_hilog.h"
 #include "window_property.h"
 #include "window_root.h"
 #include "wm_common.h"
@@ -30,6 +31,13 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "MockSessionManagerServiceTest"};
+
+    std::string g_errLog;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_errLog = msg;
+    }
 }
 
 class MockSessionManagerServiceTest : public testing::Test {
@@ -64,12 +72,14 @@ namespace {
  */
 HWTEST_F(MockSessionManagerServiceTest, OnRemoteDied, TestSize.Level1)
 {
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     WLOGI("OnRemoteDied");
     MockSessionManagerService::SMSDeathRecipient smsDeathRecipient(100);
-    auto res = WMError::WM_OK;
     wptr<IRemoteObject> object = nullptr;
     smsDeathRecipient.OnRemoteDied(object);
-    ASSERT_EQ(WMError::WM_OK, res);
+    EXPECT_TRUE(g_errLog.find("sessionManagerService is null") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -79,13 +89,17 @@ HWTEST_F(MockSessionManagerServiceTest, OnRemoteDied, TestSize.Level1)
  */
 HWTEST_F(MockSessionManagerServiceTest, OnRemoteDied1, TestSize.Level1)
 {
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     GTEST_LOG_(INFO) << "MockSessionManagerServiceTest: OnRemoteDied1 start";
     WLOGI("OnRemoteDied");
     MockSessionManagerService::SMSDeathRecipient* mService = new MockSessionManagerService::SMSDeathRecipient(100);
-    auto res = WMError::WM_OK;
     wptr<IRemoteObject> object = nullptr;
     mService->OnRemoteDied(object);
-    ASSERT_EQ(WMError::WM_OK, res);
+    EXPECT_FALSE(g_errLog.find("SessionManagerService died!") != std::string::npos);
+    LOG_SetCallback(nullptr);
+    delete mService;
+    mService = nullptr;
     GTEST_LOG_(INFO) << "MockSessionManagerServiceTest: OnRemoteDied1 end";
 }
 
@@ -122,10 +136,12 @@ HWTEST_F(MockSessionManagerServiceTest, GetSessionManagerService, TestSize.Level
  */
 HWTEST_F(MockSessionManagerServiceTest, OnStart, TestSize.Level1)
 {
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     WLOGI("onStart");
-    auto ret = WMError::WM_OK;
     MockSessionManagerService::GetInstance().OnStart();
-    ASSERT_EQ(ret, WMError::WM_OK);
+    EXPECT_FALSE(g_errLog.find("OnStart begin") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -135,12 +151,16 @@ HWTEST_F(MockSessionManagerServiceTest, OnStart, TestSize.Level1)
  */
 HWTEST_F(MockSessionManagerServiceTest, OnStart1, TestSize.Level1)
 {
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     GTEST_LOG_(INFO) << "MockSessionManagerServiceTest: OnStart1 start";
     MockSessionManagerService* mService = new MockSessionManagerService();
     WLOGI("onStart");
-    auto ret = WMError::WM_OK;
     mService->OnStart();
-    ASSERT_EQ(ret, WMError::WM_OK);
+    EXPECT_FALSE(g_errLog.find("OnStart begin") != std::string::npos);
+    LOG_SetCallback(nullptr);
+    delete mService;
+    mService = nullptr;
     GTEST_LOG_(INFO) << "MockSessionManagerServiceTest: OnStart1 end";
 }
 

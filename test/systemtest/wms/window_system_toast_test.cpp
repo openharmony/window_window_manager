@@ -118,9 +118,7 @@ HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow01, TestSize.Level1)
         ASSERT_NE(WMError::WM_OK, scene->GoForeground());
     }
 
-    if (scene->GetMainWindow() == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, scene->GetMainWindow());
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
     ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
 }
@@ -145,9 +143,7 @@ HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow02, TestSize.Level1)
         ASSERT_NE(WMError::WM_OK, scene->GoForeground());
     }
 
-    if (scene->GetMainWindow() == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, scene->GetMainWindow());
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());
     ASSERT_EQ(true, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
@@ -179,9 +175,7 @@ HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow03, TestSize.Level1)
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
     ASSERT_EQ(false, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
-    if (scene->GetMainWindow() == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, scene->GetMainWindow());
     ASSERT_EQ(true, scene->GetMainWindow()->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
 
@@ -211,11 +205,9 @@ HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow04, TestSize.Level1)
         ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
     }
 
-    if (scene->GetMainWindow() == nullptr) {
-        return;
-    }
     ASSERT_EQ(nullptr, scene->GetMainWindow());
-    ASSERT_EQ(false, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
+    ASSERT_EQ(nullptr, scene->GetMainWindow());
+    ASSERT_NE(false, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
 }
 } // namespace Rosen
