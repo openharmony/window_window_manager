@@ -8319,7 +8319,6 @@ void SceneSession::SetCustomDecorHeight(int32_t height)
 
 WSError SceneSession::SetDecorVisible(bool isVisible)
 {
-    TLOGD(WmsLogTag::WMS_DECOR, "isVisible: %{public}d", isVisible);
     std::lock_guard lock(customDecorHeightMutex_);
     isDecorVisible_ = isVisible;
     return WSError::WS_OK;

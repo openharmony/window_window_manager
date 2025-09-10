@@ -6947,10 +6947,6 @@ napi_value JsWindow::OnSetContentAspectRatio(napi_env env, napi_callback_info in
         return logAndThrowError(WmErrorCode::WM_ERROR_INVALID_PARAM, "Number of parameters is invalid");
     }
 
-    if (!windowToken_) {
-        return logAndThrowError(WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Window is nullptr");
-    }
-
     double aspectRatio = 0.0;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], aspectRatio)) {
         return logAndThrowError(WmErrorCode::WM_ERROR_INVALID_PARAM, "Failed to convert parameter to aspectRatio");

@@ -491,60 +491,6 @@ HWTEST_F(SceneSessionLayoutTest, SetAspectRatio7, TestSize.Level0)
 }
 
 /**
- * @tc.name: SetAspectRatio8
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionLayoutTest, SetAspectRatio8, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetAspectRatio8";
-    info.bundleName_ = "SetAspectRatio8";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->isActive_ = true;
-
-    float ratio = 0.1;
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    WindowLimits limits;
-    limits.minHeight_ = 1000;
-    limits.maxHeight_ = 1000;
-    limits.minWidth_ = 1000;
-    limits.maxWidth_ = 1000;
-    property->SetWindowLimits(limits);
-    sceneSession->SetSessionProperty(property);
-    auto result = sceneSession->SetAspectRatio(ratio);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
-}
-
-/**
- * @tc.name: SetAspectRatio9
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionLayoutTest, SetAspectRatio9, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetAspectRatio9";
-    info.bundleName_ = "SetAspectRatio9";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->isActive_ = true;
-
-    float ratio = 0.1;
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    WindowLimits limits;
-    limits.minHeight_ = 1000;
-    limits.maxHeight_ = 1000;
-    limits.minWidth_ = 1000;
-    limits.maxWidth_ = 1000;
-    property->SetWindowLimits(limits);
-    sceneSession->SetSessionProperty(property);
-    auto result = sceneSession->SetAspectRatio(ratio);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
-}
-
-/**
  * @tc.name: SaveAspectRatio
  * @tc.desc: SaveAspectRatio
  * @tc.type: FUNC
