@@ -6951,10 +6951,6 @@ napi_value JsWindow::OnSetContentAspectRatio(napi_env env, napi_callback_info in
         return logAndThrowError(WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Window is nullptr");
     }
 
-    if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
-        return logAndThrowError(WmErrorCode::WM_ERROR_INVALID_CALLING, "Only allowed for the main window");
-    }
-
     double aspectRatio = 0.0;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], aspectRatio)) {
         return logAndThrowError(WmErrorCode::WM_ERROR_INVALID_PARAM, "Failed to convert parameter to aspectRatio");
@@ -6982,7 +6978,8 @@ napi_value JsWindow::OnSetContentAspectRatio(napi_env env, napi_callback_info in
             return;
         }
         WMError ret = window->SetContentAspectRatio(aspectRatio, isPersistent, needUpdateRect);
-        WmErrorCode code = ConvertErrorToCode(ret);
+        auto it = WM_JS_TO_ERROR_CODE_MAP.find(ret);
+        WmErrorCode code = (it != WM_JS_TO_ERROR_CODE_MAP.end()) ? it->second : WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
         if (code == WmErrorCode::WM_OK) {
             napiAsyncTask->Resolve(env, NapiGetUndefined(env));
         } else {
