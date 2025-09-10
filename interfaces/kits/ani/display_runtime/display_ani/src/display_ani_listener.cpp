@@ -422,7 +422,7 @@ void DisplayAniListener::OnAvailableAreaChanged(DMRect area)
                     return;
                 }
                 DisplayAniUtils::ConvertRect(area, rectObj, env);
-                DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "availableAreaChangedCallback",
+                DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "availableAreaChangedCallback",
                     nullptr, oneAniCallback, rectObj);
             };
             if (!eventHandler_) {

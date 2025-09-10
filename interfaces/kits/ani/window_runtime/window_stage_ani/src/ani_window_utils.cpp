@@ -858,7 +858,7 @@ ani_object AniWindowUtils::CreateAniRotationChangeInfo(ani_env* env, const Rotat
 {
     TLOGI(WmsLogTag::WMS_ROTATION, "[ANI]");
     ani_class aniClass;
-    ani_status ret = env->FindClass("L@ohos/window/window/RotationChangeInfoInternal;", &aniClass);
+    ani_status ret = env->FindClass("@ohos.window.window.RotationChangeInfoInternal", &aniClass);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] class not found");
         return AniWindowUtils::CreateAniUndefined(env);
@@ -876,7 +876,7 @@ ani_object AniWindowUtils::CreateAniRotationChangeInfo(ani_env* env, const Rotat
         return AniWindowUtils::CreateAniUndefined(env);
     }
     ani_enum rotationChangeType;
-    ret = env->FindEnum("L@ohos/window/window/RotationChangeType;", &rotationChangeType);
+    ret = env->FindEnum("@ohos.window.window.RotationChangeType", &rotationChangeType);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] failed to FindEnum");
         return AniWindowUtils::CreateAniUndefined(env);

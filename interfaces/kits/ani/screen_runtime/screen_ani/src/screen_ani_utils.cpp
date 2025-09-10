@@ -316,7 +316,7 @@ ani_object ScreenAniUtils::CreateDisplayIdVectorAniObject(ani_env* env, std::vec
     ani_size index = 0;
     for (const auto& displayId : displayIds) {
         TLOGI(WmsLogTag::DMS, "displayId: %{public}" PRIu64, displayId);
-        ani_status ret = env->Object_CallMethodByName_Void(arrayObj, "$_set", "il:V", index,
+        ani_status ret = env->Object_CallMethodByName_Void(arrayObj, "$_set", "il:", index,
             static_cast<ani_long>(displayId));
         if (ret != ANI_OK) {
             TLOGE(WmsLogTag::DMS, "Failed to set displayId item, index: %{public}zu, ret: %{public}d", index, ret);
