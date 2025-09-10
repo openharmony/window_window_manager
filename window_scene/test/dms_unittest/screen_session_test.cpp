@@ -1599,7 +1599,7 @@ HWTEST_F(ScreenSessionTest, AddChild, TestSize.Level1)
     ASSERT_EQ(res, false);
 
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
-    res = sessionGroup.AddChild(session, startPoint, defaultScreenSession);
+    res = sessionGroup.AddChild(session, startPoint, defaultScreenSession, false, {Rotation::ROTATION_0, true});
     ASSERT_EQ(res, true);
     GTEST_LOG_(INFO) << "ScreenSessionTest: AddChild end";
 }

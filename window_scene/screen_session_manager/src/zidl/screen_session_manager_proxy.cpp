@@ -1400,7 +1400,7 @@ DMError ScreenSessionManagerProxy::DestroyVirtualScreen(ScreenId screenId)
 }
 
 DMError ScreenSessionManagerProxy::MakeMirror(ScreenId mainScreenId,
-                                              std::vector<ScreenId> mirrorScreenIds, ScreenId& screenGroupId)
+    std::vector<ScreenId> mirrorScreenIds, ScreenId& screenGroupId, const RotationOption& rotationOption)
 {
     TLOGW(WmsLogTag::DMS, "SCB: ENTER");
     sptr<IRemoteObject> remote = Remote();
@@ -1417,7 +1417,8 @@ DMError ScreenSessionManagerProxy::MakeMirror(ScreenId mainScreenId,
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     bool res = data.WriteUint64(static_cast<uint64_t>(mainScreenId)) &&
-        data.WriteUInt64Vector(mirrorScreenIds);
+        data.WriteUInt64Vector(mirrorScreenIds) && data.WriteUint32(static_cast<uint32_t>(rotationOption.rotation_)) &&
+        data.WriteBool(rotationOption.needSetRotation_);
     if (!res) {
         TLOGE(WmsLogTag::DMS, "SCB: data write failed");
         return DMError::DM_ERROR_IPC_FAILED;

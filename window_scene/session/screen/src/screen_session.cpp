@@ -1931,7 +1931,8 @@ bool ScreenSessionGroup::GetRSDisplayNodeConfig(sptr<ScreenSession>& screenSessi
 }
 
 bool ScreenSessionGroup::AddChild(sptr<ScreenSession>& smsScreen, Point& startPoint,
-                                  sptr<ScreenSession> defaultScreenSession, bool isExtend)
+                                  sptr<ScreenSession> defaultScreenSession, bool isExtend,
+                                  const RotationOption& rotationOption)
 {
     if (smsScreen == nullptr) {
         TLOGE(WmsLogTag::DMS, "AddChild, smsScreen is nullptr.");
@@ -1949,6 +1950,9 @@ bool ScreenSessionGroup::AddChild(sptr<ScreenSession>& smsScreen, Point& startPo
     struct RSDisplayNodeConfig config;
     if (!GetRSDisplayNodeConfig(smsScreen, config, defaultScreenSession)) {
         return false;
+    }
+    if (rotationOption.needSetRotation_) {
+        config.mirrorSourceRotation = static_cast<uint32_t>(rotationOption.rotation_);
     }
     smsScreen->InitRSDisplayNode(config, startPoint, isExtend);
     smsScreen->lastGroupSmsId_ = smsScreen->groupSmsId_;

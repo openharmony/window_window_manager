@@ -361,7 +361,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 break;
             }
             ScreenId screenGroupId = INVALID_SCREEN_ID;
-            DMError ret = MakeMirror(mainScreenId, mirrorScreenId, screenGroupId);
+            Rotation rotation = static_cast<Rotation>(data.ReadUint32());
+            bool needSetRotation = data.ReadBool();
+            RotationOption rotationOption = {rotation, needSetRotation};
+            DMError ret = MakeMirror(mainScreenId, mirrorScreenId, screenGroupId, rotationOption);
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
             static_cast<void>(reply.WriteUint64(static_cast<uint64_t>(screenGroupId)));
             break;
