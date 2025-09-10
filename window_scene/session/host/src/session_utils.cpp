@@ -28,7 +28,7 @@ bool IsAspectRatioValid(float aspectRatio, const WindowLimits& limits, const Win
     WindowLimits contentLimits = limits;
     contentLimits.Trim(decoration.Horizontal(), decoration.Vertical());
     if (!contentLimits.IsValid()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid limits: %{public}s", contentLimits.ToString().c_str());
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid contentLimits: %{public}s", contentLimits.ToString().c_str());
         return false;
     }
 
@@ -60,6 +60,7 @@ WindowLimits AdjustLimitsByAspectRatio(const WindowLimits& limits,
     WindowLimits adjustedLimits = limits;
     adjustedLimits.Trim(decorW, decorH);
     if (!adjustedLimits.IsValid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid adjustedLimits: %{public}s", adjustedLimits.ToString().c_str());
         return limits;
     }
 
@@ -104,6 +105,7 @@ WSRect AdjustRectByAspectRatio(const WSRect& rect,
     WindowLimits adjustedLimits = limits;
     adjustedLimits.Trim(decorW, decorH);
     if (!adjustedLimits.IsValid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid adjustedLimits: %{public}s", adjustedLimits.ToString().c_str());
         return rect;
     }
 
@@ -113,7 +115,9 @@ WSRect AdjustRectByAspectRatio(const WSRect& rect,
     uint32_t minW = std::max(adjustedLimits.minWidth_, minWByH);
     uint32_t maxW = std::min(adjustedLimits.maxWidth_, maxWByH);
     if (minW > maxW) {
-        // Aspect ratio conflicts with limits
+        TLOGE(WmsLogTag::WMS_LAYOUT,
+            "Aspect ratio conflicts with limits, aspectRatio: %{public}f, adjustedLimits: %{public}s",
+            aspectRatio, adjustedLimits.ToString().c_str());
         return rect;
     }
 
@@ -131,6 +135,7 @@ WSRect AdjustRectByAspectRatio(const WSRect& rect,
     // Tolerance: <= tolerancePx pixels is considered no adjustment
     if (std::abs(rect.width_ - adjustedRect.width_) <= tolerancePx &&
         std::abs(rect.height_ - adjustedRect.height_) <= tolerancePx) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Adjustment within tolerance: %{public}dpx, no adjustment", tolerancePx);
         return rect;
     }
     return adjustedRect;

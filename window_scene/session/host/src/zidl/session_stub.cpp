@@ -1657,7 +1657,6 @@ int SessionStub::HandleSetCustomDecorHeight(MessageParcel& data, MessageParcel& 
 
 int SessionStub::HandleSetDecorVisible(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_DECOR, "In");
     bool isVisible = false;
     if (!data.ReadBool(isVisible)) {
         TLOGE(WmsLogTag::WMS_DECOR, "Failed to read isVisible");
