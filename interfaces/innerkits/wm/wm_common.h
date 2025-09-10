@@ -1788,18 +1788,26 @@ struct WindowLimits {
 
     void Trim(uint32_t trimWidth, uint32_t trimHeight)
     {
-        minWidth_ -= trimWidth;
-        maxWidth_ -= trimWidth;
-        minHeight_ -= trimHeight;
-        maxHeight_ -= trimHeight;
+        auto safeSub = [](uint32_t base, uint32_t dec) -> uint32_t {
+            return (dec >= base) ? 0 : base - dec;
+        };
+
+        minWidth_ = safeSub(minWidth_, trimWidth);
+        maxWidth_ = safeSub(maxWidth_, trimWidth);
+        minHeight_ = safeSub(minHeight_, trimHeight);
+        maxHeight_ = safeSub(maxHeight_, trimHeight);
     }
 
     void Expand(uint32_t expandWidth, uint32_t expandHeight)
     {
-        minWidth_ += expandWidth;
-        maxWidth_ += expandWidth;
-        minHeight_ += expandHeight;
-        maxHeight_ += expandHeight;
+        auto safeAdd = [](uint32_t base, uint32_t inc) -> uint32_t {
+            return (base > UINT32_MAX - inc) ? UINT32_MAX : base + inc;
+        };
+
+        minWidth_ = safeAdd(minWidth_, expandWidth);
+        maxWidth_ = safeAdd(maxWidth_, expandWidth);
+        minHeight_ = safeAdd(minHeight_, expandHeight);
+        maxHeight_ = safeAdd(maxHeight_, expandHeight);
     }
 
     bool IsEmpty() const
