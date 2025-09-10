@@ -2628,6 +2628,11 @@ DMError DisplayManager::Impl::ConvertRelativeCoordinateToGlobal(const RelativePo
             relativePosition.displayId);
         return DMError::DM_ERROR_NULLPTR;
     }
+    if (displayInfo->GetDisplaySourceMode() != DisplaySourceMode::MAIN &&
+        displayInfo->GetDisplaySourceMode() != DisplaySourceMode::EXTEND) {
+        TLOGE(WmsLogTag::DMS, "Display is not main or extend mode:%u", displayInfo->GetDisplaySourceMode());
+        return DMError::DM_ERROR_ILLEGAL_PARAM;
+    }
 
     int32_t startX = displayInfo->GetX();
     int32_t startY = displayInfo->GetY();
