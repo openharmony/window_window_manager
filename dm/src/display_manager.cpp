@@ -991,21 +991,20 @@ void DisplayManager::RemoveDisplayIdFromAms(const wptr<IRemoteObject>& abilityTo
 
 void DisplayManager::UpdateDisplayIdFromAms(DisplayId displayId, const wptr<IRemoteObject>& abilityToken)
 {
-    TLOGI(WmsLogTag::DMS, "start");
+    TLOGI(WmsLogTag::DMS, "start, displayId: %{public}" PRIu64, displayId);
     if (abilityToken == nullptr || displayId == DISPLAY_ID_INVALID) {
         TLOGE(WmsLogTag::DMS, "abilityToken is nullptr or display id invalid. displayId: %{public}" PRIu64, displayId);
         return;
     }
     std::lock_guard<std::mutex> lock(displayOperateMutex_);
     if (displayIdList_.empty()) {
-        TLOGI(WmsLogTag::DMS, "displayIdList_ is empty. add displayId directly.");
+        TLOGI(WmsLogTag::DMS, "displayIdList is empty. add displayId directly.");
         displayIdList_.push_back(std::make_pair(abilityToken, displayId));
         return;
     }
     displayIdList_.erase(
         std::remove_if(displayIdList_.begin(), displayIdList_.end(),
             [abilityToken](const auto &item) -> bool {
-                TLOGI(WmsLogTag::DMS, "item second: displayId: %{public}" PRIu64, item.second);
                 return item.first == abilityToken;
             }),
         displayIdList_.end()
