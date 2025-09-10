@@ -31,9 +31,14 @@ bool LoadMotionSensor(void)
     }
     int32_t cnt = 0;
     int32_t retryTimes = 3;
+    const char* dlopenError;
     do {
         cnt++;
         g_handle = dlopen(PLUGIN_SO_PATH.c_str(), RTLD_LAZY);
+        dlopenError = dlerror();
+        if (dlopenError) {
+            TLOGE(WmsLogTag::DMS, "dlopen error: %{public}s", dlopenError);
+        }
         TLOGI(WmsLogTag::DMS, "dlopen %{public}s, retry cnt: %{public}d", PLUGIN_SO_PATH.c_str(), cnt);
         usleep(SLEEP_TIME_US);
     } while (!g_handle && cnt < retryTimes);
