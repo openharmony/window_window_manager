@@ -780,5 +780,13 @@ struct RelativePosition {
     DisplayId displayId = 0;
     Position position = {0, 0};
 };
+
+/**
+ * @brief Rotation option
+ */
+struct RotationOption {
+    Rotation rotation_ = Rotation::ROTATION_0;
+    bool needSetRotation_ = false;
+};
 }
 #endif // OHOS_ROSEN_DM_COMMON_H
