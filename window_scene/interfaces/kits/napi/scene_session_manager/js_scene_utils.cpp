@@ -1880,6 +1880,10 @@ napi_value CreateJsSessionProcessMode(napi_env env)
         static_cast<int32_t>(AAFwk::ProcessMode::NEW_PROCESS_ATTACH_TO_PARENT)));
     napi_set_named_property(env, objValue, "NEW_PROCESS_ATTACH_TO_STATUS_BAR_ITEM", CreateJsValue(env,
         static_cast<int32_t>(AAFwk::ProcessMode::NEW_PROCESS_ATTACH_TO_STATUS_BAR_ITEM)));
+    napi_set_named_property(env, objValue, "NEW_HIDDEN_PROCESS", CreateJsValue(env,
+        static_cast<int32_t>(AAFwk::ProcessMode::NEW_HIDDEN_PROCESS)));
+    napi_set_named_property(env, objValue, "NO_ATTACHMENT", CreateJsValue(env,
+        static_cast<int32_t>(AAFwk::ProcessMode::NO_ATTACHMENT)));
     napi_set_named_property(env, objValue, "END", CreateJsValue(env,
         static_cast<int32_t>(AAFwk::ProcessMode::END)));
     return objValue;
