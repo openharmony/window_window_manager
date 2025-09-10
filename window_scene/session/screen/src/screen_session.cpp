@@ -1317,16 +1317,16 @@ void ScreenSession::SetScreenType(ScreenType type)
 
 Rotation ScreenSession::CalcRotation(Orientation orientation, FoldDisplayMode foldDisplayMode) const
 {
-    sptr<SupportedScreenModes> info = GetActiveScreenMode();
-    if (info == nullptr) {
-        return Rotation::ROTATION_0;
+    // Calculate the width and height based on the 0-degree rotation direction, and set the orientation
+    Rotation deviceRotation = property_.GetDeviceRotation();
+    auto bounds = property_.GetBounds();
+    uint32_t width = bounds.rect_.GetWidth();
+    uint32_t height = bounds.rect_.GetHeight();
+    if (!IsVertical(deviceRotation)) {
+        width = bounds.rect_.GetHeight();
+        height = bounds.rect_.GetWidth();
     }
-    // vertical: phone(Plugin screen); horizontal: pad & external screen
-    bool isVerticalScreen = info->width_ < info->height_;
-    if (foldDisplayMode != FoldDisplayMode::UNKNOWN &&
-        (g_screenRotationOffSet == ROTATION_90 || g_screenRotationOffSet == ROTATION_270)) {
-        isVerticalScreen = info->width_ > info->height_;
-    }
+    bool isVerticalScreen = width < height;
     switch (orientation) {
         case Orientation::UNSPECIFIED: {
             return Rotation::ROTATION_0;
@@ -1335,19 +1335,24 @@ Rotation ScreenSession::CalcRotation(Orientation orientation, FoldDisplayMode fo
             return isVerticalScreen ? Rotation::ROTATION_0 : Rotation::ROTATION_90;
         }
         case Orientation::HORIZONTAL: {
-            return isVerticalScreen ? Rotation::ROTATION_90 : Rotation::ROTATION_0;
+            return isVerticalScreen ? Rotation::ROTATION_90 : Rotation::ROTATION_180;
         }
         case Orientation::REVERSE_VERTICAL: {
             return isVerticalScreen ? Rotation::ROTATION_180 : Rotation::ROTATION_270;
         }
         case Orientation::REVERSE_HORIZONTAL: {
-            return isVerticalScreen ? Rotation::ROTATION_270 : Rotation::ROTATION_180;
+            return isVerticalScreen ? Rotation::ROTATION_270 : Rotation::ROTATION_0;
         }
         default: {
             TLOGE(WmsLogTag::DMS, "unknown orientation %{public}u", orientation);
             return Rotation::ROTATION_0;
         }
     }
+}
+
+bool ScreenSession::IsVertical(Rotation rotation) const
+{
+    return rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180;
 }
 
 DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation,
@@ -1581,7 +1586,7 @@ void ScreenSession::FillScreenInfo(sptr<ScreenInfo> info) const
     info->SetVirtualHeight(height / virtualPixelRatio);
     info->SetVirtualWidth(width / virtualPixelRatio);
     info->SetRotation(property_.GetScreenRotation());
-    info->SetOrientation(static_cast<Orientation>(property_.GetDisplayOrientation()));
+    info->SetOrientation(CalcDisplayOrientationToOrientation(property_.GetDisplayOrientation()));
     info->SetSourceMode(sourceMode);
     info->SetType(property_.GetScreenType());
     info->SetModeId(activeIdx_);
@@ -1593,6 +1598,33 @@ void ScreenSession::FillScreenInfo(sptr<ScreenInfo> info) const
     info->parent_ = groupSmsId_;
     info->isScreenGroup_ = isScreenGroup_;
     info->modes_ = modes_;
+}
+
+Orientation ScreenSession::CalcDisplayOrientationToOrientation(DisplayOrientation displayOrientation) const
+{
+    Orientation orientation = Orientation::UNSPECIFIED;
+    switch (displayOrientation) {
+        case DisplayOrientation::PORTRAIT: {
+            orientation = Orientation::VERTICAL;
+            break;
+        }
+        case DisplayOrientation::LANDSCAPE: {
+            orientation = Orientation::HORIZONTAL;
+            break;
+        }
+        case DisplayOrientation::PORTRAIT_INVERTED: {
+            orientation = Orientation::REVERSE_VERTICAL;
+            break;
+        }
+        case DisplayOrientation::LANDSCAPE_INVERTED: {
+            orientation = Orientation::REVERSE_HORIZONTAL;
+            break;
+        }
+        default: {
+            TLOGE(WmsLogTag::DMS, "unknown displayOrientation %{public}d", displayOrientation);
+        }
+    }
+    return orientation;
 }
 
 sptr<ScreenInfo> ScreenSession::ConvertToScreenInfo() const
