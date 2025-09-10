@@ -57,6 +57,8 @@ public:
     static void UnregisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
         ani_ref callback);
     static void Finalizer(ani_env* env, ani_long nativeObj);
+    static void SetContentAspectRatio(ani_env* env, ani_object obj, ani_long nativeObj,
+                                      ani_float aspectRatio, ani_boolean isPersistent, ani_boolean needUpdateRect);
 
     /*
      * Window Layout
@@ -98,6 +100,12 @@ private:
         const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, sptr<Window> windowToken);
     WMError SetSystemBarPropertiesByFlags(std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags,
         std::map<WindowType, SystemBarProperty>& systemBarProperties, sptr<Window> windowToken);
+
+    /*
+     * Window Layout
+     */
+    void OnSetContentAspectRatio(
+        ani_env* env, ani_float aspectRatio, ani_boolean isPersistent, ani_boolean needUpdateRect);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<AniWindowRegisterManager> registerManager_ = nullptr;
