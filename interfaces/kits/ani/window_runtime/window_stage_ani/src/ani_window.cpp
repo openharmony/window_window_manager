@@ -2392,6 +2392,7 @@ static void StartMoving(ani_env* env, ani_object obj, ani_long nativeObj)
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is null");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     aniWindow->StartMoving(env);
@@ -2405,6 +2406,7 @@ static void StartMoveWindowWithCoordinate(ani_env* env, ani_object obj, ani_long
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is null");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     aniWindow->StartMoveWindowWithCoordinate(env, offsetX, offsetY);
@@ -2418,6 +2420,7 @@ static void SetWindowTitleButtonVisible(ani_env* env, ani_object obj, ani_long n
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "[ANI] windowToken is null");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     aniWindow->SetWindowTitleButtonVisible(env, visibleParam);
@@ -2430,6 +2433,7 @@ static void SetDecorButtonStyle(ani_env* env, ani_object obj, ani_long nativeObj
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "[ANI] windowToken is null");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     aniWindow->SetDecorButtonStyle(env, decorStyle);
@@ -2442,6 +2446,7 @@ static ani_int GetWindowStatus(ani_env* env, ani_object obj, ani_long nativeObj)
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
         TLOGE(WmsLogTag::WMS_PC, "[ANI] windowToken is null");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return ANI_ERROR;
     }
     return aniWindow->GetWindowStatus(env);
@@ -2454,6 +2459,7 @@ static void Minimize(ani_env* env, ani_object obj, ani_long nativeObj)
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] windowToken is null");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     aniWindow->Minimize(env);
@@ -2466,6 +2472,7 @@ static void Maximize(ani_env* env, ani_object obj, ani_long nativeObj, ani_int p
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] windowToken is null");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     aniWindow->Maximize(env, presentation);
@@ -2562,6 +2569,7 @@ static ani_int WindowSetWindowDecorVisible(ani_env* env, ani_object obj, ani_lon
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
         TLOGD(WmsLogTag::DEFAULT, "[ANI] windowToken_ is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return ANI_ERROR;
     }
     aniWindow->SetWindowDecorVisible(env, static_cast<bool>(isVisible));
@@ -2575,6 +2583,7 @@ static ani_int WindowSetWindowDecorHeight(ani_env* env, ani_object obj, ani_long
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] windowToken_ is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return ANI_ERROR;
     }
     aniWindow->SetWindowDecorHeight(env, height);
