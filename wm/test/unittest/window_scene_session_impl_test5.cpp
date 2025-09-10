@@ -2300,7 +2300,7 @@ HWTEST_F(WindowSceneSessionImplTest5, TestSetContentAspectRatio, TestSize.Level1
 
     // Case 2: Invalid session
     window->hostSession_ = nullptr;
-    auto ret = window->SetContentAspectRatio(ratio, isPersistent, needUpdateRect);
+    ret = window->SetContentAspectRatio(ratio, isPersistent, needUpdateRect);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
     window->hostSession_ = mockHostSession;
 

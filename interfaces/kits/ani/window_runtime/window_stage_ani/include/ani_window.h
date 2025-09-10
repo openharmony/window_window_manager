@@ -58,7 +58,7 @@ public:
         ani_ref callback);
     static void Finalizer(ani_env* env, ani_long nativeObj);
     static void SetContentAspectRatio(ani_env* env, ani_object obj, ani_long nativeObj,
-                                      ani_float aspectRatio, ani_boolean isPersistent, ani_boolean needUpdateRect);
+                                      ani_double ratio, ani_boolean isPersistent, ani_boolean needUpdateRect);
 
     /*
      * Window Layout
@@ -105,7 +105,7 @@ private:
      * Window Layout
      */
     void OnSetContentAspectRatio(
-        ani_env* env, ani_float aspectRatio, ani_boolean isPersistent, ani_boolean needUpdateRect);
+        ani_env* env, ani_double ratio, ani_boolean isPersistent, ani_boolean needUpdateRect);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<AniWindowRegisterManager> registerManager_ = nullptr;
