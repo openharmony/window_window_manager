@@ -2789,6 +2789,10 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
             session->addSnapshotCallback_();
         }
         session->SetAddSnapshotCallback([]() {});
+        {
+            std::lock_guard<std::mutex> lock(session->saveSnapshotCallbackMutex_);
+            session->saveSnapshotCallback_();
+        }
         if (!requirePersist) {
             return;
         }
@@ -2806,12 +2810,13 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
                 "_" + std::to_string(key.first) + std::to_string(key.second), true,
                 ScenePersistentStorageType::MAXIMIZE_STATE);
         }
-        Task saveSnapshotCallback = []() {};
+        session->scenePersistence_->ResetSnapshotCache();
+        Task removeSnapshotCallback = []() {};
         {
-            std::lock_guard lock(session->saveSnapshotCallbackMutex_);
-            saveSnapshotCallback = session->saveSnapshotCallback_;
+            std::lock_guard lock(session->removeSnapshotCallbackMutex_);
+            removeSnapshotCallback = session->removeSnapshotCallback_;
         }
-        session->scenePersistence_->SaveSnapshot(pixelMap, saveSnapshotCallback, key, rotate,
+        session->scenePersistence_->SaveSnapshot(pixelMap, removeSnapshotCallback, key, rotate,
             session->freeMultiWindow_.load());
         if (updateSnapshot) {
             session->SetExitSplitOnBackground(false);
