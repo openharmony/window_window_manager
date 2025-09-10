@@ -5334,12 +5334,19 @@ EnableIfSame<T, IDisplayMoveListener, std::vector<sptr<IDisplayMoveListener>>> W
 void WindowSessionImpl::NotifyDisplayMove(DisplayId from, DisplayId to)
 {
     WLOGFD("from %{public}" PRIu64 " to %{public}" PRIu64, from, to);
-    std::lock_guard<std::mutex> lockListener(displayMoveListenerMutex_);
-    auto displayMoveListeners = GetListeners<IDisplayMoveListener>();
-    for (auto& listener : displayMoveListeners) {
-        if (listener != nullptr) {
-            listener->OnDisplayMove(from, to);
+    {
+        std::lock_guard<std::mutex> lockListener(displayMoveListenerMutex_);
+        auto displayMoveListeners = GetListeners<IDisplayMoveListener>();
+        for (auto& listener : displayMoveListeners) {
+            if (listener != nullptr) {
+                listener->OnDisplayMove(from, to);
+            }
         }
+    }
+    auto context = GetContext();
+    if (context != nullptr) {
+        TLOGI(WmsLogTag::WMS_MAIN, "update display move to dms");
+        DisplayManager::GetInstance().UpdateDisplayIdFromAms(to, context->GetToken());
     }
 }
 

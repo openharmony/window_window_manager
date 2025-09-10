@@ -837,6 +837,14 @@ public:
     void RemoveDisplayIdFromAms(const wptr<IRemoteObject>& abilityToken);
 
     /**
+     * @brief update displayId for current ability through Ability Management.
+     *
+     * @param displayId Identifier of the current display.
+     * @param abilityToken Token of the ability.
+     */
+    void UpdateDisplayIdFromAms(DisplayId displayId, const wptr<IRemoteObject>& abilityToken);
+
+    /**
      * @brief Get primary display object by means of sync.
      *
      * @return primary display.
