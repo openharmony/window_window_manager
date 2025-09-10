@@ -31,7 +31,7 @@ bool LoadMotionSensor(void)
     }
     int32_t cnt = 0;
     int32_t retryTimes = 3;
-    const char* dlopenError;
+    const char* dlopenError = nullptr;
     do {
         cnt++;
         g_handle = dlopen(PLUGIN_SO_PATH.c_str(), RTLD_LAZY);
