@@ -81,11 +81,11 @@ HWTEST_F(SessionUtilsTest, TestIsAspectRatioValid, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestAdjustLimitsByAspectRatio
+ * @tc.name: TestAdjustLimitsByAspectRatio1
  * @tc.desc: Verify AdjustLimitsByAspectRatio behavior in different scenarios
  * @tc.type: FUNC
  */
-HWTEST_F(SessionUtilsTest, TestAdjustLimitsByAspectRatio, TestSize.Level1)
+HWTEST_F(SessionUtilsTest, TestAdjustLimitsByAspectRatio1, TestSize.Level1)
 {
     WindowLimits baseLimits(400, 400, 100, 100, FLT_MAX, 0.0f);
     WindowDecoration noDecor {0, 0, 0, 0};
@@ -140,6 +140,17 @@ HWTEST_F(SessionUtilsTest, TestAdjustLimitsByAspectRatio, TestSize.Level1)
         EXPECT_EQ(adjusted.maxWidth_, limits.maxWidth_);
         EXPECT_EQ(adjusted.maxHeight_, limits.maxHeight_);
     }
+}
+
+/**
+ * @tc.name: TestAdjustLimitsByAspectRatio2
+ * @tc.desc: Verify AdjustLimitsByAspectRatio behavior in different scenarios
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionUtilsTest, TestAdjustLimitsByAspectRatio2, TestSize.Level1)
+{
+    WindowLimits baseLimits(400, 400, 100, 100, FLT_MAX, 0.0f);
+    WindowDecoration noDecor {0, 0, 0, 0};
 
     // Case 5: With decoration (expand + trim check)
     {
