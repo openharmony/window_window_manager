@@ -1669,6 +1669,60 @@ HWTEST_F(WindowSceneSessionImplTest5, GetTargetOrientationConfigInfo, Function |
 }
 
 /**
+ * @tc.name: IsTransitionAnimationSupported
+ * @tc.desc: IsTransitionAnimationSupported
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, IsTransitionAnimationSupported, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsTransitionAnimationSupported");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    auto property = window->GetProperty();
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    property->persistentId_ = 100;
+
+    window->state_ = WindowState::STATE_DESTROYED;
+    WMError ret = window->IsTransitionAnimationSupported();
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    window->state_ = WindowState::STATE_SHOWN;
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ret = window->IsTransitionAnimationSupported();
+    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    property->SetIsPcAppInPad(true);
+    ret = window->IsTransitionAnimationSupported();
+    ASSERT_EQ(ret, WMError::WM_OK);
+
+    property->SetIsPcAppInPad(false);
+    ret = window->IsTransitionAnimationSupported();
+    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ret = window->IsTransitionAnimationSupported();
+    ASSERT_EQ(ret, WMError::WM_OK);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    ret = window->IsTransitionAnimationSupported();
+    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    ret = window->IsTransitionAnimationSupported();
+    ASSERT_EQ(ret, WMError::WM_OK);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = window->IsTransitionAnimationSupported();
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+}
+
+/**
  * @tc.name: SetWindowTransitionAnimation
  * @tc.desc: SetWindowTransitionAnimation
  * @tc.type: FUNC

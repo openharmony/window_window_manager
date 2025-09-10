@@ -4292,6 +4292,13 @@ public:
     virtual bool GetWindowShadowEnabled() const { return true; }
 
     /**
+     * @brief Check if the window supports transition animation and has permission to use it.
+     *
+     * @return WM_OK means transition animation is supported and allowed by the system.
+     */
+    virtual WMError IsTransitionAnimationSupported() const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Set the transition animation.
      *
      * @param transitionType window transition type.
