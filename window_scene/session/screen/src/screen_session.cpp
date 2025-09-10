@@ -1352,7 +1352,7 @@ Rotation ScreenSession::CalcRotation(Orientation orientation, FoldDisplayMode fo
 
 bool ScreenSession::IsVertical(Rotation rotation) const
 {
-    return (rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180);
+    return rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180;
 }
 
 DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation,
