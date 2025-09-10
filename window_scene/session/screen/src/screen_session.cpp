@@ -2456,7 +2456,7 @@ std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshotWithAllWindows(
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ss:GetScreenSnapshotWithAllWindows");
     auto callback = std::make_shared<SurfaceCaptureFuture>();
     {
-        DmsXcollie dmsXcollie("DMS:GetScreenSnapshotWithAllWindows:TaskSurfaceCaptureWithAllWindows",
+        DmsXcollie dmsXcollie("DMS:GetScreenSnapshotWithAllWindows:TakeSurfaceCaptureWithAllWindows",
             XCOLLIE_TIMEOUT_5S);
         std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
         if (displayNode_ == nullptr) {
@@ -2468,7 +2468,7 @@ std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshotWithAllWindows(
             .scaleY = scaleY,
         };
         SetScreenSnapshotRect(config);
-        bool ret = RSInterfaces::GetInstance().TaskSurfaceCaptureWithAllWindows(displayNode_, callback, config,
+        bool ret = RSInterfaces::GetInstance().TakeSurfaceCaptureWithAllWindows(displayNode_, callback, config,
             isNeedCheckDrmAndSurfaceLock);
         if (!ret) {
             TLOGE(WmsLogTag::DMS, "take surface capture with all windows failed");
