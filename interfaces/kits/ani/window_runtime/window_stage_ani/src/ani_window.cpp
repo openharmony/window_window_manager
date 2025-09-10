@@ -889,7 +889,7 @@ void AniWindow::Finalizer(ani_env* env, ani_long nativeObj)
 }
 
 void AniWindow::SetContentAspectRatio(ani_env* env, ani_object obj, ani_long nativeObj,
-                                      ani_float aspectRatio, ani_boolean isPersistent, ani_boolean needUpdateRect)
+                                      ani_double ratio, ani_boolean isPersistent, ani_boolean needUpdateRect)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
@@ -898,11 +898,11 @@ void AniWindow::SetContentAspectRatio(ani_env* env, ani_object obj, ani_long nat
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
-    aniWindow->OnSetContentAspectRatio(env, aspectRatio, isPersistent, needUpdateRect);
+    aniWindow->OnSetContentAspectRatio(env, ratio, isPersistent, needUpdateRect);
 }
 
 void AniWindow::OnSetContentAspectRatio(
-    ani_env* env, ani_float aspectRatio, ani_boolean isPersistent, ani_boolean needUpdateRect)
+    ani_env* env, ani_double ratio, ani_boolean isPersistent, ani_boolean needUpdateRect)
 {
     if (!windowToken_) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] window is nullptr");
@@ -910,7 +910,7 @@ void AniWindow::OnSetContentAspectRatio(
         return;
     }
     WMError ret = windowToken_->SetContentAspectRatio(
-        static_cast<float>(aspectRatio), static_cast<bool>(isPersistent), static_cast<bool>(needUpdateRect));
+        static_cast<float>(ratio), static_cast<bool>(isPersistent), static_cast<bool>(needUpdateRect));
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] failed, windowId: %{public}u, ret: %{public}d",
             windowToken_->GetWindowId(), static_cast<int32_t>(ret));
@@ -1227,7 +1227,7 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::GetWindowAvoidArea)},
         ani_native_function {"setWaterMarkFlagSync", "JZ:V",
             reinterpret_cast<void *>(AniWindow::SetWaterMarkFlag)},
-        ani_native_function {"setContentAspectRatio", "lfzz:",
+        ani_native_function {"setContentAspectRatio", "JDZZ:V",
             reinterpret_cast<void *>(AniWindow::SetContentAspectRatio)},
         ani_native_function {"onSync", nullptr,
             reinterpret_cast<void *>(AniWindow::RegisterWindowCallback)},

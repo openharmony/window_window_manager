@@ -1260,10 +1260,10 @@ export class WindowInternal implements Window {
     private native getUIContextSync(nativeObj: long): UIContext;
     private native getWindowAvoidAreaSync(nativeObj: long, type: int): AvoidArea;
     private native setWaterMarkFlagSync(nativeObj: long, enable: boolean): void;
-    private native onSync(nativeObj: long, type: string, callback: object): void;
-    private native offSync(nativeObj: long, type: string, callback?: object): void;
     private native setContentAspectRatio(
       nativeObj: long, ratio: number, isPersistent: boolean, needUpdateRect: boolean): void;
+    private native onSync(nativeObj: long, type: string, callback: object): void;
+    private native offSync(nativeObj: long, type: string, callback?: object): void;
 
     public resize(width: number, height: number): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
