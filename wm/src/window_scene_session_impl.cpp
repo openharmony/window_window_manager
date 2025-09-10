@@ -1319,6 +1319,8 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
                                      WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
         }
         property_->SetWindowModeSupportType(windowModeSupportType);
+        TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}u, windowModeSupportType: %{public}u",
+            GetWindowId(), windowModeSupportType);
         // update windowModeSupportType to server
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
         bool isWindowModeSupportFullscreen = GetTargetAPIVersion() < 15 ? // 15: isolated version
@@ -1398,6 +1400,8 @@ void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
     uint32_t displayWidth = static_cast<uint32_t>(displayInfo->GetWidth());
     uint32_t displayHeight = static_cast<uint32_t>(displayInfo->GetHeight());
     if (displayWidth == 0 || displayHeight == 0) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "displayWidth or displayHeight is zero, displayId: %{public}" PRIu64,
+            property_->GetDisplayId());
         return;
     }
     virtualPixelRatio = GetVirtualPixelRatio(displayInfo);
@@ -1498,6 +1502,8 @@ void WindowSceneSessionImpl::UpdateWindowSizeLimits()
 
     CalculateNewLimitsByLimits(newLimits, customizedLimits, virtualPixelRatio);
     if (MathHelper::NearZero(virtualPixelRatio)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "windowId: %{public}u, virtual pixel ratio is zero",
+            GetWindowId());
         return;
     }
     newLimits.vpRatio_ = virtualPixelRatio;
@@ -4125,11 +4131,12 @@ MaximizeMode WindowSceneSessionImpl::GetGlobalMaximizeMode() const
 
 WMError WindowSceneSessionImpl::SetWindowMode(WindowMode mode)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "%{public}u mode %{public}u", GetWindowId(), static_cast<uint32_t>(mode));
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}u, windowModeSupportType: %{public}u, mode: %{public}u",
+        GetWindowId(), property_->GetWindowModeSupportType(), static_cast<uint32_t>(mode));
     if (!WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(), mode)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "window %{public}u do not support mode: %{public}u",
             GetWindowId(), static_cast<uint32_t>(mode));
@@ -5370,10 +5377,11 @@ WSError WindowSceneSessionImpl::NotifyLayoutFinishAfterWindowModeChange(WindowMo
 
 WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
 {
-    WLOGFI("%{public}u mode %{public}u", GetWindowId(), static_cast<uint32_t>(mode));
     if (IsWindowSessionInvalid()) {
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}u, windowModeSupportType: %{public}u, mode: %{public}u",
+        GetWindowId(), property_->GetWindowModeSupportType(), static_cast<uint32_t>(mode));
     if (!WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(), mode)) {
         WLOGFE("%{public}u do not support mode: %{public}u",
             GetWindowId(), static_cast<uint32_t>(mode));
@@ -6700,6 +6708,7 @@ WMError WindowSceneSessionImpl::SetWindowAnchorInfo(const WindowAnchorInfo& wind
 WMError WindowSceneSessionImpl::SetFollowParentWindowLayoutEnabled(bool isFollow)
 {
     if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "windowId: %{public}u, window session is invalid", GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     const auto& property = GetProperty();
@@ -6722,6 +6731,7 @@ WMError WindowSceneSessionImpl::SetFollowParentWindowLayoutEnabled(bool isFollow
     }
     WSError ret = GetHostSession()->SetFollowParentWindowLayoutEnabled(isFollow);
     if (ret == WSError::WS_ERROR_DEVICE_NOT_SUPPORT) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "windowId: %{public}u, device not support", GetWindowId());
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
