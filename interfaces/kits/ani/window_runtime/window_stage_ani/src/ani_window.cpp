@@ -4496,9 +4496,9 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
         }
     }
     std::array staticMethods = {
-        ani_native_function {"nativeTransferStatic", "C{std/interop/ESValue}:C{std/core/Object}",
+        ani_native_function {"nativeTransferStatic", "C{std.interop.ESValue}:C{std.core.Object}",
             reinterpret_cast<void *>(AniWindow::NativeTransferStatic)},
-        ani_native_function {"nativeTransferDynamic", "l:C{std/interop/ESValue}",
+        ani_native_function {"nativeTransferDynamic", "l:C{std.interop.ESValue}",
             reinterpret_cast<void *>(AniWindow::NativeTransferDynamic)},
     };
     for (auto method : staticMethods) {

@@ -428,7 +428,7 @@ ani_object DisplayAniUtils::CreateRectObject(ani_env *env)
         return nullptr;
     }
     ani_method aniCtor;
-    auto ret = env->Class_FindMethod(aniClass, "<Ctor>", ":V", &aniCtor);
+    auto ret = env->Class_FindMethod(aniClass, "<ctor>", ":", &aniCtor);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] Class_FindMethod failed");
         return nullptr;
