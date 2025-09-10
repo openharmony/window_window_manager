@@ -388,6 +388,8 @@ public:
     void UpdateMirrorHeight(uint32_t mirrorHeight);
 
 private:
+    bool IsVertical(Rotation rotation) const;
+    Orientation CalcDisplayOrientationToOrientation(DisplayOrientation displayOrientation) const;
     ScreenProperty property_;
     mutable std::mutex propertyMutex_; // above guarded by clientProxyMutex_
     std::shared_ptr<RSDisplayNode> displayNode_;

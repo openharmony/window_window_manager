@@ -11843,7 +11843,7 @@ Rotation ScreenSessionManager::RemoveRotationCorrection(Rotation rotation)
 Rotation ScreenSessionManager::GetConfigCorrectionByDisplayMode(FoldDisplayMode displayMode)
 {
     if (!CORRECTION_ENABLE) {
-      return Rotation::ROTATION_0;
+        return Rotation::ROTATION_0;
     }
     InitRotationCorrectionMap(DISPLAYMODE_CORRECTION);
     std::shared_lock<std::shared_mutex> lock(rotationCorrectionMutex_);
