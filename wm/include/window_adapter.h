@@ -84,7 +84,7 @@ public:
     virtual void ClearWindowAdapter();
 
     virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos);
-    virtual WMError IsChangedPosition(const Rect& rect, Rect& newRect, DisplayId& newDisplayId);
+    virtual WMError ConvertToRelativeCoordinateForFoldPC(const Rect& rect, Rect& newRect, DisplayId& newDisplayId);
     virtual WMError GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<UnreliableWindowInfo>>& infos);
     virtual WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos);
     virtual WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos);

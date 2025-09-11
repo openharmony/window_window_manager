@@ -88,7 +88,7 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_INFO):
             return HandleGetAccessibilityWindowInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GLOBAL_COORDINATE_TO_RELATIVE_COORDINATE):
-            return HandleIsChangedPosition(data, reply);
+            return HandleConvertToRelativeCoordinateForFoldPC(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_UNRELIABLE_WINDOW_INFO):
             return HandleGetUnreliableWindowInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REGISTER_SESSION_LISTENER):
@@ -914,7 +914,7 @@ int SceneSessionManagerStub::HandleSetGestureNavigationEnabled(MessageParcel& da
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleIsChangedPosition(MessageParcel& data, MessageParcel& reply)
+int SceneSessionManagerStub::HandleConvertToRelativeCoordinateForFoldPC(MessageParcel& data, MessageParcel& reply)
 {
     int32_t posX_ = 0;
     int32_t posY_ = 0;
@@ -927,7 +927,7 @@ int SceneSessionManagerStub::HandleIsChangedPosition(MessageParcel& data, Messag
     Rect rect = { posX_, posY_, width_, height_ };
     Rect newRect;
     DisplayId newDisplayId;
-    WMError errCode = IsChangedPosition(rect, newRect, newDisplayId);
+    WMError errCode = ConvertToRelativeCoordinateForFoldPC(rect, newRect, newDisplayId);
     reply.WriteInt32(static_cast<int32_t>(newRect.posX_));
     reply.WriteInt32(static_cast<int32_t>(newRect.posY_));
     reply.WriteUint32(static_cast<uint32_t>(newRect.width_));

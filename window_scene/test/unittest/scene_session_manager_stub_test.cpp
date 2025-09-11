@@ -1673,18 +1673,18 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetGestureNavigationEnabled, TestSiz
 }
 
 /**
- * @tc.name: HandleIsChangedPosition
- * @tc.desc: test HandleIsChangedPosition
+ * @tc.name: HandleConvertToRelativeCoordinateForFoldPC
+ * @tc.desc: test HandleConvertToRelativeCoordinateForFoldPC
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleIsChangedPosition, TestSize.Level1)
+HWTEST_F(SceneSessionManagerStubTest, HandleConvertToRelativeCoordinateForFoldPC, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
 
     data.WriteBool(false);
 
-    int res = stub_->HandleIsChangedPosition(data, reply);
+    int res = stub_->HandleConvertToRelativeCoordinateForFoldPC(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 

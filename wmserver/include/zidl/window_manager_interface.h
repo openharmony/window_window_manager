@@ -257,7 +257,7 @@ public:
     {
         return WSError::WS_OK;
     }
-    virtual WMError IsChangedPosition(const Rect& rect, Rect& newRect, DisplayId& newDisplayId)
+    virtual WMError ConvertToRelativeCoordinateForFoldPC(const Rect& rect, Rect& newRect, DisplayId& newDisplayId)
     {
         return WMError::WM_OK;
     }

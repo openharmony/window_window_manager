@@ -292,11 +292,11 @@ HWTEST_F(WindowManagerTest, GetAccessibilityWindowInfo01, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsChangedPosition
- * @tc.desc: IsChangedPosition ok
+ * @tc.name: ConvertToRelativeCoordinateForFoldPC
+ * @tc.desc: ConvertToRelativeCoordinateForFoldPC ok
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, IsChangedPosition, TestSize.Level1)
+HWTEST_F(WindowManagerTest, ConvertToRelativeCoordinateForFoldPC, TestSize.Level1)
 {
     std::unique_ptr<Mocker> mocker = std::make_unique<Mocker>();
     ASSERT_NE(mocker, nullptr);
@@ -305,8 +305,8 @@ HWTEST_F(WindowManagerTest, IsChangedPosition, TestSize.Level1)
     DisplayId newDisplayId = 0;
     rect = { 100, 2000, 400, 600 };
     newRect = { 0, 100, 200, 300 };
-    EXPECT_CALL(mocker->Mock(), IsChangedPosition(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    EXPECT_EQ(WMError::WM_OK, WindowManager::GetInstance().IsChangedPosition(rect, newRect, newDisplayId));
+    EXPECT_CALL(mocker->Mock(), ConvertToRelativeCoordinateForFoldPC(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_EQ(WMError::WM_OK, WindowManager::GetInstance().ConvertToRelativeCoordinateForFoldPC(rect, newRect, newDisplayId));
 }
 
 /**
