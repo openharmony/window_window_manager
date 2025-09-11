@@ -1694,7 +1694,7 @@ WMError WindowManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessibility
 WMError WindowManager::ConvertToRelativeCoordinateForFoldPC(const Rect& rect, Rect& newRect, DisplayId& newDisplayId)
 {
     WMError ret =
-    SingletonContainer::Get<WindowAdapter>().ConvertToRelativeCoordinateForFoldPC(rect, newRect, newDisplayId);
+        SingletonContainer::Get<WindowAdapter>().ConvertToRelativeCoordinateForFoldPC(rect, newRect, newDisplayId);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "change failed.");
     }

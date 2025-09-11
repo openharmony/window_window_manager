@@ -10865,20 +10865,17 @@ WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessi
 
 WMError SceneSessionManager::ConvertToRelativeCoordinateForFoldPC(const Rect& rect, Rect& newRect, DisplayId& newDisplayId)
 {
-    newRect.posX_ = rect.posX_;
-    newRect.width_ = rect.width_;
-    newRect.height_ = rect.height_;
+    newRect = rect;
     SuperFoldStatus foldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
-    TLOGD(WmsLogTag::WMS_LAYOUT, "foldStatus=%{public}d", foldStatus);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "foldStatus=%{public}d", static_cast<uint32_t>foldStatus);
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
         PcFoldScreenManager::GetInstance().GetDisplayRects();
-    if (foldStatus == SuperFoldStatus::HALF_FOLDED &&
-        rect.posY_ > (defaultDisplayRect.height_ + foldCreaseRect.height_)) {
-            newRect.posY_ = rect.posY_ - defaultDisplayRect.height_ - foldCreaseRect.height_;
-            newDisplayId = VIRTUAL_DISPLAY_ID;
-            return WMError::WM_OK;
+    bool flag = rect.posY_ > (defaultDisplayRect.height_ + foldCreaseRect.height_);
+    if (foldStatus == SuperFoldStatus::HALF_FOLDED && flag) {
+        newRect.posY_ = rect.posY_ - defaultDisplayRect.height_ - foldCreaseRect.height_;
+        newDisplayId = VIRTUAL_DISPLAY_ID;
+        return WMError::WM_OK;
     } else {
-        newRect.posY_ = rect.posY_;
         return WMError::WM_DO_NOTHING;
     }
 }

@@ -2709,20 +2709,9 @@ WMError SceneSessionManagerProxy::ConvertToRelativeCoordinateForFoldPC(
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write interface token failed.");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt32(rect.posX_)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Write posX_ failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt32(rect.posY_)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Write posY_ failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteUint32(rect.width_)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Write width_ failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteUint32(rect.height_)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Write height_ failed");
+    if (!data.WriteInt32(rect.posX_) || !data.WriteInt32(rect.posY_) ||
+        !data.WriteUint32(rect.width_) || !data.WriteUint32(rect.height_)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to write rect");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
@@ -2730,9 +2719,10 @@ WMError SceneSessionManagerProxy::ConvertToRelativeCoordinateForFoldPC(
         TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "remote is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (remote->SendRequest(
+    auto sendRet = remote->SendRequest(
         static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GLOBAL_COORDINATE_TO_RELATIVE_COORDINATE),
-        data, reply, option) != ERR_NONE) {
+        data, reply, option);
+    if (sendRet != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "SendRequest GetFreeMultiWindowEnableState failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
