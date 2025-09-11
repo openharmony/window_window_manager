@@ -460,7 +460,7 @@ enum class WindowUIType : uint8_t {
 extern const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP;
 
 /**
- * @brief Convert a WMError to its corresponding WmErrorCode.
+ * @brief Convert WMError to corresponding WmErrorCode.
  *
  * @param error WMError value to convert.
  * @param defaultCode Value to return if mapping is not found.
@@ -1786,16 +1786,16 @@ struct WindowLimits {
         float minRatio, float vpRatio) : maxWidth_(maxWidth), maxHeight_(maxHeight), minWidth_(minWidth),
         minHeight_(minHeight), maxRatio_(maxRatio), minRatio_(minRatio), vpRatio_(vpRatio) {}
 
-    void Trim(uint32_t trimWidth, uint32_t trimHeight)
+    void Clip(uint32_t clipWidth, uint32_t clipHeight)
     {
         auto safeSub = [](uint32_t base, uint32_t dec) -> uint32_t {
             return (dec >= base) ? 0 : base - dec;
         };
 
-        minWidth_ = safeSub(minWidth_, trimWidth);
-        maxWidth_ = safeSub(maxWidth_, trimWidth);
-        minHeight_ = safeSub(minHeight_, trimHeight);
-        maxHeight_ = safeSub(maxHeight_, trimHeight);
+        minWidth_ = safeSub(minWidth_, clipWidth);
+        maxWidth_ = safeSub(maxWidth_, clipWidth);
+        minHeight_ = safeSub(minHeight_, clipHeight);
+        maxHeight_ = safeSub(maxHeight_, clipHeight);
     }
 
     void Expand(uint32_t expandWidth, uint32_t expandHeight)

@@ -2737,7 +2737,7 @@ public:
     virtual WMError SetAspectRatio(float ratio) { return WMError::WM_OK; }
 
     /**
-     * @brief Sets the content aspect ratio of window.
+     * @brief Set content aspect ratio of the window.
      *
      * @param ratio The aspect ratio of window content (width divided by height).
      * @param isPersistent Whether to persist the aspect ratio setting.

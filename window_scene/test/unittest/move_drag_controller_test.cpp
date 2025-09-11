@@ -637,7 +637,7 @@ HWTEST_F(MoveDragControllerTest, CalcFixedAspectRatioTranslateLimitsAbnormalBran
 
 /**
  * @tc.name: CalcFixedAspectRatioTranslateLimitsNormalBranches
- * @tc.desc: Verify correct translate limits for all handled AreaType when aspectRatio_ is valid
+ * @tc.desc: Verify correct translate limits for all handled AreaType when aspectRatio is valid
  * @tc.type: FUNC
  */
 HWTEST_F(MoveDragControllerTest, CalcFixedAspectRatioTranslateLimitsNormalBranches, TestSize.Level1)

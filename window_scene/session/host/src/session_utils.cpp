@@ -26,7 +26,7 @@ bool IsAspectRatioValid(float aspectRatio, const WindowLimits& limits, const Win
     }
 
     WindowLimits contentLimits = limits;
-    contentLimits.Trim(decoration.Horizontal(), decoration.Vertical());
+    contentLimits.Clip(decoration.Horizontal(), decoration.Vertical());
     if (!contentLimits.IsValid()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid contentLimits: %{public}s", contentLimits.ToString().c_str());
         return false;
@@ -56,9 +56,9 @@ WindowLimits AdjustLimitsByAspectRatio(const WindowLimits& limits,
     const uint32_t decorW = decoration.Horizontal();
     const uint32_t decorH = decoration.Vertical();
 
-    // Trim limits by decoration
+    // Clip limits by decoration
     WindowLimits adjustedLimits = limits;
-    adjustedLimits.Trim(decorW, decorH);
+    adjustedLimits.Clip(decorW, decorH);
     if (!adjustedLimits.IsValid()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid adjustedLimits: %{public}s", adjustedLimits.ToString().c_str());
         return limits;
@@ -101,9 +101,9 @@ WSRect AdjustRectByAspectRatio(const WSRect& rect,
     const uint32_t decorW = decoration.Horizontal();
     const uint32_t decorH = decoration.Vertical();
 
-    // Trim limits by decoration
+    // Clip limits by decoration
     WindowLimits adjustedLimits = limits;
-    adjustedLimits.Trim(decorW, decorH);
+    adjustedLimits.Clip(decorW, decorH);
     if (!adjustedLimits.IsValid()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid adjustedLimits: %{public}s", adjustedLimits.ToString().c_str());
         return rect;
