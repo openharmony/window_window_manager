@@ -73,10 +73,10 @@ group("unittest") {
     ":ws_window_scene_config_test",
     "animation:ws_scene_session_animation_test",
     "animation:ws_session_proxy_animation_test",
-    "animation:ws_window_session_property_animation_test",
-    "animation:ws_ui_effect_controller_test",
     "animation:ws_ui_effect_controller_proxy_test",
     "animation:ws_ui_effect_controller_stub_test",
+    "animation:ws_ui_effect_controller_test",
+    "animation:ws_window_session_property_animation_test",
     "event_distribution:ws_intention_event_manager_test",
     "event_distribution:ws_scene_input_manager_test",
     "event_distribution:ws_scene_session_dirty_manager_test2",
@@ -95,8 +95,8 @@ group("unittest") {
     deps += [
       ":ws_hidumper_controller_test",
       ":ws_keyboard_session_test",
-      ":ws_mock_session_manager_service_test",
       ":ws_main_session_test",
+      ":ws_mock_session_manager_service_test",
       ":ws_pc_fold_screen_controller_test",
       ":ws_scene_session_lifecycle_test",
       ":ws_scene_session_manager_kiosk_test",
@@ -200,7 +200,7 @@ ohos_unittest("ws_system_session_test") {
 
   sources = [
     "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
-    "system_session_test.cpp"
+    "system_session_test.cpp",
   ]
 
   deps = [ ":ws_unittest_common" ]
@@ -941,7 +941,7 @@ ohos_unittest("ws_scene_session_lifecycle_test") {
   external_deps = test_external_deps
   external_deps += [
     "ability_base:session_info",
-    "ability_runtime:process_options"
+    "ability_runtime:process_options",
   ]
 
   cflags = []
@@ -1363,9 +1363,9 @@ ohos_unittest("ws_mock_session_manager_service_test") {
 
   include_dirs = [ "../mock" ]
 
-  sources = [ 
+  sources = [
     "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
-    "mock_session_manager_service_test.cpp"
+    "mock_session_manager_service_test.cpp",
   ]
 
   deps = [
