@@ -685,6 +685,33 @@ export function makeUnique(screenId: long): Promise<void> {
 }
  
 export native function makeUniqueNative(screenId: long, nativeObj: long): void;
+
+export function addVirtualScreenBlocklist(windowIds: Array<int>): Promise<void> {
+    return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+            addVirtualScreenBlocklistNative(windowIds, displayMgrRef);
+        }).then((ret: NullishType): void => {
+            resolve(undefined);
+        }).catch((err: NullishType): void => {
+            reject(err as BusinessError);
+        });
+    });
+}
+ 
+export function removeVirtualScreenBlocklist(windowIds: Array<int>): Promise<void> {
+    return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+            removeVirtualScreenBlocklistNative(windowIds, displayMgrRef);
+        }).then((ret: NullishType): void => {
+            resolve(undefined);
+        }).catch((err: NullishType): void => {
+            reject(err as BusinessError);
+        });
+    });
+}
+ 
+export native function addVirtualScreenBlocklistNative(windowIds: Array<int>, nativeObj: long): Promise<void>;
+export native function removeVirtualScreenBlocklistNative(windowIds: Array<int>, nativeObj: long): Promise<void>;
  
 export function setFoldStatusLocked(locked: boolean): void {
     setFoldStatusLockedNative(locked, displayMgrRef);

@@ -56,6 +56,8 @@ public:
     static void DestroyVirtualScreen(ani_env* env, ani_long screenId, ani_long nativeObj);
     static void SetVirtualScreenSurface(ani_env* env, ani_long screenId, ani_string surfaceId, ani_long nativeObj);
     static void MakeUnique(ani_env* env, ani_long screenId, ani_long nativeObj);
+    static void AddVirtualScreenBlocklist(ani_env* env, ani_object windowIdsObj, ani_long nativeObj);
+    static void RemoveVirtualScreenBlocklist(ani_env* env, ani_object windowIdsObj, ani_long nativeObj);
     static void FinalizerDisplay(ani_env* env, ani_object displayObj, ani_long nativeObj);
 private:
     void OnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
@@ -69,6 +71,8 @@ private:
     void OnDestroyVirtualScreen(ani_env* env, ani_long screenId);
     void OnSetVirtualScreenSurface(ani_env* env, ani_long screenId, ani_string surfaceId);
     void OnMakeUnique(ani_env* env, ani_long screenId);
+    void OnAddVirtualScreenBlocklist(ani_env* env, ani_object windowIdsObj);
+    void OnRemoveVirtualScreenBlocklist(ani_env* env, ani_object windowIdsObj);
     void OnFinalizerDisplay(ani_env* env, ani_object displayObj);
     bool IsCallbackRegistered(ani_env* env, const std::string& type, ani_ref callback);
     std::mutex mtx_;
