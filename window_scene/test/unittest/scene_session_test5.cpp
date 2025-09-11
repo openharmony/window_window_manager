@@ -1185,7 +1185,7 @@ HWTEST_F(SceneSessionTest5, SetWatermarkEnabled, TestSize.Level1)
 
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    session->surfaceNode_ = surfaceNode;
+    session->SetSurfaceNode(surfaceNode);
     session->SetWatermarkEnabled(watermarkName, true);
 }
 
@@ -1700,7 +1700,7 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdatePrivacyMode1, TestSize.Level0)
     EXPECT_NE(session->property_, nullptr);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    session->surfaceNode_ = surfaceNode;
+    session->SetSurfaceNode(surfaceNode);
     session->property_->SetPrivacyMode(false);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetPrivacyMode(true);
@@ -1725,7 +1725,7 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdatePrivacyMode2, TestSize.Level1)
     EXPECT_NE(session->property_, nullptr);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    session->surfaceNode_ = surfaceNode;
+    session->SetSurfaceNode(surfaceNode);
     session->property_->SetPrivacyMode(true);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetPrivacyMode(false);
