@@ -1643,20 +1643,19 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
 
 sptr<DisplayInfo> WindowSceneSessionImpl::GetDisplayInfo() const
 {
-    const auto type = GetType();
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr && (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
-        type == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW || WindowHelper::IsSubWindow(type))) {
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "not find, displayId: %{public}" PRIu64 ", persistentId: %{public}d",
+            property_->GetDisplayId(), GetPersistentId());
         display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
         if (display != nullptr) {
             property_->SetDisplayId(display->GetId());
-            TLOGI(WmsLogTag::WMS_KEYBOARD, "use default display id: %{public}" PRIu64, display->GetId());
+            TLOGI(WmsLogTag::WMS_LIFE, "use default display id: %{public}" PRIu64, display->GetId());
+        } else {
+            TLOGE(WmsLogTag::WMS_LIFE, "failed, display is null, name: %{public}s, id: %{public}d",
+                property_->GetWindowName().c_str(), GetPersistentId());
+            return nullptr;
         }
-    }
-    if (display == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "failed, display is null, name: %{public}s, id: %{public}d",
-            property_->GetWindowName().c_str(), GetPersistentId());
-        return nullptr;
     }
     return display->GetDisplayInfo();
 }
