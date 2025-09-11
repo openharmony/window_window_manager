@@ -158,11 +158,11 @@ HWTEST_F(WindowAdapterTest, GetAccessibilityWindowInfo, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsChangedPosition
- * @tc.desc: WindowAdapter/IsChangedPosition
+ * @tc.name: ConvertToRelativeCoordinateForFoldPC
+ * @tc.desc: WindowAdapter/ConvertToRelativeCoordinateForFoldPC
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, IsChangedPosition, TestSize.Level1)
+HWTEST_F(WindowAdapterTest, ConvertToRelativeCoordinateForFoldPC, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     Rect rect;
@@ -170,7 +170,7 @@ HWTEST_F(WindowAdapterTest, IsChangedPosition, TestSize.Level1)
     DisplayId newDisplayId = 0;
     rect = { 100, 2000, 400, 600 };
     newRect = { 0, 100, 200, 300 };
-    EXPECT_EQ(WMError::WM_OK, windowAdapter.IsChangedPosition(rect, newRect, newDisplayId));
+    EXPECT_EQ(WMError::WM_OK, windowAdapter.ConvertToRelativeCoordinateForFoldPC(rect, newRect, newDisplayId));
 }
 
 /**

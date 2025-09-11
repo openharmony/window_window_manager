@@ -910,14 +910,14 @@ public:
     WMError SetWindowLayoutMode(WindowLayoutMode mode);
 
     /**
-     * @brief global coordinates converted to relative coordinates.
+     * @brief Global coordinate to relative coordinate conversion in foldedPC
      *
      * @param rect global coordinates.
-     * @param newRect relative coordinates.
-     * @param newDisplayId newDisplayId.
+     * @param newRect Converted relative coordinates
+     * @param newDisplayId Current window ID
      * @return WM_OK means converted, others means not converted.
      */
-    WMError IsChangedPosition(const Rect& rect, Rect& newRect, DisplayId& newDisplayId);
+    WMError ConvertToRelativeCoordinateForFoldPC(const Rect& rect, Rect& newRect, DisplayId& newDisplayId);
 
     /**
      * @brief Get accessibility window info.

@@ -10863,7 +10863,7 @@ WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessi
     return taskScheduler_->PostSyncTask(task, "GetAccessibilityWindowInfo");
 }
 
-WMError SceneSessionManager::IsChangedPosition(const Rect& rect, Rect& newRect, DisplayId& newDisplayId)
+WMError SceneSessionManager::ConvertToRelativeCoordinateForFoldPC(const Rect& rect, Rect& newRect, DisplayId& newDisplayId)
 {
     newRect.posX_ = rect.posX_;
     newRect.width_ = rect.width_;

@@ -2024,11 +2024,11 @@ HWTEST_F(sceneSessionManagerProxyTest, RemoveSessionBlackList02, TestSize.Level1
 }
 
 /**
- * @tc.name: IsChangedPosition01
- * @tc.desc: IsChangedPosition
+ * @tc.name: ConvertToRelativeCoordinateForFoldPC01
+ * @tc.desc: ConvertToRelativeCoordinateForFoldPC
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, IsChangedPosition01, TestSize.Level1)
+HWTEST_F(sceneSessionManagerProxyTest, ConvertToRelativeCoordinateForFoldPC01, TestSize.Level1)
 {
     auto tempProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
     Rect rect;
@@ -2038,7 +2038,7 @@ HWTEST_F(sceneSessionManagerProxyTest, IsChangedPosition01, TestSize.Level1)
     newRect = { 0, 100, 200, 300 };
 
     // remote == nullptr
-    auto ret = tempProxy->IsChangedPosition(rect, newRect, newDisplayId);
+    auto ret = tempProxy->ConvertToRelativeCoordinateForFoldPC(rect, newRect, newDisplayId);
     EXPECT_EQ(ret, WMError::WS_ERROR_NULLPTR);
 
     // WriteInterfaceToken failed
@@ -2047,24 +2047,24 @@ HWTEST_F(sceneSessionManagerProxyTest, IsChangedPosition01, TestSize.Level1)
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     ASSERT_NE(proxy, nullptr);
-    ret = proxy->IsChangedPosition(rect, newRect, newDisplayId);
+    ret = proxy->ConvertToRelativeCoordinateForFoldPC(rect, newRect, newDisplayId);
     EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
 
     // SendRequest failed
     ASSERT_NE(proxy, nullptr);
     remoteMocker->SetRequestResult(ERR_INVALID_DATA);
-    ret = proxy->IsChangedPosition(rect, newRect, newDisplayId);
+    ret = proxy->ConvertToRelativeCoordinateForFoldPC(rect, newRect, newDisplayId);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
     remoteMocker->SetRequestResult(ERR_NONE);
 }
 
 /**
- * @tc.name: IsChangedPosition02
- * @tc.desc: IsChangedPosition
+ * @tc.name: ConvertToRelativeCoordinateForFoldPC02
+ * @tc.desc: ConvertToRelativeCoordinateForFoldPC
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, IsChangedPosition02, TestSize.Level1)
+HWTEST_F(sceneSessionManagerProxyTest, ConvertToRelativeCoordinateForFoldPC02, TestSize.Level1)
 {
     auto tempProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
     Rect rect;
@@ -2074,7 +2074,7 @@ HWTEST_F(sceneSessionManagerProxyTest, IsChangedPosition02, TestSize.Level1)
     newRect = { 0, 100, 200, 300 };
 
     // remote == nullptr
-    auto ret = tempProxy->IsChangedPosition(rect, newRect, newDisplayId);
+    auto ret = tempProxy->ConvertToRelativeCoordinateForFoldPC(rect, newRect, newDisplayId);
     EXPECT_EQ(ret, WMError::WS_ERROR_NULLPTR);
 
     // WriteInterfaceToken failed
@@ -2083,14 +2083,14 @@ HWTEST_F(sceneSessionManagerProxyTest, IsChangedPosition02, TestSize.Level1)
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     ASSERT_NE(proxy, nullptr);
-    ret = proxy->IsChangedPosition(rect, newRect, newDisplayId);
+    ret = proxy->ConvertToRelativeCoordinateForFoldPC(rect, newRect, newDisplayId);
     EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
 
     // SendRequest failed
     ASSERT_NE(proxy, nullptr);
     remoteMocker->SetRequestResult(ERR_INVALID_DATA);
-    ret = proxy->IsChangedPosition(rect, newRect, newDisplayId);
+    ret = proxy->ConvertToRelativeCoordinateForFoldPC(rect, newRect, newDisplayId);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
     remoteMocker->SetRequestResult(WMError::WM_OK);
 }
