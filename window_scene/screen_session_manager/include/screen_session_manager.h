@@ -130,7 +130,8 @@ public:
     virtual DMError DestroyVirtualScreen(ScreenId screenId) override;
     DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height) override;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
-        ScreenId& screenGroupId, bool forceMirror = false) override;
+        ScreenId& screenGroupId, const RotationOption& rotationOption = {Rotation::ROTATION_0, false},
+        bool forceMirror = false) override;
     virtual DMError MakeMirrorForRecord(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) override;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
@@ -200,17 +201,18 @@ public:
 
     void ChangeScreenGroup(sptr<ScreenSessionGroup> group, const std::vector<ScreenId>& screens,
              const std::vector<Point>& startPoints, bool filterScreen, ScreenCombination combination,
-             DMRect mainScreenRegion = DMRect::NONE());
+             DMRect mainScreenRegion = DMRect::NONE(),
+             const RotationOption& rotationOption = {Rotation::ROTATION_0, false});
 
     bool RemoveChildFromGroup(sptr<ScreenSession> screen, sptr<ScreenSessionGroup> screenGroup);
 
     void AddScreenToGroup(sptr<ScreenSessionGroup> group,
         const std::vector<ScreenId>& addScreens, const std::vector<Point>& addChildPos,
-        std::map<ScreenId, bool>& removeChildResMap);
+        std::map<ScreenId, bool>& removeChildResMap, const RotationOption& rotationOption);
     bool CheckScreenInScreenGroup(sptr<ScreenSession> screen) const;
 
     DMError SetMirror(ScreenId screenId, std::vector<ScreenId> screens, DMRect mainScreenRegion,
-        bool forceMirror = false);
+        const RotationOption& rotationOption, bool forceMirror = false);
     DMError StopScreens(const std::vector<ScreenId>& screenIds, ScreenCombination stopCombination);
 
     void NotifyScreenConnected(sptr<ScreenInfo> screenInfo);
@@ -584,7 +586,9 @@ private:
     void NotifyCaptureStatusChanged();
     void NotifyCaptureStatusChanged(bool IsCaptured);
     DMError DoMakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
-        DMRect mainScreenRegion, ScreenId& screenGroupId, bool forceMirror = false);
+        DMRect mainScreenRegion, ScreenId& screenGroupId,
+        const RotationOption& rotationOption = {Rotation::ROTATION_0, false},
+        bool forceMirror = false);
     bool OnMakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
     bool OnRemoteDied(const sptr<IRemoteObject>& agent);
     std::string TransferTypeToString(ScreenType type) const;

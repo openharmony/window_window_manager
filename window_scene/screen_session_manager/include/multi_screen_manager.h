@@ -33,7 +33,7 @@ public:
     DMError UniqueSwitch(const std::vector<ScreenId>& screenIds, std::vector<DisplayId>& displayIds);
 
     DMError MirrorSwitch(const ScreenId mainScreenId, const std::vector<ScreenId>& screenIds, DMRect mainScreenRegion,
-        ScreenId& screenGroupId, bool forceMirror = false);
+        ScreenId& screenGroupId, const RotationOption& rotationOption, bool forceMirror = false);
 
     void MultiScreenModeChange(sptr<ScreenSession> mainSession, sptr<ScreenSession> secondarySession,
         const std::string& operateType);
@@ -61,10 +61,11 @@ private:
         std::vector<ScreenId>& physicalScreenIds, std::vector<ScreenId>& virtualScreenIds);
 
     DMError VirtualScreenMirrorSwitch(const ScreenId mainScreenId, const std::vector<ScreenId>& screenIds,
-        DMRect mainScreenRegion, ScreenId& screenGroupId, bool forceMirror = false);
+        DMRect mainScreenRegion, ScreenId& screenGroupId, const RotationOption& rotationOption,
+        bool forceMirror = false);
 
     DMError PhysicalScreenMirrorSwitch(const std::vector<ScreenId>& screenIds, DMRect mainScreenRegion,
-        bool forceMirror = false);
+        const RotationOption& rotationOption, bool forceMirror = false);
 
     DMError PhysicalScreenUniqueSwitch(const std::vector<ScreenId>& screenIds);
 
