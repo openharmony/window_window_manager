@@ -288,7 +288,8 @@ public:
     {
         return WMError::WM_OK;
     }
-    virtual WMError ConvertToRelativeCoordinateForFoldPC(const Rect& rect, Rect& newRect, DisplayId& newDisplayId) override
+    virtual WMError ConvertToRelativeCoordinateForFoldPC(
+        const Rect& rect, Rect& newRect, DisplayId& newDisplayId) override
     {
         return WMError::WM_OK;
     }
