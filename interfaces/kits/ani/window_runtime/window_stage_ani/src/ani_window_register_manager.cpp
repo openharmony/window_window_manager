@@ -325,12 +325,12 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowNoInteractionRegister(sptr<An
     constexpr ani_long secToMicrosecRatio = 1000;
     constexpr ani_long noInteractionMax = LLONG_MAX / secToMicrosecRatio;
     if (timeout <= 0 || (timeout > noInteractionMax)) {
-        TLOGE(WmsLogTag::DEFAULT, "invalid parameter: no-interaction-timeout %{public}" PRId64 " is not in "
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]invalid parameter: no-interaction-timeout %{public}" PRId64 " is not in "
             "(0s~%{public}" PRId64, timeout, noInteractionMax);
         return WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     thisListener->SetTimeout(timeout * secToMicrosecRatio);
-    return WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowNoInteractionListener(thisListener));
+    return AniWindowUtils::ToErrorCode(window->RegisterWindowNoInteractionListener(thisListener));
 }
 
 WmErrorCode AniWindowRegisterManager::ProcessScreenshotRegister(sptr<AniWindowListener> listener,
@@ -445,10 +445,10 @@ WmErrorCode AniWindowRegisterManager::RegisterListener(sptr<Window> window, cons
     ani_vm* vm = nullptr;
     ani_status aniRet = env->GetVM(&vm);
     if (aniRet != ANI_OK || vm == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]Get VM failed");
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]Get VM failed, ret: %{public}u", aniRet);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
-    sptr<AniWindowListener> windowManagerListener = new AniWindowListener(env, cbRef, caseType, vm);
+    sptr<AniWindowListener> windowManagerListener = new AniWindowListener(env, vm, cbRef, caseType);
     if (windowManagerListener == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI]New AniWindowListener failed");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
