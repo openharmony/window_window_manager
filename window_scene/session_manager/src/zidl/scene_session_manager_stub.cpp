@@ -1014,32 +1014,6 @@ int SceneSessionManagerStub::HandleUpdateSessionAvoidAreaListener(MessageParcel&
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleGetSessionSnapshot(MessageParcel& data, MessageParcel& reply)
-{
-    TLOGD(WmsLogTag::WMS_SYSTEM, "Handled!");
-    std::u16string deviceIdData;
-    if (!data.ReadString16(deviceIdData)) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "read deviceId fail");
-        return ERR_INVALID_DATA;
-    }
-    std::string deviceId = Str16ToStr8(deviceIdData);
-    int32_t persistentId = 0;
-    if (!data.ReadInt32(persistentId)) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "read persistentId fail");
-        return ERR_INVALID_DATA;
-    }
-    bool isLowResolution = false;
-    if (!data.ReadBool(isLowResolution)) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "read isLowResolution fail");
-        return ERR_INVALID_DATA;
-    }
-    std::shared_ptr<SessionSnapshot> snapshot = std::make_shared<SessionSnapshot>();
-    WSError ret = GetSessionSnapshot(deviceId, persistentId, *snapshot, isLowResolution);
-    reply.WriteParcelable(snapshot.get());
-    reply.WriteUint32(static_cast<uint32_t>(ret));
-    return ERR_NONE;
-}
-
 int SceneSessionManagerStub::HandleGetSessionSnapshotById(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_SYSTEM, "Handled!");
@@ -2506,6 +2480,33 @@ int SceneSessionManagerStub::HandleGetPiPSettingSwitchStatus(MessageParcel& data
         TLOGE(WmsLogTag::WMS_PIP, "Write errCode fail.");
         return ERR_INVALID_DATA;
     }
+    return ERR_NONE;
+}
+
+
+int SceneSessionManagerStub::HandleGetSessionSnapshot(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SYSTEM, "Handled!");
+    std::u16string deviceIdData;
+    if (!data.ReadString16(deviceIdData)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "read deviceId fail");
+        return ERR_INVALID_DATA;
+    }
+    std::string deviceId = Str16ToStr8(deviceIdData);
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "read persistentId fail");
+        return ERR_INVALID_DATA;
+    }
+    bool isLowResolution = false;
+    if (!data.ReadBool(isLowResolution)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "read isLowResolution fail");
+        return ERR_INVALID_DATA;
+    }
+    std::shared_ptr<SessionSnapshot> snapshot = std::make_shared<SessionSnapshot>();
+    WSError ret = GetSessionSnapshot(deviceId, persistentId, *snapshot, isLowResolution);
+    reply.WriteParcelable(snapshot.get());
+    reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
