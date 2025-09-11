@@ -46,6 +46,8 @@ static ani_status CvtDisplay(sptr<Display> display, ani_env* env, ani_object obj
 
 static ani_status GetStdString(ani_env *env, ani_string ani_str, std::string &result);
 
+static ani_status GetAniArrayInt(ani_env *env, ani_object arrayObj, std::vector<int32_t>& arrayNative);
+
 static ani_status NewAniObject(ani_env* env, ani_class cls, const char *signature, ani_object* result, ...);
 
 static ani_status NewAniObjectNoParams(ani_env* env, ani_class cls, ani_object* object);
