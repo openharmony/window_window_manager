@@ -401,7 +401,7 @@ void AniWindowListener::OnWindowNoInteractionCallback()
     TLOGI(WmsLogTag::WMS_EVENT, "[ANI]");
     auto task = [self = weakRef_, vm = vm_] () {
         auto thisListener = self.promote();
-        if (thisListener == nullptr || eng == nullptr || thisListener->aniCallback_ == nullptr) {
+        if (thisListener == nullptr || vm == nullptr || thisListener->aniCallback_ == nullptr) {
             TLOGE(WmsLogTag::WMS_EVENT, "[ANI]thisListener, vm or callback is nullptr!");
             return;
         }
