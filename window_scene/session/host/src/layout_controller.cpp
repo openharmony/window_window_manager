@@ -160,7 +160,7 @@ WSRect LayoutController::AdjustRectByAspectRatio(const WSRect& rect, const Windo
     }
     float vpr = display->GetVirtualPixelRatio();
     auto limits = sessionProperty_->GetWindowLimits();
-    SessionUtils::CalcFloatWindowRectLimits(limits, getSystemConfigFunc_().maxFloatingWindowSize_, vpr);
+    SessionUtils::CalcFloatWindowRectLimits(getSystemConfigFunc_().maxFloatingWindowSize_, vpr, limits);
     WSRect adjustedRect = SessionUtils::AdjustRectByAspectRatio(rect, limits, decoration, aspectRatio_);
     TLOGD(WmsLogTag::WMS_LAYOUT, "After adjustment, windowId: %{public}d, rect: %{public}s",
         windowId, adjustedRect.ToString().c_str());

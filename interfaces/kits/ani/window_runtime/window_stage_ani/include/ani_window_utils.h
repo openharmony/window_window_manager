@@ -317,7 +317,7 @@ public:
         std::map<WindowType, SystemBarProperty>& systemBarProperties);
 
     /**
-     * @brief Convert a WMError to its corresponding WmErrorCode.
+     * @brief Convert WMError to corresponding WmErrorCode.
      *
      * If the WMError is not found in the mapping, returns the given default code.
      *

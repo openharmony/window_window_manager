@@ -24,7 +24,7 @@ namespace SessionUtils {
 constexpr const char* SESSION_NAME_MARK_HEAD = "#";
 constexpr const char* SESSION_NAME_SEPARATOR = ":";
 
-inline void CalcFloatWindowRectLimits(WindowLimits& limits, uint32_t maxFloatingWindowSize, float vpr)
+inline void CalcFloatWindowRectLimits(uint32_t maxFloatingWindowSize, float vpr, WindowLimits& limits)
 {
     uint32_t maxWidth = (limits.maxWidth_ == 0 || limits.maxWidth_ >= INT32_MAX) ? INT32_MAX : limits.maxWidth_;
     uint32_t maxHeight = (limits.maxHeight_ == 0 || limits.maxHeight_ >= INT32_MAX) ? INT32_MAX : limits.maxHeight_;
