@@ -2457,14 +2457,15 @@ WSError SessionProxy::SetDecorVisible(bool isVisible)
         return WSError::WS_ERROR_IPC_FAILED;
     }
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option;
     int sendRet = remote->SendRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DECOR_VISIBLE), data, reply, option);
     if (sendRet != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_DECOR, "Failed to send request, error = %{public}d", sendRet);
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    return WSError::WS_OK;
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
 }
 
 WSError SessionProxy::AdjustKeyboardLayout(const KeyboardLayoutParams& params)
