@@ -149,19 +149,14 @@ HWTEST_F(SessionUtilsTest, TestAdjustLimitsByAspectRatio1, TestSize.Level1)
  */
 HWTEST_F(SessionUtilsTest, TestAdjustLimitsByAspectRatio2, TestSize.Level1)
 {
-    WindowLimits baseLimits(400, 400, 100, 100, FLT_MAX, 0.0f);
-    WindowDecoration noDecor {0, 0, 0, 0};
-
     // Case 5: With decoration (expand + trim check)
-    {
-        WindowLimits limits(500, 500, 100, 100, FLT_MAX, 0.0f);
-        WindowDecoration decor {10, 20, 10, 20};
-        auto adjusted = AdjustLimitsByAspectRatio(limits, decor, 1.0f);
-        EXPECT_EQ(adjusted.minWidth_, 100);
-        EXPECT_EQ(adjusted.minHeight_, 120);
-        EXPECT_EQ(adjusted.maxWidth_, 480);
-        EXPECT_EQ(adjusted.maxHeight_, 500);
-    }
+    WindowLimits limits(500, 500, 100, 100, FLT_MAX, 0.0f);
+    WindowDecoration decor {10, 20, 10, 20};
+    auto adjusted = AdjustLimitsByAspectRatio(limits, decor, 1.0f);
+    EXPECT_EQ(adjusted.minWidth_, 100);
+    EXPECT_EQ(adjusted.minHeight_, 120);
+    EXPECT_EQ(adjusted.maxWidth_, 480);
+    EXPECT_EQ(adjusted.maxHeight_, 500);
 }
 
 /**
