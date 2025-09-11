@@ -71,6 +71,7 @@ public:
     MOCK_METHOD(WSError, ProcessPointDownSession, (int32_t x, int32_t y), (override));
     MOCK_CONST_METHOD2(ConvertGlobalRectToRelative, WSRect(const WSRect& globalRect, DisplayId targetDisplayId));
     MOCK_METHOD1(SetIsShowDecorInFreeMultiWindow, WSError(bool isShow));
+    MOCK_METHOD(WSError, SetContentAspectRatio, (float ratio, bool isPersistent, bool needUpdateRect), (override));
 };
 } // namespace Rosen
 } // namespace OHOS

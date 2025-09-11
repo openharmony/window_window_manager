@@ -2609,6 +2609,32 @@ WMError WindowSceneSessionImpl::ResetAspectRatio()
     return static_cast<WMError>(hostSession->SetAspectRatio(0.0f));
 }
 
+WMError WindowSceneSessionImpl::SetContentAspectRatio(float ratio, bool isPersistent, bool needUpdateRect)
+{
+    auto windowId = GetWindowId();
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Only allowed for the main window, windowId: %{public}u", windowId);
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid session, windowId: %{public}u", windowId);
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    if (ratio == MathHelper::INF || ratio == MathHelper::NAG_INF || std::isnan(ratio) || MathHelper::NearZero(ratio)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid ratio: %{public}f, windowId: %{public}u", ratio, windowId);
+        return WMError::WM_ERROR_ILLEGAL_PARAM;
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT,
+        "windowId: %{public}u, ratio: %{public}f, isPersistent: %{public}d, needUpdateRect: %{public}d",
+        windowId, ratio, isPersistent, needUpdateRect);
+    if (hostSession->SetContentAspectRatio(ratio, isPersistent, needUpdateRect) != WSError::WS_OK) {
+        return WMError::WM_ERROR_ILLEGAL_PARAM;
+    }
+    return WMError::WM_OK;
+}
+
 /** @note @window.hierarchy */
 WMError WindowSceneSessionImpl::RaiseToAppTop()
 {

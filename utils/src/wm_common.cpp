@@ -62,13 +62,15 @@ const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
     {WMError::WM_ERROR_UI_EFFECT_ERROR,                WmErrorCode::WM_ERROR_UI_EFFECT_ERROR          },
 };
 
-WmErrorCode ConvertErrorToCode(WMError error)
+WmErrorCode ConvertErrorToCode(WMError error, WmErrorCode defaultCode)
 {
     auto iter = WM_JS_TO_ERROR_CODE_MAP.find(error);
     if (iter != WM_JS_TO_ERROR_CODE_MAP.end()) {
         return iter->second;
     }
-    TLOGE(WmsLogTag::DEFAULT, "not find error::%{public}d", static_cast<int32_t>(error));
-    return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+    TLOGE(WmsLogTag::DEFAULT,
+        "No mapping found for WMError: %{public}d, fallback to default WmErrorCode: %{public}d",
+        static_cast<int32_t>(error), static_cast<int32_t>(defaultCode));
+    return defaultCode;
 }
 }

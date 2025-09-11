@@ -2737,6 +2737,17 @@ public:
     virtual WMError SetAspectRatio(float ratio) { return WMError::WM_OK; }
 
     /**
+     * @brief Set content aspect ratio of the window.
+     *
+     * @param ratio The aspect ratio of window content (width divided by height).
+     * @param isPersistent Whether to persist the aspect ratio setting.
+     * @param needUpdateRect Whether to update the window rect after setting aspect ratio.
+     * @return WMError::WM_OK on success, or appropriate error code on failure.
+     */
+    virtual WMError SetContentAspectRatio(
+        float ratio, bool isPersistent, bool needUpdateRect) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Unset aspect ratio
      * @return WMError
      */

@@ -875,14 +875,21 @@ napi_value JsWindow::SetHandwritingFlag(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetAspectRatio(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetAspectRatio(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetContentAspectRatio(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetContentAspectRatio(env, info) : nullptr;
+}
+
 napi_value JsWindow::ResetAspectRatio(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnResetAspectRatio(env, info) : nullptr;
 }
@@ -1285,6 +1292,16 @@ napi_valuetype GetType(napi_env env, napi_value value)
     napi_valuetype res = napi_undefined;
     napi_typeof(env, value, &res);
     return res;
+}
+
+template <typename T>
+bool ConvertFromOptionalJsValue(napi_env env, napi_value jsValue, T& value, const T& defaultValue)
+{
+    if (GetType(env, jsValue) == napi_undefined) {
+        value = defaultValue;
+        return true;
+    }
+    return ConvertFromJsValue(env, jsValue, value);
 }
 
 napi_value JsWindow::OnShow(napi_env env, napi_callback_info info)
@@ -6915,6 +6932,63 @@ napi_value JsWindow::OnResetAspectRatio(napi_env env, napi_callback_info info)
     return result;
 }
 
+napi_value JsWindow::OnSetContentAspectRatio(napi_env env, napi_callback_info info)
+{
+    const std::string errMsgPrefix = "[window][setContentAspectRatio]msg: ";
+    auto logAndThrowError = [env, where = __func__, errMsgPrefix](WmErrorCode code, const std::string& msg) {
+        TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: %{public}s", where, msg.c_str());
+        return NapiThrowError(env, code, errMsgPrefix + msg);
+    };
+
+    size_t argc = THREE_PARAMS_SIZE;
+    napi_value argv[THREE_PARAMS_SIZE] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ONE_PARAMS_SIZE || argc > THREE_PARAMS_SIZE) {
+        return logAndThrowError(WmErrorCode::WM_ERROR_INVALID_PARAM, "Number of parameters is invalid");
+    }
+
+    double aspectRatio = 0.0;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], aspectRatio)) {
+        return logAndThrowError(WmErrorCode::WM_ERROR_INVALID_PARAM, "Failed to convert parameter to aspectRatio");
+    }
+
+    bool isPersistent = true;
+    if (argc >= TWO_PARAMS_SIZE && !ConvertFromOptionalJsValue(env, argv[INDEX_ONE], isPersistent, true)) {
+        return logAndThrowError(WmErrorCode::WM_ERROR_INVALID_PARAM, "Failed to convert parameter to isPersistent");
+    }
+
+    bool needUpdateRect = true;
+    if (argc == THREE_PARAMS_SIZE && !ConvertFromOptionalJsValue(env, argv[INDEX_TWO], needUpdateRect, true)) {
+        return logAndThrowError(WmErrorCode::WM_ERROR_INVALID_PARAM, "Failed to convert parameter to needUpdateRect");
+    }
+
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [windowToken = wptr<Window>(windowToken_), aspectRatio, isPersistent, needUpdateRect,
+                      env, napiAsyncTask, where = __func__, errMsgPrefix] {
+        auto window = windowToken.promote();
+        if (!window) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: Window is nullptr", where);
+            napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(
+                env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, errMsgPrefix + "Window is nullptr"));
+            return;
+        }
+        WMError ret = window->SetContentAspectRatio(aspectRatio, isPersistent, needUpdateRect);
+        auto it = WM_JS_TO_ERROR_CODE_MAP.find(ret);
+        WmErrorCode code = (it != WM_JS_TO_ERROR_CODE_MAP.end()) ? it->second : WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        if (code == WmErrorCode::WM_OK) {
+            napiAsyncTask->Resolve(env, NapiGetUndefined(env));
+        } else {
+            napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, code, errMsgPrefix + "Failed"));
+        }
+    };
+    if (napi_send_event(env, asyncTask, napi_eprio_high, __func__) != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(
+            env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, errMsgPrefix + "Failed to send event"));
+    }
+    return result;
+}
+
 napi_value JsWindow::OnMinimize(napi_env env, napi_callback_info info)
 {
     size_t argc = FOUR_PARAMS_SIZE;
@@ -9227,6 +9301,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setBackdropBlur", moduleName, JsWindow::SetBackdropBlur);
     BindNativeFunction(env, object, "setBackdropBlurStyle", moduleName, JsWindow::SetBackdropBlurStyle);
     BindNativeFunction(env, object, "setAspectRatio", moduleName, JsWindow::SetAspectRatio);
+    BindNativeFunction(env, object, "setContentAspectRatio", moduleName, JsWindow::SetContentAspectRatio);
     BindNativeFunction(env, object, "resetAspectRatio", moduleName, JsWindow::ResetAspectRatio);
     BindNativeFunction(env, object, "setWaterMarkFlag", moduleName, JsWindow::SetWaterMarkFlag);
     BindNativeFunction(env, object, "setHandwritingFlag", moduleName, JsWindow::SetHandwritingFlag);

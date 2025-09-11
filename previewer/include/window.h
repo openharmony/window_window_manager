@@ -419,6 +419,18 @@ public:
     virtual WMError NotifyMemoryLevel(int32_t level) = 0;
     virtual bool IsAllowHaveSystemSubWindow() = 0;
     virtual WMError SetAspectRatio(float ratio) = 0;
+
+    /**
+     * @brief Set content aspect ratio of the window.
+     *
+     * @param ratio The aspect ratio of window content (width divided by height).
+     * @param isPersistent Whether to persist the aspect ratio setting.
+     * @param needUpdateRect Whether to update the window rect after setting aspect ratio.
+     * @return WMError::WM_OK on success, or appropriate error code on failure.
+     */
+    virtual WMError SetContentAspectRatio(
+        float ratio, bool isPersistent, bool needUpdateRect) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
     virtual WMError ResetAspectRatio() = 0;
     virtual KeyboardAnimationConfig GetKeyboardAnimationConfig() = 0;
     virtual void SetNeedDefaultAnimation(bool needDefaultAnimation) = 0;
