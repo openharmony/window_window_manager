@@ -859,7 +859,7 @@ void NapiSetNamedProperty(napi_env env, napi_value objValue, sptr<DisplayInfo> i
         napi_set_named_property(env, objValue, "y", NapiGetUndefined(env));
     }
     napi_set_named_property(env, objValue, "sourceMode", CreateJsValue(env, info->GetDisplaySourceMode()));
-    napi_set_named_property(env, objValue, "supportedRefreshRate", CreateJsSupportedRefreshRateArray(
+    napi_set_named_property(env, objValue, "supportedRefreshRates", CreateJsSupportedRefreshRateArray(
         env, info->GetSupportedRefreshRate()));
 }
 
