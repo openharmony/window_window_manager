@@ -1249,12 +1249,17 @@ std::string ScreenSessionManagerClient::OnDumperClientScreenSessions()
 
 void ScreenSessionManagerClient::SetDefaultMultiScreenModeWhenSwitchUser()
 {
-    if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
+    wptr<IScreenSessionManager> screenSessionManagerWptr = screenSessionManager_;
+    auto task = [screenSessionManagerWptr] {
+        auto screenSessionManager = screenSessionManagerWptr.promote();
+        if (!screenSessionManager) {
+            TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
+            return;
+        }
+        screenSessionManager->SetDefaultMultiScreenModeWhenSwitchUser();
         return;
-    }
-    screenSessionManager_->SetDefaultMultiScreenModeWhenSwitchUser();
-    return;
+    };
+    ffrtQueueHelper_->SubmitTask(std::move(task));
 }
 
 void ScreenSessionManagerClient::NotifyExtendScreenCreateFinish()

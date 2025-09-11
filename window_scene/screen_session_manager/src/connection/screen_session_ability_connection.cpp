@@ -223,6 +223,10 @@ bool ScreenSessionAbilityConnection::ScreenSessionConnectExtension(const std::st
     TLOGI(WmsLogTag::DMS, "bundleName:%{public}s, abilityName:%{public}s", bundleName.c_str(), abilityName.c_str());
     OHOS::sptr<OHOS::ISystemAbilityManager> systemAbilityManager =
         OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (systemAbilityManager == nullptr) {
+        TLOGE(WmsLogTag::DMS, "GetSystemAbilityManager failed");
+        return false;
+    }
     OHOS::sptr<OHOS::IRemoteObject> remoteObject =
         systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     if (remoteObject == nullptr) {
