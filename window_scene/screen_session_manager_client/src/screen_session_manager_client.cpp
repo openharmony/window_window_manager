@@ -1259,7 +1259,7 @@ void ScreenSessionManagerClient::SetDefaultMultiScreenModeWhenSwitchUser()
         screenSessionManager->SetDefaultMultiScreenModeWhenSwitchUser();
         return;
     };
-    ffrtQueueHelper_->SubmitTask(task);
+    ffrtQueueHelper_->SubmitTask(std::move(task));
 }
 
 void ScreenSessionManagerClient::NotifyExtendScreenCreateFinish()
