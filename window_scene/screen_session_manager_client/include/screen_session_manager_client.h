@@ -26,6 +26,7 @@
 #include "display_change_info.h"
 #include "dm_common.h"
 #include "session/screen/include/screen_session.h"
+#include "session_manager/include/ffrt_queue_helper.h"
 #include "interfaces/include/ws_common.h"
 #include "wm_single_instance.h"
 #include "zidl/screen_session_manager_client_stub.h"
@@ -179,6 +180,8 @@ private:
     std::function<void()> switchingToAnotherUserFunc_ = nullptr;
 
     sptr<IScreenSessionManager> screenSessionManager_;
+
+    std::shared_ptr<FfrtQueueHelper> ffrtQueueHelper_ = std::make_shared<FfrtQueueHelper>();
 
     IScreenConnectionListener* screenConnectionListener_;
     sptr<IScreenConnectionChangeListener> screenConnectionChangeListener_;
