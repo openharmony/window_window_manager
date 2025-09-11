@@ -2388,6 +2388,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
     } else if (property == nullptr && SessionHelper::IsMainWindow(static_cast<WindowType>(sessionInfo.windowType_))) {
         sceneSession = new MainSession(sessionInfo, specificCb);
         TLOGI(WmsLogTag::WMS_MAIN, "Create MainSession, id: %{public}d", sceneSession->GetPersistentId());
+        AddRequestTaskInfo(sceneSession->GetPersistentId(), sessionInfo);
     } else if (property != nullptr && SessionHelper::IsSubWindow(property->GetWindowType())) {
         sceneSession = new SubSession(sessionInfo, specificCb);
         TLOGI(WmsLogTag::WMS_SUB, "Create SubSession, type: %{public}d", property->GetWindowType());
@@ -2858,6 +2859,7 @@ void SceneSessionManager::UpdateSceneSessionWant(const SessionInfo& sessionInfo)
             TLOGI(WmsLogTag::WMS_MAIN, "Get session id:%{public}d", sessionInfo.persistentId_);
             if (!CheckCollaboratorType(session->GetCollaboratorType())) {
                 session->SetSessionInfoWant(sessionInfo.want);
+                AddRequestTaskInfo(sessionInfo);
                 TLOGI(WmsLogTag::WMS_MAIN, "Want updated, id:%{public}d", sessionInfo.persistentId_);
             } else {
                 UpdateCollaboratorSessionWant(session, sessionInfo.persistentId_);
@@ -2882,7 +2884,7 @@ void SceneSessionManager::UpdateCollaboratorSessionWant(sptr<SceneSession>& sess
 }
 
 sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<SceneSession>& sceneSession,
-    int32_t requestId)
+    int32_t requestId, bool useRequestTaskInfo)
 {
     const auto& sessionInfo = sceneSession->GetSessionInfo();
     auto abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
@@ -2904,7 +2906,11 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     abilitySessionInfo->requestId = sessionInfo.requestId;
     abilitySessionInfo->reuseDelegatorWindow = sessionInfo.reuseDelegatorWindow;
     abilitySessionInfo->specifiedFlag = sessionInfo.specifiedFlag_;
-    if (sessionInfo.want != nullptr) {
+    std::shared_ptr<AAFwk::Want> requestWant = nullptr;
+    if (useRequestTaskInfo &&
+        (requestWant = GetRequestWantFromTaskInfoMap(sceneSession->GetPersistentId(), requestId)) != nullptr) {
+        abilitySessionInfo->want = *requestWant;
+    } else if (sessionInfo.want != nullptr) {
         abilitySessionInfo->want = sessionInfo.GetWantSafely();
     } else {
         abilitySessionInfo->want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_,
@@ -3000,6 +3006,7 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
             sceneSession->SetExitSplitOnBackground(false);
         }
         abilityInfoMap_.clear(); // clear cache after terminate
+        RemoveRequestTaskInfo(sceneSession->GetPersistentId(), requestId);
         if (!isValid) {
             OHOS::HiviewDFX::HiTraceChain::End(hiTraceId);
         }
@@ -3012,9 +3019,10 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
 }
 
 void SceneSessionManager::NotifyAmsPendingSessionWhenFail(uint32_t resultCode, std::string resultMessage,
-        int32_t requestId)
+        int32_t requestId, int32_t persistentId)
 {
     TLOGE(WmsLogTag::WMS_LIFE, "failed, requestId:%{public}d", requestId);
+    RemoveRequestTaskInfo(persistentId, requestId);
     ffrtQueueHelper_->SubmitTask([requestId]{
          AAFwk::AbilityManagerClient::GetInstance()->NotifyStartupExceptionBySCB(requestId);
     });
@@ -3147,12 +3155,12 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
             exceptionInfo.needRemoveSession = true;
             sceneSession->NotifySessionExceptionInner(SetAbilitySessionInfo(sceneSession), exceptionInfo);
             NotifyAmsPendingSessionWhenFail(static_cast<uint32_t>(RequestResultCode::FAIL),
-                "", sceneSession->GetSessionInfo().requestId);
+                "", sceneSession->GetSessionInfo().requestId, sceneSession->GetPersistentId());
             return WSError::WS_ERROR_PRE_HANDLE_COLLABORATOR_FAILED;
         }
     }
     sceneSession->NotifyActivation();
-    auto sceneSessionInfo = SetAbilitySessionInfo(sceneSession, requestId);
+    auto sceneSessionInfo = SetAbilitySessionInfo(sceneSession, requestId, true);
     sceneSessionInfo->isNewWant = isNewActive;
     if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
         sceneSessionInfo->want.SetParam(AncoConsts::ANCO_MISSION_ID, sceneSessionInfo->persistentId);
@@ -3216,6 +3224,70 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         sceneSession->UpdatePrivacyModeControlInfo();
     }
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::AddRequestTaskInfo(const SessionInfo& sessionInfo) {
+    AddRequestTaskInfo(sessionInfo.persistentId_, sessionInfo);
+}
+ 
+void SceneSessionManager::AddRequestTaskInfo(int32_t persistentId, const SessionInfo& sessionInfo) {
+    if (sessionInfo.requestId < MIN_REQUEST_ID_FROM_AMS ||
+        persistentId == INVALID_SESSION_ID ||
+        sessionInfo.want == nullptr) {
+        return;
+    }
+    AAFwk::Want wantTmp = sessionInfo.GetWantSafely();
+    std::lock_guard<std::mutex> lock(requestTaskInfoMapMutex_);
+    if (requestTaskInfoMap.find(persistentId) == requestTaskInfoMap.end()) {
+        requestTaskInfoMap.emplace(persistentId, std::make_shared<RequestTaskInfo>());
+    }
+    auto& requestIdToWantMap = requestTaskInfoMap[persistentId]->requestIdToWantMap;
+    requestIdToWantMap[sessionInfo.requestId] = wantTmp;
+    TLOGI(WmsLogTag::WMS_LIFE, "persistentId:%{public}d, requestId:%{public}d, "
+        "infoMap size:%{public}lu, wantMap size:%{public}lu",
+        persistentId, sessionInfo.requestId, requestTaskInfoMap.size(), requestIdToWantMap.size());
+}
+ 
+void SceneSessionManager::RemoveRequestTaskInfo(int32_t persistentId, int32_t requestId) {
+    if (requestId < MIN_REQUEST_ID_FROM_AMS || persistentId == INVALID_SESSION_ID) {
+        return;
+    }
+    std::lock_guard<std::mutex> lock(requestTaskInfoMapMutex_);
+    if (requestTaskInfoMap.find(persistentId) == requestTaskInfoMap.end()) {
+        return;
+    }
+    requestTaskInfoMap[persistentId]->requestIdToWantMap.erase(requestId);
+    TLOGI(WmsLogTag::WMS_LIFE, "persistentId:%{public}d, requestId:%{public}d, "
+        "infoMap size:%{public}lu, wantMap size:%{public}lu",
+        persistentId, requestId, requestTaskInfoMap.size(),
+        requestTaskInfoMap[persistentId]->requestIdToWantMap.size());
+}
+
+void SceneSessionManager::ClearRequestTaskInfo(int32_t persistentId) {
+    if (persistentId == INVALID_SESSION_ID) {
+        return;
+    }
+    std::lock_guard<std::mutex> lock(requestTaskInfoMapMutex_);
+    requestTaskInfoMap.erase(persistentId);
+    TLOGI(WmsLogTag::WMS_LIFE, "persistentId:%{public}d", persistentId);
+}
+
+std::shared_ptr<AAFwk::Want> SceneSessionManager::GetRequestWantFromTaskInfoMap(
+    int32_t persistentId, int32_t requestId) {
+    if (requestId < MIN_REQUEST_ID_FROM_AMS || persistentId == INVALID_SESSION_ID) {
+        return nullptr;
+    }
+    std::lock_guard<std::mutex> lock(requestTaskInfoMapMutex_);
+    if (requestTaskInfoMap.find(persistentId) == requestTaskInfoMap.end()) {
+        return nullptr;
+    }
+    auto& requestIdToWantMap = requestTaskInfoMap[persistentId]->requestIdToWantMap;
+    if (requestIdToWantMap.find(requestId) == requestIdToWantMap.end()) {
+        return nullptr;
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "exsit, persistentId:%{public}d, requestId:%{public}d",
+        persistentId, requestId);
+    return std::make_shared<AAFwk::Want>(requestIdToWantMap[requestId]);
 }
 
 void SceneSessionManager::NotifyCollaboratorAfterStart(sptr<SceneSession>& sceneSession,
@@ -3691,6 +3763,7 @@ WSError SceneSessionManager::RequestSceneSessionDestructionInner(sptr<SceneSessi
         sceneSession->ResetSessionInfoResultCode();
         sceneSession->EditSessionInfo().isSetStartWindowType_ = false;
     }
+    ClearRequestTaskInfo(persistentId);
     NotifySessionForCallback(sceneSession, needRemoveSession);
     // Clear js cb map if needed.
     sceneSession->ClearJsSceneSessionCbMap(needRemoveSession);
@@ -10070,12 +10143,13 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
         auto persistentId = sceneSession->GetPersistentId();
         if (!GetSceneSession(persistentId)) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: session is invalid, id:%{public}d", where, persistentId);
+            RemoveRequestTaskInfo(persistentId, requestId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         const auto& sessionInfo = sceneSession->GetSessionInfo();
         TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s: state:%{public}d, id:%{public}d",
             where, sessionInfo.callState_, persistentId);
-        auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession, requestId);
+        auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession, requestId, true);
         bool isColdStart = false;
         AAFwk::AbilityManagerClient::GetInstance()->CallUIAbilityBySCB(abilitySessionInfo, isColdStart);
         CloseAllFd(sessionInfo.want);
@@ -10086,6 +10160,7 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
             sceneSession->ResetSessionConnectState();
             sceneSession->UpdatePrivacyModeControlInfo();
         }
+        RemoveRequestTaskInfo(persistentId, requestId);
         return WSError::WS_OK;
     };
     std::string taskName = "RequestSceneSessionByCall:PID:" +
