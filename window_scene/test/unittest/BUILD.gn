@@ -397,7 +397,8 @@ ohos_unittest("ws_session_test") {
   defines = []
   if (window_manager_feature_asbng_path_enable) {
     defines += [ "WINDOW_ATOMIC_SERVICE_ATTRIBUTION_ENABLE" ]
-    cflags += [ "-DACE_ENGINE_PLUGIN_PATH=\"${window_manager_feature_asbng_path}\"" ]
+    cflags +=
+        [ "-DACE_ENGINE_PLUGIN_PATH=\"${window_manager_feature_asbng_path}\"" ]
   }
 }
 
@@ -720,7 +721,8 @@ ohos_unittest("ws_ssmgr_specific_window_test") {
 ohos_unittest("ws_scene_session_manager_proxy_test") {
   module_out_path = module_out_path
 
-  configs = [ "${window_base_path}/window_scene/session:ui_effect_public_config" ]
+  configs =
+      [ "${window_base_path}/window_scene/session:ui_effect_public_config" ]
 
   sources = [
     "../mock/mock_message_parcel.cpp",
@@ -850,7 +852,8 @@ ohos_unittest("ws_scene_session_manager_stub_test") {
 ohos_unittest("ws_scene_session_manager_stub_test2") {
   module_out_path = module_out_path
 
-  configs = [ "${window_base_path}/window_scene/session:ui_effect_public_config" ]
+  configs =
+      [ "${window_base_path}/window_scene/session:ui_effect_public_config" ]
 
   sources = [
     "${window_base_path}/window_scene/test/mock/mock_message_parcel.cpp",
@@ -948,7 +951,8 @@ ohos_unittest("ws_scene_session_lifecycle_test") {
   defines = []
   if (window_manager_feature_asbng_path_enable) {
     defines += [ "WINDOW_ATOMIC_SERVICE_ATTRIBUTION_ENABLE" ]
-    cflags += [ "-DACE_ENGINE_PLUGIN_PATH=\"${window_manager_feature_asbng_path}\"" ]
+    cflags +=
+        [ "-DACE_ENGINE_PLUGIN_PATH=\"${window_manager_feature_asbng_path}\"" ]
   }
 }
 

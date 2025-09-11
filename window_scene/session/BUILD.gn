@@ -36,14 +36,13 @@ config("session_public_config") {
   defines = []
   if (window_manager_feature_asbng_path_enable) {
     defines += [ "WINDOW_ATOMIC_SERVICE_ATTRIBUTION_ENABLE" ]
-    cflags += [ "-DACE_ENGINE_PLUGIN_PATH=\"${window_manager_feature_asbng_path}\"" ]
+    cflags +=
+        [ "-DACE_ENGINE_PLUGIN_PATH=\"${window_manager_feature_asbng_path}\"" ]
   }
 }
 
 config("ui_effect_public_config") {
-  include_dirs = [
-    "${window_base_path}/window_scene/session/host/include",
-  ]
+  include_dirs = [ "${window_base_path}/window_scene/session/host/include" ]
 }
 
 ohos_source_set("ui_effect_controller_client") {
@@ -59,10 +58,8 @@ ohos_source_set("ui_effect_controller_client") {
     "host/src/ui_effect_controller_client_stub.cpp",
     "host/src/ui_effect_controller_proxy.cpp",
   ]
-  public_configs = [":ui_effect_public_config"]
-  public_deps = [
-    "${window_base_path}/utils:ui_effect_controller_common",
-  ]
+  public_configs = [ ":ui_effect_public_config" ]
+  public_deps = [ "${window_base_path}/utils:ui_effect_controller_common" ]
   part_name = "window_manager"
   subsystem_name = "window"
 }
@@ -80,12 +77,10 @@ ohos_source_set("ui_effect_controller") {
     "host/src/ui_effect_controller_client_proxy.cpp",
     "host/src/ui_effect_controller_stub.cpp",
   ]
-  public_configs = [":ui_effect_public_config"]
-  public_deps = ["${window_base_path}/utils:ui_effect_controller_common"]
+  public_configs = [ ":ui_effect_public_config" ]
+  public_deps = [ "${window_base_path}/utils:ui_effect_controller_common" ]
 
-  deps = [
-    "${window_base_path}/window_scene/common:window_scene_common",
-  ]
+  deps = [ "${window_base_path}/window_scene/common:window_scene_common" ]
   part_name = "window_manager"
   subsystem_name = "window"
 }
