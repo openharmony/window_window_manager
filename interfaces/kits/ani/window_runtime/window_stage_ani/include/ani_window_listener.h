@@ -55,8 +55,8 @@ class AniWindowListener : public IWindowChangeListener,
                         public IDisplayIdChangeListener,
                         public IWindowRotationChangeListener {
 public:
-    AniWindowListener(ani_env* env, ani_ref callback, CaseType caseType, ani_vm* vm)
-        : env_(env), aniCallback_(callback), caseType_(caseType), vm_(vm),
+    AniWindowListener(ani_env* env, ani_vm* vm, ani_ref callback, CaseType caseType)
+        : env_(env), vm_(vm), aniCallback_(callback), caseType_(caseType),
         weakRef_(wptr<AniWindowListener> (this)) {}
     ~AniWindowListener();
     ani_ref GetAniCallback() const { return aniCallback_; }
@@ -109,9 +109,9 @@ private:
     void LifeCycleCallback(LifeCycleEventType eventType);
     int64_t noInteractionTimeout_ = 0;
     ani_env* env_ = nullptr;
+    ani_vm* vm_ = nullptr;
     ani_ref aniCallback_;
     CaseType caseType_ = CaseType::CASE_WINDOW;
-    ani_vm* vm_ = nullptr;
     wptr<AniWindowListener> weakRef_ = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;
     DEFINE_VAR_DEFAULT_FUNC_SET(bool, IsDeprecatedInterface, isDeprecatedInterface, false)
