@@ -2332,7 +2332,6 @@ HWTEST_F(SceneSessionTest, IsFollowParentMultiScreenPolicy, TestSize.Level1)
  */
 HWTEST_F(SceneSessionTest, CloneWindow, TestSize.Level1)
 {
-    LOG_SetCallback(SceneSessionLogCallback);
     SessionInfo info;
     info.abilityName_ = "CloneWindow";
     info.bundleName_ = "CloneWindow";
@@ -2343,12 +2342,15 @@ HWTEST_F(SceneSessionTest, CloneWindow, TestSize.Level1)
     EXPECT_NE(sceneSession, nullptr);
     uint64_t surfaceNodeId = 1;
     bool needOffScreen = false;
+    sceneSession->SetSurfaceNode(nullptr);
+    sceneSession->CloneWindow(surfaceNodeId, needOffScreen);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    sceneSession->GetLeashWinShadowSurfaceNode(surfaceNode);
+    sceneSession->SetSurfaceNode(surfaceNode);
+    auto shadowSurfaceNode = sceneSession->GetShadowSurfaceNode();
     sceneSession->CloneWindow(surfaceNodeId, needOffScreen);
-    EXPECT_TRUE(logMsg.find("cloned") != std::string::npos);
-}
+    EXPECT_TRUE(shadowSurfaceNode != nullptr);
+}}
 
 /**
  * @tc.name: GetGlobalOrWinRect

@@ -1265,6 +1265,7 @@ HWTEST_F(SceneSessionTest6, SetSupportEnterWaterfallMode, Function | SmallTest |
 {
     SessionInfo info;
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     session->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     session->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     session->SetSupportEnterWaterfallMode(true);

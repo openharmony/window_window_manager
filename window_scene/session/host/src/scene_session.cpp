@@ -4882,10 +4882,10 @@ void SceneSession::CloneWindow(NodeId surfaceNodeId, bool needOffScreen)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::CloneWindow");
     AutoRSTransaction trans(GetRSUIContext());
-    if (auto leashWinShadowSurfaceNode = GetLeashWinShadowSurfaceNode()) {
+    if (auto shadowSurfaceNode = GetShadowSurfaceNode()) {
         TLOGI(WmsLogTag::WMS_PC, "%{public}s this: %{public}" PRIu64 " cloned: %{public}" PRIu64,
-            leashWinShadowSurfaceNode->GetName().c_str(), leashWinShadowSurfaceNode->GetId(), surfaceNodeId);
-        leashWinShadowSurfaceNode->SetClonedNodeInfo(surfaceNodeId, needOffScreen);
+            shadowSurfaceNode->GetName().c_str(), shadowSurfaceNode->GetId(), surfaceNodeId);
+        shadowSurfaceNode->SetClonedNodeInfo(surfaceNodeId, needOffScreen);
     }
 }
 
