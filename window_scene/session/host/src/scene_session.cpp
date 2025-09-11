@@ -432,9 +432,10 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
             return ret;
         }
         session->NotifySingleHandTransformChange(session->GetSingleHandTransform());
-        auto leashWinSurfaceNode = session->GetLeashWinSurfaceNode();
+        auto leashWinSurfaceNode = session->GetLeashWinShadowSurfaceNode();
         if (leashWinSurfaceNode && sessionProperty) {
             bool lastPrivacyMode = sessionProperty->GetPrivacyMode() || sessionProperty->GetSystemPrivacyMode();
+            AutoRSTransaction trans(session->GetRSLeashWinShadowContext());
             leashWinSurfaceNode->SetSecurityLayer(lastPrivacyMode);
         }
         session->MarkAvoidAreaAsDirty();
@@ -450,8 +451,7 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
             session->specificCallback_->onHandleSecureSessionShouldHide_(session);
             session->UpdateGestureBackEnabled();
         } else {
-            TLOGNI(WmsLogTag::WMS_LIFE,
-                "%{public}s foreground specific callback does not take effect, callback function null", where);
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s foreground specific callback is null", where);
         }
         auto leashWinShadowSurfaceNode = session->GetLeashWinShadowSurfaceNode();
         if (session->isUIFirstEnabled_ && leashWinShadowSurfaceNode) {
@@ -4693,7 +4693,7 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "property is null");
         return;
     }
-    auto surfaceNode = GetSurfaceNode();
+    auto surfaceNode = GetShadowSurfaceNode();
     if (!surfaceNode) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode_ is null");
         return;
@@ -4707,10 +4707,11 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
     property->SetPrivacyMode(isPrivacy);
     property->SetSystemPrivacyMode(isPrivacy);
     {
-        AutoRSTransaction trans(GetRSUIContext());
+        AutoRSTransaction trans(GetRSShadowContext());
         surfaceNode->SetSecurityLayer(isPrivacy);
-        auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
+        auto leashWinSurfaceNode = GetLeashWinShadowSurfaceNode();
         if (leashWinSurfaceNode != nullptr) {
+            AutoRSTransaction leashTrans(GetRSLeashWinShadowContext());
             leashWinSurfaceNode->SetSecurityLayer(isPrivacy);
         }
     }
@@ -4758,7 +4759,7 @@ WMError SceneSession::SetSnapshotSkip(bool isSkip)
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "property is null");
         return WMError::WM_ERROR_DESTROYED_OBJECT;
     }
-    auto surfaceNode = GetSurfaceNode();
+    auto surfaceNode = GetShadowSurfaceNode();
     if (!surfaceNode) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode_ is null");
         return WMError::WM_ERROR_DESTROYED_OBJECT;
@@ -4772,10 +4773,11 @@ WMError SceneSession::SetSnapshotSkip(bool isSkip)
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, isSkip: %{public}d", GetWindowId(), isSkip);
     property->SetSnapshotSkip(isSkip);
     {
-        AutoRSTransaction trans(GetRSUIContext());
+        AutoRSTransaction trans(GetRSShadowContext());
         surfaceNode->SetSkipLayer(isSkip);
-        auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
+        auto leashWinSurfaceNode = GetLeashWinShadowSurfaceNode();
         if (leashWinSurfaceNode != nullptr) {
+            AutoRSTransaction leashTrans(GetRSLeashWinShadowContext());
             leashWinSurfaceNode->SetSkipLayer(isSkip);
         }
     }
@@ -4784,7 +4786,7 @@ WMError SceneSession::SetSnapshotSkip(bool isSkip)
 
 void SceneSession::SetWatermarkEnabled(const std::string& watermarkName, bool isEnabled)
 {
-    auto surfaceNode = GetSurfaceNode();
+    auto surfaceNode = GetShadowSurfaceNode();
     if (!surfaceNode) {
         TLOGE(WmsLogTag::DEFAULT, "surfaceNode is null");
         return;
@@ -4792,9 +4794,10 @@ void SceneSession::SetWatermarkEnabled(const std::string& watermarkName, bool is
     TLOGI(WmsLogTag::DEFAULT, "watermarkName:%{public}s, isEnabled:%{public}d, wid:%{public}d",
         watermarkName.c_str(), isEnabled, GetPersistentId());
     {
-        AutoRSTransaction trans(GetRSUIContext());
+        AutoRSTransaction trans(GetRSShadowContext());
         surfaceNode->SetWatermarkEnabled(watermarkName, isEnabled);
-        if (auto leashWinSurfaceNode = GetLeashWinSurfaceNode()) {
+        if (auto leashWinSurfaceNode = GetLeashWinShadowSurfaceNode()) {
+            AutoRSTransaction leashTrans(GetRSLeashWinShadowContext());
             leashWinSurfaceNode->SetWatermarkEnabled(watermarkName, isEnabled);
         }
     }
@@ -8651,7 +8654,7 @@ uint32_t SceneSession::GetMaxSubWindowLevel() const
 
 void SceneSession::SetColorSpace(ColorSpace colorSpace)
 {
-    auto surfaceNode = GetSurfaceNode();
+    auto surfaceNode = GetShadowSurfaceNode();
     if (!surfaceNode) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode is invalid");
         return;
@@ -8662,7 +8665,7 @@ void SceneSession::SetColorSpace(ColorSpace colorSpace)
         colorGamut = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DCI_P3;
     }
     {
-        AutoRSTransaction trans(GetRSUIContext());
+        AutoRSTransaction trans(GetRSShadowContext());
         surfaceNode->SetColorSpace(colorGamut);
     }
 }
