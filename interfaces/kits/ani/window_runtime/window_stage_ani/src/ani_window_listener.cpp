@@ -56,14 +56,20 @@ void AniWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
     }
     currRect_ = rect;
 
-    auto task = [self = weakRef_, rect, eng = env_] () {
+    auto task = [self = weakRef_, rect, eng = vm_] () {
         auto thisListener = self.promote();
         if (thisListener == nullptr || eng == nullptr || thisListener->aniCallback_ == nullptr) {
             TLOGE(WmsLogTag::DEFAULT, "[ANI]this listener, eng or callback is nullptr");
             return;
         }
-        AniWindowUtils::CallAniFunctionVoid(eng, "L@ohos/window/window;", "runWindowSizeCallback",
-            nullptr, thisListener->aniCallback_, AniWindowUtils::CreateAniSize(eng, rect.width_, rect.height_));
+        ani_env* env = nullptr;
+        ani_status ret = eng->GetEnv(ANI_VERSION_1, &env);
+        if (ret != ANI_OK || env == nullptr) {
+            TLOGE(WmsLogTag::DEFAULT, "[ANI]Get env failed, ret:%{public}d", ret);
+            return;
+        }
+        AniWindowUtils::CallAniFunctionVoid(env, "L@ohos/window/window;", "runWindowSizeCallback",
+            nullptr, thisListener->aniCallback_, AniWindowUtils::CreateAniSize(env, rect.width_, rect.height_));
     };
     if (!eventHandler_) {
         TLOGE(WmsLogTag::DEFAULT, "get main event handler failed!");
@@ -486,14 +492,20 @@ void AniWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
         TLOGD(WmsLogTag::WMS_LAYOUT, "drag end change to move event");
         rectChangeReason = RectChangeReason::MOVE;
     }
-    auto task = [self = weakRef_, rect, rectChangeReason, eng = env_] () {
+    auto task = [self = weakRef_, rect, rectChangeReason, eng = vm_] () {
         auto thisListener = self.promote();
         if (thisListener == nullptr || eng == nullptr || thisListener->aniCallback_ == nullptr) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI]this listener, eng or callback is nullptr");
             return;
         }
-        AniWindowUtils::CallAniFunctionVoid(eng, "L@ohos/window/window;", "runWindowRectChangeCallback",
-            nullptr, thisListener->aniCallback_, AniWindowUtils::CreateAniRect(eng, rect),
+        ani_env* env = nullptr;
+        ani_status ret = eng->GetEnv(ANI_VERSION_1, &env);
+        if (ret != ANI_OK || env == nullptr) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI]Get env failed, ret:%{public}d", ret);
+            return;
+        }
+        AniWindowUtils::CallAniFunctionVoid(env, "L@ohos/window/window;", "runWindowRectChangeCallback",
+            nullptr, thisListener->aniCallback_, AniWindowUtils::CreateAniRect(env, rect),
             static_cast<ani_int>(rectChangeReason));
     };
     if (!eventHandler_) {
