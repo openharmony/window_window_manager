@@ -378,7 +378,9 @@ private:
     void RegisterSceneSessionDestructCallback();
     void OnSceneSessionDestruct(int32_t persistentId);
     void RegisterTransferSessionToTargetScreenCallback();
-    void OnTransferSessionToTargetScreen(const TransferSessionInfo& info, const uint64_t fromScreenId);
+    void OnTransferSessionToTargetScreen(const TransferSessionInfo& info);
+    static napi_value NotifySessionTransferToTargetScreenEvent(napi_env env, napi_callback_info info);
+    napi_value OnNotifySessionTransferToTargetScreenEvent(napi_env env, napi_callback_info info);
     static napi_value UpdateRecentMainSessionInfos(napi_env env, napi_callback_info info);
 
     napi_env env_;
