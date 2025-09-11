@@ -2350,7 +2350,7 @@ HWTEST_F(SceneSessionTest, CloneWindow, TestSize.Level1)
     auto shadowSurfaceNode = sceneSession->GetShadowSurfaceNode();
     sceneSession->CloneWindow(surfaceNodeId, needOffScreen);
     EXPECT_TRUE(shadowSurfaceNode != nullptr);
-}}
+}
 
 /**
  * @tc.name: GetGlobalOrWinRect
