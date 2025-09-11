@@ -448,7 +448,7 @@ WmErrorCode AniWindowRegisterManager::RegisterListener(sptr<Window> window, cons
         TLOGE(WmsLogTag::DEFAULT, "[ANI]Get VM failed, ret: %{public}u", aniRet);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
-    sptr<AniWindowListener> windowManagerListener = new AniWindowListener(env, vm, cbRef, caseType);
+    auto windowManagerListener = sptr<AniWindowListener>::MakeSptr(env, vm, cbRef, caseType);
     if (windowManagerListener == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI]New AniWindowListener failed");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
