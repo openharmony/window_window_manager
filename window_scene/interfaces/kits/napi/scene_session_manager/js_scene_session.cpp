@@ -4590,6 +4590,16 @@ void JsSceneSession::ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<S
 
 sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info)
 {
+    bool setSessionFlag = false;
+    sptr<SceneSession> ret = GenSceneSession(info, setSessionFlag);
+    if (setSessionFlag) {
+        SceneSessionManager::GetInstance().AddRequestTaskInfo(ret->GetPersistentId(), info);
+    }
+    return ret;
+}
+ 
+sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info, bool& setSessionFlag)
+{
     sptr<SceneSession> sceneSession = nullptr;
     if (info.persistentId_ == 0) {
         auto result = SceneSessionManager::GetInstance().CheckIfReuseSession(info);
@@ -4617,6 +4627,7 @@ sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info)
             }
         } else {
             sceneSession->SetSessionInfo(info);
+            setSessionFlag = true;
         }
         info.persistentId_ = sceneSession->GetPersistentId();
         sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
@@ -4633,6 +4644,7 @@ sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info)
             sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
         } else {
             sceneSession->SetSessionInfo(info);
+            setSessionFlag = true;
         }
     }
     return sceneSession;
