@@ -7432,15 +7432,18 @@ bool SceneSession::IsTemporarilyShowWhenLocked() const
 
 void SceneSession::SetSkipDraw(bool skip)
 {
-    auto surfaceNode = GetSurfaceNode();
-    if (!surfaceNode) {
-        WLOGFE("surfaceNode_ is null");
+    auto shadowSurfaceNode = GetShadowSurfaceNode();
+    if (!shadowSurfaceNode) {
+        WLOGFE("shadowSurfaceNode is null");
         return;
     }
-    AutoRSTransaction trans(GetRSUIContext());
-    surfaceNode->SetSkipDraw(skip);
-    if (auto leashWinSurfaceNode = GetLeashWinSurfaceNode()) {
-        leashWinSurfaceNode->SetSkipDraw(skip);
+    {
+        AutoRSTransaction trans(GetRSShadowContext());
+        shadowSurfaceNode->SetSkipDraw(skip);
+    }
+    if (auto leashShadowSurfaceNode = GetLeashWinShadowSurfaceNode()) {
+        AutoRSTransaction trans(GetRSLeashWinShadowContext());
+        leashShadowSurfaceNode->SetSkipDraw(skip);
     }
 }
 
