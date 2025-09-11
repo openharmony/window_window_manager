@@ -5026,7 +5026,7 @@ napi_value JsSceneSessionManager::OnNotifySessionTransferToTargetScreenEvent(nap
 {
     size_t argc = ARGC_FOUR;
     napi_value argv[ARGC_FOUR] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argc, nullptr, nullptr);
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARGC_FOUR) {
         TLOGE(WmsLogTag::WMS_LIFE, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
@@ -5035,40 +5035,39 @@ napi_value JsSceneSessionManager::OnNotifySessionTransferToTargetScreenEvent(nap
     }
     int32_t persistentId;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], persistentId)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert persistentId");
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to persistentId");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     uint32_t resultCode;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], resultCode)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert resultCode");
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to resultCode");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     int64_t fromScreenId;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_TWO], fromScreenId) || fromScreenId < 0 ) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert fromScreenId");
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_TWO], fromScreenId) || fromScreenId < 0) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to fromScreenId");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     int64_t toScreenId;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_THREE], toScreenId) || toScreenId < 0 ) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert toScreenId");
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_THREE], toScreenId) || toScreenId < 0) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to toScreenId");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    TLOGI(WmsLogTag::WMS_LIFE,
-        "persistentId: %{public}d, resultCode: %{public}d, fromScreenId: %{public}ld, toScreenId: %{public}ld",
+    TLOGI(WmsLogTag::WMS_LIFE, "persistentId: %{public}d, resultCode: %{public}d, "
+        "fromScreenId: %{public}" PRId64 " , toScreenId: %{public}" PRId64,
         persistentId, resultCode, fromScreenId, toScreenId);
     SceneSessionManager::GetInstance().NotifySessionTransferToTargetScreenEvent(
         persistentId, resultCode, static_cast<uint64_t>(fromScreenId), static_cast<uint64_t>(toScreenId));
     return NapiGetUndefined(env);
 }
-
 
 napi_value JsSceneSessionManager::OnSupportFollowParentWindowLayout(napi_env env, napi_callback_info info)
 {
