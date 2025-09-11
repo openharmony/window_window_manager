@@ -442,7 +442,13 @@ WmErrorCode AniWindowRegisterManager::RegisterListener(sptr<Window> window, cons
         TLOGE(WmsLogTag::DEFAULT, "[ANI]create global ref fail");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     };
-    sptr<AniWindowListener> windowManagerListener = new AniWindowListener(env, cbRef, caseType);
+    ani_vm* vm = nullptr;
+    ani_status aniRet = env->GetVM(&vm);
+    if (aniRet != ANI_OK || vm == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]Get VM failed");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<AniWindowListener> windowManagerListener = new AniWindowListener(env, cbRef, caseType, vm);
     if (windowManagerListener == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI]New AniWindowListener failed");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
