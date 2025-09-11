@@ -4589,6 +4589,13 @@ public:
     {
         return false;
     }
+
+    /**
+     * @brief notify window is full screen in force split mode.
+     *
+     * @param shouldFullScreen true means full screen, false means force split.
+     */
+    virtual void NotifyIsFullScreenInForceSplitMode(bool isFullScreen) {}
 };
 }
 }
