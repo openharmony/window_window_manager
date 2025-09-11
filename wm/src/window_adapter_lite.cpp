@@ -166,18 +166,18 @@ bool WindowAdapterLite::InitSSMProxy()
         return true;
     }
     windowManagerServiceProxy_ = SessionManagerLite::GetInstance(userId_)->GetSceneSessionManagerLiteProxy();
-    if (!windowManagerServiceProxy_ || !windowManagerServiceProxy_->AsObject()) {
-        WLOGFE("Failed to get scene session manager lite proxy");
-        return false;
-    }
-    wmsDeath_ = new (std::nothrow) WMSDeathRecipient(userId_);
-    if (!wmsDeath_) {
-        WLOGFE("Failed to create death recipient WMSDeathRecipient");
+    if (!windowManagerServiceProxy_) {
+        TLOGE(WmsLogTag::WMS_SCB, "windowManagerServiceProxy_ is null");
         return false;
     }
     sptr<IRemoteObject> remoteObject = windowManagerServiceProxy_->AsObject();
+    if (!remoteObject) {
+        TLOGE(WmsLogTag::WMS_SCB, "remoteObject is null");
+        return false;
+    }
+    wmsDeath_ = sptr<WMSDeathRecipient>::MakeSptr(userId_);
     if (remoteObject->IsProxyObject() && !remoteObject->AddDeathRecipient(wmsDeath_)) {
-        WLOGFE("Failed to add death recipient");
+        TLOGE(WmsLogTag::WMS_SCB, "Failed to add death recipient");
         return false;
     }
     // U0 system user needs to subscribe OnUserSwitch event
@@ -221,12 +221,12 @@ WMSDeathRecipient::WMSDeathRecipient(int32_t userId) : userId_(userId) {}
 void WMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 {
     if (wptrDeath == nullptr) {
-        WLOGFE("wptrDeath is null");
+        TLOGE(WmsLogTag::WMS_SCB, "wptrDeath is null");
         return;
     }
     sptr<IRemoteObject> object = wptrDeath.promote();
     if (!object) {
-        WLOGFE("object is null");
+        TLOGE(WmsLogTag::WMS_SCB, "object is null");
         return;
     }
     TLOGI(WmsLogTag::WMS_SCB, "wms lite OnRemoteDied");

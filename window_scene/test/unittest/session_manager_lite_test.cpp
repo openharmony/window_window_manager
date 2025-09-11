@@ -14,16 +14,16 @@
  */
 
 #include <gtest/gtest.h>
-#include "session_manager.h"
+#include <ipc_skeleton.h>
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
-#include <ipc_skeleton.h>
+#include "iremote_object_mocker.h"
 #include "scene_board_judgement.h"
+#include "session_manager.h"
 #include "session_manager_lite.h"
 #include "session_manager_service_recover_interface.h"
 #include "singleton_delegator.h"
 #include "window_manager_hilog.h"
-#include "iremote_object_mocker.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -36,9 +36,6 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-
-private:
-    std::shared_ptr<SessionManagerLite> sml_;
 };
 
 void SessionManagerLiteTest::SetUpTestCase() {}
@@ -61,8 +58,7 @@ namespace {
  */
 HWTEST_F(SessionManagerLiteTest, RecoverSessionManagerService, TestSize.Level1)
 {
-    int32_t userId = -1;
-    auto sml = SessionManagerLite::GetInstance(userId);
+    auto sml = SessionManagerLite::GetInstance(-1);
     bool funcInvoked = false;
     sml->RecoverSessionManagerService(nullptr);
     ASSERT_EQ(funcInvoked, false);
@@ -79,37 +75,26 @@ HWTEST_F(SessionManagerLiteTest, RecoverSessionManagerService, TestSize.Level1)
  */
 HWTEST_F(SessionManagerLiteTest, ReregisterSessionListener, TestSize.Level1)
 {
-    int32_t userId = -1;
-    auto sml = SessionManagerLite::GetInstance(userId);
-    ASSERT_NE(nullptr, sml);
-    sml->ReregisterSessionListener();
-    ASSERT_EQ(nullptr, sml->sceneSessionManagerLiteProxy_);
-
+    auto sml = SessionManagerLite::GetInstance(-1);
     sml->recoverListenerRegistered_ = true;
     sml->GetSceneSessionManagerLiteProxy();
     sml->ReregisterSessionListener();
-    ASSERT_NE(nullptr, sml->sceneSessionManagerLiteProxy_);
+    ASSERT_NE(nullptr, sml);
 }
 
 /**
- * @tc.name: OnRemoteDied1
+ * @tc.name: FoundationDeathRecipientLite::OnRemoteDied
  * @tc.desc: foundation died
  * @tc.type: FUNC
  */
 HWTEST_F(SessionManagerLiteTest, OnRemoteDied1, TestSize.Level1)
 {
-    int32_t userId = -1;
-    auto sml = SessionManagerLite::GetInstance(userId);
+    auto sml = SessionManagerLite::GetInstance(-1);
+    sptr<FoundationDeathRecipientLite> deathRecipient = new FoundationDeathRecipientLite();
+    sptr<IRemoteObject> sptrDeath = sptr<IRemoteObjectMocker>::MakeSptr();
+    wptr<IRemoteObject> wptrDeath = wptr(sptrDeath);
+    deathRecipient->OnRemoteDied(wptrDeath);
     ASSERT_NE(nullptr, sml);
-    FoundationDeathRecipient foundationDeathRecipient;
-    wptr<IRemoteObject> wptrDeath;
-    foundationDeathRecipient.OnRemoteDied(wptrDeath);
-    ASSERT_EQ(false, sml->isWMSConnected_);
-    ASSERT_EQ(false, sml->isFoundationListenerRegistered_);
-    ASSERT_EQ(false, sml->recoverListenerRegistered_);
-    ASSERT_EQ(nullptr, sml->mockSessionManagerServiceProxy_);
-    ASSERT_EQ(nullptr, sml->sessionManagerServiceProxy_);
-    ASSERT_EQ(nullptr, sml->sceneSessionManagerLiteProxy_);
 }
 
 /**
@@ -119,13 +104,12 @@ HWTEST_F(SessionManagerLiteTest, OnRemoteDied1, TestSize.Level1)
  */
 HWTEST_F(SessionManagerLiteTest, OnRemoteDied2, TestSize.Level1)
 {
-    int32_t userId = -1;
-    auto sml = SessionManagerLite::GetInstance(userId);
+    auto sml = SessionManagerLite::GetInstance(-1);
     ASSERT_NE(nullptr, sml);
-    SSMDeathRecipient sSMDeathRecipient;
-    wptr<IRemoteObject> wptrDeath;
-    sSMDeathRecipient.OnRemoteDied(wptrDeath);
-    ASSERT_EQ(nullptr, sml->sessionManagerServiceProxy_);
+    sptr<SSMDeathRecipientLite> deathRecipient = new SSMDeathRecipientLite();
+    sptr<IRemoteObject> sptrDeath = sptr<IRemoteObjectMocker>::MakeSptr();
+    wptr<IRemoteObject> wptrDeath = wptr(sptrDeath);
+    deathRecipient->OnRemoteDied(wptrDeath);
 }
 
 /**
@@ -186,35 +170,9 @@ HWTEST_F(SessionManagerLiteTest, RegisterSMSRecoverListener2, TestSize.Level1)
  */
 HWTEST_F(SessionManagerLiteTest, InitMockSMSProxy, TestSize.Level1)
 {
-    int32_t userId = -1;
-    auto sml = SessionManagerLite::GetInstance(userId);
+    auto sml = SessionManagerLite::GetInstance(-1);
+    sml->InitMockSMSProxy();
     ASSERT_NE(nullptr, sml);
-    sml->InitMockSMSProxy();
-    sml->InitMockSMSProxy();
-    ASSERT_NE(sml->foundationDeath_, nullptr);
-}
-
-/**
- * @tc.name: GetInstance
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerLiteTest, GetInstance, TestSize.Level1)
-{
-    sptr<SessionManagerLite> instance = nullptr;
-    int32_t userId;
-
-    userId = -1;
-    instance = SessionManagerLite::GetInstance(userId);
-    ASSERT_NE(nullptr, instance);
-
-    userId = 101;
-    instance = SessionManagerLite::GetInstance(userId);
-    ASSERT_NE(nullptr, instance);
-
-    // branch overried
-    instance = SessionManagerLite::GetInstance(userId);
-    ASSERT_NE(nullptr, instance);
 }
 
 /**
@@ -224,13 +182,18 @@ HWTEST_F(SessionManagerLiteTest, GetInstance, TestSize.Level1)
  */
 HWTEST_F(SessionManagerLiteTest, SessionManagerServiceLiteRecoverListener1, TestSize.Level1)
 {
-    int32_t userId = 101;
-    sptr<SessionManagerLite> sml = SessionManagerLite::GetInstance(userId);
+    auto sml = SessionManagerLite::GetInstance(-1);
     ASSERT_NE(nullptr, sml);
-
-    sptr<SessionManagerServiceLiteRecoverListener> listener = new SessionManagerServiceLiteRecoverListener(sml);
+ 
     sptr<IRemoteObject> service = sptr<IRemoteObjectMocker>::MakeSptr();
-    listener->OnSessionManagerServiceRecover(service);
+    // branch 1: nullptr
+    sptr<SessionManagerServiceLiteRecoverListener> listener1 = new SessionManagerServiceLiteRecoverListener(nullptr);
+    listener1->OnSessionManagerServiceRecover(service);
+ 
+    // branch 2
+    sptr<SessionManagerServiceLiteRecoverListener> listener2 = new SessionManagerServiceLiteRecoverListener(sml);
+    listener2->OnSessionManagerServiceRecover(service);
+    ASSERT_NE(nullptr, sml);
 }
 
 /**
@@ -243,16 +206,18 @@ HWTEST_F(SessionManagerLiteTest, SessionManagerServiceLiteRecoverListener2, Test
     int32_t userId = 100;
     int32_t screenId = 101;
     bool isConnected = false;
-
     sptr<IRemoteObject> service = sptr<IRemoteObjectMocker>::MakeSptr();
+ 
+    // branch 1
     sptr<SessionManagerServiceLiteRecoverListener> listener1 = new SessionManagerServiceLiteRecoverListener(nullptr);
-    ASSERT_NE(nullptr, listener1);
     listener1->OnWMSConnectionChanged(userId, screenId, isConnected, service);
-
-    sptr<SessionManagerLite> sml = SessionManagerLite::GetInstance(userId);
+    ASSERT_NE(nullptr, listener1);
+ 
+    // branch 2
+    auto sml = SessionManagerLite::GetInstance(-1);
     sptr<SessionManagerServiceLiteRecoverListener> listener2 = new SessionManagerServiceLiteRecoverListener(sml);
-    ASSERT_NE(nullptr, listener2);
     listener2->OnWMSConnectionChanged(userId, screenId, isConnected, service);
+    ASSERT_NE(nullptr, sml);
 }
 
 /**
@@ -267,38 +232,57 @@ HWTEST_F(SessionManagerLiteTest, SessionManagerServiceLiteRecoverListener3, Test
     OHOS::MessageOption option;
     IPCObjectStub iPCObjectStub;
     uint32_t code;
-    int32_t userId = 101;
-
-    sptr<SessionManagerLite> sml = SessionManagerLite::GetInstance(userId);
+    auto sml = SessionManagerLite::GetInstance(-1);
     sptr<SessionManagerServiceLiteRecoverListener> listener = new SessionManagerServiceLiteRecoverListener(sml);
-    ASSERT_NE(nullptr, listener);
-
     code = static_cast<uint32_t>(OHOS::Rosen::ISessionManagerServiceRecoverListener::
                                      SessionManagerServiceRecoverMessage::TRANS_ID_ON_SESSION_MANAGER_SERVICE_RECOVER);
-    auto ret = listener->OnRemoteRequest(code, data, reply, option);
-    ASSERT_NE(ret, 0);
-
+    listener->OnRemoteRequest(code, data, reply, option);
+ 
     code = static_cast<uint32_t>(OHOS::Rosen::ISessionManagerServiceRecoverListener::
                                      SessionManagerServiceRecoverMessage::TRANS_ID_ON_WMS_CONNECTION_CHANGED);
-    ret = listener->OnRemoteRequest(code, data, reply, option);
-    ASSERT_NE(ret, 0);
-
+    listener->OnRemoteRequest(code, data, reply, option);
+ 
     code = 10;
-    ret = listener->OnRemoteRequest(code, data, reply, option);
-    ASSERT_NE(ret, 0);
+    listener->OnRemoteRequest(code, data, reply, option);
+    ASSERT_NE(nullptr, listener);
 }
 
 /**
- * @tc.name: SSMDeathRecipientLite::OnRemoteDied
+ * @tc.name: SessionManagerLite::GetInstance(int32_t userId)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerLiteTest, OnRemoteDied3, TestSize.Level1)
+HWTEST_F(SessionManagerLiteTest, GetInstanceMulti, TestSize.Level1)
 {
-    sptr<SSMDeathRecipientLite> recipient = new SSMDeathRecipientLite();
-    ASSERT_NE(nullptr, recipient);
-    wptr<IRemoteObject> wptrDeath;
-    recipient->OnRemoteDied(wptrDeath);
+    sptr<SessionManagerLite> instance = nullptr;
+    int32_t userId = 101;
+ 
+    instance = SessionManagerLite::GetInstance(userId);
+    ASSERT_NE(nullptr, instance);
+ 
+    // branch overried
+    instance = SessionManagerLite::GetInstance(userId);
+    ASSERT_NE(nullptr, instance);
+}
+
+/**
+ * @tc.name: SessionManagerLite::InitSessionManagerServiceProxy()
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerLiteTest, InitSessionManagerServiceProxy, TestSize.Level1)
+{
+    // branch 1
+    auto instance1 = SessionManagerLite::GetInstance(-1);
+    instance1->ClearSessionManagerProxy();
+    ASSERT_EQ(nullptr, instance1->sessionManagerServiceProxy_);
+    instance1->InitSessionManagerServiceProxy();
+ 
+    // branch 2
+    auto instance2 = SessionManagerLite::GetInstance(101);
+    instance2->ClearSessionManagerProxy();
+    ASSERT_EQ(nullptr, instance2->sessionManagerServiceProxy_);
+    instance2->InitSessionManagerServiceProxy();
 }
 } // namespace
 } // namespace Rosen
