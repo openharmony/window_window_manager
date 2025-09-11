@@ -299,6 +299,7 @@ HWTEST_F(WindowManagerTest, GetAccessibilityWindowInfo01, TestSize.Level1)
 HWTEST_F(WindowManagerTest, IsChangedPosition, TestSize.Level1)
 {
     std::unique_ptr<Mocker> mocker = std::make_unique<Mocker>();
+    ASSERT_NE(mocker, nullptr);
     Rect rect;
     Rect newRect;
     DisplayId newDisplayId = 0;
@@ -316,7 +317,6 @@ HWTEST_F(WindowManagerTest, IsChangedPosition, TestSize.Level1)
 HWTEST_F(WindowManagerTest, GetUnreliableWindowInfo, TestSize.Level1)
 {
     std::unique_ptr<Mocker> mocker = std::make_unique<Mocker>();
-    ASSERT_NE(mocker, nullptr);
     int32_t windowId = 0;
     std::vector<sptr<UnreliableWindowInfo>> infos;
     EXPECT_CALL(mocker->Mock(), GetUnreliableWindowInfo(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
