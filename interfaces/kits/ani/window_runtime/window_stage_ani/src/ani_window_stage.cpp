@@ -278,7 +278,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
     std::array methods = {
         ani_native_function {"loadContentSync",
-            "JLstd/core/String;Larkui/stateManagement/storages/localStorage/LocalStorage;:V",
+            "JLstd/core/String;Larkui/stateManagement/storage/localStorage/LocalStorage;:V",
             reinterpret_cast<void *>(AniWindowStage::LoadContent)},
         ani_native_function {"disableWindowDecorSync", nullptr,
             reinterpret_cast<void *>(AniWindowStage::DisableWindowDecor)},
