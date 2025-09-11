@@ -281,6 +281,29 @@ ani_status DisplayAniUtils::GetStdString(ani_env *env, ani_string ani_str, std::
     return ret;
 }
 
+ani_status DisplayAniUtils::GetAniArrayInt(ani_env* env, ani_object arrayObj, std::vector<int32_t>& result)
+{
+    ani_int length;
+    ani_status ret = env->Object_GetPropertyByName_Int(arrayObj, "length", &length);
+    if (ANI_OK != ret) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get ani_array len fail");
+        return ret;
+    }
+    auto array = reinterpret_cast<ani_array_int>(arrayObj);
+    std::vector<ani_int> nativeArray(length);
+ 
+    ret = env->Array_GetRegion_Int(array, 0, length, nativeArray.data());
+    if (ANI_OK != ret) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get ani_array region fail");
+        return ret;
+    }
+    result.resize(length);
+    for (ani_int i = 0; i < length; i++) {
+        result[i] = static_cast<int32_t>(nativeArray[i]);
+    }
+    return ret;
+}
+
 ani_status DisplayAniUtils::NewAniObject(ani_env* env, ani_class cls, const char *signature, ani_object* result, ...)
 {
     ani_method aniCtor;

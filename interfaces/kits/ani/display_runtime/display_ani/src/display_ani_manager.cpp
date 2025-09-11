@@ -539,7 +539,11 @@ void DisplayManagerAni::GetAllDisplayPhysicalResolution(ani_env* env, ani_object
 {
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
     DisplayManagerAni* displayManagerAni = reinterpret_cast<DisplayManagerAni*>(nativeObj);
-    displayManagerAni->OnGetAllDisplayPhysicalResolution(env, arrayObj);
+    if (displayManagerAni != nullptr) {
+        displayManagerAni->OnGetAllDisplayPhysicalResolution(env, arrayObj);
+    } else {
+        TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
+    }
 }
 
 void DisplayManagerAni::OnGetAllDisplayPhysicalResolution(ani_env* env, ani_object arrayObj)
@@ -564,7 +568,11 @@ void DisplayManagerAni::CreateVirtualScreen(ani_env* env,
         return;
     }
     DisplayManagerAni* displayManagerAni = reinterpret_cast<DisplayManagerAni*>(nativeObj);
-    displayManagerAni->OnCreateVirtualScreen(env, virtualScreenConfig);
+    if (displayManagerAni != nullptr) {
+        displayManagerAni->OnCreateVirtualScreen(env, virtualScreenConfig);
+    } else {
+        TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
+    }
 }
  
 ani_long DisplayManagerAni::OnCreateVirtualScreen(ani_env* env, ani_object virtualScreenConfig)
@@ -604,7 +612,11 @@ void DisplayManagerAni::DestroyVirtualScreen(ani_env* env, ani_long screenId, an
         return;
     }
     DisplayManagerAni* displayManagerAni = reinterpret_cast<DisplayManagerAni*>(nativeObj);
-    displayManagerAni->OnDestroyVirtualScreen(env, screenId);
+    if (displayManagerAni != nullptr) {
+        displayManagerAni->OnDestroyVirtualScreen(env, screenId);
+    } else {
+        TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
+    }
 }
  
 void DisplayManagerAni::OnDestroyVirtualScreen(ani_env* env, ani_long screenId)
@@ -633,7 +645,11 @@ void DisplayManagerAni::SetVirtualScreenSurface(
         return;
     }
     DisplayManagerAni* displayManagerAni = reinterpret_cast<DisplayManagerAni*>(nativeObj);
-    displayManagerAni->OnSetVirtualScreenSurface(env, screenId, surfaceId);
+    if (displayManagerAni != nullptr) {
+        displayManagerAni->OnSetVirtualScreenSurface(env, screenId, surfaceId);
+    } else {
+        TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
+    }
 }
  
 void DisplayManagerAni::OnSetVirtualScreenSurface(ani_env* env, ani_long screenId, ani_string surfaceId)
@@ -669,7 +685,11 @@ void DisplayManagerAni::MakeUnique(ani_env* env, ani_long screenId, ani_long nat
         return;
     }
     DisplayManagerAni* displayManagerAni = reinterpret_cast<DisplayManagerAni*>(nativeObj);
-    displayManagerAni->OnMakeUnique(env, screenId);
+    if (displayManagerAni != nullptr) {
+        displayManagerAni->OnMakeUnique(env, screenId);
+    } else {
+        TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
+    }
 }
  
 void DisplayManagerAni::OnMakeUnique(ani_env* env, ani_long screenId)
@@ -692,11 +712,79 @@ void DisplayManagerAni::OnMakeUnique(ani_env* env, ani_long screenId)
     }
 }
 
+void DisplayManagerAni::AddVirtualScreenBlocklist(ani_env* env, ani_object windowIdsObj, ani_long nativeObj)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
+        return;
+    }
+    DisplayManagerAni* displayManagerAni = reinterpret_cast<DisplayManagerAni*>(nativeObj);
+    if (displayManagerAni != nullptr) {
+        displayManagerAni->OnAddVirtualScreenBlocklist(env, windowIdsObj);
+    } else {
+        TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
+    }
+}
+ 
+void DisplayManagerAni::OnAddVirtualScreenBlocklist(ani_env* env, ani_object windowIdsObj)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
+    std::vector<int32_t> persistentIds;
+    ani_status ret = DisplayAniUtils::GetAniArrayInt(env, windowIdsObj, persistentIds);
+    if (ANI_OK != ret) {
+        TLOGE(WmsLogTag::DMS, "[ANI] GetAniArrayInt fail");
+        return;
+    }
+    auto res = DM_JS_TO_ERROR_CODE_MAP.at(
+        SingletonContainer::Get<ScreenManager>().AddVirtualScreenBlockList(persistentIds));
+    if (res != DmErrorCode::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] on add virtual screen blocklist failed.");
+        AniErrUtils::ThrowBusinessError(env, res, "OnAddVirtualScreenBlocklist failed.");
+    }
+}
+ 
+void DisplayManagerAni::RemoveVirtualScreenBlocklist(ani_env* env, ani_object windowIdsObj, ani_long nativeObj)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
+        return;
+    }
+    DisplayManagerAni* displayManagerAni = reinterpret_cast<DisplayManagerAni*>(nativeObj);
+    if (displayManagerAni != nullptr) {
+        displayManagerAni->OnRemoveVirtualScreenBlocklist(env, windowIdsObj);
+    } else {
+        TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
+    }
+}
+ 
+void DisplayManagerAni::OnRemoveVirtualScreenBlocklist(ani_env* env, ani_object windowIdsObj)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
+    std::vector<int32_t> persistentIds;
+    ani_status ret = DisplayAniUtils::GetAniArrayInt(env, windowIdsObj, persistentIds);
+    if (ANI_OK != ret) {
+        TLOGE(WmsLogTag::DMS, "[ANI] GetAniArrayInt fail");
+        return;
+    }
+    auto res = DM_JS_TO_ERROR_CODE_MAP.at(
+        SingletonContainer::Get<ScreenManager>().RemoveVirtualScreenBlockList(persistentIds));
+    if (res != DmErrorCode::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] on remove virtual screen blocklist failed.");
+        AniErrUtils::ThrowBusinessError(env, res, "OnRemoveVirtualScreenBlocklist failed.");
+    }
+}
+
 void DisplayManagerAni::FinalizerDisplay(ani_env* env, ani_object displayObj, ani_long nativeObj)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] DMS FinalizerDisplayNative begin");
     DisplayManagerAni* displayManagerAni = reinterpret_cast<DisplayManagerAni*>(nativeObj);
-    displayManagerAni->OnFinalizerDisplay(env, displayObj);
+    if (displayManagerAni != nullptr) {
+        displayManagerAni->OnFinalizerDisplay(env, displayObj);
+    } else {
+        TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
+    }
 }
  
 void DisplayManagerAni::OnFinalizerDisplay(ani_env* env, ani_object displayObj)
