@@ -5470,7 +5470,7 @@ void ScreenSessionManager::MirrorSwitchNotify(ScreenId screenId)
 }
 
 DMError ScreenSessionManager::DoMakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
-    DMRect mainScreenRegion, ScreenId& screenGroupId, bool forceMirror)
+    DMRect mainScreenRegion, ScreenId& screenGroupId, const RotationOption& rotationOption, bool forceMirror)
 {
 #ifdef WM_MULTI_SCREEN_ENABLE
     TLOGW(WmsLogTag::DMS, "enter!");
@@ -5501,7 +5501,7 @@ DMError ScreenSessionManager::DoMakeMirror(ScreenId mainScreenId, std::vector<Sc
         OnVirtualScreenChange(screenId, ScreenEvent::DISCONNECTED);
     }
     DMError makeResult = MultiScreenManager::GetInstance().MirrorSwitch(mainScreenId,
-        allMirrorScreenIds, mainScreenRegion, screenGroupId, forceMirror);
+        allMirrorScreenIds, mainScreenRegion, screenGroupId, rotationOption, forceMirror);
     if (makeResult != DMError::DM_OK) {
         TLOGE(WmsLogTag::DMS, "MakeMirror set mirror failed.");
         return makeResult;
@@ -5524,16 +5524,17 @@ DMError ScreenSessionManager::DoMakeMirror(ScreenId mainScreenId, std::vector<Sc
 }
 
 DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
-    ScreenId& screenGroupId, bool forceMirror)
+    ScreenId& screenGroupId, const RotationOption& rotationOption, bool forceMirror)
 {
 #ifdef FOLD_ABILITY_ENABLE
     if (foldScreenController_ != nullptr && FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         DMRect mainScreenRegion = DMRect::NONE();
         foldScreenController_->SetMainScreenRegion(mainScreenRegion);
-        return DoMakeMirror(mainScreenId, mirrorScreenIds, mainScreenRegion, screenGroupId, forceMirror);
+        return DoMakeMirror(mainScreenId, mirrorScreenIds, mainScreenRegion, screenGroupId, rotationOption,
+            forceMirror);
     }
 #endif
-    return DoMakeMirror(mainScreenId, mirrorScreenIds, DMRect::NONE(), screenGroupId, forceMirror);
+    return DoMakeMirror(mainScreenId, mirrorScreenIds, DMRect::NONE(), screenGroupId, rotationOption, forceMirror);
 }
 
 DMError ScreenSessionManager::MakeMirrorForRecord(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
@@ -6337,7 +6338,7 @@ bool ScreenSessionManager::RemoveChildFromGroup(sptr<ScreenSession> screen, sptr
 }
 
 DMError ScreenSessionManager::SetMirror(ScreenId screenId, std::vector<ScreenId> screens, DMRect mainScreenRegion,
-    bool forceMirror)
+    const RotationOption& rotationOption, bool forceMirror)
 {
     TLOGI(WmsLogTag::DMS, "screenId:%{public}" PRIu64"", screenId);
     sptr<ScreenSession> screen = GetScreenSession(screenId);
@@ -6363,7 +6364,7 @@ DMError ScreenSessionManager::SetMirror(ScreenId screenId, std::vector<ScreenId>
             && !forceMirror;
     group->mirrorScreenId_ = screen->screenId_;
     ChangeScreenGroup(group, screens, startPoints, filterMirroredScreen, ScreenCombination::SCREEN_MIRROR,
-        mainScreenRegion);
+        mainScreenRegion, rotationOption);
     TLOGI(WmsLogTag::DMS, "success");
     return DMError::DM_OK;
 }
@@ -6397,7 +6398,8 @@ bool ScreenSessionManager::CheckScreenInScreenGroup(sptr<ScreenSession> screen) 
 }
 
 void ScreenSessionManager::ChangeScreenGroup(sptr<ScreenSessionGroup> group, const std::vector<ScreenId>& screens,
-    const std::vector<Point>& startPoints, bool filterScreen, ScreenCombination combination, DMRect mainScreenRegion)
+    const std::vector<Point>& startPoints, bool filterScreen, ScreenCombination combination, DMRect mainScreenRegion,
+    const RotationOption& rotationOption)
 {
     std::map<ScreenId, bool> removeChildResMap;
     std::vector<ScreenId> addScreens;
@@ -6443,7 +6445,7 @@ void ScreenSessionManager::ChangeScreenGroup(sptr<ScreenSessionGroup> group, con
         SetScreenCastInfo(screen->GetScreenId(), group->mirrorScreenId_, combination);
     }
     group->combination_ = combination;
-    AddScreenToGroup(group, addScreens, addChildPos, removeChildResMap);
+    AddScreenToGroup(group, addScreens, addChildPos, removeChildResMap, rotationOption);
 }
 
 void ScreenSessionManager::ChangeMirrorScreenConfig(const sptr<ScreenSessionGroup>& group,
@@ -6521,7 +6523,7 @@ void ScreenSessionManager::IsEnableRegionRotation(sptr<ScreenSession> screenSess
 
 void ScreenSessionManager::AddScreenToGroup(sptr<ScreenSessionGroup> group,
     const std::vector<ScreenId>& addScreens, const std::vector<Point>& addChildPos,
-    std::map<ScreenId, bool>& removeChildResMap)
+    std::map<ScreenId, bool>& removeChildResMap, const RotationOption& rotationOption)
 {
     std::vector<sptr<ScreenInfo>> addToGroup;
     std::vector<sptr<ScreenInfo>> removeFromGroup;
@@ -6535,7 +6537,8 @@ void ScreenSessionManager::AddScreenToGroup(sptr<ScreenSessionGroup> group,
         Point expandPoint = addChildPos[i];
         TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64", Point: %{public}d, %{public}d",
             screen->screenId_, expandPoint.posX_, expandPoint.posY_);
-        bool addChildRes = group->AddChild(screen, expandPoint, GetScreenSession(group->mirrorScreenId_));
+        bool addChildRes = group->AddChild(screen, expandPoint, GetScreenSession(group->mirrorScreenId_),
+            false, rotationOption);
         if (removeChildResMap[screenId] && addChildRes) {
             changeGroup.emplace_back(screen->ConvertToScreenInfo());
             TLOGD(WmsLogTag::DMS, "changeGroup");
@@ -11732,7 +11735,7 @@ void ScreenSessionManager::MakeMirrorAfterSwitchUser()
         }
     }
     ScreenId screenGroupId = SCREEN_GROUP_ID_DEFAULT;
-    MakeMirror(mainScreenId, mirrorScreenIds, screenGroupId, true);
+    MakeMirror(mainScreenId, mirrorScreenIds, screenGroupId, {Rotation::ROTATION_0, false}, true);
 }
 
 void ScreenSessionManager::NotifySwitchUserAnimationFinish()
