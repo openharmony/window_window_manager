@@ -33,7 +33,6 @@
 #include "wm_common.h"
 #include "wm_single_instance.h"
 
-
 namespace OHOS {
 namespace Rosen {
 struct SystemBarRegionTint {
