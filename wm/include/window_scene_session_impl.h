@@ -79,6 +79,7 @@ public:
 
     void PerformBack() override;
     WMError SetAspectRatio(float ratio) override;
+    WMError SetContentAspectRatio(float ratio, bool isPersistent, bool needUpdateRect) override;
     WMError ResetAspectRatio() override;
     WMError SetGlobalMaximizeMode(MaximizeMode mode) override;
     MaximizeMode GetGlobalMaximizeMode() const override;

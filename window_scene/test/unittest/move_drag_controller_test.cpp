@@ -604,28 +604,104 @@ HWTEST_F(MoveDragControllerTest, CalcFreeformTranslateLimits01, TestSize.Level0)
 }
 
 /**
- * @tc.name: CalcFixedAspectRatioTranslateLimits01
- * @tc.desc: test function : CalcFixedAspectRatioTranslateLimits01
+ * @tc.name: CalcFixedAspectRatioTranslateLimitsAbnormalBranches
+ * @tc.desc: Verify early-return and default branch (invalid AreaType) behaviors
  * @tc.type: FUNC
  */
-HWTEST_F(MoveDragControllerTest, CalcFixedAspectRatioTranslateLimits01, TestSize.Level1)
+HWTEST_F(MoveDragControllerTest, CalcFixedAspectRatioTranslateLimitsAbnormalBranches, TestSize.Level1)
 {
-    moveDragController->limits_ = { 30, 60, 30, 60, 2.0, 2.0 };
-    moveDragController->aspectRatio_ = 1.0f;
-    AreaType type = AreaType::RIGHT;
-    ASSERT_TRUE((moveDragController != nullptr));
-    moveDragController->isDecorEnable_ = true;
-    moveDragController->CalcFixedAspectRatioTranslateLimits(type);
-    moveDragController->isDecorEnable_ = false;
-    moveDragController->CalcFixedAspectRatioTranslateLimits(type);
-    moveDragController->limits_ = { 60, 60, 60, 60, 2.0, 2.0 };
-    moveDragController->CalcFixedAspectRatioTranslateLimits(type);
-    type = AreaType::LEFT;
-    moveDragController->CalcFixedAspectRatioTranslateLimits(type);
-    type = AreaType::BOTTOM;
-    moveDragController->CalcFixedAspectRatioTranslateLimits(type);
-    type = AreaType::TOP;
-    moveDragController->CalcFixedAspectRatioTranslateLimits(type);
+    moveDragController->limits_ = WindowLimits(300, 150, 100, 50, FLT_MAX, 0.0f);
+    moveDragController->decoration_ = {0, 0, 0, 0}; // no decoration
+    moveDragController->moveDragProperty_.originalRect_ = {0, 0, 200, 120};
+    moveDragController->minTranX_ = INT32_MIN;
+    moveDragController->minTranY_ = INT32_MIN;
+    moveDragController->maxTranX_ = INT32_MAX;
+    moveDragController->maxTranY_ = INT32_MAX;
+
+    // Case 1: aspectRatio_ is near zero -> early return, no modification
+    moveDragController->aspectRatio_ = 0.0f;
+    moveDragController->CalcFixedAspectRatioTranslateLimits(AreaType::LEFT);
+    EXPECT_EQ(moveDragController->minTranX_, INT32_MIN);
+    EXPECT_EQ(moveDragController->minTranY_, INT32_MIN);
+    EXPECT_EQ(moveDragController->maxTranX_, INT32_MAX);
+    EXPECT_EQ(moveDragController->maxTranY_, INT32_MAX);
+
+    // Case 2: invalid AreaType -> no modification
+    moveDragController->aspectRatio_ = 2.0f;
+    moveDragController->CalcFixedAspectRatioTranslateLimits(AreaType::UNDEFINED);
+    EXPECT_EQ(moveDragController->minTranX_, INT32_MIN);
+    EXPECT_EQ(moveDragController->minTranY_, INT32_MIN);
+    EXPECT_EQ(moveDragController->maxTranX_, INT32_MAX);
+    EXPECT_EQ(moveDragController->maxTranY_, INT32_MAX);
+}
+
+/**
+ * @tc.name: CalcFixedAspectRatioTranslateLimitsNormalBranches
+ * @tc.desc: Verify correct translate limits for all handled AreaType when aspectRatio is valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, CalcFixedAspectRatioTranslateLimitsNormalBranches, TestSize.Level1)
+{
+    moveDragController->limits_ = WindowLimits(300, 150, 100, 50, FLT_MAX, 0.0f); // compatible with aspectRatio = 2.0
+    moveDragController->decoration_ = {0, 0, 0, 0};  // no decoration
+    moveDragController->moveDragProperty_.originalRect_ = {0, 0, 200, 120};
+    moveDragController->aspectRatio_ = 2.0f;
+
+    // Case 1: LEFT
+    moveDragController->CalcFixedAspectRatioTranslateLimits(AreaType::LEFT);
+    EXPECT_EQ(moveDragController->minTranX_, -100);
+    EXPECT_EQ(moveDragController->maxTranX_, 100);
+    EXPECT_EQ(moveDragController->minTranY_, -70);
+    EXPECT_EQ(moveDragController->maxTranY_, 30);
+
+    // Case 2: LEFT_BOTTOM
+    moveDragController->CalcFixedAspectRatioTranslateLimits(AreaType::LEFT_BOTTOM);
+    EXPECT_EQ(moveDragController->minTranX_, -100);
+    EXPECT_EQ(moveDragController->maxTranX_, 100);
+    EXPECT_EQ(moveDragController->minTranY_, -70);
+    EXPECT_EQ(moveDragController->maxTranY_, 30);
+
+    // Case 3: LEFT_TOP
+    moveDragController->CalcFixedAspectRatioTranslateLimits(AreaType::LEFT_TOP);
+    EXPECT_EQ(moveDragController->minTranX_, -100);
+    EXPECT_EQ(moveDragController->maxTranX_, 100);
+    EXPECT_EQ(moveDragController->minTranY_, -30);
+    EXPECT_EQ(moveDragController->maxTranY_, 70);
+
+    // Case 4: RIGHT
+    moveDragController->CalcFixedAspectRatioTranslateLimits(AreaType::RIGHT);
+    EXPECT_EQ(moveDragController->minTranX_, -100);
+    EXPECT_EQ(moveDragController->maxTranX_, 100);
+    EXPECT_EQ(moveDragController->minTranY_, -70);
+    EXPECT_EQ(moveDragController->maxTranY_, 30);
+
+    // Case 5: RIGHT_BOTTOM
+    moveDragController->CalcFixedAspectRatioTranslateLimits(AreaType::RIGHT_BOTTOM);
+    EXPECT_EQ(moveDragController->minTranX_, -100);
+    EXPECT_EQ(moveDragController->maxTranX_, 100);
+    EXPECT_EQ(moveDragController->minTranY_, -70);
+    EXPECT_EQ(moveDragController->maxTranY_, 30);
+
+    // Case 6: BOTTOM
+    moveDragController->CalcFixedAspectRatioTranslateLimits(AreaType::BOTTOM);
+    EXPECT_EQ(moveDragController->minTranX_, -100);
+    EXPECT_EQ(moveDragController->maxTranX_, 100);
+    EXPECT_EQ(moveDragController->minTranY_, -70);
+    EXPECT_EQ(moveDragController->maxTranY_, 30);
+
+    // Case 7: RIGHT_TOP
+    moveDragController->CalcFixedAspectRatioTranslateLimits(AreaType::RIGHT_TOP);
+    EXPECT_EQ(moveDragController->minTranX_, -100);
+    EXPECT_EQ(moveDragController->maxTranX_, 100);
+    EXPECT_EQ(moveDragController->minTranY_, -30);
+    EXPECT_EQ(moveDragController->maxTranY_, 70);
+
+    // Case 8: TOP
+    moveDragController->CalcFixedAspectRatioTranslateLimits(AreaType::TOP);
+    EXPECT_EQ(moveDragController->minTranX_, -100);
+    EXPECT_EQ(moveDragController->maxTranX_, 100);
+    EXPECT_EQ(moveDragController->minTranY_, -30);
+    EXPECT_EQ(moveDragController->maxTranY_, 70);
 }
 
 /**
@@ -1794,6 +1870,53 @@ HWTEST_F(MoveDragControllerTest, UpdateSubWindowGravityWhenFollow01, TestSize.Le
     moveDragController->UpdateSubWindowGravityWhenFollow(followController, surfaceNode);
     modifier = surfaceNode->GetModifierByType(ModifierNG::RSModifierType::CLIP_TO_FRAME);
     EXPECT_NE(modifier, nullptr);
+}
+
+/**
+ * @tc.name: TestCalcDragTargetRect
+ * @tc.desc: Verify normal flows of CalcDragTargetRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, TestCalcDragTargetRect, TestSize.Level1)
+{
+    WSRect originalRect = {0, 0, 200, 100};
+    moveDragController->moveDragProperty_.originalRect_ = originalRect;
+    moveDragController->limits_ = WindowLimits(400, 400, 200, 50, FLT_MAX, 0.0f);
+    moveDragController->decoration_ = {0, 0, 0, 0};
+    moveDragController->type_ = AreaType::RIGHT;
+
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent->SetTargetDisplayId(0);
+
+    // Case 1: DRAG_START → Adjust originalRect_ and set targetRect_ = originalRect_
+    moveDragController->moveDragProperty_.targetRect_ = WSRect::EMPTY_RECT;
+    SizeChangeReason reason = SizeChangeReason::DRAG_START;
+    moveDragController->CalcDragTargetRect(pointerEvent, reason);
+    EXPECT_EQ(moveDragController->moveDragProperty_.targetRect_, originalRect);
+
+    reason = SizeChangeReason::DRAG;
+
+    // Case 2: Cross-display disabled & displayId mismatch → no update
+    moveDragController->moveDragProperty_.targetRect_ = WSRect::EMPTY_RECT;
+    moveDragController->winType_ = WindowType::SYSTEM_WINDOW_BASE;
+    moveDragController->moveDragStartDisplayId_ = 1;
+    moveDragController->CalcDragTargetRect(pointerEvent, reason);
+    EXPECT_EQ(moveDragController->moveDragProperty_.targetRect_, WSRect::EMPTY_RECT);
+
+    // Case 3: Cross-display enabled but aspect ratio is 0
+    moveDragController->moveDragProperty_.targetRect_ = WSRect::EMPTY_RECT;
+    moveDragController->winType_ = WindowType::WINDOW_TYPE_FLOAT;
+    moveDragController->aspectRatio_ = 0.0f;
+    moveDragController->CalcDragTargetRect(pointerEvent, reason);
+    EXPECT_NE(moveDragController->moveDragProperty_.targetRect_, WSRect::EMPTY_RECT);
+
+    // Case 4: PointerEvent‘s displayId equals moveDragStartDisplayId and aspect ratio is not 0
+    moveDragController->moveDragProperty_.targetRect_ = WSRect::EMPTY_RECT;
+    pointerEvent->SetTargetDisplayId(0);
+    moveDragController->moveDragStartDisplayId_ = 0;
+    moveDragController->aspectRatio_ = 1.0f;
+    moveDragController->CalcDragTargetRect(pointerEvent, reason);
+    EXPECT_NE(moveDragController->moveDragProperty_.targetRect_, WSRect::EMPTY_RECT);
 }
 } // namespace
 } // namespace Rosen

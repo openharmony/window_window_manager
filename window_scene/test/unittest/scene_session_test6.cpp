@@ -1274,6 +1274,75 @@ HWTEST_F(SceneSessionTest6, SetSupportEnterWaterfallMode, Function | SmallTest |
     session->SetSupportEnterWaterfallMode(true);
     EXPECT_TRUE(session->sessionStage_ != nullptr);
 }
+
+/**
+ * @tc.name: TestSetContentAspectRatio
+ * @tc.desc: Verify SetContentAspectRatio covers all branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, TestSetContentAspectRatio, TestSize.Level1)
+{
+    SessionInfo info;
+    auto session = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    // Case 1: sessionProperty is null
+    session->property_ = nullptr;
+    auto result = session->SetContentAspectRatio(1.5f, true, true);
+    EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
+
+    // Case 2: aspect ratio is invalid
+    session->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    WindowLimits limits(400, 200, 200, 100, FLT_MAX, 0.0f);
+    session->property_->SetWindowLimits(limits);
+    result = session->SetContentAspectRatio(0.5f, true, true);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
+
+    // Case 3: aspect ratio is valid, moveDragController is null
+    session->moveDragController_ = nullptr;
+    result = session->SetContentAspectRatio(2.0f, false, false);
+    EXPECT_EQ(result, WSError::WS_OK);
+
+    // Case 4: aspect ratio is valid, moveDragController is not null
+    session->moveDragController_ =
+        sptr<MoveDragController>::MakeSptr(session->GetPersistentId(), session->GetWindowType());
+    result = session->SetContentAspectRatio(2.0f, true, true);
+    EXPECT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: TestGetWindowDecoration
+ * @tc.desc: Verify GetWindowDecoration covers all branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, TestGetWindowDecoration, TestSize.Level1)
+{
+    SessionInfo info;
+    auto session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto prop = session->GetSessionProperty();
+
+    WindowDecoration emptyDecor{0, 0, 0, 0};
+
+    // Case 1: Not visible
+    session->SetDecorVisible(false);
+    auto decor = session->GetWindowDecoration();
+    EXPECT_EQ(decor, emptyDecor);
+
+    // Case 2: Not enabled
+    session->SetDecorVisible(true);
+    session->systemConfig_.isSystemDecorEnable_ = false;
+    decor = session->GetWindowDecoration();
+    EXPECT_EQ(decor, emptyDecor);
+
+    prop->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    prop->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    session->systemConfig_.decorWindowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+    session->systemConfig_.isSystemDecorEnable_ = true;
+
+    // Case 3: display is null
+    prop->SetDisplayId(DISPLAY_ID_INVALID);
+    decor = session->GetWindowDecoration();
+    EXPECT_EQ(decor, emptyDecor);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
