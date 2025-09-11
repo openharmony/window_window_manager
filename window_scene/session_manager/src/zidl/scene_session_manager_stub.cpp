@@ -916,8 +916,8 @@ int SceneSessionManagerStub::HandleSetGestureNavigationEnabled(MessageParcel& da
 
 int SceneSessionManagerStub::HandleIsChangedPosition(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t posX_ = INVALID_WINDOW_ID;
-    int32_t posY_ = INVALID_WINDOW_ID;
+    int32_t posX_ = 0;
+    int32_t posY_ = 0;
     uint32_t width_ = 0;
     uint32_t height_ = 0;
     if (!data.ReadInt32(posX_) || !data.ReadInt32(posY_) || !data.WriteUint32(width_) || !data.WriteUint32(height_)) {

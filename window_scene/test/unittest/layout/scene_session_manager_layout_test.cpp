@@ -239,20 +239,16 @@ HWTEST_F(SceneSessionManagerLayoutTest, IsChangedPosition_TestMode, TestSize.Lev
     DisplayId newDisplayId;
     rect = { 100, 2000, 400, 600 };
     newRect = { 0, 100, 200, 300 };
-    singleHandScreenInfo.mode = SingleHandMode::LEFT;
     ssm_->IsChangedPosition(rect, newRect, newDisplayId);
     usleep(WAIT_SYNC_IN_NS);
-    EXPECT_EQ(310, newRect.poxY_);
+    EXPECT_EQ(310, newRect.posY_);
     EXPECT_EQ(999, newDisplayId);
-    ssm_->singleHandTransform_ = singleHandTransform;
 
-    singleHandScreenInfo.mode = SingleHandMode::RIGHT;
     rect = { 100, 200, 400, 600 };
     ssm_->IsChangedPosition(rect, newRect, newDisplayId);
     usleep(WAIT_SYNC_IN_NS);
-    EXPECT_EQ(200, ssm_->singleHandTransform_.posY_);
+    EXPECT_EQ(200, newRect.posY_);
     EXPECT_EQ(0, newDisplayId);
-    ssm_->singleHandTransform_ = singleHandTransform;
 }
 
 /**
