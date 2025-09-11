@@ -55,9 +55,9 @@ ohos_source_set("ui_effect_controller_client") {
     debug = false
   }
   sources = [
-    "host/src/ui_effect_controller_proxy.cpp",
-    "host/src/ui_effect_controller_client_stub.cpp",
     "host/src/ui_effect_controller_client.cpp",
+    "host/src/ui_effect_controller_client_stub.cpp",
+    "host/src/ui_effect_controller_proxy.cpp",
   ]
   public_configs = [":ui_effect_public_config"]
   public_deps = [
@@ -76,9 +76,9 @@ ohos_source_set("ui_effect_controller") {
     debug = false
   }
   sources = [
-    "host/src/ui_effect_controller_stub.cpp",
     "host/src/ui_effect_controller.cpp",
     "host/src/ui_effect_controller_client_proxy.cpp",
+    "host/src/ui_effect_controller_stub.cpp",
   ]
   public_configs = [":ui_effect_public_config"]
   public_deps = ["${window_base_path}/utils:ui_effect_controller_common"]
