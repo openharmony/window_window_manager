@@ -168,9 +168,14 @@ HWTEST_F(WindowAdapterTest, ConvertToRelativeCoordinateForFoldPC, TestSize.Level
     Rect rect;
     Rect newRect;
     DisplayId newDisplayId = 0;
-    rect = { 100, 2000, 400, 600 };
-    newRect = { 0, 100, 200, 300 };
-    EXPECT_EQ(WMError::WM_OK, windowAdapter.ConvertToRelativeCoordinateForFoldPC(rect, newRect, newDisplayId));
+    rect = { 100, 3000, 400, 600 };
+    auto ret = windowAdapter.ConvertToRelativeCoordinateForFoldPC(rect, newRect, newDisplayId);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+    EXPECT_EQ(newRect.posX_, 100);
+    EXPECT_EQ(newRect.posY_, 3000);
+    EXPECT_EQ(newRect.width_, 400);
+    EXPECT_EQ(newRect.height_, 600);
+    EXPECT_EQ(newRect.newDisplayId, 0);
 }
 
 /**

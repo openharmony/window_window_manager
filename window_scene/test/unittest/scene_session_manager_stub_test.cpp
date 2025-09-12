@@ -1679,13 +1679,39 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetGestureNavigationEnabled, TestSiz
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleConvertToRelativeCoordinateForFoldPC, TestSize.Level1)
 {
-    MessageParcel data;
+    MessageParcel data1;
     MessageParcel reply;
 
-    data.WriteBool(false);
+    Rect rect = {200, 100, 400, 600};
 
-    int res = stub_->HandleConvertToRelativeCoordinateForFoldPC(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
+    data1.WriteInt32(rect.posX_);
+    data1.WriteInt32(rect.posY_);
+    data1.WriteInt32(rect.width_);
+    data1.WriteInt32(rect.height_);
+    int res1 = stub_->HandleConvertToRelativeCoordinateForFoldPC(data1, reply);
+    EXPECT_EQ(res1, ERR_NONE);
+
+    MessageParcel data2;
+    data2.WriteInt32(rect.posX_);
+    data2.WriteInt32(rect.posY_);
+    data2.WriteInt32(rect.width_);
+    int res2 = stub_->HandleConvertToRelativeCoordinateForFoldPC(data2, reply);
+    EXPECT_EQ(res2, ERR_TRANSACTION_FAILED);
+
+    MessageParcel data3;
+    data3.WriteInt32(rect.posX_);
+    data3.WriteInt32(rect.posY_);
+    int res3 = stub_->HandleConvertToRelativeCoordinateForFoldPC(data3, reply);
+    EXPECT_EQ(res3, ERR_TRANSACTION_FAILED);
+
+    MessageParcel data4;
+    data4.WriteInt32(rect.posX_);
+    int res4 = stub_->HandleConvertToRelativeCoordinateForFoldPC(data4, reply);
+    EXPECT_EQ(res4, ERR_TRANSACTION_FAILED);
+
+    MessageParcel data5;
+    int res5 = stub_->HandleConvertToRelativeCoordinateForFoldPC(data5, reply);
+    EXPECT_EQ(res5, ERR_TRANSACTION_FAILED);
 }
 
 /**

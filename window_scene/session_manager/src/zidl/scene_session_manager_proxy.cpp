@@ -2723,16 +2723,32 @@ WMError SceneSessionManagerProxy::ConvertToRelativeCoordinateForFoldPC(
         static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GLOBAL_COORDINATE_TO_RELATIVE_COORDINATE),
         data, reply, option);
     if (sendRet != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "SendRequest GetFreeMultiWindowEnableState failed");
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW,
+            "SendRequest ConvertToRelativeCoordinateForFoldPC failed, code: %{public}d", sendRet);
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    auto posX = reply.ReadInt32();
-    auto posY = reply.ReadInt32();
-    auto width = reply.ReadUint32();
-    auto height = reply.ReadUint32();
+    int32_t posX = 0;
+    int32_t posY = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    if (!reply.ReadInt32(posX) || !reply.ReadInt32(posY) ||
+        !reply.ReadUint32(width) || !reply.ReadUint32(height)) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "Failed to read rect");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
     newRect = {posX, posY, width, height};
-    newDisplayId = reply.ReadUint64();
-    return static_cast<WMError>(reply.ReadInt32());
+    uint64_t displayId = 0;
+    if (!reply.ReadUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "Failed to read displayId");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    newDisplayId = displayId;
+    int32_t result = 0;
+    if (!reply.ReadInt32(result)) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "Failed to read result");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(result);
 }
 
 WSError SceneSessionManagerProxy::GetFreeMultiWindowEnableState(bool& enable)

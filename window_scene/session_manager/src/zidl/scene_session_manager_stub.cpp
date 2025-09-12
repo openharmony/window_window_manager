@@ -914,29 +914,6 @@ int SceneSessionManagerStub::HandleSetGestureNavigationEnabled(MessageParcel& da
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleConvertToRelativeCoordinateForFoldPC(MessageParcel& data, MessageParcel& reply)
-{
-    int32_t posX_ = 0;
-    int32_t posY_ = 0;
-    uint32_t width_ = 0;
-    uint32_t height_ = 0;
-    if (!data.ReadInt32(posX_) || !data.ReadInt32(posY_) || !data.WriteUint32(width_) || !data.WriteUint32(height_)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Read window infos failed.");
-        return ERR_TRANSACTION_FAILED;
-    }
-    Rect rect = { posX_, posY_, width_, height_ };
-    Rect newRect;
-    DisplayId newDisplayId;
-    WMError errCode = ConvertToRelativeCoordinateForFoldPC(rect, newRect, newDisplayId);
-    reply.WriteInt32(static_cast<int32_t>(newRect.posX_));
-    reply.WriteInt32(static_cast<int32_t>(newRect.posY_));
-    reply.WriteUint32(static_cast<uint32_t>(newRect.width_));
-    reply.WriteUint32(static_cast<uint32_t>(newRect.height_));
-    reply.WriteUint64(static_cast<uint64_t>(newDisplayId));
-    reply.WriteInt32(static_cast<int32_t>(errCode));
-    return ERR_NONE;
-}
-
 int SceneSessionManagerStub::HandleGetAccessibilityWindowInfo(MessageParcel& data, MessageParcel& reply)
 {
     std::vector<sptr<AccessibilityWindowInfo>> infos;
@@ -1011,6 +988,32 @@ int SceneSessionManagerStub::HandleUpdateSessionAvoidAreaListener(MessageParcel&
     }
     WSError errCode = UpdateSessionAvoidAreaListener(persistentId, haveAvoidAreaListener);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetSessionSnapshot(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SYSTEM, "Handled!");
+    std::u16string deviceIdData;
+    if (!data.ReadString16(deviceIdData)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "read deviceId fail");
+        return ERR_INVALID_DATA;
+    }
+    std::string deviceId = Str16ToStr8(deviceIdData);
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "read persistentId fail");
+        return ERR_INVALID_DATA;
+    }
+    bool isLowResolution = false;
+    if (!data.ReadBool(isLowResolution)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "read isLowResolution fail");
+        return ERR_INVALID_DATA;
+    }
+    std::shared_ptr<SessionSnapshot> snapshot = std::make_shared<SessionSnapshot>();
+    WSError ret = GetSessionSnapshot(deviceId, persistentId, *snapshot, isLowResolution);
+    reply.WriteParcelable(snapshot.get());
+    reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
 
@@ -2484,29 +2487,36 @@ int SceneSessionManagerStub::HandleGetPiPSettingSwitchStatus(MessageParcel& data
 }
 
 
-int SceneSessionManagerStub::HandleGetSessionSnapshot(MessageParcel& data, MessageParcel& reply)
+int SceneSessionManagerStub::HandleConvertToRelativeCoordinateForFoldPC(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_SYSTEM, "Handled!");
-    std::u16string deviceIdData;
-    if (!data.ReadString16(deviceIdData)) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "read deviceId fail");
-        return ERR_INVALID_DATA;
+    int32_t posX_ = 0;
+    int32_t posY_ = 0;
+    uint32_t width_ = 0;
+    uint32_t height_ = 0;
+    if (!data.ReadInt32(posX_) || !data.ReadInt32(posY_) || !data.ReadUint32(width_) || !data.ReadUint32(height_)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read window infos failed.");
+        return ERR_TRANSACTION_FAILED;
     }
-    std::string deviceId = Str16ToStr8(deviceIdData);
-    int32_t persistentId = 0;
-    if (!data.ReadInt32(persistentId)) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "read persistentId fail");
-        return ERR_INVALID_DATA;
+    Rect rect = {posX_, posY_, width_, height_};
+    Rect newRect;
+    DisplayId newDisplayId = 0;
+    WMError errCode = ConvertToRelativeCoordinateForFoldPC(rect, newRect, newDisplayId);
+    if (!reply.WriteInt32(static_cast<int32_t>(newRect.posX_)) ||
+        !reply.WriteInt32(static_cast<int32_t>(newRect.posY_)) ||
+        !reply.WriteUint32(static_cast<uint32_t>(newRect.width_)) ||
+        !reply.WriteUint32(static_cast<uint32_t>(newRect.height_))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write rect failed.");
+        return ERR_TRANSACTION_FAILED;
     }
-    bool isLowResolution = false;
-    if (!data.ReadBool(isLowResolution)) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "read isLowResolution fail");
-        return ERR_INVALID_DATA;
+    if (!reply.WriteUint64(static_cast<uint64_t>(newDisplayId))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write newDisplayId failed.");
+        return ERR_TRANSACTION_FAILED;
     }
-    std::shared_ptr<SessionSnapshot> snapshot = std::make_shared<SessionSnapshot>();
-    WSError ret = GetSessionSnapshot(deviceId, persistentId, *snapshot, isLowResolution);
-    reply.WriteParcelable(snapshot.get());
-    reply.WriteUint32(static_cast<uint32_t>(ret));
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write errCode failed.");
+        return ERR_TRANSACTION_FAILED;
+    }
     return ERR_NONE;
 }
+
 } // namespace OHOS::Rosen

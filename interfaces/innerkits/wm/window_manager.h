@@ -912,9 +912,9 @@ public:
     /**
      * @brief Global coordinate to relative coordinate conversion in foldedPC
      *
-     * @param rect global coordinates.
-     * @param newRect Converted relative coordinates
-     * @param newDisplayId Current window ID
+     * @param rect Rect relative to the default display
+     * @param newRect Rect relative to the current display
+     * @param newDisplayId Current displayID
      * @return WM_OK means converted, others means not converted.
      */
     WMError ConvertToRelativeCoordinateForFoldPC(const Rect& rect, Rect& newRect, DisplayId& newDisplayId);
