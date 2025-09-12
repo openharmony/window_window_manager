@@ -2771,7 +2771,7 @@ HWTEST_F(DisplayManagerTest, GetPrimaryDisplaySystemDpi, TestSize.Level1)
 {
     float dpi = SingletonContainer::Get<DisplayManager>().GetPrimaryDisplaySystemDpi();
     SingletonContainer::Get<DisplayManagerAdapter>().InitDMSProxy();
-    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    sptr<DisplayInfo> displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetPrimaryDisplayInfo();
     ASSERT_NE(displayInfo, nullptr);
     float primaryDisplaySystemDpi = displayInfo->GetDefaultVirtualPixelRatio();
     EXPECT_EQ(dpi, primaryDisplaySystemDpi);
