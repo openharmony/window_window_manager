@@ -179,7 +179,6 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::UpdateRotateAnimationConfig);
     BindNativeFunction(env, exportObj, "processBackEvent", moduleName, JsSceneSessionManager::ProcessBackEvent);
     BindNativeFunction(env, exportObj, "checkSceneZOrder", moduleName, JsSceneSessionManager::CheckSceneZOrder);
-    BindNativeFunction(env, exportObj, "updateFocus", moduleName, JsSceneSessionManager::UpdateFocus);
     BindNativeFunction(env, exportObj, "initUserInfo", moduleName, JsSceneSessionManager::InitUserInfo);
     BindNativeFunction(env, exportObj, "requestSceneSessionByCall", moduleName,
         JsSceneSessionManager::RequestSceneSessionByCall);
@@ -324,8 +323,6 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::SetUIEffectControllerAliveInUI);
     BindNativeFunction(env, exportObj, "setPiPSettingSwitchStatus", moduleName,
         JsSceneSessionManager::SetPiPSettingSwitchStatus);
-    BindNativeFunction(env, exportObj, "UpdateSystemDecorEnable", moduleName,
-        JsSceneSessionManager::UpdateSystemDecorEnable);
     BindNativeFunction(env, exportObj, "applyFeatureConfig", moduleName,
         JsSceneSessionManager::ApplyFeatureConfig);
     return NapiGetUndefined(env);
@@ -806,13 +803,6 @@ napi_value JsSceneSessionManager::RegisterCallback(napi_env env, napi_callback_i
     WLOGFD("[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnRegisterCallback(env, info) : nullptr;
-}
-
-napi_value JsSceneSessionManager::UpdateFocus(napi_env env, napi_callback_info info)
-{
-    TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI]");
-    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
-    return (me != nullptr) ? me->OnUpdateFocus(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::ProcessBackEvent(napi_env env, napi_callback_info info)
@@ -1644,35 +1634,6 @@ void JsSceneSessionManager::ProcessRegisterCallback(ListenerFunctionType listene
         default:
             break;
     }
-}
-
-napi_value JsSceneSessionManager::OnUpdateFocus(napi_env env, napi_callback_info info)
-{
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARGC_TWO) {
-        WLOGFE("Argc is invalid: %{public}zu", argc);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    int32_t persistentId;
-    if (!ConvertFromJsValue(env, argv[0], persistentId)) {
-        WLOGFE("Failed to convert parameter to persistentId");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    bool isFocused;
-    if (!ConvertFromJsValue(env, argv[1], isFocused)) {
-        WLOGFE("Failed to convert parameter to bool");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    SceneSessionManager::GetInstance().UpdateFocus(persistentId, isFocused);
-    return NapiGetUndefined(env);
 }
 
 napi_value JsSceneSessionManager::OnProcessBackEvent(napi_env env, napi_callback_info info)
@@ -5318,35 +5279,6 @@ napi_value JsSceneSessionManager::OnSetPiPSettingSwitchStatus(napi_env env, napi
         return NapiGetUndefined(env);
     }
     SceneSessionManager::GetInstance().SetPiPSettingSwitchStatus(switchStatus);
-    return NapiGetUndefined(env);
-}
-
-napi_value JsSceneSessionManager::UpdateSystemDecorEnable(napi_env env, napi_callback_info info)
-{
-    TLOGI(WmsLogTag::WMS_DECOR, "in");
-    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
-    return (me != nullptr) ? me->OnUpdateSystemDecorEnable(env, info) : nullptr;
-}
-
-napi_value JsSceneSessionManager::OnUpdateSystemDecorEnable(napi_env env, napi_callback_info info)
-{
-    size_t argc = ARGC_ONE;
-    napi_value argv[ARGC_ONE] = { nullptr };
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != ARGC_ONE) {
-        TLOGE(WmsLogTag::WMS_DECOR, "Argc is invalid: %{public}zu", argc);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    bool enable = true;
-    if (!ConvertFromJsValue(env, argv[0], enable)) {
-        TLOGE(WmsLogTag::WMS_DECOR, "Failed to convert parameter to enable");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    SceneSessionManager::GetInstance().UpdateSystemDecorEnable(enable);
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen

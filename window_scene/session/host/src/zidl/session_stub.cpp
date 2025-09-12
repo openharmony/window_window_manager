@@ -143,6 +143,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetTargetOrientationConfigInfo(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_ASPECT_RATIO):
             return HandleSetAspectRatio(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CONTENT_ASPECT_RATIO):
+            return HandleSetContentAspectRatio(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_WINDOW_ANIMATION_FLAG):
             return HandleSetWindowAnimationFlag(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_CUSTOM_ANIMATION):
@@ -183,6 +185,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetCallingSessionId(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CUSTOM_DECOR_HEIGHT):
             return HandleSetCustomDecorHeight(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DECOR_VISIBLE):
+            return HandleSetDecorVisible(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_PROPERTY):
             return HandleUpdatePropertyByAction(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_ADJUST_KEYBOARD_LAYOUT):
@@ -496,6 +500,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteUint32(static_cast<uint32_t>(property->GetRequestedOrientation()));
         reply.WriteUint32(static_cast<uint32_t>(property->GetUserRequestedOrientation()));
         reply.WriteString(property->GetAppInstanceKey());
+        reply.WriteInt32(property->GetAppIndex());
         reply.WriteBool(property->GetDragEnabled());
         reply.WriteBool(property->GetIsAtomicService());
         reply.WriteBool(property->GetIsAbilityHook());
@@ -507,6 +512,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteString(property->GetAncoRealBundleName());
         MissionInfo missionInfo = property->GetMissionInfo();
         reply.WriteParcelable(&missionInfo);
+        reply.WriteBool(property->GetIsShowDecorInFreeMultiWindow());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -1244,6 +1250,29 @@ int SessionStub::HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply)
     return ERR_NONE;
 }
 
+/** @note @window.layout */
+int SessionStub::HandleSetContentAspectRatio(MessageParcel& data, MessageParcel& reply)
+{
+    float ratio = 0.0f;
+    if (!data.ReadFloat(ratio)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read ratio");
+        return ERR_INVALID_DATA;
+    }
+    bool isPersistent = true;
+    if (!data.ReadBool(isPersistent)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read isPersistent");
+        return ERR_INVALID_DATA;
+    }
+    bool needUpdateRect = true;
+    if (!data.ReadBool(needUpdateRect)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read needUpdateRect");
+        return ERR_INVALID_DATA;
+    }
+    WSError ret = SetContentAspectRatio(ratio, isPersistent, needUpdateRect);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
 int SessionStub::HandleUpdateWindowSceneAfterCustomAnimation(MessageParcel& data, MessageParcel& reply)
 {
     WLOGD("HandleUpdateWindowSceneAfterCustomAnimation!");
@@ -1623,6 +1652,18 @@ int SessionStub::HandleSetCustomDecorHeight(MessageParcel& data, MessageParcel& 
         return ERR_INVALID_DATA;
     }
     SetCustomDecorHeight(height);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetDecorVisible(MessageParcel& data, MessageParcel& reply)
+{
+    bool isVisible = false;
+    if (!data.ReadBool(isVisible)) {
+        TLOGE(WmsLogTag::WMS_DECOR, "Failed to read isVisible");
+        return ERR_INVALID_DATA;
+    }
+    WSError ret = SetDecorVisible(isVisible);
+    reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
 

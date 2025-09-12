@@ -432,9 +432,10 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
             return ret;
         }
         session->NotifySingleHandTransformChange(session->GetSingleHandTransform());
-        auto leashWinSurfaceNode = session->GetLeashWinSurfaceNode();
+        auto leashWinSurfaceNode = session->GetLeashWinShadowSurfaceNode();
         if (leashWinSurfaceNode && sessionProperty) {
             bool lastPrivacyMode = sessionProperty->GetPrivacyMode() || sessionProperty->GetSystemPrivacyMode();
+            AutoRSTransaction trans(session->GetRSLeashWinShadowContext());
             leashWinSurfaceNode->SetSecurityLayer(lastPrivacyMode);
         }
         session->MarkAvoidAreaAsDirty();
@@ -450,11 +451,12 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
             session->specificCallback_->onHandleSecureSessionShouldHide_(session);
             session->UpdateGestureBackEnabled();
         } else {
-            TLOGNI(WmsLogTag::WMS_LIFE,
-                "%{public}s foreground specific callback does not take effect, callback function null", where);
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s foreground specific callback is null", where);
         }
-        if (session->isUIFirstEnabled_ && leashWinSurfaceNode) {
-            leashWinSurfaceNode->SetForceUIFirst(false);
+        auto leashWinShadowSurfaceNode = session->GetLeashWinShadowSurfaceNode();
+        if (session->isUIFirstEnabled_ && leashWinShadowSurfaceNode) {
+            AutoRSTransaction trans(session->GetRSLeashWinShadowContext());
+            leashWinShadowSurfaceNode->SetForceUIFirst(false);
             session->isUIFirstEnabled_ = false;
         }
         return WSError::WS_OK;
@@ -1394,76 +1396,51 @@ WSError SceneSession::GetGlobalMaximizeMode(MaximizeMode& mode)
     }, __func__);
 }
 
-static WSError CheckAspectRatioValid(const sptr<SceneSession>& session, float ratio, float vpr)
-{
-    if (MathHelper::NearZero(ratio)) {
-        return WSError::WS_OK;
-    }
-    if (!session) {
-        return WSError::WS_ERROR_INVALID_PARAM;
-    }
-    auto sessionProperty = session->GetSessionProperty();
-    if (!sessionProperty) {
-        return WSError::WS_ERROR_INVALID_PARAM;
-    }
-    auto limits = sessionProperty->GetWindowLimits();
-    if (session->IsDecorEnable()) {
-        if (limits.minWidth_ && limits.maxHeight_ &&
-            MathHelper::LessNotEqual(ratio, SessionUtils::ToLayoutWidth(limits.minWidth_, vpr) /
-            SessionUtils::ToLayoutHeight(limits.maxHeight_, vpr))) {
-            WLOGE("Failed, because aspectRatio is smaller than minWidth/maxHeight");
-            return WSError::WS_ERROR_INVALID_PARAM;
-        } else if (limits.minHeight_ && limits.maxWidth_ &&
-            MathHelper::GreatNotEqual(ratio, SessionUtils::ToLayoutWidth(limits.maxWidth_, vpr) /
-            SessionUtils::ToLayoutHeight(limits.minHeight_, vpr))) {
-            WLOGE("Failed, because aspectRatio is bigger than maxWidth/minHeight");
-            return WSError::WS_ERROR_INVALID_PARAM;
-        }
-    } else {
-        if (limits.minWidth_ && limits.maxHeight_ && MathHelper::LessNotEqual(ratio,
-            static_cast<float>(limits.minWidth_) / limits.maxHeight_)) {
-            WLOGE("Failed, because aspectRatio is smaller than minWidth/maxHeight");
-            return WSError::WS_ERROR_INVALID_PARAM;
-        } else if (limits.minHeight_ && limits.maxWidth_ && MathHelper::GreatNotEqual(ratio,
-            static_cast<float>(limits.maxWidth_) / limits.minHeight_)) {
-            WLOGE("Failed, because aspectRatio is bigger than maxWidth/minHeight");
-            return WSError::WS_ERROR_INVALID_PARAM;
-        }
-    }
-    return WSError::WS_OK;
-}
-
 /** @note @window.layout */
 WSError SceneSession::SetAspectRatio(float ratio)
 {
-    return PostSyncTask([weakThis = wptr(this), ratio, where = __func__] {
+    return SetContentAspectRatio(ratio, true, true);
+}
+
+WSError SceneSession::SetContentAspectRatio(float ratio, bool isPersistent, bool needUpdateRect)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT,
+        "windowId: %{public}d, ratio: %{public}f, isPersistent: %{public}d, needUpdateRect: %{public}d",
+        GetPersistentId(), ratio, isPersistent, needUpdateRect);
+    return PostSyncTask([weakThis = wptr(this), ratio, isPersistent, needUpdateRect, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", where);
+            return WSError::WS_ERROR_NULLPTR;
         }
-        float vpr = 1.5f; // 1.5f: default virtual pixel ratio
-        auto display = DisplayManager::GetInstance().GetDefaultDisplay();
-        if (display) {
-            vpr = display->GetVirtualPixelRatio();
-            TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s vpr=%{public}f", where, vpr);
+        auto property = session->GetSessionProperty();
+        if (!property) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: property is null", where);
+            return WSError::WS_ERROR_NULLPTR;
         }
-        WSError ret = CheckAspectRatioValid(session, ratio, vpr);
-        if (ret != WSError::WS_OK) {
-            return ret;
+        WindowLimits limits = property->GetWindowLimits();
+        WindowDecoration decoration = session->GetWindowDecoration();
+        if (!SessionUtils::IsAspectRatioValid(ratio, limits, decoration)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s: Invalid ratio: %{public}f", where, ratio);
+            return WSError::WS_ERROR_INVALID_PARAM;
         }
         session->Session::SetAspectRatio(ratio);
         if (session->moveDragController_) {
             session->moveDragController_->SetAspectRatio(ratio);
         }
-        session->SaveAspectRatio(session->GetAspectRatio());
-        WSRect adjustedRect = session->GetSessionRect();
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s Before adjusting, the id:%{public}d, the current rect:%{public}s, "
-            "ratio:%{public}f", where, session->GetPersistentId(), adjustedRect.ToString().c_str(), ratio);
-        if (session->layoutController_->AdjustRectByAspectRatio(adjustedRect, session->IsDecorEnable())) {
-            TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s After adjusting, the id:%{public}d, the adjusted rect:%{public}s",
-                where, session->GetPersistentId(), adjustedRect.ToString().c_str());
-            session->NotifySessionRectChange(adjustedRect, SizeChangeReason::RESIZE);
+        if (isPersistent) {
+            session->SaveAspectRatio(ratio);
+        }
+        if (needUpdateRect) {
+            WSRect originalRect = session->GetSessionRect();
+            WSRect adjustedRect = session->layoutController_->AdjustRectByAspectRatio(originalRect, decoration);
+            if (adjustedRect != originalRect) {
+                session->NotifySessionRectChange(adjustedRect, SizeChangeReason::RESIZE);
+                TLOGNI(WmsLogTag::WMS_LAYOUT,
+                    "%{public}s: windowId: %{public}d, originalRect: %{public}s, adjustedRect: %{public}s",
+                    where, session->GetPersistentId(),
+                    originalRect.ToString().c_str(), adjustedRect.ToString().c_str());
+            }
         }
         return WSError::WS_OK;
     }, __func__);
@@ -2269,7 +2246,7 @@ WSError SceneSession::HandleLayoutAvoidAreaUpdate(AvoidAreaType avoidAreaType)
         // code below aims to check if ai bar avoid area reaches window rect's bottom
         // it should not be removed until unexpected window rect update issues were solved
         if (avoidAreaType == AvoidAreaType::TYPE_NAVIGATION_INDICATOR && isAINavigationBarAvoidAreaValid_ &&
-            !isAINavigationBarAvoidAreaValid_(area, GetSessionRect().height_)) {
+            !isAINavigationBarAvoidAreaValid_(GetSessionProperty()->GetDisplayId(), area, GetSessionRect().height_)) {
             TLOGE(WmsLogTag::WMS_IMMS, "ai bar avoid area dose not reach the bottom of the rect");
             return WSError::WS_OK;
         }
@@ -2285,7 +2262,8 @@ WSError SceneSession::HandleLayoutAvoidAreaUpdate(AvoidAreaType avoidAreaType)
             // code below aims to check if ai bar avoid area reaches window rect's bottom
             // it should not be removed until unexpected window rect update issues were solved
             if (type == AvoidAreaType::TYPE_NAVIGATION_INDICATOR && isAINavigationBarAvoidAreaValid_ &&
-                !isAINavigationBarAvoidAreaValid_(area, GetSessionRect().height_)) {
+                !isAINavigationBarAvoidAreaValid_(GetSessionProperty()->GetDisplayId(),
+                    area, GetSessionRect().height_)) {
                 TLOGE(WmsLogTag::WMS_IMMS, "ai bar avoid area dose not reach the bottom "
                     "of the rect while traversing all avoid area type");
                 continue;
@@ -2909,7 +2887,8 @@ WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
             // it should not be removed until unexpected window rect update issues were solved
             if (type == AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
                 if (session->isAINavigationBarAvoidAreaValid_ &&
-                    !session->isAINavigationBarAvoidAreaValid_(area, session->GetSessionRect().height_)) {
+                    !session->isAINavigationBarAvoidAreaValid_(session->GetSessionProperty()->GetDisplayId(),
+                        area, session->GetSessionRect().height_)) {
                     continue;
                 }
             }
@@ -3227,6 +3206,9 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
             TLOGD(WmsLogTag::WMS_LAYOUT, "moveDragController_ is null");
             return Session::TransferPointerEvent(pointerEvent, needNotifyClient, isExecuteDelayRaise);
         }
+        if (isPointDown) {
+            moveDragController_->SetWindowDecoration(GetWindowDecoration());
+        }
         moveDragController_->SetScale(GetScaleX(), GetScaleY()); // need scale ratio to calculate translate
         SetParentRect();
         if (IsDraggable() &&
@@ -3398,15 +3380,15 @@ WSError SceneSession::RequestSessionBack(bool needMoveToBackground)
             return WSError::WS_DO_NOTHING;
         }
         if (g_enableForceUIFirst) {
-            AutoRSTransaction trans(session->GetRSUIContext());
-            auto leashWinSurfaceNode = session->GetLeashWinSurfaceNode();
-            if (leashWinSurfaceNode) {
-                leashWinSurfaceNode->SetForceUIFirst(true);
+            auto leashWinShadowSurfaceNode = session->GetLeashWinShadowSurfaceNode();
+            if (leashWinShadowSurfaceNode) {
+                AutoRSTransaction trans(session->GetRSLeashWinShadowContext());
+                leashWinShadowSurfaceNode->SetForceUIFirst(true);
                 session->isUIFirstEnabled_ = true;
-                TLOGNI(WmsLogTag::WMS_EVENT, "%{public}s leashWinSurfaceNode_ SetForceUIFirst id:%{public}u!",
+                TLOGNI(WmsLogTag::WMS_EVENT, "%{public}s leashWinShadowSurfaceNode_ SetForceUIFirst id:%{public}u!",
                     where, session->GetPersistentId());
             } else {
-                TLOGNI(WmsLogTag::WMS_EVENT, "%{public}s failed, leashWinSurfaceNode_ null id:%{public}u",
+                TLOGNI(WmsLogTag::WMS_EVENT, "%{public}s failed, leashWinShadowSurfaceNode_ null id:%{public}u",
                     where, session->GetPersistentId());
             }
         }
@@ -3459,6 +3441,7 @@ void SceneSession::NotifySessionDisplayIdChange(uint64_t displayId)
         }
         if (session->sessionDisplayIdChangeFunc_) {
             session->sessionDisplayIdChangeFunc_(displayId);
+            session->HandleLayoutAvoidAreaUpdate();
         }
     }, __func__);
 }
@@ -4688,7 +4671,7 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "property is null");
         return;
     }
-    auto surfaceNode = GetSurfaceNode();
+    auto surfaceNode = GetShadowSurfaceNode();
     if (!surfaceNode) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode_ is null");
         return;
@@ -4702,10 +4685,11 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
     property->SetPrivacyMode(isPrivacy);
     property->SetSystemPrivacyMode(isPrivacy);
     {
-        AutoRSTransaction trans(GetRSUIContext());
+        AutoRSTransaction trans(GetRSShadowContext());
         surfaceNode->SetSecurityLayer(isPrivacy);
-        auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
+        auto leashWinSurfaceNode = GetLeashWinShadowSurfaceNode();
         if (leashWinSurfaceNode != nullptr) {
+            AutoRSTransaction leashTrans(GetRSLeashWinShadowContext());
             leashWinSurfaceNode->SetSecurityLayer(isPrivacy);
         }
     }
@@ -4753,7 +4737,7 @@ WMError SceneSession::SetSnapshotSkip(bool isSkip)
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "property is null");
         return WMError::WM_ERROR_DESTROYED_OBJECT;
     }
-    auto surfaceNode = GetSurfaceNode();
+    auto surfaceNode = GetShadowSurfaceNode();
     if (!surfaceNode) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode_ is null");
         return WMError::WM_ERROR_DESTROYED_OBJECT;
@@ -4767,10 +4751,11 @@ WMError SceneSession::SetSnapshotSkip(bool isSkip)
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, isSkip: %{public}d", GetWindowId(), isSkip);
     property->SetSnapshotSkip(isSkip);
     {
-        AutoRSTransaction trans(GetRSUIContext());
+        AutoRSTransaction trans(GetRSShadowContext());
         surfaceNode->SetSkipLayer(isSkip);
-        auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
+        auto leashWinSurfaceNode = GetLeashWinShadowSurfaceNode();
         if (leashWinSurfaceNode != nullptr) {
+            AutoRSTransaction leashTrans(GetRSLeashWinShadowContext());
             leashWinSurfaceNode->SetSkipLayer(isSkip);
         }
     }
@@ -4779,7 +4764,7 @@ WMError SceneSession::SetSnapshotSkip(bool isSkip)
 
 void SceneSession::SetWatermarkEnabled(const std::string& watermarkName, bool isEnabled)
 {
-    auto surfaceNode = GetSurfaceNode();
+    auto surfaceNode = GetShadowSurfaceNode();
     if (!surfaceNode) {
         TLOGE(WmsLogTag::DEFAULT, "surfaceNode is null");
         return;
@@ -4787,9 +4772,10 @@ void SceneSession::SetWatermarkEnabled(const std::string& watermarkName, bool is
     TLOGI(WmsLogTag::DEFAULT, "watermarkName:%{public}s, isEnabled:%{public}d, wid:%{public}d",
         watermarkName.c_str(), isEnabled, GetPersistentId());
     {
-        AutoRSTransaction trans(GetRSUIContext());
+        AutoRSTransaction trans(GetRSShadowContext());
         surfaceNode->SetWatermarkEnabled(watermarkName, isEnabled);
-        if (auto leashWinSurfaceNode = GetLeashWinSurfaceNode()) {
+        if (auto leashWinSurfaceNode = GetLeashWinShadowSurfaceNode()) {
+            AutoRSTransaction leashTrans(GetRSLeashWinShadowContext());
             leashWinSurfaceNode->SetWatermarkEnabled(watermarkName, isEnabled);
         }
     }
@@ -4880,10 +4866,10 @@ void SceneSession::CloneWindow(NodeId surfaceNodeId, bool needOffScreen)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::CloneWindow");
     AutoRSTransaction trans(GetRSUIContext());
-    if (auto surfaceNode = GetSurfaceNode()) {
+    if (auto shadowSurfaceNode = GetShadowSurfaceNode()) {
         TLOGI(WmsLogTag::WMS_PC, "%{public}s this: %{public}" PRIu64 " cloned: %{public}" PRIu64,
-            surfaceNode->GetName().c_str(), surfaceNode->GetId(), surfaceNodeId);
-        surfaceNode->SetClonedNodeInfo(surfaceNodeId, needOffScreen);
+            shadowSurfaceNode->GetName().c_str(), shadowSurfaceNode->GetId(), surfaceNodeId);
+        shadowSurfaceNode->SetClonedNodeInfo(surfaceNodeId, needOffScreen);
     }
 }
 
@@ -4968,6 +4954,49 @@ bool SceneSession::IsAppOrLowerSystemSession() const
         return true;
     }
     return IsAppSession();
+}
+
+/** @note @window.focus */
+bool SceneSession::IsBlockingFocusFullScreenSystemPanel() const
+{
+    bool blockingFocus = GetBlockingFocus();
+    if (!blockingFocus) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "not blocking focus window");
+        return false;
+    }
+    if (!(systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow())) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "device type unmatched");
+        return false;
+    }
+    WindowType windowType = GetWindowType();
+    //Get height and width of current screen
+    uint64_t displayId = GetSessionProperty()->GetDisplayId();
+    auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "get display object failed of display: %{public}" PRIu64, displayId);
+        return false;
+    }
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "get display info failed of display: %{public}" PRIu64, displayId);
+        return false;
+    }
+    if ((windowType == WindowType::WINDOW_TYPE_PANEL || windowType == WindowType::WINDOW_TYPE_GLOBAL_SEARCH ||
+         windowType == WindowType::WINDOW_TYPE_NEGATIVE_SCREEN) &&
+        (GetSessionRect().height_ == displayInfo->GetHeight() && GetSessionRect().width_ == displayInfo->GetWidth())) {
+        return true;
+    }
+    TLOGD(WmsLogTag::WMS_FOCUS, "current session is not full-screen, "
+          "screen w: %{public}d, h: %{public}d, window w: %{public}d, h: %{public}d",
+          displayInfo->GetWidth(), displayInfo->GetHeight(), GetSessionRect().width_, GetSessionRect().height_);
+    return false;
+}
+
+/** @note @window.focus */
+bool SceneSession::IsAppMainWindowFullScreen()
+{
+    auto mainSession = GetMainSession();
+    return mainSession == nullptr ? false : (mainSession->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
 }
 
 /** @note @window.focus */
@@ -7369,6 +7398,12 @@ void SceneSession::SetTemporarilyShowWhenLocked(bool isTemporarilyShowWhenLocked
     isTemporarilyShowWhenLocked_.store(isTemporarilyShowWhenLocked);
     TLOGI(WmsLogTag::WMS_SCB, "SetTemporarilyShowWhenLocked successfully, target:%{public}u",
         isTemporarilyShowWhenLocked);
+    if (systemConfig_.freeMultiWindowSupport_) {
+        const bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
+        const bool isShow = !(isTemporarilyShowWhenLocked && (systemConfig_.IsFreeMultiWindowMode() && !isPcMode));
+        GetSessionProperty()->SetIsShowDecorInFreeMultiWindow(isShow);
+        SetIsShowDecorInFreeMultiWindow(isShow);
+    }
 }
 
 bool SceneSession::IsTemporarilyShowWhenLocked() const
@@ -7378,15 +7413,18 @@ bool SceneSession::IsTemporarilyShowWhenLocked() const
 
 void SceneSession::SetSkipDraw(bool skip)
 {
-    auto surfaceNode = GetSurfaceNode();
-    if (!surfaceNode) {
-        WLOGFE("surfaceNode_ is null");
+    auto shadowSurfaceNode = GetShadowSurfaceNode();
+    if (!shadowSurfaceNode) {
+        WLOGFE("shadowSurfaceNode is null");
         return;
     }
-    AutoRSTransaction trans(GetRSUIContext());
-    surfaceNode->SetSkipDraw(skip);
-    if (auto leashWinSurfaceNode = GetLeashWinSurfaceNode()) {
-        leashWinSurfaceNode->SetSkipDraw(skip);
+    {
+        AutoRSTransaction trans(GetRSShadowContext());
+        shadowSurfaceNode->SetSkipDraw(skip);
+    }
+    if (auto leashShadowSurfaceNode = GetLeashWinShadowSurfaceNode()) {
+        AutoRSTransaction trans(GetRSLeashWinShadowContext());
+        leashShadowSurfaceNode->SetSkipDraw(skip);
     }
 }
 
@@ -8288,6 +8326,46 @@ void SceneSession::SetCustomDecorHeight(int32_t height)
     customDecorHeight_ = height;
 }
 
+WSError SceneSession::SetDecorVisible(bool isVisible)
+{
+    std::lock_guard lock(customDecorHeightMutex_);
+    isDecorVisible_ = isVisible;
+    return WSError::WS_OK;
+}
+
+bool SceneSession::IsDecorVisible() const
+{
+    std::lock_guard lock(customDecorHeightMutex_);
+    return isDecorVisible_;
+}
+
+WindowDecoration SceneSession::GetWindowDecoration() const
+{
+    auto getTopDecorInPx = [&, where = __func__]() -> uint32_t {
+        if (!IsDecorVisible() || !IsDecorEnable()) {
+            TLOGW(WmsLogTag::WMS_DECOR, "%{public}s: decor not visible or not enable", where);
+            return 0;
+        }
+        auto displayId = GetDisplayId();
+        auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
+        if (!display) {
+            TLOGW(WmsLogTag::WMS_DECOR, "%{public}s: display is null, displayId: %{public}" PRIu64, where, displayId);
+            return 0;
+        }
+        float vpr = display->GetVirtualPixelRatio();
+        constexpr int32_t defaultTopDecorHeightVp = 37;
+        std::lock_guard lock(customDecorHeightMutex_);
+        auto decorHeightVp = customDecorHeight_ != 0 ? customDecorHeight_ : defaultTopDecorHeightVp;
+        TLOGD(WmsLogTag::WMS_DECOR, "%{public}s: decorHeight: %{public}d, vpr: %{public}f", where, decorHeightVp, vpr);
+        return static_cast<uint32_t>(decorHeightVp * vpr);
+    };
+    // Only the top decoration (title bar) currently has height. Left, right, and bottom are set to 0 by default.
+    // If future specifications introduce additional decorations, this return value should be updated accordingly.
+    WindowDecoration decoration{0, getTopDecorInPx(), 0, 0};
+    TLOGD(WmsLogTag::WMS_DECOR, "decoration: %{public}s", decoration.ToString().c_str());
+    return decoration;
+}
+
 void SceneSession::UpdateGestureBackEnabled()
 {
     if (specificCallback_ != nullptr &&
@@ -8597,7 +8675,7 @@ uint32_t SceneSession::GetMaxSubWindowLevel() const
 
 void SceneSession::SetColorSpace(ColorSpace colorSpace)
 {
-    auto surfaceNode = GetSurfaceNode();
+    auto surfaceNode = GetShadowSurfaceNode();
     if (!surfaceNode) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode is invalid");
         return;
@@ -8608,7 +8686,7 @@ void SceneSession::SetColorSpace(ColorSpace colorSpace)
         colorGamut = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DCI_P3;
     }
     {
-        AutoRSTransaction trans(GetRSUIContext());
+        AutoRSTransaction trans(GetRSShadowContext());
         surfaceNode->SetColorSpace(colorGamut);
     }
 }
@@ -8811,6 +8889,7 @@ void SceneSession::ModifyRSAnimatableProperty(bool isDefaultSidebarBlur, bool is
     constexpr int32_t duration = 150;
     if (isDefaultSidebarBlur) {
         auto rsUIContext = GetRSUIContext();
+        AutoRSTransaction trans(rsUIContext);
         if (isNeedAnimation) {
             Rosen::RSAnimationTimingProtocol timingProtocol;
             timingProtocol.SetDuration(duration);
@@ -9230,7 +9309,7 @@ bool SceneSession::IsSubWindowOutlineEnabled() const
 WSError SceneSession::SetWindowTransitionAnimation(WindowTransitionType transitionType,
     const TransitionAnimation& animation)
 {
-    if (!(IsPcWindow() || IsFreeMultiWindowMode())) {
+    if (!(IsPcWindow() || IsFreeMultiWindowMode() || GetSessionProperty()->GetIsPcAppInPad())) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Not pc or pad device");
         return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -9355,14 +9434,26 @@ WSError SceneSession::SetFrameRectForPartialZoomIn(const Rect& frameRect)
 
 WSError SceneSession::SetFrameRectForPartialZoomInInner(const Rect& frameRect)
 {
-    auto surfaceNode = GetSurfaceNode();
-    if (surfaceNode == nullptr) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "surface node is null");
+    if (!mainHandler_) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Main handler is nullptr, id: %{public}d.", GetPersistentId());
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
-    AutoRSTransaction trans(GetRSUIContext(), true);
-    surfaceNode->SetRegionToBeMagnified({ frameRect.posX_, frameRect.posY_, frameRect.width_, frameRect.height_ });
-    TLOGI(WmsLogTag::WMS_ANIMATION, "frameRect: %{public}s", frameRect.ToString().c_str());
+    mainHandler_->PostTask([weakThis = wptr(this), frameRect, where = __func__]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s, session is null", where);
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        auto surfaceNode = session->GetSurfaceNode();
+        if (surfaceNode == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s, surface node is null", where);
+            return WSError::WS_ERROR_INVALID_WINDOW;
+        }
+        AutoRSTransaction trans(session->GetRSUIContext(), true);
+        surfaceNode->SetRegionToBeMagnified({ frameRect.posX_, frameRect.posY_, frameRect.width_, frameRect.height_ });
+        TLOGNI(WmsLogTag::WMS_ANIMATION, "%{public}s, frameRect: %{public}s", where, frameRect.ToString().c_str());
+        return WSError::WS_OK;
+    }, __func__, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
     return WSError::WS_OK;
 }
 

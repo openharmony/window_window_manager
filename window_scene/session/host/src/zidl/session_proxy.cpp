@@ -328,6 +328,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         property->SetRequestedOrientation(static_cast<Orientation>(reply.ReadUint32()));
         property->SetUserRequestedOrientation(static_cast<Orientation>(reply.ReadUint32()));
         property->SetAppInstanceKey(reply.ReadString());
+        property->SetAppIndex(reply.ReadInt32());
         property->SetDragEnabled(reply.ReadBool());
         property->SetIsAtomicService(reply.ReadBool());
         property->SetIsAbilityHook(reply.ReadBool());
@@ -343,6 +344,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
             return WSError::WS_ERROR_IPC_FAILED;
         }
         property->SetMissionInfo(*missionInfo);
+        property->SetIsShowDecorInFreeMultiWindow(reply.ReadBool());
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
@@ -964,9 +966,11 @@ WMError SessionProxy::OnUpdateColorMode(const std::string& colorMode, bool hasDa
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_COLOR_MODE),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
+    int sendCode = remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_COLOR_MODE),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed, code: %{public}d", sendCode);
         return WMError::WM_ERROR_IPC_FAILED;
     }
     return WMError::WM_OK;
@@ -1262,9 +1266,11 @@ WMError SessionProxy::NotifySnapshotUpdate()
         TLOGE(WmsLogTag::WMS_PATTERN, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_SNAPSHOT_UPDATE),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "SendRequest failed");
+    int sendCode = remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_SNAPSHOT_UPDATE),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "SendRequest failed, code: %{public}d", sendCode);
         return WMError::WM_ERROR_IPC_FAILED;
     }
     return WMError::WM_OK;
@@ -1638,6 +1644,43 @@ WSError SessionProxy::SetAspectRatio(float ratio)
     if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_ASPECT_RATIO),
                             data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
+/** @note @window.layout */
+WSError SessionProxy::SetContentAspectRatio(float ratio, bool isPersistent, bool needUpdateRect)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to write interface token");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteFloat(ratio)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to write ratio");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(isPersistent)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to write isPersistent");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(needUpdateRect)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to write needUpdateRect");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int sendRet = remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CONTENT_ASPECT_RATIO), data, reply, option);
+    if (sendRet != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to send request, error = %{public}d", sendRet);
         return WSError::WS_ERROR_IPC_FAILED;
     }
     int32_t ret = reply.ReadInt32();
@@ -2363,9 +2406,11 @@ void SessionProxy::SetCallingSessionId(const uint32_t callingSessionId)
         TLOGE(WmsLogTag::DEFAULT, "remote is null");
         return;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CALLING_SESSION_ID),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
+    int sendCode = remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CALLING_SESSION_ID),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed, code: %{public}d", sendCode);
         return;
     }
 }
@@ -2395,6 +2440,34 @@ void SessionProxy::SetCustomDecorHeight(int32_t height)
     }
 }
 
+WSError SessionProxy::SetDecorVisible(bool isVisible)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_DECOR, "Failed to write interface token");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(isVisible)) {
+        TLOGE(WmsLogTag::WMS_DECOR, "Failed to write isVisible");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int sendRet = remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DECOR_VISIBLE), data, reply, option);
+    if (sendRet != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_DECOR, "Failed to send request, error = %{public}d", sendRet);
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
 WSError SessionProxy::AdjustKeyboardLayout(const KeyboardLayoutParams& params)
 {
     MessageParcel data;
@@ -2413,9 +2486,11 @@ WSError SessionProxy::AdjustKeyboardLayout(const KeyboardLayoutParams& params)
         TLOGE(WmsLogTag::DEFAULT, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_ADJUST_KEYBOARD_LAYOUT),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
+    int sendCode = remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_ADJUST_KEYBOARD_LAYOUT),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed, code: %{public}d", sendCode);
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return static_cast<WSError>(reply.ReadInt32());
@@ -2439,9 +2514,11 @@ WSError SessionProxy::ChangeKeyboardEffectOption(const KeyboardEffectOption& eff
         TLOGE(WmsLogTag::DEFAULT, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CHANGE_KEYBOARD_VIEW_MODE),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
+    int sendCode = remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CHANGE_KEYBOARD_VIEW_MODE),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed, code: %{public}d", sendCode);
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return WSError::WS_OK;
@@ -3308,10 +3385,11 @@ void SessionProxy::NotifyWindowAttachStateListenerRegistered(bool registered)
         TLOGE(WmsLogTag::WMS_MAIN, "remote is null");
         return;
     }
-    if (remote->SendRequest(
+    int sendCode = remote->SendRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_WINDOW_ATTACH_STATE_LISTENER_REGISTERED),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed");
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed, code: %{public}d", sendCode);
     }
 }
 
@@ -3333,9 +3411,11 @@ void SessionProxy::NotifyKeyboardWillShowRegistered(bool registered)
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Remote is null");
         return;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_WILL_SHOW_REGISTERED),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
+    int sendCode = remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_WILL_SHOW_REGISTERED),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed, code: %{public}d", sendCode);
     }
 }
 
@@ -3357,9 +3437,11 @@ void SessionProxy::NotifyKeyboardWillHideRegistered(bool registered)
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Remote is null");
         return;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_WILL_HIDE_REGISTERED),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
+    int sendCode = remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_WILL_HIDE_REGISTERED),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed, code: %{public}d", sendCode);
     }
 }
 
@@ -3381,9 +3463,11 @@ void SessionProxy::NotifyKeyboardDidShowRegistered(bool registered)
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Remote is null");
         return;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_DID_SHOW_REGISTERED),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
+    int sendCode = remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_DID_SHOW_REGISTERED),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed, code: %{public}d", sendCode);
     }
 }
 
@@ -3405,9 +3489,11 @@ void SessionProxy::NotifyKeyboardDidHideRegistered(bool registered)
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Remote is null");
         return;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_DID_HIDE_REGISTERED),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
+    int sendCode = remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_DID_HIDE_REGISTERED),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed, code: %{public}d", sendCode);
     }
 }
 

@@ -151,6 +151,7 @@ ohos_shared_library("sms") {
 
   deps = [
     ":mock_session_manager_service_stub",
+    "${window_base_path}/dm:libdm",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/common:window_scene_common",
@@ -170,6 +171,7 @@ ohos_shared_library("sms") {
     "hilog:libhilog",
     "image_framework:image_native",
     "ipc:ipc_single",
+    "os_account:os_account_innerkits",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]

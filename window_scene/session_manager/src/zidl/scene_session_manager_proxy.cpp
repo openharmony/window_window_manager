@@ -2743,9 +2743,11 @@ WMError SceneSessionManagerProxy::GetCallingWindowWindowStatus(int32_t persisten
         TLOGE(WmsLogTag::WMS_KEYBOARD, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_STATUS),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
+    int sendCode = remote->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_STATUS),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed, code: %{public}d", sendCode);
         return WMError::WM_ERROR_IPC_FAILED;
     }
     auto ret = static_cast<WMError>(reply.ReadInt32());
@@ -2773,9 +2775,11 @@ WMError SceneSessionManagerProxy::GetCallingWindowRect(int32_t persistentId, Rec
         TLOGE(WmsLogTag::WMS_KEYBOARD, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_RECT),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
+    int sendCode = remote->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_RECT),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed, code: %{public}d", sendCode);
         return WMError::WM_ERROR_IPC_FAILED;
     }
     auto ret = static_cast<WMError>(reply.ReadInt32());
@@ -3360,9 +3364,11 @@ WMError SceneSessionManagerProxy::SetImageForRecent(uint32_t imgResourceId, Imag
         TLOGE(WmsLogTag::WMS_PATTERN, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_IMAGE_FOR_RECENT),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "SendRequest failed");
+    int sendCode = remote->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_IMAGE_FOR_RECENT),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "SendRequest failed, code: %{public}d", sendCode);
         return WMError::WM_ERROR_IPC_FAILED;
     }
     uint32_t ret = 0;
@@ -3619,9 +3625,11 @@ WMError SceneSessionManagerProxy::SetStartWindowBackgroundColor(
         TLOGE(WmsLogTag::WMS_PATTERN, "Remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerMessage::TRANS_ID_SET_START_WINDOW_BACKGROUND_COLOR), data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "SendRequest failed");
+    int sendCode = remote->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_START_WINDOW_BACKGROUND_COLOR),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "SendRequest failed, code: %{public}d", sendCode);
         return WMError::WM_ERROR_IPC_FAILED;
     }
     int32_t ret = 0;
@@ -3788,7 +3796,7 @@ WMError SceneSessionManagerProxy::CreateUIEffectController(const sptr<IUIEffectC
     controllerId = reply.ReadInt32();
     sptr<IRemoteObject> controllerObject = reply.ReadRemoteObject();
     if (controllerObject == nullptr) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "receive filter failed");
+        TLOGE(WmsLogTag::WMS_ANIMATION, "receive controller object failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     controller = iface_cast<IUIEffectController>(controllerObject);

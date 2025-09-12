@@ -130,7 +130,8 @@ public:
     virtual DMError DestroyVirtualScreen(ScreenId screenId) override;
     DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height) override;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
-        ScreenId& screenGroupId, bool forceMirror = false) override;
+        ScreenId& screenGroupId, const RotationOption& rotationOption = {Rotation::ROTATION_0, false},
+        bool forceMirror = false) override;
     virtual DMError MakeMirrorForRecord(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) override;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
@@ -200,17 +201,18 @@ public:
 
     void ChangeScreenGroup(sptr<ScreenSessionGroup> group, const std::vector<ScreenId>& screens,
              const std::vector<Point>& startPoints, bool filterScreen, ScreenCombination combination,
-             DMRect mainScreenRegion = DMRect::NONE());
+             DMRect mainScreenRegion = DMRect::NONE(),
+             const RotationOption& rotationOption = {Rotation::ROTATION_0, false});
 
     bool RemoveChildFromGroup(sptr<ScreenSession> screen, sptr<ScreenSessionGroup> screenGroup);
 
     void AddScreenToGroup(sptr<ScreenSessionGroup> group,
         const std::vector<ScreenId>& addScreens, const std::vector<Point>& addChildPos,
-        std::map<ScreenId, bool>& removeChildResMap);
+        std::map<ScreenId, bool>& removeChildResMap, const RotationOption& rotationOption);
     bool CheckScreenInScreenGroup(sptr<ScreenSession> screen) const;
 
     DMError SetMirror(ScreenId screenId, std::vector<ScreenId> screens, DMRect mainScreenRegion,
-        bool forceMirror = false);
+        const RotationOption& rotationOption, bool forceMirror = false);
     DMError StopScreens(const std::vector<ScreenId>& screenIds, ScreenCombination stopCombination);
 
     void NotifyScreenConnected(sptr<ScreenInfo> screenInfo);
@@ -518,6 +520,7 @@ private:
     void OnHgmRefreshRateChange(uint32_t refreshRate);
     sptr<ScreenSession> GetOrCreateScreenSession(ScreenId screenId);
     void CreateScreenProperty(ScreenId screenId, ScreenProperty& property);
+    static const std::string GetScreenName(ScreenId screenId);
     void InitScreenProperty(ScreenId screenId, RSScreenModeInfo& screenMode,
         RSScreenCapability& screenCapability, ScreenProperty& property);
     RRect GetScreenBounds(ScreenId screenId, RSScreenModeInfo& screenMode);
@@ -556,6 +559,7 @@ private:
     void SetInnerScreenFallbackPlan(sptr<ScreenSession> screenSession);
     int32_t GetCurrentInUseScreenNumber();
     void ReportHandleScreenEvent(ScreenEvent screenEvent, ScreenCombination screenCombination);
+    void NotifyUserClientProxy(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
     void HandleScreenConnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
     void HandleScreenDisconnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
     void HandlePhysicalMirrorDisconnect(sptr<ScreenSession> screenSession, ScreenId screenId, bool phyMirrorEnable);
@@ -566,6 +570,7 @@ private:
     ScreenRotation ConvertOffsetToCorrectRotation(int32_t phyOffset);
     Rotation ConvertIntToRotation(int32_t rotation);
     void MultiScreenModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, const std::string& operateType);
+    void SetClientInner(int32_t userId, const sptr<IScreenSessionManagerClient>& client);
     void OperateModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, sptr<ScreenSession>& firstSession,
         sptr<ScreenSession>& secondarySession, const std::string& operateMode);
     void SetClientInner(int32_t newUserId);
@@ -581,7 +586,9 @@ private:
     void NotifyCaptureStatusChanged();
     void NotifyCaptureStatusChanged(bool IsCaptured);
     DMError DoMakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
-        DMRect mainScreenRegion, ScreenId& screenGroupId, bool forceMirror = false);
+        DMRect mainScreenRegion, ScreenId& screenGroupId,
+        const RotationOption& rotationOption = {Rotation::ROTATION_0, false},
+        bool forceMirror = false);
     bool OnMakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
     bool OnRemoteDied(const sptr<IRemoteObject>& agent);
     std::string TransferTypeToString(ScreenType type) const;
@@ -622,6 +629,7 @@ private:
         sptr<ScreenSession>& secondScreenSession, MultiScreenPositionOptions mainScreenOptions,
         MultiScreenPositionOptions secondScreenOption);
     void HandleSuperFoldStatusLocked(bool isLocked);
+    void SetDisplayRegionAndAreaFixed(Rotation rotation, DMRect& displayRegion, DMRect& displayAreaFixed);
     void CalculateRotatedDisplay(Rotation rotation, const DMRect& screenRegion, DMRect& displayRegion, DMRect& displayArea);
     void CalculateScreenArea(const DMRect& displayRegion, const DMRect& displayArea, const DMRect& screenRegion, DMRect& screenArea);
     void DisconnectScreenIfScreenInfoNull(sptr<ScreenSession>& screenSession);
@@ -650,6 +658,15 @@ private:
     void SetGotScreenOffAndWakeUpBlock();
     void WakeUpPictureFrameBlock(DisplayEvent event);
 
+    /**
+     * multi user concurrency
+     */
+    static bool IsConcurrentUser();
+    void ActiveUser(int32_t userId);
+    DisplayId GetUserDisplayId(int32_t userId);
+    int32_t GetActiveUserByDisplayId(DisplayId displayId);
+    ScreenId GenerateSmsScreenId(ScreenId rsScreenId);
+    
     class ScreenIdManager {
     friend class ScreenSessionGroup;
     public:
@@ -688,6 +705,17 @@ private:
     int32_t currentScbPId_ { -1 };
     int32_t switchId_ { -1 };
     std::vector<int32_t> oldScbPids_ {};
+    std::map<int32_t, sptr<IScreenSessionManagerClient>> multiClientProxyMap_;
+    std::mutex multiClientProxyMapMutex_;
+
+    /*
+        example:
+        user100:    screen0 active=0
+        user101:    screen0 active=1
+        user102:    screen1 active=1
+    */
+    std::map<int32_t, std::pair<bool, ScreenId>> userScreenMap_;
+    std::mutex userScreenMapMutex_;
     std::map<int32_t, sptr<IScreenSessionManagerClient>> clientProxyMap_;
     FoldDisplayMode oldScbDisplayMode_ = FoldDisplayMode::UNKNOWN;
 
@@ -870,6 +898,8 @@ private:
     void SwapScreenWeightAndHeight(sptr<ScreenSession>& screenSession);
     Rotation GetOldDisplayModeRotation(FoldDisplayMode oldDisplayMode, Rotation rotation);
     void HandleScreenRotationAndBoundsWhenSetClient(sptr<ScreenSession>& screenSession);
+    void HandleFoldDeviceScreenConnect(ScreenId screenId, const sptr<ScreenSession>& screenSession,
+        bool phyMirrorEnable, ScreenEvent screenEvent);
 
     LowTempMode lowTemp_ {LowTempMode::UNKNOWN};
     std::mutex lowTempMutex_;
@@ -877,6 +907,7 @@ private:
     std::atomic<DisplayGroupId> displayGroupNum_ { 1 };
     std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap_;
     std::shared_mutex rotationCorrectionMutex_;
+    std::atomic<bool> firstSCBConnect_ = false;
 
     // Fold Screen duringcall
     bool duringCallState_ = false;

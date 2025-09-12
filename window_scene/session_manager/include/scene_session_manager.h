@@ -318,7 +318,6 @@ public:
     WMError RequestFocusStatusBySA(int32_t persistentId, bool isFocused = true,
         bool byForeground = true, FocusChangeReason reason = FocusChangeReason::SA_REQUEST) override;
     void RequestAllAppSessionUnfocus();
-    WSError UpdateFocus(int32_t persistentId, bool isFocused);
     WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override;
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
     WSError GetFocusSessionToken(sptr<IRemoteObject>& token, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
@@ -809,7 +808,6 @@ public:
 
     std::vector<sptr<SceneSession>> GetSceneSessions(ScreenId screenId);
     WMError UpdateScreenLockState(int32_t persistentId);
-    WMError UpdateSystemDecorEnable(bool enable);
 
 protected:
     SceneSessionManager();
@@ -1043,7 +1041,7 @@ private:
     WSError RequestSceneSessionActivationInner(sptr<SceneSession>& sceneSession, bool isNewActive,
         int32_t requestId = DEFAULT_REQUEST_FROM_SCB_ID) REQUIRES(SCENE_GUARD);
     WSError SetBrightness(const sptr<SceneSession>& sceneSession, float brightness);
-    void PostBrightnessTask(const sptr<SceneSession>& sceneSession, float brightness);
+    void PostBrightnessTask(float brightness);
     WSError UpdateBrightness(int32_t persistentId);
     void SetDisplayBrightness(float brightness);
     float GetDisplayBrightness() const;
@@ -1250,7 +1248,7 @@ private:
     SystemSessionConfig systemConfig_;
     float snapshotScale_ = 0.5;
     int32_t brightnessSessionId_ = INVALID_SESSION_ID;
-    std::atomic<float> displayBrightness_ = UNDEFINED_BRIGHTNESS;
+    float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     bool isScreenLocked_ { false };
     bool isPrepareTerminateEnable_ { false };
 
@@ -1449,7 +1447,6 @@ private:
      * Window Watermark
      */
     bool SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession);
-    void RemoveProcessWatermarkPid(int32_t pid);
     std::vector<NodeId> GetSessionNodeIdsAndWatermarkNameByPid(int32_t pid, std::string& watermarkName);
     void SetWatermarkForSession(const sptr<SceneSession>& session);
     void ClearWatermarkForSession(const sptr<SceneSession>& session);
@@ -1526,7 +1523,7 @@ private:
     NotifyRootSceneAvoidAreaChangeFunc onNotifyAvoidAreaChangeForRootFunc_;
     OnFlushUIParamsFunc onFlushUIParamsFunc_;
     IsRootSceneLastFrameLayoutFinishedFunc isRootSceneLastFrameLayoutFinishedFunc_;
-    bool isAINavigationBarVisible_ = false;
+    std::unordered_map<uint64_t, bool> isAINavigationBarVisible_;
     std::shared_mutex currAINavigationBarAreaMapMutex_;
     std::map<uint64_t, WSRect> currAINavigationBarAreaMap_;
     std::mutex nextAvoidRectInfoMapMutex_;
@@ -1721,6 +1718,7 @@ private:
     void UpdateAllStartingWindowRdb();
     bool needUpdateRdb_ = true;
     std::string GetCallerSessionColorMode(const SessionInfo& sessionInfo);
+    void NotifySessionScreenLockedChange(bool isScreenLocked);
 };
 } // namespace OHOS::Rosen
 

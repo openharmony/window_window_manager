@@ -45,6 +45,7 @@ constexpr int WINDOW_NAME_TYPE_VOICEINPUT = 2;
 const std::string SCREENSHOT_WINDOW_NAME_PREFIX = "ScreenShotWindow";
 const std::string PREVIEW_WINDOW_NAME_PREFIX = "PreviewWindow";
 const std::string VOICEINPUT_WINDOW_NAME_PREFIX = "__VoiceHardwareInput";
+const std::string SCREEN_LOCK_WINDOW = "scbScreenLock";
 } // namespace
 
 static bool operator==(const MMI::Rect left, const MMI::Rect right)
@@ -192,10 +193,15 @@ void SceneSessionDirtyManager::CalSpecialNotRotateTransform(const sptr<SceneSess
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
         return;
     }
-
+    auto physicalRotation = screenProperty.GetPhysicalRotation();
+    auto componentRotation = screenProperty.GetScreenComponentRotation();
+    auto currentRotation = sceneSession->GetCurrentRotation();
+    auto rotation = physicalRotation - componentRotation - currentRotation;
     MMI::Direction displayRotation =
-        ConvertDegreeToMMIRotation(PositiveFmod(screenProperty.GetPhysicalRotation() -
-        screenProperty.GetScreenComponentRotation() - sceneSession->GetCurrentRotation(), DIRECTION360));
+        ConvertDegreeToMMIRotation(PositiveFmod(rotation, DIRECTION360));
+    TLOGD(WmsLogTag::WMS_EVENT, "wid:%{public}d, physicalRotation:%{public}f, componentRotation:%{public}f,"
+        " currentRotation:%{public}d, rotation:%{public}f, displayRotation:%{public}d", sceneSession->GetWindowId(),
+        physicalRotation, componentRotation, currentRotation, rotation, static_cast<int32_t>(displayRotation));
     float width = screenProperty.GetBounds().rect_.GetWidth();
     float height = screenProperty.GetBounds().rect_.GetHeight();
     Vector2f scale(sceneSession->GetScaleX(), sceneSession->GetScaleY());
@@ -234,8 +240,10 @@ void SceneSessionDirtyManager::CalTransform(const sptr<SceneSession>& sceneSessi
         return;
     }
     auto screenProperty = screensProperties[displayId];
-    bool isRotateWindow = screenProperty.GetPhysicalRotation() - screenProperty.GetScreenComponentRotation() !=
-        sceneSession->GetCurrentRotation();
+    auto isScreenLockWindow = sceneSession->GetSessionInfo().bundleName_.find(SCREEN_LOCK_WINDOW) != std::string::npos;
+    bool isRotateWindow = !NearEqual(PositiveFmod(screenProperty.GetPhysicalRotation() -
+        screenProperty.GetScreenComponentRotation(), DIRECTION360),
+        PositiveFmod(sceneSession->GetCurrentRotation(), DIRECTION360));
     bool isSystem = sceneSession->GetSessionInfo().isSystem_;
     bool displayModeIsFull = static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::FULL;
     bool displayModeIsGlobalFull = displayMode == FoldDisplayMode::GLOBAL_FULL;
@@ -244,13 +252,13 @@ void SceneSessionDirtyManager::CalTransform(const sptr<SceneSession>& sceneSessi
         FoldScreenStateInternel::IsSecondaryDisplayFoldDevice();
     TLOGD(WmsLogTag::WMS_EVENT, "wid:%{public}d, isRotate:%{public}d, isSystem:%{public}d,"
         " displayModeIsFull:%{public}d, displayModeIsGlobalFull:%{public}d, displayModeIsMain:%{public}d,"
-        " foldScreenStateInternel:%{public}d, isRotateWindow:%{public}d",
+        " foldScreenStateInternel:%{public}d, isRotateWindow:%{public}d, isScreenLockWindow:%{public}d",
         sceneSession->GetWindowId(), isRotate, isSystem, displayModeIsFull, displayModeIsGlobalFull,
-        displayModeIsMain, foldScreenStateInternel, isRotateWindow);
+        displayModeIsMain, foldScreenStateInternel, isRotateWindow, isScreenLockWindow);
 
     if (isRotate || !isSystem || displayModeIsFull || displayModeIsGlobalFull ||
         (displayModeIsMain && foldScreenStateInternel)) {
-        if (isRotateWindow && isSystem && ((displayModeIsMain && foldScreenStateInternel) ||
+        if (isScreenLockWindow && isRotateWindow && ((displayModeIsMain && foldScreenStateInternel) ||
             (displayModeIsFull && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()))) {
             CalSpecialNotRotateTransform(sceneSession, screenProperty, transform, useUIExtension);
             return;

@@ -23,7 +23,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr uint32_t TOUCH_HOT_AREA_MAX_NUM = 50;
-constexpr uint32_t TRANSTITION_ANIMATION_MAP_SIZE_MAX_NUM = 100;
+constexpr uint32_t TRANSITION_ANIMATION_MAP_SIZE_MAX_NUM = 100;
 }
 
 const std::map<uint64_t, HandlWritePropertyFunc> WindowSessionProperty::writeFuncMap_ {
@@ -1176,7 +1176,7 @@ bool WindowSessionProperty::UnmarshallingSessionInfo(Parcel& parcel, WindowSessi
 bool WindowSessionProperty::MarshallingTransitionAnimationMap(Parcel& parcel) const
 {
     uint32_t transitionAnimationMapSize = transitionAnimationConfig_.size();
-    if (transitionAnimationMapSize > TRANSTITION_ANIMATION_MAP_SIZE_MAX_NUM ||
+    if (transitionAnimationMapSize > TRANSITION_ANIMATION_MAP_SIZE_MAX_NUM ||
         !parcel.WriteUint32(transitionAnimationMapSize)) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to write transitionAnimationMapSize");
         return false;
@@ -1198,7 +1198,7 @@ bool WindowSessionProperty::UnmarshallingTransitionAnimationMap(Parcel& parcel, 
 {
     uint32_t transitionAnimationMapSize = 0;
     if (!parcel.ReadUint32(transitionAnimationMapSize) ||
-        transitionAnimationMapSize > TRANSTITION_ANIMATION_MAP_SIZE_MAX_NUM) {
+        transitionAnimationMapSize > TRANSITION_ANIMATION_MAP_SIZE_MAX_NUM) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to read transitionAnimationMapSize");
         return false;
     }
@@ -1352,7 +1352,9 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteParcelable(&keyboardLayoutParams_) &&
         parcel.WriteBool(isAppSupportPhoneInPc_) &&
         parcel.WriteBool(isPcAppInLargeScreenDevice_) &&
-        parcel.WriteString(appInstanceKey_) && parcel.WriteBool(isSystemKeyboard_) &&
+        parcel.WriteString(appInstanceKey_) &&
+        parcel.WriteInt32(appIndex_) &&
+        parcel.WriteBool(isSystemKeyboard_) &&
         parcel.WriteUint32(avoidAreaOption_) && parcel.WriteBool(isWindowDelayRaiseEnabled_) &&
         parcel.WriteUint8(backgroundAlpha_) && parcel.WriteParcelable(&keyboardEffectOption_) &&
         parcel.WriteFloat(cornerRadius_) && parcel.WriteBool(isExclusivelyHighlighted_) &&
@@ -1367,7 +1369,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isPcAppInpadSpecificSystemBarInvisible_) &&
         parcel.WriteBool(isPcAppInpadOrientationLandscape_) &&
         parcel.WriteBool(isPcAppInpadCompatibleMode_) &&
-        parcel.WriteString(ancoRealBundleName_);
+        parcel.WriteString(ancoRealBundleName_) &&
+        parcel.WriteBool(isShowDecorInFreeMultiWindow_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1454,6 +1457,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsAppSupportPhoneInPc(parcel.ReadBool());
     property->SetIsPcAppInPad(parcel.ReadBool());
     property->SetAppInstanceKey(parcel.ReadString());
+    property->SetAppIndex(parcel.ReadInt32());
     property->SetIsSystemKeyboard(parcel.ReadBool());
     property->SetAvoidAreaOption(parcel.ReadUint32());
     property->SetWindowDelayRaiseEnabled(parcel.ReadBool());
@@ -1483,6 +1487,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetPcAppInpadOrientationLandscape(parcel.ReadBool());
     property->SetPcAppInpadCompatibleMode(parcel.ReadBool());
     property->SetAncoRealBundleName(parcel.ReadString());
+    property->SetIsShowDecorInFreeMultiWindow(parcel.ReadBool());
     return property;
 }
 
@@ -1570,6 +1575,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isUIExtAnySubWindow_ = property->isUIExtAnySubWindow_;
     parentWindowType_ = property->parentWindowType_;
     appInstanceKey_ = property->appInstanceKey_;
+    appIndex_ = property->appIndex_;
     isSystemKeyboard_ = property->isSystemKeyboard_;
     avoidAreaOption_ = property->avoidAreaOption_;
     isWindowDelayRaiseEnabled_ = property->isWindowDelayRaiseEnabled_;
@@ -1594,6 +1600,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
         std::lock_guard<std::mutex> lock(missionInfoMutex_);
         missionInfo_ = property->missionInfo_;
     }
+    isShowDecorInFreeMultiWindow_ = property->isShowDecorInFreeMultiWindow_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -2135,6 +2142,16 @@ std::string WindowSessionProperty::GetAppInstanceKey() const
     return appInstanceKey_;
 }
 
+void WindowSessionProperty::SetAppIndex(int32_t appIndex)
+{
+    appIndex_ = appIndex;
+}
+
+int32_t WindowSessionProperty::GetAppIndex() const
+{
+    return appIndex_;
+}
+
 void WindowSessionProperty::SetIsSystemKeyboard(bool isSystemKeyboard)
 {
     isSystemKeyboard_ = isSystemKeyboard;
@@ -2589,6 +2606,16 @@ void WindowSessionProperty::UnmarshallingShadowsInfo(Parcel& parcel, WindowSessi
 void SystemSessionConfig::ConvertSupportUIExtensionSubWindow(const std::string& itemValue)
 {
     supportUIExtensionSubWindow_ = StringUtil::ConvertStringToBool(itemValue);
+}
+
+void WindowSessionProperty::SetIsShowDecorInFreeMultiWindow(bool isShow)
+{
+    isShowDecorInFreeMultiWindow_ = isShow;
+}
+
+bool WindowSessionProperty::GetIsShowDecorInFreeMultiWindow() const
+{
+    return isShowDecorInFreeMultiWindow_;
 }
 } // namespace Rosen
 } // namespace OHOS

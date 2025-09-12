@@ -594,7 +594,7 @@ HWTEST_F(SceneSessionTest, SetPrivacyMode01, TestSize.Level0)
     EXPECT_NE(sceneSession, nullptr);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    sceneSession->surfaceNode_ = surfaceNode;
+    sceneSession->SetSurfaceNode(surfaceNode);
     sceneSession->SetPrivacyMode(false);
     ASSERT_EQ(false, sceneSession->property_->GetPrivacyMode());
     ASSERT_EQ(false, sceneSession->property_->GetSystemPrivacyMode());
@@ -615,7 +615,7 @@ HWTEST_F(SceneSessionTest, SetPrivacyMode02, TestSize.Level0)
     EXPECT_NE(sceneSession, nullptr);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    sceneSession->surfaceNode_ = surfaceNode;
+    sceneSession->SetSurfaceNode(surfaceNode);
     sceneSession->SetPrivacyMode(true);
     ASSERT_EQ(true, sceneSession->property_->GetPrivacyMode());
     ASSERT_EQ(true, sceneSession->property_->GetSystemPrivacyMode());
@@ -639,7 +639,7 @@ HWTEST_F(SceneSessionTest, SetPrivacyMode03, TestSize.Level0)
     sceneSession->SetEventHandler(handler, handler);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    sceneSession->surfaceNode_ = surfaceNode;
+    sceneSession->SetSurfaceNode(surfaceNode);
     sceneSession->SetPrivacyMode(true);
     EXPECT_EQ(sceneSession->appUseControlMap_.size(), 0);
 }
@@ -2332,7 +2332,6 @@ HWTEST_F(SceneSessionTest, IsFollowParentMultiScreenPolicy, TestSize.Level1)
  */
 HWTEST_F(SceneSessionTest, CloneWindow, TestSize.Level1)
 {
-    LOG_SetCallback(SceneSessionLogCallback);
     SessionInfo info;
     info.abilityName_ = "CloneWindow";
     info.bundleName_ = "CloneWindow";
@@ -2343,11 +2342,14 @@ HWTEST_F(SceneSessionTest, CloneWindow, TestSize.Level1)
     EXPECT_NE(sceneSession, nullptr);
     uint64_t surfaceNodeId = 1;
     bool needOffScreen = false;
+    sceneSession->SetSurfaceNode(nullptr);
+    sceneSession->CloneWindow(surfaceNodeId, needOffScreen);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     sceneSession->SetSurfaceNode(surfaceNode);
+    auto shadowSurfaceNode = sceneSession->GetShadowSurfaceNode();
     sceneSession->CloneWindow(surfaceNodeId, needOffScreen);
-    EXPECT_TRUE(logMsg.find("cloned") != std::string::npos);
+    EXPECT_TRUE(shadowSurfaceNode != nullptr);
 }
 
 /**

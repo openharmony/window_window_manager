@@ -654,8 +654,9 @@ public:
     bool GetAppBufferReady() const;
     void SetUseStartingWindowAboveLocked(bool useStartingWindowAboveLocked);
     bool UseStartingWindowAboveLocked() const;
-    WSError SetHidingStartingWindow(bool hidingStartWindow);
+    void SetHidingStartingWindow(bool hidingStartWindow);
     bool GetHidingStartingWindow() const;
+    WSError SetLeashWindowAlpha(bool hidingStartWindow);
 
     /*
      * Window Hierarchy
@@ -739,7 +740,7 @@ public:
     void InitSnapshotCapacity();
     SnapshotStatus GetWindowStatus() const;
     SnapshotStatus GetSessionSnapshotStatus(BackgroundReason reason = BackgroundReason::DEFAULT) const;
-    uint32_t GetWindowOrientation() const;
+    uint32_t GetWindowSnapshotOrientation() const;
     uint32_t GetLastOrientation() const;
     bool HasSnapshotFreeMultiWindow();
     bool HasSnapshot(SnapshotStatus key);
@@ -759,6 +760,8 @@ public:
      * RS Client Multi Instance
      */
     std::shared_ptr<RSUIContext> GetRSUIContext(const char* caller = "");
+
+    WSError SetIsShowDecorInFreeMultiWindow(bool isShow);
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -813,6 +816,13 @@ protected:
         handler_->PostSyncTask(std::move(syncTask), name, AppExecFwk::EventQueue::Priority::IMMEDIATE);
         return ret;
     }
+    /*
+     * Window shadow surfaceNode
+     */
+    std::shared_ptr<RSSurfaceNode> GetShadowSurfaceNode() const;
+    std::shared_ptr<RSSurfaceNode> GetLeashWinShadowSurfaceNode() const;
+    std::shared_ptr<RSUIContext> GetRSShadowContext() const;
+    std::shared_ptr<RSUIContext> GetRSLeashWinShadowContext() const;
 
     static std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     int32_t persistentId_ = INVALID_SESSION_ID;
@@ -821,6 +831,7 @@ protected:
     std::recursive_mutex sessionInfoMutex_;
     mutable std::mutex surfaceNodeMutex_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
+    std::shared_ptr<RSSurfaceNode> shadowSurfaceNode_;
     mutable std::mutex snapshotMutex_;
     std::shared_ptr<Media::PixelMap> snapshot_;
     sptr<ISessionStage> sessionStage_;
@@ -1085,6 +1096,7 @@ private:
     sptr<IPatternDetachCallback> detachCallback_ = nullptr;
 
     std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;
+    std::shared_ptr<RSSurfaceNode> leashWinShadowSurfaceNode_;
     mutable std::mutex leashWinSurfaceNodeMutex_;
     DetectTaskInfo detectTaskInfo_;
     mutable std::shared_mutex detectTaskInfoMutex_;

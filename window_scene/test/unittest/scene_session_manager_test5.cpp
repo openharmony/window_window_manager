@@ -791,25 +791,6 @@ HWTEST_F(SceneSessionManagerTest5, NotifyFocusStatusByMission, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateFocus
- * @tc.desc: UpdateFocus
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest5, UpdateFocus, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test2";
-    sptr<SceneSession> sceneSession = nullptr;
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession1, nullptr);
-    ssm_->UpdateFocus(1, true);
-    ssm_->UpdateFocus(0, false);
-}
-
-/**
  * @tc.name: RequestSessionFocusImmediately
  * @tc.desc: RequestSessionFocusImmediately
  * @tc.type: FUNC

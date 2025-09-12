@@ -187,7 +187,8 @@ public:
     virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) { return nullptr; }
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos) { return DMError::DM_OK; }
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
-        ScreenId& screenGroupId, bool forceMirror = false) { return DMError::DM_OK; }
+        ScreenId& screenGroupId, const RotationOption& rotationOption = {Rotation::ROTATION_0, false},
+        bool forceMirror = false) { return DMError::DM_OK; }
 
     virtual DMError MakeMirrorForRecord(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId &screenGroupId)

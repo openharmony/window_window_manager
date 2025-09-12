@@ -1205,9 +1205,11 @@ WMError SceneSessionManagerLiteProxy::GetCallingWindowInfo(CallingWindowInfo& ca
         TLOGE(WmsLogTag::WMS_KEYBOARD, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_CALLING_WINDOW_INFO),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
+    int sendCode = remote->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_CALLING_WINDOW_INFO),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed, code: %{public}d", sendCode);
         return WMError::WM_ERROR_IPC_FAILED;
     }
     auto ret = static_cast<WMError>(reply.ReadInt32());

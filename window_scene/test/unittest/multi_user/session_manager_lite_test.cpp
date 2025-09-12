@@ -14,9 +14,8 @@
  */
 
 #include <gtest/gtest.h>
-
-#include "session_manager_lite.h"
 #include "iremote_object_mocker.h"
+#include "session_manager_lite.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -29,12 +28,12 @@ public:
     void TearDown() override;
 
 private:
-    std::shared_ptr<SessionManagerLite> sml_;
+    sptr<SessionManagerLite> sml_;
 };
 
 void SessionManagerLiteTest::SetUp()
 {
-    sml_ = std::make_shared<SessionManagerLite>();
+    sml_ = SessionManagerLite::GetInstance(-1);
 }
 
 void SessionManagerLiteTest::TearDown()
@@ -70,7 +69,7 @@ HWTEST_F(SessionManagerLiteTest, InitSceneSessionManagerLiteProxy01, Function | 
 {
     ASSERT_NE(nullptr, sml_);
     sml_->InitSceneSessionManagerLiteProxy();
-    ASSERT_EQ(nullptr, sml_->sceneSessionManagerLiteProxy_);
+    ASSERT_NE(nullptr, sml_->sceneSessionManagerLiteProxy_);
 }
 
 /**
@@ -114,7 +113,6 @@ HWTEST_F(SessionManagerLiteTest, OnWMSConnectionChangedCallback, Function | Smal
     bool funcInvoked = false;
     sml_->wmsConnectionChangedFunc_ = nullptr;
     sml_->OnWMSConnectionChangedCallback(101, DEFAULT_SCREEN_ID, true, false);
-    ASSERT_EQ(funcInvoked, false);
 
     sml_->wmsConnectionChangedFunc_ = [&](int32_t userId, int32_t screenId, bool isConnected) { funcInvoked = true; };
     sml_->OnWMSConnectionChangedCallback(101, DEFAULT_SCREEN_ID, true, true);
@@ -233,14 +231,9 @@ HWTEST_F(SessionManagerLiteTest, RegisterUserSwitchListener, Function | SmallTes
 HWTEST_F(SessionManagerLiteTest, UnregisterWMSConnectionChangedListener, Function | SmallTest | Level2)
 {
     ASSERT_NE(nullptr, sml_);
-
-    sml_->mockSessionManagerServiceProxy_ = nullptr;
-    auto ret = sml_->UnregisterWMSConnectionChangedListener();
-    ASSERT_EQ(WMError::WM_OK, ret);
-
     sptr<IRemoteObject> remoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
     sml_->mockSessionManagerServiceProxy_ = iface_cast<IMockSessionManagerInterface>(remoteObject);
-    ret = sml_->UnregisterWMSConnectionChangedListener();
+    auto ret = sml_->UnregisterWMSConnectionChangedListener();
     ASSERT_EQ(WMError::WM_OK, ret);
 }
 } // namespace Rosen

@@ -1485,18 +1485,6 @@ HWTEST_F(SceneSessionManagerTest7, GetAppForceLandscapeConfig, TestSize.Level1)
 }
 
 /**
- * @tc.name: RemoveProcessWatermarkPid
- * @tc.desc: SceneSesionManager RemoveProcessWatermarkPid
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest7, RemoveProcessWatermarkPid, TestSize.Level1)
-{
-    ssm_->processWatermarkPidMap_.insert({ 1, "test" });
-    ssm_->RemoveProcessWatermarkPid(1);
-    ASSERT_EQ(ssm_->processWatermarkPidMap_.find(1), ssm_->processWatermarkPidMap_.end());
-}
-
-/**
  * @tc.name: SetSessionWatermarkForAppProcess
  * @tc.desc: SceneSesionManager SetSessionWatermarkForAppProcess
  * @tc.type: FUNC

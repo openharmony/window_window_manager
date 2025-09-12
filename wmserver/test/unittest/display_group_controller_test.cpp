@@ -545,6 +545,7 @@ HWTEST_F(DisplayGroupControllerTest, MoveCrossNodeToTargetDisplay01, TestSize.Le
     auto showingDisplays = child->GetShowingDisplays();
     ASSERT_NE(0, showingDisplays.size());
     ASSERT_EQ(0, showingDisplays[0]);
+    node1->children_.pop_back();
 }
 
 /**
@@ -677,8 +678,7 @@ HWTEST_F(DisplayGroupControllerTest, ProcessWindowPairWhenDisplayChange, TestSiz
     bool rotateDisplay = true;
     displayGroupController_->ProcessWindowPairWhenDisplayChange(rotateDisplay);
     auto layoutPolicy = container_->GetLayoutPolicy();
-    layoutPolicy = nullptr;
-    ASSERT_EQ(nullptr, layoutPolicy);
+    ASSERT_NE(nullptr, layoutPolicy);
 }
 
 /**

@@ -521,6 +521,11 @@ ani_object AniWindow::Resize(ani_env* env, ani_double width, ani_double height)
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 
+    if (width <= 0 || height <= 0) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "width or height should greater than 0!");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
     const uint32_t w = static_cast<uint32_t>(width);
     const uint32_t h = static_cast<uint32_t>(height);
     const WMError ret = windowToken_->Resize(w, h);
@@ -882,6 +887,37 @@ void AniWindow::Finalizer(ani_env* env, ani_long nativeObj)
         TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
     }
 }
+
+void AniWindow::SetContentAspectRatio(ani_env* env, ani_object obj, ani_long nativeObj,
+                                      ani_double ratio, ani_boolean isPersistent, ani_boolean needUpdateRect)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (!aniWindow) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] aniWindow is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    aniWindow->OnSetContentAspectRatio(env, ratio, isPersistent, needUpdateRect);
+}
+
+void AniWindow::OnSetContentAspectRatio(
+    ani_env* env, ani_double ratio, ani_boolean isPersistent, ani_boolean needUpdateRect)
+{
+    if (!windowToken_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] window is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    WMError ret = windowToken_->SetContentAspectRatio(
+        static_cast<float>(ratio), static_cast<bool>(isPersistent), static_cast<bool>(needUpdateRect));
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] failed, windowId: %{public}u, ret: %{public}d",
+            windowToken_->GetWindowId(), static_cast<int32_t>(ret));
+        AniWindowUtils::AniThrowError(env, AniWindowUtils::ToErrorCode(ret));
+        return;
+    }
+}
 }  // namespace Rosen
 }  // namespace OHOS
 
@@ -892,6 +928,7 @@ static void WindowResize(ani_env* env, ani_object obj, ani_long nativeObj, ani_d
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (!aniWindow || !aniWindow->GetWindow()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     aniWindow->Resize(env, width, height);
@@ -904,6 +941,7 @@ static void WindowMoveWindowTo(ani_env* env, ani_object obj, ani_long nativeObj,
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (!aniWindow || !aniWindow->GetWindow()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     aniWindow->MoveWindowTo(env, x, y);
@@ -916,7 +954,7 @@ static ani_object WindowGetGlobalRect(ani_env* env, ani_object obj, ani_long nat
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (!aniWindow || !aniWindow->GetWindow()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
-        return AniWindowUtils::CreateAniUndefined(env);
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     return aniWindow->GetGlobalRect(env);
 }
@@ -1189,6 +1227,8 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::GetWindowAvoidArea)},
         ani_native_function {"setWaterMarkFlagSync", "JZ:V",
             reinterpret_cast<void *>(AniWindow::SetWaterMarkFlag)},
+        ani_native_function {"setContentAspectRatio", "JDZZ:V",
+            reinterpret_cast<void *>(AniWindow::SetContentAspectRatio)},
         ani_native_function {"onSync", nullptr,
             reinterpret_cast<void *>(AniWindow::RegisterWindowCallback)},
         ani_native_function {"offSync", nullptr,

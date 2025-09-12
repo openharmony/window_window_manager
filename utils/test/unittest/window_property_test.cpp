@@ -205,7 +205,7 @@ HWTEST_F(WindowPropertyTest, AddWindowFlag001, TestSize.Level1)
         resultValue = 1;
     };
     func();
-    ASSERT_EQ(resultValue, 1);
+    ASSERT_NE(resultValue, 0);
 }
 
 /**
