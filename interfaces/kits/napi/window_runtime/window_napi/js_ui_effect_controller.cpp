@@ -222,7 +222,7 @@ napi_value JsUIEffectController::OnAnimateTo(napi_env env, napi_callback_info in
             }
         };
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsUIEffect::SetParams",
+    NapiAsyncTask::Schedule("JsUIEffect::AnimateTo",
         env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
     return result;
 }

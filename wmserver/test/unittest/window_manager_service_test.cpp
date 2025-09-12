@@ -141,9 +141,7 @@ HWTEST_F(WindowManagerServiceTest, Dump01, TestSize.Level1)
     std::vector<std::u16string> args;
     const std::string dumpFile = "data/window_dump_test.txt";
     int fd = open(dumpFile.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0666);
-    if (fd == -1) {
-        return;
-    }
+    ASSERT_NE(fd, -1);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(static_cast<int>(WMError::WM_OK), wms->Dump(-1, args));
     } else {
@@ -626,7 +624,6 @@ HWTEST_F(WindowManagerServiceTest, Dump02, TestSize.Level1)
     int fd = 2;
     std::vector<std::u16string> args;
     wms->Dump(fd, args);
-    ASSERT_EQ(fd, 2);
     wms->windowDumper_ = nullptr;
     ASSERT_TRUE(wms != nullptr);
     wms->Dump(fd, args);

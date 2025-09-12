@@ -55,11 +55,11 @@ void UnloadEdidPlugin(void)
     }
 }
 
-bool GetEdid(ScreenId screenId, struct BaseEdid &edid)
+bool GetEdid(ScreenId rsScreenId, struct BaseEdid &edid)
 {
     std::vector<uint8_t> edidData;
     uint8_t outPort;
-    int getEdidFromRS = RSInterfaces::GetInstance().GetDisplayIdentificationData(screenId, outPort, edidData);
+    int getEdidFromRS = RSInterfaces::GetInstance().GetDisplayIdentificationData(rsScreenId, outPort, edidData);
     if (getEdidFromRS != 0) {
         TLOGE(WmsLogTag::DMS, "get EDID from RS failed.");
         return false;

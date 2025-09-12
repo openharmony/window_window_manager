@@ -200,10 +200,10 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow01,
     windowInfo_.dragType_ = DragType::DRAG_LEFT_OR_RIGHT;
     windowInfo_.reason_ = WindowSizeChangeReason::DRAG;
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
+    node->property_->SetStretchable(true);
     Rect newWinRect = { 50, 50, 200, 200 };       // rect: 50, 50, 200, 200
     layoutPolicy_->UpdateFloatingWindowSizeForStretchableWindow(node, { 0, 0, 0, 0 }, newWinRect);
-    Rect expRect = { 50, 50, 200, 300 };          // rect: 50, 50, 200, 300
-    ASSERT_EQ(expRect, expRect);
+    ASSERT_EQ(node->GetDragType(), DragType::DRAG_LEFT_OR_RIGHT);
 }
 
 /**
@@ -217,10 +217,10 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow02,
     windowInfo_.dragType_ = DragType::DRAG_LEFT_TOP_CORNER;
     windowInfo_.reason_ = WindowSizeChangeReason::DRAG;
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
+    node->property_->SetStretchable(true);
     Rect newWinRect = { 50, 50, 200, 200 };      // rect: 50, 50, 200, 200
     layoutPolicy_->UpdateFloatingWindowSizeForStretchableWindow(node, { 0, 0, 0, 0 }, newWinRect);
-    Rect expRect = { 50, 50, 200, 300 };         // rect: 50, 50, 200, 300
-    ASSERT_EQ(expRect, expRect);
+    ASSERT_EQ(node->GetDragType(), DragType::DRAG_LEFT_OR_RIGHT);
 }
 
 /**
@@ -234,10 +234,10 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow03,
     windowInfo_.dragType_ = DragType::DRAG_BOTTOM_OR_TOP;
     windowInfo_.reason_ = WindowSizeChangeReason::DRAG;
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
+    node->property_->SetStretchable(true);
     Rect newWinRect = { 50, 50, 150, 300 };      // rect: 50, 50, 150, 300
     layoutPolicy_->UpdateFloatingWindowSizeForStretchableWindow(node, { 0, 0, 0, 0 }, newWinRect);
-    Rect expRect = { 50, 50, 200, 300 };         // rect: 50, 50, 200, 300
-    ASSERT_EQ(expRect, expRect);
+    ASSERT_EQ(node->GetDragType(), DragType::DRAG_LEFT_OR_RIGHT);
 }
 
 /**

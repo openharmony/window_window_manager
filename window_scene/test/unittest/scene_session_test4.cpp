@@ -296,12 +296,22 @@ HWTEST_F(SceneSessionTest4, SetSkipDraw, TestSize.Level1)
     EXPECT_NE(nullptr, session);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    session->surfaceNode_ = surfaceNode;
+    session->SetSurfaceNode(surfaceNode);
+    session->SetLeashWinSurfaceNode(surfaceNode);
+    EXPECT_TRUE(session->GetShadowSurfaceNode());
+    EXPECT_TRUE(session->GetLeashWinShadowSurfaceNode());
+    session->SetSkipDraw(true);
+    EXPECT_TRUE(session->GetShadowSurfaceNode()->GetSkipDraw());
+    session->SetSkipDraw(false);
+    EXPECT_FALSE(session->GetShadowSurfaceNode()->GetSkipDraw());
+
     session->SetLeashWinSurfaceNode(nullptr);
     session->SetSkipDraw(true);
-    session->SetLeashWinSurfaceNode(surfaceNode);
-    EXPECT_EQ(surfaceNode, session->GetLeashWinSurfaceNode());
+    EXPECT_FALSE(session->GetLeashWinShadowSurfaceNode());
+
+    session->SetSurfaceNode(nullptr);
     session->SetSkipDraw(true);
+    EXPECT_FALSE(session->GetShadowSurfaceNode());
 }
 
 /**
@@ -352,18 +362,20 @@ HWTEST_F(SceneSessionTest4, RequestSessionBack, TestSize.Level1)
     info.abilityName_ = "RequestSessionBack";
     info.bundleName_ = "RequestSessionBack";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(nullptr, session);
     NotifyBackPressedFunc func = [](const bool needMoveToBackground) {
         return;
     };
     session->backPressedFunc_ = func;
+    session->SetLeashWinSurfaceNode(nullptr);
+    EXPECT_EQ(nullptr, session->GetLeashWinShadowSurfaceNode());
     EXPECT_EQ(WSError::WS_OK, session->RequestSessionBack(true));
 
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     EXPECT_NE(nullptr, surfaceNode);
     session->SetLeashWinSurfaceNode(surfaceNode);
-    ASSERT_EQ(WSError::WS_OK, session->RequestSessionBack(true));
+    EXPECT_NE(nullptr, session->GetLeashWinShadowSurfaceNode());
+    EXPECT_EQ(WSError::WS_OK, session->RequestSessionBack(true));
 }
 
 /**
@@ -505,7 +517,7 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction1, TestSize.Level1)
 
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    sceneSession->surfaceNode_ = surfaceNode;
+    sceneSession->SetSurfaceNode(surfaceNode);
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP));
 }
@@ -734,13 +746,15 @@ HWTEST_F(SceneSessionTest4, HandleLayoutAvoidAreaUpdate, TestSize.Level1)
     EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_SYSTEM));
     EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
 
-    session->isAINavigationBarAvoidAreaValid_ = [](const AvoidArea& avoidArea, int32_t sessionBottom) {
+    session->isAINavigationBarAvoidAreaValid_ = [](DisplayId displayId,
+        const AvoidArea& avoidArea, int32_t sessionBottom) {
         return true;
     };
     EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_END));
     EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
 
-    session->isAINavigationBarAvoidAreaValid_ = [](const AvoidArea& avoidArea, int32_t sessionBottom) {
+    session->isAINavigationBarAvoidAreaValid_ = [](DisplayId displayId,
+        const AvoidArea& avoidArea, int32_t sessionBottom) {
         return false;
     };
     EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_END));

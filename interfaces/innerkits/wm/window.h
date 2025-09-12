@@ -2737,6 +2737,17 @@ public:
     virtual WMError SetAspectRatio(float ratio) { return WMError::WM_OK; }
 
     /**
+     * @brief Set content aspect ratio of the window.
+     *
+     * @param ratio The aspect ratio of window content (width divided by height).
+     * @param isPersistent Whether to persist the aspect ratio setting.
+     * @param needUpdateRect Whether to update the window rect after setting aspect ratio.
+     * @return WMError::WM_OK on success, or appropriate error code on failure.
+     */
+    virtual WMError SetContentAspectRatio(
+        float ratio, bool isPersistent, bool needUpdateRect) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Unset aspect ratio
      * @return WMError
      */
@@ -4292,6 +4303,13 @@ public:
     virtual bool GetWindowShadowEnabled() const { return true; }
 
     /**
+     * @brief Check if the window supports transition animation and has permission to use it.
+     *
+     * @return WM_OK means transition animation is supported and allowed by the system.
+     */
+    virtual WMError IsTransitionAnimationSupported() const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Set the transition animation.
      *
      * @param transitionType window transition type.
@@ -4589,6 +4607,13 @@ public:
     {
         return false;
     }
+
+    /**
+     * @brief notify window is full screen in force split mode.
+     *
+     * @param shouldFullScreen true means full screen, false means force split.
+     */
+    virtual void NotifyIsFullScreenInForceSplitMode(bool isFullScreen) {}
 };
 }
 }

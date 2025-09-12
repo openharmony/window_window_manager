@@ -1501,9 +1501,12 @@ void SessionStageProxy::NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& k
         TLOGE(WmsLogTag::WMS_KEYBOARD, "remote is null");
         return;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_INFO_CHANGE),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest notify keyboard panel info change failed");
+    int sendCode = remote->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_INFO_CHANGE),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD,
+            "SendRequest notify keyboard panel info change failed, code: %{public}d", sendCode);
         return;
     }
 }
@@ -1967,10 +1970,11 @@ void SessionStageProxy::NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo
         TLOGE(WmsLogTag::WMS_KEYBOARD, "remote is null");
         return;
     }
-    if (remote->SendRequest(
+    int sendCode = remote->SendRequest(
         static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_ANIMATION_COMPLETED),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed, code: %{public}d", sendCode);
     }
 }
 
@@ -2112,10 +2116,11 @@ void SessionStageProxy::NotifyKeyboardAnimationWillBegin(const KeyboardAnimation
         TLOGE(WmsLogTag::WMS_KEYBOARD, "remote is null");
         return;
     }
-    if (remote->SendRequest(
+    int sendCode = remote->SendRequest(
         static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_ANIMATION_WILLBEGIN),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed, code: %{public}d", sendCode);
     }
 }
 
@@ -2247,5 +2252,35 @@ WSError SessionStageProxy::CloseSpecificScene()
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return WSError::WS_OK;
+}
+
+WSError SessionStageProxy::UpdateIsShowDecorInFreeMultiWindow(bool isShow)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_DECOR, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(isShow)) {
+        TLOGE(WmsLogTag::WMS_DECOR, "Write isShow failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_DECOR, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_UPDATE_SHOW_DECOR_IN_FREE_MULTI_WINDOW),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_DECOR, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
 }
 } // namespace OHOS::Rosen

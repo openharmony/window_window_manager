@@ -21,25 +21,37 @@
 
 #include "imock_session_manager_interface.h"
 #include "session_manager_service_interface.h"
+#include "wm_common.h"
 #include "wm_single_instance.h"
 #include "zidl/scene_session_manager_interface.h"
 
 namespace OHOS::Rosen {
 class SSMDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
+    explicit SSMDeathRecipient(const int32_t userId = INVALID_USER_ID);
     void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
-};
-class FoundationDeathRecipient : public IRemoteObject::DeathRecipient {
-public:
-    void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
+
+private:
+    int32_t userId_;
 };
 
-class SessionManager {
+class FoundationDeathRecipient : public IRemoteObject::DeathRecipient {
+public:
+    explicit FoundationDeathRecipient(int32_t userId = INVALID_USER_ID);
+    void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
+
+private:
+    int32_t userId_;
+};
+
+class SessionManager : public RefBase {
     WM_DECLARE_SINGLE_INSTANCE_BASE(SessionManager);
 
 public:
+    static sptr<SessionManager> GetInstance(const int32_t userId);
+
     void ClearSessionManagerProxy();
-    void Clear();
+    void RemoveSSMDeathRecipient();
 
     sptr<ISceneSessionManager> GetSceneSessionManagerProxy();
     void OnFoundationDied();
@@ -62,20 +74,15 @@ public:
     void RegisterWindowManagerRecoverCallbackFunc(const WindowManagerRecoverCallbackFunc& callbackFunc);
     void RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService);
 
-protected:
-    SessionManager() = default;
-    virtual ~SessionManager();
+    ~SessionManager() override;
 
 private:
+    SessionManager(const int32_t userId = INVALID_USER_ID);
     void InitSessionManagerServiceProxy();
     WMError InitMockSMSProxy();
     void InitSceneSessionManagerProxy();
-
-    /*
-     * Multi User
-     */
-    void OnWMSConnectionChangedCallback(int32_t userId, int32_t screenId, bool isConnected, bool isCallbackRegistered);
-    void OnUserSwitch(const sptr<ISessionManagerService>& sessionManagerService);
+    void RemoveDeathRecipientFromProxy(const sptr<IRemoteBroker>& proxy,
+                                       const sptr<IRemoteObject::DeathRecipient>& recipient);
 
     /*
      * Window Recover
@@ -83,25 +90,36 @@ private:
     void RegisterSMSRecoverListener();
     void UnregisterSMSRecoverListener();
 
-    std::recursive_mutex mutex_;
-    sptr<IMockSessionManagerInterface> mockSessionManagerServiceProxy_ = nullptr;
-    sptr<ISessionManagerService> sessionManagerServiceProxy_ = nullptr;
-    sptr<ISceneSessionManager> sceneSessionManagerProxy_ = nullptr;
-    bool isRecoverListenerRegistered_ = false;
-    sptr<IRemoteObject> smsRecoverListener_ = nullptr;
-    sptr<SSMDeathRecipient> ssmDeath_ = nullptr;
     sptr<FoundationDeathRecipient> foundationDeath_ = nullptr;
     bool isFoundationListenerRegistered_ = false;
-    // above guarded by mutex_
+    std::mutex foundationListenerRegisterdMutex_;
+    sptr<IMockSessionManagerInterface> mockSessionManagerServiceProxy_ = nullptr;
+    std::mutex mockSessionManagerServiceMutex_;
 
-    std::recursive_mutex recoverMutex_;
+    sptr<SSMDeathRecipient> sceneSessionManagerDeath_ = nullptr;
+    sptr<ISceneSessionManager> sceneSessionManagerProxy_ = nullptr;
+    std::mutex sceneSessionManagerMutex_;
+
+    sptr<ISessionManagerService> sessionManagerServiceProxy_ = nullptr;
+    std::mutex sessionManagerServiceMutex_;
+
+    sptr<IRemoteObject> smsRecoverListener_ = nullptr;
+    bool isRecoverListenerRegistered_ = false;
+    std::mutex recoverListenerMutex_;
+
     WindowManagerRecoverCallbackFunc windowManagerRecoverFunc_ = nullptr;
-    // above guarded by recoverMutex_
+    std::mutex recoverCallbackMutex_;
 
     /*
-     * Multi User
+     * Multi User and multi screen
      */
+    void OnWMSConnectionChangedCallback(int32_t userId, int32_t screenId, bool isConnected, bool isCallbackRegistered);
+    void OnUserSwitch(const sptr<ISessionManagerService>& sessionManagerService);
+    int32_t userId_;
+    static std::unordered_map<int32_t, sptr<SessionManager>> sessionManagerMap_;
+    static std::mutex sessionManagerMapMutex_;
     UserSwitchCallbackFunc userSwitchCallbackFunc_ = nullptr;
+
     std::mutex wmsConnectionMutex_;
     bool isWMSConnected_ = false;
     int32_t currentWMSUserId_ = INVALID_USER_ID;

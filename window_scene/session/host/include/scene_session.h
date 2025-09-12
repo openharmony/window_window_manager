@@ -112,7 +112,8 @@ using NotifyPrivacyModeChangeFunc = std::function<void(bool isPrivacyMode)>;
 using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
 using NotifyVisibleChangeFunc = std::function<void(int32_t persistentId)>;
 using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
-using IsAINavigationBarAvoidAreaValidFunc = std::function<bool(const AvoidArea& avoidArea, int32_t sessionBottom)>;
+using IsAINavigationBarAvoidAreaValidFunc = std::function<bool(DisplayId displayId,
+    const AvoidArea& avoidArea, int32_t sessionBottom)>;
 using GetStatusBarDefaultVisibilityByDisplayIdFunc = std::function<bool(DisplayId displayId)>;
 using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enabled, bool isSaveBySpecifiedFlag)>;
 using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isNeedControl, bool isControlRecentOnly)>;
@@ -294,6 +295,7 @@ public:
         bool needNotifyClient = true, bool isExecuteDelayRaise = false);
     WSError RequestSessionBack(bool needMoveToBackground) override;
     WSError SetAspectRatio(float ratio) override;
+    WSError SetContentAspectRatio(float ratio, bool isPersistent, bool needUpdateRect) override;
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
     WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
     WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) override;
@@ -675,6 +677,9 @@ public:
      */
     int32_t GetCustomDecorHeight() const;
     void SetCustomDecorHeight(int32_t height) override;
+    WSError SetDecorVisible(bool isVisible) override;
+    bool IsDecorVisible() const;
+    WindowDecoration GetWindowDecoration() const;
 
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) override;
@@ -838,6 +843,8 @@ public:
     void SetFollowParentRectFunc(NotifyFollowParentRectFunc&& func);
     WSError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
     bool IsDelayFocusChange();
+    virtual bool IsBlockingFocusFullScreenSystemPanel() const;
+    virtual bool IsAppMainWindowFullScreen();
 
     /*
      * Window Property
@@ -1257,6 +1264,8 @@ private:
      */
     mutable std::mutex customDecorHeightMutex_;
     int32_t customDecorHeight_ = 0;
+    bool isDecorVisible_ = true;
+    // guarded by customDecorHeightMutex_
 
     ForceHideState forceHideState_ { ForceHideState::NOT_HIDDEN };
     int32_t oriPosYBeforeRaisedByKeyboard_ = 0;

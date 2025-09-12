@@ -1011,6 +1011,35 @@ HWTEST_F(SessionStageProxyTest, TestUpdateGlobalDisplayRectFromServer, TestSize.
     sptr<SessionStageProxy> successProxy = sptr<SessionStageProxy>::MakeSptr(remoteMock);
     EXPECT_EQ(WSError::WS_OK, successProxy->UpdateGlobalDisplayRectFromServer(rect, reason));
 }
+
+/**
+ * @tc.name: UpdateIsShowDecorInFreeMultiWindow
+ * @tc.desc: Test UpdateIsShowDecorInFreeMultiWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, UpdateIsShowDecorInFreeMultiWindow, TestSize.Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    bool isShow = true;
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionStage_->UpdateIsShowDecorInFreeMultiWindow(isShow));
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    ASSERT_EQ(WSError::WS_OK, sessionStage_->UpdateIsShowDecorInFreeMultiWindow(isShow));
+    sptr<SessionStageProxy> sProxy = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sProxy->UpdateIsShowDecorInFreeMultiWindow(isShow));
+
+    auto remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    remoteMocker->sendRequestResult_ = 1;
+    sptr<SessionStageProxy> sessionStage = sptr<SessionStageProxy>::MakeSptr(remoteMocker);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionStage->UpdateIsShowDecorInFreeMultiWindow(isShow));
+
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionStage_->UpdateIsShowDecorInFreeMultiWindow(isShow));
+    MockMessageParcel::SetWriteStringErrorFlag(false);
+    MockMessageParcel::ClearAllErrorFlag();
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

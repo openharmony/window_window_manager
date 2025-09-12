@@ -28,7 +28,7 @@ namespace {
     void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
         const char* msg)
     {
-        logMsg = msg;
+        logMsg += msg;
     }
 }
 
@@ -250,17 +250,19 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdate7, TestSize.Level1)
  */
 HWTEST_F(SceneInputManagerTest, UpdateSecSurfaceInfo, TestSize.Level1)
 {
-    int ret = 0;
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     std::map<uint64_t, std::vector<SecSurfaceInfo>> emptyMap;
     auto oldDirty = SceneInputManager::GetInstance().sceneSessionDirty_;
     ASSERT_NE(oldDirty, nullptr);
     SceneInputManager::GetInstance().sceneSessionDirty_ = nullptr;
     SceneInputManager::GetInstance().UpdateSecSurfaceInfo(emptyMap);
-    ASSERT_EQ(ret, 0);
+    EXPECT_TRUE(logMsg.find("sceneSessionDirty_ is nullptr") != std::string::npos);
+    logMsg.clear();
 
     SceneInputManager::GetInstance().sceneSessionDirty_ = oldDirty;
     SceneInputManager::GetInstance().UpdateSecSurfaceInfo(emptyMap);
-    ASSERT_EQ(ret, 0);
+    EXPECT_FALSE(logMsg.find("sceneSessionDirty_ is nullptr") != std::string::npos);
 }
 
 /**
@@ -323,12 +325,15 @@ HWTEST_F(SceneInputManagerTest, UpdateDisplayAndWindowInfo, TestSize.Level1)
  */
 HWTEST_F(SceneInputManagerTest, FlushEmptyInfoToMMI, TestSize.Level1)
 {
-    int ret = 0;
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     auto preEventHandler = SceneInputManager::GetInstance().eventHandler_;
     SceneInputManager::GetInstance().eventHandler_ = nullptr;
     SceneInputManager::GetInstance().FlushEmptyInfoToMMI();
     SceneInputManager::GetInstance().eventHandler_ = preEventHandler;
-    ASSERT_EQ(ret, 0);
+    SceneInputManager::GetInstance().FlushEmptyInfoToMMI();
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_TRUE(logMsg.find("userId") != std::string::npos);
 }
 
 /**
@@ -373,7 +378,8 @@ HWTEST_F(SceneInputManagerTest, GetConstrainedModalExtWindowInfo, TestSize.Level
 HWTEST_F(SceneInputManagerTest, FlushDisplayInfoToMMI, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "SceneInputManagerTest: FlushDisplayInfoToMMI start";
-    int ret = 0;
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     // sceneSessionDirty_ = nullptr
     std::vector<MMI::WindowInfo> windowInfoList;
     std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
@@ -381,11 +387,17 @@ HWTEST_F(SceneInputManagerTest, FlushDisplayInfoToMMI, TestSize.Level0)
     auto oldDirty = SceneInputManager::GetInstance().sceneSessionDirty_;
     SceneInputManager::GetInstance().sceneSessionDirty_ = nullptr;
     SceneInputManager::GetInstance().FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList));
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_TRUE(logMsg.find("sceneSessionDirty_ is nullptr") != std::string::npos);
+    logMsg.clear();
     SceneInputManager::GetInstance().sceneSessionDirty_ = oldDirty;
 
     // NotNeedUpdate
     SceneInputManager::GetInstance().FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList), true);
     SceneInputManager::GetInstance().FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList));
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_FALSE(logMsg.find("sceneSessionDirty_ is nullptr") != std::string::npos);
+    logMsg.clear();
 
     auto preEventHandler = SceneInputManager::GetInstance().eventHandler_;
     SceneInputManager::GetInstance().eventHandler_ = nullptr;
@@ -396,7 +408,6 @@ HWTEST_F(SceneInputManagerTest, FlushDisplayInfoToMMI, TestSize.Level0)
     WindowInfoListZeroTest(ssm_);
     MaxWindowInfoTest(ssm_);
 
-    ASSERT_EQ(ret, 0);
     GTEST_LOG_(INFO) << "SceneInputManagerTest: FlushDisplayInfoToMMI end";
 }
 

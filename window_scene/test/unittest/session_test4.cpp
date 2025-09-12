@@ -1340,15 +1340,33 @@ HWTEST_F(WindowSessionTest4, SetHidingStartingWindow, TestSize.Level1)
     ASSERT_NE(session_, nullptr);
 
     session_->SetLeashWinSurfaceNode(nullptr);
-    auto ret = session_->SetHidingStartingWindow(false);
-    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+    session_->SetHidingStartingWindow(false);
     EXPECT_TRUE(session_->GetHidingStartingWindow() == false);
 
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     session_->SetLeashWinSurfaceNode(surfaceNode);
-    ret = session_->SetHidingStartingWindow(true);
+    session_->SetHidingStartingWindow(true);
     EXPECT_TRUE(session_->GetHidingStartingWindow());
+}
+
+/**
+ * @tc.name: SetLeashWindowAlpha
+ * @tc.desc: check func SetLeashWindowAlpha
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, SetLeashWindowAlpha, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+
+    session_->SetLeashWinSurfaceNode(nullptr);
+    auto ret = session_->SetLeashWindowAlpha(false);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session_->SetLeashWinSurfaceNode(surfaceNode);
+    ret = session_->SetLeashWindowAlpha(true);
     EXPECT_EQ(ret, WSError::WS_OK);
 }
 
@@ -1502,6 +1520,45 @@ HWTEST_F(WindowSessionTest4, HasParentSessionWithToken, TestSize.Level1)
     parentSession->SetAbilityToken(token);
     ret = session->HasParentSessionWithToken(token);
     EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: SetIsShowDecorInFreeMultiWindow 01
+ * @tc.desc: Test Case SetIsShowDecorInFreeMultiWindow 01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, SetIsShowDecorInFreeMultiWindow01, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    bool isShow = true;
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    WSError result = session_->SetIsShowDecorInFreeMultiWindow(isShow);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
+
+    session_->state_ = SessionState::STATE_CONNECT;
+    session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    WSError result02 = session_->SetIsShowDecorInFreeMultiWindow(isShow);
+    EXPECT_EQ(result02, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: SetIsShowDecorInFreeMultiWindow 02
+ * @tc.desc: Test Case SetIsShowDecorInFreeMultiWindow 02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, SetIsShowDecorInFreeMultiWindow02, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    bool isShow = true;
+    session_->state_ = SessionState::STATE_CONNECT;
+    session_->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    WSError result = session_->SetIsShowDecorInFreeMultiWindow(isShow);
+    EXPECT_EQ(result, WSError::WS_OK);
+
+    session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    WSError result02 = session_->SetIsShowDecorInFreeMultiWindow(isShow);
+    EXPECT_EQ(result02, WSError::WS_OK);
 }
 } // namespace
 } // namespace Rosen

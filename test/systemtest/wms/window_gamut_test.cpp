@@ -137,7 +137,9 @@ HWTEST_F(WindowGamutTest, SetColorSpace02, TestSize.Level1)
         static_cast<ColorSpace>(static_cast<uint32_t>(ColorSpace::COLOR_SPACE_WIDE_GAMUT) + 1);
     window->SetColorSpace(invalidColorSpace); // invalid param
 
-    ASSERT_EQ(colorSpaceBackup, window->GetColorSpace());
+    ColorSpace colorSpaceBackupAfterSet = window->GetColorSpace();
+    ASSERT_EQ(colorSpaceBackup, colorSpaceBackupAfterSet);
+    ASSERT_NE(ColorSpace::COLOR_SPACE_WIDE_GAMUT, invalidColorSpace);
 
     window->Destroy();
 }

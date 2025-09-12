@@ -110,7 +110,7 @@ public:
     void SetIsAppSupportPhoneInPc(bool isSupportPhone);
     void SetIsPcAppInPad(bool isPcAppInLargeScreenDevice);
     void SetIsAtomicService(bool isAtomicService);
-    
+
     /*
      * Window Immersive
      */
@@ -301,6 +301,12 @@ public:
     std::string GetAppInstanceKey() const;
 
     /*
+     * App Clone
+     */
+    void SetAppIndex(int32_t appIndex);
+    int32_t GetAppIndex() const;
+
+    /*
      * PC Window
      */
     void SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes);
@@ -349,6 +355,9 @@ public:
     bool GetExclusivelyHighlighted() const;
     void SetExclusivelyHighlighted(bool isExclusivelyHighlighted);
     mutable std::mutex windowMaskMutex_;
+
+    void SetIsShowDecorInFreeMultiWindow(bool isShow);
+    bool GetIsShowDecorInFreeMultiWindow() const;
 
 private:
     void setTouchHotAreasInner(const std::vector<Rect>& rects, std::vector<Rect>& touchHotAreas);
@@ -541,6 +550,11 @@ private:
     std::string appInstanceKey_;
 
     /*
+     * App Clone
+     */
+    int32_t appIndex_ = 0;
+
+    /*
      * PC Window
      */
     mutable std::mutex supportWindowModesMutex_;
@@ -566,7 +580,7 @@ private:
     bool focusable_ { true };
     bool focusableOnShow_ { true };
     bool isExclusivelyHighlighted_ { true };
-    
+
     /*
      * Window Lifecycle
      */
@@ -575,7 +589,7 @@ private:
     std::string ancoRealBundleName_  = "";
     MissionInfo missionInfo_;
     mutable std::mutex missionInfoMutex_;
-    
+
     /*
      * Window Property
      */
@@ -595,8 +609,10 @@ private:
      * Window Transition Animation For PC
      */
     std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>> transitionAnimationConfig_;
+
+    bool isShowDecorInFreeMultiWindow_ { true };
 };
- 
+
 class CompatibleModeProperty : public Parcelable {
 public:
     void SetIsAdaptToImmersive(bool isAdaptToImmersive);
@@ -950,6 +966,11 @@ struct SystemSessionConfig : public Parcelable {
     bool IsPcOrPcMode() const
     {
         return IsPcWindow() || (IsPadWindow() && IsFreeMultiWindowMode());
+    }
+
+    bool isSupportPCMode() const
+    {
+        return IsPcWindow() || IsFreeMultiWindowMode();
     }
 };
 } // namespace Rosen

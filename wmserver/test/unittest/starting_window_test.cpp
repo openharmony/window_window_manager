@@ -532,6 +532,7 @@ HWTEST_F(StartingWindowTest, SetDefaultWindowMode, TestSize.Level1)
     GTEST_LOG_(INFO) << "StartingWindow::SetDefaultWindowMode start";
     WindowMode defaultMode = WindowMode::WINDOW_MODE_FULLSCREEN;
     StartingWindow::SetDefaultWindowMode(defaultMode);
+    EXPECT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, StartingWindow::defaultMode_);
     GTEST_LOG_(INFO) << "StartingWindow::SetDefaultWindowMode end";
 }
 
@@ -545,6 +546,7 @@ HWTEST_F(StartingWindowTest, SetAnimationConfig, TestSize.Level1)
     GTEST_LOG_(INFO) << "StartingWindow::SetAnimationConfig start";
     auto& animationConfig = WindowNodeContainer::GetAnimationConfigRef();
     StartingWindow::SetAnimationConfig(animationConfig);
+    EXPECT_EQ(animationConfig, StartingWindow::animationConfig_);
     GTEST_LOG_(INFO) << "StartingWindow::SetAnimationConfig end";
 }
 }

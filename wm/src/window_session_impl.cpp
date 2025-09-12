@@ -2337,7 +2337,8 @@ void WindowSessionImpl::UpdateDecorEnableToAce(bool isDecorEnable)
             auto isSubWindow = WindowHelper::IsSubWindow(GetType());
             decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
                 (property_->GetIsPcAppInPad() && isSubWindow)) &&
-                !(mode == WindowMode::WINDOW_MODE_FULLSCREEN && property_->GetCompatibleModeProperty());
+                !(mode == WindowMode::WINDOW_MODE_FULLSCREEN && property_->GetCompatibleModeProperty()) &&
+                property_->GetIsShowDecorInFreeMultiWindow();
         }
         if (mode == WindowMode::WINDOW_MODE_FULLSCREEN && property_->IsDecorFullscreenDisabled()) {
             decorVisible = false;
@@ -2369,7 +2370,8 @@ void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
                 auto isSubWindow = WindowHelper::IsSubWindow(GetType());
                 decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
                     (property_->GetIsPcAppInPad() && isSubWindow)) &&
-                    !(mode == WindowMode::WINDOW_MODE_FULLSCREEN && property_->GetCompatibleModeProperty());
+                    !(mode == WindowMode::WINDOW_MODE_FULLSCREEN && property_->GetCompatibleModeProperty()) &&
+                    property_->GetIsShowDecorInFreeMultiWindow();
             }
             if (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN && property_->IsDecorFullscreenDisabled()) {
                 decorVisible = false;
@@ -3393,6 +3395,9 @@ WMError WindowSessionImpl::SetDecorVisible(bool isVisible)
         return WMError::WM_ERROR_NULLPTR;
     }
     uiContent->SetContainerModalTitleVisible(isVisible, true);
+    if (auto hostSession = GetHostSession()) {
+        hostSession->SetDecorVisible(isVisible);
+    }
     TLOGD(WmsLogTag::WMS_DECOR, "end");
     return WMError::WM_OK;
 }
@@ -5332,12 +5337,19 @@ EnableIfSame<T, IDisplayMoveListener, std::vector<sptr<IDisplayMoveListener>>> W
 void WindowSessionImpl::NotifyDisplayMove(DisplayId from, DisplayId to)
 {
     WLOGFD("from %{public}" PRIu64 " to %{public}" PRIu64, from, to);
-    std::lock_guard<std::mutex> lockListener(displayMoveListenerMutex_);
-    auto displayMoveListeners = GetListeners<IDisplayMoveListener>();
-    for (auto& listener : displayMoveListeners) {
-        if (listener != nullptr) {
-            listener->OnDisplayMove(from, to);
+    {
+        std::lock_guard<std::mutex> lockListener(displayMoveListenerMutex_);
+        auto displayMoveListeners = GetListeners<IDisplayMoveListener>();
+        for (auto& listener : displayMoveListeners) {
+            if (listener != nullptr) {
+                listener->OnDisplayMove(from, to);
+            }
         }
+    }
+    auto context = GetContext();
+    if (context != nullptr) {
+        TLOGI(WmsLogTag::WMS_MAIN, "update display move to dms");
+        DisplayManager::GetInstance().UpdateDisplayIdFromAms(to, context->GetToken());
     }
 }
 
@@ -7040,6 +7052,7 @@ WMError WindowSessionImpl::UpdateFloatingBall(const FloatingBallTemplateBaseInfo
         return WMError::WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED;
     }
     FloatingBallTemplateInfo fbTemplateInfo = FloatingBallTemplateInfo(fbTemplateBaseInfo, icon);
+    GetProperty()->SetFbTemplateInfo(fbTemplateInfo);
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_FB_STATE_ABNORMALLY);
     return hostSession->UpdateFloatingBall(fbTemplateInfo);
@@ -8114,5 +8127,11 @@ void WindowSessionImpl::SetNotifySizeChangeFlag(bool flag)
     notifySizeChangeFlag_ = false;
 }
 
+WSError WindowSessionImpl::UpdateIsShowDecorInFreeMultiWindow(bool isShow)
+{
+    TLOGI(WmsLogTag::WMS_DECOR, "id: %{public}d, isShow: %{public}d", GetPersistentId(), isShow);
+    property_->SetIsShowDecorInFreeMultiWindow(isShow);
+    return WSError::WS_OK;
+}
 } // namespace Rosen
 } // namespace OHOS

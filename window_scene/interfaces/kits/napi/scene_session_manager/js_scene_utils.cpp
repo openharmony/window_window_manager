@@ -171,7 +171,7 @@ napi_value ConvertWindowAnimationOptionToJsValue(napi_env env,
             napi_create_array(env, &params);
             for (uint32_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
                 napi_value element;
-                napi_create_double(env, static_cast<double>(animationConfig.params[i]), &element);
+                napi_create_double(env, static_cast<double>(animationConfig.param[i]), &element);
                 napi_set_element(env, params, i, element);
             }
             napi_set_named_property(env, configJsValue, "param", params);
@@ -192,6 +192,8 @@ napi_value AnimationTypeInit(napi_env env)
         CreateJsValue(env, static_cast<uint32_t>(AnimationType::FADE_IN_OUT)));
     napi_set_named_property(env, objValue, "FADE_IN",
         CreateJsValue(env, static_cast<uint32_t>(AnimationType::FADE_IN)));
+    napi_set_named_property(env, objValue, "SEE_THE_WORLD",
+        CreateJsValue(env, static_cast<uint32_t>(AnimationType::SEE_THE_WORLD)));
     return objValue;
 }
 
@@ -1878,6 +1880,10 @@ napi_value CreateJsSessionProcessMode(napi_env env)
         static_cast<int32_t>(AAFwk::ProcessMode::NEW_PROCESS_ATTACH_TO_PARENT)));
     napi_set_named_property(env, objValue, "NEW_PROCESS_ATTACH_TO_STATUS_BAR_ITEM", CreateJsValue(env,
         static_cast<int32_t>(AAFwk::ProcessMode::NEW_PROCESS_ATTACH_TO_STATUS_BAR_ITEM)));
+    napi_set_named_property(env, objValue, "NEW_HIDDEN_PROCESS", CreateJsValue(env,
+        static_cast<int32_t>(AAFwk::ProcessMode::NEW_HIDDEN_PROCESS)));
+    napi_set_named_property(env, objValue, "NO_ATTACHMENT", CreateJsValue(env,
+        static_cast<int32_t>(AAFwk::ProcessMode::NO_ATTACHMENT)));
     napi_set_named_property(env, objValue, "END", CreateJsValue(env,
         static_cast<int32_t>(AAFwk::ProcessMode::END)));
     return objValue;

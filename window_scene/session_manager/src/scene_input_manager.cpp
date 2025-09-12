@@ -37,6 +37,7 @@ constexpr int INVALID_PERSISTENT_ID = 0;
 constexpr int DEFAULT_SCREEN_POS = 0;
 constexpr int DEFAULT_SCREEN_SCALE = 100;
 constexpr int DEFAULT_EXPAND_HEIGHT = 0;
+constexpr float DIRECTION90 = 90.0F;
 
 bool IsEqualUiExtentionWindowInfo(const std::vector<MMI::WindowInfo>& a, const std::vector<MMI::WindowInfo>& b);
 constexpr unsigned int TRANSFORM_DATA_LEN = 9;
@@ -322,8 +323,8 @@ void SceneInputManager::ConstructDisplayGroupInfos(std::map<ScreenId, ScreenProp
             .offsetY = screenProperty.GetInputOffsetY(),
             .pointerActiveWidth = screenProperty.GetPointerActiveWidth(),
             .pointerActiveHeight = screenProperty.GetPointerActiveHeight(),
-            .deviceRotation = ConvertDegreeToMMIRotation(deviceRotation * 90.0F),
-            .rotationCorrection = ConvertDegreeToMMIRotation(rotationCorrection * 90.0F)
+            .deviceRotation = ConvertDegreeToMMIRotation(deviceRotation * DIRECTION90),
+            .rotationCorrection = ConvertDegreeToMMIRotation(rotationCorrection * DIRECTION90)
         };
         DisplayGroupId displayGroupId = screenSession->GetDisplayGroupId();
         if (displayGroupMap.count(displayGroupId) == 0) {
@@ -379,6 +380,7 @@ void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::ScreenInfo>& s
     }
     MMI::UserScreenInfo userScreenInfo = {
         .userId = currentUserId_,
+        .userState = MMI::USER_ACTIVE,
         .screens = screenInfos,
         .displayGroups = displayGroupInfos
     };
@@ -411,6 +413,7 @@ void SceneInputManager::FlushEmptyInfoToMMI()
         }
         MMI::UserScreenInfo userScreenInfo = {
             .userId = currentUserId_,
+            .userState = MMI::USER_INACTIVE,
             .screens = screenInfos,
             .displayGroups = displayGroupInfos
         };

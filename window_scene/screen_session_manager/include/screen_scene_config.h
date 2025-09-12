@@ -24,6 +24,20 @@
 #include "libxml/parser.h"
 
 namespace OHOS::Rosen {
+struct DisplayFlag {
+    std::string type;
+    int32_t value;
+};
+
+struct DisplayConfig {
+    ScreenId physicalId;
+    ScreenId logicalId;
+    std::string name;
+    int32_t dpi;
+    DisplayFlag flag;
+    bool hasFlag = false;
+};
+
 class ScreenSceneConfig : public RefBase, public XmlConfigBase {
 public:
     ScreenSceneConfig() = delete;
@@ -34,7 +48,9 @@ public:
     static const std::map<std::string, std::vector<int>>& GetIntNumbersConfig();
     static const std::map<std::string, std::string>& GetStringConfig();
     static const std::map<std::string, std::vector<std::string>>& GetStringListConfig();
+    static const std::vector<DisplayConfig>& GetDisplaysConfigs();
     static void DumpConfig();
+    static void DumpDisplaysConfigs();
     static std::vector<DMRect> GetCutoutBoundaryRect(uint64_t displayId);
     static std::vector<DMRect> GetSubCutoutBoundaryRect();
     static void SetCutoutSvgPath(uint64_t displayId, const std::string& svgPath);
@@ -52,6 +68,7 @@ public:
     static bool IsSupportOffScreenRendering();
     static uint32_t GetOffScreenPPIThreshold();
     static bool IsSupportDuringCall();
+    static bool IsConcurrentUser();
 
 private:
     static std::map<int32_t, std::string> xmlNodeMap_;
@@ -60,6 +77,7 @@ private:
     static std::map<std::string, std::string> stringConfig_;
     static std::map<uint64_t, std::vector<DMRect>> cutoutBoundaryRectMap_;
     static std::map<std::string, std::vector<std::string>> stringListConfig_;
+    static std::vector<DisplayConfig> displaysConfigs_;
     static std::vector<DMRect> subCutoutBoundaryRect_;
     static bool isWaterfallDisplay_;
     static bool isScreenCompressionEnableInLandscape_;
@@ -68,6 +86,7 @@ private:
     static std::map<FoldDisplayMode, ScrollableParam> scrollableParams_;
     static bool isSupportCapture_;
     static bool isSupportOffScreenRendering_;
+    static bool isConcurrentUser_;
     static uint32_t offScreenPPIThreshold_;
 
     static bool IsValidNode(const xmlNode& currNode);
@@ -83,6 +102,9 @@ private:
     static DMRect CalcCutoutBoundaryRect(const std::string svgPath);
     static void ReadPhysicalDisplayConfigInfo(const xmlNodePtr& currNode);
     static void ReadScrollableParam(const xmlNodePtr& currNode);
+    static uint64_t ParseStrToUll(const std::string& contentStr);
+    static void ParseDisplaysConfig(const xmlNodePtr& currPtr);
+    static bool ParseFlagsConfig(const xmlNodePtr& flagsNode, DisplayFlag& outFlags);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_SCREEN_SCENE_CONFIG_H

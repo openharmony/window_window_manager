@@ -184,7 +184,12 @@ sptr<DisplayInfo> DisplayManagerService::GetDisplayInfoById(DisplayId displayId)
 {
     sptr<AbstractDisplay> display = abstractDisplayController_->GetAbstractDisplay(displayId);
     if (display == nullptr) {
-        TLOGE(WmsLogTag::DMS, "fail to get displayInfo by id: invalid display");
+        TLOGI(WmsLogTag::DMS, "fail to get displayInfo by id: %{public}" PRIu64 " invalid display", displayId);
+        sptr<DisplayInfo> displayInfo = GetDisplayInfoByScreenId(displayId);
+        if (displayInfo != nullptr) {
+            return displayInfo;
+        }
+        TLOGW(WmsLogTag::DMS, "fail to get displayInfo by screen id: %{public}" PRIu64 " invalid screen", displayId);
         return nullptr;
     }
     return display->ConvertToDisplayInfo();
@@ -644,6 +649,21 @@ sptr<ScreenInfo> DisplayManagerService::GetScreenInfoById(ScreenId screenId)
         return nullptr;
     }
     return screen->ConvertToScreenInfo();
+}
+
+sptr<DisplayInfo> DisplayManagerService::GetDisplayInfoByScreenId(ScreenId screenId) const
+{
+    auto screen = abstractScreenController_->GetAbstractScreen(screenId);
+    if (screen == nullptr) {
+        TLOGE(WmsLogTag::DMS, "cannot find screenInfo: %{public}" PRIu64, screenId);
+        return nullptr;
+    }
+    sptr<ScreenInfo> screenInfo = screen->ConvertToScreenInfo();
+    if (screenInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "cannot get screenInfo: %{public}" PRIu64, screenId);
+        return nullptr;
+    }
+    return screen->ConvertScreenInfoToDisplayInfo(screenInfo);
 }
 
 sptr<ScreenGroupInfo> DisplayManagerService::GetScreenGroupInfoById(ScreenId screenId)

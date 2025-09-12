@@ -38,13 +38,12 @@ public:
         innerAvailableAreaChangeFunc_ = availableAreaChangeFunc;
     }
 
-    void OnAvailableAreaChanged(DMRect area)
+    void OnAvailableAreaChangedByDisplayId(const DMRect& area, DisplayId displayId)
     {
         if (innerAvailableAreaChangeFunc_ == nullptr) {
             TLOGE(WmsLogTag::DMS, "[DMNDK] callback is nullptr");
             return;
         }
-        DisplayId displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
         innerAvailableAreaChangeFunc_(displayId);
     }
 

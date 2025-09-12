@@ -29,6 +29,7 @@
 #include "proxy/include/window_info.h"
 
 #include "common/include/session_permission.h"
+#include "fold_screen_state_internel.h"
 #include "rs_adapter.h"
 #include "session_coordinate_helper.h"
 #include "session_helper.h"
@@ -75,6 +76,10 @@ const std::map<SessionState, bool> DETACH_MAP = {
     { SessionState::STATE_INACTIVE, true },
     { SessionState::STATE_BACKGROUND, true },
 };
+const bool CORRECTION_ENABLE = system::GetIntParameter<int32_t>("const.system.sensor_correction_enable", 0) == 1;
+const uint32_t ROTATION_90 = 90;
+const uint32_t ROTATION_360 = 360;
+const uint32_t ROTATION_LANDSCAPE_INVERTED = 3;
 } // namespace
 
 std::shared_ptr<AppExecFwk::EventHandler> Session::mainHandler_;
@@ -124,7 +129,9 @@ Session::~Session()
     DeletePersistentImageFit();
     DeleteHasSnapshot();
     if (mainHandler_) {
-        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() {
+        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_),
+                                shadowSurfaceNode = std::move(shadowSurfaceNode_),
+                                leashWinShadowSurfaceNode = std::move(leashWinShadowSurfaceNode_)]() {
             // do nothing
         });
     }
@@ -179,12 +186,19 @@ void Session::SetSurfaceNode(const std::shared_ptr<RSSurfaceNode>& surfaceNode)
     RSAdapterUtil::SetRSUIContext(surfaceNode, GetRSUIContext(), true);
     std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
     surfaceNode_ = surfaceNode;
+    shadowSurfaceNode_ = surfaceNode_ ? surfaceNode_->CreateShadowSurfaceNode() : nullptr;
 }
 
 std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode() const
 {
     std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
     return surfaceNode_;
+}
+
+std::shared_ptr<RSSurfaceNode> Session::GetShadowSurfaceNode() const
+{
+    std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
+    return shadowSurfaceNode_;
 }
 
 std::optional<NodeId> Session::GetSurfaceNodeId() const
@@ -208,6 +222,7 @@ void Session::SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurf
     }
     std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
     leashWinSurfaceNode_ = leashWinSurfaceNode;
+    leashWinShadowSurfaceNode_ = leashWinSurfaceNode_ ? leashWinSurfaceNode_->CreateShadowSurfaceNode() : nullptr;
 }
 
 void Session::SetFrameLayoutFinishListener(const NotifyFrameLayoutFinishFunc& func)
@@ -219,6 +234,12 @@ std::shared_ptr<RSSurfaceNode> Session::GetLeashWinSurfaceNode() const
 {
     std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
     return leashWinSurfaceNode_;
+}
+
+std::shared_ptr<RSSurfaceNode> Session::GetLeashWinShadowSurfaceNode() const
+{
+    std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
+    return leashWinShadowSurfaceNode_;
 }
 
 std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNodeForMoveDrag() const
@@ -1326,6 +1347,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
         static_cast<uint32_t>(winRect.height_)};
     property->SetWindowRect(rect);
     property->SetPersistentId(GetPersistentId());
+    property->SetAppIndex(GetSessionInfo().appIndex_);
     property->SetFullScreenStart(GetSessionInfo().fullScreenStart_);
     property->SetSupportedWindowModes(GetSessionInfo().supportedWindowModes);
     property->SetWindowSizeLimits(GetSessionInfo().windowSizeLimits);
@@ -1362,6 +1384,10 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     property->SetPcAppInpadCompatibleMode(GetSessionProperty()->GetPcAppInpadCompatibleMode());
     property->SetPcAppInpadSpecificSystemBarInvisible(GetSessionProperty()->GetPcAppInpadSpecificSystemBarInvisible());
     property->SetPcAppInpadOrientationLandscape(GetSessionProperty()->GetPcAppInpadOrientationLandscape());
+    const bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
+    const bool isShow = !(isScreenLockedCallback_ && isScreenLockedCallback_() &&
+        systemConfig_.IsFreeMultiWindowMode() && !isPcMode);
+    property->SetIsShowDecorInFreeMultiWindow(isShow);
     SetSessionProperty(property);
     GetSessionProperty()->SetIsNeedUpdateWindowMode(false);
 }
@@ -1512,7 +1538,7 @@ WSError Session::Background(bool isFromClient, const std::string& identityToken)
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
-    lastSnapshotScreen_ = WSSnapshotHelper::GetScreenStatus();
+    lastSnapshotScreen_ = WSSnapshotHelper::GetInstance()->GetScreenStatus();
     SetIsPendingToBackgroundState(false);
     NotifyBackground();
     PostSpecificSessionLifeCycleTimeoutTask(DETACH_EVENT_NAME);
@@ -1545,17 +1571,25 @@ WSError Session::Disconnect(bool isFromClient, const std::string& identityToken)
     isNeedSyncSessionRect_ = true;
     if (mainHandler_) {
         std::shared_ptr<RSSurfaceNode> surfaceNode;
+        std::shared_ptr<RSSurfaceNode> shadowSurfaceNode;
+        std::shared_ptr<RSSurfaceNode> leashWinShadowSurfaceNode;
         {
             std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
             surfaceNode_.swap(surfaceNode);
+            shadowSurfaceNode.swap(shadowSurfaceNode_);
+            leashWinShadowSurfaceNode.swap(leashWinShadowSurfaceNode_);
         }
-        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode)]() mutable {
+        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode),
+                                shadowSurfaceNode = std::move(shadowSurfaceNode),
+                                leashWinShadowSurfaceNode = std::move(leashWinShadowSurfaceNode)]() mutable {
             surfaceNode.reset();
+            shadowSurfaceNode.reset();
+            leashWinShadowSurfaceNode.reset();
         });
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
     UpdateSessionState(SessionState::STATE_DISCONNECT);
-    lastSnapshotScreen_ = WSSnapshotHelper::GetScreenStatus();
+    lastSnapshotScreen_ = WSSnapshotHelper::GetInstance()->GetScreenStatus();
     NotifyDisconnect();
     if (visibilityChangedDetectFunc_) {
         visibilityChangedDetectFunc_(GetCallingPid(), isVisible_, false);
@@ -2726,7 +2760,15 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
         return;
     }
     auto key = GetSessionSnapshotStatus(reason);
-    auto rotate = WSSnapshotHelper::GetDisplayOrientation(currentRotation_);
+    auto rotation = currentRotation_;
+    if (CORRECTION_ENABLE && key.first == 0) {
+        rotation = (rotation + ROTATION_90) % ROTATION_360;
+    }
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
+        WSSnapshotHelper::GetInstance()->GetScreenStatus() == SCREEN_FOLDED) {
+        rotation = ROTATION_LANDSCAPE_INVERTED;
+    }
+    auto rotate = WSSnapshotHelper::GetDisplayOrientation(rotation);
     if (persistentPixelMap) {
         key = defaultStatus;
         rotate = DisplayOrientation::PORTRAIT;
@@ -2914,16 +2956,23 @@ SnapshotStatus Session::GetSessionSnapshotStatus(BackgroundReason reason) const
     if (state_ == SessionState::STATE_BACKGROUND || state_ == SessionState::STATE_DISCONNECT) {
         snapshotScreen = lastSnapshotScreen_;
     } else {
-        snapshotScreen = WSSnapshotHelper::GetScreenStatus();
+        snapshotScreen = WSSnapshotHelper::GetInstance()->GetScreenStatus();
     }
     if (reason == BackgroundReason::EXPAND_TO_FOLD_SINGLE_POCKET) {
         snapshotScreen = SCREEN_EXPAND;
     }
     uint32_t orientation = WSSnapshotHelper::GetOrientation(currentRotation_);
+    if (CORRECTION_ENABLE && snapshotScreen == 0) {
+        orientation ^= 1;
+    }
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
+        WSSnapshotHelper::GetInstance()->GetScreenStatus() == SCREEN_FOLDED) {
+        orientation = 1;
+    }
     return std::make_pair(snapshotScreen, orientation);
 }
 
-uint32_t Session::GetWindowOrientation() const
+uint32_t Session::GetWindowSnapshotOrientation() const
 {
     if (!SupportSnapshotAllSessionStatus()) {
         return 0;
@@ -2935,6 +2984,14 @@ uint32_t Session::GetLastOrientation() const
 {
     if (!SupportSnapshotAllSessionStatus()) {
         return SNAPSHOT_PORTRAIT;
+    }
+    if (CORRECTION_ENABLE && WSSnapshotHelper::GetInstance()->GetScreenStatus() == 0) {
+        return static_cast<uint32_t>(
+            WSSnapshotHelper::GetDisplayOrientation((currentRotation_ + ROTATION_90) % ROTATION_360));
+    }
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
+        WSSnapshotHelper::GetInstance()->GetScreenStatus() == SCREEN_FOLDED) {
+        return ROTATION_LANDSCAPE_INVERTED;
     }
     return static_cast<uint32_t>(WSSnapshotHelper::GetDisplayOrientation(currentRotation_));
 }
@@ -3338,12 +3395,12 @@ WSError Session::SetAppSupportPhoneInPc(bool isSupportPhone)
 WSError Session::SetCompatibleModeProperty(const sptr<CompatibleModeProperty> compatibleModeProperty)
 {
     auto property = GetSessionProperty();
-    if (property == nullptr || compatibleModeProperty == nullptr) {
+    if (property == nullptr) {
         TLOGE(WmsLogTag::WMS_COMPAT, "id: %{public}d property is nullptr", persistentId_);
         return WSError::WS_ERROR_NULLPTR;
     }
     property->SetCompatibleModeProperty(compatibleModeProperty);
-    if (compatibleModeProperty->IsDragResizeDisabled()) {
+    if (compatibleModeProperty && compatibleModeProperty->IsDragResizeDisabled()) {
         property->SetDragEnabled(false);
     }
     if (!sessionStage_) {
@@ -3735,9 +3792,18 @@ WSRect Session::GetClientRect() const
     return layoutController_->GetClientRect();
 }
 
-WSError Session::SetHidingStartingWindow(bool hidingStartWindow)
+void Session::SetHidingStartingWindow(bool hidingStartWindow)
 {
     hidingStartWindow_ = hidingStartWindow;
+}
+
+bool Session::GetHidingStartingWindow() const
+{
+    return hidingStartWindow_;
+}
+
+WSError Session::SetLeashWindowAlpha(bool hidingStartWindow)
+{
     auto leashSurfaceNode = GetLeashWinSurfaceNode();
     if (leashSurfaceNode == nullptr) {
         TLOGI(WmsLogTag::WMS_PATTERN, "no leashWindow: %{public}d", hidingStartWindow);
@@ -3747,11 +3813,6 @@ WSError Session::SetHidingStartingWindow(bool hidingStartWindow)
     hidingStartWindow ? leashSurfaceNode->SetAlpha(0) : leashSurfaceNode->SetAlpha(1);
     SetTouchable(!hidingStartWindow);
     return WSError::WS_OK;
-}
-
-bool Session::GetHidingStartingWindow() const
-{
-    return hidingStartWindow_;
 }
 
 void Session::SetEnableRemoveStartingWindow(bool enableRemoveStartingWindow)
@@ -4873,5 +4934,44 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
     TLOGD(WmsLogTag::WMS_SCB, "%{public}s: %{public}s, sessionId: %{public}d, screenId:%{public}" PRIu64,
           caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
     return rsUIContext_;
+}
+
+std::shared_ptr<RSUIContext> Session::GetRSShadowContext() const
+{
+    std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
+    if (!shadowSurfaceNode_) {
+        TLOGE(WmsLogTag::WMS_SCB, "Shadow surface node is nullptr, id: %{public}d.", GetPersistentId());
+        return nullptr;
+    }
+    return shadowSurfaceNode_->GetRSUIContext();
+}
+
+std::shared_ptr<RSUIContext> Session::GetRSLeashWinShadowContext() const
+{
+    std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
+    if (!leashWinShadowSurfaceNode_) {
+        TLOGE(WmsLogTag::WMS_SCB, "Leash win shadow surface node is nullptr, id: %{public}d.", GetPersistentId());
+        return nullptr;
+    }
+    return leashWinShadowSurfaceNode_->GetRSUIContext();
+}
+
+WSError Session::SetIsShowDecorInFreeMultiWindow(bool isShow)
+{
+    if (!IsSessionValid()) {
+        TLOGE(WmsLogTag::WMS_DECOR, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_DECOR, "sessionStage_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    if (WindowHelper::IsMainWindow(GetWindowType())) {
+        TLOGI(WmsLogTag::WMS_DECOR, "id: %{public}d isShow: %{public}d",
+            GetPersistentId(), isShow);
+        return sessionStage_->UpdateIsShowDecorInFreeMultiWindow(isShow);
+    }
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

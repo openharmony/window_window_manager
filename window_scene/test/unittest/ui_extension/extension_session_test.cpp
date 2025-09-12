@@ -532,7 +532,7 @@ HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed01, TestSize.Level0)
     auto keyEvent = MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
     bool isConsumed = false;
-    bool isTimeout = false;
+    bool isTimeout = true;
     bool isPreImeEvent = false;
     WSError result = extensionSession_->TransferKeyEventForConsumed(keyEvent, isConsumed, isTimeout, isPreImeEvent);
     ASSERT_EQ(result, WSError::WS_OK);

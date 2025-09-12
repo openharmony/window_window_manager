@@ -502,7 +502,11 @@ void ScreenSessionDumper::DumpRsInfoById(ScreenId id)
         TLOGE(WmsLogTag::DMS, "screenSession nullptr. screen id: %{public}" PRIu64"", id);
         return;
     }
-    auto state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance().GetScreenPowerStatus(id));
+    ScreenId rsId = id;
+    if (screenSession->rsId_ != SCREEN_ID_INVALID) {
+        rsId = screenSession->rsId_;
+    }
+    auto state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance().GetScreenPowerStatus(rsId));
     oss << std::left << std::setw(LINE_WIDTH) << "ScreenPowerState: "
         << static_cast<int32_t>(state) << std::endl;
     std::vector<ScreenColorGamut> colorGamuts;

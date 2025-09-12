@@ -29,12 +29,17 @@ namespace OHOS {
 namespace Rosen {
 class WMSDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
+    WMSDeathRecipient(const int32_t userId = INVALID_USER_ID);
     virtual void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
+private:
+    int32_t userId_;
 };
 
-class WindowAdapterLite {
-WM_DECLARE_SINGLE_INSTANCE(WindowAdapterLite);
+class WindowAdapterLite : public RefBase {
+    WM_DECLARE_SINGLE_INSTANCE_BASE(WindowAdapterLite);
 public:
+    static sptr<WindowAdapterLite> GetInstance(const int32_t userId);
+
     using WMSConnectionChangedCallbackFunc = std::function<void(int32_t, int32_t, bool)>;
     virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID);
     virtual WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
@@ -62,13 +67,19 @@ public:
     virtual WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos);
     virtual WMError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
+    ~WindowAdapterLite() = default;
+
 private:
+    WindowAdapterLite(const int32_t userId = INVALID_USER_ID);
     static inline SingletonDelegator<WindowAdapterLite> delegator;
     bool InitSSMProxy();
 
     /*
-     * Multi User
+     * Multi user and multi screen
      */
+    int32_t userId_;
+    static std::unordered_map<int32_t, sptr<WindowAdapterLite>> windowAdapterLiteMap_;
+    static std::mutex windowAdapterLiteMapMutex_;
     void OnUserSwitch();
     void ReregisterWindowManagerLiteAgent();
 

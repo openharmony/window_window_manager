@@ -1147,10 +1147,12 @@ HWTEST_F(SceneSessionTest6, SetFrameRectForPartialZoomInInner, Function | SmallT
     info.bundleName_ = "SetFrameRectForPartialZoomInInner";
     info.abilityName_ = "SetFrameRectForPartialZoomInInner";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession->mainHandler_, nullptr);
+    EXPECT_EQ(sceneSession->GetSurfaceNode(), nullptr);
 
     Rect frameRect = { 10, 10, 10, 10 };  // 10 is valid frame rect param
     WSError ret = sceneSession->SetFrameRectForPartialZoomInInner(frameRect);
-    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_WINDOW);
+    EXPECT_EQ(ret, WSError::WS_OK);
 
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
@@ -1158,6 +1160,10 @@ HWTEST_F(SceneSessionTest6, SetFrameRectForPartialZoomInInner, Function | SmallT
     sceneSession->surfaceNode_ = surfaceNode;
     ret = sceneSession->SetFrameRectForPartialZoomInInner(frameRect);
     EXPECT_EQ(ret, WSError::WS_OK);
+
+    sceneSession->mainHandler_ = nullptr;
+    ret = sceneSession->SetFrameRectForPartialZoomInInner(frameRect);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_WINDOW);
 }
 
 /**
@@ -1223,6 +1229,13 @@ HWTEST_F(SceneSessionTest6, SetWindowTransitionAnimation, Function | SmallTest |
     auto ret = session->SetWindowTransitionAnimation(transitionType, animation);
     ASSERT_EQ(ret, WSError::WS_ERROR_DEVICE_NOT_SUPPORT);
 
+    session->GetSessionProperty()->SetIsPcAppInPad(true);
+    ret = session->SetWindowTransitionAnimation(transitionType, animation);
+    ASSERT_EQ(ret, WSError::WS_OK);
+    session->GetSessionProperty()->SetIsPcAppInPad(false);
+    ret = session->SetWindowTransitionAnimation(transitionType, animation);
+    ASSERT_EQ(ret, WSError::WS_ERROR_DEVICE_NOT_SUPPORT);
+
     session->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ret = session->SetWindowTransitionAnimation(transitionType, animation);
     ASSERT_EQ(ret, WSError::WS_OK);
@@ -1252,6 +1265,7 @@ HWTEST_F(SceneSessionTest6, SetSupportEnterWaterfallMode, Function | SmallTest |
 {
     SessionInfo info;
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     session->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     session->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     session->SetSupportEnterWaterfallMode(true);
@@ -1259,6 +1273,75 @@ HWTEST_F(SceneSessionTest6, SetSupportEnterWaterfallMode, Function | SmallTest |
     session->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     session->SetSupportEnterWaterfallMode(true);
     EXPECT_TRUE(session->sessionStage_ != nullptr);
+}
+
+/**
+ * @tc.name: TestSetContentAspectRatio
+ * @tc.desc: Verify SetContentAspectRatio covers all branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, TestSetContentAspectRatio, TestSize.Level1)
+{
+    SessionInfo info;
+    auto session = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    // Case 1: sessionProperty is null
+    session->property_ = nullptr;
+    auto result = session->SetContentAspectRatio(1.5f, true, true);
+    EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
+
+    // Case 2: aspect ratio is invalid
+    session->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    WindowLimits limits(400, 200, 200, 100, FLT_MAX, 0.0f);
+    session->property_->SetWindowLimits(limits);
+    result = session->SetContentAspectRatio(0.5f, true, true);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
+
+    // Case 3: aspect ratio is valid, moveDragController is null
+    session->moveDragController_ = nullptr;
+    result = session->SetContentAspectRatio(2.0f, false, false);
+    EXPECT_EQ(result, WSError::WS_OK);
+
+    // Case 4: aspect ratio is valid, moveDragController is not null
+    session->moveDragController_ =
+        sptr<MoveDragController>::MakeSptr(session->GetPersistentId(), session->GetWindowType());
+    result = session->SetContentAspectRatio(2.0f, true, true);
+    EXPECT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: TestGetWindowDecoration
+ * @tc.desc: Verify GetWindowDecoration covers all branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, TestGetWindowDecoration, TestSize.Level1)
+{
+    SessionInfo info;
+    auto session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto prop = session->GetSessionProperty();
+
+    WindowDecoration emptyDecor{0, 0, 0, 0};
+
+    // Case 1: Not visible
+    session->SetDecorVisible(false);
+    auto decor = session->GetWindowDecoration();
+    EXPECT_EQ(decor, emptyDecor);
+
+    // Case 2: Not enabled
+    session->SetDecorVisible(true);
+    session->systemConfig_.isSystemDecorEnable_ = false;
+    decor = session->GetWindowDecoration();
+    EXPECT_EQ(decor, emptyDecor);
+
+    prop->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    prop->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    session->systemConfig_.decorWindowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+    session->systemConfig_.isSystemDecorEnable_ = true;
+
+    // Case 3: display is null
+    prop->SetDisplayId(DISPLAY_ID_INVALID);
+    decor = session->GetWindowDecoration();
+    EXPECT_EQ(decor, emptyDecor);
 }
 } // namespace
 } // namespace Rosen

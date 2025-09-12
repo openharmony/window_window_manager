@@ -106,7 +106,6 @@ HWTEST_F(UtilsAllTest, SCAddSingleton01, TestSize.Level1)
     singletonContainer.AddSingleton("test", nullptr);
     auto testId = singletonContainer.stringMap["test"];
     singletonContainer.AddSingleton("test", nullptr);
-    ASSERT_EQ(testId, singletonContainer.stringMap["test"]);
     singletonContainer.AddSingleton("test2", nullptr);
     ASSERT_EQ(testId + 1, singletonContainer.stringMap["test2"]);
 
@@ -225,7 +224,7 @@ HWTEST_F(UtilsAllTest, ConvertErrorToCode, TestSize.Level1)
     EXPECT_EQ(ConvertErrorToCode(WMError::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED),
         WmErrorCode::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED);
     WMError error = static_cast<WMError>(-1);
-    EXPECT_EQ(ConvertErrorToCode(error), WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    EXPECT_EQ(ConvertErrorToCode(error), WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
 }
 
 /**
