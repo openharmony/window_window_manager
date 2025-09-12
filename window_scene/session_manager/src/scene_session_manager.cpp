@@ -3237,12 +3237,14 @@ void SceneSessionManager::AddRequestTaskInfo(int32_t persistentId, const Session
         return;
     }
     AAFwk::Want wantTmp = sessionInfo.GetWantSafely();
-    std::lock_guard<std::mutex> lock(requestTaskInfoMapMutex_);
-    if (requestTaskInfoMap.find(persistentId) == requestTaskInfoMap.end()) {
-        requestTaskInfoMap.emplace(persistentId, std::make_shared<RequestTaskInfo>());
+    {
+        std::lock_guard<std::mutex> lock(requestTaskInfoMapMutex_);
+        if (requestTaskInfoMap.find(persistentId) == requestTaskInfoMap.end()) {
+            requestTaskInfoMap.emplace(persistentId, std::make_shared<RequestTaskInfo>());
+        }
+        auto& requestIdToWantMap = requestTaskInfoMap[persistentId]->requestIdToWantMap;
+        requestIdToWantMap[sessionInfo.requestId] = wantTmp;
     }
-    auto& requestIdToWantMap = requestTaskInfoMap[persistentId]->requestIdToWantMap;
-    requestIdToWantMap[sessionInfo.requestId] = wantTmp;
     TLOGI(WmsLogTag::WMS_LIFE, "persistentId:%{public}d, requestId:%{public}d, "
         "infoMap size:%{public}u, wantMap size:%{public}u",
         persistentId, sessionInfo.requestId, requestTaskInfoMap.size(), requestIdToWantMap.size());
@@ -3252,11 +3254,13 @@ void SceneSessionManager::RemoveRequestTaskInfo(int32_t persistentId, int32_t re
     if (requestId < MIN_REQUEST_ID_FROM_ABILITY || persistentId == INVALID_SESSION_ID) {
         return;
     }
-    std::lock_guard<std::mutex> lock(requestTaskInfoMapMutex_);
-    if (requestTaskInfoMap.find(persistentId) == requestTaskInfoMap.end()) {
-        return;
+    {
+        std::lock_guard<std::mutex> lock(requestTaskInfoMapMutex_);
+        if (requestTaskInfoMap.find(persistentId) == requestTaskInfoMap.end()) {
+            return;
+        }
+        requestTaskInfoMap[persistentId]->requestIdToWantMap.erase(requestId);
     }
-    requestTaskInfoMap[persistentId]->requestIdToWantMap.erase(requestId);
     TLOGI(WmsLogTag::WMS_LIFE, "persistentId:%{public}d, requestId:%{public}d, "
         "infoMap size:%{public}u, wantMap size:%{public}u",
         persistentId, requestId, requestTaskInfoMap.size(),
@@ -3267,8 +3271,10 @@ void SceneSessionManager::ClearRequestTaskInfo(int32_t persistentId) {
     if (persistentId == INVALID_SESSION_ID) {
         return;
     }
-    std::lock_guard<std::mutex> lock(requestTaskInfoMapMutex_);
-    requestTaskInfoMap.erase(persistentId);
+    {
+        std::lock_guard<std::mutex> lock(requestTaskInfoMapMutex_);
+        requestTaskInfoMap.erase(persistentId);
+    }
     TLOGI(WmsLogTag::WMS_LIFE, "persistentId:%{public}d", persistentId);
 }
 
@@ -3277,17 +3283,21 @@ std::shared_ptr<AAFwk::Want> SceneSessionManager::GetRequestWantFromTaskInfoMap(
     if (requestId < MIN_REQUEST_ID_FROM_ABILITY || persistentId == INVALID_SESSION_ID) {
         return nullptr;
     }
-    std::lock_guard<std::mutex> lock(requestTaskInfoMapMutex_);
-    if (requestTaskInfoMap.find(persistentId) == requestTaskInfoMap.end()) {
-        return nullptr;
-    }
-    auto& requestIdToWantMap = requestTaskInfoMap[persistentId]->requestIdToWantMap;
-    if (requestIdToWantMap.find(requestId) == requestIdToWantMap.end()) {
-        return nullptr;
+    std::shared_ptr<AAFwk::Want> retPtr = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(requestTaskInfoMapMutex_);
+        if (requestTaskInfoMap.find(persistentId) == requestTaskInfoMap.end()) {
+            return nullptr;
+        }
+        auto& requestIdToWantMap = requestTaskInfoMap[persistentId]->requestIdToWantMap;
+        if (requestIdToWantMap.find(requestId) == requestIdToWantMap.end()) {
+            return nullptr;
+        }
+        retPtr = std::make_shared<AAFwk::Want>(requestIdToWantMap[requestId])
     }
     TLOGI(WmsLogTag::WMS_LIFE, "exsit, persistentId:%{public}d, requestId:%{public}d",
         persistentId, requestId);
-    return std::make_shared<AAFwk::Want>(requestIdToWantMap[requestId]);
+    return retPtr;
 }
 
 void SceneSessionManager::NotifyCollaboratorAfterStart(sptr<SceneSession>& sceneSession,
