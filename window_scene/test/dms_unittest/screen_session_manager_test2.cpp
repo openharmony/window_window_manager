@@ -17,6 +17,7 @@
 #include <parameter.h>
 #include <parameters.h>
 
+#include "common_test_utils.h"
 #include "display_manager_agent_default.h"
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "screen_scene_config.h"
@@ -60,6 +61,7 @@ public:
     void TearDown() override;
 
     static sptr<ScreenSessionManager> ssm_;
+    sptr<ScreenSession> InitTestScreenSession(std::string name, ScreenId &screenId);
 };
 
 sptr<ScreenSessionManager> ScreenSessionManagerTest::ssm_ = nullptr;
@@ -67,6 +69,10 @@ sptr<ScreenSessionManager> ScreenSessionManagerTest::ssm_ = nullptr;
 void ScreenSessionManagerTest::SetUpTestCase()
 {
     ssm_ = new ScreenSessionManager();
+    CommonTestUtils::InjectTokenInfoByHapName(0, "com.ohos.systemui", 0);
+    const char** perms = new const char *[1];
+    perms[0] = "ohos.permission.CAPTURE_SCREEN";
+    CommonTestUtils::SetAceessTokenPermission("foundation", perms, 1);
 }
 
 void ScreenSessionManagerTest::TearDownTestCase()
@@ -153,6 +159,38 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForFold03, TestSize.Level1)
     ssm->SetScreenPowerForFold(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
     EXPECT_TRUE(g_errLog.find("set advancedOn powerStatus off") == std::string::npos);
 }
+
+/**
+ * @tc.name: SetDisplayNodeSecurity
+ * @tc.desc: SetDisplayNodeSecurity test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetDisplayNodeSecurity, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    virtualOption.width_ = 200;
+    virtualOption.height_ = 100;
+    virtualOption.isSecurity_ = true;
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+    ASSERT_NE(screenSession, nullptr);
+    screenSession->SetDisplayNodeSecurity();
+    EXPECT_TRUE(g_errLog.find("displayNode is null") != std::string::npos);
+
+    Rosen::RSDisplayNodeConfig rsConfig;
+    ScreenId rsScreenId = screenSession->GetRSScreenId();
+    rsConfig.screenId = rsScreenId;
+    screenSession->CreateDisplayNode(rsConfig);
+    screenSession->SetDisplayNodeSecurity();
+    EXPECT_TRUE(g_errLog.find("SetSecurityDisplay success") != std::string::npos);
+    ssm->DestroyVirtualScreen(screenId);
+}
+
 
 /**
  * @tc.name: SwitchScrollParam01
