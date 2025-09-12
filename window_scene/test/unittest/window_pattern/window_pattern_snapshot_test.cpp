@@ -752,21 +752,14 @@ HWTEST_F(WindowPatternSnapshotTest, GetWindowOrientation, TestSize.Level1)
     info.screenId_ = 0;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     auto ret = sceneSession->GetWindowOrientation();
-    EXPECT_EQ(ret, DisplayOrientation::PORTRAIT);
+    EXPECT_EQ(ret, 0);
 
     sceneSession->capacity_ = maxCapacity;
-    ScreenId screenId = 0;
-    sptr<ScreenSession> screenSession = nullptr;
-    screenSession = new ScreenSession(0, ScreenProperty(), 0);
-    ASSERT_NE(screenSession, nullptr);
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(screenId, screenSession);
-
     sceneSession->GetWindowOrientation();
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
 
     session_->capacity_ = maxCapacity;
     ret = session_->GetWindowOrientation();
-    EXPECT_EQ(ret, DisplayOrientation::PORTRAIT);
+    EXPECT_EQ(ret, WSSnapshotHelper::GetInstance()->GetWindowRotation());
 }
 
 /**

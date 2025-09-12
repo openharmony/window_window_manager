@@ -29,6 +29,7 @@
 #include "proxy/include/window_info.h"
 
 #include "common/include/session_permission.h"
+#include "fold_screen_state_internel.h"
 #include "rs_adapter.h"
 #include "session_coordinate_helper.h"
 #include "session_helper.h"
@@ -77,6 +78,7 @@ const std::map<SessionState, bool> DETACH_MAP = {
     { SessionState::STATE_INACTIVE, true },
     { SessionState::STATE_BACKGROUND, true },
 };
+const uint32_t ROTATION_LANDSCAPE_INVERTED = 3;
 } // namespace
 
 std::shared_ptr<AppExecFwk::EventHandler> Session::mainHandler_;
@@ -1504,7 +1506,7 @@ WSError Session::Background(bool isFromClient, const std::string& identityToken)
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
-    lastSnapshotScreen_ = WSSnapshotHelper::GetScreenStatus();
+    lastSnapshotScreen_ = WSSnapshotHelper::GetInstance()->GetScreenStatus();
     SetIsPendingToBackgroundState(false);
     NotifyBackground();
     PostSpecificSessionLifeCycleTimeoutTask(DETACH_EVENT_NAME);
@@ -1547,7 +1549,7 @@ WSError Session::Disconnect(bool isFromClient, const std::string& identityToken)
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
     UpdateSessionState(SessionState::STATE_DISCONNECT);
-    lastSnapshotScreen_ = WSSnapshotHelper::GetScreenStatus();
+    lastSnapshotScreen_ = WSSnapshotHelper::GetInstance()->GetScreenStatus();
     NotifyDisconnect();
     if (visibilityChangedDetectFunc_) {
         visibilityChangedDetectFunc_(GetCallingPid(), isVisible_, false);
@@ -2713,7 +2715,12 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
         return;
     }
     auto key = GetSessionStatus(reason);
-    auto rotate = WSSnapshotHelper::GetDisplayOrientation(currentRotation_);
+    auto rotation = currentRotation_;
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
+        WSSnapshotHelper::GetInstance()->GetScreenStatus() == SCREEN_FOLDED) {
+        rotation = ROTATION_LANDSCAPE_INVERTED;
+    }
+    auto rotate = WSSnapshotHelper::GetDisplayOrientation(rotation);
     if (persistentPixelMap) {
         key = defaultStatus;
         rotate = DisplayOrientation::PORTRAIT;
@@ -2889,10 +2896,7 @@ SnapshotStatus Session::GetWindowStatus() const
     if (!SupportSnapshotAllSessionStatus()) {
         return defaultStatus;
     }
-    uint32_t snapshotScreen = WSSnapshotHelper::GetScreenStatus();
-    auto windowOrientation = GetWindowOrientation();
-    uint32_t orientation = WSSnapshotHelper::GetOrientation(windowOrientation);
-    return std::make_pair(snapshotScreen, orientation);
+    return WSSnapshotHelper::GetInstance()->GetWindowStatus();
 }
 
 SnapshotStatus Session::GetSessionStatus(ScreenLockReason reason) const
@@ -2904,40 +2908,35 @@ SnapshotStatus Session::GetSessionStatus(ScreenLockReason reason) const
     if (state_ == SessionState::STATE_BACKGROUND || state_ == SessionState::STATE_DISCONNECT) {
         snapshotScreen = lastSnapshotScreen_;
     } else {
-        snapshotScreen = WSSnapshotHelper::GetScreenStatus();
+        snapshotScreen = WSSnapshotHelper::GetInstance()->GetScreenStatus();
     }
     if (reason == ScreenLockReason::EXPAND_TO_FOLD_SINGLE_POCKET) {
         snapshotScreen = SCREEN_EXPAND;
     }
     uint32_t orientation = WSSnapshotHelper::GetOrientation(currentRotation_);
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
+        WSSnapshotHelper::GetInstance()->GetScreenStatus() == SCREEN_FOLDED) {
+        orientation = 1;
+    }
     return std::make_pair(snapshotScreen, orientation);
 }
 
-DisplayOrientation Session::GetWindowOrientation() const
+uint32_t Session::GetWindowOrientation() const
 {
     if (!SupportSnapshotAllSessionStatus()) {
-        return DisplayOrientation::PORTRAIT;
+        return 0;
     }
-    DisplayId displayId = GetScreenId();
-    auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
-    if (!screenSession) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "screenSession is nullptr, id:%{public}d", persistentId_);
-        return DisplayOrientation::PORTRAIT;
-    }
-    auto screenProperty = screenSession->GetScreenProperty();
-    DisplayOrientation displayOrientation = screenProperty.GetDisplayOrientation();
-    auto windowOrientation = static_cast<uint32_t>(displayOrientation);
-    auto snapshotScreen = WSSnapshotHelper::GetScreenStatus();
-    if (snapshotScreen == SCREEN_UNKNOWN) {
-        windowOrientation = (windowOrientation + SECONDARY_EXPAND_OFFSET) % ROTATION_COUNT;
-    }
-    return static_cast<DisplayOrientation>(windowOrientation);
+    return WSSnapshotHelper::GetInstance()->GetWindowRotation();
 }
 
 uint32_t Session::GetLastOrientation() const
 {
     if (!SupportSnapshotAllSessionStatus()) {
         return SNAPSHOT_PORTRAIT;
+    }
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
+        WSSnapshotHelper::GetInstance()->GetScreenStatus() == SCREEN_FOLDED) {
+        return ROTATION_LANDSCAPE_INVERTED;
     }
     return static_cast<uint32_t>(WSSnapshotHelper::GetDisplayOrientation(currentRotation_));
 }
