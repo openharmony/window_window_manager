@@ -2385,6 +2385,68 @@ HWTEST_F(WindowSceneSessionImplTest5, TestSetContentAspectRatio, TestSize.Level1
     ret = window->SetContentAspectRatio(ratio, isPersistent, needUpdateRect);
     EXPECT_EQ(ret, WMError::WM_OK);
 }
+
+/**
+ * @tc.name: CalculateNewLimitsByLimits
+ * @tc.desc: test function: CalculateNewLimitsByLimits
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, CalculateNewLimitsByLimits, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> testImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    WindowLimits customizedLimits = {200, 200, 10, 10, 0.0f, 0.0f, 1.0f};
+    WindowLimits expectLimits;
+    WindowLimits newLimits;
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(0);
+    ASSERT_NE(nullptr, display);
+    auto displayInfo = display->GetDisplayInfo();
+    ASSERT_NE(nullptr, displayInfo);
+    float virtualPixelRatio = testImpl->GetVirtualPixelRatio(displayInfo);
+    testImpl->property_->SetDisplayId(0);
+    testImpl->property_->SetConfigWindowLimitsVP(customizedLimits);
+    
+    // set system limits
+    testImpl->windowSystemConfig_.maxFloatingWindowSize_ = 6240;
+    testImpl->windowSystemConfig_.miniWidthOfMainWindow_ = 1;
+    testImpl->windowSystemConfig_.miniHeightOfMainWindow_ = 1;
+    testImpl->windowSystemConfig_.miniWidthOfSubWindow_ = 1;
+    testImpl->windowSystemConfig_.miniHeightOfSubWindow_ = 1;
+    testImpl->windowSystemConfig_.miniWidthOfDialogWindow_ = 1;
+    testImpl->windowSystemConfig_.miniHeightOfDialogWindow_ = 1;
+
+    // user set flag is false, window type is mian window
+    testImpl->userLimitsSet_ = false;
+    customizedLimits = {200, 200, 10, 10, 0.0f, 0.0f, 1.0f};
+    expectLimits ={200, 200, 10, 10, 0.0f, 0.0f, 1.0f};
+    testImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    testImpl->CalculateNewLimitsByLimits(newLimits, customizedLimits, virtualPixelRatio);
+    EXPECT_EQ(customizedLimits.maxWidth_, static_cast<uint32_t>(expectLimits.maxWidth_ * virtualPixelRatio));
+    EXPECT_EQ(customizedLimits.maxHeight_, static_cast<uint32_t>(expectLimits.maxHeight_ * virtualPixelRatio));
+    EXPECT_EQ(customizedLimits.minWidth_, static_cast<uint32_t>(expectLimits.minWidth_ * virtualPixelRatio));
+    EXPECT_EQ(customizedLimits.minHeight_, static_cast<uint32_t>(expectLimits.minHeight_ * virtualPixelRatio));
+
+    // user set flag is false, window type is sys window
+    testImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    customizedLimits = {200, 200, 10, 10, 0.0f, 0.0f, 1.0f};
+    expectLimits ={200, 200, 10, 10, 0.0f, 0.0f, 1.0f};
+    testImpl->CalculateNewLimitsByLimits(newLimits, customizedLimits, virtualPixelRatio);
+    testImpl->CalculateNewLimitsByLimits(newLimits, customizedLimits, virtualPixelRatio);
+    EXPECT_EQ(customizedLimits.maxWidth_, static_cast<uint32_t>(expectLimits.maxWidth_ * virtualPixelRatio));
+    EXPECT_EQ(customizedLimits.maxHeight_, static_cast<uint32_t>(expectLimits.maxHeight_ * virtualPixelRatio));
+    EXPECT_EQ(customizedLimits.minWidth_, expectLimits.minWidth_);
+    EXPECT_EQ(customizedLimits.minHeight_, expectLimits.minHeight_);
+    // user set flag is true
+    testImpl->userLimitsSet_ = true;
+    customizedLimits = {200, 200, 10, 10, 0.0f, 0.0f, 1.0f};
+    WindowLimits userLimits = {900, 900, 100, 100, 0.0f, 0.0f, 1.0f};
+    testImpl->property_->SetUserWindowLimits(userLimits);
+    testImpl->CalculateNewLimitsByLimits(newLimits, customizedLimits, virtualPixelRatio);
+    EXPECT_EQ(customizedLimits.maxWidth_, userLimits.maxWidth_);
+    EXPECT_EQ(customizedLimits.maxHeight_, userLimits.maxHeight_);
+    EXPECT_EQ(customizedLimits.minWidth_, userLimits.minWidth_);
+    EXPECT_EQ(customizedLimits.minHeight_, userLimits.minHeight_);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
