@@ -10867,7 +10867,7 @@ WMError SceneSessionManager::ConvertToRelativeCoordinateForFoldPC(const Rect& re
 {
     newRect = rect;
     SuperFoldStatus foldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
-    TLOGD(WmsLogTag::WMS_LAYOUT, "foldStatus=%{public}d", static_cast<uint32_t>foldStatus);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "foldStatus=%{public}d", static_cast<uint32_t>(foldStatus));
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
         PcFoldScreenManager::GetInstance().GetDisplayRects();
     bool flag = rect.posY_ > (defaultDisplayRect.height_ + foldCreaseRect.height_);
