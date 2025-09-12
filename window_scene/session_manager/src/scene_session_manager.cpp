@@ -10866,18 +10866,18 @@ WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessi
 WMError SceneSessionManager::ConvertToRelativeCoordinateForFoldPC(const Rect& rect, Rect& newRect, DisplayId& newDisplayId)
 {
     newRect = rect;
-    SuperFoldStatus foldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
+    auto& pcFoldScreenManagerInstance = PcFoldScreenManager::GetInstance();
+    SuperFoldStatus foldStatus = pcFoldScreenManagerInstance.GetScreenFoldStatus();
     TLOGD(WmsLogTag::WMS_LAYOUT, "foldStatus=%{public}d", static_cast<uint32_t>(foldStatus));
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
-        PcFoldScreenManager::GetInstance().GetDisplayRects();
-    bool flag = rect.posY_ > (defaultDisplayRect.height_ + foldCreaseRect.height_);
-    if (foldStatus == SuperFoldStatus::HALF_FOLDED && flag) {
+        pcFoldScreenManagerInstance.GetDisplayRects();
+    bool isCPlane = rect.posY_ > (defaultDisplayRect.height_ + foldCreaseRect.height_);
+    if (foldStatus == SuperFoldStatus::HALF_FOLDED && isCPlane) {
         newRect.posY_ = rect.posY_ - defaultDisplayRect.height_ - foldCreaseRect.height_;
         newDisplayId = VIRTUAL_DISPLAY_ID;
         return WMError::WM_OK;
-    } else {
-        return WMError::WM_DO_NOTHING;
-    }
+    } 
+    return WMError::WM_DO_NOTHING;
 }
 
 static bool CheckUnreliableWindowType(WindowType windowType)

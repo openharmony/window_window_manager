@@ -1696,7 +1696,7 @@ WMError WindowManager::ConvertToRelativeCoordinateForFoldPC(const Rect& rect, Re
     WMError ret =
         SingletonContainer::Get<WindowAdapter>().ConvertToRelativeCoordinateForFoldPC(rect, newRect, newDisplayId);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "change failed.");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Convert relative coordinate failed");
     }
     return ret;
 }
