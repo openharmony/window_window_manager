@@ -996,6 +996,41 @@ HWTEST_F(WindowSceneSessionImplTest5, UpdateSystemBarProperties02, TestSize.Leve
 }
 
 /**
+ * @tc.name: MobileAppInPadLayoutFullScreenChange
+ * @tc.desc: MobileAppInPadLayoutFullScreenChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, MobileAppInPadLayoutFullScreenChange, TestSize.Level0)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("MobileAppInPadLayoutFullScreenChange");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_CREATED;
+
+    window->property_->SetMobileAppInPadLayoutFullScreen(true);
+    window->property_->SetWidnowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    bool statusBarEnable = true;
+    bool navigationEnable = true;
+    window->MobileAppInPadLayoutFullScreenChange(statusBarEnable, navigationEnable);
+    bool statusBarEnable = false;
+    bool navigationEnable = false;
+    window->MobileAppInPadLayoutFullScreenChange(statusBarEnable, navigationEnable);
+    bool statusBarEnable = false;
+    bool navigationEnable = true;
+    window->MobileAppInPadLayoutFullScreenChange(statusBarEnable, navigationEnable);
+    bool statusBarEnable = true;
+    bool navigationEnable = false;
+    window->MobileAppInPadLayoutFullScreenChange(statusBarEnable, navigationEnable);
+}
+
+/**
  * @tc.name: NotifyAfterDidForeground
  * @tc.desc: NotifyAfterDidForeground
  * @tc.type: FUNC
