@@ -304,10 +304,12 @@ HWTEST_F(DisplayTest, GetLiveCreaseRegion, TestSize.Level1)
     } else {
         EXPECT_EQ(ret, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
     }
-    screenId = 5;
-    baseInfo->SetScreenId(screenId);
-    ret = disPlay->GetLiveCreaseRegion(region);
-    EXPECT_EQ(ret, DMError::DM_OK);
+    if (DisplayManager::GetInstance().IsFoldable()) {
+        screenId = 5;
+        baseInfo->SetScreenId(screenId);
+        ret = disPlay->GetLiveCreaseRegion(region);
+        EXPECT_EQ(ret, DMError::DM_OK);
+    }
 }
 
 /**
