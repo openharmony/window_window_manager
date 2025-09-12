@@ -191,7 +191,6 @@ HWTEST_F(ScreenSessionManagerTest, SetDisplayNodeSecurity, TestSize.Level1)
     ssm->DestroyVirtualScreen(screenId);
 }
 
-
 /**
  * @tc.name: SwitchScrollParam01
  * @tc.desc: SwitchScrollParam test
