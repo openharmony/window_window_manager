@@ -61,7 +61,7 @@ public:
     void TearDown() override;
 
     static sptr<ScreenSessionManager> ssm_;
-    sptr<ScreenSession> InitTestScreenSession(std::string name, ScreenId &screenId);
+    sptr<ScreenSession> InitTestScreenSession(std::string name, ScreenId& screenId);
 };
 
 sptr<ScreenSessionManager> ScreenSessionManagerTest::ssm_ = nullptr;
