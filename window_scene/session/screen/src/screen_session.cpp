@@ -1857,6 +1857,23 @@ void ScreenSession::SetPrivateSessionForeground(bool hasPrivate)
 {
     hasPrivateWindowForeground_ = hasPrivate;
 }
+void ScreenSession::SetDisplayNodeSecurity()
+{
+    std::unique_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+    if (displayNode_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayNode is null");
+        return;
+    }
+    RSScreenType screenType;
+    DmsXcollie dmsXcollie("DMS:InitRSDisplayNode:GetScreenType", XCOLLIE_TIMEOUT_5S);
+    auto ret = RSInterfaces::GetInstance().GetScreenType(rsId_, screenType);
+    if (ret == StatusCode::SUCCESS && screenType == RSScreenType::VIRTUAL_TYPE_SCREEN) {
+        displayNode_->SetSecurityDisplay(isSecurity_);
+        TLOGI(WmsLogTag::DMS, "virtualScreen SetSecurityDisplay success, isSecurity:%{public}d", isSecurity_);
+    }
+    RSTransactionAdapter::FlushImplicitTransaction(GetRSUIContext());
+    TLOGI(WmsLogTag::DMS, "end");
+}
 
 void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint, bool isExtend,
     float positionX, float positionY)
