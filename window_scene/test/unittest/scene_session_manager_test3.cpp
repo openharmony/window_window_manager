@@ -737,7 +737,7 @@ HWTEST_F(SceneSessionManagerTest3, SetAbilitySessionInfo2, TestSize.Level1)
  
 /**
  * @tc.name: AddRequestTaskInfo
- * @tc.desc: SceneSesionManager add request 
+ * @tc.desc: SceneSesionManager add request
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest3, AddRequestTaskInfo, TestSize.Level1)

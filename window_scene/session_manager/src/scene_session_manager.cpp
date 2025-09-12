@@ -3231,7 +3231,7 @@ void SceneSessionManager::AddRequestTaskInfo(const SessionInfo& sessionInfo) {
 }
  
 void SceneSessionManager::AddRequestTaskInfo(int32_t persistentId, const SessionInfo& sessionInfo) {
-    if (sessionInfo.requestId < MIN_REQUEST_ID_FROM_AMS ||
+    if (sessionInfo.requestId < MIN_REQUEST_ID_FROM_ABILITY ||
         persistentId == INVALID_SESSION_ID ||
         sessionInfo.want == nullptr) {
         return;
@@ -3249,7 +3249,7 @@ void SceneSessionManager::AddRequestTaskInfo(int32_t persistentId, const Session
 }
  
 void SceneSessionManager::RemoveRequestTaskInfo(int32_t persistentId, int32_t requestId) {
-    if (requestId < MIN_REQUEST_ID_FROM_AMS || persistentId == INVALID_SESSION_ID) {
+    if (requestId < MIN_REQUEST_ID_FROM_ABILITY || persistentId == INVALID_SESSION_ID) {
         return;
     }
     std::lock_guard<std::mutex> lock(requestTaskInfoMapMutex_);
@@ -3274,7 +3274,7 @@ void SceneSessionManager::ClearRequestTaskInfo(int32_t persistentId) {
 
 std::shared_ptr<AAFwk::Want> SceneSessionManager::GetRequestWantFromTaskInfoMap(
     int32_t persistentId, int32_t requestId) {
-    if (requestId < MIN_REQUEST_ID_FROM_AMS || persistentId == INVALID_SESSION_ID) {
+    if (requestId < MIN_REQUEST_ID_FROM_ABILITY || persistentId == INVALID_SESSION_ID) {
         return nullptr;
     }
     std::lock_guard<std::mutex> lock(requestTaskInfoMapMutex_);
