@@ -1206,7 +1206,9 @@ void ScreenSessionManager::PhyMirrorConnectWakeupScreen()
 #ifdef WM_MULTI_SCREEN_ENABLE
     if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "mirror") {
         TLOGI(WmsLogTag::DMS, "Connect to an external screen to wakeup the phone screen");
-        FixPowerStatus();
+        if (!IS_SUPPORT_PC_MODE) {
+            FixPowerStatus();
+        }
     }
 #endif
 }
