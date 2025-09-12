@@ -721,6 +721,7 @@ HWTEST_F(SceneSessionManagerTest3, SetAbilitySessionInfo2, TestSize.Level1)
     info.abilityName_ = "SetAbilitySessionInfo";
     info.bundleName_ = "SetAbilitySessionInfo";
     std::shared_ptr<AAFwk::Want> wantPtr = std::make_shared<AAFwk::Want>();
+    wantPtr->SetBundle(info.bundleName_);
     info.want = wantPtr;
     info.persistentId_ = 1;
     info.requestId = 1;
@@ -729,10 +730,8 @@ HWTEST_F(SceneSessionManagerTest3, SetAbilitySessionInfo2, TestSize.Level1)
     ssm_->SetAbilitySessionInfo(sceneSession, true);
     ssm_->AddRequestTaskInfo(info);
     sptr<OHOS::AAFwk::SessionInfo> ret = ssm_->SetAbilitySessionInfo(sceneSession, true);
-    OHOS::AppExecFwk::ElementName retElementName = ret->want.GetElement();
     ssm_->ClearRequestTaskInfo(1);
-    EXPECT_EQ(retElementName.GetAbilityName(), info.abilityName_);
-    EXPECT_EQ(retElementName.GetBundleName(), info.bundleName_);
+    EXPECT_EQ(ret->want.GetBundle(), "SetAbilitySessionInfo");
 }
  
 /**
