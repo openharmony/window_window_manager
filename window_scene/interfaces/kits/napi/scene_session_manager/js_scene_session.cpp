@@ -567,6 +567,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         moduleName, JsSceneSession::SetPcAppInpadOrientationLandscape);
     BindNativeFunction(env, objValue, "setIsPcAppInpadCompatibleMode",
         moduleName, JsSceneSession::SetPcAppInpadCompatibleMode);
+    BindNativeFunction(env, objValue, "setMobileAppInPadLayoutFullScreen",
+        moduleName, JsSceneSession::SetMobileAppInPadLayoutFullScreen);
 }
 
 void JsSceneSession::BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName)
@@ -2852,6 +2854,13 @@ napi_value JsSceneSession::SetPcAppInpadCompatibleMode(napi_env env, napi_callba
     TLOGD(WmsLogTag::WMS_PC, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetPcAppInpadCompatibleMode(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetMobileAppInPadLayoutFullScreen(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_PC, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetMobileAppInPadLayoutFullScreen(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetPcAppInpadSpecificSystemBarInvisible(napi_env env, napi_callback_info info)
@@ -6546,6 +6555,33 @@ napi_value JsSceneSession::OnSetPcAppInpadCompatibleMode(napi_env env, napi_call
         return NapiGetUndefined(env);
     }
     session->SetPcAppInpadCompatibleMode(enabled);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetMobileAppInPadLayoutFullScreen(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_SCB, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isMobileAppInPadLayoutFullScreen = false;
+    if (!ConvertFromJsValue(env, argv[0], isMobileAppInPadLayoutFullScreen)) {
+        TLOGE(WmsLogTag::WMS_SCB, "Failed to convert parameter to enable");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SetMobileAppInPadLayoutFullScreen(isMobileAppInPadLayoutFullScreen);
     return NapiGetUndefined(env);
 }
 

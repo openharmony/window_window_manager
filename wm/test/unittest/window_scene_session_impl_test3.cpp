@@ -1022,6 +1022,57 @@ HWTEST_F(WindowSceneSessionImplTest3, MaximizeFloating01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MaximizeFloating
+ * @tc.desc: MaximizeFloating
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, MaximizeFloating, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("MaximizeFloating");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    auto ret = windowSceneSessionImpl->MaximizeFloating();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    windowSceneSessionImpl->SetGlobalMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
+    ret = windowSceneSessionImpl->MaximizeFloating();
+    EXPECT_EQ(WMError::WM_OK, ret);
+    auto ret1 = windowSceneSessionImpl->GetGlobalMaximizeMode();
+    EXPECT_EQ(MaximizeMode::MODE_RECOVER, ret1);
+    windowSceneSessionImpl->SetGlobalMaximizeMode(MaximizeMode::MODE_FULL_FILL);
+    ret = windowSceneSessionImpl->MaximizeFloating();
+    EXPECT_EQ(WMError::WM_OK, ret);
+    SystemBarProperty statusProperty = 
+        windowSceneSessionImpl->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    SystemBarProperty navigationIndicatorPorperty =
+        windowSceneSessionImpl->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
+    statusProperty.enable_ = false;
+    navigationIndicatorPorperty.enable_ = false;
+    ret = windowSceneSessionImpl->MaximizeFloating();
+    EXPECT_EQ(WMError::WM_OK, ret);
+    tatusProperty.enable_ = true;
+    navigationIndicatorPorperty.enable_ = true;
+    ret = windowSceneSessionImpl->MaximizeFloating();
+    EXPECT_EQ(WMError::WM_OK, ret);
+    tatusProperty.enable_ = true;
+    navigationIndicatorPorperty.enable_ = false;
+    ret = windowSceneSessionImpl->MaximizeFloating();
+    EXPECT_EQ(WMError::WM_OK, ret);
+    tatusProperty.enable_ = false;
+    navigationIndicatorPorperty.enable_ = true;
+    ret = windowSceneSessionImpl->MaximizeFloating();
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+}
+
+/**
  * @tc.name: Recover
  * @tc.desc: Recover
  * @tc.type: FUNC
