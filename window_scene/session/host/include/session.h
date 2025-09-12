@@ -736,7 +736,7 @@ public:
     void InitSnapshotCapacity();
     SnapshotStatus GetWindowStatus() const;
     SnapshotStatus GetSessionStatus(ScreenLockReason reason = ScreenLockReason::DEFAULT) const;
-    DisplayOrientation GetWindowOrientation() const;
+    uint32_t GetWindowOrientation() const;
     uint32_t GetLastOrientation() const;
     bool HasSnapshotFreeMultiWindow();
     bool HasSnapshot(SnapshotStatus key);
