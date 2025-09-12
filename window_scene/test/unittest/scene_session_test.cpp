@@ -594,7 +594,7 @@ HWTEST_F(SceneSessionTest, SetPrivacyMode01, TestSize.Level0)
     EXPECT_NE(sceneSession, nullptr);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    sceneSession->surfaceNode_ = surfaceNode;
+    sceneSession->SetSurfaceNode(surfaceNode);
     sceneSession->SetPrivacyMode(false);
     ASSERT_EQ(false, sceneSession->property_->GetPrivacyMode());
     ASSERT_EQ(false, sceneSession->property_->GetSystemPrivacyMode());
@@ -615,7 +615,7 @@ HWTEST_F(SceneSessionTest, SetPrivacyMode02, TestSize.Level0)
     EXPECT_NE(sceneSession, nullptr);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    sceneSession->surfaceNode_ = surfaceNode;
+    sceneSession->SetSurfaceNode(surfaceNode);
     sceneSession->SetPrivacyMode(true);
     ASSERT_EQ(true, sceneSession->property_->GetPrivacyMode());
     ASSERT_EQ(true, sceneSession->property_->GetSystemPrivacyMode());
@@ -639,7 +639,7 @@ HWTEST_F(SceneSessionTest, SetPrivacyMode03, TestSize.Level0)
     sceneSession->SetEventHandler(handler, handler);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    sceneSession->surfaceNode_ = surfaceNode;
+    sceneSession->SetSurfaceNode(surfaceNode);
     sceneSession->SetPrivacyMode(true);
     EXPECT_EQ(sceneSession->appUseControlMap_.size(), 0);
 }
