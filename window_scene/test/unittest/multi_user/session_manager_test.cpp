@@ -163,7 +163,7 @@ HWTEST_F(SessionManagerTest, OnUserSwitch, Function | SmallTest | Level2)
     auto sessionManagerService = SessionManagerLite::GetInstance().GetSessionManagerServiceProxy();
     sm->OnUserSwitch(sessionManagerService);
     ASSERT_EQ(funInvoked, true);
-    sml_->userSwitchCallbackFunc_ = nullptr;
+    sm->userSwitchCallbackFunc_ = nullptr;
 }
 
 /**
