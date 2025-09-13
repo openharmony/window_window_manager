@@ -1051,7 +1051,7 @@ HWTEST_F(WindowSceneSessionImplTest3, MaximizeFloating, TestSize.Level1)
     EXPECT_EQ(WMError::WM_OK, ret);
     SystemBarProperty statusProperty = 
         windowSceneSessionImpl->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    SystemBarProperty navigationIndicatorPorperty =
+    SystemBarProperty navigationIndicatorPorperty = 
         windowSceneSessionImpl->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
     statusProperty.enable_ = false;
     navigationIndicatorPorperty.enable_ = false;
@@ -1069,7 +1069,6 @@ HWTEST_F(WindowSceneSessionImplTest3, MaximizeFloating, TestSize.Level1)
     navigationIndicatorPorperty.enable_ = true;
     ret = windowSceneSessionImpl->MaximizeFloating();
     EXPECT_EQ(WMError::WM_OK, ret);
-
 }
 
 /**

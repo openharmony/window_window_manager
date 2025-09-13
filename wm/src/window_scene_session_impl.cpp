@@ -3169,7 +3169,7 @@ void WindowSceneSessionImpl::MobileAppInPadLayoutFullScreenChange(bool statusBar
 {
     TLOGI(WmsLogTag::WMS_COMPAT, "isMobileAppInPadLayoutFullScreen %{public}d",
         property_->GetMobileAppInPadLayoutFullScreen());
-    if(property_->GetMobileAppInPadLayoutFullScreen() && GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+    if (property_->GetMobileAppInPadLayoutFullScreen() && GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
         TLOGI(WmsLogTag::WMS_COMPAT, "statusProperty %{public}d, navigationIndicatorPorperty %{public}d",
             statusBarEnable, navigationEnable);
         if (!statusBarEnable && !navigationEnable) {
