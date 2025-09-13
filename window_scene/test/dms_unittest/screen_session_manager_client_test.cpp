@@ -1977,5 +1977,22 @@ HWTEST_F(ScreenSessionManagerClientTest, RegisterSwitchUserAnimationNotification
     EXPECT_NE(client->animateFinishDescriptionSet_.find(desc1), client->animateFinishDescriptionSet_.end());
     EXPECT_EQ(client->animateFinishDescriptionSet_.size(), 1);
 }
+
+/**
+ * @tc.name: NotifyIsFullScreenInForceSplitMode
+ * @tc.desc: NotifyIsFullScreenInForceSplitMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, NotifyIsFullScreenInForceSplitMode, TestSize.Level3)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    screenSessionManagerClient_->screenSessionManager_ = new ScreenSessionManagerProxy(iRemoteObjectMocker);
+    screenSessionManagerClient_->NotifyIsFullScreenInForceSplitMode(0, true);
+    screenSessionManagerClient_->screenSessionManager_ = nullptr;
+    screenSessionManagerClient_->NotifyIsFullScreenInForceSplitMode(0, true);
+    EXPECT_TRUE(logMsg.find("screenSessionManager_ is null") != std::string::npos);
+}
 } // namespace Rosen
 } // namespace OHOS

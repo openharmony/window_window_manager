@@ -66,6 +66,7 @@ struct DMHookInfo {
     bool enableHookRotation_;
     uint32_t displayOrientation_;
     bool enableHookDisplayOrientation_;
+    bool isFullScreenInForceSplit_;
 };
 
 /**

@@ -601,6 +601,17 @@ public:
     {
         return WMError::WM_OK;
     }
+
+    /**
+     * @brief notify session when full screen status in force split
+     *
+     * @param isFullScreen true means full screen in force split.
+     * @return WSError::WS_OK means set success, otherwise failed.
+     */
+    virtual WSError NotifyIsFullScreenInForceSplitMode(bool isFullScreen)
+    {
+        return WSError::WS_OK;
+    }
 };
 } // namespace OHOS::Rosen
 

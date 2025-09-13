@@ -3350,6 +3350,34 @@ HWTEST_F(ScreenSessionManagerStubTest, NotifySwitchUserAnimationFinish, TestSize
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, ERR_NONE);
 }
+
+/**
+ * @tc.name: NotifyIsFullScreenInForceSplitMode
+ * @tc.desc: normal function, TRANS_ID_NOTIFY_IS_FULL_SCREEN_IN_FORCE_SPLIT test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, NotifyIsFullScreenInForceSplitMode, TestSize.Level3)
+{
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        MessageOption option;
+        uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_IS_FULL_SCREEN_IN_FORCE_SPLIT);
+        int res = stub_->OnRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(res, ERR_INVALID_DATA);
+    }
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        MessageOption option;
+        uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_IS_FULL_SCREEN_IN_FORCE_SPLIT);
+        data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+        data.WriteInt32(0);
+        data.WriteBool(true);
+        int res = stub_->OnRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(res, ERR_NONE);
+    }
+}
 }
 }
 }

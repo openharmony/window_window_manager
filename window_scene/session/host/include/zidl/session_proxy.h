@@ -217,6 +217,11 @@ public:
      * window animation
      */
     WSError SetFrameRectForPartialZoomIn(const Rect& frameRect) override;
+
+    /**
+     * Compatible Mode
+     */
+    WSError NotifyIsFullScreenInForceSplitMode(bool isFullScreen) override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };
