@@ -111,11 +111,10 @@ HWTEST_F(SessionManagerLiteTest, OnWMSConnectionChangedCallback, Function | Smal
 {
     ASSERT_NE(nullptr, sml_);
     bool funcInvoked = false;
-    sml_->wmsConnectionChangedFunc_ = nullptr;
-    sml_->OnWMSConnectionChangedCallback(101, DEFAULT_SCREEN_ID, true, false);
-
     sml_->wmsConnectionChangedFunc_ = [&](int32_t userId, int32_t screenId, bool isConnected) { funcInvoked = true; };
     sml_->OnWMSConnectionChangedCallback(101, DEFAULT_SCREEN_ID, true, true);
+    sml_->OnWMSConnectionChangedCallback(101, DEFAULT_SCREEN_ID, true, false);
+    sml_->wmsConnectionChangedFunc_ = nullptr;
     ASSERT_EQ(funcInvoked, true);
 }
 
@@ -177,6 +176,7 @@ HWTEST_F(SessionManagerLiteTest, OnUserSwitch, Function | SmallTest | Level2)
     auto sessionManagerService = sml_->GetSessionManagerServiceProxy();
     sml_->OnUserSwitch(sessionManagerService);
     ASSERT_EQ(funInvoked, true);
+    sml_->userSwitchCallbackFunc_ = nullptr;
 }
 
 /**

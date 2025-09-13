@@ -82,12 +82,12 @@ HWTEST_F(SessionManagerTest, ClearSessionManagerProxy, Function | SmallTest | Le
 HWTEST_F(SessionManagerTest, OnWMSConnectionChangedCallback, Function | SmallTest | Level2)
 {
     auto sm = SessionManager::GetInstance(-1);
+    ASSERT_NE(nullptr, sm);
     bool funcInvoked = false;
-    sm->wmsConnectionChangedFunc_ = nullptr;
-    sm->OnWMSConnectionChangedCallback(101, DEFAULT_SCREEN_ID, true, false);
-
     sm->wmsConnectionChangedFunc_ = [&](int32_t userId, int32_t screenId, bool isConnected) { funcInvoked = true; };
     sm->OnWMSConnectionChangedCallback(101, DEFAULT_SCREEN_ID, true, true);
+    sm->OnWMSConnectionChangedCallback(101, DEFAULT_SCREEN_ID, true, false);
+    sm->wmsConnectionChangedFunc_ = nullptr;
     ASSERT_EQ(funcInvoked, true);
 }
 
@@ -163,6 +163,7 @@ HWTEST_F(SessionManagerTest, OnUserSwitch, Function | SmallTest | Level2)
     auto sessionManagerService = SessionManagerLite::GetInstance().GetSessionManagerServiceProxy();
     sm->OnUserSwitch(sessionManagerService);
     ASSERT_EQ(funInvoked, true);
+    sml_->userSwitchCallbackFunc_ = nullptr;
 }
 
 /**
