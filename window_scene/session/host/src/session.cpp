@@ -1775,7 +1775,9 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
             TLOGND(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
-        if (session->sessionStage_ && WindowHelper::IsNeedWaitAttachStateWindow(session->GetWindowType())) {
+        auto mainSession = session->GetMainSession();
+        if ((!mainSession || !mainSession->GetShowRecent()) &&
+            session->sessionStage_ && WindowHelper::IsNeedWaitAttachStateWindow(session->GetWindowType())) {
             TLOGNI(WmsLogTag::WMS_LIFE, "NotifyWindowAttachStateChange, persistentId:%{public}d",
                 session->GetPersistentId());
             session->sessionStage_->NotifyWindowAttachStateChange(isAttach);
