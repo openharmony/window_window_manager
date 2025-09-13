@@ -35,10 +35,31 @@ using OHOS::Rosen::WindowScene;
 
 namespace OHOS {
 namespace Rosen {
-
+// methods of filling the image in recent
+enum class ImageFit {
+    FILL,
+    CONTAIN,
+    COVER,
+    FIT_WIDTH,
+    FIT_HEIGHT,
+    NONE,
+    SCALE_DOWN,
+    TOP_LEFT,
+    TOP,
+    TOP_RIGHT,
+    LEFT,
+    CENTER,
+    RIGHT,
+    BOTTOM_LEFT,
+    BOTTOM,
+    BOTTOM_RIGHT,
+    MATRIX,
+};
 namespace {
 /* used for free, ani has no destructor right now, only free when aniObj freed */
 static std::map<ani_object, AniWindowStage*> localObjs;
+constexpr int64_t MIN_RESOURCE_ID = 0x1000000;
+constexpr int64_t MAX_RESOURCE_ID = 0xffffffff;
 } // namespace
 
 AniWindowStage::AniWindowStage(const std::shared_ptr<Rosen::WindowScene>& windowScene)
@@ -581,6 +602,54 @@ void AniWindowStage::OnSetDefaultDensityEnabled(ani_env* env, ani_boolean enable
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetDefaultDensityEnabled(enabled));
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u,%{public}s] enabled=%{public}u ret=%{public}d",
         window->GetWindowId(), window->GetWindowName().c_str(), enabled, ret);
+}
+
+void AniWindowStage::SetImageForRecent(ani_env* env, ani_object obj, ani_long nativeObj,
+    ani_long imgResourceId, ani_int value)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindowStage* aniWindowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
+    if (aniWindowStage != nullptr) {
+        aniWindowStage->OnSetImageForRecent(env, imgResourceId, value);
+    } else {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindowStage is nullptr");
+    }
+}
+
+void AniWindowStage::OnSetImageForRecent(ani_env* env, ani_long imgResourceId, ani_int value)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    auto windowScene = GetWindowScene().lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]windowScene is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    int64_t resourceId = static_cast<int64_t>(imgResourceId);
+    if (resourceId < MIN_RESOURCE_ID || resourceId > MAX_RESOURCE_ID) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "imgRsourceId invalid: %{public}" PRId64, resourceId);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+        return;
+    }
+    int32_t imageFit = static_cast<int32_t>(value);
+    if (imageFit < static_cast<int32_t>(ImageFit::FILL) ||
+        imageFit > static_cast<int32_t>(ImageFit::MATRIX)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "imageFit invalid: %{public}d", imageFit);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+        return;
+    }
+    auto mainWindow = windowScene->GetMainWindow();
+    if (mainWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] mainWindow is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(mainWindow->SetImageForRecent(imgResourceId,
+        static_cast<OHOS::Rosen::ImageFit>(value)));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Set image for recent failed.");
+        AniWindowUtils::AniThrowError(env, ret);
+    }
 }
 }  // namespace Rosen
 }  // namespace OHOS

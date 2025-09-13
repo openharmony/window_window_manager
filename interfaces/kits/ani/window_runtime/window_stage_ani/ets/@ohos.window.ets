@@ -20,6 +20,7 @@ import image from '@ohos.multimedia.image';
 import BaseContext from 'application.BaseContext';
 import hilog from '@ohos.hilog';
 import { ColorMetrics } from '@ohos.arkui.node';
+import { ImageFit} from '@ohos.arkui.component';
 export type AsyncCallbackVoid = (err: BusinessError) => void;
 export type WindowEventCallback = (data: window.WindowEventType) => void;
 export type WindowRectCallback = (data: window.Rect) => void;
@@ -2014,6 +2015,7 @@ export class WindowStageInternal implements WindowStage {
     public native createSubWindowSync(nativeObj: long, name: String): Window;
     public native setCustomDensitySync(nativeObj: long, density: double): void;
     public native setDefaultDensityEnabledSync(nativeObj: long, enabled: boolean): void;
+    public native setImageForRecentSync(nativeObj: long, imgResourceId: long, value: int): void;
     native onSync(nativeObj: long, eventType: 'windowStageEvent', callback: Object): void;
     native offSync(nativeObj: long, eventType: 'windowStageEvent', callback?: Object): void;
 
@@ -2191,6 +2193,18 @@ export class WindowStageInternal implements WindowStage {
         });
     }
 
+    public setImageForRecent(imgResourceId: long, value: ImageFit): Promise<void> {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) => {
+            taskpool.execute((): void => {
+                this.setImageForRecentSync(this.nativeObj, imgResourceId, value as int);
+            }).then((ret: NullishType): void => {
+                resolve(undefined);
+            }).catch((err: NullishType): void => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
     public on(eventType: 'windowStageEvent', callback: Callback<WindowStageEventType>): void {
       this.onSync(this.nativeObj, eventType, callback);
     }
@@ -2218,6 +2232,7 @@ export interface WindowStage {
     setWindowModal(isModal: boolean): Promise<void>;
     setCustomDensity(density: double): void;
     setDefaultDensityEnabled(enabled: boolean): void;
+    setImageForRecent(imgResourceId: long, value: ImageFit): Promise<void>;
     on(eventType: 'windowStageEvent', callback: Callback<WindowStageEventType>): void;
     off(eventType: 'windowStageEvent', callback?: Callback<WindowStageEventType>): void;
 }
