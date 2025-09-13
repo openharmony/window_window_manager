@@ -1251,10 +1251,20 @@ void AniWindow::SetTopmost(ani_env* env, ani_object obj, ani_long nativeObj, ani
 void AniWindow::OnSetTopmost(ani_env* env, ani_boolean isTopmost)
 {
     TLOGI(WmsLogTag::WMS_HIERARCHY, "[ANI]");
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI]OnSetTopmost permission denied!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+        return;
+    }
     auto window = GetWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] window is nullptr");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] OnSetTopmost fail, not main window");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
         return;
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetTopmost(isTopmost));
@@ -1277,6 +1287,11 @@ void AniWindow::RequestFocus(ani_env* env, ani_object obj, ani_long nativeObj, a
 void AniWindow::OnRequestFocus(ani_env* env, ani_boolean isFocused)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "[ANI]");
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "[ANI]OnRequestFocus permission denied!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+        return;
+    }
     auto window = GetWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "[ANI] window is nullptr");
