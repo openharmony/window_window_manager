@@ -161,6 +161,7 @@ public:
     DisplayOrientation CalcDeviceOrientationWithBounds(Rotation rotation,
         FoldDisplayMode foldDisplayMode, const RRect& bounds);
     void FillScreenInfo(sptr<ScreenInfo> info) const;
+    void SetDisplayNodeSecurity();
     void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint, bool isExtend = false,
         float positionX = 0, float positionY = 0);
 

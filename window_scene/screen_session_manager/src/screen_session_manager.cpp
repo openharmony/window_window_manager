@@ -10289,13 +10289,17 @@ void ScreenSessionManager::CreateExtendVirtualScreen(ScreenId screenId)
         rsConfig.screenId = rsScreenId;
         screenSession->CreateDisplayNode(rsConfig);
         screenSession->SetDisplayNodeScreenId(rsScreenId);
+        screenSession->SetDisplayNodeSecurity();
         screenSession->SetIsCurrentInUse(true);
         screenSession->SetIsExtend(true);
         screenSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
         screenSession->SetIsExtendVirtual(true);
+        screenSession->SetDisplayGroupId(DISPLAY_GROUP_ID_DEFAULT);
+        screenSession->SetMainDisplayIdOfGroup(DISPLAY_GROUP_ID_DEFAULT);
         TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64", rsScreenId:%{public}" PRIu64"",
             screenId, rsScreenId);
     }
+    NotifyDisplayCreate(screenSession->ConvertToDisplayInfo());
 }
 
 DMError ScreenSessionManager::SetMultiScreenRelativePosition(MultiScreenPositionOptions mainScreenOptions,
