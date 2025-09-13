@@ -3123,7 +3123,7 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
 {
     SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     SystemBarProperty navigationIndicatorPorperty =
-            GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
+        GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
     for (auto [systemBarType, systemBarPropertyFlag] : systemBarPropertyFlags) {
         if (systemBarProperties.find(systemBarType) == systemBarProperties.end()) {
             TLOGE(WmsLogTag::WMS_IMMS, "system bar type is invalid");
@@ -3140,11 +3140,11 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
             systemBarProperties.at(systemBarType).enableAnimation_ : property.enableAnimation_;
         if (systemBarType == WindowType::WINDOW_TYPE_STATUS_BAR) {
             statusProperty.enable_ = systemBarPropertyFlag.enableFlag ?
-            systemBarProperties.at(systemBarType).enable_ : statusProperty.enable_;
+                systemBarProperties.at(systemBarType).enable_ : statusProperty.enable_;
         }
-        if (navigationIndicatorPorperty == WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR) {
+        if (systemBarType == WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR) {
             navigationIndicatorPorperty.enable_ = systemBarPropertyFlag.enableFlag ?
-            systemBarProperties.at(systemBarType).enable_ : navigationIndicatorPorperty.enable_;
+                systemBarProperties.at(systemBarType).enable_ : statusProperty.enable_;
         }
 
         if (systemBarPropertyFlag.enableFlag) {
@@ -3167,10 +3167,10 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
 
 void WindowSceneSessionImpl::MobileAppInPadLayoutFullScreenChange(bool statusBarEnable, bool navigationEnable)
 {
-    TLOGI(WMError::WMS_COMPAT, "isMobileAppInPadLayoutFullScreen %{public}d",
+    TLOGI(WmsLogTag::WMS_COMPAT, "isMobileAppInPadLayoutFullScreen %{public}d",
         property_->GetMobileAppInPadLayoutFullScreen());
     if(property_->GetMobileAppInPadLayoutFullScreen() && GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        TLOGI(WMError::WMS_COMPAT, "statusProperty %{public}d, navigationIndicatorPorperty %{public}d",
+        TLOGI(WmsLogTag::WMS_COMPAT, "statusProperty %{public}d, navigationIndicatorPorperty %{public}d",
             statusBarEnable, navigationEnable);
         if (!statusBarEnable && !navigationEnable) {
             Maximize(MaximizePresentation::ENTER_IMMERSIVE);
@@ -3506,7 +3506,7 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
         SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
         SystemBarProperty navigationIndicatorPorperty =
             GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
-        TLOGI(WMError::WMS_COMPAT, "statusProperty %{public}d, navigationIndicatorPorperty %{public}d",
+        TLOGI(WmsLogTag::WMS_COMPAT, "statusProperty %{public}d, navigationIndicatorPorperty %{public}d",
             statusProperty.enable_, navigationIndicatorPorperty.enable_);
         if (!statusProperty.enable_ && !navigationIndicatorPorperty.enable_) {
             Maximize(MaximizePresentation::ENTER_IMMERSIVE);
