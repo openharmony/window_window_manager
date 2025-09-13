@@ -772,9 +772,14 @@ public:
     WMError GetRouterStackInfo(int32_t persistentId, const sptr<ISessionRouterStackListener>& listener);
     WMError CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey);
     WMError RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey);
+    void AddRequestTaskInfo(const SessionInfo& sessionInfo);
+    void AddRequestTaskInfo(int32_t requestId, const SessionInfo& sessionInfo);
+    std::shared_ptr<AAFwk::Want> GetRequestWantFromTaskInfoMap(int32_t persistentId, int32_t requestId);
+    void RemoveRequestTaskInfo(int32_t persistentId, int32_t requestId);
+    void ClearRequestTaskInfo(int32_t persistentId);
     void RefreshAllAppUseControlMap(const AppUseControlInfo& appUseControlInfo, ControlAppType type);
     void NotifyAmsPendingSessionWhenFail(uint32_t resultCode, std::string resultMessage,
-        int32_t requestId);
+        int32_t requestId, int32_t persistentId);
     WSError PendingSessionToBackgroundByPersistentId(const int32_t persistentId, bool shouldBackToCaller = true);
     WMError UpdateKioskAppList(const std::vector<std::string>& kioskAppList);
     WMError EnterKioskMode(const sptr<IRemoteObject>& token);
@@ -892,6 +897,8 @@ private:
     NotifySceneSessionDestructFunc onSceneSessionDestruct_;
     NotifyTransferSessionToTargetScreenFunc onTransferSessionToTargetScreen_;
     std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>> allAppUseControlMap_;
+    std::unordered_map<int32_t, std::shared_ptr<RequestTaskInfo>> requestTaskInfoMap;
+    std::mutex requestTaskInfoMapMutex_;
     sptr<SceneSession> GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo);
     void CreateRootSceneSession();
     void InitSceneSession(sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo,
@@ -909,7 +916,7 @@ private:
     bool IsSessionClearable(sptr<SceneSession> sceneSession);
     void GetAllClearableSessions(std::vector<sptr<SceneSession>>& sessionVector);
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& sceneSession,
-        int32_t requestId = DEFAULT_REQUEST_FROM_SCB_ID);
+        int32_t requestId = DEFAULT_REQUEST_FROM_SCB_ID, bool useRequestTaskInfo = false);
     void ResetWantInfo(const sptr<SceneSession>& sceneSession);
     void ResetSceneSessionInfoWant(const sptr<AAFwk::SessionInfo>& sceneSessionInfo);
     int32_t StartUIAbilityBySCBTimeoutCheck(const sptr<SceneSession>& sceneSession,

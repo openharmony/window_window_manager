@@ -711,6 +711,108 @@ HWTEST_F(SceneSessionManagerTest3, SetAbilitySessionInfo, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetAbilitySessionInfo2
+ * @tc.desc: SceneSesionManager set ability session info
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, SetAbilitySessionInfo2, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetAbilitySessionInfo";
+    info.bundleName_ = "SetAbilitySessionInfo";
+    std::shared_ptr<AAFwk::Want> wantPtr = std::make_shared<AAFwk::Want>();
+    wantPtr->SetBundle(info.bundleName_);
+    info.want = wantPtr;
+    info.persistentId_ = 1;
+    info.requestId = 1;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);;
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->SetAbilitySessionInfo(sceneSession, true);
+    ssm_->AddRequestTaskInfo(info);
+    sptr<OHOS::AAFwk::SessionInfo> ret = ssm_->SetAbilitySessionInfo(sceneSession, true);
+    ssm_->ClearRequestTaskInfo(1);
+    EXPECT_EQ(ret->want.GetBundle(), "SetAbilitySessionInfo");
+}
+ 
+/**
+ * @tc.name: AddRequestTaskInfo
+ * @tc.desc: SceneSesionManager add request
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, AddRequestTaskInfo, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "AddRequestTaskInfo";
+    info.bundleName_ = "AddRequestTaskInfo";
+    info.requestId = -1;
+    ssm_->AddRequestTaskInfo(info);
+    info.requestId = 1;
+    info.persistentId_ = INVALID_SESSION_ID;
+    ssm_->AddRequestTaskInfo(info);
+    info.persistentId_ = 1;
+    ssm_->AddRequestTaskInfo(info);
+    std::shared_ptr<AAFwk::Want> wantPtr = std::make_shared<AAFwk::Want>();
+    info.want = wantPtr;
+    ssm_->AddRequestTaskInfo(info);
+    ssm_->AddRequestTaskInfo(info);
+    std::shared_ptr<AAFwk::Want> wantRet = ssm_->GetRequestWantFromTaskInfoMap(1, 1);
+    EXPECT_NE(wantRet, nullptr);
+    ssm_->ClearRequestTaskInfo(1);
+}
+
+/**
+ * @tc.name: RemoveRequestTaskInfo
+ * @tc.desc: SceneSesionManager remove request task info
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, RemoveRequestTaskInfo, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "RemoveRequestTaskInfo";
+    info.bundleName_ = "RemoveRequestTaskInfo";
+    info.requestId = 1;
+    info.persistentId_ = 1;
+    std::shared_ptr<AAFwk::Want> wantPtr = std::make_shared<AAFwk::Want>();
+    info.want = wantPtr;
+    ssm_->ClearRequestTaskInfo(0);
+    ssm_->RemoveRequestTaskInfo(-1, 0);
+    ssm_->RemoveRequestTaskInfo(-1, 1);
+    ssm_->RemoveRequestTaskInfo(1, 0);
+    ssm_->RemoveRequestTaskInfo(1, 1);
+    ssm_->AddRequestTaskInfo(info);
+    ssm_->RemoveRequestTaskInfo(1, 1);
+    std::shared_ptr<AAFwk::Want> wantRet = ssm_->GetRequestWantFromTaskInfoMap(1, 1);
+    EXPECT_EQ(wantRet, nullptr);
+    ssm_->ClearRequestTaskInfo(1);
+}
+ 
+/**
+ * @tc.name: GetRequestWantFromTaskInfoMap
+ * @tc.desc: SceneSesionManager get request want from task info map
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, GetRequestWantFromTaskInfoMap, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetRequestWantFromTaskInfoMap";
+    info.bundleName_ = "GetRequestWantFromTaskInfoMap";
+    info.requestId = 1;
+    info.persistentId_ = 1;
+    std::shared_ptr<AAFwk::Want> wantPtr = std::make_shared<AAFwk::Want>();
+    info.want = wantPtr;
+    ssm_->GetRequestWantFromTaskInfoMap(-1, 0);
+    ssm_->GetRequestWantFromTaskInfoMap(-1, 1);
+    ssm_->GetRequestWantFromTaskInfoMap(1, 0);
+    ssm_->GetRequestWantFromTaskInfoMap(1, 1);
+    ssm_->AddRequestTaskInfo(info);
+    ssm_->GetRequestWantFromTaskInfoMap(1, 1);
+    ssm_->RemoveRequestTaskInfo(1, 1);
+    std::shared_ptr<AAFwk::Want> wantRet = ssm_->GetRequestWantFromTaskInfoMap(1, 1);
+    EXPECT_EQ(wantRet, nullptr);
+    ssm_->ClearRequestTaskInfo(1);
+}
+
+/**
  * @tc.name: PrepareTerminate
  * @tc.desc: SceneSesionManager prepare terminate
  * @tc.type: FUNC

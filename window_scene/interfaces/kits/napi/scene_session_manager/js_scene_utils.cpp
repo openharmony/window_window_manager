@@ -1504,7 +1504,7 @@ void ProcessPendingSessionActivationResult(napi_env env, napi_value callResult,
     }
     if (resultCode >= static_cast<uint32_t>(RequestResultCode::FAIL)) {
         SceneSessionManager::GetInstance().NotifyAmsPendingSessionWhenFail(resultCode,
-            resultMessage, sessionInfo->requestId);
+            resultMessage, sessionInfo->requestId, sessionInfo->persistentId_);
     }
     TLOGI(WmsLogTag::WMS_LIFE, "persistentId:%{public}d, requestId:%{public}d,"
         "resultCode:%{public}d, resultMessage:%{public}s",
