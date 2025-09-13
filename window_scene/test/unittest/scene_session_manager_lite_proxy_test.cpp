@@ -22,6 +22,7 @@
 #include "session_manager/include/zidl/scene_session_manager_lite_interface.h"
 #include "session_manager/include/zidl/scene_session_manager_lite_proxy.h"
 #include "session_manager/include/zidl/session_router_stack_listener_stub.h"
+#include "session_manager/include/zidl/pip_change_listener_stub.h"
 #include "window_manager_agent.h"
  
 using namespace testing;
@@ -35,6 +36,10 @@ public:
     void SetUp() override;
     void TearDown() override;
     sptr<IRemoteObject> iRemoteObjectMocker;
+
+private:
+    sptr<MockIRemoteObject> iRemoteObjectMocker_ {nullptr};
+    sptr<SceneSessionManagerLiteProxy> sceneSessionManagerLiteProxy_ {nullptr};
 };
  
 void sceneSessionManagerLiteProxyTest::SetUpTestCase()
@@ -47,10 +52,17 @@ void sceneSessionManagerLiteProxyTest::TearDownTestCase()
  
 void sceneSessionManagerLiteProxyTest::SetUp()
 {
+    iRemoteObjectMocker_ = sptr<MockIRemoteObject>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker_, nullptr);
+    sceneSessionManagerLiteProxy_ = sptr<SceneSessionManagerLiteProxy>::MakeSptr(iRemoteObjectMocker_);
+    ASSERT_NE(sceneSessionManagerLiteProxy_, nullptr);
 }
  
 void sceneSessionManagerLiteProxyTest::TearDown()
 {
+    iRemoteObjectMocker_ = nullptr;
+    sceneSessionManagerLiteProxy_ = nullptr;
+    MockMessageParcel::ClearAllErrorFlag();
 }
  
 namespace {
@@ -307,5 +319,195 @@ HWTEST_F(sceneSessionManagerLiteProxyTest, NotifyAppUseControlList, TestSize.Lev
     MockMessageParcel::SetWriteParcelableErrorFlag(true);
     errCode = sceneSessionManagerLiteProxy->NotifyAppUseControlList(type, userId, controlList);
     EXPECT_EQ(errCode, WSError::WS_ERROR_INVALID_PARAM);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, UnregPipChgListenerByScreenId_WriteTokenFailed, TestSize.Level1)
+{
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(sceneSessionManagerLiteProxy_->UnregisterPipChgListenerByScreenId(1), WMError::WM_ERROR_IPC_FAILED);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, UnregPipChgListenerByScreenId_WriteIntFailed, TestSize.Level1)
+{
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    EXPECT_EQ(sceneSessionManagerLiteProxy_->UnregisterPipChgListenerByScreenId(1), WMError::WM_ERROR_IPC_FAILED);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, UnregPipChgListenerByScreenId_ReadIntFailed, TestSize.Level1)
+{
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    EXPECT_EQ(sceneSessionManagerLiteProxy_->UnregisterPipChgListenerByScreenId(1), WMError::WM_ERROR_IPC_FAILED);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, UnregPipChgListenerByScreenId_SendReqFailed, TestSize.Level1)
+{
+    iRemoteObjectMocker_->SetRequestResult(1);
+    EXPECT_EQ(sceneSessionManagerLiteProxy_->UnregisterPipChgListenerByScreenId(1), WMError::WM_ERROR_IPC_FAILED);
+    iRemoteObjectMocker_->SetRequestResult(0);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, UnregPipChgListenerByScreenId_RemoteNullFailed, TestSize.Level1)
+{
+    sptr<SceneSessionManagerLiteProxy> liteProxyNullRemote = sptr<SceneSessionManagerLiteProxy>::MakeSptr(nullptr);
+    ASSERT_NE(liteProxyNullRemote, nullptr);
+    EXPECT_EQ(liteProxyNullRemote->UnregisterPipChgListenerByScreenId(1), WMError::WM_ERROR_IPC_FAILED);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, RegisterPipChgListenerByScreenId_ShouldReturnOk_WhenNotReg, TestSize.Level1)
+{
+    EXPECT_EQ(sceneSessionManagerLiteProxy_->UnregisterPipChgListenerByScreenId(1), WMError::WM_OK);
+}
+
+class MockPipChgListener : public PipChangeListenerStub {
+public:
+    void OnPipStart(int32_t windowId) override {};
+};
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, RegPipChgListenerByScreenId_Success, TestSize.Level1)
+{
+    sptr<IPipChangeListener> listener = sptr<MockPipChgListener>::MakeSptr();
+    EXPECT_EQ(sceneSessionManagerLiteProxy_->RegisterPipChgListenerByScreenId(1, listener), WMError::WM_OK);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, UnregPipChgListenerByScreenId_ShouldReturnOk_WhenRegOK, TestSize.Level1)
+{
+    sptr<IPipChangeListener> listener = sptr<MockPipChgListener>::MakeSptr();
+    EXPECT_EQ(sceneSessionManagerLiteProxy_->RegisterPipChgListenerByScreenId(1, listener), WMError::WM_OK);
+    EXPECT_EQ(sceneSessionManagerLiteProxy_->UnregisterPipChgListenerByScreenId(1), WMError::WM_OK);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, RegPipChgListenerByScreenId_WriteTokenFailed, TestSize.Level1)
+{
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    auto result = sceneSessionManagerLiteProxy_->RegisterPipChgListenerByScreenId(1, nullptr);
+    EXPECT_EQ(result, WMError::WM_ERROR_IPC_FAILED);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, RegPipChgListenerByScreenId_WriteIntFailed, TestSize.Level1)
+{
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    auto result = sceneSessionManagerLiteProxy_->RegisterPipChgListenerByScreenId(1, nullptr);
+    EXPECT_EQ(result, WMError::WM_ERROR_IPC_FAILED);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, RegPipChgListenerByScreenId_NullListenerFailed, TestSize.Level1)
+{
+    auto result = sceneSessionManagerLiteProxy_->RegisterPipChgListenerByScreenId(1, nullptr);
+    EXPECT_EQ(result, WMError::WM_ERROR_IPC_FAILED);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, RegPipChgListenerByScreenId_WriteRemoteObjFailed, TestSize.Level1)
+{
+    MockMessageParcel::SetWriteRemoteObjectErrorFlag(true);
+    sptr<IPipChangeListener> listener = sptr<MockPipChgListener>::MakeSptr();
+    auto result = sceneSessionManagerLiteProxy_->RegisterPipChgListenerByScreenId(1, listener);
+    EXPECT_EQ(result, WMError::WM_ERROR_IPC_FAILED);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, RegPipChgListenerByScreenId_SendReqFailed, TestSize.Level1)
+{
+    iRemoteObjectMocker_->SetRequestResult(1);
+    sptr<IPipChangeListener> listener = sptr<MockPipChgListener>::MakeSptr();
+    auto result = sceneSessionManagerLiteProxy_->RegisterPipChgListenerByScreenId(1, listener);
+    EXPECT_EQ(result, WMError::WM_ERROR_IPC_FAILED);
+    iRemoteObjectMocker_->SetRequestResult(0);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, RegPipChgListenerByScreenId_RemoteNullFailed, TestSize.Level1)
+{
+    sptr<SceneSessionManagerLiteProxy> liteProxyNullRemote = sptr<SceneSessionManagerLiteProxy>::MakeSptr(nullptr);
+    ASSERT_NE(liteProxyNullRemote, nullptr);
+    sptr<IPipChangeListener> listener = sptr<MockPipChgListener>::MakeSptr();
+    EXPECT_EQ(liteProxyNullRemote->RegisterPipChgListenerByScreenId(1, listener), WMError::WM_ERROR_IPC_FAILED);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, RegPipChgListenerByScreenId_ReadIntFailed, TestSize.Level1)
+{
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    sptr<IPipChangeListener> listener = sptr<MockPipChgListener>::MakeSptr();
+    auto result = sceneSessionManagerLiteProxy_->RegisterPipChgListenerByScreenId(1, listener);
+    EXPECT_EQ(result, WMError::WM_ERROR_IPC_FAILED);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, SetPipEnableByScreenId_Success, TestSize.Level1)
+{
+    EXPECT_EQ(sceneSessionManagerLiteProxy_->SetPipEnableByScreenId(1, false), WMError::WM_OK);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, SetPipEnableByScreenId_WriteTokenFailed, TestSize.Level1)
+{
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(sceneSessionManagerLiteProxy_->SetPipEnableByScreenId(1, false), WMError::WM_ERROR_IPC_FAILED);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, SetPipEnableByScreenId_WriteIntFailed, TestSize.Level1)
+{
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    EXPECT_EQ(sceneSessionManagerLiteProxy_->SetPipEnableByScreenId(1, false), WMError::WM_ERROR_IPC_FAILED);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, SetPipEnableByScreenId_WriteBoolFailed, TestSize.Level1)
+{
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    EXPECT_EQ(sceneSessionManagerLiteProxy_->SetPipEnableByScreenId(1, false), WMError::WM_ERROR_IPC_FAILED);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, SetPipEnableByScreenId_SendReqFailed, TestSize.Level1)
+{
+    iRemoteObjectMocker_->SetRequestResult(1);
+    EXPECT_EQ(sceneSessionManagerLiteProxy_->SetPipEnableByScreenId(1, false), WMError::WM_ERROR_IPC_FAILED);
+    iRemoteObjectMocker_->SetRequestResult(0);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, SetPipEnableByScreenId_RemoteNullFailed, TestSize.Level1)
+{
+    sptr<SceneSessionManagerLiteProxy> liteProxyNullRemote = sptr<SceneSessionManagerLiteProxy>::MakeSptr(nullptr);
+    ASSERT_NE(liteProxyNullRemote, nullptr);
+    EXPECT_EQ(liteProxyNullRemote->SetPipEnableByScreenId(1, false), WMError::WM_ERROR_IPC_FAILED);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, SetPipEnableByScreenId_ReadIntFailed, TestSize.Level1)
+{
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    EXPECT_EQ(sceneSessionManagerLiteProxy_->SetPipEnableByScreenId(1, false), WMError::WM_ERROR_IPC_FAILED);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, UnsetPipEnableByScreenId_Success, TestSize.Level1)
+{
+    EXPECT_EQ(sceneSessionManagerLiteProxy_->UnsetPipEnableByScreenId(1), WMError::WM_OK);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, UnsetPipEnableByScreenId_WriteTokenFailed, TestSize.Level1)
+{
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(sceneSessionManagerLiteProxy_->UnsetPipEnableByScreenId(1), WMError::WM_ERROR_IPC_FAILED);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, UnsetPipEnableByScreenId_WriteIntFailed, TestSize.Level1)
+{
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    EXPECT_EQ(sceneSessionManagerLiteProxy_->UnsetPipEnableByScreenId(1), WMError::WM_ERROR_IPC_FAILED);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, UnsetPipEnableByScreenId_SendReqFailed, TestSize.Level1)
+{
+    iRemoteObjectMocker_->SetRequestResult(1);
+    EXPECT_EQ(sceneSessionManagerLiteProxy_->UnsetPipEnableByScreenId(1), WMError::WM_ERROR_IPC_FAILED);
+    iRemoteObjectMocker_->SetRequestResult(0);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, UnsetPipEnableByScreenId_RemoteNullFailed, TestSize.Level1)
+{
+    sptr<SceneSessionManagerLiteProxy> liteProxyNullRemote = sptr<SceneSessionManagerLiteProxy>::MakeSptr(nullptr);
+    ASSERT_NE(liteProxyNullRemote, nullptr);
+    EXPECT_EQ(liteProxyNullRemote->UnsetPipEnableByScreenId(1), WMError::WM_ERROR_IPC_FAILED);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, UnsetPipEnableByScreenId_ReadIntFailed, TestSize.Level1)
+{
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    EXPECT_EQ(sceneSessionManagerLiteProxy_->UnsetPipEnableByScreenId(1), WMError::WM_ERROR_IPC_FAILED);
+}
+}
 }
 }

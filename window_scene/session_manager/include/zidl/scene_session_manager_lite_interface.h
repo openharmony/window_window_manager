@@ -28,6 +28,7 @@
 #include "zidl/window_manager_lite_interface.h"
 #include "session_lifecycle_listener_interface.h"
 #include "session_router_stack_listener.h"
+#include "pip_change_listener.h"
 
 namespace OHOS::Media {
 class PixelMap;
@@ -109,6 +110,10 @@ public:
         TRANS_ID_SET_START_WINDOW_BACKGROUND_COLOR,
         TRANS_IS_SET_IMAGE_FOR_RECENT,
         TRANS_ID_IS_FOCUS_WINDOW_PARENT,
+        TRANS_ID_SET_PIP_ENABLED_BY_SCREENID,
+        TRANS_ID_UNSET_PIP_ENABLED_BY_SCREENID,
+        TRANS_ID_REGISTER_PIP_CHG_LISTENER,
+        TRANS_ID_UNREGISTER_PIP_CHG_LISTENER,
     };
 
     /*
@@ -408,6 +413,14 @@ public:
      */
     virtual WSError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
         { return WSError::WS_OK; }
+    
+    virtual WMError SetPipEnableByScreenId(int32_t screenId, bool enabled) { return WMError::WM_OK; }
+    virtual WMError UnsetPipEnableByScreenId(int32_t screenId) { return WMError::WM_OK; }
+    virtual WMError RegisterPipChgListenerByScreenId(int32_t screenId, const sptr<IPipChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+    virtual WMError UnregisterPipChgListenerByScreenId(int32_t screenId) { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_INTERFACE_H

@@ -91,6 +91,8 @@ ohos_shared_library("scene_session_manager") {
     "src/zidl/session_lifecycle_listener_stub.cpp",
     "src/zidl/session_router_stack_listener_proxy.cpp",
     "src/zidl/session_router_stack_listener_stub.cpp",
+    "src/zidl/pip_change_listener_proxy.cpp",
+    "src/zidl/pip_change_listener_stub.cpp",
   ]
 
   public_configs = [ ":session_manager_public_config" ]

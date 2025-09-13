@@ -71,6 +71,8 @@ group("unittest") {
     ":ws_window_manager_lru_test",
     ":ws_window_manager_service_dump_test",
     ":ws_window_scene_config_test",
+    ":pip_change_listener_proxy_test",
+    ":pip_change_listener_stub_test",
     "animation:ws_scene_session_animation_test",
     "animation:ws_session_proxy_animation_test",
     "animation:ws_ui_effect_controller_proxy_test",
@@ -1595,6 +1597,33 @@ ohos_unittest("ws_session_utils_test") {
   sources = [ "session_utils_test.cpp" ]
 
   cflags_cc = [ "-Wno-thread-safety" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = test_external_deps
+}
+
+ohos_unittest("pip_change_listener_proxy_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [ "../mock" ]
+
+  sources = [
+  "../mock/mock_message_parcel.cpp",
+  "pip_change_listener_proxy_test.cpp",
+  ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = test_external_deps
+}
+
+ohos_unittest("pip_change_listener_stub_test") {
+  module_out_path = module_out_path
+
+  sources = [
+  "pip_change_listener_stub_test.cpp",
+  ]
 
   deps = [ ":ws_unittest_common" ]
 
