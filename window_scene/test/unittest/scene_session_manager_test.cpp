@@ -95,6 +95,7 @@ void SceneSessionManagerTest::TearDown()
     MockAccesstokenKit::ChangeMockStateToInit();
     usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.clear();
+    ssm_->screenPipEnabledMap_.clear();
 }
 
 void SceneSessionManagerTest::SetVisibleForAccessibility(sptr<SceneSession>& sceneSession)
@@ -1722,6 +1723,11 @@ HWTEST_F(SceneSessionManagerTest, TestIsPiPForbidden, TestSize.Level1)
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert({ displayId, screenSession });
     ASSERT_TRUE(ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_PIP));
     ASSERT_TRUE(!ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_FLOAT));
+
+    screenSessionForPad->SetName("CustomScbScreen");
+    ssm_->SetPipEnableByScreenId(displayIdForPad, false);
+    ASSERT_TRUE(ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_PIP));
+    ASSERT_TRUE(!ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_FB));
 }
 
 /**

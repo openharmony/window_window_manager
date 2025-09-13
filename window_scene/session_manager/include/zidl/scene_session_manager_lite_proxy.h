@@ -110,7 +110,10 @@ public:
     WMError CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey) override;
     WMError RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey) override;
     WMError TransferSessionToTargetScreen(const TransferSessionInfo& info) override;
-
+    WMError SetPipEnableByScreenId(int32_t screenId, bool enabled) override;
+    WMError UnsetPipEnableByScreenId(int32_t screenId) override;
+    WMError RegisterPipChgListenerByScreenId(int32_t screenId, const sptr<IPipChangeListener>& listener) override;
+    WMError UnregisterPipChgListenerByScreenId(int32_t screenId) override;
     WMError UpdateKioskAppList(const std::vector<std::string>& kioskAppList) override;
     WMError EnterKioskMode(const sptr<IRemoteObject>& token) override;
     WMError ExitKioskMode(const sptr<IRemoteObject>& token) override;

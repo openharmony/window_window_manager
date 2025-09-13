@@ -400,4 +400,29 @@ WSError SceneSessionManagerLite::SendPointerEventForHover(const std::shared_ptr<
 {
     return SceneSessionManager::GetInstance().SendPointerEventForHover(pointerEvent);
 }
+
+WMError SceneSessionManagerLite::SetPipEnableByScreenId(int32_t screenId, bool isEnabled)
+{
+    WLOGFD("in");
+    return SceneSessionManager::GetInstance().SetPipEnableByScreenId(screenId, isEnabled);
+}
+
+WMError SceneSessionManagerLite::UnsetPipEnableByScreenId(int32_t screenId)
+{
+    WLOGFD("in");
+    return SceneSessionManager::GetInstance().UnsetPipEnableByScreenId(screenId);
+}
+
+WMError SceneSessionManagerLite::RegisterPipChgListenerByScreenId(int32_t screenId,
+    const sptr<IPipChangeListener>& listener)
+{
+    WLOGFD("in");
+    return SceneSessionManager::GetInstance().RegisterPipChgListenerByScreenId(screenId, listener);
+}
+
+WMError SceneSessionManagerLite::UnregisterPipChgListenerByScreenId(int32_t screenId)
+{
+    WLOGFD("in");
+    return SceneSessionManager::GetInstance().UnregisterPipChgListenerByScreenId(screenId);
+}
 } // namespace OHOS::Rosen

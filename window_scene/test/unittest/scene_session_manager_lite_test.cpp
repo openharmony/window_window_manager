@@ -17,6 +17,7 @@
 
 #include "session_manager/include/scene_session_manager.h"
 #include "session_manager/include/scene_session_manager_lite.h"
+#include "session_manager/include/zidl/pip_change_listener_stub.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -76,6 +77,45 @@ HWTEST_F(SceneSessionManagerLiteTest, IsFocusWindowParent, TestSize.Level1)
     bool isParent = false;
     EXPECT_EQ(SceneSessionManagerLite::GetInstance().IsFocusWindowParent(token, isParent),
         WSError::WS_ERROR_INVALID_PERMISSION);
+}
+
+class MockPipChgListener : public PipChangeListenerStub {
+public:
+    void OnPipStart(int32_t windowId) override {};
+};
+
+HWTEST_F(SceneSessionManagerLiteTest, UnregPipChgListenerByScreenId_ShouldStillRetOK_WhenNotReg, TestSize.Level1)
+{
+    EXPECT_EQ(SceneSessionManagerLite::GetInstance().UnregisterPipChgListenerByScreenId(1), WMError::WM_OK);
+}
+
+HWTEST_F(SceneSessionManagerLiteTest, UnregPipChgListenerByScreenId_ShouldRetOK_WhenRegOk, TestSize.Level1)
+{
+    sptr<IPipChangeListener> listener = sptr<MockPipChgListener>::MakeSptr();
+    EXPECT_EQ(SceneSessionManagerLite::GetInstance().RegisterPipChgListenerByScreenId(1, listener), WMError::WM_OK);
+    EXPECT_EQ(SceneSessionManagerLite::GetInstance().UnregisterPipChgListenerByScreenId(1), WMError::WM_OK);
+}
+
+HWTEST_F(SceneSessionManagerLiteTest, RegisterPipChgListenerByScreenId, TestSize.Level1)
+{
+    auto result = SceneSessionManagerLite::GetInstance().RegisterPipChgListenerByScreenId(1, nullptr);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+}
+
+HWTEST_F(SceneSessionManagerLiteTest, SetPipEnableByScreenId, TestSize.Level1)
+{
+    EXPECT_EQ(SceneSessionManagerLite::GetInstance().SetPipEnableByScreenId(1, true), WMError::WM_OK);
+}
+
+HWTEST_F(SceneSessionManagerLiteTest, UnsetPipEnableByScreenId_ShouldRetOk_WhenNotSet, TestSize.Level1)
+{
+    EXPECT_EQ(SceneSessionManagerLite::GetInstance().UnsetPipEnableByScreenId(1), WMError::WM_OK);
+}
+
+HWTEST_F(SceneSessionManagerLiteTest, UnsetPipEnableByScreenId_ShouldRetOk_WhenSetOk, TestSize.Level1)
+{
+    EXPECT_EQ(SceneSessionManagerLite::GetInstance().SetPipEnableByScreenId(1, true), WMError::WM_OK);
+    EXPECT_EQ(SceneSessionManagerLite::GetInstance().UnsetPipEnableByScreenId(1), WMError::WM_OK);
 }
 } // namespace
 } // namespace Rosen

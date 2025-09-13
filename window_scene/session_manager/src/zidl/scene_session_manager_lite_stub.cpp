@@ -127,6 +127,14 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleCloseTargetPiPWindow(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_CURRENT_PIP_WINDOW_INFO):
             return HandleGetCurrentPiPWindowInfo(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_SET_PIP_ENABLED_BY_SCREENID):
+            return HandleSetPipEnableByScreenId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNSET_PIP_ENABLED_BY_SCREENID):
+            return HandleUnsetPipEnableByScreenId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_PIP_CHG_LISTENER):
+            return HandleRegisterPipChgListener(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_PIP_CHG_LISTENER):
+            return HandleUnRegisterPipChgListener(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_ROOT_MAIN_WINDOW_ID):
             return HandleGetRootMainWindowId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_INFO):
@@ -1428,6 +1436,83 @@ int SceneSessionManagerLiteStub::HandleSendPointerEventForHover(MessageParcel& d
     WSError ret = SendPointerEventForHover(pointerEvent);
     if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
         TLOGE(WmsLogTag::WMS_EVENT, "Write ret failed");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleSetPipEnableByScreenId(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_PIP, "HandleSetPipEnableByScreenId");
+    int screenId;
+    if (!data.ReadInt32(screenId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read screenId failed");
+        return ERR_INVALID_DATA;
+    }
+    bool isPipEnabled = true;
+    if (!data.ReadBool(isPipEnabled)) {
+        TLOGE(WmsLogTag::WMS_PIP, "Read isPipEnabled failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = SetPipEnableByScreenId(screenId, isPipEnabled);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleUnsetPipEnableByScreenId(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_PIP, "HandleUnsetPipEnableByScreenId");
+    int screenId;
+    if (!data.ReadInt32(screenId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read screenId failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = UnsetPipEnableByScreenId(screenId);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleRegisterPipChgListener(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_PIP, "in");
+    int32_t screenId;
+    if (!data.ReadInt32(screenId)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read screenId failed");
+        return ERR_INVALID_DATA;
+    }
+
+    sptr<IRemoteObject> listenerObject = data.ReadRemoteObject();
+    if (listenerObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "remote object is nullptr!");
+        return ERR_INVALID_DATA;
+    }
+    sptr<IPipChangeListener> listener = iface_cast<IPipChangeListener>(listenerObject);
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "listener is nullptr!");
+        return ERR_INVALID_DATA;
+    }
+
+    WMError ret = RegisterPipChgListenerByScreenId(screenId, listener);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleUnRegisterPipChgListener(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_PIP, "in");
+    int32_t screenId;
+    if (!data.ReadInt32(screenId)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read screenId failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = UnregisterPipChgListenerByScreenId(screenId);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
