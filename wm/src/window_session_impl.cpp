@@ -2186,7 +2186,8 @@ HookWindowInfo WindowSessionImpl::GetAppHookWindowInfo()
 void WindowSessionImpl::HookWindowSizeByHookWindowInfo(Rect& rect)
 {
     auto hookWindowInfo = GetAppHookWindowInfo();
-    if (!hookWindowInfo.enableHookWindow || !WindowHelper::IsMainWindow(GetType())) {
+    if (!hookWindowInfo.enableHookWindow || !WindowHelper::IsMainWindow(GetType()) ||
+        isFullScreenInForceSplit_.load()) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}u, do not need hook window info.", GetWindowId());
         return;
     }

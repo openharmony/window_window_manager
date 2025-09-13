@@ -558,6 +558,7 @@ enum class WindowSizeChangeReason : uint32_t {
     SCREEN_RELATIVE_POSITION_CHANGE,
     ROOT_SCENE_CHANGE,
     SNAPSHOT_ROTATION = 37,
+    FULL_SCREEN_IN_FORCE_SPLIT,
     END,
 };
 

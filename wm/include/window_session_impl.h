@@ -728,6 +728,7 @@ protected:
      */
     float compatScaleX_ = 1.0f;
     float compatScaleY_ = 1.0f;
+    std::atomic_bool isFullScreenInForceSplit_ { false };
 
     /*
      * DFX

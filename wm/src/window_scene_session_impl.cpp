@@ -5669,6 +5669,26 @@ WSError WindowSceneSessionImpl::PcAppInPadNormalClose()
     return WSError::WS_OK;
 }
 
+void WindowSceneSessionImpl::NotifyIsFullScreenInForceSplitMode(bool isFullScreen)
+{
+    TLOGI(WmsLogTag::WMS_COMPAT, "isFullScreen: %{public}u", isFullScreen);
+    if (isFullScreenInForceSplit_.load() == isFullScreen) {
+        TLOGI(WmsLogTag::WMS_COMPAT, "status has not changed");
+        return;
+    }
+    isFullScreenInForceSplit_.store(isFullScreen);
+    const auto& windowRect = GetRect();
+    NotifySizeChange(windowRect, WindowSizeChangeReason::FULL_SCREEN_IN_FORCE_SPLIT);
+    NotifyGlobalDisplayRectChange(windowRect, WindowSizeChangeReason::FULL_SCREEN_IN_FORCE_SPLIT);
+
+    auto hostSession = GetHostSession();
+    if (hostSession) {
+        hostSession->NotifyIsFullScreenInForceSplitMode(isFullScreen);
+    } else {
+        TLOGW(WmsLogTag::WMS_COMPAT, "hostSession is nullptr");
+    }
+}
+
 WSError WindowSceneSessionImpl::NotifyCompatibleModePropertyChange(const sptr<CompatibleModeProperty> property)
 {
     if (IsWindowSessionInvalid()) {

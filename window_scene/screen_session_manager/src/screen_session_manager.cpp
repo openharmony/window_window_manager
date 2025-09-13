@@ -2014,7 +2014,7 @@ sptr<DisplayInfo> ScreenSessionManager::HookDisplayInfoByUid(sptr<DisplayInfo> d
     }
     auto uid = IPCSkeleton::GetCallingUid();
     std::shared_lock<std::shared_mutex> lock(hookInfoMutex_);
-    if (displayHookMap_.find(uid) != displayHookMap_.end()) {
+    if (displayHookMap_.find(uid) != displayHookMap_.end() && !displayHookMap_[uid].isFullScreenInForceSplit_) {
         auto info = displayHookMap_[uid];
         std::ostringstream oss;
         oss << "hW: " << info.width_ << ", hH: " << info.height_ << ", hD: " << info.density_
@@ -2411,6 +2411,29 @@ void ScreenSessionManager::GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo)
     if (displayHookMap_.find(uid) != displayHookMap_.end()) {
         hookInfo = displayHookMap_[uid];
     }
+}
+
+void ScreenSessionManager::NotifyIsFullScreenInForceSplitMode(int32_t uid, bool isFullScreen)
+{
+    TLOGI(WmsLogTag::DMS, "uid: %{public}d isFullScreen: %{public}d", uid, isFullScreen);
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::DMS, "permission denied!");
+        return;
+    }
+    {
+        std::unique_lock<std::shared_mutex> lock(hookInfoMutex_);
+        if (uid == 0 || displayHookMap_.find(uid) == displayHookMap_.end()) {
+            TLOGE(WmsLogTag::DMS, "invalid uid: %{public}d", uid);
+            return;
+        }
+        displayHookMap_[uid].isFullScreenInForceSplit_ = isFullScreen;
+    }
+    std::map<ScreenId, sptr<ScreenSession>> screenSessionMapCopy;
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        screenSessionMapCopy = screenSessionMap_;
+    }
+    NotifyDisplayChangedByUid(screenSessionMapCopy, DisplayChangeEvent::DISPLAY_SIZE_CHANGED, uid);
 }
 
 bool ScreenSessionManager::IsFreezed(const int32_t& agentPid, const DisplayManagerAgentType& agentType)

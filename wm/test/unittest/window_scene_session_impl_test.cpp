@@ -2620,6 +2620,25 @@ HWTEST_F(WindowSceneSessionImplTest, PcAppInPadNormalClose, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyIsFullScreenInForceSplitMode
+ * @tc.desc: NotifyIsFullScreenInForceSplitMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, NotifyIsFullScreenInForceSplitMode, TestSize.Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyIsFullScreenInForceSplitMode");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->NotifyIsFullScreenInForceSplitMode(false);
+    window->NotifyIsFullScreenInForceSplitMode(true);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->NotifyIsFullScreenInForceSplitMode(false);
+    ASSERT_FALSE(WSError::WS_OK, window->isFullScreenInForceSplit_.load());
+}
+
+/**
  * @tc.name: SetPropertySessionInfo01
  * @tc.desc: SetPropertySessionInfo test
  * @tc.type: FUNC

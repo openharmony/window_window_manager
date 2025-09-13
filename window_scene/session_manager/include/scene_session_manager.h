@@ -1737,6 +1737,12 @@ private:
     bool needUpdateRdb_ = true;
     std::string GetCallerSessionColorMode(const SessionInfo& sessionInfo);
     void NotifySessionScreenLockedChange(bool isScreenLocked);
+
+    /*
+     * Compatible Mode
+     */
+    void NotifyIsFullScreenInForceSplitMode(uint32_t uid, bool isFullScreen);
+    std::unordered_set<uint32_t> fullScreenInForceSplitUidSet_;
 };
 } // namespace OHOS::Rosen
 

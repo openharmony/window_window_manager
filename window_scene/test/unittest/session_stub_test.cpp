@@ -2101,6 +2101,41 @@ HWTEST_F(SessionStubTest, HandleSetDecorVisibleCases, TestSize.Level1)
         EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_NONE);
     }
 }
+
+/**
+ * @tc.name: HandleNotifyIsFullScreenInForceSplitMode
+ * @tc.desc: HandleNotifyIsFullScreenInForceSplitMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleNotifyIsFullScreenInForceSplitMode, TestSize.Level1)
+{
+    sptr<SessionStubMocker> session = sptr<SessionStubMocker>::MakeSptr();
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_IS_FULL_SCREEN_IN_FORCE_SPLIT);
+    {
+        MessageOption option;
+        MessageParcel data;
+        MessageParcel reply;
+        EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+    {
+        MessageOption option;
+        MessageParcel data;
+        MessageParcel reply;
+        bool isFullScreen = true;
+        data.WriteBool(isFullScreen);
+        EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_NONE);
+    }
+    {
+        MessageOption option;
+        MessageParcel data;
+        MessageParcel reply;
+        bool isFullScreen = true;
+        data.WriteBool(isFullScreen);
+        MockMessageParcel::SetWriteInt32ErrorFlag(true);
+        EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+        MockMessageParcel::SetWriteInt32ErrorFlag(false);
+    }
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -46,6 +46,7 @@ public:
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) { return true; }
     virtual void UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo) {}
     virtual void GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo) {}
+    virtual void NotifyIsFullScreenInForceSplitMode(int32_t uid, bool isFullScreen) {}
 
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
         const sptr<IRemoteObject>& displayManagerAgent) { return SCREEN_ID_INVALID; }
