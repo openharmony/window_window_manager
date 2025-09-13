@@ -58,8 +58,8 @@ enum class ImageFit {
 namespace {
 /* used for free, ani has no destructor right now, only free when aniObj freed */
 static std::map<ani_object, AniWindowStage*> localObjs;
-const int64_t MIN_RESOURCE_ID = 0x1000000;
-const int64_t MAX_RESOURCE_ID = 0xffffffff;
+constexpr int64_t MIN_RESOURCE_ID = 0x1000000;
+constexpr int64_t MAX_RESOURCE_ID = 0xffffffff;
 } // namespace
 
 AniWindowStage::AniWindowStage(const std::shared_ptr<Rosen::WindowScene>& windowScene)

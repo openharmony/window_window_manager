@@ -46,7 +46,7 @@ class AniWindowStage {
     static void SetCustomDensity(ani_env* env, ani_object obj, ani_long nativeObj, ani_double density);
     static void SetDefaultDensityEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enabled);
     static void SetImageForRecent(ani_env* env, ani_object obj, ani_long nativeObj, ani_long imgResourceId,
-    ani_int value);
+        ani_int value);
     void SetWindowRectAutoSave(ani_env* env, ani_boolean enabled, ani_boolean isSaveBySpecifiedFlag);
     ani_boolean IsWindowRectAutoSave(ani_env* env);
     void RemoveStartingWindow(ani_env* env);
