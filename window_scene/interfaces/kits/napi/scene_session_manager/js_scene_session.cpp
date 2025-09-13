@@ -4592,7 +4592,7 @@ sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info)
 {
     bool setSessionFlag = false;
     sptr<SceneSession> ret = GenSceneSession(info, setSessionFlag);
-    if (setSessionFlag) {
+    if (ret != nullptr && setSessionFlag) {
         SceneSessionManager::GetInstance().AddRequestTaskInfo(ret->GetPersistentId(), info);
     }
     return ret;
