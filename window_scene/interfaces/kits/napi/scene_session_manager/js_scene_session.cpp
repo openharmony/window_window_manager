@@ -6570,7 +6570,7 @@ napi_value JsSceneSession::OnSetMobileAppInPadLayoutFullScreen(napi_env env, nap
         return NapiGetUndefined(env);
     }
     bool isMobileAppInPadLayoutFullScreen = false;
-    if (!ConvertFromJsValue(env, argv[0], isMobileAppInPadLayoutFullScreen)) {
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], isMobileAppInPadLayoutFullScreen)) {
         TLOGE(WmsLogTag::WMS_SCB, "Failed to convert parameter to enable");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
                                       "Input parameter is missing or invalid"));

@@ -1637,7 +1637,7 @@ HWTEST_F(WindowSessionPropertyTest, SetMobileAppInPadLayoutFullScreen, TestSize.
     bool isMobileAppInPadLayoutFullScreen = true;
     property->SetMobileAppInPadLayoutFullScreen(isMobileAppInPadLayoutFullScreen);
     auto result = property->GetMobileAppInPadLayoutFullScreen();
-    ASSERT_EQ(result, isMobileAppInPadLayoutFullScreen);
+    EXPECT_EQ(result, isMobileAppInPadLayoutFullScreen);
 }
 
 /**
