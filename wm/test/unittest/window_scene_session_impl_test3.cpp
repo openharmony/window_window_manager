@@ -1022,11 +1022,11 @@ HWTEST_F(WindowSceneSessionImplTest3, MaximizeFloating01, TestSize.Level1)
 }
 
 /**
- * @tc.name: MaximizeFloating
- * @tc.desc: MaximizeFloating
+ * @tc.name: MaximizeFloating03
+ * @tc.desc: MaximizeFloating03
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest3, MaximizeFloating, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest3, MaximizeFloating03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("MaximizeFloating");
@@ -1049,23 +1049,23 @@ HWTEST_F(WindowSceneSessionImplTest3, MaximizeFloating, TestSize.Level1)
     windowSceneSessionImpl->SetGlobalMaximizeMode(MaximizeMode::MODE_FULL_FILL);
     ret = windowSceneSessionImpl->MaximizeFloating();
     EXPECT_EQ(WMError::WM_OK, ret);
-    SystemBarProperty statusProperty = 
+    SystemBarProperty statusProperty =
         windowSceneSessionImpl->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    SystemBarProperty navigationIndicatorPorperty = 
+    SystemBarProperty navigationIndicatorPorperty =
         windowSceneSessionImpl->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
     statusProperty.enable_ = false;
     navigationIndicatorPorperty.enable_ = false;
     ret = windowSceneSessionImpl->MaximizeFloating();
     EXPECT_EQ(WMError::WM_OK, ret);
-    tatusProperty.enable_ = true;
+    statusProperty.enable_ = true;
     navigationIndicatorPorperty.enable_ = true;
     ret = windowSceneSessionImpl->MaximizeFloating();
     EXPECT_EQ(WMError::WM_OK, ret);
-    tatusProperty.enable_ = true;
+    statusProperty.enable_ = true;
     navigationIndicatorPorperty.enable_ = false;
     ret = windowSceneSessionImpl->MaximizeFloating();
     EXPECT_EQ(WMError::WM_OK, ret);
-    tatusProperty.enable_ = false;
+    statusProperty.enable_ = false;
     navigationIndicatorPorperty.enable_ = true;
     ret = windowSceneSessionImpl->MaximizeFloating();
     EXPECT_EQ(WMError::WM_OK, ret);
