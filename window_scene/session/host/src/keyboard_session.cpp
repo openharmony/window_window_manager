@@ -1106,7 +1106,7 @@ void KeyboardSession::CalculateOccupiedAreaAfterUIRefresh()
         needRecalculateOccupiedArea = true;
     }
     // Recalculate the occupied area info when calling session rect changes && keyboard is visible.
-    uint32_t callingId = GetCallingSessionId();
+    uint32_t callingId = GetCallingSessionId();a
     sptr<SceneSession> callingSession = GetSceneSession(callingId);
     if (callingSession && (callingSession->GetDirtyFlags() & static_cast<uint32_t>(SessionUIDirtyFlag::RECT)) !=
         static_cast<uint32_t>(SessionUIDirtyFlag::NONE) && IsVisibleForeground()) {
@@ -1130,7 +1130,7 @@ void KeyboardSession::CalculateOccupiedAreaAfterUIRefresh()
     }
 }
 
-    WMError HandleActionUpdateKeyboardTouchHotArea(const sptr<WindowSessionProperty>& property,
+    WMError KeyboardSession::HandleActionUpdateKeyboardTouchHotArea(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action)
     {
         if (GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
@@ -1138,12 +1138,12 @@ void KeyboardSession::CalculateOccupiedAreaAfterUIRefresh()
         }
         auto displayID = GetSessionProperty()->GetDisplayId();
         std::map<ScreenID, ScreenProperty> screensProperties =
-            ScreenSessionManagerClient::GetInstance()GetAllScreensProperties();
+            ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
         if (screensProperties.find(displayId) == screensProperties.end()) {
             return WMError::WM_ERROR_INVALID_DISPLAY;
         }
         const auto& screenBounds = screensProperties[displayId].GetBounds();
-        bool isLandscape = screenBounds.rect_.GetWidth() > screenBounds.rect_GetHeight();
+        bool isLandscape = screenBounds.rect_.GetWidth() > screenBounds.rect_.GetHeight();
         if (isLandscape) {
             GetSessionProperty()->SetTouchHotAreas(property->GetKeyboardTouchHotAreas().landscapeKeyboardHotAreas_);
             keyboardPanelSession_->GetSessionProperty()->SetTouchHotAreas(
@@ -1151,7 +1151,7 @@ void KeyboardSession::CalculateOccupiedAreaAfterUIRefresh()
         } else {
             GetSessionProperty()->SetTouchHotAreas(property->GetKeyboardTouchHotAreas().portraitKeyboardHotAreas_);
             keyboardPanelSession_->GetSessionProperty()->SetTouchHotAreas(
-                property->GetKeyboardTouchHotAreas().protraitPanelHotAreas_);
+                property->GetKeyboardTouchHotAreas().portraitPanelHotAreas_);
         }
         GetSessionProperty()->SetKeyboardTouchHotAreas(property->GetKeyboardTouchHotAreas());
         if (specificCallback_ != nullptr && specificCallback_->onWindowInfoUpdate_ != nullptr) {

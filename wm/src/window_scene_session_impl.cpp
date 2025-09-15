@@ -6265,7 +6265,7 @@ void WindowSceneSessionImpl::NotifyDisplayInfoChange(const sptr<DisplayInfo>& in
     SingletonContainer::Get<WindowManager>().NotifyDisplayInfoChange(token, displayId, density, orientation);
 }
 
-WMError WindowSceneSessionImpl::IsLandscape()
+bool WindowSceneSessionImpl::IsLandscape()
 {
     int32_t displayWidth = 0;
     int32_t displayHeight = 0;
