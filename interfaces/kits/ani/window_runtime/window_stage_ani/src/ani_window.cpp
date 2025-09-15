@@ -4340,6 +4340,7 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(WindowMoveWindowTo)},
         ani_native_function {"getGlobalRect", "l:C{@ohos.window.window.Rect}",
             reinterpret_cast<void *>(WindowGetGlobalRect)},
+            
         ani_native_function {"getWindowDecorHeight", "l:i",
             reinterpret_cast<void *>(WindowGetWindowDecorHeight)},
         ani_native_function {"setWindowBackgroundColor", "lC{std.core.String}:i",
