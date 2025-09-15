@@ -158,7 +158,6 @@ std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> WindowSessionIm
 std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
     WindowSessionImpl::windowTitleButtonRectChangeListeners_;
 std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> WindowSessionImpl::windowRectChangeListeners_;
-std::map<int32_t, std::vector<sptr<IWindowTitleChangeListener>>> WindowSessionImpl::windowTitleChangeListeners_;
 std::map<int32_t, std::vector<sptr<IRectChangeInGlobalDisplayListener>>>
     WindowSessionImpl::rectChangeInGlobalDisplayListeners_;
 std::map<int32_t, std::vector<sptr<IExtensionSecureLimitChangeListener>>>
@@ -193,7 +192,6 @@ std::recursive_mutex WindowSessionImpl::windowStatusDidChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowTitleButtonRectChangeListenerMutex_;
 std::mutex WindowSessionImpl::displayMoveListenerMutex_;
 std::mutex WindowSessionImpl::windowRectChangeListenerMutex_;
-std::mutex WindowSessionImpl::windowTitleChangeListenerMutex_;
 std::mutex WindowSessionImpl::rectChangeInGlobalDisplayListenerMutex_;
 std::mutex WindowSessionImpl::secureLimitChangeListenerMutex_;
 std::mutex WindowSessionImpl::subWindowCloseListenersMutex_;
@@ -4051,41 +4049,6 @@ WMError WindowSessionImpl::UnRegisterWindowWillCloseListeners(const sptr<IWindow
 }
 
 template<typename T>
-EnableIfSame<T, IWindowTitleChangeListener,
-    std::vector<sptr<IWindowTitleChangeListener>>> WindowSessionImpl::GetListeners()
-{
-    std::vector<sptr<IWindowTitleChangeListener>> windowTitleChangeListeners;
-    for (auto& listener : windowTitleChangeListeners_[GetPersistentId()]) {
-        windowTitleChangeListeners.push_back(listener);
-    }
-    return windowTitleChangeListeners;
-}
- 
-WMError WindowSessionImpl::RegisterWindowTitleChangeListener(const sptr<IWindowTitleChangeListener>& listener)
-{
-    std::lock_guard<std::mutex> lockListener(windowTitleChangeListenerMutex_);
-    WMError ret = RegisterListener(windowTitleChangeListeners_[GetPersistentId()], listener);
-    TLOGI(WmsLogTag::WMS_DECOR, "RegisterWindowTitleChangeListener");
-    if (ret == WMError::WM_OK) {
-        auto hostSession = GetHostSession();
-        CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-        hostSession->UpdateTitleChangeListenerRegistered(true);
-    }
-    return ret;
-}
- 
-WMError WindowSessionImpl::UnregisterWindowTitleChangeListener(const sptr<IWindowTitleChangeListener>& listener)
-{
-    std::lock_guard<std::mutex> lockListener(windowTitleChangeListenerMutex_);
-    WMError ret = UnregisterListener(windowTitleChangeListeners_[GetPersistentId()], listener);
-    TLOGI(WmsLogTag::WMS_DECOR, "UnregisterWindowTitleChangeListener");
-    auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    hostSession->UpdateTitleChangeListenerRegistered(false);
-    return ret;
-}
-
-template<typename T>
 EnableIfSame<T, ISwitchFreeMultiWindowListener,
     std::vector<sptr<ISwitchFreeMultiWindowListener>>> WindowSessionImpl::GetListeners()
 {
@@ -4247,36 +4210,6 @@ void WindowSessionImpl::NotifyWindowCrossAxisChange(CrossAxisState state)
             listener->OnCrossAxisChange(state);
         }
     }
-}
-
-bool WindowSessionImpl::IsHitTitleBar(std::shared_ptr<MMI::PointerEvent>& pointerEvent) const
-{
-    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
-    bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
-    bool isPcModeOrFreeMultiWindowMode = IsFreeMultiWindowMode() || isPcMode;
-    if (!isPcModeOrFreeMultiWindowMode) {
-        TLOGE(WmsLogTag::WMS_DECOR, "not PcMode or FreeMultiWindowMode.");
-        return false;
-    }
-    if (uiContent == nullptr) {
-        TLOGE(WmsLogTag::WMS_DECOR, "uiContent is null, windowId: %{public}u", GetWindowId());
-        return false;
-    }
-    Rect windowRect = property_->GetWindowRect();
-    int32_t decorHeight = uiContent->GetContainerModalTitleHeight();
-    MMI::PointerEvent::PointerItem pointerItem;
-    bool isValidPointItem = pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
-    bool isHitTitleBarX = pointerItem.GetDisplayX() > windowRect.posX_ 
-      && pointerItem.GetDisplayX() < windowRect.posX_ + windowRect.width_;
-    bool isHitTitleBarY = pointerItem.GetDisplayY() > windowRect.posY_ 
-      && pointerItem.GetDisplayY() < windowRect.posY_ + decorHeight;
-    bool isHitTitleBar = isValidPointItem && isHitTitleBarX && isHitTitleBarY;
-    if (isHitTitleBar) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "hitTitleBar success");
-        return true;
-    }
-    pointerEvent->MarkProcessed();
-    return false;
 }
 
 bool WindowSessionImpl::IsWaterfallModeEnabled()
@@ -4552,10 +4485,6 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
         std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
         ClearUselessListeners(windowRectChangeListeners_, persistentId);
     }
-    {
-        std::lock_guard<std::mutex> lockListener(windowTitleChangeListenerMutex_);
-        ClearUselessListeners(windowTitleChangeListeners_, persistentId);
-    }   
     {
         std::lock_guard<std::mutex> lockListener(rectChangeInGlobalDisplayListenerMutex_);
         ClearUselessListeners(rectChangeInGlobalDisplayListeners_, persistentId);
@@ -5586,26 +5515,6 @@ void WindowSessionImpl::NotifySwitchFreeMultiWindow(bool enable)
     for (auto& listener : switchFreeMultiWindowListeners) {
         if (listener != nullptr) {
             listener->OnSwitchFreeMultiWindow(enable);
-        }
-    }
-}
-
-void WindowSessionImpl::NotifyTitleChange(bool isShow, int32_t height)
-{
-    std::lock_guard<std::mutex> lockRectListener(windowTitleChangeListenerMutex_);
-    auto windowTitleChangeListeners = GetListeners<IWindowTitleChangeListener>();
-    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
-    if (uiContent == nullptr) {
-        TLOGE(WmsLogTag::WMS_DECOR, "uiContent is null, windowId: %{public}u", GetWindowId());
-        return;
-    }
-    int32_t width = property_->GetWindowRect().width_;
-    int32_t decorHeight = uiContent->GetContainerModalTitleHeight();
-    Rect rect = {0, height, width, decorHeight};
-    for (auto& listener : windowTitleChangeListeners) {
-        if (listener != nullptr) {
-            TLOGI(WmsLogTag::WMS_IMMS, "NotifyTitleChange, the title bar is show? %{public}d", isShow);
-            listener->OnTitleVisibilityChange(rect, isShow);
         }
     }
 }
