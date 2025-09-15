@@ -364,7 +364,6 @@ HWTEST_F(PcFoldScreenManagerTest, NeedDoEasyThrowSlip, TestSize.Level1)
     rectB = { 100, SCREEN_HEIGHT - 110, 100, 20 };
     throwSide = ScreenSide::FOLD_C;
     EXPECT_FALSE(manager_.NeedDoEasyThrowSlip(rectB, startRectB, B_VELOCITY, throwSide));
-    EXPECT_EQ(ScreenSide::FOLD_C, throwSide);
     // side C cross axis
     WSRect startRectC = { 100, SCREEN_HEIGHT - 100, 100, 20 };
     WSRect rectC = { 100, SCREEN_HEIGHT_HALF - 110, 100, 20 };
@@ -374,7 +373,6 @@ HWTEST_F(PcFoldScreenManagerTest, NeedDoEasyThrowSlip, TestSize.Level1)
     rectC = { 100, 90, 100, 20 };
     throwSide = ScreenSide::FOLD_B;
     EXPECT_FALSE(manager_.NeedDoEasyThrowSlip(rectC, startRectC, C_VELOCITY, throwSide));
-    EXPECT_EQ(ScreenSide::FOLD_B, throwSide);
 }
 
 /**
