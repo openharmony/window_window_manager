@@ -5299,10 +5299,18 @@ WMError WindowSceneSessionImpl::SetKeyboardTouchHotAreas(const KeyboardTouchHotA
     if (GetType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         return WMError::WM_ERROR_INVALID_TYPE;
     }
+    std::vector<Rect> lastTouchHotAreas;
+    property_->GetTouchHotAreas(lastTouchHotAreas);
     KeyboardTouchHotAreas lastKeyboardTouchHotAreas = property_->GetKeyboardTouchHotAreas();
+    if (IsLandscape()) {
+        property_->SetTouchHotAreas(hotAreas.landscapeKeyboardHotAreas_);
+    } else {
+        property_->SetTouchHotAreas(hotAreas.portraitKeyboardHotAreas_);
+    }
     property_->SetKeyboardTouchHotAreas(hotAreas);
     WMError result = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_KEYBOARD_TOUCH_HOT_AREA);
     if (result != WMError::WM_OK) {
+        property_->SetTouchHotAreas(lastTouchHotAreas);
         property_->SetKeyboardTouchHotAreas(lastKeyboardTouchHotAreas);
         TLOGE(WmsLogTag::WMS_EVENT, "errCode:%{public}d", static_cast<int32_t>(result));
     }
@@ -6257,7 +6265,7 @@ void WindowSceneSessionImpl::NotifyDisplayInfoChange(const sptr<DisplayInfo>& in
     SingletonContainer::Get<WindowManager>().NotifyDisplayInfoChange(token, displayId, density, orientation);
 }
 
-WMError WindowSceneSessionImpl::MoveAndResizeKeyboard(const KeyboardLayoutParams& params)
+WMError WindowSceneSessionImpl::IsLandscape()
 {
     int32_t displayWidth = 0;
     int32_t displayHeight = 0;
@@ -6273,15 +6281,19 @@ WMError WindowSceneSessionImpl::MoveAndResizeKeyboard(const KeyboardLayoutParams
         } else {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "display is null, name: %{public}s, id: %{public}d",
                 property_->GetWindowName().c_str(), GetPersistentId());
-            return WMError::WM_ERROR_NULLPTR;
+            return false;
         }
     }
-    bool isLandscape = displayWidth > displayHeight ? true : false;
+    return displayWidth > displayHeight;
+}
+
+WMError WindowSceneSessionImpl::MoveAndResizeKeyboard(const KeyboardLayoutParams& params)
+{
+    bool isLandscape = IsLandscape();
     Rect newRect = isLandscape ? params.LandscapeKeyboardRect_ : params.PortraitKeyboardRect_;
     property_->SetRequestRect(newRect);
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, newRect: %{public}s, isLandscape: %{public}d, "
-        "displayWidth: %{public}d, displayHeight: %{public}d", GetPersistentId(), newRect.ToString().c_str(),
-        isLandscape, displayWidth, displayHeight);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, newRect: %{public}s, isLandscape: %{public}d",
+        GetPersistentId(), newRect.ToString().c_str(), isLandscape);
     return WMError::WM_OK;
 }
 
