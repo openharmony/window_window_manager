@@ -6278,13 +6278,23 @@ bool WindowSceneSessionImpl::IsLandscape()
         if (defaultDisplayInfo != nullptr) {
             displayWidth = defaultDisplayInfo->GetWidth();
             displayHeight = defaultDisplayInfo->GetHeight();
-        } else {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "display is null, name: %{public}s, id: %{public}d",
-                property_->GetWindowName().c_str(), GetPersistentId());
-            return false;
         }
     }
-    return displayWidth > displayHeight;
+    bool isLandscape = displayWidth > displayHeight;
+    if (displayWidth == displayHeight) {
+        sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+        if (displayInfo == nullptr) {
+            TLOGE(WmsLogTag::DMS, "displayInfo is nullptr");
+            return false;
+        }
+        DisplayOrientation orientation = displayInfo->GetDisplayOrientation();
+        if (orientation == DisplayOrientation::UNKNOWN) {
+            TLOGW(WmsLogTag::WMS_KEYBOARD, "Display orientation is UNKNOWN");
+        }
+        isLandscape = (orientation == DisplayOrientation::LANDSCAPE ||
+            orientation == DisplayOrientation::LANDSCAPE_INVERTED);
+    }
+    return isLandscape;
 }
 
 WMError WindowSceneSessionImpl::MoveAndResizeKeyboard(const KeyboardLayoutParams& params)
