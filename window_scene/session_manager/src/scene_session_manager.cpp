@@ -16269,7 +16269,6 @@ void SceneSessionManager::ClearWatermarkRecordWhenAppExit(const sptr<SceneSessio
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "app exit: win=[%{public}d, %{public}s], pid=%{public}d",
         session->GetWindowId(), session->GetWindowName().c_str(), session->GetCallingPid());
     appWatermarkPidMap_.erase(session->GetCallingPid());
-    processWatermarkPidMap_.erase(session->GetCallingPid());
 }
 
 WMError SceneSessionManager::GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId)
