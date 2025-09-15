@@ -3121,9 +3121,6 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
     const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
     const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags)
 {
-    SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    SystemBarProperty navigationIndicatorPorperty =
-        GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
     for (auto [systemBarType, systemBarPropertyFlag] : systemBarPropertyFlags) {
         if (systemBarProperties.find(systemBarType) == systemBarProperties.end()) {
             TLOGE(WmsLogTag::WMS_IMMS, "system bar type is invalid");
@@ -3138,14 +3135,6 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
             systemBarProperties.at(systemBarType).contentColor_ : property.contentColor_;
         property.enableAnimation_ = systemBarPropertyFlag.enableAnimationFlag ?
             systemBarProperties.at(systemBarType).enableAnimation_ : property.enableAnimation_;
-        if (systemBarType == WindowType::WINDOW_TYPE_STATUS_BAR) {
-            statusProperty.enable_ = systemBarPropertyFlag.enableFlag ?
-                systemBarProperties.at(systemBarType).enable_ : statusProperty.enable_;
-        }
-        if (systemBarType == WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR) {
-            navigationIndicatorPorperty.enable_ = systemBarPropertyFlag.enableFlag ?
-                systemBarProperties.at(systemBarType).enable_ : statusProperty.enable_;
-        }
 
         if (systemBarPropertyFlag.enableFlag) {
             property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
@@ -3161,6 +3150,9 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
             }
         }
     }
+    SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    SystemBarProperty navigationIndicatorPorperty =
+        GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
     MobileAppInPadLayoutFullScreenChange(statusProperty.enable_, navigationIndicatorPorperty.enable_);
     return WMError::WM_OK;
 }
