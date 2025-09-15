@@ -369,6 +369,7 @@ void MultiScreenManager::MultiScreenModeChange(sptr<ScreenSession> firstSession,
     } else {
         TLOGW(WmsLogTag::DMS, "multi screen operate type change failed.");
     }
+    ScreenSessionManager::GetInstance().HandleResolutionEffectChange();
 }
 
 void MultiScreenManager::DoFirstMainChangeExtend(sptr<IScreenSessionManagerClient> scbClient,
