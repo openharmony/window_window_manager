@@ -497,7 +497,7 @@ HWTEST_F(KeyboardSessionTest4, HandleActionUpdateKeyboardTouchHotArea, TestSize.
     WMError ret = keyboardSession->HandleActonUpdateKeyboardTouchHotArea(property, action);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_TYPE, ret);
     keyboardSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    ret = keyboardSession->HandleActionUpdateKeyboardTouchHotArea(property,action);
+    ret = keyboardSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
 } // namespace
