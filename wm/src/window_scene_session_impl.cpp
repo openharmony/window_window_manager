@@ -142,6 +142,7 @@ constexpr uint32_t SNAPSHOT_TIMEOUT = 2000; // MS
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
 using WindowSessionImplMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
 std::mutex WindowSceneSessionImpl::windowAttachStateChangeListenerMutex_;
+std::mutex WindowSceneSessionImpl::transitionControllerMutex_;
 
 WindowSceneSessionImpl::WindowSceneSessionImpl(const sptr<WindowOption>& option) : WindowSessionImpl(option)
 {
@@ -1649,19 +1650,32 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
             hasFirstNotifyInteractive_ = false;
         }
     }
-    uint32_t animationFlag = property_->GetAnimationFlag();
-    if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
-        for (auto animationTransitionController : animationTransitionControllers_) {
-            animationTransitionController->AnimationForHidden();
-        }
-        RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
-    }
+    CustomHideAnimation();
+    
     NotifyWindowStatusChange(GetWindowMode());
     NotifyWindowStatusDidChange(GetWindowMode());
     escKeyEventTriggered_ = false;
     TLOGI(WmsLogTag::WMS_LIFE, "Window hide success [id:%{public}d, type: %{public}d",
         property_->GetPersistentId(), type);
     return res;
+}
+
+void WindowSceneSessionImpl::CustomHideAnimation()
+{
+    uint32_t animationFlag = property_->GetAnimationFlag();
+    if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        std::vector<sptr<IAnimationTransitionController>> animationTransitionControllers;
+        {
+            std::lock_guard<std::mutex> lockListener(transitionControllerMutex_);
+            animationTransitionControllers = animationTransitionControllers_;
+        }
+        for (auto animationTransitionController : animationTransitionControllers) {
+            if (animationTransitionController != nullptr) {
+                animationTransitionController->AnimationForHidden();
+            }
+        }
+        RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
+    }
 }
 
 WMError WindowSceneSessionImpl::NotifyDrawingCompleted()
@@ -4803,10 +4817,14 @@ WMError WindowSceneSessionImpl::RegisterAnimationTransitionController(
         TLOGE(WmsLogTag::WMS_SYSTEM, "listener is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (std::find(animationTransitionControllers_.begin(), animationTransitionControllers_.end(), listener) ==
+    {
+        std::lock_guard<std::mutex> lockListener(transitionControllerMutex_);
+        if (std::find(animationTransitionControllers_.begin(), animationTransitionControllers_.end(), listener) ==
             animationTransitionControllers_.end()) {
-        animationTransitionControllers_.push_back(listener);
+            animationTransitionControllers_.push_back(listener);
+        }
     }
+
     wptr<WindowSessionProperty> propertyWeak(property_);
     wptr<IAnimationTransitionController> animationTransitionControllerWeak(listener);
 

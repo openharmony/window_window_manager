@@ -1405,10 +1405,11 @@ export class TransitionContextInternal implements TransitionContext {
     private nativeObj: long = 0;
 
     setNativeObj(nativeObj: long): void {
-        if (!this.nativeObj) {
-          transContextFinalizerRegister.register(this, nativeObj);
-        }
-        this.nativeObj = nativeObj;
+      if (this.nativeObj) {
+        transContextFinalizerRegister.unregister(this);
+      }
+      transContextFinalizerRegister.register(this, nativeObj, this);
+      this.nativeObj = nativeObj;
     }
 
     private native completeTransitionSync(nativeObj: long, shouldHide: boolean): void;
@@ -1425,10 +1426,11 @@ export class TransitionControllerInternal implements TransitionController {
     private nativeObj: long = 0;
 
     setNativeObj(nativeObj: long): void {
-        if (!this.nativeObj) {
-          transControllerFinalizerRegister.register(this, nativeObj);
-        }
-        this.nativeObj = nativeObj;
+      if (this.nativeObj) {
+        transControllerFinalizerRegister.unregister(this);
+      }
+      transControllerFinalizerRegister.register(this, nativeObj, this);
+      this.nativeObj = nativeObj;
     }
 
     animationForShown: (context: window.TransitionContext) => void;
