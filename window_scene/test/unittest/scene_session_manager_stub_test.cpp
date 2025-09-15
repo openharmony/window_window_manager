@@ -2677,6 +2677,30 @@ HWTEST_F(SceneSessionManagerStubTest, HandleMinimizeByWindowId, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleUpdateAnimationSpeedMultiplierForPid
+ * @tc.desc: test HandleUpdateAnimationSpeedMultiplierForPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleUpdateAnimationSpeedMultiplierForPid, TestSize.Level1)
+{
+    ASSERT_NE(stub_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+
+    int res = stub_->HandleUpdateAnimationSpeedMultiplierForPid(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteInt32(10000);
+    res = stub_->HandleUpdateAnimationSpeedMultiplierForPid(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteInt32(10000);
+    data.WriteFloat(2.0f);
+    res = stub_->HandleUpdateAnimationSpeedMultiplierForPid(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleSetForegroundWindowNum
  * @tc.desc: test HandleSetForegroundWindowNum
  * @tc.type: FUNC

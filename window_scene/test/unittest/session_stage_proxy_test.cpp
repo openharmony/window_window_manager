@@ -671,6 +671,18 @@ HWTEST_F(SessionStageProxyTest, SetUniqueVirtualPixelRatio, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ApplyAnimationSpeedMultiplier
+ * @tc.desc: test function : ApplyAnimationSpeedMultiplier
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, ApplyAnimationSpeedMultiplier, TestSize.Level1)
+{
+    float multiplier = 2.0f;
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    sessionStage_->ApplyAnimationSpeedMultiplier(multiplier);
+}
+
+/**
  * @tc.name: NotifyDumpInfo
  * @tc.desc: test function : NotifyDumpInfo
  * @tc.type: FUNC

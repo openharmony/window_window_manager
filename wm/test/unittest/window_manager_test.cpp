@@ -1700,6 +1700,23 @@ HWTEST_F(WindowManagerTest, MinimizeByWindowId, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateAnimationSpeedMultiplierForPid
+ * @tc.desc: Check UpdateAnimationSpeedMultiplierForPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, UpdateAnimationSpeedMultiplierForPid, TestSize.Level1)
+{
+    auto& windowManager = WindowManager::GetInstance();
+    pid_t pid = 15234;
+    float multiplier = 2.0f;
+    WMError ret_1 = windowManager.UpdateAnimationSpeedMultiplierForPid(pid, multiplier);
+    ASSERT_EQ(WMError::WM_OK, ret_1);
+    multiplier = 1.0f;
+    WMError ret_2 = windowManager.UpdateAnimationSpeedMultiplierForPid(pid, multiplier);
+    ASSERT_EQ(WMError::WM_OK, ret_2);
+}
+
+/**
  * @tc.name: ProcessRegisterWindowInfoChangeCallback01
  * @tc.desc: Check ProcessRegisterWindowInfoChangeCallback
  * @tc.type: FUNC

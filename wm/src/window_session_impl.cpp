@@ -1486,6 +1486,41 @@ void WindowSessionImpl::SetUniqueVirtualPixelRatio(bool useUniqueDensity, float 
     }
 }
 
+void WindowSessionImpl::ApplyAnimationSpeedMultiplier(float multiplier)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), multiplier, where, this] {
+        auto window = weakThis.promote();
+        if (window == nullptr) {
+            TLOGW(WmsLogTag::WMS_ANIMATION, "%{public}s: window is nullptr", where);
+            return;
+        }
+
+        ApplyToAllWindowSessions(multiplier);
+        
+        isEnableAnimationSpeedMultiplier.store(!FoldScreenStateInternel::FloatEqualAbs(multiplier, 1.0f));
+        animationSpeedMultiplier.store(multiplier);
+    };
+    handler_->PostTask(task, where, 0, AppExecFwk::EventQueue::Priority::HIGH);
+}
+
+void WindowSessionImpl::ApplyToAllWindowSessions(float multiplier)
+{
+    for (const auto& [_, pair] : windowSessionMap_) {
+        auto& WindowSession = pair.second;
+        if (!WindowSession) {
+            continue;
+        }
+        auto rsUIContext = WindowSession->GetRSUIContext();
+        auto implicitAnimator = rsUIContext ? rsUIContext->GetRSImplicitAnimator() : nullptr;
+        if (implicitAnimator == nullptr) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to open implicit animtion");
+            continue;
+        }
+        implicitAnimator->ApplyAnimationSpeedMultiplier(multiplier);
+    }
+}
+
 void WindowSessionImpl::CopyUniqueDensityParameter(sptr<WindowSessionImpl> parentWindow)
 {
     if (parentWindow) {

@@ -2257,6 +2257,15 @@ WMError WindowManager::MinimizeByWindowId(const std::vector<int32_t>& windowIds)
     return ret;
 }
 
+WMError WindowManager::UpdateAnimationSpeedMultiplierForPid(pid_t pid, float multiplier)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().UpdateAnimationSpeedMultiplierForPid(pid, multiplier);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "failed");
+    }
+    return ret;
+}
+
 WMError WindowManager::SetForegroundWindowNum(uint32_t windowNum)
 {
     WMError ret = WindowAdapter::GetInstance(userId_)->SetForegroundWindowNum(windowNum);
