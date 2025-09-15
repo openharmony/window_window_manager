@@ -253,12 +253,15 @@ void ScreenSessionManagerClient::OnPropertyChanged(ScreenId screenId,
 void ScreenSessionManagerClient::OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
     PowerStateChangeReason reason)
 {
-    std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
-    if (screenSessionMap_.empty()) {
-        TLOGE(WmsLogTag::DMS, "[UL_POWER]screenSessionMap_ is nullptr");
-        return;
+    sptr<ScreenSession> screenSession;
+    {
+        std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+        if (screenSessionMap_.empty()) {
+            TLOGE(WmsLogTag::DMS, "[UL_POWER]screenSessionMap_ is empty");
+            return;
+        }
+        screenSession = screenSessionMap_.begin()->second;
     }
-    auto screenSession = screenSessionMap_.begin()->second;
     if (!screenSession) {
         TLOGE(WmsLogTag::DMS, "[UL_POWER]screenSession is null");
         return;
