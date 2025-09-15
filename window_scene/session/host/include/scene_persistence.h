@@ -66,18 +66,18 @@ public:
     std::string GetUpdatedIconPath() const;
     std::shared_ptr<Media::PixelMap> GetLocalSnapshotPixelMap(const float oriScale, const float newScale,
         SnapshotStatus key = defaultStatus, bool freeMultiWindow = false);
-    DisplayOrientation rotate_[SCREEN_COUNT][ORIENTATION_COUNT] = {};
+    DisplayOrientation rotate_[SCREEN_COUNT] = {};
 
 private:
     static std::string snapshotDirectory_;
     std::string bundleName_;
     int32_t persistentId_;
     SnapshotStatus capacity_;
-    std::string snapshotPath_[SCREEN_COUNT][ORIENTATION_COUNT];
+    std::string snapshotPath_[SCREEN_COUNT];
     std::string snapshotFreeMultiWindowPath_;
-    std::pair<uint32_t, uint32_t> snapshotSize_[SCREEN_COUNT][ORIENTATION_COUNT];
+    std::pair<uint32_t, uint32_t> snapshotSize_[SCREEN_COUNT];
     std::pair<uint32_t, uint32_t> snapshotFreeMultiWindowSize_;
-    bool hasSnapshot_[SCREEN_COUNT][ORIENTATION_COUNT] = {};
+    bool hasSnapshot_[SCREEN_COUNT] = {};
     bool hasSnapshotFreeMultiWindow_ = false;
 
     static std::string updatedIconDirectory_;
@@ -85,7 +85,7 @@ private:
     static bool isAstcEnabled_;
 
     std::atomic<int> savingSnapshotSum_ { 0 };
-    std::atomic<bool> isSavingSnapshot_[SCREEN_COUNT][ORIENTATION_COUNT] = {};
+    std::atomic<bool> isSavingSnapshot_[SCREEN_COUNT] = {};
     std::atomic<bool> isSavingSnapshotFreeMultiWindow_ { false };
 
     static std::shared_ptr<WSFFRTHelper> snapshotFfrtHelper_;

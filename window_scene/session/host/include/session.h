@@ -738,7 +738,6 @@ public:
     bool IsPersistentImageFit() const;
     bool SupportSnapshotAllSessionStatus() const;
     void InitSnapshotCapacity();
-    SnapshotStatus GetWindowStatus() const;
     SnapshotStatus GetSessionSnapshotStatus(BackgroundReason reason = BackgroundReason::DEFAULT) const;
     uint32_t GetWindowSnapshotOrientation() const;
     uint32_t GetLastOrientation() const;
