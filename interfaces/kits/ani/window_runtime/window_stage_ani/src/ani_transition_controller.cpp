@@ -24,20 +24,15 @@ namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 
-static int g_aniTransContextConstructorCount = 0;
-static int g_aniTransContextDestructorCount = 0;
-static int g_aniTransControllerConstructorCount = 0;
-static int g_aniTransControllerDestructorCount = 0;
-
 AniTransitionContext::AniTransitionContext(sptr<Window> window, bool isShownTransContext)
     : windowToken_(window), isShownTransContext_(isShownTransContext)
 {
-    TLOGI(WmsLogTag::WMS_ANIMATION, "[ANI] constructorCnt: %{public}d", ++g_aniTransContextConstructorCount);
+    TLOGI(WmsLogTag::WMS_ANIMATION, "[ANI] constructor");
 }
 
 AniTransitionContext::~AniTransitionContext()
 {
-    TLOGI(WmsLogTag::WMS_ANIMATION, "[ANI] deContructorCnt: %{public}d", ++g_aniTransContextDestructorCount);
+    TLOGI(WmsLogTag::WMS_ANIMATION, "[ANI] deContructor");
 }
 
 void AniTransitionContext::Finalizer(ani_env* env, ani_long nativeObj)
@@ -136,7 +131,11 @@ ani_object AniTransitionContext::CreateAniObj(ani_env* env, ani_ref aniWindowObj
     }
     env->Object_CallMethod_Void(obj, objFunc, reinterpret_cast<ani_long>(transContext.release()));
     if (aniWindowObj != nullptr) {
-        AniWindowUtils::CallAniMethodVoid(env, obj, cls, "<set>toWindow", nullptr, aniWindowObj);
+        ret = AniWindowUtils::CallAniMethodVoid(env, obj, cls, "<set>toWindow", nullptr, aniWindowObj);
+        if (ret != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] Set toWindow value failed %{public}u", ret);
+            return nullptr;
+        }
     }
     TLOGD(WmsLogTag::WMS_ANIMATION, "[ANI] Transition context create %{public}p success", reinterpret_cast<void*>(obj));
     return obj;
@@ -148,7 +147,7 @@ ani_status AniTransitionContext::AniTransitionContextInit(ani_env* env)
     ani_namespace ns {};
     if ((ret = env->FindNamespace("@ohos.window.window", &ns)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] Find ns failed. ret: %{public}u", ret);
-        return ANI_NOT_FOUND;
+        return ret;
     }
     std::array functions = {
         ani_native_function { "transContextFinalizerCallback", nullptr,
@@ -156,13 +155,13 @@ ani_status AniTransitionContext::AniTransitionContextInit(ani_env* env)
     };
     if ((ret = env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size())) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] Bind ns functions failed. ret: %{public}u", ret);
-        return ANI_NOT_FOUND;
+        return ret;
     }
 
     ani_class cls {};
     if ((ret = env->FindClass("@ohos.window.window.TransitionContextInternal", &cls)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] Find class TransitionContextInternal failed %{public}u", ret);
-        return ANI_NOT_FOUND;
+        return ret;
     }
 
     std::array methods = {
@@ -174,7 +173,7 @@ ani_status AniTransitionContext::AniTransitionContextInit(ani_env* env)
         if ((ret = env->Class_BindNativeMethods(cls, &method, 1u)) != ANI_OK) {
             TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] Bind methd failed. %{public}u, %{public}s, %{public}s",
                 ret, method.name, method.signature);
-            return ANI_NOT_FOUND;
+            return ret;
         }
     }
     TLOGI(WmsLogTag::WMS_ANIMATION, "[ANI] Transition context init success");
@@ -184,7 +183,7 @@ ani_status AniTransitionContext::AniTransitionContextInit(ani_env* env)
 AniTransitionController::AniTransitionController(ani_env* env, ani_ref aniWindowObj, sptr<Window> window)
     : env_(env), aniWindowObj_(aniWindowObj), windowToken_(window), weakRef_(wptr<AniTransitionController>(this))
 {
-    TLOGI(WmsLogTag::WMS_ANIMATION, "constructorCnt: %{public}d", ++g_aniTransControllerConstructorCount);
+    TLOGI(WmsLogTag::WMS_ANIMATION, "constructor");
     auto mainRunner = AppExecFwk::EventRunner::GetMainEventRunner();
     if (!mainRunner) {
         return;
@@ -194,8 +193,8 @@ AniTransitionController::AniTransitionController(ani_env* env, ani_ref aniWindow
 
 AniTransitionController::~AniTransitionController()
 {
-    TLOGI(WmsLogTag::WMS_ANIMATION, "deConstructorCnt: %{public}d", ++g_aniTransControllerDestructorCount);
-    if (env_ == nullptr) {
+    TLOGI(WmsLogTag::WMS_ANIMATION, "deConstructor");
+    if (env_ == nullptr || aniTransControllerObj_ == nullptr) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "env_ is null");
         return;
     }
@@ -352,7 +351,11 @@ sptr<AniTransitionController> AniTransitionController::CreateAniTransitionContro
         TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] Find setNativeObj failed %{public}u", ret);
         return nullptr;
     }
-    env->Object_CallMethod_Void(obj, objFunc, reinterpret_cast<ani_long>(controller.GetRefPtr()));
+    ret = env->Object_CallMethod_Void(obj, objFunc, reinterpret_cast<ani_long>(controller.GetRefPtr()));
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] Call setNativeObj failed %{public}u", ret);
+        return nullptr;
+    }
     controller->SetAniTransControllerObj(obj);
     TLOGI(WmsLogTag::WMS_ANIMATION, "[ANI] Transition controller create success %{public}p",
         reinterpret_cast<void*>(obj));
@@ -365,7 +368,7 @@ ani_status AniTransitionController::AniTransitionControllerInit(ani_env* env)
     ani_namespace ns {};
     if ((ret = env->FindNamespace("@ohos.window.window", &ns)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] Find ns failed. ret: %{public}u", ret);
-        return ANI_NOT_FOUND;
+        return ret;
     }
     std::array functions = {
         ani_native_function { "transControllerFinalizerCallback", nullptr,
@@ -373,13 +376,13 @@ ani_status AniTransitionController::AniTransitionControllerInit(ani_env* env)
     };
     if ((ret = env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size())) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] Bind ns functions failed. ret: %{public}u", ret);
-        return ANI_NOT_FOUND;
+        return ret;
     }
 
     ani_class cls {};
     if ((ret = env->FindClass("@ohos.window.window.TransitionControllerInternal", &cls)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] Find class TransitionControllerInternal failed %{public}u", ret);
-        return ANI_NOT_FOUND;
+        return ret;
     }
     TLOGI(WmsLogTag::WMS_ANIMATION, "[ANI] Transition context init success");
     return ANI_OK;
@@ -392,14 +395,18 @@ ani_status ANI_Transition_Controller_Constructor(ani_vm* vm, uint32_t *result)
     ani_status ret = vm->GetEnv(ANI_VERSION_1, &env);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] Get env failed. ret: %{public}u", ret);
-        return ANI_NOT_FOUND;
+        return ret;
     }
     ani_status contextInitRet = AniTransitionContext::AniTransitionContextInit(env);
+    if (contextInitRet != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] transition context init failed with result: %{public}u", contextInitRet);
+        return contextInitRet;
+    }
     ani_status controllerInitRet = AniTransitionController::AniTransitionControllerInit(env);
-    if (contextInitRet != ANI_OK || controllerInitRet != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] transition context or controller init failed with \
-            result [%{public}u, %{public}u]", contextInitRet, controllerInitRet);
-        return ANI_ERROR;
+    if (controllerInitRet != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] transition controller init failed with result: %{public}u",
+            controllerInitRet);
+        return controllerInitRet;
     }
     *result = ANI_VERSION_1;
     return ANI_OK;
