@@ -26,6 +26,8 @@
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
+constexpr size_t ARGC_ONE = 1;
+constexpr size_t ARGC_TWO = 2;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsTransactionManager" };
 } // namespace
@@ -127,7 +129,7 @@ std::pair<ScreenId, bool> ParseScreenIdAndInnerProcessFromArgs(napi_env env, nap
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     int64_t screenIdValue = static_cast<int64_t>(SCREEN_ID_INVALID);
     bool isInnerProcess = false;
-    if (argc != 2) {
+    if (argc != ARGC_TWO) {
         TLOGW(WmsLogTag::DEFAULT, "Argc is invalid: %{public}zu", argc);
         return std::make_pair(SCREEN_ID_INVALID, isInnerProcess);
     }
@@ -146,7 +148,7 @@ std::pair<ScreenId, bool> ParseScreenIdAndInnerProcessFromArgs(napi_env env, nap
         TLOGW(WmsLogTag::DEFAULT, "Failed to convert parameter to isInnerProcess");
         return std::make_pair(SCREEN_ID_INVALID, isInnerProcess);
     }
-    TLOGW(WmsLogTag::DEFAULT, "screenId: %{public}ld, isInnerProcess: %{public}d", screenIdValue, isInnerProcess);
+    TLOGD(WmsLogTag::DEFAULT, "isInnerProcess: %{public}d", isInnerProcess);
     return std::make_pair(static_cast<ScreenId>(screenIdValue), isInnerProcess);
 }
 
