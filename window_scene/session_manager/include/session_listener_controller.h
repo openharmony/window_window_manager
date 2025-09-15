@@ -47,10 +47,11 @@ public:
     * Window Lifecycle
     */
     void NotifySessionLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent event,
-        const SessionInfo& sessionInfo);
+        const SessionInfo& sessionInfo, LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
 
     void NotifySessionTransferToTargetScreenEvent(const SessionInfo& sessionInfo,
-        const uint32_t resultCode, const uint64_t fromScreenId, const uint64_t toScreenId);
+        const uint32_t resultCode, const uint64_t fromScreenId, const uint64_t toScreenId,
+        LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
 
     WMError RegisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener,
         const std::vector<int32_t>& persistentIdList);
@@ -119,7 +120,8 @@ private:
     * Window Lifecycle
     */
     void ConstructPayload(ISessionLifecycleListener::LifecycleEventPayload& payload, const SessionInfo& sessionInfo,
-        const uint32_t resultCode = 0, const uint64_t fromScreenId = 0, const uint64_t toScreenId = 0);
+        const uint32_t resultCode = 0, const uint64_t fromScreenId = 0, const uint64_t toScreenId = 0,
+        LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
     void OnSessionLifecycleListenerDied(const wptr<IRemoteObject>& remote);
     void RemoveSessionLifecycleListener(const sptr<IRemoteObject>& target);
 

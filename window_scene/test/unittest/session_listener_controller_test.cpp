@@ -695,13 +695,15 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionTransferToTargetScreenEvent
     EXPECT_EQ(myListener->event_, ISessionLifecycleListener::SessionLifecycleEvent::CREATED);
 
     info.persistentId_ = 111;
-    slController->NotifySessionTransferToTargetScreenEvent(info, resultCode, fromScreenId, toScreenId);
+    LifeCycleChangeReason reason = LifeCycleChangeReason::BACK_TO_DESKTOP;
+    slController->NotifySessionTransferToTargetScreenEvent(info, resultCode, fromScreenId, toScreenId, reason);
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(myListener->event_, ISessionLifecycleListener::SessionLifecycleEvent::TRANSFER_TO_TARGET_SCREEN);
     EXPECT_EQ(myListener->payload_.persistentId_, info.persistentId_);
     EXPECT_EQ(myListener->payload_.fromScreenId_, fromScreenId);
     EXPECT_EQ(myListener->payload_.toScreenId_, toScreenId);
     EXPECT_EQ(myListener->payload_.resultCode_, resultCode);
+    EXPECT_EQ(myListener->payload_.lifeCycleChangeReason_, reason);
 }
 
 /**
