@@ -1106,7 +1106,7 @@ void KeyboardSession::CalculateOccupiedAreaAfterUIRefresh()
         needRecalculateOccupiedArea = true;
     }
     // Recalculate the occupied area info when calling session rect changes && keyboard is visible.
-    uint32_t callingId = GetCallingSessionId();a
+    uint32_t callingId = GetCallingSessionId();
     sptr<SceneSession> callingSession = GetSceneSession(callingId);
     if (callingSession && (callingSession->GetDirtyFlags() & static_cast<uint32_t>(SessionUIDirtyFlag::RECT)) !=
         static_cast<uint32_t>(SessionUIDirtyFlag::NONE) && IsVisibleForeground()) {
