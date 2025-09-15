@@ -3976,6 +3976,11 @@ WSError SceneSessionManager::CheckSubSessionStartedByExtension(const sptr<IRemot
             property->GetParentPersistentId());
         return WSError::WS_ERROR_NULLPTR;
     }
+    if (extensionParentSession->GetSessionInfo().isSystem_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "extensionParentSession is SCBSystemSession: %{public}d",
+            property->GetParentPersistentId());
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
     auto pid = IPCSkeleton::GetCallingRealPid();
     auto parentPid = extensionParentSession->GetCallingPid();
     if (pid == parentPid) { // Determine Whether to create a sub window in the same process.
@@ -3992,7 +3997,8 @@ WSError SceneSessionManager::CheckSubSessionStartedByExtension(const sptr<IRemot
             return WSError::WS_OK;
         }
     }
-    if (SessionPermission::IsSystemCalling()) { // Fallback strategy.
+    if (info.extensionAbilityType == AppExecFwk::ExtensionAbilityType::UNSPECIFIED &&
+        SessionPermission::IsSystemCalling()) {
         TLOGD(WmsLogTag::WMS_UIEXT, "is system app");
         return WSError::WS_OK;
     }
