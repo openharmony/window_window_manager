@@ -27,6 +27,14 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_errLog;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_errLog = msg;
+    }
+}
 class SCBSystemSessionTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -237,13 +245,16 @@ HWTEST_F(SCBSystemSessionTest, PresentFocusIfPointDown02, TestSize.Level1)
  */
 HWTEST_F(SCBSystemSessionTest, PresentFocusIfNeed, TestSize.Level1)
 {
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     int32_t pointerAction = 8;
     scbSystemSession_->PresentFocusIfNeed(pointerAction, 0);
-    ASSERT_EQ(pointerAction, 8);
+    EXPECT_FALSE(g_errLog.find("OnClick down, id:") != std::string::npos);
 
     pointerAction = 100;
     scbSystemSession_->PresentFocusIfNeed(pointerAction, 0);
-    ASSERT_EQ(pointerAction, 100);
+    EXPECT_FALSE(g_errLog.find("OnClick down, id:") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
