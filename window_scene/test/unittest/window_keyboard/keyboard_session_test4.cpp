@@ -478,13 +478,13 @@ HWTEST_F(KeyboardSessionTest4, HandleActionUpdateKeyboardTouchHotArea, TestSize.
 {
     std::string abilityName = "HandleActionUpdateKeyboardTouchHotArea";
     std::string bundleName = "HandleActionUpdateKeyboardTouchHotArea";
-    sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundlName);
+    sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     KeyboardTouchHotAreas keyboardTouchHotAreas;
     Rect rect = {800, 800, 1200, 1200};
     keyboardTouchHotAreas.landscapeKeyboardHotAreas_.push_back(rect);
     keyboardTouchHotAreas.landscapePanelHotAreas_.push_back(rect);
-    keyboardTouchHotAreas.portraitKeyboardHotAreas.push_back(rect);
+    keyboardTouchHotAreas.portraitKeyboardHotAreas_.push_back(rect);
     keyboardTouchHotAreas.portraitPanelHotAreas_.push_back(rect);
     property->SetKeyboardTouchHotAreas(keyboardTouchHotAreas);
     SessionInfo info;
@@ -492,9 +492,9 @@ HWTEST_F(KeyboardSessionTest4, HandleActionUpdateKeyboardTouchHotArea, TestSize.
     info.bundleName_ = "keyboardPanelSession";
     sptr<SceneSession> keyboardPanelSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     keyboardSession->BindKeyboardPanelSession(keyboardPanelSession);
-    keyboardSession->GetSessionPropert()->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
+    keyboardSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
-    WMError ret = keyboardSession->HandleActonUpdateKeyboardTouchHotArea(property, action);
+    WMError ret = keyboardSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_TYPE, ret);
     keyboardSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     ret = keyboardSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
