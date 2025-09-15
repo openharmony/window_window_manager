@@ -760,6 +760,7 @@ public:
     bool IsMainWindowByPersistentId(int32_t persistentId);
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override;
     void RegisterMinimizeByWindowIdCallback(MinimizeByWindowIdFunc&& func);
+    WMError UpdateAnimationSpeedMultiplierForPid(pid_t pid, float multiplier) override;
     void RegisterSceneSessionDestructCallback(NotifySceneSessionDestructFunc&& func);
     void RegisterTransferSessionToTargetScreenCallback(NotifyTransferSessionToTargetScreenFunc&& func);
     WMError NotifyTransferSessionToTargetScreen(const TransferSessionInfo& info);

@@ -1697,6 +1697,22 @@ HWTEST_F(sceneSessionManagerProxyTest, MinimizeByWindowId, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateAnimationSpeedMultiplierForPid
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, UpdateAnimationSpeedMultiplierForPid, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sceneSessionManagerProxy, nullptr);
+
+    EXPECT_EQ(WMError::WM_OK, sceneSessionManagerProxy->UpdateAnimationSpeedMultiplierForPid(10000, 2.0f));
+}
+
+/**
  * @tc.name: SetForegroundWindowNum
  * @tc.desc: SetForegroundWindowNum
  * @tc.type: FUNC

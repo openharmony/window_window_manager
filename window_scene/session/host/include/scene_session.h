@@ -498,6 +498,7 @@ public:
     virtual void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip);
     virtual void SetSkipEventOnCastPlus(bool isSkip);
     WMError SetUniqueDensityDpi(bool useUnique, float dpi);
+    WMError ApplyAnimationSpeedMultiplier(float multiplier);
 
     bool IsAnco() const override;
     void SetBlank(bool isAddBlank) override;

@@ -68,6 +68,7 @@ public:
     MOCK_METHOD2(NotifyDisplayMove, void(DisplayId from, DisplayId to));
     MOCK_METHOD1(SwitchFreeMultiWindow, WSError(bool enable));
     MOCK_METHOD2(SetUniqueVirtualPixelRatio, void(bool useUniqueDensity, float virtualPixelRatio));
+    MOCK_METHOD1(ApplyAnimationSpeedMultiplier, void(float multiplier));
     MOCK_METHOD0(PcAppInPadNormalClose, WSError(void));
     MOCK_METHOD1(NotifyCompatibleModePropertyChange, WSError(const sptr<CompatibleModeProperty> property));
     MOCK_METHOD1(NotifySessionFullScreen, void(bool fullScreen));

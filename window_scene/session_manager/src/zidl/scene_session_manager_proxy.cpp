@@ -3669,6 +3669,42 @@ WMError SceneSessionManagerProxy::MinimizeByWindowId(const std::vector<int32_t>&
     return static_cast<WMError>(ret);
 }
 
+WMError SceneSessionManagerProxy::UpdateAnimationSpeedMultiplierForPid(pid_t pid, float multiplier)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(pid)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Write pid failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteFloat(multiplier)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Write multiplier failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_UPDATE_ANIMATION_SPEED_MULTIPLIER_FOR_PID),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Read ret failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(ret);
+}
+
 WMError SceneSessionManagerProxy::SetForegroundWindowNum(uint32_t windowNum)
 {
     MessageParcel data;

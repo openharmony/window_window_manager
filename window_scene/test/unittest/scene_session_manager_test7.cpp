@@ -2112,6 +2112,57 @@ HWTEST_F(SceneSessionManagerTest7, MinimizeByWindowId, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateAnimationSpeedMultiplierForPid
+ * @tc.desc: test function : UpdateAnimationSpeedMultiplierForPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, UpdateAnimationSpeedMultiplierForPid, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+
+    MockAccesstokenKit::MockIsSACalling(false);
+
+    float multiplier = 2.0f;
+    int32_t pid = 1;
+
+    auto result = ssm_->UpdateAnimationSpeedMultiplierForPid(pid, multiplier);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+
+    MockAccesstokenKit::MockIsSACalling(true);
+    SessionInfo info;
+    info.bundleName_ = "SceneSessionManagerTest7";
+    info.abilityName_ = "UpdateAnimationSpeedMultiplierForPid";
+    sptr<SceneSession> sceneSession01 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession02 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession03 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession04 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession01, nullptr);
+    ASSERT_NE(sceneSession02, nullptr);
+    ASSERT_NE(sceneSession03, nullptr);
+    ASSERT_NE(sceneSession04, nullptr);
+    sceneSession01->isVisible_ = false;
+    sceneSession01->SetCallingPid(2);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession01));
+    result = ssm_->UpdateAnimationSpeedMultiplierForPid(pid, multiplier);
+    EXPECT_EQ(result, WMError::WM_OK);
+    sceneSession02->isVisible_ = true;
+    sceneSession02->SetCallingPid(3);
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession02));
+    result = ssm_->UpdateAnimationSpeedMultiplierForPid(pid, multiplier);
+    EXPECT_EQ(result, WMError::WM_OK);
+    sceneSession03->isVisible_ = false;
+    sceneSession03->SetCallingPid(pid);
+    ssm_->sceneSessionMap_.insert(std::make_pair(3, sceneSession03));
+    result = ssm_->UpdateAnimationSpeedMultiplierForPid(pid, multiplier);
+    EXPECT_EQ(result, WMError::WM_OK);
+    sceneSession04->isVisible_ = true;
+    sceneSession04->SetCallingPid(pid);
+    ssm_->sceneSessionMap_.insert(std::make_pair(4, sceneSession04));
+    result = ssm_->UpdateAnimationSpeedMultiplierForPid(pid, multiplier);
+    EXPECT_EQ(result, WMError::WM_OK);
+}
+
+/**
  * @tc.name: SetForegroundWindowNum
  * @tc.desc: test function : SetForegroundWindowNum
  * @tc.type: FUNC
