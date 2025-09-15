@@ -263,6 +263,7 @@ public:
     void SetWinRectWhenUpdateRect(const WSRect& rect);
     void RegisterNotifySurfaceBoundsChangeFunc(int32_t sessionId, NotifySurfaceBoundsChangeFunc&& func) override;
     void UnregisterNotifySurfaceBoundsChangeFunc(int32_t sessionId) override;
+    std::unordered_map<int32_t, NotifySurfaceBoundsChangeFunc> GetNotifySurfaceBoundsChangeFuncMap() const;
     void SetRequestRectWhenFollowParent(const WSRect& rect) { requestRectWhenFollowParent_ = rect; }
     WSRect GetRequestRectWhenFollowParent() const { return requestRectWhenFollowParent_; }
     void HandleCrossMoveTo(WSRect& globalRect);
@@ -975,7 +976,7 @@ protected:
     std::mutex displayIdSetDuringMoveToMutex_;
     std::set<uint64_t> displayIdSetDuringMoveTo_;
     NotifyFollowParentRectFunc followParentRectFunc_ = nullptr;
-    std::mutex registerNotifySurfaceBoundsChangeMutex_;
+    mutable std::mutex registerNotifySurfaceBoundsChangeMutex_;
     std::unordered_map<int32_t, NotifySurfaceBoundsChangeFunc> notifySurfaceBoundsChangeFuncMap_;
     bool isFollowParentLayout_ = false;
     NotifyWindowAnchorInfoChangeFunc onWindowAnchorInfoChangeFunc_ = nullptr;
@@ -1110,6 +1111,9 @@ private:
     NotifySessionEventFunc onSessionEvent_;
     void ProcessWindowMoving(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void HandleSubSessionCrossNode(SizeChangeReason reason);
+    void RunAfterNVsyncs(uint32_t vsyncCount, Task&& task);
+    void RestoreToPreDragGravity();
+    void RestoreGravityWhenDragEnd();
 
     /*
      * Gesture Back
