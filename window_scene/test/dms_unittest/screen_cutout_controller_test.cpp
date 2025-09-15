@@ -283,11 +283,11 @@ HWTEST_F(ScreenCutoutControllerTest, InitRect, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckBoundaryRects
+ * @tc.name: CheckBoundaryRects01
  * @tc.desc: ScreenCutoutController check boundary rects
  * @tc.type: FUNC
 */
-HWTEST_F(ScreenCutoutControllerTest, CheckBoundaryRects, TestSize.Level1)
+HWTEST_F(ScreenCutoutControllerTest, CheckBoundaryRects01, TestSize.Level1)
 {
     sptr<ScreenCutoutController> controller = new ScreenCutoutController();
     DMRect emptyRect = {-15, -15, 8, 8};
@@ -298,15 +298,16 @@ HWTEST_F(ScreenCutoutControllerTest, CheckBoundaryRects, TestSize.Level1)
     screenProperty.SetBounds(screenBouns);
     ASSERT_TRUE(controller != nullptr);
     controller->CheckBoundaryRects(boundaryRects, 0, 0);
-    EXPECT_EQ(boundaryRects, {emptyRect_});
+    ASSERT_EQ(boundaryRects.size(), 1);
+    EXPECT_EQ(boundaryRects[0], emptyRect_);
 }
 
 /**
- * @tc.name: CheckBoundaryRects
+ * @tc.name: CheckBoundaryRects02
  * @tc.desc: ScreenCutoutController check boundary rects
  * @tc.type: FUNC
 */
-HWTEST_F(ScreenCutoutControllerTest, CheckBoundaryRects, TestSize.Level1)
+HWTEST_F(ScreenCutoutControllerTest, CheckBoundaryRects02, TestSize.Level1)
 {
     sptr<ScreenCutoutController> controller = new ScreenCutoutController();
     DMRect emptyRect = {1, 1, 7, 7};
@@ -317,15 +318,16 @@ HWTEST_F(ScreenCutoutControllerTest, CheckBoundaryRects, TestSize.Level1)
     screenProperty.SetBounds(screenBouns);
     ASSERT_TRUE(controller != nullptr);
     controller->CheckBoundaryRects(boundaryRects, 7, 8);
-    EXPECT_EQ(boundaryRects, {emptyRect_});
+    ASSERT_EQ(boundaryRects.size(), 1);
+    EXPECT_EQ(boundaryRects[0], emptyRect_);
 }
 
 /**
- * @tc.name: CheckBoundaryRects
+ * @tc.name: CheckBoundaryRects03
  * @tc.desc: ScreenCutoutController check boundary rects
  * @tc.type: FUNC
 */
-HWTEST_F(ScreenCutoutControllerTest, CheckBoundaryRects, TestSize.Level1)
+HWTEST_F(ScreenCutoutControllerTest, CheckBoundaryRects03, TestSize.Level1)
 {
     sptr<ScreenCutoutController> controller = new ScreenCutoutController();
     DMRect emptyRect = {1, 1, 7, 7};
@@ -336,15 +338,16 @@ HWTEST_F(ScreenCutoutControllerTest, CheckBoundaryRects, TestSize.Level1)
     screenProperty.SetBounds(screenBouns);
     ASSERT_TRUE(controller != nullptr);
     controller->CheckBoundaryRects(boundaryRects, 8, 7);
-    EXPECT_EQ(boundaryRects, {emptyRect_});
+    ASSERT_EQ(boundaryRects.size(), 1);
+    EXPECT_EQ(boundaryRects[0], emptyRect_);
 }
 
 /**
- * @tc.name: CheckBoundaryRects
+ * @tc.name: CheckBoundaryRects04
  * @tc.desc: ScreenCutoutController check boundary rects
  * @tc.type: FUNC
 */
-HWTEST_F(ScreenCutoutControllerTest, CheckBoundaryRects, TestSize.Level1)
+HWTEST_F(ScreenCutoutControllerTest, CheckBoundaryRects04, TestSize.Level1)
 {
     sptr<ScreenCutoutController> controller = new ScreenCutoutController();
     DMRect emptyRect = {1, 0, 8, 8};
@@ -355,15 +358,16 @@ HWTEST_F(ScreenCutoutControllerTest, CheckBoundaryRects, TestSize.Level1)
     screenProperty.SetBounds(screenBouns);
     ASSERT_TRUE(controller != nullptr);
     controller->CheckBoundaryRects(boundaryRects, 9, 7);
-    EXPECT_EQ(boundaryRects, {emptyRect_});
+    ASSERT_EQ(boundaryRects.size(), 1);
+    EXPECT_EQ(boundaryRects[0], emptyRect_);
 }
 
 /**
- * @tc.name: CheckBoundaryRects
+ * @tc.name: CheckBoundaryRects05
  * @tc.desc: ScreenCutoutController check boundary rects
  * @tc.type: FUNC
 */
-HWTEST_F(ScreenCutoutControllerTest, CheckBoundaryRects, TestSize.Level1)
+HWTEST_F(ScreenCutoutControllerTest, CheckBoundaryRects05, TestSize.Level1)
 {
     sptr<ScreenCutoutController> controller = new ScreenCutoutController();
     DMRect emptyRect = {0, 0, 0, 0};
@@ -374,7 +378,8 @@ HWTEST_F(ScreenCutoutControllerTest, CheckBoundaryRects, TestSize.Level1)
     screenProperty.SetBounds(screenBouns);
     ASSERT_TRUE(controller != nullptr);
     controller->CheckBoundaryRects(boundaryRects, 0, 0);
-    EXPECT_EQ(boundaryRects, {emptyRect_});
+    ASSERT_EQ(boundaryRects.size(), 1);
+    EXPECT_EQ(boundaryRects[0], emptyRect_);
 }
 }
 } // namespace Rosen
