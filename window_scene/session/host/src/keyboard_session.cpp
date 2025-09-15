@@ -1129,4 +1129,35 @@ void KeyboardSession::CalculateOccupiedAreaAfterUIRefresh()
         stateChanged_ = false;
     }
 }
+
+    WMError HandleActionUpdateKeyboardTouchHotArea(const sptr<WindowSessionProperty>& property,
+        WSPropertyChangeAction action)
+    {
+        if (GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+            return WMError::WM_ERROR_INVALID_TYPE;
+        }
+        auto displayID = GetSessionProperty()->GetDisplayId();
+        std::map<ScreenID, ScreenProperty> screensProperties =
+            ScreenSessionManagerClient::GetInstance()GetAllScreensProperties();
+        if (screensProperties.find(displayId) == screensProperties.end()) {
+            return WMError::WM_ERROR_INVALID_DISPLAY;
+        }
+        const auto& screenBounds = screensProperties[displayId].GetBounds();
+        bool isLandscape = screenBounds.rect_.GetWidth() > screenBounds.rect_GetHeight();
+        if (isLandscape) {
+            GetSessionProperty()->SetTouchHotAreas(property->GetKeyboardTouchHotAreas().landscapeKeyboardHotAreas_);
+            keyboardPanelSession_->GetSessionProperty()->SetTouchHotAreas(
+                property->GetKeyboardTouchHotAreas().landscapePanelHotAreas_);
+        } else {
+            GetSessionProperty()->SetTouchHotAreas(property->GetKeyboardTouchHotAreas().portraitKeyboardHotAreas_);
+            keyboardPanelSession_->GetSessionProperty()->SetTouchHotAreas(
+                property->GetKeyboardTouchHotAreas().protraitPanelHotAreas_);
+        }
+        GetSessionProperty()->SetKeyboardTouchHotAreas(property->GetKeyboardTouchHotAreas());
+        if (specificCallback_ != nullptr && specificCallback_->onWindowInfoUpdate_ != nullptr) {
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "id=%{public}d", GetPersistentId());
+            specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+        }
+        return WMError::WM_OK;
+    }
 } // namespace OHOS::Rosen
