@@ -500,6 +500,8 @@ public:
     Rotation GetConfigCorrectionByDisplayMode(FoldDisplayMode displayMode);
     Rotation RemoveRotationCorrection(Rotation rotation);
     void NotifySwitchUserAnimationFinish() override;
+    // mirror screen
+    bool HandleResolutionEffectChange();
 
 protected:
     ScreenSessionManager();
@@ -929,6 +931,13 @@ private:
     void HandleNewUserDisplayNode(int32_t newUserId, bool coldBoot);
     void WaitSwitchUserAnimateFinish(int32_t newUserId, bool isColdSwitch);
     void MakeMirrorAfterSwitchUser();
+
+    // mirror screen
+    bool SetResolutionEffect(ScreenId screenId,  uint32_t width, uint32_t height);
+    bool RecoveryResolutionEffect();
+    void RegisterSettingResolutionEffectObserver();
+    void SetResolutionEffectFromSettingData();
+    std::atomic<bool> curResolutionEffectEnable_ = false;
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {

@@ -578,7 +578,9 @@ DMError SuperFoldStateManager::RefreshMirrorRegionInner(
         mirrorRegion.height_ = mainScreenProperty.GetScreenRealHeight();
     }
     mainScreenSession->UpdateMirrorWidth(mirrorRegion.width_);
-    mainScreenSession->UpdateMirrorHeight(mirrorRegion.height_);
+    mainScreenSession->UpdateMirrorHeight(mainScreenProperty.GetScreenRealHeight());
+    secondarySession->UpdateMirrorWidth(mirrorRegion.width_);
+    secondarySession->UpdateMirrorHeight(mirrorRegion.height_);
     secondarySession->SetMirrorScreenRegion(secondarySession->GetScreenId(), mirrorRegion);
     secondarySession->SetIsPhysicalMirrorSwitch(true);
     secondarySession->EnableMirrorScreenRegion();
