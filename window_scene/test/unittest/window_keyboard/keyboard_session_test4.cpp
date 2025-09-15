@@ -486,6 +486,7 @@ HWTEST_F(KeyboardSessionTest4, HandleActionUpdateKeyboardTouchHotArea, TestSize.
     keyboardTouchHotAreas.landscapePanelHotAreas_.push_back(rect);
     keyboardTouchHotAreas.portraitKeyboardHotAreas.push_back(rect);
     keyboardTouchHotAreas.portraitPanelHotAreas_.push_back(rect);
+    property->SetKeyboardTouchHotAreas(keyboardTouchHotAreas);
     SessionInfo info;
     info.abilityName_ = "keyboardPanelSession";
     info.bundleName_ = "keyboardPanelSession";
