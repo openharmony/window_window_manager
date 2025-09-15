@@ -881,7 +881,7 @@ napi_value JsScreenSessionManager::OnSetScreenOffDelayTime(napi_env env, const n
     napi_handle_scope scope = nullptr;
     auto status = napi_open_handle_scope(env, &scope);
     if ((status != napi_ok) || (scope == nullptr)) {
-        TLOGD(WmsLogTag::DMS, "[NAPI]napi_open_handle_scope fail");
+        TLOGW(WmsLogTag::DMS, "[NAPI]napi_open_handle_scope fail");
         return NapiGetUndefined(env);
     }
     napi_value argv[1] = {nullptr};
@@ -1132,7 +1132,7 @@ napi_value JsScreenSessionManager::OnSetCameraStatus(napi_env env, const napi_ca
     napi_handle_scope scope = nullptr;
     auto status = napi_open_handle_scope(env, &scope);
     if ((status != napi_ok) || (scope == nullptr)) {
-        TLOGD(WmsLogTag::DMS, "[NAPI]napi_open_handle_scope fail");
+        TLOGW(WmsLogTag::DMS, "[NAPI]napi_open_handle_scope fail");
         return NapiGetUndefined(env);
     }
     napi_value argv[2] = {nullptr, nullptr};
@@ -1171,7 +1171,7 @@ napi_value JsScreenSessionManager::OnSetScreenOnDelayTime(napi_env env, const na
     napi_handle_scope scope = nullptr;
     auto status = napi_open_handle_scope(env, &scope);
     if ((status != napi_ok) || (scope == nullptr)) {
-        TLOGD(WmsLogTag::DMS, "[NAPI]napi_open_handle_scope fail");
+        TLOGW(WmsLogTag::DMS, "[NAPI]napi_open_handle_scope fail");
         return NapiGetUndefined(env);
     }
     napi_value argv[1] = {nullptr};
