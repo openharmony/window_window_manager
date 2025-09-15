@@ -120,13 +120,45 @@ ScreenId ParseScreenIdFromArgs(napi_env env, napi_callback_info info)
     return static_cast<ScreenId>(screenIdValue);
 }
 
+std::pair<ScreenId, bool> ParseScreenIdAndInnerProcessFromArgs(napi_env env, napi_callback_info info)
+{
+    size_t argc = 2;
+    napi_value argv[2] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    int64_t screenIdValue = static_cast<int64_t>(SCREEN_ID_INVALID);
+    bool isInnerProcess = false;
+    if (argc != 2) {
+        TLOGW(WmsLogTag::DEFAULT, "Argc is invalid: %{public}zu", argc);
+        return std::make_pair(SCREEN_ID_INVALID, isInnerProcess);
+    }
+
+    if (!ConvertFromJsValue(env, argv[0], screenIdValue)) {
+        TLOGW(WmsLogTag::DEFAULT, "Failed to convert parameter to screenId");
+        return std::make_pair(SCREEN_ID_INVALID, isInnerProcess);
+    }
+
+    if (screenIdValue == static_cast<int64_t>(SCREEN_ID_INVALID)) {
+        TLOGW(WmsLogTag::DEFAULT, "Invalid screenId");
+        return std::make_pair(SCREEN_ID_INVALID, isInnerProcess);
+    }
+
+    if (!ConvertFromJsValue(env, argv[1], isInnerProcess)) {
+        TLOGW(WmsLogTag::DEFAULT, "Failed to convert parameter to isInnerProcess");
+        return std::make_pair(SCREEN_ID_INVALID, isInnerProcess);
+    }
+    TLOGW(WmsLogTag::DEFAULT, "screenId: %{public}ld, isInnerProcess: %{public}d", screenIdValue, isInnerProcess);
+    return std::make_pair(static_cast<ScreenId>(screenIdValue), isInnerProcess);
+}
+
 napi_value JsTransactionManager::OnOpenSyncTransaction(napi_env env, napi_callback_info info)
 {
-    ScreenId screenId = ParseScreenIdFromArgs(env, info);
-    auto task = [screenId] {
+    std::pair<ScreenId, bool> res = ParseScreenIdAndInnerProcessFromArgs(env, info);
+    ScreenId screenId = res.first;
+    bool isInnerProcess = res.second;
+    auto task = [screenId, isInnerProcess] {
         auto rsUIContext = ScreenSessionManagerClient::GetInstance().GetRSUIContext(screenId);
         RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
-        RSSyncTransactionAdapter::OpenSyncTransaction(rsUIContext);
+        RSSyncTransactionAdapter::OpenSyncTransaction(rsUIContext, isInnerProcess);
     };
     auto handler = SceneSessionManager::GetInstance().GetTaskScheduler();
     if (handler) {
