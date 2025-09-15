@@ -115,7 +115,7 @@ void ScreenCutoutController::CheckBoundaryRects(std::vector<DMRect>& boundaryRec
             (static_cast<int32_t>(boundaryRect.width_) + boundaryRect.posX_ > static_cast<int32_t>(screenWidth)) ||
             (static_cast<int32_t>(boundaryRect.height_) + boundaryRect.posY_ > static_cast<int32_t>(screenHeight)) ||
             (boundaryRect.width_ > screenWidth) || (boundaryRect.height_ > screenHeight) ||
-            boundaryRect.IsUninitializedRect()) {
+            boundaryRects.IsUninitializedRect()) {
                 TLOGE(WmsLogTag::DMS, "boundary is invalid");
                 iter = boundaryRect.erase(iter);
         } else {
