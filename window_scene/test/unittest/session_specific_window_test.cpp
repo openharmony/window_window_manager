@@ -183,11 +183,9 @@ HWTEST_F(SessionSpecificWindowTest, ClearSpecificSessionCbMap01, TestSize.Level1
     info.bundleName_ = "ClearSpecificSessionCbMap01";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sptr<Session> session = sptr<Session>::MakeSptr(info);
-    auto result = false;
     sceneSession->clearCallbackMapFunc_ = nullptr;
     sceneSession->ClearSpecificSessionCbMap();
     usleep(WAIT_SYNC_IN_NS);
-    ASSERT_EQ(result, false);
     ASSERT_NE(sceneSession, nullptr);
 }
 

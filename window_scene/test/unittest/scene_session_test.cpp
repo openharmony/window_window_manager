@@ -201,9 +201,6 @@ HWTEST_F(SceneSessionTest, SetZOrder01, TestSize.Level1)
     sceneSession->SetZOrder(zOrder);
     usleep(WAIT_ASYNC_US);
     ASSERT_EQ(zOrder, sceneSession->zOrder_);
-    sceneSession->SetZOrder(zOrder);
-    usleep(WAIT_ASYNC_US);
-    ASSERT_EQ(zOrder, sceneSession->zOrder_);
 }
 
 /**
@@ -1173,9 +1170,7 @@ HWTEST_F(SceneSessionTest, GetCutoutAvoidArea, TestSize.Level1)
     EXPECT_NE(sceneSession, nullptr);
     WSRect overlapRect = { 0, 0, 0, 0 };
     AvoidArea avoidArea;
-    int ret = 1;
     sceneSession->GetCutoutAvoidArea(overlapRect, avoidArea);
-    ASSERT_EQ(ret, 1);
 }
 
 /**
@@ -1273,9 +1268,8 @@ HWTEST_F(SceneSessionTest, OnShowWhenLocked, TestSize.Level1)
     sptr<SceneSession> sceneSession;
     sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
     EXPECT_NE(sceneSession, nullptr);
-    int ret = 0;
-    sceneSession->OnShowWhenLocked(false);
-    ASSERT_EQ(ret, 0);
+    auto res = sceneSession->OnShowWhenLocked(false);
+    ASSERT_EQ(res, WSError::WS_OK);
 }
 
 /**
@@ -1492,7 +1486,6 @@ HWTEST_F(SceneSessionTest, CalculateAvoidAreaRect, TestSize.Level1)
     sptr<SceneSession> sceneSession;
     sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
     EXPECT_NE(sceneSession, nullptr);
-    int ret = 0;
     WSRect overlapRect = { 0, 0, 0, 0 };
     WSRect avoidRect = { 0, 0, 0, 0 };
     AvoidArea avoidArea;
@@ -1500,7 +1493,6 @@ HWTEST_F(SceneSessionTest, CalculateAvoidAreaRect, TestSize.Level1)
     WSRect overlapRect_ = { 1, 1, 1, 1 };
     WSRect avoidRect_ = { 1, 1, 1, 1 };
     sceneSession->CalculateAvoidAreaRect(overlapRect_, avoidRect_, avoidArea);
-    ASSERT_EQ(ret, 0);
 }
 
 /**
@@ -1590,7 +1582,6 @@ HWTEST_F(SceneSessionTest, UpdateCameraWindowStatus, TestSize.Level1)
     sptr<SystemSession> sysSession;
     sysSession = sptr<SystemSession>::MakeSptr(info, specificCallback_);
     EXPECT_NE(sysSession, nullptr);
-    int ret = 1;
     specificCallback_->onCameraFloatSessionChange_ = [](uint32_t accessTokenId, bool isShowing) {};
     specificCallback_->onCameraSessionChange_ = [](uint32_t accessTokenId, bool isShowing) {};
 
@@ -1611,7 +1602,6 @@ HWTEST_F(SceneSessionTest, UpdateCameraWindowStatus, TestSize.Level1)
     sysSession->SetPiPTemplateInfo(pipType);
     sysSession->property_ = property;
     sysSession->UpdateCameraWindowStatus(false);
-    ASSERT_EQ(ret, 1);
 }
 
 /**
@@ -1664,7 +1654,6 @@ HWTEST_F(SceneSessionTest, NotifyPropertyWhenConnect, TestSize.Level1)
     sptr<SceneSession> sceneSession;
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    int ret = 1;
     std::string key = info.bundleName_ + info.moduleName_ + info.abilityName_;
     sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
     sceneSession->NotifyPropertyWhenConnect();
@@ -1672,7 +1661,6 @@ HWTEST_F(SceneSessionTest, NotifyPropertyWhenConnect, TestSize.Level1)
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     sceneSession->property_ = property;
     sceneSession->NotifyPropertyWhenConnect();
-    ASSERT_EQ(ret, 1);
 }
 
 /**
