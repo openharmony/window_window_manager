@@ -1013,24 +1013,27 @@ HWTEST_F(WindowSceneSessionImplTest5, MobileAppInPadLayoutFullScreenChange, Test
     window->hostSession_ = session;
     window->property_->SetPersistentId(1);
     window->state_ = WindowState::STATE_CREATED;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
 
     window->property_->SetMobileAppInPadLayoutFullScreen(true);
-    window->property_->SetWidnowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     bool statusBarEnable = true;
     bool navigationEnable = true;
     window->enableImmersiveMode_ = true;
     window->MobileAppInPadLayoutFullScreenChange(statusBarEnable, navigationEnable);
     EXPECT_EQ(false, window->enableImmersiveMode_);
-    bool statusBarEnable = false;
-    bool navigationEnable = false;
+    statusBarEnable = false;
+    navigationEnable = false;
     window->enableImmersiveMode_ = false;
     window->MobileAppInPadLayoutFullScreenChange(statusBarEnable, navigationEnable);
     EXPECT_EQ(true, window->enableImmersiveMode_);
-    bool statusBarEnable = false;
-    bool navigationEnable = true;
+    statusBarEnable = false;
+    navigationEnable = true;
     window->MobileAppInPadLayoutFullScreenChange(statusBarEnable, navigationEnable);
-    bool statusBarEnable = true;
-    bool navigationEnable = false;
+    statusBarEnable = true;
+    navigationEnable = false;
     window->MobileAppInPadLayoutFullScreenChange(statusBarEnable, navigationEnable);
 }
 
