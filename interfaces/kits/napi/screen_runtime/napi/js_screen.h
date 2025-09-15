@@ -37,6 +37,7 @@ public:
     static napi_value SetScreenActiveMode(napi_env env, napi_callback_info info);
     static napi_value SetOrientation(napi_env env, napi_callback_info info);
     static napi_value SetDensityDpi(napi_env env, napi_callback_info info);
+    sptr<Screen> GetScreen() const { return screen_; }
 
 private:
     sptr<Screen> screen_ = nullptr;

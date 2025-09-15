@@ -18,6 +18,7 @@
 #include <hitrace_meter.h>
 
 #include "ani.h"
+#include "screen.h"
 #include "singleton_container.h"
 
 namespace OHOS {
@@ -33,6 +34,18 @@ static ani_status GetAniString(ani_env* env, const std::string& str, ani_string*
 
 static ani_status CallAniFunctionVoid(ani_env *env, const char* ns,
     const char* fn, const char* signature, ...);
+
+static ani_status ConvertScreen(ani_env *env, sptr<Screen> screen, ani_object screenAni);
+
+static void ConvertScreenMode(ani_env* env, sptr<SupportedScreenModes> mode, ani_object obj);
+
+static ani_status ConvertScreens(ani_env *env, std::vector<sptr<Screen>> screen, ani_object& screensAni);
+
+static ani_object NewNativeObject(ani_env* env, const std::string& objName);
+
+static ani_array_ref NewNativeArray(ani_env* env, const std::string& objName, uint32_t size);
+
+static ani_enum_item CreateAniEnum(ani_env* env, const char* enum_descriptor, ani_size index);
 };
 }
 }
