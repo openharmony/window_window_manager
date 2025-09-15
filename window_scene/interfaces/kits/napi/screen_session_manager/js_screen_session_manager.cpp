@@ -879,7 +879,11 @@ napi_value JsScreenSessionManager::OnSetScreenOffDelayTime(napi_env env, const n
     TLOGD(WmsLogTag::DMS, "[NAPI]OnSetScreenOffDelayTime");
     size_t argc = 1;
     napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(env, &scope);
+    auto status = napi_open_handle_scope(env, &scope);
+    if ((status != napi_ok) || (scope == nullptr)) {
+        TLOGW(WmsLogTag::DMS, "[NAPI]napi_open_handle_scope fail");
+        return NapiGetUndefined(env);
+    }
     napi_value argv[1] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) { // 1: params num
@@ -1126,7 +1130,11 @@ napi_value JsScreenSessionManager::OnSetCameraStatus(napi_env env, const napi_ca
     TLOGD(WmsLogTag::DMS, "[NAPI]OnSetCameraStatus");
     size_t argc = 2;
     napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(env, &scope);
+    auto status = napi_open_handle_scope(env, &scope);
+    if ((status != napi_ok) || (scope == nullptr)) {
+        TLOGW(WmsLogTag::DMS, "[NAPI]napi_open_handle_scope fail");
+        return NapiGetUndefined(env);
+    }
     napi_value argv[2] = {nullptr, nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 2) { // 2: params num
@@ -1161,7 +1169,11 @@ napi_value JsScreenSessionManager::OnSetScreenOnDelayTime(napi_env env, const na
 {
     size_t argc = 1;
     napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(env, &scope);
+    auto status = napi_open_handle_scope(env, &scope);
+    if ((status != napi_ok) || (scope == nullptr)) {
+        TLOGW(WmsLogTag::DMS, "[NAPI]napi_open_handle_scope fail");
+        return NapiGetUndefined(env);
+    }
     napi_value argv[1] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) { // 1: params num
