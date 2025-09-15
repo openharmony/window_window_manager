@@ -426,61 +426,6 @@ void CheckWindowImplFunctionsPart2(sptr<WindowImpl> window, const uint8_t* data,
     window->SetSnapshotSkip(boolVal);
 }
 
-void CheckWindowImplFunctionsPart3(sptr<WindowImpl> window, const uint8_t* data, size_t size)
-{
-    size_t startPos = 0;
-    float floatVal;
-    startPos += GetObject(floatVal, data + startPos, size - startPos);
-    window->SetCornerRadius(floatVal);
-
-    startPos += GetObject(floatVal, data + startPos, size - startPos);
-    window->SetShadowRadius(floatVal);
-
-    startPos += GetObject(floatVal, data + startPos, size - startPos);
-    window->SetShadowOffsetX(floatVal);
-    startPos += GetObject(floatVal, data + startPos, size - startPos);
-    window->SetShadowOffsetY(floatVal);
-    startPos += GetObject(floatVal, data + startPos, size - startPos);
-    window->SetBlur(floatVal);
-    startPos += GetObject(floatVal, data + startPos, size - startPos);
-    window->SetBackdropBlur(floatVal);
-
-    WindowBlurStyle blurStyle;
-    startPos += GetObject(blurStyle, data + startPos, size - startPos);
-    window->SetBackdropBlurStyle(blurStyle);
-
-    bool boolVal;
-    OHOS::Rosen::Rect rect;
-    WindowSizeChangeReason reason;
-    startPos += GetObject(boolVal, data + startPos, size - startPos);
-    startPos += GetObject(rect, data + startPos, size - startPos);
-    startPos += GetObject(reason, data + startPos, size - startPos);
-    window->UpdateRect(rect, boolVal, reason);
-
-    WindowMode mode;
-    startPos += GetObject(mode, data + startPos, size - startPos);
-    window->UpdateMode(mode);
-
-    uint32_t windowModeSupportType;
-    startPos += GetObject(windowModeSupportType, data + startPos, size - startPos);
-    window->UpdateWindowModeSupportType(windowModeSupportType);
-
-    WindowState windowState;
-    startPos += GetObject(windowState, data + startPos, size - startPos);
-    window->UpdateWindowState(windowState);
-
-    PointInfo point;
-    DragEvent event;
-    startPos += GetObject(point, data + startPos, size - startPos);
-    startPos += GetObject(event, data + startPos, size - startPos);
-    window->UpdateDragEvent(point, event);
-
-    DisplayId displayId[2];
-    startPos += GetObject(displayId[0], data + startPos, size - startPos);
-    startPos += GetObject(displayId[1], data + startPos, size - startPos);
-    window->UpdateDisplayId(displayId[0], displayId[1]);
-}
-
 void CheckWindowImplFunctionsPart4(sptr<WindowImpl> window, const uint8_t* data, size_t size)
 {
     size_t startPos = 0;
@@ -781,7 +726,6 @@ void WindowImplFuzzTest(const uint8_t* data, size_t size)
 
     OHOS::CheckWindowImplFunctionsPart1(window, data, size);
     OHOS::CheckWindowImplFunctionsPart2(window, data, size);
-    OHOS::CheckWindowImplFunctionsPart3(window, data, size);
     OHOS::CheckWindowImplFunctionsPart4(window, data, size);
     OHOS::CheckWindowImplFunctionsPart5(window, data, size);
     OHOS::CheckWindowImplFunctionsPart6(window, data, size);

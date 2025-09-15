@@ -72,6 +72,7 @@ public:
      * Window Pattern
      */
     static napi_value SetImageForRecent(napi_env env, napi_callback_info info);
+    std::weak_ptr<WindowScene> GetWindowScene() { return windowScene_; }
 
 private:
     napi_value OnSetUIContent(napi_env env, napi_callback_info info);

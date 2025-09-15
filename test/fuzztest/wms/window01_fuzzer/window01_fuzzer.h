@@ -13,27 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_WINDOW_SCENE_FFRT_QUEUE_HELPER_H
-#define OHOS_ROSEN_WINDOW_SCENE_FFRT_QUEUE_HELPER_H
+#ifndef TEST_FUZZTEST_WINDOW_FUZZER_H
+#define TEST_FUZZTEST_WINDOW_FUZZER_H
 
-#include "timeout_future.h"
+#define FUZZ_PROJECT_NAME "window01_fuzzer"
 
-namespace ffrt {
-class queue;
-} // namespace ffrt
-
-namespace OHOS::Rosen {
-class FfrtQueueHelper {
-public:
-    FfrtQueueHelper();
-    ~FfrtQueueHelper();
-    bool SubmitTaskAndWait(std::function<void()>&& task, uint64_t timeout);
-    void SubmitTask(std::function<void()>&& task);
-    void SubmitTaskToHead(std::function<void()>&& task);
-
-private:
-    std::unique_ptr<ffrt::queue> ffrtQueue_;
-};
-} // namespace OHOS::Rosen
-
-#endif // OHOS_ROSEN_WINDOW_SCENE_FFRT_QUEUE_HELPER_H
+#endif
