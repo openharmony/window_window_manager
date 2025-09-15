@@ -724,6 +724,26 @@ void ScreenSession::UpdatePropertyByResolution(uint32_t width, uint32_t height)
     property_.SetBounds(screenBounds);
 }
 
+void ScreenSession::UpdatePropertyByResolution(const DMRect& rect)
+{
+    auto screenBounds = property_.GetBounds();
+    screenBounds.rect_.left_ = rect.posX_;
+    screenBounds.rect_.top_ = rect.posY_;
+    screenBounds.rect_.width_ = rect.width_;
+    screenBounds.rect_.height_ = rect.height_;
+    property_.SetBounds(screenBounds);
+    // Determine whether the touch is in a valid area.
+    property_.SetValidWidth(rect.width_);
+    property_.SetValidHeight(rect.height_);
+    property_.SetInputOffset(rect.posX_, rect.posY_);
+    // It is used to calculate the original screen size
+    property_.SetScreenAreaWidth(rect.width_);
+    property_.SetScreenAreaHeight(rect.height_);
+    // It is used to calculate the effective area of the inner screen for cursor
+    property_.SetMirrorWidth(rect.width_);
+    property_.SetMirrorHeight(rect.height_);
+}
+
 void ScreenSession::UpdatePropertyByFakeBounds(uint32_t width, uint32_t height)
 {
     auto screenFakeBounds = property_.GetFakeBounds();
