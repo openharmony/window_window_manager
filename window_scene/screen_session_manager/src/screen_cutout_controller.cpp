@@ -70,7 +70,7 @@ void ScreenCutoutController::GetCutoutArea(DisplayId displayId, uint32_t width, 
     } else {
         boundaryRects = ScreenSceneConfig::GetCutoutBoundaryRect(displayId);
     }
-
+    CheckBoundaryRects(boundaryRects, width, height);
     if (!boundaryRects.empty()) {
         CalcCutoutRects(boundaryRects, width, height, rotation, cutoutArea);
     }
@@ -102,6 +102,24 @@ void ScreenCutoutController::CalcCutoutRects(const std::vector<DMRect>& boundary
             }
             default:
                 break;
+        }
+    }
+}
+
+void ScreenCutoutController::CheckBoundaryRects(std::vector<DMRect>& boundaryRects, uint32_t screenWidth,
+                                                uint32_t screenHeight) const
+{
+    for (auto iter = boundaryRects.begin(); iter != boundaryRects.end();) {
+        DMRect boundaryRect = *iter;
+        if ((boundaryRect.posX_ < 0) || (boundaryRect.posY_ < 0) ||
+            (static_cast<int32_t>(boundaryRect.width_) + boundaryRect.posX_ > static_cast<int32_t>(screenWidth)) ||
+            (static_cast<int32_t>(boundaryRect.height_) + boundaryRect.posY_ > static_cast<int32_t>(screenHeight)) ||
+            (boundaryRect.width_ > screenWidth) || (boundaryRect.height_ > screenHeight) ||
+            boundaryRect.IsUninitializedRect()) {
+                TLOGE(WmsLogTag::DMS, "boundary is invalid");
+                iter = boundaryRects.erase(iter);
+        } else {
+            iter++;
         }
     }
 }
