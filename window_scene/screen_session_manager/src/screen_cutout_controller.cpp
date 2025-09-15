@@ -109,7 +109,7 @@ void ScreenCutoutController::CalcCutoutRects(const std::vector<DMRect>& boundary
 void ScreenCutoutController::CheckBoundaryRects(std::vector<DMRect>& boundaryRects, uint32_t screenWidth,
                                                 uint32_t screenHeight) const
 {
-    for (auto iter = boundaryRects.begin(); iter != boundaryRects.end(); ) {
+    for (auto iter = boundaryRects.begin(); iter != boundaryRects.end();) {
         DMRect boundaryRect = *iter;
         if ((boundaryRect.posX_ < 0) || (boundaryRect.posY_ < 0) ||
             (static_cast<int32_t>(boundaryRect.width_) + boundaryRect.posX_ > static_cast<int32_t>(screenWidth)) ||
