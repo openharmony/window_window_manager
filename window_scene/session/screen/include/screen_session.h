@@ -209,6 +209,7 @@ public:
     void UpdateRefreshRate(uint32_t refreshRate);
     uint32_t GetRefreshRate();
     void UpdatePropertyByResolution(uint32_t width, uint32_t height);
+    void UpdatePropertyByResolution(const DMRect& rect);
     void UpdatePropertyByFakeBounds(uint32_t width, uint32_t height);
     void SetName(std::string name);
     void SetInnerName(std::string innerName);

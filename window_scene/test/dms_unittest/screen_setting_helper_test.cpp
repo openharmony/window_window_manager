@@ -953,6 +953,79 @@ namespace {
         screenSettingHelper.GetSettingDuringCallState(value);
         ASSERT_TRUE(value);
     }
+
+    /**
+     * @tc.name: RegisterSettingResolutionEffectObserver
+     * @tc.desc: RegisterSettingResolutionEffectObserver
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, RegisterSettingResolutionEffectObserver, TestSize.Level1)
+    {
+        bool flag = false;
+        auto func = [&flag] (const std::string&) {
+            TLOGI(WmsLogTag::DMS, "UT test");
+            flag = true;
+        };
+        ScreenSettingHelper::RegisterSettingResolutionEffectObserver(func);
+        ASSERT_NE(ScreenSettingHelper::resolutionEffectObserver_, nullptr);
+
+        g_errLog.clear();
+        LOG_SetCallback(MyLogCallback);
+        bool flag1 = false;
+        auto func1 = [&flag1] (const std::string&) {
+            TLOGI(WmsLogTag::DMS, "UT test");
+            flag1 = true;
+        };
+        ScreenSettingHelper::RegisterSettingResolutionEffectObserver(func1);
+        EXPECT_TRUE(g_errLog.find("setting observer is registered") != std::string::npos);
+        LOG_SetCallback(nullptr);
+        ScreenSettingHelper::resolutionEffectObserver_ = nullptr;
+    }
+
+    /**
+     * @tc.name: UnRegisterSettingResolutionEffectObserver
+     * @tc.desc: UnRegisterSettingResolutionEffectObserver
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, UnregisterSettingResolutionEffectObserver, TestSize.Level1)
+    {
+        ScreenSettingHelper::resolutionEffectObserver_ = new SettingObserver;
+        ScreenSettingHelper::UnregisterSettingResolutionEffectObserver();
+        ASSERT_EQ(ScreenSettingHelper::resolutionEffectObserver_, nullptr);
+
+        ScreenSettingHelper::resolutionEffectObserver_ = nullptr;
+        ScreenSettingHelper::UnregisterSettingResolutionEffectObserver();
+        ASSERT_EQ(ScreenSettingHelper::resolutionEffectObserver_, nullptr);
+    }
+
+    /**
+     * @tc.name: UnRegisterSettingResolutionEffectObserver
+     * @tc.desc: UnRegisterSettingResolutionEffectObserver
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, UnregisterSettingResolutionEffectObserver02, TestSize.Level1)
+    {
+        ScreenSettingHelper::resolutionEffectObserver_ = nullptr;
+        ScreenSettingHelper::UnregisterSettingResolutionEffectObserver();
+        ASSERT_EQ(ScreenSettingHelper::resolutionEffectObserver_, nullptr);
+    }
+
+    /**
+     * @tc.name: GetResolutionEffectTest
+     * @tc.desc: Test GetResolutionEffectTest func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetResolutionEffectTestTest, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        bool value = false;
+
+        if (screenSettingHelper.GetResolutionEffect(value)) {
+            ASSERT_TRUE(value);
+        } else {
+            ASSERT_FALSE(value);
+        }
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

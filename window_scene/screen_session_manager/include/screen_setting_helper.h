@@ -67,7 +67,10 @@ public:
     static bool GetSettingExtendScreenDpi(float& coef, const std::string& key = SETTING_EXTEND_DPI_KEY);
     static bool ConvertStrToUint64(const std::string& str, uint64_t& num);
     static bool ConvertStrToInt32(const std::string& str, int32_t& num);
-
+    static bool GetResolutionEffect(bool& enable,
+        const std::string& key = SETTING_RESOLUTION_EFFECT_KEY);
+    static void RegisterSettingResolutionEffectObserver(SettingObserver::UpdateFunc func);
+    static void UnregisterSettingResolutionEffectObserver();
 private:
     static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};
     static const constexpr char* SETTING_CAST_KEY {"huaweicast.data.privacy_projection_state"};
@@ -76,6 +79,7 @@ private:
     static const constexpr char* SETTING_SCREEN_MODE_KEY {"user_set_screen_mode_edid"};
     static const constexpr char* SETTING_EXTEND_DPI_KEY {"user_set_dpi_extend"};
     static const constexpr char* SETTING_DURING_CALL_KEY {"during_call_state"};
+    static const constexpr char* SETTING_RESOLUTION_EFFECT_KEY {"user_set_resolution_effect_select"};
     static const constexpr uint32_t BASE_TEN = 10;
     static sptr<SettingObserver> dpiObserver_;
     static sptr<SettingObserver> castObserver_;
@@ -83,6 +87,7 @@ private:
     static sptr<SettingObserver> wireCastObserver_;
     static sptr<SettingObserver> extendScreenDpiObserver_;
     static sptr<SettingObserver> duringCallStateObserver_;
+    static sptr<SettingObserver> resolutionEffectObserver_;
 };
 } // namespace Rosen
 } // namespace OHOS

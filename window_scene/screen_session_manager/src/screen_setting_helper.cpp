@@ -33,6 +33,7 @@ sptr<SettingObserver> ScreenSettingHelper::rotationObserver_;
 sptr<SettingObserver> ScreenSettingHelper::wireCastObserver_;
 sptr<SettingObserver> ScreenSettingHelper::extendScreenDpiObserver_;
 sptr<SettingObserver> ScreenSettingHelper::duringCallStateObserver_;
+sptr<SettingObserver> ScreenSettingHelper::resolutionEffectObserver_;
 constexpr int32_t PARAM_NUM_TEN = 10;
 constexpr uint32_t EXPECT_SCREEN_MODE_SIZE = 2;
 constexpr uint32_t EXPECT_RELATIVE_POSITION_SIZE = 3;
@@ -56,6 +57,7 @@ constexpr float EXTEND_SCREEN_DPI_ZERO_PARAMETER = 0.85f;
 constexpr float EXTEND_SCREEN_DPI_ONE_PARAMETER = 1.00f;
 const std::string SCREEN_SHAPE = system::GetParameter("const.window.screen_shape", "0:0");
 constexpr int32_t INDEX_EXTEND_SCREEN_DPI_POSITION = -1;
+constexpr int32_t ENABLE_RESOLUTION_EFFECT = 1;
 
 void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc func)
 {
@@ -675,6 +677,52 @@ bool ScreenSettingHelper::SetSettingDuringCallState(const std::string& key, bool
         return false;
     }
     TLOGI(WmsLogTag::DMS, "put during call state is %{public}d", value);
+    return true;
+}
+
+void ScreenSettingHelper::RegisterSettingResolutionEffectObserver(SettingObserver::UpdateFunc func)
+{
+    if (resolutionEffectObserver_) {
+        TLOGE(WmsLogTag::DMS, "setting observer is registered");
+        return;
+    }
+    SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    resolutionEffectObserver_ = provider.CreateObserver(SETTING_RESOLUTION_EFFECT_KEY, func);
+    if (resolutionEffectObserver_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "create observer failed");
+        return;
+    }
+    ErrCode ret = provider.RegisterObserver(resolutionEffectObserver_);
+    if (ret != ERR_OK) {
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+        resolutionEffectObserver_ = nullptr;
+    }
+}
+
+void ScreenSettingHelper::UnregisterSettingResolutionEffectObserver()
+{
+    if (resolutionEffectObserver_ == nullptr) {
+        TLOGD(WmsLogTag::DMS, "setting observer is nullptr");
+        return;
+    }
+    SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = provider.UnregisterObserver(resolutionEffectObserver_);
+    if (ret != ERR_OK) {
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+    }
+    resolutionEffectObserver_ = nullptr;
+}
+
+bool ScreenSettingHelper::GetResolutionEffect(bool& enable, const std::string& key)
+{
+    int value = 0;
+    SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = settingProvider.GetIntValue(key, value);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+        return false;
+    }
+    enable = (value == ENABLE_RESOLUTION_EFFECT);
     return true;
 }
 } // namespace Rosen

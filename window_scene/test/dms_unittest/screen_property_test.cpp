@@ -970,6 +970,25 @@ HWTEST_F(ScreenPropertyTest, SetPhysicalTouchBounds, TestSize.Level1)
     EXPECT_EQ(property->physicalTouchBounds_.rect_.width_, 100);
     EXPECT_EQ(property->physicalTouchBounds_.rect_.height_, 200);
 }
+
+/**
+ * @tc.name: SetInputOffset
+ * @tc.desc: SetInputOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, SetInputOffset, TestSize.Level1)
+{
+    std::shared_ptr<ScreenProperty> property = std::make_shared<ScreenProperty>();
+    property->SetInputOffset(0, 0);
+    EXPECT_EQ(property->GetInputOffsetX(), 0);
+    EXPECT_EQ(property->GetInputOffsetY(), 0);
+    property->SetInputOffset(-1, -2);
+    EXPECT_EQ(property->GetInputOffsetX(), -1);
+    EXPECT_EQ(property->GetInputOffsetY(), -2);
+    property->SetInputOffset(1, 2);
+    EXPECT_EQ(property->GetInputOffsetX(), 1);
+    EXPECT_EQ(property->GetInputOffsetY(), 2);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
