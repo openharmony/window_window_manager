@@ -499,6 +499,21 @@ HWTEST_F(KeyboardSessionTest4, HandleActionUpdateKeyboardTouchHotArea, TestSize.
     keyboardSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     ret = keyboardSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ret = keyboardSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    bool updated = false;
+    specificCb->onWindowInfoUpdate_ = [&updated](int32_t persistentId, WindowUpdateType type) {
+        updated = true;
+    };
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCallback =
+        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
+    sptr<KeyboardSession> keyboardSession1 = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCallback);
+    keyboardSession1->BindKeyboardPanelSession(keyboardPanelSession);
+    keyboardSession1->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    ret = keyboardSession1->HandleActionUpdateTouchHotArea(property, action);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    EXPECT_EQ(updated, true);
 }
 } // namespace
 } // namespace Rosen

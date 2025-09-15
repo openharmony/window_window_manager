@@ -838,7 +838,7 @@ public:
     bool isSubWindowResizingOrMoving_ = false;
     virtual void CalculateOccupiedAreaAfterUIRefresh() {}
     virtual WMError HandleActionUpdateKeyboardTouchHotArea(const sptr<WindowSessionProperty>& property,
-        WSPropertyChangeAction action) { return WMError::WM_OK;}
+        WSPropertyChangeAction action) { return WMError::WM_OK; }
 
     /*
      * Window Focus
