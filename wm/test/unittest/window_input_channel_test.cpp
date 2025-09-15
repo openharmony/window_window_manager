@@ -32,7 +32,6 @@ public:
     ~MockWindow() {};
     MOCK_METHOD(bool, IsAnco, (), (const, override));
     MOCK_METHOD(bool, OnPointDown, (int32_t eventId, int32_t posX, int32_t posY), (override));
-    MOCK_METHOD(bool, IsHitTitleBar, (std::shared_ptr<MMI::PointerEvent>& pointerEvent), (const, override));
 };
 
 using WindowMocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
@@ -143,7 +142,6 @@ HWTEST_F(WindowInputChannelTest, HandlePointEvent01, TestSize.Level1)
     sptr<WindowInputChannel> inputChannel = sptr<WindowInputChannel>::MakeSptr(window);
 
     EXPECT_CALL(*(window), IsAnco()).Times(1).WillOnce(Return(true));
-    EXPECT_CALL(*(window), IsHitTitleBar(pointerEvent)).Times(1).WillOnce(Return(true));
     EXPECT_CALL(*(window), OnPointDown(_, _, _)).Times(0);
     inputChannel->HandlePointerEvent(pointerEvent);
     testing::Mock::VerifyAndClearExpectations(window);

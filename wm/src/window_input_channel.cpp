@@ -147,7 +147,7 @@ void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& 
         return;
     }
 
-    if (window_->IsAnco() && !window_->IsHitTitleBar(pointerEvent)) {
+    if (window_->IsAnco()) {
         ProcAncoEvent(pointerEvent);
         pointerEvent->MarkProcessed();
         return;
