@@ -287,7 +287,11 @@ napi_value CreateJsScreenObject(napi_env env, sptr<Screen>& screen)
         objValue = jsScreenObj->GetNapiValue();
     }
     if (objValue == nullptr) {
-        napi_create_object(env, &objValue);
+        auto status = napi_create_object(env, &objValue);
+        if ((status != napi_ok) || (objValue == nullptr)) {
+            TLOGE(WmsLogTag::DMS, "failed to create js obj, error:%{public}d", status);
+            return NapiGetUndefined(env);
+        }
     }
     if (objValue == nullptr) {
         TLOGE(WmsLogTag::DMS, "Failed to convert prop to jsObject");
