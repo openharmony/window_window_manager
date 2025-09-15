@@ -12,13 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef DISPLAY_MANAGER_ANI_ERROR_UTILS_H
-#define DISPLAY_MANAGER_ANI_ERROR_UTILS_H
-
+ 
+#ifndef SCREENSHOT_ANI_ERROR_UTILS_H
+#define SCREENSHOT_ANI_ERROR_UTILS_H
+ 
 #include "ani.h"
 #include "dm_common.h"
-
+#include "wm_common.h"
+ 
 namespace OHOS::Rosen {
 class AniErrUtils {
 public:
@@ -27,11 +28,11 @@ public:
     static ani_status ThrowBusinessError(ani_env* env, DMError error, std::string message);
     static ani_status ThrowBusinessError(ani_env* env, DmErrorCode error, std::string message);
     static ani_status CreateBusinessError(ani_env* env, int32_t error, std::string message, ani_object* err);
-
+ 
 private:
     static std::string GetErrorMsg(const DMError& errorCode);
     static std::string GetErrorMsg(const DmErrorCode& errorCode);
 };
 } // namespace OHOS::Rosen
-
+ 
 #endif //WINDOW_WINDOW_MANAGER_ANI_ERROR_UTILS_H

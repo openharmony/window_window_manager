@@ -12,14 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
 #include "ani_err_utils.h"
-
-#include <map>
-
-#include "screen_ani_utils.h"
+#include "screenshot_ani_utils.h"
 #include "window_manager_hilog.h"
-
+ 
+#include <map>
+ 
 namespace OHOS::Rosen {
 constexpr const char* DM_ERROR_MSG_OK = "ok";
 constexpr const char* DM_ERROR_MSG_INIT_DMS_PROXY_LOCKED = "init dms proxy locked";
@@ -38,7 +37,7 @@ constexpr const char* DM_ERROR_MSG_INVALID_PERMISSION = "invalid permission";
 constexpr const char* DM_ERROR_MSG_NOT_SYSTEM_APP = "not system app";
 constexpr const char* DM_ERROR_MSG_DEVICE_NOT_SUPPORT = "device not support";
 constexpr const char* DM_ERROR_MSG_UNKNOWN = "unknown";
-
+ 
 static std::map<DMError, const char*> DM_ERROR_TO_ERROR_MSG_MAP {
     {DMError::DM_OK,                                    DM_ERROR_MSG_OK                           },
     {DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED,           DM_ERROR_MSG_INIT_DMS_PROXY_LOCKED        },
@@ -58,7 +57,7 @@ static std::map<DMError, const char*> DM_ERROR_TO_ERROR_MSG_MAP {
     {DMError::DM_ERROR_DEVICE_NOT_SUPPORT,              DM_ERROR_MSG_DEVICE_NOT_SUPPORT           },
     {DMError::DM_ERROR_UNKNOWN,                         DM_ERROR_MSG_UNKNOWN                      },
 };
-
+ 
 constexpr const char* DM_ERROR_CODE_MSG_OK = "ok";
 constexpr const char* DM_ERROR_CODE_MSG_NO_PERMISSION = "no permission";
 constexpr const char* DM_ERROR_CODE_MSG_NOT_SYSTEM_APP = "not system app";
@@ -67,7 +66,7 @@ constexpr const char* DM_ERROR_CODE_MSG_DEVICE_NOT_SUPPORT = "device not support
 constexpr const char* DM_ERROR_CODE_MSG_INVALID_SCREEN = "invalid screen";
 constexpr const char* DM_ERROR_CODE_MSG_INVALID_CALLING = "invalid calling";
 constexpr const char* DM_ERROR_CODE_MSG_SYSTEM_INNORMAL = "system innormal";
-
+ 
 static std::map<DmErrorCode, const char*> DM_ERROR_CODE_TO_ERROR_MSG_MAP {
     {DmErrorCode::DM_OK,                              DM_ERROR_CODE_MSG_OK                 },
     {DmErrorCode::DM_ERROR_NO_PERMISSION,             DM_ERROR_CODE_MSG_NO_PERMISSION      },
@@ -78,19 +77,19 @@ static std::map<DmErrorCode, const char*> DM_ERROR_CODE_TO_ERROR_MSG_MAP {
     {DmErrorCode::DM_ERROR_INVALID_CALLING,           DM_ERROR_CODE_MSG_INVALID_CALLING    },
     {DmErrorCode::DM_ERROR_SYSTEM_INNORMAL,           DM_ERROR_CODE_MSG_SYSTEM_INNORMAL    },
 };
-
+ 
 std::string AniErrUtils::GetErrorMsg(const DMError& errorCode)
 {
     return DM_ERROR_TO_ERROR_MSG_MAP.find(errorCode) != DM_ERROR_TO_ERROR_MSG_MAP.end() ?
         DM_ERROR_TO_ERROR_MSG_MAP.at(errorCode) : "";
 }
-
+ 
 std::string AniErrUtils::GetErrorMsg(const DmErrorCode& errorCode)
 {
     return DM_ERROR_CODE_TO_ERROR_MSG_MAP.find(errorCode) != DM_ERROR_CODE_TO_ERROR_MSG_MAP.end() ?
         DM_ERROR_CODE_TO_ERROR_MSG_MAP.at(errorCode) : "";
 }
-
+ 
 ani_status AniErrUtils::ThrowBusinessError(ani_env* env, DMError error, std::string message)
 {
     ani_object aniError;
@@ -102,7 +101,7 @@ ani_status AniErrUtils::ThrowBusinessError(ani_env* env, DMError error, std::str
     }
     return ANI_OK;
 }
-
+ 
 ani_status AniErrUtils::ThrowBusinessError(ani_env* env, DmErrorCode error, std::string message)
 {
     ani_object aniError;
@@ -114,7 +113,7 @@ ani_status AniErrUtils::ThrowBusinessError(ani_env* env, DmErrorCode error, std:
     }
     return ANI_OK;
 }
-
+ 
 ani_status AniErrUtils::CreateBusinessError(ani_env* env, int32_t error, std::string message, ani_object* err)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] in");
@@ -131,8 +130,8 @@ ani_status AniErrUtils::CreateBusinessError(ani_env* env, int32_t error, std::st
         return status;
     }
     ani_string aniMsg;
-    ScreenAniUtils::GetAniString(env, message, &aniMsg);
-    status = env->Object_New(aniClass, aniCtor, err, aniMsg, ScreenAniUtils::CreateAniUndefined(env));
+    ScreenshotAniUtils::GetAniString(env, message, &aniMsg);
+    status = env->Object_New(aniClass, aniCtor, err, aniMsg, ScreenshotAniUtils::CreateAniUndefined(env));
     if (status != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] fail to new err, status:%{public}d", static_cast<int32_t>(status));
         return status;
