@@ -672,6 +672,60 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback02, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: OnMoveDragCallback03
+ * @tc.desc: OnMoveDragCallback for DragResizeInCompatibleMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, OnMoveDragCallback03, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "DragResizeInCompatibleMode";
+    info.bundleName_ = "DragResizeInCompatibleMode";
+    info.isSystem_ = false;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(nullptr, session);
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
+    EXPECT_NE(nullptr, session->moveDragController_);
+    SizeChangeReason reason = { SizeChangeReason::DRAG };
+    WSRect windowRect = { 1, 10, 3, 4 };
+    WSRect systemBarRect = { 1, 2, 10, 11 };
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    EXPECT_NE(compatibleModeProperty, nullptr);
+    session->isVisible_ = true;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    specificCallback->onGetSceneSessionVectorByTypeAndDisplayId_ = nullptr;
+    session->specificCallback_ = specificCallback;
+    GetSceneSessionVectorByTypeAndDisplayIdCallback func =
+        [session](WindowType type, uint64_t displayId)->std::vector<sptr<SceneSession>>
+    {
+        std::vector<sptr<SceneSession>> vSession;
+        vSession.push_back(session);
+        return vSession;
+    };
+    specificCallback->onGetSceneSessionVectorByTypeAndDisplayId_ = func;
+    compatibleModeProperty->SetIsAdaptToDragScale(true);
+    session->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    session->moveDragController_->SetTargetRect(windowRect);
+    session->GetLayoutController()->SetSessionRect(systemBarRect);
+    session->OnMoveDragCallback(reason);
+    WSRect newRect = session->moveDragController_->GetTargetRect(
+        MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
+    ASSERT_EQ(4, windowRect.height_);
+    ASSERT_EQ(10, windowRect.posY_);
+
+    compatibleModeProperty->SetIsAdaptToDragScale(false);
+    session->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    session->moveDragController_->SetTargetRect(windowRect);
+    session->GetLayoutController()->SetSessionRect(systemBarRect);
+    session->OnMoveDragCallback(reason);
+    newRect = session->moveDragController_->GetTargetRect(
+        MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
+    ASSERT_NE(4, newRect.height_);
+    ASSERT_NE(10, newRect.posY_);
+}
+
+/**
  * @tc.name: DragResizeWhenEndFilter
  * @tc.desc: DragResizeWhenEndFilter function01
  * @tc.type: FUNC
