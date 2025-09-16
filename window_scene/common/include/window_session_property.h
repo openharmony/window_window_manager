@@ -265,6 +265,8 @@ public:
     bool GetPcAppInpadSpecificSystemBarInvisible() const;
     void SetPcAppInpadOrientationLandscape(bool isPcAppInpadOrientationLandscape);
     bool GetPcAppInpadOrientationLandscape() const;
+    void SetMobileAppInPadLayoutFullScreen(bool isMobileAppInPadLayoutFullScreen);
+    bool GetMobileAppInPadLayoutFullScreen() const;
 
     /*
      * Window Lifecycle
@@ -602,6 +604,7 @@ private:
     bool isPcAppInpadCompatibleMode_ = false;
     bool isPcAppInpadSpecificSystemBarInvisible_ = false;
     bool isPcAppInpadOrientationLandscape_ = false;
+    bool isMobileAppInPadLayoutFullScreen_ = false;
 
     sptr<CompatibleModeProperty> compatibleModeProperty_ = nullptr;
 

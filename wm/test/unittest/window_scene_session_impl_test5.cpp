@@ -996,6 +996,48 @@ HWTEST_F(WindowSceneSessionImplTest5, UpdateSystemBarProperties02, TestSize.Leve
 }
 
 /**
+ * @tc.name: MobileAppInPadLayoutFullScreenChange
+ * @tc.desc: MobileAppInPadLayoutFullScreenChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, MobileAppInPadLayoutFullScreenChange, TestSize.Level0)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("MobileAppInPadLayoutFullScreenChange");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_CREATED;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+
+    window->property_->SetMobileAppInPadLayoutFullScreen(true);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    bool statusBarEnable = true;
+    bool navigationEnable = true;
+    window->enableImmersiveMode_ = true;
+    window->MobileAppInPadLayoutFullScreenChange(statusBarEnable, navigationEnable);
+    EXPECT_EQ(false, window->enableImmersiveMode_);
+    statusBarEnable = false;
+    navigationEnable = false;
+    window->enableImmersiveMode_ = false;
+    window->MobileAppInPadLayoutFullScreenChange(statusBarEnable, navigationEnable);
+    EXPECT_EQ(true, window->enableImmersiveMode_);
+    statusBarEnable = false;
+    navigationEnable = true;
+    window->MobileAppInPadLayoutFullScreenChange(statusBarEnable, navigationEnable);
+    statusBarEnable = true;
+    navigationEnable = false;
+    window->MobileAppInPadLayoutFullScreenChange(statusBarEnable, navigationEnable);
+}
+
+/**
  * @tc.name: NotifyAfterDidForeground
  * @tc.desc: NotifyAfterDidForeground
  * @tc.type: FUNC

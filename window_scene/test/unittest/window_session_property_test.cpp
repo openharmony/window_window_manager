@@ -1627,6 +1627,20 @@ HWTEST_F(WindowSessionPropertyTest, SetPcAppInpadOrientationLandscape, TestSize.
 }
 
 /**
+ * @tc.name: SetMobileAppInPadLayoutFullScreen
+ * @tc.desc: SetMobileAppInPadLayoutFullScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetMobileAppInPadLayoutFullScreen, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    bool isMobileAppInPadLayoutFullScreen = true;
+    property->SetMobileAppInPadLayoutFullScreen(isMobileAppInPadLayoutFullScreen);
+    auto result = property->GetMobileAppInPadLayoutFullScreen();
+    EXPECT_EQ(result, isMobileAppInPadLayoutFullScreen);
+}
+
+/**
  * @tc.name: UnmarshallingFbTemplateInfoTest
  * @tc.desc: UnmarshallingFbTemplateInfoTest
  * @tc.type: FUNC

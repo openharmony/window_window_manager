@@ -430,6 +430,7 @@ public:
     WSError SetPcAppInpadCompatibleMode(bool enabled);
     WSError SetPcAppInpadSpecificSystemBarInvisible(bool isPcAppInpadSpecificSystemBarInvisible);
     WSError SetPcAppInpadOrientationLandscape(bool isPcAppInpadOrientationLandscape);
+    WSError SetMobileAppInPadLayoutFullScreen(bool isMobileAppInPadLayoutFullScreen);
     bool NeedNotify() const;
     void SetNeedNotify(bool needNotify);
     WSError SetTouchable(bool touchable);

@@ -977,6 +977,19 @@ HWTEST_F(WindowSessionTest3, SetPcAppInpadOrientationLandscape, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetMobileAppInPadLayoutFullScreen
+ * @tc.desc: SetMobileAppInPadLayoutFullScreen Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetMobileAppInPadLayoutFullScreen, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    bool isMobileAppInPadLayoutFullScreen = false;
+    auto result = session_->SetMobileAppInPadLayoutFullScreen(isMobileAppInPadLayoutFullScreen);
+    EXPECT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: SetBufferAvailable
  * @tc.desc: SetBufferAvailable Test
  * @tc.type: FUNC
