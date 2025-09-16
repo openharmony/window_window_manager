@@ -18,6 +18,7 @@
 
 #include <ability_manager_client.h>
 #include <algorithm>
+#include <atomic>
 #include <climits>
 #include "configuration.h"
 #include <hitrace_meter.h>
@@ -9470,7 +9471,7 @@ void SceneSession::RunAfterNVsyncs(uint32_t vsyncCount, Task&& task)
 
     vsyncCallback->onCallback = [weakThis = wptr(this),
                                  weakCallback = std::weak_ptr<VsyncCallback>(vsyncCallback),
-                                 count = std::make_shared<int64_t>(0),
+                                 count = std::make_shared<std::atomic<uint32_t>>(0),
                                  vsyncCount,
                                  task = std::move(task),
                                  where = __func__](int64_t, int64_t) mutable {
@@ -9480,8 +9481,8 @@ void SceneSession::RunAfterNVsyncs(uint32_t vsyncCount, Task&& task)
             return;
         }
 
-        *count += 1;
-        if (*count >= vsyncCount) {
+        uint32_t current = ++(*count);
+        if (current >= vsyncCount) {
             task();
         } else {
             if (!session->requestNextVsyncFunc_) {
