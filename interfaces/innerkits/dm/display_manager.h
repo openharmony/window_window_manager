@@ -852,9 +852,9 @@ public:
     sptr<Display> GetPrimaryDisplaySync();
 
     /**
-     * @brief Get primary display id,
+     * @brief Get primary display id.
      *
-     * @return primary display id,
+     * @return primary display id.
      */
     DisplayId GetPrimaryDisplayId();
 
