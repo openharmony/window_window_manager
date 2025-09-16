@@ -4051,8 +4051,7 @@ WMError WindowSessionImpl::UnRegisterWindowWillCloseListeners(const sptr<IWindow
 }
 
 template<typename T>
-EnableIfSame<T, IWindowTitleChangeListener,
-    std::vector<sptr<IWindowTitleChangeListener>>> WindowSessionImpl::GetListeners()
+EnableIfSame<T, IWindowTitleChangeListener, std::vector<sptr<IWindowTitleChangeListener>>> WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<IWindowTitleChangeListener>> windowTitleChangeListeners;
     for (auto& listener : windowTitleChangeListeners_[GetPersistentId()]) {
@@ -4066,11 +4065,6 @@ WMError WindowSessionImpl::RegisterWindowTitleChangeListener(const sptr<IWindowT
     std::lock_guard<std::mutex> lockListener(windowTitleChangeListenerMutex_);
     WMError ret = RegisterListener(windowTitleChangeListeners_[GetPersistentId()], listener);
     TLOGI(WmsLogTag::WMS_DECOR, "RegisterWindowTitleChangeListener");
-    if (ret == WMError::WM_OK) {
-        auto hostSession = GetHostSession();
-        CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-        hostSession->UpdateTitleChangeListenerRegistered(true);
-    }
     return ret;
 }
  
@@ -4079,9 +4073,6 @@ WMError WindowSessionImpl::UnregisterWindowTitleChangeListener(const sptr<IWindo
     std::lock_guard<std::mutex> lockListener(windowTitleChangeListenerMutex_);
     WMError ret = UnregisterListener(windowTitleChangeListeners_[GetPersistentId()], listener);
     TLOGI(WmsLogTag::WMS_DECOR, "UnregisterWindowTitleChangeListener");
-    auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    hostSession->UpdateTitleChangeListenerRegistered(false);
     return ret;
 }
 
@@ -4252,10 +4243,7 @@ void WindowSessionImpl::NotifyWindowCrossAxisChange(CrossAxisState state)
 bool WindowSessionImpl::IsHitTitleBar(std::shared_ptr<MMI::PointerEvent>& pointerEvent) const
 {
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
-    bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
-    bool isPcModeOrFreeMultiWindowMode = IsFreeMultiWindowMode() || isPcMode;
-    if (!isPcModeOrFreeMultiWindowMode) {
-        TLOGE(WmsLogTag::WMS_DECOR, "not PcMode or FreeMultiWindowMode.");
+    if (!IsPcOrPadFreeMultiWindowMode()) {
         return false;
     }
     if (uiContent == nullptr) {
@@ -4272,10 +4260,9 @@ bool WindowSessionImpl::IsHitTitleBar(std::shared_ptr<MMI::PointerEvent>& pointe
       && pointerItem.GetDisplayY() < windowRect.posY_ + decorHeight;
     bool isHitTitleBar = isValidPointItem && isHitTitleBarX && isHitTitleBarY;
     if (isHitTitleBar) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "hitTitleBar success");
+        TLOGI(WmsLogTag::WMS_DECOR, "hitTitleBar success");
         return true;
     }
-    pointerEvent->MarkProcessed();
     return false;
 }
 
