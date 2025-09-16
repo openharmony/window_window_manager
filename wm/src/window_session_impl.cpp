@@ -5587,8 +5587,10 @@ void WindowSessionImpl::NotifyTitleChange(bool isShow, int32_t height)
         return;
     }
     int32_t width = property_->GetWindowRect().width_;
+    int32_t posX = property_->GetWindowRect().posX_;
+    int32_t posY = property_->GetWindowRect().posY_;
     int32_t decorHeight = uiContent->GetContainerModalTitleHeight();
-    Rect rect = {0, height, width, decorHeight};
+    Rect rect = {posX, posY, posX + width, posY + decorHeight};
     for (auto& listener : windowTitleChangeListeners) {
         if (listener != nullptr) {
             TLOGI(WmsLogTag::WMS_IMMS, "NotifyTitleChange, the title bar is show? %{public}d", isShow);
