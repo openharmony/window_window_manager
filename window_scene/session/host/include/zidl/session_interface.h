@@ -364,10 +364,6 @@ public:
     {
         return WSError::WS_OK;
     }
-    virtual WSError UpdateTitleChangeListenerRegistered(bool isRegister)
-    {
-        return WSError::WS_OK;
-    }
     virtual void SetCallingSessionId(uint32_t callingSessionId) {};
     virtual void NotifyKeyboardWillShowRegistered(bool registered) {};
     virtual void NotifyKeyboardWillHideRegistered(bool registered) {};
