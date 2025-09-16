@@ -1219,14 +1219,21 @@ void SceneSession::NotifyUpdateAppUseControl(ControlAppType type, const ControlI
         session->appUseControlMap_[type] = controlInfo;
         if (session->onUpdateAppUseControlFunc_) {
             bool isAppUseControl = (controlInfo.isNeedControl && !controlInfo.isControlRecentOnly);
+            bool isAppUseControlChanged = (session->isAppUseControl_ != isAppUseControl);
             session->isAppUseControl_ = isAppUseControl;
             session->onUpdateAppUseControlFunc_(type, controlInfo.isNeedControl, controlInfo.isControlRecentOnly);
             if (session->sessionStage_ == nullptr || type == ControlAppType::PRIVACY_WINDOW) {
                 TLOGNW(WmsLogTag::WMS_LIFE, "%{public}s sessionStage is nullptr or privacy mode control", where);
                 return;
             }
-            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s isAppUseControl: %{public}d, persistentId: %{public}d", where,
-                isAppUseControl, session->GetPersistentId());
+            auto state = session->GetSessionState();
+            TLOGNI(WmsLogTag::WMS_LIFE,
+                "%{public}s isAppUseControl: %{public}d, persistentId: %{public}d, state: %{public}d, "
+                "isAppUseControlChanged: %{public}d", where, isAppUseControl, session->GetPersistentId(), state,
+                isAppUseControlChanged);
+            if (state == SessionState::STATE_BACKGROUND && !isAppUseControlChanged) {
+                return;
+            }
             session->sessionStage_->NotifyAppUseControlStatus(isAppUseControl);
         }
     }, __func__);
