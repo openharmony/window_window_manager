@@ -146,7 +146,7 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError NotifyPrepareClosePiPWindow() override;
-    void UpdateSubWindowState(const WindowType& type, bool waitDetach = false);
+    void UpdateSubWindowState(const WindowType& type);
     WMError SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
         const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags) override;
     WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties) override;
