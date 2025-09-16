@@ -2440,27 +2440,27 @@ void AniWindow::RegisterWindowCallback(ani_env* env, ani_object obj, ani_long na
 void AniWindow::RegisterNoInteractionDetectedCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
     ani_long timeOut, ani_ref callback)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_EVENT, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow != nullptr) {
         aniWindow->OnRegisterWindowCallback(env, type, callback, timeOut);
     } else {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI] aniWindow is nullptr");
     }
 }
 
 void AniWindow::OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback, ani_long timeOut)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_EVENT, "[ANI]");
     auto window = GetWindow();
     if (window == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] window is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI] window is nullptr");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     std::string cbType;
     AniWindowUtils::GetStdString(env, type, cbType);
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] type:%{public}s", cbType.c_str());
+    TLOGI(WmsLogTag::WMS_EVENT, "[ANI] type:%{public}s", cbType.c_str());
     WmErrorCode ret = registerManager_->RegisterListener(window, cbType, CaseType::CASE_WINDOW, env, callback, timeOut);
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret);
@@ -4427,7 +4427,7 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::SetWindowMask)},
         ani_native_function {"setTouchableAreas", "lC{escompat.Array}:",
             reinterpret_cast<void *>(AniWindow::SetTouchableAreas)},
-        ani_native_function {"onNoInteractionDetected", nullptr,
+        ani_native_function {"onNoInteractionDetected", "lC{std.core.String}lC{std.core.Object}:",
             reinterpret_cast<void *>(AniWindow::RegisterNoInteractionDetectedCallback)},
         ani_native_function {"opacity", "ld:",
             reinterpret_cast<void *>(AniWindow::Opacity)},
