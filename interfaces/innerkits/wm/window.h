@@ -4625,7 +4625,7 @@ public:
      */
     virtual void NotifyIsFullScreenInForceSplitMode(bool isFullScreen) {}
 
-            /**
+    /**
      * @brief register a listener to listen whether the window title bar is show or hide.
      *
      * @param listener IWindowTitleChangeListener.
