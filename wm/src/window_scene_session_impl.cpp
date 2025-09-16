@@ -2947,6 +2947,10 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
             TLOGE(WmsLogTag::WMS_IMMS, "fullscreen window mode not supported");
             return WMError::WM_ERROR_INVALID_WINDOW;
         }
+        if (property_->IsFullScreenDisabled()) {
+            TLOGE(WmsLogTag::WMS_IMMS, "compatible mode disable fullscreen");
+            return WMError::WM_OK;
+        }
         CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
         auto event = SessionEvent::EVENT_MAXIMIZE;
         if (isFullScreenWaterfallMode_.load()) {
@@ -3269,6 +3273,10 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
             WindowMode::WINDOW_MODE_FULLSCREEN)) {
             TLOGE(WmsLogTag::WMS_IMMS, "fullscreen window not supported");
             return WMError::WM_ERROR_INVALID_WINDOW;
+        }
+        if (property_->IsFullScreenDisabled()) {
+            TLOGE(WmsLogTag::WMS_IMMS, "compatible mode disable fullscreen");
+            return WMError::WM_OK;
         }
         auto hostSession = GetHostSession();
         CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
