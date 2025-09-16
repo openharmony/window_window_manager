@@ -3915,7 +3915,9 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
         "SceneSession::OnMoveDragCallback id:%d [%d, %d, %d, %d] reason:%u", GetPersistentId(), rect.posX_, rect.posY_,
         rect.width_, rect.height_, reason);
     if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_END) {
-        UpdateWinRectForSystemBar(rect);
+        if (!property->IsAdaptToDragScale()) {
+            UpdateWinRectForSystemBar(rect);
+        }
     }
     HandleSubSessionCrossNode(reason);
     moveDragController_->SetTargetRect(rect);
