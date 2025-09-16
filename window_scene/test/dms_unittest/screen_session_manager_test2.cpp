@@ -2161,6 +2161,20 @@ HWTEST_F(ScreenSessionManagerTest, HandleFoldDeviceScreenConnect, TestSize.Level
 }
 
 /**
+ * @tc.name: FirstSCBConnect
+ * @tc.desc: FirstSCBConnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, FirstSCBConnect, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->SetFirstSCBConnect(true);
+    EXPECT_TRUE(ssm_->GetFirstSCBConnect());
+    ssm_->SetFirstSCBConnect(false);
+    EXPECT_FALSE(ssm_->GetFirstSCBConnect());
+}
+
+/**
  * @tc.name: HandleResolutionEffectChange
  * @tc.desc: HandleResolutionEffectChange
  * @tc.type: FUNC
