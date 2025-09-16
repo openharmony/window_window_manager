@@ -100,18 +100,18 @@ void MyLogCallback(const LogType type, const LogLevel level, const unsigned int 
 }
 
 /**
-*@tc.name: GetPrimaryDisplayId
-*@tc.desc: success
-*@tc.type: FUNC
-*/
-HWTEST_F(DisplayManagerTest,GetPrimaryDisplayId,TestSize.Level1)
+ * @tc.name: GetPrimaryDisplayId
+ * @tc.desc: success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetPrimaryDisplayId, TestSize.Level1)
 {
     auto ret = DisplayManager::GetInstance().GetPrimaryDisplayId();
     auto display = DisplayManager::GetInstance().GetPrimaryDisplaySync();
-    if(!display){
+    if (!display) {
         GTEST_SKIP();
-    }else{
-        EXPECT_EQ(ret,display->GetDisplayInfo()->GetDisplayId());
+    } else {
+        EXPECT_EQ(ret, display->GetDisplayInfo()->GetDisplayId());
     }
 }
 

@@ -122,6 +122,7 @@ public:
         ScreenId& screenId, DMRect& screenArea);
     virtual bool SetVirtualScreenAsDefault(ScreenId screenId);
     virtual DisplayId GetPrimaryDisplayId();
+    
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;
 };

@@ -1630,7 +1630,7 @@ DisplayId DisplayManagerAdapter::GetPrimaryDisplayId()
 {
     INIT_PROXY_CHECK_RETURN(SCREEN_ID_INVALID);
     DisplayId id = SCREEN_ID_INVALID;
-    if(screenSessionManagerServiceProxy_){
+    if (screenSessionManagerServiceProxy_) {
         id = screenSessionManagerServiceProxy_->GetPrimaryDisplayId();
     }
     return id;
