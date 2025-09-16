@@ -1033,7 +1033,8 @@ ani_status AniWindowUtils::GetAniString(ani_env* env, const std::string& str, an
     return env->String_NewUTF8(str.c_str(), static_cast<ani_size>(str.size()), result);
 }
 
-ani_object AniWindowUtils::CreateAniRectObject(ani_env* env, const Rect& rect) {
+ani_object AniWindowUtils::CreateAniRectObject(ani_env* env, const Rect& rect)
+{
     return InitAniObjectByCreator(env, "@ohos.window.window.RectInternal", "iiii:",
         ani_int(rect.posX_), ani_int(rect.posY_),
         ani_int(rect.width_), ani_int(rect.height_));
