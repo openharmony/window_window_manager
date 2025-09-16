@@ -852,6 +852,13 @@ public:
     sptr<Display> GetPrimaryDisplaySync();
 
     /**
+    *@brief Get primary display id,
+    *
+    *@return primary display id,
+    */
+    DisplayId GetPrimaryDisplayId();
+
+    /**
      * @brief Get screen capture of the target display.
      *
      * @param captureOption screen capture option.
