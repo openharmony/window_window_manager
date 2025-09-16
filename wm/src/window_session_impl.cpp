@@ -4254,9 +4254,9 @@ bool WindowSessionImpl::IsHitTitleBar(std::shared_ptr<MMI::PointerEvent>& pointe
     int32_t decorHeight = uiContent->GetContainerModalTitleHeight();
     MMI::PointerEvent::PointerItem pointerItem;
     bool isValidPointItem = pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
-    bool isHitTitleBarX = pointerItem.GetDisplayX() > windowRect.posX_ 
+    bool isHitTitleBarX = pointerItem.GetDisplayX() > windowRect.posX_
       && pointerItem.GetDisplayX() < windowRect.posX_ + windowRect.width_;
-    bool isHitTitleBarY = pointerItem.GetDisplayY() > windowRect.posY_ 
+    bool isHitTitleBarY = pointerItem.GetDisplayY() > windowRect.posY_
       && pointerItem.GetDisplayY() < windowRect.posY_ + decorHeight;
     bool isHitTitleBar = isValidPointItem && isHitTitleBarX && isHitTitleBarY;
     if (isHitTitleBar) {
