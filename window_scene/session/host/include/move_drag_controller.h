@@ -105,7 +105,7 @@ public:
     void SetParentRect(const Rect& parentRect);
     Gravity GetGravity() const;
     Gravity GetGravity(AreaType type) const;
-    void RestoreToPreDragGravity(const std::shared_ptr<RSSurfaceNode>& surfaceNode);
+    bool RestoreToPreDragGravity(const std::shared_ptr<RSSurfaceNode>& surfaceNode);
 
     /*
      * Cross Display Move Drag

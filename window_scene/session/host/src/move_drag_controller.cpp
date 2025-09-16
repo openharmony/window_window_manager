@@ -231,25 +231,24 @@ WSRect MoveDragController::GetTargetDisplayRectRelatedToStartDisplay(WSRect rect
 }
 
 void MoveDragController::UpdateSubWindowGravityWhenFollow(const sptr<MoveDragController>& followedController,
-                                                          const std::shared_ptr<RSSurfaceNode>& surfaceNode)
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
-    RETURN_IF_NULL(surfaceNode);
-    RETURN_IF_NULL(followedController);
-    auto type = followedController->GetAreaType();
-    if (type == AreaType::UNDEFINED) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Undefined type");
+    if (surfaceNode == nullptr || followedController == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "surfaceNode or followedController is null");
         return;
     }
-    preDragGravity_ = surfaceNode->GetStagingProperties().GetFrameGravity();
-    Gravity dragGravity = GetGravity(type);
-    surfaceNode->SetFrameGravity(dragGravity);
-    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode);
-    TLOGI(WmsLogTag::WMS_LAYOUT,
-          "windowId: %{public}d, type: %{public}u, preDragGravity: %{public}d, dragGravity: %{public}d",
-          persistentId_,
-          static_cast<uint32_t>(type),
-          static_cast<int32_t>(preDragGravity_.value()),
-          static_cast<int32_t>(dragGravity));
+    auto type = followedController->GetAreaType();
+    if (type == AreaType::UNDEFINED) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "type undefined");
+        return;
+    }
+    Gravity dragGravity = GRAVITY_MAP.at(type);
+    if (dragGravity >= Gravity::TOP && dragGravity <= Gravity::BOTTOM_RIGHT) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "begin SetFrameGravity when follow, gravity:%{public}d, type:%{public}d",
+            dragGravity, type);
+        surfaceNode->SetFrameGravity(dragGravity);
+        RSTransactionAdapter::FlushImplicitTransaction(surfaceNode);
+    }
 }
 
 /** @note @window.drag */
@@ -490,21 +489,19 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
     RETURN_IF_NULL(surfaceNode);
     RETURN_IF_NULL(pointerEvent);
     if (type_ == AreaType::UNDEFINED) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Undefined type");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Undefined area type");
         return;
     }
     auto actionType = pointerEvent->GetPointerAction();
     if (actionType == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         actionType == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
         preDragGravity_ = surfaceNode->GetStagingProperties().GetFrameGravity();
-        Gravity dragGravity = GRAVITY_MAP.at(type_);
+        Gravity dragGravity = GetGravity(type_);
         surfaceNode->SetFrameGravity(dragGravity);
         RSTransactionAdapter::FlushImplicitTransaction(surfaceNode);
         TLOGI(WmsLogTag::WMS_LAYOUT,
-              "windowId: %{public}d, type: %{public}u, preDragGravity: %{public}d, dragGravity: %{public}d",
-              persistentId_,
-              static_cast<uint32_t>(type_),
-              static_cast<int32_t>(preDragGravity_.value()),
+              "windowId: %{public}d, areaType: %{public}u, preDragGravity: %{public}d, dragGravity: %{public}d",
+              persistentId_, static_cast<uint32_t>(type_), static_cast<int32_t>(preDragGravity_.value()),
               static_cast<int32_t>(dragGravity));
     }
 }
@@ -555,22 +552,21 @@ Gravity MoveDragController::GetGravity(AreaType type) const
     return iter->second;
 }
 
-void MoveDragController::ResoreToPreDragGravity(const std::shared_ptr<RSSurfaceNode>& surfaceNode)
+bool MoveDragController::RestoreToPreDragGravity(const std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
-    RETURN_IF_NULL(surfaceNode);
+    RETURN_IF_NULL(surfaceNode, false);
     if (!preDragGravity_.has_value()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "No preDragGravity to restore");
-        return;
+        return false;
     }
     Gravity currentGravity = surfaceNode->GetStagingProperties().GetFrameGravity();
     surfaceNode->SetFrameGravity(preDragGravity_.value());
     RSTransactionAdapter::FlushImplicitTransaction(surfaceNode);
     TLOGI(WmsLogTag::WMS_LAYOUT,
           "windowId: %{public}d, currentGravity: %{public}d, restore preDragGravity: %{public}d",
-          persistentId_,
-          static_cast<int32_t>(currentGravity),
-          static_cast<int32_t>(preDragGravity_.value()));
+          persistentId_, static_cast<int32_t>(currentGravity), static_cast<int32_t>(preDragGravity_.value()));
     preDragGravity_.reset();
+    return true;
 }
 
 /** @note @window.drag */
