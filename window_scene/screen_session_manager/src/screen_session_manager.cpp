@@ -10893,6 +10893,41 @@ sptr<DisplayInfo> ScreenSessionManager::GetPrimaryDisplayInfo()
     }
 }
 
+DisplayId ScreenSessionManager::GetPrimaryDisplayId()
+{
+    if(!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()){
+        TLOGE(WmsLogTag::DMS, "permission denied! calling: %{public}s, pid: %{public}d",
+        SysCapUtil::GetClientName().c_str(),IPCSkeleton::GetCallingPid());
+        return SCREEN_ID_INVALID;
+    }
+    sptr<ScreenSession> screenSession = nullptr;
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        for(auto sessionIt : screenSessionMap_){
+            sptr<ScreenSession> session = sessionIt.second;
+            if(session == nullptr){
+                TLOGE(WmsLogTag::DMS, "screenSession is nullptr!");
+                continue;
+            }
+            if(!session->GetIsExtend()){
+                TLOGD(WmsLogTag::DMS, "find primary %{public}" PRIu64,session->screenId_);
+                screenSession = session;
+                break;
+            }
+        }
+    }
+    if(screenSession == nullptr){
+        TOLOW(WmsLogTag::DMS, "get extend screen faild use default!");
+        screenSession = GetScreenSession(GetDefaultScreenId());
+    }
+    if(screenSession && screenSession->IsScreenAvailable()){
+        return screenSession->GetDisplayId();
+    }else{
+        TLOGE(WmsLogTag::DMS, "failed");
+        return SCREEN_ID_INVALID;
+    }
+}
+
 void ScreenSessionManager::OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus)
 {
     TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 ", superFoldStatus: %{public}d", screenId,

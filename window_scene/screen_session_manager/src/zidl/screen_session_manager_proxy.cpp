@@ -4291,6 +4291,30 @@ sptr<DisplayInfo> ScreenSessionManagerProxy::GetPrimaryDisplayInfo()
     return info;
 }
 
+DisplayId ScreenSessionManagerProxy::GetPrimaryDisplayId()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if(remote == nullptr){
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
+        return SCREEN_ID_INVALID;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if(!data.WriteInterfaceToken(GetDescriptor())){
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return SCREEN_ID_INVALID;
+    }
+    if(remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_PRIMARY_DISPLAY_ID),
+data,reply,option) != ERR_NONE){
+    TLOGE(WmsLogTag::DMS, "SendRequest failed");
+    return SCREEN_ID_INVALID;
+    }
+
+    DisplayId id = static_cast<DisplayId>(reply.ReadUint64());
+    return id;
+}
+
 std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshotWithOption(
     const CaptureOption& captureOption, DmErrorCode* errorCode)
 {

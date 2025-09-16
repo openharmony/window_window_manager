@@ -130,6 +130,7 @@ public:
     DMError ResetAllFreezeStatus();
     DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid, std::vector<uint64_t>& windowIdList);
     sptr<Display> GetPrimaryDisplaySync();
+    DisplayId GetPrimaryDisplayId();
     void OnRemoteDied();
     sptr<CutoutInfo> GetCutoutInfoWithRotation(Rotation rotation);
     DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
@@ -2514,6 +2515,16 @@ sptr<Display> DisplayManager::Impl::GetPrimaryDisplaySync()
 sptr<Display> DisplayManager::GetPrimaryDisplaySync()
 {
     return pImpl_->GetPrimaryDisplaySync();
+}
+
+DisplayId DisplayManager::Impl::GetPrimaryDisplayId()
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetPrimaryDisplayId();
+}
+
+DisplayId DisplayManager::GetPrimaryDisplayId()
+{
+    return pImpl_->GetPrimaryDisplayId();
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenCapture(const CaptureOption& captureOption,

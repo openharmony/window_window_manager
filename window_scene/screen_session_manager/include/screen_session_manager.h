@@ -458,6 +458,7 @@ public:
         DmErrorCode* errorCode = nullptr) override;
     void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;
     sptr<DisplayInfo> GetPrimaryDisplayInfo() override;
+    DisplayId GetPrimaryDisplayId() override;
     std::shared_ptr<Media::PixelMap> GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
         DmErrorCode* errorCode) override;
     std::vector<std::shared_ptr<Media::PixelMap>> GetDisplayHDRSnapshotWithOption(const CaptureOption& captureOption,
