@@ -410,7 +410,6 @@ ani_object AniWindowUtils::CreateAniSize(ani_env* env, int32_t width, int32_t he
 
 ani_object AniWindowUtils::CreateAniDecorButtonStyle(ani_env* env, const DecorButtonStyle& decorButtonStyle)
 {
-    TLOGI(WmsLogTag::WMS_DECOR, "[ANI]");
     ani_class aniClass;
     ani_status ret = env->FindClass("@ohos.window.window.DecorButtonStyleInternal", &aniClass);
     if (ret != ANI_OK) {
@@ -462,7 +461,7 @@ ani_object AniWindowUtils::CreateAniDecorButtonStyle(ani_env* env, const DecorBu
 }
 
 ani_status AniWindowUtils::SetOptionalFieldInt(ani_env* env, ani_object obj,
-    ani_class cls, const char* method, ani_int number)
+    ani_class cls, const char* method, ani_int aniInt)
 {
     ani_class aniIntClass {};
     ani_status ret = env->FindClass("std.core.Int", &aniIntClass);
@@ -477,7 +476,7 @@ ani_status AniWindowUtils::SetOptionalFieldInt(ani_env* env, ani_object obj,
         return ret;
     }
     ani_object intObj {};
-    if (env->Object_New(aniIntClass, aniCtor, &intObj, number) != ANI_OK) {
+    if (env->Object_New(aniIntClass, aniCtor, &intObj, aniInt) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_DECOR, "[ANI] fail to new obj: %{public}s", method);
         return ret;
     }
