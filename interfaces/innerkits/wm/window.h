@@ -214,7 +214,7 @@ public:
 class IWindowTitleChangeListener : virtual public RefBase {
 public:
     virtual void OnTitleVisibilityChange(Rect& titleRect, bool visibility) {}
-}; 
+};
 
 /**
  * @class IWindowChangeListener
@@ -4632,7 +4632,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     virtual WMError RegisterWindowTitleChangeListener(const sptr<IWindowTitleChangeListener>& listener)
-    { 
+    {
         return WMError::WM_OK;
     }
  
@@ -4643,7 +4643,7 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     virtual WMError UnregisterWindowTitleChangeListener(const sptr<IWindowTitleChangeListener>& listener)
-    { 
+    {
         return WMError::WM_OK;
     }
  
