@@ -682,7 +682,7 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback03, TestSize.Level1)
     info.abilityName_ = "DragResizeInCompatibleMode";
     info.bundleName_ = "DragResizeInCompatibleMode";
     info.isSystem_ = false;
-    sptr<sesSceneSessionion> = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<sesSceneSessionion> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(nullptr, session);
     session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
     EXPECT_NE(nullptr, session->moveDragController_);
