@@ -4305,7 +4305,8 @@ DisplayId ScreenSessionManagerProxy::GetPrimaryDisplayId()
         TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return SCREEN_ID_INVALID;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_PRIMARY_DISPLAY_ID), data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_PRIMARY_DISPLAY_ID),
+        data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return SCREEN_ID_INVALID;
     }

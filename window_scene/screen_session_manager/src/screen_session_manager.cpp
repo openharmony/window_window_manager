@@ -10917,7 +10917,7 @@ DisplayId ScreenSessionManager::GetPrimaryDisplayId()
         }
     }
     if (screenSession == nullptr) {
-        TOLOW(WmsLogTag::DMS, "get extend screen faild use default!");
+        TOLOW(WmsLogTag::DMS, "get extend screen failed use default!");
         screenSession = GetScreenSession(GetDefaultScreenId());
     }
     if (screenSession && screenSession->IsScreenAvailable()) {
