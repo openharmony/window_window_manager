@@ -540,6 +540,13 @@ namespace window {
     top: int;
     width: int;
     height: int;
+    constructor() {}
+    constructor(left: int, top: int, width: int, height: int) {
+      this.left = left;
+      this.top = top;
+      this.width = width;
+      this.height = height;
+    }
   }
 
   export interface RectChangeOptions {
@@ -1214,7 +1221,6 @@ export interface WindowProperties {
 export class WindowPropertiesInternal implements WindowProperties {
     windowRect: Rect;
     drawableRect: Rect;
-    type: WindowType;
     isFullScreen: boolean;
     isLayoutFullScreen: boolean;
     focusable: boolean;
@@ -1225,11 +1231,35 @@ export class WindowPropertiesInternal implements WindowProperties {
     isPrivacyMode: boolean;
     isRoundCorner: boolean;
     isTransparent: boolean;
+    type: WindowType;
     id: int;
     displayId?: long;
-    displayIdInternal: long;
-    typeInternal: int;
     name?: string;
+
+    constructor(windowRect: Rect, drawableRect: Rect, isFullScreen: boolean, isLayoutFullScreen: boolean,
+      focusable: boolean, touchable: boolean, brightness: double, dimBehindValue: number, isKeepScreenOn: boolean,
+      isPrivacyMode: boolean, isRoundCorner: boolean, isTransparent: boolean, typeInternal: int, id: int,
+      displayId: long, name: string)
+    {
+      this.windowRect = windowRect;
+      this.drawableRect = drawableRect;
+      this.isFullScreen = isFullScreen;
+      this.isLayoutFullScreen = isLayoutFullScreen;
+      this.focusable = focusable;
+      this.touchable = touchable;
+      this.brightness = brightness;
+      this.dimBehindValue = dimBehindValue;
+      this.isKeepScreenOn = isKeepScreenOn;
+      this.isPrivacyMode = isPrivacyMode;
+      this.isRoundCorner = isRoundCorner;
+      this.isTransparent = isTransparent;
+      this.type = typeInternal as WindowType;
+      this.id = id;
+      this.displayId = displayId;
+      this.name = name;
+    }
+
+    constructor() {}
 }
 
 /**
@@ -3761,7 +3791,7 @@ native function shiftAppWindowFocusSync(nativeObj: long, sourceWindowId: int, ta
 native function shiftAppWindowPointerEventSync(nativeObj: long, sourceWindowId: int, targetWindowId: int): void;
 native function createWindowSync(nativeObj: long, config: Configuration): Window;
 native function getAllWindowLayoutInfo(nativeObj: long, displayId: long): Array<WindowLayoutInfo>;
-native function getSnapshot(nativeObj: long, windowId: number): image.PixelMap;
+native function getSnapshot(nativeObj: long, windowId: int): image.PixelMap;
 native function getVisibleWindowInfo(nativeObj: long): Array<WindowInfoInternal>;
 native function setGestureNavigationEnabled(nativeObj: long, enabled: boolean): void;
 native function setWaterMarkImage(nativeObj: long, pixelMap: image.PixelMap, enabled: boolean): void;
@@ -3876,7 +3906,7 @@ export function getAllWindowLayoutInfo(displayId: long): Promise<Array<WindowLay
   });
 }
 
-export function getSnapshot(windowId: number): Promise<image.PixelMap> {
+export function getSnapshot(windowId: int): Promise<image.PixelMap> {
   return new Promise<image.PixelMap>((
     resolve: (value: image.PixelMap) => void, reject: (error: BusinessError) => void): void => {
       taskpool.execute(() => {
