@@ -25,7 +25,7 @@ WSRect SessionCoordinateHelper::RelativeToGlobalDisplayRect(ScreenId screenId, c
 {
     auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(screenId);
     if (!screenSession) {
-        TLOGW(WmsLogTag::WMS_LAYOUT,
+        TLOGD(WmsLogTag::WMS_LAYOUT,
             "Screen not found, screenId: %{public}" PRIu64 ", relativeRect: %{public}s",
             screenId, relativeRect.ToString().c_str());
         return relativeRect;
