@@ -2921,7 +2921,6 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
         TLOGI(WmsLogTag::WMS_IMMS, "system window not supported");
         return WMError::WM_OK;
     }
-
     if (IsPcOrPadFreeMultiWindowMode() && property_->IsAdaptToImmersive()) {
         SetLayoutFullScreenByApiVersion(status);
         // compatibleMode app may set statusBarColor before ignoreSafeArea
@@ -2932,14 +2931,12 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
         }
         return WMError::WM_OK;
     }
-
     bool preStatus = property_->IsLayoutFullScreen();
     property_->SetIsLayoutFullScreen(status);
     auto hostSession = GetHostSession();
     if (hostSession != nullptr) {
         hostSession->OnLayoutFullScreenChange(status);
     }
-
     if (WindowHelper::IsMainWindow(GetType()) && !windowSystemConfig_.IsPhoneWindow() &&
         !windowSystemConfig_.IsPadWindow()) {
         if (!WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),
@@ -2962,7 +2959,6 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
         hostSession->OnSessionEvent(event);
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     }
-
     WMError ret = SetLayoutFullScreenByApiVersion(status);
     if (ret != WMError::WM_OK) {
         property_->SetIsLayoutFullScreen(preStatus);
