@@ -259,7 +259,7 @@ ScreenSessionManager::ScreenSessionManager()
     if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         InitSecondaryDisplayPhysicalParams();
     }
-    firstSCBConnect_ = true;
+    SetFirstSCBConnect(true);
     WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), BootFinishedCallback, this);
 }
 
@@ -4804,6 +4804,7 @@ void ScreenSessionManager::UpdateScreenDirectionInfo(ScreenId screenId, const Sc
 void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
     ScreenPropertyChangeType screenPropertyChangeType, bool isSwitchUser)
 {
+    SetFirstSCBConnect(false);
     std::ostringstream oss;
     std::string changeType = TransferPropertyChangeTypeToString(screenPropertyChangeType);
     oss << "screenId: " << screenId << " rotation: " << rotation << " width: " << bounds.rect_.width_ \
@@ -9288,7 +9289,7 @@ void ScreenSessionManager::SetClientInner(int32_t newUserId, const sptr<IScreenS
     SwitchUserDealUserDisplayNode(newUserId);
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     DisplayId targetDisplay = GetUserDisplayId(newUserId);
-    bool isSuperFoldDeviceBootUp = FoldScreenStateInternel::IsSuperFoldDisplayDevice() && firstSCBConnect_;
+    bool isSuperFoldDeviceBootUp = FoldScreenStateInternel::IsSuperFoldDisplayDevice() && GetFirstSCBConnect();
     for (auto iter : screenSessionMap_) {
         if (!iter.second) {
             TLOGI(WmsLogTag::DMS, "not notify screen: %{public}" PRIu64 " to user: %{public}d", iter.first, newUserId);
@@ -9354,7 +9355,6 @@ void ScreenSessionManager::HandleScreenRotationAndBoundsWhenSetClient(sptr<Scree
             screenSession->SetDisplayBoundary(RectF(0, boundaryOffset, phyWidth, phyHeight), 0);
         }
     }
-    firstSCBConnect_ = false;
 }
 
 void ScreenSessionManager::SetPhysicalRotationClientInner(ScreenId screenId, int rotation)
@@ -12132,5 +12132,15 @@ void ScreenSessionManager::SetDuringCallState(bool value)
 {
     bool ret = ScreenSettingHelper::SetSettingDuringCallState("during_call_state", value);
     TLOGI(WmsLogTag::DMS, "set during call state to %{public}d, ret:%{public}d", value, ret);
+}
+
+bool ScreenSessionManager::GetFirstSCBConnect()
+{
+    return firstSCBConnect_;
+}
+
+void ScreenSessionManager::SetFirstSCBConnect(bool firstSCBConnect)
+{
+    firstSCBConnect_ = firstSCBConnect;
 }
 } // namespace OHOS::Rosen

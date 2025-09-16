@@ -684,14 +684,18 @@ void ScreenSession::UpdatePropertyByActiveMode()
 }
 
 ScreenProperty ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty,
-    FoldDisplayMode foldDisplayMode)
+    FoldDisplayMode foldDisplayMode, bool firstSCBConnect)
 {
     property_.SetDpiPhyBounds(updatedProperty.GetPhyWidth(), updatedProperty.GetPhyHeight());
     property_.SetPhyBounds(updatedProperty.GetPhyBounds());
     property_.SetBounds(updatedProperty.GetBounds());
     if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        Rotation screenRotation = property_.GetScreenRotation();
+        if (firstSCBConnect) {
+            AddRotationCorrection(screenRotation, foldDisplayMode);
+        }
         DisplayOrientation deviceOrientation =
-            CalcDeviceOrientation(property_.GetScreenRotation(), foldDisplayMode);
+            CalcDeviceOrientation(screenRotation, foldDisplayMode);
         property_.SetDisplayOrientation(deviceOrientation);
         property_.SetDeviceOrientation(deviceOrientation);
         property_.SetScreenAreaOffsetY(updatedProperty.GetScreenAreaOffsetY());
@@ -2722,6 +2726,17 @@ Rotation ScreenSession::GetRotationCorrection(FoldDisplayMode displayMode)
         rotationOffset = iter->second;
     }
     return static_cast<Rotation>(rotationOffset);
+}
+
+void ScreenSession::AddRotationCorrection(Rotation& rotation, FoldDisplayMode displayMode)
+{
+    if (static_cast<uint32_t>(rotation) >= SECONDARY_ROTATION_MOD) {
+        return;
+    }
+    uint32_t rotationOffset = static_cast<uint32_t>(GetRotationCorrection(displayMode));
+    uint32_t rotationValue = (static_cast<uint32_t>(rotation) + rotationOffset) % SECONDARY_ROTATION_MOD;
+    rotation = static_cast<Rotation>(rotationValue);
+    TLOGI(WmsLogTag::DMS, "rotation:%{public}u, rotationOffset:%{public}u", rotation, rotationOffset);
 }
  
 void ScreenSession::RemoveRotationCorrection(Rotation& rotation, FoldDisplayMode displayMode)
