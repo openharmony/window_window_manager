@@ -435,9 +435,9 @@ ani_object AniWindowUtils::CreateAniDecorButtonStyle(ani_env* env, const DecorBu
         return AniWindowUtils::CreateAniUndefined(env);
     }
     std::string itemName = "COLOR_MODE_NOT_SET";
-    if (style.colorMode == LIGHT_COLOR_MODE) {
+    if (decorButtonStyle.colorMode == LIGHT_COLOR_MODE) {
         itemName = "COLOR_MODE_DARK";
-    } else if (style.colorMode == DARK_COLOR_MODE) {
+    } else if (decorButtonStyle.colorMode == DARK_COLOR_MODE) {
         itemName = "COLOR_MODE_LIGHT";
     }
     ani_enum_item aniColorMode;
