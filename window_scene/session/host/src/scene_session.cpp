@@ -3236,10 +3236,15 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
 
 void SceneSession::NotifyUpdateGravity()
 {
-    for (const auto& [sessionId, _] : GetNotifySurfaceBoundsChangeFuncMap()) {
+    std::unordered_map<int32_t, NotifySurfaceBoundsChangeFunc> funcMap;
+    {
+        std::lock_guard lock(registerNotifySurfaceBoundsChangeMutex_);
+        funcMap = notifySurfaceBoundsChangeFuncMap_;
+    }
+    for (const auto& [sessionId, _] : funcMap) {
         auto subSession = GetSceneSessionById(sessionId);
         if (!subSession || !subSession->GetIsFollowParentLayout()) {
-            continue;
+            return;
         }
         auto surfaceNode = subSession->GetSurfaceNode();
         auto subController = subSession->GetMoveDragController();
@@ -5928,7 +5933,12 @@ WMError SceneSession::NotifySubSessionAcrossDisplaysChange(bool isAcrossDisplays
 
 WMError SceneSession::NotifyFollowedParentWindowAcrossDisplaysChange(bool isAcrossDisplays)
 {
-    for (const auto& [sessionId, _] : GetNotifySurfaceBoundsChangeFuncMap()) {
+    std::unordered_map<int32_t, NotifySurfaceBoundsChangeFunc> funcMap;
+    {
+        std::lock_guard lock(registerNotifySurfaceBoundsChangeMutex_);
+        funcMap = notifySurfaceBoundsChangeFuncMap_;
+    }
+    for (const auto& [sessionId, _] : funcMap) {
         auto subSession = GetSceneSessionById(sessionId);
         if (subSession == nullptr) {
             TLOGW(WmsLogTag::WMS_ATTRIBUTE, "subsession is null");
@@ -7702,12 +7712,6 @@ void SceneSession::UnregisterNotifySurfaceBoundsChangeFunc(int32_t sessionId)
 {
     std::lock_guard lock(registerNotifySurfaceBoundsChangeMutex_);
     notifySurfaceBoundsChangeFuncMap_.erase(sessionId);
-}
-
-std::unordered_map<int32_t, NotifySurfaceBoundsChangeFunc> SceneSession::GetNotifySurfaceBoundsChangeFuncMap() const
-{
-    std::lock_guard lock(registerNotifySurfaceBoundsChangeMutex_);
-    return notifySurfaceBoundsChangeFuncMap_;
 }
 
 sptr<SceneSession> SceneSession::GetSceneSessionById(int32_t sessionId) const
@@ -9498,30 +9502,6 @@ void SceneSession::RunAfterNVsyncs(uint32_t vsyncCount, Task&& task)
     requestNextVsyncFunc_(vsyncCallback);
 }
 
-void SceneSession::RestoreToPreDragGravity()
-{
-    if (!moveDragController_) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "moveDragController is null");
-        return;
-    }
-
-    // Restore gravity for the current session
-    moveDragController_->RestoreToPreDragGravity(GetSurfaceNode());
-
-    // Restore gravity for all sub-sessions that follow the parent layout
-    for (const auto& [sessionId, _] : GetNotifySurfaceBoundsChangeFuncMap()) {
-        auto subSession = GetSceneSessionById(sessionId);
-        if (!subSession || !subSession->GetIsFollowParentLayout()) {
-            continue;
-        }
-        if (auto subController = subSession->GetMoveDragController()) {
-            subController->RestoreToPreDragGravity(subSession->GetSurfaceNode());
-        }
-    }
-
-    TLOGD(WmsLogTag::WMS_LAYOUT, "Restore gravity completed, windowId: %{public}d", GetPersistentId());
-}
-
 void SceneSession::RestoreGravityWhenDragEnd()
 {
     // Ensure the last frame of drag rendering is completed
@@ -9540,7 +9520,15 @@ void SceneSession::RestoreGravityWhenDragEnd()
                 TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", where);
                 return;
             }
-            session->RestoreToPreDragGravity();
+
+            if (!session->moveDragController_) {
+                TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: moveDragController is null", where);
+                return;
+            }
+
+            session->moveDragController_->RestoreToPreDragGravity(session->GetSurfaceNode());
+            TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: Restore gravity completed, windowId: %{public}d",
+                where, session->GetPersistentId());
         }, where);
     });
 }
