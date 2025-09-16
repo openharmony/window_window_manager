@@ -2724,8 +2724,6 @@ export class WindowInternal implements Window {
 
     public getWindowProperties(): WindowProperties {
         let windowProperties = this.getWindowProperties(this.nativeObj) as WindowPropertiesInternal;
-        windowProperties.type = windowProperties.typeInternal as WindowType;
-        windowProperties.displayId = windowProperties.displayIdInternal;
         return windowProperties;
     }
 
@@ -2734,8 +2732,6 @@ export class WindowInternal implements Window {
             reject: (error: BusinessError) => void) => {
             taskpool.execute((): WindowProperties => {
                 let res = this.getProperties(this.nativeObj) as WindowPropertiesInternal;
-                res.type = res.typeInternal as WindowType;
-                res.displayId = res.displayIdInternal;
                 return res;
             }).then((ret: NullishType) => {
                 resolve(ret as WindowProperties);
@@ -2748,8 +2744,6 @@ export class WindowInternal implements Window {
     public getProperties(callback: AsyncCallback<WindowProperties>): void {
         taskpool.execute((): WindowProperties => {
             let res = this.getProperties(this.nativeObj) as WindowPropertiesInternal;
-            res.type = res.typeInternal as WindowType;
-            res.displayId = res.displayIdInternal;
             return res;
         }).then((ret: NullishType) => {
             callback(new BusinessError(), ret as WindowProperties);
