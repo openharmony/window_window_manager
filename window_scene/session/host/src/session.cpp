@@ -195,6 +195,20 @@ std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode() const
     return surfaceNode_;
 }
 
+std::shared_ptr<RSSurfaceNode> GetSurfaceNode(bool isUpdateContextBeforeGet)
+{
+    std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
+    if (isUpdateContextBeforeGet) {
+        TLOGD(WmsLogTag::WMS_SCB,
+              "id: %{public}d, surfaceNode: %{public}s, original %{public}s",
+              GetPersistentId(),
+              RSAdapterUtil::RSNodeToStr(surfaceNode_).c_str(),
+              RSAdapterUtil::RSUIContextToStr(GetRSUIContext()).c_str());
+        RSAdapterUtil::SetRSUIContext(surfaceNode_, GetRSUIContext(), true);
+    }
+    return surfaceNode_;
+}
+
 std::shared_ptr<RSSurfaceNode> Session::GetShadowSurfaceNode() const
 {
     std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
@@ -4920,6 +4934,11 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     auto screenId = GetScreenId();
+    if (screenId == SCREEN_ID_INVALID) {
+        TLOGW(WmsLogTag::WMS_SCB, 
+              "invalid screenId, %{public}s: %{public}s, sessionId: %{public}d, screenId:%{public}" PRIu64,ss
+              caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
+    }
     if (screenIdOfRSUIContext_ != screenId) {
         // Note: For the window corresponding to UIExtAbility, RSUIContext cannot be obtained
         // directly here because its server side is not SceneBoard. The acquisition of RSUIContext

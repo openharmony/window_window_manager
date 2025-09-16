@@ -263,6 +263,7 @@ public:
     int32_t GetCurrentRotation() const;
     void SetSurfaceNode(const std::shared_ptr<RSSurfaceNode>& surfaceNode);
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
+    std::shared_ptr<RSSurfaceNode> GetSurfaceNode(bool isUpdateContextBeforeGet);
     std::optional<NodeId> GetSurfaceNodeId() const;
     void SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode);
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
