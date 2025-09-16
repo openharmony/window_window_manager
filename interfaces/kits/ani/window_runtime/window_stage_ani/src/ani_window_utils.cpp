@@ -410,9 +410,8 @@ ani_object AniWindowUtils::CreateAniSize(ani_env* env, int32_t width, int32_t he
 
 ani_object AniWindowUtils::CreateAniDecorButtonStyle(ani_env* env, const DecorButtonStyle& decorButtonStyle)
 {
-    TLOGI(WmsLogTag::WMS_DECOR, "[ANI]");
     ani_class aniClass;
-    ani_status ret = env->FindClass("@ohos.window.window.DecorButtonStyle", &aniClass);
+    ani_status ret = env->FindClass("@ohos.window.window.DecorButtonStyleInternal", &aniClass);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_DECOR, "[ANI] class not found");
         return AniWindowUtils::CreateAniUndefined(env);
@@ -429,19 +428,59 @@ ani_object AniWindowUtils::CreateAniDecorButtonStyle(ani_env* env, const DecorBu
         TLOGE(WmsLogTag::WMS_DECOR, "[ANI] fail to new obj");
         return AniWindowUtils::CreateAniUndefined(env);
     }
-    CallAniMethodVoid(env, aniDecorButtonStyle, aniClass,
-        "<set>colorMode", nullptr, ani_long(decorButtonStyle.colorMode));
-    CallAniMethodVoid(env, aniDecorButtonStyle, aniClass,
-        "<set>buttonBackgroundSize", nullptr, ani_int(decorButtonStyle.buttonBackgroundSize));
-    CallAniMethodVoid(env, aniDecorButtonStyle, aniClass,
-        "<set>spacingBetweenButtons", nullptr, ani_int(decorButtonStyle.spacingBetweenButtons));
-    CallAniMethodVoid(env, aniDecorButtonStyle, aniClass,
-        "<set>closeButtonRightMargin", nullptr, ani_int(decorButtonStyle.closeButtonRightMargin));
-    CallAniMethodVoid(env, aniDecorButtonStyle, aniClass,
-        "<set>buttonIconSize", nullptr, ani_int(decorButtonStyle.buttonIconSize));
-    CallAniMethodVoid(env, aniDecorButtonStyle, aniClass,
-        "<set>buttonBackgroundCornerRadius", nullptr, ani_int(decorButtonStyle.buttonBackgroundCornerRadius));
+    ani_enum aniColorModeType;
+    ret = env->FindEnum("@ohos.app.ability.ConfigurationConstant.ConfigurationConstant.ColorMode", &aniColorModeType);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_DECOR, "[ANI] failed to FindEnum");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    std::string itemName = "COLOR_MODE_NOT_SET";
+    if (decorButtonStyle.colorMode == LIGHT_COLOR_MODE) {
+        itemName = "COLOR_MODE_DARK";
+    } else if (decorButtonStyle.colorMode == DARK_COLOR_MODE) {
+        itemName = "COLOR_MODE_LIGHT";
+    }
+    ani_enum_item aniColorMode;
+    ret = env->Enum_GetEnumItemByName(aniColorModeType, itemName.c_str(), &aniColorMode);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_DECOR, "[ANI] Enum_GetEnumItemByName failed");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    CallAniMethodVoid(env, aniDecorButtonStyle, aniClass, "colorMode", nullptr, aniColorMode);
+    SetOptionalFieldInt(env, aniDecorButtonStyle, aniClass,
+        "buttonBackgroundSize", ani_int(decorButtonStyle.buttonBackgroundSize));
+    SetOptionalFieldInt(env, aniDecorButtonStyle, aniClass,
+        "spacingBetweenButtons", ani_int(decorButtonStyle.spacingBetweenButtons));
+    SetOptionalFieldInt(env, aniDecorButtonStyle, aniClass,
+        "closeButtonRightMargin", ani_int(decorButtonStyle.closeButtonRightMargin));
+    SetOptionalFieldInt(env, aniDecorButtonStyle, aniClass,
+        "buttonIconSize", ani_int(decorButtonStyle.buttonIconSize));
+    SetOptionalFieldInt(env, aniDecorButtonStyle, aniClass,
+        "buttonBackgroundCornerRadius", ani_int(decorButtonStyle.buttonBackgroundCornerRadius));
     return aniDecorButtonStyle;
+}
+
+ani_status AniWindowUtils::SetOptionalFieldInt(ani_env* env, ani_object obj,
+    ani_class cls, const char* method, ani_int aniInt)
+{
+    ani_class aniIntClass {};
+    ani_status ret = env->FindClass("std.core.Int", &aniIntClass);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_DECOR, "[ANI] class not found");
+        return ret;
+    }
+    ani_method aniCtor {};
+    ret = env->Class_FindMethod(aniIntClass, "<ctor>", "i:", &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_DECOR, "[ANI] ctor not found");
+        return ret;
+    }
+    ani_object intObj {};
+    if (env->Object_New(aniIntClass, aniCtor, &intObj, aniInt) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_DECOR, "[ANI] fail to new obj: %{public}s", method);
+        return ret;
+    }
+    return CallAniMethodVoid(env, obj, cls, method, nullptr, intObj);
 }
 
 ani_object AniWindowUtils::CreateAniTitleButtonRect(ani_env* env, const TitleButtonRect& titleButtonRect)
