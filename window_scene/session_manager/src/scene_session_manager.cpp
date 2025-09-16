@@ -1644,22 +1644,28 @@ void SceneSessionManager::CreateRootSceneSession()
     rootSceneSession_->isKeyboardPanelEnabled_ = isKeyboardPanelEnabled_;
     rootSceneSession_->SetEventHandler(taskScheduler_->GetEventHandler());
     rootSceneSession_->SetSystemConfig(systemConfig_);
-
-    AppExecFwk::RunningProcessInfo info;
-    DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->GetRunningProcessInfoByPid(getpid(), info);
-    TLOGI(WmsLogTag::WMS_LIFE, "pid: %{public}d processName: %{public}s", getpid(), info.processName_.c_str());
-
-    if (SCENE_BOARD_BUNDLE_NAME == info.processName_) {
-        AAFwk::AbilityManagerClient::GetInstance()->SetRootSceneSession(rootSceneSession_->AsObject());
-        TLOGI(WmsLogTag::WMS_LIFE, "SetRootSceneSession success.");
-    }
-
     rootSceneSession_->RegisterGetStatusBarAvoidHeightFunc([this](DisplayId displayId, WSRect& barArea) {
         return this->GetStatusBarAvoidHeight(displayId, barArea);
     });
     rootSceneSession_->RegisterGetStatusBarConstantlyShowFunc([this](DisplayId displayId, bool& isVisible) {
         return this->GetStatusBarConstantlyShow(displayId, isVisible);
     });
+}
+
+void SceneSessionManager::RegisterRootSceneSession()
+{
+    if (rootSceneSession_ == nullptr) {
+        TLOGW(WmsLogTag::WMS_LIFE, "rootSceneSession is null");
+        return;
+    }
+    AppExecFwk::RunningProcessInfo info;
+    DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->GetRunningProcessInfoByPid(getpid(), info);
+    TLOGI(WmsLogTag::WMS_LIFE, "pid: %{public}d, processName: %{public}s, currentUserId: %{public}d", getpid(),
+        info.processName_.c_str(), currentUserId_.load());
+    if (SCENE_BOARD_BUNDLE_NAME == info.processName_ && currentUserId_ != DEFAULT_USERID) {
+        AAFwk::AbilityManagerClient::GetInstance()->SetRootSceneSession(rootSceneSession_->AsObject());
+        TLOGI(WmsLogTag::WMS_LIFE, "SetRootSceneSession success.");
+    }
 }
 
 sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
@@ -5152,6 +5158,7 @@ WSError SceneSessionManager::InitUserInfo(int32_t userId, std::string& fileDir)
             MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
         }
         AbilityInfoManager::GetInstance().SetCurrentUserId(currentUserId_);
+        RegisterRootSceneSession();
         RegisterSecSurfaceInfoListener();
         RegisterConstrainedModalUIExtInfoListener();
         return WSError::WS_OK;
