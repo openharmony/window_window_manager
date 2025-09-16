@@ -442,6 +442,7 @@ private:
     bool titleHoverShowEnabled_ = true;
     bool dockHoverShowEnabled_ = true;
     void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);
+    void MobileAppInPadLayoutFullScreenChange(bool statusBarEnable, bool navigationEnable);
 
     /*
      * Gesture Back

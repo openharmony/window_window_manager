@@ -3150,7 +3150,27 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
             }
         }
     }
+    SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    SystemBarProperty navigationIndicatorPorperty =
+        GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
+    MobileAppInPadLayoutFullScreenChange(statusProperty.enable_, navigationIndicatorPorperty.enable_);
     return WMError::WM_OK;
+}
+
+void WindowSceneSessionImpl::MobileAppInPadLayoutFullScreenChange(bool statusBarEnable, bool navigationEnable)
+{
+    TLOGI(WmsLogTag::WMS_COMPAT, "isMobileAppInPadLayoutFullScreen %{public}d",
+        property_->GetMobileAppInPadLayoutFullScreen());
+    if (property_->GetMobileAppInPadLayoutFullScreen() && GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        TLOGI(WmsLogTag::WMS_COMPAT, "statusProperty %{public}d, navigationIndicatorPorperty %{public}d",
+            statusBarEnable, navigationEnable);
+        if (!statusBarEnable && !navigationEnable) {
+            Maximize(MaximizePresentation::ENTER_IMMERSIVE);
+        }
+        if (statusBarEnable && navigationEnable) {
+            Maximize(MaximizePresentation::EXIT_IMMERSIVE);
+        }
+    }
 }
 
 WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
@@ -3473,6 +3493,17 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
     if (property_->IsFullScreenDisabled()) {
         TLOGW(WmsLogTag::WMS_COMPAT, "diable fullScreen in compatibleMode window ,id:%{public}d", GetPersistentId());
         return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (property_->GetMobileAppInPadLayoutFullScreen()) {
+        SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+        SystemBarProperty navigationIndicatorPorperty =
+            GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
+        TLOGI(WmsLogTag::WMS_COMPAT, "statusProperty %{public}d, navigationIndicatorPorperty %{public}d",
+            statusProperty.enable_, navigationIndicatorPorperty.enable_);
+        if (!statusProperty.enable_ && !navigationIndicatorPorperty.enable_) {
+            Maximize(MaximizePresentation::ENTER_IMMERSIVE);
+            return WMError::WM_OK;
+        }
     }
     if (GetGlobalMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
         hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);

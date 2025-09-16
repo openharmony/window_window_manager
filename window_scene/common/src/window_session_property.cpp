@@ -1370,7 +1370,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isPcAppInpadOrientationLandscape_) &&
         parcel.WriteBool(isPcAppInpadCompatibleMode_) &&
         parcel.WriteString(ancoRealBundleName_) &&
-        parcel.WriteBool(isShowDecorInFreeMultiWindow_);
+        parcel.WriteBool(isShowDecorInFreeMultiWindow_) &&
+        parcel.WriteBool(isMobileAppInPadLayoutFullScreen_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1488,6 +1489,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetPcAppInpadCompatibleMode(parcel.ReadBool());
     property->SetAncoRealBundleName(parcel.ReadString());
     property->SetIsShowDecorInFreeMultiWindow(parcel.ReadBool());
+    property->SetMobileAppInPadLayoutFullScreen(parcel.ReadBool());
     return property;
 }
 
@@ -1601,6 +1603,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
         missionInfo_ = property->missionInfo_;
     }
     isShowDecorInFreeMultiWindow_ = property->isShowDecorInFreeMultiWindow_;
+    isMobileAppInPadLayoutFullScreen_ = property->isMobileAppInPadLayoutFullScreen_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -2339,6 +2342,11 @@ void WindowSessionProperty::SetPcAppInpadOrientationLandscape(bool isPcAppInpadO
     isPcAppInpadOrientationLandscape_ = isPcAppInpadOrientationLandscape;
 }
 
+void WindowSessionProperty::SetMobileAppInPadLayoutFullScreen(bool isMobileAppInPadLayoutFullScreen)
+{
+    isMobileAppInPadLayoutFullScreen_ = isMobileAppInPadLayoutFullScreen;
+}
+
 bool WindowSessionProperty::GetPcAppInpadCompatibleMode() const
 {
     return isPcAppInpadCompatibleMode_;
@@ -2352,6 +2360,11 @@ bool WindowSessionProperty::GetPcAppInpadSpecificSystemBarInvisible() const
 bool WindowSessionProperty::GetPcAppInpadOrientationLandscape() const
 {
     return isPcAppInpadOrientationLandscape_;
+}
+
+bool WindowSessionProperty::GetMobileAppInPadLayoutFullScreen() const
+{
+    return isMobileAppInPadLayoutFullScreen_;
 }
 
 void WindowSessionProperty::SetAncoRealBundleName(const std::string& ancoRealBundleName)

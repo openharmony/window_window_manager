@@ -1384,6 +1384,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     property->SetPcAppInpadCompatibleMode(GetSessionProperty()->GetPcAppInpadCompatibleMode());
     property->SetPcAppInpadSpecificSystemBarInvisible(GetSessionProperty()->GetPcAppInpadSpecificSystemBarInvisible());
     property->SetPcAppInpadOrientationLandscape(GetSessionProperty()->GetPcAppInpadOrientationLandscape());
+    property->SetMobileAppInPadLayoutFullScreen(GetSessionProperty()->GetMobileAppInPadLayoutFullScreen());
     const bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
     const bool isShow = !(isScreenLockedCallback_ && isScreenLockedCallback_() &&
         systemConfig_.IsFreeMultiWindowMode() && !isPcMode);
@@ -3434,6 +3435,14 @@ WSError Session::SetPcAppInpadOrientationLandscape(bool isPcAppInpadOrientationL
     TLOGD(WmsLogTag::WMS_COMPAT, "isPcAppInpadOrientationLandscape: %{public}d",
         isPcAppInpadOrientationLandscape);
     GetSessionProperty()->SetPcAppInpadOrientationLandscape(isPcAppInpadOrientationLandscape);
+    return WSError::WS_OK;
+}
+
+WSError Session::SetMobileAppInPadLayoutFullScreen(bool isMobileAppInPadLayoutFullScreen)
+{
+    TLOGD(WmsLogTag::WMS_COMPAT, "isMobileAppInPadLayoutFullScreen: %{public}d",
+        isMobileAppInPadLayoutFullScreen);
+    GetSessionProperty()->SetMobileAppInPadLayoutFullScreen(isMobileAppInPadLayoutFullScreen);
     return WSError::WS_OK;
 }
 
