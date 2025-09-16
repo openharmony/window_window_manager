@@ -500,6 +500,8 @@ public:
     Rotation GetConfigCorrectionByDisplayMode(FoldDisplayMode displayMode);
     Rotation RemoveRotationCorrection(Rotation rotation);
     void NotifySwitchUserAnimationFinish() override;
+    bool GetFirstSCBConnect();
+    void SetFirstSCBConnect(bool firstSCBConnect);
     // mirror screen
     bool HandleResolutionEffectChange();
 

@@ -205,7 +205,7 @@ public:
     void UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode, const RRect& bounds);
     void UpdatePropertyByFakeInUse(bool isFakeInUse);
     ScreenProperty UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty,
-        FoldDisplayMode foldDisplayMode = FoldDisplayMode::UNKNOWN);
+        FoldDisplayMode foldDisplayMode = FoldDisplayMode::UNKNOWN, bool firstSCBConnect = false);
     void UpdateDisplayState(DisplayState displayState);
     void UpdateRefreshRate(uint32_t refreshRate);
     uint32_t GetRefreshRate();
@@ -448,6 +448,7 @@ private:
     mutable std::shared_mutex modesMutex_;
 
     void RemoveRotationCorrection(Rotation& rotation, FoldDisplayMode foldDisplayMode);
+    void AddRotationCorrection(Rotation& rotation, FoldDisplayMode displayMode);
     std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap_;
     std::shared_mutex rotationCorrectionMutex_;
 

@@ -4600,6 +4600,57 @@ HWTEST_F(ScreenSessionTest, GetScreenSnapshotWithAllWindows02, TestSize.Level2)
 }
 
 /**
+ * @tc.name: UpdatePropertyByFoldControl
+ * @tc.desc: UpdatePropertyByFoldControl Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdatePropertyByFoldControl, TestSize.Level2)
+{
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        GTEST_SKIP() << "Skip test when device is not secondaryDisplayFoldDevice.";
+    }
+    ScreenId screenId = 100;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
+    ScreenProperty newProperty;
+    screenSession->GetScreenProperty().UpdateScreenRotation(Rotation::ROTATION_0);
+    std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap;
+    rotationCorrectionMap.insert({FoldDisplayMode::MAIN, 3});
+    screenSession->SetRotationCorrectionMap(rotationCorrectionMap);
+    screenSession->UpdatePropertyByFoldControl(newProperty, FoldDisplayMode::MAIN, true);
+    screenProperty = screenSession->GetScreenProperty();
+    EXPECT_EQ(screenProperty.GetDisplayOrientation(), DisplayOrientation::LANDSCAPE_INVERTED);
+    screenSession->UpdatePropertyByFoldControl(newProperty, FoldDisplayMode::MAIN, false);
+    screenProperty = screenSession->GetScreenProperty();
+    EXPECT_EQ(screenProperty.GetDisplayOrientation(), DisplayOrientation::PORTRAIT);
+}
+
+/**
+ * @tc.name: AddRotationCorrection
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, AddRotationCorrection, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    Rotation rotation = Rotation::ROTATION_0;
+    std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap;
+    rotationCorrectionMap.insert({FoldDisplayMode::MAIN, 3});
+    session->SetRotationCorrectionMap(rotationCorrectionMap);
+    session->AddRotationCorrection(rotation, FoldDisplayMode::MAIN);
+    EXPECT_EQ(rotation, Rotation::ROTATION_270);
+ 
+    rotation = Rotation::ROTATION_0;
+    session->AddRotationCorrection(rotation, FoldDisplayMode::FULL);
+    EXPECT_EQ(rotation, Rotation::ROTATION_0);
+ 
+    rotation = static_cast<Rotation>(100);
+    session->AddRotationCorrection(rotation, FoldDisplayMode::FULL);
+    EXPECT_EQ(static_cast<int32_t>(rotation), 100);
+}
+
+/**
  * @tc.name: TestPropertyChangeAllCases
  * @tc.desc: Verify PropertyChange behavior for multiple scenarios
  * @tc.type: FUNC
