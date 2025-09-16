@@ -53,6 +53,37 @@ static const std::map<DisplayState,      DisplayStateMode> NATIVE_TO_JS_DISPLAY_
     { DisplayState::ON_SUSPEND,   DisplayStateMode::STATE_ON_SUSPEND   },
 };
 
+ani_method unboxInt {};
+
+ani_ref g_intCls {};
+
+template<typename T>
+ani_status unbox(ani_env *env, ani_object obj, T *result)
+{
+    return ANI_INVALID_TYPE;
+}
+
+template<>
+ani_status unbox<ani_int>(ani_env *env, ani_object obj, ani_int *result)
+{
+    if (g_intCls == nullptr) {
+        ani_class intCls {};
+        auto status = env->FindClass("std.core.Intrger", &intCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->GlobalReference_Create(intCls, &g_intCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->Class_FindMethod(intCls, "unboxed", ":i", &unboxInt);
+        if (status != ANI_OK) {
+            return status;
+        }
+    }
+    return env->Object_CallMethod_Int(obj, unboxInt, result);
+}
+
 
 void DisplayAniUtils::ConvertRect(DMRect rect, ani_object rectObj, ani_env* env)
 {
@@ -289,13 +320,23 @@ ani_status DisplayAniUtils::GetAniArrayInt(ani_env* env, ani_object arrayObj, st
         TLOGE(WmsLogTag::DMS, "[ANI] get ani_array len fail");
         return ret;
     }
-    auto array = reinterpret_cast<ani_array_int>(arrayObj);
+    auto array = reinterpret_cast<ani_array>(arrayObj);
     std::vector<ani_int> nativeArray(length);
  
-    ret = env->Array_GetRegion_Int(array, 0, length, nativeArray.data());
-    if (ANI_OK != ret) {
-        TLOGE(WmsLogTag::DMS, "[ANI] get ani_array region fail");
-        return ret;
+    for (auto i = 0; i < length; i++) {
+        ani_ref intRef {};
+        ani_int intValue {};
+        auto status = env->Array_Get(array, i, &intRef);
+        if (status != ANI_OK) {
+            TLOGE(WmsLogTag::DMS, "Array_Get failed, status: %{public}d", status);
+            return status;
+        }
+        status = unbox(env, static_cast<ani_object>(intRef), &intValue);
+        if (status != ANI_OK) {
+            TLOGE(WmsLogTag::DMS, "Unbox failed, status: %{public}d", status);
+            return status;
+        }
+        nativeArray[i] = intValue;
     }
     result.resize(length);
     for (ani_int i = 0; i < length; i++) {
