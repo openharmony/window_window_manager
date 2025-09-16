@@ -1780,7 +1780,8 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
     RecordLifeCycleExceptionEvent(LifeCycleEvent::HIDE_EVENT, res);
     if (res == WMError::WM_OK) {
         // update sub window state if this is main window
-        UpdateSubWindowState(type, waitDetach);
+        GetAttachStateSyncResult(waitDetach, false);
+        UpdateSubWindowState(type);
         NotifyAfterDidBackground(reason);
         state_ = WindowState::STATE_HIDDEN;
         requestState_ = WindowState::STATE_HIDDEN;
@@ -1836,15 +1837,15 @@ WMError WindowSceneSessionImpl::NotifyRemoveStartingWindow()
     return res;
 }
 
-void WindowSceneSessionImpl::UpdateSubWindowState(const WindowType& type, bool waitDetach)
+void WindowSceneSessionImpl::UpdateSubWindowState(const WindowType& type)
 {
     UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_HIDDEN);
     if (WindowHelper::IsSubWindow(type)) {
         if (state_ == WindowState::STATE_SHOWN) {
-            NotifyAfterBackground(true, true, waitDetach);
+            NotifyAfterBackground(true, true);
         }
     } else {
-        NotifyAfterBackground(true, true, waitDetach);
+        NotifyAfterBackground(true, true);
     }
 }
 

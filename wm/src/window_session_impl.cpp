@@ -4929,7 +4929,7 @@ void WindowSessionImpl::NotifyAfterDidForeground(uint32_t reason)
     }, where, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
-void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool needNotifyUiContent, bool waitDetach)
+void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool needNotifyUiContent)
 {
     if (needNotifyListeners) {
         {
@@ -4939,7 +4939,7 @@ void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool nee
         }
         NotifyAfterLifecycleBackground();
     }
-    GetAttachStateSyncResult(waitDetach, false);
+
     if (needNotifyUiContent) {
         CALL_UI_CONTENT(Background);
     }
