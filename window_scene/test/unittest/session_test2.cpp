@@ -758,7 +758,7 @@ HWTEST_F(WindowSessionTest2, GetSurfaceNode02, TestSize.Level1)
     session_->surfaceNode_ = nullptr;
     std::shared_ptr<RSSurfaceNode> res = session_->GetSurfaceNode(false);
     ASSERT_EQ(res, nullptr);
-    res = session_->GetSurfaceNode(false);
+    res = session_->GetSurfaceNode(true);
     ASSERT_EQ(res, nullptr);
 
     struct RSSurfaceNodeConfig config;
