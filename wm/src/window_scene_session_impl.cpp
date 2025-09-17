@@ -2949,7 +2949,7 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
             return WMError::WM_OK;
         }
         CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-        auto event = getSessionEvent();
+        auto event = GetSessionEvent();
         hostSession->OnSessionEvent(event);
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     }
@@ -2963,7 +2963,7 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
     return ret;
 }
 
-SessionEvent WindowSceneSessionImpl::getSessionEvent()
+SessionEvent WindowSceneSessionImpl::GetSessionEvent()
 {
     auto event = SessionEvent::EVENT_MAXIMIZE;
     if (isFullScreenWaterfallMode_.load()) {
