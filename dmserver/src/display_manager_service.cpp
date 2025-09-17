@@ -32,6 +32,7 @@
 namespace OHOS::Rosen {
 namespace {
 const std::string SCREEN_CAPTURE_PERMISSION = "ohos.permission.CAPTURE_SCREEN";
+const std::string CUSTOM_SCREEN_RECORDING_PERMISSION = "ohos.permission.CUSTOM_SCREEN_RECORDING";
 const std::string ACCESS_VIRTUAL_SCREEN_PERMISSION = "ohos.permission.ACCESS_VIRTUAL_SCREEN";
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerService)
@@ -307,8 +308,8 @@ std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDisplaySnapshot(Displ
     DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:GetDisplaySnapshot(%" PRIu64 ")", displayId);
-    if ((Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) ||
-        Permission::IsStartByHdcd()) {
+    if ((Permission::IsSystemCalling() && (Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION) ||
+        Permission::CheckCallingPermission(CUSTOM_SCREEN_RECORDING_PERMISSION))) || Permission::IsStartByHdcd()) {
         auto res = abstractDisplayController_->GetScreenSnapshot(displayId);
         if (res != nullptr) {
             NotifyScreenshot(displayId);
