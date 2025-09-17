@@ -218,7 +218,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, MinimizeAllWindow, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
 
-    DisplayId displayId =0;
+    DisplayId displayId = 0;
     MockAccesstokenKit::MockIsSACalling(false);
     MockAccesstokenKit::MockIsSystemApp(false);
     EXPECT_EQ(ssm_->MinimizeAllWindow(displayId), WMError::WM_OK);
@@ -249,7 +249,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, MinimizeAllWindow01, TestSize.Level1
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
 
-    DisplayId displayId =0;
+    DisplayId displayId = 0;
     MockAccesstokenKit::MockIsSACalling(true);
     MockAccesstokenKit::MockIsSystemApp(true);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
@@ -262,7 +262,6 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, MinimizeAllWindow01, TestSize.Level1
     sceneSession->SetScreenId(0);
     ssm_->sceneSessionMap_.insert({1, nullptr});
     ssm_->sceneSessionMap_.insert({9, sceneSession});
-    MockAccesstokenKit::MockAccessTokenKitRet(0);
     EXPECT_EQ(ssm_->MinimizeAllWindow(displayId), WMError::WM_OK);
 
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
