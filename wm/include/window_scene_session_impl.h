@@ -397,7 +397,7 @@ private:
     void NotifyDisplayInfoChange(const sptr<DisplayInfo>& info = nullptr);
     void UpdateDensityInner(const sptr<DisplayInfo>& info = nullptr);
     sptr<DisplayInfo> GetDisplayInfo() const;
-    SessionEvent getSessionEvent();
+    SessionEvent GetSessionEvent();
 
     /*
      * Window Input Event
