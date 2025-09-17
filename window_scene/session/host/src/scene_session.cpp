@@ -9504,8 +9504,7 @@ void SceneSession::RunAfterNVsyncs(uint32_t vsyncCount, Task&& task)
 
 void SceneSession::RestoreGravityWhenDragEnd()
 {
-    // Ensure the last frame of drag rendering is completed
-    // before restoring the gravity to its pre-drag state.
+    // Ensure the last frame of drag rendering is completed before restoring the gravity to its pre-drag state.
     constexpr uint32_t gravityUpdateDelayVsyncs = 2;
     RunAfterNVsyncs(gravityUpdateDelayVsyncs, [weakSession = wptr(this), where = __func__] {
         auto session = weakSession.promote();
@@ -9527,7 +9526,7 @@ void SceneSession::RestoreGravityWhenDragEnd()
             }
 
             session->moveDragController_->RestoreToPreDragGravity(session->GetSurfaceNode());
-            TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: Restore gravity completed, windowId: %{public}d",
+            TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: Restore gravity completed, windowId: %{public}d",
                 where, session->GetPersistentId());
         }, where);
     });
