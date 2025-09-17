@@ -156,6 +156,7 @@ public:
         TRANS_ID_REMOVE_SESSION_BLACK_LIST,
         TRANS_ID_GET_PIP_SWITCH_STATUS,
         TRANS_ID_RECOVER_WINDOW_PROPERTY_CHANGE_FLAG,
+        TRANS_ID_MINIMIZE_ALL_WINDOW,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -330,6 +331,7 @@ public:
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) override {}
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override { return WMError::WM_OK; }
     WMError SetForegroundWindowNum(uint32_t windowNum) override { return WMError::WM_OK; }
+    WMError MinimizeAllWindow(DisplayId displayId) override { return WMError::WM_OK; }
 
     /**
      * @brief Raise a window to screen top by id of window.

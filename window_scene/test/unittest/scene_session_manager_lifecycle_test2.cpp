@@ -29,6 +29,7 @@
 #include "zidl/window_manager_agent_interface.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "application_info.h"
 #include "context.h"
 
@@ -199,6 +200,85 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange02, TestSize.Lev
     sceneSession->SetFocusedOnShow(false);
     ASSERT_NE(nullptr, ssm_);
     ssm_->OnSessionStateChange(1, state);
+}
+
+/**
+ * @tc.name: MinimizeAllWindow
+ * @tc.desc: MinimizeAllWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLifecycleTest2, MinimizeAllWindow, TestSize.Level1)
+{
+    int ret = 0;
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "MinimizeAllWindow";
+    info.bundleName_ = "MinimizeAllWindow";
+    info.screenId_ = 0;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+
+    DisplayId displayId =0;
+    MockAccesstokenKit::MockIsSACalling(false);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    EXPECT_EQ(ssm_->MinimizeAllWindow(displayId), WMError::WM_ERROR_NOT_SYSTEM_APP);
+
+    MockAccesstokenKit::MockIsSACalling(true);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    EXPECT_EQ(ssm_->MinimizeAllWindow(displayId), WMError::WM_OK);
+
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    EXPECT_EQ(ssm_->MinimizeAllWindow(displayId), WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    EXPECT_EQ(ssm_->MinimizeAllWindow(displayId), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: MinimizeAllWindow
+ * @tc.desc: MinimizeAllWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLifecycleTest2, MinimizeAllWindow01, TestSize.Level1)
+{
+    int ret = 0;
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "MinimizeAllWindow01";
+    info.bundleName_ = "MinimizeAllWindow01";
+    info.screenId_ = 0;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+
+    DisplayId displayId =0;
+    MockAccesstokenKit::MockIsSACalling(true);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->property_ = property;
+    sceneSession->SetSessionInfoPersistentId(9);
+    sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
+    sceneSession->SetSessionLabel("MinimizeAllWindow01");
+    sceneSession->SetScreenId(0);
+    ssm_->sceneSessionMap_.insert({1, nullptr});
+    ssm_->sceneSessionMap_.insert({9, sceneSession});
+    MockAccesstokenKit::MockAccessTokenKitRet(0);
+    EXPECT_EQ(ssm_->MinimizeAllWindow(displayId), WMError::WM_OK);
+
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    sceneSession->property_ = property;
+    ssm_->sceneSessionMap_.insert({9, sceneSession});
+    EXPECT_EQ(ssm_->MinimizeAllWindow(displayId), WMError::WM_OK);
+
+    sceneSession->SetScreenId(1);
+    ssm_->sceneSessionMap_.insert({9, sceneSession});
+    EXPECT_EQ(ssm_->MinimizeAllWindow(displayId), WMError::WM_OK);
+
+    sceneSession->SetScreenId(1);
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    sceneSession->property_ = property;
+    ssm_->sceneSessionMap_.insert({9, sceneSession});
+    EXPECT_EQ(ssm_->MinimizeAllWindow(displayId), WMError::WM_OK);
 }
 
 /**
