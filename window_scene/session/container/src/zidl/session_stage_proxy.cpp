@@ -199,7 +199,11 @@ WSError SessionStageProxy::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         WLOGFE("Write has transaction failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (hasRSTransaction) {
+
+    bool isInnerProcess = hasRSTransaction ? rsTransaction->GetInnerProcessFlag() : false;
+    TLOGD(WmsLogTag::DEFAULT, "hasRSTransaction: %{public}d, isInnerProcess: %{public}d", hasRSTransaction,
+        isInnerProcess);
+    if (hasRSTransaction && !isInnerProcess) {
         auto pid = rsTransaction->GetParentPid();
         rsTransaction->SetParentPid(getprocpid());
         if (!data.WriteParcelable(rsTransaction.get())) {
