@@ -2949,13 +2949,7 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
             return WMError::WM_OK;
         }
         CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-        auto event = SessionEvent::EVENT_MAXIMIZE;
-        if (isFullScreenWaterfallMode_.load()) {
-            event = SessionEvent::EVENT_MAXIMIZE_WATERFALL;
-        } else if (isWaterfallToMaximize_.load()) {
-            event = SessionEvent::EVENT_WATERFALL_TO_MAXIMIZE;
-            isWaterfallToMaximize_.store(false);
-        }
+        auto event = getSessionEvent();
         hostSession->OnSessionEvent(event);
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     }
@@ -2967,6 +2961,18 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
     }
     enableImmersiveMode_ = status;
     return ret;
+}
+
+SessionEvent WindowSceneSessionImpl::getSessionEvent()
+{
+    auto event = SessionEvent::EVENT_MAXIMIZE;
+    if (isFullScreenWaterfallMode_.load()) {
+        event = SessionEvent::EVENT_MAXIMIZE_WATERFALL;
+    } else if (isWaterfallToMaximize_.load()) {
+        event = SessionEvent::EVENT_WATERFALL_TO_MAXIMIZE;
+        isWaterfallToMaximize_.store(false);
+    }
+    return event;
 }
 
 WMError WindowSceneSessionImpl::SetTitleAndDockHoverShown(
