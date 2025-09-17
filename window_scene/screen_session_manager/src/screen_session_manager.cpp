@@ -1712,6 +1712,8 @@ void ScreenSessionManager::HandleScreenDisconnectEvent(sptr<ScreenSession> scree
     if (g_isPcDevice) {
         ScreenCombination screenCombination = screenSession->GetScreenCombination();
         ReportHandleScreenEvent(ScreenEvent::DISCONNECTED, screenCombination);
+    }
+    if (g_isPcDevice || IS_SUPPORT_PC_MODE) {
         SetMultiScreenFrameControl();
     }
     if (!(screenId == SCREEN_ID_MAIN && isCoordinationFlag_ == true)) {
@@ -3405,7 +3407,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
         std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
         screenSessionMap_[smsScreenId] = session;
     }
-    if (g_isPcDevice) {
+    if (g_isPcDevice || IS_SUPPORT_PC_MODE) {
         SetMultiScreenFrameControl();
     }
     screenEventTracker_.RecordEvent("create screen session success.");
@@ -9012,18 +9014,10 @@ bool ScreenSessionManager::HandleSwitchPcMode()
         TLOGI(WmsLogTag::DMS, "PcMode change isPcDevice true");
         g_isPcDevice = true;
         SwitchModeHandleExternalScreen(true);
-#ifdef WM_MULTI_SCREEN_CTL_ABILITY_ENABLE
-        SetMultiScreenFrameControl();
-#endif
     } else {
         TLOGI(WmsLogTag::DMS, "PadMode change isPcDevice false");
         g_isPcDevice = false;
         SwitchModeHandleExternalScreen(false);
-#ifdef WM_MULTI_SCREEN_CTL_ABILITY_ENABLE
-        TLOGI(WmsLogTag::DMS, "Disable frame rate control");
-        EventInfo event = { "VOTER_MUTIPHYSICALSCREEN", REMOVE_VOTE };
-        rsInterface_.NotifyRefreshRateEvent(event);
-#endif
     }
     return g_isPcDevice;
 }
