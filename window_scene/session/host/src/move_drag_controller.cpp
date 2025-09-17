@@ -1169,17 +1169,13 @@ void MoveDragController::CalcFixedAspectRatioTranslateLimits(AreaType type)
     if (isDecorEnable_) {
         if (SessionUtils::ToLayoutWidth(minW, vpr_) < SessionUtils::ToLayoutHeight(minH, vpr_) * aspectRatio_) {
             minW = SessionUtils::ToWinWidth(SessionUtils::ToLayoutHeight(minH, vpr_) * aspectRatio_, vpr_);
-            minH = SessionUtils::ToLayoutHeight(minH, vpr_);
         } else {
             minH = SessionUtils::ToWinHeight(SessionUtils::ToLayoutWidth(minW, vpr_) / aspectRatio_, vpr_);
-            minW = SessionUtils::ToLayoutWidth(minW, vpr_);
         }
         if (SessionUtils::ToLayoutWidth(maxW, vpr_) < SessionUtils::ToLayoutHeight(maxH, vpr_) * aspectRatio_) {
             maxH = SessionUtils::ToWinHeight(SessionUtils::ToLayoutWidth(maxW, vpr_) / aspectRatio_, vpr_);
-            maxW = SessionUtils::ToLayoutWidth(maxW, vpr_);
         } else {
             maxW = SessionUtils::ToWinWidth(SessionUtils::ToLayoutHeight(maxH, vpr_) * aspectRatio_, vpr_);
-            maxH = SessionUtils::ToLayoutHeight(maxH, vpr_);
         }
     } else {
         // width = height * aspectRatio
