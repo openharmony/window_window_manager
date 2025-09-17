@@ -17014,6 +17014,31 @@ void SceneSessionManager::GetStatusBarAvoidHeight(DisplayId displayId, WSRect& b
     barArea.height_ = it->second;
 }
 
+WMError SceneSessionManager::MinimizeAllWindow(DisplayId displayId)
+{
+    if (!SessionPermission::IsSystemCalling() && !!SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no right.");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    if (!systemConfig_.IsPhoneWindow()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Device not support!");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& iter : sceneSessionMap_) {
+        auto& session = iter.second;
+        if (sceneSession == nullptr) {
+            TLOGW(WmsLogTag::WMS_LIFE, "Scene session nullptr, persistentId: %{public}d", iter.first);
+            continue;
+        }
+        if (displayId == session->GetScreenId() && WindowHelper::IsMainWindow(session->GetWindowType())) {
+            session->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
+            TLOGI(WmsLogTag::WMS_LIFE, "Id: %{public}d has minimized window.", session->GetPersistendId());
+        }
+    }
+    return WMError::WM_OK;
+}
+
 WSError SceneSessionManager::CloneWindow(int32_t fromPersistentId, int32_t toPersistentId, bool needOffScreen)
 {
     return taskScheduler_->PostSyncTask([this, fromPersistentId, toPersistentId, needOffScreen]() {
