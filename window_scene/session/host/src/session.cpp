@@ -195,11 +195,11 @@ std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode() const
     return surfaceNode_;
 }
 
-std::shared_ptr<RSSurfaceNode> GetSurfaceNode(bool isUpdateContextBeforeGet)
+std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode(bool isUpdateContextBeforeGet)
 {
     std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
     if (isUpdateContextBeforeGet) {
-        TLOGD(WmsLogTag::WMS_SCB,
+        TLOGI(WmsLogTag::WMS_SCB,
               "id: %{public}d, surfaceNode: %{public}s, original %{public}s",
               GetPersistentId(),
               RSAdapterUtil::RSNodeToStr(surfaceNode_).c_str(),
@@ -4936,7 +4936,7 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
     auto screenId = GetScreenId();
     if (screenId == SCREEN_ID_INVALID) {
         TLOGW(WmsLogTag::WMS_SCB, 
-              "invalid screenId, %{public}s: %{public}s, sessionId: %{public}d, screenId:%{public}" PRIu64,ss
+              "invalid screenId, %{public}s: %{public}s, sessionId: %{public}d, screenId:%{public}" PRIu64,
               caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
     }
     if (screenIdOfRSUIContext_ != screenId) {
