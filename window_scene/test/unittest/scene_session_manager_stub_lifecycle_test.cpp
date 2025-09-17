@@ -211,7 +211,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleClearAllSessions, TestSize.
  * @tc.desc: test HandleMinimizeAllWindow
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleMinimizeAllWindowWhenWriteValidDataThenReturnNone, TestSize.Level1)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleMinimizeAllWindow, TestSize.Level1)
 {
     ASSERT_NE(nullptr, stub_);
     MessageParcel data;
