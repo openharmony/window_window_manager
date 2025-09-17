@@ -1252,7 +1252,7 @@ void AniWindow::OnSetTopmost(ani_env* env, ani_boolean isTopmost)
 {
     TLOGI(WmsLogTag::WMS_HIERARCHY, "[ANI]");
     if (!Permission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI]OnSetTopmost permission denied!");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] OnSetTopmost permission denied!");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
         return;
     }
@@ -1288,7 +1288,7 @@ void AniWindow::OnRequestFocus(ani_env* env, ani_boolean isFocused)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "[ANI]");
     if (!Permission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "[ANI]OnRequestFocus permission denied!");
+        TLOGE(WmsLogTag::WMS_FOCUS, "[ANI] OnRequestFocus permission denied!");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
         return;
     }
