@@ -2514,6 +2514,92 @@ HWTEST_F(WindowSceneSessionImplTest2, IsWindowRectAutoSave002, TestSize.Level1)
     ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
 }
+
+/**
+ * @tc.name: SetLayoutFullScreen01
+ * @tc.desc: SetLayoutFullScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SetLayoutFullScreen01, TestSize.Level0)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowName("SetLayoutFullScreen01");
+    window->property_->SetWindowType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetLayoutFullScreen(false));
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetLayoutFullScreen(false));
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetLayoutFullScreen(false));
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    WMError res = window->SetLayoutFullScreen(false);
+    ASSERT_EQ(WMError::WM_OK, res);
+    ASSERT_EQ(false, window->IsLayoutFullScreen());
+    ASSERT_EQ(WMError::WM_OK, window->SetLayoutFullScreen(true));
+    ASSERT_EQ(true, window->IsLayoutFullScreen());
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    ASSERT_NE(compatibleModeProperty, nullptr);
+    compatibleModeProperty->SetDisableFullScreen(false);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    window->SetLayoutFullScreen(true);
+    compatibleModeProperty->SetDisableFullScreen(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    ASSERT_EQ(WMError::WM_OK, window->SetLayoutFullScreen(true));
+    window->property_->SetWindowModeSupportType(0);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetLayoutFullScreen(false));
+}
+
+/**
+ * @tc.name: SetFullScreen
+ * @tc.desc: SetFullScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SetFullScreen, TestSize.Level0)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowName("SetLayoutFullScreen01");
+    window->property_->SetWindowType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFullScreen(false));
+
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->property_->SetWindowModeSupportType(0);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFullScreen(false));
+
+    window->property_->SetWindowModeSupportType(1);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFullScreen(false));
+
+    window->property_->SetPersistentId(1);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFullScreen(false));
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->state_ = WindowState::STATE_SHOWN;
+    window->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_OK, window->SetFullScreen(false));
+    ASSERT_EQ(false, window->IsLayoutFullScreen());
+    ASSERT_EQ(WMError::WM_OK, window->SetFullScreen(true));
+    ASSERT_EQ(true, window->IsLayoutFullScreen());
+
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    ASSERT_NE(compatibleModeProperty, nullptr);
+    compatibleModeProperty->SetDisableFullScreen(false);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    window->SetFullScreen(true);
+    compatibleModeProperty->SetDisableFullScreen(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    ASSERT_EQ(WMError::WM_OK, window->SetFullScreen(true));
+}
 }
 } // namespace
 } // namespace Rosen
