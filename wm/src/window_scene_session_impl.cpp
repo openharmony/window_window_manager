@@ -2921,7 +2921,6 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
         TLOGI(WmsLogTag::WMS_IMMS, "system window not supported");
         return WMError::WM_OK;
     }
-
     if (IsPcOrPadFreeMultiWindowMode() && property_->IsAdaptToImmersive()) {
         SetLayoutFullScreenByApiVersion(status);
         // compatibleMode app may set statusBarColor before ignoreSafeArea
@@ -2932,14 +2931,12 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
         }
         return WMError::WM_OK;
     }
-
     bool preStatus = property_->IsLayoutFullScreen();
     property_->SetIsLayoutFullScreen(status);
     auto hostSession = GetHostSession();
     if (hostSession != nullptr) {
         hostSession->OnLayoutFullScreenChange(status);
     }
-
     if (WindowHelper::IsMainWindow(GetType()) && !windowSystemConfig_.IsPhoneWindow() &&
         !windowSystemConfig_.IsPadWindow()) {
         if (!WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),
@@ -2947,18 +2944,15 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
             TLOGE(WmsLogTag::WMS_IMMS, "fullscreen window mode not supported");
             return WMError::WM_ERROR_INVALID_WINDOW;
         }
-        CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-        auto event = SessionEvent::EVENT_MAXIMIZE;
-        if (isFullScreenWaterfallMode_.load()) {
-            event = SessionEvent::EVENT_MAXIMIZE_WATERFALL;
-        } else if (isWaterfallToMaximize_.load()) {
-            event = SessionEvent::EVENT_WATERFALL_TO_MAXIMIZE;
-            isWaterfallToMaximize_.store(false);
+        if (property_->IsFullScreenDisabled()) {
+            TLOGE(WmsLogTag::WMS_IMMS, "compatible mode disable fullscreen");
+            return WMError::WM_OK;
         }
+        CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+        auto event = GetSessionEvent();
         hostSession->OnSessionEvent(event);
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     }
-
     WMError ret = SetLayoutFullScreenByApiVersion(status);
     if (ret != WMError::WM_OK) {
         property_->SetIsLayoutFullScreen(preStatus);
@@ -2967,6 +2961,18 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
     }
     enableImmersiveMode_ = status;
     return ret;
+}
+
+SessionEvent WindowSceneSessionImpl::GetSessionEvent()
+{
+    auto event = SessionEvent::EVENT_MAXIMIZE;
+    if (isFullScreenWaterfallMode_.load()) {
+        event = SessionEvent::EVENT_MAXIMIZE_WATERFALL;
+    } else if (isWaterfallToMaximize_.load()) {
+        event = SessionEvent::EVENT_WATERFALL_TO_MAXIMIZE;
+        isWaterfallToMaximize_.store(false);
+    }
+    return event;
 }
 
 WMError WindowSceneSessionImpl::SetTitleAndDockHoverShown(
@@ -3269,6 +3275,10 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
             WindowMode::WINDOW_MODE_FULLSCREEN)) {
             TLOGE(WmsLogTag::WMS_IMMS, "fullscreen window not supported");
             return WMError::WM_ERROR_INVALID_WINDOW;
+        }
+        if (property_->IsFullScreenDisabled()) {
+            TLOGE(WmsLogTag::WMS_IMMS, "compatible mode disable fullscreen");
+            return WMError::WM_OK;
         }
         auto hostSession = GetHostSession();
         CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
