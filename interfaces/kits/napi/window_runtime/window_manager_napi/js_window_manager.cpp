@@ -36,6 +36,7 @@
 #include "scene_board_judgement.h"
 #include "singleton_container.h"
 #include "sys_cap_util.h"
+#include "get_snapshot_callback.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -189,6 +190,18 @@ napi_value JsWindowManager::GetAllWindowLayoutInfo(napi_env env, napi_callback_i
 {
     JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
     return (me != nullptr) ? me->OnGetAllWindowLayoutInfo(env, info) : nullptr;
+}
+
+napi_value JsWindowManager::GetAllMainWindowInfo(napi_env env, napi_callback_info info)
+{
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
+    return (me != nullptr) ? me->OnGetAllMainWindowInfo(env, info) : nullptr;
+}
+ 
+napi_value JsWindowManager::GetMainWindowSnapshot(napi_env env, napi_callback_info info)
+{
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
+    return (me != nullptr) ? me->OnGetMainWindowSnapshot(env, info) : nullptr;
 }
 
 napi_value JsWindowManager::GetGlobalWindowMode(napi_env env, napi_callback_info info)
@@ -606,6 +619,19 @@ bool JsWindowManager::ParseConfigOption(napi_env env, napi_value jsObject,
         option.SetParentId(parentId);
     }
 
+    return true;
+}
+
+bool JsWindowManager::ParseWindowSnapshotConfiguration(napi_env env, napi_value jsObject,
+    WindowSnapshotConfiguration& config)
+{
+    bool useCache = true;
+
+    if (!ParseJsValue(jsObject, env, "useCache", useCache)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "parse useCache failed");
+        return false;
+    }
+    config.useCache = useCache;
     return true;
 }
 
@@ -1422,6 +1448,111 @@ napi_value JsWindowManager::OnGetAllWindowLayoutInfo(napi_env env, napi_callback
     return result;
 }
 
+napi_value JsWindowManager::OnGetAllMainWindowInfo(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc >= ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [env, task = napiAsyncTask, where = __func__] {
+        std::vector<sptr<MainWindowInfo>> infos;
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<WindowManager>().GetAllMainWindowInfo(infos));
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, CreateJsMainWindowInfoArrayObject(env, infos));
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s success", where);
+        } else {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "failed"));
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s failed", where);
+        }
+    };
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnGetAllMainWindowInfo") != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env,
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY), "send event failed"));
+    }
+    return result;
+}
+ 
+napi_value JsWindowManager::OnGetMainWindowSnapshot(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+ 
+    if (argc != ARGC_TWO) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+ 
+    std::vector<int32_t> windowIds;
+    if (!GetWindowIdFromJsValue(env, argv[INDEX_ZERO], windowIds)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "GetWindowIdFromJsValue failed");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+ 
+    WindowSnapshotConfiguration config;
+    if (!ParseWindowSnapshotConfiguration(env, argv[INDEX_ONE], config)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to config");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    napi_value result = nullptr;
+    napi_value callBackResult = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    std::shared_ptr<NapiAsyncTask> napiAsyncCallBackTask = CreateEmptyAsyncTask(env, nullptr, &callBackResult);
+    auto asyncTask = [env, task = napiAsyncTask, napiAsyncCallBackTask, windowIds, config, where = __func__] {
+        sptr<GetSnapshotCallback> getSnapshotCallback = sptr<GetSnapshotCallback>::MakeSptr();
+        RegisterCallBackFunc(env, getSnapshotCallback, task, napiAsyncCallBackTask);
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().
+            GetMainWindowSnapshot(windowIds, config, getSnapshotCallback->AsObject()));
+        if (ret != WmErrorCode::WM_OK) {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "failed"));
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s failed", where);
+        }
+    };
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnGetMainWindowSnapshot") != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env,
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY), "send event failed"));
+        napiAsyncCallBackTask->Reject(env,
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY), "send event failed"));
+    }
+    return result;
+}
+
+void JsWindowManager::RegisterCallBackFunc(napi_env env, sptr<GetSnapshotCallback>& getSnapshotCallback,
+    const std::shared_ptr<AbilityRuntime::NapiAsyncTask>& task,
+    const std::shared_ptr<AbilityRuntime::NapiAsyncTask>& napiAsyncCallBackTask)
+{
+    getSnapshotCallback->RegisterFunc([env, task, napiAsyncCallBackTask, where = __func__]
+        (WMError errCode, std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps) {
+            auto asyncCallBackTask = [env, task, napiAsyncCallBackTask, errCode, pixelMaps, where = __func__] {
+                TLOGNI(WmsLogTag::WMS_LIFE, "pixelMaps size :%{public}zu", pixelMaps.size());
+                if (errCode != WMError::WM_OK) {
+                    task->Reject(env, CreateJsError(
+                        env, static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY), "failed"));
+                    napiAsyncCallBackTask->Reject(env, CreateJsError(
+                        env, static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY), "failed"));
+                    TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s failed", where);
+                } else {
+                    task->Resolve(env, CreateJsPixelMapArrayObject(env, pixelMaps));
+                    napiAsyncCallBackTask->Resolve(env, NapiGetUndefined(env));
+                    TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s success", where);
+                }
+            };
+            if (napi_send_event(env, asyncCallBackTask, napi_eprio_high, "GetMainWindowSnapshotFunc") !=
+                napi_status::napi_ok) {
+                task->Reject(env, CreateJsError(env, static_cast<int32_t>(
+                    WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY), "send event failed"));
+                napiAsyncCallBackTask->Reject(env, CreateJsError(env, static_cast<int32_t>(
+                    WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY), "send event failed"));
+                }
+            });
+}
+
 napi_value JsWindowManager::OnGetGlobalWindowMode(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_FOUR;
@@ -1856,6 +1987,8 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
         JsWindowManager::SetWatermarkImageForApp);
     BindNativeFunction(env, exportObj, "shiftAppWindowFocus", moduleName, JsWindowManager::ShiftAppWindowFocus);
     BindNativeFunction(env, exportObj, "getAllWindowLayoutInfo", moduleName, JsWindowManager::GetAllWindowLayoutInfo);
+    BindNativeFunction(env, exportObj, "getAllMainWindowInfo", moduleName, JsWindowManager::GetAllMainWindowInfo);
+    BindNativeFunction(env, exportObj, "getMainWindowSnapshot", moduleName, JsWindowManager::GetMainWindowSnapshot);
     BindNativeFunction(env, exportObj, "getGlobalWindowMode", moduleName, JsWindowManager::GetGlobalWindowMode);
     BindNativeFunction(env, exportObj, "getTopNavDestinationName", moduleName,
         JsWindowManager::GetTopNavDestinationName);

@@ -640,6 +640,65 @@ struct PointInfo {
 };
 
 /**
+@struct MainWindowInfo.
+@brief topN main window info.
+*/
+struct MainWindowInfo : public Parcelable {
+    virtual bool Marshalling(Parcel& parcel) const override
+    {
+        if (!parcel.WriteInt32(pid_)) {
+            return false;
+        }
+
+        if (!parcel.WriteString(bundleName_)) {
+            return false;
+        }
+
+        if (!parcel.WriteInt32(persistentId_)) {
+            return false;
+        }
+
+        if (!parcel.WriteInt32(bundleType_)) {
+            return false;
+        }
+        
+        if (!parcel.WriteUint64(displayId_)) {
+            return false;
+        }
+
+        if (!parcel.WriteBool(showing_)) {
+            return false;
+        }
+
+        if (!parcel.WriteString(label_)) {
+            return false;
+        }
+        return true;
+    }
+
+    static MainWindowInfo* Unmarshalling(Parcel& parcel)
+    {
+        MainWindowInfo* mainWindowInfo = new MainWindowInfo;
+        mainWindowInfo->pid_ = parcel.ReadInt32();
+        mainWindowInfo->bundleName_ = parcel.ReadString();
+        mainWindowInfo->persistentId_ = parcel.ReadInt32();
+        mainWindowInfo->bundleType_ = parcel.ReadInt32();
+        mainWindowInfo->displayId_ = parcel.ReadUint64();
+        mainWindowInfo->showing_ = parcel.ReadBool();
+        mainWindowInfo->label_ = parcel.ReadString();
+        return mainWindowInfo;
+    }
+
+    int32_t pid_ = 0;
+    std::string bundleName_ = "";
+    int32_t persistentId_ = 0;
+    int32_t bundleType_ = 0;
+    DisplayId displayId_ = DISPLAY_ID_INVALID;
+    bool showing_ = false;
+    std::string label_ = "";
+};
+
+/**
  * @class Transform
  *
  * @brief parameter of transform and rotate.

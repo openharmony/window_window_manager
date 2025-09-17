@@ -1203,6 +1203,25 @@ HWTEST_F(WindowSessionTest, SetSessionLabel, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateSessionLabel
+ * @tc.desc: UpdateSessionLabel Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, UpdateSessionLabel, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->label_ = "test label";
+    session_->UpdateSessionLabel("test label1");
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_EQ(session_->label_, "test label");
+
+    session_->label_ = "";
+    session_->UpdateSessionLabel("test label1");
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_EQ(session_->label_, "");
+}
+
+/**
  * @tc.name: SetUpdateSessionLabelListener
  * @tc.desc: SetUpdateSessionLabelListener Test
  * @tc.type: FUNC

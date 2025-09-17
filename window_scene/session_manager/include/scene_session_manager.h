@@ -742,7 +742,11 @@ public:
     int32_t StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abilitySessionInfo, sptr<SceneSession>& sceneSession);
     int32_t StartUIAbilityBySCB(sptr<SceneSession>& sceneSessions);
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
+    WMError GetAllMainWindowInfo(std::vector<sptr<MainWindowInfo>>& infos) override;
+    WMError GetMainWindowSnapshot(const std::vector<int32_t>& windowIds, const WindowSnapshotConfiguration& config,
+        const sptr<IRemoteObject>& callback) override;
     WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo);
+    void createDefaultPixelMap(std::shared_ptr<Media::PixelMap>& pixelMap);
     void NotifyDisplayIdChanged(int32_t persistentId, uint64_t displayId);
     WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const;
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
@@ -929,6 +933,8 @@ private:
     void ResetSceneMissionInfo(const sptr<AAFwk::SessionInfo>& abilitySessionInfo);
     void UpdateAbilityHookState(sptr<SceneSession>& sceneSession, bool isAbilityHook);
     void CloseAllFd(std::shared_ptr<AAFwk::Want>& want);
+    WMError CheckWindowIds(
+        const std::vector<int32_t>& windowIds, const sptr<IRemoteObject>& callback);
 
     /*
      * Window Focus
