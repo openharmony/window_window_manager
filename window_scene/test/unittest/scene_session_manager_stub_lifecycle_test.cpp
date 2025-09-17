@@ -317,6 +317,50 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleGetVisibilityWindowInfo, Te
     int res = stub_->HandleGetVisibilityWindowInfo(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
+
+/**
+ * @tc.name: HandleGetAllMainWindowInfo
+ * @tc.desc: test HandleGetAllMainWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubLifecycleTest, GetAllMainWindowInfo, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, stub_);
+    MessageParcel data;
+    MessageParcel reply;
+ 
+    int res = stub_->HandleGetAllMainWindowInfo(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+ 
+/**
+ * @tc.name: HandleGetMainWindowSnapshot
+ * @tc.desc: test HandleGetMainWindowSnapshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleGetMainWindowSnapshot, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, stub_);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteBool(true);
+    EXPECT_EQ(stub_->HandleGetMainWindowSnapshot(data, reply), ERR_INVALID_DATA);
+ 
+    std::vector<int32_t> windowIds;
+    windowIds.emplace_back(1);
+    windowIds.emplace_back(2);
+    data.WriteInt32Vector(windowIds);
+    EXPECT_EQ(stub_->HandleGetMainWindowSnapshot(data, reply), ERR_INVALID_DATA);
+ 
+    data.WriteInt32Vector(windowIds);
+    data.WriteBool(true);
+    EXPECT_EQ(stub_->HandleGetMainWindowSnapshot(data, reply), ERR_INVALID_DATA);
+ 
+    data.WriteInt32Vector(windowIds);
+    data.WriteBool(true);
+    data.WriteRemoteObject(stub_->AsObject());
+    EXPECT_EQ(stub_->HandleGetMainWindowSnapshot(data, reply), ERR_NONE);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

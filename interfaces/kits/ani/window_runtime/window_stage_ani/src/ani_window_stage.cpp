@@ -303,6 +303,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"CreateWindowStage", "J:L@ohos/window/window/WindowStageInternal;",
             reinterpret_cast<void *>(WindowStageCreate)},
         ani_native_function {"getLastWindowSync", nullptr, reinterpret_cast<void *>(AniWindowManager::GetLastWindow)},
+        ani_native_function {"getAllMainWindowInfo", "J:Lescompat/Array;",
+            reinterpret_cast<void *>(AniWindowManager::GetAllMainWindowInfo)},
+        ani_native_function {"getMainWindowSnapshot",
+            "JLescompat/Array;L@ohos/window/window/WindowSnapshotConfiguration;:Lescompat/Array;",
+            reinterpret_cast<void *>(AniWindowManager::GetMainWindowSnapshot)},
     };
     if ((ret = env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size())) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] bind ns func %{public}u", ret);

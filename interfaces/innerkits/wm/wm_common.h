@@ -825,6 +825,19 @@ struct MainWindowInfo : public Parcelable {
         if (!parcel.WriteInt32(bundleType_)) {
             return false;
         }
+
+        if (!parcel.WriteUint64(displayId_)) {
+            return false;
+        }
+
+        if (!parcel.WriteBool(showing_)) {
+            return false;
+        }
+
+        if (!parcel.WriteString(label_)) {
+            return false;
+        }
+
         return true;
     }
 
@@ -835,6 +848,9 @@ struct MainWindowInfo : public Parcelable {
         mainWindowInfo->bundleName_ = parcel.ReadString();
         mainWindowInfo->persistentId_ = parcel.ReadInt32();
         mainWindowInfo->bundleType_ = parcel.ReadInt32();
+        mainWindowInfo->displayId_ = parcel.ReadUint64();
+        mainWindowInfo->showing_ = parcel.ReadBool();
+        mainWindowInfo->label_ = parcel.ReadString();
         return mainWindowInfo;
     }
 
@@ -842,6 +858,32 @@ struct MainWindowInfo : public Parcelable {
     std::string bundleName_ = "";
     int32_t persistentId_ = 0;
     int32_t bundleType_ = 0;
+    DisplayId displayId_ = DISPLAY_ID_INVALID;
+    bool showing_ = false;
+    std::string label_ = "";
+};
+
+/**
+ * @struct WindowSnapshotConfiguration
+ *
+ * @brief main window info for all windows on the screen.
+ */
+struct WindowSnapshotConfiguration : public Parcelable {
+    bool useCache = true;
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteBool(useCache);
+    }
+
+    static WindowSnapshotConfiguration* Unmarshalling(Parcel& parcel)
+    {
+        auto windowSnapshotConfiguration = std::make_unique<WindowSnapshotConfiguration>();
+        if (!parcel.ReadBool(windowSnapshotConfiguration->useCache)) {
+            return nullptr;
+        }
+        return windowSnapshotConfiguration.release();
+    }
 };
 
 /**

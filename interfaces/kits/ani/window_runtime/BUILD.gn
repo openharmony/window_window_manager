@@ -78,6 +78,7 @@ ohos_shared_library("windowstageani_kit") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "image_framework:image",
+    "image_framework:image_taihe",
     "image_framework:image_native",
     "ipc:ipc_napi",
     "ipc:ipc_single",

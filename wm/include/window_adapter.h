@@ -87,6 +87,9 @@ public:
     virtual WMError GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<UnreliableWindowInfo>>& infos);
     virtual WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos);
     virtual WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos);
+    virtual WMError GetAllMainWindowInfo(std::vector<sptr<MainWindowInfo>>& infos);
+    virtual WMError GetMainWindowSnapshot(const std::vector<int32_t>& windowIds,
+        const WindowSnapshotConfiguration& config, const sptr<IRemoteObject>& callback);
     virtual WMError GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode& globalWinMode);
     virtual WMError GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName);
     virtual WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos);

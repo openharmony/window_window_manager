@@ -82,6 +82,8 @@
 #include "xcollie/xcollie.h"
 #include "xcollie/xcollie_define.h"
 #include "session_permission.h"
+#include "get_snapshot_callback.h"
+#include "image_type.h"
 
 #include "ui_effect_manager.h"
 #ifdef MEMMGR_WINDOW_ENABLE
@@ -117,6 +119,7 @@ const std::string EMPTY_DEVICE_ID = "";
 const std::string STARTWINDOW_TYPE = "startWindowType";
 const std::string STARTWINDOW_COLOR_MODE_TYPE = "startWindowColorModeType";
 const int32_t MAX_NUMBER_OF_DISTRIBUTED_SESSIONS = 20;
+const int32_t MAX_SESSION_LIMIT_ALL_APP = 512;
 
 constexpr int WINDOW_NAME_MAX_WIDTH = 21;
 constexpr int DISPLAY_NAME_MAX_WIDTH = 10;
@@ -15418,6 +15421,126 @@ WMError SceneSessionManager::GetAllMainWindowInfos(std::vector<MainWindowInfo>& 
         }
     }
     return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::GetAllMainWindowInfo(std::vector<sptr<MainWindowInfo>>& infos)
+{
+    if (!systemConfig_.IsPcWindow()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "device not support");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!SessionPermission::VerifyCallingPermission("ohos.permission.CUSTOM_SCREEN_CAPTURE")) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& [_, session] : sceneSessionMap_) {
+        if (session == nullptr) {
+            continue;
+        }
+        if (WindowHelper::IsMainWindow(session->GetWindowType())) {
+            auto mainWindowInfo = sptr<MainWindowInfo>::MakeSptr();
+            mainWindowInfo->displayId_ = session->GetSessionProperty()->GetDisplayId();
+            mainWindowInfo->persistentId_ = session->GetPersistentId();
+            mainWindowInfo->showing_ = (session->GetSessionState() == SessionState::STATE_ACTIVE ||
+                session->GetSessionState() == SessionState::STATE_FOREGROUND);
+            mainWindowInfo->label_ = session->GetSessionLabel();
+            infos.emplace_back(mainWindowInfo);
+        }
+    }
+    return WMError::WM_OK;
+}
+ 
+WMError SceneSessionManager::GetMainWindowSnapshot(const std::vector<int32_t>& windowIds,
+    const WindowSnapshotConfiguration& config, const sptr<IRemoteObject>& callback)
+{
+    if (!systemConfig_.IsPcWindow()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "device not support");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    WMError ret = CheckWindowIds(windowIds, callback);
+    if (WMError::WM_OK != ret) {
+        return ret;
+    }
+    const char* const where = __func__;
+    taskScheduler_->PostAsyncTask([this, callback, config, windowIds, where] {
+        std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps;
+        WMError errCode = WMError::WM_OK;
+        for (const auto windowId : windowIds) {
+            auto pixelMap = SceneSessionManager::GetSessionSnapshotPixelMap(
+                windowId, 1.0f, SnapshotNodeType::LEASH_NODE, !config.useCache);
+            if (config.useCache && !pixelMap) {
+                pixelMap = SceneSessionManager::GetSessionSnapshotPixelMap(
+                    windowId, 1.0f, SnapshotNodeType::LEASH_NODE, true);
+            }
+            if (!pixelMap) {
+                TLOGNW(WmsLogTag::WMS_LIFE, "Get snapshot failed, create new snapshot");
+                SceneSessionManager::createDefaultPixelMap(pixelMap);
+            }
+            if (!pixelMap) {
+                TLOGNW(WmsLogTag::WMS_LIFE, "get snapshot failed id:%{public}d.", windowId);
+                continue;
+            }
+            pixelMaps.emplace_back(pixelMap);
+        }
+        TLOGNI(WmsLogTag::WMS_LIFE, "windowIds size: %{public}zu, pixelMaps size: %{public}zu",
+            windowIds.size(), pixelMaps.size());
+        sptr<IGetSnapshotCallback> getSnapshotCallback = iface_cast<IGetSnapshotCallback>(callback);
+        if (getSnapshotCallback) {
+            getSnapshotCallback->OnReceived(errCode, pixelMaps);
+        } else {
+            TLOGNE(WmsLogTag::WMS_LIFE, "getSnapshotCallback is null");
+        }
+    }, __func__);
+    return ret;
+}
+ 
+WMError SceneSessionManager::CheckWindowIds(
+    const std::vector<int32_t>& windowIds, const sptr<IRemoteObject>& callback)
+{
+    if (!SessionPermission::VerifyCallingPermission("ohos.permission.CUSTOM_SCREEN_CAPTURE")) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    if (windowIds.empty()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Input param invalid, windowIds empty.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (callback == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Input param invalid, callback is null.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (windowIds.size() > MAX_SESSION_LIMIT_ALL_APP) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Input param invalid, windowIds is too long.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    std::unordered_set<int32_t> uniqueIds(windowIds.begin(), windowIds.end());
+    if (uniqueIds.size() != windowIds.size()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Input param invalid, duplicate windowId exist.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    for (const auto windowId : windowIds) {
+        auto sceneSession = GetSceneSession(windowId);
+        if (sceneSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Session id:%{public}d is not found.", windowId);
+            return WMError::WM_ERROR_INVALID_PARAM;
+        }
+        if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Session id:%{public}d is not mainWindow.", windowId);
+            return WMError::WM_ERROR_INVALID_PARAM;
+        }
+    }
+    return WMError::WM_OK;
+}
+
+void SceneSessionManager::createDefaultPixelMap(std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    Media::InitializationOptions opts;
+    opts.size.width = 200;
+    opts.size.height = 200;
+    opts.pixelFormat = Media::PixelFormat::NV21;
+    opts.useDMA = true;
+    pixelMap = Media::PixelMap::Create(opts);
 }
 
 WMError SceneSessionManager::ClearMainSessions(const std::vector<int32_t>& persistentIds,
