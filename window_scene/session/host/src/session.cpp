@@ -4935,7 +4935,7 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     auto screenId = GetScreenId();
     if (screenId == SCREEN_ID_INVALID) {
-        TLOGW(WmsLogTag::WMS_SCB, 
+        TLOGW(WmsLogTag::WMS_SCB,
               "invalid screenId, %{public}s: %{public}s, sessionId: %{public}d, screenId:%{public}" PRIu64,
               caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
     }
