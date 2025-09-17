@@ -3977,6 +3977,8 @@ bool SceneSession::DragResizeWhenEndFilter(SizeChangeReason reason)
         } else {
             TLOGI(WmsLogTag::WMS_LAYOUT_PC, "trigger client rect change by scb");
             WSRect relativeRect = moveDragController_->GetTargetRect(
+                GetDragResizeTypeDuringDrag() == DragResizeType::RESIZE_WHEN_DRAG_END ?
+                MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY :
                 MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY);
             HandleMoveDragEnd(relativeRect, reason);
             SetUIFirstSwitch(RSUIFirstSwitch::NONE);
