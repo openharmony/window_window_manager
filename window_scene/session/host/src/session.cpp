@@ -2759,7 +2759,7 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
     }
     auto key = GetSessionSnapshotStatus(reason);
     auto rotation = currentRotation_;
-    if (CORRECTION_ENABLE && key.first == 0) {
+    if (CORRECTION_ENABLE && key == 0) {
         rotation = (rotation + ROTATION_90) % ROTATION_360;
     }
     if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
@@ -2810,8 +2810,7 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
         } else {
             session->scenePersistence_->SetHasSnapshot(true, key);
             ScenePersistentStorage::Insert("Snapshot_" + std::to_string(session->persistentId_) +
-                "_" + std::to_string(key.first) + std::to_string(key.second), true,
-                ScenePersistentStorageType::MAXIMIZE_STATE);
+                "_" + std::to_string(key), true, ScenePersistentStorageType::MAXIMIZE_STATE);
         }
         session->scenePersistence_->ResetSnapshotCache();
         Task removeSnapshotCallback = []() {};
@@ -2852,9 +2851,7 @@ void Session::SetFreeMultiWindow()
 void Session::DeleteHasSnapshot()
 {
     for (uint32_t screenStatus = SCREEN_UNKNOWN; screenStatus < SCREEN_COUNT; screenStatus++) {
-        for (uint32_t orientation = SNAPSHOT_PORTRAIT; orientation < ORIENTATION_COUNT; orientation++) {
-            DeleteHasSnapshot({ screenStatus, orientation });
-        }
+        DeleteHasSnapshot(screenStatus);
     }
     DeleteHasSnapshotFreeMultiWindow();
 }
@@ -2862,12 +2859,10 @@ void Session::DeleteHasSnapshot()
 void Session::DeleteHasSnapshot(SnapshotStatus key)
 {
     auto hasSnapshot = ScenePersistentStorage::HasKey("Snapshot_" + std::to_string(persistentId_) +
-        "_" + std::to_string(key.first) + std::to_string(key.second),
-        ScenePersistentStorageType::MAXIMIZE_STATE);
+        "_" + std::to_string(key), ScenePersistentStorageType::MAXIMIZE_STATE);
     if (hasSnapshot) {
         ScenePersistentStorage::Delete("Snapshot_" + std::to_string(persistentId_) +
-            "_" + std::to_string(key.first) + std::to_string(key.second),
-            ScenePersistentStorageType::MAXIMIZE_STATE);
+            "_" + std::to_string(key), ScenePersistentStorageType::MAXIMIZE_STATE);
     }
 }
 
@@ -2884,8 +2879,7 @@ void Session::DeleteHasSnapshotFreeMultiWindow()
 bool Session::HasSnapshot(SnapshotStatus key)
 {
     auto hasSnapshot = ScenePersistentStorage::HasKey("Snapshot_" + std::to_string(persistentId_) +
-        "_" + std::to_string(key.first) + std::to_string(key.second),
-        ScenePersistentStorageType::MAXIMIZE_STATE);
+        "_" + std::to_string(key), ScenePersistentStorageType::MAXIMIZE_STATE);
     if (hasSnapshot && scenePersistence_) {
         scenePersistence_->SetHasSnapshot(true, key);
     }
@@ -2906,10 +2900,8 @@ bool Session::HasSnapshotFreeMultiWindow()
 bool Session::HasSnapshot()
 {
     for (uint32_t screenStatus = SCREEN_UNKNOWN; screenStatus < SCREEN_COUNT; screenStatus++) {
-        for (uint32_t orientation = SNAPSHOT_PORTRAIT; orientation < ORIENTATION_COUNT; orientation++) {
-            if (HasSnapshot({ screenStatus, orientation })) {
-                return true;
-            }
+        if (HasSnapshot(screenStatus)) {
+            return true;
         }
     }
     return HasSnapshotFreeMultiWindow();
@@ -2937,14 +2929,6 @@ bool Session::SupportSnapshotAllSessionStatus() const
     return (!IsPersistentImageFit() && (capacity_ != defaultCapacity));
 }
 
-SnapshotStatus Session::GetWindowStatus() const
-{
-    if (!SupportSnapshotAllSessionStatus()) {
-        return defaultStatus;
-    }
-    return WSSnapshotHelper::GetInstance()->GetWindowStatus();
-}
-
 SnapshotStatus Session::GetSessionSnapshotStatus(BackgroundReason reason) const
 {
     if (!SupportSnapshotAllSessionStatus()) {
@@ -2959,15 +2943,7 @@ SnapshotStatus Session::GetSessionSnapshotStatus(BackgroundReason reason) const
     if (reason == BackgroundReason::EXPAND_TO_FOLD_SINGLE_POCKET) {
         snapshotScreen = SCREEN_EXPAND;
     }
-    uint32_t orientation = WSSnapshotHelper::GetOrientation(currentRotation_);
-    if (CORRECTION_ENABLE && snapshotScreen == 0) {
-        orientation ^= 1;
-    }
-    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
-        WSSnapshotHelper::GetInstance()->GetScreenStatus() == SCREEN_FOLDED) {
-        orientation = 1;
-    }
-    return std::make_pair(snapshotScreen, orientation);
+    return snapshotScreen;
 }
 
 uint32_t Session::GetWindowSnapshotOrientation() const
@@ -4611,7 +4587,7 @@ std::shared_ptr<Media::PixelMap> Session::GetSnapshotPixelMap(const float oriSca
     if (scenePersistence_ == nullptr) {
         return nullptr;
     }
-    auto key = GetWindowStatus();
+    auto key = WSSnapshotHelper::GetInstance()->GetScreenStatus();
     return scenePersistence_->IsSavingSnapshot(key, freeMultiWindow_.load()) ? GetSnapshot() :
         scenePersistence_->GetLocalSnapshotPixelMap(oriScale, newScale, key, freeMultiWindow_.load());
 }
