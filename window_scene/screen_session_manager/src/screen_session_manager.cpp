@@ -10916,14 +10916,9 @@ DisplayId ScreenSessionManager::GetPrimaryDisplayId()
             }
         }
     }
-    if (screenSession == nullptr) {
-        TLOGW(WmsLogTag::DMS, "get extend screen failed use default!");
-        screenSession = GetScreenSession(GetDefaultScreenId());
-    }
     if (screenSession && screenSession->IsScreenAvailable()) {
         return screenSession->GetDisplayId();
     } else {
-        TLOGE(WmsLogTag::DMS, "failed");
         return SCREEN_ID_INVALID;
     }
 }
