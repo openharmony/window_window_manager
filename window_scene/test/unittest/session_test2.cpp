@@ -748,6 +748,30 @@ HWTEST_F(WindowSessionTest2, GetSurfaceNode, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetSurfaceNode
+ * @tc.desc: GetSurfaceNode Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, GetSurfaceNode02, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->surfaceNode_ = nullptr;
+    std::shared_ptr<RSSurfaceNode> res = session_->GetSurfaceNode(false);
+    ASSERT_EQ(res, nullptr);
+    res = session_->GetSurfaceNode(false);
+    ASSERT_EQ(res, nullptr);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session_->surfaceNode_ = surfaceNode;
+    res = session_->GetSurfaceNode(false);
+    ASSERT_EQ(res, surfaceNode);
+    res = session_->GetSurfaceNode(true);
+    ASSERT_EQ(res, surfaceNode);
+    session_->surfaceNode_ = nullptr;
+}
+
+/**
  * @tc.name: GetLeashWinSurfaceNode
  * @tc.desc: GetLeashWinSurfaceNode Test
  * @tc.type: FUNC
