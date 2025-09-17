@@ -91,7 +91,7 @@ void JsExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason r
             return;
         }
         napi_handle_scope scope = nullptr;
-        napi_status = napi_open_handle_scope(eng, &scope);
+        napi_status status = napi_open_handle_scope(eng, &scope);
         if (status != napi_ok || scope == nullptr) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "open handle scope failed");
             return;
