@@ -10120,8 +10120,13 @@ DMError ScreenSessionManager::GetDisplayCapability(std::string& capabilitInfo)
         return GetSuperFoldCapability(capabilitInfo);
     }
 
+    bool isWidthGreaterThanHeight = false;
+    auto displayInfo = GetDefaultDisplayInfo();
+    if (displayInfo != nullptr && (displayInfo->GetWidth() > displayInfo->GetHeight())) {
+        isWidthGreaterThanHeight = true;
+    }
     std::vector<std::string> orientation = ORIENTATION_DEFAULT;
-    if (g_isPcDevice && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+    if ((g_isPcDevice && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) || isWidthGreaterThanHeight) {
         orientation = {"1", "0", "3", "2"};
     }
     nlohmann::ordered_json jsonDisplayCapabilityList;
