@@ -837,6 +837,8 @@ public:
     void NotifyKeyboardDidHideRegistered(bool registered) override;
     bool isSubWindowResizingOrMoving_ = false;
     virtual void CalculateOccupiedAreaAfterUIRefresh() {}
+    virtual WMError HandleActionUpdateKeyboardTouchHotArea(const sptr<WindowSessionProperty>& property,
+        WSPropertyChangeAction action) { return WMError::WM_OK; }
 
     /*
      * Window Focus
@@ -1173,8 +1175,6 @@ private:
     WMError HandleActionUpdateAnimationFlag(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError HandleActionUpdateTouchHotArea(const sptr<WindowSessionProperty>& property,
-        WSPropertyChangeAction action);
-    WMError HandleActionUpdateKeyboardTouchHotArea(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError HandleActionUpdateDecorEnable(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);

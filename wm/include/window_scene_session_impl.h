@@ -430,6 +430,7 @@ private:
      * Window Immersive
      */
     void UpdateDefaultStatusBarColor();
+    bool IsLandscape();
     WMError MoveAndResizeKeyboard(const KeyboardLayoutParams& params);
     bool userLimitsSet_ = false;
     bool forceLimits_ = false;

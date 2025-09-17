@@ -468,6 +468,53 @@ HWTEST_F(KeyboardSessionTest4, CalculateScaledRect01, TestSize.Level1)
     result = {667, 0, 1783, 1941};
     EXPECT_TRUE(scaledRect == result);
 }
+
+/**
+ * @tc.name: HandleActionUpdateKeyboardTouchHotArea
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest4, HandleActionUpdateKeyboardTouchHotArea, TestSize.Level1)
+{
+    std::string abilityName = "HandleActionUpdateKeyboardTouchHotArea";
+    std::string bundleName = "HandleActionUpdateKeyboardTouchHotArea";
+    sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    KeyboardTouchHotAreas keyboardTouchHotAreas;
+    Rect rect = {800, 800, 1200, 1200};
+    keyboardTouchHotAreas.landscapeKeyboardHotAreas_.push_back(rect);
+    keyboardTouchHotAreas.landscapePanelHotAreas_.push_back(rect);
+    keyboardTouchHotAreas.portraitKeyboardHotAreas_.push_back(rect);
+    keyboardTouchHotAreas.portraitPanelHotAreas_.push_back(rect);
+    property->SetKeyboardTouchHotAreas(keyboardTouchHotAreas);
+    SessionInfo info;
+    info.abilityName_ = "keyboardPanelSession";
+    info.bundleName_ = "keyboardPanelSession";
+    sptr<SceneSession> keyboardPanelSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    keyboardSession->BindKeyboardPanelSession(keyboardPanelSession);
+    keyboardSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
+    WMError ret = keyboardSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_TYPE, ret);
+    keyboardSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    ret = keyboardSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ret = keyboardSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    bool updated = false;
+    specificCb->onWindowInfoUpdate_ = [&updated](int32_t persistentId, WindowUpdateType type) {
+        updated = true;
+    };
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCallback =
+        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
+    sptr<KeyboardSession> keyboardSession1 = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCallback);
+    keyboardSession1->BindKeyboardPanelSession(keyboardPanelSession);
+    keyboardSession1->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    ret = keyboardSession1->HandleActionUpdateTouchHotArea(property, action);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    EXPECT_EQ(updated, true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
