@@ -663,7 +663,11 @@ export enum WindowType {
     TYPE_SYSTEM_TOAST = 18,
     TYPE_DIVIDER = 19,
     TYPE_GLOBAL_SEARCH = 20,
-    TYPE_HANDWRITE = 21
+    TYPE_HANDWRITE = 21,
+    TYPE_WALLET_SWIPE_CARD = 22,
+    TYPE_SCREEN_CONTROL = 23,
+    TYPE_FLOAT_NAVIGATION = 24,
+    TYPE_MAIN = 32
 }
 
 export enum Orientation {
@@ -740,6 +744,10 @@ export class SubWindowOptionsInternal implements SubWindowOptions {
     maximizeSupported?: boolean;
     zLevel?: int;
     outlineEnabled?: boolean;
+}
+
+export interface SystemWindowOptions {
+    windowType: WindowType;
 }
 
 export interface StatusBarProperty {
