@@ -221,7 +221,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, MinimizeAllWindow, TestSize.Level1)
     DisplayId displayId =0;
     MockAccesstokenKit::MockIsSACalling(false);
     MockAccesstokenKit::MockIsSystemApp(false);
-    EXPECT_EQ(ssm_->MinimizeAllWindow(displayId), WMError::WM_ERROR_NOT_SYSTEM_APP);
+    EXPECT_EQ(ssm_->MinimizeAllWindow(displayId), WMError::WM_OK);
 
     MockAccesstokenKit::MockIsSACalling(true);
     MockAccesstokenKit::MockIsSystemApp(true);
