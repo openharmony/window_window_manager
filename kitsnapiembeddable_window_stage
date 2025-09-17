@@ -1,28 +1,0 @@
-[1mdiff --git a/interfaces/kits/napi/extension_window/js_extension_window_listener.cpp b/interfaces/kits/napi/extension_window/js_extension_window_listener.cpp[m
-[1mindex 76ef869961..6e86813031 100644[m
-[1m--- a/interfaces/kits/napi/extension_window/js_extension_window_listener.cpp[m
-[1m+++ b/interfaces/kits/napi/extension_window/js_extension_window_listener.cpp[m
-[36m@@ -91,8 +91,8 @@[m [mvoid JsExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason r[m
-             return;[m
-         }[m
-         napi_handle_scope scope = nullptr;[m
-[31m-        napi_open_handle_scope(eng, &scope);[m
-[31m-        if (scope == nullptr) {[m
-[32m+[m[32m        napi_status != napi_open_handle_scope(eng, &scope);[m[41m[m
-[32m+[m[32m        if (status != napi_ok || scope == nullptr) {[m[41m[m
-             TLOGNE(WmsLogTag::WMS_UIEXT, "open handle scope failed");[m
-             return;[m
-         }[m
-[36m@@ -375,7 +375,11 @@[m [mstatic void LifeCycleCallBack(LifeCycleEventType eventType, wptr<JsExtensionWind[m
-             return;[m
-         }[m
-         napi_handle_scope scope = nullptr;[m
-[31m-        napi_open_handle_scope(eng, &scope);[m
-[32m+[m[32m        napi_status status = napi_open_handle_scope(eng, &scope);[m[41m[m
-[32m+[m[32m        if(status != napi_ok || scope == nullptr){[m[41m[m
-[32m+[m[32m            TLOGNE(WmsLogTag::WMS_UIEXT,"open handle scope failed");[m[41m[m
-[32m+[m[32m            return;[m[41m[m
-[32m+[m[32m        }[m[41m[m
-         napi_value argv[] = {CreateJsValue(eng, static_cast<uint32_t>(eventType))};[m
-         thisListener->CallJsMethod(LIFECYCLE_EVENT_CB.c_str(), argv, ArraySize(argv));[m
-         napi_close_handle_scope(eng, scope);[m
