@@ -1359,7 +1359,7 @@ HWTEST_F(SceneSessionTest6, TestRunAfterNVsyncs, TestSize.Level1)
     session->requestNextVsyncFunc_ = [](const std::shared_ptr<VsyncCallback>& cb) {
         cb->onCallback(0, 0);
     };
-    session->RunAfterNVsyncs(1, [&]() { taskExecuted = true; });
+    session->RunAfterNVsyncs(1, [&] { taskExecuted = true; });
     EXPECT_TRUE(taskExecuted);
 
     // Case 2: vsyncCount = 3
@@ -1368,13 +1368,13 @@ HWTEST_F(SceneSessionTest6, TestRunAfterNVsyncs, TestSize.Level1)
         static int times = 0;
         if (++times <= 3) cb->onCallback(0, 0);
     };
-    session->RunAfterNVsyncs(3, [&]() { taskExecuted = true; });
+    session->RunAfterNVsyncs(3, [&] { taskExecuted = true; });
     EXPECT_TRUE(taskExecuted);
 
     // Case 3: requestNextVsyncFunc_ = nullptr
     taskExecuted = false;
     session->requestNextVsyncFunc_ = nullptr;
-    session->RunAfterNVsyncs(1, [&]() { taskExecuted = true; });
+    session->RunAfterNVsyncs(1, [&] { taskExecuted = true; });
     EXPECT_FALSE(taskExecuted);
 
     // Case 4: RestoreGravityWhenDragEnd will not crash

@@ -1926,11 +1926,11 @@ HWTEST_F(MoveDragControllerTest, TestCalcDragTargetRect, TestSize.Level1)
  */
 HWTEST_F(MoveDragControllerTest, TestGetGravity, TestSize.Level1)
 {
-    // Case1: type in GRAVITY_MAP
+    // Case 1: type in GRAVITY_MAP
     auto gravity = moveDragController->GetGravity(AreaType::TOP);
     EXPECT_EQ(gravity, Gravity::BOTTOM_LEFT);
 
-    // Case2: type not in GRAVITY_MAP
+    // Case 2: type not in GRAVITY_MAP
     gravity = moveDragController->GetGravity(static_cast<AreaType>(999));
     EXPECT_EQ(gravity, Gravity::TOP_LEFT);
 }
