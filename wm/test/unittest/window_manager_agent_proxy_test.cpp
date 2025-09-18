@@ -918,6 +918,44 @@ HWTEST_F(WindowManagerAgentProxyTest, WriteWindowChangeInfoValue03, TestSize.Lev
 
     MockMessageParcel::ClearAllErrorFlag();
 }
+
+/**
+ * @tc.name: WriteWindowChangeInfoValue04_MidScene_Write_Success
+ * @tc.desc: test WriteWindowChangeInfoValue for MID_SCENE write success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, WriteWindowChangeInfoValue04_MidScene_Write_Success, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockMessageParcel::ClearAllErrorFlag();
+    MessageParcel data;
+    std::pair<WindowInfoKey, WindowChangeInfoType> windowInfoPair;
+    WindowChangeInfoType windowInfo = true;
+    windowInfoPair = std::make_pair(WindowInfoKey::MID_SCENE, windowInfo);
+    auto ret = windowManagerAgentProxy->WriteWindowChangeInfoValue(data, windowInfoPair);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: WriteWindowChangeInfoValue04_MidScene_Write_Failed
+ * @tc.desc: test WriteWindowChangeInfoValue for MID_SCENE write failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, WriteWindowChangeInfoValue04_MidScene_Write_Failed, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockMessageParcel::ClearAllErrorFlag();
+    MessageParcel data;
+    std::pair<WindowInfoKey, WindowChangeInfoType> windowInfoPair;
+
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    WindowChangeInfoType windowInfo = true;
+    windowInfoPair = std::make_pair(WindowInfoKey::MID_SCENE, windowInfo);
+    auto ret = windowManagerAgentProxy->WriteWindowChangeInfoValue(data, windowInfoPair);
+    EXPECT_EQ(ret, false);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
