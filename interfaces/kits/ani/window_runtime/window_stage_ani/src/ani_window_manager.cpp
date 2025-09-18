@@ -111,7 +111,7 @@ ani_object AniWindowManager::OnGetMainWindowSnapshot(
     std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps;
     WMError errCode = WMError::WM_OK;
     getSnapshotCallback->RegisterFunc([env, &errCode, &pixelMaps, &getSnapshotCallback]
-        (WMError errCodeResult, std::vector<std::shared_ptr<Media::PixelMap>> pixelMapResult) {
+        (WMError errCodeResult, const std::vector<std::shared_ptr<Media::PixelMap>>& pixelMapResult) {
             TLOGI(WmsLogTag::WMS_LIFE, "getSnapshotCallback errCodeResult: %{public}d",
                 static_cast<int32_t>(errCodeResult));
             if (errCodeResult != WMError::WM_OK) {

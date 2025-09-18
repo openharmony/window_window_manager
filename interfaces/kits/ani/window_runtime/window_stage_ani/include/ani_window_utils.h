@@ -289,7 +289,7 @@ public:
     static void* GetAbilityContext(ani_env *env, ani_object aniObj);
     static ani_object CreateWindowsProperties(ani_env* env, const sptr<Window>& window);
     static ani_object CreateAniPixelMapArray(ani_env* env,
-        const std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps);
+        const std::vector<std::shared_ptr<Media::PixelMap>>& pixelMaps);
     static ani_object CreateAniMainWindowInfoArray(ani_env* env, const std::vector<sptr<MainWindowInfo>>& infos);
     static ani_object CreateAniMainWindowInfo(ani_env* env, const MainWindowInfo& info);
     static ani_object CreateProperties(ani_env* env, const sptr<Window>& window);

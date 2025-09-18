@@ -83,15 +83,12 @@ ani_status AniWindowUtils::GetIntVector(ani_env* env, ani_object ary, std::vecto
     if (static_cast<int32_t>(size) <= 0) {
         return ANI_INVALID_ARGS;
     }
-    ani_double *native_buffer = new ani_double[size];
-    env->Array_GetRegion_Double(reinterpret_cast<ani_array_double>(ary), 0, size, native_buffer);
+    std::unique_ptr<ani_double[]> native_buffer = std::make_unique<ani_double[]>(size);
+    env->Array_GetRegion_Double(reinterpret_cast<ani_array_double>(ary), 0, size, native_buffer.get());
 
     ani_size idx;
     for (idx = 0; idx < size; idx++) {
         result.push_back(static_cast<int32_t>(native_buffer[idx]));
-    }
-    if (native_buffer != nullptr) {
-        delete[] native_buffer;
     }
     return ANI_OK;
 }
@@ -509,7 +506,7 @@ ani_object AniWindowUtils::CreateWindowsProperties(ani_env* env, const sptr<Wind
 }
 
 ani_object AniWindowUtils::CreateAniPixelMapArray(ani_env* env,
-    const std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps)
+    const std::vector<std::shared_ptr<Media::PixelMap>>& pixelMaps)
 {
     ani_class cls;
     if (env->FindClass("L@ohos/multimedia/image/image/PixelMap;", &cls) != ANI_OK) {
@@ -549,6 +546,10 @@ ani_object AniWindowUtils::CreateAniMainWindowInfoArray(ani_env* env,
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
     }
     for (size_t i = 0; i < infos.size(); i++) {
+        if (!infos[i]) {
+            TLOGE(WmsLogTag::WMS_LIFE, "[ANI] infos[i] is nullptr at index %{public}d", static_cast<int32_t>(i));
+            return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+        }
         if (env->Array_Set_Ref(mainWindowInfoArray, i, CreateAniMainWindowInfo(env, *infos[i])) != ANI_OK) {
             TLOGE(WmsLogTag::WMS_LIFE, "[ANI] create mainWindowInfoArray failed");
             return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
