@@ -2873,12 +2873,9 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rec
             return {};
         }
         auto avoidArea = session->GetAvoidAreaByTypeInner(type, rect);
-        if (type == AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
-            if (session->isAINavigationBarAvoidAreaValid_ &&
-                !session->isAINavigationBarAvoidAreaValid_(
-                    session->GetSessionProperty()->GetDisplayId(), area, session->GetSessionRect().height_)) {
-                return {};
-            }
+        if (type == AvoidAreaType::TYPE_NAVIGATION_INDICATOR && session->isAINavigationBarAvoidAreaValid_ != nullptr) {
+            session->GetSessionProperty()->GetDisplayId(), area, session->GetSessionRect().height_);
+            return {};
         }
         return avoidArea;
     }, __func__);
