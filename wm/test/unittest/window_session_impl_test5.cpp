@@ -2083,7 +2083,7 @@ HWTEST_F(WindowSessionImplTest5, IsHitTitleBar02, TestSize.Level1)
  * @tc.name: RegisterWindowTitleChangeListener
  * @tc.desc: RegisterWindowTitleChangeListener
  * @tc.type: FUNC
- */ 
+ */
 HWTEST_F(WindowSessionImplTest5, RegisterWindowTitleChangeListener, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
