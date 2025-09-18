@@ -2763,7 +2763,7 @@ std::optional<ExtensionWindowEventInfo> SceneSession::GetLastModalUIExtensionEve
 
 Vector2f SceneSession::GetSessionGlobalPosition(bool useUIExtension)
 {
-    WSRect windowRect = GetSessionGlobalRect();
+    WSRect windowRect = GetSessionGlobalRectInMultiScreen();
     if (useUIExtension) {
         if (auto modalUIExtensionEventInfo = GetLastModalUIExtensionEventInfo()) {
             const auto& rect = modalUIExtensionEventInfo.value().windowRect;
