@@ -292,13 +292,13 @@ WMError WindowAdapter::GetAccessibilityWindowInfo(std::vector<sptr<Accessibility
     return wmsProxy->GetAccessibilityWindowInfo(infos);
 }
 
-WMError WindowAdapter::ConvertToRelativeCoordinateForFoldPC(const Rect& rect, Rect& newRect, DisplayId& newDisplayId)
+WMError WindowAdapter::ConvertToRelativeCoordinateExtended(const Rect& rect, Rect& newRect, DisplayId& newDisplayId)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
-    return wmsProxy->ConvertToRelativeCoordinateForFoldPC(rect, newRect, newDisplayId);
+    return wmsProxy->ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
 }
 
 WMError WindowAdapter::GetUnreliableWindowInfo(int32_t windowId,

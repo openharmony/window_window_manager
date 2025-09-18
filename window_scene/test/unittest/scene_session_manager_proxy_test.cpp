@@ -2025,7 +2025,7 @@ HWTEST_F(sceneSessionManagerProxyTest, RemoveSessionBlackList02, TestSize.Level1
 
 /**
  * @tc.name: ConvertToRelativeCoordinateForFoldPC01
- * @tc.desc: ConvertToRelativeCoordinateForFoldPC
+ * @tc.desc: ConvertToRelativeCoordinateExtended
  * @tc.type: FUNC
  */
 HWTEST_F(sceneSessionManagerProxyTest, ConvertToRelativeCoordinateForFoldPC01, TestSize.Level1)
@@ -2038,31 +2038,34 @@ HWTEST_F(sceneSessionManagerProxyTest, ConvertToRelativeCoordinateForFoldPC01, T
 
     sptr<MockIRemoteObject> remoteMocker = nullptr;
     auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
-    auto ret = proxy->ConvertToRelativeCoordinateForFoldPC(rect, newRect, newDisplayId);
+    auto ret = proxy->ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
     EXPECT_EQ(ret, WMError::WS_ERROR_NULLPTR);
     ASSERT_NE(proxy, nullptr);
+
+    remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
 
     // WriteInterfaceToken failed
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    ret = proxy->ConvertToRelativeCoordinateForFoldPC(rect, newRect, newDisplayId);
+    ret = proxy->ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
     EXPECT_EQ(WMError::WS_ERROR_NULLPTR, ret);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
     
     MockMessageParcel::SetWriteInt32ErrorFlag(true);
-    ret = proxy->ConvertToRelativeCoordinateForFoldPC(rect, newRect, newDisplayId);
+    ret = proxy->ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
     EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
     MockMessageParcel::SetWriteInt32ErrorFlag(false);
 
     MockMessageParcel::SetWriteUint32ErrorFlag(true);
-    ret = proxy->ConvertToRelativeCoordinateForFoldPC(rect, newRect, newDisplayId);
+    ret = proxy->ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
     EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
     MockMessageParcel::SetWriteUint32ErrorFlag(false);
 
     // SendRequest failed
     ASSERT_NE(proxy, nullptr);
     remoteMocker->SetRequestResult(ERR_INVALID_DATA);
-    ret = proxy->ConvertToRelativeCoordinateForFoldPC(rect, newRect, newDisplayId);
+    ret = proxy->ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
     remoteMocker->SetRequestResult(ERR_NONE);
 }

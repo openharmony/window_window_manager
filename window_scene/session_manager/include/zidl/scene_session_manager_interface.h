@@ -446,7 +446,7 @@ public:
     WMError RemoveSessionBlackList(const std::unordered_set<std::string>& bundleNames,
         const std::unordered_set<std::string>& privacyWindowTags) override { return WMError::WM_OK; }
     WMError GetPiPSettingSwitchStatus(bool& switchStatus) override { return WMError::WM_OK; }
-    WMError ConvertToRelativeCoordinateForFoldPC(
+    WMError ConvertToRelativeCoordinateExtended(
         const Rect& rect, Rect& newRect, DisplayId& newDisplayId) override
     {
         return WMError::WM_OK;

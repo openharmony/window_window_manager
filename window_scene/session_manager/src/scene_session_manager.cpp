@@ -10863,7 +10863,7 @@ WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessi
     return taskScheduler_->PostSyncTask(task, "GetAccessibilityWindowInfo");
 }
 
-WMError SceneSessionManager::ConvertToRelativeCoordinateForFoldPC(const Rect& rect, Rect& newRect, DisplayId& newDisplayId)
+WMError SceneSessionManager::ConvertToRelativeCoordinateExtended(const Rect& rect, Rect& newRect, DisplayId& newDisplayId)
 {
     newRect = rect;
     auto& pcFoldScreenManagerInstance = PcFoldScreenManager::GetInstance();
