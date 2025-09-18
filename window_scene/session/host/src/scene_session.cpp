@@ -2872,7 +2872,15 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rec
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", where);
             return {};
         }
-        return session->GetAvoidAreaByTypeInner(type, rect);
+        auto avoidArea = session->GetAvoidAreaByTypeInner(type, rect);
+        if (type == AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
+            if (session->isAINavigationBarAvoidAreaValid_ &&
+                !session->isAINavigationBarAvoidAreaValid_(
+                    session->GetSessionProperty()->GetDisplayId(), area, session->GetSessionRect().height_)) {
+                return {};
+            }
+        }
+        return avoidArea;
     }, __func__);
 }
 

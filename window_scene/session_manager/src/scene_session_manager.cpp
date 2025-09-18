@@ -153,6 +153,7 @@ constexpr uint64_t NOTIFY_START_ABILITY_TIMEOUT = 4000;
 constexpr uint64_t START_UI_ABILITY_TIMEOUT = 5000;
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 constexpr int32_t NAV_FORCE_SPLIT_MODE = 6;
+constexpr int32_t DIFF_NUMBER = 1;
 const std::string FB_PANEL_NAME = "Fb_panel";
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
@@ -320,18 +321,27 @@ public:
     }
 };
 
-bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& avoidArea, int32_t sessionBottom)
+bool IsAINavigationBarAttachedToBottom(AvoidArea& avoidArea, const Rect& avoidRect, int32_t sessionBottom)
+{
+    if (std::abs(avoidRect.posY_ + static_cast<int32_t>(avoidRect.height_) - sessionBottom) <= DIFF_NUMBER) {
+        avoidArea.bottomRect_ = avoidRect;
+        return true;
+    }
+    return false;
+}
+
+bool CheckAvoidAreaForAINavigationBar(bool isVisible, AvoidArea& avoidArea, int32_t sessionBottom)
 {
     if (!avoidArea.topRect_.IsUninitializedRect() || !avoidArea.leftRect_.IsUninitializedRect() ||
         !avoidArea.rightRect_.IsUninitializedRect()) {
-        return false;
+        return (IsAINavigationBarAttachedToBottom(avoidArea, avoidArea.topRect_, sessionBottom) ||
+                IsAINavigationBarAttachedToBottom(avoidArea, avoidArea.leftRect_, sessionBottom) ||
+                IsAINavigationBarAttachedToBottom(avoidArea, avoidArea.rightRect_, sessionBottom)) && isVisible;
     }
     if (avoidArea.bottomRect_.IsUninitializedRect()) {
         return true;
     }
-    auto diff =
-        std::abs(avoidArea.bottomRect_.posY_ + static_cast<int32_t>(avoidArea.bottomRect_.height_) - sessionBottom);
-    return isVisible && diff <= 1;
+    return IsAINavigationBarAttachedToBottom(avoidArea, avoidArea.bottomRect_, sessionBottom) && isVisible;;
 }
 
 enum class UpdateStartingWindowColorCacheResult : uint32_t {
@@ -2429,7 +2439,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
             return this->IsLastFrameLayoutFinished(isLayoutFinished);
         });
         sceneSession->SetIsAINavigationBarAvoidAreaValidFunc([this](DisplayId displayId,
-                const AvoidArea& avoidArea, int32_t sessionBottom) {
+                AvoidArea& avoidArea, int32_t sessionBottom) {
             return CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_[displayId], avoidArea, sessionBottom);
         });
         sceneSession->RegisterGetStatusBarAvoidHeightFunc([this](DisplayId displayId, WSRect& barArea) {
