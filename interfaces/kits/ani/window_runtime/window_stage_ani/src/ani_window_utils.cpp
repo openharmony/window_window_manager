@@ -16,6 +16,7 @@
 #include "ani_window_utils.h"
 
 #include <iomanip>
+#include <mutex>
 #include <regex>
 #include <sstream>
 
@@ -40,6 +41,9 @@ ani_method unboxBoolean {};
 ani_method unboxDouble {};
 ani_method unboxInt {};
 ani_method unboxLong {};
+
+std::mutex g_aniCreatorsMutex;
+std::unordered_map<std::string, std::pair<ani_class, std::unordered_map<std::string, ani_method>>> globalAniCreators;
 
 std::string GetHexColor(uint32_t color)
 {
@@ -1068,54 +1072,112 @@ ani_status AniWindowUtils::GetAniString(ani_env* env, const std::string& str, an
     return env->String_NewUTF8(str.c_str(), static_cast<ani_size>(str.size()), result);
 }
 
+ani_object AniWindowUtils::CreateAniRectObject(ani_env* env, const Rect& rect)
+{
+    return InitAniObjectByCreator(env, "@ohos.window.window.RectInternal", "iiii:",
+        ani_int(rect.posX_), ani_int(rect.posY_),
+        ani_int(rect.width_), ani_int(rect.height_));
+}
+
 ani_object AniWindowUtils::CreateWindowsProperties(ani_env* env, const WindowPropertyInfo& windowPropertyInfo)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    static const char* clsName = "@ohos.window.window.WindowPropertiesInternal";
-    ani_object aniSystemProperties;
-    NewAniObjectNoParams(env, clsName, &aniSystemProperties);
-    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>windowRect", nullptr,
-        CreateAniRect(env, windowPropertyInfo.windowRect));
-    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>drawableRect", nullptr,
-        CreateAniRect(env, windowPropertyInfo.drawableRect));
-    WindowType aniWindowType = windowPropertyInfo.type;
-    if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(aniWindowType) != 0) {
-        env->Object_SetFieldByName_Int(aniSystemProperties, "typeInternal",
-            ani_int(NATIVE_JS_TO_WINDOW_TYPE_MAP.at(aniWindowType)));
+    ani_object aniRect = CreateAniRectObject(env, windowPropertyInfo.windowRect);
+    ani_object aniDrawableRect = CreateAniRectObject(env, windowPropertyInfo.drawableRect);
+    int windowType;
+    if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(windowPropertyInfo.type) != 0) {
+        windowType = static_cast<int>(NATIVE_JS_TO_WINDOW_TYPE_MAP.at(windowPropertyInfo.type));
     } else {
-        env->Object_SetFieldByName_Int(aniSystemProperties, "typeInternal", ani_int(aniWindowType));
+        windowType = static_cast<int>(windowPropertyInfo.type);
     }
-    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>isLayoutFullScreen", nullptr,
-        ani_boolean(windowPropertyInfo.isLayoutFullScreen));
-    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>isFullScreen", nullptr,
-        ani_boolean(windowPropertyInfo.isFullScreen));
-    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>touchable", nullptr,
-        ani_boolean(windowPropertyInfo.isTouchable));
-    std::string windowName = windowPropertyInfo.name;
     ani_string aniWindowName;
-    if (ANI_OK == GetAniString(env, windowName, &aniWindowName)) {
-        CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>name", nullptr, aniWindowName);
+    GetAniString(env, windowPropertyInfo.name, &aniWindowName);
+    ani_object aniWindowsProperties = InitAniObjectByCreator(env, "@ohos.window.window.WindowPropertiesInternal",
+        "C{@ohos.window.window.Rect}C{@ohos.window.window.Rect}zzzzddzzzziilC{std.core.String}:",
+        aniRect, aniDrawableRect, ani_boolean(windowPropertyInfo.isFullScreen),
+        ani_boolean(windowPropertyInfo.isLayoutFullScreen), ani_boolean(windowPropertyInfo.isFocusable),
+        ani_boolean(windowPropertyInfo.isTouchable), ani_float(windowPropertyInfo.brightness), ani_float(0),
+        ani_boolean(windowPropertyInfo.isKeepScreenOn), ani_boolean(windowPropertyInfo.isPrivacyMode),
+        ani_boolean(false),  ani_boolean(windowPropertyInfo.isTransparent), ani_int(windowType),
+        ani_int(windowPropertyInfo.id), ani_long(windowPropertyInfo.displayId), aniWindowName);
+    return aniWindowsProperties;
+}
+
+ani_status AniWindowUtils::InitAniCreator(ani_env* env,
+    const std::string& aniClassDescriptor, const std::string& aniCtorSignature)
+{
+    ani_status status = ANI_OK;
+    auto aniClassIter = globalAniCreators.find(aniClassDescriptor);
+    if (aniClassIter != globalAniCreators.end()) {
+        auto& aniCtorSignatureMap = aniClassIter->second.second;
+        if (aniCtorSignatureMap.find(aniCtorSignature) != aniCtorSignatureMap.end()) {
+            TLOGD(WmsLogTag::DEFAULT, "class %{public}s and its ctor already exist", aniClassDescriptor.c_str());
+            return status;
+        }
     }
-    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>focusable", nullptr,
-        ani_boolean(windowPropertyInfo.isFocusable));
-    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>isPrivacyMode", nullptr,
-        ani_boolean(windowPropertyInfo.isPrivacyMode));
-    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>isKeepScreenOn", nullptr,
-        ani_boolean(windowPropertyInfo.isKeepScreenOn));
-    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>brightness", nullptr,
-        ani_float(windowPropertyInfo.brightness));
-    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>isTransparent", nullptr,
-        ani_boolean(windowPropertyInfo.isTransparent));
-    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>isRoundCorner", nullptr, ani_boolean(false));
-    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>dimBehindValue", nullptr, ani_int(0));
-    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>id", nullptr, ani_int(windowPropertyInfo.id));
-    CallAniMethodVoid(env, aniSystemProperties, clsName, "<set>displayIdInternal", nullptr,
-        ani_long(windowPropertyInfo.displayId));
-    if (aniSystemProperties == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] AniSystemProperties is nullptr");
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    bool isNewClassEntry = false;
+    ani_class aniClass = nullptr;
+    if (aniClassIter == globalAniCreators.end()) {
+        status = env->FindClass(aniClassDescriptor.c_str(), &aniClass);
+        if (status != ANI_OK) {
+            TLOGE(WmsLogTag::DEFAULT, "class %{public}s not found, ret %{public}d", aniClassDescriptor.c_str(), status);
+            return status;
+        }
+        auto [iter, inserted] = globalAniCreators.emplace(
+            aniClassDescriptor, std::make_pair(aniClass, std::unordered_map<std::string, ani_method>()));
+        if (!inserted) {
+            TLOGE(WmsLogTag::DEFAULT, "emplace class %{public}s failed", aniClassDescriptor.c_str());
+            return ANI_ERROR;
+        }
+        aniClassIter = iter;
+        isNewClassEntry = true;
+        auto& newClassEntry = aniClassIter->second;
+        status = env->GlobalReference_Create(static_cast<ani_ref>(newClassEntry.first),
+            reinterpret_cast<ani_ref*>(&(newClassEntry.first)));
+        if (status != ANI_OK) {
+            TLOGE(WmsLogTag::DEFAULT, "GlobalReference_Create failed ret %{public}d", status);
+            globalAniCreators.erase(aniClassIter);
+            return status;
+        }
     }
-    return aniSystemProperties;
+    aniClass = aniClassIter->second.first;
+    ani_method aniCtorMethod;
+    status = env->Class_FindMethod(aniClass, "<ctor>", aniCtorSignature.c_str(), &aniCtorMethod);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "find %{public}s ctor failed ret %{public}d", aniClassDescriptor.c_str(), status);
+        if (isNewClassEntry) {
+            env->GlobalReference_Delete(static_cast<ani_ref>(aniClass));
+            globalAniCreators.erase(aniClassIter);
+        }
+        return status;
+    }
+    aniClassIter->second.second.emplace(aniCtorSignature, aniCtorMethod);
+    return status;
+}
+
+ani_object AniWindowUtils::InitAniObjectByCreator(ani_env* env,
+    const std::string& aniClassDescriptor, const std::string aniCtorSignature, ...)
+{
+    std::lock_guard<std::mutex> lock(g_aniCreatorsMutex);
+    ani_status status = InitAniCreator(env, aniClassDescriptor, aniCtorSignature);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "InitAniCreator failed, ret %{public}d", status);
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    va_list args;
+    va_start(args, aniCtorSignature);
+    auto& creatorEntry = globalAniCreators[aniClassDescriptor];
+    ani_object aniObject;
+    status = env->Object_New_V(
+        creatorEntry.first,
+        creatorEntry.second[aniCtorSignature],
+        &aniObject,
+        args);
+    va_end(args);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "Object_New_V failed, ret %{public}d", status);
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    return aniObject;
 }
 
 ani_object AniWindowUtils::CreateProperties(ani_env* env, const sptr<Window>& window)
