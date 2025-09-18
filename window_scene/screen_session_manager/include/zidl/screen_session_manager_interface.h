@@ -346,6 +346,10 @@ public:
     {
         return nullptr;
     }
+    virtual DisplayId GetPrimaryDisplayId()
+    {
+        return SCREEN_ID_INVALID;
+    }
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
         DmErrorCode* errorCode = nullptr)
     {
