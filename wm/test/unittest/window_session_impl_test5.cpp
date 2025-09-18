@@ -1983,6 +1983,116 @@ HWTEST_F(WindowSessionImplTest5, UpdateIsShowDecorInFreeMultiWindow, Function | 
     bool isShow = true;
     ASSERT_EQ(WSError::WS_OK, window->UpdateIsShowDecorInFreeMultiWindow(isShow));
 }
+
+/**
+ * @tc.name: GetListeners
+ * @tc.desc: GetListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, GetListeners, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetListeners");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(502);
+    window->windowTitleChangeListeners_[502] = std::vector<sptr<IWindowTitleChangeListener>>();
+ 
+    ASSERT_FALSE(window_->windowTitleChangeListeners_[window_->GetPersistentId()].empty());
+}
+ 
+/**
+ * @tc.name: NotifyTitleChange
+ * @tc.desc: NotifyTitleChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, NotifyTitleChange, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyTitleChange");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+ 
+    SessionInfo sessionInfo = {"NotifyTitleBundle", "NotifyTitleModule", "NotifyTitleAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    bool isShow = false;
+    int32_t height = 0;
+    window->NotifyTitleChange(isShow, height);
+ 
+    sptr<IWindowTitleChangeListener> listener = sptr<IWindowTitleChangeListener>::MakeSptr();
+    window->RegisterWindowTitleChangeListener(listener);
+    window->NotifyTitleChange(isShow, height);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+}
+ 
+/**
+ * @tc.name: IsHitTitleBar
+ * @tc.desc: IsHitTitleBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, IsHitTitleBar01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsHitTitleBar01");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    window->uiContent_ = nullptr;
+    bool isHitTitleBar = window->IsHitTitleBar(pointerEvent);
+    EXPECT_EQ(isHitTitleBar, false);
+ 
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    MMI::PointerEvent::PointerItem pointerItem;
+    Rect rect{ 0, 0, 200, 200 };
+    window->property_->SetWindowRect(rect);
+    pointerItem.SetDisplayX(100);
+    pointerItem.SetDisplayY(-100);
+    pointerEvent->AddPointerItem(pointerItem);
+    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    isHitTitleBar = window->IsHitTitleBar(pointerEvent);
+    EXPECT_EQ(isHitTitleBar, true);
+}
+ 
+/**
+ * @tc.name: IsHitTitleBar
+ * @tc.desc: IsHitTitleBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, IsHitTitleBar02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsHitTitleBar02");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    window->uiContent_ = nullptr;
+    bool isHitTitleBar = window->IsHitTitleBar(pointerEvent);
+    EXPECT_EQ(isHitTitleBar, false);
+
+    
+ 
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    MMI::PointerEvent::PointerItem pointerItem;
+    Rect rect{ 0, 0, 1, 1 };
+    window->property_->SetWindowRect(rect);
+    pointerItem.SetDisplayX(100);
+    pointerEvent->AddPointerItem(pointerItem);
+    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    isHitTitleBar = window->IsHitTitleBar(pointerEvent);
+    EXPECT_EQ(isHitTitleBar, false);
+}
+
+/**
+ * @tc.name: RegisterWindowTitleChangeListener
+ * @tc.desc: RegisterWindowTitleChangeListener
+ * @tc.type: FUNC
+ */ 
+HWTEST_F(WindowSessionImplTest5, RegisterWindowTitleChangeListener, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("RegisterWindowTitleChangeListener");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    sptr<IWindowTitleChangeListener> listener = nullptr;
+    WMError ret = window->RegisterWindowTitleChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

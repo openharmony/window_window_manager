@@ -4054,6 +4054,7 @@ template<typename T>
 EnableIfSame<T, IWindowTitleChangeListener, std::vector<sptr<IWindowTitleChangeListener>>> WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<IWindowTitleChangeListener>> windowTitleChangeListeners;
+    std::lock_guard<std::mutex> lockRectListener(windowTitleChangeListenerMutex_);
     for (auto& listener : windowTitleChangeListeners_[GetPersistentId()]) {
         windowTitleChangeListeners.push_back(listener);
     }
@@ -5579,7 +5580,6 @@ void WindowSessionImpl::NotifySwitchFreeMultiWindow(bool enable)
 
 void WindowSessionImpl::NotifyTitleChange(bool isShow, int32_t height)
 {
-    std::lock_guard<std::mutex> lockRectListener(windowTitleChangeListenerMutex_);
     auto windowTitleChangeListeners = GetListeners<IWindowTitleChangeListener>();
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
