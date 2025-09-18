@@ -1593,7 +1593,7 @@ void SessionStageProxy::SetUniqueVirtualPixelRatio(bool useUniqueDensity, float 
     }
 }
 
-void SessionStageProxy::ApplyAnimationSpeedMultiplier(float multiplier)
+void SessionStageProxy::UpdateAnimationSpeed(float speed)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -1609,12 +1609,12 @@ void SessionStageProxy::ApplyAnimationSpeedMultiplier(float multiplier)
         return;
     }
 
-    if (!data.WriteFloat(multiplier)) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "Write multiplier failed");
+    if (!data.WriteFloat(speed)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Write speed failed");
         return;
     }
 
-    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_APPLY_ANIMATION_SPEED_MULTIPLIER),
+    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_ANIMATION_SPEED),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "SendRequest failed");
         return;

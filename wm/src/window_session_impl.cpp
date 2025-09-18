@@ -1486,25 +1486,23 @@ void WindowSessionImpl::SetUniqueVirtualPixelRatio(bool useUniqueDensity, float 
     }
 }
 
-void WindowSessionImpl::ApplyAnimationSpeedMultiplier(float multiplier)
+void WindowSessionImpl::UpdateAnimationSpeed(float speed)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), multiplier, where, this] {
+    auto task = [weakThis = wptr(this), speed, where, this] {
         auto window = weakThis.promote();
         if (window == nullptr) {
             TLOGW(WmsLogTag::WMS_ANIMATION, "%{public}s: window is nullptr", where);
             return;
         }
-
-        ApplyToAllWindowSessions(multiplier);
-        
-        isEnableAnimationSpeedMultiplier.store(!FoldScreenStateInternel::FloatEqualAbs(multiplier, 1.0f));
-        animationSpeedMultiplier.store(multiplier);
+        UpdateAllWindowSessions(speed);
+        isEnableAnimationSpeed_.store(!FoldScreenStateInternel::FloatEqualAbs(speed, 1.0f));
+        animationSpeed_.store(speed);
     };
     handler_->PostTask(task, where, 0, AppExecFwk::EventQueue::Priority::HIGH);
 }
 
-void WindowSessionImpl::ApplyToAllWindowSessions(float multiplier)
+void WindowSessionImpl::UpdateAllWindowSessions(float speed)
 {
     for (const auto& [_, pair] : windowSessionMap_) {
         auto& WindowSession = pair.second;
@@ -1517,7 +1515,7 @@ void WindowSessionImpl::ApplyToAllWindowSessions(float multiplier)
             TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to open implicit animtion");
             continue;
         }
-        implicitAnimator->ApplyAnimationSpeedMultiplier(multiplier);
+        implicitAnimator->ApplyAnimationSpeedMultiplier(speed);
     }
 }
 

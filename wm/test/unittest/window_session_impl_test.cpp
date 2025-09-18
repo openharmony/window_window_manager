@@ -1961,19 +1961,19 @@ HWTEST_F(WindowSessionImplTest, SetUniqueVirtualPixelRatio, TestSize.Level1)
 }
 
 /**
- * @tc.name: ApplyAnimationSpeedMultiplier
- * @tc.desc: ApplyAnimationSpeedMultiplier
+ * @tc.name: UpdateAnimationSpeed
+ * @tc.desc: UpdateAnimationSpeed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest, ApplyAnimationSpeedMultiplier, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest, UpdateAnimationSpeed, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
-    option->SetWindowName("ApplyAnimationSpeedMultiplier");
+    option->SetWindowName("UpdateAnimationSpeed");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
-    window->ApplyAnimationSpeedMultiplier(1.0f);
-    window->ApplyAnimationSpeedMultiplier(2.0f);
+    window->UpdateAnimationSpeed(1.0f);
+    window->UpdateAnimationSpeed(2.0f);
 }
 
 /**

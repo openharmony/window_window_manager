@@ -1124,14 +1124,14 @@ HWTEST_F(WindowAdapterTest, MinimizeByWindowId, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateAnimationSpeedMultiplierForPid
- * @tc.desc: WindowAdapter/UpdateAnimationSpeedMultiplierForPid
+ * @tc.name: UpdateAnimationSpeedWithPid
+ * @tc.desc: WindowAdapter/UpdateAnimationSpeedWithPid
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, UpdateAnimationSpeedMultiplierForPid, TestSize.Level1)
+HWTEST_F(WindowAdapterTest, UpdateAnimationSpeedWithPid, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
-    auto err = windowAdapter.UpdateAnimationSpeedMultiplierForPid(10000, 2.0f);
+    auto err = windowAdapter.UpdateAnimationSpeedWithPid(10000, 2.0f);
     ASSERT_EQ(WMError::WM_OK, err);
 }
 

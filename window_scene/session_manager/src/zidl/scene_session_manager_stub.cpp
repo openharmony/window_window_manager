@@ -262,8 +262,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetPiPSettingSwitchStatus(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RECOVER_WINDOW_PROPERTY_CHANGE_FLAG):
             return HandleRecoverWindowPropertyChangeFlag(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_ANIMATION_SPEED_MULTIPLIER_FOR_PID):
-            return HandleUpdateAnimationSpeedMultiplierForPid(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_ANIMATION_SPEED_WITH_PID):
+            return HandleUpdateAnimationSpeedWithPid(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -2282,19 +2282,19 @@ int SceneSessionManagerStub::HandleMinimizeByWindowId(MessageParcel& data, Messa
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleUpdateAnimationSpeedMultiplierForPid(MessageParcel& data, MessageParcel& reply)
+int SceneSessionManagerStub::HandleUpdateAnimationSpeedWithPid(MessageParcel& data, MessageParcel& reply)
 {
     int32_t pid = 0;
-    float multiplier = 1.0f;
+    float speed = 1.0f;
     if (!data.ReadInt32(pid)) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "read pid failed");
         return ERR_INVALID_DATA;
     }
-    if (!data.ReadFloat(multiplier)) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "read multiplier failed");
+    if (!data.ReadFloat(speed)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "read speed failed");
         return ERR_INVALID_DATA;
     }
-    WMError errCode = UpdateAnimationSpeedMultiplierForPid(pid, multiplier);
+    WMError errCode = UpdateAnimationSpeedWithPid(pid, speed);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Write errCode failed.");
         return ERR_INVALID_DATA;

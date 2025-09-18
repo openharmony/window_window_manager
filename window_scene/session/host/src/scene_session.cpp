@@ -7496,7 +7496,7 @@ WMError SceneSession::SetUniqueDensityDpi(bool useUnique, float dpi)
     return WMError::WM_OK;
 }
 
-WMError SceneSession::ApplyAnimationSpeedMultiplier(float multiplier)
+WMError SceneSession::UpdateAnimationSpeed(float speed)
 {
     if (!IsSessionValid()) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Session is invalid");
@@ -7507,7 +7507,7 @@ WMError SceneSession::ApplyAnimationSpeedMultiplier(float multiplier)
         TLOGE(WmsLogTag::WMS_ANIMATION, "sessionStage_ is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    sessionStage_->ApplyAnimationSpeedMultiplier(multiplier);
+    sessionStage_->UpdateAnimationSpeed(speed);
     return WMError::WM_OK;
 }
 
