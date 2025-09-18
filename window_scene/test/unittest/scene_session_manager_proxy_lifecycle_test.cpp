@@ -88,12 +88,12 @@ HWTEST_F(sceneSessionManagerProxyLifecycleTest, MinimizeAllAppWindows, TestSize.
     MockMessageParcel::SetWriteUint64ErrorFlag(true);
     EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ssManagerProxy->MinimizeAllAppWindows(displayId));
     MockMessageParcel::SetWriteUint64ErrorFlag(false);
-    EXPECT_EQ(WMError::WM_OK, ssManagerProxy->MinimizeAllAppWindows(displayId));
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ssManagerProxy->MinimizeAllAppWindows(displayId));
  
     iRemoteObjectMocker->SetRequestResult(ERR_INVALID_DATA);
     EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ssManagerProxy->MinimizeAllAppWindows(displayId));
     iRemoteObjectMocker->SetRequestResult(ERR_NONE);
-    EXPECT_EQ(WMError::WM_OK, ssManagerProxy->MinimizeAllAppWindows(displayId));
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ssManagerProxy->MinimizeAllAppWindows(displayId));
     MockMessageParcel::ClearAllErrorFlag();
 }
 
