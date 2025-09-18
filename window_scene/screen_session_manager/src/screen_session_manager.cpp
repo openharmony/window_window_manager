@@ -5422,7 +5422,8 @@ DMError ScreenSessionManager::AddVirtualScreenBlockList(const std::vector<int32_
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
-    MockSessionManagerService::GetInstance().AddSkipSelfWhenShowOnVirtualScreenList(persistentIds);
+    MockSessionManagerService::GetInstance().AddSkipSelfWhenShowOnVirtualScreenList(
+        persistentIds, GetUserIdByCallingUid());
     return DMError::DM_OK;
 }
 
@@ -5433,7 +5434,8 @@ DMError ScreenSessionManager::RemoveVirtualScreenBlockList(const std::vector<int
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
-    MockSessionManagerService::GetInstance().RemoveSkipSelfWhenShowOnVirtualScreenList(persistentIds);
+    MockSessionManagerService::GetInstance().RemoveSkipSelfWhenShowOnVirtualScreenList(
+        persistentIds, GetUserIdByCallingUid());
     return DMError::DM_OK;
 }
 
