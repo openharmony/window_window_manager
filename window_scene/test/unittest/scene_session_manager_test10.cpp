@@ -30,7 +30,14 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-
+namespace {
+    std::string g_errLog;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_errLog = msg;
+    }
+}
 class SceneSessionManagerTest10 : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -591,15 +598,18 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate05, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest10, ChangeWindowRectYInVirtualDisplay, TestSize.Level1)
 {
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     DisplayId defaultDisplayId = 0;
     DisplayId displayId = 0;
     int32_t y = 100;
     ssm_->ChangeWindowRectYInVirtualDisplay(displayId, y);
-    EXPECT_EQ(displayId, 0);
+    EXPECT_TRUE(g_errLog.find("This is not VIRTUAL_DISPLAY_ID") != std::string::npos);
     EXPECT_EQ(y, 100);
     displayId = 999;
     ssm_->ChangeWindowRectYInVirtualDisplay(displayId, y);
     EXPECT_EQ(displayId, defaultDisplayId);
+    LOG_SetCallback(nullptr);
 }
 /**
  * @tc.name: ProcessFocusZOrderChange

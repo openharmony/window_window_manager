@@ -20,13 +20,21 @@
 #include "session/host/include/session.h"
 #include "session/host/include/scene_session.h"
 #include "common/include/window_session_property.h"
-
+#include "window_manager_hilog.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_errLog;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_errLog = msg;
+    }
+}
 class AnomalyDetectionTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -288,9 +296,10 @@ void WallPaperTest(sptr<SceneSessionManager> ssm_)
 HWTEST_F(AnomalyDetectionTest, SceneZOrderCheckProcess, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AnomalyDetectionTest: SceneZOrderCheckProcess start";
-    int ret = 0;
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     AnomalyDetection::SceneZOrderCheckProcess();
-
+    EXPECT_FALSE(g_errLog.find("ZOrderCheck err, zorder 0") != std::string::npos);
     SessionVisibleTest(ssm_);
     ZeroOrderTest(ssm_);
     EQOrderTest(ssm_);
@@ -299,7 +308,7 @@ HWTEST_F(AnomalyDetectionTest, SceneZOrderCheckProcess, TestSize.Level1)
     KeyGUARDTest(ssm_);
     IsShowWhenLockedTest(ssm_);
     WallPaperTest(ssm_);
-    ASSERT_EQ(ret, 0);
+    LOG_SetCallback(nullptr);
     GTEST_LOG_(INFO) << "AnomalyDetectionTest: SceneZOrderCheckProcess end";
 }
 

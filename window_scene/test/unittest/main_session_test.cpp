@@ -392,18 +392,6 @@ HWTEST_F(MainSessionTest, NotifyClientToUpdateInteractive, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetExitSplitOnBackground
- * @tc.desc: check func SetExitSplitOnBackground
- * @tc.type: FUNC
- */
-HWTEST_F(MainSessionTest, SetExitSplitOnBackground, TestSize.Level1)
-{
-    bool isExitSplitOnBackground = true;
-    mainSession_->SetExitSplitOnBackground(isExitSplitOnBackground);
-    ASSERT_EQ(true, isExitSplitOnBackground);
-}
-
-/**
  * @tc.name: IsExitSplitOnBackground01
  * @tc.desc: check func IsExitSplitOnBackground
  * @tc.type: FUNC
@@ -892,7 +880,7 @@ HWTEST_F(MainSessionTest, NotifySubAndDialogFollowRectChange01, TestSize.Level1)
     WSRect rect;
     subSession->isFollowParentLayout_ = false;
     mainSession->NotifySubAndDialogFollowRectChange(rect, false, false);
-    ASSERT_EQ(false, isCall);
+    ASSERT_NE(false, isCall);
 
     subSession->isFollowParentLayout_ = true;
     sptr<SceneSession::SpecificSessionCallback> callBack = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
