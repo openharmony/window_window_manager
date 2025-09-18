@@ -1371,7 +1371,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isPcAppInpadCompatibleMode_) &&
         parcel.WriteString(ancoRealBundleName_) &&
         parcel.WriteBool(isShowDecorInFreeMultiWindow_) &&
-        parcel.WriteBool(isMobileAppInPadLayoutFullScreen_);
+        parcel.WriteBool(isMobileAppInPadLayoutFullScreen_) &&
+        parcel.WriteBool(isFullScreenInForceSplitMode_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1490,6 +1491,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetAncoRealBundleName(parcel.ReadString());
     property->SetIsShowDecorInFreeMultiWindow(parcel.ReadBool());
     property->SetMobileAppInPadLayoutFullScreen(parcel.ReadBool());
+    property->SetIsFullScreenInForceSplitMode(parcel.ReadBool());
     return property;
 }
 
@@ -2325,6 +2327,16 @@ bool WindowSessionProperty::IsAdaptToSubWindow() const
 bool WindowSessionProperty::IsAdaptToSimulationScale() const
 {
     return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToSimulationScale();
+}
+
+void WindowSessionProperty::SetIsFullScreenInForceSplitMode(bool isFullScreenInForceSplitMode)
+{
+    isFullScreenInForceSplitMode_ = isFullScreenInForceSplitMode;
+}
+
+bool WindowSessionProperty::IsFullScreenInForceSplitMode() const
+{
+    return isFullScreenInForceSplitMode_;
 }
 
 void WindowSessionProperty::SetPcAppInpadCompatibleMode(bool enabled)

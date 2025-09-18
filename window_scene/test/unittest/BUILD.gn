@@ -1258,7 +1258,15 @@ ohos_unittest("ws_hidumper_controller_test") {
 ohos_unittest("ws_session_stub_test") {
   module_out_path = module_out_path
 
-  sources = [ "session_stub_test.cpp" ]
+  include_dirs = [
+    "${window_base_path}/window_scene/session/host/include/zidl",
+    "${window_base_path}/window_scene/test/mock",
+  ]
+
+  sources = [
+    "${window_base_path}/window_scene/test/mock/mock_message_parcel.cpp",
+    "session_stub_test.cpp",
+  ]
 
   deps = [ ":ws_unittest_common" ]
 
