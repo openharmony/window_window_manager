@@ -1454,7 +1454,7 @@ napi_value JsWindowManager::OnGetAllMainWindowInfo(napi_env env, napi_callback_i
     napi_value argv[ARGC_FOUR] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc >= ARGC_ONE) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_LIFE, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     napi_value result = nullptr;
@@ -1465,10 +1465,10 @@ napi_value JsWindowManager::OnGetAllMainWindowInfo(napi_env env, napi_callback_i
             SingletonContainer::Get<WindowManager>().GetAllMainWindowInfo(infos));
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, CreateJsMainWindowInfoArrayObject(env, infos));
-            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s success", where);
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s success", where);
         } else {
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "failed"));
-            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s failed", where);
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s failed", where);
         }
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnGetAllMainWindowInfo") != napi_status::napi_ok) {
@@ -1511,6 +1511,7 @@ napi_value JsWindowManager::OnGetMainWindowSnapshot(napi_env env, napi_callback_
             GetMainWindowSnapshot(windowIds, config, getSnapshotCallback->AsObject()));
         if (ret != WmErrorCode::WM_OK) {
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "failed"));
+            napiAsyncCallBackTask->Reject(env, JsErrUtils::CreateJsError(env, ret, "failed"));
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s failed", where);
         }
     };
