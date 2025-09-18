@@ -22,6 +22,7 @@
  
 #include "fold_screen_controller/super_fold_sensor_manager.h"
 #include "fold_screen_controller/super_fold_state_manager.h"
+#include "fold_screen_controller/fold_screen_controller_config.h"
 #include "window_manager_hilog.h"
 #include "screen_session_manager.h"
  
@@ -29,7 +30,6 @@ namespace OHOS {
  
 namespace Rosen {
 namespace {
-constexpr float ANGLE_MIN_VAL = 30.0F;
 constexpr float ANGLE_MAX_VAL = 180.0F;
 constexpr float ANGLE_FLAT_THRESHOLD = 160.0F;
 constexpr float ANGLE_SENSOR_THRESHOLD = 160.0F;

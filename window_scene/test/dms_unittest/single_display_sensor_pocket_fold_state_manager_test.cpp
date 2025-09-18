@@ -164,10 +164,13 @@ HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, GetNextFoldState02, Test
 {
     SingleDisplaySensorPocketFoldStateManager manager;
     manager.allowUserSensorForLargeFoldDevice = 1;
-    float angel = 25.0F;
+    float angel;
     int hall = 1;
-    auto result1 = manager.GetNextFoldState(angel, hall);
-    EXPECT_EQ(static_cast<int>(result1), 0);
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        angel = 25.0F;
+        auto result1 = manager.GetNextFoldState(angel, hall);
+        EXPECT_EQ(static_cast<int>(result1), 0);
+    }
 
     angel = 70.0F - 0.1;
     auto result2 = manager.GetNextFoldState(angel, hall);

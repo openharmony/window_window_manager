@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <vector>
 #include <gtest/gtest.h>
 
 #include <libxml/globals.h>
@@ -1274,6 +1275,33 @@ HWTEST_F(ScreenSceneConfigTest, IsSupportDuringCall02, TestSize.Level1)
     bool res = ScreenSceneConfig::IsSupportDuringCall();
     EXPECT_FALSE(res);
 }
+
+/**
+ * @tc.name: GetNumberConfigValue
+ * @tc.desc: GetNumberConfigValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, GetNumberConfigValue, TestSize.Level1)
+{
+    std::vector<int> test_config;
+    test_config.push_back(10);
+    ScreenSceneConfig::intNumbersConfig_["halfFoldedBuffer"] = test_config;
+    uint32_t res = ScreenSceneConfig::GetNumberConfigValue("halfFoldedBuffer", 1);
+    EXPECT_EQ(res, 10);
+}
+
+/**
+ * @tc.name: GetNumberConfigValue_default
+ * @tc.desc: GetNumberConfigValue_default
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, GetNumberConfigValue_default, TestSize.Level1)
+{
+    ScreenSceneConfig::intNumbersConfig_.erase("halfFoldedBuffer");
+    uint32_t res = ScreenSceneConfig::GetNumberConfigValue("halfFoldedBuffer", 1);
+    EXPECT_EQ(res, 1);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS
