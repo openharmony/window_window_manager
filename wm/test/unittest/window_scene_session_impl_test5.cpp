@@ -2308,6 +2308,125 @@ HWTEST_F(WindowSceneSessionImplTest5, UpdateImmersiveBySwitchMode, TestSize.Leve
     window->UpdateImmersiveBySwitchMode(false);
     EXPECT_EQ(window->enableImmersiveMode_, true);
 }
+
+/**
+ * @tc.name: TestSetContentAspectRatio
+ * @tc.desc: Test SetContentAspectRatio under multiple conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, TestSetContentAspectRatio, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    auto property = window->GetProperty();
+    property->SetPersistentId(123);
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> mockHostSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    // Case 1: Not main window
+    float ratio = 1.5f;
+    bool isPersistent = true;
+    bool needUpdateRect = true;
+    property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    auto ret = window->SetContentAspectRatio(ratio, isPersistent, needUpdateRect);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+
+    // Case 2: Invalid session
+    window->hostSession_ = nullptr;
+    ret = window->SetContentAspectRatio(ratio, isPersistent, needUpdateRect);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+    window->hostSession_ = mockHostSession;
+
+    // Case 3: Invalid ratio => WM_ERROR_ILLEGAL_PARAM
+    ratio = MathHelper::INF;
+    ret = window->SetContentAspectRatio(ratio, isPersistent, needUpdateRect);
+    EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
+    ratio = MathHelper::NAG_INF;
+    ret = window->SetContentAspectRatio(ratio, isPersistent, needUpdateRect);
+    EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
+    ratio = std::numeric_limits<float>::quiet_NaN();
+    ret = window->SetContentAspectRatio(ratio, isPersistent, needUpdateRect);
+    EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
+    ratio = 0.0f;
+    ret = window->SetContentAspectRatio(ratio, isPersistent, needUpdateRect);
+    EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
+
+    // Case 4: host returns failure => WM_ERROR_ILLEGAL_PARAM
+    ratio = 1.5f;
+    EXPECT_CALL(*mockHostSession, SetContentAspectRatio(_, _, _))
+        .Times(1).WillOnce(Return(WSError::WS_ERROR_IPC_FAILED));
+    ret = window->SetContentAspectRatio(ratio, isPersistent, needUpdateRect);
+    EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
+
+    // Case 5: host returns success => WM_OK
+    EXPECT_CALL(*mockHostSession, SetContentAspectRatio(_, _, _))
+        .Times(1).WillOnce(Return(WSError::WS_OK));
+    ret = window->SetContentAspectRatio(ratio, isPersistent, needUpdateRect);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: CalculateNewLimitsByLimits
+ * @tc.desc: test function: CalculateNewLimitsByLimits
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, CalculateNewLimitsByLimits, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> testImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    WindowLimits customizedLimits = {200, 200, 10, 10, 0.0f, 0.0f, 1.0f};
+    WindowLimits expectLimits;
+    WindowLimits newLimits;
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(0);
+    ASSERT_NE(nullptr, display);
+    auto displayInfo = display->GetDisplayInfo();
+    ASSERT_NE(nullptr, displayInfo);
+    float virtualPixelRatio = testImpl->GetVirtualPixelRatio(displayInfo);
+    testImpl->property_->SetDisplayId(0);
+    testImpl->property_->SetConfigWindowLimitsVP(customizedLimits);
+    
+    // set system limits
+    testImpl->windowSystemConfig_.maxFloatingWindowSize_ = 6240;
+    testImpl->windowSystemConfig_.miniWidthOfMainWindow_ = 1;
+    testImpl->windowSystemConfig_.miniHeightOfMainWindow_ = 1;
+    testImpl->windowSystemConfig_.miniWidthOfSubWindow_ = 1;
+    testImpl->windowSystemConfig_.miniHeightOfSubWindow_ = 1;
+    testImpl->windowSystemConfig_.miniWidthOfDialogWindow_ = 1;
+    testImpl->windowSystemConfig_.miniHeightOfDialogWindow_ = 1;
+
+    // user set flag is false, window type is mian window
+    testImpl->userLimitsSet_ = false;
+    customizedLimits = {200, 200, 10, 10, 0.0f, 0.0f, 1.0f};
+    expectLimits ={200, 200, 10, 10, 0.0f, 0.0f, 1.0f};
+    testImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    testImpl->CalculateNewLimitsByLimits(newLimits, customizedLimits, virtualPixelRatio);
+    EXPECT_EQ(customizedLimits.maxWidth_, static_cast<uint32_t>(expectLimits.maxWidth_ * virtualPixelRatio));
+    EXPECT_EQ(customizedLimits.maxHeight_, static_cast<uint32_t>(expectLimits.maxHeight_ * virtualPixelRatio));
+    EXPECT_EQ(customizedLimits.minWidth_, static_cast<uint32_t>(expectLimits.minWidth_ * virtualPixelRatio));
+    EXPECT_EQ(customizedLimits.minHeight_, static_cast<uint32_t>(expectLimits.minHeight_ * virtualPixelRatio));
+
+    // user set flag is false, window type is sys window
+    testImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    customizedLimits = {200, 200, 10, 10, 0.0f, 0.0f, 1.0f};
+    expectLimits ={200, 200, 10, 10, 0.0f, 0.0f, 1.0f};
+    testImpl->CalculateNewLimitsByLimits(newLimits, customizedLimits, virtualPixelRatio);
+    testImpl->CalculateNewLimitsByLimits(newLimits, customizedLimits, virtualPixelRatio);
+    EXPECT_EQ(customizedLimits.maxWidth_, static_cast<uint32_t>(expectLimits.maxWidth_ * virtualPixelRatio));
+    EXPECT_EQ(customizedLimits.maxHeight_, static_cast<uint32_t>(expectLimits.maxHeight_ * virtualPixelRatio));
+    EXPECT_EQ(customizedLimits.minWidth_, expectLimits.minWidth_);
+    EXPECT_EQ(customizedLimits.minHeight_, expectLimits.minHeight_);
+    // user set flag is true
+    testImpl->userLimitsSet_ = true;
+    customizedLimits = {200, 200, 10, 10, 0.0f, 0.0f, 1.0f};
+    WindowLimits userLimits = {900, 900, 100, 100, 0.0f, 0.0f, 1.0f};
+    testImpl->property_->SetUserWindowLimits(userLimits);
+    testImpl->CalculateNewLimitsByLimits(newLimits, customizedLimits, virtualPixelRatio);
+    EXPECT_EQ(customizedLimits.maxWidth_, userLimits.maxWidth_);
+    EXPECT_EQ(customizedLimits.maxHeight_, userLimits.maxHeight_);
+    EXPECT_EQ(customizedLimits.minWidth_, userLimits.minWidth_);
+    EXPECT_EQ(customizedLimits.minHeight_, userLimits.minHeight_);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

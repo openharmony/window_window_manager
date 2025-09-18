@@ -1423,8 +1423,11 @@ void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
         customizedLimits = property_->GetConfigWindowLimitsVP();
         customizedLimits.maxWidth_ = static_cast<uint32_t>(customizedLimits.maxWidth_ * virtualPixelRatio);
         customizedLimits.maxHeight_ = static_cast<uint32_t>(customizedLimits.maxHeight_ * virtualPixelRatio);
-        customizedLimits.minWidth_ = static_cast<uint32_t>(customizedLimits.minWidth_ * virtualPixelRatio);
-        customizedLimits.minHeight_ = static_cast<uint32_t>(customizedLimits.minHeight_ * virtualPixelRatio);
+        // system window maintains default limits
+        customizedLimits.minWidth_ = WindowHelper::IsSystemWindow(GetType()) ? customizedLimits.minWidth_ :
+            static_cast<uint32_t>(customizedLimits.minWidth_ * virtualPixelRatio);
+        customizedLimits.minHeight_ = WindowHelper::IsSystemWindow(GetType()) ? customizedLimits.minHeight_ :
+            static_cast<uint32_t>(customizedLimits.minHeight_ * virtualPixelRatio);
     }
     newLimits = systemLimits;
     uint32_t limitMinWidth = systemLimits.minWidth_;
