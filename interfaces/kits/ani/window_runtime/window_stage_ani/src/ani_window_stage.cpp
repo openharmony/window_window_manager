@@ -261,6 +261,30 @@ static ani_ref WindowGetMainWindow(ani_env* env, ani_object obj, ani_long native
 }
 
 extern "C" {
+using namespace OHOS::Rosen;
+std::array methods = {
+    ani_native_function {"loadContentSync",
+        "JLstd/core/String;Larkui/stateManagement/storage/localStorage/LocalStorage;:V",
+        reinterpret_cast<void *>(AniWindowStage::LoadContent)},
+    ani_native_function {"disableWindowDecorSync", nullptr,
+        reinterpret_cast<void *>(AniWindowStage::DisableWindowDecor)},
+    ani_native_function {"setShowOnLockScreenSync",
+        nullptr, reinterpret_cast<void *>(AniWindowStage::SetShowOnLockScreen)},
+    ani_native_function {"getMainWindowSync", "J:L@ohos/window/window/Window;",
+        reinterpret_cast<void *>(WindowGetMainWindow)},
+};
+
+std::array functions = {
+    ani_native_function {"CreateWindowStage", "J:L@ohos/window/window/WindowStageInternal;",
+        reinterpret_cast<void *>(WindowStageCreate)},
+    ani_native_function {"getLastWindowSync", nullptr, reinterpret_cast<void *>(AniWindowManager::GetLastWindow)},
+    ani_native_function {"getAllMainWindowInfo", "J:Lescompat/Array;",
+        reinterpret_cast<void *>(AniWindowManager::GetAllMainWindowInfo)},
+    ani_native_function {"getMainWindowSnapshot",
+        "JLescompat/Array;L@ohos/window/window/WindowSnapshotConfiguration;:Lescompat/Array;",
+        reinterpret_cast<void *>(AniWindowManager::GetMainWindowSnapshot)},
+};
+
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     using namespace OHOS::Rosen;
@@ -276,17 +300,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         TLOGE(WmsLogTag::DEFAULT, "[ANI] can't find class %{public}u", ret);
         return ANI_NOT_FOUND;
     }
-    std::array methods = {
-        ani_native_function {"loadContentSync",
-            "JLstd/core/String;Larkui/stateManagement/storage/localStorage/LocalStorage;:V",
-            reinterpret_cast<void *>(AniWindowStage::LoadContent)},
-        ani_native_function {"disableWindowDecorSync", nullptr,
-            reinterpret_cast<void *>(AniWindowStage::DisableWindowDecor)},
-        ani_native_function {"setShowOnLockScreenSync",
-            nullptr, reinterpret_cast<void *>(AniWindowStage::SetShowOnLockScreen)},
-        ani_native_function {"getMainWindowSync", "J:L@ohos/window/window/Window;",
-            reinterpret_cast<void *>(WindowGetMainWindow)},
-    };
     if ((ret = env->Class_BindNativeMethods(cls, methods.data(), methods.size())) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] bind fail %{public}u", ret);
         return ANI_NOT_FOUND;
@@ -299,16 +312,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         TLOGE(WmsLogTag::DEFAULT, "[ANI] find ns %{public}u", ret);
         return ANI_NOT_FOUND;
     }
-    std::array functions = {
-        ani_native_function {"CreateWindowStage", "J:L@ohos/window/window/WindowStageInternal;",
-            reinterpret_cast<void *>(WindowStageCreate)},
-        ani_native_function {"getLastWindowSync", nullptr, reinterpret_cast<void *>(AniWindowManager::GetLastWindow)},
-        ani_native_function {"getAllMainWindowInfo", "J:Lescompat/Array;",
-            reinterpret_cast<void *>(AniWindowManager::GetAllMainWindowInfo)},
-        ani_native_function {"getMainWindowSnapshot",
-            "JLescompat/Array;L@ohos/window/window/WindowSnapshotConfiguration;:Lescompat/Array;",
-            reinterpret_cast<void *>(AniWindowManager::GetMainWindowSnapshot)},
-    };
     if ((ret = env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size())) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] bind ns func %{public}u", ret);
         return ANI_NOT_FOUND;

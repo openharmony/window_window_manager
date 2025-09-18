@@ -133,7 +133,7 @@ ani_object AniWindowManager::OnGetMainWindowSnapshot(
     } else {
         getSnapshotCallback->GetSyncResult(static_cast<int32_t>(MAIN_WINDOW_SNAPSGOT_TIMEOUT));
         if (*errCode == WMError::WM_OK) {
-            return AniWindowUtils::CreateAniPixelMapArray(env, pixelMaps);
+            return AniWindowUtils::CreateAniPixelMapArray(env, *pixelMaps);
         }
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
     }
