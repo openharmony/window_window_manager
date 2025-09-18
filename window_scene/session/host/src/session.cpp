@@ -4569,6 +4569,7 @@ void Session::SetIsMidScene(bool isMidScene)
             TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "persistentId:%{public}d, isMidScene:%{public}d",
                 session->GetPersistentId(), isMidScene);
             session->isMidScene_ = isMidScene;
+            session->NotifySessionPropertyChange(WindowInfoKey::MID_SCENE);
         }
     }, "SetIsMidScene");
 }

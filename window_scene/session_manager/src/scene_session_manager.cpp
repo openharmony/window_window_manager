@@ -17327,6 +17327,9 @@ void SceneSessionManager::PackWindowPropertyChangeInfo(const sptr<SceneSession>&
     if (interestedFlags_ & static_cast<uint32_t>(SessionPropertyFlag::FLOATING_SCALE)) {
         windowPropertyChangeInfo[WindowInfoKey::FLOATING_SCALE] = sceneSession->GetFloatingScale();
     }
+    if (interestedFlags_ & static_cast<uint32_t>(SessionPropertyFlag::MID_SCENE)) {
+        windowPropertyChangeInfo[WindowInfoKey::MID_SCENE] = sceneSession->GetIsMidScene();
+    }
 }
 
 WSError SceneSessionManager::UseImplicitAnimation(int32_t hostWindowId, bool useImplicit)
