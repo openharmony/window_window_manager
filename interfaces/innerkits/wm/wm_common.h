@@ -810,35 +810,9 @@ struct PointInfo {
 struct MainWindowInfo : public Parcelable {
     virtual bool Marshalling(Parcel& parcel) const override
     {
-        if (!parcel.WriteInt32(pid_)) {
-            return false;
-        }
-
-        if (!parcel.WriteString(bundleName_)) {
-            return false;
-        }
-
-        if (!parcel.WriteInt32(persistentId_)) {
-            return false;
-        }
-
-        if (!parcel.WriteInt32(bundleType_)) {
-            return false;
-        }
-
-        if (!parcel.WriteUint64(displayId_)) {
-            return false;
-        }
-
-        if (!parcel.WriteBool(showing_)) {
-            return false;
-        }
-
-        if (!parcel.WriteString(label_)) {
-            return false;
-        }
-
-        return true;
+        return parcel.WriteInt32(pid_) && parcel.WriteString(bundleName_) &&
+            parcel.WriteInt32(persistentId_) && parcel.WriteInt32(bundleType_) &&
+            parcel.WriteUint64(displayId_) && parcel.WriteBool(showing_) && parcel.WriteString(label_);
     }
 
     static MainWindowInfo* Unmarshalling(Parcel& parcel)

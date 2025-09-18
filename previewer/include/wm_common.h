@@ -646,46 +646,21 @@ struct PointInfo {
 struct MainWindowInfo : public Parcelable {
     virtual bool Marshalling(Parcel& parcel) const override
     {
-        if (!parcel.WriteInt32(pid_)) {
-            return false;
-        }
-
-        if (!parcel.WriteString(bundleName_)) {
-            return false;
-        }
-
-        if (!parcel.WriteInt32(persistentId_)) {
-            return false;
-        }
-
-        if (!parcel.WriteInt32(bundleType_)) {
-            return false;
-        }
-        
-        if (!parcel.WriteUint64(displayId_)) {
-            return false;
-        }
-
-        if (!parcel.WriteBool(showing_)) {
-            return false;
-        }
-
-        if (!parcel.WriteString(label_)) {
-            return false;
-        }
-        return true;
+        return parcel.WriteInt32(pid_) && parcel.WriteString(bundleName_) &&
+            parcel.WriteInt32(persistentId_) && parcel.WriteInt32(bundleType_) &&
+            parcel.WriteUint64(displayId_) && parcel.WriteBool(showing_) && parcel.WriteString(label_);
     }
 
     static MainWindowInfo* Unmarshalling(Parcel& parcel)
     {
         MainWindowInfo* mainWindowInfo = new MainWindowInfo;
-        mainWindowInfo->pid_ = parcel.ReadInt32();
-        mainWindowInfo->bundleName_ = parcel.ReadString();
-        mainWindowInfo->persistentId_ = parcel.ReadInt32();
-        mainWindowInfo->bundleType_ = parcel.ReadInt32();
-        mainWindowInfo->displayId_ = parcel.ReadUint64();
-        mainWindowInfo->showing_ = parcel.ReadBool();
-        mainWindowInfo->label_ = parcel.ReadString();
+        if (!parcel.ReadInt32(mainWindowInfo->pid_) || !parcel.ReadString(mainWindowInfo->bundleName_) ||
+            !parcel.ReadInt32(mainWindowInfo->persistentId_) || !parcel.ReadInt32(mainWindowInfo->bundleType_) ||
+            !parcel.ReadUint64(mainWindowInfo->displayId_) || !parcel.ReadBool(mainWindowInfo->showing_) ||
+            !parcel.ReadString(mainWindowInfo->label_)) {
+            delete mainWindowInfo;
+            return nullptr;
+        }
         return mainWindowInfo;
     }
 

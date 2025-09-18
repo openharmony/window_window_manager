@@ -108,16 +108,16 @@ ani_object AniWindowManager::OnGetMainWindowSnapshot(
 {
     TLOGI(WmsLogTag::WMS_LIFE, "[ANI]");
     sptr<GetSnapshotCallback> getSnapshotCallback = sptr<GetSnapshotCallback>::MakeSptr();
-    std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps;
-    WMError errCode = WMError::WM_OK;
-    getSnapshotCallback->RegisterFunc([env, &errCode, &pixelMaps, &getSnapshotCallback]
+    auto pixelMaps = std::make_shared<std::vector<std::shared_ptr<Media::PixelMap>>>();
+    std::shared_ptr<WMError> errCode = std::make_shared<WMError>(WMError::WM_OK);
+    getSnapshotCallback->RegisterFunc([env, errCode, pixelMaps, getSnapshotCallback]
         (WMError errCodeResult, const std::vector<std::shared_ptr<Media::PixelMap>>& pixelMapResult) {
             TLOGI(WmsLogTag::WMS_LIFE, "getSnapshotCallback errCodeResult: %{public}d",
                 static_cast<int32_t>(errCodeResult));
             if (errCodeResult != WMError::WM_OK) {
-                errCode = errCodeResult;
+                *errCode = errCodeResult;
             }
-            pixelMaps = pixelMapResult;
+            *pixelMaps = pixelMapResult;
             getSnapshotCallback->OnNotifyResult();
         });
     std::vector<int32_t> windowIdList;
@@ -132,7 +132,7 @@ ani_object AniWindowManager::OnGetMainWindowSnapshot(
         return AniWindowUtils::AniThrowError(env, ret);
     } else {
         getSnapshotCallback->GetSyncResult(static_cast<int32_t>(MAIN_WINDOW_SNAPSGOT_TIMEOUT));
-        if (errCode == WMError::WM_OK) {
+        if (*errCode == WMError::WM_OK) {
             return AniWindowUtils::CreateAniPixelMapArray(env, pixelMaps);
         }
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);

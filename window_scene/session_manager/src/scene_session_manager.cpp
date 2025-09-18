@@ -156,7 +156,7 @@ constexpr uint64_t NOTIFY_START_ABILITY_TIMEOUT = 4000;
 constexpr uint64_t START_UI_ABILITY_TIMEOUT = 5000;
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 constexpr int32_t NAV_FORCE_SPLIT_MODE = 6;
-constexpr int32_t DEFAULT_HEIGTH = 200;
+constexpr int32_t DEFAULT_HEIGHT = 200;
 constexpr int32_t DEFAULT_WIDTH = 200;
 const std::string FB_PANEL_NAME = "Fb_panel";
 
@@ -15539,7 +15539,7 @@ void SceneSessionManager::CreateDefaultPixelMap(std::shared_ptr<Media::PixelMap>
 {
     Media::InitializationOptions opts;
     opts.size.width = DEFAULT_WIDTH;
-    opts.size.height = DEFAULT_HEIGTH;
+    opts.size.height = DEFAULT_HEIGHT;
     opts.pixelFormat = Media::PixelFormat::NV21;
     opts.useDMA = true;
     pixelMap = Media::PixelMap::Create(opts);
