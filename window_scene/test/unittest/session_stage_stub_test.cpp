@@ -812,18 +812,18 @@ HWTEST_F(SessionStageStubTest, HandleSetUniqueVirtualPixelRatio, TestSize.Level1
 }
 
 /**
- * @tc.name: HandleApplyAnimationSpeedMultiplier
- * @tc.desc: test function : HandleApplyAnimationSpeedMultiplier
+ * @tc.name: HandleUpdateAnimationSpeed
+ * @tc.desc: test function : HandleUpdateAnimationSpeed
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleApplyAnimationSpeedMultiplier, TestSize.Level1)
+HWTEST_F(SessionStageStubTest, HandleUpdateAnimationSpeed, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
     ASSERT_TRUE(sessionStageStub_ != nullptr);
-    ASSERT_EQ(ERR_INVALID_DATA, sessionStageStub_->HandleApplyAnimationSpeedMultiplier(data, reply));
+    ASSERT_EQ(ERR_INVALID_DATA, sessionStageStub_->HandleUpdateAnimationSpeed(data, reply));
     data.WriteFloat(2.0f);
-    ASSERT_EQ(0, sessionStageStub_->HandleApplyAnimationSpeedMultiplier(data, reply));
+    ASSERT_EQ(0, sessionStageStub_->HandleUpdateAnimationSpeed(data, reply));
 }
 
 /**

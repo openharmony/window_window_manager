@@ -1365,12 +1365,12 @@ WMError WindowAdapter::MinimizeByWindowId(const std::vector<int32_t>& windowIds)
     return wmsProxy->MinimizeByWindowId(windowIds);
 }
 
-WMError WindowAdapter::UpdateAnimationSpeedMultiplierForPid(pid_t pid, float multiplier)
+WMError WindowAdapter::UpdateAnimationSpeedWithPid(pid_t pid, float speed)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
-    return wmsProxy->UpdateAnimationSpeedMultiplierForPid(pid, multiplier);
+    return wmsProxy->UpdateAnimationSpeedWithPid(pid, speed);
 }
 
 WMError WindowAdapter::SetForegroundWindowNum(uint32_t windowNum)

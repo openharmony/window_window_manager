@@ -99,7 +99,8 @@ enum class SessionStageInterfaceCode {
     TRANS_ID_SEND_FB_ACTION_EVENT,
     TRANS_ID_NOTIFY_UPDATE_SHOW_DECOR_IN_FREE_MULTI_WINDOW,
 
-    TRANS_ID_APPLY_ANIMATION_SPEED_MULTIPLIER,
+    // Window Animation
+    TRANS_ID_UPDATE_ANIMATION_SPEED,
 };
 }   // namespace Rosen
 }   // namespace OHOS

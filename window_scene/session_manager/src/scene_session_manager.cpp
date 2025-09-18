@@ -17128,7 +17128,7 @@ void SceneSessionManager::RegisterMinimizeByWindowIdCallback(MinimizeByWindowIdF
     minimizeByWindowIdFunc_ = std::move(func);
 }
 
-WMError SceneSessionManager::UpdateAnimationSpeedMultiplierForPid(pid_t pid, float multiplier)
+WMError SceneSessionManager::UpdateAnimationSpeedWithPid(pid_t pid, float speed)
 {
     if (!SessionPermission::IsSystemServiceCalling()) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "The caller is not system service.");
@@ -17137,7 +17137,7 @@ WMError SceneSessionManager::UpdateAnimationSpeedMultiplierForPid(pid_t pid, flo
 
     for (const auto& [_, session] : sceneSessionMap_) {
         if (session && session->GetCallingPid() == pid && session->IsVisible()) {
-            session->ApplyAnimationSpeedMultiplier(multiplier);
+            session->UpdateAnimationSpeed(speed);
             return WMError::WM_OK;
         }
     }

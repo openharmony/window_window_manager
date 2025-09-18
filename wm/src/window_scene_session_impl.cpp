@@ -672,7 +672,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         SetPcAppInpadSpecificSystemBarInvisible();
         SetPcAppInpadOrientationLandscape();
     }
-    ApplyAnimationSpeedMultiplierIfEnabled();
+    UpdateAnimationSpeedIfEnabled();
     TLOGI(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, id:%{public}d], state:%{public}u, "
         "mode:%{public}u, enableDefaultDensity:%{public}d, displayId:%{public}" PRIu64,
         property_->GetWindowName().c_str(), property_->GetPersistentId(), state_, GetWindowMode(),
@@ -680,15 +680,15 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     return ret;
 }
 
-void WindowSceneSessionImpl::ApplyAnimationSpeedMultiplierIfEnabled()
+void WindowSceneSessionImpl::UpdateAnimationSpeedIfEnabled()
 {
-    if (!isEnableAnimationSpeedMultiplier.load()) {
+    if (!isEnableAnimationSpeed_.load()) {
         return;
     }
     auto rsUIContext = WindowSessionImpl::GetRSUIContext();
     auto implicitAnimator = rsUIContext ? rsUIContext->GetRSImplicitAnimator() : nullptr;
     if (implicitAnimator != nullptr) {
-        implicitAnimator->ApplyAnimationSpeedMultiplier(animationSpeedMultiplier.load());
+        implicitAnimator->ApplyAnimationSpeedMultiplier(animationSpeed_.load());
     }
 }
 

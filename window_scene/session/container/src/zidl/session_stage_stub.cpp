@@ -238,8 +238,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSendFbActionEvent(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_UPDATE_SHOW_DECOR_IN_FREE_MULTI_WINDOW):
             return HandleUpdateIsShowDecorInFreeMultiWindow(data, reply);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_APPLY_ANIMATION_SPEED_MULTIPLIER):
-            return HandleApplyAnimationSpeedMultiplier(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_ANIMATION_SPEED):
+            return HandleUpdateAnimationSpeed(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -867,15 +867,15 @@ int SessionStageStub::HandleSetUniqueVirtualPixelRatio(MessageParcel& data, Mess
     return ERR_NONE;
 }
 
-int SessionStageStub::HandleApplyAnimationSpeedMultiplier(MessageParcel& data, MessageParcel& reply)
+int SessionStageStub::HandleUpdateAnimationSpeed(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_ANIMATION, "HandleApplyAnimationSpeedMultiplier!");
-    float multiplier;
-    if (!data.ReadFloat(multiplier)) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "Read multiplier failed.");
+    TLOGD(WmsLogTag::WMS_ANIMATION, "HandleUpdateAnimationSpeed!");
+    float speed = 0.0f;
+    if (!data.ReadFloat(speed)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Read speed failed.");
         return ERR_INVALID_DATA;
     }
-    ApplyAnimationSpeedMultiplier(multiplier);
+    UpdateAnimationSpeed(speed);
     return ERR_NONE;
 }
 

@@ -156,7 +156,7 @@ public:
         TRANS_ID_REMOVE_SESSION_BLACK_LIST,
         TRANS_ID_GET_PIP_SWITCH_STATUS,
         TRANS_ID_RECOVER_WINDOW_PROPERTY_CHANGE_FLAG,
-        TRANS_ID_UPDATE_ANIMATION_SPEED_MULTIPLIER_FOR_PID,
+        TRANS_ID_UPDATE_ANIMATION_SPEED_WITH_PID,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
