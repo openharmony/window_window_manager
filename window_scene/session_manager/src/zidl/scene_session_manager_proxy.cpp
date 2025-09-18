@@ -2698,7 +2698,7 @@ WSError SceneSessionManagerProxy::GetHostGlobalScaledRect(int32_t hostWindowId, 
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerProxy::ConvertToRelativeCoordinateForFoldPC(
+WMError SceneSessionManagerProxy::ConvertToRelativeCoordinateExtended(
     const Rect& rect, Rect& newRect, DisplayId& newDisplayId)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
@@ -2724,7 +2724,7 @@ WMError SceneSessionManagerProxy::ConvertToRelativeCoordinateForFoldPC(
         data, reply, option);
     if (sendRet != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_MULTI_WINDOW,
-            "SendRequest ConvertToRelativeCoordinateForFoldPC failed, code: %{public}d", sendRet);
+            "SendRequest ConvertToRelativeCoordinateExtended failed, code: %{public}d", sendRet);
         return WMError::WM_ERROR_IPC_FAILED;
     }
     int32_t posX = 0;

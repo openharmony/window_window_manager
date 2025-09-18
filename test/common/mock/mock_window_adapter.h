@@ -50,7 +50,7 @@ public:
                                                 const sptr<IWindowManagerAgent>& windowManagerAgent));
     MOCK_METHOD1(GetVisibilityWindowInfo, WMError(std::vector<sptr<WindowVisibilityInfo>>& infos));
     MOCK_METHOD1(GetAccessibilityWindowInfo, WMError(std::vector<sptr<AccessibilityWindowInfo>>& infos));
-    MOCK_METHOD3(ConvertToRelativeCoordinateForFoldPC, WMError(const Rect& rect,
+    MOCK_METHOD3(ConvertToRelativeCoordinateExtended, WMError(const Rect& rect,
         Rect& newRect, DisplayId& newDisplayId));
     MOCK_METHOD2(GetUnreliableWindowInfo, WMError(int32_t windowId, std::vector<sptr<UnreliableWindowInfo>>& infos));
     MOCK_METHOD1(RaiseToAppTop, WMError(uint32_t windowId));

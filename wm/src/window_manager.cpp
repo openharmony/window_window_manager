@@ -1691,10 +1691,10 @@ WMError WindowManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessibility
     return ret;
 }
 
-WMError WindowManager::ConvertToRelativeCoordinateForFoldPC(const Rect& rect, Rect& newRect, DisplayId& newDisplayId)
+WMError WindowManager::ConvertToRelativeCoordinateExtended(const Rect& rect, Rect& newRect, DisplayId& newDisplayId)
 {
     WMError ret =
-        SingletonContainer::Get<WindowAdapter>().ConvertToRelativeCoordinateForFoldPC(rect, newRect, newDisplayId);
+        SingletonContainer::Get<WindowAdapter>().ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Convert relative coordinate failed");
     }

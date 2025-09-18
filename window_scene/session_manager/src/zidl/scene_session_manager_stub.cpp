@@ -2500,7 +2500,7 @@ int SceneSessionManagerStub::HandleConvertToRelativeCoordinateForFoldPC(MessageP
     Rect rect = {posX_, posY_, width_, height_};
     Rect newRect;
     DisplayId newDisplayId = 0;
-    WMError errCode = ConvertToRelativeCoordinateForFoldPC(rect, newRect, newDisplayId);
+    WMError errCode = ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
     if (!reply.WriteInt32(static_cast<int32_t>(newRect.posX_)) ||
         !reply.WriteInt32(static_cast<int32_t>(newRect.posY_)) ||
         !reply.WriteUint32(static_cast<uint32_t>(newRect.width_)) ||
