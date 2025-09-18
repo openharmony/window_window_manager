@@ -83,7 +83,7 @@ namespace {
  */
 HWTEST_F(MainSessionTest, MainSession01, TestSize.Level1)
 {
-    MainSession* pMainSession = nullptr;
+    sptr<MainSession> pMainSession = nullptr;
     sptr<MainSession::SpecificSessionCallback> pSpecificCallback = nullptr;
 
     SessionInfo info;
@@ -118,7 +118,7 @@ HWTEST_F(MainSessionTest, MainSession01, TestSize.Level1)
  */
 HWTEST_F(MainSessionTest, MainSession02, TestSize.Level1)
 {
-    MainSession* pMainSession = nullptr;
+    sptr<MainSession> pMainSession = nullptr;
     sptr<MainSession::SpecificSessionCallback> pSpecificCallback = nullptr;
 
     SessionInfo info;
