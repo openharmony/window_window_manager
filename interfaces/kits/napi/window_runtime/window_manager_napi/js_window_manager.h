@@ -16,6 +16,7 @@
 #ifndef OHOS_JS_WINDOW_MANAGER_H
 #define OHOS_JS_WINDOW_MANAGER_H
 
+#include "get_snapshot_callback.h"
 #include "js_runtime_utils.h"
 #include "js_window_register_manager.h"
 #include "native_engine/native_engine.h"
@@ -57,6 +58,8 @@ public:
     static napi_value ShiftAppWindowTouchEvent(napi_env env, napi_callback_info info);
     static napi_value NotifyScreenshotEvent(napi_env env, napi_callback_info info);
     static napi_value CreateUIEffectController(napi_env env, napi_callback_info info);
+    static napi_value GetAllMainWindowInfo(napi_env env, napi_callback_info info);
+    static napi_value GetMainWindowSnapshot(napi_env env, napi_callback_info info);
 
 private:
     static napi_value OnCreate(napi_env env, napi_callback_info info);
@@ -76,6 +79,8 @@ private:
     static napi_value OnSetWatermarkImageForApp(napi_env env, napi_callback_info info);
     static napi_value OnShiftAppWindowFocus(napi_env env, napi_callback_info info);
     static napi_value OnGetAllWindowLayoutInfo(napi_env env, napi_callback_info info);
+    static napi_value OnGetAllMainWindowInfo(napi_env env, napi_callback_info info);
+    static napi_value OnGetMainWindowSnapshot(napi_env env, napi_callback_info info);
     static napi_value OnGetGlobalWindowMode(napi_env env, napi_callback_info info);
     static napi_value OnGetTopNavDestinationName(napi_env env, napi_callback_info info);
     static napi_value OnGetVisibleWindowInfo(napi_env env, napi_callback_info info);
@@ -90,6 +95,11 @@ private:
     static bool ParseConfigOption(
         napi_env env, napi_value jsObject, WindowOption& option, void*& contextPtr);
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
+    static bool ParseWindowSnapshotConfiguration(
+        napi_env env, napi_value jsObject, WindowSnapshotConfiguration& option);
+    static void RegisterCallBackFunc(napi_env env, sptr<GetSnapshotCallback>& getSnapshotCallback,
+        const std::shared_ptr<AbilityRuntime::NapiAsyncTask>& task,
+        const std::shared_ptr<AbilityRuntime::NapiAsyncTask>& napiAsyncCallBackTask);
 };
 }  // namespace Rosen
 }  // namespace OHOS
