@@ -16,6 +16,7 @@
 #ifndef OHOS_ANI_WINDOW_UTILS_H
 #define OHOS_ANI_WINDOW_UTILS_H
 
+#include <cstdarg>
 #include <map>
 
 #include "ani.h"
@@ -39,6 +40,10 @@ namespace Rosen {
 constexpr Rect g_emptyRect = {0, 0, 0, 0};
 class AniWindowUtils {
 public:
+    static ani_status InitAniCreator(ani_env* env,
+        const std::string& aniClassDescriptor, const std::string& aniCtorSignature);
+    static ani_object InitAniObjectByCreator(ani_env* env,
+        const std::string& aniClassDescriptor, const std::string aniCtorSignature, ...);
     static ani_status GetStdString(ani_env* env, ani_string ani_str, std::string& result);
     static ani_status GetStdStringVector(ani_env* env, ani_object ary, std::vector<std::string>& result);
     static ani_status GetPropertyIntObject(ani_env* env, const char* propertyName, ani_object object, int32_t& result);
@@ -83,6 +88,7 @@ public:
         const char* method, const char* signature, ...);
     static ani_status GetAniString(ani_env* env, const std::string& str, ani_string* result);
     static void* GetAbilityContext(ani_env *env, ani_object aniObj);
+    static ani_object CreateAniRectObject(ani_env* env, const Rect& rect);
     static ani_object CreateWindowsProperties(ani_env* env, const WindowPropertyInfo& windowPropertyInfo);
     static ani_object CreateProperties(ani_env* env, const sptr<Window>& window);
     static uint32_t GetColorFromAni(ani_env* env, const char* name,
