@@ -1918,6 +1918,50 @@ HWTEST_F(MoveDragControllerTest, TestCalcDragTargetRect, TestSize.Level1)
     moveDragController->CalcDragTargetRect(pointerEvent, reason);
     EXPECT_NE(moveDragController->moveDragProperty_.targetRect_, WSRect::EMPTY_RECT);
 }
+
+/**
+ * @tc.name: TestGetGravity
+ * @tc.desc: Verify GetGravity returns correct value or TOP_LEFT when not found
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, TestGetGravity, TestSize.Level1)
+{
+    // Case 1: type in GRAVITY_MAP
+    auto gravity = moveDragController->GetGravity(AreaType::TOP);
+    EXPECT_EQ(gravity, Gravity::BOTTOM_LEFT);
+
+    // Case 2: type not in GRAVITY_MAP
+    gravity = moveDragController->GetGravity(static_cast<AreaType>(999));
+    EXPECT_EQ(gravity, Gravity::TOP_LEFT);
+}
+
+/**
+ * @tc.name: TestRestoreToPreDragGravity
+ * @tc.desc: Verify RestoreToPreDragGravity handles null, no-value, and valid cases
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, TestRestoreToPreDragGravity, TestSize.Level1)
+{
+    // Case 1: surfaceNode is null
+    auto res = moveDragController->RestoreToPreDragGravity(nullptr);
+    EXPECT_FALSE(res);
+
+    struct RSSurfaceNodeConfig config;
+    auto surfaceNode = RSSurfaceNode::Create(config);
+
+    // Case 2: preDragGravity is nullopt
+    moveDragController->preDragGravity_ = std::nullopt;
+    res = moveDragController->RestoreToPreDragGravity(surfaceNode);
+    EXPECT_FALSE(res);
+
+    // Case 3: preDragGravity has value
+    moveDragController->preDragGravity_ = Gravity::BOTTOM_RIGHT;
+    res = moveDragController->RestoreToPreDragGravity(surfaceNode);
+    Gravity gravity = surfaceNode->GetStagingProperties().GetFrameGravity();
+    EXPECT_TRUE(res);
+    EXPECT_EQ(gravity, Gravity::BOTTOM_RIGHT);
+    EXPECT_EQ(moveDragController->preDragGravity_, std::nullopt);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
