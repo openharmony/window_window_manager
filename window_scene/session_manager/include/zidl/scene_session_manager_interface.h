@@ -331,7 +331,7 @@ public:
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) override {}
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override { return WMError::WM_OK; }
     WMError SetForegroundWindowNum(uint32_t windowNum) override { return WMError::WM_OK; }
-    WMError MinimizeAllWindow(DisplayId displayId) override { return WMError::WM_OK; }
+    WMError MinimizeAllAppWindows(DisplayId displayId) override { return WMError::WM_OK; }
 
     /**
      * @brief Raise a window to screen top by id of window.
