@@ -484,6 +484,7 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
     } else {
         TLOGE(WmsLogTag::WMS_RECOVER, "want is nullptr!");
     }
+    property_->SetIsFullScreenInForceSplitMode(isFullScreenInForceSplit_.load());
     windowRecoverStateChangeFunc_(false, WindowRecoverState::WINDOW_START_RECONNECT);
     sptr<ISessionStage> iSessionStage(this);
     sptr<IWindowEventChannel> iWindowEventChannel = sptr<WindowEventChannel>::MakeSptr(iSessionStage);

@@ -3083,9 +3083,9 @@ HWTEST_F(SceneSessionManagerTest12, NotifyIsFullScreenInForceSplitMode, TestSize
 {
     uint32_t uid = 100;
     ssm_->NotifyIsFullScreenInForceSplitMode(uid, true);
-    EXPECT_EQ(ssm_->fullScreenInForceSplitUidSet_.find(uid) != ssm_->fullScreenInForceSplitUidSet_.end());
+    EXPECT_TRUE(ssm_->fullScreenInForceSplitUidSet_.find(uid) != ssm_->fullScreenInForceSplitUidSet_.end());
     ssm_->NotifyIsFullScreenInForceSplitMode(uid, false);
-    EXPECT_EQ(ssm_->fullScreenInForceSplitUidSet_.find(uid) == ssm_->fullScreenInForceSplitUidSet_.end());
+    EXPECT_TRUE(ssm_->fullScreenInForceSplitUidSet_.find(uid) == ssm_->fullScreenInForceSplitUidSet_.end());
 }
 } // namespace
 } // namespace Rosen
