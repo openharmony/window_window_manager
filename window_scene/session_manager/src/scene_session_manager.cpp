@@ -17014,7 +17014,7 @@ void SceneSessionManager::GetStatusBarAvoidHeight(DisplayId displayId, WSRect& b
     barArea.height_ = it->second;
 }
 
-WMError SceneSessionManager::MinimizeAllWindow(DisplayId displayId)
+WMError SceneSessionManager::MinimizeAllAppWindows(DisplayId displayId)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no right.");

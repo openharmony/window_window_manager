@@ -207,20 +207,20 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleClearAllSessions, TestSize.
 }
 
 /**
- * @tc.name: HandleMinimizeAllWindow
- * @tc.desc: test HandleMinimizeAllWindow
+ * @tc.name: HandleMinimizeAllAppWindows
+ * @tc.desc: test HandleMinimizeAllAppWindows
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleMinimizeAllWindow, TestSize.Level1)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleMinimizeAllAppWindows, TestSize.Level1)
 {
     ASSERT_NE(nullptr, stub_);
     MessageParcel data;
     MessageParcel reply;
     data.WriteBool(true);
-    EXPECT_EQ(stub_->HandleMinimizeAllWindow(data, reply), ERR_INVALID_DATA);
+    EXPECT_EQ(stub_->HandleMinimizeAllAppWindows(data, reply), ERR_INVALID_DATA);
 
     data.WriteUint64(0);
-    EXPECT_EQ(stub_->HandleMinimizeAllWindow(data, reply), ERR_NONE);
+    EXPECT_EQ(stub_->HandleMinimizeAllAppWindows(data, reply), ERR_NONE);
 }
 
 /**
