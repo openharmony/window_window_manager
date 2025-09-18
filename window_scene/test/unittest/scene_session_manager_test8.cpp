@@ -1391,6 +1391,46 @@ HWTEST_F(SceneSessionManagerTest8, FlushSessionBlackListInfoMapWhenRemove02, Tes
 }
 
 /**
+ * @tc.name: CheckAvoidAreaForAINavigationBar
+ * @tc.desc: test function : CheckAvoidAreaForAINavigationBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, CheckAvoidAreaForAINavigationBar, TestSize.Level1)
+{
+    bool isVisible = false;
+    AvoidArea avoidArea;
+    int32_t sessionBottom = 2720;
+    EXPECT_EQ(CheckAvoidAreaForAINavigationBar(isVisible, avoidArea, sessionBottom), true);
+    avoidArea.topRect_ = { 600, 2710, 500, 10 };
+    EXPECT_EQ(CheckAvoidAreaForAINavigationBar(isVisible, avoidArea, sessionBottom), false);
+    avoidArea.topRect_ = { 0, 0, 0, 10 };
+    avoidArea.leftRect_ = { 600, 2710, 500, 10 };
+    isVisible = true;
+    EXPECT_EQ(CheckAvoidAreaForAINavigationBar(isVisible, avoidArea, sessionBottom), true);
+    avoidArea.leftRect_ = { 0, 0, 0, 0 };
+    avoidArea.rightRect_ = { 600, 2710, 500, 10 };
+    EXPECT_EQ(CheckAvoidAreaForAINavigationBar(isVisible, avoidArea, sessionBottom), true);
+    avoidArea.rightRect_ = { 0, 0, 0, 0 };
+    avoidArea.bottomRect_ = { 600, 2710, 500, 10 };
+    EXPECT_EQ(CheckAvoidAreaForAINavigationBar(isVisible, avoidArea, sessionBottom), false);
+}
+
+/**
+ * @tc.name: IsAINavigationBarAttachedToBottom
+ * @tc.desc: test function : IsAINavigationBarAttachedToBottom
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, IsAINavigationBarAttachedToBottom, TestSize.Level1)
+{
+    AvoidArea avoidArea;
+    Rect avoidRect = { 600, 2710, 500, 10 };
+    int32_t sessionBottom = 2720;
+    EXPECT_EQ(IsAINavigationBarAttachedToBottom(avoidArea, avoidRect, sessionBottom), true);
+    avoidRect = { 600, 2710, 500, 8 };
+    EXPECT_EQ(IsAINavigationBarAttachedToBottom(avoidArea, avoidRect, sessionBottom), false);
+}
+
+/**
  * @tc.name: AddskipSurfaceNodeIdSet
  * @tc.desc: test function : AddskipSurfaceNodeIdSet
  * @tc.type: FUNC
