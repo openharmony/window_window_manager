@@ -2898,14 +2898,20 @@ WMError SceneSessionManagerProxy::MinimizeAllAppWindows(DisplayId displayId)
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
+        TLOGE(WmsLogTag::WMS_LIFE, "Remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
         SceneSessionManagerMessage::TRANS_ID_MINIMIZE_ALL_WINDOW), data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    return static_cast<WMError>(reply.ReadInt32());
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read ret failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(ret);
 }
 
 WMError SceneSessionManagerProxy::ToggleShownStateForAllAppWindows()
