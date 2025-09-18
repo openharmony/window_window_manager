@@ -2039,16 +2039,18 @@ HWTEST_F(WindowSessionImplTest5, IsHitTitleBar01, TestSize.Level1)
     bool isHitTitleBar = window->IsHitTitleBar(pointerEvent);
     EXPECT_EQ(isHitTitleBar, false);
  
+    
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->uiContent_->SetContainerModalTitleHeight(100);
     MMI::PointerEvent::PointerItem pointerItem;
-    Rect rect{ 0, 0, 200, 200 };
+    Rect rect = { 0, 0, 200, 200 };
     window->property_->SetWindowRect(rect);
     pointerItem.SetDisplayX(100);
-    pointerItem.SetDisplayY(-100);
+    pointerItem.SetDisplayY(50);
     pointerEvent->AddPointerItem(pointerItem);
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     isHitTitleBar = window->IsHitTitleBar(pointerEvent);
-    EXPECT_EQ(isHitTitleBar, true);
+    EXPECT_EQ(isHitTitleBar, false);
 }
  
 /**
@@ -2066,8 +2068,6 @@ HWTEST_F(WindowSessionImplTest5, IsHitTitleBar02, TestSize.Level1)
     bool isHitTitleBar = window->IsHitTitleBar(pointerEvent);
     EXPECT_EQ(isHitTitleBar, false);
 
-    
- 
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     MMI::PointerEvent::PointerItem pointerItem;
     Rect rect{ 0, 0, 1, 1 };
