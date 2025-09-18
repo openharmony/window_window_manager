@@ -50,10 +50,13 @@ public:
     static void LoadContent(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_string path, ani_object storage);
     static void SetWindowSystemBarEnable(ani_env* env, ani_object obj, ani_long nativeObj, ani_object nameAry);
+    static void SetWindowTouchable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isTouchable);
     static ani_object GetUIContext(ani_env* env, ani_object obj, ani_long nativeObj);
     static ani_object GetWindowAvoidArea(ani_env* env, ani_object obj, ani_long nativeObj, ani_int type);
     static void RegisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
         ani_ref callback);
+    static void RegisterNoInteractionDetectedCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
+        ani_long timeout, ani_ref callback);
     static void UnregisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
         ani_ref callback);
     static void Finalizer(ani_env* env, ani_long nativeObj);
@@ -89,9 +92,10 @@ private:
     void OnSetWaterMarkFlag(ani_env* env, ani_boolean enable);
     void OnLoadContent(ani_env* env, ani_string path, ani_object storage);
     void OnSetWindowSystemBarEnable(ani_env* env, ani_object nameAry);
+    void OnSetWindowTouchable(ani_env* env, ani_boolean isTouchable);
     ani_object OnGetUIContext(ani_env* env);
     ani_object OnGetWindowAvoidArea(ani_env* env, ani_int type);
-    void OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
+    void OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback, ani_long timeout);
     void OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
     bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
         std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags,

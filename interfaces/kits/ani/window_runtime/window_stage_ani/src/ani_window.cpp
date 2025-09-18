@@ -401,6 +401,36 @@ WMError AniWindow::SetSystemBarPropertiesByFlags(std::map<WindowType, SystemBarP
     return ret;
 }
 
+void AniWindow::SetWindowTouchable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isTouchable)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "[ANI]Enter");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]aniWindow is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    aniWindow->OnSetWindowTouchable(env, isTouchable);
+}
+
+void AniWindow::OnSetWindowTouchable(ani_env* env, ani_boolean isTouchable)
+{
+    auto window = GetWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]window is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    WmErrorCode ret = AniWindowUtils::ToErrorCode(window->SetTouchable(static_cast<bool>(isTouchable)));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]SetTouchable failed, ret: %{public}d", ret);
+        AniWindowUtils::AniThrowError(env, ret, "Window set touchable on failed");
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_EVENT, "[ANI]Window [%{public}u, %{public}s]OnSetWindowTouchable end, isTouchable: "
+        "%{public}d", window->GetWindowId(), window->GetWindowName().c_str(), isTouchable);
+}
+
 ani_object AniWindow::GetUIContext(ani_env* env, ani_object obj, ani_long nativeObj)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
@@ -635,14 +665,27 @@ void AniWindow::RegisterWindowCallback(ani_env* env, ani_object obj, ani_long na
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    ani_long timeout = 0;
     if (aniWindow != nullptr) {
-        aniWindow->OnRegisterWindowCallback(env, type, callback);
+        aniWindow->OnRegisterWindowCallback(env, type, callback, timeout);
     } else {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
     }
 }
 
-void AniWindow::OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback)
+void AniWindow::RegisterNoInteractionDetectedCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
+    ani_long timeout, ani_ref callback)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow != nullptr) {
+        aniWindow->OnRegisterWindowCallback(env, type, callback, timeout);
+    } else {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]aniWindow is nullptr!");
+    }
+}
+
+void AniWindow::OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback, ani_long timeout)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     auto window = GetWindow();
@@ -654,7 +697,7 @@ void AniWindow::OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref 
     std::string cbType;
     AniWindowUtils::GetStdString(env, type, cbType);
     TLOGI(WmsLogTag::DEFAULT, "[ANI] type:%{public}s", cbType.c_str());
-    WmErrorCode ret = registerManager_->RegisterListener(window, cbType, CaseType::CASE_WINDOW, env, callback);
+    WmErrorCode ret = registerManager_->RegisterListener(window, cbType, CaseType::CASE_WINDOW, env, callback, timeout);
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret);
         return;
@@ -1221,6 +1264,8 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::SetWindowKeepScreenOn)},
         ani_native_function {"setWindowSystemBarEnableSync", "JLescompat/Array;:V",
             reinterpret_cast<void *>(AniWindow::SetWindowSystemBarEnable)},
+        ani_native_function {"setWindowTouchableSync", "lz:",
+            reinterpret_cast<void *>(AniWindow::SetWindowTouchable)},
         ani_native_function {"getUIContextSync", "J:L@ohos/arkui/UIContext/UIContext;",
             reinterpret_cast<void *>(AniWindow::GetUIContext)},
         ani_native_function {"getWindowAvoidAreaSync", "JI:L@ohos/window/window/AvoidArea;",
@@ -1231,6 +1276,8 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::SetContentAspectRatio)},
         ani_native_function {"onSync", nullptr,
             reinterpret_cast<void *>(AniWindow::RegisterWindowCallback)},
+        ani_native_function {"onNoInteractionDetected", "lC{std.core.String}lC{std.core.Object}:",
+            reinterpret_cast<void *>(AniWindow::RegisterNoInteractionDetectedCallback)},
         ani_native_function {"offSync", nullptr,
             reinterpret_cast<void *>(AniWindow::UnregisterWindowCallback)},
     };
