@@ -30,6 +30,7 @@
 #include "ability_state_data.h"
 #include "process_data.h"
 #include "fold_screen_controller/fold_screen_policy.h"
+#include "fold_screen_controller/fold_screen_controller_config.h"
 #include "screen_setting_helper.h"
 
 #include "fold_screen_controller/fold_screen_sensor_manager.h"
@@ -62,7 +63,6 @@ const float INWARD_HALF_FOLDED_MIN_THRESHOLD = static_cast<float>(system::GetInt
     ("const.fold.half_folded_min_threshold", 85));
 constexpr int32_t HALL_THRESHOLD = 1;
 constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
-constexpr float ANGLE_MIN_VAL = 0.0F;
 constexpr float INWARD_FOLDED_LOWER_THRESHOLD = 10.0F;
 constexpr float INWARD_FOLDED_UPPER_THRESHOLD = 20.0F;
 constexpr float HALL_ZERO_INVALID_POSTURE = 170.0F;

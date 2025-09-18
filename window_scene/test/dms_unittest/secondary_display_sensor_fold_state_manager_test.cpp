@@ -417,6 +417,9 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf02, Tes
  */
 HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf03, TestSize.Level1)
 {
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
     SecondaryDisplaySensorFoldStateManager manager;
     int32_t allowUserSensorForLargeFoldDevice = 0;
     FoldStatus state = FoldStatus::UNKNOWN;

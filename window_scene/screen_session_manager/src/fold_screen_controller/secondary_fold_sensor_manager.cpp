@@ -19,6 +19,7 @@
 #include <parameters.h>
 
 #include "fold_screen_controller/secondary_fold_sensor_manager.h"
+#include "fold_screen_controller/fold_screen_controller_config.h"
 #include "fold_screen_state_internel.h"
 #include "window_manager_hilog.h"
 #include "screen_session_manager.h"
@@ -30,7 +31,6 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr float ANGLE_MIN_VAL = 0.0F;
 constexpr float ANGLE_MAX_VAL = 180.0F;
 constexpr int32_t SENSOR_SUCCESS = 0;
 // 10ms = 1000 * 1000 * 10 ns
@@ -41,8 +41,6 @@ constexpr uint16_t HALL_A_B_COLUMN_ORDER = 4;
 constexpr float ACCURACY_ERROR_FOR_ALTA = 0.0001F;
 constexpr float MINI_NOTIFY_FOLD_ANGLE = 0.5F;
 std::vector<float> oldFoldAngle = {0.0F, 0.0F};
-constexpr size_t SECONDARY_POSTURE_SIZE = 3;
-constexpr size_t SECONDARY_HALL_SIZE = 2;
 constexpr uint16_t FIRST_DATA = 0;
 constexpr uint16_t SECOND_DATA = 1;
 constexpr uint16_t THIRD_DATA = 2;
@@ -155,7 +153,7 @@ void SecondaryFoldSensorManager::HandlePostureData(const SensorEvent * const eve
 
 void SecondaryFoldSensorManager::NotifyFoldAngleChanged(const std::vector<float> &angles)
 {
-    if (angles.size() < SECONDARY_HALL_SIZE) {
+    if (angles.size() < HALL_SIZE) {
         return;
     }
     bool bcFlag = fabs(angles[0] - oldFoldAngle[0]) < MINI_NOTIFY_FOLD_ANGLE;
@@ -198,12 +196,12 @@ void SecondaryFoldSensorManager::HandleHallDataExt(const SensorEvent * const eve
 
 bool SecondaryFoldSensorManager::IsDataBeyondBoundary()
 {
-    if (globalAngle_.size() < SECONDARY_POSTURE_SIZE || globalHall_.size() < SECONDARY_HALL_SIZE) {
+    if (globalAngle_.size() < POSTURE_SIZE || globalHall_.size() < HALL_SIZE) {
         TLOGE(WmsLogTag::DMS, "oversize, global angles: %{public}zu, halls size: %{public}zu.",
             globalAngle_.size(), globalHall_.size());
         return true;
     }
-    for (size_t i = 0; i < SECONDARY_POSTURE_SIZE - 1; i++) {
+    for (size_t i = 0; i < POSTURE_SIZE - 1; i++) {
         float angle = globalAngle_[i];
         if (std::isless(angle, ANGLE_MIN_VAL) ||
             std::isgreater(angle, ANGLE_MAX_VAL + ACCURACY_ERROR_FOR_ALTA)) {
@@ -211,7 +209,7 @@ bool SecondaryFoldSensorManager::IsDataBeyondBoundary()
             return true;
         }
     }
-    for (size_t i = 0; i < SECONDARY_HALL_SIZE; i++) {
+    for (size_t i = 0; i < HALL_SIZE; i++) {
         uint16_t hall = globalHall_[i];
         if (hall != 0 && hall != 1) {
             TLOGE(WmsLogTag::DMS, "i = %{public}zu, hall = %{public}u", i, hall);
