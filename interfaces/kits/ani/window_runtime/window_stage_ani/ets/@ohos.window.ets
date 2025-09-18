@@ -22,6 +22,7 @@ export type AsyncCallbackVoid = (err: BusinessError) => void;
 export type WindowEventCallback = (data: window.WindowEventType) => void;
 export type WindowSizeCallback = (data: window.Size) => void;
 export type WindowStatusCallback = (data: window.WindowStatusType) => void;
+export type WindowVoidCallback = () => void;
 
 namespace window {
   export interface Size {
@@ -1257,12 +1258,14 @@ export class WindowInternal implements Window {
     private native loadContentSync(nativeObj: long, path: string, storage?: LocalStorage): void;
     private native setWindowKeepScreenOnSync(nativeObj: long, isKeepScreenOn: boolean): void;
     private native setWindowSystemBarEnableSync(nativeObj: long, names: Array<'status' | 'navigation'>): void;
+    private native setWindowTouchableSync(nativeObj: long, isTouchable: boolean): void;
     private native getUIContextSync(nativeObj: long): UIContext;
     private native getWindowAvoidAreaSync(nativeObj: long, type: int): AvoidArea;
     private native setWaterMarkFlagSync(nativeObj: long, enable: boolean): void;
     private native setContentAspectRatio(
       nativeObj: long, ratio: number, isPersistent: boolean, needUpdateRect: boolean): void;
     private native onSync(nativeObj: long, type: string, callback: object): void;
+    private native onNoInteractionDetected(nativeObj: long, type: string, timeout: long, callback: Object): void;
     private native offSync(nativeObj: long, type: string, callback?: object): void;
 
     public resize(width: number, height: number): Promise<void> {
@@ -1656,6 +1659,28 @@ export class WindowInternal implements Window {
       });
     }
 
+    public setWindowTouchable(isTouchable: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setWindowTouchableSync(this.nativeObj, isTouchable);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public setWindowTouchable(isTouchable: boolean, callback: AsyncCallback<void>): void {
+      taskpool.execute((): void => {
+        this.setWindowTouchableSync(this.nativeObj, isTouchable);
+      }).then((ret: NullishType) => {
+        callback(new BusinessError(), undefined);
+      }).catch((err: NullishType) => {
+        callback(err as BusinessError, undefined);
+      });
+    }
+
     public getUIContext(): UIContext {
       return this.getUIContextSync(this.nativeObj);
     }
@@ -1703,6 +1728,10 @@ export class WindowInternal implements Window {
       this.onSync(this.nativeObj, type, callback);
     }
 
+    public on<T>(type: 'noInteractionDetected', timeout: long, callback: Callback<T>): void {
+      this.onNoInteractionDetected(this.nativeObj, type, timeout, callback as WindowVoidCallback);
+    }
+
     public off<T>(type: string, callback?: Callback<T>): void {
       this.offSync(this.nativeObj, type, callback);
     }
@@ -1748,12 +1777,15 @@ export interface Window {
     setWindowKeepScreenOn(isKeepScreenOn: boolean, callback: AsyncCallback<void>): void;
     setWindowSystemBarEnable(names: Array<'status' | 'navigation'>): Promise<void>;
     setWindowSystemBarEnable(names: Array<'status' | 'navigation'>, callback: AsyncCallback<void>): void;
+    setWindowTouchable(isTouchable: boolean): Promise<void>
+    setWindowTouchable(isTouchable: boolean, callback: AsyncCallback<void>): void
     getUIContext(): UIContext;
     getWindowAvoidArea(type: AvoidAreaType): AvoidArea;
     setWaterMarkFlag(enable: boolean): Promise<void>;
     setWaterMarkFlag(enable: boolean, callback: AsyncCallback<void>): void;
     setContentAspectRatio(ratio: number, isPersistent?: boolean, needUpdateRect?: boolean): Promise<void>;
     on<T>(type: string, callback: Callback<T>): void;
+    on<T>(type: 'noInteractionDetected', timeout: long, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;
 }
 
@@ -1808,6 +1840,21 @@ function runWindowSizeCallBack(cb: object, cbArg: object): void {
 function runWindowStatusCallBack(cb: object, cbArg: int): void {
     const func = cb as (cbArg: WindowStatusType) => void;
     func(cbArg as WindowStatusType);
+}
+
+function runWindowTouchOutCallback(cb: object): void {
+  const func = cb as () => void;
+  func();
+}
+
+function runWindowDialogTargetCallback(cb: object): void {
+  const func = cb as () => void;
+  func();
+}
+
+function runWindowNoInteractionCallback(cb: object): void {
+  const func = cb as () => void;
+  func();
 }
 }
 
