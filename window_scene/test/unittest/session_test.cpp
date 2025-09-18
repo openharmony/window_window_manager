@@ -40,6 +40,12 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 const std::string UNDEFINED = "undefined";
+std::string g_errLog;
+void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+    const char *msg)
+{
+    g_errLog = msg;
+}
 }
 
 class WindowSessionTest : public testing::Test {
@@ -1667,9 +1673,12 @@ HWTEST_F(WindowSessionTest, GetAndSetSessionRequestRect, TestSize.Level1)
  */
 HWTEST_F(WindowSessionTest, SetSessionRect01, TestSize.Level1)
 {
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     WSRect rect = session_->GetSessionRect();
     session_->SetSessionRect(rect);
-    ASSERT_EQ(rect, session_->GetSessionRect());
+    EXPECT_TRUE(g_errLog.find("skip same rect") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
