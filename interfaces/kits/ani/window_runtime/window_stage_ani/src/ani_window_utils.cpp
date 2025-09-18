@@ -305,15 +305,15 @@ ani_object AniWindowUtils::CreateAniSize(ani_env* env, int32_t width, int32_t he
         TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
         return AniWindowUtils::CreateAniUndefined(env);
     }
-    ani_object aniRect;
-    ret = env->Object_New(aniClass, aniCtor, &aniRect);
+    ani_object aniSize;
+    ret = env->Object_New(aniClass, aniCtor, &aniSize);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to new obj");
         return AniWindowUtils::CreateAniUndefined(env);
     }
-    CallAniMethodVoid(env, aniRect, aniClass, "<set>width", nullptr, ani_int(width));
-    CallAniMethodVoid(env, aniRect, aniClass, "<set>height", nullptr, ani_int(height));
-    return aniRect;
+    CallAniMethodVoid(env, aniSize, aniClass, "<set>width", nullptr, ani_int(width));
+    CallAniMethodVoid(env, aniSize, aniClass, "<set>height", nullptr, ani_int(height));
+    return aniSize;
 }
 
 ani_object AniWindowUtils::CreateAniRect(ani_env* env, const Rect& rect)
