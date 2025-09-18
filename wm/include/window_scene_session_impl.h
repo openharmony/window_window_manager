@@ -412,8 +412,6 @@ private:
     WMError MoveAndResizeKeyboard(const KeyboardLayoutParams& params);
     bool userLimitsSet_ = false;
     bool forceLimits_ = false;
-    bool enableDefaultAnimation_ = true;
-    std::vector<sptr<IAnimationTransitionController>> animationTransitionControllers_;
     uint32_t setSameSystembarPropertyCnt_ = 0;
     std::atomic<bool> isDefaultDensityEnabled_ = false;
     std::atomic<uint32_t> getAvoidAreaCnt_ = 0;
@@ -421,6 +419,14 @@ private:
     bool titleHoverShowEnabled_ = true;
     bool dockHoverShowEnabled_ = true;
     void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);
+
+    /*
+     * Window Animation
+     */
+    bool enableDefaultAnimation_ = true;
+    static std::mutex transitionControllerMutex_;
+    std::vector<sptr<IAnimationTransitionController>> animationTransitionControllers_;
+    void CustomHideAnimation();
 
     /*
      * Gesture Back
