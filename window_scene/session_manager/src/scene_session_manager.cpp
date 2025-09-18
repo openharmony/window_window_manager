@@ -17016,7 +17016,7 @@ void SceneSessionManager::GetStatusBarAvoidHeight(DisplayId displayId, WSRect& b
 
 WMError SceneSessionManager::MinimizeAllWindow(DisplayId displayId)
 {
-    if (!SessionPermission::IsSystemCalling() && !!SessionPermission::IsStartByHdcd()) {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no right.");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -17027,7 +17027,7 @@ WMError SceneSessionManager::MinimizeAllWindow(DisplayId displayId)
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& iter : sceneSessionMap_) {
         auto& session = iter.second;
-        if (sceneSession == nullptr) {
+        if (session == nullptr) {
             TLOGW(WmsLogTag::WMS_LIFE, "Scene session nullptr, persistentId: %{public}d", iter.first);
             continue;
         }
