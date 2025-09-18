@@ -1626,6 +1626,16 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetPrimaryDisplayInfo()
     return displayInfo;
 }
 
+DisplayId DisplayManagerAdapter::GetPrimaryDisplayId()
+{
+    INIT_PROXY_CHECK_RETURN(SCREEN_ID_INVALID);
+    DisplayId id = SCREEN_ID_INVALID;
+    if (screenSessionManagerServiceProxy_) {
+        id = screenSessionManagerServiceProxy_->GetPrimaryDisplayId();
+    }
+    return id;
+}
+
 std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
     DmErrorCode* errorCode)
 {

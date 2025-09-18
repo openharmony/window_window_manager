@@ -121,7 +121,8 @@ public:
     virtual DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea);
     virtual bool SetVirtualScreenAsDefault(ScreenId screenId);
-
+    virtual DisplayId GetPrimaryDisplayId();
+    
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;
 };
