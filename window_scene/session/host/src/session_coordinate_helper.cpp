@@ -25,7 +25,7 @@ WSRect SessionCoordinateHelper::RelativeToGlobalDisplayRect(ScreenId screenId, c
 {
     auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(screenId);
     if (!screenSession) {
-        TLOGW(WmsLogTag::WMS_LAYOUT,
+        TLOGD(WmsLogTag::WMS_LAYOUT,
             "Screen not found, screenId: %{public}" PRIu64 ", relativeRect: %{public}s",
             screenId, relativeRect.ToString().c_str());
         return relativeRect;
@@ -87,7 +87,7 @@ WSScreenRelativeRect SessionCoordinateHelper::GlobalToScreenRelativeRect(
 
         // Compute intersection area between this screen and the scaled globalRect.
         uint64_t area = scaledGlobalRect.IntersectionArea<uint64_t>(screenRect);
-        if (area > maxIntersectionArea || (area == maxIntersectionArea && screenId < candidateScreenId)) {
+        if (area > maxIntersectionArea || (area != 0 && area == maxIntersectionArea && screenId < candidateScreenId)) {
             maxIntersectionArea = area;
             candidateScreenId = screenId;
             candidateScreenRect = screenRect;
