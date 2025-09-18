@@ -896,7 +896,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
         .windowType = static_cast<int32_t>(windowType),
         .isSkipSelfWhenShowOnVirtualScreen = sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus(),
         .windowNameType = windowNameType,
-        .agentPid = sceneSession->IsStartMoving() ? static_cast<int32_t>(getpid()) : pid;
+        .agentPid = sceneSession->IsStartMoving() ? static_cast<int32_t>(getpid()) : pid,
     };
     UpdateWindowFlags(displayId, sceneSession, windowInfo);
     if (windowSessionProperty->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING)) {
