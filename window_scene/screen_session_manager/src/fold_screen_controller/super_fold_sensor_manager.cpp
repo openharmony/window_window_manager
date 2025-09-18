@@ -225,7 +225,7 @@ void SuperFoldSensorManager::NotifyHallChanged(uint16_t Hall)
         events = SuperFoldStatusChangeEvents::KEYBOARD_OFF;
     } else if (Hall == HALL_HAVE_KEYBOARD_THRESHOLD) {
         if (SuperFoldStateManager::GetInstance().GetCurrentStatus() == SuperFoldStatus::EXPANDED) {
-            TLOGI(WmsLogTag::DMS, "is expaned");
+            TLOGI(WmsLogTag::DMS, "is expanded");
             return;
         }
         TLOGI(WmsLogTag::DMS, "NotifyHallChanged: Keyboard on!");
