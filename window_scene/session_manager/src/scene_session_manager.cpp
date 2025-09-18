@@ -17033,7 +17033,7 @@ WMError SceneSessionManager::MinimizeAllWindow(DisplayId displayId)
         }
         if (displayId == session->GetScreenId() && WindowHelper::IsMainWindow(session->GetWindowType())) {
             session->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
-            TLOGI(WmsLogTag::WMS_LIFE, "Id: %{public}d has minimized window.", session->GetPersistendId());
+            TLOGI(WmsLogTag::WMS_LIFE, "Id: %{public}d has minimized window.", session->GetPersistentId());
         }
     }
     return WMError::WM_OK;
