@@ -2874,7 +2874,8 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rec
         }
         auto avoidArea = session->GetAvoidAreaByTypeInner(type, rect);
         if (type == AvoidAreaType::TYPE_NAVIGATION_INDICATOR && session->isAINavigationBarAvoidAreaValid_ != nullptr) {
-            session->GetSessionProperty()->GetDisplayId(), area, session->GetSessionRect().height_);
+            session->isAINavigationBarAvoidAreaValid_(session->GetSessionProperty()->GetDisplayId(),
+                avoidArea, session->GetSessionRect().height_);
             return {};
         }
         return avoidArea;
