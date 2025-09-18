@@ -844,13 +844,13 @@ struct MainWindowInfo : public Parcelable {
     static MainWindowInfo* Unmarshalling(Parcel& parcel)
     {
         MainWindowInfo* mainWindowInfo = new MainWindowInfo;
-        mainWindowInfo->pid_ = parcel.ReadInt32();
-        mainWindowInfo->bundleName_ = parcel.ReadString();
-        mainWindowInfo->persistentId_ = parcel.ReadInt32();
-        mainWindowInfo->bundleType_ = parcel.ReadInt32();
-        mainWindowInfo->displayId_ = parcel.ReadUint64();
-        mainWindowInfo->showing_ = parcel.ReadBool();
-        mainWindowInfo->label_ = parcel.ReadString();
+        if (!parcel.ReadInt32(mainWindowInfo->pid_) || !parcel.ReadString(mainWindowInfo->bundleName_) ||
+            !parcel.ReadInt32(mainWindowInfo->persistentId_) || !parcel.ReadInt32(mainWindowInfo->bundleType_) ||
+            !parcel.ReadUint64(mainWindowInfo->displayId_) || !parcel.ReadBool(mainWindowInfo->showing_) ||
+            !parcel.ReadString(mainWindowInfo->label_)) {
+            delete mainWindowInfo;
+            return nullptr;
+        }
         return mainWindowInfo;
     }
 

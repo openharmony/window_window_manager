@@ -156,6 +156,8 @@ constexpr uint64_t NOTIFY_START_ABILITY_TIMEOUT = 4000;
 constexpr uint64_t START_UI_ABILITY_TIMEOUT = 5000;
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 constexpr int32_t NAV_FORCE_SPLIT_MODE = 6;
+constexpr int32_t DEFAULT_HEIGTH = 200;
+constexpr int32_t DEFAULT_WIDTH = 200;
 const std::string FB_PANEL_NAME = "Fb_panel";
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
@@ -15475,7 +15477,7 @@ WMError SceneSessionManager::GetMainWindowSnapshot(const std::vector<int32_t>& w
             }
             if (!pixelMap) {
                 TLOGNW(WmsLogTag::WMS_LIFE, "Get snapshot failed, create new snapshot");
-                SceneSessionManager::createDefaultPixelMap(pixelMap);
+                SceneSessionManager::CreateDefaultPixelMap(pixelMap);
             }
             if (!pixelMap) {
                 TLOGNW(WmsLogTag::WMS_LIFE, "get snapshot failed id:%{public}d.", windowId);
@@ -15533,11 +15535,11 @@ WMError SceneSessionManager::CheckWindowIds(
     return WMError::WM_OK;
 }
 
-void SceneSessionManager::createDefaultPixelMap(std::shared_ptr<Media::PixelMap>& pixelMap)
+void SceneSessionManager::CreateDefaultPixelMap(std::shared_ptr<Media::PixelMap>& pixelMap)
 {
     Media::InitializationOptions opts;
-    opts.size.width = 200;
-    opts.size.height = 200;
+    opts.size.width = DEFAULT_WIDTH;
+    opts.size.height = DEFAULT_HEIGTH;
     opts.pixelFormat = Media::PixelFormat::NV21;
     opts.useDMA = true;
     pixelMap = Media::PixelMap::Create(opts);

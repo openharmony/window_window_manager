@@ -636,8 +636,7 @@ int32_t OH_WindowManager_GetAllMainWindowInfo(
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s get failed, errCode: %{public}d", where, errCode);
             return;
         }
-        WindowManager_MainWindowInfo* infosInner = (WindowManager_MainWindowInfo*)malloc(
-            sizeof(WindowManager_MainWindowInfo) * infos.size());
+        WindowManager_MainWindowInfo* infosInner = new WindowManager_MainWindowInfo[infos.size()];
         if (infosInner == nullptr) {
             errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s infosInner is nullptr", where);
@@ -677,7 +676,7 @@ int32_t OH_WindowManager_GetMainWindowSnapshot(int32_t* windowIdList, size_t win
         std::vector<int32_t> windowIdVector(windowIdList, windowIdList + windowIdListSize);
         OHOS::sptr<GetSnapshotCallback> getSnapshotCallback = OHOS::sptr<GetSnapshotCallback>::MakeSptr();
         getSnapshotCallback->RegisterFunc([callback, where = __func__]
-            (WMError errCode, std::vector<std::shared_ptr<OHOS::Media::PixelMap>> pixelMaps) {
+            (WMError errCode, const std::vector<std::shared_ptr<OHOS::Media::PixelMap>>& pixelMaps) {
                 if (!callback) {
                     TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s callback is nullptr", where);
                     return;

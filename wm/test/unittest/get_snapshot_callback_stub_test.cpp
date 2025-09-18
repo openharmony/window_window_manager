@@ -66,7 +66,7 @@ HWTEST_F(GetSnapshotCallbackTest, OnReceived, TestSize.Level1)
         testId = testNum + testId;
     };
 
-    getStub->RegisterFunc(func);
+    getStub->RegisterFunc(std::move(func));
     getStub->OnReceived(errCode, pixelMaps);
     EXPECT_EQ(testId, 9);
 }

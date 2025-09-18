@@ -1528,7 +1528,7 @@ void JsWindowManager::RegisterCallBackFunc(napi_env env, sptr<GetSnapshotCallbac
     const std::shared_ptr<AbilityRuntime::NapiAsyncTask>& napiAsyncCallBackTask)
 {
     getSnapshotCallback->RegisterFunc([env, task, napiAsyncCallBackTask, where = __func__]
-        (WMError errCode, std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps) {
+        (WMError errCode, const std::vector<std::shared_ptr<Media::PixelMap>>& pixelMaps) {
             auto asyncCallBackTask = [env, task, napiAsyncCallBackTask, errCode, pixelMaps, where = __func__] {
                 TLOGNI(WmsLogTag::WMS_LIFE, "pixelMaps size :%{public}zu", pixelMaps.size());
                 if (errCode != WMError::WM_OK) {
