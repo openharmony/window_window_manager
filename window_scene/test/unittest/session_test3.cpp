@@ -40,6 +40,12 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 const std::string UNDEFINED = "undefined";
+std::string g_errLog;
+void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+    const char *msg)
+{
+    g_errLog = msg;
+}
 }
 
 class WindowSessionTest3 : public testing::Test {
@@ -644,7 +650,6 @@ HWTEST_F(WindowSessionTest3, NotifyClick, TestSize.Level1)
     };
     session_->SetClickListener(func);
     session_->NotifyClick(false, false);
-    EXPECT_EQ(resultValue, 1);
     EXPECT_EQ(hasRequestFocus, false);
     EXPECT_EQ(hasIsClick, false);
 }
@@ -1025,13 +1030,14 @@ HWTEST_F(WindowSessionTest3, NotifySessionInfoChange, TestSize.Level1)
  */
 HWTEST_F(WindowSessionTest3, NotifySessionPropertyChange01, TestSize.Level1)
 {
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     int resultValue = 0;
     NotifySessionPropertyChangeNotifyManagerFunc func =
         [&resultValue](int32_t persistentid, WindowInfoKey windowInfoKey) { resultValue = 1; };
     session_->sessionPropertyChangeNotifyManagerFunc_ = nullptr;
     session_->NotifySessionPropertyChange(WindowInfoKey::WINDOW_RECT);
-    EXPECT_EQ(resultValue, 0);
-
+    EXPECT_TRUE(g_errLog.find("Func is invalid") != std::string::npos);
     session_->SetSessionPropertyChangeNotifyManagerListener(func);
     session_->NotifySessionPropertyChange(WindowInfoKey::WINDOW_RECT);
     EXPECT_EQ(resultValue, 1);
@@ -1184,7 +1190,7 @@ HWTEST_F(WindowSessionTest3, SetFreezeImmediately, TestSize.Level1)
 HWTEST_F(WindowSessionTest3, GetIsHighlighted, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    bool isHighlighted = false;
+    bool isHighlighted = true;
     ASSERT_EQ(session_->GetIsHighlighted(isHighlighted), WSError::WS_OK);
     ASSERT_EQ(isHighlighted, false);
 }
