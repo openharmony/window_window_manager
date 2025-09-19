@@ -1444,6 +1444,36 @@ HWTEST_F(ScreenSessionManagerTest, GetDisplayHookInfo, Function | SmallTest | Le
     ASSERT_EQ(hookInfo.height_, 200);
 }
 
+/**
+ * @tc.name: NotifyIsFullScreenInForceSplitMode
+ * @tc.desc: NotifyIsFullScreenInForceSplitMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, NotifyIsFullScreenInForceSplitMode, Function | SmallTest | Level2)
+{
+    int32_t uid = 0;
+    MockAccesstokenKit::MockIsSystemApp(false);
+    ssm_->NotifyIsFullScreenInForceSplitMode(uid, true);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    DMHookInfo hookInfo;
+    hookInfo.enableHookRotation_ = true;
+    hookInfo.rotation_ = true;
+    hookInfo.density_ = 1.1;
+    hookInfo.width_ = 100;
+    hookInfo.height_ = 200;
+    ssm_->UpdateDisplayHookInfo(uid, true, hookInfo);
+    DMHookInfo hookInfo2;
+    ssm_->GetDisplayHookInfo(uid, hookInfo2);
+    ASSERT_EQ(hookInfo2.width_, 0);
+
+    uid = 100;
+    ssm_->NotifyIsFullScreenInForceSplitMode(uid, true);
+    ssm_->UpdateDisplayHookInfo(uid, true, hookInfo);
+    ssm_->NotifyIsFullScreenInForceSplitMode(uid, true);
+    DMHookInfo hookInfo3;
+    ssm_->GetDisplayHookInfo(uid, hookInfo3);
+    ASSERT_TRUE(hookInfo3.isFullScreenInForceSplit_);
+}
 
 /**
  * @tc.name: SetVirtualPixelRatio
@@ -1692,13 +1722,14 @@ HWTEST_F(ScreenSessionManagerTest, SetMirror, TestSize.Level1)
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     auto screen = ssm_->GetScreenSession(2);
     screen->GetScreenProperty().SetScreenType(ScreenType::REAL);
-    ASSERT_EQ(DMError::DM_OK, ssm_->SetMirror(2, screens, DMRect::NONE()));
-    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetMirror(9, screens, DMRect::NONE()));
-    ASSERT_EQ(DMError::DM_OK, ssm_->SetMirror(screenId, screens, DMRect::NONE()));
+    ASSERT_EQ(DMError::DM_OK, ssm_->SetMirror(2, screens, DMRect::NONE(), {Rotation::ROTATION_0, false}));
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetMirror(9, screens, DMRect::NONE(), {Rotation::ROTATION_0, false}));
+    ASSERT_EQ(DMError::DM_OK, ssm_->SetMirror(screenId, screens, DMRect::NONE(), {Rotation::ROTATION_0, false}));
     auto mirrorscreen = ssm_->GetScreenSession(screenId);
     ASSERT_TRUE(mirrorscreen != nullptr);
     mirrorscreen->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
-    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetMirror(screenId, screens, DMRect::NONE()));
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetMirror(screenId, screens, DMRect::NONE(),
+        {Rotation::ROTATION_0, false}));
     ssm_->DestroyVirtualScreen(screenId);
 }
 
@@ -1860,7 +1891,7 @@ HWTEST_F(ScreenSessionManagerTest, AddScreenToGroup, TestSize.Level1)
     const std::vector<Point> addChildPos;
     std::map<ScreenId, bool> removeChildResMap;
     sptr<ScreenSessionGroup> group;
-    ssm_->AddScreenToGroup(group, addScreens, addChildPos, removeChildResMap);
+    ssm_->AddScreenToGroup(group, addScreens, addChildPos, removeChildResMap, {Rotation::ROTATION_0, false});
     sptr<ScreenSession> screenSession =new  (std::nothrow) ScreenSession();
     ASSERT_NE(screenSession, ssm_->InitAndGetScreen(2));
     ssm_->DestroyVirtualScreen(screenId);

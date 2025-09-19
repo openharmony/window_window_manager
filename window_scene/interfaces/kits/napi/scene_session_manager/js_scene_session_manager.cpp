@@ -325,6 +325,10 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::SetPiPSettingSwitchStatus);
     BindNativeFunction(env, exportObj, "applyFeatureConfig", moduleName,
         JsSceneSessionManager::ApplyFeatureConfig);
+    BindNativeFunction(env, exportObj, "notifySessionTransferToTargetScreenEvent", moduleName,
+        JsSceneSessionManager::NotifySessionTransferToTargetScreenEvent);
+    BindNativeFunction(env, exportObj, "getPipDeviceCollaborationPolicy", moduleName,
+        JsSceneSessionManager::GetPipDeviceCollaborationPolicy);
     return NapiGetUndefined(env);
 }
 
@@ -4990,23 +4994,16 @@ void JsSceneSessionManager::RegisterTransferSessionToTargetScreenCallback()
 {
     SceneSessionManager::GetInstance().RegisterTransferSessionToTargetScreenCallback(
         [this](const TransferSessionInfo& info) {
-            auto sceneSession = SceneSessionManager::GetInstance().GetSceneSession(info.persistentId);
-            if (sceneSession == nullptr) {
-                TLOGE(WmsLogTag::WMS_MAIN, "sceneSession is nullptr");
-                return;
-            }
-            this->OnTransferSessionToTargetScreen(info, sceneSession->GetSessionProperty()->GetDisplayId());
+            this->OnTransferSessionToTargetScreen(info);
     });
 }
 
-void JsSceneSessionManager::OnTransferSessionToTargetScreen(const TransferSessionInfo& info,
-    const uint64_t fromScreenId)
+void JsSceneSessionManager::OnTransferSessionToTargetScreen(const TransferSessionInfo& info)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
     const char* const where = __func__;
     taskScheduler_->PostMainThreadTask(
-        [info, fromScreenId, where,
-            jsCallBack = GetJSCallback(SCENE_SESSION_TRANSFER_TO_TARGET_SCREEN_CB), env = env_] {
+        [info, where, jsCallBack = GetJSCallback(SCENE_SESSION_TRANSFER_TO_TARGET_SCREEN_CB), env = env_] {
             if (jsCallBack == nullptr) {
                 TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s:jsCallBack is nullptr", where);
                 return;
@@ -5015,23 +5012,63 @@ void JsSceneSessionManager::OnTransferSessionToTargetScreen(const TransferSessio
             napi_value toScreenId = CreateJsValue(env, info.toScreenId);
             napi_value wantParams = OHOS::AppExecFwk::WrapWantParams(env, info.wantParams);
             napi_value argv[] = { persistentId, toScreenId, wantParams };
-            napi_value callResult = nullptr;
-            napi_status ret = napi_call_function(
-                env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, &callResult);
-            if (ret != napi_ok) {
-                TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s:napi call exception ret:%{public}d", where, ret);
-                return;
-            }
+            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
             SceneSessionManager::GetInstance().UpdateScreenLockState(info.persistentId);
-
-            uint32_t resultCode = 0;
-            std::string resultMessage = "";
-            if (!ConvertSessionResultFromJsValue(env, callResult, resultCode, resultMessage)) {
-                return;
-            }
-            SceneSessionManager::GetInstance().NotifySessionTransferToTargetScreenEvent(
-                info.persistentId, resultCode, fromScreenId, info.toScreenId);
         }, __func__);
+}
+
+napi_value JsSceneSessionManager::NotifySessionTransferToTargetScreenEvent(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnNotifySessionTransferToTargetScreenEvent(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::OnNotifySessionTransferToTargetScreenEvent(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_FOUR) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t persistentId;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], persistentId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to persistentId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    uint32_t resultCode;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], resultCode)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to resultCode");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int64_t fromScreenId;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_TWO], fromScreenId) || fromScreenId < 0) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to fromScreenId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int64_t toScreenId;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_THREE], toScreenId) || toScreenId < 0) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to toScreenId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "persistentId: %{public}d, resultCode: %{public}d, "
+        "fromScreenId: %{public}" PRId64 " , toScreenId: %{public}" PRId64,
+        persistentId, resultCode, fromScreenId, toScreenId);
+    SceneSessionManager::GetInstance().NotifySessionTransferToTargetScreenEvent(
+        persistentId, resultCode, static_cast<uint64_t>(fromScreenId), static_cast<uint64_t>(toScreenId));
+    return NapiGetUndefined(env);
 }
 
 napi_value JsSceneSessionManager::OnSupportFollowParentWindowLayout(napi_env env, napi_callback_info info)
@@ -5280,5 +5317,35 @@ napi_value JsSceneSessionManager::OnSetPiPSettingSwitchStatus(napi_env env, napi
     }
     SceneSessionManager::GetInstance().SetPiPSettingSwitchStatus(switchStatus);
     return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::GetPipDeviceCollaborationPolicy(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "in");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetPipDeviceCollaborationPolicy(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::OnGetPipDeviceCollaborationPolicy(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_ONE;
+    napi_value argv[ARGC_ONE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_PIP, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t screenId = -1;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], screenId)) {
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter to screenId, %{public}d", screenId);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    TLOGI(WmsLogTag::WMS_PIP, "screenId  %{public}d", screenId);
+    bool isPipEnabled = SceneSessionManager::GetInstance().GetPipDeviceCollaborationPolicy(screenId);
+    return CreateJsValue(env, isPipEnabled);
 }
 } // namespace OHOS::Rosen

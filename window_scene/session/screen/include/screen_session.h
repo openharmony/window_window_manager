@@ -161,6 +161,7 @@ public:
     DisplayOrientation CalcDeviceOrientationWithBounds(Rotation rotation,
         FoldDisplayMode foldDisplayMode, const RRect& bounds);
     void FillScreenInfo(sptr<ScreenInfo> info) const;
+    void SetDisplayNodeSecurity();
     void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint, bool isExtend = false,
         float positionX = 0, float positionY = 0);
 
@@ -388,6 +389,8 @@ public:
     void UpdateMirrorHeight(uint32_t mirrorHeight);
 
 private:
+    bool IsVertical(Rotation rotation) const;
+    Orientation CalcDisplayOrientationToOrientation(DisplayOrientation displayOrientation) const;
     ScreenProperty property_;
     mutable std::mutex propertyMutex_; // above guarded by clientProxyMutex_
     std::shared_ptr<RSDisplayNode> displayNode_;
@@ -461,7 +464,8 @@ public:
 
     bool AddChild(sptr<ScreenSession>& smsScreen, Point& startPoint);
     bool AddChild(sptr<ScreenSession>& smsScreen, Point& startPoint,
-        sptr<ScreenSession> defaultScreenSession, bool isExtend = false);
+        sptr<ScreenSession> defaultScreenSession, bool isExtend = false,
+        const RotationOption& rotationOption = {Rotation::ROTATION_0, false});
     bool AddChildren(std::vector<sptr<ScreenSession>>& smsScreens, std::vector<Point>& startPoints);
     bool RemoveChild(sptr<ScreenSession>& smsScreen);
     bool HasChild(ScreenId childScreen) const;

@@ -193,6 +193,18 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError SetAspectRatio(float ratio) { return WSError::WS_OK; }
+
+    /**
+     * @brief Set content aspect ratio of the window.
+     *
+     * @param ratio The aspect ratio of window content (width divided by height).
+     * @param isPersistent Whether to persist the aspect ratio setting.
+     * @param needUpdateRect Whether to update the window rect after setting aspect ratio.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SetContentAspectRatio(
+        float ratio, bool isPersistent, bool needUpdateRect) { return WSError::WS_DO_NOTHING; }
+
     virtual WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) { return WSError::WS_OK; }
     virtual WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) { return WSError::WS_OK; }
 
@@ -358,6 +370,15 @@ public:
     virtual void NotifyKeyboardDidShowRegistered(bool registered) {};
     virtual void NotifyKeyboardDidHideRegistered(bool registered) {};
     virtual void SetCustomDecorHeight(int32_t height) {};
+
+    /**
+     * @brief Set whether the window decoration is visible.
+     *
+     * @param isVisible True means the window decoration is visible, false means the opposite.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SetDecorVisible(bool isVisible) { return WSError::WS_DO_NOTHING; }
+
     virtual WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) { return WMError::WM_OK; }
     virtual WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) { return WMError::WM_OK; }
@@ -579,6 +600,17 @@ public:
     virtual WMError RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& want)
     {
         return WMError::WM_OK;
+    }
+
+    /**
+     * @brief notify session when full screen status in force split
+     *
+     * @param isFullScreen true means full screen in force split.
+     * @return WSError::WS_OK means set success, otherwise failed.
+     */
+    virtual WSError NotifyIsFullScreenInForceSplitMode(bool isFullScreen)
+    {
+        return WSError::WS_OK;
     }
 };
 } // namespace OHOS::Rosen

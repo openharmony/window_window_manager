@@ -46,6 +46,7 @@ public:
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) { return true; }
     virtual void UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo) {}
     virtual void GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo) {}
+    virtual void NotifyIsFullScreenInForceSplitMode(int32_t uid, bool isFullScreen) {}
 
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
         const sptr<IRemoteObject>& displayManagerAgent) { return SCREEN_ID_INVALID; }
@@ -187,7 +188,8 @@ public:
     virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) { return nullptr; }
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos) { return DMError::DM_OK; }
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
-        ScreenId& screenGroupId, bool forceMirror = false) { return DMError::DM_OK; }
+        ScreenId& screenGroupId, const RotationOption& rotationOption = {Rotation::ROTATION_0, false},
+        bool forceMirror = false) { return DMError::DM_OK; }
 
     virtual DMError MakeMirrorForRecord(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId &screenGroupId)

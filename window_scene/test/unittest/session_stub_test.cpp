@@ -2022,6 +2022,120 @@ HWTEST_F(SessionStubTest, HandleConnect003, Function | SmallTest | Level2)
     result = session_->HandleConnect(data, reply);
     EXPECT_EQ(result, ERR_NONE);
 }
+
+/**
+ * @tc.name: HandleSetContentAspectRatioCases
+ * @tc.desc: Verify HandleSetContentAspectRatio with invalid and valid inputs
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetContentAspectRatioCases, TestSize.Level1)
+{
+    sptr<SessionStubMocker> session = sptr<SessionStubMocker>::MakeSptr();
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CONTENT_ASPECT_RATIO);
+    MessageOption option;
+    float ratio = 1.5f;
+    bool isPersistent = true;
+    bool needUpdateRect = false;
+
+    // Case 1: Missing ratio
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+
+    // Case 2: Missing isPersistent and needUpdateRect
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        data.WriteFloat(ratio);
+        EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+
+    // Case 3: Missing needUpdateRect
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        data.WriteFloat(ratio);
+        data.WriteBool(isPersistent);
+        EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+
+    // Case 4: Success
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        data.WriteFloat(ratio);
+        data.WriteBool(isPersistent);
+        data.WriteBool(needUpdateRect);
+        EXPECT_CALL(*session, SetContentAspectRatio(ratio, isPersistent, needUpdateRect)).Times(1);
+        EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_NONE);
+    }
+}
+
+/**
+ * @tc.name: HandleSetDecorVisibleCases
+ * @tc.desc: Verify HandleSetDecorVisible with invalid and valid inputs
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetDecorVisibleCases, TestSize.Level1)
+{
+    sptr<SessionStubMocker> session = sptr<SessionStubMocker>::MakeSptr();
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DECOR_VISIBLE);
+    MessageOption option;
+
+    // Case 1: Missing isVisible
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+
+    // Case 2: Success
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        bool isVisible = true;
+        data.WriteBool(isVisible);
+        EXPECT_CALL(*session, SetDecorVisible(isVisible)).Times(1);
+        EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_NONE);
+    }
+}
+
+/**
+ * @tc.name: HandleNotifyIsFullScreenInForceSplitMode
+ * @tc.desc: HandleNotifyIsFullScreenInForceSplitMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleNotifyIsFullScreenInForceSplitMode, TestSize.Level1)
+{
+    sptr<SessionStubMocker> session = sptr<SessionStubMocker>::MakeSptr();
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_IS_FULL_SCREEN_IN_FORCE_SPLIT);
+    {
+        MessageOption option;
+        MessageParcel data;
+        MessageParcel reply;
+        EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+    {
+        MessageOption option;
+        MessageParcel data;
+        MessageParcel reply;
+        bool isFullScreen = true;
+        data.WriteBool(isFullScreen);
+        EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_NONE);
+    }
+    {
+        MessageOption option;
+        MessageParcel data;
+        MessageParcel reply;
+        bool isFullScreen = true;
+        data.WriteBool(isFullScreen);
+        MockMessageParcel::SetWriteInt32ErrorFlag(true);
+        EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+        MockMessageParcel::SetWriteInt32ErrorFlag(false);
+    }
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

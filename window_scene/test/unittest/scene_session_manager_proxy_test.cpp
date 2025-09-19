@@ -2042,9 +2042,6 @@ HWTEST_F(sceneSessionManagerProxyTest, ConvertToRelativeCoordinateForFoldPC01, T
     EXPECT_EQ(ret, WMError::WS_ERROR_NULLPTR);
     ASSERT_NE(proxy, nullptr);
 
-    remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
-    proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
-
     // WriteInterfaceToken failed
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);

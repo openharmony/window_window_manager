@@ -14,9 +14,11 @@
  */
 
 #include "session/host/include/ws_snapshot_helper.h"
+#include "parameters.h"
 
 namespace OHOS::Rosen {
 namespace {
+const bool CORRECTION_ENABLE = system::GetIntParameter<int32_t>("const.system.sensor_correction_enable", 0) == 1;
 const std::unordered_map<int32_t, DisplayOrientation> ROTATION_TO_DISPLAYORIENTATION_MAP = {
     { PORTRAIT_ANGLE, DisplayOrientation::PORTRAIT },
     { LANDSCAPE_ANGLE, DisplayOrientation::LANDSCAPE },
@@ -87,14 +89,28 @@ void WSSnapshotHelper::SetWindowOrientationStatus(Rotation rotation)
 
 SnapshotStatus WSSnapshotHelper::GetWindowStatus() const
 {
-    std::lock_guard lock(statusMutex_);
-    return GetInstance()->windowStatus_;
+    SnapshotStatus key = defaultStatus;
+    {
+        std::lock_guard lock(statusMutex_);
+        key = GetInstance()->windowStatus_;
+    }
+    if (CORRECTION_ENABLE && key.first == 0) {
+        key.second ^= 1;
+    }
+    return key;
 }
 
 uint32_t WSSnapshotHelper::GetWindowRotation() const
 {
-    std::lock_guard lock(rotationMutex_);
-    return static_cast<uint32_t>(GetInstance()->windowRotation_);
+    uint32_t rotation = 0;
+    {
+        std::lock_guard lock(rotationMutex_);
+        rotation = static_cast<uint32_t>(GetInstance()->windowRotation_);
+    }
+    if (CORRECTION_ENABLE && GetInstance()->GetScreenStatus() == 0) {
+        return (rotation + SECONDARY_EXPAND_OFFSET) % ROTATION_COUNT;
+    }
+    return rotation;
 }
 // LCOV_EXCL_STOP
 } // namespace OHOS::Rosen

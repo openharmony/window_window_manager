@@ -59,6 +59,7 @@
 #include "wm_single_instance.h"
 #include "zidl/session_lifecycle_listener_interface.h"
 #include "zidl/session_router_stack_listener.h"
+#include "zidl/pip_change_listener.h"
 
 namespace OHOS::AAFwk {
 class SessionInfo;
@@ -652,6 +653,11 @@ public:
     WMError GetPiPSettingSwitchStatus(bool& switchStatus) override;
     void SetPiPSettingSwitchStatus(bool switchStatus);
     void SetStartPiPFailedListener(NotifyStartPiPFailedFunc&& func);
+    bool GetPipDeviceCollaborationPolicy(int32_t screenId);
+    WMError SetPipEnableByScreenId(int32_t screenId, bool enabled);
+    WMError UnsetPipEnableByScreenId(int32_t screenId);
+    WMError RegisterPipChgListenerByScreenId(int32_t screenId, const sptr<IPipChangeListener>& listener);
+    WMError UnregisterPipChgListenerByScreenId(int32_t screenId);
 
      /*
      * FloatingBall Window
@@ -767,9 +773,14 @@ public:
     WMError GetRouterStackInfo(int32_t persistentId, const sptr<ISessionRouterStackListener>& listener);
     WMError CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey);
     WMError RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey);
+    void AddRequestTaskInfo(const SessionInfo& sessionInfo);
+    void AddRequestTaskInfo(int32_t requestId, const SessionInfo& sessionInfo);
+    std::shared_ptr<AAFwk::Want> GetRequestWantFromTaskInfoMap(int32_t persistentId, int32_t requestId);
+    void RemoveRequestTaskInfo(int32_t persistentId, int32_t requestId);
+    void ClearRequestTaskInfo(int32_t persistentId);
     void RefreshAllAppUseControlMap(const AppUseControlInfo& appUseControlInfo, ControlAppType type);
     void NotifyAmsPendingSessionWhenFail(uint32_t resultCode, std::string resultMessage,
-        int32_t requestId);
+        int32_t requestId, int32_t persistentId);
     WSError PendingSessionToBackgroundByPersistentId(const int32_t persistentId, bool shouldBackToCaller = true);
     WMError UpdateKioskAppList(const std::vector<std::string>& kioskAppList);
     WMError EnterKioskMode(const sptr<IRemoteObject>& token);
@@ -887,6 +898,8 @@ private:
     NotifySceneSessionDestructFunc onSceneSessionDestruct_;
     NotifyTransferSessionToTargetScreenFunc onTransferSessionToTargetScreen_;
     std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>> allAppUseControlMap_;
+    std::unordered_map<int32_t, std::shared_ptr<RequestTaskInfo>> requestTaskInfoMap;
+    std::mutex requestTaskInfoMapMutex_;
     sptr<SceneSession> GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo);
     void CreateRootSceneSession();
     void InitSceneSession(sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo,
@@ -904,7 +917,7 @@ private:
     bool IsSessionClearable(sptr<SceneSession> sceneSession);
     void GetAllClearableSessions(std::vector<sptr<SceneSession>>& sessionVector);
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& sceneSession,
-        int32_t requestId = DEFAULT_REQUEST_FROM_SCB_ID);
+        int32_t requestId = DEFAULT_REQUEST_FROM_SCB_ID, bool useRequestTaskInfo = false);
     void ResetWantInfo(const sptr<SceneSession>& sceneSession);
     void ResetSceneSessionInfoWant(const sptr<AAFwk::SessionInfo>& sceneSessionInfo);
     int32_t StartUIAbilityBySCBTimeoutCheck(const sptr<SceneSession>& sceneSession,
@@ -1365,11 +1378,16 @@ private:
     std::mutex pipSettingSwitchMutex_;
     uint64_t pipWindowSurfaceId_ = 0;
     bool pipSwitchStatus_ = true;
+    std::shared_mutex screenPipEnabledMapLock_;
+    std::unordered_map<int32_t, bool> screenPipEnabledMap_;
+    std::shared_mutex pipChgListenerMapMutex_;
+    std::map<int32_t, sptr<IPipChangeListener>> pipChgListenerMap_;
     bool CheckPiPPriority(const PiPTemplateInfo& pipTemplateInfo, DisplayId displayId = 0);
     bool IsEnablePiPCreate(const sptr<WindowSessionProperty>& property);
     bool IsPiPForbidden(const sptr<WindowSessionProperty>& property, const WindowType& type);
     bool IsLastPiPWindowVisible(uint64_t surfaceId, WindowVisibilityState lastVisibilityState);
     void NotifyPiPWindowVisibleChange(bool isScreenLocked);
+    void NotifyMulScreenPipStart(const sptr<WindowSessionProperty>& property, WindowType type);
 
     /*
      * Floating ball
@@ -1720,6 +1738,12 @@ private:
     bool needUpdateRdb_ = true;
     std::string GetCallerSessionColorMode(const SessionInfo& sessionInfo);
     void NotifySessionScreenLockedChange(bool isScreenLocked);
+
+    /*
+     * Compatible Mode
+     */
+    void NotifyIsFullScreenInForceSplitMode(uint32_t uid, bool isFullScreen);
+    std::unordered_set<uint32_t> fullScreenInForceSplitUidSet_;
 };
 } // namespace OHOS::Rosen
 

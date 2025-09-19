@@ -159,60 +159,6 @@ HWTEST_F(LayoutControllerTest, ConvertGlobalRectToRelative, TestSize.Level1)
 }
 
 /**
- * @tc.name: AdjustRectByAspectRatio
- * @tc.desc: AdjustRectByAspectRatio function01
- * @tc.type: FUNC
- */
-HWTEST_F(LayoutControllerTest, AdjustRectByAspectRatio, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "AdjustRectByAspectRatio";
-    info.bundleName_ = "AdjustRectByAspectRatio";
-    info.isSystem_ = false;
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    session->GetLayoutController()->SetSystemConfigFunc([session] {
-        return session->GetSystemConfig();
-    });
-    WSRect rect;
-    EXPECT_EQ(false, session->GetLayoutController()->AdjustRectByAspectRatio(rect, false));
-    session->property_->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
-    EXPECT_EQ(false, session->GetLayoutController()->AdjustRectByAspectRatio(rect, false));
-    session->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    session->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
-    EXPECT_EQ(false, session->GetLayoutController()->AdjustRectByAspectRatio(rect, false));
-    session->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    EXPECT_EQ(false, session->GetLayoutController()->AdjustRectByAspectRatio(rect, false));
-}
-
-/**
- * @tc.name: AdjustRectByAspectRatio01
- * @tc.desc: AdjustRectByAspectRatio function01
- * @tc.type: FUNC
- */
-HWTEST_F(LayoutControllerTest, AdjustRectByAspectRatio01, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "AdjustRectByAspectRatio01";
-    info.bundleName_ = "AdjustRectByAspectRatio01";
-    info.isSystem_ = false;
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    WSRect rect;
-    session->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    info.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
-    session->Session::SetAspectRatio(0.5f);
-    EXPECT_NE(nullptr, DisplayManager::GetInstance().GetDefaultDisplay());
-
-    SystemSessionConfig systemConfig;
-    systemConfig.isSystemDecorEnable_ = true;
-    systemConfig.decorWindowModeSupportType_ = 2;
-    session->SetSystemConfig(systemConfig);
-    EXPECT_EQ(true, session->GetLayoutController()->AdjustRectByAspectRatio(rect, true));
-
-    systemConfig.isSystemDecorEnable_ = false;
-    EXPECT_EQ(true, session->GetLayoutController()->AdjustRectByAspectRatio(rect, false));
-}
-
-/**
  * @tc.name: SetSystemConfigFunc
  * @tc.desc: SetSystemConfigFunc
  * @tc.type: FUNC
@@ -229,6 +175,49 @@ HWTEST_F(LayoutControllerTest, SetSystemConfigFunc, TestSize.Level1)
     });
     layoutController_->getSystemConfigFunc_();
     EXPECT_EQ(layoutController_->GetSessionRect(), rect);
+}
+
+/**
+ * @tc.name: TestAdjustRectByAspectRatioAbnormalCases
+ * @tc.desc: Verify AdjustRectByAspectRatio handles abnormal cases correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutControllerTest, TestAdjustRectByAspectRatioAbnormalCases, TestSize.Level1)
+{
+    WSRect rect{10, 20, 200, 200};
+    WindowDecoration decor{0, 0, 0, 0};
+
+    // Case 1: sessionProperty is null
+    layoutController_->sessionProperty_ = nullptr;
+    EXPECT_EQ(layoutController_->AdjustRectByAspectRatio(rect, decor), rect);
+
+    auto prop = sptr<WindowSessionProperty>::MakeSptr();
+    layoutController_->sessionProperty_ = prop;
+
+    // Case 2: mode != FLOATING
+    prop->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
+    EXPECT_EQ(layoutController_->AdjustRectByAspectRatio(rect, decor), rect);
+
+    // Case 3: Not main window
+    prop->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    prop->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    EXPECT_EQ(layoutController_->AdjustRectByAspectRatio(rect, decor), rect);
+
+    prop->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+
+    // Case 4: display is null
+    prop->SetDisplayId(DISPLAY_ID_INVALID);
+    EXPECT_EQ(layoutController_->AdjustRectByAspectRatio(rect, decor), rect);
+
+    // Case 5: Success
+    DisplayManager::GetInstance().GetDisplayByScreen(0);
+    layoutController_->aspectRatio_ = 2.0f;
+    prop->SetDisplayId(0);
+    layoutController_->SetSystemConfigFunc([] {
+        SystemSessionConfig systemConfig;
+        return systemConfig;
+    });
+    EXPECT_NE(layoutController_->AdjustRectByAspectRatio(rect, decor), rect);
 }
 } // namespace
 } // namespace Rosen

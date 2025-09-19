@@ -2231,5 +2231,39 @@ HWTEST_F(ScreenSessionManagerProxyTest, NotifySwitchUserAnimationFinish, TestSiz
     proxy->NotifySwitchUserAnimationFinish();
     MockMessageParcel::ClearAllErrorFlag();
 }
+
+/**
+ * @tc.name: NotifyIsFullScreenInForceSplitMode
+ * @tc.desc: NotifyIsFullScreenInForceSplitMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, NotifyIsFullScreenInForceSplitMode, TestSize.Level3)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockMessageParcel::ClearAllErrorFlag();
+    auto proxy = sptr<ScreenSessionManagerProxy>::MakeSptr(nullptr);
+    proxy->NotifyIsFullScreenInForceSplitMode(0, true);
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    proxy = sptr<ScreenSessionManagerProxy>::MakeSptr(remoteMocker);
+    proxy->NotifyIsFullScreenInForceSplitMode(uid, true);
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    proxy->NotifyIsFullScreenInForceSplitMode(uid, true);
+    remoteMocker->SetRequestResult(ERR_NONE);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    proxy->NotifyIsFullScreenInForceSplitMode(uid, true);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+    MockMessageParcel::ClearAllErrorFlag();
+
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    proxy->NotifyIsFullScreenInForceSplitMode(uid, true);
+    EXPECT_TRUE(logMsg.find("Write uid failed") != std::string::npos);
+    MockMessageParcel::ClearAllErrorFlag();
+
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    proxy->NotifyIsFullScreenInForceSplitMode(uid, true);
+    EXPECT_TRUE(logMsg.find("Write isFullScreen failed") != std::string::npos);
+    MockMessageParcel::ClearAllErrorFlag();
+}
 }
 }

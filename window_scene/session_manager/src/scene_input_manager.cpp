@@ -380,6 +380,7 @@ void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::ScreenInfo>& s
     }
     MMI::UserScreenInfo userScreenInfo = {
         .userId = currentUserId_,
+        .userState = MMI::USER_ACTIVE,
         .screens = screenInfos,
         .displayGroups = displayGroupInfos
     };
@@ -412,6 +413,7 @@ void SceneInputManager::FlushEmptyInfoToMMI()
         }
         MMI::UserScreenInfo userScreenInfo = {
             .userId = currentUserId_,
+            .userState = MMI::USER_INACTIVE,
             .screens = screenInfos,
             .displayGroups = displayGroupInfos
         };

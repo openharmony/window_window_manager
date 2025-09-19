@@ -93,7 +93,8 @@ public:
     virtual DMError SetVirtualMirrorScreenScaleMode(ScreenId screenId, ScreenScaleMode scaleMode) override;
 
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
-        ScreenId& screenGroupId, bool forceRecord = false) override;
+        ScreenId& screenGroupId, const RotationOption& rotationOption = {Rotation::ROTATION_0, false},
+        bool forceRecord = false) override;
     virtual DMError MakeMirrorForRecord(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) override;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
@@ -144,6 +145,7 @@ public:
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) override;
     virtual void UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo) override;
     void GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo) override;
+    void NotifyIsFullScreenInForceSplitMode(int32_t uid, bool isFullScreen) override;
 
     virtual void DumpAllScreensInfo(std::string& dumpInfo) override;
     virtual void DumpSpecialScreenInfo(ScreenId id, std::string& dumpInfo) override;
