@@ -4591,6 +4591,7 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
             sessionRecoverStateChangeFunc_(SessionRecoverState::SESSION_NOT_RECONNECT, property);
             return ret;
         }
+        sceneSession->NotifyIsFullScreenInForceSplitMode(property->IsFullScreenInForceSplitMode());
         sessionRecoverStateChangeFunc_(SessionRecoverState::SESSION_FINISH_RECONNECT, property);
         session = sceneSession;
         return WSError::WS_OK;
@@ -17854,10 +17855,11 @@ void SceneSessionManager::NotifySessionScreenLockedChange(bool isScreenLocked) {
 
 void SceneSessionManager::NotifyIsFullScreenInForceSplitMode(uint32_t uid, bool isFullScreen)
 {
-    std::unique_lock lock(appHookWindowInfoMapMutex_);
     if (isFullScreen) {
+        std::unique_lock lock(appHookWindowInfoMapMutex_);
         fullScreenInForceSplitUidSet_.insert(uid);
     } else {
+        std::unique_lock lock(appHookWindowInfoMapMutex_);
         fullScreenInForceSplitUidSet_.erase(uid);
     }
     ScreenSessionManagerClient::GetInstance().NotifyIsFullScreenInForceSplitMode(uid, isFullScreen);
