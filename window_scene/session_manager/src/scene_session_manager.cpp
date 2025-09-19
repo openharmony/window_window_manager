@@ -4476,6 +4476,11 @@ void SceneSessionManager::NotifyRecoveringFinished()
         recoveringFinished_ = true;
         recoverSubSessionCacheMap_.clear();
         recoverDialogSessionCacheMap_.clear();
+        if (needRecoverOutline_) {
+            TLOGNI(WmsLogTag::WMS_ANIMATION, "RecoverFinished recover outline.");
+            UpdateOutlineInner(outlineRemoteObject_, recoverOutlineParams_);
+            needRecoverOutline_ = false;
+        }
     }, __func__);
 }
 
@@ -17917,6 +17922,120 @@ void SceneSessionManager::NotifySessionScreenLockedChange(bool isScreenLocked) {
         sceneSession->GetSessionProperty()->SetIsShowDecorInFreeMultiWindow(isShow);
         sceneSession->SetIsShowDecorInFreeMultiWindow(isShow);
     }
+}
+
+bool SceneSessionManager::NeedOutline(int32_t persistentId, const std::vector<int32_t>& persistentIdList)
+{
+    if (std::find(persistentIdList.begin(), persistentIdList.end(), persistentId) != persistentIdList.end()) {
+        return true;
+    }
+    return false;
+}
+
+WMError SceneSessionManager::UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams)
+{
+    TLOGI(WmsLogTag::WMS_ANIMATION, "%{public}s", outlineParams.ToString().c_str());
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Update outline permission denied.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+
+    if (!(systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode())) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "This device can not update outline.");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    UpdateOutlineInner(remoteObject, outlineParams);
+    return WMError::WM_OK;
+}
+
+void SceneSessionManager::UpdateOutlineInner(const sptr<IRemoteObject>& remoteObject,
+                                             const OutlineParams& outlineParams)
+{
+    taskScheduler_->PostAsyncTask([this, remoteObject, outlineParams]() {
+        std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
+        {
+            std::lock_guard<std::shared_mutex> lock(sceneSessionMapMutex_);
+            sceneSessionMapCopy = sceneSessionMap_;
+        }
+
+        for (const auto& [persistentId, session] : sceneSessionMapCopy) {
+            if (session == nullptr) {
+                TLOGNI(WmsLogTag::WMS_ANIMATION, "session is null, id: %{public}d.", persistentId);
+                continue;
+            }
+            SessionState state = session->GetSessionState();
+            if (state <= SessionState::STATE_DISCONNECT || state >= SessionState::STATE_END) {
+                TLOGND(WmsLogTag::WMS_ANIMATION, "session state: %{public}d invalid, id: %{public}d.",
+                      state, persistentId);
+                continue;
+            }
+            if (NeedOutline(persistentId, outlineParams.persistentIds_)) {
+                session->UpdateSessionOutline(true, outlineParams.outlineStyleParams_);
+            } else {
+                OutlineStyleParams defaultParams;
+                session->UpdateSessionOutline(false, defaultParams);
+            }
+        }
+        AddOutlineRemoteDeathRecipient(remoteObject);
+        if (!recoveringFinished_) {
+            recoverOutlineParams_= outlineParams;
+            needRecoverOutline_ = true;
+            TLOGNI(WmsLogTag::WMS_ANIMATION, "Recovering not finished, cachae outline params.");
+        }
+    }, __func__);
+}
+
+void SceneSessionManager::AddOutlineRemoteDeathRecipient(const sptr<IRemoteObject>& remoteObject)
+{
+    if (remoteObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Remote object is null.");
+        return;
+    }
+    if (outlineRemoteObject_ == remoteObject) {
+        TLOGI(WmsLogTag::WMS_ANIMATION, "This remote object has already registered.");
+        return;
+    }
+    if (outlineRemoteObject_ && !outlineRemoteObject_->RemoveDeathRecipient(outlineRemoteDeath_)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Remove the old remote object's death recipient failed.");
+        return;
+    }
+    outlineRemoteObject_ = remoteObject;
+    if (!outlineRemoteObject_->AddDeathRecipient(outlineRemoteDeath_)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Add death recipient failed.");
+        return;
+    }
+}
+
+void SceneSessionManager::DeleteAllOutline(const sptr<IRemoteObject>& remoteObject)
+{
+    if (outlineRemoteObject_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Outline remote object is nullptr.");
+        return;
+    }
+    if (remoteObject != outlineRemoteObject_) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "This is not outline remote object died.");
+        return;
+    }
+    std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
+    {
+        std::lock_guard<std::shared_mutex> lock(sceneSessionMapMutex_);
+        sceneSessionMapCopy = sceneSessionMap_;
+    }
+    for (const auto& [persistentId, session] : sceneSessionMapCopy) {
+        if (session == nullptr) {
+            TLOGI(WmsLogTag::WMS_ANIMATION, "invalid session, id: %{public}d.", persistentId);
+            continue;
+        }
+        SessionState state = session->GetSessionState();
+        if (state <= SessionState::STATE_DISCONNECT || state >= SessionState::STATE_END) {
+            TLOGI(WmsLogTag::WMS_ANIMATION, "session state: %{public}d invalid, id: %{public}d.", state, persistentId);
+            continue;
+        }
+        OutlineStyleParams defaultParams;
+        session->UpdateSessionOutline(false, defaultParams);
+    }
+    outlineRemoteObject_ = nullptr;
 }
 
 void SceneSessionManager::NotifyIsFullScreenInForceSplitMode(uint32_t uid, bool isFullScreen)
