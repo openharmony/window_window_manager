@@ -43,7 +43,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
     DisplayManagerMessage msgId = static_cast<DisplayManagerMessage>(code);
     switch (msgId) {
         case DisplayManagerMessage::TRANS_ID_GET_DEFAULT_DISPLAY_INFO: {
-            auto info = GetDefaultDisplayInfo();
+            int32_t userId;
+            if (!data.ReadInt32(userId)) {
+                TLOGE(WmsLogTag::DMS, "Read userId failed");
+                return ERR_INVALID_DATA;
+            }
+            auto info = GetDefaultDisplayInfo(userId);
             reply.WriteParcelable(info);
             break;
         }
@@ -171,7 +176,13 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_ALL_DISPLAYIDS: {
-            std::vector<DisplayId> allDisplayIds = GetAllDisplayIds();
+            int32_t userId;
+            if (!data.ReadInt32(userId)) {
+                TLOGE(WmsLogTag::DMS, "Read userId failed");
+                return ERR_INVALID_DATA;
+            }
+            TLOGD(WmsLogTag::DMS, "case TRANS_ID_GET_ALL_DISPLAYIDS get userId %{public}u", userId);
+            std::vector<DisplayId> allDisplayIds = GetAllDisplayIds(userId);
             static_cast<void>(reply.WriteUInt64Vector(allDisplayIds));
             break;
         }

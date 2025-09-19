@@ -857,9 +857,9 @@ DisplayId DisplayManagerLite::GetDefaultDisplayId()
     return info->GetDisplayId();
 }
 
-std::vector<DisplayId> DisplayManagerLite::GetAllDisplayIds()
+std::vector<DisplayId> DisplayManagerLite::GetAllDisplayIds(int32_t userId)
 {
-    return SingletonContainer::Get<DisplayManagerAdapterLite>().GetAllDisplayIds();
+    return SingletonContainer::Get<DisplayManagerAdapterLite>().GetAllDisplayIds(userId);
 }
 
 VirtualScreenFlag DisplayManagerLite::GetVirtualScreenFlag(ScreenId screenId)

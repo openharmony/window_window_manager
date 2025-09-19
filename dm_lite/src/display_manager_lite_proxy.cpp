@@ -900,7 +900,7 @@ uint32_t DisplayManagerLiteProxy::GetScreenBrightness(uint64_t screenId)
 #endif
 }
 
-std::vector<DisplayId> DisplayManagerLiteProxy::GetAllDisplayIds()
+std::vector<DisplayId> DisplayManagerLiteProxy::GetAllDisplayIds(int32_t userId)
 {
 #ifdef SCENE_BOARD_ENABLED
     sptr<IRemoteObject> remote = Remote();
@@ -914,6 +914,10 @@ std::vector<DisplayId> DisplayManagerLiteProxy::GetAllDisplayIds()
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return allDisplayIds;
+    }
+    if (!data.WriteInt32(userId)) {
+        TLOGE(WmsLogTag::DMS, "Write userId failed");
         return allDisplayIds;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_ALL_DISPLAYIDS),

@@ -22,7 +22,7 @@ namespace {
 constexpr uint32_t  MAX_CREASE_REGION_SIZE = 20;
 }
 
-sptr<DisplayInfo> OHOS::Rosen::ScreenSessionManagerProxy::GetDefaultDisplayInfo()
+sptr<DisplayInfo> OHOS::Rosen::ScreenSessionManagerProxy::GetDefaultDisplayInfo(int32_t userId)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -35,6 +35,10 @@ sptr<DisplayInfo> OHOS::Rosen::ScreenSessionManagerProxy::GetDefaultDisplayInfo(
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return nullptr;
+    }
+    if (!data.WriteInt32(userId)) {
+        TLOGE(WmsLogTag::DMS, "Write userId failed");
         return nullptr;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DEFAULT_DISPLAY_INFO),
@@ -1983,7 +1987,7 @@ sptr<DisplayInfo> ScreenSessionManagerProxy::GetDisplayInfoByScreen(ScreenId scr
     return info;
 }
 
-std::vector<DisplayId> ScreenSessionManagerProxy::GetAllDisplayIds()
+std::vector<DisplayId> ScreenSessionManagerProxy::GetAllDisplayIds(int32_t userId)
 {
     std::vector<DisplayId> allDisplayIds;
     sptr<IRemoteObject> remote = Remote();
@@ -1997,6 +2001,10 @@ std::vector<DisplayId> ScreenSessionManagerProxy::GetAllDisplayIds()
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return allDisplayIds;
+    }
+    if (!data.WriteInt32(userId)) {
+        TLOGE(WmsLogTag::DMS, "WriteInt32 userId failed");
         return allDisplayIds;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_ALL_DISPLAYIDS),
