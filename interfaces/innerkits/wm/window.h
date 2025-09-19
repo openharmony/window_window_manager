@@ -1692,12 +1692,12 @@ public:
     virtual float GetBrightness() const { return 0.0f; }
 
     /**
-     * @brief Set calling window.
+     * @brief Change calling window id.
      *
-     * @param windowId Window id.
-     * @return WM_OK means set success, others means set failed.
+     * @param callingWindowId Window id.
+     * @return WM_OK means change success, others means change failed.
      */
-    virtual WMError SetCallingWindow(uint32_t windowId) { return WMError::WM_OK; }
+    virtual WMError ChangeCallingWindowId(uint32_t callingWindowId) { return WMError::WM_OK; }
 
     /**
      * @brief Set privacy mode of window.
@@ -3819,20 +3819,22 @@ public:
 
     /**
      * @brief get callingWindow windowStatus.
+     * @param callingWindowId
      * @param windowStatus
-     * @return WM_OK means set success, others means set Failed.
+     * @return WM_OK means get success, others means get Failed.
      */
-    virtual WMError GetCallingWindowWindowStatus(WindowStatus& windowStatus) const
+    virtual WMError GetCallingWindowWindowStatus(uint32_t callingWindowId, WindowStatus& windowStatus) const
     {
         return WMError::WM_OK;
     }
 
     /**
-     * @brief get callingWindow windowStatus
+     * @brief get callingWindow windowRect
+     * @param callingWindowId
      * @param rect.
-     * @return WM_OK means set success, others means set failed
+     * @return WM_OK means get success, others means get failed
      */
-    virtual WMError GetCallingWindowRect(Rect& rect) const
+    virtual WMError GetCallingWindowRect(uint32_t callingWindowId, Rect& rect) const
     {
         return WMError::WM_OK;
     }
@@ -4060,10 +4062,12 @@ public:
     /**
      * @brief Show keyboard window
      *
+     * @param callingWindowId the id of calling window.
      * @param effectOption Keyboard will show with special effect option.
      * @return WM_OK means window show success, others means failed.
      */
-    virtual WMError ShowKeyboard(KeyboardEffectOption effectOption)
+    virtual WMError ShowKeyboard(uint32_t callingWindowId, KeyboardEffectOption effectOption
+        = { KeyboardViewMode::NON_IMMERSIVE_MODE, KeyboardFlowLightMode::NONE, KeyboardGradientMode::NONE, 0 })
     {
         return WMError::WM_OK;
     }

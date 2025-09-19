@@ -113,6 +113,7 @@ const std::string SET_SUB_WINDOW_SOURCE_CB = "setSubWindowSource";
 const std::string ANIMATE_TO_CB = "animateToTargetProperty";
 const std::string BATCH_PENDING_SCENE_ACTIVE_CB = "batchPendingSceneSessionsActivation";
 const std::string SCENE_OUTLINE_PARAMS_CHANGE_CB = "sceneOutlineParamsChange";
+const std::string CALLING_SESSION_ID_CHANGE_CB = "callingWindowIdChange";
 
 constexpr int ARG_COUNT_1 = 1;
 constexpr int ARG_COUNT_2 = 2;
@@ -219,6 +220,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {FLOATING_BALL_STOP_CB,                 ListenerFuncType::FLOATING_BALL_STOP_CB},
     {FLOATING_BALL_RESTORE_MAIN_WINDOW_CB,      ListenerFuncType::FLOATING_BALL_RESTORE_MAIN_WINDOW_CB},
     {SCENE_OUTLINE_PARAMS_CHANGE_CB,        ListenerFuncType::SCENE_OUTLINE_PARAMS_CHANGE_CB},
+    {CALLING_SESSION_ID_CHANGE_CB,          ListenerFuncType::CALLING_SESSION_ID_CHANGE_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -3219,6 +3221,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::SCENE_OUTLINE_PARAMS_CHANGE_CB):
             ProcessSceneOutlineParamsChangeRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::CALLING_SESSION_ID_CHANGE_CB):
+            ProcessCallingSessionIdChangeRegister();
             break;
         default:
             break;
@@ -7546,25 +7551,27 @@ void JsSceneSession::ProcessKeyboardStateChangeRegister()
         return;
     }
     session->SetKeyboardStateChangeListener(
-        [weakThis = wptr(this), where = __func__](SessionState state, const KeyboardEffectOption& effectOption) {
+        [weakThis = wptr(this), where = __func__](
+            SessionState state, const KeyboardEffectOption& effectOption, uint32_t callingSessionId) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s: jsSceneSession is null", where);
             return;
         }
-        jsSceneSession->OnKeyboardStateChange(state, effectOption);
+        jsSceneSession->OnKeyboardStateChange(state, effectOption, callingSessionId);
     });
     TLOGD(WmsLogTag::WMS_KEYBOARD, "success");
 }
 
-void JsSceneSession::OnKeyboardStateChange(SessionState state, const KeyboardEffectOption& effectOption)
+void JsSceneSession::OnKeyboardStateChange(SessionState state, const KeyboardEffectOption& effectOption,
+    const uint32_t callingSessionId)
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGW(WmsLogTag::WMS_KEYBOARD, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, state, env = env_, effectOption,
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, state, env = env_, effectOption, callingSessionId,
         where = __func__] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
@@ -7579,12 +7586,60 @@ void JsSceneSession::OnKeyboardStateChange(SessionState state, const KeyboardEff
         }
         napi_value jsKeyboardStateObj = CreateJsValue(env, state);
         napi_value jsKeyboardEffectOptionObj = ConvertKeyboardEffectOptionToJsValue(env, effectOption);
-        napi_value argv[] = { jsKeyboardStateObj, jsKeyboardEffectOptionObj };
+        napi_value jsKeyboardCallingIdObj = CreateJsValue(env, callingSessionId);
+        napi_value argv[] = { jsKeyboardStateObj, jsKeyboardEffectOptionObj, jsKeyboardCallingIdObj };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        TLOGNI(WmsLogTag::WMS_KEYBOARD, "%{public}s: id: %{public}d, state: %{public}d", where, persistentId, state);
+        TLOGNI(WmsLogTag::WMS_KEYBOARD, "%{public}s: id: %{public}d, state: %{public}d, callingSessionId: %{public}u",
+            where, persistentId, state, callingSessionId);
     };
     taskScheduler_->PostMainThreadTask(task, "OnKeyboardStateChange, state:" +
         std::to_string(static_cast<uint32_t>(state)));
+}
+
+void JsSceneSession::ProcessCallingSessionIdChangeRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    session->SetCallingSessionIdSessionListenser([weakThis = wptr(this), where = __func__](uint32_t callingSessionId) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s: jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->OnCallingSessionIdChange(callingSessionId);
+    });
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "success");
+}
+
+void JsSceneSession::OnCallingSessionIdChange(uint32_t callingSessionId)
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGW(WmsLogTag::WMS_KEYBOARD, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, callingSessionId, env = env_, where = __func__] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "OnCallingSessionIdChange jsSceneSession id:%{public}d has been destroyed",
+                persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(CALLING_SESSION_ID_CHANGE_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value argv[] = { CreateJsValue(env, callingSessionId) };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        TLOGNI(WmsLogTag::WMS_KEYBOARD, "%{public}s: id: %{public}d, newCallingId: %{public}d",
+            where, persistentId, callingSessionId);
+    };
+    taskScheduler_->PostMainThreadTask(std::move(task),
+        "OnCallingSessionIdChange, callingId:" + std::to_string(callingSessionId));
 }
 
 void JsSceneSession::ProcessKeyboardEffectOptionChangeRegister()

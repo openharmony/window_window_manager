@@ -2100,7 +2100,6 @@ sptr<KeyboardSession::KeyboardSessionCallback> SceneSessionManager::CreateKeyboa
     keyboardCb->onGetFocusedSessionId = [this] {
         return this->GetFocusedSessionId();
     };
-    keyboardCb->onCallingSessionIdChange = callingSessionIdChangeFunc_;
     keyboardCb->onSystemKeyboardAvoidChange = [this](DisplayId displayId, SystemKeyboardAvoidChangeReason reason) {
         this->HandleKeyboardAvoidChange(nullptr, displayId, reason);
     };
@@ -8091,12 +8090,6 @@ void SceneSessionManager::SetSCBFocusChangeListener(const NotifyDiffSCBAfterUpda
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "in");
     notifyDiffSCBAfterUnfocusedFunc_ = std::move(func);
-}
-
-void SceneSessionManager::SetCallingSessionIdSessionListenser(const ProcessCallingSessionIdChangeFunc& func)
-{
-    TLOGD(WmsLogTag::DEFAULT, "in");
-    callingSessionIdChangeFunc_ = func;
 }
 
 void SceneSessionManager::SetStartUIAbilityErrorListener(const ProcessStartUIAbilityErrorFunc& func)
@@ -15165,30 +15158,34 @@ WindowStatus SceneSessionManager::GetWindowStatus(WindowMode mode, SessionState 
     return windowStatus;
 }
 
-WMError SceneSessionManager::GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus)
+WMError SceneSessionManager::GetCallingWindowWindowStatus(uint32_t callingWindowId, WindowStatus& windowStatus)
 {
     if (!SessionPermission::IsStartedByInputMethod()) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "permission is not allowed persistentId: %{public}d", persistentId);
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "permission is not allowed, callingWindowId: %{public}u", callingWindowId);
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    auto sceneSession = GetSceneSession(persistentId);
+    auto sceneSession = GetSceneSession(callingWindowId);
     if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "sceneSession is null, persistentId: %{public}d", persistentId);
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "sceneSession is null, callingWindowId: %{public}u", callingWindowId);
         return WMError::WM_ERROR_NULLPTR;
     }
     auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
     auto focusedSessionId = GetFocusedSessionId(displayId);
-    TLOGD(WmsLogTag::WMS_KEYBOARD, "persistentId: %{public}d, windowType: %{public}d",
-        persistentId, sceneSession->GetWindowType());
-    uint32_t callingWindowId = sceneSession->GetSessionProperty()->GetCallingSessionId();
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "callingWindowId: %{public}u, focusedSessionId: %{public}d, windowType: %{public}d",
+        callingWindowId, focusedSessionId, sceneSession->GetWindowType());
     auto callingSession = GetSceneSession(callingWindowId);
     if (callingSession == nullptr) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "callingsSession is null");
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "callingsSession is null, focusedSessionId: %{public}d", focusedSessionId);
         callingSession = GetSceneSession(focusedSessionId);
         if (callingSession == nullptr) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "callingsSession obtained through focusedSession fail");
             return WMError::WM_ERROR_INVALID_WINDOW;
         }
+    }
+    int32_t pid = callingSession->GetCallingPid();
+    if (!SessionPermission::IsKeyboardCallingProcess(pid, callingWindowId)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Is not keyboard calling process, callingWindowId: %{public}u", callingWindowId);
+        return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     if (callingSession->IsSystemSession()) {
         windowStatus = WindowStatus::WINDOW_STATUS_FULLSCREEN;
@@ -15196,40 +15193,44 @@ WMError SceneSessionManager::GetCallingWindowWindowStatus(int32_t persistentId, 
         windowStatus = GetWindowStatus(callingSession->GetWindowMode(), callingSession->GetSessionState(),
             callingSession->GetSessionProperty());
     }
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Get WindowStatus persistentId: %{public}d windowstatus: %{public}d",
-        persistentId, windowStatus);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Get WindowStatus callingWindowId: %{public}d windowstatus: %{public}d",
+        callingWindowId, windowStatus);
     return WMError::WM_OK;
 }
 
-WMError SceneSessionManager::GetCallingWindowRect(int32_t persistentId, Rect& rect)
+WMError SceneSessionManager::GetCallingWindowRect(uint32_t callingWindowId, Rect& rect)
 {
     if (!SessionPermission::IsStartedByInputMethod()) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "permission is not allowed persistentId: %{public}d", persistentId);
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "permission is not allowed, callingWindowId: %{public}u", callingWindowId);
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    auto sceneSession = GetSceneSession(persistentId);
+    auto sceneSession = GetSceneSession(callingWindowId);
     if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "sceneSession is null, persistentId: %{public}d", persistentId);
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "sceneSession is null, callingWindowId: %{public}u", callingWindowId);
         return WMError::WM_ERROR_NULLPTR;
     }
     auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
     auto focusedSessionId = GetFocusedSessionId(displayId);
-    TLOGD(WmsLogTag::WMS_KEYBOARD, "persistentId: %{public}d, windowType: %{public}d",
-        persistentId, sceneSession->GetWindowType());
-    uint32_t callingWindowId = sceneSession->GetSessionProperty()->GetCallingSessionId();
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "callingWindowId: %{public}u, windowType: %{public}d",
+        callingWindowId, sceneSession->GetWindowType());
     auto callingSession = GetSceneSession(callingWindowId);
     if (callingSession == nullptr) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "callingsSession is null");
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "callingsSession is null, focusedSessionId: %{public}d", focusedSessionId);
         callingSession = GetSceneSession(focusedSessionId);
         if (callingSession == nullptr) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "callingsSession obtained through focusedSession fail");
             return WMError::WM_ERROR_INVALID_WINDOW;
         }
     }
+    int32_t pid = callingSession->GetCallingPid();
+    if (!SessionPermission::IsKeyboardCallingProcess(pid, callingWindowId)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Is not keyboard calling process, callingWindowId: %{public}u", callingWindowId);
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     WSRect sessionRect = callingSession->GetSessionRect();
     rect = {sessionRect.posX_, sessionRect.posY_, sessionRect.width_, sessionRect.height_};
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Get Rect persistentId: %{public}d, x: %{public}d, y: %{public}d, "
-        "height: %{public}u, width: %{public}u", persistentId, rect.posX_, rect.posY_, rect.width_, rect.height_);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Get Rect callingWindowId: %{public}u, x: %{public}d, y: %{public}d, "
+        "height: %{public}u, width: %{public}u", callingWindowId, rect.posX_, rect.posY_, rect.width_, rect.height_);
     return WMError::WM_OK;
 }
 

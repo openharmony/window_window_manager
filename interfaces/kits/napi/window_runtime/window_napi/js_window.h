@@ -109,7 +109,7 @@ public:
     static napi_value HideNonSystemFloatingWindows(napi_env env, napi_callback_info info);
     static napi_value SetWindowTouchable(napi_env env, napi_callback_info info);
     static napi_value SetTransparent(napi_env env, napi_callback_info info);
-    static napi_value SetCallingWindow(napi_env env, napi_callback_info info);
+    static napi_value ChangeCallingWindowId(napi_env env, napi_callback_info info);
     static napi_value SetPreferredOrientation(napi_env env, napi_callback_info info);
     static napi_value GetPreferredOrientation(napi_env env, napi_callback_info info);
     static napi_value SetSnapshotSkip(napi_env env, napi_callback_info info);
@@ -358,7 +358,7 @@ private:
     napi_value OnHideNonSystemFloatingWindows(napi_env env, napi_callback_info info);
     napi_value OnSetWindowTouchable(napi_env env, napi_callback_info info);
     napi_value OnSetTransparent(napi_env env, napi_callback_info info);
-    napi_value OnSetCallingWindow(napi_env env, napi_callback_info info);
+    napi_value OnChangeCallingWindowId(napi_env env, napi_callback_info info);
     napi_value OnDump(napi_env env, napi_callback_info info);
     napi_value OnSetForbidSplitMove(napi_env env, napi_callback_info info);
     napi_value OnSnapshot(napi_env env, napi_callback_info info);

@@ -2551,6 +2551,11 @@ struct KeyboardEffectOption : public Parcelable {
     KeyboardGradientMode gradientMode_ = KeyboardGradientMode::NONE;
     uint32_t blurHeight_ = 0;
 
+    KeyboardEffectOption() {}
+    KeyboardEffectOption(KeyboardViewMode viewMode, KeyboardFlowLightMode flowLightMode,
+        KeyboardGradientMode gradientMode, uint32_t blurHeight) : viewMode_(viewMode), flowLightMode_(flowLightMode),
+        gradientMode_(gradientMode), blurHeight_(blurHeight) {}
+
     virtual bool Marshalling(Parcel& parcel) const override
     {
         return (parcel.WriteUint32(static_cast<uint32_t>(viewMode_)) &&

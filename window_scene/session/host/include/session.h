@@ -110,13 +110,15 @@ using UpdateTransitionAnimationFunc = std::function<void(WindowTransitionType ty
 using NofitySessionLabelAndIconUpdatedFunc =
     std::function<void(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon)>;
 using NotifySessionGetTargetOrientationConfigInfoFunc = std::function<void(uint32_t targetOrientation)>;
-using NotifyKeyboardStateChangeFunc = std::function<void(SessionState state, const KeyboardEffectOption& effectOption)>;
+using NotifyKeyboardStateChangeFunc = std::function<void(SessionState state, const KeyboardEffectOption& effectOption,
+    const uint32_t callingSessionId)>;
 using NotifyHighlightChangeFunc = std::function<void(bool isHighlight)>;
 using NotifySurfaceBoundsChangeFunc = std::function<void(const WSRect& rect, bool isGlobal, bool needFlush)>;
 using HasRequestedVsyncFunc = std::function<WSError(bool& hasRequestedVsync)>;
 using RequestNextVsyncWhenModeChangeFunc = std::function<WSError(const std::shared_ptr<VsyncCallback>& vsyncCallback)>;
 using NotifyClearSubSessionFunc = std::function<void(const int32_t subPersistentId)>;
 using OutlineParamsChangeCallbackFunc = std::function<void(bool enabled, const OutlineStyleParams& outlineStyleParams)>;
+using ProcessCallingSessionIdChangeFunc = std::function<void(uint32_t callingSessionId)>;
 class ILifecycleListener {
 public:
     virtual void OnActivation() {}
@@ -548,6 +550,7 @@ public:
     void SetAbilityToken(sptr<IRemoteObject> token);
     sptr<IRemoteObject> GetAbilityToken() const;
     WindowMode GetWindowMode() const;
+    void SetCallingSessionIdSessionListenser(const ProcessCallingSessionIdChangeFunc&& func);
 
     /*
      * Window ZOrder
@@ -1012,6 +1015,7 @@ protected:
      * Keyboard Window
      */
     NotifyKeyboardStateChangeFunc keyboardStateChangeFunc_;
+    ProcessCallingSessionIdChangeFunc callingSessionIdChangeFunc_;
 
     /*
      * Window Property

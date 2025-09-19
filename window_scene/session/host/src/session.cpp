@@ -3139,6 +3139,7 @@ void Session::UnregisterSessionChangeListeners()
     sessionRectChangeFunc_ = nullptr;
     updateSessionLabelAndIconFunc_ = nullptr;
     onRaiseMainWindowAboveTarget_ = nullptr;
+    callingSessionIdChangeFunc_ = nullptr;
     WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", GetPersistentId());
 }
 
@@ -3200,7 +3201,9 @@ void Session::NotifySessionStateChange(const SessionState& state)
             static_cast<uint32_t>(state), session->GetPersistentId());
         if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
             session->keyboardStateChangeFunc_) {
-            session->keyboardStateChangeFunc_(state, session->GetSessionProperty()->GetKeyboardEffectOption());
+            const sptr<WindowSessionProperty>& property = session->GetSessionProperty();
+            session->keyboardStateChangeFunc_(
+                state, property->GetKeyboardEffectOption(), property->GetCallingSessionId());
         } else if (session->sessionStateChangeFunc_) {
             session->sessionStateChangeFunc_(state);
         } else {
@@ -4043,6 +4046,19 @@ void Session::SetKeyboardStateChangeListener(const NotifyKeyboardStateChangeFunc
         session->NotifySessionStateChange(newState);
         TLOGNI(WmsLogTag::WMS_KEYBOARD, "%{public}s id: %{public}d, state_: %{public}d, newState: %{public}d",
             where, session->GetPersistentId(), session->GetSessionState(), newState);
+    }, __func__);
+}
+
+void Session::SetCallingSessionIdSessionListenser(const ProcessCallingSessionIdChangeFunc&& func)
+{
+    TLOGD(WmsLogTag::DEFAULT, "in");
+    PostTask([weakThis = wptr(this), func = std::move(func), where = __func__]() {
+        auto session = weakThis.promote();
+        if (session == nullptr || func == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s session or func is null", where);
+            return;
+        }
+        session->callingSessionIdChangeFunc_ = std::move(func);
     }, __func__);
 }
 

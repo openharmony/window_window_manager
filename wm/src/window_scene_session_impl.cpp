@@ -1690,9 +1690,10 @@ sptr<DisplayInfo> WindowSceneSessionImpl::GetDisplayInfo() const
     return display->GetDisplayInfo();
 }
 
-WMError WindowSceneSessionImpl::ShowKeyboard(KeyboardEffectOption effectOption)
+WMError WindowSceneSessionImpl::ShowKeyboard(uint32_t callingWindowId, KeyboardEffectOption effectOption)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Effect option: %{public}s", effectOption.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "CallingWindowId: %{public}d, effect option: %{public}s",
+        callingWindowId, effectOption.ToString().c_str());
     if (effectOption.viewMode_ >= KeyboardViewMode::VIEW_MODE_END) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid view mode: %{public}u. Use default mode",
             static_cast<uint32_t>(effectOption.viewMode_));
@@ -1709,6 +1710,7 @@ WMError WindowSceneSessionImpl::ShowKeyboard(KeyboardEffectOption effectOption)
         effectOption.gradientMode_ = KeyboardGradientMode::NONE;
     }
     property_->SetKeyboardEffectOption(effectOption);
+    property_->SetCallingSessionId(callingWindowId);
     return Show();
 }
 
@@ -5407,16 +5409,22 @@ WmErrorCode WindowSceneSessionImpl::KeepKeyboardOnFocus(bool keepKeyboardFlag)
     return WmErrorCode::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::SetCallingWindow(uint32_t callingSessionId)
+WMError WindowSceneSessionImpl::ChangeCallingWindowId(uint32_t callingSessionId)
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "session is invalid!");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (callingSessionId != property_->GetCallingSessionId()) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "from %{public}d to: %{public}d",
-            property_->GetCallingSessionId(), callingSessionId);
+    WindowType type = GetType();
+    uint32_t curCallingSessionId = property_->GetCallingSessionId();
+    if (type != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT || callingSessionId == curCallingSessionId ||
+        state_ != WindowState::STATE_SHOWN) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "set calling window id failed, type: %{public}d, newId: %{public}u,"
+            " state: %{public}d", type, callingSessionId, state_);
+        return WMError::WM_ERROR_INVALID_OPERATION;
     }
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, curId: %{public}u, newId: %{public}u",
+        property_->GetPersistentId(), curCallingSessionId, callingSessionId);
     if (auto hostSession = GetHostSession()) {
         hostSession->SetCallingSessionId(callingSessionId);
     }
