@@ -3652,6 +3652,35 @@ void ScreenSessionManagerProxy::NotifyScreenConnectCompletion(ScreenId screenId)
     }
 }
 
+void ScreenSessionManagerProxy::NotifyAodOpCompletion(AodOP operation, int32_t result)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is null");
+        return;
+    }
+
+    MessageOption option(MessageOption::TF_ASYNC);
+    MessageParcel reply;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return ;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(operation))) {
+        TLOGE(WmsLogTag::DMS, "Write operation failed");
+        return;
+    }
+    if (!data.WriteInt32(result)) {
+        TLOGE(WmsLogTag::DMS, "Write operation result failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_AOD_OP_COMPLETION),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return;
+    }
+}
 
 void ScreenSessionManagerProxy::RecordEventFromScb(std::string description, bool needRecordEvent)
 {

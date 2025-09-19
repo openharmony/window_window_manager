@@ -1088,6 +1088,20 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             NotifyScreenConnectCompletion(static_cast<ScreenId>(screenId));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_NOTIFY_AOD_OP_COMPLETION: {
+            uint32_t op;
+            int32_t result;
+            if (!data.ReadUint32(op)) {
+                TLOGE(WmsLogTag::DMS, "Read aod operation failed");
+                return ERR_INVALID_DATA;
+            }
+            if (!data.ReadInt32(result)) {
+                TLOGE(WmsLogTag::DMS, "Read aod result failed");
+                return ERR_INVALID_DATA;
+            }
+            NotifyAodOpCompletion(static_cast<AodOP>(op), result);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_GET_VIRTUAL_SCREEN_FLAG: {
             ProcGetVirtualScreenFlag(data, reply);
             break;

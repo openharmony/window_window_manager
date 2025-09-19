@@ -22,6 +22,7 @@ namespace {
 
 static void *g_handle = nullptr;
 using IsInAodFunc = bool (*)();
+using StopAodFunc = bool (*)(int32_t);
 
 bool LoadAodLib(void)
 {
@@ -67,6 +68,21 @@ __attribute__((no_sanitize("cfi"))) bool IsInAod()
         return false;
     }
     return func();
+}
+
+__attribute__((no_sanitize("cfi"))) bool StopAod(int32_t status)
+{
+    if (g_handle == nullptr) {
+        TLOGE(WmsLogTag::DMS, "g_handle is nullptr");
+        return false;
+    }
+    StopAodFunc func = reinterpret_cast<StopAodFunc>(dlsym(g_handle, "Stop"));
+    const char* dlsymError = dlerror();
+    if  (dlsymError) {
+        TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
+        return false;
+    }
+    return func(status);
 }
 }
 }
