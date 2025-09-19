@@ -238,6 +238,15 @@ enum class DmErrorCode : int32_t {
 };
 
 /**
+ * @brief Enumerates the aod operation
+ */
+enum class AodOP {
+    ENTER,
+    EXIT,
+    AOD_OP_MAX
+};
+
+/**
  * @brief Constructs the mapping of the DM errors to the DM error codes.
  */
 const std::map<DMError, DmErrorCode> DM_JS_TO_ERROR_CODE_MAP {

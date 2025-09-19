@@ -28,7 +28,8 @@
 #include "session/screen/include/screen_session.h"
 #include "zidl/screen_session_manager_stub.h"
 #include "client_agent_container.h"
-#include "session_display_power_controller.h"
+#include "screen_power_fsm/session_display_power_controller.h"
+#include "screen_power_fsm/screen_state_machine.h"
 #include "wm_single_instance.h"
 #include "screen_edid_parse.h"
 #include "session_manager/include/ffrt_queue_helper.h"
@@ -247,8 +248,10 @@ public:
      * On/Off screen
      */
     bool WakeUpBegin(PowerStateChangeReason reason) override;
+    bool DoWakeUpBegin(PowerStateChangeReason reason);
     bool WakeUpEnd() override;
     bool SuspendBegin(PowerStateChangeReason reason) override;
+    bool DoSuspendBegin(PowerStateChangeReason reason);
     bool SuspendEnd() override;
     void BlockScreenOnByCV(void);
     void BlockScreenOffByCV(void);
@@ -258,6 +261,7 @@ public:
     bool IsPreBrightAuthFail(void);
     void ScreenOffCVNotify(void);
     bool SetDisplayState(DisplayState state) override;
+    bool DoSetDisplayState(DisplayState state);
     bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
     ScreenPowerState GetScreenPower(ScreenId screenId) override;
     void NotifyDisplayEvent(DisplayEvent event) override;
@@ -481,7 +485,8 @@ public:
     void UpdateScreenIdManager(sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen);
     std::string DumperClientScreenSessions();
     void SetMultiScreenModeChangeTracker(std::string changeProc);
-    void SetRSScreenPowerStatus(ScreenId screenId, ScreenPowerStatus status);
+    void SetRSScreenPowerStatus(ScreenId screenId, ScreenPowerStatus status, ScreenPowerEvent event);
+    void SetRSScreenPowerStatusExt(ScreenId screenId, ScreenPowerStatus status);
     void NotifyScreenMaskAppear() override;
     bool IsSystemSleep();
     void SwitchSubscriberInit();
@@ -505,6 +510,9 @@ public:
     void SetFirstSCBConnect(bool firstSCBConnect);
     // mirror screen
     bool HandleResolutionEffectChange();
+    void NotifyAodOpCompletion(AodOP operation, int32_t result) override;
+    void DoAodExitAndSetPower(ScreenId screenId, ScreenPowerStatus status);
+    void DoAodExitAndSetPowerAllOff();
 
 protected:
     ScreenSessionManager();
@@ -697,6 +705,7 @@ private:
 
     EventTracker screenEventTracker_;
     RSInterfaces& rsInterface_;
+
     std::shared_ptr<TaskScheduler> taskScheduler_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
     std::shared_ptr<FfrtQueueHelper> ffrtQueueHelper_ = nullptr;
@@ -884,6 +893,7 @@ private:
     void CallRsSetScreenPowerStatusSyncForExtend(const std::vector<ScreenId>& screenIds, ScreenPowerStatus status);
     void SetRsSetScreenPowerStatusSync(std::vector<ScreenId>& screenIds, ScreenPowerStatus status);
     DisplayState lastDisplayState_ { DisplayState::UNKNOWN };
+    AodStatus aodNotifyFlag_ { AodStatus::UNKNOWN };
     bool IsFakeDisplayExist();
     DMError DoMakeUniqueScreenOld(const std::vector<ScreenId>& allUniqueScreenIds, std::vector<DisplayId>& displayIds,
         bool isCallingByThirdParty);
@@ -917,6 +927,8 @@ private:
 
     // Fold Screen duringcall
     bool duringCallState_ = false;
+    ScreenPowerEvent ConvertScreenStateEvent(ScreenPowerStatus status);
+    ScreenTransitionState ConvertPowerStatus2ScreenState(ScreenPowerStatus status);
 
     mutable std::recursive_mutex userDisplayNodeMapMutex_;
     std::map<int32_t, std::map<ScreenId, std::shared_ptr<RSDisplayNode>>> userDisplayNodeMap_;
