@@ -66,6 +66,38 @@ HWTEST_F(sceneSessionManagerProxyLifecycleTest, UpdateSessionWindowVisibilityLis
 }
 
 /**
+ * @tc.name: MinimizeAllAppWindows
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyLifecycleTest, MinimizeAllAppWindows, TestSize.Level1)
+{
+    sptr<MockIRemoteObject> iRemoteObjectMocker = nullptr;
+    sptr<SceneSessionManagerProxy> ssManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(ssManagerProxy, nullptr);
+    DisplayId displayId = 0;
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ssManagerProxy->MinimizeAllAppWindows(displayId));
+ 
+    iRemoteObjectMocker = sptr<MockIRemoteObject>::MakeSptr();
+    ssManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(ssManagerProxy, nullptr);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ssManagerProxy->MinimizeAllAppWindows(displayId));
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ssManagerProxy->MinimizeAllAppWindows(displayId));
+    MockMessageParcel::SetWriteUint64ErrorFlag(false);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ssManagerProxy->MinimizeAllAppWindows(displayId));
+ 
+    iRemoteObjectMocker->SetRequestResult(ERR_INVALID_DATA);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ssManagerProxy->MinimizeAllAppWindows(displayId));
+    iRemoteObjectMocker->SetRequestResult(ERR_NONE);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ssManagerProxy->MinimizeAllAppWindows(displayId));
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
  * @tc.name: PendingSessionToForeground
  * @tc.desc: normal function
  * @tc.type: FUNC

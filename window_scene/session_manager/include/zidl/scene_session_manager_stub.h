@@ -152,6 +152,7 @@ private:
     int HandleAddSessionBlackList(MessageParcel& data, MessageParcel& reply);
     int HandleRemoveSessionBlackList(MessageParcel& data, MessageParcel& reply);
     int HandleGetPiPSettingSwitchStatus(MessageParcel& data, MessageParcel& reply);
+    int HandleMinimizeAllAppWindows(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H
