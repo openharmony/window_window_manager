@@ -28,12 +28,7 @@ class XCNodeController extends NodeController {
     }
     makeNode(l2) {
         this.node = new FrameNode(l2);
-        try {
-            this.node.appendChild(this.mXComponent);
-        }
-        catch (err) {
-            console.log('appendChild failed');
-        }
+        this.node.appendChild(this.mXComponent);
         return this.node;
     }
     replaceNode(k) {
@@ -43,10 +38,6 @@ class XCNodeController extends NodeController {
     }
     removeNode() {
         this.node?.removeChild(this.mXComponent);
-    }
-
-    aboutToDisappear(){
-        this.node?.clearChildren();
     }
 }
 
