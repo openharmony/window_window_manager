@@ -324,6 +324,8 @@ public:
 bool IsAINavigationBarAttachedToBottom(AvoidArea& avoidArea, const Rect& avoidRect, int32_t sessionBottom)
 {
     if (std::abs(avoidRect.posY_ + static_cast<int32_t>(avoidRect.height_) - sessionBottom) <= DIFF_NUMBER) {
+        AvoidArea avoidAreaEmpty;
+        avoidArea = avoidAreaEmpty;
         avoidArea.bottomRect_ = avoidRect;
         return true;
     }
