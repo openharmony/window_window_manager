@@ -2072,7 +2072,29 @@ WSError Session::SetSessionLabel(const std::string& label)
     if (updateSessionLabelFunc_) {
         updateSessionLabelFunc_(label);
     }
+    label_ = label;
     return WSError::WS_OK;
+}
+
+void Session::UpdateSessionLabel(const std::string& label)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), label, where] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
+            return;
+        }
+        if (session->label_ == "") {
+            session->label_ = label;
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s set label success label:%{public}s", where, label.c_str());
+        }
+        }, where);
+}
+
+std::string Session::GetSessionLabel() const
+{
+    return label_;
 }
 
 void Session::SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc& func)

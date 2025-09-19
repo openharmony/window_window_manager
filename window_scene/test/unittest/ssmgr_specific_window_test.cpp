@@ -252,7 +252,6 @@ HWTEST_F(SSMgrSpecificWindowTest, IsKeyboardForeground, TestSize.Level1)
 
     ssm_->sceneSessionMap_.insert({ 0, sceneSession });
     session->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(session->property_, nullptr);
 
     if (session->property_) {
         auto result1 = session->GetWindowType();

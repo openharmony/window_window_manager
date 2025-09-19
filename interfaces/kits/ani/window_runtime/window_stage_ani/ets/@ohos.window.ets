@@ -17,6 +17,7 @@ import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { UIContext } from '@ohos.arkui.UIContext';
 import BaseContext from 'application.BaseContext';
 import { ColorMetrics } from '@ohos.arkui.node';
+import image from '@ohos.multimedia.image';
 
 export type AsyncCallbackVoid = (err: BusinessError) => void;
 export type WindowEventCallback = (data: window.WindowEventType) => void;
@@ -1788,6 +1789,59 @@ export function getLastWindow(ctx: BaseContext, callback: AsyncCallback<Window>)
     }).catch((err: NullishType) => {
         callback(err as BusinessError, new WindowInternal());
     });
+}
+
+export interface MainWindowInfo {
+  displayId: number;
+  windowId: number;
+  showing: boolean;
+  label: string;
+}
+
+export class MainWindowInfoInternal implements MainWindowInfo {
+  displayId: number;
+  windowId: number;
+  showing: boolean;
+  label: string;
+}
+
+export interface WindowSnapshotConfiguration {
+  useCache?: boolean;
+}
+
+export class WindowSnapshotConfigurationInternal implements WindowSnapshotConfiguration {
+  useCache?: boolean;
+}
+
+native function getAllMainWindowInfo(nativeObj: long): Array<MainWindowInfo>;
+native function getMainWindowSnapshot(
+  nativeObj: long, windowId: Array<number>, config: WindowSnapshotConfiguration): Array<image.PixelMap>;
+
+export function getAllMainWindowInfo(): Promise<Array<MainWindowInfo>> {
+  return new Promise<Array<MainWindowInfo>>(
+    (resolve: (value: Array<MainWindowInfo>) => void, reject: (error: BusinessError) => void ) => {
+      taskpool.execute((): Array<MainWindowInfo> => {
+          return getAllMainWindowInfo(nativeObj);
+      }).then((ret: NullishType) => {
+          resolve(ret as Array<MainWindowInfo>);
+      }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+      });
+  });
+}
+
+export function getMainWindowSnapshot(windowId: Array<number>, config: WindowSnapshotConfiguration):
+  Promise<Array<image.PixelMap>> {
+    return new Promise<Array<image.PixelMap>>(
+      (resolve: (value: Array<image.PixelMap>) => void, reject: (error: BusinessError) => void ) => {
+      taskpool.execute((): Array<image.PixelMap> => {
+        return getMainWindowSnapshot(nativeObj, windowId, config);
+    }).then((ret: NullishType) => {
+        resolve(ret as Array<image.PixelMap>);
+    }).catch((err: NullishType) => {
+        reject(err as BusinessError);
+    });
+  });
 }
 
 function runWindowStageLifecycleEventCallBack(cb: object, cbArg: int): void {

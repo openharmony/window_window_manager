@@ -533,6 +533,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::SetIsPendingToBackgroundState);
     BindNativeFunction(env, objValue, "setIsActivatedAfterScreenLocked", moduleName,
         JsSceneSession::SetIsActivatedAfterScreenLocked);
+    BindNativeFunction(env, objValue, "setLabel", moduleName, JsSceneSession::SetLabel);
     BindNativeFunction(env, objValue, "setFrameGravity", moduleName,
         JsSceneSession::SetFrameGravity);
     BindNativeFunction(env, objValue, "setUseStartingWindowAboveLocked", moduleName,
@@ -2721,6 +2722,13 @@ napi_value JsSceneSession::SetIsPendingToBackgroundState(napi_env env, napi_call
     TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetIsPendingToBackgroundState(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetLabel(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetLabel(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetIsActivatedAfterScreenLocked(napi_env env, napi_callback_info info)
@@ -6867,6 +6875,33 @@ napi_value JsSceneSession::OnSetIsPendingToBackgroundState(napi_env env, napi_ca
         TLOGD(WmsLogTag::WMS_LIFE, "isPendingToBackgroundState: %{public}u", isPendingToBackgroundState);
     }
     session->SetIsPendingToBackgroundState(isPendingToBackgroundState);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetLabel(napi_env env, napi_callback_info info)
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is null, id: %{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM), "Input Invalid"));
+        return NapiGetUndefined(env);
+    }
+    std::string label;
+    if (!ConvertFromJsValue(env, argv[0], label)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to string");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "label:%{public}s, id:%{public}d", label.c_str(), persistentId_);
+    session->UpdateSessionLabel(label);
     return NapiGetUndefined(env);
 }
 

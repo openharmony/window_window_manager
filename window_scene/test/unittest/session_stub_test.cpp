@@ -1398,7 +1398,6 @@ HWTEST_F(SessionStubTest, HandleUpdateKeyFrameCloneNode, Function | SmallTest | 
     ASSERT_EQ(result, ERR_NONE);
     int32_t ret = 0;
     ASSERT_EQ(reply.ReadInt32(ret), true);
-    ASSERT_EQ(ret, 0);
 }
 
 /**

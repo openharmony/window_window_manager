@@ -810,31 +810,21 @@ struct PointInfo {
 struct MainWindowInfo : public Parcelable {
     virtual bool Marshalling(Parcel& parcel) const override
     {
-        if (!parcel.WriteInt32(pid_)) {
-            return false;
-        }
-
-        if (!parcel.WriteString(bundleName_)) {
-            return false;
-        }
-
-        if (!parcel.WriteInt32(persistentId_)) {
-            return false;
-        }
-
-        if (!parcel.WriteInt32(bundleType_)) {
-            return false;
-        }
-        return true;
+        return parcel.WriteInt32(pid_) && parcel.WriteString(bundleName_) &&
+            parcel.WriteInt32(persistentId_) && parcel.WriteInt32(bundleType_) &&
+            parcel.WriteUint64(displayId_) && parcel.WriteBool(showing_) && parcel.WriteString(label_);
     }
 
     static MainWindowInfo* Unmarshalling(Parcel& parcel)
     {
         MainWindowInfo* mainWindowInfo = new MainWindowInfo;
-        mainWindowInfo->pid_ = parcel.ReadInt32();
-        mainWindowInfo->bundleName_ = parcel.ReadString();
-        mainWindowInfo->persistentId_ = parcel.ReadInt32();
-        mainWindowInfo->bundleType_ = parcel.ReadInt32();
+        if (!parcel.ReadInt32(mainWindowInfo->pid_) || !parcel.ReadString(mainWindowInfo->bundleName_) ||
+            !parcel.ReadInt32(mainWindowInfo->persistentId_) || !parcel.ReadInt32(mainWindowInfo->bundleType_) ||
+            !parcel.ReadUint64(mainWindowInfo->displayId_) || !parcel.ReadBool(mainWindowInfo->showing_) ||
+            !parcel.ReadString(mainWindowInfo->label_)) {
+            delete mainWindowInfo;
+            return nullptr;
+        }
         return mainWindowInfo;
     }
 
@@ -842,6 +832,32 @@ struct MainWindowInfo : public Parcelable {
     std::string bundleName_ = "";
     int32_t persistentId_ = 0;
     int32_t bundleType_ = 0;
+    DisplayId displayId_ = DISPLAY_ID_INVALID;
+    bool showing_ = false;
+    std::string label_ = "";
+};
+
+/**
+ * @struct WindowSnapshotConfiguration
+ *
+ * @brief main window info for all windows on the screen.
+ */
+struct WindowSnapshotConfiguration : public Parcelable {
+    bool useCache = true;
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteBool(useCache);
+    }
+
+    static WindowSnapshotConfiguration* Unmarshalling(Parcel& parcel)
+    {
+        auto windowSnapshotConfiguration = std::make_unique<WindowSnapshotConfiguration>();
+        if (!parcel.ReadBool(windowSnapshotConfiguration->useCache)) {
+            return nullptr;
+        }
+        return windowSnapshotConfiguration.release();
+    }
 };
 
 /**

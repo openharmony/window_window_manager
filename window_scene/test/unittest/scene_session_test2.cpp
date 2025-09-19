@@ -169,14 +169,9 @@ HWTEST_F(SceneSessionTest2, NotifyPropertyWhenConnect1, TestSize.Level1)
     EXPECT_NE(specificCallback_, nullptr);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    int ret = 1;
     std::string key = info.bundleName_ + info.moduleName_ + info.abilityName_;
     sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
     sceneSession->NotifyPropertyWhenConnect();
-
-    sptr<WindowSessionProperty> property = nullptr;
-    sceneSession->NotifyPropertyWhenConnect();
-    ASSERT_EQ(ret, 1);
 }
 
 /**
@@ -506,11 +501,9 @@ HWTEST_F(SceneSessionTest2, SetScale, TestSize.Level1)
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback_, nullptr);
-    int resultValue = 0;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->SetScale(1.0f, 1.0f, 0.0f, 0.0f);
-    ASSERT_EQ(0, resultValue);
 }
 
 /**

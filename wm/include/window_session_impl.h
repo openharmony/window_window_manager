@@ -327,8 +327,7 @@ public:
     void NotifyAfterForeground(bool needNotifyListeners = true,
         bool needNotifyUiContent = true, bool waitAttach = false);
     void GetAttachStateSyncResult(bool waitAttachState, bool afterForeground) const;
-    void NotifyAfterBackground(bool needNotifyListeners = true,
-        bool needNotifyUiContent = true, bool waitDetach = false);
+    void NotifyAfterBackground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
     void NotifyAfterDidForeground(uint32_t reason = static_cast<uint32_t>(WindowStateChangeReason::NORMAL));
     void NotifyAfterDidBackground(uint32_t reason = static_cast<uint32_t>(WindowStateChangeReason::NORMAL));
     void NotifyForegroundFailed(WMError ret);

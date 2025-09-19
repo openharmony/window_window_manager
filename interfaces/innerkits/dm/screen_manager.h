@@ -137,10 +137,10 @@ public:
         ScreenId& screenGroupId);
 
     /**
-     * @brief Make screen as mirror-screen for region of main screen.
+     * @brief Make screen as mirror-screen with rotation.
      *
      * @param mainScreenId Main screen id.
-     * @param mirrorScreenId Mirro screen id.
+     * @param mirrorScreenId Mirror screen ids.
      * @param screenGroupId Screen group id.
      * @param rotation Mirror screen rotation.
      * @return DM_OK means make mirror success, others means make mirror failed.

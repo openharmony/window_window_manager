@@ -1402,6 +1402,38 @@ HWTEST_F(WindowSceneSessionImplTest, Hide03, TestSize.Level0)
 }
 
 /**
+ * @tc.name: Hide04
+ * @tc.desc: Hide session
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, Hide04, TestSize.Level0)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(LogCallback);
+    sptr option = sptr::MakeSptr();
+    option->SetWindowName("Hide04");
+    sptr window = sptr::MakeSptr(option);
+
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr session = sptr::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+
+    EXPECT_EQ(WMError::WM_OK, window->Hide(0, false, false, false));
+    EXPECT_TRUE(g_logMsg.find("init lifecycleCallback") == std::string::npos);
+    EXPECT_EQ(WMError::WM_OK, window->Show(0, false, true, false));
+
+    EXPECT_EQ(WMError::WM_OK, window->Hide(0, false, false, true));
+    EXPECT_FALSE(g_logMsg.find("lifecycleCallback is null") == std::string::npos);
+    EXPECT_FALSE(g_logMsg.find("window attach state timeout, persistentId") == std::string::npos);
+    EXPECT_FALSE(g_logMsg.find("get attach state sync result, id") == std::string::npos);
+    EXPECT_EQ(WMError::WM_OK, window->Show(0, false, true, true));
+
+    EXPECT_EQ(WMError::WM_OK, window->Destroy(false));
+}
+
+/**
  * @tc.name: Show01
  * @tc.desc: Show session
  * @tc.type: FUNC
