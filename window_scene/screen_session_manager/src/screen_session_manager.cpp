@@ -9854,7 +9854,7 @@ void ScreenSessionManager::NotifyUnfreezedAgents(const int32_t& pid, const std::
         auto agents = dmAgentContainer_.GetAgentsByType(agentType);
         for (auto agent : agents) {
             int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
-            if (agentPid != pid || unfreezedPidList.count(pid) == 0) {
+            if (agent == nullptr|| agentPid != pid || unfreezedPidList.count(pid) == 0) {
                 continue;
             }
             isAgentTypeNotify = true;
