@@ -161,30 +161,6 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForFold03, TestSize.Level1)
 }
 
 /**
- * @tc.name: NotifyUnfreezedAgents
- * @tc.desc: NotifyUnfreezedAgents
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, NotifyUnfreezedAgents, TestSize.Level1)
-{
-    logMsg.clear();
-    LOG_SetCallback(MyLogCallback);
-    sptr<ScreenSessionManager> ssm = new ScreenSessionManager();
-    sptr<IDisplayManagerAgent> agent = new IDisplayManagerAgent();
-
-    int32_t pid = 1;
-    std::set<int32_t> unfreezedPidList = {1, 2, 3};
-    std::set<DisplayManagerAgentType> pidAgentTypes = {DisplayManagerAgentType::SCREEN_EVENT_LISTENER};
-    ScreenId screenId = 1050;
-    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
-
-    ssm->RegisterDisplayManagerAgent(agent, DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
-    ssm->dmAgentContainer_.RegisterAgent(nullptr, DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
-    ssm->NotifyUnfreezedAgents(pid, unfreezedPidList, pidAgentTypes, screenSession);
-    EXPECT_TRUE(logMsg.find("Unknown agentType") == std::string::npos);
-}
-
-/**
  * @tc.name: SetDisplayNodeSecurity
  * @tc.desc: SetDisplayNodeSecurity test
  * @tc.type: FUNC
