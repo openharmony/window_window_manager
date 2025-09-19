@@ -86,6 +86,7 @@ public:
     void SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition);
     void NotifyFoldToExpandCompletion(bool foldToExpand);
     void NotifyScreenConnectCompletion(ScreenId screenId);
+    void NotifyAodOpCompletion(AodOP operation, int32_t result);
     void RecordEventFromScb(std::string description, bool needRecordEvent);
     FoldStatus GetFoldStatus();
     SuperFoldStatus GetSuperFoldStatus();
