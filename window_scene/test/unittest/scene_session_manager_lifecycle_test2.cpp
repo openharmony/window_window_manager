@@ -32,6 +32,7 @@
 #include "mock/mock_accesstoken_kit.h"
 #include "application_info.h"
 #include "context.h"
+#include "get_snapshot_callback.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -329,6 +330,152 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, NotifyWindowStateErrorFromMMI, TestS
     ssm_->NotifyWindowStateErrorFromMMI(100, 10086);
     ASSERT_EQ(ret, 0);
 }
+
+/**
+ * @tc.name: GetAllMainWindowInfo
+ * @tc.desc: GetAllMainWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLifecycleTest2, GetAllMainWindowInfo, TestSize.Level1)
+{
+    int ret = 0;
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "SceneSessionManagerLifecycleTest2";
+    info.bundleName_ = "GetAllMainWindowInfo";
+    info.screenId_ = 0;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->property_ = property;
+    sceneSession->SetSessionInfoPersistentId(99);
+    sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
+    sceneSession->SetSessionLabel("GetAllMainWindowInfo");
+ 
+    std::vector<sptr<MainWindowInfo>> infos;
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    EXPECT_EQ(ssm_->GetAllMainWindowInfo(infos), WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    EXPECT_EQ(ssm_->GetAllMainWindowInfo(infos), WMError::WM_ERROR_INVALID_PERMISSION);
+ 
+    ssm_->sceneSessionMap_.insert({1, nullptr});
+    ssm_->sceneSessionMap_.insert({9, sceneSession});
+    MockAccesstokenKit::MockAccessTokenKitRet(0);
+    EXPECT_EQ(ssm_->GetAllMainWindowInfo(infos), WMError::WM_OK);
+ 
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    EXPECT_EQ(ssm_->GetAllMainWindowInfo(infos), WMError::WM_OK);
+}
+ 
+/**
+ * @tc.name: GetMainWindowSnapshot
+ * @tc.desc: GetMainWindowSnapshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLifecycleTest2, GetMainWindowSnapshot, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SceneSessionManagerLifecycleTest2";
+    info.bundleName_ = "GetMainWindowSnapshot";
+    info.screenId_ = 0;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->property_ = property;
+    sceneSession->SetCallingPid(100);
+    sceneSession->SetSessionInfoPersistentId(9);
+    sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
+    sceneSession->SetSessionLabel("GetMainWindowSnapshot");
+ 
+    std::vector<int32_t> windowIds;
+    WindowSnapshotConfiguration configs;
+    configs.useCache = true;
+    sptr<IRemoteObject> callback = sptr<IRemoteObjectMocker>::MakeSptr();
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    EXPECT_EQ(ssm_->GetMainWindowSnapshot(windowIds, configs, callback), WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    EXPECT_EQ(ssm_->GetMainWindowSnapshot(windowIds, configs, callback), WMError::WM_ERROR_INVALID_PERMISSION);
+    MockAccesstokenKit::MockAccessTokenKitRet(0);
+    EXPECT_EQ(ssm_->GetMainWindowSnapshot(windowIds, configs, callback), WMError::WM_ERROR_INVALID_PARAM);
+
+    windowIds.emplace_back(1);
+    windowIds.emplace_back(9);
+    EXPECT_EQ(ssm_->GetMainWindowSnapshot(windowIds, configs, nullptr), WMError::WM_ERROR_INVALID_PARAM);
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
+    EXPECT_EQ(ssm_->GetMainWindowSnapshot(windowIds, configs, callback), WMError::WM_ERROR_INVALID_PERMISSION);
+    MockAccesstokenKit::MockAccessTokenKitRet(0);
+    EXPECT_EQ(ssm_->GetMainWindowSnapshot(windowIds, configs, callback), WMError::WM_ERROR_INVALID_PARAM);
+
+    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    ssm_->sceneSessionMap_.insert({9, sceneSession});
+    sptr<GetSnapshotCallback> getSnapshotCallback = sptr<GetSnapshotCallback>::MakeSptr();
+    EXPECT_EQ(ssm_->GetMainWindowSnapshot(windowIds, configs, getSnapshotCallback), WMError::WM_OK);
+
+    configs.useCache = true;
+    sptr<IRemoteObject> callbackNull = sptr<IRemoteObjectMocker>::MakeSptr();
+    EXPECT_EQ(ssm_->GetMainWindowSnapshot(windowIds, configs, callbackNull), WMError::WM_OK);
+
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    sceneSession->property_ = property;
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    ssm_->sceneSessionMap_.insert({9, sceneSession});
+    EXPECT_EQ(ssm_->GetMainWindowSnapshot(windowIds, configs, getSnapshotCallback), WMError::WM_ERROR_INVALID_PARAM);
+}
+ 
+/**
+ * @tc.name: GetMainWindowSnapshot01
+ * @tc.desc: GetMainWindowSnapshot01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLifecycleTest2, GetMainWindowSnapshot01, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SceneSessionManagerLifecycleTest2";
+    info.bundleName_ = "GetMainWindowSnapshot01";
+    info.screenId_ = 0;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->property_ = property;
+    sceneSession->SetCallingPid(99);
+ 
+    std::vector<int32_t> windowIdsRepeat;
+    windowIdsRepeat.emplace_back(1);
+    windowIdsRepeat.emplace_back(1);
+    WindowSnapshotConfiguration configs;
+    configs.useCache = true;
+    MockAccesstokenKit::MockAccessTokenKitRet(0);
+    sptr<IRemoteObject> callback = sptr<IRemoteObjectMocker>::MakeSptr();
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    EXPECT_EQ(ssm_->GetMainWindowSnapshot(windowIdsRepeat, configs, callback), WMError::WM_ERROR_INVALID_PARAM);
+ 
+    std::vector<int32_t> windowIdsAbnormal;
+    windowIdsAbnormal.emplace_back(1); // windowId
+    windowIdsAbnormal.emplace_back(1000); // abnormal windowId
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    MockAccesstokenKit::MockAccessTokenKitRet(0);
+    EXPECT_EQ(ssm_->GetMainWindowSnapshot(windowIdsAbnormal, configs, callback), WMError::WM_ERROR_INVALID_PARAM);
+ 
+    std::vector<int32_t> windowIdsMaxSize;
+    ssm_->sceneSessionMap_.clear();
+    for (int i = 0; i < 600; i++) { // windowIdsMax size
+        windowIdsMaxSize.emplace_back(i);
+    }
+    callback = sceneSession->AsObject();
+    EXPECT_EQ(ssm_->GetMainWindowSnapshot(windowIdsMaxSize, configs, callback), WMError::WM_ERROR_INVALID_PARAM);
+}
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

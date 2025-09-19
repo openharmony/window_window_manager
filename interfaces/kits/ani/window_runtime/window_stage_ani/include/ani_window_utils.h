@@ -32,6 +32,7 @@
 #include "window_option.h"
 #include "window_visibility_info.h"
 #include "wm_common.h"
+#include "pixel_map.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -270,6 +271,7 @@ class AniWindowUtils {
 public:
     static ani_status GetStdString(ani_env* env, ani_string ani_str, std::string& result);
     static ani_status GetStdStringVector(ani_env* env, ani_object ary, std::vector<std::string>& result);
+    static ani_status GetIntVector(ani_env* env, ani_object ary, std::vector<int32_t>& result);
     static ani_status NewAniObjectNoParams(ani_env* env, const char* cls, ani_object* object);
     static ani_status NewAniObject(ani_env* env, const char* cls, const char* signature, ani_object* result, ...);
     static ani_object CreateAniUndefined(ani_env* env);
@@ -286,6 +288,10 @@ public:
     static ani_status GetAniString(ani_env* env, const std::string& str, ani_string* result);
     static void* GetAbilityContext(ani_env *env, ani_object aniObj);
     static ani_object CreateWindowsProperties(ani_env* env, const sptr<Window>& window);
+    static ani_object CreateAniPixelMapArray(ani_env* env,
+        const std::vector<std::shared_ptr<Media::PixelMap>>& pixelMaps);
+    static ani_object CreateAniMainWindowInfoArray(ani_env* env, const std::vector<sptr<MainWindowInfo>>& infos);
+    static ani_object CreateAniMainWindowInfo(ani_env* env, const MainWindowInfo& info);
     static ani_object CreateProperties(ani_env* env, const sptr<Window>& window);
     static uint32_t GetColorFromAni(ani_env* env, const char* name,
         uint32_t defaultColor, bool& flag, const ani_object& aniObject);
@@ -315,6 +321,8 @@ public:
     static void GetSpecificBarStatus(sptr<Window>& window, const std::string& name,
         std::map<WindowType, SystemBarProperty>& newSystemBarProperties,
         std::map<WindowType, SystemBarProperty>& systemBarProperties);
+    static void GetWindowSnapshotConfiguration(ani_env* env, ani_object config,
+        WindowSnapshotConfiguration& windowSnapshotConfiguration);
 
     /**
      * @brief Convert WMError to corresponding WmErrorCode.

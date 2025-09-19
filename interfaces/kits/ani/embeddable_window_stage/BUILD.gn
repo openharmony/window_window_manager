@@ -78,6 +78,8 @@ ohos_shared_library("embeddablewindowstageani_kit") {
     "hitrace:hitrace_meter",
     "napi:ace_napi",
     "runtime_core:ani",
+    "image_framework:image",
+    "image_framework:image_ani",
   ]
 
   innerapi_tags = [ "platformsdk" ]

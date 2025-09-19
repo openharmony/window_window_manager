@@ -145,6 +145,126 @@ HWTEST_F(sceneSessionManagerProxyLifecycleTest, GetVisibilityWindowInfo, TestSiz
     std::vector<sptr<WindowVisibilityInfo>> infos;
     ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy->GetVisibilityWindowInfo(infos));
 }
+
+/**
+ * @tc.name: GetAllMainWindowInfo
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyLifecycleTest, GetAllMainWindowInfo, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = nullptr;
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    std::vector<sptr<MainWindowInfo>> infos;
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, sceneSessionManagerProxy->GetAllMainWindowInfo(infos));
+ 
+    iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sceneSessionManagerProxy, nullptr);
+ 
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, sceneSessionManagerProxy->GetAllMainWindowInfo(infos));
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, sceneSessionManagerProxy->GetAllMainWindowInfo(infos));
+    MockMessageParcel::ClearAllErrorFlag();
+ 
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, sceneSessionManagerProxy->GetAllMainWindowInfo(infos));
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, sceneSessionManagerProxy->GetAllMainWindowInfo(infos));
+    MockMessageParcel::ClearAllErrorFlag();
+}
+ 
+/**
+ * @tc.name: GetAllMainWindowInfo01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyLifecycleTest, GetAllMainWindowInfo01, TestSize.Level1)
+{
+    sptr<MockIRemoteObject> iRemoteObjMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SceneSessionManagerProxy> ssManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjMocker);
+    ASSERT_NE(ssManagerProxy, nullptr);
+    std::vector<sptr<MainWindowInfo>> infos;
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    iRemoteObjMocker->SetRequestResult(ERR_INVALID_DATA);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ssManagerProxy->GetAllMainWindowInfo(infos));
+    iRemoteObjMocker->SetRequestResult(ERR_NONE);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+ 
+/**
+ * @tc.name: GetMainWindowSnapshot
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyLifecycleTest, GetMainWindowSnapshot, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = nullptr;
+    sptr<SceneSessionManagerProxy> ssManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(ssManagerProxy, nullptr);
+    std::vector<int32_t> windowIds;
+    WindowSnapshotConfiguration configs;
+    configs.useCache = true;
+    sptr<IRemoteObject> callback = sptr<IRemoteObjectMocker>::MakeSptr();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ssManagerProxy->GetMainWindowSnapshot(windowIds, configs, callback));
+ 
+    iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ssManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(ssManagerProxy, nullptr);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ssManagerProxy->GetMainWindowSnapshot(windowIds, configs, callback));
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ssManagerProxy->GetMainWindowSnapshot(windowIds, configs, callback));
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ssManagerProxy->GetMainWindowSnapshot(windowIds, configs, callback));
+    MockMessageParcel::SetWriteBoolErrorFlag(false);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ssManagerProxy->GetMainWindowSnapshot(windowIds, configs, nullptr));
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ssManagerProxy->GetMainWindowSnapshot(windowIds, configs, callback));
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ssManagerProxy->GetMainWindowSnapshot(windowIds, configs, callback));
+    MockMessageParcel::ClearAllErrorFlag();
+}
+ 
+/**
+ * @tc.name: GetMainWindowSnapshot01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyLifecycleTest, GetMainWindowSnapshot01, TestSize.Level1)
+{
+    sptr<MockIRemoteObject> iRemoteObjectMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SceneSessionManagerProxy> ssManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(ssManagerProxy, nullptr);
+    std::vector<int32_t> windowIds;
+    WindowSnapshotConfiguration configs;
+    configs.useCache = true;
+    sptr<IRemoteObject> callback = sptr<IRemoteObjectMocker>::MakeSptr();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    MockMessageParcel::SetWriteBoolErrorFlag(false);
+ 
+    iRemoteObjectMocker->SetRequestResult(ERR_INVALID_DATA);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ssManagerProxy->GetMainWindowSnapshot(windowIds, configs, callback));
+    iRemoteObjectMocker->SetRequestResult(ERR_NONE);
+ 
+    MockMessageParcel::SetWriteRemoteObjectErrorFlag(true);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ssManagerProxy->GetMainWindowSnapshot(windowIds, configs, callback));
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ssManagerProxy->GetMainWindowSnapshot(windowIds, configs, nullptr));
+    MockMessageParcel::SetWriteRemoteObjectErrorFlag(false);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ssManagerProxy->GetMainWindowSnapshot(windowIds, configs, callback));
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ssManagerProxy->GetMainWindowSnapshot(windowIds, configs, nullptr));
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

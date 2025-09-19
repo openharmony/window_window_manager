@@ -10120,8 +10120,13 @@ DMError ScreenSessionManager::GetDisplayCapability(std::string& capabilitInfo)
         return GetSuperFoldCapability(capabilitInfo);
     }
 
+    bool isWidthGreaterThanHeight = false;
+    auto displayInfo = GetDefaultDisplayInfo();
+    if (displayInfo != nullptr && (displayInfo->GetWidth() > displayInfo->GetHeight())) {
+        isWidthGreaterThanHeight = true;
+    }
     std::vector<std::string> orientation = ORIENTATION_DEFAULT;
-    if (g_isPcDevice && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+    if ((g_isPcDevice && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) || isWidthGreaterThanHeight) {
         orientation = {"1", "0", "3", "2"};
     }
     nlohmann::ordered_json jsonDisplayCapabilityList;
@@ -10890,6 +10895,36 @@ sptr<DisplayInfo> ScreenSessionManager::GetPrimaryDisplayInfo()
     } else {
         TLOGE(WmsLogTag::DMS, "failed");
         return nullptr;
+    }
+}
+
+DisplayId ScreenSessionManager::GetPrimaryDisplayId()
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied! calling: %{public}s, pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(),IPCSkeleton::GetCallingPid());
+        return SCREEN_ID_INVALID;
+    }
+    sptr<ScreenSession> screenSession = nullptr;
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        for (auto sessionIt : screenSessionMap_) {
+            sptr<ScreenSession> session = sessionIt.second;
+            if (session == nullptr) {
+                TLOGE(WmsLogTag::DMS, "screenSession is nullptr!");
+                continue;
+            }
+            if (!session->GetIsExtend()) {
+                TLOGD(WmsLogTag::DMS, "find primary %{public}" PRIu64, session->screenId_);
+                screenSession = session;
+                break;
+            }
+        }
+    }
+    if (screenSession && screenSession->IsScreenAvailable()) {
+        return screenSession->GetDisplayId();
+    } else {
+        return SCREEN_ID_INVALID;
     }
 }
 

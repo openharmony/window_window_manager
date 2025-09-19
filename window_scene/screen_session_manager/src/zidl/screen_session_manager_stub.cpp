@@ -1206,6 +1206,11 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteParcelable(info);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_PRIMARY_DISPLAY_ID: {
+            auto info = GetPrimaryDisplayId();
+            reply.WriteUint64(info);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_SNAPSHOT_WITH_OPTION: {
             ProcGetDisplaySnapshotWithOption(data, reply);
             break;

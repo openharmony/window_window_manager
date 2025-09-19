@@ -230,6 +230,7 @@ public:
     std::vector<std::shared_ptr<Media::PixelMap>> GetDisplayHDRSnapshotWithOption(const CaptureOption& captureOption,
         DmErrorCode& errorCode) override;
     sptr<DisplayInfo> GetPrimaryDisplayInfo() override;
+    DisplayId GetPrimaryDisplayId() override;
     ScreenCombination GetScreenCombination(ScreenId screenId) override;
     DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable) override;
     bool GetIsRealScreen(ScreenId screenId) override;
