@@ -51,6 +51,7 @@ const std::string WINDOW_RECT_CHANGE_CB = "windowRectChange";
 const std::string SUB_WINDOW_CLOSE_CB = "subWindowClose";
 const std::string WINDOW_STAGE_CLOSE_CB = "windowStageClose";
 const std::string WINDOW_STAGE_LIFECYCLE_EVENT_CB = "windowStageLifecycleEvent";
+const std::string WINDOW_ROTATION_CHANGE_CB = "windowRotationChange";
 
 class AniWindowListener : public IWindowChangeListener,
                         public ISystemBarChangedListener,
@@ -70,7 +71,8 @@ class AniWindowListener : public IWindowChangeListener,
                         public IWindowRectChangeListener,
                         public IMainWindowCloseListener,
                         public ISubWindowCloseListener,
-                        public IWindowStageLifeCycle {
+                        public IWindowStageLifeCycle,
+                        public IWindowRotationChangeListener {
 public:
     AniWindowListener(ani_env* env, ani_ref callback, CaseType caseType)
         : env_(env), aniCallBack_(callback), caseType_(caseType),
@@ -107,6 +109,8 @@ public:
     void OnRectChange(Rect rect, WindowSizeChangeReason reason) override;
     void OnSubWindowClose(bool& terminateCloseProcess) override;
     void OnMainWindowClose(bool& terminateCloseProcess) override;
+    void OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
+        RotationChangeResult& rotationChangeResult) override;
 
     void AfterLifecycleForeground() override;
     void AfterLifecycleBackground() override;

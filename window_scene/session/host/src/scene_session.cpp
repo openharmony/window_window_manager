@@ -2764,7 +2764,7 @@ std::optional<ExtensionWindowEventInfo> SceneSession::GetLastModalUIExtensionEve
 
 Vector2f SceneSession::GetSessionGlobalPosition(bool useUIExtension)
 {
-    WSRect windowRect = GetSessionGlobalRect();
+    WSRect windowRect = GetSessionGlobalRectInMultiScreen();
     if (useUIExtension) {
         if (auto modalUIExtensionEventInfo = GetLastModalUIExtensionEventInfo()) {
             const auto& rect = modalUIExtensionEventInfo.value().windowRect;
@@ -3977,8 +3977,11 @@ bool SceneSession::DragResizeWhenEndFilter(SizeChangeReason reason)
         if (reason == SizeChangeReason::DRAG) {
             HandleMoveDragEvent(reason);
         } else {
-            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "trigger client rect change by scb");
+            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "trigger client rect change by scb, "
+                "isPcOrPcMode: %{public}d", systemConfig_.IsPcWindow());
             WSRect relativeRect = moveDragController_->GetTargetRect(
+                (systemConfig_.IsPcWindow() && GetDragResizeTypeDuringDrag() == DragResizeType::RESIZE_WHEN_DRAG_END) ?
+                MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY :
                 MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY);
             HandleMoveDragEnd(relativeRect, reason);
             SetUIFirstSwitch(RSUIFirstSwitch::NONE);
