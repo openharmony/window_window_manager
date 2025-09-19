@@ -1647,8 +1647,6 @@ HWTEST_F(SceneSessionManagerTest9, SetSkipEventOnCastPlusInner01, TestSize.Level
     ssm_->SetSkipEventOnCastPlusInner(sceneSession->GetPersistentId(), false);
     EXPECT_EQ(false, sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus()); 
 }
-
-
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
