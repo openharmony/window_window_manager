@@ -47,12 +47,12 @@ DMError BaseAdapter::ConvertToDMError(ErrCode errCode, int32_t dmError)
     return static_cast<DMError>(dmError);
 }
 
-sptr<DisplayInfo> DisplayManagerAdapter::GetDefaultDisplayInfo()
+sptr<DisplayInfo> DisplayManagerAdapter::GetDefaultDisplayInfo(int32_t userId)
 {
     INIT_PROXY_CHECK_RETURN(nullptr);
 
     if (screenSessionManagerServiceProxy_) {
-        return screenSessionManagerServiceProxy_->GetDefaultDisplayInfo();
+        return screenSessionManagerServiceProxy_->GetDefaultDisplayInfo(userId);
     }
 
     sptr<DisplayInfo> displayInfo;
@@ -970,13 +970,13 @@ sptr<ScreenInfo> ScreenManagerAdapter::GetScreenInfo(ScreenId screenId)
     return screenInfo;
 }
 
-std::vector<DisplayId> DisplayManagerAdapter::GetAllDisplayIds()
+std::vector<DisplayId> DisplayManagerAdapter::GetAllDisplayIds(int32_t userId)
 {
     TLOGD(WmsLogTag::DMS, "enter");
     INIT_PROXY_CHECK_RETURN(std::vector<DisplayId>());
 
     if (screenSessionManagerServiceProxy_) {
-        return screenSessionManagerServiceProxy_->GetAllDisplayIds();
+        return screenSessionManagerServiceProxy_->GetAllDisplayIds(userId);
     }
 
     std::vector<DisplayId> displayIds;
