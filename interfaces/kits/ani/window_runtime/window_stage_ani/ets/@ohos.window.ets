@@ -1531,6 +1531,7 @@ export class WindowInternal implements Window {
     private native getUIContextSync(nativeObj: long): UIContext;
     private native getWindowAvoidAreaSync(nativeObj: long, type: int): AvoidArea;
     private native setWaterMarkFlagSync(nativeObj: long, enable: boolean): void;
+    private native setWindowFocusableSync(nativeObj: long, isFocusable: boolean): void;
     private native setContentAspectRatio(
       nativeObj: long, ratio: number, isPersistent: boolean, needUpdateRect: boolean): void;
     private native onSync(nativeObj: long, type: string, callback: object): void;
@@ -1977,6 +1978,28 @@ export class WindowInternal implements Window {
       });
     }
 
+    public setWindowFocusable(isFocusable: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setWindowFocusableSync(this.nativeObj, isFocusable);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public setWindowFocusable(isFocusable: boolean, callback: AsyncCallback<void>): void {
+      taskpool.execute((): void => {
+        this.setWindowFocusableSync(this.nativeObj, isFocusable);
+      }).then((ret: NullishType) => {
+        callback(new BusinessError(), undefined);
+      }).catch((err: NullishType) => {
+        callback(err as BusinessError, undefined);
+      });
+    }
+
     public setContentAspectRatio(ratio: number, isPersistent?: boolean, needUpdateRect?: boolean): Promise<void> {
       return new Promise<void>(
         (resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
@@ -2043,6 +2066,8 @@ export interface Window {
     getWindowAvoidArea(type: AvoidAreaType): AvoidArea;
     setWaterMarkFlag(enable: boolean): Promise<void>;
     setWaterMarkFlag(enable: boolean, callback: AsyncCallback<void>): void;
+    setWindowFocusable(isFocusable: boolean): Promise<void>;
+    setWindowFocusable(isFocusable: boolean, callback: AsyncCallback<void>): void;
     setContentAspectRatio(ratio: number, isPersistent?: boolean, needUpdateRect?: boolean): Promise<void>;
     opacity(opacity: double): void;
     scale(scaleOptions: ScaleOptions): void;
@@ -2063,6 +2088,7 @@ export function setNativeObj(nativeObject: long):void {
 }
 
 native function getLastWindowSync(nativeObj: long, ctx: BaseContext): Window;
+native function shiftAppWindowFocusSync(nativeObj: long, sourceWindowId: int, targetWindowId: int): void;
 
 export function getLastWindow(ctx: BaseContext): Promise<Window> {
   return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void ) => {
@@ -2085,6 +2111,18 @@ export function getLastWindow(ctx: BaseContext, callback: AsyncCallback<Window>)
         callback(err as BusinessError, new WindowInternal());
     });
 }
+
+export function shiftAppWindowFocus(sourceWindowId: int, targetWindowId: int): Promise<void> {
+  return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+      taskpool.execute((): void => {
+          return shiftAppWindowFocusSync(nativeObj, sourceWindowId, targetWindowId);
+      }).then((ret: NullishType) => {
+          resolve(undefined);
+      }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+      });
+  });
+} 
 
 export interface MainWindowInfo {
   displayId: number;
