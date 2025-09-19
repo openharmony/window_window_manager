@@ -261,21 +261,21 @@ void AniWindow::OnSetWaterMarkFlag(ani_env* env, ani_boolean enable)
 
 void AniWindow::SetWindowFocusable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isFocusable)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_FOCUS, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow != nullptr) {
         aniWindow->OnSetWindowFocusable(env, isFocusable);
     } else {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
+        TLOGE(WmsLogTag::WMS_FOCUS, "[ANI] aniWindow is nullptr");
     }
 }
 
 void AniWindow::OnSetWindowFocusable(ani_env* env, ani_boolean isFocusable)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_FOCUS, "[ANI]");
     auto window = GetWindow();
     if (window == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] window is nullptr");
+        TLOGE(WmsLogTag::WMS_FOCUS, "[ANI] window is nullptr");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
