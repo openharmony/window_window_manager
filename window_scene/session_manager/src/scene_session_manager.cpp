@@ -123,6 +123,7 @@ const int32_t MAX_SESSION_LIMIT_ALL_APP = 512;
 
 constexpr int WINDOW_NAME_MAX_WIDTH = 21;
 constexpr int DISPLAY_NAME_MAX_WIDTH = 10;
+constexpr int32_t ZERO_NUMBER = 0;
 constexpr int32_t DIFF_NUMBER = 1;
 constexpr int VALUE_MAX_WIDTH = 5;
 constexpr int MAX_RESEND_TIMES = 6;
@@ -326,29 +327,32 @@ public:
     }
 };
 
-bool IsAINavigationBarAttachedToBottom(AvoidArea& avoidArea, const Rect& avoidRect, int32_t sessionBottom)
+// tanhong
+void UpdateAINavigationBarAvoidAreaToBottomRect(AvoidArea& avoidArea, const Rect& avoidRect)
 {
-    if (std::abs(avoidRect.posY_ + static_cast<int32_t>(avoidRect.height_) - sessionBottom) <= DIFF_NUMBER) {
-        AvoidArea avoidAreaEmpty;
-        avoidArea = avoidAreaEmpty;
-        avoidArea.bottomRect_ = avoidRect;
-        return true;
+    if (avoidRect.posX_ == ZERO_NUMBER && avoidRect.posY_ == ZERO_NUMBER &&
+        avoidRect.width_ == ZERO_NUMBER && avoidRect.height_ == ZERO_NUMBER) {
+        return;
     }
-    return false;
+    AvoidArea avoidAreaEmpty;
+    avoidArea = avoidAreaEmpty;
+    avoidArea.bottomRect_ = avoidRect;
 }
 
 bool CheckAvoidAreaForAINavigationBar(bool isVisible, AvoidArea& avoidArea, int32_t sessionBottom)
 {
     if (!avoidArea.topRect_.IsUninitializedRect() || !avoidArea.leftRect_.IsUninitializedRect() ||
         !avoidArea.rightRect_.IsUninitializedRect()) {
-        return (IsAINavigationBarAttachedToBottom(avoidArea, avoidArea.topRect_, sessionBottom) ||
-                IsAINavigationBarAttachedToBottom(avoidArea, avoidArea.leftRect_, sessionBottom) ||
-                IsAINavigationBarAttachedToBottom(avoidArea, avoidArea.rightRect_, sessionBottom)) && isVisible;
+        UpdateAINavigationBarAvoidAreaToBottomRect(avoidArea, avoidArea.topRect_);
+        UpdateAINavigationBarAvoidAreaToBottomRect(avoidArea, avoidArea.leftRect_);
+        UpdateAINavigationBarAvoidAreaToBottomRect(avoidArea, avoidArea.rightRect_);
     }
     if (avoidArea.bottomRect_.IsUninitializedRect()) {
         return true;
     }
-    return IsAINavigationBarAttachedToBottom(avoidArea, avoidArea.bottomRect_, sessionBottom) && isVisible;;
+    bool isAttachedToBottom = 
+        std::abs(avoidRect.posY_ + static_cast<int32_t>(avoidRect.height_) - sessionBottom) <= DIFF_NUMBER;
+    return isAttachedToBottom && isVisible;
 }
 
 enum class UpdateStartingWindowColorCacheResult : uint32_t {

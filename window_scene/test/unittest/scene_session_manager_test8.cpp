@@ -1403,7 +1403,7 @@ HWTEST_F(SceneSessionManagerTest8, CheckAvoidAreaForAINavigationBar, TestSize.Le
     EXPECT_EQ(CheckAvoidAreaForAINavigationBar(isVisible, avoidArea, sessionBottom), true);
     avoidArea.topRect_ = { 600, 2710, 500, 10 };
     EXPECT_EQ(CheckAvoidAreaForAINavigationBar(isVisible, avoidArea, sessionBottom), false);
-    avoidArea.topRect_ = { 0, 0, 0, 10 };
+    avoidArea.topRect_ = { 0, 0, 0, 0 };
     avoidArea.leftRect_ = { 600, 2710, 500, 10 };
     isVisible = true;
     EXPECT_EQ(CheckAvoidAreaForAINavigationBar(isVisible, avoidArea, sessionBottom), true);
@@ -1411,23 +1411,24 @@ HWTEST_F(SceneSessionManagerTest8, CheckAvoidAreaForAINavigationBar, TestSize.Le
     avoidArea.rightRect_ = { 600, 2710, 500, 10 };
     EXPECT_EQ(CheckAvoidAreaForAINavigationBar(isVisible, avoidArea, sessionBottom), true);
     avoidArea.rightRect_ = { 0, 0, 0, 0 };
-    avoidArea.bottomRect_ = { 600, 2710, 500, 10 };
+    avoidArea.bottomRect_ = { 600, 2710, 500, 100 };
     EXPECT_EQ(CheckAvoidAreaForAINavigationBar(isVisible, avoidArea, sessionBottom), false);
 }
 
 /**
- * @tc.name: IsAINavigationBarAttachedToBottom
- * @tc.desc: test function : IsAINavigationBarAttachedToBottom
+ * @tc.name: UpdateAINavigationBarAvoidAreaToBottomRect
+ * @tc.desc: test function : UpdateAINavigationBarAvoidAreaToBottomRect
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, IsAINavigationBarAttachedToBottom, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest8, UpdateAINavigationBarAvoidAreaToBottomRect, TestSize.Level1)
 {
     AvoidArea avoidArea;
     Rect avoidRect = { 600, 2710, 500, 10 };
-    int32_t sessionBottom = 2720;
-    EXPECT_EQ(IsAINavigationBarAttachedToBottom(avoidArea, avoidRect, sessionBottom), true);
-    avoidRect = { 600, 2710, 500, 8 };
-    EXPECT_EQ(IsAINavigationBarAttachedToBottom(avoidArea, avoidRect, sessionBottom), false);
+    UpdateAINavigationBarAvoidAreaToBottomRect(avoidArea, avoidRect);
+    EXPECT_EQ(avoidArea.bottomRect_, avoidRect);
+    avoidRect = { 0, 0, 0, 0 };
+    UpdateAINavigationBarAvoidAreaToBottomRect(avoidArea, avoidRect);
+    EXPECT_EQ(avoidArea.bottomRect_, avoidRect);
 }
 
 /**
