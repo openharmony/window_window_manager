@@ -484,7 +484,7 @@ ohos_unittest("ws_scene_session_manager_lifecycle_test2") {
 
   sources = [
     "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
-    "scene_session_manager_lifecycle_test2.cpp"
+    "scene_session_manager_lifecycle_test2.cpp",
   ]
 
   cflags_cc = [ "-Wno-thread-safety" ]
@@ -508,7 +508,7 @@ ohos_unittest("ws_scene_session_manager_proxy_lifecycle_test") {
 
   sources = [
     "../mock/mock_message_parcel.cpp",
-    "scene_session_manager_proxy_lifecycle_test.cpp"
+    "scene_session_manager_proxy_lifecycle_test.cpp",
   ]
 
   deps = [ ":ws_unittest_common" ]
