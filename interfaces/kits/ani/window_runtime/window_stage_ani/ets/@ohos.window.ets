@@ -591,6 +591,16 @@ export enum ModalityType {
     APPLICATION_MODALITY = 1
 }
 
+export enum RotationChangeType {
+  WINDOW_WILL_ROTATE = 0,
+  WINDOW_DID_ROTATE = 1
+}
+
+export enum RectType {
+  RELATIVE_TO_SCREEN = 0,
+  RELATIVE_TO_PARENT_WINDOW = 1
+}
+
 export interface SystemBarProperties {
     /**
      * The color of the status bar.
@@ -1005,6 +1015,260 @@ export interface WindowProperties {
     displayId: number;
 }
 
+/**
+  * Describes the scale options of window
+  *
+  * @interface ScaleOptions
+  * @syscap SystemCapability.WindowManager.WindowManager.Core
+  * @systemapi
+  * @since 9
+  */
+export interface ScaleOptions {
+  /**
+    * The scale param of x direction. Default is 1.f
+    *
+    * @type { ?double }
+    * @syscap SystemCapability.WindowManager.WindowManager.Core
+    * @systemapi
+    * @since 9
+    */
+  x?: double;
+
+  /**
+    * The scale param of y direction. Default is 1.f
+    *
+    * @type { ?double }
+    * @syscap SystemCapability.WindowManager.WindowManager.Core
+    * @systemapi
+    * @since 9
+    */
+  y?: double;
+
+  /**
+    * The scale param of pivot point of x. Default is 0.5f, Interval is 0.f - 1.f
+    *
+    * @type { ?double }
+    * @syscap SystemCapability.WindowManager.WindowManager.Core
+    * @systemapi
+    * @since 9
+    */
+  pivotX?: double;
+
+  /**
+    * The scale param of pivot point of y. Default is 0.5f, Interval is 0.f - 1.f
+    *
+    * @type { ?double }
+    * @syscap SystemCapability.WindowManager.WindowManager.Core
+    * @systemapi
+    * @since 9
+    */
+  pivotY?: double;
+}
+
+export class ScaleOptionsInternal implements ScaleOptions {
+  x?: double;
+  y?: double;
+  pivotX?: double;
+  pivotY?: double;
+}
+
+/**
+  * Describes the rotate options of window
+  *
+  * @interface RotateOptions
+  * @syscap SystemCapability.WindowManager.WindowManager.Core
+  * @systemapi
+  * @since 9
+  */
+export interface RotateOptions {
+  /**
+    * The rotate degree of x direction. Default value is 0.f
+    *
+    * @type { ?double }
+    * @syscap SystemCapability.WindowManager.WindowManager.Core
+    * @systemapi
+    * @since 9
+    */
+  x?: double;
+
+  /**
+    * The rotate degree of y direction. Default value is 0.f
+    *
+    * @type { ?double }
+    * @syscap SystemCapability.WindowManager.WindowManager.Core
+    * @systemapi
+    * @since 9
+    */
+  y?: double;
+
+  /**
+    * The rotate degree of z direction. Default value is 0.f
+    *
+    * @type { ?double }
+    * @syscap SystemCapability.WindowManager.WindowManager.Core
+    * @systemapi
+    * @since 9
+    */
+  z?: double;
+
+  /**
+    * The param of pivot point of x. Default is 0.5f, Interval is 0.f - 1.f
+    *
+    * @type { ?double }
+    * @syscap SystemCapability.WindowManager.WindowManager.Core
+    * @systemapi
+    * @since 9
+    */
+  pivotX?: double;
+
+  /**
+    * The param of pivot point of y. Default is 0.5f, Interval is 0.f - 1.f
+    *
+    * @type { ?double }
+    * @syscap SystemCapability.WindowManager.WindowManager.Core
+    * @systemapi
+    * @since 9
+    */
+  pivotY?: double;
+}
+
+export class RotateOptionsInternal implements RotateOptions {
+  x?: double;
+  y?: double;
+  z?: double;
+  pivotX?: double;
+  pivotY?: double;
+}
+
+/**
+  * Describes the translate options of windows
+  *
+  * @interface TranslateOptions
+  * @syscap SystemCapability.WindowManager.WindowManager.Core
+  * @systemapi
+  * @since 9
+  */
+export interface TranslateOptions {
+  /**
+    * The translate pixel param of x direction. Default is 0.f
+    *
+    * @type { ?double }
+    * @syscap SystemCapability.WindowManager.WindowManager.Core
+    * @systemapi
+    * @since 9
+    */
+  x?: double;
+
+  /**
+    * The translate pixel param of y direction. Default is 0.f
+    *
+    * @type { ?double }
+    * @syscap SystemCapability.WindowManager.WindowManager.Core
+    * @systemapi
+    * @since 9
+    */
+  y?: double;
+
+  /**
+    * The translate pixel param of z direction. Default is 0.f
+    *
+    * @type { ?double }
+    * @syscap SystemCapability.WindowManager.WindowManager.Core
+    * @systemapi
+    * @since 9
+    */
+  z?: double;
+}
+
+export class TranslateOptionsInternal implements TranslateOptions {
+  x?: double;
+  y?: double;
+  z?: double;
+}
+
+/**
+ * Rotation change info
+ *
+ * @interface RotationChangeInfo
+ * @syscap SystemCapability.Window.SessionManager
+ * @atomicservice
+ * @since 19
+ */
+export interface RotationChangeInfo {
+  /**
+   * Rotation change type
+   *
+   * @type { RotationChangeType }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 19
+   */
+  type: RotationChangeType;
+  /**
+   * window orientation
+   *
+   * @type { int }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 19
+   */
+  orientation: int;
+  /**
+   * Display id
+   *
+   * @type { long }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 19
+   */
+  displayId: long;
+  /**
+   * Display rect
+   *
+   * @type { Rect }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 19
+   */
+  displayRect: Rect;
+}
+
+export class RotationChangeInfoInternal implements RotationChangeInfo {
+  type: RotationChangeType;
+  orientation: int;
+  displayId: long;
+  displayRect: Rect;
+}
+
+/**
+ * Rotation change result
+ *
+ * @interface RotationChangeResult
+ * @syscap SystemCapability.Window.SessionManager
+ * @atomicservice
+ * @since 19
+ */
+export interface RotationChangeResult {
+  /**
+   * Rect type
+   *
+   * @type { RectType }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 19
+   */
+  rectType: RectType;
+  /**
+   * Window Rect
+   *
+   * @type { Rect }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 19
+   */
+  windowRect: Rect;
+}
+
 export class WindowPropertiesInternal implements WindowProperties {
     windowRect: Rect;
     drawableRect: Rect;
@@ -1406,6 +1670,12 @@ export class WindowInternal implements Window {
     private native setWindowLayoutFullScreen(nativeObj: long, isLayoutFullScreen: boolean): int;
     private native setWindowSystemBarProperties(nativeObj: long, systemBarProperties: SystemBarProperties): int;
     private native setSpecificSystemBarEnabled(nativeObj: long, name: String, enable: boolean, enableAnimation: boolean): int;
+    private native opacity(nativeObj: long, opacity: double): void;
+    private native scale(nativeObj: long, scaleOptions: ScaleOptions): void;
+    private native translate(nativeObj: long, translateOptions: TranslateOptions): void;
+    private native rotate(nativeObj: long, rotateOptions: RotateOptions): void;
+    private native setShadow(nativeObj: long, radius: double, color?: string,
+      offsetX?: double, offsetY?: double): void;
 
     private native setWindowColorSpaceSync(nativeObj: long, colorSpace: int): void;
     private native setPreferredOrientationSync(nativeObj: long, orientation: int): void;
@@ -1418,6 +1688,7 @@ export class WindowInternal implements Window {
     private native getUIContextSync(nativeObj: long): UIContext;
     private native getWindowAvoidAreaSync(nativeObj: long, type: int): AvoidArea;
     private native setWaterMarkFlagSync(nativeObj: long, enable: boolean): void;
+    private native setWindowFocusableSync(nativeObj: long, isFocusable: boolean): void;
     private native setContentAspectRatio(
       nativeObj: long, ratio: number, isPersistent: boolean, needUpdateRect: boolean): void;
     private native onSync(nativeObj: long, type: string, callback: object): void;
@@ -1632,6 +1903,26 @@ export class WindowInternal implements Window {
         });
     }
 
+    public opacity(opacity: double): void {
+      this.opacity(this.nativeObj, opacity);
+    }
+
+    public scale(scaleOptions: ScaleOptions): void {
+      this.scale(this.nativeObj, scaleOptions);
+    }
+
+    public translate(translateOptions: TranslateOptions): void {
+      this.translate(this.nativeObj, translateOptions);
+    }
+
+    public rotate(rotateOptions: RotateOptions): void {
+      this.rotate(this.nativeObj, rotateOptions);
+    }
+
+    public setShadow(radius: double, color?: string, offsetX?: double, offsetY?: double): void {
+      this.setShadow(this.nativeObj, radius, color, offsetX, offsetY);
+    }
+
     public setWindowColorSpace(colorSpace: ColorSpace): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
@@ -1844,6 +2135,28 @@ export class WindowInternal implements Window {
       });
     }
 
+    public setWindowFocusable(isFocusable: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setWindowFocusableSync(this.nativeObj, isFocusable);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public setWindowFocusable(isFocusable: boolean, callback: AsyncCallback<void>): void {
+      taskpool.execute((): void => {
+        this.setWindowFocusableSync(this.nativeObj, isFocusable);
+      }).then((ret: NullishType) => {
+        callback(new BusinessError(), undefined);
+      }).catch((err: NullishType) => {
+        callback(err as BusinessError, undefined);
+      });
+    }
+
     public setContentAspectRatio(ratio: number, isPersistent?: boolean, needUpdateRect?: boolean): Promise<void> {
       return new Promise<void>(
         (resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
@@ -1910,7 +2223,14 @@ export interface Window {
     getWindowAvoidArea(type: AvoidAreaType): AvoidArea;
     setWaterMarkFlag(enable: boolean): Promise<void>;
     setWaterMarkFlag(enable: boolean, callback: AsyncCallback<void>): void;
+    setWindowFocusable(isFocusable: boolean): Promise<void>;
+    setWindowFocusable(isFocusable: boolean, callback: AsyncCallback<void>): void;
     setContentAspectRatio(ratio: number, isPersistent?: boolean, needUpdateRect?: boolean): Promise<void>;
+    opacity(opacity: double): void;
+    scale(scaleOptions: ScaleOptions): void;
+    translate(translateOptions: TranslateOptions): void;
+    rotate(rotateOptions: RotateOptions): void;
+    setShadow(radius: double, color?: string, offsetX?: double, offsetY?: double): void;
     on<T>(type: string, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;
 }
@@ -1926,6 +2246,7 @@ export function setNativeObj(nativeObject: long):void {
 
 native function getLastWindowSync(nativeObj: long, ctx: BaseContext): Window;
 native function createWindowSync(nativeObj: long, config: Configuration): Window;
+native function shiftAppWindowFocusSync(nativeObj: long, sourceWindowId: int, targetWindowId: int): void;
 
 export function getLastWindow(ctx: BaseContext): Promise<Window> {
   return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void ) => {
@@ -1969,6 +2290,18 @@ export function createWindow(config: Configuration, callback: AsyncCallback<Wind
     }).catch((err: NullishType) => {
         callback(err as BusinessError, new WindowInternal());
     });
+}
+
+export function shiftAppWindowFocus(sourceWindowId: int, targetWindowId: int): Promise<void> {
+  return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+      taskpool.execute((): void => {
+          return shiftAppWindowFocusSync(nativeObj, sourceWindowId, targetWindowId);
+      }).then((ret: NullishType) => {
+          resolve(undefined);
+      }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+      });
+  });
 }
 
 export interface MainWindowInfo {

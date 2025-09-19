@@ -30,7 +30,6 @@
 #include "singleton_container.h"
 #include "pixel_map.h"
 #include "../../../../../../wm/include/get_snapshot_callback.h"
-#include "ability_context.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -78,6 +77,31 @@ ani_ref AniWindowManager::OnGetLastWindow(ani_env* env, ani_object aniContext)
     }
     return CreateAniWindowObject(env, window);
 }
+
+
+void AniWindowManager::ShiftAppWindowFocus(ani_env* env, ani_long nativeObj,
+    ani_int sourceWindowId, ani_int targetWindowId)
+{
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    if (aniWindowManager != nullptr) {
+        aniWindowManager->OnShiftAppWindowFocus(env, sourceWindowId, targetWindowId);
+    } else {
+        TLOGE(WmsLogTag::WMS_FOCUS, "[ANI] aniWindowManager is nullptr");
+    }
+}
+
+void AniWindowManager::OnShiftAppWindowFocus(ani_env* env, ani_int sourceWindowId, ani_int targetWindowId)
+{
+    TLOGI(WmsLogTag::WMS_FOCUS, "[ANI] sourceWindowId: %{public}d targetWindowId: %{public}d",
+        static_cast<int32_t>(sourceWindowId), static_cast<int32_t>(targetWindowId));
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+        SingletonContainer::Get<WindowManager>().ShiftAppWindowFocus(sourceWindowId, targetWindowId));
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret, "ShiftAppWindowFocus failed.");
+    }
+    return ;
+}
+
 ani_object AniWindowManager::GetAllMainWindowInfo(ani_env* env, ani_long nativeObj, ani_object context)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "[ANI]");
