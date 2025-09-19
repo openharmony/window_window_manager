@@ -41,6 +41,7 @@ using DestroyScreenSceneFunc = std::function<void()>;
 
 class IScreenChangeListener {
 public:
+    virtual ~IScreenChangeListener() = default;
     virtual void OnConnect(ScreenId screenId) {}
     virtual void OnDisconnect(ScreenId screenId) {}
     virtual void OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
@@ -381,12 +382,14 @@ public:
     void UpdateMirrorHeight(uint32_t mirrorHeight);
 
 private:
+    std::vector<IScreenChangeListener*> GetScreenChangeListenerList() const;
+
     ScreenProperty property_;
     mutable std::mutex propertyMutex_; // above guarded by clientProxyMutex_
     std::shared_ptr<RSDisplayNode> displayNode_;
     ScreenState screenState_ { ScreenState::INIT };
     std::vector<IScreenChangeListener*> screenChangeListenerList_;
-    std::mutex screenChangeListenerListMutex_;
+    mutable std::mutex screenChangeListenerListMutex_;
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
     mutable std::mutex combinationMutex_; // above guarded by clientProxyMutex_
     VirtualScreenFlag screenFlag_ { VirtualScreenFlag::DEFAULT };

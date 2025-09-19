@@ -14,10 +14,13 @@
  */
 
 #include "screen_session.h"
+
 #include <gtest/gtest.h>
-#include "screen_session_manager/include/screen_session_manager.h"
-#include "scene_board_judgement.h"
+#include <gmock/gmock.h>
+
 #include "fold_screen_state_internel.h"
+#include "scene_board_judgement.h"
+#include "screen_session_manager/include/screen_session_manager.h"
 #include "window_manager_hilog.h"
 
 // using namespace FRAME_TRACE;
@@ -34,28 +37,31 @@ namespace {
     g_errLog = msg;
     }
 }
+
 class MockScreenChangeListener : public IScreenChangeListener {
 public:
-    void OnConnect(ScreenId screenId) override {}
-    void OnDisconnect(ScreenId screenId) override {}
-    void OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
-        ScreenId screenId) override {}
-    void OnPowerStatusChange(DisplayPowerEvent event, EventStatus status,
-        PowerStateChangeReason reason) override {}
-    void OnSensorRotationChange(float sensorRotation, ScreenId screenId) override {}
-    void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) override {}
-    void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) override {}
-    void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) override {}
-    void OnHoverStatusChange(int32_t hoverStatus, bool needRotate, ScreenId screenId) override {}
-    void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override {}
-    void OnCameraBackSelfieChange(bool isCameraBackSelfie, ScreenId screenId) override {}
-    void OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus) override {}
-    void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) override {}
-    void OnExtendScreenConnectStatusChange(ScreenId screenId,
-        ExtendScreenConnectStatus extendScreenConnectStatus) override {}
-    void OnBeforeScreenPropertyChange(FoldStatus foldStatus) override {}
-    void OnScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent) override {}
+    MOCK_METHOD(void, OnConnect, (ScreenId screenId), (override));
+    MOCK_METHOD(void, OnDisconnect, (ScreenId screenId), (override));
+    MOCK_METHOD(void, OnPropertyChange,
+        (const ScreenProperty& newProperty, ScreenPropertyChangeReason reason, ScreenId screenId), (override));
+    MOCK_METHOD(void, OnPowerStatusChange,
+        (DisplayPowerEvent event, EventStatus status, PowerStateChangeReason reason), (override));
+    MOCK_METHOD(void, OnSensorRotationChange, (float sensorRotation, ScreenId screenId), (override));
+    MOCK_METHOD(void, OnScreenOrientationChange, (float screenOrientation, ScreenId screenId), (override));
+    MOCK_METHOD(void, OnScreenRotationLockedChange, (bool isLocked, ScreenId screenId), (override));
+    MOCK_METHOD(void, OnScreenExtendChange, (ScreenId mainScreenId, ScreenId extendScreenId), (override));
+    MOCK_METHOD(void, OnHoverStatusChange, (int32_t hoverStatus, bool needRotate, ScreenId screenId), (override));
+    MOCK_METHOD(void, OnScreenCaptureNotify,
+        (ScreenId mainScreenId, int32_t uid, const std::string& clientName), (override));
+    MOCK_METHOD(void, OnCameraBackSelfieChange, (bool isCameraBackSelfie, ScreenId screenId), (override));
+    MOCK_METHOD(void, OnSuperFoldStatusChange, (ScreenId screenId, SuperFoldStatus superFoldStatus), (override));
+    MOCK_METHOD(void, OnSecondaryReflexionChange, (ScreenId screenId, bool isSecondaryReflexion), (override));
+    MOCK_METHOD(void, OnExtendScreenConnectStatusChange,
+        (ScreenId screenId, ExtendScreenConnectStatus extendScreenConnectStatus), (override));
+    MOCK_METHOD(void, OnBeforeScreenPropertyChange, (FoldStatus foldStatus), (override));
+    MOCK_METHOD(void, OnScreenModeChange, (ScreenModeChangeEvent screenModeChangeEvent), (override));
 };
+
 class ScreenSessionTest : public testing::Test {
   public:
     void TearDown() override;
@@ -4552,6 +4558,60 @@ HWTEST_F(ScreenSessionTest, GetScreenSnapshotWithAllWindows02, TestSize.Level2)
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     pixelMap = screenSession->GetScreenSnapshotWithAllWindows(scaleX, scaleY, isNeedCheckDrmAndSurfaceLock);
     EXPECT_EQ(pixelMap, nullptr);
+}
+
+/**
+ * @tc.name: TestPropertyChangeAllCases
+ * @tc.desc: Verify PropertyChange behavior for multiple scenarios
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, TestPropertyChangeAllCases, TestSize.Level1)
+{
+    ScreenId screenId = 10000;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
+
+    // Case 1: reason = VIRTUAL_PIXEL_RATIO_CHANGE -> no listener call
+    {
+        auto listener = std::make_unique<MockScreenChangeListener>();
+        EXPECT_CALL(*listener, OnPropertyChange(_, _, _)).Times(0);
+
+        session->screenChangeListenerList_.push_back(listener.get());
+        session->PropertyChange(screenProperty, ScreenPropertyChangeReason::VIRTUAL_PIXEL_RATIO_CHANGE);
+        session->screenChangeListenerList_.clear();
+    }
+
+    // Case 2: listener list is empty -> early return
+    {
+        session->PropertyChange(screenProperty, ScreenPropertyChangeReason::UNDEFINED);
+        SUCCEED();
+    }
+
+    // Case 3: listener list contains nullptr -> skip safely
+    {
+        auto reason = ScreenPropertyChangeReason::UNDEFINED;
+        auto listener = std::make_unique<MockScreenChangeListener>();
+        EXPECT_CALL(*listener, OnPropertyChange(_, reason, screenId)).Times(1);
+
+        session->screenChangeListenerList_.push_back(nullptr);
+        session->screenChangeListenerList_.push_back(listener.get());
+        session->PropertyChange(screenProperty, reason);
+        session->screenChangeListenerList_.clear();
+    }
+
+    // Case 4: normal case -> all valid listeners should be called
+    {
+        auto reason = ScreenPropertyChangeReason::UNDEFINED;
+        auto listener1 = std::make_unique<MockScreenChangeListener>();
+        auto listener2 = std::make_unique<MockScreenChangeListener>();
+        EXPECT_CALL(*listener1, OnPropertyChange(_, reason, screenId)).Times(1);
+        EXPECT_CALL(*listener2, OnPropertyChange(_, reason, screenId)).Times(1);
+
+        session->screenChangeListenerList_.push_back(listener1.get());
+        session->screenChangeListenerList_.push_back(listener2.get());
+        session->PropertyChange(screenProperty, reason);
+        session->screenChangeListenerList_.clear();
+    }
 }
 } // namespace
 } // namespace Rosen
