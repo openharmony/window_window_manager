@@ -17024,18 +17024,24 @@ WMError SceneSessionManager::MinimizeAllAppWindows(DisplayId displayId)
         TLOGE(WmsLogTag::WMS_LIFE, "Device not support!");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (const auto& iter : sceneSessionMap_) {
-        auto& session = iter.second;
-        if (session == nullptr) {
-            TLOGW(WmsLogTag::WMS_LIFE, "Scene session nullptr, persistentId: %{public}d", iter.first);
-            continue;
+
+    const char* const where = __func__;
+    taskScheduler_->PostAsyncTask([this, displayId, where] {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& iter : sceneSessionMap_) {
+            auto& session = iter.second;
+            if (session == nullptr) {
+                TLOGW(WmsLogTag::WMS_LIFE, "%{public}s Scene session nullptr, persistentId: %{public}d", where,
+                    iter.first);
+                continue;
+            }
+            if (displayId == session->GetScreenId() && WindowHelper::IsMainWindow(session->GetWindowType())) {
+                session->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
+                TLOGI(WmsLogTag::WMS_LIFE, "%{public}s Id: %{public}d has minimized window.", where,
+                    session->GetPersistentId());
+            }
         }
-        if (displayId == session->GetScreenId() && WindowHelper::IsMainWindow(session->GetWindowType())) {
-            session->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
-            TLOGI(WmsLogTag::WMS_LIFE, "Id: %{public}d has minimized window.", session->GetPersistentId());
-        }
-    }
+    }, __func__);
     return WMError::WM_OK;
 }
 
