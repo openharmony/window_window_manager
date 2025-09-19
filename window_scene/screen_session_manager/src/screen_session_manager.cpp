@@ -206,7 +206,7 @@ constexpr uint32_t EXPECT_DISPLAY_MODE_CORRECTION_SIZE = 2;
 constexpr int32_t PARAM_NUM_TEN = 10;
 
 constexpr int32_t COLD_SWITCH_ANIMATE_TIMEOUT_MILLISECONDS = 3000;
-constexpr int32_t HOT_SWITCH_ANIMATE_TIMEOUT_MILLISECONDS = 1200;
+constexpr int32_t HOT_SWITCH_ANIMATE_TIMEOUT_MILLISECONDS = 600;
 
 constexpr float POSITION_Z_DEFAULT = 2.0f;
 constexpr float POSITION_Z_HIGH = 3.0f;
@@ -8975,7 +8975,6 @@ void ScreenSessionManager::RecoverMultiScreenModeWhenSwitchUser(std::vector<int3
             extendScreenConnected = true;
             extendScreenId = screenId;
             RecoverMultiScreenMode(screenSession);
-            FlushDisplayNodeWhenSwtichUser(oldScbPids, newScbPid, screenSession);
         } else if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL &&
             !screenSession->GetIsExtend()) {
             SetExtendedScreenFallbackPlan(screenId);
@@ -8988,20 +8987,6 @@ void ScreenSessionManager::RecoverMultiScreenModeWhenSwitchUser(std::vector<int3
             OnExtendScreenConnectStatusChange(extendScreenId, ExtendScreenConnectStatus::DISCONNECT);
         }
     }
-}
-
-void ScreenSessionManager::FlushDisplayNodeWhenSwtichUser(std::vector<int32_t> oldScbPids, int32_t newScbPid,
-    sptr<ScreenSession> screenSession)
-{
-    {
-        auto displayNode = screenSession->GetDisplayNode();
-        if (displayNode == nullptr) {
-            TLOGE(WmsLogTag::DMS, "display node is null");
-            return;
-        }
-        displayNode->SetScbNodePid(oldScbPids, newScbPid);
-    }
-    RSTransactionAdapter::FlushImplicitTransaction(screenSession->GetRSUIContext());
 }
 
 bool ScreenSessionManager::HandleSwitchPcMode()
