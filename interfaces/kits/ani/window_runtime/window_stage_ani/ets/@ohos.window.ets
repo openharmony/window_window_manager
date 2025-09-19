@@ -1135,6 +1135,137 @@ export interface WindowLimits {
     minHeight: number;
 }
 
+/**
+ * Configuration parameters for window creation.
+ *
+ * @interface Configuration
+ * @syscap SystemCapability.WindowManager.WindowManager.Core
+ * @since 9
+ */
+/**
+ * Configuration parameters for window creation.
+ *
+ * @interface Configuration
+ * @syscap SystemCapability.WindowManager.WindowManager.Core
+ * @atomicservice
+ * @since 12
+ */
+export interface Configuration {
+    /**
+     * Indicates window id.
+     *
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 9
+     */
+    /**
+     * Indicates window id.
+     *
+     * @type { string }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    name: string;
+
+    /**
+     * Indicates window type
+     *
+     * @type { WindowType }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 9
+     */
+    /**
+     * Indicates window type
+     *
+     * @type { WindowType }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    windowType: WindowType;
+
+    /**
+     * Indicates window context.
+     *
+     * @type { ?BaseContext }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 9
+     */
+    /**
+     * Indicates window context.
+     *
+     * @type { ?BaseContext }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    ctx?: BaseContext;
+
+    /**
+     * Indicates display id.
+     *
+     * @type { ?number }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 9
+     */
+    /**
+     * Indicates display id.
+     *
+     * @type { ?long }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    displayId?: long;
+
+    /**
+     * Indicates parent window id
+     *
+     * @type { ?int }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 9
+     */
+    /**
+     * Indicates parent window id
+     *
+     * @type { ?int }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    parentId?: int;
+
+    /**
+     * Indicates whether enable window decor, only support dialog, the default value is false.
+     *
+     * @type { ?boolean }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 12
+     */
+    decorEnabled?: boolean;
+
+    /**
+     * Indicates dialog window title when decor enabled.
+     *
+     * @type { ?string }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 12
+     */
+    title?: string;
+}
+
+export class ConfigurationInternal implements Configuration {
+    name: string;
+    windowType: WindowType;
+    ctx?: BaseContext;
+    displayId?: long;
+    parentId?: int;
+    decorEnabled?: boolean;
+    title?: string;
+}
+
 export class WindowStageInternal implements WindowStage {
     static { loadLibrary('windowstageani_kit.z') }
 
@@ -1147,6 +1278,7 @@ export class WindowStageInternal implements WindowStage {
     public native disableWindowDecorSync(nativeObj:long): void;
     public native setShowOnLockScreenSync(nativeObj:long, showOnLockScreen: boolean): void;
     public native getMainWindowSync(nativeObj: long): Window;
+    public native createSubWindowSync(nativeObj: long, name: String): Window;
 
     public loadContent(path: string, storage: LocalStorage, callback: AsyncCallback<void>): void {
       try {
@@ -1212,6 +1344,29 @@ export class WindowStageInternal implements WindowStage {
         }).catch((err: NullishType) => {
         });
     }
+
+    public createSubWindow(name: string): Promise<Window> {
+        return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void) => {
+            taskpool.execute((): Window => {
+                let window = this.createSubWindowSync(this.nativeObj, name);
+                return window;
+            }).then((ret: NullishType) => {
+                resolve(ret as Window);
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
+    public createSubWindow(name: string, callback: AsyncCallback<Window>): void {
+        taskpool.execute((): Window => {
+            let res = this.createSubWindowSync(this.nativeObj, name);
+            return res;
+        }).then((ret: NullishType) => {
+            callback(new BusinessError(), ret as Window);
+        }).catch((err: NullishType) => {
+        });
+    }
 }
 
 export interface WindowStage {
@@ -1223,6 +1378,8 @@ export interface WindowStage {
     getMainWindow(callback: AsyncCallback<Window>): void;
     disableWindowDecor(): void;
     setShowOnLockScreen(showOnLockScreen: boolean): void;
+    createSubWindow(name: string): Promise<Window>;
+    createSubWindow(name: string, callback: AsyncCallback<Window>): void;
 }
 
 export class WindowInternal implements Window {
@@ -1768,6 +1925,7 @@ export function setNativeObj(nativeObject: long):void {
 }
 
 native function getLastWindowSync(nativeObj: long, ctx: BaseContext): Window;
+native function createWindowSync(nativeObj: long, config: Configuration): Window;
 
 export function getLastWindow(ctx: BaseContext): Promise<Window> {
   return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void ) => {
@@ -1784,6 +1942,28 @@ export function getLastWindow(ctx: BaseContext): Promise<Window> {
 export function getLastWindow(ctx: BaseContext, callback: AsyncCallback<Window>): void {
     taskpool.execute((): Window => {
         return getLastWindowSync(nativeObj, ctx);
+    }).then((ret: NullishType) => {
+        callback(new BusinessError(), ret as Window);
+    }).catch((err: NullishType) => {
+        callback(err as BusinessError, new WindowInternal());
+    });
+}
+
+export function createWindow(config: Configuration): Promise<Window> {
+  return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void ) => {
+      taskpool.execute((): Window => {
+          return createWindowSync(nativeObj, config);
+      }).then((ret: NullishType) => {
+          resolve(ret as Window);
+      }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+      });
+  });
+}
+
+export function createWindow(config: Configuration, callback: AsyncCallback<Window>): void {
+    taskpool.execute((): Window => {
+        return createWindowSync(nativeObj, config);
     }).then((ret: NullishType) => {
         callback(new BusinessError(), ret as Window);
     }).catch((err: NullishType) => {

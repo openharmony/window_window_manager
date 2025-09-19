@@ -17,6 +17,7 @@
 
 #include <ability.h>
 
+#include "ability_context.h"
 #include "ani.h"
 #include "ani_window.h"
 #include "ani_window_utils.h"
@@ -24,10 +25,12 @@
 #include "window_scene.h"
 #include "window_helper.h"
 #include "window_manager.h"
+#include "window_option.h"
 #include "permission.h"
 #include "singleton_container.h"
 #include "pixel_map.h"
 #include "../../../../../../wm/include/get_snapshot_callback.h"
+#include "ability_context.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -136,6 +139,161 @@ ani_object AniWindowManager::OnGetMainWindowSnapshot(
             return AniWindowUtils::CreateAniPixelMapArray(env, *pixelMaps);
         }
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    }
+}
+
+ani_ref AniWindowManager::CreateWindow(ani_env* env, ani_long nativeObj, ani_object configuration)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    return aniWindowManager != nullptr ? aniWindowManager->OnCreateWindow(env, configuration) : nullptr;
+}
+
+ani_ref CreateAniSystemWindow(ani_env* env, void* contextPtr, sptr<WindowOption> windowOption)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    if (windowOption == nullptr) {
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    }
+    auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
+    if (contextPtr == nullptr || context == nullptr) {
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_CONTEXT_ABNORMALLY,
+            "[ANI] Context is nullptr");
+    }
+    if (windowOption->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT ||
+        windowOption->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
+        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context->lock());
+        if (abilityContext != nullptr) {
+            if (!Permission::CheckCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW")) {
+                return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NO_PERMISSION,
+                    "[ANI] TYPE_FLOAT CheckCallingPermission failed");
+            }
+        }
+    }
+    WMError wmError = WMError::WM_OK;
+    sptr<Window> window = Window::Create(windowOption->GetWindowName(), windowOption, context->lock(), wmError);
+    WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(wmError);
+    if (window != nullptr && wmErrorCode == WmErrorCode::WM_OK) {
+        return CreateAniWindowObject(env, window);
+    } else {
+        return AniWindowUtils::AniThrowError(env, wmErrorCode, "Create window failed");
+    }
+}
+
+ani_ref CreateAniSubWindow(ani_env* env, sptr<WindowOption> windowOption)
+{
+    if (windowOption == nullptr) {
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    }
+    windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+    if (windowOption->GetParentId() == INVALID_WINDOW_ID) {
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[ANI] Parent window missed");
+    }
+
+    sptr<Window> window = Window::Create(windowOption->GetWindowName(), windowOption);
+    if (window == nullptr) {
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    } else {
+        return CreateAniWindowObject(env, window);
+    }
+}
+
+bool ParseRequiredConfigOption(ani_env* env, ani_object configuration, WindowOption &option)
+{
+    ani_ref result;
+    env->Object_GetPropertyByName_Ref(configuration, "name", &result);
+    ani_string aniWindowName = reinterpret_cast<ani_string>(result);
+    std::string windowName;
+    AniWindowUtils::GetStdString(env, aniWindowName, windowName);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] WindowName: %{public}s", windowName.c_str());
+    option.SetWindowName(windowName);
+
+    ani_int ret;
+    env->Object_GetPropertyByName_Ref(configuration, "windowType", &result);
+    auto status = env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(result), &ret);
+    if (status != ANI_OK) {
+        TLOGI(WmsLogTag::DEFAULT, "[ANI] Fail to throw err, status: %{public}d", static_cast<int32_t>(status));
+        return false;
+    }
+    uint32_t winType = static_cast<uint32_t>(ret);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] winType: %{public}u", winType);
+    if (winType >= static_cast<uint32_t>(ApiWindowType::TYPE_BASE) &&
+        winType < static_cast<uint32_t>(ApiWindowType::TYPE_END)) {
+        option.SetWindowType(JS_TO_NATIVE_WINDOW_TYPE_MAP.at(static_cast<ApiWindowType>(winType)));
+    } else {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Invalid winType");
+        return false;
+    }
+    return true;
+}
+
+bool ParseConfigOption(ani_env* env, ani_object configuration, WindowOption &option, void*& contextPtr)
+{
+    if (!ParseRequiredConfigOption(env, configuration, option)) {
+        return false;
+    }
+
+    ani_ref result;
+    env->Object_GetPropertyByName_Ref(configuration, "title", &result);
+    ani_boolean isTitleUndefined = false;
+    env->Reference_IsUndefined(result, &isTitleUndefined);
+    if (!isTitleUndefined) {
+        ani_string aniDialogTitle = reinterpret_cast<ani_string>(result);
+        std::string dialogTitle;
+        AniWindowUtils::GetStdString(env, aniDialogTitle, dialogTitle);
+        TLOGI(WmsLogTag::DEFAULT, "[ANI] dialogTitle: %{public}s", dialogTitle.c_str());
+        option.SetDialogTitle(dialogTitle);
+    }
+
+    env->Object_GetPropertyByName_Ref(configuration, "ctx", &result);
+    ani_boolean isCtxUndefined = false;
+    env->Reference_IsUndefined(result, &isCtxUndefined);
+    if (!isCtxUndefined) {
+        ani_object aniContextPtr = reinterpret_cast<ani_object>(result);
+        contextPtr = AniWindowUtils::GetAbilityContext(env, aniContextPtr);
+        auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
+        if (context == nullptr) {
+            TLOGE(WmsLogTag::DEFAULT, "[ANI] context is nullptr");
+            return AniWindowUtils::AniThrowError(env, WMError::WM_ERROR_NULLPTR, "Stage mode without context");
+        }
+    }
+
+    ani_boolean dialogDecorEnable;
+    env->Object_GetPropertyByName_Boolean(configuration, "decorEnabled", &dialogDecorEnable);
+    option.SetDialogDecorEnable(dialogDecorEnable);
+
+    ani_double ret;
+    env->Object_GetPropertyByName_Double(configuration, "displayId", &ret);
+    int64_t displayId = static_cast<int64_t>(ret);
+    if (displayId < 0 ||
+        SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
+        TLOGI(WmsLogTag::DEFAULT, "[ANI] DisplayId is invalid");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    option.SetDisplayId(displayId);
+
+    env->Object_GetPropertyByName_Double(configuration, "parentId", &ret);
+    int64_t parentId = static_cast<int64_t>(ret);
+    option.SetParentId(parentId);
+
+    return true;
+}
+
+ani_ref AniWindowManager::OnCreateWindow(ani_env* env, ani_object configuration)
+{
+    WindowOption option;
+    void* contextPtr = nullptr;
+    if (!ParseConfigOption(env, configuration, option, contextPtr)) {
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, "[ANI] Failed to parse config");
+    }
+    sptr<WindowOption> windowOption = new WindowOption(option);
+    if (WindowHelper::IsSystemWindow(option.GetWindowType())) {
+        return CreateAniSystemWindow(env, contextPtr, windowOption);
+    } else if (WindowHelper::IsSubWindow(option.GetWindowType())) {
+        return CreateAniSubWindow(env, windowOption);
+    } else {
+        return AniWindowUtils::AniThrowError(env, WMError::WM_ERROR_NULLPTR, "[ANI] Create window failed");
     }
 }
 }  // namespace Rosen
