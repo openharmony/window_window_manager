@@ -1262,12 +1262,9 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"offSync", nullptr,
             reinterpret_cast<void *>(AniWindow::UnregisterWindowCallback)},
     };
-    for (auto method : methods) {
-        if ((ret = env->Class_BindNativeMethods(cls, &method, 1u)) != ANI_OK) {
-            TLOGE(WmsLogTag::DEFAULT, "[ANI] bind window method fail %{public}u, %{public}s, %{public}s",
-                ret, method.name, method.signature);
-            return ANI_NOT_FOUND;
-        }
+    if ((ret = env->Class_BindNativeMethods(cls, methods.data(), methods.size())) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] bind window method fail %{public}u", ret);
+        return ANI_NOT_FOUND;
     }
     *result = ANI_VERSION_1;
 
