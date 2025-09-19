@@ -228,8 +228,6 @@ HWTEST_F(MockSessionManagerServiceTest, GetProcessSurfaceNodeIdByPersistentId, T
         pid, persistentIds, surfaceNodeIds);
     ASSERT_EQ(0, surfaceNodeIds.size());
 }
-
-
 }
 }
 }
