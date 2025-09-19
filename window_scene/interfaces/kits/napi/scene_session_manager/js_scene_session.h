@@ -112,6 +112,7 @@ enum class ListenerFuncType : uint32_t {
     FLOATING_BALL_UPDATE_CB,
     FLOATING_BALL_STOP_CB,
     FLOATING_BALL_RESTORE_MAIN_WINDOW_CB,
+    SCENE_OUTLINE_PARAMS_CHANGE_CB,
 };
 
 class SceneSession;
@@ -427,6 +428,7 @@ private:
     void ProcessUseImplicitAnimationChangeRegister();
     void ProcessSetSubWindowSourceRegister();
     void ProcessAnimateToTargetPropertyRegister();
+    void ProcessSceneOutlineParamsChangeRegister();
 
     /*
      * Window Property
@@ -518,6 +520,7 @@ private:
     void NotifySetSubWindowSource(SubWindowSource source);
     void OnAnimateToTargetProperty(const WindowAnimationProperty& animationProperty,
         const WindowAnimationOption& animationOption);
+    void OnOutlineParamsChange(bool isOutlineEnabled, const OutlineStyleParams& outlineStyleParams);
 
     /*
      * Window Property

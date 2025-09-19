@@ -2013,6 +2013,69 @@ HWTEST_F(sceneSessionManagerProxyTest, RemoveSessionBlackList02, TestSize.Level1
 }
 
 /**
+ * @tc.name: UpdateOutline
+ * @tc.desc: UpdateOutline
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, UpdateOutline, TestSize.Level1)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
+
+    sptr<IRemoteObject> remoteObject;
+    OutlineParams params;
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    WMError ret = proxy->UpdateOutline(remoteObject, params);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    ret = proxy->UpdateOutline(remoteObject, params);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+
+    remoteObject = sptr<MockIRemoteObject>::MakeSptr();
+    MockMessageParcel::SetWriteRemoteObjectErrorFlag(true);
+    ret = proxy->UpdateOutline(remoteObject, params);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+
+    MockMessageParcel::SetWriteRemoteObjectErrorFlag(false);
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    ret = proxy->UpdateOutline(remoteObject, params);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+
+    MockMessageParcel::SetWriteParcelableErrorFlag(false);
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ret = proxy->UpdateOutline(remoteObject, params);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+
+    remoteMocker->SetRequestResult(ERR_NONE);
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    ret = proxy->UpdateOutline(remoteObject, params);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+    ret = proxy->UpdateOutline(remoteObject, params);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: UpdateOutline01
+ * @tc.desc: UpdateOutline
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, UpdateOutline01, TestSize.Level1)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+
+    sptr<IRemoteObject> remoteObject;
+    OutlineParams params;
+    WMError ret = proxy->UpdateOutline(remoteObject, params);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+}
+
+/**
  * @tc.name: ConvertToRelativeCoordinateExtended01
  * @tc.desc: ConvertToRelativeCoordinateExtended
  * @tc.type: FUNC
