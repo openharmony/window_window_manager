@@ -142,7 +142,6 @@ constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const int32_t LOGICAL_DISPLACEMENT_32 = 32;
 constexpr int32_t GET_TOP_WINDOW_DELAY = 100;
 constexpr char SMALL_FOLD_PRODUCT_TYPE = '2';
-constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 10;
 constexpr uint64_t VIRTUAL_DISPLAY_ID = 999;
 constexpr uint32_t DEFAULT_LOCK_SCREEN_ZORDER = 2000;
 constexpr int32_t MAX_LOCK_STATUS_CACHE_SIZE = 1000;
@@ -3855,7 +3854,8 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     auto parentSession = GetSceneSession(property->GetParentPersistentId());
     if (parentSession) {
         auto parentProperty = parentSession->GetSessionProperty();
-        if (parentProperty->GetSubWindowLevel() >= MAX_SUB_WINDOW_LEVEL) {
+        if (parentProperty->GetSubWindowLevel() >= MAX_SUB_WINDOW_LEVEL &&
+            !WindowHelper::IsToastSubWindow(property->GetWindowType(), property->GetWindowFlags())) {
             TLOGE(WmsLogTag::WMS_SUB, "sub window level exceeds limit");
             return WSError::WS_ERROR_INVALID_WINDOW;
         }
