@@ -21,6 +21,7 @@
 
 #include "image/pixelmap_native.h"
 #include "pixelmap_native_impl.h"
+#include "get_snapshot_callback.h"
 #include "ui_content.h"
 
 #include <event_handler.h>
@@ -130,7 +131,7 @@ namespace {
 #define WINDOW_MANAGER_FREE_MEMORY(ptr) \
     do { \
         if ((ptr)) { \
-            free((ptr)); \
+            free((void*)(ptr)); \
             (ptr) = NULL; \
         } \
     } while (0)
@@ -165,6 +166,21 @@ void TransformedToWindowManagerRect(const Rect& rect, WindowManager_Rect& wmRect
     wmRect.posY = rect.posY_;
     wmRect.width = rect.width_;
     wmRect.height = rect.height_;
+}
+
+void TransformedToMainWindowInfo(const OHOS::sptr<MainWindowInfo> mainWindowInfo,
+    WindowManager_MainWindowInfo& wmMainWindowInfo)
+{
+    wmMainWindowInfo.displayId = mainWindowInfo->displayId_;
+    wmMainWindowInfo.windowId = mainWindowInfo->persistentId_;
+    wmMainWindowInfo.showing = mainWindowInfo->showing_;
+    wmMainWindowInfo.label = mainWindowInfo->label_.c_str();
+}
+ 
+void TransformedToWindowSnapshotConfig(WindowSnapshotConfiguration& windowSnapshotConfiguration,
+    const WindowManager_WindowSnapshotConfig& wmWindowSnapshotConfiguration)
+{
+    windowSnapshotConfiguration.useCache = wmWindowSnapshotConfiguration.useCache;
 }
 
 void TransformedToWindowManagerAvoidArea(const AvoidArea& allAvoidArea, WindowManager_AvoidArea* avoidArea)
@@ -593,4 +609,104 @@ int32_t OH_WindowManager_InjectTouchEvent(
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(window->InjectTouchEvent(pointerEvent));
     }, __func__);
     return errCode;
+}
+
+int32_t OH_WindowManager_GetAllMainWindowInfo(
+    WindowManager_MainWindowInfo** infoList, size_t* mainWindowInfoSize)
+{
+    if (infoList == nullptr || mainWindowInfoSize == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "param is nullptr");
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+    }
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::OK;
+    auto eventHandler = GetMainEventHandler();
+    if (eventHandler == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "eventHandler is null");
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+    }
+    eventHandler->PostSyncTask([infoList, mainWindowInfoSize, &errCode, where = __func__] {
+        std::vector<OHOS::sptr<MainWindowInfo>> infos;
+        auto ret = SingletonContainer::Get<WindowManager>().GetAllMainWindowInfo(infos);
+        if (OH_WINDOW_TO_ERROR_CODE_MAP.find(ret) == OH_WINDOW_TO_ERROR_CODE_MAP.end()) {
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s get failed, errCode: %{public}d", where, errCode);
+            return;
+        } else if (OH_WINDOW_TO_ERROR_CODE_MAP.at(ret) != WindowManager_ErrorCode::OK) {
+            errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(ret);
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s get failed, errCode: %{public}d", where, errCode);
+            return;
+        }
+        WindowManager_MainWindowInfo* infosInner = new WindowManager_MainWindowInfo[infos.size()];
+        if (infosInner == nullptr) {
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s infosInner is nullptr", where);
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s infos size: %{public}d", where, static_cast<int32_t>(infos.size()));
+        for (size_t i = 0; i < infos.size(); i++) {
+            TransformedToMainWindowInfo(infos[i], infosInner[i]);
+        }
+        *infoList = infosInner;
+        *mainWindowInfoSize = infos.size();
+        }, __func__);
+    return errCode;
+}
+ 
+void OH_WindowManager_ReleaseAllMainWindowInfo(WindowManager_MainWindowInfo* infoList)
+{
+    WINDOW_MANAGER_FREE_MEMORY(infoList);
+}
+ 
+int32_t OH_WindowManager_GetMainWindowSnapshot(int32_t* windowIdList, size_t windowIdListSize,
+    WindowManager_WindowSnapshotConfig config, OH_WindowManager_WindowSnapshotCallback callback)
+{
+    if (windowIdList == nullptr) {
+        TLOGNE(WmsLogTag::WMS_LIFE, "param is nullptr");
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+    }
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::OK;
+    auto eventHandler = GetMainEventHandler();
+    if (eventHandler == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "eventHandler is null");
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+    }
+    eventHandler->PostSyncTask([windowIdList, windowIdListSize, config, &errCode, callback, where = __func__] {
+        WindowSnapshotConfiguration windowSnapshotConfiguration;
+        TransformedToWindowSnapshotConfig(windowSnapshotConfiguration, config);
+        std::vector<int32_t> windowIdVector(windowIdList, windowIdList + windowIdListSize);
+        OHOS::sptr<GetSnapshotCallback> getSnapshotCallback = OHOS::sptr<GetSnapshotCallback>::MakeSptr();
+        getSnapshotCallback->RegisterFunc([callback, where = __func__]
+            (WMError errCode, const std::vector<std::shared_ptr<OHOS::Media::PixelMap>>& pixelMaps) {
+                if (!callback) {
+                    TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s callback is nullptr", where);
+                    return;
+                }
+                if (errCode != WMError::WM_OK) {
+                    TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s error: %{public}d", where, static_cast<int32_t>(errCode));
+                    callback(nullptr, 0);
+                    return;
+                }
+                const OH_PixelmapNative** pixelmapArray = new const OH_PixelmapNative* [pixelMaps.size()];
+                if (pixelmapArray == nullptr) {
+                    TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s alloc failed", where);
+                    callback(nullptr, 0);
+                    return;
+                }
+                for (size_t i = 0; i < pixelMaps.size(); i++) {
+                    pixelmapArray[i] = new OH_PixelmapNative(pixelMaps[i]);
+                }
+                size_t count = pixelMaps.size();
+                callback(pixelmapArray, count);
+            });
+        auto ret = SingletonContainer::Get<WindowManager>().GetMainWindowSnapshot(
+            windowIdVector, windowSnapshotConfiguration, getSnapshotCallback->AsObject());
+        errCode = OH_WINDOW_TO_ERROR_CODE_MAP.find(ret) == OH_WINDOW_TO_ERROR_CODE_MAP.end() ?
+            WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL : OH_WINDOW_TO_ERROR_CODE_MAP.at(ret);
+        }, __func__);
+    return errCode;
+}
+ 
+void OH_WindowManager_ReleaseMainWindowSnapshot(const OH_PixelmapNative* snapshotPixelMapList)
+{
+    WINDOW_MANAGER_FREE_MEMORY(snapshotPixelMapList);
 }

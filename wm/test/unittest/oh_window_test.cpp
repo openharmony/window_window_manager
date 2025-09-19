@@ -171,6 +171,58 @@ HWTEST_F(OHWindowTest, OH_WindowManager_InjectTouchEvent, TestSize.Level0)
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret);
     OH_Input_DestroyTouchEvent(&touchEvent);
 }
+
+/**
+ * @tc.name: OH_WindowManager_GetAllMainWindowInfo
+ * @tc.desc: OH_WindowManager_GetAllMainWindowInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHWindowTest, OH_WindowManager_GetAllMainWindowInfo, TestSize.Level0)
+{
+    WindowManager_MainWindowInfo** infoListNull = nullptr;
+    size_t* mainWindowInfoSizeNull = nullptr;
+    auto infoList = (WindowManager_MainWindowInfo**)malloc(sizeof(WindowManager_MainWindowInfo**));
+    auto mainWindowInfoSize = (size_t*)malloc(sizeof(size_t*));
+    auto ret = OH_WindowManager_GetAllMainWindowInfo(infoListNull, mainWindowInfoSizeNull);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
+ 
+    ret = OH_WindowManager_GetAllMainWindowInfo(infoListNull, mainWindowInfoSize);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
+ 
+    ret = OH_WindowManager_GetAllMainWindowInfo(infoList, mainWindowInfoSizeNull);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
+ 
+    ret = OH_WindowManager_GetAllMainWindowInfo(infoList, mainWindowInfoSize);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret);
+    OH_WindowManager_ReleaseAllMainWindowInfo(*infoList);
+    *infoList = nullptr;
+    free(infoList);
+    infoList = nullptr;
+    free(mainWindowInfoSize);
+    mainWindowInfoSize = nullptr;
+}
+ 
+/**
+ * @tc.name: OH_WindowManager_GetMainWindowSnapshot
+ * @tc.desc: OH_WindowManager_GetMainWindowSnapshot test
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHWindowTest, OH_WindowManager_GetMainWindowSnapshot, TestSize.Level0)
+{
+    int32_t* windowIdListNull = nullptr;
+    size_t windowIdListSize = 1;
+    WindowManager_WindowSnapshotConfig config;
+    config.useCache = false;
+    OH_WindowManager_WindowSnapshotCallback callback = nullptr;
+    auto ret = OH_WindowManager_GetMainWindowSnapshot(windowIdListNull, windowIdListSize, config, callback);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
+ 
+    auto windowIdList = (int32_t*)malloc(sizeof(int32_t*));
+    ret = OH_WindowManager_GetMainWindowSnapshot(windowIdList, windowIdListSize, config, callback);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret);
+    free(windowIdList);
+    windowIdList = nullptr;
+}
 }
 } // namespace Rosen
 } // namespace OHOS

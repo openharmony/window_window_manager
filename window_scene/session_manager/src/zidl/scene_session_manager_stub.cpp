@@ -155,6 +155,10 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleListWindowInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_LAYOUT_INFO):
             return HandleGetAllWindowLayoutInfo(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_ALL_MAIN_WINDOW_INFO):
+            return HandleGetAllMainWindowInfo(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_MAIN_WINDOW_SNAPSHOT):
+            return HandleGetMainWindowSnapshot(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_GLOBAL_WINDOW_MODE):
             return HandleGetGlobalWindowMode(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_TOP_NAV_DEST_NAME):
@@ -1395,6 +1399,46 @@ int SceneSessionManagerStub::HandleGetAllWindowLayoutInfo(MessageParcel& data, M
     }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write errCode fail");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetAllMainWindowInfo(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<sptr<MainWindowInfo>> infos;
+    WMError errCode = GetAllMainWindowInfo(infos);
+    if (!MarshallingHelper::MarshallingVectorParcelableObj<MainWindowInfo>(reply, infos)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to write main window info");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write errCode fail");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+ 
+int SceneSessionManagerStub::HandleGetMainWindowSnapshot(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<int32_t> windowIds;
+    if (!data.ReadInt32Vector(&windowIds)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read windowIds Failed");
+        return ERR_INVALID_DATA;
+    }
+    WindowSnapshotConfiguration config;
+    if (!data.ReadBool(config.useCache)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read useCache failed!");
+        return ERR_INVALID_DATA;
+    }
+    sptr<IRemoteObject> callback = data.ReadRemoteObject();
+    if (callback == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "callback is null");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = GetMainWindowSnapshot(windowIds, config, callback);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write errCode fail");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

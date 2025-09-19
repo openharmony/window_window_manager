@@ -4054,6 +4054,7 @@ template<typename T>
 EnableIfSame<T, IWindowTitleChangeListener, std::vector<sptr<IWindowTitleChangeListener>>> WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<IWindowTitleChangeListener>> windowTitleChangeListeners;
+    std::lock_guard<std::mutex> lockRectListener(windowTitleChangeListenerMutex_);
     for (auto& listener : windowTitleChangeListeners_[GetPersistentId()]) {
         windowTitleChangeListeners.push_back(listener);
     }
@@ -4929,7 +4930,7 @@ void WindowSessionImpl::NotifyAfterDidForeground(uint32_t reason)
     }, where, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
-void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool needNotifyUiContent, bool waitDetach)
+void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool needNotifyUiContent)
 {
     if (needNotifyListeners) {
         {
@@ -4939,7 +4940,7 @@ void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool nee
         }
         NotifyAfterLifecycleBackground();
     }
-    GetAttachStateSyncResult(waitDetach, false);
+
     if (needNotifyUiContent) {
         CALL_UI_CONTENT(Background);
     }
@@ -5579,7 +5580,6 @@ void WindowSessionImpl::NotifySwitchFreeMultiWindow(bool enable)
 
 void WindowSessionImpl::NotifyTitleChange(bool isShow, int32_t height)
 {
-    std::lock_guard<std::mutex> lockRectListener(windowTitleChangeListenerMutex_);
     auto windowTitleChangeListeners = GetListeners<IWindowTitleChangeListener>();
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {

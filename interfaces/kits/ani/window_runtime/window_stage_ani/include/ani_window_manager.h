@@ -32,9 +32,15 @@ class AniWindowManager {
 public:
     static ani_status AniWindowManagerInit(ani_env* env, ani_namespace windowNameSpace);
     static ani_ref GetLastWindow(ani_env* env, ani_long nativeObj, ani_object context);
+    static ani_object GetAllMainWindowInfo(ani_env* env, ani_long nativeObj, ani_object context);
+    static ani_object GetMainWindowSnapshot(
+        ani_env* env, ani_long nativeObj, ani_object windowId, ani_object config);
 private:
     ani_ref OnGetLastWindow(ani_env* env, ani_object context);
     ani_object GetTopWindowTask(ani_env* env, void* contextPtr, bool newApi);
+    ani_object OnGetAllMainWindowInfo(ani_env* env, ani_object context);
+    ani_object OnGetMainWindowSnapshot(
+        ani_env* env, ani_object windowId, ani_object config);
 };
 } // namespace Rosen
 } // namespace OHOS
