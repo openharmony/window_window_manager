@@ -278,6 +278,8 @@ std::array functions = {
     ani_native_function {"CreateWindowStage", "J:L@ohos/window/window/WindowStageInternal;",
         reinterpret_cast<void *>(WindowStageCreate)},
     ani_native_function {"getLastWindowSync", nullptr, reinterpret_cast<void *>(AniWindowManager::GetLastWindow)},
+    ani_native_function {"shiftAppWindowFocusSync", "JII:V",
+        reinterpret_cast<void *>(AniWindowManager::ShiftAppWindowFocus)},
     ani_native_function {"getAllMainWindowInfo", "J:Lescompat/Array;",
         reinterpret_cast<void *>(AniWindowManager::GetAllMainWindowInfo)},
     ani_native_function {"getMainWindowSnapshot",

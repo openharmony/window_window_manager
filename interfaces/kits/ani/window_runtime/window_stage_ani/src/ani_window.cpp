@@ -259,6 +259,32 @@ void AniWindow::OnSetWaterMarkFlag(ani_env* env, ani_boolean enable)
     }
 }
 
+void AniWindow::SetWindowFocusable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isFocusable)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow != nullptr) {
+        aniWindow->OnSetWindowFocusable(env, isFocusable);
+    } else {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
+    }
+}
+
+void AniWindow::OnSetWindowFocusable(ani_env* env, ani_boolean isFocusable)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    auto window = GetWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] window is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetFocusable(isFocusable));
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret, "SetWindowFocusable failed.");
+    }
+}
+
 void AniWindow::LoadContent(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path,
     ani_object storage)
 {
@@ -498,7 +524,7 @@ __attribute__((no_sanitize("cfi")))
     }
     ani_method setObjFunc = nullptr;
     if ((ret = env->Class_FindMethod(cls, "setNativeObj", "J:V", &setObjFunc)) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] get ctor fail %{public}u", ret);
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] get setNativeObj fail %{public}u", ret);
         return nullptr;
     }
     env->Object_CallMethod_Void(obj, setObjFunc, reinterpret_cast<ani_long>(aniWindow.get()));
@@ -1136,7 +1162,7 @@ __attribute__((no_sanitize("cfi")))
     }
     ani_method setObjFunc = nullptr;
     if ((ret = env->Class_FindMethod(cls, "setNativeObj", "J:V", &setObjFunc)) != ANI_OK) {
-        TLOGD(WmsLogTag::DEFAULT, "[ANI] get ctor fail %{public}u", ret);
+        TLOGD(WmsLogTag::DEFAULT, "[ANI] get setNativeObj fail %{public}u", ret);
         return nullptr;
     }
     env->Object_CallMethod_Void(obj, setObjFunc, reinterpret_cast<ani_long>(uniqueWindow.get()));
@@ -1215,7 +1241,7 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"setUIContentSync", "JLstd/core/String;:V",
             reinterpret_cast<void *>(AniWindow::SetUIContent)},
         ani_native_function {"loadContentSync",
-            "JLstd/core/String;Larkui/stateManagement/storages/localStorage/LocalStorage;:V",
+            "JLstd/core/String;Larkui/stateManagement/storage/localStorage/LocalStorage;:V",
             reinterpret_cast<void *>(AniWindow::LoadContent)},
         ani_native_function {"setWindowKeepScreenOnSync", "JZ:V",
             reinterpret_cast<void *>(AniWindow::SetWindowKeepScreenOn)},
@@ -1227,6 +1253,8 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::GetWindowAvoidArea)},
         ani_native_function {"setWaterMarkFlagSync", "JZ:V",
             reinterpret_cast<void *>(AniWindow::SetWaterMarkFlag)},
+        ani_native_function {"setWindowFocusableSync", "JZ:V",
+            reinterpret_cast<void *>(AniWindow::SetWindowFocusable)},
         ani_native_function {"setContentAspectRatio", "JDZZ:V",
             reinterpret_cast<void *>(AniWindow::SetContentAspectRatio)},
         ani_native_function {"onSync", nullptr,
@@ -1234,10 +1262,12 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"offSync", nullptr,
             reinterpret_cast<void *>(AniWindow::UnregisterWindowCallback)},
     };
-    if ((ret = env->Class_BindNativeMethods(cls, methods.data(), methods.size())) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] bind window method fail %{public}u", ret);
-        return ANI_NOT_FOUND;
-    }
+    for (auto method : methods) {
+        if ((ret = env->Class_BindNativeMethods(cls, &method, 1u)) != ANI_OK) {
+            TLOGE(WmsLogTag::DEFAULT, "[ANI] bind window method fail %{public}u, %{public}s, %{public}s",
+                ret, method.name, method.signature);
+            return ANI_NOT_FOUND;
+        }
     *result = ANI_VERSION_1;
 
     ani_namespace ns;
