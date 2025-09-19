@@ -1268,6 +1268,7 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
                 ret, method.name, method.signature);
             return ANI_NOT_FOUND;
         }
+    }
     *result = ANI_VERSION_1;
 
     ani_namespace ns;
