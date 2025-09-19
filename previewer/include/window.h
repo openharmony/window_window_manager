@@ -282,7 +282,7 @@ public:
     virtual bool IsTransparent() const = 0;
     virtual WMError SetBrightness(float brightness) = 0;
     virtual float GetBrightness() const = 0;
-    virtual WMError SetCallingWindow(uint32_t windowId) = 0;
+    virtual WMError ChangeCallingWindowId(uint32_t windowId) = 0;
     virtual WMError SetPrivacyMode(bool isPrivacyMode) = 0;
     virtual bool IsPrivacyMode() const = 0;
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) = 0;

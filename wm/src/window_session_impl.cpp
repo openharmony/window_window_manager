@@ -7480,23 +7480,23 @@ bool WindowSessionImpl::IsHorizontalOrientation(Orientation orientation) const
            orientation == Orientation::USER_ROTATION_LANDSCAPE_INVERTED;
 }
 
-WMError WindowSessionImpl::GetCallingWindowWindowStatus(WindowStatus& windowStatus) const
+WMError WindowSessionImpl::GetCallingWindowWindowStatus(uint32_t callingWindowId, WindowStatus& windowStatus) const
 {
-    TLOGD(WmsLogTag::WMS_KEYBOARD, "id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "callingWindowId: %{public}d", callingWindowId);
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    return SingletonContainer::Get<WindowAdapter>().GetCallingWindowWindowStatus(GetPersistentId(), windowStatus);
+    return SingletonContainer::Get<WindowAdapter>().GetCallingWindowWindowStatus(callingWindowId, windowStatus);
 }
 
-WMError WindowSessionImpl::GetCallingWindowRect(Rect& rect) const
+WMError WindowSessionImpl::GetCallingWindowRect(uint32_t callingWindowId, Rect& rect) const
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    return SingletonContainer::Get<WindowAdapter>().GetCallingWindowRect(GetPersistentId(), rect);
+    return SingletonContainer::Get<WindowAdapter>().GetCallingWindowRect(callingWindowId, rect);
 }
 
 void WindowSessionImpl::SetUiDvsyncSwitch(bool dvsyncSwitch)

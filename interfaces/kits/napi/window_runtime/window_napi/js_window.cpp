@@ -676,11 +676,11 @@ napi_value JsWindow::SetTransparent(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetTransparent(env, info) : nullptr;
 }
 
-napi_value JsWindow::SetCallingWindow(napi_env env, napi_callback_info info)
+napi_value JsWindow::ChangeCallingWindowId(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DEFAULT, "SetCallingWindow");
+    TLOGD(WmsLogTag::DEFAULT, "ChangeCallingWindowId");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
-    return (me != nullptr) ? me->OnSetCallingWindow(env, info) : nullptr;
+    return (me != nullptr) ? me->OnChangeCallingWindowId(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetPreferredOrientation(napi_env env, napi_callback_info info)
@@ -5443,7 +5443,7 @@ napi_value JsWindow::OnSetTransparent(napi_env env, napi_callback_info info)
     return result;
 }
 
-napi_value JsWindow::OnSetCallingWindow(napi_env env, napi_callback_info info)
+napi_value JsWindow::OnChangeCallingWindowId(napi_env env, napi_callback_info info)
 {
     WMError errCode = WMError::WM_OK;
     size_t argc = 4;
@@ -5479,7 +5479,7 @@ napi_value JsWindow::OnSetCallingWindow(napi_env env, napi_callback_info info)
             task->Reject(env, JsErrUtils::CreateJsError(env, errCode, "Invalidate params."));
             return;
         }
-        WMError ret = weakWindow->SetCallingWindow(callingWindow);
+        WMError ret = weakWindow->ChangeCallingWindowId(callingWindow);
         if (ret == WMError::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
@@ -5488,7 +5488,7 @@ napi_value JsWindow::OnSetCallingWindow(napi_env env, napi_callback_info info)
         TLOGNI(WmsLogTag::WMS_LIFE, "Window [%{public}u, %{public}s] set calling window end",
             weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetCallingWindow") != napi_status::napi_ok) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnChangeCallingWindowId") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
     }
     return result;
@@ -9276,7 +9276,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setTouchableAreas", moduleName, JsWindow::SetTouchableAreas);
     BindNativeFunction(env, object, "setWindowTouchable", moduleName, JsWindow::SetWindowTouchable);
     BindNativeFunction(env, object, "setTransparent", moduleName, JsWindow::SetTransparent);
-    BindNativeFunction(env, object, "setCallingWindow", moduleName, JsWindow::SetCallingWindow);
+    BindNativeFunction(env, object, "changeCallingWindowId", moduleName, JsWindow::ChangeCallingWindowId);
     BindNativeFunction(env, object, "setSnapshotSkip", moduleName, JsWindow::SetSnapshotSkip);
     BindNativeFunction(env, object, "raiseToAppTop", moduleName, JsWindow::RaiseToAppTop);
     BindNativeFunction(env, object, "disableWindowDecor", moduleName, JsWindow::DisableWindowDecor);
