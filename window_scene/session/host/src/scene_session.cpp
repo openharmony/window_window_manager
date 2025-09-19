@@ -2470,8 +2470,8 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d displayId %{public}" PRIu64 " constantly isVisible %{public}d",
                 GetPersistentId(), displayId, isVisible);
         }
-        bool isStatusBarVisible = WindowHelper::IsMainWindow(Session::GetWindowType()) ?
-            isStatusBarVisible_ : isVisible;
+        bool isStatusBarVisible = (WindowHelper::IsMainWindow(Session::GetWindowType()) ||
+            WindowHelper::IsSubWindow(Session::GetWindowType())) ? isStatusBarVisible_ : isVisible;
         if (!isStatusBarVisible) {
             TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d status bar not visible", GetPersistentId());
             continue;
