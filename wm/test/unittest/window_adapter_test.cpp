@@ -1317,11 +1317,22 @@ HWTEST_F(WindowAdapterTest, GetInstance, TestSize.Level1)
  */
 HWTEST_F(WindowAdapterTest, InitSSMProxy, TestSize.Level1)
 {
-    int32_t userId = -1;
-    sptr<WindowAdapter> instance = WindowAdapter::GetInstance(userId);
-    ASSERT_NE(instance, nullptr);
+    sptr<WindowAdapter> instance = WindowAdapter::GetInstance(101);
  
-    ASSERT_NE(true, instance->InitWMSProxy());
+    // branch 1
+    instance->isProxyValid_ = true;
+
+    ASSERT_EQ(true, instance->InitSSMProxy());
+ 
+    // branch 2
+    instance->isProxyValid_ = false;
+    instance->recoverInitialized_ = true;
+    instance->InitSSMProxy();
+
+ 
+    // branch 3
+    instance->recoverInitialized_ = false;
+    ASSERT_EQ(true, instance->InitSSMProxy());
 }
 } // namespace
 } // namespace Rosen

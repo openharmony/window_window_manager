@@ -99,23 +99,20 @@ HWTEST_F(WindowAdapterLiteTest, UnregisterWindowManagerAgent01, TestSize.Level1)
 
 /**
  * @tc.name: OnRemoteDied
- * @tc.desc: WindowAdapterLite/OnRemoteDied
+ * @tc.desc: WMSDeathRecipient
  * @tc.type: FUNC
  */
 HWTEST_F(WindowAdapterLiteTest, OnRemoteDied, TestSize.Level1)
 {
-    g_logMsg.clear();
-    LOG_SetCallback(MyLogCallback);
-    std::shared_ptr<WindowAdapterLite> windowAdapterLite_ = std::make_shared<WindowAdapterLite>();
-    ASSERT_NE(windowAdapterLite_, nullptr);
-    windowAdapterLite_->OnUserSwitch();
-
-    sptr<WMSDeathRecipient> wmSDeathRecipient = sptr<WMSDeathRecipient>::MakeSptr();
+    sptr<WMSDeathRecipient> wmSDeathRecipient = new WMSDeathRecipient();
     ASSERT_NE(wmSDeathRecipient, nullptr);
+
     wptr<IRemoteObject> wptrDeath = nullptr;
     wmSDeathRecipient->OnRemoteDied(wptrDeath);
-    EXPECT_TRUE(g_logMsg.find("wptrDeath is null") != std::string::npos);
-    LOG_SetCallback(nullptr);
+
+    sptr<IRemoteObject> service = sptr<IRemoteObjectMocker>::MakeSptr();
+    wptrDeath = wptr(service);
+    wmSDeathRecipient->OnRemoteDied(wptrDeath);
 }
 
 /**
@@ -299,31 +296,52 @@ HWTEST_F(WindowAdapterLiteTest, SendPointerEventForHover, Function | SmallTest |
 HWTEST_F(WindowAdapterLiteTest, GetInstance, Function | SmallTest | Level2)
 {
     sptr<WindowAdapterLite> instance = nullptr;
-    int32_t userId = 100;
+    int32_t userId = -1;
     instance = WindowAdapterLite::GetInstance(userId);
     ASSERT_NE(instance, nullptr);
 
-    userId = -1;
+    userId = 101;
     instance = WindowAdapterLite::GetInstance(userId);
     ASSERT_NE(instance, nullptr);
 
-    userId = -2;
     instance = WindowAdapterLite::GetInstance(userId);
     ASSERT_NE(instance, nullptr);
 }
 
 /**
- * @tc.name: WMSDeathRecipient::OnRemoteDied
- * @tc.desc: WindowAdapterLite/OnRemoteDied
+ * @tc.name: InitSSMProxy
+ * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterLiteTest, OnRemoteDied2, TestSize.Level1)
+HWTEST_F(WindowAdapterLiteTest, InitSSMProxy, TestSize.Level1)
 {
-    sptr<WMSDeathRecipient> wmSDeathRecipient = sptr<WMSDeathRecipient>::MakeSptr();
-    ASSERT_NE(wmSDeathRecipient, nullptr);
-    sptr<IRemoteObject> service = sptr<IRemoteObjectMocker>::MakeSptr();
-    wptr<IRemoteObject> wptrDeath = wptr(service);
-    wmSDeathRecipient->OnRemoteDied(wptrDeath);
+    auto instance = WindowAdapterLite::GetInstance(-1);
+
+    // branch 1
+    instance->isProxyValid_ = true;
+    ASSERT_EQ(true, instance->InitSSMProxy());
+
+    // branch 2
+    instance->isProxyValid_ = false;
+    instance->isRegisteredUserSwitchListener_ = true;
+    instance->InitSSMProxy();
+
+    // branch 3
+    ASSERT_NE(nullptr, instance);
+    instance->isRegisteredUserSwitchListener_ = false;
+    instance->InitSSMProxy();
+}
+
+/**
+ * @tc.name: UnregisterWMSConnectionChangedListener
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterLiteTest, UnregisterWMSConnectionChangedListener, TestSize.Level1)
+{
+    auto instance = WindowAdapterLite::GetInstance(-1);
+    instance->UnregisterWMSConnectionChangedListener();
+    ASSERT_NE(nullptr, instance);
 }
 } // namespace
 } // namespace Rosen

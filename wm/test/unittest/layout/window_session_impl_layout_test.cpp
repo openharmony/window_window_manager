@@ -466,6 +466,11 @@ HWTEST_F(WindowSessionImplLayoutTest, HookWindowSizeByHookWindowInfo, TestSize.L
     window->HookWindowSizeByHookWindowInfo(rect);
     EXPECT_EQ(rect.width_, defaultSize);
 
+    window->isFullScreenInForceSplit_.store(true);
+    window->HookWindowSizeByHookWindowInfo(rect);
+    EXPECT_EQ(rect.width_, defaultSize);
+    window->isFullScreenInForceSplit_.store(false);
+
     // Case 4: success
     hookWindowInfo.widthHookRatio = 0.5f;
     window->SetAppHookWindowInfo(hookWindowInfo);

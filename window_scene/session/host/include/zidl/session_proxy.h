@@ -74,6 +74,7 @@ public:
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
     WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
     WSError SetAspectRatio(float ratio) override;
+    WSError SetContentAspectRatio(float ratio, bool isPersistent, bool needUpdateRect) override;
     WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) override;
     WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
     WSError GetIsMidScene(bool& isMidScene) override;
@@ -124,6 +125,7 @@ public:
     void NotifyKeyboardDidShowRegistered(bool registered) override;
     void NotifyKeyboardDidHideRegistered(bool registered) override;
     void SetCustomDecorHeight(int32_t height) override;
+    WSError SetDecorVisible(bool isVisible) override;
     WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
     WSError ChangeKeyboardEffectOption(const KeyboardEffectOption& effectOption) override;
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
@@ -215,6 +217,11 @@ public:
      * window animation
      */
     WSError SetFrameRectForPartialZoomIn(const Rect& frameRect) override;
+
+    /**
+     * Compatible Mode
+     */
+    WSError NotifyIsFullScreenInForceSplitMode(bool isFullScreen) override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

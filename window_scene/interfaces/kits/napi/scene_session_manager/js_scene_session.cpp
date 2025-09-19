@@ -4588,7 +4588,7 @@ void JsSceneSession::ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<S
         jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
 }
 
-sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info)
+sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info, bool needAddRequestInfo)
 {
     sptr<SceneSession> sceneSession = nullptr;
     if (info.persistentId_ == 0) {
@@ -4617,6 +4617,7 @@ sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info)
             }
         } else {
             sceneSession->SetSessionInfo(info);
+            AddRequestTaskInfo(sceneSession, info, needAddRequestInfo);
         }
         info.persistentId_ = sceneSession->GetPersistentId();
         sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
@@ -4633,6 +4634,7 @@ sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info)
             sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
         } else {
             sceneSession->SetSessionInfo(info);
+            AddRequestTaskInfo(sceneSession, info, needAddRequestInfo);
         }
     }
     return sceneSession;
@@ -4644,7 +4646,7 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
         "appIndex %{public}d, reuse %{public}d, requestId %{public}d, specifiedFlag %{public}s",
         info.bundleName_.c_str(), info.moduleName_.c_str(),
         info.abilityName_.c_str(), info.appIndex_, info.reuse, info.requestId, info.specifiedFlag_.c_str());
-    auto sceneSession = GenSceneSession(info);
+    auto sceneSession = GenSceneSession(info, true);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "GenSceneSession failed");
         return;
@@ -8126,5 +8128,14 @@ void JsSceneSession::OnAnimateToTargetProperty(const WindowAnimationProperty& an
         napi_value argv[] = { jsAnimationProperty, jsAnimationOption };
         napi_call_function(env, NapiGetUndefined(env), jsCallback->GetNapiValue(), ArraySize(argv), argv, nullptr);
     }, __func__);
+}
+
+
+void JsSceneSession::AddRequestTaskInfo(sptr<SceneSession> sceneSession,
+    SessionInfo& info, bool needAddRequestInfo)
+{
+    if (needAddRequestInfo && sceneSession != nullptr) {
+        SceneSessionManager::GetInstance().AddRequestTaskInfo(sceneSession->GetPersistentId(), info);
+    }
 }
 } // namespace OHOS::Rosen

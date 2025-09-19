@@ -505,8 +505,11 @@ void MoveDragController::CalcDragTargetRect(const std::shared_ptr<MMI::PointerEv
                                             SizeChangeReason reason)
 {
     if (reason == SizeChangeReason::DRAG_START) {
+        moveDragProperty_.originalRect_ =
+            SessionUtils::AdjustRectByAspectRatio(moveDragProperty_.originalRect_, limits_, decoration_, aspectRatio_);
         moveDragProperty_.targetRect_ = moveDragProperty_.originalRect_;
-        TLOGD(WmsLogTag::WMS_LAYOUT, "drag rect:%{public}s", moveDragProperty_.targetRect_.ToString().c_str());
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Drag start, originalRect: %{public}s",
+            moveDragProperty_.originalRect_.ToString().c_str());
         return;
     }
     std::pair<int32_t, int32_t> trans = CalcUnifiedTranslate(pointerEvent);
@@ -1162,94 +1165,58 @@ void MoveDragController::CalcFreeformTranslateLimits(AreaType type)
 
 void MoveDragController::CalcFixedAspectRatioTranslateLimits(AreaType type)
 {
-    int32_t minW = static_cast<int32_t>(limits_.minWidth_);
-    int32_t maxW = static_cast<int32_t>(limits_.maxWidth_);
-    int32_t minH = static_cast<int32_t>(limits_.minHeight_);
-    int32_t maxH = static_cast<int32_t>(limits_.maxHeight_);
-    if (isDecorEnable_) {
-        if (SessionUtils::ToLayoutWidth(minW, vpr_) < SessionUtils::ToLayoutHeight(minH, vpr_) * aspectRatio_) {
-            minW = SessionUtils::ToWinWidth(SessionUtils::ToLayoutHeight(minH, vpr_) * aspectRatio_, vpr_);
-            minH = SessionUtils::ToLayoutHeight(minH, vpr_);
-        } else {
-            minH = SessionUtils::ToWinHeight(SessionUtils::ToLayoutWidth(minW, vpr_) / aspectRatio_, vpr_);
-            minW = SessionUtils::ToLayoutWidth(minW, vpr_);
-        }
-        if (SessionUtils::ToLayoutWidth(maxW, vpr_) < SessionUtils::ToLayoutHeight(maxH, vpr_) * aspectRatio_) {
-            maxH = SessionUtils::ToWinHeight(SessionUtils::ToLayoutWidth(maxW, vpr_) / aspectRatio_, vpr_);
-            maxW = SessionUtils::ToLayoutWidth(maxW, vpr_);
-        } else {
-            maxW = SessionUtils::ToWinWidth(SessionUtils::ToLayoutHeight(maxH, vpr_) * aspectRatio_, vpr_);
-            maxH = SessionUtils::ToLayoutHeight(maxH, vpr_);
-        }
-    } else {
-        // width = height * aspectRatio
-        if (minW < minH * aspectRatio_) {
-            minW = minH * aspectRatio_;
-        } else {
-            minH = minW / aspectRatio_;
-        }
-        if (maxW < maxH * aspectRatio_) {
-            maxH = maxW / aspectRatio_;
-        } else {
-            maxW = maxH * aspectRatio_;
-        }
-    }
-
-    const static std::map<AreaType, std::function<void(int32_t, int32_t, int32_t, int32_t)>> calcMinMaxTranMap = {
-        { AreaType::LEFT, [this](int32_t maxW, int32_t minW, int32_t maxH, int32_t minH) {
-            minTranX_ = static_cast<int32_t>(moveDragProperty_.originalRect_.width_) - maxW;
-            maxTranX_ = static_cast<int32_t>(moveDragProperty_.originalRect_.width_) - minW;
-            minTranY_ = minH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
-            maxTranY_ = maxH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
-        }},
-        { AreaType::LEFT_TOP, [this](int32_t maxW, int32_t minW, int32_t maxH, int32_t minH) {
-            minTranX_ = static_cast<int32_t>(moveDragProperty_.originalRect_.width_) - maxW;
-            maxTranX_ = static_cast<int32_t>(moveDragProperty_.originalRect_.width_) - minW;
-            minTranY_ = static_cast<int32_t>(moveDragProperty_.originalRect_.height_) - maxH;
-            maxTranY_ = static_cast<int32_t>(moveDragProperty_.originalRect_.height_) - minH;
-        }},
-        { AreaType::LEFT_BOTTOM, [this](int32_t maxW, int32_t minW, int32_t maxH, int32_t minH) {
-            minTranX_ = static_cast<int32_t>(moveDragProperty_.originalRect_.width_) - maxW;
-            maxTranX_ = static_cast<int32_t>(moveDragProperty_.originalRect_.width_) - minW;
-            minTranY_ = minH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
-            maxTranY_ = maxH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
-        }},
-        { AreaType::RIGHT, [this](int32_t maxW, int32_t minW, int32_t maxH, int32_t minH) {
-            minTranX_ = minW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
-            maxTranX_ = maxW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
-            minTranY_ = minH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
-            maxTranY_ = maxH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
-        }},
-        { AreaType::RIGHT_TOP, [this](int32_t maxW, int32_t minW, int32_t maxH, int32_t minH) {
-            minTranX_ = minW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
-            maxTranX_ = maxW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
-            minTranY_ = static_cast<int32_t>(moveDragProperty_.originalRect_.height_) - maxH;
-            maxTranY_ = static_cast<int32_t>(moveDragProperty_.originalRect_.height_) - minH;
-        }},
-        { AreaType::RIGHT_BOTTOM, [this](int32_t maxW, int32_t minW, int32_t maxH, int32_t minH) {
-            minTranX_ = minW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
-            maxTranX_ = maxW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
-            minTranY_ = minH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
-            maxTranY_ = maxH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
-        }},
-        { AreaType::TOP, [this](int32_t maxW, int32_t minW, int32_t maxH, int32_t minH) {
-            minTranX_ = minW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
-            maxTranX_ = maxW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
-            minTranY_ = static_cast<int32_t>(moveDragProperty_.originalRect_.height_) - maxH;
-            maxTranY_ = static_cast<int32_t>(moveDragProperty_.originalRect_.height_) - minH;
-        }},
-        { AreaType::BOTTOM, [this](int32_t maxW, int32_t minW, int32_t maxH, int32_t minH) {
-            minTranX_ = minW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
-            maxTranX_ = maxW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
-            minTranY_ = minH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
-            maxTranY_ = maxH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
-        }},
-    };
-    if (calcMinMaxTranMap.find(type) == calcMinMaxTranMap.end()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "not find type:%{public}d", type);
+    if (MathHelper::NearZero(aspectRatio_)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "aspectRatio is near 0, id:%{public}d", persistentId_);
         return;
     }
-    calcMinMaxTranMap.at(type)(maxW, minW, maxH, minH);
+
+    const int32_t origW = moveDragProperty_.originalRect_.width_;
+    const int32_t origH = moveDragProperty_.originalRect_.height_;
+
+    auto adjustedLimits = SessionUtils::AdjustLimitsByAspectRatio(limits_, decoration_, aspectRatio_);
+    const int32_t minW = static_cast<int32_t>(adjustedLimits.minWidth_);
+    const int32_t maxW = static_cast<int32_t>(adjustedLimits.maxWidth_);
+    const int32_t minH = static_cast<int32_t>(adjustedLimits.minHeight_);
+    const int32_t maxH = static_cast<int32_t>(adjustedLimits.maxHeight_);
+
+    switch (type) {
+        case AreaType::LEFT:
+        case AreaType::LEFT_BOTTOM: {
+            minTranX_ = origW - maxW;
+            maxTranX_ = origW - minW;
+            minTranY_ = minH - origH;
+            maxTranY_ = maxH - origH;
+            break;
+        }
+        case AreaType::LEFT_TOP: {
+            minTranX_ = origW - maxW;
+            maxTranX_ = origW - minW;
+            minTranY_ = origH - maxH;
+            maxTranY_ = origH - minH;
+            break;
+        }
+        case AreaType::RIGHT:
+        case AreaType::RIGHT_BOTTOM:
+        case AreaType::BOTTOM: {
+            minTranX_ = minW - origW;
+            maxTranX_ = maxW - origW;
+            minTranY_ = minH - origH;
+            maxTranY_ = maxH - origH;
+            break;
+        }
+        case AreaType::RIGHT_TOP:
+        case AreaType::TOP: {
+            minTranX_ = minW - origW;
+            maxTranX_ = maxW - origW;
+            minTranY_ = origH - maxH;
+            maxTranY_ = origH - minH;
+            break;
+        }
+        default: {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid type: %{public}u", static_cast<uint32_t>(type));
+            break;
+        }
+    }
 }
 
 void MoveDragController::FixTranslateByLimits(int32_t& tranX, int32_t& tranY)

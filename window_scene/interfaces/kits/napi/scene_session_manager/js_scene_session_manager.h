@@ -176,6 +176,7 @@ public:
      * PiP Window
      */
     static napi_value SetPiPSettingSwitchStatus(napi_env env, napi_callback_info info);
+    static napi_value GetPipDeviceCollaborationPolicy(napi_env env, napi_callback_info info);
 
 private:
     napi_value OnSetBehindWindowFilterEnabled(napi_env env, napi_callback_info info);
@@ -341,6 +342,7 @@ private:
     void OnStartPiPFailed(DisplayId displayId);
     void ProcessStartPiPFailedRegister();
     napi_value OnSetPiPSettingSwitchStatus(napi_env env, napi_callback_info info);
+    napi_value OnGetPipDeviceCollaborationPolicy(napi_env env, napi_callback_info info);
 
     /*
      * Window Animation
@@ -378,7 +380,9 @@ private:
     void RegisterSceneSessionDestructCallback();
     void OnSceneSessionDestruct(int32_t persistentId);
     void RegisterTransferSessionToTargetScreenCallback();
-    void OnTransferSessionToTargetScreen(const TransferSessionInfo& info, const uint64_t fromScreenId);
+    void OnTransferSessionToTargetScreen(const TransferSessionInfo& info);
+    static napi_value NotifySessionTransferToTargetScreenEvent(napi_env env, napi_callback_info info);
+    napi_value OnNotifySessionTransferToTargetScreenEvent(napi_env env, napi_callback_info info);
     static napi_value UpdateRecentMainSessionInfos(napi_env env, napi_callback_info info);
 
     napi_env env_;

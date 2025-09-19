@@ -26,6 +26,7 @@
 #include "display_change_info.h"
 #include "dm_common.h"
 #include "session/screen/include/screen_session.h"
+#include "session_manager/include/ffrt_queue_helper.h"
 #include "interfaces/include/ws_common.h"
 #include "wm_single_instance.h"
 #include "zidl/screen_session_manager_client_stub.h"
@@ -99,6 +100,7 @@ public:
     void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override;
     void UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo);
     void GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo) const;
+    void NotifyIsFullScreenInForceSplitMode(int32_t uid, bool isFullScreen);
     void SetForceCloseHdr(ScreenId screenId, bool isForceCloseHdr);
 
     void RegisterSwitchingToAnotherUserFunction(std::function<void()>&& func);
@@ -179,6 +181,8 @@ private:
     std::function<void()> switchingToAnotherUserFunc_ = nullptr;
 
     sptr<IScreenSessionManager> screenSessionManager_;
+
+    std::shared_ptr<FfrtQueueHelper> ffrtQueueHelper_ = std::make_shared<FfrtQueueHelper>();
 
     IScreenConnectionListener* screenConnectionListener_;
     sptr<IScreenConnectionChangeListener> screenConnectionChangeListener_;

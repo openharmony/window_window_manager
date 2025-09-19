@@ -837,6 +837,15 @@ void ScreenSessionManagerClient::GetDisplayHookInfo(int32_t uid, DMHookInfo& hoo
     screenSessionManager_->GetDisplayHookInfo(uid, hookInfo);
 }
 
+void ScreenSessionManagerClient::NotifyIsFullScreenInForceSplitMode(int32_t uid, bool isFullScreen)
+{
+    if (!screenSessionManager_) {
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
+        return;
+    }
+    screenSessionManager_->NotifyIsFullScreenInForceSplitMode(uid, isFullScreen);
+}
+
 void ScreenSessionManagerClient::OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo)
 {
     if (displayChangeListener_) {
@@ -1249,12 +1258,17 @@ std::string ScreenSessionManagerClient::OnDumperClientScreenSessions()
 
 void ScreenSessionManagerClient::SetDefaultMultiScreenModeWhenSwitchUser()
 {
-    if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
+    wptr<IScreenSessionManager> screenSessionManagerWptr = screenSessionManager_;
+    auto task = [screenSessionManagerWptr] {
+        auto screenSessionManager = screenSessionManagerWptr.promote();
+        if (!screenSessionManager) {
+            TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
+            return;
+        }
+        screenSessionManager->SetDefaultMultiScreenModeWhenSwitchUser();
         return;
-    }
-    screenSessionManager_->SetDefaultMultiScreenModeWhenSwitchUser();
-    return;
+    };
+    ffrtQueueHelper_->SubmitTask(std::move(task));
 }
 
 void ScreenSessionManagerClient::NotifyExtendScreenCreateFinish()

@@ -635,31 +635,42 @@ bool WindowAdapter::InitSSMProxy()
         return true;
     }
     windowManagerServiceProxy_ = SessionManager::GetInstance(userId_)->GetSceneSessionManagerProxy();
-    if (!windowManagerServiceProxy_ || !windowManagerServiceProxy_->AsObject()) {
-        WLOGFE("Failed to get system scene session manager services");
+    if (!windowManagerServiceProxy_) {
+        TLOGE(WmsLogTag::WMS_SCB, "windowManagerServiceProxy_ is null");
+        return false;
+    }
+    sptr<IRemoteObject> remoteObject = windowManagerServiceProxy_->AsObject();
+    if (!remoteObject) {
+        TLOGE(WmsLogTag::WMS_SCB, "remoteObject is null");
         return false;
     }
     wmsDeath_ = sptr<WMSDeathRecipient>::MakeSptr(userId_);
-    sptr<IRemoteObject> remoteObject = windowManagerServiceProxy_->AsObject();
     if (remoteObject->IsProxyObject() && !remoteObject->AddDeathRecipient(wmsDeath_)) {
-        WLOGFE("Failed to add death recipient");
+        TLOGE(WmsLogTag::WMS_SCB, "Failed to add death recipient");
         return false;
     }
     if (!recoverInitialized_) {
         SessionManager::GetInstance(userId_)->RegisterWindowManagerRecoverCallbackFunc([weakThis = wptr(this)] {
-            auto windowAdapter = weakThis.promote();
-            if (!windowAdapter) {
+            auto instance = weakThis.promote();
+            if (!instance) {
                 TLOGE(WmsLogTag::WMS_SCB, "window adapter is null");
                 return;
             }
-            windowAdapter->WindowManagerAndSessionRecover();
+            instance->WindowManagerAndSessionRecover();
         });
         recoverInitialized_ = true;
     }
     // U0 system user needs to subscribe OnUserSwitch event
     int32_t clientUserId = GetUserIdByUid(getuid());
     if (clientUserId == SYSTEM_USERID && !isRegisteredUserSwitchListener_) {
-        SessionManager::GetInstance(userId_)->RegisterUserSwitchListener([this]() { this->OnUserSwitch(); });
+        SessionManager::GetInstance(userId_)->RegisterUserSwitchListener([weakThis = wptr(this)]() {
+            auto instance = weakThis.promote();
+            if (!instance) {
+                TLOGE(WmsLogTag::WMS_SCB, "window adapter is null");
+                return;
+            }
+            instance->OnUserSwitch();
+        });
         isRegisteredUserSwitchListener_ = true;
     }
     isProxyValid_ = true;

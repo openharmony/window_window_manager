@@ -150,6 +150,7 @@ using GetAllAppUseControlMapFunc =
 using GetFbPanelWindowIdFunc =  std::function<WMError(uint32_t& windowId)>;
 using FindScenePanelRsNodeByZOrderFunc = std::function<std::shared_ptr<Rosen::RSNode>(DisplayId displayId,
     uint32_t targetZOrder)>;
+using ForceSplitFullScreenChangeCallback = std::function<void(uint32_t uid, bool isFullScreen)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -295,6 +296,7 @@ public:
         bool needNotifyClient = true, bool isExecuteDelayRaise = false);
     WSError RequestSessionBack(bool needMoveToBackground) override;
     WSError SetAspectRatio(float ratio) override;
+    WSError SetContentAspectRatio(float ratio, bool isPersistent, bool needUpdateRect) override;
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
     WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
     WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) override;
@@ -402,6 +404,8 @@ public:
      */
     bool IsInCompatScaleStatus() const;
     bool IsInCompatScaleMode();
+    virtual void RegisterForceSplitFullScreenChangeCallback(ForceSplitFullScreenChangeCallback&& callback) {}
+    virtual bool IsFullScreenInForceSplit() { return false; }
 
     /*
      * PC Window
@@ -676,6 +680,9 @@ public:
      */
     int32_t GetCustomDecorHeight() const;
     void SetCustomDecorHeight(int32_t height) override;
+    WSError SetDecorVisible(bool isVisible) override;
+    bool IsDecorVisible() const;
+    WindowDecoration GetWindowDecoration() const;
 
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) override;
@@ -1260,6 +1267,8 @@ private:
      */
     mutable std::mutex customDecorHeightMutex_;
     int32_t customDecorHeight_ = 0;
+    bool isDecorVisible_ = true;
+    // guarded by customDecorHeightMutex_
 
     ForceHideState forceHideState_ { ForceHideState::NOT_HIDDEN };
     int32_t oriPosYBeforeRaisedByKeyboard_ = 0;

@@ -76,6 +76,9 @@ const std::map<SessionState, bool> DETACH_MAP = {
     { SessionState::STATE_INACTIVE, true },
     { SessionState::STATE_BACKGROUND, true },
 };
+const bool CORRECTION_ENABLE = system::GetIntParameter<int32_t>("const.system.sensor_correction_enable", 0) == 1;
+const uint32_t ROTATION_90 = 90;
+const uint32_t ROTATION_360 = 360;
 const uint32_t ROTATION_LANDSCAPE_INVERTED = 3;
 } // namespace
 
@@ -1772,7 +1775,9 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
             TLOGND(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
-        if (session->sessionStage_ && WindowHelper::IsNeedWaitAttachStateWindow(session->GetWindowType())) {
+        auto mainSession = session->GetMainSession();
+        if ((!mainSession || !mainSession->GetShowRecent()) &&
+            session->sessionStage_ && WindowHelper::IsNeedWaitAttachStateWindow(session->GetWindowType())) {
             TLOGNI(WmsLogTag::WMS_LIFE, "NotifyWindowAttachStateChange, persistentId:%{public}d",
                 session->GetPersistentId());
             session->sessionStage_->NotifyWindowAttachStateChange(isAttach);
@@ -2753,6 +2758,9 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
     }
     auto key = GetSessionSnapshotStatus(reason);
     auto rotation = currentRotation_;
+    if (CORRECTION_ENABLE && key.first == 0) {
+        rotation = (rotation + ROTATION_90) % ROTATION_360;
+    }
     if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
         WSSnapshotHelper::GetInstance()->GetScreenStatus() == SCREEN_FOLDED) {
         rotation = ROTATION_LANDSCAPE_INVERTED;
@@ -2951,6 +2959,9 @@ SnapshotStatus Session::GetSessionSnapshotStatus(BackgroundReason reason) const
         snapshotScreen = SCREEN_EXPAND;
     }
     uint32_t orientation = WSSnapshotHelper::GetOrientation(currentRotation_);
+    if (CORRECTION_ENABLE && snapshotScreen == 0) {
+        orientation ^= 1;
+    }
     if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
         WSSnapshotHelper::GetInstance()->GetScreenStatus() == SCREEN_FOLDED) {
         orientation = 1;
@@ -2970,6 +2981,10 @@ uint32_t Session::GetLastOrientation() const
 {
     if (!SupportSnapshotAllSessionStatus()) {
         return SNAPSHOT_PORTRAIT;
+    }
+    if (CORRECTION_ENABLE && WSSnapshotHelper::GetInstance()->GetScreenStatus() == 0) {
+        return static_cast<uint32_t>(
+            WSSnapshotHelper::GetDisplayOrientation((currentRotation_ + ROTATION_90) % ROTATION_360));
     }
     if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
         WSSnapshotHelper::GetInstance()->GetScreenStatus() == SCREEN_FOLDED) {

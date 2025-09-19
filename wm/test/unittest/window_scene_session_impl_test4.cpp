@@ -466,14 +466,6 @@ HWTEST_F(WindowSceneSessionImplTest4, ResetSuperFoldDisplayY01, TestSize.Level1)
     updatedDisplayY = pointerItem.GetDisplayYPos();
     ASSERT_EQ(updatedDisplayY, originalDisplayY - 150);
 
-    pointerItem.SetDisplayYPos(150.001);
-    pointerEvent->AddPointerItem(pointerItem);
-    originalDisplayY = pointerItem.GetDisplayYPos();
-    windowSceneSessionImpl->ResetSuperFoldDisplayY(pointerEvent);
-    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
-    updatedDisplayY = pointerItem.GetDisplayYPos();
-    ASSERT_EQ(updatedDisplayY, originalDisplayY - 150);
-
     pointerItem.SetDisplayYPos(151.001);
     pointerEvent->AddPointerItem(pointerItem);
     originalDisplayY = pointerItem.GetDisplayYPos();

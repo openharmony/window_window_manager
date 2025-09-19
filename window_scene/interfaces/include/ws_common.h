@@ -46,6 +46,7 @@ using ScreenId = uint64_t;
 
 constexpr int32_t ROTATE_ANIMATION_DURATION = 400;
 constexpr int32_t INVALID_SESSION_ID = 0;
+constexpr int32_t MIN_REQUEST_ID_FROM_ABILITY = 1;
 constexpr int32_t DEFAULT_REQUEST_FROM_SCB_ID = -1;
 constexpr int32_t WINDOW_SUPPORT_MODE_MAX_SIZE = 4;
 constexpr int32_t DEFAULT_SCALE_RATIO = 100;
@@ -512,6 +513,10 @@ struct SessionInfo {
     std::shared_ptr<StartAnimationSystemOptions> startAnimationSystemOptions = nullptr;
 };
 
+struct RequestTaskInfo {
+    std::unordered_map<int32_t, AAFwk::Want> requestIdToWantMap;
+};
+
 enum class SessionFlag : uint32_t {
     SESSION_FLAG_NEED_AVOID = 1,
     SESSION_FLAG_PARENT_LIMIT = 1 << 1,
@@ -790,6 +795,41 @@ struct WSScreenRelativeRect {
     {
         std::ostringstream oss;
         oss << screenId << ", " << rect.ToString();
+        return oss.str();
+    }
+};
+
+/**
+ * @struct WindowDecoration
+ *
+ * @brief Represents the window decoration thickness (non-drawable area).
+ *        In general, the top decoration includes the title bar.
+ */
+struct WindowDecoration {
+    uint32_t left = 0;
+    uint32_t top = 0;
+    uint32_t right = 0;
+    uint32_t bottom = 0;
+
+    bool operator==(const WindowDecoration& other) const
+    {
+        return left == other.left && top == other.top && right == other.right && bottom == other.bottom;
+    }
+
+    /**
+     * @brief Calculate the total horizontal decoration.
+     */
+    uint32_t Horizontal() const { return left + right; }
+
+    /**
+     * @brief Calculate the total vertical decoration.
+     */
+    uint32_t Vertical() const { return top + bottom; }
+
+    std::string ToString() const
+    {
+        std::ostringstream oss;
+        oss << "[" << left << ", " << top << ", " << right << ", " << bottom << "]";
         return oss.str();
     }
 };

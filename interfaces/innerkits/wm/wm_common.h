@@ -458,7 +458,15 @@ enum class WindowUIType : uint8_t {
  * @brief Used to map from WMError to WmErrorCode.
  */
 extern const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP;
-WmErrorCode ConvertErrorToCode(WMError error);
+
+/**
+ * @brief Convert WMError to corresponding WmErrorCode.
+ *
+ * @param error WMError value to convert.
+ * @param defaultCode Value to return if mapping is not found.
+ * @return Corresponding WmErrorCode or defaultCode if unmapped.
+ */
+WmErrorCode ConvertErrorToCode(WMError error, WmErrorCode defaultCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
 
 /**
  * @brief Enumerates flag of window.
@@ -550,6 +558,7 @@ enum class WindowSizeChangeReason : uint32_t {
     SCREEN_RELATIVE_POSITION_CHANGE,
     ROOT_SCENE_CHANGE,
     SNAPSHOT_ROTATION = 37,
+    FULL_SCREEN_IN_FORCE_SPLIT,
     END,
 };
 
@@ -1778,9 +1787,38 @@ struct WindowLimits {
         float minRatio, float vpRatio) : maxWidth_(maxWidth), maxHeight_(maxHeight), minWidth_(minWidth),
         minHeight_(minHeight), maxRatio_(maxRatio), minRatio_(minRatio), vpRatio_(vpRatio) {}
 
+    void Clip(uint32_t clipWidth, uint32_t clipHeight)
+    {
+        auto safeSub = [](uint32_t base, uint32_t dec) -> uint32_t {
+            return (dec >= base) ? 0 : base - dec;
+        };
+
+        minWidth_ = safeSub(minWidth_, clipWidth);
+        maxWidth_ = safeSub(maxWidth_, clipWidth);
+        minHeight_ = safeSub(minHeight_, clipHeight);
+        maxHeight_ = safeSub(maxHeight_, clipHeight);
+    }
+
+    void Expand(uint32_t expandWidth, uint32_t expandHeight)
+    {
+        auto safeAdd = [](uint32_t base, uint32_t inc) -> uint32_t {
+            return (base > UINT32_MAX - inc) ? UINT32_MAX : base + inc;
+        };
+
+        minWidth_ = safeAdd(minWidth_, expandWidth);
+        maxWidth_ = safeAdd(maxWidth_, expandWidth);
+        minHeight_ = safeAdd(minHeight_, expandHeight);
+        maxHeight_ = safeAdd(maxHeight_, expandHeight);
+    }
+
     bool IsEmpty() const
     {
         return (maxWidth_ == 0 || minWidth_ == 0 || maxHeight_ == 0 || minHeight_ == 0);
+    }
+
+    bool IsValid() const
+    {
+        return minWidth_ <= maxWidth_ && minHeight_ <= maxHeight_;
     }
 
     std::string ToString() const

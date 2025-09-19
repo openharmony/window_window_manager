@@ -1260,6 +1260,8 @@ export class WindowInternal implements Window {
     private native getUIContextSync(nativeObj: long): UIContext;
     private native getWindowAvoidAreaSync(nativeObj: long, type: int): AvoidArea;
     private native setWaterMarkFlagSync(nativeObj: long, enable: boolean): void;
+    private native setContentAspectRatio(
+      nativeObj: long, ratio: number, isPersistent: boolean, needUpdateRect: boolean): void;
     private native onSync(nativeObj: long, type: string, callback: object): void;
     private native offSync(nativeObj: long, type: string, callback?: object): void;
 
@@ -1684,6 +1686,19 @@ export class WindowInternal implements Window {
       });
     }
 
+    public setContentAspectRatio(ratio: number, isPersistent?: boolean, needUpdateRect?: boolean): Promise<void> {
+      return new Promise<void>(
+        (resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
+          taskpool.execute((): void => {
+              this.setContentAspectRatio(this.nativeObj, ratio, isPersistent ?? true, needUpdateRect ?? true);
+          }).then((ret: NullishType) => {
+              resolve(undefined);
+          }).catch((err: NullishType) => {
+              reject(err as BusinessError);
+          });
+      });
+    }
+
     public on<T>(type: string, callback: Callback<T>): void {
       this.onSync(this.nativeObj, type, callback);
     }
@@ -1737,6 +1752,7 @@ export interface Window {
     getWindowAvoidArea(type: AvoidAreaType): AvoidArea;
     setWaterMarkFlag(enable: boolean): Promise<void>;
     setWaterMarkFlag(enable: boolean, callback: AsyncCallback<void>): void;
+    setContentAspectRatio(ratio: number, isPersistent?: boolean, needUpdateRect?: boolean): Promise<void>;
     on<T>(type: string, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;
 }

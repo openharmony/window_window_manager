@@ -363,7 +363,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 break;
             }
             ScreenId screenGroupId = INVALID_SCREEN_ID;
-            DMError ret = MakeMirror(mainScreenId, mirrorScreenId, screenGroupId);
+            Rotation rotation = static_cast<Rotation>(data.ReadUint32());
+            bool needSetRotation = data.ReadBool();
+            RotationOption rotationOption = {rotation, needSetRotation};
+            DMError ret = MakeMirror(mainScreenId, mirrorScreenId, screenGroupId, rotationOption);
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
             static_cast<void>(reply.WriteUint64(static_cast<uint64_t>(screenGroupId)));
             break;
@@ -1155,6 +1158,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             hookInfo.enableHookRotation_ = data.ReadBool();
             hookInfo.displayOrientation_ = data.ReadUint32();
             hookInfo.enableHookDisplayOrientation_ = data.ReadBool();
+            hookInfo.isFullScreenInForceSplit_ = data.ReadBool();
             UpdateDisplayHookInfo(uid, enable, hookInfo);
             break;
         }
@@ -1342,6 +1346,20 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_NOTIFY_SWITCH_USER_ANIMATION_FINISH: {
             NotifySwitchUserAnimationFinish();
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_NOTIFY_IS_FULL_SCREEN_IN_FORCE_SPLIT: {
+            int32_t uid = 0;
+            if (!data.ReadInt32(uid)) {
+                TLOGE(WmsLogTag::DMS, "Read uid failed");
+                return ERR_INVALID_DATA;
+            }
+            bool isFullScreen = false;
+            if (!data.ReadBool(isFullScreen)) {
+                TLOGE(WmsLogTag::DMS, "Read isFullScreen failed");
+                return ERR_INVALID_DATA;
+            }
+            NotifyIsFullScreenInForceSplitMode(uid, isFullScreen);
             break;
         }
         default:

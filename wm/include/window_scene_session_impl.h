@@ -79,6 +79,7 @@ public:
 
     void PerformBack() override;
     WMError SetAspectRatio(float ratio) override;
+    WMError SetContentAspectRatio(float ratio, bool isPersistent, bool needUpdateRect) override;
     WMError ResetAspectRatio() override;
     WMError SetGlobalMaximizeMode(MaximizeMode mode) override;
     MaximizeMode GetGlobalMaximizeMode() const override;
@@ -216,6 +217,7 @@ public:
     WSError NotifyCompatibleModePropertyChange(const sptr<CompatibleModeProperty> property) override;
     void HookDecorButtonStyleInCompatibleMode(uint32_t contentColor);
     WSError PcAppInPadNormalClose() override;
+    void NotifyIsFullScreenInForceSplitMode(bool isFullScreen) override;
 
     /*
      * Free Multi Window
@@ -311,6 +313,7 @@ public:
     /**
      * Window Transition Animation For PC
      */
+    WMError IsTransitionAnimationSupported() const override;
     WMError SetWindowTransitionAnimation(WindowTransitionType transitionType,
         const TransitionAnimation& animation) override;
     std::shared_ptr<TransitionAnimation> GetWindowTransitionAnimation(WindowTransitionType transitionType) override;

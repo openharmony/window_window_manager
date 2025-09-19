@@ -296,12 +296,22 @@ HWTEST_F(SceneSessionTest4, SetSkipDraw, TestSize.Level1)
     EXPECT_NE(nullptr, session);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    session->surfaceNode_ = surfaceNode;
+    session->SetSurfaceNode(surfaceNode);
+    session->SetLeashWinSurfaceNode(surfaceNode);
+    EXPECT_TRUE(session->GetShadowSurfaceNode());
+    EXPECT_TRUE(session->GetLeashWinShadowSurfaceNode());
+    session->SetSkipDraw(true);
+    EXPECT_TRUE(session->GetShadowSurfaceNode()->GetSkipDraw());
+    session->SetSkipDraw(false);
+    EXPECT_FALSE(session->GetShadowSurfaceNode()->GetSkipDraw());
+
     session->SetLeashWinSurfaceNode(nullptr);
     session->SetSkipDraw(true);
-    session->SetLeashWinSurfaceNode(surfaceNode);
-    EXPECT_EQ(surfaceNode, session->GetLeashWinSurfaceNode());
+    EXPECT_FALSE(session->GetLeashWinShadowSurfaceNode());
+
+    session->SetSurfaceNode(nullptr);
     session->SetSkipDraw(true);
+    EXPECT_FALSE(session->GetShadowSurfaceNode());
 }
 
 /**
@@ -507,7 +517,7 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction1, TestSize.Level1)
 
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    sceneSession->surfaceNode_ = surfaceNode;
+    sceneSession->SetSurfaceNode(surfaceNode);
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP));
 }

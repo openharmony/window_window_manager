@@ -2063,6 +2063,116 @@ HWTEST_F(SessionProxyTest, GetAppHookWindowInfoFromServer, TestSize.Level1)
     MockMessageParcel::ClearAllErrorFlag();
     GTEST_LOG_(INFO) << "SessionProxyTest: GetAppHookWindowInfoFromServer end";
 }
+
+/**
+ * @tc.name: TestSetContentAspectRatio
+ * @tc.desc: Test SetContentAspectRatio behavior in various IPC scenarios
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, TestSetContentAspectRatio, TestSize.Level1)
+{
+    auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
+    auto sessionProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    float ratio = 1.5f;
+    bool isPersistent = true;
+    bool needUpdateRect = false;
+
+    // Case 1: Failed to write interface token
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->SetContentAspectRatio(ratio, isPersistent, needUpdateRect));
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    // Case 2: Failed to write ratio
+    MockMessageParcel::SetWriteFloatErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->SetContentAspectRatio(ratio, isPersistent, needUpdateRect));
+    MockMessageParcel::SetWriteFloatErrorFlag(false);
+
+    // Case 3: Failed to write isPersistent and needUpdateRect
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->SetContentAspectRatio(ratio, isPersistent, needUpdateRect));
+    MockMessageParcel::SetWriteBoolErrorFlag(false);
+
+    // Case 4: remote is nullptr
+    sptr<SessionProxy> nullProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, nullProxy->SetContentAspectRatio(ratio, isPersistent, needUpdateRect));
+
+    // Case 5: Failed to send request
+    mockRemote->sendRequestResult_ = ERR_TRANSACTION_FAILED;
+    sptr<SessionProxy> failProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, failProxy->SetContentAspectRatio(ratio, isPersistent, needUpdateRect));
+
+    // Case 6: Success
+    mockRemote->sendRequestResult_ = ERR_NONE;
+    sptr<SessionProxy> okProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WSError::WS_OK, okProxy->SetContentAspectRatio(ratio, isPersistent, needUpdateRect));
+}
+
+/**
+ * @tc.name: TestSetDecorVisible
+ * @tc.desc: Test SetDecorVisible behavior in various IPC scenarios
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, TestSetDecorVisible, TestSize.Level1)
+{
+    auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
+    auto sessionProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    bool isVisible = true;
+
+    // Case 1: Failed to write interface token
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->SetDecorVisible(isVisible));
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    // Case 2: Failed to write isVisible
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->SetDecorVisible(isVisible));
+    MockMessageParcel::SetWriteBoolErrorFlag(false);
+
+    // Case 3: remote is nullptr
+    sptr<SessionProxy> nullProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, nullProxy->SetDecorVisible(isVisible));
+
+    // Case 4: Failed to send request
+    mockRemote->sendRequestResult_ = ERR_TRANSACTION_FAILED;
+    sptr<SessionProxy> failProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, failProxy->SetDecorVisible(isVisible));
+
+    // Case 5: Success
+    mockRemote->sendRequestResult_ = ERR_NONE;
+    sptr<SessionProxy> okProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WSError::WS_OK, okProxy->SetDecorVisible(isVisible));
+}
+
+/**
+ * @tc.name: NotifyIsFullScreenInForceSplitMode
+ * @tc.desc: NotifyIsFullScreenInForceSplitMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, NotifyIsFullScreenInForceSplitMode, TestSize.Level3)
+{
+    auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
+    auto sessionProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    bool isFullScreen = true;
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->NotifyIsFullScreenInForceSplitMode(isFullScreen));
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->NotifyIsFullScreenInForceSplitMode(isFullScreen));
+    MockMessageParcel::SetWriteBoolErrorFlag(false);
+
+    sptr<SessionProxy> nullProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, nullProxy->NotifyIsFullScreenInForceSplitMode(isFullScreen));
+
+    mockRemote->sendRequestResult_ = ERR_TRANSACTION_FAILED;
+    sptr<SessionProxy> failProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, failProxy->NotifyIsFullScreenInForceSplitMode(isFullScreen));
+
+    mockRemote->sendRequestResult_ = ERR_NONE;
+    sptr<SessionProxy> okProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WSError::WS_OK, okProxy->NotifyIsFullScreenInForceSplitMode(isFullScreen));
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

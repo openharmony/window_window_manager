@@ -569,4 +569,23 @@ void MainSession::SetRecentSessionState(RecentSessionInfo& info, const SessionSt
         }
     }
 }
+
+void MainSession::RegisterForceSplitFullScreenChangeCallback(ForceSplitFullScreenChangeCallback&& callback)
+{
+    forceSplitFullScreenChangeCallback_ = std::move(callback);
+}
+
+WSError MainSession::NotifyIsFullScreenInForceSplitMode(bool isFullScreen)
+{
+    isFullScreenInForceSplit_.store(isFullScreen);
+    if (forceSplitFullScreenChangeCallback_) {
+        forceSplitFullScreenChangeCallback_(GetCallingUid(), isFullScreen);
+    }
+    return WSError::WS_OK;
+}
+
+bool MainSession::IsFullScreenInForceSplit()
+{
+    return isFullScreenInForceSplit_.load();
+}
 } // namespace OHOS::Rosen
