@@ -1213,28 +1213,30 @@ HWTEST_F(SceneSessionTest6, TestUpdateGlobalDisplayRectFromClient, Function | Sm
 }
 
 /**
- * @tc.name: GetAvoidAreaByType
- * @tc.desc: GetAvoidAreaByType
+ * @tc.name: PatchAINavigationBarArea
+ * @tc.desc: PatchAINavigationBarArea
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest6, GetAvoidAreaByType, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionTest6, PatchAINavigationBarArea, Function | SmallTest | Level1)
 {
     SessionInfo info;
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    WSRect winRect = { 0, 0, 0, 0 };
     AvoidArea avoidArea;
-    session->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, winRect, 20);
-    EXPECT_EQ(session->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, winRect, 20), avoidArea);
-    session->isAINavigationBarAvoidAreaValid_ = nullptr;
-    EXPECT_EQ(session->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR, winRect, 20), avoidArea);
-    session->isAINavigationBarAvoidAreaValid_ = [](DisplayId displayId, AvoidArea& area, int32_t sessionBottom) {
-        return false;
-    };
-    EXPECT_EQ(session->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR, winRect, 20), avoidArea);
-    session->isAINavigationBarAvoidAreaValid_ = [](DisplayId displayId, AvoidArea& area, int32_t sessionBottom) {
-        return true;
-    };
-    EXPECT_EQ(session->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR, winRect, 20), avoidArea);
+    AvoidArea avoidAreaEmpty;
+    Rect rect = { 600, 2710, 500, 10 };
+    session->PatchAINavigationBarArea(avoidArea);
+    EXPECT_EQ(avoidArea, avoidAreaEmpty);
+    avoidArea.topRect_ = { 600, 2710, 500, 10 };
+    session->PatchAINavigationBarArea(avoidArea);
+    EXPECT_EQ(avoidArea.bottomRect_, rect);
+    avoidArea.topRect_ = { 0, 0, 0, 0 };
+    avoidArea.leftRect_ = { 600, 2710, 500, 10 };
+    session->PatchAINavigationBarArea(avoidArea);
+    EXPECT_EQ(avoidArea.bottomRect_, rect);
+    avoidArea.leftRect_ = { 0, 0, 0, 0 };
+    avoidArea.rightRect_ = { 600, 2710, 500, 10 };
+    session->PatchAINavigationBarArea(avoidArea);
+    EXPECT_EQ(avoidArea.bottomRect_, rect);
 }
 
 /**
