@@ -2226,7 +2226,7 @@ WSError SceneSession::SetIsStatusBarVisibleInner(bool isVisible)
     bool isNeedNotify = IsStatusBarVisible() != isVisible;
     TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}d, %{public}s] visible %{public}u need notify %{public}u",
         GetPersistentId(), GetWindowName().c_str(), isVisible, isNeedNotify);
-    SetIsStatusBarVisible(isVisible);
+    UpdateStatusBarVisible(isVisible);
     if (!isNeedNotify) {
         return WSError::WS_OK;
     }
@@ -7355,7 +7355,7 @@ bool SceneSession::GetIsDisplayStatusBarTemporarily() const
 void SceneSession::RetrieveStatusBarDefaultVisibility()
 {
     if (specificCallback_ && specificCallback_->onGetStatusBarDefaultVisibilityByDisplayId_) {
-        SetIsStatusBarVisible(
+        UpdateStatusBarVisible(
             specificCallback_->onGetStatusBarDefaultVisibilityByDisplayId_(GetSessionProperty()->GetDisplayId()));
     }
 }
