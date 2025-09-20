@@ -315,6 +315,8 @@ public:
     static void GetSpecificBarStatus(sptr<Window>& window, const std::string& name,
         std::map<WindowType, SystemBarProperty>& newSystemBarProperties,
         std::map<WindowType, SystemBarProperty>& systemBarProperties);
+    static ani_object CreateOptionalBool(ani_env *env, ani_boolean value);
+    static ani_object CreateOptionalInt(ani_env *env, ani_int value);
 
     /**
      * @brief Convert WMError to corresponding WmErrorCode.

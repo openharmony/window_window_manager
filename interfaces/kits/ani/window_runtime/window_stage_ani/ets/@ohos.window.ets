@@ -1134,6 +1134,262 @@ export interface WindowLimits {
     minHeight: number;
 }
 
+/**
+ * Options for subwindow creation
+ * 
+ * @interface SubWindowOptions
+ * @syscap SystemCapability.Window.SessionManager
+ * @since 11
+ */
+/**
+ * Options for subwindow creation
+ * 
+ * @interface SubWindowOptions
+ * @syscap SystemCapability.Window.SessionManager
+ * @atomicservice
+ * @since 12
+ */
+export interface SubWindowOptions {
+  /**
+   * Indicates subwindow title
+   * 
+   * @type { string }
+   * @syscap SystemCapability.Window.SessionManager
+   * @since 11
+   */
+  /**
+   * Indicates subwindow title
+   * 
+   * @type { string }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 12
+   */
+  title: string;
+  /**
+   * Indicates decor of subwindow
+   * 
+   * @type { boolean }
+   * @syscap SystemCapability.Window.SessionManager
+   * @since 11
+   */
+  /**
+   * Indicates decor of subwindow
+   * 
+   * @type { boolean }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 12
+   */
+  decorEnabled: boolean;
+  /**
+   * Indicates modality of subwindow
+   * 
+   * @type { ?boolean }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 12
+   */
+  isModal?: boolean;
+  /**
+   * Indicates whether subwindow is topmost
+   * 
+   * @type { ?boolean }
+   * @syscap SystemCapability.Window.SessionManager
+   * @systemapi Hide this for inner system use.
+   * @since 12
+   */
+  isTopmost?: boolean;
+  /**
+   * Indicates modality type of subwindow
+   * 
+   * @type { ?ModalityType }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 14
+   */
+  modalityType?: ModalityType;
+  /**
+   * Indicates position and size of subwindow
+   * 
+   * @type { ?Rect }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 18
+   */
+  windowRect?: Rect;
+  /**
+   * Indicates whether subwindow support fullscreen
+   * 
+   * @type { ?boolean }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 19
+   */
+  maximizeSupported?: boolean;
+  /**
+   * Indicates zlevel of subwindow
+   * 
+   * @type { ?number }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 18
+   */
+  zLevel?: number;
+  /**
+   * Indicates whether subwindow show outline
+   * 
+   * @type { ?boolean }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 20
+   */
+  outlineEnabled?: boolean;
+}
+
+export class SubWindowOptionsInternal implements SubWindowOptions {
+  title: string;
+  decorEnabled: boolean;
+  isModal?: boolean;
+  isTopmost?: boolean;
+  modalityType?: ModalityType;
+  windowRect?: Rect;
+  maximizeSupported?: boolean;
+  zLevel?: number;
+  outlineEnabled?: boolean;
+}
+
+/**
+ * Attribute of the window for UI service extension ability.
+ *
+ * @enum { number }
+ * @syscap SystemCapability.Window.SessionManager
+ * @systemapi Hide this for inner system use.
+ * @stagemodelonly
+ * @since 14
+ */
+export enum ExtensionWindowAttribute {
+  /**
+   * System window.
+   *
+   * @syscap SystemCapability.Window.SessionManager
+   * @systemapi Hide this for inner system use.
+   * @stagemodelonly
+   * @since 14
+   */
+  SYSTEM_WINDOW = 0,
+
+  /**
+   * Sub window.
+   *
+   * @syscap SystemCapability.Window.SessionManager
+   * @systemapi Hide this for inner system use.
+   * @stagemodelonly
+   * @since 14
+   */
+  SUB_WINDOW = 1
+}
+
+/**
+ * Options for system window creation.
+ *
+ * @interface SystemWindowOptions
+ * @syscap SystemCapability.Window.SessionManager
+ * @systemapi Hide this for inner system use.
+ * @stagemodelonly
+ * @since 14
+ */
+export interface SystemWindowOptions {
+  /**
+   * Indicates window type.
+   *
+   * @type { WindowType }
+   * @syscap SystemCapability.Window.SessionManager
+   * @systemapi Hide this for inner system use.
+   * @stagemodelonly
+   * @since 14
+   */
+  windowType: WindowType;
+}
+
+export class SystemWindowOptionsInternal implements SystemWindowOptions {
+  windowType: WindowType;
+}
+
+/**
+ * Configuration of the window for UI service extension ability.
+ *
+ * @interface ExtensionWindowConfig
+ * @syscap SystemCapability.Window.SessionManager
+ * @systemapi Hide this for inner system use.
+ * @stagemodelonly
+ * @since 14
+ */
+export interface ExtensionWindowConfig {
+  /**
+   * Window name.
+   *
+   * @type { string }
+   * @syscap SystemCapability.Window.SessionManager
+   * @systemapi Hide this for inner system use.
+   * @stagemodelonly
+   * @since 14
+   */
+  windowName: string;
+
+  /**
+   * Defines whether the window is a subwindow or a system window.
+   *
+   * @type { ExtensionWindowAttribute }
+   * @syscap SystemCapability.Window.SessionManager
+   * @systemapi Hide this for inner system use.
+   * @stagemodelonly
+   * @since 14
+   */
+  windowAttribute: ExtensionWindowAttribute;
+
+  /**
+   * The position and size of window.
+   *
+   * @type { Rect }
+   * @syscap SystemCapability.Window.SessionManager
+   * @systemapi Hide this for inner system use.
+   * @stagemodelonly
+   * @since 14
+   */
+  windowRect: Rect;
+
+  /**
+   * The options of sub window creation.
+   *
+   * @type { ?SubWindowOptions }
+   * @syscap SystemCapability.Window.SessionManager
+   * @systemapi Hide this for inner system use.
+   * @stagemodelonly
+   * @since 14
+   */
+  subWindowOptions?: SubWindowOptions;
+
+  /**
+   * The options of system window creation.
+   *
+   * @type { ?SystemWindowOptions }
+   * @syscap SystemCapability.Window.SessionManager
+   * @systemapi Hide this for inner system use.
+   * @stagemodelonly
+   * @since 14
+   */
+  systemWindowOptions?: SystemWindowOptions;
+}
+
+export class ExtensionWindowConfigInternal implements ExtensionWindowConfig {
+  windowName: string;
+  windowAttribute: ExtensionWindowAttribute;
+  windowRect: Rect;
+  subWindowOptions?: SubWindowOptions;
+  systemWindowOptions?: SystemWindowOptions;
+}
+
 export class WindowStageInternal implements WindowStage {
     static { loadLibrary('windowstageani_kit.z') }
 

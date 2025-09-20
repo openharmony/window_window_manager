@@ -747,5 +747,51 @@ WmErrorCode AniWindowUtils::ToErrorCode(WMError error, WmErrorCode defaultCode)
         static_cast<int32_t>(error), static_cast<int32_t>(defaultCode));
     return defaultCode;
 }
+
+ani_object AniWindowUtils::CreateOptionalBool(ani_env *env, ani_boolean value)
+{
+    ani_class intClass;
+    ani_status ret = env->FindClass("std.core.Boolean", &intClass);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_method aniCtor;
+    ret = env->Class_FindMethod(intClass, "<ctor>", "z:", &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object obj {};
+    if (env->Object_New(intClass, aniCtor, &obj, value) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to allocate Boolean");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    
+    return obj;
+}
+
+ani_object AniWindowUtils::CreateOptionalInt(ani_env *env, ani_int value)
+{
+    ani_class intClass;
+    ani_status ret = env->FindClass("std.core.Int", &intClass);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_method aniCtor;
+    ret = env->Class_FindMethod(intClass, "<ctor>", "i:", &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object obj {};
+    if (env->Object_New(intClass, aniCtor, &obj, value) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to allocate Int");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    
+    return obj;
+}
 } // namespace Rosen
 } // namespace OHOS
