@@ -37,6 +37,7 @@ public:
     static ani_object GetAllMainWindowInfo(ani_env* env, ani_long nativeObj, ani_object context);
     static ani_object GetMainWindowSnapshot(
         ani_env* env, ani_long nativeObj, ani_object windowId, ani_object config);
+    static ani_ref CreateWindow(ani_env* env, ani_long nativeObj, ani_object configuration);
 private:
     ani_ref OnGetLastWindow(ani_env* env, ani_object context);
     void OnShiftAppWindowFocus(ani_env* env, ani_int sourceWindowId, ani_int targetWindowId);
@@ -44,6 +45,7 @@ private:
     ani_object OnGetAllMainWindowInfo(ani_env* env, ani_object context);
     ani_object OnGetMainWindowSnapshot(
         ani_env* env, ani_object windowId, ani_object config);
+    ani_ref OnCreateWindow(ani_env* env, ani_object configuration);
 };
 } // namespace Rosen
 } // namespace OHOS

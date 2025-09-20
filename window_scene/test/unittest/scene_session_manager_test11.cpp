@@ -1385,6 +1385,12 @@ HWTEST_F(SceneSessionManagerTest11, AddSkipSelfWhenShowOnVirtualScreenList, Func
 
     MockAccesstokenKit::MockIsSACalling(true);
     MockAccesstokenKit::MockIsSystemApp(true);
+    ssm_->isUserBackground_ = false;
+    ret = ssm_->AddSkipSelfWhenShowOnVirtualScreenList(persistentIds);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    ssm_->isUserBackground_ = true;
     ret = ssm_->AddSkipSelfWhenShowOnVirtualScreenList(persistentIds);
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(ret, WMError::WM_OK);
@@ -1410,6 +1416,12 @@ HWTEST_F(SceneSessionManagerTest11, RemoveSkipSelfWhenShowOnVirtualScreenList, F
 
     MockAccesstokenKit::MockIsSACalling(true);
     MockAccesstokenKit::MockIsSystemApp(true);
+    ssm_->isUserBackground_ = false;
+    ret = ssm_->RemoveSkipSelfWhenShowOnVirtualScreenList(persistentIds);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    ssm_->isUserBackground_ = true;
     ret = ssm_->RemoveSkipSelfWhenShowOnVirtualScreenList(persistentIds);
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(ret, WMError::WM_OK);
