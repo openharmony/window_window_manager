@@ -48,6 +48,9 @@ class AniWindowListener : public IWindowChangeListener,
                         public IWindowRectChangeListener,
                         public IMainWindowCloseListener,
                         public ISubWindowCloseListener,
+                        public IWindowHighlightChangeListener,
+                        public ISystemDensityChangeListener,
+                        public IDisplayIdChangeListener,
                         public IWindowStageLifeCycle,
                         public IWindowRotationChangeListener {
 public:
