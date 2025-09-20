@@ -246,6 +246,21 @@ void AniWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
 
 void AniWindowListener::OnSubWindowClose(bool& terminateCloseProcess)
 {
+    TLOGI(WmsLogTag::WMS_SUB, "[ANI]");
+    auto task = [self = weakRef_, eng = env_, terminateCloseProcess] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || eng == nullptr || thisListener->aniCallBack_ == nullptr) {
+            TLOGE(WmsLogTag::WMS_SUB, "[ANI]this listener, eng or callback is nullptr");
+            return;
+        }
+        AniWindowUtils::CallAniFunctionVoid(eng, "@ohos.window.window", "runWindowListenerBooleanArgCallback",
+            nullptr, thisListener->aniCallBack_, ani_boolean(terminateCloseProcess));
+    };
+    if (!eventHandler_) {
+        TLOGE(WmsLogTag::DEFAULT, "get main event handler failed!");
+        return;
+    }
+    eventHandler_->PostTask(task, __func__, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 void AniWindowListener::OnMainWindowClose(bool& terminateCloseProcess)
