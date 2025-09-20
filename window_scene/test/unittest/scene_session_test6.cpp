@@ -1221,7 +1221,7 @@ HWTEST_F(SceneSessionTest6, GetAvoidAreaByType, Function | SmallTest | Level1)
 {
     SessionInfo info;
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    Rect winRect = { 0, 0, 0, 0 };
+    WSRect winRect = { 0, 0, 0, 0 };
     AvoidArea avoidArea;
     session->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, winRect, 20);
     EXPECT_EQ(session->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, winRect, 20), avoidArea);
