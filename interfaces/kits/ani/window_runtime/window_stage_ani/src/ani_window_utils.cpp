@@ -459,6 +459,34 @@ void AniWindowUtils::ParseRotationChangeResult(ani_env* env, ani_object obj, Rot
     rotationChangeResult.windowRect_ = windowRect;
 }
 
+ani_object AniWindowUtils::CreateAniKeyboardInfo(ani_env* env, const KeyboardPanelInfo& keyboardPanelInfo)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "[ANI]");
+    ani_class aniClass;
+    ani_status ret = env->FindClass("L@ohos/window/window/KeyboardInfoInternal;", &aniClass);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_method aniCtor;
+    ret = env->Class_FindMethod(aniClass, "<ctor>", nullptr, &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object keyboardInfo;
+    ret = env->Object_New(aniClass, aniCtor, &keyboardInfo);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    CallAniMethodVoid(env, keyboardInfo, aniClass, "<set>beginRect", nullptr,
+        CreateAniRect(env, keyboardPanelInfo.beginRect_));
+    CallAniMethodVoid(env, keyboardInfo, aniClass, "<set>endRect", nullptr,
+        CreateAniRect(env, keyboardPanelInfo.endRect_));
+    return keyboardInfo;
+}
+
 ani_status AniWindowUtils::CallAniFunctionVoid(ani_env *env, const char* ns,
     const char* fn, const char* signature, ...)
 {
