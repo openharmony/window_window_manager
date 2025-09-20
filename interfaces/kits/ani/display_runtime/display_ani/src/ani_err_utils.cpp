@@ -20,7 +20,6 @@
 #include "display_ani_utils.h"
 #include "window_manager_hilog.h"
 
-
 namespace OHOS::Rosen {
 
 constexpr const char* DM_ERROR_MSG_OK = "ok";
@@ -93,31 +92,31 @@ std::string AniErrUtils::GetErrorMsg(const DmErrorCode& errorCode)
         DM_ERROR_CODE_TO_ERROR_MSG_MAP.at(errorCode) : "";
 }
 
-ani_object AniErrUtils::CreateAniError(ani_env* env, const DMError& errorCode, const std::string& message)
+ani_object AniErrUtils::CreateAniError(ani_env* env, const DMError& errorCode, std::string msg)
 {
-    auto msg = message == "" ? GetErrorMsg(errorCode) : message;
+    msg = msg == "" ? GetErrorMsg(errorCode) : msg;
     ani_string aniMsg;
     env->String_NewUTF8(msg.c_str(), msg.size(), &aniMsg);
     ani_object aniError = nullptr;
     ani_class cls;
-    if (ANI_OK != env->FindClass("Lescompat/Error", &cls)) {
+    if (ANI_OK != env->FindClass("escompat.Error", &cls)) {
         TLOGE(WmsLogTag::DMS, "[ANI] null class FoldCreaseRegionImpl");
     }
-    DisplayAniUtils::NewAniObject(env, cls, "Lstd/core/String;Lescompat/ErrorOptions;:V", &aniError, aniMsg);
+    DisplayAniUtils::NewAniObject(env, cls, "C{std.core.String}C{escompat.ErrorOptions}:", &aniError, aniMsg);
     return aniError;
 }
 
-ani_object AniErrUtils::CreateAniError(ani_env* env, const DmErrorCode& errorCode, const std::string& message)
+ani_object AniErrUtils::CreateAniError(ani_env* env, const DmErrorCode& errorCode, std::string msg)
 {
-    auto msg = message == "" ? GetErrorMsg(errorCode) : message;
+    msg = msg == "" ? GetErrorMsg(errorCode) : msg;
     ani_string aniMsg;
     env->String_NewUTF8(msg.c_str(), msg.size(), &aniMsg);
     ani_object aniError = nullptr;
     ani_class cls;
-    if (ANI_OK != env->FindClass("Lescompat/Error", &cls)) {
+    if (ANI_OK != env->FindClass("escompat.Error", &cls)) {
         TLOGE(WmsLogTag::DMS, "[ANI] null class FoldCreaseRegionImpl");
     }
-    DisplayAniUtils::NewAniObject(env, cls, "Lstd/core/String;Lescompat/ErrorOptions;:V", &aniError, aniMsg);
+    DisplayAniUtils::NewAniObject(env, cls, "C{std.core.String}C{escompat.ErrorOptions}:", &aniError, aniMsg);
     return aniError;
 }
 
@@ -149,13 +148,13 @@ ani_status AniErrUtils::CreateBusinessError(ani_env* env, int32_t error, std::st
 {
     TLOGI(WmsLogTag::DMS, "[ANI] in");
     ani_class aniClass;
-    ani_status status = env->FindClass("L@ohos/base/BusinessError;", &aniClass);
+    ani_status status = env->FindClass("@ohos.base.BusinessError", &aniClass);
     if (status != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] class not found, status:%{public}d", static_cast<int32_t>(status));
         return status;
     }
     ani_method aniCtor;
-    status = env->Class_FindMethod(aniClass, "<ctor>", "Lstd/core/String;Lescompat/ErrorOptions;:V", &aniCtor);
+    status = env->Class_FindMethod(aniClass, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &aniCtor);
     if (status != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] ctor not found, status:%{public}d", static_cast<int32_t>(status));
         return status;
@@ -167,7 +166,7 @@ ani_status AniErrUtils::CreateBusinessError(ani_env* env, int32_t error, std::st
         TLOGE(WmsLogTag::DMS, "[ANI] fail to new err, status:%{public}d", static_cast<int32_t>(status));
         return status;
     }
-    status = env->Object_SetFieldByName_Double(*err, "code", static_cast<ani_double>(error));
+    status = env->Object_SetFieldByName_Int(*err, "code", static_cast<ani_int>(error));
     if (status != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] fail to set code, status:%{public}d", static_cast<int32_t>(status));
         return status;

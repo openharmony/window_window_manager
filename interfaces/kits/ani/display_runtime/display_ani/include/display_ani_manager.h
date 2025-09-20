@@ -25,31 +25,36 @@ namespace Rosen {
 class DisplayManagerAni {
 public:
     explicit DisplayManagerAni();
-    static ani_status initDisplayManagerAni(ani_namespace displayNameSpace, ani_env* env);
+    static ani_status InitDisplayManagerAni(ani_namespace displayNameSpace, ani_env* env);
 
-    static ani_int getFoldDisplayModeAni(ani_env* env);
-    static ani_boolean isFoldableAni(ani_env* env);
-    static ani_int getFoldStatus(ani_env* env);
-    static void getCurrentFoldCreaseRegion(ani_env* env, ani_object obj, ani_long nativeObj);
+    static ani_int GetFoldDisplayModeAni(ani_env* env);
+    static ani_boolean IsFoldableAni(ani_env* env);
+    static ani_int GetFoldStatus(ani_env* env);
+    static ani_boolean IsCaptured(ani_env* env);
+    static void GetCurrentFoldCreaseRegion(ani_env* env, ani_object obj, ani_long nativeObj);
 
-    static void getAllDisplaysAni(ani_env* env, ani_object arrayObj);
-    static void getDisplayByIdSyncAni(ani_env* env, ani_object obj, ani_double displayId);
-    static void getDefaultDisplaySyncAni(ani_env* env, ani_object obj);
+    static void GetAllDisplaysAni(ani_env* env, ani_object arrayObj);
+    static void GetDisplayByIdSyncAni(ani_env* env, ani_object obj, ani_long displayId);
+    static void GetDefaultDisplaySyncAni(ani_env* env, ani_object obj);
 
-    static void registerCallback(ani_env* env, ani_string type,
+    static void RegisterCallback(ani_env* env, ani_string type,
         ani_ref callback, ani_long nativeObj);
-    static void unRegisterCallback(ani_env* env, ani_string type,
+    static void UnRegisterCallback(ani_env* env, ani_string type,
         ani_long nativeObj, ani_ref callback);
     DMError UnRegisterDisplayListenerWithType(std::string type, ani_env* env, ani_ref callback);
     DMError UnregisterAllDisplayListenerWithType(std::string type);
-    DmErrorCode processRegisterCallback(ani_env* env, std::string& typeStr,
+    DmErrorCode ProcessRegisterCallback(ani_env* env, std::string& typeStr,
         sptr<DisplayAniListener> displayAniListener);
+    static ani_boolean HasPrivateWindow(ani_env* env, ani_long displayId);
+    static void GetAllDisplayPhysicalResolution(ani_env* env, ani_object arrayObj, ani_long nativeObj);
+    static void FinalizerDisplay(ani_env* env, ani_object displayObj, ani_long nativeObj);
 private:
-    void onRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
-    void onUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
-    void onGetCurrentFoldCreaseRegion(ani_env* env, ani_object obj);
+    void OnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
+    void OnUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
+    void OnGetCurrentFoldCreaseRegion(ani_env* env, ani_object obj);
+    void OnGetAllDisplayPhysicalResolution(ani_env* env, ani_object arrayObj);
+    void OnFinalizerDisplay(ani_env* env, ani_object displayObj);
     bool IsCallbackRegistered(ani_env* env, const std::string& type, ani_ref callback);
-    void SetMainEventHandler();
     std::mutex mtx_;
     std::map<std::string, std::map<ani_ref, sptr<DisplayAniListener>>> jsCbMap_;
 };
