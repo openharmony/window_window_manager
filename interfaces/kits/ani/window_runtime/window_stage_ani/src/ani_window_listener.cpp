@@ -360,7 +360,7 @@ void AniWindowListener::OnRotationChange(const RotationChangeInfo& rotationChang
     auto task = [self = weakRef_, eng = env_, rotationChangeInfo, &rotationChangeResult] {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "AniWindowListener::OnRotationChange");
         auto thisListener = self.promote();
-        if (thisListener == nullptr || eng == nullptr || thisListener->aniCallBack_ == nullptr) {
+        if (thisListener == nullptr || eng == nullptr || thisListener->aniCallback_ == nullptr) {
             TLOGE(WmsLogTag::WMS_ROTATION, "[ANI]this listener, eng or callback is nullptr");
             return;
         }
@@ -370,7 +370,7 @@ void AniWindowListener::OnRotationChange(const RotationChangeInfo& rotationChang
             return;
         }
         ani_ref rotationChangeResultObj;
-        AniWindowUtils::CallAniFunctionRef(eng, rotationChangeResultObj, thisListener->aniCallBack_, 1,
+        AniWindowUtils::CallAniFunctionRef(eng, rotationChangeResultObj, thisListener->aniCallback_, 1,
             rotationInfoObj);
         if (rotationChangeResultObj != nullptr) {
             AniWindowUtils::ParseRotationChangeResult(eng, static_cast<ani_object>(rotationChangeResultObj),
