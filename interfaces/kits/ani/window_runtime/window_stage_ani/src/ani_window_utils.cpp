@@ -305,15 +305,15 @@ ani_object AniWindowUtils::CreateAniSize(ani_env* env, int32_t width, int32_t he
         TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
         return AniWindowUtils::CreateAniUndefined(env);
     }
-    ani_object aniRect;
-    ret = env->Object_New(aniClass, aniCtor, &aniRect);
+    ani_object aniSize;
+    ret = env->Object_New(aniClass, aniCtor, &aniSize);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to new obj");
         return AniWindowUtils::CreateAniUndefined(env);
     }
-    CallAniMethodVoid(env, aniRect, aniClass, "<set>width", nullptr, ani_double(width));
-    CallAniMethodVoid(env, aniRect, aniClass, "<set>height", nullptr, ani_double(height));
-    return aniRect;
+    CallAniMethodVoid(env, aniSize, aniClass, "<set>width", nullptr, ani_int(width));
+    CallAniMethodVoid(env, aniSize, aniClass, "<set>height", nullptr, ani_int(height));
+    return aniSize;
 }
 
 ani_object AniWindowUtils::CreateAniRect(ani_env* env, const Rect& rect)
@@ -337,10 +337,10 @@ ani_object AniWindowUtils::CreateAniRect(ani_env* env, const Rect& rect)
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to create new obj");
         return AniWindowUtils::CreateAniUndefined(env);
     }
-    CallAniMethodVoid(env, aniRect, aniClass, "<set>left", nullptr, ani_double(rect.posX_));
-    CallAniMethodVoid(env, aniRect, aniClass, "<set>top", nullptr, ani_double(rect.posY_));
-    CallAniMethodVoid(env, aniRect, aniClass, "<set>width", nullptr, ani_double(rect.width_));
-    CallAniMethodVoid(env, aniRect, aniClass, "<set>height", nullptr, ani_double(rect.height_));
+    CallAniMethodVoid(env, aniRect, aniClass, "<set>left", nullptr, ani_int(rect.posX_));
+    CallAniMethodVoid(env, aniRect, aniClass, "<set>top", nullptr, ani_int(rect.posY_));
+    CallAniMethodVoid(env, aniRect, aniClass, "<set>width", nullptr, ani_int(rect.width_));
+    CallAniMethodVoid(env, aniRect, aniClass, "<set>height", nullptr, ani_int(rect.height_));
     return aniRect;
 }
 
