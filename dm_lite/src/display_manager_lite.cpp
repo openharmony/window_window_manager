@@ -153,8 +153,12 @@ public:
         }
         TLOGD(WmsLogTag::DMS, "display %{public}" PRIu64", event %{public}u", displayInfo->GetDisplayId(), event);
         pImpl_->NotifyDisplayChange(displayInfo);
-        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
-        for (auto listener : pImpl_->displayListeners_) {
+        std::set<sptr<IDisplayListener>> displayListeners;
+        {
+            std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+            displayListeners = pImpl_->displayListeners_;
+        }
+        for (auto listener : displayListeners) {
             listener->OnChange(displayInfo->GetDisplayId());
         }
     };
