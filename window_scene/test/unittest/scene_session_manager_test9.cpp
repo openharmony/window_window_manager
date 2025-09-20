@@ -1640,7 +1640,7 @@ HWTEST_F(SceneSessionManagerTest9, SetSkipEventOnCastPlusInner01, TestSize.Level
     EXPECT_EQ(true, sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus());
     ssm_->SetSkipEventOnCastPlusInner(sceneSession->GetPersistentId(), false);
     EXPECT_EQ(false, sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus());
-    ssm_->isUserBackground_ = fasle;
+    ssm_->isUserBackground_ = false;
     ssm_->SetSkipEventOnCastPlusInner(sceneSession->GetPersistentId(), false);
     EXPECT_EQ(false, sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus());
     ssm_->isUserBackground_ = true;
