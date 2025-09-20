@@ -1645,7 +1645,7 @@ HWTEST_F(SceneSessionManagerTest9, SetSkipEventOnCastPlusInner01, TestSize.Level
     EXPECT_EQ(false, sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus());
     ssm_->isUserBackground_ = true;
     ssm_->SetSkipEventOnCastPlusInner(sceneSession->GetPersistentId(), false);
-    EXPECT_EQ(false, sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus()); 
+    EXPECT_EQ(false, sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus());
 }
 } // namespace
 } // namespace Rosen
