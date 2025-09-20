@@ -40,7 +40,7 @@ private:
 class WindowAdapter : public RefBase {
 WM_DECLARE_SINGLE_INSTANCE_BASE(WindowAdapter);
 public:
-    static sptr<WindowAdapter> GetInstance(const int32_t userId);
+    static WindowAdapter& GetInstance(const int32_t userId);
 
     using SessionRecoverCallbackFunc = std::function<WMError()>;
     using UIEffectRecoverCallbackFunc = std::function<WMError()>;
@@ -240,9 +240,11 @@ public:
     void UnregisterOutlineRecoverCallbackFunc();
     virtual WMError UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams);
 
-    ~WindowAdapter() override;
-
 private:
+    friend class sptr<WindowAdapter>;
+    ~WindowAdapter() override;
+    WindowAdapter(const int32_t userId = INVALID_USER_ID);
+
     static inline SingletonDelegator<WindowAdapter> delegator;
     bool InitWMSProxy();
     bool InitSSMProxy();
@@ -250,7 +252,6 @@ private:
     /*
      * Multi user and multi screen
      */
-    explicit WindowAdapter(const int32_t userId = INVALID_USER_ID);
     void OnUserSwitch();
     int32_t userId_;
     static std::unordered_map<int32_t, sptr<WindowAdapter>> windowAdapterMap_;

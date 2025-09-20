@@ -621,7 +621,7 @@ class WindowManager : public RefBase {
     friend class WMSDeathRecipient;
     friend class SSMDeathRecipient;
 public:
-    static sptr<WindowManager> GetInstance(const int32_t userId);
+    static WindowManager& GetInstance(const int32_t userId);
     static WMError RemoveInstanceByUserId(const int32_t userId);
 
     /**
@@ -1401,13 +1401,14 @@ public:
      */
     WMError UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams);
 
-    ~WindowManager() override;
-
 private:
     /**
      * multi user and multi screen
      */
+    friend class sptr<WindowManager>;
     WindowManager(const int32_t userId = INVALID_USER_ID);
+    ~WindowManager() override;
+
     int32_t userId_;
     static std::unordered_map<int32_t, sptr<WindowManager>> windowManagerMap_;
     static std::mutex windowManagerMapMutex_;
@@ -1415,7 +1416,6 @@ private:
     std::recursive_mutex mutex_;
     class Impl;
     std::unique_ptr<Impl> pImpl_;
-    bool destroyed_ = false;
     std::unordered_set<std::string> isModuleHookOffSet_;
     std::unordered_map<WindowInfoKey, uint32_t> interestInfoMap_;
     GetJSWindowObjFunc getJSWindowObjFunc_;
