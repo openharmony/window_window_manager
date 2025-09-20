@@ -1257,23 +1257,6 @@ HWTEST_F(WindowSessionTest, SetPendingSessionToForegroundListener, TestSize.Leve
 }
 
 /**
- * @tc.name: IsStatusBarVisible
- * @tc.desc: IsStatusBarVisible Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, IsStatusBarVisible, TestSize.Level1)
-{
-    SessionInfo info;
-    info.windowType_ = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
-    sptr<Session> session = sptr<Session>::MakeSptr(info, nullptr);
-    session->SetIsStatusBarVisible(fasle);
-    EXPECT_EQ(false, session->IsStatusBarVisible());
-    session->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    session->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    EXPECT_EQ(false, session->IsStatusBarVisible());
-}
-
-/**
  * @tc.name: NotifyScreenshot
  * @tc.desc: NotifyScreenshot Test
  * @tc.type: FUNC
@@ -1831,6 +1814,22 @@ HWTEST_F(WindowSessionTest, TransformRelativeRectToGlobalRect, TestSize.Level1)
     sceneSession->GetLayoutController()->SetSessionRect({ 0, 9999, 2472, 1648 });
     sceneSession->TransformRelativeRectToGlobalRect(rect);
     EXPECT_NE(rect.posY_, 100);
+}
+
+/**
+ * @tc.name: IsStatusBarVisible
+ * @tc.desc: IsStatusBarVisible Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsStatusBarVisible, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    session->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    session_->SetIsStatusBarVisible(false);
+    EXPECT_EQ(false, session->IsStatusBarVisible());
+    session->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    EXPECT_EQ(false, session->IsStatusBarVisible());
 }
 } // namespace
 } // namespace Rosen
