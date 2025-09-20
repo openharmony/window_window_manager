@@ -27,10 +27,57 @@ export type WindowVoidCallback = () => void;
 
 namespace window {
   export interface Size {
+    /**
+     * The width of the window.
+     *
+     * @type { int }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 7
+     */
+    /**
+     * The width of the window.
+     *
+     * @type { int }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @crossplatform
+     * @since 10
+     */
+    /**
+     * The width of the window.
+     *
+     * @type { int }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @crossplatform
+     * @atomicservice
+     * @since 11
+     */
     width: int;
+
+    /**
+     * The height of the window.
+     *
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 7
+     */
+    /**
+     * The height of the window.
+     *
+     * @type { int }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @crossplatform
+     * @since 10
+     */
+    /**
+     * The height of the window.
+     *
+     * @type { int }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @crossplatform
+     * @atomicservice
+     * @since 11
+     */
     height: int;
   }
-
   export enum AvoidAreaType {
     /**
      * Default area of the system
@@ -283,9 +330,100 @@ namespace window {
   }
 
   export interface Rect {
+    /**
+     * The left of the Rect.
+     *
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 7
+     */
+    /**
+     * The left of the Rect.
+     *
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @crossplatform
+     * @since 10
+     */
+    /**
+     * The left of the Rect.
+     *
+     * @type { int }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @crossplatform
+     * @atomicservice
+     * @since 11
+     */
     left: int;
+
+    /**
+     * The top of the Rect.
+     *
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 7
+     */
+    /**
+     * The top of the Rect.
+     *
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @crossplatform
+     * @since 10
+     */
+    /**
+     * The top of the Rect.
+     *
+     * @type { int }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @crossplatform
+     * @atomicservice
+     * @since 11
+     */
     top: int;
+
+    /**
+     * The width of the Rect.
+     *
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 7
+     */
+    /**
+     * The width of the Rect.
+     *
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @crossplatform
+     * @since 10
+     */
+    /**
+     * The width of the Rect.
+     *
+     * @type { int }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @crossplatform
+     * @atomicservice
+     * @since 11
+     */
     width: int;
+
+    /**
+     * The height of the Rect.
+     *
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 7
+     */
+    /**
+     * The height of the Rect.
+     *
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @crossplatform
+     * @since 10
+     */
+    /**
+     * The height of the Rect.
+     *
+     * @type { int }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @crossplatform
+     * @atomicservice
+     * @since 11
+     */
     height: int;
   }
 
@@ -1191,10 +1329,89 @@ export interface TransitionController {
     animationForHidden(context: window.TransitionContext): void;
 }
 
+/**
+ * Limits of window.
+ *
+ * @interface WindowLimits
+ * @syscap SystemCapability.Window.SessionManager
+ * @since 11
+ */
+/**
+ * Limits of window.
+ *
+ * @interface WindowLimits
+ * @syscap SystemCapability.Window.SessionManager
+ * @atomicservice
+ * @since 12
+ */
 export interface WindowLimits {
+
+    /**
+     * The maximum width of the window.
+     *
+     * @type { ?int }
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 11
+     */
+    /**
+     * The maximum width of the window.
+     *
+     * @type { ?int }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 12
+     */
     maxWidth?: int;
+
+    /**
+     * The maximum height of the window.
+     *
+     * @type { ?int }
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 11
+     */
+    /**
+     * The maximum height of the window.
+     *
+     * @type { ?int }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 12
+     */
     maxHeight?: int;
+
+    /**
+     * The minimum width of the window.
+     *
+     * @type { ?int }
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 11
+     */
+    /**
+     * The minimum width of the window.
+     *
+     * @type { ?int }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 12
+     */
     minWidth?: int;
+
+    /**
+     * The minimum height of the window.
+     *
+     * @type { ?int }
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 11
+     */
+    /**
+     * The minimum height of the window.
+     *
+     * @type { ?int }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 12
+     */
     minHeight?: int;
 }
 

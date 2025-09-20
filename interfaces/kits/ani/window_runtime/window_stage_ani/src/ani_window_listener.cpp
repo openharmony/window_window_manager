@@ -365,12 +365,12 @@ void AniWindowListener::OnSubWindowClose(bool& terminateCloseProcess)
     TLOGI(WmsLogTag::WMS_SUB, "[ANI]");
     auto task = [self = weakRef_, eng = env_, terminateCloseProcess] {
         auto thisListener = self.promote();
-        if (thisListener == nullptr || eng == nullptr || thisListener->aniCallBack_ == nullptr) {
+        if (thisListener == nullptr || eng == nullptr || thisListener->aniCallback_ == nullptr) {
             TLOGE(WmsLogTag::WMS_SUB, "[ANI]this listener, eng or callback is nullptr");
             return;
         }
         AniWindowUtils::CallAniFunctionVoid(eng, "@ohos.window.window", "runWindowListenerBooleanArgCallback",
-            nullptr, thisListener->aniCallBack_, ani_boolean(terminateCloseProcess));
+            nullptr, thisListener->aniCallback_, ani_boolean(terminateCloseProcess));
     };
     if (!eventHandler_) {
         TLOGE(WmsLogTag::DEFAULT, "get main event handler failed!");
