@@ -2889,13 +2889,7 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rec
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", where);
             return {};
         }
-        auto avoidArea = session->GetAvoidAreaByTypeInner(type, rect);
-        if (type == AvoidAreaType::TYPE_NAVIGATION_INDICATOR && session->isAINavigationBarAvoidAreaValid_ != nullptr) {
-            session->isAINavigationBarAvoidAreaValid_(session->GetSessionProperty()->GetDisplayId(),
-                avoidArea, session->GetSessionRect().height_);
-            return avoidArea;
-        }
-        return avoidArea;
+        return session->GetAvoidAreaByTypeInner(type, rect);
     }, __func__);
 }
 
