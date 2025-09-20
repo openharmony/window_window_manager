@@ -19,6 +19,7 @@
 #include <mutex>
 
 #include "ani.h"
+#include "ani_window_utils.h"
 #include "class_var_definition.h"
 #include "event_handler.h"
 #include "refbase.h"
