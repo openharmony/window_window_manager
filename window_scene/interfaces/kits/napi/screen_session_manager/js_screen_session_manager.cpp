@@ -915,6 +915,37 @@ napi_value JsScreenSessionManager::OnSetScreenOffDelayTime(napi_env env, const n
     return NapiGetUndefined(env);
 }
 
+napi_value JsScreenSessionManager::OnSetScreenOnDelayTime(napi_env env, const napi_callback_info info)
+{
+    size_t argc = 1;
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env, &scope);
+    if ((status != napi_ok) || (scope == nullptr)) {
+        TLOGW(WmsLogTag::DMS, "[NAPI]napi_open_handle_scope fail");
+        return NapiGetUndefined(env);
+    }
+    napi_value argv[1] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) { // 1: params num
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        napi_close_handle_scope(env, scope);
+        return NapiGetUndefined(env);
+    }
+    int32_t delay;
+    if (!ConvertFromJsValue(env, argv[0], delay)) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to delay");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        napi_close_handle_scope(env, scope);
+        return NapiGetUndefined(env);
+    }
+    ScreenSessionManagerClient::GetInstance().SetScreenOnDelayTime(delay);
+    napi_close_handle_scope(env, scope);
+    return NapiGetUndefined(env);
+}
+
 napi_value JsScreenSessionManager::OnNotifyFoldToExpandCompletion(napi_env env, const napi_callback_info info)
 {
     TLOGD(WmsLogTag::DMS, "[NAPI]OnNotifyFoldToExpandCompletion");
@@ -1200,37 +1231,6 @@ napi_value JsScreenSessionManager::OnSetCameraStatus(napi_env env, const napi_ca
         return NapiGetUndefined(env);
     }
     ScreenSessionManagerClient::GetInstance().SetCameraStatus(cameraStatus, cameraPosition);
-    napi_close_handle_scope(env, scope);
-    return NapiGetUndefined(env);
-}
-
-napi_value JsScreenSessionManager::OnSetScreenOnDelayTime(napi_env env, const napi_callback_info info)
-{
-    size_t argc = 1;
-    napi_handle_scope scope = nullptr;
-    auto status = napi_open_handle_scope(env, &scope);
-    if ((status != napi_ok) || (scope == nullptr)) {
-        TLOGW(WmsLogTag::DMS, "[NAPI]napi_open_handle_scope fail");
-        return NapiGetUndefined(env);
-    }
-    napi_value argv[1] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARGC_ONE) { // 1: params num
-        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        napi_close_handle_scope(env, scope);
-        return NapiGetUndefined(env);
-    }
-    int32_t delay;
-    if (!ConvertFromJsValue(env, argv[0], delay)) {
-        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to delay");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        napi_close_handle_scope(env, scope);
-        return NapiGetUndefined(env);
-    }
-    ScreenSessionManagerClient::GetInstance().SetScreenOnDelayTime(delay);
     napi_close_handle_scope(env, scope);
     return NapiGetUndefined(env);
 }
