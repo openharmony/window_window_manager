@@ -1391,49 +1391,6 @@ HWTEST_F(SceneSessionManagerTest8, FlushSessionBlackListInfoMapWhenRemove02, Tes
 }
 
 /**
- * @tc.name: CheckAvoidAreaForAINavigationBar
- * @tc.desc: test function : CheckAvoidAreaForAINavigationBar
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest8, CheckAvoidAreaForAINavigationBar, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    bool isVisible = false;
-    AvoidArea avoidArea;
-    int32_t sessionBottom = 2720;
-    EXPECT_EQ(ssm_->CheckAvoidAreaForAINavigationBar(isVisible, avoidArea, sessionBottom), true);
-    avoidArea.topRect_ = { 600, 2710, 500, 10 };
-    EXPECT_EQ(ssm_->CheckAvoidAreaForAINavigationBar(isVisible, avoidArea, sessionBottom), false);
-    avoidArea.topRect_ = { 0, 0, 0, 0 };
-    avoidArea.leftRect_ = { 600, 2710, 500, 10 };
-    isVisible = true;
-    EXPECT_EQ(ssm_->CheckAvoidAreaForAINavigationBar(isVisible, avoidArea, sessionBottom), true);
-    avoidArea.leftRect_ = { 0, 0, 0, 0 };
-    avoidArea.rightRect_ = { 600, 2710, 500, 10 };
-    EXPECT_EQ(ssm_->CheckAvoidAreaForAINavigationBar(isVisible, avoidArea, sessionBottom), true);
-    avoidArea.rightRect_ = { 0, 0, 0, 0 };
-    avoidArea.bottomRect_ = { 600, 2710, 500, 100 };
-    EXPECT_EQ(ssm_->CheckAvoidAreaForAINavigationBar(isVisible, avoidArea, sessionBottom), false);
-}
-
-/**
- * @tc.name: UpdateAINavigationBarAvoidAreaToBottomRect
- * @tc.desc: test function : UpdateAINavigationBarAvoidAreaToBottomRect
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest8, UpdateAINavigationBarAvoidAreaToBottomRect, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    AvoidArea avoidArea;
-    Rect avoidRect = { 600, 2710, 500, 10 };
-    ssm_->UpdateAINavigationBarAvoidAreaToBottomRect(avoidArea, avoidRect);
-    EXPECT_EQ(avoidArea.bottomRect_, avoidRect);
-    avoidRect = { 0, 0, 0, 0 };
-    ssm_->UpdateAINavigationBarAvoidAreaToBottomRect(avoidArea, avoidRect);
-    EXPECT_EQ(avoidArea.bottomRect_, avoidRect);
-}
-
-/**
  * @tc.name: AddskipSurfaceNodeIdSet
  * @tc.desc: test function : AddskipSurfaceNodeIdSet
  * @tc.type: FUNC

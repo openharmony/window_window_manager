@@ -123,7 +123,6 @@ const int32_t MAX_SESSION_LIMIT_ALL_APP = 512;
 
 constexpr int WINDOW_NAME_MAX_WIDTH = 21;
 constexpr int DISPLAY_NAME_MAX_WIDTH = 10;
-constexpr int32_t MAX_DIFF_NUMBER = 1;
 constexpr int VALUE_MAX_WIDTH = 5;
 constexpr int MAX_RESEND_TIMES = 6;
 constexpr int ORIEN_MAX_WIDTH = 12;
@@ -2427,7 +2426,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
             return this->IsLastFrameLayoutFinished(isLayoutFinished);
         });
         sceneSession->SetIsAINavigationBarAvoidAreaValidFunc([this](DisplayId displayId,
-                AvoidArea& avoidArea, int32_t sessionBottom) {
+                const AvoidArea& avoidArea, int32_t sessionBottom) {
             return CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_[displayId], avoidArea, sessionBottom);
         });
         sceneSession->RegisterGetStatusBarAvoidHeightFunc([this](DisplayId displayId, WSRect& barArea) {
@@ -12146,20 +12145,18 @@ void SceneSessionManager::UpdateAINavigationBarAvoidAreaToBottomRect(AvoidArea& 
     avoidArea.bottomRect_ = area;
 }
 
-bool SceneSessionManager::CheckAvoidAreaForAINavigationBar(bool isVisible, AvoidArea& avoidArea, int32_t sessionBottom)
+bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& avoidArea, int32_t sessionBottom)
 {
     if (!avoidArea.topRect_.IsUninitializedRect() || !avoidArea.leftRect_.IsUninitializedRect() ||
         !avoidArea.rightRect_.IsUninitializedRect()) {
-        UpdateAINavigationBarAvoidAreaToBottomRect(avoidArea, avoidArea.topRect_);
-        UpdateAINavigationBarAvoidAreaToBottomRect(avoidArea, avoidArea.leftRect_);
-        UpdateAINavigationBarAvoidAreaToBottomRect(avoidArea, avoidArea.rightRect_);
+        return false;
     }
     if (avoidArea.bottomRect_.IsUninitializedRect()) {
         return true;
     }
-    auto isAttachedToBottomDiff = 
+    auto diff =
         std::abs(avoidArea.bottomRect_.posY_ + static_cast<int32_t>(avoidArea.bottomRect_.height_) - sessionBottom);
-    return isAttachedToBottomDiff <= MAX_DIFF_NUMBER && isVisible;
+    return isVisible && diff <= 1;
 }
 
 void SceneSessionManager::UpdateAvoidArea(int32_t persistentId)

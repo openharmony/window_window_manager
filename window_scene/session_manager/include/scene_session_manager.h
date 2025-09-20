@@ -1040,8 +1040,6 @@ private:
     void UpdateAvoidArea(int32_t persistentId);
     void UpdateRootSceneSessionAvoidArea(int32_t persistentId, bool& needUpdate);
     void NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty);
-    void UpdateAINavigationBarAvoidAreaToBottomRect(AvoidArea& avoidArea, const Rect& avoidRect);
-    bool CheckAvoidAreaForAINavigationBar(bool isVisible, AvoidArea& avoidArea, int32_t sessionBottom);
 
     WSError IsLastFrameLayoutFinished(bool& isLayoutFinished);
     void HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property,
