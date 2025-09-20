@@ -459,6 +459,12 @@ public:
     bool NeedCheckContextTransparent() const;
 
     /*
+     * Window Immersive
+     */
+    void SetIsStatusBarVisible(bool isStatusBarVisible) { isStatusBarVisible_ = isStatusBarVisible; };
+    bool IsStatusBarVisible() const;
+
+    /*
      * Window Layout
      */
     bool UpdateWindowModeSupportType(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
@@ -1019,6 +1025,11 @@ private:
     void CreateDetectStateTask(bool isAttach, WindowMode windowMode);
     void PostSpecificSessionLifeCycleTimeoutTask(const std::string& eventName);   // only report for specific window
     bool IsNeedReportTimeout() const;
+
+    /*
+     * Window Immersive
+     */
+    bool isStatusBarVisible_ = true;
 
     /*
      * Window Rotate Animation

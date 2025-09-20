@@ -1386,7 +1386,6 @@ private:
      */
     std::map<Rosen::WindowType, Rosen::SystemBarProperty> targetSystemBarProperty_;
     std::atomic_bool isDisplayStatusBarTemporarily_ { false };
-    bool isStatusBarVisible_ = true;
     IsLastFrameLayoutFinishedFunc isLastFrameLayoutFinishedFunc_;
     IsAINavigationBarAvoidAreaValidFunc isAINavigationBarAvoidAreaValid_;
     std::unordered_map<AvoidAreaType, std::tuple<DisplayId, WSRect, WSRect>> lastAvoidAreaInputParamtersMap_;
