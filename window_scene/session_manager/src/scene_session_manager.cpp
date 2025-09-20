@@ -325,6 +325,20 @@ public:
     }
 };
 
+bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& avoidArea, int32_t sessionBottom)
+{
+    if (!avoidArea.topRect_.IsUninitializedRect() || !avoidArea.leftRect_.IsUninitializedRect() ||
+        !avoidArea.rightRect_.IsUninitializedRect()) {
+        return false;
+    }
+    if (avoidArea.bottomRect_.IsUninitializedRect()) {
+        return true;
+    }
+    auto diff =
+        std::abs(avoidArea.bottomRect_.posY_ + static_cast<int32_t>(avoidArea.bottomRect_.height_) - sessionBottom);
+    return isVisible && diff <= 1;
+}
+
 enum class UpdateStartingWindowColorCacheResult : uint32_t {
     SUCCESS = 0,
     COLOR_MAP_BUNDLE_NOT_FOUND,
@@ -12133,30 +12147,6 @@ void SceneSessionManager::NotifyMMIWindowPidChange(int32_t windowId, bool startM
         }
         SceneInputManager::GetInstance().NotifyMMIWindowPidChange(sceneSession, startMoving);
     }, __func__);
-}
-
-void SceneSessionManager::UpdateAINavigationBarAvoidAreaToBottomRect(AvoidArea& avoidArea, const Rect& avoidRect)
-{
-    if (avoidRect.IsUninitializedRect()) {
-        return;
-    }
-    Rect area = avoidRect;
-    avoidArea = AvoidArea();
-    avoidArea.bottomRect_ = area;
-}
-
-bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& avoidArea, int32_t sessionBottom)
-{
-    if (!avoidArea.topRect_.IsUninitializedRect() || !avoidArea.leftRect_.IsUninitializedRect() ||
-        !avoidArea.rightRect_.IsUninitializedRect()) {
-        return false;
-    }
-    if (avoidArea.bottomRect_.IsUninitializedRect()) {
-        return true;
-    }
-    auto diff =
-        std::abs(avoidArea.bottomRect_.posY_ + static_cast<int32_t>(avoidArea.bottomRect_.height_) - sessionBottom);
-    return isVisible && diff <= 1;
 }
 
 void SceneSessionManager::UpdateAvoidArea(int32_t persistentId)
