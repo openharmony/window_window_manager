@@ -206,6 +206,7 @@ public:
     void SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func);
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker);
     WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
+    std::string GetSessionLabel() const;
 
     /*
      * App Use Control
@@ -384,6 +385,7 @@ public:
     // Just terminate, not clear session
     WSError Clear(bool needStartCaller = false, bool isForceClean = false);
     WSError SetSessionLabel(const std::string& label);
+    void UpdateSessionLabel(const std::string& label);
     void SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc& func);
     WSError SetSessionIcon(const std::shared_ptr<Media::PixelMap>& icon);
     void SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc& func);
@@ -847,6 +849,7 @@ protected:
     std::atomic_bool isExitSplitOnBackground_ = false;
     bool isVisible_ = false;
     int32_t currentRotation_ = 0;
+    std::string label_;
 
     NotifyChangeSessionVisibilityWithStatusBarFunc changeSessionVisibilityWithStatusBarFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;

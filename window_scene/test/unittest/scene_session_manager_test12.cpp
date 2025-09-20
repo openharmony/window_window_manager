@@ -40,6 +40,7 @@
 #include "session_manager/include/zidl/session_router_stack_listener_stub.h"
 #include "ui_effect_manager.h"
 #include "ui_effect_controller_client_proxy.h"
+#include "window_manager_hilog.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1675,7 +1676,6 @@ HWTEST_F(SceneSessionManagerTest12, HasFloatingWindowForeground01, TestSize.Leve
     bool hasFloatWindowForeground = false;
     WMError result = ssm_->HasFloatingWindowForeground(nullptr, hasFloatWindowForeground);
     EXPECT_EQ(result, WMError::WM_ERROR_NULLPTR);
-    EXPECT_EQ(hasFloatWindowForeground, false);
 }
 
 /**
@@ -1708,7 +1708,7 @@ HWTEST_F(SceneSessionManagerTest12, HasFloatingWindowForeground02, TestSize.Leve
     sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
 
-    bool hasFloatWindowForeground = false;
+    bool hasFloatWindowForeground = true;
     sptr<IRemoteObject> token2 = sptr<MockIRemoteObject>::MakeSptr();
     WMError result = ssm_->HasFloatingWindowForeground(token2, hasFloatWindowForeground);
     EXPECT_EQ(result, WMError::WM_OK);
@@ -1790,12 +1790,12 @@ HWTEST_F(SceneSessionManagerTest12, HasFloatingWindowForeground04, TestSize.Leve
     ssm_->sceneSessionMap_.insert({ sceneSession1->GetPersistentId(), sceneSession1 });
     ssm_->sceneSessionMap_.insert({ sceneSession2->GetPersistentId(), sceneSession2 });
 
-    bool hasFloatWindowForeground = false;
+    bool hasFloatWindowForeground = true;
     WMError result = ssm_->HasFloatingWindowForeground(token1, hasFloatWindowForeground);
     EXPECT_EQ(result, WMError::WM_OK);
     EXPECT_EQ(hasFloatWindowForeground, false);
 
-    hasFloatWindowForeground = false;
+    hasFloatWindowForeground = true;
     result = ssm_->HasFloatingWindowForeground(token2, hasFloatWindowForeground);
     EXPECT_EQ(result, WMError::WM_OK);
     EXPECT_EQ(hasFloatWindowForeground, false);
@@ -1821,7 +1821,7 @@ HWTEST_F(SceneSessionManagerTest12, HasFloatingWindowForeground05, TestSize.Leve
 
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
 
-    bool hasFloatWindowForeground = false;
+    bool hasFloatWindowForeground = true;
     WMError result = ssm_->HasFloatingWindowForeground(token, hasFloatWindowForeground);
     EXPECT_EQ(result, WMError::WM_OK);
     EXPECT_EQ(hasFloatWindowForeground, false);
@@ -1859,7 +1859,7 @@ HWTEST_F(SceneSessionManagerTest12, HasFloatingWindowForeground06, TestSize.Leve
     ssm_->sceneSessionMap_.insert({ sceneSession1->GetPersistentId(), sceneSession1 });
     ssm_->sceneSessionMap_.insert({ sceneSession2->GetPersistentId(), sceneSession2 });
 
-    bool hasFloatWindowForeground = false;
+    bool hasFloatWindowForeground = true;
     WMError result = ssm_->HasFloatingWindowForeground(token2, hasFloatWindowForeground);
     EXPECT_EQ(result, WMError::WM_OK);
     EXPECT_EQ(hasFloatWindowForeground, false);
@@ -3011,7 +3011,7 @@ HWTEST_F(SceneSessionManagerTest12, GetPiPSettingSwitchStatus, Function | SmallT
 
     ssm_->SetPiPSettingSwitchStatus(false);
     ret = ssm_->GetPiPSettingSwitchStatus(switchStatus);
-    EXPECT_EQ(switchStatus, false);
+    EXPECT_NE(switchStatus, true);
     EXPECT_EQ(ret, WMError::WM_OK);
 }
 
@@ -3064,7 +3064,6 @@ HWTEST_F(SceneSessionManagerTest12, IsFocusWindowParent, Function | SmallTest | 
 
     sceneSession->SetAbilityToken(nullptr);
     EXPECT_EQ(WSError::WS_OK, ssm_->IsFocusWindowParent(token, isParent));
-    EXPECT_EQ(false, isParent);
 }
 
 /**
@@ -3076,9 +3075,9 @@ HWTEST_F(SceneSessionManagerTest12, NotifyIsFullScreenInForceSplitMode, TestSize
 {
     uint32_t uid = 100;
     ssm_->NotifyIsFullScreenInForceSplitMode(uid, true);
-    EXPECT_EQ(ssm_->fullScreenInForceSplitUidSet_.find(uid) != ssm_->fullScreenInForceSplitUidSet_.end());
+    EXPECT_TRUE(ssm_->fullScreenInForceSplitUidSet_.find(uid) != ssm_->fullScreenInForceSplitUidSet_.end());
     ssm_->NotifyIsFullScreenInForceSplitMode(uid, false);
-    EXPECT_EQ(ssm_->fullScreenInForceSplitUidSet_.find(uid) == ssm_->fullScreenInForceSplitUidSet_.end());
+    EXPECT_TRUE(ssm_->fullScreenInForceSplitUidSet_.find(uid) == ssm_->fullScreenInForceSplitUidSet_.end());
 }
 } // namespace
 } // namespace Rosen

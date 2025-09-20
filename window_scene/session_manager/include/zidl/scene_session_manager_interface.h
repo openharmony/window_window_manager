@@ -98,6 +98,8 @@ public:
         TRANS_ID_SHIFT_APP_WINDOW_FOCUS,
         TRANS_ID_LIST_WINDOW_INFO,
         TRANS_ID_GET_WINDOW_LAYOUT_INFO,
+        TRANS_ID_GET_ALL_MAIN_WINDOW_INFO,
+        TRANS_ID_GET_MAIN_WINDOW_SNAPSHOT,
         TRANS_ID_GET_GLOBAL_WINDOW_MODE,
         TRANS_ID_GET_TOP_NAV_DEST_NAME,
         TRANS_ID_SET_APP_WATERMARK_IMAGE,
@@ -156,6 +158,7 @@ public:
         TRANS_ID_REMOVE_SESSION_BLACK_LIST,
         TRANS_ID_GET_PIP_SWITCH_STATUS,
         TRANS_ID_RECOVER_WINDOW_PROPERTY_CHANGE_FLAG,
+        TRANS_ID_MINIMIZE_ALL_WINDOW,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -295,6 +298,9 @@ public:
         std::vector<sptr<WindowInfo>>& infos) override { return WMError::WM_OK; }
     WMError GetAllWindowLayoutInfo(DisplayId displayId,
         std::vector<sptr<WindowLayoutInfo>>& infos) override { return WMError::WM_OK; }
+    WMError GetAllMainWindowInfo(std::vector<sptr<MainWindowInfo>>& infos) override { return WMError::WM_OK; }
+    WMError GetMainWindowSnapshot(const std::vector<int32_t>& windowIds, const WindowSnapshotConfiguration& config,
+        const sptr<IRemoteObject>& callback) override { return WMError::WM_OK; }
     WMError GetGlobalWindowMode(DisplayId displayId,
         GlobalWindowMode& globalWinMode) override { return WMError::WM_OK; }
     WMError GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName) override { return WMError::WM_OK; }

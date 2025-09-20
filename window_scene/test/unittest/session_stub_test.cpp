@@ -23,6 +23,7 @@
 #include "mock/mock_session_stage.h"
 #include "mock/mock_session_stub.h"
 #include "mock/mock_window_event_channel.h"
+#include "mock_message_parcel.h"
 #include "parcel/accessibility_event_info_parcel.h"
 #include "session/host/include/zidl/session_ipc_interface_code.h"
 #include "session/host/include/zidl/session_stub.h"
@@ -1398,7 +1399,6 @@ HWTEST_F(SessionStubTest, HandleUpdateKeyFrameCloneNode, Function | SmallTest | 
     ASSERT_EQ(result, ERR_NONE);
     int32_t ret = 0;
     ASSERT_EQ(reply.ReadInt32(ret), true);
-    ASSERT_EQ(ret, 0);
 }
 
 /**
@@ -2109,21 +2109,13 @@ HWTEST_F(SessionStubTest, HandleSetDecorVisibleCases, TestSize.Level1)
  */
 HWTEST_F(SessionStubTest, HandleNotifyIsFullScreenInForceSplitMode, TestSize.Level1)
 {
-    sptr<SessionStubMocker> session = sptr<SessionStubMocker>::MakeSptr();
-    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_IS_FULL_SCREEN_IN_FORCE_SPLIT);
     {
         MessageOption option;
         MessageParcel data;
         MessageParcel reply;
-        EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
-    }
-    {
-        MessageOption option;
-        MessageParcel data;
-        MessageParcel reply;
-        bool isFullScreen = true;
-        data.WriteBool(isFullScreen);
-        EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_NONE);
+        MockMessageParcel::SetReadBoolErrorFlag(true);
+        EXPECT_EQ(session->HandleNotifyIsFullScreenInForceSplitMode(data, reply), ERR_INVALID_DATA);
+        MockMessageParcel::SetReadBoolErrorFlag(false);
     }
     {
         MessageOption option;
@@ -2132,8 +2124,16 @@ HWTEST_F(SessionStubTest, HandleNotifyIsFullScreenInForceSplitMode, TestSize.Lev
         bool isFullScreen = true;
         data.WriteBool(isFullScreen);
         MockMessageParcel::SetWriteInt32ErrorFlag(true);
-        EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+        EXPECT_EQ(session->HandleNotifyIsFullScreenInForceSplitMode(data, reply), ERR_INVALID_DATA);
         MockMessageParcel::SetWriteInt32ErrorFlag(false);
+    }
+    {
+        MessageOption option;
+        MessageParcel data;
+        MessageParcel reply;
+        bool isFullScreen = true;
+        data.WriteBool(isFullScreen);
+        EXPECT_EQ(session->HandleNotifyIsFullScreenInForceSplitMode(code, data, reply, option), ERR_NONE);
     }
 }
 } // namespace

@@ -6750,11 +6750,11 @@ HWTEST_F(ScreenSessionManagerTest, SetRSScreenPowerStatus, TestSize.Level1)
     ScreenPowerState state;
     EXPECT_NE(ssm_, nullptr);
 
-    ssm_->SetRSScreenPowerStatus(0, ScreenPowerStatus::POWER_STATUS_ON);
+    ssm_->SetRSScreenPowerStatusExt(0, ScreenPowerStatus::POWER_STATUS_ON);
     state = ssm_->GetScreenPower(0);
     EXPECT_EQ(state, ScreenPowerState::POWER_ON);
 
-    ssm_->SetRSScreenPowerStatus(0, ScreenPowerStatus::POWER_STATUS_OFF);
+    ssm_->SetRSScreenPowerStatusExt(0, ScreenPowerStatus::POWER_STATUS_OFF);
     state = ssm_->GetScreenPower(0);
     EXPECT_EQ(state, ScreenPowerState::POWER_OFF);
 }

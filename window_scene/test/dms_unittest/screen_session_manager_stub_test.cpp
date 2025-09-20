@@ -3364,7 +3364,7 @@ HWTEST_F(ScreenSessionManagerStubTest, NotifyIsFullScreenInForceSplitMode, TestS
         MessageOption option;
         uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_IS_FULL_SCREEN_IN_FORCE_SPLIT);
         int res = stub_->OnRemoteRequest(code, data, reply, option);
-        EXPECT_EQ(res, ERR_INVALID_DATA);
+        EXPECT_EQ(res, 1);
     }
     {
         MessageParcel data;

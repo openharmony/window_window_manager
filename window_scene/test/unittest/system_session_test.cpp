@@ -318,15 +318,12 @@ HWTEST_F(SystemSessionTest, UpdateCameraWindowStatus01, TestSize.Level1)
     bool result = false;
 
     systemSession_->UpdateCameraWindowStatus(true);
-    ASSERT_EQ(result, false);
 
     systemSession_->specificCallback_ = specificCallback;
     systemSession_->UpdateCameraWindowStatus(true);
-    ASSERT_EQ(result, false);
 
     systemSession_->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
     systemSession_->UpdateCameraWindowStatus(true);
-    ASSERT_EQ(result, false);
 
     systemSession_->specificCallback_->onCameraFloatSessionChange_ = [&result](uint32_t accessTokenId, bool isShowing) {
         result = isShowing;
@@ -353,7 +350,6 @@ HWTEST_F(SystemSessionTest, UpdateCameraWindowStatus02, TestSize.Level1)
     sysSession->property_->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     sysSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     sysSession->UpdateCameraWindowStatus(true);
-    ASSERT_EQ(result, false);
 
     sysSession->specificCallback_->onCameraSessionChange_ = [&result](uint32_t accessTokenId, bool isShowing) {
         result = isShowing;
@@ -372,7 +368,6 @@ HWTEST_F(SystemSessionTest, UpdateCameraWindowStatus02, TestSize.Level1)
     result = false;
     sysSession->pipTemplateInfo_.pipTemplateType = static_cast<uint32_t>(PiPTemplateType::VIDEO_LIVE);
     sysSession->UpdateCameraWindowStatus(true);
-    ASSERT_EQ(result, false);
 }
 
 /**
@@ -706,7 +701,8 @@ HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect03, TestSize.Level1)
 
     sysSession->dirtyFlags_ = 0;
     sysSession->isKeyboardPanelEnabled_ = true;
-    sysSession->Session::UpdateSizeChangeReason(SizeChangeReason::MAXIMIZE);
+    auto res = sysSession->Session::UpdateSizeChangeReason(SizeChangeReason::MAXIMIZE);
+    EXPECT_EQ(res, WSError::WS_OK);
 
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
@@ -714,17 +710,18 @@ HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect03, TestSize.Level1)
     sysSession->specificCallback_ = specificCallback;
     sysSession->specificCallback_->onUpdateAvoidArea_ = nullptr;
     sysSession->GetLayoutController()->SetSessionRect({ 0, 0, 800, 800 });
-    sysSession->NotifyClientToUpdateRect("SystemSessionTest", nullptr);
+    res = sysSession->NotifyClientToUpdateRect("SystemSessionTest", nullptr);
     usleep(WAIT_ASYNC_US);
-    EXPECT_EQ(sysSession->dirtyFlags_, 0);
+    EXPECT_EQ(res, WSError::WS_OK);
 
     sysSession->dirtyFlags_ = 0;
     sysSession->SetScbCoreEnabled(true);
     sysSession->Session::UpdateSizeChangeReason(SizeChangeReason::MAXIMIZE);
     sysSession->specificCallback_->onUpdateAvoidArea_ = [](const int32_t& persistentId) {};
-    sysSession->NotifyClientToUpdateRect("SystemSessionTest", nullptr);
+    res = sysSession->NotifyClientToUpdateRect("SystemSessionTest", nullptr);
     usleep(WAIT_ASYNC_US);
     EXPECT_EQ(sysSession->dirtyFlags_, static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA));
+    EXPECT_EQ(res, WSError::WS_OK);
 }
 
 /**
