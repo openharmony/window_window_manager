@@ -30,6 +30,21 @@
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+std::string GetHexColor(uint32_t color)
+{
+    std::stringstream ioss;
+    std::string temp;
+    ioss << std::setiosflags(std::ios::uppercase) << std::hex << color;
+    ioss >> temp;
+    int count = RGBA_LENGTH - static_cast<int>(temp.length());
+    std::string tmpColor(count, '0');
+    tmpColor += temp;
+    std::string finalColor("#");
+    finalColor += tmpColor;
+    return finalColor;
+}
+}
 ani_status AniWindowUtils::GetStdString(ani_env *env, ani_string ani_str, std::string &result)
 {
     ani_size strSize;
