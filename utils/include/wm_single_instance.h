@@ -15,29 +15,40 @@
 
 #ifndef OHOS_WM_SINGLE_INSTANCE_H
 #define OHOS_WM_SINGLE_INSTANCE_H
+#include <mutex>
+
 namespace OHOS {
 namespace Rosen {
-#define WM_DECLARE_SINGLE_INSTANCE_BASE(className)          \
-public:                                                     \
-    static className& GetInstance();                        \
-    className(const className&) = delete;                   \
-    className& operator= (const className&) = delete;       \
-    className(className&&) = delete;                        \
-    className& operator= (className&&) = delete;            \
+#define WM_DECLARE_SINGLE_INSTANCE_BASE(className)   \
+public:                                              \
+    static className& GetInstance();                 \
+    static void SetInstance(className* newInstance); \
+    className(const className&) = delete;            \
+    className& operator=(const className&) = delete; \
+    className(className&&) = delete;                 \
+    className& operator=(className&&) = delete;      \
+    static className* singleton_;
 
 #define WM_DECLARE_SINGLE_INSTANCE(className)  \
     WM_DECLARE_SINGLE_INSTANCE_BASE(className) \
 protected:                                     \
     className() = default;                     \
-    virtual ~className() = default;            \
+    virtual ~className() = default;
 
-#define WM_IMPLEMENT_SINGLE_INSTANCE(className) \
-className& className::GetInstance()             \
-{                                               \
-    static className instance;                  \
-    return instance;                            \
-}                                               \
+#define WM_IMPLEMENT_SINGLE_INSTANCE(className)         \
+    className* className::singleton_ = nullptr;         \
+    className& className::GetInstance()                 \
+    {                                                   \
+        if (!singleton_) {                              \
+            singleton_ = new className();               \
+        }                                               \
+        return *singleton_;                             \
+    }                                                   \
+    void className::SetInstance(className* newInstance) \
+    {                                                   \
+        singleton_ = newInstance;                       \
+    }
 
+} // namespace Rosen
 } // namespace OHOS
-}
 #endif // OHOS_SINGLE_INSTANCE_H
