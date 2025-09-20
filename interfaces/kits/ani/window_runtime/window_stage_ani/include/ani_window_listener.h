@@ -55,10 +55,10 @@ class AniWindowListener : public IWindowChangeListener,
                         public IWindowRotationChangeListener {
 public:
     AniWindowListener(ani_env* env, ani_ref callback, CaseType caseType)
-        : env_(env), aniCallBack_(callback), caseType_(caseType),
+        : env_(env), aniCallback_(callback), caseType_(caseType),
         weakRef_(wptr<AniWindowListener> (this)) {}
     ~AniWindowListener();
-    ani_ref GetAniCallBack() { return aniCallBack_; }
+    ani_ref GetAniCallback() { return aniCallback_; }
     void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) override;
     void OnSizeChange(Rect rect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
@@ -105,10 +105,10 @@ private:
 
     Rect currRect_ = {0, 0, 0, 0};
     WindowState state_ {WindowState::STATE_INITIAL};
-    void LifeCycleCallBack(LifeCycleEventType eventType);
+    void LifeCycleCallback(LifeCycleEventType eventType);
     void WindowStageLifecycleCallback(WindowStageLifeCycleEventType eventType);
     ani_env* env_ = nullptr;
-    ani_ref aniCallBack_;
+    ani_ref aniCallback_;
     CaseType caseType_ = CaseType::CASE_WINDOW;
     wptr<AniWindowListener> weakRef_ = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;
