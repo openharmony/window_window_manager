@@ -3029,16 +3029,6 @@ void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc&
     }, "SetSessionStateChangeListenser");
 }
 
-bool Session::IsStatusBarVisible() const
-{
-    if (WindowHelper::IsMainWindow(Session::GetWindowType())) {
-        return isStatusBarVisible_;
-    } else if (WindowHelper::IsSubWindow(Session::GetWindowType())) {
-        return GetMainSession() != nullptr ? GetMainSession()->isStatusBarVisible_ : false;
-    }
-    return false;
-}
-
 void Session::SetClearSubSessionCallback(const NotifyClearSubSessionFunc& func)
 {
     PostTask(
