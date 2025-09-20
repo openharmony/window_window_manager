@@ -2365,22 +2365,22 @@ function runAvoidAreaChangeCallback(cb: object, area: object, type: int): void {
   func({type: type as AvoidAreaType, area: area as AvoidArea});
 }
 
-function runWindowStageLifecycleEventCallBack(cb: object, cbArg: int): void {
+function runWindowStageLifecycleEventCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: WindowStageLifeCycleEventType) => void;
     func(cbArg as WindowStageLifeCycleEventType);
 }
 
-function runWindowEventCallBack(cb: object, cbArg: int): void {
+function runWindowEventCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: WindowEventType) => void;
     func(cbArg as WindowEventType);
 }
 
-function runWindowSizeCallBack(cb: object, cbArg: object): void {
+function runWindowSizeCallback(cb: object, cbArg: object): void {
     const func = cb as (cbArg: Size) => void;
     func(cbArg as Size);
 }
 
-function runWindowStatusCallBack(cb: object, cbArg: int): void {
+function runWindowStatusCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: WindowStatusType) => void;
     func(cbArg as WindowStatusType);
 }

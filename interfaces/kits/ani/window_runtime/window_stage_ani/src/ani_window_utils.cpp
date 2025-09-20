@@ -565,7 +565,7 @@ ani_status AniWindowUtils::CallAniFunctionVoid(ani_env *env, const char* ns,
     }
     ani_function func{};
     if ((ret = env->Namespace_FindFunction(aniNamespace, fn, signature, &func)) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]canot find callBack %{public}d", ret);
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]canot find callback %{public}d", ret);
         return ret;
     }
     va_list args;
@@ -573,7 +573,7 @@ ani_status AniWindowUtils::CallAniFunctionVoid(ani_env *env, const char* ns,
     ret = env->Function_Call_Void_V(func, args);
     va_end(args);
     if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]canot run callBack %{public}d", ret);
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]canot run callback %{public}d", ret);
         return ret;
     }
     return ret;
