@@ -1824,12 +1824,12 @@ HWTEST_F(WindowSessionTest, TransformRelativeRectToGlobalRect, TestSize.Level1)
 HWTEST_F(WindowSessionTest, IsStatusBarVisible, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
-    session->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    session->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     session_->UpdateStatusBarVisible(false);
-    EXPECT_EQ(false, session->IsStatusBarVisible());
-    session->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    EXPECT_EQ(false, session->IsStatusBarVisible());
+    EXPECT_EQ(false, session_->IsStatusBarVisible());
+    session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    EXPECT_EQ(false, session_->IsStatusBarVisible());
 }
 } // namespace
 } // namespace Rosen
