@@ -640,6 +640,40 @@ struct PointInfo {
 };
 
 /**
+@struct MainWindowInfo.
+@brief topN main window info.
+*/
+struct MainWindowInfo : public Parcelable {
+    virtual bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteInt32(pid_) && parcel.WriteString(bundleName_) &&
+            parcel.WriteInt32(persistentId_) && parcel.WriteInt32(bundleType_) &&
+            parcel.WriteUint64(displayId_) && parcel.WriteBool(showing_) && parcel.WriteString(label_);
+    }
+
+    static MainWindowInfo* Unmarshalling(Parcel& parcel)
+    {
+        MainWindowInfo* mainWindowInfo = new MainWindowInfo;
+        if (!parcel.ReadInt32(mainWindowInfo->pid_) || !parcel.ReadString(mainWindowInfo->bundleName_) ||
+            !parcel.ReadInt32(mainWindowInfo->persistentId_) || !parcel.ReadInt32(mainWindowInfo->bundleType_) ||
+            !parcel.ReadUint64(mainWindowInfo->displayId_) || !parcel.ReadBool(mainWindowInfo->showing_) ||
+            !parcel.ReadString(mainWindowInfo->label_)) {
+            delete mainWindowInfo;
+            return nullptr;
+        }
+        return mainWindowInfo;
+    }
+
+    int32_t pid_ = 0;
+    std::string bundleName_ = "";
+    int32_t persistentId_ = 0;
+    int32_t bundleType_ = 0;
+    DisplayId displayId_ = DISPLAY_ID_INVALID;
+    bool showing_ = false;
+    std::string label_ = "";
+};
+
+/**
  * @class Transform
  *
  * @brief parameter of transform and rotate.

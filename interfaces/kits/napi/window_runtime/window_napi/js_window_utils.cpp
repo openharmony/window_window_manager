@@ -23,6 +23,8 @@
 #include "window_manager_hilog.h"
 #include "js_window.h"
 #include "wm_common.h"
+#include "pixel_map.h"
+#include "pixel_map_napi.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -714,6 +716,38 @@ napi_value CreateJsWindowLayoutInfoArrayObject(napi_env env, const std::vector<s
     return arrayValue;
 }
 
+napi_value CreateJsPixelMapArrayObject(napi_env env, const std::vector<std::shared_ptr<Media::PixelMap>>& pixelMaps)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, pixelMaps.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "arrayValue is null");
+        return nullptr;
+    }
+    for (size_t i = 0; i < pixelMaps.size(); i++) {
+        if (!pixelMaps[i]) {
+            TLOGW(WmsLogTag::WMS_LIFE, "pixelMaps index: %{public}d is null", static_cast<int32_t>(i));
+            continue;
+        }
+        napi_set_element(env, arrayValue, i, CreateJsPixelMapObject(env, pixelMaps[i]));
+    }
+    return arrayValue;
+}
+ 
+napi_value CreateJsMainWindowInfoArrayObject(napi_env env, const std::vector<sptr<MainWindowInfo>>& infos)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, infos.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "arrayValue is null");
+        return nullptr;
+    }
+    for (size_t i = 0; i < infos.size(); i++) {
+        napi_set_element(env, arrayValue, i, CreateJsMainWindowInfoObject(env, infos[i]));
+    }
+    return arrayValue;
+}
+
 napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
     napi_value arrayValue = nullptr;
@@ -792,6 +826,31 @@ napi_value CreateJsWindowLayoutInfoObject(napi_env env, const sptr<WindowLayoutI
     napi_value objValue = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
     napi_set_named_property(env, objValue, "windowRect", GetRectAndConvertToJsValue(env, info->rect));
+    return objValue;
+}
+
+napi_value CreateJsMainWindowInfoObject(napi_env env, const sptr<MainWindowInfo>& info)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+ 
+    napi_set_named_property(env, objValue, "displayId", CreateJsValue(env, static_cast<uint32_t>(info->displayId_)));
+    napi_set_named_property(env, objValue, "windowId", CreateJsValue(env, info->persistentId_));
+    napi_set_named_property(env, objValue, "showing", CreateJsValue(env, info->showing_));
+    napi_set_named_property(env, objValue, "label", CreateJsValue(env, info->label_));
+    return objValue;
+}
+ 
+napi_value CreateJsPixelMapObject(napi_env env, const std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    if (!pixelMap) {
+        TLOGE(WmsLogTag::WMS_LIFE, "pixelMap is null");
+        return nullptr;
+    }
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    
+    objValue = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
     return objValue;
 }
 
@@ -1290,6 +1349,27 @@ bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std
             return false;
         }
         windowMask.emplace_back(elementArray);
+    }
+    return true;
+}
+
+bool GetWindowIdFromJsValue(napi_env env, napi_value jsObject, std::vector<int32_t>& windowIds)
+{
+    if (jsObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to window id");
+        return false;
+    }
+    uint32_t size = 0;
+    napi_get_array_length(env, jsObject, &size);
+    for (uint32_t i = 0; i < size; i++) {
+        int32_t elementArray;
+        napi_value getElementValue = nullptr;
+        napi_get_element(env, jsObject, i, &getElementValue);
+        if (!ConvertFromJsValue(env, getElementValue, elementArray)) {
+            TLOGE(WmsLogTag::WMS_LIFE, "jsObject is null");
+            return false;
+        }
+        windowIds.emplace_back(elementArray);
     }
     return true;
 }

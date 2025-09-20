@@ -576,6 +576,15 @@ void ScreenSessionManagerClient::NotifyScreenConnectCompletion(ScreenId screenId
     screenSessionManager_->NotifyScreenConnectCompletion(screenId);
 }
 
+void ScreenSessionManagerClient::NotifyAodOpCompletion(AodOP operation, int32_t result)
+{
+    if (!screenSessionManager_) {
+        TLOGE(WmsLogTag::DMS, "screenSessionManager is null");
+        return;
+    }
+    screenSessionManager_->NotifyAodOpCompletion(operation, result);
+}
+
 void ScreenSessionManagerClient::RecordEventFromScb(std::string description, bool needRecordEvent)
 {
     if (!screenSessionManager_) {

@@ -32,6 +32,7 @@
 #include "window_option.h"
 #include "window_visibility_info.h"
 #include "wm_common.h"
+#include "pixel_map.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -270,6 +271,14 @@ class AniWindowUtils {
 public:
     static ani_status GetStdString(ani_env* env, ani_string ani_str, std::string& result);
     static ani_status GetStdStringVector(ani_env* env, ani_object ary, std::vector<std::string>& result);
+    static ani_status GetPropertyIntObject(ani_env* env, const char* propertyName, ani_object object, int32_t& result);
+    static ani_status GetPropertyDoubleObject(ani_env* env, const char* propertyName,
+        ani_object object, double& result);
+    static bool GetPropertyRectObject(ani_env* env, const char* propertyName,
+        ani_object object, Rect& result);
+    static bool GetIntObject(ani_env* env, const char* propertyName, ani_object object, int32_t& result);
+    static ani_status GetDoubleObject(ani_env* env, ani_object double_object, double& result);
+    static ani_status GetIntVector(ani_env* env, ani_object ary, std::vector<int32_t>& result);
     static ani_status NewAniObjectNoParams(ani_env* env, const char* cls, ani_object* object);
     static ani_status NewAniObject(ani_env* env, const char* cls, const char* signature, ani_object* result, ...);
     static ani_object CreateAniUndefined(ani_env* env);
@@ -278,14 +287,22 @@ public:
     static ani_object CreateAniSize(ani_env* env, int32_t width, int32_t height);
     static ani_object CreateAniRect(ani_env* env, const Rect& rect);
     static ani_object CreateAniAvoidArea(ani_env* env, const AvoidArea& avoidArea, AvoidAreaType type);
+    static ani_object CreateAniRotationChangeInfo(ani_env* env, const RotationChangeInfo& info);
+    static void ParseRotationChangeResult(ani_env* env, ani_object obj, RotationChangeResult& rotationChangeResult);
     static ani_status CallAniFunctionVoid(ani_env *env, const char* ns, const char* func, const char* signature, ...);
     static ani_status CallAniMethodVoid(ani_env* env, ani_object object, const char* cls,
         const char* method, const char* signature, ...);
+    static ani_status CallAniFunctionRef(ani_env *env, ani_ref& result, ani_ref ani_callback,
+        const int32_t args_num, ...);
     static ani_status CallAniMethodVoid(ani_env* env, ani_object object, ani_class cls,
         const char* method, const char* signature, ...);
     static ani_status GetAniString(ani_env* env, const std::string& str, ani_string* result);
     static void* GetAbilityContext(ani_env *env, ani_object aniObj);
     static ani_object CreateWindowsProperties(ani_env* env, const sptr<Window>& window);
+    static ani_object CreateAniPixelMapArray(ani_env* env,
+        const std::vector<std::shared_ptr<Media::PixelMap>>& pixelMaps);
+    static ani_object CreateAniMainWindowInfoArray(ani_env* env, const std::vector<sptr<MainWindowInfo>>& infos);
+    static ani_object CreateAniMainWindowInfo(ani_env* env, const MainWindowInfo& info);
     static ani_object CreateProperties(ani_env* env, const sptr<Window>& window);
     static uint32_t GetColorFromAni(ani_env* env, const char* name,
         uint32_t defaultColor, bool& flag, const ani_object& aniObject);
@@ -315,6 +332,8 @@ public:
     static void GetSpecificBarStatus(sptr<Window>& window, const std::string& name,
         std::map<WindowType, SystemBarProperty>& newSystemBarProperties,
         std::map<WindowType, SystemBarProperty>& systemBarProperties);
+    static void GetWindowSnapshotConfiguration(ani_env* env, ani_object config,
+        WindowSnapshotConfiguration& windowSnapshotConfiguration);
 
     /**
      * @brief Convert WMError to corresponding WmErrorCode.

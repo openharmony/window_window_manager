@@ -26,6 +26,7 @@
 #include "ipc_skeleton.h"
 #include "ui_content.h"
 #include "window_manager_hilog.h"
+#include "pixel_map_taihe_ani.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -64,6 +65,166 @@ ani_status AniWindowUtils::GetStdStringVector(ani_env* env, ani_object ary, std:
         std::string str;
         AniWindowUtils::GetStdString(env, static_cast<ani_string>(stringRef), str);
         result.emplace_back(str);
+    }
+    return ANI_OK;
+}
+
+ani_status AniWindowUtils::GetPropertyIntObject(ani_env* env, const char* propertyName,
+    ani_object object, int32_t& result)
+{
+    ani_ref int_ref;
+    ani_status ret = env->Object_GetPropertyByName_Ref(object, propertyName, &int_ref);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed, ret : %{public}u",
+            propertyName, static_cast<int32_t>(ret));
+        return ret;
+    }
+
+    ani_boolean isUndefined;
+    if (ANI_OK != env->Reference_IsUndefined(int_ref, &isUndefined)) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
+        return ret;
+    }
+
+    if (isUndefined) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] %{public}s is Undefined Now", propertyName);
+        return ret;
+    }
+
+    ani_int int_value;
+    if (ANI_OK != env->Object_CallMethodByName_Int(static_cast<ani_object>(int_ref), "intValue", nullptr, &int_value)) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
+        return ret;
+    }
+    result = static_cast<int32_t>(int_value);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] %{public}s is: %{public}u", propertyName, result);
+    return ret;
+}
+
+ani_status AniWindowUtils::GetPropertyDoubleObject(ani_env* env, const char* propertyName,
+    ani_object object, double& result)
+{
+    ani_ref double_ref;
+    ani_status ret = env->Object_GetPropertyByName_Ref(object, propertyName, &double_ref);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed, ret : %{public}u",
+            propertyName, static_cast<int32_t>(ret));
+        return ret;
+    }
+
+    ani_boolean isUndefined;
+    if (ANI_OK != env->Reference_IsUndefined(double_ref, &isUndefined)) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
+        return ret;
+    }
+
+    if (isUndefined) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] %{public}s is Undefined Now", propertyName);
+        return ret;
+    }
+
+    ani_double double_value;
+    if (ANI_OK != env->Object_CallMethodByName_Double(static_cast<ani_object>(double_ref),
+        "doubleValue", nullptr, &double_value)) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
+        return ret;
+    }
+    result = static_cast<double>(double_value);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] %{public}s is: %{public}f", propertyName, result);
+    return ret;
+}
+
+bool AniWindowUtils::GetPropertyRectObject(ani_env* env, const char* propertyName,
+    ani_object object, Rect& result)
+{
+    ani_ref windowRect;
+    ani_status ret = env->Object_GetPropertyByName_Ref(object, propertyName, &windowRect);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed, ret : %{public}u",
+            propertyName, static_cast<int32_t>(ret));
+        return false;
+    }
+
+    int32_t posX = 0;
+    int32_t posY = 0;
+    int32_t width = 0;
+    int32_t height = 0;
+    bool ret_bool = GetIntObject(env, "left", static_cast<ani_object>(windowRect), posX);
+    ret_bool |= GetIntObject(env, "top", static_cast<ani_object>(windowRect), posY);
+    ret_bool |= GetIntObject(env, "width", static_cast<ani_object>(windowRect), width);
+    ret_bool |= GetIntObject(env, "height", static_cast<ani_object>(windowRect), height);
+    if (!ret_bool) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] GetIntObject Failed");
+        return false;
+    }
+    result.posX_ = posX;
+    result.posY_ = posY;
+    result.width_ = width;
+    result.height_ = height;
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] rect is [%{public}u, %{public}u, %{public}u, %{public}u]",
+        result.posX_, result.posY_, result.width_, result.height_);
+    return ret_bool;
+}
+
+bool AniWindowUtils::GetIntObject(ani_env* env, const char* propertyName,
+    ani_object object, int32_t& result)
+{
+    ani_int int_value;
+    ani_status ret = env->Object_GetPropertyByName_Int(object, propertyName, &int_value);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Int %{public}s Failed, ret : %{public}u",
+            propertyName, static_cast<int32_t>(ret));
+        return false;
+    }
+    result = static_cast<int32_t>(int_value);
+    return true;
+}
+
+ani_status AniWindowUtils::GetDoubleObject(ani_env* env, ani_object double_object, double& result)
+{
+    ani_boolean isUndefined;
+    ani_status isUndefinedRet = env->Reference_IsUndefined(double_object, &isUndefined);
+    if (ANI_OK != isUndefinedRet) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Check double_object isUndefined fail");
+        return isUndefinedRet;
+    }
+
+    if (isUndefined) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] CallMeWithOptionalDouble Not Pass Value");
+        return ANI_INVALID_ARGS;
+    }
+
+    ani_double double_value;
+    ani_status ret = env->Object_CallMethodByName_Double(double_object, "doubleValue", nullptr, &double_value);
+    if (ANI_OK != ret) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_CallMethodByName_Double Failed!");
+        return ret;
+    }
+    result = static_cast<double>(double_value);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] double result is: %{public}f", result);
+    return ret;
+}
+
+ani_status AniWindowUtils::GetIntVector(ani_env* env, ani_object ary, std::vector<int32_t>& result)
+{
+    ani_size size = 0;
+    ani_status status = ANI_ERROR;
+
+    if ((status = env->Array_GetLength(reinterpret_cast<ani_array>(ary), &size)) != ANI_OK) {
+        TLOGI(WmsLogTag::WMS_LIFE, "getLength failed, status : %{public}d", status);
+        return status;
+    }
+
+    TLOGI(WmsLogTag::WMS_LIFE, "vector size: %{public}d", static_cast<int32_t>(size));
+    if (static_cast<int32_t>(size) <= 0) {
+        return ANI_INVALID_ARGS;
+    }
+    std::unique_ptr<ani_double[]> native_buffer = std::make_unique<ani_double[]>(size);
+    env->Array_GetRegion_Double(reinterpret_cast<ani_array_double>(ary), 0, size, native_buffer.get());
+
+    ani_size idx;
+    for (idx = 0; idx < size; idx++) {
+        result.push_back(static_cast<int32_t>(native_buffer[idx]));
     }
     return ANI_OK;
 }
@@ -217,6 +378,87 @@ ani_object AniWindowUtils::CreateAniAvoidArea(ani_env* env, const AvoidArea& avo
     return aniAvoidArea;
 }
 
+ani_object AniWindowUtils::CreateAniRotationChangeInfo(ani_env* env, const RotationChangeInfo& info)
+{
+    TLOGI(WmsLogTag::WMS_ROTATION, "[ANI]");
+    ani_class aniClass;
+    ani_status ret = env->FindClass("L@ohos/window/window/RotationChangeInfoInternal;", &aniClass);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_method aniCtor;
+    ret = env->Class_FindMethod(aniClass, "<ctor>", nullptr, &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object RotationChangeInfo;
+    ret = env->Object_New(aniClass, aniCtor, &RotationChangeInfo);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] failed to new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_enum rotationChangeType;
+    ret = env->FindEnum("L@ohos/window/window/RotationChangeType;", &rotationChangeType);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] failed to FindEnum");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_enum_item rotationChangeTypeItem;
+    std::string itemName =
+        info.type_ == RotationChangeType::WINDOW_WILL_ROTATE? "WINDOW_WILL_ROTATE" : "WINDOW_DID_ROTATE";
+    ret = env->Enum_GetEnumItemByName(rotationChangeType, itemName.c_str(), &rotationChangeTypeItem);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] Enum_GetEnumItemByName failed");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    CallAniMethodVoid(env, RotationChangeInfo, aniClass, "<set>type", nullptr,
+        rotationChangeTypeItem);
+    CallAniMethodVoid(env, RotationChangeInfo, aniClass, "<set>orientation", nullptr,
+        ani_int(info.orientation_));
+    CallAniMethodVoid(env, RotationChangeInfo, aniClass, "<set>displayId", nullptr,
+        ani_long(info.displayId_));
+    CallAniMethodVoid(env, RotationChangeInfo, aniClass, "<set>displayRect", nullptr,
+        CreateAniRect(env, info.displayRect_));
+    return RotationChangeInfo;
+}
+
+void AniWindowUtils::ParseRotationChangeResult(ani_env* env, ani_object obj, RotationChangeResult& rotationChangeResult)
+{
+    ani_boolean isUndefined;
+    ani_status ret = env->Reference_IsUndefined(obj, &isUndefined);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] Check rotationChangeResultObj isUndefined failed, ret: %{public}d", ret);
+        return;
+    }
+    if (isUndefined) {
+        TLOGI(WmsLogTag::WMS_ROTATION, "[ANI] RotationChangeResult is undefined");
+        return;
+    }
+    ani_ref rectTypeRef;
+    ret = env->Object_GetPropertyByName_Ref(obj, "rectType", &rectTypeRef);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] Object_GetPropertyByName_Ref failed, ret: %{public}d", ret);
+        return;
+    }
+    ani_int rectType;
+    ret = env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(rectTypeRef), &rectType);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] EnumItem_GetValue_Int failed, ret: %{public}d", ret);
+        return;
+    }
+
+    Rect windowRect;
+    bool ret_bool = GetPropertyRectObject(env, "windowRect", obj, windowRect);
+    if (!ret_bool) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] GetPropertyRectObject failed");
+        return;
+    }
+    rotationChangeResult.rectType_ = static_cast<RectType>(rectType);
+    rotationChangeResult.windowRect_ = windowRect;
+}
+
 ani_status AniWindowUtils::CallAniFunctionVoid(ani_env *env, const char* ns,
     const char* fn, const char* signature, ...)
 {
@@ -237,6 +479,25 @@ ani_status AniWindowUtils::CallAniFunctionVoid(ani_env *env, const char* ns,
     va_end(args);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI]canot run callBack %{public}d", ret);
+        return ret;
+    }
+    return ret;
+}
+
+ani_status AniWindowUtils::CallAniFunctionRef(ani_env *env, ani_ref& result,
+    ani_ref ani_callback, const int32_t args_num, ...)
+{
+    va_list args;
+    va_start(args, args_num);
+    std::vector<ani_ref> vec;
+    for (int i = 0; i < args_num; i++) {
+        vec.push_back(va_arg(args, ani_object));
+    }
+    va_end(args);
+    ani_status ret = env->FunctionalObject_Call(static_cast<ani_fn_object>(ani_callback), ani_size(args_num),
+        vec.data(), &result);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]cannot run callback %{public}d", ret);
         return ret;
     }
     return ret;
@@ -478,6 +739,102 @@ ani_object AniWindowUtils::CreateWindowsProperties(ani_env* env, const sptr<Wind
     }
 
     return aniSystemProperties;
+}
+
+ani_object AniWindowUtils::CreateAniPixelMapArray(ani_env* env,
+    const std::vector<std::shared_ptr<Media::PixelMap>>& pixelMaps)
+{
+    ani_class cls;
+    if (env->FindClass("L@ohos/multimedia/image/image/PixelMap;", &cls) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] class not found");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    }
+    ani_array_ref pixelMapArray = nullptr;
+    if (env->Array_New_Ref(cls, pixelMaps.size(), CreateAniUndefined(env), &pixelMapArray) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] create array failed");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    }
+    for (size_t i = 0; i < pixelMaps.size(); i++) {
+        auto nativePixelMap = OHOS::Media::PixelMapTaiheAni::CreateEtsPixelMap(env, pixelMaps[i]);
+        if (nativePixelMap == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Create native pixelmap is nullptr!");
+            return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+        }
+        if (env->Array_Set_Ref(pixelMapArray, i, nativePixelMap) != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_LIFE, "[ANI] create pixelMapArray failed");
+            return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+        }
+    }
+    return pixelMapArray;
+}
+
+ani_object AniWindowUtils::CreateAniMainWindowInfoArray(ani_env* env,
+    const std::vector<sptr<MainWindowInfo>>& infos)
+{
+    ani_class aniClass;
+    if (env->FindClass("@ohos.window.window.MainWindowInfoInternal", &aniClass) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] class not found");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    }
+    ani_array_ref mainWindowInfoArray = nullptr;
+    if (env->Array_New_Ref(aniClass, infos.size(), CreateAniUndefined(env), &mainWindowInfoArray) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] create array failed");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    }
+    for (size_t i = 0; i < infos.size(); i++) {
+        if (!infos[i]) {
+            TLOGE(WmsLogTag::WMS_LIFE, "[ANI] infos[i] is nullptr at index %{public}d", static_cast<int32_t>(i));
+            return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+        }
+        if (env->Array_Set_Ref(mainWindowInfoArray, i, CreateAniMainWindowInfo(env, *infos[i])) != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_LIFE, "[ANI] create mainWindowInfoArray failed");
+            return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+        }
+    }
+    return mainWindowInfoArray;
+}
+
+ani_object AniWindowUtils::CreateAniMainWindowInfo(ani_env* env, const MainWindowInfo& info)
+{
+    ani_class aniClass;
+    if (env->FindClass("@ohos.window.window.MainWindowInfoInternal", &aniClass) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] class not found");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    }
+    ani_method ctor;
+    if (env->Class_FindMethod(aniClass, "<ctor>", nullptr, &ctor) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] ctor not found");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    }
+    ani_object mainWindowInfo;
+    if (env->Object_New(aniClass, ctor, &mainWindowInfo) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] fail to new obj");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    }
+    ani_string label;
+    if (GetAniString(env, info.label_, &label) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] create string failed");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    }
+    CallAniMethodVoid(env, mainWindowInfo, aniClass, "<set>displayId", nullptr, ani_double(info.displayId_));
+    CallAniMethodVoid(env, mainWindowInfo, aniClass, "<set>showing", nullptr, ani_boolean(info.showing_));
+    CallAniMethodVoid(env, mainWindowInfo, aniClass, "<set>windowId", nullptr, ani_double(info.persistentId_));
+    CallAniMethodVoid(env, mainWindowInfo, aniClass, "<set>label", nullptr, label);
+    return mainWindowInfo;
+}
+
+void AniWindowUtils::GetWindowSnapshotConfiguration(ani_env* env, ani_object config,
+    WindowSnapshotConfiguration& windowSnapshotConfiguration)
+{
+    ani_status ret;
+    ani_ref nativeObj;
+    if ((ret = env->Object_GetPropertyByName_Ref(config, "useCache", &nativeObj)) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] obj fetch long %{public}u", ret);
+        return;
+    }
+    ani_boolean value = 0;
+    env->Object_CallMethodByName_Boolean(static_cast<ani_object>(nativeObj), "unboxed", ":z", &value);
+    windowSnapshotConfiguration.useCache = static_cast<bool>(value);
 }
 
 ani_object AniWindowUtils::CreateProperties(ani_env* env, const sptr<Window>& window)

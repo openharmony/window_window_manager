@@ -105,7 +105,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForFold01, TestSize.Level1)
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<ScreenSessionManager> ssm = sptr<ScreenSessionManager>::MakeSptr();
-    ssm->SetRSScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
+    ssm->SetRSScreenPowerStatusExt(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
 
     // 下电
     ssm->lastPowerForAllStatus_.store(ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
@@ -131,7 +131,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForFold02, TestSize.Level1)
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<ScreenSessionManager> ssm = sptr<ScreenSessionManager>::MakeSptr();
-    ssm->SetRSScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
+    ssm->SetRSScreenPowerStatusExt(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
 
     ssm->lastPowerForAllStatus_.store(ScreenPowerStatus::POWER_STATUS_OFF);
     ssm->lastScreenId_.store(SCREEN_ID_FULL);
@@ -152,12 +152,36 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForFold03, TestSize.Level1)
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<ScreenSessionManager> ssm = sptr<ScreenSessionManager>::MakeSptr();
-    ssm->SetRSScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
+    ssm->SetRSScreenPowerStatusExt(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
 
     ssm->lastPowerForAllStatus_.store(ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
     ssm->lastScreenId_.store(SCREEN_ID_MAIN);
     ssm->SetScreenPowerForFold(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
     EXPECT_TRUE(g_errLog.find("set advancedOn powerStatus off") == std::string::npos);
+}
+
+/**
+ * @tc.name: NotifyUnfreezedAgents
+ * @tc.desc: NotifyUnfreezedAgents
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, NotifyUnfreezedAgents, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenSessionManager> ssm = new ScreenSessionManager();
+    sptr<IDisplayManagerAgent> agent = new IDisplayManagerAgent();
+
+    int32_t pid = 1;
+    std::set<int32_t> unfreezedPidList = {1, 2, 3};
+    std::set<DisplayManagerAgentType> pidAgentTypes = {DisplayManagerAgentType::SCREEN_EVENT_LISTENER};
+    ScreenId screenId = 1050;
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
+
+    ssm->RegisterDisplayManagerAgent(agent, DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
+    ssm->dmAgentContainer_.RegisterAgent(nullptr, DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
+    ssm->NotifyUnfreezedAgents(pid, unfreezedPidList, pidAgentTypes, screenSession);
+    EXPECT_TRUE(logMsg.find("Unknown agentType") == std::string::npos);
 }
 
 /**

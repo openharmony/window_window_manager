@@ -22,9 +22,18 @@
 #include "ani_window_utils.h"
 #include "window_manager_hilog.h"
 #include "window_scene.h"
+#include "window_helper.h"
+#include "window_manager.h"
+#include "permission.h"
+#include "singleton_container.h"
+#include "pixel_map.h"
+#include "../../../../../../wm/include/get_snapshot_callback.h"
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+constexpr int32_t MAIN_WINDOW_SNAPSGOT_TIMEOUT = 5000;
+}
 ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace windowNameSpace)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
@@ -65,6 +74,94 @@ ani_ref AniWindowManager::OnGetLastWindow(ani_env* env, ani_object aniContext)
         return AniWindowUtils::AniThrowError(env, WMError::WM_ERROR_NULLPTR, "Get top window failed");
     }
     return CreateAniWindowObject(env, window);
+}
+
+
+void AniWindowManager::ShiftAppWindowFocus(ani_env* env, ani_long nativeObj,
+    ani_int sourceWindowId, ani_int targetWindowId)
+{
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    if (aniWindowManager != nullptr) {
+        aniWindowManager->OnShiftAppWindowFocus(env, sourceWindowId, targetWindowId);
+    } else {
+        TLOGE(WmsLogTag::WMS_FOCUS, "[ANI] aniWindowManager is nullptr");
+    }
+}
+
+void AniWindowManager::OnShiftAppWindowFocus(ani_env* env, ani_int sourceWindowId, ani_int targetWindowId)
+{
+    TLOGI(WmsLogTag::WMS_FOCUS, "[ANI] sourceWindowId: %{public}d targetWindowId: %{public}d",
+        static_cast<int32_t>(sourceWindowId), static_cast<int32_t>(targetWindowId));
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+        SingletonContainer::Get<WindowManager>().ShiftAppWindowFocus(sourceWindowId, targetWindowId));
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret, "ShiftAppWindowFocus failed.");
+    }
+    return ;
+}
+
+ani_object AniWindowManager::GetAllMainWindowInfo(ani_env* env, ani_long nativeObj, ani_object context)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "[ANI]");
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    return aniWindowManager != nullptr ? aniWindowManager->OnGetAllMainWindowInfo(env, context) : nullptr;
+}
+
+ani_object AniWindowManager::OnGetAllMainWindowInfo(ani_env* env, ani_object context)
+{
+    std::vector<sptr<MainWindowInfo>> infos;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+        SingletonContainer::Get<WindowManager>().GetAllMainWindowInfo(infos));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGI(WmsLogTag::WMS_LIFE, "Get All MainWindowInfo failed, ret: %{public}d", static_cast<int32_t>(ret));
+        return AniWindowUtils::AniThrowError(env, ret, "Window Get All Main Window failed");
+    }
+    return AniWindowUtils::CreateAniMainWindowInfoArray(env, infos);
+}
+
+ani_object AniWindowManager::GetMainWindowSnapshot(
+    ani_env* env, ani_long nativeObj, ani_object windowId, ani_object config)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "[ANI]");
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    return aniWindowManager != nullptr ?
+        aniWindowManager->OnGetMainWindowSnapshot(env, windowId, config) : nullptr;
+}
+
+ani_object AniWindowManager::OnGetMainWindowSnapshot(
+    ani_env* env, ani_object windowId, ani_object config)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "[ANI]");
+    sptr<GetSnapshotCallback> getSnapshotCallback = sptr<GetSnapshotCallback>::MakeSptr();
+    auto pixelMaps = std::make_shared<std::vector<std::shared_ptr<Media::PixelMap>>>();
+    std::shared_ptr<WMError> errCode = std::make_shared<WMError>(WMError::WM_OK);
+    getSnapshotCallback->RegisterFunc([env, errCode, pixelMaps, getSnapshotCallback]
+        (WMError errCodeResult, const std::vector<std::shared_ptr<Media::PixelMap>>& pixelMapResult) {
+            TLOGI(WmsLogTag::WMS_LIFE, "getSnapshotCallback errCodeResult: %{public}d",
+                static_cast<int32_t>(errCodeResult));
+            if (errCodeResult != WMError::WM_OK) {
+                *errCode = errCodeResult;
+            }
+            *pixelMaps = pixelMapResult;
+            getSnapshotCallback->OnNotifyResult();
+        });
+    std::vector<int32_t> windowIdList;
+    WindowSnapshotConfiguration windowSnapshotConfiguration;
+    AniWindowUtils::GetIntVector(env, windowId, windowIdList);
+    AniWindowUtils::GetWindowSnapshotConfiguration(env, config, windowSnapshotConfiguration);
+    TLOGI(WmsLogTag::WMS_LIFE, "windowIdList size: %{public}d", static_cast<int32_t>(windowIdList.size()));
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().
+        GetMainWindowSnapshot(windowIdList, windowSnapshotConfiguration, getSnapshotCallback->AsObject()));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Get snapshot not ok!");
+        return AniWindowUtils::AniThrowError(env, ret);
+    } else {
+        getSnapshotCallback->GetSyncResult(static_cast<int32_t>(MAIN_WINDOW_SNAPSGOT_TIMEOUT));
+        if (*errCode == WMError::WM_OK) {
+            return AniWindowUtils::CreateAniPixelMapArray(env, *pixelMaps);
+        }
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    }
 }
 }  // namespace Rosen
 }  // namespace OHOS

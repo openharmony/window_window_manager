@@ -41,6 +41,12 @@ namespace Rosen {
 namespace {
 const std::string UNDEFINED = "undefined";
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionTest4" };
+    std::string g_errLog;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_errLog = msg;
+    }
 } // namespace
 namespace {
 std::string g_logMsg;
@@ -935,16 +941,18 @@ HWTEST_F(WindowSessionTest4, ShouldCreateDetectTaskInRecent, TestSize.Level1)
  */
 HWTEST_F(WindowSessionTest4, CreateWindowStateDetectTask, TestSize.Level1)
 {
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     auto isScreenLockedCallback = [this]() { return ssm_->IsScreenLocked(); };
     session_->RegisterIsScreenLockedCallback(isScreenLockedCallback);
     session_->SetSessionState(SessionState::STATE_CONNECT);
     bool isAttach = true;
     session_->CreateWindowStateDetectTask(isAttach, WindowMode::WINDOW_MODE_UNDEFINED);
-    ASSERT_EQ(isAttach, true);
+    EXPECT_FALSE(g_errLog.find("Window attach state and session state mismatch, ") != std::string::npos);
 
     session_->handler_ = nullptr;
     session_->CreateWindowStateDetectTask(false, WindowMode::WINDOW_MODE_UNDEFINED);
-    ASSERT_EQ(session_->handler_, nullptr);
+    LOG_SetCallback(nullptr);
 }
 
 /**

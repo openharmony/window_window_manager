@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_MOVE_DRAG_CONTROLLER_H
 #define OHOS_ROSEN_WINDOW_SCENE_MOVE_DRAG_CONTROLLER_H
 
+#include <optional>
 #include <mutex>
 
 #include <refbase.h>
@@ -103,6 +104,8 @@ public:
     void SetScale(float scalex, float scaley);
     void SetParentRect(const Rect& parentRect);
     Gravity GetGravity() const;
+    Gravity GetGravity(AreaType type) const;
+    bool RestoreToPreDragGravity(const std::shared_ptr<RSSurfaceNode>& surfaceNode);
 
     /*
      * Cross Display Move Drag
@@ -335,6 +338,7 @@ private:
     NotifyWindowDragHotAreaFunc windowDragHotAreaFunc_;
     NotifyWindowPidChangeCallback pidChangeCallback_;
 
+    std::optional<Gravity> preDragGravity_ = std::nullopt;
     const std::map<AreaType, Gravity> GRAVITY_MAP = {
         {AreaType::LEFT,          Gravity::TOP_RIGHT},
         {AreaType::TOP,           Gravity::BOTTOM_LEFT},
