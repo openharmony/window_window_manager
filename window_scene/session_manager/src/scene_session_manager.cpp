@@ -123,8 +123,7 @@ const int32_t MAX_SESSION_LIMIT_ALL_APP = 512;
 
 constexpr int WINDOW_NAME_MAX_WIDTH = 21;
 constexpr int DISPLAY_NAME_MAX_WIDTH = 10;
-constexpr int32_t ZERO_NUMBER = 0;
-constexpr int32_t DIFF_NUMBER = 1;
+constexpr int32_t MAX_DIFF_NUMBER = 1;
 constexpr int VALUE_MAX_WIDTH = 5;
 constexpr int MAX_RESEND_TIMES = 6;
 constexpr int ORIEN_MAX_WIDTH = 12;
@@ -326,34 +325,6 @@ public:
         SceneSessionManager::GetInstance().OnBundleUpdated(bundleName, userId);
     }
 };
-
-// tanhong
-void UpdateAINavigationBarAvoidAreaToBottomRect(AvoidArea& avoidArea, const Rect& avoidRect)
-{
-    if (avoidRect.posX_ == ZERO_NUMBER && avoidRect.posY_ == ZERO_NUMBER &&
-        avoidRect.width_ == ZERO_NUMBER && avoidRect.height_ == ZERO_NUMBER) {
-        return;
-    }
-    AvoidArea avoidAreaEmpty;
-    avoidArea = avoidAreaEmpty;
-    avoidArea.bottomRect_ = avoidRect;
-}
-
-bool CheckAvoidAreaForAINavigationBar(bool isVisible, AvoidArea& avoidArea, int32_t sessionBottom)
-{
-    if (!avoidArea.topRect_.IsUninitializedRect() || !avoidArea.leftRect_.IsUninitializedRect() ||
-        !avoidArea.rightRect_.IsUninitializedRect()) {
-        UpdateAINavigationBarAvoidAreaToBottomRect(avoidArea, avoidArea.topRect_);
-        UpdateAINavigationBarAvoidAreaToBottomRect(avoidArea, avoidArea.leftRect_);
-        UpdateAINavigationBarAvoidAreaToBottomRect(avoidArea, avoidArea.rightRect_);
-    }
-    if (avoidArea.bottomRect_.IsUninitializedRect()) {
-        return true;
-    }
-    bool isAttachedToBottom = 
-        std::abs(avoidRect.posY_ + static_cast<int32_t>(avoidRect.height_) - sessionBottom) <= DIFF_NUMBER;
-    return isAttachedToBottom && isVisible;
-}
 
 enum class UpdateStartingWindowColorCacheResult : uint32_t {
     SUCCESS = 0,
@@ -12163,6 +12134,32 @@ void SceneSessionManager::NotifyMMIWindowPidChange(int32_t windowId, bool startM
         }
         SceneInputManager::GetInstance().NotifyMMIWindowPidChange(sceneSession, startMoving);
     }, __func__);
+}
+
+void SceneSessionManager::UpdateAINavigationBarAvoidAreaToBottomRect(AvoidArea& avoidArea, const Rect& avoidRect)
+{
+    if (avoidRect.IsUninitializedRect()) {
+        return;
+    }
+    Rect area = avoidRect;
+    avoidArea = AvoidArea();
+    avoidArea.bottomRect_ = area;
+}
+
+bool SceneSessionManager::CheckAvoidAreaForAINavigationBar(bool isVisible, AvoidArea& avoidArea, int32_t sessionBottom)
+{
+    if (!avoidArea.topRect_.IsUninitializedRect() || !avoidArea.leftRect_.IsUninitializedRect() ||
+        !avoidArea.rightRect_.IsUninitializedRect()) {
+        UpdateAINavigationBarAvoidAreaToBottomRect(avoidArea, avoidArea.topRect_);
+        UpdateAINavigationBarAvoidAreaToBottomRect(avoidArea, avoidArea.leftRect_);
+        UpdateAINavigationBarAvoidAreaToBottomRect(avoidArea, avoidArea.rightRect_);
+    }
+    if (avoidArea.bottomRect_.IsUninitializedRect()) {
+        return true;
+    }
+    auto isAttachedToBottomDiff = 
+        std::abs(avoidArea.bottomRect_.posY_ + static_cast<int32_t>(avoidArea.bottomRect_.height_) - sessionBottom);
+    return isAttachedToBottomDiff <= MAX_DIFF_NUMBER && isVisible;
 }
 
 void SceneSessionManager::UpdateAvoidArea(int32_t persistentId)
