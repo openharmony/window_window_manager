@@ -23,6 +23,7 @@ export type AsyncCallbackVoid = (err: BusinessError) => void;
 export type WindowEventCallback = (data: window.WindowEventType) => void;
 export type WindowSizeCallback = (data: window.Size) => void;
 export type WindowStatusCallback = (data: window.WindowStatusType) => void;
+export type WindowVoidCallback = () => void;
 
 namespace window {
   export interface Size {
@@ -1399,6 +1400,137 @@ export interface WindowLimits {
     minHeight: number;
 }
 
+/**
+ * Configuration parameters for window creation.
+ *
+ * @interface Configuration
+ * @syscap SystemCapability.WindowManager.WindowManager.Core
+ * @since 9
+ */
+/**
+ * Configuration parameters for window creation.
+ *
+ * @interface Configuration
+ * @syscap SystemCapability.WindowManager.WindowManager.Core
+ * @atomicservice
+ * @since 12
+ */
+export interface Configuration {
+    /**
+     * Indicates window id.
+     *
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 9
+     */
+    /**
+     * Indicates window id.
+     *
+     * @type { string }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    name: string;
+
+    /**
+     * Indicates window type
+     *
+     * @type { WindowType }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 9
+     */
+    /**
+     * Indicates window type
+     *
+     * @type { WindowType }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    windowType: WindowType;
+
+    /**
+     * Indicates window context.
+     *
+     * @type { ?BaseContext }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 9
+     */
+    /**
+     * Indicates window context.
+     *
+     * @type { ?BaseContext }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    ctx?: BaseContext;
+
+    /**
+     * Indicates display id.
+     *
+     * @type { ?number }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 9
+     */
+    /**
+     * Indicates display id.
+     *
+     * @type { ?long }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    displayId?: long;
+
+    /**
+     * Indicates parent window id
+     *
+     * @type { ?int }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 9
+     */
+    /**
+     * Indicates parent window id
+     *
+     * @type { ?int }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    parentId?: int;
+
+    /**
+     * Indicates whether enable window decor, only support dialog, the default value is false.
+     *
+     * @type { ?boolean }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 12
+     */
+    decorEnabled?: boolean;
+
+    /**
+     * Indicates dialog window title when decor enabled.
+     *
+     * @type { ?string }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 12
+     */
+    title?: string;
+}
+
+export class ConfigurationInternal implements Configuration {
+    name: string;
+    windowType: WindowType;
+    ctx?: BaseContext;
+    displayId?: long;
+    parentId?: int;
+    decorEnabled?: boolean;
+    title?: string;
+}
+
 export class WindowStageInternal implements WindowStage {
     static { loadLibrary('windowstageani_kit.z') }
 
@@ -1411,6 +1543,7 @@ export class WindowStageInternal implements WindowStage {
     public native disableWindowDecorSync(nativeObj:long): void;
     public native setShowOnLockScreenSync(nativeObj:long, showOnLockScreen: boolean): void;
     public native getMainWindowSync(nativeObj: long): Window;
+    public native createSubWindowSync(nativeObj: long, name: String): Window;
 
     public loadContent(path: string, storage: LocalStorage, callback: AsyncCallback<void>): void {
       try {
@@ -1476,6 +1609,29 @@ export class WindowStageInternal implements WindowStage {
         }).catch((err: NullishType) => {
         });
     }
+
+    public createSubWindow(name: string): Promise<Window> {
+        return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void) => {
+            taskpool.execute((): Window => {
+                let window = this.createSubWindowSync(this.nativeObj, name);
+                return window;
+            }).then((ret: NullishType) => {
+                resolve(ret as Window);
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
+    public createSubWindow(name: string, callback: AsyncCallback<Window>): void {
+        taskpool.execute((): Window => {
+            let res = this.createSubWindowSync(this.nativeObj, name);
+            return res;
+        }).then((ret: NullishType) => {
+            callback(new BusinessError(), ret as Window);
+        }).catch((err: NullishType) => {
+        });
+    }
 }
 
 export interface WindowStage {
@@ -1487,6 +1643,8 @@ export interface WindowStage {
     getMainWindow(callback: AsyncCallback<Window>): void;
     disableWindowDecor(): void;
     setShowOnLockScreen(showOnLockScreen: boolean): void;
+    createSubWindow(name: string): Promise<Window>;
+    createSubWindow(name: string, callback: AsyncCallback<Window>): void;
 }
 
 export class WindowInternal implements Window {
@@ -1528,6 +1686,7 @@ export class WindowInternal implements Window {
     private native loadContentSync(nativeObj: long, path: string, storage?: LocalStorage): void;
     private native setWindowKeepScreenOnSync(nativeObj: long, isKeepScreenOn: boolean): void;
     private native setWindowSystemBarEnableSync(nativeObj: long, names: Array<'status' | 'navigation'>): void;
+    private native setWindowTouchableSync(nativeObj: long, isTouchable: boolean): void;
     private native getUIContextSync(nativeObj: long): UIContext;
     private native getWindowAvoidAreaSync(nativeObj: long, type: int): AvoidArea;
     private native setWaterMarkFlagSync(nativeObj: long, enable: boolean): void;
@@ -1535,6 +1694,7 @@ export class WindowInternal implements Window {
     private native setContentAspectRatio(
       nativeObj: long, ratio: number, isPersistent: boolean, needUpdateRect: boolean): void;
     private native onSync(nativeObj: long, type: string, callback: object): void;
+    private native onNoInteractionDetected(nativeObj: long, type: string, timeout: long, callback: Object): void;
     private native offSync(nativeObj: long, type: string, callback?: object): void;
 
     public resize(width: number, height: number): Promise<void> {
@@ -1948,6 +2108,28 @@ export class WindowInternal implements Window {
       });
     }
 
+    public setWindowTouchable(isTouchable: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setWindowTouchableSync(this.nativeObj, isTouchable);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public setWindowTouchable(isTouchable: boolean, callback: AsyncCallback<void>): void {
+      taskpool.execute((): void => {
+        this.setWindowTouchableSync(this.nativeObj, isTouchable);
+      }).then((ret: NullishType) => {
+        callback(new BusinessError(), undefined);
+      }).catch((err: NullishType) => {
+        callback(err as BusinessError, undefined);
+      });
+    }
+
     public getUIContext(): UIContext {
       return this.getUIContextSync(this.nativeObj);
     }
@@ -2017,6 +2199,10 @@ export class WindowInternal implements Window {
       this.onSync(this.nativeObj, type, callback);
     }
 
+    public on<T>(type: 'noInteractionDetected', timeout: long, callback: Callback<T>): void {
+      this.onNoInteractionDetected(this.nativeObj, type, timeout, callback as WindowVoidCallback);
+    }
+
     public off<T>(type: string, callback?: Callback<T>): void {
       this.offSync(this.nativeObj, type, callback);
     }
@@ -2062,6 +2248,8 @@ export interface Window {
     setWindowKeepScreenOn(isKeepScreenOn: boolean, callback: AsyncCallback<void>): void;
     setWindowSystemBarEnable(names: Array<'status' | 'navigation'>): Promise<void>;
     setWindowSystemBarEnable(names: Array<'status' | 'navigation'>, callback: AsyncCallback<void>): void;
+    setWindowTouchable(isTouchable: boolean): Promise<void>
+    setWindowTouchable(isTouchable: boolean, callback: AsyncCallback<void>): void
     getUIContext(): UIContext;
     getWindowAvoidArea(type: AvoidAreaType): AvoidArea;
     setWaterMarkFlag(enable: boolean): Promise<void>;
@@ -2075,6 +2263,7 @@ export interface Window {
     rotate(rotateOptions: RotateOptions): void;
     setShadow(radius: double, color?: string, offsetX?: double, offsetY?: double): void;
     on<T>(type: string, callback: Callback<T>): void;
+    on<T>(type: 'noInteractionDetected', timeout: long, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;
 }
 
@@ -2088,6 +2277,7 @@ export function setNativeObj(nativeObject: long):void {
 }
 
 native function getLastWindowSync(nativeObj: long, ctx: BaseContext): Window;
+native function createWindowSync(nativeObj: long, config: Configuration): Window;
 native function shiftAppWindowFocusSync(nativeObj: long, sourceWindowId: int, targetWindowId: int): void;
 
 export function getLastWindow(ctx: BaseContext): Promise<Window> {
@@ -2112,6 +2302,28 @@ export function getLastWindow(ctx: BaseContext, callback: AsyncCallback<Window>)
     });
 }
 
+export function createWindow(config: Configuration): Promise<Window> {
+  return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void ) => {
+      taskpool.execute((): Window => {
+          return createWindowSync(nativeObj, config);
+      }).then((ret: NullishType) => {
+          resolve(ret as Window);
+      }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+      });
+  });
+}
+
+export function createWindow(config: Configuration, callback: AsyncCallback<Window>): void {
+    taskpool.execute((): Window => {
+        return createWindowSync(nativeObj, config);
+    }).then((ret: NullishType) => {
+        callback(new BusinessError(), ret as Window);
+    }).catch((err: NullishType) => {
+        callback(err as BusinessError, new WindowInternal());
+    });
+}
+
 export function shiftAppWindowFocus(sourceWindowId: int, targetWindowId: int): Promise<void> {
   return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
       taskpool.execute((): void => {
@@ -2122,7 +2334,7 @@ export function shiftAppWindowFocus(sourceWindowId: int, targetWindowId: int): P
           reject(err as BusinessError);
       });
   });
-} 
+}
 
 export interface MainWindowInfo {
   displayId: number;
@@ -2195,6 +2407,21 @@ function runWindowSizeCallBack(cb: object, cbArg: object): void {
 function runWindowStatusCallBack(cb: object, cbArg: int): void {
     const func = cb as (cbArg: WindowStatusType) => void;
     func(cbArg as WindowStatusType);
+}
+
+function runWindowTouchOutCallback(cb: object): void {
+  const func = cb as () => void;
+  func();
+}
+
+function runWindowDialogTargetCallback(cb: object): void {
+  const func = cb as () => void;
+  func();
+}
+
+function runWindowNoInteractionCallback(cb: object): void {
+  const func = cb as () => void;
+  func();
 }
 }
 
