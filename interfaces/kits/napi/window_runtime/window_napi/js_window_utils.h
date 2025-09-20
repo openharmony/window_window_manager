@@ -330,6 +330,30 @@ public:
         : resolvedCallback_(resolvedCallback), rejectedCallback_(rejectedCallback) {}
 };
 
+class WsNapiAsyncTask final {
+public:
+    using ExecuteCallback = std::function<void()>;
+    using CompleteCallback = std::function<void(napi_env, WsNapiAsyncTask&, int32_t)>;
+ 
+    WsNapiAsyncTask(napi_deferred deferred, std::unique_ptr<ExecuteCallback>&& execute,
+        std::unique_ptr<CompleteCallback>&& complete);
+    WsNapiAsyncTask(napi_ref callbackRef, std::unique_ptr<ExecuteCallback>&& execute,
+        std::unique_ptr<CompleteCallback>&& complete);
+    ~WsNapiAsyncTask();
+ 
+    void Resolve(napi_env env, napi_value value);
+    void Reject(napi_env env, napi_value error);
+private:
+    napi_deferred deferred_ = nullptr;
+    napi_ref callbackRef_ = nullptr;
+    napi_async_work work_ = nullptr;
+    std::unique_ptr<ExecuteCallback> execute_;
+    std::unique_ptr<CompleteCallback> complete_;
+    napi_env env_ = nullptr;
+};
+ 
+std::unique_ptr<WsNapiAsyncTask> CreateEmptyWsNapiAsyncTask(napi_env env, napi_value lastParam, napi_value* result);
+
     /*
      * Promise
      */
