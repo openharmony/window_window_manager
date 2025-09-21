@@ -34,7 +34,6 @@ public:
     explicit AniWindow(const sptr<Window>& window);
     explicit AniWindow(const std::shared_ptr<OHOS::Rosen::Window>& window);
     sptr<Window> GetWindow() { return windowToken_; }
-    void SetAniRef(const ani_ref& aniRef) { aniRef_ = aniRef; }
     ani_ref GetAniRef() { return aniRef_; }
     void SetAniRef(const ani_ref& aniRef) { aniRef_ = aniRef; }
 
