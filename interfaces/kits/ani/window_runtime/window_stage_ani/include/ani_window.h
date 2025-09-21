@@ -73,8 +73,8 @@ public:
     /*
      * Window Layout
      */
-    ani_object Resize(ani_env* env, ani_double width, ani_double height);
-    ani_object MoveWindowTo(ani_env* env, ani_double x, ani_double y);
+    void Resize(ani_env* env, ani_int width, ani_int height);
+    void MoveWindowTo(ani_env* env, ani_int x, ani_int y);
     ani_object GetGlobalRect(ani_env* env);
 
     ani_double GetWindowDecorHeight(ani_env* env);

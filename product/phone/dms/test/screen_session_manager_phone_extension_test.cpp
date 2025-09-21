@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,6 @@
 #include <regex>
 #include "screen_session_manager_phone_extension.h"
 #include "screen_session_manager.h"
-#include "screen_session.h"
 #include "display_manager_agent_default.h"
 #include "iconsumer_surface.h"
 #include "connection/screen_cast_connection.h"
@@ -26,16 +25,11 @@
 #include "scene_board_judgement.h"
 #include "fold_screen_state_internel.h"
 #include "common_test_utils.h"
-#include "iremote_object_mocker.h"
 #include "os_account_manager.h"
 #include "screen_session_manager_client.h"
-#include "../mock/mock_accesstoken_kit.h"
+#include "mock_accesstoken_kit.h"
 #include <parameter.h>
 #include <parameters.h>
-#include <functional>
-#include "screen_setting_helper.h"
-#include "mock/mock_session_stage.h"
-#include "mock/mock_window_event_channel.h"
 #include "window_manager_hilog.h"
 #include "test_client.h"
 
