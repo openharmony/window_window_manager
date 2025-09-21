@@ -60,7 +60,7 @@ public:
         : env_(env), vm_(vm), aniCallback_(callback), caseType_(caseType),
         weakRef_(wptr<AniWindowListener> (this)) {}
     ~AniWindowListener();
-    ani_ref GetAniCallBack() { return aniCallback_; }
+    ani_ref GetAniCallback() { return aniCallback_; }
     void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) override;
     void OnSizeChange(Rect rect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
@@ -112,7 +112,7 @@ private:
     Rect currRect_ = {0, 0, 0, 0};
     WindowState state_ {WindowState::STATE_INITIAL};
     int64_t noInteractionTimeout_ = 0;
-    void LifeCycleCallBack(LifeCycleEventType eventType);
+    void LifeCycleCallback(LifeCycleEventType eventType);
     void WindowStageLifecycleCallback(WindowStageLifeCycleEventType eventType);
     ani_env* env_ = nullptr;
     ani_vm* vm_ = nullptr;
