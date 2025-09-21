@@ -1066,6 +1066,7 @@ private:
     void GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetAINavigationBarArea(WSRect& rect, AvoidArea& avoidArea);
+    void PatchAINavigationBarArea(AvoidArea& avoidArea);
     AvoidArea GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT);
     WSError GetAvoidAreasByRotation(Rotation rotation, const WSRect& rect,
         const std::map<WindowType, SystemBarProperty>& properties, std::map<AvoidAreaType, AvoidArea>& avoidAreas);
@@ -1386,7 +1387,6 @@ private:
      */
     std::map<Rosen::WindowType, Rosen::SystemBarProperty> targetSystemBarProperty_;
     std::atomic_bool isDisplayStatusBarTemporarily_ { false };
-    bool isStatusBarVisible_ = true;
     IsLastFrameLayoutFinishedFunc isLastFrameLayoutFinishedFunc_;
     IsAINavigationBarAvoidAreaValidFunc isAINavigationBarAvoidAreaValid_;
     std::unordered_map<AvoidAreaType, std::tuple<DisplayId, WSRect, WSRect>> lastAvoidAreaInputParamtersMap_;

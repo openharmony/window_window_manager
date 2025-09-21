@@ -81,6 +81,7 @@ public:
     static napi_value RegisterDisplayManagerCallback(napi_env env, napi_callback_info info);
     static napi_value UnregisterDisplayManagerCallback(napi_env env, napi_callback_info info);
     static napi_value GetLiveCreaseRegion(napi_env env, napi_callback_info info);
+    sptr<Display> GetDisplay() const { return display_; }
 
 private:
     sptr<Display> display_ = nullptr;

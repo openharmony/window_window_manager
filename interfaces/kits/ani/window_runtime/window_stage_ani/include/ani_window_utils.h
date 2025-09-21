@@ -62,6 +62,7 @@ public:
     static ani_object CreateAniSystemBarRegionTint(ani_env* env, const SystemBarRegionTint& tint);
     static ani_object CreateAniRotationChangeInfo(ani_env* env, const RotationChangeInfo& info);
     static void ParseRotationChangeResult(ani_env* env, ani_object obj, RotationChangeResult& rotationChangeResult);
+    static ani_object CreateAniKeyboardInfo(ani_env* env, const KeyboardPanelInfo& keyboardPanelInfo);
     static ani_status CallAniFunctionVoid(ani_env *env, const char* ns, const char* func, const char* signature, ...);
     static ani_status CallAniMethodVoid(ani_env* env, ani_object object, const char* cls,
         const char* method, const char* signature, ...);
