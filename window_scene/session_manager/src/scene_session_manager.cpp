@@ -98,6 +98,8 @@
 #ifdef IMF_ENABLE
 #include <input_method_controller.h>
 #endif // IMF_ENABLE
+#include "dms_global_mutex.h"
+
 
 namespace OHOS::Rosen {
 namespace {
@@ -6179,7 +6181,7 @@ WMError SceneSessionManager::GetTopWindowId(uint32_t mainWinId, uint32_t& topWin
     TLOGI(WmsLogTag::WMS_PIPELINE, "wait for flush UI, id: %{public}d", mainWinId);
     {
         std::unique_lock<std::mutex> lock(nextFlushCompletedMutex_);
-        if (nextFlushCompletedCV_.wait_for(lock, std::chrono::milliseconds(GET_TOP_WINDOW_DELAY)) ==
+        if (DmUtils::safe_wait_for(nextFlushCompletedCV_, lock, std::chrono::milliseconds(GET_TOP_WINDOW_DELAY)) ==
             std::cv_status::timeout) {
             TLOGW(WmsLogTag::WMS_PIPELINE, "wait for 100ms");
         }
