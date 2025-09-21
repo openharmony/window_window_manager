@@ -1624,7 +1624,7 @@ void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSe
         TLOGW(WmsLogTag::DMS, "screen connect and notify to scb.");
         clientProxy->OnScreenConnectionChanged(GetSessionOption(screenSession, screenId), screenEvent);
     }
-    if (phyMirrorEnable) {
+    if (phyMirrorEnable || (IsConcurrentUser() && screenId != SCREEN_ID_DEFAULT)) {
         NotifyScreenConnected(screenSession->ConvertToScreenInfo());
         // when display add, need wait update available area, ensure display info is accurate
         WaitUpdateAvailableAreaForPc();
@@ -1672,6 +1672,25 @@ void ScreenSessionManager::HandleScreenDisconnectEvent(sptr<ScreenSession> scree
        TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
        return;
     }
+    ScreenId matchscreenId = screenSession->GetScreenId();
+    if (IsConcurrentUser()) {
+        std::map<int32_t, userScreenInfo> userScreenMap;
+        {
+            std::lock_guard<std::mutex> lock(userScreenMapMutex_);
+            userScreenMap = userScreenMap_;
+        }
+        // delete all displaynode if screenId matched in userScreenMap_
+        for (const auto& it : userScreenMap) {
+            if (it.second.screenId == matchscreenId) {
+                TLOGI(WmsLogTag::DMS,
+                    "find match userId %{public}d with screenId %{public}" PRIu64 " from userMap",
+                    it.first, matchscreenId);
+                RemoveUserDisplayNode(it.first, matchscreenId);
+            }
+        }
+    } else {
+        RemoveUserDisplayNode(currentUserId_, matchscreenId);
+    }
     RemoveScreenCastInfo(screenId);
     if (g_isPcDevice) {
         ScreenId rsId = screenSession->GetRSScreenId();
@@ -1688,13 +1707,13 @@ void ScreenSessionManager::HandleScreenDisconnectEvent(sptr<ScreenSession> scree
     HandlePhysicalMirrorDisconnect(screenSession, screenId, phyMirrorEnable);
     if (IsConcurrentUser()) {
         ScreenId displayId = screenSession->GetDisplayId();
-        std::map<int32_t, std::pair<bool, ScreenId>> tempUserScreenMap;
+        std::map<int32_t, userScreenInfo> tempUserScreenMap;
         {
             std::lock_guard<std::mutex> lock(userScreenMapMutex_);
             tempUserScreenMap = userScreenMap_;
         }
         for (const auto& [id, info] : tempUserScreenMap) {
-            if (info.second != displayId) {
+            if (info.screenId != displayId) {
                 continue;
             }
             sptr<IScreenSessionManagerClient> clientProxy;
@@ -1730,10 +1749,9 @@ void ScreenSessionManager::HandleScreenDisconnectEvent(sptr<ScreenSession> scree
         std::lock_guard<std::recursive_mutex> lock_phy(phyScreenPropMapMutex_);
         phyScreenPropMap_.erase(screenId);
     }
-    if (phyMirrorEnable) {
+    if (phyMirrorEnable || (IsConcurrentUser() && screenId != SCREEN_ID_DEFAULT)) {
         NotifyScreenDisconnected(screenSession->GetScreenId());
         NotifyDisplayDestroy(screenSession->GetScreenId());
-        isPhyScreenConnected_ = false;
     }
     if (!g_isPcDevice && phyMirrorEnable) {
         UnregisterSettingWireCastObserver(screenId);
@@ -2062,10 +2080,24 @@ sptr<DisplayInfo> ScreenSessionManager::HookDisplayInfoByUid(sptr<DisplayInfo> d
     return displayInfo;
 }
 
-sptr<DisplayInfo> ScreenSessionManager::GetDefaultDisplayInfo()
+sptr<DisplayInfo> ScreenSessionManager::GetDefaultDisplayInfo(int32_t userId)
 {
-    GetDefaultScreenId();
-    sptr<ScreenSession> screenSession = GetScreenSession(defaultScreenId_);
+    if (IsConcurrentUser()) {
+        if (userId == CONCURRENT_USER_ID_DEFAULT) {
+            userId = GetUserIdByCallingUid();
+            TLOGI(WmsLogTag::DMS, "concurrentuser open, get userId %{public}u by calling uid", userId);
+        }
+    } else {
+        userId = USER_ID_DEFAULT;
+    }
+    ScreenId screenId = INVALID_SCREEN_ID;
+    if (userId == USER_ID_DEFAULT) {
+        screenId = GetDefaultScreenId();
+    } else {
+        screenId = GetUserDisplayId(userId);
+    }
+    TLOGI(WmsLogTag::DMS, "get screenId %{public}" PRIu64" with userId %{public}u", screenId, userId);
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
     std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
     if (screenSession) {
         sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
@@ -2223,30 +2255,49 @@ DisplayId ScreenSessionManager::GetFakeDisplayId(sptr<ScreenSession> screenSessi
     return fakeDisplayId;
 }
 
-std::vector<DisplayId> ScreenSessionManager::GetAllDisplayIds()
+std::vector<DisplayId> ScreenSessionManager::GetAllDisplayIds(int32_t userId)
 {
     TLOGD(WmsLogTag::DMS, "enter");
+    if (IsConcurrentUser()) {
+        if (userId == CONCURRENT_USER_ID_DEFAULT) {
+            userId = GetUserIdByCallingUid();
+            TLOGI(WmsLogTag::DMS, "concurrentuser open, get userId %{public}u by calling Uid", userId);
+        }
+    } else {
+        userId = USER_ID_DEFAULT;
+    }
+    ScreenId filterScreenId = INVALID_SCREEN_ID;
+    bool onlyOne = false;
+    if (userId != USER_ID_DEFAULT) {
+        filterScreenId = GetUserDisplayId(userId);
+        // just one screen, need to filter
+        onlyOne = true;
+    }
     std::vector<DisplayId> res;
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
-    for (auto sessionIt : screenSessionMap_) {
-        auto screenSession = sessionIt.second;
+    for (const auto& [screenId, screenSession] : screenSessionMap_) {
+        if (filterScreenId != INVALID_SCREEN_ID && screenId != filterScreenId) {
+            continue;
+        }
         if (screenSession == nullptr) {
-            TLOGE(WmsLogTag::DMS, "screenSession is nullptr, ScreenId:%{public}" PRIu64"",
-                sessionIt.first);
+            TLOGE(WmsLogTag::DMS, "screenSession is nullptr, ScreenId:%{public}" PRIu64"", screenId);
             continue;
         }
         DisplayId displayId = screenSession->GetDisplayId();
+        if (displayId == DISPLAY_ID_INVALID) {
+            continue;
+        }
         res.push_back(displayId);
-        if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-            continue;
+        if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
+            screenSession->GetScreenProperty().GetIsFakeInUse()) {
+            DisplayId fakeDisplayId = GetFakeDisplayId(screenSession);
+            if (fakeDisplayId == DISPLAY_ID_FAKE) {
+                res.push_back(fakeDisplayId);
+                TLOGI(WmsLogTag::DMS, "add fakeDisplayId: %{public}" PRIu64 "", fakeDisplayId);
+            }
         }
-        if (!screenSession->GetScreenProperty().GetIsFakeInUse()) {
-            continue;
-        }
-        DisplayId fakeDisplayId = GetFakeDisplayId(screenSession);
-        if (fakeDisplayId == DISPLAY_ID_FAKE) {
-            res.push_back(fakeDisplayId);
-            TLOGI(WmsLogTag::DMS, "add fakeDisplayId: %{public}" PRIu64 "", fakeDisplayId);
+        if (onlyOne) {
+            break;
         }
     }
     return res;
@@ -3119,6 +3170,7 @@ void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenPropert
     if (IsConcurrentUser() && screenId == SCREEN_ID_MAIN) {
         groupId = displayGroupNum_++;
         mainDisplayId = screenId;
+        screenIdManager_.ConvertToSmsScreenId(screenId, mainDisplayId);
     }
     if (property.GetDisplayGroupId() == DISPLAY_GROUP_ID_INVALID) {
         property.SetDisplayGroupId(groupId);
@@ -8814,6 +8866,7 @@ void ScreenSessionManager::NotifyClientProxyUpdateFoldDisplayMode(FoldDisplayMod
 
 void ScreenSessionManager::ScbClientDeathCallback(int32_t deathScbPid)
 {
+    RemoveUserByPid(deathScbPid);
     std::unique_lock<std::mutex> lock(oldScbPidsMutex_);
     if (deathScbPid == currentScbPId_ || currentScbPId_ == INVALID_SCB_PID) {
         SetClientProxy(nullptr);
@@ -9130,6 +9183,20 @@ bool ScreenSessionManager::IsConcurrentUser()
     return ScreenSceneConfig::IsConcurrentUser();
 }
 
+void ScreenSessionManager::RemoveUserByPid(int32_t pid)
+{
+    std::lock_guard<std::mutex> lock(userScreenMapMutex_);
+    for (auto it = userScreenMap_.begin(); it != userScreenMap_.end();) {
+        if (it->second.pid == pid) {
+            TLOGI(WmsLogTag::DMS, "remove userId %{public}u in userScreenMap by Pid %{public}u", it->first, pid);
+            it = userScreenMap_.erase(it);
+            break;
+        } else {
+            ++it;
+        }
+    }
+}
+
 void ScreenSessionManager::ActiveUser(int32_t userId)
 {
     DisplayId displayId = DISPLAY_ID_INVALID;
@@ -9142,13 +9209,14 @@ void ScreenSessionManager::ActiveUser(int32_t userId)
     TLOGI(WmsLogTag::DMS, "get user display success, displayId: %{public}" PRIu64", active user: %{public}d",
         displayId, userId);
     std::lock_guard<std::mutex> lock(userScreenMapMutex_);
-    userScreenMap_[userId] = std::pair(true, displayId);
+    userScreenMap_[userId].isActive = true;
+    userScreenMap_[userId].screenId = displayId;
     for (auto& [id, info] : userScreenMap_) {
         if (id == userId) {
             continue;
         }
-        if (info.second == displayId && info.first) {
-            info.first = false;
+        if (info.screenId == displayId && info.isActive) {
+            info.isActive = false;
             TLOGI(WmsLogTag::DMS, "deactive user: %{public}d", id);
             break;
         }
@@ -9162,14 +9230,14 @@ DisplayId ScreenSessionManager::GetUserDisplayId(int32_t userId)
     if (iter == userScreenMap_.end()) {
         return DISPLAY_ID_INVALID;
     }
-    return iter->second.second;
+    return iter->second.screenId;
 }
 
 int32_t ScreenSessionManager::GetActiveUserByDisplayId(DisplayId displayId)
 {
     std::lock_guard<std::mutex> lock(userScreenMapMutex_);
     for (auto& [id, info] : userScreenMap_) {
-        if (info.second == displayId && info.first) {
+        if (info.screenId == displayId && info.isActive) {
             return id;
         }
     }
@@ -9200,7 +9268,10 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
         SetClientProxy(client);
         auto userId = GetUserIdByCallingUid();
         auto newScbPid = IPCSkeleton::GetCallingPid();
-
+        {
+            std::lock_guard<std::mutex> lock(userScreenMapMutex_);
+            userScreenMap_[userId] = {false, SCREEN_ID_DEFAULT, newScbPid};
+        }
         std::ostringstream oss;
         oss << "set client userId: " << userId << " clientName: " << SysCapUtil::GetClientName();
         TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());

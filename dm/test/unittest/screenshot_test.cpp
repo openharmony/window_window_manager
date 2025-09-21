@@ -59,8 +59,8 @@ namespace {
 HWTEST_F(ScreenshotTest, GetScreenshot_default, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-
-    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo()).Times(1).WillOnce(Return(nullptr));
+    int32_t defaultUserId = CONCURRENT_USER_ID_DEFAULT;
+    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo(defaultUserId)).Times(1).WillOnce(Return(nullptr));
     EXPECT_EQ(DISPLAY_ID_INVALID, DisplayManager::GetInstance().GetDefaultDisplayId());
 
     EXPECT_CALL(m->Mock(), GetDisplaySnapshot(_, _, _, _)).Times(1).WillOnce(Return(nullptr));
@@ -70,8 +70,8 @@ HWTEST_F(ScreenshotTest, GetScreenshot_default, TestSize.Level1)
 HWTEST_F(ScreenshotTest, GetScreenshot_01, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-
-    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo()).Times(1).WillOnce(Return(nullptr));
+    int32_t defaultUserId = CONCURRENT_USER_ID_DEFAULT;
+    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo(defaultUserId)).Times(1).WillOnce(Return(nullptr));
     EXPECT_EQ(DISPLAY_ID_INVALID, DisplayManager::GetInstance().GetDefaultDisplayId());
 
     Media::InitializationOptions opt;

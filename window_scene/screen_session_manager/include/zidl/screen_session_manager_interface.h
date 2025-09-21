@@ -38,7 +38,7 @@ class IScreenSessionManager : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IScreenSessionManager");
 
-    virtual sptr<DisplayInfo> GetDefaultDisplayInfo() { return nullptr; }
+    virtual sptr<DisplayInfo> GetDefaultDisplayInfo(int32_t userId = CONCURRENT_USER_ID_DEFAULT) { return nullptr; }
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) { return nullptr; }
     virtual sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId) { return nullptr; }
     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) {return nullptr; }
@@ -174,7 +174,10 @@ public:
     virtual bool TryToCancelScreenOff() { return false; }
     virtual bool SetScreenBrightness(uint64_t screenId, uint32_t level) { return false; }
     virtual uint32_t GetScreenBrightness(uint64_t screenId) { return 0; }
-    virtual std::vector<DisplayId> GetAllDisplayIds() { return std::vector<DisplayId>{}; }
+    virtual std::vector<DisplayId> GetAllDisplayIds(int32_t userId = CONCURRENT_USER_ID_DEFAULT)
+    {
+        return std::vector<DisplayId>{};
+    }
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) { return nullptr; }
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId, int32_t width, int32_t height,
                                            Rotation rotation) { return nullptr; }

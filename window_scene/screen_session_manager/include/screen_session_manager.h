@@ -70,7 +70,7 @@ public:
     sptr<ScreenSession> GetDefaultScreenSession();
     std::vector<ScreenId> GetAllScreenIds();
 
-    sptr<DisplayInfo> GetDefaultDisplayInfo() override;
+    sptr<DisplayInfo> GetDefaultDisplayInfo(int32_t userId = CONCURRENT_USER_ID_DEFAULT) override;
     DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
     DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
     DMError SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override;
@@ -157,7 +157,7 @@ public:
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
     virtual sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId) override;
     sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
-    std::vector<DisplayId> GetAllDisplayIds() override;
+    std::vector<DisplayId> GetAllDisplayIds(int32_t userId = CONCURRENT_USER_ID_DEFAULT) override;
     virtual sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) override;
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos) override;
     virtual DMError GetScreenSupportedColorGamuts(ScreenId screenId,
@@ -674,6 +674,7 @@ private:
      * multi user concurrency
      */
     static bool IsConcurrentUser();
+    void RemoveUserByPid(int32_t pid);
     void ActiveUser(int32_t userId);
     DisplayId GetUserDisplayId(int32_t userId);
     int32_t GetActiveUserByDisplayId(DisplayId displayId);
@@ -723,11 +724,16 @@ private:
 
     /*
         example:
-        user100:    screen0 active=0
-        user101:    screen0 active=1
-        user102:    screen1 active=1
+        user100:  {isActive=true  screenId=0  pid=1234}
+        user101:  {isActive=false screenId=0  pid=2345}
+        user102:  {isActive=true  screenId=6  pid=3456}
     */
-    std::map<int32_t, std::pair<bool, ScreenId>> userScreenMap_;
+    struct userScreenInfo {
+        bool isActive;
+        ScreenId screenId;
+        int32_t pid;
+    };
+    std::map<int32_t, userScreenInfo> userScreenMap_;
     std::mutex userScreenMapMutex_;
     std::map<int32_t, sptr<IScreenSessionManagerClient>> clientProxyMap_;
     FoldDisplayMode oldScbDisplayMode_ = FoldDisplayMode::UNKNOWN;
