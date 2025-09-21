@@ -27,26 +27,24 @@ public:                                              \
     className& operator=(const className&) = delete; \
     className(className&&) = delete;                 \
     className& operator=(className&&) = delete;      \
-    static className* singleton_;
+    static className* singleton_;\
 
 #define WM_DECLARE_SINGLE_INSTANCE(className)  \
     WM_DECLARE_SINGLE_INSTANCE_BASE(className) \
 protected:                                     \
     className() = default;                     \
-    virtual ~className() = default;
+    virtual ~className() = default;\
 
-#define WM_IMPLEMENT_SINGLE_INSTANCE(className)         \
-    className* className::singleton_ = nullptr;         \
-    className& className::GetInstance()                 \
-    {                                                   \
-        if (!singleton_) {                              \
-            singleton_ = new className();               \
-        }                                               \
-        return *singleton_;                             \
-    }                                                   \
-    void className::SetInstance(className* newInstance) \
-    {                                                   \
-        singleton_ = newInstance;                       \
+#define WM_IMPLEMENT_SINGLE_INSTANCE(className)              \
+    className* className::singleton_ = nullptr;              \
+    className& className::GetInstance() {                    \
+        if (!singleton_) {                                   \
+            singleton_ = new className();                    \
+        }                                                    \
+        return *singleton_;                                  \
+    }                                                        \
+    void className::SetInstance(className* newInstance) {    \
+        singleton_ = newInstance;                            \
     }
 
 } // namespace Rosen
