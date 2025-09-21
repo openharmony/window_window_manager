@@ -25,6 +25,7 @@
 #include "screen_manager.h"
 #include "window_manager_hilog.h"
 #include "zidl/screen_session_manager_interface.h"
+#include "dms_global_mutex.h"
 
 namespace OHOS::Rosen {
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerAdapter)
