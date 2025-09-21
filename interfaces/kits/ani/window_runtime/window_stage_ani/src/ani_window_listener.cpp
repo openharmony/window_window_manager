@@ -201,6 +201,50 @@ void AniWindowListener::AfterDestroyed()
 void AniWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
+    if (info == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "OccupiedAreaChangeInfo is nullptr");
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_KEYBOARD,
+        "OccupiedAreaChangeInfo, type: %{public}u, input rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
+        static_cast<uint32_t>(info->type_),
+        info->rect_.posX_, info->rect_.posY_, info->rect_.width_, info->rect_.height_);
+    // callback should run in js thread
+    auto thisListener = weakRef_.promote();
+    if (thisListener == nullptr || env_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "this listener or env is nullptr.");
+        return;
+    }
+    AniWindowUtils::CallAniFunctionVoid(env_, "L@ohos/window/window;", "runKeyboardHeightChangeCallBack",
+        nullptr, thisListener->aniCallback_, static_cast<ani_int>(info->rect_.height_));
+}
+
+void AniWindowListener::OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD,
+        "keyboardPanelInfo, beginRect: %{public}s, endRect: %{public}s",
+        keyboardPanelInfo.beginRect_.ToString().c_str(), keyboardPanelInfo.endRect_.ToString().c_str());
+    auto thisListener = weakRef_.promote();
+    if (thisListener == nullptr || env_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "this listener or env is nullptr.");
+        return;
+    }
+    AniWindowUtils::CallAniFunctionVoid(env_, "L@ohos/window/window;", "runKeyboardDidShowCallBack",
+        nullptr, thisListener->aniCallback_, AniWindowUtils::CreateAniKeyboardInfo(env_, keyboardPanelInfo));
+}
+
+void AniWindowListener::OnKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD,
+        "keyboardPanelInfo, beginRect: %{public}s, endRect: %{public}s",
+        keyboardPanelInfo.beginRect_.ToString().c_str(), keyboardPanelInfo.endRect_.ToString().c_str());
+    auto thisListener = weakRef_.promote();
+    if (thisListener == nullptr || env_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "this listener or env is nullptr.");
+        return;
+    }
+    AniWindowUtils::CallAniFunctionVoid(env_, "L@ohos/window/window;", "runKeyboardDidHideCallBack",
+        nullptr, thisListener->aniCallback_, AniWindowUtils::CreateAniKeyboardInfo(env_, keyboardPanelInfo));
 }
 
 void AniWindowListener::OnTouchOutside() const

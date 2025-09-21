@@ -24,6 +24,8 @@ export type WindowEventCallback = (data: window.WindowEventType) => void;
 export type WindowSizeCallback = (data: window.Size) => void;
 export type WindowStatusCallback = (data: window.WindowStatusType) => void;
 export type WindowVoidCallback = () => void;
+export type KeyboardHeightChangeCallback = (data: int) => void;
+export type KeyboardDidShowOrHideCallback = (data: window.KeyboardInfo) => void;
 
 namespace window {
   export interface Size {
@@ -1546,6 +1548,16 @@ export class ConfigurationInternal implements Configuration {
     title?: string;
 }
 
+export interface KeyboardInfo {
+    beginRect: Rect;
+    endRect: Rect;
+}
+
+export class KeyboardInfoInternal implements KeyboardInfo {
+    beginRect: Rect;
+    endRect: Rect;
+}
+
 export class WindowStageInternal implements WindowStage {
     static { loadLibrary('windowstageani_kit.z') }
 
@@ -2422,6 +2434,21 @@ function runWindowSizeCallback(cb: object, cbArg: object): void {
 function runWindowRectChangeCallback(cb: object, rect: object, reason: int): void {
     const func = cb as (data: RectChangeOptions) => void;
     func({rect: rect as Rect, reason: reason as RectChangeReason});
+}
+
+function runKeyboardHeightChangeCallBack(cb: object, cbArg: int): void {
+    const func = cb as (cbArg: int) => void;
+    func(cbArg as int);
+}
+
+function runKeyboardDidShowCallBack(cb: object, cbArg: object): void {
+    const func = cb as (cbArg: KeyboardInfo) => void;
+    func(cbArg as KeyboardInfo);
+}
+
+function runKeyboardDidHideCallBack(cb: object, cbArg: object): void {
+    const func = cb as (cbArg: KeyboardInfo) => void;
+    func(cbArg as KeyboardInfo);
 }
 
 function runWindowStatusCallBack(cb: object, cbArg: int): void {
