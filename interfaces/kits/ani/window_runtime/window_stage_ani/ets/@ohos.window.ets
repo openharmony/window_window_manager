@@ -2624,22 +2624,22 @@ function runWindowRectChangeCallback(cb: object, rect: object, reason: int): voi
     func({rect: rect as Rect, reason: reason as RectChangeReason});
 }
 
-function runKeyboardHeightChangeCallBack(cb: object, cbArg: int): void {
+function runKeyboardHeightChangeCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: int) => void;
     func(cbArg as int);
 }
 
-function runKeyboardDidShowCallBack(cb: object, cbArg: object): void {
+function runKeyboardDidShowCallback(cb: object, cbArg: object): void {
     const func = cb as (cbArg: KeyboardInfo) => void;
     func(cbArg as KeyboardInfo);
 }
 
-function runKeyboardDidHideCallBack(cb: object, cbArg: object): void {
+function runKeyboardDidHideCallback(cb: object, cbArg: object): void {
     const func = cb as (cbArg: KeyboardInfo) => void;
     func(cbArg as KeyboardInfo);
 }
 
-function runWindowStatusCallBack(cb: object, cbArg: int): void {
+function runWindowStatusCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: WindowStatusType) => void;
     func(cbArg as WindowStatusType);
 }
