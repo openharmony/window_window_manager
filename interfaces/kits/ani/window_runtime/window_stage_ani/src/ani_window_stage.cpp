@@ -384,10 +384,10 @@ std::array methods = {
         reinterpret_cast<void *>(WindowGetMainWindow)},
     ani_native_function {"createSubWindowSync", "lC{std.core.String}:C{@ohos.window.window.Window}",
         reinterpret_cast<void *>(CreateSubWindow)},
-        ani_native_function {"onSync", nullptr,
-            reinterpret_cast<void *>(AniWindowStage::RegisterWindowCallback)},
-        ani_native_function {"offSync", nullptr,
-            reinterpret_cast<void *>(AniWindowStage::UnregisterWindowCallback)},
+    ani_native_function {"onSync", nullptr,
+        reinterpret_cast<void *>(AniWindowStage::RegisterWindowCallback)},
+    ani_native_function {"offSync", nullptr,
+        reinterpret_cast<void *>(AniWindowStage::UnregisterWindowCallback)},
 };
 
 std::array functions = {
