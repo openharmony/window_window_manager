@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_WINDOW_SCENE_TIMEOUT_FUTURE_H
 
 #include <condition_variable>
+#include "dms_global_mutex.h"
 
 namespace OHOS::Rosen {
 template<class T>
@@ -25,7 +26,7 @@ public:
     T GetResult(long timeout, bool &isTimeout)
     {
         std::unique_lock<std::mutex> lock(mutex_);
-        isTimeout = !conditionVariable_.wait_for(lock,
+        isTimeout = !DmUtils::safe_wait_for(conditionVariable_, lock,
             std::chrono::milliseconds(timeout), [this] { return IsReady(); });
         return result_;
     }

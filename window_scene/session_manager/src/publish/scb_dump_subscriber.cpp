@@ -18,6 +18,7 @@
 #include <sstream>
 
 #include "window_manager_hilog.h"
+#include "dms_global_mutex.h"
 
 namespace OHOS::Rosen {
 
@@ -35,7 +36,7 @@ void ScbDumpSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data)
 std::string ScbDumpSubscriber::GetDebugDumpInfo(const std::chrono::milliseconds& time)
 {
     std::unique_lock<std::mutex> lock(mutex_);
-    if (cv_.wait_for(lock, time, [&] { return valueReady_; })) {
+    if (DmUtils::safe_wait_for(cv_, lock, time, [&] { return valueReady_; })) {
         return dumpInfo_;
     }
     return "timeout";

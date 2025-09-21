@@ -32,7 +32,7 @@
 #include "screen_power_fsm/screen_state_machine.h"
 #include "wm_single_instance.h"
 #include "screen_edid_parse.h"
-#include "session_manager/include/ffrt_queue_helper.h"
+#include "ffrt_queue_helper.h"
 
 #include "agent_death_recipient.h"
 #include "screen.h"
@@ -510,10 +510,12 @@ public:
     void SetFirstSCBConnect(bool firstSCBConnect);
     // mirror screen
     bool HandleResolutionEffectChange();
+    bool GetStoredPidFromUid(int32_t uid, int32_t& agentPid) const;
+    bool IsFreezed(const int32_t& agentPid, const DisplayManagerAgentType& agentType);
+    bool isScreenShot_ = false;
     void NotifyAodOpCompletion(AodOP operation, int32_t result) override;
     void DoAodExitAndSetPower(ScreenId screenId, ScreenPowerStatus status);
     void DoAodExitAndSetPowerAllOff();
-
 protected:
     ScreenSessionManager();
     virtual ~ScreenSessionManager() = default;
@@ -654,7 +656,6 @@ private:
 #endif // DEVICE_STATUS_ENABLE
     void ShowFoldStatusChangedInfo(int errCode, std::string& dumpInfo);
     void SetMirrorScreenIds(std::vector<ScreenId>& mirrorScreenIds);
-    bool IsFreezed(const int32_t& agentPid, const DisplayManagerAgentType& agentType);
     void NotifyUnfreezed(const std::set<int32_t>& unfreezedPidList, const sptr<ScreenSession>& screenSession);
     void NotifyUnfreezedAgents(const int32_t& pid, const std::set<int32_t>& unfreezedPidList,
         const std::set<DisplayManagerAgentType>& pidAgentTypes, const sptr<ScreenSession>& screenSession);
@@ -736,7 +737,6 @@ private:
 
     sptr<IScreenSessionManagerClient> clientProxy_;
     std::mutex clientProxyMutex_; // above guarded by clientProxyMutex_
-    ClientAgentContainer<IDisplayManagerAgent, DisplayManagerAgentType> dmAgentContainer_;
     DeviceScreenConfig deviceScreenConfig_;
     std::mutex allDisplayPhysicalResolutionMutex_;
     std::vector<DisplayPhysicalResolution> allDisplayPhysicalResolution_ {};
@@ -769,7 +769,6 @@ private:
     bool userSwitching_ = false;
     bool isAutoRotationOpen_ = false;
     bool isExpandCombination_ = false;
-    bool isScreenShot_ = false;
     bool isCoordinationFlag_ = false;
     bool isFoldScreenOuterScreenReady_ = false;
     bool isCameraBackSelfie_ = false;
