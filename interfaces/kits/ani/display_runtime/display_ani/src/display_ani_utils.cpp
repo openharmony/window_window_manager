@@ -30,6 +30,9 @@
 namespace OHOS {
 namespace Rosen {
 
+static thread_local std::map<DisplayId, std::shared_ptr<DisplayAni>> g_AniDisplayMap;
+std::recursive_mutex g_mutex;
+
 enum class DisplayStateMode : uint32_t {
     STATE_UNKNOWN = 0,
     STATE_OFF,
@@ -51,18 +54,17 @@ static const std::map<DisplayState,      DisplayStateMode> NATIVE_TO_JS_DISPLAY_
 };
 
 
-void DisplayAniUtils::convertRect(DMRect rect, ani_object rectObj, ani_env* env)
+void DisplayAniUtils::ConvertRect(DMRect rect, ani_object rectObj, ani_env* env)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] rect area start");
     TLOGI(WmsLogTag::DMS, "[ANI] rect area info: %{public}d, %{public}d, %{public}u, %{public}u",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
-    env->Object_SetFieldByName_Double(rectObj, "<property>left", rect.posX_);
-    env->Object_SetFieldByName_Double(rectObj, "<property>width", rect.width_);
-    env->Object_SetFieldByName_Double(rectObj, "<property>top", rect.posY_);
-    env->Object_SetFieldByName_Double(rectObj, "<property>height", rect.height_);
+    env->Object_SetFieldByName_Long(rectObj, "<property>left", rect.posX_);
+    env->Object_SetFieldByName_Long(rectObj, "<property>width", rect.width_);
+    env->Object_SetFieldByName_Long(rectObj, "<property>top", rect.posY_);
+    env->Object_SetFieldByName_Long(rectObj, "<property>height", rect.height_);
 }
 
-void DisplayAniUtils::convertWaterArea(WaterfallDisplayAreaRects waterfallDisplayAreaRects,
+void DisplayAniUtils::ConvertWaterArea(WaterfallDisplayAreaRects waterfallDisplayAreaRects,
     ani_object waterfallObj, ani_env *env)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] start convert WaterArea");
@@ -74,16 +76,51 @@ void DisplayAniUtils::convertWaterArea(WaterfallDisplayAreaRects waterfallDispla
     env->Object_GetFieldByName_Ref(waterfallObj, "<property>right", &rightObj);
     env->Object_GetFieldByName_Ref(waterfallObj, "<property>top", &topObj);
     env->Object_GetFieldByName_Ref(waterfallObj, "<property>bottom", &bottomObj);
-    convertRect(waterfallDisplayAreaRects.left, static_cast<ani_object>(leftObj), env);
-    convertRect(waterfallDisplayAreaRects.right, static_cast<ani_object>(rightObj), env);
-    convertRect(waterfallDisplayAreaRects.top, static_cast<ani_object>(topObj), env);
-    convertRect(waterfallDisplayAreaRects.bottom, static_cast<ani_object>(bottomObj), env);
+    ConvertRect(waterfallDisplayAreaRects.left, static_cast<ani_object>(leftObj), env);
+    ConvertRect(waterfallDisplayAreaRects.right, static_cast<ani_object>(rightObj), env);
+    ConvertRect(waterfallDisplayAreaRects.top, static_cast<ani_object>(topObj), env);
+    ConvertRect(waterfallDisplayAreaRects.bottom, static_cast<ani_object>(bottomObj), env);
 }
 
-ani_status DisplayAniUtils::cvtDisplay(sptr<Display> display, ani_env* env, ani_object obj)
+void DisplayAniUtils::ConvertDisplayPhysicalResolution(std::vector<DisplayPhysicalResolution>& displayPhysicalArray,
+    ani_object arrayObj, ani_env *env)
+{
+    ani_int arrayObjLen;
+    env->Object_GetPropertyByName_Int(arrayObj, "length", &arrayObjLen);
+
+    for (uint32_t i = 0; i < displayPhysicalArray.size() && i < static_cast<uint32_t>(arrayObjLen); i++) {
+        ani_ref obj;
+        env->Object_CallMethodByName_Ref(arrayObj, "$_get", "i:C{std.core.Object}", &obj, (ani_int)i);
+        env->Object_SetFieldByName_Int(static_cast<ani_object>(obj), "foldDisplayMode_",
+            static_cast<ani_int>(displayPhysicalArray[i].foldDisplayMode_));
+        env->Object_SetFieldByName_Long(static_cast<ani_object>(obj), "<property>physicalWidth",
+            displayPhysicalArray[i].physicalWidth_);
+        env->Object_SetFieldByName_Long(static_cast<ani_object>(obj), "<property>physicalHeight",
+            displayPhysicalArray[i].physicalHeight_);
+    }
+}
+
+ani_enum_item DisplayAniUtils::CreateAniEnum(ani_env* env, const char* enum_descriptor, ani_size index)
+{
+    ani_enum enumType;
+    ani_status ret = env->FindEnum(enum_descriptor, &enumType);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Failed to find enum, %{public}s", enum_descriptor);
+        return nullptr;
+    }
+    ani_enum_item enumItem;
+    env->Enum_GetEnumItemByIndex(enumType, index, &enumItem);
+    return enumItem;
+}
+
+ani_status DisplayAniUtils::CvtDisplay(sptr<Display> display, ani_env* env, ani_object obj)
 {
     sptr<DisplayInfo> info = display->GetDisplayInfoWithCache();
-    int setfieldid = env->Object_SetFieldByName_Double(obj, "<property>id", info->GetDisplayId());
+    if (info == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Failed to GetDisplayInfo");
+        return ANI_ERROR;
+    }
+    int setfieldid = env->Object_SetFieldByName_Long(obj, "<property>id", info->GetDisplayId());
     if (ANI_OK != setfieldid) {
         TLOGE(WmsLogTag::DMS, "[ANI] set id failed: %{public}d", setfieldid);
     }
@@ -95,45 +132,59 @@ ani_status DisplayAniUtils::cvtDisplay(sptr<Display> display, ani_env* env, ani_
     env->Object_SetFieldByName_Ref(obj, "<property>name", str);
     env->Object_SetFieldByName_Boolean(obj, "<property>alive", info->GetAliveStatus());
     if (NATIVE_TO_JS_DISPLAY_STATE_MAP.count(info->GetDisplayState()) != 0) {
-        env->Object_SetFieldByName_Int(obj, "<property>state", static_cast<uint32_t>(info->GetDisplayState()));
+        env->Object_SetFieldByName_Ref(obj, "<property>state", DisplayAniUtils::CreateAniEnum(
+            env, "@ohos.display.display.DisplayState", static_cast<ani_size>(info->GetDisplayState())));
     } else {
-        env->Object_SetFieldByName_Int(obj, "<property>state", 0);
+        env->Object_SetFieldByName_Ref(obj, "<property>state", DisplayAniUtils::CreateAniEnum(
+            env, "@ohos.display.display.DisplayState", static_cast<ani_size>(0)));
     }
-    env->Object_SetFieldByName_Double(obj, "<property>refreshRate", info->GetRefreshRate());
-    env->Object_SetFieldByName_Double(obj, "<property>rotation", static_cast<uint32_t>(info->GetRotation()));
-    ani_status setfieldRes = env->Object_SetFieldByName_Double(obj, "<property>width",
+    env->Object_SetFieldByName_Int(obj, "<property>refreshRate", info->GetRefreshRate());
+    env->Object_SetFieldByName_Int(obj, "<property>rotation", static_cast<uint32_t>(info->GetRotation()));
+    ani_status setfieldRes = env->Object_SetFieldByName_Long(obj, "<property>width",
         static_cast<uint32_t>(info->GetWidth()));
     if (ANI_OK != setfieldRes) {
         TLOGE(WmsLogTag::DMS, "[ANI] set failed: %{public}d, %{public}u", info->GetWidth(), setfieldRes);
     }
-    env->Object_SetFieldByName_Double(obj, "<property>height", display->GetHeight());
-    env->Object_SetFieldByName_Double(obj, "<property>availableWidth", info->GetAvailableWidth());
-    env->Object_SetFieldByName_Double(obj, "<property>availableHeight", info->GetAvailableHeight());
+    env->Object_SetFieldByName_Long(obj, "<property>height", display->GetHeight());
+    env->Object_SetFieldByName_Long(obj, "<property>availableWidth", info->GetAvailableWidth());
+    env->Object_SetFieldByName_Long(obj, "<property>availableHeight", info->GetAvailableHeight());
     env->Object_SetFieldByName_Double(obj, "<property>densityDPI", info->GetVirtualPixelRatio() * DOT_PER_INCH);
-    env->Object_SetFieldByName_Double(obj, "<property>orientation",
-        static_cast<uint32_t>(info->GetDisplayOrientation()));
+    env->Object_SetFieldByName_Ref(obj, "<property>orientation", DisplayAniUtils::CreateAniEnum(
+        env, "@ohos.display.display.Orientation", static_cast<ani_size>(info->GetDisplayOrientation())));
     env->Object_SetFieldByName_Double(obj, "<property>densityPixels", info->GetVirtualPixelRatio());
     env->Object_SetFieldByName_Double(obj, "<property>scaledDensity", info->GetVirtualPixelRatio());
     env->Object_SetFieldByName_Double(obj, "<property>xDPI", info->GetXDpi());
     env->Object_SetFieldByName_Double(obj, "<property>yDPI", info->GetYDpi());
+    env->Object_SetFieldByName_Ref(obj, "<property>screenShape", DisplayAniUtils::CreateAniEnum(
+        env, "@ohos.display.display.ScreenShape", static_cast<ani_size>(info->GetScreenShape())));
+    if (info->GetDisplaySourceMode() == DisplaySourceMode::MAIN ||
+        info->GetDisplaySourceMode() == DisplaySourceMode::EXTEND) {
+        env->Object_SetFieldByName_Long(obj, "<property>x", info->GetX());
+        env->Object_SetFieldByName_Long(obj, "<property>y", info->GetY());
+    } else {
+        env->Object_SetFieldByName_Ref(obj, "<property>x", DisplayAniUtils::CreateAniUndefined(env));
+        env->Object_SetFieldByName_Ref(obj, "<property>y", DisplayAniUtils::CreateAniUndefined(env));
+    }
+    env->Object_SetFieldByName_Ref(obj, "<property>sourceMode", DisplayAniUtils::CreateAniEnum(
+        env, "@ohos.display.display.DisplaySourceMode", static_cast<ani_size>(info->GetDisplaySourceMode())));
     auto colorSpaces = info->GetColorSpaces();
     auto hdrFormats = info->GetHdrFormats();
-    TLOGI(WmsLogTag::DMS, "[ANI] colorSpaces(0) %{public}zu, %{public}u", colorSpaces.size(), colorSpaces[1]);
+    auto supportedRefreshRates = info->GetSupportedRefreshRate();
     if (colorSpaces.size() != 0) {
         ani_array_int colorSpacesAni;
         CreateAniArrayInt(env, colorSpaces.size(), &colorSpacesAni, colorSpaces);
-        if (ANI_OK != env->Object_SetFieldByName_Ref(obj, "<property>colorSpaces",
-            static_cast<ani_ref>(colorSpacesAni))) {
-            TLOGE(WmsLogTag::DMS, "[ANI] Array set colorSpaces field error");
-        }
+        env->Object_SetFieldByName_Ref(obj, "<property>colorSpaces", static_cast<ani_ref>(colorSpacesAni));
     }
     if (hdrFormats.size() != 0) {
         ani_array_int hdrFormatsAni;
         CreateAniArrayInt(env, hdrFormats.size(), &hdrFormatsAni, hdrFormats);
-        if (ANI_OK != env->Object_SetFieldByName_Ref(obj, "<property>hdrFormats",
-            static_cast<ani_ref>(hdrFormatsAni))) {
-            TLOGE(WmsLogTag::DMS, "[ANI] Array set hdrFormats field error");
-        }
+        env->Object_SetFieldByName_Ref(obj, "<property>hdrFormats", static_cast<ani_ref>(hdrFormatsAni));
+    }
+    if (supportedRefreshRates.size() != 0) {
+        ani_array_int supportedRefreshRatesAni;
+        CreateAniArrayInt(env, hdrFormats.size(), &supportedRefreshRatesAni, supportedRefreshRates);
+        env->Object_SetFieldByName_Ref(obj, "<property>supportedRefreshRates",
+            static_cast<ani_ref>(supportedRefreshRatesAni));
     }
     return ANI_OK;
 }
@@ -147,6 +198,16 @@ void DisplayAniUtils::CreateAniArrayInt(ani_env* env, ani_size size, ani_array_i
     if (ANI_OK != env->Array_SetRegion_Int(*aniArray, 0, size, aniArrayBuf)) {
         TLOGE(WmsLogTag::DMS, "[ANI] Array set region int error");
     }
+}
+
+void DisplayAniUtils::CreateAniArrayDouble(ani_env* env, ani_size size,
+    ani_array_double *aniArray, std::vector<float> vec)
+{
+    env->Array_New_Double(size, aniArray);
+    std::vector<double> vecDoubles;
+    std::copy(vec.begin(), vec.end(), std::back_inserter(vecDoubles));
+    ani_double* aniArrayBuf = reinterpret_cast<ani_double *>(vecDoubles.data());
+    env->Array_SetRegion_Double(*aniArray, 0, size, aniArrayBuf);
 }
 
 ani_status DisplayAniUtils::GetStdString(ani_env *env, ani_string ani_str, std::string &result)
@@ -185,7 +246,7 @@ ani_status DisplayAniUtils::NewAniObject(ani_env* env, ani_class cls, const char
 ani_status DisplayAniUtils::NewAniObjectNoParams(ani_env* env, ani_class cls, ani_object* object)
 {
     ani_method aniCtor;
-    auto ret = env->Class_FindMethod(cls, "<ctor>", ":V", &aniCtor);
+    auto ret = env->Class_FindMethod(cls, "<ctor>", ":", &aniCtor);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] find ctor method fail");
         return ret;
@@ -220,12 +281,13 @@ ani_status DisplayAniUtils::CallAniFunctionVoid(ani_env *env, const char* ns,
         TLOGE(WmsLogTag::DMS, "[ANI]canot find callBack %{public}d", ret);
         return ret;
     }
-    va_list args;
-    va_start(args, signature);
     if (func == nullptr) {
-        TLOGI(WmsLogTag::DMS, "[ANI] null func ani");
+        TLOGE(WmsLogTag::DMS, "[ANI] null func ani");
         return ret;
     }
+    va_list args;
+    va_start(args, signature);
+    TLOGI(WmsLogTag::DMS, "[ANI]CallAniFunctionVoid begin %{public}s", signature);
     ret = env->Function_Call_Void_V(func, args);
     va_end(args);
     if (ret != ANI_OK) {
@@ -235,5 +297,50 @@ ani_status DisplayAniUtils::CallAniFunctionVoid(ani_env *env, const char* ns,
     return ret;
 }
 
+ani_object DisplayAniUtils::CreateRectObject(ani_env *env)
+{
+    ani_class aniClass{};
+    ani_status status = env->FindClass("@ohos.display.display.RectImpl", &aniClass);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] class not found, status:%{public}d", static_cast<int32_t>(status));
+        return nullptr;
+    }
+    ani_method aniCtor;
+    auto ret = env->Class_FindMethod(aniClass, "<Ctor>", ":V", &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Class_FindMethod failed");
+        return nullptr;
+    }
+    ani_object rectObj;
+    status = env->Object_New(aniClass, aniCtor, &rectObj);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] NewAniObject failed");
+        return nullptr;
+    }
+    return rectObj;
+}
+
+std::shared_ptr<DisplayAni> DisplayAniUtils::FindAniDisplayObject(sptr<Display> display, DisplayId displayId)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] Try to find display %{public}" PRIu64" in g_AniDisplayMap", displayId);
+    std::shared_ptr<DisplayAni> displayAni;
+    std::lock_guard<std::recursive_mutex> lock(g_mutex);
+    if (g_AniDisplayMap.find(displayId) == g_AniDisplayMap.end()) {
+        TLOGI(WmsLogTag::DMS, "[ANI] displayAni nullptr");
+        displayAni = std::make_shared<DisplayAni>(display);
+        g_AniDisplayMap[displayId] = displayAni;
+    }
+    return g_AniDisplayMap[displayId];
+}
+ 
+void DisplayAniUtils::DisposeAniDisplayObject(DisplayId displayId)
+{
+    TLOGI(WmsLogTag::DMS, "displayId : %{public}" PRIu64"", displayId);
+    std::lock_guard<std::recursive_mutex> lock(g_mutex);
+    if (g_AniDisplayMap.find(displayId) != g_AniDisplayMap.end()) {
+        TLOGI(WmsLogTag::DMS, "Display is destroyed: %{public}" PRIu64"", displayId);
+        g_AniDisplayMap.erase(displayId);
+    }
+}
 }
 }

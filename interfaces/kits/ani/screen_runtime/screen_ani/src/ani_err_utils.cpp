@@ -20,7 +20,6 @@
 #include "screen_ani_utils.h"
 #include "window_manager_hilog.h"
 
-
 namespace OHOS::Rosen {
 constexpr const char* DM_ERROR_MSG_OK = "ok";
 constexpr const char* DM_ERROR_MSG_INIT_DMS_PROXY_LOCKED = "init dms proxy locked";
@@ -82,8 +81,8 @@ static std::map<DmErrorCode, const char*> DM_ERROR_CODE_TO_ERROR_MSG_MAP {
 
 std::string AniErrUtils::GetErrorMsg(const DMError& errorCode)
 {
-    auto it = DM_ERROR_TO_ERROR_MSG_MAP.find(errorCode);
-    return it != DM_ERROR_TO_ERROR_MSG_MAP.end() ? it->second : "";
+    return DM_ERROR_TO_ERROR_MSG_MAP.find(errorCode) != DM_ERROR_TO_ERROR_MSG_MAP.end() ?
+        DM_ERROR_TO_ERROR_MSG_MAP.at(errorCode) : "";
 }
 
 std::string AniErrUtils::GetErrorMsg(const DmErrorCode& errorCode)
@@ -120,13 +119,13 @@ ani_status AniErrUtils::CreateBusinessError(ani_env* env, int32_t error, std::st
 {
     TLOGI(WmsLogTag::DMS, "[ANI] in");
     ani_class aniClass;
-    ani_status status = env->FindClass("L@ohos/base/BusinessError;", &aniClass);
+    ani_status status = env->FindClass("@ohos.base.BusinessError", &aniClass);
     if (status != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] class not found, status:%{public}d", static_cast<int32_t>(status));
         return status;
     }
     ani_method aniCtor;
-    status = env->Class_FindMethod(aniClass, "<ctor>", "Lstd/core/String;Lescompat/ErrorOptions;:V", &aniCtor);
+    status = env->Class_FindMethod(aniClass, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &aniCtor);
     if (status != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] ctor not found, status:%{public}d", static_cast<int32_t>(status));
         return status;
@@ -138,7 +137,7 @@ ani_status AniErrUtils::CreateBusinessError(ani_env* env, int32_t error, std::st
         TLOGE(WmsLogTag::DMS, "[ANI] fail to new err, status:%{public}d", static_cast<int32_t>(status));
         return status;
     }
-    status = env->Object_SetFieldByName_Double(*err, "code", static_cast<ani_double>(error));
+    status = env->Object_SetFieldByName_Int(*err, "code", static_cast<ani_int>(error));
     if (status != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] fail to set code, status:%{public}d", static_cast<int32_t>(status));
         return status;
