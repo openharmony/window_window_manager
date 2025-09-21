@@ -40,7 +40,6 @@ public:
         : env_(env), aniCallback_(func), aniCallbackData_(data), weakRef_(wptr<AniExtensionWindowListener> (this)) {}
     ~AniExtensionWindowListener();
     ani_ref GetAniCallback() const { return aniCallback_; }
-    void SetAniCallback(ani_ref aniCallback) { aniCallback_ = aniCallback; }
     void OnSizeChange(Rect rect, WindowSizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type,
