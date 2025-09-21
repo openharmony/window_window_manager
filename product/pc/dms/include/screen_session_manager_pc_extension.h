@@ -31,13 +31,11 @@ public:
         ScreenId defScreenId, ScreenProperty property) override;
     void NotifyCaptureStatusChangedGlobal() override;
     void GetAndMergeEdidInfo(sptr<ScreenSession> screenSession) override;
-    void CheckNeedSetMultiScreenFrameControl() override;
-    bool CheckphyScreenPropMapMutex() override;
     void OnScreenChangeDefault(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason) override;
     void ScreenConnectionChanged(sptr<ScreenSession> screenSession,
-        ScreenId screenId, ScreenEvent screenEvent) override;
-    bool StartSwitchSubscriberInit() override;
-    bool CheckNotifyCastWhenScreenConnectChange() override;
+        ScreenId screenId, ScreenEvent screenEvent, bool phyMirrorEnable) override;
+    void NotifyCastWhenScreenConnectChange(bool isConnected) override;
+    bool IsNeedAddInputServiceAbility() override;
 };
 } // namespace PCExtension
 } // namespace Rosen

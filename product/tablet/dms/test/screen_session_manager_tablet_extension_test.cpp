@@ -141,39 +141,15 @@ HWTEST_F(ScreenSessionManagerExtensionTest, OnScreenChangeDefault, TestSize.Leve
 }
 
 /**
- * @tc.name: CheckphyScreenPropMapMutex
- * @tc.desc: CheckphyScreenPropMapMutex
+ * @tc.name: IsNeedAddInputServiceAbility
+ * @tc.desc: IsNeedAddInputServiceAbility
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerExtensionTest, CheckphyScreenPropMapMutex, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerExtensionTest, IsNeedAddInputServiceAbility, TestSize.Level1)
 {
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
-    ssm_->CheckphyScreenPropMapMutex();
-    EXPECT_TRUE(g_errLog.find("CheckphyScreenPropMapMutex") != std::string::npos);
-}
-
-/**
- * @tc.name: CheckNeedSetMultiScreenFrameControl
- * @tc.desc: CheckNeedSetMultiScreenFrameControl
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerExtensionTest, CheckNeedSetMultiScreenFrameControl, TestSize.Level1)
-{
-    ssm_->CheckNeedSetMultiScreenFrameControl();
-    EXPECT_NE(ssm_, nullptr);
-}
-
-/**
- * @tc.name: StartSwitchSubscriberInit
- * @tc.desc: StartSwitchSubscriberInit
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerExtensionTest, StartSwitchSubscriberInit, TestSize.Level1)
-{
-    g_errLog.clear();
-    LOG_SetCallback(MyLogCallback);
-    ssm_->StartSwitchSubscriberInit();
+    ssm_->IsNeedAddInputServiceAbility();
     EXPECT_TRUE(g_errLog.find("current device") != std::string::npos);
 }
 
@@ -189,19 +165,20 @@ HWTEST_F(ScreenSessionManagerExtensionTest, ScreenConnectionChanged, TestSize.Le
     sptr<ScreenSession> screenSession = new ScreenSession();
     screenSession->SetScreenId(screenId);
     ScreenEvent screenEvent = ScreenEvent::CONNECTED;
+    bool phyMirrorEnable = 1;
 
     sptr<ScreenSessionManagerClient> clientProxy = new ScreenSessionManagerClient();
     ScreenSessionManagerExttest.clientProxy_ = clientProxy;
 
-    ScreenSessionManagerExttest.ScreenConnectionChanged(screenSession, screenId, screenEvent);
+    ScreenSessionManagerExttest.ScreenConnectionChanged(screenSession, screenId, screenEvent, phyMirrorEnable);
     EXPECT_NE(ScreenSessionManagerExttest.clientProxy_, nullptr);
 
     screenEvent = ScreenEvent::DISCONNECTED;
-    ScreenSessionManagerExttest.ScreenConnectionChanged(screenSession, screenId, screenEvent);
+    ScreenSessionManagerExttest.ScreenConnectionChanged(screenSession, screenId, screenEvent, phyMirrorEnable);
     EXPECT_NE(ScreenSessionManagerExttest.clientProxy_, nullptr);
 
     ScreenSessionManagerExttest.clientProxy_ = nullptr;
-    ScreenSessionManagerExttest.ScreenConnectionChanged(screenSession, screenId, screenEvent);
+    ScreenSessionManagerExttest.ScreenConnectionChanged(screenSession, screenId, screenEvent, phyMirrorEnable);
     EXPECT_EQ(ScreenSessionManagerExttest.clientProxy_, nullptr);
 }
 

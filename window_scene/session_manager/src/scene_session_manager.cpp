@@ -98,6 +98,8 @@
 #ifdef IMF_ENABLE
 #include <input_method_controller.h>
 #endif // IMF_ENABLE
+#include "dms_global_mutex.h"
+
 
 namespace OHOS::Rosen {
 namespace {
@@ -5262,7 +5264,6 @@ void SceneSessionManager::HandleUserSwitching(bool isUserActive)
         }
         AbilityInfoManager::GetInstance().SetCurrentUserId(currentUserId_);
         // notify screenSessionManager to recover current user
-        ScreenSessionManagerClient::GetInstance().SwitchingCurrentUser();
         FlushWindowInfoToMMI(true);
         NotifyAllAccessibilityInfo();
         rsInterface_.AddVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
@@ -5277,6 +5278,7 @@ void SceneSessionManager::HandleUserSwitching(bool isUserActive)
 void SceneSessionManager::HandleUserSwitched(bool isUserActive)
 {
     if (isUserActive) {
+        ScreenSessionManagerClient::GetInstance().SwitchingCurrentUser();
         // start UI abilities only after the user has switched and become active
         ProcessUIAbilityOnUserSwitch(isUserActive);
     } else {
@@ -6179,7 +6181,7 @@ WMError SceneSessionManager::GetTopWindowId(uint32_t mainWinId, uint32_t& topWin
     TLOGI(WmsLogTag::WMS_PIPELINE, "wait for flush UI, id: %{public}d", mainWinId);
     {
         std::unique_lock<std::mutex> lock(nextFlushCompletedMutex_);
-        if (nextFlushCompletedCV_.wait_for(lock, std::chrono::milliseconds(GET_TOP_WINDOW_DELAY)) ==
+        if (DmUtils::safe_wait_for(nextFlushCompletedCV_, lock, std::chrono::milliseconds(GET_TOP_WINDOW_DELAY)) ==
             std::cv_status::timeout) {
             TLOGW(WmsLogTag::WMS_PIPELINE, "wait for 100ms");
         }

@@ -35,12 +35,11 @@ public:
     sptr<ScreenSession> GetPhysicalScreenSession(ScreenId screenId, ScreenId defScreenId, ScreenProperty property);
     void NotifyCaptureStatusChangedGlobal();
     void GetAndMergeEdidInfo(sptr<ScreenSession> screenSession);
-    void CheckNeedSetMultiScreenFrameControl();
-    bool CheckphyScreenPropMapMutex();
     void OnScreenChangeDefault(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason);
-    void ScreenConnectionChanged(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
-    bool StartSwitchSubscriberInit();
-    bool CheckNotifyCastWhenScreenConnectChange();
+    void ScreenConnectionChanged(sptr<ScreenSession> screenSession, ScreenId screenId,
+        ScreenEvent screenEvent, bool phyMirrorEnable);
+    void NotifyCastWhenScreenConnectChange(bool isConnected);
+    bool IsNeedAddInputServiceAbility();
 };
 }
 } // namespace Rosen

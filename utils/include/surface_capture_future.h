@@ -19,6 +19,7 @@
 #include "future.h"
 #include "pixel_map.h"
 #include "transaction/rs_render_service_client.h"
+#include "dms_global_mutex.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -47,7 +48,8 @@ public:
     std::vector<std::shared_ptr<Media::PixelMap>> GetHDRResult(long timeOut)
     {
         std::unique_lock <std::mutex> lock(mutex_);
-        if (!conditionVariable_.wait_for(lock, std::chrono::milliseconds(timeOut), [this] { return IsReady(); })) {
+        if (!DmUtils::safe_wait_for(conditionVariable_, lock,
+            std::chrono::milliseconds(timeOut), [this] { return IsReady(); })) {
             OHOS::HiviewDFX::HiLog::Error(TAG, "wait for %{public}ld, timeout.", timeOut);
         }
         return { pixelMap_, hdrPixelMap_ };

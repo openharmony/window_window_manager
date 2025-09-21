@@ -53,16 +53,6 @@ void ScreenSessionManagerExt::GetAndMergeEdidInfo(sptr<ScreenSession> screenSess
     COMBINE_FUNC(GetAndMergeEdidInfo(screenSession));
 }
 
-void ScreenSessionManagerExt::CheckNeedSetMultiScreenFrameControl()
-{
-    COMBINE_FUNC(CheckNeedSetMultiScreenFrameControl());
-}
-
-bool ScreenSessionManagerExt::CheckphyScreenPropMapMutex()
-{
-    return COMBINE_FUNC(CheckphyScreenPropMapMutex());
-}
-
 void ScreenSessionManagerExt::OnScreenChangeDefault(ScreenId screenId,
     ScreenEvent screenEvent, ScreenChangeReason reason)
 {
@@ -70,17 +60,17 @@ void ScreenSessionManagerExt::OnScreenChangeDefault(ScreenId screenId,
 }
 
 void ScreenSessionManagerExt::ScreenConnectionChanged(sptr<ScreenSession> screenSession,
-    ScreenId screenId, ScreenEvent screenEvent)
+    ScreenId screenId, ScreenEvent screenEvent, bool phyMirrorEnable)
 {
-    COMBINE_FUNC(ScreenConnectionChanged(screenSession, screenId, screenEvent));
+    COMBINE_FUNC(ScreenConnectionChanged(screenSession, screenId, screenEvent, phyMirrorEnable));
 }
 
-bool ScreenSessionManagerExt::StartSwitchSubscriberInit()
+bool ScreenSessionManagerExt::IsNeedAddInputServiceAbility()
 {
-    return COMBINE_FUNC(StartSwitchSubscriberInit());
+    return COMBINE_FUNC(IsNeedAddInputServiceAbility());
 }
 
-bool ScreenSessionManagerExt::CheckNotifyCastWhenScreenConnectChange()
+void ScreenSessionManagerExt::NotifyCastWhenScreenConnectChange(bool isConnected)
 {
-    return COMBINE_FUNC(CheckNotifyCastWhenScreenConnectChange());
+    COMBINE_FUNC(NotifyCastWhenScreenConnectChange(bool isConnected));
 }
