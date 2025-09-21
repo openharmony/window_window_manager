@@ -49,9 +49,26 @@ public:
 
     void SetSensorFoldStateManager(sptr<SensorFoldStateManager> sensorFoldStateManager);
 
-    void HandlePostureData(const SensorEvent * const event);
+    void HandlePostureData(const SensorEvent* const event);
 
-    void HandleHallData(const SensorEvent * const event);
+    void HandleHallData(const SensorEvent* const event);
+
+    void HandleSensorData(const SensorEvent* const event);
+
+    void UnSubscribeSensorCallback();
+
+    typedef bool (*IsFwdSensorEvent)(const SensorEvent* event);
+
+    int32_t SubscribeSensorCallback(int32_t sensorTypeId, int64_t interval, const RecordSensorCallback taskCallback);
+
+    typedef struct SensorCallbackEntry {
+        RecordSensorCallback taskCallback;
+        int64_t interval;
+    } SensorCallbackEntry;
+    
+    std::map<int32_t, SensorCallbackEntry> sensorCallbacks_;
+
+    std::unordered_map<int32_t, SensorUser> users_;
 
     void TriggerDisplaySwitch();
 

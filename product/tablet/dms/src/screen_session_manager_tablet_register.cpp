@@ -21,7 +21,6 @@
 using namespace OHOS::Rosen;
 using namespace TabletExtension;
 
-// extern "C"后最近一个定义为C符号
 extern "C" __attribute__((constructor)) void ScreenSessionManagerRegisterFunc()
 {
     TLOGI(WmsLogTag::DMS, "starttablet");

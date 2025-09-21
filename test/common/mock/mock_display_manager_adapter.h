@@ -30,7 +30,7 @@ public:
         DisplayManagerAgentType type));
     MOCK_METHOD2(UnregisterDisplayManagerAgent, DMError(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type));
-    MOCK_METHOD0(GetDefaultDisplayInfo, sptr<DisplayInfo>());
+    MOCK_METHOD1(GetDefaultDisplayInfo, sptr<DisplayInfo>(int32_t userId));
     MOCK_METHOD1(GetDisplayInfoByScreenId, sptr<DisplayInfo>(ScreenId screenId));
     MOCK_METHOD4(GetDisplaySnapshot, std::shared_ptr<Media::PixelMap>(DisplayId displayId, DmErrorCode* errorCode,
         bool isUseDma, bool isCaptureFullOfScreen));
@@ -51,7 +51,7 @@ public:
         DmErrorCode& errorCode, bool isUseDma, bool isCaptureFullOfScreen));
     MOCK_METHOD2(GetDisplayHDRSnapshotWithOption, std::vector<std::shared_ptr<Media::PixelMap>>(
         const CaptureOption& captureOption, DmErrorCode& errorCode));
-    MOCK_METHOD0(GetAllDisplayIds, std::vector<DisplayId>());
+    MOCK_METHOD1(GetAllDisplayIds, std::vector<DisplayId>(int32_t userId));
 };
 
 class MockScreenManagerAdapter : public ScreenManagerAdapter {

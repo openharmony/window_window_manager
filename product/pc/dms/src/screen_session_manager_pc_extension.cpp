@@ -109,23 +109,8 @@ void ScreenSessionManagerExt::GetAndMergeEdidInfo(sptr<ScreenSession> screenSess
     }
 }
 
-bool ScreenSessionManagerExt::CheckphyScreenPropMapMutex()
-{
-    std::lock_guard<std::recursive_mutex> lock_phy(phyScreenPropMapMutex_);
-    if (phyScreenPropMap_.size() > 1) {
-        TLOGW(WmsLogTag::DMS, "only support one external screen");
-        return false;
-    }
-    return true;
-}
-
-void ScreenSessionManagerExt::CheckNeedSetMultiScreenFrameControl()
-{
-    SetMultiScreenFrameControl();
-}
-
 void ScreenSessionManagerExt::ScreenConnectionChanged(sptr<ScreenSession> screenSession,
-    ScreenId screenId, ScreenEvent screenEvent)
+    ScreenId screenId, ScreenEvent screenEvent, bool phyMirrorEnable)
 {
     auto clientProxy = GetClientProxy();
 #ifdef FOLD_ABILITY_ENABLE
@@ -137,9 +122,7 @@ void ScreenSessionManagerExt::ScreenConnectionChanged(sptr<ScreenSession> screen
         return;
     }
 #endif
-    if (IsConcurrentUser()) {
-        NotifyUserClientProxy(screenSession, screenId, screenEvent);
-    } else if (clientProxy) {
+    if (clientProxy) {
         {
             std::unique_lock<std::mutex> lock(displayAddMutex_);
             needWaitAvailableArea_ = true;
@@ -160,13 +143,13 @@ void ScreenSessionManagerExt::ScreenConnectionChanged(sptr<ScreenSession> screen
     }
 }
 
-bool ScreenSessionManagerExt::StartSwitchSubscriberInit()
+bool ScreenSessionManagerExt::IsNeedAddInputServiceAbility()
 {
-    retuen true;
+    return true;
 }
 
-bool ScreenSessionManagerExt::CheckNotifyCastWhenScreenConnectChange()
+void ScreenSessionManagerExt::NotifyCastWhenScreenConnectChange(bool isConnected)
 {
     TLOGI(WmsLogTag::DMS, "pc device");
-    return false;
+    return;
 }

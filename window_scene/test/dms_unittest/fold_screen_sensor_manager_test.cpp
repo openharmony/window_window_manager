@@ -306,6 +306,55 @@ HWTEST_F(FoldScreenSensorManagerTest, SetGlobalHallWhenParamInValid, TestSize.Le
     ASSERT_NO_FATAL_FAILURE({mgr.GetGlobalHall();});
     EXPECT_NE(mgr.GetGlobalHall(), USHRT_MAX);
 }
+
+/**
+ * @tc.name : SubscribeSensorCallback_ShouldReturnSuccess_WhenAllOperationsSucceed
+ * @tc.number: SubscribeSensorCallbackTest_001
+ * @tc.desc : 测试当所有操作（订阅传感器、设置批量处理间隔、激活传感器）都成功时,SubscribeSensorCallback 返回
+ * SENSOR_SUCCESS
+ */
+HWTEST_F(FoldScreenSensorManagerTest, ATC_SubscribeSensorCallback_Succeed, TestSize.Level0)
+{
+    int32_t sensorTypeId = 1;
+    int64_t interval = 100;
+    RecordSensorCallback taskCallback = nullptr;
+
+    FoldScreenSensorManager* manager = new FoldScreenSensorManager();
+    int32_t result = manager->SubscribeSensorCallback(sensorTypeId, interval, taskCallback);
+    EXPECT_EQ(result, 1);
+}
+
+/**
+ * @tc.name  : SubscribeSensorCallback_ShouldReturnFailure_WhenAnyOperationFails
+ * @tc.number: SubscribeSensorCallbackTest_002
+ * @tc.desc  : 测试当任何一个操作（订阅传感器、设置批量处理间隔、激活传感器）失败时,SubscribeSensorCallback 返回
+ * SENSOR_FAILURE
+ */
+HWTEST_F(FoldScreenSensorManagerTest, ATC_SubscribeSensorCallback_Fails, TestSize.Level0)
+{
+    int32_t sensorTypeId = 1;
+    int64_t interval = 100;
+    RecordSensorCallback taskCallback = nullptr;
+    FoldScreenSensorManager* manager = new FoldScreenSensorManager();
+    int32_t result = manager->SubscribeSensorCallback(sensorTypeId, interval, taskCallback);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name  : SubscribeSensorCallback_ShouldReturnFailure_WhenAllOperationsFail
+ * @tc.number: SubscribeSensorCallbackTest_003
+ * @tc.desc  : 测试当所有操作（订阅传感器、设置批量处理间隔、激活传感器）都失败时,SubscribeSensorCallback 返回
+ * SENSOR_FAILURE
+ */
+HWTEST_F(FoldScreenSensorManagerTest, ATC_SubscribeSensorCallback_Fail, TestSize.Level0)
+{
+    int32_t sensorTypeId = 1;
+    int64_t interval = 100;
+    RecordSensorCallback taskCallback = nullptr;
+    FoldScreenSensorManager* manager = new FoldScreenSensorManager();
+    int32_t result = manager->SubscribeSensorCallback(sensorTypeId, interval, taskCallback);
+    EXPECT_EQ(result, 0);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -136,49 +136,11 @@ HWTEST_F(ScreenSessionManagerPcExtensionTest, OnScreenChangeDefault, TestSize.Le
 }
 
 /**
- * @tc.name: CheckphyScreenPropMapMutex_Empty
- * @tc.desc: CheckphyScreenPropMapMutex_Empty
+ * @tc.name: IsNeedAddInputServiceAbility
+ * @tc.desc: test function : IsNeedAddInputServiceAbility
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerPcExtensionTest, CheckphyScreenPropMapMutex_Empty, TestSize.Level1)
-{
-    ssm_->phyScreenPropMap_.clear();
-    bool result = ssm_->CheckphyScreenPropMapMutex();
-    EXPECT_TRUE(result);
-}
-
-/**
- * @tc.name: CheckphyScreenPropMapMutex_One
- * @tc.desc: CheckphyScreenPropMapMutex_One
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerPcExtensionTest, CheckphyScreenPropMapMutex_One, TestSize.Level1)
-{
-    ScreenId screenId = 100;
-    ssm_->phyScreenPropMap_[screenId] = ScreenProperty();
-    bool result = ssm_->CheckphyScreenPropMapMutex();
-    EXPECT_TRUE(result);
-}
-
-/**
- * @tc.name: CheckNeedSetMultiScreenFrameControl
- * @tc.desc: CheckNeedSetMultiScreenFrameControl
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerPcExtensionTest, CheckNeedSetMultiScreenFrameControl, Function | SmallTest | Level3)
-{
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        ssm_->CheckNeedSetMultiScreenFrameControl();
-        EXPECT_NE(ssm_, nullptr);
-    }
-}
-
-/**
- * @tc.name: StartSwitchSubscriberInit
- * @tc.desc: test function : StartSwitchSubscriberInit
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerPcExtensionTest, StartSwitchSubscriberInit, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerPcExtensionTest, IsNeedAddInputServiceAbility, TestSize.Level1)
 {
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
@@ -186,7 +148,7 @@ HWTEST_F(ScreenSessionManagerPcExtensionTest, StartSwitchSubscriberInit, TestSiz
     ASSERT_NE(ssm_, nullptr);
     std::string deviceId = "UNKNOWN";
     int32_t MULTIMODAL_INPUT_SERVICE_ID = 3101;
-    ssm_->StartSwitchSubscriberInit();
+    ssm_->IsNeedAddInputServiceAbility();
 
     EXPECT_TRUE(g_errLog.find("current device") != std::string::npos);
 }
@@ -203,19 +165,20 @@ HWTEST_F(ScreenSessionManagerPcExtensionTest, ScreenConnectionChanged, TestSize.
     sptr<ScreenSession> screenSession = new ScreenSession();
     screenSession->SetScreenId(screenId);
     ScreenEvent screenEvent = ScreenEvent::CONNECTED;
+    bool phyMirrorEnable = 1;
 
     sptr<ScreenSessionManagerClient> clientProxy = new ScreenSessionManagerClient();
     ScreenSessionManagerExttest.clientProxy_ = clientProxy;
 
-    ScreenSessionManagerExttest.ScreenConnectionChanged(screenSession, screenId, screenEvent);
+    ScreenSessionManagerExttest.ScreenConnectionChanged(screenSession, screenId, screenEvent, phyMirrorEnable);
     EXPECT_NE(ScreenSessionManagerExttest.clientProxy_, nullptr);
 
     screenEvent = ScreenEvent::DISCONNECTED;
-    ScreenSessionManagerExttest.ScreenConnectionChanged(screenSession, screenId, screenEvent);
+    ScreenSessionManagerExttest.ScreenConnectionChanged(screenSession, screenId, screenEvent, phyMirrorEnable);
     EXPECT_NE(ScreenSessionManagerExttest.clientProxy_, nullptr);
 
     ScreenSessionManagerExttest.clientProxy_ = nullptr;
-    ScreenSessionManagerExttest.ScreenConnectionChanged(screenSession, screenId, screenEvent);
+    ScreenSessionManagerExttest.ScreenConnectionChanged(screenSession, screenId, screenEvent, phyMirrorEnable);
     EXPECT_EQ(ScreenSessionManagerExttest.clientProxy_, nullptr);
 }
 
@@ -235,18 +198,6 @@ HWTEST_F(ScreenSessionManagerPcExtensionTest, GetAndMergeEdidInfo, TestSize.Leve
 
     EXPECT_NE(screenSession->GetSerialNumber(), "");
     EXPECT_NE(screenSession->GetName(), "");
-}
-
-/**
- * @tc.name: CheckNotifyCastWhenScreenConnectChange
- * @tc.desc: Test CheckNotifyCastWhenScreenConnectChange
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerPcExtensionTest, CheckNotifyCastWhenScreenConnectChange, TestSize.Level1)
-{
-    ScreenSessionManagerExt ssm;
-    bool result = ssm.CheckNotifyCastWhenScreenConnectChange();
-    EXPECT_NE(g_errLog.find("pc device"), std::string::npos);
 }
 } // namespace
 } // namespace PCExtension

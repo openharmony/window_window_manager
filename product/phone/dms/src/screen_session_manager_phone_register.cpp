@@ -19,7 +19,6 @@
 using namespace OHOS::Rosen;
 using namespace PhoneExtension;
 
-// extern "C"后最近一个定义为C符号
 extern "C" __attribute__((constructor)) void PhoneScreenSessionManagerRegisterFunc()
 {
     TLOGI(WmsLogTag::DMS, "startphone");

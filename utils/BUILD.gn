@@ -223,6 +223,8 @@ ohos_shared_library("libwmutil") {
     "src/window_frame_trace_impl.cpp",
     "src/window_property.cpp",
     "src/window_transition_info.cpp",
+    "src/ffrt_queue_helper.cpp",
+    "src/dms_global_mutex.cpp",
   ]
 
   configs = [
@@ -256,6 +258,7 @@ ohos_shared_library("libwmutil") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
+    "ffrt:libffrt",
   ]
   if (!(host_os == "linux" && host_cpu == "arm64")) {
     external_deps += [ "preferences:native_preferences" ]
