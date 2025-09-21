@@ -62,7 +62,10 @@ ohos_shared_library("libdm_lite") {
 
   public_configs = [ ":libdm_public_config" ]
 
-  deps = [ "${window_base_path}/utils:libwmutil_base" ]
+  deps = [
+    "${window_base_path}/utils:libwmutil_base",
+    "${window_base_path}/utils:libwmutil",
+   ]
 
   external_deps = [
     "c_utils:utils",

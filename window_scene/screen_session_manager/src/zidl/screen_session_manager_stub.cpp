@@ -19,7 +19,8 @@
 #include "dm_common.h"
 #include <ipc_skeleton.h>
 #include "transaction/rs_marshalling_helper.h"
-
+#include "session_manager/include/scene_session_manager.h"
+#include "dms_global_mutex.h"
 #include "marshalling_helper.h"
 
 namespace OHOS::Rosen {
@@ -35,6 +36,14 @@ constexpr uint32_t  MAX_CREASE_REGION_SIZE = 20;
 int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
     MessageOption& option)
 {
+    DmUtils::HoldLock callback_lock;
+    int32_t result = OnRemoteRequestInner(code, data, reply, option);
+    return result;
+}
+
+int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessageParcel& data,
+    MessageParcel& reply, MessageOption& option)
+{
     TLOGD(WmsLogTag::DMS, "OnRemoteRequest code is %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         TLOGE(WmsLogTag::DMS, "InterfaceToken check failed");
@@ -43,7 +52,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
     DisplayManagerMessage msgId = static_cast<DisplayManagerMessage>(code);
     switch (msgId) {
         case DisplayManagerMessage::TRANS_ID_GET_DEFAULT_DISPLAY_INFO: {
-            auto info = GetDefaultDisplayInfo();
+            int32_t userId;
+            if (!data.ReadInt32(userId)) {
+                TLOGE(WmsLogTag::DMS, "Read userId failed");
+                return ERR_INVALID_DATA;
+            }
+            auto info = GetDefaultDisplayInfo(userId);
             reply.WriteParcelable(info);
             break;
         }
@@ -171,7 +185,13 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_ALL_DISPLAYIDS: {
-            std::vector<DisplayId> allDisplayIds = GetAllDisplayIds();
+            int32_t userId;
+            if (!data.ReadInt32(userId)) {
+                TLOGE(WmsLogTag::DMS, "Read userId failed");
+                return ERR_INVALID_DATA;
+            }
+            TLOGD(WmsLogTag::DMS, "case TRANS_ID_GET_ALL_DISPLAYIDS get userId %{public}u", userId);
+            std::vector<DisplayId> allDisplayIds = GetAllDisplayIds(userId);
             static_cast<void>(reply.WriteUInt64Vector(allDisplayIds));
             break;
         }
