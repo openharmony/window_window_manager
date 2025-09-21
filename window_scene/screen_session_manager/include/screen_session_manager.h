@@ -32,7 +32,7 @@
 #include "screen_power_fsm/screen_state_machine.h"
 #include "wm_single_instance.h"
 #include "screen_edid_parse.h"
-#include "session_manager/include/ffrt_queue_helper.h"
+#include "ffrt_queue_helper.h"
 
 #include "agent_death_recipient.h"
 #include "screen.h"
@@ -70,7 +70,7 @@ public:
     sptr<ScreenSession> GetDefaultScreenSession();
     std::vector<ScreenId> GetAllScreenIds();
 
-    sptr<DisplayInfo> GetDefaultDisplayInfo() override;
+    sptr<DisplayInfo> GetDefaultDisplayInfo(int32_t userId = CONCURRENT_USER_ID_DEFAULT) override;
     DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
     DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
     DMError SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override;
@@ -157,7 +157,7 @@ public:
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
     virtual sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId) override;
     sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
-    std::vector<DisplayId> GetAllDisplayIds() override;
+    std::vector<DisplayId> GetAllDisplayIds(int32_t userId = CONCURRENT_USER_ID_DEFAULT) override;
     virtual sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) override;
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos) override;
     virtual DMError GetScreenSupportedColorGamuts(ScreenId screenId,
@@ -508,10 +508,12 @@ public:
     void SetFirstSCBConnect(bool firstSCBConnect);
     // mirror screen
     bool HandleResolutionEffectChange();
+    bool GetStoredPidFromUid(int32_t uid, int32_t& agentPid) const;
+    bool IsFreezed(const int32_t& agentPid, const DisplayManagerAgentType& agentType);
+    bool isScreenShot_ = false;
     void NotifyAodOpCompletion(AodOP operation, int32_t result) override;
     void DoAodExitAndSetPower(ScreenId screenId, ScreenPowerStatus status);
     void DoAodExitAndSetPowerAllOff();
-
 protected:
     ScreenSessionManager();
     virtual ~ScreenSessionManager() = default;
@@ -652,7 +654,6 @@ private:
 #endif // DEVICE_STATUS_ENABLE
     void ShowFoldStatusChangedInfo(int errCode, std::string& dumpInfo);
     void SetMirrorScreenIds(std::vector<ScreenId>& mirrorScreenIds);
-    bool IsFreezed(const int32_t& agentPid, const DisplayManagerAgentType& agentType);
     void NotifyUnfreezed(const std::set<int32_t>& unfreezedPidList, const sptr<ScreenSession>& screenSession);
     void NotifyUnfreezedAgents(const int32_t& pid, const std::set<int32_t>& unfreezedPidList,
         const std::set<DisplayManagerAgentType>& pidAgentTypes, const sptr<ScreenSession>& screenSession);
@@ -674,6 +675,7 @@ private:
      * multi user concurrency
      */
     static bool IsConcurrentUser();
+    void RemoveUserByPid(int32_t pid);
     void ActiveUser(int32_t userId);
     DisplayId GetUserDisplayId(int32_t userId);
     int32_t GetActiveUserByDisplayId(DisplayId displayId);
@@ -723,18 +725,22 @@ private:
 
     /*
         example:
-        user100:    screen0 active=0
-        user101:    screen0 active=1
-        user102:    screen1 active=1
+        user100:  {isActive=true  screenId=0  pid=1234}
+        user101:  {isActive=false screenId=0  pid=2345}
+        user102:  {isActive=true  screenId=6  pid=3456}
     */
-    std::map<int32_t, std::pair<bool, ScreenId>> userScreenMap_;
+    struct userScreenInfo {
+        bool isActive;
+        ScreenId screenId;
+        int32_t pid;
+    };
+    std::map<int32_t, userScreenInfo> userScreenMap_;
     std::mutex userScreenMapMutex_;
     std::map<int32_t, sptr<IScreenSessionManagerClient>> clientProxyMap_;
     FoldDisplayMode oldScbDisplayMode_ = FoldDisplayMode::UNKNOWN;
 
     sptr<IScreenSessionManagerClient> clientProxy_;
     std::mutex clientProxyMutex_; // above guarded by clientProxyMutex_
-    ClientAgentContainer<IDisplayManagerAgent, DisplayManagerAgentType> dmAgentContainer_;
     DeviceScreenConfig deviceScreenConfig_;
     std::mutex allDisplayPhysicalResolutionMutex_;
     std::vector<DisplayPhysicalResolution> allDisplayPhysicalResolution_ {};
@@ -767,7 +773,6 @@ private:
     bool userSwitching_ = false;
     bool isAutoRotationOpen_ = false;
     bool isExpandCombination_ = false;
-    bool isScreenShot_ = false;
     bool isCoordinationFlag_ = false;
     bool isFoldScreenOuterScreenReady_ = false;
     bool isCameraBackSelfie_ = false;

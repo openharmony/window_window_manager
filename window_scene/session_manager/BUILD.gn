@@ -66,7 +66,6 @@ ohos_shared_library("scene_session_manager") {
     "src/anomaly_detection.cpp",
     "src/distributed_client.cpp",
     "src/extension_session_manager.cpp",
-    "src/ffrt_queue_helper.cpp",
     "src/hidump_controller.cpp",
     "src/publish/scb_dump_subscriber.cpp",
     "src/rdb/starting_window_rdb_manager.cpp",
