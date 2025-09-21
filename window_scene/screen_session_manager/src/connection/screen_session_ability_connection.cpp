@@ -24,6 +24,7 @@
 #include "window_manager_hilog.h"
 #include "ipc_skeleton.h"
 #include "extension_manager_client.h"
+#include "dms_global_mutex.h"
 
 namespace OHOS::Rosen {
 constexpr int32_t DEFAULT_VALUE = -1;
@@ -122,7 +123,7 @@ bool ScreenSessionAbilityConnectionStub::IsAbilityConnectedSync()
 {
     std::unique_lock<std::mutex> lock(connectedMutex_);
     if (!isConnected_) {
-        connectedCv_.wait_for(lock, std::chrono::milliseconds(SEND_MESSAGE_SYNC_OUT_TIME));
+        DmUtils::safe_wait_for(connectedCv_, lock, std::chrono::milliseconds(SEND_MESSAGE_SYNC_OUT_TIME));
     }
     return IsAbilityConnected();
 }
@@ -132,7 +133,7 @@ int32_t ScreenSessionAbilityConnectionStub::SendMessageSync(int32_t transCode,
 {
     std::unique_lock<std::mutex> lock(connectedMutex_);
     if (!isConnected_) {
-        connectedCv_.wait_for(lock, std::chrono::milliseconds(SEND_MESSAGE_SYNC_OUT_TIME));
+        DmUtils::safe_wait_for(connectedCv_, lock, std::chrono::milliseconds(SEND_MESSAGE_SYNC_OUT_TIME));
     }
     if (!IsAbilityConnected()) {
         TLOGE(WmsLogTag::DMS, "ability connection is not established");
@@ -159,7 +160,7 @@ int32_t ScreenSessionAbilityConnectionStub::SendMessageSyncBlock(int32_t transCo
 {
     std::unique_lock<std::mutex> lock(connectedMutex_);
     if (!isConnected_) {
-        connectedCv_.wait_for(lock, std::chrono::milliseconds(SEND_MESSAGE_SYNC_OUT_TIME));
+        DmUtils::safe_wait_for(connectedCv_, lock, std::chrono::milliseconds(SEND_MESSAGE_SYNC_OUT_TIME));
     }
     if (!IsAbilityConnected()) {
         TLOGE(WmsLogTag::DMS, "ability connection is not established");
