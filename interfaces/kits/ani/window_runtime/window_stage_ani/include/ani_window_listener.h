@@ -61,6 +61,7 @@ public:
         weakRef_(wptr<AniWindowListener> (this)) {}
     ~AniWindowListener();
     ani_ref GetAniCallback() { return aniCallback_; }
+    void SetAniCallback(ani_ref aniCallback) { aniCallback_ = aniCallback; }
     void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) override;
     void OnSizeChange(Rect rect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
