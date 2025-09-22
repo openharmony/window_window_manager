@@ -2556,6 +2556,21 @@ void SceneSession::PatchAINavigationBarArea(AvoidArea& avoidArea)
     CalculateAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR, areaEmpty, avoidArea);
 }
 
+void SceneSession::PatchAINavigationBarArea(AvoidArea& avoidArea)
+{
+    Rect areaEmpty = { 0, 0, 0, 0 };
+    if (!avoidArea.leftRect_.IsUninitializedRect()) {
+        avoidArea.bottomRect_ = avoidArea.leftRect_;
+        avoidArea.leftRect_ = areaEmpty;
+    } else if (!avoidArea.topRect_.IsUninitializedRect()) {
+        avoidArea.bottomRect_ = avoidArea.topRect_;
+        avoidArea.topRect_ = areaEmpty;
+    } else if (!avoidArea.topRect_.IsUninitializedRect()) {
+        avoidArea.bottomRect_ = avoidArea.rightRect_;
+        avoidArea.rightRect_ = areaEmpty;
+    }
+}
+
 void SceneSession::GetAINavigationBarArea(WSRect& rect, AvoidArea& avoidArea)
 {
     if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_PIP) {
@@ -2572,6 +2587,7 @@ void SceneSession::GetAINavigationBarArea(WSRect& rect, AvoidArea& avoidArea)
         barArea = specificCallback_->onGetAINavigationBarArea_(GetSessionProperty()->GetDisplayId());
     }
     CalculateAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR, rect, barArea, avoidArea);
+    PatchAINavigationBarArea(avoidArea);
 }
 
 void SceneSession::HookAvoidAreaInCompatibleMode(const WSRect& rect, AvoidAreaType avoidAreaType,

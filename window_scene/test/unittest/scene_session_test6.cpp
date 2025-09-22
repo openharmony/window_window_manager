@@ -1167,6 +1167,33 @@ HWTEST_F(SceneSessionTest6, TestUpdateGlobalDisplayRectFromClient, Function | Sm
 }
 
 /**
+ * @tc.name: PatchAINavigationBarArea
+ * @tc.desc: PatchAINavigationBarArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, PatchAINavigationBarArea, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    AvoidArea avoidArea;
+    AvoidArea avoidAreaEmpty;
+    Rect rect = { 600, 2710, 500, 10 };
+    session->PatchAINavigationBarArea(avoidArea);
+    EXPECT_EQ(avoidArea, avoidAreaEmpty);
+    avoidArea.topRect_ = { 600, 2710, 500, 10 };
+    session->PatchAINavigationBarArea(avoidArea);
+    EXPECT_EQ(avoidArea.bottomRect_, rect);
+    avoidArea.topRect_ = { 0, 0, 0, 0 };
+    avoidArea.leftRect_ = { 600, 2710, 500, 10 };
+    session->PatchAINavigationBarArea(avoidArea);
+    EXPECT_EQ(avoidArea.bottomRect_, rect);
+    avoidArea.leftRect_ = { 0, 0, 0, 0 };
+    avoidArea.rightRect_ = { 600, 2710, 500, 10 };
+    session->PatchAINavigationBarArea(avoidArea);
+    EXPECT_EQ(avoidArea.bottomRect_, rect);
+}
+
+/**
  * @tc.name: SetWindowTransitionAnimation
  * @tc.desc: SetWindowTransitionAnimation
  * @tc.type: FUNC
