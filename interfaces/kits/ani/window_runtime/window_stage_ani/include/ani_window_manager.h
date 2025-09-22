@@ -28,7 +28,6 @@ namespace Rosen {
 #define WINDOW_EXPORT __attribute__((visibility("default")))
 #endif
 
-
 class AniWindowManager {
 public:
     explicit AniWindowManager();
