@@ -383,6 +383,9 @@ DMError DisplayManagerAni::UnRegisterDisplayListenerWithType(std::string type, a
             jsCbMap_[type].erase(it++);
         }
     }
+    if (jsCbMap_[type].empty()) {
+        jsCbMap_.erase(type);
+    }
     return ret;
 }
 
