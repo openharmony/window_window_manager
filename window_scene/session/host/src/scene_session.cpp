@@ -2208,10 +2208,10 @@ void SceneSession::SetIsStatusBarVisible(bool isVisible)
 
 WSError SceneSession::SetIsStatusBarVisibleInner(bool isVisible)
 {
-    bool isNeedNotify = isStatusBarVisible_ != isVisible;
+    bool isNeedNotify = isStatusBarVisible() != isVisible;
     TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}d, %{public}s] visible %{public}u need notify %{public}u",
         GetPersistentId(), GetWindowName().c_str(), isVisible, isNeedNotify);
-    isStatusBarVisible_ = isVisible;
+    UpdateStatusBatVisible(isVisible);
     if (!isNeedNotify) {
         return WSError::WS_OK;
     }
@@ -2454,8 +2454,8 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d displayId %{public}" PRIu64 " constantly isVisible %{public}d",
                 GetPersistentId(), displayId, isVisible);
         }
-        bool isStatusBarVisible = WindowHelper::IsMainWindow(Session::GetWindowType()) ?
-            isStatusBarVisible_ : isVisible;
+        bool isStatusBarVisible =
+            WindowHelper::IsAppWindow(Session::GetWindowType()) ? IsStatusBarVisible() : isVisible;
         if (!isStatusBarVisible) {
             TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d status bar not visible", GetPersistentId());
             continue;
@@ -2548,6 +2548,12 @@ void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     }
 
     return;
+}
+
+void SceneSession::PatchAINavigationBarArea(AvoidArea& avoidArea)
+{
+    Rect areaEmpty = { 0, 0, 0, 0 };
+    CalculateAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR, areaEmpty, avoidArea);
 }
 
 void SceneSession::GetAINavigationBarArea(WSRect& rect, AvoidArea& avoidArea)
@@ -7235,8 +7241,8 @@ bool SceneSession::GetIsDisplayStatusBarTemporarily() const
 void SceneSession::RetrieveStatusBarDefaultVisibility()
 {
     if (specificCallback_ && specificCallback_->onGetStatusBarDefaultVisibilityByDisplayId_) {
-        isStatusBarVisible_ = specificCallback_->onGetStatusBarDefaultVisibilityByDisplayId_(
-            GetSessionProperty()->GetDisplayId());
+        UpdateStatusBarVisible(
+            specificCallback_->onGetStatusBarDefaultVisibilityByDisplayId_(GetSessionProperty()->GetDisplayId()));
     }
 }
 
