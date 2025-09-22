@@ -7026,6 +7026,7 @@ WMError WindowSessionImpl::UpdateFloatingBall(const FloatingBallTemplateBaseInfo
         return WMError::WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED;
     }
     FloatingBallTemplateInfo fbTemplateInfo = FloatingBallTemplateInfo(fbTemplateBaseInfo, icon);
+    GetProperty()->SetFbTemplateInfo(fbTemplateInfo);
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_FB_STATE_ABNORMALLY);
     return hostSession->UpdateFloatingBall(fbTemplateInfo);
