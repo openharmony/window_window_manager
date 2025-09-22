@@ -246,6 +246,7 @@ public:
     DMError SetScreenPrivacyWindowTagSwitch(ScreenId screenId, const std::vector<std::string>& privacyWindowTag,
         bool enable) override;
     void NotifySwitchUserAnimationFinish() override;
+    DMError SyncScreenPropertyChangedToServer(ScreenId screenId, const ScreenProperty& screenProperty) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;

@@ -57,6 +57,9 @@ public:
     void SetIsFakeInUse(bool isFakeInUse);
     bool GetIsFakeInUse() const;
 
+    void SetIsPreFakeInUse(bool isPreFakeInUse);
+    bool GetIsPreFakeInUse() const;
+
     void SetScaleX(float scaleX);
     float GetScaleX() const;
 
@@ -223,6 +226,34 @@ public:
     float CalculatePPI();
     uint32_t CalculateDPI();
 
+    void SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents changeEvent)
+    {
+        changeEvent_ = changeEvent;
+    }
+    SuperFoldStatusChangeEvents GetSuperFoldStatusChangeEvent() const
+    {
+        return changeEvent_;
+    }
+
+    void SetCurrentValidHeight(uint32_t currentValidHeight)
+    {
+        currentValidHeight_ = currentValidHeight;
+    }
+    uint32_t GetCurrentValidHeight() const
+    {
+        return currentValidHeight_;
+    }
+
+    void SetIsKeyboardOn(bool isKeyboardOn)
+    {
+        isKeyboardOn_ = isKeyboardOn;
+    }
+
+    bool GetIsKeyboardOn() const
+    {
+        return isKeyboardOn_;
+    }
+
     // OffScreenRender
     void SetCurrentOffScreenRendering(bool enable) { isCurrentOffScreenRendering_ = enable; }
     bool GetCurrentOffScreenRendering() { return isCurrentOffScreenRendering_; }
@@ -255,6 +286,7 @@ public:
     uint32_t GetScreenAreaHeight() const { return screenAreaHeight_; }
 
 private:
+    SuperFoldStatusChangeEvents changeEvent_ {SuperFoldStatusChangeEvents::UNDEFINED};
     static inline bool IsVertical(Rotation rotation)
     {
         return (rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180);
@@ -268,6 +300,7 @@ private:
     RRect phyBounds_;
     RRect fakeBounds_;
     bool isFakeInUse_ = false;  // is fakeBounds can be used
+    bool isPreFakeInUse_ = false;  // is fakeBounds can be used
 
     float scaleX_ { 1.0f };
     float scaleY_ { 1.0f };
@@ -315,6 +348,9 @@ private:
 
     uint32_t validWidth_ { UINT32_MAX };
     uint32_t validHeight_ { UINT32_MAX };
+
+    int32_t currentValidHeight_ { UINT32_MAX };
+    bool isKeyboardOn_ { false };
 
     uint32_t pointerActiveWidth_ { 0 };
     uint32_t pointerActiveHeight_ { 0 };
