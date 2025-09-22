@@ -483,6 +483,20 @@ HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfoList01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ReadWindowInfoList02
+ * @tc.desc: test ReadWindowInfoList
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfoList02, TestSize.Level1)
+{
+    MessageParcel data;
+    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
+
+    data.WriteUint32(100000);
+    EXPECT_FALSE(stub_->ReadWindowInfoList(data, windowInfoList));
+}
+
+/**
  * @tc.name: ReadWindowInfo01
  * @tc.desc: test WINDOW_ID
  * @tc.type: FUNC
