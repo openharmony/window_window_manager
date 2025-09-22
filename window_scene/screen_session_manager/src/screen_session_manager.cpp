@@ -8505,6 +8505,18 @@ void ScreenSessionManager::OnPropertyChange(const ScreenProperty& newProperty, S
     clientProxy->OnPropertyChanged(screenId, newProperty, reason);
 }
 
+void ScreenSessionManager::OnFoldPropertyChange(ScreenId screenId, const ScreenProperty& newProperty,
+    ScreenPropertyChangeReason reason, FoldDisplayMode displayMode)
+{
+    TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " reason: %{public}d", screenId, static_cast<int>(reason));
+    auto clientProxy = GetClientProxy();
+    if (!clientProxy) {
+        TLOGE(WmsLogTag::DMS, "clientProxy_ is null");
+        return;
+    }
+    clientProxy->OnFoldPropertyChanged(screenId, newProperty, reason, displayMode);
+}
+
 void ScreenSessionManager::OnPowerStatusChange(DisplayPowerEvent event, EventStatus status,
     PowerStateChangeReason reason)
 {
@@ -12033,6 +12045,33 @@ bool ScreenSessionManager::GetFirstSCBConnect()
 void ScreenSessionManager::SetFirstSCBConnect(bool firstSCBConnect)
 {
     firstSCBConnect_ = firstSCBConnect;
+}
+
+DMError ScreenSessionManager::SyncScreenPropertyChangedToServer(ScreenId screenId, const ScreenProperty& screenProperty)
+{
+    auto serverScreenSession = GetScreenSession(screenId);
+    if (serverScreenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "cannot get screenInfo: %{public}" PRIu64, screenId);
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    serverScreenSession->SetScreenProperty(screenProperty);
+    std::lock_guard<std::mutex> lock(callbackMutex_);
+    if (propertyChangedCallback_) {
+        TLOGI(WmsLogTag::DMS, "screensessionmanager callback propertychanged");
+        propertyChangedCallback_(serverScreenSession);
+    }
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
+        FoldScreenStateInternel::IsSingleDisplayFoldDevice()) {
+        NotifyDisplayChanged(serverScreenSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
+    }
+    return DMError::DM_OK;
+}
+
+void ScreenSessionManager::SetPropertyChangedCallback(std::function<void(sptr<ScreenSession>& screenSession)> callback)
+{
+    TLOGI(WmsLogTag::DMS, "set callback is valid: %{public}s",callback ? "true" : "false");
+    std::lock_guard<std::mutex> lock(callbackMutex_);
+    propertyChangedCallback_ = callback;
 }
 
 bool ScreenSessionManager::GetStoredPidFromUid(int32_t uid, int32_t& agentPid) const

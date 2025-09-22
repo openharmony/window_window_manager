@@ -46,6 +46,8 @@ public:
     virtual void OnDisconnect(ScreenId screenId) {}
     virtual void OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
         ScreenId screenId) {}
+    virtual void OnFoldPropertyChange(ScreenId screenId, const ScreenProperty& newProperty,
+            ScreenPropertyChangeReason reason, FoldDisplayMode mode) {}
     virtual void OnPowerStatusChange(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason) {}
     virtual void OnSensorRotationChange(float sensorRotation, ScreenId screenId) {}
@@ -293,6 +295,11 @@ public:
     void Connect();
     void Disconnect();
     void PropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason);
+    void NotifyClientPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason);
+    void NotifyFoldPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
+        FoldDisplayMode displayMode);
+    void UpdateSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents changeEvent);
+    SuperFoldStatusChangeEvents GetSuperFoldStatusChangeEvent();
     void PowerStatusChange(DisplayPowerEvent event, EventStatus status, PowerStateChangeReason reason);
     // notify scb
     void SensorRotationChange(Rotation sensorRotation);
