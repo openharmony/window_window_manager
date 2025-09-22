@@ -60,6 +60,9 @@ public:
         ani_long timeout, ani_ref callback);
     static void UnregisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
         ani_ref callback);
+    static void ShowWindow(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void DestroyWindow(ani_env* env, ani_object obj, ani_long nativeObj);
+    static ani_boolean IsWindowShowing(ani_env* env, ani_object obj, ani_long nativeObj);
     static void Opacity(ani_env* env, ani_object obj, ani_long nativeObj, ani_double opacity);
     static void Scale(ani_env* env, ani_object obj, ani_long nativeObj, ani_object scaleOptions);
     static void Translate(ani_env* env, ani_object obj, ani_long nativeObj, ani_object translateOptions);
@@ -107,6 +110,9 @@ private:
     ani_object OnGetWindowAvoidArea(ani_env* env, ani_int type);
     void OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback, ani_long timeout);
     void OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
+    void OnShowWindow(ani_env* env);
+    void OnDestroyWindow(ani_env* env);
+    ani_boolean OnIsWindowShowing(ani_env* env);
     void OnOpacity(ani_env* env, ani_double opacity);
     void OnScale(ani_env* env, ani_object scaleOptions);
     void OnTranslate(ani_env* env, ani_object translateOptions);

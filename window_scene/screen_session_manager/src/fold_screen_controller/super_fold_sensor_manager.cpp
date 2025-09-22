@@ -63,19 +63,8 @@ static void SensorHallDataCallback(SensorEvent *event)
 
 void SuperFoldSensorManager::RegisterPostureCallback()
 {
-    curInterval_ = POSTURE_INTERVAL;
-    postureUser.callback = SensorPostureDataCallback;
-    int32_t subscribeRet = SubscribeSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
-    int32_t setBatchRet = SetBatch(SENSOR_TYPE_ID_POSTURE, &postureUser, POSTURE_INTERVAL, POSTURE_INTERVAL);
-    int32_t activateRet = ActivateSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
-    TLOGI(WmsLogTag::DMS,
-        "subscribeRet: %{public}d, setBatchRet: %{public}d, activateRet: %{public}d",
-        subscribeRet, setBatchRet, activateRet);
-    if (subscribeRet != SENSOR_SUCCESS || setBatchRet != SENSOR_SUCCESS || activateRet != SENSOR_SUCCESS) {
-        TLOGI(WmsLogTag::DMS, "RegisterPostureCallback failed.");
-    } else {
-        TLOGI(WmsLogTag::DMS, "RegisterPostureCallback success.");
-    }
+    OHOS::Rosen::FoldScreenSensorManager::GetInstance().SubscribeSensorCallback(
+        SENSOR_TYPE_ID_POSTURE, POSTURE_INTERVAL, SensorPostureDataCallback);
 }
 
 void SuperFoldSensorManager::UnregisterPostureCallback()
@@ -91,16 +80,8 @@ void SuperFoldSensorManager::UnregisterPostureCallback()
 
 void SuperFoldSensorManager::RegisterHallCallback()
 {
-    hallUser.callback = SensorHallDataCallback;
-    int32_t subscribeRet = SubscribeSensor(SENSOR_TYPE_ID_HALL, &hallUser);
-    TLOGI(WmsLogTag::DMS, "subscribeRet: %{public}d", subscribeRet);
-    int32_t setBatchRet = SetBatch(SENSOR_TYPE_ID_HALL, &hallUser, POSTURE_INTERVAL, POSTURE_INTERVAL);
-    TLOGI(WmsLogTag::DMS, "setBatchRet: %{public}d", setBatchRet);
-    int32_t activateRet = ActivateSensor(SENSOR_TYPE_ID_HALL, &hallUser);
-    TLOGI(WmsLogTag::DMS, "activateRet: %{public}d", activateRet);
-    if (subscribeRet != SENSOR_SUCCESS || setBatchRet != SENSOR_SUCCESS || activateRet != SENSOR_SUCCESS) {
-        TLOGI(WmsLogTag::DMS, "RegisterHallCallback failed.");
-    }
+    OHOS::Rosen::FoldScreenSensorManager::GetInstance().SubscribeSensorCallback(
+        SENSOR_TYPE_ID_HALL, POSTURE_INTERVAL, SensorHallDataCallback);
 }
 
 void SuperFoldSensorManager::UnregisterHallCallback()

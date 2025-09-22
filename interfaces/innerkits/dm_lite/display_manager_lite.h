@@ -303,7 +303,7 @@ public:
      *
      * @return All display IDs.
      */
-    std::vector<DisplayId> GetAllDisplayIds();
+    std::vector<DisplayId> GetAllDisplayIds(int32_t userId = CONCURRENT_USER_ID_DEFAULT);
 
     /**
      * @brief Get virtual screen flag.
