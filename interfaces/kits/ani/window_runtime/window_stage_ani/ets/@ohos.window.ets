@@ -321,6 +321,108 @@ namespace window {
     bottomRect: Rect;
   }
 
+  /**
+   * System bar tint of region
+   *
+   * @interface SystemBarRegionTint
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
+   * @systemapi Hide this for inner system use.
+   * @since 8
+   */
+  export interface SystemBarRegionTint {
+    /**
+     * System bar type
+     *
+     * @type { WindowType }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 8
+     */
+    type: number;
+
+    /**
+     * The visibility of system bar
+     *
+     * @type { ?boolean }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 8
+     */
+    isEnable: boolean;
+
+    /**
+     * The region of system bar
+     *
+     * @type { ?Rect }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 8
+     */
+    region: Rect;
+
+    /**
+     * The background color of the system bar.
+     *
+     * @type { ?string }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 8
+     */
+    backgroundColor: string;
+
+    /**
+     * The content color of the system bar.
+     *
+     * @type { ?string }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 8
+     */
+    contentColor: string;
+  }
+
+  /**
+   * System bar tint state for systemui
+   *
+   * @interface SystemBarTintState
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
+   * @systemapi Hide this for inner system use.
+   * @since 8
+   */
+  export interface SystemBarTintState {
+    /**
+     * Id of display
+     *
+     * @type { long }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 8
+     */
+    displayId: long;
+    /**
+     * Region tint of systembar
+     *
+     * @type { Array<SystemBarRegionTint> }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 8
+     */
+    regionTint: Array<SystemBarRegionTint>;
+  }
+
+  export class SystemBarTintStateInternal implements SystemBarTintState {
+    displayId: long;
+    regionTint: Array<SystemBarRegionTint>;
+  }
+
+  export class SystemBarRegionTintInternal implements SystemBarRegionTint {
+    type: number;
+    isEnable: boolean;
+    region: Rect;
+    backgroundColor: string;
+    contentColor: string;
+  }
+
   export enum RectChangeReason {
     UNDEFINED = 0,
     MAXIMIZE = 1,
@@ -1710,6 +1812,8 @@ export class WindowInternal implements Window {
     private native setWindowLayoutFullScreen(nativeObj: long, isLayoutFullScreen: boolean): int;
     private native setWindowSystemBarProperties(nativeObj: long, systemBarProperties: SystemBarProperties): int;
     private native setSpecificSystemBarEnabled(nativeObj: long, name: String, enable: boolean, enableAnimation: boolean): int;
+    private native snapshot(nativeObj: long): image.PixelMap;
+    private native hideNonSystemFloatingWindows(nativeObj: long, shouldHide: boolean): void;
     private native opacity(nativeObj: long, opacity: double): void;
     private native scale(nativeObj: long, scaleOptions: ScaleOptions): void;
     private native translate(nativeObj: long, translateOptions: TranslateOptions): void;
@@ -1946,6 +2050,50 @@ export class WindowInternal implements Window {
                 reject(err as BusinessError);
             });
         });
+    }
+
+    public snapshot(): Promise<image.PixelMap> {
+      return new Promise<image.PixelMap>((resolve: (value: image.PixelMap) => void, reject: (error: BusinessError) => void) => {
+        taskpool.execute(() => {
+          return this.snapshot(this.nativeObj);
+        }).then((ret: NullishType) => {
+          resolve(ret as image.PixelMap);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public snapshot(callback: AsyncCallback<image.PixelMap | undefined>): void {
+      taskpool.execute(() => {
+        return this.snapshot(this.nativeObj);
+      }).then((ret: NullishType) => {
+        callback(new BusinessError(), ret as image.PixelMap);
+      }).catch((err: NullishType) => {
+        callback(err as BusinessError, undefined);
+      });
+    }
+
+    public hideNonSystemFloatingWindows(shouldHide: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute(() => {
+          this.hideNonSystemFloatingWindows(this.nativeObj, shouldHide);
+        }).then(() => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public hideNonSystemFloatingWindows(shouldHide: boolean, callback: AsyncCallback<void>): void {
+      taskpool.execute((): void => {
+        this.hideNonSystemFloatingWindows(this.nativeObj, shouldHide);
+      }).then(() => {
+        callback(new BusinessError(), undefined);
+      }).catch((err: NullishType) => {
+        callback(err as BusinessError, undefined);
+      });
     }
 
     public opacity(opacity: double): void {
@@ -2321,6 +2469,10 @@ export interface Window {
     setWindowSystemBarProperties(systemBarProperties: SystemBarProperties): Promise<void>;
     setWindowSystemBarProperties(systemBarProperties: SystemBarProperties, callback: AsyncCallback<void>): void;
     setSpecificSystemBarEnabled(name: String, enable: boolean, enableAnimation?: boolean): Promise<void>;
+    snapshot(): Promise<image.PixelMap>;
+    snapshot(callback: AsyncCallback<image.PixelMap | undefined>): void;
+    hideNonSystemFloatingWindows(shouldHide: boolean): Promise<void>;
+    hideNonSystemFloatingWindows(shouldHide: boolean, callback: AsyncCallback<void>): void;
     setWindowColorSpace(colorSpace: ColorSpace): Promise<void>;
     setWindowColorSpace(colorSpace: ColorSpace, callback: AsyncCallback<void>): void;
     setPreferredOrientation(orientation: Orientation): Promise<void>;
@@ -2374,6 +2526,8 @@ export function setNativeObj(nativeObject: long):void {
 native function getLastWindowSync(nativeObj: long, ctx: BaseContext): Window;
 native function minimizeAllSync(nativeObj: long, id: long): void;
 native function findWindowSync(nativeObj: long, name: string): Window;
+native function onSync(nativeObj: long, type: string, callback: object): void;
+native function offSync(nativeObj: long, type: string, callback?: object): void;
 native function createWindowSync(nativeObj: long, config: Configuration): Window;
 native function shiftAppWindowFocusSync(nativeObj: long, sourceWindowId: int, targetWindowId: int): void;
 
@@ -2512,12 +2666,50 @@ export function getMainWindowSnapshot(windowId: Array<number>, config: WindowSna
   });
 }
 
-function runWindowStageLifecycleEventCallBack(cb: object, cbArg: int): void {
+export function on<T>(type: string, callback: Callback<T>): void {
+  onSync(nativeObj, type, callback);
+}
+
+export function off<T>(type: string, callback?: Callback<T>): void {
+  offSync(nativeObj, type, callback);
+}
+
+function runWindowListenerVoidArgCallback(cb: object): void {
+  const func = cb as () => void;
+  func();
+}
+
+function runWindowListenerBooleanArgCallback(cb: object, cbArg: boolean): void {
+  const func = cb as (cbArg: boolean) => void;
+  func(cbArg);
+}
+
+function runSystemDensityChangeCallback(cb: object, density: double): void {
+  const func = cb as (density: double) => void;
+  func(density as double);
+}
+
+function runDisplayIdChangeCallback(cb: object, displayId: long): void {
+  const func = cb as (displayId: long) => void;
+  func(displayId as long);
+}
+
+function runSystemBarTintChangeCallback(cb: object, tint: object): void {
+  const func = cb as (tint: SystemBarTintState) => void;
+  func(tint as SystemBarTintState);
+}
+
+function runAvoidAreaChangeCallback(cb: object, area: object, type: int): void {
+  const func = cb as (data: AvoidAreaOptions) => void;
+  func({type: type as AvoidAreaType, area: area as AvoidArea});
+}
+
+function runWindowStageLifecycleEventCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: WindowStageLifeCycleEventType) => void;
     func(cbArg as WindowStageLifeCycleEventType);
 }
 
-function runWindowEventCallBack(cb: object, cbArg: int): void {
+function runWindowEventCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: WindowEventType) => void;
     func(cbArg as WindowEventType);
 }
@@ -2532,22 +2724,22 @@ function runWindowRectChangeCallback(cb: object, rect: object, reason: int): voi
     func({rect: rect as Rect, reason: reason as RectChangeReason});
 }
 
-function runKeyboardHeightChangeCallBack(cb: object, cbArg: int): void {
+function runKeyboardHeightChangeCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: int) => void;
     func(cbArg as int);
 }
 
-function runKeyboardDidShowCallBack(cb: object, cbArg: object): void {
+function runKeyboardDidShowCallback(cb: object, cbArg: object): void {
     const func = cb as (cbArg: KeyboardInfo) => void;
     func(cbArg as KeyboardInfo);
 }
 
-function runKeyboardDidHideCallBack(cb: object, cbArg: object): void {
+function runKeyboardDidHideCallback(cb: object, cbArg: object): void {
     const func = cb as (cbArg: KeyboardInfo) => void;
     func(cbArg as KeyboardInfo);
 }
 
-function runWindowStatusCallBack(cb: object, cbArg: int): void {
+function runWindowStatusCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: WindowStatusType) => void;
     func(cbArg as WindowStatusType);
 }
