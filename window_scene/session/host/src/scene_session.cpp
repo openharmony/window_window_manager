@@ -2553,12 +2553,6 @@ void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 void SceneSession::PatchAINavigationBarArea(AvoidArea& avoidArea)
 {
     Rect areaEmpty = { 0, 0, 0, 0 };
-    CalculateAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR, areaEmpty, avoidArea);
-}
-
-void SceneSession::PatchAINavigationBarArea(AvoidArea& avoidArea)
-{
-    Rect areaEmpty = { 0, 0, 0, 0 };
     if (!avoidArea.leftRect_.IsUninitializedRect()) {
         avoidArea.bottomRect_ = avoidArea.leftRect_;
         avoidArea.leftRect_ = areaEmpty;
