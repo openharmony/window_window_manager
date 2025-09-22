@@ -278,7 +278,7 @@ bool WindowManagerAgentStub::ReadWindowInfoList(MessageParcel& data,
     }
     size_t windowInfoListSize = static_cast<size_t>(windowInfoListLength);
 
-    if(windowInfoListSize > MAX_VECTOR_SIZE) {
+    if (windowInfoListSize > MAX_VECTOR_SIZE) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowInfoListSize is too large");
         return false;
     }
