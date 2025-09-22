@@ -30,6 +30,21 @@
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+std::string GetHexColor(uint32_t color)
+{
+    std::stringstream ioss;
+    std::string temp;
+    ioss << std::setiosflags(std::ios::uppercase) << std::hex << color;
+    ioss >> temp;
+    int count = RGBA_LENGTH - static_cast<int>(temp.length());
+    std::string tmpColor(count, '0');
+    tmpColor += temp;
+    std::string finalColor("#");
+    finalColor += tmpColor;
+    return finalColor;
+}
+}
 ani_status AniWindowUtils::GetStdString(ani_env *env, ani_string ani_str, std::string &result)
 {
     ani_size strSize;
@@ -378,6 +393,86 @@ ani_object AniWindowUtils::CreateAniAvoidArea(ani_env* env, const AvoidArea& avo
     return aniAvoidArea;
 }
 
+ani_object AniWindowUtils::CreateAniSystemBarTintState(ani_env* env, DisplayId displayId,
+    const SystemBarRegionTints& tints)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    ani_class aniClass;
+    if (env->FindClass("L@ohos/window/window/SystemBarTintStateInternal;", &aniClass) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_method aniCtor;
+    if (env->Class_FindMethod(aniClass, "<ctor>", nullptr, &aniCtor) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object state;
+    if (env->Object_New(aniClass, aniCtor, &state) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    CallAniMethodVoid(env, state, aniClass, "<set>displayId", nullptr, static_cast<ani_long>(displayId));
+    ani_array_ref regionTintArray = nullptr;
+    ani_class regionTintCls;
+    if (env->FindClass("L@ohos/window/window/SystemBarRegionTintInternal;", &regionTintCls) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    if (env->Array_New_Ref(regionTintCls, tints.size(), CreateAniUndefined(env), &regionTintArray) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] create array failed");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    for (size_t i = 0; i < tints.size(); i++) {
+        if (env->Array_Set_Ref(regionTintArray, i, CreateAniSystemBarRegionTint(env, tints[i])) != ANI_OK) {
+            TLOGE(WmsLogTag::DEFAULT, "[ANI] create region tint failed");
+            return AniWindowUtils::CreateAniUndefined(env);
+        }
+    }
+    CallAniMethodVoid(env, state, aniClass, "<set>regionTint", nullptr, regionTintArray);
+    return state;
+}
+
+ani_object AniWindowUtils::CreateAniSystemBarRegionTint(ani_env* env, const SystemBarRegionTint& tint)
+{
+    ani_class regionTintCls;
+    if (env->FindClass("L@ohos/window/window/SystemBarRegionTintInternal;", &regionTintCls) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_method regionTintCtor;
+    if (env->Class_FindMethod(regionTintCls, "<ctor>", nullptr, &regionTintCtor) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object regionTint;
+    if (env->Object_New(regionTintCls, regionTintCtor, &regionTint) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(tint.type_) != 0) {
+        CallAniMethodVoid(env, regionTint, regionTintCls, "<set>type", nullptr,
+            ani_long(NATIVE_JS_TO_WINDOW_TYPE_MAP.at(tint.type_)));
+    } else {
+        CallAniMethodVoid(env, regionTint, regionTintCls, "<set>type", nullptr, ani_long(tint.type_));
+    }
+    CallAniMethodVoid(env, regionTint, regionTintCls, "<set>isEnable", nullptr, ani_boolean(tint.prop_.enable_));
+    ani_string backgroundColor;
+    if (GetAniString(env, GetHexColor(tint.prop_.backgroundColor_), &backgroundColor) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] create string failed");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    CallAniMethodVoid(env, regionTint, regionTintCls, "<set>backgroundColor", nullptr, backgroundColor);
+    ani_string contentColor;
+    if (GetAniString(env, GetHexColor(tint.prop_.contentColor_), &contentColor) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] create string failed");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    CallAniMethodVoid(env, regionTint, regionTintCls, "<set>contentColor", nullptr, contentColor);
+    CallAniMethodVoid(env, regionTint, regionTintCls, "<set>region", nullptr, CreateAniRect(env, tint.region_));
+    return regionTint;
+}
+
 ani_object AniWindowUtils::CreateAniRotationChangeInfo(ani_env* env, const RotationChangeInfo& info)
 {
     TLOGI(WmsLogTag::WMS_ROTATION, "[ANI]");
@@ -498,7 +593,7 @@ ani_status AniWindowUtils::CallAniFunctionVoid(ani_env *env, const char* ns,
     }
     ani_function func{};
     if ((ret = env->Namespace_FindFunction(aniNamespace, fn, signature, &func)) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]canot find callBack %{public}d", ret);
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]canot find callback %{public}d", ret);
         return ret;
     }
     va_list args;
@@ -506,7 +601,7 @@ ani_status AniWindowUtils::CallAniFunctionVoid(ani_env *env, const char* ns,
     ret = env->Function_Call_Void_V(func, args);
     va_end(args);
     if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]canot run callBack %{public}d", ret);
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]canot run callback %{public}d", ret);
         return ret;
     }
     return ret;
