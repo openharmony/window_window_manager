@@ -196,7 +196,11 @@ void JsWindowListener::LifeCycleCallBack(LifeCycleEventType eventType)
             return;
         }
         napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(eng, &scope);
+        napi_status status = napi_open_handle_scope(eng, &scope);
+        if (status != napi_ok || scope == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "open handle scope failed.");
+            return;
+        }
         napi_value argv[] = {CreateJsValue(eng, static_cast<uint32_t>(eventType))};
         thisListener->CallJsMethod(LIFECYCLE_EVENT_CB.c_str(), argv, ArraySize(argv));
         napi_close_handle_scope(eng, scope);
@@ -220,7 +224,11 @@ void JsWindowListener::WindowStageLifecycleCallback(WindowStageLifeCycleEventTyp
             return;
         }
         napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(eng, &scope);
+        napi_status status = napi_open_handle_scope(eng, &scope);
+        if (status != napi_ok || scope == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "open handle scope failed.");
+            return;
+        }
         napi_value argv[] = {CreateJsValue(eng, static_cast<uint32_t>(eventType))};
         thisListener->CallJsMethod(WINDOW_STAGE_LIFECYCLE_EVENT_CB.c_str(), argv, ArraySize(argv));
         napi_close_handle_scope(eng, scope);
