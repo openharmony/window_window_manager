@@ -780,21 +780,15 @@ void MockSessionManagerService::GetProcessSurfaceNodeIdByPersistentId(const int3
     }
 }
 
-void MockSessionManagerService::AddSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds)
+void MockSessionManagerService::AddSkipSelfWhenShowOnVirtualScreenList(
+    const std::vector<int32_t>& persistentIds, int32_t userId)
 {
-    auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
-    if (sessionManagerService == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerService is nullptr");
+    sptr<IRemoteObject> sceneSessionManager = GetSceneSessionManagerByUserId(userId);
+    if (!sceneSessionManager) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Get scene session manager failed");
         return;
     }
-    if (!sceneSessionManager_) {
-        GetSceneSessionManager();
-        if (!sceneSessionManager_) {
-            TLOGW(WmsLogTag::WMS_ATTRIBUTE, "get scene session manager proxy failed, nullptr");
-            return;
-        }
-    }
-    sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(sceneSessionManager_);
+    sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(sceneSessionManager);
     if (sceneSessionManagerProxy == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerServiceProxy is nullptr");
         return;
@@ -805,21 +799,15 @@ void MockSessionManagerService::AddSkipSelfWhenShowOnVirtualScreenList(const std
     }
 }
 
-void MockSessionManagerService::RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds)
+void MockSessionManagerService::RemoveSkipSelfWhenShowOnVirtualScreenList(
+    const std::vector<int32_t>& persistentIds, int32_t userId)
 {
-    auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
-    if (sessionManagerService == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerService is nullptr");
+    sptr<IRemoteObject> sceneSessionManager = GetSceneSessionManagerByUserId(userId);
+    if (!sceneSessionManager) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Get scene session manager failed");
         return;
     }
-    if (!sceneSessionManager_) {
-        GetSceneSessionManager();
-        if (!sceneSessionManager_) {
-            TLOGW(WmsLogTag::WMS_ATTRIBUTE, "get scene session manager proxy failed, nullptr");
-            return;
-        }
-    }
-    sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(sceneSessionManager_);
+    sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(sceneSessionManager);
     if (sceneSessionManagerProxy == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerServiceProxy is nullptr");
         return;
