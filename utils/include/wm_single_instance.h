@@ -15,15 +15,20 @@
 
 #ifndef OHOS_WM_SINGLE_INSTANCE_H
 #define OHOS_WM_SINGLE_INSTANCE_H
+#include <mutex>
+
 namespace OHOS {
 namespace Rosen {
-#define WM_DECLARE_SINGLE_INSTANCE_BASE(className)          \
-public:                                                     \
-    static className& GetInstance();                        \
-    className(const className&) = delete;                   \
-    className& operator= (const className&) = delete;       \
-    className(className&&) = delete;                        \
-    className& operator= (className&&) = delete;            \
+#define WM_DECLARE_SINGLE_INSTANCE_BASE(className)   \
+public:                                              \
+    static className& GetInstance();                 \
+    static bool SetInstance(className* newInstance); \
+    className(const className&) = delete;            \
+    className& operator=(const className&) = delete; \
+    className(className&&) = delete;                 \
+    className& operator=(className&&) = delete;      \
+    static className* singleton_;                    \
+    static std::mutex singletonMutex_;               \
 
 #define WM_DECLARE_SINGLE_INSTANCE(className)  \
     WM_DECLARE_SINGLE_INSTANCE_BASE(className) \
@@ -31,13 +36,28 @@ protected:                                     \
     className() = default;                     \
     virtual ~className() = default;            \
 
-#define WM_IMPLEMENT_SINGLE_INSTANCE(className) \
-className& className::GetInstance()             \
-{                                               \
-    static className instance;                  \
-    return instance;                            \
-}                                               \
+#define WM_IMPLEMENT_SINGLE_INSTANCE(className)                \
+    className* className::singleton_ = nullptr;                \
+    std::mutex className::singletonMutex_;                     \
+    className& className::GetInstance()                        \
+    {                                                          \
+        if (!singleton_) {                                     \
+            std::lock_guard<std::mutex> lock(singletonMutex_); \
+            if (!singleton_) {                                 \
+                singleton_ = new className();                  \
+            }                                                  \
+        }                                                      \
+        return *singleton_;                                    \
+    }                                                          \
+    bool className::SetInstance(className* newInstance)        \
+    {                                                          \
+        if (singleton_) {                                      \
+            return false;                                      \
+        }                                                      \
+        singleton_ = newInstance;                              \
+        return true;                                           \
+    }
 
+} // namespace Rosen
 } // namespace OHOS
-}
 #endif // OHOS_SINGLE_INSTANCE_H
