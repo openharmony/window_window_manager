@@ -16,7 +16,7 @@
 #ifndef OHOS_ROSEN_SCREEN_SCENE_CONFIG_H
 #define OHOS_ROSEN_SCREEN_SCENE_CONFIG_H
 
-
+#include <string>
 #include <refbase.h>
 
 #include "cutout_info.h"
@@ -68,6 +68,7 @@ public:
     static bool IsSupportOffScreenRendering();
     static uint32_t GetOffScreenPPIThreshold();
     static bool IsSupportDuringCall();
+    static uint32_t GetNumberConfigValue(const std::string& name, const uint32_t& default_value);
     static bool IsConcurrentUser();
 
 private:
