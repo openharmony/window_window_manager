@@ -47,15 +47,28 @@ public:
     static void SetUIContent(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path);
     static void SetWindowKeepScreenOn(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isKeepScreenOn);
     static void SetWaterMarkFlag(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enable);
+    static void SetWindowFocusable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isFocusable);
     static void LoadContent(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_string path, ani_object storage);
     static void SetWindowSystemBarEnable(ani_env* env, ani_object obj, ani_long nativeObj, ani_object nameAry);
+    static void SetWindowTouchable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isTouchable);
     static ani_object GetUIContext(ani_env* env, ani_object obj, ani_long nativeObj);
     static ani_object GetWindowAvoidArea(ani_env* env, ani_object obj, ani_long nativeObj, ani_int type);
     static void RegisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
         ani_ref callback);
+    static void RegisterNoInteractionDetectedCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
+        ani_long timeout, ani_ref callback);
     static void UnregisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
         ani_ref callback);
+    static void ShowWindow(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void DestroyWindow(ani_env* env, ani_object obj, ani_long nativeObj);
+    static ani_boolean IsWindowShowing(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void Opacity(ani_env* env, ani_object obj, ani_long nativeObj, ani_double opacity);
+    static void Scale(ani_env* env, ani_object obj, ani_long nativeObj, ani_object scaleOptions);
+    static void Translate(ani_env* env, ani_object obj, ani_long nativeObj, ani_object translateOptions);
+    static void Rotate(ani_env* env, ani_object obj, ani_long nativeObj, ani_object rotateOptions);
+    static void SetShadow(ani_env* env, ani_object obj, ani_long nativeObj, ani_double radius,
+        ani_string color, ani_object offsetX, ani_object offsetY);
     static void Finalizer(ani_env* env, ani_long nativeObj);
     static void SetContentAspectRatio(ani_env* env, ani_object obj, ani_long nativeObj,
                                       ani_double ratio, ani_boolean isPersistent, ani_boolean needUpdateRect);
@@ -63,8 +76,8 @@ public:
     /*
      * Window Layout
      */
-    ani_object Resize(ani_env* env, ani_double width, ani_double height);
-    ani_object MoveWindowTo(ani_env* env, ani_double x, ani_double y);
+    void Resize(ani_env* env, ani_int width, ani_int height);
+    void MoveWindowTo(ani_env* env, ani_int x, ani_int y);
     ani_object GetGlobalRect(ani_env* env);
 
     ani_double GetWindowDecorHeight(ani_env* env);
@@ -87,12 +100,25 @@ private:
     void OnSetUIContent(ani_env* env, ani_string path);
     void OnSetWindowKeepScreenOn(ani_env* env, ani_boolean isKeepScreenOn);
     void OnSetWaterMarkFlag(ani_env* env, ani_boolean enable);
+    void OnSetWindowFocusable(ani_env* env, ani_boolean isFocusable);
     void OnLoadContent(ani_env* env, ani_string path, ani_object storage);
     void OnSetWindowSystemBarEnable(ani_env* env, ani_object nameAry);
+    void OnSetWindowTouchable(ani_env* env, ani_boolean isTouchable);
     ani_object OnGetUIContext(ani_env* env);
     ani_object OnGetWindowAvoidArea(ani_env* env, ani_int type);
-    void OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
+    void OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback, ani_long timeout);
     void OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
+    void OnShowWindow(ani_env* env);
+    void OnDestroyWindow(ani_env* env);
+    ani_boolean OnIsWindowShowing(ani_env* env);
+    void OnOpacity(ani_env* env, ani_double opacity);
+    void OnScale(ani_env* env, ani_object scaleOptions);
+    void OnTranslate(ani_env* env, ani_object translateOptions);
+    void OnRotate(ani_env* env, ani_object rotateOptions);
+    void OnSetShadow(ani_env* env, ani_double radius, ani_string color, ani_object offsetX, ani_object offsetY);
+    static bool ParseScaleOption(ani_env* env, ani_object scaleOptions, Transform& trans);
+    static bool ParseTranslateOption(ani_env* env, ani_object translateOptions, Transform& trans);
+    static bool ParseRotateOption(ani_env* env, ani_object rotateOptions, Transform& trans);
     bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
         std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags,
         const std::vector<std::string>& names, sptr<Window>& window);

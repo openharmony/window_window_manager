@@ -23,6 +23,8 @@
 #include "window_manager_hilog.h"
 #include "js_window.h"
 #include "wm_common.h"
+#include "pixel_map.h"
+#include "pixel_map_napi.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -714,6 +716,38 @@ napi_value CreateJsWindowLayoutInfoArrayObject(napi_env env, const std::vector<s
     return arrayValue;
 }
 
+napi_value CreateJsPixelMapArrayObject(napi_env env, const std::vector<std::shared_ptr<Media::PixelMap>>& pixelMaps)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, pixelMaps.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "arrayValue is null");
+        return nullptr;
+    }
+    for (size_t i = 0; i < pixelMaps.size(); i++) {
+        if (!pixelMaps[i]) {
+            TLOGW(WmsLogTag::WMS_LIFE, "pixelMaps index: %{public}d is null", static_cast<int32_t>(i));
+            continue;
+        }
+        napi_set_element(env, arrayValue, i, CreateJsPixelMapObject(env, pixelMaps[i]));
+    }
+    return arrayValue;
+}
+ 
+napi_value CreateJsMainWindowInfoArrayObject(napi_env env, const std::vector<sptr<MainWindowInfo>>& infos)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, infos.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "arrayValue is null");
+        return nullptr;
+    }
+    for (size_t i = 0; i < infos.size(); i++) {
+        napi_set_element(env, arrayValue, i, CreateJsMainWindowInfoObject(env, infos[i]));
+    }
+    return arrayValue;
+}
+
 napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
     napi_value arrayValue = nullptr;
@@ -792,6 +826,31 @@ napi_value CreateJsWindowLayoutInfoObject(napi_env env, const sptr<WindowLayoutI
     napi_value objValue = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
     napi_set_named_property(env, objValue, "windowRect", GetRectAndConvertToJsValue(env, info->rect));
+    return objValue;
+}
+
+napi_value CreateJsMainWindowInfoObject(napi_env env, const sptr<MainWindowInfo>& info)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+ 
+    napi_set_named_property(env, objValue, "displayId", CreateJsValue(env, static_cast<uint32_t>(info->displayId_)));
+    napi_set_named_property(env, objValue, "windowId", CreateJsValue(env, info->persistentId_));
+    napi_set_named_property(env, objValue, "showing", CreateJsValue(env, info->showing_));
+    napi_set_named_property(env, objValue, "label", CreateJsValue(env, info->label_));
+    return objValue;
+}
+ 
+napi_value CreateJsPixelMapObject(napi_env env, const std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    if (!pixelMap) {
+        TLOGE(WmsLogTag::WMS_LIFE, "pixelMap is null");
+        return nullptr;
+    }
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    
+    objValue = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
     return objValue;
 }
 
@@ -1290,6 +1349,27 @@ bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std
             return false;
         }
         windowMask.emplace_back(elementArray);
+    }
+    return true;
+}
+
+bool GetWindowIdFromJsValue(napi_env env, napi_value jsObject, std::vector<int32_t>& windowIds)
+{
+    if (jsObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to window id");
+        return false;
+    }
+    uint32_t size = 0;
+    napi_get_array_length(env, jsObject, &size);
+    for (uint32_t i = 0; i < size; i++) {
+        int32_t elementArray;
+        napi_value getElementValue = nullptr;
+        napi_get_element(env, jsObject, i, &getElementValue);
+        if (!ConvertFromJsValue(env, getElementValue, elementArray)) {
+            TLOGE(WmsLogTag::WMS_LIFE, "jsObject is null");
+            return false;
+        }
+        windowIds.emplace_back(elementArray);
     }
     return true;
 }
@@ -1928,6 +2008,110 @@ napi_value BuildJsPosition(napi_env env, const Position& position)
         return nullptr;
     }
     return jsPosition;
+}
+
+WsNapiAsyncTask::WsNapiAsyncTask(napi_deferred deferred, std::unique_ptr<WsNapiAsyncTask::ExecuteCallback>&& execute,
+    std::unique_ptr<WsNapiAsyncTask::CompleteCallback>&& complete)
+    : deferred_(deferred), execute_(std::move(execute)), complete_(std::move(complete))
+{}
+ 
+WsNapiAsyncTask::WsNapiAsyncTask(napi_ref callbackRef, std::unique_ptr<WsNapiAsyncTask::ExecuteCallback>&& execute,
+    std::unique_ptr<WsNapiAsyncTask::CompleteCallback>&& complete)
+    : callbackRef_(callbackRef), execute_(std::move(execute)), complete_(std::move(complete))
+{}
+ 
+WsNapiAsyncTask::~WsNapiAsyncTask()
+{
+    if (work_ && env_) {
+        napi_delete_async_work(env_, work_);
+        work_ = nullptr;
+    }
+}
+ 
+void WsNapiAsyncTask::Resolve(napi_env env, napi_value value)
+{
+    TLOGD(WmsLogTag::DEFAULT, "called");
+    napi_status status = napi_ok;
+    if (deferred_) {
+        status = napi_resolve_deferred(env, deferred_, value);
+        if (status != napi_ok) {
+            TLOGE(WmsLogTag::WMS_LIFE, "napi resolve deferred exception status:%{public}d", status);
+        }
+        deferred_ = nullptr;
+    }
+    if (callbackRef_) {
+        napi_value argv[] = {
+            CreateJsError(env, 0),
+            value,
+        };
+        napi_value func = nullptr;
+        status = napi_get_reference_value(env, callbackRef_, &func);
+        if (status != napi_ok) {
+            TLOGE(WmsLogTag::WMS_LIFE, "napi get reference value exception status:%{public}d", status);
+        }
+        status = napi_call_function(env, CreateJsUndefined(env), func, ArraySize(argv), argv, nullptr);
+        if (status != napi_ok) {
+            TLOGE(WmsLogTag::WMS_LIFE, "napi call function exception status:%{public}d", status);
+        }
+        status = napi_delete_reference(env, callbackRef_);
+        if (status != napi_ok) {
+            TLOGE(WmsLogTag::WMS_LIFE, "napi delete reference exception status:%{public}d", status);
+        }
+        callbackRef_ = nullptr;
+    }
+}
+
+void WsNapiAsyncTask::Reject(napi_env env, napi_value error)
+{
+    napi_status status = napi_ok;
+    if (deferred_) {
+        status = napi_reject_deferred(env, deferred_, error);
+        if (status != napi_ok) {
+            TLOGE(WmsLogTag::WMS_LIFE, "napi get reference value exception status:%{public}d", status);
+        }
+        deferred_ = nullptr;
+    }
+    if (callbackRef_) {
+        napi_value argv[] = {
+            error,
+            CreateJsUndefined(env),
+        };
+        napi_value func = nullptr;
+        status = napi_get_reference_value(env, callbackRef_, &func);
+        if (status != napi_ok) {
+            TLOGE(WmsLogTag::WMS_LIFE, "napi get reference value exception status:%{public}d", status);
+        }
+        status = napi_call_function(env, CreateJsUndefined(env), func, ArraySize(argv), argv, nullptr);
+        if (status != napi_ok) {
+            TLOGE(WmsLogTag::WMS_LIFE, "napi call function exception status:%{public}d", status);
+        }
+        status = napi_delete_reference(env, callbackRef_);
+        if (status != napi_ok) {
+            TLOGE(WmsLogTag::WMS_LIFE, "napi delete reference exception status:%{public}d", status);
+        }
+        callbackRef_ = nullptr;
+    }
+}
+
+std::unique_ptr<WsNapiAsyncTask> CreateEmptyWsNapiAsyncTask(napi_env env,
+    napi_value lastParam, napi_value* result)
+{
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env, lastParam, &type);
+    if (lastParam == nullptr || type != napi_function) {
+        napi_deferred nativeDeferred = nullptr;
+        napi_create_promise(env, &nativeDeferred, result);
+        return std::make_unique<WsNapiAsyncTask>(nativeDeferred,
+            std::unique_ptr<WsNapiAsyncTask::ExecuteCallback>(),
+            std::unique_ptr<WsNapiAsyncTask::CompleteCallback>());
+    } else {
+        napi_get_undefined(env, result);
+        napi_ref callbackRef = nullptr;
+        napi_create_reference(env, lastParam, 1, &callbackRef);
+        return std::make_unique<WsNapiAsyncTask>(callbackRef,
+            std::unique_ptr<WsNapiAsyncTask::ExecuteCallback>(),
+            std::unique_ptr<WsNapiAsyncTask::CompleteCallback>());
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

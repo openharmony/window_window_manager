@@ -24,6 +24,7 @@ config("display_common_config") {
     "../../../innerkits/wm",
     "../../../innerkits/dm",
     "../../../../wm/include",
+    "../../napi/display_runtime",
   ]
 }
 
@@ -60,6 +61,7 @@ ohos_shared_library("displayani_kit") {
 
   deps = [
     "../../../../dm:libdm",
+    "../../../../interfaces/kits/napi/display_runtime:display_kit",
     "../../../../utils:libwmutil",
     "../../../../utils:libwmutil_base",
   ]
@@ -72,7 +74,9 @@ ohos_shared_library("displayani_kit") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_single",
+    "napi:ace_napi",
     "runtime_core:ani",
+    "runtime_core:ani_helpers",
   ]
 
   innerapi_tags = [ "platformsdk" ]

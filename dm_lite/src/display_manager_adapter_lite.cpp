@@ -267,12 +267,12 @@ uint32_t DisplayManagerAdapterLite::GetScreenBrightness(uint64_t screenId)
     return displayManagerServiceProxy_->GetScreenBrightness(screenId);
 }
 
-std::vector<DisplayId> DisplayManagerAdapterLite::GetAllDisplayIds()
+std::vector<DisplayId> DisplayManagerAdapterLite::GetAllDisplayIds(int32_t userId)
 {
     TLOGD(WmsLogTag::DMS, "enter");
     INIT_PROXY_CHECK_RETURN(std::vector<DisplayId>());
 
-    return displayManagerServiceProxy_->GetAllDisplayIds();
+    return displayManagerServiceProxy_->GetAllDisplayIds(userId);
 }
 
 VirtualScreenFlag DisplayManagerAdapterLite::GetVirtualScreenFlag(ScreenId screenId)

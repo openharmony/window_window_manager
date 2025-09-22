@@ -77,7 +77,7 @@ public:
     bool CheckRectValid(const Media::Rect& rect, int32_t oriHeight, int32_t oriWidth) const;
     bool CheckSizeValid(const Media::Size& size, int32_t oriHeight, int32_t oriWidth) const;
     sptr<Display> GetDefaultDisplay();
-    sptr<Display> GetDefaultDisplaySync();
+    sptr<Display> GetDefaultDisplaySync(int32_t userId = CONCURRENT_USER_ID_DEFAULT);
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution();
     sptr<Display> GetDisplayById(DisplayId displayId);
     sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId);
@@ -130,6 +130,7 @@ public:
     DMError ResetAllFreezeStatus();
     DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid, std::vector<uint64_t>& windowIdList);
     sptr<Display> GetPrimaryDisplaySync();
+    DisplayId GetPrimaryDisplayId();
     void OnRemoteDied();
     sptr<CutoutInfo> GetCutoutInfoWithRotation(Rotation rotation);
     DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
@@ -640,7 +641,7 @@ sptr<Display> DisplayManager::Impl::GetDefaultDisplay()
     return displayMap_[displayId];
 }
 
-sptr<Display> DisplayManager::Impl::GetDefaultDisplaySync()
+sptr<Display> DisplayManager::Impl::GetDefaultDisplaySync(int32_t userId)
 {
     static std::chrono::steady_clock::time_point lastRequestTime = std::chrono::steady_clock::now();
     auto currentTime = std::chrono::steady_clock::now();
@@ -656,7 +657,7 @@ sptr<Display> DisplayManager::Impl::GetDefaultDisplaySync()
     uint32_t retryTimes = 0;
     sptr<DisplayInfo> displayInfo = nullptr;
     while (retryTimes < MAX_RETRY_NUM) {
-        displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDefaultDisplayInfo();
+        displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDefaultDisplayInfo(userId);
         if (displayInfo != nullptr) {
             break;
         }
@@ -1049,7 +1050,7 @@ void DisplayManager::ShowDisplayIdList(bool isShowLog)
     }
 }
 
-sptr<Display> DisplayManager::GetDefaultDisplaySync(bool isFromNapi)
+sptr<Display> DisplayManager::GetDefaultDisplaySync(bool isFromNapi, int32_t userId)
 {
     if (isFromNapi) {
         sptr<Display> display = nullptr;
@@ -1064,7 +1065,7 @@ sptr<Display> DisplayManager::GetDefaultDisplaySync(bool isFromNapi)
             TLOGI(WmsLogTag::DMS, "get displayId:%{public}" PRIu64" info nullptr.", displayId);
         }
     }
-    return pImpl_->GetDefaultDisplaySync();
+    return pImpl_->GetDefaultDisplaySync(userId);
 }
 
 bool DisplayManager::SetVirtualScreenAsDefault(ScreenId screenId)
@@ -1076,9 +1077,9 @@ bool DisplayManager::SetVirtualScreenAsDefault(ScreenId screenId)
     return pImpl_->SetVirtualScreenAsDefault(screenId);
 }
 
-std::vector<DisplayId> DisplayManager::GetAllDisplayIds()
+std::vector<DisplayId> DisplayManager::GetAllDisplayIds(int32_t userId)
 {
-    return SingletonContainer::Get<DisplayManagerAdapter>().GetAllDisplayIds();
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetAllDisplayIds(userId);
 }
 
 std::vector<DisplayPhysicalResolution> DisplayManager::Impl::GetAllDisplayPhysicalResolution()
@@ -1091,11 +1092,11 @@ std::vector<DisplayPhysicalResolution> DisplayManager::GetAllDisplayPhysicalReso
     return pImpl_->GetAllDisplayPhysicalResolution();
 }
 
-std::vector<sptr<Display>> DisplayManager::GetAllDisplays()
+std::vector<sptr<Display>> DisplayManager::GetAllDisplays(int32_t userId)
 {
     TLOGD(WmsLogTag::DMS, "start");
     std::vector<sptr<Display>> res;
-    auto displayIds = GetAllDisplayIds();
+    auto displayIds = GetAllDisplayIds(userId);
     for (auto displayId : displayIds) {
         const sptr<Display> display = GetDisplayById(displayId);
         if (display != nullptr) {
@@ -2514,6 +2515,16 @@ sptr<Display> DisplayManager::Impl::GetPrimaryDisplaySync()
 sptr<Display> DisplayManager::GetPrimaryDisplaySync()
 {
     return pImpl_->GetPrimaryDisplaySync();
+}
+
+DisplayId DisplayManager::Impl::GetPrimaryDisplayId()
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetPrimaryDisplayId();
+}
+
+DisplayId DisplayManager::GetPrimaryDisplayId()
+{
+    return pImpl_->GetPrimaryDisplayId();
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenCapture(const CaptureOption& captureOption,

@@ -1734,6 +1734,25 @@ WMError WindowManager::GetAllWindowLayoutInfo(DisplayId displayId, std::vector<s
     return ret;
 }
 
+WMError WindowManager::GetAllMainWindowInfo(std::vector<sptr<MainWindowInfo>>& infos) const
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetAllMainWindowInfo(infos);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "failed");
+    }
+    return ret;
+}
+ 
+WMError WindowManager::GetMainWindowSnapshot(const std::vector<int32_t>& windowIds,
+    const WindowSnapshotConfiguration& config, const sptr<IRemoteObject>& callback) const
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetMainWindowSnapshot(windowIds, config, callback);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "failed");
+    }
+    return ret;
+}
+
 WMError WindowManager::GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode& globalWinMode) const
 {
     return WindowAdapter::GetInstance(userId_)->GetGlobalWindowMode(displayId, globalWinMode);

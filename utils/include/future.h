@@ -19,6 +19,7 @@
 #include <condition_variable>
 #include "hilog/log.h"
 #include "window_manager_hilog.h"
+#include "dms_global_mutex.h"
 
 namespace OHOS::Rosen {
 template<class T>
@@ -28,7 +29,8 @@ public:
     T GetResult(long timeOut)
     {
         std::unique_lock <std::mutex> lock(mutex_);
-        if (!conditionVariable_.wait_for(lock, std::chrono::milliseconds(timeOut), [this] { return IsReady(); })) {
+        if (!DmUtils::safe_wait_for(conditionVariable_, lock,
+            std::chrono::milliseconds(timeOut), [this] { return IsReady(); })) {
             OHOS::HiviewDFX::HiLog::Error(LABEL, "wait for %{public}ld, timeout.", timeOut);
         }
         return FetchResult();

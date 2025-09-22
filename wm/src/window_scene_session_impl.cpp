@@ -484,6 +484,7 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
     } else {
         TLOGE(WmsLogTag::WMS_RECOVER, "want is nullptr!");
     }
+    property_->SetIsFullScreenInForceSplitMode(isFullScreenInForceSplit_.load());
     windowRecoverStateChangeFunc_(false, WindowRecoverState::WINDOW_START_RECONNECT);
     sptr<ISessionStage> iSessionStage(this);
     sptr<IWindowEventChannel> iWindowEventChannel = sptr<WindowEventChannel>::MakeSptr(iSessionStage);
@@ -1780,7 +1781,8 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
     RecordLifeCycleExceptionEvent(LifeCycleEvent::HIDE_EVENT, res);
     if (res == WMError::WM_OK) {
         // update sub window state if this is main window
-        UpdateSubWindowState(type, waitDetach);
+        GetAttachStateSyncResult(waitDetach, false);
+        UpdateSubWindowState(type);
         NotifyAfterDidBackground(reason);
         state_ = WindowState::STATE_HIDDEN;
         requestState_ = WindowState::STATE_HIDDEN;
@@ -1836,15 +1838,15 @@ WMError WindowSceneSessionImpl::NotifyRemoveStartingWindow()
     return res;
 }
 
-void WindowSceneSessionImpl::UpdateSubWindowState(const WindowType& type, bool waitDetach)
+void WindowSceneSessionImpl::UpdateSubWindowState(const WindowType& type)
 {
     UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_HIDDEN);
     if (WindowHelper::IsSubWindow(type)) {
         if (state_ == WindowState::STATE_SHOWN) {
-            NotifyAfterBackground(true, true, waitDetach);
+            NotifyAfterBackground(true, true);
         }
     } else {
-        NotifyAfterBackground(true, true, waitDetach);
+        NotifyAfterBackground(true, true);
     }
 }
 
@@ -2921,7 +2923,6 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
         TLOGI(WmsLogTag::WMS_IMMS, "system window not supported");
         return WMError::WM_OK;
     }
-
     if (IsPcOrPadFreeMultiWindowMode() && property_->IsAdaptToImmersive()) {
         SetLayoutFullScreenByApiVersion(status);
         // compatibleMode app may set statusBarColor before ignoreSafeArea
@@ -2932,14 +2933,12 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
         }
         return WMError::WM_OK;
     }
-
     bool preStatus = property_->IsLayoutFullScreen();
     property_->SetIsLayoutFullScreen(status);
     auto hostSession = GetHostSession();
     if (hostSession != nullptr) {
         hostSession->OnLayoutFullScreenChange(status);
     }
-
     if (WindowHelper::IsMainWindow(GetType()) && !windowSystemConfig_.IsPhoneWindow() &&
         !windowSystemConfig_.IsPadWindow()) {
         if (!WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),
@@ -2947,18 +2946,15 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
             TLOGE(WmsLogTag::WMS_IMMS, "fullscreen window mode not supported");
             return WMError::WM_ERROR_INVALID_WINDOW;
         }
-        CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-        auto event = SessionEvent::EVENT_MAXIMIZE;
-        if (isFullScreenWaterfallMode_.load()) {
-            event = SessionEvent::EVENT_MAXIMIZE_WATERFALL;
-        } else if (isWaterfallToMaximize_.load()) {
-            event = SessionEvent::EVENT_WATERFALL_TO_MAXIMIZE;
-            isWaterfallToMaximize_.store(false);
+        if (property_->IsFullScreenDisabled()) {
+            TLOGE(WmsLogTag::WMS_IMMS, "compatible mode disable fullscreen");
+            return WMError::WM_OK;
         }
+        CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+        auto event = GetSessionEvent();
         hostSession->OnSessionEvent(event);
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     }
-
     WMError ret = SetLayoutFullScreenByApiVersion(status);
     if (ret != WMError::WM_OK) {
         property_->SetIsLayoutFullScreen(preStatus);
@@ -2967,6 +2963,18 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
     }
     enableImmersiveMode_ = status;
     return ret;
+}
+
+SessionEvent WindowSceneSessionImpl::GetSessionEvent()
+{
+    auto event = SessionEvent::EVENT_MAXIMIZE;
+    if (isFullScreenWaterfallMode_.load()) {
+        event = SessionEvent::EVENT_MAXIMIZE_WATERFALL;
+    } else if (isWaterfallToMaximize_.load()) {
+        event = SessionEvent::EVENT_WATERFALL_TO_MAXIMIZE;
+        isWaterfallToMaximize_.store(false);
+    }
+    return event;
 }
 
 WMError WindowSceneSessionImpl::SetTitleAndDockHoverShown(
@@ -3150,7 +3158,27 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
             }
         }
     }
+    SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    SystemBarProperty navigationIndicatorPorperty =
+        GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
+    MobileAppInPadLayoutFullScreenChange(statusProperty.enable_, navigationIndicatorPorperty.enable_);
     return WMError::WM_OK;
+}
+
+void WindowSceneSessionImpl::MobileAppInPadLayoutFullScreenChange(bool statusBarEnable, bool navigationEnable)
+{
+    TLOGI(WmsLogTag::WMS_COMPAT, "isMobileAppInPadLayoutFullScreen %{public}d",
+        property_->GetMobileAppInPadLayoutFullScreen());
+    if (property_->GetMobileAppInPadLayoutFullScreen() && GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        TLOGI(WmsLogTag::WMS_COMPAT, "statusProperty %{public}d, navigationIndicatorPorperty %{public}d",
+            statusBarEnable, navigationEnable);
+        if (!statusBarEnable && !navigationEnable) {
+            Maximize(MaximizePresentation::ENTER_IMMERSIVE);
+        }
+        if (statusBarEnable && navigationEnable) {
+            Maximize(MaximizePresentation::EXIT_IMMERSIVE);
+        }
+    }
 }
 
 WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
@@ -3249,6 +3277,10 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
             WindowMode::WINDOW_MODE_FULLSCREEN)) {
             TLOGE(WmsLogTag::WMS_IMMS, "fullscreen window not supported");
             return WMError::WM_ERROR_INVALID_WINDOW;
+        }
+        if (property_->IsFullScreenDisabled()) {
+            TLOGE(WmsLogTag::WMS_IMMS, "compatible mode disable fullscreen");
+            return WMError::WM_OK;
         }
         auto hostSession = GetHostSession();
         CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
@@ -3473,6 +3505,17 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
     if (property_->IsFullScreenDisabled()) {
         TLOGW(WmsLogTag::WMS_COMPAT, "diable fullScreen in compatibleMode window ,id:%{public}d", GetPersistentId());
         return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (property_->GetMobileAppInPadLayoutFullScreen()) {
+        SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+        SystemBarProperty navigationIndicatorPorperty =
+            GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
+        TLOGI(WmsLogTag::WMS_COMPAT, "statusProperty %{public}d, navigationIndicatorPorperty %{public}d",
+            statusProperty.enable_, navigationIndicatorPorperty.enable_);
+        if (!statusProperty.enable_ && !navigationIndicatorPorperty.enable_) {
+            Maximize(MaximizePresentation::ENTER_IMMERSIVE);
+            return WMError::WM_OK;
+        }
     }
     if (GetGlobalMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
         hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
@@ -5299,10 +5342,18 @@ WMError WindowSceneSessionImpl::SetKeyboardTouchHotAreas(const KeyboardTouchHotA
     if (GetType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         return WMError::WM_ERROR_INVALID_TYPE;
     }
+    std::vector<Rect> lastTouchHotAreas;
+    property_->GetTouchHotAreas(lastTouchHotAreas);
     KeyboardTouchHotAreas lastKeyboardTouchHotAreas = property_->GetKeyboardTouchHotAreas();
+    if (IsLandscape()) {
+        property_->SetTouchHotAreas(hotAreas.landscapeKeyboardHotAreas_);
+    } else {
+        property_->SetTouchHotAreas(hotAreas.portraitKeyboardHotAreas_);
+    }
     property_->SetKeyboardTouchHotAreas(hotAreas);
     WMError result = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_KEYBOARD_TOUCH_HOT_AREA);
     if (result != WMError::WM_OK) {
+        property_->SetTouchHotAreas(lastTouchHotAreas);
         property_->SetKeyboardTouchHotAreas(lastKeyboardTouchHotAreas);
         TLOGE(WmsLogTag::WMS_EVENT, "errCode:%{public}d", static_cast<int32_t>(result));
     }
@@ -5403,6 +5454,27 @@ WSError WindowSceneSessionImpl::NotifyLayoutFinishAfterWindowModeChange(WindowMo
     return WSError::WS_OK;
 }
 
+bool WindowSceneSessionImpl::ShouldSkipSupportWindowModeCheck(uint32_t windowModeSupportType, WindowMode mode)
+{
+    bool onlySupportSplitInFreeMultiWindow =
+        IsFreeMultiWindowMode() && mode == WindowMode::WINDOW_MODE_FLOATING &&
+        (WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_SPLIT_PRIMARY) ||
+         WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_SPLIT_SECONDARY)) &&
+        !WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FULLSCREEN);
+    if (onlySupportSplitInFreeMultiWindow) {
+        return true;
+    }
+    bool isMultiWindowMode = mode == WindowMode::WINDOW_MODE_FLOATING ||
+                             mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+                             mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
+    bool isAvailableDevice =
+        (windowSystemConfig_.IsPhoneWindow() || windowSystemConfig_.IsPadWindow()) && !IsFreeMultiWindowMode();
+    if (isAvailableDevice && isMultiWindowMode) {
+        return true;
+    }
+    return false;
+}
+
 WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
 {
     if (IsWindowSessionInvalid()) {
@@ -5410,7 +5482,9 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}u, windowModeSupportType: %{public}u, mode: %{public}u",
         GetWindowId(), property_->GetWindowModeSupportType(), static_cast<uint32_t>(mode));
-    if (!WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(), mode)) {
+    uint32_t windowModeSupportType = property_->GetWindowModeSupportType();
+    if (!WindowHelper::IsWindowModeSupported(windowModeSupportType, mode) &&
+        !ShouldSkipSupportWindowModeCheck(windowModeSupportType, mode)) {
         WLOGFE("%{public}u do not support mode: %{public}u",
             GetWindowId(), static_cast<uint32_t>(mode));
         return WSError::WS_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
@@ -5519,6 +5593,7 @@ WSError WindowSceneSessionImpl::UpdateTitleInTargetPos(bool isShow, int32_t heig
         TLOGE(WmsLogTag::WMS_DECOR, "uiContent is null");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
+    NotifyTitleChange(isShow, height);
     uiContent->UpdateTitleInTargetPos(isShow, height);
     return WSError::WS_OK;
 }
@@ -6257,7 +6332,7 @@ void WindowSceneSessionImpl::NotifyDisplayInfoChange(const sptr<DisplayInfo>& in
     SingletonContainer::Get<WindowManager>().NotifyDisplayInfoChange(token, displayId, density, orientation);
 }
 
-WMError WindowSceneSessionImpl::MoveAndResizeKeyboard(const KeyboardLayoutParams& params)
+bool WindowSceneSessionImpl::IsLandscape()
 {
     int32_t displayWidth = 0;
     int32_t displayHeight = 0;
@@ -6270,18 +6345,32 @@ WMError WindowSceneSessionImpl::MoveAndResizeKeyboard(const KeyboardLayoutParams
         if (defaultDisplayInfo != nullptr) {
             displayWidth = defaultDisplayInfo->GetWidth();
             displayHeight = defaultDisplayInfo->GetHeight();
-        } else {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "display is null, name: %{public}s, id: %{public}d",
-                property_->GetWindowName().c_str(), GetPersistentId());
-            return WMError::WM_ERROR_NULLPTR;
         }
     }
-    bool isLandscape = displayWidth > displayHeight ? true : false;
+    bool isLandscape = displayWidth > displayHeight;
+    if (displayWidth == displayHeight) {
+        sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+        if (displayInfo == nullptr) {
+            TLOGE(WmsLogTag::DMS, "displayInfo is nullptr");
+            return false;
+        }
+        DisplayOrientation orientation = displayInfo->GetDisplayOrientation();
+        if (orientation == DisplayOrientation::UNKNOWN) {
+            TLOGW(WmsLogTag::WMS_KEYBOARD, "Display orientation is UNKNOWN");
+        }
+        isLandscape = (orientation == DisplayOrientation::LANDSCAPE ||
+            orientation == DisplayOrientation::LANDSCAPE_INVERTED);
+    }
+    return isLandscape;
+}
+
+WMError WindowSceneSessionImpl::MoveAndResizeKeyboard(const KeyboardLayoutParams& params)
+{
+    bool isLandscape = IsLandscape();
     Rect newRect = isLandscape ? params.LandscapeKeyboardRect_ : params.PortraitKeyboardRect_;
     property_->SetRequestRect(newRect);
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, newRect: %{public}s, isLandscape: %{public}d, "
-        "displayWidth: %{public}d, displayHeight: %{public}d", GetPersistentId(), newRect.ToString().c_str(),
-        isLandscape, displayWidth, displayHeight);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, newRect: %{public}s, isLandscape: %{public}d",
+        GetPersistentId(), newRect.ToString().c_str(), isLandscape);
     return WMError::WM_OK;
 }
 

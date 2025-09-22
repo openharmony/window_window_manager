@@ -963,6 +963,25 @@ public:
     WMError GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode& globalWinMode) const;
 
     /**
+     * @brief Get main window info.
+     *
+     * @param infos Main Window infos.
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetAllMainWindowInfo(std::vector<sptr<MainWindowInfo>>& infos) const;
+
+    /**
+     * @brief Get main window snap shot.
+     *
+     * @param windowIds Window id which want to get.
+     * @param config Snapshot configuration.
+     * @param callback callback.
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetMainWindowSnapshot(const std::vector<int32_t>& windowIds, const WindowSnapshotConfiguration& config,
+        const sptr<IRemoteObject>& callback) const;
+
+    /**
      * @brief Get the name of the top page.
      *
      * @param windowId Window id which want to get.

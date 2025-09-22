@@ -253,12 +253,15 @@ void ScreenSessionManagerClient::OnPropertyChanged(ScreenId screenId,
 void ScreenSessionManagerClient::OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
     PowerStateChangeReason reason)
 {
-    std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
-    if (screenSessionMap_.empty()) {
-        TLOGE(WmsLogTag::DMS, "[UL_POWER]screenSessionMap_ is nullptr");
-        return;
+    sptr<ScreenSession> screenSession;
+    {
+        std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+        if (screenSessionMap_.empty()) {
+            TLOGE(WmsLogTag::DMS, "[UL_POWER]screenSessionMap_ is empty");
+            return;
+        }
+        screenSession = screenSessionMap_.begin()->second;
     }
-    auto screenSession = screenSessionMap_.begin()->second;
     if (!screenSession) {
         TLOGE(WmsLogTag::DMS, "[UL_POWER]screenSession is null");
         return;
@@ -573,6 +576,15 @@ void ScreenSessionManagerClient::NotifyScreenConnectCompletion(ScreenId screenId
     screenSessionManager_->NotifyScreenConnectCompletion(screenId);
 }
 
+void ScreenSessionManagerClient::NotifyAodOpCompletion(AodOP operation, int32_t result)
+{
+    if (!screenSessionManager_) {
+        TLOGE(WmsLogTag::DMS, "screenSessionManager is null");
+        return;
+    }
+    screenSessionManager_->NotifyAodOpCompletion(operation, result);
+}
+
 void ScreenSessionManagerClient::RecordEventFromScb(std::string description, bool needRecordEvent)
 {
     if (!screenSessionManager_) {
@@ -603,16 +615,6 @@ void ScreenSessionManagerClient::SwitchUserCallback(std::vector<int32_t> oldScbP
         if (screenSession == nullptr) {
             TLOGE(WmsLogTag::DMS, "screenSession is null");
             continue;
-        }
-        {
-            auto displayNode = screenSessionManager_->GetDisplayNode(screenId);
-            if (displayNode == nullptr) {
-                TLOGE(WmsLogTag::DMS, "display node is null");
-                continue;
-            }
-            RSAdapterUtil::SetRSUIContext(displayNode, screenSession->GetRSUIContext(), true);
-            displayNode->SetScbNodePid(oldScbPids, currentScbPid);
-            RSTransactionAdapter::FlushImplicitTransaction(displayNode);
         }
         ScreenProperty screenProperty = screenSession->GetScreenProperty();
         RRect bounds = screenProperty.GetBounds();

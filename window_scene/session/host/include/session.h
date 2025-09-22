@@ -206,6 +206,7 @@ public:
     void SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func);
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker);
     WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
+    std::string GetSessionLabel() const;
 
     /*
      * App Use Control
@@ -242,6 +243,12 @@ public:
     void NotifyExtensionDetachToDisplay() override;
 
     /*
+     * Window Immersive
+     */
+    void UpdateStatusBarVisible(bool isStatusBarVisible) { isStatusBarVisible_ = isStatusBarVisible; };
+    bool IsStatusBarVisible() const;
+
+    /*
      * Cross Display Move Drag
      */
     std::shared_ptr<RSSurfaceNode> GetSurfaceNodeForMoveDrag() const;
@@ -263,6 +270,7 @@ public:
     int32_t GetCurrentRotation() const;
     void SetSurfaceNode(const std::shared_ptr<RSSurfaceNode>& surfaceNode);
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
+    std::shared_ptr<RSSurfaceNode> GetSurfaceNode(bool isUpdateContextBeforeGet);
     std::optional<NodeId> GetSurfaceNodeId() const;
     void SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode);
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
@@ -383,6 +391,7 @@ public:
     // Just terminate, not clear session
     WSError Clear(bool needStartCaller = false, bool isForceClean = false);
     WSError SetSessionLabel(const std::string& label);
+    void UpdateSessionLabel(const std::string& label);
     void SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc& func);
     WSError SetSessionIcon(const std::shared_ptr<Media::PixelMap>& icon);
     void SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc& func);
@@ -430,6 +439,7 @@ public:
     WSError SetPcAppInpadCompatibleMode(bool enabled);
     WSError SetPcAppInpadSpecificSystemBarInvisible(bool isPcAppInpadSpecificSystemBarInvisible);
     WSError SetPcAppInpadOrientationLandscape(bool isPcAppInpadOrientationLandscape);
+    WSError SetMobileAppInPadLayoutFullScreen(bool isMobileAppInPadLayoutFullScreen);
     bool NeedNotify() const;
     void SetNeedNotify(bool needNotify);
     WSError SetTouchable(bool touchable);
@@ -738,7 +748,6 @@ public:
     bool IsPersistentImageFit() const;
     bool SupportSnapshotAllSessionStatus() const;
     void InitSnapshotCapacity();
-    SnapshotStatus GetWindowStatus() const;
     SnapshotStatus GetSessionSnapshotStatus(BackgroundReason reason = BackgroundReason::DEFAULT) const;
     uint32_t GetWindowSnapshotOrientation() const;
     uint32_t GetLastOrientation() const;
@@ -846,6 +855,7 @@ protected:
     std::atomic_bool isExitSplitOnBackground_ = false;
     bool isVisible_ = false;
     int32_t currentRotation_ = 0;
+    std::string label_;
 
     NotifyChangeSessionVisibilityWithStatusBarFunc changeSessionVisibilityWithStatusBarFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
@@ -1064,6 +1074,11 @@ private:
 
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
+
+    /*
+     * Window Immersive
+     */
+    bool isStatusBarVisible_ = true;
 
     /*
      * Multi Window

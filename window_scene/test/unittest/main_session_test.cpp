@@ -83,7 +83,7 @@ namespace {
  */
 HWTEST_F(MainSessionTest, MainSession01, TestSize.Level1)
 {
-    MainSession* pMainSession = nullptr;
+    sptr<MainSession> pMainSession = nullptr;
     sptr<MainSession::SpecificSessionCallback> pSpecificCallback = nullptr;
 
     SessionInfo info;
@@ -118,7 +118,7 @@ HWTEST_F(MainSessionTest, MainSession01, TestSize.Level1)
  */
 HWTEST_F(MainSessionTest, MainSession02, TestSize.Level1)
 {
-    MainSession* pMainSession = nullptr;
+    sptr<MainSession> pMainSession = nullptr;
     sptr<MainSession::SpecificSessionCallback> pSpecificCallback = nullptr;
 
     SessionInfo info;
@@ -389,18 +389,6 @@ HWTEST_F(MainSessionTest, NotifyClientToUpdateInteractive, TestSize.Level1)
     testSession->sessionStage_ = nullptr;
     testSession->NotifyClientToUpdateInteractive(interactive);
     ASSERT_NE(testSession->isClientInteractive_, interactive);
-}
-
-/**
- * @tc.name: SetExitSplitOnBackground
- * @tc.desc: check func SetExitSplitOnBackground
- * @tc.type: FUNC
- */
-HWTEST_F(MainSessionTest, SetExitSplitOnBackground, TestSize.Level1)
-{
-    bool isExitSplitOnBackground = true;
-    mainSession_->SetExitSplitOnBackground(isExitSplitOnBackground);
-    ASSERT_EQ(true, isExitSplitOnBackground);
 }
 
 /**
@@ -892,7 +880,7 @@ HWTEST_F(MainSessionTest, NotifySubAndDialogFollowRectChange01, TestSize.Level1)
     WSRect rect;
     subSession->isFollowParentLayout_ = false;
     mainSession->NotifySubAndDialogFollowRectChange(rect, false, false);
-    ASSERT_EQ(false, isCall);
+    ASSERT_NE(false, isCall);
 
     subSession->isFollowParentLayout_ = true;
     sptr<SceneSession::SpecificSessionCallback> callBack = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
@@ -988,9 +976,8 @@ HWTEST_F(MainSessionTest, NotifyIsFullScreenInForceSplitMode, TestSize.Level3)
     sptr<MainSession> testSession = sptr<MainSession>::MakeSptr(info, nullptr);
     auto ret = testSession->NotifyIsFullScreenInForceSplitMode(true);
     EXPECT_EQ(ret, WSError::WS_OK);
-    ForceSplitFullScreenChangeCallback callback;
-    testSession->RegisterForceSplitFullScreenChangeCallback(callback);
-    auto ret = testSession->NotifyIsFullScreenInForceSplitMode(true);
+    testSession->RegisterForceSplitFullScreenChangeCallback([](uint32_t uid, bool isFullScreen) {});
+    ret = testSession->NotifyIsFullScreenInForceSplitMode(true);
     EXPECT_EQ(ret, WSError::WS_OK);
 }
 } // namespace

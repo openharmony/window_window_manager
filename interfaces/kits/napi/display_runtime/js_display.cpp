@@ -873,11 +873,11 @@ napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display)
         objValue = jsDisplayObj->GetNapiValue();
     }
     if (objValue == nullptr) {
-        napi_create_object(env, &objValue);
-    }
-    if (objValue == nullptr) {
-        TLOGE(WmsLogTag::DMS, "Failed to get jsObject");
-        return NapiGetUndefined(env);
+        auto status = napi_create_object(env, &objValue);
+        if ((status != napi_ok) || (objValue == nullptr)) {
+            TLOGE(WmsLogTag::DMS, "failed to create js obj, error:%{public}d", status);
+            return NapiGetUndefined(env);
+        }
     }
     auto info = display->GetDisplayInfoWithCache();
     if (info == nullptr) {

@@ -22,6 +22,7 @@
 #include "res_sched_client.h"
 #include "res_type.h"
 #endif
+#include "dms_global_mutex.h"
 
 namespace OHOS::Rosen {
 WM_IMPLEMENT_SINGLE_INSTANCE(MultiScreenManager)
@@ -238,7 +239,7 @@ void MultiScreenManager::BlockScreenConnect(sptr<ScreenSession>& screenSession, 
         auto func = [this, screenId] {
             return uniqueScreenTimeoutMap_[screenId];
         };
-        if (!uniqueScreenCV_.wait_for(lock, std::chrono::milliseconds(SCREEN_CONNECT_TIMEOUT), func)) {
+        if (!DmUtils::safe_wait_for(uniqueScreenCV_, lock, std::chrono::milliseconds(SCREEN_CONNECT_TIMEOUT), func)) {
             TLOGE(WmsLogTag::DMS, "wait for screen connect timeout, screenId:%{public}" PRIu64,
                 screenId);
         }
@@ -369,6 +370,7 @@ void MultiScreenManager::MultiScreenModeChange(sptr<ScreenSession> firstSession,
     } else {
         TLOGW(WmsLogTag::DMS, "multi screen operate type change failed.");
     }
+    ScreenSessionManager::GetInstance().HandleResolutionEffectChange();
 }
 
 void MultiScreenManager::DoFirstMainChangeExtend(sptr<IScreenSessionManagerClient> scbClient,

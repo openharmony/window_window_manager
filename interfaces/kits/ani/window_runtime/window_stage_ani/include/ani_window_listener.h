@@ -37,6 +37,8 @@ const std::string LIFECYCLE_EVENT_CB = "lifeCycleEvent";
 const std::string WINDOW_STAGE_EVENT_CB = "windowStageEvent";
 const std::string WINDOW_EVENT_CB = "windowEvent";
 const std::string KEYBOARD_HEIGHT_CHANGE_CB = "keyboardHeightChange";
+const std::string KEYBOARD_DID_SHOW_CB = "keyboardDidShow";
+const std::string KEYBOARD_DID_HIDE_CB = "keyboardDidHide";
 const std::string TOUCH_OUTSIDE_CB = "touchOutside";
 const std::string SCREENSHOT_EVENT_CB = "screenshot";
 const std::string DIALOG_TARGET_TOUCH_CB = "dialogTargetTouch";
@@ -51,12 +53,15 @@ const std::string WINDOW_RECT_CHANGE_CB = "windowRectChange";
 const std::string SUB_WINDOW_CLOSE_CB = "subWindowClose";
 const std::string WINDOW_STAGE_CLOSE_CB = "windowStageClose";
 const std::string WINDOW_STAGE_LIFECYCLE_EVENT_CB = "windowStageLifecycleEvent";
+const std::string WINDOW_ROTATION_CHANGE_CB = "windowRotationChange";
 
 class AniWindowListener : public IWindowChangeListener,
                         public ISystemBarChangedListener,
                         public IAvoidAreaChangedListener,
                         public IWindowLifeCycle,
                         public IOccupiedAreaChangeListener,
+                        public IKeyboardDidShowListener,
+                        public IKeyboardDidHideListener,
                         public ITouchOutsideListener,
                         public IScreenshotListener,
                         public IDialogTargetTouchListener,
@@ -70,13 +75,14 @@ class AniWindowListener : public IWindowChangeListener,
                         public IWindowRectChangeListener,
                         public IMainWindowCloseListener,
                         public ISubWindowCloseListener,
-                        public IWindowStageLifeCycle {
+                        public IWindowStageLifeCycle,
+                        public IWindowRotationChangeListener {
 public:
-    AniWindowListener(ani_env* env, ani_ref callback, CaseType caseType)
-        : env_(env), aniCallBack_(callback), caseType_(caseType),
+    AniWindowListener(ani_env* env, ani_vm* vm, ani_ref callback, CaseType caseType)
+        : env_(env), vm_(vm), aniCallback_(callback), caseType_(caseType),
         weakRef_(wptr<AniWindowListener> (this)) {}
     ~AniWindowListener();
-    ani_ref GetAniCallBack() { return aniCallBack_; }
+    ani_ref GetAniCallBack() { return aniCallback_; }
     void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) override;
     void OnSizeChange(Rect rect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
@@ -91,22 +97,28 @@ public:
     void AfterPaused() override;
     void AfterDestroyed() override;
     void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
-    const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
+    void OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo) override;
+    void OnKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo) override;
     void OnTouchOutside() const override;
-    void OnScreenshot() override;
     void OnDialogTargetTouch() const override;
+    void OnWindowNoInteractionCallback() override;
+    void OnScreenshot() override;
     void OnDialogDeathRecipient() const override;
     void OnGestureNavigationEnabledUpdate(bool enable) override;
     void OnWaterMarkFlagUpdate(bool showWaterMark) override;
     void SetMainEventHandler();
+    void SetTimeout(int64_t timeout) override;
+    int64_t GetTimeout() const override;
     void OnWindowVisibilityChangedCallback(const bool isVisible) override;
 
     void OnWindowStatusChange(WindowStatus status) override;
-    void OnWindowNoInteractionCallback() override;
     void OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect) override;
     void OnRectChange(Rect rect, WindowSizeChangeReason reason) override;
     void OnSubWindowClose(bool& terminateCloseProcess) override;
     void OnMainWindowClose(bool& terminateCloseProcess) override;
+    void OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
+        RotationChangeResult& rotationChangeResult) override;
 
     void AfterLifecycleForeground() override;
     void AfterLifecycleBackground() override;
@@ -118,10 +130,12 @@ private:
 
     Rect currRect_ = {0, 0, 0, 0};
     WindowState state_ {WindowState::STATE_INITIAL};
+    int64_t noInteractionTimeout_ = 0;
     void LifeCycleCallBack(LifeCycleEventType eventType);
     void WindowStageLifecycleCallback(WindowStageLifeCycleEventType eventType);
     ani_env* env_ = nullptr;
-    ani_ref aniCallBack_;
+    ani_vm* vm_ = nullptr;
+    ani_ref aniCallback_;
     CaseType caseType_ = CaseType::CASE_WINDOW;
     wptr<AniWindowListener> weakRef_ = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;

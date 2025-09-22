@@ -36,7 +36,7 @@ WSSnapshotHelper* WSSnapshotHelper::GetInstance()
 uint32_t WSSnapshotHelper::GetScreenStatus()
 {
     std::lock_guard lock(statusMutex_);
-    return GetInstance()->windowStatus_.first;
+    return GetInstance()->screenStatus_;
 }
 
 // LCOV_EXCL_START
@@ -64,7 +64,7 @@ DisplayOrientation WSSnapshotHelper::GetDisplayOrientation(int32_t rotation)
 void WSSnapshotHelper::SetWindowScreenStatus(uint32_t screenStatus)
 {
     std::lock_guard lock(statusMutex_);
-    GetInstance()->windowStatus_.first = screenStatus;
+    GetInstance()->screenStatus_ = screenStatus;
 }
 
 void WSSnapshotHelper::SetWindowScreenStatus(FoldStatus foldStatus)
@@ -72,32 +72,10 @@ void WSSnapshotHelper::SetWindowScreenStatus(FoldStatus foldStatus)
     SetWindowScreenStatus(GetScreenStatus(foldStatus));
 }
 
-void WSSnapshotHelper::SetWindowOrientationStatus(uint32_t orientationStatus)
-{
-    std::lock_guard lock(statusMutex_);
-    GetInstance()->windowStatus_.second = orientationStatus;
-}
-
 void WSSnapshotHelper::SetWindowOrientationStatus(Rotation rotation)
 {
-    {
-        std::lock_guard lock(rotationMutex_);
-        GetInstance()->windowRotation_ = rotation;
-    }
-    SetWindowOrientationStatus(GetOrientation(rotation));
-}
-
-SnapshotStatus WSSnapshotHelper::GetWindowStatus() const
-{
-    SnapshotStatus key = defaultStatus;
-    {
-        std::lock_guard lock(statusMutex_);
-        key = GetInstance()->windowStatus_;
-    }
-    if (CORRECTION_ENABLE && key.first == 0) {
-        key.second ^= 1;
-    }
-    return key;
+    std::lock_guard lock(rotationMutex_);
+    GetInstance()->screenRotation_ = rotation;
 }
 
 uint32_t WSSnapshotHelper::GetWindowRotation() const
@@ -105,7 +83,7 @@ uint32_t WSSnapshotHelper::GetWindowRotation() const
     uint32_t rotation = 0;
     {
         std::lock_guard lock(rotationMutex_);
-        rotation = static_cast<uint32_t>(GetInstance()->windowRotation_);
+        rotation = static_cast<uint32_t>(GetInstance()->screenRotation_);
     }
     if (CORRECTION_ENABLE && GetInstance()->GetScreenStatus() == 0) {
         return (rotation + SECONDARY_EXPAND_OFFSET) % ROTATION_COUNT;

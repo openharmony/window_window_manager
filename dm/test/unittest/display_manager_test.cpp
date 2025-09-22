@@ -100,6 +100,22 @@ void MyLogCallback(const LogType type, const LogLevel level, const unsigned int 
 }
 
 /**
+ * @tc.name: GetPrimaryDisplayId
+ * @tc.desc: success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetPrimaryDisplayId, TestSize.Level1)
+{
+    auto ret = DisplayManager::GetInstance().GetPrimaryDisplayId();
+    auto display = DisplayManager::GetInstance().GetPrimaryDisplaySync();
+    if (!display) {
+        GTEST_SKIP();
+    } else {
+        EXPECT_EQ(ret, display->GetDisplayInfo()->GetDisplayId());
+    }
+}
+
+/**
  * @tc.name: Freeze01
  * @tc.desc: success
  * @tc.type: FUNC
@@ -339,7 +355,8 @@ HWTEST_F(DisplayManagerTest, CheckSizeValid, TestSize.Level1)
 HWTEST_F(DisplayManagerTest, ImplGetDefaultDisplay01, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo()).Times(1).WillOnce(Return(nullptr));
+    int32_t defaultUserId = CONCURRENT_USER_ID_DEFAULT;
+    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo(defaultUserId)).Times(1).WillOnce(Return(nullptr));
     sptr<Display> display = DisplayManager::GetInstance().pImpl_->GetDefaultDisplay();
     ASSERT_EQ(display, nullptr);
 }
@@ -371,7 +388,8 @@ HWTEST_F(DisplayManagerTest, GetDisplayByScreen, TestSize.Level1)
 HWTEST_F(DisplayManagerTest, ImplGetDefaultDisplaySync, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo()).Times(6).WillRepeatedly(Return(nullptr));
+    int32_t defaultUserId = CONCURRENT_USER_ID_DEFAULT;
+    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo(defaultUserId)).Times(6).WillRepeatedly(Return(nullptr));
     sptr<Display> display = DisplayManager::GetInstance().GetDefaultDisplaySync();
     ASSERT_EQ(display, nullptr);
 }
@@ -1977,7 +1995,8 @@ HWTEST_F(DisplayManagerTest, ConvertGlobalCoordinateToRelativeNullDisplay, TestS
     RelativePosition relativePosition;
     Position globalPosition = {10000, 20000};
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), GetAllDisplayIds()).Times(1).WillOnce(Return(std::vector<DisplayId>{-1}));
+    int32_t defaultUserId = CONCURRENT_USER_ID_DEFAULT;
+    EXPECT_CALL(m->Mock(), GetAllDisplayIds(defaultUserId)).Times(1).WillOnce(Return(std::vector<DisplayId>{-1}));
     DMError errorCode = DisplayManager::GetInstance().ConvertGlobalCoordinateToRelative(globalPosition,
         relativePosition);
     EXPECT_EQ(errorCode, DMError::DM_OK);
@@ -2001,7 +2020,9 @@ HWTEST_F(DisplayManagerTest, ConvertGlobalCoordinateToRelativeNotMainMode, TestS
     sptr<Display> display1 = new Display("displayMock", displayInfo);
 
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), GetAllDisplayIds()).Times(1).WillOnce(Return(std::vector<DisplayId>{displayId}));
+    int32_t defaultUserId = CONCURRENT_USER_ID_DEFAULT;
+    EXPECT_CALL(m->Mock(),
+        GetAllDisplayIds(defaultUserId)).Times(1).WillOnce(Return(std::vector<DisplayId>{displayId}));
     DisplayManager::GetInstance().pImpl_->displayMap_.insert(std::make_pair(displayId, display1));
     DisplayManager::GetInstance().pImpl_->needUpdateDisplayFromDMS_ = false;
     auto currentTime = std::chrono::steady_clock::now();

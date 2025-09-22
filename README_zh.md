@@ -97,11 +97,11 @@ foundation/window/window_manager/
 
 ## 接口说明
 
-- [Window](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis-arkui/js-apis-window.md)
-- [Display](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis-arkui/js-apis-display.md)
+- [Window](https://gitcode.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis-arkui/arkts-apis-window.md)
+- [Display](https://gitcode.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis-arkui/js-apis-display.md)
 
 ## 相关仓
-- [graphic_graphic_2d](https://gitee.com/openharmony/graphic_graphic_2d)
-- [arkui_ace_engine](https://gitee.com/openharmony/arkui_ace_engine)
-- [ability_ability_runtime](https://gitee.com/openharmony/ability_ability_runtime)
-- [multimodalinput_input](https://gitee.com/openharmony/multimodalinput_input)
+- [graphic_graphic_2d](https://gitcode.com/openharmony/graphic_graphic_2d)
+- [arkui_ace_engine](https://gitcode.com/openharmony/arkui_ace_engine)
+- [ability_ability_runtime](https://gitcode.com/openharmony/ability_ability_runtime)
+- [multimodalinput_input](https://gitcode.com/openharmony/multimodalinput_input)

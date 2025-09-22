@@ -105,7 +105,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForFold01, TestSize.Level1)
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<ScreenSessionManager> ssm = sptr<ScreenSessionManager>::MakeSptr();
-    ssm->SetRSScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
+    ssm->SetRSScreenPowerStatusExt(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
 
     // 下电
     ssm->lastPowerForAllStatus_.store(ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
@@ -131,7 +131,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForFold02, TestSize.Level1)
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<ScreenSessionManager> ssm = sptr<ScreenSessionManager>::MakeSptr();
-    ssm->SetRSScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
+    ssm->SetRSScreenPowerStatusExt(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
 
     ssm->lastPowerForAllStatus_.store(ScreenPowerStatus::POWER_STATUS_OFF);
     ssm->lastScreenId_.store(SCREEN_ID_FULL);
@@ -152,7 +152,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForFold03, TestSize.Level1)
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<ScreenSessionManager> ssm = sptr<ScreenSessionManager>::MakeSptr();
-    ssm->SetRSScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
+    ssm->SetRSScreenPowerStatusExt(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
 
     ssm->lastPowerForAllStatus_.store(ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
     ssm->lastScreenId_.store(SCREEN_ID_MAIN);
@@ -2158,6 +2158,156 @@ HWTEST_F(ScreenSessionManagerTest, HandleFoldDeviceScreenConnect, TestSize.Level
     ssm_->HandleFoldDeviceScreenConnect(screenId, session, true, screenEvent);
     EXPECT_TRUE(g_errLog.find("event: connect") != std::string::npos);
     g_errLog.clear();
+}
+
+/**
+ * @tc.name: FirstSCBConnect
+ * @tc.desc: FirstSCBConnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, FirstSCBConnect, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->SetFirstSCBConnect(true);
+    EXPECT_TRUE(ssm_->GetFirstSCBConnect());
+    ssm_->SetFirstSCBConnect(false);
+    EXPECT_FALSE(ssm_->GetFirstSCBConnect());
+}
+
+/**
+ * @tc.name: HandleResolutionEffectChange
+ * @tc.desc: HandleResolutionEffectChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleResolutionEffectChange, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+
+    sptr<ScreenSession> screenSession1 = new ScreenSession(51, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, screenSession1);
+    screenSession1->SetIsCurrentInUse(true);
+    screenSession1->SetScreenType(ScreenType::REAL);
+    screenSession1->isInternal_ = true;
+
+    sptr<ScreenSession> screenSession2 = new ScreenSession(52, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, screenSession2);
+    screenSession2->SetIsCurrentInUse(true);
+    screenSession2->SetScreenType(ScreenType::REAL);
+    screenSession2->isInternal_ = false;
+    auto ret = ssm_->HandleResolutionEffectChange();
+    EXPECT_FALSE(ret);
+
+    ssm_->screenSessionMap_[51] = screenSession1;
+    ssm_->screenSessionMap_[52] = screenSession2;
+    sptr<ScreenSession> externalSession = nullptr;
+    sptr<ScreenSession> internalSession = nullptr;
+    ssm_->GetInternalAndExternalSession(internalSession, externalSession);
+    EXPECT_EQ(internalSession, screenSession1);
+    EXPECT_EQ(externalSession, screenSession2);
+
+    screenSession2->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    ret = ssm_->HandleResolutionEffectChange();
+    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ssm_->curResolutionEffectEnable_);
+
+    ssm_->screenSessionMap_.erase(51);
+    ssm_->screenSessionMap_.erase(52);
+}
+
+/**
+ * @tc.name: SetResolutionEffect
+ * @tc.desc: SetResolutionEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetResolutionEffect, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+
+    sptr<ScreenSession> screenSession1 = new ScreenSession(51, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, screenSession1);
+    screenSession1->SetIsCurrentInUse(true);
+    screenSession1->SetScreenType(ScreenType::REAL);
+    screenSession1->isInternal_ = true;
+
+    sptr<ScreenSession> screenSession2 = new ScreenSession(52, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, screenSession2);
+    screenSession2->SetIsCurrentInUse(true);
+    screenSession2->SetScreenType(ScreenType::REAL);
+    screenSession2->isInternal_ = false;
+
+    ssm_->screenSessionMap_[51] = screenSession1;
+    ssm_->screenSessionMap_[52] = screenSession2;
+    sptr<ScreenSession> externalSession = nullptr;
+    sptr<ScreenSession> internalSession = nullptr;
+    ssm_->GetInternalAndExternalSession(internalSession, externalSession);
+    EXPECT_EQ(internalSession, screenSession1);
+    EXPECT_EQ(externalSession, screenSession2);
+
+    auto ret = ssm_->SetResolutionEffect(51, 3120, 2080);
+    EXPECT_FALSE(ret);
+
+    ret = ssm_->SetResolutionEffect(52, 3120, 2080);
+    EXPECT_FALSE(ret);
+
+    screenSession2->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    ret = ssm_->SetResolutionEffect(51, 3120, 2080);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(screenSession1->GetScreenProperty().GetBounds().rect_.width_, 3120);
+    EXPECT_EQ(screenSession1->GetScreenProperty().GetBounds().rect_.height_, 2080);
+    EXPECT_EQ(screenSession2->GetScreenProperty().GetMirrorWidth(), 3120);
+    EXPECT_EQ(screenSession2->GetScreenProperty().GetMirrorHeight(), 2080);
+
+    ssm_->screenSessionMap_.erase(51);
+    ssm_->screenSessionMap_.erase(52);
+}
+
+/**
+ * @tc.name: SetResolutionEffect
+ * @tc.desc: SetResolutionEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RecoveryResolutionEffect, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+
+    sptr<ScreenSession> screenSession1 = new ScreenSession(51, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, screenSession1);
+    screenSession1->SetIsCurrentInUse(true);
+    screenSession1->SetScreenType(ScreenType::REAL);
+    screenSession1->isInternal_ = true;
+
+    sptr<ScreenSession> screenSession2 = new ScreenSession(52, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, screenSession2);
+    screenSession2->SetIsCurrentInUse(true);
+    screenSession2->SetScreenType(ScreenType::REAL);
+    screenSession2->isInternal_ = false;
+
+    ssm_->screenSessionMap_[51] = screenSession1;
+    ssm_->screenSessionMap_[52] = screenSession2;
+    sptr<ScreenSession> externalSession = nullptr;
+    sptr<ScreenSession> internalSession = nullptr;
+    ssm_->GetInternalAndExternalSession(internalSession, externalSession);
+    ASSERT_EQ(internalSession, screenSession1);
+    ASSERT_EQ(externalSession, screenSession2);
+
+    auto ret = ssm_->RecoveryResolutionEffect();
+    EXPECT_FALSE(ret);
+
+    ssm_->curResolutionEffectEnable_ = true;
+    ret = ssm_->RecoveryResolutionEffect();
+    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ssm_->curResolutionEffectEnable_);
+    EXPECT_EQ(screenSession1->GetScreenProperty().GetBounds().rect_.width_,
+        screenSession1->GetScreenProperty().GetScreenRealWidth());
+    EXPECT_EQ(screenSession1->GetScreenProperty().GetBounds().rect_.height_,
+        screenSession1->GetScreenProperty().GetScreenRealHeight());
+    EXPECT_EQ(screenSession2->GetScreenProperty().GetMirrorWidth(),
+            screenSession1->GetScreenProperty().GetScreenRealWidth());
+    EXPECT_EQ(screenSession2->GetScreenProperty().GetMirrorHeight(),
+            screenSession1->GetScreenProperty().GetScreenRealHeight());
+    ssm_->curResolutionEffectEnable_ = false;
+    ssm_->screenSessionMap_.erase(51);
+    ssm_->screenSessionMap_.erase(52);
 }
 }
 }

@@ -233,6 +233,7 @@ private:
     static napi_value SetWindowEnableDragBySystem(napi_env env, napi_callback_info info);
     static napi_value SetIsPendingToBackgroundState(napi_env env, napi_callback_info info);
     static napi_value SetIsActivatedAfterScreenLocked(napi_env env, napi_callback_info info);
+    static napi_value SetLabel(napi_env env, napi_callback_info info);
     static napi_value SetFrameGravity(napi_env env, napi_callback_info info);
     static napi_value SetUseStartingWindowAboveLocked(napi_env env, napi_callback_info info);
     static napi_value SaveSnapshotSync(napi_env env, napi_callback_info info);
@@ -260,6 +261,7 @@ private:
     static napi_value SetPcAppInpadCompatibleMode(napi_env env, napi_callback_info info);
     static napi_value SetPcAppInpadSpecificSystemBarInvisible(napi_env env, napi_callback_info info);
     static napi_value SetPcAppInpadOrientationLandscape(napi_env env, napi_callback_info info);
+    static napi_value SetMobileAppInPadLayoutFullScreen(napi_env env, napi_callback_info info);
     /*
      * PC Window
      */
@@ -325,6 +327,7 @@ private:
     napi_value OnSetWindowEnableDragBySystem(napi_env env, napi_callback_info info);
     napi_value OnSetIsPendingToBackgroundState(napi_env env, napi_callback_info info);
     napi_value OnSetIsActivatedAfterScreenLocked(napi_env env, napi_callback_info info);
+    napi_value OnSetLabel(napi_env env, napi_callback_info info);
     napi_value OnSetFrameGravity(napi_env env, napi_callback_info info);
     napi_value OnSetUseStartingWindowAboveLocked(napi_env env, napi_callback_info info);
     napi_value OnSaveSnapshotSync(napi_env env, napi_callback_info info);
@@ -351,6 +354,7 @@ private:
     napi_value OnSetPcAppInpadCompatibleMode(napi_env env, napi_callback_info info);
     napi_value OnSetPcAppInpadSpecificSystemBarInvisible(napi_env env, napi_callback_info info);
     napi_value OnSetPcAppInpadOrientationLandscape(napi_env env, napi_callback_info info);
+    napi_value OnSetMobileAppInPadLayoutFullScreen(napi_env env, napi_callback_info info);
 
     /*
      * PC Window

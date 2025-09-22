@@ -69,6 +69,7 @@ ohos_static_library("libwm_static") {
     "src/input_transfer_station.cpp",
     "src/native_pip_window_listener.cpp",
     "src/pattern_detach_callback.cpp",
+    "src/get_snapshot_callback.cpp",
     "src/picture_in_picture_controller.cpp",
     "src/picture_in_picture_controller_base.cpp",
     "src/picture_in_picture_manager.cpp",
@@ -98,6 +99,8 @@ ohos_static_library("libwm_static") {
     "src/window_session_impl.cpp",
     "src/zidl/pattern_detach_callback_proxy.cpp",
     "src/zidl/pattern_detach_callback_stub.cpp",
+    "src/zidl/get_snapshot_callback_proxy.cpp",
+    "src/zidl/get_snapshot_callback_stub.cpp",
     "src/zidl/window_manager_agent_stub.cpp",
     "src/zidl/window_stub.cpp",
   ]
@@ -217,6 +220,7 @@ ohos_shared_library("libwm") {
     "src/input_transfer_station.cpp",
     "src/native_pip_window_listener.cpp",
     "src/pattern_detach_callback.cpp",
+    "src/get_snapshot_callback.cpp",
     "src/picture_in_picture_controller.cpp",
     "src/picture_in_picture_controller_base.cpp",
     "src/picture_in_picture_manager.cpp",
@@ -246,6 +250,8 @@ ohos_shared_library("libwm") {
     "src/window_session_impl.cpp",
     "src/zidl/pattern_detach_callback_proxy.cpp",
     "src/zidl/pattern_detach_callback_stub.cpp",
+    "src/zidl/get_snapshot_callback_proxy.cpp",
+    "src/zidl/get_snapshot_callback_stub.cpp",
     "src/zidl/window_manager_agent_stub.cpp",
     "src/zidl/window_stub.cpp",
   ]

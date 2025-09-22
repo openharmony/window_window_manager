@@ -327,6 +327,23 @@ WMError WindowAdapter::GetAllWindowLayoutInfo(DisplayId displayId, std::vector<s
     return wmsProxy->GetAllWindowLayoutInfo(displayId, infos);
 }
 
+WMError WindowAdapter::GetAllMainWindowInfo(std::vector<sptr<MainWindowInfo>>& infos)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetAllMainWindowInfo(infos);
+}
+ 
+WMError WindowAdapter::GetMainWindowSnapshot(const std::vector<int32_t>& windowIds,
+    const WindowSnapshotConfiguration& config, const sptr<IRemoteObject>& callback)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetMainWindowSnapshot(windowIds, config, callback);
+}
+
 WMError WindowAdapter::GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode& globalWinMode)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);

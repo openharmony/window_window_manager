@@ -77,19 +77,8 @@ void SecondaryFoldSensorManager::SetSensorFoldStateManager(sptr<SensorFoldStateM
 
 void SecondaryFoldSensorManager::RegisterPostureCallback()
 {
-    postureUser.callback = SecondarySensorPostureDataCallback;
-    int32_t subscribeRet = SubscribeSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
-    int32_t setBatchRet = SetBatch(SENSOR_TYPE_ID_POSTURE, &postureUser, POSTURE_INTERVAL, POSTURE_INTERVAL);
-    int32_t activateRet = ActivateSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
-    TLOGI(WmsLogTag::DMS,
-        "subscribeRet: %{public}d, setBatchRet: %{public}d, activateRet: %{public}d",
-        subscribeRet, setBatchRet, activateRet);
-    if (subscribeRet != SENSOR_SUCCESS || setBatchRet != SENSOR_SUCCESS || activateRet != SENSOR_SUCCESS) {
-        TLOGE(WmsLogTag::DMS, "failed.");
-    } else {
-        registerPosture_ = true;
-        TLOGI(WmsLogTag::DMS, "success.");
-    }
+    OHOS::Rosen::FoldScreenSensorManager::GetInstance().SubscribeSensorCallback(
+        SENSOR_TYPE_ID_POSTURE, POSTURE_INTERVAL, SecondarySensorPostureDataCallback);
 }
 
 void SecondaryFoldSensorManager::UnRegisterPostureCallback()
@@ -106,18 +95,8 @@ void SecondaryFoldSensorManager::UnRegisterPostureCallback()
 
 void SecondaryFoldSensorManager::RegisterHallCallback()
 {
-    hallUser.callback = SecondarySensorHallDataCallbackExt;
-    int32_t subscribeRet = SubscribeSensor(SENSOR_TYPE_ID_HALL_EXT, &hallUser);
-    TLOGI(WmsLogTag::DMS, "subscribeRet: %{public}d", subscribeRet);
-    int32_t setBatchRet = SetBatch(SENSOR_TYPE_ID_HALL_EXT, &hallUser, POSTURE_INTERVAL, POSTURE_INTERVAL);
-    TLOGI(WmsLogTag::DMS, "setBatchRet: %{public}d", setBatchRet);
-    int32_t activateRet = ActivateSensor(SENSOR_TYPE_ID_HALL_EXT, &hallUser);
-    TLOGI(WmsLogTag::DMS, "activateRet: %{public}d", activateRet);
-    if (subscribeRet != SENSOR_SUCCESS || setBatchRet != SENSOR_SUCCESS || activateRet != SENSOR_SUCCESS) {
-        TLOGE(WmsLogTag::DMS, "failed.");
-    } else {
-        TLOGI(WmsLogTag::DMS, "success.");
-    }
+    OHOS::Rosen::FoldScreenSensorManager::GetInstance().SubscribeSensorCallback(
+        SENSOR_TYPE_ID_HALL_EXT, POSTURE_INTERVAL, SecondarySensorHallDataCallbackExt);
 }
 
 void SecondaryFoldSensorManager::UnRegisterHallCallback()

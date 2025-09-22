@@ -2457,6 +2457,39 @@ HWTEST_F(WindowManagerTest, RegisterWMSConnectionChangedListener, TestSize.Level
     instance->pImpl_->wmsConnectionChangedListener_ = nullptr;
     ASSERT_EQ(WMError::WM_OK, instance->RegisterWMSConnectionChangedListener(listener));
 }
+
+/**
+ * @tc.name: GetAllMainWindowInfo
+ * @tc.desc: check GetAllMainWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetAllMainWindowInfo, TestSize.Level1)
+{
+    std::vector<sptr<MainWindowInfo>> infos;
+    WMError ret = WindowManager::GetInstance().GetAllMainWindowInfo(infos);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+}
+ 
+/**
+ * @tc.name: GetMainWindowSnapshot
+ * @tc.desc: check GetMainWindowSnapshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetMainWindowSnapshot, TestSize.Level1)
+{
+    std::vector<int32_t> windowIds;
+    windowIds.emplace_back(1);
+    windowIds.emplace_back(9);
+    WindowSnapshotConfiguration configs;
+    configs.useCache = true;
+    sptr<MockIRemoteObject> iRemoteObjMocker = sptr<MockIRemoteObject>::MakeSptr();
+    WMError ret = WindowManager::GetInstance().GetMainWindowSnapshot(windowIds, configs, iRemoteObjMocker);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+ 
+    iRemoteObjMocker->SetRequestResult(ERR_NONE);
+    ret = WindowManager::GetInstance().GetMainWindowSnapshot(windowIds, configs, iRemoteObjMocker);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+}
 }
 } // namespace
 } // namespace Rosen
