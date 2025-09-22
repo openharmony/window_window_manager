@@ -8911,9 +8911,6 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
             break;
         case SessionState::STATE_DISCONNECT:
             ClearWatermarkForSession(sceneSession);
-            if (SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
-                RemoveProcessSnapshotSkip(sceneSession->GetCallingPid());
-            }
             break;
         default:
             break;
@@ -16161,13 +16158,6 @@ WMError SceneSessionManager::SkipSnapshotForAppProcess(int32_t pid, bool skip)
     };
     taskScheduler_->PostTask(task, "SkipSnapshotForAppProcess");
     return WMError::WM_OK;
-}
-
-void SceneSessionManager::RemoveProcessSnapshotSkip(int32_t pid)
-{
-    if (snapshotSkipPidSet_.erase(pid) != 0) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "process died, delete pid from snapshot skip pid set. pid:%{public}d", pid);
-    }
 }
 
 void SceneSessionManager::SetSessionSnapshotSkipForAppProcess(const sptr<SceneSession>& sceneSession)
