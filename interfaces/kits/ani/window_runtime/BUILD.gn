@@ -63,6 +63,7 @@ ohos_shared_library("windowstageani_kit") {
     "../../../../utils:libwmutil",
     "../../../../utils:libwmutil_base",
     "../../../../wm:libwm",
+    "../../../../interfaces/kits/napi/window_runtime:window_native_kit",
   ]
 
   external_deps = [
@@ -84,6 +85,7 @@ ohos_shared_library("windowstageani_kit") {
     "ipc:ipc_single",
     "napi:ace_napi",
     "runtime_core:ani",
+    "runtime_core:ani_helpers",
   ]
 
   innerapi_tags = [ "platformsdk" ]
