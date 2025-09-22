@@ -98,6 +98,8 @@
 #ifdef IMF_ENABLE
 #include <input_method_controller.h>
 #endif // IMF_ENABLE
+#include "dms_global_mutex.h"
+
 
 namespace OHOS::Rosen {
 namespace {
@@ -5262,7 +5264,6 @@ void SceneSessionManager::HandleUserSwitching(bool isUserActive)
         }
         AbilityInfoManager::GetInstance().SetCurrentUserId(currentUserId_);
         // notify screenSessionManager to recover current user
-        ScreenSessionManagerClient::GetInstance().SwitchingCurrentUser();
         FlushWindowInfoToMMI(true);
         NotifyAllAccessibilityInfo();
         rsInterface_.AddVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
@@ -5277,6 +5278,7 @@ void SceneSessionManager::HandleUserSwitching(bool isUserActive)
 void SceneSessionManager::HandleUserSwitched(bool isUserActive)
 {
     if (isUserActive) {
+        ScreenSessionManagerClient::GetInstance().SwitchingCurrentUser();
         // start UI abilities only after the user has switched and become active
         ProcessUIAbilityOnUserSwitch(isUserActive);
     } else {
@@ -5419,13 +5421,14 @@ bool SceneSessionManager::CheckStartWindowColorFollowApp(const AppExecFwk::Abili
 }
 
 bool SceneSessionManager::GetStartupPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo,
-    StartingWindowInfo& startingWindowInfo, bool appColorModeChanged, Global::Resource::ColorMode colorMode)
+    StartingWindowInfo& startingWindowInfo, Global::Resource::ColorMode defaultColorMode,
+    bool appColorModeChanged, Global::Resource::ColorMode appColorMode)
 {
     const std::map<std::string, std::string> START_WINDOW_KEY_AND_DEFAULT_MAP = {
         {STARTWINDOW_TYPE, "REQUIRED_SHOW"},
     };
 
-    auto resourceMgr = GetResourceManager(abilityInfo, Global::Resource::ColorMode::COLOR_MODE_NOT_SET);
+    auto resourceMgr = GetResourceManager(abilityInfo, defaultColorMode);
     if (!resourceMgr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "resourceMgr is nullptr.");
         return false;
@@ -5435,7 +5438,7 @@ bool SceneSessionManager::GetStartupPageFromResource(const AppExecFwk::AbilityIn
         TLOGD(WmsLogTag::WMS_PATTERN, "hapPath empty:%{public}s", abilityInfo.bundleName.c_str());
     }
     if (CheckStartWindowColorFollowApp(abilityInfo, resourceMgr) && appColorModeChanged) {
-        resourceMgr = GetResourceManager(abilityInfo, colorMode);
+        resourceMgr = GetResourceManager(abilityInfo, appColorMode);
         if (!resourceMgr) {
             TLOGE(WmsLogTag::WMS_PATTERN, "resourceMgr is nullptr.");
             return false;
@@ -5520,7 +5523,8 @@ void SceneSessionManager::GetBundleStartingWindowInfos(bool isDark, const AppExe
                 .darkMode = isDark,
             };
             StartingWindowInfo startingWindowInfo;
-            if (!GetStartupPageFromResource(abilityInfo, startingWindowInfo)) {
+            auto colorMode = isDark ? Global::Resource::ColorMode::DARK : Global::Resource::ColorMode::LIGHT;
+            if (!GetStartupPageFromResource(abilityInfo, startingWindowInfo, colorMode)) {
                 continue;
             }
             outValues.emplace_back(std::make_pair(itemKey, startingWindowInfo));
@@ -5667,7 +5671,8 @@ void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, Startin
         return;
     }
     auto appColorMode = isAppDark ? Global::Resource::ColorMode::DARK : Global::Resource::ColorMode::LIGHT;
-    if (GetStartupPageFromResource(abilityInfo, startingWindowInfo, isAppDark != isSystemDark, appColorMode)) {
+    if (GetStartupPageFromResource(abilityInfo, startingWindowInfo, Global::Resource::ColorMode::COLOR_MODE_NOT_SET,
+                                   isAppDark != isSystemDark, appColorMode)) {
         isDark = GetStartWindowColorFollowApp(sessionInfo) ? isAppDark : isSystemDark;
         CacheStartingWindowInfo(
             sessionInfo.bundleName_, sessionInfo.moduleName_, sessionInfo.abilityName_, startingWindowInfo, isDark);
@@ -6179,7 +6184,7 @@ WMError SceneSessionManager::GetTopWindowId(uint32_t mainWinId, uint32_t& topWin
     TLOGI(WmsLogTag::WMS_PIPELINE, "wait for flush UI, id: %{public}d", mainWinId);
     {
         std::unique_lock<std::mutex> lock(nextFlushCompletedMutex_);
-        if (nextFlushCompletedCV_.wait_for(lock, std::chrono::milliseconds(GET_TOP_WINDOW_DELAY)) ==
+        if (DmUtils::safe_wait_for(nextFlushCompletedCV_, lock, std::chrono::milliseconds(GET_TOP_WINDOW_DELAY)) ==
             std::cv_status::timeout) {
             TLOGW(WmsLogTag::WMS_PIPELINE, "wait for 100ms");
         }

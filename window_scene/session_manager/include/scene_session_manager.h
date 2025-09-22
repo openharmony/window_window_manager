@@ -49,7 +49,7 @@
 #include "session/host/include/session.h"
 #include "session/host/include/root_scene_session.h"
 #include "session_listener_controller.h"
-#include "session_manager/include/ffrt_queue_helper.h"
+#include "ffrt_queue_helper.h"
 #include "session_manager/include/window_manager_lru.h"
 #include "session_manager/include/zidl/scene_session_manager_stub.h"
 #include "thread_safety_annotations.h"
@@ -1725,8 +1725,9 @@ private:
     bool CheckStartWindowColorFollowApp(const AppExecFwk::AbilityInfo& abilityInfo,
         const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr);
     bool GetStartupPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo, StartingWindowInfo& startingWindowInfo,
+        Global::Resource::ColorMode defaultColorMode = Global::Resource::ColorMode::COLOR_MODE_NOT_SET,
         bool appColorModeChanged = false,
-        Global::Resource::ColorMode colorMode = Global::Resource::ColorMode::COLOR_MODE_NOT_SET);
+        Global::Resource::ColorMode appColorMode = Global::Resource::ColorMode::COLOR_MODE_NOT_SET);
     void GetBundleStartingWindowInfos(bool isDark, const AppExecFwk::BundleInfo& bundleInfo,
         std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>>& outValues);
     void CacheStartingWindowInfo(const std::string& bundleName, const std::string& moduleName,

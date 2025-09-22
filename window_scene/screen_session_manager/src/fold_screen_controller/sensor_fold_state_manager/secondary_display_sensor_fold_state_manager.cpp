@@ -25,6 +25,7 @@
 #include "fold_screen_state_internel.h"
 
 #include "window_manager_hilog.h"
+#include "dms_global_mutex.h"
 
 #ifdef POWER_MANAGER_ENABLE
 #include <power_mgr_client.h>
@@ -277,7 +278,7 @@ FoldStatus SecondaryDisplaySensorFoldStateManager::HandleSecondaryOneStep(FoldSt
     }
     std::unique_lock<std::mutex> lock(oneStepMutex_);
     isInOneStep_ = true;
-    if (oneStep_.wait_for(lock, std::chrono::milliseconds(FULL_WAIT_TIMES)) == std::cv_status::timeout) {
+    if (DmUtils::safe_wait_for(oneStep_, lock, std::chrono::milliseconds(FULL_WAIT_TIMES)) == std::cv_status::timeout) {
         const std::vector<uint16_t>& newHalls = SecondaryFoldSensorManager::GetInstance().GetGlobalHall();
         const std::vector<float>& newAngles = SecondaryFoldSensorManager::GetInstance().GetGlobalAngle();
         // calculate new foldStatus
