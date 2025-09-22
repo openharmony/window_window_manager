@@ -140,6 +140,15 @@ public:
     virtual WMError UpdateWindowModeByIdForUITest(int32_t windowId, int32_t updateMode) { return WMError::WM_OK; }
     virtual WMError GetAllWindowLayoutInfo(DisplayId displayId,
         std::vector<sptr<WindowLayoutInfo>>& infos) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError GetAllMainWindowInfo(std::vector<sptr<MainWindowInfo>>& infos)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual WMError GetMainWindowSnapshot(const std::vector<int32_t>& windowIds,
+        const WindowSnapshotConfiguration& config, const sptr<IRemoteObject>& callback)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual WMError GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode& globalWinMode)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;

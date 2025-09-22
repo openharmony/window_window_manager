@@ -18,6 +18,7 @@
 
 #include <ability_manager_client.h>
 #include <algorithm>
+#include <atomic>
 #include <climits>
 #include "configuration.h"
 #include <hitrace_meter.h>
@@ -1219,14 +1220,21 @@ void SceneSession::NotifyUpdateAppUseControl(ControlAppType type, const ControlI
         session->appUseControlMap_[type] = controlInfo;
         if (session->onUpdateAppUseControlFunc_) {
             bool isAppUseControl = (controlInfo.isNeedControl && !controlInfo.isControlRecentOnly);
+            bool isAppUseControlChanged = (session->isAppUseControl_ != isAppUseControl);
             session->isAppUseControl_ = isAppUseControl;
             session->onUpdateAppUseControlFunc_(type, controlInfo.isNeedControl, controlInfo.isControlRecentOnly);
             if (session->sessionStage_ == nullptr || type == ControlAppType::PRIVACY_WINDOW) {
                 TLOGNW(WmsLogTag::WMS_LIFE, "%{public}s sessionStage is nullptr or privacy mode control", where);
                 return;
             }
-            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s isAppUseControl: %{public}d, persistentId: %{public}d", where,
-                isAppUseControl, session->GetPersistentId());
+            auto state = session->GetSessionState();
+            TLOGNI(WmsLogTag::WMS_LIFE,
+                "%{public}s isAppUseControl: %{public}d, persistentId: %{public}d, state: %{public}d, "
+                "isAppUseControlChanged: %{public}d", where, isAppUseControl, session->GetPersistentId(), state,
+                isAppUseControlChanged);
+            if (state == SessionState::STATE_BACKGROUND && !isAppUseControlChanged) {
+                return;
+            }
             session->sessionStage_->NotifyAppUseControlStatus(isAppUseControl);
         }
     }, __func__);
@@ -2215,10 +2223,10 @@ void SceneSession::SetIsStatusBarVisible(bool isVisible)
 
 WSError SceneSession::SetIsStatusBarVisibleInner(bool isVisible)
 {
-    bool isNeedNotify = isStatusBarVisible_ != isVisible;
+    bool isNeedNotify = IsStatusBarVisible() != isVisible;
     TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}d, %{public}s] visible %{public}u need notify %{public}u",
         GetPersistentId(), GetWindowName().c_str(), isVisible, isNeedNotify);
-    isStatusBarVisible_ = isVisible;
+    UpdateStatusBarVisible(isVisible);
     if (!isNeedNotify) {
         return WSError::WS_OK;
     }
@@ -2462,8 +2470,8 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d displayId %{public}" PRIu64 " constantly isVisible %{public}d",
                 GetPersistentId(), displayId, isVisible);
         }
-        bool isStatusBarVisible = WindowHelper::IsMainWindow(Session::GetWindowType()) ?
-            isStatusBarVisible_ : isVisible;
+        bool isStatusBarVisible =
+            WindowHelper::IsAppWindow(Session::GetWindowType()) ? IsStatusBarVisible() : isVisible;
         if (!isStatusBarVisible) {
             TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d status bar not visible", GetPersistentId());
             continue;
@@ -2558,6 +2566,21 @@ void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     return;
 }
 
+void SceneSession::PatchAINavigationBarArea(AvoidArea& avoidArea)
+{
+    Rect areaEmpty = { 0, 0, 0, 0 };
+    if (!avoidArea.leftRect_.IsUninitializedRect()) {
+        avoidArea.bottomRect_ = avoidArea.leftRect_;
+        avoidArea.leftRect_ = areaEmpty;
+    } else if (!avoidArea.topRect_.IsUninitializedRect()) {
+        avoidArea.bottomRect_ = avoidArea.topRect_;
+        avoidArea.topRect_ = areaEmpty;
+    } else if (!avoidArea.topRect_.IsUninitializedRect()) {
+        avoidArea.bottomRect_ = avoidArea.rightRect_;
+        avoidArea.rightRect_ = areaEmpty;
+    }
+}
+
 void SceneSession::GetAINavigationBarArea(WSRect& rect, AvoidArea& avoidArea)
 {
     if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_PIP) {
@@ -2574,6 +2597,7 @@ void SceneSession::GetAINavigationBarArea(WSRect& rect, AvoidArea& avoidArea)
         barArea = specificCallback_->onGetAINavigationBarArea_(GetSessionProperty()->GetDisplayId());
     }
     CalculateAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR, rect, barArea, avoidArea);
+    PatchAINavigationBarArea(avoidArea);
 }
 
 void SceneSession::HookAvoidAreaInCompatibleMode(const WSRect& rect, AvoidAreaType avoidAreaType,
@@ -2756,7 +2780,7 @@ std::optional<ExtensionWindowEventInfo> SceneSession::GetLastModalUIExtensionEve
 
 Vector2f SceneSession::GetSessionGlobalPosition(bool useUIExtension)
 {
-    WSRect windowRect = GetSessionGlobalRect();
+    WSRect windowRect = GetSessionGlobalRectInMultiScreen();
     if (useUIExtension) {
         if (auto modalUIExtensionEventInfo = GetLastModalUIExtensionEventInfo()) {
             const auto& rect = modalUIExtensionEventInfo.value().windowRect;
@@ -3623,6 +3647,7 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
     moveDragController_->SetLastDragEndRect(rect);
     moveDragController_->ResetCrossMoveDragProperty();
     OnSessionEvent(SessionEvent::EVENT_END_MOVE);
+    RestoreGravityWhenDragEnd();
 }
 
 /**
@@ -3908,7 +3933,9 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
         "SceneSession::OnMoveDragCallback id:%d [%d, %d, %d, %d] reason:%u", GetPersistentId(), rect.posX_, rect.posY_,
         rect.width_, rect.height_, reason);
     if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_END) {
-        UpdateWinRectForSystemBar(rect);
+        if (!property->IsAdaptToDragScale()) {
+            UpdateWinRectForSystemBar(rect);
+        }
     }
     HandleSubSessionCrossNode(reason);
     moveDragController_->SetTargetRect(rect);
@@ -3966,8 +3993,11 @@ bool SceneSession::DragResizeWhenEndFilter(SizeChangeReason reason)
         if (reason == SizeChangeReason::DRAG) {
             HandleMoveDragEvent(reason);
         } else {
-            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "trigger client rect change by scb");
+            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "trigger client rect change by scb, "
+                "isPcOrPcMode: %{public}d", systemConfig_.IsPcWindow());
             WSRect relativeRect = moveDragController_->GetTargetRect(
+                (systemConfig_.IsPcWindow() && GetDragResizeTypeDuringDrag() == DragResizeType::RESIZE_WHEN_DRAG_END) ?
+                MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY :
                 MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY);
             HandleMoveDragEnd(relativeRect, reason);
             SetUIFirstSwitch(RSUIFirstSwitch::NONE);
@@ -6357,16 +6387,6 @@ WMError SceneSession::HandleActionUpdateTouchHotArea(const sptr<WindowSessionPro
     return WMError::WM_OK;
 }
 
-WMError SceneSession::HandleActionUpdateKeyboardTouchHotArea(const sptr<WindowSessionProperty>& property,
-    WSPropertyChangeAction action)
-{
-    if (GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-        return WMError::WM_ERROR_INVALID_TYPE;
-    }
-    GetSessionProperty()->SetKeyboardTouchHotAreas(property->GetKeyboardTouchHotAreas());
-    return WMError::WM_OK;
-}
-
 WMError SceneSession::HandleActionUpdateDecorEnable(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
@@ -7354,8 +7374,8 @@ bool SceneSession::GetIsDisplayStatusBarTemporarily() const
 void SceneSession::RetrieveStatusBarDefaultVisibility()
 {
     if (specificCallback_ && specificCallback_->onGetStatusBarDefaultVisibilityByDisplayId_) {
-        isStatusBarVisible_ = specificCallback_->onGetStatusBarDefaultVisibilityByDisplayId_(
-            GetSessionProperty()->GetDisplayId());
+        UpdateStatusBarVisible(
+            specificCallback_->onGetStatusBarDefaultVisibilityByDisplayId_(GetSessionProperty()->GetDisplayId()));
     }
 }
 
@@ -9460,5 +9480,73 @@ WSError SceneSession::SetFrameRectForPartialZoomInInner(const Rect& frameRect)
 void SceneSession::SetFindScenePanelRsNodeByZOrderFunc(FindScenePanelRsNodeByZOrderFunc&& func)
 {
     findScenePanelRsNodeByZOrderFunc_ = std::move(func);
+}
+
+void SceneSession::RunAfterNVsyncs(uint32_t vsyncCount, Task&& task)
+{
+    if (!requestNextVsyncFunc_) {
+        TLOGE(WmsLogTag::DEFAULT, "Could not request next vsync");
+        return;
+    }
+
+    auto vsyncCallback = std::make_shared<VsyncCallback>();
+
+    vsyncCallback->onCallback = [weakThis = wptr(this),
+                                 weakCallback = std::weak_ptr<VsyncCallback>(vsyncCallback),
+                                 count = std::make_shared<std::atomic<uint32_t>>(0),
+                                 vsyncCount,
+                                 task = std::move(task),
+                                 where = __func__](int64_t, int64_t) mutable {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::DEFAULT, "%{public}s: session is null", where);
+            return;
+        }
+
+        uint32_t current = ++(*count);
+        if (current >= vsyncCount) {
+            task();
+        } else {
+            if (!session->requestNextVsyncFunc_) {
+                TLOGE(WmsLogTag::DEFAULT, "Could not request next vsync");
+                return;
+            }
+            if (auto callback = weakCallback.lock()) {
+                session->requestNextVsyncFunc_(callback);
+            }
+        }
+    };
+
+    requestNextVsyncFunc_(vsyncCallback);
+}
+
+void SceneSession::RestoreGravityWhenDragEnd()
+{
+    // Ensure the last frame of drag rendering is completed before restoring the gravity to its pre-drag state.
+    constexpr uint32_t gravityUpdateDelayVsyncs = 2;
+    RunAfterNVsyncs(gravityUpdateDelayVsyncs, [weakSession = wptr(this), where = __func__] {
+        auto session = weakSession.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", where);
+            return;
+        }
+
+        session->PostTask([weakSession, where] {
+            auto session = weakSession.promote();
+            if (!session) {
+                TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", where);
+                return;
+            }
+
+            if (!session->moveDragController_) {
+                TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: moveDragController is null", where);
+                return;
+            }
+
+            session->moveDragController_->RestoreToPreDragGravity(session->GetSurfaceNode());
+            TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: Restore gravity completed, windowId: %{public}d",
+                where, session->GetPersistentId());
+        }, where);
+    });
 }
 } // namespace OHOS::Rosen

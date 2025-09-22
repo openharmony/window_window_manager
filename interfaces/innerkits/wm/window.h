@@ -207,6 +207,16 @@ public:
 };
 
 /**
+ * @class IWindowTitleChangeListener
+ *
+ * @brief IWindowTitleChangeListener is used to observe the title appear or disappear.
+ */
+class IWindowTitleChangeListener : virtual public RefBase {
+public:
+    virtual void OnTitleVisibilityChange(Rect& titleRect, bool visibility) {}
+};
+
+/**
  * @class IWindowChangeListener
  *
  * @brief IWindowChangeListener is used to observe the window size or window mode when window changed.
@@ -4614,6 +4624,35 @@ public:
      * @param shouldFullScreen true means full screen, false means force split.
      */
     virtual void NotifyIsFullScreenInForceSplitMode(bool isFullScreen) {}
+
+    /**
+     * @brief register a listener to listen whether the window title bar is show or hide.
+     *
+     * @param listener IWindowTitleChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowTitleChangeListener(const sptr<IWindowTitleChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+ 
+    /**
+     * @brief Unregister the IWindowTitleChangeListener.
+     *
+     * @param listener IWindowTitleChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowTitleChangeListener(const sptr<IWindowTitleChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+ 
+    /**
+     * @brief Calculate whether the pointerEvent hits the title bar.
+     *
+     * @param hitTitleBar true means hit title bar success, false means not hit title bar.
+     */
+    virtual bool IsHitTitleBar(std::shared_ptr<MMI::PointerEvent>& pointerEvent) const { return false; }
 };
 }
 }

@@ -97,6 +97,7 @@ ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionRea
         }
         case ScreenSessionReason::CREATE_SESSION_FOR_REAL: {
             rsConfig.screenId = rsId_;
+            rsConfig.isSync = true;
             break;
         }
         case ScreenSessionReason::CREATE_SESSION_WITHOUT_DISPLAY_NODE: {
@@ -684,14 +685,18 @@ void ScreenSession::UpdatePropertyByActiveMode()
 }
 
 ScreenProperty ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty,
-    FoldDisplayMode foldDisplayMode)
+    FoldDisplayMode foldDisplayMode, bool firstSCBConnect)
 {
     property_.SetDpiPhyBounds(updatedProperty.GetPhyWidth(), updatedProperty.GetPhyHeight());
     property_.SetPhyBounds(updatedProperty.GetPhyBounds());
     property_.SetBounds(updatedProperty.GetBounds());
     if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        Rotation screenRotation = property_.GetScreenRotation();
+        if (firstSCBConnect) {
+            AddRotationCorrection(screenRotation, foldDisplayMode);
+        }
         DisplayOrientation deviceOrientation =
-            CalcDeviceOrientation(property_.GetScreenRotation(), foldDisplayMode);
+            CalcDeviceOrientation(screenRotation, foldDisplayMode);
         property_.SetDisplayOrientation(deviceOrientation);
         property_.SetDeviceOrientation(deviceOrientation);
         property_.SetScreenAreaOffsetY(updatedProperty.GetScreenAreaOffsetY());
@@ -722,6 +727,26 @@ void ScreenSession::UpdatePropertyByResolution(uint32_t width, uint32_t height)
     screenBounds.rect_.width_ = width;
     screenBounds.rect_.height_ = height;
     property_.SetBounds(screenBounds);
+}
+
+void ScreenSession::UpdatePropertyByResolution(const DMRect& rect)
+{
+    auto screenBounds = property_.GetBounds();
+    screenBounds.rect_.left_ = rect.posX_;
+    screenBounds.rect_.top_ = rect.posY_;
+    screenBounds.rect_.width_ = rect.width_;
+    screenBounds.rect_.height_ = rect.height_;
+    property_.SetBounds(screenBounds);
+    // Determine whether the touch is in a valid area.
+    property_.SetValidWidth(rect.width_);
+    property_.SetValidHeight(rect.height_);
+    property_.SetInputOffset(rect.posX_, rect.posY_);
+    // It is used to calculate the original screen size
+    property_.SetScreenAreaWidth(rect.width_);
+    property_.SetScreenAreaHeight(rect.height_);
+    // It is used to calculate the effective area of the inner screen for cursor
+    property_.SetMirrorWidth(rect.width_);
+    property_.SetMirrorHeight(rect.height_);
 }
 
 void ScreenSession::UpdatePropertyByFakeBounds(uint32_t width, uint32_t height)
@@ -781,16 +806,16 @@ void ScreenSession::Disconnect()
 
 void ScreenSession::PropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason)
 {
-    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
-    property_ = newProperty;
+    SetScreenProperty(newProperty);
     if (reason == ScreenPropertyChangeReason::VIRTUAL_PIXEL_RATIO_CHANGE) {
         return;
     }
-    if (screenChangeListenerList_.empty()) {
+    auto listeners = GetScreenChangeListenerList();
+    if (listeners.empty()) {
         TLOGE(WmsLogTag::DMS, "screenChangeListenerList is empty.");
         return;
     }
-    for (auto& listener : screenChangeListenerList_) {
+    for (auto* listener : listeners) {
         if (!listener) {
             TLOGE(WmsLogTag::DMS, "screenChangeListener is null.");
             continue;
@@ -2703,6 +2728,17 @@ Rotation ScreenSession::GetRotationCorrection(FoldDisplayMode displayMode)
     }
     return static_cast<Rotation>(rotationOffset);
 }
+
+void ScreenSession::AddRotationCorrection(Rotation& rotation, FoldDisplayMode displayMode)
+{
+    if (static_cast<uint32_t>(rotation) >= SECONDARY_ROTATION_MOD) {
+        return;
+    }
+    uint32_t rotationOffset = static_cast<uint32_t>(GetRotationCorrection(displayMode));
+    uint32_t rotationValue = (static_cast<uint32_t>(rotation) + rotationOffset) % SECONDARY_ROTATION_MOD;
+    rotation = static_cast<Rotation>(rotationValue);
+    TLOGI(WmsLogTag::DMS, "rotation:%{public}u, rotationOffset:%{public}u", rotation, rotationOffset);
+}
  
 void ScreenSession::RemoveRotationCorrection(Rotation& rotation, FoldDisplayMode displayMode)
 {
@@ -2798,5 +2834,11 @@ void ScreenSession::SetScreenAreaHeight(uint32_t screenAreaHeight)
 uint32_t ScreenSession::GetScreenAreaHeight() const
 {
     return property_.GetScreenAreaHeight();
+}
+
+std::vector<IScreenChangeListener*> ScreenSession::GetScreenChangeListenerList() const
+{
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
+    return screenChangeListenerList_;
 }
 } // namespace OHOS::Rosen

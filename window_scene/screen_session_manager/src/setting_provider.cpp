@@ -36,6 +36,7 @@ const std::string SETTING_COLUMN_KEYWORD = "KEYWORD";
 const std::string SETTING_COLUMN_VALUE = "VALUE";
 const std::string SETTING_URI_PROXY = "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
 const std::string WALL_KEY = "wallpaperAodDisplay";
+const std::string SETTING_RESOLUTION_EFFECT_KEY = "user_set_resolution_effect_select";
 const std::string DURING_CALL_KEY = "during_call_state";
 const std::string SETTING_MULTI_USER_URI = "datashare:///com.ohos.settingsdata/entry/settingsdata/";
 const std::string SETTING_MULTI_USER_TABLE = "USER_SETTINGSDATA_";
@@ -136,7 +137,8 @@ ErrCode SettingProvider::RegisterObserver(const sptr<SettingObserver>& observer)
         return ERR_NO_INIT;
     }
     std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
-    Uri uri = (observer->GetKey() == DURING_CALL_KEY) ?
+    Uri uri = ((observer->GetKey() == DURING_CALL_KEY ||
+        observer->GetKey() == SETTING_RESOLUTION_EFFECT_KEY)) ?
         AssembleUriMultiUser(observer->GetKey()) : AssembleUri(observer->GetKey());
     auto helper = CreateDataShareHelper();
     if (helper == nullptr) {
@@ -198,7 +200,8 @@ ErrCode SettingProvider::GetStringValue(const std::string& key, std::string& val
     std::vector<std::string> columns = {SETTING_COLUMN_VALUE};
     DataShare::DataSharePredicates predicates;
     predicates.EqualTo(SETTING_COLUMN_KEYWORD, key);
-    Uri uri = (key == WALL_KEY || key == DURING_CALL_KEY) ? AssembleUriMultiUser(key) : AssembleUri(key);
+    Uri uri = (key == WALL_KEY || key == DURING_CALL_KEY || key == SETTING_RESOLUTION_EFFECT_KEY) ?
+        AssembleUriMultiUser(key) : AssembleUri(key);
     auto resultSet = helper->Query(uri, predicates, columns);
     ReleaseDataShareHelper(helper);
     if (resultSet == nullptr) {

@@ -32,9 +32,24 @@ class AniWindowManager {
 public:
     static ani_status AniWindowManagerInit(ani_env* env, ani_namespace windowNameSpace);
     static ani_ref GetLastWindow(ani_env* env, ani_long nativeObj, ani_object context);
+    static ani_ref FindWindow(ani_env* env, ani_long nativeObj, ani_string windowName);
+    static void MinimizeAll(ani_env* env, ani_long nativeObj, ani_long displayId);
+    static void ShiftAppWindowFocus(ani_env* env, ani_long nativeObj,
+        ani_int sourceWindowId, ani_int targetWindowId);
+    static ani_object GetAllMainWindowInfo(ani_env* env, ani_long nativeObj, ani_object context);
+    static ani_object GetMainWindowSnapshot(
+        ani_env* env, ani_long nativeObj, ani_object windowId, ani_object config);
+    static ani_ref CreateWindow(ani_env* env, ani_long nativeObj, ani_object configuration);
 private:
     ani_ref OnGetLastWindow(ani_env* env, ani_object context);
+    ani_ref OnFindWindow(ani_env* env, ani_string windowName);
+    void OnMinimizeAll(ani_env* env, ani_long displayId);
+    void OnShiftAppWindowFocus(ani_env* env, ani_int sourceWindowId, ani_int targetWindowId);
     ani_object GetTopWindowTask(ani_env* env, void* contextPtr, bool newApi);
+    ani_object OnGetAllMainWindowInfo(ani_env* env, ani_object context);
+    ani_object OnGetMainWindowSnapshot(
+        ani_env* env, ani_object windowId, ani_object config);
+    ani_ref OnCreateWindow(ani_env* env, ani_object configuration);
 };
 } // namespace Rosen
 } // namespace OHOS

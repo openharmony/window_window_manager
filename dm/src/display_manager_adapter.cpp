@@ -25,6 +25,7 @@
 #include "screen_manager.h"
 #include "window_manager_hilog.h"
 #include "zidl/screen_session_manager_interface.h"
+#include "dms_global_mutex.h"
 
 namespace OHOS::Rosen {
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerAdapter)
@@ -47,12 +48,12 @@ DMError BaseAdapter::ConvertToDMError(ErrCode errCode, int32_t dmError)
     return static_cast<DMError>(dmError);
 }
 
-sptr<DisplayInfo> DisplayManagerAdapter::GetDefaultDisplayInfo()
+sptr<DisplayInfo> DisplayManagerAdapter::GetDefaultDisplayInfo(int32_t userId)
 {
     INIT_PROXY_CHECK_RETURN(nullptr);
 
     if (screenSessionManagerServiceProxy_) {
-        return screenSessionManagerServiceProxy_->GetDefaultDisplayInfo();
+        return screenSessionManagerServiceProxy_->GetDefaultDisplayInfo(userId);
     }
 
     sptr<DisplayInfo> displayInfo;
@@ -970,13 +971,13 @@ sptr<ScreenInfo> ScreenManagerAdapter::GetScreenInfo(ScreenId screenId)
     return screenInfo;
 }
 
-std::vector<DisplayId> DisplayManagerAdapter::GetAllDisplayIds()
+std::vector<DisplayId> DisplayManagerAdapter::GetAllDisplayIds(int32_t userId)
 {
     TLOGD(WmsLogTag::DMS, "enter");
     INIT_PROXY_CHECK_RETURN(std::vector<DisplayId>());
 
     if (screenSessionManagerServiceProxy_) {
-        return screenSessionManagerServiceProxy_->GetAllDisplayIds();
+        return screenSessionManagerServiceProxy_->GetAllDisplayIds(userId);
     }
 
     std::vector<DisplayId> displayIds;
@@ -1624,6 +1625,16 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetPrimaryDisplayInfo()
         return nullptr;
     }
     return displayInfo;
+}
+
+DisplayId DisplayManagerAdapter::GetPrimaryDisplayId()
+{
+    INIT_PROXY_CHECK_RETURN(SCREEN_ID_INVALID);
+    DisplayId id = SCREEN_ID_INVALID;
+    if (screenSessionManagerServiceProxy_) {
+        id = screenSessionManagerServiceProxy_->GetPrimaryDisplayId();
+    }
+    return id;
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshotWithOption(const CaptureOption& captureOption,

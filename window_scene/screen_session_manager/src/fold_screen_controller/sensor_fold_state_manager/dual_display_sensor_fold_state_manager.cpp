@@ -43,6 +43,7 @@
 
 #include "iremote_object.h"
 #include "window_manager_hilog.h"
+#include "dms_global_mutex.h"
 
 #ifdef POWER_MANAGER_ENABLE
 #include <power_mgr_client.h>
@@ -139,7 +140,7 @@ void DualDisplaySensorFoldStateManager::HandleHallChange(float angle, int hall,
         auto condition = [this] {
             return this->isInTask_.load();
         };
-        if (!angleChangeCv_.wait_for(lock, std::chrono::milliseconds(FULL_WAIT_TIMES), condition)) {
+        if (!DmUtils::safe_wait_for(angleChangeCv_, lock, std::chrono::milliseconds(FULL_WAIT_TIMES), condition)) {
             SensorReportTimeOutPro(angle, hall, foldScreenPolicy);
             return;
         }

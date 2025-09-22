@@ -362,6 +362,18 @@ std::shared_ptr<RSTransaction> RSSyncTransactionAdapter::GetRSTransaction(const 
     return GetRSTransaction(rsNode ? rsNode->GetRSUIContext() : nullptr);
 }
 
+void RSSyncTransactionAdapter::OpenSyncTransaction(const std::shared_ptr<RSUIContext>& rsUIContext,
+    bool isInnerProcess, const std::shared_ptr<AppExecFwk::EventHandler>& handler)
+{
+    InvokeSyncTransaction<void>(
+        rsUIContext,
+        [isInnerProcess, handler](auto& invoker) {
+            RETURN_IF_PARAM_IS_NULL(invoker);
+            invoker->OpenSyncTransaction(handler, isInnerProcess);
+        },
+        __func__);
+}
+
 void RSSyncTransactionAdapter::OpenSyncTransaction(
     const std::shared_ptr<RSUIContext>& rsUIContext, const std::shared_ptr<AppExecFwk::EventHandler>& handler)
 {

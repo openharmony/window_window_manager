@@ -59,9 +59,9 @@ private:
 class DisplayManagerAdapter : public BaseAdapter {
 WM_DECLARE_SINGLE_INSTANCE(DisplayManagerAdapter);
 public:
-    virtual sptr<DisplayInfo> GetDefaultDisplayInfo();
+    virtual sptr<DisplayInfo> GetDefaultDisplayInfo(int32_t userId = CONCURRENT_USER_ID_DEFAULT);
     virtual sptr<DisplayInfo> GetDisplayInfoByScreenId(ScreenId screenId);
-    virtual std::vector<DisplayId> GetAllDisplayIds();
+    virtual std::vector<DisplayId> GetAllDisplayIds(int32_t userId = CONCURRENT_USER_ID_DEFAULT);
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
         DmErrorCode* errorCode = nullptr, bool isUseDma = false, bool isCaptureFullOfScreen = false);
     virtual std::vector<std::shared_ptr<Media::PixelMap>> GetDisplayHDRSnapshot(DisplayId displayId,
@@ -121,7 +121,8 @@ public:
     virtual DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea);
     virtual bool SetVirtualScreenAsDefault(ScreenId screenId);
-
+    virtual DisplayId GetPrimaryDisplayId();
+    
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;
 };

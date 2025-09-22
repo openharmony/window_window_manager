@@ -91,8 +91,8 @@ void JsExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason r
             return;
         }
         napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(eng, &scope);
-        if (scope == nullptr) {
+        napi_status status = napi_open_handle_scope(eng, &scope);
+        if (status != napi_ok || scope == nullptr) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "open handle scope failed");
             return;
         }
@@ -375,7 +375,11 @@ static void LifeCycleCallBack(LifeCycleEventType eventType, wptr<JsExtensionWind
             return;
         }
         napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(eng, &scope);
+        napi_status status = napi_open_handle_scope(eng, &scope);
+        if (status != napi_ok || scope == nullptr) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "open handle scope failed");
+            return;
+        }
         napi_value argv[] = {CreateJsValue(eng, static_cast<uint32_t>(eventType))};
         thisListener->CallJsMethod(LIFECYCLE_EVENT_CB.c_str(), argv, ArraySize(argv));
         napi_close_handle_scope(eng, scope);

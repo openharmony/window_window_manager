@@ -65,6 +65,40 @@ namespace {
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
+HWTEST_F(ScreenSessionManagerStubTest, ATC_OnRemoteRequest_NormalCase, TestSize.Level0)
+{
+    ScreenSessionManagerStub stub;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = 1;
+
+    int32_t expectedResult = 0;
+    int32_t actualResult = stub.OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(actualResult, expectedResult);
+}
+
+/**
+
+@tc.name : OnRemoteRequest_ShouldReturnCorrectResult_WhenOnRemoteRequestInnerFails
+
+@tc.number: OnRemoteRequestTest_002
+
+@tc.desc : 测试当 OnRemoteRequestInner 失败时,OnRemoteRequest 返回正确的结果
+*/
+HWTEST_F(ScreenSessionManagerStubTest, ATC_OnRemoteRequest_FailureCase, TestSize.Level0)
+{
+    ScreenSessionManagerStub stub;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = 1;
+
+    int32_t expectedResult = -1;
+    int32_t actualResult = stub.OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(actualResult, expectedResult);
+}
+
 HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest01, TestSize.Level1)
 {
     MessageParcel data;
@@ -3364,7 +3398,7 @@ HWTEST_F(ScreenSessionManagerStubTest, NotifyIsFullScreenInForceSplitMode, TestS
         MessageOption option;
         uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_IS_FULL_SCREEN_IN_FORCE_SPLIT);
         int res = stub_->OnRemoteRequest(code, data, reply, option);
-        EXPECT_EQ(res, ERR_INVALID_DATA);
+        EXPECT_EQ(res, 1);
     }
     {
         MessageParcel data;

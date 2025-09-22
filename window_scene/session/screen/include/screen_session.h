@@ -41,6 +41,7 @@ using DestroyScreenSceneFunc = std::function<void()>;
 
 class IScreenChangeListener {
 public:
+    virtual ~IScreenChangeListener() = default;
     virtual void OnConnect(ScreenId screenId) {}
     virtual void OnDisconnect(ScreenId screenId) {}
     virtual void OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
@@ -204,11 +205,12 @@ public:
     void UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode, const RRect& bounds);
     void UpdatePropertyByFakeInUse(bool isFakeInUse);
     ScreenProperty UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty,
-        FoldDisplayMode foldDisplayMode = FoldDisplayMode::UNKNOWN);
+        FoldDisplayMode foldDisplayMode = FoldDisplayMode::UNKNOWN, bool firstSCBConnect = false);
     void UpdateDisplayState(DisplayState displayState);
     void UpdateRefreshRate(uint32_t refreshRate);
     uint32_t GetRefreshRate();
     void UpdatePropertyByResolution(uint32_t width, uint32_t height);
+    void UpdatePropertyByResolution(const DMRect& rect);
     void UpdatePropertyByFakeBounds(uint32_t width, uint32_t height);
     void SetName(std::string name);
     void SetInnerName(std::string innerName);
@@ -391,12 +393,14 @@ public:
 private:
     bool IsVertical(Rotation rotation) const;
     Orientation CalcDisplayOrientationToOrientation(DisplayOrientation displayOrientation) const;
+    std::vector<IScreenChangeListener*> GetScreenChangeListenerList() const;
+
     ScreenProperty property_;
     mutable std::mutex propertyMutex_; // above guarded by clientProxyMutex_
     std::shared_ptr<RSDisplayNode> displayNode_;
     ScreenState screenState_ { ScreenState::INIT };
     std::vector<IScreenChangeListener*> screenChangeListenerList_;
-    std::mutex screenChangeListenerListMutex_;
+    mutable std::mutex screenChangeListenerListMutex_;
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
     mutable std::mutex combinationMutex_; // above guarded by clientProxyMutex_
     VirtualScreenFlag screenFlag_ { VirtualScreenFlag::DEFAULT };
@@ -444,6 +448,7 @@ private:
     mutable std::shared_mutex modesMutex_;
 
     void RemoveRotationCorrection(Rotation& rotation, FoldDisplayMode foldDisplayMode);
+    void AddRotationCorrection(Rotation& rotation, FoldDisplayMode displayMode);
     std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap_;
     std::shared_mutex rotationCorrectionMutex_;
 

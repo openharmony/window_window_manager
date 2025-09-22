@@ -664,6 +664,12 @@ void ScreenProperty::SetInputOffsetY()
     }
 }
 
+void ScreenProperty::SetInputOffset(int32_t x, int32_t y)
+{
+    inputOffsetX_ = x;
+    inputOffsetY_ = y;
+}
+
 float ScreenProperty::CalculatePPI()
 {
     int32_t phywidth = GetPhyWidth();

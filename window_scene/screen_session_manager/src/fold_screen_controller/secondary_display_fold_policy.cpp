@@ -543,8 +543,8 @@ void SecondaryDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> sc
             break;
         }
     }
-
-    screenSession->UpdatePropertyByFoldControl(screenProperty_, displayMode);
+    bool firstSCBConnect = ScreenSessionManager::GetInstance().GetFirstSCBConnect();
+    screenSession->UpdatePropertyByFoldControl(screenProperty_, displayMode, firstSCBConnect);
     auto oldScreenProperty = screenSession->GetScreenProperty();
     if (displayMode == FoldDisplayMode::MAIN) {
         screenSession->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);

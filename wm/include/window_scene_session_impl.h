@@ -146,7 +146,7 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError NotifyPrepareClosePiPWindow() override;
-    void UpdateSubWindowState(const WindowType& type, bool waitDetach = false);
+    void UpdateSubWindowState(const WindowType& type);
     WMError SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
         const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags) override;
     WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties) override;
@@ -397,6 +397,7 @@ private:
     void NotifyDisplayInfoChange(const sptr<DisplayInfo>& info = nullptr);
     void UpdateDensityInner(const sptr<DisplayInfo>& info = nullptr);
     sptr<DisplayInfo> GetDisplayInfo() const;
+    SessionEvent GetSessionEvent();
 
     /*
      * Window Input Event
@@ -418,6 +419,7 @@ private:
     void CheckMoveConfiguration(MoveConfiguration& moveConfiguration);
     void UpdateEnableDragWhenSwitchMultiWindow(bool enable);
     WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
+    bool ShouldSkipSupportWindowModeCheck(uint32_t windowModeSupportType, WindowMode mode);
 
     /*
      * PC Window Layout
@@ -430,6 +432,7 @@ private:
      * Window Immersive
      */
     void UpdateDefaultStatusBarColor();
+    bool IsLandscape();
     WMError MoveAndResizeKeyboard(const KeyboardLayoutParams& params);
     bool userLimitsSet_ = false;
     bool forceLimits_ = false;
@@ -442,6 +445,7 @@ private:
     bool titleHoverShowEnabled_ = true;
     bool dockHoverShowEnabled_ = true;
     void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);
+    void MobileAppInPadLayoutFullScreenChange(bool statusBarEnable, bool navigationEnable);
 
     /*
      * Gesture Back
