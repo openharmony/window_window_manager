@@ -4838,7 +4838,7 @@ WMError WindowSceneSessionImpl::RegisterAnimationTransitionController(
             }
             uint32_t animationFlag = property->GetAnimationFlag();
             if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
-                // CustomAnimation is enabled when animationTransitionController_ exists
+                // CustomAnimation is enabled when animationTransitionController exists
                 animationTransitionController->AnimationForShown();
             }
             TLOGI(WmsLogTag::WMS_SYSTEM, "AnimationForShown excute sucess %{public}d!", property->GetPersistentId());
