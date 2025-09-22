@@ -436,21 +436,15 @@ HWTEST_F(WindowManagerServiceDumpTest, SceneSessionDumpSessionElementInfo, TestS
     info.abilityName_ = "Background01";
     info.bundleName_ = "IsFloatingWindowAppType";
     info.windowType_ = 1;
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
     sptr<SceneSession> sceneSession;
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_NE(mockSessionStage, nullptr);
     std::vector<std::string> params;
     sceneSession->DumpSessionElementInfo(params);
-    int ret = 1;
     sceneSession->sessionStage_ = mockSessionStage;
     sceneSession->DumpSessionElementInfo(params);
-    ASSERT_EQ(ret, 1);
 }
 
 } // namespace
