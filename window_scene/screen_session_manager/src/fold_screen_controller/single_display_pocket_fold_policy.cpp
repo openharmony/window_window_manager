@@ -587,6 +587,7 @@ void SingleDisplayPocketFoldPolicy::BootAnimationFinishPowerInit()
     } else {
         TLOGI(WmsLogTag::DMS, "Fold Screen Power Init, invalid active screen id");
     }
+    ScreenStateMachine::GetInstance().IncScreenStateInitRef();
 }
 
 void SingleDisplayPocketFoldPolicy::ChangeOnTentMode(FoldStatus currentState)
