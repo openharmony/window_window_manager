@@ -19,6 +19,7 @@
 #include <mutex>
 
 #include "ani.h"
+#include "ani_window_utils.h"
 #include "class_var_definition.h"
 #include "event_handler.h"
 #include "refbase.h"
@@ -28,10 +29,6 @@
 
 namespace OHOS {
 namespace Rosen {
-const std::string WINDOW_SIZE_CHANGE_CB = "windowSizeChange";
-const std::string AVOID_AREA_CHANGE_CB = "avoidAreaChange";
-const std::string WINDOW_STAGE_EVENT_CB = "windowStageEvent";
-const std::string WINDOW_EVENT_CB = "windowEvent";
 constexpr const char* ETS_UIEXTENSION_HOST_NAMESPACE_DESCRIPTOR = "L@ohos/uiExtensionHost/uiExtensionHost;";
 
 class AniExtensionWindowListener : public IWindowChangeListener,
