@@ -54,5 +54,10 @@ void FfrtQueueHelper::SubmitTask(std::function<void()>&& task)
 {
     ffrtQueue_->submit(task);
 }
+
+void FfrtQueueHelper::SubmitTaskToHead(std::function<void()>&& task)
+{
+    ffrtQueue_->submit_head(task);
+}
 // LCOV_EXCL_STOP
 } // namespace OHOS::Rosen
