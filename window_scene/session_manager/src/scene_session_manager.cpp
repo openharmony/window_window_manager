@@ -11023,7 +11023,7 @@ WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessi
 WMError SceneSessionManager::ConvertToRelativeCoordinateExtended(const Rect& rect, Rect& newRect, DisplayId& newDisplayId)
 {
     newRect = rect;
-    auto& pcFoldScreenManagerInstance = PcFoldScreenManager::GetInstance();
+    const auto& pcFoldScreenManagerInstance = PcFoldScreenManager::GetInstance();
     SuperFoldStatus foldStatus = pcFoldScreenManagerInstance.GetScreenFoldStatus();
     TLOGD(WmsLogTag::WMS_LAYOUT, "foldStatus=%{public}d", static_cast<uint32_t>(foldStatus));
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
