@@ -1005,7 +1005,7 @@ static NativeDisplayManager_DisplayInfo* NativeDisplayManager_FillDisplayInfo(sp
         *errCode = NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
         return nullptr;
     }
-    memcpy_s(displayInner->name, sizeof(displayInner->name) - 1, info->GetName().c_str(), info->GetName().size());
+    int ret = memcpy_s(displayInner->name, sizeof(displayInner->name) - 1, info->GetName().c_str(), info->GetName().size());
     if (ret != EOK) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] memcpy display name failed.");
         DISPLAY_MANAGER_FREE_MEMORY(displayInner);
