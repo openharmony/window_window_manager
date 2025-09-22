@@ -3585,8 +3585,13 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return false;
     }
+
     ScreenPowerInfoType type = reason;
-    return ScreenStateMachine::GetInstance().HandlePowerStateChange(ScreenPowerEvent::POWER_OFF, type);
+    if (ScreenStateMachine::GetInstance().GetTransitionState() == ScreenTransitionState::SCREEN_INIT) {
+        return DoSuspendBegin(reason);
+    } else {
+        return ScreenStateMachine::GetInstance().HandlePowerStateChange(ScreenPowerEvent::POWER_OFF, type);
+    }
 }
 
 bool ScreenSessionManager::DoSuspendBegin(PowerStateChangeReason reason)
