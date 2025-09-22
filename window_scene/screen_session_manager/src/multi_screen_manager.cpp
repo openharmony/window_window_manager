@@ -34,6 +34,7 @@ const std::string SCREEN_OUTER_OFF = "off";
 const std::string MULTI_SCREEN_EXIT_STR = "exit";
 const std::string MULTI_SCREEN_ENTER_STR = "enter";
 const std::string CUSTOM_SCB_SCREEN_NAME = "CustomScbScreen";
+const std::string CELIA_VIEW_NAME = "CeliaView";
 constexpr int32_t MULTI_SCREEN_EXIT = 0;
 constexpr int32_t MULTI_SCREEN_ENTER = 1;
 constexpr uint32_t SCREEN_CONNECT_TIMEOUT = 500;
@@ -168,7 +169,10 @@ DMError MultiScreenManager::PhysicalScreenUniqueSwitch(const std::vector<ScreenI
         screenSession->SetVirtualPixelRatio(screenSession->GetScreenProperty().GetDefaultDensity());
         {
             std::unique_lock<std::mutex> lock(uniqueScreenMutex_);
-            uniqueScreenTimeoutMap_.insert_or_assign(physicalScreenId, false);
+            if (screenSession->GetInnerName() == CUSTOM_SCB_SCREEN_NAME ||
+                screenSession->GetName() == CELIA_VIEW_NAME) {
+                    uniqueScreenTimeoutMap_.insert_or_assign(physicalScreenId, false);
+                }
         }
         ScreenSessionManager::GetInstance().OnVirtualScreenChange(physicalScreenId, ScreenEvent::CONNECTED);
         ScreenSessionManager::GetInstance().RemoveScreenCastInfo(physicalScreenId);
@@ -221,7 +225,10 @@ DMError MultiScreenManager::VirtualScreenUniqueSwitch(sptr<ScreenSession> screen
         ScreenSessionManager::GetInstance().RemoveScreenCastInfo(uniqueScreenId);
         {
             std::unique_lock<std::mutex> lock(uniqueScreenMutex_);
-            uniqueScreenTimeoutMap_.insert_or_assign(uniqueScreenId, false);
+            if (uniqueScreen != nullptr && (uniqueScreen->GetInnerName() == CUSTOM_SCB_SCREEN_NAME ||
+                uniqueScreen->GetName() == CELIA_VIEW_NAME)) {
+                    uniqueScreenTimeoutMap_.insert_or_assign(uniqueScreenId, false);
+                }
         }
         // virtual screen create callback to notify scb
         ScreenSessionManager::GetInstance().OnVirtualScreenChange(uniqueScreenId, ScreenEvent::CONNECTED);
@@ -235,7 +242,8 @@ DMError MultiScreenManager::VirtualScreenUniqueSwitch(sptr<ScreenSession> screen
 void MultiScreenManager::BlockScreenConnect(sptr<ScreenSession>& screenSession, ScreenId screenId)
 {
     std::unique_lock<std::mutex> lock(uniqueScreenMutex_);
-    if ((screenSession != nullptr) && (screenSession->GetInnerName() == CUSTOM_SCB_SCREEN_NAME)) {
+    if (screenSession != nullptr && (screenSession->GetInnerName() == CUSTOM_SCB_SCREEN_NAME ||
+        screenSession->GetName() == CELIA_VIEW_NAME)) {
         auto func = [this, screenId] {
             return uniqueScreenTimeoutMap_[screenId];
         };
