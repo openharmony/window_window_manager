@@ -228,11 +228,11 @@ HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestMode, Tes
 }
 
 /**
- * @tc.name: ConvertToRelativeCoordinateForFoldPC_TestMode
+ * @tc.name: ConvertToRelativeCoordinateExtended_TestMode
  * @tc.desc: test function : ConvertToRelativeCoordinateExtended
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLayoutTest, ConvertToRelativeCoordinateForFoldPC_TestMode, TestSize.Level1)
+HWTEST_F(SceneSessionManagerLayoutTest, ConvertToRelativeCoordinateExtended_TestMode, TestSize.Level1)
 {
     Rect rect = { 100, 3500, 400, 600};
     Rect newRect;
