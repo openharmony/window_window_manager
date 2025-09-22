@@ -1673,11 +1673,11 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetGestureNavigationEnabled, TestSiz
 }
 
 /**
- * @tc.name: HandleConvertToRelativeCoordinateForFoldPC
- * @tc.desc: test HandleConvertToRelativeCoordinateForFoldPC
+ * @tc.name: HandleConvertToRelativeCoordinateExtended
+ * @tc.desc: test HandleConvertToRelativeCoordinateExtended
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleConvertToRelativeCoordinateForFoldPC, TestSize.Level1)
+HWTEST_F(SceneSessionManagerStubTest, HandleConvertToRelativeCoordinateExtended, TestSize.Level1)
 {
     MessageParcel data1;
     MessageParcel reply;
@@ -1688,29 +1688,29 @@ HWTEST_F(SceneSessionManagerStubTest, HandleConvertToRelativeCoordinateForFoldPC
     data1.WriteInt32(rect.posY_);
     data1.WriteInt32(rect.width_);
     data1.WriteInt32(rect.height_);
-    int res1 = stub_->HandleConvertToRelativeCoordinateForFoldPC(data1, reply);
+    int res1 = stub_->HandleConvertToRelativeCoordinateExtended(data1, reply);
     EXPECT_EQ(res1, ERR_NONE);
 
     MessageParcel data2;
     data2.WriteInt32(rect.posX_);
     data2.WriteInt32(rect.posY_);
     data2.WriteInt32(rect.width_);
-    int res2 = stub_->HandleConvertToRelativeCoordinateForFoldPC(data2, reply);
+    int res2 = stub_->HandleConvertToRelativeCoordinateExtended(data2, reply);
     EXPECT_EQ(res2, ERR_TRANSACTION_FAILED);
 
     MessageParcel data3;
     data3.WriteInt32(rect.posX_);
     data3.WriteInt32(rect.posY_);
-    int res3 = stub_->HandleConvertToRelativeCoordinateForFoldPC(data3, reply);
+    int res3 = stub_->HandleConvertToRelativeCoordinateExtended(data3, reply);
     EXPECT_EQ(res3, ERR_TRANSACTION_FAILED);
 
     MessageParcel data4;
     data4.WriteInt32(rect.posX_);
-    int res4 = stub_->HandleConvertToRelativeCoordinateForFoldPC(data4, reply);
+    int res4 = stub_->HandleConvertToRelativeCoordinateExtended(data4, reply);
     EXPECT_EQ(res4, ERR_TRANSACTION_FAILED);
 
     MessageParcel data5;
-    int res5 = stub_->HandleConvertToRelativeCoordinateForFoldPC(data5, reply);
+    int res5 = stub_->HandleConvertToRelativeCoordinateExtended(data5, reply);
     EXPECT_EQ(res5, ERR_TRANSACTION_FAILED);
 }
 
