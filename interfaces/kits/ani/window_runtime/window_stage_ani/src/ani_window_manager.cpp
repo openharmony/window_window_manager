@@ -57,6 +57,11 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace wi
         ani_native_function {"offSync", nullptr,
             reinterpret_cast<void *>(AniWindowManager::UnregisterWindowManagerCallback)},
     };
+    if ((ret = env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size())) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] bind ns func %{public}u", ret);
+        return ANI_NOT_FOUND;
+    }
+    
     ani_function setObjFunc = nullptr;
     ret = env->Namespace_FindFunction(windowNameSpace, "setNativeObj", "J:V", &setObjFunc);
     if (ret != ANI_OK) {
