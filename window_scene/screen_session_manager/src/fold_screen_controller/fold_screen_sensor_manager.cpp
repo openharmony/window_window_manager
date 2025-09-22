@@ -19,6 +19,7 @@
 #include <parameters.h>
 
 #include "fold_screen_controller/fold_screen_sensor_manager.h"
+#include "fold_screen_controller/fold_screen_controller_config.h"
 #include "fold_screen_state_internel.h"
 #include "window_manager_hilog.h"
 #include "screen_session_manager.h"
@@ -41,7 +42,6 @@ static void SensorHallDataCallback(SensorEvent *event)
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr float ANGLE_MIN_VAL = 0.0F;
 constexpr float ANGLE_MAX_VAL = 180.0F;
 constexpr int32_t SENSOR_SUCCESS = 0;
 constexpr int32_t SENSOR_FAILURE = 1;
