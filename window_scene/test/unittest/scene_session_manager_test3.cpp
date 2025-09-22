@@ -130,9 +130,7 @@ HWTEST_F(SceneSessionManagerTest3, ConfigDecor, TestSize.Level1)
 {
     WindowSceneConfig::ConfigItem* item = new (std::nothrow) WindowSceneConfig::ConfigItem;
     ASSERT_NE(nullptr, item);
-    int ret = 0;
     ssm_->ConfigDecor(*item);
-    ASSERT_EQ(ret, 0);
     delete item;
 }
 
@@ -145,9 +143,7 @@ HWTEST_F(SceneSessionManagerTest3, ConfigWindowEffect, TestSize.Level1)
 {
     WindowSceneConfig::ConfigItem* item = new (std::nothrow) WindowSceneConfig::ConfigItem;
     ASSERT_NE(nullptr, item);
-    int ret = 0;
     ssm_->ConfigWindowEffect(*item);
-    ASSERT_EQ(ret, 0);
     delete item;
 }
 
@@ -292,36 +288,33 @@ HWTEST_F(SceneSessionManagerTest3, ConfigWindowAnimation, TestSize.Level1)
 
     item.SetValue(opacity);
     windowAnimationConfig.SetValue({ { "opacity", item } });
-    int ret = 0;
+    EXPECT_TRUE(windowAnimationConfig.IsMap());
     ssm_->ConfigWindowAnimation(windowAnimationConfig);
-    ASSERT_EQ(ret, 0);
 
     item.SetValue(rotation);
     windowAnimationConfig.SetValue({ { "rotation", item } });
+    EXPECT_TRUE(windowAnimationConfig.IsMap());
     ssm_->ConfigWindowAnimation(windowAnimationConfig);
-    ASSERT_EQ(ret, 0);
 
     item.SetValue(translate);
     windowAnimationConfig.SetValue({ { "translate", item } });
+    EXPECT_TRUE(windowAnimationConfig.IsMap());
     ssm_->ConfigWindowAnimation(windowAnimationConfig);
-    ASSERT_EQ(ret, 0);
 
     item.SetValue(scale);
     windowAnimationConfig.SetValue({ { "scale", item } });
+    EXPECT_TRUE(windowAnimationConfig.IsMap());
     ssm_->ConfigWindowAnimation(windowAnimationConfig);
-    ASSERT_EQ(ret, 0);
 
     item.SetValue(duration);
     item.SetValue({ { "duration", item } });
     windowAnimationConfig.SetValue({ { "timing", item } });
     ssm_->ConfigWindowAnimation(windowAnimationConfig);
-    ASSERT_EQ(ret, 0);
 
     item.SetValue(duration);
     item.SetValue({ { "curve", item } });
     windowAnimationConfig.SetValue({ { "timing", item } });
     ssm_->ConfigWindowAnimation(windowAnimationConfig);
-    ASSERT_EQ(ret, 0);
 }
 
 /**
@@ -362,6 +355,7 @@ HWTEST_F(SceneSessionManagerTest3, ConfigStartingWindowAnimation, TestSize.Level
     curve.SetValue({ { "curve", curve } });
     WindowSceneConfig::ConfigItem enableConfigItem;
     enableConfigItem.SetValue(false);
+    EXPECT_EQ(enableConfigItem.boolValue_, false);
     std::map<std::string, WindowSceneConfig::ConfigItem> midMap = { { "duration", middleInt }, { "curve", curve } };
     WindowSceneConfig::ConfigItem timing;
     timing.SetValue(midMap);
@@ -371,9 +365,7 @@ HWTEST_F(SceneSessionManagerTest3, ConfigStartingWindowAnimation, TestSize.Level
                                                                        { "opacityEnd", middleFloat } };
     WindowSceneConfig::ConfigItem configItem;
     configItem.SetValue(middleMap);
-    int ret = 0;
     ssm_->ConfigStartingWindowAnimation(configItem);
-    ASSERT_EQ(ret, 0);
     midMap.clear();
     middleMap.clear();
 }
@@ -409,29 +401,14 @@ HWTEST_F(SceneSessionManagerTest3, CreateCurve, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetRootSceneContext
- * @tc.desc: SceneSesionManager set root scene context
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest3, SetRootSceneContext, TestSize.Level1)
-{
-    int ret = 0;
-    std::weak_ptr<AbilityRuntime::Context> contextWeakPtr;
-    ssm_->SetRootSceneContext(contextWeakPtr);
-    ASSERT_EQ(ret, 0);
-}
-
-/**
  * @tc.name: GetRootSceneSession
  * @tc.desc: SceneSesionManager get root scene session
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest3, GetRootSceneSession, TestSize.Level1)
 {
-    int ret = 0;
-    ssm_->GetRootSceneSession();
-    ssm_->GetRootSceneSession();
-    ASSERT_EQ(ret, 0);
+    sptr<RootSceneSession> res = ssm_->GetRootSceneSession();
+    EXPECT_EQ(res, ssm_->rootSceneSession_);
 }
 
 /**
@@ -584,7 +561,6 @@ HWTEST_F(SceneSessionManagerTest3, GetWindowLimits, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest3, CheckWindowId, TestSize.Level1)
 {
-    int ret = 0;
     int32_t windowId = 1;
     int32_t pid = 2;
     ssm_->CheckWindowId(windowId, pid);
@@ -599,7 +575,6 @@ HWTEST_F(SceneSessionManagerTest3, CheckWindowId, TestSize.Level1)
     ssm_->CheckWindowId(windowId, pid);
     ssm_->PerformRegisterInRequestSceneSession(sceneSession);
     ssm_->sceneSessionMap_.erase(windowId);
-    ASSERT_EQ(ret, 0);
 }
 
 /**
@@ -847,15 +822,17 @@ HWTEST_F(SceneSessionManagerTest3, DestroyDialogWithMainWindow, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest3, AddClientDeathRecipient, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     SessionInfo info;
     info.abilityName_ = "AddClientDeathRecipient";
     info.bundleName_ = "AddClientDeathRecipient";
     sptr<SceneSession> sceneSession;
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    int ret = 0;
     ssm_->AddClientDeathRecipient(nullptr, sceneSession);
-    ASSERT_EQ(ret, 0);
+    EXPECT_FALSE(g_logMsg.find("failed to add death recipient") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -865,10 +842,12 @@ HWTEST_F(SceneSessionManagerTest3, AddClientDeathRecipient, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest3, DestroySpecificSession, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<IRemoteObject> remoteObject = nullptr;
-    int ret = 0;
     ssm_->DestroySpecificSession(remoteObject);
-    ASSERT_EQ(ret, 0);
+    EXPECT_TRUE(g_logMsg.find("Invalid remoteObject") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -878,9 +857,8 @@ HWTEST_F(SceneSessionManagerTest3, DestroySpecificSession, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest3, SetCreateSystemSessionListener, TestSize.Level1)
 {
-    int ret = 0;
     ssm_->SetCreateSystemSessionListener(nullptr);
-    ASSERT_EQ(ret, 0);
+    ASSERT_EQ(nullptr, ssm_->createSystemSessionFunc_);
 }
 
 /**
@@ -890,9 +868,8 @@ HWTEST_F(SceneSessionManagerTest3, SetCreateSystemSessionListener, TestSize.Leve
  */
 HWTEST_F(SceneSessionManagerTest3, SetGestureNavigationEnabledChangeListener, TestSize.Level1)
 {
-    int ret = 0;
     ssm_->SetGestureNavigationEnabledChangeListener(nullptr);
-    ASSERT_EQ(ret, 0);
+    ASSERT_EQ(nullptr, ssm_->gestureNavigationEnabledChangeFunc_);
 }
 
 /**
@@ -904,21 +881,15 @@ HWTEST_F(SceneSessionManagerTest3, OnOutsideDownEvent, TestSize.Level1)
 {
     int32_t x = 32;
     int32_t y = 32;
-    int ret = 0;
+    int32_t ret = 0;
+    ProcessOutsideDownEventFunc func = [&ret](int32_t x, int32_t y) {
+        ret = x + y;
+    };
+    auto tempFunc = ssm_->outsideDownEventFunc_;
+    ssm_->outsideDownEventFunc_ = func;
     ssm_->OnOutsideDownEvent(x, y);
-    ASSERT_EQ(ret, 0);
-}
-
-/**
- * @tc.name: NotifySessionTouchOutside
- * @tc.desc: SceneSesionManager notify session touch outside
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest3, NotifySessionTouchOutside, TestSize.Level1)
-{
-    int ret = 0;
-    ssm_->NotifySessionTouchOutside(0, 0);
-    ASSERT_EQ(ret, 0);
+    EXPECT_EQ(ret, 64);
+    ssm_->outsideDownEventFunc_ = tempFunc;
 }
 
 /**
@@ -951,28 +922,14 @@ HWTEST_F(SceneSessionManagerTest3, IsSameDisplayGroupId02, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetOutsideDownEventListener
- * @tc.desc: SceneSesionManager set outside down event listener
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest3, SetOutsideDownEventListener, TestSize.Level1)
-{
-    ProcessOutsideDownEventFunc func = [](int32_t x, int32_t y) { ssm_->OnOutsideDownEvent(x, y); };
-    int ret = 0;
-    ssm_->SetOutsideDownEventListener(func);
-    ASSERT_EQ(ret, 0);
-}
-
-/**
  * @tc.name: GetWindowSceneConfig
  * @tc.desc: SceneSesionManager get window scene config
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest3, GetWindowSceneConfig, TestSize.Level1)
 {
-    int ret = 0;
     AppWindowSceneConfig appWindowSceneConfig_ = ssm_->GetWindowSceneConfig();
-    ASSERT_EQ(ret, 0);
+    EXPECT_EQ(appWindowSceneConfig.backgroundScreenLock_, ssm_->appWindowSceneConfig_.backgroundScreenLock_);
 }
 
 /**
@@ -993,12 +950,14 @@ HWTEST_F(SceneSessionManagerTest3, ProcessBackEvent, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest3, HandleUserSwitch, TestSize.Level1)
 {
-    int ret = 0;
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     ssm_->HandleUserSwitch(UserSwitchEventType::SWITCHING, true);
     ssm_->HandleUserSwitch(UserSwitchEventType::SWITCHED, true);
     ssm_->HandleUserSwitch(UserSwitchEventType::SWITCHING, false);
     ssm_->HandleUserSwitch(UserSwitchEventType::SWITCHED, false);
-    ASSERT_EQ(ret, 0);
+    EXPECT_FALSE(g_logMsg.find("Invalid switchEventType") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
