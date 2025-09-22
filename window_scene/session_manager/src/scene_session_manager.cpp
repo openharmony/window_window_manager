@@ -5421,13 +5421,14 @@ bool SceneSessionManager::CheckStartWindowColorFollowApp(const AppExecFwk::Abili
 }
 
 bool SceneSessionManager::GetStartupPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo,
-    StartingWindowInfo& startingWindowInfo, bool appColorModeChanged, Global::Resource::ColorMode colorMode)
+    StartingWindowInfo& startingWindowInfo, Global::Resource::ColorMode defaultColorMode,
+    bool appColorModeChanged, Global::Resource::ColorMode appColorMode)
 {
     const std::map<std::string, std::string> START_WINDOW_KEY_AND_DEFAULT_MAP = {
         {STARTWINDOW_TYPE, "REQUIRED_SHOW"},
     };
 
-    auto resourceMgr = GetResourceManager(abilityInfo, Global::Resource::ColorMode::COLOR_MODE_NOT_SET);
+    auto resourceMgr = GetResourceManager(abilityInfo, defaultColorMode);
     if (!resourceMgr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "resourceMgr is nullptr.");
         return false;
@@ -5437,7 +5438,7 @@ bool SceneSessionManager::GetStartupPageFromResource(const AppExecFwk::AbilityIn
         TLOGD(WmsLogTag::WMS_PATTERN, "hapPath empty:%{public}s", abilityInfo.bundleName.c_str());
     }
     if (CheckStartWindowColorFollowApp(abilityInfo, resourceMgr) && appColorModeChanged) {
-        resourceMgr = GetResourceManager(abilityInfo, colorMode);
+        resourceMgr = GetResourceManager(abilityInfo, appColorMode);
         if (!resourceMgr) {
             TLOGE(WmsLogTag::WMS_PATTERN, "resourceMgr is nullptr.");
             return false;
@@ -5522,7 +5523,8 @@ void SceneSessionManager::GetBundleStartingWindowInfos(bool isDark, const AppExe
                 .darkMode = isDark,
             };
             StartingWindowInfo startingWindowInfo;
-            if (!GetStartupPageFromResource(abilityInfo, startingWindowInfo)) {
+            auto colorMode = isDark ? Global::Resource::ColorMode::DARK : Global::Resource::ColorMode::LIGHT;
+            if (!GetStartupPageFromResource(abilityInfo, startingWindowInfo, colorMode)) {
                 continue;
             }
             outValues.emplace_back(std::make_pair(itemKey, startingWindowInfo));
@@ -5669,7 +5671,8 @@ void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, Startin
         return;
     }
     auto appColorMode = isAppDark ? Global::Resource::ColorMode::DARK : Global::Resource::ColorMode::LIGHT;
-    if (GetStartupPageFromResource(abilityInfo, startingWindowInfo, isAppDark != isSystemDark, appColorMode)) {
+    if (GetStartupPageFromResource(abilityInfo, startingWindowInfo, Global::Resource::ColorMode::COLOR_MODE_NOT_SET,
+                                   isAppDark != isSystemDark, appColorMode)) {
         isDark = GetStartWindowColorFollowApp(sessionInfo) ? isAppDark : isSystemDark;
         CacheStartingWindowInfo(
             sessionInfo.bundleName_, sessionInfo.moduleName_, sessionInfo.abilityName_, startingWindowInfo, isDark);
