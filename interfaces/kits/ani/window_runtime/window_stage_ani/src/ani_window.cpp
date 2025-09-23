@@ -904,6 +904,32 @@ ani_object AniWindow::OnGetWindowAvoidArea(ani_env* env, ani_int type)
     return AniWindowUtils::CreateAniAvoidArea(env, avoidArea, static_cast<AvoidAreaType>(type));
 }
 
+ani_object AniWindow::GetWindowAvoidAreaIgnoringVisibility(ani_env* env, ani_object obj,
+    ani_long nativeObj, ani_int type)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] type:%{public}d", static_cast<int32_t>(type));
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    return aniWindow != nullptr ? aniWindow->OnGetWindowAvoidAreaIgnoringVisibility(env, type) : nullptr;
+}
+
+ani_object AniWindow::OnGetWindowAvoidAreaIgnoringVisibility(ani_env* env, ani_int type)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    auto window = GetWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] window is nullptr");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    AvoidArea avoidArea;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+        window->GetWindowAvoidAreaIgnoringVisibility(static_cast<AvoidAreaType>(type), avoidArea));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "[ANI] get failed, ret: %{public}d", ret);
+        return AniWindowUtils::AniThrowError(env, ret);
+    }
+    return AniWindowUtils::CreateAniAvoidArea(env, avoidArea, static_cast<AvoidAreaType>(type));
+}
+
 void DropWindowObjectByAni(ani_ref aniObj)
 {
     auto obj = g_localObjs.find(reinterpret_cast<ani_ref>(aniObj));
@@ -1875,6 +1901,8 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::GetUIContext)},
         ani_native_function {"getWindowAvoidAreaSync", "JI:L@ohos/window/window/AvoidArea;",
             reinterpret_cast<void *>(AniWindow::GetWindowAvoidArea)},
+        ani_native_function {"getWindowAvoidAreaIgnoringVisibilitySync", "JI:L@ohos/window/window/AvoidArea;",
+            reinterpret_cast<void *>(AniWindow::GetWindowAvoidAreaIgnoringVisibility)},
         ani_native_function {"setWaterMarkFlagSync", "JZ:V",
             reinterpret_cast<void *>(AniWindow::SetWaterMarkFlag)},
         ani_native_function {"setWindowFocusableSync", "JZ:V",

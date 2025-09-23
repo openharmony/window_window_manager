@@ -37,7 +37,7 @@ class UIContent;
 namespace OHOS {
 namespace Rosen {
 class RSNode;
-using GetSessionAvoidAreaByTypeCallback = std::function<AvoidArea(AvoidAreaType)>;
+using GetSessionAvoidAreaByTypeCallback = std::function<AvoidArea(AvoidAreaType, bool)>;
 using GetStatusBarHeightCallback = std::function<uint32_t()>;
 using UpdateRootSceneRectCallback = std::function<void(const Rect& rect)>;
 using UpdateRootSceneAvoidAreaCallback = std::function<void()>;
@@ -69,6 +69,8 @@ public:
     void OnFlushUIParams();
     WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = Rect::EMPTY_RECT,
         int32_t apiVersion = API_VERSION_INVALID) override;
+    WMError GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType type, AvoidArea& avoidArea,
+        const Rect& rect = Rect::EMPTY_RECT) override;
     void RegisterGetSessionAvoidAreaByTypeCallback(GetSessionAvoidAreaByTypeCallback&& callback);
     uint32_t GetStatusBarHeight() const override;
     void RegisterGetStatusBarHeightCallback(GetStatusBarHeightCallback&& callback);

@@ -1832,6 +1832,7 @@ export class WindowInternal implements Window {
     private native setWindowTouchableSync(nativeObj: long, isTouchable: boolean): void;
     private native getUIContextSync(nativeObj: long): UIContext;
     private native getWindowAvoidAreaSync(nativeObj: long, type: int): AvoidArea;
+    private native getWindowAvoidAreaIgnoringVisibilitySync(nativeObj: long, type: int): AvoidArea;
     private native setWaterMarkFlagSync(nativeObj: long, enable: boolean): void;
     private native setWindowFocusableSync(nativeObj: long, isFocusable: boolean): void;
     private native showWindowSync(nativeObj: long): void;
@@ -2328,6 +2329,10 @@ export class WindowInternal implements Window {
       return this.getWindowAvoidAreaSync(this.nativeObj, type as AvoidAreaType);
     }
 
+    public getWindowAvoidAreaIgnoringVisibility(type: AvoidAreaType): AvoidArea {
+      return this.getWindowAvoidAreaIgnoringVisibilitySync(this.nativeObj, type as AvoidAreaType);
+    }
+
     public setWaterMarkFlag(enable: boolean): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
@@ -2494,6 +2499,7 @@ export interface Window {
     setWindowTouchable(isTouchable: boolean, callback: AsyncCallback<void>): void
     getUIContext(): UIContext;
     getWindowAvoidArea(type: AvoidAreaType): AvoidArea;
+    getWindowAvoidAreaIgnoringVisibility(type: AvoidAreaType): AvoidArea;
     setWaterMarkFlag(enable: boolean): Promise<void>;
     setWaterMarkFlag(enable: boolean, callback: AsyncCallback<void>): void;
     setWindowFocusable(isFocusable: boolean): Promise<void>;

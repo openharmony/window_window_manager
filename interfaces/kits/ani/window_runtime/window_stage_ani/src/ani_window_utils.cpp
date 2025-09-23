@@ -359,7 +359,8 @@ ani_object AniWindowUtils::CreateAniRect(ani_env* env, const Rect& rect)
     return aniRect;
 }
 
-ani_object AniWindowUtils::CreateAniAvoidArea(ani_env* env, const AvoidArea& avoidArea, AvoidAreaType type)
+ani_object AniWindowUtils::CreateAniAvoidArea(ani_env* env, const AvoidArea& avoidArea,
+    AvoidAreaType type, bool useActualVisibility)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     ani_class aniClass;
@@ -380,8 +381,13 @@ ani_object AniWindowUtils::CreateAniAvoidArea(ani_env* env, const AvoidArea& avo
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to new obj");
         return AniWindowUtils::CreateAniUndefined(env);
     }
-    CallAniMethodVoid(env, aniAvoidArea, aniClass, "<set>visible", nullptr,
-        ani_boolean(type != AvoidAreaType::TYPE_CUTOUT));
+    if (useActualVisibility) {
+        CallAniMethodVoid(env, aniAvoidArea, aniClass, "<set>visible", nullptr,
+            ani_boolean(!avoidArea.isEmptyAvoidArea()));
+    } else {
+        CallAniMethodVoid(env, aniAvoidArea, aniClass, "<set>visible", nullptr,
+            ani_boolean(type != AvoidAreaType::TYPE_CUTOUT));
+    }
     CallAniMethodVoid(env, aniAvoidArea, aniClass, "<set>leftRect", nullptr,
         CreateAniRect(env, avoidArea.leftRect_));
     CallAniMethodVoid(env, aniAvoidArea, aniClass, "<set>topRect", nullptr,

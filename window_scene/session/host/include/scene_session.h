@@ -57,7 +57,7 @@ using UpdateOccupiedAreaIfNeedCallback = std::function<void(int32_t persistentId
 using NotifyWindowInfoUpdateCallback = std::function<void(int32_t persistentId, WindowUpdateType type)>;
 using NotifyWindowPidChangeCallback = std::function<void(int32_t windowId, bool startMoving)>;
 using NotifySessionTouchOutsideCallback = std::function<void(int32_t persistentId, DisplayId displayId)>;
-using GetAINavigationBarArea = std::function<WSRect(uint64_t displayId)>;
+using GetAINavigationBarArea = std::function<WSRect(uint64_t displayId, bool ignoreVisibility)>;
 using RecoveryCallback = std::function<void(int32_t persistentId, Rect rect)>;
 using NotifyBindDialogSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifySessionPiPControlStatusChangeFunc = std::function<void(WsPiPControlType controlType,
@@ -461,6 +461,8 @@ public:
     WSError OnNeedAvoid(bool status) override;
     AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT,
         int32_t apiVersion = API_VERSION_INVALID) override;
+    AvoidArea GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType type,
+        const WSRect& rect = WSRect::EMPTY_RECT) override;
     WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
     WSError GetTargetOrientationConfigInfo(Orientation targetOrientation,
         const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& properties) override;
@@ -1062,12 +1064,13 @@ private:
      */
     void SetSystemBarPropertyForRotation(const std::map<WindowType, SystemBarProperty>& properties);
     std::map<Rosen::WindowType, Rosen::SystemBarProperty>& GetSystemBarPropertyForRotation();
-    void GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea);
+    void GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea, bool ignoreVisibility = false);
     void GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea);
-    void GetAINavigationBarArea(WSRect& rect, AvoidArea& avoidArea);
+    void GetAINavigationBarArea(WSRect& rect, AvoidArea& avoidArea, bool ignoreVisibility = false);
     void PatchAINavigationBarArea(AvoidArea& avoidArea);
-    AvoidArea GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT);
+    AvoidArea GetAvoidAreaByTypeInner(AvoidAreaType type,
+        const WSRect& rect = WSRect::EMPTY_RECT, bool ignoreVisibility = false);
     WSError GetAvoidAreasByRotation(Rotation rotation, const WSRect& rect,
         const std::map<WindowType, SystemBarProperty>& properties, std::map<AvoidAreaType, AvoidArea>& avoidAreas);
     void GetSystemBarAvoidAreaByRotation(Rotation rotation, AvoidAreaType type, const WSRect& rect,

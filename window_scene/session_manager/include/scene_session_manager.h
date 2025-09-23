@@ -474,9 +474,9 @@ public:
         const WSRect& portraitRect, const WSRect& landspaceRect, DisplayId displayId);
     WSError GetNextAvoidRectInfo(DisplayId displayId, AvoidAreaType type,
         std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo);
-    WSRect GetAINavigationBarArea(uint64_t displayId);
+    WSRect GetAINavigationBarArea(uint64_t displayId, bool ignoreVisibility = false);
     void ClearDisplayStatusBarTemporarilyFlags();
-    AvoidArea GetRootSessionAvoidAreaByType(AvoidAreaType type);
+    AvoidArea GetRootSessionAvoidAreaByType(AvoidAreaType type, bool ignoreVisibility = false);
     uint32_t GetRootSceneStatusBarHeight() const;
     void SetOnFlushUIParamsFunc(OnFlushUIParamsFunc&& func);
     void SetIsRootSceneLastFrameLayoutFinishedFunc(IsRootSceneLastFrameLayoutFinishedFunc&& func);

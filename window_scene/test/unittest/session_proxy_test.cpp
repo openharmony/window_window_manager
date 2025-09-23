@@ -175,6 +175,23 @@ HWTEST_F(SessionProxyTest, OnNeedAvoid, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetAvoidAreaByTypeIgnoringVisibility
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, GetAvoidAreaByTypeIgnoringVisibility, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetAvoidAreaByTypeIgnoringVisibility start";
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM;
+    AvoidArea res = sProxy->GetAvoidAreaByTypeIgnoringVisibility(type);
+    AvoidArea empty;
+    EXPECT_EQ(res, empty);
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetAvoidAreaByTypeIgnoringVisibility end";
+}
+
+/**
  * @tc.name: RequestSessionBack
  * @tc.desc: normal function
  * @tc.type: FUNC
