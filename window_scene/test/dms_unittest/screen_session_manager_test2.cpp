@@ -2309,6 +2309,50 @@ HWTEST_F(ScreenSessionManagerTest, RecoveryResolutionEffect, TestSize.Level1)
     ssm_->screenSessionMap_.erase(51);
     ssm_->screenSessionMap_.erase(52);
 }
+
+/**
+ * @tc.name: SwitchModeOffScreenRenderingResetScreenProperty
+ * @tc.desc: SwitchModeOffScreenRenderingResetScreenProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SwitchModeOffScreenRenderingResetScreenProperty, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr);
+    sptr<ScreenSession> session = nullptr;
+    g_errLog.clear();
+    ssm_->SwitchModeOffScreenRenderingResetScreenProperty(session, true);
+    EXPECT_TRUE(g_errLog.find("externalScreenSession is nullptr") != std::string::npos);
+    session = sptr<ScreenSession>::MakeSptr();
+    g_errLog.clear();
+    ssm_->SwitchModeOffScreenRenderingResetScreenProperty(session, true);
+    EXPECT_FALSE(g_errLog.find("SetExtendProperty screenId") != std::string::npos);
+    g_errLog.clear();
+    ssm_->SwitchModeOffScreenRenderingResetScreenProperty(session, false);
+    EXPECT_TRUE(g_errLog.find("SetExtendProperty screenId") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+ 
+/**
+ * @tc.name: SwitchModeOffScreenRenderingAdapter
+ * @tc.desc: SwitchModeOffScreenRenderingAdapter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SwitchModeOffScreenRenderingAdapter, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr);
+    std::vector<ScreenId> externalScreenIds;
+    g_errLog.clear();
+    ssm_->SwitchModeOffScreenRenderingAdapter(externalScreenIds);
+    EXPECT_TRUE(g_errLog.find("externalScreenIds is empty") != std::string::npos);
+    g_errLog.clear();
+    ScreenId screenId = 666;
+    externalScreenIds.emplace_back(screenId);
+    ssm_->SwitchModeOffScreenRenderingAdapter(externalScreenIds);
+    EXPECT_FALSE(g_errLog.find("externalScreenIds is empty") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
 }
 }
 }
