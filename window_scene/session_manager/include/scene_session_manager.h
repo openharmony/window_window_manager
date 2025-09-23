@@ -717,12 +717,13 @@ public:
         int32_t requestId = DEFAULT_REQUEST_FROM_SCB_ID);
     WSError RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession, const bool isDelegator = false,
         const bool isToDesktop = false, const bool isSaveSnapshot = true,
-        BackgroundReason reason = BackgroundReason::DEFAULT);
+        LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
     WSError RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession, bool needRemoveSession = true,
-        bool isSaveSnapshot = true, const bool isForceClean = false, bool isUserRequestedExit = false);
+        bool isSaveSnapshot = true, const bool isForceClean = false, bool isUserRequestedExit = false,
+        LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
     WSError RequestSceneSessionDestructionInner(sptr<SceneSession>& sceneSession,
         sptr<AAFwk::SessionInfo> sceneSessionInfo, const bool needRemoveSession, const bool isForceClean = false,
-        bool isUserRequestedExit = false);
+        bool isUserRequestedExit = false, LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
     void NotifyForegroundInteractiveStatus(const sptr<SceneSession>& sceneSession, bool interactive);
     WSError RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession,
         int32_t requestId = DEFAULT_REQUEST_FROM_SCB_ID);
@@ -770,7 +771,8 @@ public:
     void RegisterTransferSessionToTargetScreenCallback(NotifyTransferSessionToTargetScreenFunc&& func);
     WMError NotifyTransferSessionToTargetScreen(const TransferSessionInfo& info);
     void NotifySessionTransferToTargetScreenEvent(const int32_t persistentId,
-        const uint32_t resultCode, const uint64_t fromScreenid, const uint64_t toScreenId);
+        const uint32_t resultCode, const uint64_t fromScreenid, const uint64_t toScreenId,
+        LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
     WSError GetApplicationInfo(const std::string& bundleName, SCBApplicationInfo& scbApplicationInfo);
     WSError GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList);
     void UpdateRecentMainSessionInfos(const std::vector<int32_t>& recentMainSessionIdList);
@@ -1121,7 +1123,8 @@ private:
     void RegisterAcquireRotateAnimationConfigFunc(const sptr<SceneSession>& sceneSession);
 
     void RegisterVisibilityChangedDetectFunc(const sptr<SceneSession>& sceneSession);
-    void NotifySessionForCallback(const sptr<SceneSession>& sceneSession, const bool needRemoveSession);
+    void NotifySessionForCallback(const sptr<SceneSession>& sceneSession, const bool needRemoveSession,
+        LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
     void AddClientDeathRecipient(const sptr<ISessionStage>& sessionStage, const sptr<SceneSession>& sceneSession);
     void DestroySpecificSession(const sptr<IRemoteObject>& remoteObject);
     bool GetExtensionWindowIds(const sptr<IRemoteObject>& token, int32_t& persistentId, int32_t& parentId);
