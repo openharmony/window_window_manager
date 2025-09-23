@@ -1216,7 +1216,15 @@ HWTEST_F(SceneSessionTest3, NotifyUpdateAppUseControl, Function | SmallTest | Le
         .isControlRecentOnly = false
     };
     sceneSession->NotifyUpdateAppUseControl(type, controlInfoSec);
-    EXPECT_TRUE(logMsg.find("begin call pause") == std::string::npos);
+
+    sceneSession->Session::SetSessionState(SessionState::STATE_BACKGROUND);
+    sceneSession->NotifyUpdateAppUseControl(type, controlInfoSec);
+    ControlInfo controlInfoThd = {
+        .isNeedControl = true,
+        .isControlRecentOnly = false
+    };
+    sceneSession->NotifyUpdateAppUseControl(type, controlInfoThd);
+    EXPECT_TRUE(logMsg.find("isAppUseControl:") != std::string::npos);
     LOG_SetCallback(nullptr);
 }
 

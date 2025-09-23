@@ -2586,7 +2586,11 @@ void MainThreadScheduler::PostMainThreadTask(Task&& localTask, std::string trace
             return;
         }
         napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
+        napi_status status = napi_open_handle_scope(env, &scope);
+        if (status != napi_ok || scope == nullptr) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "open handle scope failed.");
+            return;
+        }
         localTask();
         napi_close_handle_scope(env, scope);
     };
