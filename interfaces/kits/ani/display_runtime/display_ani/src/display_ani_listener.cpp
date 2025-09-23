@@ -117,7 +117,7 @@ void DisplayAniListener::OnCreate(DisplayId id)
         }
         auto task = [env = env_, oneAniCallback, id] {
             DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "displayEventCallBack",
-                nullptr, oneAniCallback, static_cast<ani_double>(id));
+                nullptr, oneAniCallback, static_cast<ani_long>(id));
         };
         if (!eventHandler_) {
             TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
@@ -162,7 +162,7 @@ void DisplayAniListener::OnDestroy(DisplayId id)
         }
         auto task = [env = env_, oneAniCallback, id] {
             DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "displayEventCallBack",
-                nullptr, oneAniCallback, static_cast<ani_double>(id));
+                nullptr, oneAniCallback, static_cast<ani_long>(id));
         };
         if (!eventHandler_) {
             TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
@@ -204,7 +204,7 @@ void DisplayAniListener::OnChange(DisplayId id)
         }
         auto task = [env = env_, oneAniCallback, id] {
             DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "displayEventCallBack",
-                nullptr, oneAniCallback, static_cast<ani_double>(id));
+                nullptr, oneAniCallback, static_cast<ani_long>(id));
         };
         if (!eventHandler_) {
             TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
