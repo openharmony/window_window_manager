@@ -16,6 +16,7 @@ import { AsyncCallback, BusinessError, Callback } from '@ohos.base';
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { UIContext } from '@ohos.arkui.UIContext';
 import BaseContext from 'application.BaseContext';
+import hilog from '@ohos.hilog';
 import { ColorMetrics } from '@ohos.arkui.node';
 import image from '@ohos.multimedia.image';
 
