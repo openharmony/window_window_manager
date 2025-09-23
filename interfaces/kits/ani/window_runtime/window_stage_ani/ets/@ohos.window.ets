@@ -1797,6 +1797,9 @@ export class WindowInternal implements Window {
         this.nativeObj = nativeObj;
     }
 
+    private static native nativeTransferStatic(input: ESValue): Object;
+    private static native nativeTransferDynamic(nativeObj: long): ESValue;
+
     private native resize(nativeObj: long, width: int, height: int): void;
     private native moveWindowTo(nativeObj: long, x: int, y: int): void;
     private native getGlobalRect(nativeObj:long): Rect;
@@ -1842,6 +1845,16 @@ export class WindowInternal implements Window {
     private native onSync(nativeObj: long, type: string, callback: object): void;
     private native onNoInteractionDetected(nativeObj: long, type: string, timeout: long, callback: Object): void;
     private native offSync(nativeObj: long, type: string, callback?: object): void;
+
+    public static transferStatic(input: Any): Object {
+      hilog.info(DOMAIN, TAG, 'window transfer static, input:' + input);
+      return WindowInternal.nativeTransferStatic(ESValue.wrap(input));
+    }
+
+    public static transferDynamic(input: Object): Any {
+      hilog.info(DOMAIN, TAG, 'window transfer dynamic, input:' + input);
+      return WindowInternal.nativeTransferDynamic((input as WindowInternal).nativeObj).unwrap();
+    }
 
     public resize(width: int, height: int): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
