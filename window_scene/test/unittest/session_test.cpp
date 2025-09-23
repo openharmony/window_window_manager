@@ -1209,6 +1209,25 @@ HWTEST_F(WindowSessionTest, SetSessionLabel, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateSessionLabel
+ * @tc.desc: UpdateSessionLabel Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, UpdateSessionLabel, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->label_ = "test label";
+    session_->UpdateSessionLabel("test label1");
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_EQ(session_->label_, "test label");
+
+    session_->label_ = "";
+    session_->UpdateSessionLabel("test label1");
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_EQ(session_->label_, "");
+}
+
+/**
  * @tc.name: SetUpdateSessionLabelListener
  * @tc.desc: SetUpdateSessionLabelListener Test
  * @tc.type: FUNC
@@ -1795,6 +1814,22 @@ HWTEST_F(WindowSessionTest, TransformRelativeRectToGlobalRect, TestSize.Level1)
     sceneSession->GetLayoutController()->SetSessionRect({ 0, 9999, 2472, 1648 });
     sceneSession->TransformRelativeRectToGlobalRect(rect);
     EXPECT_NE(rect.posY_, 100);
+}
+
+/**
+ * @tc.name: IsStatusBarVisible
+ * @tc.desc: IsStatusBarVisible Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsStatusBarVisible, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    session_->UpdateStatusBarVisible(false);
+    EXPECT_EQ(false, session_->IsStatusBarVisible());
+    session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    EXPECT_EQ(false, session_->IsStatusBarVisible());
 }
 } // namespace
 } // namespace Rosen

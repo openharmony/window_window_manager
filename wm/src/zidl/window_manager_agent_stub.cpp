@@ -381,6 +381,15 @@ bool WindowManagerAgentStub::ReadWindowInfo(MessageParcel& data,
             windowInfo[windowInfoKey] = value;
             break;
         }
+        case WindowInfoKey::MID_SCENE : {
+            bool value = false;
+            if (!data.ReadBool(value)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read bool failed");
+                return false;
+            }
+            windowInfo[windowInfoKey] = value;
+            break;
+        }
         default : {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "unknown WindowInfoKey");
             return false;

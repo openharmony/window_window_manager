@@ -2667,7 +2667,7 @@ HWTEST_F(WindowSceneSessionImplTest, NotifyIsFullScreenInForceSplitMode, TestSiz
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->NotifyIsFullScreenInForceSplitMode(false);
-    ASSERT_FALSE(WSError::WS_OK, window->isFullScreenInForceSplit_.load());
+    ASSERT_FALSE(window->isFullScreenInForceSplit_.load());
 }
 
 /**

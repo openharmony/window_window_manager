@@ -18,6 +18,7 @@ group("ani_packages") {
     "display_runtime:display_ani",
     "embeddable_window_stage:embeddable_window_stage_ani",
     "screen_runtime:screen_ani",
+    "screenshot_runtime:screenshot_ani",
     "window_runtime:window_stage_ani_pack",
   ]
 }

@@ -47,14 +47,6 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-namespace {
-    std::string g_errLog;
-    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
-        const char *msg)
-    {
-        g_errLog = msg;
-    }
-}
 class KeyboardTestData;
 class SceneSessionManagerTest12 : public testing::Test {
 public:
@@ -3083,9 +3075,9 @@ HWTEST_F(SceneSessionManagerTest12, NotifyIsFullScreenInForceSplitMode, TestSize
 {
     uint32_t uid = 100;
     ssm_->NotifyIsFullScreenInForceSplitMode(uid, true);
-    EXPECT_EQ(ssm_->fullScreenInForceSplitUidSet_.find(uid) != ssm_->fullScreenInForceSplitUidSet_.end());
+    EXPECT_TRUE(ssm_->fullScreenInForceSplitUidSet_.find(uid) != ssm_->fullScreenInForceSplitUidSet_.end());
     ssm_->NotifyIsFullScreenInForceSplitMode(uid, false);
-    EXPECT_EQ(ssm_->fullScreenInForceSplitUidSet_.find(uid) == ssm_->fullScreenInForceSplitUidSet_.end());
+    EXPECT_TRUE(ssm_->fullScreenInForceSplitUidSet_.find(uid) == ssm_->fullScreenInForceSplitUidSet_.end());
 }
 } // namespace
 } // namespace Rosen

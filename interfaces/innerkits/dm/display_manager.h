@@ -188,7 +188,7 @@ public:
      *
      * @return All displays.
      */
-    std::vector<sptr<Display>> GetAllDisplays();
+    std::vector<sptr<Display>> GetAllDisplays(int32_t userId = CONCURRENT_USER_ID_DEFAULT);
 
     /**
      * @brief Obtain the id of the default display.
@@ -209,7 +209,7 @@ public:
      *
      * @return Default display id.
      */
-    sptr<Display> GetDefaultDisplaySync(bool isFromNapi = false);
+    sptr<Display> GetDefaultDisplaySync(bool isFromNapi = false, int32_t userId = CONCURRENT_USER_ID_DEFAULT);
 
     /**
      * @brief Provide ability of setting virtual screen as primary for no-screen device.
@@ -257,7 +257,7 @@ public:
      *
      * @return All display IDs.
      */
-    std::vector<DisplayId> GetAllDisplayIds();
+    std::vector<DisplayId> GetAllDisplayIds(int32_t userId = CONCURRENT_USER_ID_DEFAULT);
 
     /**
      * @brief Get whether the target display contains privacy windows.

@@ -339,6 +339,8 @@ public:
     bool IsSupportRotateFullScreen() const;
     bool IsAdaptToSubWindow() const;
     bool IsAdaptToSimulationScale() const;
+    void SetIsFullScreenInForceSplitMode(bool isFullScreenInForceSplitMode);
+    bool IsFullScreenInForceSplitMode() const;
 
     /*
      * Keyboard
@@ -515,6 +517,7 @@ private:
     bool isAppSupportPhoneInPc_ = false;
     bool isPcAppInLargeScreenDevice_ = false;
     mutable std::mutex compatibleModeMutex_;
+    bool isFullScreenInForceSplitMode_;
     uint8_t backgroundAlpha_ = 0xff; // default alpha is opaque.
     mutable std::mutex atomicServiceMutex_;
     bool isAtomicService_ = false;

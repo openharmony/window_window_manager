@@ -1,0 +1,85 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("../../windowmanager_aafwk.gni")
+
+config("libdm_extension_private_config") {
+  include_dirs = [
+    "dms/include",
+    "${window_base_path}/window_scene/session/screen/include",
+    "${window_base_path}/interfaces/innerkits",
+    "${window_base_path}/interfaces/innerkits/dm",
+    "${window_base_path}/utils/include",
+    "${window_base_path}/dmserver/include",
+    "${window_base_path}/window_scene/screen_session_manager/include",
+  ]
+}
+
+config("libdm_extension_public_config") {
+  include_dirs = [
+  ]
+}
+
+## Build libdm_extension.so
+ohos_shared_library("libdm_extension") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  sources = [
+    "dms/src/screen_session_manager_phone_extension.cpp",
+    "dms/src/screen_session_manager_phone_register.cpp",
+  ]
+
+  configs = [
+    ":libdm_extension_private_config",
+  ]
+
+  public_configs = [
+    ":libdm_extension_public_config",
+  ]
+
+  deps = [
+    "${window_base_path}/dmserver:display_manager_interface_source_set_proxy",
+    "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/utils:libwmutil_base",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+    "${window_base_path}/window_scene/common:window_scene_common",
+    "${window_base_path}/window_scene/screen_session_manager:screen_session_manager",
+    "${window_base_path}/window_scene:window_scene",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "safwk:system_ability_fwk",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
+    "selinux_adapter:librestorecon",
+
+  ]
+
+  part_name = "window_manager"
+  subsystem_name = "window"
+
+  visibility = [ "*" ]
+}
+
+group("test") {
+  testonly = true
+  deps = [ "dms/test:unittest" ]
+}

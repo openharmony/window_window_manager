@@ -445,6 +445,7 @@ struct SessionInfo {
     bool disableDelegator = false;
     bool reuseDelegatorWindow = false;
     bool isAbilityHook_ = false;
+    std::string label_ = "";
     StartWindowType startWindowType_ = StartWindowType::DEFAULT;
     bool isSetStartWindowType_ = false;
     int32_t scenarios = 0;
@@ -1093,6 +1094,7 @@ enum class SessionPropertyFlag {
     WINDOW_RECT = 1 << 6,
     WINDOW_MODE = 1 << 7,
     FLOATING_SCALE = 1 << 8,
+    MID_SCENE = 1 << 9,
 };
 
 /**

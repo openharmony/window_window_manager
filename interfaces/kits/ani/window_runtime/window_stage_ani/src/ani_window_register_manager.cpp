@@ -37,6 +37,8 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     {LIFECYCLE_EVENT_CB, RegisterListenerType::LIFECYCLE_EVENT_CB},
     {WINDOW_EVENT_CB, RegisterListenerType::WINDOW_EVENT_CB},
     {KEYBOARD_HEIGHT_CHANGE_CB, RegisterListenerType::KEYBOARD_HEIGHT_CHANGE_CB},
+    {KEYBOARD_DID_SHOW_CB, RegisterListenerType::KEYBOARD_DID_SHOW_CB},
+    {KEYBOARD_DID_HIDE_CB, RegisterListenerType::KEYBOARD_DID_HIDE_CB},
     {TOUCH_OUTSIDE_CB, RegisterListenerType::TOUCH_OUTSIDE_CB},
     {SCREENSHOT_EVENT_CB, RegisterListenerType::SCREENSHOT_EVENT_CB},
     {DIALOG_TARGET_TOUCH_CB, RegisterListenerType::DIALOG_TARGET_TOUCH_CB},
@@ -47,6 +49,10 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     {WINDOW_NO_INTERACTION_DETECT_CB, RegisterListenerType::WINDOW_NO_INTERACTION_DETECT_CB},
     {WINDOW_RECT_CHANGE_CB, RegisterListenerType::WINDOW_RECT_CHANGE_CB},
     {SUB_WINDOW_CLOSE_CB, RegisterListenerType::SUB_WINDOW_CLOSE_CB},
+    {WINDOW_HIGHLIGHT_CHANGE_CB, RegisterListenerType::WINDOW_HIGHLIGHT_CHANGE_CB},
+    {WINDOW_DISPLAYID_CHANGE_CB, RegisterListenerType::WINDOW_DISPLAYID_CHANGE_CB},
+    {SYSTEM_DENSITY_CHANGE_CB, RegisterListenerType::SYSTEM_DENSITY_CHANGE_CB},
+    {WINDOW_ROTATION_CHANGE_CB, RegisterListenerType::WINDOW_ROTATION_CHANGE_CB},
 };
 const std::map<std::string, RegisterListenerType> WINDOW_STAGE_LISTENER_MAP {
     // white register list for window stage
@@ -126,6 +132,40 @@ WmErrorCode AniWindowRegisterManager::ProcessAvoidAreaChangeRegister(sptr<AniWin
     return ret;
 }
 
+WmErrorCode AniWindowRegisterManager::ProcessSystemDensityChangeRegister(sptr<AniWindowListener> listener,
+    sptr<Window> window, bool isRegister, ani_env* env)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<ISystemDensityChangeListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterSystemDensityChangeListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterSystemDensityChangeListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode AniWindowRegisterManager::ProcessDisplayIdChangeRegister(sptr<AniWindowListener> listener,
+    sptr<Window> window, bool isRegister, ani_env* env)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IDisplayIdChangeListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterDisplayIdChangeListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterDisplayIdChangeListener(thisListener));
+    }
+    return ret;
+}
+
 WmErrorCode AniWindowRegisterManager::ProcessLifeCycleEventRegister(sptr<AniWindowListener> listener,
     sptr<Window> window, bool isRegister, ani_env* env)
 {
@@ -164,7 +204,7 @@ WmErrorCode AniWindowRegisterManager::ProcessOccupiedAreaChangeRegister(sptr<Ani
     sptr<Window> window, bool isRegister, ani_env* env)
 {
     if (window == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]Window is nullptr");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI]Window is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IOccupiedAreaChangeListener> thisListener(listener);
@@ -173,6 +213,40 @@ WmErrorCode AniWindowRegisterManager::ProcessOccupiedAreaChangeRegister(sptr<Ani
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterOccupiedAreaChangeListener(thisListener));
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterOccupiedAreaChangeListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode AniWindowRegisterManager::ProcessKeyboardDidShowRegister(sptr<AniWindowListener> listener,
+    sptr<Window> window, bool isRegister, ani_env* env)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI]Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IKeyboardDidShowListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterKeyboardDidShowListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterKeyboardDidShowListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode AniWindowRegisterManager::ProcessKeyboardDidHideRegister(sptr<AniWindowListener> listener,
+    sptr<Window> window, bool isRegister, ani_env* env)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI]Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IKeyboardDidHideListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterKeyboardDidHideListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterKeyboardDidHideListener(thisListener));
     }
     return ret;
 }
@@ -224,18 +298,55 @@ WmErrorCode AniWindowRegisterManager::ProcessWaterMarkFlagChangeRegister(sptr<An
 WmErrorCode AniWindowRegisterManager::ProcessTouchOutsideRegister(sptr<AniWindowListener> listener,
     sptr<Window> window, bool isRegister, ani_env* env)
 {
-    TLOGI(WmsLogTag::DEFAULT, "called");
+    TLOGI(WmsLogTag::WMS_EVENT, "called");
     if (window == nullptr) {
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<ITouchOutsideListener> thisListener(listener);
     WmErrorCode ret = WmErrorCode::WM_OK;
     if (isRegister) {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterTouchOutsideListener(thisListener));
+        ret = AniWindowUtils::ToErrorCode(window->RegisterTouchOutsideListener(thisListener));
     } else {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterTouchOutsideListener(thisListener));
+        ret = AniWindowUtils::ToErrorCode(window->UnregisterTouchOutsideListener(thisListener));
     }
     return ret;
+}
+
+WmErrorCode AniWindowRegisterManager::ProcessDialogTargetTouchRegister(sptr<AniWindowListener> listener,
+    sptr<Window> window, bool isRegister, ani_env* env)
+{
+    if (window == nullptr) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IDialogTargetTouchListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = AniWindowUtils::ToErrorCode(window->RegisterDialogTargetTouchListener(thisListener));
+    } else {
+        ret = AniWindowUtils::ToErrorCode(window->UnregisterDialogTargetTouchListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode AniWindowRegisterManager::ProcessWindowNoInteractionRegister(sptr<AniWindowListener> listener,
+    sptr<Window> window, bool isRegister, ani_env* env, ani_long timeout)
+{
+    if (window == nullptr) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IWindowNoInteractionListener> thisListener(listener);
+    if (!isRegister) {
+        return AniWindowUtils::ToErrorCode(window->UnregisterWindowNoInteractionListener(thisListener));
+    }
+    constexpr ani_long secToMicrosecRatio = 1000;
+    constexpr ani_long noInteractionMax = LLONG_MAX / secToMicrosecRatio;
+    if (timeout <= 0 || (timeout > noInteractionMax)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]invalid parameter: no-interaction-timeout %{public}" PRId64 " is not in "
+            "(0s~%{public}" PRId64, timeout, noInteractionMax);
+        return WmErrorCode::WM_ERROR_INVALID_PARAM;
+    }
+    thisListener->SetTimeout(timeout * secToMicrosecRatio);
+    return AniWindowUtils::ToErrorCode(window->RegisterWindowNoInteractionListener(thisListener));
 }
 
 WmErrorCode AniWindowRegisterManager::ProcessWindowVisibilityChangeRegister(sptr<AniWindowListener> listener,
@@ -255,12 +366,6 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowVisibilityChangeRegister(sptr
     return ret;
 }
 
-WmErrorCode AniWindowRegisterManager::ProcessWindowNoInteractionRegister(sptr<AniWindowListener> listener,
-    sptr<Window> window, bool isRegister, ani_env* env)
-{
-    return WmErrorCode::WM_OK;
-}
-
 WmErrorCode AniWindowRegisterManager::ProcessScreenshotRegister(sptr<AniWindowListener> listener,
     sptr<Window> window, bool isRegister, ani_env* env)
 {
@@ -276,22 +381,6 @@ WmErrorCode AniWindowRegisterManager::ProcessScreenshotRegister(sptr<AniWindowLi
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterScreenshotListener(thisListener));
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterScreenshotListener(thisListener));
-    }
-    return ret;
-}
-
-WmErrorCode AniWindowRegisterManager::ProcessDialogTargetTouchRegister(sptr<AniWindowListener> listener,
-    sptr<Window> window, bool isRegister, ani_env* env)
-{
-    if (window == nullptr) {
-        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-    }
-    sptr<IDialogTargetTouchListener> thisListener(listener);
-    WmErrorCode ret = WmErrorCode::WM_OK;
-    if (isRegister) {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterDialogTargetTouchListener(thisListener));
-    } else {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterDialogTargetTouchListener(thisListener));
     }
     return ret;
 }
@@ -348,7 +437,7 @@ bool AniWindowRegisterManager::IsCallbackRegistered(ani_env* env, std::string ty
 }
 
 WmErrorCode AniWindowRegisterManager::RegisterListener(sptr<Window> window, const std::string& type,
-    CaseType caseType, ani_env* env, ani_ref callback)
+    CaseType caseType, ani_env* env, ani_ref callback, ani_long timeout)
 {
     std::lock_guard<std::mutex> lock(mtx_);
     if (IsCallbackRegistered(env, type, callback)) {
@@ -370,13 +459,19 @@ WmErrorCode AniWindowRegisterManager::RegisterListener(sptr<Window> window, cons
         TLOGE(WmsLogTag::DEFAULT, "[ANI]create global ref fail");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     };
-    sptr<AniWindowListener> windowManagerListener = new AniWindowListener(env, cbRef, caseType);
+    ani_vm* vm = nullptr;
+    ani_status aniRet = env->GetVM(&vm);
+    if (aniRet != ANI_OK || vm == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]Get VM failed, ret: %{public}u", aniRet);
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    auto windowManagerListener = sptr<AniWindowListener>::MakeSptr(env, vm, cbRef, caseType);
     if (windowManagerListener == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI]New AniWindowListener failed");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     windowManagerListener->SetMainEventHandler();
-    WmErrorCode ret = ProcessListener(listenerType, caseType, windowManagerListener, window, true, env);
+    WmErrorCode ret = ProcessListener(listenerType, caseType, windowManagerListener, window, true, env, timeout);
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI]Register type %{public}s failed", type.c_str());
         return ret;
@@ -405,7 +500,8 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowStageListener(RegisterListene
 }
 
 WmErrorCode AniWindowRegisterManager::ProcessWindowListener(RegisterListenerType registerListenerType,
-    const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister, ani_env* env)
+    const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister, ani_env* env,
+    ani_long timeout)
 {
     switch (static_cast<uint32_t>(registerListenerType)) {
         case static_cast<uint32_t>(RegisterListenerType::WINDOW_SIZE_CHANGE_CB):
@@ -420,12 +516,18 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowListener(RegisterListenerType
             return ProcessLifeCycleEventRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::KEYBOARD_HEIGHT_CHANGE_CB):
             return ProcessOccupiedAreaChangeRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::KEYBOARD_DID_SHOW_CB):
+            return ProcessKeyboardDidShowRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::KEYBOARD_DID_HIDE_CB):
+            return ProcessKeyboardDidHideRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::TOUCH_OUTSIDE_CB):
             return ProcessTouchOutsideRegister(windowManagerListener, window, isRegister, env);
-        case static_cast<uint32_t>(RegisterListenerType::SCREENSHOT_EVENT_CB):
-            return ProcessScreenshotRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::DIALOG_TARGET_TOUCH_CB):
             return ProcessDialogTargetTouchRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::WINDOW_NO_INTERACTION_DETECT_CB):
+            return ProcessWindowNoInteractionRegister(windowManagerListener, window, isRegister, env, timeout);
+        case static_cast<uint32_t>(RegisterListenerType::SCREENSHOT_EVENT_CB):
+            return ProcessScreenshotRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::DIALOG_DEATH_RECIPIENT_CB):
             return ProcessDialogDeathRecipientRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::WINDOW_STATUS_CHANGE_CB):
@@ -434,12 +536,18 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowListener(RegisterListenerType
             return ProcessWindowTitleButtonRectChangeRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::WINDOW_VISIBILITY_CHANGE_CB):
             return ProcessWindowVisibilityChangeRegister(windowManagerListener, window, isRegister, env);
-        case static_cast<uint32_t>(RegisterListenerType::WINDOW_NO_INTERACTION_DETECT_CB):
-            return ProcessWindowNoInteractionRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::WINDOW_RECT_CHANGE_CB):
             return ProcessWindowRectChangeRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::SUB_WINDOW_CLOSE_CB):
             return ProcessSubWindowCloseRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::WINDOW_HIGHLIGHT_CHANGE_CB):
+            return ProcessWindowHighlightChangeRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::SYSTEM_DENSITY_CHANGE_CB):
+            return ProcessSystemDensityChangeRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::WINDOW_DISPLAYID_CHANGE_CB):
+            return ProcessDisplayIdChangeRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::WINDOW_ROTATION_CHANGE_CB):
+            return ProcessWindowRotationChangeRegister(windowManagerListener, window, isRegister, env);
         default:
             TLOGE(WmsLogTag::DEFAULT, "[ANI]RegisterListenerType %{public}u is not supported",
                 static_cast<uint32_t>(registerListenerType));
@@ -466,12 +574,13 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowManagerListener(RegisterListe
 }
 
 WmErrorCode AniWindowRegisterManager::ProcessListener(RegisterListenerType registerListenerType, CaseType caseType,
-    const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister, ani_env* env)
+    const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister, ani_env* env,
+    ani_long timeout)
 {
     if (caseType == CaseType::CASE_WINDOW_MANAGER) {
         return ProcessWindowManagerListener(registerListenerType, windowManagerListener, window, isRegister, env);
     } else if (caseType == CaseType::CASE_WINDOW) {
-        return ProcessWindowListener(registerListenerType, windowManagerListener, window, isRegister, env);
+        return ProcessWindowListener(registerListenerType, windowManagerListener, window, isRegister, env, timeout);
     } else if (caseType == CaseType::CASE_STAGE) {
         return ProcessWindowStageListener(registerListenerType, windowManagerListener, window, isRegister, env);
     }
@@ -502,12 +611,13 @@ WmErrorCode AniWindowRegisterManager::UnregisterListener(sptr<Window> window, co
     if (isUndef == ANI_TRUE) {
         TLOGI(WmsLogTag::DEFAULT, "[ANI]Unregister all callbck, type:%{public}s", type.c_str());
         for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
-            WmErrorCode ret = ProcessListener(listenerType, caseType, it->second, window, false, env);
+            WmErrorCode ret = ProcessListener(listenerType, caseType, it->second, window, false, env, 0);
             if (ret != WmErrorCode::WM_OK) {
                 TLOGE(WmsLogTag::DEFAULT, "[ANI]Unregister type %{public}s failed, no value", type.c_str());
                 return ret;
             }
-            env->GlobalReference_Delete(it->second->GetAniCallBack());
+            env->GlobalReference_Delete(it->second->GetAniCallback());
+            it->second->SetAniCallback(nullptr);
             jsCbMap_[type].erase(it++);
         }
     } else {
@@ -520,11 +630,13 @@ WmErrorCode AniWindowRegisterManager::UnregisterListener(sptr<Window> window, co
                 continue;
             }
             findFlag = true;
-            WmErrorCode ret = ProcessListener(listenerType, caseType, it->second, window, false, env);
+            WmErrorCode ret = ProcessListener(listenerType, caseType, it->second, window, false, env, 0);
             if (ret != WmErrorCode::WM_OK) {
                 TLOGE(WmsLogTag::DEFAULT, "[ANI]Unregister type %{public}s failed", type.c_str());
                 return ret;
             }
+            env->GlobalReference_Delete(it->second->GetAniCallback());
+            it->second->SetAniCallback(nullptr);
             jsCbMap_[type].erase(it);
             break;
         }
@@ -592,6 +704,22 @@ WmErrorCode AniWindowRegisterManager::ProcessSubWindowCloseRegister(sptr<AniWind
     return ret;
 }
 
+WmErrorCode AniWindowRegisterManager::ProcessWindowHighlightChangeRegister(sptr<AniWindowListener> listener,
+    sptr<Window> window, bool isRegister, ani_env* env)
+{
+    if (window == nullptr) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IWindowHighlightChangeListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowHighlightChangeListeners(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowHighlightChangeListeners(thisListener));
+    }
+    return ret;
+}
+
 WmErrorCode AniWindowRegisterManager::ProcessMainWindowCloseRegister(const sptr<AniWindowListener>& listener,
     const sptr<Window>& window, bool isRegister, ani_env* env)
 {
@@ -603,6 +731,25 @@ WmErrorCode AniWindowRegisterManager::ProcessMainWindowCloseRegister(const sptr<
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterMainWindowCloseListeners(listener));
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterMainWindowCloseListeners(listener));
+    }
+    return ret;
+}
+
+WmErrorCode AniWindowRegisterManager::ProcessWindowRotationChangeRegister(const sptr<AniWindowListener>& listener,
+    const sptr<Window>& window, bool isRegister, ani_env* env)
+{
+    if (window == nullptr || listener == nullptr) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IWindowRotationChangeListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (window->IsPcWindow()) {
+        return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowRotationChangeListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowRotationChangeListener(thisListener));
     }
     return ret;
 }

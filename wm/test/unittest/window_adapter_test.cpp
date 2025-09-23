@@ -158,6 +158,27 @@ HWTEST_F(WindowAdapterTest, GetAccessibilityWindowInfo, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ConvertToRelativeCoordinateExtended
+ * @tc.desc: WindowAdapter/ConvertToRelativeCoordinateExtended
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, ConvertToRelativeCoordinateExtended, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    Rect rect;
+    Rect newRect;
+    DisplayId newDisplayId = 0;
+    rect = { 100, 3000, 400, 600 };
+    auto ret = windowAdapter.ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+    EXPECT_EQ(newRect.posX_, 100);
+    EXPECT_EQ(newRect.posY_, 3000);
+    EXPECT_EQ(newRect.width_, 400);
+    EXPECT_EQ(newRect.height_, 600);
+    EXPECT_EQ(newRect.newDisplayId, 0);
+}
+
+/**
  * @tc.name: GetGlobalWindowMode
  * @tc.desc: WindowAdapter/GetGlobalWindowMode
  * @tc.type: FUNC

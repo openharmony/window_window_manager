@@ -21,7 +21,7 @@
 #include <bundlemgr/launcher_service.h>
 #include "interfaces/include/ws_common.h"
 #include "screen_fold_data.h"
-#include "session_manager/include/ffrt_queue_helper.h"
+#include "ffrt_queue_helper.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"

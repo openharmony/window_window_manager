@@ -419,6 +419,7 @@ private:
     void CheckMoveConfiguration(MoveConfiguration& moveConfiguration);
     void UpdateEnableDragWhenSwitchMultiWindow(bool enable);
     WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
+    bool ShouldSkipSupportWindowModeCheck(uint32_t windowModeSupportType, WindowMode mode);
 
     /*
      * PC Window Layout

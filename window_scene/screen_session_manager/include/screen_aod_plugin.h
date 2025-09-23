@@ -34,6 +34,7 @@ const std::string PLUGIN_AOD_SO_PATH = "/system/lib/libaod_native.z.so";
 bool LoadAodLib(void);
 void UnloadAodLib(void);
 bool IsInAod();
+bool StopAod(int32_t status);
 }
 }
 #endif /* SCREEN_AOD_PLUGIN_H */

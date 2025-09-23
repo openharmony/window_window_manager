@@ -26,7 +26,7 @@
 #include "display_change_info.h"
 #include "dm_common.h"
 #include "session/screen/include/screen_session.h"
-#include "session_manager/include/ffrt_queue_helper.h"
+#include "ffrt_queue_helper.h"
 #include "interfaces/include/ws_common.h"
 #include "wm_single_instance.h"
 #include "zidl/screen_session_manager_client_stub.h"
@@ -86,6 +86,7 @@ public:
     void SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition);
     void NotifyFoldToExpandCompletion(bool foldToExpand);
     void NotifyScreenConnectCompletion(ScreenId screenId);
+    void NotifyAodOpCompletion(AodOP operation, int32_t result);
     void RecordEventFromScb(std::string description, bool needRecordEvent);
     FoldStatus GetFoldStatus();
     SuperFoldStatus GetSuperFoldStatus();

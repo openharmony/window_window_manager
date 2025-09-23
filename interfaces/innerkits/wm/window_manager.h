@@ -47,7 +47,7 @@ struct SystemBarRegionTint {
 using SystemBarRegionTints = std::vector<SystemBarRegionTint>;
 using GetJSWindowObjFunc = std::function<void*(const std::string& windowName)>;
 using WindowChangeInfoType = std::variant<int32_t, uint32_t, int64_t, uint64_t, std::string, float, Rect, WindowMode,
-    WindowVisibilityState>;
+    WindowVisibilityState, bool>;
 
 struct VisibleWindowNumInfo {
     uint32_t displayId;
@@ -909,6 +909,16 @@ public:
     WMError SetWindowLayoutMode(WindowLayoutMode mode);
 
     /**
+     * @brief Global coordinate to relative coordinate conversion in Extension
+     *
+     * @param rect Rect relative to the default display
+     * @param newRect Rect relative to the current display
+     * @param newDisplayId Current displayID
+     * @return WM_OK means converted, others means not converted.
+     */
+    WMError ConvertToRelativeCoordinateExtended(const Rect& rect, Rect& newRect, DisplayId& newDisplayId);
+
+    /**
      * @brief Get accessibility window info.
      *
      * @param infos WindowInfos used for Accessibility.
@@ -951,6 +961,25 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     WMError GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode& globalWinMode) const;
+
+    /**
+     * @brief Get main window info.
+     *
+     * @param infos Main Window infos.
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetAllMainWindowInfo(std::vector<sptr<MainWindowInfo>>& infos) const;
+
+    /**
+     * @brief Get main window snap shot.
+     *
+     * @param windowIds Window id which want to get.
+     * @param config Snapshot configuration.
+     * @param callback callback.
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetMainWindowSnapshot(const std::vector<int32_t>& windowIds, const WindowSnapshotConfiguration& config,
+        const sptr<IRemoteObject>& callback) const;
 
     /**
      * @brief Get the name of the top page.
@@ -1415,6 +1444,8 @@ private:
     WMError UnregisterWindowModeChangedListenerForPropertyChange(const sptr<IWindowInfoChangedListener>& listener);
     WMError RegisterFloatingScaleChangedListener(const sptr<IWindowInfoChangedListener>& listener);
     WMError UnregisterFloatingScaleChangedListener(const sptr<IWindowInfoChangedListener>& listener);
+    WMError RegisterMidSceneChangedListener(const sptr<IWindowInfoChangedListener>& listener);
+    WMError UnregisterMidSceneChangedListener(const sptr<IWindowInfoChangedListener>& listener);
     void SetIsModuleHookOffToSet(const std::string& moduleName);
     bool GetIsModuleHookOffFromSet(const std::string& moduleName);
 };

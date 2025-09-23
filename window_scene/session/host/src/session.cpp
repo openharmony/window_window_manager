@@ -2072,7 +2072,29 @@ WSError Session::SetSessionLabel(const std::string& label)
     if (updateSessionLabelFunc_) {
         updateSessionLabelFunc_(label);
     }
+    label_ = label;
     return WSError::WS_OK;
+}
+
+void Session::UpdateSessionLabel(const std::string& label)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), label, where] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
+            return;
+        }
+        if (session->label_ == "") {
+            session->label_ = label;
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s set label success label:%{public}s", where, label.c_str());
+        }
+        }, where);
+}
+
+std::string Session::GetSessionLabel() const
+{
+    return label_;
 }
 
 void Session::SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc& func)
@@ -3018,6 +3040,16 @@ void Session::SetClearSubSessionCallback(const NotifyClearSubSessionFunc& func)
             }
             session->clearSubSessionFunc_ = std::move(func);
         }, __func__);
+}
+
+bool Session::IsStatusBarVisible() const
+{
+    if (WindowHelper::IsMainWindow(Session::GetWindowType())) {
+        return isStatusBarVisible_;
+    } else if (WindowHelper::IsSubWindow(Session::GetWindowType())) {
+        return GetMainSession() != nullptr ? GetMainSession()->isStatusBarVisible_ : false;
+    }
+    return false;
 }
 
 void Session::SetBufferAvailableChangeListener(const NotifyBufferAvailableChangeFunc& func)
@@ -4569,6 +4601,7 @@ void Session::SetIsMidScene(bool isMidScene)
             TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "persistentId:%{public}d, isMidScene:%{public}d",
                 session->GetPersistentId(), isMidScene);
             session->isMidScene_ = isMidScene;
+            session->NotifySessionPropertyChange(WindowInfoKey::MID_SCENE);
         }
     }, "SetIsMidScene");
 }

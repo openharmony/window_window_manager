@@ -20,7 +20,7 @@
 #include "session/host/include/scene_session.h"
 #include "window_manager_agent.h"
 #include "session_manager.h"
-#include "session_display_power_controller.h"
+#include "screen_power_fsm/session_display_power_controller.h"
 #include "zidl/window_manager_agent_interface.h"
 #include "screen_session_manager/include/screen_session_manager.h"
 

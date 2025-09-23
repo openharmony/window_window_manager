@@ -21,6 +21,7 @@
 #include "ani.h"
 #include "event_handler.h"
 #include "screen_manager.h"
+#include "refbase.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -42,13 +43,13 @@ public:
 private:
     ani_env* env_;
     std::mutex mtx_;
-    std::map<std::string, std::vector<ani_ref>> aniCallBack_;
-    std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;
+    std::map<std::string, std::vector<ani_ref>> aniCallback_;
     wptr<ScreenAniListener> weakRef_;
+    std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;
 };
-const std::string EVENT_CONNECT = "connect";
-const std::string EVENT_DISCONNECT = "disconnect";
-const std::string EVENT_CHANGE = "change";
+const std::string ANI_EVENT_CONNECT = "connect";
+const std::string ANI_EVENT_DISCONNECT = "disconnect";
+const std::string ANI_EVENT_CHANGE = "change";
 }  // namespace Rosen
 }  // namespace OHOS
-#endif /* OHOS_ANI_SCREEN_LISTENER_H */
+#endif /* OHOS_JS_SCREEN_LISTENER_H */

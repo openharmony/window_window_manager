@@ -2197,6 +2197,75 @@ WMError SceneSessionManagerProxy::GetAllWindowLayoutInfo(DisplayId displayId,
     return static_cast<WMError>(errCode);
 }
 
+WMError SceneSessionManagerProxy::GetAllMainWindowInfo(std::vector<sptr<MainWindowInfo>>& infos)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_GET_ALL_MAIN_WINDOW_INFO), data, reply, option) != ERR_NONE) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!MarshallingHelper::UnmarshallingVectorParcelableObj<MainWindowInfo>(reply, infos)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read main window info failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t errCode = 0;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read errcode failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(errCode);
+}
+ 
+WMError SceneSessionManagerProxy::GetMainWindowSnapshot(const std::vector<int32_t>& windowIds,
+    const WindowSnapshotConfiguration& config, const sptr<IRemoteObject>& callback)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32Vector(windowIds)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write windowIds failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(config.useCache)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write useCache failed!");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteRemoteObject(callback)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write callback failed!");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_GET_MAIN_WINDOW_SNAPSHOT), data, reply, option) != ERR_NONE) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t errCode = 0;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read errcode failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(errCode);
+}
+
 WMError SceneSessionManagerProxy::GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode& globalWinMode)
 {
     MessageParcel data;
@@ -2698,6 +2767,59 @@ WSError SceneSessionManagerProxy::GetHostGlobalScaledRect(int32_t hostWindowId, 
     return static_cast<WSError>(reply.ReadInt32());
 }
 
+WMError SceneSessionManagerProxy::ConvertToRelativeCoordinateExtended(
+    const Rect& rect, Rect& newRect, DisplayId& newDisplayId)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write interface token failed.");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(rect.posX_) || !data.WriteInt32(rect.posY_) ||
+        !data.WriteUint32(rect.width_) || !data.WriteUint32(rect.height_)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to write rect");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "remote is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto sendRet = remote->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GLOBAL_COORDINATE_TO_RELATIVE_COORDINATE),
+        data, reply, option);
+    if (sendRet != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW,
+            "SendRequest ConvertToRelativeCoordinateExtended failed, code: %{public}d", sendRet);
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t posX = 0;
+    int32_t posY = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    if (!reply.ReadInt32(posX) || !reply.ReadInt32(posY) ||
+        !reply.ReadUint32(width) || !reply.ReadUint32(height)) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "Failed to read rect");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    newRect = {posX, posY, width, height};
+    uint64_t displayId = 0;
+    if (!reply.ReadUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "Failed to read displayId");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    newDisplayId = displayId;
+    int32_t result = 0;
+    if (!reply.ReadInt32(result)) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "Failed to read result");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(result);
+}
+
 WSError SceneSessionManagerProxy::GetFreeMultiWindowEnableState(bool& enable)
 {
     TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "in");
@@ -2816,12 +2938,33 @@ WMError SceneSessionManagerProxy::GetWindowModeType(WindowModeType& windowModeTy
 
 WMError SceneSessionManagerProxy::MinimizeAllAppWindows(DisplayId displayId)
 {
-    if (!Permission::IsSystemCallingOrStartByHdcd(true)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no right, displayId %{public}" PRIu64, displayId);
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
     }
-    TLOGE(WmsLogTag::WMS_LIFE, "Not support minimize, displayId %{public}" PRIu64, displayId);
-    return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    if (!data.WriteUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write displayId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_MINIMIZE_ALL_WINDOW), data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read ret failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(ret);
 }
 
 WMError SceneSessionManagerProxy::ToggleShownStateForAllAppWindows()
