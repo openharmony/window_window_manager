@@ -879,10 +879,11 @@ static NativeDisplayManager_ErrorCode NativeDisplayManager_SetDisplaysInfo(const
             TLOGE(WmsLogTag::DMS, "[DMNDK] memset display info fail.");
             return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
         }
-        int ret = memcpy_s(displaysInfo[i].name, sizeof(displaysInfo[i].name) - 1, info->GetName().c_str(), info->GetName().size());
-        if (ret != EOK) {	
+        int ret = memcpy_s(displaysInfo[i].name, sizeof(displaysInfo[i].name) - 1, info->GetName().c_str(),
+                           info->GetName().size());
+        if (ret != EOK) {
             TLOGE(WmsLogTag::DMS, "[DMNDK] failed to memcpy name.");
-            return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;	
+            return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
         }
         NativeDisplayManager_SetDisplayInfo(displaysInfo + i, info);
         i++;
@@ -1005,7 +1006,8 @@ static NativeDisplayManager_DisplayInfo* NativeDisplayManager_FillDisplayInfo(sp
         *errCode = NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
         return nullptr;
     }
-    int ret = memcpy_s(displayInner->name, sizeof(displayInner->name) - 1, info->GetName().c_str(), info->GetName().size());
+    int ret = memcpy_s(displayInner->name, sizeof(displayInner->name) - 1, info->GetName().c_str(),
+                       info->GetName().size());
     if (ret != EOK) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] memcpy display name failed.");
         DISPLAY_MANAGER_FREE_MEMORY(displayInner);
