@@ -2405,7 +2405,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
             return this->IsLastFrameLayoutFinished(isLayoutFinished);
         });
         sceneSession->SetIsAINavigationBarAvoidAreaValidFunc([this](DisplayId displayId,
-            const AvoidArea& avoidArea, int32_t sessionBottom) {
+                const AvoidArea& avoidArea, int32_t sessionBottom) {
             return CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_[displayId], avoidArea, sessionBottom);
         });
         sceneSession->RegisterGetStatusBarAvoidHeightFunc([this](DisplayId displayId, WSRect& barArea) {
@@ -11991,6 +11991,7 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
             isNeedUpdate = isAINavigationBarVisible_[displayId] != isVisible ||
                            currAINavigationBarAreaMap_.count(displayId) == 0 ||
                            currAINavigationBarAreaMap_[displayId] != barArea;
+
             if (isNeedUpdate) {
                 isAINavigationBarVisible_[displayId] = isVisible;
                 currAINavigationBarAreaMap_[displayId] = barArea;
