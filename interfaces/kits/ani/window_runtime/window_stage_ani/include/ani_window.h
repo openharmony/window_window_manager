@@ -54,6 +54,8 @@ public:
     static void SetWindowTouchable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isTouchable);
     static ani_object GetUIContext(ani_env* env, ani_object obj, ani_long nativeObj);
     static ani_object GetWindowAvoidArea(ani_env* env, ani_object obj, ani_long nativeObj, ani_int type);
+    static ani_object GetWindowAvoidAreaIgnoringVisibility(ani_env* env, ani_object obj,
+        ani_long nativeObj, ani_int type);
     static void RegisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
         ani_ref callback);
     static void RegisterNoInteractionDetectedCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
@@ -108,6 +110,7 @@ private:
     void OnSetWindowTouchable(ani_env* env, ani_boolean isTouchable);
     ani_object OnGetUIContext(ani_env* env);
     ani_object OnGetWindowAvoidArea(ani_env* env, ani_int type);
+    ani_object OnGetWindowAvoidAreaIgnoringVisibility(ani_env* env, ani_int type);
     void OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback, ani_long timeout);
     void OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnShowWindow(ani_env* env);

@@ -1700,6 +1700,28 @@ HWTEST_F(WindowSceneSessionImplTest, GetAvoidAreaByType, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetAvoidAreaByTypeIgnoringVisibility
+ * @tc.desc: GetAvoidAreaByTypeIgnoringVisibility test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, GetAvoidAreaByTypeIgnoringVisibility, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    option->SetWindowName("GetAvoidAreaByType");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    AvoidArea avoidarea;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
+        window->GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType::TYPE_CUTOUT, avoidarea));
+    window->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_OK, window->GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType::TYPE_CUTOUT, avoidarea));
+}
+
+/**
  * @tc.name: Immersive
  * @tc.desc: Immersive01 test
  * @tc.type: FUNC

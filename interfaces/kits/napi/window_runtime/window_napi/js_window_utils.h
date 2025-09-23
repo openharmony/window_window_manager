@@ -397,7 +397,8 @@ std::unique_ptr<WsNapiAsyncTask> CreateEmptyWsNapiAsyncTask(napi_env env, napi_v
         bool& systemBarEnable, bool& systemBarEnableAnimation);
     napi_value CreateJsSystemBarRegionTintArrayObject(napi_env env,
         const SystemBarRegionTints& tints);
-    napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea, AvoidAreaType type);
+    napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea,
+        AvoidAreaType type, bool useActualVisibility = false);
     bool CheckCallingPermission(std::string permission);
     bool ParseSystemWindowTypeForApiWindowType(int32_t apiWindowType, WindowType& windowType);
     napi_value WindowTypeInit(napi_env env);

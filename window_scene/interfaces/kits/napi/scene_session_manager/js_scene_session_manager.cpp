@@ -764,8 +764,8 @@ void JsSceneSessionManager::RegisterSSManagerCallbacksOnRootScene()
             rootSceneSession->SetRootSessionRect(rootSceneRect);
         }
     });
-    rootScene_->RegisterGetSessionAvoidAreaByTypeCallback([](AvoidAreaType type) {
-        return SceneSessionManager::GetInstance().GetRootSessionAvoidAreaByType(type);
+    rootScene_->RegisterGetSessionAvoidAreaByTypeCallback([](AvoidAreaType type, bool ignoreVisibility) {
+        return SceneSessionManager::GetInstance().GetRootSessionAvoidAreaByType(type, ignoreVisibility);
     });
     rootScene_->RegisterGetStatusBarHeightCallback([]() {
         return SceneSessionManager::GetInstance().GetRootSceneStatusBarHeight();

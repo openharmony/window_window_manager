@@ -1232,13 +1232,17 @@ void ConvertJSSystemBarStyleToSystemBarProperties(napi_env env, napi_value jsObj
         propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].contentColorFlag);
 }
 
-napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea, AvoidAreaType type)
+napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea,
+    AvoidAreaType type, bool useActualVisibility)
 {
     napi_value objValue = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
 
-    napi_set_named_property(env, objValue, "visible",
-        CreateJsValue(env, type == AvoidAreaType::TYPE_CUTOUT ? false : true));
+    if (useActualVisibility) {
+        napi_set_named_property(env, objValue, "visible", CreateJsValue(env, !avoidArea.isEmptyAvoidArea()));
+    } else {
+        napi_set_named_property(env, objValue, "visible", CreateJsValue(env, type != AvoidAreaType::TYPE_CUTOUT));
+    }
     napi_set_named_property(env, objValue, "leftRect", GetRectAndConvertToJsValue(env, avoidArea.leftRect_));
     napi_set_named_property(env, objValue, "topRect", GetRectAndConvertToJsValue(env, avoidArea.topRect_));
     napi_set_named_property(env, objValue, "rightRect", GetRectAndConvertToJsValue(env, avoidArea.rightRect_));
