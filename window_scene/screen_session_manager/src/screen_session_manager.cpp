@@ -171,7 +171,7 @@ const std::string SCREEN_EXTEND = "extend";
 const std::string SCREEN_MIRROR = "mirror";
 const std::string MULTI_SCREEN_EXIT_STR = "exit";
 const std::string MULTI_SCREEN_ENTER_STR = "enter";
-const int32_t CV_WAIT_SCREEN_MASK_MS = 1500;
+const int32_t CV_WAIT_SCREEN_MASK_MS = 500;
 #endif
 const bool IS_COORDINATION_SUPPORT =
     OHOS::system::GetBoolParameter("const.window.foldabledevice.is_coordination_support", false);
