@@ -108,6 +108,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::NotifyFoldToExpandCompletion);
     BindNativeFunction(env, exportObj, "notifyScreenConnectCompletion", moduleName,
         JsScreenSessionManager::NotifyScreenConnectCompletion);
+    BindNativeFunction(env, exportObj, "notifyAodOpCompletion", moduleName,
+        JsScreenSessionManager::NotifyAodOpCompletion);
     BindNativeFunction(env, exportObj, "recordEventFromScb", moduleName,
         JsScreenSessionManager::RecordEventFromScb);
     BindNativeFunction(env, exportObj, "getFoldStatus", moduleName, JsScreenSessionManager::GetFoldStatus);
@@ -271,6 +273,13 @@ napi_value JsScreenSessionManager::NotifyScreenConnectCompletion(napi_env env, n
     TLOGD(WmsLogTag::DMS, "[NAPI]NotifyFoldToExpandCompletion");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnNotifyScreenConnectCompletion(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::NotifyAodOpCompletion(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]NotifyAodOpCompletion");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnNotifyAodOpCompletion(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::RecordEventFromScb(napi_env env, napi_callback_info info)
@@ -949,6 +958,36 @@ napi_value JsScreenSessionManager::OnNotifyScreenConnectCompletion(napi_env env,
         return NapiGetUndefined(env);
     }
     ScreenSessionManagerClient::GetInstance().NotifyScreenConnectCompletion(static_cast<uint64_t>(screenId));
+    return NapiGetUndefined(env);
+}
+
+napi_value JsScreenSessionManager::OnNotifyAodOpCompletion(napi_env env, const napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]Enter");
+    size_t argc = ARGC_TWO;
+    napi_value argv[ARGC_TWO] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_TWO) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    AodOP op;
+    int32_t result;
+    if (!ConvertFromJsValue(env, argv[0], op) || (op >= AodOP::AOD_OP_MAX)) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to aod operation");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    if (!ConvertFromJsValue(env, argv[1], result)) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to aod operation result");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    ScreenSessionManagerClient::GetInstance().NotifyAodOpCompletion(op, result);
     return NapiGetUndefined(env);
 }
 

@@ -41,6 +41,8 @@ constexpr int DOT_PER_INCH = 160;
 const static std::string DEFAULT_SCREEN_NAME = "buildIn";
 constexpr int DOT_PER_INCH_MAXIMUM_VALUE = 1000;
 constexpr int DOT_PER_INCH_MINIMUM_VALUE = 80;
+constexpr int32_t CONCURRENT_USER_ID_DEFAULT = -1;
+constexpr int32_t USER_ID_DEFAULT = 0;
 constexpr uint32_t BASELINE_DENSITY = 160;
 constexpr uint32_t HALF_SCREEN_PARAM = 2;
 const std::string DM_ERROR_MSG_NOT_SUPPORT_COOR_WHEN_WIRED_CASTING =
@@ -235,6 +237,15 @@ enum class DmErrorCode : int32_t {
     DM_ERROR_INVALID_CALLING = 1400002,
     DM_ERROR_SYSTEM_INNORMAL = 1400003,
     DM_ERROR_ILLEGAL_PARAM = 1400004,
+};
+
+/**
+ * @brief Enumerates the aod operation
+ */
+enum class AodOP {
+    ENTER,
+    EXIT,
+    AOD_OP_MAX
 };
 
 /**

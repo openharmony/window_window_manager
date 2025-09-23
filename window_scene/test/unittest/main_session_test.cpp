@@ -976,9 +976,8 @@ HWTEST_F(MainSessionTest, NotifyIsFullScreenInForceSplitMode, TestSize.Level3)
     sptr<MainSession> testSession = sptr<MainSession>::MakeSptr(info, nullptr);
     auto ret = testSession->NotifyIsFullScreenInForceSplitMode(true);
     EXPECT_EQ(ret, WSError::WS_OK);
-    ForceSplitFullScreenChangeCallback callback;
-    testSession->RegisterForceSplitFullScreenChangeCallback(callback);
-    auto ret = testSession->NotifyIsFullScreenInForceSplitMode(true);
+    testSession->RegisterForceSplitFullScreenChangeCallback([](uint32_t uid, bool isFullScreen) {});
+    ret = testSession->NotifyIsFullScreenInForceSplitMode(true);
     EXPECT_EQ(ret, WSError::WS_OK);
 }
 } // namespace

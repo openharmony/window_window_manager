@@ -105,7 +105,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForFold01, TestSize.Level1)
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<ScreenSessionManager> ssm = sptr<ScreenSessionManager>::MakeSptr();
-    ssm->SetRSScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
+    ssm->SetRSScreenPowerStatusExt(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
 
     // 下电
     ssm->lastPowerForAllStatus_.store(ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
@@ -131,7 +131,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForFold02, TestSize.Level1)
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<ScreenSessionManager> ssm = sptr<ScreenSessionManager>::MakeSptr();
-    ssm->SetRSScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
+    ssm->SetRSScreenPowerStatusExt(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
 
     ssm->lastPowerForAllStatus_.store(ScreenPowerStatus::POWER_STATUS_OFF);
     ssm->lastScreenId_.store(SCREEN_ID_FULL);
@@ -152,7 +152,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForFold03, TestSize.Level1)
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<ScreenSessionManager> ssm = sptr<ScreenSessionManager>::MakeSptr();
-    ssm->SetRSScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
+    ssm->SetRSScreenPowerStatusExt(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
 
     ssm->lastPowerForAllStatus_.store(ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
     ssm->lastScreenId_.store(SCREEN_ID_MAIN);

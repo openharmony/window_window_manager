@@ -633,6 +633,13 @@ bool WindowManagerAgentProxy::WriteWindowChangeInfoValue(MessageParcel& data,
             }
             break;
         }
+        case WindowInfoKey::MID_SCENE : {
+            if (!data.WriteBool(std::get<bool>(windowInfoPair.second))) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write bool failed");
+                return false;
+            }
+            break;
+        }
         default : {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Unknown WindowInfoKey: %{public}d",
                 static_cast<int32_t>(windowInfoPair.first));

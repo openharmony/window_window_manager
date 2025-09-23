@@ -570,19 +570,24 @@ void SingleDisplayPocketFoldPolicy::BootAnimationFinishPowerInit()
     if (RSInterfaces::GetInstance().GetActiveScreenId() == SCREEN_ID_FULL) {
         // coordination to full: power off main screen
         TLOGI(WmsLogTag::DMS, "Fold Screen Power main screen off.");
-        ScreenSessionManager::GetInstance().SetRSScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF);
+        ScreenSessionManager::GetInstance().SetRSScreenPowerStatusExt(SCREEN_ID_MAIN,
+            ScreenPowerStatus::POWER_STATUS_OFF);
     } else if (RSInterfaces::GetInstance().GetActiveScreenId() == SCREEN_ID_MAIN) {
         // coordination to main: power off both and power on main screen
         TLOGI(WmsLogTag::DMS, "Fold Screen Power all screen off.");
-        ScreenSessionManager::GetInstance().SetRSScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF);
-        ScreenSessionManager::GetInstance().SetRSScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
+        ScreenSessionManager::GetInstance().SetRSScreenPowerStatusExt(SCREEN_ID_MAIN,
+            ScreenPowerStatus::POWER_STATUS_OFF);
+        ScreenSessionManager::GetInstance().SetRSScreenPowerStatusExt(SCREEN_ID_FULL,
+            ScreenPowerStatus::POWER_STATUS_OFF);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(timeStamp));
         TLOGI(WmsLogTag::DMS, "Fold Screen Power main screen on.");
-        ScreenSessionManager::GetInstance().SetRSScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
+        ScreenSessionManager::GetInstance().SetRSScreenPowerStatusExt(SCREEN_ID_MAIN,
+            ScreenPowerStatus::POWER_STATUS_ON);
     } else {
         TLOGI(WmsLogTag::DMS, "Fold Screen Power Init, invalid active screen id");
     }
+    ScreenStateMachine::GetInstance().IncScreenStateInitRef();
 }
 
 void SingleDisplayPocketFoldPolicy::ChangeOnTentMode(FoldStatus currentState)

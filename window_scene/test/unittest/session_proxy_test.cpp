@@ -2154,6 +2154,11 @@ HWTEST_F(SessionProxyTest, NotifyIsFullScreenInForceSplitMode, TestSize.Level3)
     auto sessionProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
     bool isFullScreen = true;
 
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    sessionProxy->NotifyIsFullScreenInForceSplitMode(isFullScreen);
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->NotifyIsFullScreenInForceSplitMode(isFullScreen));
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);

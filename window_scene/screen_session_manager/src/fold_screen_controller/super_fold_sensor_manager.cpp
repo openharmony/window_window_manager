@@ -22,6 +22,7 @@
  
 #include "fold_screen_controller/super_fold_sensor_manager.h"
 #include "fold_screen_controller/super_fold_state_manager.h"
+#include "fold_screen_controller/fold_screen_controller_config.h"
 #include "window_manager_hilog.h"
 #include "screen_session_manager.h"
  
@@ -29,7 +30,6 @@ namespace OHOS {
  
 namespace Rosen {
 namespace {
-constexpr float ANGLE_MIN_VAL = 30.0F;
 constexpr float ANGLE_MAX_VAL = 180.0F;
 constexpr float ANGLE_FLAT_THRESHOLD = 160.0F;
 constexpr float ANGLE_SENSOR_THRESHOLD = 160.0F;
@@ -63,19 +63,8 @@ static void SensorHallDataCallback(SensorEvent *event)
 
 void SuperFoldSensorManager::RegisterPostureCallback()
 {
-    curInterval_ = POSTURE_INTERVAL;
-    postureUser.callback = SensorPostureDataCallback;
-    int32_t subscribeRet = SubscribeSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
-    int32_t setBatchRet = SetBatch(SENSOR_TYPE_ID_POSTURE, &postureUser, POSTURE_INTERVAL, POSTURE_INTERVAL);
-    int32_t activateRet = ActivateSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
-    TLOGI(WmsLogTag::DMS,
-        "subscribeRet: %{public}d, setBatchRet: %{public}d, activateRet: %{public}d",
-        subscribeRet, setBatchRet, activateRet);
-    if (subscribeRet != SENSOR_SUCCESS || setBatchRet != SENSOR_SUCCESS || activateRet != SENSOR_SUCCESS) {
-        TLOGI(WmsLogTag::DMS, "RegisterPostureCallback failed.");
-    } else {
-        TLOGI(WmsLogTag::DMS, "RegisterPostureCallback success.");
-    }
+    OHOS::Rosen::FoldScreenSensorManager::GetInstance().SubscribeSensorCallback(
+        SENSOR_TYPE_ID_POSTURE, POSTURE_INTERVAL, SensorPostureDataCallback);
 }
 
 void SuperFoldSensorManager::UnregisterPostureCallback()
@@ -91,16 +80,8 @@ void SuperFoldSensorManager::UnregisterPostureCallback()
 
 void SuperFoldSensorManager::RegisterHallCallback()
 {
-    hallUser.callback = SensorHallDataCallback;
-    int32_t subscribeRet = SubscribeSensor(SENSOR_TYPE_ID_HALL, &hallUser);
-    TLOGI(WmsLogTag::DMS, "subscribeRet: %{public}d", subscribeRet);
-    int32_t setBatchRet = SetBatch(SENSOR_TYPE_ID_HALL, &hallUser, POSTURE_INTERVAL, POSTURE_INTERVAL);
-    TLOGI(WmsLogTag::DMS, "setBatchRet: %{public}d", setBatchRet);
-    int32_t activateRet = ActivateSensor(SENSOR_TYPE_ID_HALL, &hallUser);
-    TLOGI(WmsLogTag::DMS, "activateRet: %{public}d", activateRet);
-    if (subscribeRet != SENSOR_SUCCESS || setBatchRet != SENSOR_SUCCESS || activateRet != SENSOR_SUCCESS) {
-        TLOGI(WmsLogTag::DMS, "RegisterHallCallback failed.");
-    }
+    OHOS::Rosen::FoldScreenSensorManager::GetInstance().SubscribeSensorCallback(
+        SENSOR_TYPE_ID_HALL, POSTURE_INTERVAL, SensorHallDataCallback);
 }
 
 void SuperFoldSensorManager::UnregisterHallCallback()
@@ -224,6 +205,10 @@ void SuperFoldSensorManager::NotifyHallChanged(uint16_t Hall)
         TLOGI(WmsLogTag::DMS, "NotifyHallChanged: Keyboard off!");
         events = SuperFoldStatusChangeEvents::KEYBOARD_OFF;
     } else if (Hall == HALL_HAVE_KEYBOARD_THRESHOLD) {
+        if (SuperFoldStateManager::GetInstance().GetCurrentStatus() == SuperFoldStatus::EXPANDED) {
+            TLOGI(WmsLogTag::DMS, "is expanded");
+            return;
+        }
         TLOGI(WmsLogTag::DMS, "NotifyHallChanged: Keyboard on!");
         events = SuperFoldStatusChangeEvents::KEYBOARD_ON;
         HandleSuperSensorChange(SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED);

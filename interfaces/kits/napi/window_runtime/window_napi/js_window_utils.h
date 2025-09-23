@@ -330,6 +330,30 @@ public:
         : resolvedCallback_(resolvedCallback), rejectedCallback_(rejectedCallback) {}
 };
 
+class WsNapiAsyncTask final {
+public:
+    using ExecuteCallback = std::function<void()>;
+    using CompleteCallback = std::function<void(napi_env, WsNapiAsyncTask&, int32_t)>;
+ 
+    WsNapiAsyncTask(napi_deferred deferred, std::unique_ptr<ExecuteCallback>&& execute,
+        std::unique_ptr<CompleteCallback>&& complete);
+    WsNapiAsyncTask(napi_ref callbackRef, std::unique_ptr<ExecuteCallback>&& execute,
+        std::unique_ptr<CompleteCallback>&& complete);
+    ~WsNapiAsyncTask();
+ 
+    void Resolve(napi_env env, napi_value value);
+    void Reject(napi_env env, napi_value error);
+private:
+    napi_deferred deferred_ = nullptr;
+    napi_ref callbackRef_ = nullptr;
+    napi_async_work work_ = nullptr;
+    std::unique_ptr<ExecuteCallback> execute_;
+    std::unique_ptr<CompleteCallback> complete_;
+    napi_env env_ = nullptr;
+};
+ 
+std::unique_ptr<WsNapiAsyncTask> CreateEmptyWsNapiAsyncTask(napi_env env, napi_value lastParam, napi_value* result);
+
     /*
      * Promise
      */
@@ -340,6 +364,10 @@ public:
 
     napi_value CreateJsWindowLayoutInfoArrayObject(napi_env env, const std::vector<sptr<WindowLayoutInfo>>& infos);
     napi_value CreateJsWindowLayoutInfoObject(napi_env env, const sptr<WindowLayoutInfo>& info);
+    napi_value CreateJsPixelMapArrayObject(napi_env env, const std::vector<std::shared_ptr<Media::PixelMap>>& pixelMap);
+    napi_value CreateJsPixelMapObject(napi_env env, const std::shared_ptr<Media::PixelMap>& pixelMap);
+    napi_value CreateJsMainWindowInfoArrayObject(napi_env env, const std::vector<sptr<MainWindowInfo>>& infos);
+    napi_value CreateJsMainWindowInfoObject(napi_env env, const sptr<MainWindowInfo>& info);
     napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<WindowVisibilityInfo>>& infos);
     napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInfo>& window);
     napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect);
@@ -404,6 +432,7 @@ public:
     bool ConvertDecorButtonStyleFromJs(napi_env env, napi_value jsObject, DecorButtonStyle& decorButtonStyle);
     bool GetAPI7Ability(napi_env env, AppExecFwk::Ability* &ability);
     bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std::vector<uint32_t>>& windowMask);
+    bool GetWindowIdFromJsValue(napi_env env, napi_value jsObject, std::vector<int32_t>& windowIds);
     bool GetMoveConfigurationFromJsValue(napi_env env, napi_value jsObject, MoveConfiguration& moveConfiguration);
     bool ParseRectAnimationConfig(napi_env env, napi_value jsObject, RectAnimationConfig& rectAnimationConfig);
     void ConvertJSSystemBarStyleToSystemBarProperties(napi_env env, napi_value jsObject,

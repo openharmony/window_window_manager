@@ -576,6 +576,15 @@ void ScreenSessionManagerClient::NotifyScreenConnectCompletion(ScreenId screenId
     screenSessionManager_->NotifyScreenConnectCompletion(screenId);
 }
 
+void ScreenSessionManagerClient::NotifyAodOpCompletion(AodOP operation, int32_t result)
+{
+    if (!screenSessionManager_) {
+        TLOGE(WmsLogTag::DMS, "screenSessionManager is null");
+        return;
+    }
+    screenSessionManager_->NotifyAodOpCompletion(operation, result);
+}
+
 void ScreenSessionManagerClient::RecordEventFromScb(std::string description, bool needRecordEvent)
 {
     if (!screenSessionManager_) {
@@ -606,16 +615,6 @@ void ScreenSessionManagerClient::SwitchUserCallback(std::vector<int32_t> oldScbP
         if (screenSession == nullptr) {
             TLOGE(WmsLogTag::DMS, "screenSession is null");
             continue;
-        }
-        {
-            auto displayNode = screenSessionManager_->GetDisplayNode(screenId);
-            if (displayNode == nullptr) {
-                TLOGE(WmsLogTag::DMS, "display node is null");
-                continue;
-            }
-            RSAdapterUtil::SetRSUIContext(displayNode, screenSession->GetRSUIContext(), true);
-            displayNode->SetScbNodePid(oldScbPids, currentScbPid);
-            RSTransactionAdapter::FlushImplicitTransaction(displayNode);
         }
         ScreenProperty screenProperty = screenSession->GetScreenProperty();
         RRect bounds = screenProperty.GetBounds();

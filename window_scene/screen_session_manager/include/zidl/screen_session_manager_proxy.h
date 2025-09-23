@@ -29,7 +29,7 @@ public:
 
     ~ScreenSessionManagerProxy() = default;
 
-    virtual sptr<DisplayInfo> GetDefaultDisplayInfo() override;
+    virtual sptr<DisplayInfo> GetDefaultDisplayInfo(int32_t userId = CONCURRENT_USER_ID_DEFAULT) override;
     virtual DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
     virtual DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
     virtual DMError SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override;
@@ -123,7 +123,7 @@ public:
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
     virtual sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId) override;
     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
-    virtual std::vector<DisplayId> GetAllDisplayIds() override;
+    virtual std::vector<DisplayId> GetAllDisplayIds(int32_t userId = CONCURRENT_USER_ID_DEFAULT) override;
 
     virtual sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) override;
 
@@ -203,6 +203,7 @@ public:
     virtual DMError GetExpandAvailableArea(DisplayId displayId, DMRect& area) override;
     void NotifyFoldToExpandCompletion(bool foldToExpand) override;
     void NotifyScreenConnectCompletion(ScreenId screenId) override;
+    void NotifyAodOpCompletion(AodOP op, int32_t result) override;
     void RecordEventFromScb(std::string description, bool needRecordEvent) override;
     void SwitchUser() override;
 

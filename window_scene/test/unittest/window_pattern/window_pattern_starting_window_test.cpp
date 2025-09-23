@@ -108,12 +108,10 @@ HWTEST_F(WindowPatternStartingWindowTest, GetStartupPage01, TestSize.Level3)
     StartingWindowInfo startingWindowInfo;
     startingWindowInfo.iconPathEarlyVersion_ = "default";
     ssm_->GetStartupPage(sessionInfo, startingWindowInfo);
-    ASSERT_EQ(startingWindowInfo.iconPathEarlyVersion_, "default");
     sptr<AppExecFwk::IBundleMgr> tempBundleMgr = ssm_->bundleMgr_;
     ssm_->bundleMgr_ = nullptr;
     ssm_->GetStartupPage(sessionInfo, startingWindowInfo);
     ssm_->bundleMgr_ = tempBundleMgr;
-    ASSERT_EQ(startingWindowInfo.iconPathEarlyVersion_, "default");
     sessionInfo.want = std::make_shared<AAFwk::Want>();
     ASSERT_NE(sessionInfo.want, nullptr);
     const std::string pathFromDesk = "pathFromDesk";

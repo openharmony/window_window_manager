@@ -1993,6 +1993,7 @@ HWTEST_F(ScreenSessionManagerClientTest, NotifyIsFullScreenInForceSplitMode, Tes
     screenSessionManagerClient_->screenSessionManager_ = nullptr;
     screenSessionManagerClient_->NotifyIsFullScreenInForceSplitMode(0, true);
     EXPECT_TRUE(logMsg.find("screenSessionManager_ is null") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 } // namespace Rosen
 } // namespace OHOS

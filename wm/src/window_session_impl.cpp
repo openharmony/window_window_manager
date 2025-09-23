@@ -672,6 +672,7 @@ WMError WindowSessionImpl::Connect()
     sptr<IWindowEventChannel> iWindowEventChannel(windowEventChannel);
     auto context = GetContext();
     sptr<IRemoteObject> token = context ? context->GetToken() : nullptr;
+    uint64_t originDisplayId = GetDisplayId();
     if (token) {
         property_->SetTokenState(true);
     }
@@ -692,6 +693,9 @@ WMError WindowSessionImpl::Connect()
     }
     TLOGI(WmsLogTag::WMS_LIFE, "Window Connect [name:%{public}s, id:%{public}d, type:%{public}u], ret:%{public}u",
         property_->GetWindowName().c_str(), GetPersistentId(), property_->GetWindowType(), ret);
+    if (originDisplayId != property_->GetDisplayId()) {
+        NotifyDmsDisplayMove(property_->GetDisplayId());
+    }
     if (IsInCompatScaleMode() || WindowHelper::IsUIExtensionWindow(GetType())) {
         RegisterWindowScaleCallback();
     }
@@ -5406,6 +5410,11 @@ void WindowSessionImpl::NotifyDisplayMove(DisplayId from, DisplayId to)
             }
         }
     }
+    NotifyDmsDisplayMove(to);
+}
+ 
+void WindowSessionImpl::NotifyDmsDisplayMove(DisplayId to)
+{
     auto context = GetContext();
     if (context != nullptr) {
         TLOGI(WmsLogTag::WMS_MAIN, "update display move to dms");

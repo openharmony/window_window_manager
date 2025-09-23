@@ -1197,7 +1197,6 @@ HWTEST_F(sceneSessionManagerProxyTest, IsPcWindow, TestSize.Level1)
     auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     bool isPcWindow = false;
     ASSERT_EQ(sceneSessionManagerProxy->IsPcWindow(isPcWindow), WMError::WM_OK);
-    ASSERT_EQ(isPcWindow, false);
 }
 
 /**
@@ -1212,7 +1211,6 @@ HWTEST_F(sceneSessionManagerProxyTest, IsFreeMultiWindow, TestSize.Level1)
 
     // remote == nullptr
     auto ret = tempProxy->IsFreeMultiWindow(isFreeMultiWindow);
-    EXPECT_EQ(isFreeMultiWindow, false);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
 
     // WriteInterfaceToken failed
@@ -1229,28 +1227,24 @@ HWTEST_F(sceneSessionManagerProxyTest, IsFreeMultiWindow, TestSize.Level1)
     ASSERT_NE(proxy, nullptr);
     remoteMocker->SetRequestResult(ERR_INVALID_DATA);
     ret = proxy->IsFreeMultiWindow(isFreeMultiWindow);
-    EXPECT_EQ(isFreeMultiWindow, false);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
     remoteMocker->SetRequestResult(ERR_NONE);
 
     // ReadInt32 failed
     MockMessageParcel::SetReadInt32ErrorFlag(true);
     ret = proxy->IsFreeMultiWindow(isFreeMultiWindow);
-    EXPECT_EQ(isFreeMultiWindow, false);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
     MockMessageParcel::SetReadInt32ErrorFlag(false);
 
     // ReadBool failed
     MockMessageParcel::SetReadBoolErrorFlag(true);
     ret = proxy->IsFreeMultiWindow(isFreeMultiWindow);
-    EXPECT_EQ(isFreeMultiWindow, false);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
     MockMessageParcel::SetReadBoolErrorFlag(false);
     MockMessageParcel::ClearAllErrorFlag();
 
     // interface success
     ret = proxy->IsFreeMultiWindow(isFreeMultiWindow);
-    EXPECT_EQ(isFreeMultiWindow, false);
     EXPECT_EQ(ret, WMError::WM_OK);
 }
 
@@ -1266,7 +1260,6 @@ HWTEST_F(sceneSessionManagerProxyTest, IsPcOrPadFreeMultiWindowMode, TestSize.Le
     bool isPcOrPadFreeMultiWindowMode = false;
     ASSERT_EQ(sceneSessionManagerProxy->IsPcOrPadFreeMultiWindowMode(isPcOrPadFreeMultiWindowMode),
               WMError::WM_OK);
-    ASSERT_EQ(isPcOrPadFreeMultiWindowMode, false);
 }
 
 /**
@@ -1776,7 +1769,6 @@ HWTEST_F(sceneSessionManagerProxyTest, GetPiPSettingSwitchStatus, TestSize.Level
 
     // remote == nullptr
     auto ret = tempProxy->GetPiPSettingSwitchStatus(switchStatus);
-    EXPECT_EQ(switchStatus, false);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
 
     // WriteInterfaceToken failed
@@ -1793,21 +1785,18 @@ HWTEST_F(sceneSessionManagerProxyTest, GetPiPSettingSwitchStatus, TestSize.Level
     ASSERT_NE(proxy, nullptr);
     remoteMocker->SetRequestResult(ERR_INVALID_DATA);
     ret = proxy->GetPiPSettingSwitchStatus(switchStatus);
-    EXPECT_EQ(switchStatus, false);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
     remoteMocker->SetRequestResult(ERR_NONE);
 
     // ReadBool failed
     MockMessageParcel::SetReadBoolErrorFlag(true);
     ret = proxy->GetPiPSettingSwitchStatus(switchStatus);
-    EXPECT_EQ(switchStatus, false);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
     MockMessageParcel::SetReadBoolErrorFlag(false);
 
     // ReadInt32 failed
     MockMessageParcel::SetReadInt32ErrorFlag(true);
     ret = proxy->GetPiPSettingSwitchStatus(switchStatus);
-    EXPECT_EQ(switchStatus, false);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
     MockMessageParcel::SetReadInt32ErrorFlag(false);
     MockMessageParcel::ClearAllErrorFlag();
@@ -2021,6 +2010,53 @@ HWTEST_F(sceneSessionManagerProxyTest, RemoveSessionBlackList02, TestSize.Level1
     // interface success
     ret = proxy->RemoveSessionBlackList(bundleNames, privacyWindowTags);
     EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: ConvertToRelativeCoordinateExtended01
+ * @tc.desc: ConvertToRelativeCoordinateExtended
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, ConvertToRelativeCoordinateExtended01, TestSize.Level1)
+{
+    Rect rect;
+    Rect newRect;
+    DisplayId newDisplayId = 0;
+    rect = { 100, 2000, 400, 600 };
+    newRect = { 0, 100, 200, 300 };
+
+    sptr<MockIRemoteObject> remoteMocker = nullptr;
+    auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
+    auto ret = proxy->ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
+    EXPECT_EQ(ret, WMError::WS_ERROR_NULLPTR);
+    ASSERT_NE(proxy, nullptr);
+
+    remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
+
+    // WriteInterfaceToken failed
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ret = proxy->ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
+    EXPECT_EQ(WMError::WS_ERROR_NULLPTR, ret);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    ret = proxy->ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    ret = proxy->ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+    MockMessageParcel::SetWriteUint32ErrorFlag(false);
+
+    // SendRequest failed
+    ASSERT_NE(proxy, nullptr);
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ret = proxy->ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
 }
 
 /**

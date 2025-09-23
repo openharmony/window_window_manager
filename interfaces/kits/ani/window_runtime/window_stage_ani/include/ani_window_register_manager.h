@@ -25,39 +25,15 @@
 
 namespace OHOS {
 namespace Rosen {
-enum class RegisterListenerType : uint32_t {
-    SYSTEM_BAR_TINT_CHANGE_CB,
-    GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
-    WATER_MARK_FLAG_CHANGE_CB,
-    WINDOW_SIZE_CHANGE_CB,
-    SYSTEM_AVOID_AREA_CHANGE_CB,
-    AVOID_AREA_CHANGE_CB,
-    LIFECYCLE_EVENT_CB,
-    WINDOW_EVENT_CB,
-    KEYBOARD_HEIGHT_CHANGE_CB,
-    TOUCH_OUTSIDE_CB,
-    SCREENSHOT_EVENT_CB,
-    DIALOG_TARGET_TOUCH_CB,
-    DIALOG_DEATH_RECIPIENT_CB,
-    WINDOW_STATUS_CHANGE_CB,
-    WINDOW_TITLE_BUTTON_RECT_CHANGE_CB,
-    WINDOW_VISIBILITY_CHANGE_CB,
-    WINDOW_NO_INTERACTION_DETECT_CB,
-    WINDOW_RECT_CHANGE_CB,
-    SUB_WINDOW_CLOSE_CB,
-    WINDOW_STAGE_EVENT_CB,
-    WINDOW_STAGE_CLOSE_CB,
-    WINDOW_STAGE_LIFECYCLE_EVENT_CB,
-};
 
 class AniWindowRegisterManager {
 public:
     AniWindowRegisterManager();
     ~AniWindowRegisterManager();
-    WmErrorCode RegisterListener(sptr<Window> window, const std::string& type,
-    CaseType caseType, ani_env* env, ani_ref callback);
-    WmErrorCode UnregisterListener(sptr<Window> window, const std::string& type,
-    CaseType caseType, ani_env* env, ani_ref callback);
+    WmErrorCode RegisterListener(sptr<Window> window, const std::string& type, CaseType caseType,
+        ani_env* env, ani_ref callback, ani_long timeout);
+    WmErrorCode UnregisterListener(sptr<Window> window, const std::string& type, CaseType caseType,
+        ani_env* env, ani_ref callback);
 private:
     bool IsCallbackRegistered(ani_env* env, std::string type, ani_ref jsListenerObject);
     WmErrorCode ProcessWindowChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window, bool isRegister,
@@ -72,13 +48,19 @@ private:
         bool isRegister, ani_env* env);
     WmErrorCode ProcessOccupiedAreaChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
+    WmErrorCode ProcessKeyboardDidShowRegister(sptr<AniWindowListener> listener, sptr<Window> window,
+        bool isRegister, ani_env* env);
+    WmErrorCode ProcessKeyboardDidHideRegister(sptr<AniWindowListener> listener, sptr<Window> window,
+        bool isRegister, ani_env* env);
     WmErrorCode ProcessSystemBarChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window, bool isRegister,
     ani_env* env);
     WmErrorCode ProcessTouchOutsideRegister(sptr<AniWindowListener> listener, sptr<Window> window, bool isRegister,
-    ani_env* env);
-    WmErrorCode ProcessScreenshotRegister(sptr<AniWindowListener> listener, sptr<Window> window, bool isRegister,
-    ani_env* env);
+        ani_env* env);
     WmErrorCode ProcessDialogTargetTouchRegister(sptr<AniWindowListener> listener, sptr<Window> window, bool isRegister,
+        ani_env* env);
+    WmErrorCode ProcessWindowNoInteractionRegister(sptr<AniWindowListener> listener, sptr<Window> window,
+        bool isRegister, ani_env* env, ani_long timeout);
+    WmErrorCode ProcessScreenshotRegister(sptr<AniWindowListener> listener, sptr<Window> window, bool isRegister,
         ani_env* env);
     WmErrorCode ProcessDialogDeathRecipientRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
@@ -88,7 +70,9 @@ private:
         sptr<Window> window, bool isRegister, ani_env* env);
     WmErrorCode ProcessWindowVisibilityChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
-    WmErrorCode ProcessWindowNoInteractionRegister(sptr<AniWindowListener> listener, sptr<Window> window,
+    WmErrorCode ProcessSystemDensityChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
+        bool isRegister, ani_env* env);
+    WmErrorCode ProcessDisplayIdChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
     WmErrorCode ProcessWindowStatusChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
@@ -98,6 +82,8 @@ private:
         bool isRegister, ani_env* env);
     WmErrorCode ProcessSubWindowCloseRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
+    WmErrorCode ProcessWindowHighlightChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
+        bool isRegister, ani_env* env);
     WmErrorCode ProcessMainWindowCloseRegister(const sptr<AniWindowListener>& listener, const sptr<Window>& window,
         bool isRegister, ani_env* env);
     WmErrorCode ProcessWindowStageListener(RegisterListenerType registerListenerType,
@@ -105,13 +91,15 @@ private:
         ani_env* env);
     WmErrorCode ProcessWindowListener(RegisterListenerType registerListenerType,
         const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,
-        ani_env* env);
+        ani_env* env, ani_long timeout);
     WmErrorCode ProcessWindowManagerListener(RegisterListenerType registerListenerType,
         const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,
         ani_env* env);
+    WmErrorCode ProcessWindowRotationChangeRegister(const sptr<AniWindowListener>& listener, const sptr<Window>& window,
+        bool isRegister, ani_env* env);
     WmErrorCode ProcessListener(RegisterListenerType registerListenerType, CaseType caseType,
-        const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,
-        ani_env* env);
+        const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister, ani_env* env,
+        ani_long timeout);
     std::map<std::string, std::map<ani_ref, sptr<AniWindowListener>>> jsCbMap_;
     std::mutex mtx_;
 };

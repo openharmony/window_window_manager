@@ -206,6 +206,7 @@ public:
     void SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func);
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker);
     WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
+    std::string GetSessionLabel() const;
 
     /*
      * App Use Control
@@ -240,6 +241,12 @@ public:
     void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) override;
     void NotifyExtensionDetachToDisplay() override;
+
+    /*
+     * Window Immersive
+     */
+    void UpdateStatusBarVisible(bool isStatusBarVisible) { isStatusBarVisible_ = isStatusBarVisible; };
+    bool IsStatusBarVisible() const;
 
     /*
      * Cross Display Move Drag
@@ -384,6 +391,7 @@ public:
     // Just terminate, not clear session
     WSError Clear(bool needStartCaller = false, bool isForceClean = false);
     WSError SetSessionLabel(const std::string& label);
+    void UpdateSessionLabel(const std::string& label);
     void SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc& func);
     WSError SetSessionIcon(const std::shared_ptr<Media::PixelMap>& icon);
     void SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc& func);
@@ -847,6 +855,7 @@ protected:
     std::atomic_bool isExitSplitOnBackground_ = false;
     bool isVisible_ = false;
     int32_t currentRotation_ = 0;
+    std::string label_;
 
     NotifyChangeSessionVisibilityWithStatusBarFunc changeSessionVisibilityWithStatusBarFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
@@ -1065,6 +1074,11 @@ private:
 
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
+
+    /*
+     * Window Immersive
+     */
+    bool isStatusBarVisible_ = true;
 
     /*
      * Multi Window
