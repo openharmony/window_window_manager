@@ -132,6 +132,54 @@ const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
     { ApiWindowType::TYPE_GLOBAL_SEARCH,       WindowType::WINDOW_TYPE_GLOBAL_SEARCH       },
     { ApiWindowType::TYPE_HANDWRITE,           WindowType::WINDOW_TYPE_HANDWRITE           },
 };
+const std::map<ApiWindowType, std::string> API_TO_ANI_STRING_TYPE_MAP {
+    {ApiWindowType::TYPE_BASE,                 "TYPE_APP"                  },
+    {ApiWindowType::TYPE_APP,                  "TYPE_APP"                  },
+    {ApiWindowType::TYPE_SYSTEM_ALERT,         "TYPE_SYSTEM_ALERT"         },
+    {ApiWindowType::TYPE_INPUT_METHOD,         "TYPE_INPUT_METHOD"         },
+    {ApiWindowType::TYPE_STATUS_BAR,           "TYPE_STATUS_BAR"           },
+    {ApiWindowType::TYPE_PANEL,                "TYPE_PANEL"                },
+    {ApiWindowType::TYPE_KEYGUARD,             "TYPE_KEYGUARD"             },
+    {ApiWindowType::TYPE_VOLUME_OVERLAY,       "TYPE_VOLUME_OVERLAY"       },
+    {ApiWindowType::TYPE_NAVIGATION_BAR,       "TYPE_NAVIGATION_BAR"       },
+    {ApiWindowType::TYPE_FLOAT,                "TYPE_FLOAT"                },
+    {ApiWindowType::TYPE_WALLPAPER,            "TYPE_WALLPAPER"            },
+    {ApiWindowType::TYPE_DESKTOP,              "TYPE_DESKTOP"              },
+    {ApiWindowType::TYPE_LAUNCHER_RECENT,      "TYPE_LAUNCHER_RECENT"      },
+    {ApiWindowType::TYPE_LAUNCHER_DOCK,        "TYPE_LAUNCHER_DOCK"        },
+    {ApiWindowType::TYPE_VOICE_INTERACTION,    "TYPE_VOICE_INTERACTION"    },
+    {ApiWindowType::TYPE_POINTER,              "TYPE_POINTER"              },
+    {ApiWindowType::TYPE_FLOAT_CAMERA,         "TYPE_FLOAT_CAMERA"         },
+    {ApiWindowType::TYPE_DIALOG,               "TYPE_DIALOG"               },
+    {ApiWindowType::TYPE_SCREENSHOT,           "TYPE_SCREENSHOT"           },
+    {ApiWindowType::TYPE_SYSTEM_TOAST,         "TYPE_SYSTEM_TOAST"         },
+    {ApiWindowType::TYPE_DIVIDER,              "TYPE_DIVIDER"              },
+    {ApiWindowType::TYPE_GLOBAL_SEARCH,        "TYPE_GLOBAL_SEARCH"        },
+    {ApiWindowType::TYPE_HANDWRITE,            "TYPE_HANDWRITE"            },
+};
+
+TYPE_APP = 0,
+TYPE_SYSTEM_ALERT = 1,
+TYPE_INPUT_METHOD = 2,
+TYPE_STATUS_BAR = 3,
+TYPE_PANEL = 4,
+TYPE_KEYGUARD = 5,
+TYPE_VOLUME_OVERLAY = 6,
+TYPE_NAVIGATION_BAR = 7,
+TYPE_FLOAT = 8,
+TYPE_WALLPAPER = 9,
+TYPE_DESKTOP = 10,
+TYPE_LAUNCHER_RECENT = 11,
+TYPE_LAUNCHER_DOCK = 12,
+TYPE_VOICE_INTERACTION = 13,
+TYPE_POINTER = 14,
+TYPE_FLOAT_CAMERA = 15,
+TYPE_DIALOG = 16,
+TYPE_SCREENSHOT = 17,
+TYPE_SYSTEM_TOAST = 18,
+TYPE_DIVIDER = 19,
+TYPE_GLOBAL_SEARCH = 20,
+TYPE_HANDWRITE = 21
 
 enum class ApiWindowMode : uint32_t {
     UNDEFINED = 1,
@@ -315,6 +363,8 @@ public:
     static void GetSpecificBarStatus(sptr<Window>& window, const std::string& name,
         std::map<WindowType, SystemBarProperty>& newSystemBarProperties,
         std::map<WindowType, SystemBarProperty>& systemBarProperties);
+    static ani_object CreateOptionalBool(ani_env *env, ani_boolean value);
+    static ani_object CreateOptionalInt(ani_env *env, ani_int value);
     static ani_object CreateOptionalBool(ani_env *env, ani_boolean value);
     static ani_object CreateOptionalInt(ani_env *env, ani_int value);
 

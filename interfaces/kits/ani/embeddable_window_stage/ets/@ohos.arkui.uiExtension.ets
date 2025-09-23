@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,12 +13,213 @@
  * limitations under the License.
  */
 
-class ExtensionWindow {
-    private nativeObj: long = 0;
-    private setNativeObj(nativeObj: long): void {
-        this.nativeObj = nativeObj;
+import { BusinessError } from '@ohos.base';
+import hilog from '@ohos.hilog';
+import window from '@ohos.window';
+import { Callback } from '@ohos.base';
+
+/**
+ * uiExtension.
+ *
+ * @namespace uiExtension
+ * @syscap SystemCapability.ArkUI.ArkUI.Full
+ * @atomicservice
+ * @since 12
+ */
+namespace uiExtension {
+  // UIExtension WmsLogTag
+  const WMS_UIEXT: int = 0xC0420D;
+  const WMS_UIEXT_TAG: string = "WMSUiext";
+  const enum WmErrorCode {
+    WM_OK = 0,
+    WM_ERROR_INVALID_PARAM = 401
+  }
+
+  class UIEProperties implements WindowProxyProperties {
+    constructor() {
+      this.uiExtensionHostWindowProxyRect = new UIERect();
     }
+
+    uiExtensionHostWindowProxyRect: window.Rect;
+  }
+
+  class UIERect implements window.Rect {
+    left: double;
+    top: double;
+    width: double;
+    height: double;
+  }
+
+  class UIEAvoidArea implements window.AvoidArea {
+    constructor() {
+      this.leftRect = new UIERect();
+      this.topRect = new UIERect();
+      this.rightRect = new UIERect();
+      this.bottomRect = new UIERect();
+    }
+
+    visible: boolean;
+    leftRect: window.Rect;
+    topRect: window.Rect;
+    rightRect: window.Rect;
+    bottomRect: window.Rect;
+  }
+
+  // API implementation
+  export class UIExtensionInternal implements WindowProxy {
+    static { loadLibrary("embeddablewindowstageani_kit.z") }
+    private nativeObj: long = 0;
+
+    private setNativeObj(nativeObj: long): void {
+      this.nativeObj = nativeObj;
+    }
+
+    public native getProperties(nativeObj: long, property: object): int;
+    public native setProperties(nativeObj: long, property: object): int;
+    public native getWindowAvoidArea(nativeObj: long, type: int, area: object): int;
+    public native setWaterMarkFlag(nativeObj: long, enable: boolean): int;
+    public native createSubWindowWithOptions(nativeObj: long, name: string,
+        subWindowOptions: window.SubWindowOptions): window.Window;
+    public native occupyEvents(nativeObj: long, eventFlags: long): void;
+    public native hideNonSecureWindows(nativeObj: long, shouldHide: boolean): void;
+    public native onSync(nativeObj: long, type: string, callback: object): void;
+    public native offSync(nativeObj: long, type: string, callback?: object): void;
+
+    get properties(): WindowProxyProperties {
+      let property = new UIEProperties();
+      let ret = this.getProperties(this.nativeObj, property as object);
+      if (ret !== WmErrorCode.WM_OK) {
+        hilog.error(WMS_UIEXT, WMS_UIEXT_TAG, `getProperties failed, ret: ${ret}`);
+      }
+      return property;
+    }
+
+    set properties(properties: WindowProxyProperties) {
+      this.setProperties(this.nativeObj, properties as object);
+    }
+
+    public on<T>(type: string, callback: Callback<T>): void {
+      this.onSync(this.nativeObj, type, callback);
+    }
+
+    public off<T>(type: string, callback?: Callback<T>): void {
+      this.offSync(this.nativeObj, type, callback);
+    }
+
+    getWindowAvoidArea(type: window.AvoidAreaType): window.AvoidArea {
+      let area: window.AvoidArea = new UIEAvoidArea();
+      let ret = this.getWindowAvoidArea(this.nativeObj, type as int, area as object);
+      if (ret !== WmErrorCode.WM_OK) {
+        hilog.error(WMS_UIEXT, WMS_UIEXT_TAG, `getWindowAvoidArea failed, ret: ${ret}`);
+      }
+      return area;
+    }
+
+    setWaterMarkFlag(enable: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          let ret = this.setWaterMarkFlag(this.nativeObj, enable);
+          if (ret !== WmErrorCode.WM_OK) {
+            hilog.error(WMS_UIEXT, WMS_UIEXT_TAG, `setWaterMarkFlag failed, ret: ${ret}`);
+          }
+        }).then((ret: NullishType) :void => {
+          resolve(undefined);
+        }).catch((err: NullishType) :void => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    hideNonSecureWindows(shouldHide: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.hideNonSecureWindows(this.nativeObj, shouldHide);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    createSubWindowWithOptions(name: string, subWindowOptions: window.SubWindowOptions): Promise<window.Window> {
+      return new Promise<window.Window>((resolve: (value: window.Window) => void, reject: (error: BusinessError) => void) => {
+        taskpool.execute((): window.Window => {
+          return this.createSubWindowWithOptions(this.nativeObj, name, subWindowOptions);
+        }).then((ret: NullishType) => {
+            resolve(ret as window.Window);
+        }).catch((err: NullishType) => {
+            reject(err as BusinessError);
+        });
+      });
+    }
+
+    occupyEvents(eventFlags: long): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.occupyEvents(this.nativeObj, eventFlags);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+  }
+
+  /**
+   * Defines the avoid area information.
+   *
+   * @interface AvoidAreaInfo
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 12
+   */
+  export interface AvoidAreaInfo {
+    type: window.AvoidAreaType;
+    area: window.AvoidArea;
+  }
+
+  /**
+   * The proxy of the UIExtension window.
+   *
+   * @interface WindowProxy
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 12
+   */
+  interface WindowProxy {
+    getWindowAvoidArea(type: window.AvoidAreaType): window.AvoidArea;
+    setWaterMarkFlag(enable: boolean): Promise<void>;
+    hideNonSecureWindows(shouldHide: boolean): Promise<void>;
+    createSubWindowWithOptions(name: string, subWindowOptions: window.SubWindowOptions): Promise<window.Window>;
+    occupyEvents(eventFlags: long): Promise<void>;
+    on<T>(type: string, callback: Callback<T>): void;
+    off<T>(type: string, callback?: Callback<T>): void;
+
+    properties: WindowProxyProperties;
+  }
+
+  /**
+   * Properties of UIExtension window
+   *
+   * @interface WindowProxyProperties
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 14
+   * 
+   */
+  interface WindowProxyProperties {
+    /**
+     * Position and size of the component (EmbeddedComponent or UIExtensionComponent).
+     *
+     * @type { window.Rect } 
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @atomicservice
+     * @since 14
+     */
+    uiExtensionHostWindowProxyRect: window.Rect;
+  }
 }
 
-export default ExtensionWindow;
-
+export default uiExtension;

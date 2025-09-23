@@ -36,9 +36,6 @@ AniExtensionWindowListener::~AniExtensionWindowListener()
     if (aniCallback_ != nullptr) {
         env_->GlobalReference_Delete(aniCallback_);
     }
-    if (aniCallbackData_ != nullptr) {
-        env_->GlobalReference_Delete(aniCallbackData_);
-    }
     TLOGI(WmsLogTag::WMS_UIEXT, "[ANI]~AniExtensionWindowListener");
 }
 
@@ -51,7 +48,7 @@ void AniExtensionWindowListener::SetMainEventHandler()
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(mainRunner);
 }
 
-void AniExtensionWindowListener::CallSizeChangeCallback()
+void AniExtensionWindowListener::CallSizeChangeCallback(ani_object size)
 {
     ani_status ret {};
     ani_function fn {};
@@ -64,23 +61,8 @@ void AniExtensionWindowListener::CallSizeChangeCallback()
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Find function failed, ret: %{public}u", ret);
         return;
     }
-    if ((ret = env_->Function_Call_Void(fn, aniCallback_, aniCallbackData_)) != ANI_OK) {
+    if ((ret = env_->Function_Call_Void(fn, aniCallback_, size)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Call function failed, ret: %{public}u", ret);
-        return;
-    }
-}
-
-void AniExtensionWindowListener::SetSizeInfo(uint32_t width, uint32_t height)
-{
-    ani_status ret {};
-    if ((ret = env_->Object_SetFieldByName_Double(static_cast<ani_object>(aniCallbackData_), "<property>width",
-        static_cast<double>(width))) != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Set width failed, ret: %{public}u", ret);
-        return;
-    };
-    if ((ret = env_->Object_SetFieldByName_Double(static_cast<ani_object>(aniCallbackData_), "<property>height",
-        static_cast<double>(height))) != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Set height failed, ret: %{public}u", ret);
         return;
     }
 }
@@ -101,8 +83,7 @@ void AniExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason 
             TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]thisListener, eng or callback is nullptr");
             return;
         }
-        thisListener->SetSizeInfo(rect.width_, rect.height_);
-        thisListener->CallSizeChangeCallback();
+        thisListener->CallSizeChangeCallback(AniWindowUtils::CreateAniSize(eng, rect.width_, rect.height_));
     };
     if (reason == WindowSizeChangeReason::ROTATION) {
         onSizeChangeTask();

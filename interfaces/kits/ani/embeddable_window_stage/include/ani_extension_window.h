@@ -40,8 +40,11 @@ public:
     WmErrorCode OnSetWaterMarkFlag(ani_env* env, ani_boolean enable);
     WmErrorCode OnHidePrivacyContentForHost(ani_env* env, ani_boolean shouldHide);
     WmErrorCode GetExtensionWindowRect(Rect& rect);
-    WmErrorCode RegisterListener(const std::string& cbType, ani_env* env, ani_object fn, ani_object fnArg);
-    WmErrorCode UnregisterListener(const std::string& cbType, ani_env* env, ani_object fn);
+    WmErrorCode RegisterListener(ani_env* env, ani_string type,  ani_object fn);
+    WmErrorCode UnregisterListener(ani_env* env, ani_string type, ani_object fn);
+    void OnHideNonSecureWindows(ani_env* env, ani_boolean shouldHide);
+    void OnOccupyEvents(ani_env* env, ani_long eventFlags);
+    ani_object OnCreateSubWindowWithOptions(ani_env* env, ani_string name, ani_object subWindowOptions);
 private:
     bool IsExtensionWindowValid();
     std::shared_ptr<Rosen::ExtensionWindow> extensionWindow_;

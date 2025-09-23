@@ -39,8 +39,8 @@ class AniExtensionWindowListener : public IWindowChangeListener,
                                    public IWindowLifeCycle,
                                    public IOccupiedAreaChangeListener {
 public:
-    AniExtensionWindowListener(ani_env* env, ani_ref func, ani_ref data)
-        : env_(env), aniCallback_(func), aniCallbackData_(data), weakRef_(wptr<AniExtensionWindowListener> (this)) {}
+    AniExtensionWindowListener(ani_env* env, ani_ref func)
+        : env_(env), aniCallback_(func), weakRef_(wptr<AniExtensionWindowListener> (this)) {}
     ~AniExtensionWindowListener();
     ani_ref GetAniCallback() const { return aniCallback_; }
     void SetAniCallback(ani_ref aniCallback) { aniCallback_ = aniCallback; }
@@ -51,15 +51,13 @@ public:
     void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void SetMainEventHandler();
-    void SetSizeInfo(uint32_t width, uint32_t height);
 
 private:
-    void CallSizeChangeCallback();
+    void CallSizeChangeCallback(ani_object size);
     uint32_t currentWidth_ = 0;
     uint32_t currentHeight_ = 0;
     ani_env* env_ = nullptr;
     ani_ref aniCallback_;
-    ani_ref aniCallbackData_;
     wptr<AniExtensionWindowListener> weakRef_ = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;
     DEFINE_VAR_DEFAULT_FUNC_SET(bool, IsDeprecatedInterface, isDeprecatedInterface, false)
