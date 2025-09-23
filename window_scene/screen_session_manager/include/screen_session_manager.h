@@ -912,8 +912,8 @@ private:
     void SetExtendScreenDpi();
     bool HandleSwitchPcMode();
     void SwitchModeHandleExternalScreen(bool isSwitchToPcMode);
-    void SetScreenNameWhenSwitchMode(sptr<ScreenSession>& screenSession, bool isSwitchToPcMode);
-    void SwitchModeOffScreenRenderingResetScreenProperty(sptr<ScreenSession>& externalScreenSession,
+    void SetScreenNameWhenSwitchMode(const sptr<ScreenSession>& screenSession, bool isSwitchToPcMode);
+    void SwitchModeOffScreenRenderingResetScreenProperty(const sptr<ScreenSession>& externalScreenSession,
         bool isSwitchToPcMode);
     void SwitchModeOffScreenRenderingAdapter(const std::vector<ScreenId>& externalScreenIds);
 
