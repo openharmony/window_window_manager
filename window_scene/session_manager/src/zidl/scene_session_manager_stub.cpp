@@ -88,7 +88,7 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_INFO):
             return HandleGetAccessibilityWindowInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GLOBAL_COORDINATE_TO_RELATIVE_COORDINATE):
-            return HandleConvertToRelativeCoordinateForFoldPC(data, reply);
+            return HandleConvertToRelativeCoordinateExtended(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_UNRELIABLE_WINDOW_INFO):
             return HandleGetUnreliableWindowInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REGISTER_SESSION_LISTENER):
@@ -2548,7 +2548,7 @@ int SceneSessionManagerStub::HandleGetPiPSettingSwitchStatus(MessageParcel& data
 }
 
 
-int SceneSessionManagerStub::HandleConvertToRelativeCoordinateForFoldPC(MessageParcel& data, MessageParcel& reply)
+int SceneSessionManagerStub::HandleConvertToRelativeCoordinateExtended(MessageParcel& data, MessageParcel& reply)
 {
     int32_t posX_ = 0;
     int32_t posY_ = 0;

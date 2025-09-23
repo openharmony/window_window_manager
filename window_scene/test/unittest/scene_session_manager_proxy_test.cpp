@@ -2013,11 +2013,11 @@ HWTEST_F(sceneSessionManagerProxyTest, RemoveSessionBlackList02, TestSize.Level1
 }
 
 /**
- * @tc.name: ConvertToRelativeCoordinateForFoldPC01
+ * @tc.name: ConvertToRelativeCoordinateExtended01
  * @tc.desc: ConvertToRelativeCoordinateExtended
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, ConvertToRelativeCoordinateForFoldPC01, TestSize.Level1)
+HWTEST_F(sceneSessionManagerProxyTest, ConvertToRelativeCoordinateExtended01, TestSize.Level1)
 {
     Rect rect;
     Rect newRect;
@@ -2030,6 +2030,9 @@ HWTEST_F(sceneSessionManagerProxyTest, ConvertToRelativeCoordinateForFoldPC01, T
     auto ret = proxy->ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
     EXPECT_EQ(ret, WMError::WS_ERROR_NULLPTR);
     ASSERT_NE(proxy, nullptr);
+
+    remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
 
     // WriteInterfaceToken failed
     MockMessageParcel::ClearAllErrorFlag();
