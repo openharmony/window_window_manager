@@ -230,6 +230,8 @@ napi_value JsWindowSceneConfig::CreateWindowLimits(napi_env env, const WindowLim
         windowLimits.minWidth_));
     napi_set_named_property(env, objValue, "minHeight", CreateJsValue(env,
         windowLimits.minHeight_));
+    napi_set_named_property(env, objValue, "pixelUnit", CreateJsValue(env,
+        static_cast<uint32_t>(windowLimits.pixelUnit_)));
     return objValue;
 }
 

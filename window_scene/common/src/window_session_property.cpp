@@ -666,6 +666,16 @@ WindowLimits WindowSessionProperty::GetWindowLimits() const
     return limits_;
 }
 
+void WindowSessionProperty::SetWindowLimitsVP(const WindowLimits& windowLimits)
+{
+    limitsVP_ = windowLimits;
+}
+
+WindowLimits WindowSessionProperty::GetWindowLimitsVP() const
+{
+    return limitsVP_;
+}
+
 void WindowSessionProperty::SetWindowMode(WindowMode mode)
 {
     windowMode_ = mode;
@@ -902,20 +912,40 @@ bool WindowSessionProperty::GetUseControlState() const
 
 bool WindowSessionProperty::MarshallingWindowLimits(Parcel& parcel) const
 {
-    if (parcel.WriteUint32(limits_.maxWidth_) &&
-        parcel.WriteUint32(limits_.maxHeight_) && parcel.WriteUint32(limits_.minWidth_) &&
-        parcel.WriteUint32(limits_.minHeight_) && parcel.WriteFloat(limits_.maxRatio_) &&
-        parcel.WriteFloat(limits_.minRatio_) && parcel.WriteFloat(limits_.vpRatio_)) {
-        return true;
-    }
-    return false;
+    auto writeWindowLimits = [&parcel](const WindowLimits& limits) -> bool {
+        return parcel.WriteUint32(limits.maxWidth_) &&
+               parcel.WriteUint32(limits.maxHeight_) &&
+               parcel.WriteUint32(limits.minWidth_) &&
+               parcel.WriteUint32(limits.minHeight_) &&
+               parcel.WriteFloat(limits.maxRatio_) &&
+               parcel.WriteFloat(limits.minRatio_) &&
+               parcel.WriteFloat(limits.vpRatio_) &&
+               parcel.WriteUint32(static_cast<uint32_t>(limits.pixelUnit_));
+    };
+
+    return writeWindowLimits(limits_) &&
+           writeWindowLimits(limitsVP_) &&
+           writeWindowLimits(userLimits_);
 }
 
 void WindowSessionProperty::UnmarshallingWindowLimits(Parcel& parcel, WindowSessionProperty* property)
 {
-    WindowLimits windowLimits = { parcel.ReadUint32(), parcel.ReadUint32(), parcel.ReadUint32(),
-        parcel.ReadUint32(), parcel.ReadFloat(), parcel.ReadFloat(), parcel.ReadFloat() };
-    property->SetWindowLimits(windowLimits);
+    auto readWindowLimits = [&parcel]() -> WindowLimits {
+        return {
+            parcel.ReadUint32(),  // maxWidth
+            parcel.ReadUint32(),  // maxHeight
+            parcel.ReadUint32(),  // minWidth
+            parcel.ReadUint32(),  // minHeight
+            parcel.ReadFloat(),   // maxRatio
+            parcel.ReadFloat(),   // minRatio
+            parcel.ReadFloat(),   // vpRatio
+            static_cast<PixelUnit>(parcel.ReadUint32())  // pixelUnit
+        };
+    };
+
+    property->SetWindowLimits(readWindowLimits());
+    property->SetWindowLimitsVP(readWindowLimits());
+    property->SetUserWindowLimits(readWindowLimits());
 }
 
 bool WindowSessionProperty::MarshallingSystemBarMap(Parcel& parcel) const
@@ -1537,6 +1567,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     windowMode_ = property->windowMode_;
     windowState_ = property->windowState_;
     limits_ = property->limits_;
+    limitsVP_ = property->limitsVP_;
     userLimits_ = property->userLimits_;
     configLimitsVP_ = property->configLimitsVP_;
     lastVpr_ = property->lastVpr_;

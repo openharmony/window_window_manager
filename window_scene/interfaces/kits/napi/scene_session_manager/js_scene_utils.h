@@ -246,6 +246,7 @@ napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& para
 napi_value CreateRotationChangeType(napi_env env);
 napi_value CreateRectType(napi_env env);
 napi_value CreateWindowAnchorType(napi_env env);
+napi_value CreatePixelUnitType(napi_env env);
 napi_value CreateJsWindowAnchorInfo(napi_env env, const WindowAnchorInfo& windowAnchorInfo);
 napi_value CreateSupportType(napi_env env);
 napi_value SubWindowModalTypeInit(napi_env env);

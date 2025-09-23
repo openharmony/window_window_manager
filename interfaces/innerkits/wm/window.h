@@ -3053,9 +3053,13 @@ public:
      * @brief Get the window limits of current window.
      *
      * @param windowLimits.
+     * @param getVirtualPixel return windowLimits in virtual pixel if it is true, else return pixel.
      * @return WMError.
      */
-    virtual WMError GetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError GetWindowLimits(WindowLimits& windowLimits, bool getVirtualPixel = false)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Set the window limits of current window.
