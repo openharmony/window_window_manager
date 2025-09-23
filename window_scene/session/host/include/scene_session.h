@@ -112,7 +112,8 @@ using NotifyPrivacyModeChangeFunc = std::function<void(bool isPrivacyMode)>;
 using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
 using NotifyVisibleChangeFunc = std::function<void(int32_t persistentId)>;
 using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
-using IsAINavigationBarAvoidAreaValidFunc = std::function<bool(const AvoidArea& avoidArea, int32_t sessionBottom)>;
+using IsAINavigationBarAvoidAreaValidFunc = std::function<bool(DisplayId displayId,
+    const AvoidArea& avoidArea, int32_t sessionBottom)>;
 using GetStatusBarDefaultVisibilityByDisplayIdFunc = std::function<bool(DisplayId displayId)>;
 using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enabled, bool isSaveBySpecifiedFlag)>;
 using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isNeedControl, bool isControlRecentOnly)>;
