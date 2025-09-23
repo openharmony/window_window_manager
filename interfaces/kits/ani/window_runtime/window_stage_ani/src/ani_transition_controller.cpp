@@ -137,7 +137,7 @@ ani_object AniTransitionContext::CreateAniObj(ani_env* env, ani_ref aniWindowObj
             return nullptr;
         }
     }
-    TLOGD(WmsLogTag::WMS_ANIMATION, "[ANI] Transition context create %{public}p success", reinterpret_cast<void*>(obj));
+    TLOGD(WmsLogTag::WMS_ANIMATION, "[ANI] Transition context create success");
     return obj;
 }
 
@@ -357,8 +357,7 @@ sptr<AniTransitionController> AniTransitionController::CreateAniTransitionContro
         return nullptr;
     }
     controller->SetAniTransControllerObj(obj);
-    TLOGI(WmsLogTag::WMS_ANIMATION, "[ANI] Transition controller create success %{public}p",
-        reinterpret_cast<void*>(obj));
+    TLOGI(WmsLogTag::WMS_ANIMATION, "[ANI] Transition controller create success");
     return controller;
 }
 
