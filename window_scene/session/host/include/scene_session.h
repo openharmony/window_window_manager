@@ -1091,6 +1091,8 @@ private:
     NotifySessionEventFunc onSessionEvent_;
     void ProcessWindowMoving(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void HandleSubSessionCrossNode(SizeChangeReason reason);
+    void RunAfterNVsyncs(uint32_t vsyncCount, Task&& task);
+    void RestoreGravityWhenDragEnd();
 
     /*
      * Gesture Back
