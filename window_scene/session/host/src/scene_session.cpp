@@ -88,6 +88,7 @@ constexpr int32_t HOOK_SYSTEM_BAR_HEIGHT = 40;
 constexpr int32_t HOOK_AI_BAR_HEIGHT = 28;
 constexpr int32_t POW_DOUBLE = 2;
 constexpr int32_t MULTI_WINDOW_TITLE_BAR_DEFAULT_HEIGHT_VP = 32;
+constexpr int32_t MAX_FLOAT_TITLE_BAR_HEIGHT_VP = 40;
 constexpr uint32_t ROTATION_DEGREE = 90;
 constexpr int32_t HALF_VALUE = 2;
 const int32_t ROTATE_POLICY_WINDOW = 0;
@@ -2450,7 +2451,10 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         }
         vpr = display->GetVirtualPixelRatio();
         bool isFloat = windowMode == WindowMode::WINDOW_MODE_FLOATING && !GetIsMidScene();
-        int32_t height = isFloat ? GetStatusBarHeight() : vpr * MULTI_WINDOW_TITLE_BAR_DEFAULT_HEIGHT_VP;
+        int32_t maxFloatTitleBarHeight = static_cast<int32_t>(vpr * MAX_FLOAT_TITLE_BAR_HEIGHT_VP);
+        int32_t floatTitleBarHeight = std::min(maxFloatTitleBarHeight, GetStatusBarHeight());
+        int32_t height =
+            isFloat ? floatTitleBarHeight : static_cast<int32_t>(vpr * MULTI_WINDOW_TITLE_BAR_DEFAULT_HEIGHT_VP);
         avoidArea.topRect_.height_ = static_cast<uint32_t>(height);
         avoidArea.topRect_.width_ = static_cast<uint32_t>(display->GetWidth());
         return;
