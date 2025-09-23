@@ -50,7 +50,7 @@ public:
     void SetFoldDisplayModeAsync(const FoldDisplayMode displayMode);
     bool IsFoldable();
     FoldStatus GetFoldStatus();
-    sptr<DisplayInfo> GetDefaultDisplayInfo();
+    sptr<DisplayInfo> GetDefaultDisplayInfo(int32_t userId = CONCURRENT_USER_ID_DEFAULT);
     sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId);
     sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId);
     VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId);

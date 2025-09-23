@@ -146,7 +146,7 @@ public:
      *
      * @return Default display object.
      */
-    sptr<DisplayLite> GetDefaultDisplay();
+    sptr<DisplayLite> GetDefaultDisplay(int32_t userId = CONCURRENT_USER_ID_DEFAULT);
 
     /**
      * @brief Check whether the device is foldable.
@@ -296,7 +296,7 @@ public:
      *
      * @return Default display id.
      */
-    DisplayId GetDefaultDisplayId();
+    DisplayId GetDefaultDisplayId(int32_t userId = CONCURRENT_USER_ID_DEFAULT);
 
     /**
      * @brief Get IDs of all displays.
