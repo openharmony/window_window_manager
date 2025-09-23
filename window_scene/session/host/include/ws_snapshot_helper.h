@@ -38,10 +38,10 @@ constexpr uint32_t ROTATION_ANGLE = 360;
 constexpr uint32_t ROTATION_COUNT = 4;
 constexpr uint32_t SECONDARY_EXPAND_OFFSET = 1;
 }
-using SnapshotStatus = std::pair<uint32_t, uint32_t>;
-constexpr SnapshotStatus defaultStatus = { SCREEN_UNKNOWN, SNAPSHOT_PORTRAIT };
-constexpr SnapshotStatus defaultCapacity = { SCREEN_EXPAND, SNAPSHOT_LANDSCAPE };
-constexpr SnapshotStatus maxCapacity = { SCREEN_COUNT, ORIENTATION_COUNT };
+using SnapshotStatus = uint32_t;
+constexpr SnapshotStatus defaultStatus = SCREEN_UNKNOWN;
+constexpr SnapshotStatus defaultCapacity = SCREEN_EXPAND;
+constexpr SnapshotStatus maxCapacity = SCREEN_COUNT;
 
 class WSSnapshotHelper {
 public:
@@ -51,40 +51,14 @@ public:
     static DisplayOrientation GetDisplayOrientation(int32_t rotation);
     void SetWindowScreenStatus(uint32_t screenStatus);
     void SetWindowScreenStatus(FoldStatus foldStatus);
-    void SetWindowOrientationStatus(uint32_t orientationStatus);
     void SetWindowOrientationStatus(Rotation rotation);
-    SnapshotStatus GetWindowStatus() const;
     uint32_t GetWindowRotation() const;
-    static inline uint32_t GetOrientation(int32_t rotation)
-    {
-        if (rotation == LANDSCAPE_ANGLE || rotation == LANDSCAPE_INVERTED_ANGLE) {
-            return SNAPSHOT_LANDSCAPE;
-        }
-        return SNAPSHOT_PORTRAIT;
-    }
-
-    static inline uint32_t GetOrientation(DisplayOrientation displayOrientation)
-    {
-        if (displayOrientation == DisplayOrientation::LANDSCAPE ||
-            displayOrientation == DisplayOrientation::LANDSCAPE_INVERTED) {
-            return SNAPSHOT_LANDSCAPE;
-        }
-        return SNAPSHOT_PORTRAIT;
-    }
-
-    static inline uint32_t GetOrientation(Rotation rotation)
-    {
-        if (rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180) {
-            return SNAPSHOT_PORTRAIT;
-        }
-        return SNAPSHOT_LANDSCAPE;
-    }
 
 private:
     WSSnapshotHelper() = default;
     ~WSSnapshotHelper() = default;
-    SnapshotStatus windowStatus_;
-    Rotation windowRotation_;
+    SnapshotStatus screenStatus_;
+    Rotation screenRotation_;
     mutable std::mutex statusMutex_;
     mutable std::mutex rotationMutex_;
 };
