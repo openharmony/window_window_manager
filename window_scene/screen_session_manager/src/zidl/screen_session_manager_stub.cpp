@@ -52,10 +52,9 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
     DisplayManagerMessage msgId = static_cast<DisplayManagerMessage>(code);
     switch (msgId) {
         case DisplayManagerMessage::TRANS_ID_GET_DEFAULT_DISPLAY_INFO: {
-            int32_t userId;
+            int32_t userId = CONCURRENT_USER_ID_DEFAULT;
             if (!data.ReadInt32(userId)) {
-                TLOGE(WmsLogTag::DMS, "Read userId failed");
-                return ERR_INVALID_DATA;
+                TLOGD(WmsLogTag::DMS, "Read userId failed");
             }
             auto info = GetDefaultDisplayInfo(userId);
             reply.WriteParcelable(info);
@@ -185,10 +184,9 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_ALL_DISPLAYIDS: {
-            int32_t userId;
+            int32_t userId = CONCURRENT_USER_ID_DEFAULT;
             if (!data.ReadInt32(userId)) {
-                TLOGE(WmsLogTag::DMS, "Read userId failed");
-                return ERR_INVALID_DATA;
+                TLOGD(WmsLogTag::DMS, "Read userId failed");
             }
             TLOGD(WmsLogTag::DMS, "case TRANS_ID_GET_ALL_DISPLAYIDS get userId %{public}u", userId);
             std::vector<DisplayId> allDisplayIds = GetAllDisplayIds(userId);
