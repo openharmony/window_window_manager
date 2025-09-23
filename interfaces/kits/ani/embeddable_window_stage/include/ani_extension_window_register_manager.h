@@ -32,7 +32,7 @@ public:
     AniExtensionWindowRegisterManager();
     ~AniExtensionWindowRegisterManager();
     WmErrorCode RegisterListener(sptr<Window> window, const std::string& type,
-        CaseType caseType, ani_env* env, ani_object fn, ani_object fnArg);
+        CaseType caseType, ani_env* env, ani_object fn);
     WmErrorCode UnregisterListener(sptr<Window> window, const std::string& type,
         CaseType caseType, ani_env* env, ani_object fn);
 

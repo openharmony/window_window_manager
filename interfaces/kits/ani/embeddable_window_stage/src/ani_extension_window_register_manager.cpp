@@ -113,7 +113,7 @@ bool AniExtensionWindowRegisterManager::IsCallbackRegistered(ani_env* env, const
 }
 
 WmErrorCode AniExtensionWindowRegisterManager::RegisterListener(sptr<Window> window, const std::string& type,
-    CaseType caseType, ani_env* env, ani_object fn, ani_object fnArg)
+    CaseType caseType, ani_env* env, ani_object fn)
 {
     std::lock_guard<std::mutex> lock(mtx_);
     if (IsCallbackRegistered(env, type, fn)) {
@@ -129,21 +129,13 @@ WmErrorCode AniExtensionWindowRegisterManager::RegisterListener(sptr<Window> win
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Create fn global reference failed, ret: %{public}u", ret);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     };
-    ani_ref fnArgRef {};
-    if ((ret = env->GlobalReference_Create(fnArg, &fnArgRef)) != ANI_OK) {
-        env->GlobalReference_Delete(fnRef);
-        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Create fnArg global reference failed, ret: %{public}u", ret);
-        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-    };
-    sptr<AniExtensionWindowListener> extensionWindowListener =
-        sptr<AniExtensionWindowListener>::MakeSptr(env, fnRef, fnArgRef);
+    sptr<AniExtensionWindowListener> extensionWindowListener = sptr<AniExtensionWindowListener>::MakeSptr(env, fnRef);
     extensionWindowListener->SetMainEventHandler();
     WmErrorCode retCode = ProcessRegister(caseType, extensionWindowListener, window, type, true);
     if (retCode != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Register type %{public}s listener failed, ret: %{public}d",
             type.c_str(), retCode);
         env->GlobalReference_Delete(fnRef);
-        env->GlobalReference_Delete(fnArgRef);
         return retCode;
     }
     aniCbMap_[type][fnRef] = extensionWindowListener;

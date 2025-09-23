@@ -36,12 +36,6 @@ namespace uiExtensionHost {
     WM_OK = 0,
     WM_ERROR_INVALID_PARAM = 401
   }
-  const WM_ERRORCODE_INVALID_PARAM_MSG: string = `Parameter error. Possible causes: ` +
-    `1. Mandatory parameters are left unspecified; ` +
-    `2. Incorrect parameters types; ` +
-    `3. Parameter verification failed.`;
-  const WINDOW_SIZE_CHANGE_CB: string = "windowSizeChange";
-  const AVOID_AREA_CHANGE_CB: string = "avoidAreaChange";
 
   // internal class and function
   export type CallbackSize = (size: window.Size) => void;
@@ -60,11 +54,6 @@ namespace uiExtensionHost {
   function keyboardHeightChangeCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: number) => void;
     func(cbArg as number);
-  }
-
-  class UIESize implements window.Size {
-    width: double;
-    height: double;
   }
 
   class UIERect implements window.Rect {
@@ -87,11 +76,6 @@ namespace uiExtensionHost {
     topRect: window.Rect;
     rightRect: window.Rect;
     bottomRect: window.Rect;
-  }
-
-  class UIEAreaAndType {
-    type: window.AvoidAreaType;
-    area: UIEAvoidArea;
   }
 
   class UIEProperties implements UIExtensionHostWindowProxyProperties {
@@ -120,10 +104,11 @@ namespace uiExtensionHost {
     public native getWindowAvoidArea(nativeObj: long, type: int, area: object): int;
     public native setWaterMarkFlag(nativeObj: long, enable: boolean): int;
     public native hidePrivacyContentForHost(nativeObj: long, shouldHide: boolean): int;
-    public native onAvoidAreaChange(nativeObj: long, callback: object, callbackData: object): int;
-    public native offAvoidAreaChange(nativeObj: long, callback?: object): int;
-    public native onWindowSizeChange(nativeObj: long, callback: object, callbackData: object): int;
-    public native offWindowSizeChange(nativeObj: long, callback?: object): int;
+    public native onSync(nativeObj: long, type: string, callback: object): void;
+    public native offSync(nativeObj: long, type: string, callback?: object): void;
+    public native createSubWindowWithOptions(nativeObj: long, name: string,
+      subWindowOptions: window.SubWindowOptions): window.Window;
+    public native hideNonSecureWindows(nativeObj: long, shouldHide: boolean): void;
 
     get properties(): UIExtensionHostWindowProxyProperties {
       let property = new UIEProperties();
@@ -139,45 +124,11 @@ namespace uiExtensionHost {
     }
 
     public on<T>(type: string, callback: Callback<T>): void {
-      if (type === AVOID_AREA_CHANGE_CB) {
-        let area = new UIEAreaAndType();
-        let ret = this.onAvoidAreaChange(this.nativeObj, callback as object, area as object);
-        if (ret !== WmErrorCode.WM_OK) {
-          hilog.error(WMS_UIEXT, WMS_UIEXT_TAG, `register ${type} callback failed, ret: ${ret}`);
-        }
-      } else if (type === WINDOW_SIZE_CHANGE_CB) {
-        let size = new UIESize();
-        let ret = this.onWindowSizeChange(this.nativeObj, callback as object, size as object);
-        if (ret !== WmErrorCode.WM_OK) {
-          hilog.error(WMS_UIEXT, WMS_UIEXT_TAG, `register ${type} callback failed, ret: ${ret}`);
-        }
-      } else {
-        hilog.error(WMS_UIEXT, WMS_UIEXT_TAG, `type ${type} is not supported`);
-        throw {
-          code: WmErrorCode.WM_ERROR_INVALID_PARAM,
-          message: WM_ERRORCODE_INVALID_PARAM_MSG
-        } as BusinessError<string> as Error;
-      }
+      this.onSync(this.nativeObj, type, callback);
     }
 
     public off<T>(type: string, callback?: Callback<T>): void {
-      if (type === AVOID_AREA_CHANGE_CB) {
-        let ret = this.offAvoidAreaChange(this.nativeObj, callback);
-        if (ret !== WmErrorCode.WM_OK) {
-          hilog.error(WMS_UIEXT, WMS_UIEXT_TAG, `unregister ${type} callback failed, ret: ${ret}`);
-        }
-      } else if (type === WINDOW_SIZE_CHANGE_CB) {
-        let ret = this.offWindowSizeChange(this.nativeObj, callback);
-        if (ret !== WmErrorCode.WM_OK) {
-          hilog.error(WMS_UIEXT, WMS_UIEXT_TAG, `unregister ${type} callback failed, ret: ${ret}`);
-        }
-      } else {
-        hilog.error(WMS_UIEXT, WMS_UIEXT_TAG, `type ${type} is not supported`);
-        throw {
-          code: WmErrorCode.WM_ERROR_INVALID_PARAM,
-          message: WM_ERRORCODE_INVALID_PARAM_MSG
-        } as BusinessError<string> as Error;
-      }
+      this.offSync(this.nativeObj, type, callback);
     }
 
     getWindowAvoidArea(type: window.AvoidAreaType): window.AvoidArea {
@@ -218,6 +169,30 @@ namespace uiExtensionHost {
         });
       });
     }
+
+    hideNonSecureWindows(shouldHide: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.hideNonSecureWindows(this.nativeObj, shouldHide);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    createSubWindowWithOptions(name: string, subWindowOptions: window.SubWindowOptions): Promise<window.Window> {
+      return new Promise<window.Window>((resolve: (value: window.Window) => void, reject: (error: BusinessError) => void) => {
+        taskpool.execute((): window.Window => {
+          return this.createSubWindowWithOptions(this.nativeObj, name, subWindowOptions);
+        }).then((ret: NullishType) => {
+            resolve(ret as window.Window);
+        }).catch((err: NullishType) => {
+            reject(err as BusinessError);
+        });
+      });
+    }
   }
 
   /**
@@ -232,6 +207,8 @@ namespace uiExtensionHost {
     getWindowAvoidArea(type: window.AvoidAreaType): window.AvoidArea;
     setWaterMarkFlag(enable: boolean): Promise<void>;
     hidePrivacyContentForHost(shouldHide: boolean): Promise<void>;
+    hideNonSecureWindows(shouldHide: boolean): Promise<void>;
+    createSubWindowWithOptions(name: string, subWindowOptions: window.SubWindowOptions): Promise<window.Window>;
     on<T>(type: string, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;
     properties: UIExtensionHostWindowProxyProperties;
