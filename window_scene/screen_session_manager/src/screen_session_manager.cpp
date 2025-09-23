@@ -8903,7 +8903,7 @@ void ScreenSessionManager::SwitchModeHandleExternalScreen(bool isSwitchToPcMode)
     SetExtendScreenDpi();
 }
 
-void ScreenSessionManager::SwitchModeOffScreenRenderingResetScreenProperty(sptr<ScreenSession>& externalScreenSession,
+void ScreenSessionManager::SwitchModeOffScreenRenderingResetScreenProperty(const sptr<ScreenSession>& externalScreenSession,
     bool isSwitchToPcMode)
 {
     if (externalScreenSession == nullptr) {
@@ -8935,7 +8935,7 @@ void ScreenSessionManager::SwitchModeOffScreenRenderingAdapter(const std::vector
     }
 }
 
-void ScreenSessionManager::SetScreenNameWhenSwitchMode(sptr<ScreenSession>& screenSession, bool isSwitchToPcMode)
+void ScreenSessionManager::SetScreenNameWhenSwitchMode(const sptr<ScreenSession>& screenSession, bool isSwitchToPcMode)
 {
     if (screenSession == nullptr) {
         TLOGI(WmsLogTag::DMS, "screenSession is nullptr");
