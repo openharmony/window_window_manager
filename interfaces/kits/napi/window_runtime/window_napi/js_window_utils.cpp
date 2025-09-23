@@ -179,6 +179,22 @@ napi_value GlobalWindowModeInit(napi_env env)
     return objValue;
 }
 
+napi_value WindowOcclusionStateInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(env, objValue, "NO_OCCLUSION", CreateJsValue(env,
+        static_cast<int32_t>(WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION)));
+    napi_set_named_property(env, objValue, "PARTIALLY_OCCLUSION", CreateJsValue(env,
+        static_cast<int32_t>(WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION)));
+    napi_set_named_property(env, objValue, "TOTALLY_OCCLUSION", CreateJsValue(env,
+        static_cast<int32_t>(WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION)));
+    return objValue;
+}
+
 napi_value ScreenshotEventTypeInit(napi_env env)
 {
     CHECK_NAPI_ENV_RETURN_IF_NULL(env);

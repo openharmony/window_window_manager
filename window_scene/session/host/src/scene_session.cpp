@@ -5157,6 +5157,19 @@ void SceneSession::NotifyWindowVisibility()
     }
 }
 
+void SceneSession::NotifyOcclusionState()
+{
+    if (sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "no stage, win=[%{public}d, %{public}s]", GetWindowId(),
+            GetWindowName().c_str());
+        return;
+    }
+    auto visibilityState = GetVisibilityState();
+    auto retCode = sessionStage_->NotifyWindowOcclusionState(visibilityState);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "win=[%{public}d, %{public}s], visibilityState=%{public}u, retCode=%{public}d",
+        GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(visibilityState), static_cast<int32_t>(retCode));
+}
+
 bool SceneSession::CheckTouchOutsideCallbackRegistered()
 {
     return onTouchOutside_ != nullptr;

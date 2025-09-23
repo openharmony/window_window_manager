@@ -152,6 +152,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyDensityFollowHost(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_VISIBILITY_CHANGE):
             return HandleNotifyWindowVisibilityChange(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_VISIBILITY_STATE):
+            return HandleNotifyWindowOcclusionState(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TRANSFORM_CHANGE):
             return HandleNotifyTransformChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SINGLE_HAND_TRANSFORM):
@@ -634,6 +636,25 @@ int SessionStageStub::HandleNotifyWindowVisibilityChange(MessageParcel& data, Me
     bool isVisible = data.ReadBool();
     WSError errCode = NotifyWindowVisibility(isVisible);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyWindowOcclusionState(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t state = static_cast<uint32_t>(WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
+    if (!data.ReadUint32(state)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read visibility state failed");
+        return ERR_INVALID_DATA;
+    }
+    if (state > static_cast<uint32_t>(WindowVisibilityState::END)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid visibility state: %{public}u", state);
+        return ERR_INVALID_DATA;
+    }
+    auto errCode = NotifyWindowOcclusionState(static_cast<WindowVisibilityState>(state));
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write failed: errCode=%{public}d", static_cast<int32_t>(errCode));
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
