@@ -22,6 +22,10 @@
 #include "ani.h"
 #include "ani_err_utils.h"
 #include "ani_window_utils.h"
+#include "interop_js/arkts_esvalue.h"
+#include "interop_js/arkts_interop_js_api.h"
+#include "interop_js/hybridgref_ani.h"
+#include "interop_js/hybridgref_napi.h"
 #include "permission.h"
 #include "pixel_map.h"
 #include "pixel_map_taihe_ani.h"
@@ -68,6 +72,68 @@ AniWindow* AniWindow::GetWindowObjectFromEnv(ani_env* env, ani_object obj)
         return nullptr;
     }
     return reinterpret_cast<AniWindow*>(nativeObj);
+}
+
+ani_object AniWindow::NativeTransferStatic(ani_env* aniEnv, ani_class cls, ani_object input)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    void *unwrapResult = nullptr;
+    if (!arkts_esvalue_unwrap(aniEnv, input, &unwrapResult)) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to unwrap input");
+        return AniWindowUtils::CreateAniUndefined(aniEnv);
+    }
+    if (unwrapResult == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] unwrapResult is nullptr");
+        return AniWindowUtils::CreateAniUndefined(aniEnv);
+    }
+    JsWindow* jsWindow = static_cast<JsWindow*>(unwrapResult);
+    sptr<Window> windowToken = jsWindow->GetWindow();
+    ani_ref aniWindowObj = CreateAniWindowObject(aniEnv, windowToken);
+    if (aniWindowObj == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] ani window object is nullptr");
+        return AniWindowUtils::CreateAniUndefined(aniEnv);
+    }
+    return static_cast<ani_object>(aniWindowObj);
+}
+
+ani_object AniWindow::NativeTransferDynamic(ani_env* aniEnv, ani_class cls, ani_long nativeObj)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
+        return AniWindowUtils::CreateAniUndefined(aniEnv);
+    }
+    napi_env napiEnv {};
+    if (!arkts_napi_scope_open(aniEnv, &napiEnv)) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] napi scope open fail");
+        return AniWindowUtils::CreateAniUndefined(aniEnv);
+    }
+    sptr<Window> windowToken = aniWindow->GetWindow();
+    napi_value jsWindow = CreateJsWindowObject(napiEnv, windowToken);
+    hybridgref ref {};
+    if (!hybridgref_create_from_napi(napiEnv, jsWindow, &ref)) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] create hybridgref fail");
+        arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);
+        return AniWindowUtils::CreateAniUndefined(aniEnv);
+    }
+    ani_object result {};
+    if (!hybridgref_get_esvalue(aniEnv, ref, &result)) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] get esvalue fail");
+        hybridgref_delete_from_napi(napiEnv, ref);
+        arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);
+        return AniWindowUtils::CreateAniUndefined(aniEnv);
+    }
+    if (!hybridgref_delete_from_napi(napiEnv, ref)) {
+        arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] delete hybridgref fail");
+        return AniWindowUtils::CreateAniUndefined(aniEnv);
+    }
+    if (!arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr)) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] napi close scope fail");
+        return AniWindowUtils::CreateAniUndefined(aniEnv);
+    }
+    return result;
 }
 
 void AniWindow::SetWindowColorSpace(ani_env* env, ani_object obj, ani_long nativeObj, ani_int colorSpace)
@@ -1903,6 +1969,10 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::DestroyWindow)},
         ani_native_function {"isWindowShowingSync", nullptr,
             reinterpret_cast<void *>(AniWindow::IsWindowShowing)},
+        ani_native_function {"nativeTransferStatic", "Lstd/interop/ESValue;:Lstd/core/Object;",
+            reinterpret_cast<void *>(AniWindow::NativeTransferStatic)},
+        ani_native_function {"nativeTransferDynamic", "J:Lstd/interop/ESValue;",
+            reinterpret_cast<void *>(AniWindow::NativeTransferDynamic)},
     };
     if ((ret = env->Class_BindNativeMethods(cls, methods.data(), methods.size())) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] bind window method fail %{public}u", ret);
