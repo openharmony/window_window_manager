@@ -228,6 +228,7 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
             .area = MMI::Rect { areaRect.posX_, areaRect.posY_,
                 static_cast<int32_t>(areaRect.width_), static_cast<int32_t>(areaRect.height_) },
             .agentWindowId = static_cast<int32_t>(windowNode->GetWindowId()),
+            .agentPid = windowNode->GetInputEventCallingPid(),
         };
 
         auto iter = (windowNode->GetParentId() == INVALID_WINDOW_ID) ?
