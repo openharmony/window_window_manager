@@ -922,7 +922,7 @@ ani_object AniWindow::OnGetWindowAvoidAreaIgnoringVisibility(ani_env* env, ani_i
     }
     AvoidArea avoidArea;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
-        window->GetWindowAvoidAreaIgnoringVisibility(static_cast<AvoidAreaType>(type), avoidArea));
+        window->GetAvoidAreaByTypeIgnoringVisibility(static_cast<AvoidAreaType>(type), avoidArea));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_IMMS, "[ANI] get failed, ret: %{public}d", ret);
         return AniWindowUtils::AniThrowError(env, ret);
