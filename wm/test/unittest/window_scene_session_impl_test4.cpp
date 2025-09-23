@@ -189,6 +189,8 @@ HWTEST_F(WindowSceneSessionImplTest4, GetSystemSizeLimits01, TestSize.Level1)
     uint32_t minMainHeight = 20;
     uint32_t minSubWidth = 30;
     uint32_t minSubHeight = 40;
+    uint32_t minDialogWidth = 37;
+    uint32_t minDialogHeight = 43;
     uint32_t displayWidth = 100;
     uint32_t displayHeight = 100;
     float displayVpr = 1.0f;
@@ -199,21 +201,23 @@ HWTEST_F(WindowSceneSessionImplTest4, GetSystemSizeLimits01, TestSize.Level1)
     windowSceneSessionImpl->windowSystemConfig_.miniHeightOfMainWindow_ = minMainHeight;
     windowSceneSessionImpl->windowSystemConfig_.miniWidthOfSubWindow_ = minSubWidth;
     windowSceneSessionImpl->windowSystemConfig_.miniHeightOfSubWindow_ = minSubHeight;
+    windowSceneSessionImpl->windowSystemConfig_.miniWidthOfDialogWindow_ = minDialogWidth;
+    windowSceneSessionImpl->windowSystemConfig_.miniHeightOfDialogWindow_ = minDialogHeight;
 
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    WindowLimits limits = windowSceneSessionImpl->GetSystemSizeLimits(displayWidth, displayHeight, displayVpr);
+    const auto& [limits, _] = windowSceneSessionImpl->GetSystemSizeLimits(displayWidth, displayHeight, displayVpr);
     EXPECT_EQ(limits.minWidth_, minMainWidth);
     EXPECT_EQ(limits.minHeight_, minMainHeight);
 
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    limits = windowSceneSessionImpl->GetSystemSizeLimits(displayWidth, displayHeight, displayVpr);
-    EXPECT_EQ(limits.minWidth_, minSubWidth);
-    EXPECT_EQ(limits.minHeight_, minSubHeight);
+    const auto& [limits2, _2] = windowSceneSessionImpl->GetSystemSizeLimits(displayWidth, displayHeight, displayVpr);
+    EXPECT_EQ(limits2.minWidth_, minSubWidth);
+    EXPECT_EQ(limits2.minHeight_, minSubHeight);
 
     windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
-    limits = windowSceneSessionImpl->GetSystemSizeLimits(displayWidth, displayHeight, displayVpr);
-    EXPECT_EQ(limits.minWidth_, static_cast<uint32_t>(MIN_FLOATING_WIDTH * displayVpr));
-    EXPECT_EQ(limits.minHeight_, static_cast<uint32_t>(MIN_FLOATING_HEIGHT * displayVpr));
+    const auto& [limits3, _3] = windowSceneSessionImpl->GetSystemSizeLimits(displayWidth, displayHeight, displayVpr);
+    EXPECT_EQ(limits3.minWidth_, minDialogWidth);
+    EXPECT_EQ(limits3.minHeight_, minDialogHeight);
 }
 
 /**

@@ -240,6 +240,7 @@ void JsExtensionWindow::RegisterUnsupportFuncs(napi_env env, napi_value objValue
     BindNativeFunction(env, objValue, "isSystemAvoidAreaEnabled", moduleName, JsExtensionWindow::UnsupportSyncCall);
     BindNativeFunction(env, objValue, "isWindowHighlighted", moduleName, JsExtensionWindow::UnsupportSyncCall);
     BindNativeFunction(env, objValue, "getWindowLimits", moduleName, JsExtensionWindow::UnsupportSyncCall);
+    BindNativeFunction(env, objValue, "getWindowLimitsVP", moduleName, JsExtensionWindow::UnsupportSyncCall);
     BindNativeFunction(env, objValue, "getWindowDecorVisible", moduleName, JsExtensionWindow::UnsupportSyncCall);
     BindNativeFunction(env, objValue, "setWindowTitleMoveEnabled", moduleName, JsExtensionWindow::UnsupportSyncCall);
     BindNativeFunction(env, objValue, "setWindowDecorHeight", moduleName, JsExtensionWindow::UnsupportSyncCall);

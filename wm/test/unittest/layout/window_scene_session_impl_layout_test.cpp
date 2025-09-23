@@ -404,6 +404,82 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits05, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetWindowLimits_Test_Diff_Unit
+ * @tc.desc: SetWindowLimits
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits_Test_Diff_Unit, TestSize.Level1)
+{
+    sptr<WindowOption> windowOption = sptr<WindowOption>::MakeSptr();
+    windowOption->SetWindowName("SetWindowLimits_Test_Diff_Unit");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(windowOption);
+    windowSceneSessionImpl->GetProperty()->SetPersistentId(1005);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> sessionMocker = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->hostSession_ = sessionMocker;
+    windowSceneSessionImpl->GetProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+
+    // Case1: set window limits measured in px
+    windowSceneSessionImpl->forceLimits_ = false;
+    windowSceneSessionImpl->userLimitsSet_ = false;
+    WindowLimits windowLimitsPx = { 2000, 2000, 2000, 2000, 0.0f, 0.0f, 0.0f, PixelUnit::PX };
+    WindowLimits limitsPxCopy = windowLimitsPx;
+    EXPECT_EQ(WMError::WM_OK, windowSceneSessionImpl->SetWindowLimits(limitsPxCopy, true));
+    EXPECT_EQ(windowSceneSessionImpl->forceLimits_, true);
+    EXPECT_EQ(windowSceneSessionImpl->userLimitsSet_, true);
+    WindowLimits userWindowLimits = windowSceneSessionImpl->GetProperty()->GetUserWindowLimits();
+    EXPECT_EQ(userWindowLimits.maxWidth_, windowLimitsPx.maxWidth_);
+    EXPECT_EQ(userWindowLimits.maxHeight_, windowLimitsPx.maxHeight_);
+    EXPECT_EQ(userWindowLimits.minWidth_, windowLimitsPx.minWidth_);
+    EXPECT_EQ(userWindowLimits.minHeight_, windowLimitsPx.minHeight_);
+    EXPECT_EQ(userWindowLimits.pixelUnit_, windowLimitsPx.pixelUnit_);
+
+    // Case1: set window limits measured in vp
+    windowSceneSessionImpl->forceLimits_ = true;
+    windowSceneSessionImpl->userLimitsSet_ = false;
+    WindowLimits windowLimitsVp = { 1000, 1000, 1000, 1000, 0.0f, 0.0f, 0.0f, PixelUnit::VP };
+    WindowLimits limitsVpCopy = windowLimitsVp;
+    EXPECT_EQ(WMError::WM_OK, windowSceneSessionImpl->SetWindowLimits(limitsVpCopy, true));
+    EXPECT_EQ(windowSceneSessionImpl->forceLimits_, false);
+    EXPECT_EQ(windowSceneSessionImpl->userLimitsSet_, true);
+    userWindowLimits = windowSceneSessionImpl->GetProperty()->GetUserWindowLimits();
+    EXPECT_EQ(userWindowLimits.maxWidth_, windowLimitsVp.maxWidth_);
+    EXPECT_EQ(userWindowLimits.maxHeight_, windowLimitsVp.maxHeight_);
+    EXPECT_EQ(userWindowLimits.minWidth_, windowLimitsVp.minWidth_);
+    EXPECT_EQ(userWindowLimits.minHeight_, windowLimitsVp.minHeight_);
+    EXPECT_EQ(userWindowLimits.pixelUnit_, windowLimitsVp.pixelUnit_);
+}
+
+/**
+ * @tc.name: SetMinimumDimensions_Test_Other_Window_Type
+ * @tc.desc: SetMinimumDimensions test other window types besides the main window, sub window,
+ *           dialog window and system window
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, SetMinimumDimensions_Test_Other_Window_Type, TestSize.Level1)
+{
+    sptr<WindowOption> windowOption = sptr<WindowOption>::MakeSptr();
+    windowOption->SetWindowName("SetMinimumDimensions_Test_Other_Window_Type");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(windowOption);
+    window->GetProperty()->SetPersistentId(1005);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> sessionMocker = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = sessionMocker;
+    window->GetProperty()->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+
+    WindowLimits systemLimits;
+    WindowLimits systemLimitsVP = WindowLimits::DEFAULT_VP_LIMITS();
+    const uint32_t displayWidth = 3120;
+    const uint32_t displayHeight = 2080;
+    const float virtualPixelRatio = 1.9f;
+    window->SetMinimumDimensions(systemLimits, systemLimitsVP, displayWidth, displayHeight, virtualPixelRatio);
+    EXPECT_EQ(systemLimits.minWidth_, static_cast<uint32_t>(MIN_FLOATING_WIDTH * virtualPixelRatio));
+    EXPECT_EQ(systemLimits.minHeight_, static_cast<uint32_t>(MIN_FLOATING_HEIGHT * virtualPixelRatio));
+    EXPECT_EQ(systemLimitsVP.minWidth_, MIN_FLOATING_WIDTH);
+    EXPECT_EQ(systemLimitsVP.minHeight_, MIN_FLOATING_HEIGHT);
+}
+
+/**
  * @tc.name: CalculateNewLimitsByRatio01
  * @tc.desc: CalculateNewLimitsByRatio
  * @tc.type: FUNC
@@ -415,13 +491,14 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, CalculateNewLimitsByRatio01, TestSize
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     WindowLimits newLimits = { 0, 0, 0, 0, 0.0, 0.0 };
+    WindowLimits newLimitsVP = WindowLimits::DEFAULT_VP_LIMITS();
     WindowLimits customizedLimits = { 3, 3, 3, 3, 0.0, 0.0 };
-    windowSceneSessionImpl->CalculateNewLimitsByRatio(newLimits, customizedLimits);
+    windowSceneSessionImpl->CalculateNewLimitsByRatio(newLimits, newLimitsVP, customizedLimits);
     newLimits = { 500, 500, 500, 500, 0.0, 0.0 };
     customizedLimits = { 3, 3, 3, 3, 2.0, 2.0 };
-    windowSceneSessionImpl->CalculateNewLimitsByRatio(newLimits, customizedLimits);
+    windowSceneSessionImpl->CalculateNewLimitsByRatio(newLimits, newLimitsVP, customizedLimits);
     customizedLimits = { 3, 3, 3, 3, 1.0, 1.0 };
-    windowSceneSessionImpl->CalculateNewLimitsByRatio(newLimits, customizedLimits);
+    windowSceneSessionImpl->CalculateNewLimitsByRatio(newLimits, newLimitsVP, customizedLimits);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::BELOW_APP_SYSTEM_WINDOW_END);
     auto ret = windowSceneSessionImpl->UpdateAnimationFlagProperty(true);
     EXPECT_EQ(WMError::WM_OK, ret);
@@ -439,13 +516,14 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, CalculateNewLimitsByRatio02, TestSize
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     WindowLimits newLimits = { 0, 0, 0, 0, 0.0, 0.0 };
+    WindowLimits newLimitsVP = WindowLimits::DEFAULT_VP_LIMITS();
     WindowLimits customizedLimits = { 3, 3, 3, 3, 0.0, 0.0 };
-    windowSceneSessionImpl->CalculateNewLimitsByRatio(newLimits, customizedLimits);
+    windowSceneSessionImpl->CalculateNewLimitsByRatio(newLimits, newLimitsVP, customizedLimits);
     newLimits = { 500, 500, 500, 500, 0.0, 0.0 };
     customizedLimits = { 3, 3, 3, 3, 2.0, 2.0 };
-    windowSceneSessionImpl->CalculateNewLimitsByRatio(newLimits, customizedLimits);
+    windowSceneSessionImpl->CalculateNewLimitsByRatio(newLimits, newLimitsVP, customizedLimits);
     customizedLimits = { 3, 3, 3, 3, 1.0, 1.0 };
-    windowSceneSessionImpl->CalculateNewLimitsByRatio(newLimits, customizedLimits);
+    windowSceneSessionImpl->CalculateNewLimitsByRatio(newLimits, newLimitsVP, customizedLimits);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE);
     auto ret = windowSceneSessionImpl->UpdateAnimationFlagProperty(true);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
@@ -694,6 +772,88 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, UpdateWindowModeForUITest01, TestSize
     EXPECT_EQ(WMError::WM_OK, res);
     res = window->UpdateWindowModeForUITest(static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING));
     EXPECT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: GetWindowLimits_Test_Unit
+ * @tc.desc: Test the return value of getWindowLimits under different unit input parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, GetWindowLimits_Test_Unit, TestSize.Level0)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetWindowLimits_Test_Unit");
+    option->SetDisplayId(0);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    window->GetProperty()->SetPersistentId(2025);
+    window->GetProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->state_ = WindowState::STATE_SHOWN;
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+
+    WindowLimits windowLimitsPx = { 2000, 2000, 2000, 2000, 0.0f, 0.0f, 0.0f, PixelUnit::PX };
+    WindowLimits windowLimitsVp = { 1000, 1000, 1000, 1000, 0.0f, 0.0f, 0.0f, PixelUnit::VP };
+    window->GetProperty()->SetWindowLimits(windowLimitsPx);
+    window->GetProperty()->SetWindowLimitsVP(windowLimitsVp);
+
+    // Case1: getWindowLimits measured in px
+    WindowLimits windowSizeLimitsPx;
+    EXPECT_EQ(window->GetWindowLimits(windowSizeLimitsPx, false), WMError::WM_OK);
+    EXPECT_EQ(windowSizeLimitsPx.maxWidth_, windowLimitsPx.maxWidth_);
+    EXPECT_EQ(windowSizeLimitsPx.maxHeight_, windowLimitsPx.maxHeight_);
+    EXPECT_EQ(windowSizeLimitsPx.minWidth_, windowLimitsPx.minWidth_);
+    EXPECT_EQ(windowSizeLimitsPx.minHeight_, windowLimitsPx.minHeight_);
+    EXPECT_EQ(windowSizeLimitsPx.pixelUnit_, windowLimitsPx.pixelUnit_);
+
+    // Case2: getWindowLimits measured in vp
+    WindowLimits windowSizeLimitsVp;
+    EXPECT_EQ(window->GetWindowLimits(windowSizeLimitsVp, true), WMError::WM_OK);
+    EXPECT_EQ(windowSizeLimitsVp.maxWidth_, windowLimitsVp.maxWidth_);
+    EXPECT_EQ(windowSizeLimitsVp.maxHeight_, windowLimitsVp.maxHeight_);
+    EXPECT_EQ(windowSizeLimitsVp.minWidth_, windowLimitsVp.minWidth_);
+    EXPECT_EQ(windowSizeLimitsVp.minHeight_, windowLimitsVp.minHeight_);
+    EXPECT_EQ(windowSizeLimitsVp.pixelUnit_, windowLimitsVp.pixelUnit_);
+}
+
+/**
+ * @tc.name: FillWindowLimits_By_PixelUnit
+ * @tc.desc: Test the return value of FillWindowLimits under different unit input parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, FillWindowLimits_By_PixelUnit, TestSize.Level0)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("FillWindowLimits_By_PixelUnit");
+    option->SetDisplayId(0);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    window->GetProperty()->SetPersistentId(2025);
+    window->GetProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+
+    WindowLimits windowLimitsPx = { 2000, 2000, 2000, 2000, 0.0f, 0.0f, 0.0f, PixelUnit::PX };
+    WindowLimits windowLimitsVp = { 1000, 1000, 1000, 1000, 0.0f, 0.0f, 0.0f, PixelUnit::VP };
+    window->GetProperty()->SetWindowLimits(windowLimitsPx);
+    window->GetProperty()->SetWindowLimitsVP(windowLimitsVp);
+
+    // Case1: px
+    WindowLimits windowSizeLimitsPx;
+    window->FillWindowLimits(windowSizeLimitsPx, PixelUnit::PX);
+    EXPECT_EQ(windowSizeLimitsPx.maxWidth_, windowLimitsPx.maxWidth_);
+    EXPECT_EQ(windowSizeLimitsPx.maxHeight_, windowLimitsPx.maxHeight_);
+    EXPECT_EQ(windowSizeLimitsPx.minWidth_, windowLimitsPx.minWidth_);
+    EXPECT_EQ(windowSizeLimitsPx.minHeight_, windowLimitsPx.minHeight_);
+    EXPECT_EQ(windowSizeLimitsPx.pixelUnit_, windowLimitsPx.pixelUnit_);
+
+    // Case2: vp
+    WindowLimits windowSizeLimitsVp;
+    window->FillWindowLimits(windowSizeLimitsVp, PixelUnit::VP);
+    EXPECT_EQ(windowSizeLimitsVp.maxWidth_, windowLimitsVp.maxWidth_);
+    EXPECT_EQ(windowSizeLimitsVp.maxHeight_, windowLimitsVp.maxHeight_);
+    EXPECT_EQ(windowSizeLimitsVp.minWidth_, windowLimitsVp.minWidth_);
+    EXPECT_EQ(windowSizeLimitsVp.minHeight_, windowLimitsVp.minHeight_);
+    EXPECT_EQ(windowSizeLimitsVp.pixelUnit_, windowLimitsVp.pixelUnit_);
 }
 
 /**

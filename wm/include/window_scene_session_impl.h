@@ -86,7 +86,7 @@ public:
 
     WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
     WMError SetDialogBackGestureEnabled(bool isEnabled) override;
-    WMError GetWindowLimits(WindowLimits& windowLimits) override;
+    WMError GetWindowLimits(WindowLimits& windowLimits, bool getVirtualPixel = false) override;
     WMError SetWindowLimits(WindowLimits& windowLimits, bool isForce) override;
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
         const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts = {});
@@ -340,7 +340,9 @@ protected:
     WMError NotifyWindowNeedAvoid(bool status = false);
     WMError SetLayoutFullScreenByApiVersion(bool status) override;
     void UpdateWindowSizeLimits();
-    WindowLimits GetSystemSizeLimits(uint32_t displayWidth, uint32_t displayHeight, float vpr);
+    // First windowLimits uses px(physical pixels), second uses vp(virtual pixels)
+    std::pair<WindowLimits, WindowLimits> GetSystemSizeLimits(uint32_t displayWidth,
+        uint32_t displayHeight, float vpr);
     void GetConfigurationFromAbilityInfo();
     std::vector<AppExecFwk::SupportWindowMode> ExtractSupportWindowModeFromMetaData(
         const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
@@ -368,10 +370,9 @@ private:
     void AdjustWindowAnimationFlag(bool withAnimation = false);
     WMError UpdateAnimationFlagProperty(bool withAnimation);
     WMError UpdateWindowModeImmediately(WindowMode mode);
-    uint32_t UpdateConfigVal(uint32_t minVal, uint32_t maxVal, uint32_t configVal, uint32_t defaultVal, float vpr);
     void UpdateWindowState();
     void UpdateNewSize();
-    void fillWindowLimits(WindowLimits& windowLimits);
+    void FillWindowLimits(WindowLimits& windowLimits, PixelUnit pixelUnit);
     void UpdateSupportWindowModesWhenSwitchFreeMultiWindow();
     void PendingUpdateSupportWindowModesWhenSwitchMultiWindow();
     void ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -392,9 +393,6 @@ private:
     bool HandlePointDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const MMI::PointerEvent::PointerItem& pointerItem);
     std::unique_ptr<Media::PixelMap> HandleWindowMask(const std::vector<std::vector<uint32_t>>& windowMask);
-    void CalculateNewLimitsByLimits(
-        WindowLimits& newLimits, WindowLimits& customizedLimits, float& virtualPixelRatio);
-    void CalculateNewLimitsByRatio(WindowLimits& newLimits, WindowLimits& customizedLimits);
     void NotifyDisplayInfoChange(const sptr<DisplayInfo>& info = nullptr);
     void UpdateDensityInner(const sptr<DisplayInfo>& info = nullptr);
     sptr<DisplayInfo> GetDisplayInfo() const;
@@ -421,6 +419,24 @@ private:
     void UpdateEnableDragWhenSwitchMultiWindow(bool enable);
     WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
     bool ShouldSkipSupportWindowModeCheck(uint32_t windowModeSupportType, WindowMode mode);
+    uint32_t UpdateConfigVal(uint32_t minVal, uint32_t maxVal, uint32_t configVal, uint32_t defaultVal, float vpr);
+    uint32_t UpdateConfigValInVP(uint32_t minVal, uint32_t maxVal, uint32_t configVal, uint32_t defaultVal, float vpr);
+    void CalculateNewLimitsByLimits(
+        WindowLimits& newLimits, WindowLimits& newLimitsVP, WindowLimits& customizedLimits, float& virtualPixelRatio);
+    void ProcessVirtualPixelLimits(WindowLimits& newLimits, WindowLimits& newLimitsVP,
+        const WindowLimits& customizedLimits, const WindowLimits& systemLimitsVP, float virtualPixelRatio);
+    void ProcessPhysicalPixelLimits(WindowLimits& newLimits, WindowLimits& newLimitsVP,
+        const WindowLimits& customizedLimits, const WindowLimits& systemLimits, float virtualPixelRatio);
+    void SetMinimumDimensions(WindowLimits& systemLimits, WindowLimits& systemLimitsVP,
+        uint32_t displayWidth, uint32_t displayHeight, float vpr);
+    void ApplyConfiguredMinSizeToLimits(WindowLimits& systemLimits, WindowLimits& systemLimitsVP,
+        uint32_t displayWidth, uint32_t displayHeight, float vpr, uint32_t configMinWidth, uint32_t configMinHeight);
+    void CalculateNewLimitsByRatio(WindowLimits& newLimits, WindowLimits& newLimitsVP,
+        const WindowLimits& customizedLimits);
+    void CalculateInitialRatioBounds(const WindowLimits& currentLimits, double& maxRatio, double& minRatio);
+    void ApplyCustomRatioConstraints(const WindowLimits& customizedLimits, double& maxRatio, double& minRatio);
+    void RecalculateSizeLimitsWithRatios(WindowLimits& limits, WindowLimits& limitsVP, double maxRatio,
+        double minRatio, PixelUnit pixelUnit);
 
     /*
      * PC Window Layout
