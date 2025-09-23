@@ -133,7 +133,6 @@ const std::unordered_set<WindowType> INVALID_SCB_WINDOW_TYPE = {
     WindowType::WINDOW_TYPE_LAUNCHER_RECENT,
     WindowType::WINDOW_TYPE_LAUNCHER_DOCK
 };
-constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 10;
 constexpr float INVALID_DEFAULT_DENSITY = 1.0f;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 40;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
@@ -240,11 +239,39 @@ void WindowSceneSessionImpl::AddSubWindowMapForExtensionWindow()
     }
 }
 
+bool WindowSceneSessionImpl::hasAncestorFloatSession(uint32_t parentId, const SessionMap& sessionMap)
+{
+    if (parentId == INVALID_SESSION_ID) {
+        TLOGW(WmsLogTag::WMS_SUB, "invalid parent id");
+        return false;
+    }
+    for (const auto& [_, pair] : sessionMap) {
+        auto& window = pair.second;
+        if (window && window->GetWindowId() == parentId) {
+            if (window->GetType() == WindowType::WINDOW_TYPE_FLOAT) {
+                TLOGD(WmsLogTag::WMS_SUB, "find float session, id:%{public}u", window->GetWindowId());
+                return true;
+            } else if (WindowHelper::IsSubWindow(window->GetType())) {
+                return hasAncestorFloatSession(window->GetParentId(), sessionMap);
+            }
+            return false;
+        }
+    }
+    TLOGD(WmsLogTag::WMS_SUB, "don't find float session, parentId:%{public}u", parentId);
+    return false;
+}
+
 WMError WindowSceneSessionImpl::GetParentSessionAndVerify(bool isToast, sptr<WindowSessionImpl>& parentSession)
 {
     if (isToast) {
+        auto parentWindow = GetWindowWithId(property_->GetParentId());
         std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
-        parentSession = FindParentMainSession(property_->GetParentId(), windowSessionMap_);
+        if (parentWindow && hasAncestorFloatSession(parentWindow->GetWindowId(), windowSessionMap_)) {
+            TLOGI(WmsLogTag::WMS_SUB, "parentId: %{public}u exist ancestor float window", property_->GetParentId());
+            parentSession = parentWindow;
+        } else {
+            parentSession = FindParentMainSession(property_->GetParentId(), windowSessionMap_);
+        }
     } else {
         parentSession = FindParentSessionByParentId(property_->GetParentId());
     }
@@ -315,7 +342,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         }
     } else if (WindowHelper::IsSubWindow(type)) {
         sptr<WindowSessionImpl> parentSession = nullptr;
-        auto ret = WindowSceneSessionImpl::VerifySubWindowLevel(hasToastFlag, parentSession);
+        auto ret = WindowSceneSessionImpl::GetParentSessionAndVerify(hasToastFlag, parentSession);
         if (ret != WMError::WM_OK) {
             return ret;
         }
