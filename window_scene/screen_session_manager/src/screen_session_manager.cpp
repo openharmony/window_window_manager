@@ -735,7 +735,7 @@ void ScreenSessionManager::ConfigureDpi()
             pcModeDpi_ = pcModeDpi;
             isDensityDpiLoad_ = true;
             defaultDpi = pcModeDpi_;
-            cachedSettingDpi_ = defaultDpi;
+            cachedSettingDpi_ = pcModeDpi_;
             densityDpi_ = static_cast<float>(pcModeDpi_) / BASELINE_DENSITY;
         }
         TLOGI(WmsLogTag::DMS, "config pcmode densityDpi: %{public}f", densityDpi_);
@@ -8879,13 +8879,15 @@ void ScreenSessionManager::SwitchModeHandleExternalScreen(bool isSwitchToPcMode)
             if (screenSession == nullptr) {
                 continue;
             }
-            if (IsDefaultMirrorMode(screenSession->GetScreenId()) && screenSession->GetIsRealScreen()) {
-                externalScreenIds.emplace_back(screenSession->GetScreenId());
+            ScreenId screenId = screenSession->GetScreenId();
+            if (IsDefaultMirrorMode(screenId) && screenSession->GetIsRealScreen()) {
+                externalScreenIds.emplace_back(screenId);
                 hasExternalScreen = true;
-                screenSession->SetName(isSwitchToPcMode ? SCREEN_NAME_EXTEND : SCREEN_NAME_CAST);
+                SetScreenNameWhenSwitchMode(screenSession, isSwitchToPcMode);
                 screenSession->SetVirtualScreenFlag(isSwitchToPcMode ?
                     VirtualScreenFlag::DEFAULT : VirtualScreenFlag::CAST);
-                oss << screenSession->GetScreenId() << ",";
+                oss << screenId << ",";
+                SwitchModeOffScreenRenderingResetScreenProperty(screenSession, isSwitchToPcMode);
             }
         }
     }
@@ -8896,6 +8898,63 @@ void ScreenSessionManager::SwitchModeHandleExternalScreen(bool isSwitchToPcMode)
         TLOGI(WmsLogTag::DMS, "notify cast screen connect");
         NotifyCastWhenScreenConnectChange(true);
     }
+    SwitchModeOffScreenRenderingAdapter(externalScreenIds);
+    ConfigureDpi();
+    SetExtendScreenDpi();
+}
+
+void ScreenSessionManager::SwitchModeOffScreenRenderingResetScreenProperty(sptr<ScreenSession>& externalScreenSession,
+    bool isSwitchToPcMode)
+{
+    if (externalScreenSession == nullptr) {
+        TLOGI(WmsLogTag::DMS, "externalScreenSession is nullptr");
+        return;
+    }
+    ScreenId screenId = externalScreenSession->GetScreenId();
+    auto screenProperty = externalScreenSession->GetScreenProperty();
+    if (isSwitchToPcMode) {
+        InitExtendScreenProperty(screenId, externalScreenSession, screenProperty);
+    } else {
+        uint32_t screenRealWidth = screenProperty.GetScreenRealWidth();
+        uint32_t screenRealHeight = screenProperty.GetScreenRealHeight();
+        auto screenBounds = RRect({ 0, 0, screenRealWidth, screenRealHeight }, 0.0f, 0.0f);
+        externalScreenSession->SetExtendProperty(screenBounds, true);
+        TLOGI(WmsLogTag::DMS, "SetExtendProperty screenId:%{public}" PRIu64", width:%{public}d, height:%{public}d",
+            screenId, screenRealWidth, screenRealHeight);
+    }
+}
+
+void ScreenSessionManager::SwitchModeOffScreenRenderingAdapter(const std::vector<ScreenId>& externalScreenIds)
+{
+    if (externalScreenIds.empty()) {
+        TLOGI(WmsLogTag::DMS, "externalScreenIds is empty");
+        return;
+    }
+    for (const auto& screenId : externalScreenIds) {
+        SetExtendedScreenFallbackPlan(screenId);
+    }
+}
+
+void ScreenSessionManager::SetScreenNameWhenSwitchMode(sptr<ScreenSession>& screenSession, bool isSwitchToPcMode)
+{
+    if (screenSession == nullptr) {
+        TLOGI(WmsLogTag::DMS, "screenSession is nullptr");
+        return;
+    }
+    std::string screenName = "UNKNOWN";
+    if (isSwitchToPcMode) {
+        ScreenId rsScreenId = screenIdManager_.ConvertToRsScreenId(screenSession->GetScreenId());
+        struct BaseEdid edid;
+        if (GetEdid(rsScreenId, edid)) {
+            screenName = edid.displayProductName_;
+        } else {
+            screenName = SCREEN_NAME_EXTEND;
+        }
+    } else {
+        screenName = SCREEN_NAME_CAST;
+    }
+    screenSession->SetName(screenName);
+    TLOGI(WmsLogTag::DMS, "screenName:%{public}s", screenName.c_str());
 }
 
 bool ScreenSessionManager::IsConcurrentUser()
