@@ -16,7 +16,6 @@ import { AsyncCallback, BusinessError, Callback } from '@ohos.base';
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { UIContext } from '@ohos.arkui.UIContext';
 import BaseContext from 'application.BaseContext';
-import hilog from '@ohos.hilog';
 import { ColorMetrics } from '@ohos.arkui.node';
 import image from '@ohos.multimedia.image';
 
@@ -1848,12 +1847,10 @@ export class WindowInternal implements Window {
     private native offSync(nativeObj: long, type: string, callback?: object): void;
 
     public static transferStatic(input: Any): Object {
-      hilog.info(DOMAIN, TAG, 'window transfer static, input:' + input);
       return WindowInternal.nativeTransferStatic(ESValue.wrap(input));
     }
 
     public static transferDynamic(input: Object): Any {
-      hilog.info(DOMAIN, TAG, 'window transfer dynamic, input:' + input);
       return WindowInternal.nativeTransferDynamic((input as WindowInternal).nativeObj).unwrap();
     }
 
