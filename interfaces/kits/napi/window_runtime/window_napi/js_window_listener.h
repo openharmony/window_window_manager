@@ -51,6 +51,7 @@ const std::string DIALOG_DEATH_RECIPIENT_CB = "dialogDeathRecipient";
 const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
 const std::string WATER_MARK_FLAG_CHANGE_CB = "waterMarkFlagChange";
 const std::string WINDOW_VISIBILITY_CHANGE_CB = "windowVisibilityChange";
+const std::string OCCLUSION_STATE_CHANGE_CB = "occlusionStateChanged";
 const std::string WINDOW_DISPLAYID_CHANGE_CB = "displayIdChange";
 const std::string SYSTEM_DENSITY_CHANGE_CB = "systemDensityChange";
 const std::string ACROSS_DISPLAYS_CHANGE_CB = "mainWindowFullScreenAcrossDisplaysChanged";
@@ -81,6 +82,7 @@ class JsWindowListener : public IWindowChangeListener,
                          public IWaterMarkFlagChangedListener,
                          public IGestureNavigationEnabledChangedListener,
                          public IWindowVisibilityChangedListener,
+                         public IOcclusionStateChangedListener,
                          public IDisplayIdChangeListener,
                          public ISystemDensityChangeListener,
                          public IAcrossDisplaysChangeListener,
@@ -139,6 +141,7 @@ public:
     napi_value CallJsMethod(const char* methodName, napi_value const * argv = nullptr, size_t argc = 0);
     void SetMainEventHandler();
     void OnWindowVisibilityChangedCallback(const bool isVisible) override;
+    void OnOcclusionStateChanged(const WindowVisibilityState state) override;
     void OnDisplayIdChanged(DisplayId displayId) override;
     void OnSystemDensityChanged(float density) override;
     void OnAcrossDisplaysChanged(bool isAcrossDisplays) override;

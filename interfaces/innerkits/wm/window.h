@@ -530,6 +530,16 @@ public:
 using IWindowVisibilityListenerSptr = sptr<IWindowVisibilityChangedListener>;
 
 /**
+ * @class IOcclusionStateChangedListener
+ *
+ * @brief Listener to observe the window occlusion state changed.
+ */
+class IOcclusionStateChangedListener : virtual public RefBase {
+public:
+    virtual void OnOcclusionStateChanged(const WindowVisibilityState state) {};
+};
+
+/**
  * @class IDisplayIdChangeListener
  *
  * @brief Listener to observe one window displayId changed.
@@ -2991,6 +3001,28 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     virtual WMError UnregisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Register window occlusion state change listener.
+     *
+     * @param listener IOcclusionStateChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterOcclusionStateChangeListener(const sptr<IOcclusionStateChangedListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister window occlusion state change listener.
+     *
+     * @param listener IOcclusionStateChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterOcclusionStateChangeListener(const sptr<IOcclusionStateChangedListener>& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }

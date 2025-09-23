@@ -149,6 +149,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleNotifyWindowExtensionVisibilityChange(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_WINDOW_VISIBILITY_LISTENER):
             return HandleUpdateSessionWindowVisibilityListener(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_SESSION_OCCLUSION_STATE_LISTENER):
+            return HandleUpdateSessionOcclusionStateListener(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SHIFT_APP_WINDOW_FOCUS):
             return HandleShiftAppWindowFocus(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_LIST_WINDOW_INFO):
@@ -1332,6 +1334,26 @@ int SceneSessionManagerStub::HandleUpdateSessionWindowVisibilityListener(Message
     }
     WSError ret = UpdateSessionWindowVisibilityListener(persistentId, haveListener);
     reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleUpdateSessionOcclusionStateListener(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read persistentId fail");
+        return ERR_INVALID_DATA;
+    }
+    bool haveListener = false;
+    if (!data.ReadBool(haveListener)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read haveListener fail");
+        return ERR_INVALID_DATA;
+    }
+    auto errCode = UpdateSessionOcclusionStateListener(persistentId, haveListener);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write error code failed");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 

@@ -146,6 +146,8 @@ std::unordered_map<int32_t, std::vector<IScreenshotAppEventListenerSptr>>
     WindowSessionImpl::screenshotAppEventListeners_;
 std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> WindowSessionImpl::touchOutsideListeners_;
 std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> WindowSessionImpl::windowVisibilityChangeListeners_;
+std::mutex WindowSessionImpl::occlusionStateChangeListenerMutex_;
+std::map<int32_t, std::vector<sptr<IOcclusionStateChangedListener>>> WindowSessionImpl::occlusionStateChangeListeners_;
 std::mutex WindowSessionImpl::displayIdChangeListenerMutex_;
 std::map<int32_t, std::vector<IDisplayIdChangeListenerSptr>> WindowSessionImpl::displayIdChangeListeners_;
 std::mutex WindowSessionImpl::systemDensityChangeListenerMutex_;
@@ -4144,6 +4146,12 @@ void WindowSessionImpl::RecoverSessionListener()
         }
     }
     {
+        std::lock_guard<std::mutex> lockListener(occlusionStateChangeListenerMutex_);
+        if (occlusionStateChangeListeners_.find(persistentId) != occlusionStateChangeListeners_.end()) {
+            SingletonContainer::Get<WindowAdapter>().UpdateSessionOcclusionStateListener(persistentId, true);
+        }
+    }
+    {
         std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
         if (windowRectChangeListeners_.find(persistentId) != windowRectChangeListeners_.end() &&
             !windowRectChangeListeners_[persistentId].empty()) {
@@ -5911,6 +5919,61 @@ WMError WindowSessionImpl::UnregisterWindowVisibilityChangeListener(const IWindo
         ret = SingletonContainer::Get<WindowAdapter>().UpdateSessionWindowVisibilityListener(persistentId, false);
     }
     return ret;
+}
+
+WMError WindowSessionImpl::RegisterOcclusionStateChangeListener(const sptr<IOcclusionStateChangedListener>& listener)
+{
+    auto persistentId = GetPersistentId();
+    {
+        std::lock_guard<std::mutex> lockListener(occlusionStateChangeListenerMutex_);
+        auto ret = RegisterListener(occlusionStateChangeListeners_[persistentId], listener);
+        if (ret != WMError::WM_OK) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed: winId=%{public}d", persistentId);
+            return ret;
+        }
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d", persistentId);
+    return SingletonContainer::Get<WindowAdapter>().UpdateSessionOcclusionStateListener(persistentId, true);
+}
+
+WMError WindowSessionImpl::UnregisterOcclusionStateChangeListener(const sptr<IOcclusionStateChangedListener>& listener)
+{
+    auto persistentId = GetPersistentId();
+    {
+        std::lock_guard<std::mutex> lockListener(occlusionStateChangeListenerMutex_);
+        auto ret = UnregisterListener(occlusionStateChangeListeners_[persistentId], listener);
+        if (ret != WMError::WM_OK) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed: winId=%{public}d", persistentId);
+            return ret;
+        }
+        if (occlusionStateChangeListeners_[persistentId].empty()) {
+            occlusionStateChangeListeners_.erase(persistentId);
+        }
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d", persistentId);
+    return SingletonContainer::Get<WindowAdapter>().UpdateSessionOcclusionStateListener(persistentId, false);
+}
+
+WSError WindowSessionImpl::NotifyWindowOcclusionState(const WindowVisibilityState state)
+{
+    auto persistentId = GetPersistentId();
+    std::vector<sptr<IOcclusionStateChangedListener>> listeners;
+    {
+        std::lock_guard<std::mutex> lockListener(occlusionStateChangeListenerMutex_);
+        for (auto& listener : occlusionStateChangeListeners_[persistentId]) {
+            listeners.push_back(listener);
+        }
+    }
+    uint32_t notifyCounter = 0;
+    for (auto& listener : listeners) {
+        if (listener != nullptr) {
+            listener->OnOcclusionStateChanged(state);
+            notifyCounter++;
+        }
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d, visibilityState=%{public}u, notifyCounter=%{public}d",
+        persistentId, static_cast<uint32_t>(state), notifyCounter);
+    return WSError::WS_OK;
 }
 
 WMError WindowSessionImpl::RegisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener)

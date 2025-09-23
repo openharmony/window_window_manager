@@ -56,6 +56,7 @@ public:
     void DumpSessionElementInfo(const std::vector<std::string>& params)  override;
     WSError NotifyTouchOutside() override;
     WSError NotifyWindowVisibility(bool isVisible) override;
+    WSError NotifyWindowOcclusionState(const WindowVisibilityState state) override;
     WSError UpdateWindowMode(WindowMode mode) override;
     WSError GetTopNavDestinationName(std::string& topNavDestName) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
