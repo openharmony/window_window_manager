@@ -912,6 +912,10 @@ private:
     void SetExtendScreenDpi();
     bool HandleSwitchPcMode();
     void SwitchModeHandleExternalScreen(bool isSwitchToPcMode);
+    void SetScreenNameWhenSwitchMode(sptr<ScreenSession>& screenSession, bool isSwitchToPcMode);
+    void SwitchModeOffScreenRenderingResetScreenProperty(sptr<ScreenSession>& externalScreenSession,
+        bool isSwitchToPcMode);
+    void SwitchModeOffScreenRenderingAdapter(const std::vector<ScreenId>& externalScreenIds);
 
     std::unordered_map<ScreenId, std::pair<ScreenId, ScreenCombination>> screenCastInfoMap_;
     std::shared_mutex screenCastInfoMapMutex_;
