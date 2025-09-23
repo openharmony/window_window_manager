@@ -58,7 +58,7 @@ private:
     /*
      * Window Immersive
      */
-    AvoidArea GetAvoidAreaByTypeInner(AvoidAreaType type, bool ignoreVisibility);
+    AvoidArea GetAvoidAreaByTypeInner(AvoidAreaType type, bool ignoreVisibility = false);
     void GetSystemAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea, bool ignoreVisibility = false);
     void GetCutoutAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea);
     void GetKeyboardAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea);
