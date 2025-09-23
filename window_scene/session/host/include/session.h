@@ -734,9 +734,8 @@ public:
     bool IsPersistentImageFit() const;
     bool SupportSnapshotAllSessionStatus() const;
     void InitSnapshotCapacity();
-    SnapshotStatus GetWindowStatus() const;
-    SnapshotStatus GetSessionStatus(ScreenLockReason reason = ScreenLockReason::DEFAULT) const;
-    uint32_t GetWindowOrientation() const;
+    SnapshotStatus GetSessionSnapshotStatus(ScreenLockReason reason = ScreenLockReason::DEFAULT) const;
+    uint32_t GetWindowSnapshotOrientation() const;
     uint32_t GetLastOrientation() const;
     bool HasSnapshotFreeMultiWindow();
     bool HasSnapshot(SnapshotStatus key);
