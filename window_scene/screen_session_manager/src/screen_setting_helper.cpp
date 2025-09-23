@@ -35,13 +35,15 @@ sptr<SettingObserver> ScreenSettingHelper::extendScreenDpiObserver_;
 sptr<SettingObserver> ScreenSettingHelper::duringCallStateObserver_;
 sptr<SettingObserver> ScreenSettingHelper::resolutionEffectObserver_;
 constexpr int32_t PARAM_NUM_TEN = 10;
+constexpr uint32_t EXPECT_ACTIVE_MODE_SIZE = 1;
 constexpr uint32_t EXPECT_SCREEN_MODE_SIZE = 2;
 constexpr uint32_t EXPECT_RELATIVE_POSITION_SIZE = 3;
-constexpr uint32_t VALID_MULTI_SCREEN_INFO_SIZE = 4;
+constexpr uint32_t VALID_MULTI_SCREEN_INFO_SIZE = 5;
 constexpr uint32_t INDEX_SCREEN_INFO = 0;
 constexpr uint32_t INDEX_SCREEN_MODE = 1;
 constexpr uint32_t INDEX_FIRST_RELATIVE_POSITION = 2;
 constexpr uint32_t INDEX_SECOND_RELATIVE_POSITION = 3;
+constexpr uint32_t INDEX_THREE_ACTIVE_MODE_ID = 4;
 constexpr uint32_t DATA_INDEX_ZERO = 0;
 constexpr uint32_t DATA_INDEX_ONE = 1;
 constexpr uint32_t DATA_INDEX_TWO = 2;
@@ -388,6 +390,9 @@ std::map<std::string, MultiScreenInfo> ScreenSettingHelper::GetMultiScreenInfo(c
             TLOGE(WmsLogTag::DMS, "invalid screen of relative position!");
             continue;
         }
+        if (!GetScreenActiveMode(info, infoVector[INDEX_THREE_ACTIVE_MODE_ID])) {
+            continue;
+        }
         multiScreenInfoMap[infoVector[INDEX_SCREEN_INFO]] = info;
     }
     return multiScreenInfoMap;
@@ -493,6 +498,27 @@ bool ScreenSettingHelper::GetScreenRelativePosition(MultiScreenInfo& info, const
         info.secondaryScreenOption.startX_ = startX;
         info.secondaryScreenOption.startY_ = startY;
     }
+    return true;
+}
+
+bool ScreenSettingHelper::GetScreenActiveMode(MultiScreenInfo& info, const std::string& inputString)
+{
+    std::vector<std::string> activeIdStr = {};
+    bool split = SplitString(activeIdStr, inputString, ' ');
+    uint32_t dataSize = activeIdStr.size();
+    if (!split || dataSize != EXPECT_ACTIVE_MODE_SIZE) {
+        TLOGE(WmsLogTag::DMS, "split failed, data size: %{public}d", dataSize);
+        return false;
+    }
+    int32_t activeId = -1;
+    if (!IsNumber(activeIdStr[DATA_INDEX_ZERO])) {
+        TLOGE(WmsLogTag::DMS, "not number");
+        return false;
+    } else {
+        activeId = static_cast<int32_t>(strtoll(activeIdStr[DATA_INDEX_ZERO].c_str(), nullptr, PARAM_NUM_TEN));
+    }
+    TLOGW(WmsLogTag::DMS, "activeId: %{public}d", activeId);
+    info.activeId = activeId;
     return true;
 }
 
