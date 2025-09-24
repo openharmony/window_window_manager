@@ -1021,7 +1021,8 @@ bool AniWindowUtils::SetWindowStatusBarContentColor(ani_env* env,
             aniObject);
     } else if (!isColorUndefined) {
         ani_boolean isStatusIcon;
-        env->Object_CallMethodByName_Boolean(static_cast<ani_object>(aniStatusContentColor), "unboxed", ":z", &isStatusIcon);
+        env->Object_CallMethodByName_Boolean(static_cast<ani_object>(aniStatusContentColor),
+            "unboxed", ":z", &isStatusIcon);
         if (static_cast<bool>(aniStatusIcon)) {
             properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ = SYSTEM_COLOR_WHITE;
         } else {
