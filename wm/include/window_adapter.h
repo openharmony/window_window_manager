@@ -202,6 +202,9 @@ public:
      * Window Pattern
      */
     virtual WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId);
+    virtual WMError SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, ImageFit imageFit,
+        int32_t persistentId);
+    virtual WMError RemoveImageForRecent(int32_t persistentId);
 
     /*
      * Window Animation

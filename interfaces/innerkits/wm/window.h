@@ -1253,6 +1253,28 @@ public:
     }
 
     /**
+     * @brief Set static Image resource for recent.
+     *
+     * @param pixelMap recent image.
+     * @param imageFit imageFit of static image.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, ImageFit imageFit)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Remove static Image resource for recent.
+     *
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError RemoveImageForRecent()
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Get whether main window is topmost
      *
      * @return True means main window is topmost
