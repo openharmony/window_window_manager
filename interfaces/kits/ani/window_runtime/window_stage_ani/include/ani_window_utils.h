@@ -30,6 +30,7 @@
 #include "mock/window_manager.h"
 #endif
 
+#include "window_manager_hilog.h"
 #include "window_option.h"
 #include "window_visibility_info.h"
 #include "wm_common.h"
@@ -50,6 +51,8 @@ public:
     static bool GetIntObject(ani_env* env, const char* propertyName, ani_object object, int32_t& result);
     static ani_status GetDoubleObject(ani_env* env, ani_object double_object, double& result);
     static ani_status GetIntVector(ani_env* env, ani_object ary, std::vector<int32_t>& result);
+    static ani_status GetPropertyLongObject(ani_env* env, const char* propertyName, ani_object object, int64_t& result);
+    static ani_status GetEnumValue(ani_env* env, ani_enum_item enumPara, uint32_t& result);
     static ani_status NewAniObjectNoParams(ani_env* env, const char* cls, ani_object* object);
     static ani_status NewAniObject(ani_env* env, const char* cls, const char* signature, ani_object* result, ...);
     static ani_object CreateAniUndefined(ani_env* env);
@@ -57,6 +60,7 @@ public:
     static ani_object AniThrowError(ani_env* env, WmErrorCode errorCode, std::string msg = "");
     static ani_object CreateAniSize(ani_env* env, int32_t width, int32_t height);
     static ani_object CreateAniRect(ani_env* env, const Rect& rect);
+    static ani_object CreateAniWindowLimits(ani_env* env, const WindowLimits& windowLimits);
     static ani_object CreateAniAvoidArea(ani_env* env, const AvoidArea& avoidArea, AvoidAreaType type);
     static ani_object CreateAniSystemBarTintState(ani_env* env, DisplayId displayId, const SystemBarRegionTints& tints);
     static ani_object CreateAniSystemBarRegionTint(ani_env* env, const SystemBarRegionTint& tint);
@@ -108,6 +112,8 @@ public:
         std::map<WindowType, SystemBarProperty>& systemBarProperties);
     static void GetWindowSnapshotConfiguration(ani_env* env, ani_object config,
         WindowSnapshotConfiguration& windowSnapshotConfiguration);
+    static WindowLimits ParseWindowLimits(ani_env* env, ani_object aniWindowLimits);
+    static bool CheckParaIsUndefined(ani_env* env, ani_object para);
 
     /**
      * @brief Convert WMError to corresponding WmErrorCode.
@@ -119,6 +125,8 @@ public:
      * @return Corresponding WmErrorCode or defaultCode if unmapped.
      */
     static WmErrorCode ToErrorCode(WMError error, WmErrorCode defaultCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    template<typename T>
+    static ani_object CreateBaseTypeObject(ani_env* env, T value);
 
 private:
     static void SetSystemPropertiesWindowRect(ani_env* env, const sptr<Window>& window,
@@ -152,6 +160,73 @@ private:
     static void SetSystemPropertiesdisplayId(ani_env* env, const sptr<Window>& window,
         ani_object& systemProperties, const char* clsName);
 };
+
+template<typename T>
+const char* GetClassName()
+{
+    if (std::is_same<T, int>::value) {
+        return "Lstd/core/Int;";
+    } else if (std::is_same<T, double>::value) {
+        return "Lstd/core/Double;";
+    } else if (std::is_same<T, long>::value) {
+        return "Lstd/core/Long;";
+    } else {
+        return nullptr;
+    }
+}
+
+template<typename T>
+const char* GetCtorSignature()
+{
+    if (std::is_same<T, int>::value) {
+        return "I:V";
+    } else if (std::is_same<T, double>::value) {
+        return "D:V";
+    } else if (std::is_same<T, long>::value) {
+        return "J:V";
+    } else {
+        return nullptr;
+    }
+}
+
+template<typename T>
+ani_object AniWindowUtils::CreateBaseTypeObject(ani_env* env, T value)
+{
+    static const char* className = GetClassName<T>();
+    ani_class cls;
+    ani_status ret =  env->FindClass(className, &cls);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found for type");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    // Obtains the signature of a constructor based on the type
+    const char* signature = GetCtorSignature<T>();
+    ani_method ctor;
+    ret = env->Class_FindMethod(cls, "<ctor>", signature, &ctor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found for type");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    // Convert values based on types and create objects
+    ani_object obj;
+    if (std::is_same<T, int>::value) {
+        ret = env->Object_New(cls, ctor, &obj, ani_int(value));
+    } else if (std::is_same<T, double>::value) {
+        ret = env->Object_New(cls, ctor, &obj, ani_double(value));
+    } else if (std::is_same<T, long>::value) {
+        ret = env->Object_New(cls, ctor, &obj, ani_long(value));
+    } else {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] unsupported type");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] failed to create new obj for type");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    return obj;
+}
 }
 }
 #endif
