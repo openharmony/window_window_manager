@@ -60,12 +60,15 @@ public:
         TRANS_ID_ON_BEFORE_PROPERTY_CHANGED,
         TRANS_ID_ON_SCREEN_MODE_CHANGED,
         TRANS_ID_ON_ANIMATE_FINISH_TIMEOUT,
+        TRANS_ID_ON_FOLD_PROPERTY_CHANGED,
     };
 
     virtual void SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid) = 0;
     virtual void OnScreenConnectionChanged(SessionOption option, ScreenEvent screenEvent) = 0;
     virtual void OnPropertyChanged(ScreenId screenId,
         const ScreenProperty& property, ScreenPropertyChangeReason reason) = 0;
+    virtual void OnFoldPropertyChanged(ScreenId screenId, const ScreenProperty& property,
+            ScreenPropertyChangeReason reason, FoldDisplayMode displayMode) = 0;
     virtual void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason) = 0;
     virtual void OnSensorRotationChanged(ScreenId screenId, float sensorRotation) = 0;

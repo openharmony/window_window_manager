@@ -131,6 +131,9 @@ public:
     void FreezeScreen(ScreenId screenId, bool isFreeze);
     std::shared_ptr<Media::PixelMap> GetScreenSnapshotWithAllWindows(ScreenId screenId, float scaleX, float scaleY,
         bool isNeedCheckDrmAndSurfaceLock);
+    void OnScreenPropertyChanged(ScreenId screenId, float rotation, RRect bounds);
+    void OnFoldPropertyChanged(ScreenId screenId, const ScreenProperty& property, ScreenPropertyChangeReason reason,
+        FoldDisplayMode displayMode) override;
 
     /*
      * RS Client Multi Instance
@@ -175,6 +178,13 @@ private:
         float rotation, RRect bounds, ScreenId screenId);
     sptr<ScreenSession> CreateTempScreenSession(
         ScreenId screenId, ScreenId rsId, const std::shared_ptr<RSDisplayNode>& displayNode);
+
+    void HandleKeyboardOnPropertyChange(sptr<ScreenSession>& screenSession, int32_t height);
+    void HandleKeyboardOffPropertyChange(sptr<ScreenSession>& screenSession);
+    void HandleSystemKeyboardOnPropertyChange(sptr<ScreenSession>& screenSession, SuperFoldStatus currentStatus,
+        bool isKeyboardOn, int32_t validHeight);
+    void HandleSystemKeyboardOffPropertyChange(sptr<ScreenSession>& screenSession, SuperFoldStatus currentStatus,
+        bool isKeyboardOn);
 
     mutable std::mutex screenSessionMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;

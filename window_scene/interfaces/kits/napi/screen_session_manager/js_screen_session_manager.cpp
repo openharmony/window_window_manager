@@ -84,6 +84,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "on", moduleName, JsScreenSessionManager::RegisterCallback);
     BindNativeFunction(env, exportObj, "updateScreenRotationProperty", moduleName,
         JsScreenSessionManager::UpdateScreenRotationProperty);
+    BindNativeFunction(env, exportObj, "updateServerScreenProperty", moduleName,
+        JsScreenSessionManager::UpdateServerScreenProperty);
     BindNativeFunction(env, exportObj, "getCurvedScreenCompressionArea", moduleName,
         JsScreenSessionManager::GetCurvedCompressionArea);
     BindNativeFunction(env, exportObj, "registerShutdownCallback", moduleName,
@@ -183,6 +185,13 @@ napi_value JsScreenSessionManager::UpdateScreenRotationProperty(napi_env env, na
     TLOGD(WmsLogTag::DMS, "[NAPI]UpdateScreenRotationProperty");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdateScreenRotationProperty(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::UpdateServerScreenProperty(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]UpdateServerScreenProperty");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnUpdateServerScreenProperty(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::GetCurvedCompressionArea(napi_env env, napi_callback_info info)
@@ -696,6 +705,46 @@ napi_value JsScreenSessionManager::OnUpdateScreenRotationProperty(napi_env env,
     }
     ScreenSessionManagerClient::GetInstance().UpdateScreenRotationProperty(screenId, bounds, directionInfo,
         type);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsScreenSessionManager::OnUpdateServerScreenProperty(napi_env env,
+    const napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnUpdateServerScreenProperty");
+    size_t argc = 3;
+    napi_value argv[3] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 3) { // 3: params num
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t screenId = INVALID_ID;
+    if (!ConvertFromJsValue(env, argv[0], screenId) || screenId < 0) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to screenId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t rotation;
+    if (!ConvertFromJsValue(env, argv[1], rotation)) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to rotation");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    RRect bounds;
+    napi_value nativeObj = argv[2];
+    if (nativeObj == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to get bounds from js object");
+        return NapiGetUndefined(env);
+    } else if (!ConvertRRectFromJs(env, nativeObj, bounds)) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to bounds");
+        return NapiGetUndefined(env);
+    }
+    ScreenSessionManagerClient::GetInstance().OnScreenPropertyChanged(screenId, static_cast<float>(rotation), bounds);
     return NapiGetUndefined(env);
 }
 

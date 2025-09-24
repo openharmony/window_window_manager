@@ -4759,4 +4759,40 @@ void ScreenSessionManagerProxy::NotifySwitchUserAnimationFinish()
         return;
     }
 }
+
+DMError ScreenSessionManagerProxy::SyncScreenPropertyChangedToServer(ScreenId screenId,
+    const ScreenProperty& screenProperty)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is null");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    if (!RSMarshallingHelper::Marshalling(data, screenProperty)) {
+        TLOGE(WmsLogTag::DMS, "Write screenSession failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_PROPERTY_BY_FOLD_STATE_CHANGE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+            }
+    int32_t ret = -1;
+    if (!reply.ReadInt32(ret)) {
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(ret);
+}
 } // namespace OHOS::Rosen
