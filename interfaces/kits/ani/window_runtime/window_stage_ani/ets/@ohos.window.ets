@@ -2789,6 +2789,12 @@ function runWindowNoInteractionCallback(cb: object): void {
   const func = cb as () => void;
   func();
 }
+
+function runWindowStageEventCallback(cb: object, cbArg: int): void {
+    const func = cb as (cbArg: WindowStageEventType) => void;
+    func(cbArg as WindowStageEventType);
+}
+
 }
 
 export default window;
