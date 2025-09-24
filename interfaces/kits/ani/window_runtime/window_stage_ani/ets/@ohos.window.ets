@@ -536,6 +536,13 @@ namespace window {
     top: int;
     width: int;
     height: int;
+    constructor() {}
+    constructor(left: int, top: int, width: int, height: int) {
+      this.left = left;
+      this.top = top;
+      this.width = width;
+      this.height = height;
+    }
   }
 
   export interface RectChangeOptions {
@@ -741,7 +748,7 @@ export interface SystemBarProperties {
      * @atomicservice
      * @since 12
      */
-    statusBarColor: string;
+    statusBarColor?: string;
 
     /**
      * The light icon of the status bar.
@@ -757,7 +764,7 @@ export interface SystemBarProperties {
      * @atomicservice
      * @since 12
      */
-    isStatusBarLightIcon: boolean;
+    isStatusBarLightIcon?: boolean;
 
     /**
      * The content color of the status bar
@@ -773,7 +780,7 @@ export interface SystemBarProperties {
      * @atomicservice
      * @since 12
      */
-    statusBarContentColor: string;
+    statusBarContentColor?: string;
 
     /**
      * The color of the navigation bar.
@@ -789,7 +796,7 @@ export interface SystemBarProperties {
      * @atomicservice
      * @since 12
      */
-    navigationBarColor: string;
+    navigationBarColor?: string;
 
     /**
      * The light icon of the navigation bar.
@@ -805,7 +812,7 @@ export interface SystemBarProperties {
      * @atomicservice
      * @since 12
      */
-    isNavigationBarLightIcon: boolean;
+    isNavigationBarLightIcon?: boolean;
 
     /**
      * The content color of the navigation bar
@@ -821,7 +828,7 @@ export interface SystemBarProperties {
      * @atomicservice
      * @since 12
      */
-    navigationBarContentColor: string;
+    navigationBarContentColor?: string;
 
     /**
      * Enable the animation of the status bar.
@@ -831,7 +838,7 @@ export interface SystemBarProperties {
      * @atomicservice
      * @since 12
      */
-    enableStatusBarAnimation: boolean;
+    enableStatusBarAnimation?: boolean;
 
     /**
      * Enable the animation of the navigation bar.
@@ -841,18 +848,18 @@ export interface SystemBarProperties {
      * @atomicservice
      * @since 12
      */
-    enableNavigationBarAnimation: boolean;
+    enableNavigationBarAnimation?: boolean;
 }
 
 export class SystemBarPropertiesInternal implements SystemBarProperties {
-    statusBarColor: string = "";
-    isStatusBarLightIcon: boolean;
-    statusBarContentColor: string = "";
-    navigationBarColor: string = "";
-    isNavigationBarLightIcon: boolean;
-    navigationBarContentColor: string = "";
-    enableStatusBarAnimation: boolean;
-    enableNavigationBarAnimation: boolean;
+    statusBarColor?: string;
+    isStatusBarLightIcon?: boolean;
+    statusBarContentColor?: string;
+    navigationBarColor?: string;
+    isNavigationBarLightIcon?: boolean;
+    navigationBarContentColor?: string;
+    enableStatusBarAnimation?: boolean;
+    enableNavigationBarAnimation?: boolean;
 }
 
 /**
@@ -1017,7 +1024,7 @@ export interface WindowProperties {
     /**
      * Brightness value of window.
      *
-     * @type { number }
+     * @type { double }
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @crossplatform
      * @since 10
@@ -1025,13 +1032,13 @@ export interface WindowProperties {
     /**
      * Brightness value of window.
      *
-     * @type { number }
+     * @type { double }
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @crossplatform
      * @atomicservice
      * @since 11
      */
-    brightness: number;
+    brightness: double;
 
     /**
      * The dimbehind value of window.
@@ -1115,29 +1122,39 @@ export interface WindowProperties {
     /**
      * Window id.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 9
      */
     /**
      * Window id.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @atomicservice
      * @since 12
      */
-    id: number;
+    id: int;
 
     /**
      * display id.
      *
-     * @type { ?number }
+     * @type { ?long }
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @atomicservice
      * @since 12
      */
-    displayId: number;
+    displayId?: long;
+
+    /**
+     * window name.
+     *
+     * @type { ?string }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 18
+     */
+    name?: string;
 }
 
 /**
@@ -1188,6 +1205,50 @@ export interface ScaleOptions {
     * @since 9
     */
   pivotY?: double;
+}
+
+export class WindowPropertiesInternal implements WindowProperties {
+    windowRect: Rect;
+    drawableRect: Rect;
+    isFullScreen: boolean;
+    isLayoutFullScreen: boolean;
+    focusable: boolean;
+    touchable: boolean;
+    brightness: double;
+    dimBehindValue: number;
+    isKeepScreenOn: boolean;
+    isPrivacyMode: boolean;
+    isRoundCorner: boolean;
+    isTransparent: boolean;
+    type: WindowType;
+    id: int;
+    displayId?: long;
+    name?: string;
+
+    constructor(windowRect: Rect, drawableRect: Rect, isFullScreen: boolean, isLayoutFullScreen: boolean,
+      focusable: boolean, touchable: boolean, brightness: double, dimBehindValue: number, isKeepScreenOn: boolean,
+      isPrivacyMode: boolean, isRoundCorner: boolean, isTransparent: boolean, typeInternal: int, id: int,
+      displayId: long, name: string)
+    {
+      this.windowRect = windowRect;
+      this.drawableRect = drawableRect;
+      this.isFullScreen = isFullScreen;
+      this.isLayoutFullScreen = isLayoutFullScreen;
+      this.focusable = focusable;
+      this.touchable = touchable;
+      this.brightness = brightness;
+      this.dimBehindValue = dimBehindValue;
+      this.isKeepScreenOn = isKeepScreenOn;
+      this.isPrivacyMode = isPrivacyMode;
+      this.isRoundCorner = isRoundCorner;
+      this.isTransparent = isTransparent;
+      this.type = typeInternal as WindowType;
+      this.id = id;
+      this.displayId = displayId;
+      this.name = name;
+    }
+
+    constructor() {}
 }
 
 export class ScaleOptionsInternal implements ScaleOptions {
@@ -1394,25 +1455,6 @@ export interface RotationChangeResult {
   windowRect: Rect;
 }
 
-export class WindowPropertiesInternal implements WindowProperties {
-    windowRect: Rect;
-    drawableRect: Rect;
-    type: WindowType;
-    isFullScreen: boolean;
-    isLayoutFullScreen: boolean;
-    focusable: boolean;
-    touchable: boolean;
-    brightness: number;
-    dimBehindValue: number;
-    isKeepScreenOn: boolean;
-    isPrivacyMode: boolean;
-    isRoundCorner: boolean;
-    isTransparent: boolean;
-    id: number;
-    displayId: number;
-    typeInternal: int;
-}
-
 export interface MoveConfiguration {
     displayId?: long;
 }
@@ -1422,9 +1464,13 @@ export class MoveConfigurationInternal implements MoveConfiguration {
 }
 
 export interface WindowDensityInfo {
-    systemDensity: number;
-    defaultDensity: number;
-    customDensity: number;
+    systemDensity: double;
+    defaultDensity: double;
+    customDensity: double;
+}
+
+export interface SystemBarStyle {
+  statusBarContentColor?: string;
 }
 
 export interface AvoidAreaOptions {
@@ -1978,16 +2024,14 @@ export class WindowInternal implements Window {
 
     public getWindowProperties(): WindowProperties {
         let windowProperties = this.getWindowProperties(this.nativeObj) as WindowPropertiesInternal;
-        windowProperties.type = windowProperties.typeInternal as WindowType;
         return windowProperties;
     }
 
     public getProperties(): Promise<WindowProperties> {
         return new Promise<WindowProperties>((resolve: (value: WindowProperties) => void,
-            reject: (error: BusinessError) => void ) => {
+            reject: (error: BusinessError) => void) => {
             taskpool.execute((): WindowProperties => {
                 let res = this.getProperties(this.nativeObj) as WindowPropertiesInternal;
-                res.type = res.typeInternal as WindowType;
                 return res;
             }).then((ret: NullishType) => {
                 resolve(ret as WindowProperties);
@@ -1999,7 +2043,7 @@ export class WindowInternal implements Window {
 
     public getProperties(callback: AsyncCallback<WindowProperties>): void {
         taskpool.execute((): WindowProperties => {
-            let res = this.getProperties(this.nativeObj);
+            let res = this.getProperties(this.nativeObj) as WindowPropertiesInternal;
             return res;
         }).then((ret: NullishType) => {
             callback(new BusinessError(), ret as WindowProperties);
