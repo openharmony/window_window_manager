@@ -308,6 +308,21 @@ HWTEST_F(WindowManagerTest, GetAccessibilityWindowInfo01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ConvertToRelativeCoordinateExtended
+ * @tc.desc: ConvertToRelativeCoordinateExtended ok
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, ConvertToRelativeCoordinateExtended, TestSize.Level1)
+{
+    Rect rect;
+    Rect newRect;
+    DisplayId newDisplayId = 0;
+    rect = { 100, 2000, 400, 600 };
+    auto ret = WindowManager::GetInstance().ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
  * @tc.name: GetUnreliableWindowInfo
  * @tc.desc: GetUnreliableWindowInfo ok
  * @tc.type: FUNC

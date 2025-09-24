@@ -603,6 +603,7 @@ protected:
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     void ClearListenersById(int32_t persistentId);
+    void NotifyDmsDisplayMove(DisplayId to);
 
     /*
      * Free Multi Window

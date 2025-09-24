@@ -54,8 +54,9 @@ ohos_shared_library("floatingball_napi") {
     "ability_runtime:runtime",
     "c_utils:utils",
     "hilog:libhilog",
-    "napi:ace_napi",
     "image_framework:image",
+    "ipc:ipc_single",
+    "napi:ace_napi",
   ]
 
   relative_install_dir = "module/window"

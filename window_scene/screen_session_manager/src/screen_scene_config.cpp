@@ -68,7 +68,14 @@ enum XmlNodeElement {
     IS_SUPPORT_OFFSCREEN_RENDERING,
     OFF_SCREEN_PPI_THRESHOLD,
     PC_MODE_DPI,
-    SUPPORT_DURING_CALL
+    SUPPORT_DURING_CALL,
+    HALF_FOLDED_MAX_THRESHOLD,
+    CLOSE_HALF_FOLDED_MIN_THRESHOLD,
+    OPEN_HALF_FOLDED_MIN_THRESHOLD,
+    HALF_FOLDED_BUFFER,
+    LARGER_BOUNDARY_FOR_THRESHOLD,
+    POSTURE_SIZE,
+    HALL_SIZE
 };
 }
 
@@ -117,7 +124,14 @@ std::map<int32_t, std::string> ScreenSceneConfig::xmlNodeMap_ = {
     {IS_SUPPORT_OFFSCREEN_RENDERING, "isSupportOffScreenRendering"},
     {OFF_SCREEN_PPI_THRESHOLD, "offScreenPPIThreshold"},
     {PC_MODE_DPI, "pcModeDpi"},
-    {SUPPORT_DURING_CALL, "supportDuringCall"}
+    {SUPPORT_DURING_CALL, "supportDuringCall"},
+    {HALF_FOLDED_MAX_THRESHOLD, "halfFoldMaxThreshold"},
+    {CLOSE_HALF_FOLDED_MIN_THRESHOLD, "closeHalfFoldedMinThreshold"},
+    {OPEN_HALF_FOLDED_MIN_THRESHOLD, "openHalfFoldedMinThreshold"},
+    {HALF_FOLDED_BUFFER, "halfFoldedBuffer"},
+    {LARGER_BOUNDARY_FOR_THRESHOLD, "largerBoundaryForThreshold"},
+    {POSTURE_SIZE, "postureSize"},
+    {HALL_SIZE, "hallSize"}
 };
 
 std::vector<std::string> ScreenSceneConfig::Split(std::string str, std::string pattern)
@@ -217,7 +231,14 @@ void ScreenSceneConfig::ParseNodeConfig(const xmlNodePtr& currNode)
         (xmlNodeMap_[BUILD_IN_DEFAULT_ORIENTATION] == nodeName) ||
         (xmlNodeMap_[DEFAULT_DEVICE_ROTATION_OFFSET] == nodeName) ||
         (xmlNodeMap_[OFF_SCREEN_PPI_THRESHOLD] == nodeName) ||
-        (xmlNodeMap_[PC_MODE_DPI] == nodeName);
+        (xmlNodeMap_[PC_MODE_DPI] == nodeName) ||
+        (xmlNodeMap_[HALF_FOLDED_MAX_THRESHOLD] == nodeName) ||
+        (xmlNodeMap_[CLOSE_HALF_FOLDED_MIN_THRESHOLD] == nodeName) ||
+        (xmlNodeMap_[OPEN_HALF_FOLDED_MIN_THRESHOLD] == nodeName) ||
+        (xmlNodeMap_[HALF_FOLDED_BUFFER] == nodeName) ||
+        (xmlNodeMap_[LARGER_BOUNDARY_FOR_THRESHOLD] == nodeName) ||
+        (xmlNodeMap_[POSTURE_SIZE] == nodeName) ||
+        (xmlNodeMap_[HALL_SIZE] == nodeName);
     bool stringConfigCheck = (xmlNodeMap_[DEFAULT_DISPLAY_CUTOUT_PATH] == nodeName) ||
         (xmlNodeMap_[SUB_DISPLAY_CUTOUT_PATH] == nodeName) ||
         (xmlNodeMap_[ROTATION_POLICY] == nodeName) ||
@@ -743,4 +764,13 @@ bool ScreenSceneConfig::IsConcurrentUser()
     return isConcurrentUser_;
 }
 // LCOV_EXCL_STOP
+
+uint32_t ScreenSceneConfig::GetNumberConfigValue(const std::string& name, const uint32_t& default_value)
+{
+    if (intNumbersConfig_.count(name) != 0) {
+        return static_cast<uint32_t>(intNumbersConfig_[name][0]);
+    }
+    TLOGI(WmsLogTag::DMS, "default %{public}s = %{public}u", name.c_str(), default_value);
+    return default_value;
+}
 } // namespace OHOS::Rosen

@@ -25,34 +25,6 @@
 
 namespace OHOS {
 namespace Rosen {
-enum class RegisterListenerType : uint32_t {
-    SYSTEM_BAR_TINT_CHANGE_CB,
-    GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
-    WATER_MARK_FLAG_CHANGE_CB,
-    WINDOW_SIZE_CHANGE_CB,
-    SYSTEM_AVOID_AREA_CHANGE_CB,
-    AVOID_AREA_CHANGE_CB,
-    LIFECYCLE_EVENT_CB,
-    WINDOW_EVENT_CB,
-    KEYBOARD_HEIGHT_CHANGE_CB,
-    KEYBOARD_DID_SHOW_CB,
-    KEYBOARD_DID_HIDE_CB,
-    TOUCH_OUTSIDE_CB,
-    SCREENSHOT_EVENT_CB,
-    DIALOG_TARGET_TOUCH_CB,
-    DIALOG_DEATH_RECIPIENT_CB,
-    WINDOW_STATUS_CHANGE_CB,
-    WINDOW_TITLE_BUTTON_RECT_CHANGE_CB,
-    WINDOW_VISIBILITY_CHANGE_CB,
-    OCCLUSION_STATE_CHANGE_CB,
-    WINDOW_NO_INTERACTION_DETECT_CB,
-    WINDOW_RECT_CHANGE_CB,
-    SUB_WINDOW_CLOSE_CB,
-    WINDOW_STAGE_EVENT_CB,
-    WINDOW_STAGE_CLOSE_CB,
-    WINDOW_STAGE_LIFECYCLE_EVENT_CB,
-    WINDOW_ROTATION_CHANGE_CB,
-};
 
 class AniWindowRegisterManager {
 public:
@@ -99,6 +71,9 @@ private:
     WmErrorCode ProcessWindowVisibilityChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
     WmErrorCode ProcessOcclusionStateChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
+    WmErrorCode ProcessSystemDensityChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
+        bool isRegister, ani_env* env);
+    WmErrorCode ProcessDisplayIdChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
     WmErrorCode ProcessWindowStatusChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
@@ -107,6 +82,8 @@ private:
     WmErrorCode ProcessWindowRectChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
     WmErrorCode ProcessSubWindowCloseRegister(sptr<AniWindowListener> listener, sptr<Window> window,
+        bool isRegister, ani_env* env);
+    WmErrorCode ProcessWindowHighlightChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
     WmErrorCode ProcessMainWindowCloseRegister(const sptr<AniWindowListener>& listener, const sptr<Window>& window,
         bool isRegister, ani_env* env);

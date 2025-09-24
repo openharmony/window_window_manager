@@ -17,6 +17,7 @@
 
 #include "screen_session_manager/include/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_fold_state_manager.h"
 #include "scene_board_judgement.h"
+#include "fold_screen_state_internel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -171,10 +172,13 @@ HWTEST_F(SingleDisplaySensorFoldStateManagerTest, GetNextFoldState02, TestSize.L
     }
     SingleDisplaySensorFoldStateManager manager;
     manager.allowUserSensorForLargeFoldDevice = 1;
-    float angel = 25.0F;
     int hall = 1;
-    auto result1 = manager.GetNextFoldState(angel, hall);
-    EXPECT_EQ(static_cast<int>(result1), 0);
+    float angel;
+    if (FoldScreenStateInternel::IsSingleDisplayFoldDevice()) {
+        angel = 25.0F;
+        auto result1 = manager.GetNextFoldState(angel, hall);
+        EXPECT_EQ(static_cast<int>(result1), 0);
+    }
 
     angel = 70.0F - 0.1;
     auto result2 = manager.GetNextFoldState(angel, hall);

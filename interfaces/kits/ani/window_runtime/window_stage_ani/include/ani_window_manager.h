@@ -30,6 +30,8 @@ namespace Rosen {
 
 class AniWindowManager {
 public:
+    explicit AniWindowManager();
+
     static ani_status AniWindowManagerInit(ani_env* env, ani_namespace windowNameSpace);
     static ani_ref GetLastWindow(ani_env* env, ani_long nativeObj, ani_object context);
     static ani_ref FindWindow(ani_env* env, ani_long nativeObj, ani_string windowName);
@@ -40,6 +42,8 @@ public:
     static ani_object GetMainWindowSnapshot(
         ani_env* env, ani_long nativeObj, ani_object windowId, ani_object config);
     static ani_ref CreateWindow(ani_env* env, ani_long nativeObj, ani_object configuration);
+    static void RegisterWindowManagerCallback(ani_env* env, ani_long nativeObj, ani_string type, ani_ref callback);
+    static void UnregisterWindowManagerCallback(ani_env* env, ani_long nativeObj, ani_string type, ani_ref callback);
 private:
     ani_ref OnGetLastWindow(ani_env* env, ani_object context);
     ani_ref OnFindWindow(ani_env* env, ani_string windowName);
@@ -50,6 +54,10 @@ private:
     ani_object OnGetMainWindowSnapshot(
         ani_env* env, ani_object windowId, ani_object config);
     ani_ref OnCreateWindow(ani_env* env, ani_object configuration);
+    void OnRegisterWindowManagerCallback(ani_env* env, ani_string type, ani_ref callback);
+    void OnUnregisterWindowManagerCallback(ani_env* env, ani_string type, ani_ref callback);
+
+    std::unique_ptr<AniWindowRegisterManager> registerManager_ = nullptr;
 };
 } // namespace Rosen
 } // namespace OHOS

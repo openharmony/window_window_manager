@@ -909,6 +909,16 @@ public:
     WMError SetWindowLayoutMode(WindowLayoutMode mode);
 
     /**
+     * @brief Global coordinate to relative coordinate conversion in Extension
+     *
+     * @param rect Rect relative to the default display
+     * @param newRect Rect relative to the current display
+     * @param newDisplayId Current displayID
+     * @return WM_OK means converted, others means not converted.
+     */
+    WMError ConvertToRelativeCoordinateExtended(const Rect& rect, Rect& newRect, DisplayId& newDisplayId);
+
+    /**
      * @brief Get accessibility window info.
      *
      * @param infos WindowInfos used for Accessibility.
