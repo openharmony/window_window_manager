@@ -2740,7 +2740,6 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             MultiInstanceManager::GetInstance().FillInstanceKeyIfNeed(sceneSession);
         }
         LOCK_GUARD_EXPR(SCENE_GUARD, InitSceneSession(sceneSession, sessionInfo, property));
-        PreLoadStartingWindow(sceneSession);
         if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: ancoSceneState: %{public}d",
                 where, sceneSession->GetSessionInfo().ancoSceneState);
@@ -5848,8 +5847,8 @@ void SceneSessionManager::PreLoadStartingWindow(sptr<SceneSession> sceneSession)
                 where, sceneSession->GetPersistentId());
             return;
         }
-        if (sessionInfo.isPersistentRecover_) {
-            TLOGNI(WmsLogTag::WMS_PATTERN, "%{public}s skip id: %{public}d for recover",
+        if (sceneSession->GetSessionState() != SessionState::STATE_DISCONNECT) {
+            TLOGND(WmsLogTag::WMS_PATTERN, "%{public}s id: %{public}d is not disconnect",
                 where, sceneSession->GetPersistentId());
             return;
         }
@@ -5878,10 +5877,6 @@ void SceneSessionManager::PreLoadStartingWindow(sptr<SceneSession> sceneSession)
         sceneSession->NotifyPreLoadStartingWindowFinished();
     };
     ffrtQueueHelper_->SubmitTask(loadTask);
-    if (needUpdateRdb_) {
-        UpdateAllStartingWindowRdb();
-        needUpdateRdb_ = false;
-    }
 }
 
 bool SceneSessionManager::CheckAndGetPreLoadResourceId(const StartingWindowInfo& startingWindowInfo, uint32_t& resId)
