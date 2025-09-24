@@ -816,6 +816,7 @@ public:
         uint32_t color, int32_t uid) override;
     void ConfigSupportSnapshotAllSessionStatus();
     void ConfigSupportPreloadStartingWindow();
+    void PreLoadStartingWindow(sptr<SceneSession> sceneSession);
 
     /*
      * Window Animation
@@ -1733,7 +1734,6 @@ private:
         std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>>& outValues);
     void CacheStartingWindowInfo(const std::string& bundleName, const std::string& moduleName,
         const std::string& abilityName, const StartingWindowInfo& startingWindowInfo, bool isDark);
-    void PreLoadStartingWindow(sptr<SceneSession> sceneSession);
     bool CheckAndGetPreLoadResourceId(const StartingWindowInfo& startingWindowInfo, uint32_t& resId);
     std::unique_ptr<StartingWindowRdbManager> startingWindowRdbMgr_;
     std::unique_ptr<LruCache> snapshotLruCache_;
@@ -1744,7 +1744,6 @@ private:
     std::function<void()> closeSyncFunc_ = nullptr;
     WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId) override;
     void UpdateAllStartingWindowRdb();
-    bool needUpdateRdb_ = true;
     std::string GetCallerSessionColorMode(const SessionInfo& sessionInfo);
     void NotifySessionScreenLockedChange(bool isScreenLocked);
 
