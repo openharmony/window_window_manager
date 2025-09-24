@@ -35,7 +35,8 @@ public:
     explicit AniExtensionWindow(const std::shared_ptr<Rosen::ExtensionWindow> extensionWindow, int32_t hostWindowId);
     AniExtensionWindow(const std::shared_ptr<Rosen::ExtensionWindow> extensionWindow,
         sptr<AAFwk::SessionInfo> sessionInfo);
-    static ani_object CreateAniExtensionWindow(ani_env* env, sptr<Rosen::Window> window, int32_t hostWindowId);
+    static ani_object CreateAniExtensionWindow(ani_env* env, sptr<Rosen::Window> window, int32_t hostWindowId,
+        bool isHost = true);
     WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea);
     WmErrorCode OnSetWaterMarkFlag(ani_env* env, ani_boolean enable);
     WmErrorCode OnHidePrivacyContentForHost(ani_env* env, ani_boolean shouldHide);

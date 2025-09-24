@@ -32,6 +32,8 @@ namespace uiExtensionHost {
   // UIExtension WmsLogTag
   const WMS_UIEXT: int = 0xC0420D;
   const WMS_UIEXT_TAG: string = "WMSUiext";
+  const WINDOW_SIZE_CHANGE_CB: string = "windowSizeChange";
+  const AVOID_AREA_CHANGE_CB: string = "avoidAreaChange";
   const enum WmErrorCode {
     WM_OK = 0,
     WM_ERROR_INVALID_PARAM = 401
@@ -131,6 +133,22 @@ namespace uiExtensionHost {
       this.offSync(this.nativeObj, type, callback);
     }
 
+    public onAvoidAreaChange(callback: Callback<{ type: window.AvoidAreaType, area: window.AvoidArea }>): void {
+      this.onSync(this.nativeObj, AVOID_AREA_CHANGE_CB, callback);
+    }
+
+    public offAvoidAreaChange(callback?: Callback<{ type: window.AvoidAreaType, area: window.AvoidArea }>): void {
+      this.offSync(this.nativeObj, AVOID_AREA_CHANGE_CB, callback);
+    }
+
+    public onWindowSizeChange(callback: Callback<window.Size>): void {
+      this.onSync(this.nativeObj, WINDOW_SIZE_CHANGE_CB, callback);
+    }
+
+    public offWindowSizeChange(callback?: Callback<window.Size>): void {
+      this.offSync(this.nativeObj, WINDOW_SIZE_CHANGE_CB, callback);
+    }
+
     getWindowAvoidArea(type: window.AvoidAreaType): window.AvoidArea {
       let area: window.AvoidArea = new UIEAvoidArea();
       let ret = this.getWindowAvoidArea(this.nativeObj, type as int, area as object);
@@ -211,6 +229,11 @@ namespace uiExtensionHost {
     createSubWindowWithOptions(name: string, subWindowOptions: window.SubWindowOptions): Promise<window.Window>;
     on<T>(type: string, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;
+    onAvoidAreaChange(callback: Callback<{ type: window.AvoidAreaType, area: window.AvoidArea }>): void;
+    offAvoidAreaChange(callback?: Callback<{ type: window.AvoidAreaType, area: window.AvoidArea }>): void;
+    onWindowSizeChange(callback: Callback<window.Size>): void;
+    offWindowSizeChange(callback?: Callback<window.Size>): void;
+
     properties: UIExtensionHostWindowProxyProperties;
   }
 

@@ -30,6 +30,9 @@ namespace uiExtension {
   // UIExtension WmsLogTag
   const WMS_UIEXT: int = 0xC0420D;
   const WMS_UIEXT_TAG: string = "WMSUiext";
+  const WINDOW_SIZE_CHANGE_CB: string = "windowSizeChange";
+  const AVOID_AREA_CHANGE_CB: string = "avoidAreaChange";
+  const WINDOW_RECT_CHANGE_CB: string = "rectChange";
   const enum WmErrorCode {
     WM_OK = 0,
     WM_ERROR_INVALID_PARAM = 401
@@ -44,10 +47,10 @@ namespace uiExtension {
   }
 
   class UIERect implements window.Rect {
-    left: double;
-    top: double;
-    width: double;
-    height: double;
+    left: int;
+    top: int;
+    width: int;
+    height: int;
   }
 
   class UIEAvoidArea implements window.AvoidArea {
@@ -80,7 +83,7 @@ namespace uiExtension {
     public native setWaterMarkFlag(nativeObj: long, enable: boolean): int;
     public native createSubWindowWithOptions(nativeObj: long, name: string,
         subWindowOptions: window.SubWindowOptions): window.Window;
-    public native occupyEvents(nativeObj: long, eventFlags: long): void;
+    public native occupyEvents(nativeObj: long, eventFlags: int): void;
     public native hideNonSecureWindows(nativeObj: long, shouldHide: boolean): void;
     public native onSync(nativeObj: long, type: string, callback: object): void;
     public native offSync(nativeObj: long, type: string, callback?: object): void;
@@ -104,6 +107,22 @@ namespace uiExtension {
 
     public off<T>(type: string, callback?: Callback<T>): void {
       this.offSync(this.nativeObj, type, callback);
+    }
+
+    public onAvoidAreaChange(callback: Callback<AvoidAreaInfo>): void {
+      this.onSync(this.nativeObj, AVOID_AREA_CHANGE_CB, callback);
+    }
+
+    public offAvoidAreaChange(callback?: Callback<AvoidAreaInfo>): void {
+      this.offSync(this.nativeObj, AVOID_AREA_CHANGE_CB, callback);
+    }
+
+    public onWindowSizeChange(callback: Callback<window.Size>): void {
+      this.onSync(this.nativeObj, WINDOW_SIZE_CHANGE_CB, callback);
+    }
+
+    public offWindowSizeChange(callback?: Callback<window.Size>): void {
+      this.offSync(this.nativeObj, WINDOW_SIZE_CHANGE_CB, callback);
     }
 
     getWindowAvoidArea(type: window.AvoidAreaType): window.AvoidArea {
@@ -154,7 +173,7 @@ namespace uiExtension {
       });
     }
 
-    occupyEvents(eventFlags: long): Promise<void> {
+    occupyEvents(eventFlags: int): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.occupyEvents(this.nativeObj, eventFlags);
@@ -181,6 +200,31 @@ namespace uiExtension {
   }
 
   /**
+   * Defines the reason of component rect change
+   *
+   * @enum { number }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 14
+   */
+  export enum RectChangeReason {
+    HOST_WINDOW_RECT_CHANGE = 0x0001,
+  }
+
+  /**
+   * Rect change options
+   *
+   * @interface RectChangeOptions
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 14
+   */
+  export interface RectChangeOptions {
+    rect: window.Rect,
+    reason: RectChangeReason
+  }
+
+  /**
    * The proxy of the UIExtension window.
    *
    * @interface WindowProxy
@@ -193,9 +237,15 @@ namespace uiExtension {
     setWaterMarkFlag(enable: boolean): Promise<void>;
     hideNonSecureWindows(shouldHide: boolean): Promise<void>;
     createSubWindowWithOptions(name: string, subWindowOptions: window.SubWindowOptions): Promise<window.Window>;
-    occupyEvents(eventFlags: long): Promise<void>;
+    occupyEvents(eventFlags: int): Promise<void>;
     on<T>(type: string, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;
+    onAvoidAreaChange(callback: Callback<AvoidAreaInfo>): void;
+    offAvoidAreaChange(callback?: Callback<AvoidAreaInfo>): void;
+    onWindowSizeChange(callback: Callback<window.Size>): void;
+    offWindowSizeChange(callback?: Callback<window.Size>): void;
+    // onRectChange(reasons: number, callback: Callback<RectChangeOptions>): void;
+    // offRectChange(callback?: Callback<RectChangeOptions>): void;
 
     properties: WindowProxyProperties;
   }
