@@ -46,7 +46,6 @@ const std::string DIALOG_DEATH_RECIPIENT_CB = "dialogDeathRecipient";
 const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
 const std::string WATER_MARK_FLAG_CHANGE_CB = "waterMarkFlagChange";
 const std::string WINDOW_VISIBILITY_CHANGE_CB = "windowVisibilityChange";
-const std::string OCCLUSION_STATE_CHANGE_CB = "occlusionStateChanged";
 const std::string WINDOW_STATUS_CHANGE_CB = "windowStatusChange";
 const std::string WINDOW_TITLE_BUTTON_RECT_CHANGE_CB = "windowTitleButtonRectChange";
 const std::string WINDOW_NO_INTERACTION_DETECT_CB = "noInteractionDetected";
@@ -77,6 +76,9 @@ class AniWindowListener : public IWindowChangeListener,
                         public IWindowRectChangeListener,
                         public IMainWindowCloseListener,
                         public ISubWindowCloseListener,
+                        public IWindowHighlightChangeListener,
+                        public ISystemDensityChangeListener,
+                        public IDisplayIdChangeListener,
                         public IWindowStageLifeCycle,
                         public IWindowRotationChangeListener {
 public:
@@ -84,7 +86,8 @@ public:
         : env_(env), vm_(vm), aniCallback_(callback), caseType_(caseType),
         weakRef_(wptr<AniWindowListener> (this)) {}
     ~AniWindowListener();
-    ani_ref GetAniCallBack() { return aniCallback_; }
+    ani_ref GetAniCallback() { return aniCallback_; }
+    void SetAniCallback(ani_ref aniCallback) { aniCallback_ = aniCallback; }
     void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) override;
     void OnSizeChange(Rect rect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
@@ -113,12 +116,12 @@ public:
     void SetTimeout(int64_t timeout) override;
     int64_t GetTimeout() const override;
     void OnWindowVisibilityChangedCallback(const bool isVisible) override;
-    void OnOcclusionStateChanged(const WindowVisibilityState state) override;
 
     void OnWindowStatusChange(WindowStatus status) override;
     void OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect) override;
     void OnRectChange(Rect rect, WindowSizeChangeReason reason) override;
     void OnSubWindowClose(bool& terminateCloseProcess) override;
+    void OnWindowHighlightChange(bool isHighlight) override;
     void OnMainWindowClose(bool& terminateCloseProcess) override;
     void OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
         RotationChangeResult& rotationChangeResult) override;
@@ -134,7 +137,7 @@ private:
     Rect currRect_ = {0, 0, 0, 0};
     WindowState state_ {WindowState::STATE_INITIAL};
     int64_t noInteractionTimeout_ = 0;
-    void LifeCycleCallBack(LifeCycleEventType eventType);
+    void LifeCycleCallback(LifeCycleEventType eventType);
     void WindowStageLifecycleCallback(WindowStageLifeCycleEventType eventType);
     ani_env* env_ = nullptr;
     ani_vm* vm_ = nullptr;

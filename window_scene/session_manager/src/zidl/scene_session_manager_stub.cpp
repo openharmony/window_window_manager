@@ -87,6 +87,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleSetGestureNavigationEnabled(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_INFO):
             return HandleGetAccessibilityWindowInfo(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GLOBAL_COORDINATE_TO_RELATIVE_COORDINATE):
+            return HandleConvertToRelativeCoordinateExtended(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_UNRELIABLE_WINDOW_INFO):
             return HandleGetUnreliableWindowInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REGISTER_SESSION_LISTENER):
@@ -2566,4 +2568,38 @@ int SceneSessionManagerStub::HandleGetPiPSettingSwitchStatus(MessageParcel& data
     }
     return ERR_NONE;
 }
+
+
+int SceneSessionManagerStub::HandleConvertToRelativeCoordinateExtended(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t posX_ = 0;
+    int32_t posY_ = 0;
+    uint32_t width_ = 0;
+    uint32_t height_ = 0;
+    if (!data.ReadInt32(posX_) || !data.ReadInt32(posY_) || !data.ReadUint32(width_) || !data.ReadUint32(height_)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read window infos failed.");
+        return ERR_TRANSACTION_FAILED;
+    }
+    Rect rect = {posX_, posY_, width_, height_};
+    Rect newRect;
+    DisplayId newDisplayId = 0;
+    WMError errCode = ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
+    if (!reply.WriteInt32(static_cast<int32_t>(newRect.posX_)) ||
+        !reply.WriteInt32(static_cast<int32_t>(newRect.posY_)) ||
+        !reply.WriteUint32(static_cast<uint32_t>(newRect.width_)) ||
+        !reply.WriteUint32(static_cast<uint32_t>(newRect.height_))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write rect failed.");
+        return ERR_TRANSACTION_FAILED;
+    }
+    if (!reply.WriteUint64(static_cast<uint64_t>(newDisplayId))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write newDisplayId failed.");
+        return ERR_TRANSACTION_FAILED;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write errCode failed.");
+        return ERR_TRANSACTION_FAILED;
+    }
+    return ERR_NONE;
+}
+
 } // namespace OHOS::Rosen

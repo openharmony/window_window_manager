@@ -147,7 +147,6 @@ constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const int32_t LOGICAL_DISPLACEMENT_32 = 32;
 constexpr int32_t GET_TOP_WINDOW_DELAY = 100;
 constexpr char SMALL_FOLD_PRODUCT_TYPE = '2';
-constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 10;
 constexpr uint64_t VIRTUAL_DISPLAY_ID = 999;
 constexpr uint32_t DEFAULT_LOCK_SCREEN_ZORDER = 2000;
 constexpr int32_t MAX_LOCK_STATUS_CACHE_SIZE = 1000;
@@ -3874,7 +3873,8 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     auto parentSession = GetSceneSession(property->GetParentPersistentId());
     if (parentSession) {
         auto parentProperty = parentSession->GetSessionProperty();
-        if (parentProperty->GetSubWindowLevel() >= MAX_SUB_WINDOW_LEVEL) {
+        if (parentProperty->GetSubWindowLevel() >= MAX_SUB_WINDOW_LEVEL &&
+            !WindowHelper::IsToastSubWindow(property->GetWindowType(), property->GetWindowFlags())) {
             TLOGE(WmsLogTag::WMS_SUB, "sub window level exceeds limit");
             return WSError::WS_ERROR_INVALID_WINDOW;
         }
@@ -11021,6 +11021,23 @@ WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessi
         return WMError::WM_OK;
     };
     return taskScheduler_->PostSyncTask(task, "GetAccessibilityWindowInfo");
+}
+
+WMError SceneSessionManager::ConvertToRelativeCoordinateExtended(const Rect& rect, Rect& newRect, DisplayId& newDisplayId)
+{
+    newRect = rect;
+    const auto& pcFoldScreenManagerInstance = PcFoldScreenManager::GetInstance();
+    SuperFoldStatus foldStatus = pcFoldScreenManagerInstance.GetScreenFoldStatus();
+    TLOGD(WmsLogTag::WMS_LAYOUT, "foldStatus=%{public}d", static_cast<uint32_t>(foldStatus));
+    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
+        pcFoldScreenManagerInstance.GetDisplayRects();
+    bool isCPlane = rect.posY_ > (defaultDisplayRect.height_ + foldCreaseRect.height_);
+    if (foldStatus == SuperFoldStatus::HALF_FOLDED && isCPlane) {
+        newRect.posY_ = rect.posY_ - defaultDisplayRect.height_ - foldCreaseRect.height_;
+        newDisplayId = VIRTUAL_DISPLAY_ID;
+        return WMError::WM_OK;
+    } 
+    return WMError::WM_DO_NOTHING;
 }
 
 static bool CheckUnreliableWindowType(WindowType windowType)
