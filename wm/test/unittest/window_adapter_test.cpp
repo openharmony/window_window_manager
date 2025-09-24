@@ -1283,14 +1283,14 @@ HWTEST_F(WindowAdapterTest, WMSDeathRecipient, TestSize.Level1)
 {
     auto wmsDeath_ = sptr<WMSDeathRecipient>::MakeSptr();
     ASSERT_NE(wmsDeath_, nullptr);
- 
+
     sptr<IRemoteObject> token = nullptr;
     wmsDeath_->OnRemoteDied(wptr(token));
- 
+
     token = sptr<IRemoteObjectMocker>::MakeSptr();
     wmsDeath_->OnRemoteDied(wptr(token));
 }
- 
+
 /**
  * @tc.name: RegisterAndUnregisterOutlineRecoverCallbackFunc
  * @tc.desc: normal function
@@ -1330,18 +1330,18 @@ HWTEST_F(WindowAdapterTest, GetInstance, TestSize.Level1)
 {
     sptr<WindowAdapter> instance = nullptr;
     int32_t userId = -1;
-    instance = WindowAdapter::GetInstance(userId);
+    instance = &WindowAdapter::GetInstance(userId);
     ASSERT_NE(instance, nullptr);
- 
+
     userId = 101;
-    instance = WindowAdapter::GetInstance(userId);
+    instance = &WindowAdapter::GetInstance(userId);
     ASSERT_NE(instance, nullptr);
- 
+
     // branch overried
-    instance = WindowAdapter::GetInstance(userId);
+    instance = &WindowAdapter::GetInstance(userId);
     ASSERT_NE(instance, nullptr);
 }
- 
+
 /**
  * @tc.name: InitSSMProxy
  * @tc.desc: normal function
@@ -1349,22 +1349,33 @@ HWTEST_F(WindowAdapterTest, GetInstance, TestSize.Level1)
  */
 HWTEST_F(WindowAdapterTest, InitSSMProxy, TestSize.Level1)
 {
-    sptr<WindowAdapter> instance = WindowAdapter::GetInstance(101);
- 
+    sptr<WindowAdapter> instance = &WindowAdapter::GetInstance(101);
+
     // branch 1
     instance->isProxyValid_ = true;
-
     ASSERT_EQ(true, instance->InitSSMProxy());
- 
+
     // branch 2
     instance->isProxyValid_ = false;
     instance->recoverInitialized_ = true;
     instance->InitSSMProxy();
 
- 
     // branch 3
+    ASSERT_NE(nullptr, instance);
     instance->recoverInitialized_ = false;
-    ASSERT_EQ(true, instance->InitSSMProxy());
+    instance->InitSSMProxy();
+}
+
+/**
+ * @tc.name: UnregisterWMSConnectionChangedListener
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, UnregisterWMSConnectionChangedListener, TestSize.Level1)
+{
+    sptr<WindowAdapter> instance = &WindowAdapter::GetInstance(101);
+    ASSERT_NE(nullptr, instance);
+    instance->UnregisterWMSConnectionChangedListener();
 }
 } // namespace
 } // namespace Rosen

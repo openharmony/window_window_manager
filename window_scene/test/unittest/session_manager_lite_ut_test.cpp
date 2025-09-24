@@ -155,10 +155,11 @@ HWTEST_F(SessionManagerLiteUTTest, OnWMSConnectionChangedCallback, TestSize.Leve
     ASSERT_NE(nullptr, sml_);
     bool funcInvoked = false;
     sml_->wmsConnectionChangedFunc_ = nullptr;
-    sml_->OnWMSConnectionChangedCallback(101, DEFAULT_SCREEN_ID, true, false);
+    sml_->OnWMSConnectionChangedCallback(101, DEFAULT_SCREEN_ID, true);
+    ASSERT_EQ(funcInvoked, false);
 
     sml_->wmsConnectionChangedFunc_ = [&](int32_t userId, int32_t screenId, bool isConnected) { funcInvoked = true; };
-    sml_->OnWMSConnectionChangedCallback(101, DEFAULT_SCREEN_ID, true, true);
+    sml_->OnWMSConnectionChangedCallback(101, DEFAULT_SCREEN_ID, true);
     ASSERT_EQ(funcInvoked, true);
 }
 
