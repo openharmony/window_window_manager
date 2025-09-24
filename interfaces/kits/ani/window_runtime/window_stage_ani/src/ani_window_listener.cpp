@@ -81,7 +81,7 @@ void AniWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
             TLOGE(WmsLogTag::DEFAULT, "[ANI]Get env failed, ret:%{public}u", ret);
             return;
         }
-        AniWindowUtils::CallAniFunctionVoid(env, "L@ohos/window/window;", "runWindowSizeCallback",
+        AniWindowUtils::CallAniFunctionVoid(env, "@ohos.window.window;", "runWindowSizeCallback",
             nullptr, thisListener->aniCallback_, AniWindowUtils::CreateAniSize(env, rect.width_, rect.height_));
     };
     if (!eventHandler_) {
@@ -537,7 +537,7 @@ void AniWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
             TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI]Get env failed, ret:%{public}u", ret);
             return;
         }
-        AniWindowUtils::CallAniFunctionVoid(env, "L@ohos/window/window;", "runWindowRectChangeCallback",
+        AniWindowUtils::CallAniFunctionVoid(env, "@ohos.window.window;", "runWindowRectChangeCallback",
             nullptr, thisListener->aniCallback_, AniWindowUtils::CreateAniRect(env, rect),
             static_cast<ani_int>(rectChangeReason));
     };
