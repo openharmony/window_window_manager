@@ -1789,7 +1789,6 @@ HWTEST_F(SceneSessionManagerTest10, SetMaximizeFullScreen, TestSize.Level1)
     int32_t persistentId = 100;
     bool isMaximizeFullScreen = true;
     EXPECT_EQ(ssm_->SetMaximizeFullScreen(persistentId, isMaximizeFullScreen), WSError::WS_ERROR_INVALID_WINDOW);
-
  
     SessionInfo info;
     info.abilityName_ = "testSetMaximizeFullScreen1";
@@ -1798,7 +1797,6 @@ HWTEST_F(SceneSessionManagerTest10, SetMaximizeFullScreen, TestSize.Level1)
     sceneSession->property_->SetPersistentId(200);
     sceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
-
     EXPECT_EQ(ssm_->SetMaximizeFullScreen(sceneSession->GetPersistentId(), isMaximizeFullScreen),
         WSError::WS_ERROR_INVALID_WINDOW);
  
