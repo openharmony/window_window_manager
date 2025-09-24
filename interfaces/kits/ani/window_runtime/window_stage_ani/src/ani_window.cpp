@@ -1436,6 +1436,7 @@ ani_boolean AniWindow::IsWindowSupportWideGamut(ani_env* env)
         return false;
     }
     ani_boolean res = static_cast<ani_boolean>(windowToken_->IsSupportWideGamut());
+    TLOGI(WmsLogTag::ATTRIBUTE, "[ANI] Window IsWindowSupportWideGamut end");
     return res;
 }
 

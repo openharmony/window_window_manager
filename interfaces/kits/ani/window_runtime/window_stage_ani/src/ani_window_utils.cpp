@@ -1013,7 +1013,7 @@ bool AniWindowUtils::SetWindowStatusBarContentColor(ani_env* env,
     env->Reference_IsUndefined(aniStatusIcon, &isIconUndefined);
 
     if (!isIconUndefined) {
-        properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ =  GetColorFromAni(
+        properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ = GetColorFromAni(
             env,
             "statusBarContentColor",
             statusProperty.contentColor_,
@@ -1021,8 +1021,7 @@ bool AniWindowUtils::SetWindowStatusBarContentColor(ani_env* env,
             aniObject);
     } else if (!isColorUndefined) {
         ani_boolean isStatusIcon;
-        env->Object_CallMethodByName_Boolean(static_cast<ani_object>(aniStatusContentColor),
-            "unboxed", ":z", &isStatusIcon);
+        env->Object_CallMethodByName_Boolean(static_cast<ani_object>(aniStatusIcon), "unboxed", ":z", &isStatusIcon);
         if (static_cast<bool>(aniStatusIcon)) {
             properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ = SYSTEM_COLOR_WHITE;
         } else {
@@ -1052,7 +1051,7 @@ bool AniWindowUtils::SetWindowNavigationBarContentColor(ani_env* env,
     env->Reference_IsUndefined(aniNavigationIcon, &isIconUndefined);
 
     if (!isColorUndefined) {
-        properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ =  GetColorFromAni(
+        properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ = GetColorFromAni(
             env,
             "navigationBarContentColor",
             navProperty.contentColor_,
