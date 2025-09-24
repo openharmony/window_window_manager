@@ -312,6 +312,7 @@ public:
     /**
      * Window Transition Animation For PC
      */
+    WMError IsTransitionAnimationSupported() const override;
     WMError SetWindowTransitionAnimation(WindowTransitionType transitionType,
         const TransitionAnimation& animation) override;
     std::shared_ptr<TransitionAnimation> GetWindowTransitionAnimation(WindowTransitionType transitionType) override;
