@@ -1336,6 +1336,35 @@ bool AniWindowUtils::CheckParaIsUndefined(ani_env* env, ani_object para)
     return false;
 }
 
+ani_object AniWindowUtils::CreateAniPosition(ani_env* env, const Position& position)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    ani_class aniClass;
+    ani_status ret = env->FindClass("@ohos.window.window.PositionInternal", &aniClass);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    ani_method aniCtor;
+    ret = env->Class_FindMethod(aniClass, "<ctor>", nullptr, &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    ani_object aniPosition;
+    ret = env->Object_New(aniClass, aniCtor, &aniPosition);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to create new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    CallAniMethodVoid(env, aniPosition, aniClass, "<set>x", nullptr, ani_int(position.x));
+    CallAniMethodVoid(env, aniPosition, aniClass, "<set>y", nullptr, ani_int(position.y));
+    return aniPosition;
+}
+
 WmErrorCode AniWindowUtils::ToErrorCode(WMError error, WmErrorCode defaultCode)
 {
     auto it = WM_JS_TO_ERROR_CODE_MAP.find(error);

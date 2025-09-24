@@ -2034,6 +2034,56 @@ void AniWindow::SetFollowParentMultiScreenPolicy(ani_env* env, ani_boolean enabl
     TLOGD(WmsLogTag::WMS_LAYOUT, "[ANI] success, windowId: %{public}u, enable: %{public}u", windowId, boEnabled);
 }
 
+/** @note @window.layout */
+void AniWindow::MoveWindowToGlobalDisplay(ani_env* env, ani_int x, ani_int y)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "[ANI] windowToken_ is null");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+
+    int32_t posX = static_cast<int32_t>(x);
+    int32_t posY = static_cast<int32_t>(y);
+    WMError ret = windowToken_->MoveWindowToGlobalDisplay(posX, posY);
+    const WmErrorCode errorCode = AniWindowUtils::ToErrorCode(ret);
+    const uint32_t windowId = windowToken_->GetWindowId();
+    if (errorCode != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Failed, windowId: %{public}u, x: %{public}u, y: %{public}u, "
+            "ret: %{public}d", windowId, posX, posY, static_cast<int32_t>(ret));
+        AniWindowUtils::AniThrowError(env, errorCode);
+        return;
+    }
+
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[ANI] success, windowId: %{public}u, x: %{public}u, y: %{public}u",
+        windowId, posX, posY);
+}
+
+template <typename PositionTransformFunc>
+ani_object AniWindow::HandlePositionTransform(
+    ani_env* env, ani_int x, ani_int y, PositionTransformFunc transformFunc, const char* caller)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "[ANI] windowToken_ is null");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+
+    int32_t posX = static_cast<int32_t>(x);
+    int32_t posY = static_cast<int32_t>(y);
+    Position inPosition { posX, posY };
+    Position outPosition;
+    WMError ret = transformFunc(windowToken_, inPosition, outPosition);
+    const WmErrorCode errorCode = AniWindowUtils::ToErrorCode(ret);
+    const uint32_t windowId = windowToken_->GetWindowId();
+    if (errorCode != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Failed, windowId: %{public}u, x: %{public}u, y: %{public}u, "
+            "ret: %{public}d", windowId, posX, posY, static_cast<int32_t>(ret));
+        return AniWindowUtils::AniThrowError(env, errorCode);
+    }
+
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[ANI] success, x: %{public}u, y: %{public}u", posX, posY);
+    return AniWindowUtils::CreateAniPosition(env, outPosition);
+}
 }  // namespace Rosen
 }  // namespace OHOS
 
@@ -2472,6 +2522,56 @@ static void WindowSetFollowParentMultiScreenPolicy(ani_env* env, ani_object obj,
     aniWindow->SetFollowParentMultiScreenPolicy(env, enable);
 }
 
+static void WindowMoveWindowToGlobalDisplay(ani_env* env, ani_object obj, ani_long nativeObj,
+                                            ani_int x, ani_int y)
+{
+    using namespace OHOS::Rosen;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (!aniWindow || !aniWindow->GetWindow()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    aniWindow->MoveWindowToGlobalDisplay(env, x, y);
+}
+
+static ani_object WindowClientToGlobalDisplay(ani_env* env, ani_object obj, ani_long nativeObj,
+                                              ani_int winX, ani_int winY)
+{
+    using namespace OHOS::Rosen;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (!aniWindow || !aniWindow->GetWindow()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    return aniWindow->HandlePositionTransform(
+        env, winX, winY,
+        [](const OHOS::sptr<Window>& window, const Position& inPos, Position& outPos) {
+            return window->ClientToGlobalDisplay(inPos, outPos);
+        },
+        __func__);
+}
+
+static ani_object WindowGlobalDisplayToClient(ani_env* env, ani_object obj, ani_long nativeObj,
+                                              ani_int globalDisplayX, ani_int globalDisplayY)
+{
+    using namespace OHOS::Rosen;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (!aniWindow || !aniWindow->GetWindow()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    return aniWindow->HandlePositionTransform(
+        env, globalDisplayX, globalDisplayY,
+        [](const OHOS::sptr<Window>& window, const Position& inPos, Position& outPos) {
+            return window->GlobalDisplayToClient(inPos, outPos);
+        },
+        __func__);
+}
+
 ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
 {
     using namespace OHOS::Rosen;
@@ -2602,6 +2702,12 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(WindowSetFollowParentWindowLayoutEnabled)},
         ani_native_function {"setFollowParentMultiScreenPolicy", "JZ:V",
             reinterpret_cast<void *>(WindowSetFollowParentMultiScreenPolicy)},
+        ani_native_function {"moveWindowToGlobalDisplay", "JII:V",
+            reinterpret_cast<void *>(WindowMoveWindowToGlobalDisplay)},
+        ani_native_function {"clientToGlobalDisplay", "JII:L@ohos/window/window/Position;",
+            reinterpret_cast<void *>(WindowClientToGlobalDisplay)},
+        ani_native_function {"globalDisplayToClient", "JII:L@ohos/window/window/Position;",
+            reinterpret_cast<void *>(WindowGlobalDisplayToClient)},
     };
     if ((ret = env->Class_BindNativeMethods(cls, methods.data(), methods.size())) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] bind window method fail %{public}u", ret);

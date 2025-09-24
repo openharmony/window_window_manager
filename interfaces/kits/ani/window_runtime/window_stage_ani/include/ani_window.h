@@ -110,6 +110,10 @@ public:
     void SetForbidSplitMove(ani_env* env, ani_boolean isForbidSplitMove);
     void SetFollowParentWindowLayoutEnabled(ani_env* env, ani_boolean enable);
     void SetFollowParentMultiScreenPolicy(ani_env* env, ani_boolean enable);
+    void MoveWindowToGlobalDisplay(ani_env* env, ani_int x, ani_int y);
+    template <typename PositionTransformFunc>
+    ani_object HandlePositionTransform(ani_env* env, ani_int x, ani_int y, PositionTransformFunc transformFunc,
+        const char* caller);
 
 private:
     void OnSetWindowColorSpace(ani_env* env, ani_int colorSpace);

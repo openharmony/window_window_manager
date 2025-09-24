@@ -548,6 +548,16 @@ namespace window {
     height: int;
   }
 
+  export interface Position {
+    x: int;
+    y: int;
+  }
+
+  export class PositionInternal implements Position {
+    x: int;
+    y: int;
+  }
+
 //enum WMError {
     const WMError_WM_OK = 0
     const WMError_WM_DO_NOTHING = 1
@@ -1874,6 +1884,9 @@ export class WindowInternal implements Window {
     private native setForbidSplitMove(nativeObj: long, isForbidSplitMove: boolean): void;
     private native setFollowParentWindowLayoutEnabled(nativeObj: long, enabled: boolean): void;
     private native setFollowParentMultiScreenPolicy(nativeObj: long, enabled: boolean): void;
+    private native moveWindowToGlobalDisplay(nativeObj: long, x: int, y: int): void;
+    private native clientToGlobalDisplay(nativeObj: long, winX: int, winY: int): Position;
+    private native globalDisplayToClient(nativeObj: long, globalDisplayX: int, globalDisplayY: int): Position;
 
     public static transferStatic(input: Any): Object {
       return WindowInternal.nativeTransferStatic(ESValue.wrap(input));
@@ -2718,6 +2731,42 @@ export class WindowInternal implements Window {
           });
       });
     }
+
+    public moveWindowToGlobalDisplay(x: int, y: int): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
+          taskpool.execute(() => {
+              this.moveWindowToGlobalDisplay(this.nativeObj, x, y);
+          }).then((ret: NullishType) => {
+              resolve(undefined);
+          }).catch((err: NullishType) => {
+              reject(err as BusinessError);
+          });
+      });
+    }
+
+    public clientToGlobalDisplay(winX: int, winY: int): Promise<Position> {
+      return new Promise<Position>((resolve: (value: Position) => void, reject: (error: BusinessError) => void) => {
+          taskpool.execute(() => {
+              return this.clientToGlobalDisplay(this.nativeObj, winX, winY);
+          }).then((ret: NullishType) => {
+              resolve(ret as Position);
+          }).catch((err: NullishType) => {
+              reject(err as BusinessError);
+          });
+      });
+    }
+
+    public globalDisplayToClient(globalDisplayX: int, globalDisplayY: int): Promise<Position> {
+      return new Promise<Position>((resolve: (value: Position) => void, reject: (error: BusinessError) => void) => {
+          taskpool.execute(() => {
+              return this.globalDisplayToClient(this.nativeObj, globalDisplayX, globalDisplayY);
+          }).then((ret: NullishType) => {
+              resolve(ret as Position);
+          }).catch((err: NullishType) => {
+              reject(err as BusinessError);
+          });
+      });
+    }
 }
 
 export interface Window {
@@ -2807,6 +2856,9 @@ export interface Window {
     setForbidSplitMove(isForbidSplitMove: boolean): Promise<void>;
     setFollowParentWindowLayoutEnabled(enabled: boolean): Promise<void>;
     setFollowParentMultiScreenPolicy(enabled: boolean): Promise<void>;
+    moveWindowToGlobalDisplay(x: int, y: int): Promise<void>;
+    clientToGlobalDisplay(winX: int, winY: int): Promise<Position>;
+    globalDisplayToClient(globalDisplayX: int, globalDisplayY: int): Promise<Position>;
 }
 
 export native function CreateWindowStage(scene: long): WindowStageInternal;
@@ -3077,6 +3129,16 @@ function runWindowDialogTargetCallback(cb: object): void {
 function runWindowNoInteractionCallback(cb: object): void {
   const func = cb as () => void;
   func();
+}
+
+function runRectChangeInGlobalDisplayCallback(cb: object, rect: object, reason: int): void {
+    const func = cb as (data: RectChangeOptions) => void;
+    func({rect: rect as Rect, reason: reason as RectChangeReason});
+}
+
+function runWindowStatusDidChangeCallback(cb: object, windowStatus: int): void {
+    const func = cb as (windowStatus: WindowStatusType) => void;
+    func(windowStatus as WindowStatusType);
 }
 }
 
