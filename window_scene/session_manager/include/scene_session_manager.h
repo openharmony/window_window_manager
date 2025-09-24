@@ -1501,7 +1501,7 @@ private:
     NotifyRootSceneAvoidAreaChangeFunc onNotifyAvoidAreaChangeForRootFunc_;
     OnFlushUIParamsFunc onFlushUIParamsFunc_;
     IsRootSceneLastFrameLayoutFinishedFunc isRootSceneLastFrameLayoutFinishedFunc_;
-    bool isAINavigationBarVisible_ = false;
+    std::unordered_map<uint64_t, bool> isAINavigationBarVisible_;
     std::shared_mutex currAINavigationBarAreaMapMutex_;
     std::map<uint64_t, WSRect> currAINavigationBarAreaMap_;
     std::mutex nextAvoidRectInfoMapMutex_;
