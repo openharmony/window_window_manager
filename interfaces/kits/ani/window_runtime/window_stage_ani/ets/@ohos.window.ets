@@ -29,6 +29,7 @@ export type KeyboardHeightChangeCallback = (data: int) => void;
 export type KeyboardDidShowOrHideCallback = (data: window.KeyboardInfo) => void;
 const DOMAIN = 0x4200;
 const TAG = '[ANI]';
+const WM_ERROR_INVALID_PARAM = 401;
 
 namespace window {
   export interface Size {
@@ -1779,7 +1780,7 @@ export class WindowStageInternal implements WindowStage {
 
     public static transferStatic(input: Any): Object {
       if (!input) {
-        throw new BusinessError(401, new Error('TransferStatic invalid input!'));
+        throw new BusinessError(WM_ERROR_INVALID_PARAM, new Error('TransferStatic invalid input!'));
       }
       hilog.info(DOMAIN, TAG, 'transfer static, input:' + input);
       let windowStage: ESValue = ESValue.wrap(input).getPropertySafe('windowStage_');
@@ -1792,13 +1793,13 @@ export class WindowStageInternal implements WindowStage {
 
     public static transferDynamic(input: Object): Any {
       if (!input) {
-        throw new BusinessError(401, new Error('TransferDynamic invalid input!'));
+        throw new BusinessError(WM_ERROR_INVALID_PARAM, new Error('TransferDynamic invalid input!'));
       }
       hilog.info(DOMAIN, TAG, 'transfer dynamic, input:' + input);
       if (input instanceof WindowStageInternal) {
         return WindowStageInternal.nativeTransferDynamic((input as WindowStageInternal).nativeObj).unwrap();
       } else {
-        throw new BusinessError(401, new Error('Invalid instance input!'));
+        throw new BusinessError(WM_ERROR_INVALID_PARAM, new Error('Invalid instance input!'));
       }
     }
 
