@@ -380,7 +380,7 @@ ani_object AniWindowUtils::CreateAniRect(ani_env* env, const Rect& rect)
         return AniWindowUtils::CreateAniUndefined(env);
     }
     ani_method aniCtor;
-    ret = env->Class_FindMethod(aniClass, "<ctor>", nullptr, &aniCtor);
+    ret = env->Class_FindMethod(aniClass, "<ctor>", ":V", &aniCtor);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
         return AniWindowUtils::CreateAniUndefined(env);
