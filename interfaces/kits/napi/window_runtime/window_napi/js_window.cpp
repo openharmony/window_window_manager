@@ -7357,32 +7357,15 @@ napi_value JsWindow::OnSetFollowParentMultiScreenPolicy(napi_env env, napi_callb
     return result;
 }
 
-static bool IsTransitionAnimationEnable(napi_env env, sptr<Window> windowToken, WmErrorCode& enableResult)
-{
-    if (!windowToken) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "Window instance not exist");
-        enableResult = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-        return false;
-    }
-    if (!windowToken->IsPcOrPadFreeMultiWindowMode()) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "Device is invalid");
-        enableResult = WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
-        return false;
-    }
-    if (!WindowHelper::IsMainWindow(windowToken->GetType())) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "Window type is invalid");
-        enableResult = WmErrorCode::WM_ERROR_INVALID_CALLING;
-        return false;
-    }
-    return true;
-}
-
 napi_value JsWindow::OnSetWindowTransitionAnimation(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_ANIMATION, "[NAPI]");
-    WmErrorCode enableResult = WmErrorCode::WM_OK;
-    if (!IsTransitionAnimationEnable(env, windowToken_, enableResult)) {
-        return NapiThrowError(env, enableResult);
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Window instance not exist");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->IsTransitionAnimationSupported());
+    if (ret != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, ret);
     }
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
@@ -7408,7 +7391,6 @@ napi_value JsWindow::OnSetWindowTransitionAnimation(napi_env env, napi_callback_
     auto asyncTask = [weakToken = wptr<Window>(windowToken_), task = napiAsyncTask, env, type, animation, where] {
         auto window = weakToken.promote();
         if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s window is nullptr", where);
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
                 "[window][setWindowTransitionAnimation]msg:native window is nullptr"));
             return;
@@ -7423,8 +7405,7 @@ napi_value JsWindow::OnSetWindowTransitionAnimation(napi_env env, napi_callback_
         }
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowTransitionAnimation") != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env, CreateJsError(env,
-            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+        napiAsyncTask->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
             "[window][setWindowTransitionAnimation]msg:send event failed"));
     }
     return result;
@@ -7433,9 +7414,14 @@ napi_value JsWindow::OnSetWindowTransitionAnimation(napi_env env, napi_callback_
 napi_value JsWindow::OnGetWindowTransitionAnimation(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_ANIMATION, "[NAPI]");
-    WmErrorCode enableResult = WmErrorCode::WM_OK;
-    if (!IsTransitionAnimationEnable(env, windowToken_, enableResult)) {
-        return NapiThrowError(env, enableResult,
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Window instance not exist");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][getWindowTransitionAnimation]msg:transition animation is not enable");
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->IsTransitionAnimationSupported());
+    if (ret != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, ret,
             "[window][getWindowTransitionAnimation]msg:transition animation is not enable");
     }
     size_t argc = ONE_PARAMS_SIZE;
