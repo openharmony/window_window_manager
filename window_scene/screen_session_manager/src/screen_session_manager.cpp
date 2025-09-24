@@ -2426,11 +2426,11 @@ DMError ScreenSessionManager::SetScreenActiveMode(ScreenId screenId, uint32_t mo
     uint32_t phyHeight = property.GetScreenRealHeight();
     uint32_t refreshRate = screenSession->GetRefreshRate();
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetScreenActiveMode(%" PRIu64", %u)", screenId, modeId);
-    auto rsInterface_.SetScreenActiveMode(rsScreenId, modeId); // modeId is activeIdx;
+    auto res = rsInterface_.SetScreenActiveMode(rsScreenId, modeId); // modeId is activeIdx;
     int id = HiviewDFX::XCollie::GetInstance().SetTimer("SetScreenActiveModeCallRS", XCOLLIE_TIMEOUT_10S, nullptr,
         nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
     TLOGW(WmsLogTag::DMS, "Call rsInterface_ GetScreenActiveMode rsid: %{public}" PRIu64, rsScreenId);
-    RSScreenModeInfo screenMode = rsInterface_.GetScreenActiveMode(phyScreenId);
+    RSScreenModeInfo screenMode = rsInterface_.GetScreenActiveMode(rsScreenId);
     HiviewDFX::XCollie::GetInstance().CancelTimer(id);
     ReportScreenModeChangeEvent(screenMode, res);
     const char* logPreFix = (res = StatusCode::SUCCESS) ? "RS success" : "RS fail";
@@ -10507,7 +10507,7 @@ DMError ScreenSessionManager::SetMultiScreenRelativePosition(MultiScreenPosition
     if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
         !MultiScreenManager::GetInstance().AreScreensTouching(firstScreenSession, secondScreenSession,
         mainScreenOptions, secondScreenOption)) {
-        const std::string errMsg = "Options incorrect"
+        const std::string errMsg = "Options incorrect";
         ReportRelativePositionChangeEvent(mainScreenOptions, secondScreenOption, errMsg);     
         TLOGE(WmsLogTag::DMS, "Options incorrect!");
         return DMError::DM_ERROR_INVALID_PARAM;
@@ -10537,7 +10537,7 @@ void ScreenSessionManager::SetMultiScreenRelativePositionInner(sptr<ScreenSessio
             firstPhysicalScreen->SetStartPosition(mainScreenOptions.startX_, mainScreenOptions.startY_);
             secondPhysicalScreen->SetStartPosition(secondScreenOption.startX_, secondScreenOption.startY_);
             CalculateXYPosition(firstPhysicalScreen, secondPhysicalScreen);
-            const std::string errMsg = "success"
+            const std::string errMsg = "success";
             ReportRelativePositionChangeEvent(mainScreenOptions, secondScreenOption, errMsg);     
         }
     }
@@ -10566,7 +10566,7 @@ void ScreenSessionManager::SetRelativePositionForDisconnect(MultiScreenPositionO
         return;
     }
     defaultScreenSession->SetStartPosition(defaultScreenOptions.startX_, defaultScreenOptions.startY_);
-    const std::string errMsg = "default position"
+    const std::string errMsg = "default position";
     ReportRelativePositionChangeEvent(defaultScreenOptions, defaultScreenOptions, errMsg);
     CalculateXYPosition(defaultScreenSession);
     defaultScreenSession->PropertyChange(defaultScreenSession->GetScreenProperty(),

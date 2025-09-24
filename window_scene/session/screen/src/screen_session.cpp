@@ -673,7 +673,7 @@ void ScreenSession::SetDefaultDeviceRotationOffset(uint32_t defaultRotationOffse
     property_.SetDefaultDeviceRotationOffset(defaultRotationOffset);
 }
 
-void ScreenSession::UpdatePropertyByActiveMode()
+void ScreenSession::UpdatePropertyByActiveModeChange()
 {
     sptr<SupportedScreenModes> mode = GetActiveScreenMode();
     if (mode != nullptr) {
@@ -705,7 +705,7 @@ void ScreenSession::UpdatePropertyByActiveMode()
 }
 
 
-void ScreenSession::UpdatePropertyByActiveModeChange()
+void ScreenSession::UpdatePropertyByActiveMode()
 {
     sptr<SupportedScreenModes> mode = GetActiveScreenMode();
     if (mode != nullptr) {
