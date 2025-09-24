@@ -317,14 +317,9 @@ bool ConvertWindowCreateParamsFromJsValue(napi_env env, napi_value jsObject,
             windowCreateParams.animationParams = nullptr;
         }
     }
-    if (!IsSystemCalling()) {
-        TLOGW(WmsLogTag::WMS_ANIMATION, "Not system calling")
-        windowCreateParams.animationSystemParams = nullptr;
-        return true;
-    }
     bool hasAnimationSystemParams = false;
     napi_has_named_property(env, jsObject, "systemAnimationParams", &hasAnimationSystemParams);
-    if (hasAnimationSystemParams) {
+    if (hasAnimationSystemParams && IsSystemCalling()) {
         napi_value jsAnimationSystemParams = nullptr;
         napi_get_named_property(env, jsObject, "systemAnimationParams", &jsAnimationSystemParams);
         windowCreateParams.animationSystemParams = std::make_shared<StartAnimationSystemOptions>();
