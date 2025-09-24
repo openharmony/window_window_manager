@@ -2406,7 +2406,6 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
     } else if (property == nullptr && SessionHelper::IsMainWindow(static_cast<WindowType>(sessionInfo.windowType_))) {
         sceneSession = new MainSession(sessionInfo, specificCb);
         TLOGI(WmsLogTag::WMS_MAIN, "Create MainSession, id: %{public}d", sceneSession->GetPersistentId());
-        AddRequestTaskInfo(sceneSession->GetPersistentId(), sessionInfo);
     } else if (property != nullptr && SessionHelper::IsSubWindow(property->GetWindowType())) {
         sceneSession = new SubSession(sessionInfo, specificCb);
         TLOGI(WmsLogTag::WMS_SUB, "Create SubSession, type: %{public}d", property->GetWindowType());
@@ -2883,11 +2882,11 @@ void SceneSessionManager::UpdateSceneSessionWant(const SessionInfo& sessionInfo)
             TLOGI(WmsLogTag::WMS_MAIN, "Get session id:%{public}d", sessionInfo.persistentId_);
             if (!CheckCollaboratorType(session->GetCollaboratorType())) {
                 session->SetSessionInfoWant(sessionInfo.want);
-                AddRequestTaskInfo(sessionInfo);
                 TLOGI(WmsLogTag::WMS_MAIN, "Want updated, id:%{public}d", sessionInfo.persistentId_);
             } else {
                 UpdateCollaboratorSessionWant(session, sessionInfo.persistentId_);
             }
+            AddRequestTaskInfo(session, sessionInfo.requestId);
         } else {
             TLOGI(WmsLogTag::WMS_MAIN, "Get session fail(%{public}d), id:%{public}d",
                 session == nullptr, sessionInfo.persistentId_);
@@ -3250,12 +3249,13 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     return WSError::WS_OK;
 }
 
-void SceneSessionManager::AddRequestTaskInfo(const SessionInfo& sessionInfo) {
-    AddRequestTaskInfo(sessionInfo.persistentId_, sessionInfo);
-}
- 
-void SceneSessionManager::AddRequestTaskInfo(int32_t persistentId, const SessionInfo& sessionInfo) {
-    if (sessionInfo.requestId < MIN_REQUEST_ID_FROM_ABILITY ||
+void SceneSessionManager::AddRequestTaskInfo(sptr<SceneSession> sceneSession, int32_t requestId) {
+    if (sceneSession == nullptr) {
+        return;
+    }
+    const SessionInfo& sessionInfo = sceneSession->GetSessionInfo();
+    int32_t persistentId = sceneSession->GetPersistentId();
+    if (requestId < MIN_REQUEST_ID_FROM_ABILITY ||
         persistentId == INVALID_SESSION_ID ||
         sessionInfo.want == nullptr) {
         return;
@@ -3268,12 +3268,12 @@ void SceneSessionManager::AddRequestTaskInfo(int32_t persistentId, const Session
             requestTaskInfoMap.emplace(persistentId, std::make_shared<RequestTaskInfo>());
         }
         auto& requestIdToWantMap = requestTaskInfoMap[persistentId]->requestIdToWantMap;
-        requestIdToWantMap[sessionInfo.requestId] = wantTmp;
+        requestIdToWantMap[requestId] = wantTmp;
         requestIdToWantMapSize = requestIdToWantMap.size();
     }
     TLOGI(WmsLogTag::WMS_LIFE, "persistentId:%{public}d, requestId:%{public}d, "
         "infoMap size:%{public}u, wantMap size:%{public}u",
-        persistentId, sessionInfo.requestId, requestTaskInfoMap.size(), requestIdToWantMapSize);
+        persistentId, requestId, requestTaskInfoMap.size(), requestIdToWantMapSize);
 }
  
 void SceneSessionManager::RemoveRequestTaskInfo(int32_t persistentId, int32_t requestId) {

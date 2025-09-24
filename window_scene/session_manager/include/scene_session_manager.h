@@ -778,8 +778,7 @@ public:
     WMError GetRouterStackInfo(int32_t persistentId, const sptr<ISessionRouterStackListener>& listener);
     WMError CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey);
     WMError RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey);
-    void AddRequestTaskInfo(const SessionInfo& sessionInfo);
-    void AddRequestTaskInfo(int32_t requestId, const SessionInfo& sessionInfo);
+    void AddRequestTaskInfo(sptr<SceneSession> sceneSession, int32_t requestId);
     std::shared_ptr<AAFwk::Want> GetRequestWantFromTaskInfoMap(int32_t persistentId, int32_t requestId);
     void RemoveRequestTaskInfo(int32_t persistentId, int32_t requestId);
     void ClearRequestTaskInfo(int32_t persistentId);
