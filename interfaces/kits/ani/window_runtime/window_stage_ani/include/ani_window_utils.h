@@ -114,6 +114,7 @@ public:
         WindowSnapshotConfiguration& windowSnapshotConfiguration);
     static WindowLimits ParseWindowLimits(ani_env* env, ani_object aniWindowLimits);
     static bool CheckParaIsUndefined(ani_env* env, ani_object para);
+    static ani_object CreateAniPosition(ani_env* env, const Position& position);
 
     /**
      * @brief Convert WMError to corresponding WmErrorCode.

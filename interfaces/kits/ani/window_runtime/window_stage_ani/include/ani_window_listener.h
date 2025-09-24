@@ -54,6 +54,8 @@ class AniWindowListener : public IWindowChangeListener,
                         public ISystemDensityChangeListener,
                         public IDisplayIdChangeListener,
                         public IWindowStageLifeCycle,
+                        public IRectChangeInGlobalDisplayListener,
+                        public IWindowStatusDidChangeListener,
                         public IWindowRotationChangeListener {
 public:
     AniWindowListener(ani_env* env, ani_vm* vm, ani_ref callback, CaseType caseType)
@@ -101,6 +103,8 @@ public:
     void OnMainWindowClose(bool& terminateCloseProcess) override;
     void OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
         RotationChangeResult& rotationChangeResult) override;
+    void OnRectChangeInGlobalDisplay(const Rect& rect, WindowSizeChangeReason reason) override;
+    void OnWindowStatusDidChange(WindowStatus status) override;
 
     void AfterLifecycleForeground() override;
     void AfterLifecycleBackground() override;
