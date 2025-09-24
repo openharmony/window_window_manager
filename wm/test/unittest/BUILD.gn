@@ -79,6 +79,7 @@ group("unittest") {
       ":wm_window_scene_session_impl_test3",
       ":wm_window_scene_session_impl_test4",
       ":wm_window_scene_session_impl_test5",
+      ":wm_window_scene_session_impl_test6",
       ":wm_window_session_impl_test",
       ":wm_window_session_impl_test2",
       ":wm_window_session_impl_test3",

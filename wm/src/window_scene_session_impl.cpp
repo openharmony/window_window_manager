@@ -3428,6 +3428,7 @@ WMError WindowSceneSessionImpl::Maximize()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (WindowHelper::IsMainWindow(GetType())) {
+        UpdateIsShow
         SetLayoutFullScreen(enableImmersiveMode_);
     }
     return WMError::WM_OK;
@@ -3533,6 +3534,8 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
 
     return WMError::WM_OK;
 }
+
+
 
 WMError WindowSceneSessionImpl::Recover()
 {

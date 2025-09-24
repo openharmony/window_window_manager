@@ -1776,6 +1776,8 @@ HWTEST_F(SceneSessionManagerTest10, RefreshAllAppUseControlMap, TestSize.Level1)
     ssm_->RefreshAllAppUseControlMap(appUseControlInfo, ControlAppType::PARENT_CONTROL);
     EXPECT_EQ(0, ssm_->allAppUseControlMap_.size());
 }
+
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
