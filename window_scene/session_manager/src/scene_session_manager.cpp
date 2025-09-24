@@ -13201,6 +13201,7 @@ WSError SceneSessionManager::GetIsLayoutFullScreen(bool& isLayoutFullScreen)
     return WSError::WS_OK;
 }
 
+
 WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64_t screenId)
 {
     auto sceneSession = GetSceneSession(persistentId);

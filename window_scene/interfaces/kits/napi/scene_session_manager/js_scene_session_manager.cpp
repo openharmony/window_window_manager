@@ -253,6 +253,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::GetFreeMultiWindowConfig);
     BindNativeFunction(env, exportObj, "getIsLayoutFullScreen", moduleName,
         JsSceneSessionManager::GetIsLayoutFullScreen);
+    BindNativeFunction
     BindNativeFunction(env, exportObj, "getWindowLimits", moduleName,
         JsSceneSessionManager::GetWindowLimits);
     BindNativeFunction(env, exportObj, "notifyEnterRecentTask", moduleName,
@@ -1260,6 +1261,7 @@ napi_value JsSceneSessionManager::GetIsLayoutFullScreen(napi_env env, napi_callb
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetIsLayoutFullScreen(env, info) : nullptr;
 }
+
 
 napi_value JsSceneSessionManager::GetWindowLimits(napi_env env, napi_callback_info info)
 {
@@ -3919,6 +3921,7 @@ napi_value JsSceneSessionManager::OnGetIsLayoutFullScreen(napi_env env, napi_cal
     napi_get_boolean(env, isLayoutFullScreen, &result);
     return result;
 }
+
 
 napi_value JsSceneSessionManager::OnGetWindowLimits(napi_env env, napi_callback_info info)
 {
