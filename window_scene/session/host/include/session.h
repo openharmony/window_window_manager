@@ -245,7 +245,7 @@ public:
     /*
      * Window Immersive
      */
-    void UpdateStatusBarVisible(bool isStatusBarVisible) { isStatusBarVisible_ = isStatusBarVisible; };
+    void UpdateStatusBarVisible(bool isStatusBarVisible) { isStatusBarVisible_ = isStatusBarVisible; }
     bool IsStatusBarVisible() const;
 
     /*
