@@ -3545,9 +3545,6 @@ void WindowSceneSessionImpl::MaximizeEvent(sptr<ISession> hostSession)
         UpdateDecorEnable(true);
         NotifyWindowStatusChange(GetWindowMode());
     }
-    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
-
-    return WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::Recover()
