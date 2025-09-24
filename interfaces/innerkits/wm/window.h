@@ -536,7 +536,7 @@ using IWindowVisibilityListenerSptr = sptr<IWindowVisibilityChangedListener>;
  */
 class IOcclusionStateChangedListener : virtual public RefBase {
 public:
-    virtual void OnOcclusionStateChanged(const WindowVisibilityState state) {};
+    virtual void OnOcclusionStateChanged(const WindowVisibilityState state) {}
 };
 
 /**
