@@ -346,7 +346,7 @@ WmErrorCode JsWindowRegisterManager::ProcessOcclusionStateChangeRegister(sptr<Js
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     if (window == nullptr || listener == nullptr) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "window or listener is null");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window or listener is null");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     WMError retCode = WMError::WM_OK;

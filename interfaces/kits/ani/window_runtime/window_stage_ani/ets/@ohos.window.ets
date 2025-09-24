@@ -526,6 +526,12 @@ export enum WindowStatusType {
     SPLIT_SCREEN = 5
 }
 
+export enum OcclusionState {
+    NO_OCCLUSION = 0,
+    PARTIALLY_OCCLUSION = 1,
+    TOTALLY_OCCLUSION = 2
+}
+
 export enum WindowStageEventType {
     SHOWN = 1,
     ACTIVE = 2,
@@ -2249,6 +2255,14 @@ export class WindowInternal implements Window {
       this.offSync(this.nativeObj, type, callback);
     }
 
+    public onOcclusionStateChanged(callback: Callback<OcclusionState>): void {
+      this.onSync(this.nativeObj, 'occlusionStateChanged', callback);
+    }
+
+    public offOcclusionStateChanged(callback?: Callback<OcclusionState>): void {
+      this.offSync(this.nativeObj, 'occlusionStateChanged', callback);
+    }
+
     public showWindow(callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.showWindowSync(this.nativeObj);
@@ -2360,6 +2374,8 @@ export interface Window {
     on<T>(type: string, callback: Callback<T>): void;
     on<T>(type: 'noInteractionDetected', timeout: long, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;
+    onOcclusionStateChanged(callback: Callback<OcclusionState>): void;
+    offOcclusionStateChanged(callback?: Callback<OcclusionState>): void;
 }
 
 export native function CreateWindowStage(scene: long): WindowStageInternal;
@@ -2550,6 +2566,11 @@ function runKeyboardDidHideCallBack(cb: object, cbArg: object): void {
 function runWindowStatusCallBack(cb: object, cbArg: int): void {
     const func = cb as (cbArg: WindowStatusType) => void;
     func(cbArg as WindowStatusType);
+}
+
+function runOcclusionStateChangeCallback(cb: object, cbArg: int): void {
+    const func = cb as (cbArg: OcclusionState) => void;
+    func(cbArg as OcclusionState);
 }
 
 function runWindowTouchOutCallback(cb: object): void {

@@ -44,6 +44,7 @@ enum class RegisterListenerType : uint32_t {
     WINDOW_STATUS_CHANGE_CB,
     WINDOW_TITLE_BUTTON_RECT_CHANGE_CB,
     WINDOW_VISIBILITY_CHANGE_CB,
+    OCCLUSION_STATE_CHANGE_CB,
     WINDOW_NO_INTERACTION_DETECT_CB,
     WINDOW_RECT_CHANGE_CB,
     SUB_WINDOW_CLOSE_CB,
@@ -96,6 +97,8 @@ private:
     WmErrorCode ProcessWaterMarkFlagChangeRegister(sptr<AniWindowListener> listener,
         sptr<Window> window, bool isRegister, ani_env* env);
     WmErrorCode ProcessWindowVisibilityChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
+        bool isRegister, ani_env* env);
+    WmErrorCode ProcessOcclusionStateChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
     WmErrorCode ProcessWindowStatusChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
