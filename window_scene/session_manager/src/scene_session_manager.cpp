@@ -896,12 +896,14 @@ WSError SceneSessionManager::SwitchFreeMultiWindow(bool enable)
         return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
     }
     LoadFreeMultiWindowConfig(enable);
-    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (const auto& [_, sceneSession] : sceneSessionMap_) {
-        if (sceneSession == nullptr) {
-            continue;
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [_, sceneSession] : sceneSessionMap_) {
+            if (sceneSession == nullptr) {
+                continue;
+            }
+            sceneSession->SwitchFreeMultiWindow(systemConfig_);
         }
-        sceneSession->SwitchFreeMultiWindow(systemConfig_);
     }
     UpdateAppHookWindowInfoWhenSwitchFreeMultiWindow(enable);
     WindowStyleType type = enable ?
