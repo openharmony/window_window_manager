@@ -4998,12 +4998,11 @@ bool SceneSession::IsBlockingFocusWindowType() const
     }
     bool blockingFocus = GetBlockingFocus();
     WindowType windowType = GetWindowType();
-    bool isBlockingWindowType =
-        (blockingFocus && (windowType == WindowType::WINDOW_TYPE_PANEL ||
+    bool isBlockingSystemWindowType =
+        blockingFocus && (windowType == WindowType::WINDOW_TYPE_PANEL ||
         windowType == WindowType::WINDOW_TYPE_GLOBAL_SEARCH ||
-        windowType == WindowType::WINDOW_TYPE_NEGATIVE_SCREEN)) ||
-        WindowHelper::IsMainWindow(windowType);
-    if (!isBlockingWindowType) {
+        windowType == WindowType::WINDOW_TYPE_NEGATIVE_SCREEN);
+    if (!isBlockingSystemWindowType && !WindowHelper::IsMainWindow(windowType)) {
         TLOGD(WmsLogTag::WMS_FOCUS, "not blocking focus window type");
         return false;
     }
@@ -5019,8 +5018,8 @@ bool SceneSession::IsBlockingFocusWindowType() const
         TLOGE(WmsLogTag::WMS_FOCUS, "get display info failed of display: %{public}" PRIu64, displayId);
         return false;
     }
-    if ((std::abs(GetSessionRect().height_ - displayInfo->GetHeight()) <= 1) &&
-        (std::abs(GetSessionRect().width_ - displayInfo->GetWidth()) <= 1)) {
+    if (std::abs(GetSessionRect().height_ - displayInfo->GetHeight()) <= 1 &&
+        std::abs(GetSessionRect().width_ - displayInfo->GetWidth()) <= 1) {
         TLOGD(WmsLogTag::WMS_FOCUS, "current session is full-screen, "
             "screen w: %{public}d, h: %{public}d, window w: %{public}d, h: %{public}d",
             displayInfo->GetWidth(), displayInfo->GetHeight(), GetSessionRect().width_, GetSessionRect().height_);
