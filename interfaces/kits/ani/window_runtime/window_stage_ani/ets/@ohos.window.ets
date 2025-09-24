@@ -1779,7 +1779,7 @@ export class WindowStageInternal implements WindowStage {
 
     public static transferStatic(input: Any): Object {
       if (!input) {
-        throw new BusinessError(401);
+        throw new BusinessError(401, new Error('TransferStatic invalid input!'));
       }
       hilog.info(DOMAIN, TAG, 'transfer static, input:' + input);
       let windowStage: ESValue = ESValue.wrap(input).getPropertySafe('windowStage_');
@@ -1792,13 +1792,13 @@ export class WindowStageInternal implements WindowStage {
 
     public static transferDynamic(input: Object): Any {
       if (!input) {
-        throw new BusinessError(401);
+        throw new BusinessError(401, new Error('TransferDynamic invalid input!'));
       }
       hilog.info(DOMAIN, TAG, 'transfer dynamic, input:' + input);
       if (input instanceof WindowStageInternal) {
         return WindowStageInternal.nativeTransferDynamic((input as WindowStageInternal).nativeObj).unwrap();
       } else {
-        throw new BusinessError(401);
+        throw new BusinessError(401, new Error('Invalid instance input!'));
       }
     }
 
