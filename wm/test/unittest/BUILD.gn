@@ -504,6 +504,26 @@ ohos_unittest("wm_window_scene_session_impl_test5") {
   ]
 }
 
+ohos_unittest("wm_window_scene_session_impl_test6") {
+  module_out_path = module_out_path
+  include_dirs = [ "${window_base_path}/test/common/utils/include/" ]
+ 
+  sources = [ "window_scene_session_impl_test6.cpp" ]
+ 
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/test/common/utils:libtestutil",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
+ 
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+    "ability_runtime:app_context",
+  ]
+}
+
 ohos_unittest("wm_window_manager_stub_proxy_test") {
   module_out_path = module_out_path
 

@@ -38,7 +38,6 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName);
 napi_value NapiGetUndefined(napi_env env);
 napi_valuetype GetType(napi_env env, napi_value value);
 bool NapiIsCallable(napi_env env, napi_value value);
-bool NapiIsCallable(napi_env env, napi_value value);
 napi_value NapiThrowError(napi_env env, WmErrorCode errCode);
 napi_value NapiThrowError(napi_env env, WmErrorCode errCode, const std::string& msg);
 class JsWindow final {
