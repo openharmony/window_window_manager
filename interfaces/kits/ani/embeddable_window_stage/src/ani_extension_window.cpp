@@ -47,7 +47,8 @@ AniExtensionWindow::AniExtensionWindow(
 {
 }
 
-ani_object AniExtensionWindow::CreateAniExtensionWindow(ani_env* env, sptr<Rosen::Window> window, int32_t hostWindowId)
+ani_object AniExtensionWindow::CreateAniExtensionWindow(ani_env* env, sptr<Rosen::Window> window, int32_t hostWindowId,
+    bool isHost)
 {
     if (env == nullptr || window == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "env or window is nullptr");
@@ -56,7 +57,8 @@ ani_object AniExtensionWindow::CreateAniExtensionWindow(ani_env* env, sptr<Rosen
 
     ani_status ret {};
     ani_class cls = nullptr;
-    if ((ret = env->FindClass(ETS_UIEXTENSION_HOST_CLASS_DESCRIPTOR, &cls)) != ANI_OK) {
+    const char* clsName = isHost ? ETS_UIEXTENSION_HOST_CLASS_DESCRIPTOR : ETS_UIEXTENSION_CLASS_DESCRIPTOR;
+    if ((ret = env->FindClass(clsName, &cls)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Find class failed, ret: %{public}u", ret);
         return cls;
     }
@@ -189,7 +191,7 @@ ani_object AniExtensionWindow::OnCreateSubWindowWithOptions(ani_env* env, ani_st
     return AniWindowUtils::CreateAniUndefined(env);
 }
 
-void AniExtensionWindow::OnOccupyEvents(ani_env* env, ani_long eventFlags)
+void AniExtensionWindow::OnOccupyEvents(ani_env* env, ani_int eventFlags)
 {
 
 }
@@ -367,7 +369,7 @@ static ani_object ExtWindowCreateSubWindowWithOptions(ani_env* env, ani_object o
     return aniExtWinPtr->OnCreateSubWindowWithOptions(env, name, subWindowOptions);
 }
 
-static void ExtWindowOccupyEvents(ani_env* env, ani_object obj, ani_long nativeObj, ani_long eventFlags)
+static void ExtWindowOccupyEvents(ani_env* env, ani_object obj, ani_long nativeObj, ani_int eventFlags)
 {
     AniExtensionWindow* aniExtWinPtr = reinterpret_cast<AniExtensionWindow*>(nativeObj);
     if (aniExtWinPtr == nullptr) {
@@ -403,7 +405,7 @@ std::array extensionWindowNativeMethods = {
     ani_native_function {"createSubWindowWithOptions",
         "lC{std.core.String}C{@ohos.window.window.SubWindowOptions}:C{@ohos.window.window.Window}:",
         reinterpret_cast<void *>(ExtWindowCreateSubWindowWithOptions)},
-    ani_native_function {"occupyEvents", "ll:", reinterpret_cast<void *>(ExtWindowOccupyEvents)},
+    ani_native_function {"occupyEvents", "li:", reinterpret_cast<void *>(ExtWindowOccupyEvents)},
     ani_native_function {"onSync", "lC{std.core.String}C{std.core.Object}:",
         reinterpret_cast<void *>(AniWindow::RegisterExtWindowCallback)},
     ani_native_function {"offSync", "lC{std.core.String}C{std.core.Object}:",
@@ -452,19 +454,6 @@ ANI_EXPORT ani_status ExtensionWindow_ANI_Constructor(ani_vm *vm, uint32_t *resu
     }
     *result = ANI_VERSION_1;
 
-    // ani_namespace ns;
-    // if ((ret = env->FindNamespace(ETS_UIEXTENSION_HOST_NAMESPACE_DESCRIPTOR, &ns)) != ANI_OK) {
-    //     TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Find namespace failed, ret: %{public}u", ret);
-    //     return ANI_NOT_FOUND;
-    // }
-    // std::array functions = {
-    //     ani_native_function {"createExtensionWindow", nullptr, reinterpret_cast<void *>(createExtensionWindow)},
-    // };
-    // if ((ret = env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size())) != ANI_OK) {
-    //     TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Namespace bind native functions failed, ret: %{public}u", ret);
-    //     return ANI_NOT_FOUND;
-    // }
-
     TLOGD(WmsLogTag::WMS_UIEXT, "[ANI]Init ExtensionWindow end");
     return ANI_OK;
 }
@@ -472,7 +461,7 @@ ANI_EXPORT ani_status ExtensionWindow_ANI_Constructor(ani_vm *vm, uint32_t *resu
 ANI_EXPORT ani_status ExtensionWindowHost_ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     using namespace OHOS::Rosen;
-    TLOGD(WmsLogTag::WMS_UIEXT, "[ANI]Init ExtensionWindow begin");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[ANI]Init ExtensionWindowHost begin");
     ani_status ret {};
     ani_env* env;
     if ((ret = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK) {
@@ -506,7 +495,7 @@ ANI_EXPORT ani_status ExtensionWindowHost_ANI_Constructor(ani_vm *vm, uint32_t *
         return ANI_NOT_FOUND;
     }
 
-    TLOGD(WmsLogTag::WMS_UIEXT, "[ANI]Init ExtensionWindow end");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[ANI]Init ExtensionWindowHost end");
     return ANI_OK;
 }
 }
