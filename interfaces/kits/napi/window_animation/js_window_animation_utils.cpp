@@ -14,6 +14,10 @@
  */
 
 #include "js_window_animation_utils.h"
+
+#include <accesstoken_kit.h>
+#include <ipc_skeleton.h>
+#include <tokenid_kit.h>
 #include "window_manager_hilog.h"
 namespace {
     #define NAPI_CALL_NO_THROW(theCall, retVal)      \
@@ -139,6 +143,12 @@ bool ParseJsValue(napi_value jsObject, napi_env env, const std::string& name, T&
 }
 namespace OHOS {
 namespace Rosen {
+bool IsSystemCalling()
+{
+    uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
+    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx);
+}
+
 napi_value ConvertTransitionAnimationToJsValue(napi_env env, std::shared_ptr<TransitionAnimation> transitionAnimation)
 {
     napi_value objValue = nullptr;
@@ -306,6 +316,11 @@ bool ConvertWindowCreateParamsFromJsValue(napi_env env, napi_value jsObject,
         if (!ConvertStartAnimationOptionsFromJsValue(env, jsAnimationParams, *(windowCreateParams.animationParams))) {
             windowCreateParams.animationParams = nullptr;
         }
+    }
+    if (!IsSystemCalling()) {
+        TLOGW(WmsLogTag::WMS_ANIMATION, "Not system calling")
+        windowCreateParams.animationSystemParams = nullptr;
+        return true;
     }
     bool hasAnimationSystemParams = false;
     napi_has_named_property(env, jsObject, "systemAnimationParams", &hasAnimationSystemParams);
