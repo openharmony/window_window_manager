@@ -152,7 +152,7 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyDensityFollowHost(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_VISIBILITY_CHANGE):
             return HandleNotifyWindowVisibilityChange(data, reply);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_VISIBILITY_STATE):
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_OCCLUSION_STATE):
             return HandleNotifyWindowOcclusionState(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TRANSFORM_CHANGE):
             return HandleNotifyTransformChange(data, reply);
