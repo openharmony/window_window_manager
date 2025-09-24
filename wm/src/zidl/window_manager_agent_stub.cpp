@@ -23,7 +23,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerAgentStub"};
-constexpr uint32_t MAX_VECTOR_SIZE = 100;
+constexpr uint32_t MAX_VECTOR_SIZE = 10000;
 }
 
 int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
@@ -279,7 +279,7 @@ bool WindowManagerAgentStub::ReadWindowInfoList(MessageParcel& data,
     size_t windowInfoListSize = static_cast<size_t>(windowInfoListLength);
 
     if (windowInfoListSize > MAX_VECTOR_SIZE) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowInfoListSize is too large");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowInfoListSize is too large, size: %{public}zu", windowInfoListSize);
         return false;
     }
 
