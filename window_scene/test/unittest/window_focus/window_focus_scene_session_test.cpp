@@ -179,8 +179,8 @@ HWTEST_F(WindowFocusSceneSessionTest, IsBlockingFocusWindowType_RectCheck, TestS
 
     sceneSession->blockingFocus_ = true;
     sceneSession->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    constexpr DisplayId DISPLAY_ID = DEFAULT_DISPLAY_ID;
-    sceneSession->GetSessionProperty()->SetDisplayId(DISPLAY_ID);
+    constexpr DisplayId displayId = DEFAULT_DISPLAY_ID;
+    sceneSession->GetSessionProperty()->SetDisplayId(displayId);
 
     const WSRect rect = {0, 0, 0, 0};
     sceneSession->SetSessionRect(rect);
@@ -188,7 +188,7 @@ HWTEST_F(WindowFocusSceneSessionTest, IsBlockingFocusWindowType_RectCheck, TestS
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     EXPECT_EQ(false, sceneSession->IsBlockingFocusWindowType());
 
-    auto display = DisplayManager::GetInstance().GetDisplayById(DISPLAY_ID);
+    auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
     ASSERT_NE(nullptr, display);
     auto displayInfo = display->GetDisplayInfo();
     ASSERT_NE(nullptr, displayInfo);
