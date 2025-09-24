@@ -487,7 +487,8 @@ void AniWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
 
 void AniWindowListener::OnOcclusionStateChanged(const WindowVisibilityState state)
 {
-    auto task = [self = weakRef_, state, env = env_] () {
+    const char* const where = __func__;
+    auto task = [self = weakRef_, state, where, env = env_] () {
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] %{public}s: listener or env is null", where);

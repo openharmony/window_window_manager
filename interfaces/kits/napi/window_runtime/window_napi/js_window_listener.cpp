@@ -729,7 +729,8 @@ void JsWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
 
 void JsWindowListener::OnOcclusionStateChanged(const WindowVisibilityState state)
 {
-    auto jsCallback = [self = weakRef_, state, env = env_] {
+    const char* const where = __func__;
+    auto jsCallback = [self = weakRef_, state, where, env = env_] {
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: listener or env is null", where);
