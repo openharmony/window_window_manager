@@ -1157,6 +1157,50 @@ export interface WindowProperties {
     name?: string;
 }
 
+export class WindowPropertiesInternal implements WindowProperties {
+    windowRect: Rect;
+    drawableRect: Rect;
+    isFullScreen: boolean;
+    isLayoutFullScreen: boolean;
+    focusable: boolean;
+    touchable: boolean;
+    brightness: double;
+    dimBehindValue: number;
+    isKeepScreenOn: boolean;
+    isPrivacyMode: boolean;
+    isRoundCorner: boolean;
+    isTransparent: boolean;
+    type: WindowType;
+    id: int;
+    displayId?: long;
+    name?: string;
+
+    constructor(windowRect: Rect, drawableRect: Rect, isFullScreen: boolean, isLayoutFullScreen: boolean,
+      focusable: boolean, touchable: boolean, brightness: double, dimBehindValue: number, isKeepScreenOn: boolean,
+      isPrivacyMode: boolean, isRoundCorner: boolean, isTransparent: boolean, typeInternal: int, id: int,
+      displayId: long, name: string)
+    {
+      this.windowRect = windowRect;
+      this.drawableRect = drawableRect;
+      this.isFullScreen = isFullScreen;
+      this.isLayoutFullScreen = isLayoutFullScreen;
+      this.focusable = focusable;
+      this.touchable = touchable;
+      this.brightness = brightness;
+      this.dimBehindValue = dimBehindValue;
+      this.isKeepScreenOn = isKeepScreenOn;
+      this.isPrivacyMode = isPrivacyMode;
+      this.isRoundCorner = isRoundCorner;
+      this.isTransparent = isTransparent;
+      this.type = typeInternal as WindowType;
+      this.id = id;
+      this.displayId = displayId;
+      this.name = name;
+    }
+
+    constructor() {}
+}
+
 /**
   * Describes the scale options of window
   *
@@ -1205,50 +1249,6 @@ export interface ScaleOptions {
     * @since 9
     */
   pivotY?: double;
-}
-
-export class WindowPropertiesInternal implements WindowProperties {
-    windowRect: Rect;
-    drawableRect: Rect;
-    isFullScreen: boolean;
-    isLayoutFullScreen: boolean;
-    focusable: boolean;
-    touchable: boolean;
-    brightness: double;
-    dimBehindValue: number;
-    isKeepScreenOn: boolean;
-    isPrivacyMode: boolean;
-    isRoundCorner: boolean;
-    isTransparent: boolean;
-    type: WindowType;
-    id: int;
-    displayId?: long;
-    name?: string;
-
-    constructor(windowRect: Rect, drawableRect: Rect, isFullScreen: boolean, isLayoutFullScreen: boolean,
-      focusable: boolean, touchable: boolean, brightness: double, dimBehindValue: number, isKeepScreenOn: boolean,
-      isPrivacyMode: boolean, isRoundCorner: boolean, isTransparent: boolean, typeInternal: int, id: int,
-      displayId: long, name: string)
-    {
-      this.windowRect = windowRect;
-      this.drawableRect = drawableRect;
-      this.isFullScreen = isFullScreen;
-      this.isLayoutFullScreen = isLayoutFullScreen;
-      this.focusable = focusable;
-      this.touchable = touchable;
-      this.brightness = brightness;
-      this.dimBehindValue = dimBehindValue;
-      this.isKeepScreenOn = isKeepScreenOn;
-      this.isPrivacyMode = isPrivacyMode;
-      this.isRoundCorner = isRoundCorner;
-      this.isTransparent = isTransparent;
-      this.type = typeInternal as WindowType;
-      this.id = id;
-      this.displayId = displayId;
-      this.name = name;
-    }
-
-    constructor() {}
 }
 
 export class ScaleOptionsInternal implements ScaleOptions {
