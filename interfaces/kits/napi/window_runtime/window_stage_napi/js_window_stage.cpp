@@ -18,6 +18,7 @@
 #include "js_window.h"
 #include "window_manager_hilog.h"
 #include "permission.h"
+#include "pixel_map_napi.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -216,6 +217,13 @@ napi_value JsWindowStage::SetImageForRecent(napi_env env, napi_callback_info inf
     TLOGD(WmsLogTag::WMS_PATTERN, "[NAPI]");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
     return (me != nullptr) ? me->OnSetImageForRecent(env, info) : nullptr;
+}
+
+napi_value JsWindowStage::RemoveImageForRecent(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_PATTERN, "[NAPI]");
+    JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
+    return (me != nullptr) ? me->OnRemoveImageForRecent(env, info) : nullptr;
 }
 
 napi_value JsWindowStage::OnSetUIContent(napi_env env, napi_callback_info info)
@@ -1080,13 +1088,25 @@ napi_value JsWindowStage::OnSetImageForRecent(napi_env env, napi_callback_info i
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     uint32_t imgResourceId = 0;
-    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], imgResourceId)) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "Get imgResourceId error");
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    if (GetType(env, argv[INDEX_ZERO]) == napi_number) {
+        if (!ConvertFromJsValue(env, argv[INDEX_ZERO], imgResourceId)) {
+            TLOGE(WmsLogTag::WMS_PATTERN, "Get imgResourceId error");
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        }
+        if (imgResourceId < MIN_RESOURCE_ID || imgResourceId > MAX_RESOURCE_ID) {
+            TLOGE(WmsLogTag::WMS_PATTERN, "imgRsourceId invalid: %{public}d", imgResourceId);
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+        }
+    } else if (GetType(env, argv[INDEX_ZERO]) == napi_object) {
+        pixelMap = OHOS::Media::PixelMapNapi::GetPixelMap(env, argv[INDEX_ZERO]);
+        if (pixelMap = nullptr) {
+            TLOGE(WmsLogTag::WMS_PATTERN, "Get pixelMap error");
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        }
+    } else {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Get imgResourceId or pixelMap error");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-    }
-    if (imgResourceId < MIN_RESOURCE_ID || imgResourceId > MAX_RESOURCE_ID) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "imgRsourceId invalid: %{public}d", imgResourceId);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
     }
     ImageFit imageFit = ImageFit::FILL;
     if (!ConvertFromJsValue(env, argv[INDEX_ONE], imageFit)) {
@@ -1102,7 +1122,7 @@ napi_value JsWindowStage::OnSetImageForRecent(napi_env env, napi_callback_info i
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto window = windowScene->GetMainWindow();
     const char* const where = __func__;
-    auto asyncTask = [weakWindow = wptr(window), where, env, imgResourceId, imageFit, task = napiAsyncTask] {
+    auto asyncTask = [weakWindow = wptr(window), where, env, imgResourceId, pixelMap, imageFit, task = napiAsyncTask] {
         auto window = weakWindow.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s window is nullptr", where);
@@ -1110,14 +1130,54 @@ napi_value JsWindowStage::OnSetImageForRecent(napi_env env, napi_callback_info i
             task->Reject(env, JsErrUtils::CreateJsError(env, wmErroeCode, "window is nullptr."));
             return;
         }
-        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetImageForRecent(imgResourceId, imageFit));
+        WmErrorCode ret = WmErrorCode::WM_OK;
+        if (pixelMap) {
+            ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetImageForRecentPixelMap(pixelMap, imageFit));
+        } else {
+            ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetImageForRecent(imgResourceId, imageFit));
+        }
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "set image for recemt failed."));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "set image for recent failed."));
         }
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetImageForRecent") != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env,
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
+    return result;
+}
+
+napi_value JsWindowStage::OnRemoveImageForRecent(napi_env env, napi_callback_info info)
+{
+    auto windowScene = windowScene_.lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "WindowScene is null");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+        return NapiGetUndefined(env);
+    }
+
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto window = windowScene->GetMainWindow();
+    const char* const where = __func__;
+    auto asyncTask = [weakWindow = wptr(window), where, env, task = napiAsyncTask] {
+        auto window = weakWindow.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s window is nullptr", where);
+            WmErrorCode wmErroeCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
+            task->Reject(env, JsErrUtils::CreateJsError(env, wmErroeCode, "window is nullptr."));
+            return;
+        }
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RemoveImageForRecent());
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "remove image for recent failed."));
+        }
+    };
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnRemoveImageForRecent") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -1214,6 +1274,8 @@ napi_value CreateJsWindowStage(napi_env env, std::shared_ptr<Rosen::WindowScene>
         objValue, "setSupportedWindowModes", moduleName, JsWindowStage::SetSupportedWindowModes);
     BindNativeFunction(env,
         objValue, "setImageForRecent", moduleName, JsWindowStage::SetImageForRecent);
+    BindNativeFunction(env,
+        objValue, "removeImageForRecent", moduleName, JsWindowStage::RemoveImageForRecent);
     return objValue;
 }
 }  // namespace Rosen

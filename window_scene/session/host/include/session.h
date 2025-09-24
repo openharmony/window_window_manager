@@ -746,6 +746,7 @@ public:
     void SetBorderUnoccupied(bool borderUnoccupied = false);
     bool GetBorderUnoccupied() const;
     bool IsPersistentImageFit() const;
+    void DeletePersistentImageFit();
     bool SupportSnapshotAllSessionStatus() const;
     void InitSnapshotCapacity();
     SnapshotStatus GetSessionSnapshotStatus(BackgroundReason reason = BackgroundReason::DEFAULT) const;
@@ -1157,7 +1158,6 @@ private:
      * Window Pattern
      */
     bool borderUnoccupied_ = false;
-    void DeletePersistentImageFit();
     uint32_t GetBackgroundColor() const;
 
     /*

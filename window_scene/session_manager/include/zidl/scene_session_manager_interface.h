@@ -149,6 +149,8 @@ public:
         TRANS_ID_SET_FOREGROUND_WINDOW_NUM,
         TRANS_ID_USE_IMPLICIT_ANIMATION,
         TRANS_ID_SET_IMAGE_FOR_RECENT,
+        TRANS_ID_SET_IMAGE_FOR_RECENT_PIXELMAP,
+        TRANS_ID_REMOVE_IMAGE_FOR_RECENT,
         TRANS_ID_REGISTER_WINDOW_PROPERTY_CHANGE_AGENT,
         TRANS_ID_UNREGISTER_WINDOW_PROPERTY_CHANGE_AGENT,
         TRANS_ID_GET_HOST_GLOBAL_SCALE_RECT,
@@ -423,6 +425,9 @@ public:
 
     WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit,
         int32_t persistentId) override { return WMError::WM_OK; }
+    WMError SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, ImageFit imageFit,
+        int32_t persistentId) override { return WMError::WM_OK; }
+    WMError RemoveImageForRecent(int32_t persistentId) override { return WMError::WM_OK; }
         
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override { return WMError::WM_OK; }

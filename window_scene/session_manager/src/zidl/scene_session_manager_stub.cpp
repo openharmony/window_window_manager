@@ -256,6 +256,10 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleUseImplicitAnimation(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_IMAGE_FOR_RECENT):
             return HandleSetImageForRecent(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_IMAGE_FOR_RECENT_PIXELMAP):
+            return HandleSetImageForRecentPixelMap(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REMOVE_IMAGE_FOR_RECENT):
+            return HandleRemoveImageForRecent(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ANIMATE_TO_WINDOW):
             return HandleAnimateTo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_CREATE_UI_EFFECT_CONTROLLER):
@@ -2139,6 +2143,46 @@ int SceneSessionManagerStub::HandleSetImageForRecent(MessageParcel& data, Messag
         return ERR_INVALID_DATA;
     }
     WMError errCode = SetImageForRecent(imgResourceId, static_cast<ImageFit>(imageFit), persistentId);
+    if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSetImageForRecentPixelMap(MessageParcel& data, MessageParcel& reply)
+{
+    std::shared_ptr<Media::PixelMap> pixelMap(data.ReadParcelable<Media::PixelMap>());
+    if (!pixelMap) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Read pixelMap failed.");
+        return ERR_INVALID_DATA;
+    }
+    uint32_t imageFit = 0;
+    if (!data.ReadUint32(imageFit)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Read imageFit failed.");
+        return ERR_INVALID_DATA;
+    }
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Read persistentId failed.");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = SetImageForRecentPixelMap(pixelMap, static_cast<ImageFit>(imageFit), persistentId);
+    if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleRemoveImageForRecent(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Read persistentId failed.");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = RemoveImageForRecent(persistentId);
     if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Write errCode failed.");
         return ERR_INVALID_DATA;

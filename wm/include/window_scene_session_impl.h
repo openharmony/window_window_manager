@@ -310,6 +310,9 @@ public:
      * Window Pattern
      */
     WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit) override;
+    WMError SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, ImageFit imageFit) override;
+    WMError RemoveImageForRecent() override;
+
     /**
      * Window Transition Animation For PC
      */
