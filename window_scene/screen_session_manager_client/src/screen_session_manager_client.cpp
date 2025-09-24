@@ -164,6 +164,14 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(SessionOption option,
                 option.screenId_, static_cast<int>(screenEvent), option.rsId_);
         }
     }
+    auto task = [this, option, screenEvent] {
+        HandleScreenDisconnectEvent(option, screenEvent);
+    };
+    ffrtQueueHelper_->SubmitTaskToHead(std::move(task));
+}
+
+void ScreenSessionManagerClient::HandleScreenDisconnectEvent(SessionOption option, ScreenEvent screenEvent)
+{
     if (screenEvent == ScreenEvent::DISCONNECTED) {
         if (HandleScreenDisconnection(option)) {
             connectedScreenSet_.erase(option.screenId_);
@@ -1402,17 +1410,12 @@ std::string ScreenSessionManagerClient::OnDumperClientScreenSessions()
 
 void ScreenSessionManagerClient::SetDefaultMultiScreenModeWhenSwitchUser()
 {
-    wptr<IScreenSessionManager> screenSessionManagerWptr = screenSessionManager_;
-    auto task = [screenSessionManagerWptr] {
-        auto screenSessionManager = screenSessionManagerWptr.promote();
-        if (!screenSessionManager) {
-            TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
-            return;
-        }
-        screenSessionManager->SetDefaultMultiScreenModeWhenSwitchUser();
+    if (!screenSessionManager_) {
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return;
-    };
-    ffrtQueueHelper_->SubmitTask(std::move(task));
+    }
+    screenSessionManager_->SetDefaultMultiScreenModeWhenSwitchUser();
+    return;
 }
 
 void ScreenSessionManagerClient::NotifyExtendScreenCreateFinish()
