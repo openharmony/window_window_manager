@@ -378,13 +378,19 @@ void MainSession::NotifySubAndDialogFollowRectChange(const WSRect& rect, bool is
         funcMap = notifySurfaceBoundsChangeFuncMap_;
     }
     WSRect newRect;
+    bool isCompatMode = IsInCompatScaleMode();
     for (const auto& [sessionId, func] : funcMap) {
         auto subSession = GetSceneSessionById(sessionId);
         if (subSession && subSession->GetIsFollowParentLayout() && func) {
+            if (!isCompatMode) {
+                func(rect, isGlobal, needFlush);
+            }
             if (newRect.IsEmpty()) {
                 HookStartMoveRect(newRect, rect);
             }
-            func(newRect, isGlobal, needFlush);
+            if (GetCallingPid() != subSession->GetCallingPid()) {
+                func(newRect, isGlobal, needFlush);
+            }
         }
     }
 }

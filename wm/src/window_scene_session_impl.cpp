@@ -6014,6 +6014,11 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
         return WMError::WM_OK;
     }
 
+    if (property_->IsAdaptToSimulationScale()) {
+        TLOGI(WmsLogTag::WMS_COMPAT, "compat mode not use default density");
+        return WMError::WM_OK;
+    }
+
     if (auto hostSession = GetHostSession()) {
         hostSession->OnDefaultDensityEnabled(enabled);
     }
@@ -6890,6 +6895,7 @@ WMError WindowSceneSessionImpl::SetFollowParentWindowLayoutEnabled(bool isFollow
         return WMError::WM_ERROR_INVALID_SESSION;
     }
     WSError ret = GetHostSession()->SetFollowParentWindowLayoutEnabled(isFollow);
+    TLOGI(WmsLogTag::WMS_SUB, "id:%{public}d, isFollow:%{public}d", GetPersistentId(), isFollow);
     if (ret == WSError::WS_ERROR_DEVICE_NOT_SUPPORT) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "windowId: %{public}u, device not support", GetWindowId());
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
