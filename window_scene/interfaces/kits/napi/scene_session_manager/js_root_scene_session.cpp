@@ -444,7 +444,7 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
 
     sceneSession->SetSessionInfo(info);
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
-    SceneSessionManager::GetInstance().AddRequestTaskInfo(info);
+    SceneSessionManager::GetInstance().AddRequestTaskInfo(sceneSession, info.requestId);
     auto task = [this, sessionInfo]() {
         PendingSessionActivationInner(sessionInfo);
     };
