@@ -18,6 +18,7 @@ import { UIContext } from '@ohos.arkui.UIContext';
 import BaseContext from 'application.BaseContext';
 import { ColorMetrics } from '@ohos.arkui.node';
 import image from '@ohos.multimedia.image';
+import hilog from '@ohos.hilog';
 
 export type AsyncCallbackVoid = (err: BusinessError) => void;
 export type WindowEventCallback = (data: window.WindowEventType) => void;
@@ -26,6 +27,9 @@ export type WindowStatusCallback = (data: window.WindowStatusType) => void;
 export type WindowVoidCallback = () => void;
 export type KeyboardHeightChangeCallback = (data: int) => void;
 export type KeyboardDidShowOrHideCallback = (data: window.KeyboardInfo) => void;
+const DOMAIN = 0x4200;
+const TAG = '[ANI]';
+const WM_ERROR_INVALID_PARAM = 401;
 
 namespace window {
   export interface Size {
@@ -1684,6 +1688,8 @@ export class WindowStageInternal implements WindowStage {
         this.nativeObj = nativeObj;
     }
 
+    private static native nativeTransferStatic(input: ESValue): Object;
+    private static native nativeTransferDynamic(nativeObj: long): ESValue;
     public native loadContentSync(nativeObj: long, path: string, storage?: LocalStorage): void;
     public native disableWindowDecorSync(nativeObj:long): void;
     public native setShowOnLockScreenSync(nativeObj:long, showOnLockScreen: boolean): void;
@@ -1787,6 +1793,32 @@ export class WindowStageInternal implements WindowStage {
     public off(eventType: 'windowStageEvent', callback?: Callback<WindowStageEventType>): void {
       this.offSync(this.nativeObj, eventType, callback);
     }
+
+    public static transferStatic(input: Any): Object {
+      if (!input) {
+        throw new BusinessError(WM_ERROR_INVALID_PARAM, new Error('TransferStatic invalid input!'));
+      }
+      hilog.info(DOMAIN, TAG, 'transfer static, input:' + input);
+      let windowStage: ESValue = ESValue.wrap(input).getPropertySafe('windowStage_');
+      if (windowStage !== ESValue.Undefined) {
+        return WindowStageInternal.nativeTransferStatic(windowStage);
+      } else {
+        return WindowStageInternal.nativeTransferStatic(ESValue.wrap(input));
+      }
+    }
+
+    public static transferDynamic(input: Object): Any {
+      if (!input) {
+        throw new BusinessError(WM_ERROR_INVALID_PARAM, new Error('TransferDynamic invalid input!'));
+      }
+      hilog.info(DOMAIN, TAG, 'transfer dynamic, input:' + input);
+      if (input instanceof WindowStageInternal) {
+        return WindowStageInternal.nativeTransferDynamic((input as WindowStageInternal).nativeObj).unwrap();
+      } else {
+        throw new BusinessError(WM_ERROR_INVALID_PARAM, new Error('Invalid instance input!'));
+      }
+    }
+
 }
 
 export interface WindowStage {
@@ -3078,6 +3110,12 @@ function runWindowNoInteractionCallback(cb: object): void {
   const func = cb as () => void;
   func();
 }
+
+function runWindowStageEventCallback(cb: object, cbArg: int): void {
+    const func = cb as (cbArg: WindowStageEventType) => void;
+    func(cbArg as WindowStageEventType);
+}
+
 }
 
 export default window;
