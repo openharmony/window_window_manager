@@ -380,8 +380,12 @@ DMError DisplayManagerAni::UnRegisterDisplayListenerWithType(std::string type, a
                 ret = SingletonContainer::Get<DisplayManager>().UnregisterPrivateWindowListener(thisListener);
                 TLOGI(WmsLogTag::DMS, "[ANI] UnRegisterDisplayListener privateWindowListener success");
             }
-            jsCbMap_[type].erase(it++);
+            jsCbMap_[type].erase(it);
+            break;
         }
+    }
+    if (jsCbMap_[type].empty()) {
+        jsCbMap_.erase(type);
     }
     return ret;
 }
