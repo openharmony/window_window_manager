@@ -18,6 +18,7 @@ group("fuzztest") {
     "fb_fuzzer:fuzztest",
     "pip_fuzzer:fuzztest",
     "window_fuzzer:fuzztest",
+    "window01_fuzzer:fuzztest",
     "windowagent_fuzzer:fuzztest",
     "windowipc_fuzzer:fuzztest",
     "windowmanager_fuzzer:fuzztest",
