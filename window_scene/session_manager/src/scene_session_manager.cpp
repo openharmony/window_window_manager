@@ -7776,11 +7776,16 @@ bool SceneSessionManager::CheckClickFocusIsDownThroughFullScreen(const sptr<Scen
     if (reason != FocusChangeReason::CLICK) {
         return false;
     }
-    if (focusedSession->IsBlockingFocusFullScreenSystemPanel()) {
-        return sceneSession->GetZOrder() < focusedSession->GetZOrder();
+    if (focusedSession == nullptr || sceneSession == nullptr) {
+        TLOGW(WmsLogTag::WMS_FOCUS, "session is null");
+        return false;
     }
-    if (focusedSession->IsAppMainWindowFullScreen()) {
-        return sceneSession->GetZOrder() < focusedSession->GetMainSession()->GetZOrder();
+    if (focusedSession->GetDisplayId() != sceneSession->GetDisplayId()) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "click on the different screen");
+        return false;
+    }
+    if (focusedSession->IsBlockingFocusWindowType()) {
+        return sceneSession->GetZOrder() < focusedSession->GetZOrder();
     }
     return false;
 }
