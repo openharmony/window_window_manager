@@ -1537,11 +1537,7 @@ bool AniWindowUtils::ParseWindowMaskInnerValue(ani_env* env, ani_array innerArra
             TLOGE(WmsLogTag::WMS_PC, "[ANI]Get maskValue failed, ret: %{public}u", aniRet);
             return false;
         }
-        if (maskValue >= 0) {
-            elementArray.emplace_back(static_cast<uint32_t>(maskValue));
-        } else {
-            return false;
-        }
+        elementArray.emplace_back(static_cast<uint32_t>(maskValue));
     }
     return true;
 }
