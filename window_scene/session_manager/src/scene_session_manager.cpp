@@ -157,8 +157,6 @@ constexpr uint64_t NOTIFY_START_ABILITY_TIMEOUT = 4000;
 constexpr uint64_t START_UI_ABILITY_TIMEOUT = 5000;
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 constexpr int32_t NAV_FORCE_SPLIT_MODE = 6;
-constexpr int32_t DEFAULT_HEIGHT = 200;
-constexpr int32_t DEFAULT_WIDTH = 200;
 const std::string FB_PANEL_NAME = "Fb_panel";
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
@@ -15505,6 +15503,12 @@ WMError SceneSessionManager::GetMainWindowSnapshot(const std::vector<int32_t>& w
         std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps;
         WMError errCode = WMError::WM_OK;
         for (const auto windowId : windowIds) {
+            auto sceneSession = GetSceneSession(windowId);
+            if (sceneSession && !WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+                TLOGNW(WmsLogTag::WMS_LIFE, "window: %{public}d is not mainWindow.", windowId);
+                pixelMaps.emplace_back(nullptr);
+                continue;
+            }
             auto pixelMap = SceneSessionManager::GetSessionSnapshotPixelMap(
                 windowId, 1.0f, SnapshotNodeType::LEASH_NODE, !config.useCache);
             if (config.useCache && !pixelMap) {
@@ -15512,12 +15516,7 @@ WMError SceneSessionManager::GetMainWindowSnapshot(const std::vector<int32_t>& w
                     windowId, 1.0f, SnapshotNodeType::LEASH_NODE, true);
             }
             if (!pixelMap) {
-                TLOGNW(WmsLogTag::WMS_LIFE, "Get snapshot failed, create new snapshot");
-                SceneSessionManager::CreateDefaultPixelMap(pixelMap);
-            }
-            if (!pixelMap) {
-                TLOGNW(WmsLogTag::WMS_LIFE, "get snapshot failed id:%{public}d.", windowId);
-                continue;
+                TLOGNW(WmsLogTag::WMS_LIFE, "Get snapshot failed");
             }
             pixelMaps.emplace_back(pixelMap);
         }
@@ -15557,28 +15556,14 @@ WMError SceneSessionManager::CheckWindowIds(
         TLOGE(WmsLogTag::WMS_LIFE, "Input param invalid, duplicate windowId exist.");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    for (const auto windowId : windowIds) {
-        auto sceneSession = GetSceneSession(windowId);
-        if (sceneSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "Session id:%{public}d is not found.", windowId);
-            return WMError::WM_ERROR_INVALID_PARAM;
-        }
-        if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
-            TLOGE(WmsLogTag::WMS_LIFE, "Session id:%{public}d is not mainWindow.", windowId);
-            return WMError::WM_ERROR_INVALID_PARAM;
-        }
+    bool sessionIdsIsInvalid = std::any_of(windowIds.begin(), windowIds.end(), [](int windowId) {
+        return windowId <= INVALID_SESSION_ID;
+    });
+    if (sessionIdsIsInvalid) {
+        TLOGE(WmsLogTag::WMS_LIFE, "invalid windowId.");
+        return WMError::WM_ERROR_INVALID_PARAM;
     }
     return WMError::WM_OK;
-}
-
-void SceneSessionManager::CreateDefaultPixelMap(std::shared_ptr<Media::PixelMap>& pixelMap)
-{
-    Media::InitializationOptions opts;
-    opts.size.width = DEFAULT_WIDTH;
-    opts.size.height = DEFAULT_HEIGHT;
-    opts.pixelFormat = Media::PixelFormat::NV21;
-    opts.useDMA = true;
-    pixelMap = Media::PixelMap::Create(opts);
 }
 
 WMError SceneSessionManager::ClearMainSessions(const std::vector<int32_t>& persistentIds,
