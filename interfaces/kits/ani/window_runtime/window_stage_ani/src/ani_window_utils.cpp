@@ -1042,7 +1042,7 @@ bool AniWindowUtils::SetWindowNavigationBarContentColor(ani_env* env,
     auto navProperty = properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR];
     ani_ref aniNaviGationBarColor;
     env->Object_GetPropertyByName_Ref(aniObject, "navigationBarContentColor", &aniNaviGationBarColor);
-    ani_boolean aniNavigationIcon;
+    ani_ref aniNavigationIcon;
     env->Object_GetPropertyByName_Ref(aniObject, "isNavigationBarLightIcon", &aniNavigationIcon);
 
     ani_boolean isColorUndefined;
