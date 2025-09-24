@@ -122,11 +122,11 @@ HWTEST_F(SessionManagerUTTest, OnWMSConnectionChangedCallback, TestSize.Level1)
     LOG_SetCallback(MyLogCallback);
     ASSERT_NE(nullptr, sm_);
     sm_->wmsConnectionChangedFunc_ = nullptr;
-    sm_->OnWMSConnectionChangedCallback(101, DEFAULT_SCREEN_ID, true, false);
+    sm_->OnWMSConnectionChangedCallback(101, DEFAULT_SCREEN_ID, true);
     EXPECT_FALSE(g_logMsg.find("WMS CallbackFunc is null.") != std::string::npos);
 
     sm_->wmsConnectionChangedFunc_ = [&](int32_t userId, int32_t screenId, bool isConnected) {};
-    sm_->OnWMSConnectionChangedCallback(101, DEFAULT_SCREEN_ID, true, true);
+    sm_->OnWMSConnectionChangedCallback(101, DEFAULT_SCREEN_ID, true);
     EXPECT_TRUE(g_logMsg.find("WMS connection changed") != std::string::npos);
     LOG_SetCallback(nullptr);
 }
