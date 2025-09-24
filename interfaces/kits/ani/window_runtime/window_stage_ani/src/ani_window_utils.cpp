@@ -16,6 +16,7 @@
 #include "ani_window_utils.h"
 
 #include <iomanip>
+#include <mutex>
 #include <regex>
 #include <sstream>
 
@@ -31,6 +32,10 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
+
+std::mutex g_aniCreatorsMutex;
+std::unordered_map<std::string, std::pair<ani_class, std::unordered_map<std::string, ani_method>>> globalAniCreators;
+
 std::string GetHexColor(uint32_t color)
 {
     std::stringstream ioss;
@@ -293,23 +298,6 @@ ani_status AniWindowUtils::GetIntVector(ani_env* env, ani_object ary, std::vecto
         result.push_back(static_cast<int32_t>(native_buffer[idx]));
     }
     return ANI_OK;
-}
-
-ani_status AniWindowUtils::NewAniObjectNoParams(ani_env* env, const char* cls, ani_object* object)
-{
-    ani_class aniClass;
-    ani_status ret = env->FindClass(cls, &aniClass);
-    if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] Find class failed");
-        return ret;
-    }
-    ani_method aniCtor;
-    ret = env->Class_FindMethod(aniClass, "<ctor>", nullptr, &aniCtor);
-    if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] Find class constructor failed");
-        return ret;
-    }
-    return env->Object_New(aniClass, aniCtor, object);
 }
 
 ani_status AniWindowUtils::NewAniObject(ani_env* env, const char* cls, const char* signature, ani_object* result, ...)
@@ -762,192 +750,112 @@ ani_status AniWindowUtils::GetAniString(ani_env* env, const std::string& str, an
     return env->String_NewUTF8(str.c_str(), static_cast<ani_size>(str.size()), result);
 }
 
-void AniWindowUtils::SetSystemPropertiesWindowRect(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
+ani_object AniWindowUtils::CreateAniRectObject(ani_env* env, const Rect& rect)
 {
-    Rect rect = window->GetRect();
-    ani_object aniWindowRect = CreateAniRect(env, rect);
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>windowRect", nullptr, aniWindowRect);
+    return InitAniObjectByCreator(env, "L@ohos/window/window/RectInternal;", "iiii:",
+        ani_int(rect.posX_), ani_int(rect.posY_),
+        ani_int(rect.width_), ani_int(rect.height_));
 }
 
-void AniWindowUtils::SetSystemPropertiesDrawableRect(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
+ani_object AniWindowUtils::CreateWindowsProperties(ani_env* env, const WindowPropertyInfo& windowPropertyInfo)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    Ace::UIContent* uiContent = window->GetUIContent();
-    Rect drawableRect = g_emptyRect;
-    if (uiContent == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] uicontent is nullptr");
+    ani_object aniRect = CreateAniRectObject(env, windowPropertyInfo.windowRect);
+    ani_object aniDrawableRect = CreateAniRectObject(env, windowPropertyInfo.drawableRect);
+    int windowType;
+    if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(windowPropertyInfo.type) != 0) {
+        windowType = static_cast<int>(NATIVE_JS_TO_WINDOW_TYPE_MAP.at(windowPropertyInfo.type));
     } else {
-        uiContent->GetWindowPaintSize(drawableRect);
+        windowType = static_cast<int>(windowPropertyInfo.type);
     }
+    ani_string aniWindowName;
+    GetAniString(env, windowPropertyInfo.name, &aniWindowName);
+    ani_object aniWindowsProperties = InitAniObjectByCreator(env, "L@ohos/window/window/WindowPropertiesInternal;",
+        "L@ohos/window/window/Rect;L@ohos/window/window/Rect;ZZZZDDZZZZIIJLstd/core/String;:V",
+        aniRect, aniDrawableRect, ani_boolean(windowPropertyInfo.isFullScreen),
+        ani_boolean(windowPropertyInfo.isLayoutFullScreen), ani_boolean(windowPropertyInfo.isFocusable),
+        ani_boolean(windowPropertyInfo.isTouchable), ani_float(windowPropertyInfo.brightness), ani_float(0),
+        ani_boolean(windowPropertyInfo.isKeepScreenOn), ani_boolean(windowPropertyInfo.isPrivacyMode),
+        ani_boolean(false),  ani_boolean(windowPropertyInfo.isTransparent), ani_int(windowType),
+        ani_int(windowPropertyInfo.id), ani_long(windowPropertyInfo.displayId), aniWindowName);
+    return aniWindowsProperties;
+}
 
-    ani_object aniDrawableRect = CreateAniRect(env, drawableRect);
-    if (aniDrawableRect == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] GetDrawableRect failed!");
-        return;
+ani_status AniWindowUtils::InitAniCreator(ani_env* env,
+    const std::string& aniClassDescriptor, const std::string& aniCtorSignature)
+{
+    ani_status status = ANI_OK;
+    auto aniClassIter = globalAniCreators.find(aniClassDescriptor);
+    if (aniClassIter != globalAniCreators.end()) {
+        auto& aniCtorSignatureMap = aniClassIter->second.second;
+        if (aniCtorSignatureMap.find(aniCtorSignature) != aniCtorSignatureMap.end()) {
+            TLOGD(WmsLogTag::DEFAULT, "class %{public}s and its ctor already exist", aniClassDescriptor.c_str());
+            return status;
+        }
     }
-
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>drawableRect", nullptr, aniDrawableRect);
-}
-
-void AniWindowUtils::SetSystemPropertiesWindowType(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    WindowType aniWindowType = window->GetType();
-    env->Object_SetFieldByName_Int(systemProperties, "typeInternal", ani_int(aniWindowType));
-}
-
-void AniWindowUtils::SetSystemPropertiesWindowIsLayoutFullScreen(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    bool isLayotFullScreen = window->IsLayoutFullScreen();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>isLayoutFullScreen", nullptr,
-        static_cast<ani_boolean>(isLayotFullScreen));
-}
-
-
-void AniWindowUtils::SetSystemPropertiesWindowIsFullScreen(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    bool isFullScreen = window->IsFullScreen();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>isFullScreen", nullptr,
-        static_cast<ani_boolean>(isFullScreen));
-}
-
-void AniWindowUtils::SetSystemPropertiesWindowTouchable(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    bool windowTouchable = window->GetTouchable();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>touchable", nullptr,
-        static_cast<ani_boolean>(windowTouchable));
-}
-
-void AniWindowUtils::SetSystemPropertiesWindowFousable(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    bool windowFousable = window->GetFocusable();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>focusable", nullptr,
-        static_cast<ani_boolean>(windowFousable));
-}
-
-void AniWindowUtils::SetSystemPropertiesWindowIsPrivacyMode(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    bool windowIsPrivacyMode = window->IsPrivacyMode();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>isPrivacyMode", nullptr,
-        static_cast<ani_boolean>(windowIsPrivacyMode));
-}
-
-void AniWindowUtils::SetSystemPropertiesWindowIsKeepScreenOn(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    bool windowIsKeepScreenOn = window->IsKeepScreenOn();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>isKeepScreenOn", nullptr,
-        static_cast<ani_boolean>(windowIsKeepScreenOn));
-}
-
-void AniWindowUtils::SetSystemPropertiesWindowBrightness(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    float windowBrightness = window->GetBrightness();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>brightness", nullptr,
-        static_cast<ani_float>(windowBrightness));
-}
-
-
-void AniWindowUtils::SetSystemPropertiesWindowIsTransparent(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    bool isTransparent = window->IsTransparent();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>isTransparent", nullptr,
-        static_cast<ani_boolean>(isTransparent));
-}
-
-
-void AniWindowUtils::SetSystemPropertieswindowIsRoundCorner(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    bool windowIsRoundCorner {false};
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>isRoundCorner", nullptr,
-        static_cast<ani_boolean>(windowIsRoundCorner));
-}
-
-
-void AniWindowUtils::SetSystemPropertiesWindowDimBehindValue(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    int windowDimBehindValue {0};
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>dimBehindValue", nullptr,
-        static_cast<ani_int>(windowDimBehindValue));
-}
-
-
-void AniWindowUtils::SetSystemPropertieswindowId(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    uint32_t windowId = window->GetWindowId();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>id", nullptr,
-        static_cast<ani_int>(windowId));
-}
-
-void AniWindowUtils::SetSystemPropertiesdisplayId(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    uint32_t displayId = window->GetDisplayId();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>displayId", nullptr,
-        static_cast<ani_int>(displayId));
-}
-
-ani_object AniWindowUtils::CreateWindowsProperties(ani_env* env, const sptr<Window>& window)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "window is nullptr or get invalid param");
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    bool isNewClassEntry = false;
+    ani_class aniClass = nullptr;
+    if (aniClassIter == globalAniCreators.end()) {
+        status = env->FindClass(aniClassDescriptor.c_str(), &aniClass);
+        if (status != ANI_OK) {
+            TLOGE(WmsLogTag::DEFAULT, "class %{public}s not found, ret %{public}d", aniClassDescriptor.c_str(), status);
+            return status;
+        }
+        auto [iter, inserted] = globalAniCreators.emplace(
+            aniClassDescriptor, std::make_pair(aniClass, std::unordered_map<std::string, ani_method>()));
+        if (!inserted) {
+            TLOGE(WmsLogTag::DEFAULT, "emplace class %{public}s failed", aniClassDescriptor.c_str());
+            return ANI_ERROR;
+        }
+        aniClassIter = iter;
+        isNewClassEntry = true;
+        auto& newClassEntry = aniClassIter->second;
+        status = env->GlobalReference_Create(static_cast<ani_ref>(newClassEntry.first),
+            reinterpret_cast<ani_ref*>(&(newClassEntry.first)));
+        if (status != ANI_OK) {
+            TLOGE(WmsLogTag::DEFAULT, "GlobalReference_Create failed ret %{public}d", status);
+            globalAniCreators.erase(aniClassIter);
+            return status;
+        }
     }
-
-    static const char* clsName = "L@ohos/window/window/WindowPropertiesInternal;";
-    ani_object aniSystemProperties;
-
-    NewAniObjectNoParams(env, clsName, &aniSystemProperties);
-    SetSystemPropertiesWindowRect(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesDrawableRect(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowType(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowIsLayoutFullScreen(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowIsFullScreen(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowTouchable(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowFousable(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowIsPrivacyMode(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowIsKeepScreenOn(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowBrightness(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowIsTransparent(env, window, aniSystemProperties, clsName);
-    SetSystemPropertieswindowIsRoundCorner(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowDimBehindValue(env, window, aniSystemProperties, clsName);
-    SetSystemPropertieswindowId(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesdisplayId(env, window, aniSystemProperties, clsName);
-
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] Window [%{public}u, %{public}s] get properties end", window->GetWindowId(),
-        window->GetWindowName().c_str());
-    if (aniSystemProperties == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] AniSystemProperties is nullptr");
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    aniClass = aniClassIter->second.first;
+    ani_method aniCtorMethod;
+    status = env->Class_FindMethod(aniClass, "<ctor>", aniCtorSignature.c_str(), &aniCtorMethod);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "find %{public}s ctor failed ret %{public}d", aniClassDescriptor.c_str(), status);
+        if (isNewClassEntry) {
+            env->GlobalReference_Delete(static_cast<ani_ref>(aniClass));
+            globalAniCreators.erase(aniClassIter);
+        }
+        return status;
     }
+    aniClassIter->second.second.emplace(aniCtorSignature, aniCtorMethod);
+    return status;
+}
 
-    return aniSystemProperties;
+ani_object AniWindowUtils::InitAniObjectByCreator(ani_env* env,
+    const std::string& aniClassDescriptor, const std::string aniCtorSignature, ...)
+{
+    std::lock_guard<std::mutex> lock(g_aniCreatorsMutex);
+    ani_status status = InitAniCreator(env, aniClassDescriptor, aniCtorSignature);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "InitAniCreator failed, ret %{public}d", status);
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    va_list args;
+    va_start(args, aniCtorSignature);
+    auto& creatorEntry = globalAniCreators[aniClassDescriptor];
+    ani_object aniObject;
+    status = env->Object_New_V(
+        creatorEntry.first,
+        creatorEntry.second[aniCtorSignature],
+        &aniObject,
+        args);
+    va_end(args);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "Object_New_V failed, ret %{public}d", status);
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    return aniObject;
 }
 
 ani_object AniWindowUtils::CreateAniPixelMapArray(ani_env* env,
@@ -1059,6 +967,13 @@ uint32_t AniWindowUtils::GetColorFromAni(ani_env* env,
 {
     ani_ref result;
     env->Object_GetPropertyByName_Ref(aniObject, name, &result);
+    ani_boolean isColorUndefined;
+    env->Reference_IsUndefined(result, &isColorUndefined);
+    if (isColorUndefined) {
+        TLOGI(WmsLogTag::WMS_IMMS, "the color is undefined, return default");
+        return defaultColor;
+    }
+
     ani_string aniColor = reinterpret_cast<ani_string>(result);
     std::string colorStr;
     GetStdString(env, aniColor, colorStr);
@@ -1089,20 +1004,31 @@ bool AniWindowUtils::SetWindowStatusBarContentColor(ani_env* env,
     auto statusProperty = properties[WindowType::WINDOW_TYPE_STATUS_BAR];
     ani_ref aniStatusContentColor;
     env->Object_GetPropertyByName_Ref(aniObject, "statusBarContentColor", &aniStatusContentColor);
-    ani_boolean aniStatusIcon;
-    env->Object_GetPropertyByName_Boolean(aniObject, "isStatusBarLightIcon", &aniStatusIcon);
-    properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ =  GetColorFromAni(
-        env,
-        "statusBarContentColor",
-        statusProperty.contentColor_,
-        propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].contentColorFlag,
-        aniObject);
-    if (aniStatusIcon) {
-        properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ = SYSTEM_COLOR_WHITE;
-    } else {
-        properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ = SYSTEM_COLOR_BLACK;
+    ani_ref aniStatusIcon;
+    env->Object_GetPropertyByName_Ref(aniObject, "isStatusBarLightIcon", &aniStatusIcon);
+
+    ani_boolean isColorUndefined;
+    env->Reference_IsUndefined(aniStatusContentColor, &isColorUndefined);
+    ani_boolean isIconUndefined;
+    env->Reference_IsUndefined(aniStatusIcon, &isIconUndefined);
+
+    if (!isIconUndefined) {
+        properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ =  GetColorFromAni(
+            env,
+            "statusBarContentColor",
+            statusProperty.contentColor_,
+            propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].contentColorFlag,
+            aniObject);
+    } else if (!isColorUndefined) {
+        ani_boolean isStatusIcon;
+        env->Object_CallMethodByName_Boolean(static_cast<ani_object>(aniStatusContentColor), "unboxed", ":z", &isStatusIcon);
+        if (static_cast<bool>(aniStatusIcon)) {
+            properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ = SYSTEM_COLOR_WHITE;
+        } else {
+            properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ = SYSTEM_COLOR_BLACK;
+        }
+        propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].contentColorFlag = true;
     }
-    propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].contentColorFlag = true;
     return true;
 }
 
@@ -1117,19 +1043,31 @@ bool AniWindowUtils::SetWindowNavigationBarContentColor(ani_env* env,
     ani_ref aniNaviGationBarColor;
     env->Object_GetPropertyByName_Ref(aniObject, "navigationBarContentColor", &aniNaviGationBarColor);
     ani_boolean aniNavigationIcon;
-    env->Object_GetPropertyByName_Boolean(aniObject, "isNavigationBarLightIcon", &aniNavigationIcon);
-    properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ =  GetColorFromAni(
-        env,
-        "navigationBarContentColor",
-        navProperty.contentColor_,
-        propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColorFlag,
-        aniObject);
-    if (aniNavigationIcon) {
-        properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ = SYSTEM_COLOR_WHITE;
-    } else {
-        properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ = SYSTEM_COLOR_BLACK;
+    env->Object_GetPropertyByName_Ref(aniObject, "isNavigationBarLightIcon", &aniNavigationIcon);
+
+    ani_boolean isColorUndefined;
+    env->Reference_IsUndefined(aniNaviGationBarColor, &isColorUndefined);
+    ani_boolean isIconUndefined;
+    env->Reference_IsUndefined(aniNavigationIcon, &isIconUndefined);
+
+    if (!isColorUndefined) {
+        properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ =  GetColorFromAni(
+            env,
+            "navigationBarContentColor",
+            navProperty.contentColor_,
+            propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColorFlag,
+            aniObject);
+    } else if (!isIconUndefined) {
+        ani_boolean isNavigationIcon;
+        env->Object_CallMethodByName_Boolean(static_cast<ani_object>(aniNavigationIcon),
+            "unboxed", ":z", &isNavigationIcon);
+        if (static_cast<bool>(isNavigationIcon)) {
+            properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ = SYSTEM_COLOR_WHITE;
+        } else {
+            properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ = SYSTEM_COLOR_BLACK;
+        }
+        propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColorFlag = true;
     }
-    propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColorFlag = true;
     return true;
 }
 
@@ -1170,18 +1108,30 @@ bool AniWindowUtils::SetSystemBarPropertiesFromAni(ani_env* env,
         return false;
     }
 
-    ani_boolean aniEnableStatusBarAnimation;
-    env->Object_GetPropertyByName_Boolean(aniProperties, "enableStatusBarAnimation", &aniEnableStatusBarAnimation);
-    if (static_cast<bool>(aniEnableStatusBarAnimation)) {
-        windowBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_ = aniEnableStatusBarAnimation;
+    ani_ref aniEnableStatusBarAnimation;
+    env->Object_GetPropertyByName_Ref(aniProperties, "enableStatusBarAnimation", &aniEnableStatusBarAnimation);
+    ani_boolean isStatusAnimationUndefined;
+    env->Reference_IsUndefined(aniEnableStatusBarAnimation, &isStatusAnimationUndefined);
+    if (!isStatusAnimationUndefined) {
+        ani_boolean isStatusAnimation;
+        env->Object_CallMethodByName_Boolean(static_cast<ani_object>(aniEnableStatusBarAnimation),
+            "unboxed", "z", &isStatusAnimation);
+        windowBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_ =
+            static_cast<bool>(isStatusAnimation);
         windowPropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimationFlag = true;
     }
 
-    ani_boolean aniEnableNavigationBarAnimation;
-    env->Object_GetPropertyByName_Boolean(aniProperties, "enableNavigationBarAnimation",
+    ani_ref aniEnableNavigationBarAnimation;
+    env->Object_GetPropertyByName_Ref(aniProperties, "enableNavigationBarAnimation",
         &aniEnableNavigationBarAnimation);
-    if (static_cast<bool>(aniEnableNavigationBarAnimation)) {
-        windowBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableAnimation_ = aniEnableNavigationBarAnimation;
+    ani_boolean isNavigationAnimationUndefined;
+    env->Reference_IsUndefined(aniEnableNavigationBarAnimation, &isNavigationAnimationUndefined);
+    if (!isNavigationAnimationUndefined) {
+        ani_boolean isNavigationAnimation;
+        env->Object_CallMethodByName_Boolean(static_cast<ani_object>(aniEnableNavigationBarAnimation),
+            "unboxed", "z", &isNavigationAnimation);
+        windowBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableAnimation_ =
+            static_cast<bool>(isNavigationAnimation);
         windowPropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableAnimationFlag = true;
     }
     return true;
