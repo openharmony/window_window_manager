@@ -869,7 +869,7 @@ WSError SessionStageProxy::NotifyWindowOcclusionState(const WindowVisibilityStat
         return WSError::WS_ERROR_IPC_FAILED;
     }
     auto reqErrCode = remote->SendRequest(
-        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_VISIBILITY_STATE),
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_OCCLUSION_STATE),
         data, reply, option);
     if (reqErrCode != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "send stage request failed, errCode: %{public}d", reqErrCode);

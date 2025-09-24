@@ -485,25 +485,6 @@ void AniWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
     eventHandler_->PostTask(task, __func__, 0, AppExecFwk::EventQueue::Priority::HIGH);
 }
 
-void AniWindowListener::OnWindowHighlightChange(bool isHighlight)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    auto task = [self = weakRef_, eng = env_, isHighlight] {
-        auto thisListener = self.promote();
-        if (thisListener == nullptr || eng == nullptr || thisListener->aniCallback_ == nullptr) {
-            TLOGE(WmsLogTag::DEFAULT, "[ANI]this listener, eng or callback is nullptr");
-            return;
-        }
-        AniWindowUtils::CallAniFunctionVoid(eng, "L@ohos/window/window;", "runWindowListenerBooleanArgCallback",
-            nullptr, thisListener->aniCallback_, ani_boolean(isHighlight));
-    };
-    if (!eventHandler_) {
-        TLOGE(WmsLogTag::DEFAULT, "get main event handler failed!");
-        return;
-    }
-    eventHandler_->PostTask(task, __func__, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
-}
-
 void AniWindowListener::OnOcclusionStateChanged(const WindowVisibilityState state)
 {
     auto task = [self = weakRef_, state, env = env_] () {
@@ -523,6 +504,25 @@ void AniWindowListener::OnOcclusionStateChanged(const WindowVisibilityState stat
     }
     eventHandler_->PostTask(task, "[ANI] wms:AniWindowListener::OnOcclusionStateChanged", 0,
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
+void AniWindowListener::OnWindowHighlightChange(bool isHighlight)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    auto task = [self = weakRef_, eng = env_, isHighlight] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || eng == nullptr || thisListener->aniCallback_ == nullptr) {
+            TLOGE(WmsLogTag::DEFAULT, "[ANI]this listener, eng or callback is nullptr");
+            return;
+        }
+        AniWindowUtils::CallAniFunctionVoid(eng, "L@ohos/window/window;", "runWindowListenerBooleanArgCallback",
+            nullptr, thisListener->aniCallback_, ani_boolean(isHighlight));
+    };
+    if (!eventHandler_) {
+        TLOGE(WmsLogTag::DEFAULT, "get main event handler failed!");
+        return;
+    }
+    eventHandler_->PostTask(task, __func__, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 void AniWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect)
