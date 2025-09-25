@@ -5031,10 +5031,10 @@ napi_value JsSceneSessionManager::NotifySessionTransferToTargetScreenEvent(napi_
 
 napi_value JsSceneSessionManager::OnNotifySessionTransferToTargetScreenEvent(napi_env env, napi_callback_info info)
 {
-    size_t argc = ARGC_FOUR;
-    napi_value argv[ARGC_FOUR] = {nullptr};
+    size_t argc = ARGC_FIVE;
+    napi_value argv[ARGC_FIVE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != ARGC_FOUR) {
+    if (argc != ARGC_FIVE) {
         TLOGE(WmsLogTag::WMS_LIFE, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -5068,9 +5068,17 @@ napi_value JsSceneSessionManager::OnNotifySessionTransferToTargetScreenEvent(nap
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
+
+    LifeCycleChangeReason transferReason = LifeCycleChangeReason::DEFAULT;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_FOUR], transferReason)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to transferReason");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
     TLOGI(WmsLogTag::WMS_LIFE, "persistentId: %{public}d, resultCode: %{public}d, "
-        "fromScreenId: %{public}" PRId64 " , toScreenId: %{public}" PRId64,
-        persistentId, resultCode, fromScreenId, toScreenId);
+        "fromScreenId: %{public}" PRId64 " , toScreenId: %{public}" PRId64 ", transferReason: %{public}u",
+        persistentId, resultCode, fromScreenId, toScreenId, transferReason);
     SceneSessionManager::GetInstance().NotifySessionTransferToTargetScreenEvent(
         persistentId, resultCode, static_cast<uint64_t>(fromScreenId), static_cast<uint64_t>(toScreenId));
     return NapiGetUndefined(env);
