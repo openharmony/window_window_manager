@@ -653,13 +653,13 @@ void AniWindowListener::OnRectChangeInGlobalDisplay(const Rect& rect, WindowSize
     auto task = [self = weakRef_, rect, rectChangeReason, vm = vm_] () {
         auto thisListener = self.promote();
         if (thisListener == nullptr || vm == nullptr || thisListener->aniCallback_ == nullptr) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI]this listener, vm or callback is nullptr");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "[ANI]this listener, vm or callback is nullptr");
             return;
         }
         ani_env* env = nullptr;
         ani_status ret = vm->GetEnv(ANI_VERSION_1, &env);
         if (ret != ANI_OK || env == nullptr) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI]Get env failed, ret:%{public}u", ret);
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "[ANI]get env failed, ret:%{public}u", ret);
             return;
         }
         AniWindowUtils::CallAniFunctionVoid(env, "@ohos.window.window", "runRectChangeInGlobalDisplayCallback",
@@ -676,17 +676,17 @@ void AniWindowListener::OnRectChangeInGlobalDisplay(const Rect& rect, WindowSize
 
 void AniWindowListener::OnWindowStatusDidChange(WindowStatus status)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI] reason:%{public}u", status);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI] status:%{public}u", status);
     auto task = [self = weakRef_, status, vm = vm_] () {
         auto thisListener = self.promote();
         if (thisListener == nullptr || vm == nullptr || thisListener->aniCallback_ == nullptr) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI]this listener, vm or callback is nullptr");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "[ANI]this listener, vm or callback is nullptr");
             return;
         }
         ani_env* env = nullptr;
         ani_status ret = vm->GetEnv(ANI_VERSION_1, &env);
         if (ret != ANI_OK || env == nullptr) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI]Get env failed, ret:%{public}u", ret);
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "[ANI]get env failed, ret:%{public}u", ret);
             return;
         }
         AniWindowUtils::CallAniFunctionVoid(env, "@ohos.window.window", "runWindowStatusDidChangeCallback",
