@@ -3525,8 +3525,12 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
     return WMError::WM_OK;
 }
  
-void WindowSceneSessionImpl::MaximizeEvent(sptr<ISession> hostSession)
+void WindowSceneSessionImpl::MaximizeEvent(const sptr<ISession> hostSession)
 {
+    if (hostSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "hostSession is nullptr");
+        return;
+    }
     if (GetGlobalMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
         const bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
         if (IsFreeMultiWindowMode() && !isPcMode && !property_->GetIsPcAppInPad()) {

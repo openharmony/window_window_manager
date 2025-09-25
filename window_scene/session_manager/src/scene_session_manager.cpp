@@ -13201,7 +13201,7 @@ WSError SceneSessionManager::GetIsLayoutFullScreen(bool& isLayoutFullScreen)
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::SetMaximizeFullScreen(int32_t persistentId, bool& isMaximizeFullScreen)
+WSError SceneSessionManager::SetMaximizeFullScreen(int32_t persistentId, bool isMaximizeFullScreen)
 {
     auto sceneSession = GetSceneSession(persistentId);
     if (!sceneSession) {
@@ -13213,8 +13213,7 @@ WSError SceneSessionManager::SetMaximizeFullScreen(int32_t persistentId, bool& i
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "only main window support setMaximizeFullScreen.");
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
-    WSError ret = sceneSession->SetIsShowDecorInFreeMultiWindow(!isMaximizeFullScreen);
-    return ret;
+    return sceneSession->SetIsShowDecorInFreeMultiWindow(!isMaximizeFullScreen);
 }
 
 WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64_t screenId)
