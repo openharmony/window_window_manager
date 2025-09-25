@@ -3525,7 +3525,7 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
     return WMError::WM_OK;
 }
  
-void WindowSceneSessionImpl::MaximizeEvent(const sptr<ISession> hostSession)
+void WindowSceneSessionImpl::MaximizeEvent(const sptr<ISession> &hostSession)
 {
     if (hostSession == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "hostSession is nullptr");
