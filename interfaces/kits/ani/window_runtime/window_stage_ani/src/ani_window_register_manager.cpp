@@ -767,16 +767,13 @@ WmErrorCode AniWindowRegisterManager::ProcessRectChangeInGlobalDisplayRegister(c
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IRectChangeInGlobalDisplayListener> thisListener(listener);
-    WmErrorCode ret = WmErrorCode::WM_OK;
-    if (window->IsPcWindow()) {
-        return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
+    WMError ret = WMError::WM_OK;
     if (isRegister) {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterRectChangeInGlobalDisplayListener(thisListener));
+        ret = window->RegisterRectChangeInGlobalDisplayListener(thisListener);
     } else {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterRectChangeInGlobalDisplayListener(thisListener));
+        ret = window->UnregisterRectChangeInGlobalDisplayListener(thisListener);
     }
-    return ret;
+    return AniWindowUtils::ToErrorCode(ret);
 }
 
 WmErrorCode AniWindowRegisterManager::ProcessWindowStatusDidChangeRegister(const sptr<AniWindowListener>& listener,
@@ -786,16 +783,13 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowStatusDidChangeRegister(const
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IWindowStatusDidChangeListener> thisListener(listener);
-    WmErrorCode ret = WmErrorCode::WM_OK;
-    if (window->IsPcWindow()) {
-        return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
+    WMError ret = WMError::WM_OK;
     if (isRegister) {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowStatusDidChangeListener(thisListener));
+        ret = window->RegisterWindowStatusDidChangeListener(thisListener);
     } else {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowStatusDidChangeListener(thisListener));
+        ret = window->UnregisterWindowStatusDidChangeListener(thisListener);
     }
-    return ret;
+    return AniWindowUtils::ToErrorCode(ret);
 }
 } // namespace Rosen
 } // namespace OHOS

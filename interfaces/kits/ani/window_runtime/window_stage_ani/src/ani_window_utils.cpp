@@ -183,7 +183,7 @@ ani_status AniWindowUtils::GetPropertyLongObject(ani_env* env, const char* prope
         return ret;
     }
     result = static_cast<int64_t>(long_value);
-    TLOGD(WmsLogTag::DEFAULT, "[ANI] property name is %{public}s, value is:%{public}" PRIu64" ", propertyName, result);
+    TLOGD(WmsLogTag::DEFAULT, "[ANI] property name is %{public}s, value is:%{public}" PRIu64, propertyName, result);
     return ret;
 }
 
@@ -1306,11 +1306,16 @@ WindowLimits AniWindowUtils::ParseWindowLimits(ani_env* env, ani_object aniWindo
 {
     WindowLimits windowLimits;
     
-    auto getAndAssign = [&](const char* name, uint32_t& field) {
+    auto getAndAssign = [&, where = __func__](const char* name, uint32_t& field) {
         int value;
         ani_status ret = AniWindowUtils::GetPropertyIntObject(env, name, aniWindowLimits, value);
         if (ret == ANI_OK) {
-            field = static_cast<uint32_t>(value);
+            if (value >= 0) {
+                field = static_cast<uint32_t>(value);
+            } else {
+                field = 0;
+                TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: [ANI] Invalid %{public}s: %{public}d", where, name, value);
+            }
         }
     };
 
@@ -1330,10 +1335,7 @@ bool AniWindowUtils::CheckParaIsUndefined(ani_env* env, ani_object para)
             static_cast<int32_t>(aniRet));
         return true;
     }
-    if (isUndefined) {
-        return true;
-    }
-    return false;
+    return static_cast<bool>(isUndefined);
 }
 
 ani_object AniWindowUtils::CreateAniPosition(ani_env* env, const Position& position)
