@@ -301,13 +301,56 @@ HWTEST_F(WindowSessionImplTest2, RecoverSessionListener, TestSize.Level1)
     window->avoidAreaChangeListeners_.insert({ id, iAvoidAreaChangedListeners });
     window->acrossDisplaysChangeListeners_.insert({ id, iAcrossDisplaysChangeListener });
     window->touchOutsideListeners_.insert({ id, iTouchOutsideListeners });
+    std::vector<sptr<IOcclusionStateChangedListener>> occlusionStateChangeListeners;
+    occlusionStateChangeListeners.push_back(nullptr);
+    window->occlusionStateChangeListeners_.clear();
+    window->occlusionStateChangeListeners_.insert({ id, occlusionStateChangeListeners });
     window->RecoverSessionListener();
+    window->occlusionStateChangeListeners_.clear();
     ASSERT_TRUE(window->avoidAreaChangeListeners_.find(id) != window->avoidAreaChangeListeners_.end() &&
                 !window->avoidAreaChangeListeners_[id].empty());
     ASSERT_TRUE(window->touchOutsideListeners_.find(id) != window->touchOutsideListeners_.end() &&
                 !window->touchOutsideListeners_[id].empty());
     ASSERT_TRUE(window->acrossDisplaysChangeListeners_.find(id) != window->acrossDisplaysChangeListeners_.end() &&
                 !window->acrossDisplaysChangeListeners_[id].empty());
+    window->Destroy();
+}
+
+/**
+ * @tc.name: RegisterOcclusionStateChangeListener
+ * @tc.desc: register occlusion state change listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, RegisterOcclusionStateChangeListener, TestSize.Level1)
+{
+    auto window = GetTestWindowImpl("RegisterOcclusionStateChangeListener");
+    ASSERT_NE(window, nullptr);
+    window->occlusionStateChangeListeners_.clear();
+    EXPECT_NE(window->RegisterOcclusionStateChangeListener(nullptr), WMError::WM_OK);
+    sptr<IOcclusionStateChangedListener> listener = sptr<IOcclusionStateChangedListener>::MakeSptr();
+    EXPECT_EQ(window->RegisterOcclusionStateChangeListener(listener), WMError::WM_OK);
+    EXPECT_EQ(window->occlusionStateChangeListeners_.size(), 1);
+    window->occlusionStateChangeListeners_.clear();
+    window->Destroy();
+}
+
+/**
+ * @tc.name: UnregisterOcclusionStateChangeListener
+ * @tc.desc: unregister occlusion state change listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, UnregisterOcclusionStateChangeListener, TestSize.Level1)
+{
+    auto window = GetTestWindowImpl("UnregisterOcclusionStateChangeListener");
+    ASSERT_NE(window, nullptr);
+    window->occlusionStateChangeListeners_.clear();
+    EXPECT_NE(window->UnregisterOcclusionStateChangeListener(nullptr), WMError::WM_OK);
+    sptr<IOcclusionStateChangedListener> listener = sptr<IOcclusionStateChangedListener>::MakeSptr();
+    EXPECT_EQ(window->RegisterOcclusionStateChangeListener(listener), WMError::WM_OK);
+    EXPECT_EQ(window->occlusionStateChangeListeners_.size(), 1);
+    EXPECT_EQ(window->UnregisterOcclusionStateChangeListener(listener), WMError::WM_OK);
+    EXPECT_EQ(window->occlusionStateChangeListeners_.size(), 0);
+    window->occlusionStateChangeListeners_.clear();
     window->Destroy();
 }
 

@@ -12451,8 +12451,8 @@ WMError SceneSessionManager::UpdateSessionOcclusionStateListener(int32_t persist
                 where, persistentId, haveListener);
             return WMError::WM_DO_NOTHING;
         }
-        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: persistentId=%{public}d, haveListener=%{public}d",
-            where, persistentId, haveListener);
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: win=[%{public}d, %{public}s], haveListener=%{public}d",
+            where, persistentId, sceneSession->GetWindowName().c_str(), haveListener);
         if (haveListener) {
             occlusionStateListenerSessionSet_.insert(persistentId);
             sceneSession->NotifyOcclusionState();
