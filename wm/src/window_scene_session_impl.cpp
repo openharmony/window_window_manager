@@ -5348,13 +5348,36 @@ WSError WindowSceneSessionImpl::NotifyLayoutFinishAfterWindowModeChange(WindowMo
     return WSError::WS_OK;
 }
 
+bool WindowSceneSessionImpl::ShouldSkipSupportWindowModeCheck(uint32_t windowModeSupportType, WindowMode mode)
+{
+    bool onlySupportSplitInFreeMultiWindow =
+        IsFreeMultiWindowMode() && mode == WindowMode::WINDOW_MODE_FLOATING &&
+        (WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_SPLIT_PRIMARY) ||
+         WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_SPLIT_SECONDARY)) &&
+        !WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FULLSCREEN);
+    if (onlySupportSplitInFreeMultiWindow) {
+        return true;
+    }
+    bool isMultiWindowMode = mode == WindowMode::WINDOW_MODE_FLOATING ||
+                             mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+                             mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
+    bool isAvailableDevice =
+        (windowSystemConfig_.IsPhoneWindow() || windowSystemConfig_.IsPadWindow()) && !IsFreeMultiWindowMode();
+    if (isAvailableDevice && isMultiWindowMode) {
+        return true;
+    }
+    return false;
+}
+
 WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
 {
     WLOGFI("%{public}u mode %{public}u", GetWindowId(), static_cast<uint32_t>(mode));
     if (IsWindowSessionInvalid()) {
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
-    if (!WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(), mode)) {
+    uint32_t windowModeSupportType = property_->GetWindowModeSupportType();
+    if (!WindowHelper::IsWindowModeSupported(windowModeSupportType, mode) &&
+        !ShouldSkipSupportWindowModeCheck(windowModeSupportType, mode)) {
         WLOGFE("%{public}u do not support mode: %{public}u",
             GetWindowId(), static_cast<uint32_t>(mode));
         return WSError::WS_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
