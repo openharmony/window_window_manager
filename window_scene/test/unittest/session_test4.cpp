@@ -1641,21 +1641,21 @@ HWTEST_F(WindowSessionTest4, UpdateSessionOutline01, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckIfNeedKeyboardAvoidAreaEmpty 01
- * @tc.desc: Test Case CheckIfNeedKeyboardAvoidAreaEmpty 01
+ * @tc.name: CheckEmptyKeyboardAvoidAreaIfNeeded 01
+ * @tc.desc: Test Case CheckEmptyKeyboardAvoidAreaIfNeeded 01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest4, CheckIfNeedKeyboardAvoidAreaEmpty01, TestSize.Level1)
+HWTEST_F(WindowSessionTest4, CheckEmptyKeyboardAvoidAreaIfNeeded01, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     DisplayId displayId = 0;
     session_->property_->SetDisplayId(displayId);
-    bool result = session_->CheckIfNeedKeyboardAvoidAreaEmpty();
+    bool result = session_->CheckEmptyKeyboardAvoidAreaIfNeeded();
     EXPECT_EQ(result, false);
 
     displayId = 100;
     session_->property_->SetDisplayId(displayId);
-    result = session_->CheckIfNeedKeyboardAvoidAreaEmpty();
+    result = session_->CheckEmptyKeyboardAvoidAreaIfNeeded();
     EXPECT_EQ(result, false);
 }
 } // namespace
