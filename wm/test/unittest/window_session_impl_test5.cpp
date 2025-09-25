@@ -2005,11 +2005,12 @@ HWTEST_F(WindowSessionImplTest5, GetListeners, TestSize.Level1)
  * @tc.desc: NotifyTitleChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest5, NotifyTitleChange, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest5, NotifyTitleChange01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("NotifyTitleChange");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetCollaboratorType(static_cast<int32_t>(CollaboratorType::RESERVE_TYPE));
  
     SessionInfo sessionInfo = {"NotifyTitleBundle", "NotifyTitleModule", "NotifyTitleAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
@@ -2023,6 +2024,25 @@ HWTEST_F(WindowSessionImplTest5, NotifyTitleChange, TestSize.Level1)
     window->NotifyTitleChange(isShow, height);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
 }
+
+
+/**
+ * @tc.name: NotifyTitleChange
+ * @tc.desc: NotifyTitleChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, NotifyTitleChange02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyTitleChange");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetCollaboratorType(static_cast<int32_t>(CollaboratorType::DEFAULT_TYPE));
+ 
+    SessionInfo sessionInfo = {"NotifyTitleBundle", "NotifyTitleModule", "NotifyTitleAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+}
+
  
 /**
  * @tc.name: IsHitTitleBar
