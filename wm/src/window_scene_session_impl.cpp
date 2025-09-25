@@ -3451,6 +3451,7 @@ WMError WindowSceneSessionImpl::Maximize()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (WindowHelper::IsMainWindow(GetType())) {
+        UpdateIsShowDecorInFreeMultiWindow(true);
         SetLayoutFullScreen(enableImmersiveMode_);
     }
     return WMError::WM_OK;
@@ -3494,6 +3495,7 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
         case MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING:
             break;
     }
+    UpdateIsShowDecorInFreeMultiWindow(true);
     property_->SetIsLayoutFullScreen(enableImmersiveMode_);
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
@@ -3540,8 +3542,27 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
             return WMError::WM_OK;
         }
     }
+    MaximizeEvent(hostSession);
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
+ 
+    return WMError::WM_OK;
+}
+ 
+void WindowSceneSessionImpl::MaximizeEvent(const sptr<ISession> &hostSession)
+{
+    if (hostSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "hostSession is nullptr");
+        return;
+    }
     if (GetGlobalMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-        hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
+        const bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
+        if (IsFreeMultiWindowMode() && !isPcMode && !property_->GetIsPcAppInPad() &&
+            WindowHelper::IsMainWindow(GetType())) {
+            UpdateIsShowDecorInFreeMultiWindow(false);
+            hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE_FULLSCREEN);
+        } else {
+            hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
+        }
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
         UpdateDecorEnable(true);
         property_->SetMaximizeMode(MaximizeMode::MODE_FULL_FILL);
@@ -3552,9 +3573,6 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
         UpdateDecorEnable(true);
         NotifyWindowStatusChange(GetWindowMode());
     }
-    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
-
-    return WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::Recover()
@@ -5511,6 +5529,9 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
         WLOGFE("%{public}u do not support mode: %{public}u",
             GetWindowId(), static_cast<uint32_t>(mode));
         return WSError::WS_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
+    }
+    if (mode != WindowMode::WINDOW_MODE_FULLSCREEN) {
+        UpdateIsShowDecorInFreeMultiWindow(true);
     }
     WMError ret = UpdateWindowModeImmediately(mode);
 
