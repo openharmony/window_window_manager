@@ -43,6 +43,7 @@
 #include "session/host/include/pc_fold_screen_manager.h"
 #include "perform_reporter.h"
 #include "session/host/include/scene_persistent_storage.h"
+#include "screen_manager.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -80,6 +81,7 @@ const bool CORRECTION_ENABLE = system::GetIntParameter<int32_t>("const.system.se
 const uint32_t ROTATION_90 = 90;
 const uint32_t ROTATION_360 = 360;
 const uint32_t ROTATION_LANDSCAPE_INVERTED = 3;
+const std::string APP_CAST_SCREEN_NAME = "HwCast_AppModeDisplay";
 } // namespace
 
 std::shared_ptr<AppExecFwk::EventHandler> Session::mainHandler_;
@@ -4003,6 +4005,11 @@ bool Session::CheckEmptyKeyboardAvoidAreaIfNeeded() const
     bool isPhoneOrPadNotFreeMultiWindow = isPhoneNotFreeMultiWindow || isPadNotFreeMultiWindow;
     TLOGI(WmsLogTag::WMS_LIFE, "check keyboard avoid area, isPhoneNotFreeMultiWindow: %{public}d, "
         "isPadNotFreeMultiWindow: %{public}d", isPhoneNotFreeMultiWindow, isPadNotFreeMultiWindow);
+    auto screen = ScreenManager::GetInstance().GetScreenById(property_->GetDisplayId());
+    if (screen != nullptr && screen->GetName() == APP_CAST_SCREEN_NAME) {
+        TLOGI(WmsLogTag::WMS_LIFE, "app cast screen");
+        return true;
+    }
     return (isMainFloating || isParentFloating) && !isMidScene && isPhoneOrPadNotFreeMultiWindow;
 }
 
