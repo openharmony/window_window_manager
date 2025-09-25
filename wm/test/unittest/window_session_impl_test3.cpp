@@ -1493,6 +1493,44 @@ HWTEST_F(WindowSessionImplTest3, UpdateSubWindowInfo, TestSize.Level1)
     EXPECT_EQ(WMError::WM_OK, subWindow->Destroy(true));
     EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
 }
+
+/**
+ * @tc.name: UpdateSubWindowInfo
+ * @tc.desc: UpdateSubWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, UpdateSubWindowInfo, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateSubWindowInfo");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+
+    sptr<WindowOption> subWindowOption = sptr<WindowOption>::MakeSptr();
+    subWindowOption->SetWindowName("UpdateSubWindowInfo_subWindow");
+    sptr<WindowSessionImpl> subWindow = sptr<WindowSessionImpl>::MakeSptr(subWindowOption);
+    subWindow->property_->SetPersistentId(2);
+    subWindow->property_->SetParentPersistentId(1);
+    subWindow->hostSession_ = session;
+    subWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    subWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    subWindow->context_ = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    WindowSessionImpl::subWindowSessionMap_.insert(std::pair<int32_t,
+        std::vector<sptr<WindowSessionImpl>>>(1, { subWindow }));
+
+    EXPECT_NE(subWindow->context_, nullptr);
+    EXPECT_EQ(subWindow->property_->GetSubWindowLevel(), 0);
+    int subWindowLevel = 5;
+    window->UpdateSubWindowInfo(subWindowLevel, nullptr);
+    EXPECT_EQ(subWindow->property_->GetSubWindowLevel(), 6);
+    EXPECT_EQ(subWindow->context_, nullptr);
+    EXPECT_EQ(WMError::WM_OK, subWindow->Destroy(true));
+    EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

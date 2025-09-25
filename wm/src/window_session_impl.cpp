@@ -171,6 +171,7 @@ std::unordered_map<int32_t, std::vector<sptr<IWindowWillCloseListener>>> WindowS
 std::map<int32_t, std::vector<sptr<ISwitchFreeMultiWindowListener>>> WindowSessionImpl::switchFreeMultiWindowListeners_;
 std::map<int32_t, std::vector<sptr<IWindowHighlightChangeListener>>> WindowSessionImpl::highlightChangeListeners_;
 std::map<int32_t, std::vector<sptr<IWindowRotationChangeListener>>> WindowSessionImpl::windowRotationChangeListeners_;
+std::map<int32_t, std::vector<sptr<IWindowRotationChangeListener>>> WindowSessionImpl::windowRotationChangeListeners_;
 std::recursive_mutex WindowSessionImpl::lifeCycleListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowStageLifeCycleListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowChangeListenerMutex_;
@@ -207,6 +208,7 @@ std::mutex WindowSessionImpl::systemBarPropertyListenerMutex_;
 std::mutex WindowSessionImpl::waterfallModeChangeListenerMutex_;
 std::unordered_map<int32_t, std::vector<sptr<IWaterfallModeChangeListener>>>
     WindowSessionImpl::waterfallModeChangeListeners_;
+std::mutex WindowSessionImpl::windowRotationChangeListenerMutex_;
 std::mutex WindowSessionImpl::windowRotationChangeListenerMutex_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
@@ -8205,6 +8207,29 @@ void WindowSessionImpl::SwitchSubWindow(bool freeMultiWindowEnable, int32_t pare
             subWindowSession->SwitchSubWindow(freeMultiWindowEnable, subWindowSession->GetPersistentId());
         }
     }
+}
+
+void WindowSessionImpl::SetNotifySizeChangeFlag(bool flag)
+{
+    if (flag) {
+        if (GetType() != WindowType::WINDOW_TYPE_FLOAT_NAVIGATION) {
+            return;
+        }
+        if (GetRect() == GetRequestRect()) {
+            return;
+        }
+        notifySizeChangeFlag_ = true;
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Set notify size change flag is true");
+        return;
+    }
+    notifySizeChangeFlag_ = false;
+}
+
+WSError WindowSessionImpl::UpdateIsShowDecorInFreeMultiWindow(bool isShow)
+{
+    TLOGI(WmsLogTag::WMS_DECOR, "id: %{public}d, isShow: %{public}d", GetPersistentId(), isShow);
+    property_->SetIsShowDecorInFreeMultiWindow(isShow);
+    return WSError::WS_OK;
 }
 
 void WindowSessionImpl::SetNotifySizeChangeFlag(bool flag)

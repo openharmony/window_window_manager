@@ -290,6 +290,8 @@ public:
     WMError UnregisterWindowStageLifeCycleListener(const sptr<IWindowStageLifeCycle>& listener) override;
     WMError RegisterSystemBarPropertyListener(const sptr<ISystemBarPropertyListener>& listener) override;
     WMError UnregisterSystemBarPropertyListener(const sptr<ISystemBarPropertyListener>& listener) override;
+    WMError RegisterSystemBarPropertyListener(const sptr<ISystemBarPropertyListener>& listener) override;
+    WMError UnregisterSystemBarPropertyListener(const sptr<ISystemBarPropertyListener>& listener) override;
     void NotifySystemBarPropertyUpdate(WindowType type, const SystemBarProperty& property) override;
     void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
     void UnregisterWindowDestroyedListener() override { notifyNativeFunc_ = nullptr; }
@@ -612,6 +614,7 @@ protected:
     WMError WindowSessionCreateCheck();
     void UpdateDecorEnableToAce(bool isDecorEnable);
     void NotifyModeChange(WindowMode mode, bool hasDeco = true);
+    void NotifyFreeWindowModeChange(WindowMode mode, bool hasDeco = true);
     WMError UpdateProperty(WSPropertyChangeAction action);
     WMError SetBackgroundColor(uint32_t color);
     uint32_t GetBackgroundColor() const;
@@ -929,6 +932,8 @@ private:
     EnableIfSame<T, ISystemBarPropertyListener, std::vector<sptr<ISystemBarPropertyListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowRotationChangeListener, std::vector<sptr<IWindowRotationChangeListener>>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, IWindowRotationChangeListener, std::vector<sptr<IWindowRotationChangeListener>>> GetListeners();
     void NotifyAfterFocused();
     void NotifyUIContentFocusStatus();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
@@ -1033,6 +1038,7 @@ private:
     static std::mutex highlightChangeListenerMutex_;
     static std::mutex systemBarPropertyListenerMutex_;
     static std::mutex windowRotationChangeListenerMutex_;
+    static std::mutex windowRotationChangeListenerMutex_;
     static std::map<int32_t, std::vector<sptr<ISystemBarPropertyListener>>> systemBarPropertyListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowStageLifeCycle>>> windowStageLifecycleListeners_;
@@ -1071,6 +1077,7 @@ private:
     static std::map<int32_t, sptr<IWindowOrientationChangeListener>> windowOrientationChangeListener_;
     static std::map<int32_t, std::vector<sptr<IWindowHighlightChangeListener>>> highlightChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowRotationChangeListener>>> windowRotationChangeListeners_;
+static std::map<int32_t, std::vector<sptr<IWindowRotationChangeListener>>> windowRotationChangeListeners_;
 
     // FA only
     sptr<IAceAbilityHandler> aceAbilityHandler_;

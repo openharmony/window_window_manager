@@ -871,6 +871,23 @@ public:
      */
     virtual void OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
         RotationChangeResult& rotationChangeResult) {}
+
+/*
+ * @class IWindowRotationChangeListener
+ *
+ * @brief IWindowRotationChangeListener is used to observe the window rotation change.
+ */
+class IWindowRotationChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window rotate
+     *
+     * @param rotationChangeInfo information of rotation
+     * @param rotationChangeResult result of rotation
+     *
+     */
+    virtual void OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
+        RotationChangeResult& rotationChangeResult) {}
 };
 
 static WMError DefaultCreateErrCode = WMError::WM_OK;
@@ -4647,6 +4664,13 @@ public:
         return WMError::WM_OK;
     }
  
+    /**
+     * @brief Calculate whether the pointerEvent hits the title bar.
+     *
+     * @param hitTitleBar true means hit title bar success, false means not hit title bar.
+     */
+    virtual bool IsHitTitleBar(std::shared_ptr<MMI::PointerEvent>& pointerEvent) const { return false; }
+
     /**
      * @brief Calculate whether the pointerEvent hits the title bar.
      *
