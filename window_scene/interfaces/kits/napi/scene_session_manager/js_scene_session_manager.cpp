@@ -3934,7 +3934,7 @@ napi_value JsSceneSessionManager::OnSetMaximizeFullScreen(napi_env env, napi_cal
     size_t argc = ARGC_TWO;
     napi_value argv[ARGC_TWO] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARGC_ONE) {
+    if (argc < ARGC_TWO) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));

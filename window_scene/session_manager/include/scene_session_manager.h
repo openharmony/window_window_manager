@@ -462,7 +462,7 @@ public:
      * Window Immersive
      */
     WSError GetIsLayoutFullScreen(bool& isLayoutFullScreen);
-    WSError SetMaximizeFullScreen(int32_t persistentId, bool& isMaximizeFullScreen);
+    WSError SetMaximizeFullScreen(int32_t persistentId, bool isMaximizeFullScreen);
     WSError UpdateSessionAvoidAreaListener(int32_t persistentId, bool haveListener) override;
     void RegisterNotifyRootSceneAvoidAreaChangeFunc(NotifyRootSceneAvoidAreaChangeFunc&& func);
     void UpdateRootSceneAvoidArea();
