@@ -1289,6 +1289,10 @@ std::string ScreenSessionManager::ConvertEdidToString(const struct BaseEdid edid
 
 void ScreenSessionManager::DisconnectScreenIfScreenInfoNull(sptr<ScreenSession>& screenSession)
 {
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && GetIsExtendScreenConnected()) {
+        SetIsExtendMode(true);
+        HandleExtendScreenConnect(GetDefaultScreenId());
+    }
 #ifdef FOLD_ABILITY_ENABLE
    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         TLOGI(WmsLogTag::DMS, "not superFoldDisplayDevice");
@@ -1321,10 +1325,6 @@ bool ScreenSessionManager::RecoverRestoredMultiScreenMode(sptr<ScreenSession> sc
     std::map<std::string, MultiScreenInfo> multiScreenInfoMap = ScreenSettingHelper::GetMultiScreenInfo();
     std::string serialNumber = screenSession->GetSerialNumber();
     if (!CheckMultiScreenInfoMap(multiScreenInfoMap, serialNumber)) {
-        if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && GetIsExtendScreenConnected()) {
-            SetIsExtendMode(true);
-            HandleExtendScreenConnect(GetDefaultScreenId());
-        }
         DisconnectScreenIfScreenInfoNull(screenSession);
         return false;
     }
