@@ -10249,7 +10249,9 @@ DMError ScreenSessionManager::SetMultiScreenMode(ScreenId mainScreenId, ScreenId
         return DMError::DM_OK;
     }
     SetMultiScreenModeInner(mainScreenId, secondaryScreenId, screenMode);
-    SetIsExtendMode(screenMode == MultiScreenMode::SCREEN_EXTEND);
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        SetIsExtendMode(screenMode == MultiScreenMode::SCREEN_EXTEND);
+    }
     if (screenMode == MultiScreenMode::SCREEN_EXTEND) {
         HandleExtendScreenConnect(mainScreenId);
     }
