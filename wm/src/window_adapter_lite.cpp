@@ -52,6 +52,18 @@ std::mutex WindowAdapterLite::windowAdapterLiteMapMutex_;
         }                                                                 \
     } while(false)
 
+WindowAdapterLite::~WindowAdapterLite()
+{
+    sptr<IRemoteObject> remoteObject = nullptr;
+    if (windowManagerServiceProxy_) {
+        remoteObject = windowManagerServiceProxy_->AsObject();
+    }
+    if (remoteObject) {
+        remoteObject->RemoveDeathRecipient(wmsDeath_);
+    }
+    TLOGI(WmsLogTag::WMS_SCB, "destroyed, userId: %{public}d", userId_);
+}
+
 WindowAdapterLite::WindowAdapterLite(const int32_t userId) : userId_(userId) {}
 
 WindowAdapterLite& WindowAdapterLite::GetInstance()

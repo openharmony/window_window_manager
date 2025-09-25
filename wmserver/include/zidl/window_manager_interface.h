@@ -358,6 +358,14 @@ public:
      * PiP Window
      */
     virtual WMError GetPiPSettingSwitchStatus(bool& switchStatus) { return WMError::WM_OK; }
+
+    /*
+     * Window outline
+     */
+    virtual WMError UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams)
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }

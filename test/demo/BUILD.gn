@@ -25,6 +25,7 @@ group("demo") {
     ":demo_system_sub_window",
     ":demo_visible_window_num_listener",
     ":demo_water_mark_listener",
+    ":demo_outline_virtual_media_service",
   ]
 }
 
@@ -213,6 +214,29 @@ ohos_executable("demo_session_manager") {
     "graphic_2d:librender_service_base",
     "hilog:libhilog",
     "ipc:ipc_core",
+  ]
+
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
+
+ohos_executable("demo_outline_virtual_media_service") {
+  sources = [ "demo_outline_virtual_media_service.cpp" ]
+
+  include_dirs = [
+    "${window_base_path}/interfaces/innerkits/wm",
+    "${window_base_path}/test/common/utils/include",
+  ]
+
+  deps = [
+    "${window_base_path}/test/common/utils:libtestutil",
+    "${window_base_path}/wm:libwm",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "graphic_2d:librender_service_base",
+    "hilog:libhilog",
   ]
 
   part_name = "window_manager"

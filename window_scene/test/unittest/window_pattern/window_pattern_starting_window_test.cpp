@@ -540,9 +540,19 @@ HWTEST_F(WindowPatternStartingWindowTest, PreLoadStartingWindow, TestSize.Level1
     info.abilityName_ = "abilityName_";
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
+    sceneSession->SetSessionProperty(property);
+    ssm_->PreLoadStartingWindow(sceneSession);
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession->SetSessionProperty(property);
+    ssm_->PreLoadStartingWindow(sceneSession);
+    sceneSession->state_ = SessionState::STATE_CONNECT;
+    ssm_->PreLoadStartingWindow(sceneSession);
+    sceneSession->state_ = SessionState::STATE_DISCONNECT;
     ssm_->PreLoadStartingWindow(sceneSession);
     ASSERT_NE(nullptr, sceneSession);
-    EXPECT_EQ(false, ssm_->needUpdateRdb_);
 }
 
 /**

@@ -319,6 +319,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::SupportSnapshotAllSessionStatus);
     BindNativeFunction(env, exportObj, "supportPreloadStartingWindow", moduleName,
         JsSceneSessionManager::SupportPreloadStartingWindow);
+    BindNativeFunction(env, exportObj, "preloadStartingWindow", moduleName,
+        JsSceneSessionManager::PreloadStartingWindow);
     BindNativeFunction(env, exportObj, "setUIEffectControllerAliveInUI", moduleName,
         JsSceneSessionManager::SetUIEffectControllerAliveInUI);
     BindNativeFunction(env, exportObj, "setPiPSettingSwitchStatus", moduleName,
@@ -2186,7 +2188,7 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionBackground(napi_env env, 
         TLOGI(WmsLogTag::WMS_LIFE, "isSaveSnapshot: %{public}u", isSaveSnapshot);
     }
 
-    BackgroundReason reason = BackgroundReason::DEFAULT;
+    LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT;
     if (argc >= ARGC_FIVE) {
         ConvertFromJsValue(env, argv[ARGC_FOUR], reason);
         TLOGI(WmsLogTag::WMS_LIFE, "backgroundReason: %{public}u", reason);
@@ -2201,8 +2203,8 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionDestruction(napi_env env,
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
     WSErrorCode errCode = WSErrorCode::WS_OK;
-    size_t argc = ARGC_FIVE;
-    napi_value argv[ARGC_FIVE] = {nullptr};
+    size_t argc = 6;
+    napi_value argv[6] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
         TLOGE(WmsLogTag::WMS_LIFE, "Argc is invalid: %{public}zu", argc);
@@ -2256,6 +2258,11 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionDestruction(napi_env env,
         RETURN_IF_CONVERT_FAIL(env, argv[ARGC_FOUR], isUserRequestedExit, "isUserRequestedExit", WmsLogTag::WMS_LIFE);
     }
 
+    LifeCycleChangeReason terminateReason = LifeCycleChangeReason::DEFAULT;
+    if (argc >= 6) {
+        RETURN_IF_CONVERT_FAIL(env, argv[ARGC_FIVE], terminateReason, "terminateReason", WmsLogTag::WMS_LIFE);
+    }
+
     if (errCode == WSErrorCode::WS_ERROR_INVALID_PARAM) {
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -2263,7 +2270,7 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionDestruction(napi_env env,
     }
 
     SceneSessionManager::GetInstance().RequestSceneSessionDestruction(sceneSession,
-        needRemoveSession, isSaveSnapshot, isForceClean, isUserRequestedExit);
+        needRemoveSession, isSaveSnapshot, isForceClean, isUserRequestedExit, terminateReason);
     return NapiGetUndefined(env);
 }
 
@@ -3654,6 +3661,60 @@ napi_value JsSceneSessionManager::OnSupportPreloadStartingWindow(napi_env env, n
     return NapiGetUndefined(env);
 }
 
+napi_value JsSceneSessionManager::PreloadStartingWindow(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnPreloadStartingWindow(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::OnPreloadStartingWindow(napi_env env, napi_callback_info info)
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsSceneSessionManager::OnPreloadStartingWindow");
+    WSErrorCode errCode = WSErrorCode::WS_OK;
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Argc is invalid: %{public}zu", argc);
+        errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
+    }
+
+    sptr<SceneSession> sceneSession = nullptr;
+    if (errCode == WSErrorCode::WS_OK) {
+        napi_value jsSceneSessionObj = argv[0];
+        if (jsSceneSessionObj == nullptr) {
+            TLOGE(WmsLogTag::WMS_PATTERN, "Failed to get js scene session object");
+            errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
+        } else {
+            void* pointerResult = nullptr;
+            napi_unwrap(env, jsSceneSessionObj, &pointerResult);
+            auto jsSceneSession = static_cast<JsSceneSession*>(pointerResult);
+            if (jsSceneSession == nullptr) {
+                TLOGE(WmsLogTag::WMS_PATTERN, "Failed to get scene session from js object");
+                errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
+            } else {
+                sceneSession = jsSceneSession->GetNativeSession();
+            }
+        }
+    }
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "sceneSession is nullptr");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_SYSTEM_ABNORMALLY),
+            "sceneSession is nullptr"));
+        return NapiGetUndefined(env);
+    }
+
+    if (errCode == WSErrorCode::WS_ERROR_INVALID_PARAM) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    SceneSessionManager::GetInstance().PreLoadStartingWindow(sceneSession);
+    return NapiGetUndefined(env);
+}
+
 napi_value JsSceneSessionManager::SupportCreateFloatWindow(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]");
@@ -5026,10 +5087,10 @@ napi_value JsSceneSessionManager::NotifySessionTransferToTargetScreenEvent(napi_
 
 napi_value JsSceneSessionManager::OnNotifySessionTransferToTargetScreenEvent(napi_env env, napi_callback_info info)
 {
-    size_t argc = ARGC_FOUR;
-    napi_value argv[ARGC_FOUR] = {nullptr};
+    size_t argc = ARGC_FIVE;
+    napi_value argv[ARGC_FIVE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != ARGC_FOUR) {
+    if (argc != ARGC_FIVE) {
         TLOGE(WmsLogTag::WMS_LIFE, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -5063,9 +5124,17 @@ napi_value JsSceneSessionManager::OnNotifySessionTransferToTargetScreenEvent(nap
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
+
+    LifeCycleChangeReason transferReason = LifeCycleChangeReason::DEFAULT;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_FOUR], transferReason)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to transferReason");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
     TLOGI(WmsLogTag::WMS_LIFE, "persistentId: %{public}d, resultCode: %{public}d, "
-        "fromScreenId: %{public}" PRId64 " , toScreenId: %{public}" PRId64,
-        persistentId, resultCode, fromScreenId, toScreenId);
+        "fromScreenId: %{public}" PRId64 " , toScreenId: %{public}" PRId64 ", transferReason: %{public}u",
+        persistentId, resultCode, fromScreenId, toScreenId, transferReason);
     SceneSessionManager::GetInstance().NotifySessionTransferToTargetScreenEvent(
         persistentId, resultCode, static_cast<uint64_t>(fromScreenId), static_cast<uint64_t>(toScreenId));
     return NapiGetUndefined(env);

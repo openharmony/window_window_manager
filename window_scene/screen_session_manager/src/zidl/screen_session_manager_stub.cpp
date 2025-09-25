@@ -1399,6 +1399,24 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             NotifyIsFullScreenInForceSplitMode(uid, isFullScreen);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_PROPERTY_BY_FOLD_STATE_CHANGE: {
+            ScreenId screenId = SCREEN_ID_INVALID;
+            if (!data.ReadUint64(screenId)) {
+                TLOGE(WmsLogTag::DMS, "Read screenId failed");
+                return ERR_INVALID_DATA;
+            }
+            ScreenProperty screenProperty;
+            if (!RSMarshallingHelper::Unmarshalling(data, screenProperty)) {
+                TLOGE(WmsLogTag::DMS, "read screenSession failed");
+                return ERR_INVALID_DATA;
+            }
+            DMError ret = SyncScreenPropertyChangedToServer(screenId, screenProperty);
+            if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+                TLOGE(WmsLogTag::DMS, "write result failed");
+                return ERR_INVALID_DATA;
+            }
+            break;
+        }
         default:
             TLOGW(WmsLogTag::DMS, "unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

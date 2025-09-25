@@ -180,14 +180,15 @@ void AniWindowListener::OnDisplayIdChanged(DisplayId displayId)
 void AniWindowListener::LifeCycleCallback(LifeCycleEventType eventType)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]LifeCycleCallback, envent type: %{public}u", eventType);
-    auto task = [self = weakRef_, eventType, eng = env_] () {
+    auto task = [self = weakRef_, eventType, caseType = caseType_, eng = env_] () {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "AniWindowListener::LifeCycleCallback");
         auto thisListener = self.promote();
         if (thisListener == nullptr || eng == nullptr) {
             TLOGE(WmsLogTag::DEFAULT, "[ANI]this listener or eng is nullptr");
             return;
         }
-        AniWindowUtils::CallAniFunctionVoid(eng, "L@ohos/window/window;", "runWindowEventCallback",
+        AniWindowUtils::CallAniFunctionVoid(eng, "L@ohos/window/window;",
+            caseType == CaseType::CASE_STAGE ? "runWindowStageEventCallback" : "runWindowEventCallback",
             nullptr, thisListener->aniCallback_, static_cast<ani_int>(eventType));
     };
     if (!eventHandler_) {
