@@ -1667,25 +1667,6 @@ HWTEST_F(ScreenSessionManagerTest, DisconnectScreenIfScreenInfoNull01, TestSize.
 }
 
 /**
- * @tc.name: SetDefaultScreenModeWhenCreateMirror
- * @tc.desc: SetDefaultScreenModeWhenCreateMirror
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, SetDefaultScreenModeWhenCreateMirror, TestSize.Level1) {
-    ASSERT_NE(ssm_, nullptr);
-#define FOLD_ABILITY_ENABLE
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        sptr<ScreenSession> session = nullptr;
-        ssm_->SetDefaultScreenModeWhenCreateMirror(session);
-        session = ssm_->GetOrCreateScreenSession(0);
-        auto mode = session->GetScreenCombination();
-        ssm_->SetDefaultScreenModeWhenCreateMirror(session);
-        ASSERT_EQ(session->GetScreenCombination(), mode);
-    }
-#undef FOLD_ABILITY_ENABLE
-}
-
-/**
  * @tc.name: GetOldDisplayModeRotation
  * @tc.desc: GetOldDisplayModeRotation
  * @tc.type: FUNC
@@ -1879,28 +1860,6 @@ HWTEST_F(ScreenSessionManagerTest, InitRotationCorrectionMap03, TestSize.Level1)
     std::string config = "1,0,1;1,0;2,0;5,3;3,a;a,a";
     ssm_->InitRotationCorrectionMap(config);
     EXPECT_EQ(ssm_->rotationCorrectionMap_[FoldDisplayMode::GLOBAL_FULL], 3);
-}
-
-/**
- * @tc.name: RecoverDefaultScreenModeInner
- * @tc.desc: RecoverDefaultScreenModeInner
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, RecoverDefaultScreenModeInner, TestSize.Level1) {
-    ASSERT_NE(ssm_, nullptr);
-#define FOLD_ABILITY_ENABLE
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        ScreenId innerRsId = 0;
-        ScreenId externalRsId = 11;
-        ssm_->SetIsFoldStatusLocked(true);
-        EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), true);
-        ssm_->RecoverDefaultScreenModeInner(innerRsId, externalRsId);
-        SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::EXPANDED);
-        innerRsId = 1;
-        externalRsId = 12;
-        ssm_->RecoverDefaultScreenModeInner(innerRsId, externalRsId);
-    }
-#undef FOLD_ABILITY_ENABLE
 }
 
 /**

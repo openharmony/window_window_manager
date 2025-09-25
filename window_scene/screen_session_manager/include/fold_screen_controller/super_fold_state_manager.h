@@ -138,7 +138,6 @@ private:
 
     uint32_t GetFoldCreaseHeight() const;
     DMError RefreshMirrorRegionInner(sptr<ScreenSession>& mainScreenSession, sptr<ScreenSession>& secondarySession);
-    DMError ForceChangeMirrorMode(sptr<ScreenSession>& mainScreenSession, sptr<ScreenSession>& secondarySession);
 };
 } // Rosen
 } // OHOS
