@@ -91,7 +91,12 @@ ScenePersistence::ScenePersistence(const std::string& bundleName, int32_t persis
 
 ScenePersistence::~ScenePersistence()
 {
-    TLOGI(WmsLogTag::WMS_PATTERN, "destroyed, persistentId: %{public}d", persistentId_);
+    ClearSnapshotPath();
+}
+
+void ScenePersistence::ClearSnapshotPath()
+{
+    TLOGI(WmsLogTag::WMS_PATTERN, "persistentId: %{public}d", persistentId_);
     for (const auto& snapshotPath : snapshotPath_) {
         remove(snapshotPath.c_str());
     }

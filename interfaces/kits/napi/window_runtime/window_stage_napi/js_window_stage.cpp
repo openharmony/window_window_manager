@@ -1100,7 +1100,7 @@ napi_value JsWindowStage::OnSetImageForRecent(napi_env env, napi_callback_info i
         }
     } else if (GetType(env, argv[INDEX_ZERO]) == napi_object) {
         pixelMap = OHOS::Media::PixelMapNapi::GetPixelMap(env, argv[INDEX_ZERO]);
-        if (pixelMap = nullptr) {
+        if (pixelMap == nullptr) {
             TLOGE(WmsLogTag::WMS_PATTERN, "Get pixelMap error");
             return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         }

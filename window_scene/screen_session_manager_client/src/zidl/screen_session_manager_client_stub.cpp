@@ -33,6 +33,10 @@ void ScreenSessionManagerClientStub::InitScreenChangeMap()
         [this](MessageParcel& data, MessageParcel& reply) {
         return HandleOnPropertyChanged(data, reply);
     };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_FOLD_PROPERTY_CHANGED] =
+            [this](MessageParcel& data, MessageParcel& reply) {
+                return HandleOnFoldPropertyChanged(data, reply);
+    };
     HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_POWER_STATUS_CHANGED] =
         [this](MessageParcel& data, MessageParcel& reply) {
         return HandleOnPowerStatusChanged(data, reply);
@@ -241,6 +245,25 @@ int ScreenSessionManagerClientStub::HandleOnPropertyChanged(MessageParcel& data,
     }
     auto reason = static_cast<ScreenPropertyChangeReason>(data.ReadUint32());
     OnPropertyChanged(screenId, property, reason);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnFoldPropertyChanged(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::DMS, "enter");
+    ScreenId screenId;
+    if (!data.ReadUint64(screenId)) {
+        TLOGE(WmsLogTag::DMS, "Read screenId failed");
+        return ERR_INVALID_DATA;
+    }
+    ScreenProperty property;
+    if (!RSMarshallingHelper::Unmarshalling(data, property)) {
+        TLOGE(WmsLogTag::DMS, "Read property failed");
+        return ERR_INVALID_DATA;
+    }
+    auto reason = static_cast<ScreenPropertyChangeReason>(data.ReadUint32());
+    auto displayMode = static_cast<FoldDisplayMode>(data.ReadUint32());
+    OnFoldPropertyChanged(screenId, property, reason, displayMode);
     return ERR_NONE;
 }
 

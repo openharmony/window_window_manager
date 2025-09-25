@@ -43,6 +43,7 @@ public:
 private:
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
     static napi_value UpdateScreenRotationProperty(napi_env env, napi_callback_info info);
+    static napi_value UpdateServerScreenProperty(napi_env env, napi_callback_info info);
     static napi_value GetCurvedCompressionArea(napi_env env, napi_callback_info info);
     static napi_value RegisterShutdownCallback(napi_env env, napi_callback_info info);
     static napi_value UnRegisterShutdownCallback(napi_env env, napi_callback_info info);
@@ -81,6 +82,7 @@ private:
 
     napi_value OnRegisterCallback(napi_env env, const napi_callback_info info);
     napi_value OnUpdateScreenRotationProperty(napi_env env, const napi_callback_info info);
+    napi_value OnUpdateServerScreenProperty(napi_env env, const napi_callback_info info);
     napi_value OnGetCurvedCompressionArea(napi_env env, const napi_callback_info info);
     napi_value OnRegisterShutdownCallback(napi_env env, const napi_callback_info info);
     napi_value OnUnRegisterShutdownCallback(napi_env env, const napi_callback_info info);
