@@ -328,6 +328,8 @@ public:
     void GetCloseAbilityWantAndClean(AAFwk::Want& outWant);
     void SetSessionInfo(const SessionInfo& info);
     void SetSessionInfoWindowInputType(uint32_t windowInputType);
+    void SetSessionInfoExpandInputFlag(uint32_t expandInputFlag);
+    uint32_t GetSessionInfoExpandInputFlag() const;
     void SetSessionInfoWindowMode(int32_t windowMode);
     const SessionInfo& GetSessionInfo() const;
     SessionInfo& EditSessionInfo();
