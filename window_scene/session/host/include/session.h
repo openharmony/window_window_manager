@@ -285,7 +285,7 @@ public:
     void ResetSnapshot();
     void SaveSnapshot(bool useFfrt, bool needPersist = true,
         std::shared_ptr<Media::PixelMap> persistentPixelMap = nullptr, bool updateSnapshot = false,
-        LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
+        BackgroundReason reason = BackgroundReason::DEFAULT);
     void SetSaveSnapshotCallback(Task&& task)
     {
         if (task) {
@@ -749,7 +749,7 @@ public:
     bool IsPersistentImageFit() const;
     bool SupportSnapshotAllSessionStatus() const;
     void InitSnapshotCapacity();
-    SnapshotStatus GetSessionSnapshotStatus(LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT) const;
+    SnapshotStatus GetSessionSnapshotStatus(BackgroundReason reason = BackgroundReason::DEFAULT) const;
     uint32_t GetWindowSnapshotOrientation() const;
     uint32_t GetLastOrientation() const;
     bool HasSnapshotFreeMultiWindow();

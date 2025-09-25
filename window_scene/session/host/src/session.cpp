@@ -2791,7 +2791,7 @@ bool Session::GetEnableAddSnapshot() const
 }
 
 void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media::PixelMap> persistentPixelMap,
-    bool updateSnapshot, LifeCycleChangeReason reason)
+    bool updateSnapshot, BackgroundReason reason)
 {
     if (scenePersistence_ == nullptr) {
         return;
@@ -2968,7 +2968,7 @@ bool Session::SupportSnapshotAllSessionStatus() const
     return (!IsPersistentImageFit() && (capacity_ != defaultCapacity));
 }
 
-SnapshotStatus Session::GetSessionSnapshotStatus(LifeCycleChangeReason reason) const
+SnapshotStatus Session::GetSessionSnapshotStatus(BackgroundReason reason) const
 {
     if (!SupportSnapshotAllSessionStatus()) {
         return defaultStatus;
@@ -2979,7 +2979,7 @@ SnapshotStatus Session::GetSessionSnapshotStatus(LifeCycleChangeReason reason) c
     } else {
         snapshotScreen = WSSnapshotHelper::GetInstance()->GetScreenStatus();
     }
-    if (reason == LifeCycleChangeReason::EXPAND_TO_FOLD_SINGLE_POCKET) {
+    if (reason == BackgroundReason::EXPAND_TO_FOLD_SINGLE_POCKET) {
         snapshotScreen = SCREEN_EXPAND;
     }
     return snapshotScreen;

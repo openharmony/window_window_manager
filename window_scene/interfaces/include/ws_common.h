@@ -1124,19 +1124,13 @@ enum class SnapshotNodeType : uint32_t {
     APP_NODE,
 };
 
-enum class LifeCycleChangeReason {
+enum class BackgroundReason {
     DEFAULT = 0,
 
     /*
      * Expanded to folded on single pocket
      */
     EXPAND_TO_FOLD_SINGLE_POCKET,
-
-    BACK_TO_DESKTOP,
-
-    LAST_SCENE_TRANSFER,
-
-    REASON_END,
 };
 
 enum class AsyncTraceTaskId: int32_t {

@@ -518,7 +518,7 @@ WSError SceneSession::NotifyFrameLayoutFinishFromApp(bool notifyListener, const 
     return WSError::WS_OK;
 }
 
-WSError SceneSession::BackgroundTask(const bool isSaveSnapshot, LifeCycleChangeReason reason)
+WSError SceneSession::BackgroundTask(const bool isSaveSnapshot, BackgroundReason reason)
 {
     auto needSaveSnapshot = !ScenePersistentStorage::HasKey("SetImageForRecent_" + std::to_string(GetPersistentId()),
         ScenePersistentStorageType::MAXIMIZE_STATE);

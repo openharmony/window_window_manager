@@ -2188,7 +2188,7 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionBackground(napi_env env, 
         TLOGI(WmsLogTag::WMS_LIFE, "isSaveSnapshot: %{public}u", isSaveSnapshot);
     }
 
-    LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT;
+    BackgroundReason reason = BackgroundReason::DEFAULT;
     if (argc >= ARGC_FIVE) {
         ConvertFromJsValue(env, argv[ARGC_FOUR], reason);
         TLOGI(WmsLogTag::WMS_LIFE, "backgroundReason: %{public}u", reason);
@@ -2203,8 +2203,8 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionDestruction(napi_env env,
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
     WSErrorCode errCode = WSErrorCode::WS_OK;
-    size_t argc = 6;
-    napi_value argv[6] = {nullptr};
+    size_t argc = ARGC_FIVE;
+    napi_value argv[ARGC_FIVE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
         TLOGE(WmsLogTag::WMS_LIFE, "Argc is invalid: %{public}zu", argc);
@@ -2258,11 +2258,6 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionDestruction(napi_env env,
         RETURN_IF_CONVERT_FAIL(env, argv[ARGC_FOUR], isUserRequestedExit, "isUserRequestedExit", WmsLogTag::WMS_LIFE);
     }
 
-    LifeCycleChangeReason terminateReason = LifeCycleChangeReason::DEFAULT;
-    if (argc >= 6) {
-        RETURN_IF_CONVERT_FAIL(env, argv[ARGC_FIVE], terminateReason, "terminateReason", WmsLogTag::WMS_LIFE);
-    }
-
     if (errCode == WSErrorCode::WS_ERROR_INVALID_PARAM) {
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -2270,7 +2265,7 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionDestruction(napi_env env,
     }
 
     SceneSessionManager::GetInstance().RequestSceneSessionDestruction(sceneSession,
-        needRemoveSession, isSaveSnapshot, isForceClean, isUserRequestedExit, terminateReason);
+        needRemoveSession, isSaveSnapshot, isForceClean, isUserRequestedExit);
     return NapiGetUndefined(env);
 }
 
