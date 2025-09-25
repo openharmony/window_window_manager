@@ -10245,7 +10245,6 @@ DMError ScreenSessionManager::SetMultiScreenMode(ScreenId mainScreenId, ScreenId
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
-    SetIsExtendMode(screenMode == MultiScreenMode::SCREEN_EXTEND);
     if (IsPhysicalExtendScreenInUse(mainScreenId, secondaryScreenId) == DMError::DM_OK) {
         return DMError::DM_ERROR_INVALID_MODE_ID;
     }
@@ -10261,9 +10260,6 @@ DMError ScreenSessionManager::SetMultiScreenMode(ScreenId mainScreenId, ScreenId
         TLOGI(WmsLogTag::DMS, "exit outer only mode.");
         ExitOuterOnlyMode(mainScreenId, secondaryScreenId, screenMode);
         return DMError::DM_OK;
-    }
-    if (screenMode == MultiScreenMode::SCREEN_EXTEND) {
-        SuperFoldSensorManager::GetInstance().HandleScreenConnectChange();
     }
     SetMultiScreenModeInner(mainScreenId, secondaryScreenId, screenMode);
     SetIsExtendMode(screenMode == MultiScreenMode::SCREEN_EXTEND);
