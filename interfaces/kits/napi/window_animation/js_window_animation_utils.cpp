@@ -145,8 +145,8 @@ namespace OHOS {
 namespace Rosen {
 bool IsSystemCalling()
 {
-    uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
-    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx);
+    uint64_t accessTokenID = IPCSkeleton::GetCallingFullTokenID();
+    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenID);
 }
 
 napi_value ConvertTransitionAnimationToJsValue(napi_env env, std::shared_ptr<TransitionAnimation> transitionAnimation)
