@@ -351,12 +351,14 @@ HWTEST_F(WindowAdapterTest, WindowManagerAndSessionRecover, TestSize.Level1)
     };
     windowAdapter.RegisterSessionRecoverCallbackFunc(persistentId, testFunc);
     windowAdapter.RegisterUIEffectRecoverCallbackFunc(persistentId, testFunc3);
+    windowAdapter.RegisterOutlineRecoverCallbackFunc(testFunc3);
     windowAdapter.WindowManagerAndSessionRecover();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(ret, 1);
     }
     windowAdapter.RegisterSessionRecoverCallbackFunc(persistentId, testFunc2);
     windowAdapter.RegisterUIEffectRecoverCallbackFunc(persistentId, testFunc4);
+    windowAdapter.RegisterOutlineRecoverCallbackFunc(testFunc4);
     windowAdapter.WindowManagerAndSessionRecover();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(ret, 2);
@@ -1289,6 +1291,36 @@ HWTEST_F(WindowAdapterTest, WMSDeathRecipient, TestSize.Level1)
     wmsDeath_->OnRemoteDied(wptr(token));
 }
  
+/**
+ * @tc.name: RegisterAndUnregisterOutlineRecoverCallbackFunc
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, RegisterAndUnregisterOutlineRecoverCallbackFunc, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    auto testFunc = [] {
+        return WMError::WM_OK;
+    };
+    windowAdapter.RegisterOutlineRecoverCallbackFunc(testFunc);
+    EXPECT_NE(windowAdapter.outlineRecoverCallbackFunc_, nullptr);
+    windowAdapter.UnregisterOutlineRecoverCallbackFunc();
+    EXPECT_EQ(windowAdapter.outlineRecoverCallbackFunc_, nullptr);
+}
+
+/**
+ * @tc.name: UpdateOutline
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, UpdateOutline, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    OutlineParams params;
+    auto ret = windowAdapter.UpdateOutline(nullptr, params);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+}
+
 /**
  * @tc.name: GetInstance
  * @tc.desc: normal function

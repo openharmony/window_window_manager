@@ -41,6 +41,10 @@ namespace Rosen {
 constexpr Rect g_emptyRect = {0, 0, 0, 0};
 class AniWindowUtils {
 public:
+    static ani_status InitAniCreator(ani_env* env,
+        const std::string& aniClassDescriptor, const std::string& aniCtorSignature);
+    static ani_object InitAniObjectByCreator(ani_env* env,
+        const std::string& aniClassDescriptor, const std::string aniCtorSignature, ...);
     static ani_status GetStdString(ani_env* env, ani_string ani_str, std::string& result);
     static ani_status GetStdStringVector(ani_env* env, ani_object ary, std::vector<std::string>& result);
     static ani_status GetPropertyIntObject(ani_env* env, const char* propertyName, ani_object object, int32_t& result);
@@ -53,7 +57,6 @@ public:
     static ani_status GetIntVector(ani_env* env, ani_object ary, std::vector<int32_t>& result);
     static ani_status GetPropertyLongObject(ani_env* env, const char* propertyName, ani_object object, int64_t& result);
     static ani_status GetEnumValue(ani_env* env, ani_enum_item enumPara, uint32_t& result);
-    static ani_status NewAniObjectNoParams(ani_env* env, const char* cls, ani_object* object);
     static ani_status NewAniObject(ani_env* env, const char* cls, const char* signature, ani_object* result, ...);
     static ani_object CreateAniUndefined(ani_env* env);
     static ani_object AniThrowError(ani_env* env, WMError errorCode, std::string msg = "");
@@ -76,7 +79,8 @@ public:
         const char* method, const char* signature, ...);
     static ani_status GetAniString(ani_env* env, const std::string& str, ani_string* result);
     static void* GetAbilityContext(ani_env *env, ani_object aniObj);
-    static ani_object CreateWindowsProperties(ani_env* env, const sptr<Window>& window);
+    static ani_object CreateAniRectObject(ani_env* env, const Rect& rect);
+    static ani_object CreateWindowsProperties(ani_env* env, const WindowPropertyInfo& windowPropertyInfo);
     static ani_object CreateAniPixelMapArray(ani_env* env,
         const std::vector<std::shared_ptr<Media::PixelMap>>& pixelMaps);
     static ani_object CreateAniMainWindowInfoArray(ani_env* env, const std::vector<sptr<MainWindowInfo>>& infos);
@@ -127,38 +131,6 @@ public:
     static WmErrorCode ToErrorCode(WMError error, WmErrorCode defaultCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     template<typename T>
     static ani_object CreateBaseTypeObject(ani_env* env, T value);
-
-private:
-    static void SetSystemPropertiesWindowRect(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesDrawableRect(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowType(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowIsLayoutFullScreen(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowIsFullScreen(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowTouchable(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowFousable(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowIsPrivacyMode(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowIsKeepScreenOn(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowBrightness(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowIsTransparent(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertieswindowIsRoundCorner(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowDimBehindValue(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertieswindowId(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesdisplayId(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
 };
 
 template<typename T>

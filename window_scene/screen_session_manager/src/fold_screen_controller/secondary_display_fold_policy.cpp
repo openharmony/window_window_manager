@@ -543,22 +543,31 @@ void SecondaryDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> sc
             break;
         }
     }
-    bool firstSCBConnect = ScreenSessionManager::GetInstance().GetFirstSCBConnect();
-    screenSession->UpdatePropertyByFoldControl(screenProperty_, displayMode, firstSCBConnect);
-    auto oldScreenProperty = screenSession->GetScreenProperty();
-    if (displayMode == FoldDisplayMode::MAIN) {
-        screenSession->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
-    }
+    HandlePropertyChange(screenSession, screenProperty_, reason, displayMode, isNeedNotifyFoldProperty);
+}
 
-    if (isNeedNotifyFoldProperty) {
-        screenSession->PropertyChange(oldScreenProperty, reason);
+void SecondaryDisplayFoldPolicy::HandlePropertyChange(sptr<ScreenSession> screenSession, ScreenProperty& ScreenProperty,
+    ScreenPropertyChangeReason reason, FoldDisplayMode displayMode, bool isNeedNotifyFoldProperty)
+{
+    if (ScreenSessionManager::GetInstance().GetClientProxy()) {
+        bool firstSCBConnect = ScreenSessionManager::GetInstance().GetFirstSCBConnect();
+        screenSession->UpdatePropertyByFoldControl(ScreenProperty, displayMode, firstSCBConnect);
+        auto oldScreenProperty = screenSession->GetScreenProperty();
+        if (displayMode == FoldDisplayMode::MAIN) {
+            screenSession->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
+        }
+        if (isNeedNotifyFoldProperty) {
+            screenSession->PropertyChange(oldScreenProperty, reason);
+        } else {
+            TLOGI(WmsLogTag::DMS, "PropertyChange...set displayModeChangeStatus");
+            SetSecondaryDisplayModeChangeStatus(false);
+        }
+        TLOGI(WmsLogTag::DMS, "screenBounds : width_= %{public}f, height_= %{public}f",
+            screenSession->GetScreenProperty().GetBounds().rect_.width_,
+            screenSession->GetScreenProperty().GetBounds().rect_.height_);
     } else {
-        TLOGI(WmsLogTag::DMS, "PropertyChange...set displayModeChangeStatus");
-        SetSecondaryDisplayModeChangeStatus(false);
+        screenSession->NotifyFoldPropertyChange(ScreenProperty, reason, displayMode);
     }
-    TLOGI(WmsLogTag::DMS, "screenBounds : width_= %{public}f, height_= %{public}f",
-        screenSession->GetScreenProperty().GetBounds().rect_.width_,
-        screenSession->GetScreenProperty().GetBounds().rect_.height_);
 }
 
 void SecondaryDisplayFoldPolicy::SetStatusFullActiveRectAndTpFeature(const sptr<ScreenSession>& screenSession,

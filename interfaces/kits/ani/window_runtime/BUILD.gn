@@ -64,6 +64,7 @@ ohos_shared_library("windowstageani_kit") {
     "../../../../utils:libwmutil_base",
     "../../../../wm:libwm",
     "../../../../interfaces/kits/napi/window_runtime:window_native_kit",
+    "../../../../interfaces/kits/napi/window_runtime:windowstage_kit",
   ]
 
   external_deps = [

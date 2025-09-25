@@ -161,6 +161,7 @@ public:
         TRANS_ID_RECOVER_WINDOW_PROPERTY_CHANGE_FLAG,
         TRANS_ID_MINIMIZE_ALL_WINDOW,
         TRANS_ID_GLOBAL_COORDINATE_TO_RELATIVE_COORDINATE,
+        TRANS_ID_UPDATE_OUTLINE,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -455,6 +456,10 @@ public:
     WMError GetPiPSettingSwitchStatus(bool& switchStatus) override { return WMError::WM_OK; }
     WMError ConvertToRelativeCoordinateExtended(
         const Rect& rect, Rect& newRect, DisplayId& newDisplayId) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams) override
     {
         return WMError::WM_OK;
     }
