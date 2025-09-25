@@ -1649,11 +1649,11 @@ HWTEST_F(ScreenSessionManagerTest, SetDuringCallState, TestSize.Level1)
 }
 
 /**
- * @tc.name: DisconnectScreenIfScreenInfoNull
- * @tc.desc: DisconnectScreenIfScreenInfoNull
+ * @tc.name: LockLandExtendIfScreenInfoNullNull
+ * @tc.desc: LockLandExtendIfScreenInfoNullNull
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, DisconnectScreenIfScreenInfoNull01, TestSize.Level1) {
+HWTEST_F(ScreenSessionManagerTest, LockLandExtendIfScreenInfoNull01, TestSize.Level1) {
     ASSERT_NE(ssm_, nullptr);
 #define FOLD_ABILITY_ENABLE
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
@@ -1661,7 +1661,7 @@ HWTEST_F(ScreenSessionManagerTest, DisconnectScreenIfScreenInfoNull01, TestSize.
         EXPECT_NE(session, nullptr);
         ssm_->SetClient(nullptr);
         ASSERT_EQ(ssm_->GetClientProxy(), nullptr);
-        ssm_->DisConnectScreenIfScreenInfoNull(session);
+        ssm_->LockLandExtendIfScreenInfoNull(session);
     }
 #undef FOLD_ABILITY_ENABLE
 }
