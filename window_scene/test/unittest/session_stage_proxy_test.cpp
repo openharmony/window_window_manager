@@ -564,8 +564,8 @@ HWTEST_F(SessionStageProxyTest, NotifyWindowOcclusionState, TestSize.Level1)
     auto ret = tempProxy->NotifyWindowOcclusionState(state);
     EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
 
-    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SessionStageProxy> proxy = sptr<SessionStageProxy>::MakeSptr(iRemoteObjectMocker);
+    sptr<IRemoteObject> remoteMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionStageProxy> proxy = sptr<SessionStageProxy>::MakeSptr(remoteMocker);
     ASSERT_NE(proxy, nullptr);
 
     MockMessageParcel::ClearAllErrorFlag();
