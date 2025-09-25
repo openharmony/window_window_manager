@@ -2427,6 +2427,100 @@ HWTEST_F(WindowSceneSessionImplTest5, CalculateNewLimitsByLimits, TestSize.Level
     EXPECT_EQ(customizedLimits.minWidth_, userLimits.minWidth_);
     EXPECT_EQ(customizedLimits.minHeight_, userLimits.minHeight_);
 }
+
+/**
+ * @tc.name: ShouldSkipSupportWindowModeCheck01
+ * @tc.desc: ShouldSkipSupportWindowModeCheck01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, ShouldSkipSupportWindowModeCheck01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("ShouldSkipSupportWindowModeCheck");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    uint32_t windowModeSupportType = WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY;
+    bool result = window->ShouldSkipSupportWindowModeCheck(windowModeSupportType, WindowMode::WINDOW_MODE_FLOATING);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: ShouldSkipSupportWindowModeCheck02
+ * @tc.desc: ShouldSkipSupportWindowModeCheck02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, ShouldSkipSupportWindowModeCheck02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("ShouldSkipSupportWindowModeCheck");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    uint32_t windowModeSupportType = WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY;
+    bool result = window->ShouldSkipSupportWindowModeCheck(windowModeSupportType, WindowMode::WINDOW_MODE_FLOATING);
+    EXPECT_EQ(result, true);
+    result = window->ShouldSkipSupportWindowModeCheck(windowModeSupportType, WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    EXPECT_EQ(result, true);
+    result = window->ShouldSkipSupportWindowModeCheck(windowModeSupportType, WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    EXPECT_EQ(result, true);
+
+    windowModeSupportType = WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY;
+    result = window->ShouldSkipSupportWindowModeCheck(windowModeSupportType, WindowMode::WINDOW_MODE_FLOATING);
+    EXPECT_EQ(result, true);
+    result = window->ShouldSkipSupportWindowModeCheck(windowModeSupportType, WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    EXPECT_EQ(result, true);
+    result = window->ShouldSkipSupportWindowModeCheck(windowModeSupportType, WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    EXPECT_EQ(result, true);
+
+    windowModeSupportType = WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
+    result = window->ShouldSkipSupportWindowModeCheck(windowModeSupportType, WindowMode::WINDOW_MODE_FLOATING);
+    EXPECT_EQ(result, true);
+    result = window->ShouldSkipSupportWindowModeCheck(windowModeSupportType, WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    EXPECT_EQ(result, true);
+    result = window->ShouldSkipSupportWindowModeCheck(windowModeSupportType, WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: ShouldSkipSupportWindowModeCheck03
+ * @tc.desc: ShouldSkipSupportWindowModeCheck03
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, ShouldSkipSupportWindowModeCheck03, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("ShouldSkipSupportWindowModeCheck");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    uint32_t windowModeSupportType = WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY;
+    bool result = window->ShouldSkipSupportWindowModeCheck(windowModeSupportType, WindowMode::WINDOW_MODE_FLOATING);
+    EXPECT_EQ(result, true);
+    result = window->ShouldSkipSupportWindowModeCheck(windowModeSupportType, WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    EXPECT_EQ(result, true);
+    result = window->ShouldSkipSupportWindowModeCheck(windowModeSupportType, WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    EXPECT_EQ(result, true);
+
+    windowModeSupportType = WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY;
+    result = window->ShouldSkipSupportWindowModeCheck(windowModeSupportType, WindowMode::WINDOW_MODE_FLOATING);
+    EXPECT_EQ(result, true);
+    result = window->ShouldSkipSupportWindowModeCheck(windowModeSupportType, WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    EXPECT_EQ(result, true);
+    result = window->ShouldSkipSupportWindowModeCheck(windowModeSupportType, WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    EXPECT_EQ(result, true);
+
+    windowModeSupportType = WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
+    result = window->ShouldSkipSupportWindowModeCheck(windowModeSupportType, WindowMode::WINDOW_MODE_FLOATING);
+    EXPECT_EQ(result, true);
+    result = window->ShouldSkipSupportWindowModeCheck(windowModeSupportType, WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    EXPECT_EQ(result, true);
+    result = window->ShouldSkipSupportWindowModeCheck(windowModeSupportType, WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    EXPECT_EQ(result, true);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
