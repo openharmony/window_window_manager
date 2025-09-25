@@ -5588,12 +5588,19 @@ void WindowSessionImpl::NotifySwitchFreeMultiWindow(bool enable)
 
 void WindowSessionImpl::NotifyTitleChange(bool isShow, int32_t height)
 {
+    if (!IsAnco()) {
+        return;
+    }
     auto windowTitleChangeListeners = GetListeners<IWindowTitleChangeListener>();
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "uiContent is null, windowId: %{public}u", GetWindowId());
         return;
     }
+    bool hideMaximizeBtn = IsPcOrPadFreeMultiWindowMode();
+    bool hideSplitBtn = hideMaximizeBtn;
+    uiContent->HideWindowTitleButton(hideSplitBtn, hideMaximizeBtn, false, false);
+    uiContent->EnableContainerModalGesture(false);
     int32_t width = property_->GetWindowRect().width_;
     int32_t posX = property_->GetWindowRect().posX_;
     int32_t posY = property_->GetWindowRect().posY_;
