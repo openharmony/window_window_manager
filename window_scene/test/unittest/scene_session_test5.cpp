@@ -711,8 +711,8 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback03, TestSize.Level1)
     session->OnMoveDragCallback(reason);
     WSRect newRect = session->moveDragController_->GetTargetRect(
         MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
-    ASSERT_EQ(4, windowRect.height_);
-    ASSERT_EQ(10, windowRect.posY_);
+    ASSERT_EQ(4, newRect.height_);
+    ASSERT_EQ(10, newRect.posY_);
 
     compatibleModeProperty->SetIsAdaptToDragScale(false);
     session->property_->SetCompatibleModeProperty(compatibleModeProperty);
