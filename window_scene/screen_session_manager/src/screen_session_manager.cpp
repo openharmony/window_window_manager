@@ -1287,7 +1287,7 @@ std::string ScreenSessionManager::ConvertEdidToString(const struct BaseEdid edid
     return oss.str();
 }
 
-void ScreenSessionManager::DisconnectScreenIfScreenInfoNull(sptr<ScreenSession>& screenSession)
+void ScreenSessionManager::LockLandExtendIfScreenInfoNull(sptr<ScreenSession>& screenSession)
 {
 #ifdef FOLD_ABILITY_ENABLE
    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
@@ -1298,20 +1298,6 @@ void ScreenSessionManager::DisconnectScreenIfScreenInfoNull(sptr<ScreenSession>&
         SetIsExtendMode(true);
         HandleExtendScreenConnect(GetDefaultScreenId());
    }
-   auto clientProxy = GetClientProxy();
-   if (!clientProxy) {
-        TLOGE(WmsLogTag::DMS, "clientProxy is null");
-        return;
-   }
-   if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "screenSession is null");
-        return;
-    }
-    if (IsDefaultMirrorMode(screenSession->GetRSScreenId()) &&
-        screenSession->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
-        clientProxy->OnScreenConnectionChanged(GetSessionOption(screenSession, screenSession->GetRSScreenId()),
-                                               ScreenEvent::DISCONNECTED);
-    }
 #endif
 }
 
