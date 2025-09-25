@@ -415,6 +415,7 @@ private:
      */
     void CheckMoveConfiguration(MoveConfiguration& moveConfiguration);
     WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
+    bool ShouldSkipSupportWindowModeCheck(uint32_t windowModeSupportType, WindowMode mode);
 
     /*
      * PC Window Layout
