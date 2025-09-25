@@ -91,6 +91,8 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env)
             reinterpret_cast<void *>(AniWindowManager::SetGestureNavigationEnabled)},
         ani_native_function {"setWaterMarkImage", "lC{@ohos.multimedia.image.image.PixelMap}z:",
             reinterpret_cast<void *>(AniWindowManager::SetWaterMarkImage)},
+        ani_native_function {"toggleShownStateForAllAppWindowsSync", "l:",
+            reinterpret_cast<void *>(AniWindowManager::ToggleShownStateForAllAppWindows)},
     };
     if ((ret = env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size())) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] bind ns func %{public}u", ret);
@@ -653,6 +655,27 @@ void AniWindowManager::OnSetWaterMarkImage(ani_env* env, ani_object nativePixelM
         return;
     }
     RSInterfaces::GetInstance().ShowWatermark(pixelMap, enable);
+}
+
+void AniWindowManager::OnToggleShownStateForAllAppWindows(ani_env* env)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+        SingletonContainer::Get<WindowManager>().ToggleShownStateForAllAppWindows());
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret, "ToggleShownStateForAllAppWindows failed.");
+    }
+}
+
+void AniWindowManager::ToggleShownStateForAllAppWindows(ani_env* env, ani_long nativeObj)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    if (aniWindowManager != nullptr) {
+        return aniWindowManager->OnToggleShownStateForAllAppWindows(env);
+    } else {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindowManager is nullptr");
+    }
 }
 }  // namespace Rosen
 }  // namespace OHOS

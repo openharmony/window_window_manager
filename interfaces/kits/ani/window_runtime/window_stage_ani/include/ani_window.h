@@ -18,6 +18,7 @@
 
 #include "ani.h"
 #include "ani_window_register_manager.h"
+#include "ani_remote_object.h"
 #include "window.h"
 
 namespace OHOS {
@@ -101,6 +102,13 @@ public:
     static void SetWindowShadowRadius(ani_env* env, ani_object obj, ani_long nativeObj, ani_double radius);
     static void Finalizer(ani_env* env, ani_long nativeObj);
     static ani_object GetTransitionController(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void BindDialogTarget(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_object token, ani_ref deathCallback);
+    static void BindDialogTargetNew(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_object requestInfo, ani_ref deathCallback);
+    static ani_object CreateSubWindowWithOptions(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_string name, ani_object options);
+    static void Hide(ani_env* env, ani_object obj, ani_long nativeObj);
 
     void SetFollowParentWindowLayoutEnabled(ani_env* env, ani_boolean enabled);
     void SetWindowDelayRaiseOnDrag(ani_env* env, ani_boolean isEnabled);
@@ -209,6 +217,10 @@ private:
     void OnRotate(ani_env* env, ani_object rotateOptions);
     void OnSetShadow(ani_env* env, ani_double radius, ani_string color, ani_object offsetX, ani_object offsetY);
     void OnSetCornerRadius(ani_env* env, ani_double cornerRadius);
+    void OnBindDialogTarget(ani_env* env, ani_object token, ani_ref deathCallback);
+    void OnBindDialogTargetNew(ani_env* env, ani_object requestInfo, ani_ref deathCallback);
+    ani_object OnCreateSubWindowWithOptions(ani_env* env, ani_string name, ani_object options);
+    void OnHide(ani_env* env);
     static bool ParseScaleOption(ani_env* env, ani_object scaleOptions, Transform& trans);
     static bool ParseTranslateOption(ani_env* env, ani_object translateOptions, Transform& trans);
     static bool ParseRotateOption(ani_env* env, ani_object rotateOptions, Transform& trans);
