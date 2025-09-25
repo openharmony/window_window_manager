@@ -1609,6 +1609,9 @@ WSError Session::Disconnect(bool isFromClient, const std::string& identityToken)
     if (visibilityChangedDetectFunc_) {
         visibilityChangedDetectFunc_(GetCallingPid(), isVisible_, false);
     }
+    // If session is disconnect, clear it's outline if need.
+    OutlineStyleParams defaultParams;
+    UpdateSessionOutline(false, defaultParams);
     return WSError::WS_OK;
 }
 
@@ -4946,6 +4949,39 @@ WSError Session::NotifyClientToUpdateGlobalDisplayRect(const WSRect& rect, SizeC
         return WSError::WS_DO_NOTHING;
     }
     return sessionStage_->UpdateGlobalDisplayRectFromServer(rect, reason);
+}
+
+void Session::SetOutlineParamsChangeCallback(OutlineParamsChangeCallbackFunc&& func)
+{
+    PostTask([weakThis = wptr(this), where = __func__, func = std::move(func)] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "session or onOutlineParamsChangeCallback is null.");
+            return;
+        }
+        session->outlineParamsChangeCallback_ = std::move(func);
+        session->outlineParamsChangeCallback_(session->isOutlineEnabled_, session->outlineStyleParams_);
+    }, __func__);
+}
+
+void Session::UpdateSessionOutline(bool enabled, const OutlineStyleParams& params)
+{
+    if (enabled == isOutlineEnabled_ && params == outlineStyleParams_) {
+        TLOGD(WmsLogTag::WMS_ANIMATION, "Same outline params.");
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_ANIMATION, "id: %{public}d, oldEnabled: %{public}d, oldParams: %{public}s, "
+          "newEnabled: %{public}d, newParams: %{public}s", GetPersistentId(), isOutlineEnabled_,
+          outlineStyleParams_.ToString().c_str(), enabled, params.ToString().c_str());
+    isOutlineEnabled_ = enabled;
+    outlineStyleParams_.outlineColor_ = params.outlineColor_;
+    outlineStyleParams_.outlineWidth_ = params.outlineWidth_;
+    outlineStyleParams_.outlineShape_ = params.outlineShape_;
+    if (outlineParamsChangeCallback_) {
+        outlineParamsChangeCallback_(isOutlineEnabled_, outlineStyleParams_);
+    } else {
+        TLOGI(WmsLogTag::WMS_ANIMATION, "Outline params change callback is null.");
+    }
 }
 
 std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)

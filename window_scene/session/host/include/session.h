@@ -116,6 +116,7 @@ using NotifySurfaceBoundsChangeFunc = std::function<void(const WSRect& rect, boo
 using HasRequestedVsyncFunc = std::function<WSError(bool& hasRequestedVsync)>;
 using RequestNextVsyncWhenModeChangeFunc = std::function<WSError(const std::shared_ptr<VsyncCallback>& vsyncCallback)>;
 using NotifyClearSubSessionFunc = std::function<void(const int32_t subPersistentId)>;
+using OutlineParamsChangeCallbackFunc = std::function<void(bool enabled, const OutlineStyleParams& outlineStyleParams)>;
 class ILifecycleListener {
 public:
     virtual void OnActivation() {}
@@ -770,6 +771,12 @@ public:
      */
     std::shared_ptr<RSUIContext> GetRSUIContext(const char* caller = "");
 
+    /*
+     * Window highligt outline
+     */
+    void UpdateSessionOutline(bool enabled, const OutlineStyleParams& params);
+    void SetOutlineParamsChangeCallback(OutlineParamsChangeCallbackFunc&& func);
+
     WSError SetIsShowDecorInFreeMultiWindow(bool isShow);
 
 protected:
@@ -1170,6 +1177,13 @@ private:
      */
     uint64_t screenIdOfRSUIContext_ = SCREEN_ID_INVALID;
     std::shared_ptr<RSUIContext> rsUIContext_;
+
+    /*
+     * Window highligt outline
+     */
+    bool isOutlineEnabled_ = false;
+    OutlineStyleParams outlineStyleParams_;
+    OutlineParamsChangeCallbackFunc outlineParamsChangeCallback_;
 };
 } // namespace OHOS::Rosen
 

@@ -829,6 +829,8 @@ public:
     std::vector<sptr<SceneSession>> GetSceneSessions(ScreenId screenId);
     WMError UpdateScreenLockState(int32_t persistentId);
 
+    WMError UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams) override;
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager();
@@ -1747,6 +1749,17 @@ private:
     std::function<void()> closeSyncFunc_ = nullptr;
     WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId) override;
     void UpdateAllStartingWindowRdb();
+
+    OutlineParams recoverOutlineParams_;
+    bool needRecoverOutline_ = false;
+    sptr<IRemoteObject> outlineRemoteObject_;
+    sptr<AgentDeathRecipient> outlineRemoteDeath_ = new AgentDeathRecipient(
+        [this](const sptr<IRemoteObject>& remoteObject) { DeleteAllOutline(remoteObject); });
+    void UpdateOutlineInner(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams);
+    bool NeedOutline(int32_t persistentId, const std::vector<int32_t>& persistentIdList);
+    void AddOutlineRemoteDeathRecipient(const sptr<IRemoteObject>& remoteObject);
+    void DeleteAllOutline(const sptr<IRemoteObject>& remoteObject);
+
     std::string GetCallerSessionColorMode(const SessionInfo& sessionInfo);
     void NotifySessionScreenLockedChange(bool isScreenLocked);
 

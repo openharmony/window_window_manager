@@ -270,6 +270,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleRecoverWindowPropertyChangeFlag(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_MINIMIZE_ALL_WINDOW):
             return HandleMinimizeAllAppWindows(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_OUTLINE):
+            return HandleUpdateOutline(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -2547,6 +2549,25 @@ int SceneSessionManagerStub::HandleGetPiPSettingSwitchStatus(MessageParcel& data
     return ERR_NONE;
 }
 
+int SceneSessionManagerStub::HandleUpdateOutline(MessageParcel& data, MessageParcel& reply)
+{
+    sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
+    if (!remoteObject) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Read remote object failed.");
+        return ERR_INVALID_DATA;
+    }
+    sptr<OutlineParams> outlineParams = data.ReadParcelable<OutlineParams>();
+    if (!outlineParams) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Read outline params failed.");
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = UpdateOutline(remoteObject, *outlineParams);
+    if (!reply.WriteUint32(static_cast<uint32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
 
 int SceneSessionManagerStub::HandleConvertToRelativeCoordinateExtended(MessageParcel& data, MessageParcel& reply)
 {
@@ -2579,5 +2600,4 @@ int SceneSessionManagerStub::HandleConvertToRelativeCoordinateExtended(MessagePa
     }
     return ERR_NONE;
 }
-
 } // namespace OHOS::Rosen

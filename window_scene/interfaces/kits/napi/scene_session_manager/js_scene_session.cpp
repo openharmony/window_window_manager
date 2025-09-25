@@ -112,6 +112,7 @@ const std::string SET_WINDOW_SHADOWS_CB = "setWindowShadows";
 const std::string SET_SUB_WINDOW_SOURCE_CB = "setSubWindowSource";
 const std::string ANIMATE_TO_CB = "animateToTargetProperty";
 const std::string BATCH_PENDING_SCENE_ACTIVE_CB = "batchPendingSceneSessionsActivation";
+const std::string SCENE_OUTLINE_PARAMS_CHANGE_CB = "sceneOutlineParamsChange";
 
 constexpr int ARG_COUNT_1 = 1;
 constexpr int ARG_COUNT_2 = 2;
@@ -217,6 +218,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {FLOATING_BALL_UPDATE_CB,               ListenerFuncType::FLOATING_BALL_UPDATE_CB},
     {FLOATING_BALL_STOP_CB,                 ListenerFuncType::FLOATING_BALL_STOP_CB},
     {FLOATING_BALL_RESTORE_MAIN_WINDOW_CB,      ListenerFuncType::FLOATING_BALL_RESTORE_MAIN_WINDOW_CB},
+    {SCENE_OUTLINE_PARAMS_CHANGE_CB,        ListenerFuncType::SCENE_OUTLINE_PARAMS_CHANGE_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -3207,6 +3209,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::FLOATING_BALL_RESTORE_MAIN_WINDOW_CB):
             ProcessFloatingBallRestoreMainWindowRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::SCENE_OUTLINE_PARAMS_CHANGE_CB):
+            ProcessSceneOutlineParamsChangeRegister();
             break;
         default:
             break;
@@ -8201,6 +8206,54 @@ void JsSceneSession::OnAnimateToTargetProperty(const WindowAnimationProperty& an
     }, __func__);
 }
 
+void JsSceneSession::ProcessSceneOutlineParamsChangeRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Session is nullptr, id: %{public}d", persistentId_);
+        return;
+    }
+    auto callback = [weakThis = wptr(this), where = __func__] (bool enabled, const OutlineStyleParams& params) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s jsSceneSession is nullptr.", where);
+            return;
+        }
+        jsSceneSession->OnOutlineParamsChange(enabled, params);
+    };
+    session->SetOutlineParamsChangeCallback(std::move(callback));
+}
+
+void JsSceneSession::OnOutlineParamsChange(bool isOutlineEnabled, const OutlineStyleParams& outlineStyleParams)
+{
+    auto task = [weakThis = wptr(this), where = __func__, env = env_, persistentId = persistentId_, isOutlineEnabled,
+                 outlineStyleParams]() {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s: JsSceneSession is invalid, id: %{public}d",
+                   where, persistentId);
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_ANIMATION, "%{public}s, id: %{public}d, enabled: %{public}d, params: %{public}s",
+               where, persistentId, isOutlineEnabled, outlineStyleParams.ToString().c_str());
+        auto jsCallBack = jsSceneSession->GetJSCallback(SCENE_OUTLINE_PARAMS_CHANGE_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s: JsCallback is nullptr.", where);
+            return;
+        }
+        napi_value enabledObj = CreateJsValue(env, isOutlineEnabled);
+        napi_value colorObj = CreateJsValue(env, outlineStyleParams.outlineColor_);
+        napi_value widthObj = CreateJsValue(env, outlineStyleParams.outlineWidth_);
+        napi_value shapeObj = CreateJsValue(env, static_cast<uint32_t>(outlineStyleParams.outlineShape_));
+        napi_value argv[] = { enabledObj, colorObj, widthObj, shapeObj };
+        napi_status ret = napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(),
+                                             ArraySize(argv), argv, nullptr);
+        if (ret != napi_ok) {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s: napi call function failed, ret: %{public}d.", where, ret);
+        }
+    };
+    taskScheduler_->PostMainThreadTask(task, __func__);
+}
 
 void JsSceneSession::AddRequestTaskInfo(sptr<SceneSession> sceneSession,
     SessionInfo& info, bool needAddRequestInfo)
