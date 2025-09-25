@@ -18,6 +18,7 @@
 #include <ipc_types.h>
 #include <iremote_stub.h>
 
+#include "mock/mock_message_parcel.h"
 #include "mock/mock_session_stage.h"
 #include <message_option.h>
 #include <message_parcel.h>
@@ -638,15 +639,15 @@ HWTEST_F(SessionStageStubTest, HandleNotifyWindowOcclusionState, TestSize.Level1
     MessageParcel data2;
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInt32ErrorFlag(true);
-    EXPECT_EQ(sessionStageStub_->OnRemoteRequest(code, data2, reply, option), ERR_INVALID_DATA);
+    EXPECT_EQ(sessionStageStub_->HandleNotifyWindowOcclusionState(code, data2, reply, option), ERR_INVALID_DATA);
 
     data2.WriteUint32(static_cast<uint32_t>(WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
-    EXPECT_EQ(sessionStageStub_->OnRemoteRequest(code, data2, reply, option), ERR_INVALID_DATA);
+    EXPECT_EQ(sessionStageStub_->HandleNotifyWindowOcclusionState(code, data2, reply, option), ERR_INVALID_DATA);
 
     MessageParcel data3;
     MockMessageParcel::ClearAllErrorFlag();
     data3.WriteUint32(static_cast<uint32_t>(WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
-    EXPECT_EQ(sessionStageStub_->OnRemoteRequest(code, data3, reply, option), ERR_NONE);
+    EXPECT_EQ(sessionStageStub_->HandleNotifyWindowOcclusionState(code, data3, reply, option), ERR_NONE);
 }
 
 /**
