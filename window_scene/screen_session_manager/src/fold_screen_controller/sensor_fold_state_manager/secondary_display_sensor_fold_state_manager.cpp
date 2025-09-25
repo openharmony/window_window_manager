@@ -163,7 +163,7 @@ FoldStatus SecondaryDisplaySensorFoldStateManager::GetNextFoldStateHalf(float an
     FoldStatus state = FoldStatus::UNKNOWN;
 
     if (allowUserSensorForLargeFoldDevice == SMALLER_BOUNDARY_FLAG) {
-        if (std::islessequal(angle, OPEN_HALF_FOLDED_MIN_THRESHOLD) && hall == HALL_FOLDED_THRESHOLD) {
+        if (std::islessequal(angle, OPEN_HALF_FOLDED_MIN_THRESHOLD)) {
             state = FoldStatus::FOLDED;
         } else if (std::isgreaterequal(angle, OPEN_HALF_FOLDED_MIN_THRESHOLD + HALF_FOLDED_BUFFER) &&
             hall == HALL_FOLDED_THRESHOLD) {
