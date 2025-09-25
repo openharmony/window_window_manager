@@ -1012,14 +1012,14 @@ bool AniWindowUtils::SetWindowStatusBarContentColor(ani_env* env,
     ani_boolean isIconUndefined;
     env->Reference_IsUndefined(aniStatusIcon, &isIconUndefined);
 
-    if (!isIconUndefined) {
+    if (!isColorUndefined) {
         properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ = GetColorFromAni(
             env,
             "statusBarContentColor",
             statusProperty.contentColor_,
             propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].contentColorFlag,
             aniObject);
-    } else if (!isColorUndefined) {
+    } else if (!isIconUndefined) {
         ani_boolean isStatusIcon;
         env->Object_CallMethodByName_Boolean(static_cast<ani_object>(aniStatusIcon), "unboxed", ":z", &isStatusIcon);
         if (static_cast<bool>(aniStatusIcon)) {
