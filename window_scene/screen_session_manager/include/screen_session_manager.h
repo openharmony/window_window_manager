@@ -458,6 +458,8 @@ public:
     void ScbClientDeathCallback(int32_t deathScbPid);
     void ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> oldScbPids, int32_t newScbPid);
     void RecoverMultiScreenModeWhenSwitchUser(std::vector<int32_t> oldScbPids, int32_t newScbPid);
+    void FlushDisplayNodeWhenSwitchUser(std::vector<int32_t> oldScbPids, int32_t newScbPid,
+        sptr<ScreenSession> screenSession);
     int32_t GetCurrentUserId();
 
     std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
