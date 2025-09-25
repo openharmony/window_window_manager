@@ -630,8 +630,8 @@ export enum WindowStatusType {
 
 export enum OcclusionState {
     NO_OCCLUSION = 0,
-    PARTIALLY_OCCLUSION = 1,
-    TOTALLY_OCCLUSION = 2
+    PARTIAL_OCCLUSION = 1,
+    TOTAL_OCCLUSION = 2
 }
 
 export enum WindowStageEventType {

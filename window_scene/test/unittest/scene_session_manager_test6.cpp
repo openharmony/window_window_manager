@@ -1618,9 +1618,57 @@ HWTEST_F(SceneSessionManagerTest6, SetSessionVisibilityInfo02, TestSize.Level1)
     ssm_->sceneSessionMap_.insert({ 2, session2 });
     ssm_->windowVisibilityListenerSessionSet_.clear();
     ssm_->windowVisibilityListenerSessionSet_.insert(1);
+    ssm_->occlusionStateListenerSessionSet_.clear();
+    ssm_->occlusionStateListenerSessionSet_.insert(1);
     ssm_->SetSessionVisibilityInfo(session1, visibleState, windowVisibilityInfos, visibilityInfo);
     EXPECT_NE(windowVisibilityInfos.size(), 0);
     ssm_->sceneSessionMap_.clear();
+    ssm_->occlusionStateListenerSessionSet_.clear();
+}
+
+/**
+ * @tc.name: UpdateSessionOcclusionStateListener
+ * @tc.desc: update window occlusion state
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, UpdateSessionOcclusionStateListener, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    auto oldSceneSessionMap = ssm_->sceneSessionMap_;
+    ssm_->sceneSessionMap_.clear();
+    ssm_->occlusionStateListenerSessionSet_.clear();
+    auto result = ssm_->UpdateSessionOcclusionStateListener(100, false);
+    EXPECT_EQ(result, WMError::WM_DO_NOTHING);
+    EXPECT_EQ(ssm_->occlusionStateListenerSessionSet_.size(), 0);
+
+    SessionInfo sessionInfo1;
+    auto session1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    session1->persistentId_ = 1;
+    session1->sessionStage_ = nullptr;
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, session1));
+    result = ssm_->UpdateSessionOcclusionStateListener(session1->persistentId_, true);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(ssm_->occlusionStateListenerSessionSet_.size(), 1);
+
+    SessionInfo sessionInfo2;
+    session2->persistentId_ = 2;
+    sessionInfo2.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    auto session2 = sptr<SceneSession>::MakeSptr(sessionInfo2, nullptr);
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(mockSessionStage, nullptr);
+    session2->sessionStage_ = mockSessionStage;
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, session2));
+    result = ssm_->UpdateSessionOcclusionStateListener(session2->persistentId_, true);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(ssm_->occlusionStateListenerSessionSet_.size(), 2);
+
+    result = ssm_->UpdateSessionOcclusionStateListener(session1->persistentId_, false);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(ssm_->occlusionStateListenerSessionSet_.size(), 1);
+
+    ssm_->occlusionStateListenerSessionSet_.clear();
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_ = oldSceneSessionMap;
 }
 
 /**
