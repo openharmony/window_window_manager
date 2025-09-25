@@ -15,6 +15,7 @@
 
 #include "screen_power_fsm/screen_state_machine.h"
 #include "screen_session_manager.h"
+#include "dms_global_mutex.h"
 
 namespace OHOS::Rosen {
 void ScreenStateTimer::StartTimer(int32_t state, uint32_t delayMs, TaskScheduler::Task task)
@@ -36,7 +37,8 @@ void ScreenStateTimer::StartTimer(int32_t state, uint32_t delayMs, TaskScheduler
         auto interval = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - expectTime).count();
         auto delayTmp = delayMs - interval;
         TLOGI(WmsLogTag::DMS, "[ScreenPower FSM] task start delay time: %{public}lld", delayTmp);
-        if (delayTmp <= 0 || std::cv_status::timeout == cv_.wait_for(lock, std::chrono::milliseconds(delayTmp))) {
+        if (delayTmp <= 0 || std::cv_status::timeout == DmUtils::safe_wait_for(cv_, lock,
+            std::chrono::milliseconds(delayTmp))) {
             if (stateCancelMap_.find(state) != stateCancelMap_.end()) {
                 stateCancelMap_[state]();
             }

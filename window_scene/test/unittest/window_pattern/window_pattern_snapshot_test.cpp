@@ -590,7 +590,7 @@ HWTEST_F(WindowPatternSnapshotTest, SaveSnapshot02, TestSize.Level1)
     ASSERT_NE(session_->snapshot_, nullptr);
 
     session_->freeMultiWindow_.store(true);
-    session_->SaveSnapshot(false, true, pixelMap, false, BackgroundReason::EXPAND_TO_FOLD_SINGLE_POCKET);
+    session_->SaveSnapshot(false, true, pixelMap, false, LifeCycleChangeReason::EXPAND_TO_FOLD_SINGLE_POCKET);
     ASSERT_NE(session_->snapshot_, nullptr);
 }
 
@@ -715,7 +715,7 @@ HWTEST_F(WindowPatternSnapshotTest, GetSessionSnapshotStatus, TestSize.Level1)
     sceneSession->GetSessionSnapshotStatus();
 
     sceneSession->state_ = SessionState::STATE_ACTIVE;
-    BackgroundReason reason = BackgroundReason::EXPAND_TO_FOLD_SINGLE_POCKET;
+    LifeCycleChangeReason reason = LifeCycleChangeReason::EXPAND_TO_FOLD_SINGLE_POCKET;
     ret = sceneSession->GetSessionSnapshotStatus(reason);
     EXPECT_EQ(ret, 1);
 }
@@ -969,43 +969,43 @@ HWTEST_F(WindowPatternSnapshotTest, SetImageForRecentPixelMap, TestSize.Level1)
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     ImageFit imageFit = ImageFit::FILL;
     auto ret = ssm_->SetImageForRecentPixelMap(pixelMap, imageFit, 1);
-    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    EXPECT_EQ(ret, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
 
     SessionInfo info;
-    info.sreenId_ = 0;
+    info.screenId_ = 0;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
-    sceneSession->state_ = SessionState::STATE_BACKGROUND;
-    ret = ssm_->SetImageForRecentPixelMap(pixelMap, imageFit, 1);
-    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    ret = ssm_->SetImageForRecentPixelMap(pixelMap, imageFit, sceneSession->GetPersistentId());
+    EXPECT_EQ(ret, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
 
-    sceneSession->state_ = SessionState::STATE_ACTIVE;
-    ret = ssm_->SetImageForRecentPixelMap(pixelMap, imageFit, 1);
-    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    std::string bundleName = "test";
+    int32_t persistentId = sceneSession->GetPersistentId();
+    sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
+    sceneSession->scenePersistence_ = scenePersistence;
+    ret = ssm_->SetImageForRecentPixelMap(pixelMap, imageFit, sceneSession->GetPersistentId());
+    EXPECT_EQ(ret, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
 
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     AppExecFwk::ApplicationInfo applicationInfo;
     applicationInfo.isSystemApp = false;
     abilityInfo->applicationInfo = applicationInfo;
     sceneSession->SetAbilitySessionInfo(abilityInfo);
-    ret = ssm_->SetImageForRecentPixelMap(pixelMap, ImageFit::FILL, sceneSession->GetPersistentId());
+    ret = ssm_->SetImageForRecentPixelMap(pixelMap, imageFit, sceneSession->GetPersistentId());
     EXPECT_EQ(ret, WMError::WM_ERROR_NOT_SYSTEM_APP);
 
     applicationInfo.isSystemApp = true;
     abilityInfo->applicationInfo = applicationInfo;
     sceneSession->SetAbilitySessionInfo(abilityInfo);
-    ret = ssm_->SetImageForRecentPixelMap(pixelMap, ImageFit::FILL, sceneSession->GetPersistentId());
+    sceneSession->state_ = SessionState::STATE_BACKGROUND;
+    ret = ssm_->SetImageForRecentPixelMap(pixelMap, imageFit, sceneSession->GetPersistentId());
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    sceneSession->state_ = SessionState::STATE_ACTIVE;
+    ret = ssm_->SetImageForRecentPixelMap(pixelMap, imageFit, sceneSession->GetPersistentId());
     EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
 
     pixelMap = std::make_shared<Media::PixelMap>();
-    ret = ssm_->SetImageForRecentPixelMap(pixelMap, ImageFit::FILL, sceneSession->GetPersistentId());
-    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
-
-    std::string bundleName = "test";
-    int32_t persistentId = sceneSession->GetPersistentId();
-    sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
-    sceneSession->scenePersistence_ = scenePersistence;
-    ret = ssm_->SetImageForRecentPixelMap(pixelMap, ImageFit::FILL, sceneSession->GetPersistentId());
+    ret = ssm_->SetImageForRecentPixelMap(pixelMap, imageFit, sceneSession->GetPersistentId());
     EXPECT_EQ(ret, WMError::WM_OK);
     ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
 }
@@ -1021,9 +1021,30 @@ HWTEST_F(WindowPatternSnapshotTest, RemoveImageForRecent, TestSize.Level1)
     EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
 
     SessionInfo info;
-    info.sreenId_ = 0;
+    info.screenId_ = 0;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
+    ret = ssm_->RemoveImageForRecent(sceneSession->GetPersistentId());
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    AppExecFwk::ApplicationInfo applicationInfo;
+    applicationInfo.isSystemApp = false;
+    abilityInfo->applicationInfo = applicationInfo;
+    sceneSession->SetAbilitySessionInfo(abilityInfo);
+    ret = ssm_->RemoveImageForRecent(sceneSession->GetPersistentId());
+    EXPECT_EQ(ret, WMError::WM_ERROR_NOT_SYSTEM_APP);
+
+    applicationInfo.isSystemApp = true;
+    abilityInfo->applicationInfo = applicationInfo;
+    sceneSession->SetAbilitySessionInfo(abilityInfo);
+    ret = ssm_->RemoveImageForRecent(sceneSession->GetPersistentId());
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    std::string bundleName = "test";
+    int32_t persistentId = sceneSession->GetPersistentId();
+    sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
+    sceneSession->scenePersistence_ = scenePersistence;
     ret = ssm_->RemoveImageForRecent(sceneSession->GetPersistentId());
     EXPECT_EQ(ret, WMError::WM_OK);
     ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());

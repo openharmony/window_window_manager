@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,26 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_IPC_IPC_SKELETON_H
-#define OHOS_IPC_IPC_SKELETON_H
+#ifndef TEST_FUZZTEST_WINDOW_FUZZER_H
+#define TEST_FUZZTEST_WINDOW_FUZZER_H
 
-#include "refbase.h"
+#define FUZZ_PROJECT_NAME "window01_fuzzer"
 
-namespace OHOS {
-class IPCSkeleton {
-public:
-    IPCSkeleton() = default;
-    ~IPCSkeleton() = default;
-
-    static uint32_t GetCallingTokenID()
-    {
-        return 0;
-    }
-
-    static uint64_t GetCallingFullTokenID()
-    {
-        return 0;
-    }
-};
-}
-#endif // OHOS_IPC_IPC_SKELETON_H
+#endif

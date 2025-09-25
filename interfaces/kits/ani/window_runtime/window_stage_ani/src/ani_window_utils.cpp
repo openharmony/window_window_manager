@@ -96,18 +96,20 @@ ani_status AniWindowUtils::GetPropertyIntObject(ani_env* env, const char* proper
     }
 
     ani_boolean isUndefined;
-    if (ANI_OK != env->Reference_IsUndefined(int_ref, &isUndefined)) {
+    ret = env->Reference_IsUndefined(int_ref, &isUndefined);
+    if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
         return ret;
     }
 
     if (isUndefined) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] %{public}s is Undefined Now", propertyName);
-        return ret;
+        return ANI_ERROR;
     }
 
     ani_int int_value;
-    if (ANI_OK != env->Object_CallMethodByName_Int(static_cast<ani_object>(int_ref), "intValue", nullptr, &int_value)) {
+    ret = env->Object_CallMethodByName_Int(static_cast<ani_object>(int_ref), "intValue", nullptr, &int_value);
+    if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
         return ret;
     }
@@ -126,26 +128,75 @@ ani_status AniWindowUtils::GetPropertyDoubleObject(ani_env* env, const char* pro
             propertyName, static_cast<int32_t>(ret));
         return ret;
     }
-
     ani_boolean isUndefined;
-    if (ANI_OK != env->Reference_IsUndefined(double_ref, &isUndefined)) {
+    ret = env->Reference_IsUndefined(double_ref, &isUndefined);
+    if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
         return ret;
     }
 
     if (isUndefined) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] %{public}s is Undefined Now", propertyName);
-        return ret;
+        return ANI_ERROR;
     }
 
     ani_double double_value;
-    if (ANI_OK != env->Object_CallMethodByName_Double(static_cast<ani_object>(double_ref),
-        "doubleValue", nullptr, &double_value)) {
+    ret = env->Object_CallMethodByName_Double(static_cast<ani_object>(double_ref),
+        "doubleValue", nullptr, &double_value);
+    if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
         return ret;
     }
     result = static_cast<double>(double_value);
     TLOGI(WmsLogTag::DEFAULT, "[ANI] %{public}s is: %{public}f", propertyName, result);
+    return ret;
+}
+
+ani_status AniWindowUtils::GetPropertyLongObject(ani_env* env, const char* propertyName, ani_object object,
+                                                 int64_t& result)
+{
+    ani_ref long_ref;
+    ani_status ret = env->Object_GetPropertyByName_Ref(object, propertyName, &long_ref);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s failed, ret : %{public}d",
+            propertyName, static_cast<int32_t>(ret));
+        return ret;
+    }
+
+    ani_boolean isUndefined;
+    ret = env->Reference_IsUndefined(long_ref, &isUndefined);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Reference_IsUndefined %{public}s failed, ret : %{public}d",
+            propertyName, static_cast<int32_t>(ret));
+        return ret;
+    }
+    if (isUndefined) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] %{public}s is Undefined Now", propertyName);
+        return ANI_ERROR;
+    }
+
+    ani_long long_value;
+    ret = env->Object_CallMethodByName_Long(static_cast<ani_object>(long_ref), "unboxed", ":J", &long_value);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_CallMethodByName_Long %{public}s failed, ret : %{public}d",
+            propertyName, static_cast<int32_t>(ret));
+        return ret;
+    }
+    result = static_cast<int64_t>(long_value);
+    TLOGD(WmsLogTag::DEFAULT, "[ANI] property name is %{public}s, value is:%{public}" PRIu64" ", propertyName, result);
+    return ret;
+}
+
+ani_status AniWindowUtils::GetEnumValue(ani_env* env, ani_enum_item enumPara, uint32_t& result)
+{
+    ani_int enumValue;
+    ani_status ret = env->EnumItem_GetValue_Int(enumPara, &enumValue);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] EnumItem_GetValue_Int failed, ret : %{public}d", static_cast<int32_t>(ret));
+        return ret;
+    }
+    result = static_cast<uint32_t>(enumValue);
+    TLOGD(WmsLogTag::DEFAULT, "[ANI] enum value is:%{public}u", result);
     return ret;
 }
 
@@ -309,7 +360,7 @@ ani_object AniWindowUtils::CreateAniSize(ani_env* env, int32_t width, int32_t he
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     ani_class aniClass;
-    ani_status ret = env->FindClass("L@ohos/window/window/SizeInternal;", &aniClass);
+    ani_status ret = env->FindClass("@ohos.window.window.SizeInternal", &aniClass);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
         return AniWindowUtils::CreateAniUndefined(env);
@@ -335,7 +386,7 @@ ani_object AniWindowUtils::CreateAniRect(ani_env* env, const Rect& rect)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     ani_class aniClass;
-    ani_status ret = env->FindClass("L@ohos/window/window/RectInternal;", &aniClass);
+    ani_status ret = env->FindClass("@ohos.window.window.RectInternal", &aniClass);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
         return AniWindowUtils::CreateAniUndefined(env);
@@ -357,6 +408,41 @@ ani_object AniWindowUtils::CreateAniRect(ani_env* env, const Rect& rect)
     CallAniMethodVoid(env, aniRect, aniClass, "<set>width", nullptr, ani_int(rect.width_));
     CallAniMethodVoid(env, aniRect, aniClass, "<set>height", nullptr, ani_int(rect.height_));
     return aniRect;
+}
+
+ani_object AniWindowUtils::CreateAniWindowLimits(ani_env* env, const WindowLimits& windowLimits)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    ani_class aniClass;
+    ani_status ret = env->FindClass("@ohos.window.window.WindowLimitsInternal", &aniClass);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    ani_method aniCtor;
+    ret = env->Class_FindMethod(aniClass, "<ctor>", nullptr, &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    ani_object aniLimits;
+    ret = env->Object_New(aniClass, aniCtor, &aniLimits);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to create new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    CallAniMethodVoid(env, aniLimits, aniClass, "<set>maxWidth", nullptr,
+        CreateBaseTypeObject<int>(env, windowLimits.maxWidth_));
+    CallAniMethodVoid(env, aniLimits, aniClass, "<set>maxHeight", nullptr,
+        CreateBaseTypeObject<int>(env, windowLimits.maxHeight_));
+    CallAniMethodVoid(env, aniLimits, aniClass, "<set>minWidth", nullptr,
+        CreateBaseTypeObject<int>(env, windowLimits.minWidth_));
+    CallAniMethodVoid(env, aniLimits, aniClass, "<set>minHeight", nullptr,
+        CreateBaseTypeObject<int>(env, windowLimits.minHeight_));
+    return aniLimits;
 }
 
 ani_object AniWindowUtils::CreateAniAvoidArea(ani_env* env, const AvoidArea& avoidArea, AvoidAreaType type)
@@ -1214,6 +1300,40 @@ void AniWindowUtils::GetSpecificBarStatus(sptr<Window>& window, const std::strin
     systemBarProperties[type].enableAnimation_ = newSystemBarProperties[type].enableAnimation_;
     systemBarProperties[type].settingFlag_ = systemBarProperties[type].settingFlag_ |
         SystemBarSettingFlag::ENABLE_SETTING;
+}
+
+WindowLimits AniWindowUtils::ParseWindowLimits(ani_env* env, ani_object aniWindowLimits)
+{
+    WindowLimits windowLimits;
+    
+    auto getAndAssign = [&](const char* name, uint32_t& field) {
+        int value;
+        ani_status ret = AniWindowUtils::GetPropertyIntObject(env, name, aniWindowLimits, value);
+        if (ret == ANI_OK) {
+            field = static_cast<uint32_t>(value);
+        }
+    };
+
+    getAndAssign("maxWidth", windowLimits.maxWidth_);
+    getAndAssign("maxHeight", windowLimits.maxHeight_);
+    getAndAssign("minWidth", windowLimits.minWidth_);
+    getAndAssign("minHeight", windowLimits.minHeight_);
+    return windowLimits;
+}
+
+bool AniWindowUtils::CheckParaIsUndefined(ani_env* env, ani_object para)
+{
+    ani_boolean isUndefined;
+    ani_status aniRet = env->Reference_IsUndefined(para, &isUndefined);
+    if (aniRet != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Reference_IsUndefined failed, ret : %{public}d",
+            static_cast<int32_t>(aniRet));
+        return true;
+    }
+    if (isUndefined) {
+        return true;
+    }
+    return false;
 }
 
 WmErrorCode AniWindowUtils::ToErrorCode(WMError error, WmErrorCode defaultCode)
