@@ -552,22 +552,6 @@ uint32_t SuperFoldStateManager::GetFoldCreaseHeight() const
     return DEFAULT_FOLD_REGION_HEIGHT;
 }
 
-DMError SuperFoldStateManager::ForceChangeMirrorMode(
-    sptr<ScreenSession>& mainScreenSession, sptr<ScreenSession>& secondarySession)
-{
-    if (mainScreenSession == nullptr || secondarySession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "screenSession is null");
-        return DMError::DM_ERROR_NULLPTR;
-    }
-    TLOGI(WmsLogTag::DMS, "currentStatus: %{public}d", GetCurrentStatus());
-    if (GetCurrentStatus() != SuperFoldStatus::EXPANDED) {
-        ScreenSessionManager::GetInstance().SetMultiScreenMode(
-            mainScreenSession->GetRSScreenId(), secondarySession->GetRSScreenId(),
-            MultiScreenMode::SCREEN_MIRROR);
-    }
-    return DMError::DM_OK;
-}
-
 DMError SuperFoldStateManager::RefreshMirrorRegionInner(
     sptr<ScreenSession>& mainScreenSession, sptr<ScreenSession>& secondarySession)
 {
@@ -629,10 +613,6 @@ DMError SuperFoldStateManager::RefreshExternalRegion()
         }
         if (secondarySession->GetScreenProperty().GetScreenType() == ScreenType::REAL &&
             secondarySession->GetIsExtend()) {
-            if (GetCurrentStatus() != SuperFoldStatus::EXPANDED &&
-                secondarySession->GetScreenCombination() != ScreenCombination::SCREEN_MIRROR) {
-                ForceChangeMirrorMode(mainScreenSession, secondarySession);
-            }
             if (secondarySession->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
                 RefreshMirrorRegionInner(mainScreenSession, secondarySession);
             }
