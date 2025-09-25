@@ -50,6 +50,7 @@ public:
     static ani_object GetVisibleWindowInfo(ani_env* env, ani_long nativeObj);
     static void SetGestureNavigationEnabled(ani_env* env, ani_long nativeObj, ani_boolean enabled);
     static void SetWaterMarkImage(ani_env* env, ani_long nativeObj, ani_object nativePixelMap, ani_boolean enabled);
+    static void ToggleShownStateForAllAppWindows(ani_env* env, ani_long nativeObj);
 private:
     ani_object OnGetWindowsByCoordinate(ani_env* env, ani_object getWindowsParam);
     ani_ref OnGetLastWindow(ani_env* env, ani_object context);
@@ -66,6 +67,7 @@ private:
     ani_object OnGetVisibleWindowInfo(ani_env* env);
     void OnSetGestureNavigationEnabled(ani_env* env, ani_boolean enabled);
     void OnSetWaterMarkImage(ani_env* env, ani_object nativePixelMap, ani_boolean enabled);
+    void OnToggleShownStateForAllAppWindows(ani_env* env);
 
     std::unique_ptr<AniWindowRegisterManager> registerManager_ = nullptr;
 };

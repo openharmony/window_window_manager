@@ -138,6 +138,10 @@ public:
      * @return Corresponding WmErrorCode or defaultCode if unmapped.
      */
     static WmErrorCode ToErrorCode(WMError error, WmErrorCode defaultCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    static bool ParseSubWindowOption(ani_env* env, ani_object jsObject, const sptr<WindowOption>& windowOption);
+    static bool ParseRectParams(ani_env* env, ani_object jsObject, const sptr<WindowOption>& windowOption);
+    static bool ParseModalityParams(ani_env* env, ani_object jsObject, const sptr<WindowOption>& windowOption);
+    static bool ParseZLevelParams(ani_env* env, ani_object jsObject, const sptr<WindowOption>& windowOption);
 };
 }
 }
