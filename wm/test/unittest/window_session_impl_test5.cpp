@@ -2025,7 +2025,6 @@ HWTEST_F(WindowSessionImplTest5, NotifyTitleChange01, TestSize.Level1)
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
 }
 
-
 /**
  * @tc.name: NotifyTitleChange
  * @tc.desc: NotifyTitleChange
