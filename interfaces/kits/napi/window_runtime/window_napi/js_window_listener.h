@@ -66,6 +66,7 @@ const std::string EXTENSION_SECURE_LIMIT_CHANGE_CB = "uiExtensionSecureLimitChan
 const std::string WINDOW_HIGHLIGHT_CHANGE_CB = "windowHighlightChange";
 const std::string WINDOW_WILL_CLOSE_CB = "windowWillClose";
 const std::string WINDOW_ROTATION_CHANGE_CB = "rotationChange";
+const std::string WINDOW_ROTATION_CHANGE_CB = "rotationChange";
 
 class JsWindowListener : public IWindowChangeListener,
                          public ISystemBarChangedListener,
@@ -99,6 +100,7 @@ class JsWindowListener : public IWindowChangeListener,
                          public IKeyboardWillShowListener,
                          public IKeyboardWillHideListener,
                          public IKeyboardDidShowListener,
+                         public IKeyboardDidHideListener,
                          public IKeyboardDidHideListener {
 public:
     JsWindowListener(napi_env env, std::shared_ptr<NativeReference> callback, CaseType caseType)
@@ -154,6 +156,7 @@ public:
      * Window Layout
      */
     void OnRectChange(Rect rect, WindowSizeChangeReason reason) override;
+    void OnRectChangeInGlobalDisplay(const Rect& rect, WindowSizeChangeReason reason) override;
     void OnRectChangeInGlobalDisplay(const Rect& rect, WindowSizeChangeReason reason) override;
 
     void OnSecureLimitChange(bool isLimit) override;
