@@ -406,19 +406,88 @@ HWTEST_F(ScreenSessionManagerTest, ReportRelativePositionChangeEvent, TestSize.L
 }
 
 /**
- * @tc.name: SetScreenActiveMode
+ * @tc.name: SetScreenActiveMode001
  * @tc.desc: SetScreenActiveMode virtual screen
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode001, TestSize.Level1)
 {
 #ifdef WM_SCREEN_ACTIVE_MODE_ENABLE
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "SetScreenActiveMode";
+    ASSERT_NE(ssm_, nullptr);
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-    ASSERT_EQ(ssm_->SetScreenActiveMode(screenId, 0), DMError::DM_OK);
+
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockSessionPermission::MockIsStarByHdcd(true);
+    auto ret = ssm_->SetScreenActiveMode(screenId, 0);
+    EXPECT_EQ(DMError::DM_ERROR_NOT_SYSTEM_APP, ret);
+
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockSessionPermission::MockIsStarByHdcd(false);
+    ret = ssm_->SetScreenActiveMode(screenId, 0);
+    EXPECT_EQ(DMError::DM_ERROR_NOT_SYSTEM_APP, ret);
+
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockSessionPermission::MockIsStarByHdcd(true);
     ssm_->DestroyVirtualScreen(screenId);
+#endif
+}
+
+/**
+ * @tc.name: SetScreenActiveMode002
+ * @tc.desc: SetScreenActiveMode002 virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode002, TestSize.Level1)
+{
+#ifdef WM_SCREEN_ACTIVE_MODE_ENABLE
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockSessionPermission::MockIsStarByHdcd(true);
+    ssm_->DestroyVirtualScreen(screenId);
+    ScreenId screenId = -1ULL;
+    ASSERT_NE(ssm_, nullptr);
+    auto ret = ssm_->SetScreenActiveMode(ScreenId, 0);
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+#endif
+}
+
+/**
+ * @tc.name: SetScreenActiveMode003
+ * @tc.desc: SetScreenActiveMode003 virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode003, TestSize.Level1)
+{
+#ifdef WM_SCREEN_ACTIVE_MODE_ENABLE
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockSessionPermission::MockIsStarByHdcd(true);
+    ssm_->DestroyVirtualScreen(screenId);
+    ScreenId screenId = 501;
+    ASSERT_NE(ssm_, nullptr);
+    auto ret = ssm_->SetScreenActiveMode(ScreenId, 0);
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+#endif
+}
+
+/**
+ * @tc.name: SetScreenActiveMode004
+ * @tc.desc: SetScreenActiveMode004 virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode004, TestSize.Level1)
+{
+#ifdef WM_SCREEN_ACTIVE_MODE_ENABLE
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockSessionPermission::MockIsStarByHdcd(true);
+    sptr<ScreenSession> screenSession = ssm_->GetOrCreateScreenSession(1050);
+    screenSession = nullptr;
+    auto ret = ssm_->SetScreenActiveMode(1050, 0);
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+    screenSession = ssm_->GetOrCreateScreenSession(1050);
+    ret = ssm_->SetScreenActiveMode(1050, 0);
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ret)
 #endif
 }
 
