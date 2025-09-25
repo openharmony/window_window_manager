@@ -632,8 +632,8 @@ HWTEST(MockSessionManagerServiceTest, DefaultSceneSessionManager, TestSize.Level
     std::vector<int32_t> persistentIds = {111, 222};
     std::vector<string> privacyWindowTags = {"tag1", "tag2"};
     mockMockSms.GetProcessSurfaceNodeIdByPersistentId(123, windowIdList, surfaceNodeIds);
-    mockMockSms.AddSkipSelfWhenShowOnVirtualScreenList(persistentIds);
-    mockMockSms.RemoveSkipSelfWhenShowOnVirtualScreenList(persistentIds);
+    mockMockSms.AddSkipSelfWhenShowOnVirtualScreenList(persistentIds, 100);
+    mockMockSms.RemoveSkipSelfWhenShowOnVirtualScreenList(persistentIds, 100);
     mockMockSms.SetScreenPrivacyWindowTagSwitch(0, privacyWindowTags, false);
 }
 

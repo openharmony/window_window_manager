@@ -105,6 +105,16 @@ bool ScreenProperty::GetIsFakeInUse() const
     return isFakeInUse_;
 }
 
+void ScreenProperty::SetIsPreFakeInUse(bool isPreFakeInUse)
+{
+    isPreFakeInUse_ = isPreFakeInUse;
+}
+
+bool ScreenProperty::GetIsPreFakeInUse() const
+{
+    return isPreFakeInUse_;
+}
+
 void ScreenProperty::SetScaleX(float scaleX)
 {
     scaleX_ = scaleX;

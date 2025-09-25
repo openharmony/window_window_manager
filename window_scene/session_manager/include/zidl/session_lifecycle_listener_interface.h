@@ -18,6 +18,7 @@
 
 #include <iremote_broker.h>
 #include <iremote_object.h>
+#include "ws_common.h"
 
 namespace OHOS::Rosen {
 
@@ -54,12 +55,14 @@ public:
                    parcel.WriteInt32(persistentId_) &&
                    parcel.WriteUint32(resultCode_) &&
                    parcel.WriteUint64(fromScreenId_) &&
-                   parcel.WriteUint64(toScreenId_);
+                   parcel.WriteUint64(toScreenId_) &&
+                   parcel.WriteUint64(screenId_) &&
+                   parcel.WriteUint32(static_cast<uint32_t>(lifeCycleChangeReason_));
         }
 
         static LifecycleEventPayload* Unmarshalling(Parcel& parcel)
         {
-            auto payload = new LifecycleEventPayload();
+            auto payload = std::make_unique<LifecycleEventPayload>();
             if (!parcel.ReadString(payload->bundleName_) ||
                 !parcel.ReadString(payload->moduleName_) ||
                 !parcel.ReadString(payload->abilityName_) ||
@@ -67,11 +70,16 @@ public:
                 !parcel.ReadInt32(payload->persistentId_) ||
                 !parcel.ReadUint32(payload->resultCode_) ||
                 !parcel.ReadUint64(payload->fromScreenId_) ||
-                !parcel.ReadUint64(payload->toScreenId_)) {
-                delete payload;
+                !parcel.ReadUint64(payload->toScreenId_) ||
+                !parcel.ReadUint64(payload->screenId_)) {
                 return nullptr;
             }
-            return payload;
+            uint32_t reason = 0;
+            if (!parcel.ReadUint32(reason) || reason >= static_cast<uint32_t>(LifeCycleChangeReason::REASON_END)) {
+                return nullptr;
+            }
+            payload->lifeCycleChangeReason_ = static_cast<LifeCycleChangeReason>(reason);
+            return payload.release();
         }
 
         std::string bundleName_;
@@ -82,6 +90,8 @@ public:
         uint32_t resultCode_ = 0;
         uint64_t fromScreenId_ = 0;
         uint64_t toScreenId_ = 0;
+        uint64_t screenId_ = 0;
+        LifeCycleChangeReason lifeCycleChangeReason_ = LifeCycleChangeReason::DEFAULT;
     };
 
     virtual void OnLifecycleEvent(SessionLifecycleEvent event, const LifecycleEventPayload& payload) {};

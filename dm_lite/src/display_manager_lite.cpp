@@ -32,7 +32,7 @@ public:
     Impl(std::recursive_mutex& mutex) : mutex_(mutex) {}
     ~Impl();
     static inline SingletonDelegator<DisplayManagerLite> delegator;
-    sptr<DisplayLite> GetDefaultDisplay();
+    sptr<DisplayLite> GetDefaultDisplay(int32_t userId = CONCURRENT_USER_ID_DEFAULT);
     FoldStatus GetFoldStatus();
     FoldDisplayMode GetFoldDisplayMode();
     FoldDisplayMode GetFoldDisplayModeForExternal();
@@ -507,14 +507,14 @@ FoldStatus DisplayManagerLite::Impl::GetFoldStatus()
     return SingletonContainer::Get<DisplayManagerAdapterLite>().GetFoldStatus();
 }
 
-sptr<DisplayLite> DisplayManagerLite::GetDefaultDisplay()
+sptr<DisplayLite> DisplayManagerLite::GetDefaultDisplay(int32_t userId)
 {
-    return pImpl_->GetDefaultDisplay();
+    return pImpl_->GetDefaultDisplay(userId);
 }
 
-sptr<DisplayLite> DisplayManagerLite::Impl::GetDefaultDisplay()
+sptr<DisplayLite> DisplayManagerLite::Impl::GetDefaultDisplay(int32_t userId)
 {
-    auto displayInfo = SingletonContainer::Get<DisplayManagerAdapterLite>().GetDefaultDisplayInfo();
+    auto displayInfo = SingletonContainer::Get<DisplayManagerAdapterLite>().GetDefaultDisplayInfo(userId);
     if (displayInfo == nullptr) {
         return nullptr;
     }
@@ -852,9 +852,9 @@ uint32_t DisplayManagerLite::GetScreenBrightness(uint64_t screenId) const
     return level;
 }
 
-DisplayId DisplayManagerLite::GetDefaultDisplayId()
+DisplayId DisplayManagerLite::GetDefaultDisplayId(int32_t userId)
 {
-    auto info = SingletonContainer::Get<DisplayManagerAdapterLite>().GetDefaultDisplayInfo();
+    auto info = SingletonContainer::Get<DisplayManagerAdapterLite>().GetDefaultDisplayInfo(userId);
     if (info == nullptr) {
         return DISPLAY_ID_INVALID;
     }

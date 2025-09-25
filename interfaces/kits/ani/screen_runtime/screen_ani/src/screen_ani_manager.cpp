@@ -125,13 +125,19 @@ void ScreenManagerAni::OnUnRegisterCallback(ani_env* env, ani_string type, ani_r
     std::lock_guard<std::mutex> lock(mtx_);
     ani_boolean callbackUndefined = 0;
     env->Reference_IsUndefined(callback, &callbackUndefined);
+    ani_ref cbRef{};
+    if (ANI_OK != env->GlobalReference_Create(callback, &cbRef)) {
+        env->GlobalReference_Delete(cbRef);
+        TLOGE(WmsLogTag::DMS, "[ANI]create global ref fail");
+        return;
+    }
     DmErrorCode ret;
     if (callbackUndefined) {
         TLOGI(WmsLogTag::DMS, "[ANI] OnUnRegisterCallback for all");
         ret = DM_JS_TO_ERROR_CODE_MAP.at(UnRegisterAllScreenListenerWithType(typeString));
     } else {
         TLOGI(WmsLogTag::DMS, "[ANI] OnUnRegisterCallback with type");
-        ret = DM_JS_TO_ERROR_CODE_MAP.at(UnRegisterScreenListenerWithType(typeString, env, callback));
+        ret = DM_JS_TO_ERROR_CODE_MAP.at(UnRegisterScreenListenerWithType(typeString, env, cbRef));
     }
 
     if (ret != DmErrorCode::DM_OK) {
@@ -139,6 +145,7 @@ void ScreenManagerAni::OnUnRegisterCallback(ani_env* env, ani_string type, ani_r
         TLOGE(WmsLogTag::DMS, "[ANI] failed to unregister screen listener with type");
         AniErrUtils::ThrowBusinessError(env, ret, errMsg);
     }
+    env->GlobalReference_Delete(cbRef);
 }
 
 bool ScreenManagerAni::IsCallbackRegistered(ani_env* env, const std::string& type, ani_ref callback)
