@@ -253,6 +253,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::GetFreeMultiWindowConfig);
     BindNativeFunction(env, exportObj, "getIsLayoutFullScreen", moduleName,
         JsSceneSessionManager::GetIsLayoutFullScreen);
+    BindNativeFunction(env, exportObj, "setMaximizeFullScreen", moduleName,
+        JsSceneSessionManager::SetMaximizeFullScreen);
     BindNativeFunction(env, exportObj, "getWindowLimits", moduleName,
         JsSceneSessionManager::GetWindowLimits);
     BindNativeFunction(env, exportObj, "notifyEnterRecentTask", moduleName,
@@ -1261,6 +1263,13 @@ napi_value JsSceneSessionManager::GetIsLayoutFullScreen(napi_env env, napi_callb
     WLOGFI("[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetIsLayoutFullScreen(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::SetMaximizeFullScreen(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSetMaximizeFullScreen(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::GetWindowLimits(napi_env env, napi_callback_info info)
@@ -3978,6 +3987,37 @@ napi_value JsSceneSessionManager::OnGetIsLayoutFullScreen(napi_env env, napi_cal
     SceneSessionManager::GetInstance().GetIsLayoutFullScreen(isLayoutFullScreen);
     napi_value result = nullptr;
     napi_get_boolean(env, isLayoutFullScreen, &result);
+    return result;
+}
+
+napi_value JsSceneSessionManager::OnSetMaximizeFullScreen(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_TWO;
+    napi_value argv[ARGC_TWO] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_TWO) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    uint32_t persistentId = 0;
+    if (!ConvertFromJsValue(env, argv[0], persistentId)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to persistentId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isMaximizeFullScreen;
+    if (!ConvertFromJsValue(env, argv[1], isMaximizeFullScreen)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to isMaximizeFullScreen bool value");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().SetMaximizeFullScreen(static_cast<int32_t>(persistentId), isMaximizeFullScreen);
+    napi_value result = nullptr;
+    napi_get_boolean(env, isMaximizeFullScreen, &result);
     return result;
 }
 

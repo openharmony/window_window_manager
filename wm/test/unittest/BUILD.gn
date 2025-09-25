@@ -79,6 +79,7 @@ group("unittest") {
       ":wm_window_scene_session_impl_test3",
       ":wm_window_scene_session_impl_test4",
       ":wm_window_scene_session_impl_test5",
+      ":wm_window_scene_session_impl_test6",
       ":wm_window_session_impl_test",
       ":wm_window_session_impl_test2",
       ":wm_window_session_impl_test3",
@@ -498,6 +499,26 @@ ohos_unittest("wm_window_scene_session_impl_test5") {
 
   external_deps = test_external_deps
   external_deps += [
+    "init:libbegetutil",
+    "ability_runtime:app_context",
+  ]
+}
+
+ohos_unittest("wm_window_scene_session_impl_test6") {
+  module_out_path = module_out_path
+  include_dirs = [ "${window_base_path}/test/common/utils/include/" ]
+ 
+  sources = [ "window_scene_session_impl_test6.cpp" ]
+ 
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/test/common/utils:libtestutil",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
+ 
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
     "init:libbegetutil",
     "ability_runtime:app_context",
   ]

@@ -210,6 +210,7 @@ public:
     void UpdateWindowModeWhenSupportTypeChange(uint32_t windowModeSupportType);
     bool haveSetSupportedWindowModes_ = false;
     uint32_t pendingWindowModeSupportType_ { WindowModeSupport::WINDOW_MODE_SUPPORT_ALL };
+    void MaximizeEvent(const sptr<ISession> &hostSession);
 
     /*
      * Compatible Mode
