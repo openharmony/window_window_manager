@@ -306,6 +306,8 @@ public:
     void HandleExtendScreenDisconnect(ScreenId screenId);
     bool GetIsFoldStatusLocked();
     void SetIsFoldStatusLocked(bool isFoldStatusLocked);
+    void SetIsExtendMode(bool isExtend);
+    bool GetIsExtendMode();
     bool GetIsLandscapeLockStatus();
     void SetIsLandscapeLockStatus(bool isLandscapeLockStatus);
     bool GetIsOuterOnlyMode();
@@ -670,8 +672,6 @@ private:
     void CalculateRotatedDisplay(Rotation rotation, const DMRect& screenRegion, DMRect& displayRegion, DMRect& displayArea);
     void CalculateScreenArea(const DMRect& displayRegion, const DMRect& displayArea, const DMRect& screenRegion, DMRect& screenArea);
     void DisconnectScreenIfScreenInfoNull(sptr<ScreenSession>& screenSession);
-    void RecoverDefaultScreenModeInner(ScreenId innerRsId, ScreenId externalRsId);
-    void SetDefaultScreenModeWhenCreateMirror(sptr<ScreenSession>& screenSession);
 #ifdef DEVICE_STATUS_ENABLE
     void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 #endif // DEVICE_STATUS_ENABLE
@@ -820,6 +820,7 @@ private:
     std::atomic<bool> isFoldStatusLocked_ = false;
     std::atomic<bool> isLandscapeLockStatus_ = false;
     std::atomic<bool> isLapTopLidOpen_ = true;
+    std::atomic<bool> isExtendMode_ = false;
 
     /**
      * On/Off screen
