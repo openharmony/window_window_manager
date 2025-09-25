@@ -590,7 +590,7 @@ HWTEST_F(WindowPatternSnapshotTest, SaveSnapshot02, TestSize.Level1)
     ASSERT_NE(session_->snapshot_, nullptr);
 
     session_->freeMultiWindow_.store(true);
-    session_->SaveSnapshot(false, true, pixelMap, false, BackgroundReason::EXPAND_TO_FOLD_SINGLE_POCKET);
+    session_->SaveSnapshot(false, true, pixelMap, false, LifeCycleChangeReason::EXPAND_TO_FOLD_SINGLE_POCKET);
     ASSERT_NE(session_->snapshot_, nullptr);
 }
 
@@ -715,7 +715,7 @@ HWTEST_F(WindowPatternSnapshotTest, GetSessionSnapshotStatus, TestSize.Level1)
     sceneSession->GetSessionSnapshotStatus();
 
     sceneSession->state_ = SessionState::STATE_ACTIVE;
-    BackgroundReason reason = BackgroundReason::EXPAND_TO_FOLD_SINGLE_POCKET;
+    LifeCycleChangeReason reason = LifeCycleChangeReason::EXPAND_TO_FOLD_SINGLE_POCKET;
     ret = sceneSession->GetSessionSnapshotStatus(reason);
     EXPECT_EQ(ret, 1);
 }

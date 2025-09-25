@@ -44,6 +44,7 @@ public:
     static ani_ref CreateWindow(ani_env* env, ani_long nativeObj, ani_object configuration);
     static void RegisterWindowManagerCallback(ani_env* env, ani_long nativeObj, ani_string type, ani_ref callback);
     static void UnregisterWindowManagerCallback(ani_env* env, ani_long nativeObj, ani_string type, ani_ref callback);
+    static void SetWindowLayoutMode(ani_env* env, ani_long nativeObj, ani_enum_item mode);
 private:
     ani_ref OnGetLastWindow(ani_env* env, ani_object context);
     ani_ref OnFindWindow(ani_env* env, ani_string windowName);
@@ -56,6 +57,7 @@ private:
     ani_ref OnCreateWindow(ani_env* env, ani_object configuration);
     void OnRegisterWindowManagerCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnUnregisterWindowManagerCallback(ani_env* env, ani_string type, ani_ref callback);
+    void OnSetWindowLayoutMode(ani_env* env, ani_enum_item mode);
 
     std::unique_ptr<AniWindowRegisterManager> registerManager_ = nullptr;
 };

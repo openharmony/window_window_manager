@@ -52,10 +52,9 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
     DisplayManagerMessage msgId = static_cast<DisplayManagerMessage>(code);
     switch (msgId) {
         case DisplayManagerMessage::TRANS_ID_GET_DEFAULT_DISPLAY_INFO: {
-            int32_t userId;
+            int32_t userId = CONCURRENT_USER_ID_DEFAULT;
             if (!data.ReadInt32(userId)) {
-                TLOGE(WmsLogTag::DMS, "Read userId failed");
-                return ERR_INVALID_DATA;
+                TLOGD(WmsLogTag::DMS, "Read userId failed");
             }
             auto info = GetDefaultDisplayInfo(userId);
             reply.WriteParcelable(info);
@@ -185,10 +184,9 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_ALL_DISPLAYIDS: {
-            int32_t userId;
+            int32_t userId = CONCURRENT_USER_ID_DEFAULT;
             if (!data.ReadInt32(userId)) {
-                TLOGE(WmsLogTag::DMS, "Read userId failed");
-                return ERR_INVALID_DATA;
+                TLOGD(WmsLogTag::DMS, "Read userId failed");
             }
             TLOGD(WmsLogTag::DMS, "case TRANS_ID_GET_ALL_DISPLAYIDS get userId %{public}u", userId);
             std::vector<DisplayId> allDisplayIds = GetAllDisplayIds(userId);
@@ -1399,6 +1397,24 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
                 return ERR_INVALID_DATA;
             }
             NotifyIsFullScreenInForceSplitMode(uid, isFullScreen);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_PROPERTY_BY_FOLD_STATE_CHANGE: {
+            ScreenId screenId = SCREEN_ID_INVALID;
+            if (!data.ReadUint64(screenId)) {
+                TLOGE(WmsLogTag::DMS, "Read screenId failed");
+                return ERR_INVALID_DATA;
+            }
+            ScreenProperty screenProperty;
+            if (!RSMarshallingHelper::Unmarshalling(data, screenProperty)) {
+                TLOGE(WmsLogTag::DMS, "read screenSession failed");
+                return ERR_INVALID_DATA;
+            }
+            DMError ret = SyncScreenPropertyChangedToServer(screenId, screenProperty);
+            if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+                TLOGE(WmsLogTag::DMS, "write result failed");
+                return ERR_INVALID_DATA;
+            }
             break;
         }
         default:
