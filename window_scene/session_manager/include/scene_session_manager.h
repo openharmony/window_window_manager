@@ -750,7 +750,6 @@ public:
     WMError GetMainWindowSnapshot(const std::vector<int32_t>& windowIds, const WindowSnapshotConfiguration& config,
         const sptr<IRemoteObject>& callback) override;
     WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo);
-    void CreateDefaultPixelMap(std::shared_ptr<Media::PixelMap>& pixelMap);
     void NotifyDisplayIdChanged(int32_t persistentId, uint64_t displayId);
     WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const;
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);

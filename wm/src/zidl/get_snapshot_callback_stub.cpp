@@ -56,9 +56,6 @@ int GetSnapshotCallbackStub::HandleOnReceived(MessageParcel& data, MessageParcel
     pixelMaps.resize(size);
     for (size_t i = 0; i < size; i++) {
         pixelMaps[i] = std::shared_ptr<OHOS::Media::PixelMap>(OHOS::Media::PixelMap::Unmarshalling(data));
-        if (pixelMaps[i] == nullptr) {
-            continue;
-        }
     }
     TLOGI(WmsLogTag::WMS_LIFE, "pixelMaps size: %{public}zu, size: %{public}zu", pixelMaps.size(), size);
     OnReceived(static_cast<WMError>(errCode), pixelMaps);
