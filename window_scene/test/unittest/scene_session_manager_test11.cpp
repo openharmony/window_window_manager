@@ -1028,8 +1028,16 @@ HWTEST_F(SceneSessionManagerTest11, SetHighlightSessionIds, TestSize.Level1)
     currSceneSession->property_->SetPersistentId(1);
     currSceneSession->persistentId_ = 1;
     ssm_->highlightIds_.clear();
-    ssm_->SetHighlightSessionIds(currSceneSession, false);
-    ASSERT_EQ(ssm_->highlightIds_.count(1) == 1, true);
+    auto timeStamp = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+    ssm_->SetHighlightSessionIds(currSceneSession, false, timeStamp);
+    EXPECT_EQ(ssm_->highlightIds_.count(1) == 1, true);
+    auto samePidSession = sptr<SceneSession>::MakeSptr(info1, nullptr);
+    samePidSession->SetCallingPid(currSceneSession->SetCallingPid());
+    samePidSession->persistentId_ = 321;
+    ssm_->AddHighlightSessionIds(samePidSession, false);
+    ssm_->SetHighlightSessionIds(currSceneSession, false, timeStamp);
+    EXPECT_EQ(ssm_->highlightIds_.count(1) == 1, true);
 }
 
 /**

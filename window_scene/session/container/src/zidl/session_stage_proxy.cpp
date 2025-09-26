@@ -501,13 +501,23 @@ WSError SessionStageProxy::NotifyCloseExistPipWindow()
     return static_cast<WSError>(ret);
 }
 
-WSError SessionStageProxy::UpdateFocus(bool focus)
+WSError SessionStageProxy::UpdateFocus(const sptr<FocusNotifyInfo>& focusNotifyInfo, bool focus)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
+    if (focusNotifyInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Invalid focus notify info");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteParcelable(focusNotifyInfo)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write focusNotifyInfo failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
@@ -1873,13 +1883,23 @@ WSError SessionStageProxy::SendContainerModalEvent(const std::string& eventName,
     return WSError::WS_OK;
 }
 
-WSError SessionStageProxy::NotifyHighlightChange(bool isHighlight)
+WSError SessionStageProxy::NotifyHighlightChange(const sptr<HighlightNotifyInfo>& highlightNotifyInfo, bool isHighlight)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
+    if (highlightNotifyInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Invalid highlight notify info");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Write interfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteParcelable(highlightNotifyInfo)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write highlightNotifyInfo failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
@@ -2142,7 +2162,7 @@ WSError SessionStageProxy::SetCurrentRotation(int32_t currentRotation)
         TLOGE(WmsLogTag::WMS_ROTATION, "Write params failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    
+
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_ROTATION, "remote is null");
