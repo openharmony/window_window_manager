@@ -1004,7 +1004,7 @@ HWTEST_F(SceneSessionTest2, GetSessionInfoExpandInputFlag, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->SetSessionInfoExpandInputFlag(1);
 
-    ASSERT_EQ(SceneSession->GetSessionInfoExpandInputFlag(), 1);
+    ASSERT_EQ(sceneSession->GetSessionInfoExpandInputFlag(), 1);
 }
 
 /**
