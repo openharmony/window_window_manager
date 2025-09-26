@@ -523,6 +523,13 @@ public:
     void NotifyAodOpCompletion(AodOP operation, int32_t result) override;
     void DoAodExitAndSetPower(ScreenId screenId, ScreenPowerStatus status);
     void DoAodExitAndSetPowerAllOff();
+    struct UserScreenInfo {
+        bool isActive;
+        ScreenId screenId;
+        int32_t pid;
+    };
+    std::map<int32_t, UserScreenInfo> GetUserScreenMap() const;
+
 protected:
     ScreenSessionManager();
     virtual ~ScreenSessionManager() = default;
@@ -750,13 +757,8 @@ private:
         user101:  {isActive=false screenId=0  pid=2345}
         user102:  {isActive=true  screenId=6  pid=3456}
     */
-    struct userScreenInfo {
-        bool isActive;
-        ScreenId screenId;
-        int32_t pid;
-    };
-    std::map<int32_t, userScreenInfo> userScreenMap_;
-    std::mutex userScreenMapMutex_;
+    std::map<int32_t, UserScreenInfo> userScreenMap_;
+    mutable std::mutex userScreenMapMutex_;
     std::map<int32_t, sptr<IScreenSessionManagerClient>> clientProxyMap_;
     FoldDisplayMode oldScbDisplayMode_ = FoldDisplayMode::UNKNOWN;
 
