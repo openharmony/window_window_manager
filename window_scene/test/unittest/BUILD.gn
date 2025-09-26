@@ -1187,7 +1187,10 @@ ohos_unittest("ws_session_stage_proxy_test") {
 ohos_unittest("ws_session_stage_stub_test") {
   module_out_path = module_out_path
 
-  sources = [ "session_stage_stub_test.cpp" ]
+  sources = [
+    "${window_base_path}/window_scene/test/mock/mock_message_parcel.cpp",
+    "session_stage_stub_test.cpp",
+  ]
 
   deps = [ ":ws_unittest_common" ]
 
