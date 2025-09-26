@@ -1323,8 +1323,8 @@ HWTEST_F(SceneSessionTest4, UpdateAllModalUIExtensions, TestSize.Level1)
 
     Rect windowRect = { 100, 100, 100, 100 };
     Rect uiExtRect = { 0, 0, 100, 100 };
-    ExtensionWindowEventInfo extensionInfo { 1, 1, windowRect, uiExtRect, false };
-    ExtensionWindowEventInfo extensionInfo2 { 2, 2, windowRect, uiExtRect, true };
+    ExtensionWindowEventInfo extensionInfo { 1, 1, -1, windowRect, uiExtRect, false };
+    ExtensionWindowEventInfo extensionInfo2 { 2, 2, -1, windowRect, uiExtRect, true };
     sceneSession->modalUIExtensionInfoList_.push_back(extensionInfo);
     sceneSession->modalUIExtensionInfoList_.push_back(extensionInfo2);
     sceneSession->UpdateAllModalUIExtensions(newGlobalRect);
