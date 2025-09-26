@@ -1347,7 +1347,7 @@ public:
         const Rect& rect = Rect::EMPTY_RECT, int32_t apiVersion = API_VERSION_INVALID) { return WMError::WM_OK; }
     
     /**
-     * @brief Get the Avoid Area By Type Ignoring Visibility
+     * @brief Get the avoid area by type ignoring visibility
      *
      * @param type avoid area type.@see reference
      * @param avoidArea
