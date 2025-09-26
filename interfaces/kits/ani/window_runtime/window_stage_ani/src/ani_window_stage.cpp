@@ -432,7 +432,7 @@ static ani_ref CreateSubWindow(ani_env* env, ani_object obj, ani_long nativeObj,
 
 extern "C" {
 using namespace OHOS::Rosen;
-std::array methods = {
+std::array g_methods = {
     ani_native_function {"loadContentSync",
         "JLstd/core/String;Larkui/stateManagement/storage/localStorage/LocalStorage;:V",
         reinterpret_cast<void *>(AniWindowStage::LoadContent)},
@@ -454,7 +454,7 @@ std::array methods = {
         reinterpret_cast<void *>(AniWindowStage::NativeTransferDynamic)},
 };
 
-std::array functions = {
+std::array g_functions = {
     ani_native_function {"CreateWindowStage", "J:L@ohos/window/window/WindowStageInternal;",
         reinterpret_cast<void *>(WindowStageCreate)},
     ani_native_function {"getLastWindowSync", nullptr, reinterpret_cast<void *>(AniWindowManager::GetLastWindow)},
@@ -489,7 +489,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         TLOGE(WmsLogTag::DEFAULT, "[ANI] can't find class %{public}u", ret);
         return ANI_NOT_FOUND;
     }
-    if ((ret = env->Class_BindNativeMethods(cls, methods.data(), methods.size())) != ANI_OK) {
+    if ((ret = env->Class_BindNativeMethods(cls, g_methods.data(), g_methods.size())) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] bind fail %{public}u", ret);
         return ANI_NOT_FOUND;
     }
@@ -501,7 +501,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         TLOGE(WmsLogTag::DEFAULT, "[ANI] find ns %{public}u", ret);
         return ANI_NOT_FOUND;
     }
-    if ((ret = env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size())) != ANI_OK) {
+    if ((ret = env->Namespace_BindNativeFunctions(ns, g_functions.data(), g_functions.size())) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] bind ns func %{public}u", ret);
         return ANI_NOT_FOUND;
     }
