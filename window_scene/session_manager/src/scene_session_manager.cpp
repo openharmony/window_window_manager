@@ -14342,7 +14342,7 @@ void SceneSessionManager::UpdateModalExtensionRect(const sptr<IRemoteObject>& to
             WSRect transRect = { globalRect.posX_, globalRect.posY_, globalRect.width_, globalRect.height_ };
             parentSession->TransformRelativeRectToGlobalRect(transRect);
             globalRect.posY_ = transRect.posY_;
-            ExtensionWindowEventInfo extensionInfo { persistentId, pid, globalRect, rect, true };
+            ExtensionWindowEventInfo extensionInfo { persistentId, pid, -1, globalRect, rect, true };
             TLOGNI(WmsLogTag::WMS_UIEXT, "%{public}s: pid: %{public}d, persistentId: %{public}d, "
                 "parentId: %{public}d, rect: %{public}s, globalRect: %{public}s, parentGlobalRect: %{public}s",
                 where, pid, persistentId, parentId, rect.ToString().c_str(), globalRect.ToString().c_str(),
@@ -14379,12 +14379,14 @@ void SceneSessionManager::ProcessModalExtensionPointDown(const sptr<IRemoteObjec
 }
 
 void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
-    const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, bool isConstrainedModal)
+    const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, int64_t startModalExtensionTimeStamp,
+    bool isConstrainedModal)
 {
     auto pid = IPCSkeleton::GetCallingRealPid();
     auto callingTokenId = IPCSkeleton::GetCallingTokenID();
     const char* const where = __func__;
-    auto task = [this, sessionStage, token, surfaceNodeId, isConstrainedModal, pid, callingTokenId, where]() {
+    auto task = [this, sessionStage, token, surfaceNodeId, startModalExtensionTimeStamp,
+        isConstrainedModal, pid, callingTokenId, where]() {
         if (sessionStage == nullptr || token == nullptr) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "input is nullptr");
             return;
@@ -14437,6 +14439,7 @@ void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>
             ExtensionWindowEventInfo extensionInfo {
                 .persistentId = persistentId,
                 .pid = pid,
+                .startModalExtensionTimeStamp = startModalExtensionTimeStamp,
             };
             if (!isConstrainedModal) {
                 parentSession->AddNormalModalUIExtension(extensionInfo);

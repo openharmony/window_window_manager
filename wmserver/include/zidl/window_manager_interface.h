@@ -252,7 +252,8 @@ public:
         return WMError::WM_OK;
     }
     virtual void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
-        const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, bool isConstrainedModal = false) {}
+        const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, int64_t startModalExtensionTimeStamp,
+        bool isConstrainedModal = false) {}
     virtual void RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
         const sptr<IRemoteObject>& token, bool isConstrainedModal = false) {}
     virtual void UpdateModalExtensionRect(const sptr<IRemoteObject>& token, Rect rect) {}

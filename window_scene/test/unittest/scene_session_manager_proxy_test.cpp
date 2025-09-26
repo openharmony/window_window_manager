@@ -601,7 +601,7 @@ HWTEST_F(sceneSessionManagerProxyTest, AddExtensionWindowStageToSCB, TestSize.Le
     ASSERT_NE(sessionStage, nullptr);
     sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(token, nullptr);
-    sceneSessionManagerProxy->AddExtensionWindowStageToSCB(sessionStage, token, 12345);
+    sceneSessionManagerProxy->AddExtensionWindowStageToSCB(sessionStage, token, 12345, -1);
 }
 
 /**

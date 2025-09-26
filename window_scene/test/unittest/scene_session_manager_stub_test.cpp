@@ -2141,6 +2141,14 @@ HWTEST_F(SceneSessionManagerStubTest, HandleAddExtensionWindowStageToSCB, TestSi
     res = stub_->HandleAddExtensionWindowStageToSCB(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
+    ASSERT_NE(nullptr, sessionStage);
+    data.WriteRemoteObject(sessionStage->AsObject());
+    ASSERT_NE(token, nullptr);
+    data.WriteRemoteObject(token);
+    data.WriteInt64(-1);
+    res = stub_->HandleAddExtensionWindowStageToSCB(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
     data.WriteRemoteObject(sessionStage->AsObject());
     ASSERT_NE(token, nullptr);
     data.WriteRemoteObject(token);

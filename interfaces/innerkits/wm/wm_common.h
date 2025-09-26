@@ -1217,6 +1217,7 @@ enum class UIExtensionUsage : uint32_t {
 struct ExtensionWindowEventInfo {
     int32_t persistentId = 0;
     int32_t pid = -1;
+    int64_t startModalExtensionTimeStamp = -1;
     Rect windowRect { 0, 0, 0, 0 }; // Calculated from global rect and UIExtension windowRect
     Rect uiExtRect { 0, 0, 0, 0 };  // Transferred from arkUI
     bool hasUpdatedRect = false;

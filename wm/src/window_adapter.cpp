@@ -1107,13 +1107,15 @@ WMError WindowAdapter::RequestFocusStatusBySA(int32_t persistentId, bool isFocus
 }
 
 void WindowAdapter::AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
-    const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, bool isConstrainedModal)
+    const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, int64_t startModalExtensionTimeStamp,
+    bool isConstrainedModal)
 {
     INIT_PROXY_CHECK_RETURN();
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_IF_NULL(wmsProxy);
-    wmsProxy->AddExtensionWindowStageToSCB(sessionStage, token, surfaceNodeId, isConstrainedModal);
+    wmsProxy->AddExtensionWindowStageToSCB(sessionStage, token, surfaceNodeId, startModalExtensionTimeStamp,
+        isConstrainedModal);
 }
 
 void WindowAdapter::RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
