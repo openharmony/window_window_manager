@@ -2677,30 +2677,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleMinimizeByWindowId, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleUpdateAnimationSpeedWithPid
- * @tc.desc: test HandleUpdateAnimationSpeedWithPid
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest, HandleUpdateAnimationSpeedWithPid, TestSize.Level1)
-{
-    ASSERT_NE(stub_, nullptr);
-    MessageParcel data;
-    MessageParcel reply;
-
-    int res = stub_->HandleUpdateAnimationSpeedWithPid(data, reply);
-    EXPECT_EQ(res, ERR_INVALID_DATA);
-
-    data.WriteInt32(10000);
-    res = stub_->HandleUpdateAnimationSpeedWithPid(data, reply);
-    EXPECT_EQ(res, ERR_INVALID_DATA);
-
-    data.WriteInt32(10000);
-    data.WriteFloat(2.0f);
-    res = stub_->HandleUpdateAnimationSpeedWithPid(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
-}
-
-/**
  * @tc.name: HandleSetForegroundWindowNum
  * @tc.desc: test HandleSetForegroundWindowNum
  * @tc.type: FUNC

@@ -144,7 +144,6 @@ private:
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int HandleMinimizeByWindowId(MessageParcel& data, MessageParcel& reply);
-    int HandleUpdateAnimationSpeedWithPid(MessageParcel& data, MessageParcel& reply);
     int HandleSetForegroundWindowNum(MessageParcel& data, MessageParcel& reply);
     int HandleUseImplicitAnimation(MessageParcel& data, MessageParcel& reply);
     int HandleCreateUIEffectController(MessageParcel& data, MessageParcel& reply);

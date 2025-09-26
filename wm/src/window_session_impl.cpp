@@ -1495,15 +1495,16 @@ void WindowSessionImpl::UpdateAnimationSpeed(float speed)
             TLOGW(WmsLogTag::WMS_ANIMATION, "%{public}s: window is nullptr", where);
             return;
         }
-        UpdateAllWindowSessions(speed);
+        UpdateAllWindowSpeed(speed);
         isEnableAnimationSpeed_.store(!FoldScreenStateInternel::FloatEqualAbs(speed, 1.0f));
         animationSpeed_.store(speed);
     };
     handler_->PostTask(task, where, 0, AppExecFwk::EventQueue::Priority::HIGH);
 }
 
-void WindowSessionImpl::UpdateAllWindowSessions(float speed)
+void WindowSessionImpl::UpdateAllWindowSpeed(float speed)
 {
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& [_, pair] : windowSessionMap_) {
         auto& WindowSession = pair.second;
         if (!WindowSession) {

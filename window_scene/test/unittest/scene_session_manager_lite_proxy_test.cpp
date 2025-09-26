@@ -132,6 +132,22 @@ HWTEST_F(sceneSessionManagerLiteProxyTest, PendingSessionToBackground, TestSize.
 }
 
 /**
+ * @tc.name: UpdateAnimationSpeedWithPid
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerLiteProxyTest, UpdateAnimationSpeedWithPid, TestSize.Level1)
+{
+    sptr<MockIRemoteObject> iRemoteObjectMocker = sptr<MockIRemoteObject>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sptr<SceneSessionManagerLiteProxy> sceneSessionManagerLiteProxy =
+        sptr<SceneSessionManagerLiteProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sceneSessionManagerLiteProxy, nullptr);
+
+    EXPECT_EQ(WMError::WM_OK, sceneSessionManagerLiteProxy->UpdateAnimationSpeedWithPid(10000, 2.0f));
+}
+
+/**
  * @tc.name: PendingSessionToBackgroundByPersistentId
  * @tc.desc: normal function
  * @tc.type: FUNC
