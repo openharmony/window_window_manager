@@ -2823,7 +2823,7 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
         rotation = ROTATION_LANDSCAPE_INVERTED;
     }
     auto rotate = WSSnapshotHelper::GetDisplayOrientation(rotation);
-    if (persistentPixelMap) {
+    if (persistentPixelMap || !SupportSnapshotAllSessionStatus()) {
         key = defaultStatus;
         rotate = DisplayOrientation::PORTRAIT;
     }
