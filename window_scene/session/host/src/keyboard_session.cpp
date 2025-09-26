@@ -697,7 +697,10 @@ void KeyboardSession::OpenKeyboardSyncTransaction()
         }
         TLOGNI(WmsLogTag::WMS_KEYBOARD, "Open keyboard sync");
         session->isKeyboardSyncTransactionOpen_ = true;
-        RSSyncTransactionAdapter::OpenSyncTransaction(session->GetRSUIContext(), session->GetEventHandler());
+        auto transactionController = RSSyncTransactionController::GetInstance();
+        if (transactionController) {
+            transactionController->OpenSyncTransaction(session->GetEventHandler());
+        }
         session->PostKeyboardAnimationSyncTimeoutTask();
         return WSError::WS_OK;
     };
@@ -773,14 +776,18 @@ void KeyboardSession::CloseRSTransaction()
         TLOGI(WmsLogTag::WMS_KEYBOARD, "cancelled");
         handler->RemoveTask(KEYBOARD_ANIM_SYNC_EVENT_NAME);
     }
-    RSSyncTransactionAdapter::CloseSyncTransaction(GetRSUIContext(), handler);
+    auto transactionController = RSSyncTransactionController::GetInstance();
+    if (transactionController) {
+        transactionController->CloseSyncTransaction(GetEventHandler());
+    }
 }
 
 std::shared_ptr<RSTransaction> KeyboardSession::GetRSTransaction()
 {
+    auto transactionController = RSSyncTransactionController::GetInstance();
     std::shared_ptr<RSTransaction> rsTransaction = nullptr;
-    if (isKeyboardSyncTransactionOpen_) {
-        rsTransaction = RSSyncTransactionAdapter::GetRSTransaction(GetRSUIContext());
+    if (transactionController) {
+        rsTransaction = transactionController->GetRSTransaction();
     }
     return rsTransaction;
 }
