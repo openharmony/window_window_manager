@@ -4639,7 +4639,6 @@ sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info, bool needA
             }
         } else {
             sceneSession->SetSessionInfo(info);
-            AddRequestTaskInfo(sceneSession, info, needAddRequestInfo);
         }
         info.persistentId_ = sceneSession->GetPersistentId();
         sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
@@ -4656,9 +4655,9 @@ sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info, bool needA
             sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
         } else {
             sceneSession->SetSessionInfo(info);
-            AddRequestTaskInfo(sceneSession, info, needAddRequestInfo);
         }
     }
+    AddRequestTaskInfo(sceneSession, info.requestId, needAddRequestInfo);
     return sceneSession;
 }
 
@@ -8255,11 +8254,10 @@ void JsSceneSession::OnOutlineParamsChange(bool isOutlineEnabled, const OutlineS
     taskScheduler_->PostMainThreadTask(task, __func__);
 }
 
-void JsSceneSession::AddRequestTaskInfo(sptr<SceneSession> sceneSession,
-    SessionInfo& info, bool needAddRequestInfo)
+void JsSceneSession::AddRequestTaskInfo(sptr<SceneSession> sceneSession, int32_t requestId, bool needAddRequestInfo)
 {
     if (needAddRequestInfo && sceneSession != nullptr) {
-        SceneSessionManager::GetInstance().AddRequestTaskInfo(sceneSession->GetPersistentId(), info);
+        SceneSessionManager::GetInstance().AddRequestTaskInfo(sceneSession, requestId);
     }
 }
 } // namespace OHOS::Rosen
