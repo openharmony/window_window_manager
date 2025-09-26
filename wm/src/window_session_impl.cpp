@@ -1582,7 +1582,7 @@ WSError WindowSessionImpl::UpdateFocus(const sptr<FocusNotifyInfo>& focusNotifyI
         isFocused, focusNotifyInfo->isSyncNotify_);
     auto timeStamp = focusNotifyInfo->timeStamp_;
     if (timeStamp <= updateFocusTimeStamp_.load()) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "timeStamp too late, current:%{public}" PRIu64 ", new:%{public}d" PRIu64,
+        TLOGD(WmsLogTag::WMS_FOCUS, "timeStamp too late, current:%{public}" PRId64 ", new:%{public}d" PRId64,
             updateFocusTimeStamp_.load(), timeStamp);
         return WSError::WS_OK;
     }
@@ -2645,7 +2645,7 @@ WSError WindowSessionImpl::NotifyHighlightChange(const sptr<HighlightNotifyInfo>
         "isSyncNotify:%{public}d", highlightNotifyInfo->timeStamp_, highlightNotifyInfo->highlightId_,
         isHighlight, highlightNotifyInfo->isSyncNotify_);
     if (highlightNotifyInfo->timeStamp_ <= updateHighlightTimeStamp_.load()) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "timeStamp too late, current:%{public}" PRIu64 ", new:%{public}d" PRIu64,
+        TLOGD(WmsLogTag::WMS_FOCUS, "timeStamp too late, current:%{public}" PRId64 ", new:%{public}d" PRId64,
             updateHighlightTimeStamp_.load(), highlightNotifyInfo->timeStamp_);
         return WSError::WS_OK;
     }
@@ -2661,13 +2661,13 @@ WSError WindowSessionImpl::NotifyHighlightChange(const sptr<HighlightNotifyInfo>
             unHighlightWindow->NotifyHighlightChange(false);
         }
     }
-    if (isHighlight) {
-        NotifyHighlightChange(isHighlight);
-    } else {
+    if (!isHighlight) {
         auto highlightWindow = GetWindowWithId(highlightNotifyInfo->highlightId_);
         if (highlightWindow != nullptr) {
             highlightWindow->NotifyHighlightChange(true);
         }
+    } else if (!isHighlighted_) {
+        NotifyHighlightChange(isHighlight);
     }
     return WSError::WS_OK;
 }
