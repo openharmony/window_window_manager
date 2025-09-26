@@ -1124,18 +1124,6 @@ HWTEST_F(WindowAdapterTest, MinimizeByWindowId, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateAnimationSpeedWithPid
- * @tc.desc: WindowAdapter/UpdateAnimationSpeedWithPid
- * @tc.type: FUNC
- */
-HWTEST_F(WindowAdapterTest, UpdateAnimationSpeedWithPid, TestSize.Level1)
-{
-    WindowAdapter windowAdapter;
-    auto err = windowAdapter.UpdateAnimationSpeedWithPid(10000, 2.0f);
-    ASSERT_EQ(WMError::WM_OK, err);
-}
-
-/**
  * @tc.name: ListWindowInfo01
  * @tc.desc: WindowAdapter/ListWindowInfo
  * @tc.type: FUNC

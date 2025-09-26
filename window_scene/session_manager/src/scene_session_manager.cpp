@@ -17134,7 +17134,7 @@ WMError SceneSessionManager::UpdateAnimationSpeedWithPid(pid_t pid, float speed)
         TLOGE(WmsLogTag::WMS_ANIMATION, "The caller is not system service.");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [_, session] : sceneSessionMap_) {
         if (session && session->GetCallingPid() == pid && session->IsVisible()) {
             session->UpdateAnimationSpeed(speed);

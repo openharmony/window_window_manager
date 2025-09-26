@@ -1273,15 +1273,6 @@ public:
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds);
 
     /**
-     * @brief Set the animation speed for a specific process.
-     *
-     * @param pid process id.
-     * @param speed The animation speed.
-     * @return WM_OK means set success, others means set failed.
-     */
-    WMError UpdateAnimationSpeedWithPid(pid_t pid, float speed);
-
-    /**
      * @brief Set foreground window number. Only main window. Only support freeMultiWindow.
      *
      * @param windowNum foreground window number

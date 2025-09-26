@@ -153,7 +153,6 @@ public:
     virtual WMError NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed);
     virtual WMError NotifyWatchFocusActiveChange(bool isActive);
     virtual WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds);
-    virtual WMError UpdateAnimationSpeedWithPid(pid_t pid, float speed);
     virtual WMError SetForegroundWindowNum(uint32_t windowNum);
     virtual WMError SetStartWindowBackgroundColor(
         const std::string& moduleName, const std::string& abilityName, uint32_t color, int32_t uid);
