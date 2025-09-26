@@ -1715,10 +1715,10 @@ HWTEST_F(WindowSceneSessionImplTest, GetAvoidAreaByTypeIgnoringVisibility, TestS
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     AvoidArea avoidarea;
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
         window->GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType::TYPE_CUTOUT, avoidarea));
     window->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_OK, window->GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType::TYPE_CUTOUT, avoidarea));
+    EXPECT_EQ(WMError::WM_OK, window->GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType::TYPE_CUTOUT, avoidarea));
 }
 
 /**
