@@ -3394,7 +3394,7 @@ WSError Session::UpdateHighlightStatus(const sptr<HighlightNotifyInfo>& highligh
         return WSError::WS_DO_NOTHING;
     }
     isHighlighted_ = isHighlight;
-    if (needBlockHighlightNotify) {
+    if (!needBlockHighlightNotify) {
         NotifyHighlightChange(highlightNotifyInfo, isHighlight);
     }
     std::lock_guard lock(highlightChangeFuncMutex_);

@@ -1587,7 +1587,7 @@ WSError WindowSessionImpl::UpdateFocus(const sptr<FocusNotifyInfo>& focusNotifyI
         return WSError::WS_OK;
     }
     updateFocusTimeStamp_.store(timeStamp);
-    TLOGI(WmsLogTag::WMS_FOCUS, "first update focus, timeStamp:%{public}" PRIu64 , timeStamp);
+    TLOGI(WmsLogTag::WMS_FOCUS, "first update focus, timeStamp:%{public}" PRIu64, timeStamp);
     auto otherWindowId = isFocused ? focusNotifyInfo->unfocusWindowId_ : focusNotifyInfo->focusWindowId_;
     if (otherWindowId == INVALID_SESSION_ID) {
         UpdateFocusState(isFocused);
@@ -1596,13 +1596,13 @@ WSError WindowSessionImpl::UpdateFocus(const sptr<FocusNotifyInfo>& focusNotifyI
     auto otherWindow = GetWindowWithId(otherWindowId);
     if (isFocused) {
         if (otherWindow != nullptr) {
-           otherWindow->UpdateFocusState(!isFocused);
+            otherWindow->UpdateFocusState(!isFocused);
         }
         UpdateFocusState(isFocused);
     } else {
         UpdateFocusState(isFocused);
         if (otherWindow != nullptr) {
-           otherWindow->UpdateFocusState(!isFocused);
+            otherWindow->UpdateFocusState(!isFocused);
         }
     }
 }
@@ -2649,7 +2649,7 @@ WSError WindowSessionImpl::NotifyHighlightChange(const sptr<HighlightNotifyInfo>
             updateHighlightTimeStamp_.load(), highlightNotifyInfo->timeStamp_);
         return WSError::WS_OK;
     }
-    TLOGI(WmsLogTag::WMS_FOCUS, "first notify highlight, timeStamp:%{public}" PRIu64 , highlightNotifyInfo->timeStamp_);
+    TLOGI(WmsLogTag::WMS_FOCUS, "first notify highlight, timeStamp:%{public}" PRIu64, highlightNotifyInfo->timeStamp_);
     updateHighlightTimeStamp_.store(highlightNotifyInfo->timeStamp_);
     for (auto unHighlightWindowId : highlightNotifyInfo->notHighlightIds_) {
         if (!isHighlight && unHighlightWindowId == GetWindowId()) {
