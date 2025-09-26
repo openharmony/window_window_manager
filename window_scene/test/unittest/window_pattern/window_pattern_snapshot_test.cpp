@@ -1018,14 +1018,14 @@ HWTEST_F(WindowPatternSnapshotTest, SetImageForRecentPixelMap, TestSize.Level1)
 HWTEST_F(WindowPatternSnapshotTest, RemoveImageForRecent, TestSize.Level1)
 {
     auto ret = ssm_->RemoveImageForRecent(1);
-    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    EXPECT_EQ(ret, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
 
     SessionInfo info;
     info.screenId_ = 0;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
     ret = ssm_->RemoveImageForRecent(sceneSession->GetPersistentId());
-    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    EXPECT_EQ(ret, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
 
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     AppExecFwk::ApplicationInfo applicationInfo;

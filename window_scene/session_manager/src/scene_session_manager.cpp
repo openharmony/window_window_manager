@@ -16740,12 +16740,12 @@ WMError SceneSessionManager::RemoveImageForRecent(int32_t persistentId)
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "sceneSession %{public}d is null", persistentId);
-        return WMError::WM_ERROR_NULLPTR;
+        return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
     }
     auto abilityInfo = sceneSession->GetSessionInfo().abilityInfo;
     if (abilityInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "abilityInfo is null");
-        return WMError::WM_ERROR_NULLPTR;
+        return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
     }
     if (!abilityInfo->applicationInfo.isSystemApp) {
         TLOGE(WmsLogTag::WMS_PATTERN, "%{public}d is not a systemApp", persistentId);
