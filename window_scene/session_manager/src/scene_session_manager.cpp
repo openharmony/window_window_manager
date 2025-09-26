@@ -3276,7 +3276,7 @@ void SceneSessionManager::AddRequestTaskInfo(sptr<SceneSession> sceneSession, in
         "infoMap size:%{public}u, wantMap size:%{public}u",
         persistentId, requestId, requestTaskInfoMap.size(), requestIdToWantMapSize);
 }
- 
+
 void SceneSessionManager::RemoveRequestTaskInfo(int32_t persistentId, int32_t requestId) {
     if (requestId < MIN_REQUEST_ID_FROM_ABILITY || persistentId == INVALID_SESSION_ID) {
         return;
@@ -8276,9 +8276,11 @@ void SceneSessionManager::SetHighlightSessionIds(const sptr<SceneSession>& scene
                 TLOGE(WmsLogTag::WMS_FOCUS, "session is nullptr");
                 continue;
             }
-            highlightNotifyInfo->isSyncNotify_ = !needBlockHighlightNotify &&
-                session->GetCallingPid() == sceneSession->GetCallingPid();
-            session->UpdateHighlightStatus(highlightNotifyInfo, false, false);
+            if (sceneSession->GetPersistentId() != persistentId) {
+                highlightNotifyInfo->isSyncNotify_ = !needBlockHighlightNotify &&
+                    session->GetCallingPid() == sceneSession->GetCallingPid();
+                session->UpdateHighlightStatus(highlightNotifyInfo, false, false);
+            }
         }
         highlightNotifyInfo->isSyncNotify_ = true;
         sceneSession->UpdateHighlightStatus(highlightNotifyInfo, true, needBlockHighlightNotify);
@@ -13259,7 +13261,7 @@ WSError SceneSessionManager::SetMaximizeFullScreen(int32_t persistentId, bool is
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is nullptr");
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
- 
+
     if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "only main window support setMaximizeFullScreen.");
         return WSError::WS_ERROR_INVALID_WINDOW;
