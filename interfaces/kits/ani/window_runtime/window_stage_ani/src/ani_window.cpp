@@ -46,11 +46,33 @@ namespace {
 /* used for free, ani has no destructor right now, only free when aniObj freed */
 static std::map<ani_ref, AniWindow*> g_localObjs;
 } // namespace
-static thread_local std::map<std::string, ani_ref> g_aniWindowMap;
+static std::mutex g_aniWindowMap_mutex;
+static std::map<std::string, ani_ref> g_aniWindowMap;
 
 AniWindow::AniWindow(const sptr<Window>& window)
     : windowToken_(window), registerManager_(std::make_unique<AniWindowRegisterManager>())
 {
+    NotifyNativeWinDestroyFunc func = [this](const std::string& windowName) {
+        {
+            std::lock_guard<std::mutex> lock(g_aniWindowMap_mutex);
+            if (windowName.empty() || g_aniWindowMap.count(windowName) == 0) {
+                TLOGE(WmsLogTag::WMS_LIFE, "Can not find window %{public}s ", windowName.c_str());
+                return;
+            }
+            g_aniWindowMap.erase(windowName);
+            TLOGI(WmsLogTag::WMS_LIFE, "Remove window %{public}s", windowName.c_str());
+        }
+        windowToken_ = nullptr;
+        TLOGI(WmsLogTag::WMS_LIFE, "Destroy window %{public}s in js window", windowName.c_str());
+    };
+    windowToken_->RegisterWindowDestroyedListener(func);
+}
+
+AniWindow::~AniWindow()
+{
+    if (windowToken_ != nullptr) {
+        windowToken_->UnregisterWindowDestroyedListener();
+    }
 }
 
 AniWindow* AniWindow::GetWindowObjectFromEnv(ani_env* env, ani_object obj)
@@ -1039,6 +1061,7 @@ __attribute__((no_sanitize("cfi")))
     };
     aniWindow->SetAniRef(ref);
     g_localObjs.insert(std::pair(ref, aniWindow.release()));
+    std::lock_guard<std::mutex> lock(g_aniWindowMap_mutex);
     g_aniWindowMap[windowName] = ref;
     return obj;
 }
@@ -1538,6 +1561,7 @@ ani_object AniWindow::SetSpecificSystemBarEnabled(ani_env* env, ani_string name,
 ani_ref FindAniWindowObject(const std::string& windowName)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI] Try to find window %{public}s in g_aniWindowMap", windowName.c_str());
+    std::lock_guard<std::mutex> lock(g_aniWindowMap_mutex);
     if (g_aniWindowMap.find(windowName) == g_aniWindowMap.end()) {
         TLOGI(WmsLogTag::DEFAULT, "[ANI] Can not find window %{public}s in g_aniWindowMap", windowName.c_str());
         return nullptr;
@@ -1596,6 +1620,7 @@ void AniWindow::Finalizer(ani_env* env, ani_long nativeObj)
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow != nullptr) {
         auto window = aniWindow->GetWindow();
+        std::lock_guard<std::mutex> lock(g_aniWindowMap_mutex);
         if (window != nullptr) {
             g_aniWindowMap.erase(window->GetWindowName());
         }
