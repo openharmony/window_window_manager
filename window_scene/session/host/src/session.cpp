@@ -385,6 +385,23 @@ void Session::SetSessionInfoWindowInputType(uint32_t windowInputType)
     NotifySessionInfoChange();
 }
 
+void Session::SetSessionInfoExpandInputFlag(uint32_t expandInputFlag)
+{
+    {
+        std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+        if (sessionInfo_.expandInputFlag_ != expandInputFlag) {
+            sessionInfo_.expandInputFlag_ = expandInputFlag;
+            TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, flag:%{public}u", GetPersistentId(), expandInputFlag);
+        }
+    }
+    NotifySessionInfoChange();
+}
+
+uint32_t Session::GetSessionInfoExpandInputFlag() const
+{
+    return sessionInfo_.expandInputFlag_;
+}
+
 void Session::SetSessionInfoWindowMode(int32_t windowMode)
 {
     sessionInfo_.windowMode = windowMode;

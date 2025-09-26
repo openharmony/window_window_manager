@@ -431,6 +431,7 @@ struct SessionInfo {
     bool isSetPointerAreas_ = false;
     bool isCastSession_ = false;
     uint32_t windowInputType_ = 0;
+    uint32_t expandInputFlag_ = 0;
     std::string continueSessionId_ = "";
     bool isCalledRightlyByCallerId_ = false;
     bool fullScreenStart_ = false;
@@ -1024,6 +1025,14 @@ enum class TerminateType : uint32_t {
     CLOSE_AND_CLEAR_MULTITASK,
     CLOSE_AND_START_CALLER,
     CLOSE_BY_EXCEPTION,
+};
+
+/**
+ * @brief window expand flag.
+ */
+enum class ExpandInputFlag : uint32_t {
+    EXPAND_INPUT_FLAG_DEFAULT = 0,
+    WINDOW_DISABLE_USER_ACTION = 1 << 2,
 };
 
 /**
