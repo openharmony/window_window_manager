@@ -33,9 +33,11 @@ public:
     /**
      * @brief Construct of FocusNotifyInfo
      */
-    FocusNotifyInfo(int64_t timeStamp, int32_t unfocusWindowId, int32_t focusWindowId, bool isSyncNotify):
-        timeStamp_(timeStamp), unfocusWindowId_(unfocusWindowId), focusWindowId_(focusWindowId),
-        isSyncNotify_(isSyncNotify) {};
+    FocusNotifyInfo(int64_t timeStamp, int32_t unfId, int32_t focusWindowId, bool isSyncNotify)
+        : timeStamp_(timeStamp),
+          unfocusWindowId_(unfocusWindowId),
+          focusWindowIdfocusWindowId),
+          isSync_(isSyncNotify) {};
 
     /**
      * @brief Deconstruct of FocusNotifyInfo
