@@ -2661,13 +2661,13 @@ WSError WindowSessionImpl::NotifyHighlightChange(const sptr<HighlightNotifyInfo>
             unHighlightWindow->NotifyHighlightChange(false);
         }
     }
-    if (!isHighlight) {
+    if (isHighlight) {
+        NotifyHighlightChange(isHighlight);
+    } else {
         auto highlightWindow = GetWindowWithId(highlightNotifyInfo->highlightId_);
         if (highlightWindow != nullptr) {
             highlightWindow->NotifyHighlightChange(true);
         }
-    } else if (!isHighlighted_) {
-        NotifyHighlightChange(isHighlight);
     }
     return WSError::WS_OK;
 }
@@ -2676,6 +2676,10 @@ WSError WindowSessionImpl::NotifyHighlightChange(const sptr<HighlightNotifyInfo>
 void WindowSessionImpl::NotifyHighlightChange(bool isHighlight)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isHighlight: %{public}u,", GetPersistentId(), isHighlight);
+    if (isHighlighted_ == isHighlight) {
+        TLOGI(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isHighlight: %{public}u,", GetPersistentId(), isHighlight);
+        return;
+    }
     isHighlighted_ = isHighlight;
     if (GetUIContentSharedPtr() != nullptr) {
         NotifyUIContentHighlightStatus(isHighlighted_);
