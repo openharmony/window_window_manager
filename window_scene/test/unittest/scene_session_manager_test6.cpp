@@ -1651,9 +1651,9 @@ HWTEST_F(SceneSessionManagerTest6, UpdateSessionOcclusionStateListener, TestSize
     EXPECT_EQ(ssm_->occlusionStateListenerSessionSet_.size(), 1);
 
     SessionInfo sessionInfo2;
-    session2->persistentId_ = 2;
     sessionInfo2.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     auto session2 = sptr<SceneSession>::MakeSptr(sessionInfo2, nullptr);
+    session2->persistentId_ = 2;
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_NE(mockSessionStage, nullptr);
     session2->sessionStage_ = mockSessionStage;
