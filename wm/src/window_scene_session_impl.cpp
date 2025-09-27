@@ -3544,10 +3544,10 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
     }
     MaximizeEvent(hostSession);
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
-
+ 
     return WMError::WM_OK;
 }
-
+ 
 void WindowSceneSessionImpl::MaximizeEvent(const sptr<ISession> &hostSession)
 {
     if (hostSession == nullptr) {
@@ -5724,7 +5724,7 @@ void WindowSceneSessionImpl::PendingUpdateSupportWindowModesWhenSwitchMultiWindo
     uint32_t windowModeSupportType = pendingWindowModeSupportType_;
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d, windowModeSupportType: %{public}u",
         GetPersistentId(), windowModeSupportType);
-
+    
     pendingWindowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     property_->SetWindowModeSupportType(windowModeSupportType);
 

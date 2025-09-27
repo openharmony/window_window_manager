@@ -2162,7 +2162,7 @@ WSError SessionStageProxy::SetCurrentRotation(int32_t currentRotation)
         TLOGE(WmsLogTag::WMS_ROTATION, "Write params failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
+    
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_ROTATION, "remote is null");
