@@ -4150,8 +4150,13 @@ void WindowSessionImpl::RecoverSessionListener()
         }
     }
     {
-        std::lock_guard<std::mutex> lockListener(occlusionStateChangeListenerMutex_);
-        if (occlusionStateChangeListeners_.find(persistentId) != occlusionStateChangeListeners_.end()) {
+        bool hasListener = false;
+        {
+            std::lock_guard<std::mutex> lockListener(occlusionStateChangeListenerMutex_);
+            hasListener = occlusionStateChangeListeners_.count(persistentId) > 0 &&
+                !occlusionStateChangeListeners_[persistentId].empty();
+        }
+        if (hasListener) {
             SingletonContainer::Get<WindowAdapter>().UpdateSessionOcclusionStateListener(persistentId, true);
         }
     }
@@ -5984,6 +5989,11 @@ WSError WindowSessionImpl::NotifyWindowOcclusionState(const WindowVisibilityStat
         for (auto& listener : occlusionStateChangeListeners_[persistentId]) {
             listeners.push_back(listener);
         }
+    }
+    if (state > WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d, recvVisibilityState=%{public}u",
+            persistentId, static_cast<uint32_t>(state));
+        state = WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION;
     }
     uint32_t notifyCounter = 0;
     for (auto& listener : listeners) {
