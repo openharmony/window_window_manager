@@ -147,7 +147,7 @@ std::unordered_map<int32_t, std::vector<IScreenshotAppEventListenerSptr>>
 std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> WindowSessionImpl::touchOutsideListeners_;
 std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> WindowSessionImpl::windowVisibilityChangeListeners_;
 std::mutex WindowSessionImpl::occlusionStateChangeListenerMutex_;
-std::map<int32_t, std::vector<sptr<IOcclusionStateChangedListener>>> WindowSessionImpl::occlusionStateChangeListeners_;
+std::unordered_map<int32_t, std::vector<sptr<IOcclusionStateChangedListener>>> WindowSessionImpl::occlusionStateChangeListeners_;
 std::mutex WindowSessionImpl::displayIdChangeListenerMutex_;
 std::map<int32_t, std::vector<IDisplayIdChangeListenerSptr>> WindowSessionImpl::displayIdChangeListeners_;
 std::mutex WindowSessionImpl::systemDensityChangeListenerMutex_;
@@ -5944,6 +5944,7 @@ WMError WindowSessionImpl::RegisterOcclusionStateChangeListener(const sptr<IOccl
     auto ret = SingletonContainer::Get<WindowAdapter>().UpdateSessionOcclusionStateListener(persistentId, true);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "ipc failed: winId=%{public}d", persistentId);
+        std::lock_guard<std::mutex> lockListener(occlusionStateChangeListenerMutex_);
         ret = UnregisterListener(occlusionStateChangeListeners_[persistentId], listener);
     }
     return ret;
@@ -5967,6 +5968,7 @@ WMError WindowSessionImpl::UnregisterOcclusionStateChangeListener(const sptr<IOc
     auto ret = SingletonContainer::Get<WindowAdapter>().UpdateSessionOcclusionStateListener(persistentId, false);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "ipc failed: winId=%{public}d", persistentId);
+        std::lock_guard<std::mutex> lockListener(occlusionStateChangeListenerMutex_);
         ret = RegisterListener(occlusionStateChangeListeners_[persistentId], listener);
     }
     return ret;
@@ -5989,7 +5991,7 @@ WSError WindowSessionImpl::NotifyWindowOcclusionState(const WindowVisibilityStat
             notifyCounter++;
         }
     }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d, visibilityState=%{public}u, notifyCounter=%{public}d",
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d, visibilityState=%{public}u, notifyCounter=%{public}u",
         persistentId, static_cast<uint32_t>(state), notifyCounter);
     return WSError::WS_OK;
 }

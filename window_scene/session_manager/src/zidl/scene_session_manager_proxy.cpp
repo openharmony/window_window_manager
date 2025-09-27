@@ -650,7 +650,7 @@ WMError SceneSessionManagerProxy::UpdateSessionOcclusionStateListener(int32_t pe
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteInt32(persistentId)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write windowId failed");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write persistentId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteBool(haveListener)) {
