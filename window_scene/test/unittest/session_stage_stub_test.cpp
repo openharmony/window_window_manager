@@ -246,7 +246,7 @@ HWTEST_F(SessionStageStubTest, HandleUpdateFocus, TestSize.Level1)
     data.WriteBool(false);
     uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_FOCUS_CHANGE);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+    ASSERT_EQ(5, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
 
 /**
@@ -995,7 +995,7 @@ HWTEST_F(SessionStageStubTest, HandleNotifyHighlightChange, TestSize.Level1)
 
     data.WriteBool(false);
     ASSERT_TRUE(sessionStageStub_ != nullptr);
-    ASSERT_EQ(0, sessionStageStub_->HandleNotifyHighlightChange(data, reply));
+    ASSERT_EQ(5, sessionStageStub_->HandleNotifyHighlightChange(data, reply));
 }
 
 /**

@@ -1033,7 +1033,7 @@ HWTEST_F(SceneSessionManagerTest11, SetHighlightSessionIds, TestSize.Level1)
     ssm_->SetHighlightSessionIds(currSceneSession, false, timeStamp);
     EXPECT_EQ(ssm_->highlightIds_.count(1) == 1, true);
     auto samePidSession = sptr<SceneSession>::MakeSptr(info1, nullptr);
-    samePidSession->SetCallingPid(currSceneSession->SetCallingPid());
+    samePidSession->SetCallingPid(currSceneSession->GetCallingPid());
     samePidSession->persistentId_ = 321;
     ssm_->AddHighlightSessionIds(samePidSession, false);
     ssm_->SetHighlightSessionIds(currSceneSession, false, timeStamp);
