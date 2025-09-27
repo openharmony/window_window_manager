@@ -1037,7 +1037,8 @@ private:
     static std::mutex systemBarPropertyListenerMutex_;
     static std::mutex windowRotationChangeListenerMutex_;
     static std::mutex occlusionStateChangeListenerMutex_;
-    static std::map<int32_t, std::vector<sptr<IOcclusionStateChangedListener>>> occlusionStateChangeListeners_;
+    static std::unordered_map<int32_t,
+        std::vector<sptr<IOcclusionStateChangedListener>>> WindowSessionImpl::occlusionStateChangeListeners_;
     static std::map<int32_t, std::vector<sptr<ISystemBarPropertyListener>>> systemBarPropertyListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowStageLifeCycle>>> windowStageLifecycleListeners_;
