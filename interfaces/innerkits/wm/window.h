@@ -871,6 +871,7 @@ public:
      */
     virtual void OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
         RotationChangeResult& rotationChangeResult) {}
+};
 
 /**
  * @class IFreeWindowModeChangeListener
@@ -4667,6 +4668,14 @@ public:
      * @param hitTitleBar true means hit title bar success, false means not hit title bar.
      */
     virtual bool IsHitTitleBar(std::shared_ptr<MMI::PointerEvent>& pointerEvent) const { return false; }
+
+
+    /**
+     * @brief Check if the current device is in free window mode.
+     *
+     * @return true means is in free window mdoe, false means not in free window mdoe.
+     */
+    virtual bool IsInFreeWindowMode() const { return false; }
 
     /**
      * @brief register a listener to listen whether the window is in free window mode.
