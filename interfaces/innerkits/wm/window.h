@@ -4669,7 +4669,6 @@ public:
      */
     virtual bool IsHitTitleBar(std::shared_ptr<MMI::PointerEvent>& pointerEvent) const { return false; }
 
-
     /**
      * @brief Check if the current device is in free window mode.
      *

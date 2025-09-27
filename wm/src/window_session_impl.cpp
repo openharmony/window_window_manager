@@ -8233,8 +8233,7 @@ WSError WindowSessionImpl::UpdateIsShowDecorInFreeMultiWindow(bool isShow)
 }
 
 template<typename T>
-EnableIfSame<T, IFreeWindowModeChangeListener, std::vector<sptr<IFreeWindowModeChangeListener>>>
-WindowSessionImpl::GetListeners()
+EnableIfSame<T, IFreeWindowModeChangeListener, std::vector<sptr<IFreeWindowModeChangeListener>>> WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<IFreeWindowModeChangeListener>> freeWindowModeChangeListeners;
     for (auto& listener : freeWindowModeChangeListeners_[GetPersistentId()]) {
