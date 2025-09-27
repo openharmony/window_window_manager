@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
  
 #include "ani_window_utils.h"
 
@@ -451,17 +450,17 @@ ani_object AniWindowUtils::CreateAniDecorButtonStyle(ani_env* env, const DecorBu
         TLOGE(WmsLogTag::WMS_DECOR, "[ANI] Enum_GetEnumItemByName failed");
         return AniWindowUtils::CreateAniUndefined(env);
     }
-    CallAniMethodVoid(env, aniDecorButtonStyle, aniClass, "colorMode", nullptr, aniColorMode);
+    CallAniMethodVoid(env, aniDecorButtonStyle, aniClass, "<set>colorMode", nullptr, aniColorMode);
     SetOptionalFieldInt(env, aniDecorButtonStyle, aniClass,
-        "buttonBackgroundSize", ani_int(decorButtonStyle.buttonBackgroundSize));
+        "<set>buttonBackgroundSize", ani_int(decorButtonStyle.buttonBackgroundSize));
     SetOptionalFieldInt(env, aniDecorButtonStyle, aniClass,
-        "spacingBetweenButtons", ani_int(decorButtonStyle.spacingBetweenButtons));
+        "<set>spacingBetweenButtons", ani_int(decorButtonStyle.spacingBetweenButtons));
     SetOptionalFieldInt(env, aniDecorButtonStyle, aniClass,
-        "closeButtonRightMargin", ani_int(decorButtonStyle.closeButtonRightMargin));
+        "<set>closeButtonRightMargin", ani_int(decorButtonStyle.closeButtonRightMargin));
     SetOptionalFieldInt(env, aniDecorButtonStyle, aniClass,
-        "buttonIconSize", ani_int(decorButtonStyle.buttonIconSize));
+        "<set>buttonIconSize", ani_int(decorButtonStyle.buttonIconSize));
     SetOptionalFieldInt(env, aniDecorButtonStyle, aniClass,
-        "buttonBackgroundCornerRadius", ani_int(decorButtonStyle.buttonBackgroundCornerRadius));
+        "<set>buttonBackgroundCornerRadius", ani_int(decorButtonStyle.buttonBackgroundCornerRadius));
     return aniDecorButtonStyle;
 }
 
