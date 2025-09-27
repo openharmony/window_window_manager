@@ -1039,37 +1039,22 @@ void JsWindowListener::OnRotationChange(const RotationChangeInfo& rotationChange
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
-void JsWindowListener::OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
-    RotationChangeResult& rotationChangeResult)
+void JsWindowListener::OnFreeWindowModeChange(bool isInFreeWindowMode)
 {
-    auto jsCallback = [self = weakRef_, rotationChangeInfo, &rotationChangeResult, env = env_] () {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::OnRotationChange");
+    auto jsCallback = [self = weakRef_, isInFreeWindowMode, env = env_] {
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGE(WmsLogTag::WMS_ROTATION, "this listener or env is nullptr");
+            WLOGFE("this listener or env is nullptr");
             return;
         }
         HandleScope handleScope(env);
-        napi_value rotationInfoObj = CreateRotationChangeInfoObject(env, rotationChangeInfo);
-        if (rotationInfoObj == nullptr) {
-            TLOGE(WmsLogTag::WMS_ROTATION, "failed to create js object");
-            return;
-        }
-        napi_value argv[] = { rotationInfoObj };
-        napi_value rotationChangeResultObj = thisListener->CallJsMethod(WINDOW_ROTATION_CHANGE_CB.c_str(), argv,
-            ArraySize(argv));
-        if (rotationChangeResultObj != nullptr) {
-            GetRotationResultFromJs(env, rotationChangeResultObj, rotationChangeResult);
-        }
+        napi_value argv[] = { CreateJsValue(env, isInFreeWindowMode) };
+        thisListener->CallJsMethod(FREE_WINDOW_MODE_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
-
-    if (!eventHandler_ ||
-        (eventHandler_->GetEventRunner() && eventHandler_->GetEventRunner()->IsCurrentRunnerThread())) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "get main event handler failed or current is alreay main thread!");
-        return jsCallback();
+    napi_status status = napi_send_event(env_, jsCallback, napi_eprio_high, "OnFreeWindowModeChange");
+    if (status != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
     }
-    eventHandler_->PostSyncTask(jsCallback, "wms:JsWindowListener::OnRotationChange",
-        AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -872,22 +872,19 @@ public:
     virtual void OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
         RotationChangeResult& rotationChangeResult) {}
 
-/*
- * @class IWindowRotationChangeListener
+/**
+ * @class IFreeWindowModeChangeListener
  *
- * @brief IWindowRotationChangeListener is used to observe the window rotation change.
+ * @brief IFreeWindowModeChangeListener is used to observe the free window mode when it changed.
  */
-class IWindowRotationChangeListener : virtual public RefBase {
+class IFreeWindowModeChangeListener : virtual public RefBase {
 public:
     /**
-     * @brief Notify caller when window rotate
+     * @brief Notify caller when free window mode changed.
      *
-     * @param rotationChangeInfo information of rotation
-     * @param rotationChangeResult result of rotation
-     *
+     * @param isInFreeWindowMode Whether in free window mode.
      */
-    virtual void OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
-        RotationChangeResult& rotationChangeResult) {}
+    virtual void OnFreeWindowModeChange(bool isInFreeWindowMode) {}
 };
 
 static WMError DefaultCreateErrCode = WMError::WM_OK;
@@ -4672,11 +4669,26 @@ public:
     virtual bool IsHitTitleBar(std::shared_ptr<MMI::PointerEvent>& pointerEvent) const { return false; }
 
     /**
-     * @brief Calculate whether the pointerEvent hits the title bar.
+     * @brief register a listener to listen whether the window is in free window mode.
      *
-     * @param hitTitleBar true means hit title bar success, false means not hit title bar.
+     * @param listener IFreeWindowModeChangeListener.
+     * @return WM_OK means register success, others means register failed.
      */
-    virtual bool IsHitTitleBar(std::shared_ptr<MMI::PointerEvent>& pointerEvent) const { return false; }
+    virtual WMError RegisterFreeWindowModeChangeListener(const sptr<IFreeWindowModeChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+ 
+    /**
+     * @brief Unregister the IFreeWindowModeChangeListener.
+     *
+     * @param listener IFreeWindowModeChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterFreeWindowModeChangeListener(const sptr<IFreeWindowModeChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }
