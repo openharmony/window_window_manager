@@ -259,16 +259,15 @@ HWTEST_F(ScreenSessionManagerTest, CheckAndNotifyChangeMode001, TestSize.Level1)
     sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "ChangeMode";
-    virtualOption.width_ = 200;
-    virtualOption.height_ = 100;
+    virtualOption.width_ = 1920;
+    virtualOption.height_ = 1080;
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
     ASSERT_NE(screenSession, nullptr);
-    uint32_t testRealWidth = 1280;
-    uint32_t testRealHeight = 720;
-    screenSession->SetRealWidth(1920);
-    screenSession->SetRealHeight(1080);
-    ssm_->CheckAndNotifyChangeMode(testRealWidth, testRealHeight, screenSession);
+    RRect testBounds = RRect({ 0, 0, 1280, 760}, 0.0f, 0.0f);
+    RRect bounds = RRect({ 0, 0, 1920, 1080}, 0.0f, 0.0f);
+    screenSession->SetBounds(bounds);
+    ssm_->CheckAndNotifyChangeMode(testBounds, screenSession);
     EXPECT_TRUE(g_errLog.find("notify end") != std::string::npos);
     g_errLog.clear();
 #endif
@@ -293,19 +292,15 @@ HWTEST_F(ScreenSessionManagerTest, CheckAndNotifyChangeMode002, TestSize.Level1)
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
     ASSERT_NE(screenSession, nullptr);
-    screenSession->SetRealWidth(1920);
-    screenSession->SetRealHeight(1080);
-    uint32_t testRealWidth = 1920;
-    uint32_t testRealHeight = 1080;
-    ssm_->CheckAndNotifyChangeMode(testRealWidth, testRealHeight, screenSession);
+    RRect testBounds = RRect({ 0, 0, 1920, 1080}, 0.0f, 0.0f);
+    RRect bounds = RRect({ 0, 0, 1920, 1080}, 0.0f, 0.0f);
+    screenSession->SetBounds(bounds);
+    ssm_->CheckAndNotifyChangeMode(testBounds, screenSession);
     EXPECT_TRUE(g_errLog.find("no notify") != std::string::npos);
     g_errLog.clear();
 #endif
 }
 
-    void CheckAndNotifyRefreshRate(uint32_t refreshRate, sptr<ScreenSession> updateScreenSession);
-    void CheckAndNotifyChangeMode(uint32_t phyWidth, uint32_t phyHeight,
-            sptr<ScreenSession> updateScreenSession);
 /**
  * @tc.name: CheckAndNotifyRefreshRate001
  * @tc.desc: CheckAndNotifyRefreshRate001
