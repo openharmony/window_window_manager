@@ -5949,7 +5949,8 @@ WMError WindowSessionImpl::RegisterOcclusionStateChangeListener(const sptr<IOccl
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d", persistentId);
     auto ret = SingletonContainer::Get<WindowAdapter>().UpdateSessionOcclusionStateListener(persistentId, true);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "ipc failed: winId=%{public}d", persistentId);
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "ipc failed: winId=%{public}d, retCode=%{public}d",
+            persistentId, static_cast<int32_t>(ret));
         std::lock_guard<std::mutex> lockListener(occlusionStateChangeListenerMutex_);
         ret = UnregisterListener(occlusionStateChangeListeners_[persistentId], listener);
     }
@@ -5973,7 +5974,8 @@ WMError WindowSessionImpl::UnregisterOcclusionStateChangeListener(const sptr<IOc
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d", persistentId);
     auto ret = SingletonContainer::Get<WindowAdapter>().UpdateSessionOcclusionStateListener(persistentId, false);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "ipc failed: winId=%{public}d", persistentId);
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "ipc failed: winId=%{public}d, retCode=%{public}d",
+            persistentId, static_cast<int32_t>(ret));
         std::lock_guard<std::mutex> lockListener(occlusionStateChangeListenerMutex_);
         ret = RegisterListener(occlusionStateChangeListeners_[persistentId], listener);
     }
@@ -5990,10 +5992,12 @@ WSError WindowSessionImpl::NotifyWindowOcclusionState(const WindowVisibilityStat
             listeners.push_back(listener);
         }
     }
-    if (state > WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
-        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d, recvVisibilityState=%{public}u",
+    auto visibilityState = state;
+    if (static_cast<uint32_t>(state) > static_cast<uint32_t>(
+        WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION)) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d, recvVisibilityState=%{public}u",
             persistentId, static_cast<uint32_t>(state));
-        state = WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION;
+        visibilityState = WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION;
     }
     uint32_t notifyCounter = 0;
     for (auto& listener : listeners) {
@@ -6003,7 +6007,7 @@ WSError WindowSessionImpl::NotifyWindowOcclusionState(const WindowVisibilityStat
         }
     }
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d, visibilityState=%{public}u, notifyCounter=%{public}u",
-        persistentId, static_cast<uint32_t>(state), notifyCounter);
+        persistentId, static_cast<uint32_t>(visibilityState), notifyCounter);
     return WSError::WS_OK;
 }
 
