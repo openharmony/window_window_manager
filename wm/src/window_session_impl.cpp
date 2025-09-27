@@ -8232,22 +8232,6 @@ WSError WindowSessionImpl::UpdateIsShowDecorInFreeMultiWindow(bool isShow)
     return WSError::WS_OK;
 }
 
-void WindowSessionImpl::SetNotifySizeChangeFlag(bool flag)
-{
-    if (flag) {
-        if (GetType() != WindowType::WINDOW_TYPE_FLOAT_NAVIGATION) {
-            return;
-        }
-        if (GetRect() == GetRequestRect()) {
-            return;
-        }
-        notifySizeChangeFlag_ = true;
-        TLOGD(WmsLogTag::WMS_LAYOUT, "Set notify size change flag is true");
-        return;
-    }
-    notifySizeChangeFlag_ = false;
-}
-
 template<typename T>
 EnableIfSame<T, IFreeWindowModeChangeListener,
     std::vector<sptr<IFreeWindowModeChangeListener>>> WindowSessionImpl::GetListeners()
