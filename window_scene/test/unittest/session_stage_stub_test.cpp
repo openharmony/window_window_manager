@@ -259,7 +259,7 @@ HWTEST_F(SessionStageStubTest, HandleUpdateFocus01, TestSize.Level1)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    auto info = sptr<FocusNotifyInfo>::MaleSptr();
+    auto info = sptr<FocusNotifyInfo>::MakeSptr();
     data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
     data.WriteParcelable(info);
     data.WriteBool(false);
@@ -1007,7 +1007,7 @@ HWTEST_F(SessionStageStubTest, HandleNotifyHighlightChange01, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    auto info = sptr<HighlightNotifyInfo>::MaleSptr();
+    auto info = sptr<HighlightNotifyInfo>::MakeSptr();
     data.WriteParcelable(info);
     data.WriteBool(false);
     ASSERT_TRUE(sessionStageStub_ != nullptr);

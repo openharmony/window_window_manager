@@ -2728,7 +2728,7 @@ HWTEST_F(WindowSessionImplTest4, NotifyHighlightChange, TestSize.Level1)
     WSError res = window->NotifyHighlightChange(info, highlight);
     info = sptr<HighlightNotifyInfo>::MakeSptr();
     info->isSyncNotify_ = false;
-    WSError res = window->NotifyHighlightChange(info, highlight);
+    res = window->NotifyHighlightChange(info, highlight);
     EXPECT_EQ(res, WSError::WS_OK);
     sptr<IWindowHighlightChangeListener> listener = sptr<IWindowHighlightChangeListener>::MakeSptr();
     window->RegisterWindowHighlightChangeListeners(listener);

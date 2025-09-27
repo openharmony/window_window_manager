@@ -1582,12 +1582,12 @@ WSError WindowSessionImpl::UpdateFocus(const sptr<FocusNotifyInfo>& focusNotifyI
         isFocused, focusNotifyInfo->isSyncNotify_);
     auto timeStamp = focusNotifyInfo->timeStamp_;
     if (timeStamp <= updateFocusTimeStamp_.load()) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "timeStamp too late, current:%{public}" PRId64 ", new:%{public}d" PRId64,
+        TLOGD(WmsLogTag::WMS_FOCUS, "timeStamp too late, current:%{public}" PRId64 ", new:%{public}" PRId64,
             updateFocusTimeStamp_.load(), timeStamp);
         return WSError::WS_OK;
     }
     updateFocusTimeStamp_.store(timeStamp);
-    TLOGI(WmsLogTag::WMS_FOCUS, "first update focus, timeStamp:%{public}" PRIu64, timeStamp);
+    TLOGI(WmsLogTag::WMS_FOCUS, "first update focus, timeStamp:%{public}" PRId64, timeStamp);
     auto otherWindowId = isFocused ? focusNotifyInfo->unfocusWindowId_ : focusNotifyInfo->focusWindowId_;
     if (otherWindowId == INVALID_SESSION_ID) {
         UpdateFocusState(isFocused);
@@ -1605,6 +1605,7 @@ WSError WindowSessionImpl::UpdateFocus(const sptr<FocusNotifyInfo>& focusNotifyI
             otherWindow->UpdateFocusState(!isFocused);
         }
     }
+    return WSError::WS_OK;
 }
 
 void WindowSessionImpl::UpdateFocusState(bool isFocused)
@@ -2641,15 +2642,15 @@ WSError WindowSessionImpl::NotifyHighlightChange(const sptr<HighlightNotifyInfo>
         NotifyHighlightChange(isHighlight);
         return WSError::WS_OK;
     }
-    TLOGD(WmsLogTag::WMS_FOCUS, "timeStamp:%{public}d, highlightId:%{public}d, isHighlight:%{public}d,"
+    TLOGD(WmsLogTag::WMS_FOCUS, "timeStamp:%{public}ld, highlightId:%{public}d, isHighlight:%{public}d,"
         "isSyncNotify:%{public}d", highlightNotifyInfo->timeStamp_, highlightNotifyInfo->highlightId_,
         isHighlight, highlightNotifyInfo->isSyncNotify_);
     if (highlightNotifyInfo->timeStamp_ <= updateHighlightTimeStamp_.load()) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "timeStamp too late, current:%{public}" PRId64 ", new:%{public}d" PRId64,
+        TLOGD(WmsLogTag::WMS_FOCUS, "timeStamp too late, current:%{public}" PRId64 ", new:%{public}" PRId64,
             updateHighlightTimeStamp_.load(), highlightNotifyInfo->timeStamp_);
         return WSError::WS_OK;
     }
-    TLOGI(WmsLogTag::WMS_FOCUS, "first notify highlight, timeStamp:%{public}" PRIu64, highlightNotifyInfo->timeStamp_);
+    TLOGI(WmsLogTag::WMS_FOCUS, "first notify highlight, timeStamp:%{public}" PRId64, highlightNotifyInfo->timeStamp_);
     updateHighlightTimeStamp_.store(highlightNotifyInfo->timeStamp_);
     for (auto unHighlightWindowId : highlightNotifyInfo->notHighlightIds_) {
         if (!isHighlight && unHighlightWindowId == GetWindowId()) {

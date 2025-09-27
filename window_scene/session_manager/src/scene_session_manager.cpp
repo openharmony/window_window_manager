@@ -17307,8 +17307,8 @@ WMError SceneSessionManager::SetParentWindowInner(const sptr<SceneSession>& subS
     }
     if (!oldParentSession->IsSameMainSession(newParentSession) && subSession->IsFocused() &&
         !subSession->GetSessionProperty()->GetExclusivelyHighlighted()) {
-        SetHighlightSessionIds(std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()).count(), subSession, true);
+        SetHighlightSessionIds(subSession, true, std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count());
     }
     return WMError::WM_OK;
 }
