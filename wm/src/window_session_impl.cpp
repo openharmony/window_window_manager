@@ -2675,11 +2675,12 @@ WSError WindowSessionImpl::NotifyHighlightChange(const sptr<HighlightNotifyInfo>
 /** @note @window.focus */
 void WindowSessionImpl::NotifyHighlightChange(bool isHighlight)
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isHighlight: %{public}u,", GetPersistentId(), isHighlight);
     if (isHighlighted_ == isHighlight) {
-        TLOGI(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isHighlight: %{public}u,", GetPersistentId(), isHighlight);
+        TLOGI(WmsLogTag::WMS_FOCUS, "update highlight repeated, windowId: %{public}d, isHighlight: %{public}u",
+            GetPersistentId(), isHighlight);
         return;
     }
+    TLOGI(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isHighlight: %{public}u,", GetPersistentId(), isHighlight);
     isHighlighted_ = isHighlight;
     if (GetUIContentSharedPtr() != nullptr) {
         NotifyUIContentHighlightStatus(isHighlighted_);
@@ -4141,7 +4142,7 @@ EnableIfSame<T, IWindowTitleChangeListener, std::vector<sptr<IWindowTitleChangeL
     }
     return windowTitleChangeListeners;
 }
-
+ 
 WMError WindowSessionImpl::RegisterWindowTitleChangeListener(const sptr<IWindowTitleChangeListener>& listener)
 {
     std::lock_guard<std::mutex> lockListener(windowTitleChangeListenerMutex_);
@@ -4149,7 +4150,7 @@ WMError WindowSessionImpl::RegisterWindowTitleChangeListener(const sptr<IWindowT
     TLOGI(WmsLogTag::WMS_DECOR, "RegisterWindowTitleChangeListener");
     return ret;
 }
-
+ 
 WMError WindowSessionImpl::UnregisterWindowTitleChangeListener(const sptr<IWindowTitleChangeListener>& listener)
 {
     std::lock_guard<std::mutex> lockListener(windowTitleChangeListenerMutex_);
@@ -5489,7 +5490,7 @@ void WindowSessionImpl::NotifyDisplayMove(DisplayId from, DisplayId to)
     }
     NotifyDmsDisplayMove(to);
 }
-
+ 
 void WindowSessionImpl::NotifyDmsDisplayMove(DisplayId to)
 {
     auto context = GetContext();

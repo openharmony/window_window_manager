@@ -3276,7 +3276,7 @@ void SceneSessionManager::AddRequestTaskInfo(sptr<SceneSession> sceneSession, in
         "infoMap size:%{public}u, wantMap size:%{public}u",
         persistentId, requestId, requestTaskInfoMap.size(), requestIdToWantMapSize);
 }
-
+ 
 void SceneSessionManager::RemoveRequestTaskInfo(int32_t persistentId, int32_t requestId) {
     if (requestId < MIN_REQUEST_ID_FROM_ABILITY || persistentId == INVALID_SESSION_ID) {
         return;
@@ -11089,7 +11089,7 @@ WMError SceneSessionManager::ConvertToRelativeCoordinateExtended(const Rect& rec
         newRect.posY_ = rect.posY_ - defaultDisplayRect.height_ - foldCreaseRect.height_;
         newDisplayId = VIRTUAL_DISPLAY_ID;
         return WMError::WM_OK;
-    }
+    } 
     return WMError::WM_DO_NOTHING;
 }
 
@@ -12373,7 +12373,7 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
             isNeedUpdate = isAINavigationBarVisible_[displayId] != isVisible ||
                            currAINavigationBarAreaMap_.count(displayId) == 0 ||
                            currAINavigationBarAreaMap_[displayId] != barArea;
-
+                           
             if (isNeedUpdate) {
                 isAINavigationBarVisible_[displayId] = isVisible;
                 currAINavigationBarAreaMap_[displayId] = barArea;
@@ -13261,7 +13261,7 @@ WSError SceneSessionManager::SetMaximizeFullScreen(int32_t persistentId, bool is
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is nullptr");
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
-
+ 
     if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "only main window support setMaximizeFullScreen.");
         return WSError::WS_ERROR_INVALID_WINDOW;
@@ -15556,7 +15556,7 @@ WMError SceneSessionManager::GetAllMainWindowInfo(std::vector<sptr<MainWindowInf
     }
     return WMError::WM_OK;
 }
-
+ 
 WMError SceneSessionManager::GetMainWindowSnapshot(const std::vector<int32_t>& windowIds,
     const WindowSnapshotConfiguration& config, const sptr<IRemoteObject>& callback)
 {
@@ -15600,7 +15600,7 @@ WMError SceneSessionManager::GetMainWindowSnapshot(const std::vector<int32_t>& w
     }, __func__);
     return ret;
 }
-
+ 
 WMError SceneSessionManager::CheckWindowIds(
     const std::vector<int32_t>& windowIds, const sptr<IRemoteObject>& callback)
 {

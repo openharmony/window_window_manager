@@ -327,13 +327,13 @@ HWTEST_F(WindowSessionImplTest3, SetWindowModal, TestSize.Level1)
     ASSERT_EQ(WMError::WM_OK, ret);
     ret = window_->SetWindowModal(false);
     ASSERT_EQ(WMError::WM_OK, ret);
-
+    
     window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     ret = window_->SetWindowModal(true);
     ASSERT_EQ(WMError::WM_OK, ret);
     ret = window_->SetWindowModal(false);
     ASSERT_EQ(WMError::WM_OK, ret);
-
+    
     window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     ret = window_->SetWindowModal(true);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
@@ -1346,7 +1346,7 @@ HWTEST_F(WindowSessionImplTest3, InjectTouchEvent, TestSize.Level1)
     std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
     auto ret = window->InjectTouchEvent(pointerEvent);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
-
+ 
     pointerEvent = MMI::PointerEvent::Create();
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
     window->uiContent_ = nullptr;

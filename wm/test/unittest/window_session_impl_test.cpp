@@ -173,7 +173,7 @@ HWTEST_F(WindowSessionImplTest, Connect02, TestSize.Level1)
     window->property_ = property;
     window->property_->SetPersistentId(1);
     window->SetContext(abilityContext_);
-
+ 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
     window->hostSession_ = session;
@@ -2512,7 +2512,7 @@ HWTEST_F(WindowSessionImplTest, GetRouterStackInfo, TestSize.Level1)
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetRouterStackInfo");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-
+    
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     std::string testInfo;
     auto res = window->GetRouterStackInfo(testInfo);

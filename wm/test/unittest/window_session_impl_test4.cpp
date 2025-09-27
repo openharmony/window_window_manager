@@ -1371,7 +1371,7 @@ HWTEST_F(WindowSessionImplTest4, UpdateRect04, TestSize.Level2)
     rect.posY_ = 0;
     rect.height_ = 50;
     rect.width_ = 50;
-
+ 
     Rect preRect;
     preRect.posX_ = 0;
     preRect.posY_ = 0;

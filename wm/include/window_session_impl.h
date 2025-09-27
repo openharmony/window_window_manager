@@ -859,7 +859,7 @@ protected:
      */
     bool grayOutMaximizeButton_ = false;
     void NotifyTitleChange(bool isShow, int32_t height);
-
+    
 private:
     void InitPropertyFromOption(const sptr<WindowOption>& option);
     //Trans between colorGamut and colorSpace
