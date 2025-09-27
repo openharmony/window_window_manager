@@ -1335,7 +1335,7 @@ bool ScreenSessionManager::RecoverRestoredMultiScreenMode(sptr<ScreenSession> sc
         TLOGI(WmsLogTag::DMS, "extend screen is main");
         info.mainScreenOption.screenId_ = screenSession->GetRSScreenId();
         info.secondaryScreenOption.screenId_ = internalSession->GetRSScreenId();
-        RecoverScreenActiveMode(screenSession->GetRSScreenId(), info.activeId);
+        RecoverScreenActiveMode(info.mainScreenOption.screenId_, info.activeId);
     } else {
         TLOGI(WmsLogTag::DMS, "extend screen is not main");
         info.mainScreenOption.screenId_ = internalSession->GetRSScreenId();
@@ -2375,16 +2375,17 @@ void ScreenSessionManager::CheckAndNotifyRefreshRate(uint32_t refreshRate, sptr<
     }
 }
 
-void ScreenSessionManager::CheckAndNotifyChangeMode(uint32_t phyWidth, uint32_t phyHeight,
-        sptr<ScreenSession> updateScreenSession)
+void ScreenSessionManager::CheckAndNotifyChangeMode(const RRect& bounds, sptr<ScreenSession> updateScreenSession)
 {
     if (updateScreenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "screenSession is null");
         return;
     }
     ScreenProperty property = updateScreenSession->GetScreenProperty();
-    bool isSizeChanged = 
-        phyWidth != property.GetScreenRealWidth() || phyHeight != property.GetScreenRealHeight();
+    RRect updateBounds = property.GetBounds();
+    bool isSizeChanged =
+        std::fabs(bounds.rect_.width_ - updateBounds.rect_.width_) >= FLT_EPSILON ||
+        std::fabs(bounds.rect_.height_ - updateBounds.rect_.height_) >= FLT_EPSILON;
     if (isSizeChanged) {
         property.SetPropertyChangeReason("active mode change");
         updateScreenSession->PropertyChange(property, ScreenPropertyChangeReason::CHANGE_MODE);
@@ -2394,6 +2395,7 @@ void ScreenSessionManager::CheckAndNotifyChangeMode(uint32_t phyWidth, uint32_t 
     } else {
         TLOGI(WmsLogTag::DMS, "no notify");
     }
+    NotifyDisplayModeChange();
 }
 
 
@@ -2421,31 +2423,32 @@ DMError ScreenSessionManager::SetScreenActiveMode(ScreenId screenId, uint32_t mo
         TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
-    ScreenProperty property = screenSession->GetScreenProperty();
-    uint32_t phyWidth = property.GetScreenRealWidth();
-    uint32_t phyHeight = property.GetScreenRealHeight();
+    RRect screenBounds = screenSession->GetScreenProperty().GetBounds();
     uint32_t refreshRate = screenSession->GetRefreshRate();
+    RSScreenModeInfo screenMode = RSScreenModeInfo();
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetScreenActiveMode(%" PRIu64", %u)", screenId, modeId);
     auto res = rsInterface_.SetScreenActiveMode(rsScreenId, modeId); // modeId is activeIdx;
-    int id = HiviewDFX::XCollie::GetInstance().SetTimer("SetScreenActiveModeCallRS", XCOLLIE_TIMEOUT_10S, nullptr,
-        nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
-    TLOGW(WmsLogTag::DMS, "Call rsInterface_ GetScreenActiveMode rsid: %{public}" PRIu64, rsScreenId);
-    RSScreenModeInfo screenMode = rsInterface_.GetScreenActiveMode(rsScreenId);
-    HiviewDFX::XCollie::GetInstance().CancelTimer(id);
-    ReportScreenModeChangeEvent(screenMode, res);
     const char* logPreFix = (res = StatusCode::SUCCESS) ? "RS success" : "RS fail";
     TLOGW(WmsLogTag::DMS, "%{public}s, rsScreenId: %{public}" PRIu64",modeId:%{public}u, res%{public}d",
         logPreFix, rsScreenId, modeId, res);
     if (res != StatusCode::SUCCESS) {
+        ReportScreenModeChangeEvent(screenMode, res);
         if (res == StatusCode::HDI_ERR_NOT_SUPPORT) {
             return DMError::DM_ERROR_INVALID_MODE_ID;
         } else {
             return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
         }
     }
+
+    int id = HiviewDFX::XCollie::GetInstance().SetTimer("SetScreenActiveModeCallRS", XCOLLIE_TIMEOUT_10S, nullptr,
+        nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
+    TLOGW(WmsLogTag::DMS, "Call rsInterface_ GetScreenActiveMode rsid: %{public}" PRIu64, rsScreenId);
+    RSScreenModeInfo screenMode = rsInterface_.GetScreenActiveMode(rsScreenId);
+    HiviewDFX::XCollie::GetInstance().CancelTimer(id);
+    ReportScreenModeChangeEvent(screenMode, res);
     int32_t activeId = screenMode.GetScreenModeId();
     UpdateSessionByActiveModeChange(screenSession, phyScreenSession, activeId);
-    CheckAndNotifyChangeMode(phyWidth, phyHeight, screenSession);
+    CheckAndNotifyChangeMode(screenBounds, screenSession);
     CheckAndNotifyRefreshRate(refreshRate, screenSession);
 #endif
     return DMError::DM_OK;

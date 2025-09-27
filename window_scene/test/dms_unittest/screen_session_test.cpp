@@ -1253,6 +1253,33 @@ HWTEST_F(ScreenSessionTest, SetColorSpaces, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdatePropertyByActiveModeChange
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdatePropertyByActiveModeChange, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "UpdatePropertyByActiveModeChange start";
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->modes_.clear();
+    sptr<SupportedScreenModes> info = new(std::nothrow) SupportedScreenModes();
+    ASSERT_NE(info, nullptr);
+    info->id_ = 0;
+    info->width_ = 1920;
+    info->height_ = 1080;
+    info->refreshRate_ = 60;
+
+    session->modes_.push_back(info);
+    session->SetActiveId(-1);
+    session->UpdatePropertyByActiveModeChange();
+    EXPECT_TRUE(g_errLog.find("mode is null") != std::string::npos);
+    session->SetActiveId(0);
+    session->UpdatePropertyByActiveModeChange();
+    EXPECT_TRUE(g_errLog.find("active mode bounds") != std::string::npos);
+}
+
+/**
  * @tc.name: SetSupportedRefreshRate
  * @tc.desc: normal function
  * @tc.type: FUNC
