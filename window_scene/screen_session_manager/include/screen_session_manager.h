@@ -339,7 +339,7 @@ public:
     void OnTentModeChanged(int tentType, int32_t hall = -1);
     void RegisterSettingDpiObserver();
     void RegisterSettingRotationObserver();
-    void NotifyBrightnessInfoChanged(ScreenId screenId, BrightnessInfo info);
+    void NotifyBrightnessInfoChanged(ScreenId screenId, const BrightnessInfo& info);
 
     void OnConnect(ScreenId screenId) override {}
     void OnDisconnect(ScreenId screenId) override {}
@@ -581,7 +581,7 @@ private:
     void RegisterScreenChangeListener();
     void RegisterFoldNotSwitchingListener();
     void RegisterBrightnessInfoChangeListener();
-    void UnReisterBrightnessInfoChangeListener();
+    void UnregisterBrightnessInfoChangeListener();
     void OnHgmRefreshRateChange(uint32_t refreshRate);
     static const std::string GetScreenName(ScreenId screenId);
     void InitScreenProperty(ScreenId screenId, RSScreenModeInfo& screenMode,

@@ -126,7 +126,7 @@ public:
     DMError RegisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener);
     DMError UnregisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener);
     DMError RegisterBrightnessInfoListener(sptr<IBrightnessInfoListener> listener);
-    DMError UnRegisterBrightnessInfoListener(sptr<IBrightnessInfoListener> listener);
+    DMError UnregisterBrightnessInfoListener(sptr<IBrightnessInfoListener> listener);
     sptr<Display> GetDisplayByScreenId(ScreenId screenId);
     DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy);
     DMError ResetAllFreezeStatus();
@@ -214,8 +214,8 @@ private:
     std::set<sptr<IScreenMagneticStateListener>> screenMagneticStateListeners_;
     class DisplayManagerScreenMagneticStateAgent;
     sptr<DisplayManagerScreenMagneticStateAgent> screenMagneticStateListenerAgent_;
-    void NotifyBrightnessInfoChanged(DisplayId displayId, ScreenBrightness info);
-    std::set<sptr<IBrightnessInfoListener>> brightnessInfoListener_;
+    void NotifyBrightnessInfoChanged(DisplayId displayId, const ScreenBrightnessInfo& info);
+    std::set<sptr<IBrightnessInfoListener>> brightnessInfoListeners_;
     class DisplayManagerBrightnessInfoAgent;
     sptr<DisplayManagerBrightnessInfoAgent> brightnessInfoListenerAgent_;
 };
@@ -455,7 +455,7 @@ public:
     }
     ~DisplayManagerBrightnessInfoAgent() = default;
     
-    virtual void NotifyBrightnessInfoChanged(DisplayId displayId, ScreenBrightnessInfo info) override
+    virtual void NotifyBrightnessInfoChanged(DisplayId displayId, const ScreenBrightnessInfo& info) override
     {
         pImpl_->NotifyBrightnessInfoChanged(displayId, info);
     }
@@ -1875,15 +1875,17 @@ void DisplayManager::Impl::NotifyScreenMagneticStateChanged(bool isMagneticState
     }
 }
 
-void DisplayManager::Impl::NotifyBrightnessInfoChanged(DisplayId displayId, ScreenBrightnessInfo info)
+void DisplayManager::Impl::NotifyBrightnessInfoChanged(DisplayId displayId, const ScreenBrightnessInfo& info)
 {
     std::set<sptr<IBrightnessInfoListener>> brightnessInfoListeners;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         brightnessInfoListeners = brightnessInfoListeners_;
     }
-    for (auto& listener : brightnessInfoListener(displayId, info)) {
-        listener->OnBrightnessInfoChanged(displayId, info);
+    for (auto& listener : brightnessInfoListeners) {
+        if (listener != nullptr) {
+            listener->OnBrightnessInfoChanged(displayId, info);
+        }
     }
 }
 
@@ -2069,15 +2071,11 @@ DMError DisplayManager::Impl::RegisterBrightnessInfoListener(sptr<IBrightnessInf
     if (brightnessInfoListenerAgent_ == nullptr) {
         brightnessInfoListenerAgent_ = new DisplayManagerBrightnessInfoAgent(this);
         ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
-              brightnessInfoListenerAgent_,
-              DisplayManagerAgentType::BRIGHTNESS_INFO_CHANGED_LISTENER);
+            brightnessInfoListenerAgent_, DisplayManagerAgentType::BRIGHTNESS_INFO_CHANGED_LISTENER);
     }
     if (ret != DMError::DM_OK) {
         TLOGW(WmsLogTag::DMS, "RegisterBrightnessInfoListener failed");
-        if (brightnessInfoListenerAgent_ != nullptr) {
-            delete brightnessInfoListenerAgent_;
-            brightnessInfoListenerAgent_ = nullptr;
-        }
+        brightnessInfoListenerAgent_ = nullptr;
     } else {
         TLOGD(WmsLogTag::DMS, "IBrightnessInfoListener register success");
         brightnessInfoListeners_.insert(listener);
@@ -2085,7 +2083,7 @@ DMError DisplayManager::Impl::RegisterBrightnessInfoListener(sptr<IBrightnessInf
     return ret;
 }
 
-DMError DisplayManager::UnreisterBrightnessInfoListener(sptr<IBrightnessInfoListener> listener)
+DMError DisplayManager::UnregisterBrightnessInfoListener(sptr<IBrightnessInfoListener> listener)
 {
     if (listener == nullptr) {
         TLOGE(WmsLogTag::DMS, "UnregisterBrightnessInfoListener is nullptr");
@@ -2096,7 +2094,7 @@ DMError DisplayManager::UnreisterBrightnessInfoListener(sptr<IBrightnessInfoList
 
 DMError DisplayManager::Impl::UnregisterBrightnessInfoListener(sptr<IBrightnessInfoListener> listener)
 {
-    sta::lock_guard<std::recursive_mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(brightnessInfoListeners_.begin(), brightnessInfoListeners_.end(), listener);
     if (iter == brightnessInfoListeners_.end()) {
         TLOGE(WmsLogTag::DMS, "could not find this listener");
@@ -2104,10 +2102,9 @@ DMError DisplayManager::Impl::UnregisterBrightnessInfoListener(sptr<IBrightnessI
     }
     brightnessInfoListeners_.erase(iter);
     DMError ret = DMError::DM_OK;
-    if (brightnessInfoListeners_.empty() && brightnessInfoListenerAgent_ != nullptr) {
+    if (brightnessInfoListeners_.empty()) {
         ret = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
-            brightnessInfoListenerAgent_,
-            DisplayManagerAgentType::BRIGHTNESS_INFO_CHANGED_LISTENER);
+            brightnessInfoListenerAgent_, DisplayManagerAgentType::BRIGHTNESS_INFO_CHANGED_LISTENER);
         brightnessInfoListenerAgent_ = nullptr;
     }
     return ret;
@@ -2741,12 +2738,12 @@ DMError DisplayManager::Impl::GetScreenAreaOfDisplayArea(DisplayId displayId, co
 
 DMError DisplayManager::GetBrightnessInfo(DisplayId displayId, ScreenBrightnessInfo& brightnessInfo)
 {
-    pImpl_->GetBrightnessInfo(displayId, brightnessInfo);
+    return pImpl_->GetBrightnessInfo(displayId, brightnessInfo);
 }
 
-DMError DisplayManager::Impl::GetBrightnessInfo(DisplayId diaplayId, ScreenBrightnessInfo& brightnessInfo)
+DMError DisplayManager::Impl::GetBrightnessInfo(DisplayId displayId, ScreenBrightnessInfo& brightnessInfo)
 {
-    SingletonContainer::Get<DisplayManagerAdapter>().GetBrightnessInfo(displayId, brightnessInfo);
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetBrightnessInfo(displayId, brightnessInfo);
 }
 
 DMError DisplayManager::ConvertRelativeCoordinateToGlobal(const RelativePosition& relativePosition, Position& position)

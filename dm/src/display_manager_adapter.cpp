@@ -601,6 +601,10 @@ DMError BaseAdapter::RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent
         return screenSessionManagerServiceProxy_->RegisterDisplayManagerAgent(displayManagerAgent, type);
     }
 
+    if (type == DisplayManagerAgentType::BRIGHTNESS_INFO_CHANGED_LISTENER) {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
     int32_t dmError;
     ErrCode errCode = displayManagerServiceProxy_->RegisterDisplayManagerAgent(displayManagerAgent,
         static_cast<uint32_t>(type), dmError);
@@ -614,6 +618,10 @@ DMError BaseAdapter::UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAge
 
     if (screenSessionManagerServiceProxy_) {
         return screenSessionManagerServiceProxy_->UnregisterDisplayManagerAgent(displayManagerAgent, type);
+    }
+
+    if (type == DisplayManagerAgentType::BRIGHTNESS_INFO_CHANGED_LISTENER) {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
     int32_t dmError;
@@ -1698,8 +1706,7 @@ DMError DisplayManagerAdapter::GetBrightnessInfo(DisplayId displayId, ScreenBrig
     if (screenSessionManagerServiceProxy_) {
         return screenSessionManagerServiceProxy_->GetBrightnessInfo(displayId, brightnessInfo);
     }
-
-    return DMError::DM_OK;
+    return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
 }
 
 DMError ScreenManagerAdapter::SetVirtualScreenAutoRotation(ScreenId screenId, bool enable)

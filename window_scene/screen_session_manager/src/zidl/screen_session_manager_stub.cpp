@@ -242,13 +242,25 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
             ScreenBrightnessInfo brightnessInfo;
             DMError ret = GetBrightnessInfo(displayId, brightnessInfo);
-            reply.WriteInt32(static_cast<int32_t>(ret));
+            if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+                TLOGE(WmsLogTag::DMS, "write ret failed!");
+                break;
+            }
             if (ret != DMError::DM_OK) {
                 break;
             }
-            reply.WriteFloat(brightnessInfo.currentHeadroom);
-            reply.WriteFloat(brightnessInfo.maxHeadroom);
-            reply.WriteFloat(brightnessInfo.sdrNits);
+            if (!reply.WriteFloat(brightnessInfo.currentHeadroom)) {
+                TLOGE(WmsLogTag::DMS, "write currentHeadroom failed!");
+                break;
+            }
+            if (!reply.WriteFloat(brightnessInfo.maxHeadroom)) {
+                TLOGE(WmsLogTag::DMS, "write maxHeadroom failed!");
+                break;
+            }
+            if (!reply.WriteFloat(brightnessInfo.sdrNits)) {
+                TLOGE(WmsLogTag::DMS, "write sdrNits failed!");
+                break;
+            }
             break;
         }
         case DisplayManagerMessage::TRANS_ID_CREATE_VIRTUAL_SCREEN: {

@@ -49,7 +49,7 @@ public:
     virtual void NotifyScreenMagneticStateChanged(bool isMagneticState) override;
     virtual void NotifyScreenModeChange(const std::vector<sptr<ScreenInfo>>& screenInfos) override;
     virtual void NotifyAbnormalScreenConnectChange(ScreenId screenId) override;
-    void NotifyBrightnessInfoChanged(ScreenId screenId, ScreenBrightnessInfo info) override;
+    void NotifyBrightnessInfoChanged(ScreenId screenId, const ScreenBrightnessInfo& info) override;
 private:
     static inline BrokerDelegator<DisplayManagerAgentProxy> delegator_;
 };

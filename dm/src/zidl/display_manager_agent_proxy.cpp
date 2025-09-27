@@ -510,11 +510,11 @@ void DisplayManagerAgentProxy::NotifyScreenMagneticStateChanged(bool isMagneticS
     }
 }
 
-void DisplayManagerAgentProxy::NotifyBrightnessInfoChanged(ScreenId screenId, ScreenBrightnessInfo info)
+void DisplayManagerAgentProxy::NotifyBrightnessInfoChanged(ScreenId screenId, const ScreenBrightnessInfo& info)
 {
-    sptr<IRomteObject> remote = Romote();
+    sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOG(WmsLogTag::DMD, "remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
         return;
     }
 
@@ -526,16 +526,17 @@ void DisplayManagerAgentProxy::NotifyBrightnessInfoChanged(ScreenId screenId, Sc
         return;
     }
     if (!data.WriteUint64(screenId)) {
-        TLOGE(WmsLogTag::DMS, "Write DispayId failed");
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
         return;
     }
-    if (!data.WriteFloat(info.currentHeadroom) || !data.WriteFloat(info.maxHeadroom)
-        || !data.WriteFloat(info.sdrNits)) {
+    if (!data.WriteFloat(info.currentHeadroom) || !data.WriteFloat(info.maxHeadroom) ||
+        !data.WriteFloat(info.sdrNits)) {
         TLOGE(WmsLogTag::DMS, "write info failed");
         return;
     }
-    if (remote->SendRequest(TRANS_ID_ON_BRIGHTNESS_INFO_CHANGED, data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::DMS, "SendRequest failed")
+    int32_t ret = remote->SendRequest(TRANS_ID_ON_BRIGHTNESS_INFO_CHANGED, data, reply, option);
+    if (ret != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed, ret: %{public}d", ret);
     }
 }
 

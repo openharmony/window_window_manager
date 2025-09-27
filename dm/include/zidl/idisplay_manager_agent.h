@@ -98,7 +98,7 @@ public:
     virtual void NotifyScreenMagneticStateChanged(bool isMagneticState) = 0;
     virtual void NotifyScreenModeChange(const std::vector<sptr<ScreenInfo>>& screenInfos) = 0;
     virtual void NotifyAbnormalScreenConnectChange(ScreenId screenId) = 0;
-    void NotifyBrightnessInfoChanged(ScreenId screenId, ScreenBrightnessInfo info) = 0;
+    virtual void NotifyBrightnessInfoChanged(ScreenId screenId, const ScreenBrightnessInfo& info) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS
