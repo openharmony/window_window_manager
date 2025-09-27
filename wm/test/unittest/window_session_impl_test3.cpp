@@ -327,19 +327,19 @@ HWTEST_F(WindowSessionImplTest3, SetWindowModal, TestSize.Level1)
     ASSERT_EQ(WMError::WM_OK, ret);
     ret = window_->SetWindowModal(false);
     ASSERT_EQ(WMError::WM_OK, ret);
-    
-    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
-    ret = window_->SetWindowModal(true);
-    ASSERT_EQ(WMError::WM_OK, ret);
-    ret = window_->SetWindowModal(false);
-    ASSERT_EQ(WMError::WM_OK, ret);
-    
-    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
-    ret = window_->SetWindowModal(true);
-    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
-    ret = window_->SetWindowModal(false);
-    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
 
+    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    ret = window_->SetWindowModal(true);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ret = window_->SetWindowModal(false);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    
+    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    ret = window_->SetWindowModal(true);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+    ret = window_->SetWindowModal(false);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+    
     window_->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ret = window_->SetWindowModal(false);
     ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);

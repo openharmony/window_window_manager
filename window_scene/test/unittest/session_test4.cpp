@@ -569,7 +569,7 @@ HWTEST_F(WindowSessionTest4, SetSessionIcon, TestSize.Level1)
     session_->updateSessionIconFunc_ = func2;
     ASSERT_EQ(WSError::WS_OK, session_->SetSessionIcon(icon));
 
-    NotifyTerminateSessionFuncNew func3 =
+    NotifyTerminateSessionFuncNew func3 = 
         [](const SessionInfo& info, bool needStartCaller, bool isFromBroker, bool isForceClean) {};
     session_->terminateSessionFuncNew_ = func3;
     ASSERT_EQ(WSError::WS_OK, session_->Clear());
