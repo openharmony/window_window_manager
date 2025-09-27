@@ -283,6 +283,9 @@ const std::map<DMError, std::string> DM_ERROR_JS_TO_ERROR_MESSAGE_MAP {
     {DMError::DM_ERROR_NOT_SUPPORT_COOR_WHEN_TENTMODE,           DM_ERROR_MSG_NOT_SUPPORT_COOR_WHEN_TENTMODE        },
 };
 
+constexpr float DEFAULT_HEADROOM = 1.0f;
+constexpr float DEFAULT_SDR_NITS = 500.0f;
+
 using DisplayStateCallback = std::function<void(DisplayState)>;
 
 /**
@@ -617,13 +620,11 @@ struct MultiScreenRecoverOption {
     uint32_t second_;
 };
 
-struct ScreenBrihtnessInfo
-{
-    float currentHeadroom = 1.0f;
-    float maxHeadroom = 1.0f;
-    float sdrNits = 500.0f;
+struct ScreenBrightnessInfo {
+    float currentHeadroom = DEFAULT_HEADROOM;
+    float maxHeadroom = DEFAULT_HEADROOM;
+    float sdrNits = DEFAULT_SDR_NITS;
 };
-
 
 struct MultiScreenPositionOptions {
     ScreenId screenId_;

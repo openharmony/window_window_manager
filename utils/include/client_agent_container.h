@@ -34,7 +34,6 @@ public:
 
     bool RegisterAgent(const sptr<T1>& agent, T2 type);
     bool UnregisterAgent(const sptr<T1>& agent, T2 type);
-    std::set<sptr<T1>> GetAgentMapFor(const T2& type);
     std::set<sptr<T1>> GetAgentsByType(T2 type);
     void SetAgentDeathCallback(std::function<void(const sptr<IRemoteObject>&)> callback);
     int32_t GetAgentPid(const sptr<T1>& agent);
@@ -114,17 +113,6 @@ std::set<sptr<T1>> ClientAgentContainer<T1, T2>::GetAgentsByType(T2 type)
         return std::set<sptr<T1>>();
     }
     return agentMap_.at(type);
-}
-
-template<typename T1, typename T2>
-std::set<sptr<T1>> ClientAgentContainer<T1, T2>:GetAgentMapFor(const T2& type)
-{
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    auto iter = agentMap_.find(type);
-    if (iter != agentMap_.end()) {
-        return iter->second;
-    }
-    return {};
 }
 
 template<typename T1, typename T2>

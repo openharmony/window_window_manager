@@ -627,7 +627,7 @@ public:
      * @brief Register a listener for the event of brightness info changed.
      *
      * @param listener IBrightnessInfoListener.
-     * @return DM_OK means unregister success, others means unregister failed.
+     * @return DM_OK means register success, others means register failed.
      */
     DMError RegisterBrightnessInfoListener(sptr<IBrightnessInfoListener> listener);
 
@@ -948,7 +948,7 @@ public:
         ScreenId& screenId, DMRect& screenArea);
     
     /**
-     * @brief Get BrightnessInfo of display
+     * @brief Get brightnessInfo of display
      *
      * @param DisplayId displayId.
      * @param brightnessInfo ScreenBrightnessInfo.

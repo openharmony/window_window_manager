@@ -385,7 +385,8 @@ public:
     virtual uint32_t GetDeviceStatus() { return 0; }
     virtual DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea) { return DMError::DM_OK; }
-    virtual DMError GetBrightnessInfo(DisplayId displayId, ScreenBrightnessInfo& brightnessInfo) {return DMError::DM_OK;}
+    virtual DMError GetBrightnessInfo(DisplayId displayId,
+        ScreenBrightnessInfo& brightnessInfo) { return DMError::DM_OK; }
     virtual DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) { return DMError::DM_OK; }
     virtual DMError SetScreenPrivacyWindowTagSwitch(ScreenId screenId, const std::vector<std::string>& privacyWindowTag,
         bool enable) { return DMError::DM_OK; }

@@ -1756,7 +1756,7 @@ HWTEST_F(DisplayManagerTest, RegisterBrightnessInfoListener, TestSize.Level1)
     sptr<DisplayManager::IBrightnessInfoListener> listener;
     auto ret = DisplayManager::GetInstance().RegisterBrightnessInfoListener(listener);
     ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
-    listener = new DisplayManager::IScreenMagneticStateListener();
+    listener = new DisplayManager::IBrightnessInfoListener();
     ret = DisplayManager::GetInstance().RegisterBrightnessInfoListener(listener);
     ASSERT_EQ(ret, DisplayManager::GetInstance().pImpl_->RegisterBrightnessInfoListener(listener));
     listener.clear();
@@ -1807,11 +1807,24 @@ HWTEST_F(DisplayManagerTest, UnregisterBrightnessInfoListener, TestSize.Level1)
 {
     sptr<DisplayManager::IBrightnessInfoListener> listener;
     auto ret = DisplayManager::GetInstance().UnregisterBrightnessInfoListener(listener);
-    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+    EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
     listener = new DisplayManager::IBrightnessInfoListener();
     ret = DisplayManager::GetInstance().UnregisterBrightnessInfoListener(listener);
-    ASSERT_EQ(ret, DisplayManager::GetInstance().pImpl_->UnregisterBrightnessInfoListener(listener));
+    EXPECT_EQ(ret, DisplayManager::GetInstance().pImpl_->UnregisterBrightnessInfoListener(listener));
     listener.clear();
+
+    DisplayManager::GetInstance().pImpl_->brightnessInfoListeners_.clear();
+    sptr<DisplayManager::IBrightnessInfoListener> listener1 = new DisplayManager::IBrightnessInfoListener();
+    DisplayManager::GetInstance().RegisterBrightnessInfoListener(listener1);
+    sptr<DisplayManager::IBrightnessInfoListener> listener2 = new DisplayManager::IBrightnessInfoListener();
+    DisplayManager::GetInstance().RegisterBrightnessInfoListener(listener2);
+
+    ret = DisplayManager::GetInstance().pImpl_->UnregisterBrightnessInfoListener(listener1);
+    EXPECT_NE(DisplayManager::GetInstance().pImpl_->brightnessInfoListenerAgent_, nullptr);
+    EXPECT_EQ(ret, DMError::DM_OK);
+    ret = DisplayManager::GetInstance().pImpl_->UnregisterBrightnessInfoListener(listener1);
+    EXPECT_EQ(DisplayManager::GetInstance().pImpl_->brightnessInfoListenerAgent_, nullptr);
+    EXPECT_EQ(ret, DMError::DM_OK);
 }
 
 /**
@@ -2853,7 +2866,7 @@ HWTEST_F(DisplayManagerTest, GetBrightnessInfo, TestSize.Level1)
 {
     uint64_t screenId = 0;
     ScreenBrightnessInfo brightnessInfo;
-    bool res = SingletonContainer::Get<DisplayManager>().GetBrightnessInfo(screenId, brightnessInfo);
+    DMError res = SingletonContainer::Get<DisplayManager>().GetBrightnessInfo(screenId, brightnessInfo);
     EXPECT_EQ(res, DMError::DM_OK);
 }
 

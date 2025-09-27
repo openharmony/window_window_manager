@@ -48,6 +48,7 @@ public:
     void OnCaptureStatusChanged(bool isCapture) override;
     void OnDisplayModeChanged(FoldDisplayMode displayMode) override;
     void OnAvailableAreaChanged(DMRect area) override;
+    void OnBrightnessInfoChanged(DisplayId id, const ScreenBrightnessInfo& info) override;
 
 private:
     void CallJsMethod(const std::string& methodName, napi_value const * argv = nullptr, size_t argc = 0);

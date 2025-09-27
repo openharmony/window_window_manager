@@ -2312,6 +2312,22 @@ HWTEST_F(ScreenSessionManagerTest, SwitchModeOffScreenRenderingAdapter, TestSize
     EXPECT_FALSE(g_errLog.find("externalScreenIds is empty") != std::string::npos);
     LOG_SetCallback(nullptr);
 }
+
+/**
+ * @tc.name: GetBrightnessInfo
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetBrightnessInfo, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetBrightnessInfo start";
+    ScreenBrightnessInfo brightnessInfo;
+    ssm_->GetBrightnessInfo(0, brightnessInfo);
+    EXPECT_NE(brightnessInfo.currentHeadroom, 0);
+    EXPECT_NE(brightnessInfo.maxHeadroom, 0);
+    EXPECT_NE(brightnessInfo.sdrNits, 0);
+    GTEST_LOG_(INFO) << "GetBrightnessInfo end";
+}
 }
 }
 }

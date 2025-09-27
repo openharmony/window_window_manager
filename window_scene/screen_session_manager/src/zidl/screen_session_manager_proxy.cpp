@@ -2129,7 +2129,7 @@ DMError ScreenSessionManagerProxy::GetBrightnessInfo(DisplayId displayId, Screen
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    if (!data.WriInterfaceToken(GetDescriptor())) {
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGW(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
@@ -2142,14 +2142,27 @@ DMError ScreenSessionManagerProxy::GetBrightnessInfo(DisplayId displayId, Screen
         TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-    DMError ret = static_cast<DMError>(reply.ReadInt32());
-    if (ret != DMError::DM_OK) {
-        return ret;
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::DMS, "Read ret failed!");
+        return DMError::DM_ERROR_IPC_FAILED;
     }
-    brightnessInfo.currentHeadroom = reply.ReadFloat();
-    brightnessInfo.maxHeadroom = reply.ReadFloat();
-    brightnessInfo.sdrNits = reply.ReadFloat();
-    return ret;
+    if (static_cast<DMError>(ret) != DMError::DM_OK) {
+        return static_cast<DMError>(ret);
+    }
+    if (!reply.ReadFloat(brightnessInfo.currentHeadroom)) {
+        TLOGE(WmsLogTag::DMS, "Read currentHeadroom failed!");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (!reply.ReadFloat(brightnessInfo.maxHeadroom)) {
+        TLOGE(WmsLogTag::DMS, "Read maxHeadroom failed!");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (!reply.ReadFloat(brightnessInfo.sdrNits)) {
+        TLOGE(WmsLogTag::DMS, "Read sdrNits failed!");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return DMError::DM_OK;
 }
 
 DMError ScreenSessionManagerProxy::GetPhysicalScreenIds(std::vector<ScreenId>& screenIds)
