@@ -2642,7 +2642,7 @@ WSError WindowSessionImpl::NotifyHighlightChange(const sptr<HighlightNotifyInfo>
         NotifyHighlightChange(isHighlight);
         return WSError::WS_OK;
     }
-    TLOGD(WmsLogTag::WMS_FOCUS, "timeStamp:%{public}ld, highlightId:%{public}d, isHighlight:%{public}d,"
+    TLOGD(WmsLogTag::WMS_FOCUS, "timeStamp:%{public}" PRId64 ", highlightId:%{public}d, isHighlight:%{public}d,"
         "isSyncNotify:%{public}d", highlightNotifyInfo->timeStamp_, highlightNotifyInfo->highlightId_,
         isHighlight, highlightNotifyInfo->isSyncNotify_);
     if (highlightNotifyInfo->timeStamp_ <= updateHighlightTimeStamp_.load()) {
