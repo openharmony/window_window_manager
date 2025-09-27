@@ -241,6 +241,7 @@ public:
     void NotifyScreenMaskAppear() override;
     DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea) override;
+    DMError GetBrightnessInfo(DisplayId displayId, ScreenBrightnessInfo& brightnessInfo) override;
     DMError SetPrimaryDisplaySystemDpi(float dpi) override;
     DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) override;
     DMError SetScreenPrivacyWindowTagSwitch(ScreenId screenId, const std::vector<std::string>& privacyWindowTag,

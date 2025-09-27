@@ -31,7 +31,8 @@ class JsDisplayListener : public DisplayManager::IDisplayListener,
                           public DisplayManager::IFoldAngleListener,
                           public DisplayManager::ICaptureStatusListener,
                           public DisplayManager::IDisplayModeListener,
-                          public DisplayManager::IAvailableAreaListener {
+                          public DisplayManager::IAvailableAreaListener,
+                          public DisplayManager::IBrightnessInfoListener {
 public:
     explicit JsDisplayListener(napi_env env);
     ~JsDisplayListener() override;
@@ -66,6 +67,7 @@ const std::string EVENT_FOLD_ANGLE_CHANGED = "foldAngleChange";
 const std::string EVENT_CAPTURE_STATUS_CHANGED = "captureStatusChange";
 const std::string EVENT_DISPLAY_MODE_CHANGED = "foldDisplayModeChange";
 const std::string EVENT_AVAILABLE_AREA_CHANGED = "availableAreaChange";
+const std::string EVENT_BRIGHTNESS_INFO_CHANGED = "brightnessInfoChange";
 }  // namespace Rosen
 }  // namespace OHOS
 #endif /* OHOS_JS_DISPLAY_LISTENER_H */

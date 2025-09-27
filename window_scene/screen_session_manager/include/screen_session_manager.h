@@ -339,6 +339,7 @@ public:
     void OnTentModeChanged(int tentType, int32_t hall = -1);
     void RegisterSettingDpiObserver();
     void RegisterSettingRotationObserver();
+    void NotifyBrightnessInfoChanged(ScreenId screenId, BrightnessInfo info);
 
     void OnConnect(ScreenId screenId) override {}
     void OnDisconnect(ScreenId screenId) override {}
@@ -500,6 +501,7 @@ public:
     bool GetKeyboardState() override;
     DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea) override;
+    DMError GetBrightnessInfo(DisplayId displayId, ScreenBrightnessInfo& brightnessInfo) override;
     DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) override;
     bool SetScreenOffset(ScreenId screenId, float offsetX, float offsetY);
     bool SynchronizePowerStatus(ScreenPowerState state) override;
@@ -578,6 +580,8 @@ private:
     void ConfigureScreenSnapshotParams();
     void RegisterScreenChangeListener();
     void RegisterFoldNotSwitchingListener();
+    void RegisterBrightnessInfoChangeListener();
+    void UnReisterBrightnessInfoChangeListener();
     void OnHgmRefreshRateChange(uint32_t refreshRate);
     static const std::string GetScreenName(ScreenId screenId);
     void InitScreenProperty(ScreenId screenId, RSScreenModeInfo& screenMode,

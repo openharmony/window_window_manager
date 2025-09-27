@@ -510,6 +510,35 @@ void DisplayManagerAgentProxy::NotifyScreenMagneticStateChanged(bool isMagneticS
     }
 }
 
+void DisplayManagerAgentProxy::NotifyBrightnessInfoChanged(ScreenId screenId, ScreenBrightnessInfo info)
+{
+    sptr<IRomteObject> remote = Romote();
+    if (remote == nullptr) {
+        TLOG(WmsLogTag::DMD, "remote is nullptr");
+        return;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(screenId)) {
+        TLOGE(WmsLogTag::DMS, "Write DispayId failed");
+        return;
+    }
+    if (!data.WriteFloat(info.currentHeadroom) || !data.WriteFloat(info.maxHeadroom)
+        || !data.WriteFloat(info.sdrNits)) {
+        TLOGE(WmsLogTag::DMS, "write info failed");
+        return;
+    }
+    if (remote->SendRequest(TRANS_ID_ON_BRIGHTNESS_INFO_CHANGED, data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed")
+    }
+}
+
 void DisplayManagerAgentProxy::NotifyAvailableAreaChanged(DMRect area, DisplayId displayId)
 {
     sptr<IRemoteObject> remote = Remote();
