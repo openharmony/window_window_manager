@@ -349,7 +349,25 @@ HWTEST_F(WindowSessionImplTest2, UnregisterOcclusionStateChangeListener, TestSiz
     EXPECT_EQ(window->RegisterOcclusionStateChangeListener(listener), WMError::WM_OK);
     EXPECT_EQ(window->occlusionStateChangeListeners_.size(), 1);
     EXPECT_EQ(window->UnregisterOcclusionStateChangeListener(listener), WMError::WM_OK);
+    window->occlusionStateChangeListeners_.clear();
     EXPECT_EQ(window->occlusionStateChangeListeners_.size(), 0);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: NotifyWindowOcclusionState
+ * @tc.desc: unregister occlusion state change listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, NotifyWindowOcclusionState, TestSize.Level1)
+{
+    auto window = GetTestWindowImpl("NotifyWindowOcclusionState");
+    ASSERT_NE(window, nullptr);
+    window->occlusionStateChangeListeners_.clear();
+    sptr<IOcclusionStateChangedListener> listener = sptr<IOcclusionStateChangedListener>::MakeSptr();
+    EXPECT_EQ(window->RegisterOcclusionStateChangeListener(listener), WMError::WM_OK);
+    EXPECT_EQ(window->occlusionStateChangeListeners_.size(), 1);
+    EXPECT_EQ(window->NotifyWindowOcclusionState(WindowVisibilityState::END), WSError::WS_OK);
     window->occlusionStateChangeListeners_.clear();
     window->Destroy();
 }

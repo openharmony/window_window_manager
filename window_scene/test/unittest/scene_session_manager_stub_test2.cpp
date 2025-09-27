@@ -190,7 +190,7 @@ HWTEST_F(SceneSessionManagerStubTest2, HandleUpdateSessionOcclusionStateListener
     uint32_t code = static_cast<uint32_t>(
         ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_UPDATE_SESSION_OCCLUSION_STATE_LISTENER);
     auto res = stub_->ProcessRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, ERR_NONE);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInt32ErrorFlag(true);

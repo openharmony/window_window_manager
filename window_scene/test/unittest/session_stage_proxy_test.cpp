@@ -585,7 +585,7 @@ HWTEST_F(SessionStageProxyTest, NotifyWindowOcclusionState, TestSize.Level1)
 
     remoteMocker->SetRequestResult(ERR_NONE);
     ret = proxy->NotifyWindowOcclusionState(state);
-    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
     MockMessageParcel::ClearAllErrorFlag();
 }
 

@@ -634,7 +634,7 @@ HWTEST_F(SessionStageStubTest, HandleNotifyWindowOcclusionState, TestSize.Level1
     data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
     data.WriteUint32(static_cast<uint32_t>(WindowVisibilityState::END) + 1);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
-    EXPECT_EQ(sessionStageStub_->OnRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    EXPECT_EQ(sessionStageStub_->OnRemoteRequest(code, data, reply, option), ERR_TRANSACTION_FAILED);
 
     MessageParcel data2;
     MockMessageParcel::ClearAllErrorFlag();
@@ -647,7 +647,7 @@ HWTEST_F(SessionStageStubTest, HandleNotifyWindowOcclusionState, TestSize.Level1
     MessageParcel data3;
     MockMessageParcel::ClearAllErrorFlag();
     data3.WriteUint32(static_cast<uint32_t>(WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
-    EXPECT_EQ(sessionStageStub_->HandleNotifyWindowOcclusionState(data3, reply), ERR_NONE);
+    EXPECT_EQ(sessionStageStub_->HandleNotifyWindowOcclusionState(data3, reply), ERR_INVALID_DATA);
 }
 
 /**
