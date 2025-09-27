@@ -1108,11 +1108,11 @@ napi_value JsWindow::IsImmersiveLayout(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnIsImmersiveLayout(env, info) : nullptr;
 }
 
-napi_value JsWindow::IsImmersiveLayout(napi_env env, napi_callback_info info)
+napi_value JsWindow::IsInFreeWindowMode(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
-    return (me != nullptr) ? me->OnIsImmersiveLayout(env, info) : nullptr;
+    return (me != nullptr) ? me->OnIsInFreeWindowMode(env, info) : nullptr;
 }
 
 napi_value JsWindow::GetWindowStatus(napi_env env, napi_callback_info info)
@@ -8261,30 +8261,17 @@ napi_value JsWindow::OnIsImmersiveLayout(napi_env env, napi_callback_info info)
     return CreateJsValue(env, isImmersiveLayout);
 }
 
-napi_value JsWindow::OnGetWindowStatus(napi_env env, napi_callback_info info)
+napi_value JsWindow::OnIsInFreeWindowMode(napi_env env, napi_callback_info info)
 {
-    auto window = windowToken_;
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_PC, "window is nullptr");
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "windowToken_ is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][getWindowStatus]msg: Window is nullptr");
+            "[window][OnIsInFreeWindowMode]msg: invalid window");
     }
-    WindowStatus windowStatus;
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->GetWindowStatus(windowStatus));
-    if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_PC, "failed, ret=%{public}d", ret);
-        return NapiThrowError(env, ret,
-            "[window][getWindowStatus]msg: Falied");
-    }
-    auto objValue = CreateJsValue(env, windowStatus);
-    if (objValue != nullptr) {
-        TLOGI(WmsLogTag::WMS_PC, "id:[%{public}u] end", window->GetWindowId());
-        return objValue;
-    } else {
-        TLOGE(WmsLogTag::WMS_PC, "create js value windowStatus failed");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][getWindowStatus]msg: Create js value windowStatus failed");
-    }
+    bool isInFreeWindowMode = windowToken_->IsPcOrPadFreeMultiWindowMode();
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u isInFreeWindowMod %{public}u end",
+        windowToken_->GetWindowId(), isInFreeWindowMode);
+    return CreateJsValue(env, isInFreeWindowMode);
 }
 
 napi_value JsWindow::OnGetWindowStatus(napi_env env, napi_callback_info info)
@@ -9402,7 +9389,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
         JsWindow::SetFollowParentWindowLayoutEnabled);
     BindNativeFunction(env, object, "setWindowShadowEnabled", moduleName, JsWindow::SetWindowShadowEnabled);
     BindNativeFunction(env, object, "isImmersiveLayout", moduleName, JsWindow::IsImmersiveLayout);
-    BindNativeFunction(env, object, "isImmersiveLayout", moduleName, JsWindow::IsImmersiveLayout);
+    BindNativeFunction(env, object, "isInFreeWindowMode", moduleName, JsWindow::IsInFreeWindowMode);
 }
 }  // namespace Rosen
 }  // namespace OHOS
