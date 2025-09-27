@@ -688,15 +688,16 @@ void ScreenSession::UpdatePropertyByActiveModeChange()
         property_.SetScreenRealHeight(mode->height_);
         property_.SetScreenRealPPI();
         property_.SetScreenRealDPI();
-        property_.SetScreenAreaOffsetX(property_.GetPhyBounds().rect_.GetLeft());
-        property_.SetScreenAreaOffsetY(property_.GetPhyBounds().rect_.GetTop());
-        property_.SetScreenAreaWidth(property_.GetPhyBounds().rect_.GetWidth());
-        property_.SetScreenAreaHeight(property_.GetPhyBounds().rect_.GetHeight());
+        RRect phyBounds = property_.GetPhyBounds();
+        property_.SetScreenAreaOffsetX(phyBounds.rect_.GetLeft());
+        property_.SetScreenAreaOffsetY(phyBounds.rect_.GetTop());
+        property_.SetScreenAreaWidth(phyBounds.rect_.GetWidth());
+        property_.SetScreenAreaHeight(phyBounds.rect_.GetHeight());
         property_.SetScreenRealPPI();
         property_.SetRefreshRate(mode->refreshRate_);
         property_.SetCurrentOffScreenRendering(true);
-        property_.SetValidWidth(property_.GetPhyBounds().rect_.GetWidth());
-        property_.SetValidHeight(property_.GetPhyBounds().rect_.GetHeight());
+        property_.SetValidWidth(phyBounds.rect_.GetWidth());
+        property_.SetValidHeight(phyBounds.rect_.GetHeight());
         TLOGI(WmsLogTag::DMS, "active mode bounds:[%{public}u %{public}u], property[%{public}u, %{public}u]",
             mode->width_, mode->height_, property_.GetScreenRealWidth(), property_.GetScreenRealHeight());
     } else {

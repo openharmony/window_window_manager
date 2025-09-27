@@ -193,7 +193,7 @@ HWTEST_F(ScreenSessionManagerTest, SetDisplayNodeSecurity, TestSize.Level1)
 
 /**
  * @tc.name: UpdatePropertyByActiveModeChange001
- * @tc.desc: UpdatePropertyByActiveModeChange001 virtual screen
+ * @tc.desc: UpdatePropertyByActiveModeChange001
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerTest, UpdatePropertyByActiveModeChange001, TestSize.Level1)
@@ -218,7 +218,7 @@ HWTEST_F(ScreenSessionManagerTest, UpdatePropertyByActiveModeChange001, TestSize
 
 /**
  * @tc.name: UpdatePropertyByActiveModeChange002
- * @tc.desc: UpdatePropertyByActiveModeChange002 virtual screen
+ * @tc.desc: UpdatePropertyByActiveModeChange002
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerTest, UpdatePropertyByActiveModeChange002, TestSize.Level1)
@@ -247,7 +247,7 @@ HWTEST_F(ScreenSessionManagerTest, UpdatePropertyByActiveModeChange002, TestSize
 
 /**
  * @tc.name: CheckAndNotifyChangeMode001
- * @tc.desc: CheckAndNotifyChangeMode001 virtual screen
+ * @tc.desc: CheckAndNotifyChangeMode001
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerTest, CheckAndNotifyChangeMode001, TestSize.Level1)
@@ -276,7 +276,7 @@ HWTEST_F(ScreenSessionManagerTest, CheckAndNotifyChangeMode001, TestSize.Level1)
 
 /**
  * @tc.name: CheckAndNotifyChangeMode002
- * @tc.desc: CheckAndNotifyChangeMode002 virtual screen
+ * @tc.desc: CheckAndNotifyChangeMode002
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerTest, CheckAndNotifyChangeMode002, TestSize.Level1)
@@ -308,7 +308,7 @@ HWTEST_F(ScreenSessionManagerTest, CheckAndNotifyChangeMode002, TestSize.Level1)
             sptr<ScreenSession> updateScreenSession);
 /**
  * @tc.name: CheckAndNotifyRefreshRate001
- * @tc.desc: CheckAndNotifyRefreshRate001 virtual screen
+ * @tc.desc: CheckAndNotifyRefreshRate001
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerTest, CheckAndNotifyRefreshRate001, TestSize.Level1)
@@ -335,7 +335,7 @@ HWTEST_F(ScreenSessionManagerTest, CheckAndNotifyRefreshRate001, TestSize.Level1
 
 /**
  * @tc.name: CheckAndNotifyRefreshRate002
- * @tc.desc: CheckAndNotifyRefreshRate002 virtual screen
+ * @tc.desc: CheckAndNotifyRefreshRate002
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerTest, CheckAndNotifyRefreshRate002, TestSize.Level1)
@@ -367,7 +367,7 @@ HWTEST_F(ScreenSessionManagerTest, CheckAndNotifyRefreshRate002, TestSize.Level1
 
 /**
  * @tc.name: ReportScreenModeChangeEvent
- * @tc.desc: ReportScreenModeChangeEvent virtual screen
+ * @tc.desc: ReportScreenModeChangeEvent
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerTest, ReportScreenModeChangeEvent, TestSize.Level1)
@@ -387,7 +387,7 @@ HWTEST_F(ScreenSessionManagerTest, ReportScreenModeChangeEvent, TestSize.Level1)
 
 /**
  * @tc.name: ReportRelativePositionChangeEvent
- * @tc.desc: ReportRelativePositionChangeEvent virtual screen
+ * @tc.desc: ReportRelativePositionChangeEvent
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerTest, ReportRelativePositionChangeEvent, TestSize.Level1)
@@ -407,7 +407,7 @@ HWTEST_F(ScreenSessionManagerTest, ReportRelativePositionChangeEvent, TestSize.L
 
 /**
  * @tc.name: SetScreenActiveMode001
- * @tc.desc: SetScreenActiveMode virtual screen
+ * @tc.desc: SetScreenActiveMode
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode001, TestSize.Level1)
@@ -437,7 +437,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode001, TestSize.Level1)
 
 /**
  * @tc.name: SetScreenActiveMode002
- * @tc.desc: SetScreenActiveMode002 virtual screen
+ * @tc.desc: SetScreenActiveMode002
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode002, TestSize.Level1)
@@ -455,7 +455,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode002, TestSize.Level1)
 
 /**
  * @tc.name: SetScreenActiveMode003
- * @tc.desc: SetScreenActiveMode003 virtual screen
+ * @tc.desc: SetScreenActiveMode003
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode003, TestSize.Level1)
@@ -473,7 +473,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode003, TestSize.Level1)
 
 /**
  * @tc.name: SetScreenActiveMode004
- * @tc.desc: SetScreenActiveMode004 virtual screen
+ * @tc.desc: SetScreenActiveMode004
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode004, TestSize.Level1)
@@ -489,6 +489,103 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode004, TestSize.Level1)
     ret = ssm_->SetScreenActiveMode(1050, 0);
     EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ret)
 #endif
+}
+
+/**
+ * @tc.name: SetScreenActiveMode005
+ * @tc.desc: SetScreenActiveMode005
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode005, TestSize.Level1)
+{
+#ifdef WM_SCREEN_ACTIVE_MODE_ENABLE
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockSessionPermission::MockIsStarByHdcd(true);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    ASSERT_NE(displayManagerAgent, nullptr);
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "SetScreenActiveMode005";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    auto ret = ssm_->SetScreenActiveMode(1050, 0);
+    EXPECT_EQ(DMError::DM_OK, ret);
+#endif
+}
+
+/**
+ * @tc.name: UpdateSessionByActiveModeChange001
+ * @tc.desc: UpdateSessionByActiveModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, UpdateSessionByActiveModeChange001, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockSessionPermission::MockIsStarByHdcd(true);
+    sptr<ScreenSession> screenSession = nullptr;
+    ssm_->UpdateSessionByActiveModeChange(screenSession, screenSession, 0);
+    EXPECT_FALSE(g_errLog.find("screenSession is nullptr") != std::string::npos);
+    g_errLog.clear();
+}
+
+/**
+ * @tc.name: UpdateSessionByActiveModeChange002
+ * @tc.desc: UpdateSessionByActiveModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, UpdateSessionByActiveModeChange002, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockSessionPermission::MockIsStarByHdcd(true);
+    sptr<ScreenSession> screenSession = ssm_->GetOrCreateScreenSession(1050);
+    ssm_->UpdateSessionByActiveModeChange(screenSession, screenSession, 0);
+    EXPECT_TRUE(g_errLog.find("end") != std::string::npos);
+    g_errLog.clear();
+}
+
+
+RecoverScreenActiveMode
+/**
+ * @tc.name: RecoverScreenActiveMode001
+ * @tc.desc: RecoverScreenActiveMode001
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RecoverScreenActiveMode001, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    ScreenId screenId = 1058;
+    ssm_->RecoverScreenActiveMode(screenId, 0);
+    EXPECT_TRUE(g_errLog.find("screenSession is null") != std::string::npos);
+    g_errLog.clear();
+}
+
+/**
+ * @tc.name: RecoverScreenActiveMode002
+ * @tc.desc: RecoverScreenActiveMode002
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RecoverScreenActiveMode002, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    ASSERT_NE(displayManagerAgent, nullptr);
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "RecoverScreenActiveMode002";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+
+    ScreenId rsScreenId = SCREEN_ID_INVALID;
+    ssm_->screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockSessionPermission::MockIsStarByHdcd(false);
+    ssm_->RecoverScreenActiveMode(rsScreenId, 0);
+    EXPECT_TRUE(g_errLog.find("recover error") != std::string::npos);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockSessionPermission::MockIsStarByHdcd(true);
+    g_errLog.clear();
 }
 
 /**
