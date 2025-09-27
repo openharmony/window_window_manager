@@ -617,6 +617,14 @@ struct MultiScreenRecoverOption {
     uint32_t second_;
 };
 
+struct ScreenBrihtnessInfo
+{
+    float currentHeadroom = 1.0f;
+    float maxHeadroom = 1.0f;
+    float sdrNits = 500.0f;
+};
+
+
 struct MultiScreenPositionOptions {
     ScreenId screenId_;
     uint32_t startX_;

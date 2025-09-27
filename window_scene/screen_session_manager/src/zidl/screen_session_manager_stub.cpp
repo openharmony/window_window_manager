@@ -238,6 +238,19 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             );
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_GET_SCREEN_BRIGHTNESS_INFO: {
+            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+            ScreenBrightnessInfo brightnessInfo;
+            DMError ret = GetBrightnessInfo(displayId, brightnessInfo);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            if (ret != DMError::DM_OK) {
+                break;
+            }
+            reply.WriteFloat(brightnessInfo.currentHeadroom);
+            reply.WriteFloat(brightnessInfo.maxHeadroom);
+            reply.WriteFloat(brightnessInfo.sdrNits);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_CREATE_VIRTUAL_SCREEN: {
             std::string name = data.ReadString();
             uint32_t width = data.ReadUint32();

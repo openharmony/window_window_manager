@@ -1692,6 +1692,16 @@ DMError DisplayManagerAdapter::GetScreenAreaOfDisplayArea(DisplayId displayId, c
     return DMError::DM_OK;
 }
 
+DMError DisplayManagerAdapter::GetBrightnessInfo(DisplayId displayId, ScreenBrightnessInfo& brightnessInfo)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    if (screenSessionManagerServiceProxy_) {
+        return screenSessionManagerServiceProxy_->GetBrightnessInfo(displayId, brightnessInfo);
+    }
+
+    return DMError::DM_OK;
+}
+
 DMError ScreenManagerAdapter::SetVirtualScreenAutoRotation(ScreenId screenId, bool enable)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);

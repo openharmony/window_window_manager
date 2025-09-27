@@ -120,6 +120,7 @@ public:
     virtual sptr<DisplayInfo> GetPrimaryDisplayInfo();
     virtual DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea);
+    virtual DMError GetBrightnessInfo(DisplayId displayId, ScreenBrightnessInfo& brightnessInfo);
     virtual bool SetVirtualScreenAsDefault(ScreenId screenId);
     virtual DisplayId GetPrimaryDisplayId();
     
