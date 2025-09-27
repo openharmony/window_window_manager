@@ -2395,7 +2395,7 @@ void ScreenSessionManager::CheckAndNotifyChangeMode(const RRect& bounds, sptr<Sc
     } else {
         TLOGI(WmsLogTag::DMS, "no notify");
     }
-    NotifyDisplayModeChange();
+    NotifyScreenModeChange();
 }
 
 
@@ -2443,7 +2443,7 @@ DMError ScreenSessionManager::SetScreenActiveMode(ScreenId screenId, uint32_t mo
     int id = HiviewDFX::XCollie::GetInstance().SetTimer("SetScreenActiveModeCallRS", XCOLLIE_TIMEOUT_10S, nullptr,
         nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
     TLOGW(WmsLogTag::DMS, "Call rsInterface_ GetScreenActiveMode rsid: %{public}" PRIu64, rsScreenId);
-    RSScreenModeInfo screenMode = rsInterface_.GetScreenActiveMode(rsScreenId);
+    screenMode = rsInterface_.GetScreenActiveMode(rsScreenId);
     HiviewDFX::XCollie::GetInstance().CancelTimer(id);
     ReportScreenModeChangeEvent(screenMode, res);
     int32_t activeId = screenMode.GetScreenModeId();

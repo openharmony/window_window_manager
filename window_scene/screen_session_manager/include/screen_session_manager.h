@@ -576,8 +576,7 @@ private:
         sptr<ScreenSession> phyScreenSession, int32_t activeIdx);
     void RecoverScreenActiveMode(ScreenId screenId, int32_t activeIdx);
     void CheckAndNotifyRefreshRate(uint32_t refreshRate, sptr<ScreenSession> updateScreenSession);
-    void CheckAndNotifyChangeMode(uint32_t phyWidth, uint32_t phyHeight,
-            sptr<ScreenSession> updateScreenSession);
+    void CheckAndNotifyChangeMode(const RRect& bounds, sptr<ScreenSession> updateScreenSession);
     void ReportScreenModeChangeEvent(RSScreenModeInfo screenmode, uint32_t result);
     void ReportRelativePositionChangeEvent(MultiScreenPositionOptions& mainScreenOptions,
         MultiScreenPositionOptions& secondScreenOption, const std::string& errMsg); 
