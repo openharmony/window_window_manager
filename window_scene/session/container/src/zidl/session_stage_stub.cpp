@@ -401,7 +401,7 @@ int SessionStageStub::HandleNotifyCloseExistPipWindow(MessageParcel& data, Messa
 int SessionStageStub::HandleUpdateFocus(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("UpdateFocus!");
-    auto focusNotifyInfo = data.ReadParcelable<FocusNotifyInfo>();
+    sptr<FocusNotifyInfo> focusNotifyInfo = data.ReadParcelable<FocusNotifyInfo>();
     if (focusNotifyInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Failed to read focusNotifyInfo");
         return ERR_INVALID_DATA;
@@ -1016,7 +1016,7 @@ int SessionStageStub::HandleSendContainerModalEvent(MessageParcel& data, Message
 int SessionStageStub::HandleNotifyHighlightChange(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "called!");
-    auto highlightNotifyInfo = data.ReadParcelable<HighlightNotifyInfo>();
+    sptr<HighlightNotifyInfo> highlightNotifyInfo = data.ReadParcelable<HighlightNotifyInfo>();
     if (highlightNotifyInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Failed to read highlightNotifyInfo");
         return ERR_INVALID_DATA;
