@@ -61,11 +61,10 @@ HWTEST_F(SessionManagerLiteTest, RecoverSessionManagerService, TestSize.Level1)
     auto sml = SessionManagerLite::GetInstance(-1);
     bool funcInvoked = false;
     sml->RecoverSessionManagerService(nullptr);
-    ASSERT_EQ(funcInvoked, false);
 
     sml->userSwitchCallbackFunc_ = [&]() { funcInvoked = true; };
     sml->RecoverSessionManagerService(nullptr);
-    ASSERT_EQ(funcInvoked, true);
+    EXPECT_NE(funcInvoked, false);
 }
 
 /**

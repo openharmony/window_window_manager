@@ -61,7 +61,6 @@ ohos_shared_library("screen_session_manager") {
   sources = [
     "../../dm/src/zidl/display_manager_agent_proxy.cpp",
     "../screen_session_manager_client/src/zidl/screen_session_manager_client_proxy.cpp",
-    "../session_manager/src/ffrt_queue_helper.cpp",
     "src/connection/screen_cast_connection.cpp",
     "src/connection/screen_session_ability_connection.cpp",
     "src/connection/screen_snapshot_picker_connection.cpp",
@@ -81,10 +80,13 @@ ohos_shared_library("screen_session_manager") {
     "src/screen_session_manager.cpp",
     "src/screen_setting_helper.cpp",
     "src/screen_tent_property.cpp",
-    "src/session_display_power_controller.cpp",
+    "src/screen_power_fsm/session_display_power_controller.cpp",
+    "src/screen_power_fsm/screen_state_machine.cpp",
+    "src/screen_power_fsm/screen_state_timer.cpp",
     "src/setting_observer.cpp",
     "src/setting_provider.cpp",
     "src/zidl/screen_session_manager_stub.cpp",
+    "src/screen_session_manager_adapter.cpp"
   ]
 
   cflags_cc = [ "-std=c++17" ]

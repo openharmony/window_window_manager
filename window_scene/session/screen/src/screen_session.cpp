@@ -824,6 +824,47 @@ void ScreenSession::PropertyChange(const ScreenProperty& newProperty, ScreenProp
     }
 }
 
+void ScreenSession::NotifyFoldPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
+    FoldDisplayMode displayMode)
+{
+    TLOGI(WmsLogTag::DMS, "ScreenSession NotifyFoldPropertyChange");
+    if (reason == ScreenPropertyChangeReason::VIRTUAL_PIXEL_RATIO_CHANGE) {
+        return;
+    }
+    auto listeners = GetScreenChangeListenerList();
+    if (listeners.empty()) {
+        TLOGE(WmsLogTag::DMS, "screenChangeListenerList is empty.");
+        return;
+    }
+    for (auto* listener : listeners) {
+        if (!listener) {
+            TLOGE(WmsLogTag::DMS, "screenChangeListener is null.");
+            continue;
+        }
+        listener->OnFoldPropertyChange(screenId_, newProperty, reason, displayMode);
+    }
+}
+
+void ScreenSession::NotifyClientPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason)
+{
+    TLOGI(WmsLogTag::DMS, "ScreenSession NotifyClientPropertyChange.");
+    if (reason == ScreenPropertyChangeReason::VIRTUAL_PIXEL_RATIO_CHANGE) {
+        return;
+    }
+    auto listeners = GetScreenChangeListenerList();
+    if (listeners.empty()) {
+        TLOGE(WmsLogTag::DMS, "screenChangeListenerList is empty.");
+        return;
+    }
+    for (auto* listener : listeners) {
+        if (!listener) {
+            TLOGE(WmsLogTag::DMS, "screenChangeListener is null.");
+            continue;
+        }
+        listener->OnPropertyChange(newProperty, reason, screenId_);
+    }
+}
+
 void ScreenSession::PowerStatusChange(DisplayPowerEvent event, EventStatus status, PowerStateChangeReason reason)
 {
     std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
@@ -2840,5 +2881,15 @@ std::vector<IScreenChangeListener*> ScreenSession::GetScreenChangeListenerList()
 {
     std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     return screenChangeListenerList_;
+}
+
+void ScreenSession::UpdateSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents changeEvent)
+{
+    property_.SetSuperFoldStatusChangeEvent(changeEvent);
+}
+
+SuperFoldStatusChangeEvents ScreenSession::GetSuperFoldStatusChangeEvent()
+{
+    return property_.GetSuperFoldStatusChangeEvent();
 }
 } // namespace OHOS::Rosen

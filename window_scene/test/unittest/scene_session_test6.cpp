@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <algorithm>
 #include <gtest/gtest.h>
 #include <pointer_event.h>
 #include <transaction/rs_transaction.h>
@@ -662,7 +663,12 @@ HWTEST_F(SceneSessionTest6, GetSystemAvoidArea, Function | SmallTest | Level1)
     WSRect rect;
     AvoidArea avoidArea;
     session->GetSystemAvoidArea(rect, avoidArea);
-    int32_t height = session->GetStatusBarHeight();
+    int32_t statusBarHeight = session->GetStatusBarHeight();
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    ASSERT_NE(display, nullptr);
+    float vpr = display->GetVirtualPixelRatio();
+    int32_t maxFloatTitleBarHeight = 40;
+    int height = std::min(static_cast<int32_t>(vpr * maxFloatTitleBarHeight), statusBarHeight);
     EXPECT_EQ(height, avoidArea.topRect_.height_);
 
     auto task = [](DisplayId displayId, WSRect& barArea) {

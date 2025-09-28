@@ -407,7 +407,7 @@ napi_value JsWindowStage::OffEvent(napi_env env, napi_callback_info info)
 }
 
 static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std::string contextUrl,
-    sptr<Window> weakWindow, napi_env env, NapiAsyncTask& task, bool isLoadedByName)
+    sptr<Window> weakWindow, napi_env env, WsNapiAsyncTask& task, bool isLoadedByName)
 {
     napi_value nativeStorage = (contentStorage == nullptr) ? nullptr : contentStorage->GetNapiValue();
     WMError ret;
@@ -464,7 +464,7 @@ napi_value JsWindowStage::OnLoadContent(napi_env env, napi_callback_info info, b
     }
 
     napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, callBack, &result);
+    std::shared_ptr<WsNapiAsyncTask> napiAsyncTask = CreateEmptyWsNapiAsyncTask(env, callBack, &result);
     auto asyncTask = [weak = windowScene_, contentStorage, contextUrl, isLoadedByName, env, task = napiAsyncTask] {
         auto weakScene = weak.lock();
         sptr<Window> win = weakScene ? weakScene->GetMainWindow() : nullptr;

@@ -49,7 +49,7 @@
 #include "session/host/include/session.h"
 #include "session/host/include/root_scene_session.h"
 #include "session_listener_controller.h"
-#include "session_manager/include/ffrt_queue_helper.h"
+#include "ffrt_queue_helper.h"
 #include "session_manager/include/window_manager_lru.h"
 #include "session_manager/include/zidl/scene_session_manager_stub.h"
 #include "thread_safety_annotations.h"
@@ -410,6 +410,7 @@ public:
     void NotifySessionTouchOutside(int32_t persistentId, DisplayId displayId);
 
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override;
+    WMError ConvertToRelativeCoordinateExtended(const Rect& rect, Rect& newRect, DisplayId& newDisplayId) override;
     WMError GetUnreliableWindowInfo(int32_t windowId,
         std::vector<sptr<UnreliableWindowInfo>>& infos) override;
     WSError SetWindowFlags(const sptr<SceneSession>& sceneSession, const sptr<WindowSessionProperty>& property);
@@ -461,6 +462,7 @@ public:
      * Window Immersive
      */
     WSError GetIsLayoutFullScreen(bool& isLayoutFullScreen);
+    WSError SetMaximizeFullScreen(int32_t persistentId, bool isMaximizeFullScreen);
     WSError UpdateSessionAvoidAreaListener(int32_t persistentId, bool haveListener) override;
     void RegisterNotifyRootSceneAvoidAreaChangeFunc(NotifyRootSceneAvoidAreaChangeFunc&& func);
     void UpdateRootSceneAvoidArea();
@@ -716,12 +718,13 @@ public:
         int32_t requestId = DEFAULT_REQUEST_FROM_SCB_ID);
     WSError RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession, const bool isDelegator = false,
         const bool isToDesktop = false, const bool isSaveSnapshot = true,
-        BackgroundReason reason = BackgroundReason::DEFAULT);
+        LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
     WSError RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession, bool needRemoveSession = true,
-        bool isSaveSnapshot = true, const bool isForceClean = false, bool isUserRequestedExit = false);
+        bool isSaveSnapshot = true, const bool isForceClean = false, bool isUserRequestedExit = false,
+        LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
     WSError RequestSceneSessionDestructionInner(sptr<SceneSession>& sceneSession,
         sptr<AAFwk::SessionInfo> sceneSessionInfo, const bool needRemoveSession, const bool isForceClean = false,
-        bool isUserRequestedExit = false);
+        bool isUserRequestedExit = false, LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
     void NotifyForegroundInteractiveStatus(const sptr<SceneSession>& sceneSession, bool interactive);
     WSError RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession,
         int32_t requestId = DEFAULT_REQUEST_FROM_SCB_ID);
@@ -739,6 +742,7 @@ public:
     WSError ClearAllSessions() override;
     WSError MoveSessionsToForeground(const std::vector<int32_t>& sessionIds, int32_t topSessionId) override;
     WSError MoveSessionsToBackground(const std::vector<int32_t>& sessionIds, std::vector<int32_t>& result) override;
+    WMError MinimizeAllAppWindows(DisplayId displayId) override;
     int32_t StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abilitySessionInfo, sptr<SceneSession>& sceneSession);
     int32_t StartUIAbilityBySCB(sptr<SceneSession>& sceneSessions);
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
@@ -746,7 +750,6 @@ public:
     WMError GetMainWindowSnapshot(const std::vector<int32_t>& windowIds, const WindowSnapshotConfiguration& config,
         const sptr<IRemoteObject>& callback) override;
     WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo);
-    void CreateDefaultPixelMap(std::shared_ptr<Media::PixelMap>& pixelMap);
     void NotifyDisplayIdChanged(int32_t persistentId, uint64_t displayId);
     WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const;
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
@@ -768,7 +771,8 @@ public:
     void RegisterTransferSessionToTargetScreenCallback(NotifyTransferSessionToTargetScreenFunc&& func);
     WMError NotifyTransferSessionToTargetScreen(const TransferSessionInfo& info);
     void NotifySessionTransferToTargetScreenEvent(const int32_t persistentId,
-        const uint32_t resultCode, const uint64_t fromScreenid, const uint64_t toScreenId);
+        const uint32_t resultCode, const uint64_t fromScreenid, const uint64_t toScreenId,
+        LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
     WSError GetApplicationInfo(const std::string& bundleName, SCBApplicationInfo& scbApplicationInfo);
     WSError GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList);
     void UpdateRecentMainSessionInfos(const std::vector<int32_t>& recentMainSessionIdList);
@@ -776,8 +780,7 @@ public:
     WMError GetRouterStackInfo(int32_t persistentId, const sptr<ISessionRouterStackListener>& listener);
     WMError CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey);
     WMError RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey);
-    void AddRequestTaskInfo(const SessionInfo& sessionInfo);
-    void AddRequestTaskInfo(int32_t requestId, const SessionInfo& sessionInfo);
+    void AddRequestTaskInfo(sptr<SceneSession> sceneSession, int32_t requestId);
     std::shared_ptr<AAFwk::Want> GetRequestWantFromTaskInfoMap(int32_t persistentId, int32_t requestId);
     void RemoveRequestTaskInfo(int32_t persistentId, int32_t requestId);
     void ClearRequestTaskInfo(int32_t persistentId);
@@ -814,6 +817,7 @@ public:
         uint32_t color, int32_t uid) override;
     void ConfigSupportSnapshotAllSessionStatus();
     void ConfigSupportPreloadStartingWindow();
+    void PreLoadStartingWindow(sptr<SceneSession> sceneSession);
 
     /*
      * Window Animation
@@ -823,6 +827,8 @@ public:
 
     std::vector<sptr<SceneSession>> GetSceneSessions(ScreenId screenId);
     WMError UpdateScreenLockState(int32_t persistentId);
+
+    WMError UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams) override;
 
 protected:
     SceneSessionManager();
@@ -1119,7 +1125,8 @@ private:
     void RegisterAcquireRotateAnimationConfigFunc(const sptr<SceneSession>& sceneSession);
 
     void RegisterVisibilityChangedDetectFunc(const sptr<SceneSession>& sceneSession);
-    void NotifySessionForCallback(const sptr<SceneSession>& sceneSession, const bool needRemoveSession);
+    void NotifySessionForCallback(const sptr<SceneSession>& sceneSession, const bool needRemoveSession,
+        LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
     void AddClientDeathRecipient(const sptr<ISessionStage>& sessionStage, const sptr<SceneSession>& sceneSession);
     void DestroySpecificSession(const sptr<IRemoteObject>& remoteObject);
     bool GetExtensionWindowIds(const sptr<IRemoteObject>& token, int32_t& persistentId, int32_t& parentId);
@@ -1724,13 +1731,13 @@ private:
     bool CheckStartWindowColorFollowApp(const AppExecFwk::AbilityInfo& abilityInfo,
         const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr);
     bool GetStartupPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo, StartingWindowInfo& startingWindowInfo,
+        Global::Resource::ColorMode defaultColorMode = Global::Resource::ColorMode::COLOR_MODE_NOT_SET,
         bool appColorModeChanged = false,
-        Global::Resource::ColorMode colorMode = Global::Resource::ColorMode::COLOR_MODE_NOT_SET);
+        Global::Resource::ColorMode appColorMode = Global::Resource::ColorMode::COLOR_MODE_NOT_SET);
     void GetBundleStartingWindowInfos(bool isDark, const AppExecFwk::BundleInfo& bundleInfo,
         std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>>& outValues);
     void CacheStartingWindowInfo(const std::string& bundleName, const std::string& moduleName,
         const std::string& abilityName, const StartingWindowInfo& startingWindowInfo, bool isDark);
-    void PreLoadStartingWindow(sptr<SceneSession> sceneSession);
     bool CheckAndGetPreLoadResourceId(const StartingWindowInfo& startingWindowInfo, uint32_t& resId);
     std::unique_ptr<StartingWindowRdbManager> startingWindowRdbMgr_;
     std::unique_ptr<LruCache> snapshotLruCache_;
@@ -1741,7 +1748,17 @@ private:
     std::function<void()> closeSyncFunc_ = nullptr;
     WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId) override;
     void UpdateAllStartingWindowRdb();
-    bool needUpdateRdb_ = true;
+
+    OutlineParams recoverOutlineParams_;
+    bool needRecoverOutline_ = false;
+    sptr<IRemoteObject> outlineRemoteObject_;
+    sptr<AgentDeathRecipient> outlineRemoteDeath_ = new AgentDeathRecipient(
+        [this](const sptr<IRemoteObject>& remoteObject) { DeleteAllOutline(remoteObject); });
+    void UpdateOutlineInner(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams);
+    bool NeedOutline(int32_t persistentId, const std::vector<int32_t>& persistentIdList);
+    void AddOutlineRemoteDeathRecipient(const sptr<IRemoteObject>& remoteObject);
+    void DeleteAllOutline(const sptr<IRemoteObject>& remoteObject);
+
     std::string GetCallerSessionColorMode(const SessionInfo& sessionInfo);
     void NotifySessionScreenLockedChange(bool isScreenLocked);
 

@@ -1277,9 +1277,38 @@ HWTEST_F(SceneSessionManagerTest9, CheckClickFocusIsDownThroughFullScreen_FocusC
 
     sptr<SceneSessionMocker> focusedSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
     focusedSession->zOrder_ = 2;
-    EXPECT_CALL(*focusedSession, IsBlockingFocusFullScreenSystemPanel()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*focusedSession, IsBlockingFocusWindowType()).WillRepeatedly(Return(true));
 
     bool ret = ssm_->CheckClickFocusIsDownThroughFullScreen(focusedSession, sceneSession, FocusChangeReason::DEFAULT);
+    EXPECT_EQ(ret, false);
+
+    ret = ssm_->CheckClickFocusIsDownThroughFullScreen(focusedSession, sceneSession, FocusChangeReason::CLICK);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: CheckClickFocusIsDownThroughFullScreen_SessionValidationCheck
+ * @tc.desc: Test return value with nullptr session
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, CheckClickFocusIsDownThroughFullScreen_SessionValidationCheck, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "CheckClickFocusIsDownThroughFullScreen_SessionValidationCheck";
+    info.bundleName_ = "CheckClickFocusIsDownThroughFullScreen_SessionValidationCheck";
+
+    sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    sceneSession->zOrder_ = 1;
+
+    sptr<SceneSessionMocker> focusedSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    focusedSession->zOrder_ = 2;
+    EXPECT_CALL(*focusedSession, IsBlockingFocusWindowType()).WillRepeatedly(Return(true));
+
+    bool ret = ssm_->CheckClickFocusIsDownThroughFullScreen(focusedSession, nullptr, FocusChangeReason::CLICK);
+    EXPECT_EQ(ret, false);
+
+    ret = ssm_->CheckClickFocusIsDownThroughFullScreen(nullptr, sceneSession, FocusChangeReason::CLICK);
     EXPECT_EQ(ret, false);
 
     ret = ssm_->CheckClickFocusIsDownThroughFullScreen(focusedSession, sceneSession, FocusChangeReason::CLICK);
@@ -1305,19 +1334,13 @@ HWTEST_F(SceneSessionManagerTest9, CheckClickFocusIsDownThroughFullScreen_FullSc
     focusedSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     focusedSession->zOrder_ = 2;
 
-    FocusChangeReason focusChangeReason = FocusChangeReason::CLICK;
+    FocusChangeReason reason = FocusChangeReason::CLICK;
 
-    EXPECT_CALL(*focusedSession, IsBlockingFocusFullScreenSystemPanel()).WillRepeatedly(Return(false));
-    EXPECT_CALL(*focusedSession, IsAppMainWindowFullScreen()).WillRepeatedly(Return(false));
+    EXPECT_CALL(*focusedSession, IsBlockingFocusWindowType()).WillRepeatedly(Return(false));
     bool ret = ssm_->CheckClickFocusIsDownThroughFullScreen(focusedSession, sceneSession, reason);
     EXPECT_EQ(ret, false);
 
-    EXPECT_CALL(*focusedSession, IsBlockingFocusFullScreenSystemPanel()).WillRepeatedly(Return(true));
-    ret = ssm_->CheckClickFocusIsDownThroughFullScreen(focusedSession, sceneSession, reason);
-    EXPECT_EQ(ret, true);
-
-    EXPECT_CALL(*focusedSession, IsBlockingFocusFullScreenSystemPanel()).WillRepeatedly(Return(false));
-    EXPECT_CALL(*focusedSession, IsAppMainWindowFullScreen()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*focusedSession, IsBlockingFocusWindowType()).WillRepeatedly(Return(true));
     ret = ssm_->CheckClickFocusIsDownThroughFullScreen(focusedSession, sceneSession, reason);
     EXPECT_EQ(ret, true);
 }
@@ -1337,8 +1360,7 @@ HWTEST_F(SceneSessionManagerTest9, CheckClickFocusIsDownThroughFullScreen_ZOrder
     sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
     sptr<SceneSessionMocker> focusedSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
     focusedSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    EXPECT_CALL(*focusedSession, IsBlockingFocusFullScreenSystemPanel()).WillRepeatedly(Return(false));
-    EXPECT_CALL(*focusedSession, IsAppMainWindowFullScreen()).WillRepeatedly(Return(false));
+    EXPECT_CALL(*focusedSession, IsBlockingFocusWindowType()).WillRepeatedly(Return(true));
 
     FocusChangeReason reason = FocusChangeReason::CLICK;
 
@@ -1353,6 +1375,37 @@ HWTEST_F(SceneSessionManagerTest9, CheckClickFocusIsDownThroughFullScreen_ZOrder
     EXPECT_EQ(ret, false);
 
     focusedSession->zOrder_ = 2;
+    ret = ssm_->CheckClickFocusIsDownThroughFullScreen(focusedSession, sceneSession, reason);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: CheckClickFocusIsDownThroughFullScreen_DisplayIdCheck
+ * @tc.desc: Test return value with window-pairs of different display id
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, CheckClickFocusIsDownThroughFullScreen_DisplayIdCheck, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "CheckClickFocusIsDownThroughFullScreen_DisplayIdCheck";
+    info.bundleName_ = "CheckClickFocusIsDownThroughFullScreen_DisplayIdCheck";
+
+    sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    sptr<SceneSessionMocker> focusedSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    focusedSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    EXPECT_CALL(*focusedSession, IsBlockingFocusWindowType()).WillRepeatedly(Return(true));
+
+    FocusChangeReason reason = FocusChangeReason::CLICK;
+    focusedSession->zOrder_ = 2;
+    sceneSession->zOrder_ = 1;
+
+    focusedSession->property_->SetDisplayId(DISPLAY_ID_FAKE);
+    sceneSession->property_->SetDisplayId(DEFAULT_DISPLAY_ID);
+    bool ret = ssm_->CheckClickFocusIsDownThroughFullScreen(focusedSession, sceneSession, reason);
+    EXPECT_EQ(ret, false);
+
+    focusedSession->property_->SetDisplayId(DEFAULT_DISPLAY_ID);
     ret = ssm_->CheckClickFocusIsDownThroughFullScreen(focusedSession, sceneSession, reason);
     EXPECT_EQ(ret, true);
 }
@@ -1638,6 +1691,12 @@ HWTEST_F(SceneSessionManagerTest9, SetSkipEventOnCastPlusInner01, TestSize.Level
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
     ssm_->SetSkipEventOnCastPlusInner(sceneSession->GetPersistentId(), true);
     EXPECT_EQ(true, sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus());
+    ssm_->SetSkipEventOnCastPlusInner(sceneSession->GetPersistentId(), false);
+    EXPECT_EQ(false, sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus());
+    ssm_->isUserBackground_ = false;
+    ssm_->SetSkipEventOnCastPlusInner(sceneSession->GetPersistentId(), false);
+    EXPECT_EQ(false, sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus());
+    ssm_->isUserBackground_ = true;
     ssm_->SetSkipEventOnCastPlusInner(sceneSession->GetPersistentId(), false);
     EXPECT_EQ(false, sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus());
 }

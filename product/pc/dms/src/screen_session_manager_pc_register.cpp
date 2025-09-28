@@ -13,26 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_WINDOW_SCENE_FFRT_QUEUE_HELPER_H
-#define OHOS_ROSEN_WINDOW_SCENE_FFRT_QUEUE_HELPER_H
+#include "screen_session_manager.h"
+#include "../include/screen_session_manager_pc_extension.h"
 
-#include "timeout_future.h"
+using namespace OHOS::Rosen;
+using namespace PCExtension;
 
-namespace ffrt {
-class queue;
-} // namespace ffrt
-
-namespace OHOS::Rosen {
-class FfrtQueueHelper {
-public:
-    FfrtQueueHelper();
-    ~FfrtQueueHelper();
-    bool SubmitTaskAndWait(std::function<void()>&& task, uint64_t timeout);
-    void SubmitTask(std::function<void()>&& task);
-
-private:
-    std::unique_ptr<ffrt::queue> ffrtQueue_;
-};
-} // namespace OHOS::Rosen
-
-#endif // OHOS_ROSEN_WINDOW_SCENE_FFRT_QUEUE_HELPER_H
+extern "C" __attribute__((constructor)) void PCScreenSessionManagerRegisterFunc()
+{
+    TLOGI(WmsLogTag::DMS, "startpc");
+    ScreenSessionManager::SetInstance(static_cast<ScreenSessionManager*>(&ScreenSessionManagerExt::GetInstance()));
+    TLOGI(WmsLogTag::DMS, "pcScreenSessionManagerExt registered successfully");
+}

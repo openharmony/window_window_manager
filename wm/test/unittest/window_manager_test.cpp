@@ -130,6 +130,18 @@ public:
     };
 };
 
+class TestMidSceneChangedListener : public IWindowInfoChangedListener {
+public:
+    int32_t count_ = 0;
+
+    void OnWindowInfoChanged(
+        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList) override
+    {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "TestMidSceneChangedListener");
+        ++count_;
+    };
+};
+
 class TestWindowModeChangedListener : public IWindowModeChangedListener {
 public:
     void OnWindowModeUpdate(WindowModeType mode) override
@@ -293,6 +305,21 @@ HWTEST_F(WindowManagerTest, GetAccessibilityWindowInfo01, TestSize.Level1)
     auto instance = WindowManager::GetInstance(-1);
     ASSERT_NE(nullptr, instance);
     instance->GetAccessibilityWindowInfo(infos);
+}
+
+/**
+ * @tc.name: ConvertToRelativeCoordinateExtended
+ * @tc.desc: ConvertToRelativeCoordinateExtended ok
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, ConvertToRelativeCoordinateExtended, TestSize.Level1)
+{
+    Rect rect;
+    Rect newRect;
+    DisplayId newDisplayId = 0;
+    rect = { 100, 2000, 400, 600 };
+    auto ret = WindowManager::GetInstance().ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -1721,6 +1748,9 @@ HWTEST_F(WindowManagerTest, ProcessRegisterWindowInfoChangeCallback01, Function 
     observedInfo = WindowInfoKey::BUNDLE_NAME;
     ret = WindowManager::GetInstance().ProcessRegisterWindowInfoChangeCallback(observedInfo, listener);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    observedInfo = WindowInfoKey::MID_SCENE;
+    ret = WindowManager::GetInstance().ProcessRegisterWindowInfoChangeCallback(observedInfo, nullptr);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -1745,6 +1775,9 @@ HWTEST_F(WindowManagerTest, ProcessUnregisterWindowInfoChangeCallback01, Functio
     observedInfo = WindowInfoKey::BUNDLE_NAME;
     ret = WindowManager::GetInstance().ProcessUnregisterWindowInfoChangeCallback(observedInfo, listener);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    observedInfo = WindowInfoKey::MID_SCENE;
+    ret = WindowManager::GetInstance().ProcessUnregisterWindowInfoChangeCallback(observedInfo, nullptr);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -2076,6 +2109,102 @@ HWTEST_F(WindowManagerTest, NotifyFloatingScaleChange, TestSize.Level1)
 
     windowManager.pImpl_->NotifyFloatingScaleChange(windowInfoList);
     EXPECT_EQ(listener->count_, 0);
+}
+
+/**
+ * @tc.name: RegisterMidSceneChangedListener01
+ * @tc.desc: check RegisterMidSceneChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RegisterMidSceneChangedListener01, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManager::GetInstance();
+    auto oldWindowManagerAgent = windowManager.pImpl_->windowPropertyChangeAgent_;
+    auto oldListeners = windowManager.pImpl_->midSceneStatusChangeListeners_;
+    windowManager.pImpl_->windowPropertyChangeAgent_ = nullptr;
+    windowManager.pImpl_->midSceneStatusChangeListeners_.clear();
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterMidSceneChangedListener(nullptr));
+
+    sptr<TestMidSceneChangedListener> listener = sptr<TestMidSceneChangedListener>::MakeSptr();
+    listener->AddInterestInfo(Rosen::WindowInfoKey::MID_SCENE);
+    listener->AddInterestInfo(Rosen::WindowInfoKey::NONE);
+
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.RegisterMidSceneChangedListener(listener));
+    EXPECT_EQ(0, windowManager.pImpl_->midSceneStatusChangeListeners_.size());
+
+    // to check that the same listner can not be registered twice
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.RegisterMidSceneChangedListener(listener));
+    EXPECT_EQ(0, windowManager.pImpl_->midSceneStatusChangeListeners_.size());
+
+    windowManager.pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
+    windowManager.pImpl_->midSceneStatusChangeListeners_ = oldListeners;
+}
+
+/**
+ * @tc.name: UnregisterMidSceneChangedListener01
+ * @tc.desc: check UnregisterMidSceneChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, UnregisterMidSceneChangedListener01, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManager::GetInstance();
+    auto oldWindowManagerAgent = windowManager.pImpl_->windowPropertyChangeAgent_;
+    auto oldListeners = windowManager.pImpl_->midSceneStatusChangeListeners_;
+    windowManager.pImpl_->windowPropertyChangeAgent_ = sptr<WindowManagerAgent>::MakeSptr();
+    windowManager.pImpl_->midSceneStatusChangeListeners_.clear();
+
+    // check nullpter
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterMidSceneChangedListener(nullptr));
+
+    sptr<TestMidSceneChangedListener> listener1 = sptr<TestMidSceneChangedListener>::MakeSptr();
+    sptr<TestMidSceneChangedListener> listener2 = sptr<TestMidSceneChangedListener>::MakeSptr();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.UnregisterMidSceneChangedListener(listener1));
+
+    listener1->AddInterestInfo(Rosen::WindowInfoKey::MID_SCENE);
+    listener1->AddInterestInfo(Rosen::WindowInfoKey::NONE);
+    windowManager.RegisterMidSceneChangedListener(listener1);
+    windowManager.RegisterMidSceneChangedListener(listener2);
+    EXPECT_EQ(0, windowManager.pImpl_->midSceneStatusChangeListeners_.size());
+
+    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterMidSceneChangedListener(listener1));
+    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterMidSceneChangedListener(listener2));
+    EXPECT_EQ(0, windowManager.pImpl_->midSceneStatusChangeListeners_.size());
+    ASSERT_EQ(nullptr, windowManager.pImpl_->windowPropertyChangeAgent_);
+
+    windowManager.pImpl_->midSceneStatusChangeListeners_.emplace_back(listener1);
+    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterMidSceneChangedListener(listener1));
+    EXPECT_EQ(0, windowManager.pImpl_->midSceneStatusChangeListeners_.size());
+
+    windowManager.pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
+    windowManager.pImpl_->midSceneStatusChangeListeners_ = oldListeners;
+}
+
+/**
+ * @tc.name: NotifyMidSceneStatusChange01
+ * @tc.desc: check NotifyMidSceneStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyMidSceneStatusChange01, TestSize.Level1)
+{
+    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
+    windowInfoList.push_back({{WindowInfoKey::MID_SCENE, true}});
+
+    auto& windowManager = WindowManager::GetInstance();
+    windowManager.pImpl_->midSceneStatusChangeListeners_.clear();
+    windowManager.pImpl_->NotifyMidSceneStatusChange(windowInfoList);
+
+    windowManager.pImpl_->midSceneStatusChangeListeners_.push_back(nullptr);
+    windowManager.pImpl_->NotifyMidSceneStatusChange(windowInfoList);
+
+    sptr<TestMidSceneChangedListener> listener =
+        sptr<TestMidSceneChangedListener>::MakeSptr();
+
+    windowManager.pImpl_->NotifyMidSceneStatusChange(windowInfoList);
+    EXPECT_EQ(listener->count_, 0);
+
+    windowManager.pImpl_->midSceneStatusChangeListeners_.push_back(listener);
+    windowManager.pImpl_->NotifyMidSceneStatusChange(windowInfoList);
+    EXPECT_EQ(listener->count_, 1);
 }
 
 /**
@@ -2427,6 +2556,69 @@ HWTEST_F(WindowManagerTest, GetInstanceMulti, TestSize.Level1)
 HWTEST_F(WindowManagerTest, RemoveInstanceByUserId, TestSize.Level1)
 {
     ASSERT_EQ(WMError::WM_OK, WindowManager::RemoveInstanceByUserId(101));
+}
+
+/**
+ * @tc.name: UpdateOutline
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, UpdateOutline, TestSize.Level1)
+{
+    OutlineParams params;
+    WMError ret = WindowManager::GetInstance().UpdateOutline(nullptr, params);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+
+    sptr<IRemoteObject> remoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
+    ret = WindowManager::GetInstance().UpdateOutline(remoteObject, params);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+
+    params.type_ = OutlineType::OUTLINE_FOR_WINDOW;
+    params.outlineStyleParams_.outlineWidth_ = 0;
+    ret = WindowManager::GetInstance().UpdateOutline(remoteObject, params);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+
+    params.outlineStyleParams_.outlineWidth_ = OUTLINE_WIDTH_MAX + 1;
+    ret = WindowManager::GetInstance().UpdateOutline(remoteObject, params);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+
+    params.outlineStyleParams_.outlineWidth_ = OUTLINE_WIDTH_DEFAULT;
+    params.outlineStyleParams_.outlineShape_ = OutlineShape::OUTLINE_SHAPE_END;
+    ret = WindowManager::GetInstance().UpdateOutline(remoteObject, params);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+
+    params.outlineStyleParams_.outlineShape_ = OutlineShape::OUTLINE_SHAPE_FOUR_CORNERS;
+    params.outlineStyleParams_.outlineColor_ = 0x00ffffff  + 1; // 0x00ffffff: color has no alpha byte.
+    ret = WindowManager::GetInstance().UpdateOutline(remoteObject, params);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), UpdateOutline(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_INVALID_PERMISSION));
+    params.outlineStyleParams_.outlineColor_ = 0x00ffffff - 1; // 0x00ffffff: color has no alpha byte.
+    ret = WindowManager::GetInstance().UpdateOutline(remoteObject, params);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PERMISSION);
+
+    EXPECT_CALL(m->Mock(), UpdateOutline(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_INVALID_PERMISSION));
+    params.outlineStyleParams_.outlineColor_ = 0xff000000 + 1; // 0xff000000: color opaque
+    ret = WindowManager::GetInstance().UpdateOutline(remoteObject, params);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PERMISSION);
+
+    EXPECT_CALL(m->Mock(), UpdateOutline(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ret = WindowManager::GetInstance().UpdateOutline(remoteObject, params);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    bool outlineRecoverRegister = WindowManager::GetInstance().isOutlineRecoverRegistered_;
+    params.persistentIds_.push_back(1); // 1 persistentId
+    EXPECT_CALL(m->Mock(), UpdateOutline(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ret = WindowManager::GetInstance().UpdateOutline(remoteObject, params);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    WindowManager::GetInstance().isOutlineRecoverRegistered_ = !outlineRecoverRegister;
+    EXPECT_CALL(m->Mock(), UpdateOutline(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ret = WindowManager::GetInstance().UpdateOutline(remoteObject, params);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    WindowManager::GetInstance().isOutlineRecoverRegistered_ = outlineRecoverRegister;
 }
 
 /**

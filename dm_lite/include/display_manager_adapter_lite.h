@@ -54,8 +54,8 @@ private:
 class DisplayManagerAdapterLite : public BaseAdapterLite {
 WM_DECLARE_SINGLE_INSTANCE(DisplayManagerAdapterLite);
 public:
-    virtual sptr<DisplayInfo> GetDefaultDisplayInfo();
-    virtual std::vector<DisplayId> GetAllDisplayIds();
+    virtual sptr<DisplayInfo> GetDefaultDisplayInfo(int32_t userId = CONCURRENT_USER_ID_DEFAULT);
+    virtual std::vector<DisplayId> GetAllDisplayIds(int32_t userId = CONCURRENT_USER_ID_DEFAULT);
     virtual bool IsFoldable();
     virtual FoldStatus GetFoldStatus();
     virtual FoldDisplayMode GetFoldDisplayMode();

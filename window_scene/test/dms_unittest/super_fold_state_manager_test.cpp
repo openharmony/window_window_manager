@@ -547,57 +547,6 @@ HWTEST_F(SuperFoldStateManagerTest, RefreshExternalRegion_ShouldReturnOk_WhenNoE
 }
 
 /**
- * @tc.name  : ForceChangeMirrorMode_ShouldReturnNullptrError_WhenMainScreenSessionIsNull
- * @tc.number: ForceChangeMirrorModeTest_001
- * @tc.desc  : When `mainScreenSession` is `nullptr`, the function should return `DM_ERROR_NULLPTR`
- */
-HWTEST_F(SuperFoldStateManagerTest, ForceChangeMirrorMode_ShouldReturnNullptrError_WhenMainScreenSessionIsNull,
-    TestSize.Level0)
-{
-    SuperFoldStateManager manager;
-    sptr<ScreenSession> mainScreenSession = nullptr;
-    sptr<ScreenSession> secondarySession = sptr<ScreenSession>::MakeSptr();
-    DMError result = manager.ForceChangeMirrorMode(mainScreenSession, secondarySession);
-    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, result);
-}
-
-/**
- * @tc.name  : ForceChangeMirrorMode_ShouldReturnNullptrError_WhenSecondarySessionIsNull
- * @tc.number: ForceChangeMirrorModeTest_002
- * @tc.desc  : When `secondarySession` is `nullptr`, the function should return `DM_ERROR_NULLPTR`.
- */
-HWTEST_F(SuperFoldStateManagerTest, ForceChangeMirrorMode_ShouldReturnNullptrError_WhenSecondarySessionIsNull,
-    TestSize.Level0)
-{
-    SuperFoldStateManager manager;
-    sptr<ScreenSession> mainScreenSession = sptr<ScreenSession>::MakeSptr();
-    sptr<ScreenSession> secondarySession = nullptr;
-    DMError result = manager.ForceChangeMirrorMode(mainScreenSession, secondarySession);
-    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, result);
-}
-
-/**
- * @tc.name  : ForceChangeMirrorMode_ShouldNotSetMultiScreenMode_WhenConditionsNotMet
- * @tc.number: ForceChangeMirrorModeTest_003
- * @tc.desc  : When the conditions are not met, the function should not call SetMultiScreenMode and return DM_OK.
- */
-HWTEST_F(
-    SuperFoldStateManagerTest, ForceChangeMirrorMode_ShouldNotSetMultiScreenMode_WhenConditionsNotMet, TestSize.Level0)
-{
-    sptr<ScreenSession> mainScreenSession = sptr<ScreenSession>::MakeSptr();
-    sptr<ScreenSession> secondarySession = sptr<ScreenSession>::MakeSptr();
-
-    SuperFoldStateManager manager;
-    manager.SetCurrentStatus(SuperFoldStatus::FOLDED);
-    DMError result = manager.ForceChangeMirrorMode(mainScreenSession, secondarySession);
-    ASSERT_EQ(DMError::DM_OK, result);
-
-    manager.SetCurrentStatus(SuperFoldStatus::EXPANDED);
-    result = manager.ForceChangeMirrorMode(mainScreenSession, secondarySession);
-    ASSERT_EQ(DMError::DM_OK, result);
-}
-
-/**
  * @tc.name: GetFoldCreaseRect01
  * @tc.desc: test function : GetFoldCreaseRect01
  * @tc.type: FUNC

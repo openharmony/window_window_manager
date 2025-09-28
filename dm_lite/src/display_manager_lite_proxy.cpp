@@ -250,7 +250,7 @@ FoldStatus DisplayManagerLiteProxy::GetFoldStatus()
 #endif
 }
 
-sptr<DisplayInfo> OHOS::Rosen::DisplayManagerLiteProxy::GetDefaultDisplayInfo()
+sptr<DisplayInfo> OHOS::Rosen::DisplayManagerLiteProxy::GetDefaultDisplayInfo(int32_t userId)
 {
 #ifdef SCENE_BOARD_ENABLED
     sptr<IRemoteObject> remote = Remote();
@@ -263,6 +263,10 @@ sptr<DisplayInfo> OHOS::Rosen::DisplayManagerLiteProxy::GetDefaultDisplayInfo()
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return nullptr;
+    }
+    if (!data.WriteInt32(userId)) {
+        TLOGE(WmsLogTag::DMS, "Write userId failed");
         return nullptr;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DEFAULT_DISPLAY_INFO),
@@ -900,7 +904,7 @@ uint32_t DisplayManagerLiteProxy::GetScreenBrightness(uint64_t screenId)
 #endif
 }
 
-std::vector<DisplayId> DisplayManagerLiteProxy::GetAllDisplayIds()
+std::vector<DisplayId> DisplayManagerLiteProxy::GetAllDisplayIds(int32_t userId)
 {
 #ifdef SCENE_BOARD_ENABLED
     sptr<IRemoteObject> remote = Remote();
@@ -914,6 +918,10 @@ std::vector<DisplayId> DisplayManagerLiteProxy::GetAllDisplayIds()
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return allDisplayIds;
+    }
+    if (!data.WriteInt32(userId)) {
+        TLOGE(WmsLogTag::DMS, "Write userId failed");
         return allDisplayIds;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_ALL_DISPLAYIDS),

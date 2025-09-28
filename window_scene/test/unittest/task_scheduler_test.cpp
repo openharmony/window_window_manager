@@ -38,9 +38,8 @@ HWTEST_F(TaskSchedulerTest, task_scheduler_test001, TestSize.Level1)
     std::string threadName = "threadName";
     std::string name = "name";
     TaskScheduler* taskScheduler = new (std::nothrow) TaskScheduler(threadName);
-    int res = 0;
+    ASSERT_NE(taskScheduler, nullptr);
     taskScheduler->RemoveTask(name);
-    ASSERT_EQ(res, 0);
     delete taskScheduler;
     GTEST_LOG_(INFO) << "TaskSchedulerTest: task_scheduler_test001 end";
 }

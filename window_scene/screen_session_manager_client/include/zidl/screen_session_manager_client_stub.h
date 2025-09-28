@@ -36,6 +36,7 @@ private:
     void InitScreenChangeMap();
     int HandleOnScreenConnectionChanged(MessageParcel& data, MessageParcel& reply);
     int HandleOnPropertyChanged(MessageParcel& data, MessageParcel& reply);
+    int HandleOnFoldPropertyChanged(MessageParcel& data, MessageParcel& reply);
     int HandleOnPowerStatusChanged(MessageParcel& data, MessageParcel& reply);
     int HandleOnSensorRotationChanged(MessageParcel& data, MessageParcel& reply);
     int HandleOnScreenOrientationChanged(MessageParcel& data, MessageParcel& reply);

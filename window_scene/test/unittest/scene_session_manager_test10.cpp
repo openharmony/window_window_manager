@@ -1776,6 +1776,43 @@ HWTEST_F(SceneSessionManagerTest10, RefreshAllAppUseControlMap, TestSize.Level1)
     ssm_->RefreshAllAppUseControlMap(appUseControlInfo, ControlAppType::PARENT_CONTROL);
     EXPECT_EQ(0, ssm_->allAppUseControlMap_.size());
 }
+
+/**
+ * @tc.name: SetMaximizeFullScreen
+ * @tc.desc: SetMaximizeFullScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, SetMaximizeFullScreen, TestSize.Level1)
+{
+    ssm_->sceneSessionMap_.clear();
+    ASSERT_NE(ssm_, nullptr);
+    int32_t persistentId = 100;
+    bool isMaximizeFullScreen = true;
+    EXPECT_EQ(ssm_->SetMaximizeFullScreen(persistentId, isMaximizeFullScreen), WSError::WS_ERROR_INVALID_WINDOW);
+ 
+    SessionInfo info;
+    info.abilityName_ = "testSetMaximizeFullScreen1";
+    info.bundleName_ = "testSetMaximizeFullScreen1";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->property_->SetPersistentId(200);
+    sceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    EXPECT_EQ(ssm_->SetMaximizeFullScreen(sceneSession->GetPersistentId(), isMaximizeFullScreen),
+        WSError::WS_ERROR_INVALID_WINDOW);
+ 
+    SessionInfo info1;
+    info1.abilityName_ = "testSetMaximizeFullScreen2";
+    info1.bundleName_ = "testSetMaximizeFullScreen2";
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
+    sceneSession1->property_->SetPersistentId(300);
+    sceneSession1->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession1->SetSessionState(SessionState::STATE_FOREGROUND);
+    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
+    EXPECT_EQ(ssm_->SetMaximizeFullScreen(sceneSession1->GetPersistentId(), isMaximizeFullScreen),
+        WSError::WS_ERROR_NULLPTR);
+ 
+    ssm_->sceneSessionMap_.clear();
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

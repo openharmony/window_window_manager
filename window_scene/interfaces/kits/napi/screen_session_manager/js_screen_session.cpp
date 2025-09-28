@@ -489,9 +489,8 @@ void JsScreenSession::CallJsCallback(const std::string& callbackType)
         TLOGE(WmsLogTag::DMS, "Call js callback %{public}s start", callbackType.c_str());
         UnRegisterScreenChangeListener();
     }
-    auto jsCallbackRef = GetJSCallback(callbackType);
     wptr<ScreenSession> screenSessionWeak(screenSession_);
-    auto asyncTask = [jsCallbackRef, callbackType, screenSessionWeak, env = env_]() {
+    auto asyncTask = [jsCallbackRef = GetJSCallback(callbackType), callbackType, screenSessionWeak, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenSession::CallJsCallback");
         if (jsCallbackRef == nullptr) {
             TLOGNE(WmsLogTag::DMS, "Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());

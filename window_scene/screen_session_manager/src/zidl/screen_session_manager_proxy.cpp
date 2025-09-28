@@ -22,7 +22,7 @@ namespace {
 constexpr uint32_t  MAX_CREASE_REGION_SIZE = 20;
 }
 
-sptr<DisplayInfo> OHOS::Rosen::ScreenSessionManagerProxy::GetDefaultDisplayInfo()
+sptr<DisplayInfo> OHOS::Rosen::ScreenSessionManagerProxy::GetDefaultDisplayInfo(int32_t userId)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -35,6 +35,10 @@ sptr<DisplayInfo> OHOS::Rosen::ScreenSessionManagerProxy::GetDefaultDisplayInfo(
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return nullptr;
+    }
+    if (!data.WriteInt32(userId)) {
+        TLOGE(WmsLogTag::DMS, "Write userId failed");
         return nullptr;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DEFAULT_DISPLAY_INFO),
@@ -1983,7 +1987,7 @@ sptr<DisplayInfo> ScreenSessionManagerProxy::GetDisplayInfoByScreen(ScreenId scr
     return info;
 }
 
-std::vector<DisplayId> ScreenSessionManagerProxy::GetAllDisplayIds()
+std::vector<DisplayId> ScreenSessionManagerProxy::GetAllDisplayIds(int32_t userId)
 {
     std::vector<DisplayId> allDisplayIds;
     sptr<IRemoteObject> remote = Remote();
@@ -1997,6 +2001,10 @@ std::vector<DisplayId> ScreenSessionManagerProxy::GetAllDisplayIds()
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return allDisplayIds;
+    }
+    if (!data.WriteInt32(userId)) {
+        TLOGE(WmsLogTag::DMS, "WriteInt32 userId failed");
         return allDisplayIds;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_ALL_DISPLAYIDS),
@@ -3652,6 +3660,35 @@ void ScreenSessionManagerProxy::NotifyScreenConnectCompletion(ScreenId screenId)
     }
 }
 
+void ScreenSessionManagerProxy::NotifyAodOpCompletion(AodOP operation, int32_t result)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is null");
+        return;
+    }
+
+    MessageOption option(MessageOption::TF_ASYNC);
+    MessageParcel reply;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return ;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(operation))) {
+        TLOGE(WmsLogTag::DMS, "Write operation failed");
+        return;
+    }
+    if (!data.WriteInt32(result)) {
+        TLOGE(WmsLogTag::DMS, "Write operation result failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_AOD_OP_COMPLETION),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return;
+    }
+}
 
 void ScreenSessionManagerProxy::RecordEventFromScb(std::string description, bool needRecordEvent)
 {
@@ -4721,5 +4758,41 @@ void ScreenSessionManagerProxy::NotifySwitchUserAnimationFinish()
         TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return;
     }
+}
+
+DMError ScreenSessionManagerProxy::SyncScreenPropertyChangedToServer(ScreenId screenId,
+    const ScreenProperty& screenProperty)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is null");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    if (!RSMarshallingHelper::Marshalling(data, screenProperty)) {
+        TLOGE(WmsLogTag::DMS, "Write screenSession failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_PROPERTY_BY_FOLD_STATE_CHANGE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+            }
+    int32_t ret = -1;
+    if (!reply.ReadInt32(ret)) {
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(ret);
 }
 } // namespace OHOS::Rosen

@@ -25,6 +25,7 @@ group("demo") {
     ":demo_system_sub_window",
     ":demo_visible_window_num_listener",
     ":demo_water_mark_listener",
+    ":demo_outline_virtual_media_service",
   ]
 }
 
@@ -33,7 +34,11 @@ ohos_executable("demo_mirror_screen_listener") {
 
   include_dirs = [ "../common/utils/include" ]
 
-  deps = [ "${window_base_path}/dm:libdm" ]
+  deps = [ 
+    "${window_base_path}/dm:libdm",
+    "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/utils:libwmutil_base",
+   ]
 
   external_deps = [
     "c_utils:utils",
@@ -108,6 +113,8 @@ ohos_executable("demo_system_sub_window") {
   deps = [
     "${window_base_path}/test/common/utils:libtestutil",
     "${window_base_path}/wm:libwm",
+    "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/utils:libwmutil_base",
   ]
 
   external_deps = [
@@ -144,8 +151,11 @@ ohos_executable("demo_water_mark_listener") {
     "${window_base_path}/test/common/utils/include",
   ]
 
-  deps = [ "${window_base_path}/wm:libwm" ]
-
+  deps = [ 
+    "${window_base_path}/wm:libwm",
+    "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/utils:libwmutil_base",
+ ]
   external_deps = [
     "c_utils:utils",
     "graphic_2d:librender_service_base",
@@ -165,7 +175,11 @@ ohos_executable("demo_visible_window_num_listener") {
     "${window_base_path}/test/common/utils/include",
   ]
 
-  deps = [ "${window_base_path}/wm:libwm" ]
+  deps = [ 
+    "${window_base_path}/wm:libwm",
+    "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/utils:libwmutil_base",
+ ]
 
   external_deps = [
     "c_utils:utils",
@@ -200,6 +214,30 @@ ohos_executable("demo_session_manager") {
     "graphic_2d:librender_service_base",
     "hilog:libhilog",
     "ipc:ipc_core",
+  ]
+
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
+
+ohos_executable("demo_outline_virtual_media_service") {
+  sources = [ "demo_outline_virtual_media_service.cpp" ]
+
+  include_dirs = [
+    "${window_base_path}/interfaces/innerkits/wm",
+    "${window_base_path}/test/common/utils/include",
+  ]
+
+  deps = [
+    "${window_base_path}/test/common/utils:libtestutil",
+    "${window_base_path}/wm:libwm",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "graphic_2d:librender_service_base",
+    "hilog:libhilog",
+    "selinux_adapter:librestorecon",
   ]
 
   part_name = "window_manager"

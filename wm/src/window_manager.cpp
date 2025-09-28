@@ -75,6 +75,8 @@ public:
         const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
     void NotifyFloatingScaleChange(
         const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
+    void NotifyMidSceneStatusChange(
+        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
     bool IsNeedToSkipForInterestWindowIds(sptr<IWindowInfoChangedListener> listener,
         const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
     void NotifyWindowStyleChange(WindowStyleType type);
@@ -123,6 +125,7 @@ public:
     std::vector<sptr<IWindowInfoChangedListener>> windowRectChangeListeners_;
     std::vector<sptr<IWindowInfoChangedListener>> windowModeChangeListeners_;
     std::vector<sptr<IWindowInfoChangedListener>> floatingScaleChangeListeners_;
+    std::vector<sptr<IWindowInfoChangedListener>> midSceneStatusChangeListeners_;
     sptr<WindowManagerAgent> windowSystemBarPropertyChangeAgent_;
     std::vector<sptr<IWindowSystemBarPropertyChangedListener>> windowSystemBarPropertyChangedListeners_;
     sptr<IWindowLifeCycleListener> windowLifeCycleListener_;
@@ -435,6 +438,21 @@ void WindowManager::Impl::NotifyFloatingScaleChange(
     }
 }
 
+void WindowManager::Impl::NotifyMidSceneStatusChange(
+    const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList)
+{
+    std::vector<sptr<IWindowInfoChangedListener>> midSceneStatusChangeListeners;
+    {
+        std::unique_lock<std::shared_mutex> lock(listenerMutex_);
+        midSceneStatusChangeListeners = midSceneStatusChangeListeners_;
+    }
+    for (auto& listener : midSceneStatusChangeListeners) {
+        if (listener != nullptr && !IsNeedToSkipForInterestWindowIds(listener, windowInfoList)) {
+            listener->OnWindowInfoChanged(windowInfoList);
+        }
+    }
+}
+
 void WindowManager::Impl::NotifyDisplayIdChange(
     const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList)
 {
@@ -551,6 +569,8 @@ WindowManager::~WindowManager()
     TLOGI(WmsLogTag::WMS_SCB, "destroyed");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     destroyed_ = true;
+    SingletonContainer::Get<WindowAdapter>().UnregisterOutlineRecoverCallbackFunc();
+    isOutlineRecoverRegistered_ = false;
 }
 
 WindowManager& WindowManager::GetInstance()
@@ -1217,6 +1237,78 @@ WMError WindowManager::UnregisterFloatingScaleChangedListener(const sptr<IWindow
     return ret;
 }
 
+WMError WindowManager::RegisterMidSceneChangedListener(const sptr<IWindowInfoChangedListener>& listener)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "in");
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->windowPropertyChangeAgent_ == nullptr) {
+        pImpl_->windowPropertyChangeAgent_ = new WindowManagerAgent();
+    }
+    uint32_t interestInfo = 0;
+    for (auto windowInfoKey : listener->GetInterestInfo()) {
+        if (interestInfoMap_.find(windowInfoKey) == interestInfoMap_.end()) {
+            interestInfoMap_[windowInfoKey] = 1;
+        } else {
+            interestInfoMap_[windowInfoKey]++;
+        }
+        interestInfo |= static_cast<uint32_t>(windowInfoKey);
+    }
+    ret = WindowAdapter::GetInstance(userId_)->RegisterWindowPropertyChangeAgent(
+        WindowInfoKey::MID_SCENE, interestInfo, pImpl_->windowPropertyChangeAgent_);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "RegisterWindowPropertyChangeAgent failed!");
+        pImpl_->windowPropertyChangeAgent_ = nullptr;
+    } else {
+        auto iter = std::find(pImpl_->midSceneStatusChangeListeners_.begin(),
+            pImpl_->midSceneStatusChangeListeners_.end(), listener);
+        if (iter != pImpl_->midSceneStatusChangeListeners_.end()) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Listener is already registered.");
+            return WMError::WM_OK;
+        }
+        pImpl_->midSceneStatusChangeListeners_.emplace_back(listener);
+    }
+    return ret;
+}
+
+WMError WindowManager::UnregisterMidSceneChangedListener(const sptr<IWindowInfoChangedListener>& listener)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "in");
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+    pImpl_->midSceneStatusChangeListeners_.erase(std::remove_if(pImpl_->midSceneStatusChangeListeners_.begin(),
+        pImpl_->midSceneStatusChangeListeners_.end(), [listener](sptr<IWindowInfoChangedListener> registeredListener) {
+            return registeredListener == listener;
+        }), pImpl_->midSceneStatusChangeListeners_.end());
+    uint32_t interestInfo = 0;
+    for (auto windowInfoKey : listener->GetInterestInfo()) {
+        if (interestInfoMap_.find(windowInfoKey) == interestInfoMap_.end()) {
+            continue;
+        } else if (interestInfoMap_[windowInfoKey] == 1) {
+            interestInfoMap_.erase(windowInfoKey);
+            interestInfo |= static_cast<uint32_t>(windowInfoKey);
+        } else {
+            interestInfoMap_[windowInfoKey]--;
+        }
+    }
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->midSceneStatusChangeListeners_.empty() && pImpl_->windowPropertyChangeAgent_ != nullptr) {
+        ret = WindowAdapter::GetInstance(userId_)->UnregisterWindowPropertyChangeAgent(
+            WindowInfoKey::MID_SCENE, interestInfo, pImpl_->windowPropertyChangeAgent_);
+        if (ret == WMError::WM_OK) {
+            pImpl_->windowPropertyChangeAgent_ = nullptr;
+        }
+    }
+    return ret;
+}
+
 WMError WindowManager::RegisterVisibilityStateChangedListener(const sptr<IWindowInfoChangedListener>& listener)
 {
     if (listener == nullptr) {
@@ -1687,6 +1779,16 @@ WMError WindowManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessibility
     WMError ret = WindowAdapter::GetInstance(userId_)->GetAccessibilityWindowInfo(infos);
     if (ret != WMError::WM_OK) {
         WLOGFE("get window info failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::ConvertToRelativeCoordinateExtended(const Rect& rect, Rect& newRect, DisplayId& newDisplayId)
+{
+    WMError ret =
+        SingletonContainer::Get<WindowAdapter>().ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Convert relative coordinate failed");
     }
     return ret;
 }
@@ -2299,6 +2401,8 @@ WMError WindowManager::ProcessRegisterWindowInfoChangeCallback(WindowInfoKey obs
             return RegisterWindowModeChangedListenerForPropertyChange(listener);
         case WindowInfoKey::FLOATING_SCALE :
             return RegisterFloatingScaleChangedListener(listener);
+        case WindowInfoKey::MID_SCENE :
+            return RegisterMidSceneChangedListener(listener);
         default:
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Invalid observedInfo: %{public}d", static_cast<uint32_t>(observedInfo));
             return WMError::WM_ERROR_INVALID_PARAM;
@@ -2319,6 +2423,8 @@ WMError WindowManager::ProcessUnregisterWindowInfoChangeCallback(WindowInfoKey o
             return UnregisterWindowModeChangedListenerForPropertyChange(listener);
         case WindowInfoKey::FLOATING_SCALE :
             return UnregisterFloatingScaleChangedListener(listener);
+        case WindowInfoKey::MID_SCENE :
+            return UnregisterMidSceneChangedListener(listener);
         default:
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Invalid observedInfo: %{public}d", static_cast<uint32_t>(observedInfo));
             return WMError::WM_ERROR_INVALID_PARAM;
@@ -2423,6 +2529,9 @@ void WindowManager::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
     if (propertyDirtyFlags & static_cast<int32_t>(WindowInfoKey::FLOATING_SCALE)) {
         pImpl_->NotifyFloatingScaleChange(windowInfoList);
     }
+    if (propertyDirtyFlags & static_cast<int32_t>(WindowInfoKey::MID_SCENE)) {
+        pImpl_->NotifyMidSceneStatusChange(windowInfoList);
+    }
 }
 
 WMError WindowManager::AnimateTo(int32_t windowId, WindowAnimationProperty animationProperty,
@@ -2501,6 +2610,87 @@ WMError WindowManager::RemoveSessionBlackList(
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "in");
     auto ret = WindowAdapter::GetInstance(userId_)->
         RemoveSessionBlackList(bundleNames, privacyWindowTags);
+    return ret;
+}
+
+WMError WindowManager::CheckOutlineParams(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams)
+{
+    if (remoteObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "The remote object is null.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (outlineParams.type_ != OutlineType::OUTLINE_FOR_WINDOW) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Can update outline for windows only.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    if (outlineParams.outlineStyleParams_.outlineWidth_ < OUTLINE_WIDTH_MIN ||
+        outlineParams.outlineStyleParams_.outlineWidth_ > OUTLINE_WIDTH_MAX) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Outline width: %{public}d is out of valid range.",
+            outlineParams.outlineStyleParams_.outlineWidth_);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    if (outlineParams.outlineStyleParams_.outlineShape_ >= OutlineShape::OUTLINE_SHAPE_END) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Invalid outline shape: %{public}d.",
+              outlineParams.outlineStyleParams_.outlineShape_);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    if ((outlineParams.outlineStyleParams_.outlineColor_ >> OUTLINE_COLOR_OPAQUE_OFFSET) != 0 &&
+        (outlineParams.outlineStyleParams_.outlineColor_ >> OUTLINE_COLOR_OPAQUE_OFFSET) != OUTLINE_COLOR_OPAQUE) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Invalid outline color: %{public}d",
+              outlineParams.outlineStyleParams_.outlineColor_);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowManager::UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams)
+{
+    TLOGI(WmsLogTag::WMS_ANIMATION, "%{public}s", outlineParams.ToString().c_str());
+    auto ret = CheckOutlineParams(remoteObject, outlineParams);
+    if (ret !=WMError::WM_OK) {
+        return ret;
+    }
+
+    ret = SingletonContainer::Get<WindowAdapter>().UpdateOutline(remoteObject, outlineParams);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Update outline failed, ret: %{public}d.", ret);
+        return ret;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (outlineParams.persistentIds_.size() == 0) {
+        SingletonContainer::Get<WindowAdapter>().UnregisterOutlineRecoverCallbackFunc();
+        isOutlineRecoverRegistered_ = false;
+        TLOGI(WmsLogTag::WMS_ANIMATION, "No window need to be highlight.");
+        return ret;
+    }
+
+    outlineRemoteObject_ = remoteObject;
+    outlineParams_ = outlineParams;
+    if (isOutlineRecoverRegistered_) {
+        TLOGI(WmsLogTag::WMS_ANIMATION, "Outline recover callback has already been registered.");
+        return ret;
+    }
+
+    SingletonContainer::Get<WindowAdapter>().RegisterOutlineRecoverCallbackFunc([weakThis = wptr(this)]() -> WMError {
+        auto windowManager = weakThis.promote();
+        if (!windowManager) {
+            TLOGE(WmsLogTag::WMS_SCB, "window adapter is null");
+            return WMError::WM_DO_NOTHING;
+        }
+        sptr<IRemoteObject> remoteObject;
+        OutlineParams outlineParams;
+        {
+            std::lock_guard<std::recursive_mutex> lock(windowManager->mutex_);
+            remoteObject = windowManager->outlineRemoteObject_;
+            outlineParams = windowManager->outlineParams_;
+        }
+        return windowManager->UpdateOutline(remoteObject, outlineParams);
+    });
+    isOutlineRecoverRegistered_ = true;
     return ret;
 }
 } // namespace Rosen

@@ -25,6 +25,7 @@
 #include "screen.h"
 #include "screen_group_info.h"
 #include "session/screen/include/screen_property.h"
+#include "session/screen/include/screen_session.h"
 #include "window_manager_hilog.h"
 #include "zidl/idisplay_manager_agent.h"
 #include "zidl/screen_session_manager_client_interface.h"
@@ -38,7 +39,7 @@ class IScreenSessionManager : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IScreenSessionManager");
 
-    virtual sptr<DisplayInfo> GetDefaultDisplayInfo() { return nullptr; }
+    virtual sptr<DisplayInfo> GetDefaultDisplayInfo(int32_t userId = CONCURRENT_USER_ID_DEFAULT) { return nullptr; }
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) { return nullptr; }
     virtual sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId) { return nullptr; }
     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) {return nullptr; }
@@ -174,7 +175,10 @@ public:
     virtual bool TryToCancelScreenOff() { return false; }
     virtual bool SetScreenBrightness(uint64_t screenId, uint32_t level) { return false; }
     virtual uint32_t GetScreenBrightness(uint64_t screenId) { return 0; }
-    virtual std::vector<DisplayId> GetAllDisplayIds() { return std::vector<DisplayId>{}; }
+    virtual std::vector<DisplayId> GetAllDisplayIds(int32_t userId = CONCURRENT_USER_ID_DEFAULT)
+    {
+        return std::vector<DisplayId>{};
+    }
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) { return nullptr; }
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId, int32_t width, int32_t height,
                                            Rotation rotation) { return nullptr; }
@@ -300,6 +304,7 @@ public:
     }
     virtual void NotifyFoldToExpandCompletion(bool foldToExpand) {}
     virtual void NotifyScreenConnectCompletion(ScreenId screenId) {}
+    virtual void NotifyAodOpCompletion(AodOP op, int32_t result) {}
     virtual void RecordEventFromScb(std::string description, bool needRecordEvent) {}
     virtual DeviceScreenConfig GetDeviceScreenConfig() { return {}; }
     virtual DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
@@ -385,6 +390,10 @@ public:
         bool enable) { return DMError::DM_OK; }
     virtual bool SynchronizePowerStatus(ScreenPowerState state) { return false; }
     virtual void NotifySwitchUserAnimationFinish() {}
+    virtual DMError SyncScreenPropertyChangedToServer(ScreenId screenId, const ScreenProperty& screenProperty)
+    {
+        return DMError::DM_OK;
+    }
 };
 } // namespace Rosen
 } // namespace OHOS

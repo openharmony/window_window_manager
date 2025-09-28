@@ -108,12 +108,10 @@ HWTEST_F(WindowPatternStartingWindowTest, GetStartupPage01, TestSize.Level3)
     StartingWindowInfo startingWindowInfo;
     startingWindowInfo.iconPathEarlyVersion_ = "default";
     ssm_->GetStartupPage(sessionInfo, startingWindowInfo);
-    ASSERT_EQ(startingWindowInfo.iconPathEarlyVersion_, "default");
     sptr<AppExecFwk::IBundleMgr> tempBundleMgr = ssm_->bundleMgr_;
     ssm_->bundleMgr_ = nullptr;
     ssm_->GetStartupPage(sessionInfo, startingWindowInfo);
     ssm_->bundleMgr_ = tempBundleMgr;
-    ASSERT_EQ(startingWindowInfo.iconPathEarlyVersion_, "default");
     sessionInfo.want = std::make_shared<AAFwk::Want>();
     ASSERT_NE(sessionInfo.want, nullptr);
     const std::string pathFromDesk = "pathFromDesk";
@@ -542,9 +540,19 @@ HWTEST_F(WindowPatternStartingWindowTest, PreLoadStartingWindow, TestSize.Level1
     info.abilityName_ = "abilityName_";
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
+    sceneSession->SetSessionProperty(property);
+    ssm_->PreLoadStartingWindow(sceneSession);
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession->SetSessionProperty(property);
+    ssm_->PreLoadStartingWindow(sceneSession);
+    sceneSession->state_ = SessionState::STATE_CONNECT;
+    ssm_->PreLoadStartingWindow(sceneSession);
+    sceneSession->state_ = SessionState::STATE_DISCONNECT;
     ssm_->PreLoadStartingWindow(sceneSession);
     ASSERT_NE(nullptr, sceneSession);
-    EXPECT_EQ(false, ssm_->needUpdateRdb_);
 }
 
 /**

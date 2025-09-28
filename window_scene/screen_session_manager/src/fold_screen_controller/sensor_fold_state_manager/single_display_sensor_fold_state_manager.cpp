@@ -17,6 +17,7 @@
 #include <parameters.h>
 
 #include "fold_screen_controller/fold_screen_policy.h"
+#include "fold_screen_controller/fold_screen_controller_config.h"
 #include "fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.h"
 #include "session/screen/include/screen_session.h"
 
@@ -28,12 +29,6 @@
 
 namespace OHOS::Rosen {
 namespace {
-constexpr float ANGLE_MIN_VAL = 0.0F;
-constexpr float ALTA_HALF_FOLDED_MAX_THRESHOLD = 140.0F;
-constexpr float CLOSE_ALTA_HALF_FOLDED_MIN_THRESHOLD = 70.0F;
-constexpr float OPEN_ALTA_HALF_FOLDED_MIN_THRESHOLD = 25.0F;
-constexpr float ALTA_HALF_FOLDED_BUFFER = 10.0F;
-constexpr float LARGER_BOUNDARY_FOR_ALTA_THRESHOLD = 90.0F;
 constexpr int32_t LARGER_BOUNDARY_FLAG = 1;
 constexpr int32_t SMALLER_BOUNDARY_FLAG = 0;
 constexpr int32_t HALL_THRESHOLD = 1;
@@ -61,7 +56,7 @@ void SingleDisplaySensorFoldStateManager::UpdateSwitchScreenBoundaryForLargeFold
 {
     if (hall == HALL_FOLDED_THRESHOLD) {
         allowUserSensorForLargeFoldDevice = SMALLER_BOUNDARY_FLAG;
-    } else if (angle >= LARGER_BOUNDARY_FOR_ALTA_THRESHOLD) {
+    } else if (angle >= LARGER_BOUNDARY_FOR_THRESHOLD) {
         allowUserSensorForLargeFoldDevice = LARGER_BOUNDARY_FLAG;
     }
 }
@@ -77,15 +72,15 @@ FoldStatus SingleDisplaySensorFoldStateManager::GetNextFoldState(float angle, in
     FoldStatus state;
 
     if (allowUserSensorForLargeFoldDevice == SMALLER_BOUNDARY_FLAG) {
-        if (std::islessequal(angle, OPEN_ALTA_HALF_FOLDED_MIN_THRESHOLD) && hall == HALL_FOLDED_THRESHOLD) {
+        if (std::islessequal(angle, OPEN_HALF_FOLDED_MIN_THRESHOLD) && hall == HALL_FOLDED_THRESHOLD) {
             state = FoldStatus::FOLDED;
-        } else if (std::isgreaterequal(angle, OPEN_ALTA_HALF_FOLDED_MIN_THRESHOLD + ALTA_HALF_FOLDED_BUFFER) &&
+        } else if (std::isgreaterequal(angle, OPEN_HALF_FOLDED_MIN_THRESHOLD + HALF_FOLDED_BUFFER) &&
             hall == HALL_FOLDED_THRESHOLD) {
             state = FoldStatus::HALF_FOLD;
-        } else if (std::islessequal(angle, ALTA_HALF_FOLDED_MAX_THRESHOLD - ALTA_HALF_FOLDED_BUFFER) &&
+        } else if (std::islessequal(angle, HALF_FOLDED_MAX_THRESHOLD - HALF_FOLDED_BUFFER) &&
             hall == HALL_THRESHOLD) {
             state = FoldStatus::HALF_FOLD;
-        } else if (std::isgreaterequal(angle, ALTA_HALF_FOLDED_MAX_THRESHOLD)) {
+        } else if (std::isgreaterequal(angle, HALF_FOLDED_MAX_THRESHOLD)) {
             state = FoldStatus::EXPAND;
         } else {
             state = currentState;
@@ -96,14 +91,14 @@ FoldStatus SingleDisplaySensorFoldStateManager::GetNextFoldState(float angle, in
         return state;
     }
 
-    if (hall == HALL_THRESHOLD && angle == OPEN_ALTA_HALF_FOLDED_MIN_THRESHOLD) {
+    if (hall == HALL_THRESHOLD && angle == OPEN_HALF_FOLDED_MIN_THRESHOLD) {
         state = currentState;
-    } else if (std::islessequal(angle, CLOSE_ALTA_HALF_FOLDED_MIN_THRESHOLD)) {
+    } else if (std::islessequal(angle, CLOSE_HALF_FOLDED_MIN_THRESHOLD)) {
         state = FoldStatus::FOLDED;
-    } else if (std::islessequal(angle, ALTA_HALF_FOLDED_MAX_THRESHOLD - ALTA_HALF_FOLDED_BUFFER) &&
-        std::isgreater(angle, CLOSE_ALTA_HALF_FOLDED_MIN_THRESHOLD + ALTA_HALF_FOLDED_BUFFER)) {
+    } else if (std::islessequal(angle, HALF_FOLDED_MAX_THRESHOLD - HALF_FOLDED_BUFFER) &&
+        std::isgreater(angle, CLOSE_HALF_FOLDED_MIN_THRESHOLD + HALF_FOLDED_BUFFER)) {
         state = FoldStatus::HALF_FOLD;
-    } else if (std::isgreaterequal(angle, ALTA_HALF_FOLDED_MAX_THRESHOLD)) {
+    } else if (std::isgreaterequal(angle, HALF_FOLDED_MAX_THRESHOLD)) {
         state = FoldStatus::EXPAND;
     } else {
         state = currentState;

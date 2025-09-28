@@ -158,6 +158,27 @@ HWTEST_F(WindowAdapterTest, GetAccessibilityWindowInfo, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ConvertToRelativeCoordinateExtended
+ * @tc.desc: WindowAdapter/ConvertToRelativeCoordinateExtended
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, ConvertToRelativeCoordinateExtended, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    Rect rect;
+    Rect newRect;
+    DisplayId newDisplayId = 0;
+    rect = { 100, 3000, 400, 600 };
+    auto ret = windowAdapter.ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+    EXPECT_EQ(newRect.posX_, 100);
+    EXPECT_EQ(newRect.posY_, 3000);
+    EXPECT_EQ(newRect.width_, 400);
+    EXPECT_EQ(newRect.height_, 600);
+    EXPECT_EQ(newRect.newDisplayId, 0);
+}
+
+/**
  * @tc.name: GetGlobalWindowMode
  * @tc.desc: WindowAdapter/GetGlobalWindowMode
  * @tc.type: FUNC
@@ -330,12 +351,14 @@ HWTEST_F(WindowAdapterTest, WindowManagerAndSessionRecover, TestSize.Level1)
     };
     windowAdapter.RegisterSessionRecoverCallbackFunc(persistentId, testFunc);
     windowAdapter.RegisterUIEffectRecoverCallbackFunc(persistentId, testFunc3);
+    windowAdapter.RegisterOutlineRecoverCallbackFunc(testFunc3);
     windowAdapter.WindowManagerAndSessionRecover();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(ret, 1);
     }
     windowAdapter.RegisterSessionRecoverCallbackFunc(persistentId, testFunc2);
     windowAdapter.RegisterUIEffectRecoverCallbackFunc(persistentId, testFunc4);
+    windowAdapter.RegisterOutlineRecoverCallbackFunc(testFunc4);
     windowAdapter.WindowManagerAndSessionRecover();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(ret, 2);
@@ -1268,6 +1291,36 @@ HWTEST_F(WindowAdapterTest, WMSDeathRecipient, TestSize.Level1)
     wmsDeath_->OnRemoteDied(wptr(token));
 }
  
+/**
+ * @tc.name: RegisterAndUnregisterOutlineRecoverCallbackFunc
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, RegisterAndUnregisterOutlineRecoverCallbackFunc, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    auto testFunc = [] {
+        return WMError::WM_OK;
+    };
+    windowAdapter.RegisterOutlineRecoverCallbackFunc(testFunc);
+    EXPECT_NE(windowAdapter.outlineRecoverCallbackFunc_, nullptr);
+    windowAdapter.UnregisterOutlineRecoverCallbackFunc();
+    EXPECT_EQ(windowAdapter.outlineRecoverCallbackFunc_, nullptr);
+}
+
+/**
+ * @tc.name: UpdateOutline
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, UpdateOutline, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    OutlineParams params;
+    auto ret = windowAdapter.UpdateOutline(nullptr, params);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+}
+
 /**
  * @tc.name: GetInstance
  * @tc.desc: normal function

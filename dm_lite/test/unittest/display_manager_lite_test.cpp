@@ -357,7 +357,8 @@ HWTEST_F(DisplayManagerTest, UnregisterFoldStatusListener03, TestSize.Level1)
 HWTEST_F(DisplayManagerTest, GetDefaultDisplay, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo()).Times(1).WillOnce(Return(nullptr));
+    int32_t defaultUserId = CONCURRENT_USER_ID_DEFAULT;
+    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo(defaultUserId)).Times(1).WillOnce(Return(nullptr));
     auto ret = DisplayManagerLite::GetInstance().GetDefaultDisplay();
     ASSERT_EQ(ret, nullptr);
 }
