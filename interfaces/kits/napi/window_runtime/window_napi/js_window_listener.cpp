@@ -1044,7 +1044,7 @@ void JsWindowListener::OnFreeWindowModeChange(bool isInFreeWindowMode)
     auto jsCallback = [self = weakRef_, isInFreeWindowMode, env = env_] {
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            WLOGFE("this listener or env is nullptr");
+            TLOGE(WmsLogTag::WMS_IMMS, "this listener or env is nullptr");
             return;
         }
         HandleScope handleScope(env);
