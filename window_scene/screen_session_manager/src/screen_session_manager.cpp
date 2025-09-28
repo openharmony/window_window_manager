@@ -2443,7 +2443,7 @@ DMError ScreenSessionManager::SetScreenActiveMode(ScreenId screenId, uint32_t mo
         XCOLLIE_TIMEOUT_10S, nullptr, nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
     TLOGW(WmsLogTag::DMS, "Call rsInterface_ GetScreenActiveMode rsid: %{public}" PRIu64, rsScreenId);
     screenMode = rsInterface_.GetScreenActiveMode(rsScreenId);
-    HiviewDFX::XCollie::GetInstance().CancelTimer(id);
+    HiviewDFX::XCollie::GetInstance().CancelTimer(setScreenActiveId);
     ReportScreenModeChangeEvent(screenMode, ret);
     int32_t activeId = screenMode.GetScreenModeId();
     UpdateSessionByActiveModeChange(screenSession, phyScreenSession, activeId);
@@ -4512,7 +4512,7 @@ void ScreenSessionManager::CallRsSetScreenPowerStatusSync(ScreenId screenId, Scr
         }
         auto activeId = screenSession->GetActiveId();
         RecoverScreenActiveMode(screenId, activeId);
-        TLOGI(WmsLogTag::DMS, "set screen active mode, rsid:%{public}" PRId64 ", activeId:&{public}u",
+        TLOGI(WmsLogTag::DMS, "set screen active mode, rsid:%{public}" PRId64 ", activeId:%{public}u",
             screenId, activeId);
     }
 #endif
