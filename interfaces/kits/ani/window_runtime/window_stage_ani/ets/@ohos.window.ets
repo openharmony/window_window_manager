@@ -3405,8 +3405,32 @@ export class WindowInternal implements Window {
       this.onNoInteractionDetected(this.nativeObj, type, timeout, callback as WindowVoidCallback);
     }
 
+    public onTouchOutside(callback: Callback<void>): void {
+      this.onSync(this.nativeObj, 'touchOutside', callback);
+    }
+
+    public onDialogTargetTouch(callback: Callback<void>): void {
+      this.onSync(this.nativeObj, 'dialogTargetTouch', callback);
+    }
+
+    public onNoInteractionDetected(timeout: long, callback: Callback<void>): void {
+      this.onSync(this.nativeObj, 'noInteractionDetected', timeout, callback as WindowVoidCallback);
+    }
+
     public off<T>(type: string, callback?: Callback<T>): void {
       this.offSync(this.nativeObj, type, callback);
+    }
+
+    public offTouchOutside(callback?: Callback<void>): void {
+      this.offSync(this.nativeObj, 'touchOutside', callback);
+    }
+
+    public offDialogTargetTouch(callback?: Callback<void>): void {
+      this.offSync(this.nativeObj, 'dialogTargetTouch', callback);
+    }
+
+    public offNoInteractionDetected(callback?: Callback<void>): void {
+      this.offSync(this.nativeObj, 'noInteractionDetected', callback);
     }
 
     public showWindow(callback: AsyncCallback<void>): void {
@@ -3781,7 +3805,13 @@ export interface Window {
     getTransitionController(): TransitionController;
     on<T>(type: string, callback: Callback<T>): void;
     on<T>(type: 'noInteractionDetected', timeout: long, callback: Callback<T>): void;
+    onTouchOutside(callback: Callback<void>): void;
+    onDialogTargetTouch(callback: Callback<void>): void;
+    onNoInteractionDetected(timeout: long, callback: Callback<void>): void;
     off<T>(type: string, callback?: Callback<T>): void;
+    offTouchOutside(callback?: Callback<void>): void;
+    offDialogTargetTouch(callback?: Callback<void>): void;
+    offNoInteractionDetected(callback?: Callback<void>): void;
 }
 
 export native function CreateWindowStage(scene: long): WindowStageInternal;
