@@ -26,12 +26,12 @@ namespace OHOS::Rosen {
 class FocusNotifyInfo : public Parcelable {
 public:
     /**
-     * @brief Default construct of FocusNotifyInfo
+     * @brief Default constructor of FocusNotifyInfo
      */
     FocusNotifyInfo() = default;
 
     /**
-     * @brief Construct of FocusNotifyInfo
+     * @brief Constructor of FocusNotifyInfo
      */
     FocusNotifyInfo(int64_t timeStamp, int32_t unfocusWindowId, int32_t focusWindowId, bool isSyncNotify)
         : timeStamp_(timeStamp),
@@ -40,7 +40,7 @@ public:
           isSyncNotify_(isSyncNotify) {};
 
     /**
-     * @brief Deconstruct of FocusNotifyInfo
+     * @brief Destructor of FocusNotifyInfo
      */
     ~FocusNotifyInfo() = default;
 
@@ -75,4 +75,4 @@ public:
     bool isSyncNotify_ = false;
 };
 } // namespace OHOS::Rosen
-#endif // OHOS_ROSEN_FOCUS_CHANGE_INFO_H
+#endif // OHOS_ROSEN_FOCUS_NOTIFY_INFO_H
