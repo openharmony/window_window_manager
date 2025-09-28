@@ -11801,7 +11801,7 @@ void ScreenSessionManager::RemoveUserDisplayNodeFromTree(int32_t userId)
     RSTransactionAdapter::FlushImplicitTransaction(rsUIContexts);
 }
 
-bool ScreenSessionManager::CheckUserIsForeground()
+bool ScreenSessionManager::CheckUserIsForeground(int32_t userId)
 {
     bool isForeground = false;
     ErrCode err = AccountSA::OsAccountManager::IsOsAccountForeground(userId, isForeground);
