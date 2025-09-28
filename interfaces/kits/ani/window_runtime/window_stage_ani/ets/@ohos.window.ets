@@ -3414,7 +3414,7 @@ export class WindowInternal implements Window {
     }
 
     public onNoInteractionDetected(timeout: long, callback: Callback<void>): void {
-      this.onSync(this.nativeObj, 'noInteractionDetected', timeout, callback as WindowVoidCallback);
+      this.onNoInteractionDetected(this.nativeObj, 'noInteractionDetected', timeout, callback as WindowVoidCallback);
     }
 
     public off<T>(type: string, callback?: Callback<T>): void {
