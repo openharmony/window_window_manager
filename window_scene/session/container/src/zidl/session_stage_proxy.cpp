@@ -1597,6 +1597,34 @@ void SessionStageProxy::SetUniqueVirtualPixelRatio(bool useUniqueDensity, float 
     }
 }
 
+void SessionStageProxy::UpdateAnimationSpeed(float speed)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "remote is nullptr");
+        return;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteFloat(speed)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Write speed failed");
+        return;
+    }
+
+    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_ANIMATION_SPEED),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "SendRequest failed");
+        return;
+    }
+}
+
 WSError SessionStageProxy::NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
     sptr<IRemoteObject> remote = Remote();

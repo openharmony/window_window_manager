@@ -41,6 +41,7 @@ public:
     WMError DestroyHookWindow();
     WMError NotifyDrawingCompleted() override;
     WMError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) override;
+    void UpdateAnimationSpeedIfEnabled();
     void PreProcessCreate();
     void SetDefaultProperty();
     WMError Minimize() override;

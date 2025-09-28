@@ -812,6 +812,21 @@ HWTEST_F(SessionStageStubTest, HandleSetUniqueVirtualPixelRatio, TestSize.Level1
 }
 
 /**
+ * @tc.name: HandleUpdateAnimationSpeed
+ * @tc.desc: test function : HandleUpdateAnimationSpeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateAnimationSpeed, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    ASSERT_EQ(ERR_INVALID_DATA, sessionStageStub_->HandleUpdateAnimationSpeed(data, reply));
+    data.WriteFloat(2.0f);
+    ASSERT_EQ(0, sessionStageStub_->HandleUpdateAnimationSpeed(data, reply));
+}
+
+/**
  * @tc.name: HandleNotifySessionFullScreen
  * @tc.desc: test function : HandleNotifySessionFullScreen
  * @tc.type: FUNC

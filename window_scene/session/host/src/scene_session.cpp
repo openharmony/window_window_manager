@@ -7529,6 +7529,21 @@ WMError SceneSession::SetUniqueDensityDpi(bool useUnique, float dpi)
     return WMError::WM_OK;
 }
 
+WMError SceneSession::UpdateAnimationSpeed(float speed)
+{
+    if (!IsSessionValid()) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_SESSION;
+    }
+
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "sessionStage_ is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    sessionStage_->UpdateAnimationSpeed(speed);
+    return WMError::WM_OK;
+}
+
 WMError SceneSession::SetSystemWindowEnableDrag(bool enableDrag)
 {
     if (!WindowHelper::IsSubWindow(GetWindowType()) && !WindowHelper::IsSystemWindow(GetWindowType())) {
