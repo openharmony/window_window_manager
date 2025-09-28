@@ -36,7 +36,6 @@ namespace Rosen {
         HOST_WINDOW_RECT_CHANGE = 1,
     };
     napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect);
-    napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea, AvoidAreaType type);
     napi_value CreateJsExtensionWindowPropertiesObject(napi_env env, sptr<Window>& window);
     napi_value CreateJsExtensionWindowProperties(napi_env env, sptr<Window>& window);
     napi_value GetStatusBarPropertyObject(napi_env env, sptr<Window>& window);

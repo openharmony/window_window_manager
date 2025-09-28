@@ -98,6 +98,19 @@ HWTEST_F(WindowAdapterLiteTest, UnregisterWindowManagerAgent01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateAnimationSpeedWithPid
+ * @tc.desc: WindowAdapterLite/UpdateAnimationSpeedWithPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterLiteTest, UpdateAnimationSpeedWithPid, TestSize.Level1)
+{
+    std::shared_ptr<WindowAdapterLite> windowAdapterLite_ = std::make_shared<WindowAdapterLite>();
+    ASSERT_NE(windowAdapterLite_, nullptr);
+    auto err = windowAdapterLite_->UpdateAnimationSpeedWithPid(10000, 2.0f);
+    ASSERT_EQ(WMError::WM_OK, err);
+}
+
+/**
  * @tc.name: OnRemoteDied
  * @tc.desc: WMSDeathRecipient
  * @tc.type: FUNC

@@ -67,7 +67,7 @@ public:
     static bool GetSettingExtendScreenDpi(float& coef, const std::string& key = SETTING_EXTEND_DPI_KEY);
     static bool ConvertStrToUint64(const std::string& str, uint64_t& num);
     static bool ConvertStrToInt32(const std::string& str, int32_t& num);
-    static bool GetResolutionEffect(bool& enable,
+    static bool GetResolutionEffect(bool& enable, const std::string& serialNumber,
         const std::string& key = SETTING_RESOLUTION_EFFECT_KEY);
     static void RegisterSettingResolutionEffectObserver(SettingObserver::UpdateFunc func);
     static void UnregisterSettingResolutionEffectObserver();

@@ -182,6 +182,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleSendPointerEventForHover(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UPDATE_WINDOW_MODE_BY_ID_FOR_UI_TEST):
             return HandleUpdateWindowModeByIdForUITest(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UPDATE_ANIMATION_SPEED_WITH_PID):
+            return HandleUpdateAnimationSpeedWithPid(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -861,6 +863,26 @@ int SceneSessionManagerLiteStub::HandleGetMainWinodowInfo(MessageParcel& data, M
         return ERR_INVALID_DATA;
     }
 
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleUpdateAnimationSpeedWithPid(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t pid = 0;
+    float speed = 1.0f;
+    if (!data.ReadInt32(pid)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "read pid failed");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadFloat(speed)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "read speed failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = UpdateAnimationSpeedWithPid(pid, speed);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 

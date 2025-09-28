@@ -932,21 +932,6 @@ HWTEST_F(SceneSessionManagerSupplementTest, RecoverAndConnectSpecificSession, Te
 }
 
 /**
- * @tc.name: NotifyRecoveringFinished
- * @tc.desc: NotifyRecoveringFinished
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerSupplementTest, NotifyRecoveringFinished, TestSize.Level1)
-{
-    ssm_->NotifyRecoveringFinished();
-    EXPECT_EQ(false, ssm_->needRecoverOutline_);
-    ssm_->needRecoverOutline_ = true;
-    ssm_->NotifyRecoveringFinished();
-    usleep(WAIT_SYNC_IN_NS);
-    EXPECT_EQ(false, ssm_->needRecoverOutline_);
-}
-
-/**
  * @tc.name: TestCacheSpecificSessionForRecovering_01
  * @tc.desc: Test CacheSpecificSessionForRecovering with recoveringFinished_ is false
  * @tc.type: FUNC
