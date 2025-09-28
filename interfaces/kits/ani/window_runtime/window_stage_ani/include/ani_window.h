@@ -16,6 +16,8 @@
 #ifndef OHOS_ANI_WINDOW_H
 #define OHOS_ANI_WINDOW_H
 
+#include <functional>
+
 #include "ani.h"
 #include "ani_window_register_manager.h"
 #include "window.h"
@@ -99,7 +101,7 @@ public:
     ani_object Snapshot(ani_env* env);
     void HideNonSystemFloatingWindows(ani_env* env, ani_boolean shouldHide);
     void ResizeAsync(ani_env* env, ani_int width, ani_int height);
-    ani_object SetWindowLimits(ani_env* env, ani_object inWindowLimits, ani_object isForcible);
+    ani_object SetWindowLimits(ani_env* env, ani_object inWindowLimits, ani_object forcible);
     ani_object GetWindowLimits(ani_env* env);
     void SetAspectRatio(ani_env* env, ani_double ratio);
     void ResetAspectRatio(ani_env* env);
@@ -111,6 +113,9 @@ public:
     void SetForbidSplitMove(ani_env* env, ani_boolean isForbidSplitMove);
     void SetFollowParentWindowLayoutEnabled(ani_env* env, ani_boolean enable);
     void SetFollowParentMultiScreenPolicy(ani_env* env, ani_boolean enable);
+    void MoveWindowToGlobalDisplay(ani_env* env, ani_int x, ani_int y);
+    ani_object HandlePositionTransform(ani_env* env, ani_int x, ani_int y,
+        std::function<WMError(sptr<Window>&, const Position&, Position&)> transformFunc);
 
 private:
     void OnSetWindowColorSpace(ani_env* env, ani_int colorSpace);
