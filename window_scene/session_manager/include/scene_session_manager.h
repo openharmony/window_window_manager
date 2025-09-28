@@ -475,9 +475,9 @@ public:
         const WSRect& portraitRect, const WSRect& landspaceRect, DisplayId displayId);
     WSError GetNextAvoidRectInfo(DisplayId displayId, AvoidAreaType type,
         std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo);
-    WSRect GetAINavigationBarArea(uint64_t displayId);
+    WSRect GetAINavigationBarArea(uint64_t displayId, bool ignoreVisibility = false);
     void ClearDisplayStatusBarTemporarilyFlags();
-    AvoidArea GetRootSessionAvoidAreaByType(AvoidAreaType type);
+    AvoidArea GetRootSessionAvoidAreaByType(AvoidAreaType type, bool ignoreVisibility = false);
     uint32_t GetRootSceneStatusBarHeight() const;
     void SetOnFlushUIParamsFunc(OnFlushUIParamsFunc&& func);
     void SetIsRootSceneLastFrameLayoutFinishedFunc(IsRootSceneLastFrameLayoutFinishedFunc&& func);
@@ -767,6 +767,7 @@ public:
     bool IsMainWindowByPersistentId(int32_t persistentId);
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override;
     void RegisterMinimizeByWindowIdCallback(MinimizeByWindowIdFunc&& func);
+    WMError UpdateAnimationSpeedWithPid(pid_t pid, float speed);
     void RegisterSceneSessionDestructCallback(NotifySceneSessionDestructFunc&& func);
     void RegisterTransferSessionToTargetScreenCallback(NotifyTransferSessionToTargetScreenFunc&& func);
     WMError NotifyTransferSessionToTargetScreen(const TransferSessionInfo& info);
@@ -985,9 +986,10 @@ private:
     bool CheckBlockingFocus(const sptr<SceneSession>& session, bool includingAppSession);
     WSError ShiftFocus(DisplayId displayId, const sptr<SceneSession>& nextSession, bool isProactiveUnfocus,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
-    void UpdateFocusStatus(DisplayId displayId, const sptr<SceneSession>& sceneSession, bool isFocused);
-    void NotifyFocusStatus(const sptr<SceneSession>& sceneSession, bool isFocused,
-        const sptr<FocusGroup>& focusGroup);
+    void UpdateFocusStatus(DisplayId displayId, const sptr<SceneSession>& focusedSession,
+        const sptr<SceneSession>& nextSession, bool isFocused);
+    void NotifyFocusStatus(const sptr<SceneSession>& focusedSession, const sptr<SceneSession>& nextSession,
+        bool isFocused, const sptr<FocusGroup>& focusGroup);
     int32_t NotifyRssThawApp(const int32_t uid, const std::string& bundleName, const std::string& reason);
     void NotifyFocusStatusByMission(const sptr<SceneSession>& prevSession, const sptr<SceneSession>& currSession);
     void NotifyUnFocusedByMission(const sptr<SceneSession>& sceneSession);
@@ -1015,7 +1017,8 @@ private:
     void NotifyMMIWindowPidChange(int32_t windowId, bool startMoving);
     void UpdateHighlightStatus(DisplayId displayId, const sptr<SceneSession>& preSceneSession,
         const sptr<SceneSession>& currSceneSession, bool isProactiveUnfocus);
-    void SetHighlightSessionIds(const sptr<SceneSession>& sceneSession, bool needBlockHighlightNotify);
+    void SetHighlightSessionIds(const sptr<SceneSession>& sceneSession, bool needBlockHighlightNotify,
+        int64_t timeStamp);
     void AddHighlightSessionIds(const sptr<SceneSession>& sceneSession, bool needBlockHighlightNotify);
     void RemoveHighlightSessionIds(const sptr<SceneSession>& sceneSession);
     std::string GetHighlightIdsStr();
@@ -1749,6 +1752,7 @@ private:
     WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId) override;
     void UpdateAllStartingWindowRdb();
 
+    RecoverState recoverState_ = RecoverState::RECOVER_END;
     OutlineParams recoverOutlineParams_;
     bool needRecoverOutline_ = false;
     sptr<IRemoteObject> outlineRemoteObject_;
@@ -1758,6 +1762,7 @@ private:
     bool NeedOutline(int32_t persistentId, const std::vector<int32_t>& persistentIdList);
     void AddOutlineRemoteDeathRecipient(const sptr<IRemoteObject>& remoteObject);
     void DeleteAllOutline(const sptr<IRemoteObject>& remoteObject);
+    bool CacheOutlineParamsIfNeed(const OutlineParams& outlineParams);
 
     std::string GetCallerSessionColorMode(const SessionInfo& sessionInfo);
     void NotifySessionScreenLockedChange(bool isScreenLocked);

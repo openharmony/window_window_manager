@@ -137,6 +137,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNeedAvoid(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_AVOID_AREA):
             return HandleGetAvoidAreaByType(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_AVOID_AREA_IGNORING_VISIBILITY):
+            return HandleGetAvoidAreaByTypeIgnoringVisibility(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_ALL_AVOID_AREAS):
             return HandleGetAllAvoidAreas(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_TARGET_ORIENTATION_CONFIG_INFO):
@@ -1190,6 +1192,26 @@ int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& re
     AvoidAreaType type = static_cast<AvoidAreaType>(typeId);
     WLOGFD("HandleGetAvoidArea type:%{public}d", typeId);
     AvoidArea avoidArea = GetAvoidAreaByType(type, rect, apiVersion);
+    reply.WriteParcelable(&avoidArea);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleGetAvoidAreaByTypeIgnoringVisibility(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t typeId = 0;
+    if (!data.ReadUint32(typeId) ||
+        typeId >= static_cast<uint32_t>(AvoidAreaType::TYPE_END)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "read typeId error");
+        return ERR_INVALID_DATA;
+    }
+    WSRect rect {};
+    if (!data.ReadInt32(rect.posX_) || !data.ReadInt32(rect.posY_) ||
+        !data.ReadInt32(rect.width_) || !data.ReadInt32(rect.height_)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "read rect error");
+        return ERR_INVALID_DATA;
+    }
+    AvoidAreaType type = static_cast<AvoidAreaType>(typeId);
+    AvoidArea avoidArea = GetAvoidAreaByTypeIgnoringVisibility(type, rect);
     reply.WriteParcelable(&avoidArea);
     return ERR_NONE;
 }

@@ -57,7 +57,10 @@ constexpr float EXTEND_SCREEN_DPI_ZERO_PARAMETER = 0.85f;
 constexpr float EXTEND_SCREEN_DPI_ONE_PARAMETER = 1.00f;
 const std::string SCREEN_SHAPE = system::GetParameter("const.window.screen_shape", "0:0");
 constexpr int32_t INDEX_EXTEND_SCREEN_DPI_POSITION = -1;
-constexpr int32_t ENABLE_RESOLUTION_EFFECT = 1;
+const std::string ENABLE_RESOLUTION_EFFECT = "1";
+constexpr int32_t EXPECT_SCREEN_RESOLUTION_EFFECT_SIZE = 2;
+constexpr int32_t INDEX_SCREEN_RESOLUTION_EFFECT_SN = 0;
+constexpr int32_t INDEX_SCREEN_RESOLUTION_EFFECT_EN = 1;
 
 void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc func)
 {
@@ -707,16 +710,36 @@ void ScreenSettingHelper::UnregisterSettingResolutionEffectObserver()
     resolutionEffectObserver_ = nullptr;
 }
 
-bool ScreenSettingHelper::GetResolutionEffect(bool& enable, const std::string& key)
+bool ScreenSettingHelper::GetResolutionEffect(bool& enable, const std::string& serialNumber, const std::string& key)
 {
-    int value = 0;
+    std::string value = "";
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
-    ErrCode ret = settingProvider.GetIntValue(key, value);
+    ErrCode ret = settingProvider.GetStringValue(key, value);
     if (ret != ERR_OK) {
         TLOGE(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
         return false;
     }
-    enable = (value == ENABLE_RESOLUTION_EFFECT);
+    std::string validString = RemoveInvalidChar(value);
+    std::vector<std::string> screenResolutionEffectSet = {};
+    bool split = SplitString(screenResolutionEffectSet, validString, ',');
+    uint32_t dataSize = screenResolutionEffectSet.size();
+    if (!split || dataSize == 0) {
+        TLOGE(WmsLogTag::DMS, "split failed, data size: %{public}d", dataSize);
+        return false;
+    }
+    for (auto infoString : screenResolutionEffectSet) {
+        std::vector<std::string> infoVector = {};
+        split = SplitString(infoVector, infoString, ' ');
+        dataSize = infoVector.size();
+        if (!split || dataSize != EXPECT_SCREEN_RESOLUTION_EFFECT_SIZE) {
+            TLOGE(WmsLogTag::DMS, "split failed, screenResolutionEffect size: %{public}d", dataSize);
+            return false;
+        }
+        if (infoVector[INDEX_SCREEN_RESOLUTION_EFFECT_SN] == serialNumber) {
+            enable = (infoVector[INDEX_SCREEN_RESOLUTION_EFFECT_EN] == ENABLE_RESOLUTION_EFFECT);
+            TLOGI(WmsLogTag::DMS, "screenResolutionEffectEn: %{public}d", enable);
+        }
+    }
     return true;
 }
 } // namespace Rosen

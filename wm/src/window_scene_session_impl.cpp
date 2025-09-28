@@ -492,7 +492,7 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
         property_->GetWindowMode(), property_->GetWindowType(), GetPersistentId(), state_, requestState_);
 
     if (isFocused_) {
-        UpdateFocus(false);
+        UpdateFocusState(false);
     }
     auto context = GetContext();
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context);
@@ -700,11 +700,24 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         SetPcAppInpadSpecificSystemBarInvisible();
         SetPcAppInpadOrientationLandscape();
     }
+    UpdateAnimationSpeedIfEnabled();
     TLOGI(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, id:%{public}d], state:%{public}u, "
         "mode:%{public}u, enableDefaultDensity:%{public}d, displayId:%{public}" PRIu64,
         property_->GetWindowName().c_str(), property_->GetPersistentId(), state_, GetWindowMode(),
         isEnableDefaultDensityWhenCreate_, property_->GetDisplayId());
     return ret;
+}
+
+void WindowSceneSessionImpl::UpdateAnimationSpeedIfEnabled()
+{
+    if (!isEnableAnimationSpeed_.load()) {
+        return;
+    }
+    auto rsUIContext = WindowSessionImpl::GetRSUIContext();
+    auto implicitAnimator = rsUIContext ? rsUIContext->GetRSImplicitAnimator() : nullptr;
+    if (implicitAnimator != nullptr) {
+        implicitAnimator->ApplyAnimationSpeedMultiplier(animationSpeed_.load());
+    }
 }
 
 WMError WindowSceneSessionImpl::SetPcAppInpadSpecificSystemBarInvisible()
@@ -2864,6 +2877,26 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
     getAvoidAreaCnt_++;
     TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}d times %{public}u area %{public}s",
           GetWindowId(), GetWindowName().c_str(), type, getAvoidAreaCnt_.load(), avoidArea.ToString().c_str());
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType type,
+    AvoidArea& avoidArea, const Rect& rect)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (type == AvoidAreaType::TYPE_KEYBOARD) {
+        return WMError::WM_ERROR_ILLEGAL_PARAM;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+    WSRect sessionRect = {
+        rect.posX_, rect.posY_, static_cast<int32_t>(rect.width_), static_cast<int32_t>(rect.height_)
+    };
+    avoidArea = hostSession->GetAvoidAreaByTypeIgnoringVisibility(type, sessionRect);
+    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}d area %{public}s",
+          GetWindowId(), GetWindowName().c_str(), type, avoidArea.ToString().c_str());
     return WMError::WM_OK;
 }
 

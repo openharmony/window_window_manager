@@ -348,7 +348,21 @@ WMError RootScene::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, 
             type, apiVersion);
         return WMError::WM_DO_NOTHING;
     }
-    avoidArea = getSessionAvoidAreaByTypeCallback_(type);
+    avoidArea = getSessionAvoidAreaByTypeCallback_(type, false);
+    TLOGI(WmsLogTag::WMS_IMMS, "root scene type %{public}u area %{public}s", type, avoidArea.ToString().c_str());
+    return WMError::WM_OK;
+}
+
+WMError RootScene::GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect)
+{
+    if (type == AvoidAreaType::TYPE_KEYBOARD) {
+        return WMError::WM_ERROR_ILLEGAL_PARAM;
+    }
+    if (getSessionAvoidAreaByTypeCallback_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "getSessionAvoidAreaByTypeCallback is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    avoidArea = getSessionAvoidAreaByTypeCallback_(type, true);
     TLOGI(WmsLogTag::WMS_IMMS, "root scene type %{public}u area %{public}s", type, avoidArea.ToString().c_str());
     return WMError::WM_OK;
 }

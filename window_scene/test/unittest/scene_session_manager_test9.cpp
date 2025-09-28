@@ -739,6 +739,27 @@ HWTEST_F(SceneSessionManagerTest9, ProcessFocusWhenForeground01, TestSize.Level1
 }
 
 /**
+ * @tc.name: ProcessFocusWhenForeground02
+ * @tc.desc: ProcessFocusWhenForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, ProcessFocusWhenForeground02, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest9";
+    sessionInfo.abilityName_ = "ProcessFocusWhenForeground02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->persistentId_ = 1;
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(1);
+    focusGroup->SetNeedBlockNotifyFocusStatusUntilForeground(true);
+    ssm_->ProcessFocusWhenForeground(sceneSession);
+    EXPECT_EQ(focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground(), false);
+}
+
+/**
  * @tc.name: ProcessSubSessionForeground03
  * @tc.desc: ProcessSubSessionForeground
  * @tc.type: FUNC
@@ -1699,6 +1720,31 @@ HWTEST_F(SceneSessionManagerTest9, SetSkipEventOnCastPlusInner01, TestSize.Level
     ssm_->isUserBackground_ = true;
     ssm_->SetSkipEventOnCastPlusInner(sceneSession->GetPersistentId(), false);
     EXPECT_EQ(false, sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus());
+}
+
+/**
+ * @tc.name: SetParentWindowInner
+ * @tc.desc: SetParentWindowInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, SetParentWindowInner, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest9";
+    sessionInfo.abilityName_ = "SetParentWindowInner";
+    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sptr<SceneSession> oldParentSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sptr<SceneSession> newParentSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    oldParentSession->property_->SetSubWindowLevel(10);
+    oldParentSession->persistentId_ = 10;
+    newParentSession->property_->SetSubWindowLevel(1);
+    newParentSession->persistentId_ = 1;
+    subSession->persistentId_ = 100;
+    subSession->isFocused_ = true;
+    subSession->SetExclusivelyHighlighted(false);
+    ssm_->SetParentWindowInner(subSession, oldParentSession, newParentSession);
 }
 } // namespace
 } // namespace Rosen

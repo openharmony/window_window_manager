@@ -235,6 +235,11 @@ WMError SceneSessionManagerLite::GetMainWindowInfos(int32_t topNum, std::vector<
     return SceneSessionManager::GetInstance().GetMainWindowInfos(topNum, topNInfo);
 }
 
+WMError SceneSessionManagerLite::UpdateAnimationSpeedWithPid(pid_t pid, float speed)
+{
+    return SceneSessionManager::GetInstance().UpdateAnimationSpeedWithPid(pid, speed);
+}
+
 WMError SceneSessionManagerLite::GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo)
 {
     return SceneSessionManager::GetInstance().GetCallingWindowInfo(callingWindowInfo);

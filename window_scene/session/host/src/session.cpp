@@ -3341,7 +3341,7 @@ WSError Session::UpdateFocus(bool isFocused)
     return WSError::WS_OK;
 }
 
-WSError Session::NotifyFocusStatus(bool isFocused)
+WSError Session::NotifyFocusStatus(const sptr<FocusNotifyInfo>& focusNotifyInfo, bool isFocused)
 {
     if (!IsSessionValid()) {
         TLOGD(WmsLogTag::WMS_FOCUS, "Session is invalid, id: %{public}d state: %{public}u",
@@ -3353,7 +3353,7 @@ WSError Session::NotifyFocusStatus(bool isFocused)
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_NULLPTR;
     }
-    sessionStage_->UpdateFocus(isFocused);
+    sessionStage_->UpdateFocus(focusNotifyInfo, isFocused);
 
     return WSError::WS_OK;
 }
@@ -3384,7 +3384,8 @@ void Session::SetExclusivelyHighlighted(bool isExclusivelyHighlighted)
     property->SetExclusivelyHighlighted(isExclusivelyHighlighted);
 }
 
-WSError Session::UpdateHighlightStatus(bool isHighlight, bool needBlockHighlightNotify)
+WSError Session::UpdateHighlightStatus(const sptr<HighlightNotifyInfo>& highlightNotifyInfo, bool isHighlight,
+    bool needBlockHighlightNotify)
 {
     TLOGD(WmsLogTag::WMS_FOCUS,
         "windowId: %{public}d, currHighlight: %{public}d, nextHighlight: %{public}d, needBlockNotify:%{public}d",
@@ -3393,8 +3394,8 @@ WSError Session::UpdateHighlightStatus(bool isHighlight, bool needBlockHighlight
         return WSError::WS_DO_NOTHING;
     }
     isHighlighted_ = isHighlight;
-    if (needBlockHighlightNotify) {
-        NotifyHighlightChange(isHighlight);
+    if (!needBlockHighlightNotify) {
+        NotifyHighlightChange(highlightNotifyInfo, isHighlight);
     }
     std::lock_guard lock(highlightChangeFuncMutex_);
     if (highlightChangeFunc_ != nullptr) {
@@ -3403,7 +3404,7 @@ WSError Session::UpdateHighlightStatus(bool isHighlight, bool needBlockHighlight
     return WSError::WS_OK;
 }
 
-WSError Session::NotifyHighlightChange(bool isHighlight)
+WSError Session::NotifyHighlightChange(const sptr<HighlightNotifyInfo>& highlightNotifyInfo, bool isHighlight)
 {
     if (IsSystemSession()) {
         TLOGW(WmsLogTag::WMS_FOCUS, "Invalid [%{public}d, %{public}u]", persistentId_, GetSessionState());
@@ -3413,7 +3414,7 @@ WSError Session::NotifyHighlightChange(bool isHighlight)
         TLOGE(WmsLogTag::WMS_FOCUS, "sessionStage is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    sessionStage_->NotifyHighlightChange(isHighlight);
+    sessionStage_->NotifyHighlightChange(highlightNotifyInfo, isHighlight);
     return WSError::WS_OK;
 }
 

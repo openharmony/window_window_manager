@@ -513,16 +513,68 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateFocus start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("WindowSessionCreateCheck");
+    option->SetWindowName("UpdateFocus");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
-
-    WSError res = window->UpdateFocus(true);
-    ASSERT_EQ(res, WSError::WS_OK);
-    res = window->UpdateFocus(false);
-    ASSERT_EQ(res, WSError::WS_OK);
+    sptr<FocusNotifyInfo> info = nullptr;
+    WSError res = window->UpdateFocus(info, true);
+    info = sptr<FocusNotifyInfo>::MakeSptr();
+    info->isSyncNotify_ = false;
+    res = window->UpdateFocus(info, true);
+    EXPECT_EQ(res, WSError::WS_OK);
+    res = window->UpdateFocus(info, false);
+    EXPECT_EQ(res, WSError::WS_OK);
 
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateFocus end";
+}
+
+/**
+ * @tc.name: UpdateFocus01
+ * @tc.desc: UpdateFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, UpdateFocus01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateFocus01");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->updateFocusTimeStamp_.store(2);
+    auto info = sptr<FocusNotifyInfo>::MakeSptr();
+    info->isSyncNotify_ = true;
+    info->timeStamp_ = 1;
+    WSError res = window->UpdateFocus(info, true);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), 2);
+    info->timeStamp_ = 3;
+    res = window->UpdateFocus(info, false);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), 3);
+    res = window->UpdateFocus(info, true);
+    EXPECT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: UpdateFocus02
+ * @tc.desc: UpdateFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, UpdateFocus02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateFocus02");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window1 = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window1, nullptr);
+    window->property_->SetPersistentId(1);
+    window1->property_->SetPersistentId(2);
+    window->updateFocusTimeStamp_.store(2);
+    auto info = sptr<FocusNotifyInfo>::MakeSptr(3, window->GetWindowId(), window1->GetWindowId(), true);
+    WSError res = window->UpdateFocus(info, true);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), 3);
+    info->timeStamp_ = 4;
+    res = window->UpdateFocus(info, false);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), 4);
+    EXPECT_EQ(res, WSError::WS_OK);
 }
 
 /**
@@ -1982,6 +2034,22 @@ HWTEST_F(WindowSessionImplTest, SetUniqueVirtualPixelRatio, TestSize.Level1)
     ASSERT_NE(window, nullptr);
     window->SetUniqueVirtualPixelRatio(true, 3.25f);
     window->SetUniqueVirtualPixelRatio(false, 3.25f);
+}
+
+/**
+ * @tc.name: UpdateAnimationSpeed
+ * @tc.desc: UpdateAnimationSpeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, UpdateAnimationSpeed, TestSize.Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("UpdateAnimationSpeed");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->UpdateAnimationSpeed(1.0f);
+    window->UpdateAnimationSpeed(2.0f);
 }
 
 /**
