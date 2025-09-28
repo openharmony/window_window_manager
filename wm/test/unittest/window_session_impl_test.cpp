@@ -1985,6 +1985,22 @@ HWTEST_F(WindowSessionImplTest, SetUniqueVirtualPixelRatio, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateAnimationSpeed
+ * @tc.desc: UpdateAnimationSpeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, UpdateAnimationSpeed, TestSize.Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("UpdateAnimationSpeed");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->UpdateAnimationSpeed(1.0f);
+    window->UpdateAnimationSpeed(2.0f);
+}
+
+/**
  * @tc.name: EnableDrag
  * @tc.desc: EnableDrag Test
  * @tc.type: FUNC

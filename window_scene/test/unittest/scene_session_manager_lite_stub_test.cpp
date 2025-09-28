@@ -955,6 +955,32 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetMainWinodowInfo, TestSize.Lev
 }
 
 /**
+ * @tc.name: HandleUpdateAnimationSpeedWithPid
+ * @tc.desc: test HandleUpdateAnimationSpeedWithPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleUpdateAnimationSpeedWithPid, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    int res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleUpdateAnimationSpeedWithPid(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteInt32(10000);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleUpdateAnimationSpeedWithPid(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteInt32(10000);
+    data.WriteFloat(2.0f);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleUpdateAnimationSpeedWithPid(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleGetAllMainWindowInfos
  * @tc.desc: test function : HandleGetAllMainWindowInfos
  * @tc.type: FUNC

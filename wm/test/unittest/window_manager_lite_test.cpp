@@ -473,6 +473,23 @@ HWTEST_F(WindowManagerLiteTest, GetMainWindowInfos, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateAnimationSpeedWithPid
+ * @tc.desc: Check UpdateAnimationSpeedWithPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, UpdateAnimationSpeedWithPid, TestSize.Level1)
+{
+    auto& windowManager = WindowManagerLite::GetInstance();
+    pid_t pid = 15234;
+    float speed = 2.0f;
+    WMError ret_1 = windowManager.UpdateAnimationSpeedWithPid(pid, speed);
+    ASSERT_EQ(WMError::WM_OK, ret_1);
+    speed = 1.0f;
+    WMError ret_2 = windowManager.UpdateAnimationSpeedWithPid(pid, speed);
+    ASSERT_EQ(WMError::WM_OK, ret_2);
+}
+
+/**
  * @tc.name: TestUpdateFocusChangeInfo
  * @tc.desc: TestUpdateFocusChangeInfo
  * @tc.type: FUNC

@@ -1573,6 +1573,31 @@ HWTEST_F(SceneSessionTest5, SetUniqueDensityDpi, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateAnimationSpeed
+ * @tc.desc: UpdateAnimationSpeed function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, UpdateAnimationSpeed, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateAnimationSpeed";
+    info.bundleName_ = "UpdateAnimationSpeed";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    session->sessionStage_ = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_SESSION, session->UpdateAnimationSpeed(2.0f));
+    session->sessionInfo_.isSystem_ = false;
+    session->state_ = SessionState::STATE_DISCONNECT;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_SESSION, session->UpdateAnimationSpeed(2.0f));
+    session->state_ = SessionState::STATE_CONNECT;
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, session->UpdateAnimationSpeed(2.0f));
+
+    session->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    EXPECT_NE(nullptr, session->sessionStage_);
+    EXPECT_EQ(WMError::WM_OK, session->UpdateAnimationSpeed(2.0f));
+}
+
+/**
  * @tc.name: HandleActionUpdateWindowModeSupportType
  * @tc.desc: HandleActionUpdateWindowModeSupportType function01
  * @tc.type: FUNC

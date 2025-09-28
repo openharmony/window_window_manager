@@ -17334,6 +17334,22 @@ void SceneSessionManager::RegisterMinimizeByWindowIdCallback(MinimizeByWindowIdF
     minimizeByWindowIdFunc_ = std::move(func);
 }
 
+WMError SceneSessionManager::UpdateAnimationSpeedWithPid(pid_t pid, float speed)
+{
+    if (!SessionPermission::IsSystemServiceCalling()) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "The caller is not system service.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& [_, session] : sceneSessionMap_) {
+        if (session && session->GetCallingPid() == pid && session->IsVisible()) {
+            session->UpdateAnimationSpeed(speed);
+            return WMError::WM_OK;
+        }
+    }
+    return WMError::WM_OK;
+}
+
 const std::vector<sptr<SceneSession>> SceneSessionManager::GetActiveSceneSessionCopy()
 {
     std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
