@@ -58,15 +58,14 @@ public:
 
     static FocusNotifyInfo* Unmarshalling(Parcel& parcel)
     {
-        auto focusNotifyInfo = new FocusNotifyInfo();
+        std::unique_ptr<FocusNotifyInfo> focusNotifyInfo = std::make_unique<FocusNotifyInfo>();
         bool res = parcel.ReadInt64(focusNotifyInfo->timeStamp_) &&
             parcel.ReadInt32(focusNotifyInfo->unfocusWindowId_) && parcel.ReadInt32(focusNotifyInfo->focusWindowId_) &&
             parcel.ReadBool(focusNotifyInfo->isSyncNotify_);
         if (!res) {
-            delete focusNotifyInfo;
             return nullptr;
         }
-        return focusNotifyInfo;
+        return focusNotifyInfo.release();
     }
 
     int64_t timeStamp_ = 0;
