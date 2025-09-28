@@ -32,6 +32,7 @@
 #include "agent_death_recipient.h"
 #include "app_debug_listener_interface.h"
 #include "app_mgr_client.h"
+#include "application_state_observer_stub.h"
 #include "common/include/task_scheduler.h"
 #include "display_change_info.h"
 #include "display_change_listener.h"
@@ -172,6 +173,7 @@ using NotifySessionRecoverStateChangeFunc = std::function<void(const SessionReco
 using NotifyRecoverStateChangeFunc = std::function<void(const RecoverState& state)>;
 using FindScenePanelRsNodeByZOrderFunc = std::function<std::shared_ptr<Rosen::RSNode>(DisplayId screenId,
     uint32_t targetZOrder)>;
+using NotifyAppProcessDiedFunc = std::function<void(const AppExecFwk::ProcessData& processData)>;
 using ConvertSystemConfigFunc = std::function<void(const std::string& configItem)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
@@ -201,6 +203,15 @@ class ScreenConnectionChangeListener : public IScreenConnectionChangeListener {
 public:
     void OnScreenConnected(const sptr<ScreenSession>& screenSession) override;
     void OnScreenDisconnected(const sptr<ScreenSession>& screenSession) override;
+};
+
+class AppStateObserver : public AppExecFwk::ApplicationStateObserverStub {
+public:
+    void OnProcessDied(const AppExecFwk::ProcessData& processData) override;
+    void RegisterProcessDiedNotifyFunc(NotifyAppProcessDiedFunc&& func);
+
+private:
+    NotifyAppProcessDiedFunc procDiedCallback_;
 };
 
 class SceneSessionManager : public SceneSessionManagerStub {
@@ -1481,7 +1492,7 @@ private:
     std::vector<NodeId> GetSessionNodeIdsAndWatermarkNameByPid(int32_t pid, std::string& watermarkName);
     void SetWatermarkForSession(const sptr<SceneSession>& session);
     void ClearWatermarkForSession(const sptr<SceneSession>& session);
-    void ClearWatermarkRecordWhenAppExit(const sptr<SceneSession>& session);
+    void ClearProcessRecordWhenAppExit(const AppExecFwk::ProcessData& processData);
 
     /*
      * Window Layout
@@ -1623,6 +1634,9 @@ private:
     void AddSkipSurfaceNodeWhenAttach(int32_t windowId, const std::string& bundleName, uint64_t surfaceNodeId);
     std::unordered_map<std::string, std::unordered_set<std::string>> bundleRSBlackListConfigMap_;
     inline static const std::string WMS_DEFAULT = "WMS_DEFAULT";
+    sptr<AppExecFwk::IAppMgr> appMgrClient_ = nullptr;
+    sptr<AppStateObserver> appStateObserver_ = nullptr;
+    void RegisterAppStateObserver();
 
     struct SessionBlackListInfo {
         int32_t windowId = INVALID_SESSION_ID;

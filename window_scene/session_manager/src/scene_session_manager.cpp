@@ -82,6 +82,7 @@
 #include "xcollie/xcollie.h"
 #include "xcollie/xcollie_define.h"
 #include "session_permission.h"
+#include "sys_mgr_client.h"
 #include "get_snapshot_callback.h"
 #include "image_type.h"
 
@@ -387,6 +388,10 @@ SceneSessionManager::~SceneSessionManager()
 {
     ScbDumpSubscriber::UnSubscribe(scbDumpSubscriber_);
     SessionChangeRecorder::GetInstance().stopLogFlag_.store(true);
+    if (appMgrClient_ != nullptr && appStateObserver_ != nullptr) {
+        auto ret = appMgrClient_->UnregisterApplicationStateObserver(appStateObserver_);
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "unregister app observer result=%{public}d", ret);
+    }
 }
 
 void SceneSessionManager::Init()
@@ -463,6 +468,7 @@ void SceneSessionManager::Init()
         std::bind(&SceneSessionManager::UpdateSessionWithFoldStateChange, this, std::placeholders::_1,
         std::placeholders::_2, std::placeholders::_3));
     PcFoldScreenManager::GetInstance().RegisterFoldScreenStatusChangeCallback(0, foldChangeCallback_);
+    RegisterAppStateObserver();
 
     InitSnapshotCache();
 }
@@ -3737,7 +3743,6 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
             this->RemoveSnapshotFromCache(persistentId);
         });
         sceneSession->DisconnectTask(false, isSaveSnapshot);
-        ClearWatermarkRecordWhenAppExit(sceneSession);
         if (!GetSceneSession(persistentId)) {
             TLOGNE(WmsLogTag::WMS_MAIN, "Destruct session invalid by %{public}d", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
@@ -16412,23 +16417,14 @@ void SceneSessionManager::ClearWatermarkForSession(const sptr<SceneSession>& ses
     }, __func__);
 }
 
-void SceneSessionManager::ClearWatermarkRecordWhenAppExit(const sptr<SceneSession>& session)
+void SceneSessionManager::ClearProcessRecordWhenAppExit(const AppExecFwk::ProcessData& processData)
 {
-    if (session == nullptr || !SessionHelper::IsMainWindow(session->GetWindowType())) {
-        return;
-    }
-    {
-        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        for (const auto& [_, sess] : sceneSessionMap_) {
-            if (sess != nullptr && sess->GetCallingPid() == session->GetCallingPid() &&
-                SessionHelper::IsMainWindow(sess->GetWindowType()) && sess->GetWindowId() != session->GetWindowId()) {
-                return;
-            }
-        }
-    }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "app exit: win=[%{public}d, %{public}s], pid=%{public}d",
-        session->GetWindowId(), session->GetWindowName().c_str(), session->GetCallingPid());
-    appWatermarkPidMap_.erase(session->GetCallingPid());
+    taskScheduler_->PostAsyncTask([this, processData, where = __func__]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
+        TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: pid=%{public}d, bundleName=%{public}s",
+            where, processData.pid, processData.bundleName.c_str());
+        appWatermarkPidMap_.erase(processData.pid);
+        snapshotSkipPidSet_.erase(processData.pid);
+    }, __func__);
 }
 
 WMError SceneSessionManager::GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId)
@@ -18038,5 +18034,45 @@ void SceneSessionManager::NotifyIsFullScreenInForceSplitMode(uint32_t uid, bool 
         fullScreenInForceSplitUidSet_.erase(uid);
     }
     ScreenSessionManagerClient::GetInstance().NotifyIsFullScreenInForceSplitMode(uid, isFullScreen);
+}
+
+void SceneSessionManager::RegisterAppStateObserver()
+{
+    auto sysMgrClient = DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance();
+    if (sysMgrClient == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sysMgrClient is nullptr");
+        return;
+    }
+    auto sysAbilityObj = sysMgrClient->GetSystemAbility(APP_MGR_SERVICE_ID);
+    if (sysAbilityObj == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sysAbilityObj is nullptr");
+        return;
+    }
+    appMgrClient_ = iface_cast<AppExecFwk::IAppMgr>(sysAbilityObj);
+    if (appMgrClient_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "appMgrClient is nullptr");
+        return;
+    }
+    appStateObserver_ = sptr<AppStateObserver>::MakeSptr();
+    appStateObserver_->RegisterProcessDiedNotifyFunc([this](const AppExecFwk::ProcessData& processData) {
+        ClearProcessRecordWhenAppExit(processData);
+    });
+    auto ret = appMgrClient_->RegisterApplicationStateObserver(appStateObserver_);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "register observer result=%{public}d", ret);
+}
+
+void AppStateObserver::OnProcessDied(const AppExecFwk::ProcessData& processData)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "pid=%{public}d, bundleName=%{public}s, hasCallback=%{public}d",
+        processData.pid, processData.bundleName.c_str(), procDiedCallback_ != nullptr);
+    if (procDiedCallback_) {
+        procDiedCallback_(processData);
+    }
+}
+
+void AppStateObserver::RegisterProcessDiedNotifyFunc(NotifyAppProcessDiedFunc&& func)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "register");
+    procDiedCallback_ = std::move(func);
 }
 } // namespace OHOS::Rosen
