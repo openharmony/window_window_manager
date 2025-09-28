@@ -155,6 +155,7 @@ public:
     void SetFakeScreenSession(sptr<ScreenSession> screenSession);
     sptr<ScreenSession> GetFakeScreenSession() const;
     void UpdatePropertyByActiveMode();
+    void UpdatePropertyByActiveModeChange();
     std::shared_ptr<RSDisplayNode> GetDisplayNode() const;
     void ReleaseDisplayNode();
 
