@@ -3133,7 +3133,7 @@ WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const Sy
         return WMError::WM_OK;
     }
     setSameSystembarPropertyCnt_ = 0;
-    if (GetSystemBarPropertyByType(type) != property) {
+    if (!(GetSystemBarPropertyByType(type) == property)) {
         TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}u "
             "%{public}u %{public}x %{public}x %{public}u %{public}u",
             GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type), property.enable_,
