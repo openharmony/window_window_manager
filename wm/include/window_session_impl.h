@@ -229,7 +229,8 @@ public:
     void UpdateAllWindowSpeed(float speed);
     WSError UpdateOrientation() override;
     WSError UpdateDisplayId(uint64_t displayId) override;
-    WSError UpdateFocus(bool focus) override;
+    WSError UpdateFocus(const sptr<FocusNotifyInfo>& focusNotifyInfo, bool isFocused) override;
+    void UpdateFocusState(bool isFocused);
     bool IsFocused() const override;
     WMError RequestFocus() const override;
     WMError RequestFocusByClient(bool isFocused) const override;
@@ -540,7 +541,8 @@ public:
     WMError SetExclusivelyHighlighted(bool isExclusivelyHighlighted) override;
     WMError RegisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener) override;
     WMError UnregisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener) override;
-    WSError NotifyHighlightChange(bool isHighlight) override;
+    WSError NotifyHighlightChange(const sptr<HighlightNotifyInfo>& highlightNotifyInfo, bool isHighlight) override;
+    void NotifyHighlightChange(bool isHighlight);
 
     /*
      * PC Fold Screen
@@ -706,6 +708,8 @@ protected:
     std::atomic_bool isFocused_ = false;
     std::atomic_bool isHighlighted_ = false;
     std::atomic_bool shouldReNotifyHighlight_ = false;
+    static std::atomic<int64_t> updateFocusTimeStamp_;
+    static std::atomic<int64_t> updateHighlightTimeStamp_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
     bool shouldReNotifyFocus_ = false;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;

@@ -596,7 +596,8 @@ HWTEST_F(WindowSessionTest4, SetRaiseToAppTopForPointDownFunc, TestSize.Level1)
     session_->UnregisterSessionChangeListeners();
     session_->SetSessionStateChangeNotifyManagerListener(nullptr);
     session_->SetSessionInfoChangeNotifyManagerListener(nullptr);
-    session_->NotifyFocusStatus(true);
+    auto info = sptr<FocusNotifyInfo>::MakeSptr();
+    session_->NotifyFocusStatus(info, true);
 
     session_->SetRequestFocusStatusNotifyManagerListener(nullptr);
     session_->SetNotifyUIRequestFocusFunc(nullptr);

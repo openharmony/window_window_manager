@@ -403,8 +403,17 @@ int SessionStageStub::HandleNotifyCloseExistPipWindow(MessageParcel& data, Messa
 int SessionStageStub::HandleUpdateFocus(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("UpdateFocus!");
-    bool isFocused = data.ReadBool();
-    WSError errCode = UpdateFocus(isFocused);
+    sptr<FocusNotifyInfo> focusNotifyInfo = data.ReadParcelable<FocusNotifyInfo>();
+    if (focusNotifyInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Failed to read focusNotifyInfo");
+        return ERR_INVALID_DATA;
+    }
+    bool isFocused = false;
+    if (!data.ReadBool(isFocused)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Failed to read isFocused");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = UpdateFocus(focusNotifyInfo, isFocused);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -1021,12 +1030,17 @@ int SessionStageStub::HandleSendContainerModalEvent(MessageParcel& data, Message
 int SessionStageStub::HandleNotifyHighlightChange(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "called!");
+    sptr<HighlightNotifyInfo> highlightNotifyInfo = data.ReadParcelable<HighlightNotifyInfo>();
+    if (highlightNotifyInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Failed to read highlightNotifyInfo");
+        return ERR_INVALID_DATA;
+    }
     bool isHighlight = false;
     if (!data.ReadBool(isHighlight)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Read isHighlight failed.");
         return ERR_INVALID_DATA;
     }
-    NotifyHighlightChange(isHighlight);
+    NotifyHighlightChange(highlightNotifyInfo, isHighlight);
     return ERR_NONE;
 }
 

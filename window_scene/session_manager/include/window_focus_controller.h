@@ -38,6 +38,7 @@ public:
     bool GetNeedBlockNotifyFocusStatusUntilForeground() const { return needBlockNotifyFocusStatusUntilForeground_; }
     bool GetNeedBlockNotifyUnfocusStatus() const { return needBlockNotifyUnfocusStatus_; }
     DisplayId GetDisplayGroupId() const { return displayGroupId_; }
+    int64_t GetUpdateFocusTimeStamp() const { return updateFocusTimeStamp_; }
     void SetFocusedSessionId(int32_t persistentId) { focusedSessionId_ = persistentId; }
     void SetLastFocusedSessionId(int32_t persistentId) { lastFocusedSessionId_ = persistentId; }
     void SetLastFocusedAppSessionId(int32_t persistentId) { lastFocusedAppSessionId_ = persistentId; }
@@ -46,6 +47,7 @@ public:
         needBlockNotifyFocusStatusUntilForeground_ = needBlock;
     }
     void SetNeedBlockNotifyUnfocusStatus(bool needBlock) { needBlockNotifyUnfocusStatus_ = needBlock; }
+    void SetUpdateFocusTimeStamp(int64_t timeStamp) { updateFocusTimeStamp_ = timeStamp; }
     WSError UpdateFocusedSessionId(int32_t persistentId);
     WSError UpdateFocusedAppSessionId(int32_t persistentId);
     std::unordered_set<DisplayId> displayIds_;
@@ -57,6 +59,7 @@ private:
     bool needBlockNotifyFocusStatusUntilForeground_ { false };
     bool needBlockNotifyUnfocusStatus_ { false };
     DisplayId displayGroupId_ = DISPLAY_ID_INVALID;
+    int64_t updateFocusTimeStamp_ = INVALID_TIME_STAMP;
 };
 
 class WindowFocusController : public RefBase {
