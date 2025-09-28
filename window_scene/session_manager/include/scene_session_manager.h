@@ -810,7 +810,6 @@ public:
     std::shared_ptr<Media::PixelMap> GetPreLoadStartingWindow(const SessionInfo& sessionInfo);
     void RemovePreLoadStartingWindowFromMap(const SessionInfo& sessionInfo);
     WSError RegisterSaveSnapshotFunc(const sptr<SceneSession>& sceneSession);
-    WSError RegisterRemoveSnapshotFunc(const sptr<SceneSession>& sceneSession);
     std::shared_ptr<Media::PixelMap> GetPixelMap(uint32_t resourceId,
         std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     bool GetPersistentImageFit(int32_t persistentId, int32_t& imageFit);
