@@ -2248,41 +2248,12 @@ HWTEST_F(ScreenSessionTest, CalcRotation, TestSize.Level1)
     property.SetBounds(bounds);
     property.UpdateDeviceRotation(Rotation::ROTATION_0);
     session->SetScreenProperty(property);
-    Orientation orientation = Orientation::BEGIN;
+    Orientation orientation = Orientation::VERTICAL;
     FoldDisplayMode foldDisplayMode = FoldDisplayMode::UNKNOWN;
     auto res = session->CalcRotation(orientation, foldDisplayMode);
     EXPECT_EQ(Rotation::ROTATION_0, res);
-    orientation = Orientation::UNSPECIFIED;
-    res = session->CalcRotation(orientation, foldDisplayMode);
-    EXPECT_EQ(Rotation::ROTATION_0, res);
-    orientation = Orientation::VERTICAL;
-    res = session->CalcRotation(orientation, foldDisplayMode);
-    EXPECT_EQ(Rotation::ROTATION_0, res);
-    orientation = Orientation::HORIZONTAL;
-    res = session->CalcRotation(orientation, foldDisplayMode);
-    EXPECT_EQ(Rotation::ROTATION_90, res);
-    orientation = Orientation::REVERSE_VERTICAL;
-    res = session->CalcRotation(orientation, foldDisplayMode);
-    EXPECT_EQ(Rotation::ROTATION_180, res);
-    orientation = Orientation::REVERSE_HORIZONTAL;
-    res = session->CalcRotation(orientation, foldDisplayMode);
-    EXPECT_EQ(Rotation::ROTATION_270, res);
-    orientation = Orientation::LOCKED;
-    res = session->CalcRotation(orientation, foldDisplayMode);
-    EXPECT_EQ(Rotation::ROTATION_0, res);
-
     property.UpdateDeviceRotation(Rotation::ROTATION_90);
     session->SetScreenProperty(property);
-    orientation = Orientation::VERTICAL;
-    res = session->CalcRotation(orientation, foldDisplayMode);
-    EXPECT_EQ(Rotation::ROTATION_90, res);
-    orientation = Orientation::HORIZONTAL;
-    res = session->CalcRotation(orientation, foldDisplayMode);
-    EXPECT_EQ(Rotation::ROTATION_180, res);
-    orientation = Orientation::REVERSE_VERTICAL;
-    res = session->CalcRotation(orientation, foldDisplayMode);
-    EXPECT_EQ(Rotation::ROTATION_270, res);
-    orientation = Orientation::REVERSE_HORIZONTAL;
     res = session->CalcRotation(orientation, foldDisplayMode);
     EXPECT_EQ(Rotation::ROTATION_0, res);
 }
@@ -2299,6 +2270,70 @@ HWTEST_F(ScreenSessionTest, IsVertical, TestSize.Level1)
     EXPECT_FALSE(session->IsVertical(Rotation::ROTATION_90));
     EXPECT_TRUE(session->IsVertical(Rotation::ROTATION_180));
     EXPECT_FALSE(session->IsVertical(Rotation::ROTATION_270));
+}
+
+/**
+ * @tc.name: CalcOrientationToDisplayOrientation
+ * @tc.desc: CalcOrientationToDisplayOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CalcOrientationToDisplayOrientation, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    DisplayOrientation orientation = session->CalcOrientationToDisplayOrientation(Orientation::UNSPECIFIED);
+    EXPECT_EQ(orientation, DisplayOrientation::UNKNOWN);
+    orientation = session->CalcOrientationToDisplayOrientation(Orientation::VERTICAL);
+    EXPECT_EQ(orientation, DisplayOrientation::PORTRAIT);
+    orientation = session->CalcOrientationToDisplayOrientation(Orientation::HORIZONTAL);
+    EXPECT_EQ(orientation, DisplayOrientation::LANDSCAPE);
+    orientation = session->CalcOrientationToDisplayOrientation(Orientation::REVERSE_VERTICAL);
+    EXPECT_EQ(orientation, DisplayOrientation::PORTRAIT_INVERTED);
+    orientation = session->CalcOrientationToDisplayOrientation(Orientation::REVERSE_HORIZONTAL);
+    EXPECT_EQ(orientation, DisplayOrientation::LANDSCAPE_INVERTED);
+}
+
+/**
+ * @tc.name: CalcRotationByDeviceOrientation
+ * @tc.desc: CalcRotationByDeviceOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CalcRotationByDeviceOrientation, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    DisplayOrientation displayOrientation = DisplayOrientation::PORTRAIT;
+    FoldDisplayMode foldDisplayMode = FoldDisplayMode::GLOBAL_FULL;
+    RRect boundsInRotationZero;
+    boundsInRotationZero.rect_.width_ = 1344;
+    boundsInRotationZero.rect_.height_ = 2772;
+    Rotation rotation = session->CalcRotationByDeviceOrientation(displayOrientation,
+        foldDisplayMode, boundsInRotationZero);
+    EXPECT_EQ(rotation, Rotation::ROTATION_90);
+    foldDisplayMode = FoldDisplayMode::UNKNOWN;
+    rotation = session->CalcRotationByDeviceOrientation(displayOrientation,
+        foldDisplayMode, boundsInRotationZero);
+    EXPECT_EQ(rotation, Rotation::ROTATION_0);
+    boundsInRotationZero.rect_.width_ = 2772;
+    boundsInRotationZero.rect_.height_ = 1344;
+    rotation = session->CalcRotationByDeviceOrientation(displayOrientation,
+        foldDisplayMode, boundsInRotationZero);
+    EXPECT_EQ(rotation, Rotation::ROTATION_270);
+    foldDisplayMode = FoldDisplayMode::MAIN;
+    displayOrientation = DisplayOrientation::PORTRAIT;
+    rotation = session->CalcRotationByDeviceOrientation(displayOrientation,
+        foldDisplayMode, boundsInRotationZero);
+    EXPECT_EQ(rotation, Rotation::ROTATION_0);
+    displayOrientation = DisplayOrientation::LANDSCAPE;
+    rotation = session->CalcRotationByDeviceOrientation(displayOrientation,
+        foldDisplayMode, boundsInRotationZero);
+    EXPECT_EQ(rotation, Rotation::ROTATION_90);
+    displayOrientation = DisplayOrientation::PORTRAIT_INVERTED;
+    rotation = session->CalcRotationByDeviceOrientation(displayOrientation,
+        foldDisplayMode, boundsInRotationZero);
+    EXPECT_EQ(rotation, Rotation::ROTATION_180);
+    displayOrientation = DisplayOrientation::LANDSCAPE_INVERTED;
+    rotation = session->CalcRotationByDeviceOrientation(displayOrientation,
+        foldDisplayMode, boundsInRotationZero);
+    EXPECT_EQ(rotation, Rotation::ROTATION_270);
 }
 
 /**

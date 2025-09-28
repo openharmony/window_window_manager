@@ -3546,7 +3546,8 @@ bool ScreenSessionManager::DoSuspendBegin(PowerStateChangeReason reason)
     if (!g_isPcDevice && reason != PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT &&
         reason != PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS &&
         reason != PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON &&
-        reason != PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
+        reason != PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF &&
+        reason != PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         sessionDisplayPowerController_->canCancelSuspendNotify_ = true;
     }
     sessionDisplayPowerController_->isSuspendBegin_ = true;
@@ -10053,6 +10054,9 @@ DMError ScreenSessionManager::GetSecondaryDisplayCapability(std::string& capabil
         ROTATION_DEFAULT, ORIENTATION_DEFAULT);
     jsonDisplayCapabilityList["capability"].push_back(std::move(mCapabilityInfo));
     std::vector<std::string> orientation = {"3", "0", "1", "2"};
+    if (CORRECTION_ENABLE) {
+        orientation = ORIENTATION_DEFAULT;
+    }
     nlohmann::ordered_json gCapability = GetCapabilityJson(FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND,
         FoldDisplayMode::FULL, ROTATION_DEFAULT, orientation);
     jsonDisplayCapabilityList["capability"].push_back(std::move(gCapability));
@@ -11746,6 +11750,10 @@ void ScreenSessionManager::SwitchUserDealUserDisplayNode(int32_t newUserId)
 void ScreenSessionManager::AddUserDisplayNodeOnTree(int32_t userId)
 {
     TLOGI(WmsLogTag::DMS, "userId: %{public}d", userId);
+    if (!CheckUserIsForeground(userId)) {
+        TLOGI(WmsLogTag::DMS, "user: %{public}d is background not on tree", userId);
+        return;
+    }
     auto userDisplayNodeMap = GetUserDisplayNodeMap(userId);
     std::unordered_set<std::shared_ptr<RSUIContext>> rsUIContexts;
     for (auto userDisplayNodeIt : userDisplayNodeMap) {
@@ -11768,6 +11776,10 @@ void ScreenSessionManager::AddUserDisplayNodeOnTree(int32_t userId)
 void ScreenSessionManager::RemoveUserDisplayNodeFromTree(int32_t userId)
 {
     TLOGI(WmsLogTag::DMS, "userId: %{public}d", userId);
+    if (CheckUserIsForeground(userId)) {
+        TLOGI(WmsLogTag::DMS, "user: %{public}d is foreground remove from tree", userId);
+        return;
+    }
     auto userDisplayNodeMap = GetUserDisplayNodeMap(userId);
     std::unordered_set<std::shared_ptr<RSUIContext>> rsUIContexts;
     for (auto userDisplayNodeIt : userDisplayNodeMap) {
@@ -11785,6 +11797,16 @@ void ScreenSessionManager::RemoveUserDisplayNodeFromTree(int32_t userId)
         rsUIContexts.insert(screenSession->GetRSUIContext());
     }
     RSTransactionAdapter::FlushImplicitTransaction(rsUIContexts);
+}
+
+bool ScreenSessionManager::CheckUserIsForeground(int32_t userId)
+{
+    bool isForeground = false;
+    ErrCode err = AccountSA::OsAccountManager::IsOsAccountForeground(userId, isForeground);
+    if (err != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "errorCode: %{public}d, user: %{public}d", err, userId);
+    }
+    return isForeground;
 }
 
 void ScreenSessionManager::SetUserDisplayNodePositionZ(int32_t userId, float positionZ)
