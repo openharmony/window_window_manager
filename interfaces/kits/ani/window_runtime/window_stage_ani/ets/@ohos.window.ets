@@ -3409,6 +3409,40 @@ export class WindowInternal implements Window {
       this.offSync(this.nativeObj, type, callback);
     }
 
+    public onKeyboardHeightChange(callback: Callback<int>): void {
+      this.onSync(this.nativeObj, "keyboardHeightChange", callback);
+    }
+
+    public offKeyboardHeightChange(callback?: Callback<int>): void {
+      this.offSync(this.nativeObj, "keyboardHeightChange", callback);
+    }
+
+    public onKeyboardDidShow(callback: Callback<KeyboardInfo>): void {
+      this.onSync(this.nativeObj, "keyboardDidShow", callback);
+    }
+
+    public offKeyboardDidShow(callback?: Callback<KeyboardInfo>): void {
+      this.offSync(this.nativeObj, "keyboardDidShow", callback);
+    }
+
+    public onKeyboardDidHide(callback: Callback<KeyboardInfo>): void {
+      this.onSync(this.nativeObj, "keyboardDidHide", callback);
+    }
+
+    public offKeyboardDidHide(callback?: Callback<KeyboardInfo>): void {
+      this.offSync(this.nativeObj, "keyboardDidHide", callback);
+    }
+
+    public onRotationChange(callback: RotationChangeCallback<RotationChangeInfo,
+      RotationChangeResult | undefined>): void {
+      this.onSync(this.nativeObj, "rotationChange", callback);
+    }
+
+    public offRotationChange(callback?: RotationChangeCallback<RotationChangeInfo,
+      RotationChangeResult | undefined>): void; {
+      this.offSync(this.nativeObj, "rotationChange", callback);
+    }
+
     public showWindow(callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.showWindowSync(this.nativeObj);
@@ -3782,6 +3816,16 @@ export interface Window {
     on<T>(type: string, callback: Callback<T>): void;
     on<T>(type: 'noInteractionDetected', timeout: long, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;
+    onKeyboardHeightChange(callback: Callback<int>): void;
+    onKeyboardDidShow(callback: Callback<KeyboardInfo>): void;
+    onKeyboardDidHide(callback: Callback<KeyboardInfo>): void;
+    onRotationChange(callback: RotationChangeCallback<RotationChangeInfo, RotationChangeResult |
+      undefined>): void;
+    offKeyboardHeightChange(callback?: Callback<int>): void;
+    offKeyboardDidShow(callback?: Callback<KeyboardInfo>): void;
+    offKeyboardDidHide(callback?: Callback<KeyboardInfo>): void;
+    offRotationChange(callback?: RotationChangeCallback<RotationChangeInfo, RotationChangeResult |
+      undefined>): void;
 }
 
 export native function CreateWindowStage(scene: long): WindowStageInternal;
