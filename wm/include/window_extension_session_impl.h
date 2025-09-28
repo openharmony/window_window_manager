@@ -79,9 +79,9 @@ public:
     WMError NapiSetUIContentByName(const std::string& contentName, napi_env env, napi_value storage,
         BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override {}
-    WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
-        const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION },
-        const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {}) override;
+    WSError UpdateRect(const WSRect &rect, SizeChangeReason reason, const SceneAnimationConfig &config = {
+        nullptr, ROTATE_ANIMATION_DURATION, 0, WindowAnimationCurve::LINEAR, {0.0f, 0.0f, 0.0f, 0.0f} },
+        const std::map<AvoidAreaType, AvoidArea> &avoidAreas = {}) override;
 
     WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = Rect::EMPTY_RECT,
         int32_t apiVersion = API_VERSION_INVALID) override;

@@ -1260,7 +1260,13 @@ WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason r
     }
     if (sessionStage_ != nullptr) {
         int32_t rotateAnimationDuration = GetRotateAnimationDuration();
-        SceneAnimationConfig config { .rsTransaction_ = rsTransaction, .animationDuration_ = rotateAnimationDuration };
+        SceneAnimationConfig config;
+        config.rsTransaction_ = rsTransaction;
+        config.animationDuration_ = rotateAnimationDuration;
+        if (reason == SizeChangeReason::SCENE_WITH_ANIMATION) {
+            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "UpdateRectWithLayoutInfo %{public}d", reason);
+            config = sceneAnimationConfig_;
+        }
         UpdateClientRectPosYAndDisplayId(updateRect);
         sessionStage_->UpdateRect(updateRect, reason, config, avoidAreas);
         SetClientRect(rect);

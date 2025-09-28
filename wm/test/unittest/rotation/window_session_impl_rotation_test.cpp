@@ -128,7 +128,8 @@ HWTEST_F(WindowSessionImplRotationTest, UpdateRectForRotation, TestSize.Level1)
     window->property_->SetWindowRect(preRect);
     WindowSizeChangeReason wmReason = WindowSizeChangeReason{ 0 };
     std::shared_ptr<RSTransaction> rsTransaction;
-    SceneAnimationConfig config{ .rsTransaction_ = rsTransaction };
+    SceneAnimationConfig config = { rsTransaction, ROTATE_ANIMATION_DURATION,
+        0, WindowAnimationCurve::LINEAR, {0.0f, 0.0f, 0.0f, 0.0f } };
     window->UpdateRectForRotation(wmRect, preRect, wmReason, config);
 
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
@@ -351,7 +352,8 @@ HWTEST_F(WindowSessionImplRotationTest, UpdateRectForRotation02, TestSize.Level2
     window->property_->SetWindowRect(preRect);
     WindowSizeChangeReason wmReason = WindowSizeChangeReason::SNAPSHOT_ROTATION;
     std::shared_ptr<RSTransaction> rsTransaction;
-    SceneAnimationConfig config{ .rsTransaction_ = rsTransaction };
+    SceneAnimationConfig config = { rsTransaction, ROTATE_ANIMATION_DURATION,
+        0, WindowAnimationCurve::LINEAR, {0.0f, 0.0f, 0.0f, 0.0f } };
     window->UpdateRectForRotation(wmRect, preRect, wmReason, config);
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(window->lastSizeChangeReason_, WindowSizeChangeReason::ROTATION);

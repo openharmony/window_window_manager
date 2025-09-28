@@ -263,6 +263,7 @@ private:
     static napi_value SetPcAppInpadCompatibleMode(napi_env env, napi_callback_info info);
     static napi_value SetPcAppInpadSpecificSystemBarInvisible(napi_env env, napi_callback_info info);
     static napi_value SetPcAppInpadOrientationLandscape(napi_env env, napi_callback_info info);
+    static napi_value UpdateSceneAnimationConfig(napi_env env, napi_callback_info info);
     static napi_value SetMobileAppInPadLayoutFullScreen(napi_env env, napi_callback_info info);
     /*
      * PC Window
@@ -357,6 +358,7 @@ private:
     napi_value OnSetPcAppInpadCompatibleMode(napi_env env, napi_callback_info info);
     napi_value OnSetPcAppInpadSpecificSystemBarInvisible(napi_env env, napi_callback_info info);
     napi_value OnSetPcAppInpadOrientationLandscape(napi_env env, napi_callback_info info);
+    napi_value OnUpdateSceneAnimationConfig(napi_env env, napi_callback_info info);
     napi_value OnSetMobileAppInPadLayoutFullScreen(napi_env env, napi_callback_info info);
 
     /*
