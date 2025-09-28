@@ -245,7 +245,9 @@ HWTEST_F(WindowSessionImplTest3, IsFocused, TestSize.Level1)
 
     window_->property_->SetPersistentId(1);
     window_->state_ = WindowState::STATE_CREATED;
-    window_->UpdateFocus(true);
+    auto info = sptr<FocusNotifyInfo>::MakeSptr();
+    info->isSyncNotify_ = false;
+    window_->UpdateFocus(info, true);
     ret = window_->IsFocused();
     ASSERT_EQ(ret, true);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: IsFocused end";

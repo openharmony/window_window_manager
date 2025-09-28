@@ -762,10 +762,11 @@ HWTEST_F(WindowSessionTest3, NotifyFocusStatus, TestSize.Level1)
     session_->state_ = SessionState::STATE_CONNECT;
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     EXPECT_NE(nullptr, mockSessionStage);
+    auto info = sptr<FocusNotifyInfo>::MakeSptr();
     session_->sessionStage_ = mockSessionStage;
-    EXPECT_EQ(WSError::WS_OK, session_->NotifyFocusStatus(true));
+    EXPECT_EQ(WSError::WS_OK, session_->NotifyFocusStatus(info, true));
     session_->sessionStage_ = nullptr;
-    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session_->NotifyFocusStatus(true));
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session_->NotifyFocusStatus(info, true));
 }
 
 /**

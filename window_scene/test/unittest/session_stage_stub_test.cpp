@@ -246,6 +246,25 @@ HWTEST_F(SessionStageStubTest, HandleUpdateFocus, TestSize.Level1)
     data.WriteBool(false);
     uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_FOCUS_CHANGE);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(5, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleUpdateFocus01
+ * @tc.desc: test function : HandleUpdateFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateFocus01, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    auto info = sptr<FocusNotifyInfo>::MakeSptr();
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteParcelable(info);
+    data.WriteBool(false);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_FOCUS_CHANGE);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
     ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
 
@@ -989,6 +1008,22 @@ HWTEST_F(SessionStageStubTest, HandleNotifyHighlightChange, TestSize.Level1)
     MessageParcel data;
     MessageParcel reply;
 
+    data.WriteBool(false);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    ASSERT_EQ(5, sessionStageStub_->HandleNotifyHighlightChange(data, reply));
+}
+
+/**
+ * @tc.name: HandleNotifyHighlightChange01
+ * @tc.desc: test function : HandleNotifyHighlightChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyHighlightChange01, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto info = sptr<HighlightNotifyInfo>::MakeSptr();
+    data.WriteParcelable(info);
     data.WriteBool(false);
     ASSERT_TRUE(sessionStageStub_ != nullptr);
     ASSERT_EQ(0, sessionStageStub_->HandleNotifyHighlightChange(data, reply));

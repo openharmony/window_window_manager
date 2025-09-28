@@ -1765,11 +1765,13 @@ HWTEST_F(WindowSessionTest, SetExclusivelyHighlighted, TestSize.Level1)
 HWTEST_F(WindowSessionTest, UpdateHighlightStatus, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
-    EXPECT_EQ(session_->UpdateHighlightStatus(false, false), WSError::WS_DO_NOTHING);
+    auto info = sptr<HighlightNotifyInfo>::MakeSptr();
+    info->isSyncNotify_ = false;
+    EXPECT_EQ(session_->UpdateHighlightStatus(info, false, false), WSError::WS_DO_NOTHING);
 
-    EXPECT_EQ(session_->UpdateHighlightStatus(true, false), WSError::WS_OK);
+    EXPECT_EQ(session_->UpdateHighlightStatus(info, true, false), WSError::WS_OK);
     session_->isHighlighted_ = false;
-    EXPECT_EQ(session_->UpdateHighlightStatus(true, true), WSError::WS_OK);
+    EXPECT_EQ(session_->UpdateHighlightStatus(info, true, true), WSError::WS_OK);
 }
 
 /**
@@ -1781,14 +1783,16 @@ HWTEST_F(WindowSessionTest, NotifyHighlightChange, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     session_->sessionInfo_.isSystem_ = true;
-    EXPECT_EQ(session_->NotifyHighlightChange(true), WSError::WS_ERROR_INVALID_SESSION);
+    auto info = sptr<HighlightNotifyInfo>::MakeSptr();
+    info->isSyncNotify_ = false;
+    EXPECT_EQ(session_->NotifyHighlightChange(info, true), WSError::WS_ERROR_INVALID_SESSION);
     session_->sessionInfo_.isSystem_ = false;
-    EXPECT_EQ(session_->NotifyHighlightChange(true), WSError::WS_ERROR_NULLPTR);
+    EXPECT_EQ(session_->NotifyHighlightChange(info, true), WSError::WS_ERROR_NULLPTR);
     session_->sessionStage_ = mockSessionStage_;
     session_->state_ = SessionState::STATE_CONNECT;
-    EXPECT_EQ(session_->NotifyHighlightChange(true), WSError::WS_OK);
+    EXPECT_EQ(session_->NotifyHighlightChange(info, true), WSError::WS_OK);
     session_->sessionStage_ = nullptr;
-    EXPECT_EQ(session_->NotifyHighlightChange(true), WSError::WS_ERROR_NULLPTR);
+    EXPECT_EQ(session_->NotifyHighlightChange(info, true), WSError::WS_ERROR_NULLPTR);
 }
 
 /**

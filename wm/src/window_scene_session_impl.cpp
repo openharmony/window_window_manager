@@ -492,7 +492,7 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
         property_->GetWindowMode(), property_->GetWindowType(), GetPersistentId(), state_, requestState_);
 
     if (isFocused_) {
-        UpdateFocus(false);
+        UpdateFocusState(false);
     }
     auto context = GetContext();
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context);

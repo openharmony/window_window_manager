@@ -986,9 +986,10 @@ private:
     bool CheckBlockingFocus(const sptr<SceneSession>& session, bool includingAppSession);
     WSError ShiftFocus(DisplayId displayId, const sptr<SceneSession>& nextSession, bool isProactiveUnfocus,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
-    void UpdateFocusStatus(DisplayId displayId, const sptr<SceneSession>& sceneSession, bool isFocused);
-    void NotifyFocusStatus(const sptr<SceneSession>& sceneSession, bool isFocused,
-        const sptr<FocusGroup>& focusGroup);
+    void UpdateFocusStatus(DisplayId displayId, const sptr<SceneSession>& focusedSession,
+        const sptr<SceneSession>& nextSession, bool isFocused);
+    void NotifyFocusStatus(const sptr<SceneSession>& focusedSession, const sptr<SceneSession>& nextSession,
+        bool isFocused, const sptr<FocusGroup>& focusGroup);
     int32_t NotifyRssThawApp(const int32_t uid, const std::string& bundleName, const std::string& reason);
     void NotifyFocusStatusByMission(const sptr<SceneSession>& prevSession, const sptr<SceneSession>& currSession);
     void NotifyUnFocusedByMission(const sptr<SceneSession>& sceneSession);
@@ -1016,7 +1017,8 @@ private:
     void NotifyMMIWindowPidChange(int32_t windowId, bool startMoving);
     void UpdateHighlightStatus(DisplayId displayId, const sptr<SceneSession>& preSceneSession,
         const sptr<SceneSession>& currSceneSession, bool isProactiveUnfocus);
-    void SetHighlightSessionIds(const sptr<SceneSession>& sceneSession, bool needBlockHighlightNotify);
+    void SetHighlightSessionIds(const sptr<SceneSession>& sceneSession, bool needBlockHighlightNotify,
+        int64_t timeStamp);
     void AddHighlightSessionIds(const sptr<SceneSession>& sceneSession, bool needBlockHighlightNotify);
     void RemoveHighlightSessionIds(const sptr<SceneSession>& sceneSession);
     std::string GetHighlightIdsStr();
