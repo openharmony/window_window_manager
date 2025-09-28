@@ -961,6 +961,7 @@ private:
     void SwitchUserDealUserDisplayNode(int32_t newUserId);
     void AddUserDisplayNodeOnTree(int32_t userId);
     void RemoveUserDisplayNodeFromTree(int32_t userId);
+    bool CheckUserIsForeground(int32_t userId);
     void SetUserDisplayNodePositionZ(int32_t userId, float positionZ);
     void HandleNewUserDisplayNode(int32_t newUserId, bool coldBoot);
     void WaitSwitchUserAnimateFinish(int32_t newUserId, bool isColdSwitch);
