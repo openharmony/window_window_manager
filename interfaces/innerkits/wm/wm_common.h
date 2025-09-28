@@ -444,6 +444,7 @@ enum class WindowSizeChangeReason : uint32_t {
     AVOID_AREA_CHANGE,
     MAXIMIZE_TO_SPLIT,
     SPLIT_TO_MAXIMIZE,
+    FULL_SCREEN_IN_FORCE_SPLIT,
     END,
 };
 

@@ -399,6 +399,17 @@ public:
     virtual WSError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WSError::WS_OK; };
     virtual WSError UpdateFlag(const std::string& flag) { return WSError::WS_OK; };
     virtual WSError GetIsHighlighted(bool& isHighlighted) { return WSError::WS_OK; }
+
+    /**
+     * @brief notify session when full screen status in force split
+     *
+     * @param isFullScreen true means full screen in force split.
+     * @return WSError::WS_OK means set success, otherwise failed.
+     */
+    virtual WSError NotifyIsFullScreenInForceSplitMode(bool isFullScreen)
+    {
+        return WSError::WS_OK;
+    }
 };
 } // namespace OHOS::Rosen
 

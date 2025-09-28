@@ -1016,6 +1016,29 @@ HWTEST_F(SessionStubTest, GetIsHighlighted, Function | SmallTest | Level2)
     auto result = session_->HandleGetIsHighlighted(data, reply);
     ASSERT_EQ(result, ERR_NONE);
 }
+
+/**
+ * @tc.name: HandleNotifyIsFullScreenInForceSplitMode
+ * @tc.desc: HandleNotifyIsFullScreenInForceSplitMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleNotifyIsFullScreenInForceSplitMode, TestSize.Level1)
+{
+    {
+        MessageOption option;
+        MessageParcel data;
+        MessageParcel reply;
+        EXPECT_EQ(session_->HandleNotifyIsFullScreenInForceSplitMode(data, reply), ERR_INVALID_DATA);
+    }
+    {
+        MessageOption option;
+        MessageParcel data;
+        MessageParcel reply;
+        bool isFullScreen = true;
+        data.WriteBool(isFullScreen);
+        EXPECT_EQ(session_->HandleNotifyIsFullScreenInForceSplitMode(data, reply), ERR_NONE);
+    }
+}
 }
 } // namespace Rosen
 } // namespace OHOS

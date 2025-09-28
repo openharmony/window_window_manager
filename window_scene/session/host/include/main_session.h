@@ -72,6 +72,13 @@ public:
     WSError SetSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon) override;
     void SetUpdateSessionLabelAndIconListener(NofitySessionLabelAndIconUpdatedFunc&& func) override;
 
+    /*
+     * Compatible Mode
+     */
+    WSError NotifyIsFullScreenInForceSplitMode(bool isFullScreen) override;
+    void RegisterForceSplitFullScreenChangeCallback(ForceSplitFullScreenChangeCallback&& callback) override;
+    bool IsFullScreenInForceSplit() override;
+
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
     bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;
@@ -90,6 +97,12 @@ private:
      * Window Layout
      */
     void NotifySubAndDialogFollowRectChange(const WSRect& rect, bool isGlobal, bool needFlush) override;
+
+    /*
+     * Compatible Mode
+     */
+    ForceSplitFullScreenChangeCallback forceSplitFullScreenChangeCallback_;
+    std::atomic_bool isFullScreenInForceSplit_ { false };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MAIN_SESSION_H
