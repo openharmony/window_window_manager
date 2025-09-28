@@ -7347,9 +7347,9 @@ WMError SceneSessionManager::RequestFocusStatus(int32_t persistentId, bool isFoc
 }
 
 WMError SceneSessionManager::RequestFocusStatusBySCB(int32_t persistentId, bool isFocused, bool byForeground,
-    FocusChangeReason reason)
+    FocusChangeReason reason, DisplayId displayId)
 {
-    TLOGD(WmsLogTag::WMS_FOCUS, "id: %{public}d, reason: %{public}d", persistentId, reason);
+    TLOGD(WmsLogTag::WMS_FOCUS, "id: %{public}d, reason: %{public}d, displayId: %{public}" PRIu64, persistentId, reason, displayId);
     auto task = [this, persistentId, isFocused, byForeground, reason]() {
         if (isFocused) {
             if (reason == FocusChangeReason::FOREGROUND) {
@@ -7376,7 +7376,7 @@ WMError SceneSessionManager::RequestFocusStatusBySCB(int32_t persistentId, bool 
                 }
             }
         } else {
-            RequestSessionUnfocus(persistentId, reason);
+            RequestSessionUnfocus(persistentId, reason, displayId);
         }
     };
     taskScheduler_->PostAsyncTask(task, "RequestFocusStatusBySCB" + std::to_string(persistentId));
@@ -7492,9 +7492,9 @@ WSError SceneSessionManager::RequestSessionFocus(int32_t persistentId, bool byFo
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId, FocusChangeReason reason)
+WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId, FocusChangeReason reason, DisplayId displayId)
 {
-    TLOGD(WmsLogTag::WMS_FOCUS, "id: %{public}d", persistentId);
+    TLOGD(WmsLogTag::WMS_FOCUS, "id: %{public}d, displayId: %{public}" PRIu64, persistentId, displayId);
     if (persistentId == INVALID_SESSION_ID) {
         TLOGE(WmsLogTag::WMS_FOCUS, "id is invalid: %{public}d", persistentId);
         return WSError::WS_ERROR_INVALID_SESSION;
@@ -7504,7 +7504,8 @@ WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId, FocusCh
         TLOGE(WmsLogTag::WMS_FOCUS, "session is nullptr: %{public}d", persistentId);
         return WSError::WS_ERROR_INVALID_SESSION;
     }
-    auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
+    auto displayId = displayId != DISPLAY_ID_INVALID ? displayId :
+        sceneSession->GetSessionProperty()->GetDisplayId();
     auto focusGroup = windowFocusController_->GetFocusGroup(displayId);
     if (focusGroup == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "focus group is nullptr: %{public}" PRIu64, displayId);

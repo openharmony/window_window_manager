@@ -946,7 +946,8 @@ private:
     WSError RequestSessionFocus(int32_t persistentId, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
     WSError RequestSessionFocusImmediately(int32_t persistentId, bool blockNotifyUntilVisible = true);
-    WSError RequestSessionUnfocus(int32_t persistentId, FocusChangeReason reason = FocusChangeReason::DEFAULT);
+    WSError RequestSessionUnfocus(int32_t persistentId, FocusChangeReason reason = FocusChangeReason::DEFAULT,
+        DisplayId displayId = DISPLAY_ID_INVALID);
     WSError RequestAllAppSessionUnfocusInner();
     WSError RequestSessionFocusCheck(const sptr<SceneSession>& sceneSession, const sptr<FocusGroup>& focusGroup,
         int32_t persistentId, bool byForeground, FocusChangeReason reason);

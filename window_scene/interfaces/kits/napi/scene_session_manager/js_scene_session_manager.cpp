@@ -3042,8 +3042,8 @@ napi_value JsSceneSessionManager::OnPreloadInLakeApp(napi_env env, napi_callback
 
 napi_value JsSceneSessionManager::OnRequestFocusStatus(napi_env env, napi_callback_info info)
 {
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = 5;
+    napi_value argv[5] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < MIN_ARG_COUNT) {
         WLOGFE("Argc is invalid: %{public}zu", argc);
@@ -3081,10 +3081,19 @@ napi_value JsSceneSessionManager::OnRequestFocusStatus(napi_env env, napi_callba
             return NapiGetUndefined(env);
         }
     }
+    DisplayId displayId = DISPLAY_ID_INVALID;
+    if (argc > DEFAULT_ARG_COUNT) {
+        if (!ConvertFromJsValue(env, argv[ARG_INDEX_FOUR], displayId)) {
+            TLOGI(WmsLogTag::WMS_FOCUS, "Failed to convert parameter to displayId");
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                "Input parameter is missing or invalid"));
+            return NapiGetUndefined(env);
+        }
+    }
     TLOGD(WmsLogTag::WMS_FOCUS, "Id: %{public}d, isFocused: %{public}d, byForeground: %{public}d, "
-        "reason: %{public}d", persistentId, isFocused, byForeground, reason);
+        "reason: %{public}d, displayId: %{public}" PRIu64, persistentId, isFocused, byForeground, reason, displayId);
     if (Session::IsScbCoreEnabled()) {
-        SceneSessionManager::GetInstance().RequestFocusStatusBySCB(persistentId, isFocused, byForeground, reason);
+        SceneSessionManager::GetInstance().RequestFocusStatusBySCB(persistentId, isFocused, byForeground, reason, displayId);
     } else {
         SceneSessionManager::GetInstance().RequestFocusStatus(persistentId, isFocused, byForeground, reason);
     }
