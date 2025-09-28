@@ -1019,12 +1019,9 @@ namespace {
     {
         ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
         bool value = false;
-
-        if (screenSettingHelper.GetResolutionEffect(value)) {
-            ASSERT_TRUE(value);
-        } else {
-            ASSERT_FALSE(value);
-        }
+        auto ret = screenSettingHelper.GetResolutionEffect(value, "testsn");
+        ASSERT_FALSE(ret);
+        ASSERT_FALSE(value);
     }
 }
 } // namespace Rosen

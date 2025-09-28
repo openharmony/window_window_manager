@@ -2594,15 +2594,13 @@ DMError ScreenSessionManager::SetResolution(ScreenId screenId, uint32_t width, u
 
 bool ScreenSessionManager::HandleResolutionEffectChange()
 {
-    TLOGI(WmsLogTag::DMS, "start");
     if (!g_isPcDevice || FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         TLOGE(WmsLogTag::DMS, "not support");
         return false;
     }
+    TLOGI(WmsLogTag::DMS, "start");
     sptr<ScreenSession> internalSession = nullptr;
     sptr<ScreenSession> externalSession = nullptr;
-    bool effectFlag = false;
-    ScreenSettingHelper::GetResolutionEffect(effectFlag);
     GetInternalAndExternalSession(internalSession, externalSession);
     if (!internalSession || !externalSession ||
         externalSession->GetScreenCombination() != ScreenCombination::SCREEN_MIRROR) {
@@ -2610,7 +2608,8 @@ bool ScreenSessionManager::HandleResolutionEffectChange()
         RecoveryResolutionEffect();
         return false;
     }
-
+    bool effectFlag = false;
+    ScreenSettingHelper::GetResolutionEffect(effectFlag, externalSession->GetSerialNumber());
     uint32_t innerWidth = internalSession->GetScreenProperty().GetScreenRealWidth();
     uint32_t innerHeight = internalSession->GetScreenProperty().GetScreenRealHeight();
     uint32_t externalWidth = externalSession->GetScreenProperty().GetScreenRealWidth();
@@ -2695,11 +2694,11 @@ bool ScreenSessionManager::SetResolutionEffect(ScreenId screenId,  uint32_t widt
 
 bool ScreenSessionManager::RecoveryResolutionEffect()
 {
-    TLOGI(WmsLogTag::DMS, "recovery inner and external screen resolution");
     if (!g_isPcDevice || FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         TLOGW(WmsLogTag::DMS, "not support");
         return false;
     }
+    TLOGI(WmsLogTag::DMS, "recovery inner and external screen resolution");
     sptr<ScreenSession> internalSession = nullptr;
     sptr<ScreenSession> externalSession = nullptr;
     GetInternalAndExternalSession(internalSession, externalSession);
@@ -4506,11 +4505,8 @@ void ScreenSessionManager::RegisterSettingResolutionEffectObserver()
 
 void ScreenSessionManager::SetResolutionEffectFromSettingData()
 {
-    bool enable = false;
-    if (ScreenSettingHelper::GetResolutionEffect(enable)) {
-        TLOGI(WmsLogTag::DMS, "update ResolutionEffect enable: %{public}u", enable);
-        HandleResolutionEffectChange();
-    }
+    TLOGI(WmsLogTag::DMS, "update ResolutionEffect enable");
+    HandleResolutionEffectChange();
 }
 
 void ScreenSessionManager::RegisterSettingDpiObserver()
