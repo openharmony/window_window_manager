@@ -969,6 +969,45 @@ HWTEST_F(SceneSessionTest2, SetSessionInfoWindowInputType, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetSessionInfoExpandInputFlag
+ * @tc.desc: SetSessionInfoExpandInputFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, SetSessionInfoExpandInputFlag, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSessionInfoExpandInputFlag";
+    info.bundleName_ = "SetSessionInfoExpandInputFlag";
+    info.expandInputFlag_ = 0;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetSessionInfoExpandInputFlag(1);
+
+    SessionInfo sessionInfo = sceneSession->GetSessionInfo();
+    ASSERT_EQ(sessionInfo.expandInputFlag_, 1);
+
+    sceneSession->SetSessionInfoExpandInputFlag(0);
+    sessionInfo = sceneSession->GetSessionInfo();
+    ASSERT_EQ(sessionInfo.expandInputFlag_, 0);
+}
+
+/**
+ * @tc.name: GetSessionInfoExpandInputFlag
+ * @tc.desc: GetSessionInfoExpandInputFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, GetSessionInfoExpandInputFlag, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetSessionInfoExpandInputFlag";
+    info.bundleName_ = "GetSessionInfoExpandInputFlag";
+    info.expandInputFlag_ = 0;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetSessionInfoExpandInputFlag(1);
+
+    ASSERT_EQ(sceneSession->GetSessionInfoExpandInputFlag(), 1);
+}
+
+/**
  * @tc.name: SetSelfToken
  * @tc.desc: SetSelfToken
  * @tc.type: FUNC

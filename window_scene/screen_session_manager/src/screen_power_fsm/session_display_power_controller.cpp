@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "session_display_power_controller.h"
+#include "screen_power_fsm/session_display_power_controller.h"
 #include "screen_session_manager.h"
 #include "window_manager_hilog.h"
 
@@ -51,6 +51,7 @@ bool SessionDisplayPowerController::HandleSetDisplayStateOff(DisplayState& state
                 displayState_ = lastState;
                 ScreenSessionManager::GetInstance().NotifyDisplayStateChanged(DISPLAY_ID_INVALID,
                     DisplayState::UNKNOWN);
+                ScreenStateMachine::GetInstance().ToTransition(ScreenTransitionState::SCREEN_ON, true);
                 return true;
             }
             DisplayPowerEvent displayPowerEvent = state == DisplayState::OFF ?
@@ -68,6 +69,7 @@ bool SessionDisplayPowerController::HandleSetDisplayStateOff(DisplayState& state
             displayState_ = lastState;
             ScreenSessionManager::GetInstance().NotifyDisplayStateChanged(DISPLAY_ID_INVALID,
                 DisplayState::UNKNOWN);
+            ScreenStateMachine::GetInstance().ToTransition(ScreenTransitionState::SCREEN_ON, true);
             return true;
         }
     }
@@ -112,6 +114,7 @@ void SessionDisplayPowerController::WaitScreenOffNotify(DisplayState& state)
         skipScreenOffBlock_ = false;
         if (ScreenSessionManager::GetInstance().IsScreenLockSuspend()) {
             state = DisplayState::ON_SUSPEND;
+            displayState_ = state;
         }
     }
 }

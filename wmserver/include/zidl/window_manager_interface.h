@@ -266,6 +266,10 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WMError ConvertToRelativeCoordinateExtended(const Rect& rect, Rect& newRect, DisplayId& newDisplayId)
+    {
+        return WMError::WM_OK;
+    }
     virtual WSError GetHostWindowRect(int32_t hostWindowId, Rect& rect)
     {
         return WSError::WS_OK;
@@ -350,6 +354,14 @@ public:
      * PiP Window
      */
     virtual WMError GetPiPSettingSwitchStatus(bool& switchStatus) { return WMError::WM_OK; }
+
+    /*
+     * Window outline
+     */
+    virtual WMError UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams)
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }

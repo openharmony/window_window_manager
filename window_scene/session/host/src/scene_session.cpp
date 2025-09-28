@@ -88,6 +88,7 @@ constexpr int32_t HOOK_SYSTEM_BAR_HEIGHT = 40;
 constexpr int32_t HOOK_AI_BAR_HEIGHT = 28;
 constexpr int32_t POW_DOUBLE = 2;
 constexpr int32_t MULTI_WINDOW_TITLE_BAR_DEFAULT_HEIGHT_VP = 32;
+constexpr int32_t MAX_FLOAT_TITLE_BAR_HEIGHT_VP = 40;
 constexpr uint32_t ROTATION_DEGREE = 90;
 constexpr int32_t HALF_VALUE = 2;
 const int32_t ROTATE_POLICY_WINDOW = 0;
@@ -517,7 +518,7 @@ WSError SceneSession::NotifyFrameLayoutFinishFromApp(bool notifyListener, const 
     return WSError::WS_OK;
 }
 
-WSError SceneSession::BackgroundTask(const bool isSaveSnapshot, BackgroundReason reason)
+WSError SceneSession::BackgroundTask(const bool isSaveSnapshot, LifeCycleChangeReason reason)
 {
     auto needSaveSnapshot = !ScenePersistentStorage::HasKey("SetImageForRecent_" + std::to_string(GetPersistentId()),
         ScenePersistentStorageType::MAXIMIZE_STATE);
@@ -1505,10 +1506,9 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
         }
         session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
         session->AddPropertyDirtyFlags(static_cast<uint32_t>(SessionPropertyFlag::WINDOW_RECT));
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}d, reason:%{public}d %{public}s, "
-            "rect:%{public}s, clientRect:%{public}s",
-            where, session->GetPersistentId(), session->GetSizeChangeReason(), updateReason.c_str(),
-            rect.ToString().c_str(), session->GetClientRect().ToString().c_str());
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}d, reason:%{public}d %{public}s rect:win=%{public}s "
+            "client=%{public}s", where, session->GetPersistentId(), session->GetSizeChangeReason(),
+            updateReason.c_str(), rect.ToString().c_str(), session->GetClientRect().ToString().c_str());
     }, __func__ + GetRectInfo(rect));
     return WSError::WS_OK;
 }
@@ -1822,8 +1822,8 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason r
         }
         NotifySessionRectChange(rect, reason);
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d newReason:%{public}d moveConfiguration:%{public}s "
-        "rect:%{public}s newRequestRect:%{public}s newWinRect:%{public}s", GetPersistentId(), reason, newReason,
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d->%{public}d cfg:%{public}s rects:in=%{public}s "
+        "newReq=%{public}s newWin=%{public}s", GetPersistentId(), reason, newReason,
         moveConfiguration.ToString().c_str(), rect.ToString().c_str(), newRequestRect.ToString().c_str(),
         newWinRect.ToString().c_str());
 }
@@ -2223,8 +2223,8 @@ void SceneSession::SetIsStatusBarVisible(bool isVisible)
 
 WSError SceneSession::SetIsStatusBarVisibleInner(bool isVisible)
 {
-    bool isNeedNotify = isStatusBarVisible_ != isVisible;
-    isStatusBarVisible_ = isVisible;
+    bool isNeedNotify = IsStatusBarVisible() != isVisible;
+    UpdateStatusBarVisible(isVisible);
     if (!isNeedNotify) {
         return WSError::WS_OK;
     }
@@ -2450,7 +2450,10 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         }
         vpr = display->GetVirtualPixelRatio();
         bool isFloat = windowMode == WindowMode::WINDOW_MODE_FLOATING && !GetIsMidScene();
-        int32_t height = isFloat ? GetStatusBarHeight() : vpr * MULTI_WINDOW_TITLE_BAR_DEFAULT_HEIGHT_VP;
+        int32_t maxFloatTitleBarHeight = static_cast<int32_t>(vpr * MAX_FLOAT_TITLE_BAR_HEIGHT_VP);
+        int32_t floatTitleBarHeight = std::min(maxFloatTitleBarHeight, GetStatusBarHeight());
+        int32_t height =
+            isFloat ? floatTitleBarHeight : static_cast<int32_t>(vpr * MULTI_WINDOW_TITLE_BAR_DEFAULT_HEIGHT_VP);
         avoidArea.topRect_.height_ = static_cast<uint32_t>(height);
         avoidArea.topRect_.width_ = static_cast<uint32_t>(display->GetWidth());
         return;
@@ -2470,8 +2473,8 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d displayId %{public}" PRIu64 " constantly isVisible %{public}d",
                 GetPersistentId(), displayId, isVisible);
         }
-        bool isStatusBarVisible = WindowHelper::IsMainWindow(Session::GetWindowType()) ?
-            isStatusBarVisible_ : isVisible;
+        bool isStatusBarVisible =
+            WindowHelper::IsAppWindow(Session::GetWindowType()) ? IsStatusBarVisible() : isVisible;
         if (!isStatusBarVisible) {
             TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d status bar not visible", GetPersistentId());
             continue;
@@ -2780,7 +2783,7 @@ std::optional<ExtensionWindowEventInfo> SceneSession::GetLastModalUIExtensionEve
 
 Vector2f SceneSession::GetSessionGlobalPosition(bool useUIExtension)
 {
-    WSRect windowRect = GetSessionGlobalRect();
+    WSRect windowRect = GetSessionGlobalRectInMultiScreen();
     if (useUIExtension) {
         if (auto modalUIExtensionEventInfo = GetLastModalUIExtensionEventInfo()) {
             const auto& rect = modalUIExtensionEventInfo.value().windowRect;
@@ -3993,8 +3996,11 @@ bool SceneSession::DragResizeWhenEndFilter(SizeChangeReason reason)
         if (reason == SizeChangeReason::DRAG) {
             HandleMoveDragEvent(reason);
         } else {
-            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "trigger client rect change by scb");
+            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "trigger client rect change by scb, "
+                "isPcOrPcMode: %{public}d", systemConfig_.IsPcWindow());
             WSRect relativeRect = moveDragController_->GetTargetRect(
+                (systemConfig_.IsPcWindow() && GetDragResizeTypeDuringDrag() == DragResizeType::RESIZE_WHEN_DRAG_END) ?
+                MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY :
                 MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY);
             HandleMoveDragEnd(relativeRect, reason);
             SetUIFirstSwitch(RSUIFirstSwitch::NONE);
@@ -4984,18 +4990,22 @@ bool SceneSession::IsAppOrLowerSystemSession() const
 }
 
 /** @note @window.focus */
-bool SceneSession::IsBlockingFocusFullScreenSystemPanel() const
+bool SceneSession::IsBlockingFocusWindowType() const
 {
-    bool blockingFocus = GetBlockingFocus();
-    if (!blockingFocus) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "not blocking focus window");
-        return false;
-    }
     if (!(systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow())) {
         TLOGD(WmsLogTag::WMS_FOCUS, "device type unmatched");
         return false;
     }
+    bool blockingFocus = GetBlockingFocus();
     WindowType windowType = GetWindowType();
+    bool isBlockingSystemWindowType =
+        blockingFocus && (windowType == WindowType::WINDOW_TYPE_PANEL ||
+        windowType == WindowType::WINDOW_TYPE_GLOBAL_SEARCH ||
+        windowType == WindowType::WINDOW_TYPE_NEGATIVE_SCREEN);
+    if (!isBlockingSystemWindowType && !WindowHelper::IsMainWindow(windowType)) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "not blocking focus window type");
+        return false;
+    }
     //Get height and width of current screen
     uint64_t displayId = GetSessionProperty()->GetDisplayId();
     auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
@@ -5008,22 +5018,17 @@ bool SceneSession::IsBlockingFocusFullScreenSystemPanel() const
         TLOGE(WmsLogTag::WMS_FOCUS, "get display info failed of display: %{public}" PRIu64, displayId);
         return false;
     }
-    if ((windowType == WindowType::WINDOW_TYPE_PANEL || windowType == WindowType::WINDOW_TYPE_GLOBAL_SEARCH ||
-         windowType == WindowType::WINDOW_TYPE_NEGATIVE_SCREEN) &&
-        (GetSessionRect().height_ == displayInfo->GetHeight() && GetSessionRect().width_ == displayInfo->GetWidth())) {
+    if (std::abs(GetSessionRect().height_ - displayInfo->GetHeight()) <= 1 &&
+        std::abs(GetSessionRect().width_ - displayInfo->GetWidth()) <= 1) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "current session is full-screen, "
+            "screen w: %{public}d, h: %{public}d, window w: %{public}d, h: %{public}d",
+            displayInfo->GetWidth(), displayInfo->GetHeight(), GetSessionRect().width_, GetSessionRect().height_);
         return true;
     }
     TLOGD(WmsLogTag::WMS_FOCUS, "current session is not full-screen, "
-          "screen w: %{public}d, h: %{public}d, window w: %{public}d, h: %{public}d",
-          displayInfo->GetWidth(), displayInfo->GetHeight(), GetSessionRect().width_, GetSessionRect().height_);
+        "screen w: %{public}d, h: %{public}d, window w: %{public}d, h: %{public}d",
+        displayInfo->GetWidth(), displayInfo->GetHeight(), GetSessionRect().width_, GetSessionRect().height_);
     return false;
-}
-
-/** @note @window.focus */
-bool SceneSession::IsAppMainWindowFullScreen()
-{
-    auto mainSession = GetMainSession();
-    return mainSession == nullptr ? false : (mainSession->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
 }
 
 /** @note @window.focus */
@@ -7371,8 +7376,8 @@ bool SceneSession::GetIsDisplayStatusBarTemporarily() const
 void SceneSession::RetrieveStatusBarDefaultVisibility()
 {
     if (specificCallback_ && specificCallback_->onGetStatusBarDefaultVisibilityByDisplayId_) {
-        isStatusBarVisible_ = specificCallback_->onGetStatusBarDefaultVisibilityByDisplayId_(
-            GetSessionProperty()->GetDisplayId());
+        UpdateStatusBarVisible(
+            specificCallback_->onGetStatusBarDefaultVisibilityByDisplayId_(GetSessionProperty()->GetDisplayId()));
     }
 }
 
@@ -8173,9 +8178,9 @@ bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeC
             GetPersistentId(), rect.ToString().c_str(), globalRect.ToString().c_str());
         return false;
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, updateRect rectAfter:%{public}s preRect:%{public}s "
-        "preGlobalRect:%{public}s clientRect:%{public}s", GetPersistentId(), rect.ToString().c_str(),
-        GetSessionRect().ToString().c_str(), globalRect.ToString().c_str(), GetClientRect().ToString().c_str());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, rect:%{public}s->%{public}s global=%{public}s client=%{public}s",
+        GetPersistentId(), GetSessionRect().ToString().c_str(), rect.ToString().c_str(), globalRect.ToString().c_str(),
+        GetClientRect().ToString().c_str());
     layoutController_->SetSessionRect(rect);
     RectCheckProcess();
     return true;

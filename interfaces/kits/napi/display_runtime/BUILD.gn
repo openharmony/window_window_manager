@@ -45,22 +45,22 @@ ohos_shared_library("display_napi") {
   ]
 
   deps = [
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     "../../../../dm:libdm",
     "../../../../utils:libwmutil",
     "../../../../utils:libwmutil_base",
     "../common:wm_napi_util",
-    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
   ]
 
   external_deps = [
     "ability_runtime:runtime",
     "c_utils:utils",
-    "hilog:libhilog",
-    "hitrace:hitrace_meter",
-    "napi:ace_napi",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "graphic_surface:surface",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "napi:ace_napi",
   ]
 
   public_external_deps = [ "image_framework:image_native" ]
@@ -69,4 +69,43 @@ ohos_shared_library("display_napi") {
   part_name = "window_manager"
   subsystem_name = "window"
 }
+
 ## Build display_napi.so }}}
+
+ohos_shared_library("display_kit") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  sources = [
+    "js_display.cpp",
+    "js_display_listener.cpp",
+  ]
+
+  configs = [
+    ":display_config",
+    "../../../../resources/config/build:coverage_flags",
+  ]
+
+  deps = [
+    "../../../../dm:libdm",
+    "../../../../utils:libwmutil",
+    "../../../../utils:libwmutil_base",
+    "../common:wm_napi_util",
+  ]
+
+  external_deps = [
+    "ability_runtime:runtime",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "napi:ace_napi",
+  ]
+
+  innerapi_tags = [ "platformsdk" ]
+  part_name = "window_manager"
+  subsystem_name = "window"
+}

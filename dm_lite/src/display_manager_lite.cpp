@@ -32,7 +32,7 @@ public:
     Impl(std::recursive_mutex& mutex) : mutex_(mutex) {}
     ~Impl();
     static inline SingletonDelegator<DisplayManagerLite> delegator;
-    sptr<DisplayLite> GetDefaultDisplay();
+    sptr<DisplayLite> GetDefaultDisplay(int32_t userId = CONCURRENT_USER_ID_DEFAULT);
     FoldStatus GetFoldStatus();
     FoldDisplayMode GetFoldDisplayMode();
     FoldDisplayMode GetFoldDisplayModeForExternal();
@@ -153,8 +153,12 @@ public:
         }
         TLOGD(WmsLogTag::DMS, "display %{public}" PRIu64", event %{public}u", displayInfo->GetDisplayId(), event);
         pImpl_->NotifyDisplayChange(displayInfo);
-        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
-        for (auto listener : pImpl_->displayListeners_) {
+        std::set<sptr<IDisplayListener>> displayListeners;
+        {
+            std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+            displayListeners = pImpl_->displayListeners_;
+        }
+        for (auto listener : displayListeners) {
             listener->OnChange(displayInfo->GetDisplayId());
         }
     };
@@ -503,14 +507,14 @@ FoldStatus DisplayManagerLite::Impl::GetFoldStatus()
     return SingletonContainer::Get<DisplayManagerAdapterLite>().GetFoldStatus();
 }
 
-sptr<DisplayLite> DisplayManagerLite::GetDefaultDisplay()
+sptr<DisplayLite> DisplayManagerLite::GetDefaultDisplay(int32_t userId)
 {
-    return pImpl_->GetDefaultDisplay();
+    return pImpl_->GetDefaultDisplay(userId);
 }
 
-sptr<DisplayLite> DisplayManagerLite::Impl::GetDefaultDisplay()
+sptr<DisplayLite> DisplayManagerLite::Impl::GetDefaultDisplay(int32_t userId)
 {
-    auto displayInfo = SingletonContainer::Get<DisplayManagerAdapterLite>().GetDefaultDisplayInfo();
+    auto displayInfo = SingletonContainer::Get<DisplayManagerAdapterLite>().GetDefaultDisplayInfo(userId);
     if (displayInfo == nullptr) {
         return nullptr;
     }
@@ -848,18 +852,18 @@ uint32_t DisplayManagerLite::GetScreenBrightness(uint64_t screenId) const
     return level;
 }
 
-DisplayId DisplayManagerLite::GetDefaultDisplayId()
+DisplayId DisplayManagerLite::GetDefaultDisplayId(int32_t userId)
 {
-    auto info = SingletonContainer::Get<DisplayManagerAdapterLite>().GetDefaultDisplayInfo();
+    auto info = SingletonContainer::Get<DisplayManagerAdapterLite>().GetDefaultDisplayInfo(userId);
     if (info == nullptr) {
         return DISPLAY_ID_INVALID;
     }
     return info->GetDisplayId();
 }
 
-std::vector<DisplayId> DisplayManagerLite::GetAllDisplayIds()
+std::vector<DisplayId> DisplayManagerLite::GetAllDisplayIds(int32_t userId)
 {
-    return SingletonContainer::Get<DisplayManagerAdapterLite>().GetAllDisplayIds();
+    return SingletonContainer::Get<DisplayManagerAdapterLite>().GetAllDisplayIds(userId);
 }
 
 VirtualScreenFlag DisplayManagerLite::GetVirtualScreenFlag(ScreenId screenId)

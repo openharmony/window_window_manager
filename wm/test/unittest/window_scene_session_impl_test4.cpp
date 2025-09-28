@@ -1686,6 +1686,74 @@ HWTEST_F(WindowSceneSessionImplTest4, FindParentMainSession001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: hasAncestorFloatSession
+ * @tc.desc: hasAncestorFloatSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, hasAncestorFloatSession, TestSize.Level1)
+{
+    using SessionPair = std::pair<uint64_t, sptr<WindowSessionImpl>>;
+    int32_t subWindowId = 1;
+    auto subWindow = CreateWindow("subWindow", WindowType::WINDOW_TYPE_APP_SUB_WINDOW, subWindowId);
+    subWindow->windowSessionMap_.clear();
+    subWindow->windowSessionMap_["nullptr"] = SessionPair(0, nullptr);
+    EXPECT_FALSE(subWindow->hasAncestorFloatSession(0, subWindow->windowSessionMap_));
+    EXPECT_FALSE(subWindow->hasAncestorFloatSession(subWindowId, subWindow->windowSessionMap_));
+
+    subWindow->windowSessionMap_["subWindow"] = SessionPair(subWindowId, subWindow);
+    EXPECT_FALSE(subWindow->hasAncestorFloatSession(subWindowId, subWindow->windowSessionMap_));
+
+    auto window = CreateWindow("window", WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, 2);
+    window->windowSessionMap_["window"] = SessionPair(window->GetPersistentId(), window);
+    subWindow->property_->SetParentPersistentId(window->GetPersistentId());
+    subWindow->property_->SetParentId(window->GetPersistentId());
+    EXPECT_FALSE(subWindow->hasAncestorFloatSession(subWindowId, subWindow->windowSessionMap_));
+
+    subWindowId = 3;
+    auto subWindow2 = CreateWindow("subWindow2", WindowType::WINDOW_TYPE_APP_SUB_WINDOW, subWindowId);
+    subWindow2->property_->SetParentPersistentId(subWindow->GetPersistentId());
+    subWindow2->property_->SetParentId(subWindow->GetPersistentId());
+    subWindow2->windowSessionMap_["subWindow2"] = SessionPair(subWindowId, subWindow2);
+    EXPECT_FALSE(subWindow->hasAncestorFloatSession(subWindowId, subWindow->windowSessionMap_));
+
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    EXPECT_TRUE(subWindow->hasAncestorFloatSession(subWindowId, subWindow->windowSessionMap_));
+    subWindow->windowSessionMap_.clear();
+}
+
+/**
+ * @tc.name: GetParentSessionAndVerify_forFloatSubWindow
+ * @tc.desc: hasAncestorFloatSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, GetParentSessionAndVerify_forFloatSubWindow, TestSize.Level1)
+{
+    using SessionPair = std::pair<uint64_t, sptr<WindowSessionImpl>>;
+    auto toastSubWindow = CreateWindow("toastSubWindow", WindowType::WINDOW_TYPE_APP_SUB_WINDOW, 1);
+    toastSubWindow->property_->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_TOAST);
+    toastSubWindow->windowSessionMap_.clear();
+    sptr<WindowSessionImpl> parentSession = nullptr;
+    auto res = toastSubWindow->GetParentSessionAndVerify(true, parentSession);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, res);
+
+    toastSubWindow->windowSessionMap_["toastSubWindow"] =
+        SessionPair(toastSubWindow->GetPersistentId(), toastSubWindow);
+    toastSubWindow->GetParentSessionAndVerify(true, parentSession);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, res);
+    auto subWindow = CreateWindow("subWindow", WindowType::WINDOW_TYPE_APP_SUB_WINDOW, 2);
+    subWindow->windowSessionMap_["subWindow"] = SessionPair(subWindow->GetPersistentId(), subWindow);
+    auto floatWindow = CreateWindow("floatWindow", WindowType::WINDOW_TYPE_FLOAT, 3);
+    floatWindow->windowSessionMap_["floatWindow"] = SessionPair(floatWindow->GetPersistentId(), floatWindow);
+    toastSubWindow->property_->SetParentPersistentId(subWindow->GetPersistentId());
+    toastSubWindow->property_->SetParentId(subWindow->GetPersistentId());
+    subWindow->property_->SetParentPersistentId(floatWindow->GetPersistentId());
+    subWindow->property_->SetParentId(floatWindow->GetPersistentId());
+    res = toastSubWindow->GetParentSessionAndVerify(true, parentSession);
+    toastSubWindow->windowSessionMap_.clear();
+    EXPECT_EQ(WMError::WM_OK, res);
+}
+
+/**
  * @tc.name: IsPcOrPadFreeMultiWindowMode
  * @tc.desc: IsPcOrPadFreeMultiWindowMode
  * @tc.type: FUNC

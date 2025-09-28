@@ -1577,10 +1577,12 @@ HWTEST_F(SceneSessionManagerTest2, LoadFreeMultiWindowConfigTest, TestSize.Level
  */
 HWTEST_F(SceneSessionManagerTest2, Init, TestSize.Level1)
 {
-    int ret = 0;
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     ssm_->Init();
     ssm_->RegisterAppListener();
-    ASSERT_EQ(ret, 0);
+    EXPECT_FALSE(g_logMsg.find("appMgrClient is nullptr.") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -1590,13 +1592,11 @@ HWTEST_F(SceneSessionManagerTest2, Init, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, LoadWindowSceneXml, TestSize.Level1)
 {
-    int ret = 0;
     ssm_->LoadWindowSceneXml();
     ssm_->ConfigWindowSceneXml();
     ssm_->SetEnableInputEvent(true);
     ssm_->SetEnableInputEvent(false);
     ASSERT_EQ(ssm_->IsInputEventEnabled(), false);
-    ASSERT_EQ(ret, 0);
 }
 
 /**
@@ -1628,7 +1628,8 @@ HWTEST_F(SceneSessionManagerTest2, UpdateRecoveredSessionInfo, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, UpdateRecoveredSessionInfo02, TestSize.Level1)
 {
-    int ret = 0;
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     ASSERT_NE(ssm_, nullptr);
     std::vector<int32_t> recoveredPersistentIds;
     recoveredPersistentIds.push_back(0);
@@ -1641,9 +1642,10 @@ HWTEST_F(SceneSessionManagerTest2, UpdateRecoveredSessionInfo02, TestSize.Level1
     ssm_->failRecoveredPersistentIdSet_.insert(0);
     ssm_->sceneSessionMap_.insert({ 1, sceneSession });
     ssm_->UpdateRecoveredSessionInfo(recoveredPersistentIds);
+    EXPECT_FALSE(g_logMsg.find("Session is nullptr,") != std::string::npos);
+    LOG_SetCallback(nullptr);
     ssm_->failRecoveredPersistentIdSet_.erase(0);
     ssm_->sceneSessionMap_.erase(1);
-    ASSERT_EQ(ret, 0);
 }
 
 /**
@@ -1653,7 +1655,8 @@ HWTEST_F(SceneSessionManagerTest2, UpdateRecoveredSessionInfo02, TestSize.Level1
  */
 HWTEST_F(SceneSessionManagerTest2, NotifyCreateSubSession, TestSize.Level1)
 {
-    int ret = 0;
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
     info.abilityName_ = "NotifyCreateSubSession";
@@ -1663,20 +1666,9 @@ HWTEST_F(SceneSessionManagerTest2, NotifyCreateSubSession, TestSize.Level1)
     NotifyCreateSubSessionFunc func;
     ssm_->createSubSessionFuncMap_.insert({ 1, func });
     ssm_->NotifyCreateSubSession(1, sceneSession, 256);
+    EXPECT_FALSE(g_logMsg.find("SubSession is nullptr") != std::string::npos);
+    LOG_SetCallback(nullptr);
     ssm_->createSubSessionFuncMap_.erase(1);
-    ASSERT_EQ(ret, 0);
-}
-
-/**
- * @tc.name: ConfigWindowSceneXml
- * @tc.desc: SceneSesionManager config window scene xml run
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml, TestSize.Level1)
-{
-    int ret = 0;
-    ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ret, 0);
 }
 
 /**

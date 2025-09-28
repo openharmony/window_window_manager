@@ -19,6 +19,7 @@
 #include "common_test_utils.h"
 #include "display_test_utils.h"
 #include "display_manager_proxy.h"
+#include "dm_common.h"
 #include "future.h"
 #include "pixel_map.h"
 #include "screenshot_listener_future.h"
@@ -96,7 +97,7 @@ HWTEST_F(ScreenshotTest, ScreenShotValid01, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
-    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo()).Times(1).WillOnce(Return(nullptr));
+    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo(CONCURRENT_USER_ID_DEFAULT)).Times(1).WillOnce(Return(nullptr));
     EXPECT_EQ(DISPLAY_ID_INVALID, DisplayManager::GetInstance().GetDefaultDisplayId());
 
     Media::InitializationOptions opt;
@@ -140,7 +141,7 @@ HWTEST_F(ScreenshotTest, ScreenShotValid03, TestSize.Level1)
     displayInfo->SetWidth(CommonTestUtils::TEST_IMAGE_WIDTH);
     displayInfo->SetHeight(CommonTestUtils::TEST_IMAGE_HEIGHT);
     displayInfo->SetDisplayId(0);
-    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo()).Times(1).WillOnce(Return(displayInfo));
+    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo(CONCURRENT_USER_ID_DEFAULT)).Times(1).WillOnce(Return(displayInfo));
 
     Media::Size screenSize = {screenshot->GetWidth(), screenshot->GetHeight()};
     ASSERT_TRUE(Utils::SizeEqualToDisplay(dm.GetDefaultDisplay(), screenSize));
@@ -177,7 +178,7 @@ HWTEST_F(ScreenshotTest, ScreenShotValid05, TestSize.Level1)
     auto& dm = DisplayManager::GetInstance();
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
-    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo()).Times(1).WillOnce(Return(nullptr));
+    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo(CONCURRENT_USER_ID_DEFAULT)).Times(1).WillOnce(Return(nullptr));
     EXPECT_EQ(DISPLAY_ID_INVALID, DisplayManager::GetInstance().GetDefaultDisplayId());
 
     Media::InitializationOptions opt;
@@ -234,7 +235,7 @@ HWTEST_F(ScreenshotTest, ScreenShotValid06, TestSize.Level1)
     displayInfo->SetWidth(CommonTestUtils::TEST_IMAGE_WIDTH);
     displayInfo->SetHeight(CommonTestUtils::TEST_IMAGE_HEIGHT);
     displayInfo->SetDisplayId(0);
-    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo()).Times(1).WillOnce(Return(displayInfo));
+    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo(CONCURRENT_USER_ID_DEFAULT)).Times(1).WillOnce(Return(displayInfo));
     Media::Size screenSize = {screenshot->GetWidth(), screenshot->GetHeight()};
     ASSERT_TRUE(Utils::SizeEqualToDisplay(dm.GetDefaultDisplay(), screenSize));
 }

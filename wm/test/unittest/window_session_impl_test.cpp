@@ -27,6 +27,7 @@
 #include "mock_session_stub.h"
 #include "mock_uicontent.h"
 #include "mock_window.h"
+#include "mock_window_session_property.h"
 #include "parameters.h"
 #include "window_helper.h"
 #include "window_session_impl.h"
@@ -158,6 +159,29 @@ HWTEST_F(WindowSessionImplTest, Connect01, TestSize.Level1)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
+/**
+ * @tc.name: Connect02
+ * @tc.desc: Connect session
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, Connect02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("Connect02");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    sptr<WindowSessionPropertyMocker> property = sptr<WindowSessionPropertyMocker>::MakeSptr();
+    window->property_ = property;
+    window->property_->SetPersistentId(1);
+    window->SetContext(abilityContext_);
+ 
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    window->hostSession_ = session;
+    EXPECT_CALL(*(property), GetDisplayId()).WillOnce(Return(0)).WillRepeatedly(Return(1001));
+    EXPECT_CALL(*(session), Connect(_, _, _, _, _, _, _)).WillOnce(Return(WSError::WS_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Connect());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
 
 /**
  * @tc.name: Connect_RegisterWindowScaleCallback

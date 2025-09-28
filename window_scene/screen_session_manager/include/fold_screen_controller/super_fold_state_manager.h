@@ -86,6 +86,8 @@ public:
 
     nlohmann::ordered_json GetFoldCreaseRegionJson();
 
+    void HandleSuperFoldDisplayCallback(sptr<ScreenSession>& screenSession);
+
 private:
     std::atomic<SuperFoldStatus> curState_ = SuperFoldStatus::UNKNOWN;
     sptr<FoldCreaseRegion> currentSuperFoldCreaseRegion_ = nullptr;
@@ -124,11 +126,11 @@ private:
     void SetCurrentStatus(SuperFoldStatus curState);
 
     void HandleDisplayNotify(SuperFoldStatusChangeEvents changeEvent);
-    void HandleExtendToHalfFoldDisplayNotify(sptr<ScreenSession> screenSession);
-    void HandleHalfFoldToExtendDisplayNotify(sptr<ScreenSession> screenSession);
-    void HandleKeyboardOnDisplayNotify(sptr<ScreenSession> screenSession);
-    void HandleKeyboardOffDisplayNotify(sptr<ScreenSession> screenSession);
-    void HandleSystemKeyboardStatusDisplayNotify(sptr<ScreenSession> screenSession, bool isTpKeyboardOn = false);
+    void HandleExtendToHalfFoldDisplayNotify(sptr<ScreenSession>& screenSession);
+    void HandleHalfFoldToExtendDisplayNotify(sptr<ScreenSession>& screenSession);
+    void HandleKeyboardOnDisplayNotify(sptr<ScreenSession>& screenSession);
+    void HandleKeyboardOffDisplayNotify(sptr<ScreenSession>& screenSession);
+    void HandleSystemKeyboardStatusDisplayNotify(sptr<ScreenSession>& screenSession, bool isTpKeyboardOn = false);
     void ReportNotifySuperFoldStatusChange(int32_t currentStatus, int32_t nextStatus, float postureAngle);
 
     static bool ChangeScreenState(bool toHalf);
@@ -136,7 +138,6 @@ private:
 
     uint32_t GetFoldCreaseHeight() const;
     DMError RefreshMirrorRegionInner(sptr<ScreenSession>& mainScreenSession, sptr<ScreenSession>& secondarySession);
-    DMError ForceChangeMirrorMode(sptr<ScreenSession>& mainScreenSession, sptr<ScreenSession>& secondarySession);
 };
 } // Rosen
 } // OHOS

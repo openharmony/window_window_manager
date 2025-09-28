@@ -50,7 +50,7 @@ public:
     void SetFoldDisplayModeAsync(const FoldDisplayMode displayMode);
     bool IsFoldable();
     FoldStatus GetFoldStatus();
-    sptr<DisplayInfo> GetDefaultDisplayInfo();
+    sptr<DisplayInfo> GetDefaultDisplayInfo(int32_t userId = CONCURRENT_USER_ID_DEFAULT);
     sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId);
     sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId);
     VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId);
@@ -72,7 +72,7 @@ public:
     bool TryToCancelScreenOff();
     bool SetScreenBrightness(uint64_t screenId, uint32_t level);
     uint32_t GetScreenBrightness(uint64_t screenId);
-    std::vector<DisplayId> GetAllDisplayIds();
+    std::vector<DisplayId> GetAllDisplayIds(int32_t userId = CONCURRENT_USER_ID_DEFAULT);
     DMError GetPhysicalScreenIds(std::vector<ScreenId>& screenIds);
     DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos);
     DMError SetSystemKeyboardStatus(bool isTpKeyboardOn = false);

@@ -40,6 +40,14 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
+    std::string g_logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_logMsg += msg;
+    }
+}
+namespace {
 const std::string EMPTY_DEVICE_ID = "";
 }
 class SceneSessionManagerLifecycleTest2 : public testing::Test {
@@ -204,6 +212,85 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange02, TestSize.Lev
 }
 
 /**
+ * @tc.name: MinimizeAllAppWindows
+ * @tc.desc: MinimizeAllAppWindows
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLifecycleTest2, MinimizeAllAppWindows, TestSize.Level1)
+{
+    int ret = 0;
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "MinimizeAllAppWindows";
+    info.bundleName_ = "MinimizeAllAppWindows";
+    info.screenId_ = 0;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+
+    DisplayId displayId = 0;
+    MockAccesstokenKit::MockIsSACalling(false);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    EXPECT_EQ(ssm_->MinimizeAllAppWindows(displayId), WMError::WM_ERROR_NOT_SYSTEM_APP);
+
+    MockAccesstokenKit::MockIsSACalling(true);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    EXPECT_EQ(ssm_->MinimizeAllAppWindows(displayId), WMError::WM_OK);
+
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    EXPECT_EQ(ssm_->MinimizeAllAppWindows(displayId), WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    EXPECT_EQ(ssm_->MinimizeAllAppWindows(displayId), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: MinimizeAllAppWindows
+ * @tc.desc: MinimizeAllAppWindows
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLifecycleTest2, MinimizeAllWindow01, TestSize.Level1)
+{
+    int ret = 0;
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "MinimizeAllWindow01";
+    info.bundleName_ = "MinimizeAllWindow01";
+    info.screenId_ = 0;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+
+    DisplayId displayId = 0;
+    MockAccesstokenKit::MockIsSACalling(true);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->property_ = property;
+    sceneSession->SetSessionInfoPersistentId(9);
+    sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
+    sceneSession->SetSessionLabel("MinimizeAllWindow01");
+    sceneSession->SetScreenId(0);
+    ssm_->sceneSessionMap_.insert({1, nullptr});
+    ssm_->sceneSessionMap_.insert({9, sceneSession});
+    EXPECT_EQ(ssm_->MinimizeAllAppWindows(displayId), WMError::WM_OK);
+
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    sceneSession->property_ = property;
+    ssm_->sceneSessionMap_.insert({9, sceneSession});
+    EXPECT_EQ(ssm_->MinimizeAllAppWindows(displayId), WMError::WM_OK);
+
+    sceneSession->SetScreenId(1);
+    ssm_->sceneSessionMap_.insert({9, sceneSession});
+    EXPECT_EQ(ssm_->MinimizeAllAppWindows(displayId), WMError::WM_OK);
+
+    sceneSession->SetScreenId(1);
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    sceneSession->property_ = property;
+    ssm_->sceneSessionMap_.insert({9, sceneSession});
+    EXPECT_EQ(ssm_->MinimizeAllAppWindows(displayId), WMError::WM_OK);
+}
+
+/**
  * @tc.name: NotifyWindowStateErrorFromMMI
  * @tc.desc: NotifyWindowStateErrorFromMMI
  * @tc.type: FUNC
@@ -300,14 +387,13 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, GetAllMainWindowInfo, TestSize.Level
  */
 HWTEST_F(SceneSessionManagerLifecycleTest2, GetMainWindowSnapshot, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     SessionInfo info;
     info.abilityName_ = "SceneSessionManagerLifecycleTest2";
     info.bundleName_ = "GetMainWindowSnapshot";
-    info.screenId_ = 0;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sceneSession->property_ = property;
     sceneSession->SetCallingPid(100);
@@ -334,7 +420,9 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, GetMainWindowSnapshot, TestSize.Leve
     MockAccesstokenKit::MockAccessTokenKitRet(-1);
     EXPECT_EQ(ssm_->GetMainWindowSnapshot(windowIds, configs, callback), WMError::WM_ERROR_INVALID_PERMISSION);
     MockAccesstokenKit::MockAccessTokenKitRet(0);
-    EXPECT_EQ(ssm_->GetMainWindowSnapshot(windowIds, configs, callback), WMError::WM_ERROR_INVALID_PARAM);
+    ssm_->GetMainWindowSnapshot(windowIds, configs, callback);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_TRUE(g_logMsg.find("Get snapshot failed") != std::string::npos);
 
     ssm_->sceneSessionMap_.insert({1, sceneSession});
     ssm_->sceneSessionMap_.insert({9, sceneSession});
@@ -350,7 +438,9 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, GetMainWindowSnapshot, TestSize.Leve
     ssm_->sceneSessionMap_.clear();
     ssm_->sceneSessionMap_.insert({1, sceneSession});
     ssm_->sceneSessionMap_.insert({9, sceneSession});
-    EXPECT_EQ(ssm_->GetMainWindowSnapshot(windowIds, configs, getSnapshotCallback), WMError::WM_ERROR_INVALID_PARAM);
+    ssm_->GetMainWindowSnapshot(windowIds, configs, callback);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_TRUE(g_logMsg.find("is not mainWindow") != std::string::npos);
 }
  
 /**
@@ -360,6 +450,8 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, GetMainWindowSnapshot, TestSize.Leve
  */
 HWTEST_F(SceneSessionManagerLifecycleTest2, GetMainWindowSnapshot01, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     SessionInfo info;
     info.abilityName_ = "SceneSessionManagerLifecycleTest2";
     info.bundleName_ = "GetMainWindowSnapshot01";
@@ -387,7 +479,9 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, GetMainWindowSnapshot01, TestSize.Le
     windowIdsAbnormal.emplace_back(1000); // abnormal windowId
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     MockAccesstokenKit::MockAccessTokenKitRet(0);
-    EXPECT_EQ(ssm_->GetMainWindowSnapshot(windowIdsAbnormal, configs, callback), WMError::WM_ERROR_INVALID_PARAM);
+    ssm_->GetMainWindowSnapshot(windowIdsAbnormal, configs, callback);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_TRUE(g_logMsg.find("Get snapshot failed") != std::string::npos);
  
     std::vector<int32_t> windowIdsMaxSize;
     ssm_->sceneSessionMap_.clear();
