@@ -3409,6 +3409,14 @@ export class WindowInternal implements Window {
       this.offSync(this.nativeObj, type, callback);
     }
 
+    public onWindowHighlightChange(callback: Callback<boolean>): void {
+      this.onSync(this.nativeObj, "WindowHighlightChange", callback);
+    }
+
+    public offWindowHighlightChange(callback?: Callback<boolean>): void {
+      this.offSync(this.nativeObj, "WindowHighlightChange", callback);
+    }
+
     public showWindow(callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.showWindowSync(this.nativeObj);
@@ -3782,6 +3790,8 @@ export interface Window {
     on<T>(type: string, callback: Callback<T>): void;
     on<T>(type: 'noInteractionDetected', timeout: long, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;
+    onWindowHighlightChange(callback: Callback<boolean>): void;
+    offWindowHighlightChange(callback?: Callback<boolean>): void;
 }
 
 export native function CreateWindowStage(scene: long): WindowStageInternal;
