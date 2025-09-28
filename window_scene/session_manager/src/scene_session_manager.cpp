@@ -521,11 +521,18 @@ void SceneSessionManager::RegisterRecoverStateChangeListener()
 void SceneSessionManager::OnRecoverStateChange(const RecoverState& state)
 {
     TLOGI(WmsLogTag::WMS_RECOVER, "state: %{public}u", state);
+    recoverState_ = state;
     switch(state) {
         case RecoverState::RECOVER_INITIAL:
             break;
         case RecoverState::RECOVER_ENABLE_INPUT:
             SetDisplayBrightness(INVALID_BRIGHTNESS);
+            // All session info has been recovered then recover the window outline if need.
+            if (needRecoverOutline_) {
+                TLOGI(WmsLogTag::WMS_ANIMATION, "Recover the window outline.");
+                UpdateOutlineInner(outlineRemoteObject_, recoverOutlineParams_);
+                needRecoverOutline_ = false;
+            }
             break;
         default:
             break;
@@ -4475,11 +4482,6 @@ void SceneSessionManager::NotifyRecoveringFinished()
         recoveringFinished_ = true;
         recoverSubSessionCacheMap_.clear();
         recoverDialogSessionCacheMap_.clear();
-        if (needRecoverOutline_) {
-            TLOGNI(WmsLogTag::WMS_ANIMATION, "RecoverFinished recover outline.");
-            UpdateOutlineInner(outlineRemoteObject_, recoverOutlineParams_);
-            needRecoverOutline_ = false;
-        }
     }, __func__);
 }
 
@@ -17948,6 +17950,17 @@ bool SceneSessionManager::NeedOutline(int32_t persistentId, const std::vector<in
     return false;
 }
 
+bool SceneSessionManager::CacheOutlineParamsIfNeed(const OutlineParams& outlineParams)
+{
+    if (recoverState_ == RecoverState::RECOVER_INITIAL) {
+        recoverOutlineParams_= outlineParams;
+        needRecoverOutline_ = true;
+        TLOGI(WmsLogTag::WMS_ANIMATION, "Recovering has not finished, cache outline params.");
+        return true;
+    }
+    return false;
+}
+
 WMError SceneSessionManager::UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams)
 {
     TLOGI(WmsLogTag::WMS_ANIMATION, "%{public}s", outlineParams.ToString().c_str());
@@ -17957,6 +17970,12 @@ WMError SceneSessionManager::UpdateOutline(const sptr<IRemoteObject>& remoteObje
     }
 
     if (!(systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode())) {
+        // The isFreeMultiWindowMode has not recovered in pcmode device, cache the outline params.
+        bool shouldCacheOutlineParams = CacheOutlineParamsIfNeed(outlineParams);
+        if (shouldCacheOutlineParams) {
+            AddOutlineRemoteDeathRecipient(remoteObject);
+            return WMError::WM_OK;
+        }
         TLOGE(WmsLogTag::WMS_ANIMATION, "This device can not update outline.");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -17971,7 +17990,7 @@ void SceneSessionManager::UpdateOutlineInner(const sptr<IRemoteObject>& remoteOb
     taskScheduler_->PostAsyncTask([this, remoteObject, outlineParams]() {
         std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
         {
-            std::lock_guard<std::shared_mutex> lock(sceneSessionMapMutex_);
+            std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             sceneSessionMapCopy = sceneSessionMap_;
         }
 
@@ -17994,11 +18013,7 @@ void SceneSessionManager::UpdateOutlineInner(const sptr<IRemoteObject>& remoteOb
             }
         }
         AddOutlineRemoteDeathRecipient(remoteObject);
-        if (!recoveringFinished_) {
-            recoverOutlineParams_= outlineParams;
-            needRecoverOutline_ = true;
-            TLOGNI(WmsLogTag::WMS_ANIMATION, "Recovering not finished, cachae outline params.");
-        }
+        CacheOutlineParamsIfNeed(outlineParams);
     }, __func__);
 }
 
@@ -18045,7 +18060,7 @@ void SceneSessionManager::DeleteAllOutline(const sptr<IRemoteObject>& remoteObje
         }
         SessionState state = session->GetSessionState();
         if (state <= SessionState::STATE_DISCONNECT || state >= SessionState::STATE_END) {
-            TLOGI(WmsLogTag::WMS_ANIMATION, "session state: %{public}d invalid, id: %{public}d.", state, persistentId);
+            TLOGD(WmsLogTag::WMS_ANIMATION, "session state: %{public}d invalid, id: %{public}d.", state, persistentId);
             continue;
         }
         OutlineStyleParams defaultParams;

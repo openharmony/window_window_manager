@@ -1750,6 +1750,7 @@ private:
     WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId) override;
     void UpdateAllStartingWindowRdb();
 
+    RecoverState recoverState_ = RecoverState::RECOVER_END;
     OutlineParams recoverOutlineParams_;
     bool needRecoverOutline_ = false;
     sptr<IRemoteObject> outlineRemoteObject_;
@@ -1759,6 +1760,7 @@ private:
     bool NeedOutline(int32_t persistentId, const std::vector<int32_t>& persistentIdList);
     void AddOutlineRemoteDeathRecipient(const sptr<IRemoteObject>& remoteObject);
     void DeleteAllOutline(const sptr<IRemoteObject>& remoteObject);
+    bool CacheOutlineParamsIfNeed(const OutlineParams& outlineParams);
 
     std::string GetCallerSessionColorMode(const SessionInfo& sessionInfo);
     void NotifySessionScreenLockedChange(bool isScreenLocked);
