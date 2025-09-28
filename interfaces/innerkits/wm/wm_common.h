@@ -3161,9 +3161,6 @@ struct OutlineParams : public Parcelable {
     static OutlineParams* Unmarshalling(Parcel& parcel)
     {
         std::unique_ptr<OutlineParams> params = std::make_unique<OutlineParams>();
-        if (params == nullptr) {
-            return nullptr;
-        }
 
         uint32_t type = 0;
         if (!parcel.ReadUint32(type)) {
