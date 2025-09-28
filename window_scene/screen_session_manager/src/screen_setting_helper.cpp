@@ -59,8 +59,8 @@ const std::string SCREEN_SHAPE = system::GetParameter("const.window.screen_shape
 constexpr int32_t INDEX_EXTEND_SCREEN_DPI_POSITION = -1;
 const std::string ENABLE_RESOLUTION_EFFECT = "1";
 constexpr int32_t EXPECT_SCREEN_RESOLUTION_EFFECT_SIZE = 2;
-constexpr int32_t EXPECT_SCREEN_RESOLUTION_EFFECT_SN = 0;
-constexpr int32_t EXPECT_SCREEN_RESOLUTION_EFFECT_EN = 1;
+constexpr int32_t INDEX_SCREEN_RESOLUTION_EFFECT_SN = 0;
+constexpr int32_t INDEX_SCREEN_RESOLUTION_EFFECT_EN = 1;
 
 void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc func)
 {
@@ -741,8 +741,8 @@ bool ScreenSettingHelper::GetResolutionEffect(bool& enable, const std::string& s
             TLOGE(WmsLogTag::DMS, "split failed, screenResolutionEffect size: %{public}d", dataSize);
             return false;
         }
-        if (infoVector[EXPECT_SCREEN_RESOLUTION_EFFECT_SN] == serialNumber) {
-            enable = (infoVector[EXPECT_SCREEN_RESOLUTION_EFFECT_EN] == ENABLE_RESOLUTION_EFFECT);
+        if (infoVector[INDEX_SCREEN_RESOLUTION_EFFECT_SN] == serialNumber) {
+            enable = (infoVector[INDEX_SCREEN_RESOLUTION_EFFECT_EN] == ENABLE_RESOLUTION_EFFECT);
             TLOGI(WmsLogTag::DMS, "screenResolutionEffectEn: %{public}d", enable);
         }
     }
