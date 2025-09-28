@@ -718,7 +718,7 @@ void ScreenSettingHelper::UnregisterSettingResolutionEffectObserver()
 
 bool ScreenSettingHelper::GetResolutionEffect(bool& enable, const std::string& serialNumber, const std::string& key)
 {
-    std::string value;
+    std::string value = "";
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = settingProvider.GetStringValue(key, value);
     if (ret != ERR_OK) {
