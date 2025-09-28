@@ -25,6 +25,7 @@
 #include "screen.h"
 #include "screen_group_info.h"
 #include "session/screen/include/screen_property.h"
+#include "session/screen/include/screen_session.h"
 #include "window_manager_hilog.h"
 #include "zidl/idisplay_manager_agent.h"
 #include "zidl/screen_session_manager_client_interface.h"
@@ -389,6 +390,10 @@ public:
         bool enable) { return DMError::DM_OK; }
     virtual bool SynchronizePowerStatus(ScreenPowerState state) { return false; }
     virtual void NotifySwitchUserAnimationFinish() {}
+    virtual DMError SyncScreenPropertyChangedToServer(ScreenId screenId, const ScreenProperty& screenProperty)
+    {
+        return DMError::DM_OK;
+    }
 };
 } // namespace Rosen
 } // namespace OHOS

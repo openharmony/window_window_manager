@@ -27,6 +27,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(SingletonContainer)
 SingletonContainer::~SingletonContainer()
 {
     destroyed_ = true;
+    std::unique_lock<std::shared_mutex> lock(mapMutex_);
     while (singletonMap.empty() == false) {
         auto it = singletonMap.begin();
         while (it != singletonMap.end()) {
@@ -68,6 +69,7 @@ void SingletonContainer::AddSingleton(const std::string& name, void* instance)
 
 void SingletonContainer::SetSingleton(const std::string& name, void* instance)
 {
+    std::unique_lock<std::shared_mutex> lock(mapMutex_);
     if (stringMap.find(name) == stringMap.end()) {
         AddSingleton(name, instance);
     } else {
@@ -78,6 +80,7 @@ void SingletonContainer::SetSingleton(const std::string& name, void* instance)
 
 void* SingletonContainer::GetSingleton(const std::string& name)
 {
+    std::shared_lock<std::shared_mutex> lock(mapMutex_);
     if (stringMap.find(name) == stringMap.end()) {
         TLOGE(WmsLogTag::DEFAULT, "cant get %{public}s", name.c_str());
         return nullptr;
@@ -91,11 +94,14 @@ void* SingletonContainer::GetSingleton(const std::string& name)
 
 void* SingletonContainer::DependOn(const std::string& instance, const std::string& name)
 {
-    auto& instanceDependencySet = dependencySetMap[stringMap[instance]];
-    if (instanceDependencySet.find(stringMap[name]) == instanceDependencySet.end()) {
-        WLOGFD("%{public}s DependOn %{public}s", instance.c_str(), name.c_str());
-        instanceDependencySet.insert(stringMap[name]);
-        singletonMap[stringMap[name]].refCount++;
+    {
+        std::unique_lock<std::shared_mutex> lock(mapMutex_);
+        auto& instanceDependencySet = dependencySetMap[stringMap[instance]];
+        if (instanceDependencySet.find(stringMap[name]) == instanceDependencySet.end()) {
+            WLOGFD("%{public}s DependOn %{public}s", instance.c_str(), name.c_str());
+            instanceDependencySet.insert(stringMap[name]);
+            singletonMap[stringMap[name]].refCount++;
+        }
     }
     return GetSingleton(name);
 }

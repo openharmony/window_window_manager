@@ -117,7 +117,7 @@ void DisplayAniListener::OnCreate(DisplayId id)
         }
         auto task = [env = env_, oneAniCallback, id] {
             DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "displayEventCallBack",
-                nullptr, oneAniCallback, static_cast<ani_double>(id));
+                nullptr, oneAniCallback, static_cast<ani_long>(id));
         };
         if (!eventHandler_) {
             TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
@@ -162,7 +162,7 @@ void DisplayAniListener::OnDestroy(DisplayId id)
         }
         auto task = [env = env_, oneAniCallback, id] {
             DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "displayEventCallBack",
-                nullptr, oneAniCallback, static_cast<ani_double>(id));
+                nullptr, oneAniCallback, static_cast<ani_long>(id));
         };
         if (!eventHandler_) {
             TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
@@ -204,7 +204,7 @@ void DisplayAniListener::OnChange(DisplayId id)
         }
         auto task = [env = env_, oneAniCallback, id] {
             DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "displayEventCallBack",
-                nullptr, oneAniCallback, static_cast<ani_double>(id));
+                nullptr, oneAniCallback, static_cast<ani_long>(id));
         };
         if (!eventHandler_) {
             TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
@@ -306,10 +306,10 @@ void DisplayAniListener::OnFoldAngleChanged(std::vector<float> foldAngles)
     }
     if (env_ != nullptr) {
         auto it = aniCallback_.find(ANI_EVENT_FOLD_ANGLE_CHANGED);
-        ani_array_double cbArray;
-        DisplayAniUtils::CreateAniArrayDouble(env_, foldAngles.size(), &cbArray, foldAngles);
         for (auto oneAniCallback : it->second) {
-            auto task = [env = env_, oneAniCallback, cbArray] () {
+            auto task = [env = env_, oneAniCallback, foldAngles] () {
+                ani_array_double cbArray;
+                DisplayAniUtils::CreateAniArrayDouble(env, foldAngles.size(), &cbArray, foldAngles);
                 DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "foldAngleChangeCallback",
                     nullptr, oneAniCallback, cbArray);
             };

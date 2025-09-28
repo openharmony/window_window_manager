@@ -28,6 +28,11 @@ public:
     {
         return 0;
     }
+
+    static uint64_t GetCallingFullTokenID()
+    {
+        return 0;
+    }
 };
 }
 #endif // OHOS_IPC_IPC_SKELETON_H

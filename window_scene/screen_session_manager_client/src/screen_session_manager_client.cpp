@@ -30,6 +30,8 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr int LINE_WIDTH = 30;
+constexpr uint32_t DISPLAY_A_HEIGHT = 3296;
+constexpr uint32_t DISPLAY_B_HEIGHT = 1608;
 } // namespace
 
 WM_IMPLEMENT_SINGLE_INSTANCE(ScreenSessionManagerClient)
@@ -162,6 +164,14 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(SessionOption option,
                 option.screenId_, static_cast<int>(screenEvent), option.rsId_);
         }
     }
+    auto task = [this, option, screenEvent] {
+        HandleScreenDisconnectEvent(option, screenEvent);
+    };
+    ffrtQueueHelper_->SubmitTaskToHead(std::move(task));
+}
+
+void ScreenSessionManagerClient::HandleScreenDisconnectEvent(SessionOption option, ScreenEvent screenEvent)
+{
     if (screenEvent == ScreenEvent::DISCONNECTED) {
         if (HandleScreenDisconnection(option)) {
             connectedScreenSet_.erase(option.screenId_);
@@ -247,7 +257,147 @@ void ScreenSessionManagerClient::OnPropertyChanged(ScreenId screenId,
         TLOGE(WmsLogTag::DMS, "screenSession is null");
         return;
     }
-    screenSession->PropertyChange(property, reason);
+    screenSession->SetScreenProperty(property);
+    ScreenProperty screenProperty = screenSession->GetScreenProperty();
+    SuperFoldStatusChangeEvents changeEvent = screenSession->GetSuperFoldStatusChangeEvent();
+    int32_t validHeight = screenProperty.GetCurrentValidHeight();
+    bool isKeyboardOn = screenProperty.GetIsKeyboardOn();
+    SuperFoldStatus currentState = GetSuperFoldStatus();
+    switch (changeEvent) {
+        case SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED: {
+            TLOGI(WmsLogTag::DMS, "handle extend change to half fold");
+            screenSession->UpdatePropertyByFakeInUse(true);
+            break;
+        }
+        case SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED: {
+            TLOGI(WmsLogTag::DMS, "handle half fold change to expanded");
+            screenSession->UpdatePropertyByFakeInUse(false);
+            break;
+        }
+        case SuperFoldStatusChangeEvents::KEYBOARD_ON: {
+            TLOGI(WmsLogTag::DMS, "handle keyboard on");
+            HandleKeyboardOnPropertyChange(screenSession, validHeight);
+            break;
+        }
+        case SuperFoldStatusChangeEvents::KEYBOARD_OFF: {
+            TLOGI(WmsLogTag::DMS, "handle keyboard off");
+            HandleKeyboardOffPropertyChange(screenSession);
+            break;
+        }
+        case SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_ON: {
+            TLOGI(WmsLogTag::DMS, "handle system keyboard on");
+            HandleSystemKeyboardOnPropertyChange(screenSession, currentState, isKeyboardOn, validHeight);
+            break;
+        }
+        case SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_OFF: {
+            TLOGI(WmsLogTag::DMS, "handle system keyboard off");
+            HandleSystemKeyboardOffPropertyChange(screenSession, currentState, isKeyboardOn);
+            break;
+        }
+        default:
+            TLOGE(WmsLogTag::DMS, "nothing to handle");
+    }
+    screenSession->PropertyChange(screenSession->GetScreenProperty(), reason);
+}
+
+void ScreenSessionManagerClient::HandleKeyboardOnPropertyChange(sptr<ScreenSession>& screenSession, int32_t height)
+{
+    TLOGI(WmsLogTag::DMS, "Client HandleKeyboardOnPropertyChange");
+    auto screenBounds = screenSession->GetScreenProperty().GetBounds();
+    screenSession->UpdatePropertyByFakeInUse(false);
+    if (screenBounds.rect_.GetWidth() < screenBounds.rect_.GetHeight()) {
+        screenSession->SetValidHeight(height);
+        screenSession->SetValidWidth(screenBounds.rect_.GetWidth());
+    } else {
+        screenSession->SetValidHeight(height);
+        screenSession->SetValidWidth(screenBounds.rect_.GetHeight());
+    }
+    screenSession->SetScreenAreaHeight(DISPLAY_B_HEIGHT);
+}
+
+void ScreenSessionManagerClient::HandleKeyboardOffPropertyChange(sptr<ScreenSession>& screenSession)
+{
+    TLOGI(WmsLogTag::DMS, "Client HandleKeyboardOffPropertyChange");
+    auto screenBounds = screenSession->GetScreenProperty().GetBounds();
+    screenSession->UpdatePropertyByFakeInUse(true);
+    screenSession->SetValidHeight(screenBounds.rect_.GetHeight());
+    screenSession->SetValidWidth(screenBounds.rect_.GetWidth());
+    screenSession->SetScreenAreaHeight(DISPLAY_A_HEIGHT);
+}
+
+void ScreenSessionManagerClient::HandleSystemKeyboardOnPropertyChange(sptr<ScreenSession>& screenSession,
+    SuperFoldStatus currentStatus, bool isKeyboardOn, int32_t validHeight)
+{
+    TLOGI(WmsLogTag::DMS, "Client HandleSystemKeyboardOnPropertyChange");
+    if (!isKeyboardOn && currentStatus == SuperFoldStatus::HALF_FOLDED) {
+        TLOGI(WmsLogTag::DMS, "KeyboardOff and currentStatus is HALF_FOLDED");
+        screenSession->UpdatePropertyByFakeInUse(false);
+    }
+    auto screenBounds = screenSession->GetScreenProperty().GetBounds();
+    if (screenBounds.rect_.GetWidth() < screenBounds.rect_.GetHeight()) {
+        screenSession->SetPointerActiveWidth(static_cast<int32_t>(screenBounds.rect_.GetWidth()));
+        screenSession->SetPointerActiveHeight(static_cast<int32_t>(validHeight));
+    } else {
+        screenSession->SetPointerActiveWidth(static_cast<int32_t>(screenBounds.rect_.GetHeight()));
+        screenSession->SetPointerActiveHeight(static_cast<int32_t>(validHeight));
+    }
+}
+
+void ScreenSessionManagerClient::HandleSystemKeyboardOffPropertyChange(sptr<ScreenSession>& screenSession,
+    SuperFoldStatus currentStatus, bool isKeyboardOn)
+{
+    TLOGI(WmsLogTag::DMS, "Client HandleSystemKeyboardOffPropertyChange");
+    if (!isKeyboardOn && currentStatus == SuperFoldStatus::HALF_FOLDED) {
+        TLOGI(WmsLogTag::DMS, "KeyboardOff and currentStatus is HALF_FOLDED");
+        screenSession->UpdatePropertyByFakeInUse(true);
+    }
+    screenSession->SetPointerActiveWidth(0);
+    screenSession->SetPointerActiveHeight(0);
+}
+
+void ScreenSessionManagerClient::OnScreenPropertyChanged(ScreenId screenId, float rotation, RRect bounds)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        TLOGE(WmsLogTag::DMS, "screenSession is null");
+        return;
+    }
+    screenSession->GetScreenProperty().SetRotation(rotation);
+    screenSession->GetScreenProperty().SetBounds(bounds);
+    if (!screenSessionManager_) {
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
+        return;
+    }
+    screenSessionManager_->SyncScreenPropertyChangedToServer(screenId, screenSession->GetScreenProperty());
+}
+
+void ScreenSessionManagerClient::OnFoldPropertyChanged(ScreenId screenId, const ScreenProperty& property,
+    ScreenPropertyChangeReason reason, FoldDisplayMode displayMode)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        TLOGE(WmsLogTag::DMS, "screenSession is null");
+        return;
+    }
+    ScreenProperty screenProperty = screenSession->GetScreenProperty();
+    screenProperty.SetDpiPhyBounds(property.GetPhyWidth(), property.GetPhyHeight());
+    screenProperty.SetPhyBounds(property.GetPhyBounds());
+    screenProperty.SetBounds(property.GetBounds());
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        DisplayOrientation deviceOrientation =
+            screenSession->CalcDeviceOrientation(screenProperty.GetScreenRotation(), displayMode);
+        screenProperty.SetDisplayOrientation(deviceOrientation);
+        screenProperty.SetDeviceOrientation(deviceOrientation);
+        screenProperty.SetScreenAreaOffsetY(property.GetScreenAreaOffsetY());
+        screenProperty.SetScreenAreaHeight(property.GetScreenAreaHeight());
+    }
+    screenProperty.SetPhysicalTouchBounds(screenSession->GetRotationCorrection(displayMode));
+    screenProperty.SetInputOffsetY();
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() || FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+        screenProperty.SetValidHeight(screenProperty.GetBounds().rect_.GetHeight());
+        screenProperty.SetValidWidth(screenProperty.GetBounds().rect_.GetWidth());
+    }
+    screenSession->PropertyChange(screenProperty, reason);
 }
 
 void ScreenSessionManagerClient::OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
@@ -616,6 +766,14 @@ void ScreenSessionManagerClient::SwitchUserCallback(std::vector<int32_t> oldScbP
             TLOGE(WmsLogTag::DMS, "screenSession is null");
             continue;
         }
+        auto displayNode = screenSessionManager_->GetDisplayNode(screenId);
+        if (displayNode == nullptr) {
+            TLOGE(WmsLogTag::DMS, "display node is null");
+            continue;
+        }
+        RSAdapterUtil::SetRSUIContext(displayNode, screenSession->GetRSUIContext(), true);
+        displayNode->SetScbNodePid(oldScbPids, currentScbPid);
+        RSTransactionAdapter::FlushImplicitTransaction(displayNode);
         ScreenProperty screenProperty = screenSession->GetScreenProperty();
         RRect bounds = screenProperty.GetBounds();
         float rotation = screenSession->ConvertRotationToFloat(screenSession->GetRotation());
@@ -1260,17 +1418,12 @@ std::string ScreenSessionManagerClient::OnDumperClientScreenSessions()
 
 void ScreenSessionManagerClient::SetDefaultMultiScreenModeWhenSwitchUser()
 {
-    wptr<IScreenSessionManager> screenSessionManagerWptr = screenSessionManager_;
-    auto task = [screenSessionManagerWptr] {
-        auto screenSessionManager = screenSessionManagerWptr.promote();
-        if (!screenSessionManager) {
-            TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
-            return;
-        }
-        screenSessionManager->SetDefaultMultiScreenModeWhenSwitchUser();
+    if (!screenSessionManager_) {
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return;
-    };
-    ffrtQueueHelper_->SubmitTask(std::move(task));
+    }
+    screenSessionManager_->SetDefaultMultiScreenModeWhenSwitchUser();
+    return;
 }
 
 void ScreenSessionManagerClient::NotifyExtendScreenCreateFinish()

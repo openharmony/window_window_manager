@@ -228,6 +228,31 @@ HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestMode, Tes
 }
 
 /**
+ * @tc.name: ConvertToRelativeCoordinateExtended_TestMode
+ * @tc.desc: test function : ConvertToRelativeCoordinateExtended
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLayoutTest, ConvertToRelativeCoordinateExtended_TestMode, TestSize.Level1)
+{
+    Rect rect = { 100, 3500, 400, 600};
+    Rect newRect;
+    DisplayId newDisplayId = 0;
+    // Convert success
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
+        { 0, 0, 2472, 1648}, {0, 1648, 2472, 1648}, {0, 1642, 2472, 1648});
+    ssm_->ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
+    EXPECT_EQ(204, newRect.posY_);
+    EXPECT_EQ(999, newDisplayId);
+
+    // Convert Failed
+    newDisplayId = 0;
+    rect = { 100, 200, 400, 600 };
+    ssm_->ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
+    EXPECT_EQ(200, newRect.posY_);
+    EXPECT_EQ(0, newDisplayId);
+}
+
+/**
  * @tc.name: SetHasRootSceneRequestedVsyncFunc
  * @tc.desc: SetHasRootSceneRequestedVsyncFunc
  * @tc.type: FUNC

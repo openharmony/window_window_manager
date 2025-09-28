@@ -1272,6 +1272,18 @@ HWTEST_F(WindowSessionTest2, UpdateSesionState, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateSesionState01
+ * @tc.desc: UpdateSesionState
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, UpdateSesionState01, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->UpdateSessionState(SessionState::STATE_DISCONNECT);
+    ASSERT_EQ(session_->state_, SessionState::STATE_DISCONNECT);
+}
+
+/**
  * @tc.name: GetTouchable
  * @tc.desc: GetTouchable
  * @tc.type: FUNC

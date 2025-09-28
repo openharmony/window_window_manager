@@ -211,7 +211,8 @@ public:
     WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false,
         const std::string& identityToken = "") override;
     WSError Background(bool isFromClient = false, const std::string& identityToken = "") override;
-    WSError BackgroundTask(const bool isSaveSnapshot = true, BackgroundReason reason = BackgroundReason::DEFAULT);
+    WSError BackgroundTask(const bool isSaveSnapshot = true,
+        LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
     WSError Disconnect(bool isFromClient = false, const std::string& identityToken = "") override;
     WSError DisconnectTask(bool isFromClient = false, bool isSaveSnapshot = true);
     void SetClientIdentityToken(const std::string& clientIdentityToken);
@@ -848,8 +849,7 @@ public:
     void SetFollowParentRectFunc(NotifyFollowParentRectFunc&& func);
     WSError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
     bool IsDelayFocusChange();
-    virtual bool IsBlockingFocusFullScreenSystemPanel() const;
-    virtual bool IsAppMainWindowFullScreen();
+    virtual bool IsBlockingFocusWindowType() const;
 
     /*
      * Window Property

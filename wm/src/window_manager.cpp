@@ -569,6 +569,8 @@ WindowManager::~WindowManager()
     TLOGI(WmsLogTag::WMS_SCB, "destroyed");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     destroyed_ = true;
+    SingletonContainer::Get<WindowAdapter>().UnregisterOutlineRecoverCallbackFunc();
+    isOutlineRecoverRegistered_ = false;
 }
 
 WindowManager& WindowManager::GetInstance()
@@ -1781,6 +1783,16 @@ WMError WindowManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessibility
     return ret;
 }
 
+WMError WindowManager::ConvertToRelativeCoordinateExtended(const Rect& rect, Rect& newRect, DisplayId& newDisplayId)
+{
+    WMError ret =
+        SingletonContainer::Get<WindowAdapter>().ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Convert relative coordinate failed");
+    }
+    return ret;
+}
+
 WMError WindowManager::GetUnreliableWindowInfo(int32_t windowId,
     std::vector<sptr<UnreliableWindowInfo>>& infos) const
 {
@@ -2598,6 +2610,87 @@ WMError WindowManager::RemoveSessionBlackList(
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "in");
     auto ret = WindowAdapter::GetInstance(userId_)->
         RemoveSessionBlackList(bundleNames, privacyWindowTags);
+    return ret;
+}
+
+WMError WindowManager::CheckOutlineParams(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams)
+{
+    if (remoteObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "The remote object is null.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (outlineParams.type_ != OutlineType::OUTLINE_FOR_WINDOW) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Can update outline for windows only.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    if (outlineParams.outlineStyleParams_.outlineWidth_ < OUTLINE_WIDTH_MIN ||
+        outlineParams.outlineStyleParams_.outlineWidth_ > OUTLINE_WIDTH_MAX) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Outline width: %{public}d is out of valid range.",
+            outlineParams.outlineStyleParams_.outlineWidth_);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    if (outlineParams.outlineStyleParams_.outlineShape_ >= OutlineShape::OUTLINE_SHAPE_END) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Invalid outline shape: %{public}d.",
+              outlineParams.outlineStyleParams_.outlineShape_);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    if ((outlineParams.outlineStyleParams_.outlineColor_ >> OUTLINE_COLOR_OPAQUE_OFFSET) != 0 &&
+        (outlineParams.outlineStyleParams_.outlineColor_ >> OUTLINE_COLOR_OPAQUE_OFFSET) != OUTLINE_COLOR_OPAQUE) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Invalid outline color: %{public}d",
+              outlineParams.outlineStyleParams_.outlineColor_);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowManager::UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams)
+{
+    TLOGI(WmsLogTag::WMS_ANIMATION, "%{public}s", outlineParams.ToString().c_str());
+    auto ret = CheckOutlineParams(remoteObject, outlineParams);
+    if (ret !=WMError::WM_OK) {
+        return ret;
+    }
+
+    ret = SingletonContainer::Get<WindowAdapter>().UpdateOutline(remoteObject, outlineParams);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Update outline failed, ret: %{public}d.", ret);
+        return ret;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (outlineParams.persistentIds_.size() == 0) {
+        SingletonContainer::Get<WindowAdapter>().UnregisterOutlineRecoverCallbackFunc();
+        isOutlineRecoverRegistered_ = false;
+        TLOGI(WmsLogTag::WMS_ANIMATION, "No window need to be highlight.");
+        return ret;
+    }
+
+    outlineRemoteObject_ = remoteObject;
+    outlineParams_ = outlineParams;
+    if (isOutlineRecoverRegistered_) {
+        TLOGI(WmsLogTag::WMS_ANIMATION, "Outline recover callback has already been registered.");
+        return ret;
+    }
+
+    SingletonContainer::Get<WindowAdapter>().RegisterOutlineRecoverCallbackFunc([weakThis = wptr(this)]() -> WMError {
+        auto windowManager = weakThis.promote();
+        if (!windowManager) {
+            TLOGE(WmsLogTag::WMS_SCB, "window adapter is null");
+            return WMError::WM_DO_NOTHING;
+        }
+        sptr<IRemoteObject> remoteObject;
+        OutlineParams outlineParams;
+        {
+            std::lock_guard<std::recursive_mutex> lock(windowManager->mutex_);
+            remoteObject = windowManager->outlineRemoteObject_;
+            outlineParams = windowManager->outlineParams_;
+        }
+        return windowManager->UpdateOutline(remoteObject, outlineParams);
+    });
+    isOutlineRecoverRegistered_ = true;
     return ret;
 }
 } // namespace Rosen

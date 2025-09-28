@@ -155,6 +155,7 @@ public:
     static napi_value NotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
     static napi_value NotifyNextAvoidRectInfo(napi_env env, napi_callback_info info);
     static napi_value GetIsLayoutFullScreen(napi_env env, napi_callback_info info);
+    static napi_value SetMaximizeFullScreen(napi_env env, napi_callback_info info);
     static napi_value SetStatusBarDefaultVisibilityPerDisplay(napi_env env, napi_callback_info info);
     static napi_value NotifyStatusBarShowStatus(napi_env env, napi_callback_info info);
     static napi_value NotifyStatusBarConstantlyShowStatus(napi_env env, napi_callback_info info);
@@ -171,6 +172,7 @@ public:
      */
     static napi_value SupportSnapshotAllSessionStatus(napi_env env, napi_callback_info info);
     static napi_value SupportPreloadStartingWindow(napi_env env, napi_callback_info info);
+    static napi_value PreloadStartingWindow(napi_env env, napi_callback_info info);
 
     /*
      * PiP Window
@@ -276,6 +278,7 @@ private:
     napi_value OnNotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
     napi_value OnNotifyNextAvoidRectInfo(napi_env env, napi_callback_info info);
     napi_value OnGetIsLayoutFullScreen(napi_env env, napi_callback_info info);
+    napi_value OnSetMaximizeFullScreen(napi_env env, napi_callback_info info);
     napi_value OnSetStatusBarDefaultVisibilityPerDisplay(napi_env env, napi_callback_info info);
     napi_value OnNotifyStatusBarShowStatus(napi_env env, napi_callback_info info);
     napi_value OnNotifyStatusBarConstantlyShowStatus(napi_env env, napi_callback_info info);
@@ -404,6 +407,7 @@ private:
      */
     napi_value OnSupportSnapshotAllSessionStatus(napi_env env, napi_callback_info info);
     napi_value OnSupportPreloadStartingWindow(napi_env env, napi_callback_info info);
+    napi_value OnPreloadStartingWindow(napi_env env, napi_callback_info info);
 };
 } // namespace OHOS::Rosen
 

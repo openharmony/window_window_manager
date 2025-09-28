@@ -21,6 +21,9 @@
 #include "ani.h"
 #include "ani_window.h"
 #include "ani_window_utils.h"
+#include "permission.h"
+#include "singleton_container.h"
+#include "window_manager.h"
 #include "window_manager_hilog.h"
 #include "window_scene.h"
 #include "window_helper.h"
@@ -37,11 +40,35 @@ namespace {
 constexpr int32_t MAIN_WINDOW_SNAPSGOT_TIMEOUT = 5000;
 const std::string PIP_WINDOW = "pip_window";
 }
+
+AniWindowManager::AniWindowManager() : registerManager_(std::make_unique<AniWindowRegisterManager>())
+{
+}
+
 ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace windowNameSpace)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    ani_namespace ns;
+    ani_status ret;
+    if ((ret = env->FindNamespace("L@ohos/window/window;", &ns)) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] find ns %{public}u", ret);
+        return ANI_NOT_FOUND;
+    }
+    std::array functions = {
+        ani_native_function {"onSync", nullptr,
+            reinterpret_cast<void *>(AniWindowManager::RegisterWindowManagerCallback)},
+        ani_native_function {"offSync", nullptr,
+            reinterpret_cast<void *>(AniWindowManager::UnregisterWindowManagerCallback)},
+        ani_native_function {"setWindowLayoutMode", "JL@ohos/window/window/WindowLayoutMode;:V",
+            reinterpret_cast<void *>(AniWindowManager::SetWindowLayoutMode)},
+    };
+    if ((ret = env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size())) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] bind ns func %{public}u", ret);
+        return ANI_NOT_FOUND;
+    }
+
     ani_function setObjFunc = nullptr;
-    ani_status ret = env->Namespace_FindFunction(windowNameSpace, "setNativeObj", "J:V", &setObjFunc);
+    ret = env->Namespace_FindFunction(windowNameSpace, "setNativeObj", "J:V", &setObjFunc);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] find setNativeObj func fail %{public}u", ret);
         return ret;
@@ -376,6 +403,101 @@ void AniWindowManager::OnMinimizeAll(ani_env* env, ani_long displayId)
         TLOGE(WmsLogTag::WMS_LIFE, "[ANI] Minimize all failed, ret:%{public}d", static_cast<int32_t>(ret));
         AniWindowUtils::AniThrowError(env, ret, "OnMinimizeAll failed");
         return;
+    }
+}
+
+void AniWindowManager::RegisterWindowManagerCallback(ani_env* env, ani_long nativeObj,
+    ani_string type, ani_ref callback)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    if (aniWindowManager != nullptr) {
+        aniWindowManager->OnRegisterWindowManagerCallback(env, type, callback);
+    } else {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindowManager is nullptr");
+    }
+}
+
+void AniWindowManager::OnRegisterWindowManagerCallback(ani_env* env, ani_string type, ani_ref callback)
+{
+    std::string cbType;
+    AniWindowUtils::GetStdString(env, type, cbType);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] type:%{public}s", cbType.c_str());
+    WmErrorCode ret = registerManager_->RegisterListener(nullptr, cbType, CaseType::CASE_WINDOW_MANAGER,
+        env, callback, ani_double(0));
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret);
+    }
+}
+
+void AniWindowManager::UnregisterWindowManagerCallback(ani_env* env, ani_long nativeObj,
+    ani_string type, ani_ref callback)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    if (aniWindowManager != nullptr) {
+        aniWindowManager->OnUnregisterWindowManagerCallback(env, type, callback);
+    } else {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindowManager is nullptr");
+    }
+}
+
+void AniWindowManager::OnUnregisterWindowManagerCallback(ani_env* env, ani_string type, ani_ref callback)
+{
+    std::string cbType;
+    AniWindowUtils::GetStdString(env, type, cbType);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] type:%{public}s", cbType.c_str());
+    WmErrorCode ret = registerManager_->UnregisterListener(nullptr, cbType, CaseType::CASE_WINDOW_MANAGER,
+        env, callback);
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret);
+    }
+}
+
+void AniWindowManager::OnSetWindowLayoutMode(ani_env* env, ani_enum_item mode)
+{
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] permission denied!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+        return;
+    }
+
+    uint32_t modeType;
+    ani_status ani_ret = AniWindowUtils::GetEnumValue(env, mode, modeType);
+    if (ani_ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] GetEnumValue failed, ret: %{public}d", ani_ret);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return;
+    }
+
+    WindowLayoutMode winLayoutMode = static_cast<WindowLayoutMode>(modeType);
+    if (winLayoutMode != WindowLayoutMode::CASCADE && winLayoutMode != WindowLayoutMode::TILE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Invalid winLayoutMode: %{public}u", winLayoutMode);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return;
+    }
+
+    const WMError ret = SingletonContainer::Get<WindowManager>().SetWindowLayoutMode(winLayoutMode);
+    const WmErrorCode errorCode = AniWindowUtils::ToErrorCode(ret);
+    if (errorCode != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Failed, modeType: %{public}u, ret: %{public}d",
+            modeType, static_cast<int32_t>(ret));
+        AniWindowUtils::AniThrowError(env, errorCode);
+        return;
+    }
+
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[ANI] Success, modeType: %{public}u", modeType);
+}
+
+void AniWindowManager::SetWindowLayoutMode(ani_env* env, ani_long nativeObj, ani_enum_item mode)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI]");
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    if (aniWindowManager != nullptr) {
+        aniWindowManager->OnSetWindowLayoutMode(env, mode);
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] aniWindowManager is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 }
 

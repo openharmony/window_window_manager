@@ -909,6 +909,16 @@ public:
     WMError SetWindowLayoutMode(WindowLayoutMode mode);
 
     /**
+     * @brief Global coordinate to relative coordinate conversion in Extension
+     *
+     * @param rect Rect relative to the default display
+     * @param newRect Rect relative to the current display
+     * @param newDisplayId Current displayID
+     * @return WM_OK means converted, others means not converted.
+     */
+    WMError ConvertToRelativeCoordinateExtended(const Rect& rect, Rect& newRect, DisplayId& newDisplayId);
+
+    /**
      * @brief Get accessibility window info.
      *
      * @param infos WindowInfos used for Accessibility.
@@ -1383,6 +1393,14 @@ public:
     WMError RemoveSessionBlackList(
         const std::unordered_set<std::string>& bundleNames, const std::unordered_set<std::string>& privacyWindowTags);
 
+    /**
+     * @brief Update outline style of window.
+     * @param remoteObject Remote object who needs to update outline.
+     * @param outlineParams The outline params.
+     * @return WM_OK means update success, others means update failed.
+     */
+    WMError UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams);
+
     ~WindowManager() override;
 
 private:
@@ -1402,6 +1420,14 @@ private:
     std::unordered_map<WindowInfoKey, uint32_t> interestInfoMap_;
     GetJSWindowObjFunc getJSWindowObjFunc_;
 
+    /**
+     * Update window outline.
+     */
+    sptr<IRemoteObject> outlineRemoteObject_ = nullptr;
+    OutlineParams outlineParams_;
+    bool isOutlineRecoverRegistered_ = false;
+    WMError CheckOutlineParams(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams);
+    
     void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) const;
     void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
         DisplayId displayId, bool focused) const;

@@ -1649,11 +1649,11 @@ HWTEST_F(ScreenSessionManagerTest, SetDuringCallState, TestSize.Level1)
 }
 
 /**
- * @tc.name: DisconnectScreenIfScreenInfoNull
- * @tc.desc: DisconnectScreenIfScreenInfoNull
+ * @tc.name: LockLandExtendIfScreenInfoNullNull
+ * @tc.desc: LockLandExtendIfScreenInfoNullNull
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, DisconnectScreenIfScreenInfoNull01, TestSize.Level1) {
+HWTEST_F(ScreenSessionManagerTest, LockLandExtendIfScreenInfoNull01, TestSize.Level1) {
     ASSERT_NE(ssm_, nullptr);
 #define FOLD_ABILITY_ENABLE
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
@@ -1661,26 +1661,7 @@ HWTEST_F(ScreenSessionManagerTest, DisconnectScreenIfScreenInfoNull01, TestSize.
         EXPECT_NE(session, nullptr);
         ssm_->SetClient(nullptr);
         ASSERT_EQ(ssm_->GetClientProxy(), nullptr);
-        ssm_->DisConnectScreenIfScreenInfoNull(session);
-    }
-#undef FOLD_ABILITY_ENABLE
-}
-
-/**
- * @tc.name: SetDefaultScreenModeWhenCreateMirror
- * @tc.desc: SetDefaultScreenModeWhenCreateMirror
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, SetDefaultScreenModeWhenCreateMirror, TestSize.Level1) {
-    ASSERT_NE(ssm_, nullptr);
-#define FOLD_ABILITY_ENABLE
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        sptr<ScreenSession> session = nullptr;
-        ssm_->SetDefaultScreenModeWhenCreateMirror(session);
-        session = ssm_->GetOrCreateScreenSession(0);
-        auto mode = session->GetScreenCombination();
-        ssm_->SetDefaultScreenModeWhenCreateMirror(session);
-        ASSERT_EQ(session->GetScreenCombination(), mode);
+        ssm_->LockLandExtendIfScreenInfoNull(session);
     }
 #undef FOLD_ABILITY_ENABLE
 }
@@ -1879,28 +1860,6 @@ HWTEST_F(ScreenSessionManagerTest, InitRotationCorrectionMap03, TestSize.Level1)
     std::string config = "1,0,1;1,0;2,0;5,3;3,a;a,a";
     ssm_->InitRotationCorrectionMap(config);
     EXPECT_EQ(ssm_->rotationCorrectionMap_[FoldDisplayMode::GLOBAL_FULL], 3);
-}
-
-/**
- * @tc.name: RecoverDefaultScreenModeInner
- * @tc.desc: RecoverDefaultScreenModeInner
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, RecoverDefaultScreenModeInner, TestSize.Level1) {
-    ASSERT_NE(ssm_, nullptr);
-#define FOLD_ABILITY_ENABLE
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        ScreenId innerRsId = 0;
-        ScreenId externalRsId = 11;
-        ssm_->SetIsFoldStatusLocked(true);
-        EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), true);
-        ssm_->RecoverDefaultScreenModeInner(innerRsId, externalRsId);
-        SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::EXPANDED);
-        innerRsId = 1;
-        externalRsId = 12;
-        ssm_->RecoverDefaultScreenModeInner(innerRsId, externalRsId);
-    }
-#undef FOLD_ABILITY_ENABLE
 }
 
 /**
@@ -2308,6 +2267,50 @@ HWTEST_F(ScreenSessionManagerTest, RecoveryResolutionEffect, TestSize.Level1)
     ssm_->curResolutionEffectEnable_ = false;
     ssm_->screenSessionMap_.erase(51);
     ssm_->screenSessionMap_.erase(52);
+}
+
+/**
+ * @tc.name: SwitchModeOffScreenRenderingResetScreenProperty
+ * @tc.desc: SwitchModeOffScreenRenderingResetScreenProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SwitchModeOffScreenRenderingResetScreenProperty, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr);
+    sptr<ScreenSession> session = nullptr;
+    g_errLog.clear();
+    ssm_->SwitchModeOffScreenRenderingResetScreenProperty(session, true);
+    EXPECT_TRUE(g_errLog.find("externalScreenSession is nullptr") != std::string::npos);
+    session = sptr<ScreenSession>::MakeSptr();
+    g_errLog.clear();
+    ssm_->SwitchModeOffScreenRenderingResetScreenProperty(session, true);
+    EXPECT_FALSE(g_errLog.find("SetExtendProperty screenId") != std::string::npos);
+    g_errLog.clear();
+    ssm_->SwitchModeOffScreenRenderingResetScreenProperty(session, false);
+    EXPECT_TRUE(g_errLog.find("SetExtendProperty screenId") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+ 
+/**
+ * @tc.name: SwitchModeOffScreenRenderingAdapter
+ * @tc.desc: SwitchModeOffScreenRenderingAdapter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SwitchModeOffScreenRenderingAdapter, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr);
+    std::vector<ScreenId> externalScreenIds;
+    g_errLog.clear();
+    ssm_->SwitchModeOffScreenRenderingAdapter(externalScreenIds);
+    EXPECT_TRUE(g_errLog.find("externalScreenIds is empty") != std::string::npos);
+    g_errLog.clear();
+    ScreenId screenId = 666;
+    externalScreenIds.emplace_back(screenId);
+    ssm_->SwitchModeOffScreenRenderingAdapter(externalScreenIds);
+    EXPECT_FALSE(g_errLog.find("externalScreenIds is empty") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 }
 }

@@ -90,6 +90,22 @@ constexpr uint32_t SIDEBAR_SNAPSHOT_MASKCOLOR_DARK = 0xff414141;
  */
 constexpr float COMPACT_SIMULATION_SCALE_DPI = 3.25f;
 constexpr float COMPACT_NORMAL_SCALE = 1.0f;
+
+/*
+ * Window outline
+ */
+constexpr uint32_t OUTLINE_COLOR_DEFAULT = 0xff64bb5c; // Default color, ARGB formate.
+constexpr uint32_t OUTLINE_WIDTH_MIN = 1; // vp
+constexpr uint32_t OUTLINE_WIDTH_DEFAULT = 4; // vp
+constexpr uint32_t OUTLINE_WIDTH_MAX = 8; // vp
+constexpr uint32_t OUTLINE_FOR_WINDOW_MAX_NUM = 256; // Up to 256 windows can show simultaneously.
+constexpr uint32_t OUTLINE_COLOR_OPAQUE_OFFSET = 24; // Shift right 24 bits.
+constexpr uint32_t OUTLINE_COLOR_OPAQUE = 0xff; // Color opaque byte.
+
+/*
+ * Sub Window
+ */
+constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 10;
 }
 
 /**
@@ -3056,6 +3072,153 @@ enum class RequestResultCode: uint32_t {
     INIT = 0,
     SUCCESS = 1,
     FAIL,
+};
+
+/**
+ * @brief The type of outline.
+ */
+enum class OutlineType: uint32_t {
+    OUTLINE_FOR_UNDEFINED = 0, // Invalid outline type
+    OUTLINE_FOR_SCREEN,        // Update outline for screen
+    OUTLINE_FOR_SCREEN_RECT,   // Update outline for a rect of a screen
+    OUTLINE_FOR_WINDOW         // Update outline for windows
+};
+
+/**
+ * @brief The shape of outline.
+ */
+enum class OutlineShape: uint32_t {
+    OUTLINE_SHAPE_RECTANGLE,
+    OUTLINE_SHAPE_FOUR_CORNERS,
+    OUTLINE_SHAPE_END
+};
+
+/**
+ * @brief Outline style params.
+ */
+struct OutlineStyleParams {
+    uint32_t outlineColor_ = OUTLINE_COLOR_DEFAULT; // Can not be transparent.
+    uint32_t outlineWidth_ = OUTLINE_WIDTH_DEFAULT; // Valid range: [1vp, 8vp].
+    OutlineShape outlineShape_ = OutlineShape::OUTLINE_SHAPE_FOUR_CORNERS;
+
+    bool operator == (const OutlineStyleParams& a) const
+    {
+        return outlineColor_ == a.outlineColor_ && outlineWidth_ == a.outlineWidth_ && outlineShape_ == a.outlineShape_;
+    }
+    inline std::string ToString() const
+    {
+        std::ostringstream oss;
+        oss << "[ color: " << outlineColor_ << ", width: " << outlineWidth_ << "vp, shape: ";
+        oss << static_cast<uint32_t>(outlineShape_) << " ]";
+        return oss.str();
+    }
+};
+
+/**
+ * @brief Outline params.
+ */
+struct OutlineParams : public Parcelable {
+    OutlineType type_ = OutlineType::OUTLINE_FOR_UNDEFINED; // Update outline for what kind of area.
+    DisplayId displayId_ = DISPLAY_ID_INVALID; // Indicates the displayId of the screen that needs outline.
+    Rect rect_;                                // Indicates the rect of a screen that needs outline.
+    std::vector<int32_t> persistentIds_;       // Indicates which windows need outline.
+    OutlineStyleParams outlineStyleParams_;    // Indicates the style of a outline.
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!parcel.WriteUint32(static_cast<uint32_t>(type_))) {
+            return false;
+        }
+
+        if (!parcel.WriteUint64(static_cast<uint64_t>(displayId_))) {
+            return false;
+        }
+
+        if (!parcel.WriteInt32(rect_.posX_) || !parcel.WriteInt32(rect_.posY_) ||
+            !parcel.WriteUint32(rect_.width_) || !parcel.WriteUint32(rect_.height_)) {
+            return false;
+        }
+
+        uint32_t size = static_cast<uint32_t>(persistentIds_.size());
+        if (size > OUTLINE_FOR_WINDOW_MAX_NUM || !parcel.WriteUint32(size)) {
+            return false;
+        }
+
+        for (const auto id : persistentIds_) {
+            if (!parcel.WriteInt32(id)) {
+                return false;
+            }
+        }
+
+        if (!parcel.WriteUint32(outlineStyleParams_.outlineColor_) ||
+            !parcel.WriteUint32(outlineStyleParams_.outlineWidth_) ||
+            !parcel.WriteUint32(static_cast<uint32_t>(outlineStyleParams_.outlineShape_))) {
+            return false;
+        }
+        return true;
+    }
+
+    static OutlineParams* Unmarshalling(Parcel& parcel)
+    {
+        std::unique_ptr<OutlineParams> params = std::make_unique<OutlineParams>();
+        if (params == nullptr) {
+            return nullptr;
+        }
+
+        uint32_t type = 0;
+        if (!parcel.ReadUint32(type)) {
+            return nullptr;
+        }
+        params->type_ = static_cast<OutlineType>(type);
+
+        uint64_t displayId = 0;
+        if (!parcel.ReadUint64(displayId)) {
+            return nullptr;
+        }
+        params->displayId_ = static_cast<DisplayId>(displayId);
+
+        if (!parcel.ReadInt32(params->rect_.posX_) || !parcel.ReadInt32(params->rect_.posY_) ||
+            !parcel.ReadUint32(params->rect_.width_) || !parcel.ReadUint32(params->rect_.height_)) {
+            return nullptr;
+        }
+
+        uint32_t size = 0;
+        if (!parcel.ReadUint32(size) || size > OUTLINE_FOR_WINDOW_MAX_NUM) {
+            return nullptr;
+        }
+        for (uint32_t i = 0; i < size; i++) {
+            int32_t persistentId;
+            if (!parcel.ReadInt32(persistentId)) {
+                return nullptr;
+            }
+            params->persistentIds_.push_back(persistentId);
+        }
+
+        if (!parcel.ReadUint32(params->outlineStyleParams_.outlineColor_) ||
+            !parcel.ReadUint32(params->outlineStyleParams_.outlineWidth_)) {
+            return nullptr;
+        }
+
+        uint32_t outlineShape = 0;
+        if (!parcel.ReadUint32(outlineShape)) {
+            return nullptr;
+        }
+        params->outlineStyleParams_.outlineShape_ = static_cast<OutlineShape>(outlineShape);
+        return params.release();
+    }
+
+    inline std::string ToString() const
+    {
+        std::ostringstream oss;
+        oss << "Outline params: type=" << static_cast<uint32_t>(type_) << ", displayId=" << displayId_ << ", ";
+        oss << "rect=[" << rect_.posX_ << ", " << rect_.posY_ << ", " << rect_.width_ << ", " << rect_.height_ << "], ";
+        oss << "windowIdList=[ ";
+        for (const auto id : persistentIds_) {
+            oss << id << ", ";
+        }
+        oss << "], outlineStyleParams=";
+        return oss.str() + outlineStyleParams_.ToString();
+    }
 };
 }
 }

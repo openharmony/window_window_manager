@@ -67,7 +67,7 @@ public:
     virtual WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos);
     virtual WMError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
-    ~WindowAdapterLite() = default;
+    ~WindowAdapterLite() override;
 
 private:
     WindowAdapterLite(const int32_t userId = INVALID_USER_ID);

@@ -22,6 +22,7 @@
  
 #include "fold_screen_controller/super_fold_sensor_manager.h"
 #include "fold_screen_controller/super_fold_state_manager.h"
+#include "fold_screen_controller/fold_screen_controller_config.h"
 #include "window_manager_hilog.h"
 #include "screen_session_manager.h"
  
@@ -29,7 +30,6 @@ namespace OHOS {
  
 namespace Rosen {
 namespace {
-constexpr float ANGLE_MIN_VAL = 30.0F;
 constexpr float ANGLE_MAX_VAL = 180.0F;
 constexpr float ANGLE_FLAT_THRESHOLD = 160.0F;
 constexpr float ANGLE_SENSOR_THRESHOLD = 160.0F;
@@ -226,7 +226,8 @@ void SuperFoldSensorManager::NotifyHallChanged(uint16_t Hall)
 void SuperFoldSensorManager::HandleSuperSensorChange(SuperFoldStatusChangeEvents events)
 {
     // trigger events
-    if (ScreenSessionManager::GetInstance().GetIsFoldStatusLocked() ||
+    if (ScreenSessionManager::GetInstance().GetIsExtendMode() ||
+        ScreenSessionManager::GetInstance().GetIsFoldStatusLocked() ||
         ScreenSessionManager::GetInstance().GetIsLandscapeLockStatus()) {
         return;
     }
@@ -243,6 +244,10 @@ void SuperFoldSensorManager::HandleScreenDisconnectChange()
 {
     if (ScreenSessionManager::GetInstance().GetIsFoldStatusLocked()) {
         TLOGW(WmsLogTag::DMS, "Fold status is still locked.");
+        return;
+    }
+    if (ScreenSessionManager::GetInstance().GetIsExtendScreenConnected()) {
+        TLOGW(WmsLogTag::DMS, "Extend screen is still connected.");
         return;
     }
     if (ScreenSessionManager::GetInstance().GetIsLandscapeLockStatus()) {
