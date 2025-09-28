@@ -1345,6 +1345,17 @@ public:
      */
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
         const Rect& rect = Rect::EMPTY_RECT, int32_t apiVersion = API_VERSION_INVALID) { return WMError::WM_OK; }
+    
+    /**
+     * @brief Get the avoid area by type ignoring visibility
+     *
+     * @param type avoid area type.@see reference
+     * @param avoidArea
+     * @param rect
+     * @return WMError
+     */
+    virtual WMError GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType type, AvoidArea& avoidArea,
+        const Rect& rect = Rect::EMPTY_RECT) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Set whether the system or app sub window can obtain area

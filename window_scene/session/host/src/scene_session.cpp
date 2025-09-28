@@ -2408,7 +2408,7 @@ void SceneSession::CalculateAvoidAreaRect(const WSRect& rect, const WSRect& avoi
     }
 }
 
-void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
+void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea, bool ignoreVisibility)
 {
     auto sessionProperty = GetSessionProperty();
     bool isNeedAvoid = sessionProperty->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID);
@@ -2439,7 +2439,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     bool isAvailableScreen = !screenSession || (screenSession->GetName() != "HiCar");
     if (isWindowFloatingOrSplit && isAvailableWindowType && isAvailableDevice && isAvailableScreen) {
         // mini floating scene no need avoid
-        if (LessOrEqual(Session::GetFloatingScale(), MINI_FLOAT_SCALE)) {
+        if (LessOrEqual(Session::GetFloatingScale(), MINI_FLOAT_SCALE) && !ignoreVisibility) {
             return;
         }
         float vpr = 3.5f; // 3.5f: default pixel ratio
@@ -2475,7 +2475,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         }
         bool isStatusBarVisible =
             WindowHelper::IsAppWindow(Session::GetWindowType()) ? IsStatusBarVisible() : isVisible;
-        if (!isStatusBarVisible) {
+        if (!isStatusBarVisible && !ignoreVisibility) {
             TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d status bar not visible", GetPersistentId());
             continue;
         }
@@ -2485,7 +2485,6 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         }
         CalculateAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, rect, statusBarRect, avoidArea);
     }
-    return;
 }
 
 void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
@@ -2584,7 +2583,7 @@ void SceneSession::PatchAINavigationBarArea(AvoidArea& avoidArea)
     }
 }
 
-void SceneSession::GetAINavigationBarArea(WSRect& rect, AvoidArea& avoidArea)
+void SceneSession::GetAINavigationBarArea(WSRect& rect, AvoidArea& avoidArea, bool ignoreVisibility)
 {
     if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_PIP) {
         TLOGD(WmsLogTag::WMS_IMMS, "window mode pip return");
@@ -2597,7 +2596,7 @@ void SceneSession::GetAINavigationBarArea(WSRect& rect, AvoidArea& avoidArea)
     }
     WSRect barArea;
     if (specificCallback_ != nullptr && specificCallback_->onGetAINavigationBarArea_) {
-        barArea = specificCallback_->onGetAINavigationBarArea_(GetSessionProperty()->GetDisplayId());
+        barArea = specificCallback_->onGetAINavigationBarArea_(GetSessionProperty()->GetDisplayId(), ignoreVisibility);
     }
     CalculateAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR, rect, barArea, avoidArea);
     PatchAINavigationBarArea(avoidArea);
@@ -2848,7 +2847,7 @@ int32_t SceneSession::GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId
     return ret->second;
 }
 
-AvoidArea SceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect& rect)
+AvoidArea SceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect& rect, bool ignoreVisibility)
 {
     if (!CheckGetAvoidAreaAvailable(type)) {
         return {};
@@ -2858,7 +2857,7 @@ AvoidArea SceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect
     WSRect sessionRect = rect.IsEmpty() ? GetSessionRect() : rect;
     switch (type) {
         case AvoidAreaType::TYPE_SYSTEM: {
-            GetSystemAvoidArea(sessionRect, avoidArea);
+            GetSystemAvoidArea(sessionRect, avoidArea, ignoreVisibility);
             return avoidArea;
         }
         case AvoidAreaType::TYPE_CUTOUT: {
@@ -2873,7 +2872,7 @@ AvoidArea SceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect
             return avoidArea;
         }
         case AvoidAreaType::TYPE_NAVIGATION_INDICATOR: {
-            GetAINavigationBarArea(sessionRect, avoidArea);
+            GetAINavigationBarArea(sessionRect, avoidArea, ignoreVisibility);
             return avoidArea;
         }
         default: {
@@ -2893,6 +2892,18 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rec
             return {};
         }
         return session->GetAvoidAreaByTypeInner(type, rect);
+    }, __func__);
+}
+
+AvoidArea SceneSession::GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType type, const WSRect& rect)
+{
+    return PostSyncTask([weakThis = wptr(this), type, rect, where = __func__]() -> AvoidArea {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", where);
+            return {};
+        }
+        return session->GetAvoidAreaByTypeInner(type, rect, true);
     }, __func__);
 }
 
