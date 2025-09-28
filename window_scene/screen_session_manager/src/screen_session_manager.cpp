@@ -2427,25 +2427,24 @@ DMError ScreenSessionManager::SetScreenActiveMode(ScreenId screenId, uint32_t mo
     uint32_t refreshRate = screenSession->GetRefreshRate();
     RSScreenModeInfo screenMode = RSScreenModeInfo();
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetScreenActiveMode(%" PRIu64", %u)", screenId, modeId);
-    auto res = rsInterface_.SetScreenActiveMode(rsScreenId, modeId); // modeId is activeIdx;
-    const char* logPreFix = (res = StatusCode::SUCCESS) ? "RS success" : "RS fail";
-    TLOGW(WmsLogTag::DMS, "%{public}s, rsScreenId: %{public}" PRIu64",modeId:%{public}u, res%{public}d",
-        logPreFix, rsScreenId, modeId, res);
-    if (res != StatusCode::SUCCESS) {
-        ReportScreenModeChangeEvent(screenMode, res);
-        if (res == StatusCode::HDI_ERR_NOT_SUPPORT) {
+    auto ret = rsInterface_.SetScreenActiveMode(rsScreenId, modeId); // modeId is activeIdx;
+    const char* logPreFix = (ret = StatusCode::SUCCESS) ? "RS success" : "RS fail";
+    TLOGW(WmsLogTag::DMS, "%{public}s, rsScreenId: %{public}" PRIu64",modeId:%{public}u, ret%{public}d",
+        logPreFix, rsScreenId, modeId, ret);
+    if (ret != StatusCode::SUCCESS) {
+        ReportScreenModeChangeEvent(screenMode, ret);
+        if (ret == StatusCode::HDI_ERR_NOT_SUPPORT) {
             return DMError::DM_ERROR_INVALID_MODE_ID;
         } else {
             return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
         }
     }
-
-    int id = HiviewDFX::XCollie::GetInstance().SetTimer("SetScreenActiveModeCallRS", XCOLLIE_TIMEOUT_10S, nullptr,
-        nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
+    int setScreenActiveId = HiviewDFX::XCollie::GetInstance().SetTimer("SetScreenActiveModeCallRS",
+        XCOLLIE_TIMEOUT_10S, nullptr, nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
     TLOGW(WmsLogTag::DMS, "Call rsInterface_ GetScreenActiveMode rsid: %{public}" PRIu64, rsScreenId);
     screenMode = rsInterface_.GetScreenActiveMode(rsScreenId);
     HiviewDFX::XCollie::GetInstance().CancelTimer(id);
-    ReportScreenModeChangeEvent(screenMode, res);
+    ReportScreenModeChangeEvent(screenMode, ret);
     int32_t activeId = screenMode.GetScreenModeId();
     UpdateSessionByActiveModeChange(screenSession, phyScreenSession, activeId);
     CheckAndNotifyChangeMode(screenBounds, screenSession);
@@ -3718,7 +3717,6 @@ bool ScreenSessionManager::DoSuspendBegin(PowerStateChangeReason reason)
 
 bool ScreenSessionManager::IsSystemSleep()
 {
-    // 主动灭屏 按电源键灭屏或者在电源选项中灭屏
     return powerStateChangeReason_ == PowerStateChangeReason::STATE_CHANGE_REASON_SYSTEM ||
         powerStateChangeReason_ == PowerStateChangeReason::STATE_CHANGE_REASON_HARD_KEY;
 }
