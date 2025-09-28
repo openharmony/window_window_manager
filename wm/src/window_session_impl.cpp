@@ -1109,12 +1109,8 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         UpdateRectForRotation(wmRect, preRect, wmReason, config, avoidAreas);
     } else if (handler_ != nullptr && wmReason == WindowSizeChangeReason::PAGE_ROTATION) {
         UpdateRectForPageRotation(wmRect, preRect, wmReason, config, avoidAreas);
-    } else if (handler_ != nullptr && wmReason == WindowSizeChangeReason::RESIZE_WITH_ANIMATION) {
-        RectAnimationConfig rectAnimationConfig = property_->GetRectAnimationConfig();
-        TLOGI(WmsLogTag::WMS_LAYOUT, "rectAnimationConfig.duration: %{public}d", rectAnimationConfig.duration);
-        postTaskDone_ = false;
-        UpdateRectForResizeWithAnimation(wmRect, preRect, wmReason, rectAnimationConfig,
-            config.rsTransaction_, avoidAreas);
+    } else if (handler_ != nullptr && wmReason == WindowSizeChangeReason::SCENE_WITH_ANIMATION) {
+        UpdateRectForResizeAnimation(wmRect, preRect, wmReason, config, avoidAreas);
     } else {
         UpdateRectForOtherReason(wmRect, preRect, wmReason, config.rsTransaction_, avoidAreas);
     }
@@ -1142,6 +1138,74 @@ void WindowSessionImpl::UpdateVirtualPixelRatio(const sptr<Display>& display)
     }
     virtualPixelRatio_ = GetVirtualPixelRatio(displayInfo);
     TLOGD(WmsLogTag::WMS_LAYOUT, "virtualPixelRatio: %{public}f", virtualPixelRatio_);
+}
+
+void WindowSessionImpl::UpdateRectForResizeAnimation(const Rect& wmRect, const Rect& preRect,
+    WindowSizeChangeReason wmReason, const SceneAnimationConfig& config,
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
+{
+    handler_->PostTask([weak = wptr(this), wmReason, wmRect, preRect, config, avoidAreas]() mutable {
+        HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::UpdateRectForResizeAnimation");
+        auto window = weak.promote();
+        if (!window) {
+            return;
+        }
+        auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(window->property_->GetDisplayId());
+        sptr<DisplayInfo> displayInfo = display ? display->GetDisplayInfo() : nullptr;
+        window->UpdateVirtualPixelRatio(display);
+        auto rsUIContext = window->GetRSUIContext();
+        std::array<float, ANIMATION_PARAM_SIZE> param = config.animationParam_;
+        RSAnimationTimingCurve curve = window->updateConfigCurve(config.animationCurve_, param);
+        std::shared_ptr<RSTransaction> rsTransaction = config.rsTransaction_;
+        if (rsTransaction) {
+            RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
+            rsTransaction->Begin();
+        }
+
+        RSAnimationTimingProtocol protocol;
+        protocol.SetDuration(config.animationDuration_);
+        protocol.SetStartDelay(config.animationDelay_);
+        RSNode::OpenImplicitAnimation(rsUIContext, protocol, curve, nullptr);
+        if ((wmRect != preRect) || (wmReason != window->lastSizeChangeReason_)) {
+            window->NotifySizeChange(wmRect, wmReason);
+            window->lastSizeChangeReason_ = wmReason;
+        }
+        window->UpdateViewportConfig(wmRect, wmReason, rsTransaction, displayInfo, avoidAreas);
+        RSNode::CloseImplicitAnimation(rsUIContext);
+        if (rsTransaction) {
+            rsTransaction->Commit();
+        } else {
+            RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
+        }
+        window->postTaskDone_ = true;
+    }, "WMS_WindowSessionImpl_UpdateRectForResizeAnimation");
+}
+
+RSAnimationTimingCurve WindowSessionImpl::updateConfigCurve(WindowAnimationCurve configCurve,
+    std::array<float, ANIMATION_PARAM_SIZE> param)
+{
+    RSAnimationTimingCurve curve;
+    switch (configCurve) {
+        case WindowAnimationCurve::LINEAR:
+            TLOGI(WmsLogTag::WMS_LAYOUT, "Linear params");
+            curve = RSAnimationTimingCurve::LINEAR;
+            break;
+        case WindowAnimationCurve::INTERPOLATION_SPRING:
+            TLOGI(WmsLogTag::WMS_LAYOUT, "Spring params: %{public}f, %{public}f, %{public}f, %{public}f",
+                param[0], param[1], param[2], param[3]);
+            curve = RSAnimationTimingCurve::CreateInterpolatingSpring(param[0], param[1], param[2], param[3]);
+            break;
+        case WindowAnimationCurve::CUBIC_BEZIER:
+            TLOGI(WmsLogTag::WMS_LAYOUT, "Bezier params: %{public}f, %{public}f, %{public}f, %{public}f",
+                param[0], param[1], param[2], param[3]);
+            curve = RSAnimationTimingCurve::CreateCubicCurve(param[0], param[1], param[2], param[3]);
+            break;
+        default:
+            TLOGW(WmsLogTag::WMS_LAYOUT, "Unknown curve type: %{public}d, using LINEAR as default",
+                static_cast<int>(configCurve));
+            curve = RSAnimationTimingCurve::LINEAR;
+    }
+    return curve;
 }
 
 void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& preRect,

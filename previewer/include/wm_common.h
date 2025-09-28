@@ -450,6 +450,7 @@ enum class WindowSizeChangeReason : uint32_t {
     RECOVER_IN_IMPLICIT = 33,
     SCREEN_RELATIVE_POSITION_CHANGE,
     SNAPSHOT_ROTATION = 37,
+    SCENE_WITH_ANIMATION,
     END
 };
 

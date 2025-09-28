@@ -969,6 +969,7 @@ protected:
     uint32_t uiNodeId_ = 0;
     std::map<MMI::WindowArea, WSRectF> windowAreas_;
     bool isTerminating_ = false;
+    SceneAnimationConfig sceneAnimationConfig_;
     float floatingScale_ = 1.0f;
     bool scbKeepKeyboardFlag_ = false;
     mutable std::shared_mutex dialogVecMutex_;

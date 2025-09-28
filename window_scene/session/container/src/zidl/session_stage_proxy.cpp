@@ -200,6 +200,10 @@ WSError SessionStageProxy::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
+    if (!data.WriteParcelable(&config)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write SceneAnimationConfig failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     bool isInnerProcess = hasRSTransaction ? rsTransaction->GetInnerProcessFlag() : false;
     TLOGD(WmsLogTag::DEFAULT, "hasRSTransaction: %{public}d, isInnerProcess: %{public}d", hasRSTransaction,
         isInnerProcess);
@@ -212,12 +216,6 @@ WSError SessionStageProxy::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         }
         rsTransaction->SetParentPid(pid);
     }
-
-    if (!data.WriteInt32(config.animationDuration_)) {
-        TLOGE(WmsLogTag::DEFAULT, "Write animation duration failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
     if (!data.WriteUint32(avoidAreas.size())) {
         TLOGE(WmsLogTag::WMS_IMMS, "Write avoid area size failed");
         return WSError::WS_ERROR_IPC_FAILED;

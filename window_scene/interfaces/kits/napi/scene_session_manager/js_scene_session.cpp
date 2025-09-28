@@ -571,6 +571,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         moduleName, JsSceneSession::SetPcAppInpadOrientationLandscape);
     BindNativeFunction(env, objValue, "setIsPcAppInpadCompatibleMode",
         moduleName, JsSceneSession::SetPcAppInpadCompatibleMode);
+    BindNativeFunction(env, objValue, "updateSceneAnimationConfig", moduleName,
+        JsSceneSession::UpdateSceneAnimationConfig);
     BindNativeFunction(env, objValue, "setMobileAppInPadLayoutFullScreen",
         moduleName, JsSceneSession::SetMobileAppInPadLayoutFullScreen);
 }
@@ -2892,6 +2894,13 @@ napi_value JsSceneSession::SetPcAppInpadOrientationLandscape(napi_env env, napi_
     TLOGD(WmsLogTag::WMS_PC, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetPcAppInpadOrientationLandscape(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::UpdateSceneAnimationConfig(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_PC, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnUpdateSceneAnimationConfig(env, info) : nullptr;
 }
 
 bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -6685,6 +6694,33 @@ napi_value JsSceneSession::OnSetPcAppInpadOrientationLandscape(napi_env env, nap
         return NapiGetUndefined(env);
     }
     session->SetPcAppInpadOrientationLandscape(isPcAppInpadOrientationLandscape);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnUpdateSceneAnimationConfig(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_SCB, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneAnimationConfig animationConfig;
+    if (!convertAnimConfigFromJs(env, argv[0], animationConfig)) {
+        TLOGE(WmsLogTag::WMS_SCB, "Failed to convert parameter to animationConfig.");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is invalid."));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SetSceneAnimationConfig(animationConfig);
     return NapiGetUndefined(env);
 }
 

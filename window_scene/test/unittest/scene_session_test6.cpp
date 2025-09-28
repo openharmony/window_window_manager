@@ -1290,6 +1290,30 @@ HWTEST_F(SceneSessionTest6, SetWindowTransitionAnimation, Function | SmallTest |
 }
 
 /**
+ * @tc.name: SetSceneAnimationConfig01
+ * @tc.desc: SetSceneAnimationConfig01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, SetSceneAnimationConfig01, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSceneAnimationConfig01";
+    info.bundleName_ = "SetSceneAnimationConfig01";
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+ 
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    sceneSession->SetSessionProperty(property);
+    SceneAnimationConfig animationConfig;
+    animationConfig.animationDelay_ = 0;
+    animationConfig.animationDuration_ = 300;
+    animationConfig.animationCurve_ = WindowAnimationCurve::LINEAR;
+    animationConfig.animationParam_ = {0.0f, 0.0f, 0.0f, 0.0f};
+    auto result = sceneSession->SetSceneAnimationConfig(animationConfig);
+    EXPECT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: SetSupportEnterWaterfallMode
  * @tc.desc: SetSupportEnterWaterfallMode
  * @tc.type: FUNC
