@@ -151,7 +151,7 @@ constexpr uint64_t VIRTUAL_DISPLAY_ID = 999;
 constexpr uint32_t DEFAULT_LOCK_SCREEN_ZORDER = 2000;
 constexpr int32_t MAX_LOCK_STATUS_CACHE_SIZE = 1000;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PC = 50;
-constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PAD = 8;
+constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PAD = 0;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PHONE = 1;
 constexpr uint64_t NOTIFY_START_ABILITY_TIMEOUT = 4000;
 constexpr uint64_t START_UI_ABILITY_TIMEOUT = 5000;
@@ -2814,9 +2814,6 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
     if (systemConfig_.IsPcOrPcMode()) {
         RegisterGetStartWindowConfigCallback(sceneSession);
     }
-    if (systemConfig_.windowUIType_ == WindowUIType::PAD_WINDOW) {
-        RegisterRemoveSnapshotFunc(sceneSession);
-    }
     // Skip FillSessionInfo when atomicService free-install start.
     if (!IsAtomicServiceFreeInstall(sessionInfo)) {
         FillSessionInfo(sceneSession);
@@ -3420,23 +3417,6 @@ WSError SceneSessionManager::RegisterSaveSnapshotFunc(const sptr<SceneSession>& 
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::RegisterRemoveSnapshotFunc(const sptr<SceneSession>& sceneSession)
-{
-    if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "session is nullptr");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
-        return WSError::WS_ERROR_INVALID_WINDOW;
-    }
-    auto persistentId = sceneSession->GetPersistentId();
-    sceneSession->SetRemoveSnapshotCallback([this, persistentId]() {
-        this->RemoveSnapshotFromCache(persistentId);
-    });
-    return WSError::WS_OK;
-}
-
-
 void SceneSessionManager::ConfigSupportSnapshotAllSessionStatus()
 {
     TLOGI(WmsLogTag::WMS_PATTERN, "support");
@@ -3741,7 +3721,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         }
         WindowDestroyNotifyVisibility(sceneSession);
         NotifySessionUpdate(sceneSession->GetSessionInfo(), ActionType::SINGLE_CLOSE);
-        sceneSession->SetRemoveSnapshotCallback([this, persistentId]() {
+        sceneSession->SetSaveSnapshotCallback([this, persistentId]() {
             this->RemoveSnapshotFromCache(persistentId);
         });
         sceneSession->DisconnectTask(false, isSaveSnapshot);

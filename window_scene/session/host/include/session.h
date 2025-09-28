@@ -293,13 +293,6 @@ public:
             saveSnapshotCallback_ = std::move(task);
         }
     }
-    void SetRemoveSnapshotCallback(Task&& task)
-    {
-        if (task) {
-            std::lock_guard lock(removeSnapshotCallbackMutex_);
-            removeSnapshotCallback_ = std::move(task);
-        }
-    }
     void SetAddSnapshotCallback(Task&& task)
     {
         if (task) {
@@ -1157,10 +1150,8 @@ private:
      */
     std::atomic<bool> enableAddSnapshot_ = true;
     Task saveSnapshotCallback_ = []() {};
-    Task removeSnapshotCallback_ = []() {};
     Task addSnapshotCallback_ = []() {};
     std::mutex saveSnapshotCallbackMutex_;
-    std::mutex removeSnapshotCallbackMutex_;
     std::mutex addSnapshotCallbackMutex_;
 
     /*
