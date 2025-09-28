@@ -424,7 +424,7 @@ void RootScene::NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, A
     AvoidArea area = {};
     if (avoidArea != nullptr) {
         area= *avoidArea;
-        TLOGI(WmsLogTag::WMS_IMMS, "type %{public}d area %{public}s.", type, avoidArea->ToString().c_str());
+        TLOGD(WmsLogTag::WMS_IMMS, "type %{public}d area %{public}s.", type, avoidArea->ToString().c_str());
     }
     std::lock_guard<std::mutex> lock(mutex_);
     for (auto& listener : avoidAreaChangeListeners_) {
