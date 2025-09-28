@@ -16,6 +16,8 @@
 #ifndef OHOS_ANI_WINDOW_H
 #define OHOS_ANI_WINDOW_H
 
+#include <functional>
+
 #include "ani.h"
 #include "ani_window_register_manager.h"
 #include "window.h"
@@ -33,9 +35,14 @@ class AniWindow {
 public:
     explicit AniWindow(const sptr<Window>& window);
     explicit AniWindow(const std::shared_ptr<OHOS::Rosen::Window>& window);
+    ~AniWindow();
     sptr<Window> GetWindow() { return windowToken_; }
     ani_ref GetAniRef() { return aniRef_; }
     void SetAniRef(const ani_ref& aniRef) { aniRef_ = aniRef; }
+
+    /* transfer window class  */
+    static ani_object NativeTransferStatic(ani_env* aniEnv, ani_class cls, ani_object input);
+    static ani_object NativeTransferDynamic(ani_env* aniEnv, ani_class cls, ani_long nativeObj);
 
     /* window obj stored in ANI */
     static AniWindow* GetWindowObjectFromEnv(ani_env* env, ani_object obj);
@@ -91,6 +98,24 @@ public:
     void SetSystemBarProperties(ani_env* env, ani_object aniSystemBarProperties);
     ani_object SetSpecificSystemBarEnabled(ani_env* env, ani_string, ani_boolean enable,
         ani_boolean enableAnimation);
+    ani_object Snapshot(ani_env* env);
+    void HideNonSystemFloatingWindows(ani_env* env, ani_boolean shouldHide);
+    void ResizeAsync(ani_env* env, ani_int width, ani_int height);
+    ani_object SetWindowLimits(ani_env* env, ani_object inWindowLimits, ani_object forcible);
+    ani_object GetWindowLimits(ani_env* env);
+    void SetAspectRatio(ani_env* env, ani_double ratio);
+    void ResetAspectRatio(ani_env* env);
+    void SetResizeByDragEnabled(ani_env* env, ani_boolean enable);
+    void EnableDrag(ani_env* env, ani_boolean enable);
+    void MoveWindowToGlobal(ani_env* env, ani_int x, ani_int y, ani_object inMoveConfiguration);
+    void MoveWindowToAsync(ani_env* env, ani_int x, ani_int y, ani_object inMoveConfiguration);
+    void SetWindowMode(ani_env* env, ani_enum_item mode);
+    void SetForbidSplitMove(ani_env* env, ani_boolean isForbidSplitMove);
+    void SetFollowParentWindowLayoutEnabled(ani_env* env, ani_boolean enable);
+    void SetFollowParentMultiScreenPolicy(ani_env* env, ani_boolean enable);
+    void MoveWindowToGlobalDisplay(ani_env* env, ani_int x, ani_int y);
+    ani_object HandlePositionTransform(ani_env* env, ani_int x, ani_int y,
+        std::function<WMError(sptr<Window>&, const Position&, Position&)> transformFunc);
 
 private:
     void OnSetWindowColorSpace(ani_env* env, ani_int colorSpace);

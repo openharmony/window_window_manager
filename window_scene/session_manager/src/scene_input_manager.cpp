@@ -105,7 +105,7 @@ bool operator!=(const std::vector<float>& a, const std::vector<float>& b)
 bool IsEqualWindowInfo(const MMI::WindowInfo& a, const MMI::WindowInfo& b)
 {
     if (a.id != b.id || a.pid != b.pid || a.uid != b.uid || a.agentWindowId != b.agentWindowId || a.flags != b.flags ||
-        a.displayId != b.displayId || a.zOrder != b.zOrder) {
+        a.displayId != b.displayId || a.zOrder != b.zOrder || a.agentPid != b.agentPid) {
         return false;
     }
 
@@ -570,7 +570,7 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
     static std::unordered_map<int32_t, MMI::Rect> lastWindowDefaultHotArea;
     for (auto& e : windowInfoList) {
         idListStream << e.id << "|" << e.flags << "|" << e.zOrder << "|"
-                     << e.pid << "|" << e.defaultHotAreas.size();
+                     << e.pid << "|" << e.agentPid << "|" << e.defaultHotAreas.size();
 
         if (e.defaultHotAreas.size() > 0) {
             auto iter = lastWindowDefaultHotArea.find(e.id);

@@ -727,9 +727,10 @@ napi_value CreateJsPixelMapArrayObject(napi_env env, const std::vector<std::shar
     for (size_t i = 0; i < pixelMaps.size(); i++) {
         if (!pixelMaps[i]) {
             TLOGW(WmsLogTag::WMS_LIFE, "pixelMaps index: %{public}d is null", static_cast<int32_t>(i));
-            continue;
+            napi_set_element(env, arrayValue, i, NapiGetUndefined(env));
+        } else {
+            napi_set_element(env, arrayValue, i, CreateJsPixelMapObject(env, pixelMaps[i]));
         }
-        napi_set_element(env, arrayValue, i, CreateJsPixelMapObject(env, pixelMaps[i]));
     }
     return arrayValue;
 }
@@ -1356,11 +1357,18 @@ bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std
 bool GetWindowIdFromJsValue(napi_env env, napi_value jsObject, std::vector<int32_t>& windowIds)
 {
     if (jsObject == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to window id");
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to window id, jsObject is nullptr");
         return false;
     }
     uint32_t size = 0;
-    napi_get_array_length(env, jsObject, &size);
+    if (GetType(env, jsObject) != napi_object || napi_get_array_length(env, jsObject, &size) == napi_invalid_arg) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to window id, invalid arg");
+        return false;
+    }
+    if (size == 0) {
+        TLOGE(WmsLogTag::WMS_LIFE, "invalid windowIds size");
+        return false;
+    }
     for (uint32_t i = 0; i < size; i++) {
         int32_t elementArray;
         napi_value getElementValue = nullptr;

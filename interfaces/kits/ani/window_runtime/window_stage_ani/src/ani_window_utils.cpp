@@ -16,6 +16,7 @@
 #include "ani_window_utils.h"
 
 #include <iomanip>
+#include <mutex>
 #include <regex>
 #include <sstream>
 
@@ -30,6 +31,25 @@
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+
+std::mutex g_aniCreatorsMutex;
+std::unordered_map<std::string, std::pair<ani_class, std::unordered_map<std::string, ani_method>>> globalAniCreators;
+
+std::string GetHexColor(uint32_t color)
+{
+    std::stringstream ioss;
+    std::string temp;
+    ioss << std::setiosflags(std::ios::uppercase) << std::hex << color;
+    ioss >> temp;
+    int count = RGBA_LENGTH - static_cast<int>(temp.length());
+    std::string tmpColor(count, '0');
+    tmpColor += temp;
+    std::string finalColor("#");
+    finalColor += tmpColor;
+    return finalColor;
+}
+}
 ani_status AniWindowUtils::GetStdString(ani_env *env, ani_string ani_str, std::string &result)
 {
     ani_size strSize;
@@ -81,18 +101,20 @@ ani_status AniWindowUtils::GetPropertyIntObject(ani_env* env, const char* proper
     }
 
     ani_boolean isUndefined;
-    if (ANI_OK != env->Reference_IsUndefined(int_ref, &isUndefined)) {
+    ret = env->Reference_IsUndefined(int_ref, &isUndefined);
+    if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
         return ret;
     }
 
     if (isUndefined) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] %{public}s is Undefined Now", propertyName);
-        return ret;
+        return ANI_ERROR;
     }
 
     ani_int int_value;
-    if (ANI_OK != env->Object_CallMethodByName_Int(static_cast<ani_object>(int_ref), "intValue", nullptr, &int_value)) {
+    ret = env->Object_CallMethodByName_Int(static_cast<ani_object>(int_ref), "intValue", nullptr, &int_value);
+    if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
         return ret;
     }
@@ -111,26 +133,75 @@ ani_status AniWindowUtils::GetPropertyDoubleObject(ani_env* env, const char* pro
             propertyName, static_cast<int32_t>(ret));
         return ret;
     }
-
     ani_boolean isUndefined;
-    if (ANI_OK != env->Reference_IsUndefined(double_ref, &isUndefined)) {
+    ret = env->Reference_IsUndefined(double_ref, &isUndefined);
+    if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
         return ret;
     }
 
     if (isUndefined) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] %{public}s is Undefined Now", propertyName);
-        return ret;
+        return ANI_ERROR;
     }
 
     ani_double double_value;
-    if (ANI_OK != env->Object_CallMethodByName_Double(static_cast<ani_object>(double_ref),
-        "doubleValue", nullptr, &double_value)) {
+    ret = env->Object_CallMethodByName_Double(static_cast<ani_object>(double_ref),
+        "doubleValue", nullptr, &double_value);
+    if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
         return ret;
     }
     result = static_cast<double>(double_value);
     TLOGI(WmsLogTag::DEFAULT, "[ANI] %{public}s is: %{public}f", propertyName, result);
+    return ret;
+}
+
+ani_status AniWindowUtils::GetPropertyLongObject(ani_env* env, const char* propertyName, ani_object object,
+                                                 int64_t& result)
+{
+    ani_ref long_ref;
+    ani_status ret = env->Object_GetPropertyByName_Ref(object, propertyName, &long_ref);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s failed, ret : %{public}d",
+            propertyName, static_cast<int32_t>(ret));
+        return ret;
+    }
+
+    ani_boolean isUndefined;
+    ret = env->Reference_IsUndefined(long_ref, &isUndefined);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Reference_IsUndefined %{public}s failed, ret : %{public}d",
+            propertyName, static_cast<int32_t>(ret));
+        return ret;
+    }
+    if (isUndefined) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] %{public}s is Undefined Now", propertyName);
+        return ANI_ERROR;
+    }
+
+    ani_long long_value;
+    ret = env->Object_CallMethodByName_Long(static_cast<ani_object>(long_ref), "unboxed", ":J", &long_value);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_CallMethodByName_Long %{public}s failed, ret : %{public}d",
+            propertyName, static_cast<int32_t>(ret));
+        return ret;
+    }
+    result = static_cast<int64_t>(long_value);
+    TLOGD(WmsLogTag::DEFAULT, "[ANI] property name is %{public}s, value is:%{public}" PRIu64, propertyName, result);
+    return ret;
+}
+
+ani_status AniWindowUtils::GetEnumValue(ani_env* env, ani_enum_item enumPara, uint32_t& result)
+{
+    ani_int enumValue;
+    ani_status ret = env->EnumItem_GetValue_Int(enumPara, &enumValue);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] EnumItem_GetValue_Int failed, ret : %{public}d", static_cast<int32_t>(ret));
+        return ret;
+    }
+    result = static_cast<uint32_t>(enumValue);
+    TLOGD(WmsLogTag::DEFAULT, "[ANI] enum value is:%{public}u", result);
     return ret;
 }
 
@@ -229,23 +300,6 @@ ani_status AniWindowUtils::GetIntVector(ani_env* env, ani_object ary, std::vecto
     return ANI_OK;
 }
 
-ani_status AniWindowUtils::NewAniObjectNoParams(ani_env* env, const char* cls, ani_object* object)
-{
-    ani_class aniClass;
-    ani_status ret = env->FindClass(cls, &aniClass);
-    if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] Find class failed");
-        return ret;
-    }
-    ani_method aniCtor;
-    ret = env->Class_FindMethod(aniClass, "<ctor>", nullptr, &aniCtor);
-    if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] Find class constructor failed");
-        return ret;
-    }
-    return env->Object_New(aniClass, aniCtor, object);
-}
-
 ani_status AniWindowUtils::NewAniObject(ani_env* env, const char* cls, const char* signature, ani_object* result, ...)
 {
     ani_class aniClass;
@@ -294,7 +348,7 @@ ani_object AniWindowUtils::CreateAniSize(ani_env* env, int32_t width, int32_t he
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     ani_class aniClass;
-    ani_status ret = env->FindClass("L@ohos/window/window/SizeInternal;", &aniClass);
+    ani_status ret = env->FindClass("@ohos.window.window.SizeInternal", &aniClass);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
         return AniWindowUtils::CreateAniUndefined(env);
@@ -320,13 +374,13 @@ ani_object AniWindowUtils::CreateAniRect(ani_env* env, const Rect& rect)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     ani_class aniClass;
-    ani_status ret = env->FindClass("L@ohos/window/window/RectInternal;", &aniClass);
+    ani_status ret = env->FindClass("@ohos.window.window.RectInternal", &aniClass);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
         return AniWindowUtils::CreateAniUndefined(env);
     }
     ani_method aniCtor;
-    ret = env->Class_FindMethod(aniClass, "<ctor>", nullptr, &aniCtor);
+    ret = env->Class_FindMethod(aniClass, "<ctor>", ":V", &aniCtor);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
         return AniWindowUtils::CreateAniUndefined(env);
@@ -342,6 +396,41 @@ ani_object AniWindowUtils::CreateAniRect(ani_env* env, const Rect& rect)
     CallAniMethodVoid(env, aniRect, aniClass, "<set>width", nullptr, ani_int(rect.width_));
     CallAniMethodVoid(env, aniRect, aniClass, "<set>height", nullptr, ani_int(rect.height_));
     return aniRect;
+}
+
+ani_object AniWindowUtils::CreateAniWindowLimits(ani_env* env, const WindowLimits& windowLimits)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    ani_class aniClass;
+    ani_status ret = env->FindClass("@ohos.window.window.WindowLimitsInternal", &aniClass);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    ani_method aniCtor;
+    ret = env->Class_FindMethod(aniClass, "<ctor>", nullptr, &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    ani_object aniLimits;
+    ret = env->Object_New(aniClass, aniCtor, &aniLimits);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to create new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    CallAniMethodVoid(env, aniLimits, aniClass, "<set>maxWidth", nullptr,
+        CreateBaseTypeObject<int>(env, windowLimits.maxWidth_));
+    CallAniMethodVoid(env, aniLimits, aniClass, "<set>maxHeight", nullptr,
+        CreateBaseTypeObject<int>(env, windowLimits.maxHeight_));
+    CallAniMethodVoid(env, aniLimits, aniClass, "<set>minWidth", nullptr,
+        CreateBaseTypeObject<int>(env, windowLimits.minWidth_));
+    CallAniMethodVoid(env, aniLimits, aniClass, "<set>minHeight", nullptr,
+        CreateBaseTypeObject<int>(env, windowLimits.minHeight_));
+    return aniLimits;
 }
 
 ani_object AniWindowUtils::CreateAniAvoidArea(ani_env* env, const AvoidArea& avoidArea, AvoidAreaType type)
@@ -376,6 +465,86 @@ ani_object AniWindowUtils::CreateAniAvoidArea(ani_env* env, const AvoidArea& avo
     CallAniMethodVoid(env, aniAvoidArea, aniClass, "<set>bottomRect", nullptr,
         CreateAniRect(env, avoidArea.bottomRect_));
     return aniAvoidArea;
+}
+
+ani_object AniWindowUtils::CreateAniSystemBarTintState(ani_env* env, DisplayId displayId,
+    const SystemBarRegionTints& tints)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    ani_class aniClass;
+    if (env->FindClass("L@ohos/window/window/SystemBarTintStateInternal;", &aniClass) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_method aniCtor;
+    if (env->Class_FindMethod(aniClass, "<ctor>", nullptr, &aniCtor) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object state;
+    if (env->Object_New(aniClass, aniCtor, &state) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    CallAniMethodVoid(env, state, aniClass, "<set>displayId", nullptr, static_cast<ani_long>(displayId));
+    ani_array_ref regionTintArray = nullptr;
+    ani_class regionTintCls;
+    if (env->FindClass("L@ohos/window/window/SystemBarRegionTintInternal;", &regionTintCls) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    if (env->Array_New_Ref(regionTintCls, tints.size(), CreateAniUndefined(env), &regionTintArray) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] create array failed");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    for (size_t i = 0; i < tints.size(); i++) {
+        if (env->Array_Set_Ref(regionTintArray, i, CreateAniSystemBarRegionTint(env, tints[i])) != ANI_OK) {
+            TLOGE(WmsLogTag::DEFAULT, "[ANI] create region tint failed");
+            return AniWindowUtils::CreateAniUndefined(env);
+        }
+    }
+    CallAniMethodVoid(env, state, aniClass, "<set>regionTint", nullptr, regionTintArray);
+    return state;
+}
+
+ani_object AniWindowUtils::CreateAniSystemBarRegionTint(ani_env* env, const SystemBarRegionTint& tint)
+{
+    ani_class regionTintCls;
+    if (env->FindClass("L@ohos/window/window/SystemBarRegionTintInternal;", &regionTintCls) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_method regionTintCtor;
+    if (env->Class_FindMethod(regionTintCls, "<ctor>", nullptr, &regionTintCtor) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object regionTint;
+    if (env->Object_New(regionTintCls, regionTintCtor, &regionTint) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(tint.type_) != 0) {
+        CallAniMethodVoid(env, regionTint, regionTintCls, "<set>type", nullptr,
+            ani_long(NATIVE_JS_TO_WINDOW_TYPE_MAP.at(tint.type_)));
+    } else {
+        CallAniMethodVoid(env, regionTint, regionTintCls, "<set>type", nullptr, ani_long(tint.type_));
+    }
+    CallAniMethodVoid(env, regionTint, regionTintCls, "<set>isEnable", nullptr, ani_boolean(tint.prop_.enable_));
+    ani_string backgroundColor;
+    if (GetAniString(env, GetHexColor(tint.prop_.backgroundColor_), &backgroundColor) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] create string failed");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    CallAniMethodVoid(env, regionTint, regionTintCls, "<set>backgroundColor", nullptr, backgroundColor);
+    ani_string contentColor;
+    if (GetAniString(env, GetHexColor(tint.prop_.contentColor_), &contentColor) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] create string failed");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    CallAniMethodVoid(env, regionTint, regionTintCls, "<set>contentColor", nullptr, contentColor);
+    CallAniMethodVoid(env, regionTint, regionTintCls, "<set>region", nullptr, CreateAniRect(env, tint.region_));
+    return regionTint;
 }
 
 ani_object AniWindowUtils::CreateAniRotationChangeInfo(ani_env* env, const RotationChangeInfo& info)
@@ -498,7 +667,7 @@ ani_status AniWindowUtils::CallAniFunctionVoid(ani_env *env, const char* ns,
     }
     ani_function func{};
     if ((ret = env->Namespace_FindFunction(aniNamespace, fn, signature, &func)) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]canot find callBack %{public}d", ret);
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]canot find callback %{public}d", ret);
         return ret;
     }
     va_list args;
@@ -506,7 +675,7 @@ ani_status AniWindowUtils::CallAniFunctionVoid(ani_env *env, const char* ns,
     ret = env->Function_Call_Void_V(func, args);
     va_end(args);
     if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]canot run callBack %{public}d", ret);
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]canot run callback %{public}d", ret);
         return ret;
     }
     return ret;
@@ -581,192 +750,112 @@ ani_status AniWindowUtils::GetAniString(ani_env* env, const std::string& str, an
     return env->String_NewUTF8(str.c_str(), static_cast<ani_size>(str.size()), result);
 }
 
-void AniWindowUtils::SetSystemPropertiesWindowRect(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
+ani_object AniWindowUtils::CreateAniRectObject(ani_env* env, const Rect& rect)
 {
-    Rect rect = window->GetRect();
-    ani_object aniWindowRect = CreateAniRect(env, rect);
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>windowRect", nullptr, aniWindowRect);
+    return InitAniObjectByCreator(env, "L@ohos/window/window/RectInternal;", "iiii:",
+        ani_int(rect.posX_), ani_int(rect.posY_),
+        ani_int(rect.width_), ani_int(rect.height_));
 }
 
-void AniWindowUtils::SetSystemPropertiesDrawableRect(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
+ani_object AniWindowUtils::CreateWindowsProperties(ani_env* env, const WindowPropertyInfo& windowPropertyInfo)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    Ace::UIContent* uiContent = window->GetUIContent();
-    Rect drawableRect = g_emptyRect;
-    if (uiContent == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] uicontent is nullptr");
+    ani_object aniRect = CreateAniRectObject(env, windowPropertyInfo.windowRect);
+    ani_object aniDrawableRect = CreateAniRectObject(env, windowPropertyInfo.drawableRect);
+    int windowType;
+    if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(windowPropertyInfo.type) != 0) {
+        windowType = static_cast<int>(NATIVE_JS_TO_WINDOW_TYPE_MAP.at(windowPropertyInfo.type));
     } else {
-        uiContent->GetWindowPaintSize(drawableRect);
+        windowType = static_cast<int>(windowPropertyInfo.type);
     }
+    ani_string aniWindowName;
+    GetAniString(env, windowPropertyInfo.name, &aniWindowName);
+    ani_object aniWindowsProperties = InitAniObjectByCreator(env, "L@ohos/window/window/WindowPropertiesInternal;",
+        "L@ohos/window/window/Rect;L@ohos/window/window/Rect;ZZZZDDZZZZIIJLstd/core/String;:V",
+        aniRect, aniDrawableRect, ani_boolean(windowPropertyInfo.isFullScreen),
+        ani_boolean(windowPropertyInfo.isLayoutFullScreen), ani_boolean(windowPropertyInfo.isFocusable),
+        ani_boolean(windowPropertyInfo.isTouchable), ani_float(windowPropertyInfo.brightness), ani_float(0),
+        ani_boolean(windowPropertyInfo.isKeepScreenOn), ani_boolean(windowPropertyInfo.isPrivacyMode),
+        ani_boolean(false),  ani_boolean(windowPropertyInfo.isTransparent), ani_int(windowType),
+        ani_int(windowPropertyInfo.id), ani_long(windowPropertyInfo.displayId), aniWindowName);
+    return aniWindowsProperties;
+}
 
-    ani_object aniDrawableRect = CreateAniRect(env, drawableRect);
-    if (aniDrawableRect == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] GetDrawableRect failed!");
-        return;
+ani_status AniWindowUtils::InitAniCreator(ani_env* env,
+    const std::string& aniClassDescriptor, const std::string& aniCtorSignature)
+{
+    ani_status status = ANI_OK;
+    auto aniClassIter = globalAniCreators.find(aniClassDescriptor);
+    if (aniClassIter != globalAniCreators.end()) {
+        auto& aniCtorSignatureMap = aniClassIter->second.second;
+        if (aniCtorSignatureMap.find(aniCtorSignature) != aniCtorSignatureMap.end()) {
+            TLOGD(WmsLogTag::DEFAULT, "class %{public}s and its ctor already exist", aniClassDescriptor.c_str());
+            return status;
+        }
     }
-
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>drawableRect", nullptr, aniDrawableRect);
-}
-
-void AniWindowUtils::SetSystemPropertiesWindowType(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    WindowType aniWindowType = window->GetType();
-    env->Object_SetFieldByName_Int(systemProperties, "typeInternal", ani_int(aniWindowType));
-}
-
-void AniWindowUtils::SetSystemPropertiesWindowIsLayoutFullScreen(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    bool isLayotFullScreen = window->IsLayoutFullScreen();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>isLayoutFullScreen", nullptr,
-        static_cast<ani_boolean>(isLayotFullScreen));
-}
-
-
-void AniWindowUtils::SetSystemPropertiesWindowIsFullScreen(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    bool isFullScreen = window->IsFullScreen();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>isFullScreen", nullptr,
-        static_cast<ani_boolean>(isFullScreen));
-}
-
-void AniWindowUtils::SetSystemPropertiesWindowTouchable(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    bool windowTouchable = window->GetTouchable();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>touchable", nullptr,
-        static_cast<ani_boolean>(windowTouchable));
-}
-
-void AniWindowUtils::SetSystemPropertiesWindowFousable(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    bool windowFousable = window->GetFocusable();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>focusable", nullptr,
-        static_cast<ani_boolean>(windowFousable));
-}
-
-void AniWindowUtils::SetSystemPropertiesWindowIsPrivacyMode(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    bool windowIsPrivacyMode = window->IsPrivacyMode();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>isPrivacyMode", nullptr,
-        static_cast<ani_boolean>(windowIsPrivacyMode));
-}
-
-void AniWindowUtils::SetSystemPropertiesWindowIsKeepScreenOn(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    bool windowIsKeepScreenOn = window->IsKeepScreenOn();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>isKeepScreenOn", nullptr,
-        static_cast<ani_boolean>(windowIsKeepScreenOn));
-}
-
-void AniWindowUtils::SetSystemPropertiesWindowBrightness(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    float windowBrightness = window->GetBrightness();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>brightness", nullptr,
-        static_cast<ani_float>(windowBrightness));
-}
-
-
-void AniWindowUtils::SetSystemPropertiesWindowIsTransparent(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    bool isTransparent = window->IsTransparent();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>isTransparent", nullptr,
-        static_cast<ani_boolean>(isTransparent));
-}
-
-
-void AniWindowUtils::SetSystemPropertieswindowIsRoundCorner(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    bool windowIsRoundCorner {false};
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>isRoundCorner", nullptr,
-        static_cast<ani_boolean>(windowIsRoundCorner));
-}
-
-
-void AniWindowUtils::SetSystemPropertiesWindowDimBehindValue(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    int windowDimBehindValue {0};
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>dimBehindValue", nullptr,
-        static_cast<ani_int>(windowDimBehindValue));
-}
-
-
-void AniWindowUtils::SetSystemPropertieswindowId(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    uint32_t windowId = window->GetWindowId();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>id", nullptr,
-        static_cast<ani_int>(windowId));
-}
-
-void AniWindowUtils::SetSystemPropertiesdisplayId(ani_env* env, const sptr<Window>& window,
-    ani_object& systemProperties, const char* clsName)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    uint32_t displayId = window->GetDisplayId();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>displayId", nullptr,
-        static_cast<ani_int>(displayId));
-}
-
-ani_object AniWindowUtils::CreateWindowsProperties(ani_env* env, const sptr<Window>& window)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "window is nullptr or get invalid param");
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    bool isNewClassEntry = false;
+    ani_class aniClass = nullptr;
+    if (aniClassIter == globalAniCreators.end()) {
+        status = env->FindClass(aniClassDescriptor.c_str(), &aniClass);
+        if (status != ANI_OK) {
+            TLOGE(WmsLogTag::DEFAULT, "class %{public}s not found, ret %{public}d", aniClassDescriptor.c_str(), status);
+            return status;
+        }
+        auto [iter, inserted] = globalAniCreators.emplace(
+            aniClassDescriptor, std::make_pair(aniClass, std::unordered_map<std::string, ani_method>()));
+        if (!inserted) {
+            TLOGE(WmsLogTag::DEFAULT, "emplace class %{public}s failed", aniClassDescriptor.c_str());
+            return ANI_ERROR;
+        }
+        aniClassIter = iter;
+        isNewClassEntry = true;
+        auto& newClassEntry = aniClassIter->second;
+        status = env->GlobalReference_Create(static_cast<ani_ref>(newClassEntry.first),
+            reinterpret_cast<ani_ref*>(&(newClassEntry.first)));
+        if (status != ANI_OK) {
+            TLOGE(WmsLogTag::DEFAULT, "GlobalReference_Create failed ret %{public}d", status);
+            globalAniCreators.erase(aniClassIter);
+            return status;
+        }
     }
-
-    static const char* clsName = "L@ohos/window/window/WindowPropertiesInternal;";
-    ani_object aniSystemProperties;
-
-    NewAniObjectNoParams(env, clsName, &aniSystemProperties);
-    SetSystemPropertiesWindowRect(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesDrawableRect(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowType(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowIsLayoutFullScreen(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowIsFullScreen(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowTouchable(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowFousable(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowIsPrivacyMode(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowIsKeepScreenOn(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowBrightness(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowIsTransparent(env, window, aniSystemProperties, clsName);
-    SetSystemPropertieswindowIsRoundCorner(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesWindowDimBehindValue(env, window, aniSystemProperties, clsName);
-    SetSystemPropertieswindowId(env, window, aniSystemProperties, clsName);
-    SetSystemPropertiesdisplayId(env, window, aniSystemProperties, clsName);
-
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] Window [%{public}u, %{public}s] get properties end", window->GetWindowId(),
-        window->GetWindowName().c_str());
-    if (aniSystemProperties == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] AniSystemProperties is nullptr");
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    aniClass = aniClassIter->second.first;
+    ani_method aniCtorMethod;
+    status = env->Class_FindMethod(aniClass, "<ctor>", aniCtorSignature.c_str(), &aniCtorMethod);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "find %{public}s ctor failed ret %{public}d", aniClassDescriptor.c_str(), status);
+        if (isNewClassEntry) {
+            env->GlobalReference_Delete(static_cast<ani_ref>(aniClass));
+            globalAniCreators.erase(aniClassIter);
+        }
+        return status;
     }
+    aniClassIter->second.second.emplace(aniCtorSignature, aniCtorMethod);
+    return status;
+}
 
-    return aniSystemProperties;
+ani_object AniWindowUtils::InitAniObjectByCreator(ani_env* env,
+    const std::string& aniClassDescriptor, const std::string aniCtorSignature, ...)
+{
+    std::lock_guard<std::mutex> lock(g_aniCreatorsMutex);
+    ani_status status = InitAniCreator(env, aniClassDescriptor, aniCtorSignature);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "InitAniCreator failed, ret %{public}d", status);
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    va_list args;
+    va_start(args, aniCtorSignature);
+    auto& creatorEntry = globalAniCreators[aniClassDescriptor];
+    ani_object aniObject;
+    status = env->Object_New_V(
+        creatorEntry.first,
+        creatorEntry.second[aniCtorSignature],
+        &aniObject,
+        args);
+    va_end(args);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "Object_New_V failed, ret %{public}d", status);
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    return aniObject;
 }
 
 ani_object AniWindowUtils::CreateAniPixelMapArray(ani_env* env,
@@ -878,6 +967,13 @@ uint32_t AniWindowUtils::GetColorFromAni(ani_env* env,
 {
     ani_ref result;
     env->Object_GetPropertyByName_Ref(aniObject, name, &result);
+    ani_boolean isColorUndefined;
+    env->Reference_IsUndefined(result, &isColorUndefined);
+    if (isColorUndefined) {
+        TLOGI(WmsLogTag::WMS_IMMS, "the color is undefined, return default");
+        return defaultColor;
+    }
+
     ani_string aniColor = reinterpret_cast<ani_string>(result);
     std::string colorStr;
     GetStdString(env, aniColor, colorStr);
@@ -908,20 +1004,31 @@ bool AniWindowUtils::SetWindowStatusBarContentColor(ani_env* env,
     auto statusProperty = properties[WindowType::WINDOW_TYPE_STATUS_BAR];
     ani_ref aniStatusContentColor;
     env->Object_GetPropertyByName_Ref(aniObject, "statusBarContentColor", &aniStatusContentColor);
-    ani_boolean aniStatusIcon;
-    env->Object_GetPropertyByName_Boolean(aniObject, "isStatusBarLightIcon", &aniStatusIcon);
-    properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ =  GetColorFromAni(
-        env,
-        "statusBarContentColor",
-        statusProperty.contentColor_,
-        propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].contentColorFlag,
-        aniObject);
-    if (aniStatusIcon) {
-        properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ = SYSTEM_COLOR_WHITE;
-    } else {
-        properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ = SYSTEM_COLOR_BLACK;
+    ani_ref aniStatusIcon;
+    env->Object_GetPropertyByName_Ref(aniObject, "isStatusBarLightIcon", &aniStatusIcon);
+
+    ani_boolean isColorUndefined;
+    env->Reference_IsUndefined(aniStatusContentColor, &isColorUndefined);
+    ani_boolean isIconUndefined;
+    env->Reference_IsUndefined(aniStatusIcon, &isIconUndefined);
+
+    if (!isColorUndefined) {
+        properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ = GetColorFromAni(
+            env,
+            "statusBarContentColor",
+            statusProperty.contentColor_,
+            propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].contentColorFlag,
+            aniObject);
+    } else if (!isIconUndefined) {
+        ani_boolean isStatusIcon;
+        env->Object_CallMethodByName_Boolean(static_cast<ani_object>(aniStatusIcon), "unboxed", ":z", &isStatusIcon);
+        if (static_cast<bool>(aniStatusIcon)) {
+            properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ = SYSTEM_COLOR_WHITE;
+        } else {
+            properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ = SYSTEM_COLOR_BLACK;
+        }
+        propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].contentColorFlag = true;
     }
-    propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].contentColorFlag = true;
     return true;
 }
 
@@ -935,20 +1042,32 @@ bool AniWindowUtils::SetWindowNavigationBarContentColor(ani_env* env,
     auto navProperty = properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR];
     ani_ref aniNaviGationBarColor;
     env->Object_GetPropertyByName_Ref(aniObject, "navigationBarContentColor", &aniNaviGationBarColor);
-    ani_boolean aniNavigationIcon;
-    env->Object_GetPropertyByName_Boolean(aniObject, "isNavigationBarLightIcon", &aniNavigationIcon);
-    properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ =  GetColorFromAni(
-        env,
-        "navigationBarContentColor",
-        navProperty.contentColor_,
-        propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColorFlag,
-        aniObject);
-    if (aniNavigationIcon) {
-        properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ = SYSTEM_COLOR_WHITE;
-    } else {
-        properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ = SYSTEM_COLOR_BLACK;
+    ani_ref aniNavigationIcon;
+    env->Object_GetPropertyByName_Ref(aniObject, "isNavigationBarLightIcon", &aniNavigationIcon);
+
+    ani_boolean isColorUndefined;
+    env->Reference_IsUndefined(aniNaviGationBarColor, &isColorUndefined);
+    ani_boolean isIconUndefined;
+    env->Reference_IsUndefined(aniNavigationIcon, &isIconUndefined);
+
+    if (!isColorUndefined) {
+        properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ = GetColorFromAni(
+            env,
+            "navigationBarContentColor",
+            navProperty.contentColor_,
+            propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColorFlag,
+            aniObject);
+    } else if (!isIconUndefined) {
+        ani_boolean isNavigationIcon;
+        env->Object_CallMethodByName_Boolean(static_cast<ani_object>(aniNavigationIcon),
+            "unboxed", ":z", &isNavigationIcon);
+        if (static_cast<bool>(isNavigationIcon)) {
+            properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ = SYSTEM_COLOR_WHITE;
+        } else {
+            properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ = SYSTEM_COLOR_BLACK;
+        }
+        propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColorFlag = true;
     }
-    propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColorFlag = true;
     return true;
 }
 
@@ -989,18 +1108,30 @@ bool AniWindowUtils::SetSystemBarPropertiesFromAni(ani_env* env,
         return false;
     }
 
-    ani_boolean aniEnableStatusBarAnimation;
-    env->Object_GetPropertyByName_Boolean(aniProperties, "enableStatusBarAnimation", &aniEnableStatusBarAnimation);
-    if (static_cast<bool>(aniEnableStatusBarAnimation)) {
-        windowBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_ = aniEnableStatusBarAnimation;
+    ani_ref aniEnableStatusBarAnimation;
+    env->Object_GetPropertyByName_Ref(aniProperties, "enableStatusBarAnimation", &aniEnableStatusBarAnimation);
+    ani_boolean isStatusAnimationUndefined;
+    env->Reference_IsUndefined(aniEnableStatusBarAnimation, &isStatusAnimationUndefined);
+    if (!isStatusAnimationUndefined) {
+        ani_boolean isStatusAnimation;
+        env->Object_CallMethodByName_Boolean(static_cast<ani_object>(aniEnableStatusBarAnimation),
+            "unboxed", "z", &isStatusAnimation);
+        windowBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_ =
+            static_cast<bool>(isStatusAnimation);
         windowPropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimationFlag = true;
     }
 
-    ani_boolean aniEnableNavigationBarAnimation;
-    env->Object_GetPropertyByName_Boolean(aniProperties, "enableNavigationBarAnimation",
+    ani_ref aniEnableNavigationBarAnimation;
+    env->Object_GetPropertyByName_Ref(aniProperties, "enableNavigationBarAnimation",
         &aniEnableNavigationBarAnimation);
-    if (static_cast<bool>(aniEnableNavigationBarAnimation)) {
-        windowBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableAnimation_ = aniEnableNavigationBarAnimation;
+    ani_boolean isNavigationAnimationUndefined;
+    env->Reference_IsUndefined(aniEnableNavigationBarAnimation, &isNavigationAnimationUndefined);
+    if (!isNavigationAnimationUndefined) {
+        ani_boolean isNavigationAnimation;
+        env->Object_CallMethodByName_Boolean(static_cast<ani_object>(aniEnableNavigationBarAnimation),
+            "unboxed", "z", &isNavigationAnimation);
+        windowBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableAnimation_ =
+            static_cast<bool>(isNavigationAnimation);
         windowPropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableAnimationFlag = true;
     }
     return true;
@@ -1119,6 +1250,71 @@ void AniWindowUtils::GetSpecificBarStatus(sptr<Window>& window, const std::strin
     systemBarProperties[type].enableAnimation_ = newSystemBarProperties[type].enableAnimation_;
     systemBarProperties[type].settingFlag_ = systemBarProperties[type].settingFlag_ |
         SystemBarSettingFlag::ENABLE_SETTING;
+}
+
+WindowLimits AniWindowUtils::ParseWindowLimits(ani_env* env, ani_object aniWindowLimits)
+{
+    WindowLimits windowLimits;
+    
+    auto getAndAssign = [&, where = __func__](const char* name, uint32_t& field) {
+        int value;
+        ani_status ret = AniWindowUtils::GetPropertyIntObject(env, name, aniWindowLimits, value);
+        if (ret == ANI_OK) {
+            if (value >= 0) {
+                field = static_cast<uint32_t>(value);
+            } else {
+                field = 0;
+                TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: [ANI] Invalid %{public}s: %{public}d", where, name, value);
+            }
+        }
+    };
+
+    getAndAssign("maxWidth", windowLimits.maxWidth_);
+    getAndAssign("maxHeight", windowLimits.maxHeight_);
+    getAndAssign("minWidth", windowLimits.minWidth_);
+    getAndAssign("minHeight", windowLimits.minHeight_);
+    return windowLimits;
+}
+
+bool AniWindowUtils::CheckParaIsUndefined(ani_env* env, ani_object para)
+{
+    ani_boolean isUndefined;
+    ani_status aniRet = env->Reference_IsUndefined(para, &isUndefined);
+    if (aniRet != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Reference_IsUndefined failed, ret : %{public}d",
+            static_cast<int32_t>(aniRet));
+        return true;
+    }
+    return static_cast<bool>(isUndefined);
+}
+
+ani_object AniWindowUtils::CreateAniPosition(ani_env* env, const Position& position)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    ani_class aniClass;
+    ani_status ret = env->FindClass("@ohos.window.window.PositionInternal", &aniClass);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    ani_method aniCtor;
+    ret = env->Class_FindMethod(aniClass, "<ctor>", nullptr, &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    ani_object aniPosition;
+    ret = env->Object_New(aniClass, aniCtor, &aniPosition);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to create new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    CallAniMethodVoid(env, aniPosition, aniClass, "<set>x", nullptr, ani_int(position.x));
+    CallAniMethodVoid(env, aniPosition, aniClass, "<set>y", nullptr, ani_int(position.y));
+    return aniPosition;
 }
 
 WmErrorCode AniWindowUtils::ToErrorCode(WMError error, WmErrorCode defaultCode)

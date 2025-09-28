@@ -308,6 +308,21 @@ HWTEST_F(WindowManagerTest, GetAccessibilityWindowInfo01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ConvertToRelativeCoordinateExtended
+ * @tc.desc: ConvertToRelativeCoordinateExtended ok
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, ConvertToRelativeCoordinateExtended, TestSize.Level1)
+{
+    Rect rect;
+    Rect newRect;
+    DisplayId newDisplayId = 0;
+    rect = { 100, 2000, 400, 600 };
+    auto ret = WindowManager::GetInstance().ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
  * @tc.name: GetUnreliableWindowInfo
  * @tc.desc: GetUnreliableWindowInfo ok
  * @tc.type: FUNC
@@ -2541,6 +2556,69 @@ HWTEST_F(WindowManagerTest, GetInstanceMulti, TestSize.Level1)
 HWTEST_F(WindowManagerTest, RemoveInstanceByUserId, TestSize.Level1)
 {
     ASSERT_EQ(WMError::WM_OK, WindowManager::RemoveInstanceByUserId(101));
+}
+
+/**
+ * @tc.name: UpdateOutline
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, UpdateOutline, TestSize.Level1)
+{
+    OutlineParams params;
+    WMError ret = WindowManager::GetInstance().UpdateOutline(nullptr, params);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+
+    sptr<IRemoteObject> remoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
+    ret = WindowManager::GetInstance().UpdateOutline(remoteObject, params);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+
+    params.type_ = OutlineType::OUTLINE_FOR_WINDOW;
+    params.outlineStyleParams_.outlineWidth_ = 0;
+    ret = WindowManager::GetInstance().UpdateOutline(remoteObject, params);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+
+    params.outlineStyleParams_.outlineWidth_ = OUTLINE_WIDTH_MAX + 1;
+    ret = WindowManager::GetInstance().UpdateOutline(remoteObject, params);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+
+    params.outlineStyleParams_.outlineWidth_ = OUTLINE_WIDTH_DEFAULT;
+    params.outlineStyleParams_.outlineShape_ = OutlineShape::OUTLINE_SHAPE_END;
+    ret = WindowManager::GetInstance().UpdateOutline(remoteObject, params);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+
+    params.outlineStyleParams_.outlineShape_ = OutlineShape::OUTLINE_SHAPE_FOUR_CORNERS;
+    params.outlineStyleParams_.outlineColor_ = 0x00ffffff  + 1; // 0x00ffffff: color has no alpha byte.
+    ret = WindowManager::GetInstance().UpdateOutline(remoteObject, params);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), UpdateOutline(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_INVALID_PERMISSION));
+    params.outlineStyleParams_.outlineColor_ = 0x00ffffff - 1; // 0x00ffffff: color has no alpha byte.
+    ret = WindowManager::GetInstance().UpdateOutline(remoteObject, params);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PERMISSION);
+
+    EXPECT_CALL(m->Mock(), UpdateOutline(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_INVALID_PERMISSION));
+    params.outlineStyleParams_.outlineColor_ = 0xff000000 + 1; // 0xff000000: color opaque
+    ret = WindowManager::GetInstance().UpdateOutline(remoteObject, params);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PERMISSION);
+
+    EXPECT_CALL(m->Mock(), UpdateOutline(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ret = WindowManager::GetInstance().UpdateOutline(remoteObject, params);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    bool outlineRecoverRegister = WindowManager::GetInstance().isOutlineRecoverRegistered_;
+    params.persistentIds_.push_back(1); // 1 persistentId
+    EXPECT_CALL(m->Mock(), UpdateOutline(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ret = WindowManager::GetInstance().UpdateOutline(remoteObject, params);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    WindowManager::GetInstance().isOutlineRecoverRegistered_ = !outlineRecoverRegister;
+    EXPECT_CALL(m->Mock(), UpdateOutline(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ret = WindowManager::GetInstance().UpdateOutline(remoteObject, params);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    WindowManager::GetInstance().isOutlineRecoverRegistered_ = outlineRecoverRegister;
 }
 
 /**

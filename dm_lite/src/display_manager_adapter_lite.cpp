@@ -90,11 +90,11 @@ bool BaseAdapterLite::InitDMSProxy()
     return true;
 }
 
-sptr<DisplayInfo> DisplayManagerAdapterLite::GetDefaultDisplayInfo()
+sptr<DisplayInfo> DisplayManagerAdapterLite::GetDefaultDisplayInfo(int32_t userId)
 {
     INIT_PROXY_CHECK_RETURN(nullptr);
 
-    return displayManagerServiceProxy_->GetDefaultDisplayInfo();
+    return displayManagerServiceProxy_->GetDefaultDisplayInfo(userId);
 }
 
 bool DisplayManagerAdapterLite::IsFoldable()
