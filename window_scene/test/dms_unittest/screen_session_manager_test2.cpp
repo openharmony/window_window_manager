@@ -355,11 +355,6 @@ HWTEST_F(ScreenSessionManagerTest, CheckAndNotifyRefreshRate002, TestSize.Level1
 #endif
 }
 
-    void ReportScreenModeChangeEvent(RSScreenModeInfo screenmode, uint32_t result);
-    void ReportRelativePositionChangeEvent(MultiScreenPositionOptions& mainScreenOptions,
-        MultiScreenPositionOptions& secondScreenOption, const std::string& errMsg); 
-    static const std::string GetScreenName(ScreenId screenId);
-
 /**
  * @tc.name: ReportScreenModeChangeEvent
  * @tc.desc: ReportScreenModeChangeEvent
