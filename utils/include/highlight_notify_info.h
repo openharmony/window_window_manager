@@ -26,19 +26,19 @@ namespace OHOS::Rosen {
 class HighlightNotifyInfo : public Parcelable {
 public:
     /**
-     * @brief Default construct of HighlightNotifyInfo
+     * @brief Default constructor of HighlightNotifyInfo
      */
     HighlightNotifyInfo() = default;
 
     /**
-     * @brief Construct of HighlightNotifyInfo
+     * @brief Constructor of HighlightNotifyInfo
      */
     HighlightNotifyInfo(int64_t timeStamp, const std::vector<int32_t>& notHighlightIds, int32_t highlightId,
         bool isSyncNotify): timeStamp_(timeStamp), notHighlightIds_(notHighlightIds), highlightId_(highlightId),
         isSyncNotify_(isSyncNotify) {};
 
     /**
-     * @brief Deconstruct of HighlightNotifyInfo
+     * @brief Destructor of HighlightNotifyInfo
      */
     ~HighlightNotifyInfo() = default;
 
@@ -73,4 +73,4 @@ public:
     bool isSyncNotify_ = false;
 };
 } // namespace OHOS::Rosen
-#endif // OHOS_ROSEN_FOCUS_CHANGE_INFO_H
+#endif // OHOS_ROSEN_HIGHLIGHT_NOTIFY_INFO_H
