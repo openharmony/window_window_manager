@@ -2867,6 +2867,26 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
     return WMError::WM_OK;
 }
 
+WMError WindowSceneSessionImpl::GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType type,
+    AvoidArea& avoidArea, const Rect& rect)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (type == AvoidAreaType::TYPE_KEYBOARD) {
+        return WMError::WM_ERROR_ILLEGAL_PARAM;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+    WSRect sessionRect = {
+        rect.posX_, rect.posY_, static_cast<int32_t>(rect.width_), static_cast<int32_t>(rect.height_)
+    };
+    avoidArea = hostSession->GetAvoidAreaByTypeIgnoringVisibility(type, sessionRect);
+    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}d area %{public}s",
+          GetWindowId(), GetWindowName().c_str(), type, avoidArea.ToString().c_str());
+    return WMError::WM_OK;
+}
+
 WMError WindowSceneSessionImpl::NotifyWindowNeedAvoid(bool status)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "win %{public}u status %{public}d",

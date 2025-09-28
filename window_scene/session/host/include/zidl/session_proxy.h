@@ -66,6 +66,8 @@ public:
     WSError OnNeedAvoid(bool status) override;
     AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT,
         int32_t apiVersion = API_VERSION_INVALID) override;
+    AvoidArea GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType type,
+        const WSRect& rect = WSRect::EMPTY_RECT) override;
     WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
     WSError GetTargetOrientationConfigInfo(Orientation targetOrientation,
         const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& properties) override;
