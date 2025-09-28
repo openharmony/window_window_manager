@@ -1245,6 +1245,7 @@ private:
     GetRSNodeByStringIDFunc getRSNodeByStringIDFunc_;
     SetTopWindowBoundaryByIDFunc setTopWindowBoundaryByIDFunc_;
     SingleHandCompatibleModeConfig singleHandCompatibleModeConfig_;
+    std::shared_mutex appHookWindowInfoMapMutex_;
     void InitVsyncStation();
     void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
     bool GetDisplaySizeById(DisplayId displayId, int32_t& displayWidth, int32_t& displayHeight);
@@ -1371,6 +1372,12 @@ private:
     std::unique_ptr<LruCache> snapshotLruCache_;
     std::size_t snapshotCapacity_ = 0;
     bool GetIconFromDesk(const SessionInfo& sessionInfo, std::string& startupPagePath) const;
+
+    /*
+     * Compatible Mode
+     */
+    void NotifyIsFullScreenInForceSplitMode(uint32_t uid, bool isFullScreen);
+    std::unordered_set<uint32_t> fullScreenInForceSplitUidSet_;
 };
 } // namespace OHOS::Rosen
 

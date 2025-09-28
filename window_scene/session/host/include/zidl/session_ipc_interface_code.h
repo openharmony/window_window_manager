@@ -111,6 +111,9 @@ enum class SessionInterfaceCode {
 
     // Window Pattern
     TRANS_ID_NOTIFY_WINDOW_ATTACH_STATE_LISTENER_REGISTERED,
+
+    // Compatible Mode
+    TRANS_ID_NOTIFY_IS_FULL_SCREEN_IN_FORCE_SPLIT,
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -2082,6 +2082,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->RegisterGetStatusBarConstantlyShowFunc([this](DisplayId displayId, bool& isVisible) {
             return this->GetStatusBarConstantlyShow(displayId, isVisible);
         });
+        sceneSession->RegisterForceSplitFullScreenChangeCallback([this](uint32_t uid, bool isFullScreen) {
+            this->NotifyIsFullScreenInForceSplitMode(uid, isFullScreen);
+        });
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
         GetAppDragResizeType(sessionInfo.bundleName_, dragResizeType);
         sceneSession->SetAppDragResizeType(dragResizeType);
@@ -3784,6 +3787,7 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
             EraseSceneSessionMapById(sessionInfo.persistentId_);
             return ret;
         }
+        sceneSession->NotifyIsFullScreenInForceSplitMode(property->IsFullScreenInForceSplitMode());
         sceneSession->SetRecovered(true);
         recoverSceneSessionFunc_(sceneSession, sessionInfo);
         NotifySessionUnfocusedToClient(persistentId);
@@ -12795,6 +12799,10 @@ WMError SceneSessionManager::UpdateDisplayHookInfo(int32_t uid, uint32_t width, 
     dmHookInfo.density_ = density;
     dmHookInfo.rotation_ = 0;
     dmHookInfo.enableHookRotation_ = false;
+    {
+        std::shared_lock lock(appHookWindowInfoMapMutex_);
+        dmHookInfo.isFullScreenInForceSplit_ = fullScreenInForceSplitUidSet_.find(uid) != fullScreenInForceSplitUidSet_.end();
+    }
     ScreenSessionManagerClient::GetInstance().UpdateDisplayHookInfo(uid, enable, dmHookInfo);
     return WMError::WM_OK;
 }
@@ -12814,6 +12822,10 @@ WMError SceneSessionManager::UpdateAppHookDisplayInfo(int32_t uid, const HookInf
     dmHookInfo.density_ = hookInfo.density_;
     dmHookInfo.rotation_ = hookInfo.rotation_;
     dmHookInfo.enableHookRotation_ = hookInfo.enableHookRotation_;
+    {
+        std::shared_lock lock(appHookWindowInfoMapMutex_);
+        dmHookInfo.isFullScreenInForceSplit_ = fullScreenInForceSplitUidSet_.find(uid) != fullScreenInForceSplitUidSet_.end();
+    }
     ScreenSessionManagerClient::GetInstance().UpdateDisplayHookInfo(uid, enable, dmHookInfo);
     return WMError::WM_OK;
 }
@@ -13948,5 +13960,17 @@ WMError SceneSessionManager::MinimizeByWindowId(const std::vector<int32_t>& wind
         }
     }, __func__);
     return WMError::WM_OK;
+}
+
+void SceneSessionManager::NotifyIsFullScreenInForceSplitMode(uint32_t uid, bool isFullScreen)
+{
+    if (isFullScreen) {
+        std::unique_lock lock(appHookWindowInfoMapMutex_);
+        fullScreenInForceSplitUidSet_.insert(uid);
+    } else {
+        std::unique_lock lock(appHookWindowInfoMapMutex_);
+        fullScreenInForceSplitUidSet_.erase(uid);
+    }
+    ScreenSessionManagerClient::GetInstance().NotifyIsFullScreenInForceSplitMode(uid, isFullScreen);
 }
 } // namespace OHOS::Rosen

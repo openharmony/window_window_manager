@@ -50,6 +50,7 @@ struct DMHookInfo {
     float_t density_;
     uint32_t rotation_;
     bool enableHookRotation_;
+    bool isFullScreenInForceSplit_;
 };
 
 /**

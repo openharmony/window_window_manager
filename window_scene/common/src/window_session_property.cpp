@@ -1252,7 +1252,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteFloat(cornerRadius_) && parcel.WriteBool(isExclusivelyHighlighted_) &&
         parcel.WriteBool(isAtomicService_) && parcel.WriteUint32(apiVersion_) &&
         parcel.WriteBool(isFullScreenWaterfallMode_) &&
-        parcel.WriteBool(isSaveBySpecifiedFlag_);
+        parcel.WriteBool(isSaveBySpecifiedFlag_) &&
+        parcel.WriteBool(isFullScreenInForceSplitMode_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1345,6 +1346,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetApiVersion(parcel.ReadUint32());
     property->SetIsFullScreenWaterfallMode(parcel.ReadBool());
     property->SetIsSaveBySpecifiedFlag(parcel.ReadBool());
+    property->SetIsFullScreenInForceSplitMode(parcel.ReadBool());
     return property;
 }
 
@@ -2023,6 +2025,16 @@ void WindowSessionProperty::SetIsFullScreenWaterfallMode(bool isFullScreenWaterf
 bool WindowSessionProperty::GetIsFullScreenWaterfallMode() const
 {
     return isFullScreenWaterfallMode_;
+}
+
+void WindowSessionProperty::SetIsFullScreenInForceSplitMode(bool isFullScreenInForceSplitMode)
+{
+    isFullScreenInForceSplitMode_ = isFullScreenInForceSplitMode;
+}
+
+bool WindowSessionProperty::IsFullScreenInForceSplitMode() const
+{
+    return isFullScreenInForceSplitMode_;
 }
 } // namespace Rosen
 } // namespace OHOS

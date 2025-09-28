@@ -1741,6 +1741,20 @@ HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId3, Function | SmallTes
     EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(1);
     ssm_->UpdateSessionDisplayId(86, 12);
 }
+
+/**
+ * @tc.name: NotifyIsFullScreenInForceSplitMode
+ * @tc.desc: NotifyIsFullScreenInForceSplitMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifyIsFullScreenInForceSplitMode, TestSize.Level3)
+{
+    uint32_t uid = 100;
+    ssm_->NotifyIsFullScreenInForceSplitMode(uid, true);
+    EXPECT_TRUE(ssm_->fullScreenInForceSplitUidSet_.find(uid) != ssm_->fullScreenInForceSplitUidSet_.end());
+    ssm_->NotifyIsFullScreenInForceSplitMode(uid, false);
+    EXPECT_TRUE(ssm_->fullScreenInForceSplitUidSet_.find(uid) == ssm_->fullScreenInForceSplitUidSet_.end());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

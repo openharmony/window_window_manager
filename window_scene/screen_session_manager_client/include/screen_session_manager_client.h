@@ -94,6 +94,7 @@ public:
     void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override;
     void UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo);
     void GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo);
+    void NotifyIsFullScreenInForceSplitMode(int32_t uid, bool isFullScreen);
 
     void RegisterSwitchingToAnotherUserFunction(std::function<void()>&& func);
     void SwitchingCurrentUser();
