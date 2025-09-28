@@ -11752,7 +11752,7 @@ void ScreenSessionManager::SwitchUserDealUserDisplayNode(int32_t newUserId)
 void ScreenSessionManager::AddUserDisplayNodeOnTree(int32_t userId)
 {
     TLOGI(WmsLogTag::DMS, "userId: %{public}d", userId);
-    if (!CheckUserIsForeground()) {
+    if (!CheckUserIsForeground(userId)) {
         TLOGI(WmsLogTag::DMS, "user: %{public}d is background not on tree", userId);
         return;
     }
@@ -11778,7 +11778,7 @@ void ScreenSessionManager::AddUserDisplayNodeOnTree(int32_t userId)
 void ScreenSessionManager::RemoveUserDisplayNodeFromTree(int32_t userId)
 {
     TLOGI(WmsLogTag::DMS, "userId: %{public}d", userId);
-    if (CheckUserIsForeground()) {
+    if (CheckUserIsForeground(userId)) {
         TLOGI(WmsLogTag::DMS, "user: %{public}d is foreground remove from tree", userId);
         return;
     }
