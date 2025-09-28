@@ -56,15 +56,14 @@ public:
 
     static HighlightNotifyInfo* Unmarshalling(Parcel& parcel)
     {
-        auto highlightNotifyInfo = new HighlightNotifyInfo();
+        std::unique_ptr<HighlightNotifyInfo> highlightNotifyInfo = std::make_unique<HighlightNotifyInfo>();
         bool res = parcel.ReadInt64(highlightNotifyInfo->timeStamp_) &&
             parcel.ReadInt32Vector(&highlightNotifyInfo->notHighlightIds_) &&
             parcel.ReadInt32(highlightNotifyInfo->highlightId_) && parcel.ReadBool(highlightNotifyInfo->isSyncNotify_);
         if (!res) {
-            delete highlightNotifyInfo;
             return nullptr;
         }
-        return highlightNotifyInfo;
+        return highlightNotifyInfo.release();
     }
 
     int64_t timeStamp_ = 0;
