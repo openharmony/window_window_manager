@@ -47,7 +47,7 @@ void RootSceneSession::GetSystemAvoidAreaForRoot(const WSRect& rect, AvoidArea& 
                 displayId, isVisible);
         }
         if (!isVisible) {
-            TLOGI(WmsLogTag::WMS_IMMS, "invisible");
+            TLOGD(WmsLogTag::WMS_IMMS, "invisible");
             continue;
         }
         WSRect statusBarRect = statusBar->GetSessionRect();
