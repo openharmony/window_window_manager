@@ -202,6 +202,8 @@ HWTEST_F(SceneSessionTest2, GetSystemAvoidArea, TestSize.Level1)
     AvoidArea avoidArea;
     sceneSession->GetSystemAvoidArea(rect, avoidArea);
     ASSERT_EQ(p, 10);
+    sceneSession->GetSystemAvoidArea(rect, avoidArea, true);
+    ASSERT_EQ(p, 10);
 }
 
 /**
@@ -969,6 +971,45 @@ HWTEST_F(SceneSessionTest2, SetSessionInfoWindowInputType, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetSessionInfoExpandInputFlag
+ * @tc.desc: SetSessionInfoExpandInputFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, SetSessionInfoExpandInputFlag, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSessionInfoExpandInputFlag";
+    info.bundleName_ = "SetSessionInfoExpandInputFlag";
+    info.expandInputFlag_ = 0;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetSessionInfoExpandInputFlag(1);
+
+    SessionInfo sessionInfo = sceneSession->GetSessionInfo();
+    ASSERT_EQ(sessionInfo.expandInputFlag_, 1);
+
+    sceneSession->SetSessionInfoExpandInputFlag(0);
+    sessionInfo = sceneSession->GetSessionInfo();
+    ASSERT_EQ(sessionInfo.expandInputFlag_, 0);
+}
+
+/**
+ * @tc.name: GetSessionInfoExpandInputFlag
+ * @tc.desc: GetSessionInfoExpandInputFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, GetSessionInfoExpandInputFlag, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetSessionInfoExpandInputFlag";
+    info.bundleName_ = "GetSessionInfoExpandInputFlag";
+    info.expandInputFlag_ = 0;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetSessionInfoExpandInputFlag(1);
+
+    ASSERT_EQ(sceneSession->GetSessionInfoExpandInputFlag(), 1);
+}
+
+/**
  * @tc.name: SetSelfToken
  * @tc.desc: SetSelfToken
  * @tc.type: FUNC
@@ -1305,11 +1346,12 @@ HWTEST_F(SceneSessionTest2, GetAINavigationBarArea, TestSize.Level1)
     sceneSession->SetSessionProperty(property);
     sceneSession->specificCallback_ = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     ASSERT_NE(nullptr, sceneSession->specificCallback_);
-    sceneSession->specificCallback_->onGetAINavigationBarArea_ = [](uint64_t displayId) {
+    sceneSession->specificCallback_->onGetAINavigationBarArea_ = [](uint64_t displayId, bool ignoreVisibility) {
         WSRect rect = { 1, 1, 1, 1 };
         return rect;
     };
     sceneSession->GetAINavigationBarArea(rect, avoidArea);
+    sceneSession->GetAINavigationBarArea(rect, avoidArea, true);
 }
 
 /**

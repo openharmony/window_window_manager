@@ -306,6 +306,8 @@ public:
     void HandleExtendScreenDisconnect(ScreenId screenId);
     bool GetIsFoldStatusLocked();
     void SetIsFoldStatusLocked(bool isFoldStatusLocked);
+    void SetIsExtendMode(bool isExtend);
+    bool GetIsExtendMode();
     bool GetIsLandscapeLockStatus();
     void SetIsLandscapeLockStatus(bool isLandscapeLockStatus);
     bool GetIsOuterOnlyMode();
@@ -456,6 +458,8 @@ public:
     void ScbClientDeathCallback(int32_t deathScbPid);
     void ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> oldScbPids, int32_t newScbPid);
     void RecoverMultiScreenModeWhenSwitchUser(std::vector<int32_t> oldScbPids, int32_t newScbPid);
+    void FlushDisplayNodeWhenSwitchUser(std::vector<int32_t> oldScbPids, int32_t newScbPid,
+        sptr<ScreenSession> screenSession);
     int32_t GetCurrentUserId();
 
     std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
@@ -575,6 +579,14 @@ private:
     void RegisterScreenChangeListener();
     void RegisterFoldNotSwitchingListener();
     void OnHgmRefreshRateChange(uint32_t refreshRate);
+    void UpdateSessionByActiveModeChange(sptr<ScreenSession> screenSession,
+        sptr<ScreenSession> phyScreenSession, int32_t activeIdx);
+    void RecoverScreenActiveMode(ScreenId screenId, int32_t activeIdx);
+    void CheckAndNotifyRefreshRate(uint32_t refreshRate, sptr<ScreenSession> updateScreenSession);
+    void CheckAndNotifyChangeMode(const RRect& bounds, sptr<ScreenSession> updateScreenSession);
+    void ReportScreenModeChangeEvent(RSScreenModeInfo screenmode, uint32_t result);
+    void ReportRelativePositionChangeEvent(MultiScreenPositionOptions& mainScreenOptions,
+        MultiScreenPositionOptions& secondScreenOption, const std::string& errMsg);
     static const std::string GetScreenName(ScreenId screenId);
     void InitScreenProperty(ScreenId screenId, RSScreenModeInfo& screenMode,
         RSScreenCapability& screenCapability, ScreenProperty& property);
@@ -669,9 +681,7 @@ private:
     void SetDisplayRegionAndAreaFixed(Rotation rotation, DMRect& displayRegion, DMRect& displayAreaFixed);
     void CalculateRotatedDisplay(Rotation rotation, const DMRect& screenRegion, DMRect& displayRegion, DMRect& displayArea);
     void CalculateScreenArea(const DMRect& displayRegion, const DMRect& displayArea, const DMRect& screenRegion, DMRect& screenArea);
-    void DisconnectScreenIfScreenInfoNull(sptr<ScreenSession>& screenSession);
-    void RecoverDefaultScreenModeInner(ScreenId innerRsId, ScreenId externalRsId);
-    void SetDefaultScreenModeWhenCreateMirror(sptr<ScreenSession>& screenSession);
+    void LockLandExtendIfScreenInfoNull(sptr<ScreenSession>& screenSession);
 #ifdef DEVICE_STATUS_ENABLE
     void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 #endif // DEVICE_STATUS_ENABLE
@@ -820,6 +830,7 @@ private:
     std::atomic<bool> isFoldStatusLocked_ = false;
     std::atomic<bool> isLandscapeLockStatus_ = false;
     std::atomic<bool> isLapTopLidOpen_ = true;
+    std::atomic<bool> isExtendMode_ = false;
 
     /**
      * On/Off screen
@@ -958,6 +969,7 @@ private:
     void SwitchUserDealUserDisplayNode(int32_t newUserId);
     void AddUserDisplayNodeOnTree(int32_t userId);
     void RemoveUserDisplayNodeFromTree(int32_t userId);
+    bool CheckUserIsForeground(int32_t userId);
     void SetUserDisplayNodePositionZ(int32_t userId, float positionZ);
     void HandleNewUserDisplayNode(int32_t newUserId, bool coldBoot);
     void WaitSwitchUserAnimateFinish(int32_t newUserId, bool isColdSwitch);

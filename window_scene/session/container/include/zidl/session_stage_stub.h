@@ -81,6 +81,7 @@ private:
     int HandlePcAppInPadNormalClose(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyCompatibleModePropertyChange(MessageParcel& data, MessageParcel& reply);
     int HandleSetUniqueVirtualPixelRatio(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateAnimationSpeed(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySessionFullScreen(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& reply);
     int HandleExtensionHostData(MessageParcel& data, MessageParcel& reply, MessageOption& option);

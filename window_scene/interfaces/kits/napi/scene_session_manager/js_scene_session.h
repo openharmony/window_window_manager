@@ -146,7 +146,7 @@ private:
     void ProcessSessionUpdateFollowScreenChange();
     void OnSessionLockStateChange(bool isLockedState);
     sptr<SceneSession> GenSceneSession(SessionInfo& info, bool needAddRequestInfo = false);
-    void AddRequestTaskInfo(sptr<SceneSession> sceneSession, SessionInfo& info, bool needAddRequestInfo);
+    void AddRequestTaskInfo(sptr<SceneSession> sceneSession, int32_t requestId, bool needAddRequestInfo);
     void PendingSessionActivation(SessionInfo& info);
     void PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo);
     void BatchPendingSessionsActivation(const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos,
@@ -173,6 +173,7 @@ private:
     static napi_value SetZOrder(napi_env env, napi_callback_info info);
     static napi_value SetTouchable(napi_env env, napi_callback_info info);
     static napi_value SetWindowInputType(napi_env env, napi_callback_info info);
+    static napi_value SetExpandInputFlag(napi_env env, napi_callback_info info);
     static napi_value SetSystemActive(napi_env env, napi_callback_info info);
     static napi_value SetPrivacyMode(napi_env env, napi_callback_info info);
     static napi_value SetFloatingScale(napi_env env, napi_callback_info info);
@@ -275,6 +276,7 @@ private:
     napi_value OnSetZOrder(napi_env env, napi_callback_info info);
     napi_value OnSetTouchable(napi_env env, napi_callback_info info);
     napi_value OnSetWindowInputType(napi_env env, napi_callback_info info);
+    napi_value OnSetExpandInputFlag(napi_env env, napi_callback_info info);
     napi_value OnSetSystemActive(napi_env env, napi_callback_info info);
     napi_value OnSetPrivacyMode(napi_env env, napi_callback_info info);
     napi_value OnSetFloatingScale(napi_env env, napi_callback_info info);

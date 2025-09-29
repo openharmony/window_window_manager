@@ -240,6 +240,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSendFbActionEvent(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_UPDATE_SHOW_DECOR_IN_FREE_MULTI_WINDOW):
             return HandleUpdateIsShowDecorInFreeMultiWindow(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_ANIMATION_SPEED):
+            return HandleUpdateAnimationSpeed(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -403,8 +405,17 @@ int SessionStageStub::HandleNotifyCloseExistPipWindow(MessageParcel& data, Messa
 int SessionStageStub::HandleUpdateFocus(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("UpdateFocus!");
-    bool isFocused = data.ReadBool();
-    WSError errCode = UpdateFocus(isFocused);
+    sptr<FocusNotifyInfo> focusNotifyInfo = data.ReadParcelable<FocusNotifyInfo>();
+    if (focusNotifyInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Failed to read focusNotifyInfo");
+        return ERR_INVALID_DATA;
+    }
+    bool isFocused = false;
+    if (!data.ReadBool(isFocused)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Failed to read isFocused");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = UpdateFocus(focusNotifyInfo, isFocused);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -886,6 +897,18 @@ int SessionStageStub::HandleSetUniqueVirtualPixelRatio(MessageParcel& data, Mess
     return ERR_NONE;
 }
 
+int SessionStageStub::HandleUpdateAnimationSpeed(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ANIMATION, "HandleUpdateAnimationSpeed!");
+    float speed = 0.0f;
+    if (!data.ReadFloat(speed)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Read speed failed.");
+        return ERR_INVALID_DATA;
+    }
+    UpdateAnimationSpeed(speed);
+    return ERR_NONE;
+}
+
 int SessionStageStub::HandleSetSplitButtonVisible(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
@@ -1028,12 +1051,17 @@ int SessionStageStub::HandleSendContainerModalEvent(MessageParcel& data, Message
 int SessionStageStub::HandleNotifyHighlightChange(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "called!");
+    sptr<HighlightNotifyInfo> highlightNotifyInfo = data.ReadParcelable<HighlightNotifyInfo>();
+    if (highlightNotifyInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Failed to read highlightNotifyInfo");
+        return ERR_INVALID_DATA;
+    }
     bool isHighlight = false;
     if (!data.ReadBool(isHighlight)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Read isHighlight failed.");
         return ERR_INVALID_DATA;
     }
-    NotifyHighlightChange(isHighlight);
+    NotifyHighlightChange(highlightNotifyInfo, isHighlight);
     return ERR_NONE;
 }
 

@@ -1423,6 +1423,45 @@ AvoidArea SessionProxy::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rec
     return *area;
 }
 
+AvoidArea SessionProxy::GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType type, const WSRect& rect)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    AvoidArea avoidArea;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_IMMS, "WriteInterfaceToken failed");
+        return avoidArea;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(type))) {
+        TLOGE(WmsLogTag::WMS_IMMS, "write type error");
+        return avoidArea;
+    }
+    if (!data.WriteInt32(rect.posX_) || !data.WriteInt32(rect.posY_) ||
+        !data.WriteInt32(rect.width_) || !data.WriteInt32(rect.height_)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "write rect error");
+        return avoidArea;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "remote is null");
+        return avoidArea;
+    }
+    int sendCode = remote->SendRequest(static_cast<uint32_t>(
+        SessionInterfaceCode::TRANS_ID_GET_AVOID_AREA_IGNORING_VISIBILITY),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_IMMS, "SendRequest failed, code: %{public}d", sendCode);
+        return avoidArea;
+    }
+    sptr<AvoidArea> area = reply.ReadParcelable<AvoidArea>();
+    if (area == nullptr) {
+        return avoidArea;
+    }
+    return *area;
+}
+
 WSError SessionProxy::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
     MessageParcel data;

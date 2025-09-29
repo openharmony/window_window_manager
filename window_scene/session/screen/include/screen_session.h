@@ -155,10 +155,14 @@ public:
     void SetFakeScreenSession(sptr<ScreenSession> screenSession);
     sptr<ScreenSession> GetFakeScreenSession() const;
     void UpdatePropertyByActiveMode();
+    void UpdatePropertyByActiveModeChange();
     std::shared_ptr<RSDisplayNode> GetDisplayNode() const;
     void ReleaseDisplayNode();
 
-    Rotation CalcRotation(Orientation orientation, FoldDisplayMode foldDisplayMode) const;
+    Rotation CalcRotation(Orientation orientation, FoldDisplayMode foldDisplayMode);
+    DisplayOrientation CalcOrientationToDisplayOrientation(Orientation orientation);
+    Rotation CalcRotationByDeviceOrientation(DisplayOrientation displayRotation,
+        FoldDisplayMode foldDisplayMode, const RRect& boundsInRotationZero);
     DisplayOrientation CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode);
     DisplayOrientation CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode);
     DisplayOrientation CalcDeviceOrientationWithBounds(Rotation rotation,

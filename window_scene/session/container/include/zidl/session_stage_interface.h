@@ -20,6 +20,8 @@
 #include <list>
 #include <map>
 #include "common/include/window_session_property.h"
+#include "focus_notify_info.h"
+#include "highlight_notify_info.h"
 #include "interfaces/include/ws_common.h"
 #include "occupied_area_change_info.h"
 
@@ -99,13 +101,14 @@ public:
      *
      * Notify window session to update focus status.
      *
+     * @param focusNotifyInfo focus notify information when shift focus.
      * @param isFocused set isFocused.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError UpdateFocus(bool isFocused) = 0;
+    virtual WSError UpdateFocus(const sptr<FocusNotifyInfo>& focusNotifyInfo, bool isFocused) = 0;
     virtual WSError NotifyDestroy() = 0;
     virtual WSError NotifyExtensionSecureLimitChange(bool isLimit) = 0;
-    virtual WSError NotifyHighlightChange(bool isHighlight) = 0;
+    virtual WSError NotifyHighlightChange(const sptr<HighlightNotifyInfo>& highlightNotifyInfo, bool isHighlight) = 0;
 
     /**
      * @brief Notify client to close the existing pip window.
@@ -207,6 +210,7 @@ public:
         return WSError::WS_OK;
     }
     virtual void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) = 0;
+    virtual void UpdateAnimationSpeed(float speed) = 0;
     virtual void NotifySessionFullScreen(bool fullScreen) {}
 
     // **Non** IPC interface

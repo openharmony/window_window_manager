@@ -241,6 +241,7 @@ public:
     static napi_value GetStatusBarProperty(napi_env env, napi_callback_info info);
     static napi_value GetAvoidArea(napi_env env, napi_callback_info info);
     static napi_value GetWindowAvoidAreaSync(napi_env env, napi_callback_info info);
+    static napi_value GetWindowAvoidAreaIgnoringVisibilitySync(napi_env env, napi_callback_info info);
     static napi_value SetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
     static napi_value SetSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
     static napi_value IsSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
@@ -470,6 +471,7 @@ private:
     napi_value OnGetStatusBarPropertySync(napi_env env, napi_callback_info info);
     napi_value OnGetAvoidArea(napi_env env, napi_callback_info info);
     napi_value OnGetWindowAvoidAreaSync(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowAvoidAreaIgnoringVisibilitySync(napi_env env, napi_callback_info info);
     napi_value OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     napi_value OnGetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
