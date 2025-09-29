@@ -30,6 +30,16 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerClientTest"};
 }
+
+namespace {
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        logMsg = msg;
+    }
+}
+
 class DmPrivateWindowListener : public DisplayManager::IPrivateWindowListener {
 public:
     void OnPrivateWindow(bool hasPrivate) {WLOGFI("IPrivateWindowListener hasPrivatewindow: %{public}u", hasPrivate);}
@@ -1385,6 +1395,24 @@ HWTEST_F(ScreenSessionManagerClientTest, ScreenCaptureNotify, Function | SmallTe
     std::string clientName = "test";
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
     screenSessionManagerClient_->ScreenCaptureNotify(screenId, uid, clientName);
+}
+
+/**
+ * @tc.name: NotifyIsFullScreenInForceSplitMode
+ * @tc.desc: NotifyIsFullScreenInForceSplitMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, NotifyIsFullScreenInForceSplitMode, TestSize.Level3)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    screenSessionManagerClient_->screenSessionManager_ = new ScreenSessionManagerProxy(iRemoteObjectMocker);
+    screenSessionManagerClient_->NotifyIsFullScreenInForceSplitMode(0, true);
+    screenSessionManagerClient_->screenSessionManager_ = nullptr;
+    screenSessionManagerClient_->NotifyIsFullScreenInForceSplitMode(0, true);
+    EXPECT_TRUE(logMsg.find("screenSessionManager_ is null") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 } // namespace Rosen
 } // namespace OHOS

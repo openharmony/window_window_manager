@@ -19,6 +19,8 @@
 #include <common/rs_rect.h>
 #include <transaction/rs_marshalling_helper.h>
 #include <iremote_broker.h>
+#include <iremote_object_mocker.h>
+#include "mock_message_parcel.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_manager/include/zidl/scene_session_manager_interface.h"
 #include "window_manager_agent.h"
@@ -2027,6 +2029,41 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayCapability, Function | SmallTe
         EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
                 screenSessionManagerProxy->GetDisplayCapability(capabilitInfo));
     }
+}
+
+/**
+ * @tc.name: NotifyIsFullScreenInForceSplitMode
+ * @tc.desc: NotifyIsFullScreenInForceSplitMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, NotifyIsFullScreenInForceSplitMode, TestSize.Level3)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockMessageParcel::ClearAllErrorFlag();
+    auto proxy = sptr<ScreenSessionManagerProxy>::MakeSptr(nullptr);
+    proxy->NotifyIsFullScreenInForceSplitMode(0, true);
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    proxy = sptr<ScreenSessionManagerProxy>::MakeSptr(remoteMocker);
+    proxy->NotifyIsFullScreenInForceSplitMode(0, true);
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    proxy->NotifyIsFullScreenInForceSplitMode(0, true);
+    remoteMocker->SetRequestResult(ERR_NONE);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    proxy->NotifyIsFullScreenInForceSplitMode(0, true);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+    MockMessageParcel::ClearAllErrorFlag();
+
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    proxy->NotifyIsFullScreenInForceSplitMode(0, true);
+    EXPECT_TRUE(logMsg.find("Write uid failed") != std::string::npos);
+    MockMessageParcel::ClearAllErrorFlag();
+
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    proxy->NotifyIsFullScreenInForceSplitMode(0, true);
+    EXPECT_TRUE(logMsg.find("Write isFullScreen failed") != std::string::npos);
+    MockMessageParcel::ClearAllErrorFlag();
+    LOG_SetCallback(nullptr);
 }
 }
 }

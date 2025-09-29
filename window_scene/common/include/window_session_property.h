@@ -268,6 +268,12 @@ public:
     bool GetIsSaveBySpecifiedFlag() const;
 
     /*
+     * Compatible mode
+     */
+    void SetIsFullScreenInForceSplitMode(bool isFullScreenInForceSplitMode);
+    bool IsFullScreenInForceSplitMode() const;
+
+    /*
      * Keyboard
      */
     void SetIsSystemKeyboard(bool isSystemKeyboard);
@@ -431,6 +437,7 @@ private:
     bool isSupportDragInPcCompatibleMode_ = false;
     bool isPcAppInPad_ = false;
     mutable std::mutex compatibleModeMutex_;
+    bool isFullScreenInForceSplitMode_;
     bool compatibleModeEnableInPad_ = false;
     uint8_t backgroundAlpha_ = 0xff; // default alpha is opaque.
     mutable std::mutex atomicServiceMutex_;

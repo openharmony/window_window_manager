@@ -140,6 +140,7 @@ public:
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) override;
     virtual void UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo) override;
     virtual void GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo) override;
+    void NotifyIsFullScreenInForceSplitMode(int32_t uid, bool isFullScreen) override;
 
     virtual void DumpAllScreensInfo(std::string& dumpInfo) override;
     virtual void DumpSpecialScreenInfo(ScreenId id, std::string& dumpInfo) override;
