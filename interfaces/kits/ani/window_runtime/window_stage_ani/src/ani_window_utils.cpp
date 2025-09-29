@@ -178,8 +178,7 @@ ani_status AniWindowUtils::GetPropertyBoolObject(ani_env* env, const char* prope
         return ANI_ERROR;
     }
 
-     ani_boolean bool_value;
-
+    ani_boolean bool_value;
     ret = env->Object_CallMethodByName_Boolean(static_cast<ani_object>(bool_ref), "unboxed", ":z", &bool_value);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
@@ -207,7 +206,10 @@ ani_status AniWindowUtils::GetPropertyLongObject(ani_env* env, const char* prope
             propertyName, static_cast<int32_t>(ret));
         return ret;
     }
-
+    if (isUndefined) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] %{public}s is Undefined Now", propertyName);
+        return ANI_ERROR;
+    }
     ani_long long_value;
     ret = env->Object_CallMethodByName_Long(static_cast<ani_object>(long_ref), "unboxed", ":J", &long_value);
     if (ret != ANI_OK) {
@@ -230,7 +232,6 @@ ani_status AniWindowUtils::GetEnumValue(ani_env* env, ani_enum_item enumPara, ui
     }
     result = static_cast<uint32_t>(enumValue);
     TLOGD(WmsLogTag::DEFAULT, "[ANI] enum value is:%{public}u", result);
->>>>>>> master
     return ret;
 }
 
@@ -1503,7 +1504,6 @@ bool AniWindowUtils::ParseModalityParam(ani_env *env, ani_object aniObject, cons
             TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to modalityType");
             return false;
         }
-        
     }
     TLOGI(WmsLogTag::WMS_SUB, "isModal: %{public}d, isTopmost: %{public}d, WindowFlag: %{public}d",
         isModal, isTopmost, windowOption->GetWindowFlags());

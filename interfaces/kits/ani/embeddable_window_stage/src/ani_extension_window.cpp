@@ -426,7 +426,7 @@ static void RegisterExtWindowCallback(ani_env* env, ani_object obj, ani_long nat
 }
 
 static void UnregisterExtWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
-    ani_string type, ani_object callback)
+    ani_object callback)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     AniExtensionWindow* aniExtWinPtr = reinterpret_cast<AniExtensionWindow*>(nativeObj);

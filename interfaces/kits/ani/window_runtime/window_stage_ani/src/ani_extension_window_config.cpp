@@ -24,7 +24,7 @@ namespace Rosen {
 ani_enum_item GetAniModalityType(ani_env* env, ModalityType enumObj)
 {
     ani_enum enumType;
-    if(ANI_OK != env->FindEnum("L@ohos/window/window/ModalityType;", &enumType)) {
+    if (ANI_OK != env->FindEnum("L@ohos/window/window/ModalityType;", &enumType)) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] ModalityType not found");
     }
     ani_enum_item enumItem;
@@ -111,7 +111,7 @@ ani_object CreatAniSystemWindowOptions(ani_env* env, const SystemWindowOptions& 
     }
 
     ani_enum enumType;
-    if(ANI_OK != env->FindEnum("L@ohos/window/window/WindowType;", &enumType)) {
+    if (ANI_OK != env->FindEnum("L@ohos/window/window/WindowType;", &enumType)) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] WindowType not found");
     }
     ani_enum_item enumItem;
@@ -124,7 +124,7 @@ ani_object CreatAniSystemWindowOptions(ani_env* env, const SystemWindowOptions& 
 ani_enum_item GetAniExtensionWindowAttribute(ani_env* env, ExtensionWindowAttribute enumObj)
 {
     ani_enum enumType;
-    if(ANI_OK != env->FindEnum("L@ohos/window/window/ExtensionWindowAttribute;", &enumType)) {
+    if (ANI_OK != env->FindEnum("L@ohos/window/window/ExtensionWindowAttribute;", &enumType)) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] ExtensionWindowAttribute not found");
     }
     ani_enum_item enumItem;
