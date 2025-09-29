@@ -42,6 +42,7 @@ private:
         AVOID_AREA_CHANGE_CB,
         WINDOW_EVENT_CB,
         WINDOW_STAGE_EVENT_CB,
+        WINDOW_RECT_CHANGE_CB,
     };
 
     bool IsCallbackRegistered(ani_env* env, const std::string& type, ani_object fn);
@@ -50,6 +51,8 @@ private:
     WmErrorCode ProcessAvoidAreaChangeRegister(sptr<AniExtensionWindowListener> listener,
         sptr<Window> window, bool isRegister);
     WmErrorCode ProcessLifeCycleEventRegister(sptr<AniExtensionWindowListener> listener,
+        sptr<Window> window, bool isRegister);
+    WmErrorCode ProcessWindowRectChangeRegister(sptr<AniExtensionWindowListener> listener,
         sptr<Window> window, bool isRegister);
     WmErrorCode ProcessRegister(CaseType caseType, const sptr<AniExtensionWindowListener>& listener,
         const sptr<Window>& window, const std::string& type, bool isRegister);

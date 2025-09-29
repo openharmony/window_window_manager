@@ -110,7 +110,7 @@ namespace uiExtensionHost {
     public native offSync(nativeObj: long, type: string, callback?: object): void;
     public native createSubWindowWithOptions(nativeObj: long, name: string,
       subWindowOptions: window.SubWindowOptions): window.Window;
-    public native hideNonSecureWindows(nativeObj: long, shouldHide: boolean): void;
+    public native hideNonSecureWindows(nativeObj: long, shouldHide: boolean): int;
 
     get properties(): UIExtensionHostWindowProxyProperties {
       let property = new UIEProperties();
@@ -191,7 +191,10 @@ namespace uiExtensionHost {
     hideNonSecureWindows(shouldHide: boolean): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
-          this.hideNonSecureWindows(this.nativeObj, shouldHide);
+          let ret = this.hideNonSecureWindows(this.nativeObj, shouldHide);
+          if (ret !== WmErrorCode.WM_OK) {
+            hilog.error(WMS_UIEXT, WMS_UIEXT_TAG, `hideNonSecureWindows failed, ret: ${ret}`);
+          }
         }).then((ret: NullishType) => {
           resolve(undefined);
         }).catch((err: NullishType) => {
