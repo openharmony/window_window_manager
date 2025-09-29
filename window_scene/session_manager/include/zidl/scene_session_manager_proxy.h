@@ -159,6 +159,9 @@ public:
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
     WMError IsWindowRectAutoSave(const std::string& key, bool& enabled, int persistentId) override;
     WMError SetImageForRecent(uint32_t imgResourceId, ImageFit ImageFit, int32_t persistentId) override;
+    WMError SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, ImageFit ImageFit,
+        int32_t persistentId) override;
+    WMError RemoveImageForRecent(int32_t persistentId) override;
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override;
     WMError SetGlobalDragResizeType(DragResizeType dragResizeType) override;

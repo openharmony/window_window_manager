@@ -3934,6 +3934,19 @@ WMError WindowSceneSessionImpl::SetImageForRecent(uint32_t imgResourceId, ImageF
     return SingletonContainer::Get<WindowAdapter>().SetImageForRecent(imgResourceId, imageFit, persistentId);
 }
 
+WMError WindowSceneSessionImpl::SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
+    ImageFit imageFit)
+{
+    int32_t persistentId = GetPersistentId();
+    return SingletonContainer::Get<WindowAdapter>().SetImageForRecentPixelMap(pixelMap, imageFit, persistentId);
+}
+
+WMError WindowSceneSessionImpl::RemoveImageForRecent()
+{
+    int32_t persistentId = GetPersistentId();
+    return SingletonContainer::Get<WindowAdapter>().RemoveImageForRecent(persistentId);
+}
+
 /** @note @window.drag */
 void WindowSceneSessionImpl::StartMove()
 {
@@ -5726,6 +5739,7 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
         return WSError::WS_ERROR_REPEAT_OPERATION;
     }
     NotifySwitchFreeMultiWindow(enable);
+    NotifyFreeWindowModeChange(enable);
     // Switch process finish, update system config
     SetFreeMultiWindowMode(enable);
     if (enable) {

@@ -402,6 +402,15 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    virtual WMError SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
+        OHOS::Rosen::ImageFit ImageFit)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual WMError RemoveImageForRecent()
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual WMError SetFollowParentMultiScreenPolicy(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual void StartMove() = 0;
     virtual WmErrorCode StartMoveWindow() { return WmErrorCode::WM_OK; }

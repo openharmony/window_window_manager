@@ -883,6 +883,21 @@ public:
         RotationChangeResult& rotationChangeResult) {}
 };
 
+/**
+ * @class IFreeWindowModeChangeListener
+ *
+ * @brief IFreeWindowModeChangeListener is used to observe the free window mode when it changed.
+ */
+class IFreeWindowModeChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when free window mode changed.
+     *
+     * @param isInFreeWindowMode Whether in free window mode.
+     */
+    virtual void OnFreeWindowModeChange(bool isInFreeWindowMode) {}
+};
+
 static WMError DefaultCreateErrCode = WMError::WM_OK;
 class Window : virtual public RefBase {
 public:
@@ -1258,6 +1273,28 @@ public:
      * @return WM_OK means set success, others means failed.
      */
     virtual WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Set static Image resource for recent.
+     *
+     * @param pixelMap recent image.
+     * @param imageFit imageFit of static image.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, ImageFit imageFit)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Remove static Image resource for recent.
+     *
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError RemoveImageForRecent()
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -4696,6 +4733,35 @@ public:
      * @param hitTitleBar true means hit title bar success, false means not hit title bar.
      */
     virtual bool IsHitTitleBar(std::shared_ptr<MMI::PointerEvent>& pointerEvent) const { return false; }
+
+    /**
+     * @brief Check if the current device is in free window mode.
+     *
+     * @return true means is in free window mdoe, false means not in free window mdoe.
+     */
+    virtual bool IsInFreeWindowMode() const { return false; }
+
+    /**
+     * @brief register a listener to listen whether the window is in free window mode.
+     *
+     * @param listener IFreeWindowModeChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterFreeWindowModeChangeListener(const sptr<IFreeWindowModeChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+ 
+    /**
+     * @brief Unregister the IFreeWindowModeChangeListener.
+     *
+     * @param listener IFreeWindowModeChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterFreeWindowModeChangeListener(const sptr<IFreeWindowModeChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }
