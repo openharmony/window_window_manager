@@ -88,6 +88,7 @@ ohos_shared_library("windowstageani_kit") {
     "ipc:ipc_napi",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "ipc:rpc_ani",
     "runtime_core:ani",
     "runtime_core:ani_helpers",
   ]
@@ -144,6 +145,7 @@ ohos_shared_library("windowstageani_module") {
     "ipc:ipc_napi",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "ipc:rpc_ani",
     "runtime_core:ani",
   ]
 
