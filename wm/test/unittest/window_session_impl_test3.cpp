@@ -1495,6 +1495,49 @@ HWTEST_F(WindowSessionImplTest3, UpdateSubWindowInfo, TestSize.Level1)
     EXPECT_EQ(WMError::WM_OK, subWindow->Destroy(true));
     EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
 }
+
+/**
+ * @tc.name: RegisterFreeWindowModeChangeListener
+ * @tc.desc: RegisterFreeWindowModeChangeListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, RegisterFreeWindowModeChangeListener, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("freeWindow1");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    sptr<IFreeWindowModeChangeListener> listener = sptr<IFreeWindowModeChangeListener>::MakeSptr();
+    auto ret = window->RegisterFreeWindowModeChangeListener(listener);
+    window->NotifyFreeWindowModeChange(true);
+    EXPECT_EQ(WMError::WM_OK, ret);
+ 
+    listener = nullptr;
+    window->NotifyFreeWindowModeChange(true);
+    ret = window->RegisterFreeWindowModeChangeListener(listener);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    window->Destroy();
+}
+ 
+/**
+ * @tc.name: UnregisterFreeWindowModeChangeListener
+ * @tc.desc: UnregisterFreeWindowModeChangeListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, UnregisterFreeWindowModeChangeListener, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("freeWindow2");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(2);
+    sptr<IFreeWindowModeChangeListener> listener = sptr<IFreeWindowModeChangeListener>::MakeSptr();
+    auto ret = window->RegisterFreeWindowModeChangeListener(listener);
+    EXPECT_EQ(WMError::WM_OK, ret);
+ 
+    auto ret1 = window->UnregisterFreeWindowModeChangeListener((listener));
+    EXPECT_EQ(WMError::WM_OK, ret1);
+    window->Destroy();
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

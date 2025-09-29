@@ -1115,6 +1115,13 @@ napi_value JsWindow::IsImmersiveLayout(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnIsImmersiveLayout(env, info) : nullptr;
 }
 
+napi_value JsWindow::IsInFreeWindowMode(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnIsInFreeWindowMode(env, info) : nullptr;
+}
+
 napi_value JsWindow::GetWindowStatus(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_PC, "[NAPI]");
@@ -8310,6 +8317,19 @@ napi_value JsWindow::OnIsImmersiveLayout(napi_env env, napi_callback_info info)
     return CreateJsValue(env, isImmersiveLayout);
 }
 
+napi_value JsWindow::OnIsInFreeWindowMode(napi_env env, napi_callback_info info)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "windowToken_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][OnIsInFreeWindowMode]msg: invalid window");
+    }
+    bool isInFreeWindowMode = windowToken_->IsPcOrPadFreeMultiWindowMode();
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u isInFreeWindowMod %{public}u end",
+        windowToken_->GetWindowId(), isInFreeWindowMode);
+    return CreateJsValue(env, isInFreeWindowMode);
+}
+
 napi_value JsWindow::OnGetWindowStatus(napi_env env, napi_callback_info info)
 {
     auto window = windowToken_;
@@ -9427,6 +9447,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
         JsWindow::SetFollowParentWindowLayoutEnabled);
     BindNativeFunction(env, object, "setWindowShadowEnabled", moduleName, JsWindow::SetWindowShadowEnabled);
     BindNativeFunction(env, object, "isImmersiveLayout", moduleName, JsWindow::IsImmersiveLayout);
+    BindNativeFunction(env, object, "isInFreeWindowMode", moduleName, JsWindow::IsInFreeWindowMode);
 }
 }  // namespace Rosen
 }  // namespace OHOS

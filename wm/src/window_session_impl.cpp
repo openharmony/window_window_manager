@@ -171,6 +171,7 @@ std::unordered_map<int32_t, std::vector<sptr<IWindowWillCloseListener>>> WindowS
 std::map<int32_t, std::vector<sptr<ISwitchFreeMultiWindowListener>>> WindowSessionImpl::switchFreeMultiWindowListeners_;
 std::map<int32_t, std::vector<sptr<IWindowHighlightChangeListener>>> WindowSessionImpl::highlightChangeListeners_;
 std::map<int32_t, std::vector<sptr<IWindowRotationChangeListener>>> WindowSessionImpl::windowRotationChangeListeners_;
+std::map<int32_t, std::vector<sptr<IFreeWindowModeChangeListener>>> WindowSessionImpl::freeWindowModeChangeListeners_;
 std::recursive_mutex WindowSessionImpl::lifeCycleListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowStageLifeCycleListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowChangeListenerMutex_;
@@ -208,6 +209,7 @@ std::mutex WindowSessionImpl::waterfallModeChangeListenerMutex_;
 std::unordered_map<int32_t, std::vector<sptr<IWaterfallModeChangeListener>>>
     WindowSessionImpl::waterfallModeChangeListeners_;
 std::mutex WindowSessionImpl::windowRotationChangeListenerMutex_;
+std::mutex WindowSessionImpl::freeWindowModeChangeListenerMutex_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
 std::set<sptr<WindowSessionImpl>> g_windowExtensionSessionSet_;
@@ -8338,6 +8340,47 @@ WSError WindowSessionImpl::UpdateIsShowDecorInFreeMultiWindow(bool isShow)
     TLOGI(WmsLogTag::WMS_DECOR, "id: %{public}d, isShow: %{public}d", GetPersistentId(), isShow);
     property_->SetIsShowDecorInFreeMultiWindow(isShow);
     return WSError::WS_OK;
+}
+
+template<typename T>
+EnableIfSame<T, IFreeWindowModeChangeListener, std::vector<sptr<IFreeWindowModeChangeListener>>> WindowSessionImpl::GetListeners()
+{
+    std::vector<sptr<IFreeWindowModeChangeListener>> freeWindowModeChangeListeners;
+    for (auto& listener : freeWindowModeChangeListeners_[GetPersistentId()]) {
+        freeWindowModeChangeListeners.push_back(listener);
+    }
+    return freeWindowModeChangeListeners;
+}
+ 
+WMError WindowSessionImpl::RegisterFreeWindowModeChangeListener(const sptr<IFreeWindowModeChangeListener>& listener)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "Start register");
+    if (listener) {
+        std::lock_guard<std::mutex> lockListener(freeWindowModeChangeListenerMutex_);
+        return RegisterListener(freeWindowModeChangeListeners_[GetPersistentId()], listener);
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d, listener is null", GetPersistentId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    return WMError::WM_OK;
+}
+ 
+WMError WindowSessionImpl::UnregisterFreeWindowModeChangeListener(const sptr<IFreeWindowModeChangeListener>& listener)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "Start unregister");
+    std::lock_guard<std::mutex> lockListener(freeWindowModeChangeListenerMutex_);
+    return UnregisterListener(freeWindowModeChangeListeners_[GetPersistentId()], listener);
+}
+ 
+void WindowSessionImpl::NotifyFreeWindowModeChange(bool isInFreeWindowMode)
+{
+    std::lock_guard<std::mutex> lockListener(freeWindowModeChangeListenerMutex_);
+    auto freeWindowModeChangeListeners = GetListeners<IFreeWindowModeChangeListener>();
+    for (auto& listener : freeWindowModeChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnFreeWindowModeChange(isInFreeWindowMode);
+        }
+    }
 }
 } // namespace Rosen
 } // namespace OHOS
