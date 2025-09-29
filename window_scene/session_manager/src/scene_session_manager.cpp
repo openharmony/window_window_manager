@@ -16743,11 +16743,67 @@ WMError SceneSessionManager::SetImageForRecent(uint32_t imgResourceId, ImageFit 
         TLOGE(WmsLogTag::WMS_PATTERN, "scenePersistence is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    // Decoupling from LRU
-    sceneSession->SetSaveSnapshotCallback([](){});
     sceneSession->SaveSnapshot(true, true, pixelMap);
     scenePersistence->SetHasSnapshot(true);
     ScenePersistentStorage::Insert("SetImageForRecent_" + std::to_string(persistentId), static_cast<int32_t>(imageFit), ScenePersistentStorageType::MAXIMIZE_STATE);
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
+    ImageFit imageFit, int32_t persistentId)
+{
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "sceneSession %{public}d is null", persistentId);
+        return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
+    auto scenePersistence = sceneSession->GetScenePersistence();
+    if (scenePersistence == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "scenePersistence is null");
+        return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
+    auto abilityInfo = sceneSession->GetSessionInfo().abilityInfo;
+    if (abilityInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "abilityInfo is null");
+        return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
+    if (!abilityInfo->applicationInfo.isSystemApp) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "%{public}d is not a systemApp", persistentId);
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    if (sceneSession->GetSessionState() == SessionState::STATE_BACKGROUND) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "sessionState is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (pixelMap == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "get pixelMap failed");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    sceneSession->SaveSnapshot(true, true, pixelMap);
+    scenePersistence->SetHasSnapshot(true);
+    ScenePersistentStorage::Insert("SetImageForRecent_" + std::to_string(persistentId),
+        static_cast<int32_t>(imageFit), ScenePersistentStorageType::MAXIMIZE_STATE);
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::RemoveImageForRecent(int32_t persistentId)
+{
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "sceneSession %{public}d is null", persistentId);
+        return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
+    auto abilityInfo = sceneSession->GetSessionInfo().abilityInfo;
+    if (abilityInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "abilityInfo is null");
+        return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
+    if (!abilityInfo->applicationInfo.isSystemApp) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "%{public}d is not a systemApp", persistentId);
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    sceneSession->ResetSnapshot();
+    sceneSession->DeletePersistentImageFit();
     return WMError::WM_OK;
 }
 

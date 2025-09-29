@@ -1292,6 +1292,65 @@ HWTEST_F(sceneSessionManagerProxyTest, SetImageForRecent, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetImageForRecentPixelMap
+ * @tc.desc: SetImageForRecentPixelMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, SetImageForRecentPixelMap, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    auto pixelMap = std::make_shared<Media::PixelMap>();
+    EXPECT_EQ(sceneSessionManagerProxy->SetImageForRecentPixelMap(pixelMap, ImageFit::FILL, 1),
+        WMError::WM_ERROR_IPC_FAILED);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(sceneSessionManagerProxy->SetImageForRecentPixelMap(pixelMap, ImageFit::FILL, 1),
+        WMError::WM_ERROR_IPC_FAILED);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    EXPECT_EQ(sceneSessionManagerProxy->SetImageForRecentPixelMap(pixelMap, ImageFit::FILL, 1),
+        WMError::WM_ERROR_IPC_FAILED);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    EXPECT_EQ(sceneSessionManagerProxy->SetImageForRecentPixelMap(pixelMap, ImageFit::FILL, 1),
+        WMError::WM_ERROR_IPC_FAILED);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    EXPECT_EQ(sceneSessionManagerProxy->SetImageForRecentPixelMap(pixelMap, ImageFit::FILL, 1),
+        WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: RemoveImageForRecent
+ * @tc.desc: RemoveImageForRecent
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, RemoveImageForRecent, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    auto pixelMap = std::make_shared<Media::PixelMap>();
+    EXPECT_EQ(sceneSessionManagerProxy->RemoveImageForRecent(1), WMError::WM_ERROR_IPC_FAILED);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(sceneSessionManagerProxy->RemoveImageForRecent(1), WMError::WM_ERROR_IPC_FAILED);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    EXPECT_EQ(sceneSessionManagerProxy->RemoveImageForRecent(1), WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
  * @tc.name: GetDisplayIdByWindowId
  * @tc.desc: GetDisplayIdByWindowId
  * @tc.type: FUNC

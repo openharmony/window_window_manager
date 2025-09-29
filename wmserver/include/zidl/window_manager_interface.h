@@ -99,6 +99,8 @@ public:
         TRANS_ID_GET_UNRELIABLE_WINDOW_INFO_ID,
         TRANS_ID_GET_FREE_MULTI_WINDOW_ENABLE_STATE,
         TRANS_ID_SET_IMAGE_FOR_RECENT,
+        TRANS_ID_SET_IMAGE_FOR_RECENT_PIXELMAP,
+        TRANS_ID_REMOVE_IMAGE_FOR_RECENT,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -310,6 +312,9 @@ public:
         int persistentId) { return WMError::WM_OK; }
     virtual WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit,
         int32_t persistentId) { return WMError::WM_OK; }
+    virtual WMError SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, ImageFit imageFit,
+        int32_t persistentId) { return WMError::WM_OK; }
+    virtual WMError RemoveImageForRecent(int32_t persistentId) { return WMError::WM_OK; }
     virtual WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) { return WMError::WM_OK; }
     virtual WMError SetGlobalDragResizeType(DragResizeType dragResizeType) { return WMError::WM_OK; }
