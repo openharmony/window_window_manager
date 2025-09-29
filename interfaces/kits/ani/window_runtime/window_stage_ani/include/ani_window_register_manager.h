@@ -70,7 +70,7 @@ private:
         sptr<Window> window, bool isRegister, ani_env* env);
     WmErrorCode ProcessWindowVisibilityChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
-    WmErrorCode ProcessOcclusionStateChangeRegister(const sptr<AniWindowListener> listener&, sptr<Window> window,
+    WmErrorCode ProcessOcclusionStateChangeRegister(const sptr<AniWindowListener>& listener, sptr<Window> window,
         bool isRegister, ani_env* env);
     WmErrorCode ProcessSystemDensityChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
