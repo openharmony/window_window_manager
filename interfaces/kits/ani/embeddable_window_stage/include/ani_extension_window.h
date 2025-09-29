@@ -44,7 +44,7 @@ public:
     WmErrorCode RegisterListener(ani_env* env, ani_string type,  ani_object fn);
     WmErrorCode UnregisterListener(ani_env* env, ani_string type, ani_object fn);
     WmErrorCode OnHideNonSecureWindows(ani_env* env, ani_boolean shouldHide);
-    void OnOccupyEvents(ani_env* env, ani_long eventFlags);
+    void OnOccupyEvents(ani_env* env, ani_int eventFlags);
     ani_object OnCreateSubWindowWithOptions(ani_env* env, ani_string name, ani_object subWindowOptions);
     WmErrorCode OnRegisterRectChangeCallback(ani_env* env, ani_int reason, ani_object fn);
     WmErrorCode OnUnRegisterRectChangeCallback(ani_env* env, ani_object fn);

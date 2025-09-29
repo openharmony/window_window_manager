@@ -185,10 +185,10 @@ namespace uiExtension {
       });
     }
 
-    occupyEvents(eventFlags: int): Promise<void> {
+    occupyEvents(eventFlags: double): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
-          this.occupyEvents(this.nativeObj, eventFlags);
+          this.occupyEvents(this.nativeObj, eventFlags as int);
         }).then((ret: NullishType) => {
           resolve(undefined);
         }).catch((err: NullishType) => {
@@ -232,6 +232,73 @@ namespace uiExtension {
   }
 
   /**
+   * Gesture event type
+   *
+   * @enum { number }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 18
+   */
+  export enum EventFlag {
+    /**
+     * None gesture event
+     *
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @atomicservice
+     * @since 18
+     */
+    EVENT_NONE = 0x00000000,
+    /**
+     * Pan gesture left events
+     *
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @atomicservice
+     * @since 18
+     */
+    EVENT_PAN_GESTURE_LEFT = 0x00000001,
+    /**
+     * Pan gesture right events
+     *
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @atomicservice
+     * @since 18
+     */
+    EVENT_PAN_GESTURE_RIGHT = 0x00000002,
+    /**
+     * Pan gesture up events
+     *
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @atomicservice
+     * @since 18
+     */
+    EVENT_PAN_GESTURE_UP = 0x00000004,
+    /**
+     * Pan gesture down events
+     *
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @atomicservice
+     * @since 18
+     */
+    EVENT_PAN_GESTURE_DOWN = 0x00000008,
+    /**
+     * Click gesture events
+     *
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @atomicservice
+     * @since 18
+     */
+    EVENT_CLICK = 0x00000100,
+    /**
+     * Long press gesture events
+     *
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @atomicservice
+     * @since 18
+     */
+    EVENT_LONG_PRESS = 0x00000200,
+  }
+
+  /**
    * Rect change options
    *
    * @interface RectChangeOptions
@@ -252,12 +319,12 @@ namespace uiExtension {
    * @atomicservice
    * @since 12
    */
-  interface WindowProxy {
+  export interface WindowProxy {
     getWindowAvoidArea(type: window.AvoidAreaType): window.AvoidArea;
     setWaterMarkFlag(enable: boolean): Promise<void>;
     hideNonSecureWindows(shouldHide: boolean): Promise<void>;
     createSubWindowWithOptions(name: string, subWindowOptions: window.SubWindowOptions): Promise<window.Window>;
-    occupyEvents(eventFlags: int): Promise<void>;
+    occupyEvents(eventFlags: double): Promise<void>;
     on<T>(type: string, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;
     onAvoidAreaChange(callback: Callback<AvoidAreaInfo>): void;
@@ -278,7 +345,7 @@ namespace uiExtension {
    * @since 14
    * 
    */
-  interface WindowProxyProperties {
+  export interface WindowProxyProperties {
     /**
      * Position and size of the component (EmbeddedComponent or UIExtensionComponent).
      *

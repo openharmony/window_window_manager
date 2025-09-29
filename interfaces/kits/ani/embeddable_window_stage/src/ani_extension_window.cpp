@@ -244,7 +244,11 @@ ani_object AniExtensionWindow::OnCreateSubWindowWithOptions(ani_env* env, ani_st
 
 void AniExtensionWindow::OnOccupyEvents(ani_env* env, ani_int eventFlags)
 {
-
+    auto ret = WM_JS_TO_ERROR_CODE_MAP.at(extensionWindow_->OccupyEvents(eventFlags));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]OnOccupyEvents failed, code: %{public}d", ret);
+        AniWindowUtils::AniThrowError(env, ret);
+    }
 }
 
 WmErrorCode AniExtensionWindow::OnRegisterRectChangeCallback(ani_env* env, ani_int reason, ani_object fn)
