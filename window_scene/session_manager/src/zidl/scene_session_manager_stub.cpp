@@ -278,6 +278,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleMinimizeAllAppWindows(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_OUTLINE):
             return HandleUpdateOutline(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SNED_COMMAND_EVENT):
+            return HandleSendCommonEvent(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -2640,6 +2642,52 @@ int SceneSessionManagerStub::HandleUpdateOutline(MessageParcel& data, MessagePar
     }
     return ERR_NONE;
 }
+
+int SceneSessionManagerStub::HandleSendCommonEvent(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t commnad = 0;
+    if (!data.ReadInt32(commnad)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed");
+        return ERR_INVALID_DATA;
+    }
+
+    std::vector<int32_t> datas;
+    int32_t length = 0;
+    if (!data.ReadInt32(length)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed");
+        return ERR_INVALID_DATA;
+    }
+    datas.emplace_back(length);
+
+    int32_t info = 0;
+    for (int i = 0; i < length; i++) {
+        if (!data.ReadInt32(info)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed");
+            return ERR_INVALID_DATA;
+        }
+        datas.emplace_back(info);
+    }
+
+    WMError ret = WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    swtich(commnad) {
+        case case static_cast<uint32_t>(CommonEventCommand::LOCK_CURSOR):
+            ret = LockCursor(datas);
+            break;
+        case case static_cast<uint32_t>(CommonEventCommand::UNLOCK_CURSOR):
+            ret = UnLockCursor(datas);
+            break;
+        default:
+            ret = WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+            break;
+    }
+
+    if (!reply.WriteUint32(static_cast<uint32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Write errCode failed.");
+        return WM_ERROR_IPC_FAILED;
+    }
+    return ERR_NONE;
+}
+
 
 int SceneSessionManagerStub::HandleConvertToRelativeCoordinateExtended(MessageParcel& data, MessageParcel& reply)
 {

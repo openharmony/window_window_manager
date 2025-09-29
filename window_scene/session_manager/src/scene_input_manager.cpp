@@ -677,6 +677,27 @@ void SceneInputManager::SetCurrentUserId(int32_t userId)
     MMI::InputManager::GetInstance()->SetCurrentUser(userId);
 }
 
+void SceneInputManager::LockCursor(int32_t windowId, bool isCursorFollowMovement)
+{
+    cursorInfo.isActivating = true;
+    cursorInfo.windowId = windowId;
+    cursorInfo.isCursorFollowMovement = isCursorFollowMovement;
+    TLOGI(WmsLogTag::WMS_EVENT, "winId:%{public}d-%{public}d", windowId, isCursorFollowMovement);
+}
+
+bool SceneInputManager::UnLockCursor(int32_t windowId)
+{
+    if (!cursorInfo.isActivating) {
+        TLOGI(WmsLogTag::WMS_EVENT, "winId:%{public}d-same", windowId);
+        return false;
+    }
+    cursorInfo.isActivating = false;
+    cursorInfo.windowId = windowId;
+    cursorInfo.isCursorFollowMovement = false;
+    TLOGI(WmsLogTag::WMS_EVENT, "winId:%{public}d", windowId);
+    return true;
+}
+
 void SceneInputManager::UpdateDisplayAndWindowInfo(const std::vector<MMI::ScreenInfo>& screenInfos,
     std::map<DisplayGroupId, MMI::DisplayGroupInfo>& displayGroupMap,
     std::vector<MMI::WindowInfo> windowInfoList)

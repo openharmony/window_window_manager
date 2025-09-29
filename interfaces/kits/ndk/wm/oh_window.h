@@ -343,7 +343,28 @@ int32_t OH_WindowManager_GetMainWindowSnapshot(int32_t* windowIdList, size_t win
  * @since 21
  */
 void OH_WindowManager_ReleaseMainWindowSnapshot(const OH_PixelmapNative* snapshotPixelMapList);
-    
+
+/**
+ * @brief Set the window capture mouse cursor status.
+ * 
+ * @param windowId windowId when window is created.
+ * @param isCursorFollowMovement
+ * @return Returns the status code of the execution.
+ *         {@link WS_OK} the function call is successful.
+ * @since 22
+ */
+int32_t OH_WindowManager_LockCursor(int32_t windowId, bool isCursorFollowMovement);
+
+/**
+ * @brief 
+ * 
+ * @param windowId windowId when window is created.
+ * @return Returns the status code of the execution.
+ *         {@link WS_OK} the function call is successful.
+ * @since 22
+ */
+int32_t OH_WindowManager_UnLockCursor(int32_t windowId);
+
 #ifdef __cplusplus
 }
 #endif
