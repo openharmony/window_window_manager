@@ -6534,6 +6534,13 @@ WMError WindowSessionImpl::HandleEscKeyEvent(const std::shared_ptr<MMI::KeyEvent
         return WMError::WM_ERROR_NULLPTR;
     }
 
+    if (keyEvent->GetKeyCode() != MMI::KeyEvent::KEYCODE_ESCAPE) {
+        TLOGD(WmsLogTag::WMS_EVENT, "keyevent not esc");
+        escKeyHasDown_ = false;
+        escKeyEventTriggered_ = false;
+        return WMError::WM_DO_NOTHING;
+    }
+
     if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
         IsPcOrPadFreeMultiWindowMode() &&
         property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
