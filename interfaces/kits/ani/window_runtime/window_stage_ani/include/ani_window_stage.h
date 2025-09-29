@@ -45,6 +45,9 @@ class AniWindowStage {
         ani_ref callback);
     static void SetCustomDensity(ani_env* env, ani_object obj, ani_long nativeObj, ani_double density);
     static void SetDefaultDensityEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enabled);
+    static ani_object GetSubWindow(ani_env* env, ani_object obj, ani_long nativeObj);
+    static ani_object CreateSubWindowWithOptions(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_string name, ani_object options);
     static void SetImageForRecent(ani_env* env, ani_object obj, ani_long nativeObj, ani_long imgResourceId,
         ani_int value);
     void SetWindowRectAutoSave(ani_env* env, ani_boolean enabled, ani_boolean isSaveBySpecifiedFlag);
@@ -64,6 +67,8 @@ private:
     void OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnSetImageForRecent(ani_env* env, ani_long imgResourceId, ani_int value);
+    ani_object OnGetSubWindow(ani_env* env);
+    ani_object OnCreateSubWindowWithOptions(ani_env* env, ani_string name, ani_object options);
     std::weak_ptr<WindowScene> windowScene_;
     std::unique_ptr<AniWindowRegisterManager> registerManager_ = nullptr;
 };
