@@ -3743,6 +3743,30 @@ export class WindowInternal implements Window {
         });
       });
     }
+
+    public onWindowSizeChange(callback: Callback<Size>): void {
+      this.onSync(this.nativeObj, 'windowSizeChange', callback);
+    }
+
+    public offWindowSizeChange(callback?: Callback<Size>): void {
+      this.offSync(this.nativeObj, 'windowSizeChange', callback);
+    }
+
+    public onWindowStatusChange(callback: Callback<WindowStatusType>): void {
+      this.onSync(this.nativeObj, 'windowStatusChange', callback);
+    }
+
+    public offWindowStatusChange(callback?: Callback<WindowStatusType>): void {
+      this.offSync(this.nativeObj, 'windowStatusChange', callback);
+    }
+
+    public onWindowRectChange(callback: Callback<RectChangeOptions>): void {
+      this.onSync(this.nativeObj, 'windowRectChange', callback);
+    }
+
+    public offWindowRectChange(callback?: Callback<RectChangeOptions>): void {
+      this.offSync(this.nativeObj, 'windowRectChange', callback);
+    }
 }
 
 export interface Window {
@@ -3894,6 +3918,12 @@ export interface Window {
     offTouchOutside(callback?: Callback<void>): void;
     offDialogTargetTouch(callback?: Callback<void>): void;
     offNoInteractionDetected(callback?: Callback<void>): void;
+    onWindowSizeChange(callback: Callback<Size>): void;
+    offWindowSizeChange(callback?: Callback<Size>): void;
+    onWindowStatusChange(callback: Callback<WindowStatusType>): void;
+    offWindowStatusChange(callback?: Callback<WindowStatusType>): void;
+    onWindowRectChange(callback: Callback<RectChangeOptions>): void;
+    offWindowRectChange(callback?: Callback<RectChangeOptions>): void;
 }
 
 export native function CreateWindowStage(scene: long): WindowStageInternal;
