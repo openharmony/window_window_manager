@@ -166,38 +166,6 @@ public:
     static bool ParseModalityParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
     static bool ParseZLevelParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
     static ani_object CreateAniWindow(ani_env* env, OHOS::sptr<OHOS::Rosen::Window>& window);
-
-private:
-    static void SetSystemPropertiesWindowRect(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesDrawableRect(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowType(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowIsLayoutFullScreen(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowIsFullScreen(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowTouchable(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowFousable(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowIsPrivacyMode(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowIsKeepScreenOn(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowBrightness(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowIsTransparent(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertieswindowIsRoundCorner(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesWindowDimBehindValue(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertieswindowId(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesdisplayId(ani_env* env, const sptr<Window>& window,
-        ani_object& systemProperties, const char* clsName);
     template<typename T>
     static ani_object CreateBaseTypeObject(ani_env* env, T value);
 };
