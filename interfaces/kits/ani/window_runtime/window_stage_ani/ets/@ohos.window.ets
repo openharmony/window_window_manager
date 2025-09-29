@@ -1741,17 +1741,17 @@ export interface TitleButtonVisibleParam {
 }
 
 export interface GetWindowsByCoordinateParam {
-  displayId: number;
-  windowNumber: number;
-  x: number;
-  y: number;
+  displayId: long;
+  windowNumber: int;
+  x: int;
+  y: int;
 }
 
 export class GetWindowsByCoordinateParamInternal implements GetWindowsByCoordinateParam {
-  displayId: number;
-  windowNumber: number;
-  x: number;
-  y: number;
+  displayId: long;
+  windowNumber: int;
+  x: int;
+  y: int;
 }
 
 /**
