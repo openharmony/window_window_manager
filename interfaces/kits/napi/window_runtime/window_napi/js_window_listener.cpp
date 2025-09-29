@@ -1044,7 +1044,7 @@ void JsWindowListener::OnFreeWindowModeChange(bool isInFreeWindowMode)
     auto jsCallback = [self = weakRef_, isInFreeWindowMode, env = env_] {
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGE(WmsLogTag::WMS_IMMS, "this listener or env is nullptr");
+            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "this listener or env is nullptr");
             return;
         }
         HandleScope handleScope(env);
@@ -1053,7 +1053,7 @@ void JsWindowListener::OnFreeWindowModeChange(bool isInFreeWindowMode)
     };
     napi_status status = napi_send_event(env_, jsCallback, napi_eprio_high, "OnFreeWindowModeChange");
     if (status != napi_status::napi_ok) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to send event");
     }
 }
 } // namespace Rosen
