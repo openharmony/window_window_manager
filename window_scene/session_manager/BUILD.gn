@@ -64,7 +64,6 @@ ohos_shared_library("scene_session_manager") {
   sources = [
     "../../wm/src/zidl/window_manager_agent_proxy.cpp",
     "src/anomaly_detection.cpp",
-    "src/distributed_client.cpp",
     "src/extension_session_manager.cpp",
     "src/hidump_controller.cpp",
     "src/publish/scb_dump_subscriber.cpp",
@@ -132,7 +131,6 @@ ohos_shared_library("scene_session_manager") {
     "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "config_policy:configpolicy_util",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "graphic_2d:librender_service_base",
@@ -155,10 +153,20 @@ ohos_shared_library("scene_session_manager") {
   ]
 
   defines = []
+  if (window_manager_feature_support_dmsfwk) {
+    sources +=[ "src/distributed_client.cpp" ]
+    defines += [ "WINDOW_MANAGER_FEATURE_SUPPORT_DMSFWK" ]
+  }
+
   if (defined(global_parts_info) &&
       defined(global_parts_info.resourceschedule_memmgr_override)) {
     external_deps += [ "memmgr:memmgrclient" ]
     defines += [ "MEMMGR_WINDOW_ENABLE" ]
+  }
+
+  if (window_manager_feature_support_dsoftbus) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+    defines += [ "WINDOW_MANAGER_FEATURE_SUPPORT_DSOFTBUS" ]
   }
 
   if (defined(global_parts_info) &&
