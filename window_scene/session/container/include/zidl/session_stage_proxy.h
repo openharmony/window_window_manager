@@ -41,7 +41,7 @@ public:
     WSError UpdateSessionViewportConfig(const SessionViewportConfig& config) override;
     WSError HandleBackEvent() override;
     WSError MarkProcessed(int32_t eventId) override;
-    WSError UpdateFocus(bool isFocused) override;
+    WSError UpdateFocus(const sptr<FocusNotifyInfo>& focusNotifyInfo, bool isFocused) override;
     WSError NotifyDestroy() override;
     WSError NotifyCloseExistPipWindow() override;
     WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) override;
@@ -80,6 +80,7 @@ public:
     WSError PcAppInPadNormalClose() override;
     WSError NotifyCompatibleModePropertyChange(const sptr<CompatibleModeProperty> property) override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override;
+    void UpdateAnimationSpeed(float speed) override;
     void NotifySessionFullScreen(bool fullScreen) override;
     WSError NotifyTargetRotationInfo(OrientationInfo& Info) override;
     RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo) override;
@@ -98,7 +99,7 @@ public:
     WSError SetSupportEnterWaterfallMode(bool isSupportEnter) override;
     WSError SendContainerModalEvent(const std::string& eventName, const std::string& eventValue) override;
     WSError NotifyExtensionSecureLimitChange(bool isLimit) override;
-    WSError NotifyHighlightChange(bool isHighlight) override;
+    WSError NotifyHighlightChange(const sptr<HighlightNotifyInfo>& highlightNotifyInfo, bool isHighlight) override;
     void NotifyWindowCrossAxisChange(CrossAxisState state) override;
     WSError NotifyWindowAttachStateChange(bool isAttach) override;
     void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) override;

@@ -186,6 +186,46 @@ void ScreenSessionManagerClientProxy::OnPropertyChanged(ScreenId screenId,
     }
 }
 
+void ScreenSessionManagerClientProxy::OnFoldPropertyChanged(ScreenId screenId, const ScreenProperty& property,
+    ScreenPropertyChangeReason reason, FoldDisplayMode displayMode)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
+        return;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(screenId)) {
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
+        return;
+    }
+    if (!RSMarshallingHelper::Marshalling(data, property)) {
+        TLOGE(WmsLogTag::DMS, "Write property failed");
+        return;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
+        TLOGE(WmsLogTag::DMS, "Write reason failed");
+        return;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(displayMode))) {
+        TLOGE(WmsLogTag::DMS, "Write displayMode failed");
+        return;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_FOLD_PROPERTY_CHANGED),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return;
+    }
+}
+
 void ScreenSessionManagerClientProxy::OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
     PowerStateChangeReason reason)
 {

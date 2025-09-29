@@ -44,6 +44,7 @@ public:
     void SetHasSnapshotFreeMultiWindow(bool hasSnapshot);
     bool HasSnapshot() const;
     bool HasSnapshot(SnapshotStatus key, bool freeMultiWindow = false) const;
+    void ClearSnapshotPath();
     void ClearSnapshot(SnapshotStatus key);
     bool IsSnapshotExisted(SnapshotStatus key = defaultStatus);
     std::string GetSnapshotFilePath(SnapshotStatus& key, bool useKey = false, bool freeMultiWindow = false);

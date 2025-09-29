@@ -41,6 +41,7 @@ public:
     WMError DestroyHookWindow();
     WMError NotifyDrawingCompleted() override;
     WMError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) override;
+    void UpdateAnimationSpeedIfEnabled();
     void PreProcessCreate();
     void SetDefaultProperty();
     WMError Minimize() override;
@@ -210,6 +211,7 @@ public:
     void UpdateWindowModeWhenSupportTypeChange(uint32_t windowModeSupportType);
     bool haveSetSupportedWindowModes_ = false;
     uint32_t pendingWindowModeSupportType_ { WindowModeSupport::WINDOW_MODE_SUPPORT_ALL };
+    void MaximizeEvent(const sptr<ISession> &hostSession);
 
     /*
      * Compatible Mode
@@ -299,6 +301,8 @@ public:
      */
     WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = Rect::EMPTY_RECT,
         int32_t apiVersion = API_VERSION_INVALID) override;
+    WMError GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType type, AvoidArea& avoidArea,
+        const Rect& rect = Rect::EMPTY_RECT) override;
     SystemBarProperty GetSystemBarPropertyByType(WindowType type) const override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     WMError SetLayoutFullScreen(bool status) override;
@@ -310,6 +314,9 @@ public:
      * Window Pattern
      */
     WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit) override;
+    WMError SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, ImageFit imageFit) override;
+    WMError RemoveImageForRecent() override;
+
     /**
      * Window Transition Animation For PC
      */
@@ -473,6 +480,7 @@ private:
     void AddSubWindowMapForExtensionWindow();
     WMError GetParentSessionAndVerify(bool isToast, sptr<WindowSessionImpl>& parentSession);
     static WMError VerifySubWindowLevel(bool isToast, const sptr<WindowSessionImpl>& parentSession);
+    bool hasAncestorFloatSession(uint32_t parentId, const SessionMap& sessionMap);
     WMError SetParentWindowInner(int32_t oldParentWindowId, const sptr<WindowSessionImpl>& newParentWindow);
 
     WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;

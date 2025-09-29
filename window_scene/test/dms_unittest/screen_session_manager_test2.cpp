@@ -192,6 +192,393 @@ HWTEST_F(ScreenSessionManagerTest, SetDisplayNodeSecurity, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdatePropertyByActiveModeChange001
+ * @tc.desc: UpdatePropertyByActiveModeChange001
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, UpdatePropertyByActiveModeChange001, TestSize.Level1)
+{
+#ifdef WM_SCREEN_ACTIVE_MODE_ENABLE
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr);
+        sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "UpdateProperty";
+    virtualOption.width_ = 200;
+    virtualOption.height_ = 100;
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+    ASSERT_NE(screenSession, nullptr);
+    screenSession->UpdatePropertyByActiveModeChange();
+    EXPECT_TRUE(g_errLog.find("active mode bounds") != std::string::npos);
+    g_errLog.clear();
+#endif
+}
+
+/**
+ * @tc.name: UpdatePropertyByActiveModeChange002
+ * @tc.desc: UpdatePropertyByActiveModeChange002
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, UpdatePropertyByActiveModeChange002, TestSize.Level1)
+{
+#ifdef WM_SCREEN_ACTIVE_MODE_ENABLE
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr);
+        sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "UpdateProperty";
+    virtualOption.width_ = 200;
+    virtualOption.height_ = 100;
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+    ASSERT_NE(screenSession, nullptr);
+    int32_t oldActiveIdx = screenSession->GetActiveId();
+    int32_t testActiveIdx = -1;
+    screenSession->SetActiveId(testActiveIdx);
+    screenSession->UpdatePropertyByActiveModeChange();
+    EXPECT_TRUE(g_errLog.find("mode is null") != std::string::npos);
+    screenSession->SetActiveId(oldActiveIdx);
+    g_errLog.clear();
+#endif
+}
+
+/**
+ * @tc.name: CheckAndNotifyChangeMode001
+ * @tc.desc: CheckAndNotifyChangeMode001
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CheckAndNotifyChangeMode001, TestSize.Level1)
+{
+#ifdef WM_SCREEN_ACTIVE_MODE_ENABLE
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "ChangeMode";
+    virtualOption.width_ = 1920;
+    virtualOption.height_ = 1080;
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+    ASSERT_NE(screenSession, nullptr);
+    RRect testBounds = RRect({ 0, 0, 1280, 760}, 0.0f, 0.0f);
+    RRect bounds = RRect({ 0, 0, 1920, 1080}, 0.0f, 0.0f);
+    screenSession->SetBounds(bounds);
+    ssm_->CheckAndNotifyChangeMode(testBounds, screenSession);
+    EXPECT_TRUE(g_errLog.find("notify end") != std::string::npos);
+    g_errLog.clear();
+#endif
+}
+
+/**
+ * @tc.name: CheckAndNotifyChangeMode002
+ * @tc.desc: CheckAndNotifyChangeMode002
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CheckAndNotifyChangeMode002, TestSize.Level1)
+{
+#ifdef WM_SCREEN_ACTIVE_MODE_ENABLE
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "ChangeMode";
+    virtualOption.width_ = 200;
+    virtualOption.height_ = 100;
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+    ASSERT_NE(screenSession, nullptr);
+    RRect testBounds = RRect({ 0, 0, 1920, 1080}, 0.0f, 0.0f);
+    RRect bounds = RRect({ 0, 0, 1920, 1080}, 0.0f, 0.0f);
+    screenSession->SetBounds(bounds);
+    ssm_->CheckAndNotifyChangeMode(testBounds, screenSession);
+    EXPECT_TRUE(g_errLog.find("no notify") != std::string::npos);
+    g_errLog.clear();
+#endif
+}
+
+/**
+ * @tc.name: CheckAndNotifyRefreshRate001
+ * @tc.desc: CheckAndNotifyRefreshRate001
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CheckAndNotifyRefreshRate001, TestSize.Level1)
+{
+#ifdef WM_SCREEN_ACTIVE_MODE_ENABLE
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "RefreshRate";
+    virtualOption.width_ = 200;
+    virtualOption.height_ = 100;
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+    ASSERT_NE(screenSession, nullptr);
+    uint32_t testRefresh = 60;
+    screenSession->UpdateRefreshRate(140);
+    ssm_->CheckAndNotifyRefreshRate(testRefresh, screenSession);
+    EXPECT_TRUE(g_errLog.find("notify end") != std::string::npos);
+    g_errLog.clear();
+#endif
+}
+
+/**
+ * @tc.name: CheckAndNotifyRefreshRate002
+ * @tc.desc: CheckAndNotifyRefreshRate002
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CheckAndNotifyRefreshRate002, TestSize.Level1)
+{
+#ifdef WM_SCREEN_ACTIVE_MODE_ENABLE
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "RefreshRate001";
+    virtualOption.width_ = 200;
+    virtualOption.height_ = 100;
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+    ASSERT_NE(screenSession, nullptr);
+    uint32_t testRefresh = 140;
+    screenSession->UpdateRefreshRate(140);
+    ssm_->CheckAndNotifyRefreshRate(testRefresh, screenSession);
+    EXPECT_TRUE(g_errLog.find("no notify") != std::string::npos);
+    g_errLog.clear();
+#endif
+}
+
+/**
+ * @tc.name: ReportScreenModeChangeEvent
+ * @tc.desc: ReportScreenModeChangeEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ReportScreenModeChangeEvent, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr);
+    RSScreenModeInfo screenmode;
+    screenmode.SetScreenWidth(1920);
+    screenmode.SetScreenHeight(1080);
+    screenmode.SetScreenRefreshRate(60);
+    screenmode.SetScreenModeId(1050);
+    ssm_->ReportScreenModeChangeEvent(screenmode, 0);
+    EXPECT_FALSE(g_errLog.find("Write HiSysEvent error") != std::string::npos);
+    g_errLog.clear();
+}
+
+/**
+ * @tc.name: ReportRelativePositionChangeEvent
+ * @tc.desc: ReportRelativePositionChangeEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ReportRelativePositionChangeEvent, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr);
+    ScreenId mainScreenId = 0;
+    ScreenId externalScreenId = 16;
+    MultiScreenPositionOptions mianOptions = {mainScreenId, 0, 0};
+    MultiScreenPositionOptions externalOptions = {mainScreenId, 1920, 1080};
+    std::string errmsg = "openHarmony";
+    ssm_->ReportRelativePositionChangeEvent(mianOptions, externalOptions, errmsg);
+    EXPECT_FALSE(g_errLog.find("Write HiSysEvent error") != std::string::npos);
+    g_errLog.clear();
+}
+
+/**
+ * @tc.name: SetScreenActiveMode001
+ * @tc.desc: SetScreenActiveMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode001, TestSize.Level1)
+{
+#ifdef WM_SCREEN_ACTIVE_MODE_ENABLE
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "SetScreenActiveMode";
+    ASSERT_NE(ssm_, nullptr);
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockSessionPermission::MockIsStarByHdcd(true);
+    auto ret = ssm_->SetScreenActiveMode(screenId, 0);
+    EXPECT_EQ(DMError::DM_ERROR_NOT_SYSTEM_APP, ret);
+
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockSessionPermission::MockIsStarByHdcd(false);
+    ret = ssm_->SetScreenActiveMode(screenId, 0);
+    EXPECT_EQ(DMError::DM_ERROR_NOT_SYSTEM_APP, ret);
+
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockSessionPermission::MockIsStarByHdcd(true);
+    ssm_->DestroyVirtualScreen(screenId);
+#endif
+}
+
+/**
+ * @tc.name: SetScreenActiveMode002
+ * @tc.desc: SetScreenActiveMode002
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode002, TestSize.Level1)
+{
+#ifdef WM_SCREEN_ACTIVE_MODE_ENABLE
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockSessionPermission::MockIsStarByHdcd(true);
+    ssm_->DestroyVirtualScreen(screenId);
+    ScreenId screenId = -1ULL;
+    ASSERT_NE(ssm_, nullptr);
+    auto ret = ssm_->SetScreenActiveMode(ScreenId, 0);
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+#endif
+}
+
+/**
+ * @tc.name: SetScreenActiveMode003
+ * @tc.desc: SetScreenActiveMode003
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode003, TestSize.Level1)
+{
+#ifdef WM_SCREEN_ACTIVE_MODE_ENABLE
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockSessionPermission::MockIsStarByHdcd(true);
+    ssm_->DestroyVirtualScreen(screenId);
+    ScreenId screenId = 501;
+    ASSERT_NE(ssm_, nullptr);
+    auto ret = ssm_->SetScreenActiveMode(ScreenId, 0);
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+#endif
+}
+
+/**
+ * @tc.name: SetScreenActiveMode004
+ * @tc.desc: SetScreenActiveMode004
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode004, TestSize.Level1)
+{
+#ifdef WM_SCREEN_ACTIVE_MODE_ENABLE
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockSessionPermission::MockIsStarByHdcd(true);
+    sptr<ScreenSession> screenSession = ssm_->GetOrCreateScreenSession(1050);
+    screenSession = nullptr;
+    auto ret = ssm_->SetScreenActiveMode(1050, 0);
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+    screenSession = ssm_->GetOrCreateScreenSession(1050);
+    ret = ssm_->SetScreenActiveMode(1050, 0);
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ret)
+#endif
+}
+
+/**
+ * @tc.name: SetScreenActiveMode005
+ * @tc.desc: SetScreenActiveMode005
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode005, TestSize.Level1)
+{
+#ifdef WM_SCREEN_ACTIVE_MODE_ENABLE
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockSessionPermission::MockIsStarByHdcd(true);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    ASSERT_NE(displayManagerAgent, nullptr);
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "SetScreenActiveMode005";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    auto ret = ssm_->SetScreenActiveMode(1050, 0);
+    EXPECT_EQ(DMError::DM_OK, ret);
+#endif
+}
+
+/**
+ * @tc.name: UpdateSessionByActiveModeChange001
+ * @tc.desc: UpdateSessionByActiveModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, UpdateSessionByActiveModeChange001, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockSessionPermission::MockIsStarByHdcd(true);
+    sptr<ScreenSession> screenSession = nullptr;
+    ssm_->UpdateSessionByActiveModeChange(screenSession, screenSession, 0);
+    EXPECT_FALSE(g_errLog.find("screenSession is nullptr") != std::string::npos);
+    g_errLog.clear();
+}
+
+/**
+ * @tc.name: UpdateSessionByActiveModeChange002
+ * @tc.desc: UpdateSessionByActiveModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, UpdateSessionByActiveModeChange002, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockSessionPermission::MockIsStarByHdcd(true);
+    sptr<ScreenSession> screenSession = ssm_->GetOrCreateScreenSession(1050);
+    ssm_->UpdateSessionByActiveModeChange(screenSession, screenSession, 0);
+    EXPECT_TRUE(g_errLog.find("end") != std::string::npos);
+    g_errLog.clear();
+}
+
+
+RecoverScreenActiveMode
+/**
+ * @tc.name: RecoverScreenActiveMode001
+ * @tc.desc: RecoverScreenActiveMode001
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RecoverScreenActiveMode001, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    ScreenId screenId = 1058;
+    ssm_->RecoverScreenActiveMode(screenId, 0);
+    EXPECT_TRUE(g_errLog.find("screenSession is null") != std::string::npos);
+    g_errLog.clear();
+}
+
+/**
+ * @tc.name: RecoverScreenActiveMode002
+ * @tc.desc: RecoverScreenActiveMode002
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RecoverScreenActiveMode002, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    ASSERT_NE(displayManagerAgent, nullptr);
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "RecoverScreenActiveMode002";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+
+    ScreenId rsScreenId = SCREEN_ID_INVALID;
+    ssm_->screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockSessionPermission::MockIsStarByHdcd(false);
+    ssm_->RecoverScreenActiveMode(rsScreenId, 0);
+    EXPECT_TRUE(g_errLog.find("recover error") != std::string::npos);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockSessionPermission::MockIsStarByHdcd(true);
+    g_errLog.clear();
+}
+
+/**
  * @tc.name: SwitchScrollParam01
  * @tc.desc: SwitchScrollParam test
  * @tc.type: FUNC
@@ -1649,11 +2036,11 @@ HWTEST_F(ScreenSessionManagerTest, SetDuringCallState, TestSize.Level1)
 }
 
 /**
- * @tc.name: DisconnectScreenIfScreenInfoNull
- * @tc.desc: DisconnectScreenIfScreenInfoNull
+ * @tc.name: LockLandExtendIfScreenInfoNullNull
+ * @tc.desc: LockLandExtendIfScreenInfoNullNull
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, DisconnectScreenIfScreenInfoNull01, TestSize.Level1) {
+HWTEST_F(ScreenSessionManagerTest, LockLandExtendIfScreenInfoNull01, TestSize.Level1) {
     ASSERT_NE(ssm_, nullptr);
 #define FOLD_ABILITY_ENABLE
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
@@ -1661,26 +2048,7 @@ HWTEST_F(ScreenSessionManagerTest, DisconnectScreenIfScreenInfoNull01, TestSize.
         EXPECT_NE(session, nullptr);
         ssm_->SetClient(nullptr);
         ASSERT_EQ(ssm_->GetClientProxy(), nullptr);
-        ssm_->DisConnectScreenIfScreenInfoNull(session);
-    }
-#undef FOLD_ABILITY_ENABLE
-}
-
-/**
- * @tc.name: SetDefaultScreenModeWhenCreateMirror
- * @tc.desc: SetDefaultScreenModeWhenCreateMirror
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, SetDefaultScreenModeWhenCreateMirror, TestSize.Level1) {
-    ASSERT_NE(ssm_, nullptr);
-#define FOLD_ABILITY_ENABLE
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        sptr<ScreenSession> session = nullptr;
-        ssm_->SetDefaultScreenModeWhenCreateMirror(session);
-        session = ssm_->GetOrCreateScreenSession(0);
-        auto mode = session->GetScreenCombination();
-        ssm_->SetDefaultScreenModeWhenCreateMirror(session);
-        ASSERT_EQ(session->GetScreenCombination(), mode);
+        ssm_->LockLandExtendIfScreenInfoNull(session);
     }
 #undef FOLD_ABILITY_ENABLE
 }
@@ -1879,28 +2247,6 @@ HWTEST_F(ScreenSessionManagerTest, InitRotationCorrectionMap03, TestSize.Level1)
     std::string config = "1,0,1;1,0;2,0;5,3;3,a;a,a";
     ssm_->InitRotationCorrectionMap(config);
     EXPECT_EQ(ssm_->rotationCorrectionMap_[FoldDisplayMode::GLOBAL_FULL], 3);
-}
-
-/**
- * @tc.name: RecoverDefaultScreenModeInner
- * @tc.desc: RecoverDefaultScreenModeInner
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, RecoverDefaultScreenModeInner, TestSize.Level1) {
-    ASSERT_NE(ssm_, nullptr);
-#define FOLD_ABILITY_ENABLE
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        ScreenId innerRsId = 0;
-        ScreenId externalRsId = 11;
-        ssm_->SetIsFoldStatusLocked(true);
-        EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), true);
-        ssm_->RecoverDefaultScreenModeInner(innerRsId, externalRsId);
-        SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::EXPANDED);
-        innerRsId = 1;
-        externalRsId = 12;
-        ssm_->RecoverDefaultScreenModeInner(innerRsId, externalRsId);
-    }
-#undef FOLD_ABILITY_ENABLE
 }
 
 /**
@@ -2308,6 +2654,50 @@ HWTEST_F(ScreenSessionManagerTest, RecoveryResolutionEffect, TestSize.Level1)
     ssm_->curResolutionEffectEnable_ = false;
     ssm_->screenSessionMap_.erase(51);
     ssm_->screenSessionMap_.erase(52);
+}
+
+/**
+ * @tc.name: SwitchModeOffScreenRenderingResetScreenProperty
+ * @tc.desc: SwitchModeOffScreenRenderingResetScreenProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SwitchModeOffScreenRenderingResetScreenProperty, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr);
+    sptr<ScreenSession> session = nullptr;
+    g_errLog.clear();
+    ssm_->SwitchModeOffScreenRenderingResetScreenProperty(session, true);
+    EXPECT_TRUE(g_errLog.find("externalScreenSession is nullptr") != std::string::npos);
+    session = sptr<ScreenSession>::MakeSptr();
+    g_errLog.clear();
+    ssm_->SwitchModeOffScreenRenderingResetScreenProperty(session, true);
+    EXPECT_FALSE(g_errLog.find("SetExtendProperty screenId") != std::string::npos);
+    g_errLog.clear();
+    ssm_->SwitchModeOffScreenRenderingResetScreenProperty(session, false);
+    EXPECT_TRUE(g_errLog.find("SetExtendProperty screenId") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+ 
+/**
+ * @tc.name: SwitchModeOffScreenRenderingAdapter
+ * @tc.desc: SwitchModeOffScreenRenderingAdapter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SwitchModeOffScreenRenderingAdapter, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr);
+    std::vector<ScreenId> externalScreenIds;
+    g_errLog.clear();
+    ssm_->SwitchModeOffScreenRenderingAdapter(externalScreenIds);
+    EXPECT_TRUE(g_errLog.find("externalScreenIds is empty") != std::string::npos);
+    g_errLog.clear();
+    ScreenId screenId = 666;
+    externalScreenIds.emplace_back(screenId);
+    ssm_->SwitchModeOffScreenRenderingAdapter(externalScreenIds);
+    EXPECT_FALSE(g_errLog.find("externalScreenIds is empty") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 }
 }

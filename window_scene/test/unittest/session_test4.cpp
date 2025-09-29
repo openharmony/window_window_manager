@@ -596,7 +596,8 @@ HWTEST_F(WindowSessionTest4, SetRaiseToAppTopForPointDownFunc, TestSize.Level1)
     session_->UnregisterSessionChangeListeners();
     session_->SetSessionStateChangeNotifyManagerListener(nullptr);
     session_->SetSessionInfoChangeNotifyManagerListener(nullptr);
-    session_->NotifyFocusStatus(true);
+    auto info = sptr<FocusNotifyInfo>::MakeSptr();
+    session_->NotifyFocusStatus(info, true);
 
     session_->SetRequestFocusStatusNotifyManagerListener(nullptr);
     session_->SetNotifyUIRequestFocusFunc(nullptr);
@@ -1568,6 +1569,66 @@ HWTEST_F(WindowSessionTest4, SetIsShowDecorInFreeMultiWindow02, TestSize.Level1)
     WSError result02 = session_->SetIsShowDecorInFreeMultiWindow(isShow);
     EXPECT_EQ(result02, WSError::WS_OK);
 }
+
+/**
+ * @tc.name: UpdateSessionOutline
+ * @tc.desc: Test func UpdateSessionOutline
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, UpdateSessionOutline, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+
+    OutlineStyleParams defaultParams;
+    bool enabled = false;
+    session_->UpdateSessionOutline(enabled, defaultParams);
+    EXPECT_EQ(session_->isOutlineEnabled_, false);
+
+    enabled = true;
+    session_->UpdateSessionOutline(enabled, defaultParams);
+    EXPECT_EQ(session_->isOutlineEnabled_, true);
+
+    defaultParams.outlineColor_ = 0x00ffffff; // 0x00ffffff: color has no alpha byte.
+    session_->UpdateSessionOutline(enabled, defaultParams);
+    EXPECT_EQ(session_->outlineStyleParams_.outlineColor_, 0x00ffffff); // 0x00ffffff: color has no alpha byte.
+}
+
+/**
+ * @tc.name: SetOutlineParamsChangeCallback
+ * @tc.desc: Test func SetOutlineParamsChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, SetOutlineParamsChangeCallback, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetOutlineParamsChangeCallback(nullptr);
+    EXPECT_EQ(session_->outlineParamsChangeCallback_, nullptr);
+
+    auto func = [](bool enabled, const OutlineStyleParams& outlineStyleParams) {};
+    session_->SetOutlineParamsChangeCallback(std::move(func));
+    usleep(waitSyncInNs_);
+    EXPECT_NE(session_->outlineParamsChangeCallback_, nullptr);
+}
+
+/**
+ * @tc.name: UpdateSessionOutline01
+ * @tc.desc: Test func UpdateSessionOutline
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, UpdateSessionOutline01, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    auto func = [](bool enabled, const OutlineStyleParams& outlineStyleParams) {};
+    session_->SetOutlineParamsChangeCallback(std::move(func));
+    usleep(waitSyncInNs_);
+    OutlineStyleParams defaultParams;
+    defaultParams.outlineColor_ = 0x000000ff; // 0x000000ff: color blue byte.
+    bool enabled = false;
+    session_->UpdateSessionOutline(enabled, defaultParams);
+    EXPECT_EQ(session_->outlineStyleParams_.outlineColor_, 0x000000ff); // 0x000000ff: color blue byte.
+}
+
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

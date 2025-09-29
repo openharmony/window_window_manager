@@ -819,6 +819,15 @@ WMError WindowManagerLite::GetMainWindowInfos(int32_t topNum, std::vector<MainWi
     return WindowAdapterLite::GetInstance(userId_)->GetMainWindowInfos(topNum, topNInfo);
 }
 
+WMError WindowManagerLite::UpdateAnimationSpeedWithPid(pid_t pid, float speed)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapterLite>().UpdateAnimationSpeedWithPid(pid, speed);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "failed");
+    }
+    return ret;
+}
+
 WMError WindowManagerLite::GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo)
 {
     return WindowAdapterLite::GetInstance(userId_)->GetCallingWindowInfo(callingWindowInfo);

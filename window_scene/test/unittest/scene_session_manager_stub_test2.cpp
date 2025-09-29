@@ -215,6 +215,69 @@ HWTEST_F(SceneSessionManagerStubTest2, HandleCreateUIEffectController, Function 
     data.RewindRead(0);
     EXPECT_EQ(stubMock->HandleCreateUIEffectController(data, reply), ERR_NONE);
 }
+
+/**
+ * @tc.name: HandleUpdateOutline
+ * @tc.desc: test HandleUpdateOutline
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest2, HandleUpdateOutline, TestSize.Level1)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_UPDATE_OUTLINE);
+    
+    auto ret = stub_->ProcessRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
+
+    sptr<IRemoteObject> remoteObject = sptr<MockIRemoteObject>::MakeSptr();
+    data.WriteRemoteObject(remoteObject);
+    ret = stub_->HandleUpdateOutline(data, reply);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleUpdateOutline01
+ * @tc.desc: test HandleUpdateOutline
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest2, HandleUpdateOutline01, TestSize.Level1)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    MessageParcel data;
+    MessageParcel reply;
+
+    sptr<IRemoteObject> remoteObject = sptr<MockIRemoteObject>::MakeSptr();
+    data.WriteRemoteObject(remoteObject);
+    OutlineParams params;
+    data.WriteParcelable(&params);
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    auto ret = stub_->HandleUpdateOutline(data, reply);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleUpdateOutline02
+ * @tc.desc: test HandleUpdateOutline
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest2, HandleUpdateOutline02, TestSize.Level1)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    MessageParcel data;
+    MessageParcel reply;
+
+    sptr<IRemoteObject> remoteObject = sptr<MockIRemoteObject>::MakeSptr();
+    data.WriteRemoteObject(remoteObject);
+    OutlineParams params;
+    data.WriteParcelable(&params);
+    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+    auto ret = stub_->HandleUpdateOutline(data, reply);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

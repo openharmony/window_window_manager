@@ -104,6 +104,10 @@ class WindowStage {
   setImageForRecent(imgResourceId, value) {
     return this.windowStage_.setImageForRecent(imgResourceId, value);
   }
+
+  removeImageForRecent() {
+    return this.windowStage_.removeImageForRecent();
+  }
 }
 
 export default WindowStage;

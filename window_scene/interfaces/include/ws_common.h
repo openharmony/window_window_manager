@@ -46,6 +46,7 @@ using ScreenId = uint64_t;
 
 constexpr int32_t ROTATE_ANIMATION_DURATION = 400;
 constexpr int32_t INVALID_SESSION_ID = 0;
+constexpr int64_t INVALID_TIME_STAMP = 0;
 constexpr int32_t MIN_REQUEST_ID_FROM_ABILITY = 1;
 constexpr int32_t DEFAULT_REQUEST_FROM_SCB_ID = -1;
 constexpr int32_t WINDOW_SUPPORT_MODE_MAX_SIZE = 4;
@@ -431,6 +432,7 @@ struct SessionInfo {
     bool isSetPointerAreas_ = false;
     bool isCastSession_ = false;
     uint32_t windowInputType_ = 0;
+    uint32_t expandInputFlag_ = 0;
     std::string continueSessionId_ = "";
     bool isCalledRightlyByCallerId_ = false;
     bool fullScreenStart_ = false;
@@ -594,6 +596,7 @@ enum class SessionEvent : uint32_t {
     EVENT_WATERFALL_TO_MAXIMIZE,
     EVENT_COMPATIBLE_TO_MAXIMIZE,
     EVENT_COMPATIBLE_TO_RECOVER,
+    EVENT_MAXIMIZE_FULLSCREEN,
     EVENT_END
 };
 
@@ -1026,6 +1029,14 @@ enum class TerminateType : uint32_t {
 };
 
 /**
+ * @brief window expand flag.
+ */
+enum class ExpandInputFlag : uint32_t {
+    EXPAND_INPUT_FLAG_DEFAULT = 0,
+    WINDOW_DISABLE_USER_ACTION = 1 << 2,
+};
+
+/**
  * @brief System animaged scene type.
  */
 enum class SystemAnimatedSceneType : uint32_t {
@@ -1124,13 +1135,19 @@ enum class SnapshotNodeType : uint32_t {
     APP_NODE,
 };
 
-enum class BackgroundReason {
+enum class LifeCycleChangeReason {
     DEFAULT = 0,
 
     /*
      * Expanded to folded on single pocket
      */
     EXPAND_TO_FOLD_SINGLE_POCKET,
+
+    BACK_TO_DESKTOP,
+
+    LAST_SCENE_TRANSFER,
+
+    REASON_END,
 };
 
 enum class AsyncTraceTaskId: int32_t {

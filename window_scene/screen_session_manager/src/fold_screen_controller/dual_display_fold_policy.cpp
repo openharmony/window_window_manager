@@ -508,11 +508,15 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeOnBootAnimation(sptr<ScreenSe
     if (screenId == SCREEN_ID_SUB) {
         reason = ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING;
     }
-    screenSession->UpdatePropertyByFoldControl(screenProperty_);
-    screenSession->PropertyChange(screenSession->GetScreenProperty(), reason);
-    TLOGI(WmsLogTag::DMS, "screenBounds : width_= %{public}f, height_= %{public}f",
-        screenSession->GetScreenProperty().GetBounds().rect_.width_,
-        screenSession->GetScreenProperty().GetBounds().rect_.height_);
+    if (!ScreenSessionManager::GetInstance().GetClientProxy()) {
+        screenSession->UpdatePropertyByFoldControl(screenProperty_);
+        screenSession->PropertyChange(screenSession->GetScreenProperty(), reason);
+        TLOGI(WmsLogTag::DMS, "screenBounds : width_= %{public}f, height_= %{public}f",
+            screenSession->GetScreenProperty().GetBounds().rect_.width_,
+            screenSession->GetScreenProperty().GetBounds().rect_.height_);
+    } else {
+        screenSession->NotifyFoldPropertyChange(screenProperty_, reason, FoldDisplayMode::UNKNOWN);
+    }
     screenId_ = screenId;
 }
 

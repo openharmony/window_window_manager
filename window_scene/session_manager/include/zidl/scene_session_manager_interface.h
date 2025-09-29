@@ -149,6 +149,8 @@ public:
         TRANS_ID_SET_FOREGROUND_WINDOW_NUM,
         TRANS_ID_USE_IMPLICIT_ANIMATION,
         TRANS_ID_SET_IMAGE_FOR_RECENT,
+        TRANS_ID_SET_IMAGE_FOR_RECENT_PIXELMAP,
+        TRANS_ID_REMOVE_IMAGE_FOR_RECENT,
         TRANS_ID_REGISTER_WINDOW_PROPERTY_CHANGE_AGENT,
         TRANS_ID_UNREGISTER_WINDOW_PROPERTY_CHANGE_AGENT,
         TRANS_ID_GET_HOST_GLOBAL_SCALE_RECT,
@@ -160,6 +162,7 @@ public:
         TRANS_ID_RECOVER_WINDOW_PROPERTY_CHANGE_FLAG,
         TRANS_ID_MINIMIZE_ALL_WINDOW,
         TRANS_ID_GLOBAL_COORDINATE_TO_RELATIVE_COORDINATE,
+        TRANS_ID_UPDATE_OUTLINE,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -423,6 +426,9 @@ public:
 
     WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit,
         int32_t persistentId) override { return WMError::WM_OK; }
+    WMError SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, ImageFit imageFit,
+        int32_t persistentId) override { return WMError::WM_OK; }
+    WMError RemoveImageForRecent(int32_t persistentId) override { return WMError::WM_OK; }
         
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override { return WMError::WM_OK; }
@@ -454,6 +460,10 @@ public:
     WMError GetPiPSettingSwitchStatus(bool& switchStatus) override { return WMError::WM_OK; }
     WMError ConvertToRelativeCoordinateExtended(
         const Rect& rect, Rect& newRect, DisplayId& newDisplayId) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams) override
     {
         return WMError::WM_OK;
     }

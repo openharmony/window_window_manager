@@ -52,6 +52,18 @@ std::mutex WindowAdapterLite::windowAdapterLiteMapMutex_;
         }                                                                 \
     } while(false)
 
+WindowAdapterLite::~WindowAdapterLite()
+{
+    sptr<IRemoteObject> remoteObject = nullptr;
+    if (windowManagerServiceProxy_) {
+        remoteObject = windowManagerServiceProxy_->AsObject();
+    }
+    if (remoteObject) {
+        remoteObject->RemoveDeathRecipient(wmsDeath_);
+    }
+    TLOGI(WmsLogTag::WMS_SCB, "destroyed, userId: %{public}d", userId_);
+}
+
 WindowAdapterLite::WindowAdapterLite(const int32_t userId) : userId_(userId) {}
 
 WindowAdapterLite& WindowAdapterLite::GetInstance()
@@ -266,6 +278,15 @@ WMError WindowAdapterLite::GetMainWindowInfos(int32_t topNum, std::vector<MainWi
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->GetMainWindowInfos(topNum, topNInfo);
+}
+
+WMError WindowAdapterLite::UpdateAnimationSpeedWithPid(pid_t pid, float speed)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    TLOGD(WmsLogTag::WMS_MAIN, "update animation speed with pid");
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->UpdateAnimationSpeedWithPid(pid, speed);
 }
 
 WMError WindowAdapterLite::GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo)

@@ -873,6 +873,21 @@ public:
         RotationChangeResult& rotationChangeResult) {}
 };
 
+/**
+ * @class IFreeWindowModeChangeListener
+ *
+ * @brief IFreeWindowModeChangeListener is used to observe the free window mode when it changed.
+ */
+class IFreeWindowModeChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when free window mode changed.
+     *
+     * @param isInFreeWindowMode Whether in free window mode.
+     */
+    virtual void OnFreeWindowModeChange(bool isInFreeWindowMode) {}
+};
+
 static WMError DefaultCreateErrCode = WMError::WM_OK;
 class Window : virtual public RefBase {
 public:
@@ -1253,6 +1268,28 @@ public:
     }
 
     /**
+     * @brief Set static Image resource for recent.
+     *
+     * @param pixelMap recent image.
+     * @param imageFit imageFit of static image.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, ImageFit imageFit)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Remove static Image resource for recent.
+     *
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError RemoveImageForRecent()
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Get whether main window is topmost
      *
      * @return True means main window is topmost
@@ -1345,6 +1382,17 @@ public:
      */
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
         const Rect& rect = Rect::EMPTY_RECT, int32_t apiVersion = API_VERSION_INVALID) { return WMError::WM_OK; }
+    
+    /**
+     * @brief Get the avoid area by type ignoring visibility
+     *
+     * @param type avoid area type.@see reference
+     * @param avoidArea
+     * @param rect
+     * @return WMError
+     */
+    virtual WMError GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType type, AvoidArea& avoidArea,
+        const Rect& rect = Rect::EMPTY_RECT) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Set whether the system or app sub window can obtain area
@@ -4653,6 +4701,35 @@ public:
      * @param hitTitleBar true means hit title bar success, false means not hit title bar.
      */
     virtual bool IsHitTitleBar(std::shared_ptr<MMI::PointerEvent>& pointerEvent) const { return false; }
+
+    /**
+     * @brief Check if the current device is in free window mode.
+     *
+     * @return true means is in free window mdoe, false means not in free window mdoe.
+     */
+    virtual bool IsInFreeWindowMode() const { return false; }
+
+    /**
+     * @brief register a listener to listen whether the window is in free window mode.
+     *
+     * @param listener IFreeWindowModeChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterFreeWindowModeChangeListener(const sptr<IFreeWindowModeChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+ 
+    /**
+     * @brief Unregister the IFreeWindowModeChangeListener.
+     *
+     * @param listener IFreeWindowModeChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterFreeWindowModeChangeListener(const sptr<IFreeWindowModeChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }
