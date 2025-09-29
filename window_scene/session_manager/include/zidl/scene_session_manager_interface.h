@@ -41,6 +41,14 @@ class RSSurfaceNode;
 using ISessionListener = AAFwk::IMissionListener;
 using SessionInfoBean = AAFwk::MissionInfo;
 using SessionSnapshot = AAFwk::MissionSnapshot;
+
+enum class CommonEventCommand : int32_t {
+    LOCK_CURSOR = 0,
+    UNLOCK_CURSOR,
+};
+constexpr int32_t LOCK_CURSOR_LENGTH = 2;
+constexpr int32_t UNLOCK_CURSOR_LENGTH = 1;
+
 class ISceneSessionManager : public IWindowManager {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISceneSessionManager");
@@ -164,6 +172,7 @@ public:
         TRANS_ID_MINIMIZE_ALL_WINDOW,
         TRANS_ID_GLOBAL_COORDINATE_TO_RELATIVE_COORDINATE,
         TRANS_ID_UPDATE_OUTLINE,
+        TRANS_ID_SNED_COMMAND_EVENT,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -465,6 +474,20 @@ public:
         return WMError::WM_OK;
     }
     WMError UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams) override
+    {
+        return WMError::WM_OK;
+    }
+
+    // event
+    WMError SendCommonEvent(CommonEventCommand command, const std::vector<int32_t>& datas) override
+    {
+        return WMError::WM_OK;
+    }
+    virtual WMError LockCursor(const std::vector<int32_t>& datas)
+    {
+        return WMError::WM_OK;
+    }
+    virtual WMError UnLockCursor(const std::vector<int32_t>& datas)
     {
         return WMError::WM_OK;
     }

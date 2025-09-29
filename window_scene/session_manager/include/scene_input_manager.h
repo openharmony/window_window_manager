@@ -30,6 +30,13 @@ namespace OHOS {
 namespace Rosen {
 class SceneSessionDirtyManager;
 struct SecSurfaceInfo;
+
+struct CursorInfo {
+    bool isActivating = false;
+    int32_t windowId = INVALID_WINDOW_ID;
+    bool isCursorFollowMovement = false;
+}
+
 class SceneInputManager : public std::enable_shared_from_this<SceneInputManager> {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SceneInputManager)
 public:
@@ -55,6 +62,9 @@ public:
     void FlushEmptyInfoToMMI();
     void SetUserBackground(bool userBackground);
     void SetCurrentUserId(int32_t userId);
+
+    void LockCursor(int32_t windowId, bool isCursorFollowMovement);
+    bool UnLockCursor(int32_t windowId);
 
 protected:
     SceneInputManager() = default;
@@ -90,6 +100,8 @@ private:
     std::vector<MMI::WindowInfo> lastWindowInfoList_;
     int32_t lastFocusId_ { -1 };
     int32_t focusedSessionId_ { -1 };
+
+    CursorInfo cursorInfo;
 
     /*
      * Multi User

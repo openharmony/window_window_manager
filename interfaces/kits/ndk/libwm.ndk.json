@@ -194,5 +194,13 @@
     {
         "first_instroduced":"20",
         "name":"OH_WindowManager_InjectTouchEvent"
+    },
+    {
+        "first_instroduced":"22",
+        "name":"OH_WindowManager_LockCursor"
+    },
+    {
+        "first_instroduced":"22",
+        "name":"OH_WindowManager_UnLockCursor"
     }
 ]

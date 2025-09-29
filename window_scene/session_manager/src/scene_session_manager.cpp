@@ -5933,6 +5933,56 @@ void SceneSessionManager::PreLoadStartingWindow(sptr<SceneSession> sceneSession)
     ffrtQueueHelper_->SubmitTask(loadTask);
 }
 
+/*
+ * Window Event start
+ */
+
+WMError SceneSessionManager::LockCursor(const std::vector<int32_t>& datas)
+{
+    if (datas.size() < 1) {
+        TLOGE(WmsLogTag::WMS_EVENT, "The format is incorrect(size=0).");
+        return WMError::WM_ERROR_ILLEGAL_PARAM;
+    }
+    if (datas[0] != LOCK_CURSOR_LENGTH) {
+        TLOGE(WmsLogTag::WMS_EVENT, "The format is incorrect(length error).");
+        return WMError::WM_ERROR_ILLEGAL_PARAM;
+    }
+    if (datas[0] != datas.size() - 1) {
+        TLOGE(WmsLogTag::WMS_EVENT, "The format is incorrect(length error).");
+        return WMError::WM_ERROR_ILLEGAL_PARAM;
+    }
+    int32_t windowId = datas[1];
+    bool isCursorFollowMovement = static_cast<bool>(datas[2]);
+    SceneInputManager::GetInstance().LockCursor(windowId, isCursorFollowMovement);
+    FlushWindowInfoToMMI();
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::UnLockCursor(const std::vector<int32_t>& datas)
+{
+    if (datas.size() < 1) {
+        TLOGE(WmsLogTag::WMS_EVENT, "The format is incorrect(size=0).");
+        return WMError::WM_ERROR_ILLEGAL_PARAM;
+    }
+    if (datas[0] != LOCK_CURSOR_LENGTH) {
+        TLOGE(WmsLogTag::WMS_EVENT, "The format is incorrect(length error).");
+        return WMError::WM_ERROR_ILLEGAL_PARAM;
+    }
+    if (datas[0] != datas.size() - 1) {
+        TLOGE(WmsLogTag::WMS_EVENT, "The format is incorrect(length error).");
+        return WMError::WM_ERROR_ILLEGAL_PARAM;
+    }
+    int32_t windowId = datas[1];
+    if (SceneInputManager::GetInstance().UnLockCursor(windowId)) {
+        FlushWindowInfoToMMI();
+    }
+    return WMError::WM_OK;
+}
+
+/*
+ * Window Event end
+ */
+
 bool SceneSessionManager::CheckAndGetPreLoadResourceId(const StartingWindowInfo& startingWindowInfo, uint32_t& resId)
 {
     if (startingWindowInfo.configFileEnabled_) {

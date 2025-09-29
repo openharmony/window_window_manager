@@ -4747,6 +4747,30 @@ public:
     {
         return WMError::WM_OK;
     }
+
+    /**
+     * @brief Set the window capture mouse cursor status.
+     *
+     * @param windowId PointerEvent of Multi-Model Input.
+     * @param isCursorFollowMovement
+     * @return WM_OK means set success.
+     */
+    virtual WMError LockCursor(int32_t windowId, bool isCursorFollowMovement)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Set the window capture mouse cursor status.
+     *
+     * @param windowId PointerEvent of Multi-Model Input.
+     * @param isCursorFollowMovement
+     * @return WM_OK means set success.
+     */
+    virtual WMError UnLockCursor(int32_t windowId)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
  
     /**
      * @brief Calculate whether the pointerEvent hits the title bar.
