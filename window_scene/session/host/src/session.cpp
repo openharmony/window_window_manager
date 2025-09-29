@@ -385,6 +385,23 @@ void Session::SetSessionInfoWindowInputType(uint32_t windowInputType)
     NotifySessionInfoChange();
 }
 
+void Session::SetSessionInfoExpandInputFlag(uint32_t expandInputFlag)
+{
+    {
+        std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+        if (sessionInfo_.expandInputFlag_ != expandInputFlag) {
+            sessionInfo_.expandInputFlag_ = expandInputFlag;
+            TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, flag:%{public}u", GetPersistentId(), expandInputFlag);
+        }
+    }
+    NotifySessionInfoChange();
+}
+
+uint32_t Session::GetSessionInfoExpandInputFlag() const
+{
+    return sessionInfo_.expandInputFlag_;
+}
+
 void Session::SetSessionInfoWindowMode(int32_t windowMode)
 {
     sessionInfo_.windowMode = windowMode;
@@ -1401,7 +1418,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     property->SetMobileAppInPadLayoutFullScreen(GetSessionProperty()->GetMobileAppInPadLayoutFullScreen());
     const bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
     const bool isShow = !(isScreenLockedCallback_ && isScreenLockedCallback_() &&
-        systemConfig_.IsFreeMultiWindowMode() && !isPcMode);
+        systemConfig_.freeMultiWindowSupport_ && !isPcMode);
     property->SetIsShowDecorInFreeMultiWindow(isShow);
     SetSessionProperty(property);
     GetSessionProperty()->SetIsNeedUpdateWindowMode(false);
@@ -2806,7 +2823,7 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
         rotation = ROTATION_LANDSCAPE_INVERTED;
     }
     auto rotate = WSSnapshotHelper::GetDisplayOrientation(rotation);
-    if (persistentPixelMap) {
+    if (persistentPixelMap || !SupportSnapshotAllSessionStatus()) {
         key = defaultStatus;
         rotate = DisplayOrientation::PORTRAIT;
     }
@@ -3324,7 +3341,7 @@ WSError Session::UpdateFocus(bool isFocused)
     return WSError::WS_OK;
 }
 
-WSError Session::NotifyFocusStatus(bool isFocused)
+WSError Session::NotifyFocusStatus(const sptr<FocusNotifyInfo>& focusNotifyInfo, bool isFocused)
 {
     if (!IsSessionValid()) {
         TLOGD(WmsLogTag::WMS_FOCUS, "Session is invalid, id: %{public}d state: %{public}u",
@@ -3336,7 +3353,7 @@ WSError Session::NotifyFocusStatus(bool isFocused)
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_NULLPTR;
     }
-    sessionStage_->UpdateFocus(isFocused);
+    sessionStage_->UpdateFocus(focusNotifyInfo, isFocused);
 
     return WSError::WS_OK;
 }
@@ -3367,7 +3384,8 @@ void Session::SetExclusivelyHighlighted(bool isExclusivelyHighlighted)
     property->SetExclusivelyHighlighted(isExclusivelyHighlighted);
 }
 
-WSError Session::UpdateHighlightStatus(bool isHighlight, bool needBlockHighlightNotify)
+WSError Session::UpdateHighlightStatus(const sptr<HighlightNotifyInfo>& highlightNotifyInfo, bool isHighlight,
+    bool needBlockHighlightNotify)
 {
     TLOGD(WmsLogTag::WMS_FOCUS,
         "windowId: %{public}d, currHighlight: %{public}d, nextHighlight: %{public}d, needBlockNotify:%{public}d",
@@ -3376,8 +3394,8 @@ WSError Session::UpdateHighlightStatus(bool isHighlight, bool needBlockHighlight
         return WSError::WS_DO_NOTHING;
     }
     isHighlighted_ = isHighlight;
-    if (needBlockHighlightNotify) {
-        NotifyHighlightChange(isHighlight);
+    if (!needBlockHighlightNotify) {
+        NotifyHighlightChange(highlightNotifyInfo, isHighlight);
     }
     std::lock_guard lock(highlightChangeFuncMutex_);
     if (highlightChangeFunc_ != nullptr) {
@@ -3386,7 +3404,7 @@ WSError Session::UpdateHighlightStatus(bool isHighlight, bool needBlockHighlight
     return WSError::WS_OK;
 }
 
-WSError Session::NotifyHighlightChange(bool isHighlight)
+WSError Session::NotifyHighlightChange(const sptr<HighlightNotifyInfo>& highlightNotifyInfo, bool isHighlight)
 {
     if (IsSystemSession()) {
         TLOGW(WmsLogTag::WMS_FOCUS, "Invalid [%{public}d, %{public}u]", persistentId_, GetSessionState());
@@ -3396,7 +3414,7 @@ WSError Session::NotifyHighlightChange(bool isHighlight)
         TLOGE(WmsLogTag::WMS_FOCUS, "sessionStage is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    sessionStage_->NotifyHighlightChange(isHighlight);
+    sessionStage_->NotifyHighlightChange(highlightNotifyInfo, isHighlight);
     return WSError::WS_OK;
 }
 

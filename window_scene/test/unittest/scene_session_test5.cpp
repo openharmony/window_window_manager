@@ -711,8 +711,8 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback03, TestSize.Level1)
     session->OnMoveDragCallback(reason);
     WSRect newRect = session->moveDragController_->GetTargetRect(
         MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
-    ASSERT_EQ(4, windowRect.height_);
-    ASSERT_EQ(10, windowRect.posY_);
+    ASSERT_EQ(4, newRect.height_);
+    ASSERT_EQ(10, newRect.posY_);
 
     compatibleModeProperty->SetIsAdaptToDragScale(false);
     session->property_->SetCompatibleModeProperty(compatibleModeProperty);
@@ -1570,6 +1570,31 @@ HWTEST_F(SceneSessionTest5, SetUniqueDensityDpi, TestSize.Level1)
 
     session->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     EXPECT_NE(nullptr, session->sessionStage_);
+}
+
+/**
+ * @tc.name: UpdateAnimationSpeed
+ * @tc.desc: UpdateAnimationSpeed function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, UpdateAnimationSpeed, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateAnimationSpeed";
+    info.bundleName_ = "UpdateAnimationSpeed";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    session->sessionStage_ = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_SESSION, session->UpdateAnimationSpeed(2.0f));
+    session->sessionInfo_.isSystem_ = false;
+    session->state_ = SessionState::STATE_DISCONNECT;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_SESSION, session->UpdateAnimationSpeed(2.0f));
+    session->state_ = SessionState::STATE_CONNECT;
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, session->UpdateAnimationSpeed(2.0f));
+
+    session->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    EXPECT_NE(nullptr, session->sessionStage_);
+    EXPECT_EQ(WMError::WM_OK, session->UpdateAnimationSpeed(2.0f));
 }
 
 /**

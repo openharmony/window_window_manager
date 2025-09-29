@@ -158,6 +158,15 @@ public:
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
 
     /**
+     * @brief Set the animation speed for a specific process.
+     *
+     * @param pid process id.
+     * @param speed The animation speed.
+     * @return WM_OK means set success, others means set failed.
+     */
+    WMError UpdateAnimationSpeedWithPid(pid_t pid, float speed);
+
+    /**
      * @brief Get keyboard calling window information.
      *
      * @param callingWindowInfo calling window information

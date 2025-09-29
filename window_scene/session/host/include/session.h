@@ -328,6 +328,8 @@ public:
     void GetCloseAbilityWantAndClean(AAFwk::Want& outWant);
     void SetSessionInfo(const SessionInfo& info);
     void SetSessionInfoWindowInputType(uint32_t windowInputType);
+    void SetSessionInfoExpandInputFlag(uint32_t expandInputFlag);
+    uint32_t GetSessionInfoExpandInputFlag() const;
     void SetSessionInfoWindowMode(int32_t windowMode);
     const SessionInfo& GetSessionInfo() const;
     SessionInfo& EditSessionInfo();
@@ -500,10 +502,11 @@ public:
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
     void NotifyUIRequestFocus();
     virtual void NotifyUILostFocus();
-    WSError NotifyFocusStatus(bool isFocused);
+    WSError NotifyFocusStatus(const sptr<FocusNotifyInfo>& focusNotifyInfo, bool isFocused);
     void SetExclusivelyHighlighted(bool isExclusivelyHighlighted);
-    virtual WSError UpdateHighlightStatus(bool isHighlight, bool needBlockHighlightNotify);
-    WSError NotifyHighlightChange(bool isHighlight);
+    virtual WSError UpdateHighlightStatus(const sptr<HighlightNotifyInfo>& highlightNotifyInfo, bool isHighlight,
+        bool needBlockHighlightNotify);
+    WSError NotifyHighlightChange(const sptr<HighlightNotifyInfo>& highlightNotifyInfo, bool isHighlight);
     WSError GetIsHighlighted(bool& isHighlighted) override;
     WSError HandlePointerEventForFocus(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool isExecuteDelayRaise = false);

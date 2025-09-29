@@ -214,6 +214,8 @@ std::mutex WindowSessionImpl::windowRotationChangeListenerMutex_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
 std::set<sptr<WindowSessionImpl>> g_windowExtensionSessionSet_;
+std::atomic<int64_t> WindowSessionImpl::updateFocusTimeStamp_;
+std::atomic<int64_t> WindowSessionImpl::updateHighlightTimeStamp_;
 std::shared_mutex WindowSessionImpl::windowExtensionSessionMutex_;
 std::recursive_mutex WindowSessionImpl::subWindowSessionMutex_;
 std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWindowSessionMap_;
@@ -1494,6 +1496,40 @@ void WindowSessionImpl::SetUniqueVirtualPixelRatio(bool useUniqueDensity, float 
     }
 }
 
+void WindowSessionImpl::UpdateAnimationSpeed(float speed)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), speed, where, this] {
+        auto window = weakThis.promote();
+        if (window == nullptr) {
+            TLOGW(WmsLogTag::WMS_ANIMATION, "%{public}s: window is nullptr", where);
+            return;
+        }
+        UpdateAllWindowSpeed(speed);
+        isEnableAnimationSpeed_.store(!FoldScreenStateInternel::FloatEqualAbs(speed, 1.0f));
+        animationSpeed_.store(speed);
+    };
+    handler_->PostTask(task, where, 0, AppExecFwk::EventQueue::Priority::HIGH);
+}
+
+void WindowSessionImpl::UpdateAllWindowSpeed(float speed)
+{
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+    for (const auto& [_, pair] : windowSessionMap_) {
+        auto& WindowSession = pair.second;
+        if (!WindowSession) {
+            continue;
+        }
+        auto rsUIContext = WindowSession->GetRSUIContext();
+        auto implicitAnimator = rsUIContext ? rsUIContext->GetRSImplicitAnimator() : nullptr;
+        if (implicitAnimator == nullptr) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to open implicit animtion");
+            continue;
+        }
+        implicitAnimator->ApplyAnimationSpeedMultiplier(speed);
+    }
+}
+
 void WindowSessionImpl::CopyUniqueDensityParameter(sptr<WindowSessionImpl> parentWindow)
 {
     if (parentWindow) {
@@ -1572,7 +1608,42 @@ WSError WindowSessionImpl::UpdateDisplayId(uint64_t displayId)
     return WSError::WS_OK;
 }
 
-WSError WindowSessionImpl::UpdateFocus(bool isFocused)
+WSError WindowSessionImpl::UpdateFocus(const sptr<FocusNotifyInfo>& focusNotifyInfo, bool isFocused)
+{
+    if (focusNotifyInfo == nullptr || !focusNotifyInfo->isSyncNotify_) {
+        UpdateFocusState(isFocused);
+        return WSError::WS_OK;
+    }
+    TLOGI(WmsLogTag::WMS_FOCUS, "unfocusId:%{public}d, focusId:%{public}d, isFocused:%{public}d,"
+        "isSyncNotify:%{public}d, current:%{public}" PRId64 ", new:%{public}" PRId64, focusNotifyInfo->unfocusWindowId_,
+        focusNotifyInfo->focusWindowId_, isFocused, focusNotifyInfo->isSyncNotify_, updateFocusTimeStamp_.load(),
+        focusNotifyInfo->timeStamp_);
+    auto timeStamp = focusNotifyInfo->timeStamp_;
+    if (timeStamp <= updateFocusTimeStamp_.load()) {
+        return WSError::WS_OK;
+    }
+    updateFocusTimeStamp_.store(timeStamp);
+    auto otherWindowId = isFocused ? focusNotifyInfo->unfocusWindowId_ : focusNotifyInfo->focusWindowId_;
+    if (otherWindowId == INVALID_SESSION_ID) {
+        UpdateFocusState(isFocused);
+        return WSError::WS_OK;
+    }
+    auto otherWindow = GetWindowWithId(otherWindowId);
+    if (isFocused) {
+        if (otherWindow != nullptr) {
+            otherWindow->UpdateFocusState(!isFocused);
+        }
+        UpdateFocusState(isFocused);
+    } else {
+        UpdateFocusState(isFocused);
+        if (otherWindow != nullptr) {
+            otherWindow->UpdateFocusState(!isFocused);
+        }
+    }
+    return WSError::WS_OK;
+}
+
+void WindowSessionImpl::UpdateFocusState(bool isFocused)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "focus: %{public}u, id: %{public}d", isFocused, GetPersistentId());
     isFocused_ = isFocused;
@@ -1591,7 +1662,6 @@ WSError WindowSessionImpl::UpdateFocus(bool isFocused)
     } else {
         NotifyAfterUnfocused();
     }
-    return WSError::WS_OK;
 }
 
 bool WindowSessionImpl::IsFocused() const
@@ -2601,8 +2671,49 @@ bool WindowSessionImpl::GetExclusivelyHighlighted() const
 }
 
 /** @note @window.focus */
-WSError WindowSessionImpl::NotifyHighlightChange(bool isHighlight)
+WSError WindowSessionImpl::NotifyHighlightChange(const sptr<HighlightNotifyInfo>& highlightNotifyInfo, bool isHighlight)
 {
+    if (highlightNotifyInfo == nullptr || !highlightNotifyInfo->isSyncNotify_) {
+        NotifyHighlightChange(isHighlight);
+        return WSError::WS_OK;
+    }
+    TLOGI(WmsLogTag::WMS_FOCUS, "timeStamp:%{public}" PRId64 ", highlightId:%{public}d, isHighlight:%{public}d,"
+        "isSyncNotify:%{public}d, current:%{public}" PRId64 ", new:%{public}" PRId64, highlightNotifyInfo->timeStamp_,
+        highlightNotifyInfo->highlightId_, isHighlight, highlightNotifyInfo->isSyncNotify_,
+        updateHighlightTimeStamp_.load(), highlightNotifyInfo->timeStamp_);
+    if (highlightNotifyInfo->timeStamp_ <= updateHighlightTimeStamp_.load()) {
+        return WSError::WS_OK;
+    }
+    updateHighlightTimeStamp_.store(highlightNotifyInfo->timeStamp_);
+    for (auto unHighlightWindowId : highlightNotifyInfo->notHighlightIds_) {
+        if (!isHighlight && unHighlightWindowId == GetWindowId()) {
+            NotifyHighlightChange(isHighlight);
+            continue;
+        }
+        auto unHighlightWindow = GetWindowWithId(unHighlightWindowId);
+        if (unHighlightWindow != nullptr) {
+            unHighlightWindow->NotifyHighlightChange(false);
+        }
+    }
+    if (isHighlight) {
+        NotifyHighlightChange(isHighlight);
+    } else {
+        auto highlightWindow = GetWindowWithId(highlightNotifyInfo->highlightId_);
+        if (highlightWindow != nullptr) {
+            highlightWindow->NotifyHighlightChange(true);
+        }
+    }
+    return WSError::WS_OK;
+}
+
+/** @note @window.focus */
+void WindowSessionImpl::NotifyHighlightChange(bool isHighlight)
+{
+    if (isHighlighted_ == isHighlight) {
+        TLOGI(WmsLogTag::WMS_FOCUS, "update highlight repeated, windowId: %{public}d, isHighlight: %{public}u",
+            GetPersistentId(), isHighlight);
+        return;
+    }
     TLOGI(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isHighlight: %{public}u,", GetPersistentId(), isHighlight);
     isHighlighted_ = isHighlight;
     if (GetUIContentSharedPtr() != nullptr) {
@@ -2617,7 +2728,6 @@ WSError WindowSessionImpl::NotifyHighlightChange(bool isHighlight)
             listener->OnWindowHighlightChange(isHighlight);
         }
     }
-    return WSError::WS_OK;
 }
 
 /** @note @window.focus */
@@ -5602,12 +5712,19 @@ void WindowSessionImpl::NotifySwitchFreeMultiWindow(bool enable)
 
 void WindowSessionImpl::NotifyTitleChange(bool isShow, int32_t height)
 {
+    if (!IsAnco()) {
+        return;
+    }
     auto windowTitleChangeListeners = GetListeners<IWindowTitleChangeListener>();
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "uiContent is null, windowId: %{public}u", GetWindowId());
         return;
     }
+    bool hideMaximizeBtn = IsPcOrPadFreeMultiWindowMode();
+    bool hideSplitBtn = hideMaximizeBtn;
+    uiContent->HideWindowTitleButton(hideSplitBtn, hideMaximizeBtn, false, false);
+    uiContent->EnableContainerModalGesture(false);
     int32_t width = property_->GetWindowRect().width_;
     int32_t posX = property_->GetWindowRect().posX_;
     int32_t posY = property_->GetWindowRect().posY_;

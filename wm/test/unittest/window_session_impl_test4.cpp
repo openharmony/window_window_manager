@@ -2724,13 +2724,65 @@ HWTEST_F(WindowSessionImplTest4, NotifyHighlightChange, TestSize.Level1)
     window->property_->SetPersistentId(1);
 
     bool highlight = false;
-    WSError res = window->NotifyHighlightChange(highlight);
+    sptr<HighlightNotifyInfo> info = nullptr;
+    WSError res = window->NotifyHighlightChange(info, highlight);
+    info = sptr<HighlightNotifyInfo>::MakeSptr();
+    info->isSyncNotify_ = false;
+    res = window->NotifyHighlightChange(info, highlight);
     EXPECT_EQ(res, WSError::WS_OK);
     sptr<IWindowHighlightChangeListener> listener = sptr<IWindowHighlightChangeListener>::MakeSptr();
     window->RegisterWindowHighlightChangeListeners(listener);
-    res = window->NotifyHighlightChange(highlight);
+    res = window->NotifyHighlightChange(info, highlight);
     EXPECT_EQ(res, WSError::WS_OK);
     window->UnregisterWindowHighlightChangeListeners(listener);
+}
+
+/**
+ * @tc.name: NotifyHighlightChange01
+ * @tc.desc: NotifyHighlightChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, NotifyHighlightChange01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyHighlightChange01");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    window->updateHighlightTimeStamp_.store(2);
+    bool highlight = false;
+    auto info = sptr<HighlightNotifyInfo>::MakeSptr();
+    info->isSyncNotify_ = true;
+    info->timeStamp_ = 1;
+    WSError res = window->NotifyHighlightChange(info, highlight);
+    EXPECT_EQ(window->updateHighlightTimeStamp_.load(), 2);
+    info->timeStamp_ = 3;
+    res = window->NotifyHighlightChange(info, highlight);
+    EXPECT_EQ(window->updateHighlightTimeStamp_.load(), 3);
+    EXPECT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: NotifyHighlightChange02
+ * @tc.desc: NotifyHighlightChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, NotifyHighlightChange02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyHighlightChange02");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    sptr<WindowSessionImpl> window1 = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    window1->property_->SetPersistentId(2);
+    window->updateHighlightTimeStamp_.store(2);
+    bool highlight = false;
+    auto info = sptr<HighlightNotifyInfo>::MakeSptr(3, std::vector<int32_t>(1, 2), 2, true);
+    WSError res = window->NotifyHighlightChange(info, highlight);
+    EXPECT_EQ(window->updateHighlightTimeStamp_.load(), 3);
+    info->timeStamp_ = 4;
+    res = window->NotifyHighlightChange(info, highlight);
+    EXPECT_EQ(window->updateHighlightTimeStamp_.load(), 4);
+    EXPECT_EQ(res, WSError::WS_OK);
 }
 
 /**

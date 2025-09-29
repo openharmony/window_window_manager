@@ -492,7 +492,7 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
         property_->GetWindowMode(), property_->GetWindowType(), GetPersistentId(), state_, requestState_);
 
     if (isFocused_) {
-        UpdateFocus(false);
+        UpdateFocusState(false);
     }
     auto context = GetContext();
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context);
@@ -700,11 +700,24 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         SetPcAppInpadSpecificSystemBarInvisible();
         SetPcAppInpadOrientationLandscape();
     }
+    UpdateAnimationSpeedIfEnabled();
     TLOGI(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, id:%{public}d], state:%{public}u, "
         "mode:%{public}u, enableDefaultDensity:%{public}d, displayId:%{public}" PRIu64,
         property_->GetWindowName().c_str(), property_->GetPersistentId(), state_, GetWindowMode(),
         isEnableDefaultDensityWhenCreate_, property_->GetDisplayId());
     return ret;
+}
+
+void WindowSceneSessionImpl::UpdateAnimationSpeedIfEnabled()
+{
+    if (!isEnableAnimationSpeed_.load()) {
+        return;
+    }
+    auto rsUIContext = WindowSessionImpl::GetRSUIContext();
+    auto implicitAnimator = rsUIContext ? rsUIContext->GetRSImplicitAnimator() : nullptr;
+    if (implicitAnimator != nullptr) {
+        implicitAnimator->ApplyAnimationSpeedMultiplier(animationSpeed_.load());
+    }
 }
 
 WMError WindowSceneSessionImpl::SetPcAppInpadSpecificSystemBarInvisible()
@@ -2867,6 +2880,26 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
     return WMError::WM_OK;
 }
 
+WMError WindowSceneSessionImpl::GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType type,
+    AvoidArea& avoidArea, const Rect& rect)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (type == AvoidAreaType::TYPE_KEYBOARD) {
+        return WMError::WM_ERROR_ILLEGAL_PARAM;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+    WSRect sessionRect = {
+        rect.posX_, rect.posY_, static_cast<int32_t>(rect.width_), static_cast<int32_t>(rect.height_)
+    };
+    avoidArea = hostSession->GetAvoidAreaByTypeIgnoringVisibility(type, sessionRect);
+    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}d area %{public}s",
+          GetWindowId(), GetWindowName().c_str(), type, avoidArea.ToString().c_str());
+    return WMError::WM_OK;
+}
+
 WMError WindowSceneSessionImpl::NotifyWindowNeedAvoid(bool status)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "win %{public}u status %{public}d",
@@ -3451,6 +3484,7 @@ WMError WindowSceneSessionImpl::Maximize()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (WindowHelper::IsMainWindow(GetType())) {
+        UpdateIsShowDecorInFreeMultiWindow(true);
         SetLayoutFullScreen(enableImmersiveMode_);
     }
     return WMError::WM_OK;
@@ -3494,6 +3528,7 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
         case MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING:
             break;
     }
+    UpdateIsShowDecorInFreeMultiWindow(true);
     property_->SetIsLayoutFullScreen(enableImmersiveMode_);
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
@@ -3540,8 +3575,27 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
             return WMError::WM_OK;
         }
     }
+    MaximizeEvent(hostSession);
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
+ 
+    return WMError::WM_OK;
+}
+ 
+void WindowSceneSessionImpl::MaximizeEvent(const sptr<ISession> &hostSession)
+{
+    if (hostSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "hostSession is nullptr");
+        return;
+    }
     if (GetGlobalMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-        hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
+        const bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
+        if (IsFreeMultiWindowMode() && !isPcMode && !property_->GetIsPcAppInPad() &&
+            WindowHelper::IsMainWindow(GetType())) {
+            UpdateIsShowDecorInFreeMultiWindow(false);
+            hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE_FULLSCREEN);
+        } else {
+            hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
+        }
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
         UpdateDecorEnable(true);
         property_->SetMaximizeMode(MaximizeMode::MODE_FULL_FILL);
@@ -3552,9 +3606,6 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
         UpdateDecorEnable(true);
         NotifyWindowStatusChange(GetWindowMode());
     }
-    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
-
-    return WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::Recover()
@@ -5511,6 +5562,9 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
         WLOGFE("%{public}u do not support mode: %{public}u",
             GetWindowId(), static_cast<uint32_t>(mode));
         return WSError::WS_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
+    }
+    if (mode != WindowMode::WINDOW_MODE_FULLSCREEN) {
+        UpdateIsShowDecorInFreeMultiWindow(true);
     }
     WMError ret = UpdateWindowModeImmediately(mode);
 

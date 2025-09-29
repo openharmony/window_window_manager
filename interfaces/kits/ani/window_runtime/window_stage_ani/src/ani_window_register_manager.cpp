@@ -54,6 +54,8 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     {WINDOW_DISPLAYID_CHANGE_CB, RegisterListenerType::WINDOW_DISPLAYID_CHANGE_CB},
     {SYSTEM_DENSITY_CHANGE_CB, RegisterListenerType::SYSTEM_DENSITY_CHANGE_CB},
     {WINDOW_ROTATION_CHANGE_CB, RegisterListenerType::WINDOW_ROTATION_CHANGE_CB},
+    {RECT_CHANGE_IN_GLOBAL_DISPLAY_CB, RegisterListenerType::RECT_CHANGE_IN_GLOBAL_DISPLAY_CB},
+    {WINDOW_STATUS_DID_CHANGE_CB, RegisterListenerType::WINDOW_STATUS_DID_CHANGE_CB},
 };
 const std::map<std::string, RegisterListenerType> WINDOW_STAGE_LISTENER_MAP {
     // white register list for window stage
@@ -573,6 +575,10 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowListener(RegisterListenerType
             return ProcessDisplayIdChangeRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::WINDOW_ROTATION_CHANGE_CB):
             return ProcessWindowRotationChangeRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::RECT_CHANGE_IN_GLOBAL_DISPLAY_CB):
+            return ProcessRectChangeInGlobalDisplayRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::WINDOW_STATUS_DID_CHANGE_CB):
+            return ProcessWindowStatusDidChangeRegister(windowManagerListener, window, isRegister, env);
         default:
             TLOGE(WmsLogTag::DEFAULT, "[ANI]RegisterListenerType %{public}u is not supported",
                 static_cast<uint32_t>(registerListenerType));
@@ -777,6 +783,38 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowRotationChangeRegister(const 
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowRotationChangeListener(thisListener));
     }
     return ret;
+}
+
+WmErrorCode AniWindowRegisterManager::ProcessRectChangeInGlobalDisplayRegister(const sptr<AniWindowListener>& listener,
+    const sptr<Window>& window, bool isRegister, ani_env* env)
+{
+    if (window == nullptr || listener == nullptr) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IRectChangeInGlobalDisplayListener> thisListener(listener);
+    WMError ret = WMError::WM_OK;
+    if (isRegister) {
+        ret = window->RegisterRectChangeInGlobalDisplayListener(thisListener);
+    } else {
+        ret = window->UnregisterRectChangeInGlobalDisplayListener(thisListener);
+    }
+    return AniWindowUtils::ToErrorCode(ret);
+}
+
+WmErrorCode AniWindowRegisterManager::ProcessWindowStatusDidChangeRegister(const sptr<AniWindowListener>& listener,
+    const sptr<Window>& window, bool isRegister, ani_env* env)
+{
+    if (window == nullptr || listener == nullptr) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IWindowStatusDidChangeListener> thisListener(listener);
+    WMError ret = WMError::WM_OK;
+    if (isRegister) {
+        ret = window->RegisterWindowStatusDidChangeListener(thisListener);
+    } else {
+        ret = window->UnregisterWindowStatusDidChangeListener(thisListener);
+    }
+    return AniWindowUtils::ToErrorCode(ret);
 }
 } // namespace Rosen
 } // namespace OHOS

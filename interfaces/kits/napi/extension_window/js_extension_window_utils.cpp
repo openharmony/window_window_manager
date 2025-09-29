@@ -38,23 +38,6 @@ napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect)
     return objValue;
 }
 
-napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea, AvoidAreaType type)
-{
-    napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert avoidArea to jsObject");
-        return nullptr;
-    }
-    napi_set_named_property(env, objValue, "visible",
-                            CreateJsValue(env, type == AvoidAreaType::TYPE_CUTOUT ? false : true));
-    napi_set_named_property(env, objValue, "leftRect", GetRectAndConvertToJsValue(env, avoidArea.leftRect_));
-    napi_set_named_property(env, objValue, "topRect", GetRectAndConvertToJsValue(env, avoidArea.topRect_));
-    napi_set_named_property(env, objValue, "rightRect", GetRectAndConvertToJsValue(env, avoidArea.rightRect_));
-    napi_set_named_property(env, objValue, "bottomRect", GetRectAndConvertToJsValue(env, avoidArea.bottomRect_));
-    return objValue;
-}
-
 napi_value CreateJsExtensionWindowPropertiesObject(napi_env env, sptr<Window>& window)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "CreateJsExtensionWindowPropertiesObject is called");

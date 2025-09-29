@@ -237,6 +237,7 @@ ohos_executable("demo_outline_virtual_media_service") {
     "c_utils:utils",
     "graphic_2d:librender_service_base",
     "hilog:libhilog",
+    "selinux_adapter:librestorecon",
   ]
 
   part_name = "window_manager"

@@ -468,6 +468,13 @@ napi_value JsWindow::GetWindowAvoidAreaSync(napi_env env, napi_callback_info inf
     return (me != nullptr) ? me->OnGetWindowAvoidAreaSync(env, info) : nullptr;
 }
 
+napi_value JsWindow::GetWindowAvoidAreaIgnoringVisibilitySync(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGetWindowAvoidAreaIgnoringVisibilitySync(env, info) : nullptr;
+}
+
 napi_value JsWindow::IsShowing(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::DEFAULT, "IsShowing");
@@ -3796,6 +3803,55 @@ napi_value JsWindow::OnGetWindowAvoidAreaSync(napi_env env, napi_callback_info i
         avoidArea.bottomRect_ = g_emptyRect;
     }
     napi_value avoidAreaObj = ConvertAvoidAreaToJsValue(env, avoidArea, avoidAreaType);
+    if (avoidAreaObj != nullptr) {
+        return avoidAreaObj;
+    } else {
+        TLOGE(WmsLogTag::WMS_IMMS, "ConvertAvoidAreaToJsValue failed");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][getWindowAvoidArea]msg: convert avoid area failed");
+    }
+}
+
+napi_value JsWindow::OnGetWindowAvoidAreaIgnoringVisibilitySync(napi_env env, napi_callback_info info)
+{
+    WmErrorCode errCode = WmErrorCode::WM_OK;
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) { // 1: params num
+        TLOGE(WmsLogTag::WMS_IMMS, "invalid argc %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    AvoidAreaType avoidAreaType = AvoidAreaType::TYPE_SYSTEM;
+    napi_value nativeType = argv[0];
+    if (nativeType == nullptr) {
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+    } else {
+        uint32_t resultValue = 0;
+        CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            napi_get_value_uint32(env, nativeType, &resultValue));
+        avoidAreaType = static_cast<AvoidAreaType>(resultValue);
+        errCode = avoidAreaType >= AvoidAreaType::TYPE_END ?
+            WmErrorCode::WM_ERROR_INVALID_PARAM : WmErrorCode::WM_OK;
+    }
+    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
+        TLOGE(WmsLogTag::WMS_IMMS, "invalid param");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "window is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][getWindowAvoidArea]msg: invalid window");
+    }
+
+    AvoidArea avoidArea;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+        windowToken_->GetAvoidAreaByTypeIgnoringVisibility(avoidAreaType, avoidArea));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "failed, ret %{public}d", ret);
+        return NapiThrowError(env, ret);
+    }
+    napi_value avoidAreaObj = ConvertAvoidAreaToJsValue(env, avoidArea, avoidAreaType, true);
     if (avoidAreaObj != nullptr) {
         return avoidAreaObj;
     } else {
@@ -9246,6 +9302,8 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "getStatusBarProperty", moduleName, JsWindow::GetStatusBarProperty);
     BindNativeFunction(env, object, "getAvoidArea", moduleName, JsWindow::GetAvoidArea);
     BindNativeFunction(env, object, "getWindowAvoidArea", moduleName, JsWindow::GetWindowAvoidAreaSync);
+    BindNativeFunction(env, object, "getWindowAvoidAreaIgnoringVisibility",
+        moduleName, JsWindow::GetWindowAvoidAreaIgnoringVisibilitySync);
     BindNativeFunction(env, object, "isShowing", moduleName, JsWindow::IsShowing);
     BindNativeFunction(env, object, "isWindowShowing", moduleName, JsWindow::IsWindowShowingSync);
     BindNativeFunction(env, object, "isSupportWideGamut", moduleName, JsWindow::IsSupportWideGamut);
