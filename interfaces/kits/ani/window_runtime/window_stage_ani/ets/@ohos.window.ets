@@ -4090,27 +4090,27 @@ export function off<T>(type: string, callback?: Callback<T>): void {
 }
 
 export function onSystemBarTintChange(callback: Callback<SystemBarTintState>): void {
-  this.onSync(nativeObj, 'systemBarTintChange', callback);
+  onSync(nativeObj, 'systemBarTintChange', callback);
 }
 
 export function offSystemBarTintChange(callback?: Callback<SystemBarTintState>): void {
-  this.offSync(nativeObj, 'systemBarTintChange', callback);
+  offSync(nativeObj, 'systemBarTintChange', callback);
 }
 
 export function onGestureNavigationEnabledChange(callback: Callback<boolean>): void {
-  this.onSync(nativeObj, 'gestureNavigationEnabledChange', callback);
+  onSync(nativeObj, 'gestureNavigationEnabledChange', callback);
 }
 
 export function offGestureNavigationEnabledChange(callback?: Callback<boolean>): void {
-  this.offSync(nativeObj, 'gestureNavigationEnabledChange', callback);
+  offSync(nativeObj, 'gestureNavigationEnabledChange', callback);
 }
 
 export function onWaterMarkFlagChange(callback: Callback<boolean>): void {
-  this.onSync(nativeObj, 'waterMarkFlagChange', callback);
+  onSync(nativeObj, 'waterMarkFlagChange', callback);
 }
 
 export function offWaterMarkFlagChange(callback?: Callback<boolean>): void {
-  this.offSync(nativeObj, 'waterMarkFlagChange', callback);
+  offSync(nativeObj, 'waterMarkFlagChange', callback);
 }
 
 function runWindowListenerVoidArgCallback(cb: object): void {
