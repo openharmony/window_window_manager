@@ -1300,18 +1300,6 @@ HWTEST_F(SceneSessionManagerTest7, UpdateNormalSessionAvoidArea02, TestSize.Leve
 }
 
 /**
- * @tc.name: RemoveProcessSnapshotSkip
- * @tc.desc: SceneSesionManager RemoveProcessSnapshotSkip
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest7, RemoveProcessSnapshotSkip, TestSize.Level1)
-{
-    ssm_->snapshotSkipPidSet_.insert(1);
-    ssm_->RemoveProcessSnapshotSkip(1);
-    ASSERT_EQ(ssm_->snapshotSkipPidSet_.find(1), ssm_->snapshotSkipPidSet_.end());
-}
-
-/**
  * @tc.name: SetSessionSnapshotSkipForAppProcess
  * @tc.desc: SceneSesionManager SetSessionSnapshotSkipForAppProcess
  * @tc.type: FUNC
@@ -1323,7 +1311,7 @@ HWTEST_F(SceneSessionManagerTest7, SetSessionSnapshotSkipForAppProcess, TestSize
     sceneSession->SetCallingPid(1000);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    sceneSession->surfaceNode_ = surfaceNode;
+    sceneSession->SetSurfaceNode(surfaceNode);
     ssm_->SetSessionSnapshotSkipForAppProcess(sceneSession);
     ASSERT_EQ(sceneSession->GetSessionProperty()->GetSnapshotSkip(), false);
 
@@ -1616,7 +1604,7 @@ HWTEST_F(SceneSessionManagerTest7, SetSessionSnapshotSkipForAppBundleName, TestS
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, nullptr);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    sceneSession->surfaceNode_ = surfaceNode;
+    sceneSession->SetSurfaceNode(surfaceNode);
     ssm_->SetSessionSnapshotSkipForAppBundleName(sceneSession);
     ASSERT_EQ(sceneSession->GetSessionProperty()->GetSnapshotSkip(), false);
 
