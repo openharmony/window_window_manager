@@ -149,6 +149,40 @@ ani_status AniWindowUtils::GetPropertyDoubleObject(ani_env* env, const char* pro
     return ret;
 }
 
+ani_status AniWindowUtils::GetPropertyBoolObject(ani_env* env, const char* propertyName,
+    ani_object object, bool& result)
+{
+    ani_ref bool_ref;
+    ani_status ret = env->Object_GetPropertyByName_Ref(object, propertyName, &bool_ref);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed, ret : %{public}u",
+            propertyName, static_cast<int32_t>(ret));
+        return ret;
+    }
+    ani_boolean isUndefined;
+    ret = env->Reference_IsUndefined(bool_ref, &isUndefined);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
+        return ret;
+    }
+
+    if (isUndefined) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] %{public}s is Undefined Now", propertyName);
+        return ANI_ERROR;
+    }
+
+    ani_boolean bool_value;
+
+    ret = env->Object_CallMethodByName_Boolean(static_cast<ani_object>(bool_ref), "unboxed", ":z", &bool_value);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
+        return ret;
+    }
+    result = static_cast<bool>(bool_value);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] %{public}s is: %{public}d", propertyName, result);
+    return ret;
+}
+
 bool AniWindowUtils::GetPropertyRectObject(ani_env* env, const char* propertyName,
     ani_object object, Rect& result)
 {
@@ -1271,6 +1305,171 @@ ani_object AniWindowUtils::CreateOptionalInt(ani_env *env, ani_int value)
         return AniWindowUtils::CreateAniUndefined(env);
     }
     
+    return obj;
+}
+
+bool AniWindowUtils::ParseSubWindowOptions(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption)
+{
+    if (aniObject == nullptr || windowOption == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "aniObject or windowOption is null");
+        return false;
+    }
+    ani_ref titleRef;
+    env->Object_GetPropertyByName_Ref(aniObject, "title", &titleRef);
+    std::string title;
+    ani_status ret = GetStdString(env, static_cast<ani_string>(titleRef), title);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to title");
+        return false;
+    }
+    ani_boolean decorEnabled = false;
+    env->Object_GetPropertyByName_Boolean(aniObject, "decorEnabled", &decorEnabled);
+
+    // optional
+    bool maximizeSupported = false;
+    GetPropertyBoolObject(env, "maximizeSupported", aniObject, &maximizeSupported);
+    bool outlineEnabled = false;
+    GetPropertyBoolObject(env, "outlineEnabled", aniObject, &outlineEnabled);
+    windowOption->SetSubWindowTitle(title);
+    windowOption->SetSubWindowDecorEnable(decorEnabled);
+    windowOption->SetSubWindowMaximizeSupported(maximizeSupported);
+    windowOption->SetSubWindowOutlineEnabled(outlineEnabled);
+    if (!ParseRectParam(env, aniObject, windowOption)) {
+        return false;
+    }
+    if (!ParseModalityParam(env, aniObject, windowOption)) {
+        return false;
+    }
+    return ParseZLevelParam(env, aniObject, windowOption);
+}
+
+bool AniWindowUtils::ParseRectParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption)
+{
+    ani_ref windowRectRef;
+    ani_status ret = env->Object_GetPropertyByName_Ref(object, "windowRect", &windowRectRef);
+    if (ret != ANI_OK) {
+        return true;
+    }
+    Rect windowRect;
+    if (!GetPropertyRectObject(env, "windowRect", aniObject, windowRect)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] GetPropertyRectObject failed");
+        return false;
+    }
+    
+    if (windowRect.width_ <= 0 || windowRect.height_ <= 0) {
+        TLOGE(WmsLogTag::WMS_SUB, "width or height should greater than 0!");
+        return false;
+    }
+    windowOption->SetWindowRect(windowRect);
+    TLOGI(WmsLogTag::WMS_SUB, "windowRect: %{public}s", windowRect.ToString().c_str());
+    return true;
+}
+
+bool AniWindowUtils::ParseModalityParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption)
+{
+    bool isModal = false;
+    GetPropertyBoolObject(env, "isModal", aniObject, isModal);
+    if (isModal) {
+        windowOption->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
+    }
+
+    bool isTopmost = false;
+    GetPropertyBoolObject(env, "isTopmost", aniObject, isTopmost);
+    if (!isModal && isTopmost) {
+        TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow not support topmost");
+        return false;
+    }
+    windowOption->SetWindowTopmost(isTopmost);
+    
+    ani_ref modalityTypeRef;
+    ani_status ret = env->Object_GetPropertyByName_Ref(aniObject, "modalityType", &modalityTypeRef);
+    ani_int modalityType;
+    if (ret == ANI_OK && env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(modalityTypeRef), &modalityType)) {
+        if (!isModal) {
+            TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow not support modalityType");
+            return false;
+        }
+        using T = std::underlying_type_t<ApiModalityType>;
+        T apiModalityType = static_cast<T>(modalityType);
+        if (apiModalityType >= static_cast<T>(ApiModalityType::BEGIN) &&
+            apiModalityType <= static_cast<T>(ApiModalityType::END)) {
+            auto type = JS_TO_NATIVE_MODALITY_TYPE_MAP.at(static_cast<ApiModalityType>(apiModalityType));
+            if (type == ModalityType::APPLICATION_MODALITY) {
+                windowOption->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
+            }
+        } else {
+            TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to modalityType");
+            return false;
+        }
+        
+    }
+    TLOGI(WmsLogTag::WMS_SUB, "isModal: %{public}d, isTopmost: %{public}d, WindowFlag: %{public}d",
+        isModal, isTopmost, windowOption->GetWindowFlags());
+    return true;
+}
+
+bool AniWindowUtils::ParseZLevelParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption)
+{
+    int zLevel = 0;
+    bool isModal = false;
+    if (GetPropertyIntObject(env, "zLevel", aniObject, zLevel) == ANI_OK) {
+        if (zLevel < MINIMUM_Z_LEVEL || zLevel > MAXIMUM_Z_LEVEL) {
+            TLOGE(WmsLogTag::WMS_SUB, "zLevel value %{public}d exceeds valid range [-10000, 10000]!", zLevel);
+            return false;
+        }
+        if (GetPropertyBoolObject(env, "isModal", aniObject, isModal) == ANI_OK) {
+            if (isModal) {
+                TLOGE(WmsLogTag::WMS_SUB, "modal window not support custom zLevel");
+                return false;
+            }
+        }
+        windowOption->SetSubWindowZLevel(zLevel);
+    }
+    TLOGI(WmsLogTag::WMS_SUB, "zLevel: %{public}d", zLevel);
+    return true;
+}
+
+ani_object AniWindowUtils::CreateAniWindow(ani_env* env, OHOS::sptr<OHOS::Rosen::Window>& window)
+__attribute__((no_sanitize("cfi")))
+{
+    using namespace OHOS::Rosen;
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] null env");
+        return nullptr;
+    }
+    TLOGD(WmsLogTag::DEFAULT, "[ANI] create wstage");
+
+    ani_status ret;
+    ani_class cls = nullptr;
+    if ((ret = env->FindClass("L@ohos/window/window/WindowInternal;", &cls)) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] null env %{public}u", ret);
+        return cls;
+    }
+
+    std::unique_ptr<AniWindow> uniqueWindow = std::make_unique<AniWindow>(window);
+
+    ani_field contextField;
+    if ((ret = env->Class_FindField(cls, "nativeObj", &contextField)) != ANI_OK) {
+        TLOGD(WmsLogTag::DEFAULT, "[ANI] get field fail %{public}u", ret);
+        return nullptr;
+    }
+
+    ani_method initFunc = nullptr;
+    if ((ret = env->Class_FindMethod(cls, "<ctor>", ":V", &initFunc)) != ANI_OK) {
+        TLOGD(WmsLogTag::DEFAULT, "[ANI] get ctor fail %{public}u", ret);
+        return nullptr;
+    }
+    ani_object obj = nullptr;
+    if ((ret = env->Object_New(cls, initFunc, &obj)) != ANI_OK) {
+        TLOGD(WmsLogTag::DEFAULT, "[ANI] obj new fail %{public}u", ret);
+        return nullptr;
+    }
+    ani_method setObjFunc = nullptr;
+    if ((ret = env->Class_FindMethod(cls, "setNativeObj", "J:V", &setObjFunc)) != ANI_OK) {
+        TLOGD(WmsLogTag::DEFAULT, "[ANI] get setNativeObj fail %{public}u", ret);
+        return nullptr;
+    }
+    env->Object_CallMethod_Void(obj, setObjFunc, reinterpret_cast<ani_long>(uniqueWindow.get()));
     return obj;
 }
 } // namespace Rosen

@@ -72,6 +72,7 @@ public:
     static ani_status GetPropertyIntObject(ani_env* env, const char* propertyName, ani_object object, int32_t& result);
     static ani_status GetPropertyDoubleObject(ani_env* env, const char* propertyName,
         ani_object object, double& result);
+    static ani_status GetPropertyBoolObject(ani_env* env, const char* propertyName, ani_object object, bool& result);
     static bool GetPropertyRectObject(ani_env* env, const char* propertyName,
         ani_object object, Rect& result);
     static bool GetIntObject(ani_env* env, const char* propertyName, ani_object object, int32_t& result);
@@ -148,6 +149,11 @@ public:
      * @return Corresponding WmErrorCode or defaultCode if unmapped.
      */
     static WmErrorCode ToErrorCode(WMError error, WmErrorCode defaultCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    static bool ParseSubWindowOptions(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
+    static bool ParseRectParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
+    static bool ParseModalityParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
+    static bool ParseZLevelParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
+    static ani_object CreateAniWindow(ani_env* env, OHOS::sptr<OHOS::Rosen::Window>& window);
 
 private:
     static void SetSystemPropertiesWindowRect(ani_env* env, const sptr<Window>& window,

@@ -31,6 +31,7 @@ AniExtensionWindowRegisterManager::AniExtensionWindowRegisterManager()
         {WINDOW_SIZE_CHANGE_CB, ListenerType::WINDOW_SIZE_CHANGE_CB},
         {AVOID_AREA_CHANGE_CB, ListenerType::AVOID_AREA_CHANGE_CB},
         {WINDOW_EVENT_CB, ListenerType::WINDOW_EVENT_CB},
+        {WINDOW_RECT_CHANGE_CB, ListenerType::WINDOW_RECT_CHANGE_CB},
     };
     // white register list for window stage
     listenerCodeMap_[CaseType::CASE_STAGE] = {
@@ -89,6 +90,22 @@ WmErrorCode AniExtensionWindowRegisterManager::ProcessLifeCycleEventRegister(spt
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterLifeCycleListener(thisListener));
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterLifeCycleListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode AniExtensionWindowRegisterManager::ProcessWindowRectChangeRegister(
+    sptr<AniExtensionWindowListener> listener, sptr<Window> window, bool isRegister)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowRectChangeListener(listener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowRectChangeListener(listener));
     }
     return ret;
 }
@@ -222,6 +239,9 @@ WmErrorCode AniExtensionWindowRegisterManager::ProcessRegister(CaseType caseType
                 break;
             case ListenerType::WINDOW_EVENT_CB:
                 ret = ProcessLifeCycleEventRegister(listener, window, isRegister);
+                break;
+            case ListenerType::WINDOW_RECT_CHANGE_CB:
+                ret = ProcessWindowRectChangeRegister(listener, window, isRegister);
                 break;
             default:
                 break;

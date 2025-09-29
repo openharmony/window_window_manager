@@ -38,6 +38,13 @@ namespace uiExtension {
     WM_ERROR_INVALID_PARAM = 401
   }
 
+  export type CallbacRect = (area: RectChangeOptions) => void;
+
+  function windowRectChangeCallback(cb: object, rect: object, reason: int): void {
+    const func = cb as (cbArg: RectChangeOptions) => void;
+    func({ rect: rect as window.Rect, reason: reason as RectChangeReason });
+  }
+
   class UIEProperties implements WindowProxyProperties {
     constructor() {
       this.uiExtensionHostWindowProxyRect = new UIERect();
@@ -84,9 +91,11 @@ namespace uiExtension {
     public native createSubWindowWithOptions(nativeObj: long, name: string,
         subWindowOptions: window.SubWindowOptions): window.Window;
     public native occupyEvents(nativeObj: long, eventFlags: int): void;
-    public native hideNonSecureWindows(nativeObj: long, shouldHide: boolean): void;
+    public native hideNonSecureWindows(nativeObj: long, shouldHide: boolean): int;
     public native onSync(nativeObj: long, type: string, callback: object): void;
     public native offSync(nativeObj: long, type: string, callback?: object): void;
+    public native onRectChange(nativeObj: long, reason: int, callback?: object): void;
+    public native offRectChange(nativeObj: long, callback?: object): void;
 
     get properties(): WindowProxyProperties {
       let property = new UIEProperties();
@@ -152,7 +161,10 @@ namespace uiExtension {
     hideNonSecureWindows(shouldHide: boolean): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
-          this.hideNonSecureWindows(this.nativeObj, shouldHide);
+          let ret = this.hideNonSecureWindows(this.nativeObj, shouldHide);
+          if (ret !== WmErrorCode.WM_OK) {
+            hilog.error(WMS_UIEXT, WMS_UIEXT_TAG, `hideNonSecureWindows failed, ret: ${ret}`);
+          }
         }).then((ret: NullishType) => {
           resolve(undefined);
         }).catch((err: NullishType) => {
@@ -183,6 +195,14 @@ namespace uiExtension {
           reject(err as BusinessError);
         });
       });
+    }
+
+    onRectChange(reason: double, callback: Callback<RectChangeOptions>): void {
+      this.onRectChange(this.nativeObj, reason as int, callback);
+    }
+
+    offRectChange(callback?: Callback<RectChangeOptions>): void {
+      this.offRectChange(this.nativeObj, callback);
     }
   }
 
@@ -244,9 +264,8 @@ namespace uiExtension {
     offAvoidAreaChange(callback?: Callback<AvoidAreaInfo>): void;
     onWindowSizeChange(callback: Callback<window.Size>): void;
     offWindowSizeChange(callback?: Callback<window.Size>): void;
-    // onRectChange(reasons: number, callback: Callback<RectChangeOptions>): void;
-    // offRectChange(callback?: Callback<RectChangeOptions>): void;
-
+    onRectChange(reasons: double, callback: Callback<RectChangeOptions>): void;
+    offRectChange(callback?: Callback<RectChangeOptions>): void;
     properties: WindowProxyProperties;
   }
 

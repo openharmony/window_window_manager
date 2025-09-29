@@ -28,6 +28,7 @@ namespace {
 constexpr const char* ETS_WINDOW_SIZE_CHANGE_CB = "sizeChangeCallback";
 constexpr const char* ETS_AVOID_AREA_CHANGE_CB = "avoidAreaChangeCallback";
 constexpr const char* ETS_KEYBOARD_HEIGHT_CHANGE_CB = "keyboardHeightChangeCallback";
+constexpr const char* ETS_WINDOW_RECT_CHANGE_CB = "windowRectChangeCallback";
 }
 
 AniExtensionWindowListener::~AniExtensionWindowListener()
@@ -143,6 +144,30 @@ void AniExtensionWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>
     }
     eventHandler_->PostTask(onSizeChangeTask, "wms:AniExtensionWindowListener::SizeChangeCallback", 0,
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
+void AniExtensionWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
+{
+    if (currRect_ == rect) {
+        TLOGD(WmsLogTag::WMS_UIEXT, "Skip redundant rect update");
+        return;
+    }
+    // js callback should run in js thread
+    const char* const where = __func__;
+    auto onRectChangeTask = [self = weakRef_, rect, env = env_, where] {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsExtensionWindowListener::OnRectChange");
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s This listener or env is nullptr", where);
+            return;
+        }
+        AniWindowUtils::CallAniFunctionVoid(env, ETS_UIEXTENSION_NAMESPACE_DESCRIPTOR,
+            ETS_WINDOW_RECT_CHANGE_CB, nullptr, thisListener->aniCallback_,
+            AniWindowUtils::CreateAniRect(env, rect), ComponentRectChangeReason::HOST_WINDOW_RECT_CHANGE);
+    };
+    eventHandler_->PostTask(onRectChangeTask, "wms:AniExtensionWindowListener::RectChangeCallback", 0,
+        AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    currRect_ = rect;
 }
 
 } // namespace Rosen

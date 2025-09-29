@@ -18,8 +18,10 @@
 #include "ani.h"
 #include "ani_extension_window_register_manager.h"
 #include "ani_window_utils.h"
+#include "ani_window_listener.h"
 #include "extension_window_impl.h"
 #include "window_manager_hilog.h"
+#include "permission.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -181,19 +183,108 @@ WmErrorCode AniExtensionWindow::GetExtensionWindowRect(Rect& rect)
     return WmErrorCode::WM_OK;
 }
 
-void AniExtensionWindow::OnHideNonSecureWindows(ani_env* env, ani_boolean shouldHide)
+WmErrorCode AniExtensionWindow::OnHideNonSecureWindows(ani_env* env, ani_boolean shouldHide)
 {
-
+    if (extensionWindow_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "extensionWindow_ is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    WMError ret = extensionWindow_->HideNonSecureWindows(shouldHide);
+    if (WM_JS_TO_ERROR_CODE_MAP.at(ret) != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, WM_JS_TO_ERROR_CODE_MAP.at(ret));
+        return WM_JS_TO_ERROR_CODE_MAP.at(ret);
+    }
+    TLOGI(WmsLogTag::WMS_UIEXT, "[ANI]finished, shouldHide: %{public}u", shouldHide);
+    return WmErrorCode::WM_OK;
 }
 
 ani_object AniExtensionWindow::OnCreateSubWindowWithOptions(ani_env* env, ani_string name, ani_object subWindowOptions)
 {
+    if (!IsExtensionWindowValid()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]extension window is invalid");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    std::string windowName;
+    ani_status status = AniWindowUtils::GetStdString(env, name, windowName);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Failed to convert parameter to windowName");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    sptr<WindowOption> option = new WindowOption();
+    if (!AniWindowUtils::ParseSubWindowOptions(env, subWindowOptions, option)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Get invalid options param");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if ((option->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL)) &&
+        !extensionWindow_->IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_SUB, "[ANI]device not support");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+    }
+    if (option->GetWindowTopmost() && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::WMS_SUB, "Modal subwindow has topmost, but no system permission");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
+    option->SetParentId(hostWindowId_);
+    option->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    option->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+    option->SetOnlySupportSceneBoard(true);
+    option->SetIsUIExtFirstSubWindow(true);
+    auto window = Window::Create(windowName, option, extensionWindow_->GetWindow()->GetContext());
+    if (window == nullptr) {
+        TLOGI(WmsLogTag::WMS_UIEXT, "create sub window failed");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    if (!window->IsTopmost()) {
+        extensionWindow_->GetWindow()->NotifyModalUIExtensionMayBeCovered(false);
+    }
+    TLOGI(WmsLogTag::WMS_UIEXT, "%{public}s end", windowName.c_str());
     return AniWindowUtils::CreateAniUndefined(env);
 }
 
 void AniExtensionWindow::OnOccupyEvents(ani_env* env, ani_int eventFlags)
 {
 
+}
+
+WmErrorCode AniExtensionWindow::OnRegisterRectChangeCallback(ani_env* env, ani_int reason, ani_object fn)
+{
+    if (!IsExtensionWindowValid()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]extension window is invalid");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    auto windowImpl = extensionWindow_->GetWindow();
+    if (!windowImpl->IsPcWindow()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Device is not PC");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+        return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (static_cast<uint32_t>(reason) != static_cast<uint32_t>(
+        AniExtensionWindowListener::ComponentRectChangeReason::HOST_WINDOW_RECT_CHANGE)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Unsupported rect change reasons");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return WmErrorCode::WM_ERROR_INVALID_PARAM;
+    }
+    return extensionRegisterManager_->RegisterListener(
+        windowImpl, RECT_CHANGE_CB_TYPE, CaseType::CASE_WINDOW, env, fn);
+}
+
+WmErrorCode AniExtensionWindow::OnUnRegisterRectChangeCallback(ani_env* env, ani_object fn)
+{
+    if (!IsExtensionWindowValid()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]extension window is invalid");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    auto windowImpl = extensionWindow_->GetWindow();
+    if (!windowImpl->IsPcWindow()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Device is not PC");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+        return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    return extensionRegisterManager_->UnregisterListener(
+        windowImpl, RECT_CHANGE_CB_TYPE, CaseType::CASE_WINDOW, env, fn);
 }
 
 static ani_status ExtWindowSetRect(ani_env* env, ani_object obj, OHOS::Rosen::Rect& rect)
@@ -346,15 +437,16 @@ static void UnregisterExtWindowCallback(ani_env* env, ani_object obj, ani_long n
     }
 }
 
-static void ExtWindowHideNonSecureWindows(ani_env* env, ani_object obj, ani_long nativeObj,
+static ani_int ExtWindowHideNonSecureWindows(ani_env* env, ani_object obj, ani_long nativeObj,
     ani_boolean shouldHide)
 {
     AniExtensionWindow* aniExtWinPtr = reinterpret_cast<AniExtensionWindow*>(nativeObj);
     if (aniExtWinPtr == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]aniExtWinPtr is nullptr");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return static_cast<ani_int>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    aniExtWinPtr->OnHideNonSecureWindows(env, shouldHide);
+    return static_cast<ani_int>(aniExtWinPtr->OnHideNonSecureWindows(env, shouldHide));
 }
 
 static ani_object ExtWindowCreateSubWindowWithOptions(ani_env* env, ani_object obj, ani_long nativeObj,
@@ -379,6 +471,37 @@ static void ExtWindowOccupyEvents(ani_env* env, ani_object obj, ani_long nativeO
     aniExtWinPtr->OnOccupyEvents(env, eventFlags);
 }
 
+static void ExtWindowOnRectChange(ani_env* env, ani_object obj, ani_long nativeObj, ani_int reason, ani_object callback)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniExtensionWindow* aniExtWinPtr = reinterpret_cast<AniExtensionWindow*>(nativeObj);
+    if (aniExtWinPtr == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]aniExtWinPtr is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+
+    WmErrorCode ret = aniExtWinPtr->OnRegisterRectChangeCallback(env, reason, callback);
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Register failde: %{public}d", static_cast<int32_t>(ret));
+        AniWindowUtils::AniThrowError(env, ret);
+    }
+}
+
+static void ExtWindowOffRectChange(ani_env* env, ani_object obj, ani_long nativeObj, ani_object callback)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniExtensionWindow* aniExtWinPtr = reinterpret_cast<AniExtensionWindow*>(nativeObj);
+    if (aniExtWinPtr == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]aniExtWinPtr is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    WmErrorCode ret = aniExtWinPtr->OnUnRegisterRectChangeCallback(env, callback);
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Unregister failde: %{public}d", static_cast<int32_t>(ret));
+        AniWindowUtils::AniThrowError(env, ret);
+    }
+}
+
 ani_object createExtensionWindow(ani_env* env, ani_long win, ani_int hostId)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "[ANI]Create extwindow with hostId: %{public}d", hostId);
@@ -401,7 +524,7 @@ std::array extensionWindowNativeMethods = {
         reinterpret_cast<void *>(ExtWindowGetWindowAvoidArea)},
     ani_native_function {"setWaterMarkFlag", "JZ:I",
         reinterpret_cast<void *>(ExtWindowSetWaterMarkFlag)},
-    ani_native_function {"hideNonSecureWindows", "lz:", reinterpret_cast<void *>(ExtWindowHideNonSecureWindows)},
+    ani_native_function {"hideNonSecureWindows", "JZ:I", reinterpret_cast<void *>(ExtWindowHideNonSecureWindows)},
     ani_native_function {"createSubWindowWithOptions",
         "lC{std.core.String}C{@ohos.window.window.SubWindowOptions}:C{@ohos.window.window.Window}:",
         reinterpret_cast<void *>(ExtWindowCreateSubWindowWithOptions)},
@@ -410,6 +533,8 @@ std::array extensionWindowNativeMethods = {
         reinterpret_cast<void *>(AniWindow::RegisterExtWindowCallback)},
     ani_native_function {"offSync", "lC{std.core.String}C{std.core.Object}:",
         reinterpret_cast<void *>(AniWindow::UnregisterExtWindowCallback)},
+    ani_native_function {"onRectChange", "liC{std.core.Object}:", reinterpret_cast<void *>(ExtWindowOnRectChange)},
+    ani_native_function {"offRectChange", "lC{std.core.Object}:", reinterpret_cast<void *>(ExtWindowOffRectChange)},
     };
 
 std::array extensionWindowHostNativeMethods = {
@@ -420,7 +545,7 @@ std::array extensionWindowHostNativeMethods = {
         reinterpret_cast<void *>(ExtWindowSetWaterMarkFlag)},
     ani_native_function {"hidePrivacyContentForHost", "JZ:I",
         reinterpret_cast<void *>(ExtWindowHidePrivacyContentForHost)},
-    ani_native_function {"hideNonSecureWindows", "lz:", reinterpret_cast<void *>(ExtWindowHideNonSecureWindows)},
+    ani_native_function {"hideNonSecureWindows", "JZ:I", reinterpret_cast<void *>(ExtWindowHideNonSecureWindows)},
     ani_native_function {"createSubWindowWithOptions",
         "lC{std.core.String}C{@ohos.window.window.SubWindowOptions}:C{@ohos.window.window.Window}:",
         reinterpret_cast<void *>(ExtWindowCreateSubWindowWithOptions)},
