@@ -51,7 +51,9 @@
 #include "common/include/fold_screen_state_internel.h"
 #include "common/include/session_permission.h"
 #include "display_manager.h"
+#ifdef WINDOW_MANAGER_FEATURE_SUPPORT_DMSFWK
 #include "distributed_client.h"
+#endif
 #include "dms_reporter.h"
 #include "hidump_controller.h"
 #include "image_source.h"
@@ -75,7 +77,9 @@
 #include "session_helper.h"
 #include "session_manager_agent_controller.h"
 #include "singleton_container.h"
+#ifdef WINDOW_MANAGER_FEATURE_SUPPORT_DSOFTBUS
 #include "softbus_bus_center.h"
+#endif
 #include "user_switch_reporter.h"
 #include "window_helper.h"
 #include "xcollie/watchdog.h"
@@ -965,8 +969,10 @@ WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject>& 
             return WSError::WS_ERROR_INVALID_PARAM;
         }
         sceneSession->SetSessionInfoContinueState(continueState);
+#ifdef WINDOW_MANAGER_FEATURE_SUPPORT_DMSFWK
         DistributedClient::GetInstance().SetMissionContinueState(sceneSession->GetPersistentId(),
             static_cast<AAFwk::ContinueState>(continueState), callingUid);
+#endif
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: id:%{public}d, continueState:%{public}d",
             where, sceneSession->GetPersistentId(), continueState);
         return WSError::WS_OK;
@@ -9690,6 +9696,7 @@ WSError SceneSessionManager::GetMainWindowStatesByPid(int32_t pid, std::vector<M
     return taskScheduler_->PostSyncTask(task, "GetMainWindowStatesByPid");
 }
 
+#ifdef WINDOW_MANAGER_FEATURE_SUPPORT_DMSFWK
 int SceneSessionManager::GetRemoteSessionInfos(const std::string& deviceId, int32_t numMax,
                                                std::vector<SessionInfoBean>& sessionInfos)
 {
@@ -9701,6 +9708,7 @@ int SceneSessionManager::GetRemoteSessionInfos(const std::string& deviceId, int3
     }
     return ERR_OK;
 }
+#endif
 
 WSError SceneSessionManager::GetSessionInfo(const std::string& deviceId,
                                             int32_t persistentId, SessionInfoBean& sessionInfo)
@@ -9790,10 +9798,12 @@ int SceneSessionManager::GetRemoteSessionInfo(const std::string& deviceId,
 {
     TLOGI(WmsLogTag::DEFAULT, "in");
     std::vector<SessionInfoBean> sessionVector;
+#ifdef WINDOW_MANAGER_FEATURE_SUPPORT_DMSFWK
     int result = GetRemoteSessionInfos(deviceId, MAX_NUMBER_OF_DISTRIBUTED_SESSIONS, sessionVector);
     if (result != ERR_OK) {
         return result;
     }
+#endif
     for (auto iter = sessionVector.begin(); iter != sessionVector.end(); iter++) {
         if (iter->id == persistentId) {
             sessionInfo = *iter;
@@ -9825,6 +9835,7 @@ bool SceneSessionManager::CheckIsRemote(const std::string& deviceId)
 
 bool SceneSessionManager::GetLocalDeviceId(std::string& localDeviceId)
 {
+#ifdef WINDOW_MANAGER_FEATURE_SUPPORT_DSOFTBUS
     auto localNode = std::make_unique<NodeBasicInfo>();
     int32_t errCode = GetLocalNodeDeviceInfo(DM_PKG_NAME.c_str(), localNode.get());
     if (errCode != ERR_OK) {
@@ -9836,6 +9847,7 @@ bool SceneSessionManager::GetLocalDeviceId(std::string& localDeviceId)
         TLOGD(WmsLogTag::DEFAULT, "get local deviceId, deviceId=%{public}s", AnonymizeDeviceId(localDeviceId).c_str());
         return true;
     }
+#endif
     TLOGE(WmsLogTag::DEFAULT, "localDeviceId null");
     return false;
 }
@@ -10264,6 +10276,7 @@ WSError SceneSessionManager::GetUIContentRemoteObj(int32_t persistentId, sptr<IR
     return sceneSession->GetUIContentRemoteObj(uiContentRemoteObj);
 }
 
+#ifdef WINDOW_MANAGER_FEATURE_SUPPORT_DMSFWK
 int SceneSessionManager::GetRemoteSessionSnapshotInfo(const std::string& deviceId, int32_t sessionId,
                                                       AAFwk::MissionSnapshot& sessionSnapshot)
 {
@@ -10276,6 +10289,7 @@ int SceneSessionManager::GetRemoteSessionSnapshotInfo(const std::string& deviceI
     }
     return ERR_OK;
 }
+#endif
 
 sptr<AAFwk::IAbilityManagerCollaborator> SceneSessionManager::GetCollaboratorByType(int32_t collaboratorType)
 {
