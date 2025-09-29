@@ -190,7 +190,7 @@ napi_value WindowOcclusionStateInit(napi_env env)
         static_cast<int32_t>(WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION)));
     napi_set_named_property(env, objValue, "PARTIAL_OCCLUSION", CreateJsValue(env,
         static_cast<int32_t>(WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION)));
-    napi_set_named_property(env, objValue, "TOTAL_OCCLUSION", CreateJsValue(env,
+    napi_set_named_property(env, objValue, "FULL_OCCLUSION", CreateJsValue(env,
         static_cast<int32_t>(WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION)));
     return objValue;
 }
