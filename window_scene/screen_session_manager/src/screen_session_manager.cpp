@@ -12023,8 +12023,8 @@ void ScreenSessionManager::WaitSwitchUserAnimateFinish(int32_t newUserId, bool i
 void ScreenSessionManager::MakeMirrorAfterSwitchUser()
 {
     TLOGI(WmsLogTag::DMS, "start to make mirror");
-    ScreenId mainScreenId = INVALID_SCREEN_ID;
-    std::vector<ScreenId> mirrorScreenIds;
+    sptr<ScreenSession> mainSession = nullptr;
+    std::vector<sptr<ScreenSession>> mirrorScreenSessions;
     {
         std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
         for (auto it : screenSessionMap_) {
@@ -12034,24 +12034,25 @@ void ScreenSessionManager::MakeMirrorAfterSwitchUser()
                 continue;
             }
             if (screenSession->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
-                mirrorScreenIds.emplace_back(it.first);
+                mirrorScreenSessions.emplace_back(screenSession);
                 continue;
             }
             if (screenSession->GetScreenCombination() == ScreenCombination::SCREEN_MAIN) {
-                mainScreenId = it.first;
+                mainSession = screenSession;
             }
         }
-        if (mirrorScreenIds.empty()) {
+        if (mirrorScreenSessions.empty()) {
             TLOGI(WmsLogTag::DMS, "no mirror screens, no need to make mirror");
             return;
         }
-        if (mainScreenId == INVALID_SCREEN_ID) {
+        if (mainSession == nullptr || mainSession->GetDisplayNode() == nullptr) {
             TLOGE(WmsLogTag::DMS, "make mirror error, no main screen");
             return;
         }
     }
-    ScreenId screenGroupId = SCREEN_GROUP_ID_DEFAULT;
-    MakeMirror(mainScreenId, mirrorScreenIds, screenGroupId, {Rotation::ROTATION_0, false}, true);
+    for (auto session : mirrorScreenSessions) {
+        session->ReuseDisplayNode({ session->rsId_, true, mainSession->GetDisplayNode()->GetId() });
+    }
 }
 
 void ScreenSessionManager::NotifySwitchUserAnimationFinish()
