@@ -57,6 +57,8 @@ using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
 const std::string SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME = "SetUIContentTimeoutListener";
 constexpr int64_t SET_UICONTENT_TIMEOUT_TIME_MS = 4000;
 constexpr int64_t SET_UICONTENT_TIMEOUT_TIME_AFTER_FREEZE_MS = 5000;
+static std::atomic<float> animationSpeed_ = 1.0f;
+static std::atomic<bool> isEnableAnimationSpeed_ = false;
 }
 
 struct WindowTitleVisibleFlags {
@@ -223,9 +225,12 @@ public:
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {}) override;
     void UpdateDensity() override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override;
+    void UpdateAnimationSpeed(float speed) override;
+    void UpdateAllWindowSpeed(float speed);
     WSError UpdateOrientation() override;
     WSError UpdateDisplayId(uint64_t displayId) override;
-    WSError UpdateFocus(bool focus) override;
+    WSError UpdateFocus(const sptr<FocusNotifyInfo>& focusNotifyInfo, bool isFocused) override;
+    void UpdateFocusState(bool isFocused);
     bool IsFocused() const override;
     WMError RequestFocus() const override;
     WMError RequestFocusByClient(bool isFocused) const override;
@@ -290,6 +295,8 @@ public:
     WMError UnregisterWindowStageLifeCycleListener(const sptr<IWindowStageLifeCycle>& listener) override;
     WMError RegisterSystemBarPropertyListener(const sptr<ISystemBarPropertyListener>& listener) override;
     WMError UnregisterSystemBarPropertyListener(const sptr<ISystemBarPropertyListener>& listener) override;
+    WMError RegisterFreeWindowModeChangeListener(const sptr<IFreeWindowModeChangeListener>& listener) override;
+    WMError UnregisterFreeWindowModeChangeListener(const sptr<IFreeWindowModeChangeListener>& listener) override;
     void NotifySystemBarPropertyUpdate(WindowType type, const SystemBarProperty& property) override;
     void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
     void UnregisterWindowDestroyedListener() override { notifyNativeFunc_ = nullptr; }
@@ -536,7 +543,8 @@ public:
     WMError SetExclusivelyHighlighted(bool isExclusivelyHighlighted) override;
     WMError RegisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener) override;
     WMError UnregisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener) override;
-    WSError NotifyHighlightChange(bool isHighlight) override;
+    WSError NotifyHighlightChange(const sptr<HighlightNotifyInfo>& highlightNotifyInfo, bool isHighlight) override;
+    void NotifyHighlightChange(bool isHighlight);
 
     /*
      * PC Fold Screen
@@ -612,6 +620,7 @@ protected:
     WMError WindowSessionCreateCheck();
     void UpdateDecorEnableToAce(bool isDecorEnable);
     void NotifyModeChange(WindowMode mode, bool hasDeco = true);
+    void NotifyFreeWindowModeChange(bool isInFreeWindowMode);
     WMError UpdateProperty(WSPropertyChangeAction action);
     WMError SetBackgroundColor(uint32_t color);
     uint32_t GetBackgroundColor() const;
@@ -702,6 +711,8 @@ protected:
     std::atomic_bool isFocused_ = false;
     std::atomic_bool isHighlighted_ = false;
     std::atomic_bool shouldReNotifyHighlight_ = false;
+    static std::atomic<int64_t> updateFocusTimeStamp_;
+    static std::atomic<int64_t> updateHighlightTimeStamp_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
     bool shouldReNotifyFocus_ = false;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
@@ -929,6 +940,8 @@ private:
     EnableIfSame<T, ISystemBarPropertyListener, std::vector<sptr<ISystemBarPropertyListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowRotationChangeListener, std::vector<sptr<IWindowRotationChangeListener>>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, IFreeWindowModeChangeListener, std::vector<sptr<IFreeWindowModeChangeListener>>> GetListeners();
     void NotifyAfterFocused();
     void NotifyUIContentFocusStatus();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
@@ -1033,6 +1046,7 @@ private:
     static std::mutex highlightChangeListenerMutex_;
     static std::mutex systemBarPropertyListenerMutex_;
     static std::mutex windowRotationChangeListenerMutex_;
+    static std::mutex freeWindowModeChangeListenerMutex_;
     static std::map<int32_t, std::vector<sptr<ISystemBarPropertyListener>>> systemBarPropertyListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowStageLifeCycle>>> windowStageLifecycleListeners_;
@@ -1071,6 +1085,7 @@ private:
     static std::map<int32_t, sptr<IWindowOrientationChangeListener>> windowOrientationChangeListener_;
     static std::map<int32_t, std::vector<sptr<IWindowHighlightChangeListener>>> highlightChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowRotationChangeListener>>> windowRotationChangeListeners_;
+    static std::map<int32_t, std::vector<sptr<IFreeWindowModeChangeListener>>> freeWindowModeChangeListeners_;
 
     // FA only
     sptr<IAceAbilityHandler> aceAbilityHandler_;

@@ -155,6 +155,8 @@ public:
     virtual WSError OnNeedAvoid(bool status) { return WSError::WS_OK; }
     virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT,
         int32_t apiVersion = API_VERSION_INVALID) { return {}; }
+    virtual AvoidArea GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType type,
+        const WSRect& rect = WSRect::EMPTY_RECT) { return {}; }
     virtual WSError GetTargetOrientationConfigInfo(Orientation targetOrientation,
         const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& properties) { return WSError::WS_OK; }
     virtual WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) { return WSError::WS_OK; }
@@ -435,6 +437,25 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError OnSetImageForRecent(uint32_t imgResourceId, ImageFit ImageFit) { return WSError::WS_OK; }
+
+    /**
+     * @brief Callback for set image for recent.
+     *
+     * @param pixelMap recent image.
+     * @param imageFit imageFit.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnSetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, ImageFit ImageFit)
+    {
+        return WSError::WS_OK;
+    }
+
+    /**
+     * @brief Callback for remove image for recent.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnSetImageForRecent() { return WSError::WS_OK; }
 
     /**
      * @brief Callback for setting to radius of window.

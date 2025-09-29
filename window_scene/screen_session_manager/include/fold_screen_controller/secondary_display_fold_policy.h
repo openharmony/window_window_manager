@@ -42,6 +42,8 @@ public:
     void GetAllCreaseRegion(std::vector<FoldCreaseRegionItem>& foldCreaseRegionItems) const override;
     void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command) override;
 private:
+    void HandlePropertyChange(sptr<ScreenSession> screenSession, ScreenProperty& ScreenProperty,
+        ScreenPropertyChangeReason reason, FoldDisplayMode displayMode, bool isNeedNotifyFoldProperty);
     void ChangeSuperScreenDisplayMode(sptr<ScreenSession> screenSession,
         FoldDisplayMode displayMode);
     void CloseCoordinationScreen();

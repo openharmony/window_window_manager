@@ -206,6 +206,24 @@ HWTEST_F(RootSceneSessionTest, GetAvoidAreaByType, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetAvoidAreaByTypeIgnoringVisibility
+ * @tc.desc: test function : GetAvoidAreaByTypeIgnoringVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneSessionTest, GetAvoidAreaByTypeIgnoringVisibility, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr();
+    using T = std::underlying_type_t<AvoidAreaType>;
+    for (T avoidAreaType = static_cast<T>(AvoidAreaType::TYPE_START);
+        avoidAreaType < static_cast<T>(AvoidAreaType::TYPE_END); avoidAreaType++) {
+        auto type = static_cast<AvoidAreaType>(avoidAreaType);
+        auto avoidArea = ssm_->rootSceneSession_->GetAvoidAreaByTypeIgnoringVisibility(type, {0, 0, 0, 0});
+        EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
+    }
+}
+
+/**
  * @tc.name: GetSystemAvoidAreaForRoot_01
  * @tc.desc: test function : GetSystemAvoidAreaForRoot_01
  * @tc.type: FUNC
@@ -233,11 +251,13 @@ HWTEST_F(RootSceneSessionTest, GetSystemAvoidAreaForRoot_01, TestSize.Level1)
     AvoidArea avoidArea;
     ssm_->rootSceneSession_->GetSystemAvoidAreaForRoot(ssm_->rootSceneSession_->GetSessionRect(), avoidArea);
     Rect rect = { 0, 0, 1260, 123 };
-    ASSERT_EQ(avoidArea.topRect_, rect);
+    EXPECT_EQ(avoidArea.topRect_, rect);
     statusBarSession->isVisible_ = false;
     avoidArea.topRect_ = { 0, 0, 0, 0 };
     ssm_->rootSceneSession_->GetSystemAvoidAreaForRoot(ssm_->rootSceneSession_->GetSessionRect(), avoidArea);
     EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
+    ssm_->rootSceneSession_->GetSystemAvoidAreaForRoot(ssm_->rootSceneSession_->GetSessionRect(), avoidArea, true);
+    EXPECT_EQ(avoidArea.topRect_, rect);
 }
 
 /**
@@ -308,16 +328,22 @@ HWTEST_F(RootSceneSessionTest, GetAINavigationBarAreaForRoot_01, TestSize.Level1
 {
     ASSERT_NE(nullptr, ssm_);
     auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    specificCb->onGetAINavigationBarArea_ = [](uint64_t displayId) { return ssm_->GetAINavigationBarArea(displayId); };
+    specificCb->onGetAINavigationBarArea_ = [](uint64_t displayId, bool ignoreVisibility) {
+        return ssm_->GetAINavigationBarArea(displayId, ignoreVisibility);
+    };
     ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr(specificCb);
     ssm_->rootSceneSession_->GetLayoutController()->SetSessionRect({ 0, 0, 1260, 2720 });
     AvoidArea avoidArea;
     ssm_->rootSceneSession_->GetAINavigationBarAreaForRoot(ssm_->rootSceneSession_->GetSessionRect(), avoidArea);
     EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
+    ssm_->isAINavigationBarVisible_[0] = true;
     ssm_->currAINavigationBarAreaMap_[0] = { 409, 2629, 442, 91 };
     ssm_->rootSceneSession_->GetAINavigationBarAreaForRoot(ssm_->rootSceneSession_->GetSessionRect(), avoidArea);
     Rect rect = { 409, 2629, 442, 91 };
-    ASSERT_EQ(avoidArea.bottomRect_, rect);
+    EXPECT_EQ(avoidArea.bottomRect_, rect);
+    ssm_->isAINavigationBarVisible_[0] = false;
+    ssm_->rootSceneSession_->GetAINavigationBarAreaForRoot(ssm_->rootSceneSession_->GetSessionRect(), avoidArea, true);
+    EXPECT_EQ(avoidArea.bottomRect_, rect);
 }
 
 /**

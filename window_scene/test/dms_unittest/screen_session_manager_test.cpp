@@ -1285,23 +1285,6 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenInfoById, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetScreenActiveMode
- * @tc.desc: SetScreenActiveMode virtual screen
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode, TestSize.Level1)
-{
-#ifdef WM_SCREEN_ACTIVE_MODE_ENABLE
-    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
-    VirtualScreenOption virtualOption;
-    virtualOption.name_ = "SetScreenActiveMode";
-    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-    ASSERT_EQ(ssm_->SetScreenActiveMode(screenId, 0), DMError::DM_OK);
-    ssm_->DestroyVirtualScreen(screenId);
-#endif
-}
-
-/**
  * @tc.name: NotifyScreenChanged
  * @tc.desc: NotifyScreenChanged virtual screen
  * @tc.type: FUNC

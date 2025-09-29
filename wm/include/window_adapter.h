@@ -45,6 +45,7 @@ public:
     using SessionRecoverCallbackFunc = std::function<WMError()>;
     using UIEffectRecoverCallbackFunc = std::function<WMError()>;
     using WMSConnectionChangedCallbackFunc = std::function<void(int32_t, int32_t, bool)>;
+    using OutlineRecoverCallbackFunc = std::function<WMError()>;
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& windowProperty,
         std::shared_ptr<RSSurfaceNode> surfaceNode, uint32_t& windowId, const sptr<IRemoteObject>& token);
     virtual WMError AddWindow(sptr<WindowProperty>& windowProperty);
@@ -202,6 +203,9 @@ public:
      * Window Pattern
      */
     virtual WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId);
+    virtual WMError SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, ImageFit imageFit,
+        int32_t persistentId);
+    virtual WMError RemoveImageForRecent(int32_t persistentId);
 
     /*
      * Window Animation
@@ -226,6 +230,13 @@ public:
      * PiP Window
      */
     WMError GetPiPSettingSwitchStatus(bool& switchStatus);
+
+    /*
+     * Window outline
+     */
+    void RegisterOutlineRecoverCallbackFunc(const OutlineRecoverCallbackFunc& callback);
+    void UnregisterOutlineRecoverCallbackFunc();
+    virtual WMError UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams);
 
     ~WindowAdapter() override;
 
@@ -265,6 +276,9 @@ private:
     std::mutex effectMutex_;
     std::map<int32_t, UIEffectRecoverCallbackFunc> uiEffectRecoverCallbackFuncMap_;
     bool recoverInitialized_ = false;
+
+    std::mutex outlineMutex_;
+    OutlineRecoverCallbackFunc outlineRecoverCallbackFunc_;
     // above guarded by mutex_
 };
 } // namespace Rosen

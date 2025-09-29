@@ -3079,6 +3079,179 @@ HWTEST_F(SceneSessionManagerTest12, NotifyIsFullScreenInForceSplitMode, TestSize
     ssm_->NotifyIsFullScreenInForceSplitMode(uid, false);
     EXPECT_TRUE(ssm_->fullScreenInForceSplitUidSet_.find(uid) == ssm_->fullScreenInForceSplitUidSet_.end());
 }
+
+/**
+ * @tc.name: NeedOutline
+ * @tc.desc: test function : NeedOutline
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NeedOutline, Function | SmallTest | Level2)
+{
+    int32_t persistentId = 0; // 0 window persistent id
+    std::vector<int32_t> persistentIdList;
+    EXPECT_EQ(ssm_->NeedOutline(persistentId, persistentIdList), false);
+    persistentIdList.push_back(persistentId);
+    EXPECT_EQ(ssm_->NeedOutline(persistentId, persistentIdList), true);
+}
+
+/**
+ * @tc.name: UpdateOutline
+ * @tc.desc: test function : UpdateOutline
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, UpdateOutline, Function | SmallTest | Level2)
+{
+    MockAccesstokenKit::MockIsSACalling(false);
+    auto ssm = sptr<SceneSessionManager>::MakeSptr();
+    sptr<IRemoteObject> remoteObject = sptr<MockIRemoteObject>::MakeSptr();
+    OutlineParams params;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ssm->UpdateOutline(remoteObject, params));
+
+    MockAccesstokenKit::MockIsSACalling(true);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ssm->UpdateOutline(remoteObject, params));
+
+    ssm->recoverState_ = RecoverState::RECOVER_INITIAL;
+    EXPECT_EQ(WMError::WM_OK, ssm->UpdateOutline(remoteObject, params));
+
+    ssm->systemConfig_.freeMultiWindowEnable_ = true;
+    ssm->systemConfig_.freeMultiWindowSupport_ = true;
+    EXPECT_EQ(WMError::WM_OK, ssm->UpdateOutline(remoteObject, params));
+
+    ssm->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    EXPECT_EQ(WMError::WM_OK, ssm->UpdateOutline(remoteObject, params));
+
+    ssm->systemConfig_.freeMultiWindowEnable_ = false;
+    ssm->systemConfig_.freeMultiWindowSupport_ = false;
+    EXPECT_EQ(WMError::WM_OK, ssm->UpdateOutline(remoteObject, params));
+}
+
+/**
+ * @tc.name: UpdateOutlineInner
+ * @tc.desc: test function : UpdateOutlineInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, UpdateOutlineInner, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateOutlineInner";
+    info.bundleName_ = "UpdateOutlineInner";
+    sptr<SceneSession> session0 = nullptr;
+    sptr<SceneSession> session1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> session2 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> session3 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> session4 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto ssm = sptr<SceneSessionManager>::MakeSptr();
+    ssm->sceneSessionMap_.insert({0, session0});
+    ssm->sceneSessionMap_.insert({1, session1}); // 1 persistentId
+    ssm->sceneSessionMap_.insert({2, session2}); // 2 persistentId
+    ssm->sceneSessionMap_.insert({3, session3}); // 3 persistentId
+    ssm->sceneSessionMap_.insert({4, session4}); // 4 persistentId
+    session1->SetSessionState(SessionState::STATE_ACTIVE);
+    session2->SetSessionState(SessionState::STATE_DISCONNECT);
+    session3->SetSessionState(SessionState::STATE_END);
+    session4->SetSessionState(SessionState::STATE_ACTIVE);
+    OutlineParams params;
+    params.persistentIds_.push_back(1); // 1 persistentId
+    ssm->UpdateOutlineInner(nullptr, params);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(session1->isOutlineEnabled_, true);
+}
+
+/**
+ * @tc.name: AddOutlineRemoteDeathRecipient
+ * @tc.desc: test function : AddOutlineRemoteDeathRecipient
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, AddOutlineRemoteDeathRecipient, Function | SmallTest | Level2)
+{
+    auto ssm = sptr<SceneSessionManager>::MakeSptr();
+    ssm->AddOutlineRemoteDeathRecipient(nullptr);
+    EXPECT_EQ(ssm->outlineRemoteObject_, nullptr);
+
+    sptr<RemoteObjectMocker> remoteObject = sptr<RemoteObjectMocker>::MakeSptr();
+    EXPECT_CALL(*remoteObject, AddDeathRecipient(_)).
+        WillOnce([](const sptr<IRemoteObject::DeathRecipient>& recipient) {
+            return false;
+        });
+    ssm->AddOutlineRemoteDeathRecipient(remoteObject);
+    EXPECT_NE(ssm->outlineRemoteObject_, nullptr);
+
+    ssm->AddOutlineRemoteDeathRecipient(remoteObject);
+    EXPECT_NE(ssm->outlineRemoteObject_, nullptr);
+
+    sptr<RemoteObjectMocker> remoteObject1 = sptr<RemoteObjectMocker>::MakeSptr();
+    EXPECT_CALL(*remoteObject, RemoveDeathRecipient(_)).
+        WillOnce([](const sptr<IRemoteObject::DeathRecipient>& recipient) {
+            return true;
+        });
+    EXPECT_CALL(*remoteObject1, AddDeathRecipient(_)).
+        WillOnce([](const sptr<IRemoteObject::DeathRecipient>& recipient) {
+            return true;
+        });
+    ssm->AddOutlineRemoteDeathRecipient(remoteObject1);
+    EXPECT_NE(ssm->outlineRemoteObject_, nullptr);
+
+    sptr<RemoteObjectMocker> remoteObject2 = sptr<RemoteObjectMocker>::MakeSptr();
+    EXPECT_CALL(*remoteObject1, RemoveDeathRecipient(_)).
+        WillOnce([](const sptr<IRemoteObject::DeathRecipient>& recipient) {
+            return false;
+        });
+    ssm->AddOutlineRemoteDeathRecipient(remoteObject2);
+    EXPECT_NE(ssm->outlineRemoteObject_, nullptr);
+}
+
+/**
+ * @tc.name: DeleteAllOutline
+ * @tc.desc: test function : DeleteAllOutline
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, DeleteAllOutline, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "DeleteAllOutline";
+    info.bundleName_ = "DeleteAllOutline";
+    sptr<SceneSession> session0 = nullptr;
+    sptr<SceneSession> session1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> session2 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> session3 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session1->isOutlineEnabled_ = true;
+    session1->SetSessionState(SessionState::STATE_ACTIVE);
+    session2->SetSessionState(SessionState::STATE_DISCONNECT);
+    session3->SetSessionState(SessionState::STATE_END);
+    auto ssm = sptr<SceneSessionManager>::MakeSptr();
+    ssm->sceneSessionMap_.insert({0, session0});
+    ssm->sceneSessionMap_.insert({1, session1}); // 1 persistentId
+    ssm->sceneSessionMap_.insert({2, session2}); // 2 persistentId
+    ssm->sceneSessionMap_.insert({3, session3}); // 3 persistentId
+    ssm->DeleteAllOutline(nullptr);
+    EXPECT_EQ(session1->isOutlineEnabled_, true);
+
+    sptr<IRemoteObject> remoteObject = sptr<MockIRemoteObject>::MakeSptr();
+    ssm->outlineRemoteObject_ = sptr<MockIRemoteObject>::MakeSptr();
+    ssm->DeleteAllOutline(remoteObject);
+    EXPECT_NE(ssm->outlineRemoteObject_, nullptr);
+
+    ssm->DeleteAllOutline(ssm->outlineRemoteObject_);
+    EXPECT_EQ(session1->isOutlineEnabled_, false);
+    EXPECT_EQ(ssm->outlineRemoteObject_, nullptr);
+}
+
+
+/**
+ * @tc.name: RecoverOutline
+ * @tc.desc: test function : OnRecoverStateChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RecoverOutline, Function | SmallTest | Level2)
+{
+    auto ssm = sptr<SceneSessionManager>::MakeSptr();
+    ssm->needRecoverOutline_ = true;
+    ssm->OnRecoverStateChange(RecoverState::RECOVER_ENABLE_INPUT);
+    EXPECT_EQ(false, ssm->needRecoverOutline_);
+
+    ssm->OnRecoverStateChange(RecoverState::RECOVER_ENABLE_INPUT);
+    EXPECT_EQ(false, ssm->needRecoverOutline_);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

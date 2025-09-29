@@ -487,6 +487,7 @@ WSError MainSession::SetSessionLabelAndIconInner(const std::string& label,
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s session is nullptr", where);
             return WSError::WS_ERROR_NULLPTR;
         }
+        session->label_ = label;
         if (session->updateSessionLabelAndIconFunc_) {
             session->updateSessionLabelAndIconFunc_(label, icon);
         }

@@ -603,6 +603,18 @@ void WindowAdapter::WindowManagerAndSessionRecover()
             TLOGE(WmsLogTag::WMS_RECOVER, "ui effect create failed, id: %{public}d, reason %{public}d", it.first, ret);
         }
     }
+
+    OutlineRecoverCallbackFunc outlineRecoverCallbackFunc;
+    {
+        std::lock_guard<std::mutex> lock(outlineMutex_);
+        outlineRecoverCallbackFunc = outlineRecoverCallbackFunc_;
+    }
+    if (outlineRecoverCallbackFunc) {
+        auto ret = outlineRecoverCallbackFunc();
+        if (ret != WMError::WM_OK) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "Recover outline failed, ret: %{public}d.", ret);
+        }
+    }
 }
 
 WMError  WindowAdapter::RecoverWindowPropertyChangeFlag()
@@ -1293,6 +1305,23 @@ WMError WindowAdapter::SetImageForRecent(uint32_t imgResourceId, ImageFit imageF
     return wmsProxy->SetImageForRecent(imgResourceId, imageFit, persistentId);
 }
 
+WMError WindowAdapter::SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
+    ImageFit imageFit, int32_t persistentId)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->SetImageForRecentPixelMap(pixelMap, imageFit, persistentId);
+}
+
+WMError WindowAdapter::RemoveImageForRecent(int32_t persistentId)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->RemoveImageForRecent(persistentId);
+}
+
 WMError WindowAdapter::ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId, int32_t fingerId)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
@@ -1449,6 +1478,26 @@ WMError WindowAdapter::RemoveSessionBlackList(
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->RemoveSessionBlackList(bundleNames, privacyWindowTags);
+}
+
+void WindowAdapter::RegisterOutlineRecoverCallbackFunc(const OutlineRecoverCallbackFunc& callback)
+{
+    std::lock_guard<std::mutex> lock(outlineMutex_);
+    outlineRecoverCallbackFunc_ = callback;
+}
+
+void WindowAdapter::UnregisterOutlineRecoverCallbackFunc()
+{
+    std::lock_guard<std::mutex> lock(outlineMutex_);
+    outlineRecoverCallbackFunc_ = nullptr;
+}
+
+WMError WindowAdapter::UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->UpdateOutline(remoteObject, outlineParams);
 }
 } // namespace Rosen
 } // namespace OHOS

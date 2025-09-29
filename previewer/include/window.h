@@ -223,6 +223,8 @@ public:
     virtual WMError SetWindowFlags(uint32_t flags) = 0;
     virtual WMError IsWindowRectAutoSave(bool& enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) = 0;
+    virtual WMError GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType type, AvoidArea& avoidArea,
+        const Rect& rect = Rect::EMPTY_RECT) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetAvoidAreaOption(uint32_t avoidAreaOption) { return WMError::WM_OK; }
     virtual WMError GetAvoidAreaOption(uint32_t& avoidAreaOption) { return WMError::WM_OK; }
     virtual WMError UpdateSystemBarProperties(
@@ -397,6 +399,15 @@ public:
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     virtual WMError SetImageForRecent(uint32_t imgResourceId, OHOS::Rosen::ImageFit ImageFit)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual WMError SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
+        OHOS::Rosen::ImageFit ImageFit)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual WMError RemoveImageForRecent()
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }

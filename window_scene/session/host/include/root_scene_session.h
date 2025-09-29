@@ -48,6 +48,8 @@ public:
      */
     AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT,
         int32_t apiVersion = API_VERSION_INVALID) override;
+    AvoidArea GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType type,
+        const WSRect& rect = WSRect::EMPTY_RECT) override;
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
 
 private:
@@ -56,10 +58,11 @@ private:
     /*
      * Window Immersive
      */
-    void GetSystemAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea);
+    AvoidArea GetAvoidAreaByTypeInner(AvoidAreaType type, bool ignoreVisibility = false);
+    void GetSystemAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea, bool ignoreVisibility = false);
     void GetCutoutAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea);
     void GetKeyboardAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea);
-    void GetAINavigationBarAreaForRoot(const WSRect& rect, AvoidArea& avoidArea);
+    void GetAINavigationBarAreaForRoot(const WSRect& rect, AvoidArea& avoidArea, bool ignoreVisibility = false);
 };
 } // namespace OHOS::Rosen
 

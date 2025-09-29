@@ -297,7 +297,7 @@ HWTEST_F(ScreenCutoutControllerTest, CheckBoundaryRects01, TestSize.Level1)
     auto screenBouns = RRect({0, 0, 35, 35}, 0.0f, 0.0f);
     screenProperty.SetBounds(screenBouns);
     ASSERT_TRUE(controller != nullptr);
-    controller->CheckBoundaryRects(boundaryRects, 0, 0);
+    controller->CheckBoundaryRects(boundaryRects, 35, 35);
     ASSERT_EQ(boundaryRects.size(), 1);
     EXPECT_EQ(boundaryRects[0], emptyRect_);
 }
@@ -317,8 +317,8 @@ HWTEST_F(ScreenCutoutControllerTest, CheckBoundaryRects02, TestSize.Level1)
     auto screenBouns = RRect({0, 0, 35, 35}, 0.0f, 0.0f);
     screenProperty.SetBounds(screenBouns);
     ASSERT_TRUE(controller != nullptr);
-    controller->CheckBoundaryRects(boundaryRects, 7, 8);
-    ASSERT_EQ(boundaryRects.size(), 1);
+    controller->CheckBoundaryRects(boundaryRects, 35, 35);
+    ASSERT_EQ(boundaryRects.size(), 2);
     EXPECT_EQ(boundaryRects[0], emptyRect_);
 }
 
@@ -331,15 +331,13 @@ HWTEST_F(ScreenCutoutControllerTest, CheckBoundaryRects03, TestSize.Level1)
 {
     sptr<ScreenCutoutController> controller = new ScreenCutoutController();
     DMRect emptyRect = {1, 1, 7, 7};
-    DMRect emptyRect_ = {21, 21, 3, 3};
-    std::vector<DMRect> boundaryRects = {emptyRect_, emptyRect};
+    std::vector<DMRect> boundaryRects = {emptyRect};
     ScreenProperty screenProperty;
-    auto screenBouns = RRect({0, 0, 35, 35}, 0.0f, 0.0f);
+    auto screenBouns = RRect({0, 0, 6, 6}, 0.0f, 0.0f);
     screenProperty.SetBounds(screenBouns);
     ASSERT_TRUE(controller != nullptr);
-    controller->CheckBoundaryRects(boundaryRects, 8, 7);
-    ASSERT_EQ(boundaryRects.size(), 1);
-    EXPECT_EQ(boundaryRects[0], emptyRect_);
+    controller->CheckBoundaryRects(boundaryRects, 6, 6);
+    ASSERT_EQ(boundaryRects.size(), 0);
 }
 
 /**
@@ -354,12 +352,12 @@ HWTEST_F(ScreenCutoutControllerTest, CheckBoundaryRects04, TestSize.Level1)
     DMRect emptyRect_ = {21, 21, 3, 3};
     std::vector<DMRect> boundaryRects = {emptyRect_, emptyRect};
     ScreenProperty screenProperty;
-    auto screenBouns = RRect({0, 0, 35, 35}, 0.0f, 0.0f);
+    auto screenBouns = RRect({0, 0, 25, 23}, 0.0f, 0.0f);
     screenProperty.SetBounds(screenBouns);
     ASSERT_TRUE(controller != nullptr);
-    controller->CheckBoundaryRects(boundaryRects, 9, 7);
+    controller->CheckBoundaryRects(boundaryRects, 25, 23);
     ASSERT_EQ(boundaryRects.size(), 1);
-    EXPECT_EQ(boundaryRects[0], emptyRect_);
+    EXPECT_EQ(boundaryRects[0], emptyRect);
 }
 
 /**
@@ -377,7 +375,7 @@ HWTEST_F(ScreenCutoutControllerTest, CheckBoundaryRects05, TestSize.Level1)
     auto screenBouns = RRect({0, 0, 35, 35}, 0.0f, 0.0f);
     screenProperty.SetBounds(screenBouns);
     ASSERT_TRUE(controller != nullptr);
-    controller->CheckBoundaryRects(boundaryRects, 0, 0);
+    controller->CheckBoundaryRects(boundaryRects, 35, 35);
     ASSERT_EQ(boundaryRects.size(), 1);
     EXPECT_EQ(boundaryRects[0], emptyRect_);
 }

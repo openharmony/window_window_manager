@@ -44,6 +44,7 @@ class JsWindow final {
 public:
     explicit JsWindow(const sptr<Window>& window);
     ~JsWindow();
+    sptr<Window> GetWindow() { return windowToken_; }
     static void Finalizer(napi_env env, void* data, void* hint);
     static napi_value Show(napi_env env, napi_callback_info info);
     static napi_value ShowWindow(napi_env env, napi_callback_info info);
@@ -191,6 +192,7 @@ public:
     static napi_value GetWindowStatus(napi_env env, napi_callback_info info);
     static napi_value SetWindowMask(napi_env env, napi_callback_info info);
     static napi_value SetFollowParentMultiScreenPolicy(napi_env env, napi_callback_info info);
+    static napi_value IsInFreeWindowMode(napi_env env, napi_callback_info info);
 
     /*
      * Window Transition Animation For PC
@@ -240,6 +242,7 @@ public:
     static napi_value GetStatusBarProperty(napi_env env, napi_callback_info info);
     static napi_value GetAvoidArea(napi_env env, napi_callback_info info);
     static napi_value GetWindowAvoidAreaSync(napi_env env, napi_callback_info info);
+    static napi_value GetWindowAvoidAreaIgnoringVisibilitySync(napi_env env, napi_callback_info info);
     static napi_value SetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
     static napi_value SetSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
     static napi_value IsSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
@@ -414,6 +417,7 @@ private:
     napi_value OnSetWindowMask(napi_env env, napi_callback_info info);
     napi_value OnGetWindowStatus(napi_env env, napi_callback_info info);
     napi_value OnSetFollowParentMultiScreenPolicy(napi_env env, napi_callback_info info);
+    napi_value OnIsInFreeWindowMode(napi_env env, napi_callback_info info);
 
     /*
      * Window Transition Animation For PC
@@ -469,6 +473,7 @@ private:
     napi_value OnGetStatusBarPropertySync(napi_env env, napi_callback_info info);
     napi_value OnGetAvoidArea(napi_env env, napi_callback_info info);
     napi_value OnGetWindowAvoidAreaSync(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowAvoidAreaIgnoringVisibilitySync(napi_env env, napi_callback_info info);
     napi_value OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     napi_value OnGetImmersiveModeEnabledState(napi_env env, napi_callback_info info);

@@ -116,6 +116,7 @@ using NotifySurfaceBoundsChangeFunc = std::function<void(const WSRect& rect, boo
 using HasRequestedVsyncFunc = std::function<WSError(bool& hasRequestedVsync)>;
 using RequestNextVsyncWhenModeChangeFunc = std::function<WSError(const std::shared_ptr<VsyncCallback>& vsyncCallback)>;
 using NotifyClearSubSessionFunc = std::function<void(const int32_t subPersistentId)>;
+using OutlineParamsChangeCallbackFunc = std::function<void(bool enabled, const OutlineStyleParams& outlineStyleParams)>;
 class ILifecycleListener {
 public:
     virtual void OnActivation() {}
@@ -245,7 +246,7 @@ public:
     /*
      * Window Immersive
      */
-    void UpdateStatusBarVisible(bool isStatusBarVisible) { isStatusBarVisible_ = isStatusBarVisible; };
+    void UpdateStatusBarVisible(bool isStatusBarVisible) { isStatusBarVisible_ = isStatusBarVisible; }
     bool IsStatusBarVisible() const;
 
     /*
@@ -284,7 +285,7 @@ public:
     void ResetSnapshot();
     void SaveSnapshot(bool useFfrt, bool needPersist = true,
         std::shared_ptr<Media::PixelMap> persistentPixelMap = nullptr, bool updateSnapshot = false,
-        BackgroundReason reason = BackgroundReason::DEFAULT);
+        LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
     void SetSaveSnapshotCallback(Task&& task)
     {
         if (task) {
@@ -327,6 +328,8 @@ public:
     void GetCloseAbilityWantAndClean(AAFwk::Want& outWant);
     void SetSessionInfo(const SessionInfo& info);
     void SetSessionInfoWindowInputType(uint32_t windowInputType);
+    void SetSessionInfoExpandInputFlag(uint32_t expandInputFlag);
+    uint32_t GetSessionInfoExpandInputFlag() const;
     void SetSessionInfoWindowMode(int32_t windowMode);
     const SessionInfo& GetSessionInfo() const;
     SessionInfo& EditSessionInfo();
@@ -499,10 +502,11 @@ public:
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
     void NotifyUIRequestFocus();
     virtual void NotifyUILostFocus();
-    WSError NotifyFocusStatus(bool isFocused);
+    WSError NotifyFocusStatus(const sptr<FocusNotifyInfo>& focusNotifyInfo, bool isFocused);
     void SetExclusivelyHighlighted(bool isExclusivelyHighlighted);
-    virtual WSError UpdateHighlightStatus(bool isHighlight, bool needBlockHighlightNotify);
-    WSError NotifyHighlightChange(bool isHighlight);
+    virtual WSError UpdateHighlightStatus(const sptr<HighlightNotifyInfo>& highlightNotifyInfo, bool isHighlight,
+        bool needBlockHighlightNotify);
+    WSError NotifyHighlightChange(const sptr<HighlightNotifyInfo>& highlightNotifyInfo, bool isHighlight);
     WSError GetIsHighlighted(bool& isHighlighted) override;
     WSError HandlePointerEventForFocus(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool isExecuteDelayRaise = false);
@@ -746,9 +750,10 @@ public:
     void SetBorderUnoccupied(bool borderUnoccupied = false);
     bool GetBorderUnoccupied() const;
     bool IsPersistentImageFit() const;
+    void DeletePersistentImageFit();
     bool SupportSnapshotAllSessionStatus() const;
     void InitSnapshotCapacity();
-    SnapshotStatus GetSessionSnapshotStatus(BackgroundReason reason = BackgroundReason::DEFAULT) const;
+    SnapshotStatus GetSessionSnapshotStatus(LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT) const;
     uint32_t GetWindowSnapshotOrientation() const;
     uint32_t GetLastOrientation() const;
     bool HasSnapshotFreeMultiWindow();
@@ -769,6 +774,12 @@ public:
      * RS Client Multi Instance
      */
     std::shared_ptr<RSUIContext> GetRSUIContext(const char* caller = "");
+
+    /*
+     * Window highligt outline
+     */
+    void UpdateSessionOutline(bool enabled, const OutlineStyleParams& params);
+    void SetOutlineParamsChangeCallback(OutlineParamsChangeCallbackFunc&& func);
 
     WSError SetIsShowDecorInFreeMultiWindow(bool isShow);
 
@@ -1157,7 +1168,6 @@ private:
      * Window Pattern
      */
     bool borderUnoccupied_ = false;
-    void DeletePersistentImageFit();
     uint32_t GetBackgroundColor() const;
 
     /*
@@ -1170,6 +1180,13 @@ private:
      */
     uint64_t screenIdOfRSUIContext_ = SCREEN_ID_INVALID;
     std::shared_ptr<RSUIContext> rsUIContext_;
+
+    /*
+     * Window highligt outline
+     */
+    bool isOutlineEnabled_ = false;
+    OutlineStyleParams outlineStyleParams_;
+    OutlineParamsChangeCallbackFunc outlineParamsChangeCallback_;
 };
 } // namespace OHOS::Rosen
 

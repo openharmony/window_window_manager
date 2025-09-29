@@ -1031,9 +1031,8 @@ WSError SessionProxy::UpdateSessionRect(const WSRect& rect, SizeChangeReason rea
     bool isGlobal, bool isFromMoveToGlobal, const MoveConfiguration& moveConfiguration,
     const RectAnimationConfig& rectAnimationConfig)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Rect [%{public}d, %{public}d, %{public}u, %{public}u] isGlobal %{public}d "
-        "isFromMoveToGlobal %{public}d moveConfiguration %{public}s", rect.posX_, rect.posY_,
-        rect.width_, rect.height_, isGlobal, isFromMoveToGlobal, moveConfiguration.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Rect:%{public}s global:%{public}d isFromMoveToGlobal:%{public}d cfg:%{public}s",
+        rect.ToString().c_str(), isGlobal, isFromMoveToGlobal, moveConfiguration.ToString().c_str());
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -1412,6 +1411,45 @@ AvoidArea SessionProxy::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rec
         return avoidArea;
     }
     int sendCode = remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_AVOID_AREA),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_IMMS, "SendRequest failed, code: %{public}d", sendCode);
+        return avoidArea;
+    }
+    sptr<AvoidArea> area = reply.ReadParcelable<AvoidArea>();
+    if (area == nullptr) {
+        return avoidArea;
+    }
+    return *area;
+}
+
+AvoidArea SessionProxy::GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType type, const WSRect& rect)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    AvoidArea avoidArea;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_IMMS, "WriteInterfaceToken failed");
+        return avoidArea;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(type))) {
+        TLOGE(WmsLogTag::WMS_IMMS, "write type error");
+        return avoidArea;
+    }
+    if (!data.WriteInt32(rect.posX_) || !data.WriteInt32(rect.posY_) ||
+        !data.WriteInt32(rect.width_) || !data.WriteInt32(rect.height_)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "write rect error");
+        return avoidArea;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "remote is null");
+        return avoidArea;
+    }
+    int sendCode = remote->SendRequest(static_cast<uint32_t>(
+        SessionInterfaceCode::TRANS_ID_GET_AVOID_AREA_IGNORING_VISIBILITY),
         data, reply, option);
     if (sendCode != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_IMMS, "SendRequest failed, code: %{public}d", sendCode);
