@@ -1339,6 +1339,35 @@ HWTEST_F(ScreenSessionManagerTest, UpdateDisplayHookInfo002, Function | SmallTes
 }
 
 /**
+ * @tc.name: NotifyIsFullScreenInForceSplitMode
+ * @tc.desc: NotifyIsFullScreenInForceSplitMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, NotifyIsFullScreenInForceSplitMode, Function | SmallTest | Level2)
+{
+    int32_t uid = 0;
+    ssm_->NotifyIsFullScreenInForceSplitMode(uid, true);
+    DMHookInfo hookInfo;
+    hookInfo.enableHookRotation_ = true;
+    hookInfo.rotation_ = true;
+    hookInfo.density_ = 1.1;
+    hookInfo.width_ = 100;
+    hookInfo.height_ = 200;
+    ssm_->UpdateDisplayHookInfo(uid, true, hookInfo);
+    DMHookInfo hookInfo2;
+    ssm_->GetDisplayHookInfo(uid, hookInfo2);
+    ASSERT_EQ(hookInfo2.width_, 0);
+
+    uid = 100;
+    ssm_->NotifyIsFullScreenInForceSplitMode(uid, true);
+    ssm_->UpdateDisplayHookInfo(uid, true, hookInfo);
+    ssm_->NotifyIsFullScreenInForceSplitMode(uid, true);
+    DMHookInfo hookInfo3;
+    ssm_->GetDisplayHookInfo(uid, hookInfo3);
+    ASSERT_TRUE(hookInfo3.isFullScreenInForceSplit_);
+}
+
+/**
  * @tc.name: SetVirtualPixelRatio
  * @tc.desc: SetVirtualPixelRatio virtual screen
  * @tc.type: FUNC

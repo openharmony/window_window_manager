@@ -3676,7 +3676,8 @@ void OHOS::Rosen::ScreenSessionManagerProxy::UpdateDisplayHookInfo(int32_t uid, 
 
     if (!data.WriteUint32(hookInfo.width_) || !data.WriteUint32(hookInfo.height_) ||
         !data.WriteFloat(hookInfo.density_) || !data.WriteUint32(hookInfo.rotation_) ||
-        !data.WriteBool(hookInfo.enableHookRotation_)) {
+        !data.WriteBool(hookInfo.enableHookRotation_) ||
+        !data.WriteBool(hookInfo.isFullScreenInForceSplit_)) {
         TLOGE(WmsLogTag::DMS, "Write hookInfo failed");
         return;
     }
@@ -3720,6 +3721,35 @@ void ScreenSessionManagerProxy::GetDisplayHookInfo(int32_t uid, DMHookInfo& hook
     hookInfo.density_ = reply.ReadFloat();
     hookInfo.rotation_ = reply.ReadUint32();
     hookInfo.enableHookRotation_ = reply.ReadBool();
+}
+
+void ScreenSessionManagerProxy::NotifyIsFullScreenInForceSplitMode(int32_t uid, bool isFullScreen)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteInt32(uid)) {
+        TLOGE(WmsLogTag::DMS, "Write uid failed");
+        return;
+    }
+    if (!data.WriteBool(isFullScreen)) {
+        TLOGE(WmsLogTag::DMS, "Write isFullScreen failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_IS_FULL_SCREEN_IN_FORCE_SPLIT),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return;
+    }
 }
 
 DMError ScreenSessionManagerProxy::SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,

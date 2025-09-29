@@ -164,6 +164,10 @@ public:
     WSError RequestFocus(bool isFocused) override;
     WSError GetIsHighlighted(bool& isHighlighted) override;
 
+    /**
+     * Compatible Mode
+     */
+    WSError NotifyIsFullScreenInForceSplitMode(bool isFullScreen) override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

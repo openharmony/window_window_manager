@@ -514,6 +514,11 @@ protected:
     static std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> subWindowSessionMap_;
 
     /*
+     * Compatible Mode
+     */
+    std::atomic_bool isFullScreenInForceSplit_ { false };
+
+    /*
      * DFX
      */
     void SetUIContentComplete();

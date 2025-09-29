@@ -1027,6 +1027,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             hookInfo.density_ = data.ReadFloat();
             hookInfo.rotation_ = data.ReadUint32();
             hookInfo.enableHookRotation_ = data.ReadBool();
+            hookInfo.isFullScreenInForceSplit_ = data.ReadBool();
             UpdateDisplayHookInfo(uid, enable, hookInfo);
             break;
         }
@@ -1126,6 +1127,20 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             bool muteFlag = data.ReadBool();
             SetVirtualDisplayMuteFlag(screenId, muteFlag);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_NOTIFY_IS_FULL_SCREEN_IN_FORCE_SPLIT: {
+            int32_t uid = 0;
+            if (!data.ReadInt32(uid)) {
+                TLOGE(WmsLogTag::DMS, "Read uid failed");
+                return ERR_INVALID_DATA;
+            }
+            bool isFullScreen = false;
+            if (!data.ReadBool(isFullScreen)) {
+                TLOGE(WmsLogTag::DMS, "Read isFullScreen failed");
+                return ERR_INVALID_DATA;
+            }
+            NotifyIsFullScreenInForceSplitMode(uid, isFullScreen);
             break;
         }
         default:

@@ -480,4 +480,23 @@ WSError MainSession::UpdateFlag(const std::string& flag)
     }, __func__);
     return WSError::WS_OK;
 }
+
+void MainSession::RegisterForceSplitFullScreenChangeCallback(ForceSplitFullScreenChangeCallback&& callback)
+{
+    forceSplitFullScreenChangeCallback_ = std::move(callback);
+}
+
+WSError MainSession::NotifyIsFullScreenInForceSplitMode(bool isFullScreen)
+{
+    isFullScreenInForceSplit_.store(isFullScreen);
+    if (forceSplitFullScreenChangeCallback_) {
+        forceSplitFullScreenChangeCallback_(GetCallingUid(), isFullScreen);
+    }
+    return WSError::WS_OK;
+}
+
+bool MainSession::IsFullScreenInForceSplit()
+{
+    return isFullScreenInForceSplit_.load();
+}
 } // namespace OHOS::Rosen

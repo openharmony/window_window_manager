@@ -552,6 +552,24 @@ HWTEST_F(MainSessionTest, NotifySubAndDialogFollowRectChange01, Function | Small
     mainSession->NotifySubAndDialogFollowRectChange(rect, false, false);
     ASSERT_EQ(true, isCall);
 }
+
+/**
+ * @tc.name: NotifyIsFullScreenInForceSplitMode
+ * @tc.desc: NotifyIsFullScreenInForceSplitMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, NotifyIsFullScreenInForceSplitMode, TestSize.Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyIsFullScreenInForceSplitMode";
+    info.bundleName_ = "NotifyIsFullScreenInForceSplitMode";
+    sptr<MainSession> testSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    auto ret = testSession->NotifyIsFullScreenInForceSplitMode(true);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    testSession->RegisterForceSplitFullScreenChangeCallback([](uint32_t uid, bool isFullScreen) {});
+    ret = testSession->NotifyIsFullScreenInForceSplitMode(true);
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
 }
 }
 }
