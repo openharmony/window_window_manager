@@ -3075,6 +3075,46 @@ export class WindowInternal implements Window {
       }
     }
 
+    public onAvoidAreaChange(callback: Callback<AvoidAreaOptions>): void {
+      this.onSync(this.nativeObj, 'avoidAreaChange', callback);
+    }
+
+    public offAvoidAreaChange(callback?: Callback<AvoidAreaOptions>): void {
+      this.offSync(this.nativeObj, 'avoidAreaChange', callback);
+    }
+
+    public onDisplayIdChange(callback: Callback<long>): void {
+      this.onSync(this.nativeObj, 'displayIdChange', callback);
+    }
+
+    public offDisplayIdChange(callback?: Callback<long>): void {
+      this.offSync(this.nativeObj, 'displayIdChange', callback);
+    }
+
+    public onWindowVisibilityChange(callback: Callback<boolean>) {
+      this.onSync(this.nativeObj, 'windowVisibilityChange', callback);
+    }
+
+    public offWindowVisibilityChange(callback?: Callback<boolean>): void {
+      this.offSync(this.nativeObj, 'windowVisibilityChange', callback);
+    }
+
+    public onSystemDensityChange(callback: Callback<double>): void {
+      this.onSync(this.nativeObj, 'systemDensityChange', callback);
+    }
+
+    public offSystemDensityChange(callback?: Callback<double>): void {
+      this.offSync(this.nativeObj, 'systemDensityChange', callback);
+    }
+
+    public onScreenshot(callback: Callback<void>): void {
+      this.onSync(this.nativeObj, 'screenshot', callback);
+    }
+
+    public offScreenshot(callback?: Callback<void>): void {
+      this.offSync(this.nativeObj, 'screenshot', callback);
+    }
+
     public setWindowKeepScreenOn(isKeepScreenOn: boolean): Promise<void> {
         return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
             taskpool.execute((): void => {
@@ -3735,6 +3775,16 @@ export interface Window {
     loadContent(path: string, storage: LocalStorage, callback: AsyncCallback<void>): void;
     loadContent(path: string): Promise<void>;
     loadContent(path: string, callback: AsyncCallback<void>): void;
+    onAvoidAreaChange(callback: Callback<AvoidAreaOptions>): void;
+    offAvoidAreaChange(callback?: Callback<AvoidAreaOptions>): void;
+    onDisplayIdChange(callback: Callback<long>): void;
+    offDisplayIdChange(callback?: Callback<long>): void;
+    onWindowVisibilityChange(callback: Callback<boolean>): void;
+    offWindowVisibilityChange(callback?: Callback<boolean>): void;
+    onSystemDensityChange(callback: Callback<double>): void;
+    offSystemDensityChange(callback?: Callback<double>): void;
+    onScreenshot(callback: Callback<void>): void;
+    offScreenshot(callback?: Callback<void>): void;
     setWindowKeepScreenOn(isKeepScreenOn: boolean): Promise<void>;
     setWindowKeepScreenOn(isKeepScreenOn: boolean, callback: AsyncCallback<void>): void;
     setWindowSystemBarEnable(names: Array<'status' | 'navigation'>): Promise<void>;
@@ -4037,6 +4087,30 @@ export function on<T>(type: string, callback: Callback<T>): void {
 
 export function off<T>(type: string, callback?: Callback<T>): void {
   offSync(nativeObj, type, callback);
+}
+
+export function onSystemBarTintChange(callback: Callback<SystemBarTintState>): void {
+  this.onSync(nativeObj, 'systemBarTintChange', callback);
+}
+
+export function offSystemBarTintChange(callback?: Callback<SystemBarTintState>): void {
+  this.offSync(nativeObj, 'systemBarTintChange', callback);
+}
+
+export function onGestureNavigationEnabledChange(callback: Callback<boolean>): void {
+  this.onSync(nativeObj, 'gestureNavigationEnabledChange', callback);
+}
+
+export function offGestureNavigationEnabledChange(callback?: Callback<boolean>): void {
+  this.offSync(nativeObj, 'gestureNavigationEnabledChange', callback);
+}
+
+export function onWaterMarkFlagChange(callback: Callback<boolean>): void {
+  this.onSync(nativeObj, 'waterMarkFlagChange', callback);
+}
+
+export function offWaterMarkFlagChange(callback?: Callback<boolean>): void {
+  this.offSync(nativeObj, 'waterMarkFlagChange', callback);
 }
 
 function runWindowListenerVoidArgCallback(cb: object): void {
