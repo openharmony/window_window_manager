@@ -986,7 +986,9 @@ struct SceneAnimationConfig : public Parcelable {
     uint32_t animationDelay_ = 0;
     WindowAnimationCurve animationCurve_ = WindowAnimationCurve::LINEAR;
     std::array<float, ANIMATION_PARAM_SIZE> animationParam_ = {0.0f, 0.0f, 0.0f, 0.0f};
+
     SceneAnimationConfig() = default;
+
     SceneAnimationConfig(
         std::shared_ptr<RSTransaction> rsTransaction,
         int32_t animationDuration,
@@ -1013,6 +1015,7 @@ struct SceneAnimationConfig : public Parcelable {
         }
         return true;
     }
+    
     static SceneAnimationConfig* Unmarshalling(Parcel& parcel)
     {
         auto config = new SceneAnimationConfig();
