@@ -1711,7 +1711,7 @@ bool AniWindowUtils::ParseSubWindowOption(ani_env* env, ani_object jsObject, con
         TLOGE(WmsLogTag::DEFAULT, "[ANI] null env");
         return false;
     }
-    if (jsObject == nullptr || windowOption == nullptr) {
+    if (jsObject == nullptr) {
         TLOGE(WmsLogTag::WMS_SUB, "jsObject is null");
         return false;
     }

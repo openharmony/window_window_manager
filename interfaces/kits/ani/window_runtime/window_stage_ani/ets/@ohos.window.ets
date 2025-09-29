@@ -2453,10 +2453,6 @@ export class WindowInternal implements Window {
     private native setWindowMaskSync(nativeObj: long, windowMask: Array<Array<long>>): void;
     private native onNoInteractionDetected(nativeObj: long, type: string, timeout: long, callback: Object): void;
     private native keepKeyboardOnFocusSync(nativeObj: long, enable: boolean): void;
-    private native bindDialogTargetWithRemoteObjectSync(nativeObj: long, token: rpc.RemoteObject,
-      deathCallback: object): void;
-    private native bindDialogTargetWithRequestInfoSync(nativeObj: long, requestInfo: dialogRequest.RequestInfo,
-      deathCallback: object): void;
     private native createSubWindowWithOptionsSync(nativeObj: long, name: string, options: SubWindowOptions): Window;
     private native hideSync(nativeObj: long): void;
     private native onSync(nativeObj: long, type: string, callback: object): void;
@@ -3553,53 +3549,6 @@ export class WindowInternal implements Window {
       });
     }
 
-    public bindDialogTarget(token: rpc.RemoteObject, deathCallback: Callback<void>): Promise<void> {
-       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
-        taskpool.execute((): void => {
-          this.bindDialogTargetWithRemoteObjectSync(this.nativeObj, token, deathCallback);
-        }).then((ret: NullishType) => {
-          resolve(undefined);
-        }).catch((err: NullishType) => {
-          reject(err as BusinessError);
-        });
-      });
-    }
-
-    public bindDialogTarget(token: rpc.RemoteObject, deathCallback: Callback<void>,
-      callback: AsyncCallback<void>): void {
-      taskpool.execute((): void => {
-        this.bindDialogTargetWithRemoteObjectSync(this.nativeObj, token, deathCallback);
-      }).then((ret: NullishType) => {
-        callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
-        callback(err as BusinessError, undefined);
-      });
-    }
-
-    public bindDialogTarget(requestInfo: dialogRequest.RequestInfo, deathCallback: Callback<void>): Promise<void> {
-      return new Promise<void>((resolve: (value: undefined) => void,
-        reject: (error: BusinessError) => void): void => {
-        taskpool.execute((): void => {
-          this.bindDialogTargetWithRequestInfoSync(this.nativeObj, requestInfo, deathCallback);
-        }).then((ret: NullishType) => {
-          resolve(undefined);
-        }).catch((err: NullishType) => {
-          reject(err as BusinessError);
-        });
-      });
-    }
-
-    public bindDialogTarget(requestInfo: dialogRequest.RequestInfo, deathCallback: Callback<void>,
-        callback: AsyncCallback<void>): void {
-      taskpool.execute((): void => {
-        this.bindDialogTargetWithRequestInfoSync(this.nativeObj, requestInfo, deathCallback);
-      }).then((ret: NullishType) => {
-        callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
-        callback(err as BusinessError, undefined);
-      });
-    }
-
     public createSubWindowWithOptions(name: string, options: SubWindowOptions): Promise<Window> {
       return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void) => {
         taskpool.execute((): Window => {
@@ -3911,11 +3860,6 @@ export interface Window {
     setGestureBackEnabled(enabled: boolean): Promise<void>;
     setSingleFrameComposerEnabled(enabled: boolean): Promise<void>;
     getTransitionController(): TransitionController;
-    bindDialogTarget(token: rpc.RemoteObject, deathCallback: Callback<void>): Promise<void>;
-    bindDialogTarget(token: rpc.RemoteObject, deathCallback: Callback<void>, callback: AsyncCallback<void>): void;
-    bindDialogTarget(requestInfo: dialogRequest.RequestInfo, deathCallback: Callback<void>): Promise<void>;
-    bindDialogTarget(requestInfo: dialogRequest.RequestInfo, deathCallback: Callback<void>,
-      callback: AsyncCallback<void>): void;
     createSubWindowWithOptions(name: string, options: SubWindowOptions): Promise<Window>;
     on<T>(type: string, callback: Callback<T>): void;
     on<T>(type: 'noInteractionDetected', timeout: long, callback: Callback<T>): void;
