@@ -76,7 +76,7 @@ ani_status unbox<ani_int>(ani_env *env, ani_object obj, ani_int *result)
         if (status != ANI_OK) {
             return status;
         }
-        status = env->Class_FindMethod(intCls, "unboxed", ":i", &unboxInt);
+        status = env->Class_FindMethod(intCls, "toInt", ":i", &unboxInt);
         if (status != ANI_OK) {
             return status;
         }
