@@ -369,7 +369,7 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowVisibilityChangeRegister(sptr
     return ret;
 }
 
-WmErrorCode AniWindowRegisterManager::ProcessOcclusionStateChangeRegister(sptr<AniWindowListener> listener,
+WmErrorCode AniWindowRegisterManager::ProcessOcclusionStateChangeRegister(const sptr<AniWindowListener>& listener,
     sptr<Window> window, bool isRegister, ani_env* env)
 {
     if (window == nullptr || listener == nullptr) {
