@@ -1508,12 +1508,12 @@ HWTEST_F(WindowSessionImplTest3, RegisterFreeWindowModeChangeListener, TestSize.
     sptr<IFreeWindowModeChangeListener> listener = sptr<IFreeWindowModeChangeListener>::MakeSptr();
     auto ret = window->RegisterFreeWindowModeChangeListener(listener);
     window->NotifyFreeWindowModeChange(true);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
  
     listener = nullptr;
     window->NotifyFreeWindowModeChange(true);
     ret = window->RegisterFreeWindowModeChangeListener(listener);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     window->Destroy();
 }
  
@@ -1530,10 +1530,10 @@ HWTEST_F(WindowSessionImplTest3, UnregisterFreeWindowModeChangeListener, TestSiz
     window->property_->SetPersistentId(2);
     sptr<IFreeWindowModeChangeListener> listener = sptr<IFreeWindowModeChangeListener>::MakeSptr();
     auto ret = window->RegisterFreeWindowModeChangeListener(listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
  
     auto ret1 = window->UnregisterFreeWindowModeChangeListener((listener));
-    ASSERT_EQ(WMError::WM_OK, ret1);
+    EXPECT_EQ(WMError::WM_OK, ret1);
     window->Destroy();
 }
 } // namespace
