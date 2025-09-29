@@ -4927,6 +4927,9 @@ void Session::DeletePersistentImageFit()
         Rosen::ScenePersistentStorage::Delete("SetImageForRecent_" + std::to_string(GetPersistentId()),
             Rosen::ScenePersistentStorageType::MAXIMIZE_STATE);
     }
+    if (scenePersistence_) {
+        scenePersistence_->ClearSnapshotPath();
+    }
 }
 
 void Session::SetGlobalDisplayRect(const WSRect& rect)

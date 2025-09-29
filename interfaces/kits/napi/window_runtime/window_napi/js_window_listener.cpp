@@ -1058,5 +1058,23 @@ void JsWindowListener::OnRotationChange(const RotationChangeInfo& rotationChange
     eventHandler_->PostSyncTask(jsCallback, "wms:JsWindowListener::OnRotationChange",
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
+
+void JsWindowListener::OnFreeWindowModeChange(bool isInFreeWindowMode)
+{
+    auto jsCallback = [self = weakRef_, isInFreeWindowMode, env = env_] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "this listener or env is nullptr");
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value argv[] = { CreateJsValue(env, isInFreeWindowMode) };
+        thisListener->CallJsMethod(FREE_WINDOW_MODE_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
+    napi_status status = napi_send_event(env_, jsCallback, napi_eprio_high, "OnFreeWindowModeChange");
+    if (status != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to send event");
+    }
+}
 } // namespace Rosen
 } // namespace OHOS

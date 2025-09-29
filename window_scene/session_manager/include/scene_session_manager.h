@@ -1752,6 +1752,9 @@ private:
     bool needCloseSync_ = false;
     std::function<void()> closeSyncFunc_ = nullptr;
     WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId) override;
+    WMError SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, ImageFit imageFit,
+        int32_t persistentId) override;
+    WMError RemoveImageForRecent(int32_t persistentId) override;
     void UpdateAllStartingWindowRdb();
 
     RecoverState recoverState_ = RecoverState::RECOVER_END;

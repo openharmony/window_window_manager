@@ -439,6 +439,25 @@ public:
     virtual WSError OnSetImageForRecent(uint32_t imgResourceId, ImageFit ImageFit) { return WSError::WS_OK; }
 
     /**
+     * @brief Callback for set image for recent.
+     *
+     * @param pixelMap recent image.
+     * @param imageFit imageFit.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnSetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, ImageFit ImageFit)
+    {
+        return WSError::WS_OK;
+    }
+
+    /**
+     * @brief Callback for remove image for recent.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnSetImageForRecent() { return WSError::WS_OK; }
+
+    /**
      * @brief Callback for setting to radius of window.
      *
      * @param cornerRadius corner radius of window.
