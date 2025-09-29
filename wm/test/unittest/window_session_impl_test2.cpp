@@ -541,9 +541,9 @@ HWTEST_F(WindowSessionImplTest2, HandleEscKeyEvent003, TestSize.Level1)
     ASSERT_NE(keyEvent, nullptr);
     bool isConsumed = true;
     keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_A);
-    EXPECT_EQ(WMError::WM_OK, window->HandleEscKeyEvent(keyEvent, isConsumed));
+    EXPECT_EQ(WMError::WM_DO_NOTHING, window->HandleEscKeyEvent(keyEvent, isConsumed));
     isConsumed = false;
-    EXPECT_EQ(WMError::WM_OK, window->HandleEscKeyEvent(keyEvent, isConsumed));
+    EXPECT_EQ(WMError::WM_DO_NOTHING, window->HandleEscKeyEvent(keyEvent, isConsumed));
 
     keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_ESCAPE);
     keyEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE);
