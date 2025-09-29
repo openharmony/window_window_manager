@@ -363,6 +363,12 @@ public:
     void SetIsShowDecorInFreeMultiWindow(bool isShow);
     bool GetIsShowDecorInFreeMultiWindow() const;
 
+    /*
+     * Window Layout
+     */
+    void SetAspectRatio(float ratio);
+    float GetAspectRatio() const;
+
 private:
     void setTouchHotAreasInner(const std::vector<Rect>& rects, std::vector<Rect>& touchHotAreas);
     bool MarshallingTouchHotAreasInner(const std::vector<Rect>& touchHotAreas, Parcel& parcel) const;
@@ -403,6 +409,7 @@ private:
     bool WriteActionUpdateBackgroundAlpha(Parcel& parcel);
     bool WriteActionUpdateExclusivelyHighlighted(Parcel& parcel);
     bool WriteActionUpdateFollowScreenChange(Parcel& parcel);
+    bool WriteActionUpdateAspectRatio(Parcel& parcel);
     void ReadActionUpdateTurnScreenOn(Parcel& parcel);
     void ReadActionUpdateKeepScreenOn(Parcel& parcel);
     void ReadActionUpdateViewKeepScreenOn(Parcel& parcel);
@@ -435,6 +442,7 @@ private:
     void ReadActionUpdateBackgroundAlpha(Parcel& parcel);
     void ReadActionUpdateExclusivelyHighlighted(Parcel& parcel);
     void ReadActionUpdateFollowScreenChange(Parcel& parcel);
+    void ReadActionUpdateAspectRatio(Parcel& parcel);
     std::string windowName_;
     SessionInfo sessionInfo_;
     mutable std::mutex windowRectMutex_;
@@ -617,6 +625,11 @@ private:
     std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>> transitionAnimationConfig_;
 
     bool isShowDecorInFreeMultiWindow_ { true };
+
+    /*
+     * Window Layout
+     */
+    float aspectRatio_ { 0.0f };
 };
 
 class CompatibleModeProperty : public Parcelable {
