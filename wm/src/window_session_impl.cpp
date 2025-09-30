@@ -1150,6 +1150,8 @@ void WindowSessionImpl::UpdateRectForResizeAnimation(const Rect& wmRect, const R
         if (!window) {
             return;
         }
+        auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(window->property_->GetDisplayId());
+        sptr<DisplayInfo> displayInfo = display ? display->GetDisplayInfo() : nullptr;
         auto rsUIContext = window->GetRSUIContext();
         std::array<float, ANIMATION_PARAM_SIZE> param = config.animationParam_;
         RSAnimationTimingCurve curve = window->updateConfigCurve(config.animationCurve_, param);
