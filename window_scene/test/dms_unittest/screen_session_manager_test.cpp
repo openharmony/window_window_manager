@@ -1670,13 +1670,14 @@ HWTEST_F(ScreenSessionManagerTest, SetMirror, TestSize.Level1)
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     auto screen = ssm_->GetScreenSession(2);
     screen->GetScreenProperty().SetScreenType(ScreenType::REAL);
-    ASSERT_EQ(DMError::DM_OK, ssm_->SetMirror(2, screens, DMRect::NONE()));
-    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetMirror(9, screens, DMRect::NONE()));
-    ASSERT_EQ(DMError::DM_OK, ssm_->SetMirror(screenId, screens, DMRect::NONE()));
+    ASSERT_EQ(DMError::DM_OK, ssm_->SetMirror(2, screens, DMRect::NONE(), {Rotation::ROTATION_0, false}));
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetMirror(9, screens, DMRect::NONE(), {Rotation::ROTATION_0, false}));
+    ASSERT_EQ(DMError::DM_OK, ssm_->SetMirror(screenId, screens, DMRect::NONE(), {Rotation::ROTATION_0, false}));
     auto mirrorscreen = ssm_->GetScreenSession(screenId);
     ASSERT_TRUE(mirrorscreen != nullptr);
     mirrorscreen->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
-    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetMirror(screenId, screens, DMRect::NONE()));
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetMirror(screenId, screens, DMRect::NONE(),
+        {Rotation::ROTATION_0, false}));
     ssm_->DestroyVirtualScreen(screenId);
 }
 
@@ -1838,7 +1839,7 @@ HWTEST_F(ScreenSessionManagerTest, AddScreenToGroup, TestSize.Level1)
     const std::vector<Point> addChildPos;
     std::map<ScreenId, bool> removeChildResMap;
     sptr<ScreenSessionGroup> group;
-    ssm_->AddScreenToGroup(group, addScreens, addChildPos, removeChildResMap);
+    ssm_->AddScreenToGroup(group, addScreens, addChildPos, removeChildResMap, {Rotation::ROTATION_0, false});
     sptr<ScreenSession> screenSession =new  (std::nothrow) ScreenSession();
     ASSERT_NE(screenSession, ssm_->InitAndGetScreen(2));
     ssm_->DestroyVirtualScreen(screenId);

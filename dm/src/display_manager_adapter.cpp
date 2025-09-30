@@ -862,12 +862,13 @@ void BaseAdapter::Clear()
 }
 
 DMError ScreenManagerAdapter::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId,
-    ScreenId& screenGroupId)
+    ScreenId& screenGroupId, const RotationOption& rotationOption)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     if (screenSessionManagerServiceProxy_) {
-        return screenSessionManagerServiceProxy_->MakeMirror(mainScreenId, mirrorScreenId, screenGroupId);
+        return screenSessionManagerServiceProxy_->MakeMirror(mainScreenId, mirrorScreenId, screenGroupId,
+            rotationOption);
     }
 
     int32_t dmError;

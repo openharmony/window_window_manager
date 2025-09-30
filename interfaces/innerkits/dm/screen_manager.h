@@ -137,6 +137,18 @@ public:
         ScreenId& screenGroupId);
 
     /**
+     * @brief Make screen as mirror-screen with rotation.
+     *
+     * @param mainScreenId Main screen id.
+     * @param mirrorScreenId Mirror screen ids.
+     * @param screenGroupId Screen group id.
+     * @param rotation Mirror screen rotation.
+     * @return DM_OK means make mirror success, others means make mirror failed.
+     */
+    DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId,
+        ScreenId& screenGroupId, Rotation rotation);
+
+    /**
      * @brief Make screens as mirror-screen
      *
      * @param mainScreenId Main screen id.

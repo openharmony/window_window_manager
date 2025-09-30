@@ -452,7 +452,8 @@ public:
 
     bool AddChild(sptr<ScreenSession>& smsScreen, Point& startPoint);
     bool AddChild(sptr<ScreenSession>& smsScreen, Point& startPoint,
-        sptr<ScreenSession> defaultScreenSession, bool isExtend = false);
+        sptr<ScreenSession> defaultScreenSession, bool isExtend = false,
+        const RotationOption& rotationOption = {Rotation::ROTATION_0, false});
     bool AddChildren(std::vector<sptr<ScreenSession>>& smsScreens, std::vector<Point>& startPoints);
     bool RemoveChild(sptr<ScreenSession>& smsScreen);
     bool HasChild(ScreenId childScreen) const;

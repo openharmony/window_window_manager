@@ -721,6 +721,25 @@ HWTEST_F(ScreenManagerTest, MakeMirror_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MakeMirror_002
+ * @tc.desc: MakeMirror_002 fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, MakeMirror_002, TestSize.Level1)
+{
+    std::vector<ScreenId> mirrorScreenId;
+    mirrorScreenId.emplace_back(1000);
+    ScreenId screenGroupId = SCREEN_ID_INVALID;
+    DMError ret1 = ScreenManager::GetInstance().MakeMirror(1, mirrorScreenId, screenGroupId, Rotation::ROTATION_0);
+    ASSERT_NE(ret1, DMError::DM_ERROR_INVALID_PARAM);
+    for (uint32_t i = 0; i < 33; ++i) {
+        mirrorScreenId.emplace_back(i);
+    }
+    DMError ret2 = ScreenManager::GetInstance().MakeMirror(1, mirrorScreenId, ScreenGroupId, Rotation::ROTATION_0);
+    ASSERT_EQ(ret2, DMError::DM_ERROR_INVALID_PARAM);
+}
+
+/**
  * @tc.name: StopExpand
  * @tc.desc: StopExpand fun
  * @tc.type: FUNC
