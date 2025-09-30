@@ -179,13 +179,14 @@ ani_status AniWindowUtils::GetPropertyBoolObject(ani_env* env, const char* prope
     }
 
     ani_boolean bool_value;
-    ret = env->Object_CallMethodByName_Boolean(static_cast<ani_object>(bool_ref), "unboxed", ":z", &bool_value);
+    ret = env->Object_CallMethodByName_Boolean(static_cast<ani_object>(bool_ref), "unboxed", ":Z", &bool_value);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
         return ret;
     }
     result = static_cast<bool>(bool_value);
     TLOGI(WmsLogTag::DEFAULT, "[ANI] %{public}s is: %{public}d", propertyName, result);
+    return ret;
 }
 
 ani_status AniWindowUtils::GetPropertyLongObject(ani_env* env, const char* propertyName, ani_object object,
@@ -1449,7 +1450,7 @@ bool AniWindowUtils::ParseSubWindowOptions(ani_env *env, ani_object aniObject, c
 bool AniWindowUtils::ParseRectParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption)
 {
     ani_ref windowRectRef;
-    ani_status ret = env->Object_GetPropertyByName_Ref(object, "windowRect", &windowRectRef);
+    ani_status ret = env->Object_GetPropertyByName_Ref(aniObject, "windowRect", &windowRectRef);
     if (ret != ANI_OK) {
         return true;
     }
