@@ -1628,7 +1628,24 @@ HWTEST_F(WindowSessionTest4, UpdateSessionOutline01, TestSize.Level1)
     EXPECT_EQ(session_->outlineStyleParams_.outlineColor_, 0x000000ff); // 0x000000ff: color blue byte.
 }
 
+/**
+ * @tc.name: CheckEmptyKeyboardAvoidAreaIfNeeded 01
+ * @tc.desc: Test Case CheckEmptyKeyboardAvoidAreaIfNeeded 01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, CheckEmptyKeyboardAvoidAreaIfNeeded01, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    DisplayId displayId = 0;
+    session_->property_->SetDisplayId(displayId);
+    bool result = session_->CheckEmptyKeyboardAvoidAreaIfNeeded();
+    EXPECT_EQ(result, false);
 
+    displayId = 100;
+    session_->property_->SetDisplayId(displayId);
+    result = session_->CheckEmptyKeyboardAvoidAreaIfNeeded();
+    EXPECT_EQ(result, false);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
