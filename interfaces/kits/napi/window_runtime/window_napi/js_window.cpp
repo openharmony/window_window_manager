@@ -7134,7 +7134,8 @@ napi_value JsWindow::OnMaximize(napi_env env, napi_callback_info info)
         (GetType(env, argv[INDEX_ONE]) == napi_function ? argv[INDEX_ONE] : nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [windowToken = wptr<Window>(windowToken_), presentation, env, task = napiAsyncTask] {
+    const char* const where = __func__;
+    auto asyncTask = [windowToken = wptr<Window>(windowToken_), presentation, env, where, task = napiAsyncTask] {
         auto window = windowToken.promote();
         if (window == nullptr) {
             task->Reject(env,
@@ -7150,6 +7151,8 @@ napi_value JsWindow::OnMaximize(napi_env env, napi_callback_info info)
             task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode,
                 "[window][maximize]msg: Failed"));
         }
+        TLOGNI(WmsLogTag::WMS_PC, "%{public}s id:%{public}u presentation:%{public}d end",
+            where, window->GetWindowId(), presentation);
     };
     if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnMaximize") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
