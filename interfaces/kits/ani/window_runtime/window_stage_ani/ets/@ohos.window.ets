@@ -1743,17 +1743,17 @@ export interface TitleButtonVisibleParam {
 }
 
 export interface GetWindowsByCoordinateParam {
-  displayId: number;
-  windowNumber: number;
-  x: number;
-  y: number;
+  displayId: long;
+  windowNumber: int;
+  x: int;
+  y: int;
 }
 
 export class GetWindowsByCoordinateParamInternal implements GetWindowsByCoordinateParam {
-  displayId: number;
-  windowNumber: number;
-  x: number;
-  y: number;
+  displayId: long;
+  windowNumber: int;
+  x: int;
+  y: int;
 }
 
 /**
@@ -4070,8 +4070,8 @@ export function minimizeAll(id: long, callback: AsyncCallback<void>): void {
     });
 }
 
-export function getWindowsByCoordinate(displayId: number, windowNumber?: number,
-                                       x?: number, y?: number): Promise<Array<Window>> {
+export function getWindowsByCoordinate(displayId: long, windowNumber?: int,
+                                       x?: int, y?: int): Promise<Array<Window>> {
   return new Promise<Array<Window>>((resolve: (value: Array<Window>) => void,
                                      reject: (error: BusinessError) => void): void => {
     taskpool.execute((): Array<Window> => {
