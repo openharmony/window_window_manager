@@ -530,15 +530,15 @@ std::array extensionWindowNativeMethods = {
         reinterpret_cast<void *>(ExtWindowSetWaterMarkFlag)},
     ani_native_function {"hideNonSecureWindows", "JZ:I", reinterpret_cast<void *>(ExtWindowHideNonSecureWindows)},
     ani_native_function {"createSubWindowWithOptions",
-        "lC{std.core.String}C{@ohos.window.window.SubWindowOptions}:C{@ohos.window.window.Window}:",
+        "JLstd/core/String;L@ohos/window/window/SubWindowOptions;:L@ohos/window/window/Window;",
         reinterpret_cast<void *>(ExtWindowCreateSubWindowWithOptions)},
-    ani_native_function {"occupyEvents", "li:", reinterpret_cast<void *>(ExtWindowOccupyEvents)},
-    ani_native_function {"onSync", "lC{std.core.String}C{std.core.Object}:",
+    ani_native_function {"occupyEvents", "JI:V", reinterpret_cast<void *>(ExtWindowOccupyEvents)},
+    ani_native_function {"onSync", "JLstd/core/String;Lstd/core/Object;:V",
         reinterpret_cast<void *>(RegisterExtWindowCallback)},
-    ani_native_function {"offSync", "lC{std.core.String}C{std.core.Object}:",
+    ani_native_function {"offSync", "JLstd/core/String;Lstd/core/Object;:V",
         reinterpret_cast<void *>(UnregisterExtWindowCallback)},
-    ani_native_function {"onRectChange", "liC{std.core.Object}:", reinterpret_cast<void *>(ExtWindowOnRectChange)},
-    ani_native_function {"offRectChange", "lC{std.core.Object}:", reinterpret_cast<void *>(ExtWindowOffRectChange)},
+    ani_native_function {"onRectChange", "JILstd/core/Object;:V", reinterpret_cast<void *>(ExtWindowOnRectChange)},
+    ani_native_function {"offRectChange", "JLstd/core/Object;:V", reinterpret_cast<void *>(ExtWindowOffRectChange)},
     };
 
 std::array extensionWindowHostNativeMethods = {
@@ -551,11 +551,11 @@ std::array extensionWindowHostNativeMethods = {
         reinterpret_cast<void *>(ExtWindowHidePrivacyContentForHost)},
     ani_native_function {"hideNonSecureWindows", "JZ:I", reinterpret_cast<void *>(ExtWindowHideNonSecureWindows)},
     ani_native_function {"createSubWindowWithOptions",
-        "lC{std.core.String}C{@ohos.window.window.SubWindowOptions}:C{@ohos.window.window.Window}:",
+        "JLstd/core/String;L@ohos/window/window/SubWindowOptions;:L@ohos/window/window/Window;",
         reinterpret_cast<void *>(ExtWindowCreateSubWindowWithOptions)},
-    ani_native_function {"onSync", "lC{std.core.String}C{std.core.Object}:",
+    ani_native_function {"onSync", "JLstd/core/String;Lstd/core/Object;:V",
         reinterpret_cast<void *>(RegisterExtWindowCallback)},
-    ani_native_function {"offSync", "lC{std.core.String}C{std.core.Object}:",
+    ani_native_function {"offSync", "JLstd/core/String;Lstd/core/Object;:V",
         reinterpret_cast<void *>(UnregisterExtWindowCallback)},
     };
 
