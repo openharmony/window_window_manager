@@ -79,7 +79,7 @@ ani_status unbox<ani_double>(ani_env* env, ani_object obj, ani_double* result)
         if (status != ANI_OK) {
             return status;
         }
-        status = env->Class_FindMethod(doubleCls, "unboxed", ":d", &unboxDouble);
+        status = env->Class_FindMethod(doubleCls, "toDouble", ":d", &unboxDouble);
         if (status != ANI_OK) {
             return status;
         }
@@ -100,7 +100,7 @@ ani_status unbox<ani_boolean>(ani_env* env, ani_object obj, ani_boolean* result)
         if (status != ANI_OK) {
             return status;
         }
-        status = env->Class_FindMethod(booleanCls, "unboxed", ":z", &unboxBoolean);
+        status = env->Class_FindMethod(booleanCls, "toBoolean", ":z", &unboxBoolean);
         if (status != ANI_OK) {
             return status;
         }
@@ -121,7 +121,7 @@ ani_status unbox<ani_int>(ani_env* env, ani_object obj, ani_int* result)
         if (status != ANI_OK) {
             return status;
         }
-        status = env->Class_FindMethod(intCls, "unboxed", ":i", &unboxInt);
+        status = env->Class_FindMethod(intCls, "toInt", ":i", &unboxInt);
         if (status != ANI_OK) {
             return status;
         }
@@ -142,7 +142,7 @@ ani_status unbox<ani_long>(ani_env* env, ani_object obj, ani_long* result)
         if (status != ANI_OK) {
             return status;
         }
-        status = env->Class_FindMethod(longCls, "unboxed", ":l", &unboxLong);
+        status = env->Class_FindMethod(longCls, "toLong", ":l", &unboxLong);
         if (status != ANI_OK) {
             return status;
         }
