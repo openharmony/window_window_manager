@@ -271,7 +271,7 @@ WmErrorCode AniExtensionWindow::OnRegisterRectChangeCallback(ani_env* env, ani_i
         return WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     return extensionRegisterManager_->RegisterListener(
-        windowImpl, RECT_CHANGE_CB_TYPE, CaseType::CASE_WINDOW, env, fn);
+        windowImpl, WINDOW_RECT_CHANGE_CB, CaseType::CASE_WINDOW, env, fn);
 }
 
 WmErrorCode AniExtensionWindow::OnUnRegisterRectChangeCallback(ani_env* env, ani_object fn)
@@ -288,7 +288,7 @@ WmErrorCode AniExtensionWindow::OnUnRegisterRectChangeCallback(ani_env* env, ani
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     return extensionRegisterManager_->UnregisterListener(
-        windowImpl, RECT_CHANGE_CB_TYPE, CaseType::CASE_WINDOW, env, fn);
+        windowImpl, WINDOW_RECT_CHANGE_CB, CaseType::CASE_WINDOW, env, fn);
 }
 
 static ani_status ExtWindowSetRect(ani_env* env, ani_object obj, OHOS::Rosen::Rect& rect)
