@@ -270,9 +270,9 @@ export interface Display {
 
     hasImmersiveWindow(): Promise<boolean>;
 
-    on(type: string, callback: Callback<Rect>): void;
+    onAvailableAreaChange(callback: Callback<Rect>): void;
 
-    off(type: string, callback?: Callback<Rect>): void;
+    offAvailableAreaChange(callback?: Callback<Rect>): void;
 
     getDisplayCapability(): string;
 }
@@ -402,12 +402,12 @@ export class DisplayImpl implements Display {
         })
     }
 
-    on(type: string, callback: Callback<Rect>): void {
-        this.syncOn(type, callback as object);
+    onAvailableAreaChange(callback: Callback<Rect>): void {
+        this.syncOn('availableAreaChange', callback as object);
     }
 
-    off(type: string, callback?: Callback<Rect>): void {
-        this.syncOff(type, callback);
+    offAvailableAreaChange(callback?: Callback<Rect>): void {
+        this.syncOff('availableAreaChange', callback);
     }
 
     getDisplayCapability(): string {
@@ -578,14 +578,62 @@ export function getNewDisplay(): DisplayImpl {
     return new DisplayImpl();
 }
 
-export function on<T>(type: string, callback: Callback<T>): void {
-    syncOn(type, callback as object, displayMgrRef);
+export function onAdd(callback: Callback<long>): void {
+    syncOn('add', callback as object, displayMgrRef);
+}
+
+export function onRemove(callback: Callback<long>): void {
+    syncOn('remove', callback as object, displayMgrRef);
+}
+
+export function onChange(callback: Callback<long>): void {
+    syncOn('change', callback as object, displayMgrRef);
+}
+
+export function onPrivateModeChange(callback: Callback<boolean>): void {
+    syncOn('privateModeChange', callback as object, displayMgrRef);
+}
+
+export function onFoldStatusChange(callback: Callback<FoldStatus>): void {
+    syncOn('foldStatusChange', callback as object, displayMgrRef);
+}
+
+export function onFoldAngleChange(callback: Callback<Array<double>>): void {
+    syncOn('foldAngleChange', callback as object, displayMgrRef);
+}
+
+export function onCaptureStatusChange(callback: Callback<boolean>): void {
+    syncOn('captureStatusChange', callback as object, displayMgrRef);
 }
 
 export native function syncOn(type: string, callback: object, nativeObj: long): void;
 
-export function off<T>(type: string, callback?: Callback<T>): void {
-    syncOff(type, displayMgrRef, callback);
+export function offAdd(callback?: Callback<long>): void {
+    syncOff('add', displayMgrRef, callback);
+}
+
+export function offRemove(callback?: Callback<long>): void {
+    syncOff('remove', displayMgrRef, callback);
+}
+
+export function offChange(callback?: Callback<long>): void {
+    syncOff('change', displayMgrRef, callback);
+}
+
+export function offPrivateModeChange(callback?: Callback<boolean>): void {
+    syncOff('privateModeChange', displayMgrRef, callback);
+}
+
+export function offFoldStatusChange(callback?: Callback<FoldStatus>): void {
+    syncOff('foldStatusChange', displayMgrRef, callback);
+}
+
+export function offFoldAngleChange(callback?: Callback<Array<double>>): void {
+    syncOff('foldAngleChange', displayMgrRef, callback);
+}
+
+export function offCaptureStatusChange(callback?: Callback<boolean>): void {
+    syncOff('captureStatusChange', displayMgrRef, callback);
 }
 
 export native function syncOff(type: string, nativeObj: long, callback?: object) : void;
