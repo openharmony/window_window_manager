@@ -133,11 +133,11 @@ namespace uiExtensionHost {
       this.offSync(this.nativeObj, type, callback);
     }
 
-    public onAvoidAreaChange(callback: Callback<{ type: window.AvoidAreaType, area: window.AvoidArea }>): void {
+    public onAvoidAreaChange<T>(callback: Callback<T>): void {
       this.onSync(this.nativeObj, AVOID_AREA_CHANGE_CB, callback);
     }
 
-    public offAvoidAreaChange(callback?: Callback<{ type: window.AvoidAreaType, area: window.AvoidArea }>): void {
+    public offAvoidAreaChange<T>(callback?: Callback<T>): void {
       this.offSync(this.nativeObj, AVOID_AREA_CHANGE_CB, callback);
     }
 
@@ -232,8 +232,8 @@ namespace uiExtensionHost {
     createSubWindowWithOptions(name: string, subWindowOptions: window.SubWindowOptions): Promise<window.Window>;
     on<T>(type: string, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;
-    onAvoidAreaChange(callback: Callback<{ type: window.AvoidAreaType, area: window.AvoidArea }>): void;
-    offAvoidAreaChange(callback?: Callback<{ type: window.AvoidAreaType, area: window.AvoidArea }>): void;
+    onAvoidAreaChange<T>(callback: Callback<T>): void;
+    offAvoidAreaChange<T>(callback?: Callback<T>): void;
     onWindowSizeChange(callback: Callback<window.Size>): void;
     offWindowSizeChange(callback?: Callback<window.Size>): void;
 
