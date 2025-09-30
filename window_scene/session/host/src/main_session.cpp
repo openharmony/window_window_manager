@@ -384,6 +384,7 @@ void MainSession::NotifySubAndDialogFollowRectChange(const WSRect& rect, bool is
         if (subSession && subSession->GetIsFollowParentLayout() && func) {
             if (!isCompatMode) {
                 func(rect, isGlobal, needFlush);
+                continue;
             }
             if (newRect.IsEmpty()) {
                 HookStartMoveRect(newRect, rect);
