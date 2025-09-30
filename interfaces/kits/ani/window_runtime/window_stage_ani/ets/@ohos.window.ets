@@ -31,6 +31,7 @@ export type WindowStatusCallback = (data: window.WindowStatusType) => void;
 export type KeyboardHeightChangeCallback = (data: int) => void;
 export type KeyboardDidShowOrHideCallback = (data: window.KeyboardInfo) => void;
 export type WindowVoidCallback = () => void;
+export type RotationChangeCallback<T, U> = (info: T) => U;
 const DOMAIN = 0x4200;
 const TAG = '[ANI]';
 namespace window {
@@ -3509,8 +3510,42 @@ export class WindowInternal implements Window {
       this.onNoInteractionDetected(this.nativeObj, 'noInteractionDetected', timeout, callback as WindowVoidCallback);
     }
 
+    public onKeyboardHeightChange(callback: Callback<int>): void {
+      this.onSync(this.nativeObj, "keyboardHeightChange", callback);
+    }
+
+    public onKeyboardDidShow(callback: Callback<KeyboardInfo>): void {
+      this.onSync(this.nativeObj, "keyboardDidShow", callback);
+    }
+
+    public onKeyboardDidHide(callback: Callback<KeyboardInfo>): void {
+      this.onSync(this.nativeObj, "keyboardDidHide", callback);
+    }
+
+    public onRotationChange(callback: RotationChangeCallback<RotationChangeInfo,
+      RotationChangeResult | undefined>): void {
+      this.onSync(this.nativeObj, "rotationChange", callback);
+    }
+
     public off<T>(type: string, callback?: Callback<T>): void {
       this.offSync(this.nativeObj, type, callback);
+    }
+
+    public offKeyboardHeightChange(callback?: Callback<int>): void {
+      this.offSync(this.nativeObj, "keyboardHeightChange", callback);
+    }
+
+    public offKeyboardDidShow(callback?: Callback<KeyboardInfo>): void {
+      this.offSync(this.nativeObj, "keyboardDidShow", callback);
+    }
+
+    public offKeyboardDidHide(callback?: Callback<KeyboardInfo>): void {
+      this.offSync(this.nativeObj, "keyboardDidHide", callback);
+    }
+
+    public offRotationChange(callback?: RotationChangeCallback<RotationChangeInfo,
+      RotationChangeResult | undefined>): void {
+      this.offSync(this.nativeObj, "rotationChange", callback);
     }
 
     public offTouchOutside(callback?: Callback<void>): void {
@@ -3974,7 +4009,17 @@ export interface Window {
     onTouchOutside(callback: Callback<void>): void;
     onDialogTargetTouch(callback: Callback<void>): void;
     onNoInteractionDetected(timeout: long, callback: Callback<void>): void;
+    onKeyboardHeightChange(callback: Callback<int>): void;
+    onKeyboardDidShow(callback: Callback<KeyboardInfo>): void;
+    onKeyboardDidHide(callback: Callback<KeyboardInfo>): void;
+    onRotationChange(callback: RotationChangeCallback<RotationChangeInfo, RotationChangeResult |
+      undefined>): void;
     off<T>(type: string, callback?: Callback<T>): void;
+    offKeyboardHeightChange(callback?: Callback<int>): void;
+    offKeyboardDidShow(callback?: Callback<KeyboardInfo>): void;
+    offKeyboardDidHide(callback?: Callback<KeyboardInfo>): void;
+    offRotationChange(callback?: RotationChangeCallback<RotationChangeInfo, RotationChangeResult |
+      undefined>): void;
     offTouchOutside(callback?: Callback<void>): void;
     offDialogTargetTouch(callback?: Callback<void>): void;
     offNoInteractionDetected(callback?: Callback<void>): void;
