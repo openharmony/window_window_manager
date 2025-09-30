@@ -1604,19 +1604,15 @@ WSError Session::Disconnect(bool isFromClient, const std::string& identityToken)
     if (mainHandler_) {
         std::shared_ptr<RSSurfaceNode> surfaceNode;
         std::shared_ptr<RSSurfaceNode> shadowSurfaceNode;
-        std::shared_ptr<RSSurfaceNode> leashWinShadowSurfaceNode;
         {
             std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
             surfaceNode_.swap(surfaceNode);
             shadowSurfaceNode.swap(shadowSurfaceNode_);
-            leashWinShadowSurfaceNode.swap(leashWinShadowSurfaceNode_);
         }
         mainHandler_->PostTask([surfaceNode = std::move(surfaceNode),
-                                shadowSurfaceNode = std::move(shadowSurfaceNode),
-                                leashWinShadowSurfaceNode = std::move(leashWinShadowSurfaceNode)]() mutable {
+                                shadowSurfaceNode = std::move(shadowSurfaceNode)]() mutable {
             surfaceNode.reset();
             shadowSurfaceNode.reset();
-            leashWinShadowSurfaceNode.reset();
         });
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
