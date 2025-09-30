@@ -22,6 +22,7 @@
 #include "window_helper.h"
 #include "session_helper.h"
 #include "session/host/include/scene_persistent_storage.h"
+#include "wm_math.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -95,6 +96,7 @@ WSError MainSession::Reconnect(const sptr<ISessionStage>& sessionStage, const sp
         if (session->pcFoldScreenController_) {
             session->pcFoldScreenController_->OnConnect();
         }
+        session->RestoreAspectRatio(property->GetAspectRatio());
         return ret;
     });
 }
@@ -588,5 +590,21 @@ WSError MainSession::NotifyIsFullScreenInForceSplitMode(bool isFullScreen)
 bool MainSession::IsFullScreenInForceSplit()
 {
     return isFullScreenInForceSplit_.load();
+}
+
+bool MainSession::RestoreAspectRatio(float ratio)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, ratio: %{public}f", GetPersistentId(), ratio);
+
+    // If ratio is nearly zero, no aspect ratio needs to be restored.
+    // This avoids overwriting the persistent configuration.
+    if (MathHelper::NearZero(ratio)) {
+        return false;
+    }
+    Session::SetAspectRatio(ratio);
+    if (moveDragController_) {
+        moveDragController_->SetAspectRatio(ratio);
+    }
+    return true;
 }
 } // namespace OHOS::Rosen

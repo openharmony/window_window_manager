@@ -163,43 +163,44 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, SetAspectRatio03, TestSize.Level1)
 }
 
 /**
- * @tc.name: ResetAspectRatio01
- * @tc.desc: ResetAspectRatio test GetAvoidAreaByType
+ * @tc.name: ResetAspectRatioTest
+ * @tc.desc: Verify ResetAspectRatio behavior in different scenarios.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplLayoutTest, ResetAspectRatio01, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplLayoutTest, ResetAspectRatioTest, TestSize.Level1)
 {
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("ResetAspectRatio01");
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_OK, window->ResetAspectRatio());
-    ASSERT_EQ(0, session->GetAspectRatio());
-}
+    auto option = sptr<WindowOption>::MakeSptr();
+    auto window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetAspectRatio(1.5f);
+    SessionInfo sessionInfo;
+    auto mockHostSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
 
-/**
- * @tc.name: ResetAspectRatio02
- * @tc.desc: ResetAspectRatio
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplLayoutTest, ResetAspectRatio02, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("ResetAspectRatio02");
-    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    windowSceneSessionImpl->hostSession_ = nullptr;
-    auto ret = windowSceneSessionImpl->ResetAspectRatio();
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
-    windowSceneSessionImpl->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    windowSceneSessionImpl->hostSession_ = session;
-    windowSceneSessionImpl->state_ = WindowState::STATE_CREATED;
-    ret = windowSceneSessionImpl->ResetAspectRatio();
-    EXPECT_EQ(WMError::WM_OK, ret);
+    // Case 1: hostSession_ is nullptr
+    {
+        window->hostSession_ = nullptr;
+        auto ret = window->ResetAspectRatio();
+        EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+        EXPECT_FLOAT_EQ(1.5f, window->property_->GetAspectRatio());
+    }
+
+    // Case 2: hostSession_->SetAspectRatio fails
+    {
+        EXPECT_CALL(*mockHostSession, SetAspectRatio(_))
+            .Times(1).WillOnce(Return(WSError::WS_ERROR_IPC_FAILED));
+        window->hostSession_ = mockHostSession;
+        auto ret = window->ResetAspectRatio();
+        EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+        EXPECT_FLOAT_EQ(1.5f, window->property_->GetAspectRatio());
+    }
+
+    // Case 3: hostSession_->SetAspectRatio succeeds
+    {
+        EXPECT_CALL(*mockHostSession, SetAspectRatio(_))
+            .Times(1).WillOnce(Return(WSError::WS_OK));
+        auto ret = window->ResetAspectRatio();
+        EXPECT_EQ(WMError::WM_OK, ret);
+        EXPECT_FLOAT_EQ(0.0f, window->property_->GetAspectRatio());
+    }
 }
 
 /**

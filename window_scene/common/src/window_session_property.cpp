@@ -99,6 +99,8 @@ const std::map<uint64_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
         &WindowSessionProperty::WriteActionUpdateFollowScreenChange),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_SHADOW_ENABLED),
         &WindowSessionProperty::WriteActionUpdateWindowShadowEnabled),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO),
+        &WindowSessionProperty::WriteActionUpdateAspectRatio),
 };
 
 const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncMap_ {
@@ -174,6 +176,8 @@ const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
         &WindowSessionProperty::ReadActionUpdateFollowScreenChange),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_SHADOW_ENABLED),
         &WindowSessionProperty::ReadActionUpdateWindowShadowEnabled),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO),
+        &WindowSessionProperty::ReadActionUpdateAspectRatio),
 };
 
 WindowSessionProperty::WindowSessionProperty(const sptr<WindowSessionProperty>& property)
@@ -1372,7 +1376,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteString(ancoRealBundleName_) &&
         parcel.WriteBool(isShowDecorInFreeMultiWindow_) &&
         parcel.WriteBool(isMobileAppInPadLayoutFullScreen_) &&
-        parcel.WriteBool(isFullScreenInForceSplitMode_);
+        parcel.WriteBool(isFullScreenInForceSplitMode_) &&
+        parcel.WriteFloat(aspectRatio_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1492,6 +1497,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsShowDecorInFreeMultiWindow(parcel.ReadBool());
     property->SetMobileAppInPadLayoutFullScreen(parcel.ReadBool());
     property->SetIsFullScreenInForceSplitMode(parcel.ReadBool());
+    property->SetAspectRatio(parcel.ReadFloat());
     return property;
 }
 
@@ -1606,6 +1612,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     }
     isShowDecorInFreeMultiWindow_ = property->isShowDecorInFreeMultiWindow_;
     isMobileAppInPadLayoutFullScreen_ = property->isMobileAppInPadLayoutFullScreen_;
+    aspectRatio_ = property->aspectRatio_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -1782,6 +1789,11 @@ bool WindowSessionProperty::WriteActionUpdateWindowShadowEnabled(Parcel& parcel)
     return parcel.WriteBool(windowShadowEnabled_);
 }
 
+bool WindowSessionProperty::WriteActionUpdateAspectRatio(Parcel& parcel)
+{
+    return parcel.WriteFloat(aspectRatio_);
+}
+
 void WindowSessionProperty::Read(Parcel& parcel, WSPropertyChangeAction action)
 {
     const auto funcIter = readFuncMap_.find(static_cast<uint64_t>(action));
@@ -1956,6 +1968,11 @@ void WindowSessionProperty::ReadActionUpdateFollowScreenChange(Parcel& parcel)
 void WindowSessionProperty::ReadActionUpdateWindowShadowEnabled(Parcel& parcel)
 {
     SetWindowShadowEnabled(parcel.ReadBool());
+}
+
+void WindowSessionProperty::ReadActionUpdateAspectRatio(Parcel& parcel)
+{
+    SetAspectRatio(parcel.ReadFloat());
 }
 
 void WindowSessionProperty::SetTransform(const Transform& trans)
@@ -2641,6 +2658,16 @@ void WindowSessionProperty::SetIsShowDecorInFreeMultiWindow(bool isShow)
 bool WindowSessionProperty::GetIsShowDecorInFreeMultiWindow() const
 {
     return isShowDecorInFreeMultiWindow_;
+}
+
+void WindowSessionProperty::SetAspectRatio(float ratio)
+{
+    aspectRatio_ = ratio;
+}
+
+float WindowSessionProperty::GetAspectRatio() const
+{
+    return aspectRatio_;
 }
 } // namespace Rosen
 } // namespace OHOS

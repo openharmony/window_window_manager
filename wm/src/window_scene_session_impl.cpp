@@ -2640,6 +2640,7 @@ WMError WindowSceneSessionImpl::SetAspectRatio(float ratio)
     if (hostSession->SetAspectRatio(ratio) != WSError::WS_OK) {
         return WMError::WM_ERROR_INVALID_PARAM;
     }
+    property_->SetAspectRatio(ratio);
     return WMError::WM_OK;
 }
 
@@ -2647,7 +2648,14 @@ WMError WindowSceneSessionImpl::ResetAspectRatio()
 {
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-    return static_cast<WMError>(hostSession->SetAspectRatio(0.0f));
+    WSError ret = hostSession->SetAspectRatio(0.0f);
+    if (ret != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed, windowId: %{public}u, ret: %{public}d",
+            GetWindowId(), static_cast<int32_t>(ret));
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    property_->SetAspectRatio(0.0f);
+    return WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::SetContentAspectRatio(float ratio, bool isPersistent, bool needUpdateRect)
@@ -2673,6 +2681,7 @@ WMError WindowSceneSessionImpl::SetContentAspectRatio(float ratio, bool isPersis
     if (hostSession->SetContentAspectRatio(ratio, isPersistent, needUpdateRect) != WSError::WS_OK) {
         return WMError::WM_ERROR_ILLEGAL_PARAM;
     }
+    property_->SetAspectRatio(ratio);
     return WMError::WM_OK;
 }
 
