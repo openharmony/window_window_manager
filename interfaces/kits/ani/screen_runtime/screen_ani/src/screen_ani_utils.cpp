@@ -405,9 +405,9 @@ ani_status ScreenAniUtils::GetScreenIdArrayFromAni(ani_env* env, ani_object mirr
             return ret;
         }
         ani_long screenId;
-        ret = env->Object_CallMethodByName_Long(static_cast<ani_object>(screenIdRef), "unboxed", ":l", &screenId);
+        ret = env->Object_CallMethodByName_Long(static_cast<ani_object>(screenIdRef), "toLong", ":l", &screenId);
         if (ret !=ANI_OK) {
-            TLOGE(WmsLogTag::DMS, "[ANI] unboxed screenId failed, ret: %{public}u", ret);
+            TLOGE(WmsLogTag::DMS, "[ANI] unbox screenId failed, ret: %{public}u", ret);
             return ret;
         }
         mirrorScreenIds.emplace_back(static_cast<ScreenId>(screenId));

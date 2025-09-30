@@ -229,10 +229,10 @@ ani_long ScreenManagerAni::MakeMirror(ani_env* env, ani_long mainScreen, ani_obj
             return static_cast<ani_long>(INVALID_SCREEN_ID);
         }
         ani_long screenId;
-        ret = env->Object_CallMethodByName_Long(static_cast<ani_object>(screenIdRef), "unboxed", ":l", &screenId);
+        ret = env->Object_CallMethodByName_Long(static_cast<ani_object>(screenIdRef), "toLong", ":l", &screenId);
         if (ANI_OK != ret) {
-            TLOGE(WmsLogTag::DMS, "[ANI] unboxed screenId failed, ret: %{public}u", ret);
-            AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to unboxed screenId");
+            TLOGE(WmsLogTag::DMS, "[ANI] unbox screenId failed, ret: %{public}u", ret);
+            AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to unbox screenId");
             return static_cast<ani_long>(INVALID_SCREEN_ID);
         }
         screenIds.emplace_back(static_cast<ScreenId>(screenId));
