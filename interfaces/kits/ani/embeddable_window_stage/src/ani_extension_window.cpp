@@ -534,9 +534,9 @@ std::array extensionWindowNativeMethods = {
         reinterpret_cast<void *>(ExtWindowCreateSubWindowWithOptions)},
     ani_native_function {"occupyEvents", "li:", reinterpret_cast<void *>(ExtWindowOccupyEvents)},
     ani_native_function {"onSync", "lC{std.core.String}C{std.core.Object}:",
-        reinterpret_cast<void *>(AniWindow::RegisterExtWindowCallback)},
+        reinterpret_cast<void *>(RegisterExtWindowCallback)},
     ani_native_function {"offSync", "lC{std.core.String}C{std.core.Object}:",
-        reinterpret_cast<void *>(AniWindow::UnregisterExtWindowCallback)},
+        reinterpret_cast<void *>(UnregisterExtWindowCallback)},
     ani_native_function {"onRectChange", "liC{std.core.Object}:", reinterpret_cast<void *>(ExtWindowOnRectChange)},
     ani_native_function {"offRectChange", "lC{std.core.Object}:", reinterpret_cast<void *>(ExtWindowOffRectChange)},
     };
@@ -554,9 +554,9 @@ std::array extensionWindowHostNativeMethods = {
         "lC{std.core.String}C{@ohos.window.window.SubWindowOptions}:C{@ohos.window.window.Window}:",
         reinterpret_cast<void *>(ExtWindowCreateSubWindowWithOptions)},
     ani_native_function {"onSync", "lC{std.core.String}C{std.core.Object}:",
-        reinterpret_cast<void *>(AniWindow::RegisterExtWindowCallback)},
+        reinterpret_cast<void *>(RegisterExtWindowCallback)},
     ani_native_function {"offSync", "lC{std.core.String}C{std.core.Object}:",
-        reinterpret_cast<void *>(AniWindow::UnregisterExtWindowCallback)},
+        reinterpret_cast<void *>(UnregisterExtWindowCallback)},
     };
 
 ANI_EXPORT ani_status ExtensionWindow_ANI_Constructor(ani_vm *vm, uint32_t *result)
