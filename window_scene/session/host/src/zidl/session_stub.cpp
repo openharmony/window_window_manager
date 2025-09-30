@@ -1687,8 +1687,7 @@ int SessionStub::HandleSetDecorVisible(MessageParcel& data, MessageParcel& reply
         TLOGE(WmsLogTag::WMS_DECOR, "Failed to read isVisible");
         return ERR_INVALID_DATA;
     }
-    WSError ret = SetDecorVisible(isVisible);
-    reply.WriteInt32(static_cast<int32_t>(ret));
+    SetDecorVisible(isVisible);
     return ERR_NONE;
 }
 

@@ -103,6 +103,7 @@ private:
     void NotifySubSessionRectChangeByAnchor(const WSRect& parentRect,
         SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID) override;
     void HandleSubSessionSurfaceNodeByWindowAnchor(SizeChangeReason reason, DisplayId displayId) override;
+    bool RestoreAspectRatio(float ratio);
 
     /*
      * Compatible Mode

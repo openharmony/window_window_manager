@@ -980,6 +980,43 @@ HWTEST_F(MainSessionTest, NotifyIsFullScreenInForceSplitMode, TestSize.Level3)
     ret = testSession->NotifyIsFullScreenInForceSplitMode(true);
     EXPECT_EQ(ret, WSError::WS_OK);
 }
+
+/**
+ * @tc.name: RestoreAspectRatioTest
+ * @tc.desc: Verify RestoreAspectRatio behavior under different conditions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, RestoreAspectRatioTest, TestSize.Level1)
+{
+    SessionInfo info;
+    sptr<MainSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
+    session->Session::SetAspectRatio(0.0f);
+
+    // Case 1: ratio nearly zero
+    {
+        float ratio = 0.0f;
+        bool ret = session->RestoreAspectRatio(ratio);
+        EXPECT_FALSE(ret);
+        EXPECT_FLOAT_EQ(session->GetAspectRatio(), 0.0f);
+    }
+
+    // Case 2: ratio valid, moveDragController_ is not nullptr
+    {
+        float ratio = 1.6f;
+        bool ret = session->RestoreAspectRatio(ratio);
+        EXPECT_TRUE(ret);
+        EXPECT_FLOAT_EQ(session->GetAspectRatio(), ratio);
+    }
+
+    // Case 3: ratio valid, moveDragController_ is nullptr
+    {
+        float ratio = 1.33f;
+        session->moveDragController_ = nullptr;
+        bool ret = session->RestoreAspectRatio(ratio);
+        EXPECT_TRUE(ret);
+        EXPECT_FLOAT_EQ(session->GetAspectRatio(), ratio);
+    }
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
