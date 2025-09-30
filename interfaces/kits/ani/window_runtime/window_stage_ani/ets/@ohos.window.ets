@@ -3481,6 +3481,14 @@ export class WindowInternal implements Window {
       return this.getTransitionControllerSync(this.nativeObj);
     }
 
+    public onWindowHighlightChange(callback: Callback<boolean>): void {
+      this.onSync(this.nativeObj, "WindowHighlightChange", callback);
+    }
+
+    public offWindowHighlightChange(callback?: Callback<boolean>): void {
+      this.offSync(this.nativeObj, "WindowHighlightChange", callback);
+    }
+
     public on<T>(type: string, callback: Callback<T>): void {
       this.onSync(this.nativeObj, type, callback);
     }
@@ -3958,6 +3966,8 @@ export interface Window {
     setGestureBackEnabled(enabled: boolean): Promise<void>;
     setSingleFrameComposerEnabled(enabled: boolean): Promise<void>;
     getTransitionController(): TransitionController;
+    onWindowHighlightChange(callback: Callback<boolean>): void;
+    offWindowHighlightChange(callback?: Callback<boolean>): void;
     createSubWindowWithOptions(name: string, options: SubWindowOptions): Promise<Window>;
     on<T>(type: string, callback: Callback<T>): void;
     on<T>(type: 'noInteractionDetected', timeout: long, callback: Callback<T>): void;
