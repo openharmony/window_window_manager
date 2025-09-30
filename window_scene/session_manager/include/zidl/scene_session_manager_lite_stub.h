@@ -102,6 +102,7 @@ private:
     int HandleUnsetPipEnableByScreenId(MessageParcel& data, MessageParcel& reply);
     int HandleRegisterPipChgListener(MessageParcel& data, MessageParcel& reply);
     int HandleUnRegisterPipChgListener(MessageParcel& data, MessageParcel& reply);
+    int HandleGetDisplayIdByWindowId(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };
