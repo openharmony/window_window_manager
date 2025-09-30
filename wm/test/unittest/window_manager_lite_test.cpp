@@ -1536,6 +1536,19 @@ HWTEST_F(WindowManagerLiteTest, RemoveInstanceByUserId, TestSize.Level1)
 {
     ASSERT_EQ(WMError::WM_OK, WindowManagerLite::RemoveInstanceByUserId(101));
 }
+
+/**
+ * @tc.name: GetDisplayIdByWindowId
+ * @tc.desc: check GetDisplayIdByWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, GetDisplayIdByWindowId, TestSize.Level1)
+{
+    const std::vector<uint64_t> windowIds = { 1, 2 };
+    std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
+    auto ret = WindowManagerLite::GetInstance().GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
 }
 } // namespace
 } // namespace OHOS::Rosen
