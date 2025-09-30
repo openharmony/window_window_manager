@@ -1431,9 +1431,9 @@ bool AniWindowUtils::ParseSubWindowOptions(ani_env *env, ani_object aniObject, c
 
     // optional
     bool maximizeSupported = false;
-    GetPropertyBoolObject(env, "maximizeSupported", aniObject, &maximizeSupported);
+    GetPropertyBoolObject(env, "maximizeSupported", aniObject, maximizeSupported);
     bool outlineEnabled = false;
-    GetPropertyBoolObject(env, "outlineEnabled", aniObject, &outlineEnabled);
+    GetPropertyBoolObject(env, "outlineEnabled", aniObject, outlineEnabled);
     windowOption->SetSubWindowTitle(title);
     windowOption->SetSubWindowDecorEnable(decorEnabled);
     windowOption->SetSubWindowMaximizeSupported(maximizeSupported);
