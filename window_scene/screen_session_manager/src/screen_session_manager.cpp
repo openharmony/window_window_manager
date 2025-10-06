@@ -10898,13 +10898,6 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenCapture(const Ca
         return nullptr;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetScreenCapture(%" PRIu64")", captureOption.displayId_);
-    std::ostringstream oss;
-    for (size_t i = 0; i < captureOption.surfaceNodesList_.size(); ++i) {
-        oss << captureOption.surfaceNodesList_[i] << ", ";
-    }
-
-    TLOGI(WmsLogTag::DMS, "zhao capture option isNeedNotify=%{public}d isNeedPointer=%{public}d  surfaceList=%{public}s",
-        captureOption.isNeedNotify_, captureOption.isNeedPointer_, oss.str().c_str());
     auto res = GetScreenSnapshot(captureOption.displayId_, false, false, captureOption.surfaceNodesList_);
     AddPermissionUsedRecord(CUSTOM_SCREEN_CAPTURE_PERMISSION,
         static_cast<int32_t>(res != nullptr), static_cast<int32_t>(res == nullptr));
