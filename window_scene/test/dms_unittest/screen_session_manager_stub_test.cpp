@@ -2904,7 +2904,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest133, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest13301, TestSize.Level1)
 {
-    logMsg.clear();
+    g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     MessageParcel data;
     MessageParcel reply;
@@ -2918,7 +2918,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest13301, TestSize.Level1)
     data.WriteBool(true);
     uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_CAPTURE);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_TRUE(logMsg.find("Read node surfaceNodesList failed") != std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("Read node surfaceNodesList failed") != std::string::npos);
     LOG_SetCallback(nullptr);
 }
 
