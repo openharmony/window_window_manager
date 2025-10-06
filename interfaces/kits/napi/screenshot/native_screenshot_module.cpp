@@ -253,7 +253,7 @@ static bool GetScreenshotParam(napi_env env, std::unique_ptr<Param> &param, napi
 {
     if (param == nullptr) {
         TLOGI(WmsLogTag::DMS, "param == nullptr, use default param");
-        rreturn true;
+        return true;
     }
     GetDisplayId(env, param, argv);
     GetRotation(env, param, argv);
