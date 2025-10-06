@@ -49,6 +49,7 @@ struct Option {
     bool isNeedNotify = true;
     bool isNeedPointer = true;
     bool isCaptureFullOfScreen = false;
+    std::vector<NodeId> surfaceNodesList = {};
 };
 
 struct Param {
@@ -208,6 +209,32 @@ static void IsNeedPointer(napi_env env, std::unique_ptr<Param> &param, napi_valu
     }
 }
 
+static bool ConverSurfaceIdList(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
+{
+    napi_value surfaceIdList;
+    napi_status status = napi_get_named_property(env, argv, "blackWindowIds", &surfaceIdList);
+    if (status != napi_ok) {
+        return true;
+    }
+    uint32_t size = 0;
+    if (GetType(env, surfaceIdList) != napi_object ||
+        napi_get_array_length(env, surfaceIdList, &size) == napi_invalid_arg) {
+        TLOGW(WmsLogTag::DMS, "no surface id list");
+        return true;
+    }
+    std::vector<uint64_t> persistentIds;
+    for (uint32_t i = 0; i < size; i++) {
+        int64_t persistentId = 0;
+        napi_value element = nullptr;
+        napi_get_element(env, surfaceIdList, i, &element);
+        if (napi_get_value_int64(env, element, &persistentId) != napi_ok) {
+            return false;
+        }
+        param->option.surfaceNodesList.push_back(static_cast<uint64_t>(persistentId));
+    }
+    return true;
+}
+
 static void IsCaptureFullOfScreen(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
 {
     TLOGI(WmsLogTag::DMS, "Get Screenshot Option: isCaptureFullOfScreen");
@@ -222,11 +249,11 @@ static void IsCaptureFullOfScreen(napi_env env, std::unique_ptr<Param> &param, n
     }
 }
 
-static void GetScreenshotParam(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
+static bool GetScreenshotParam(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
 {
     if (param == nullptr) {
         TLOGI(WmsLogTag::DMS, "param == nullptr, use default param");
-        return;
+        rreturn true;
     }
     GetDisplayId(env, param, argv);
     GetRotation(env, param, argv);
@@ -235,6 +262,8 @@ static void GetScreenshotParam(napi_env env, std::unique_ptr<Param> &param, napi
     IsNeedNotify(env, param, argv);
     IsNeedPointer(env, param, argv);
     IsCaptureFullOfScreen(env, param, argv);
+    auto result = ConverSurfaceIdList(env, param, argv);
+    return result;
 }
 
 static void AsyncGetScreenshot(napi_env env, std::unique_ptr<Param> &param)
@@ -498,7 +527,7 @@ napi_value PickFunc(napi_env env, napi_callback_info info)
         param->validInputParam = true;
         NAPI_CALL(env, napi_create_reference(env, argv[0], 1, &ref));
     } else {  // 0 valid parameters
-        TLOGI(WmsLogTag::DMS, "argc == 0");
+        TLOGI(WmsLogTag::DMS, "argc != 0");
         param->validInputParam = true;
     }
     param->isPick = true;
@@ -511,8 +540,13 @@ static void AsyncGetScreenCapture(napi_env env, std::unique_ptr<Param> &param)
     captureOption.displayId_ = param->option.displayId;
     captureOption.isNeedNotify_ = param->option.isNeedNotify;
     captureOption.isNeedPointer_ = param->option.isNeedPointer;
-    TLOGI(WmsLogTag::DMS, "capture option isNeedNotify=%{public}d isNeedPointer=%{public}d",
-        captureOption.isNeedNotify_, captureOption.isNeedPointer_);
+    captureOption.surfaceNodesList_ = param->option.surfaceNodesList;
+    std::ostringstream oss;
+    for (size_t i = 0; i < captureOption.surfaceNodesList_.size(); ++i) {
+        oss << captureOption.surfaceNodesList_[i] << ", ";
+    }
+    TLOGI(WmsLogTag::DMS, "capture option isNeedNotify=%{public}d isNeedPointer=%{public}d  surfaceList=%{public}s",
+        captureOption.isNeedNotify_, captureOption.isNeedPointer_, oss.str().c_str());
     param->image = DisplayManager::GetInstance().GetScreenCapture(captureOption, &param->wret);
     if (param->image == nullptr && param->wret == DmErrorCode::DM_OK) {
         TLOGI(WmsLogTag::DMS, "screen capture failed!");
@@ -538,7 +572,10 @@ napi_value CaptureFunc(napi_env env, napi_callback_info info)
     napi_ref ref = nullptr;
     if (argc > 0 && GetType(env, argv[0]) == napi_object) {
         TLOGI(WmsLogTag::DMS, "argv[0]'s type is napi_object");
-        GetScreenshotParam(env, param, argv[0]);
+        bool result = GetScreenshotParam(env, param, argv[0]);
+        if (!result) {
+            return nullptr;
+        }
     } else {
         TLOGI(WmsLogTag::DMS, "use default.");
     }

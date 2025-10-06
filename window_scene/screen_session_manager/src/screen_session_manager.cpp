@@ -10884,11 +10884,6 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenCapture(const Ca
         *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
         return nullptr;
     }
-    if (!ScreenSceneConfig::IsSupportCapture()) {
-        TLOGW(WmsLogTag::DMS, "device not support capture.");
-        *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
-        return nullptr;
-    }
     if (!Permission::CheckCallingPermission(CUSTOM_SCREEN_CAPTURE_PERMISSION) &&
         !Permission::CheckCallingPermission(CUSTOM_SCREEN_RECORDING_PERMISSION) && !SessionPermission::IsShellCall()) {
         TLOGE(WmsLogTag::DMS, "Permission Denied! clientName: %{public}s, pid: %{public}d.",
@@ -10903,7 +10898,14 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenCapture(const Ca
         return nullptr;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetScreenCapture(%" PRIu64")", captureOption.displayId_);
-    auto res = GetScreenSnapshot(captureOption.displayId_, false);
+    std::ostringstream oss;
+    for (size_t i = 0; i < captureOption.surfaceNodesList_.size(); ++i) {
+        oss << captureOption.surfaceNodesList_[i] << ", ";
+    }
+
+    TLOGI(WmsLogTag::DMS, "zhao capture option isNeedNotify=%{public}d isNeedPointer=%{public}d  surfaceList=%{public}s",
+        captureOption.isNeedNotify_, captureOption.isNeedPointer_, oss.str().c_str());
+    auto res = GetScreenSnapshot(captureOption.displayId_, false, false, captureOption.surfaceNodesList_);
     AddPermissionUsedRecord(CUSTOM_SCREEN_CAPTURE_PERMISSION,
         static_cast<int32_t>(res != nullptr), static_cast<int32_t>(res == nullptr));
     if (res == nullptr) {
