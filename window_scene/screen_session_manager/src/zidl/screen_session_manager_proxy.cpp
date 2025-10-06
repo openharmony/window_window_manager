@@ -4280,7 +4280,8 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetScreenCapture(con
         return nullptr;
     }
     if (!data.WriteUint64(captureOption.displayId_) ||
-        !data.WriteBool(captureOption.isNeedNotify_) || !data.WriteBool(captureOption.isNeedPointer_)) {
+        !data.WriteBool(captureOption.isNeedNotify_) || !data.WriteBool(captureOption.isNeedPointer_) ||
+        !data.WriteUInt64Vector(captureOption.surfaceNodesList_)) {
         TLOGE(WmsLogTag::DMS, "Write displayId or isNeedNotify or isNeedPointer failed");
         return nullptr;
     }
