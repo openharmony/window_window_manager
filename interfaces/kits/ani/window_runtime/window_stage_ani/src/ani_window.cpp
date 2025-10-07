@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <ui_content.h>
 
 #include "ani.h"
@@ -1859,6 +1860,96 @@ void AniWindow::ResetAspectRatio(ani_env* env)
     TLOGD(WmsLogTag::WMS_LAYOUT, "[ANI] success, windowId: %{public}u", windowId);
 }
 
+void AniWindow::Maximize(
+    ani_env* env, ani_object obj, ani_long nativeObj, ani_object aniPresentation, ani_object aniAcrossDisplay)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (!aniWindow) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] aniWindow is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    aniWindow->OnMaximize(env, aniPresentation, aniAcrossDisplay);
+}
+
+std::optional<MaximizePresentation> ParsePresentation(ani_env* env, ani_object aniPresentation)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] env is nullptr");
+        return std::nullopt;
+    }
+    if (AniWindowUtils::CheckParaIsUndefined(env, aniPresentation)) {
+        return MaximizePresentation::ENTER_IMMERSIVE;
+    }
+    uint32_t value = 0;
+    ani_status ret = AniWindowUtils::GetEnumValue(env, static_cast<ani_enum_item>(aniPresentation), value);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Invalid presentation param, ret: %{public}d", ret);
+        return std::nullopt;
+    }
+    return static_cast<MaximizePresentation>(value);
+}
+
+std::optional<WaterfallResidentState> ParseWaterfallResidentState(ani_env* env, ani_object aniAcrossDisplay)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] env is nullptr");
+        return std::nullopt;
+    }
+    if (AniWindowUtils::CheckParaIsUndefined(env, aniAcrossDisplay)) {
+        return WaterfallResidentState::CANCEL;
+    }
+    ani_boolean acrossDisplay = ANI_FALSE;
+    ani_status ret = env->Object_CallMethodByName_Boolean(aniAcrossDisplay, "unboxed", ":z", &acrossDisplay);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Invalid acrossDisplay param, ret: %{public}d", ret);
+        return std::nullopt;
+    }
+    return acrossDisplay ? WaterfallResidentState::OPEN : WaterfallResidentState::CLOSE;
+}
+
+void AniWindow::OnMaximize(ani_env* env, ani_object aniPresentation, ani_object aniAcrossDisplay)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] window is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    if (!(WindowHelper::IsMainWindow(windowToken_->GetType()) || windowToken_->IsSubWindowMaximizeSupported())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Unsupported window type");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+        return;
+    }
+    auto presentationOpt = ParsePresentation(env, aniPresentation);
+    if (!presentationOpt) {
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return;
+    }
+    auto waterfallResidentStateOpt = ParseWaterfallResidentState(env, aniAcrossDisplay);
+    if (!waterfallResidentStateOpt) {
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return;
+    }
+    auto ret = windowToken_->Maximize(*presentationOpt, *waterfallResidentStateOpt);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC,
+              "[ANI] Failed, windowId: %{public}u, presentation: %{public}d, waterfallResidentState: %{public}u, ret: "
+              "%{public}d",
+              windowToken_->GetWindowId(),
+              static_cast<int32_t>(*presentationOpt),
+              static_cast<uint32_t>(*waterfallResidentStateOpt),
+              static_cast<int32_t>(ret));
+        AniWindowUtils::AniThrowError(env, AniWindowUtils::ToErrorCode(ret));
+        return;
+    }
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC,
+          "[ANI] Success, windowId: %{public}u, presentation: %{public}d, waterfallResidentState: %{public}d",
+          windowToken_->GetWindowId(),
+          static_cast<int32_t>(*presentationOpt),
+          static_cast<uint32_t>(*waterfallResidentStateOpt));
+}
+
 /** @note @window.layout */
 void AniWindow::SetResizeByDragEnabled(ani_env* env, ani_boolean enable)
 {
@@ -2843,6 +2934,8 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(WindowSetAspectRatio)},
         ani_native_function {"resetAspectRatio", "J:V",
             reinterpret_cast<void *>(WindowResetAspectRatio)},
+        ani_native_function {"maximize", "JL@ohos/window/window/MaximizePresentation;Lstd/core/Boolean;:V",
+            reinterpret_cast<void *>(AniWindow::Maximize)},
         ani_native_function {"setResizeByDragEnabled", "JZ:V",
             reinterpret_cast<void *>(WindowSetResizeByDragEnabled)},
         ani_native_function {"enableDrag", "JZ:V",

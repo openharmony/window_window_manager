@@ -1961,6 +1961,7 @@ export class WindowInternal implements Window {
     private native getWindowLimits(nativeObj: long): WindowLimits;
     private native setAspectRatio(nativeObj: long, ratio: double): void;
     private native resetAspectRatio(nativeObj: long): void;
+    private native maximize(nativeObj: long, presentation?: MaximizePresentation, acrossDisplay?: boolean): void;
     private native setResizeByDragEnabled(nativeObj: long, enable: boolean): void;
     private native enableDrag(nativeObj: long, enable: boolean): void;
     private native moveWindowToGlobal(nativeObj: long, x: int, y: int, moveConfiguration?: MoveConfiguration): void;
@@ -2679,6 +2680,18 @@ export class WindowInternal implements Window {
       });
     }
 
+    public maximize(presentation?: MaximizePresentation, acrossDisplay?: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
+        taskpool.execute(() => {
+          this.maximize(this.nativeObj, presentation, acrossDisplay);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
     public setResizeByDragEnabled(enable: boolean, callback: AsyncCallback<void>) {
       taskpool.execute(() => {
         this.setResizeByDragEnabled(this.nativeObj, enable);
@@ -2959,6 +2972,7 @@ export interface Window {
     setAspectRatio(ratio: double): Promise<void>;
     resetAspectRatio(callback: AsyncCallback<void>): void;
     resetAspectRatio(): Promise<void>;
+    maximize(presentation?: MaximizePresentation, acrossDisplay?: boolean): Promise<void>;
     setResizeByDragEnabled(enable: boolean, callback: AsyncCallback<void>): void;
     setResizeByDragEnabled(enable: boolean): Promise<void>;
     enableDrag(enable: boolean): Promise<void>;
