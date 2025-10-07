@@ -1784,6 +1784,10 @@ HWTEST_F(SceneSessionTest, OnSessionEvent, TestSize.Level1)
     sceneSession->moveDragController_->hasPointDown_ = true;
     ASSERT_EQ(sceneSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE), WSError::WS_OK);
     ASSERT_EQ(sceneSession->OnSessionEvent(SessionEvent::EVENT_END_MOVE), WSError::WS_OK);
+
+    SessionEventParam param;
+    auto ret = sceneSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE, param);
+    EXPECT_EQ(ret, WSError::WS_OK);
 }
 
 /**
