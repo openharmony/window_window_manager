@@ -4238,7 +4238,7 @@ WMError SceneSessionManagerProxy::UpdateOutline(const sptr<IRemoteObject>& remot
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerProxy::SendCommonEvent(CommonEventCommand command, const std::vector<int32_t>& datas)
+WMError SceneSessionManagerProxy::SendCommonEvent(int32_t command, const std::vector<int32_t>& datas)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -4248,13 +4248,13 @@ WMError SceneSessionManagerProxy::SendCommonEvent(CommonEventCommand command, co
         TLOGE(WmsLogTag::WMS_EVENT, "Write interface token failed.");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt32(static_cast<int32_t>(command))) {
+    if (!data.WriteInt32(command)) {
         TLOGE(WmsLogTag::WMS_EVENT, "Write command failed.");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     for (auto dataInfo : datas) {
         if (!data.WriteInt32(dataInfo)) {
-            TLOGE(WmsLogTag::WMS_EVENT, "Write command failed.");
+            TLOGE(WmsLogTag::WMS_EVENT, "Write dataInfo failed.");
             return WMError::WM_ERROR_IPC_FAILED;
         }
     }
@@ -4271,7 +4271,7 @@ WMError SceneSessionManagerProxy::SendCommonEvent(CommonEventCommand command, co
     }
     int32_t ret;
     if (!reply.ReadInt32(ret)) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "Read reply failed.");
+        TLOGE(WmsLogTag::WMS_EVENT, "Read reply failed.");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     return static_cast<WMError>(ret);

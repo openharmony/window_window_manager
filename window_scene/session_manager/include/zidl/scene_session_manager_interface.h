@@ -478,8 +478,10 @@ public:
         return WMError::WM_OK;
     }
 
-    // event
-    WMError SendCommonEvent(CommonEventCommand command, const std::vector<int32_t>& datas) override
+    /*
+     * Window event
+     */
+    WMError SendCommonEvent(int32_t command, const std::vector<int32_t>& datas) override
     {
         return WMError::WM_OK;
     }

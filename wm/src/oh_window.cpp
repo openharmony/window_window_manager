@@ -727,9 +727,13 @@ int32_t OH_WindowManager_LockCursor(int32_t windowId, bool isCursorFollowMovemen
             return;
         }
         if (!window->IsFocused()) {
+            TLOGE(WmsLogTag::WMS_EVENT, "%{public}s window is not focused, windowId:%{public}d", where, windowId);
             errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+            return;
         }
-        errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(window->LockCursor(isFocusable));
+        auto ret = window->LockCursor(windowId, isCursorFollowMovement);
+        errCode = OH_WINDOW_TO_ERROR_CODE_MAP.find(ret) == OH_WINDOW_TO_ERROR_CODE_MAP.end() ?
+            WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL : OH_WINDOW_TO_ERROR_CODE_MAP.at(ret);
     }, __func__);
     return errCode;
 }
@@ -751,8 +755,11 @@ int32_t OH_WindowManager_UnLockCursor(int32_t windowId)
         }
         if (!window->IsFocused()) {
             errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+            return;
         }
-        errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(window->UnLockCursor());
+        auto ret = window->UnLockCursor(windowId);
+        errCode = OH_WINDOW_TO_ERROR_CODE_MAP.find(ret) == OH_WINDOW_TO_ERROR_CODE_MAP.end() ?
+            WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL : OH_WINDOW_TO_ERROR_CODE_MAP.at(ret);
     }, __func__);
     return errCode;
 }

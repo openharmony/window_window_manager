@@ -2645,8 +2645,8 @@ int SceneSessionManagerStub::HandleUpdateOutline(MessageParcel& data, MessagePar
 
 int SceneSessionManagerStub::HandleSendCommonEvent(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t commnad = 0;
-    if (!data.ReadInt32(commnad)) {
+    int32_t command = 0;
+    if (!data.ReadInt32(command)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed");
         return ERR_INVALID_DATA;
     }
@@ -2669,11 +2669,11 @@ int SceneSessionManagerStub::HandleSendCommonEvent(MessageParcel& data, MessageP
     }
 
     WMError ret = WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    swtich(commnad) {
-        case case static_cast<uint32_t>(CommonEventCommand::LOCK_CURSOR):
+    switch(command) {
+        case static_cast<uint32_t>(CommonEventCommand::LOCK_CURSOR):
             ret = LockCursor(datas);
             break;
-        case case static_cast<uint32_t>(CommonEventCommand::UNLOCK_CURSOR):
+        case static_cast<uint32_t>(CommonEventCommand::UNLOCK_CURSOR):
             ret = UnLockCursor(datas);
             break;
         default:
@@ -2683,7 +2683,7 @@ int SceneSessionManagerStub::HandleSendCommonEvent(MessageParcel& data, MessageP
 
     if (!reply.WriteUint32(static_cast<uint32_t>(ret))) {
         TLOGE(WmsLogTag::WMS_EVENT, "Write errCode failed.");
-        return WM_ERROR_IPC_FAILED;
+        return ERR_INVALID_DATA;
     }
     return ERR_NONE;
 }

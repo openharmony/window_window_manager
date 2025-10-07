@@ -163,7 +163,7 @@ public:
     virtual WMError SetForegroundWindowNum(uint32_t windowNum);
     virtual WMError SetStartWindowBackgroundColor(
         const std::string& moduleName, const std::string& abilityName, uint32_t color, int32_t uid);
-    virtual WMError SendCommonEvent(CommonEventCommand command, const std::vector<int32_t>& datas);
+    virtual WMError SendCommonEvent(int32_t command, const std::vector<int32_t>& datas);
 
     /*
      * Window Recover

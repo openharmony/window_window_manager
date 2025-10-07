@@ -6562,7 +6562,8 @@ WMError WindowSessionImpl::LockCursor(int32_t windowId, bool isCursorFollowMovem
     datas.emplace_back(LOCK_CURSOR_LENGTH);
     datas.emplace_back(windowId);
     datas.emplace_back(static_cast<int32_t>(isCursorFollowMovement));
-    return SingletonContainer::Get<WindowAdapter>().SendCommonEvent(CommonEventCommand::LOCK_CURSOR, datas);
+    return SingletonContainer::Get<WindowAdapter>().SendCommonEvent(
+        static_cast<int32_t>(CommonEventCommand::LOCK_CURSOR), datas);
 }
 
 WMError WindowSessionImpl::UnLockCursor(int32_t windowId)
@@ -6574,7 +6575,8 @@ WMError WindowSessionImpl::UnLockCursor(int32_t windowId)
     std::vector<int32_t> datas;
     datas.emplace_back(UNLOCK_CURSOR_LENGTH);
     datas.emplace_back(windowId);
-    return SingletonContainer::Get<WindowAdapter>().SendCommonEvent(CommonEventCommand::UNLOCK_CURSOR, datas);
+    return SingletonContainer::Get<WindowAdapter>().SendCommonEvent(
+        static_cast<int32_t>(CommonEventCommand::UNLOCK_CURSOR), datas);
 }
 
 WMError WindowSessionImpl::SetKeyEventFilter(KeyEventFilterFunc filter)

@@ -5964,7 +5964,7 @@ WMError SceneSessionManager::UnLockCursor(const std::vector<int32_t>& datas)
         TLOGE(WmsLogTag::WMS_EVENT, "The format is incorrect(size=0).");
         return WMError::WM_ERROR_ILLEGAL_PARAM;
     }
-    if (datas[0] != LOCK_CURSOR_LENGTH) {
+    if (datas[0] != UNLOCK_CURSOR_LENGTH) {
         TLOGE(WmsLogTag::WMS_EVENT, "The format is incorrect(length error).");
         return WMError::WM_ERROR_ILLEGAL_PARAM;
     }
