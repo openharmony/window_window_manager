@@ -1512,11 +1512,11 @@ WMError WindowAdapter::UpdateOutline(const sptr<IRemoteObject>& remoteObject, co
     return wmsProxy->UpdateOutline(remoteObject, outlineParams);
 }
 
-WMError WindowAdapter::SendCommonEvent(CommonEventCommand command, const std::vector<int32_t>& datas)
+WMError WindowAdapter::SendCommonEvent(int32_t command, const std::vector<int32_t>& datas)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     auto wmsProxy = GetWindowManagerServiceProxy();
-    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_NULLPTR);
     return wmsProxy->SendCommonEvent(command, datas);
 }
 } // namespace Rosen

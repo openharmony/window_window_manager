@@ -35,7 +35,7 @@ struct CursorInfo {
     bool isActivating = false;
     int32_t windowId = INVALID_WINDOW_ID;
     bool isCursorFollowMovement = false;
-}
+};
 
 class SceneInputManager : public std::enable_shared_from_this<SceneInputManager> {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SceneInputManager)
