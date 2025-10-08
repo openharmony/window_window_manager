@@ -117,6 +117,19 @@ HWTEST_F(SceneSessionManagerLiteTest, UnsetPipEnableByScreenId_ShouldRetOk_WhenS
     EXPECT_EQ(SceneSessionManagerLite::GetInstance().SetPipEnableByScreenId(1, true), WMError::WM_OK);
     EXPECT_EQ(SceneSessionManagerLite::GetInstance().UnsetPipEnableByScreenId(1), WMError::WM_OK);
 }
+
+/**
+ * @tc.name: GetDisplayIdByWindowId01
+ * @tc.desc: test function : GetDisplayIdByWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteTest, GetDisplayIdByWindowId01, TestSize.Level1)
+{
+    std::vector<uint64_t> windowIds;
+    std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
+    EXPECT_EQ(SceneSessionManagerLite::GetInstance().GetDisplayIdByWindowId(windowIds, windowDisplayIdMap),
+        WMError::WM_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

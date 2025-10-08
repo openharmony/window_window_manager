@@ -377,6 +377,16 @@ public:
      */
     WMError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
+    /**
+     * @brief Get displayId by windowId.
+     *
+     * @param windowIds list of window ids that need to get screen ids
+     * @param windowDisplayIdMap map of windows and displayIds
+     * @return WM_OK means get success, others means failed.
+     */
+    WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+        std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap);
+
     ~WindowManagerLite() override;
 
 private:
