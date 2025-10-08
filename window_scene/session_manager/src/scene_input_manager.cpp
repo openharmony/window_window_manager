@@ -230,7 +230,7 @@ void SceneInputManager::ResetSessionDirty()
 auto SceneInputManager::GetFullWindowInfoList() ->
     std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::PixelMap>>>
 {
-    return sceneSessionDirty_->GetFullWindowInfoList();
+    return sceneSessionDirty_->GetFullWindowInfoList(lockCursorInfo);
 }
 
 std::vector<MMI::ScreenInfo> SceneInputManager::ConstructScreenInfos(
@@ -679,21 +679,21 @@ void SceneInputManager::SetCurrentUserId(int32_t userId)
 
 void SceneInputManager::LockCursor(int32_t windowId, bool isCursorFollowMovement)
 {
-    cursorInfo.isActivating = true;
-    cursorInfo.windowId = windowId;
-    cursorInfo.isCursorFollowMovement = isCursorFollowMovement;
+    lockCursorInfo.isActivating = true;
+    lockCursorInfo.windowId = windowId;
+    lockCursorInfo.isCursorFollowMovement = isCursorFollowMovement;
     TLOGI(WmsLogTag::WMS_EVENT, "winId:%{public}d-%{public}d", windowId, isCursorFollowMovement);
 }
 
 bool SceneInputManager::UnLockCursor(int32_t windowId)
 {
-    if (!cursorInfo.isActivating) {
+    if (!lockCursorInfo.isActivating) {
         TLOGI(WmsLogTag::WMS_EVENT, "winId:%{public}d-same", windowId);
         return false;
     }
-    cursorInfo.isActivating = false;
-    cursorInfo.windowId = windowId;
-    cursorInfo.isCursorFollowMovement = false;
+    lockCursorInfo.isActivating = false;
+    lockCursorInfo.windowId = windowId;
+    lockCursorInfo.isCursorFollowMovement = false;
     TLOGI(WmsLogTag::WMS_EVENT, "winId:%{public}d", windowId);
     return true;
 }

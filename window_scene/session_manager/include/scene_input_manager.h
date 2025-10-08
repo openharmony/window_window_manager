@@ -31,7 +31,7 @@ namespace Rosen {
 class SceneSessionDirtyManager;
 struct SecSurfaceInfo;
 
-struct CursorInfo {
+struct LockCursorInfo {
     bool isActivating = false;
     int32_t windowId = INVALID_WINDOW_ID;
     bool isCursorFollowMovement = false;
@@ -101,7 +101,7 @@ private:
     int32_t lastFocusId_ { -1 };
     int32_t focusedSessionId_ { -1 };
 
-    CursorInfo cursorInfo;
+    LockCursorInfo lockCursorInfo;
 
     /*
      * Multi User

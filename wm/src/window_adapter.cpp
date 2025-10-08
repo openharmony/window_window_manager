@@ -1516,7 +1516,7 @@ WMError WindowAdapter::SendCommonEvent(int32_t command, const std::vector<int32_
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     auto wmsProxy = GetWindowManagerServiceProxy();
-    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_NULLPTR);
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->SendCommonEvent(command, datas);
 }
 } // namespace Rosen

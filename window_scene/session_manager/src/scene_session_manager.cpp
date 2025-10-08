@@ -5936,19 +5936,26 @@ void SceneSessionManager::PreLoadStartingWindow(sptr<SceneSession> sceneSession)
 /*
  * Window Event start
  */
+bool SceneSessionManager::checkDatas(const std::vector<int32_t>& datas, const int32_t length)
+{
+    if (datas.size() < 1) {
+        TLOGE(WmsLogTag::WMS_EVENT, "The format is incorrect(size<1).");
+        return false;
+    }
+    if (datas[0] != length) {
+        TLOGE(WmsLogTag::WMS_EVENT, "The format is incorrect(length error).");
+        return false;
+    }
+    if (datas[0] != datas.size() - 1) {
+        TLOGE(WmsLogTag::WMS_EVENT, "The format is incorrect(size error).");
+        return false;
+    }
+    return true;
+}
 
 WMError SceneSessionManager::LockCursor(const std::vector<int32_t>& datas)
 {
-    if (datas.size() < 1) {
-        TLOGE(WmsLogTag::WMS_EVENT, "The format is incorrect(size=0).");
-        return WMError::WM_ERROR_ILLEGAL_PARAM;
-    }
-    if (datas[0] != LOCK_CURSOR_LENGTH) {
-        TLOGE(WmsLogTag::WMS_EVENT, "The format is incorrect(length error).");
-        return WMError::WM_ERROR_ILLEGAL_PARAM;
-    }
-    if (datas[0] != datas.size() - 1) {
-        TLOGE(WmsLogTag::WMS_EVENT, "The format is incorrect(length error).");
+    if (!checkDatas(datasm, LOCK_CURSOR_LENGTH)) {
         return WMError::WM_ERROR_ILLEGAL_PARAM;
     }
     int32_t windowId = datas[1];
@@ -5960,16 +5967,7 @@ WMError SceneSessionManager::LockCursor(const std::vector<int32_t>& datas)
 
 WMError SceneSessionManager::UnLockCursor(const std::vector<int32_t>& datas)
 {
-    if (datas.size() < 1) {
-        TLOGE(WmsLogTag::WMS_EVENT, "The format is incorrect(size=0).");
-        return WMError::WM_ERROR_ILLEGAL_PARAM;
-    }
-    if (datas[0] != UNLOCK_CURSOR_LENGTH) {
-        TLOGE(WmsLogTag::WMS_EVENT, "The format is incorrect(length error).");
-        return WMError::WM_ERROR_ILLEGAL_PARAM;
-    }
-    if (datas[0] != datas.size() - 1) {
-        TLOGE(WmsLogTag::WMS_EVENT, "The format is incorrect(length error).");
+    if (!checkDatas(datasm, UNLOCK_CURSOR_LENGTH)) {
         return WMError::WM_ERROR_ILLEGAL_PARAM;
     }
     int32_t windowId = datas[1];
