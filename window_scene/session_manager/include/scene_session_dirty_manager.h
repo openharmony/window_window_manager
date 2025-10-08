@@ -29,6 +29,7 @@
 namespace OHOS::Rosen {
 struct SecSurfaceInfo;
 struct SecRectInfo;
+struct LockCursorInfo;
 MMI::Direction ConvertDegreeToMMIRotation(float degree);
 MMI::Rotation ConvertToMMIRotation(float degree);
 std::string DumpWindowInfo(const MMI::WindowInfo& info);
@@ -63,7 +64,7 @@ public:
     void NotifyWindowInfoChange(const sptr<SceneSession>& sceneSession,
         const WindowUpdateType& type, const bool startMoving = false);
     std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::PixelMap>>>
-        GetFullWindowInfoList();
+        GetFullWindowInfoList(LockCursorInfo& lockCursorInfo);
     void RegisterFlushWindowInfoCallback(FlushWindowInfoCallback&& callback);
     void ResetSessionDirty();
     void UpdateSecSurfaceInfo(const std::map<uint64_t, std::vector<SecSurfaceInfo>>& secSurfaceInfoMap);
@@ -75,8 +76,8 @@ public:
 private:
     std::vector<MMI::WindowInfo> FullSceneSessionInfoUpdate() const;
     bool IsFilterSession(const sptr<SceneSession>& sceneSession) const;
-    std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>>
-        GetWindowInfo(const sptr<SceneSession>& sceneSession, const WindowAction& action) const;
+    std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> GetWindowInfo(const sptr<SceneSession>& sceneSession,
+        const WindowAction& action, const LockCursorInfo& lockCursorInfo) const;
     SingleHandData GetSingleHandData(const sptr<SceneSession>& sceneSession) const;
     void CalNotRotateTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform,
         bool useUIExtension = false) const;

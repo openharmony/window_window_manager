@@ -839,6 +839,7 @@ public:
     /*
      * Window Event
      */
+    bool checkDatas(const std::vector<int32_t>& datas, const int32_t length);
     WMError LockCursor(const std::vector<int32_t>& datas) override;
     WMError UnLockCursor(const std::vector<int32_t>& datas) override;
 

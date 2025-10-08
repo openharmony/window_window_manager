@@ -700,7 +700,7 @@ void SceneSessionDirtyManager::GetModalUIExtensionInfo(std::vector<MMI::WindowIn
     }
 }
 
-auto SceneSessionDirtyManager::GetFullWindowInfoList() ->
+auto SceneSessionDirtyManager::GetFullWindowInfoList(LockCursorInfo& lockCursorInfo) ->
 std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::PixelMap>>>
 {
     std::vector<MMI::WindowInfo> windowInfoList;
@@ -719,7 +719,7 @@ std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::Pixel
             " windowId=%{public}d activeStatus=%{public}d", sceneSessionValue->GetWindowName().c_str(),
             sceneSessionValue->GetSessionInfo().bundleName_.c_str(), sceneSessionValue->GetWindowId(),
             sceneSessionValue->GetForegroundInteractiveStatus());
-        auto [windowInfo, pixelMap] = GetWindowInfo(sceneSessionValue, WindowAction::WINDOW_ADD);
+        auto [windowInfo, pixelMap] = GetWindowInfo(sceneSessionValue, WindowAction::WINDOW_ADD, lockCursorInfo);
         auto iter = (sceneSessionValue->GetMainSessionId() == INVALID_SESSION_ID) ?
             dialogMap.find(sceneSessionValue->GetPersistentId()) :
             dialogMap.find(sceneSessionValue->GetMainSessionId());
@@ -834,7 +834,7 @@ void SceneSessionDirtyManager::UpdateWindowFlags(DisplayId displayId, const sptr
 }
 
 std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyManager::GetWindowInfo(
-    const sptr<SceneSession>& sceneSession, const WindowAction& action) const
+    const sptr<SceneSession>& sceneSession, const WindowAction& action, const LockCursorInfo& lockCursorInfo) const
 {
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
@@ -905,6 +905,18 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     auto expandInputFlag = sceneSession->GetSessionInfoExpandInputFlag();
     if (expandInputFlag & static_cast<uint32_t>(ExpandInputFlag::WINDOW_DISABLE_USER_ACTION)) {
         windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_DISABLE_USER_ACTION;
+    }
+    if (sceneSession->IsFocused() && lockCursorInfo.isActivating) {
+        if (windowId != lockCursorInfo.windowId) {
+            TLOGW(WmsLogTag::WMS_EVENT, "LockCursor:Inconsistent focus IDs(WF:%{public}d-L:%{public}d)", windowId,
+                lockCursorInfo.windowId);
+            lockCursorInfo.isActivating = false;
+        } else {
+            windowInfo.flags |= 0x08;
+            if (lockCursorInfo.isCursorFollowMovement) {
+                windowInfo.flags |= 0x10;
+            }
+        }
     }
     UpdatePrivacyMode(sceneSession, windowInfo);
     windowInfo.uiExtentionWindowInfo = GetSecSurfaceWindowinfoList(sceneSession, windowInfo, transform);
