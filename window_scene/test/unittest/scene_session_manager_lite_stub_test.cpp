@@ -310,6 +310,8 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         return WMError::WM_OK;
     }
     WMError UnregisterPipChgListenerByScreenId(int32_t screenId) override { return WMError::WM_OK; }
+    WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+        std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override { return WMError::WM_OK; }
 };
 
 class SceneSessionManagerLiteStubTest : public testing::Test {
@@ -1438,6 +1440,22 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnsetPipEnableByScreenId_ReadInt
     MessageParcel data;
     MessageParcel reply;
     EXPECT_EQ(sceneSessionManagerLiteStub_->HandleUnsetPipEnableByScreenId(data, reply), ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleGetDisplayIdByWindowId
+ * @tc.desc: test HandleGetDisplayIdByWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetDisplayIdByWindowId, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    const std::vector<uint64_t> windowIds = { 1, 2 };
+    data.WriteUInt64Vector(windowIds);
+
+    int res = sceneSessionManagerLiteStub_->HandleGetDisplayIdByWindowId(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
 }
 
 HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetPipEnableByScreenId_Success, Function | SmallTest | Level1)

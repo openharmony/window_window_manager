@@ -430,4 +430,11 @@ WMError SceneSessionManagerLite::UnregisterPipChgListenerByScreenId(int32_t scre
     WLOGFD("in");
     return SceneSessionManager::GetInstance().UnregisterPipChgListenerByScreenId(screenId);
 }
+
+WMError SceneSessionManagerLite::GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+    std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap)
+{
+    WLOGFD("in");
+    return SceneSessionManager::GetInstance().GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
+}
 } // namespace OHOS::Rosen
