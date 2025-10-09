@@ -134,7 +134,24 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
         // otherwise, stop the previous one
         PictureInPictureManager::DoClose(true, true);
     }
-    return StartPictureInPictureInner(startType);
+
+    WMError errCode = StartPictureInPictureInner(startType);
+    if (errCode != WMError::WM_OK) {
+        DeletePIPMode();
+    }
+    return errCode;
+}
+
+void PictureInPictureController::DeletePIPMode()
+{
+    std::string navId = pipOption_->GetNavigationId();
+    if (!navId.empty()) {
+        auto navController = NavigationController::GetNavigationController(mainWindow_->GetUIContent(), navId);
+        if (navController) {
+            navController->DeletePIPMode(handleId_);
+            TLOGI(WmsLogTag::WMS_PIP, "Delete pip mode id: %{public}d", handleId_);
+        }
+    }
 }
 
 void PictureInPictureController::SetAutoStartEnabled(bool enable)
