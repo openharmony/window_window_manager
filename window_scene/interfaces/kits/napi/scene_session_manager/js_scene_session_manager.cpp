@@ -3081,19 +3081,21 @@ napi_value JsSceneSessionManager::OnRequestFocusStatus(napi_env env, napi_callba
             return NapiGetUndefined(env);
         }
     }
-    DisplayId displayId = DISPLAY_ID_INVALID;
+    int64_t displayIdValue = -1;
     if (argc > DEFAULT_ARG_COUNT) {
-        if (!ConvertFromJsValue(env, argv[ARG_INDEX_FOUR], displayId)) {
+        if (!ConvertFromJsValue(env, argv[ARG_INDEX_FOUR], displayIdValue)) {
             TLOGI(WmsLogTag::WMS_FOCUS, "Failed to convert parameter to displayId");
             napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
                 "Input parameter is missing or invalid"));
             return NapiGetUndefined(env);
         }
     }
+    DisplayId displayId = displayIdValue < 0 ? DISPLAY_ID_INVALID : static_cast<DisplayId>(displayIdValue);
     TLOGD(WmsLogTag::WMS_FOCUS, "Id: %{public}d, isFocused: %{public}d, byForeground: %{public}d, "
         "reason: %{public}d, displayId: %{public}" PRIu64, persistentId, isFocused, byForeground, reason, displayId);
     if (Session::IsScbCoreEnabled()) {
-        SceneSessionManager::GetInstance().RequestFocusStatusBySCB(persistentId, isFocused, byForeground, reason, displayId);
+        SceneSessionManager::GetInstance().RequestFocusStatusBySCB(persistentId, isFocused, byForeground, reason,
+            displayId);
     } else {
         SceneSessionManager::GetInstance().RequestFocusStatus(persistentId, isFocused, byForeground, reason);
     }
