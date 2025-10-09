@@ -3046,51 +3046,53 @@ napi_value JsSceneSessionManager::OnRequestFocusStatus(napi_env env, napi_callba
     napi_value argv[5] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < MIN_ARG_COUNT) {
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_FOCUS, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     int32_t persistentId;
     if (!ConvertFromJsValue(env, argv[0], persistentId)) {
-        WLOGFE("Failed to convert parameter to persistentId");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Failed to convert parameter to persistentId");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     bool isFocused = false;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], isFocused)) {
-        WLOGFE("Failed to convert parameter to isFocused");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Failed to convert parameter to isFocused");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     bool byForeground = false;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_TWO], byForeground)) {
-        WLOGFE("Failed to convert parameter to byForeground");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Failed to convert parameter to byForeground");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     FocusChangeReason reason = FocusChangeReason::DEFAULT;
-    if (argc > MIN_ARG_COUNT) {
-        if (!ConvertFromJsValue(env, argv[ARG_INDEX_THREE], reason)) {
-            TLOGI(WmsLogTag::WMS_FOCUS, "Failed to convert parameter to reason");
-            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-                "Input parameter is missing or invalid"));
-            return NapiGetUndefined(env);
-        }
+    if (argc > MIN_ARG_COUNT && !ConvertFromJsValue(env, argv[ARG_INDEX_THREE], reason)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Failed to convert parameter to reason");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
     }
     int64_t displayIdValue = -1;
-    if (argc > DEFAULT_ARG_COUNT) {
-        if (!ConvertFromJsValue(env, argv[ARG_INDEX_FOUR], displayIdValue)) {
-            TLOGI(WmsLogTag::WMS_FOCUS, "Failed to convert parameter to displayId");
-            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-                "Input parameter is missing or invalid"));
-            return NapiGetUndefined(env);
-        }
+    if (argc > DEFAULT_ARG_COUNT && !ConvertFromJsValue(env, argv[ARG_INDEX_FOUR], displayIdValue)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Failed to convert parameter to displayId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
     }
     DisplayId displayId = displayIdValue < 0 ? DISPLAY_ID_INVALID : static_cast<DisplayId>(displayIdValue);
+    return DoRequestFocusStatus(persistentId, isFocused, byForeground, reason, displayId);
+}
+
+napi_value JsSceneSessionManager::DoRequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground,
+    FocusChangeReason reason, DisplayId displayId)
+{
     TLOGD(WmsLogTag::WMS_FOCUS, "Id: %{public}d, isFocused: %{public}d, byForeground: %{public}d, "
         "reason: %{public}d, displayId: %{public}" PRIu64, persistentId, isFocused, byForeground, reason, displayId);
     if (Session::IsScbCoreEnabled()) {

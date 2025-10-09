@@ -315,7 +315,7 @@ public:
     WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT) override;
     WMError RequestFocusStatusBySCB(int32_t persistentId, bool isFocused, bool byForeground = true,
-        FocusChangeReason reason = FocusChangeReason::DEFAULT);
+        FocusChangeReason reason = FocusChangeReason::DEFAULT, DisplayId displayI = DISPLAY_ID_INVALID);
     WMError RequestFocusStatusBySA(int32_t persistentId, bool isFocused = true,
         bool byForeground = true, FocusChangeReason reason = FocusChangeReason::SA_REQUEST) override;
     void RequestAllAppSessionUnfocus();
