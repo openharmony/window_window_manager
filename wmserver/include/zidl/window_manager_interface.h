@@ -208,6 +208,10 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WMError UpdateSessionOcclusionStateListener(int32_t persistentId, bool haveListener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId)
     {
         return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;

@@ -11454,6 +11454,9 @@ void SceneSessionManager::SetSessionVisibilityInfo(const sptr<SceneSession>& ses
     if (windowVisibilityListenerSessionSet_.find(windowId) != windowVisibilityListenerSessionSet_.end()) {
         session->NotifyWindowVisibility();
     }
+    if (occlusionStateListenerSessionSet_.count(windowId) > 0) {
+        session->NotifyOcclusionState();
+    }
     auto windowVisibilityInfo = sptr<WindowVisibilityInfo>::MakeSptr(
         windowId, session->GetCallingPid(), session->GetCallingUid(), visibleState, session->GetWindowType());
     windowVisibilityInfo->SetAppIndex(session->GetSessionInfo().appIndex_);
@@ -12506,6 +12509,28 @@ WSError SceneSessionManager::UpdateSessionWindowVisibilityListener(int32_t persi
         }
         return WSError::WS_OK;
     }, __func__);
+}
+
+WMError SceneSessionManager::UpdateSessionOcclusionStateListener(int32_t persistentId, bool haveListener)
+{
+    const char* const where = __func__;
+    return taskScheduler_->PostSyncTask([this, persistentId, haveListener, where]() -> WMError {
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: no session for winId=%{public}d, haveListener=%{public}d",
+                where, persistentId, haveListener);
+            return WMError::WM_DO_NOTHING;
+        }
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: win=[%{public}d, %{public}s], haveListener=%{public}d",
+            where, persistentId, sceneSession->GetWindowName().c_str(), haveListener);
+        if (haveListener) {
+            occlusionStateListenerSessionSet_.insert(persistentId);
+            sceneSession->NotifyOcclusionState();
+        } else {
+            occlusionStateListenerSessionSet_.erase(persistentId);
+        }
+        return WMError::WM_OK;
+    }, where);
 }
 
 void SceneSessionManager::UpdateDarkColorModeToRS()

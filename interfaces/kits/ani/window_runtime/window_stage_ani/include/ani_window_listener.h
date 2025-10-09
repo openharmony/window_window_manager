@@ -44,6 +44,7 @@ class AniWindowListener : public IWindowChangeListener,
                         public IWaterMarkFlagChangedListener,
                         public IGestureNavigationEnabledChangedListener,
                         public IWindowVisibilityChangedListener,
+                        public IOcclusionStateChangedListener,
                         public IWindowTitleButtonRectChangedListener,
                         public IWindowStatusChangeListener,
                         public IWindowNoInteractionListener,
@@ -92,6 +93,7 @@ public:
     void SetTimeout(int64_t timeout) override;
     int64_t GetTimeout() const override;
     void OnWindowVisibilityChangedCallback(const bool isVisible) override;
+    void OnOcclusionStateChanged(const WindowVisibilityState state) override;
     void OnSystemDensityChanged(float density) override;
     void OnDisplayIdChanged(DisplayId displayId) override;
 
