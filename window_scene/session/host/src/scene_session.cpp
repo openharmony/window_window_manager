@@ -8838,7 +8838,8 @@ WSError SceneSession::NotifyRotationProperty(uint32_t rotation, uint32_t width, 
     return WSError::WS_OK;
 }
 
-WSError SceneSession::ConvertRotationToOrientation(uint32_t rotation, uint32_t width, uint32_t height, uint32_t& orientation)
+WSError SceneSession::ConvertRotationToOrientation(uint32_t rotation,
+    uint32_t width, uint32_t height, uint32_t& orientation)
 {
     sptr<ScreenSession> screenSession =
         ScreenSessionManagerClient::GetInstance().GetScreenSessionById(GetSessionProperty()->GetDisplayId());
@@ -8852,7 +8853,8 @@ WSError SceneSession::ConvertRotationToOrientation(uint32_t rotation, uint32_t w
     DisplayOrientation displayOrientation =
         screenSession->CalcDeviceOrientationWithBounds(targetRotation, foldDisplayMode, bounds);
     orientation = static_cast<uint32_t>(displayOrientation);
-    TLOGI(WmsLogTag::WMS_ROTATION, "rotation: %{public}d, width: %{public}d, height: %{public}d, orientation: %{public}d",
+    TLOGI(WmsLogTag::WMS_ROTATION,
+        "rotation: %{public}d, width: %{public}d, height: %{public}d, orientation: %{public}d",
         rotation, width, height, orientation);
     return WSError::WS_OK;
 }
