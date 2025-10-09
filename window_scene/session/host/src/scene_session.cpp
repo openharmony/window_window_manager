@@ -8819,7 +8819,7 @@ WSError SceneSession::NotifyRotationProperty(uint32_t rotation, uint32_t width, 
             auto properties = session->GetSystemBarPropertyForRotation();
             std::map<AvoidAreaType, AvoidArea> avoidAreas;
             uint32_t orientation = 0;
-            WSError ret = session->ConvertRotationToOrientation(rotation, orientation);
+            WSError ret = session->ConvertRotationToOrientation(rotation, width, height, orientation);
             if (ret != WSError::WS_OK) {
                 TLOGNE(WmsLogTag::WMS_ROTATION, "failed to convert Rotation to Orientation");
                 return ret;
@@ -8838,7 +8838,7 @@ WSError SceneSession::NotifyRotationProperty(uint32_t rotation, uint32_t width, 
     return WSError::WS_OK;
 }
 
-WSError SceneSession::ConvertRotationToOrientation(uint32_t rotation, uint32_t& orientation)
+WSError SceneSession::ConvertRotationToOrientation(uint32_t rotation, uint32_t width, uint32_t height, uint32_t& orientation)
 {
     sptr<ScreenSession> screenSession =
         ScreenSessionManagerClient::GetInstance().GetScreenSessionById(GetSessionProperty()->GetDisplayId());
@@ -8848,8 +8848,12 @@ WSError SceneSession::ConvertRotationToOrientation(uint32_t rotation, uint32_t& 
     }
     FoldDisplayMode foldDisplayMode = ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
     Rotation targetRotation = static_cast<Rotation>(rotation / ROTATION_DEGREE);
-    DisplayOrientation displayOrientation = screenSession->CalcDisplayOrientation(targetRotation, foldDisplayMode);
+    RRect bounds = RRect({ 0, 0, width, height }, 0.0f, 0.0f);
+    DisplayOrientation displayOrientation =
+        screenSession->CalcDeviceOrientationWithBounds(targetRotation, foldDisplayMode, bounds);
     orientation = static_cast<uint32_t>(displayOrientation);
+    TLOGI(WmsLogTag::WMS_ROTATION, "rotation: %{public}d, width: %{public}d, height: %{public}d, orientation: %{public}d",
+        rotation, width, height, orientation);
     return WSError::WS_OK;
 }
 

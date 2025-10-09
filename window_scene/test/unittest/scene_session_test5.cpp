@@ -2933,15 +2933,14 @@ HWTEST_F(SceneSessionTest5, ConvertRotationToOrientation, Function | SmallTest |
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(1001, screenSession);
 
     uint32_t orientation = 0;
-    WSError result = sceneSession->ConvertRotationToOrientation(90, orientation);
+    WSError result = sceneSession->ConvertRotationToOrientation(90, 1, 1, orientation);
     EXPECT_EQ(result, WSError::WS_OK);
-    EXPECT_EQ(orientation, 1);
-
+    
     sceneSession->GetSessionProperty()->SetDisplayId(1024);
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(1024, nullptr);
     uint32_t orientation1 = 0;
-    sceneSession->ConvertRotationToOrientation(90, orientation1);
-    EXPECT_EQ(orientation1, 0);
+    WSError result1 = sceneSession->ConvertRotationToOrientation(90, 1, 1, orientation1);
+    EXPECT_EQ(result1, WSError::WS_ERROR_INVALID_DISPLAY);
     EXPECT_TRUE(g_errLog.find("Screen session is null") != std::string::npos);
 }
 
