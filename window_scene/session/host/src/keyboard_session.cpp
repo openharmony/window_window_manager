@@ -160,15 +160,15 @@ WSError KeyboardSession::Disconnect(bool isFromClient, const std::string& identi
         }
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Disconnect keyboard session, id: %{public}d, isFromClient: %{public}d",
             session->GetPersistentId(), isFromClient);
+        if (session->keyboardPanelSession_) {
+            std::vector<Rect> keyboardPanelHotAreas;
+            session->keyboardPanelSession_->GetSessionProperty()->SetTouchHotAreas(keyboardPanelHotAreas);
+        }
         session->SceneSession::Disconnect(isFromClient);
         WSRect rect = {0, 0, 0, 0};
         session->NotifyKeyboardPanelInfoChange(rect, false);
         !session->IsSystemKeyboard() ? session->RestoreCallingSession(session->GetCallingSessionId(), nullptr) :
             session->NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason::KEYBOARD_DISCONNECT);
-        auto sessionProperty = session->GetSessionProperty();
-        if (sessionProperty) {
-            sessionProperty->SetCallingSessionId(INVALID_WINDOW_ID);
-        }
         return WSError::WS_OK;
     }, "Disconnect");
     return WSError::WS_OK;
@@ -1179,10 +1179,6 @@ WMError KeyboardSession::HandleActionUpdateKeyboardTouchHotArea(const sptr<Windo
             property->GetKeyboardTouchHotAreas().portraitPanelHotAreas_);
     }
     GetSessionProperty()->SetKeyboardTouchHotAreas(property->GetKeyboardTouchHotAreas());
-    if (specificCallback_ != nullptr && specificCallback_->onWindowInfoUpdate_ != nullptr) {
-        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "id=%{public}d", GetPersistentId());
-        specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
-    }
     return WMError::WM_OK;
 }
 } // namespace OHOS::Rosen
