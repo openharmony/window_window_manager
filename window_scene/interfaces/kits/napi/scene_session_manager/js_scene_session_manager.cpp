@@ -3087,10 +3087,11 @@ napi_value JsSceneSessionManager::OnRequestFocusStatus(napi_env env, napi_callba
         return NapiGetUndefined(env);
     }
     DisplayId displayId = displayIdValue < 0 ? DISPLAY_ID_INVALID : static_cast<DisplayId>(displayIdValue);
-    return DoRequestFocusStatus(persistentId, isFocused, byForeground, reason, displayId);
+    DoRequestFocusStatus(persistentId, isFocused, byForeground, reason, displayId);
+    return NapiGetUndefined(env);
 }
 
-napi_value JsSceneSessionManager::DoRequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground,
+void JsSceneSessionManager::DoRequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground,
     FocusChangeReason reason, DisplayId displayId)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "Id: %{public}d, isFocused: %{public}d, byForeground: %{public}d, "
@@ -3101,7 +3102,6 @@ napi_value JsSceneSessionManager::DoRequestFocusStatus(int32_t persistentId, boo
     } else {
         SceneSessionManager::GetInstance().RequestFocusStatus(persistentId, isFocused, byForeground, reason);
     }
-    return NapiGetUndefined(env);
 }
 
 napi_value JsSceneSessionManager::OnRequestAllAppSessionUnfocus(napi_env env, napi_callback_info info)
