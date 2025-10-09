@@ -2437,9 +2437,10 @@ HWTEST_F(WindowSceneSessionImplTest5, CalculateNewLimitsByLimits, TestSize.Level
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> testImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    WindowLimits customizedLimits = {200, 200, 10, 10, 0.0f, 0.0f, 1.0f};
+    WindowLimits customizedLimits = {200, 200, 10, 10, 0.0f, 0.0f, 1.0f, PixelUnit::VP};
     WindowLimits expectLimits;
     WindowLimits newLimits;
+    WindowLimits newLimitsVP = WindowLimits::DEFAULT_VP_LIMITS();
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(0);
     ASSERT_NE(nullptr, display);
     auto displayInfo = display->GetDisplayInfo();
@@ -2447,7 +2448,7 @@ HWTEST_F(WindowSceneSessionImplTest5, CalculateNewLimitsByLimits, TestSize.Level
     float virtualPixelRatio = testImpl->GetVirtualPixelRatio(displayInfo);
     testImpl->property_->SetDisplayId(0);
     testImpl->property_->SetConfigWindowLimitsVP(customizedLimits);
-    
+
     // set system limits
     testImpl->windowSystemConfig_.maxFloatingWindowSize_ = 6240;
     testImpl->windowSystemConfig_.miniWidthOfMainWindow_ = 1;
@@ -2462,28 +2463,29 @@ HWTEST_F(WindowSceneSessionImplTest5, CalculateNewLimitsByLimits, TestSize.Level
     customizedLimits = {200, 200, 10, 10, 0.0f, 0.0f, 1.0f};
     expectLimits ={200, 200, 10, 10, 0.0f, 0.0f, 1.0f};
     testImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    testImpl->CalculateNewLimitsByLimits(newLimits, customizedLimits, virtualPixelRatio);
-    EXPECT_EQ(customizedLimits.maxWidth_, static_cast<uint32_t>(expectLimits.maxWidth_ * virtualPixelRatio));
-    EXPECT_EQ(customizedLimits.maxHeight_, static_cast<uint32_t>(expectLimits.maxHeight_ * virtualPixelRatio));
-    EXPECT_EQ(customizedLimits.minWidth_, static_cast<uint32_t>(expectLimits.minWidth_ * virtualPixelRatio));
-    EXPECT_EQ(customizedLimits.minHeight_, static_cast<uint32_t>(expectLimits.minHeight_ * virtualPixelRatio));
+    testImpl->CalculateNewLimitsByLimits(newLimits, newLimitsVP, customizedLimits, virtualPixelRatio);
+    EXPECT_EQ(customizedLimits.maxWidth_, expectLimits.maxWidth_);
+    EXPECT_EQ(customizedLimits.maxHeight_, expectLimits.maxHeight_);
+    EXPECT_EQ(customizedLimits.minWidth_, expectLimits.minWidth_);
+    EXPECT_EQ(customizedLimits.minHeight_, expectLimits.minHeight_);
 
     // user set flag is false, window type is sys window
     testImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     customizedLimits = {200, 200, 10, 10, 0.0f, 0.0f, 1.0f};
     expectLimits ={200, 200, 10, 10, 0.0f, 0.0f, 1.0f};
-    testImpl->CalculateNewLimitsByLimits(newLimits, customizedLimits, virtualPixelRatio);
-    testImpl->CalculateNewLimitsByLimits(newLimits, customizedLimits, virtualPixelRatio);
-    EXPECT_EQ(customizedLimits.maxWidth_, static_cast<uint32_t>(expectLimits.maxWidth_ * virtualPixelRatio));
-    EXPECT_EQ(customizedLimits.maxHeight_, static_cast<uint32_t>(expectLimits.maxHeight_ * virtualPixelRatio));
+    testImpl->CalculateNewLimitsByLimits(newLimits, newLimitsVP, customizedLimits, virtualPixelRatio);
+    testImpl->CalculateNewLimitsByLimits(newLimits, newLimitsVP, customizedLimits, virtualPixelRatio);
+    EXPECT_EQ(customizedLimits.maxWidth_, expectLimits.maxWidth_);
+    EXPECT_EQ(customizedLimits.maxHeight_, expectLimits.maxHeight_);
     EXPECT_EQ(customizedLimits.minWidth_, expectLimits.minWidth_);
     EXPECT_EQ(customizedLimits.minHeight_, expectLimits.minHeight_);
+
     // user set flag is true
     testImpl->userLimitsSet_ = true;
     customizedLimits = {200, 200, 10, 10, 0.0f, 0.0f, 1.0f};
     WindowLimits userLimits = {900, 900, 100, 100, 0.0f, 0.0f, 1.0f};
     testImpl->property_->SetUserWindowLimits(userLimits);
-    testImpl->CalculateNewLimitsByLimits(newLimits, customizedLimits, virtualPixelRatio);
+    testImpl->CalculateNewLimitsByLimits(newLimits, newLimitsVP, customizedLimits, virtualPixelRatio);
     EXPECT_EQ(customizedLimits.maxWidth_, userLimits.maxWidth_);
     EXPECT_EQ(customizedLimits.maxHeight_, userLimits.maxHeight_);
     EXPECT_EQ(customizedLimits.minWidth_, userLimits.minWidth_);

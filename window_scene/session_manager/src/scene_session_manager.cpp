@@ -2176,10 +2176,13 @@ WMError SceneSessionManager::GetWindowLimits(int32_t windowId, WindowLimits& win
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "sessionProperty(%{public}d) is nullptr", windowId);
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    windowLimits = sessionProperty->GetWindowLimits();
+    WindowLimits userWindowLimits = sessionProperty->GetUserWindowLimits();
+    bool useVPLimits = (userWindowLimits.pixelUnit_ == PixelUnit::VP);
+    windowLimits = useVPLimits ? sessionProperty->GetWindowLimitsVP() : sessionProperty->GetWindowLimits();
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "GetWindowLimits minWidth:%{public}u, minHeight:%{public}u, "
-        "maxWidth:%{public}u, maxHeight:%{public}u, vpRatio:%{public}f", windowLimits.minWidth_,
-        windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_, windowLimits.vpRatio_);
+        "maxWidth:%{public}u, maxHeight:%{public}u, vpRatio:%{public}f, pixelUnit:%{public}u", windowLimits.minWidth_,
+        windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_, windowLimits.vpRatio_,
+        windowLimits.pixelUnit_);
     return WMError::WM_OK;
 }
 
@@ -12546,6 +12549,9 @@ void SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDispla
                           displayInfo->GetWidth(), displayInfo->GetHeight() };
             processVirtualPixelRatioChangeFunc_(displayInfo->GetVirtualPixelRatio(), rect);
         }
+        if (onVirtualPixelChangeCallback_ != nullptr && type == DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE) {
+            onVirtualPixelChangeCallback_(displayInfo->GetVirtualPixelRatio() * DOT_PER_INCH, displayInfo->GetScreenId());
+        }
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& [_, sceneSession] : sceneSessionMap_) {
             if (sceneSession == nullptr) {
@@ -18180,6 +18186,13 @@ void SceneSessionManager::NotifyIsFullScreenInForceSplitMode(uint32_t uid, bool 
         fullScreenInForceSplitUidSet_.erase(uid);
     }
     ScreenSessionManagerClient::GetInstance().NotifyIsFullScreenInForceSplitMode(uid, isFullScreen);
+}
+
+void SceneSessionManager::RegisterVirtualPixelChangeCallback(NotifyVirtualPixelChangeFunc&& func)
+{
+    taskScheduler_->PostAsyncTask([this, func] {
+        onVirtualPixelChangeCallback_ = std::move(func);
+    }, __func__);
 }
 
 void SceneSessionManager::RegisterAppStateObserver()

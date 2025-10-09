@@ -1639,6 +1639,18 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
     }, __func__);
 }
 
+void SceneSession::SetSessionWindowLimitsChangeCallback(const NotifySessionWindowLimitsChangeFunc& func)
+{
+    PostTask([weakThis = wptr(this), func, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
+            return;
+        }
+        session->sessionWindowLimitsChangeFunc_ = func;
+        }, __func__);
+}
+
 void SceneSession::SetSessionDisplayIdChangeCallback(NotifySessionDisplayIdChangeFunc&& func)
 {
     PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {
@@ -3466,6 +3478,21 @@ void SceneSession::NotifySessionRectChange(const WSRect& rect,
             session->sessionRectChangeFunc_(rect, reason, displayId, rectAnimationConfig);
         }
     }, __func__ + GetRectInfo(rect));
+}
+
+/** @note @window.layout */
+void SceneSession::NotifySessionWindowLimitsChange(const WindowLimits& windowlimits)
+{
+    PostTask([weakThis = wptr(this), windowlimits, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
+            return;
+        }
+        if (session->sessionWindowLimitsChangeFunc_) {
+            session->sessionWindowLimitsChangeFunc_(windowlimits);
+        }
+        }, __func__);
 }
 
 /** @note @window.layout */
@@ -6420,10 +6447,19 @@ WMError SceneSession::HandleActionUpdateWindowLimits(const sptr<WindowSessionPro
     auto sessionProperty = GetSessionProperty();
     if (sessionProperty != nullptr) {
         sessionProperty->SetWindowLimits(property->GetWindowLimits());
+        sessionProperty->SetWindowLimitsVP(property->GetWindowLimitsVP());
+        sessionProperty->SetUserWindowLimits(property->GetUserWindowLimits());
+
         WindowLimits windowLimits = sessionProperty->GetWindowLimits();
-        TLOGI(WmsLogTag::WMS_LAYOUT, "UpdateWindowLimits minWidth:%{public}u, minHeight:%{public}u, "
-            "maxWidth:%{public}u, maxHeight:%{public}u, vpRatio:%{public}f", windowLimits.minWidth_,
-            windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_, windowLimits.vpRatio_);
+        WindowLimits windowLimitsVP = sessionProperty->GetWindowLimitsVP();
+        WindowLimits userWindowLimits = sessionProperty->GetUserWindowLimits();
+        TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, px:%{public}s, vp:%{public}s, userLimitsUnit:%{public}u",
+            GetPersistentId(), windowLimits.ToString().c_str(), windowLimitsVP.ToString().c_str(),
+            userWindowLimits.pixelUnit_);
+
+        bool useVPLimits = (userWindowLimits.pixelUnit_ == PixelUnit::VP);
+        const WindowLimits& limitsToNotify = useVPLimits ? windowLimitsVP : windowLimits;
+        NotifySessionWindowLimitsChange(limitsToNotify);
     }
     return WMError::WM_OK;
 }

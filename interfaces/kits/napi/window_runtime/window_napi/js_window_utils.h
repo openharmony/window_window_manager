@@ -411,6 +411,7 @@ std::unique_ptr<WsNapiAsyncTask> CreateEmptyWsNapiAsyncTask(napi_env env, napi_v
     napi_value WindowStageEventTypeInit(napi_env env);
     napi_value WindowStageLifecycleEventTypeInit(napi_env env);
     napi_value WindowAnchorInit(napi_env env);
+    napi_value PixelUnitInit(napi_env env);
     napi_value WindowEventTypeInit(napi_env env);
     napi_value WindowLayoutModeInit(napi_env env);
     napi_value BlurStyleInit(napi_env env);
