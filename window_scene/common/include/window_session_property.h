@@ -82,6 +82,7 @@ public:
     void SetMaximizeMode(MaximizeMode mode);
     void SetWindowMode(WindowMode mode);
     void SetWindowLimits(const WindowLimits& windowLimits);
+    void SetWindowLimitsVP(const WindowLimits& windowLimits);
     void SetUserWindowLimits(const WindowLimits& windowLimits);
     void SetConfigWindowLimitsVP(const WindowLimits& windowLimitsVP);
     void SetLastLimitsVpr(float vpr);
@@ -157,6 +158,7 @@ public:
     MaximizeMode GetMaximizeMode() const;
     WindowMode GetWindowMode() const;
     WindowLimits GetWindowLimits() const;
+    WindowLimits GetWindowLimitsVP() const;
     WindowLimits GetUserWindowLimits() const;
     WindowLimits GetConfigWindowLimitsVP() const;
     float GetLastLimitsVpr() const;
@@ -483,8 +485,9 @@ private:
     WindowMode windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     WindowState windowState_ = WindowState::STATE_INITIAL;
     WindowLimits limits_;
-    WindowLimits userLimits_;
-    WindowLimits configLimitsVP_;
+    WindowLimits limitsVP_ = WindowLimits::DEFAULT_VP_LIMITS();
+    WindowLimits userLimits_ = WindowLimits::DEFAULT_VP_LIMITS();
+    WindowLimits configLimitsVP_ = WindowLimits::DEFAULT_VP_LIMITS();
     float lastVpr_ = 0.0f;
     PiPTemplateInfo pipTemplateInfo_ = {};
     FloatingBallTemplateInfo fbTemplateInfo_ = {};

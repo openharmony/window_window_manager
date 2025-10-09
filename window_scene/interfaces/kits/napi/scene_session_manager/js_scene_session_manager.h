@@ -54,6 +54,7 @@ enum class ListenerFunctionType : uint32_t {
     KIOSK_MODE_CHANGE_CB,
     UI_EFFECT_SET_PARAMS_CB,
     UI_EFFECT_ANIMATE_TO_CB,
+    VIRTUAL_DENSITY_CHANGE_CB,
 };
 
 class JsSceneSessionManager final {
@@ -263,7 +264,8 @@ private:
      * PC Window
      */
     napi_value OnGetWindowLimits(napi_env env, napi_callback_info info);
-    
+    void RegisterVirtualPixelRatioChangeCallback();
+    void OnVirtualPixelChange(float density, DisplayId displayId);
     /*
      * Multi Instance
      */

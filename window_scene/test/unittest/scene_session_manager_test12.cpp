@@ -924,6 +924,19 @@ HWTEST_F(SceneSessionManagerTest12, RegisterWatchFocusActiveChangeCallback, Test
 }
 
 /**
+ * @tc.name: RegisterVirtualPixelChangeCallback
+ * @tc.desc: RegisterVirtualPixelChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RegisterVirtualPixelChangeCallback, TestSize.Level1)
+{
+    NotifyVirtualPixelChangeFunc func = [](float density, DisplayId displayId) {};
+    ssm_->RegisterVirtualPixelChangeCallback(std::move(func));
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_NE(ssm_->onVirtualPixelChangeCallback_, nullptr);
+}
+
+/**
  * @tc.name: NotifyWatchGestureConsumeResult
  * @tc.desc: NotifyWatchGestureConsumeResult
  * @tc.type: FUNC
