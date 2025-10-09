@@ -5955,7 +5955,7 @@ bool SceneSessionManager::checkDatas(const std::vector<int32_t>& datas, const in
 
 WMError SceneSessionManager::LockCursor(const std::vector<int32_t>& datas)
 {
-    if (!checkDatas(datasm, LOCK_CURSOR_LENGTH)) {
+    if (!checkDatas(datas, LOCK_CURSOR_LENGTH)) {
         return WMError::WM_ERROR_ILLEGAL_PARAM;
     }
     int32_t windowId = datas[1];
@@ -5967,7 +5967,7 @@ WMError SceneSessionManager::LockCursor(const std::vector<int32_t>& datas)
 
 WMError SceneSessionManager::UnLockCursor(const std::vector<int32_t>& datas)
 {
-    if (!checkDatas(datasm, UNLOCK_CURSOR_LENGTH)) {
+    if (!checkDatas(datas, UNLOCK_CURSOR_LENGTH)) {
         return WMError::WM_ERROR_ILLEGAL_PARAM;
     }
     int32_t windowId = datas[1];
