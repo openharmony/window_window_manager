@@ -437,7 +437,6 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
         auto leashWinSurfaceNode = session->GetLeashWinShadowSurfaceNode();
         if (leashWinSurfaceNode && sessionProperty) {
             bool lastPrivacyMode = sessionProperty->GetPrivacyMode() || sessionProperty->GetSystemPrivacyMode();
-            AutoRSTransaction trans(session->GetRSLeashWinShadowContext());
             leashWinSurfaceNode->SetSecurityLayer(lastPrivacyMode);
         }
         session->MarkAvoidAreaAsDirty();
