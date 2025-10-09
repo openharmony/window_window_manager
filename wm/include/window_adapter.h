@@ -117,6 +117,7 @@ public:
     virtual WMError UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener);
     virtual WMError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible);
     virtual WMError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener);
+    virtual WMError UpdateSessionOcclusionStateListener(int32_t persistentId, bool haveListener);
     virtual WMError RaiseWindowToTop(int32_t persistentId);
     virtual WMError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId);
     virtual void CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,

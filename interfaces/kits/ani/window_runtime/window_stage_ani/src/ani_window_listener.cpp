@@ -486,6 +486,28 @@ void AniWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
     eventHandler_->PostTask(task, __func__, 0, AppExecFwk::EventQueue::Priority::HIGH);
 }
 
+void AniWindowListener::OnOcclusionStateChanged(const WindowVisibilityState state)
+{
+    const char* const where = __func__;
+    auto task = [self = weakRef_, state, where, env = env_] () {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] %{public}s: listener or env is null", where);
+            return;
+        }
+        AniWindowUtils::CallAniFunctionVoid(env, "L@ohos/window/window;", "runOcclusionStateChangeCallback",
+            nullptr, thisListener->aniCallback_, static_cast<ani_int>(state));
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "[ANI] %{public}s: occlusionState=%{public}u",
+            where, static_cast<uint32_t>(state));
+    };
+    if (!eventHandler_) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] main event handler is null");
+        return;
+    }
+    eventHandler_->PostTask(task, "[ANI] wms:AniWindowListener::OnOcclusionStateChanged", 0,
+        AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
 void AniWindowListener::OnWindowHighlightChange(bool isHighlight)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");

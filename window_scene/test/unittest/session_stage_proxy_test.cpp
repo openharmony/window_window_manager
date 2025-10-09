@@ -607,6 +607,43 @@ HWTEST_F(SessionStageProxyTest, NotifyTransformChange, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyWindowOcclusionState
+ * @tc.desc: notify the occlusion state
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyWindowOcclusionState, TestSize.Level1)
+{
+    auto state = WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION;
+    auto tempProxy = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    auto ret = tempProxy->NotifyWindowOcclusionState(state);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SessionStageProxy> proxy = sptr<SessionStageProxy>::MakeSptr(remoteMocker);
+    ASSERT_NE(proxy, nullptr);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ret = proxy->NotifyWindowOcclusionState(state);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    ret = proxy->NotifyWindowOcclusionState(state);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteUint32ErrorFlag(false);
+
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ret = proxy->NotifyWindowOcclusionState(state);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+
+    remoteMocker->SetRequestResult(ERR_NONE);
+    ret = proxy->NotifyWindowOcclusionState(state);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
  * @tc.name: NotifyWindowVisibility
  * @tc.desc: test function : NotifyWindowVisibility
  * @tc.type: FUNC

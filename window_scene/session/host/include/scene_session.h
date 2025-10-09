@@ -547,6 +547,7 @@ public:
     bool NeedStartingWindowExitAnimation() const override;
 
     void NotifyWindowVisibility();
+    void NotifyOcclusionState();
     WSError OnShowWhenLocked(bool showWhenLocked);
     void SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& icon);
     void NotifyTouchOutside();
