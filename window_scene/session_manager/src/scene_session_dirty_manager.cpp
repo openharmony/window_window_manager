@@ -700,7 +700,7 @@ void SceneSessionDirtyManager::GetModalUIExtensionInfo(std::vector<MMI::WindowIn
     }
 }
 
-auto SceneSessionDirtyManager::GetFullWindowInfoList(LockCursorInfo& lockCursorInfo) ->
+auto SceneSessionDirtyManager::GetFullWindowInfoList(std::shared_ptr<LockCursorInfo>& lockCursorInfo) ->
 std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::PixelMap>>>
 {
     std::vector<MMI::WindowInfo> windowInfoList;
@@ -834,7 +834,8 @@ void SceneSessionDirtyManager::UpdateWindowFlags(DisplayId displayId, const sptr
 }
 
 std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyManager::GetWindowInfo(
-    const sptr<SceneSession>& sceneSession, const WindowAction& action, const LockCursorInfo& lockCursorInfo) const
+    const sptr<SceneSession>& sceneSession, const WindowAction& action,
+    std::shared_ptr<LockCursorInfo>& lockCursorInfo) const
 {
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
@@ -906,15 +907,15 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     if (expandInputFlag & static_cast<uint32_t>(ExpandInputFlag::WINDOW_DISABLE_USER_ACTION)) {
         windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_DISABLE_USER_ACTION;
     }
-    if (sceneSession->IsFocused() && lockCursorInfo.isActivating) {
-        if (windowId != lockCursorInfo.windowId) {
+    if (sceneSession->IsFocused() && lockCursorInfo && lockCursorInfo->isActivating) {
+        if (windowId != lockCursorInfo->windowId) {
             TLOGW(WmsLogTag::WMS_EVENT, "LockCursor:Inconsistent focus IDs(WF:%{public}d-L:%{public}d)", windowId,
-                lockCursorInfo.windowId);
-            lockCursorInfo.isActivating = false;
+                lockCursorInfo->windowId);
+            lockCursorInfo->isActivating = false;
         } else {
             windowInfo.flags |= 0x08;
-            if (lockCursorInfo.isCursorFollowMovement) {
-                windowInfo.flags |= 0x10;
+            if (lockCursorInfo->isCursorFollowMovement) {
+                windowInfo->flags |= 0x10;
             }
         }
     }

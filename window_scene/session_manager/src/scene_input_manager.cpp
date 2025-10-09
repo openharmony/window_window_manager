@@ -208,6 +208,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(SceneInputManager)
 
 void SceneInputManager::Init()
 {
+    lockCursorInfo_ = std::make_shared<LockCursorInfo>();
     sceneSessionDirty_ = std::make_shared<SceneSessionDirtyManager>();
     eventLoop_ = AppExecFwk::EventRunner::Create(FLUSH_DISPLAY_INFO_THREAD);
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(eventLoop_);
@@ -230,7 +231,7 @@ void SceneInputManager::ResetSessionDirty()
 auto SceneInputManager::GetFullWindowInfoList() ->
     std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::PixelMap>>>
 {
-    return sceneSessionDirty_->GetFullWindowInfoList(lockCursorInfo);
+    return sceneSessionDirty_->GetFullWindowInfoList(lockCursorInfo_);
 }
 
 std::vector<MMI::ScreenInfo> SceneInputManager::ConstructScreenInfos(
@@ -568,21 +569,23 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
     focusedSessionId_ = SceneSessionManager::GetInstance().GetFocusedSessionId();
     std::unordered_map<int32_t, MMI::Rect> currWindowDefaultHotArea;
     static std::unordered_map<int32_t, MMI::Rect> lastWindowDefaultHotArea;
+    MMI::WindowInfo focusedWindow;
     for (auto& e : windowInfoList) {
-        idListStream << e.id << "|" << e.flags << "|" << e.zOrder << "|"
+        idListStream << e.id << "|" << e.displayId << "|" << e.flags << "|" << e.zOrder << "|"
                      << e.pid << "|" << e.agentPid << "|" << e.defaultHotAreas.size();
 
         if (e.defaultHotAreas.size() > 0) {
             auto iter = lastWindowDefaultHotArea.find(e.id);
             if (iter == lastWindowDefaultHotArea.end() || iter->second != e.defaultHotAreas[0]) {
-                idListStream << "|" << e.defaultHotAreas[0].x << "|" << e.defaultHotAreas[0].y
-                             << "|" << e.defaultHotAreas[0].width << "|" << e.defaultHotAreas[0].height;
+                idListStream << "|" << e.defaultHotAreas[0].x << "," << e.defaultHotAreas[0].y
+                             << "," << e.defaultHotAreas[0].width << "," << e.defaultHotAreas[0].height;
             }
             currWindowDefaultHotArea.insert({e.id, e.defaultHotAreas[0]});
         }
-        idListStream << ",";
+        idListStream << ";";
         if ((focusedSessionId_ == e.id) && (e.id == e.agentWindowId)) {
             UpdateFocusedSessionId(focusedSessionId_);
+            focusedWindow = e;
         }
         if (e.uiExtentionWindowInfo.size() > 0) {
             DumpUIExtentionWindowInfo(e);
@@ -591,8 +594,10 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
     }
     lastWindowDefaultHotArea = currWindowDefaultHotArea;
     SingleHandTransform transform = SceneSessionManager::GetInstance().GetNormalSingleHandTransform();
-    idListStream << focusedSessionId_ << "|" << transform.posX << "|" << transform.posY
-        << "|" << transform.scaleX << "|" << transform.scaleY;
+    idListStream << focusedSessionId_ << "|" << transform.posX << "," << transform.posY
+        << "|" << transform.scaleX << "," << transform.scaleY
+        << "|" << focusedWindow.defaultHotAreas[0].x << "," << focusedWindow.defaultHotAreas[0].y
+        << "," << focusedWindow.defaultHotAreas[0].width << "," << focusedWindow.defaultHotAreas[0].height;
     std::string idList = idListStream.str();
     if (lastIdList != idList) {
         windowEventID++;
@@ -679,21 +684,29 @@ void SceneInputManager::SetCurrentUserId(int32_t userId)
 
 void SceneInputManager::LockCursor(int32_t windowId, bool isCursorFollowMovement)
 {
-    lockCursorInfo.isActivating = true;
-    lockCursorInfo.windowId = windowId;
-    lockCursorInfo.isCursorFollowMovement = isCursorFollowMovement;
+    if (lockCursorInfo_ == nullptr) {
+        TLOGNE(WmsLogTag::WMS_EVENT, "sceneSessionDirty_ is nullptr");
+        return;
+    }
+    lockCursorInfo_->isActivating = true;
+    lockCursorInfo_->windowId = windowId;
+    lockCursorInfo_->isCursorFollowMovement = isCursorFollowMovement;
     TLOGI(WmsLogTag::WMS_EVENT, "winId:%{public}d-%{public}d", windowId, isCursorFollowMovement);
 }
 
 bool SceneInputManager::UnLockCursor(int32_t windowId)
 {
-    if (!lockCursorInfo.isActivating) {
+    if (lockCursorInfo_ == nullptr) {
+        TLOGNE(WmsLogTag::WMS_EVENT, "sceneSessionDirty_ is nullptr");
+        return false;
+    }
+    if (!lockCursorInfo_->isActivating) {
         TLOGI(WmsLogTag::WMS_EVENT, "winId:%{public}d-same", windowId);
         return false;
     }
-    lockCursorInfo.isActivating = false;
-    lockCursorInfo.windowId = windowId;
-    lockCursorInfo.isCursorFollowMovement = false;
+    lockCursorInfo_->isActivating = false;
+    lockCursorInfo_->windowId = windowId;
+    lockCursorInfo_->isCursorFollowMovement = false;
     TLOGI(WmsLogTag::WMS_EVENT, "winId:%{public}d", windowId);
     return true;
 }
