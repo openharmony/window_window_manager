@@ -1646,7 +1646,6 @@ HWTEST_F(WindowSessionTest4, UpdateSessionOutline01, TestSize.Level1)
     session_->UpdateSessionOutline(enabled, defaultParams);
     EXPECT_EQ(session_->outlineStyleParams_.outlineColor_, 0x000000ff); // 0x000000ff: color blue byte.
 }
-
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
