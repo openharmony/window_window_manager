@@ -7504,7 +7504,7 @@ WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId, FocusCh
         TLOGE(WmsLogTag::WMS_FOCUS, "session is nullptr: %{public}d", persistentId);
         return WSError::WS_ERROR_INVALID_SESSION;
     }
-    auto displayId = displayId != DISPLAY_ID_INVALID ? displayId :
+    displayId = displayId != DISPLAY_ID_INVALID ? displayId :
         sceneSession->GetSessionProperty()->GetDisplayId();
     auto focusGroup = windowFocusController_->GetFocusGroup(displayId);
     if (focusGroup == nullptr) {
