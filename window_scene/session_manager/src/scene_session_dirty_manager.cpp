@@ -700,7 +700,7 @@ void SceneSessionDirtyManager::GetModalUIExtensionInfo(std::vector<MMI::WindowIn
     }
 }
 
-auto SceneSessionDirtyManager::GetFullWindowInfoList(std::shared_ptr<LockCursorInfo>& lockCursorInfo) ->
+auto SceneSessionDirtyManager::GetFullWindowInfoList(std::shared_ptr<LockCursorInfo> lockCursorInfo) ->
 std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::PixelMap>>>
 {
     std::vector<MMI::WindowInfo> windowInfoList;
@@ -835,7 +835,7 @@ void SceneSessionDirtyManager::UpdateWindowFlags(DisplayId displayId, const sptr
 
 std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyManager::GetWindowInfo(
     const sptr<SceneSession>& sceneSession, const WindowAction& action,
-    std::shared_ptr<LockCursorInfo>& lockCursorInfo) const
+    std::shared_ptr<LockCursorInfo> lockCursorInfo) const
 {
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
@@ -915,7 +915,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
         } else {
             windowInfo.flags |= 0x08;
             if (lockCursorInfo->isCursorFollowMovement) {
-                windowInfo->flags |= 0x10;
+                windowInfo.flags |= 0x10;
             }
         }
     }
