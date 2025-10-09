@@ -2301,6 +2301,7 @@ export class WindowStageInternal implements WindowStage {
     public off(eventType: 'windowStageEvent', callback?: Callback<WindowStageEventType>): void {
       this.offSync(this.nativeObj, eventType, callback);
     }
+
 }
 
 export interface WindowStage {
