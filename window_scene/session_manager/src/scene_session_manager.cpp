@@ -8142,7 +8142,7 @@ WSError SceneSessionManager::ShiftFocus(DisplayId displayId, const sptr<SceneSes
 {
     auto focusNotifyInfo = GetFocusNotifyInfo(displayId, nextSession);
     if (focusNotifyInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "focusNotifyInfo is nullptr: %{public}" PRIu64, displayId);
+        TLOGD(WmsLogTag::WMS_FOCUS, "focusNotifyInfo is nullptr");
         focusNotifyInfo = sptr<FocusNotifyInfo>::MakeSptr();
     }
     // unfocus
@@ -8159,7 +8159,7 @@ WSError SceneSessionManager::ShiftFocus(DisplayId displayId, const sptr<SceneSes
     } else {
         nextId = nextSession->GetPersistentId();
     }
-    UpdateFocusStatus(displayId, nextSession, true, focusNotifyInfo0);
+    UpdateFocusStatus(displayId, nextSession, true, focusNotifyInfo);
     UpdateHighlightStatus(displayId, focusedSession, nextSession, isProactiveUnfocus);
     if (shiftFocusFunc_ != nullptr) {
         auto displayGroupId = windowFocusController_->GetDisplayGroupId(displayId);
@@ -8188,12 +8188,16 @@ WSError SceneSessionManager::ShiftFocus(DisplayId displayId, const sptr<SceneSes
 }
 
 void SceneSessionManager::UpdateFocusStatus(DisplayId displayId, const sptr<SceneSession>& sceneSession,
-    bool isFocused, const sptr<FocusNotifyInfo>& focusNotifyInfo)
+    bool isFocused, sptr<FocusNotifyInfo>& focusNotifyInfo)
 {
     auto focusGroup = windowFocusController_->GetFocusGroup(displayId);
     if (focusGroup == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "focus group is nullptr: %{public}" PRIu64, displayId);
         return;
+    }
+    if (focusNotifyInfo == nullptr) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "focusNotifyInfo is nullptr");
+        focusNotifyInfo = sptr<FocusNotifyInfo>::MakeSptr();
     }
     bool needBlockNotifyFocusStatusUntilForeground = focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground();
     bool needBlockNotifyUnfocusStatus = focusGroup->GetNeedBlockNotifyUnfocusStatus();
@@ -8369,11 +8373,15 @@ std::string SceneSessionManager::GetHighlightIdsStr()
 }
 
 void SceneSessionManager::NotifyFocusStatus(const sptr<SceneSession>& sceneSession, bool isFocused,
-    const sptr<FocusGroup>& focusGroup, const sptr<FocusNotifyInfo>& focusNotifyInfo)
+    const sptr<FocusGroup>& focusGroup, sptr<FocusNotifyInfo>& focusNotifyInfo)
 {
     if (focusGroup == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "focus group is nullptr");
         return;
+    }
+    if (focusNotifyInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "focusNotifyInfo is nullptr");
+        focusNotifyInfo = sptr<FocusNotifyInfo>::MakeSptr();
     }
     int32_t persistentId = sceneSession->GetPersistentId();
 
