@@ -7350,7 +7350,7 @@ WMError SceneSessionManager::RequestFocusStatusBySCB(int32_t persistentId, bool 
     FocusChangeReason reason, DisplayId displayId)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "id: %{public}d, reason: %{public}d, displayId: %{public}" PRIu64, persistentId, reason, displayId);
-    auto task = [this, persistentId, isFocused, byForeground, reason]() {
+    auto task = [this, persistentId, isFocused, byForeground, reason, displayId]() {
         if (isFocused) {
             if (reason == FocusChangeReason::FOREGROUND) {
                 RequestSessionFocusImmediately(persistentId);
