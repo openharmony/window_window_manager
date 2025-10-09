@@ -617,7 +617,7 @@ HWTEST_F(SceneSessionManagerTest9, RequestSessionUnfocus02, TestSize.Level0)
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
     WSError ret = ssm_->RequestSessionUnfocus(0, FocusChangeReason::DEFAULT);
-    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
 
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest9";
@@ -626,7 +626,7 @@ HWTEST_F(SceneSessionManagerTest9, RequestSessionUnfocus02, TestSize.Level0)
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->windowFocusController_->UpdateFocusedSessionId(DEFAULT_DISPLAY_ID, 0);
     ret = ssm_->RequestSessionUnfocus(1, FocusChangeReason::DEFAULT);
-    ASSERT_EQ(ret, WSError::WS_DO_NOTHING);
+    EXPECT_EQ(ret, WSError::WS_DO_NOTHING);
     ssm_->windowFocusController_->UpdateFocusedSessionId(DEFAULT_DISPLAY_ID, 2);
     sceneSession->persistentId_ = 1;
     sceneSession->SetZOrder(50);
@@ -636,30 +636,31 @@ HWTEST_F(SceneSessionManagerTest9, RequestSessionUnfocus02, TestSize.Level0)
 
     SessionInfo sessionInfo1;
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
-    ASSERT_NE(nullptr, sceneSession1);
     sceneSession1->GetSessionProperty()->SetParentPersistentId(1);
     sceneSession1->persistentId_ = 2;
     sceneSession1->SetZOrder(100);
     ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession1));
     ret = ssm_->RequestSessionUnfocus(2, FocusChangeReason::DEFAULT);
-    ASSERT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(ret, WSError::WS_OK);
     auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
-    ASSERT_EQ(focusGroup->GetFocusedSessionId(), 1);
+    EXPECT_EQ(focusGroup->GetFocusedSessionId(), 1);
 
     focusGroup->SetLastFocusedSessionId(4);
     sceneSession1->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
     SessionInfo sessionInfo2;
     sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo2, nullptr);
-    ASSERT_NE(nullptr, sceneSession2);
     sceneSession2->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_DESKTOP);
     sceneSession2->SetZOrder(20);
     sceneSession2->state_ = SessionState::STATE_FOREGROUND;
     sceneSession2->isVisible_ = true;
     sceneSession2->persistentId_ = 4;
     ssm_->sceneSessionMap_.insert(std::make_pair(4, sceneSession2));
+    ret = ssm_->RequestSessionUnfocus(1, FocusChangeReason::DEFAULT, 2);
+    EXPECT_EQ(focusGroup->GetFocusedSessionId(), 1);
+
     ret = ssm_->RequestSessionUnfocus(1, FocusChangeReason::DEFAULT);
-    ASSERT_EQ(ret, WSError::WS_OK);
-    ASSERT_EQ(focusGroup->GetFocusedSessionId(), 4);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(focusGroup->GetFocusedSessionId(), 4);
 }
 
 /**
