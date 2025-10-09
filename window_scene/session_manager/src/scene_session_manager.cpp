@@ -10510,10 +10510,7 @@ WMError SceneSessionManager::GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_
             }
             surfaceNodeIds.push_back(sceneSession->GetSurfaceNode()->GetId());
             GetSurfaceNodeIdsFromSubSession(sceneSession, surfaceNodeIds);
-            if (isBlackList && sceneSession->GetLeashWinSurfaceNode()) {
-                surfaceNodeIds.push_back(missionId);
-                continue;
-            }
+            surfaceNodeIds.push_back(missionId);
             if (sceneSession->GetLeashWinSurfaceNode()) {
                 surfaceNodeIds.push_back(sceneSession->GetLeashWinSurfaceNode()->GetId());
             }
