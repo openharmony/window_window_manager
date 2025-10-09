@@ -17,11 +17,13 @@
 
 #include "ani.h"
 #include "ani_extension_window_register_manager.h"
+#include <ani_signature_builder.h>
 #include "extension_window_impl.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
+using namespace arkts::ani_signature;
 
 AniExtensionWindow::AniExtensionWindow(
     const std::shared_ptr<Rosen::ExtensionWindow> extensionWindow, int32_t hostWindowId)
@@ -170,19 +172,23 @@ WMError AniExtensionWindow::GetRect(Rect& rect)
 static ani_int ExtWindowSetRect(ani_env* env, ani_object obj, OHOS::Rosen::Rect& rect)
 {
     ani_status ret {};
-    if ((ret = env->Object_SetFieldByName_Double(obj, "<property>left", rect.posX_)) != ANI_OK) {
+    if ((ret = env->Object_SetFieldByName_Double(obj,
+        Builder::BuildPropertyName("left").c_str(), rect.posX_)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] set left field %{public}u", ret);
         return (ani_int)WMError::WM_DO_NOTHING;
     }
-    if ((ret = env->Object_SetFieldByName_Double(obj, "<property>top", rect.posY_)) != ANI_OK) {
+    if ((ret = env->Object_SetFieldByName_Double(obj,
+        Builder::BuildPropertyName("top").c_str(), rect.posY_)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] set top field %{public}u", ret);
         return (ani_int)WMError::WM_DO_NOTHING;
     }
-    if ((ret = env->Object_SetFieldByName_Double(obj, "<property>width", rect.width_)) != ANI_OK) {
+    if ((ret = env->Object_SetFieldByName_Double(obj,
+        Builder::BuildPropertyName("width").c_str(), rect.width_)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] set width field %{public}u", ret);
         return (ani_int)WMError::WM_DO_NOTHING;
     }
-    if ((ret = env->Object_SetFieldByName_Double(obj, "<property>height", rect.height_)) != ANI_OK) {
+    if ((ret = env->Object_SetFieldByName_Double(obj,
+        Builder::BuildPropertyName("height").c_str(), rect.height_)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] set height field %{public}u", ret);
         return (ani_int)WMError::WM_DO_NOTHING;
     }
@@ -208,7 +214,8 @@ static ani_int ExtWindowGetProperties(ani_env* env, ani_object obj, ani_long nat
     if ((retCode = aniExt->GetRect(rect)) != WMError::WM_OK) {
         return (ani_int)retCode;
     };
-    return ExtWindowSetRectMember(env, propertyRef, "<property>uiExtensionHostWindowProxyRect", rect);
+    return ExtWindowSetRectMember(env, propertyRef,
+        Builder::BuildPropertyName("uiExtensionHostWindowProxyRect").c_str(), rect);
 }
 
 static ani_int ExtWindowSetProperties(ani_env* env, ani_object obj, ani_long nativeObj, ani_object propertyRef)
@@ -226,7 +233,8 @@ static ani_int ExtWindowGetWindowAvoidArea(ani_env* env, ani_object obj, ani_lon
     }
     AvoidArea avoidArea {};
     ani_status ret {};
-    ret = env->Object_SetFieldByName_Boolean(area, "<property>visible", areaType != (int)AvoidAreaType::TYPE_CUTOUT);
+    ret = env->Object_SetFieldByName_Boolean(area, Builder::BuildPropertyName("visible").c_str(),
+        areaType != (int)AvoidAreaType::TYPE_CUTOUT);
     if (ret != ANI_OK) {
         TLOGI(WmsLogTag::WMS_UIEXT, "[ANI] set visible faild %{public}d", (int)ret);
         return (ani_int)WMError::WM_DO_NOTHING;
@@ -236,20 +244,21 @@ static ani_int ExtWindowGetWindowAvoidArea(ani_env* env, ani_object obj, ani_lon
     if (retCode != WMError::WM_OK) {
         return (ani_int)retCode;
     }
-    if ((retCode = (WMError)ExtWindowSetRectMember(env, area, "<property>leftRect", avoidArea.leftRect_)) !=
+    if ((retCode = (WMError)ExtWindowSetRectMember(env, area, Builder::BuildPropertyName("leftRect").c_str(),
+        avoidArea.leftRect_)) !=
         WMError::WM_OK) {
         return (ani_int)retCode;
     }
-    if ((retCode = (WMError)ExtWindowSetRectMember(env, area, "<property>rightRect", avoidArea.rightRect_)) !=
-        WMError::WM_OK) {
+    if ((retCode = (WMError)ExtWindowSetRectMember(env, area, Builder::BuildPropertyName("rightRect").c_str(),
+        avoidArea.rightRect_)) != WMError::WM_OK) {
         return (ani_int)retCode;
     }
-    if ((retCode = (WMError)ExtWindowSetRectMember(env, area, "<property>topRect", avoidArea.topRect_)) !=
-        WMError::WM_OK) {
+    if ((retCode = (WMError)ExtWindowSetRectMember(env, area, Builder::BuildPropertyName("topRect").c_str(),
+        avoidArea.topRect_)) != WMError::WM_OK) {
         return (ani_int)retCode;
     }
-    if ((retCode = (WMError)ExtWindowSetRectMember(env, area, "<property>bottomRect", avoidArea.bottomRect_)) !=
-        WMError::WM_OK) {
+    if ((retCode = (WMError)ExtWindowSetRectMember(env, area, Builder::BuildPropertyName("bottomRect").c_str(),
+        avoidArea.bottomRect_)) != WMError::WM_OK) {
         return (ani_int)retCode;
     }
     return (ani_int)WMError::WM_OK;
