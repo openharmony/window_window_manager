@@ -2224,12 +2224,12 @@ void SceneSession::SetIsStatusBarVisible(bool isVisible)
 WSError SceneSession::SetIsStatusBarVisibleInner(bool isVisible)
 {
     bool isNeedNotify = IsStatusBarVisible() != isVisible;
-    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}d, %{public}s] visible %{public}u need notify %{public}u",
-        GetPersistentId(), GetWindowName().c_str(), isVisible, isNeedNotify);
     UpdateStatusBarVisible(isVisible);
     if (!isNeedNotify) {
         return WSError::WS_OK;
     }
+    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}d, %{public}s] visible %{public}u need notify",
+        GetPersistentId(), GetWindowName().c_str(), isVisible);
     return HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_SYSTEM);
 }
 
