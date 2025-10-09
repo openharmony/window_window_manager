@@ -215,7 +215,7 @@ private:
     napi_value OnPreloadInLakeApp(napi_env env, napi_callback_info info);
     napi_value OnRequestFocusStatus(napi_env env, napi_callback_info info);
     napi_value DoRequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground,
-        FocusChangeReason reason, DisplayId displayId)
+        FocusChangeReason reason, DisplayId displayId);
     napi_value OnRequestAllAppSessionUnfocus(napi_env env, napi_callback_info info);
     napi_value OnSetScreenLocked(napi_env env, napi_callback_info info);
     napi_value OnSetUserAuthPassed(napi_env env, napi_callback_info info);
