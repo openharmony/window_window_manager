@@ -54,6 +54,7 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     {WINDOW_DISPLAYID_CHANGE_CB, RegisterListenerType::WINDOW_DISPLAYID_CHANGE_CB},
     {SYSTEM_DENSITY_CHANGE_CB, RegisterListenerType::SYSTEM_DENSITY_CHANGE_CB},
     {WINDOW_ROTATION_CHANGE_CB, RegisterListenerType::WINDOW_ROTATION_CHANGE_CB},
+    {WINDOW_WILL_CLOSE_CB, RegisterListenerType::WINDOW_WILL_CLOSE_CB},
 };
 const std::map<std::string, RegisterListenerType> WINDOW_STAGE_LISTENER_MAP {
     // white register list for window stage
@@ -401,6 +402,24 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowTitleButtonRectChangeRegister
     return ret;
 }
 
+WmErrorCode AniWindowRegisterManager::ProcessWindowWillCloseRegister(sptr<AniWindowListener> listener,
+    sptr<Window> window, bool isRegister, ani_env* env)
+{
+    TLOGD(WmsLogTag::DEFAULT, "called");
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IWindowWillCloseListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowWillCloseListeners(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnRegisterWindowWillCloseListeners(thisListener));
+    }
+    return ret;
+}
+
 bool AniWindowRegisterManager::IsCallbackRegistered(ani_env* env, std::string type, ani_ref jsListenerObject)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
@@ -529,6 +548,8 @@ WmErrorCode AniWindowRegisterManager::ProcessListener(RegisterListenerType regis
                 return ProcessDisplayIdChangeRegister(windowManagerListener, window, isRegister, env);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_ROTATION_CHANGE_CB):
                 return ProcessWindowRotationChangeRegister(windowManagerListener, window, isRegister, env);
+            case static_cast<uint32_t>(RegisterListenerType::WINDOW_WILL_CLOSE_CB):
+                return ProcessWindowWillCloseRegister(windowManagerListener, window, isRegister, env);
             default:
                 TLOGE(WmsLogTag::DEFAULT, "[ANI]RegisterListenerType %{public}u is not supported",
                     static_cast<uint32_t>(registerListenerType));
