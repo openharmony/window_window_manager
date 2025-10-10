@@ -1102,6 +1102,7 @@ void KeyboardSession::CalculateOccupiedAreaAfterUIRefresh()
         static_cast<uint32_t>(SessionUIDirtyFlag::NONE) ||
         (keyboardDirtyFlags & static_cast<uint32_t>(SessionUIDirtyFlag::RECT)) !=
         static_cast<uint32_t>(SessionUIDirtyFlag::NONE) || stateChanged_) {
+        HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_KEYBOARD);
         TLOGD(WmsLogTag::WMS_KEYBOARD, "Keyboard panel rect has changed");
         needRecalculateOccupiedArea = true;
     }
