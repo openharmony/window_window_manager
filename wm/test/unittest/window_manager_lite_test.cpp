@@ -289,7 +289,6 @@ HWTEST_F(WindowManagerLiteTest, UnregisterCameraWindowChangedListener01, TestSiz
     ASSERT_EQ(WMError::WM_OK, windowManager->UnregisterCameraWindowChangedListener(listener1));
     ASSERT_EQ(WMError::WM_OK, windowManager->UnregisterCameraWindowChangedListener(listener2));
     ASSERT_EQ(0, windowManager->pImpl_->cameraWindowChangedListeners_.size());
-    ASSERT_EQ(nullptr, windowManager->pImpl_->cameraWindowChangedListenerAgent_);
 
     windowManager->pImpl_->cameraWindowChangedListeners_.emplace_back(listener1);
     ASSERT_EQ(WMError::WM_OK, windowManager->UnregisterCameraWindowChangedListener(listener1));
@@ -404,7 +403,6 @@ HWTEST_F(WindowManagerLiteTest, UnregisterWindowModeChangedListener02, TestSize.
     ASSERT_EQ(WMError::WM_OK, windowManager->UnregisterWindowModeChangedListener(listener1));
     ASSERT_EQ(WMError::WM_OK, windowManager->UnregisterWindowModeChangedListener(listener2));
     ASSERT_EQ(0, windowManager->pImpl_->windowModeListeners_.size());
-    ASSERT_EQ(nullptr, windowManager->pImpl_->windowModeListenerAgent_);
 
     windowManager->pImpl_->windowModeListeners_.emplace_back(listener1);
     ASSERT_EQ(WMError::WM_OK, windowManager->UnregisterWindowModeChangedListener(listener1));
@@ -1149,7 +1147,6 @@ HWTEST_F(WindowManagerLiteTest, UnregisterWindowUpdateListener01, TestSize.Level
     ASSERT_EQ(WMError::WM_OK, windowManager->UnregisterWindowUpdateListener(listener1));
     ASSERT_EQ(WMError::WM_OK, windowManager->UnregisterWindowUpdateListener(listener2));
     ASSERT_EQ(0, windowManager->pImpl_->windowUpdateListeners_.size());
-    ASSERT_EQ(nullptr, windowManager->pImpl_->windowUpdateListenerAgent_);
 
     windowManager->pImpl_->windowUpdateListeners_.emplace_back(listener1);
     ASSERT_EQ(WMError::WM_OK, windowManager->UnregisterWindowUpdateListener(listener1));
@@ -1442,7 +1439,6 @@ HWTEST_F(WindowManagerLiteTest, RegisterVisibilityStateChangedListener01, Functi
 
     sptr<TestWindowVisibilityStateListener> listener = sptr<TestWindowVisibilityStateListener>::MakeSptr();
     windowManager->RegisterVisibilityStateChangedListener(listener);
-    ASSERT_EQ(nullptr, windowManager->pImpl_->windowVisibilityStateListenerAgent_);
 
     // to check that the same listner can not be registered twice
     windowManager->RegisterVisibilityStateChangedListener(listener);

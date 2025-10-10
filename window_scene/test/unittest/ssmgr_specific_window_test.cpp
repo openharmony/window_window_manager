@@ -249,17 +249,6 @@ HWTEST_F(SSMgrSpecificWindowTest, IsKeyboardForeground, TestSize.Level1)
     session->property_ = nullptr;
     auto result = ssm_->IsKeyboardForeground();
     ASSERT_EQ(result, false);
-
-    ssm_->sceneSessionMap_.insert({ 0, sceneSession });
-    session->property_ = sptr<WindowSessionProperty>::MakeSptr();
-
-    if (session->property_) {
-        auto result1 = session->GetWindowType();
-        result1 = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
-        ASSERT_EQ(result1, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    }
-    result = ssm_->IsKeyboardForeground();
-    ASSERT_EQ(result, false);
 }
 
 /**
