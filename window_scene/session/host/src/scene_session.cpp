@@ -5827,6 +5827,7 @@ static bool IsNeedSystemPermissionByAction(WSPropertyChangeAction action,
         case WSPropertyChangeAction::ACTION_UPDATE_TOPMOST:
         case WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE:
         case WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO:
+        case WSPropertyChangeAction::ACTION_UPDATE_ROTATION_LOCK_CHANGE:
             return true;
         case WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG:
             return property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM);
@@ -6199,6 +6200,8 @@ WMError SceneSession::ProcessUpdatePropertyByAction(const sptr<WindowSessionProp
             return HandleActionUpdateFollowScreenChange(property, action);
         case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_SHADOW_ENABLED):
             return HandleActionUpdateWindowShadowEnabled(property, action);
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_ROTATION_LOCK_CHANGE):
+            return HandleActionUpdateRotationLockChange(property, action);
         default:
             TLOGE(WmsLogTag::DEFAULT, "Failed to find func handler!");
             return WMError::WM_DO_NOTHING;
@@ -9613,5 +9616,35 @@ void SceneSession::RestoreGravityWhenDragEnd()
                 where, session->GetPersistentId());
         }, where);
     });
+}
+
+void SceneSession::RegisterRotationLockChangeCallback(NotifyRotationLockChangeFunc&& callback)
+{
+    PostTask([weakThis = wptr(this), callback = std::move(callback)] {
+        auto session = weakThis.promote();
+        if (!session || !session->specificCallback_ || !callback) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "session or specific callback or callback is null");
+            return;
+        }
+        session->specificCallback_->onRotationLockChange_ = std::move(callback);
+        session->specificCallback_->onRotationLockChange_(session->GetSessionProperty()->GetRotationLocked());
+    }, __func__);
+}
+ 
+WMError SceneSession::HandleActionUpdateRotationLockChange(const sptr<WindowSessionProperty>& property,
+    WSPropertyChangeAction action)
+{
+    GetSessionProperty()->SetRotationLocked(property->GetRotationLocked());
+    PostTask([weakThis = wptr(this), property] {
+        auto session = weakThis.promote();
+        if (!session || !session->specificCallback_) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "session or specific callback is null");
+            return;
+        }
+        if (session->specificCallback_->onRotationLockChange_) {
+            session->specificCallback_->onRotationLockChange_(property->GetRotationLocked());
+        }
+    }, __func__);
+    return WMError::WM_OK;
 }
 } // namespace OHOS::Rosen

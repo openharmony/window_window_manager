@@ -274,6 +274,8 @@ public:
     WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) override;
     WMError IsMainWindowFullScreenAcrossDisplays(bool& isAcrossDisplays) override;
     WMError GetWindowPropertyInfo(WindowPropertyInfo& windowPropertyInfo) override;
+    WMError SetRotationLocked(bool locked) override;
+    WMError GetRotationLocked(bool& locked) override;
 
     /*
      * Window Decor

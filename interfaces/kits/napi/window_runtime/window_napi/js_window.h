@@ -171,6 +171,8 @@ public:
     static napi_value SetWaterMarkFlag(napi_env env, napi_callback_info info);
     static napi_value SetHandwritingFlag(napi_env env, napi_callback_info info);
     static napi_value SetWindowGrayScale(napi_env env, napi_callback_info info);
+    static napi_value SetRotationLocked(napi_env env, napi_callback_info info);
+    static napi_value GetRotationLocked(napi_env env, napi_callback_info info);
 
     /*
      * Sub Window
@@ -396,6 +398,8 @@ private:
     napi_value OnEnableDrag(napi_env env, napi_callback_info info);
     napi_value OnStartMoving(napi_env env, napi_callback_info info);
     napi_value OnStopMoving(napi_env env, napi_callback_info info);
+    napi_value OnSetRotationLocked(napi_env env, napi_callback_info info);
+    napi_value OnGetRotationLocked(napi_env env, napi_callback_info info);
 
     /*
      * Sub Window

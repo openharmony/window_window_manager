@@ -101,6 +101,8 @@ const std::map<uint64_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
         &WindowSessionProperty::WriteActionUpdateWindowShadowEnabled),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO),
         &WindowSessionProperty::WriteActionUpdateAspectRatio),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_ROTATION_LOCK_CHANGE),
+        &WindowSessionProperty::WriteActionUpdateRotationLockChange),
 };
 
 const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncMap_ {
@@ -178,6 +180,8 @@ const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
         &WindowSessionProperty::ReadActionUpdateWindowShadowEnabled),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO),
         &WindowSessionProperty::ReadActionUpdateAspectRatio),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_ROTATION_LOCK_CHANGE),
+        &WindowSessionProperty::ReadActionUpdateRotationLockChange),
 };
 
 WindowSessionProperty::WindowSessionProperty(const sptr<WindowSessionProperty>& property)
@@ -904,6 +908,16 @@ bool WindowSessionProperty::GetUseControlState() const
     return isUseControlState_;
 }
 
+void WindowSessionProperty::SetRotationLocked(bool locked)
+{
+    isRotationLock_ = locked;
+}
+ 
+bool WindowSessionProperty::GetRotationLocked() const
+{
+    return isRotationLock_;
+}
+
 bool WindowSessionProperty::MarshallingWindowLimits(Parcel& parcel) const
 {
     if (parcel.WriteUint32(limits_.maxWidth_) &&
@@ -1377,7 +1391,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isShowDecorInFreeMultiWindow_) &&
         parcel.WriteBool(isMobileAppInPadLayoutFullScreen_) &&
         parcel.WriteBool(isFullScreenInForceSplitMode_) &&
-        parcel.WriteFloat(aspectRatio_);
+        parcel.WriteFloat(aspectRatio_) &&
+        parcel.WriteBool(isRotationLock_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1498,6 +1513,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetMobileAppInPadLayoutFullScreen(parcel.ReadBool());
     property->SetIsFullScreenInForceSplitMode(parcel.ReadBool());
     property->SetAspectRatio(parcel.ReadFloat());
+    property->SetRotationLocked(parcel.ReadBool());
     return property;
 }
 
@@ -1613,6 +1629,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isShowDecorInFreeMultiWindow_ = property->isShowDecorInFreeMultiWindow_;
     isMobileAppInPadLayoutFullScreen_ = property->isMobileAppInPadLayoutFullScreen_;
     aspectRatio_ = property->aspectRatio_;
+    isRotationLock_ = property->isRotationLock_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -1794,6 +1811,11 @@ bool WindowSessionProperty::WriteActionUpdateAspectRatio(Parcel& parcel)
     return parcel.WriteFloat(aspectRatio_);
 }
 
+bool WindowSessionProperty::WriteActionUpdateRotationLockChange(Parcel& parcel)
+{
+    return parcel.WriteBool(isRotationLock_);
+}
+
 void WindowSessionProperty::Read(Parcel& parcel, WSPropertyChangeAction action)
 {
     const auto funcIter = readFuncMap_.find(static_cast<uint64_t>(action));
@@ -1973,6 +1995,11 @@ void WindowSessionProperty::ReadActionUpdateWindowShadowEnabled(Parcel& parcel)
 void WindowSessionProperty::ReadActionUpdateAspectRatio(Parcel& parcel)
 {
     SetAspectRatio(parcel.ReadFloat());
+}
+
+void WindowSessionProperty::ReadActionUpdateRotationLockChange(Parcel& parcel)
+{
+    SetRotationLocked(parcel.ReadBool());
 }
 
 void WindowSessionProperty::SetTransform(const Transform& trans)

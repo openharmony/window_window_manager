@@ -267,6 +267,8 @@ public:
     bool GetPcAppInpadOrientationLandscape() const;
     void SetMobileAppInPadLayoutFullScreen(bool isMobileAppInPadLayoutFullScreen);
     bool GetMobileAppInPadLayoutFullScreen() const;
+    void SetRotationLocked(bool locked);
+    bool GetRotationLocked() const;
 
     /*
      * Window Lifecycle
@@ -410,6 +412,7 @@ private:
     bool WriteActionUpdateExclusivelyHighlighted(Parcel& parcel);
     bool WriteActionUpdateFollowScreenChange(Parcel& parcel);
     bool WriteActionUpdateAspectRatio(Parcel& parcel);
+    bool WriteActionUpdateRotationLockChange(Parcel& parcel);
     void ReadActionUpdateTurnScreenOn(Parcel& parcel);
     void ReadActionUpdateKeepScreenOn(Parcel& parcel);
     void ReadActionUpdateViewKeepScreenOn(Parcel& parcel);
@@ -443,6 +446,7 @@ private:
     void ReadActionUpdateExclusivelyHighlighted(Parcel& parcel);
     void ReadActionUpdateFollowScreenChange(Parcel& parcel);
     void ReadActionUpdateAspectRatio(Parcel& parcel);
+    void ReadActionUpdateRotationLockChange(Parcel& parcel);
     std::string windowName_;
     SessionInfo sessionInfo_;
     mutable std::mutex windowRectMutex_;
@@ -616,6 +620,7 @@ private:
     bool isPcAppInpadSpecificSystemBarInvisible_ = false;
     bool isPcAppInpadOrientationLandscape_ = false;
     bool isMobileAppInPadLayoutFullScreen_ = false;
+    bool isRotationLock_ = false;
 
     sptr<CompatibleModeProperty> compatibleModeProperty_ = nullptr;
 
