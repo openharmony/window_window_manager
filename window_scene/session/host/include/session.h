@@ -241,6 +241,12 @@ public:
     void NotifyExtensionDetachToDisplay() override;
 
     /*
+     * Window Immersive
+     */
+    void UpdateStatusBarVisible(bool isStatusBarVisible) { isStatusBarVisible_ = isStatusBarVisible; }
+    bool IsStatusBarVisible() const;
+
+    /*
      * Cross Display Move Drag
      */
     std::shared_ptr<RSSurfaceNode> GetSurfaceNodeForMoveDrag() const;
@@ -1049,6 +1055,11 @@ private:
 
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
+
+    /*
+     * Window Immersive
+     */
+    bool isStatusBarVisible_ = true;
 
     /*
      * Multi Window

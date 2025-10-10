@@ -2215,10 +2215,10 @@ void SceneSession::SetIsStatusBarVisible(bool isVisible)
 
 WSError SceneSession::SetIsStatusBarVisibleInner(bool isVisible)
 {
-    bool isNeedNotify = isStatusBarVisible_ != isVisible;
+    bool isNeedNotify = IsStatusBarVisible() != isVisible;
     TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}d, %{public}s] visible %{public}u need notify %{public}u",
         GetPersistentId(), GetWindowName().c_str(), isVisible, isNeedNotify);
-    isStatusBarVisible_ = isVisible;
+    UpdateStatusBarVisible(isVisible);
     if (!isNeedNotify) {
         return WSError::WS_OK;
     }
@@ -2462,8 +2462,8 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d displayId %{public}" PRIu64 " constantly isVisible %{public}d",
                 GetPersistentId(), displayId, isVisible);
         }
-        bool isStatusBarVisible = WindowHelper::IsMainWindow(Session::GetWindowType()) ?
-            isStatusBarVisible_ : isVisible;
+        bool isStatusBarVisible =
+            WindowHelper::IsAppWindow(Session::GetWindowType()) ? IsStatusBarVisible() : isVisible;
         if (!isStatusBarVisible) {
             TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d status bar not visible", GetPersistentId());
             continue;
@@ -2558,6 +2558,21 @@ void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     return;
 }
 
+void SceneSession::PatchAINavigationBarArea(AvoidArea& avoidArea)
+{
+    Rect areaEmpty = { 0, 0, 0, 0 };
+    if (!avoidArea.leftRect_.IsUninitializedRect()) {
+        avoidArea.bottomRect_ = avoidArea.leftRect_;
+        avoidArea.leftRect_ = areaEmpty;
+    } else if (!avoidArea.topRect_.IsUninitializedRect()) {
+        avoidArea.bottomRect_ = avoidArea.topRect_;
+        avoidArea.topRect_ = areaEmpty;
+    } else if (!avoidArea.topRect_.IsUninitializedRect()) {
+        avoidArea.bottomRect_ = avoidArea.rightRect_;
+        avoidArea.rightRect_ = areaEmpty;
+    }
+}
+
 void SceneSession::GetAINavigationBarArea(WSRect& rect, AvoidArea& avoidArea)
 {
     if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_PIP) {
@@ -2574,6 +2589,7 @@ void SceneSession::GetAINavigationBarArea(WSRect& rect, AvoidArea& avoidArea)
         barArea = specificCallback_->onGetAINavigationBarArea_(GetSessionProperty()->GetDisplayId());
     }
     CalculateAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR, rect, barArea, avoidArea);
+    PatchAINavigationBarArea(avoidArea);
 }
 
 void SceneSession::HookAvoidAreaInCompatibleMode(const WSRect& rect, AvoidAreaType avoidAreaType,
@@ -7248,8 +7264,8 @@ bool SceneSession::GetIsDisplayStatusBarTemporarily() const
 void SceneSession::RetrieveStatusBarDefaultVisibility()
 {
     if (specificCallback_ && specificCallback_->onGetStatusBarDefaultVisibilityByDisplayId_) {
-        isStatusBarVisible_ = specificCallback_->onGetStatusBarDefaultVisibilityByDisplayId_(
-            GetSessionProperty()->GetDisplayId());
+        UpdateStatusBarVisible(
+            specificCallback_->onGetStatusBarDefaultVisibilityByDisplayId_(GetSessionProperty()->GetDisplayId()));
     }
 }
 
