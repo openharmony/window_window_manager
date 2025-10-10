@@ -455,15 +455,33 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
         } else {
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s foreground specific callback is null", where);
         }
-        auto leashWinShadowSurfaceNode = session->GetLeashWinShadowSurfaceNode();
-        if (session->isUIFirstEnabled_ && leashWinShadowSurfaceNode) {
-            AutoRSTransaction trans(session->GetRSLeashWinShadowContext());
-            leashWinShadowSurfaceNode->SetForceUIFirst(false);
-            session->isUIFirstEnabled_ = false;
-        }
+        session->DisableUIFirstIfNeed();
         return WSError::WS_OK;
     }, __func__);
     return WSError::WS_OK;
+}
+
+void SceneSession::DisableUIFirstIfNeed()
+{
+    if (!isUIFirstEnabled_) {
+        TLOGI(WmsLogTag::WMS_ANIMATION, "UIFirst is disabled, id: %{public}d.", GetPersistentId());
+        return;
+    }
+    auto leashWinShadowSurfaceNode = GetLeashWinShadowSurfaceNode();
+    if (!leashWinShadowSurfaceNode) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "leashWinShadowSurfaceNode is null, id:%{public}d.", GetPersistentId());
+        return;
+    }
+    if (RSAdapterUtil::IsClientMultiInstanceEnabled()) {
+        // If client multi instance is enabled，use the shadowSurfaceNode's commit flush SetForceUIFirst command.
+        AutoRSTransaction trans(GetRSLeashWinShadowContext());
+        leashWinShadowSurfaceNode->SetForceUIFirst(false);
+    } else {
+        // If client multi instance is disabled，reuse the ark's commit flush SetForceUIFirst command.
+        leashWinShadowSurfaceNode->SetForceUIFirst(false);
+    }
+    isUIFirstEnabled_ = false;
+    TLOGI(WmsLogTag::WMS_ANIMATION, "leashWinShadowSurfaceNode disable UIFirst id:%{public}d!", GetPersistentId());
 }
 
 void SceneSession::CheckAndMoveDisplayIdRecursively(uint64_t displayId)
