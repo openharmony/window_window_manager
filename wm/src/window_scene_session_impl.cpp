@@ -6088,7 +6088,7 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
-    if (IsStageDefaultDensityEnabled == enabled) {
+    if (IsStageDefaultDensityEnabled() == enabled) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "defaultDensityEnabledGlobalConfig not change");
         return WMError::WM_OK;
     }
