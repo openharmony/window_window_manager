@@ -9271,6 +9271,93 @@ napi_value JsWindow::OnSetWindowShadowEnabled(napi_env env, napi_callback_info i
     return result;
 }
 
+napi_value JsWindow::SetRotationLocked(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetRotationLocked(env, info) : nullptr;
+}
+ 
+napi_value JsWindow::OnSetRotationLocked(napi_env env, napi_callback_info info)
+{
+    const std::string errMsgPrefix = "[window][setRotationLocked]msg: ";
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "windowToken is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, errMsgPrefix + "window is nullptr");
+    }
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "permission denied, require system application!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP, errMsgPrefix + "not system application");
+    }
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1 || argv[0] == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Argc is invalid: %{public}zu.", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, errMsgPrefix + "paramters is invalid");
+    }
+    bool locked = false;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], locked)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter from jsValue");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            errMsgPrefix + "fail to convert parameter to locked");
+    }
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [windowToken = wptr<Window>(windowToken_), locked, env, napiAsyncTask, errMsgPrefix] {
+        auto window = windowToken.promote();
+        if (!window) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "window is nullptr");
+            napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                errMsgPrefix + "window is nullptr"));
+            return;
+        }
+        auto ret = window->SetRotationLocked(locked);
+        auto it = WM_JS_TO_ERROR_CODE_MAP.find(ret);
+        WmErrorCode code = (it != WM_JS_TO_ERROR_CODE_MAP.end()) ? it->second : WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        if (code == WmErrorCode::WM_OK) {
+            napiAsyncTask->Resolve(env, NapiGetUndefined(env));
+        } else {
+            napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, code,
+                errMsgPrefix + "set rotation locked failed"));
+        }
+    };
+    if (napi_send_event(env, asyncTask, napi_eprio_high, __func__) != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            errMsgPrefix + "failed to send event"));
+    }
+    return result;
+}
+ 
+napi_value JsWindow::GetRotationLocked(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGetRotationLocked(env, info) : nullptr;
+}
+ 
+napi_value JsWindow::OnGetRotationLocked(napi_env env, napi_callback_info info)
+{
+    const std::string errMsgPrefix = "[window][getRotationLocked]msg: ";
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "window is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, errMsgPrefix + "window is nullptr");
+    }
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "permission denied, require system application!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP, errMsgPrefix + "not system application");
+    }
+    bool locked = false;
+    WmErrorCode code = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetRotationLocked(locked));
+    if (code != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Get rotation locked failed");
+        return NapiThrowError(env, code, errMsgPrefix + "get rotation locked failed");
+    }
+    TLOGI(WmsLogTag::WMS_ROTATION, "window [%{public}u, %{public}s] locked = %{public}d",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), locked);
+    return CreateJsValue(env, locked);
+}
+
 void BindFunctions(napi_env env, napi_value object, const char* moduleName)
 {
     BindNativeFunction(env, object, "startMoving", moduleName, JsWindow::StartMoving);
@@ -9451,6 +9538,8 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setWindowShadowEnabled", moduleName, JsWindow::SetWindowShadowEnabled);
     BindNativeFunction(env, object, "isImmersiveLayout", moduleName, JsWindow::IsImmersiveLayout);
     BindNativeFunction(env, object, "isInFreeWindowMode", moduleName, JsWindow::IsInFreeWindowMode);
+    BindNativeFunction(env, object, "setRotationLocked", moduleName, JsWindow::SetRotationLocked);
+    BindNativeFunction(env, object, "getRotationLocked", moduleName, JsWindow::GetRotationLocked);
 }
 }  // namespace Rosen
 }  // namespace OHOS

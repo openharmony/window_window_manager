@@ -2271,6 +2271,87 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowContainerModalColor01, TestSize.L
     res = window->SetWindowContainerModalColor(activeColor, inactiveColor);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
 }
+
+/**
+ * @tc.name: SetRotationLocked
+ * @tc.desc: SetRotationLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, SetRotationLocked, TestSize.Level0)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetRotationLocked");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(0);
+    WMError ret = window->SetRotationLocked(false);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+ 
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    EXPECT_NE(nullptr, session);
+    window->hostSession_ = session;
+    
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
+    ret = window->SetRotationLocked(false);
+    EXPECT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+ 
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ret = window->SetRotationLocked(false);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW_TYPE);
+ 
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    ret = window->SetRotationLocked(false);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ret = window->SetRotationLocked(false);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    ret = window->SetRotationLocked(false);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
+ 
+/**
+ * @tc.name: GetRotationLocked
+ * @tc.desc: GetRotationLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, GetRotationLocked, TestSize.Level0)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetRotationLocked");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(0);
+    bool locked = false;
+    WMError ret = window->GetRotationLocked(locked);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+ 
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    EXPECT_NE(nullptr, session);
+    window->hostSession_ = session;
+    
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
+    ret = window->GetRotationLocked(locked);
+    EXPECT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+ 
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ret = window->GetRotationLocked(locked);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW_TYPE);
+ 
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    ret = window->GetRotationLocked(locked);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ret = window->GetRotationLocked(locked);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    ret = window->GetRotationLocked(locked);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -208,6 +208,12 @@ public:
         return type == WindowType::WINDOW_TYPE_DYNAMIC;
     }
 
+    static inline bool IsAuxiliaryWindow(WindowType type)
+    {
+        return (type == WindowType::WINDOW_TYPE_FLOAT || type == WindowType::WINDOW_TYPE_DIALOG ||
+                type == WindowType::WINDOW_TYPE_PIP || type == WindowType::WINDOW_TYPE_FB);
+    }
+
     static inline bool IsFullScreenWindow(WindowMode mode)
     {
         return mode == WindowMode::WINDOW_MODE_FULLSCREEN;

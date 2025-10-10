@@ -4762,6 +4762,22 @@ public:
     {
         return WMError::WM_OK;
     }
+
+    /**
+     * @brief Set whether this window limits screen rotation when this window is shown.
+     *
+     * @param locked Screen rotation lock status to set.
+     * @return Errorcode of window.
+     */
+    virtual WMError SetRotationLocked(bool locked) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    
+    /**
+     * @brief Get whether this window limits screen rotation when this window is shown.
+     * @param locked Screen rotation lock status to get.
+     *
+     * @return Errorcode of window.
+     */
+    virtual WMError GetRotationLocked(bool& locked) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }
