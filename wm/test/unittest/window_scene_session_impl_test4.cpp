@@ -2301,7 +2301,7 @@ HWTEST_F(WindowSceneSessionImplTest4, SetRotationLocked, TestSize.Level0)
     ret = window->SetRotationLocked(false);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW_TYPE);
  
-    window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_HANDWRITE);
     ret = window->SetRotationLocked(false);
     EXPECT_EQ(ret, WMError::WM_OK);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
@@ -2342,7 +2342,7 @@ HWTEST_F(WindowSceneSessionImplTest4, GetRotationLocked, TestSize.Level0)
     ret = window->GetRotationLocked(locked);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW_TYPE);
  
-    window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_HANDWRITE);
     ret = window->GetRotationLocked(locked);
     EXPECT_EQ(ret, WMError::WM_OK);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
