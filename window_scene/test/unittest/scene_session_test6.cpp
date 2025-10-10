@@ -1414,6 +1414,45 @@ HWTEST_F(SceneSessionTest6, TestRunAfterNVsyncs, TestSize.Level1)
     session->RestoreGravityWhenDragEnd();
     SUCCEED();
 }
+
+/**
+ * @tc.name: DisableUIFirstIfNeed
+ * @tc.desc: DisableUIFirstIfNeed function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, DisableUIFirstIfNeed, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "DisableUIFirstIfNeed";
+    info.bundleName_ = "DisableUIFirstIfNeed";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_EQ(false, session->isUIFirstEnabled_);
+    EXPECT_EQ(nullptr, session->GetLeashWinShadowSurfaceNode());
+    session->DisableUIFirstIfNeed();
+    EXPECT_EQ(false, session->isUIFirstEnabled_);
+
+    session->isUIFirstEnabled_ = true;
+    EXPECT_EQ(true, session->isUIFirstEnabled_);
+    EXPECT_EQ(nullptr, session->GetLeashWinShadowSurfaceNode());
+    session->SetSessionState(SessionState::STATE_CONNECT);
+    EXPECT_EQ(WSError::WS_OK, session->ForegroundTask(property));
+
+    session->isUIFirstEnabled_ = true;
+    EXPECT_EQ(true, session->isUIFirstEnabled_);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    EXPECT_NE(nullptr, surfaceNode);
+    session->SetLeashWinSurfaceNode(surfaceNode);
+    EXPECT_NE(nullptr, session->GetLeashWinShadowSurfaceNode());
+    session->SetSessionState(SessionState::STATE_CONNECT);
+    EXPECT_EQ(WSError::WS_OK, session->ForegroundTask(property));
+
+    session->isUIFirstEnabled_ = false;
+    EXPECT_EQ(false, session->isUIFirstEnabled_);
+    EXPECT_NE(nullptr, session->GetLeashWinShadowSurfaceNode());
+    session->SetSessionState(SessionState::STATE_CONNECT);
+    EXPECT_EQ(WSError::WS_OK, session->ForegroundTask(property));
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

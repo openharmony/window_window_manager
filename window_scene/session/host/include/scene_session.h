@@ -1369,6 +1369,7 @@ private:
     NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
     NotifyAnimateToFunc onAnimateTo_;
     bool isUIFirstEnabled_ = false;
+    void DisableUIFirstIfNeed();
 
     /*
      * Window Layout
