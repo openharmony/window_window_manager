@@ -1157,11 +1157,9 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionForeground, TestSize.Level0)
     ASSERT_NE(mockSessionStage, nullptr);
     uint32_t reason = 1;
     bool withAnimation = true;
-    int ret = 1;
 
     sceneSession->sessionStage_ = mockSessionStage;
     sceneSession->NotifySessionForeground(reason, withAnimation);
-    ASSERT_EQ(ret, 1);
 }
 
 /**
@@ -1183,10 +1181,8 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionFullScreen, TestSize.Level0)
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_NE(mockSessionStage, nullptr);
     bool fullScreen = true;
-    int ret = 1;
     sceneSession->sessionStage_ = mockSessionStage;
     sceneSession->NotifySessionFullScreen(fullScreen);
-    ASSERT_EQ(ret, 1);
     sceneSession->sessionStage_ = nullptr;
     sceneSession->NotifySessionFullScreen(fullScreen);
 }
@@ -1214,11 +1210,9 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionBackground, TestSize.Level0)
     uint32_t reason = 1;
     bool withAnimation = true;
     bool isFromInnerkits = true;
-    int ret = 1;
 
     sceneSession->sessionStage_ = mockSessionStage;
     sceneSession->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
-    ASSERT_EQ(ret, 1);
 }
 
 /**

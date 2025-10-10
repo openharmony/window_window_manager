@@ -218,7 +218,6 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange02, TestSize.Lev
  */
 HWTEST_F(SceneSessionManagerLifecycleTest2, MinimizeAllAppWindows, TestSize.Level1)
 {
-    int ret = 0;
     ssm_->sceneSessionMap_.clear();
     SessionInfo info;
     info.abilityName_ = "MinimizeAllAppWindows";
@@ -250,7 +249,6 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, MinimizeAllAppWindows, TestSize.Leve
  */
 HWTEST_F(SceneSessionManagerLifecycleTest2, MinimizeAllWindow01, TestSize.Level1)
 {
-    int ret = 0;
     ssm_->sceneSessionMap_.clear();
     SessionInfo info;
     info.abilityName_ = "MinimizeAllWindow01";
@@ -297,7 +295,6 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, MinimizeAllWindow01, TestSize.Level1
  */
 HWTEST_F(SceneSessionManagerLifecycleTest2, NotifyWindowStateErrorFromMMI, TestSize.Level1)
 {
-    int ret = 0;
     ssm_->sceneSessionMap_.clear();
     SessionInfo info;
     info.abilityName_ = "SceneSessionManagerLifecycleTest2";
@@ -337,7 +334,6 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, NotifyWindowStateErrorFromMMI, TestS
     ssm_->sceneSessionMap_.insert({ 10089, nullptr });
     ssm_->NotifyWindowStateErrorFromMMI(-1, 10086);
     ssm_->NotifyWindowStateErrorFromMMI(100, 10086);
-    ASSERT_EQ(ret, 0);
 }
 
 /**
@@ -347,7 +343,6 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, NotifyWindowStateErrorFromMMI, TestS
  */
 HWTEST_F(SceneSessionManagerLifecycleTest2, GetAllMainWindowInfo, TestSize.Level1)
 {
-    int ret = 0;
     ssm_->sceneSessionMap_.clear();
     SessionInfo info;
     info.abilityName_ = "SceneSessionManagerLifecycleTest2";
