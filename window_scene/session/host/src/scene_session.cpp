@@ -9564,22 +9564,22 @@ void SceneSession::RunAfterNVsyncs(uint32_t vsyncCount, Task&& task)
 
 void SceneSession::SetSecurityLayerWhenEnterForeground()
 {
-    auto leashWinSurfaceNode = GetLeashWinShadowSurfaceNode();	
-    if (leashWinSurfaceNode == nullptr) {	
+    auto leashWinSurfaceNode = GetLeashWinShadowSurfaceNode();
+    if (leashWinSurfaceNode == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "leash node is null, win=[%{public}d, %{public}s]", GetWindowId(),
             GetWindowName().c_str());
         return;
     }
     auto sessionProperty = GetSessionProperty();
-    bool lastPrivacyMode = sessionProperty->GetPrivacyMode() || sessionProperty->GetSystemPrivacyMode();	
+    bool lastPrivacyMode = sessionProperty->GetPrivacyMode() || sessionProperty->GetSystemPrivacyMode();
     bool multiInstanceEnabled = RSAdapterUtil::IsClientMultiInstanceEnabled();
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "win=[%{public}d, %{public}s], isMultiInstance=%{public}d, isPrivacy=%{public}d",
         GetWindowId(), GetWindowName().c_str(), multiInstanceEnabled, lastPrivacyMode);
     if (multiInstanceEnabled) {
         AutoRSTransaction trans(GetRSLeashWinShadowContext());
-        leashWinSurfaceNode->SetSecurityLayer(lastPrivacyMode);	
+        leashWinSurfaceNode->SetSecurityLayer(lastPrivacyMode);
     } else {
-        leashWinSurfaceNode->SetSecurityLayer(lastPrivacyMode);	
+        leashWinSurfaceNode->SetSecurityLayer(lastPrivacyMode);
     }
 }
 
