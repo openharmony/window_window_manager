@@ -49,7 +49,7 @@ struct Option {
     bool isNeedNotify = true;
     bool isNeedPointer = true;
     bool isCaptureFullOfScreen = false;
-    std::vector<NodeId> surfaceNodesList = {};
+    std::vector<uint64_t> blackWindowIds = {};
 };
 
 struct Param {
@@ -209,16 +209,16 @@ static void IsNeedPointer(napi_env env, std::unique_ptr<Param> &param, napi_valu
     }
 }
 
-static bool ConverSurfaceIdList(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
+static bool ConverWindowIdList(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
 {
-    napi_value surfaceIdList;
-    napi_status status = napi_get_named_property(env, argv, "blackWindowIds", &surfaceIdList);
+    napi_value blackWindowIds;
+    napi_status status = napi_get_named_property(env, argv, "blackWindowIds", &blackWindowIds);
     if (status != napi_ok) {
         return true;
     }
     uint32_t size = 0;
-    if (GetType(env, surfaceIdList) != napi_object ||
-        napi_get_array_length(env, surfaceIdList, &size) == napi_invalid_arg) {
+    if (GetType(env, blackWindowIds) != napi_object ||
+        napi_get_array_length(env, blackWindowIds, &size) == napi_invalid_arg) {
         TLOGW(WmsLogTag::DMS, "no surface id list");
         return true;
     }
@@ -226,11 +226,14 @@ static bool ConverSurfaceIdList(napi_env env, std::unique_ptr<Param> &param, nap
     for (uint32_t i = 0; i < size; i++) {
         int64_t persistentId = 0;
         napi_value element = nullptr;
-        napi_get_element(env, surfaceIdList, i, &element);
+        napi_get_element(env, blackWindowIds, i, &element);
         if (napi_get_value_int64(env, element, &persistentId) != napi_ok) {
             return false;
         }
-        param->option.surfaceNodesList.push_back(static_cast<uint64_t>(persistentId));
+        if (persistentId < 0) {
+            continue;
+        }
+        param->option.blackWindowIds.push_back(static_cast<uint64_t>(persistentId));
     }
     return true;
 }
@@ -262,7 +265,7 @@ static bool GetScreenshotParam(napi_env env, std::unique_ptr<Param> &param, napi
     IsNeedNotify(env, param, argv);
     IsNeedPointer(env, param, argv);
     IsCaptureFullOfScreen(env, param, argv);
-    auto result = ConverSurfaceIdList(env, param, argv);
+    auto result = ConverWindowIdList(env, param, argv);
     return result;
 }
 
@@ -540,12 +543,12 @@ static void AsyncGetScreenCapture(napi_env env, std::unique_ptr<Param> &param)
     captureOption.displayId_ = param->option.displayId;
     captureOption.isNeedNotify_ = param->option.isNeedNotify;
     captureOption.isNeedPointer_ = param->option.isNeedPointer;
-    captureOption.surfaceNodesList_ = param->option.surfaceNodesList;
+    captureOption.blackWindowIdList_ = param->option.blackWindowIds;
     std::ostringstream oss;
-    for (size_t i = 0; i < captureOption.surfaceNodesList_.size(); ++i) {
-        oss << captureOption.surfaceNodesList_[i] << ", ";
+    for (size_t i = 0; i < captureOption.blackWindowIdList_.size(); ++i) {
+        oss << captureOption.blackWindowIdList_[i] << ", ";
     }
-    TLOGI(WmsLogTag::DMS, "capture option isNeedNotify=%{public}d isNeedPointer=%{public}d  surfaceList=%{public}s",
+    TLOGI(WmsLogTag::DMS, "capture option isNeedNotify=%{public}d isNeedPointer=%{public}d  blackWindowIds=%{public}s",
         captureOption.isNeedNotify_, captureOption.isNeedPointer_, oss.str().c_str());
     param->image = DisplayManager::GetInstance().GetScreenCapture(captureOption, &param->wret);
     if (param->image == nullptr && param->wret == DmErrorCode::DM_OK) {

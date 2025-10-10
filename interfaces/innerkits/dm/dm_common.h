@@ -603,6 +603,7 @@ struct CaptureOption {
     bool isNeedPointer_ = true;
     bool isCaptureFullOfScreen_ = false;
     std::vector<NodeId> surfaceNodesList_ = {}; // exclude surfacenodes in screenshot
+    std::vector<NodeId> blackWindowIdList_ = {};
 };
 
 struct ExpandOption {
