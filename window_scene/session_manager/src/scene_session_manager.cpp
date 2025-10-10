@@ -8107,14 +8107,42 @@ void SceneSessionManager::SetAbilityManagerCollaboratorRegisteredFunc(
     taskScheduler_->PostAsyncTask(task, __func__);
 }
 
+sptr<FocusNotifyInfo> SceneSessionManager::GetFocusNotifyInfo(DisplayId displayId,
+    const sptr<SceneSession>& nextSession)
+{
+    auto focusGroup = windowFocusController_->GetFocusGroup(displayId);
+    if (focusGroup == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "focus group is nullptr: %{public}" PRIu64, displayId);
+        return nullptr;
+    }
+    auto focusNotifyTimeStamp = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+    focusGroup->SetUpdateFocusTimeStamp(focusNotifyTimeStamp);
+    auto focusedSessionId = focusGroup->GetFocusedSessionId();
+    auto focusedSession = GetSceneSession(focusedSessionId);
+    int32_t nextSessionId = nextSession == nullptr ? INVALID_SESSION_ID : nextSession->GetPersistentId();
+    auto focusNotifyInfo = sptr<FocusNotifyInfo>::MakeSptr(focusGroup->GetUpdateFocusTimeStamp(), focusedSessionId,
+        nextSessionId, false);
+    if (focusedSession && nextSession) {
+        focusNotifyInfo->isSyncNotify_ = focusedSession->GetCallingPid() == nextSession->GetCallingPid() &&
+            !focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground();
+    }
+    return focusNotifyInfo;
+}
+
 WSError SceneSessionManager::ShiftFocus(DisplayId displayId, const sptr<SceneSession>& nextSession,
     bool isProactiveUnfocus, FocusChangeReason reason)
 {
+    auto focusNotifyInfo = GetFocusNotifyInfo(displayId, nextSession);
+    if (focusNotifyInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "focusNotifyInfo is nullptr");
+        return WSError::WS_OK;
+    }
     // unfocus
     auto focusedSessionId = windowFocusController_->GetFocusedSessionId(displayId);
     int32_t focusedId = focusedSessionId;
     auto focusedSession = GetSceneSession(focusedSessionId);
-    UpdateFocusStatus(displayId, focusedSession, nextSession, false);
+    UpdateFocusStatus(displayId, focusedSession, false, focusNotifyInfo);
     // focus
     int32_t nextId = INVALID_SESSION_ID;
     if (nextSession == nullptr) {
@@ -8124,7 +8152,7 @@ WSError SceneSessionManager::ShiftFocus(DisplayId displayId, const sptr<SceneSes
     } else {
         nextId = nextSession->GetPersistentId();
     }
-    UpdateFocusStatus(displayId, focusedSession, nextSession, true);
+    UpdateFocusStatus(displayId, nextSession, true, focusNotifyInfo);
     UpdateHighlightStatus(displayId, focusedSession, nextSession, isProactiveUnfocus);
     if (shiftFocusFunc_ != nullptr) {
         auto displayGroupId = windowFocusController_->GetDisplayGroupId(displayId);
@@ -8152,21 +8180,20 @@ WSError SceneSessionManager::ShiftFocus(DisplayId displayId, const sptr<SceneSes
     return WSError::WS_OK;
 }
 
-void SceneSessionManager::UpdateFocusStatus(DisplayId displayId, const sptr<SceneSession>& focusedSession,
-    const sptr<SceneSession>& nextSession, bool isFocused)
+void SceneSessionManager::UpdateFocusStatus(DisplayId displayId, const sptr<SceneSession>& sceneSession,
+    bool isFocused, const sptr<FocusNotifyInfo>& focusNotifyInfo)
 {
     auto focusGroup = windowFocusController_->GetFocusGroup(displayId);
     if (focusGroup == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "focus group is nullptr: %{public}" PRIu64, displayId);
         return;
     }
-    if (!isFocused) {
-        focusGroup->SetUpdateFocusTimeStamp(std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()).count());
+    if (focusNotifyInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "focusNotifyInfo is nullptr");
+        return;
     }
     bool needBlockNotifyFocusStatusUntilForeground = focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground();
     bool needBlockNotifyUnfocusStatus = focusGroup->GetNeedBlockNotifyUnfocusStatus();
-    auto sceneSession = isFocused ? nextSession : focusedSession;
     if (sceneSession == nullptr) {
         TLOGW(WmsLogTag::WMS_FOCUS, "session is nullptr");
         if (isFocused) {
@@ -8193,7 +8220,7 @@ void SceneSessionManager::UpdateFocusStatus(DisplayId displayId, const sptr<Scen
         NotifyUnFocusedByMission(prevSession);
     }
     if ((isFocused && !needBlockNotifyFocusStatusUntilForeground) || (!isFocused && !needBlockNotifyUnfocusStatus)) {
-        NotifyFocusStatus(focusedSession, nextSession, isFocused, focusGroup);
+        NotifyFocusStatus(sceneSession, isFocused, focusGroup, focusNotifyInfo);
     }
 }
 
@@ -8338,14 +8365,17 @@ std::string SceneSessionManager::GetHighlightIdsStr()
     return oss.str();
 }
 
-void SceneSessionManager::NotifyFocusStatus(const sptr<SceneSession>& focusedSession,
-    const sptr<SceneSession>& nextSession, bool isFocused, const sptr<FocusGroup>& focusGroup)
+void SceneSessionManager::NotifyFocusStatus(const sptr<SceneSession>& sceneSession, bool isFocused,
+    const sptr<FocusGroup>& focusGroup, const sptr<FocusNotifyInfo>& focusNotifyInfo)
 {
     if (focusGroup == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "focus group is nullptr");
         return;
     }
-    auto sceneSession = isFocused ? nextSession : focusedSession;
+    if (focusNotifyInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "focusNotifyInfo is nullptr");
+        return;
+    }
     int32_t persistentId = sceneSession->GetPersistentId();
 
     TLOGI(WmsLogTag::WMS_FOCUS,
@@ -8373,19 +8403,11 @@ void SceneSessionManager::NotifyFocusStatus(const sptr<SceneSession>& focusedSes
     );
     SceneSessionManager::NotifyRssThawApp(focusChangeInfo->uid_, "", "THAW_BY_FOCUS_CHANGED");
     SessionManagerAgentController::GetInstance().UpdateFocusChangeInfo(focusChangeInfo, isFocused);
-    int32_t focusedSessionId = focusedSession == nullptr ? INVALID_SESSION_ID : focusedSession->GetPersistentId();
-    int32_t nextSessionId = nextSession == nullptr ? INVALID_SESSION_ID : nextSession->GetPersistentId();
-    bool isSyncNotify = false;
-    auto focusNotifyInfo = sptr<FocusNotifyInfo>::MakeSptr(focusGroup->GetUpdateFocusTimeStamp(), focusedSessionId,
-        nextSessionId, isSyncNotify);
-    if (focusedSession && nextSession) {
-        focusNotifyInfo->isSyncNotify_ = focusedSession->GetCallingPid() == nextSession->GetCallingPid() &&
-            !focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground();
-    }
     sceneSession->NotifyFocusStatus(focusNotifyInfo, isFocused);
     // notify listenerController focused
-    if (isFocused && MissionChanged(focusedSession, nextSession)) {
-        NotifyFocusedByMission(nextSession);
+    auto prevSession = GetSceneSession(focusGroup->GetLastFocusedSessionId());
+    if (isFocused && MissionChanged(prevSession, sceneSession)) {
+        NotifyFocusedByMission(sceneSession);
     }
 }
 
@@ -8975,8 +8997,9 @@ void SceneSessionManager::ProcessFocusWhenForeground(sptr<SceneSession>& sceneSe
         if (focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground()) {
             focusGroup->SetNeedBlockNotifyFocusStatusUntilForeground(false);
             focusGroup->SetNeedBlockNotifyUnfocusStatus(false);
-            auto lastFocusedSession = GetSceneSession(focusGroup->GetLastFocusedSessionId());
-            NotifyFocusStatus(lastFocusedSession, sceneSession, true, focusGroup);
+            auto focusNotifyInfo = sptr<FocusNotifyInfo>::MakeSptr(focusGroup->GetUpdateFocusTimeStamp(),
+                focusGroup->GetLastFocusedSessionId(), sceneSession->GetPersistentId(), false);
+            NotifyFocusStatus(sceneSession, true, focusGroup, focusNotifyInfo);
             auto highlightNotifyInfo = sptr<HighlightNotifyInfo>::MakeSptr(focusGroup->GetUpdateFocusTimeStamp(),
                 std::vector<int32_t>(), sceneSession->GetPersistentId(), false);
             sceneSession->NotifyHighlightChange(highlightNotifyInfo, true);
@@ -9170,8 +9193,9 @@ void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneS
         if (modal->GetPersistentId() == focusedSessionId && needBlockNotifyFocusStatusUntilForeground) {
             focusGroup->SetNeedBlockNotifyFocusStatusUntilForeground(false);
             focusGroup->SetNeedBlockNotifyUnfocusStatus(false);
-            auto lastFocusedSession = GetSceneSession(focusGroup->GetLastFocusedSessionId());
-            NotifyFocusStatus(lastFocusedSession, modalSession, true, focusGroup);
+            auto focusNotifyInfo = sptr<FocusNotifyInfo>::MakeSptr(focusGroup->GetUpdateFocusTimeStamp(),
+                focusGroup->GetLastFocusedSessionId(), modalSession->GetPersistentId(), false);
+            NotifyFocusStatus(modalSession, true, focusGroup, focusNotifyInfo);
         }
         HandleKeepScreenOn(modalSession, modalSession->IsKeepScreenOn(), WINDOW_SCREEN_LOCK_PREFIX,
                            modalSession->keepScreenLock_);

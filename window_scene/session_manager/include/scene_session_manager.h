@@ -998,10 +998,11 @@ private:
     bool CheckBlockingFocus(const sptr<SceneSession>& session, bool includingAppSession);
     WSError ShiftFocus(DisplayId displayId, const sptr<SceneSession>& nextSession, bool isProactiveUnfocus,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
-    void UpdateFocusStatus(DisplayId displayId, const sptr<SceneSession>& focusedSession,
-        const sptr<SceneSession>& nextSession, bool isFocused);
-    void NotifyFocusStatus(const sptr<SceneSession>& focusedSession, const sptr<SceneSession>& nextSession,
-        bool isFocused, const sptr<FocusGroup>& focusGroup);
+    void UpdateFocusStatus(DisplayId displayId, const sptr<SceneSession>& sceneSession, bool isFocused,
+        const sptr<FocusNotifyInfo>& focusNotifyInfo);
+    void NotifyFocusStatus(const sptr<SceneSession>& sceneSession, bool isFocused, const sptr<FocusGroup>& focusGroup,
+        const sptr<FocusNotifyInfo>& focusNotifyInfo);
+    sptr<FocusNotifyInfo> GetFocusNotifyInfo(DisplayId displayId, const sptr<SceneSession>& nextSession);
     int32_t NotifyRssThawApp(const int32_t uid, const std::string& bundleName, const std::string& reason);
     void NotifyFocusStatusByMission(const sptr<SceneSession>& prevSession, const sptr<SceneSession>& currSession);
     void NotifyUnFocusedByMission(const sptr<SceneSession>& sceneSession);
