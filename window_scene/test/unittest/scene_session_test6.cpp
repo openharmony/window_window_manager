@@ -1309,6 +1309,28 @@ HWTEST_F(SceneSessionTest6, SetSupportEnterWaterfallMode, Function | SmallTest |
 }
 
 /**
+ * @tc.name: SetSecurityLayerWhenEnterForeground
+ * @tc.desc: SetSecurityLayerWhenEnterForeground function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, SetSecurityLayerWhenEnterForeground, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSecurityLayerWhenEnterForeground";
+    info.bundleName_ = "SetSecurityLayerWhenEnterForeground";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_EQ(nullptr, session->GetLeashWinShadowSurfaceNode());
+    session->SetSecurityLayerWhenEnterForeground();
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    EXPECT_NE(nullptr, surfaceNode);
+    session->SetLeashWinSurfaceNode(surfaceNode);
+    EXPECT_NE(nullptr, session->GetLeashWinShadowSurfaceNode());
+    session->SetSecurityLayerWhenEnterForeground();
+}
+
+/**
  * @tc.name: TestSetContentAspectRatio
  * @tc.desc: Verify SetContentAspectRatio covers all branches
  * @tc.type: FUNC
