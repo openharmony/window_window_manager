@@ -41,6 +41,7 @@ static const uint32_t PIXMAP_VECTOR_ONLY_SDR_SIZE = 1;
 static const uint32_t PIXMAP_VECTOR_SIZE = 2;
 static const uint32_t SDR_PIXMAP = 0;
 static const uint32_t HDR_PIXMAP = 1;
+static const uint32_t MAX_ARRAY_SIZE = 1024;
 struct Option {
     Media::Rect rect;
     Media::Size size;
@@ -209,11 +210,12 @@ static void IsNeedPointer(napi_env env, std::unique_ptr<Param> &param, napi_valu
     }
 }
 
-static bool ConverWindowIdList(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
+static bool ConvertWindowIdList(napi_env env, std::unique_ptr<Param>& param, napi_value& argv)
 {
     napi_value blackWindowIds;
     napi_status status = napi_get_named_property(env, argv, "blackWindowIds", &blackWindowIds);
     if (status != napi_ok) {
+        TLOGD(WmsLogTag::DMS, "no black window ids.");
         return true;
     }
     uint32_t size = 0;
@@ -221,6 +223,10 @@ static bool ConverWindowIdList(napi_env env, std::unique_ptr<Param> &param, napi
         napi_get_array_length(env, blackWindowIds, &size) == napi_invalid_arg) {
         TLOGW(WmsLogTag::DMS, "no surface id list");
         return true;
+    }
+    if (size > MAX_ARRAY_SIZE) {
+        TLOGE(WmsLogTag::DMS, "size bigger than 1024, size: %{public}u", size);
+        return false;
     }
     std::vector<uint64_t> persistentIds;
     for (uint32_t i = 0; i < size; i++) {
@@ -265,8 +271,7 @@ static bool GetScreenshotParam(napi_env env, std::unique_ptr<Param> &param, napi
     IsNeedNotify(env, param, argv);
     IsNeedPointer(env, param, argv);
     IsCaptureFullOfScreen(env, param, argv);
-    auto result = ConverWindowIdList(env, param, argv);
-    return result;
+    return ConvertWindowIdList(env, param, argv);
 }
 
 static void AsyncGetScreenshot(napi_env env, std::unique_ptr<Param> &param)
