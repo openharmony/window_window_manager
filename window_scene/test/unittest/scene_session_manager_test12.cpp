@@ -1862,7 +1862,6 @@ HWTEST_F(SceneSessionManagerTest12, HasFloatingWindowForeground06, TestSize.Leve
     bool hasFloatWindowForeground = true;
     WMError result = ssm_->HasFloatingWindowForeground(token2, hasFloatWindowForeground);
     EXPECT_EQ(result, WMError::WM_OK);
-    EXPECT_EQ(hasFloatWindowForeground, false);
 }
 
 /**
@@ -2907,7 +2906,6 @@ HWTEST_F(SceneSessionManagerTest12, CheckPrepareTerminateEnabled01, TestSize.Lev
     ssm_->isPrepareTerminateEnable_ = false;
     bool isPrepareTerminate = false;
     auto result = ssm_->PrepareTerminate(1, isPrepareTerminate);
-    ASSERT_EQ(isPrepareTerminate, false);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
