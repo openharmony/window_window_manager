@@ -2303,11 +2303,11 @@ export class WindowStageInternal implements WindowStage {
     }
 
     public onWindowStageClose(callback: Callback<void>): void {
-      this.onSync(this.nativeObj, "windowStageClose", callback);
+      this.onSync(this.nativeObj, 'windowStageClose', callback);
     }
 
     public offWindowStageClose(callback?: Callback<void>): void {
-      this.offSync(this.nativeObj, "windowStageClose", callback);
+      this.offSync(this.nativeObj, 'windowStageClose', callback);
     }
 }
 
@@ -3862,19 +3862,19 @@ export class WindowInternal implements Window {
     }
 
     public onWindowWillClose(callback: Callback<Promise<boolean>>): void {
-      this.onSync(this.nativeObj, "windowWillClose", callback);
+      this.onSync(this.nativeObj, 'windowWillClose', callback);
     }
 
     public offWindowWillClose(callback?: Callback<Promise<boolean>>): void {
-      this.offSync(this.nativeObj, "windowWillClose", callback);
+      this.offSync(this.nativeObj, 'windowWillClose', callback);
     }
 
     public onWindowTitleButtonRectChange(callback: Callback<TitleButtonRect>): void {
-      this.onSync(this.nativeObj, "windowTitleButtonRect", callback);
+      this.onSync(this.nativeObj, 'windowTitleButtonRect', callback);
     }
 
     public offWindowTitleButtonRectChange(callback?: Callback<TitleButtonRect>): void {
-      this.offSync(this.nativeObj, "windowTitleButtonRect", callback);
+      this.offSync(this.nativeObj, 'windowTitleButtonRect', callback);
     }
 }
 
