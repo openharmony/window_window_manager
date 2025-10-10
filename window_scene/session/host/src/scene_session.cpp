@@ -2642,7 +2642,7 @@ bool SceneSession::CheckGetSubWindowAvoidAreaAvailable(WindowMode winMode, Avoid
     if (GetSessionProperty()->GetAvoidAreaOption() & static_cast<uint32_t>(AvoidAreaOption::ENABLE_APP_SUB_WINDOW)) {
         return true;
     }
-    if (IsFreeMultiWindowMode() || systemConfig_.IsPcWindow()) {
+    if ((winMode == WindowMode::WINDOW_MODE_FLOATING && IsFreeMultiWindowMode()) || systemConfig_.IsPcWindow()) {
         TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d not support", GetPersistentId());
         return false;
     }
@@ -2665,7 +2665,7 @@ bool SceneSession::CheckGetMainWindowAvoidAreaAvailable(WindowMode winMode, Avoi
     if (GetSessionProperty()->IsAdaptToImmersive()) {
         return true;
     }
-    if (IsFreeMultiWindowMode() || systemConfig_.IsPcWindow()) {
+    if ((winMode == WindowMode::WINDOW_MODE_FLOATING && IsFreeMultiWindowMode()) || systemConfig_.IsPcWindow()) {
         TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d not support", GetPersistentId());
         return false;
     }
