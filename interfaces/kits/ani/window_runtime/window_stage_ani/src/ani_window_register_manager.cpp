@@ -402,8 +402,8 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowTitleButtonRectChangeRegister
     return ret;
 }
 
-WmErrorCode AniWindowRegisterManager::ProcessWindowWillCloseRegister(sptr<AniWindowListener> listener,
-    sptr<Window> window, bool isRegister, ani_env* env)
+WmErrorCode AniWindowRegisterManager::ProcessWindowWillCloseRegister(const sptr<AniWindowListener>& listener,
+    const sptr<Window>& window, bool isRegister, ani_env* env)
 {
     TLOGD(WmsLogTag::DEFAULT, "called");
     if (window == nullptr) {
