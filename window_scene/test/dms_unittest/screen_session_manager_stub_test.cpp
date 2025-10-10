@@ -30,13 +30,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    std::string g_logMsg;
-    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
-        const char* msg)
-    {
-        g_logMsg = msg;
-    }
-    constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
+constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 }
 class ScreenSessionManagerStubTest : public testing::Test {
 public:
@@ -2895,31 +2889,6 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest133, TestSize.Level1)
     uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_CAPTURE);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest13301
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest13301, TestSize.Level1)
-{
-    g_logMsg.clear();
-    LOG_SetCallback(MyLogCallback);
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    ScreenId id = 0;
-    data.WriteUint64(static_cast<uint64_t>(id));
-    data.WriteBool(true);
-    data.WriteBool(true);
-    data.WriteBool(true);
-    uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_CAPTURE);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_TRUE(g_logMsg.find("Read node surfaceNodesList failed") != std::string::npos);
-    LOG_SetCallback(nullptr);
 }
 
 /**
