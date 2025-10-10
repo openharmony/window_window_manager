@@ -36,13 +36,13 @@ int32_t LruCache::Put(int32_t key)
     int32_t lastRemovedKey = UNDEFINED_REMOVED_KEY;
     std::lock_guard lock(lruCacheMutex_);
     if (!LocalVisit(key)) {
-        if (cacheList_.size() >= capacity_) {
+        cacheList_.push_front(key);
+        cacheMap_[key] = cacheList_.begin();
+        if (cacheList_.size() > capacity_) {
             lastRemovedKey = cacheList_.back();
             cacheList_.pop_back();
             cacheMap_.erase(lastRemovedKey);
         }
-        cacheList_.push_front(key);
-        cacheMap_[key] = cacheList_.begin();
     }
     return lastRemovedKey;
 }
