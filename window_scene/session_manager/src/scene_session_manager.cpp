@@ -1965,7 +1965,9 @@ WMError SceneSessionManager::AddSkipSelfWhenShowOnVirtualScreenList(const std::v
             }
             SetSkipEventOnCastPlusInner(persistentId, true);
         }
-        rsInterface_.SetVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
+        if (!isUserBackground_) {
+            rsInterface_.SetVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
+        }
         return WMError::WM_OK;
     };
     return taskScheduler_->PostSyncTask(task, __func__);
@@ -2003,7 +2005,9 @@ WMError SceneSessionManager::RemoveSkipSelfWhenShowOnVirtualScreenList(const std
             }
             SetSkipEventOnCastPlusInner(persistentId, false);
         }
-        rsInterface_.SetVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
+        if (!isUserBackground_) {
+            rsInterface_.SetVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
+        }
         return WMError::WM_OK;
     };
     return taskScheduler_->PostSyncTask(task, __func__);
@@ -2045,7 +2049,9 @@ void SceneSessionManager::SetSkipEventOnCastPlusInner(int32_t windowId, bool isS
         return;
     }
     sceneSession->GetSessionProperty()->SetSkipEventOnCastPlus(isSkip);
-    FlushWindowInfoToMMI(true);
+    if (!isUserBackground_) {
+        FlushWindowInfoToMMI(true);
+    }
 }
 
 sptr<KeyboardSession::KeyboardSessionCallback> SceneSessionManager::CreateKeyboardSessionCallback()

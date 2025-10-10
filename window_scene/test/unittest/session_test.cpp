@@ -1779,6 +1779,22 @@ HWTEST_F(WindowSessionTest, TransformRelativeRectToGlobalRect, TestSize.Level1)
     sceneSession->TransformRelativeRectToGlobalRect(rect);
     EXPECT_NE(rect.posY_, 100);
 }
+
+/**
+ * @tc.name: IsStatusBarVisible
+ * @tc.desc: IsStatusBarVisible Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsStatusBarVisible, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    session_->UpdateStatusBarVisible(false);
+    EXPECT_EQ(false, session_->IsStatusBarVisible());
+    session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    EXPECT_EQ(false, session_->IsStatusBarVisible());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
