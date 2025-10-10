@@ -3005,7 +3005,8 @@ HWTEST_F(WindowSessionImplTest4, IsStageDefaultDensityEnabled01, TestSize.Level1
     mainWindowSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     mainWindowSession->context_ = abilityContext_;
     mainWindowSession->defaultDensityEnabledStageConfig_.store(false);
-    WindowSessionImpl::windowSessionMap_.insert(std::make_pair("mainWindow", mainWindowSession));
+    mainWindowSession->windowSessionMap_.["mainWindow"] =
+        std::pair<int32_t, sptr<WindowSessionImpl>>(1, mainWindowSession);
 
     mainWindowSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     mainWindowSession->defaultDensityEnabledStageConfig_.store(true);
@@ -3020,7 +3021,7 @@ HWTEST_F(WindowSessionImplTest4, IsStageDefaultDensityEnabled01, TestSize.Level1
  * @tc.desc: Sub Window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, IsStageDefaultDensityEnabled01, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest4, IsStageDefaultDensityEnabled02, TestSize.Level1)
 {
     sptr<WindowOption> mainWindowOption = sptr<WindowOption>::MakeSptr();
     mainWindowOption->SetWindowName("mainWindow");
@@ -3028,7 +3029,8 @@ HWTEST_F(WindowSessionImplTest4, IsStageDefaultDensityEnabled01, TestSize.Level1
     mainWindowSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     mainWindowSession->context_ = abilityContext_;
     mainWindowSession->defaultDensityEnabledStageConfig_.store(false);
-    WindowSessionImpl::windowSessionMap_.insert(std::make_pair("mainWindow", mainWindowSession));
+    mainWindowSession->windowSessionMap_.["mainWindow"] =
+        std::pair<int32_t, sptr<WindowSessionImpl>>(1, mainWindowSession);
 
     sptr<WindowOption> subWindowOption = sptr<WindowOption>::MakeSptr();
     subWindowOption->SetWindowName("subWindow");
@@ -3037,6 +3039,8 @@ HWTEST_F(WindowSessionImplTest4, IsStageDefaultDensityEnabled01, TestSize.Level1
     subWindowSession->context_ = abilityContext_;
     subWindowSession->defaultDensityEnabledStageConfig_.store(true);
     WindowSessionImpl::windowSessionMap_.insert(std::make_pair("subWindow", subWindowSession));
+    subWindowSession->windowSessionMap_.["subWindow"] =
+        std::pair<int32_t, sptr<WindowSessionImpl>>(2, subWindowSession);
 
     EXPECT_FALSE(subWindowSession->IsStageDefaultDensityEnabled());
 
