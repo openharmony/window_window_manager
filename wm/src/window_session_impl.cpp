@@ -301,7 +301,6 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option,
     }
     WindowHelper::SplitStringByDelimiter(
         system::GetParameter("const.window.containerColorLists", ""), ",", containerColorList_);
-    SetDefaultDensityEnabledValue(IsStageDefaultDensityEnabled());
 }
 
 void WindowSessionImpl::InitPropertyFromOption(const sptr<WindowOption>& option)
