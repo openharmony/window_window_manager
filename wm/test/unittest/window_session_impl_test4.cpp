@@ -2997,17 +2997,22 @@ HWTEST_F(WindowSessionImplTest4, NotifyAppForceLandscapeConfigUpdated, TestSize.
  * @tc.desc: Main Window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, IsStageDefaultDensityEnabled01, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest4, IsStageDefaultDensityEnabled01, TestSize.Level1)
 {
-    auto window = GetTestWindowImpl("IsStageDefaultDensityEnabled01");
-    ASSERT_NE(nullptr, window);
+    sptr<WindowOption> mainWindowOption = sptr<WindowOption>::MakeSptr();
+    mainWindowOption->SetWindowName("mainWindow");
+    sptr<WindowSessionImpl> mainWindowSession = sptr<WindowSessionImpl>::MakeSptr(mainWindowOption);
+    mainWindowSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    mainWindowSession->context_ = abilityContext_;
+    mainWindowSession->defaultDensityEnabledStageConfig_.store(false);
+    WindowSessionImpl::windowSessionMap_.insert(std::make_pair("mainWindow", mainWindowSession));
 
-    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    window->defaultDensityEnabledStageConfig_.store(true);
-    EXPECT_TRUE(window->IsStageDefaultDensityEnabled());
+    mainWindowSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    mainWindowSession->defaultDensityEnabledStageConfig_.store(true);
+    EXPECT_TRUE(mainWindowSession->IsStageDefaultDensityEnabled());
 
     window->defaultDensityEnabledStageConfig_.store(false);
-    EXPECT_FALSE(window->IsStageDefaultDensityEnabled());
+    EXPECT_FALSE(mainWindowSession->IsStageDefaultDensityEnabled());
 }
 
 /**
@@ -3015,10 +3020,10 @@ HWTEST_F(WindowSessionImplTest2, IsStageDefaultDensityEnabled01, TestSize.Level1
  * @tc.desc: Sub Window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, IsStageDefaultDensityEnabled01, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest4, IsStageDefaultDensityEnabled01, TestSize.Level1)
 {
     sptr<WindowOption> mainWindowOption = sptr<WindowOption>::MakeSptr();
-    mainWindowOption->SetWindowName("subWindow");
+    mainWindowOption->SetWindowName("mainWindow");
     sptr<WindowSessionImpl> mainWindowSession = sptr<WindowSessionImpl>::MakeSptr(mainWindowOption);
     mainWindowSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     mainWindowSession->context_ = abilityContext_;
