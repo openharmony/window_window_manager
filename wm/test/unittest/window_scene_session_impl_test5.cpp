@@ -418,6 +418,7 @@ HWTEST_F(WindowSceneSessionImplTest5, IsDefaultDensityEnabled02, TestSize.Level1
 }
 
 
+
 /**
  * @tc.name: GetCustomDensity01
  * @tc.desc: GetCustomDensity
