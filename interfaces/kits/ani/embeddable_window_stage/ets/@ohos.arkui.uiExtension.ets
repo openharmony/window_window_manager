@@ -185,10 +185,10 @@ namespace uiExtension {
       });
     }
 
-    occupyEvents(eventFlags: double): Promise<void> {
+    occupyEvents(eventFlags: int): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
-          this.occupyEvents(this.nativeObj, eventFlags as int);
+          this.occupyEvents(this.nativeObj, eventFlags);
         }).then((ret: NullishType) => {
           resolve(undefined);
         }).catch((err: NullishType) => {
@@ -197,8 +197,8 @@ namespace uiExtension {
       });
     }
 
-    onRectChange(reason: double, callback: Callback<RectChangeOptions>): void {
-      this.onRectChange(this.nativeObj, reason as int, callback);
+    onRectChange(reason: int, callback: Callback<RectChangeOptions>): void {
+      this.onRectChange(this.nativeObj, reason, callback);
     }
 
     offRectChange(callback?: Callback<RectChangeOptions>): void {
@@ -324,14 +324,14 @@ namespace uiExtension {
     setWaterMarkFlag(enable: boolean): Promise<void>;
     hideNonSecureWindows(shouldHide: boolean): Promise<void>;
     createSubWindowWithOptions(name: string, subWindowOptions: window.SubWindowOptions): Promise<window.Window>;
-    occupyEvents(eventFlags: double): Promise<void>;
+    occupyEvents(eventFlags: int): Promise<void>;
     on<T>(type: string, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;
     onAvoidAreaChange(callback: Callback<AvoidAreaInfo>): void;
     offAvoidAreaChange(callback?: Callback<AvoidAreaInfo>): void;
     onWindowSizeChange(callback: Callback<window.Size>): void;
     offWindowSizeChange(callback?: Callback<window.Size>): void;
-    onRectChange(reasons: double, callback: Callback<RectChangeOptions>): void;
+    onRectChange(reasons: int, callback: Callback<RectChangeOptions>): void;
     offRectChange(callback?: Callback<RectChangeOptions>): void;
     properties: WindowProxyProperties;
   }
