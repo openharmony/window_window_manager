@@ -523,11 +523,13 @@ public:
      */
     WMError SetWindowDefaultDensityEnabled(bool enabled) override;
     void SetDefaultDensityEnabledValue(bool enabled);
+    bool IsStageDefaultDensityEnabled();
     WSError NotifyDisplayIdChange(DisplayId displayId);
     WSError NotifyScreenshotAppEvent(ScreenshotEventType type) override;
     bool IsDeviceFeatureCapableFor(const std::string& feature) const override;
     bool IsDeviceFeatureCapableForFreeMultiWindow() const override;
     bool IsAnco() const override;
+    std::atomic<bool> defaultDensityEnabledStageConfig_;
 
     /*
      * Window Input Event
@@ -840,7 +842,6 @@ protected:
     bool hasDarkRes_;
     std::unordered_set<std::string> containerColorList_;
     float lastSystemDensity_ = UNDEFINED_DENSITY;
-    static std::atomic<bool> defaultDensityEnabledGlobalConfig_;
     std::atomic<bool> isDefaultDensityEnabled_ = false;
     WSError NotifySystemDensityChange(float density);
     void RegisterWindowInspectorCallback();

@@ -2501,21 +2501,21 @@ HWTEST_F(WindowSceneSessionImplTest5, SetDefaultDensityEnabled_forCompatMode, Te
     option->SetWindowName("SetDefaultDensityEnabled_forCompatMode");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    window->defaultDensityEnabledGlobalConfig_ = false;
+    window->defaultDensityEnabledStageConfig_.restore(false);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->property_->SetPersistentId(1);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_SHOWN;
     EXPECT_EQ(WMError::WM_OK, window->SetDefaultDensityEnabled(true));
-    EXPECT_TRUE(window->defaultDensityEnabledGlobalConfig_);
+    EXPECT_TRUE(window->IsStageDefaultDensityEnabled());
     sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
     compatibleModeProperty->SetIsAdaptToSimulationScale(true);
     window->property_->SetCompatibleModeProperty(compatibleModeProperty);
     EXPECT_EQ(window->IsAdaptToSimulationScale(), true);
-    window->defaultDensityEnabledGlobalConfig_ = false;
+    window->defaultDensityEnabledStageConfig_.restore(false);
     EXPECT_EQ(WMError::WM_OK, window->SetDefaultDensityEnabled(true));
-    EXPECT_FALSE(window->defaultDensityEnabledGlobalConfig_);
+    EXPECT_FALSE(window->IsStageDefaultDensityEnabled());
 }
 
 /**
