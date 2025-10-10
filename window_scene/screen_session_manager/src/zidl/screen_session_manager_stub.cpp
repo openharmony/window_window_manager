@@ -1524,8 +1524,8 @@ void ScreenSessionManagerStub::ProcGetScreenCapture(MessageParcel& data, Message
     option.displayId_ = static_cast<DisplayId>(data.ReadUint64());
     option.isNeedNotify_ = static_cast<bool>(data.ReadBool());
     option.isNeedPointer_ = static_cast<bool>(data.ReadBool());
-    if (!data.ReadUInt64Vector(&option.surfaceNodesList_)) {
-        TLOGE(WmsLogTag::DMS, "Read node surfaceNodesList failed");
+    if (!data.ReadUInt64Vector(&option.blackWindowIdList_)) {
+        TLOGE(WmsLogTag::DMS, "Read node blackWindowIdList failed");
         return;
     }
     DmErrorCode errCode = DmErrorCode::DM_OK;

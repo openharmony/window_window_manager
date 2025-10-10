@@ -10898,7 +10898,9 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenCapture(const Ca
         return nullptr;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetScreenCapture(%" PRIu64")", captureOption.displayId_);
-    auto res = GetScreenSnapshot(captureOption.displayId_, false, false, captureOption.surfaceNodesList_);
+    std::vector<uint64_t> surfaceNodesList;
+    ConvertWindowIdsToSurfaceNodeList(captureOption.blackWindowIdList_, surfaceNodesList);
+    auto res = GetScreenSnapshot(captureOption.displayId_, false, false, surfaceNodesList);
     AddPermissionUsedRecord(CUSTOM_SCREEN_CAPTURE_PERMISSION,
         static_cast<int32_t>(res != nullptr), static_cast<int32_t>(res == nullptr));
     if (res == nullptr) {
@@ -10917,6 +10919,25 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenCapture(const Ca
     /* notify application capture happend */
     NotifyCaptureStatusChanged();
     return res;
+}
+
+void ScreenSessionManager::ConvertWindowIdsToSurfaceNodeList(std::vector<uint64_t> windowIdList, 
+    std::vector<uint64_t>& surfaceNodesList)
+{
+    if (windowIdList.empty()) {
+        return;
+    }
+    auto clientProxy = GetClientProxy();
+    if (!clientProxy) {
+        TLOGE(WmsLogTag::DMS, "clientProxy_ is nullptr");
+        return;
+    }
+    clientProxy->OnGetSurfaceNodeIdsFromMissionIdsChanged(windowIdList, surfaceNodesList, true);
+    std::ostringstream oss;
+    for (size_t i = 0; i < surfaceNodesList.size(); ++i) {
+        oss << surfaceNodesList[i] << ", ";
+    }
+    TLOGD(WmsLogTag::DMS, "capture option surfaceNodesList=%{public}s", oss.str().c_str());
 }
 
 sptr<DisplayInfo> ScreenSessionManager::GetPrimaryDisplayInfo()
