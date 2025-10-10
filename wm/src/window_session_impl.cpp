@@ -1186,16 +1186,16 @@ RSAnimationTimingCurve WindowSessionImpl::updateConfigCurve(WindowAnimationCurve
     RSAnimationTimingCurve curve;
     switch (configCurve) {
         case WindowAnimationCurve::LINEAR:
-            TLOGI(WmsLogTag::WMS_LAYOUT, "Linear params");
+            TLOGD(WmsLogTag::WMS_LAYOUT, "Linear params");
             curve = RSAnimationTimingCurve::LINEAR;
             break;
         case WindowAnimationCurve::INTERPOLATION_SPRING:
-            TLOGI(WmsLogTag::WMS_LAYOUT, "Spring params: %{public}f, %{public}f, %{public}f, %{public}f",
+            TLOGD(WmsLogTag::WMS_LAYOUT, "Spring params: %{public}f, %{public}f, %{public}f, %{public}f",
                 param[0], param[1], param[2], param[3]);
             curve = RSAnimationTimingCurve::CreateInterpolatingSpring(param[0], param[1], param[2], param[3]);
             break;
         case WindowAnimationCurve::CUBIC_BEZIER:
-            TLOGI(WmsLogTag::WMS_LAYOUT, "Bezier params: %{public}f, %{public}f, %{public}f, %{public}f",
+            TLOGD(WmsLogTag::WMS_LAYOUT, "Bezier params: %{public}f, %{public}f, %{public}f, %{public}f",
                 param[0], param[1], param[2], param[3]);
             curve = RSAnimationTimingCurve::CreateCubicCurve(param[0], param[1], param[2], param[3]);
             break;
