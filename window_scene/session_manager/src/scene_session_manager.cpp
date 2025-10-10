@@ -8142,8 +8142,8 @@ WSError SceneSessionManager::ShiftFocus(DisplayId displayId, const sptr<SceneSes
 {
     auto focusNotifyInfo = GetFocusNotifyInfo(displayId, nextSession);
     if (focusNotifyInfo == nullptr) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "focusNotifyInfo is nullptr");
-        focusNotifyInfo = sptr<FocusNotifyInfo>::MakeSptr();
+        TLOGE(WmsLogTag::WMS_FOCUS, "focusNotifyInfo is nullptr");
+        return WSError::WS_OK;
     }
     // unfocus
     auto focusedSessionId = windowFocusController_->GetFocusedSessionId(displayId);
@@ -8188,7 +8188,7 @@ WSError SceneSessionManager::ShiftFocus(DisplayId displayId, const sptr<SceneSes
 }
 
 void SceneSessionManager::UpdateFocusStatus(DisplayId displayId, const sptr<SceneSession>& sceneSession,
-    bool isFocused, sptr<FocusNotifyInfo>& focusNotifyInfo)
+    bool isFocused, const sptr<FocusNotifyInfo>& focusNotifyInfo)
 {
     auto focusGroup = windowFocusController_->GetFocusGroup(displayId);
     if (focusGroup == nullptr) {
@@ -8196,8 +8196,8 @@ void SceneSessionManager::UpdateFocusStatus(DisplayId displayId, const sptr<Scen
         return;
     }
     if (focusNotifyInfo == nullptr) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "focusNotifyInfo is nullptr");
-        focusNotifyInfo = sptr<FocusNotifyInfo>::MakeSptr();
+        TLOGE(WmsLogTag::WMS_FOCUS, "focusNotifyInfo is nullptr");
+        return;
     }
     bool needBlockNotifyFocusStatusUntilForeground = focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground();
     bool needBlockNotifyUnfocusStatus = focusGroup->GetNeedBlockNotifyUnfocusStatus();
@@ -8373,7 +8373,7 @@ std::string SceneSessionManager::GetHighlightIdsStr()
 }
 
 void SceneSessionManager::NotifyFocusStatus(const sptr<SceneSession>& sceneSession, bool isFocused,
-    const sptr<FocusGroup>& focusGroup, sptr<FocusNotifyInfo>& focusNotifyInfo)
+    const sptr<FocusGroup>& focusGroup, const sptr<FocusNotifyInfo>& focusNotifyInfo)
 {
     if (focusGroup == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "focus group is nullptr");
@@ -8381,7 +8381,7 @@ void SceneSessionManager::NotifyFocusStatus(const sptr<SceneSession>& sceneSessi
     }
     if (focusNotifyInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "focusNotifyInfo is nullptr");
-        focusNotifyInfo = sptr<FocusNotifyInfo>::MakeSptr();
+        return;
     }
     int32_t persistentId = sceneSession->GetPersistentId();
 

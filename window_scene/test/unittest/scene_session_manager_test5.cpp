@@ -685,6 +685,8 @@ HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus02, TestSize.Level1)
     auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
     focusGroup->SetNeedBlockNotifyFocusStatusUntilForeground(true);
     ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, sceneSession, true, focusNotifyInfo);
+    focusNotifyInfo = nullptr;
+    ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, sceneSession, true, focusNotifyInfo);
 }
 
 /**
@@ -764,6 +766,8 @@ HWTEST_F(SceneSessionManagerTest5, NotifyFocusStatus, TestSize.Level1)
     auto focusNotifyInfo = sptr<FocusNotifyInfo>::MakeSptr();
     ssm_->NotifyFocusStatus(sceneSession1, false, focusGroup, focusNotifyInfo);
     info.isSystem_ = true;
+    ssm_->NotifyFocusStatus(sceneSession1, true, focusGroup, focusNotifyInfo);
+    focusNotifyInfo = nullptr;
     ssm_->NotifyFocusStatus(sceneSession1, true, focusGroup, focusNotifyInfo);
 }
 

@@ -1457,6 +1457,7 @@ HWTEST_F(SceneSessionManagerTest9, ShiftFocus, TestSize.Level1)
     ASSERT_EQ(ret, WSError::WS_OK);
     ASSERT_EQ(focusedSession->isFocused_, false);
     ASSERT_EQ(nextSession->isFocused_, true);
+    ret = ssm_->ShiftFocus(100, nextSession, false, FocusChangeReason::DEFAULT);
 }
 
 /**
