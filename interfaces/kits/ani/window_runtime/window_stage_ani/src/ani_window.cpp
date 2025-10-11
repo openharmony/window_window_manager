@@ -35,6 +35,7 @@
 #include "window_scene.h"
 #include "wm_common.h"
 #include "wm_math.h"
+#include "permission.h"
 
 using OHOS::Rosen::WindowScene;
 
@@ -2162,6 +2163,74 @@ ani_object AniWindow::HandlePositionTransform(
     TLOGD(WmsLogTag::WMS_LAYOUT, "[ANI] success, x: %{public}d, y: %{public}d", posX, posY);
     return AniWindowUtils::CreateAniPosition(env, outPosition);
 }
+
+void AniWindow::SetRotationLocked(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean locked)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (!aniWindow) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] aniWindow is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    aniWindow->OnSetRotationLocked(env, locked);
+}
+ 
+void AniWindow::OnSetRotationLocked(ani_env* env, ani_boolean locked)
+{
+    if (!windowToken_) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] window is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "permission denied, require system application!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+        return;
+    }
+    WMError ret = windowToken_->SetRotationLocked(locked);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] failed, windowId: %{public}u, ret: %{public}d",
+            windowToken_->GetWindowId(), static_cast<int32_t>(ret));
+        AniWindowUtils::AniThrowError(env, AniWindowUtils::ToErrorCode(ret));
+        return;
+    }
+}
+
+ani_boolean AniWindow::GetRotationLocked(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow != nullptr) {
+        return static_cast<ani_boolean>(aniWindow->OnGetRotationLocked(env));
+    }
+    TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] aniWindow is nullptr");
+    AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    return ANI_FALSE;
+}
+
+bool AniWindow::OnGetRotationLocked(ani_env* env)
+{
+    bool locked = false;
+    if (!windowToken_) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] window is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return locked;
+    }
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "permission denied, require system application!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+        return locked;
+    }
+    WMError ret = windowToken_->GetRotationLocked(locked);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] failed, windowId: %{public}u, ret: %{public}d",
+            windowToken_->GetWindowId(), static_cast<int32_t>(ret));
+        AniWindowUtils::AniThrowError(env, AniWindowUtils::ToErrorCode(ret));
+        return locked;
+    }
+    return locked;
+}
 }  // namespace Rosen
 }  // namespace OHOS
 
@@ -2796,6 +2865,10 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(WindowClientToGlobalDisplay)},
         ani_native_function {"globalDisplayToClient", "JII:L@ohos/window/window/Position;",
             reinterpret_cast<void *>(WindowGlobalDisplayToClient)},
+        ani_native_function {"setRotationLocked", "JZ:V",
+            reinterpret_cast<void *>(AniWindow::SetRotationLocked)},
+        ani_native_function {"getRotationLocked", "J:Z",
+            reinterpret_cast<void *>(AniWindow::GetRotationLocked)},
     };
     if ((ret = env->Class_BindNativeMethods(cls, methods.data(), methods.size())) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] bind window method fail %{public}u", ret);

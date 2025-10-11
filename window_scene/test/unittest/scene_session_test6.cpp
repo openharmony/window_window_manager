@@ -1475,6 +1475,59 @@ HWTEST_F(SceneSessionTest6, DisableUIFirstIfNeed, TestSize.Level1)
     session->SetSessionState(SessionState::STATE_CONNECT);
     EXPECT_EQ(WSError::WS_OK, session->ForegroundTask(property));
 }
+
+/**
+ * @tc.name: RegisterRotationLockChangeCallback
+ * @tc.desc: RegisterRotationLockChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, RegisterRotationLockChangeCallback, TestSize.Level0)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(nullptr, sceneSession);
+    sceneSession->specificCallback_ = nullptr;
+    auto task = [] (bool locked) {};
+    sceneSession->RegisterRotationLockChangeCallback(std::move(task));
+    EXPECT_EQ(nullptr, sceneSession->specificCallback_);
+
+    sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(nullptr, callback);
+    sceneSession->specificCallback_ = callback;
+    sceneSession->RegisterRotationLockChangeCallback(nullptr);
+    EXPECT_EQ(nullptr, callback->onRotationLockChange_);
+    sceneSession->RegisterRotationLockChangeCallback(std::move(task));
+    EXPECT_NE(nullptr, callback->onRotationLockChange_);
+}
+
+/**
+ * @tc.name: HandleActionUpdateRotationLockChange
+ * @tc.desc: HandleActionUpdateRotationLockChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, HandleActionUpdateRotationLockChange, TestSize.Level0)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetRotationLocked(false);
+    sceneSession->specificCallback_ = nullptr;
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ROTATION_LOCK_CHANGE;
+    WMError ret = sceneSession->HandleActionUpdateRotationLockChange(property, action);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(nullptr, callback);
+    sceneSession->specificCallback_ = callback;
+    ret = sceneSession->HandleActionUpdateRotationLockChange(property, action);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    auto task = [] (bool locked) {};
+    callback->onRotationLockChange_ = task;
+    ret = sceneSession->HandleActionUpdateRotationLockChange(property, action);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

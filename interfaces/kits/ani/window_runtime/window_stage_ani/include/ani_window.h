@@ -81,6 +81,8 @@ public:
     static void Finalizer(ani_env* env, ani_long nativeObj);
     static void SetContentAspectRatio(ani_env* env, ani_object obj, ani_long nativeObj,
                                       ani_double ratio, ani_boolean isPersistent, ani_boolean needUpdateRect);
+    static void SetRotationLocked(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean locked);
+    static ani_boolean GetRotationLocked(ani_env* env, ani_object obj, ani_long nativeObj);
 
     /*
      * Window Layout
@@ -154,6 +156,8 @@ private:
         const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, sptr<Window> windowToken);
     WMError SetSystemBarPropertiesByFlags(std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags,
         std::map<WindowType, SystemBarProperty>& systemBarProperties, sptr<Window> windowToken);
+    void OnSetRotationLocked(ani_env* env, ani_boolean locked);
+    bool OnGetRotationLocked(ani_env* env);
 
     /*
      * Window Layout

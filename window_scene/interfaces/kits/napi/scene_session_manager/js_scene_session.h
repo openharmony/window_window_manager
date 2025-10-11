@@ -114,6 +114,7 @@ enum class ListenerFuncType : uint32_t {
     FLOATING_BALL_STOP_CB,
     FLOATING_BALL_RESTORE_MAIN_WINDOW_CB,
     SCENE_OUTLINE_PARAMS_CHANGE_CB,
+    ROTATION_LOCK_CHANGE_CB,
 };
 
 class SceneSession;
@@ -439,6 +440,7 @@ private:
     */
     void ProcessSetWindowCornerRadiusRegister();
     void ProcessSetWindowShadowsRegister();
+    void ProcessRotationLockChangeRegister();
 
     /*
      * PC Window Layout
@@ -532,6 +534,7 @@ private:
     */
     void OnSetWindowCornerRadius(float cornerRadius);
     void OnSetWindowShadows(const ShadowsInfo& shadowsInfo);
+    void OnRotationLockChange(bool locked);
 
     /*
      * PC Window Layout
