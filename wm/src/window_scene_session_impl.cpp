@@ -7200,8 +7200,8 @@ WMError WindowSceneSessionImpl::GetRotationLocked(bool& locked)
         return WMError::WM_ERROR_INVALID_WINDOW_TYPE;
     }
  
-    TLOGI(WmsLogTag::WMS_ROTATION, "get id %{public}u rotation lock %{public}d.", GetWindowId(), locked);
     locked = property_->GetRotationLocked();
+    TLOGI(WmsLogTag::WMS_ROTATION, "get id %{public}u rotation lock %{public}d.", GetWindowId(), locked);
     return WMError::WM_OK;
 }
 

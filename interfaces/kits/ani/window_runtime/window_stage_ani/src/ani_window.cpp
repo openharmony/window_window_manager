@@ -2203,11 +2203,10 @@ ani_boolean AniWindow::GetRotationLocked(ani_env* env, ani_object obj, ani_long 
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow != nullptr) {
         return static_cast<ani_boolean>(aniWindow->OnGetRotationLocked(env));
-    } else {
-        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] aniWindow is nullptr");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-        return ANI_FALSE;
     }
+    TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] aniWindow is nullptr");
+    AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    return ANI_FALSE;
 }
 
 bool AniWindow::OnGetRotationLocked(ani_env* env)
