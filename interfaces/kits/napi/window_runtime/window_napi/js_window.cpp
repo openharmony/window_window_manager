@@ -9294,7 +9294,7 @@ napi_value JsWindow::OnSetRotationLocked(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != 1 || argv[0] == nullptr) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Argc is invalid: %{public}zu.", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, errMsgPrefix + "paramters is invalid");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, errMsgPrefix + "parameter is invalid");
     }
     bool locked = false;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], locked)) {
