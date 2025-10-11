@@ -238,8 +238,9 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnGetSurfaceNodeIdsFromMissionIdsC
 {
     std::vector<uint64_t> missionIds = {0, 1};
     std::vector<uint64_t> surfaceNodeIds;
+    bool isBlackList = false;
     ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
-    screenSessionManagerClientProxy_->OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds);
+    screenSessionManagerClientProxy_->OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds, isBlackList);
 }
 
 /**
