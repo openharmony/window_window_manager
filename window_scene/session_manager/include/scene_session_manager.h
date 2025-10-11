@@ -189,7 +189,7 @@ public:
     void OnScreenshot(DisplayId displayId) override;
     void OnImmersiveStateChange(ScreenId screenId, bool& immersive) override;
     void OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
-        std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false) override;
+        std::vector<uint64_t>& surfaceNodeIds) override;
     void OnSetSurfaceNodeIds(DisplayId displayId, const std::vector<uint64_t>& surfaceNodeIds) override;
     void OnVirtualScreenDisconnected(DisplayId displayId) override;
 
@@ -460,8 +460,7 @@ public:
     WSError NotifyStackEmpty(int32_t persistentId);
     void NotifySessionUpdate(const SessionInfo& sessionInfo, ActionType type,
         ScreenId fromScreenId = SCREEN_ID_INVALID);
-    WMError GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
-        std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false);
+    WMError GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds, std::vector<uint64_t>& surfaceNodeIds);
     WMError GetSurfaceNodeIdsFromSubSession(
         const sptr<SceneSession>& sceneSession, std::vector<uint64_t>& surfaceNodeIds);
     WMError UpdateSubSessionBlackList(const sptr<SceneSession>& sceneSession);
