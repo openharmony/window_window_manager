@@ -175,7 +175,7 @@ using FindScenePanelRsNodeByZOrderFunc = std::function<std::shared_ptr<Rosen::RS
     uint32_t targetZOrder)>;
 using NotifyAppProcessDiedFunc = std::function<void(const AppExecFwk::ProcessData& processData)>;
 using ConvertSystemConfigFunc = std::function<void(const std::string& configItem)>;
-
+using NotifyVirtualPixelChangeFunc = std::function<void(float density, DisplayId displayId)>;
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
     void OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInfo>& debugInfos) override;
@@ -406,7 +406,8 @@ public:
         int32_t fingerId) override;
     void SetFocusedSessionDisplayIdIfNeeded(sptr<SceneSession>& newSession);
     WMError GetWindowLimits(int32_t windowId, WindowLimits& windowLimits);
-
+    void RegisterVirtualPixelChangeCallback(NotifyVirtualPixelChangeFunc&& func);
+    NotifyVirtualPixelChangeFunc onVirtualPixelChangeCallback_;
     /*
      * Sub Window
      */

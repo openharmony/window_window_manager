@@ -1114,6 +1114,14 @@ enum class WindowUpdateType : int32_t {
     WINDOW_UPDATE_PROPERTY
 };
 
+/**
+ * @brief Enumerates window size unit type.
+ */
+enum class PixelUnit : uint32_t {
+    PX = 0, // Physical pixel
+    VP = 1, // Virtual pixel
+};
+
 struct WindowLimits {
     uint32_t maxWidth_ = static_cast<uint32_t>(INT32_MAX); // The width and height are no larger than INT32_MAX.
     uint32_t maxHeight_ = static_cast<uint32_t>(INT32_MAX);
@@ -1122,6 +1130,7 @@ struct WindowLimits {
     float maxRatio_ = FLT_MAX;
     float minRatio_ = 0.0f;
     float vpRatio_ = 1.0f;
+    PixelUnit pixelUnit_ = PixelUnit::PX;
 
     WindowLimits() {}
     WindowLimits(uint32_t maxWidth, uint32_t maxHeight, uint32_t minWidth, uint32_t minHeight, float maxRatio,
@@ -1130,6 +1139,10 @@ struct WindowLimits {
     WindowLimits(uint32_t maxWidth, uint32_t maxHeight, uint32_t minWidth, uint32_t minHeight, float maxRatio,
         float minRatio, float vpRatio) : maxWidth_(maxWidth), maxHeight_(maxHeight), minWidth_(minWidth),
         minHeight_(minHeight), maxRatio_(maxRatio), minRatio_(minRatio), vpRatio_(vpRatio) {}
+    WindowLimits(uint32_t maxWidth, uint32_t maxHeight, uint32_t minWidth, uint32_t minHeight, float maxRatio,
+        float minRatio, float vpRatio, PixelUnit pixelUnit) : maxWidth_(maxWidth), maxHeight_(maxHeight),
+        minWidth_(minWidth), minHeight_(minHeight), maxRatio_(maxRatio), minRatio_(minRatio), vpRatio_(vpRatio),
+        pixelUnit_(pixelUnit) {}
 
     void Clip(uint32_t clipWidth, uint32_t clipHeight)
     {
@@ -1165,13 +1178,27 @@ struct WindowLimits {
         return minWidth_ <= maxWidth_ && minHeight_ <= maxHeight_;
     }
 
+    static const WindowLimits DEFAULT_VP_LIMITS()
+    {
+        return {
+            static_cast<uint32_t>(INT32_MAX),  // maxWidth
+            static_cast<uint32_t>(INT32_MAX),  // maxHeight
+            1,                                 // minWidth
+            1,                                 // minHeight
+            FLT_MAX,                           // maxRatio
+            0.0f,                              // minRatio
+            1.0f,                              // vpRatio
+            PixelUnit::VP                      // pixelUnit
+        };
+    }
+
     std::string ToString() const
     {
         constexpr int precision = 6;
         std::ostringstream oss;
         oss << "[" << maxWidth_ << " " << maxHeight_ << " " << minWidth_ << " " << minHeight_
             << " " << std::fixed << std::setprecision(precision) << maxRatio_ << " " << minRatio_
-            << " " << vpRatio_ << "]";
+            << " " << vpRatio_ << " " << static_cast<uint32_t>(pixelUnit_) << "]";
         return oss.str();
     }
 };
