@@ -2331,6 +2331,11 @@ bool WindowSessionProperty::IsDecorFullscreenDisabled() const
     return compatibleModeProperty_ && compatibleModeProperty_->IsDecorFullscreenDisabled();
 }
 
+bool WindowSessionProperty::IsFullScreenStart() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsFullScreenStart();
+}
+
 bool WindowSessionProperty::IsSupportRotateFullScreen() const
 {
     return compatibleModeProperty_ && compatibleModeProperty_->IsSupportRotateFullScreen();
@@ -2516,6 +2521,16 @@ bool CompatibleModeProperty::IsDecorFullscreenDisabled() const
     return disableDecorFullscreen_;
 }
 
+void CompatibleModeProperty::SetIsFullScreenStart(bool isFullScreenStart)
+{
+    isFullScreenStart_ = isFullScreenStart;
+}
+
+bool CompatibleModeProperty::IsFullScreenStart() const
+{
+    return isFullScreenStart_;
+}
+
 void CompatibleModeProperty::SetIsSupportRotateFullScreen(bool isSupportRotateFullScreen)
 {
     isSupportRotateFullScreen_ = isSupportRotateFullScreen;
@@ -2559,6 +2574,7 @@ bool CompatibleModeProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(disableSplit_) &&
         parcel.WriteBool(disableWindowLimit_) &&
         parcel.WriteBool(disableDecorFullscreen_) &&
+        parcel.WriteBool(isFullScreenStart_) &&
         parcel.WriteBool(isSupportRotateFullScreen_) &&
         parcel.WriteBool(isAdaptToSubWindow_) &&
         parcel.WriteBool(isAdaptToSimulationScale_);
@@ -2581,6 +2597,7 @@ CompatibleModeProperty* CompatibleModeProperty::Unmarshalling(Parcel& parcel)
     property->disableSplit_ = parcel.ReadBool();
     property->disableWindowLimit_ = parcel.ReadBool();
     property->disableDecorFullscreen_ = parcel.ReadBool();
+    property->isFullScreenStart_ = parcel.ReadBool();
     property->isSupportRotateFullScreen_ = parcel.ReadBool();
     property->isAdaptToSubWindow_ = parcel.ReadBool();
     property->isAdaptToSimulationScale_ = parcel.ReadBool();
