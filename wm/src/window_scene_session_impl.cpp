@@ -7175,7 +7175,7 @@ WMError WindowSceneSessionImpl::SetRotationLocked(bool locked)
         TLOGE(WmsLogTag::WMS_ROTATION, "window is not pc, pad or phone, not supported.");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    if (!(WindowHelper::IsSystemWindow(GetType()) && !WindowHelper::IsAuxiliaryWindow(GetType()))) {
+    if (!(WindowHelper::IsSystemWindow(GetType()) && !WindowHelper::IsWindowInApp(GetType()))) {
         TLOGE(WmsLogTag::WMS_ROTATION, "is not system window.");
         return WMError::WM_ERROR_INVALID_WINDOW_TYPE;
     }
@@ -7195,7 +7195,7 @@ WMError WindowSceneSessionImpl::GetRotationLocked(bool& locked)
         TLOGE(WmsLogTag::WMS_ROTATION, "window is not pc, pad or phone, not supported.");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    if (!(WindowHelper::IsSystemWindow(GetType()) && !WindowHelper::IsAuxiliaryWindow(GetType()))) {
+    if (!(WindowHelper::IsSystemWindow(GetType()) && !WindowHelper::IsWindowInApp(GetType()))) {
         TLOGE(WmsLogTag::WMS_ROTATION, "is not system window.");
         return WMError::WM_ERROR_INVALID_WINDOW_TYPE;
     }
