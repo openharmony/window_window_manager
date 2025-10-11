@@ -7180,7 +7180,7 @@ WMError WindowSceneSessionImpl::SetRotationLocked(bool locked)
         return WMError::WM_ERROR_INVALID_WINDOW_TYPE;
     }
  
-    TLOGI(WmsLogTag::WMS_ROTATION, "set id %{public}u orientation lock %{public}d.", GetWindowId(), locked);
+    TLOGI(WmsLogTag::WMS_ROTATION, "set id %{public}u rotation lock %{public}d.", GetWindowId(), locked);
     property_->SetRotationLocked(locked);
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ROTATION_LOCK_CHANGE);
 }
@@ -7200,7 +7200,7 @@ WMError WindowSceneSessionImpl::GetRotationLocked(bool& locked)
         return WMError::WM_ERROR_INVALID_WINDOW_TYPE;
     }
  
-    TLOGI(WmsLogTag::WMS_ROTATION, "get id %{public}u orientation lock %{public}d.", GetWindowId(), locked);
+    TLOGI(WmsLogTag::WMS_ROTATION, "get id %{public}u rotation lock %{public}d.", GetWindowId(), locked);
     locked = property_->GetRotationLocked();
     return WMError::WM_OK;
 }

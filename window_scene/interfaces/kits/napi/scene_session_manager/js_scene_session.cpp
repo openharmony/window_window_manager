@@ -8322,7 +8322,7 @@ void JsSceneSession::ProcessRotationLockChangeRegister()
  
 void JsSceneSession::OnRotationLockChange(bool locked)
 {
-    TLOGI(WmsLogTag::WMS_ROTATION, "orientation lock change: %{public}u", locked);
+    TLOGI(WmsLogTag::WMS_ROTATION, "rotation lock change to: %{public}d", locked);
     std::string info = "OnRotationLockChange, locked:" + std::to_string(locked);
     taskScheduler_->PostMainThreadTask([weakThis = wptr(this), persistentId = persistentId_, locked, env = env_] {
         auto jsSceneSession = weakThis.promote();
