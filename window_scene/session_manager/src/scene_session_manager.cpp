@@ -10491,20 +10491,20 @@ WSError SceneSessionManager::BindDialogSessionTarget(uint64_t persistentId, sptr
 }
 
 void DisplayChangeListener::OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
-    std::vector<uint64_t>& surfaceNodeIds)
+    std::vector<uint64_t>& surfaceNodeIds, bool isBlackList)
 {
-    SceneSessionManager::GetInstance().GetSurfaceNodeIdsFromMissionIds(missionIds, surfaceNodeIds);
+    SceneSessionManager::GetInstance().GetSurfaceNodeIdsFromMissionIds(missionIds, surfaceNodeIds, isBlackList);
 }
 
 WMError SceneSessionManager::GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
-    std::vector<uint64_t>& surfaceNodeIds)
+    std::vector<uint64_t>& surfaceNodeIds, bool isBlackList)
 {
     auto isSaCall = SessionPermission::IsSACalling();
     if (!isSaCall) {
         TLOGE(WmsLogTag::DEFAULT, "The interface only support for sa call");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    auto task = [this, &missionIds, &surfaceNodeIds]() {
+    auto task = [this, &missionIds, &surfaceNodeIds, isBlackList]() {
         std::map<int32_t, sptr<SceneSession>>::iterator iter;
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (auto missionId : missionIds) {
@@ -10518,7 +10518,10 @@ WMError SceneSessionManager::GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_
             }
             surfaceNodeIds.push_back(sceneSession->GetSurfaceNode()->GetId());
             GetSurfaceNodeIdsFromSubSession(sceneSession, surfaceNodeIds);
-            surfaceNodeIds.push_back(missionId);
+            if (isBlackList && sceneSession->GetLeashWinSurfaceNode()) {
+                surfaceNodeIds.push_back(missionId);
+                continue;
+            }
             if (sceneSession->GetLeashWinSurfaceNode()) {
                 surfaceNodeIds.push_back(sceneSession->GetLeashWinSurfaceNode()->GetId());
             }
