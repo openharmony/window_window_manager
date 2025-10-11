@@ -493,10 +493,10 @@ void ScreenSessionManagerClient::OnUpdateFoldDisplayMode(FoldDisplayMode display
 }
 
 void ScreenSessionManagerClient::OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
-    std::vector<uint64_t>& surfaceNodeIds)
+    std::vector<uint64_t>& surfaceNodeIds, bool isBlackList)
 {
     if (displayChangeListener_) {
-        displayChangeListener_->OnGetSurfaceNodeIdsFromMissionIds(missionIds, surfaceNodeIds);
+        displayChangeListener_->OnGetSurfaceNodeIdsFromMissionIds(missionIds, surfaceNodeIds, isBlackList);
     }
 }
 
