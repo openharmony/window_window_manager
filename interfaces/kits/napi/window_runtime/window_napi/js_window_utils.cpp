@@ -350,6 +350,19 @@ napi_value WindowAnchorInit(napi_env env)
     return objValue;
 }
 
+napi_value PixelUnitInit(napi_env env)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "PX", CreateJsValue(env,
+        static_cast<int32_t>(PixelUnit::PX)));
+    napi_set_named_property(env, objValue, "VP", CreateJsValue(env,
+        static_cast<int32_t>(PixelUnit::VP)));
+    return objValue;
+}
+
 napi_value WindowEventTypeInit(napi_env env)
 {
     WLOGFD("WindowEventTypeInit");
@@ -1276,6 +1289,7 @@ napi_value GetWindowLimitsAndConvertToJsValue(napi_env env, const WindowLimits& 
     napi_set_named_property(env, objValue, "maxHeight", CreateJsValue(env, windowLimits.maxHeight_));
     napi_set_named_property(env, objValue, "minWidth", CreateJsValue(env, windowLimits.minWidth_));
     napi_set_named_property(env, objValue, "minHeight", CreateJsValue(env, windowLimits.minHeight_));
+    napi_set_named_property(env, objValue, "pixelUnit", CreateJsValue(env, windowLimits.pixelUnit_));
     return objValue;
 }
 

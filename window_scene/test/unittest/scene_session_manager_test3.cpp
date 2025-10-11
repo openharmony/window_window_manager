@@ -527,6 +527,7 @@ HWTEST_F(SceneSessionManagerTest3, GetWindowLimits, TestSize.Level1)
     limits.maxWidth_ = 1000;
     limits.minWidth_ = 500;
     sceneSession->property_->SetWindowLimits(limits);
+    sceneSession->property_->SetWindowLimitsVP(limits);
 
     int32_t windowId = 1;
     WindowLimits windowlimits;

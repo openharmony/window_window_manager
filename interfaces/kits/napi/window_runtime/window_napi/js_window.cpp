@@ -954,6 +954,14 @@ napi_value JsWindow::GetWindowLimits(napi_env env, napi_callback_info info)
 }
 
 /** @note @window.layout */
+napi_value JsWindow::GetWindowLimitsVP(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGetWindowLimitsVP(env, info) : nullptr;
+}
+
+/** @note @window.layout */
 napi_value JsWindow::SetWindowLimits(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
@@ -7228,25 +7236,32 @@ bool JsWindow::ParseWindowLimits(napi_env env, napi_value jsObject, WindowLimits
     if (ParseJsValue(jsObject, env, "maxWidth", data)) {
         windowLimits.maxWidth_ = data;
     } else {
-        WLOGFE("Failed to convert object to windowLimits");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to maxWidth");
         return false;
     }
     if (ParseJsValue(jsObject, env, "minWidth", data)) {
         windowLimits.minWidth_ = data;
     } else {
-        WLOGFE("Failed to convert object to windowLimits");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to minWidth");
         return false;
     }
     if (ParseJsValue(jsObject, env, "maxHeight", data)) {
         windowLimits.maxHeight_ = data;
     } else {
-        WLOGFE("Failed to convert object to windowLimits");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to maxHeight");
         return false;
     }
     if (ParseJsValue(jsObject, env, "minHeight", data)) {
         windowLimits.minHeight_ = data;
     } else {
-        WLOGFE("Failed to convert object to windowLimits");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to minHeight");
+        return false;
+    }
+    PixelUnit pixelUnit = PixelUnit::PX;
+    if (ParseJsValueOrGetDefault(jsObject, env, "pixelUnit", pixelUnit, PixelUnit::PX)) {
+        windowLimits.pixelUnit_ = pixelUnit;
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to pixelUnit");
         return false;
     }
     return true;
@@ -7430,6 +7445,38 @@ napi_value JsWindow::OnGetWindowLimits(napi_env env, napi_callback_info info)
         return objValue;
     } else {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "[window][getWindowLimits]msg: Nullptr");
+    }
+}
+
+/** @note @window.layout */
+napi_value JsWindow::OnGetWindowLimitsVP(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc > 1) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][getWindowLimitsVP]msg: Argc is invalid");
+    }
+
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][getWindowLimitsVP]msg: Window is nullptr");
+    }
+    WindowLimits windowLimits;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetWindowLimits(windowLimits, true));
+    if (ret != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, ret, "[window][getWindowLimitsVP]msg: Failed");
+    }
+    auto objValue = GetWindowLimitsAndConvertToJsValue(env, windowLimits);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id: %{public}u, name: %{public}s, getWindowLimitsVP end",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+    if (objValue != nullptr) {
+        return objValue;
+    } else {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "[window][getWindowLimitsVP]msg: Nullptr");
     }
 }
 
@@ -9397,6 +9444,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "keepKeyboardOnFocus", moduleName, JsWindow::KeepKeyboardOnFocus);
     BindNativeFunction(env, object, "setWindowLimits", moduleName, JsWindow::SetWindowLimits);
     BindNativeFunction(env, object, "getWindowLimits", moduleName, JsWindow::GetWindowLimits);
+    BindNativeFunction(env, object, "getWindowLimitsVP", moduleName, JsWindow::GetWindowLimitsVP);
     BindNativeFunction(env, object, "setSpecificSystemBarEnabled", moduleName, JsWindow::SetSpecificSystemBarEnabled);
     BindNativeFunction(env, object, "setSingleFrameComposerEnabled", moduleName,
         JsWindow::SetSingleFrameComposerEnabled);

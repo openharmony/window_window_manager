@@ -88,6 +88,7 @@ const std::string UPDATE_KIOSK_APP_LIST_CB = "updateKioskAppList";
 const std::string KIOSK_MODE_CHANGE_CB = "kioskModeChange";
 const std::string UI_EFFECT_SET_PARAMS_CB = "uiEffectSetParams";
 const std::string UI_EFFECT_ANIMATE_TO_CB = "uiEffectAnimateTo";
+const std::string VIRTUAL_DENSITY_CHANGE_CB = "virtualDensityChange";
 
 const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {CREATE_SYSTEM_SESSION_CB,     ListenerFunctionType::CREATE_SYSTEM_SESSION_CB},
@@ -114,6 +115,7 @@ const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {KIOSK_MODE_CHANGE_CB,         ListenerFunctionType::KIOSK_MODE_CHANGE_CB},
     {UI_EFFECT_SET_PARAMS_CB,       ListenerFunctionType::UI_EFFECT_SET_PARAMS_CB},
     {UI_EFFECT_ANIMATE_TO_CB,      ListenerFunctionType::UI_EFFECT_ANIMATE_TO_CB},
+    {VIRTUAL_DENSITY_CHANGE_CB,   ListenerFunctionType::VIRTUAL_DENSITY_CHANGE_CB},
 };
 } // namespace
 
@@ -148,6 +150,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "RotationChangeType", CreateRotationChangeType(env));
     napi_set_named_property(env, exportObj, "RectType", CreateRectType(env));
     napi_set_named_property(env, exportObj, "WindowAnchor", CreateWindowAnchorType(env));
+    napi_set_named_property(env, exportObj, "PixelUnit", CreatePixelUnitType(env));
     napi_set_named_property(env, exportObj, "AnimationType", AnimationTypeInit(env));
     napi_set_named_property(env, exportObj, "WindowTransitionType", WindowTransitionTypeInit(env));
     napi_set_named_property(env, exportObj, "WindowAnimationCurve", WindowAnimationCurveInit(env));
@@ -1645,6 +1648,9 @@ void JsSceneSessionManager::ProcessRegisterCallback(ListenerFunctionType listene
             break;
         case ListenerFunctionType::UI_EFFECT_ANIMATE_TO_CB:
             RegisterUIEffectAnimateToCallback();
+            break;
+        case ListenerFunctionType::VIRTUAL_DENSITY_CHANGE_CB:
+            RegisterVirtualPixelRatioChangeCallback();
             break;
         default:
             break;
@@ -5469,5 +5475,28 @@ napi_value JsSceneSessionManager::OnGetPipDeviceCollaborationPolicy(napi_env env
     TLOGI(WmsLogTag::WMS_PIP, "screenId  %{public}d", screenId);
     bool isPipEnabled = SceneSessionManager::GetInstance().GetPipDeviceCollaborationPolicy(screenId);
     return CreateJsValue(env, isPipEnabled);
+}
+
+void JsSceneSessionManager::RegisterVirtualPixelRatioChangeCallback()
+{
+    SceneSessionManager::GetInstance().RegisterVirtualPixelChangeCallback(
+        [this](float density, DisplayId displayId) {
+            this->OnVirtualPixelChange(density, displayId);
+    });
+}
+
+void JsSceneSessionManager::OnVirtualPixelChange(float density, DisplayId displayId)
+{
+    taskScheduler_->PostMainThreadTask(
+        [this, density, displayId, jsCallBack = GetJSCallback(VIRTUAL_DENSITY_CHANGE_CB), env = env_] {
+            if (jsCallBack == nullptr) {
+                TLOGNE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
+                return;
+            }
+            napi_value densityValue = CreateJsValue(env, density);
+            napi_value displayIdValue = CreateJsValue(env, static_cast<int64_t>(displayId));
+            napi_value argv[] = { densityValue, displayIdValue };
+            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        }, __func__);
 }
 } // namespace OHOS::Rosen

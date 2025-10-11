@@ -15,6 +15,7 @@
 
 #include "js_scene_utils.h"
 #include "js_scene_session.h"
+#include "js_window_scene_config.h"
 #include "napi_common_want.h"
 #include "pixel_map_napi.h"
 #include "session/host/include/ability_info_manager.h"
@@ -35,6 +36,7 @@ const std::string UPDATE_TRANSITION_ANIMATION_CB = "updateTransitionAnimation";
 const std::string BUFFER_AVAILABLE_CHANGE_CB = "bufferAvailableChange";
 const std::string SESSION_EVENT_CB = "sessionEvent";
 const std::string SESSION_RECT_CHANGE_CB = "sessionRectChange";
+const std::string SESSION_WINDOW_LIMITS_CHANGE_CB = "sessionWindowLimitsChange";
 const std::string FLOATING_BALL_UPDATE_CB = "updateFbTemplateInfo";
 const std::string FLOATING_BALL_STOP_CB = "prepareRemoveFb";
 const std::string FLOATING_BALL_RESTORE_MAIN_WINDOW_CB = "restoreFbMainWindow";
@@ -138,6 +140,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {BUFFER_AVAILABLE_CHANGE_CB,            ListenerFuncType::BUFFER_AVAILABLE_CHANGE_CB},
     {SESSION_EVENT_CB,                      ListenerFuncType::SESSION_EVENT_CB},
     {SESSION_RECT_CHANGE_CB,                ListenerFuncType::SESSION_RECT_CHANGE_CB},
+    {SESSION_WINDOW_LIMITS_CHANGE_CB,       ListenerFuncType::SESSION_WINDOW_LIMITS_CHANGE_CB},
     {SESSION_PIP_CONTROL_STATUS_CHANGE_CB,  ListenerFuncType::SESSION_PIP_CONTROL_STATUS_CHANGE_CB},
     {SESSION_AUTO_START_PIP_CB,             ListenerFuncType::SESSION_AUTO_START_PIP_CB},
     {CREATE_SUB_SESSION_CB,                 ListenerFuncType::CREATE_SUB_SESSION_CB},
@@ -1371,6 +1374,24 @@ void JsSceneSession::ProcessSessionRectChangeRegister()
         jsSceneSession->OnSessionRectChange(rect, reason, displayId, rectAnimationConfig);
     });
     TLOGD(WmsLogTag::DEFAULT, "success");
+}
+
+void JsSceneSession::ProcessSessionWindowLimitsChangeRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    session->SetSessionWindowLimitsChangeCallback([weakThis = wptr(this)](const WindowLimits& windowLimits) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "ProcessSessionWindowLimitsChangeRegister jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->OnSessionWindowLimitsChange(windowLimits);
+    });
+    TLOGD(WmsLogTag::WMS_LAYOUT, "success");
 }
 
 void JsSceneSession::ProcessFloatingBallUpdateRegister()
@@ -2995,6 +3016,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
         case static_cast<uint32_t>(ListenerFuncType::SESSION_RECT_CHANGE_CB):
             ProcessSessionRectChangeRegister();
             break;
+        case static_cast<uint32_t>(ListenerFuncType::SESSION_WINDOW_LIMITS_CHANGE_CB):
+            ProcessSessionWindowLimitsChangeRegister();
+            break;
         case static_cast<uint32_t>(ListenerFuncType::WINDOW_MOVING_CB):
             ProcessWindowMovingRegister();
             break;
@@ -3995,6 +4019,33 @@ void JsSceneSession::OnSessionRectChange(const WSRect& rect, SizeChangeReason re
     std::string rectInfo = "OnSessionRectChange [" + std::to_string(rect.posX_) + "," + std::to_string(rect.posY_)
         + "], [" + std::to_string(rect.width_) + ", " + std::to_string(rect.height_);
     taskScheduler_->PostMainThreadTask(task, rectInfo);
+}
+
+/** @note @window.layout */
+void JsSceneSession::OnSessionWindowLimitsChange(const WindowLimits& windowLimits)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, windowLimits, env = env_, funcName = __func__] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: jsSceneSession id:%{public}d has been destroyed",
+                funcName, persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(SESSION_WINDOW_LIMITS_CHANGE_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: jsCallBack is nullptr", funcName);
+            return;
+        }
+        napi_value jsSessionWindowLimits = JsWindowSceneConfig::CreateWindowLimits(env, windowLimits);
+        napi_value argv[] = { jsSessionWindowLimits };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    std::string windowLimitsInfo = std::string(__func__) + " [" + std::to_string(windowLimits.maxWidth_) + ", " +
+        std::to_string(windowLimits.maxHeight_) + ", " + std::to_string(windowLimits.minWidth_) + ", " +
+        std::to_string(windowLimits.minHeight_) + ", " + std::to_string(static_cast<uint32_t>(windowLimits.pixelUnit_))
+        + "] id:" + std::to_string(persistentId_);
+    taskScheduler_->PostMainThreadTask(task, windowLimitsInfo);
 }
 
 void JsSceneSession::OnFloatingBallUpdate(const FloatingBallTemplateInfo& fbTemplateInfo)

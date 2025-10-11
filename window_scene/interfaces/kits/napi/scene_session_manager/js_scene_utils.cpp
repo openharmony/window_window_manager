@@ -2590,6 +2590,25 @@ napi_value CreateWindowAnchorType(napi_env env)
     return objValue;
 }
 
+napi_value CreatePixelUnitType(napi_env env)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Env is nullptr");
+        return nullptr;
+    }
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to get object");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "PX",
+        CreateJsValue(env, static_cast<uint32_t>(PixelUnit::PX)));
+    napi_set_named_property(env, objValue, "VP",
+        CreateJsValue(env, static_cast<uint32_t>(PixelUnit::VP)));
+    return objValue;
+}
+
 MainThreadScheduler::MainThreadScheduler(napi_env env)
     : env_(env)
 {
