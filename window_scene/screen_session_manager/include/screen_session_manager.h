@@ -465,6 +465,8 @@ public:
     std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
         DmErrorCode* errorCode = nullptr) override;
     void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;
+    void ConvertWindowIdsToSurfaceNodeList(std::vector<uint64_t> windowIdList,
+        std::vector<uint64_t>& surfaceNodesList);
     sptr<DisplayInfo> GetPrimaryDisplayInfo() override;
     DisplayId GetPrimaryDisplayId() override;
     std::shared_ptr<Media::PixelMap> GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
