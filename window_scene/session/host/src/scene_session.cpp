@@ -434,12 +434,7 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
             return ret;
         }
         session->NotifySingleHandTransformChange(session->GetSingleHandTransform());
-        auto leashWinSurfaceNode = session->GetLeashWinShadowSurfaceNode();
-        if (leashWinSurfaceNode && sessionProperty) {
-            bool lastPrivacyMode = sessionProperty->GetPrivacyMode() || sessionProperty->GetSystemPrivacyMode();
-            AutoRSTransaction trans(session->GetRSLeashWinShadowContext());
-            leashWinSurfaceNode->SetSecurityLayer(lastPrivacyMode);
-        }
+        session->SetSecurityLayerWhenEnterForeground();
         session->MarkAvoidAreaAsDirty();
         auto subSessions = session->GetSubSession();
         for (const auto& subSession : subSessions) {
@@ -9583,6 +9578,27 @@ void SceneSession::RunAfterNVsyncs(uint32_t vsyncCount, Task&& task)
     };
 
     requestNextVsyncFunc_(vsyncCallback);
+}
+
+void SceneSession::SetSecurityLayerWhenEnterForeground()
+{
+    auto leashWinSurfaceNode = GetLeashWinShadowSurfaceNode();
+    if (leashWinSurfaceNode == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "leash node is null, win=[%{public}d, %{public}s]", GetWindowId(),
+            GetWindowName().c_str());
+        return;
+    }
+    auto sessionProperty = GetSessionProperty();
+    bool lastPrivacyMode = sessionProperty->GetPrivacyMode() || sessionProperty->GetSystemPrivacyMode();
+    bool multiInstanceEnabled = RSAdapterUtil::IsClientMultiInstanceEnabled();
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "win=[%{public}d, %{public}s], isMultiInstance=%{public}d, isPrivacy=%{public}d",
+        GetWindowId(), GetWindowName().c_str(), multiInstanceEnabled, lastPrivacyMode);
+    if (multiInstanceEnabled) {
+        AutoRSTransaction trans(GetRSLeashWinShadowContext());
+        leashWinSurfaceNode->SetSecurityLayer(lastPrivacyMode);
+    } else {
+        leashWinSurfaceNode->SetSecurityLayer(lastPrivacyMode);
+    }
 }
 
 void SceneSession::RestoreGravityWhenDragEnd()
