@@ -1975,6 +1975,7 @@ void WindowSessionImpl::HideTitleButton(bool& hideSplitButton, bool& hideMaximiz
     }
     // compatible mode adapt to proportional scale, will show its button
     bool showScaleBtn = property_->IsAdaptToProportionalScale() && !property_->GetIsAtomicService();
+    
     uiContent->OnContainerModalEvent(SCB_COMPATIBLE_MAXIMIZE_VISIBILITY,
         !isLayoutFullScreen && showScaleBtn  ? "true" : "false");
     // compatible mode adapt to back, will show its button
