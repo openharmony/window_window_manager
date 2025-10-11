@@ -686,10 +686,18 @@ ani_object AniWindowUtils::CreateAniKeyboardInfo(ani_env* env, const KeyboardPan
         TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to new obj");
         return AniWindowUtils::CreateAniUndefined(env);
     }
-    CallAniMethodVoid(env, keyboardInfo, aniClass, "<set>beginRect", nullptr,
+    ret = CallAniMethodVoid(env, keyboardInfo, aniClass, "<set>beginRect", nullptr,
         CreateAniRect(env, keyboardPanelInfo.beginRect_));
-    CallAniMethodVoid(env, keyboardInfo, aniClass, "<set>endRect", nullptr,
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to set beginRect");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ret = CallAniMethodVoid(env, keyboardInfo, aniClass, "<set>endRect", nullptr,
         CreateAniRect(env, keyboardPanelInfo.endRect_));
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to set endRect");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
     return keyboardInfo;
 }
 

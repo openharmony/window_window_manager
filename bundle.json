@@ -513,6 +513,16 @@
               ],
               "header_base": "//foundation/window/window_manager/interfaces/innerkits/wm"
             }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/interfaces/kits/ani/window_animation:ani_window_animation_utils",
+            "header": {
+              "header_files": [
+                "wm_animation_common.h"
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/innerkits/wm"
+            }
           }
         ],
         "test": [

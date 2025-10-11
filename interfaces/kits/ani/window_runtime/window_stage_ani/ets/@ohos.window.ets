@@ -31,6 +31,7 @@ export type KeyboardDidShowOrHideCallback = (data: window.KeyboardInfo) => void;
 const DOMAIN = 0x4200;
 const TAG = '[ANI]';
 const WM_ERROR_INVALID_PARAM = 401;
+declare type WindowAnimationCurveParam = Array<number>;
 
 namespace window {
   export interface Size {
@@ -1607,6 +1608,72 @@ export interface TransitionController {
     animationForHidden(context: window.TransitionContext): void;
 }
 
+export enum WindowTransitionType {
+    DESTROY = 0,
+}
+
+export enum AnimationType {
+    FADE_IN_OUT = 0,
+    FADE_IN = 1,
+    SEE_THE_WORLD = 100,
+}
+
+export enum WindowAnimationCurve {
+    LINEAR = 0,
+    INTERPOLATION_SPRING = 1,
+    CUBIC_BEZIER = 2,
+}
+
+export interface WindowAnimationConfig {
+    curve: WindowAnimationCurve;
+    duration?: long;
+    param?: WindowAnimationCurveParam;
+}
+
+export class WindowAnimationConfigInternal implements WindowAnimationConfig {
+    curve: WindowAnimationCurve;
+    duration?: long;
+    param?: WindowAnimationCurveParam;
+}
+
+export interface StartAnimationSystemParams {
+    type: AnimationType;
+    animationConfig?: WindowAnimationConfig;
+}
+
+export class StartAnimationSystemParamsInternal implements StartAnimationSystemParams {
+    type: AnimationType;
+    animationConfig?: WindowAnimationConfig;
+}
+
+export interface StartAnimationParams {
+    type: AnimationType;
+}
+
+export class StartAnimationParamsInternal implements StartAnimationParams {
+    type: AnimationType;
+}
+
+export interface TransitionAnimation {
+    config: WindowAnimationConfig;
+    opacity?: double;
+}
+
+export class TransitionAnimationInternal implements TransitionAnimation {
+    config: WindowAnimationConfig;
+    opacity?: double;
+}
+
+export interface WindowCreateParams {
+    animationParams?: StartAnimationParams;
+    systemAnimationParams?: StartAnimationSystemParams;
+}
+
+export class WindowCreateParamsInternal implements WindowCreateParams {
+    animationParams?: StartAnimationParams;
+    systemAnimationParams?: StartAnimationSystemParams;
+}
+
 /**
  * Limits of window.
  *
@@ -1834,11 +1901,15 @@ export class ConfigurationInternal implements Configuration {
 export interface KeyboardInfo {
     beginRect: Rect;
     endRect: Rect;
+    animated?: boolean;
+    config?: WindowAnimationConfig;
 }
 
 export class KeyboardInfoInternal implements KeyboardInfo {
     beginRect: Rect;
     endRect: Rect;
+    animated?: boolean;
+    config?: WindowAnimationConfig;
 }
 
 /**
@@ -2559,6 +2630,11 @@ export class WindowInternal implements Window {
     private native isMainWindowFullScreenAcrossDisplaysSync(nativeObj: long): boolean;
     private native setWindowShadowEnabledSync(nativeObj: long, enable: boolean): void;
     private native isImmersiveLayoutSync(nativeObj: long): boolean;
+
+    private native setWindowTransitionAnimation(nativeObj: long, transitionType: WindowTransitionType,
+        animation: TransitionAnimation): void;
+    private native getWindowTransitionAnimationSync(nativeObj: long,
+      transitionType: WindowTransitionType): TransitionAnimation | undefined;
 
     public static transferStatic(input: Any): Object {
       return WindowInternal.nativeTransferStatic(ESValue.wrap(input));
@@ -3610,14 +3686,14 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setRotationLocked(this.nativeObj, locked);
-        }).then((ret: NullishType) => {
+          }).then((ret: NullishType) => {
           resolve(undefined);
         }).catch((err: NullishType) => {
           reject(err as BusinessError);
         });
       });
     }
-    
+
     public getRotationLocked(): boolean {
       return this.getRotationLocked(this.nativeObj);
     }
@@ -3652,6 +3728,27 @@ export class WindowInternal implements Window {
 
     public setWindowDelayRaiseOnDrag(isEnabled: boolean): void {
       this.setWindowDelayRaiseOnDrag(this.nativeObj, isEnabled);
+    }
+
+    public setWindowTransitionAnimation(transitionType: WindowTransitionType,
+      animation: TransitionAnimation): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) => {
+        taskpool.execute(() => {
+          this.setWindowTransitionAnimation(this.nativeObj, transitionType, animation);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public getWindowTransitionAnimation(transitionType: WindowTransitionType): TransitionAnimation | undefined {
+      let ret = this.getWindowTransitionAnimationSync(this.nativeObj, transitionType);
+      if (ret === undefined) {
+        return ret;
+      }
+      return ret as TransitionAnimation;
     }
 }
 
@@ -3792,6 +3889,8 @@ export interface Window {
     offScreenshotAppEvent(callback: Callback<ScreenshotEventType>): void;
     onMainWindowFullScreenAcrossDisplaysChanged(callback: Callback<boolean>): void;
     offMainWindowFullScreenAcrossDisplaysChanged(callback?: Callback<boolean>): void;
+    setWindowTransitionAnimation(transitionType: WindowTransitionType, animation: TransitionAnimation): Promise<void>;
+    getWindowTransitionAnimation(transitionType: WindowTransitionType): TransitionAnimation | undefined;
 }
 
 export native function CreateWindowStage(scene: long): WindowStageInternal;
