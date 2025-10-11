@@ -5008,11 +5008,6 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     auto screenId = GetScreenId();
-    if (screenId == SCREEN_ID_INVALID) {
-        TLOGW(WmsLogTag::WMS_SCB,
-              "invalid screenId, %{public}s: %{public}s, sessionId: %{public}d, screenId:%{public}" PRIu64,
-              caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
-    }
     if (screenIdOfRSUIContext_ != screenId) {
         // Note: For the window corresponding to UIExtAbility, RSUIContext cannot be obtained
         // directly here because its server side is not SceneBoard. The acquisition of RSUIContext
@@ -5020,6 +5015,10 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
         // as ArkUI knows the host window for this type of window.
         rsUIContext_ = ScreenSessionManagerClient::GetInstance().GetRSUIContext(screenId);
         screenIdOfRSUIContext_ = screenId;
+    }
+    if (rsUIContext_ = nullptr) {
+        TLOGI(WmsLogTag::WMS_SCB, "%{public}s: %{public}s, sessionId: %{public}d, screenId:%{public}" PRIu64,
+          caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
     }
     TLOGD(WmsLogTag::WMS_SCB, "%{public}s: %{public}s, sessionId: %{public}d, screenId:%{public}" PRIu64,
           caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
