@@ -21,6 +21,7 @@
 #include "ani.h"
 #include "ani_window_register_manager.h"
 #include "window.h"
+#include "wm_animation_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -143,6 +144,13 @@ public:
     ani_object HandlePositionTransform(ani_env* env, ani_int x, ani_int y,
         std::function<WMError(sptr<Window>&, const Position&, Position&)> transformFunc);
 
+    /*
+     * Window animation
+     */
+    static void SetWindowTransitionAnimation(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_enum_item transitionType, ani_object animation);
+    static ani_object GetWindowTransitionAnimation(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_enum_item transitionType);
 private:
     void OnSetWindowColorSpace(ani_env* env, ani_int colorSpace);
     void OnSetPreferredOrientation(ani_env* env, ani_int orientation);
@@ -199,6 +207,12 @@ private:
     void OnSetContentAspectRatio(
         ani_env* env, ani_double ratio, ani_boolean isPersistent, ani_boolean needUpdateRect);
     void OnMaximize(ani_env* env, ani_object aniPresentation, ani_object aniAcrossDisplay);
+
+    /*
+     * Window animation
+     */
+    void OnSetWindowTransitionAnimation(ani_env* env, ani_enum_item transitionType, ani_object animation);
+    ani_object OnGetWindowTransitionAnimation(ani_env* env, ani_enum_item transitionType);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<AniWindowRegisterManager> registerManager_ = nullptr;

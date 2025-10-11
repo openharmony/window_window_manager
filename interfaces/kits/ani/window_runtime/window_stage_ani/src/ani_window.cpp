@@ -23,6 +23,7 @@
 #include "ani.h"
 #include "ani_err_utils.h"
 #include "ani_window_utils.h"
+#include "ani_window_animation_utils.h"
 #include "interop_js/arkts_esvalue.h"
 #include "interop_js/arkts_interop_js_api.h"
 #include "interop_js/hybridgref_ani.h"
@@ -2838,6 +2839,111 @@ void AniWindow::OnSetRelativePositionToParentWindowEnabled(ani_env* env, ani_boo
         return;
     }
 }
+
+void AniWindow::SetWindowTransitionAnimation(ani_env* env, ani_object obj, ani_long nativeObj,
+    ani_enum_item transitionType, ani_object animation)
+{
+    TLOGI(WmsLogTag::WMS_ANIMATION, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (!aniWindow || !aniWindow->GetWindow()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    aniWindow->OnSetWindowTransitionAnimation(env, transitionType, animation);
+}
+
+void AniWindow::OnSetWindowTransitionAnimation(ani_env* env, ani_enum_item transitionType, ani_object animation)
+{
+    TLOGI(WmsLogTag::WMS_ANIMATION, "[ANI]");
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Window instance not exist");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    WmErrorCode ret = AniWindowUtils::ToErrorCode(windowToken_->IsTransitionAnimationSupported());
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Transition animation is not supported");
+        AniWindowUtils::AniThrowError(env, ret);
+        return;
+    }
+    uint32_t type = 0;
+    ani_status aniRet = AniWindowUtils::GetEnumValue(env, transitionType, type);
+    if (aniRet != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] get enum value failed, ret: %{public}d", static_cast<int32_t>(aniRet));
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return;
+    }
+    if (type >= static_cast<uint32_t>(WindowTransitionType::END)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to type");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+        return;
+    }
+
+    TransitionAnimation transitionAnimation;
+    WmErrorCode convertResult = WmErrorCode::WM_OK;
+    if (!ConvertTransitionAnimationFromAniValue(env, animation, transitionAnimation, convertResult)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to animation");
+        AniWindowUtils::AniThrowError(env, convertResult);
+        return;
+    }
+
+    ret = AniWindowUtils::ToErrorCode(windowToken_->SetWindowTransitionAnimation(
+        static_cast<WindowTransitionType>(type), transitionAnimation));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Set window transition animation failed, ret is %{public}d", ret);
+        AniWindowUtils::AniThrowError(env, ret);
+    }
+}
+
+ani_object AniWindow::GetWindowTransitionAnimation(ani_env* env, ani_object obj, ani_long nativeObj,
+    ani_enum_item transitionType)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (!aniWindow || !aniWindow->GetWindow()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    return aniWindow->OnGetWindowTransitionAnimation(env, transitionType);
+}
+
+ani_object AniWindow::OnGetWindowTransitionAnimation(ani_env* env, ani_enum_item transitionType)
+{
+    TLOGI(WmsLogTag::WMS_ANIMATION, "[ANI]");
+        TLOGD(WmsLogTag::WMS_ANIMATION, "[NAPI]");
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Window instance not exist");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][getWindowTransitionAnimation]msg:transition animation is not enable");
+    }
+    WmErrorCode ret = AniWindowUtils::ToErrorCode(windowToken_->IsTransitionAnimationSupported());
+    if (ret != WmErrorCode::WM_OK) {
+        return AniWindowUtils::AniThrowError(env, ret,
+            "[window][getWindowTransitionAnimation]msg:transition animation is not enable");
+    }
+
+    uint32_t enumValue = 0;
+    ani_status aniRet = AniWindowUtils::GetEnumValue(env, transitionType, enumValue);
+    if (aniRet != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] Get transitionType value failed: %{public}u", aniRet);
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, "Get value failed");
+    }
+
+    WindowTransitionType type = static_cast<WindowTransitionType>(enumValue);
+    if (type >= WindowTransitionType::END) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "type %{public}u is out of range", static_cast<uint32_t>(type));
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "Failed to convert parameter to type");
+    }
+    ani_object result = ConvertTransitionAnimationToAniValue(env, windowToken_->GetWindowTransitionAnimation(type));
+    if (result != nullptr) {
+        TLOGI(WmsLogTag::WMS_ANIMATION, "Get window transition animation success with type %{public}u",
+            static_cast<uint32_t>(type));
+        return result;
+    }
+    return AniWindowUtils::CreateAniUndefined(env);
+}
 }  // namespace Rosen
 }  // namespace OHOS
 
@@ -3513,6 +3619,12 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::SetWindowShadowEnabled)},
         ani_native_function {"isImmersiveLayoutSync", "l:z",
             reinterpret_cast<void *>(AniWindow::IsImmersiveLayout)},
+        ani_native_function {"setWindowTransitionAnimation",
+            "lC{@ohos.window.window.WindowTransitionType}C{@ohos.window.window.TransitionAnimation}:",
+            reinterpret_cast<void *>(AniWindow::SetWindowTransitionAnimation)},
+        ani_native_function {"getWindowTransitionAnimationSync",
+            "lC{@ohos.window.window.WindowTransitionType}:C{@ohos.window.window.TransitionAnimation}",
+            reinterpret_cast<void *>(AniWindow::GetWindowTransitionAnimation)},
     };
     for (auto method : methods) {
         if ((ret = env->Class_BindNativeMethods(cls, &method, 1u)) != ANI_OK) {

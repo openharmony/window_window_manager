@@ -66,6 +66,7 @@ ohos_shared_library("windowstageani_kit") {
     "../../../../wm:libwm",
     "../../../../interfaces/kits/napi/window_runtime:window_native_kit",
     "../../../../interfaces/kits/napi/window_runtime:windowstage_kit",
+    "${window_base_path}/interfaces/kits/ani/window_animation:ani_window_animation_utils",
   ]
 
   external_deps = [
