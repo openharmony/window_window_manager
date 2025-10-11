@@ -115,6 +115,7 @@ const std::string SET_SUB_WINDOW_SOURCE_CB = "setSubWindowSource";
 const std::string ANIMATE_TO_CB = "animateToTargetProperty";
 const std::string BATCH_PENDING_SCENE_ACTIVE_CB = "batchPendingSceneSessionsActivation";
 const std::string SCENE_OUTLINE_PARAMS_CHANGE_CB = "sceneOutlineParamsChange";
+const std::string ROTATION_LOCK_CHANGE_CB = "rotationLockChange";
 
 constexpr int ARG_COUNT_1 = 1;
 constexpr int ARG_COUNT_2 = 2;
@@ -222,6 +223,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {FLOATING_BALL_STOP_CB,                 ListenerFuncType::FLOATING_BALL_STOP_CB},
     {FLOATING_BALL_RESTORE_MAIN_WINDOW_CB,      ListenerFuncType::FLOATING_BALL_RESTORE_MAIN_WINDOW_CB},
     {SCENE_OUTLINE_PARAMS_CHANGE_CB,        ListenerFuncType::SCENE_OUTLINE_PARAMS_CHANGE_CB},
+    {ROTATION_LOCK_CHANGE_CB,               ListenerFuncType::ROTATION_LOCK_CHANGE_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -3249,6 +3251,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::SCENE_OUTLINE_PARAMS_CHANGE_CB):
             ProcessSceneOutlineParamsChangeRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::ROTATION_LOCK_CHANGE_CB):
+            ProcessRotationLockChangeRegister();
             break;
         default:
             break;
@@ -8353,5 +8358,43 @@ void JsSceneSession::AddRequestTaskInfo(sptr<SceneSession> sceneSession, int32_t
     if (needAddRequestInfo && sceneSession != nullptr) {
         SceneSessionManager::GetInstance().AddRequestTaskInfo(sceneSession, requestId);
     }
+}
+
+void JsSceneSession::ProcessRotationLockChangeRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    session->RegisterRotationLockChangeCallback([weakThis = wptr(this)](bool locked) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->OnRotationLockChange(locked);
+    });
+}
+ 
+void JsSceneSession::OnRotationLockChange(bool locked)
+{
+    TLOGI(WmsLogTag::WMS_ROTATION, "rotation lock change to: %{public}d", locked);
+    std::string info = "OnRotationLockChange, locked:" + std::to_string(locked);
+    taskScheduler_->PostMainThreadTask([weakThis = wptr(this), persistentId = persistentId_, locked, env = env_] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "jsSceneSession id:%{public}d has been destroyed", persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(ROTATION_LOCK_CHANGE_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value rotationLockChangeObj = CreateJsValue(env, locked);
+        napi_value argv[] = { rotationLockChangeObj };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    }, info);
 }
 } // namespace OHOS::Rosen

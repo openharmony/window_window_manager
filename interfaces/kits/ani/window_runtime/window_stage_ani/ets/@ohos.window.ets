@@ -1972,6 +1972,8 @@ export class WindowInternal implements Window {
     private native moveWindowToGlobalDisplay(nativeObj: long, x: int, y: int): void;
     private native clientToGlobalDisplay(nativeObj: long, winX: int, winY: int): Position;
     private native globalDisplayToClient(nativeObj: long, globalDisplayX: int, globalDisplayY: int): Position;
+    private native setRotationLocked(nativeObj: long, locked: boolean): void;
+    private native getRotationLocked(nativeObj: long): boolean;
 
     public static transferStatic(input: Any): Object {
       return WindowInternal.nativeTransferStatic(ESValue.wrap(input));
@@ -2862,6 +2864,22 @@ export class WindowInternal implements Window {
         });
       });
     }
+
+    public setRotationLocked(locked: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setRotationLocked(this.nativeObj, locked);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+    
+    public getRotationLocked(): boolean {
+      return this.getRotationLocked(this.nativeObj);
+    }
 }
 
 export interface Window {
@@ -2957,6 +2975,8 @@ export interface Window {
     moveWindowToGlobalDisplay(x: int, y: int): Promise<void>;
     clientToGlobalDisplay(winX: int, winY: int): Promise<Position>;
     globalDisplayToClient(globalDisplayX: int, globalDisplayY: int): Promise<Position>;
+    setRotationLocked(locked: boolean): Promise<void>;
+    getRotationLocked(): boolean;
 }
 
 export native function CreateWindowStage(scene: long): WindowStageInternal;

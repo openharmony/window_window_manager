@@ -152,6 +152,7 @@ using GetFbPanelWindowIdFunc =  std::function<WMError(uint32_t& windowId)>;
 using FindScenePanelRsNodeByZOrderFunc = std::function<std::shared_ptr<Rosen::RSNode>(DisplayId displayId,
     uint32_t targetZOrder)>;
 using ForceSplitFullScreenChangeCallback = std::function<void(uint32_t uid, bool isFullScreen)>;
+using NotifyRotationLockChangeFunc = std::function<void(bool locked)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -191,6 +192,7 @@ public:
         GetKeyboardOccupiedAreaWithRotationCallback onKeyboardRotationChange_;
         GetSceneSessionByIdCallback onGetSceneSessionByIdCallback_;
         NotifyFollowScreenChangeFunc onUpdateFollowScreenChange_;
+        NotifyRotationLockChangeFunc onRotationLockChange_;
     };
 
     // func for change window scene pattern property
@@ -599,6 +601,7 @@ public:
     WSError SetCurrentRotation(int32_t currentRotation);
     void RegisterFollowScreenChangeCallback(NotifyFollowScreenChangeFunc&& callback);
     WSError UpdateFollowScreenChange(bool isFollowScreenChange);
+    void RegisterRotationLockChangeCallback(NotifyRotationLockChangeFunc&& callback);
 
     /*
      * Window Animation
@@ -1221,6 +1224,8 @@ private:
             WSPropertyChangeAction action);
     WMError HandleActionUpdateWindowShadowEnabled(const sptr<WindowSessionProperty>& property,
             WSPropertyChangeAction action);
+    WMError HandleActionUpdateRotationLockChange(const sptr<WindowSessionProperty>& property,
+        WSPropertyChangeAction action);
     void HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property);
     void SetWindowFlags(const sptr<WindowSessionProperty>& property);
     void NotifySessionChangeByActionNotifyManager(const sptr<WindowSessionProperty>& property,

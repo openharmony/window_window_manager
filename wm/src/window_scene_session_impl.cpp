@@ -7348,6 +7348,46 @@ WMError WindowSceneSessionImpl::GetWindowPropertyInfo(WindowPropertyInfo& window
     return WMError::WM_OK;
 }
 
+WMError WindowSceneSessionImpl::SetRotationLocked(bool locked)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!windowSystemConfig_.IsPcWindow() && !windowSystemConfig_.IsPadWindow() &&
+        !windowSystemConfig_.IsPhoneWindow()) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "window is not pc, pad or phone, not supported.");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!(WindowHelper::IsSystemWindow(GetType()) && !WindowHelper::IsWindowInApp(GetType()))) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "is not system window.");
+        return WMError::WM_ERROR_INVALID_WINDOW_TYPE;
+    }
+ 
+    TLOGI(WmsLogTag::WMS_ROTATION, "set id %{public}u rotation lock %{public}d.", GetWindowId(), locked);
+    property_->SetRotationLocked(locked);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ROTATION_LOCK_CHANGE);
+}
+ 
+WMError WindowSceneSessionImpl::GetRotationLocked(bool& locked)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!windowSystemConfig_.IsPcWindow() && !windowSystemConfig_.IsPadWindow() &&
+        !windowSystemConfig_.IsPhoneWindow()) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "window is not pc, pad or phone, not supported.");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!(WindowHelper::IsSystemWindow(GetType()) && !WindowHelper::IsWindowInApp(GetType()))) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "is not system window.");
+        return WMError::WM_ERROR_INVALID_WINDOW_TYPE;
+    }
+ 
+    locked = property_->GetRotationLocked();
+    TLOGI(WmsLogTag::WMS_ROTATION, "get id %{public}u rotation lock %{public}d.", GetWindowId(), locked);
+    return WMError::WM_OK;
+}
+
 WMError WindowSceneSessionImpl::SetHookTargetElementInfo(const AppExecFwk::ElementName& elementName)
 {
     auto context = GetContext();
