@@ -5468,7 +5468,7 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
     auto clientProxy = GetClientProxy();
     if (clientProxy && option.missionIds_.size() > 0) {
         std::vector<uint64_t> surfaceNodeIds;
-        clientProxy->OnGetSurfaceNodeIdsFromMissionIdsChanged(option.missionIds_, surfaceNodeIds);
+        clientProxy->OnGetSurfaceNodeIdsFromMissionIdsChanged(option.missionIds_, surfaceNodeIds, true);
         option.missionIds_ = surfaceNodeIds;
     }
     ScreenId rsId = rsInterface_.CreateVirtualScreen(option.name_, option.width_,
@@ -10019,7 +10019,7 @@ void ScreenSessionManager::SetVirtualScreenBlackList(ScreenId screenId, std::vec
         return;
     }
     std::vector<uint64_t> surfaceNodeIdsToRS;
-    clientProxy->OnGetSurfaceNodeIdsFromMissionIdsChanged(windowIdList, surfaceNodeIdsToRS);
+    clientProxy->OnGetSurfaceNodeIdsFromMissionIdsChanged(windowIdList, surfaceNodeIdsToRS, true);
     if (!surfaceIdList.empty()) {
         for (auto surfaceId : surfaceIdList) {
             auto it = std::find(surfaceNodeIdsToRS.begin(), surfaceNodeIdsToRS.end(), surfaceId);
