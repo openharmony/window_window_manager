@@ -529,7 +529,6 @@ public:
     bool IsDeviceFeatureCapableFor(const std::string& feature) const override;
     bool IsDeviceFeatureCapableForFreeMultiWindow() const override;
     bool IsAnco() const override;
-    std::atomic<bool> defaultDensityEnabledStageConfig_;
 
     /*
      * Window Input Event
@@ -843,6 +842,7 @@ protected:
     std::unordered_set<std::string> containerColorList_;
     float lastSystemDensity_ = UNDEFINED_DENSITY;
     std::atomic<bool> isDefaultDensityEnabled_ = false;
+    std::atomic<bool> defaultDensityEnabledStageConfig_ = false;
     WSError NotifySystemDensityChange(float density);
     void RegisterWindowInspectorCallback();
     uint32_t GetTargetAPIVersionByApplicationInfo() const;
