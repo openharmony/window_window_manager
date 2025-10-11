@@ -471,7 +471,9 @@ HWTEST_F(MainSessionTest, OnRestoreMainWindow, TestSize.Level1)
     session->onRestoreMainWindowFunc_ = nullptr;
     EXPECT_EQ(WSError::WS_OK, session->OnRestoreMainWindow());
 
-    NotifyRestoreMainWindowFunc func = [] { return; };
+    NotifyRestoreMainWindowFunc func = [](bool isAppSupportPhoneInPc, int32_t callingPid, uint32_t callingToken) {
+        return;
+    };
     session->onRestoreMainWindowFunc_ = func;
     EXPECT_EQ(WSError::WS_OK, session->OnRestoreMainWindow());
 }
@@ -493,7 +495,10 @@ HWTEST_F(MainSessionTest, OnRestoreMainWindow02, TestSize.Level1)
     EXPECT_EQ(testSession->OnRestoreMainWindow(), WSError::WS_OK);
 
     auto callbackFlag = 1;
-    testSession->onRestoreMainWindowFunc_ = [&callbackFlag]() { callbackFlag += 1; };
+    testSession->onRestoreMainWindowFunc_ = [&callbackFlag](
+        bool isAppSupportPhoneInPc, int32_t callingPid, uint32_t callingToken) {
+        callbackFlag += 1;
+    };
     testSession->OnRestoreMainWindow();
     EXPECT_EQ(callbackFlag, 2);
 }

@@ -281,14 +281,19 @@ WSError MainSession::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool 
 
 WSError MainSession::OnRestoreMainWindow()
 {
-    PostTask([weakThis = wptr(this)] {
+    bool isAppSupportPhoneInPc = GetSessionProperty()->GetIsAppSupportPhoneInPc();
+    int32_t callingPid = IPCSkeleton::GetCallingPid();
+    uint32_t callingToken = IPCSkeleton::GetCallingTokenID();
+    TLOGI(WmsLogTag::WMS_MAIN, "isAppSupportPhoneInPc: %{public}d callingPid: %{public}d callingTokenId: %{public}u",
+        isAppSupportPhoneInPc, callingPid, callingToken);
+    PostTask([weakThis = wptr(this), isAppSupportPhoneInPc, callingPid, callingToken] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "session is null");
             return;
         }
         if (session->onRestoreMainWindowFunc_) {
-            session->onRestoreMainWindowFunc_();
+            session->onRestoreMainWindowFunc_(isAppSupportPhoneInPc, callingPid, callingToken);
         }
     }, __func__);
     return WSError::WS_OK;

@@ -3683,10 +3683,6 @@ WMError WindowSceneSessionImpl::Restore()
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "This is not PC or PcAppInPad, not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    if (property_->GetIsAppSupportPhoneInPc()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "This is PhoneAppSupportOnPc, not supported");
-        return WMError::WM_ERROR_INVALID_CALLING;
-    }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
     hostSession->OnRestoreMainWindow();
