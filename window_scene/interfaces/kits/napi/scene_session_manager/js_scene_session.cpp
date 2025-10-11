@@ -1069,21 +1069,23 @@ void JsSceneSession::ProcessRestoreMainWindowRegister()
         return;
     }
     const char* const funcName = __func__;
-    session->SetRestoreMainWindowCallback([weakThis = wptr(this), funcName] {
+    session->SetRestoreMainWindowCallback([weakThis = wptr(this), funcName]
+        (bool isAppSupportPhoneInPc, int32_t callingPid, uint32_t callingToken) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s jsSceneSession is null", funcName);
             return;
         }
-        jsSceneSession->RestoreMainWindow();
+        jsSceneSession->RestoreMainWindow(isAppSupportPhoneInPc, callingPid, callingToken);
     });
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "success");
 }
 
-void JsSceneSession::RestoreMainWindow()
+void JsSceneSession::RestoreMainWindow(bool isAppSupportPhoneInPc, int32_t callingPid, uint32_t callingToken)
 {
     const char* const funcName = __func__;
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, env = env_, funcName] {
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, env = env_, funcName,
+        isAppSupportPhoneInPc, callingPid, callingToken] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s jsSceneSession id:%{public}d has been destroyed",
@@ -1095,7 +1097,11 @@ void JsSceneSession::RestoreMainWindow()
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s jsCallBack is nullptr", funcName);
             return;
         }
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, {}, nullptr);
+        napi_value jsIsAppSupportPhoneInPc = CreateJsValue(env, isAppSupportPhoneInPc);
+        napi_value jsCallingPid = CreateJsValue(env, callingPid);
+        napi_value jsCallingToken = CreateJsValue(env, callingToken);
+        napi_value argv[] = {jsIsAppSupportPhoneInPc, jsCallingPid, jsCallingToken};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, funcName);
 }
