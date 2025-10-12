@@ -757,6 +757,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         UpdateColorMode();
         SetPcAppInpadSpecificSystemBarInvisible();
         SetPcAppInpadOrientationLandscape();
+        SetDefaultDensityEnabledValue(IsStageDefaultDensityEnabled());
     }
     UpdateAnimationSpeedIfEnabled();
     TLOGI(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, id:%{public}d], state:%{public}u, "
@@ -6271,7 +6272,7 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
-    if (defaultDensityEnabledGlobalConfig_ == enabled) {
+    if (IsStageDefaultDensityEnabled() == enabled) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "defaultDensityEnabledGlobalConfig not change");
         return WMError::WM_OK;
     }
@@ -6285,7 +6286,7 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
         hostSession->OnDefaultDensityEnabled(enabled);
     }
 
-    defaultDensityEnabledGlobalConfig_ = enabled;
+    defaultDensityEnabledStageConfig_.store(enabled);
     SetDefaultDensityEnabledValue(enabled);
 
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
@@ -7235,7 +7236,7 @@ WMError WindowSceneSessionImpl::SetCustomDensity(float density, bool applyToSubW
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u set density not change", GetWindowId());
         return WMError::WM_OK;
     }
-    defaultDensityEnabledGlobalConfig_ = false;
+    defaultDensityEnabledStageConfig_.store(false);
     SetDefaultDensityEnabledValue(false);
     customDensity_ = density;
     UpdateDensity();
