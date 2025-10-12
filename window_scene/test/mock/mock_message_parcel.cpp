@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <vector>
 
 #include "mock_message_parcel.h"
 #include "iremote_object.h"
 #include "message_parcel.h"
-#include "window_manager_hilog.h"
 namespace OHOS {
 namespace {
 bool g_setWriteBoolErrorFlag = false;
@@ -38,6 +38,7 @@ bool g_setReadInt64ErrorFlag = false;
 bool g_setReadFloatErrorFlag = false;
 bool g_setReadStringVectorErrorFlag = false;
 bool g_setReadStringErrorFlag = false;
+std::vector<int32_t> g_int32Cache;
 #ifdef ENABLE_MOCK_WRITE_STRING
 const static std::string ERROR_FLAG = "error";
 #endif
@@ -166,6 +167,11 @@ void MockMessageParcel::SetReadStringErrorFlag(bool flag)
 {
     g_setReadStringErrorFlag = flag;
 }
+
+void MockMessageParcel::AddInt32Cache(int32_t value)
+{
+    g_int32Cache.emplace_back(value);
+}
 }
 
 bool MessageParcel::WriteInterfaceToken(std::u16string name)
@@ -279,8 +285,12 @@ bool Parcel::ReadUint32(uint32_t& value)
 #ifdef ENABLE_MOCK_READ_INT32
 bool Parcel::ReadInt32(int32_t& value)
 {
-    if (g_setReadInt32ErrorFlag) {
+    if (g_setReadInt32ErrorFlag && g_int32Cache.size() == 0) {
         return false;
+    }
+    if (g_int32Cache.size() > 0) {
+        value = g_int32Cache[0];
+        g_int32Cache.erase(g_int32Cache.begin());
     }
     return true;
 }

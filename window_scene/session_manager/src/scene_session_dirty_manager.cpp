@@ -833,6 +833,31 @@ void SceneSessionDirtyManager::UpdateWindowFlags(DisplayId displayId, const sptr
     }
 }
 
+void SceneSessionDirtyManager::UpdateWindowFlagsForLockCursor(const sptr<SceneSession>& sceneSession,
+        std::shared_ptr<LockCursorInfo> lockCursorInfo, MMI::WindowInfo& windowInfo) const
+{
+    if (!sceneSession->IsFocused()) {
+        return;
+    }
+    if (lockCursorInfo == nullptr) {
+        return;
+    }
+    if (!lockCursorInfo->isActivating) {
+        return;
+    }
+    auto windowId = sceneSession->GetWindowId();
+    if (windowId != lockCursorInfo->windowId) {
+        TLOGW(WmsLogTag::WMS_EVENT, "LockCursor:Inconsistent focus IDs(WF:%{public}d-L:%{public}d)", windowId,
+        lockCursorInfo->windowId);
+        lockCursorInfo->isActivating = false;
+        return;
+    }
+    windowInfo.flags |= 0x08;
+    if (lockCursorInfo->isCursorFollowMovement) {
+        windowInfo.flags |= 0x10;
+    }
+}
+
 std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyManager::GetWindowInfo(
     const sptr<SceneSession>& sceneSession, const WindowAction& action,
     std::shared_ptr<LockCursorInfo> lockCursorInfo) const
@@ -907,18 +932,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     if (expandInputFlag & static_cast<uint32_t>(ExpandInputFlag::WINDOW_DISABLE_USER_ACTION)) {
         windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_DISABLE_USER_ACTION;
     }
-    if (sceneSession->IsFocused() && lockCursorInfo && lockCursorInfo->isActivating) {
-        if (windowId != lockCursorInfo->windowId) {
-            TLOGW(WmsLogTag::WMS_EVENT, "LockCursor:Inconsistent focus IDs(WF:%{public}d-L:%{public}d)", windowId,
-                lockCursorInfo->windowId);
-            lockCursorInfo->isActivating = false;
-        } else {
-            windowInfo.flags |= 0x08;
-            if (lockCursorInfo->isCursorFollowMovement) {
-                windowInfo.flags |= 0x10;
-            }
-        }
-    }
+    UpdateWindowFlagsForLockCursor(sceneSession, lockCursorInfo, windowInfo);
     UpdatePrivacyMode(sceneSession, windowInfo);
     windowInfo.uiExtentionWindowInfo = GetSecSurfaceWindowinfoList(sceneSession, windowInfo, transform);
     return {windowInfo, pixelMap};

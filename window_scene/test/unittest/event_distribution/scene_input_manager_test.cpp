@@ -977,6 +977,43 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdateForDisplayInfos, TestSize.Level1)
     ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
     ASSERT_FALSE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
 }
+
+/**
+ * @tc.name: LockCursor
+ * @tc.desc: LockCursor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneInputManagerTest, LockCursor, TestSize.Level1)
+{
+    // test lockCursorInfo_ is null
+    auto lockCursorInfo = SceneInputManager::GetInstance().lockCursorInfo_;
+    SceneInputManager::GetInstance().lockCursorInfo_ = nullptr;
+    SceneInputManager::GetInstance().LockCursor(1, false);
+    SceneInputManager::GetInstance().lockCursorInfo_ = lockCursorInfo;
+
+    // test LockCursor normal function
+    SceneInputManager::GetInstance().LockCursor(1, false);
+    EXPECT_EQ(SceneInputManager::GetInstance().lockCursorInfo_->isActivating, true);
+}
+
+/**
+ * @tc.name: UnLockCursor
+ * @tc.desc: UnLockCursor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneInputManagerTest, UnLockCursor, TestSize.Level1)
+{
+    // test lockCursorInfo_ is null
+    auto lockCursorInfo = SceneInputManager::GetInstance().lockCursorInfo_;
+    SceneInputManager::GetInstance().lockCursorInfo_ = nullptr;
+    SceneInputManager::GetInstance().UnLockCursor(1);
+    SceneInputManager::GetInstance().lockCursorInfo_ = lockCursorInfo;
+
+    // test LockCursor normal function
+    SceneInputManager::GetInstance().UnLockCursor(1);
+    EXPECT_EQ(SceneInputManager::GetInstance().lockCursorInfo_->isActivating, false);
+}
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
