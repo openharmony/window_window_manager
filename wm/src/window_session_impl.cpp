@@ -1981,7 +1981,7 @@ void WindowSessionImpl::HideTitleButton(bool& hideSplitButton, bool& hideMaximiz
     // compatible mode adapt to back, will show its button
     bool isAdaptToBackButton = property_->IsAdaptToBackButton();
     uiContent->OnContainerModalEvent(SCB_BACK_VISIBILITY, isAdaptToBackButton ? "true" : "false");
-    bool fullScreenStart = property->IsFullScreenStart() &&
+    bool fullScreenStart = property_->IsFullScreenStart() &&
         (window->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
     uiContent->OnContainerModalEvent(SCB_COMPATIBLE_MAXIMIZE_BTN_RES, fullScreenStart ? "true" : "false");
 }
