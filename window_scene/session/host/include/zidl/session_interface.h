@@ -57,9 +57,10 @@ public:
      * This interface will take effect after touch down event.
      *
      * @param event Indicates the {@link SessionEvent}
+     * @param param Indicates the {@link SessionEventParam}
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError OnSessionEvent(SessionEvent event) { return WSError::WS_OK; }
+    virtual WSError OnSessionEvent(SessionEvent event, const SessionEventParam& param = {}) { return WSError::WS_OK; }
 
     /**
      * @brief Receive session event from application.

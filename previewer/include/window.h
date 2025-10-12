@@ -584,6 +584,18 @@ public:
 
     virtual WMError Maximize(MaximizePresentation present) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
+    /**
+     * @brief Maximize the window with the specified presentation mode and waterfall resident state.
+     *
+     * @param presentation The presentation mode used for window layout when maximizing.
+     * @param waterfallState The waterfall resident state to apply when maximizing.
+     * @return WMError::WM_OK on success, or appropriate error code on failure.
+     */
+    virtual WMError Maximize(MaximizePresentation presentation, WaterfallResidentState waterfallState)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
     virtual WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
