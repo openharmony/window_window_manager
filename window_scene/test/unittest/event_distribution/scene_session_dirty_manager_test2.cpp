@@ -753,6 +753,44 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithVoiceInputPrefix, TestS
  
     EXPECT_EQ(result.first.windowNameType, 2);
 }
+
+/**
+ * @tc.name: UpdateWindowFlagsForLockCursor
+ * @tc.desc: UpdateWindowFlagsForLockCursor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest2, UpdateWindowFlagsForLockCursor, TestSize.Level2)
+{
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->UpdateFocus(false);
+    MMI::WindowInfo windowInfo;
+    manager_->UpdateWindowFlagsForLockCursor(session, nullptr, windowInfo);
+    EXPECT_EQ(windowInfo.flags, 0);
+
+    session->UpdateFocus(true);
+    manager_->UpdateWindowFlagsForLockCursor(session, nullptr, windowInfo);
+    EXPECT_EQ(windowInfo.flags, 0);
+
+    auto lockCursorInfo = std::make_shared<LockCursorInfo>();
+    lockCursorInfo->isActivating = false;
+    manager_->UpdateWindowFlagsForLockCursor(session, lockCursorInfo, windowInfo);
+    EXPECT_EQ(windowInfo.flags, 0);
+
+    session->SetSessionInfoPersistentId(1);
+    lockCursorInfo->windowId = 2;
+    manager_->UpdateWindowFlagsForLockCursor(session, lockCursorInfo, windowInfo);
+    EXPECT_FALSE(lockCursorInfo->isActivating);
+
+    session->SetSessionInfoPersistentId(3);
+    lockCursorInfo->windowId = 3;
+    lockCursorInfo->isCursorFollowMovement = false;
+    manager_->UpdateWindowFlagsForLockCursor(session, lockCursorInfo, windowInfo);
+    EXPECT_EQ(windowInfo.flags, 8);
+
+    lockCursorInfo->isCursorFollowMovement = true;
+    manager_->UpdateWindowFlagsForLockCursor(session, lockCursorInfo, windowInfo);
+    EXPECT_EQ(windowInfo.flags, 24);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

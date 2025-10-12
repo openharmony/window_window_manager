@@ -4269,7 +4269,7 @@ WMError SceneSessionManagerProxy::SendCommonEvent(int32_t command, const std::ve
         TLOGE(WmsLogTag::WMS_EVENT, "Send request failed.code: %{public}d", sendRet);
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    int32_t ret;
+    int32_t ret = 0;
     if (!reply.ReadInt32(ret)) {
         TLOGE(WmsLogTag::WMS_EVENT, "Read reply failed.");
         return WMError::WM_ERROR_IPC_FAILED;
