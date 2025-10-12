@@ -115,6 +115,7 @@ const std::string SET_SUB_WINDOW_SOURCE_CB = "setSubWindowSource";
 const std::string ANIMATE_TO_CB = "animateToTargetProperty";
 const std::string BATCH_PENDING_SCENE_ACTIVE_CB = "batchPendingSceneSessionsActivation";
 const std::string SCENE_OUTLINE_PARAMS_CHANGE_CB = "sceneOutlineParamsChange";
+const std::string RESTART_APP_CB = "restartApp";
 const std::string ROTATION_LOCK_CHANGE_CB = "rotationLockChange";
 
 constexpr int ARG_COUNT_1 = 1;
@@ -223,6 +224,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {FLOATING_BALL_STOP_CB,                 ListenerFuncType::FLOATING_BALL_STOP_CB},
     {FLOATING_BALL_RESTORE_MAIN_WINDOW_CB,      ListenerFuncType::FLOATING_BALL_RESTORE_MAIN_WINDOW_CB},
     {SCENE_OUTLINE_PARAMS_CHANGE_CB,        ListenerFuncType::SCENE_OUTLINE_PARAMS_CHANGE_CB},
+    {RESTART_APP_CB,                        ListenerFuncType::RESTART_APP_CB},
     {ROTATION_LOCK_CHANGE_CB,               ListenerFuncType::ROTATION_LOCK_CHANGE_CB},
 };
 
@@ -3251,6 +3253,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::SCENE_OUTLINE_PARAMS_CHANGE_CB):
             ProcessSceneOutlineParamsChangeRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::RESTART_APP_CB):
+            ProcessRestartAppRegister();
             break;
         case static_cast<uint32_t>(ListenerFuncType::ROTATION_LOCK_CHANGE_CB):
             ProcessRotationLockChangeRegister();
@@ -8358,6 +8363,72 @@ void JsSceneSession::AddRequestTaskInfo(sptr<SceneSession> sceneSession, int32_t
     if (needAddRequestInfo && sceneSession != nullptr) {
         SceneSessionManager::GetInstance().AddRequestTaskInfo(sceneSession, requestId);
     }
+}
+
+void JsSceneSession::ProcessRestartAppRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    session->SetRestartAppListener([weakThis = wptr(this)](const SessionInfo& info) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->OnRestartApp(info);
+    });
+}
+
+void JsSceneSession::OnRestartApp(const SessionInfo& info)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
+    auto task = [weakThis = wptr(this), info, persistentId = persistentId_, env = env_] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "OnRestartApp JsSceneSession id:%{public}d has been destroyed", persistentId);
+            return;
+        }
+        auto jsCallback = jsSceneSession->GetJSCallback(RESTART_APP_CB);
+        if (!jsCallback) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
+            return;
+        }
+        std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
+        if (!info.isRestartApp_) {
+            SessionIdentityInfo identityInfo = { info.bundleName_, info.moduleName_, info.abilityName_,
+                info.appIndex_, info.appInstanceKey_, info.windowType_, info.isAtomicService_,
+                info.specifiedFlag_ };
+            sptr<SceneSession> sceneSession =
+                SceneSessionManager::GetInstance().GetSceneSessionByIdentityInfo(identityInfo);
+            TLOGNI(WmsLogTag::WMS_LIFE, "find the scene session by sessionInfo");
+            if (!sceneSession)
+            {
+                TLOGNI(WmsLogTag::WMS_LIFE, "not find the scene session by sessionInfo");
+                sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
+            } else {
+                sceneSession->NotifyRestart();
+            }
+            if (!sceneSession)
+            {
+                TLOGNE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr");
+                return;
+            }
+            sceneSession->SetSessionInfoCallerPersistentId(info.callerPersistentId_);
+            sceneSession->SetRestartApp(true);
+            sessionInfo = std::make_shared<SessionInfo>(sceneSession->GetSessionInfo());
+        }
+        napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
+        if (jsSessionInfo == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "target session info is nullptr");
+            return;
+        }
+        napi_value argv[] = {jsSessionInfo};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    }
+    taskScheduler_->PostMainThreadTask(task, __func__);
 }
 
 void JsSceneSession::ProcessRotationLockChangeRegister()

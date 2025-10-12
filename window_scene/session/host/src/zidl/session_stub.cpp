@@ -329,6 +329,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetFrameRectForPartialZoomIn(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_IS_FULL_SCREEN_IN_FORCE_SPLIT):
             return HandleNotifyIsFullScreenInForceSplitMode(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RESTART_APP):
+            return HandleRestartApp(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -2392,6 +2394,22 @@ int SessionStub::HandleNotifyIsFullScreenInForceSplitMode(MessageParcel& data, M
         return ERR_INVALID_DATA;
     }
     WSError errCode = NotifyIsFullScreenInForceSplitMode(isFullScreen);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleRestartApp(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "HandleRestartApp");
+    std::shared_ptr<AAFwk::Want> want = std::shared_ptr<AAFwk::Want>(data.ReadParcelable<AAFwk::Want>());
+    if (!want) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read want error");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = RestartApp(want);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_COMPAT, "write errCode fail.");
         return ERR_INVALID_DATA;

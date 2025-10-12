@@ -2127,6 +2127,70 @@ WSError SceneSession::RaiseToAppTop()
     }, __func__);
 }
 
+WSError SceneSession::RestartApp(const std::shared_ptr<AAFwk::Want>& want)
+{
+    if (want == nullptr)
+    {
+        TLOGE(WmsLogTag::WMS_LIFE, "want is null");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    return PostSyncTask([weakThis = wptr(this), want, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (!SessionHelper::IsMainWindow(session->GetWindowType())) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is not main window, id:%{public}d", session->GetPersistentId());
+            return WSError::WS_ERROR_INVALID_SESSION;
+        }
+        if (!session->IsSessionForeground()) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is not foreground, id:%{public}d", session->GetPersistentId());
+            return WSError::WS_ERROR_INVALID_PERMISSION;
+        }
+        if (session->sessionInfo_.bundleName_ != want->GetElement().GetBundleName()) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "not the same app, ability:%{public}s, target:%{public}s",
+                session->sessionInfo_.bundleName_.c_str(), want->GetElement().GetBundleName().c_str());
+            return WSError::WS_ERROR_INVALID_OPERATION;
+        }
+        if (!session->GetAbilityInfoByWant(want)) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "ability info is null, ability name:%{public}s",
+                want->GetElement()GetBundleName().c_str());
+            return WSError::WS_ERROR_INVALID_OPERATION;
+        }
+        SessionInfo info = GetSessionInfoByWant(want, session);
+        if (session->restartAppFun_)
+        {
+            session->restartAppFun_(info);
+        }
+        return WSError::WS_OK;
+    }, __func__);
+}
+
+SessionInfo SceneSession::GetSessionInfoByWant(const std::shared_ptr<AAFwk::Want>& want,
+    const sptr<SceneSession>& session)
+{
+    SessionInfo info;
+    if (session->sessionInfo_.moduleName_ != want->GetElement().GetModuleName()
+        && session->sessionInfo_.abilityName_ != want->GetElement().GetAbilityName()) {
+        session->sessionInfo_.isRestartApp_ = true;
+        session->sessionInfo_.callerPersistentId_ = INVALID_SESSION_ID;
+        info = session->sessionInfo_;
+        session->NotifyRestart();
+    } else {
+        info.abilityName_ = want->GetElement().GetAbilityName();
+        info.bundleName_ = want->GetElement().GetBundleName();
+        info.moduleName_ = want->GetElement().GetModuleName();
+        int32_t appCloneIndex = want->GetIntParam(APP_CLONE_INDEX, 0);
+        info.appIndex_ = appCloneIndex == 0 ? want->GetIntParam(DLP_INDEX, 0) : appCloneIndex;
+        info.appInstanceKey_ = want->GetStringParam(AAFwK::Want::APP_INSTANCE_KEY);
+        TLOGI(WmsLogTag::WMS_LIFE, "the new session info, appindex:%{public}d, appInstanceKey:%{public}s",
+            info.appIndex_, info.appInstanceKey_.c_str());
+        info.callerPersistentId_ = session->GetPersistentId();
+    }
+    return info;
+}
+
 /** @note @window.hierarchy */
 WSError SceneSession::RaiseAboveTarget(int32_t subWindowId)
 {
@@ -7833,6 +7897,16 @@ sptr<SceneSession> SceneSession::GetSceneSessionById(int32_t sessionId) const
     }
     return specificCallback_->onGetSceneSessionByIdCallback_(sessionId);
 }
+
+bool SceneSession::GetAbilityInfoByWant(const std::shared_ptr<AAFwK::Want>& want) const
+{
+    if (specificCallback_ == nullptr || specificCallback_->onGetAbilityInfoByWantCallback_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "specificCallback or onGetAbilityInfoByWantCallback is null");
+        return nullptr;
+    }
+    return specificCallback_->onGetAbilityInfoByWantCallback_(want);
+}
+
 
 void SceneSession::SetWindowAnchorInfoChangeFunc(NotifyWindowAnchorInfoChangeFunc&& func)
 {

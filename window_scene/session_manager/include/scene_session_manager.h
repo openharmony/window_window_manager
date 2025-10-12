@@ -224,6 +224,7 @@ public:
     void SetRootSceneContext(const std::weak_ptr<AbilityRuntime::Context>& contextWeak);
     sptr<RootSceneSession> GetRootSceneSession();
     sptr<SceneSession> GetSceneSession(int32_t persistentId);
+    bool GetAbilityInfoByWant(const std::shared<AAFwk::Want>& want);
     sptr<SceneSession> GetMainParentSceneSession(int32_t persistentId,
         const std::map<int32_t, sptr<SceneSession>>& sessionMap);
     void PostFlushWindowInfoTask(FlushWindowInfoTask&& task, const std::string& taskName, const int delayTime);
@@ -946,6 +947,7 @@ private:
     int32_t StartUIAbilityBySCBTimeoutCheck(const sptr<SceneSession>& sceneSession,
         const sptr<AAFwk::SessionInfo>& abilitySessionInfo,
         const uint32_t& windowStateChangeReason, bool& isColdStart);
+    void ResetSessionInfoAfterStartUIAbility(const sptr<SceneSession>& sceneSession);
     sptr<SceneSession> GetHookedSessionByModuleName(const SessionInfo& sessionInfo);
     void RegisterHookSceneSessionActivationFunc(const sptr<SceneSession>& sceneSession);
     void SetSessionInfoStartWindowType(const sptr<SceneSession>& sceneSession);

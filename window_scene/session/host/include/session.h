@@ -118,6 +118,7 @@ using HasRequestedVsyncFunc = std::function<WSError(bool& hasRequestedVsync)>;
 using RequestNextVsyncWhenModeChangeFunc = std::function<WSError(const std::shared_ptr<VsyncCallback>& vsyncCallback)>;
 using NotifyClearSubSessionFunc = std::function<void(const int32_t subPersistentId)>;
 using OutlineParamsChangeCallbackFunc = std::function<void(bool enabled, const OutlineStyleParams& outlineStyleParams)>;
+using NotifyRestartAppFunc = std::function<void(const SessionInfo& info)>;
 class ILifecycleListener {
 public:
     virtual void OnActivation() {}
@@ -138,6 +139,7 @@ public:
     virtual void OnAppRemoveStartingWindow() {}
     virtual void OnUpdateSnapshotWindow() {}
     virtual void OnPreLoadStartingWindowFinished() {}
+    virtual void OnRestart() {}
 };
 
 enum class LifeCycleTaskType : uint32_t {
@@ -209,6 +211,7 @@ public:
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker);
     WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
     std::string GetSessionLabel() const;
+    void SetRestartAppListener(NotifyRestartAppFunc& func);
 
     /*
      * App Use Control
@@ -238,6 +241,7 @@ public:
     void NotifyRemoveSnapshot();
     void NotifyUpdateSnapshotWindow();
     void NotifyPreLoadStartingWindowFinished();
+    void NotifyRestart();
     void NotifyExtensionDied() override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
     void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
@@ -351,6 +355,8 @@ public:
     WSRect GetLayoutRect() const;
     bool GetSkipSelfWhenShowOnVirtualScreen() const;
     DisplayId GetDisplayId() const { return GetSessionProperty()->GetDisplayId(); }
+    void SetRestartApp(bool restartApp);
+    bool GetRestartApp();
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
@@ -906,6 +912,7 @@ protected:
     NofitySessionLabelAndIconUpdatedFunc updateSessionLabelAndIconFunc_;
     NotifySessionGetTargetOrientationConfigInfoFunc sessionGetTargetOrientationConfigInfoFunc_;
     NotifyClearSubSessionFunc clearSubSessionFunc_;
+    NotifyRestartAppFunc restartAppFunc_;
 
     /*
      * Window Rotate Animation
