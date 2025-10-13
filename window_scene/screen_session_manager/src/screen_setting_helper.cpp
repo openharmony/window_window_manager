@@ -819,10 +819,10 @@ bool ScreenSettingHelper::GetRotationCorrectionExemptionList(std::vector<std::st
     return true;
 }
  
-void ScreenSettingHelper::GetCorrectionExemptionListFromJson(const std::string& value,
+void ScreenSettingHelper::GetCorrectionExemptionListFromJson(const std::string& exemptionListJsonStr,
     std::vector<std::string>& exemptionApps)
 {
-    nlohmann::json exemptionListJson = nlohmann::json::parse(value, nullptr, false);
+    nlohmann::json exemptionListJson = nlohmann::json::parse(exemptionListJsonStr, nullptr, false);
     if (exemptionListJson.is_discarded()) {
         TLOGE(WmsLogTag::DMS, "parse json failed");
         return;

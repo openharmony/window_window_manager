@@ -77,7 +77,7 @@ public:
     static void UnregisterRotationCorrectionExemptionListObserver();
     static bool GetRotationCorrectionExemptionList(std::vector<std::string>& exemptionApps,
         const std::string& key = SETTING_COMPATIBLE_APP_STRATEGY_KEY);
-    static void GetCorrectionExemptionListFromJson(const std::string& exemptionListJson,
+    static void GetCorrectionExemptionListFromJson(const std::string& exemptionListJsonStr,
         std::vector<std::string>& exemptionApps);
     static std::string GetJsonValueString(const nlohmann::json& payload, const std::string& key);
     static int32_t GetJsonValueNumber(const nlohmann::json& payload, const std::string& key);
