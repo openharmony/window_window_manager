@@ -4223,7 +4223,7 @@ WMError SceneSessionManagerProxy::UpdateOutline(const sptr<IRemoteObject>& remot
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    int32_t ret;
+    int32_t ret = 0;
     if (!reply.ReadInt32(ret)) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Read reply failed.");
         return WMError::WM_ERROR_IPC_FAILED;

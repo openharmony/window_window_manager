@@ -18187,7 +18187,7 @@ void SceneSessionManager::DeleteAllOutline(const sptr<IRemoteObject>& remoteObje
     }
     std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
     {
-        std::lock_guard<std::shared_mutex> lock(sceneSessionMapMutex_);
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         sceneSessionMapCopy = sceneSessionMap_;
     }
     for (const auto& [persistentId, session] : sceneSessionMapCopy) {
