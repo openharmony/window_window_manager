@@ -26,6 +26,7 @@
 #include "screen_edid_parse.h"
 #include "setting_observer.h"
 #include "dm_common.h"
+#include "nlohmann/json.hpp"
 
 namespace OHOS {
 namespace Rosen {
@@ -72,6 +73,15 @@ public:
         const std::string& key = SETTING_RESOLUTION_EFFECT_KEY);
     static void RegisterSettingResolutionEffectObserver(SettingObserver::UpdateFunc func);
     static void UnregisterSettingResolutionEffectObserver();
+    static void RegisterRotationCorrectionExemptionListObserver(SettingObserver::UpdateFunc func);
+    static void UnregisterRotationCorrectionExemptionListObserver();
+    static bool GetRotationCorrectionExemptionList(std::vector<std::string>& exemptionApps,
+        const std::string& key = SETTING_COMPATIBLE_APP_STRATEGY_KEY);
+    static void GetCorrectionExemptionListFromJson(const std::string& exemptionListJson,
+        std::vector<std::string>& exemptionApps);
+    static std::string GetJsonValueString(const nlohmann::json& payload, const std::string& key);
+    static int32_t GetJsonValueNumber(const nlohmann::json& payload, const std::string& key);
+    static bool GetJsonValueBool(const nlohmann::json& payload, const std::string& key);
 private:
     static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};
     static const constexpr char* SETTING_CAST_KEY {"huaweicast.data.privacy_projection_state"};
@@ -81,6 +91,7 @@ private:
     static const constexpr char* SETTING_EXTEND_DPI_KEY {"user_set_dpi_extend"};
     static const constexpr char* SETTING_DURING_CALL_KEY {"during_call_state"};
     static const constexpr char* SETTING_RESOLUTION_EFFECT_KEY {"user_set_resolution_effect_select"};
+    static const constexpr char* SETTING_COMPATIBLE_APP_STRATEGY_KEY {"COMPATIBLE_APP_STRATEGY"};
     static const constexpr uint32_t BASE_TEN = 10;
     static sptr<SettingObserver> dpiObserver_;
     static sptr<SettingObserver> castObserver_;
@@ -89,6 +100,7 @@ private:
     static sptr<SettingObserver> extendScreenDpiObserver_;
     static sptr<SettingObserver> duringCallStateObserver_;
     static sptr<SettingObserver> resolutionEffectObserver_;
+    static sptr<SettingObserver> correctionExemptionListObserver_;
 };
 } // namespace Rosen
 } // namespace OHOS
