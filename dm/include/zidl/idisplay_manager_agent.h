@@ -43,6 +43,7 @@ enum class DisplayManagerAgentType : uint32_t {
     SCREEN_MAGNETIC_STATE_CHANGED_LISTENER,
     SCREEN_MODE_CHANGE_EVENT_LISTENER,
     ABNORMAL_SCREEN_CONNECT_CHANGE_LISTENER,
+    BRIGHTNESS_INFO_CHANGED_LISTENER,
     // add listener before
     DISPLAY_MANAGER_MAX_AGENT_TYPE,
 };
@@ -73,6 +74,7 @@ public:
         TRANS_ID_ON_SCREEN_MAGNETIC_STATE_CHANGED,
         TRANS_ID_ON_SCREEN_MODE_CHANGED,
         TRANS_ID_NOTIFY_ABNORMAL_SCREEN_CONNECT_CHANGED,
+        TRANS_ID_ON_BRIGHTNESS_INFO_CHANGED,
     };
     virtual void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status) = 0;
     virtual void NotifyDisplayStateChanged(DisplayId id, DisplayState state) = 0;
@@ -96,6 +98,7 @@ public:
     virtual void NotifyScreenMagneticStateChanged(bool isMagneticState) = 0;
     virtual void NotifyScreenModeChange(const std::vector<sptr<ScreenInfo>>& screenInfos) = 0;
     virtual void NotifyAbnormalScreenConnectChange(ScreenId screenId) = 0;
+    virtual void NotifyBrightnessInfoChanged(ScreenId screenId, const ScreenBrightnessInfo& info) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

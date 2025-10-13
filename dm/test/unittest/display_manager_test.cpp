@@ -1747,6 +1747,22 @@ HWTEST_F(DisplayManagerTest, RegisterScreenMagneticStateListener, TestSize.Level
 }
 
 /**
+ * @tc.name: RegisterBrightnessInfoListener
+ * @tc.desc: RegisterBrightnessInfoListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, RegisterBrightnessInfoListener, TestSize.Level1)
+{
+    sptr<DisplayManager::IBrightnessInfoListener> listener;
+    auto ret = DisplayManager::GetInstance().RegisterBrightnessInfoListener(listener);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+    listener = new DisplayManager::IBrightnessInfoListener();
+    ret = DisplayManager::GetInstance().RegisterBrightnessInfoListener(listener);
+    ASSERT_EQ(ret, DisplayManager::GetInstance().pImpl_->RegisterBrightnessInfoListener(listener));
+    listener.clear();
+}
+
+/**
  * @tc.name: ImplRegisterScreenMagneticStateListener
  * @tc.desc: ImplRegisterScreenMagneticStateListener fun
  * @tc.type: FUNC
@@ -1780,6 +1796,35 @@ HWTEST_F(DisplayManagerTest, UnregisterScreenMagneticStateListener, TestSize.Lev
     ret = DisplayManager::GetInstance().UnregisterScreenMagneticStateListener(listener);
     ASSERT_EQ(ret, DisplayManager::GetInstance().pImpl_->UnregisterScreenMagneticStateListener(listener));
     listener.clear();
+}
+
+/**
+ * @tc.name: UnregisterBrightnessInfoListener
+ * @tc.desc: UnregisterBrightnessInfoListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, UnregisterBrightnessInfoListener, TestSize.Level1)
+{
+    sptr<DisplayManager::IBrightnessInfoListener> listener;
+    auto ret = DisplayManager::GetInstance().UnregisterBrightnessInfoListener(listener);
+    EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+    listener = new DisplayManager::IBrightnessInfoListener();
+    ret = DisplayManager::GetInstance().UnregisterBrightnessInfoListener(listener);
+    EXPECT_EQ(ret, DisplayManager::GetInstance().pImpl_->UnregisterBrightnessInfoListener(listener));
+    listener.clear();
+
+    DisplayManager::GetInstance().pImpl_->brightnessInfoListeners_.clear();
+    sptr<DisplayManager::IBrightnessInfoListener> listener1 = new DisplayManager::IBrightnessInfoListener();
+    DisplayManager::GetInstance().RegisterBrightnessInfoListener(listener1);
+    sptr<DisplayManager::IBrightnessInfoListener> listener2 = new DisplayManager::IBrightnessInfoListener();
+    DisplayManager::GetInstance().RegisterBrightnessInfoListener(listener2);
+
+    ret = DisplayManager::GetInstance().pImpl_->UnregisterBrightnessInfoListener(listener1);
+    EXPECT_NE(DisplayManager::GetInstance().pImpl_->brightnessInfoListenerAgent_, nullptr);
+    EXPECT_EQ(ret, DMError::DM_OK);
+    ret = DisplayManager::GetInstance().pImpl_->UnregisterBrightnessInfoListener(listener1);
+    EXPECT_EQ(DisplayManager::GetInstance().pImpl_->brightnessInfoListenerAgent_, nullptr);
+    EXPECT_EQ(ret, DMError::DM_OK);
 }
 
 /**
@@ -2813,6 +2858,19 @@ HWTEST_F(DisplayManagerTest, SetVirtualScreenAsDefault, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetBrightnessInfo
+ * @tc.desc: Test GetBrightnessInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetBrightnessInfo, TestSize.Level1)
+{
+    uint64_t screenId = 0;
+    ScreenBrightnessInfo brightnessInfo;
+    DMError res = SingletonContainer::Get<DisplayManager>().GetBrightnessInfo(screenId, brightnessInfo);
+    EXPECT_EQ(res, DMError::DM_OK);
+}
+
+/**
  * @tc.name: NotifyAvailableAreaChanged
  * @tc.desc: Test NotifyAvailableAreaChanged
  * @tc.type: FUNC
@@ -2827,6 +2885,20 @@ HWTEST_F(DisplayManagerTest, NotifyAvailableAreaChanged, TestSize.Level1)
     displayManagerImpl->NotifyAvailableAreaChanged(rect, displayId);
     displayManagerImpl->availableAreaListenersMap_.insert({displayId, availableAreaSet});
     displayManagerImpl->NotifyAvailableAreaChanged(rect, displayId);
+}
+
+/**
+ * @tc.name: NotifyBrightnessInfoChanged
+ * @tc.desc: Test NotifyBrightnessInfoChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, NotifyBrightnessInfoChanged, TestSize.Level1)
+{
+    DisplayId displayId = 1234;
+    ScreenBrightnessInfo info;
+    auto displayManagerImpl = DisplayManager::GetInstance().pImpl_;
+    ASSERT_NE(displayManagerImpl, nullptr);
+    displayManagerImpl->NotifyBrightnessInfoChanged(displayId, info);
 }
 
 /**

@@ -2118,6 +2118,53 @@ DMError ScreenSessionManagerProxy::GetScreenSupportedColorGamuts(ScreenId screen
     return ret;
 }
 
+DMError ScreenSessionManagerProxy::GetBrightnessInfo(DisplayId displayId, ScreenBrightnessInfo& brightnessInfo)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGW(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(displayId))) {
+        TLOGW(WmsLogTag::DMS, "Write displayId failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_GET_SCREEN_BRIGHTNESS_INFO),
+        data, reply, option) != ERR_NONE) {
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::DMS, "Read ret failed!");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (static_cast<DMError>(ret) != DMError::DM_OK) {
+        return static_cast<DMError>(ret);
+    }
+    if (!reply.ReadFloat(brightnessInfo.currentHeadroom)) {
+        TLOGE(WmsLogTag::DMS, "Read currentHeadroom failed!");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (!reply.ReadFloat(brightnessInfo.maxHeadroom)) {
+        TLOGE(WmsLogTag::DMS, "Read maxHeadroom failed!");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (!reply.ReadFloat(brightnessInfo.sdrNits)) {
+        TLOGE(WmsLogTag::DMS, "Read sdrNits failed!");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return DMError::DM_OK;
+}
+
 DMError ScreenSessionManagerProxy::GetPhysicalScreenIds(std::vector<ScreenId>& screenIds)
 {
     sptr<IRemoteObject> remote = Remote();
