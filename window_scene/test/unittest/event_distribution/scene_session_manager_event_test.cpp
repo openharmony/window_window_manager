@@ -172,6 +172,13 @@ HWTEST_F(SceneSessionManagerEventTest, UnLockCursor, TestSize.Level1)
     datas.emplace_back(1);
     ret = ssm_->UnLockCursor(datas);
     EXPECT_EQ(ret, WMError::WM_OK);
+
+    // test normal process(repeat)
+    datas.clear();
+    datas.emplace_back(UNLOCK_CURSOR_LENGTH);
+    datas.emplace_back(1);
+    ret = ssm_->UnLockCursor(datas);
+    EXPECT_EQ(ret, WMError::WM_OK);
 }
 } // namespace
 } // namespace Rosen
