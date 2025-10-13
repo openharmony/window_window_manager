@@ -46,6 +46,7 @@ void SceneSessionManagerStubEventTest::TearDownTestCase()
 void SceneSessionManagerStubEventTest::SetUp()
 {
     stub_ = sptr<SceneSessionManager>::MakeSptr();
+    SceneSessionManager::GetInstance().isUserBackground_ = true;
 }
 
 void SceneSessionManagerStubEventTest::TearDown()
