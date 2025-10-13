@@ -1638,7 +1638,7 @@ void ScreenSessionManager::HandleScreenDisconnectEvent(sptr<ScreenSession> scree
     }
     ScreenId matchscreenId = screenSession->GetScreenId();
     if (IsConcurrentUser()) {
-        std::map<int32_t, userScreenInfo> userScreenMap;
+        std::map<int32_t, UserScreenInfo> userScreenMap;
         {
             std::lock_guard<std::mutex> lock(userScreenMapMutex_);
             userScreenMap = userScreenMap_;
@@ -1671,7 +1671,7 @@ void ScreenSessionManager::HandleScreenDisconnectEvent(sptr<ScreenSession> scree
     HandlePhysicalMirrorDisconnect(screenSession, screenId, phyMirrorEnable);
     if (IsConcurrentUser()) {
         ScreenId displayId = screenSession->GetDisplayId();
-        std::map<int32_t, userScreenInfo> tempUserScreenMap;
+        std::map<int32_t, UserScreenInfo> tempUserScreenMap;
         {
             std::lock_guard<std::mutex> lock(userScreenMapMutex_);
             tempUserScreenMap = userScreenMap_;
@@ -2222,29 +2222,34 @@ DisplayId ScreenSessionManager::GetFakeDisplayId(sptr<ScreenSession> screenSessi
 std::vector<DisplayId> ScreenSessionManager::GetAllDisplayIds(int32_t userId)
 {
     TLOGD(WmsLogTag::DMS, "enter");
-    if (IsConcurrentUser()) {
-        if (userId == CONCURRENT_USER_ID_DEFAULT) {
-            userId = GetUserIdByCallingUid();
-            TLOGI(WmsLogTag::DMS, "concurrentuser open, get userId %{public}u by calling Uid", userId);
-        }
-    } else {
+    ScreenId filterScreenId = INVALID_SCREEN_ID;
+    if (!IsConcurrentUser()) {
         userId = USER_ID_DEFAULT;
     }
-    ScreenId filterScreenId = INVALID_SCREEN_ID;
-    bool onlyOne = false;
-    if (userId != USER_ID_DEFAULT) {
+    if (IsConcurrentUser() && userId == CONCURRENT_USER_ID_DEFAULT) {
+        userId = GetUserIdByCallingUid();
         filterScreenId = GetUserDisplayId(userId);
-        // just one screen, need to filter
-        onlyOne = true;
+        TLOGI(WmsLogTag::DMS, "concurrentuser open, userId: %{public}u, filterScreenId: %{public}" PRIu64"",
+              userId, filterScreenId);
     }
     std::vector<DisplayId> res;
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (const auto& [screenId, screenSession] : screenSessionMap_) {
-        if (filterScreenId != INVALID_SCREEN_ID && screenId != filterScreenId) {
-            continue;
-        }
         if (screenSession == nullptr) {
             TLOGE(WmsLogTag::DMS, "screenSession is nullptr, ScreenId:%{public}" PRIu64"", screenId);
+            continue;
+        }
+        const ScreenProperty& prop = screenSession->GetScreenProperty();
+        
+        // collect all virtual screens, regardless of filter
+        if (prop.GetScreenType() == ScreenType::VIRTUAL) {
+            DisplayId displayId = screenSession->GetDisplayId();
+            if (displayId != DISPLAY_ID_INVALID) {
+                res.push_back(displayId);
+            }
+            continue;
+        }
+        if (filterScreenId != INVALID_SCREEN_ID && screenId != filterScreenId) {
             continue;
         }
         DisplayId displayId = screenSession->GetDisplayId();
@@ -2252,16 +2257,12 @@ std::vector<DisplayId> ScreenSessionManager::GetAllDisplayIds(int32_t userId)
             continue;
         }
         res.push_back(displayId);
-        if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
-            screenSession->GetScreenProperty().GetIsFakeInUse()) {
+        if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && prop.GetIsFakeInUse()) {
             DisplayId fakeDisplayId = GetFakeDisplayId(screenSession);
             if (fakeDisplayId == DISPLAY_ID_FAKE) {
                 res.push_back(fakeDisplayId);
                 TLOGI(WmsLogTag::DMS, "add fakeDisplayId: %{public}" PRIu64 "", fakeDisplayId);
             }
-        }
-        if (onlyOne) {
-            break;
         }
     }
     return res;
@@ -12372,5 +12373,11 @@ void ScreenSessionManager::DoAodExitAndSetPowerAllOff()
         SetRSScreenPowerStatusExt(screenId, ScreenPowerStatus::POWER_STATUS_OFF);
     }
 #endif
+}
+
+std::map<int32_t, ScreenSessionManager::UserScreenInfo> ScreenSessionManager::GetUserScreenMap() const
+{
+    std::lock_guard<std::mutex> lock(userScreenMapMutex_);
+    return userScreenMap_;
 }
 } // namespace OHOS::Rosen
