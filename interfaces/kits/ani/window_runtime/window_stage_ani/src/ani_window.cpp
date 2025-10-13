@@ -50,7 +50,7 @@ static std::map<ani_ref, AniWindow*> localObjs;
 constexpr double MIN_GRAY_SCALE = 0.0;
 constexpr double MAX_GRAY_SCALE = 1.0;
 } // namespace
-static thread_local std::map<std::string, ani_ref> g_aniWindowMap;
+static std::map<std::string, ani_ref> g_aniWindowMap;
 
 AniWindow::AniWindow(const sptr<Window>& window)
     : windowToken_(window), registerManager_(std::make_unique<AniWindowRegisterManager>())
