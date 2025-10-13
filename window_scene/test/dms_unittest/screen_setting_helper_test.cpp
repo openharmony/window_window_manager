@@ -1201,17 +1201,20 @@ namespace {
         ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
         std::string json_str = R"({"testKey": 1})";
         nlohmann::json root1 = nlohmann::json::parse(json_str, nullptr, false);
-        std::string value = screenSettingHelper.GetJsonValueString(root1, "testKey");
-        EXPECT_EQ(value, "");
- 
+        std::string name = "";
+        bool ret = screenSettingHelper.GetJsonValue(root1, "testKey", name);
+        EXPECT_FALSE(ret);
+
         json_str = R"({"testKey": "aa"})";
         nlohmann::json root2 = nlohmann::json::parse(json_str, nullptr, false);
-        int32_t valueInt = screenSettingHelper.GetJsonValueNumber(root2, "testKey");
-        EXPECT_EQ(valueInt, -1);
- 
+        int32_t mode = -1;
+        ret = screenSettingHelper.GetJsonValue(root2, "testKey", mode);
+        EXPECT_FALSE(ret);
+
         json_str = R"({"testKey": "aa"})";
         nlohmann::json root3 = nlohmann::json::parse(json_str, nullptr, false);
-        bool valueBool = screenSettingHelper.GetJsonValueBool(root3, "testKey");
+        bool valueBool = false;
+        ret = screenSettingHelper.GetJsonValue(root3, "testKey", valueBool);
         EXPECT_FALSE(valueBool);
     }
 }

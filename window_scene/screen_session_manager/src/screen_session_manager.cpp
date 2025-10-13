@@ -2153,6 +2153,8 @@ void ScreenSessionManager::GetRotationCorrectionExemptionListFromDatabase(bool i
     {
         std::shared_lock<std::shared_mutex> lock(rotationCorrectionExemptionMutex_);
         if (!isForce && !(rotationCorrectionExemptionList_.empty() && needReinstallExemptionList_)) {
+            TLOGD(WmsLogTag::DMS, "no need query databese. needReinstall: %{public}d, exemptionListIsempty: %{public}d",
+                rotationCorrectionExemptionList_.empty(), needReinstallExemptionList_);
             return;
         }
     }

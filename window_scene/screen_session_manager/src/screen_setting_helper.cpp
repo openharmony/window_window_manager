@@ -830,52 +830,19 @@ void ScreenSettingHelper::GetCorrectionExemptionListFromJson(const std::string& 
     for (auto it = exemptionListJson.begin(); it != exemptionListJson.end(); ++it) {
         const std::string& key = it.key();
         const nlohmann::json& value = it.value();
-        std::string name = GetJsonValueString(value, "name");
+        std::string name = "";
+        int32_t mode = -1;
+        bool exemptNaturalDirectionCorrect = false;
+        GetJsonValue(value, "name", name);
         if (name.empty()) {
             continue;
         }
-        int32_t mode = GetJsonValueNumber(value, "mode");
-        bool exemptNaturalDirectionCorrect = GetJsonValueBool(value, "exemptNaturalDirectionCorrect");
+        GetJsonValue(value, "mode", mode);
+        GetJsonValue(value, "exemptNaturalDirectionCorrect", exemptNaturalDirectionCorrect);
         if (exemptNaturalDirectionCorrect && mode == CORRECTION_EXEMPTION_MODE) {
             exemptionApps.emplace_back(name);
         }
     }
-}
- 
-std::string ScreenSettingHelper::GetJsonValueString(const nlohmann::json& payload,
-    const std::string& key)
-{
-    if (!payload.contains(key)) {
-        return "";
-    }
-    if (payload[key].is_string()) {
-        return payload[key].get<std::string>();
-    }
-    return "";
-}
- 
-int32_t ScreenSettingHelper::GetJsonValueNumber(const nlohmann::json& payload,
-    const std::string& key)
-{
-    if (!payload.contains(key)) {
-        return -1;
-    }
-    if (payload[key].is_number()) {
-        return payload[key].get<int32_t>();
-    }
-    return -1;
-}
- 
-bool ScreenSettingHelper::GetJsonValueBool(const nlohmann::json& payload,
-    const std::string& key)
-{
-    if (!payload.contains(key)) {
-        return false;
-    }
-    if (payload[key].is_boolean()) {
-        return payload[key].get<bool>();
-    }
-    return false;
 }
 } // namespace Rosen
 } // namespace OHOS
