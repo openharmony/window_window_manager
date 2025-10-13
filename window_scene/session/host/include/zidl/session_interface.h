@@ -635,7 +635,7 @@ public:
         return WSError::WS_OK;
     }
 
-    virtual WSError RestartApp(const std::shared_ptr<AAFwK::Want>& want)
+    virtual WSError RestartApp(const std::shared_ptr<AAFwk::Want>& want)
     {
         return WSError::WS_OK;
     }

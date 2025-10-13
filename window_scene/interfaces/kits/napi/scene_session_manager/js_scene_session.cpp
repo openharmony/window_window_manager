@@ -8375,7 +8375,7 @@ void JsSceneSession::ProcessRestartAppRegister()
     session->SetRestartAppListener([weakThis = wptr(this)](const SessionInfo& info) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
+            TLOGE(WmsLogTag::WMS_LIFE, "ProcessRestartAppRegister jsSceneSession is null");
             return;
         }
         jsSceneSession->OnRestartApp(info);
@@ -8388,11 +8388,11 @@ void JsSceneSession::OnRestartApp(const SessionInfo& info)
     auto task = [weakThis = wptr(this), info, persistentId = persistentId_, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "OnRestartApp JsSceneSession id:%{public}d has been destroyed", persistentId);
+            TLOGNE(WmsLogTag::WMS_LIFE, "OnRestartApp jsSceneSession id:%{public}d has been destroyed", persistentId);
             return;
         }
-        auto jsCallback = jsSceneSession->GetJSCallback(RESTART_APP_CB);
-        if (!jsCallback) {
+        auto jsCallBack = jsSceneSession->GetJSCallback(RESTART_APP_CB);
+        if (!jsCallBack) {
             TLOGNE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
             return;
         }
@@ -8404,15 +8404,13 @@ void JsSceneSession::OnRestartApp(const SessionInfo& info)
             sptr<SceneSession> sceneSession =
                 SceneSessionManager::GetInstance().GetSceneSessionByIdentityInfo(identityInfo);
             TLOGNI(WmsLogTag::WMS_LIFE, "find the scene session by sessionInfo");
-            if (!sceneSession)
-            {
+            if (!sceneSession) {
                 TLOGNI(WmsLogTag::WMS_LIFE, "not find the scene session by sessionInfo");
                 sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
             } else {
                 sceneSession->NotifyRestart();
             }
-            if (!sceneSession)
-            {
+            if (!sceneSession) {
                 TLOGNE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr");
                 return;
             }
@@ -8427,7 +8425,7 @@ void JsSceneSession::OnRestartApp(const SessionInfo& info)
         }
         napi_value argv[] = {jsSessionInfo};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-    }
+    };
     taskScheduler_->PostMainThreadTask(task, __func__);
 }
 

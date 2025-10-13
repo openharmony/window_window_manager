@@ -2426,7 +2426,7 @@ int SessionStub::HandleRestartApp(MessageParcel& data, MessageParcel& reply)
     }
     WSError errCode = RestartApp(want);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "write errCode fail.");
+        TLOGE(WmsLogTag::WMS_LIFE, "write errCode fail.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

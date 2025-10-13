@@ -720,15 +720,15 @@ HWTEST_F(WindowSessionTest4, SetBackPressedListenser, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetRestartAppListenser
- * @tc.desc: SetRestartAppListenser Test
- type: FUNC
+ * @tc.name: SetRestartAppListener
+ * @tc.desc: SetRestartAppListener Test
+ * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest4, SetRestartAppListenser, TestSize.Level1)
+HWTEST_F(WindowSessionTest4, SetRestartAppListener, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     int32_t result = 0;
-    session_->SetRestartAppListenser([&result](const SessionInfo& info) {
+    session_->SetRestartAppListener([&result](const SessionInfo& info) {
         result = 1;
     });
     usleep(waitSyncInNs_);
@@ -740,7 +740,7 @@ HWTEST_F(WindowSessionTest4, SetRestartAppListenser, TestSize.Level1)
 /**
  * @tc.name: NotifyRestart
  * @tc.desc: NotifyRestart Test
- type: FUNC
+ * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionTest4, NotifyRestart, TestSize.Level1)
 {

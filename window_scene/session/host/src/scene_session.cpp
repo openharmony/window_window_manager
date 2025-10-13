@@ -2142,8 +2142,7 @@ WSError SceneSession::RaiseToAppTop()
 
 WSError SceneSession::RestartApp(const std::shared_ptr<AAFwk::Want>& want)
 {
-    if (want == nullptr)
-    {
+    if (want == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "want is null");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
@@ -2168,13 +2167,12 @@ WSError SceneSession::RestartApp(const std::shared_ptr<AAFwk::Want>& want)
         }
         if (!session->CheckAbilityInfoByWant(want)) {
             TLOGNE(WmsLogTag::WMS_LIFE, "ability info is null, ability name:%{public}s",
-                want->GetElement()GetBundleName().c_str());
+                want->GetElement().GetAbilityName().c_str());
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
         SessionInfo info = GetSessionInfoByWant(want, session);
-        if (session->restartAppFun_)
-        {
-            session->restartAppFun_(info);
+        if (session->restartAppFunc_) {
+            session->restartAppFunc_(info);
         }
         return WSError::WS_OK;
     }, __func__);
@@ -2184,8 +2182,8 @@ SessionInfo SceneSession::GetSessionInfoByWant(const std::shared_ptr<AAFwk::Want
     const sptr<SceneSession>& session)
 {
     SessionInfo info;
-    if (session->sessionInfo_.moduleName_ != want->GetElement().GetModuleName()
-        && session->sessionInfo_.abilityName_ != want->GetElement().GetAbilityName()) {
+    if (session->sessionInfo_.moduleName_ == want->GetElement().GetModuleName()
+        && session->sessionInfo_.abilityName_ == want->GetElement().GetAbilityName()) {
         session->sessionInfo_.isRestartApp_ = true;
         session->sessionInfo_.callerPersistentId_ = INVALID_SESSION_ID;
         info = session->sessionInfo_;
@@ -2196,7 +2194,7 @@ SessionInfo SceneSession::GetSessionInfoByWant(const std::shared_ptr<AAFwk::Want
         info.moduleName_ = want->GetElement().GetModuleName();
         int32_t appCloneIndex = want->GetIntParam(APP_CLONE_INDEX, 0);
         info.appIndex_ = appCloneIndex == 0 ? want->GetIntParam(DLP_INDEX, 0) : appCloneIndex;
-        info.appInstanceKey_ = want->GetStringParam(AAFwK::Want::APP_INSTANCE_KEY);
+        info.appInstanceKey_ = want->GetStringParam(AAFwk::Want::APP_INSTANCE_KEY);
         TLOGI(WmsLogTag::WMS_LIFE, "the new session info, appindex:%{public}d, appInstanceKey:%{public}s",
             info.appIndex_, info.appInstanceKey_.c_str());
         info.callerPersistentId_ = session->GetPersistentId();
@@ -7911,7 +7909,7 @@ sptr<SceneSession> SceneSession::GetSceneSessionById(int32_t sessionId) const
     return specificCallback_->onGetSceneSessionByIdCallback_(sessionId);
 }
 
-bool SceneSession::CheckAbilityInfoByWant(const std::shared_ptr<AAFwK::Want>& want) const
+bool SceneSession::CheckAbilityInfoByWant(const std::shared_ptr<AAFwk::Want>& want) const
 {
     if (specificCallback_ == nullptr || specificCallback_->onCheckAbilityInfoByWantCallback_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "specificCallback or onCheckAbilityInfoByWantCallback is null");

@@ -1732,7 +1732,7 @@ sptr<SceneSession> SceneSessionManager::GetSceneSession(int32_t persistentId)
     return nullptr;
 }
 
-bool SceneSessionManager::CheckAbilityInfoByWant(const std::shared<AAFwk::Want>& want)
+bool SceneSessionManager::CheckAbilityInfoByWant(const std::shared_ptr<AAFwk::Want>& want)
 {
     if (!bundleMgr_) {
         TLOGE(WmsLogTag::WMS_LIFE, "bundleMgr is nullptr");
@@ -1741,7 +1741,7 @@ bool SceneSessionManager::CheckAbilityInfoByWant(const std::shared<AAFwk::Want>&
     AppExecFwk::AbilityInfo abilityInfo;
     if (!bundleMgr_->GetAbilityInfo(want->GetElement().GetBundleName(),
         want->GetElement().GetModuleName(), want->GetElement().GetAbilityName(), abilityInfo)) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "ability not found %{public}s %{public}s %{public}s",
+        TLOGE(WmsLogTag::WMS_LIFE, "ability not found %{public}s %{public}s %{public}s",
             want->GetElement().GetBundleName().c_str(), want->GetElement().GetModuleName().c_str(),
             want->GetElement().GetAbilityName().c_str());
         return false;
@@ -1984,7 +1984,7 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onGetSceneSessionByIdCallback_ = [this](int32_t persistentId) {
         return this->GetSceneSession(persistentId);
     };
-    specificCb->onCheckAbilityInfoByWantCallback_ = [this](const std::shared<AAFwk::Want>& want) {
+    specificCb->onCheckAbilityInfoByWantCallback_ = [this](const std::shared_ptr<AAFwk::Want>& want) {
         return this->CheckAbilityInfoByWant(want);
     };
     return specificCb;
@@ -2998,17 +2998,16 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
         TLOGW(WmsLogTag::WMS_LIFE, "Invalid callState:%{public}d", sessionInfo.callState_);
     }
     abilitySessionInfo->scenarios = sessionInfo.scenarios;
-    if (sessionInfo_.isRestartApp_) {
-        TLOGI(WmsLogTag::WMS_LIFE, "resatrt app set caller session");
-        auto callerSession = GetSceneSession(sessionInfo_.callerPersistentId_);
+    if (sessionInfo.isRestartApp_) {
+        TLOGI(WmsLogTag::WMS_LIFE, "restart app set caller session");
+        auto callerSession = GetSceneSession(sessionInfo.callerPersistentId_);
         if (!callerSession) {
             callerSession = sceneSession;
         }
-        TLOGI(WmsLogTag::WMS_LIFE, "resatrt app caller session id: %{public}d",
+        TLOGI(WmsLogTag::WMS_LIFE, "restart app caller session id: %{public}d",
             callerSession->GetSessionInfo().persistentId_);
         abilitySessionInfo->callerSession = sptr<ISession>(callerSession)->AsObject();
     }
-    
     TLOGI(WmsLogTag::WMS_LIFE, "Is SCB Call, set flag:%{public}d, persistentId:%{public}d, requestId:%{public}d",
         requestId == DEFAULT_REQUEST_FROM_SCB_ID, abilitySessionInfo->persistentId, requestId);
     return abilitySessionInfo;
@@ -3145,7 +3144,7 @@ int32_t SceneSessionManager::StartUIAbilityBySCBTimeoutCheck(const sptr<SceneSes
         int timerId = HiviewDFX::XCollie::GetInstance().SetTimer("WMS:SSM:StartUIAbilityBySCB",
             START_UI_ABILITY_TIMEOUT/1000, nullptr, nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
         auto result = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(abilitySessionInfo,
-            *coldStartFlag, windowStateChangeReason, sceneSession.GetSessionInfo().isRestartApp_);
+            *coldStartFlag, windowStateChangeReason, sceneSession->GetSessionInfo().isRestartApp_);
         CloseAllFd(sceneSession->GetSessionInfo().want);
         HiviewDFX::XCollie::GetInstance().CancelTimer(timerId);
         *retCode = static_cast<int32_t>(result);
@@ -3300,7 +3299,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     return WSError::WS_OK;
 }
 
-void SceneSessionManager::ResetSessionInfoAfterStartUIAbility(sptr<SceneSession> sceneSession) {
+void SceneSessionManager::ResetSessionInfoAfterStartUIAbility(const sptr<SceneSession> sceneSession) {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
     sceneSession->SetRestartApp(false);
 }

@@ -228,7 +228,7 @@ public:
     /**
      * Restart app
      */
-    WSError RestartApp(const std::shared_ptr<AAFwK::Want>& want) override;
+    WSError RestartApp(const std::shared_ptr<AAFwk::Want>& want) override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };
