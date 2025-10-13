@@ -1087,11 +1087,10 @@ namespace {
             TLOGI(WmsLogTag::DMS, "UT test");
             flag1 = true;
         };
-        ScreenSettingHelper::correctionExemptionListObserver_ = new SettingObserver;
+        ScreenSettingHelper::correctionExemptionListObserver_ = std::make_shared<SettingObserver>();
         ScreenSettingHelper::RegisterRotationCorrectionExemptionListObserver(func1);
         EXPECT_TRUE(g_errLog.find("observer is registered") != std::string::npos);
         LOG_SetCallback(nullptr);
-        delete correctionExemptionListObserver_;
         ScreenSettingHelper::correctionExemptionListObserver_ = nullptr;
     }
  
@@ -1102,7 +1101,7 @@ namespace {
      */
     HWTEST_F(ScreenSettingHelperTest, UnregisterRotationCorrectionExemptionListObserver, TestSize.Level1)
     {
-        ScreenSettingHelper::correctionExemptionListObserver_ = new SettingObserver;
+        ScreenSettingHelper::correctionExemptionListObserver_ = std::make_shared<SettingObserver>();
         ScreenSettingHelper::UnregisterRotationCorrectionExemptionListObserver();
         ASSERT_EQ(ScreenSettingHelper::correctionExemptionListObserver_, nullptr);
  
