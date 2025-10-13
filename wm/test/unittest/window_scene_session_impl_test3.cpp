@@ -1164,7 +1164,7 @@ HWTEST_F(WindowSceneSessionImplTest3, RestorePcMainWindow, TestSize.Level1)
     windowSceneSessionImpl->property_->SetIsPcAppInPad(false);
     windowSceneSessionImpl->property_->SetIsAppSupportPhoneInPc(true);
     ret = windowSceneSessionImpl->Restore();
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**

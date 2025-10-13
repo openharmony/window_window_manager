@@ -211,12 +211,66 @@ HWTEST_F(SessionStageProxyTest, UpdateFocus, TestSize.Level1)
 {
     bool focus = false;
     ASSERT_TRUE((sessionStage_ != nullptr));
-    WSError res = sessionStage_->UpdateFocus(focus);
+    auto info = sptr<FocusNotifyInfo>::MakeSptr(1, 1, 2, false);
+    WSError res = sessionStage_->UpdateFocus(info, focus);
     ASSERT_EQ(WSError::WS_OK, res);
     focus = true;
     ASSERT_TRUE((sessionStage_ != nullptr));
-    res = sessionStage_->UpdateFocus(focus);
+    res = sessionStage_->UpdateFocus(info, focus);
     ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: UpdateFocus01
+ * @tc.desc: test function : UpdateFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, UpdateFocus01, TestSize.Level1)
+{
+    bool focus = false;
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    sptr<FocusNotifyInfo> info = nullptr;
+    WSError res = sessionStage_->UpdateFocus(info, focus);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+    info = sptr<FocusNotifyInfo>::MakeSptr();
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    res = sessionStage_->UpdateFocus(info, focus);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+}
+
+/**
+ * @tc.name: NotifyHighlightChange
+ * @tc.desc: test function : NotifyHighlightChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyHighlightChange, TestSize.Level1)
+{
+    bool isHighlight = false;
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    auto info = sptr<HighlightNotifyInfo>::MakeSptr(0, std::vector<int32_t>(), 1, false);
+    WSError res = sessionStage_->NotifyHighlightChange(info, isHighlight);
+    ASSERT_EQ(WSError::WS_OK, res);
+    isHighlight = true;
+    res = sessionStage_->NotifyHighlightChange(info, isHighlight);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: NotifyHighlightChange01
+ * @tc.desc: test function : NotifyHighlightChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyHighlightChange01, TestSize.Level1)
+{
+    bool isHighlight = false;
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    sptr<HighlightNotifyInfo> info = nullptr;
+    WSError res = sessionStage_->NotifyHighlightChange(info, isHighlight);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+    info = sptr<HighlightNotifyInfo>::MakeSptr();
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    res = sessionStage_->NotifyHighlightChange(info, isHighlight);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
 }
 
 /**
@@ -553,6 +607,43 @@ HWTEST_F(SessionStageProxyTest, NotifyTransformChange, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyWindowOcclusionState
+ * @tc.desc: notify the occlusion state
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyWindowOcclusionState, TestSize.Level1)
+{
+    auto state = WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION;
+    auto tempProxy = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    auto ret = tempProxy->NotifyWindowOcclusionState(state);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SessionStageProxy> proxy = sptr<SessionStageProxy>::MakeSptr(remoteMocker);
+    ASSERT_NE(proxy, nullptr);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ret = proxy->NotifyWindowOcclusionState(state);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    ret = proxy->NotifyWindowOcclusionState(state);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteUint32ErrorFlag(false);
+
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ret = proxy->NotifyWindowOcclusionState(state);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+
+    remoteMocker->SetRequestResult(ERR_NONE);
+    ret = proxy->NotifyWindowOcclusionState(state);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
  * @tc.name: NotifyWindowVisibility
  * @tc.desc: test function : NotifyWindowVisibility
  * @tc.type: FUNC
@@ -668,6 +759,18 @@ HWTEST_F(SessionStageProxyTest, SetUniqueVirtualPixelRatio, TestSize.Level1)
 {
     ASSERT_TRUE(sessionStage_ != nullptr);
     sessionStage_->SetUniqueVirtualPixelRatio(true, 0.1f);
+}
+
+/**
+ * @tc.name: UpdateAnimationSpeed
+ * @tc.desc: test function : UpdateAnimationSpeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, UpdateAnimationSpeed, TestSize.Level1)
+{
+    float speed = 2.0f;
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    sessionStage_->UpdateAnimationSpeed(speed);
 }
 
 /**

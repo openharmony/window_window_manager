@@ -1521,9 +1521,22 @@ void ScreenSessionManagerStub::ProcSetVirtualScreenSecurityExemption(MessageParc
 void ScreenSessionManagerStub::ProcGetScreenCapture(MessageParcel& data, MessageParcel& reply)
 {
     CaptureOption option;
-    option.displayId_ = static_cast<DisplayId>(data.ReadUint64());
-    option.isNeedNotify_ = static_cast<bool>(data.ReadBool());
-    option.isNeedPointer_ = static_cast<bool>(data.ReadBool());
+    if (!data.ReadUint64(option.displayId_)) {
+        TLOGE(WmsLogTag::DMS, "Read displayId failed");
+        return;
+    }
+    if (!data.ReadBool(option.isNeedNotify_)) {
+        TLOGE(WmsLogTag::DMS, "Read isNeedNotify failed");
+        return;
+    }
+    if (!data.ReadBool(option.isNeedPointer_)) {
+        TLOGE(WmsLogTag::DMS, "Read isCaptureFullOfScreen failed");
+        return;
+    }
+    if (!data.ReadUInt64Vector(&option.blackWindowIdList_)) {
+        TLOGE(WmsLogTag::DMS, "Read node blackWindowIdList failed");
+        return;
+    }
     DmErrorCode errCode = DmErrorCode::DM_OK;
     std::shared_ptr<Media::PixelMap> capture = GetScreenCapture(option, &errCode);
     reply.WriteParcelable(capture == nullptr ? nullptr : capture.get());

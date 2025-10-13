@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <unordered_map>
 #include <set>
+#include <shared_mutex>
 #include <string>
 
 #include "wm_single_instance.h"
@@ -29,8 +30,6 @@ class SingletonContainer {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SingletonContainer);
 
 public:
-    void AddSingleton(const std::string& name, void* instance);
-
     void SetSingleton(const std::string& name, void* instance);
 
     void* GetSingleton(const std::string& name);
@@ -68,6 +67,8 @@ private:
 
     virtual ~SingletonContainer();
 
+    void AddSingleton(const std::string& name, void* instance);
+
     struct Singleton {
         void* value;
         int32_t refCount;
@@ -76,6 +77,7 @@ private:
     std::unordered_map<int32_t, SingletonContainer::Singleton> singletonMap;
     std::unordered_map<int32_t, std::set<int32_t>> dependencySetMap;
     bool destroyed_ { false };
+    std::shared_mutex mapMutex_;
 };
 } // namespace Rosen
 } // namespace OHOS

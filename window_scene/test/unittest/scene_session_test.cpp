@@ -1347,6 +1347,48 @@ HWTEST_F(SceneSessionTest, GetAvoidAreaByType, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetAvoidAreaByTypeIgnoringVisibility
+ * @tc.desc: GetAvoidAreaByTypeIgnoringVisibility
+ * @tc.type: FUNC ok
+ */
+HWTEST_F(SceneSessionTest, GetAvoidAreaByTypeIgnoringVisibility, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "GetAvoidAreaByTypeIgnoringVisibility";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(specificCallback_, nullptr);
+    specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ =
+        [](WindowType type, uint64_t displayId) -> std::vector<sptr<SceneSession>> {
+        SessionInfo info_;
+        info_.abilityName_ = "Background01";
+        info_.bundleName_ = "GetAvoidAreaByTypeIgnoringVisibility";
+        std::vector<sptr<SceneSession>> backgroundSession;
+        sptr<SceneSession> session2 = sptr<SceneSession>::MakeSptr(info_, nullptr);
+        backgroundSession.push_back(session2);
+        return backgroundSession;
+    };
+    sptr<SceneSession> sceneSession;
+    sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
+    EXPECT_NE(sceneSession, nullptr);
+    WSRect rect = { 0, 0, 320, 240 }; // width: 320, height: 240
+    sceneSession->SetSessionRect(rect);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    sceneSession->property_ = property;
+    sing T = std::underlying_type_t<AvoidAreaType>;
+    for (T avoidAreaType = static_cast<T>(AvoidAreaType::TYPE_START);
+        avoidAreaType < static_cast<T>(AvoidAreaType::TYPE_END); avoidAreaType++) {
+        auto type = static_cast<AvoidAreaType>(avoidAreaType);
+        sceneSession->GetAvoidAreaByTypeIgnoringVisibility(type);
+    }
+    EXPECT_NE(sceneSession, nullptr);
+}
+
+/**
  * @tc.name: TransferPointerEvent
  * @tc.desc: TransferPointerEvent
  * @tc.type: FUNC
@@ -1742,6 +1784,10 @@ HWTEST_F(SceneSessionTest, OnSessionEvent, TestSize.Level1)
     sceneSession->moveDragController_->hasPointDown_ = true;
     ASSERT_EQ(sceneSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE), WSError::WS_OK);
     ASSERT_EQ(sceneSession->OnSessionEvent(SessionEvent::EVENT_END_MOVE), WSError::WS_OK);
+
+    SessionEventParam param;
+    auto ret = sceneSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE, param);
+    EXPECT_EQ(ret, WSError::WS_OK);
 }
 
 /**

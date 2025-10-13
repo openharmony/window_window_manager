@@ -68,6 +68,7 @@ public:
     WSError UpdateWindowMode(int32_t persistentId, int32_t windowMode);
     WMError GetWindowModeType(WindowModeType& windowModeType) override;
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo) override;
+    WMError UpdateAnimationSpeedWithPid(pid_t pid, float speed) override;
     WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) override;
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds) override;
     WSError RaiseWindowToTop(int32_t persistentId) override;
@@ -110,6 +111,8 @@ public:
 
     WMError RegisterPipChgListenerByScreenId(int32_t screenId, const sptr<IPipChangeListener>& listener) override;
     WMError UnregisterPipChgListenerByScreenId(int32_t screenId) override;
+    WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+        std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override;
 };
 } // namespace OHOS::Rosen
 

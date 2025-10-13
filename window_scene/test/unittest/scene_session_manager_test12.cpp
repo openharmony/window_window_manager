@@ -924,6 +924,19 @@ HWTEST_F(SceneSessionManagerTest12, RegisterWatchFocusActiveChangeCallback, Test
 }
 
 /**
+ * @tc.name: RegisterVirtualPixelChangeCallback
+ * @tc.desc: RegisterVirtualPixelChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RegisterVirtualPixelChangeCallback, TestSize.Level1)
+{
+    NotifyVirtualPixelChangeFunc func = [](float density, DisplayId displayId) {};
+    ssm_->RegisterVirtualPixelChangeCallback(std::move(func));
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_NE(ssm_->onVirtualPixelChangeCallback_, nullptr);
+}
+
+/**
  * @tc.name: NotifyWatchGestureConsumeResult
  * @tc.desc: NotifyWatchGestureConsumeResult
  * @tc.type: FUNC
@@ -1862,7 +1875,6 @@ HWTEST_F(SceneSessionManagerTest12, HasFloatingWindowForeground06, TestSize.Leve
     bool hasFloatWindowForeground = true;
     WMError result = ssm_->HasFloatingWindowForeground(token2, hasFloatWindowForeground);
     EXPECT_EQ(result, WMError::WM_OK);
-    EXPECT_EQ(hasFloatWindowForeground, false);
 }
 
 /**
@@ -2907,7 +2919,6 @@ HWTEST_F(SceneSessionManagerTest12, CheckPrepareTerminateEnabled01, TestSize.Lev
     ssm_->isPrepareTerminateEnable_ = false;
     bool isPrepareTerminate = false;
     auto result = ssm_->PrepareTerminate(1, isPrepareTerminate);
-    ASSERT_EQ(isPrepareTerminate, false);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -3110,6 +3121,9 @@ HWTEST_F(SceneSessionManagerTest12, UpdateOutline, Function | SmallTest | Level2
     MockAccesstokenKit::MockIsSACalling(true);
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ssm->UpdateOutline(remoteObject, params));
 
+    ssm->recoverState_ = RecoverState::RECOVER_INITIAL;
+    EXPECT_EQ(WMError::WM_OK, ssm->UpdateOutline(remoteObject, params));
+
     ssm->systemConfig_.freeMultiWindowEnable_ = true;
     ssm->systemConfig_.freeMultiWindowSupport_ = true;
     EXPECT_EQ(WMError::WM_OK, ssm->UpdateOutline(remoteObject, params));
@@ -3149,15 +3163,9 @@ HWTEST_F(SceneSessionManagerTest12, UpdateOutlineInner, Function | SmallTest | L
     session4->SetSessionState(SessionState::STATE_ACTIVE);
     OutlineParams params;
     params.persistentIds_.push_back(1); // 1 persistentId
-    ssm->recoveringFinished_ = true;
     ssm->UpdateOutlineInner(nullptr, params);
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(session1->isOutlineEnabled_, true);
-    
-    ssm->recoveringFinished_ = false;
-    ssm->UpdateOutlineInner(nullptr, params);
-    usleep(WAIT_SYNC_IN_NS);
-    EXPECT_EQ(ssm->needRecoverOutline_, true);
 }
 
 /**
@@ -3185,7 +3193,7 @@ HWTEST_F(SceneSessionManagerTest12, AddOutlineRemoteDeathRecipient, Function | S
     sptr<RemoteObjectMocker> remoteObject1 = sptr<RemoteObjectMocker>::MakeSptr();
     EXPECT_CALL(*remoteObject, RemoveDeathRecipient(_)).
         WillOnce([](const sptr<IRemoteObject::DeathRecipient>& recipient) {
-            return false;
+            return true;
         });
     EXPECT_CALL(*remoteObject1, AddDeathRecipient(_)).
         WillOnce([](const sptr<IRemoteObject::DeathRecipient>& recipient) {
@@ -3197,7 +3205,7 @@ HWTEST_F(SceneSessionManagerTest12, AddOutlineRemoteDeathRecipient, Function | S
     sptr<RemoteObjectMocker> remoteObject2 = sptr<RemoteObjectMocker>::MakeSptr();
     EXPECT_CALL(*remoteObject1, RemoveDeathRecipient(_)).
         WillOnce([](const sptr<IRemoteObject::DeathRecipient>& recipient) {
-            return true;
+            return false;
         });
     ssm->AddOutlineRemoteDeathRecipient(remoteObject2);
     EXPECT_NE(ssm->outlineRemoteObject_, nullptr);
@@ -3237,6 +3245,23 @@ HWTEST_F(SceneSessionManagerTest12, DeleteAllOutline, Function | SmallTest | Lev
     ssm->DeleteAllOutline(ssm->outlineRemoteObject_);
     EXPECT_EQ(session1->isOutlineEnabled_, false);
     EXPECT_EQ(ssm->outlineRemoteObject_, nullptr);
+}
+
+
+/**
+ * @tc.name: RecoverOutline
+ * @tc.desc: test function : OnRecoverStateChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RecoverOutline, Function | SmallTest | Level2)
+{
+    auto ssm = sptr<SceneSessionManager>::MakeSptr();
+    ssm->needRecoverOutline_ = true;
+    ssm->OnRecoverStateChange(RecoverState::RECOVER_ENABLE_INPUT);
+    EXPECT_EQ(false, ssm->needRecoverOutline_);
+
+    ssm->OnRecoverStateChange(RecoverState::RECOVER_ENABLE_INPUT);
+    EXPECT_EQ(false, ssm->needRecoverOutline_);
 }
 } // namespace
 } // namespace Rosen

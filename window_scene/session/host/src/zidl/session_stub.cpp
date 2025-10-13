@@ -137,6 +137,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNeedAvoid(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_AVOID_AREA):
             return HandleGetAvoidAreaByType(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_AVOID_AREA_IGNORING_VISIBILITY):
+            return HandleGetAvoidAreaByTypeIgnoringVisibility(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_ALL_AVOID_AREAS):
             return HandleGetAllAvoidAreas(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_TARGET_ORIENTATION_CONFIG_INFO):
@@ -559,6 +561,17 @@ int SessionStub::HandleRemoveStartingWindow(MessageParcel& data, MessageParcel& 
 }
 // LCOV_EXCL_STOP
 
+bool ReadEventParam(MessageParcel& data, SessionEvent event, SessionEventParam& param)
+{
+    if (event == SessionEvent::EVENT_MAXIMIZE) {
+        if (!data.ReadUint32(param.waterfallResidentState)) {
+            TLOGE(WmsLogTag::WMS_EVENT, "Failed to read waterfallResidentState");
+            return false;
+        }
+    }
+    return true;
+}
+
 int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_EVENT, "In!");
@@ -568,12 +581,16 @@ int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
         return ERR_INVALID_DATA;
     }
     TLOGD(WmsLogTag::WMS_EVENT, "eventId: %{public}d", eventId);
-    if (eventId < static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE) ||
-        eventId >= static_cast<uint32_t>(SessionEvent::EVENT_END)) {
+    auto event = static_cast<SessionEvent>(eventId);
+    if (event < SessionEvent::EVENT_MAXIMIZE || event >= SessionEvent::EVENT_END) {
         TLOGE(WmsLogTag::WMS_EVENT, "Invalid eventId: %{public}d", eventId);
         return ERR_INVALID_DATA;
     }
-    WSError errCode = OnSessionEvent(static_cast<SessionEvent>(eventId));
+    SessionEventParam param;
+    if (!ReadEventParam(data, event, param)) {
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = OnSessionEvent(event, param);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -1194,6 +1211,26 @@ int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& re
     return ERR_NONE;
 }
 
+int SessionStub::HandleGetAvoidAreaByTypeIgnoringVisibility(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t typeId = 0;
+    if (!data.ReadUint32(typeId) ||
+        typeId >= static_cast<uint32_t>(AvoidAreaType::TYPE_END)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "read typeId error");
+        return ERR_INVALID_DATA;
+    }
+    WSRect rect {};
+    if (!data.ReadInt32(rect.posX_) || !data.ReadInt32(rect.posY_) ||
+        !data.ReadInt32(rect.width_) || !data.ReadInt32(rect.height_)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "read rect error");
+        return ERR_INVALID_DATA;
+    }
+    AvoidAreaType type = static_cast<AvoidAreaType>(typeId);
+    AvoidArea avoidArea = GetAvoidAreaByTypeIgnoringVisibility(type, rect);
+    reply.WriteParcelable(&avoidArea);
+    return ERR_NONE;
+}
+
 int SessionStub::HandleGetAllAvoidAreas(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "in");
@@ -1665,8 +1702,7 @@ int SessionStub::HandleSetDecorVisible(MessageParcel& data, MessageParcel& reply
         TLOGE(WmsLogTag::WMS_DECOR, "Failed to read isVisible");
         return ERR_INVALID_DATA;
     }
-    WSError ret = SetDecorVisible(isVisible);
-    reply.WriteInt32(static_cast<int32_t>(ret));
+    SetDecorVisible(isVisible);
     return ERR_NONE;
 }
 

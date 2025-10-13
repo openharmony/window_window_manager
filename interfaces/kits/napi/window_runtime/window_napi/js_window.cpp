@@ -15,6 +15,7 @@
 
 #include "js_window.h"
 #include <new>
+#include <optional>
 
 #ifndef WINDOW_PREVIEW
 #include "js_transition_controller.h"
@@ -466,6 +467,13 @@ napi_value JsWindow::GetWindowAvoidAreaSync(napi_env env, napi_callback_info inf
     TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetWindowAvoidAreaSync(env, info) : nullptr;
+}
+
+napi_value JsWindow::GetWindowAvoidAreaIgnoringVisibilitySync(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGetWindowAvoidAreaIgnoringVisibilitySync(env, info) : nullptr;
 }
 
 napi_value JsWindow::IsShowing(napi_env env, napi_callback_info info)
@@ -947,6 +955,14 @@ napi_value JsWindow::GetWindowLimits(napi_env env, napi_callback_info info)
 }
 
 /** @note @window.layout */
+napi_value JsWindow::GetWindowLimitsVP(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGetWindowLimitsVP(env, info) : nullptr;
+}
+
+/** @note @window.layout */
 napi_value JsWindow::SetWindowLimits(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
@@ -1106,6 +1122,13 @@ napi_value JsWindow::IsImmersiveLayout(napi_env env, napi_callback_info info)
     TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnIsImmersiveLayout(env, info) : nullptr;
+}
+
+napi_value JsWindow::IsInFreeWindowMode(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnIsInFreeWindowMode(env, info) : nullptr;
 }
 
 napi_value JsWindow::GetWindowStatus(napi_env env, napi_callback_info info)
@@ -3796,6 +3819,55 @@ napi_value JsWindow::OnGetWindowAvoidAreaSync(napi_env env, napi_callback_info i
         avoidArea.bottomRect_ = g_emptyRect;
     }
     napi_value avoidAreaObj = ConvertAvoidAreaToJsValue(env, avoidArea, avoidAreaType);
+    if (avoidAreaObj != nullptr) {
+        return avoidAreaObj;
+    } else {
+        TLOGE(WmsLogTag::WMS_IMMS, "ConvertAvoidAreaToJsValue failed");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][getWindowAvoidArea]msg: convert avoid area failed");
+    }
+}
+
+napi_value JsWindow::OnGetWindowAvoidAreaIgnoringVisibilitySync(napi_env env, napi_callback_info info)
+{
+    WmErrorCode errCode = WmErrorCode::WM_OK;
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) { // 1: params num
+        TLOGE(WmsLogTag::WMS_IMMS, "invalid argc %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    AvoidAreaType avoidAreaType = AvoidAreaType::TYPE_SYSTEM;
+    napi_value nativeType = argv[0];
+    if (nativeType == nullptr) {
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+    } else {
+        uint32_t resultValue = 0;
+        CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            napi_get_value_uint32(env, nativeType, &resultValue));
+        avoidAreaType = static_cast<AvoidAreaType>(resultValue);
+        errCode = avoidAreaType >= AvoidAreaType::TYPE_END ?
+            WmErrorCode::WM_ERROR_INVALID_PARAM : WmErrorCode::WM_OK;
+    }
+    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
+        TLOGE(WmsLogTag::WMS_IMMS, "invalid param");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "window is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][getWindowAvoidArea]msg: invalid window");
+    }
+
+    AvoidArea avoidArea;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+        windowToken_->GetAvoidAreaByTypeIgnoringVisibility(avoidAreaType, avoidArea));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "failed, ret %{public}d", ret);
+        return NapiThrowError(env, ret);
+    }
+    napi_value avoidAreaObj = ConvertAvoidAreaToJsValue(env, avoidArea, avoidAreaType, true);
     if (avoidAreaObj != nullptr) {
         return avoidAreaObj;
     } else {
@@ -7038,60 +7110,95 @@ napi_value JsWindow::OnMinimize(napi_env env, napi_callback_info info)
     return result;
 }
 
+std::optional<MaximizePresentation> ParsePresentation(napi_env env, napi_value napiPresentation)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "env is nullptr");
+        return std::nullopt;
+    }
+    if (napiPresentation == nullptr || GetType(env, napiPresentation) == napi_undefined) {
+        return MaximizePresentation::ENTER_IMMERSIVE;
+    }
+    using T = std::underlying_type_t<MaximizePresentation>;
+    T value = static_cast<T>(MaximizePresentation::ENTER_IMMERSIVE);
+    if (!ConvertFromJsValue(env, napiPresentation, value) ||
+        value < static_cast<T>(MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING) ||
+        value > static_cast<T>(MaximizePresentation::ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Invalid presentation param");
+        return std::nullopt;
+    }
+    return static_cast<MaximizePresentation>(value);
+}
+
+std::optional<WaterfallResidentState> ParseWaterfallResidentState(napi_env env, napi_value napiAcrossDisplay)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "env is nullptr");
+        return std::nullopt;
+    }
+    if (napiAcrossDisplay == nullptr || GetType(env, napiAcrossDisplay) == napi_undefined) {
+        return WaterfallResidentState::CANCEL;
+    }
+    bool acrossDisplay = false;
+    if (!ConvertFromJsValue(env, napiAcrossDisplay, acrossDisplay)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Invalid acrossDisplay param");
+        return std::nullopt;
+    }
+    return acrossDisplay ? WaterfallResidentState::OPEN : WaterfallResidentState::CLOSE;
+}
+
 napi_value JsWindow::OnMaximize(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "WindowToken is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][maximize]msg: window is nullptr");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "window is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "[window][maximize]msg: window is nullptr");
     }
-    if (!(WindowHelper::IsMainWindow(windowToken_->GetType()) ||
-          windowToken_->IsSubWindowMaximizeSupported())) {
+    if (!(WindowHelper::IsMainWindow(windowToken_->GetType()) || windowToken_->IsSubWindowMaximizeSupported())) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "only support main or sub Window");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
             "[window][maximize]msg: Only support main or sub Window");
     }
-    size_t argc = FOUR_PARAMS_SIZE;
-    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    size_t argc = TWO_PARAMS_SIZE;
+    napi_value argv[TWO_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    using T = std::underlying_type_t<MaximizePresentation>;
-    T presentationValue = static_cast<T>(MaximizePresentation::ENTER_IMMERSIVE);
-    if (argc == 1) {
-        if (!ConvertFromJsValue(env, argv[INDEX_ZERO], presentationValue) ||
-            presentationValue < static_cast<T>(MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING) ||
-            presentationValue > static_cast<T>(MaximizePresentation::ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER)) {
-            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to presentationValue");
-            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-                "[window][maximize]msg: Failed to convert parameter to presentationValue");
-        }
+    auto presentationOpt = ParsePresentation(env, argv[INDEX_ZERO]);
+    if (!presentationOpt) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+                              "[window][maximize]msg: Failed to convert parameter to presentation");
     }
-    MaximizePresentation presentation = static_cast<MaximizePresentation>(presentationValue);
-    // 1: params num; 1: index of callback
-    napi_value lastParam = (argc <= 1) ? nullptr :
-        (GetType(env, argv[INDEX_ONE]) == napi_function ? argv[INDEX_ONE] : nullptr);
+    auto waterfallResidentStateOpt = ParseWaterfallResidentState(env, argv[INDEX_ONE]);
+    if (!waterfallResidentStateOpt) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+                              "[window][maximize]msg: Failed to convert parameter to acrossDisplay");
+    }
     napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [windowToken = wptr<Window>(windowToken_), presentation, env, task = napiAsyncTask] {
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [windowToken = wptr<Window>(windowToken_),
+                      presentation = *presentationOpt, waterfallResidentState = *waterfallResidentStateOpt,
+                      env, napiAsyncTask, where = __func__] {
         auto window = windowToken.promote();
         if (window == nullptr) {
-            task->Reject(env,
-                JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                    "[window][maximize]msg: Window is nullptr"));
+            napiAsyncTask->Reject(env,
+                JsErrUtils::CreateJsError(
+                    env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "[window][maximize]msg: window is nullptr"));
             return;
         }
-        WMError ret = window->Maximize(presentation);
+        WMError ret = window->Maximize(presentation, waterfallResidentState);
         if (ret == WMError::WM_OK) {
-            task->Resolve(env, NapiGetUndefined(env));
+            napiAsyncTask->Resolve(env, NapiGetUndefined(env));
         } else {
             WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
-            task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode,
-                "[window][maximize]msg: Failed"));
+            napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "[window][maximize]msg: Failed"));
         }
+        TLOGNI(WmsLogTag::WMS_LAYOUT_PC,
+            "%{public}s: windowId: %{public}u, presentation: %{public}d, waterfallResidentState: %{public}u",
+            where, window->GetWindowId(), static_cast<int32_t>(presentation),
+            static_cast<uint32_t>(waterfallResidentState));
     };
     if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnMaximize") != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env, CreateJsError(env,
-            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
-            "[window][maximize]msg: Send event failed"));
+        napiAsyncTask->Reject(env,
+            JsErrUtils::CreateJsError(
+                env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "[window][maximize]msg: Failed to send event"));
     }
     return result;
 }
@@ -7162,25 +7269,32 @@ bool JsWindow::ParseWindowLimits(napi_env env, napi_value jsObject, WindowLimits
     if (ParseJsValue(jsObject, env, "maxWidth", data)) {
         windowLimits.maxWidth_ = data;
     } else {
-        WLOGFE("Failed to convert object to windowLimits");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to maxWidth");
         return false;
     }
     if (ParseJsValue(jsObject, env, "minWidth", data)) {
         windowLimits.minWidth_ = data;
     } else {
-        WLOGFE("Failed to convert object to windowLimits");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to minWidth");
         return false;
     }
     if (ParseJsValue(jsObject, env, "maxHeight", data)) {
         windowLimits.maxHeight_ = data;
     } else {
-        WLOGFE("Failed to convert object to windowLimits");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to maxHeight");
         return false;
     }
     if (ParseJsValue(jsObject, env, "minHeight", data)) {
         windowLimits.minHeight_ = data;
     } else {
-        WLOGFE("Failed to convert object to windowLimits");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to minHeight");
+        return false;
+    }
+    PixelUnit pixelUnit = PixelUnit::PX;
+    if (ParseJsValueOrGetDefault(jsObject, env, "pixelUnit", pixelUnit, PixelUnit::PX)) {
+        windowLimits.pixelUnit_ = pixelUnit;
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to pixelUnit");
         return false;
     }
     return true;
@@ -7364,6 +7478,38 @@ napi_value JsWindow::OnGetWindowLimits(napi_env env, napi_callback_info info)
         return objValue;
     } else {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "[window][getWindowLimits]msg: Nullptr");
+    }
+}
+
+/** @note @window.layout */
+napi_value JsWindow::OnGetWindowLimitsVP(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc > 1) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][getWindowLimitsVP]msg: Argc is invalid");
+    }
+
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][getWindowLimitsVP]msg: Window is nullptr");
+    }
+    WindowLimits windowLimits;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetWindowLimits(windowLimits, true));
+    if (ret != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, ret, "[window][getWindowLimitsVP]msg: Failed");
+    }
+    auto objValue = GetWindowLimitsAndConvertToJsValue(env, windowLimits);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id: %{public}u, name: %{public}s, getWindowLimitsVP end",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+    if (objValue != nullptr) {
+        return objValue;
+    } else {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "[window][getWindowLimitsVP]msg: Nullptr");
     }
 }
 
@@ -8252,6 +8398,19 @@ napi_value JsWindow::OnIsImmersiveLayout(napi_env env, napi_callback_info info)
     TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u isImmersiveLayout %{public}u end",
         windowToken_->GetWindowId(), isImmersiveLayout);
     return CreateJsValue(env, isImmersiveLayout);
+}
+
+napi_value JsWindow::OnIsInFreeWindowMode(napi_env env, napi_callback_info info)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "windowToken_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][OnIsInFreeWindowMode]msg: invalid window");
+    }
+    bool isInFreeWindowMode = windowToken_->IsPcOrPadFreeMultiWindowMode();
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u isInFreeWindowMod %{public}u end",
+        windowToken_->GetWindowId(), isInFreeWindowMode);
+    return CreateJsValue(env, isInFreeWindowMode);
 }
 
 napi_value JsWindow::OnGetWindowStatus(napi_env env, napi_callback_info info)
@@ -9192,6 +9351,93 @@ napi_value JsWindow::OnSetWindowShadowEnabled(napi_env env, napi_callback_info i
     return result;
 }
 
+napi_value JsWindow::SetRotationLocked(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetRotationLocked(env, info) : nullptr;
+}
+ 
+napi_value JsWindow::OnSetRotationLocked(napi_env env, napi_callback_info info)
+{
+    const std::string errMsgPrefix = "[window][setRotationLocked]msg: ";
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "windowToken is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, errMsgPrefix + "window is nullptr");
+    }
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "permission denied, require system application!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP, errMsgPrefix + "not system application");
+    }
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1 || argv[0] == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Argc is invalid: %{public}zu.", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, errMsgPrefix + "parameter is invalid");
+    }
+    bool locked = false;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], locked)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter from jsValue");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            errMsgPrefix + "fail to convert parameter to locked");
+    }
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [windowToken = wptr<Window>(windowToken_), locked, env, napiAsyncTask, errMsgPrefix] {
+        auto window = windowToken.promote();
+        if (!window) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "window is nullptr");
+            napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                errMsgPrefix + "window is nullptr"));
+            return;
+        }
+        auto ret = window->SetRotationLocked(locked);
+        auto it = WM_JS_TO_ERROR_CODE_MAP.find(ret);
+        WmErrorCode code = (it != WM_JS_TO_ERROR_CODE_MAP.end()) ? it->second : WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        if (code == WmErrorCode::WM_OK) {
+            napiAsyncTask->Resolve(env, NapiGetUndefined(env));
+        } else {
+            napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, code,
+                errMsgPrefix + "set rotation locked failed"));
+        }
+    };
+    if (napi_send_event(env, asyncTask, napi_eprio_high, __func__) != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            errMsgPrefix + "failed to send event"));
+    }
+    return result;
+}
+ 
+napi_value JsWindow::GetRotationLocked(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGetRotationLocked(env, info) : nullptr;
+}
+ 
+napi_value JsWindow::OnGetRotationLocked(napi_env env, napi_callback_info info)
+{
+    const std::string errMsgPrefix = "[window][getRotationLocked]msg: ";
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "window is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, errMsgPrefix + "window is nullptr");
+    }
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "permission denied, require system application!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP, errMsgPrefix + "not system application");
+    }
+    bool locked = false;
+    WmErrorCode code = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetRotationLocked(locked));
+    if (code != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Get rotation locked failed");
+        return NapiThrowError(env, code, errMsgPrefix + "get rotation locked failed");
+    }
+    TLOGI(WmsLogTag::WMS_ROTATION, "window [%{public}u, %{public}s] locked = %{public}d",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), locked);
+    return CreateJsValue(env, locked);
+}
+
 void BindFunctions(napi_env env, napi_value object, const char* moduleName)
 {
     BindNativeFunction(env, object, "startMoving", moduleName, JsWindow::StartMoving);
@@ -9246,6 +9492,8 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "getStatusBarProperty", moduleName, JsWindow::GetStatusBarProperty);
     BindNativeFunction(env, object, "getAvoidArea", moduleName, JsWindow::GetAvoidArea);
     BindNativeFunction(env, object, "getWindowAvoidArea", moduleName, JsWindow::GetWindowAvoidAreaSync);
+    BindNativeFunction(env, object, "getWindowAvoidAreaIgnoringVisibility",
+        moduleName, JsWindow::GetWindowAvoidAreaIgnoringVisibilitySync);
     BindNativeFunction(env, object, "isShowing", moduleName, JsWindow::IsShowing);
     BindNativeFunction(env, object, "isWindowShowing", moduleName, JsWindow::IsWindowShowingSync);
     BindNativeFunction(env, object, "isSupportWideGamut", moduleName, JsWindow::IsSupportWideGamut);
@@ -9316,6 +9564,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "keepKeyboardOnFocus", moduleName, JsWindow::KeepKeyboardOnFocus);
     BindNativeFunction(env, object, "setWindowLimits", moduleName, JsWindow::SetWindowLimits);
     BindNativeFunction(env, object, "getWindowLimits", moduleName, JsWindow::GetWindowLimits);
+    BindNativeFunction(env, object, "getWindowLimitsVP", moduleName, JsWindow::GetWindowLimitsVP);
     BindNativeFunction(env, object, "setSpecificSystemBarEnabled", moduleName, JsWindow::SetSpecificSystemBarEnabled);
     BindNativeFunction(env, object, "setSingleFrameComposerEnabled", moduleName,
         JsWindow::SetSingleFrameComposerEnabled);
@@ -9369,6 +9618,9 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
         JsWindow::SetFollowParentWindowLayoutEnabled);
     BindNativeFunction(env, object, "setWindowShadowEnabled", moduleName, JsWindow::SetWindowShadowEnabled);
     BindNativeFunction(env, object, "isImmersiveLayout", moduleName, JsWindow::IsImmersiveLayout);
+    BindNativeFunction(env, object, "isInFreeWindowMode", moduleName, JsWindow::IsInFreeWindowMode);
+    BindNativeFunction(env, object, "setRotationLocked", moduleName, JsWindow::SetRotationLocked);
+    BindNativeFunction(env, object, "getRotationLocked", moduleName, JsWindow::GetRotationLocked);
 }
 }  // namespace Rosen
 }  // namespace OHOS

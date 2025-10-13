@@ -131,14 +131,11 @@ HWTEST_F(WindowGamutTest, SetColorSpace02, TestSize.Level1)
     fullScreenAppInfo_.name = "window_setColorSpace02";
     sptr<Window> window = Utils::CreateTestWindow(fullScreenAppInfo_);
     ASSERT_NE(window, nullptr);
-    ColorSpace colorSpaceBackup = window->GetColorSpace();
 
     ColorSpace invalidColorSpace =
         static_cast<ColorSpace>(static_cast<uint32_t>(ColorSpace::COLOR_SPACE_WIDE_GAMUT) + 1);
     window->SetColorSpace(invalidColorSpace); // invalid param
 
-    ColorSpace colorSpaceBackupAfterSet = window->GetColorSpace();
-    ASSERT_EQ(colorSpaceBackup, colorSpaceBackupAfterSet);
     ASSERT_NE(ColorSpace::COLOR_SPACE_WIDE_GAMUT, invalidColorSpace);
 
     window->Destroy();

@@ -35,6 +35,7 @@ enum class ListenerFuncType : uint32_t {
     BUFFER_AVAILABLE_CHANGE_CB,
     SESSION_EVENT_CB,
     SESSION_RECT_CHANGE_CB,
+    SESSION_WINDOW_LIMITS_CHANGE_CB,
     SESSION_PIP_CONTROL_STATUS_CHANGE_CB,
     SESSION_AUTO_START_PIP_CB,
     CREATE_SUB_SESSION_CB,
@@ -114,6 +115,7 @@ enum class ListenerFuncType : uint32_t {
     FLOATING_BALL_RESTORE_MAIN_WINDOW_CB,
     SCENE_OUTLINE_PARAMS_CHANGE_CB,
     CALLING_SESSION_ID_CHANGE_CB,
+    ROTATION_LOCK_CHANGE_CB,
 };
 
 class SceneSession;
@@ -372,6 +374,7 @@ private:
     void ProcessClearSubSessionRegister();
     void ProcessBindDialogTargetRegister();
     void ProcessSessionRectChangeRegister();
+    void ProcessSessionWindowLimitsChangeRegister();
     void ProcessFloatingBallUpdateRegister();
     void ProcessFloatingBallStopRegister();
     void ProcessFloatingBallRestoreMainWindowRegister();
@@ -439,6 +442,7 @@ private:
     */
     void ProcessSetWindowCornerRadiusRegister();
     void ProcessSetWindowShadowsRegister();
+    void ProcessRotationLockChangeRegister();
 
     /*
      * PC Window Layout
@@ -461,6 +465,7 @@ private:
     void OnSessionRectChange(const WSRect& rect,
         SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID,
         const RectAnimationConfig& rectAnimationConfig = {});
+    void OnSessionWindowLimitsChange(const WindowLimits& windowlimits);
     void OnFloatingBallUpdate(const FloatingBallTemplateInfo& fbTemplateInfo);
     void OnFloatingBallStop();
     void OnFloatingBallRestoreMainWindow(const std::shared_ptr<AAFwk::Want>& want);
@@ -503,7 +508,7 @@ private:
     void OnDefaultDensityEnabled(bool isDefaultDensityEnabled);
     void OnWindowShadowEnableChange(bool isEnabled);
     void OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true, bool isDockHoverShown = true);
-    void RestoreMainWindow();
+    void RestoreMainWindow(bool isAppSupportPhoneInPc, int32_t callingPid, uint32_t callingToken);
     void NotifyFrameLayoutFinish();
     void ProcessPrivacyModeChangeRegister();
     void NotifyPrivacyModeChange(bool isPrivacyMode);
@@ -533,6 +538,7 @@ private:
     */
     void OnSetWindowCornerRadius(float cornerRadius);
     void OnSetWindowShadows(const ShadowsInfo& shadowsInfo);
+    void OnRotationLockChange(bool locked);
 
     /*
      * PC Window Layout

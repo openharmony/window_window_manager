@@ -122,6 +122,7 @@ public:
     static napi_value RaiseMainWindowAboveTarget(napi_env env, napi_callback_info info);
     static napi_value KeepKeyboardOnFocus(napi_env env, napi_callback_info info);
     static napi_value GetWindowLimits(napi_env env, napi_callback_info info);
+    static napi_value GetWindowLimitsVP(napi_env env, napi_callback_info info);
     static napi_value SetWindowLimits(napi_env env, napi_callback_info info);
     static napi_value SetSingleFrameComposerEnabled(napi_env env, napi_callback_info info);
     static napi_value EnableLandscapeMultiWindow(napi_env env, napi_callback_info info);
@@ -171,6 +172,8 @@ public:
     static napi_value SetWaterMarkFlag(napi_env env, napi_callback_info info);
     static napi_value SetHandwritingFlag(napi_env env, napi_callback_info info);
     static napi_value SetWindowGrayScale(napi_env env, napi_callback_info info);
+    static napi_value SetRotationLocked(napi_env env, napi_callback_info info);
+    static napi_value GetRotationLocked(napi_env env, napi_callback_info info);
 
     /*
      * Sub Window
@@ -192,6 +195,7 @@ public:
     static napi_value GetWindowStatus(napi_env env, napi_callback_info info);
     static napi_value SetWindowMask(napi_env env, napi_callback_info info);
     static napi_value SetFollowParentMultiScreenPolicy(napi_env env, napi_callback_info info);
+    static napi_value IsInFreeWindowMode(napi_env env, napi_callback_info info);
 
     /*
      * Window Transition Animation For PC
@@ -241,6 +245,7 @@ public:
     static napi_value GetStatusBarProperty(napi_env env, napi_callback_info info);
     static napi_value GetAvoidArea(napi_env env, napi_callback_info info);
     static napi_value GetWindowAvoidAreaSync(napi_env env, napi_callback_info info);
+    static napi_value GetWindowAvoidAreaIgnoringVisibilitySync(napi_env env, napi_callback_info info);
     static napi_value SetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
     static napi_value SetSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
     static napi_value IsSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
@@ -317,6 +322,7 @@ private:
     napi_value OnKeepKeyboardOnFocus(napi_env env, napi_callback_info info);
     napi_value OnSetWindowLimits(napi_env env, napi_callback_info info);
     napi_value OnGetWindowLimits(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowLimitsVP(napi_env env, napi_callback_info info);
 
     napi_value OnIsFocused(napi_env env, napi_callback_info info);
     napi_value OnRequestFocus(napi_env env, napi_callback_info info);
@@ -394,6 +400,8 @@ private:
     napi_value OnEnableDrag(napi_env env, napi_callback_info info);
     napi_value OnStartMoving(napi_env env, napi_callback_info info);
     napi_value OnStopMoving(napi_env env, napi_callback_info info);
+    napi_value OnSetRotationLocked(napi_env env, napi_callback_info info);
+    napi_value OnGetRotationLocked(napi_env env, napi_callback_info info);
 
     /*
      * Sub Window
@@ -415,6 +423,7 @@ private:
     napi_value OnSetWindowMask(napi_env env, napi_callback_info info);
     napi_value OnGetWindowStatus(napi_env env, napi_callback_info info);
     napi_value OnSetFollowParentMultiScreenPolicy(napi_env env, napi_callback_info info);
+    napi_value OnIsInFreeWindowMode(napi_env env, napi_callback_info info);
 
     /*
      * Window Transition Animation For PC
@@ -470,6 +479,7 @@ private:
     napi_value OnGetStatusBarPropertySync(napi_env env, napi_callback_info info);
     napi_value OnGetAvoidArea(napi_env env, napi_callback_info info);
     napi_value OnGetWindowAvoidAreaSync(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowAvoidAreaIgnoringVisibilitySync(napi_env env, napi_callback_info info);
     napi_value OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     napi_value OnGetImmersiveModeEnabledState(napi_env env, napi_callback_info info);

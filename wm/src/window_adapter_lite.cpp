@@ -280,6 +280,15 @@ WMError WindowAdapterLite::GetMainWindowInfos(int32_t topNum, std::vector<MainWi
     return wmsProxy->GetMainWindowInfos(topNum, topNInfo);
 }
 
+WMError WindowAdapterLite::UpdateAnimationSpeedWithPid(pid_t pid, float speed)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    TLOGD(WmsLogTag::WMS_MAIN, "update animation speed with pid");
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->UpdateAnimationSpeedWithPid(pid, speed);
+}
+
 WMError WindowAdapterLite::GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
@@ -415,5 +424,15 @@ WMError WindowAdapterLite::SendPointerEventForHover(const std::shared_ptr<MMI::P
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return static_cast<WMError>(wmsProxy->SendPointerEventForHover(pointerEvent));
 }
+
+WMError WindowAdapterLite::GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+    std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
+}
+
 } // namespace Rosen
 } // namespace OHOS

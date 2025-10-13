@@ -67,6 +67,7 @@ private:
     int HandleUpdateTitleInTargetPos(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyDensityFollowHost(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyWindowVisibilityChange(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyWindowOcclusionState(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyTransformChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySingleHandTransformChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyDialogStateChange(MessageParcel& data, MessageParcel& reply);
@@ -80,6 +81,7 @@ private:
     int HandlePcAppInPadNormalClose(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyCompatibleModePropertyChange(MessageParcel& data, MessageParcel& reply);
     int HandleSetUniqueVirtualPixelRatio(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateAnimationSpeed(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySessionFullScreen(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& reply);
     int HandleExtensionHostData(MessageParcel& data, MessageParcel& reply, MessageOption& option);

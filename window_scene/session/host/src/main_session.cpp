@@ -22,6 +22,7 @@
 #include "window_helper.h"
 #include "session_helper.h"
 #include "session/host/include/scene_persistent_storage.h"
+#include "wm_math.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -95,6 +96,7 @@ WSError MainSession::Reconnect(const sptr<ISessionStage>& sessionStage, const sp
         if (session->pcFoldScreenController_) {
             session->pcFoldScreenController_->OnConnect();
         }
+        session->RestoreAspectRatio(property->GetAspectRatio());
         return ret;
     });
 }
@@ -279,14 +281,19 @@ WSError MainSession::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool 
 
 WSError MainSession::OnRestoreMainWindow()
 {
-    PostTask([weakThis = wptr(this)] {
+    bool isAppSupportPhoneInPc = GetSessionProperty()->GetIsAppSupportPhoneInPc();
+    int32_t callingPid = IPCSkeleton::GetCallingPid();
+    uint32_t callingToken = IPCSkeleton::GetCallingTokenID();
+    TLOGI(WmsLogTag::WMS_MAIN, "isAppSupportPhoneInPc: %{public}d callingPid: %{public}d callingTokenId: %{public}u",
+        isAppSupportPhoneInPc, callingPid, callingToken);
+    PostTask([weakThis = wptr(this), isAppSupportPhoneInPc, callingPid, callingToken] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "session is null");
             return;
         }
         if (session->onRestoreMainWindowFunc_) {
-            session->onRestoreMainWindowFunc_();
+            session->onRestoreMainWindowFunc_(isAppSupportPhoneInPc, callingPid, callingToken);
         }
     }, __func__);
     return WSError::WS_OK;
@@ -378,13 +385,20 @@ void MainSession::NotifySubAndDialogFollowRectChange(const WSRect& rect, bool is
         funcMap = notifySurfaceBoundsChangeFuncMap_;
     }
     WSRect newRect;
+    bool isCompatMode = IsInCompatScaleMode();
     for (const auto& [sessionId, func] : funcMap) {
         auto subSession = GetSceneSessionById(sessionId);
         if (subSession && subSession->GetIsFollowParentLayout() && func) {
+            if (!isCompatMode) {
+                func(rect, isGlobal, needFlush);
+                continue;
+            }
             if (newRect.IsEmpty()) {
                 HookStartMoveRect(newRect, rect);
             }
-            func(newRect, isGlobal, needFlush);
+            if (GetCallingPid() != subSession->GetCallingPid()) {
+                func(newRect, isGlobal, needFlush);
+            }
         }
     }
 }
@@ -487,6 +501,7 @@ WSError MainSession::SetSessionLabelAndIconInner(const std::string& label,
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s session is nullptr", where);
             return WSError::WS_ERROR_NULLPTR;
         }
+        session->label_ = label;
         if (session->updateSessionLabelAndIconFunc_) {
             session->updateSessionLabelAndIconFunc_(label, icon);
         }
@@ -587,5 +602,21 @@ WSError MainSession::NotifyIsFullScreenInForceSplitMode(bool isFullScreen)
 bool MainSession::IsFullScreenInForceSplit()
 {
     return isFullScreenInForceSplit_.load();
+}
+
+bool MainSession::RestoreAspectRatio(float ratio)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, ratio: %{public}f", GetPersistentId(), ratio);
+
+    // If ratio is nearly zero, no aspect ratio needs to be restored.
+    // This avoids overwriting the persistent configuration.
+    if (MathHelper::NearZero(ratio)) {
+        return false;
+    }
+    Session::SetAspectRatio(ratio);
+    if (moveDragController_) {
+        moveDragController_->SetAspectRatio(ratio);
+    }
+    return true;
 }
 } // namespace OHOS::Rosen

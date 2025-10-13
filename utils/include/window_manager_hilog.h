@@ -27,10 +27,10 @@ static constexpr unsigned int HILOG_DOMAIN_DISPLAY = 0xD004201;
 
 #define PRINT_WLOG(level, ...) HILOG_IMPL(LABEL.type, level, LABEL.domain, LABEL.tag, ##__VA_ARGS__)
 
-#define WLOGD(fmt, ...) PRINT_WLOG(LOG_DEBUG, "(%{public}d)" fmt, __LINE__, ##__VA_ARGS__)
-#define WLOGI(fmt, ...) PRINT_WLOG(LOG_INFO, "(%{public}d)" fmt, __LINE__, ##__VA_ARGS__)
-#define WLOGW(fmt, ...) PRINT_WLOG(LOG_WARN, "(%{public}d)" fmt, __LINE__, ##__VA_ARGS__)
-#define WLOGE(fmt, ...) PRINT_WLOG(LOG_ERROR, "(%{public}d)" fmt, __LINE__, ##__VA_ARGS__)
+#define WLOGD(fmt, ...) PRINT_WLOG(LOG_DEBUG, fmt, ##__VA_ARGS__)
+#define WLOGI(fmt, ...) PRINT_WLOG(LOG_INFO, fmt, ##__VA_ARGS__)
+#define WLOGW(fmt, ...) PRINT_WLOG(LOG_WARN, fmt, ##__VA_ARGS__)
+#define WLOGE(fmt, ...) PRINT_WLOG(LOG_ERROR, fmt, ##__VA_ARGS__)
 
 #define C_W_FUNC __func__
 
@@ -77,14 +77,14 @@ enum class WmsLogTag : uint8_t {
 extern const char* g_domainContents[static_cast<uint32_t>(WmsLogTag::END)];
 #ifdef IS_RELEASE_VERSION
 #define WMS_FILE_NAME ""
+#define FMT_PREFIX "%{public}s%{public}s: "
+#define FMT_PREFIX_NO_FUNC "%{public}s"
 #else
 #define WMS_FILE_NAME (__builtin_strrchr(__FILE_NAME__, '/') ?   \
                        __builtin_strrchr(__FILE_NAME__, '/') + 1 : __FILE_NAME__)
+#define FMT_PREFIX "%{public}s %{public}s: "
+#define FMT_PREFIX_NO_FUNC "%{public}s: "
 #endif
-
-#define FMT_PREFIX "[%{public}s] %{public}s: "
-
-#define FMT_PREFIX_NO_FUNC "[%{public}s]: "
 
 #define PRINT_TLOG(level, tag, ...)                                                                     \
     do {                                                                                                \
