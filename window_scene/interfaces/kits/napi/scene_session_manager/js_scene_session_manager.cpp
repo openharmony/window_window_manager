@@ -73,7 +73,6 @@ const std::string OUTSIDE_DOWN_EVENT_CB = "outsideDownEvent";
 const std::string START_UI_ABILITY_ERROR = "startUIAbilityError";
 const std::string ARG_DUMP_HELP = "-h";
 const std::string SHIFT_FOCUS_CB = "shiftFocus";
-const std::string CALLING_WINDOW_ID_CHANGE_CB = "callingWindowIdChange";
 const std::string CLOSE_TARGET_FLOAT_WINDOW_CB = "closeTargetFloatWindow";
 const std::string ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB = "abilityManagerCollaboratorRegistered";
 const std::string START_PIP_FAILED_CB = "startPiPFailed";
@@ -97,7 +96,6 @@ const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {STATUS_BAR_ENABLED_CHANGE_CB, ListenerFunctionType::STATUS_BAR_ENABLED_CHANGE_CB},
     {OUTSIDE_DOWN_EVENT_CB,        ListenerFunctionType::OUTSIDE_DOWN_EVENT_CB},
     {SHIFT_FOCUS_CB,               ListenerFunctionType::SHIFT_FOCUS_CB},
-    {CALLING_WINDOW_ID_CHANGE_CB,  ListenerFunctionType::CALLING_WINDOW_ID_CHANGE_CB},
     {START_UI_ABILITY_ERROR,       ListenerFunctionType::START_UI_ABILITY_ERROR},
     {GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
         ListenerFunctionType::GESTURE_NAVIGATION_ENABLED_CHANGE_CB},
@@ -556,20 +554,6 @@ void JsSceneSessionManager::OnShiftFocus(int32_t persistentId, DisplayId display
     taskScheduler_->PostMainThreadTask(task, "OnShiftFocus, PID:" + std::to_string(persistentId));
 }
 
-void JsSceneSessionManager::OnCallingSessionIdChange(uint32_t sessionId)
-{
-    TLOGD(WmsLogTag::WMS_KEYBOARD, "[NAPI]");
-    auto task = [this, sessionId, jsCallBack = GetJSCallback(CALLING_WINDOW_ID_CHANGE_CB), env = env_]() {
-        if (jsCallBack == nullptr) {
-            TLOGNE(WmsLogTag::WMS_KEYBOARD, "jsCallBack is nullptr");
-            return;
-        }
-        napi_value argv[] = { CreateJsValue(env, sessionId) };
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-    };
-    taskScheduler_->PostMainThreadTask(task, "OnCallingSessionIdChange, sessionId:" + std::to_string(sessionId));
-}
-
 void JsSceneSessionManager::OnAbilityManagerCollaboratorRegistered()
 {
     TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
@@ -709,16 +693,6 @@ void JsSceneSessionManager::ProcessShiftFocus()
     SceneSessionManager::GetInstance().SetSCBFocusedListener(focusedCallback);
     SceneSessionManager::GetInstance().SetSCBUnfocusedListener(unfocusedCallback);
     SceneSessionManager::GetInstance().SetSCBFocusChangeListener(std::move(scbFocusChangeCallback));
-}
-
-void JsSceneSessionManager::ProcessCallingSessionIdChangeRegister()
-{
-    const char* const where = __func__;
-    ProcessCallingSessionIdChangeFunc func = [this, where](uint32_t callingSessionId) {
-        TLOGND(WmsLogTag::WMS_KEYBOARD, "%{public}s called, callingSessionId: %{public}d", where, callingSessionId);
-        this->OnCallingSessionIdChange(callingSessionId);
-    };
-    SceneSessionManager::GetInstance().SetCallingSessionIdSessionListenser(func);
 }
 
 void JsSceneSessionManager::ProcessAbilityManagerCollaboratorRegistered()
@@ -1598,9 +1572,6 @@ void JsSceneSessionManager::ProcessRegisterCallback(ListenerFunctionType listene
             break;
         case ListenerFunctionType::SHIFT_FOCUS_CB:
             ProcessShiftFocus();
-            break;
-        case ListenerFunctionType::CALLING_WINDOW_ID_CHANGE_CB:
-            ProcessCallingSessionIdChangeRegister();
             break;
         case ListenerFunctionType::START_UI_ABILITY_ERROR:
             ProcessStartUIAbilityErrorRegister();

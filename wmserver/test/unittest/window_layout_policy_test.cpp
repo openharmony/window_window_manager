@@ -1344,7 +1344,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateLayoutRect, TestSize.Level1)
     node->SetWindowProperty(property);
     node->SetWindowRect(winRect);
     node->SetRequestRect(winRect);
-    node->SetCallingWindow(1);
+    node->ChangeCallingWindowId(1);
     layoutPolicyTile_->UpdateLayoutRect(node);
 }
 

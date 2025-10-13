@@ -1200,22 +1200,22 @@ WMError WindowAdapter::GetFreeMultiWindowEnableState(bool& enable)
     return static_cast<WMError>(wmsProxy->GetFreeMultiWindowEnableState(enable));
 }
 
-WMError WindowAdapter::GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus)
+WMError WindowAdapter::GetCallingWindowWindowStatus(uint32_t callingWindowId, WindowStatus& windowStatus)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
-    return static_cast<WMError>(wmsProxy->GetCallingWindowWindowStatus(persistentId, windowStatus));
+    return static_cast<WMError>(wmsProxy->GetCallingWindowWindowStatus(callingWindowId, windowStatus));
 }
 
-WMError WindowAdapter::GetCallingWindowRect(int32_t persistentId, Rect& rect)
+WMError WindowAdapter::GetCallingWindowRect(uint32_t callingWindowId, Rect& rect)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
-    return static_cast<WMError>(wmsProxy->GetCallingWindowRect(persistentId, rect));
+    return static_cast<WMError>(wmsProxy->GetCallingWindowRect(callingWindowId, rect));
 }
 
 WMError WindowAdapter::GetWindowModeType(WindowModeType& windowModeType)

@@ -1411,7 +1411,7 @@ HWTEST_F(WindowImplTest2, InvalidWindow, TestSize.Level1)
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->MoveTo(0, 0));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Resize(0, 0));
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetCallingWindow(INVALID_WINDOW_ID));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->ChangeCallingWindowId(INVALID_WINDOW_ID));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetBackgroundColor(std::string("???")));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Close());
 }

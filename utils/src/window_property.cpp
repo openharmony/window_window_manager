@@ -256,7 +256,7 @@ void WindowProperty::SetKeepScreenOn(bool keepScreenOn)
     keepScreenOn_ = keepScreenOn;
 }
 
-void WindowProperty::SetCallingWindow(uint32_t windowId)
+void WindowProperty::ChangeCallingWindowId(uint32_t windowId)
 {
     callingWindow_ = windowId;
 }
@@ -784,7 +784,7 @@ WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetAnimationFlag(parcel.ReadUint32());
     property->SetWindowSizeChangeReason(static_cast<WindowSizeChangeReason>(parcel.ReadUint32()));
     property->SetTokenState(parcel.ReadBool());
-    property->SetCallingWindow(parcel.ReadUint32());
+    property->ChangeCallingWindowId(parcel.ReadUint32());
     property->SetRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()));
     property->SetTurnScreenOn(parcel.ReadBool());
     property->SetKeepScreenOn(parcel.ReadBool());
@@ -921,7 +921,7 @@ void WindowProperty::Read(Parcel& parcel, PropertyChangeAction action)
             SetTouchable(parcel.ReadBool());
             break;
         case PropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW:
-            SetCallingWindow(parcel.ReadUint32());
+            ChangeCallingWindowId(parcel.ReadUint32());
             break;
         case PropertyChangeAction::ACTION_UPDATE_ORIENTATION:
             SetRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()));

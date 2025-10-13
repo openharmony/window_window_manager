@@ -58,7 +58,7 @@ public:
     void SetBrightness(float brightness);
     void SetTurnScreenOn(bool turnScreenOn);
     void SetKeepScreenOn(bool keepScreenOn);
-    void SetCallingWindow(uint32_t windowId);
+    void ChangeCallingWindowId(uint32_t windowId);
     void SetDisplayId(DisplayId displayId);
     void SetWindowId(uint32_t windowId);
     void SetParentId(uint32_t parentId);
