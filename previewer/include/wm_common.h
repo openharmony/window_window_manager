@@ -1876,6 +1876,24 @@ enum class ScreenshotEventType : int32_t {
 
     END,
 };
+
+/**
+ * @enum WaterfallResidentState
+ * @brief Represents the resident (persistent) state control of the waterfall layout.
+ */
+enum class WaterfallResidentState : uint32_t {
+    /** The resident state and the current waterfall state remain unchanged. */
+    UNCHANGED = 0,
+
+    /** Enable the resident state and enter the waterfall layout. */
+    OPEN = 1,
+
+    /** Disable the resident state and exit the waterfall layout. */
+    CLOSE = 2,
+
+    /** Disable the resident state but keep the current waterfall layout state unchanged. */
+    CANCEL = 3,
+};
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_H

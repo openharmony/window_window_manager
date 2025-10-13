@@ -199,6 +199,7 @@ public:
     WMError RecoverForCompatibleMode();
     WMError Maximize() override;
     WMError Maximize(MaximizePresentation presentation) override;
+    WMError Maximize(MaximizePresentation presentation, WaterfallResidentState state) override;
     WMError Recover() override;
     WMError Recover(uint32_t reason) override;
     WSError UpdateMaximizeMode(MaximizeMode mode) override;
@@ -449,6 +450,8 @@ private:
     /*
      * PC Window Layout
      */
+    bool CheckWaterfallResidentState(WaterfallResidentState state) const;
+    void ApplyMaximizePresentation(MaximizePresentation presentation);
     std::shared_ptr<MMI::PointerEvent> lastPointerEvent_ = nullptr;
     bool IsFullScreenSizeWindow(uint32_t width, uint32_t height);
     bool isResizedByLimit_ = false;

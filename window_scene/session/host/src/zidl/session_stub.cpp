@@ -563,6 +563,17 @@ int SessionStub::HandleRemoveStartingWindow(MessageParcel& data, MessageParcel& 
 }
 // LCOV_EXCL_STOP
 
+bool ReadEventParam(MessageParcel& data, SessionEvent event, SessionEventParam& param)
+{
+    if (event == SessionEvent::EVENT_MAXIMIZE) {
+        if (!data.ReadUint32(param.waterfallResidentState)) {
+            TLOGE(WmsLogTag::WMS_EVENT, "Failed to read waterfallResidentState");
+            return false;
+        }
+    }
+    return true;
+}
+
 int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_EVENT, "In!");
@@ -572,12 +583,16 @@ int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
         return ERR_INVALID_DATA;
     }
     TLOGD(WmsLogTag::WMS_EVENT, "eventId: %{public}d", eventId);
-    if (eventId < static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE) ||
-        eventId >= static_cast<uint32_t>(SessionEvent::EVENT_END)) {
+    auto event = static_cast<SessionEvent>(eventId);
+    if (event < SessionEvent::EVENT_MAXIMIZE || event >= SessionEvent::EVENT_END) {
         TLOGE(WmsLogTag::WMS_EVENT, "Invalid eventId: %{public}d", eventId);
         return ERR_INVALID_DATA;
     }
-    WSError errCode = OnSessionEvent(static_cast<SessionEvent>(eventId));
+    SessionEventParam param;
+    if (!ReadEventParam(data, event, param)) {
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = OnSessionEvent(event, param);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

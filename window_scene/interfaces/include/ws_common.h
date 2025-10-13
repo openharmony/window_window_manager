@@ -996,6 +996,7 @@ struct SessionEventParam {
     int32_t sessionHeight_ = 0;
     uint32_t dragResizeType = 0;
     uint32_t gravity = 0;
+    uint32_t waterfallResidentState = 0;
 };
 
 struct BackgroundParams {

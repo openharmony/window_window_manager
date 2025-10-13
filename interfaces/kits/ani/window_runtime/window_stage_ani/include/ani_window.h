@@ -81,6 +81,8 @@ public:
     static void Finalizer(ani_env* env, ani_long nativeObj);
     static void SetContentAspectRatio(ani_env* env, ani_object obj, ani_long nativeObj,
                                       ani_double ratio, ani_boolean isPersistent, ani_boolean needUpdateRect);
+    static void Maximize(ani_env* env, ani_object obj, ani_long nativeObj,
+                         ani_object aniPresentation, ani_object aniAcrossDisplay);
     static void SetRotationLocked(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean locked);
     static ani_boolean GetRotationLocked(ani_env* env, ani_object obj, ani_long nativeObj);
 
@@ -164,6 +166,7 @@ private:
      */
     void OnSetContentAspectRatio(
         ani_env* env, ani_double ratio, ani_boolean isPersistent, ani_boolean needUpdateRect);
+    void OnMaximize(ani_env* env, ani_object aniPresentation, ani_object aniAcrossDisplay);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<AniWindowRegisterManager> registerManager_ = nullptr;
