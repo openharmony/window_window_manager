@@ -645,7 +645,7 @@ public:
      *
      * @return timeStamp the timestamp when modal extension start.
      */
-    int64_t GetstartModalExtensionTimeStamp() const;
+    int64_t GetStartModalExtensionTimeStamp() const;
 
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
