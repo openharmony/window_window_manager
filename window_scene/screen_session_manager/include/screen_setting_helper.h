@@ -77,11 +77,30 @@ public:
     static void UnregisterRotationCorrectionExemptionListObserver();
     static bool GetRotationCorrectionExemptionList(std::vector<std::string>& exemptionApps,
         const std::string& key = SETTING_COMPATIBLE_APP_STRATEGY_KEY);
-    static void GetCorrectionExemptionListFromJson(const std::string& exemptionListJsonStr,
-        std::vector<std::string>& exemptionApps);
-    static std::string GetJsonValueString(const nlohmann::json& payload, const std::string& key);
-    static int32_t GetJsonValueNumber(const nlohmann::json& payload, const std::string& key);
-    static bool GetJsonValueBool(const nlohmann::json& payload, const std::string& key);
+    template<typename T>
+    static bool GetJsonValue(const nlohmann::json& payload, const std::string& key, T& result)
+    {
+        if (!payload.contains(key)) {
+            return false;
+        }
+        if constexpr (std::is_same_v<T, std::string>) {
+            if (payload[key].is_string()) {
+                result = payload[key].get<std::string>();
+                return true;
+            }
+        } else if constexpr (std::is_same_v<T, bool>) {
+            if (payload[key].is_boolean()) {
+                result = payload[key].get<bool>();
+                return true;
+            }
+        } else if constexpr (std::is_arithmetic_v<T>) {
+            if (payload[key].is_number()) {
+                result = payload[key].get<int32_t>();
+                return true;
+            }
+        }
+        return false;
+    }
 private:
     static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};
     static const constexpr char* SETTING_CAST_KEY {"huaweicast.data.privacy_projection_state"};
