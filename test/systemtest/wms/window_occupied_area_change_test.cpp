@@ -124,7 +124,7 @@ HWTEST_F(WindowOccupiedAreaChangeTest, KeyboardHeightChangeTest01, TestSize.Leve
     ASSERT_NE(nullptr, window2);
 
     ASSERT_EQ(WMError::WM_OK, window1->Show());
-    ASSERT_EQ(WMError::WM_OK, window2->SetCallingWindow(window1->GetWindowId()));
+    ASSERT_EQ(WMError::WM_OK, window2->ChangeCallingWindowId(window1->GetWindowId()));
     ASSERT_EQ(WMError::WM_OK, window2->Show());
     // Await 100ms and get callback result in listener.
     usleep(WAIT_ASYNC_US);
@@ -153,7 +153,7 @@ HWTEST_F(WindowOccupiedAreaChangeTest, KeyboardHeightChangeTest02, TestSize.Leve
     ASSERT_NE(nullptr, window2);
 
     ASSERT_EQ(WMError::WM_OK, window1->Show());
-    ASSERT_EQ(WMError::WM_OK, window2->SetCallingWindow(window1->GetWindowId()));
+    ASSERT_EQ(WMError::WM_OK, window2->ChangeCallingWindowId(window1->GetWindowId()));
     ASSERT_EQ(WMError::WM_OK, window2->Show());
     ASSERT_EQ(WMError::WM_OK, window2->Hide());
     // Await 100ms and get callback result in listener.
@@ -182,7 +182,7 @@ HWTEST_F(WindowOccupiedAreaChangeTest, KeyboardHeightChangeTest03, TestSize.Leve
     ASSERT_NE(nullptr, window2);
 
     ASSERT_EQ(WMError::WM_OK, window1->Show());
-    ASSERT_EQ(WMError::WM_OK, window2->SetCallingWindow(window1->GetWindowId()));
+    ASSERT_EQ(WMError::WM_OK, window2->ChangeCallingWindowId(window1->GetWindowId()));
     ASSERT_EQ(WMError::WM_OK, window2->Show());
     ASSERT_EQ(WMError::WM_OK, window2->Destroy());
     // Await 100ms and get callback result in listener.
