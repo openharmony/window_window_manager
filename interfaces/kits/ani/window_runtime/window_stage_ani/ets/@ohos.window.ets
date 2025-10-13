@@ -2548,6 +2548,22 @@ export class WindowInternal implements Window {
       this.offSync(this.nativeObj, 'occlusionStateChanged', callback);
     }
 
+    public onWindowStatusDidChange(callback: Callback<WindowStatusType>): void {
+      this.onSync(this.nativeObj, 'windowStatusDidChange', callback);
+    }
+
+    public offWindowStatusDidChange(callback?: Callback<WindowStatusType>): void {
+      this.offSync(this.nativeObj, 'windowStatusDidChange', callback);
+    }
+
+    public onRectChangeInGlobalDisplay(callback: Callback<RectChangeOptions>): void {
+      this.onSync(this.nativeObj, 'rectChangeInGlobalDisplay', callback);
+    }
+
+    public offRectChangeInGlobalDisplay(callback?: Callback<RectChangeOptions>): void {
+      this.offSync(this.nativeObj, 'rectChangeInGlobalDisplay', callback);
+    }
+
     public showWindow(callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.showWindowSync(this.nativeObj);
@@ -2964,6 +2980,10 @@ export interface Window {
     off<T>(type: string, callback?: Callback<T>): void;
     onOcclusionStateChanged(callback: Callback<OcclusionState>): void;
     offOcclusionStateChanged(callback?: Callback<OcclusionState>): void;
+    onWindowStatusDidChange(callback: Callback<WindowStatusType>): void;
+    offWindowStatusDidChange(callback?: Callback<WindowStatusType>): void;
+    onRectChangeInGlobalDisplay(callback: Callback<RectChangeOptions>): void;
+    offRectChangeInGlobalDisplay(callback?: Callback<RectChangeOptions>): void;
     resizeAsync(width: int, height: int): Promise<void>;
     setWindowLimits(windowLimits: WindowLimits): Promise<WindowLimits>;
     setWindowLimits(windowLimits: WindowLimits, isForcible: boolean): Promise<WindowLimits>;
