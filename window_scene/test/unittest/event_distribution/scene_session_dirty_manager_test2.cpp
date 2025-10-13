@@ -789,6 +789,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, UpdateWindowFlagsForLockCursor, TestSize
     manager_->UpdateWindowFlagsForLockCursor(session, lockCursorInfo, windowInfo);
     EXPECT_EQ(windowInfo.flags, 8);
 
+    lockCursorInfo->isActivating = true;
     lockCursorInfo->isCursorFollowMovement = true;
     manager_->UpdateWindowFlagsForLockCursor(session, lockCursorInfo, windowInfo);
     EXPECT_EQ(windowInfo.flags, 24);

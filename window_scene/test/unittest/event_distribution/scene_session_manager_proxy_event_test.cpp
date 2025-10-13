@@ -65,6 +65,7 @@ HWTEST_F(sceneSessionManagerProxyEventTest, SendCommonEvent, TestSize.Level1)
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
 
     // Failed to test remote.
+    MockMessageParcel::ClearAllErrorFlag();
     auto ssmProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
     ret = ssmProxy->SendCommonEvent(1, datas);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
