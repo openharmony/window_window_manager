@@ -2195,6 +2195,42 @@ HWTEST_F(SessionProxyTest, NotifyIsFullScreenInForceSplitMode, TestSize.Level3)
     sptr<SessionProxy> okProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
     EXPECT_EQ(WSError::WS_OK, okProxy->NotifyIsFullScreenInForceSplitMode(isFullScreen));
 }
+
+/**
+ * @tc.name: RestartApp
+ * @tc.desc: RestartApp test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, RestartApp, TestSize.Level3)
+{
+    auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
+    auto sessionProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    std::shared_ptr<AAFwk::Want> want = nullptr;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->RestartApp(want));
+
+    want = std::make_shared<AAFwk::Want>();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->RestartApp(want));
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->RestartApp(want));
+    MockMessageParcel::SetWriteParcelableErrorFlag(false);
+
+    sptr<SessionProxy> nullProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, nullProxy->RestartApp(want));
+
+    mockRemote->sendRequestResult_ = ERR_TRANSACTION_FAILED;
+    sptr<SessionProxy> failProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, failProxy->RestartApp(want));
+
+    mockRemote->sendRequestResult_ = ERR_NONE;
+    sptr<SessionProxy> okProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WSError::WS_OK, okProxy->RestartApp(want));
+    MockMessageParcel::ClearAllErrorFlag();
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
