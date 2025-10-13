@@ -2500,6 +2500,15 @@ HWTEST_F(WindowSceneSessionImplTest5, TestSetContentAspectRatio, TestSize.Level1
         .Times(1).WillOnce(Return(WSError::WS_OK));
     ret = window->SetContentAspectRatio(ratio, isPersistent, needUpdateRect);
     EXPECT_EQ(ret, WMError::WM_OK);
+
+    // Case 6: is compatibility mode => WM_OK
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    property->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_CALL(*mockHostSession, SetContentAspectRatio(_, _, _))
+        .Times(1).WillOnce(Return(WSError::WS_OK));
+    ret = window->SetContentAspectRatio(ratio, isPersistent, needUpdateRect);
+    EXPECT_EQ(ret, WMError::WM_OK);
 }
 
 /**

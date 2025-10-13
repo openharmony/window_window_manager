@@ -2792,7 +2792,10 @@ WMError WindowSceneSessionImpl::SetAspectRatio(float ratio)
         TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-
+    if (IsAdaptToProportionalScale()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Window is in compatibility mode");
+        return WMError::WM_OK;
+    }
     auto hostSession = GetHostSession();
     if (hostSession == nullptr) {
         WLOGFE("failed, because of nullptr");
@@ -2833,6 +2836,10 @@ WMError WindowSceneSessionImpl::SetContentAspectRatio(float ratio, bool isPersis
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid session, windowId: %{public}u", windowId);
         return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (IsAdaptToProportionalScale()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Window is in compatibility mode");
+        return WMError::WM_OK;
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
