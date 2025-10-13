@@ -2144,7 +2144,7 @@ WSError SceneSession::RestartApp(const std::shared_ptr<AAFwk::Want>& want)
             TLOGNE(WmsLogTag::WMS_LIFE, "session is not main window, id:%{public}d", session->GetPersistentId());
             return WSError::WS_ERROR_INVALID_SESSION;
         }
-        if (!session->IsSessionForeground()) {
+        if (!session->IsSessionForeground() || !session->GetForegroundInteractiveStatus()) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is not foreground, id:%{public}d", session->GetPersistentId());
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
