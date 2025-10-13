@@ -230,7 +230,7 @@ public:
     bool GetScreenWidthAndHeightFromClient(const sptr<WindowSessionProperty>& sessionProperty,
         uint32_t& screenWidth, uint32_t& screenHeight);
     sptr<SceneSession> GetSceneSessionById(int32_t sessionId) const;
-    bool CheckAbilityInfoBywant(const std::shared_ptr<AAFwk::Want>& want) const;
+    bool CheckAbilityInfoByWant(const std::shared_ptr<AAFwk::Want>& want) const;
 
     WSError UpdateActiveStatus(bool isActive) override;
     WSError OnSessionEvent(SessionEvent event, const SessionEventParam& param = {}) override;

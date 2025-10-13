@@ -3299,7 +3299,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     return WSError::WS_OK;
 }
 
-void SceneSessionManager::ResetSessionInfoAfterStartUIAbility(const sptr<SceneSession> sceneSession) {
+void SceneSessionManager::ResetSessionInfoAfterStartUIAbility(const sptr<SceneSession>& sceneSession) {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
     sceneSession->SetRestartApp(false);
 }

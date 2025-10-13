@@ -118,7 +118,7 @@ using HasRequestedVsyncFunc = std::function<WSError(bool& hasRequestedVsync)>;
 using RequestNextVsyncWhenModeChangeFunc = std::function<WSError(const std::shared_ptr<VsyncCallback>& vsyncCallback)>;
 using NotifyClearSubSessionFunc = std::function<void(const int32_t subPersistentId)>;
 using OutlineParamsChangeCallbackFunc = std::function<void(bool enabled, const OutlineStyleParams& outlineStyleParams)>;
-using NotifyRestartAppFunc = std::function<void(const SessionInfo&& info)>;
+using NotifyRestartAppFunc = std::function<void(const SessionInfo& info)>;
 class ILifecycleListener {
 public:
     virtual void OnActivation() {}
@@ -211,7 +211,7 @@ public:
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker);
     WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
     std::string GetSessionLabel() const;
-    void SetRestartAppListener(NotifyRestartAppFunc& func);
+    void SetRestartAppListener(NotifyRestartAppFunc&& func);
 
     /*
      * App Use Control

@@ -7912,8 +7912,8 @@ sptr<SceneSession> SceneSession::GetSceneSessionById(int32_t sessionId) const
 bool SceneSession::CheckAbilityInfoByWant(const std::shared_ptr<AAFwk::Want>& want) const
 {
     if (specificCallback_ == nullptr || specificCallback_->onCheckAbilityInfoByWantCallback_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "specificCallback or onCheckAbilityInfoByWantCallback is null");
-        return nullptr;
+        TLOGE(WmsLogTag::WMS_LIFE, "specificCallback or onCheckAbilityInfoByWantCallback is null");
+        return false;
     }
     return specificCallback_->onCheckAbilityInfoByWantCallback_(want);
 }
