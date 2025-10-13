@@ -536,6 +536,45 @@ namespace {
     }
 
     /**
+     * @tc.name: GetScreenActiveMode001
+     * @tc.desc: Test GetScreenActiveMode func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetScreenActiveMode001, Function | SmallTest | Level3)
+    {
+        MultiScreenInfo info;
+        string inputString = "1 11";
+        auto ret = ScreenSettingHelper::GetScreenActiveMode(info, inputString);
+        ASSERT_FALSE(ret);
+    }
+
+    /**
+     * @tc.name: GetScreenActiveMode002
+     * @tc.desc: Test GetScreenActiveMode func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetScreenActiveMode002, Function | SmallTest | Level3)
+    {
+        MultiScreenInfo info;
+        string inputString = "E";
+        auto ret = ScreenSettingHelper::GetScreenActiveMode(info, inputString);
+        ASSERT_FALSE(ret);
+    }
+
+    /**
+     * @tc.name: GetScreenActiveMode003
+     * @tc.desc: Test GetScreenActiveMode func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetScreenActiveMode003, Function | SmallTest | Level3)
+    {
+        MultiScreenInfo info;
+        string inputString = "1";
+        auto ret = ScreenSettingHelper::GetScreenActiveMode(info, inputString);
+        ASSERT_FALSE(ret);
+    }
+
+    /**
      * @tc.name: GetScreenModeTest
      * @tc.desc: Test GetScreenMode func
      * @tc.type: FUNC
@@ -1019,12 +1058,9 @@ namespace {
     {
         ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
         bool value = false;
-
-        if (screenSettingHelper.GetResolutionEffect(value)) {
-            ASSERT_TRUE(value);
-        } else {
-            ASSERT_FALSE(value);
-        }
+        auto ret = screenSettingHelper.GetResolutionEffect(value, "testsn");
+        ASSERT_FALSE(ret);
+        ASSERT_FALSE(value);
     }
 }
 } // namespace Rosen

@@ -179,6 +179,22 @@ napi_value GlobalWindowModeInit(napi_env env)
     return objValue;
 }
 
+napi_value WindowOcclusionStateInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(env, objValue, "NO_OCCLUSION", CreateJsValue(env,
+        static_cast<int32_t>(WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION)));
+    napi_set_named_property(env, objValue, "PARTIAL_OCCLUSION", CreateJsValue(env,
+        static_cast<int32_t>(WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION)));
+    napi_set_named_property(env, objValue, "FULL_OCCLUSION", CreateJsValue(env,
+        static_cast<int32_t>(WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION)));
+    return objValue;
+}
+
 napi_value ScreenshotEventTypeInit(napi_env env)
 {
     CHECK_NAPI_ENV_RETURN_IF_NULL(env);
@@ -331,6 +347,19 @@ napi_value WindowAnchorInit(napi_env env)
         static_cast<int32_t>(WindowAnchor::BOTTOM)));
     napi_set_named_property(env, objValue, "BOTTOM_END", CreateJsValue(env,
         static_cast<int32_t>(WindowAnchor::BOTTOM_END)));
+    return objValue;
+}
+
+napi_value PixelUnitInit(napi_env env)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "PX", CreateJsValue(env,
+        static_cast<int32_t>(PixelUnit::PX)));
+    napi_set_named_property(env, objValue, "VP", CreateJsValue(env,
+        static_cast<int32_t>(PixelUnit::VP)));
     return objValue;
 }
 
@@ -727,9 +756,10 @@ napi_value CreateJsPixelMapArrayObject(napi_env env, const std::vector<std::shar
     for (size_t i = 0; i < pixelMaps.size(); i++) {
         if (!pixelMaps[i]) {
             TLOGW(WmsLogTag::WMS_LIFE, "pixelMaps index: %{public}d is null", static_cast<int32_t>(i));
-            continue;
+            napi_set_element(env, arrayValue, i, NapiGetUndefined(env));
+        } else {
+            napi_set_element(env, arrayValue, i, CreateJsPixelMapObject(env, pixelMaps[i]));
         }
-        napi_set_element(env, arrayValue, i, CreateJsPixelMapObject(env, pixelMaps[i]));
     }
     return arrayValue;
 }
@@ -1232,13 +1262,17 @@ void ConvertJSSystemBarStyleToSystemBarProperties(napi_env env, napi_value jsObj
         propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].contentColorFlag);
 }
 
-napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea, AvoidAreaType type)
+napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea,
+    AvoidAreaType type, bool useActualVisibility)
 {
     napi_value objValue = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
 
-    napi_set_named_property(env, objValue, "visible",
-        CreateJsValue(env, type == AvoidAreaType::TYPE_CUTOUT ? false : true));
+    if (useActualVisibility) {
+        napi_set_named_property(env, objValue, "visible", CreateJsValue(env, !avoidArea.isEmptyAvoidArea()));
+    } else {
+        napi_set_named_property(env, objValue, "visible", CreateJsValue(env, type != AvoidAreaType::TYPE_CUTOUT));
+    }
     napi_set_named_property(env, objValue, "leftRect", GetRectAndConvertToJsValue(env, avoidArea.leftRect_));
     napi_set_named_property(env, objValue, "topRect", GetRectAndConvertToJsValue(env, avoidArea.topRect_));
     napi_set_named_property(env, objValue, "rightRect", GetRectAndConvertToJsValue(env, avoidArea.rightRect_));
@@ -1255,6 +1289,7 @@ napi_value GetWindowLimitsAndConvertToJsValue(napi_env env, const WindowLimits& 
     napi_set_named_property(env, objValue, "maxHeight", CreateJsValue(env, windowLimits.maxHeight_));
     napi_set_named_property(env, objValue, "minWidth", CreateJsValue(env, windowLimits.minWidth_));
     napi_set_named_property(env, objValue, "minHeight", CreateJsValue(env, windowLimits.minHeight_));
+    napi_set_named_property(env, objValue, "pixelUnit", CreateJsValue(env, windowLimits.pixelUnit_));
     return objValue;
 }
 
@@ -1356,11 +1391,18 @@ bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std
 bool GetWindowIdFromJsValue(napi_env env, napi_value jsObject, std::vector<int32_t>& windowIds)
 {
     if (jsObject == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to window id");
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to window id, jsObject is nullptr");
         return false;
     }
     uint32_t size = 0;
-    napi_get_array_length(env, jsObject, &size);
+    if (GetType(env, jsObject) != napi_object || napi_get_array_length(env, jsObject, &size) == napi_invalid_arg) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to window id, invalid arg");
+        return false;
+    }
+    if (size == 0) {
+        TLOGE(WmsLogTag::WMS_LIFE, "invalid windowIds size");
+        return false;
+    }
     for (uint32_t i = 0; i < size; i++) {
         int32_t elementArray;
         napi_value getElementValue = nullptr;

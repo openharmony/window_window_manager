@@ -16,6 +16,8 @@
 #ifndef OHOS_ANI_WINDOW_H
 #define OHOS_ANI_WINDOW_H
 
+#include <functional>
+
 #include "ani.h"
 #include "ani_window_register_manager.h"
 #include "window.h"
@@ -59,6 +61,8 @@ public:
     static void SetWindowTouchable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isTouchable);
     static ani_object GetUIContext(ani_env* env, ani_object obj, ani_long nativeObj);
     static ani_object GetWindowAvoidArea(ani_env* env, ani_object obj, ani_long nativeObj, ani_int type);
+    static ani_object GetWindowAvoidAreaIgnoringVisibility(ani_env* env, ani_object obj,
+        ani_long nativeObj, ani_int type);
     static void RegisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
         ani_ref callback);
     static void RegisterNoInteractionDetectedCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
@@ -77,6 +81,10 @@ public:
     static void Finalizer(ani_env* env, ani_long nativeObj);
     static void SetContentAspectRatio(ani_env* env, ani_object obj, ani_long nativeObj,
                                       ani_double ratio, ani_boolean isPersistent, ani_boolean needUpdateRect);
+    static void Maximize(ani_env* env, ani_object obj, ani_long nativeObj,
+                         ani_object aniPresentation, ani_object aniAcrossDisplay);
+    static void SetRotationLocked(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean locked);
+    static ani_boolean GetRotationLocked(ani_env* env, ani_object obj, ani_long nativeObj);
 
     /*
      * Window Layout
@@ -99,7 +107,7 @@ public:
     ani_object Snapshot(ani_env* env);
     void HideNonSystemFloatingWindows(ani_env* env, ani_boolean shouldHide);
     void ResizeAsync(ani_env* env, ani_int width, ani_int height);
-    ani_object SetWindowLimits(ani_env* env, ani_object inWindowLimits, ani_object isForcible);
+    ani_object SetWindowLimits(ani_env* env, ani_object inWindowLimits, ani_object forcible);
     ani_object GetWindowLimits(ani_env* env);
     void SetAspectRatio(ani_env* env, ani_double ratio);
     void ResetAspectRatio(ani_env* env);
@@ -111,6 +119,9 @@ public:
     void SetForbidSplitMove(ani_env* env, ani_boolean isForbidSplitMove);
     void SetFollowParentWindowLayoutEnabled(ani_env* env, ani_boolean enable);
     void SetFollowParentMultiScreenPolicy(ani_env* env, ani_boolean enable);
+    void MoveWindowToGlobalDisplay(ani_env* env, ani_int x, ani_int y);
+    ani_object HandlePositionTransform(ani_env* env, ani_int x, ani_int y,
+        std::function<WMError(sptr<Window>&, const Position&, Position&)> transformFunc);
 
 private:
     void OnSetWindowColorSpace(ani_env* env, ani_int colorSpace);
@@ -126,6 +137,7 @@ private:
     void OnSetWindowTouchable(ani_env* env, ani_boolean isTouchable);
     ani_object OnGetUIContext(ani_env* env);
     ani_object OnGetWindowAvoidArea(ani_env* env, ani_int type);
+    ani_object OnGetWindowAvoidAreaIgnoringVisibility(ani_env* env, ani_int type);
     void OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback, ani_long timeout);
     void OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnShowWindow(ani_env* env);
@@ -146,12 +158,15 @@ private:
         const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, sptr<Window> windowToken);
     WMError SetSystemBarPropertiesByFlags(std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags,
         std::map<WindowType, SystemBarProperty>& systemBarProperties, sptr<Window> windowToken);
+    void OnSetRotationLocked(ani_env* env, ani_boolean locked);
+    bool OnGetRotationLocked(ani_env* env);
 
     /*
      * Window Layout
      */
     void OnSetContentAspectRatio(
         ani_env* env, ani_double ratio, ani_boolean isPersistent, ani_boolean needUpdateRect);
+    void OnMaximize(ani_env* env, ani_object aniPresentation, ani_object aniAcrossDisplay);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<AniWindowRegisterManager> registerManager_ = nullptr;

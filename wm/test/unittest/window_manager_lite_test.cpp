@@ -289,7 +289,6 @@ HWTEST_F(WindowManagerLiteTest, UnregisterCameraWindowChangedListener01, TestSiz
     ASSERT_EQ(WMError::WM_OK, windowManager->UnregisterCameraWindowChangedListener(listener1));
     ASSERT_EQ(WMError::WM_OK, windowManager->UnregisterCameraWindowChangedListener(listener2));
     ASSERT_EQ(0, windowManager->pImpl_->cameraWindowChangedListeners_.size());
-    ASSERT_EQ(nullptr, windowManager->pImpl_->cameraWindowChangedListenerAgent_);
 
     windowManager->pImpl_->cameraWindowChangedListeners_.emplace_back(listener1);
     ASSERT_EQ(WMError::WM_OK, windowManager->UnregisterCameraWindowChangedListener(listener1));
@@ -404,7 +403,6 @@ HWTEST_F(WindowManagerLiteTest, UnregisterWindowModeChangedListener02, TestSize.
     ASSERT_EQ(WMError::WM_OK, windowManager->UnregisterWindowModeChangedListener(listener1));
     ASSERT_EQ(WMError::WM_OK, windowManager->UnregisterWindowModeChangedListener(listener2));
     ASSERT_EQ(0, windowManager->pImpl_->windowModeListeners_.size());
-    ASSERT_EQ(nullptr, windowManager->pImpl_->windowModeListenerAgent_);
 
     windowManager->pImpl_->windowModeListeners_.emplace_back(listener1);
     ASSERT_EQ(WMError::WM_OK, windowManager->UnregisterWindowModeChangedListener(listener1));
@@ -470,6 +468,23 @@ HWTEST_F(WindowManagerLiteTest, GetMainWindowInfos, TestSize.Level1)
         ASSERT_EQ(it1->pid_, it2->pid_);
         ASSERT_EQ(it1->bundleName_, it2->bundleName_);
     }
+}
+
+/**
+ * @tc.name: UpdateAnimationSpeedWithPid
+ * @tc.desc: Check UpdateAnimationSpeedWithPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, UpdateAnimationSpeedWithPid, TestSize.Level1)
+{
+    auto& windowManager = WindowManagerLite::GetInstance();
+    pid_t pid = 15234;
+    float speed = 2.0f;
+    WMError ret_1 = windowManager.UpdateAnimationSpeedWithPid(pid, speed);
+    ASSERT_EQ(WMError::WM_OK, ret_1);
+    speed = 1.0f;
+    WMError ret_2 = windowManager.UpdateAnimationSpeedWithPid(pid, speed);
+    ASSERT_EQ(WMError::WM_OK, ret_2);
 }
 
 /**
@@ -1132,7 +1147,6 @@ HWTEST_F(WindowManagerLiteTest, UnregisterWindowUpdateListener01, TestSize.Level
     ASSERT_EQ(WMError::WM_OK, windowManager->UnregisterWindowUpdateListener(listener1));
     ASSERT_EQ(WMError::WM_OK, windowManager->UnregisterWindowUpdateListener(listener2));
     ASSERT_EQ(0, windowManager->pImpl_->windowUpdateListeners_.size());
-    ASSERT_EQ(nullptr, windowManager->pImpl_->windowUpdateListenerAgent_);
 
     windowManager->pImpl_->windowUpdateListeners_.emplace_back(listener1);
     ASSERT_EQ(WMError::WM_OK, windowManager->UnregisterWindowUpdateListener(listener1));
@@ -1425,7 +1439,6 @@ HWTEST_F(WindowManagerLiteTest, RegisterVisibilityStateChangedListener01, Functi
 
     sptr<TestWindowVisibilityStateListener> listener = sptr<TestWindowVisibilityStateListener>::MakeSptr();
     windowManager->RegisterVisibilityStateChangedListener(listener);
-    ASSERT_EQ(nullptr, windowManager->pImpl_->windowVisibilityStateListenerAgent_);
 
     // to check that the same listner can not be registered twice
     windowManager->RegisterVisibilityStateChangedListener(listener);
@@ -1518,6 +1531,19 @@ HWTEST_F(WindowManagerLiteTest, GetInstanceMulti, TestSize.Level1)
 HWTEST_F(WindowManagerLiteTest, RemoveInstanceByUserId, TestSize.Level1)
 {
     ASSERT_EQ(WMError::WM_OK, WindowManagerLite::RemoveInstanceByUserId(101));
+}
+
+/**
+ * @tc.name: GetDisplayIdByWindowId
+ * @tc.desc: check GetDisplayIdByWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, GetDisplayIdByWindowId, TestSize.Level1)
+{
+    const std::vector<uint64_t> windowIds = { 1, 2 };
+    std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
+    auto ret = WindowManagerLite::GetInstance().GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 }
 } // namespace

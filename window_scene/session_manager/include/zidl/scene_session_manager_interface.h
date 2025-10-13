@@ -95,6 +95,7 @@ public:
         TRANS_ID_GET_PARENT_MAIN_WINDOW_ID,
         TRANS_ID_GET_UI_CONTENT_REMOTE_OBJ,
         TRANS_ID_UPDATE_WINDOW_VISIBILITY_LISTENER,
+        TRANS_ID_UPDATE_SESSION_OCCLUSION_STATE_LISTENER,
         TRANS_ID_SHIFT_APP_WINDOW_FOCUS,
         TRANS_ID_LIST_WINDOW_INFO,
         TRANS_ID_GET_WINDOW_LAYOUT_INFO,
@@ -149,6 +150,8 @@ public:
         TRANS_ID_SET_FOREGROUND_WINDOW_NUM,
         TRANS_ID_USE_IMPLICIT_ANIMATION,
         TRANS_ID_SET_IMAGE_FOR_RECENT,
+        TRANS_ID_SET_IMAGE_FOR_RECENT_PIXELMAP,
+        TRANS_ID_REMOVE_IMAGE_FOR_RECENT,
         TRANS_ID_REGISTER_WINDOW_PROPERTY_CHANGE_AGENT,
         TRANS_ID_UNREGISTER_WINDOW_PROPERTY_CHANGE_AGENT,
         TRANS_ID_GET_HOST_GLOBAL_SCALE_RECT,
@@ -424,6 +427,9 @@ public:
 
     WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit,
         int32_t persistentId) override { return WMError::WM_OK; }
+    WMError SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, ImageFit imageFit,
+        int32_t persistentId) override { return WMError::WM_OK; }
+    WMError RemoveImageForRecent(int32_t persistentId) override { return WMError::WM_OK; }
         
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override { return WMError::WM_OK; }

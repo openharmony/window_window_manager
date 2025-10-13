@@ -52,6 +52,7 @@ public:
     virtual WMError GetWindowModeType(WindowModeType& windowModeType);
     virtual WMError RaiseWindowToTop(int32_t persistentId);
     virtual WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
+    virtual WMError UpdateAnimationSpeedWithPid(pid_t pid, float speed);
     virtual WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo);
     WMError RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
     WMError UnregisterWMSConnectionChangedListener();
@@ -66,6 +67,8 @@ public:
     virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos);
     virtual WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos);
     virtual WMError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    virtual WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+       std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap);
 
     ~WindowAdapterLite() override;
 

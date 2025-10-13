@@ -35,13 +35,15 @@ sptr<SettingObserver> ScreenSettingHelper::extendScreenDpiObserver_;
 sptr<SettingObserver> ScreenSettingHelper::duringCallStateObserver_;
 sptr<SettingObserver> ScreenSettingHelper::resolutionEffectObserver_;
 constexpr int32_t PARAM_NUM_TEN = 10;
+constexpr uint32_t EXPECT_ACTIVE_MODE_SIZE = 1;
 constexpr uint32_t EXPECT_SCREEN_MODE_SIZE = 2;
 constexpr uint32_t EXPECT_RELATIVE_POSITION_SIZE = 3;
-constexpr uint32_t VALID_MULTI_SCREEN_INFO_SIZE = 4;
+constexpr uint32_t VALID_MULTI_SCREEN_INFO_SIZE = 5;
 constexpr uint32_t INDEX_SCREEN_INFO = 0;
 constexpr uint32_t INDEX_SCREEN_MODE = 1;
 constexpr uint32_t INDEX_FIRST_RELATIVE_POSITION = 2;
 constexpr uint32_t INDEX_SECOND_RELATIVE_POSITION = 3;
+constexpr uint32_t INDEX_THREE_ACTIVE_MODE_ID = 4;
 constexpr uint32_t DATA_INDEX_ZERO = 0;
 constexpr uint32_t DATA_INDEX_ONE = 1;
 constexpr uint32_t DATA_INDEX_TWO = 2;
@@ -57,7 +59,10 @@ constexpr float EXTEND_SCREEN_DPI_ZERO_PARAMETER = 0.85f;
 constexpr float EXTEND_SCREEN_DPI_ONE_PARAMETER = 1.00f;
 const std::string SCREEN_SHAPE = system::GetParameter("const.window.screen_shape", "0:0");
 constexpr int32_t INDEX_EXTEND_SCREEN_DPI_POSITION = -1;
-constexpr int32_t ENABLE_RESOLUTION_EFFECT = 1;
+const std::string ENABLE_RESOLUTION_EFFECT = "1";
+constexpr int32_t EXPECT_SCREEN_RESOLUTION_EFFECT_SIZE = 2;
+constexpr int32_t INDEX_SCREEN_RESOLUTION_EFFECT_SN = 0;
+constexpr int32_t INDEX_SCREEN_RESOLUTION_EFFECT_EN = 1;
 
 void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc func)
 {
@@ -388,6 +393,9 @@ std::map<std::string, MultiScreenInfo> ScreenSettingHelper::GetMultiScreenInfo(c
             TLOGE(WmsLogTag::DMS, "invalid screen of relative position!");
             continue;
         }
+        if (!GetScreenActiveMode(info, infoVector[INDEX_THREE_ACTIVE_MODE_ID])) {
+            continue;
+        }
         multiScreenInfoMap[infoVector[INDEX_SCREEN_INFO]] = info;
     }
     return multiScreenInfoMap;
@@ -487,6 +495,27 @@ bool ScreenSettingHelper::GetScreenRelativePosition(MultiScreenInfo& info, const
         info.secondaryScreenOption.startX_ = startX;
         info.secondaryScreenOption.startY_ = startY;
     }
+    return true;
+}
+
+bool ScreenSettingHelper::GetScreenActiveMode(MultiScreenInfo& info, const std::string& inputString)
+{
+    std::vector<std::string> activeIdStr = {};
+    bool split = SplitString(activeIdStr, inputString, ' ');
+    uint32_t dataSize = activeIdStr.size();
+    if (!split || dataSize != EXPECT_ACTIVE_MODE_SIZE) {
+        TLOGE(WmsLogTag::DMS, "split failed, data size: %{public}d", dataSize);
+        return false;
+    }
+    int32_t activeId = -1;
+    if (!IsNumber(activeIdStr[DATA_INDEX_ZERO])) {
+        TLOGE(WmsLogTag::DMS, "not number");
+        return false;
+    } else {
+        activeId = static_cast<int32_t>(strtoll(activeIdStr[DATA_INDEX_ZERO].c_str(), nullptr, PARAM_NUM_TEN));
+    }
+    TLOGW(WmsLogTag::DMS, "activeId: %{public}d", activeId);
+    info.activeId = activeId;
     return true;
 }
 
@@ -707,16 +736,36 @@ void ScreenSettingHelper::UnregisterSettingResolutionEffectObserver()
     resolutionEffectObserver_ = nullptr;
 }
 
-bool ScreenSettingHelper::GetResolutionEffect(bool& enable, const std::string& key)
+bool ScreenSettingHelper::GetResolutionEffect(bool& enable, const std::string& serialNumber, const std::string& key)
 {
-    int value = 0;
+    std::string value = "";
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
-    ErrCode ret = settingProvider.GetIntValue(key, value);
+    ErrCode ret = settingProvider.GetStringValue(key, value);
     if (ret != ERR_OK) {
         TLOGE(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
         return false;
     }
-    enable = (value == ENABLE_RESOLUTION_EFFECT);
+    std::string validString = RemoveInvalidChar(value);
+    std::vector<std::string> screenResolutionEffectSet = {};
+    bool split = SplitString(screenResolutionEffectSet, validString, ',');
+    uint32_t dataSize = screenResolutionEffectSet.size();
+    if (!split || dataSize == 0) {
+        TLOGE(WmsLogTag::DMS, "split failed, data size: %{public}d", dataSize);
+        return false;
+    }
+    for (auto infoString : screenResolutionEffectSet) {
+        std::vector<std::string> infoVector = {};
+        split = SplitString(infoVector, infoString, ' ');
+        dataSize = infoVector.size();
+        if (!split || dataSize != EXPECT_SCREEN_RESOLUTION_EFFECT_SIZE) {
+            TLOGE(WmsLogTag::DMS, "split failed, screenResolutionEffect size: %{public}d", dataSize);
+            return false;
+        }
+        if (infoVector[INDEX_SCREEN_RESOLUTION_EFFECT_SN] == serialNumber) {
+            enable = (infoVector[INDEX_SCREEN_RESOLUTION_EFFECT_EN] == ENABLE_RESOLUTION_EFFECT);
+            TLOGI(WmsLogTag::DMS, "screenResolutionEffectEn: %{public}d", enable);
+        }
+    }
     return true;
 }
 } // namespace Rosen

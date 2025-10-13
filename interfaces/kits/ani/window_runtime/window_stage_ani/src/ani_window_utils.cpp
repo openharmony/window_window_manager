@@ -188,7 +188,7 @@ ani_status AniWindowUtils::GetPropertyLongObject(ani_env* env, const char* prope
         return ret;
     }
     result = static_cast<int64_t>(long_value);
-    TLOGD(WmsLogTag::DEFAULT, "[ANI] property name is %{public}s, value is:%{public}" PRIu64" ", propertyName, result);
+    TLOGD(WmsLogTag::DEFAULT, "[ANI] property name is %{public}s, value is:%{public}" PRIu64, propertyName, result);
     return ret;
 }
 
@@ -433,7 +433,8 @@ ani_object AniWindowUtils::CreateAniWindowLimits(ani_env* env, const WindowLimit
     return aniLimits;
 }
 
-ani_object AniWindowUtils::CreateAniAvoidArea(ani_env* env, const AvoidArea& avoidArea, AvoidAreaType type)
+ani_object AniWindowUtils::CreateAniAvoidArea(ani_env* env, const AvoidArea& avoidArea,
+    AvoidAreaType type, bool useActualVisibility)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     ani_class aniClass;
@@ -454,8 +455,13 @@ ani_object AniWindowUtils::CreateAniAvoidArea(ani_env* env, const AvoidArea& avo
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to new obj");
         return AniWindowUtils::CreateAniUndefined(env);
     }
-    CallAniMethodVoid(env, aniAvoidArea, aniClass, "<set>visible", nullptr,
-        ani_boolean(type != AvoidAreaType::TYPE_CUTOUT));
+    if (useActualVisibility) {
+        CallAniMethodVoid(env, aniAvoidArea, aniClass, "<set>visible", nullptr,
+            ani_boolean(!avoidArea.isEmptyAvoidArea()));
+    } else {
+        CallAniMethodVoid(env, aniAvoidArea, aniClass, "<set>visible", nullptr,
+            ani_boolean(type != AvoidAreaType::TYPE_CUTOUT));
+    }
     CallAniMethodVoid(env, aniAvoidArea, aniClass, "<set>leftRect", nullptr,
         CreateAniRect(env, avoidArea.leftRect_));
     CallAniMethodVoid(env, aniAvoidArea, aniClass, "<set>topRect", nullptr,
@@ -1256,11 +1262,16 @@ WindowLimits AniWindowUtils::ParseWindowLimits(ani_env* env, ani_object aniWindo
 {
     WindowLimits windowLimits;
     
-    auto getAndAssign = [&](const char* name, uint32_t& field) {
+    auto getAndAssign = [&, where = __func__](const char* name, uint32_t& field) {
         int value;
         ani_status ret = AniWindowUtils::GetPropertyIntObject(env, name, aniWindowLimits, value);
         if (ret == ANI_OK) {
-            field = static_cast<uint32_t>(value);
+            if (value >= 0) {
+                field = static_cast<uint32_t>(value);
+            } else {
+                field = 0;
+                TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: [ANI] Invalid %{public}s: %{public}d", where, name, value);
+            }
         }
     };
 
@@ -1280,10 +1291,36 @@ bool AniWindowUtils::CheckParaIsUndefined(ani_env* env, ani_object para)
             static_cast<int32_t>(aniRet));
         return true;
     }
-    if (isUndefined) {
-        return true;
+    return static_cast<bool>(isUndefined);
+}
+
+ani_object AniWindowUtils::CreateAniPosition(ani_env* env, const Position& position)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    ani_class aniClass;
+    ani_status ret = env->FindClass("@ohos.window.window.PositionInternal", &aniClass);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
     }
-    return false;
+
+    ani_method aniCtor;
+    ret = env->Class_FindMethod(aniClass, "<ctor>", nullptr, &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    ani_object aniPosition;
+    ret = env->Object_New(aniClass, aniCtor, &aniPosition);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to create new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    CallAniMethodVoid(env, aniPosition, aniClass, "<set>x", nullptr, ani_int(position.x));
+    CallAniMethodVoid(env, aniPosition, aniClass, "<set>y", nullptr, ani_int(position.y));
+    return aniPosition;
 }
 
 WmErrorCode AniWindowUtils::ToErrorCode(WMError error, WmErrorCode defaultCode)

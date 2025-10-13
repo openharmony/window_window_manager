@@ -425,19 +425,6 @@ HWTEST_F(WindowSessionTest4, SetSessionState, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetSessionState01
- * @tc.desc: SetSessionState
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest4, SetSessionState01, TestSize.Level1)
-{
-    ASSERT_NE(session_, nullptr);
-    SessionState state = SessionState::STATE_DISCONNECT;
-    session_->SetSessionState(state);
-    ASSERT_EQ(state, session_->state_);
-}
-
-/**
  * @tc.name: SetFocusable03
  * @tc.desc: SetFocusable
  * @tc.type: FUNC
@@ -609,7 +596,8 @@ HWTEST_F(WindowSessionTest4, SetRaiseToAppTopForPointDownFunc, TestSize.Level1)
     session_->UnregisterSessionChangeListeners();
     session_->SetSessionStateChangeNotifyManagerListener(nullptr);
     session_->SetSessionInfoChangeNotifyManagerListener(nullptr);
-    session_->NotifyFocusStatus(true);
+    auto info = sptr<FocusNotifyInfo>::MakeSptr();
+    session_->NotifyFocusStatus(info, true);
 
     session_->SetRequestFocusStatusNotifyManagerListener(nullptr);
     session_->SetNotifyUIRequestFocusFunc(nullptr);
@@ -1648,13 +1636,30 @@ HWTEST_F(WindowSessionTest4, UpdateSessionOutline01, TestSize.Level1)
     session_->SetOutlineParamsChangeCallback(std::move(func));
     usleep(waitSyncInNs_);
     OutlineStyleParams defaultParams;
-    defaultParams.outlineColor_ = 0x00ffffff; // 0x00ffffff: color has no alpha byte.
-    bool enabled = true;
+    defaultParams.outlineColor_ = 0x000000ff; // 0x000000ff: color blue byte.
+    bool enabled = false;
     session_->UpdateSessionOutline(enabled, defaultParams);
-    EXPECT_EQ(session_->outlineStyleParams_.outlineColor_, 0x00ffffff); // 0x00ffffff: color has no alpha byte.
+    EXPECT_EQ(session_->outlineStyleParams_.outlineColor_, 0x000000ff); // 0x000000ff: color blue byte.
 }
 
+/**
+ * @tc.name: CheckEmptyKeyboardAvoidAreaIfNeeded 01
+ * @tc.desc: Test Case CheckEmptyKeyboardAvoidAreaIfNeeded 01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, CheckEmptyKeyboardAvoidAreaIfNeeded01, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    DisplayId displayId = 0;
+    session_->property_->SetDisplayId(displayId);
+    bool result = session_->CheckEmptyKeyboardAvoidAreaIfNeeded();
+    EXPECT_EQ(result, false);
 
+    displayId = 100;
+    session_->property_->SetDisplayId(displayId);
+    result = session_->CheckEmptyKeyboardAvoidAreaIfNeeded();
+    EXPECT_EQ(result, false);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

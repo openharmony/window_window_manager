@@ -55,6 +55,7 @@ class RSTransaction;
 class Session;
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect,
     SizeChangeReason reason, DisplayId displayId, const RectAnimationConfig& rectAnimationConfig)>;
+using NotifySessionWindowLimitsChangeFunc = std::function<void(const WindowLimits& windowLimits)>;
 using NotifySessionDisplayIdChangeFunc = std::function<void(uint64_t displayId)>;
 using NotifyUpdateFloatingBallFunc = std::function<void(const FloatingBallTemplateInfo& fbTemplateInfo)>;
 using NotifyStopFloatingBallFunc = std::function<void()>;
@@ -295,13 +296,6 @@ public:
             saveSnapshotCallback_ = std::move(task);
         }
     }
-    void SetRemoveSnapshotCallback(Task&& task)
-    {
-        if (task) {
-            std::lock_guard lock(removeSnapshotCallbackMutex_);
-            removeSnapshotCallback_ = std::move(task);
-        }
-    }
     void SetAddSnapshotCallback(Task&& task)
     {
         if (task) {
@@ -504,10 +498,11 @@ public:
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
     void NotifyUIRequestFocus();
     virtual void NotifyUILostFocus();
-    WSError NotifyFocusStatus(bool isFocused);
+    WSError NotifyFocusStatus(const sptr<FocusNotifyInfo>& focusNotifyInfo, bool isFocused);
     void SetExclusivelyHighlighted(bool isExclusivelyHighlighted);
-    virtual WSError UpdateHighlightStatus(bool isHighlight, bool needBlockHighlightNotify);
-    WSError NotifyHighlightChange(bool isHighlight);
+    virtual WSError UpdateHighlightStatus(const sptr<HighlightNotifyInfo>& highlightNotifyInfo, bool isHighlight,
+        bool needBlockHighlightNotify);
+    WSError NotifyHighlightChange(const sptr<HighlightNotifyInfo>& highlightNotifyInfo, bool isHighlight);
     WSError GetIsHighlighted(bool& isHighlighted) override;
     WSError HandlePointerEventForFocus(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool isExecuteDelayRaise = false);
@@ -752,6 +747,7 @@ public:
     void SetBorderUnoccupied(bool borderUnoccupied = false);
     bool GetBorderUnoccupied() const;
     bool IsPersistentImageFit() const;
+    void DeletePersistentImageFit();
     bool SupportSnapshotAllSessionStatus() const;
     void InitSnapshotCapacity();
     SnapshotStatus GetSessionSnapshotStatus(LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT) const;
@@ -932,6 +928,7 @@ protected:
     WSRect lastLayoutRect_; // rect saved when go background
     WSRect layoutRect_;     // rect of root view
     NotifySessionRectChangeFunc sessionRectChangeFunc_;
+    NotifySessionWindowLimitsChangeFunc sessionWindowLimitsChangeFunc_;
     NotifySessionDisplayIdChangeFunc sessionDisplayIdChangeFunc_;
     NotifyUpdateFloatingBallFunc updateFloatingBallFunc_;
     NotifyStopFloatingBallFunc stopFloatingBallFunc_;
@@ -1160,17 +1157,14 @@ private:
      */
     std::atomic<bool> enableAddSnapshot_ = true;
     Task saveSnapshotCallback_ = []() {};
-    Task removeSnapshotCallback_ = []() {};
     Task addSnapshotCallback_ = []() {};
     std::mutex saveSnapshotCallbackMutex_;
-    std::mutex removeSnapshotCallbackMutex_;
     std::mutex addSnapshotCallbackMutex_;
 
     /*
      * Window Pattern
      */
     bool borderUnoccupied_ = false;
-    void DeletePersistentImageFit();
     uint32_t GetBackgroundColor() const;
 
     /*

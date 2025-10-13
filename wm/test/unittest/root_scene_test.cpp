@@ -414,7 +414,7 @@ HWTEST_F(RootSceneTest, GetAvoidAreaByTypeTest, TestSize.Level1)
     AvoidArea avoidArea;
     AvoidArea testAvoidArea;
     testAvoidArea.topRect_ = {1, 1, 1, 1};
-    GetSessionAvoidAreaByTypeCallback func = [testAvoidArea](AvoidAreaType type)->AvoidArea {
+    GetSessionAvoidAreaByTypeCallback func = [testAvoidArea](AvoidAreaType type, bool ignoreVisibility)->AvoidArea {
         return testAvoidArea;
     };
     rootScene.getSessionAvoidAreaByTypeCallback_ = func;
@@ -435,7 +435,7 @@ HWTEST_F(RootSceneTest, GetAvoidAreaByTypeTest001, TestSize.Level1)
     AvoidArea avoidArea;
     AvoidArea testAvoidArea;
     testAvoidArea.topRect_ = {1, 1, 1, 1};
-    GetSessionAvoidAreaByTypeCallback func = [testAvoidArea](AvoidAreaType type)->AvoidArea {
+    GetSessionAvoidAreaByTypeCallback func = [testAvoidArea](AvoidAreaType type, bool ignoreVisibility)->AvoidArea {
         return testAvoidArea;
     };
     rootScene.getSessionAvoidAreaByTypeCallback_ = func;
@@ -444,6 +444,46 @@ HWTEST_F(RootSceneTest, GetAvoidAreaByTypeTest001, TestSize.Level1)
     auto ret = rootScene.GetAvoidAreaByType(type, avoidArea, Rect::EMPTY_RECT, API_VERSION_18);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(avoidArea.topRect_, testAvoidArea.topRect_);
+}
+
+/**
+ * @tc.name: GetAvoidAreaByTypeTestIgnoringVisibility_SUCCESS
+ * @tc.desc: GetAvoidAreaByTypeTestIgnoringVisibility_SUCCESS Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, GetAvoidAreaByTypeTestIgnoringVisibility_SUCCESS, TestSize.Level1)
+{
+    RootScene rootScene;
+    AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM_GESTURE;
+    AvoidArea avoidArea;
+    AvoidArea testAvoidArea;
+    testAvoidArea.topRect_ = {1, 1, 1, 1};
+    GetSessionAvoidAreaByTypeCallback func = [testAvoidArea](AvoidAreaType type, bool ignoreVisibility)->AvoidArea {
+        return testAvoidArea;
+    };
+    rootScene.getSessionAvoidAreaByTypeCallback_ = func;
+
+    rootScene.GetAvoidAreaByTypeIgnoringVisibility(type, avoidArea, Rect::EMPTY_RECT);
+    EXPECT_TRUE(avoidArea == testAvoidArea);
+}
+
+/**
+ * @tc.name: GetAvoidAreaByTypeTestIgnoringVisibility_ERR
+ * @tc.desc: GetAvoidAreaByTypeTestIgnoringVisibility_ERR Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, GetAvoidAreaByTypeTestIgnoringVisibility_ERR, TestSize.Level1)
+{
+    RootScene rootScene;
+    AvoidArea avoidArea;
+    rootScene.getSessionAvoidAreaByTypeCallback_ = nullptr;
+
+    auto ret = rootScene.GetAvoidAreaByTypeIgnoringVisibility(
+        AvoidAreaType::TYPE_SYSTEM_GESTURE, avoidArea, Rect::EMPTY_RECT);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    ret = rootScene.GetAvoidAreaByTypeIgnoringVisibility(
+        AvoidAreaType::TYPE_KEYBOARD, avoidArea, Rect::EMPTY_RECT);
+    EXPECT_EQ(WMError::WM_ERROR_ILLEGAL_PARAM, ret);
 }
 
 /**

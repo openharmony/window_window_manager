@@ -43,6 +43,7 @@
 #include "session/host/include/pc_fold_screen_manager.h"
 #include "perform_reporter.h"
 #include "session/host/include/scene_persistent_storage.h"
+#include "screen_manager.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -80,6 +81,7 @@ const bool CORRECTION_ENABLE = system::GetIntParameter<int32_t>("const.system.se
 const uint32_t ROTATION_90 = 90;
 const uint32_t ROTATION_360 = 360;
 const uint32_t ROTATION_LANDSCAPE_INVERTED = 3;
+const std::string APP_CAST_SCREEN_NAME = "HwCast_AppModeDisplay";
 } // namespace
 
 std::shared_ptr<AppExecFwk::EventHandler> Session::mainHandler_;
@@ -1418,7 +1420,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     property->SetMobileAppInPadLayoutFullScreen(GetSessionProperty()->GetMobileAppInPadLayoutFullScreen());
     const bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
     const bool isShow = !(isScreenLockedCallback_ && isScreenLockedCallback_() &&
-        systemConfig_.IsFreeMultiWindowMode() && !isPcMode);
+        systemConfig_.freeMultiWindowSupport_ && !isPcMode);
     property->SetIsShowDecorInFreeMultiWindow(isShow);
     SetSessionProperty(property);
     GetSessionProperty()->SetIsNeedUpdateWindowMode(false);
@@ -1604,19 +1606,15 @@ WSError Session::Disconnect(bool isFromClient, const std::string& identityToken)
     if (mainHandler_) {
         std::shared_ptr<RSSurfaceNode> surfaceNode;
         std::shared_ptr<RSSurfaceNode> shadowSurfaceNode;
-        std::shared_ptr<RSSurfaceNode> leashWinShadowSurfaceNode;
         {
             std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
             surfaceNode_.swap(surfaceNode);
             shadowSurfaceNode.swap(shadowSurfaceNode_);
-            leashWinShadowSurfaceNode.swap(leashWinShadowSurfaceNode_);
         }
         mainHandler_->PostTask([surfaceNode = std::move(surfaceNode),
-                                shadowSurfaceNode = std::move(shadowSurfaceNode),
-                                leashWinShadowSurfaceNode = std::move(leashWinShadowSurfaceNode)]() mutable {
+                                shadowSurfaceNode = std::move(shadowSurfaceNode)]() mutable {
             surfaceNode.reset();
             shadowSurfaceNode.reset();
-            leashWinShadowSurfaceNode.reset();
         });
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
@@ -2820,10 +2818,10 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
     }
     if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
         WSSnapshotHelper::GetInstance()->GetScreenStatus() == SCREEN_FOLDED) {
-        rotation = ROTATION_LANDSCAPE_INVERTED;
+        rotation = LANDSCAPE_INVERTED_ANGLE;
     }
     auto rotate = WSSnapshotHelper::GetDisplayOrientation(rotation);
-    if (persistentPixelMap) {
+    if (persistentPixelMap || !SupportSnapshotAllSessionStatus()) {
         key = defaultStatus;
         rotate = DisplayOrientation::PORTRAIT;
     }
@@ -2848,10 +2846,6 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
             session->addSnapshotCallback_();
         }
         session->SetAddSnapshotCallback([]() {});
-        {
-            std::lock_guard<std::mutex> lock(session->saveSnapshotCallbackMutex_);
-            session->saveSnapshotCallback_();
-        }
         if (!requirePersist) {
             return;
         }
@@ -2869,12 +2863,12 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
                 "_" + std::to_string(key), true, ScenePersistentStorageType::MAXIMIZE_STATE);
         }
         session->scenePersistence_->ResetSnapshotCache();
-        Task removeSnapshotCallback = []() {};
+        Task saveSnapshotCallback = []() {};
         {
-            std::lock_guard lock(session->removeSnapshotCallbackMutex_);
-            removeSnapshotCallback = session->removeSnapshotCallback_;
+            std::lock_guard lock(session->saveSnapshotCallbackMutex_);
+            saveSnapshotCallback = session->saveSnapshotCallback_;
         }
-        session->scenePersistence_->SaveSnapshot(pixelMap, removeSnapshotCallback, key, rotate,
+        session->scenePersistence_->SaveSnapshot(pixelMap, saveSnapshotCallback, key, rotate,
             session->freeMultiWindow_.load());
         if (updateSnapshot) {
             session->SetExitSplitOnBackground(false);
@@ -3137,6 +3131,7 @@ void Session::UnregisterSessionChangeListeners()
     sessionInfoLockedStateChangeFunc_ = nullptr;
     contextTransparentFunc_ = nullptr;
     sessionRectChangeFunc_ = nullptr;
+    sessionWindowLimitsChangeFunc_ = nullptr;
     updateSessionLabelAndIconFunc_ = nullptr;
     onRaiseMainWindowAboveTarget_ = nullptr;
     callingSessionIdChangeFunc_ = nullptr;
@@ -3344,7 +3339,7 @@ WSError Session::UpdateFocus(bool isFocused)
     return WSError::WS_OK;
 }
 
-WSError Session::NotifyFocusStatus(bool isFocused)
+WSError Session::NotifyFocusStatus(const sptr<FocusNotifyInfo>& focusNotifyInfo, bool isFocused)
 {
     if (!IsSessionValid()) {
         TLOGD(WmsLogTag::WMS_FOCUS, "Session is invalid, id: %{public}d state: %{public}u",
@@ -3356,7 +3351,7 @@ WSError Session::NotifyFocusStatus(bool isFocused)
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_NULLPTR;
     }
-    sessionStage_->UpdateFocus(isFocused);
+    sessionStage_->UpdateFocus(focusNotifyInfo, isFocused);
 
     return WSError::WS_OK;
 }
@@ -3387,7 +3382,8 @@ void Session::SetExclusivelyHighlighted(bool isExclusivelyHighlighted)
     property->SetExclusivelyHighlighted(isExclusivelyHighlighted);
 }
 
-WSError Session::UpdateHighlightStatus(bool isHighlight, bool needBlockHighlightNotify)
+WSError Session::UpdateHighlightStatus(const sptr<HighlightNotifyInfo>& highlightNotifyInfo, bool isHighlight,
+    bool needBlockHighlightNotify)
 {
     TLOGD(WmsLogTag::WMS_FOCUS,
         "windowId: %{public}d, currHighlight: %{public}d, nextHighlight: %{public}d, needBlockNotify:%{public}d",
@@ -3396,8 +3392,8 @@ WSError Session::UpdateHighlightStatus(bool isHighlight, bool needBlockHighlight
         return WSError::WS_DO_NOTHING;
     }
     isHighlighted_ = isHighlight;
-    if (needBlockHighlightNotify) {
-        NotifyHighlightChange(isHighlight);
+    if (!needBlockHighlightNotify) {
+        NotifyHighlightChange(highlightNotifyInfo, isHighlight);
     }
     std::lock_guard lock(highlightChangeFuncMutex_);
     if (highlightChangeFunc_ != nullptr) {
@@ -3406,7 +3402,7 @@ WSError Session::UpdateHighlightStatus(bool isHighlight, bool needBlockHighlight
     return WSError::WS_OK;
 }
 
-WSError Session::NotifyHighlightChange(bool isHighlight)
+WSError Session::NotifyHighlightChange(const sptr<HighlightNotifyInfo>& highlightNotifyInfo, bool isHighlight)
 {
     if (IsSystemSession()) {
         TLOGW(WmsLogTag::WMS_FOCUS, "Invalid [%{public}d, %{public}u]", persistentId_, GetSessionState());
@@ -3416,7 +3412,7 @@ WSError Session::NotifyHighlightChange(bool isHighlight)
         TLOGE(WmsLogTag::WMS_FOCUS, "sessionStage is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    sessionStage_->NotifyHighlightChange(isHighlight);
+    sessionStage_->NotifyHighlightChange(highlightNotifyInfo, isHighlight);
     return WSError::WS_OK;
 }
 
@@ -4023,6 +4019,11 @@ bool Session::CheckEmptyKeyboardAvoidAreaIfNeeded() const
     bool isPhoneOrPadNotFreeMultiWindow = isPhoneNotFreeMultiWindow || isPadNotFreeMultiWindow;
     TLOGI(WmsLogTag::WMS_LIFE, "check keyboard avoid area, isPhoneNotFreeMultiWindow: %{public}d, "
         "isPadNotFreeMultiWindow: %{public}d", isPhoneNotFreeMultiWindow, isPadNotFreeMultiWindow);
+    auto screen = ScreenManager::GetInstance().GetScreenById(property_->GetDisplayId());
+    if (screen != nullptr && screen->GetName() == APP_CAST_SCREEN_NAME) {
+        TLOGI(WmsLogTag::WMS_LIFE, "app cast screen");
+        return true;
+    }
     return (isMainFloating || isParentFloating) && !isMidScene && isPhoneOrPadNotFreeMultiWindow;
 }
 
@@ -4941,6 +4942,9 @@ void Session::DeletePersistentImageFit()
         TLOGI(WmsLogTag::WMS_PATTERN, "delete persistent ImageFit");
         Rosen::ScenePersistentStorage::Delete("SetImageForRecent_" + std::to_string(GetPersistentId()),
             Rosen::ScenePersistentStorageType::MAXIMIZE_STATE);
+    }
+    if (scenePersistence_) {
+        scenePersistence_->ClearSnapshotPath();
     }
 }
 

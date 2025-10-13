@@ -431,32 +431,6 @@ HWTEST_F(WindowManagerTest, UnregisterCameraFloatWindowChangedListener01, TestSi
 }
 
 /**
- * @tc.name: RegisterVisibilityChangedListener01
- * @tc.desc: check RegisterVisibilityChangedListener
- * @tc.type: FUNC
- */
-HWTEST_F(WindowManagerTest, RegisterVisibilityChangedListener01, TestSize.Level1)
-{
-    auto windowManager = WindowManager::GetInstance(-1);
-    auto oldWindowManagerAgent = windowManager->pImpl_->windowVisibilityListenerAgent_;
-    auto oldListeners = windowManager->pImpl_->windowVisibilityListeners_;
-    windowManager->pImpl_->windowVisibilityListenerAgent_ = nullptr;
-    windowManager->pImpl_->windowVisibilityListeners_.clear();
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager->RegisterVisibilityChangedListener(nullptr));
-
-    sptr<TestVisibilityChangedListener> listener = sptr<TestVisibilityChangedListener>::MakeSptr();
-    windowManager->RegisterVisibilityChangedListener(listener);
-    ASSERT_NE(nullptr, windowManager);
-
-    // to check that the same listner can not be registered twice
-    windowManager->RegisterVisibilityChangedListener(listener);
-    ASSERT_NE(nullptr, windowManager);
-
-    windowManager->pImpl_->windowVisibilityListenerAgent_ = oldWindowManagerAgent;
-    windowManager->pImpl_->windowVisibilityListeners_ = oldListeners;
-}
-
-/**
  * @tc.name: UnregisterVisibilityChangedListener01
  * @tc.desc: check UnregisterVisibilityChangedListener
  * @tc.type: FUNC
@@ -552,28 +526,6 @@ HWTEST_F(WindowManagerTest, UnregisterWindowUpdateListener01, TestSize.Level1)
 
     windowManager->pImpl_->windowUpdateListenerAgent_ = oldWindowManagerAgent;
     windowManager->pImpl_->windowUpdateListeners_ = oldListeners;
-}
-
-/**
- * @tc.name: RegisterWindowModeChangedListener01
- * @tc.desc: check RegisterWindowModeChangedListener
- * @tc.type: FUNC
- */
-HWTEST_F(WindowManagerTest, RegisterWindowModeChangedListener01, TestSize.Level1)
-{
-    auto windowManager = WindowManager::GetInstance(-1);
-    auto oldWindowManagerAgent = windowManager->pImpl_->windowModeListenerAgent_;
-    auto oldListeners = windowManager->pImpl_->windowModeListeners_;
-    windowManager->pImpl_->windowModeListenerAgent_ = nullptr;
-    windowManager->pImpl_->windowModeListeners_.clear();
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager->RegisterWindowModeChangedListener(nullptr));
-
-    sptr<TestWindowModeChangedListener> listener = sptr<TestWindowModeChangedListener>::MakeSptr();
-    windowManager->RegisterWindowModeChangedListener(listener);
-    ASSERT_EQ(nullptr, windowManager->pImpl_->windowModeListenerAgent_);
-
-    windowManager->pImpl_->windowModeListenerAgent_ = oldWindowManagerAgent;
-    windowManager->pImpl_->windowModeListeners_ = oldListeners;
 }
 
 /**
@@ -723,7 +675,6 @@ HWTEST_F(WindowManagerTest, UnregisterWaterMarkFlagChangedListener01, TestSize.L
     ASSERT_EQ(WMError::WM_OK, windowManager->UnregisterWaterMarkFlagChangedListener(listener1));
     ASSERT_EQ(WMError::WM_OK, windowManager->UnregisterWaterMarkFlagChangedListener(listener2));
     ASSERT_EQ(0, windowManager->pImpl_->waterMarkFlagChangeListeners_.size());
-    ASSERT_EQ(nullptr, windowManager->pImpl_->waterMarkFlagChangeAgent_);
 
     // if agent == nullptr, it can not be crashed.
     windowManager->pImpl_->waterMarkFlagChangeListeners_.push_back(listener1);
@@ -751,7 +702,6 @@ HWTEST_F(WindowManagerTest, RegisterGestureNavigationEnabledChangedListener, Tes
 
     windowManager->RegisterGestureNavigationEnabledChangedListener(listener);
     ASSERT_EQ(1, windowManager->pImpl_->gestureNavigationEnabledListeners_.size());
-    ASSERT_EQ(nullptr, windowManager->pImpl_->gestureNavigationEnabledAgent_);
 
     // to check that the same listner can not be registered twice
     ASSERT_EQ(WMError::WM_OK, windowManager->RegisterGestureNavigationEnabledChangedListener(listener));

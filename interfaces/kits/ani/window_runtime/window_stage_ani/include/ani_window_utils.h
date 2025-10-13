@@ -64,7 +64,8 @@ public:
     static ani_object CreateAniSize(ani_env* env, int32_t width, int32_t height);
     static ani_object CreateAniRect(ani_env* env, const Rect& rect);
     static ani_object CreateAniWindowLimits(ani_env* env, const WindowLimits& windowLimits);
-    static ani_object CreateAniAvoidArea(ani_env* env, const AvoidArea& avoidArea, AvoidAreaType type);
+    static ani_object CreateAniAvoidArea(ani_env* env, const AvoidArea& avoidArea,
+        AvoidAreaType type, bool useActualVisibility = false);
     static ani_object CreateAniSystemBarTintState(ani_env* env, DisplayId displayId, const SystemBarRegionTints& tints);
     static ani_object CreateAniSystemBarRegionTint(ani_env* env, const SystemBarRegionTint& tint);
     static ani_object CreateAniRotationChangeInfo(ani_env* env, const RotationChangeInfo& info);
@@ -118,6 +119,7 @@ public:
         WindowSnapshotConfiguration& windowSnapshotConfiguration);
     static WindowLimits ParseWindowLimits(ani_env* env, ani_object aniWindowLimits);
     static bool CheckParaIsUndefined(ani_env* env, ani_object para);
+    static ani_object CreateAniPosition(ani_env* env, const Position& position);
 
     /**
      * @brief Convert WMError to corresponding WmErrorCode.

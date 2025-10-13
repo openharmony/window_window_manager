@@ -347,23 +347,6 @@ HWTEST_F(WindowPatternSnapshotTest, SetSaveSnapshotCallback, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetRemoveSnapshotCallback
- * @tc.desc: test function: SetRemoveSnapshotCallback
- * @tc.type: FUNC
- */
-HWTEST_F(WindowPatternSnapshotTest, SetRemoveSnapshotCallback, TestSize.Level1)
-{
-    std::string bundleName = "testBundleName";
-    SessionInfo info;
-    info.abilityName_ = bundleName;
-    info.bundleName_ = bundleName;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession->removeSnapshotCallback_);
-    sceneSession->SetRemoveSnapshotCallback(nullptr);
-    ASSERT_NE(nullptr, sceneSession->removeSnapshotCallback_);
-}
-
-/**
  * @tc.name: SetAddSnapshotCallback
  * @tc.desc: test function: SetAddSnapshotCallback
  * @tc.type: FUNC
@@ -957,6 +940,97 @@ HWTEST_F(WindowPatternSnapshotTest, FindClosestFormSnapshot, TestSize.Level1)
     scenePersistence->hasSnapshot_[SCREEN_EXPAND] = false;
     ret = scenePersistence->FindClosestFormSnapshot(key);
     EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: SetImageForRecentPixelMap
+ * @tc.desc: SetImageForRecentPixelMap Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternSnapshotTest, SetImageForRecentPixelMap, TestSize.Level1)
+{
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    ImageFit imageFit = ImageFit::FILL;
+    auto ret = ssm_->SetImageForRecentPixelMap(pixelMap, imageFit, 1);
+    EXPECT_EQ(ret, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+
+    SessionInfo info;
+    info.screenId_ = 0;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
+    ret = ssm_->SetImageForRecentPixelMap(pixelMap, imageFit, sceneSession->GetPersistentId());
+    EXPECT_EQ(ret, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+
+    std::string bundleName = "test";
+    int32_t persistentId = sceneSession->GetPersistentId();
+    sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
+    sceneSession->scenePersistence_ = scenePersistence;
+    ret = ssm_->SetImageForRecentPixelMap(pixelMap, imageFit, sceneSession->GetPersistentId());
+    EXPECT_EQ(ret, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    AppExecFwk::ApplicationInfo applicationInfo;
+    applicationInfo.isSystemApp = false;
+    abilityInfo->applicationInfo = applicationInfo;
+    sceneSession->SetAbilitySessionInfo(abilityInfo);
+    ret = ssm_->SetImageForRecentPixelMap(pixelMap, imageFit, sceneSession->GetPersistentId());
+    EXPECT_EQ(ret, WMError::WM_ERROR_NOT_SYSTEM_APP);
+
+    applicationInfo.isSystemApp = true;
+    abilityInfo->applicationInfo = applicationInfo;
+    sceneSession->SetAbilitySessionInfo(abilityInfo);
+    sceneSession->state_ = SessionState::STATE_BACKGROUND;
+    ret = ssm_->SetImageForRecentPixelMap(pixelMap, imageFit, sceneSession->GetPersistentId());
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    sceneSession->state_ = SessionState::STATE_ACTIVE;
+    ret = ssm_->SetImageForRecentPixelMap(pixelMap, imageFit, sceneSession->GetPersistentId());
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+
+    pixelMap = std::make_shared<Media::PixelMap>();
+    ret = ssm_->SetImageForRecentPixelMap(pixelMap, imageFit, sceneSession->GetPersistentId());
+    EXPECT_EQ(ret, WMError::WM_OK);
+    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
+}
+
+/**
+ * @tc.name: RemoveImageForRecent
+ * @tc.desc: RemoveImageForRecent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternSnapshotTest, RemoveImageForRecent, TestSize.Level1)
+{
+    auto ret = ssm_->RemoveImageForRecent(1);
+    EXPECT_EQ(ret, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+
+    SessionInfo info;
+    info.screenId_ = 0;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
+    ret = ssm_->RemoveImageForRecent(sceneSession->GetPersistentId());
+    EXPECT_EQ(ret, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    AppExecFwk::ApplicationInfo applicationInfo;
+    applicationInfo.isSystemApp = false;
+    abilityInfo->applicationInfo = applicationInfo;
+    sceneSession->SetAbilitySessionInfo(abilityInfo);
+    ret = ssm_->RemoveImageForRecent(sceneSession->GetPersistentId());
+    EXPECT_EQ(ret, WMError::WM_ERROR_NOT_SYSTEM_APP);
+
+    applicationInfo.isSystemApp = true;
+    abilityInfo->applicationInfo = applicationInfo;
+    sceneSession->SetAbilitySessionInfo(abilityInfo);
+    ret = ssm_->RemoveImageForRecent(sceneSession->GetPersistentId());
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    std::string bundleName = "test";
+    int32_t persistentId = sceneSession->GetPersistentId();
+    sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
+    sceneSession->scenePersistence_ = scenePersistence;
+    ret = ssm_->RemoveImageForRecent(sceneSession->GetPersistentId());
+    EXPECT_EQ(ret, WMError::WM_OK);
+    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
 }
 } // namespace
 } // namespace Rosen

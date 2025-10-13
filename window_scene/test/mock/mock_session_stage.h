@@ -35,7 +35,7 @@ public:
     MOCK_METHOD1(UpdateSessionViewportConfig, WSError(const SessionViewportConfig& config));
     MOCK_METHOD0(HandleBackEvent, WSError(void));
     MOCK_METHOD0(NotifyDestroy, WSError(void));
-    MOCK_METHOD1(UpdateFocus, WSError(bool isFocused));
+    MOCK_METHOD2(UpdateFocus, WSError(const sptr<FocusNotifyInfo>& focusNotifyInfo, bool isFocused));
     MOCK_METHOD1(NotifyTransferComponentData, WSError(const AAFwk::WantParams& wantParams));
     MOCK_METHOD2(NotifyTransferComponentDataSync, WSErrorCode(const AAFwk::WantParams& wantParams,
         AAFwk::WantParams& reWantParams));
@@ -59,6 +59,7 @@ public:
     MOCK_METHOD2(UpdateTitleInTargetPos, WSError(bool isShow, int32_t height));
     MOCK_METHOD2(NotifyDensityFollowHost, WSError(bool isFollowHost, float densityValue));
     MOCK_METHOD1(NotifyWindowVisibility, WSError(bool isVisible));
+    MOCK_METHOD1(NotifyWindowOcclusionState, WSError(const WindowVisibilityState state));
     MOCK_METHOD1(NotifyTransformChange, void(const Transform& transform));
     MOCK_METHOD1(NotifySingleHandTransformChange, void(const SingleHandTransform& singleHandTransform));
     MOCK_METHOD1(NotifyDialogStateChange, WSError(bool isForeground));
@@ -68,6 +69,7 @@ public:
     MOCK_METHOD2(NotifyDisplayMove, void(DisplayId from, DisplayId to));
     MOCK_METHOD1(SwitchFreeMultiWindow, WSError(bool enable));
     MOCK_METHOD2(SetUniqueVirtualPixelRatio, void(bool useUniqueDensity, float virtualPixelRatio));
+    MOCK_METHOD1(UpdateAnimationSpeed, void(float speed));
     MOCK_METHOD0(PcAppInPadNormalClose, WSError(void));
     MOCK_METHOD1(NotifyCompatibleModePropertyChange, WSError(const sptr<CompatibleModeProperty> property));
     MOCK_METHOD1(NotifySessionFullScreen, void(bool fullScreen));
@@ -78,7 +80,8 @@ public:
     MOCK_METHOD1(SetEnableDragBySystem, WSError(bool enableDrag));
     MOCK_METHOD2(SendContainerModalEvent, WSError(const std::string& eventName, const std::string& eventValue));
     MOCK_METHOD2(UpdateWindowModeByIdForUITest, WMError(int32_t windowId, int32_t updateMode));
-    MOCK_METHOD1(NotifyHighlightChange, WSError(bool isHighlight));
+    MOCK_METHOD2(NotifyHighlightChange, WSError(const sptr<HighlightNotifyInfo>& highlightNotifyInfo,
+        bool isHighlight));
     MOCK_METHOD1(SetDragActivated, WSError(bool dragActivated));
     MOCK_METHOD3(NotifyPipWindowSizeChange, WSError(double width, double height, double scale));
     MOCK_METHOD1(NotifyWindowCrossAxisChange, void(CrossAxisState state));

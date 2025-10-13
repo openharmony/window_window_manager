@@ -465,6 +465,8 @@ public:
     std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
         DmErrorCode* errorCode = nullptr) override;
     void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;
+    void ConvertWindowIdsToSurfaceNodeList(std::vector<uint64_t> windowIdList,
+        std::vector<uint64_t>& surfaceNodesList);
     sptr<DisplayInfo> GetPrimaryDisplayInfo() override;
     DisplayId GetPrimaryDisplayId() override;
     std::shared_ptr<Media::PixelMap> GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
@@ -579,6 +581,14 @@ private:
     void RegisterScreenChangeListener();
     void RegisterFoldNotSwitchingListener();
     void OnHgmRefreshRateChange(uint32_t refreshRate);
+    void UpdateSessionByActiveModeChange(sptr<ScreenSession> screenSession,
+        sptr<ScreenSession> phyScreenSession, int32_t activeIdx);
+    void RecoverScreenActiveMode(ScreenId screenId, int32_t activeIdx);
+    void CheckAndNotifyRefreshRate(uint32_t refreshRate, sptr<ScreenSession> updateScreenSession);
+    void CheckAndNotifyChangeMode(const RRect& bounds, sptr<ScreenSession> updateScreenSession);
+    void ReportScreenModeChangeEvent(RSScreenModeInfo screenmode, uint32_t result);
+    void ReportRelativePositionChangeEvent(MultiScreenPositionOptions& mainScreenOptions,
+        MultiScreenPositionOptions& secondScreenOption, const std::string& errMsg);
     static const std::string GetScreenName(ScreenId screenId);
     void InitScreenProperty(ScreenId screenId, RSScreenModeInfo& screenMode,
         RSScreenCapability& screenCapability, ScreenProperty& property);
@@ -961,6 +971,7 @@ private:
     void SwitchUserDealUserDisplayNode(int32_t newUserId);
     void AddUserDisplayNodeOnTree(int32_t userId);
     void RemoveUserDisplayNodeFromTree(int32_t userId);
+    bool CheckUserIsForeground(int32_t userId);
     void SetUserDisplayNodePositionZ(int32_t userId, float positionZ);
     void HandleNewUserDisplayNode(int32_t newUserId, bool coldBoot);
     void WaitSwitchUserAnimateFinish(int32_t newUserId, bool isColdSwitch);

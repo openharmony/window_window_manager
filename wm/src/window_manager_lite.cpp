@@ -819,6 +819,15 @@ WMError WindowManagerLite::GetMainWindowInfos(int32_t topNum, std::vector<MainWi
     return WindowAdapterLite::GetInstance(userId_)->GetMainWindowInfos(topNum, topNInfo);
 }
 
+WMError WindowManagerLite::UpdateAnimationSpeedWithPid(pid_t pid, float speed)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapterLite>().UpdateAnimationSpeedWithPid(pid, speed);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "failed");
+    }
+    return ret;
+}
+
 WMError WindowManagerLite::GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo)
 {
     return WindowAdapterLite::GetInstance(userId_)->GetCallingWindowInfo(callingWindowInfo);
@@ -1302,6 +1311,16 @@ WMError WindowManagerLite::SendPointerEventForHover(const std::shared_ptr<MMI::P
     WMError ret = WindowAdapterLite::GetInstance(userId_)->SendPointerEventForHover(pointerEvent);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_EVENT, "send failed");
+    }
+    return ret;
+}
+
+WMError WindowManagerLite::GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+    std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap)
+{
+    WMError ret = WindowAdapterLite::GetInstance(userId_)->GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed");
     }
     return ret;
 }

@@ -235,6 +235,11 @@ WMError SceneSessionManagerLite::GetMainWindowInfos(int32_t topNum, std::vector<
     return SceneSessionManager::GetInstance().GetMainWindowInfos(topNum, topNInfo);
 }
 
+WMError SceneSessionManagerLite::UpdateAnimationSpeedWithPid(pid_t pid, float speed)
+{
+    return SceneSessionManager::GetInstance().UpdateAnimationSpeedWithPid(pid, speed);
+}
+
 WMError SceneSessionManagerLite::GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo)
 {
     return SceneSessionManager::GetInstance().GetCallingWindowInfo(callingWindowInfo);
@@ -424,5 +429,12 @@ WMError SceneSessionManagerLite::UnregisterPipChgListenerByScreenId(int32_t scre
 {
     WLOGFD("in");
     return SceneSessionManager::GetInstance().UnregisterPipChgListenerByScreenId(screenId);
+}
+
+WMError SceneSessionManagerLite::GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+    std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap)
+{
+    WLOGFD("in");
+    return SceneSessionManager::GetInstance().GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
 }
 } // namespace OHOS::Rosen

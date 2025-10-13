@@ -1300,18 +1300,6 @@ HWTEST_F(SceneSessionManagerTest7, UpdateNormalSessionAvoidArea02, TestSize.Leve
 }
 
 /**
- * @tc.name: RemoveProcessSnapshotSkip
- * @tc.desc: SceneSesionManager RemoveProcessSnapshotSkip
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest7, RemoveProcessSnapshotSkip, TestSize.Level1)
-{
-    ssm_->snapshotSkipPidSet_.insert(1);
-    ssm_->RemoveProcessSnapshotSkip(1);
-    ASSERT_EQ(ssm_->snapshotSkipPidSet_.find(1), ssm_->snapshotSkipPidSet_.end());
-}
-
-/**
  * @tc.name: SetSessionSnapshotSkipForAppProcess
  * @tc.desc: SceneSesionManager SetSessionSnapshotSkipForAppProcess
  * @tc.type: FUNC
@@ -1323,7 +1311,7 @@ HWTEST_F(SceneSessionManagerTest7, SetSessionSnapshotSkipForAppProcess, TestSize
     sceneSession->SetCallingPid(1000);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    sceneSession->surfaceNode_ = surfaceNode;
+    sceneSession->SetSurfaceNode(surfaceNode);
     ssm_->SetSessionSnapshotSkipForAppProcess(sceneSession);
     ASSERT_EQ(sceneSession->GetSessionProperty()->GetSnapshotSkip(), false);
 
@@ -1616,7 +1604,7 @@ HWTEST_F(SceneSessionManagerTest7, SetSessionSnapshotSkipForAppBundleName, TestS
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, nullptr);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    sceneSession->surfaceNode_ = surfaceNode;
+    sceneSession->SetSurfaceNode(surfaceNode);
     ssm_->SetSessionSnapshotSkipForAppBundleName(sceneSession);
     ASSERT_EQ(sceneSession->GetSessionProperty()->GetSnapshotSkip(), false);
 
@@ -2109,6 +2097,57 @@ HWTEST_F(SceneSessionManagerTest7, MinimizeByWindowId, TestSize.Level1)
     std::vector<int32_t> windowIds;
     WMError res = ssm_->MinimizeByWindowId(windowIds);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, res);
+}
+
+/**
+ * @tc.name: UpdateAnimationSpeedWithPid
+ * @tc.desc: test function : UpdateAnimationSpeedWithPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, UpdateAnimationSpeedWithPid, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+
+    MockAccesstokenKit::MockIsSACalling(false);
+
+    float speed = 2.0f;
+    int32_t pid = 1;
+
+    auto result = ssm_->UpdateAnimationSpeedWithPid(pid, speed);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+
+    MockAccesstokenKit::MockIsSACalling(true);
+    SessionInfo info;
+    info.bundleName_ = "SceneSessionManagerTest7";
+    info.abilityName_ = "UpdateAnimationSpeedWithPid";
+    sptr<SceneSession> sceneSession01 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession02 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession03 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession04 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession01, nullptr);
+    ASSERT_NE(sceneSession02, nullptr);
+    ASSERT_NE(sceneSession03, nullptr);
+    ASSERT_NE(sceneSession04, nullptr);
+    sceneSession01->isVisible_ = false;
+    sceneSession01->SetCallingPid(2);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession01));
+    result = ssm_->UpdateAnimationSpeedWithPid(pid, speed);
+    EXPECT_EQ(result, WMError::WM_OK);
+    sceneSession02->isVisible_ = true;
+    sceneSession02->SetCallingPid(3);
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession02));
+    result = ssm_->UpdateAnimationSpeedWithPid(pid, speed);
+    EXPECT_EQ(result, WMError::WM_OK);
+    sceneSession03->isVisible_ = false;
+    sceneSession03->SetCallingPid(pid);
+    ssm_->sceneSessionMap_.insert(std::make_pair(3, sceneSession03));
+    result = ssm_->UpdateAnimationSpeedWithPid(pid, speed);
+    EXPECT_EQ(result, WMError::WM_OK);
+    sceneSession04->isVisible_ = true;
+    sceneSession04->SetCallingPid(pid);
+    ssm_->sceneSessionMap_.insert(std::make_pair(4, sceneSession04));
+    result = ssm_->UpdateAnimationSpeedWithPid(pid, speed);
+    EXPECT_EQ(result, WMError::WM_OK);
 }
 
 /**

@@ -158,6 +158,15 @@ public:
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
 
     /**
+     * @brief Set the animation speed for a specific process.
+     *
+     * @param pid process id.
+     * @param speed The animation speed.
+     * @return WM_OK means set success, others means set failed.
+     */
+    WMError UpdateAnimationSpeedWithPid(pid_t pid, float speed);
+
+    /**
      * @brief Get keyboard calling window information.
      *
      * @param callingWindowInfo calling window information
@@ -367,6 +376,16 @@ public:
      * @return WM_OK means send success, others means send failed.
      */
     WMError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+
+    /**
+     * @brief Get displayId by windowId.
+     *
+     * @param windowIds list of window ids that need to get screen ids
+     * @param windowDisplayIdMap map of windows and displayIds
+     * @return WM_OK means get success, others means failed.
+     */
+    WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+        std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap);
 
     ~WindowManagerLite() override;
 

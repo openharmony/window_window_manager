@@ -2726,13 +2726,65 @@ HWTEST_F(WindowSessionImplTest4, NotifyHighlightChange, TestSize.Level1)
     window->property_->SetPersistentId(1);
 
     bool highlight = false;
-    WSError res = window->NotifyHighlightChange(highlight);
+    sptr<HighlightNotifyInfo> info = nullptr;
+    WSError res = window->NotifyHighlightChange(info, highlight);
+    info = sptr<HighlightNotifyInfo>::MakeSptr();
+    info->isSyncNotify_ = false;
+    res = window->NotifyHighlightChange(info, highlight);
     EXPECT_EQ(res, WSError::WS_OK);
     sptr<IWindowHighlightChangeListener> listener = sptr<IWindowHighlightChangeListener>::MakeSptr();
     window->RegisterWindowHighlightChangeListeners(listener);
-    res = window->NotifyHighlightChange(highlight);
+    res = window->NotifyHighlightChange(info, highlight);
     EXPECT_EQ(res, WSError::WS_OK);
     window->UnregisterWindowHighlightChangeListeners(listener);
+}
+
+/**
+ * @tc.name: NotifyHighlightChange01
+ * @tc.desc: NotifyHighlightChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, NotifyHighlightChange01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyHighlightChange01");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    window->updateHighlightTimeStamp_.store(2);
+    bool highlight = false;
+    auto info = sptr<HighlightNotifyInfo>::MakeSptr();
+    info->isSyncNotify_ = true;
+    info->timeStamp_ = 1;
+    WSError res = window->NotifyHighlightChange(info, highlight);
+    EXPECT_EQ(window->updateHighlightTimeStamp_.load(), 2);
+    info->timeStamp_ = 3;
+    res = window->NotifyHighlightChange(info, highlight);
+    EXPECT_EQ(window->updateHighlightTimeStamp_.load(), 3);
+    EXPECT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: NotifyHighlightChange02
+ * @tc.desc: NotifyHighlightChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, NotifyHighlightChange02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyHighlightChange02");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    sptr<WindowSessionImpl> window1 = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    window1->property_->SetPersistentId(2);
+    window->updateHighlightTimeStamp_.store(2);
+    bool highlight = false;
+    auto info = sptr<HighlightNotifyInfo>::MakeSptr(3, std::vector<int32_t>(1, 2), 2, true);
+    WSError res = window->NotifyHighlightChange(info, highlight);
+    EXPECT_EQ(window->updateHighlightTimeStamp_.load(), 3);
+    info->timeStamp_ = 4;
+    res = window->NotifyHighlightChange(info, highlight);
+    EXPECT_EQ(window->updateHighlightTimeStamp_.load(), 4);
+    EXPECT_EQ(res, WSError::WS_OK);
 }
 
 /**
@@ -2940,6 +2992,62 @@ HWTEST_F(WindowSessionImplTest4, NotifyAppForceLandscapeConfigUpdated, TestSize.
     EXPECT_EQ(res, WSError::WS_DO_NOTHING);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: NotifyAppForceLandscapeConfigUpdated end";
+}
+
+/**
+ * @tc.name: IsStageDefaultDensityEnabled01
+ * @tc.desc: Main Window
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, IsStageDefaultDensityEnabled01, TestSize.Level1)
+{
+    sptr<WindowOption> mainWindowOption = sptr<WindowOption>::MakeSptr();
+    mainWindowOption->SetWindowName("mainWindow");
+    sptr<WindowSessionImpl> mainWindowSession = sptr<WindowSessionImpl>::MakeSptr(mainWindowOption);
+    mainWindowSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    mainWindowSession->context_ = abilityContext_;
+    mainWindowSession->defaultDensityEnabledStageConfig_.store(false);
+    mainWindowSession->windowSessionMap_.["mainWindow"] =
+        std::pair<int32_t, sptr<WindowSessionImpl>>(1, mainWindowSession);
+
+    mainWindowSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    mainWindowSession->defaultDensityEnabledStageConfig_.store(true);
+    EXPECT_TRUE(mainWindowSession->IsStageDefaultDensityEnabled());
+
+    window->defaultDensityEnabledStageConfig_.store(false);
+    EXPECT_FALSE(mainWindowSession->IsStageDefaultDensityEnabled());
+}
+
+/**
+ * @tc.name: IsStageDefaultDensityEnabled02
+ * @tc.desc: Sub Window
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, IsStageDefaultDensityEnabled02, TestSize.Level1)
+{
+    sptr<WindowOption> mainWindowOption = sptr<WindowOption>::MakeSptr();
+    mainWindowOption->SetWindowName("mainWindow");
+    sptr<WindowSessionImpl> mainWindowSession = sptr<WindowSessionImpl>::MakeSptr(mainWindowOption);
+    mainWindowSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    mainWindowSession->context_ = abilityContext_;
+    mainWindowSession->defaultDensityEnabledStageConfig_.store(false);
+    mainWindowSession->windowSessionMap_.["mainWindow"] =
+        std::pair<int32_t, sptr<WindowSessionImpl>>(1, mainWindowSession);
+
+    sptr<WindowOption> subWindowOption = sptr<WindowOption>::MakeSptr();
+    subWindowOption->SetWindowName("subWindow");
+    sptr<WindowSessionImpl> subWindowSession = sptr<WindowSessionImpl>::MakeSptr(subWindowOption);
+    subWindowSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    subWindowSession->context_ = abilityContext_;
+    subWindowSession->defaultDensityEnabledStageConfig_.store(true);
+    WindowSessionImpl::windowSessionMap_.insert(std::make_pair("subWindow", subWindowSession));
+    subWindowSession->windowSessionMap_.["subWindow"] =
+        std::pair<int32_t, sptr<WindowSessionImpl>>(2, subWindowSession);
+
+    EXPECT_FALSE(subWindowSession->IsStageDefaultDensityEnabled());
+
+    mainWindowSession->defaultDensityEnabledStageConfig_.store(true);
+    EXPECT_TRUE(subWindowSession->IsStageDefaultDensityEnabled());
 }
 }
 } // namespace

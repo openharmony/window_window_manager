@@ -842,7 +842,18 @@ WSError SessionProxy::NotifySessionException(const sptr<AAFwk::SessionInfo> abil
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::OnSessionEvent(SessionEvent event)
+bool WriteEventParam(MessageParcel& data, SessionEvent event, const SessionEventParam& param)
+{
+    if (event == SessionEvent::EVENT_MAXIMIZE) {
+        if (!data.WriteUint32(param.waterfallResidentState)) {
+            TLOGE(WmsLogTag::WMS_EVENT, "Failed to write waterfallResidentState");
+            return false;
+        }
+    }
+    return true;
+}
+
+WSError SessionProxy::OnSessionEvent(SessionEvent event, const SessionEventParam& param)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -851,8 +862,11 @@ WSError SessionProxy::OnSessionEvent(SessionEvent event)
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!(data.WriteUint32(static_cast<uint32_t>(event)))) {
+    if (!data.WriteUint32(static_cast<uint32_t>(event))) {
         WLOGFE("Write event id failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!WriteEventParam(data, event, param)) {
         return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
@@ -1411,6 +1425,45 @@ AvoidArea SessionProxy::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rec
         return avoidArea;
     }
     int sendCode = remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_AVOID_AREA),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_IMMS, "SendRequest failed, code: %{public}d", sendCode);
+        return avoidArea;
+    }
+    sptr<AvoidArea> area = reply.ReadParcelable<AvoidArea>();
+    if (area == nullptr) {
+        return avoidArea;
+    }
+    return *area;
+}
+
+AvoidArea SessionProxy::GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType type, const WSRect& rect)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    AvoidArea avoidArea;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_IMMS, "WriteInterfaceToken failed");
+        return avoidArea;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(type))) {
+        TLOGE(WmsLogTag::WMS_IMMS, "write type error");
+        return avoidArea;
+    }
+    if (!data.WriteInt32(rect.posX_) || !data.WriteInt32(rect.posY_) ||
+        !data.WriteInt32(rect.width_) || !data.WriteInt32(rect.height_)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "write rect error");
+        return avoidArea;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "remote is null");
+        return avoidArea;
+    }
+    int sendCode = remote->SendRequest(static_cast<uint32_t>(
+        SessionInterfaceCode::TRANS_ID_GET_AVOID_AREA_IGNORING_VISIBILITY),
         data, reply, option);
     if (sendCode != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_IMMS, "SendRequest failed, code: %{public}d", sendCode);
@@ -2457,15 +2510,14 @@ WSError SessionProxy::SetDecorVisible(bool isVisible)
         return WSError::WS_ERROR_IPC_FAILED;
     }
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     int sendRet = remote->SendRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DECOR_VISIBLE), data, reply, option);
     if (sendRet != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_DECOR, "Failed to send request, error = %{public}d", sendRet);
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadInt32();
-    return static_cast<WSError>(ret);
+    return WSError::WS_OK;
 }
 
 WSError SessionProxy::AdjustKeyboardLayout(const KeyboardLayoutParams& params)

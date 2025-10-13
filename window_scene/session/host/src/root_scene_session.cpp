@@ -31,7 +31,7 @@ void RootSceneSession::LoadContent(
     }
 }
 
-void RootSceneSession::GetSystemAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea)
+void RootSceneSession::GetSystemAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea, bool ignoreVisibility)
 {
     std::vector<sptr<SceneSession>> statusBarVector;
     DisplayId displayId = GetSessionProperty()->GetDisplayId();
@@ -46,8 +46,8 @@ void RootSceneSession::GetSystemAvoidAreaForRoot(const WSRect& rect, AvoidArea& 
             TLOGD(WmsLogTag::WMS_IMMS, "displayId %{public}" PRIu64 " constantly isVisible %{public}d",
                 displayId, isVisible);
         }
-        if (!isVisible) {
-            TLOGI(WmsLogTag::WMS_IMMS, "invisible");
+        if (!isVisible && !ignoreVisibility) {
+            TLOGD(WmsLogTag::WMS_IMMS, "invisible");
             continue;
         }
         WSRect statusBarRect = statusBar->GetSessionRect();
@@ -114,18 +114,18 @@ void RootSceneSession::GetCutoutAvoidAreaForRoot(const WSRect& rect, AvoidArea& 
     }
 }
 
-void RootSceneSession::GetAINavigationBarAreaForRoot(const WSRect& rect, AvoidArea& avoidArea)
+void RootSceneSession::GetAINavigationBarAreaForRoot(const WSRect& rect, AvoidArea& avoidArea, bool ignoreVisibility)
 {
     WSRect barArea;
     if (specificCallback_ != nullptr && specificCallback_->onGetAINavigationBarArea_) {
-        barArea = specificCallback_->onGetAINavigationBarArea_(GetSessionProperty()->GetDisplayId());
+        barArea = specificCallback_->onGetAINavigationBarArea_(GetSessionProperty()->GetDisplayId(), ignoreVisibility);
     }
     CalculateAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR, rect, barArea, avoidArea);
 }
 
-AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect, int32_t apiVersion)
+AvoidArea RootSceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type, bool ignoreVisibility)
 {
-    auto task = [weakThis = wptr(this), type]() -> AvoidArea {
+    auto task = [weakThis = wptr(this), type, ignoreVisibility]() -> AvoidArea {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_IMMS, "session is null");
@@ -136,7 +136,7 @@ AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect&
         WSRect sessionRect = session->GetSessionRect();
         switch (type) {
             case AvoidAreaType::TYPE_SYSTEM: {
-                session->GetSystemAvoidAreaForRoot(sessionRect, avoidArea);
+                session->GetSystemAvoidAreaForRoot(sessionRect, avoidArea, ignoreVisibility);
                 return avoidArea;
             }
             case AvoidAreaType::TYPE_CUTOUT: {
@@ -151,7 +151,7 @@ AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect&
                 return avoidArea;
             }
             case AvoidAreaType::TYPE_NAVIGATION_INDICATOR: {
-                session->GetAINavigationBarAreaForRoot(sessionRect, avoidArea);
+                session->GetAINavigationBarAreaForRoot(sessionRect, avoidArea, ignoreVisibility);
                 return avoidArea;
             }
             default: {
@@ -162,6 +162,16 @@ AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect&
         }
     };
     return PostSyncTask(task, __func__);
+}
+
+AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect, int32_t apiVersion)
+{
+    return GetAvoidAreaByTypeInner(type);
+}
+
+AvoidArea RootSceneSession::GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType type, const WSRect& rect)
+{
+    return GetAvoidAreaByTypeInner(type, true);
 }
 
 void RootSceneSession::SetRootSessionRect(const WSRect& rect)

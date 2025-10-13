@@ -97,6 +97,7 @@ private:
     int HandleWatchFocusActiveChange(MessageParcel& data, MessageParcel& reply);
     int HandleGetParentMainWindowId(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateSessionWindowVisibilityListener(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateSessionOcclusionStateListener(MessageParcel& data, MessageParcel& reply);
     int HandleShiftAppWindowFocus(MessageParcel& data, MessageParcel& reply);
     int HandleListWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetAllWindowLayoutInfo(MessageParcel& data, MessageParcel& reply);
@@ -134,6 +135,8 @@ private:
     int HandleIsPcOrPadFreeMultiWindowMode(MessageParcel& data, MessageParcel& reply);
     int HandleIsWindowRectAutoSave(MessageParcel& data, MessageParcel& reply);
     int HandleSetImageForRecent(MessageParcel& data, MessageParcel& reply);
+    int HandleSetImageForRecentPixelMap(MessageParcel& data, MessageParcel& reply);
+    int HandleRemoveImageForRecent(MessageParcel& data, MessageParcel& reply);
     int HandleGetDisplayIdByWindowId(MessageParcel& data, MessageParcel& reply);
     int HandleSetGlobalDragResizeType(MessageParcel& data, MessageParcel& reply);
     int HandleGetGlobalDragResizeType(MessageParcel& data, MessageParcel& reply);

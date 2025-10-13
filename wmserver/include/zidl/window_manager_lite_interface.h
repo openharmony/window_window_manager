@@ -44,6 +44,7 @@ public:
         AppExecFwk::ExtensionAbilityType extensionAbilityType, int32_t& pid) = 0;
     virtual WMError GetWindowModeType(WindowModeType& windowModeType) { return WMError::WM_OK; }
     virtual WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo) = 0;
+    virtual WMError UpdateAnimationSpeedWithPid(pid_t pid, float speed) { return WMError::WM_OK; }
     virtual WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo) = 0;
     virtual WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) = 0;
     virtual WMError ClearMainSessions(const std::vector<int32_t>& persistentIds,
@@ -60,6 +61,8 @@ public:
         std::vector<sptr<WindowInfo>>& infos) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WSError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
         { return WSError::WS_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+        std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) = 0;
 };
 }
 }
