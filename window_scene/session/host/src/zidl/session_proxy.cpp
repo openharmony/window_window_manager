@@ -3976,7 +3976,7 @@ WSError SessionProxy::RestartApp(const std::shared_ptr<AAFwk::Want>& want)
     }
     int32_t ret = 0;
     if (!reply.ReadInt32(ret)) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "read reply failed");
+        TLOGE(WmsLogTag::WMS_LIFE, "read reply failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return static_cast<WSError>(ret);
