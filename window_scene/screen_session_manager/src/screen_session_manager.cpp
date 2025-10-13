@@ -81,6 +81,7 @@
 #include "wm_single_instance.h"
 #include "dms_global_mutex.h"
 #include "screen_session_manager_adapter.h"
+#include "zidl/idisplay_manager_agent.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -628,7 +629,14 @@ DMError ScreenSessionManager::RegisterDisplayManagerAgent(
             uidAndPidMap_[uid] = pid;
         }
     }
-    return ScreenSessionManagerAdapter::GetInstance().dmAgentContainer_.RegisterAgent(displayManagerAgent, type) ? DMError::DM_OK :DMError::DM_ERROR_NULLPTR;
+    if (type == DisplayManagerAgentType::BRIGHTNESS_INFO_CHANGED_LISTENER &&
+        ScreenSessionManagerAdapter::GetInstance().dmAgentContainer_.GetAgentsByType(
+        DisplayManagerAgentType::BRIGHTNESS_INFO_CHANGED_LISTENER).size() == 0) {
+        RegisterBrightnessInfoChangeListener();
+        TLOGI(WmsLogTag::DMS, "RegisterBrightnessInfoChangeListener");
+    }
+    return ScreenSessionManagerAdapter::GetInstance().dmAgentContainer_.RegisterAgent(
+        displayManagerAgent, type) ? DMError::DM_OK : DMError::DM_ERROR_NULLPTR;
 }
 
 DMError ScreenSessionManager::UnregisterDisplayManagerAgent(
@@ -642,7 +650,14 @@ DMError ScreenSessionManager::UnregisterDisplayManagerAgent(
         TLOGE(WmsLogTag::DMS, "call CheckDisplayMangerAgentTypeAndPermission fail!");
         return ret;
     }
-    return ScreenSessionManagerAdapter::GetInstance().dmAgentContainer_.UnregisterAgent(displayManagerAgent, type) ? DMError::DM_OK :DMError::DM_ERROR_NULLPTR;
+    auto res = ScreenSessionManagerAdapter::GetInstance().dmAgentContainer_.UnregisterAgent(displayManagerAgent, type);
+    if (type == DisplayManagerAgentType::BRIGHTNESS_INFO_CHANGED_LISTENER &&
+        ScreenSessionManagerAdapter::GetInstance().dmAgentContainer_.GetAgentsByType(
+        DisplayManagerAgentType::BRIGHTNESS_INFO_CHANGED_LISTENER).size() == 0) {
+        UnregisterBrightnessInfoChangeListener();
+        TLOGI(WmsLogTag::DMS, "UnregisterBrightnessInfoChangeListener");
+    }
+    return res ? DMError::DM_OK : DMError::DM_ERROR_NULLPTR;
 }
 // LCOV_EXCL_STOP
 
@@ -3555,6 +3570,34 @@ void ScreenSessionManager::SetColorSpaces(ScreenId screenId, sptr<ScreenSession>
         });
         session->SetColorSpaces(std::move(colorSpace));
     }
+}
+
+DMError ScreenSessionManager::GetBrightnessInfo(DisplayId displayId, ScreenBrightnessInfo& brightnessInfo)
+{
+    TLOGI(WmsLogTag::DMS, "start");
+    ScreenId screenId = 0;
+    const uint64_t HPR_SPECAIL_DISPLAY_ID = 999;
+    if (static_cast<uint64_t>(displayId) != HPR_SPECAIL_DISPLAY_ID) {
+        screenId = displayId;
+    }
+    BrightnessInfo rsBrightnessInfo;
+    ScreenId rsScreenId;
+    if (!screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId) ||
+        rsScreenId == INVALID_SCREEN_ID) {
+        TLOGE(WmsLogTag::DMS, "No corresponding rsId");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    auto status = rsInterface_.GetBrightnessInfo(rsScreenId, rsBrightnessInfo);
+    if (static_cast<StatusCode>(status) != StatusCode::SUCCESS) {
+        TLOGE(WmsLogTag::DMS, "get screen brightness info failed! status code:%{public}d", status);
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    TLOGE(WmsLogTag::DMS, "RS brightnessInfo currentHeadroom:%{public}f maxHeadroom:%{public}f sdrNits:%{public}f",
+          rsBrightnessInfo.currentHeadroom, rsBrightnessInfo.maxHeadroom, rsBrightnessInfo.sdrNits);
+    brightnessInfo.currentHeadroom = rsBrightnessInfo.currentHeadroom;
+    brightnessInfo.maxHeadroom = rsBrightnessInfo.maxHeadroom;
+    brightnessInfo.sdrNits = rsBrightnessInfo.sdrNits;
+    return DMError::DM_OK;
 }
 
 void ScreenSessionManager::SetSupportedRefreshRate(sptr<ScreenSession>& session)
@@ -8596,6 +8639,63 @@ void ScreenSessionManager::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
 void ScreenSessionManager::NotifyScreenMagneticStateChanged(bool isMagneticState)
 {
     ScreenSessionManagerAdapter::GetInstance().NotifyScreenMagneticStateChanged(isMagneticState);
+}
+
+void ScreenSessionManager::RegisterBrightnessInfoChangeListener()
+{
+    TLOGI(WmsLogTag::DMS, "start");
+    auto res = rsInterface_.SetBrightnessInfoChangeCallback(
+        [this](ScreenId screenId, BrightnessInfo brightnessInfo) {
+            NotifyBrightnessInfoChanged(screenId, brightnessInfo);
+        });
+    if (res != StatusCode::SUCCESS) {
+        auto task = [this]() {RegisterBrightnessInfoChangeListener();};
+        taskScheduler_->PostAsyncTask(task, "RegisterBrightnessInfoChangeListener", 50); // retry after 50ms.
+        screenEventTracker_.RecordEvent("dms brightness info register failed");
+        TLOGW(WmsLogTag::DMS, "dms brightness info register failed");
+    } else {
+        screenEventTracker_.RecordEvent("dms brightness info register success");
+    }
+}
+
+void ScreenSessionManager::UnregisterBrightnessInfoChangeListener()
+{
+    TLOGI(WmsLogTag::DMS, "start");
+    auto res = rsInterface_.SetBrightnessInfoChangeCallback(nullptr);
+    if (res != StatusCode::SUCCESS) {
+        auto task = [this]() {
+            UnregisterBrightnessInfoChangeListener();
+        };
+        taskScheduler_->PostAsyncTask(task, "UnregisterBrightnessInfoChangeListener", 50); // retry after 50ms.
+        screenEventTracker_.RecordEvent("dms brightness info unregister failed");
+        TLOGW(WmsLogTag::DMS, "dms brightness info unregister failed");
+    } else {
+        screenEventTracker_.RecordEvent("dms brightness info unregister success");
+    }
+}
+
+void ScreenSessionManager::NotifyBrightnessInfoChanged(ScreenId rsId, const BrightnessInfo& info)
+{
+    TLOGI(WmsLogTag::DMS, "BRIGHTNESS_INFO_CHANGED_LISTENER");
+    auto agents = ScreenSessionManagerAdapter::GetInstance().dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::BRIGHTNESS_INFO_CHANGED_LISTENER);
+    if (agents.empty()) {
+        TLOGW(WmsLogTag::DMS, "Agent is empty");
+        return;
+    }
+    ScreenId smsScreenId;
+    if (!screenIdManager_.ConvertToSmsScreenId(rsId, smsScreenId)) {
+        return;
+    }
+    ScreenBrightnessInfo screenBrightnessInfo;
+    screenBrightnessInfo.currentHeadroom = info.currentHeadroom;
+    screenBrightnessInfo.maxHeadroom = info.maxHeadroom;
+    screenBrightnessInfo.sdrNits = info.sdrNits;
+    for (auto& agent : agents) {
+        int32_t agentPid = ScreenSessionManagerAdapter::GetInstance().dmAgentContainer_.GetAgentPid(agent);
+        if (!IsFreezed(agentPid, DisplayManagerAgentType::BRIGHTNESS_INFO_CHANGED_LISTENER) && agent != nullptr) {
+            agent->NotifyBrightnessInfoChanged(smsScreenId, screenBrightnessInfo);
+        }
+    }
 }
 
 void ScreenSessionManager::SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId)
