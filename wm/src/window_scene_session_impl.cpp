@@ -757,6 +757,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         UpdateColorMode();
         SetPcAppInpadSpecificSystemBarInvisible();
         SetPcAppInpadOrientationLandscape();
+        SetDefaultDensityEnabledValue(IsStageDefaultDensityEnabled());
     }
     UpdateAnimationSpeedIfEnabled();
     TLOGI(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, id:%{public}d], state:%{public}u, "
@@ -3667,8 +3668,52 @@ WMError WindowSceneSessionImpl::Maximize()
 
 WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
 {
+    return Maximize(presentation, WaterfallResidentState::CANCEL);
+}
+
+bool WindowSceneSessionImpl::CheckWaterfallResidentState(WaterfallResidentState state) const
+{
+    if (WindowHelper::IsSubWindow(GetType())) {
+        return state == WaterfallResidentState::UNCHANGED || state == WaterfallResidentState::CANCEL;
+    }
+    return true;
+}
+
+void WindowSceneSessionImpl::ApplyMaximizePresentation(MaximizePresentation presentation)
+{
+    titleHoverShowEnabled_ = true;
+    dockHoverShowEnabled_ = true;
+    switch (presentation) {
+        case MaximizePresentation::ENTER_IMMERSIVE:
+            enableImmersiveMode_ = true;
+            break;
+        case MaximizePresentation::EXIT_IMMERSIVE:
+            enableImmersiveMode_ = false;
+            break;
+        case MaximizePresentation::ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER:
+            enableImmersiveMode_ = true;
+            titleHoverShowEnabled_ = false;
+            dockHoverShowEnabled_ = false;
+            break;
+        case MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING:
+            break;
+        default:
+            TLOGE(WmsLogTag::WMS_LAYOUT_PC,
+                  "Invalid presentation. windowId: %{public}u, presentation: %{public}u",
+                  GetWindowId(), static_cast<uint32_t>(presentation));
+            break;
+    }
+}
+
+WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation, WaterfallResidentState state)
+{
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!CheckWaterfallResidentState(state)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Invalid waterfallResidentState. windowId: %{public}u, state: %{public}u",
+              GetWindowId(), static_cast<uint32_t>(state));
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (!WindowHelper::IsMainWindow(GetType())) {
         if (IsSubWindowMaximizeSupported()) {
@@ -3686,23 +3731,7 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
         TLOGW(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
         return WMError::WM_OK;
     }
-    titleHoverShowEnabled_ = true;
-    dockHoverShowEnabled_ = true;
-    switch (presentation) {
-        case MaximizePresentation::ENTER_IMMERSIVE:
-            enableImmersiveMode_ = true;
-            break;
-        case MaximizePresentation::EXIT_IMMERSIVE:
-            enableImmersiveMode_ = false;
-            break;
-        case MaximizePresentation::ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER:
-            enableImmersiveMode_ = true;
-            titleHoverShowEnabled_ = false;
-            dockHoverShowEnabled_ = false;
-            break;
-        case MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING:
-            break;
-    }
+    ApplyMaximizePresentation(presentation);
     UpdateIsShowDecorInFreeMultiWindow(true);
     property_->SetIsLayoutFullScreen(enableImmersiveMode_);
     auto hostSession = GetHostSession();
@@ -3712,7 +3741,9 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
     SetLayoutFullScreenByApiVersion(enableImmersiveMode_);
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "present: %{public}d, enableImmersiveMode_:%{public}d!",
         presentation, enableImmersiveMode_.load());
-    hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
+    SessionEventParam param;
+    param.waterfallResidentState = static_cast<uint32_t>(state);
+    hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE, param);
     return SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
 }
 
@@ -6271,7 +6302,7 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
-    if (defaultDensityEnabledGlobalConfig_ == enabled) {
+    if (IsStageDefaultDensityEnabled() == enabled) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "defaultDensityEnabledGlobalConfig not change");
         return WMError::WM_OK;
     }
@@ -6285,7 +6316,7 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
         hostSession->OnDefaultDensityEnabled(enabled);
     }
 
-    defaultDensityEnabledGlobalConfig_ = enabled;
+    defaultDensityEnabledStageConfig_.store(enabled);
     SetDefaultDensityEnabledValue(enabled);
 
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
@@ -7235,7 +7266,7 @@ WMError WindowSceneSessionImpl::SetCustomDensity(float density, bool applyToSubW
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u set density not change", GetWindowId());
         return WMError::WM_OK;
     }
-    defaultDensityEnabledGlobalConfig_ = false;
+    defaultDensityEnabledStageConfig_.store(false);
     SetDefaultDensityEnabledValue(false);
     customDensity_ = density;
     UpdateDensity();

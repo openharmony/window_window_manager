@@ -233,7 +233,7 @@ public:
     bool CheckAbilityInfoBywant(const std::shared_ptr<AAFwK::Want>& want) const;
 
     WSError UpdateActiveStatus(bool isActive) override;
-    WSError OnSessionEvent(SessionEvent event) override;
+    WSError OnSessionEvent(SessionEvent event, const SessionEventParam& param = {}) override;
     WSError SyncSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError RaiseToAppTop() override;
@@ -1398,6 +1398,7 @@ private:
     MoveConfiguration requestMoveConfiguration_;
     virtual void NotifySubAndDialogFollowRectChange(const WSRect& rect, bool isGlobal, bool needFlush) {};
     virtual void SetSubWindowBoundsDuringCross(const WSRect& parentRect, bool isGlobal, bool needFlush) {}
+    void ApplySessionEventParam(SessionEvent event, const SessionEventParam& param);
     std::atomic<bool> shouldFollowParentWhenShow_ = true;
     bool isDragging_ = false;
     std::atomic<bool> isCrossAxisOfLayout_ = false;

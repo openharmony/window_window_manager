@@ -131,10 +131,6 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest01, TestSize.Level1)
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONNECT), data, reply, option);
     ASSERT_EQ(ERR_INVALID_DATA, res);
-    ASSERT_EQ(data.WriteUint32(100), true);
-    res = session_->ProcessRemoteRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SESSION_EVENT), data, reply, option);
-    ASSERT_EQ(ERR_NONE, res);
     AAFwk::Want options;
     EXPECT_NE(data.WriteString("HandleSessionException"), false);
     EXPECT_NE(data.WriteParcelable(&options), false);
@@ -2153,6 +2149,104 @@ HWTEST_F(SessionStubTest, HandleRestartApp, TestSize.Level1)
     std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
     data.WriteParcelable(want.get());
     ASSERT_EQ(session->HandleRestartApp(data, reply), ERR_NONE);
+}
+
+/**
+ * @tc.name: TestHandleSessionEventWithInvalidInputs
+ * @tc.desc: Verify that HandleSessionEvent correctly rejects invalid input data.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, TestHandleSessionEventWithInvalidInputs, TestSize.Level1)
+{
+    sptr<SessionStubMocker> session = sptr<SessionStubMocker>::MakeSptr();
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SESSION_EVENT);
+    MessageOption option;
+
+    // Case 1: Missing eventId → should fail before invoking OnSessionEvent()
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        EXPECT_CALL(*session, OnSessionEvent(_, _)).Times(0);
+        EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+
+    // Case 2: eventId below EVENT_MAXIMIZE → treated as invalid
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        data.WriteUint32(static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE) - 1);
+        EXPECT_CALL(*session, OnSessionEvent(_, _)).Times(0);
+        EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+
+    // Case 3: eventId equal or beyond EVENT_END → treated as invalid
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        data.WriteUint32(static_cast<uint32_t>(SessionEvent::EVENT_END));
+        EXPECT_CALL(*session, OnSessionEvent(_, _)).Times(0);
+        EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+
+    // Case 4: EVENT_MAXIMIZE but missing 'waterfallResidentState' parameter → should fail
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        data.WriteUint32(static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE));
+        EXPECT_CALL(*session, OnSessionEvent(_, _)).Times(0);
+        EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+}
+
+/**
+ * @tc.name: TestHandleSessionEventWithValidInputs
+ * @tc.desc: Verify that HandleSessionEvent correctly processes valid input data and writes proper response.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, TestHandleSessionEventWithValidInputs, TestSize.Level1)
+{
+    sptr<SessionStubMocker> session = sptr<SessionStubMocker>::MakeSptr();
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SESSION_EVENT);
+    MessageOption option;
+
+    // Case 1: EVENT_MAXIMIZE with valid 'waterfallResidentState' → should succeed and return WS_OK
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        uint32_t eventId = static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE);
+        uint32_t waterfallResidentState = 0;
+        data.WriteUint32(eventId);
+        data.WriteUint32(waterfallResidentState);
+
+        EXPECT_CALL(*session, OnSessionEvent(_, _))
+            .Times(1)
+            .WillOnce(testing::Return(WSError::WS_OK));
+
+        int ret = session->ProcessRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(ret, ERR_NONE);
+
+        uint32_t errCode = reply.ReadUint32();
+        EXPECT_EQ(errCode, static_cast<uint32_t>(WSError::WS_OK));
+    }
+
+    // Case 2: Non-EVENT_MAXIMIZE event (e.g. EVENT_MINIMIZE) → should succeed without reading extra params
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        uint32_t eventId = static_cast<uint32_t>(SessionEvent::EVENT_MINIMIZE);
+        uint32_t waterfallResidentState = 1;
+        data.WriteUint32(eventId);
+
+        EXPECT_CALL(*session, OnSessionEvent(_, _))
+            .Times(1)
+            .WillOnce(testing::Return(WSError::WS_OK));
+
+        int ret = session->ProcessRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(ret, ERR_NONE);
+
+        uint32_t errCode = reply.ReadUint32();
+        EXPECT_EQ(errCode, static_cast<uint32_t>(WSError::WS_OK));
+    }
 }
 } // namespace
 } // namespace Rosen
