@@ -2788,12 +2788,13 @@ WSError WindowSceneSessionImpl::NotifyTargetRotationInfo(OrientationInfo& info)
 
 WMError WindowSceneSessionImpl::SetAspectRatio(float ratio)
 {
+    auto windowId = GetWindowId();
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (IsAdaptToProportionalScale()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Window is in compatibility mode");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Window is in compatibility mode, windowId: %{public}u", windowId);
         return WMError::WM_OK;
     }
     auto hostSession = GetHostSession();
@@ -2838,7 +2839,7 @@ WMError WindowSceneSessionImpl::SetContentAspectRatio(float ratio, bool isPersis
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (IsAdaptToProportionalScale()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Window is in compatibility mode");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Window is in compatibility mode, windowId: %{public}u", windowId);
         return WMError::WM_OK;
     }
     auto hostSession = GetHostSession();
