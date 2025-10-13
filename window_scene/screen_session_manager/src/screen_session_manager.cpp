@@ -2209,10 +2209,10 @@ sptr<DisplayInfo> ScreenSessionManager::GetVisibleAreaDisplayInfoById(DisplayId 
         if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
             return displayInfo;
         }
-    #ifdef FOLD_ABILITY_ENABLE
+#ifdef FOLD_ABILITY_ENABLE
         HandleSuperFoldDisplayInfoWhenKeyboardOn(screenSession, displayInfo);
         return displayInfo;
-    #endif
+#endif
     }
     TLOGE(WmsLogTag::DMS, "GetVisibleAreaDisplayInfoById failed. displayId: %{public}" PRIu64" ", displayId);
     return nullptr;
