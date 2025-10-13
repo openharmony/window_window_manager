@@ -2136,6 +2136,24 @@ HWTEST_F(SessionStubTest, HandleNotifyIsFullScreenInForceSplitMode, TestSize.Lev
         EXPECT_EQ(session->HandleNotifyIsFullScreenInForceSplitMode(code, data, reply, option), ERR_NONE);
     }
 }
+
+/**
+ * @tc.name: HandleRestartApp
+ * @tc.desc: HandleRestartApp test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleRestartApp, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteParcelable(nullptr);
+    ASSERT_EQ(session->HandleRestartApp(data, reply), ERR_INVALID_DATA);
+
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    data.WriteParcelable(want.get());
+    ASSERT_EQ(session->HandleRestartApp(data, reply), ERR_NONE);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
