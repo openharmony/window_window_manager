@@ -724,7 +724,16 @@ private:
     DisplayId GetUserDisplayId(int32_t userId);
     int32_t GetActiveUserByDisplayId(DisplayId displayId);
     ScreenId GenerateSmsScreenId(ScreenId rsScreenId);
-    
+
+    void HandleSuperFoldDisplayInfoWhenKeyboardOn(const sptr<ScreenSession>& screenSession,
+        sptr<DisplayInfo>& displayInfo);
+    void HandleRotationCorrectionExemption(sptr<DisplayInfo>& displayInfo);
+    void GetRotationCorrectionExemptionListFromDatabase(bool isForce = false);
+    void RegisterRotationCorrectionExemptionListObserver();
+    std::shared_mutex rotationCorrectionExemptionMutex_;
+    std::vector<std::string> rotationCorrectionExemptionList_;
+    bool needReinstallExemptionList_ = true;
+
     class ScreenIdManager {
     friend class ScreenSessionGroup;
     public:

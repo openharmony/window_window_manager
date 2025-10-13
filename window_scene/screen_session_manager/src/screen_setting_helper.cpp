@@ -34,6 +34,7 @@ sptr<SettingObserver> ScreenSettingHelper::wireCastObserver_;
 sptr<SettingObserver> ScreenSettingHelper::extendScreenDpiObserver_;
 sptr<SettingObserver> ScreenSettingHelper::duringCallStateObserver_;
 sptr<SettingObserver> ScreenSettingHelper::resolutionEffectObserver_;
+sptr<SettingObserver> ScreenSettingHelper::correctionExemptionListObserver_;
 constexpr int32_t PARAM_NUM_TEN = 10;
 constexpr uint32_t EXPECT_ACTIVE_MODE_SIZE = 1;
 constexpr uint32_t EXPECT_SCREEN_MODE_SIZE = 2;
@@ -63,6 +64,7 @@ const std::string ENABLE_RESOLUTION_EFFECT = "1";
 constexpr int32_t EXPECT_SCREEN_RESOLUTION_EFFECT_SIZE = 2;
 constexpr int32_t INDEX_SCREEN_RESOLUTION_EFFECT_SN = 0;
 constexpr int32_t INDEX_SCREEN_RESOLUTION_EFFECT_EN = 1;
+constexpr int32_t CORRECTION_EXEMPTION_MODE = 8;
 
 void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc func)
 {
@@ -767,6 +769,80 @@ bool ScreenSettingHelper::GetResolutionEffect(bool& enable, const std::string& s
         }
     }
     return true;
+}
+
+void ScreenSettingHelper::RegisterRotationCorrectionExemptionListObserver(SettingObserver::UpdateFunc func)
+{
+    if (correctionExemptionListObserver_ != nullptr) {
+        TLOGI(WmsLogTag::DMS, "observer is registered");
+        return;
+    }
+    SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    correctionExemptionListObserver_ = settingProvider.CreateObserver(SETTING_COMPATIBLE_APP_STRATEGY_KEY, func);
+    if (correctionExemptionListObserver_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "create observer failed");
+        return;
+    }
+    ErrCode ret = settingProvider.RegisterObserver(correctionExemptionListObserver_);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
+        correctionExemptionListObserver_ = nullptr;
+    }
+}
+ 
+void ScreenSettingHelper::UnregisterRotationCorrectionExemptionListObserver()
+{
+    if (correctionExemptionListObserver_ == nullptr) {
+        TLOGI(WmsLogTag::DMS, "observer is nullptr");
+        return;
+    }
+    SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = settingProvider.UnregisterObserver(correctionExemptionListObserver_);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
+    }
+    correctionExemptionListObserver_ = nullptr;
+}
+ 
+bool ScreenSettingHelper::GetRotationCorrectionExemptionList(std::vector<std::string>& exemptionApps,
+    const std::string& key)
+{
+    exemptionApps.clear();
+    std::string value = "";
+    SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = settingProvider.GetStringValue(key, value);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+        return false;
+    }
+    GetCorrectionExemptionListFromJson(value, exemptionApps);
+    return true;
+}
+ 
+void ScreenSettingHelper::GetCorrectionExemptionListFromJson(const std::string& exemptionListJsonStr,
+    std::vector<std::string>& exemptionApps)
+{
+    nlohmann::json exemptionListJson = nlohmann::json::parse(exemptionListJsonStr, nullptr, false);
+    if (exemptionListJson.is_discarded()) {
+        TLOGE(WmsLogTag::DMS, "parse json failed");
+        return;
+    }
+    for (auto it = exemptionListJson.begin(); it != exemptionListJson.end(); ++it) {
+        const std::string& key = it.key();
+        const nlohmann::json& value = it.value();
+        std::string name = "";
+        int32_t mode = -1;
+        bool exemptNaturalDirectionCorrect = false;
+        GetJsonValue(value, "name", name);
+        if (name.empty()) {
+            continue;
+        }
+        GetJsonValue(value, "mode", mode);
+        GetJsonValue(value, "exemptNaturalDirectionCorrect", exemptNaturalDirectionCorrect);
+        if (exemptNaturalDirectionCorrect && mode == CORRECTION_EXEMPTION_MODE) {
+            exemptionApps.emplace_back(name);
+        }
+    }
 }
 } // namespace Rosen
 } // namespace OHOS
