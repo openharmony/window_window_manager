@@ -5016,7 +5016,7 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
         rsUIContext_ = ScreenSessionManagerClient::GetInstance().GetRSUIContext(screenId);
         screenIdOfRSUIContext_ = screenId;
     }
-    if (rsUIContext_ = nullptr) {
+    if (rsUIContext_ == nullptr) {
         TLOGI(WmsLogTag::WMS_SCB, "%{public}s: %{public}s, sessionId: %{public}d, screenId:%{public}" PRIu64,
             caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
     }
