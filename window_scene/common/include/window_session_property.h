@@ -340,6 +340,7 @@ public:
     bool IsSplitDisabled() const;
     bool IsWindowLimitDisabled() const;
     bool IsDecorFullscreenDisabled() const;
+    bool IsFullScreenStart() const;
     bool IsSupportRotateFullScreen() const;
     bool IsAdaptToSubWindow() const;
     bool IsAdaptToSimulationScale() const;
@@ -675,6 +676,9 @@ public:
     void SetDisableDecorFullscreen(bool disableDecorFullscreen);
     bool IsDecorFullscreenDisabled() const;
 
+    void SetIsFullScreenStart(bool isFullScreenStart);
+    bool IsFullScreenStart() const;
+
     void SetIsSupportRotateFullScreen(bool isSupportRotateFullScreen);
     bool IsSupportRotateFullScreen() const;
 
@@ -702,6 +706,7 @@ public:
         ss << "disableFullScreen_:" << disableFullScreen_<< " ";
         ss << "disableWindowLimit_:" << disableWindowLimit_<< " ";
         ss << "disableDecorFullscreen_:" << disableDecorFullscreen_<< " ";
+        ss << "isFullScreenStart_:" << isFullScreenStart_<< " ";
         ss << "isSupportRotateFullScreen_:" << isSupportRotateFullScreen_ << " ";
         ss << "isAdaptToSubWindow_:" << isAdaptToSubWindow_ << " ";
         ss << "isAdaptToSimulationScale_:" << isAdaptToSimulationScale_ << " ";
@@ -720,6 +725,7 @@ private:
     bool disableSplit_ { false };
     bool disableWindowLimit_ { false };
     bool disableDecorFullscreen_ { false };
+    bool isFullScreenStart_ { false };
     bool isSupportRotateFullScreen_ { false };
     bool isAdaptToSubWindow_ { false };
     bool isAdaptToSimulationScale_ { false };

@@ -1321,6 +1321,7 @@ bool ConvertCompatibleModePropertyFromJs(napi_env env, napi_value value, Compati
         {"disableSplit", &CompatibleModeProperty::SetDisableSplit},
         {"disableWindowLimit", &CompatibleModeProperty::SetDisableWindowLimit},
         {"disableDecorFullscreen", &CompatibleModeProperty::SetDisableDecorFullscreen},
+        {"isFullScreenStart", &CompatibleModeProperty::SetIsFullScreenStart},
         {"isSupportRotateFullScreen", &CompatibleModeProperty::SetIsSupportRotateFullScreen},
         {"isAdaptToSubWindow", &CompatibleModeProperty::SetIsAdaptToSubWindow},
         {"isAdaptToSimulationScale", &CompatibleModeProperty::SetIsAdaptToSimulationScale},
@@ -2058,6 +2059,7 @@ napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& para
     napi_set_named_property(env, objValue, "sessionHeight", CreateJsValue(env, param.sessionHeight_));
     napi_set_named_property(env, objValue, "dragResizeType", CreateJsValue(env, param.dragResizeType));
     napi_set_named_property(env, objValue, "gravity", CreateJsValue(env, param.gravity));
+    napi_set_named_property(env, objValue, "waterfallResidentState", CreateJsValue(env, param.waterfallResidentState));
     return objValue;
 }
 
@@ -2606,6 +2608,29 @@ napi_value CreatePixelUnitType(napi_env env)
         CreateJsValue(env, static_cast<uint32_t>(PixelUnit::PX)));
     napi_set_named_property(env, objValue, "VP",
         CreateJsValue(env, static_cast<uint32_t>(PixelUnit::VP)));
+    return objValue;
+}
+
+napi_value CreateWaterfallResidentState(napi_env env)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "env is nullptr");
+        return nullptr;
+    }
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to create object");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "UNCHANGED",
+        CreateJsValue(env, static_cast<uint32_t>(WaterfallResidentState::UNCHANGED)));
+    napi_set_named_property(env, objValue, "OPEN",
+        CreateJsValue(env, static_cast<uint32_t>(WaterfallResidentState::OPEN)));
+    napi_set_named_property(env, objValue, "CLOSE",
+        CreateJsValue(env, static_cast<uint32_t>(WaterfallResidentState::CLOSE)));
+    napi_set_named_property(env, objValue, "CANCEL",
+        CreateJsValue(env, static_cast<uint32_t>(WaterfallResidentState::CANCEL)));
     return objValue;
 }
 
