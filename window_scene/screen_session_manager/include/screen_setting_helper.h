@@ -77,6 +77,8 @@ public:
     static void UnregisterRotationCorrectionExemptionListObserver();
     static bool GetRotationCorrectionExemptionList(std::vector<std::string>& exemptionApps,
         const std::string& key = SETTING_COMPATIBLE_APP_STRATEGY_KEY);
+    static void GetCorrectionExemptionListFromJson(const std::string& exemptionListJsonStr,
+        std::vector<std::string>& exemptionApps);
     template<typename T>
     static bool GetJsonValue(const nlohmann::json& payload, const std::string& key, T& result)
     {
