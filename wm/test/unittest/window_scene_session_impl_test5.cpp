@@ -162,6 +162,73 @@ HWTEST_F(WindowSceneSessionImplTest5, HandleDownForCompatibleMode, TestSize.Leve
 }
 
 /**
+ * @tc.name: TestCheckWaterfallResidentState
+ * @tc.desc: Verify CheckWaterfallResidentState validates states correctly based on window type
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, TestCheckWaterfallResidentState, TestSize.Level1)
+{
+    auto option = sptr<WindowOption>::MakeSptr();
+    auto window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    // Case 1: Main window, any state should return true
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    EXPECT_TRUE(window->CheckWaterfallResidentState(WaterfallResidentState::UNCHANGED));
+    EXPECT_TRUE(window->CheckWaterfallResidentState(WaterfallResidentState::OPEN));
+    EXPECT_TRUE(window->CheckWaterfallResidentState(WaterfallResidentState::CLOSE));
+    EXPECT_TRUE(window->CheckWaterfallResidentState(WaterfallResidentState::CANCEL));
+
+    // Case 2: Sub window, only UNCHANGED or CANCEL should return true
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    EXPECT_TRUE(window->CheckWaterfallResidentState(WaterfallResidentState::UNCHANGED));
+    EXPECT_TRUE(window->CheckWaterfallResidentState(WaterfallResidentState::CANCEL));
+    EXPECT_FALSE(window->CheckWaterfallResidentState(WaterfallResidentState::OPEN));
+    EXPECT_FALSE(window->CheckWaterfallResidentState(WaterfallResidentState::CLOSE));
+}
+
+/**
+ * @tc.name: TestApplyMaximizePresentation
+ * @tc.desc: Verify ApplyMaximizePresentation sets immersive mode and hover flags correctly for all presentations
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, TestApplyMaximizePresentation, TestSize.Level1)
+{
+    auto option = sptr<WindowOption>::MakeSptr();
+    auto window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    // Case 1: ENTER_IMMERSIVE
+    window->ApplyMaximizePresentation(MaximizePresentation::ENTER_IMMERSIVE);
+    EXPECT_TRUE(window->enableImmersiveMode_);
+    EXPECT_TRUE(window->titleHoverShowEnabled_);
+    EXPECT_TRUE(window->dockHoverShowEnabled_);
+
+    // Case 2: EXIT_IMMERSIVE
+    window->ApplyMaximizePresentation(MaximizePresentation::EXIT_IMMERSIVE);
+    EXPECT_FALSE(window->enableImmersiveMode_);
+    EXPECT_TRUE(window->titleHoverShowEnabled_);
+    EXPECT_TRUE(window->dockHoverShowEnabled_);
+
+    // Case 3: ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER
+    window->ApplyMaximizePresentation(MaximizePresentation::ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER);
+    EXPECT_TRUE(window->enableImmersiveMode_);
+    EXPECT_FALSE(window->titleHoverShowEnabled_);
+    EXPECT_FALSE(window->dockHoverShowEnabled_);
+
+    // Case 4: FOLLOW_APP_IMMERSIVE_SETTING
+    window->enableImmersiveMode_ = false;
+    window->ApplyMaximizePresentation(MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING);
+    EXPECT_FALSE(window->enableImmersiveMode_);
+    EXPECT_TRUE(window->titleHoverShowEnabled_);
+    EXPECT_TRUE(window->dockHoverShowEnabled_);
+
+    // Case 5: Invalid enum value (default branch)
+    auto invalidPresentation = static_cast<MaximizePresentation>(999);
+    window->ApplyMaximizePresentation(invalidPresentation);
+    EXPECT_TRUE(window->titleHoverShowEnabled_);
+    EXPECT_TRUE(window->dockHoverShowEnabled_);
+}
+
+/**
  * @tc.name: Maximize
  * @tc.desc: Maximize
  * @tc.type: FUNC
@@ -203,6 +270,14 @@ HWTEST_F(WindowSceneSessionImplTest5, Maximize01, TestSize.Level1)
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     auto ret = window->Maximize(presentation);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+
+    // waterfallResidentState is invalid and windowType is invalid
+    ret = window->Maximize(presentation, WaterfallResidentState::OPEN);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+
+    // waterfallResidentState is valid but windowType is invalid
+    ret = window->Maximize(presentation, WaterfallResidentState::UNCHANGED);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
 
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->property_->SetWindowModeSupportType(0);
@@ -416,7 +491,6 @@ HWTEST_F(WindowSceneSessionImplTest5, IsDefaultDensityEnabled02, TestSize.Level1
     window->isEnableDefaultDensityWhenCreate_ = true;
     EXPECT_EQ(window->IsDefaultDensityEnabled(), true);
 }
-
 
 /**
  * @tc.name: GetCustomDensity01
@@ -2503,21 +2577,21 @@ HWTEST_F(WindowSceneSessionImplTest5, SetDefaultDensityEnabled_forCompatMode, Te
     option->SetWindowName("SetDefaultDensityEnabled_forCompatMode");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    window->defaultDensityEnabledGlobalConfig_ = false;
+    window->defaultDensityEnabledStageConfig_.store(false);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->property_->SetPersistentId(1);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_SHOWN;
     EXPECT_EQ(WMError::WM_OK, window->SetDefaultDensityEnabled(true));
-    EXPECT_TRUE(window->defaultDensityEnabledGlobalConfig_);
+    EXPECT_TRUE(window->IsStageDefaultDensityEnabled());
     sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
     compatibleModeProperty->SetIsAdaptToSimulationScale(true);
     window->property_->SetCompatibleModeProperty(compatibleModeProperty);
     EXPECT_EQ(window->IsAdaptToSimulationScale(), true);
-    window->defaultDensityEnabledGlobalConfig_ = false;
+    window->defaultDensityEnabledStageConfig_.store(false);
     EXPECT_EQ(WMError::WM_OK, window->SetDefaultDensityEnabled(true));
-    EXPECT_FALSE(window->defaultDensityEnabledGlobalConfig_);
+    EXPECT_FALSE(window->IsStageDefaultDensityEnabled());
 }
 
 /**

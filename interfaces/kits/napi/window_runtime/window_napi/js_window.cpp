@@ -15,6 +15,7 @@
 
 #include "js_window.h"
 #include <new>
+#include <optional>
 
 #ifndef WINDOW_PREVIEW
 #include "js_transition_controller.h"
@@ -7109,63 +7110,95 @@ napi_value JsWindow::OnMinimize(napi_env env, napi_callback_info info)
     return result;
 }
 
+std::optional<MaximizePresentation> ParsePresentation(napi_env env, napi_value napiPresentation)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "env is nullptr");
+        return std::nullopt;
+    }
+    if (napiPresentation == nullptr || GetType(env, napiPresentation) == napi_undefined) {
+        return MaximizePresentation::ENTER_IMMERSIVE;
+    }
+    using T = std::underlying_type_t<MaximizePresentation>;
+    T value = static_cast<T>(MaximizePresentation::ENTER_IMMERSIVE);
+    if (!ConvertFromJsValue(env, napiPresentation, value) ||
+        value < static_cast<T>(MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING) ||
+        value > static_cast<T>(MaximizePresentation::ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Invalid presentation param");
+        return std::nullopt;
+    }
+    return static_cast<MaximizePresentation>(value);
+}
+
+std::optional<WaterfallResidentState> ParseWaterfallResidentState(napi_env env, napi_value napiAcrossDisplay)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "env is nullptr");
+        return std::nullopt;
+    }
+    if (napiAcrossDisplay == nullptr || GetType(env, napiAcrossDisplay) == napi_undefined) {
+        return WaterfallResidentState::CANCEL;
+    }
+    bool acrossDisplay = false;
+    if (!ConvertFromJsValue(env, napiAcrossDisplay, acrossDisplay)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Invalid acrossDisplay param");
+        return std::nullopt;
+    }
+    return acrossDisplay ? WaterfallResidentState::OPEN : WaterfallResidentState::CLOSE;
+}
+
 napi_value JsWindow::OnMaximize(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "WindowToken is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][maximize]msg: window is nullptr");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "window is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "[window][maximize]msg: window is nullptr");
     }
-    if (!(WindowHelper::IsMainWindow(windowToken_->GetType()) ||
-          windowToken_->IsSubWindowMaximizeSupported())) {
+    if (!(WindowHelper::IsMainWindow(windowToken_->GetType()) || windowToken_->IsSubWindowMaximizeSupported())) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "only support main or sub Window");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
             "[window][maximize]msg: Only support main or sub Window");
     }
-    size_t argc = FOUR_PARAMS_SIZE;
-    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    size_t argc = TWO_PARAMS_SIZE;
+    napi_value argv[TWO_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    using T = std::underlying_type_t<MaximizePresentation>;
-    T presentationValue = static_cast<T>(MaximizePresentation::ENTER_IMMERSIVE);
-    if (argc == 1) {
-        if (!ConvertFromJsValue(env, argv[INDEX_ZERO], presentationValue) ||
-            presentationValue < static_cast<T>(MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING) ||
-            presentationValue > static_cast<T>(MaximizePresentation::ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER)) {
-            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to presentationValue");
-            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-                "[window][maximize]msg: Failed to convert parameter to presentationValue");
-        }
+    auto presentationOpt = ParsePresentation(env, argv[INDEX_ZERO]);
+    if (!presentationOpt) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+                              "[window][maximize]msg: Failed to convert parameter to presentation");
     }
-    MaximizePresentation presentation = static_cast<MaximizePresentation>(presentationValue);
-    // 1: params num; 1: index of callback
-    napi_value lastParam = (argc <= 1) ? nullptr :
-        (GetType(env, argv[INDEX_ONE]) == napi_function ? argv[INDEX_ONE] : nullptr);
+    auto waterfallResidentStateOpt = ParseWaterfallResidentState(env, argv[INDEX_ONE]);
+    if (!waterfallResidentStateOpt) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+                              "[window][maximize]msg: Failed to convert parameter to acrossDisplay");
+    }
     napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    const char* const where = __func__;
-    auto asyncTask = [windowToken = wptr<Window>(windowToken_), presentation, env, where, task = napiAsyncTask] {
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [windowToken = wptr<Window>(windowToken_),
+                      presentation = *presentationOpt, waterfallResidentState = *waterfallResidentStateOpt,
+                      env, napiAsyncTask, where = __func__] {
         auto window = windowToken.promote();
         if (window == nullptr) {
-            task->Reject(env,
-                JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                    "[window][maximize]msg: Window is nullptr"));
+            napiAsyncTask->Reject(env,
+                JsErrUtils::CreateJsError(
+                    env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "[window][maximize]msg: window is nullptr"));
             return;
         }
-        WMError ret = window->Maximize(presentation);
+        WMError ret = window->Maximize(presentation, waterfallResidentState);
         if (ret == WMError::WM_OK) {
-            task->Resolve(env, NapiGetUndefined(env));
+            napiAsyncTask->Resolve(env, NapiGetUndefined(env));
         } else {
             WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
-            task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode,
-                "[window][maximize]msg: Failed"));
+            napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "[window][maximize]msg: Failed"));
         }
-        TLOGNI(WmsLogTag::WMS_PC, "%{public}s id:%{public}u presentation:%{public}d end",
-            where, window->GetWindowId(), presentation);
+        TLOGNI(WmsLogTag::WMS_LAYOUT_PC,
+            "%{public}s: windowId: %{public}u, presentation: %{public}d, waterfallResidentState: %{public}u",
+            where, window->GetWindowId(), static_cast<int32_t>(presentation),
+            static_cast<uint32_t>(waterfallResidentState));
     };
     if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnMaximize") != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env, CreateJsError(env,
-            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
-            "[window][maximize]msg: Send event failed"));
+        napiAsyncTask->Reject(env,
+            JsErrUtils::CreateJsError(
+                env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "[window][maximize]msg: Failed to send event"));
     }
     return result;
 }

@@ -91,6 +91,7 @@ constexpr int64_t SET_UIEXTENSION_DESTROY_TIMEOUT_TIME_MS = 4000;
 
 const std::string SCB_BACK_VISIBILITY = "scb_back_visibility";
 const std::string SCB_COMPATIBLE_MAXIMIZE_VISIBILITY = "scb_compatible_maximize_visibility";
+const std::string SCB_COMPATIBLE_MAXIMIZE_BTN_RES = "scb_compatible_maximize_btn_res";
 
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
 {
@@ -224,7 +225,6 @@ std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWi
 std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> WindowSessionImpl::windowStatusChangeListeners_;
 std::map<int32_t, std::vector<sptr<IWindowStatusDidChangeListener>>> WindowSessionImpl::windowStatusDidChangeListeners_;
 bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
-std::atomic<bool> WindowSessionImpl::defaultDensityEnabledGlobalConfig_ = false;
 
 #define CALL_LIFECYCLE_LISTENER(windowLifecycleCb, listeners) \
     do {                                                      \
@@ -302,7 +302,6 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option,
     }
     WindowHelper::SplitStringByDelimiter(
         system::GetParameter("const.window.containerColorLists", ""), ",", containerColorList_);
-    SetDefaultDensityEnabledValue(defaultDensityEnabledGlobalConfig_);
 }
 
 void WindowSessionImpl::InitPropertyFromOption(const sptr<WindowOption>& option)
@@ -1980,6 +1979,9 @@ void WindowSessionImpl::HideTitleButton(bool& hideSplitButton, bool& hideMaximiz
     // compatible mode adapt to back, will show its button
     bool isAdaptToBackButton = property_->IsAdaptToBackButton();
     uiContent->OnContainerModalEvent(SCB_BACK_VISIBILITY, isAdaptToBackButton ? "true" : "false");
+    bool fullScreenStart = property_->IsFullScreenStart() &&
+        (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
+    uiContent->OnContainerModalEvent(SCB_COMPATIBLE_MAXIMIZE_BTN_RES, fullScreenStart ? "true" : "false");
 }
 
 WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
@@ -6405,6 +6407,16 @@ WMError WindowSessionImpl::SetWindowDefaultDensityEnabled(bool enabled)
 void WindowSessionImpl::SetDefaultDensityEnabledValue(bool enabled)
 {
     isDefaultDensityEnabled_.store(enabled);
+}
+
+bool WindowSessionImpl::IsStageDefaultDensityEnabled()
+{
+    if (GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+        return defaultDensityEnabledStageConfig_.load();
+    } else {
+        auto mainWindow = FindMainWindowWithContext();
+        return mainWindow ? mainWindow->defaultDensityEnabledStageConfig_.load() : false;
+    }
 }
 
 WSError WindowSessionImpl::NotifyWindowVisibility(bool isVisible)

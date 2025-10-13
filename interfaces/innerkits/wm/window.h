@@ -2626,6 +2626,18 @@ public:
     }
 
     /**
+     * @brief Maximize the window with the specified presentation mode and waterfall resident state.
+     *
+     * @param presentation The presentation mode used for window layout when maximizing.
+     * @param waterfallState The waterfall resident state to apply when maximizing.
+     * @return WMError::WM_OK on success, or appropriate error code on failure.
+     */
+    virtual WMError Maximize(MaximizePresentation presentation, WaterfallResidentState waterfallState)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief maximize the main window according to MaximizeMode. called by ACE when maximize button is clicked.
      *
      * @return WMError

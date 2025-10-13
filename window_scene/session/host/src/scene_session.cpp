@@ -887,9 +887,21 @@ WSRect SceneSession::GetGlobalOrWinRect()
     return GetSessionGlobalRect();
 }
 
-WSError SceneSession::OnSessionEvent(SessionEvent event)
+void SceneSession::ApplySessionEventParam(SessionEvent event, const SessionEventParam& param)
 {
-    PostTask([weakThis = wptr(this), event, where = __func__] {
+    switch (event) {
+        case SessionEvent::EVENT_MAXIMIZE:
+            sessionEventParam_.waterfallResidentState = param.waterfallResidentState;
+            break;
+        default:
+            sessionEventParam_.waterfallResidentState = static_cast<uint32_t>(WaterfallResidentState::UNCHANGED);
+            break;
+    }
+}
+
+WSError SceneSession::OnSessionEvent(SessionEvent event, const SessionEventParam& param)
+{
+    PostTask([weakThis = wptr(this), event, param, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
@@ -934,6 +946,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
                 session->moveDragController_->GetOriginalPointerPosY(), rect.width_, rect.height_});
         }
         session->HandleSessionDragEvent(event);
+        session->ApplySessionEventParam(event, param);
         if (session->onSessionEvent_) {
             session->onSessionEvent_(static_cast<uint32_t>(event), session->sessionEventParam_);
         }
