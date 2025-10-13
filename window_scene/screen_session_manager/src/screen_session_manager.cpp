@@ -2084,7 +2084,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDefaultDisplayInfo(int32_t userId)
             TLOGI(WmsLogTag::DMS, "ConvertToDisplayInfo error, displayInfo is nullptr.");
             return nullptr;
         }
-        // 在PC/PAD上安装的竖屏应用以及白名单中的应用在显示状态非全屏时需要hook displayinfo
+        HandleRotationCorrectionExemption(displayInfo);
         displayInfo = HookDisplayInfoByUid(displayInfo, screenSession);
         return displayInfo;
     } else {
@@ -2109,6 +2109,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
             TLOGI(WmsLogTag::DMS, "ConvertToDisplayInfo error, displayInfo is nullptr.");
             continue;
         }
+        HandleRotationCorrectionExemption(displayInfo);
         if (displayId == displayInfo->GetDisplayId()) {
             TLOGD(WmsLogTag::DMS, "success");
             displayInfo = HookDisplayInfoByUid(displayInfo, screenSession);
@@ -2130,6 +2131,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
             TLOGE(WmsLogTag::DMS, "error, fakeDisplayInfo is nullptr.");
             continue;
         }
+        HandleRotationCorrectionExemption(fakeDisplayInfo);
         fakeDisplayInfo = HookDisplayInfoByUid(fakeDisplayInfo, fakeScreenSession);
         DisplayId fakeDisplayId = fakeDisplayInfo->GetDisplayId();
         if (displayId == fakeDisplayId) {
@@ -2139,6 +2141,64 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
     }
     TLOGE(WmsLogTag::DMS, "failed. displayId: %{public}" PRIu64" ", displayId);
     return nullptr;
+}
+
+void ScreenSessionManager::HandleRotationCorrectionExemption(sptr<DisplayInfo>& displayInfo)
+{
+    if (!CORRECTION_ENABLE) {
+        return;
+    }
+    std::vector<std::string> rotationCorrectionExemptionList;
+    GetRotationCorrectionExemptionListFromDatabase();
+    {
+        std::shared_lock<std::shared_mutex> lock(rotationCorrectionExemptionMutex_);
+        rotationCorrectionExemptionList = rotationCorrectionExemptionList_;
+    }
+    std::string bundleName = SysCapUtil::GetBundleName();
+    if (std::find(rotationCorrectionExemptionList.begin(), rotationCorrectionExemptionList.end(), bundleName) !=
+        rotationCorrectionExemptionList.end()) {
+        Rotation rotation = RemoveRotationCorrection(displayInfo->GetRotation());
+        displayInfo->SetRotation(rotation);
+        TLOGI(WmsLogTag::DMS, "rotation: %{public}d, bundleName: %{public}s", rotation, bundleName.c_str());
+    }
+}
+ 
+void ScreenSessionManager::GetRotationCorrectionExemptionListFromDatabase(bool isForce)
+{
+    {
+        std::shared_lock<std::shared_mutex> lock(rotationCorrectionExemptionMutex_);
+        if (!isForce && !(rotationCorrectionExemptionList_.empty() && needReinstallExemptionList_)) {
+            TLOGD(WmsLogTag::DMS, "no need query databese. needReinstall: %{public}d, exemptionListIsempty: %{public}d",
+                rotationCorrectionExemptionList_.empty(), needReinstallExemptionList_);
+            return;
+        }
+    }
+    std::vector<std::string> rotationCorrectionExemptionList;
+    bool ret = ScreenSettingHelper::GetRotationCorrectionExemptionList(rotationCorrectionExemptionList);
+    if (!ret) {
+        TLOGE(WmsLogTag::DMS, "get correction exemption list failed");
+        std::unique_lock<std::shared_mutex> lock(rotationCorrectionExemptionMutex_);
+        needReinstallExemptionList_ = true;
+        return;
+    }
+    std::unique_lock<std::shared_mutex> lock(rotationCorrectionExemptionMutex_);
+    rotationCorrectionExemptionList_ = rotationCorrectionExemptionList;
+    if (rotationCorrectionExemptionList.size() <= 0) {
+        TLOGE(WmsLogTag::DMS, "rotationCorrectionExemptionList is empty");
+        needReinstallExemptionList_ = false;
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "success");
+}
+ 
+void ScreenSessionManager::RegisterRotationCorrectionExemptionListObserver()
+{
+    if (!CORRECTION_ENABLE) {
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "register start");
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { GetRotationCorrectionExemptionListFromDatabase(true); };
+    ScreenSettingHelper::RegisterRotationCorrectionExemptionListObserver(updateFunc);
 }
 
 sptr<DisplayInfo> ScreenSessionManager::GetVisibleAreaDisplayInfoById(DisplayId displayId)
@@ -2161,37 +2221,54 @@ sptr<DisplayInfo> ScreenSessionManager::GetVisibleAreaDisplayInfoById(DisplayId 
             continue;
         }
         TLOGD(WmsLogTag::DMS, "success");
+        HandleRotationCorrectionExemption(displayInfo);
         displayInfo = HookDisplayInfoByUid(displayInfo, screenSession);
         if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
             return displayInfo;
         }
 #ifdef FOLD_ABILITY_ENABLE
-        SuperFoldStatus status = SuperFoldStateManager::GetInstance().GetCurrentStatus();
-        bool isSystemKeyboardOn = SuperFoldStateManager::GetInstance().GetSystemKeyboardStatus();
-        RRect bounds = screenSession->GetScreenProperty().GetBounds();
-        auto screenWdith = bounds.rect_.GetWidth();
-        auto screenHeight = bounds.rect_.GetHeight();
-        // Adjust screen height when physical keyboard attach or touchPad virtual Keyboard on
-        if (status == SuperFoldStatus::KEYBOARD || isSystemKeyboardOn) {
-            if (screenWdith > screenHeight) {
-                std::swap(screenWdith, screenHeight);
-            }
-            DMRect creaseRect = screenSession->GetScreenProperty().GetCreaseRect();
-            if (creaseRect.posY_ > 0) {
-                displayInfo->SetHeight(creaseRect.posY_);
-            } else {
-                displayInfo->SetHeight(screenHeight / HALF_SCREEN_PARAM);
-            }
-            displayInfo->SetWidth(screenWdith);
-        } else {
-            displayInfo->SetWidth(screenWdith);
-            displayInfo->SetHeight(screenHeight);
-        }
+        HandleSuperFoldDisplayInfoWhenKeyboardOn(screenSession, displayInfo);
         return displayInfo;
 #endif
     }
     TLOGE(WmsLogTag::DMS, "GetVisibleAreaDisplayInfoById failed. displayId: %{public}" PRIu64" ", displayId);
     return nullptr;
+}
+
+void ScreenSessionManager::HandleSuperFoldDisplayInfoWhenKeyboardOn(
+    const sptr<ScreenSession>& screenSession, sptr<DisplayInfo>& displayInfo)
+{
+#ifdef FOLD_ABILITY_ENABLE
+    if (screenSession == nullptr) {
+        TLOGI(WmsLogTag::DMS, "screenSession is nullptr");
+        return;
+    }
+    if (displayInfo == nullptr) {
+        TLOGI(WmsLogTag::DMS, "displayInfo is nullptr");
+        return;
+    }
+    SuperFoldStatus status = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    bool isSystemKeyboardOn = SuperFoldStateManager::GetInstance().GetSystemKeyboardStatus();
+    RRect bounds = screenSession->GetScreenProperty().GetBounds();
+    uint32_t screenWidth = bounds.rect_.GetWidth();
+    uint32_t screenHeight = bounds.rect_.GetHeight();
+    // Adjust screen height when physical keyboard attach or touchPad virtual Keyboard on
+    if (status == SuperFoldStatus::KEYBOARD || isSystemKeyboardOn) {
+        if (screenWidth > screenHeight) {
+            std::swap(screenWidth, screenHeight);
+        }
+        DMRect creaseRect = screenSession->GetScreenProperty().GetCreaseRect();
+        if (creaseRect.posY_ > 0) {
+            displayInfo->SetHeight(creaseRect.posY_);
+        } else {
+            displayInfo->SetHeight(screenHeight / HALF_SCREEN_PARAM);
+        }
+        displayInfo->SetWidth(screenWidth);
+    } else {
+        displayInfo->SetWidth(screenWidth);
+        displayInfo->SetHeight(screenHeight);
+    }
+#endif
 }
 
 sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoByScreen(ScreenId screenId)
@@ -4629,6 +4706,7 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
         that.UpdateDisplayState(that.GetAllScreenIds(), DisplayState::ON);
         that.RegisterSettingDpiObserver();
         that.RegisterSettingExtendScreenDpiObserver();
+        that.RegisterRotationCorrectionExemptionListObserver();
         if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
             that.RegisterSettingDuringCallStateObserver();
         }
