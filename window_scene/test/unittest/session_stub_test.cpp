@@ -2144,11 +2144,11 @@ HWTEST_F(SessionStubTest, HandleRestartApp, TestSize.Level1)
     MessageParcel reply;
 
     data.WriteParcelable(nullptr);
-    ASSERT_EQ(session->HandleRestartApp(data, reply), ERR_INVALID_DATA);
+    ASSERT_EQ(session_->HandleRestartApp(data, reply), ERR_INVALID_DATA);
 
     std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
     data.WriteParcelable(want.get());
-    ASSERT_EQ(session->HandleRestartApp(data, reply), ERR_NONE);
+    ASSERT_EQ(session_->HandleRestartApp(data, reply), ERR_NONE);
 }
 
 /**

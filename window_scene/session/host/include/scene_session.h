@@ -131,7 +131,7 @@ using GetNextAvoidAreaRectInfoFunc = std::function<WSError(DisplayId displayId, 
 using NotifyFollowParentRectFunc = std::function<void(bool isFollow)>;
 using NotifyWindowAnchorInfoChangeFunc = std::function<void(const WindowAnchorInfo& windowAnchorInfo)>;
 using GetSceneSessionByIdCallback = std::function<sptr<SceneSession>(int32_t sessionId)>;
-using CheckAbilityInfoBywantCallback = std::function<bool(const std::shared_ptr<AAFwK::Want>& want)>;
+using CheckAbilityInfoByWantCallback = std::function<bool(const std::shared_ptr<AAFwk::Want>& want)>;
 using NotifySetParentSessionFunc = std::function<void(int32_t oldParentWindowId, int32_t newParentWindowId)>;
 using NotifyUpdateFlagFunc = std::function<void(const std::string& flag)>;
 using GetStartWindowTypeFunc = std::function<void(const SessionInfo& info, std::string& startWindowType)>;
@@ -192,7 +192,7 @@ public:
         NotifyWindowSystemBarPropertyChangeFunc onNotifyWindowSystemBarPropertyChangeFunc_;
         GetKeyboardOccupiedAreaWithRotationCallback onKeyboardRotationChange_;
         GetSceneSessionByIdCallback onGetSceneSessionByIdCallback_;
-        CheckAbilityInfoBywantCallback onCheckAbilityInfoBywantCallback_;
+        CheckAbilityInfoByWantCallback onCheckAbilityInfoByWantCallback_;
         NotifyFollowScreenChangeFunc onUpdateFollowScreenChange_;
         NotifyRotationLockChangeFunc onRotationLockChange_;
     };
@@ -230,16 +230,16 @@ public:
     bool GetScreenWidthAndHeightFromClient(const sptr<WindowSessionProperty>& sessionProperty,
         uint32_t& screenWidth, uint32_t& screenHeight);
     sptr<SceneSession> GetSceneSessionById(int32_t sessionId) const;
-    bool CheckAbilityInfoBywant(const std::shared_ptr<AAFwK::Want>& want) const;
+    bool CheckAbilityInfoBywant(const std::shared_ptr<AAFwk::Want>& want) const;
 
     WSError UpdateActiveStatus(bool isActive) override;
     WSError OnSessionEvent(SessionEvent event, const SessionEventParam& param = {}) override;
     WSError SyncSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError RaiseToAppTop() override;
-    WSError RestartApp(const std::shared_ptr<AAFwK::Want>& want) override;
-    static SessionInfo GetSessionInfoByWant(const const std::shared_ptr<AAFwK::Want>& want,
-        const sptr<SceneSession>& session)
+    WSError RestartApp(const std::shared_ptr<AAFwk::Want>& want) override;
+    static SessionInfo GetSessionInfoByWant(const std::shared_ptr<AAFwk::Want>& want,
+        const sptr<SceneSession>& session);
 
     /*
      * Window Recover

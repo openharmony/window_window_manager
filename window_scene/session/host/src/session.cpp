@@ -1928,13 +1928,13 @@ void Session::SetTerminateSessionListener(NotifyTerminateSessionFunc&& func)
     }, where);
 }
 
-void Session::SetRestartAppListeners(NotifyRestartAppFunc&& func)
+void Session::SetRestartAppListener(NotifyRestartAppFunc&& func)
 {
     const char* const where = __func__;
     PostTask([weakThis = wptr(this), func = std::move(func), where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
+            TLOGE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
             return;
         }
         session->restartAppFunc_ = std::move(func);
