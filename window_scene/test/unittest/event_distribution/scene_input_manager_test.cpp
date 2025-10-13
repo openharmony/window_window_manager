@@ -1012,8 +1012,11 @@ HWTEST_F(SceneInputManagerTest, UnLockCursor, TestSize.Level1)
     // test LockCursor normal function
     SceneInputManager::GetInstance().UnLockCursor(1);
     EXPECT_EQ(SceneInputManager::GetInstance().lockCursorInfo_->isActivating, false);
-}
 
+    // test LockCursor normal function(repeat)
+    SceneInputManager::GetInstance().UnLockCursor(1);
+    EXPECT_EQ(SceneInputManager::GetInstance().lockCursorInfo_->isActivating, false);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -761,6 +761,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithVoiceInputPrefix, TestS
  */
 HWTEST_F(SceneSessionDirtyManagerTest2, UpdateWindowFlagsForLockCursor, TestSize.Level2)
 {
+    SessionInfo info;
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     session->UpdateFocus(false);
     MMI::WindowInfo windowInfo;
@@ -783,6 +784,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, UpdateWindowFlagsForLockCursor, TestSize
 
     session->SetSessionInfoPersistentId(3);
     lockCursorInfo->windowId = 3;
+    lockCursorInfo->isActivating = true;
     lockCursorInfo->isCursorFollowMovement = false;
     manager_->UpdateWindowFlagsForLockCursor(session, lockCursorInfo, windowInfo);
     EXPECT_EQ(windowInfo.flags, 8);

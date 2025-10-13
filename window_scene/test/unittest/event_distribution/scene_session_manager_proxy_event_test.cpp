@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "iremote_object_mocker.h"
-#include "mock/moc k_message_parcel.h"
+#include "mock/mock_message_parcel.h"
 #include "session_manager/include/zidl/scene_session_manager_interface.h"
 #include "session_manager/include/zidl/scene_session_manager_proxy.h"
 #include "window_manager_agent.h"

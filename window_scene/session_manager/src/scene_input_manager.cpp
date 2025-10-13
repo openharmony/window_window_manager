@@ -594,7 +594,7 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
     lastWindowDefaultHotArea = currWindowDefaultHotArea;
     SingleHandTransform transform = SceneSessionManager::GetInstance().GetNormalSingleHandTransform();
     idListStream << focusedSessionId_ << "|" << transform.posX << "," << transform.posY
-        << "|" << transform.scaleX << "," << transform.scaleYt;
+        << "|" << transform.scaleX << "," << transform.scaleY;
     std::string idList = idListStream.str();
     if (lastIdList != idList) {
         windowEventID++;
