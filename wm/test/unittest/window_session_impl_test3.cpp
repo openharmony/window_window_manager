@@ -174,16 +174,16 @@ HWTEST_F(WindowSessionImplTest3, SetForceSplitEnable, TestSize.Level1)
 
     int32_t FORCE_SPLIT_MODE = 5;
     int32_t NAV_FORCE_SPLIT_MODE = 6;
-    AppForceLandscapeConfig config = { FORCE_SPLIT_MODE, "MainPage", true, "ArkuiOptions" };
+    AppForceLandscapeConfig config = { FORCE_SPLIT_MODE, "MainPage", true, "ArkuiOptions", false };
     window_->SetForceSplitEnable(config);
 
-    config = { FORCE_SPLIT_MODE, "MainPage", false, "ArkuiOptions" };
+    config = { FORCE_SPLIT_MODE, "MainPage", false, "ArkuiOptions", false };
     window_->SetForceSplitEnable(config);
 
-    config = { NAV_FORCE_SPLIT_MODE, "MainPage", true, "ArkuiOptions" };
+    config = { NAV_FORCE_SPLIT_MODE, "MainPage", true, "ArkuiOptions", false };
     window_->SetForceSplitEnable(config);
 
-    config = { NAV_FORCE_SPLIT_MODE, "MainPage", false, "ArkuiOptions" };
+    config = { NAV_FORCE_SPLIT_MODE, "MainPage", false, "ArkuiOptions", false };
     window_->SetForceSplitEnable(config);
     EXPECT_TRUE(logMsg.find("uiContent is null!") != std::string::npos);
     LOG_SetCallback(nullptr);
