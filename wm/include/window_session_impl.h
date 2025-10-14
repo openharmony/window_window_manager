@@ -979,7 +979,7 @@ private:
     void UpdateRectForResizeAnimation(const Rect& wmRect, const Rect& preRect,
         WindowSizeChangeReason wmReason, const SceneAnimationConfig& config,
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
-    RSAnimationTimingCurve updateConfigCurve(WindowAnimationCurve configCurve,
+    RSAnimationTimingCurve updateConfigCurve(const WindowAnimationCurve& configCurve,
         std::array<float, ANIMATION_PARAM_SIZE> param);
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const SceneAnimationConfig& config, const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});

@@ -467,8 +467,8 @@ HWTEST_F(WindowSessionImplTest5, UpdateRectForResizeAnimation, Function | SmallT
     runner->Run();
     window->handler_ = handler;
     std::shared_ptr<RSTransaction> rsTransaction;
-    SceneAnimationConfig config { rsTransaction, ROTATE_ANIMATION_DURATION,
-    0, WindowAnimationCurve::LINEAR, {0.0f, 0.0f, 0.0f, 0.0f } };
+    SceneAnimationConfig config{ rsTransaction, ROTATE_ANIMATION_DURATION,
+    0, WindowAnimationCurve::LINEAR, {0.0f, 0.0f, 0.0f, 0.0f} };
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
     std::shared_ptr<AvoidArea> avoidArea = std::make_shared<AvoidArea>();
     Rect preRect = { 0, 0, 0, 0 };
@@ -505,8 +505,8 @@ HWTEST_F(WindowSessionImplTest5, UpdateRectForResizeAnimation01, Function | Smal
     window->handler_ = handler;
     WindowSizeChangeReason wmReason = WindowSizeChangeReason::SCENE_WITH_ANIMATION;
     std::shared_ptr<RSTransaction> rsTransaction = std::make_shared<RSTransaction>();
-    SceneAnimationConfig config = {rsTransaction, ROTATE_ANIMATION_DURATION,
-    0, WindowAnimationCurve::LINEAR, {0.0f, 0.0f, 0.0f, 0.0f }};
+    SceneAnimationConfig config = { rsTransaction, ROTATE_ANIMATION_DURATION,
+    0, WindowAnimationCurve::LINEAR, {0.0f, 0.0f, 0.0f, 0.0f} };
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
     std::shared_ptr<AvoidArea> avoidArea = std::make_shared<AvoidArea>();
     Rect wmRect = { 0, 0, 0, 0 };
@@ -553,7 +553,7 @@ HWTEST_F(WindowSessionImplTest5, UpdateRectForResizeAnimation02, Function | Smal
     WindowSizeChangeReason wmReason = WindowSizeChangeReason::SCENE_WITH_ANIMATION;
     std::shared_ptr<RSTransaction> rsTransaction;
     SceneAnimationConfig config = { rsTransaction, ROTATE_ANIMATION_DURATION,
-        0, WindowAnimationCurve::LINEAR, {0.0f, 0.0f, 0.0f, 0.0f } };
+        0, WindowAnimationCurve::LINEAR, {0.0f, 0.0f, 0.0f, 0.0f} };
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
     std::shared_ptr<AvoidArea> avoidArea = std::make_shared<AvoidArea>();
     Rect wmRect = { 0, 0, 0, 0 };

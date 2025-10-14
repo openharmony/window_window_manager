@@ -1007,11 +1007,19 @@ struct SceneAnimationConfig : public Parcelable {
         if (!parcel.WriteBool(hasTransaction)) {
             return false;
         }
-        if (!parcel.WriteInt32(animationDuration_)) return false;
-        if (!parcel.WriteUint32(animationDelay_)) return false;
-        if (!parcel.WriteUint32(static_cast<uint32_t>(animationCurve_))) return false;
+        if (!parcel.WriteInt32(animationDuration_)) {
+            return false;
+        }
+        if (!parcel.WriteUint32(animationDelay_)) {
+            return false;
+        }
+        if (!parcel.WriteUint32(static_cast<uint32_t>(animationCurve_))) {
+            return false;
+        }
         for (size_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
-            if (!parcel.WriteFloat(animationParam_[i])) return false;
+            if (!parcel.WriteFloat(animationParam_[i])) {
+                return false;
+            }
         }
         return true;
     }
