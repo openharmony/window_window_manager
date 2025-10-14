@@ -1974,6 +1974,23 @@ HWTEST_F(WindowSessionImplTest, UpdateAnimationSpeed, TestSize.Level1)
     ASSERT_NE(window, nullptr);
     window->UpdateAnimationSpeed(1.0f);
     window->UpdateAnimationSpeed(2.0f);
+    usleep(WAIT_SYNC_IN_NS);
+}
+
+/**
+ * @tc.name: UpdateAllWindowSpeed
+ * @tc.desc: UpdateAllWindowSpeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, UpdateAllWindowSpeed, TestSize.Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("UpdateAllWindowSpeed");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->UpdateAllWindowSpeed(1.0f);
+    window->UpdateAllWindowSpeed(2.0f);
 }
 
 /**
