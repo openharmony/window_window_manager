@@ -1489,13 +1489,13 @@ void WindowSessionImpl::SetUniqueVirtualPixelRatio(bool useUniqueDensity, float 
 void WindowSessionImpl::UpdateAnimationSpeed(float speed)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), speed, where, this] {
+    auto task = [weakThis = wptr(this), speed, where] {
         auto window = weakThis.promote();
         if (window == nullptr) {
             TLOGW(WmsLogTag::WMS_ANIMATION, "%{public}s: window is nullptr", where);
             return;
         }
-        UpdateAllWindowSpeed(speed);
+        window->UpdateAllWindowSpeed(speed);
         isEnableAnimationSpeed_.store(!FoldScreenStateInternel::FloatEqualAbs(speed, 1.0f));
         animationSpeed_.store(speed);
     };
