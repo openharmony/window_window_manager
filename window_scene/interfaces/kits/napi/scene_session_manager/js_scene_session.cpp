@@ -8430,7 +8430,7 @@ void JsSceneSession::ProcessRestartAppRegister()
     session->SetRestartAppListener([weakThis = wptr(this)](const SessionInfo& info) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessRestartAppRegister jsSceneSession is null");
+            TLOGE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
             return;
         }
         jsSceneSession->OnRestartApp(info);
@@ -8440,15 +8440,16 @@ void JsSceneSession::ProcessRestartAppRegister()
 void JsSceneSession::OnRestartApp(const SessionInfo& info)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
-    auto task = [weakThis = wptr(this), info, persistentId = persistentId_, env = env_] {
+    auto task = [weakThis = wptr(this), info, persistentId = persistentId_, where = __func__, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "OnRestartApp jsSceneSession id:%{public}d has been destroyed", persistentId);
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: jsSceneSession id:%{public}d has been destroyed",
+                where, persistentId);
             return;
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(RESTART_APP_CB);
         if (!jsCallBack) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: jsCallBack is nullptr", where);
             return;
         }
         std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
@@ -8458,15 +8459,13 @@ void JsSceneSession::OnRestartApp(const SessionInfo& info)
                 info.specifiedFlag_ };
             sptr<SceneSession> sceneSession =
                 SceneSessionManager::GetInstance().GetSceneSessionByIdentityInfo(identityInfo);
-            TLOGNI(WmsLogTag::WMS_LIFE, "find the scene session by sessionInfo");
             if (!sceneSession) {
-                TLOGNI(WmsLogTag::WMS_LIFE, "not find the scene session by sessionInfo");
                 sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
             } else {
                 sceneSession->NotifyRestart();
             }
             if (!sceneSession) {
-                TLOGNE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr");
+                TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: sceneSession is nullptr", where);
                 return;
             }
             sceneSession->SetSessionInfoCallerPersistentId(info.callerPersistentId_);
@@ -8475,7 +8474,7 @@ void JsSceneSession::OnRestartApp(const SessionInfo& info)
         }
         napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
         if (jsSessionInfo == nullptr) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "target session info is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: target sessionInfo is nullptr", where);
             return;
         }
         napi_value argv[] = {jsSessionInfo};

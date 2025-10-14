@@ -2149,28 +2149,33 @@ WSError SceneSession::RestartApp(const std::shared_ptr<AAFwk::Want>& want)
     return PostSyncTask([weakThis = wptr(this), want, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (!SessionHelper::IsMainWindow(session->GetWindowType())) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session is not main window, id:%{public}d", session->GetPersistentId());
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: session is not main window, id:%{public}d",
+                where, session->GetPersistentId());
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         if (!session->IsSessionForeground() || !session->GetForegroundInteractiveStatus()) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session is not foreground, id:%{public}d", session->GetPersistentId());
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: session is not foreground, id:%{public}d",
+                where, session->GetPersistentId());
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
         if (session->sessionInfo_.bundleName_ != want->GetElement().GetBundleName()) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "not the same app, ability:%{public}s, target:%{public}s",
-                session->sessionInfo_.bundleName_.c_str(), want->GetElement().GetBundleName().c_str());
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: not the same app, ability:%{public}s, target:%{public}s",
+                where, session->sessionInfo_.bundleName_.c_str(), want->GetElement().GetBundleName().c_str());
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
         if (!session->CheckAbilityInfoByWant(want)) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "ability info is null, ability name:%{public}s",
-                want->GetElement().GetAbilityName().c_str());
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: ability info is null, ability name:%{public}s",
+                where, want->GetElement().GetAbilityName().c_str());
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
         SessionInfo info = GetSessionInfoByWant(want, session);
+        if (info.isRestartApp_) {
+            session->NotifyRestart();
+        }
         if (session->restartAppFunc_) {
             session->restartAppFunc_(info);
         }
@@ -2187,7 +2192,6 @@ SessionInfo SceneSession::GetSessionInfoByWant(const std::shared_ptr<AAFwk::Want
         session->sessionInfo_.isRestartApp_ = true;
         session->sessionInfo_.callerPersistentId_ = INVALID_SESSION_ID;
         info = session->sessionInfo_;
-        session->NotifyRestart();
     } else {
         info.abilityName_ = want->GetElement().GetAbilityName();
         info.bundleName_ = want->GetElement().GetBundleName();
