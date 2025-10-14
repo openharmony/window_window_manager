@@ -55,6 +55,25 @@ void SceneSessionManagerStubEventTest::TearDown()
 
 namespace {
 /**
+ * @tc.name: ProcessRemoteRequest
+ * @tc.desc: test ProcessRemoteRequest
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubEventTest, ProcessRemoteRequest, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_SYNC };
+    // Failed to obtain the command.
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    int res = stub_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SNED_COMMAND_EVENT), data, reply, option);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
  * @tc.name: HandleSendCommonEvent
  * @tc.desc: test HandleSendCommonEvent
  * @tc.type: FUNC
