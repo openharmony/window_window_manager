@@ -414,7 +414,7 @@ void CheckWindowImplFunctionsPart2(sptr<WindowImpl> window, const uint8_t* data,
 
     int32_t windowId;
     startPos += GetObject(windowId, data + startPos, size - startPos);
-    window->SetCallingWindow(windowId);
+    window->ChangeCallingWindowId(windowId);
 
     startPos += GetObject(boolVal, data + startPos, size - startPos);
     window->SetPrivacyMode(boolVal);

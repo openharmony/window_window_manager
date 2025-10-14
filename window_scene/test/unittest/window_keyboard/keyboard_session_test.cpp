@@ -410,7 +410,8 @@ HWTEST_F(KeyboardSessionTest, UseFocusIdIfCallingSessionIdInvalid, TestSize.Leve
     SessionInfo info;
     info.abilityName_ = "UseFocusIdIfCallingSessionIdInvalid";
     info.bundleName_ = "UseFocusIdIfCallingSessionIdInvalid";
-    sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession::SpecificSessionCallback> specificCb =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCb, nullptr);
     sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
         sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
@@ -425,7 +426,7 @@ HWTEST_F(KeyboardSessionTest, UseFocusIdIfCallingSessionIdInvalid, TestSize.Leve
     EXPECT_NE(id, 0);
 
     keyboardSession->GetSessionProperty()->SetCallingSessionId(id);
-    keyboardSession->UseFocusIdIfCallingSessionIdInvalid();
+    keyboardSession->UseFocusIdIfCallingSessionIdInvalid(id);
 }
 
 /**

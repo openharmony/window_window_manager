@@ -94,7 +94,7 @@ constexpr float COMPACT_NORMAL_SCALE = 1.0f;
 /*
  * Window outline
  */
-constexpr uint32_t OUTLINE_COLOR_DEFAULT = 0xff64bb5c; // Default color, ARGB formate.
+constexpr uint32_t OUTLINE_COLOR_DEFAULT = 0xff64bb5c; // Default color, ARGB format.
 constexpr uint32_t OUTLINE_WIDTH_MIN = 1; // vp
 constexpr uint32_t OUTLINE_WIDTH_DEFAULT = 4; // vp
 constexpr uint32_t OUTLINE_WIDTH_MAX = 8; // vp
@@ -2580,6 +2580,11 @@ struct KeyboardEffectOption : public Parcelable {
     KeyboardGradientMode gradientMode_ = KeyboardGradientMode::NONE;
     uint32_t blurHeight_ = 0;
 
+    KeyboardEffectOption() {}
+    KeyboardEffectOption(KeyboardViewMode viewMode, KeyboardFlowLightMode flowLightMode,
+        KeyboardGradientMode gradientMode, uint32_t blurHeight) : viewMode_(viewMode), flowLightMode_(flowLightMode),
+        gradientMode_(gradientMode), blurHeight_(blurHeight) {}
+
     virtual bool Marshalling(Parcel& parcel) const override
     {
         return (parcel.WriteUint32(static_cast<uint32_t>(viewMode_)) &&
@@ -3213,7 +3218,7 @@ struct OutlineParams : public Parcelable {
             return nullptr;
         }
         for (uint32_t i = 0; i < size; i++) {
-            int32_t persistentId;
+            int32_t persistentId = 0;
             if (!parcel.ReadInt32(persistentId)) {
                 return nullptr;
             }

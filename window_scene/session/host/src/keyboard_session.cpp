@@ -102,7 +102,7 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
             session->NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason::KEYBOARD_SHOW);
         }
         session->GetSessionProperty()->SetKeyboardEffectOption(property->GetKeyboardEffectOption());
-        session->UseFocusIdIfCallingSessionIdInvalid();
+        session->UseFocusIdIfCallingSessionIdInvalid(property->GetCallingSessionId());
         TLOGNI(WmsLogTag::WMS_KEYBOARD,
             "Show keyboard session, id: %{public}d, calling id: %{public}d, effectOption: %{public}s",
             session->GetPersistentId(), session->GetCallingSessionId(),
@@ -225,12 +225,11 @@ void KeyboardSession::SetCallingSessionId(uint32_t callingSessionId)
         }
         session->GetSessionProperty()->SetCallingSessionId(callingSessionId);
 
-        if (session->keyboardCallback_ == nullptr ||
-            session->keyboardCallback_->onCallingSessionIdChange == nullptr) {
+        if (session->callingSessionIdChangeFunc_ == nullptr) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "KeyboardCallback_, callingSessionId: %{public}d", callingSessionId);
             return;
         }
-        session->keyboardCallback_->onCallingSessionIdChange(callingSessionId);
+        session->callingSessionIdChangeFunc_(callingSessionId);
     }, "SetCallingSessionId");
     return;
 }
@@ -643,9 +642,10 @@ void KeyboardSession::NotifySessionRectChange(const WSRect& rect,
 }
 
 // Use focused session id when calling session id is invalid.
-void KeyboardSession::UseFocusIdIfCallingSessionIdInvalid()
+void KeyboardSession::UseFocusIdIfCallingSessionIdInvalid(uint32_t callingSessionId)
 {
-    if (GetSceneSession(GetCallingSessionId()) != nullptr) {
+    if (callingSessionId != INVALID_WINDOW_ID && GetSceneSession(callingSessionId) != nullptr) {
+        GetSessionProperty()->SetCallingSessionId(callingSessionId);
         return;
     }
     uint32_t focusedSessionId = static_cast<uint32_t>(GetFocusedSessionId());
@@ -654,9 +654,6 @@ void KeyboardSession::UseFocusIdIfCallingSessionIdInvalid()
     } else {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Using focusedSession id: %{public}d", focusedSessionId);
         GetSessionProperty()->SetCallingSessionId(focusedSessionId);
-        if (keyboardCallback_ != nullptr && keyboardCallback_->onCallingSessionIdChange != nullptr) {
-            keyboardCallback_->onCallingSessionIdChange(focusedSessionId);
-        }
     }
 }
 

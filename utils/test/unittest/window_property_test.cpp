@@ -287,7 +287,7 @@ HWTEST_F(WindowPropertyTest, GetCallingWindow007, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     uint32_t windowId = 1;
-    winPropSrc.SetCallingWindow(windowId);
+    winPropSrc.ChangeCallingWindowId(windowId);
     uint32_t res = winPropSrc.GetCallingWindow();
     ASSERT_EQ(res, windowId);
 }

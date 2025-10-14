@@ -34,7 +34,7 @@ public:
         bool isModuleAbilityHookEnd = false) override;
     WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
     WMError Show(uint32_t reason, bool withAnimation, bool withFocus, bool waitAttach) override;
-    WMError ShowKeyboard(KeyboardEffectOption effectOption) override;
+    WMError ShowKeyboard(uint32_t callingWindowId, KeyboardEffectOption effectOption) override;
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits, bool waitDetach) override;
     WMError Destroy(bool needNotifyServer, bool needClearListener = true, uint32_t reason = 0) override;
@@ -123,7 +123,7 @@ public:
     WMError SetTouchHotAreas(const std::vector<Rect>& rects) override;
     WMError SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas& hotAreas) override;
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) override;
-    virtual WMError SetCallingWindow(uint32_t callingSessionId) override;
+    WMError ChangeCallingWindowId(uint32_t callingWindowId) override;
     WMError ChangeKeyboardEffectOption(KeyboardEffectOption effectOption) override;
 
     virtual bool IsTransparent() const override;
