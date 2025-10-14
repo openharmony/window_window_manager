@@ -1184,14 +1184,10 @@ RSAnimationTimingCurve WindowSessionImpl::updateConfigCurve(const WindowAnimatio
     const std::array<float, ANIMATION_PARAM_SIZE> param)
 {
     RSAnimationTimingCurve curve;
-    // param[0] is the first parameter of the passed animation curve.
-    float animationParamOne = param[0];
-    // param[1] is the second parameter of the passed animation curve.
-    float animationParamTwo = param[1];
-    // param[2] is the third parameter of the passed animation curve.
-    float animationParamThree = param[2];
-    // param[3] is the fourth parameter of the passed animation curve.
-    float animationParamFour = param[3];
+    const float paramFirst = param[0]; // 0: the first parameter of the passed animation curve.
+    const float paramSecond = param[1]; // 1: the second parameter of the passed animation curve.
+    const float paramThird = param[2]; // 2: the third parameter of the passed animation curve.
+    const float paramFourth = param[3]; // 3: the fourth parameter of the passed animation curve.
     switch (configCurve) {
         case WindowAnimationCurve::LINEAR:
             TLOGD(WmsLogTag::WMS_LAYOUT, "Linear params");
