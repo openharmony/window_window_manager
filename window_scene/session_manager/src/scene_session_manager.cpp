@@ -1739,8 +1739,8 @@ bool SceneSessionManager::CheckAbilityInfoByWant(const std::shared_ptr<AAFwk::Wa
         return false;
     }
     AppExecFwk::AbilityInfo abilityInfo;
-    if (!bundleMgr_->GetAbilityInfo(want->GetElement().GetBundleName(),
-        want->GetElement().GetModuleName(), want->GetElement().GetAbilityName(), abilityInfo)) {
+    if (!bundleMgr_->QueryAbilityInfo(*want,
+        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, currentUserId_, abilityInfo)) {
         TLOGE(WmsLogTag::WMS_LIFE, "ability not found %{public}s %{public}s %{public}s",
             want->GetElement().GetBundleName().c_str(), want->GetElement().GetModuleName().c_str(),
             want->GetElement().GetAbilityName().c_str());

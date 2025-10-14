@@ -241,6 +241,9 @@ HWTEST_F(SceneSessionTest6, RestartApp, TestSize.Level1)
 
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
     EXPECT_EQ(sceneSession->RestartApp(want), WSError::WS_ERROR_INVALID_OPERATION);
+
+    want->SetBundle(info.bundleName_);
+    EXPECT_EQ(sceneSession->RestartApp(want), WSError::WS_ERROR_INVALID_OPERATION);
 }
 
 /**
