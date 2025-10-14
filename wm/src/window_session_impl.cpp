@@ -1181,24 +1181,33 @@ void WindowSessionImpl::UpdateRectForResizeAnimation(const Rect& wmRect, const R
 }
 
 RSAnimationTimingCurve WindowSessionImpl::updateConfigCurve(const WindowAnimationCurve& configCurve,
-    std::array<float, ANIMATION_PARAM_SIZE> param)
+    const std::array<float, ANIMATION_PARAM_SIZE> param)
 {
     RSAnimationTimingCurve curve;
+    // param[0] is the first parameter of the passed animation curve.
+    float animationParamOne = param[0];
+    // param[1] is the second parameter of the passed animation curve.
+    float animationParamTwo = param[1];
+    // param[2] is the third parameter of the passed animation curve.
+    float animationParamThree = param[2];
+    // param[3] is the fourth parameter of the passed animation curve.
+    float animationParamFour = param[3];
     switch (configCurve) {
-        //param[0], param[1], param[2], param[3] set parameters related to animation effects
         case WindowAnimationCurve::LINEAR:
             TLOGD(WmsLogTag::WMS_LAYOUT, "Linear params");
             curve = RSAnimationTimingCurve::LINEAR;
             break;
         case WindowAnimationCurve::INTERPOLATION_SPRING:
             TLOGD(WmsLogTag::WMS_LAYOUT, "Spring params: %{public}f, %{public}f, %{public}f, %{public}f",
-                param[0], param[1], param[2], param[3]);
-            curve = RSAnimationTimingCurve::CreateInterpolatingSpring(param[0], param[1], param[2], param[3]);
+                animationParamOne, animationParamTwo, animationParamThree, animationParamFour);
+            curve = RSAnimationTimingCurve::CreateInterpolatingSpring(animationParamOne,
+                animationParamTwo, animationParamThree, animationParamFour);
             break;
         case WindowAnimationCurve::CUBIC_BEZIER:
             TLOGD(WmsLogTag::WMS_LAYOUT, "Bezier params: %{public}f, %{public}f, %{public}f, %{public}f",
-                param[0], param[1], param[2], param[3]);
-            curve = RSAnimationTimingCurve::CreateCubicCurve(param[0], param[1], param[2], param[3]);
+                animationParamOne, animationParamTwo, animationParamThree, animationParamFour);
+            curve = RSAnimationTimingCurve::CreateCubicCurve(animationParamOne, animationParamTwo,
+                animationParamThree, animationParamFour);
             break;
         default:
             TLOGW(WmsLogTag::WMS_LAYOUT, "Unknown curve type: %{public}d, using LINEAR as default",
