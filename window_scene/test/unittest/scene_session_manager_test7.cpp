@@ -1388,7 +1388,7 @@ HWTEST_F(SceneSessionManagerTest7, TestReportIncompleteScreenFoldStatusChangeEve
 HWTEST_F(SceneSessionManagerTest7, SetAppForceLandscapeConfig, TestSize.Level1)
 {
     std::string bundleName = "SetAppForceLandscapeConfig";
-    AppForceLandscapeConfig config = { 0, "MainPage", false, "ArkuiOptions" };
+    AppForceLandscapeConfig config = { 0, "MainPage", false, "ArkuiOptions", false };
     WSError result = ssm_->SetAppForceLandscapeConfig(bundleName, config);
     ASSERT_EQ(result, WSError::WS_OK);
 }
