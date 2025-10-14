@@ -480,12 +480,12 @@ HWTEST_F(AvoidAreaControllerTest, KeyboardAvoidArea01, TestSize.Level1)
         auto avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_KEYBOARD);
         ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT));
 
-        keyboardWindowNode->SetCallingWindow(appWindow->GetWindowId());
+        keyboardWindowNode->ChangeCallingWindowId(appWindow->GetWindowId());
         avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_KEYBOARD);
         ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT,
             keyboardWindowNode->GetWindowRect()));
 
-        keyboardWindowNode->SetCallingWindow(0);
+        keyboardWindowNode->ChangeCallingWindowId(0);
         focusedWindow = appWindow->GetWindowId();
         avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_KEYBOARD);
         ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT,

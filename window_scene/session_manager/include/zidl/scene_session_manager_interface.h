@@ -383,11 +383,11 @@ public:
     {
         return WSError::WS_OK;
     }
-    WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus) override
+    WMError GetCallingWindowWindowStatus(uint32_t callingWindowId, WindowStatus& windowStatus) override
     {
         return WMError::WM_OK;
     }
-    WMError GetCallingWindowRect(int32_t persistentId, Rect& rect) override
+    WMError GetCallingWindowRect(uint32_t callingWindowId, Rect& rect) override
     {
         return WMError::WM_OK;
     }

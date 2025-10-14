@@ -598,8 +598,6 @@ HWTEST_F(SceneSessionManagerTest5, SetShiftFocusListener, TestSize.Level1)
     ssm_->SetShiftFocusListener(fun);
     ssm_->SetSCBFocusedListener(func);
     ssm_->SetSCBUnfocusedListener(func);
-    ProcessCallingSessionIdChangeFunc func1;
-    ssm_->SetCallingSessionIdSessionListenser(func1);
     ProcessStartUIAbilityErrorFunc func2;
     ssm_->SetStartUIAbilityErrorListener(func2);
     ssm_->ShiftFocus(DEFAULT_DISPLAY_ID, sceneSession1, false, reason);

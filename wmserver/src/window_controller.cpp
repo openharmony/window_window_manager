@@ -1520,7 +1520,7 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             break;
         }
         case PropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW: {
-            node->SetCallingWindow(property->GetCallingWindow());
+            node->ChangeCallingWindowId(property->GetCallingWindow());
             break;
         }
         case PropertyChangeAction::ACTION_UPDATE_ORIENTATION: {

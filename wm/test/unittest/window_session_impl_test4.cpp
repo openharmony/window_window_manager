@@ -871,14 +871,15 @@ HWTEST_F(WindowSessionImplTest4, GetCallingWindowRect, TestSize.Level1)
     option->SetWindowName("GetCallingWindowRect");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     Rect rect = { 0, 0, 0, 0 };
-    WMError retCode = window->GetCallingWindowRect(rect);
+    WMError retCode = window->GetCallingWindowRect(1, rect);
     ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
-    window->GetCallingWindowRect(rect);
+    retCode = window->GetCallingWindowRect(1, rect);
+    ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_PERMISSION);
 }
 
 /**
@@ -893,7 +894,7 @@ HWTEST_F(WindowSessionImplTest4, GetCallingWindowWindowStatus, TestSize.Level1)
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, window);
     WindowStatus windowStatus = WindowStatus::WINDOW_STATUS_UNDEFINED;
-    WMError retCode = window->GetCallingWindowWindowStatus(windowStatus);
+    WMError retCode = window->GetCallingWindowWindowStatus(1, windowStatus);
     ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
@@ -901,7 +902,8 @@ HWTEST_F(WindowSessionImplTest4, GetCallingWindowWindowStatus, TestSize.Level1)
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
-    window->GetCallingWindowWindowStatus(windowStatus);
+    retCode = window->GetCallingWindowWindowStatus(1, windowStatus);
+    ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_PERMISSION);
 }
 
 /**

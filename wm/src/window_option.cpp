@@ -219,7 +219,7 @@ float WindowOption::GetBrightness() const
     return brightness_;
 }
 
-void WindowOption::SetCallingWindow(uint32_t windowId)
+void WindowOption::ChangeCallingWindowId(uint32_t windowId)
 {
     callingWindow_ = windowId;
 }
