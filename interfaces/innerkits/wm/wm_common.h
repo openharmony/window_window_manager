@@ -1627,6 +1627,15 @@ enum class PiPState : int32_t {
 };
 
 /**
+ * @brief Enumerates picture in picture active status.
+ */
+enum class PiPActiveStatus : int32_t {
+    STATUS_FOREGROUND = 0,
+    STATUS_SIDEBAR = 1,
+    STATUS_DRAG_DELETE = 2,
+};
+
+/**
  * @brief Enumerates picture in picture control status.
  */
 enum class PiPControlStatus : int32_t {

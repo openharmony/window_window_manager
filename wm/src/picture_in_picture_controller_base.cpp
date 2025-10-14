@@ -434,6 +434,18 @@ uint64_t PictureInPictureControllerBase::GetSurfaceId() const
     return surfaceId_;
 }
 
+void PictureInPictureControllerBase::ActiveStatusChange(PiPActiveStatus status)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "notify active status: %{public}u", status);
+    for (auto& listener : pipActiveStatusObserver_) {
+        if (listener == nullptr) {
+            TLOGE(WmsLogTag::WMS_PIP, "active status listener is nullptr");
+            continue;
+        }
+        listener->OnActiveStatusChange(status);
+    }
+}
+
 void PictureInPictureControllerBase::OnPictureInPictureStart()
 {
     for (auto& listener : pipLifeCycleListeners_) {
@@ -476,6 +488,11 @@ WMError PictureInPictureControllerBase::RegisterPiPStart(const sptr<IPiPStartObs
     return RegisterListener(pipStartListeners_, listener);
 }
 
+WMError PictureInPictureControllerBase::RegisterPiPActiveStatusChange(const sptr<IPiPActiveStatusObserver>& listener)
+{
+    return RegisterListener(pipActiveStatusObserver_, listener);
+}
+
 WMError PictureInPictureControllerBase::UnregisterPiPLifecycle(const sptr<IPiPLifeCycle>& listener)
 {
     return UnregisterListener(pipLifeCycleListeners_, listener);
@@ -504,6 +521,11 @@ WMError PictureInPictureControllerBase::UnRegisterPiPTypeNodeChange(const sptr<I
 WMError PictureInPictureControllerBase::UnregisterPiPStart(const sptr<IPiPStartObserver>& listener)
 {
     return UnregisterListener(pipStartListeners_, listener);
+}
+
+WMError PictureInPictureControllerBase::UnregisterPiPActiveStatusChange(const sptr<IPiPActiveStatusObserver>& listener)
+{
+    return UnregisterListener(pipActiveStatusObserver_, listener);
 }
 
 void PictureInPictureControllerBase::UnregisterAllPiPLifecycle()
