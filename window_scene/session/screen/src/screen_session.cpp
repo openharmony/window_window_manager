@@ -2971,4 +2971,14 @@ SuperFoldStatusChangeEvents ScreenSession::GetSuperFoldStatusChangeEvent()
 {
     return property_.GetSuperFoldStatusChangeEvent();
 }
+
+ScreenId ScreenSession::GetPhyScreenId()
+{
+    return phyScreenId_;
+}
+
+void ScreenSession::SetPhyScreenId(ScreenId screenId)
+{
+    phyScreenId_ = screenId;
+}
 } // namespace OHOS::Rosen

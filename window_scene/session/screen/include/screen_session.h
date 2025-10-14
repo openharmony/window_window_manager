@@ -242,6 +242,7 @@ public:
     ScreenId screenId_ {};
     ScreenId rsId_ {};
     ScreenId defaultScreenId_ = SCREEN_ID_INVALID;
+    ScreenId phyScreenId_ = SCREEN_ID_INVALID;
 
     void SetIsExtend(bool isExtend);
     bool GetIsExtend() const;
@@ -400,6 +401,8 @@ public:
 
     void UpdateMirrorWidth(uint32_t mirrorWidth);
     void UpdateMirrorHeight(uint32_t mirrorHeight);
+    ScreenId GetPhyScreenId();
+    void SetPhyScreenId(ScreenId screenId);
 
 private:
     bool IsVertical(Rotation rotation) const;
