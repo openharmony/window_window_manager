@@ -2962,6 +2962,7 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::SetRotationLocked)},
         ani_native_function {"getRotationLocked", "J:Z",
             reinterpret_cast<void *>(AniWindow::GetRotationLocked)},
+        
     };
     if ((ret = env->Class_BindNativeMethods(cls, methods.data(), methods.size())) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] bind window method fail %{public}u", ret);
