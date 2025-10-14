@@ -4245,10 +4245,10 @@ napi_value JsSceneSessionManager::SetAppForceLandscapeConfig(napi_env env, napi_
 
 napi_value JsSceneSessionManager::OnSetAppForceLandscapeConfig(napi_env env, napi_callback_info info)
 {
-    size_t argc = ARGC_FIVE;
-    napi_value argv[ARGC_FIVE] = { nullptr };
+    size_t argc = ARGC_TWO;
+    napi_value argv[ARGC_TWO] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARGC_THREE) {
+    if (argc != OHOS::Rosen::ARGC_TWO) {
         TLOGE(WmsLogTag::DEFAULT, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -4263,35 +4263,30 @@ napi_value JsSceneSessionManager::OnSetAppForceLandscapeConfig(napi_env env, nap
         return NapiGetUndefined(env);
     }
 
-    int32_t mode;
-    if (!ConvertFromJsValue(env, argv[1], mode)) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to forceLandscapeMode");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
+    AppForceLandscapeConfig config;
+    napi_value jsMode = nullptr;
+    napi_get_named_property(env, argv[1], "mode", &jsMode);
+    RETURN_IF_CONVERT_FAIL(env, jsMode, config.mode_, "mode", WmsLogTag::DEFAULT);
 
-    std::string homePage;
-    if (argc >= ARGC_THREE && ConvertFromJsValue(env, argv[ARGC_TWO], homePage)) {
-        TLOGD(WmsLogTag::DEFAULT, "homePage: %{public}s", homePage.c_str());
-    }
+    napi_value jsHomePage = nullptr;
+    napi_get_named_property(env, argv[1], "homePage", &jsHomePage);
+    RETURN_IF_CONVERT_FAIL(env, jsHomePage, config.homePage_, "homePage", WmsLogTag::DEFAULT);
 
-    int32_t supportSplit = -1;
-    if (argc >= ARGC_FOUR && !ConvertFromJsValue(env, argv[ARGC_THREE], supportSplit)) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to supportSplit");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
+    napi_value jsSupportSplit = nullptr;
+    napi_get_named_property(env, argv[1], "supportSplit", &jsSupportSplit);
+    RETURN_IF_CONVERT_FAIL(env, jsSupportSplit, config.supportSplit_, "supportSplit", WmsLogTag::DEFAULT);
 
-    std::string arkUIOptions;
-    if (argc >= ARGC_FIVE && ConvertFromJsValue(env, argv[ARGC_FOUR], arkUIOptions)) {
-        TLOGD(WmsLogTag::DEFAULT, "arkUIOptions: %{public}s", arkUIOptions.c_str());
-    }
+    napi_value jsArkUIOptions = nullptr;
+    napi_get_named_property(env, argv[1], "arkUIOptions", &jsArkUIOptions);
+    RETURN_IF_CONVERT_FAIL(env, jsArkUIOptions, config.arkUIOptions_, "arkUIOptions", WmsLogTag::DEFAULT);
+
+    napi_value jsIgnoreOrient = nullptr;
+    napi_get_named_property(env, argv[1], "ignoreOrientation", &jsIgnoreOrient);
+    RETURN_IF_CONVERT_FAIL(env, jsIgnoreOrient, config.ignoreOrientation_, "ignoreOrientation", WmsLogTag::DEFAULT);
 
     TLOGI(WmsLogTag::DEFAULT, "app: %{public}s, mode: %{public}d, homePage: %{public}s, supportSplit: %{public}d, "
-        "arkUIOptions: %{public}s", bundleName.c_str(), mode, homePage.c_str(), supportSplit, arkUIOptions.c_str());
-    AppForceLandscapeConfig config = { mode, homePage, supportSplit, arkUIOptions };
+        "arkUIOptions: %{public}s, ignoreOrientation: %{public}d", bundleName.c_str(), config.mode_,
+        config.homePage_.c_str(), config.supportSplit_, config.arkUIOptions_.c_str(), config.ignoreOrientation_);
     SceneSessionManager::GetInstance().SetAppForceLandscapeConfig(bundleName, config);
     return NapiGetUndefined(env);
 }
