@@ -3033,7 +3033,6 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"setRelativePositionToParentWindowEnabled",
             "lzC{@ohos.window.window.WindowAnchor}C{std.core.Int}C{std.core.Int}:",
             reinterpret_cast<void *>(AniWindow::SetRelativePositionToParentWindowEnabled)},
-        
     };
     if ((ret = env->Class_BindNativeMethods(cls, methods.data(), methods.size())) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] bind window method fail %{public}u", ret);
