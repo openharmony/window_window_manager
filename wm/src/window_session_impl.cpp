@@ -1195,15 +1195,15 @@ RSAnimationTimingCurve WindowSessionImpl::updateConfigCurve(const WindowAnimatio
             break;
         case WindowAnimationCurve::INTERPOLATION_SPRING:
             TLOGD(WmsLogTag::WMS_LAYOUT, "Spring params: %{public}f, %{public}f, %{public}f, %{public}f",
-                animationParamOne, animationParamTwo, animationParamThree, animationParamFour);
-            curve = RSAnimationTimingCurve::CreateInterpolatingSpring(animationParamOne,
-                animationParamTwo, animationParamThree, animationParamFour);
+                paramFirst, paramSecond, paramThird, paramFourth);
+            curve = RSAnimationTimingCurve::CreateInterpolatingSpring(paramFirst,
+                paramSecond, paramThird, paramFourth);
             break;
         case WindowAnimationCurve::CUBIC_BEZIER:
             TLOGD(WmsLogTag::WMS_LAYOUT, "Bezier params: %{public}f, %{public}f, %{public}f, %{public}f",
-                animationParamOne, animationParamTwo, animationParamThree, animationParamFour);
-            curve = RSAnimationTimingCurve::CreateCubicCurve(animationParamOne, animationParamTwo,
-                animationParamThree, animationParamFour);
+                paramFirst, paramSecond, paramThird, paramFourth);
+            curve = RSAnimationTimingCurve::CreateCubicCurve(paramFirst, paramSecond,
+                paramThird, paramFourth);
             break;
         default:
             TLOGW(WmsLogTag::WMS_LAYOUT, "Unknown curve type: %{public}d, using LINEAR as default",
