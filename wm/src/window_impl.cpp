@@ -3775,8 +3775,12 @@ void WindowImpl::UpdateViewportConfig(const Rect& rect, const sptr<Display>& dis
         }
     }
     uiContent_->UpdateViewportConfig(config, reason, rsTransaction, avoidAreas, occupiedAreaInfo_);
-    WLOGFD("Id:%{public}u, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
+    WLOGFI("Id:%{public}u, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
         property_->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
+    WLOGFI("occupiedAreaeInfo, id: %{public}u"
+            ", rect:[%{public}u, %{public}u, %{public}u, %{public}u]", property_->GetWindowId(),
+            occupiedAreaInfo_->rect_.posX_,occupiedAreaInfo_->rect_.posY_,
+            occupiedAreaInfo_->rect_.width_, occupiedAreaInfo_->rect_.height_);
 }
 
 void WindowImpl::UpdateDecorEnable(bool needNotify)
@@ -4004,6 +4008,9 @@ void WindowImpl::UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         occupiedAreaInfo_ = info;
+        WLOGFI("occupiedAreaeInfo changed, id: %{public}u"
+            ", rect:[%{public}u, %{public}u, %{public}u, %{public}u]", property_->GetWindowId(),
+            info->rect_.posX_,info->rect_.posY_, info->rect_.width_, info->rect_.height_);
     }
     auto display = SingletonContainer::IsDestroyed() ? nullptr :
         SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
