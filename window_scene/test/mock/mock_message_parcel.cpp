@@ -39,6 +39,7 @@ bool g_setReadFloatErrorFlag = false;
 bool g_setReadStringVectorErrorFlag = false;
 bool g_setReadStringErrorFlag = false;
 std::vector<int32_t> g_int32Cache;
+int32_t g_WriteInt32ErrorCount = 0;
 #ifdef ENABLE_MOCK_WRITE_STRING
 const static std::string ERROR_FLAG = "error";
 #endif
@@ -172,6 +173,11 @@ void MockMessageParcel::AddInt32Cache(int32_t value)
 {
     g_int32Cache.emplace_back(value);
 }
+
+void MockMessageParcel::SetWriteInt32ErrorCount(int count)
+{
+    g_WriteInt32ErrorCount = count;
+}
 }
 
 bool MessageParcel::WriteInterfaceToken(std::u16string name)
@@ -210,8 +216,12 @@ bool Parcel::WriteBool(bool value)
 bool Parcel::WriteInt32(int32_t value)
 {
     (void)value;
-    if (g_setWriteInt32ErrorFlag || value == ERROR_INT) {
+    if ((g_setWriteInt32ErrorFlag || value == ERROR_INT) && g_WriteInt32ErrorCount < 1) {
         return false;
+    }
+
+    if (g_WriteInt32ErrorCount > 0) {
+        g_WriteInt32ErrorCount--;
     }
     return true;
 }

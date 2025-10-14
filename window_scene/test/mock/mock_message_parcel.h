@@ -42,6 +42,7 @@ public:
     static void SetReadFloatErrorFlag(bool flag);
     static void SetReadStringVectorErrorFlag(bool flag);
     static void SetReadStringErrorFlag(bool flag);
+    static void SetWriteInt32ErrorCount(int count);
     static void AddInt32Cache(int32_t value);
 };
 }
