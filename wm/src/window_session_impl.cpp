@@ -1180,11 +1180,12 @@ void WindowSessionImpl::UpdateRectForResizeAnimation(const Rect& wmRect, const R
     }, "WMS_WindowSessionImpl_UpdateRectForResizeAnimation");
 }
 
-RSAnimationTimingCurve WindowSessionImpl::updateConfigCurve(WindowAnimationCurve configCurve,
+RSAnimationTimingCurve WindowSessionImpl::updateConfigCurve(const WindowAnimationCurve& configCurve,
     std::array<float, ANIMATION_PARAM_SIZE> param)
 {
     RSAnimationTimingCurve curve;
     switch (configCurve) {
+        //param[0], param[1], param[2], param[3] set parameters related to animation effects
         case WindowAnimationCurve::LINEAR:
             TLOGD(WmsLogTag::WMS_LAYOUT, "Linear params");
             curve = RSAnimationTimingCurve::LINEAR;

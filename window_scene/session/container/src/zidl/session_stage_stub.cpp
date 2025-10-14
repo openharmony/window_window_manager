@@ -280,7 +280,7 @@ int SessionStageStub::HandleUpdateRect(MessageParcel& data, MessageParcel& reply
     }
     sptr<SceneAnimationConfig> configPtr = data.ReadParcelable<SceneAnimationConfig>();
     if (configPtr == nullptr) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "Read SceneAnimationConfig failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read SceneAnimationConfig failed");
         return -1;
     }
     if (hasRSTransaction) {

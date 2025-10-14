@@ -6782,7 +6782,7 @@ WSError SceneSession::OnContainerModalEvent(const std::string& eventName, const 
     return WSError::WS_OK;
 }
 
-WSError SceneSession::SetSceneAnimationConfig(SceneAnimationConfig animationConfig)
+WSError SceneSession::SetSceneAnimationConfig(const SceneAnimationConfig& animationConfig)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "SetSceneAnimationConfig");
     sceneAnimationConfig_.animationDelay_ = animationConfig.animationDelay_;
