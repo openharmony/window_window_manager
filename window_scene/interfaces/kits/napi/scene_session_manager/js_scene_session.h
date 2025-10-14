@@ -115,6 +115,7 @@ enum class ListenerFuncType : uint32_t {
     FLOATING_BALL_RESTORE_MAIN_WINDOW_CB,
     SCENE_OUTLINE_PARAMS_CHANGE_CB,
     RESTART_APP_CB,
+    CALLING_SESSION_ID_CHANGE_CB,
     ROTATION_LOCK_CHANGE_CB,
 };
 
@@ -425,6 +426,7 @@ private:
     void ProcessWindowMovingRegister();
     void ProcessUpdateSessionLabelAndIconRegister();
     void ProcessKeyboardStateChangeRegister();
+    void ProcessCallingSessionIdChangeRegister();
     void ProcessKeyboardEffectOptionChangeRegister();
     void ProcessSetHighlightChangeRegister();
     void ProcessWindowAnchorInfoChangeRegister();
@@ -516,7 +518,8 @@ private:
     void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl, bool isControlRecentOnly);
     void OnWindowMoving(DisplayId displayId, int32_t pointerX, int32_t pointerY);
     void UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
-    void OnKeyboardStateChange(SessionState state, const KeyboardEffectOption& effectOption);
+    void OnKeyboardStateChange(SessionState state, const KeyboardEffectOption& effectOption,
+        const uint32_t callingSessionId);
     void OnKeyboardEffectOptionChange(const KeyboardEffectOption& effectOption);
     void NotifyHighlightChange(bool isHighlight);
     void NotifyWindowAnchorInfoChange(const WindowAnchorInfo& windowAnchorInfo);
@@ -531,6 +534,7 @@ private:
         const WindowAnimationOption& animationOption);
     void OnOutlineParamsChange(bool isOutlineEnabled, const OutlineStyleParams& outlineStyleParams);
     void OnRestartApp(const SessionInfo& info);
+    void OnCallingSessionIdChange(uint32_t callingSessionId);
 
     /*
      * Window Property

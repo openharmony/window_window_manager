@@ -37,6 +37,7 @@ using namespace AbilityRuntime;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
+constexpr size_t ARGS_MAX = 4;
 constexpr int32_t INDEX_ONE = 1;
 class JsDisplayManager {
 public:
@@ -73,6 +74,12 @@ static napi_value GetDisplayByIdSync(napi_env env, napi_callback_info info)
 {
     JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
     return (me != nullptr) ? me->OnGetDisplayByIdSync(env, info) : nullptr;
+}
+
+static napi_value GetBrightnessInfoChange(napi_env env, napi_callback_info info)
+{
+    JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
+    return (me != nullptr) ? me->OnGetBrightnessInfoChange(env, info) : nullptr;
 }
 
 static napi_value GetAllDisplay(napi_env env, napi_callback_info info)
@@ -310,6 +317,34 @@ napi_value OnGetDisplayByIdSync(napi_env env, napi_callback_info info)
     return CreateJsDisplayObject(env, display);
 }
 
+napi_value OnGetBrightnessInfoChange(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "called");
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "OnGetBrightnessInfoChange");
+    size_t argc = ARGS_MAX;
+    napi_value argv[ARGS_MAX] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        std::string errMsg = "Invalid args count, need one arg";
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_ILLEGAL_PARAM), errMsg));
+        return NapiGetUndefined(env);
+    }
+    int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
+    if (!ConvertFromJsValue(env, argv[0], displayId)) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to displayId");
+        std::string errMsg = "Failed to convert parameter to displayId";
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_ILLEGAL_PARAM), errMsg));
+        return NapiGetUndefined(env);
+    }
+    ScreenBrightnessInfo brightnessInfo;
+    auto errCode = SingletonContainer::Get<DisplayManager>().GetBrightnessInfo(displayId, brightnessInfo);
+    if (errCode != DMError::DM_OK) {
+        return NapiThrowError(env, static_cast<DmErrorCode>(errCode), "Failed to get brightness info");
+    }
+
+    return CreateJsBrightnessInfo(env, brightnessInfo);
+}
+ 
 napi_value OnGetAllDisplay(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::DMS, "called");
@@ -470,6 +505,13 @@ napi_value OnGetAllDisplays(napi_env env, napi_callback_info info)
     return result;
 }
 
+void TransReturnErrorToNew(DMError& ret)
+{
+    if (ret == DMError::DM_ERROR_NULLPTR || ret == DMError::DM_ERROR_INVALID_PARAM) {
+        ret = DMError::DM_ERROR_ILLEGAL_PARAM;
+    }
+}
+
 DMError RegisterDisplayListenerWithType(napi_env env, const std::string& type, napi_value value)
 {
     if (IfCallbackRegistered(env, type, value)) {
@@ -496,6 +538,9 @@ DMError RegisterDisplayListenerWithType(napi_env env, const std::string& type, n
         ret = SingletonContainer::Get<DisplayManager>().RegisterDisplayModeListener(displayListener);
     } else if (type == EVENT_AVAILABLE_AREA_CHANGED) {
         ret = SingletonContainer::Get<DisplayManager>().RegisterAvailableAreaListener(displayListener);
+    } else if (type == EVENT_BRIGHTNESS_INFO_CHANGED) {
+        ret = SingletonContainer::Get<DisplayManager>().RegisterBrightnessInfoListener(displayListener);
+        TransReturnErrorToNew(ret);
     } else if (type == EVENT_FOLD_ANGLE_CHANGED) {
         ret = SingletonContainer::Get<DisplayManager>().RegisterFoldAngleListener(displayListener);
     } else if (type == EVENT_CAPTURE_STATUS_CHANGED) {
@@ -549,6 +594,10 @@ DMError UnregisterAllDisplayListenerWithType(const std::string& type)
         } else if (type == EVENT_AVAILABLE_AREA_CHANGED) {
             sptr<DisplayManager::IAvailableAreaListener> thisListener(it->second);
             ret = SingletonContainer::Get<DisplayManager>().UnregisterAvailableAreaListener(thisListener);
+        } else if (type == EVENT_BRIGHTNESS_INFO_CHANGED) {
+            sptr<DisplayManager::IBrightnessInfoListener> thisListener(it->second);
+            ret = SingletonContainer::Get<DisplayManager>().UnregisterBrightnessInfoListener(thisListener);
+            TransReturnErrorToNew(ret);
         } else if (type == EVENT_FOLD_STATUS_CHANGED) {
             sptr<DisplayManager::IFoldStatusListener> thisListener(it->second);
             ret = SingletonContainer::Get<DisplayManager>().UnregisterFoldStatusListener(thisListener);
@@ -568,6 +617,14 @@ DMError UnregisterAllDisplayListenerWithType(const std::string& type)
         TLOGI(WmsLogTag::DMS, "type %{public}s  ret: %{public}u", type.c_str(), ret);
     }
     jsCbMap_.erase(type);
+    return ret;
+}
+
+DMError UnregBrightnessInfoListener(sptr<DisplayManager::IBrightnessInfoListener> thisListener)
+{
+    DMError ret = DMError::DM_OK;
+    ret = SingletonContainer::Get<DisplayManager>().UnregisterBrightnessInfoListener(thisListener);
+    TransReturnErrorToNew(ret);
     return ret;
 }
 
@@ -592,6 +649,9 @@ DMError UnRegisterDisplayListenerWithType(napi_env env, const std::string& type,
             } else if (type == EVENT_AVAILABLE_AREA_CHANGED) {
                 sptr<DisplayManager::IAvailableAreaListener> thisListener(it->second);
                 ret = SingletonContainer::Get<DisplayManager>().UnregisterAvailableAreaListener(thisListener);
+            } else if (type == EVENT_BRIGHTNESS_INFO_CHANGED) {
+                sptr<DisplayManager::IBrightnessInfoListener> thisListener(it->second);
+                ret = UnregBrightnessInfoListener(thisListener);
             } else if (type == EVENT_FOLD_STATUS_CHANGED) {
                 sptr<DisplayManager::IFoldStatusListener> thisListener(it->second);
                 ret = SingletonContainer::Get<DisplayManager>().UnregisterFoldStatusListener(thisListener);
@@ -1851,6 +1911,7 @@ napi_value JsDisplayManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "getDefaultDisplaySync", moduleName, JsDisplayManager::GetDefaultDisplaySync);
     BindNativeFunction(env, exportObj, "getPrimaryDisplaySync", moduleName, JsDisplayManager::GetPrimaryDisplaySync);
     BindNativeFunction(env, exportObj, "getDisplayByIdSync", moduleName, JsDisplayManager::GetDisplayByIdSync);
+    BindNativeFunction(env, exportObj, "getBrightnessInfo", moduleName, JsDisplayManager::GetBrightnessInfoChange);
     BindNativeFunction(env, exportObj, "getAllDisplay", moduleName, JsDisplayManager::GetAllDisplay);
     BindNativeFunction(env, exportObj, "getAllDisplays", moduleName, JsDisplayManager::GetAllDisplays);
     BindNativeFunction(env, exportObj, "hasPrivateWindow", moduleName, JsDisplayManager::HasPrivateWindow);

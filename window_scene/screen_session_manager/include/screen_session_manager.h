@@ -339,6 +339,7 @@ public:
     void OnTentModeChanged(int tentType, int32_t hall = -1);
     void RegisterSettingDpiObserver();
     void RegisterSettingRotationObserver();
+    void NotifyBrightnessInfoChanged(ScreenId screenId, const BrightnessInfo& info);
 
     void OnConnect(ScreenId screenId) override {}
     void OnDisconnect(ScreenId screenId) override {}
@@ -502,6 +503,7 @@ public:
     bool GetKeyboardState() override;
     DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea) override;
+    DMError GetBrightnessInfo(DisplayId displayId, ScreenBrightnessInfo& brightnessInfo) override;
     DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) override;
     bool SetScreenOffset(ScreenId screenId, float offsetX, float offsetY);
     bool SynchronizePowerStatus(ScreenPowerState state) override;
@@ -525,6 +527,13 @@ public:
     void NotifyAodOpCompletion(AodOP operation, int32_t result) override;
     void DoAodExitAndSetPower(ScreenId screenId, ScreenPowerStatus status);
     void DoAodExitAndSetPowerAllOff();
+    struct UserScreenInfo {
+        bool isActive;
+        ScreenId screenId;
+        int32_t pid;
+    };
+    std::map<int32_t, UserScreenInfo> GetUserScreenMap() const;
+
 protected:
     ScreenSessionManager();
     virtual ~ScreenSessionManager() = default;
@@ -580,6 +589,8 @@ private:
     void ConfigureScreenSnapshotParams();
     void RegisterScreenChangeListener();
     void RegisterFoldNotSwitchingListener();
+    void RegisterBrightnessInfoChangeListener();
+    void UnregisterBrightnessInfoChangeListener();
     void OnHgmRefreshRateChange(uint32_t refreshRate);
     void UpdateSessionByActiveModeChange(sptr<ScreenSession> screenSession,
         sptr<ScreenSession> phyScreenSession, int32_t activeIdx);
@@ -713,7 +724,16 @@ private:
     DisplayId GetUserDisplayId(int32_t userId);
     int32_t GetActiveUserByDisplayId(DisplayId displayId);
     ScreenId GenerateSmsScreenId(ScreenId rsScreenId);
-    
+
+    void HandleSuperFoldDisplayInfoWhenKeyboardOn(const sptr<ScreenSession>& screenSession,
+        sptr<DisplayInfo>& displayInfo);
+    void HandleRotationCorrectionExemption(sptr<DisplayInfo>& displayInfo);
+    void GetRotationCorrectionExemptionListFromDatabase(bool isForce = false);
+    void RegisterRotationCorrectionExemptionListObserver();
+    std::shared_mutex rotationCorrectionExemptionMutex_;
+    std::vector<std::string> rotationCorrectionExemptionList_;
+    bool needReinstallExemptionList_ = true;
+
     class ScreenIdManager {
     friend class ScreenSessionGroup;
     public:
@@ -760,13 +780,8 @@ private:
         user101:  {isActive=false screenId=0  pid=2345}
         user102:  {isActive=true  screenId=6  pid=3456}
     */
-    struct userScreenInfo {
-        bool isActive;
-        ScreenId screenId;
-        int32_t pid;
-    };
-    std::map<int32_t, userScreenInfo> userScreenMap_;
-    std::mutex userScreenMapMutex_;
+    std::map<int32_t, UserScreenInfo> userScreenMap_;
+    mutable std::mutex userScreenMapMutex_;
     std::map<int32_t, sptr<IScreenSessionManagerClient>> clientProxyMap_;
     FoldDisplayMode oldScbDisplayMode_ = FoldDisplayMode::UNKNOWN;
 

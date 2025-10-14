@@ -981,20 +981,20 @@ HWTEST_F(WindowImplTest5, MaximizeFloating02, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetCallingWindow
- * @tc.desc: SetCallingWindow test
+ * @tc.name: ChangeCallingWindowId
+ * @tc.desc: ChangeCallingWindowId test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, SetCallingWindow, TestSize.Level1)
+HWTEST_F(WindowImplTest5, ChangeCallingWindowId, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(option, nullptr);
-    option->SetWindowName("SetCallingWindow");
+    option->SetWindowName("ChangeCallingWindowId");
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
 
     window->state_ = WindowState::STATE_INITIAL;
-    window->SetCallingWindow(1);
+    window->ChangeCallingWindowId(1);
 }
 
 /**

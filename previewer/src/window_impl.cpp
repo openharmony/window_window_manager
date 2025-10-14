@@ -640,7 +640,7 @@ float WindowImpl::GetBrightness() const
     return 0.0;
 }
 
-WMError WindowImpl::SetCallingWindow(uint32_t windowId)
+WMError WindowImpl::ChangeCallingWindowId(uint32_t windowId)
 {
     return WMError::WM_OK;
 }
