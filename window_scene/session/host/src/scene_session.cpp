@@ -472,7 +472,7 @@ void SceneSession::DisableUIFirstIfNeed()
         AutoRSTransaction trans(GetRSLeashWinShadowContext());
         leashWinShadowSurfaceNode->SetForceUIFirst(false);
     } else {
-        // If client multi instance is disabled，reuse the ark's commit flush SetForceUIFirst command.
+        // If client multi instance is disabled，reuse the arkUI's commit flush SetForceUIFirst command.
         leashWinShadowSurfaceNode->SetForceUIFirst(false);
     }
     isUIFirstEnabled_ = false;

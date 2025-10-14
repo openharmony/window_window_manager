@@ -1536,8 +1536,8 @@ HWTEST_F(SceneSessionTest6, DisableUIFirstIfNeed, TestSize.Level1)
     session->isUIFirstEnabled_ = true;
     EXPECT_EQ(true, session->isUIFirstEnabled_);
     EXPECT_EQ(nullptr, session->GetLeashWinShadowSurfaceNode());
-    session->SetSessionState(SessionState::STATE_CONNECT);
-    EXPECT_EQ(WSError::WS_OK, session->ForegroundTask(property));
+    session->DisableUIFirstIfNeed();
+    EXPECT_EQ(true, session->isUIFirstEnabled_);
 
     session->isUIFirstEnabled_ = true;
     EXPECT_EQ(true, session->isUIFirstEnabled_);
@@ -1546,14 +1546,8 @@ HWTEST_F(SceneSessionTest6, DisableUIFirstIfNeed, TestSize.Level1)
     EXPECT_NE(nullptr, surfaceNode);
     session->SetLeashWinSurfaceNode(surfaceNode);
     EXPECT_NE(nullptr, session->GetLeashWinShadowSurfaceNode());
-    session->SetSessionState(SessionState::STATE_CONNECT);
-    EXPECT_EQ(WSError::WS_OK, session->ForegroundTask(property));
-
-    session->isUIFirstEnabled_ = false;
+    session->DisableUIFirstIfNeed();
     EXPECT_EQ(false, session->isUIFirstEnabled_);
-    EXPECT_NE(nullptr, session->GetLeashWinShadowSurfaceNode());
-    session->SetSessionState(SessionState::STATE_CONNECT);
-    EXPECT_EQ(WSError::WS_OK, session->ForegroundTask(property));
 }
 
 /**

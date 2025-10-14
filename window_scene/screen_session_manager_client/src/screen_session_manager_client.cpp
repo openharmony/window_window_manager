@@ -1367,7 +1367,7 @@ void ScreenSessionManagerClient::SetScreenCombination(ScreenId mainScreenId, Scr
 std::string ScreenSessionManagerClient::OnDumperClientScreenSessions()
 {
     std::ostringstream oss;
-    oss << "-------------- Client Screen Infos --------------" << std::endl;
+    oss << "------------- Client Screen Infos -------------" << std::endl;
     {
         std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
         for (const auto& iter : screenSessionMap_) {
@@ -1408,7 +1408,6 @@ std::string ScreenSessionManagerClient::OnDumperClientScreenSessions()
             << screenProperty.GetAvailableArea().posY_ << ", "
             << screenProperty.GetAvailableArea().width_ << ", "
             << screenProperty.GetAvailableArea().height_ << ", " << std::endl;
-        oss << "------------------------------------------------" << std::endl;
     }
     }
     auto screenInfos = oss.str();

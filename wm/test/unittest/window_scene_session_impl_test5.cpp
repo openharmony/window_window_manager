@@ -814,13 +814,13 @@ HWTEST_F(WindowSceneSessionImplTest5, ShowKeyboard01, TestSize.Level1)
     effectOption.flowLightMode_ = KeyboardFlowLightMode::BACKGROUND_FLOW_LIGHT;
     effectOption.gradientMode_ = KeyboardGradientMode::LINEAR_GRADIENT;
     // normal value
-    ASSERT_EQ(keyboardWindow->ShowKeyboard(effectOption), WMError::WM_ERROR_INVALID_WINDOW);
+    ASSERT_EQ(keyboardWindow->ShowKeyboard(1000, effectOption), WMError::WM_ERROR_INVALID_WINDOW);
 
     effectOption.viewMode_ = KeyboardViewMode::VIEW_MODE_END;
     effectOption.flowLightMode_ = KeyboardFlowLightMode::END;
     effectOption.gradientMode_ = KeyboardGradientMode::END;
     // exception value
-    ASSERT_EQ(keyboardWindow->ShowKeyboard(effectOption), WMError::WM_ERROR_INVALID_WINDOW);
+    ASSERT_EQ(keyboardWindow->ShowKeyboard(1000, effectOption), WMError::WM_ERROR_INVALID_WINDOW);
     auto lastOption = keyboardWindow->property_->GetKeyboardEffectOption();
     ASSERT_EQ(lastOption.viewMode_, KeyboardViewMode::NON_IMMERSIVE_MODE);
 }
@@ -2498,6 +2498,13 @@ HWTEST_F(WindowSceneSessionImplTest5, TestSetContentAspectRatio, TestSize.Level1
     // Case 5: host returns success => WM_OK
     EXPECT_CALL(*mockHostSession, SetContentAspectRatio(_, _, _))
         .Times(1).WillOnce(Return(WSError::WS_OK));
+    ret = window->SetContentAspectRatio(ratio, isPersistent, needUpdateRect);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    // Case 6: is compatibility mode => WM_OK
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    property->SetCompatibleModeProperty(compatibleModeProperty);
     ret = window->SetContentAspectRatio(ratio, isPersistent, needUpdateRect);
     EXPECT_EQ(ret, WMError::WM_OK);
 }
