@@ -154,6 +154,22 @@ HWTEST_F(WindowSceneSessionImplTest, CreateWindowAndDestroy02, TestSize.Level0)
 }
 
 /**
+ * @tc.name: UpdateAnimationSpeedIfEnabled
+ * @tc.desc: UpdateAnimationSpeedIfEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, UpdateAnimationSpeedIfEnabled, TestSize.Level0)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateAnimationSpeedIfEnabled");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    isEnableAnimationSpeed_.store(true);
+    window->UpdateAnimationSpeedIfEnabled();
+    isEnableAnimationSpeed_.store(false);
+    window->UpdateAnimationSpeedIfEnabled();
+}
+
+/**
  * @tc.name: SetPcAppInpadSpecificSystemBarInvisible
  * @tc.desc: SetPcAppInpadSpecificSystemBarInvisible
  * @tc.type: FUNC
