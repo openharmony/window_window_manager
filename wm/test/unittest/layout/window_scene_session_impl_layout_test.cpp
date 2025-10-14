@@ -163,6 +163,32 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, SetAspectRatio03, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetAspectRatio04
+ * @tc.desc: SetAspectRatio
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, SetAspectRatio04, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetAspectRatio04");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    auto property = windowSceneSessionImpl->GetProperty();
+    property->SetPersistentId(123);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    windowSceneSessionImpl->hostSession_ = session;
+
+    //case 1: is compatibility mode => WM_OK
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    property->SetCompatibleModeProperty(compatibleModeProperty);
+    const float ratio = 1.5f;
+    auto ret = windowSceneSessionImpl->SetAspectRatio(ratio);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
  * @tc.name: ResetAspectRatioTest
  * @tc.desc: Verify ResetAspectRatio behavior in different scenarios.
  * @tc.type: FUNC
