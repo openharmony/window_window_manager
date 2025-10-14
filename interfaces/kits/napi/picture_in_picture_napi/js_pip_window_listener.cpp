@@ -183,5 +183,28 @@ void JsPiPWindowListener::OnPipTypeNodeChange(const napi_ref nodeRef)
     }
 }
 
+void JsPiPWindowListener::OnActiveStatusChange(const PiPActiveStatus& status)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "called, status: %{public}u", status);
+    auto napiTask = [jsCallback = jsCallBack_, status, env = env_]() {
+        napi_value value = nullptr;
+        napi_create_object(env, &value);
+        if (value == nullptr) {
+            TLOGNE(WmsLogTag::WMS_PIP, "Failed to convert rect to jsObject");
+            return;
+        }
+        napi_set_named_property(env, value, "status", CreateJsValue(env, static_cast<int32_t>(status)));
+        napi_value argv[] = {value};
+        CallJsFunction(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
+    };
+    if (env_ != nullptr) {
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnActiveStatusChange");
+        if (ret != napi_status::napi_ok) {
+            TLOGE(WmsLogTag::WMS_PIP, "Failed to SendEvent");
+        }
+    } else {
+        TLOGE(WmsLogTag::WMS_PIP, "env is nullptr");
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
