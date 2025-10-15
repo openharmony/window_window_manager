@@ -157,6 +157,7 @@ protected:
     Rect windowRect_ = {0, 0, 0, 0};
     bool isAutoStartEnabled_ = false;
     PiPWindowState curState_ = PiPWindowState::STATE_UNDEFINED;
+    PiPActiveStatus curActiveStatus_ = PiPActiveStatus::STATUS_UNKNOWN;
     std::shared_ptr<XComponentController> pipXComponentController_ = nullptr;
     napi_env env_ = nullptr;
     bool isStoppedFromClient_ = false;
