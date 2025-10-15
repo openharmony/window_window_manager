@@ -38,7 +38,7 @@ namespace uiExtension {
     WM_ERROR_INVALID_PARAM = 401
   }
 
-  export type CallbacRect = (area: RectChangeOptions) => void;
+  export type CallbackRect = (area: RectChangeOptions) => void;
 
   function windowRectChangeCallback(cb: object, rect: object, reason: int): void {
     const func = cb as (cbArg: RectChangeOptions) => void;
