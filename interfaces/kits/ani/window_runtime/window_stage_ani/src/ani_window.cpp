@@ -2323,7 +2323,7 @@ bool AniWindow::OnGetRotationLocked(ani_env* env)
     return locked;
 }
 
-void AniWindow::SetWindowDelayRaiseOnDrag(ani_env* env, ani_long nativeObj, ani_boolean isEnabled)
+void AniWindow::SetWindowDelayRaiseOnDrag(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isEnabled)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
@@ -2352,8 +2352,8 @@ void AniWindow::OnSetWindowDelayRaiseOnDrag(ani_env* env, ani_boolean isEnabled)
     }
 }
 
-void AniWindow::SetRelativePositionToParentWindowEnabled(ani_env* env, ani_long nativeObj, ani_boolean enabled,
-    ani_int anchor, ani_int offsetX, ani_int offsetY)
+void AniWindow::SetRelativePositionToParentWindowEnabled(ani_env* env, ani_object obj, ani_long nativeObj,
+    ani_boolean enabled, ani_int anchor, ani_int offsetX, ani_int offsetY)
 {
     TLOGD(WmsLogTag::WMS_SUB, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);

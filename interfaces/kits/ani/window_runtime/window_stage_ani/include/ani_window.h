@@ -85,9 +85,9 @@ public:
                          ani_object aniPresentation, ani_object aniAcrossDisplay);
     static void SetRotationLocked(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean locked);
     static ani_boolean GetRotationLocked(ani_env* env, ani_object obj, ani_long nativeObj);
-    static void SetRelativePositionToParentWindowEnabled(ani_env* env, ani_long nativeObj, ani_boolean enabled,
-        ani_int anchor, ani_int offsetX, ani_int offsetY);
-    static void SetWindowDelayRaiseOnDrag(ani_env* env, ani_long nativeObj, ani_boolean isEnabled);
+    static void SetRelativePositionToParentWindowEnabled(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_boolean enabled, ani_int anchor, ani_int offsetX, ani_int offsetY);
+    static void SetWindowDelayRaiseOnDrag(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isEnabled);
 
     /*
      * Window Layout
