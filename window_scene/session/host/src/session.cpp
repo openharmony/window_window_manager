@@ -2721,8 +2721,9 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
         key = defaultStatus;
         rotate = DisplayOrientation::PORTRAIT;
     }
+    bool needCacheSnapshot = (SupportCacheLockedSessionSnapshot() && reason == ScreenLockReason::SCREEN_LOCK);
     auto task = [weakThis = wptr(this), runInFfrt = useFfrt, requirePersist = needPersist, persistentPixelMap,
-        updateSnapshot, key, rotate]() {
+        updateSnapshot, key, rotate, needCacheSnapshot]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
@@ -2761,7 +2762,7 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
         }
         session->scenePersistence_->ResetSnapshotCache();
         Task saveSnapshotCallback = []() {};
-        {
+        if (!needCacheSnapshot) {
             std::lock_guard lock(session->saveSnapshotCallbackMutex_);
             saveSnapshotCallback = session->saveSnapshotCallback_;
         }
@@ -2781,6 +2782,21 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
     std::string taskName = "Session::SaveSnapshot" + std::to_string(persistentId_);
     snapshotFfrtHelper->CancelTask(taskName);
     snapshotFfrtHelper->SubmitTask(std::move(task), taskName);
+}
+
+void Session::ResetLockedCacheSnapshot()
+{
+    if (!SupportCacheLockedSessionSnapshot()) {
+        return;
+    }
+    if (snapshot_) {
+        ResetSnapshot();
+    }
+}
+
+bool Session::SupportCacheLockedSessionSnapshot() const
+{
+    return systemConfig_.supportCacheLockedSessionSnapshot_;
 }
 
 void Session::SetFreeMultiWindow()

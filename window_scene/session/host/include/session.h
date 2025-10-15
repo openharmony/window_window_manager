@@ -732,6 +732,8 @@ public:
     bool GetBorderUnoccupied() const;
     bool IsPersistentImageFit() const;
     bool SupportSnapshotAllSessionStatus() const;
+    bool SupportCacheLockedSessionSnapshot() const;
+    void ResetLockedCacheSnapshot();
     void InitSnapshotCapacity();
     SnapshotStatus GetScreenSnapshotStatus() const;
     SnapshotStatus GetSessionSnapshotStatus(ScreenLockReason reason = ScreenLockReason::DEFAULT) const;

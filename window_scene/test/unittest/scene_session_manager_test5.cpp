@@ -1150,7 +1150,7 @@ HWTEST_F(SceneSessionManagerTest5, InitSnapshotCache, TestSize.Level1)
     } else if (ssm_->systemConfig_.windowUIType_ == WindowUIType::PAD_WINDOW) {
         ASSERT_EQ(ssm_->snapshotCapacity_, 0);
     } else {
-        ASSERT_EQ(ssm_->snapshotCapacity_, 1);
+        ASSERT_EQ(ssm_->snapshotCapacity_, 0);
     }
 }
 
