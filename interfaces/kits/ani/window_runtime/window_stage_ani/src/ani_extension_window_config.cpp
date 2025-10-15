@@ -35,7 +35,7 @@ ani_enum_item GetAniModalityType(ani_env* env, ModalityType enumObj)
 
 ani_object CreatAniSubWindowOptions(ani_env* env, const std::shared_ptr<ExtensionWindowConfig>& extensionWindowConfig)
 {
-    if(extensionWindowConfig == nullptr) {
+    if (extensionWindowConfig == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] ExtensionWindowConfig is null");
         return AniWindowUtils::CreateAniUndefined(env);
     }
@@ -63,7 +63,7 @@ ani_object CreatAniSubWindowOptions(ani_env* env, const std::shared_ptr<Extensio
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Find method failed, ret: %{public}u", ret);
         AniWindowUtils::CreateAniUndefined(env);
     }
-    std::unique_ptr<AniExtensionWindowConfig> config = 
+    std::unique_ptr<AniExtensionWindowConfig> config =
         std::make_unique<AniExtensionWindowConfig>(extensionWindowConfig);
     env->Object_CallMethod_Void(aniOptions, setObjFunc, reinterpret_cast<ani_long>(config.release()));
 
@@ -107,7 +107,7 @@ ani_enum_item GetAniWindowType(ani_env* env, int32_t apiType)
 ani_object CreatAniSystemWindowOptions(ani_env* env,
     const std::shared_ptr<ExtensionWindowConfig>& extensionWindowConfig)
 {
-    if(extensionWindowConfig == nullptr) {
+    if (extensionWindowConfig == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] ExtensionWindowConfig is null");
         return AniWindowUtils::CreateAniUndefined(env);
     }
@@ -135,7 +135,7 @@ ani_object CreatAniSystemWindowOptions(ani_env* env,
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Find method failed, ret: %{public}u", ret);
         AniWindowUtils::CreateAniUndefined(env);
     }
-     std::unique_ptr<AniExtensionWindowConfig> config = 
+    std::unique_ptr<AniExtensionWindowConfig> config =
         std::make_unique<AniExtensionWindowConfig>(extensionWindowConfig);
     env->Object_CallMethod_Void(aniOptions, setObjFunc, reinterpret_cast<ani_long>(config.release()));
     
@@ -156,7 +156,7 @@ ani_enum_item GetAniExtensionWindowAttribute(ani_env* env, ExtensionWindowAttrib
 
 ani_object CreatAniRect(ani_env* env, const std::shared_ptr<ExtensionWindowConfig>& extensionWindowConfig)
 {
-    if(extensionWindowConfig == nullptr) {
+    if (extensionWindowConfig == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] ExtensionWindowConfig is null");
         return AniWindowUtils::CreateAniUndefined(env);
     }
@@ -184,7 +184,7 @@ ani_object CreatAniRect(ani_env* env, const std::shared_ptr<ExtensionWindowConfi
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Find method failed, ret: %{public}u", ret);
         AniWindowUtils::CreateAniUndefined(env);
     }
-     std::unique_ptr<AniExtensionWindowConfig> config = 
+    std::unique_ptr<AniExtensionWindowConfig> config =
         std::make_unique<AniExtensionWindowConfig>(extensionWindowConfig);
     env->Object_CallMethod_Void(aniRect, setObjFunc, reinterpret_cast<ani_long>(config.release()));
     
@@ -213,7 +213,7 @@ ani_object CreateAniExtensionWindowConfig(ani_env* env,
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to new obj");
         return AniWindowUtils::CreateAniUndefined(env);
     }
-    std::unique_ptr<AniExtensionWindowConfig> config = 
+    std::unique_ptr<AniExtensionWindowConfig> config =
         std::make_unique<AniExtensionWindowConfig>(extensionWindowConfig);
     ani_method setObjFunc = nullptr;
     if ((ret = env->Class_FindMethod(aniClass, "setNativeObj", "J:V", &setObjFunc)) != ANI_OK) {
@@ -788,9 +788,9 @@ std::array extensionWindowConfigNativeMethods = {
     ani_native_function {"getWindowRect", "J:L@ohos/window/window/Rect;", reinterpret_cast<void *>(GetWindowRect)},
     ani_native_function {"getSubWindowOptions", "J:L@ohos/window/window/SubWindowOptions;",
         reinterpret_cast<void *>(GetSubWindowOptions)},
-   ani_native_function {"getSystemWindowOptions", "J:L@ohos/window/window/SystemWindowOptions;",
+    ani_native_function {"getSystemWindowOptions", "J:L@ohos/window/window/SystemWindowOptions;",
         reinterpret_cast<void *>(GetSystemWindowOptions)},
-   ani_native_function {"setWindowName", "JLstd/core/String;:V", reinterpret_cast<void *>(SetWindowName)},
+    ani_native_function {"setWindowName", "JLstd/core/String;:V", reinterpret_cast<void *>(SetWindowName)},
     ani_native_function {"setWindowAttribute", "JL@ohos/window/window/ExtensionWindowAttribute;:V",
         reinterpret_cast<void *>(SetWindowAttribute)},
     ani_native_function {"setWindowRect", "JL@ohos/window/window/Rect;:V", reinterpret_cast<void *>(SetWindowRect)},
@@ -834,7 +834,7 @@ ani_status ExtConfig_Rect_ANI_Constructor(ani_vm *vm, uint32_t *result)
     using namespace OHOS::Rosen;
     TLOGD(WmsLogTag::WMS_UIEXT, "[ANI]Init ExtConfigRect begin");
     ani_status ret {};
-    ani_env* env, ani_object obj, ani_long nativeObj;
+    ani_env* env;
     if ((ret = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Get env failed, ret: %{public}u", ret);
         return ANI_NOT_FOUND;
@@ -862,7 +862,7 @@ ani_status ExtConfig_SubWindowOptions_ANI_Constructor(ani_vm *vm, uint32_t *resu
     using namespace OHOS::Rosen;
     TLOGD(WmsLogTag::WMS_UIEXT, "[ANI]Init ExtensionWindowConfig begin");
     ani_status ret {};
-    ani_env* env, ani_object obj, ani_long nativeObj;
+    ani_env* env;
     if ((ret = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Get env failed, ret: %{public}u", ret);
         return ANI_NOT_FOUND;
@@ -890,7 +890,7 @@ ani_status ExtConfig_SystemWindowOptions_ANI_Constructor(ani_vm *vm, uint32_t *r
     using namespace OHOS::Rosen;
     TLOGD(WmsLogTag::WMS_UIEXT, "[ANI]Init ExtensionWindowConfig begin");
     ani_status ret {};
-    ani_env* env, ani_object obj, ani_long nativeObj;
+    ani_env* env;
     if ((ret = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Get env failed, ret: %{public}u", ret);
         return ANI_NOT_FOUND;
@@ -918,7 +918,7 @@ ANI_EXPORT ani_status ExtensionWindowConfig_ANI_Constructor(ani_vm *vm, uint32_t
     using namespace OHOS::Rosen;
     TLOGD(WmsLogTag::WMS_UIEXT, "[ANI]Init ExtensionWindowConfig begin");
     ani_status ret {};
-    ani_env* env, ani_object obj, ani_long nativeObj;
+    ani_env* env;
     if ((ret = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Get env failed, ret: %{public}u", ret);
         return ANI_NOT_FOUND;
