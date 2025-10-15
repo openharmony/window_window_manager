@@ -215,7 +215,7 @@ public:
      *
      * @param windowId The window id of calling window.
      */
-    void SetCallingWindow(uint32_t windowId);
+    void ChangeCallingWindowId(uint32_t windowId);
 
     /**
      * @brief Set window main handler available.

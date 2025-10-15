@@ -43,6 +43,9 @@ public:
     void SetIsClearingBootAnimation(bool isClearingBootAnimation) override;
     void GetAllCreaseRegion(std::vector<FoldCreaseRegionItem>& foldCreaseRegionItems) const override;
 private:
+    bool CheckDisplayModeChange(FoldDisplayMode displayMode, bool isForce);
+    void ChangeScreenDisplayMode(FoldDisplayMode displayMode, bool isForce,
+        DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT);
     void ChangeScreenDisplayModeToMain(sptr<ScreenSession> screenSession,
         DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT);
     void ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession,

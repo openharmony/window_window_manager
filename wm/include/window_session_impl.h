@@ -284,6 +284,9 @@ public:
     WMError UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
     WMError RegisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener) override;
     WMError UnregisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener) override;
+    WMError RegisterOcclusionStateChangeListener(const sptr<IOcclusionStateChangedListener>& listener) override;
+    WMError UnregisterOcclusionStateChangeListener(const sptr<IOcclusionStateChangedListener>& listener) override;
+    WSError NotifyWindowOcclusionState(const WindowVisibilityState state) override;
     WMError RegisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener) override;
     WMError UnregisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener) override;
     WMError RegisterSystemDensityChangeListener(const ISystemDensityChangeListenerSptr& listener) override;
@@ -296,6 +299,8 @@ public:
     WMError UnregisterWindowStageLifeCycleListener(const sptr<IWindowStageLifeCycle>& listener) override;
     WMError RegisterSystemBarPropertyListener(const sptr<ISystemBarPropertyListener>& listener) override;
     WMError UnregisterSystemBarPropertyListener(const sptr<ISystemBarPropertyListener>& listener) override;
+    WMError RegisterFreeWindowModeChangeListener(const sptr<IFreeWindowModeChangeListener>& listener) override;
+    WMError UnregisterFreeWindowModeChangeListener(const sptr<IFreeWindowModeChangeListener>& listener) override;
     void NotifySystemBarPropertyUpdate(WindowType type, const SystemBarProperty& property) override;
     void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
     void UnregisterWindowDestroyedListener() override { notifyNativeFunc_ = nullptr; }
@@ -447,8 +452,8 @@ public:
         const sptr<IExtensionSecureLimitChangeListener>& listener) override;
     WMError UnregisterExtensionSecureLimitChangeListener(
         const sptr<IExtensionSecureLimitChangeListener>& listener) override;
-    virtual WMError GetCallingWindowWindowStatus(WindowStatus& windowStatus) const override;
-    virtual WMError GetCallingWindowRect(Rect& rect) const override;
+    virtual WMError GetCallingWindowWindowStatus(uint32_t callingWindowId, WindowStatus& windowStatus) const override;
+    virtual WMError GetCallingWindowRect(uint32_t callingWindowId, Rect& rect) const override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
     virtual void SetTouchEvent(int32_t touchType) override;
     WMError SetContinueState(int32_t continueState) override;
@@ -519,6 +524,7 @@ public:
      */
     WMError SetWindowDefaultDensityEnabled(bool enabled) override;
     void SetDefaultDensityEnabledValue(bool enabled);
+    bool IsStageDefaultDensityEnabled();
     WSError NotifyDisplayIdChange(DisplayId displayId);
     WSError NotifyScreenshotAppEvent(ScreenshotEventType type) override;
     bool IsDeviceFeatureCapableFor(const std::string& feature) const override;
@@ -619,6 +625,7 @@ protected:
     WMError WindowSessionCreateCheck();
     void UpdateDecorEnableToAce(bool isDecorEnable);
     void NotifyModeChange(WindowMode mode, bool hasDeco = true);
+    void NotifyFreeWindowModeChange(bool isInFreeWindowMode);
     WMError UpdateProperty(WSPropertyChangeAction action);
     WMError SetBackgroundColor(uint32_t color);
     uint32_t GetBackgroundColor() const;
@@ -835,8 +842,8 @@ protected:
     bool hasDarkRes_;
     std::unordered_set<std::string> containerColorList_;
     float lastSystemDensity_ = UNDEFINED_DENSITY;
-    static std::atomic<bool> defaultDensityEnabledGlobalConfig_;
     std::atomic<bool> isDefaultDensityEnabled_ = false;
+    std::atomic<bool> defaultDensityEnabledStageConfig_ = false;
     WSError NotifySystemDensityChange(float density);
     void RegisterWindowInspectorCallback();
     uint32_t GetTargetAPIVersionByApplicationInfo() const;
@@ -938,6 +945,8 @@ private:
     EnableIfSame<T, ISystemBarPropertyListener, std::vector<sptr<ISystemBarPropertyListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowRotationChangeListener, std::vector<sptr<IWindowRotationChangeListener>>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, IFreeWindowModeChangeListener, std::vector<sptr<IFreeWindowModeChangeListener>>> GetListeners();
     void NotifyAfterFocused();
     void NotifyUIContentFocusStatus();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
@@ -1044,6 +1053,10 @@ private:
     static std::mutex highlightChangeListenerMutex_;
     static std::mutex systemBarPropertyListenerMutex_;
     static std::mutex windowRotationChangeListenerMutex_;
+    static std::mutex freeWindowModeChangeListenerMutex_;
+    static std::mutex occlusionStateChangeListenerMutex_;
+    static std::unordered_map<int32_t,
+        std::vector<sptr<IOcclusionStateChangedListener>>> occlusionStateChangeListeners_;
     static std::map<int32_t, std::vector<sptr<ISystemBarPropertyListener>>> systemBarPropertyListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowStageLifeCycle>>> windowStageLifecycleListeners_;
@@ -1082,6 +1095,7 @@ private:
     static std::map<int32_t, sptr<IWindowOrientationChangeListener>> windowOrientationChangeListener_;
     static std::map<int32_t, std::vector<sptr<IWindowHighlightChangeListener>>> highlightChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowRotationChangeListener>>> windowRotationChangeListeners_;
+    static std::map<int32_t, std::vector<sptr<IFreeWindowModeChangeListener>>> freeWindowModeChangeListeners_;
 
     // FA only
     sptr<IAceAbilityHandler> aceAbilityHandler_;

@@ -37,7 +37,6 @@ enum class ListenerFunctionType : uint32_t {
     STATUS_BAR_ENABLED_CHANGE_CB,
     OUTSIDE_DOWN_EVENT_CB,
     SHIFT_FOCUS_CB,
-    CALLING_WINDOW_ID_CHANGE_CB,
     START_UI_ABILITY_ERROR,
     GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
     CLOSE_TARGET_FLOAT_WINDOW_CB,
@@ -54,6 +53,7 @@ enum class ListenerFunctionType : uint32_t {
     KIOSK_MODE_CHANGE_CB,
     UI_EFFECT_SET_PARAMS_CB,
     UI_EFFECT_ANIMATE_TO_CB,
+    VIRTUAL_DENSITY_CHANGE_CB,
 };
 
 class JsSceneSessionManager final {
@@ -216,6 +216,8 @@ private:
     napi_value OnAddWindowDragHotArea(napi_env env, napi_callback_info info);
     napi_value OnPreloadInLakeApp(napi_env env, napi_callback_info info);
     napi_value OnRequestFocusStatus(napi_env env, napi_callback_info info);
+    void DoRequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground,
+        FocusChangeReason reason, DisplayId displayId);
     napi_value OnRequestAllAppSessionUnfocus(napi_env env, napi_callback_info info);
     napi_value OnSetScreenLocked(napi_env env, napi_callback_info info);
     napi_value OnSetUserAuthPassed(napi_env env, napi_callback_info info);
@@ -263,7 +265,8 @@ private:
      * PC Window
      */
     napi_value OnGetWindowLimits(napi_env env, napi_callback_info info);
-    
+    void RegisterVirtualPixelRatioChangeCallback();
+    void OnVirtualPixelChange(float density, DisplayId displayId);
     /*
      * Multi Instance
      */
@@ -298,7 +301,6 @@ private:
     void OnOutsideDownEvent(int32_t x, int32_t y);
     void OnStartUIAbilityError(const uint32_t errorCode);
     void OnShiftFocus(int32_t persistentId, DisplayId displayGroupId);
-    void OnCallingSessionIdChange(uint32_t callingSessionId);
     void ProcessCreateSystemSessionRegister();
     void ProcessCreateKeyboardSessionRegister();
     void ProcessStatusBarEnabledChangeListener();
@@ -306,7 +308,6 @@ private:
     void ProcessStartUIAbilityErrorRegister();
     void ProcessOutsideDownEvent();
     void ProcessShiftFocus();
-    void ProcessCallingSessionIdChangeRegister();
     void ProcessRegisterCallback(ListenerFunctionType listenerFunctionType);
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void RegisterDumpRootSceneElementInfoListener();

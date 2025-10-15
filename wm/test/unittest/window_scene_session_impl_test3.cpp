@@ -481,18 +481,18 @@ HWTEST_F(WindowSceneSessionImplTest3, SetDefaultProperty, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetCallingWindow
- * @tc.desc: SetCallingWindow
+ * @tc.name: ChangeCallingWindowId
+ * @tc.desc: ChangeCallingWindowId
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest3, SetCallingWindow, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest3, ChangeCallingWindowId, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetCallingWindow");
+    option->SetWindowName("ChangeCallingWindowId");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     windowSceneSessionImpl->hostSession_ = nullptr;
-    auto ret = windowSceneSessionImpl->SetCallingWindow(0);
+    auto ret = windowSceneSessionImpl->ChangeCallingWindowId(0);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
 
     SessionInfo sessionInfo = { "CreateTestBundle0", "CreateTestModule0", "CreateTestAbility0" };
@@ -500,9 +500,36 @@ HWTEST_F(WindowSceneSessionImplTest3, SetCallingWindow, TestSize.Level1)
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     windowSceneSessionImpl->property_->SetPersistentId(1);
-    ret = windowSceneSessionImpl->SetCallingWindow(0);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    ret = windowSceneSessionImpl->ChangeCallingWindowId(10);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
     EXPECT_EQ(0, windowSceneSessionImpl->property_->callingSessionId_);
+}
+
+/**
+ * @tc.name: ChangeCallingWindowId01
+ * @tc.desc: ChangeCallingWindowId01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, ChangeCallingWindowId01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("ChangeCallingWindowId01");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    windowSceneSessionImpl->hostSession_ = nullptr;
+    auto ret = windowSceneSessionImpl->ChangeCallingWindowId(0);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+
+    SessionInfo sessionInfo = { "CreateTestBundle0", "CreateTestModule0", "CreateTestAbility0" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->property_->SetParentPersistentId(2);
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    ret = windowSceneSessionImpl->ChangeCallingWindowId(10);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(10, windowSceneSessionImpl->property_->callingSessionId_);
 }
 
 /**
@@ -1137,7 +1164,7 @@ HWTEST_F(WindowSceneSessionImplTest3, RestorePcMainWindow, TestSize.Level1)
     windowSceneSessionImpl->property_->SetIsPcAppInPad(false);
     windowSceneSessionImpl->property_->SetIsAppSupportPhoneInPc(true);
     ret = windowSceneSessionImpl->Restore();
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**

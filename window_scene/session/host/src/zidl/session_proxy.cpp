@@ -842,7 +842,18 @@ WSError SessionProxy::NotifySessionException(const sptr<AAFwk::SessionInfo> abil
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::OnSessionEvent(SessionEvent event)
+bool WriteEventParam(MessageParcel& data, SessionEvent event, const SessionEventParam& param)
+{
+    if (event == SessionEvent::EVENT_MAXIMIZE) {
+        if (!data.WriteUint32(param.waterfallResidentState)) {
+            TLOGE(WmsLogTag::WMS_EVENT, "Failed to write waterfallResidentState");
+            return false;
+        }
+    }
+    return true;
+}
+
+WSError SessionProxy::OnSessionEvent(SessionEvent event, const SessionEventParam& param)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -851,8 +862,11 @@ WSError SessionProxy::OnSessionEvent(SessionEvent event)
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!(data.WriteUint32(static_cast<uint32_t>(event)))) {
+    if (!data.WriteUint32(static_cast<uint32_t>(event))) {
         WLOGFE("Write event id failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!WriteEventParam(data, event, param)) {
         return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
@@ -2496,15 +2510,14 @@ WSError SessionProxy::SetDecorVisible(bool isVisible)
         return WSError::WS_ERROR_IPC_FAILED;
     }
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     int sendRet = remote->SendRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DECOR_VISIBLE), data, reply, option);
     if (sendRet != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_DECOR, "Failed to send request, error = %{public}d", sendRet);
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadInt32();
-    return static_cast<WSError>(ret);
+    return WSError::WS_OK;
 }
 
 WSError SessionProxy::AdjustKeyboardLayout(const KeyboardLayoutParams& params)

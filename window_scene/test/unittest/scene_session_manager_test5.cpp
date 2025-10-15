@@ -598,8 +598,6 @@ HWTEST_F(SceneSessionManagerTest5, SetShiftFocusListener, TestSize.Level1)
     ssm_->SetShiftFocusListener(fun);
     ssm_->SetSCBFocusedListener(func);
     ssm_->SetSCBUnfocusedListener(func);
-    ProcessCallingSessionIdChangeFunc func1;
-    ssm_->SetCallingSessionIdSessionListenser(func1);
     ProcessStartUIAbilityErrorFunc func2;
     ssm_->SetStartUIAbilityErrorListener(func2);
     ssm_->ShiftFocus(DEFAULT_DISPLAY_ID, sceneSession1, false, reason);
@@ -639,15 +637,15 @@ HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus, TestSize.Level1)
     SessionInfo info;
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
-    sptr<SceneSession> focusedSession = nullptr;
     sptr<SceneSession> nextSession = nullptr;
-    ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, focusedSession, nextSession, false);
-    ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, focusedSession, nextSession, true);
+    auto focusNotifyInfo = sptr<FocusNotifyInfo>::MakeSptr();
+    ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, nextSession, false, focusNotifyInfo);
+    ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, nextSession, true, focusNotifyInfo);
 
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession1, nullptr);
-    ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, focusedSession, sceneSession1, true);
-    ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, sceneSession1, focusedSession, false);
+    ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, sceneSession1, true, focusNotifyInfo);
+    ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, sceneSession1, false, focusNotifyInfo);
 }
 
 /**
@@ -658,14 +656,14 @@ HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus, TestSize.Level1)
 HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus01, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-    sptr<SceneSession> focusedSession = nullptr;
-    sptr<SceneSession> nextSession = nullptr;
+    sptr<SceneSession> sceneSession = nullptr;
+    auto focusNotifyInfo = sptr<FocusNotifyInfo>::MakeSptr();
     auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
     focusGroup->SetFocusedSessionId(1);
 
-    ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, focusedSession, nextSession, false);
+    ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, sceneSession, false, focusNotifyInfo);
     ASSERT_EQ(focusGroup->GetFocusedSessionId(), 1);
-    ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, focusedSession, nextSession, true);
+    ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, sceneSession, true, focusNotifyInfo);
     ASSERT_NE(focusGroup->GetFocusedSessionId(), 1);
 }
 
@@ -681,10 +679,12 @@ HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus02, TestSize.Level1)
     info.abilityName_ = "UpdateFocusStatus02";
     info.bundleName_ = "UpdateFocusStatus02";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sptr<SceneSession> focusedSession = nullptr;
+    auto focusNotifyInfo = sptr<FocusNotifyInfo>::MakeSptr();
     auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
     focusGroup->SetNeedBlockNotifyFocusStatusUntilForeground(true);
-    ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, focusedSession, sceneSession, true);
+    ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, sceneSession, true, focusNotifyInfo);
+    focusNotifyInfo = nullptr;
+    ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, sceneSession, true, focusNotifyInfo);
 }
 
 /**
@@ -760,11 +760,13 @@ HWTEST_F(SceneSessionManagerTest5, NotifyFocusStatus, TestSize.Level1)
     info.bundleName_ = "test2";
     auto focusGroup = sptr<FocusGroup>::MakeSptr(DEFAULT_DISPLAY_ID);
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sptr<SceneSession> anotherSession = nullptr;
     ASSERT_NE(sceneSession1, nullptr);
-    ssm_->NotifyFocusStatus(sceneSession1, anotherSession, false, focusGroup);
+    auto focusNotifyInfo = sptr<FocusNotifyInfo>::MakeSptr();
+    ssm_->NotifyFocusStatus(sceneSession1, false, focusGroup, focusNotifyInfo);
     info.isSystem_ = true;
-    ssm_->NotifyFocusStatus(anotherSession, sceneSession1, true, focusGroup);
+    ssm_->NotifyFocusStatus(sceneSession1, true, focusGroup, focusNotifyInfo);
+    focusNotifyInfo = nullptr;
+    ssm_->NotifyFocusStatus(sceneSession1, true, focusGroup, focusNotifyInfo);
 }
 
 /**
@@ -1133,9 +1135,9 @@ HWTEST_F(SceneSessionManagerTest5, InitSnapshotCache, TestSize.Level1)
     if (ssm_->systemConfig_.windowUIType_ == WindowUIType::PC_WINDOW) {
         ASSERT_EQ(ssm_->snapshotCapacity_, 50);
     } else if (ssm_->systemConfig_.windowUIType_ == WindowUIType::PAD_WINDOW) {
-        ASSERT_EQ(ssm_->snapshotCapacity_, 8);
+        ASSERT_EQ(ssm_->snapshotCapacity_, 0);
     } else {
-        ASSERT_EQ(ssm_->snapshotCapacity_, 3);
+        ASSERT_EQ(ssm_->snapshotCapacity_, 1);
     }
 }
 
@@ -1186,9 +1188,9 @@ HWTEST_F(SceneSessionManagerTest5, VisitSnapshotFromCache, TestSize.Level1)
     for (int32_t id = 30; id < 30 + ssm_->snapshotCapacity_; ++id) {
         ssm_->PutSnapshotToCache(id);
     }
-    ssm_->VisitSnapshotFromCache(30);
     ssm_->PutSnapshotToCache(30 + ssm_->snapshotCapacity_);
-    ASSERT_NE(sceneSession->snapshot_, nullptr);
+    ssm_->VisitSnapshotFromCache(30);
+    ASSERT_EQ(sceneSession->snapshot_, nullptr);
 }
 
 /**
@@ -1213,9 +1215,8 @@ HWTEST_F(SceneSessionManagerTest5, RemoveSnapshotFromCache, TestSize.Level1)
     for (int32_t id = 30; id < 30 + ssm_->snapshotCapacity_; ++id) {
         ssm_->PutSnapshotToCache(id);
     }
-    ssm_->RemoveSnapshotFromCache(31);
-    ssm_->PutSnapshotToCache(30 + ssm_->snapshotCapacity_);
-    ASSERT_NE(sceneSession->snapshot_, nullptr);
+    ssm_->RemoveSnapshotFromCache(30);
+    ASSERT_EQ(sceneSession->snapshot_, nullptr);
 }
 
 /**
@@ -1802,27 +1803,6 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus02, TestSize.Level1)
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest5, RegisterSaveSnapshotFunc, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    sptr<SceneSession> sceneSession = nullptr;
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ssm_->RegisterSaveSnapshotFunc(sceneSession));
-
-    SessionInfo info;
-    info.windowType_ = 1000;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->property_->SetPersistentId(1);
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, ssm_->RegisterSaveSnapshotFunc(sceneSession));
-
-    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    ASSERT_EQ(WSError::WS_OK, ssm_->RegisterSaveSnapshotFunc(sceneSession));
-}
-
-/**
- * @tc.name: RegisterRemoveSnapshotFunc
- * @tc.desc: RegisterRemoveSnapshotFunc Test
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest5, RegisterRemoveSnapshotFunc, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     sptr<SceneSession> sceneSession = nullptr;

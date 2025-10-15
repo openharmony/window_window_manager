@@ -283,6 +283,9 @@ const std::map<DMError, std::string> DM_ERROR_JS_TO_ERROR_MESSAGE_MAP {
     {DMError::DM_ERROR_NOT_SUPPORT_COOR_WHEN_TENTMODE,           DM_ERROR_MSG_NOT_SUPPORT_COOR_WHEN_TENTMODE        },
 };
 
+constexpr float DEFAULT_HEADROOM = 1.0f;
+constexpr float DEFAULT_SDR_NITS = 500.0f;
+
 using DisplayStateCallback = std::function<void(DisplayState)>;
 
 /**
@@ -603,6 +606,7 @@ struct CaptureOption {
     bool isNeedPointer_ = true;
     bool isCaptureFullOfScreen_ = false;
     std::vector<NodeId> surfaceNodesList_ = {}; // exclude surfacenodes in screenshot
+    std::vector<NodeId> blackWindowIdList_ = {};
 };
 
 struct ExpandOption {
@@ -615,6 +619,12 @@ struct MultiScreenRecoverOption {
     ScreenId screenId_;
     uint32_t first_;
     uint32_t second_;
+};
+
+struct ScreenBrightnessInfo {
+    float currentHeadroom = DEFAULT_HEADROOM;
+    float maxHeadroom = DEFAULT_HEADROOM;
+    float sdrNits = DEFAULT_SDR_NITS;
 };
 
 struct MultiScreenPositionOptions {

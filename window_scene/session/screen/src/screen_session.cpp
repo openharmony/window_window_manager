@@ -673,6 +673,39 @@ void ScreenSession::SetDefaultDeviceRotationOffset(uint32_t defaultRotationOffse
     property_.SetDefaultDeviceRotationOffset(defaultRotationOffset);
 }
 
+void ScreenSession::UpdatePropertyByActiveModeChange()
+{
+    sptr<SupportedScreenModes> mode = GetActiveScreenMode();
+    if (mode != nullptr) {
+        auto screeBounds = property_.GetBounds();
+        screeBounds.rect_.width_ = mode->width_;
+        screeBounds.rect_.height_ = mode->height_;
+        property_.SetPhyBounds(screeBounds);
+        property_.SetBounds(screeBounds);
+        property_.SetAvailableArea({0, 0, mode->width_, mode->height_});
+        property_.SetInputOffsetY();
+        property_.SetScreenRealWidth(mode->width_);
+        property_.SetScreenRealHeight(mode->height_);
+        property_.SetScreenRealPPI();
+        property_.SetScreenRealDPI();
+        RRect phyBounds = property_.GetPhyBounds();
+        property_.SetScreenAreaOffsetX(phyBounds.rect_.GetLeft());
+        property_.SetScreenAreaOffsetY(phyBounds.rect_.GetTop());
+        property_.SetScreenAreaWidth(phyBounds.rect_.GetWidth());
+        property_.SetScreenAreaHeight(phyBounds.rect_.GetHeight());
+        property_.SetScreenRealPPI();
+        property_.SetRefreshRate(mode->refreshRate_);
+        property_.SetCurrentOffScreenRendering(true);
+        property_.SetValidWidth(phyBounds.rect_.GetWidth());
+        property_.SetValidHeight(phyBounds.rect_.GetHeight());
+        TLOGI(WmsLogTag::DMS, "active mode bounds:[%{public}u %{public}u], property[%{public}u, %{public}u]",
+            mode->width_, mode->height_, property_.GetScreenRealWidth(), property_.GetScreenRealHeight());
+    } else {
+        TLOGE(WmsLogTag::DMS, "mode is null");
+    }
+}
+
+
 void ScreenSession::UpdatePropertyByActiveMode()
 {
     sptr<SupportedScreenModes> mode = GetActiveScreenMode();

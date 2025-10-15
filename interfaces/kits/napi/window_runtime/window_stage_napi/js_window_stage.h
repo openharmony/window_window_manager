@@ -72,6 +72,7 @@ public:
      * Window Pattern
      */
     static napi_value SetImageForRecent(napi_env env, napi_callback_info info);
+    static napi_value RemoveImageForRecent(napi_env env, napi_callback_info info);
     std::weak_ptr<WindowScene> GetWindowScene() { return windowScene_; }
 
 private:
@@ -111,6 +112,7 @@ private:
      * Window Pattern
      */
     napi_value OnSetImageForRecent(napi_env env, napi_callback_info info);
+    napi_value OnRemoveImageForRecent(napi_env env, napi_callback_info info);
 
     std::weak_ptr<WindowScene> windowScene_;
 };

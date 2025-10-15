@@ -374,6 +374,25 @@ HWTEST_F(WindowSessionImplLayoutTest, NotifyWindowStatusDidChange, TestSize.Leve
 }
 
 /**
+ * @tc.name: NotifyWindowStatusDidChange_Test_Undefined
+ * @tc.desc: NotifyWindowStatusDidChange test UNDEFINED
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplLayoutTest, NotifyWindowStatusDidChange_Test_Undefined, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyWindowStatusDidChange_Test_Undefined start";
+    auto window = GetTestWindowImpl("NotifyWindowStatusDidChange");
+    auto listeners = GetListenerList<IWindowStatusDidChangeListener, MockWindowStatusDidChangeListener>();
+    EXPECT_NE(listeners.size(), 0);
+    window->windowStatusDidChangeListeners_.insert({ window->GetPersistentId(), listeners });
+    window->lastStatusWhenNotifyWindowStatusDidChange_.store(WindowStatus::WINDOW_STATUS_FULLSCREEN);
+    window->NotifyWindowStatusDidChange(WindowMode::WINDOW_MODE_UNDEFINED);
+    EXPECT_EQ(window->lastStatusWhenNotifyWindowStatusDidChange_, WindowStatus::WINDOW_STATUS_UNDEFINED);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyWindowStatusDidChange_Test_Undefined end";
+}
+
+/**
  * @tc.name: NotifyAfterUIContentReady
  * @tc.desc: NotifyAfterUIContentReady
  * @tc.type: FUNC

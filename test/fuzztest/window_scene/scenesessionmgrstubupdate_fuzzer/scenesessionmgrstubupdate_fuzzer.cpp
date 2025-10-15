@@ -96,6 +96,10 @@ void MakeThingsPart02(MessageParcel& parcel)
         static_cast<uint32_t>(ISceneSessionManager::
             SceneSessionManagerMessage::TRANS_ID_UPDATE_EXTENSION_WINDOW_FLAGS),
         parcel, reply, option);
+    parcel.RewindRead(0);
+    SceneSessionManager::GetInstance().OnRemoteRequest(
+        static_cast<uint32_t>(ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_UPDATE_OUTLINE),
+        parcel, reply, option);
 }
 
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)

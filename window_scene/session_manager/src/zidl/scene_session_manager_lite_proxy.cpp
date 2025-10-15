@@ -2451,4 +2451,44 @@ WMError SceneSessionManagerLiteProxy::UnregisterPipChgListenerByScreenId(int32_t
     }
     return static_cast<WMError>(ret);
 }
+
+WMError SceneSessionManagerLiteProxy::GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+    std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUInt64Vector(windowIds)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write windowIds failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_DISPLAYID_BY_WINDOWID),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t mapSize;
+    if (!reply.ReadInt32(mapSize)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Fail to read mapSize");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    for (int32_t i = 0; i < mapSize; i++) {
+        uint64_t windowId;
+        if (!reply.ReadUint64(windowId)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Fail to read windowId");
+            return WMError::WM_ERROR_IPC_FAILED;
+        }
+        uint64_t displayId;
+        if (!reply.ReadUint64(displayId)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Fail to read displayId");
+            return WMError::WM_ERROR_IPC_FAILED;
+        }
+        windowDisplayIdMap[windowId] = displayId;
+    }
+    return static_cast<WMError>(reply.ReadInt32());
+}
 } // namespace OHOS::Rosen

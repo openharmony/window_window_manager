@@ -179,6 +179,17 @@ HWTEST_F(SessionPermissionTest, IsStartedByInputMethod, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsKeyboardCallingProcess
+ * @tc.desc: test function : IsKeyboardCallingProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionPermissionTest, IsKeyboardCallingProcess, TestSize.Level1)
+{
+    bool result = SessionPermission::IsKeyboardCallingProcess(1, 1);
+    ASSERT_EQ(false, result);
+}
+
+/**
  * @tc.name: IsStartedByUIExtension
  * @tc.desc: test function : IsStartedByUIExtension
  * @tc.type: FUNC
