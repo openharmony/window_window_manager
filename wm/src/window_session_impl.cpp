@@ -7079,8 +7079,7 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
         }
         window->NotifyOccupiedAreaChangeInfoInner(info);
         window->occupiedAreaInfo_ = info;
-        WLOGFI("occupiedAreaeInfo changed, id: %{public}u"
-            ", rect:[%{public}u, %{public}u, %{public}u, %{public}u]", property_->GetWindowId(),
+        WLOGFI("occupiedAreaeInfo changed, rect:[%{public}u, %{public}u, %{public}u, %{public}u]",
             info->rect_.posX_,info->rect_.posY_, info->rect_.width_, info->rect_.height_);
         window->UpdateViewportConfig(callingWindowRect, WindowSizeChangeReason::OCCUPIED_AREA_CHANGE,
             nullptr, nullptr, avoidAreas);
