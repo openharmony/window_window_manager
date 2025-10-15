@@ -2609,7 +2609,7 @@ static ani_int WindowSetSpecificSystemBarEnabled(ani_env* env, ani_object obj, a
     return ANI_OK;
 }
 
-static ani_object WindowSetDragKeyFramePolicy(ani_env* env, ani_object obj, ani_long nativeObj
+static ani_object WindowSetDragKeyFramePolicy(ani_env* env, ani_object obj, ani_long nativeObj,
     ani_object aniKeyFramePolicy)
 {
     using namespace OHOS::Rosen;
