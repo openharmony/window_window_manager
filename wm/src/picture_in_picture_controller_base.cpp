@@ -437,6 +437,7 @@ uint64_t PictureInPictureControllerBase::GetSurfaceId() const
 void PictureInPictureControllerBase::ActiveStatusChange(PiPActiveStatus status)
 {
     TLOGI(WmsLogTag::WMS_PIP, "notify active status: %{public}u", status);
+    curActiveStatus_ = status;
     for (auto& listener : pipActiveStatusObserver_) {
         if (listener == nullptr) {
             TLOGE(WmsLogTag::WMS_PIP, "active status listener is nullptr");
