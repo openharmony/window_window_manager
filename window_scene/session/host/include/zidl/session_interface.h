@@ -57,9 +57,10 @@ public:
      * This interface will take effect after touch down event.
      *
      * @param event Indicates the {@link SessionEvent}
+     * @param param Indicates the {@link SessionEventParam}
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError OnSessionEvent(SessionEvent event) { return WSError::WS_OK; }
+    virtual WSError OnSessionEvent(SessionEvent event, const SessionEventParam& param = {}) { return WSError::WS_OK; }
 
     /**
      * @brief Receive session event from application.
@@ -437,6 +438,25 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError OnSetImageForRecent(uint32_t imgResourceId, ImageFit ImageFit) { return WSError::WS_OK; }
+
+    /**
+     * @brief Callback for set image for recent.
+     *
+     * @param pixelMap recent image.
+     * @param imageFit imageFit.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnSetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, ImageFit ImageFit)
+    {
+        return WSError::WS_OK;
+    }
+
+    /**
+     * @brief Callback for remove image for recent.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnSetImageForRecent() { return WSError::WS_OK; }
 
     /**
      * @brief Callback for setting to radius of window.

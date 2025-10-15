@@ -72,7 +72,6 @@ ohos_fuzztest("PictureInPictureFuzzTest") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "config_policy:configpolicy_util",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "graphic_2d:librender_service_client",
@@ -89,6 +88,11 @@ ohos_fuzztest("PictureInPictureFuzzTest") {
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
   ]
+  defines = []
+  if (window_manager_feature_support_dsoftbus) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+    defines += [ "WINDOW_MANAGER_FEATURE_SUPPORT_DSOFTBUS" ]
+  }
 }
 
 ###############################################################################

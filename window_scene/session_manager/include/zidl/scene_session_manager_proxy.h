@@ -93,6 +93,7 @@ public:
     WSError UpdateSessionAvoidAreaListener(int32_t persistentId, bool haveListener) override;
     WSError UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener) override;
     WSError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener) override;
+    WMError UpdateSessionOcclusionStateListener(int32_t persistentId, bool haveListener) override;
     WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
                                SessionSnapshot& snapshot, bool isLowResolution) override;
     WSError GetUIContentRemoteObj(int32_t persistentId, sptr<IRemoteObject>& uiContentRemoteObj) override;
@@ -134,8 +135,8 @@ public:
     WSError GetHostWindowRect(int32_t hostWindowId, Rect& rect) override;
     WSError GetHostGlobalScaledRect(int32_t hostWindowId, Rect& globalScaledRect) override;
     WSError GetFreeMultiWindowEnableState(bool& enable) override;
-    WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus) override;
-    WMError GetCallingWindowRect(int32_t persistentId, Rect& rect) override;
+    WMError GetCallingWindowWindowStatus(uint32_t callingWindowId, WindowStatus& windowStatus) override;
+    WMError GetCallingWindowRect(uint32_t callingWindowId, Rect& rect) override;
     WMError MinimizeAllAppWindows(DisplayId displayId) override;
     WMError ToggleShownStateForAllAppWindows() override;
     WMError GetWindowModeType(WindowModeType& windowModeType) override;
@@ -158,6 +159,9 @@ public:
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
     WMError IsWindowRectAutoSave(const std::string& key, bool& enabled, int persistentId) override;
     WMError SetImageForRecent(uint32_t imgResourceId, ImageFit ImageFit, int32_t persistentId) override;
+    WMError SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, ImageFit ImageFit,
+        int32_t persistentId) override;
+    WMError RemoveImageForRecent(int32_t persistentId) override;
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override;
     WMError SetGlobalDragResizeType(DragResizeType dragResizeType) override;

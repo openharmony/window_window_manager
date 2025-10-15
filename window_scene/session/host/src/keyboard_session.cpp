@@ -102,7 +102,7 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
             session->NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason::KEYBOARD_SHOW);
         }
         session->GetSessionProperty()->SetKeyboardEffectOption(property->GetKeyboardEffectOption());
-        session->UseFocusIdIfCallingSessionIdInvalid();
+        session->UseFocusIdIfCallingSessionIdInvalid(property->GetCallingSessionId());
         TLOGNI(WmsLogTag::WMS_KEYBOARD,
             "Show keyboard session, id: %{public}d, calling id: %{public}d, effectOption: %{public}s",
             session->GetPersistentId(), session->GetCallingSessionId(),
@@ -160,15 +160,15 @@ WSError KeyboardSession::Disconnect(bool isFromClient, const std::string& identi
         }
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Disconnect keyboard session, id: %{public}d, isFromClient: %{public}d",
             session->GetPersistentId(), isFromClient);
+        if (session->keyboardPanelSession_) {
+            std::vector<Rect> keyboardPanelHotAreas;
+            session->keyboardPanelSession_->GetSessionProperty()->SetTouchHotAreas(keyboardPanelHotAreas);
+        }
         session->SceneSession::Disconnect(isFromClient);
         WSRect rect = {0, 0, 0, 0};
         session->NotifyKeyboardPanelInfoChange(rect, false);
         !session->IsSystemKeyboard() ? session->RestoreCallingSession(session->GetCallingSessionId(), nullptr) :
             session->NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason::KEYBOARD_DISCONNECT);
-        auto sessionProperty = session->GetSessionProperty();
-        if (sessionProperty) {
-            sessionProperty->SetCallingSessionId(INVALID_WINDOW_ID);
-        }
         return WSError::WS_OK;
     }, "Disconnect");
     return WSError::WS_OK;
@@ -225,12 +225,11 @@ void KeyboardSession::SetCallingSessionId(uint32_t callingSessionId)
         }
         session->GetSessionProperty()->SetCallingSessionId(callingSessionId);
 
-        if (session->keyboardCallback_ == nullptr ||
-            session->keyboardCallback_->onCallingSessionIdChange == nullptr) {
+        if (session->callingSessionIdChangeFunc_ == nullptr) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "KeyboardCallback_, callingSessionId: %{public}d", callingSessionId);
             return;
         }
-        session->keyboardCallback_->onCallingSessionIdChange(callingSessionId);
+        session->callingSessionIdChangeFunc_(callingSessionId);
     }, "SetCallingSessionId");
     return;
 }
@@ -643,9 +642,10 @@ void KeyboardSession::NotifySessionRectChange(const WSRect& rect,
 }
 
 // Use focused session id when calling session id is invalid.
-void KeyboardSession::UseFocusIdIfCallingSessionIdInvalid()
+void KeyboardSession::UseFocusIdIfCallingSessionIdInvalid(uint32_t callingSessionId)
 {
-    if (GetSceneSession(GetCallingSessionId()) != nullptr) {
+    if (callingSessionId != INVALID_WINDOW_ID && GetSceneSession(callingSessionId) != nullptr) {
+        GetSessionProperty()->SetCallingSessionId(callingSessionId);
         return;
     }
     uint32_t focusedSessionId = static_cast<uint32_t>(GetFocusedSessionId());
@@ -654,9 +654,6 @@ void KeyboardSession::UseFocusIdIfCallingSessionIdInvalid()
     } else {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Using focusedSession id: %{public}d", focusedSessionId);
         GetSessionProperty()->SetCallingSessionId(focusedSessionId);
-        if (keyboardCallback_ != nullptr && keyboardCallback_->onCallingSessionIdChange != nullptr) {
-            keyboardCallback_->onCallingSessionIdChange(focusedSessionId);
-        }
     }
 }
 
@@ -1109,6 +1106,7 @@ void KeyboardSession::CalculateOccupiedAreaAfterUIRefresh()
         static_cast<uint32_t>(SessionUIDirtyFlag::NONE) ||
         (keyboardDirtyFlags & static_cast<uint32_t>(SessionUIDirtyFlag::RECT)) !=
         static_cast<uint32_t>(SessionUIDirtyFlag::NONE) || stateChanged_) {
+        HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_KEYBOARD);
         TLOGD(WmsLogTag::WMS_KEYBOARD, "Keyboard panel rect has changed");
         needRecalculateOccupiedArea = true;
     }
@@ -1179,10 +1177,6 @@ WMError KeyboardSession::HandleActionUpdateKeyboardTouchHotArea(const sptr<Windo
             property->GetKeyboardTouchHotAreas().portraitPanelHotAreas_);
     }
     GetSessionProperty()->SetKeyboardTouchHotAreas(property->GetKeyboardTouchHotAreas());
-    if (specificCallback_ != nullptr && specificCallback_->onWindowInfoUpdate_ != nullptr) {
-        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "id=%{public}d", GetPersistentId());
-        specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
-    }
     return WMError::WM_OK;
 }
 } // namespace OHOS::Rosen

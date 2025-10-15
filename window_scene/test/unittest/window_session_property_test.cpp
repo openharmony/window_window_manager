@@ -871,6 +871,7 @@ HWTEST_F(WindowSessionPropertyTest, Read, TestSize.Level1)
     property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_SUB_WINDOW_Z_LEVEL);
     property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
     property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_ROTATION_LOCK_CHANGE);
     ASSERT_EQ(property->GetPersistentId(), INVALID_SESSION_ID);
 }
 
@@ -915,6 +916,7 @@ HWTEST_F(WindowSessionPropertyTest, Write, TestSize.Level1)
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST);
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_ROTATION_LOCK_CHANGE);
     ASSERT_EQ(property->GetPersistentId(), INVALID_SESSION_ID);
 }
 
@@ -1696,6 +1698,34 @@ HWTEST_F(WindowSessionPropertyTest, GetIsShowDecorInFreeMultiWindow, TestSize.Le
     bool isShow = true;
     property->SetIsShowDecorInFreeMultiWindow(isShow);
     ASSERT_EQ(true, property->GetIsShowDecorInFreeMultiWindow());
+}
+
+/**
+ * @tc.name: SetRotationLocked
+ * @tc.desc: Test SetRotationLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetRotationLocked, TestSize.Level0)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetRotationLocked(true);
+    EXPECT_EQ(property->isRotationLock_, true);
+    property->SetRotationLocked(false);
+    EXPECT_EQ(property->isRotationLock_, false);
+}
+ 
+/**
+ * @tc.name: GetRotationLocked
+ * @tc.desc: Test GetRotationLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetRotationLocked, TestSize.Level0)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->isRotationLock_ = true;
+    EXPECT_EQ(property->GetRotationLocked(), true);
+    property->isRotationLock_ = false;
+    EXPECT_EQ(property->GetRotationLocked(), false);
 }
 } // namespace
 } // namespace Rosen

@@ -519,11 +519,11 @@ HWTEST_F(WindowNodeTest, SetKeepScreenOn01, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetCallingWindow01
- * @tc.desc: SetCallingWindow & GetCallingWindow
+ * @tc.name: ChangeCallingWindowId01
+ * @tc.desc: ChangeCallingWindowId & GetCallingWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetCallingWindow01, TestSize.Level1)
+HWTEST_F(WindowNodeTest, ChangeCallingWindowId01, TestSize.Level1)
 {
     std::string windowName = "WindowNode15";
     auto property = CreateWindowProperty(15, windowName);
@@ -532,7 +532,7 @@ HWTEST_F(WindowNodeTest, SetCallingWindow01, TestSize.Level1)
     ASSERT_NE(nullptr, windowNode);
     windowNode->SetWindowProperty(property);
     ASSERT_EQ(INVALID_WINDOW_ID, windowNode->GetCallingWindow());
-    windowNode->SetCallingWindow(100);
+    windowNode->ChangeCallingWindowId(100);
     ASSERT_EQ(100, windowNode->GetCallingWindow());
 }
 

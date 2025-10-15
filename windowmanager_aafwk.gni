@@ -47,6 +47,18 @@ declare_args() {
 
   # Set atomicservice basic engine so path
   window_manager_feature_asbng_path = ""
+  window_manager_feature_support_dsoftbus = true
+  window_manager_feature_support_dmsfwk = true
+
+  if (defined(global_parts_info) &&
+      !defined(global_parts_info.communication_dsoftbus)) {
+    window_manager_feature_support_dsoftbus = false
+  }
+
+  if (defined(global_parts_info) &&
+      !defined(global_parts_info.ability_dmsfwk)) {
+    window_manager_feature_support_dmsfwk = false
+  }
 
   if (defined(global_parts_info) &&
       !defined(global_parts_info.msdp_device_status)) {

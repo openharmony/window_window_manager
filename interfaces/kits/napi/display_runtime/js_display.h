@@ -59,6 +59,7 @@ std::shared_ptr<NativeReference> FindJsDisplayObject(DisplayId displayId);
 napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display);
 napi_value CreateJsCutoutInfoObject(napi_env env, sptr<CutoutInfo> cutoutInfo);
 napi_value CreateJsRectObject(napi_env env, DMRect rect);
+napi_value CreateJsBrightnessInfo(napi_env env, const ScreenBrightnessInfo& brightnessInfo);
 napi_value CreateJsWaterfallDisplayAreaRectsObject(napi_env env,
     WaterfallDisplayAreaRects waterfallDisplayAreaRects);
 napi_value CreateJsBoundingRectsArrayObject(napi_env env, std::vector<DMRect> boundingRects);

@@ -41,6 +41,8 @@ public:
     MOCK_METHOD(WMError, CloseTargetPiPWindow, (const std::string& bundleName));
     MOCK_METHOD1(GetCurrentPiPWindowInfo, WMError(std::string& bundleName));
     MOCK_METHOD1(GetAccessibilityWindowInfo, WMError(std::vector<sptr<AccessibilityWindowInfo>>& infos));
+    MOCK_METHOD2(GetDisplayIdByWindowId, WMError(const std::vector<uint64_t>& windowIds,
+        std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap));
 };
 }
 } // namespace OHOS

@@ -1194,11 +1194,6 @@ HWTEST_F(SceneSessionManagerTest10, NotifyAppUseControlListInner, TestSize.Level
     controlList.push_back(controlByBundle);
     ssm_->NotifyAppUseControlListInner(ControlAppType::DLP, 0, controlList);
     EXPECT_EQ(controlListSize, 1);
-
-    ssm_->notifyAppUseControlListFunc_ = nullptr;
-    controlListSize = -1;
-    ssm_->NotifyAppUseControlListInner(ControlAppType::DLP, 0, controlList);
-    EXPECT_EQ(controlListSize, -1);
 }
 
 /**

@@ -19,6 +19,7 @@
 #include "screen_session_manager/include/screen_setting_helper.h"
 #include "window_manager_hilog.h"
 #include "scene_board_judgement.h"
+#include "nlohmann/json.hpp"
 
 using namespace testing;
 using namespace testing::ext;
@@ -536,6 +537,45 @@ namespace {
     }
 
     /**
+     * @tc.name: GetScreenActiveMode001
+     * @tc.desc: Test GetScreenActiveMode func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetScreenActiveMode001, Function | SmallTest | Level3)
+    {
+        MultiScreenInfo info;
+        string inputString = "1 11";
+        auto ret = ScreenSettingHelper::GetScreenActiveMode(info, inputString);
+        ASSERT_FALSE(ret);
+    }
+
+    /**
+     * @tc.name: GetScreenActiveMode002
+     * @tc.desc: Test GetScreenActiveMode func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetScreenActiveMode002, Function | SmallTest | Level3)
+    {
+        MultiScreenInfo info;
+        string inputString = "E";
+        auto ret = ScreenSettingHelper::GetScreenActiveMode(info, inputString);
+        ASSERT_FALSE(ret);
+    }
+
+    /**
+     * @tc.name: GetScreenActiveMode003
+     * @tc.desc: Test GetScreenActiveMode func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetScreenActiveMode003, Function | SmallTest | Level3)
+    {
+        MultiScreenInfo info;
+        string inputString = "1";
+        auto ret = ScreenSettingHelper::GetScreenActiveMode(info, inputString);
+        ASSERT_FALSE(ret);
+    }
+
+    /**
      * @tc.name: GetScreenModeTest
      * @tc.desc: Test GetScreenMode func
      * @tc.type: FUNC
@@ -1022,6 +1062,160 @@ namespace {
         auto ret = screenSettingHelper.GetResolutionEffect(value, "testsn");
         ASSERT_FALSE(ret);
         ASSERT_FALSE(value);
+    }
+
+    /**
+     * @tc.name: RegisterRotationCorrectionExemptionListObserver
+     * @tc.desc: RegisterRotationCorrectionExemptionListObserver
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, RegisterRotationCorrectionExemptionListObserver, TestSize.Level1)
+    {
+        g_errLog.clear();
+        LOG_SetCallback(MyLogCallback);
+        bool flag = false;
+        auto func = [&flag] (const std::string&) {
+            TLOGI(WmsLogTag::DMS, "UT test");
+            flag = true;
+        };
+        ScreenSettingHelper::correctionExemptionListObserver_ = nullptr;
+        ScreenSettingHelper::RegisterRotationCorrectionExemptionListObserver(func);
+        EXPECT_FALSE(g_errLog.find("observer is registered") != std::string::npos);
+ 
+        bool flag1 = false;
+        auto func1 = [&flag1] (const std::string&) {
+            TLOGI(WmsLogTag::DMS, "UT test");
+            flag1 = true;
+        };
+        ScreenSettingHelper::correctionExemptionListObserver_ = sptr<SettingObserver>::MakeSptr();
+        ScreenSettingHelper::RegisterRotationCorrectionExemptionListObserver(func1);
+        EXPECT_TRUE(g_errLog.find("observer is registered") != std::string::npos);
+        LOG_SetCallback(nullptr);
+        ScreenSettingHelper::correctionExemptionListObserver_ = nullptr;
+    }
+ 
+    /**
+     * @tc.name: UnregisterRotationCorrectionExemptionListObserver
+     * @tc.desc: UnregisterRotationCorrectionExemptionListObserver
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, UnregisterRotationCorrectionExemptionListObserver, TestSize.Level1)
+    {
+        ScreenSettingHelper::correctionExemptionListObserver_ = sptr<SettingObserver>::MakeSptr();
+        ScreenSettingHelper::UnregisterRotationCorrectionExemptionListObserver();
+        ASSERT_EQ(ScreenSettingHelper::correctionExemptionListObserver_, nullptr);
+
+        g_errLog.clear();
+        LOG_SetCallback(MyLogCallback);
+        ScreenSettingHelper::correctionExemptionListObserver_ = nullptr;
+        ScreenSettingHelper::UnregisterRotationCorrectionExemptionListObserver();
+        EXPECT_TRUE(g_errLog.find("observer is nullptr") != std::string::npos);
+        LOG_SetCallback(nullptr);
+    }
+ 
+    /**
+     * @tc.name: GetRotationCorrectionExemptionList
+     * @tc.desc: Test GetRotationCorrectionExemptionList func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetRotationCorrectionExemptionList, Function | SmallTest | Level3)
+    {
+        g_errLog.clear();
+        LOG_SetCallback(MyLogCallback);
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        std::vector<std::string> exemptionApps;
+        auto ret = screenSettingHelper.GetRotationCorrectionExemptionList(exemptionApps);
+        EXPECT_FALSE(g_errLog.find("failed") != std::string::npos);
+        LOG_SetCallback(nullptr);
+        ret = screenSettingHelper.GetRotationCorrectionExemptionList(exemptionApps, "testKey");
+        ASSERT_FALSE(ret);
+    }
+ 
+    /**
+     * @tc.name: GetCorrectionExemptionListFromJson
+     * @tc.desc: Test json is not array
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetCorrectionExemptionListFromJson01, Function | SmallTest | Level3)
+    {
+        g_errLog.clear();
+        LOG_SetCallback(MyLogCallback);
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        std::string json_str = "aa";
+        std::vector<std::string> exemptionApps;
+        screenSettingHelper.GetCorrectionExemptionListFromJson(json_str, exemptionApps);
+        EXPECT_TRUE(g_errLog.find("parse json failed") != std::string::npos);
+        g_errLog.clear();
+        LOG_SetCallback(nullptr);
+    }
+ 
+    /**
+     * @tc.name: GetCorrectionExemptionListFromJson
+     * @tc.desc: Test json is array
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetCorrectionExemptionListFromJson02, Function | SmallTest | Level3)
+    {
+        GTEST_LOG_(INFO) << "GetCorrectionExemptionListFromJson02 start";
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        std::string json_str = R"({
+            "com.test.app1": {
+                "test": "teststr"
+            },
+            "com.test.app2": {
+                "name": "com.test.app2"
+            },
+            "com.test.app3": {
+                "name": "com.test.app3",
+                "mode": 8
+            },
+            "com.test.app4": {
+                "name": "com.test.app4",
+                "mode": 8,
+                "exemptNaturalDirectionCorrect": true
+            },
+            "com.test.app5": {
+                "name": "com.test.app5",
+                "mode": 6,
+                "exemptNaturalDirectionCorrect": true
+            },
+            "com.test.app6": {
+                "name": "com.test.app6",
+                "mode": 8,
+                "exemptNaturalDirectionCorrect": false
+            }
+        })";
+ 
+        std::vector<std::string> exemptionApps;
+        screenSettingHelper.GetCorrectionExemptionListFromJson(json_str, exemptionApps);
+        EXPECT_EQ(1, exemptionApps.size());
+    }
+ 
+    /**
+     * @tc.name: GetJsonValue
+     * @tc.desc: Test GetJsonValue failed
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetJsonValue, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        std::string json_str = R"({"testKey": 1})";
+        nlohmann::json root1 = nlohmann::json::parse(json_str, nullptr, false);
+        std::string name = "";
+        bool ret = screenSettingHelper.GetJsonValue(root1, "testKey", name);
+        EXPECT_FALSE(ret);
+
+        json_str = R"({"testKey": "aa"})";
+        nlohmann::json root2 = nlohmann::json::parse(json_str, nullptr, false);
+        int32_t mode = -1;
+        ret = screenSettingHelper.GetJsonValue(root2, "testKey", mode);
+        EXPECT_FALSE(ret);
+
+        json_str = R"({"testKey": "aa"})";
+        nlohmann::json root3 = nlohmann::json::parse(json_str, nullptr, false);
+        bool valueBool = false;
+        ret = screenSettingHelper.GetJsonValue(root3, "testKey", valueBool);
+        EXPECT_FALSE(valueBool);
     }
 }
 } // namespace Rosen

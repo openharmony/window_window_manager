@@ -117,6 +117,7 @@ public:
     virtual WMError UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener);
     virtual WMError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible);
     virtual WMError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener);
+    virtual WMError UpdateSessionOcclusionStateListener(int32_t persistentId, bool haveListener);
     virtual WMError RaiseWindowToTop(int32_t persistentId);
     virtual WMError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId);
     virtual void CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
@@ -146,8 +147,8 @@ public:
     virtual WMError GetHostWindowRect(int32_t hostWindowId, Rect& rect);
     virtual WMError GetHostGlobalScaledRect(int32_t hostWindowId, Rect& globalScaledRect);
     virtual WMError GetFreeMultiWindowEnableState(bool& enable);
-    virtual WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus);
-    virtual WMError GetCallingWindowRect(int32_t persistentId, Rect& rect);
+    virtual WMError GetCallingWindowWindowStatus(uint32_t callingWindowId, WindowStatus& windowStatus);
+    virtual WMError GetCallingWindowRect(uint32_t callingWindowId, Rect& rect);
     virtual WMError GetWindowModeType(WindowModeType& windowModeType);
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType);
     virtual WMError SkipSnapshotForAppProcess(int32_t pid, bool skip);
@@ -203,6 +204,9 @@ public:
      * Window Pattern
      */
     virtual WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId);
+    virtual WMError SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, ImageFit imageFit,
+        int32_t persistentId);
+    virtual WMError RemoveImageForRecent(int32_t persistentId);
 
     /*
      * Window Animation

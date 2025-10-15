@@ -48,7 +48,7 @@ public:
     MOCK_METHOD0(Maximize, WSError(void));
     MOCK_METHOD1(PendingSessionActivation, WSError(const sptr<AAFwk::SessionInfo> info));
     MOCK_METHOD1(UpdateActiveStatus, WSError(bool isActive));
-    MOCK_METHOD1(OnSessionEvent, WSError(SessionEvent event));
+    MOCK_METHOD(WSError, OnSessionEvent, (SessionEvent event, const SessionEventParam& param), (override));
     MOCK_METHOD1(RequestSessionBack, WSError(bool needMoveToBackground));
     MOCK_METHOD0(RaiseToAppTop, WSError(void));
     MOCK_METHOD3(GetAvoidAreaByType, AvoidArea(AvoidAreaType type, const WSRect& rect, int32_t apiVersion));
