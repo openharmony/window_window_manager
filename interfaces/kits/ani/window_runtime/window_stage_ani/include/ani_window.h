@@ -107,6 +107,7 @@ public:
     void SetSystemBarProperties(ani_env* env, ani_object aniSystemBarProperties);
     ani_object SetSpecificSystemBarEnabled(ani_env* env, ani_string, ani_boolean enable,
         ani_boolean enableAnimation);
+    ani_object SetDragKeyFramePolicy(ani_env* env, ani_object aniKeyFramePolicy);    
     ani_object Snapshot(ani_env* env);
     void HideNonSystemFloatingWindows(ani_env* env, ani_boolean shouldHide);
     void ResizeAsync(ani_env* env, ani_int width, ani_int height);

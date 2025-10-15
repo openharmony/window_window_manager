@@ -635,6 +635,22 @@ namespace window {
     y: int;
   }
 
+  export interface KeyFramePolicy {
+    enable: boolean;
+    interval?: long;
+    distance?: int;
+    animationDuration: long;
+    animationDelay: long;
+  }
+
+  export class KeyFramePolicyInternal implements KeyFramePolicy {
+    enable: boolean;
+    interval?: long;
+    distance?: int;
+    animationDuration: long;
+    animationDelay: long;
+  }
+
 //enum WMError {
     const WMError_WM_OK = 0
     const WMError_WM_DO_NOTHING = 1
@@ -1991,6 +2007,7 @@ export class WindowInternal implements Window {
     private native setWindowLayoutFullScreen(nativeObj: long, isLayoutFullScreen: boolean): int;
     private native setWindowSystemBarProperties(nativeObj: long, systemBarProperties: SystemBarProperties): int;
     private native setSpecificSystemBarEnabled(nativeObj: long, name: String, enable: boolean, enableAnimation: boolean): int;
+    private native setDragKeyFramePolicy(nativeObj: long, keyFramePolicy: KeyFramePolicy): KeyFramePolicy;
     private native snapshot(nativeObj: long): image.PixelMap;
     private native hideNonSystemFloatingWindows(nativeObj: long, shouldHide: boolean): void;
     private native opacity(nativeObj: long, opacity: double): void;
@@ -2258,6 +2275,18 @@ export class WindowInternal implements Window {
                 reject(err as BusinessError);
             });
         });
+    }
+
+    public setDragKeyFramePolicy(keyFramePolicy: KeyFramePolicy): Promise<KeyFramePolicy> {
+      return new Promise<KeyFramePolicy>((resolve: (value: KeyFramePolicy) => void, reject: (error: BusinessError) => void) => {
+        taskpool.execute(() => {
+          return this.setDragKeyFramePolicy(this.nativeObj, keyFramePolicy);
+        }).then((ret: NullishType) => {
+          resolve(ret as KeyFramePolicy);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
     }
 
     public snapshot(): Promise<image.PixelMap> {
@@ -3005,6 +3034,7 @@ export interface Window {
     setWindowSystemBarProperties(systemBarProperties: SystemBarProperties): Promise<void>;
     setWindowSystemBarProperties(systemBarProperties: SystemBarProperties, callback: AsyncCallback<void>): void;
     setSpecificSystemBarEnabled(name: String, enable: boolean, enableAnimation?: boolean): Promise<void>;
+    setDragKeyFramePolicy(keyFramePolicy: KeyFramePolicy): Promise<KeyFramePolicy>;
     snapshot(): Promise<image.PixelMap>;
     snapshot(callback: AsyncCallback<image.PixelMap | undefined>): void;
     hideNonSystemFloatingWindows(shouldHide: boolean): Promise<void>;
