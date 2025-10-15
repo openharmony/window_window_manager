@@ -3019,7 +3019,7 @@ void ScreenSessionManager::GetCastVirtualMirrorSession(sptr<ScreenSession>& virt
         }
         if (screenSession->GetVirtualScreenFlag() == VirtualScreenFlag::CAST &&
             screenSession->GetMirrorScreenType() == MirrorScreenType::VIRTUAL_MIRROR) {
-            TLOGI(WmsLogTag::DMS, "virtual id:  %{public}lu", screenSession->GetScreenId());
+            TLOGI(WmsLogTag::DMS, "virtual id: %{public}" PRIu64"", screenSession->GetScreenId());
             virtualSession = screenSession;
             return;
         }
