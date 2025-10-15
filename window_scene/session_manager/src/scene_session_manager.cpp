@@ -157,7 +157,7 @@ constexpr uint32_t DEFAULT_LOCK_SCREEN_ZORDER = 2000;
 constexpr int32_t MAX_LOCK_STATUS_CACHE_SIZE = 1000;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PC = 50;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PAD = 0;
-constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PHONE = 1;
+constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PHONE = 0;
 constexpr uint64_t NOTIFY_START_ABILITY_TIMEOUT = 4000;
 constexpr uint64_t START_UI_ABILITY_TIMEOUT = 5000;
 constexpr int32_t FORCE_SPLIT_MODE = 5;
@@ -3440,6 +3440,15 @@ void SceneSessionManager::ConfigSupportSnapshotAllSessionStatus()
         systemConfig_.supportSnapshotAllSessionStatus_ = true;
     };
     taskScheduler_->PostAsyncTask(task, "ConfigSupportSnapshotAllSessionStatus");
+}
+
+void SceneSessionManager::ConfigSupportCacheLockedSessionSnapshot()
+{
+    TLOGI(WmsLogTag::WMS_PATTERN, "support");
+    auto task = [this] {
+        systemConfig_.supportSnapshotAllSessionStatus_ = true;
+    };
+    taskScheduler_->PostAsyncTask(task, "ConfigSupportCacheLockedSessionSnapshot");
 }
 
 void SceneSessionManager::ConfigSupportPreloadStartingWindow()
