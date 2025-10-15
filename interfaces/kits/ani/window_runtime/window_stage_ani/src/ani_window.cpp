@@ -2609,7 +2609,8 @@ static ani_int WindowSetSpecificSystemBarEnabled(ani_env* env, ani_object obj, a
     return ANI_OK;
 }
 
-static ani_object WindowSetDragKeyFramePolicy(ani_env* env, ani_object obj, ani_long nativeObj)
+static ani_object WindowSetDragKeyFramePolicy(ani_env* env, ani_object obj, ani_long nativeObj
+    ani_object aniKeyFramePolicy)
 {
     using namespace OHOS::Rosen;
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "[ANI]");
@@ -2618,7 +2619,7 @@ static ani_object WindowSetDragKeyFramePolicy(ani_env* env, ani_object obj, ani_
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] aniWindow is nullptr");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    return aniWindow->SetDragKeyFramePolicy(env);
+    return aniWindow->SetDragKeyFramePolicy(env, aniKeyFramePolicy);
 }
 
 static ani_object Snapshot(ani_env* env, ani_object obj, ani_long nativeObj)
