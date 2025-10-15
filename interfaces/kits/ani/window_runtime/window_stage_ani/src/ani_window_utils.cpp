@@ -946,7 +946,8 @@ ani_object AniWindowUtils::CreateAniMainWindowInfo(ani_env* env, const MainWindo
     return mainWindowInfo;
 }
 
-ani_status AniWindowUtils::CheckPropertyNameUndefined(ani_env* env, const char* propertyName, ani_object object, bool& result)
+ani_status AniWindowUtils::CheckPropertyNameUndefined(ani_env* env, const char* propertyName,
+    ani_object object, bool& result)
 {
     result = false;
     ani_ref ref;
@@ -983,7 +984,7 @@ bool AniWindowUtils::ParseKeyFramePolicy(ani_env* env, ani_object aniKeyFramePol
     
     bool propertyUndefined = false;
     int32_t distance = 0;
-    if (CheckPropertyNameUndefined(env, "distance", aniKeyFramePolicy, propertyUndefined) != ANI_OK || 
+    if (CheckPropertyNameUndefined(env, "distance", aniKeyFramePolicy, propertyUndefined) != ANI_OK ||
         !propertyUndefined) {
         if (GetPropertyIntObject(env, "distance", aniKeyFramePolicy, distance) != ANI_OK || distance < 0) {
             TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed to convert parameter to distance");
