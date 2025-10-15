@@ -966,7 +966,7 @@ ani_status AniWindowUtils::CheckPropertyNameUndefined(ani_env* env, const char* 
     return ANI_OK;
 }
 
-bool AniWindowUtils::ParseKeyFramePolicy(ani_env* env, ani_object aniKeyFramePolicy, keyFramePolicy& KeyFramePolicy)
+bool AniWindowUtils::ParseKeyFramePolicy(ani_env* env, ani_object aniKeyFramePolicy, KeyFramePolicy& keyFramePolicy)
 {
     if (CheckParaIsUndefined(env, aniKeyFramePolicy)) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] aniKeyFramePolicy undefined");
@@ -974,7 +974,7 @@ bool AniWindowUtils::ParseKeyFramePolicy(ani_env* env, ani_object aniKeyFramePol
     }
 
     ani_boolean enable = false;
-    if (env->Object_GetPropertyByName_Boolean(obj, "enable", &enable) != ANI_OK) {
+    if (env->Object_GetPropertyByName_Boolean(aniKeyFramePolicy, "enable", &enable) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed to convert parameter to enable");
         return false;
     }
@@ -984,7 +984,7 @@ bool AniWindowUtils::ParseKeyFramePolicy(ani_env* env, ani_object aniKeyFramePol
     bool propertyUndefined = false;
     int32_t distance = 0;
     if (CheckPropertyNameUndefined(env, "distance", aniKeyFramePolicy, propertyUndefined) != ANI_OK || 
-        propertyUndefined) {
+        !propertyUndefined) {
         if (GetPropertyIntObject(env, "distance", aniKeyFramePolicy, distance) != ANI_OK || distance < 0) {
             TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed to convert parameter to distance");
             return false;
@@ -994,7 +994,7 @@ bool AniWindowUtils::ParseKeyFramePolicy(ani_env* env, ani_object aniKeyFramePol
 
     int64_t longData = 0;
     if (CheckPropertyNameUndefined(env, "interval", aniKeyFramePolicy, propertyUndefined) != ANI_OK ||
-        propertyUndefined) {
+        !propertyUndefined) {
         if (GetPropertyLongObject(env, "interval", aniKeyFramePolicy, longData) != ANI_OK || longData <= 0) {
             TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed to convert parameter to interval");
             return false;
@@ -1002,7 +1002,7 @@ bool AniWindowUtils::ParseKeyFramePolicy(ani_env* env, ani_object aniKeyFramePol
         keyFramePolicy.interval_ = static_cast<uint32_t>(longData);
     }
     if (CheckPropertyNameUndefined(env, "animationDelay", aniKeyFramePolicy, propertyUndefined) != ANI_OK ||
-        propertyUndefined) {
+        !propertyUndefined) {
         if (GetPropertyLongObject(env, "animationDelay", aniKeyFramePolicy, longData) != ANI_OK || longData <= 0) {
             TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed to convert parameter to animationDelay");
             return false;
@@ -1010,7 +1010,7 @@ bool AniWindowUtils::ParseKeyFramePolicy(ani_env* env, ani_object aniKeyFramePol
         keyFramePolicy.animationDelay_ = static_cast<uint32_t>(longData);
     }
     if (CheckPropertyNameUndefined(env, "animationDuration", aniKeyFramePolicy, propertyUndefined) != ANI_OK ||
-        propertyUndefined) {
+        !propertyUndefined) {
         if (GetPropertyLongObject(env, "animationDuration", aniKeyFramePolicy, longData) != ANI_OK || longData <= 0) {
             TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed to convert parameter to animationDuration");
             return false;
@@ -1020,7 +1020,7 @@ bool AniWindowUtils::ParseKeyFramePolicy(ani_env* env, ani_object aniKeyFramePol
     return true;
 }
 
-ani_object AniWindowUtils::CreateKeyFramePolicy(ani_env* env, const keyFramePolicy& KeyFramePolicy)
+ani_object AniWindowUtils::CreateKeyFramePolicy(ani_env* env, const KeyFramePolicy& keyFramePolicy)
 {
     ani_class aniClass;
     if (env->FindClass("@ohos.window.window.KeyFramePolicyInternal", &aniClass) != ANI_OK) {
