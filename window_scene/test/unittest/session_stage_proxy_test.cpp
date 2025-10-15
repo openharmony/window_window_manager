@@ -121,7 +121,7 @@ HWTEST_F(SessionStageProxyTest, UpdateRect01, TestSize.Level1)
     WSRect rect;
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     ASSERT_TRUE((sessionStage_ != nullptr));
-    std::shared_ptr rsTransaction = std::make_shared();
+    std::shared_ptr<RSTransaction> rsTransaction = std::make_shared<RSTransaction>();
     SceneAnimationConfig config{ rsTransaction, ROTATE_ANIMATION_DURATION,
     0, WindowAnimationCurve::LINEAR, {0.0f, 0.0f, 0.0f, 0.0f} };
     MockMessageParcel::SetWriteParcelableErrorFlag(true);
