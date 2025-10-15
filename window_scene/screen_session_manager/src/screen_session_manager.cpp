@@ -2830,7 +2830,7 @@ bool ScreenSessionManager::HandleResolutionEffectChange()
     sptr<ScreenSession> internalSession = nullptr;
     sptr<ScreenSession> externalSession = nullptr;
     GetInternalAndExternalSession(internalSession, externalSession);
-    if (!internalSession || !externalSession ||
+    if (internalSession == nullptr || externalSession == nullptr ||
         externalSession->GetScreenCombination() != ScreenCombination::SCREEN_MIRROR) {
         TLOGE(WmsLogTag::DMS, "Session null or not mirror");
         RecoveryResolutionEffect();
@@ -2878,13 +2878,18 @@ bool ScreenSessionManager::SetResolutionEffect(ScreenId screenId,  uint32_t widt
     sptr<ScreenSession> internalSession = nullptr;
     sptr<ScreenSession> externalSession = nullptr;
     GetInternalAndExternalSession(internalSession, externalSession);
-    if (!externalSession ||
+    if (externalSession == nullptr ||
         externalSession->GetScreenCombination() != ScreenCombination::SCREEN_MIRROR) {
         return false;
     }
-    if (!internalSession || internalSession->GetScreenId() != screenId) {
+    if (internalSession == nullptr || internalSession->GetScreenId() != screenId) {
         TLOGE(WmsLogTag::DMS, "only internal session valid");
         return false;
+    }
+    if (internalSession->GetScreenProperty().GetBounds().rect_.width_ == width &&
+        internalSession->GetScreenProperty().GetBounds().rect_.height_ == height) {
+        TLOGE(WmsLogTag::DMS, "Resolution Effect set repeat");
+        return true;
     }
     uint32_t realWidth = internalSession->GetScreenProperty().GetScreenRealWidth();
     uint32_t realHeight = internalSession->GetScreenProperty().GetScreenRealHeight();
@@ -2899,7 +2904,7 @@ bool ScreenSessionManager::SetResolutionEffect(ScreenId screenId,  uint32_t widt
         toRect.posX_, toRect.posY_, toRect.width_, toRect.height_);
     SetInternalScreenResolutionEffect(internalSession, toRect);
     SetExternalScreenResolutionEffect(externalSession, toRect);
-    HandleVirtualScreenMirrorRegion();
+    HandleCastVirtualScreenMirrorRegion();
     NotifyScreenModeChange();
     return true;
 }
@@ -2914,7 +2919,8 @@ bool ScreenSessionManager::RecoveryResolutionEffect()
     sptr<ScreenSession> internalSession = nullptr;
     sptr<ScreenSession> externalSession = nullptr;
     GetInternalAndExternalSession(internalSession, externalSession);
-    if (!internalSession) {
+    if (internalSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "internalSession null");
         return false;
     }
     if (curResolutionEffectEnable_.load()) {
@@ -2925,12 +2931,12 @@ bool ScreenSessionManager::RecoveryResolutionEffect()
             RealResolutionRect.posX_, RealResolutionRect.posY_, RealResolutionRect.width_, RealResolutionRect.height_);
         SetInternalScreenResolutionEffect(internalSession, RealResolutionRect);
     }
-    if (externalSession) {
+    if (externalSession != nullptr) {
         DMRect externalRealRect = { 0, 0, externalSession->GetScreenProperty().GetScreenRealWidth(),
             externalSession->GetScreenProperty().GetScreenRealHeight()};
         SetExternalScreenResolutionEffect(externalSession, externalRealRect);
     }
-    HandleVirtualScreenMirrorRegion();
+    HandleCastVirtualScreenMirrorRegion();
     NotifyScreenModeChange();
     curResolutionEffectEnable_.store(false);
     return true;
@@ -2938,7 +2944,8 @@ bool ScreenSessionManager::RecoveryResolutionEffect()
 
 void ScreenSessionManager::SetInternalScreenResolutionEffect(const sptr<ScreenSession>& internalSession, DMRect targetRect)
 {
-    if (!internalSession) {
+    if (internalSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "internalSession null");
         return;
     }
     // Setting the display area of the internal screen
@@ -2954,15 +2961,17 @@ void ScreenSessionManager::SetInternalScreenResolutionEffect(const sptr<ScreenSe
 
 void ScreenSessionManager::SetExternalScreenResolutionEffect(const sptr<ScreenSession>& externalSession, DMRect targetRect)
 {
-    if (!externalSession) {
+    if (externalSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "externalSession null");
         return;
     }
-    OHOS::Rect rsRect = {targetRect.posX_, targetRect.posY_, targetRect.width_, targetRect.height_};
+    //all zero, means full screen mirror.
+    DMRect mirrorRegion = targetRect;
     if (!curResolutionEffectEnable_.load()) {
-        rsRect = {0, 0, 0, 0};
+        mirrorRegion = {0, 0, 0, 0};
     }
-    //Set up the external screen projection area ,all zero means turn off SetMirrorScreenVisibleRect
-    rsInterface_.SetMirrorScreenVisibleRect(externalSession->GetScreenId(), rsRect);
+    externalSession->SetMirrorScreenRegion(externalSession->GetScreenId(), mirrorRegion);
+    externalSession->EnableMirrorScreenRegion();
     // Parameters required for multiinput cursor
     externalSession->UpdateMirrorWidth(targetRect.width_);
     externalSession->UpdateMirrorHeight(targetRect.height_);
@@ -2973,7 +2982,7 @@ void ScreenSessionManager::SetExternalScreenResolutionEffect(const sptr<ScreenSe
     }
 }
 
-bool ScreenSessionManager::HandleVirtualScreenMirrorRegion()
+bool ScreenSessionManager::HandleCastVirtualScreenMirrorRegion()
 {
     if (!g_isPcDevice || FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         TLOGW(WmsLogTag::DMS, "not support");
@@ -2982,13 +2991,13 @@ bool ScreenSessionManager::HandleVirtualScreenMirrorRegion()
     TLOGI(WmsLogTag::DMS, "SetVirtualScreenMirrorRegion");
     sptr<ScreenSession> internalSession = nullptr;
     sptr<ScreenSession> virtualSession = nullptr;
-    GetVirtualMirrorSession(virtualSession);
+    GetCastVirtualMirrorSession(virtualSession);
     internalSession = GetInternalScreenSession();
-    if (!virtualSession || !internalSession) {
+    if (virtualSession == nullptr || internalSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "ScreenSession Null");
         return false;
     }
-    //mirrorRegion == DMRect::NONE(),means full screen mirror.
+    //all zero, means full screen mirror.
     DMRect mirrorRegion = DMRect::NONE();
     if (curResolutionEffectEnable_.load()) {
         auto bounds = internalSession->GetScreenProperty().GetBounds();
@@ -2999,7 +3008,7 @@ bool ScreenSessionManager::HandleVirtualScreenMirrorRegion()
     return true;
 }
 
-void ScreenSessionManager::GetVirtualMirrorSession(sptr<ScreenSession>& virtualSession)
+void ScreenSessionManager::GetCastVirtualMirrorSession(sptr<ScreenSession>& virtualSession)
 {
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (auto sessionIt : screenSessionMap_) {
