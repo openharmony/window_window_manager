@@ -709,7 +709,9 @@ void SingleDisplayPocketFoldPolicy::ExitCoordination()
         TLOGW(WmsLogTag::DMS, "change displaymode to coordination skipped, current coordination flag is false");
         return;
     }
-    ChangeScreenDisplayModePower(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF);
+    ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
+    ScreenSessionManager::GetInstance().SetRSScreenPowerStatusExt(SCREEN_ID_MAIN,
+        ScreenPowerStatus::POWER_STATUS_OFF);
     AddOrRemoveDisplayNodeToTree(SCREEN_ID_MAIN, REMOVE_DISPLAY_NODE);
     ScreenSessionManager::GetInstance().OnScreenChange(SCREEN_ID_MAIN, ScreenEvent::DISCONNECTED);
     ScreenSessionManager::GetInstance().SetCoordinationFlag(false);
