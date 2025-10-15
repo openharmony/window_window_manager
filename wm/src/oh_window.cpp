@@ -722,12 +722,12 @@ int32_t OH_WindowManager_LockCursor(int32_t windowId, bool isCursorFollowMovemen
     eventHandler->PostSyncTask([windowId, isCursorFollowMovement, &errCode, where = __func__] {
         auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
-            TLOGE(WmsLogTag::WMS_EVENT, "%{public}s window is null, windowId:%{public}d", where, windowId);
+            TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s window is null, windowId:%{public}d", where, windowId);
             errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
             return;
         }
         if (!window->IsFocused()) {
-            TLOGE(WmsLogTag::WMS_EVENT, "%{public}s window is not focused, windowId:%{public}d", where, windowId);
+            TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s window is not focused, windowId:%{public}d", where, windowId);
             errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
             return;
         }
@@ -749,11 +749,12 @@ int32_t OH_WindowManager_UnLockCursor(int32_t windowId)
     eventHandler->PostSyncTask([windowId, &errCode, where = __func__] {
         auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
-            TLOGE(WmsLogTag::WMS_EVENT, "%{public}s window is null, windowId:%{public}d", where, windowId);
+            TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s window is null, windowId:%{public}d", where, windowId);
             errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
             return;
         }
         if (!window->IsFocused()) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s window is not focused, windowId:%{public}d", where, windowId);
             errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
             return;
         }

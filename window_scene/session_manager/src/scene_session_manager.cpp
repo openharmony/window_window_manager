@@ -108,6 +108,8 @@
 
 namespace OHOS::Rosen {
 namespace {
+const std::string LOCK_WINDOW_CURSOR_PERMISSION = "ohos.permission.LOCK_WINDOW_CURSOR";
+
 const std::string SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
 const std::string SCENE_BOARD_APP_IDENTIFIER = "";
 const std::string SCENE_SESSION_MANAGER_THREAD = "OS_SceneSessionManager";
@@ -5955,6 +5957,10 @@ bool SceneSessionManager::checkDatas(const std::vector<int32_t>& datas, const in
 
 WMError SceneSessionManager::LockCursor(const std::vector<int32_t>& datas)
 {
+    if (!SessionPermission::VerifyCallingPermission(LOCK_WINDOW_CURSOR_PERMISSION)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     if (!checkDatas(datas, LOCK_CURSOR_LENGTH)) {
         return WMError::WM_ERROR_ILLEGAL_PARAM;
     }
@@ -5967,6 +5973,10 @@ WMError SceneSessionManager::LockCursor(const std::vector<int32_t>& datas)
 
 WMError SceneSessionManager::UnLockCursor(const std::vector<int32_t>& datas)
 {
+    if (!SessionPermission::VerifyCallingPermission(LOCK_WINDOW_CURSOR_PERMISSION)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     if (!checkDatas(datas, UNLOCK_CURSOR_LENGTH)) {
         return WMError::WM_ERROR_ILLEGAL_PARAM;
     }

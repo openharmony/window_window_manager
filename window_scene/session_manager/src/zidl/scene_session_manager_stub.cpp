@@ -278,7 +278,7 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleMinimizeAllAppWindows(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_OUTLINE):
             return HandleUpdateOutline(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SNED_COMMAND_EVENT):
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SEND_COMMAND_EVENT):
             return HandleSendCommonEvent(data, reply);
         default:
             WLOGFE("Failed to find function handler!");

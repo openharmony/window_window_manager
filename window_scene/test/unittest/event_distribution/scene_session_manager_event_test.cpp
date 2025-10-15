@@ -110,9 +110,16 @@ namespace {
  */
 HWTEST_F(SceneSessionManagerEventTest, LockCursor, TestSize.Level1)
 {
-    // test checkDatas: The format is incorrect(size<1).
     std::vector<int32_t> datas;
-    auto ret = ssm_->LockCursor(datas);
+
+    // The test dose not have the permission
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
+    auto ret = ssm_->UnLockCursor(datas);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PERMISSION);
+
+    // test checkDatas: The format is incorrect(size<1).
+    MockAccesstokenKit::MockAccessTokenKitRet(0);
+    ret = ssm_->LockCursor(datas);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
     
     // test checkDatas: The format is incorrect(length error).
@@ -151,8 +158,15 @@ HWTEST_F(SceneSessionManagerEventTest, LockCursor, TestSize.Level1)
 HWTEST_F(SceneSessionManagerEventTest, UnLockCursor, TestSize.Level1)
 {
     std::vector<int32_t> datas;
-    // test checkDatas: The format is incorrect(size<1).
+
+    // The test dose not have the permission
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     auto ret = ssm_->UnLockCursor(datas);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PERMISSION);
+
+    // test checkDatas: The format is incorrect(size<1).
+    MockAccesstokenKit::MockAccessTokenKitRet(0);
+    ret = ssm_->UnLockCursor(datas);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
     
     // test checkDatas: The format is incorrect(length error).
