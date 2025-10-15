@@ -81,6 +81,13 @@ public:
     static void Finalizer(ani_env* env, ani_long nativeObj);
     static void SetContentAspectRatio(ani_env* env, ani_object obj, ani_long nativeObj,
                                       ani_double ratio, ani_boolean isPersistent, ani_boolean needUpdateRect);
+    static void Maximize(ani_env* env, ani_object obj, ani_long nativeObj,
+                         ani_object aniPresentation, ani_object aniAcrossDisplay);
+    static void SetRotationLocked(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean locked);
+    static ani_boolean GetRotationLocked(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void SetRelativePositionToParentWindowEnabled(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_boolean enabled, ani_int anchor, ani_int offsetX, ani_int offsetY);
+    static void SetWindowDelayRaiseOnDrag(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isEnabled);
 
     /*
      * Window Layout
@@ -154,12 +161,18 @@ private:
         const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, sptr<Window> windowToken);
     WMError SetSystemBarPropertiesByFlags(std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags,
         std::map<WindowType, SystemBarProperty>& systemBarProperties, sptr<Window> windowToken);
+    void OnSetRotationLocked(ani_env* env, ani_boolean locked);
+    bool OnGetRotationLocked(ani_env* env);
+    void OnSetWindowDelayRaiseOnDrag(ani_env* env, ani_boolean isEnabled);
+    void OnSetRelativePositionToParentWindowEnabled(ani_env* env, ani_boolean enabled,
+        ani_int anchor, ani_int offsetX, ani_int offsetY);
 
     /*
      * Window Layout
      */
     void OnSetContentAspectRatio(
         ani_env* env, ani_double ratio, ani_boolean isPersistent, ani_boolean needUpdateRect);
+    void OnMaximize(ani_env* env, ani_object aniPresentation, ani_object aniAcrossDisplay);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<AniWindowRegisterManager> registerManager_ = nullptr;

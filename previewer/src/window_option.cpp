@@ -126,7 +126,7 @@ void WindowOption::SetKeepScreenOn(bool keepScreenOn)
     keepScreenOn_ = keepScreenOn;
 }
 
-void WindowOption::SetCallingWindow(uint32_t windowId)
+void WindowOption::ChangeCallingWindowId(uint32_t windowId)
 {
     callingWindow_ = windowId;
 }

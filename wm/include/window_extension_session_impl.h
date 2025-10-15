@@ -267,6 +267,7 @@ private:
     std::vector<sptr<IKeyboardDidHideListener>> keyboardDidHideListenerList_;
     std::vector<sptr<IOccupiedAreaChangeListener>> occupiedAreaChangeListenerList_;
     uint32_t hostStatusBarContentColor_ { 0 };
+    int64_t startModalExtensionTimeStamp_ = -1;
 
     /*
      * PC Fold Screen

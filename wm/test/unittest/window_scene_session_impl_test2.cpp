@@ -786,19 +786,19 @@ HWTEST_F(WindowSceneSessionImplTest2, GetSystemSizeLimits01, TestSize.Level1)
     windowSceneSession->windowSystemConfig_.miniWidthOfSubWindow_ = minSubWidth;
     windowSceneSession->windowSystemConfig_.miniHeightOfSubWindow_ = minSubHeight;
 
-    WindowLimits limits = windowSceneSession->GetSystemSizeLimits(displayWidth, displayHeight, displayVpr);
-    ASSERT_EQ(limits.minWidth_, minMainWidth);
-    ASSERT_EQ(limits.minHeight_, minMainHeight);
+    const auto& [limits, _] = windowSceneSession->GetSystemSizeLimits(displayWidth, displayHeight, displayVpr);
+    EXPECT_EQ(limits.minWidth_, minMainWidth);
+    EXPECT_EQ(limits.minHeight_, minMainHeight);
 
     windowSceneSession->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    limits = windowSceneSession->GetSystemSizeLimits(displayWidth, displayHeight, displayVpr);
-    ASSERT_EQ(limits.minWidth_, minMainWidth);
-    ASSERT_EQ(limits.minHeight_, minMainHeight);
+    const auto& [limits2, _2] = windowSceneSession->GetSystemSizeLimits(displayWidth, displayHeight, displayVpr);
+    EXPECT_EQ(limits2.minWidth_, minMainWidth);
+    EXPECT_EQ(limits2.minHeight_, minMainHeight);
 
     windowSceneSession->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
-    limits = windowSceneSession->GetSystemSizeLimits(displayWidth, displayHeight, displayVpr);
-    ASSERT_EQ(limits.minWidth_, minMainWidth);
-    ASSERT_EQ(limits.minHeight_, minMainHeight);
+    const auto& [limits3, _3] = windowSceneSession->GetSystemSizeLimits(displayWidth, displayHeight, displayVpr);
+    EXPECT_EQ(limits3.minWidth_, minMainWidth);
+    EXPECT_EQ(limits3.minHeight_, minMainHeight);
 }
 
 /**

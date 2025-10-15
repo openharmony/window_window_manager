@@ -438,7 +438,7 @@ void RootScene::NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, A
     AvoidArea area = {};
     if (avoidArea != nullptr) {
         area= *avoidArea;
-        TLOGI(WmsLogTag::WMS_IMMS, "type %{public}d area %{public}s.", type, avoidArea->ToString().c_str());
+        TLOGD(WmsLogTag::WMS_IMMS, "type %{public}d area %{public}s.", type, avoidArea->ToString().c_str());
     }
     std::lock_guard<std::mutex> lock(mutex_);
     for (auto& listener : avoidAreaChangeListeners_) {
@@ -472,34 +472,6 @@ WMError RootScene::UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedArea
     std::lock_guard<std::mutex> lock(occupiedAreaMutex_);
     occupiedAreaChangeListeners_.erase(listener);
     return WMError::WM_OK;
-}
-
-void RootScene::NotifyOccupiedAreaChangeForRoot(const sptr<OccupiedAreaChangeInfo>& info)
-{
-    if (info == nullptr) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "occupied area info is null");
-        return;
-    }
-    if (handler_ == nullptr) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "handler_ is null, notify occupied area for root failed.");
-        return;
-    }
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "occupiedRect: %{public}s, textField PositionY_: %{public}f, Height_: %{public}f",
-        info->rect_.ToString().c_str(), info->textFieldPositionY_, info->textFieldHeight_);
-    auto task = [weak = wptr(this), info]() {
-        auto window = weak.promote();
-        if (!window) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "window is null");
-            return;
-        }
-        std::lock_guard<std::mutex> lock(window->occupiedAreaMutex_);
-        for (const auto& listener : window->occupiedAreaChangeListeners_) {
-            if (listener != nullptr) {
-                listener->OnSizeChange(info);
-            }
-        }
-    };
-    handler_->PostTask(task, __func__);
 }
 
 void RootScene::RegisterNotifyWatchFocusActiveChangeCallback(NotifyWatchFocusActiveChangeCallback&& callback)

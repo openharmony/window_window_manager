@@ -585,25 +585,6 @@ HWTEST_F(RootSceneTest, UnregisterOccupiedAreaChangeListener, TestSize.Level1)
 }
 
 /**
- * @tc.name: NotifyOccupiedAreaChangeForRoot
- * @tc.desc: NotifyOccupiedAreaChangeForRoot Test
- * @tc.type: FUNC
- */
-HWTEST_F(RootSceneTest, NotifyOccupiedAreaChangeForRoot, TestSize.Level1)
-{
-    auto rootScene = sptr<RootScene>::MakeSptr();
-    sptr<IOccupiedAreaChangeListener> listener = sptr<IOccupiedAreaChangeListener>::MakeSptr();
-    ASSERT_NE(nullptr, listener);
-    auto ret = rootScene->RegisterOccupiedAreaChangeListener(listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
-    sptr<OccupiedAreaChangeInfo> info = nullptr;
-    rootScene->NotifyOccupiedAreaChangeForRoot(info);
-    info = sptr<OccupiedAreaChangeInfo>::MakeSptr();
-    ASSERT_NE(nullptr, info);
-    rootScene->NotifyOccupiedAreaChangeForRoot(info);
-}
-
-/**
  * @tc.name: GetRSNodeByStringIDTest
  * @tc.desc: For GetRSNodeByStringID Test
  * @tc.type: FUNC

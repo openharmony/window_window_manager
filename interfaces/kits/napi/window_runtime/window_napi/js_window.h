@@ -109,7 +109,7 @@ public:
     static napi_value HideNonSystemFloatingWindows(napi_env env, napi_callback_info info);
     static napi_value SetWindowTouchable(napi_env env, napi_callback_info info);
     static napi_value SetTransparent(napi_env env, napi_callback_info info);
-    static napi_value SetCallingWindow(napi_env env, napi_callback_info info);
+    static napi_value ChangeCallingWindowId(napi_env env, napi_callback_info info);
     static napi_value SetPreferredOrientation(napi_env env, napi_callback_info info);
     static napi_value GetPreferredOrientation(napi_env env, napi_callback_info info);
     static napi_value SetSnapshotSkip(napi_env env, napi_callback_info info);
@@ -122,6 +122,7 @@ public:
     static napi_value RaiseMainWindowAboveTarget(napi_env env, napi_callback_info info);
     static napi_value KeepKeyboardOnFocus(napi_env env, napi_callback_info info);
     static napi_value GetWindowLimits(napi_env env, napi_callback_info info);
+    static napi_value GetWindowLimitsVP(napi_env env, napi_callback_info info);
     static napi_value SetWindowLimits(napi_env env, napi_callback_info info);
     static napi_value SetSingleFrameComposerEnabled(napi_env env, napi_callback_info info);
     static napi_value EnableLandscapeMultiWindow(napi_env env, napi_callback_info info);
@@ -171,6 +172,8 @@ public:
     static napi_value SetWaterMarkFlag(napi_env env, napi_callback_info info);
     static napi_value SetHandwritingFlag(napi_env env, napi_callback_info info);
     static napi_value SetWindowGrayScale(napi_env env, napi_callback_info info);
+    static napi_value SetRotationLocked(napi_env env, napi_callback_info info);
+    static napi_value GetRotationLocked(napi_env env, napi_callback_info info);
 
     /*
      * Sub Window
@@ -319,6 +322,7 @@ private:
     napi_value OnKeepKeyboardOnFocus(napi_env env, napi_callback_info info);
     napi_value OnSetWindowLimits(napi_env env, napi_callback_info info);
     napi_value OnGetWindowLimits(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowLimitsVP(napi_env env, napi_callback_info info);
 
     napi_value OnIsFocused(napi_env env, napi_callback_info info);
     napi_value OnRequestFocus(napi_env env, napi_callback_info info);
@@ -360,7 +364,7 @@ private:
     napi_value OnHideNonSystemFloatingWindows(napi_env env, napi_callback_info info);
     napi_value OnSetWindowTouchable(napi_env env, napi_callback_info info);
     napi_value OnSetTransparent(napi_env env, napi_callback_info info);
-    napi_value OnSetCallingWindow(napi_env env, napi_callback_info info);
+    napi_value OnChangeCallingWindowId(napi_env env, napi_callback_info info);
     napi_value OnDump(napi_env env, napi_callback_info info);
     napi_value OnSetForbidSplitMove(napi_env env, napi_callback_info info);
     napi_value OnSnapshot(napi_env env, napi_callback_info info);
@@ -396,6 +400,8 @@ private:
     napi_value OnEnableDrag(napi_env env, napi_callback_info info);
     napi_value OnStartMoving(napi_env env, napi_callback_info info);
     napi_value OnStopMoving(napi_env env, napi_callback_info info);
+    napi_value OnSetRotationLocked(napi_env env, napi_callback_info info);
+    napi_value OnGetRotationLocked(napi_env env, napi_callback_info info);
 
     /*
      * Sub Window

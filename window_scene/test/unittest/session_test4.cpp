@@ -782,6 +782,20 @@ HWTEST_F(WindowSessionTest4, NotifySessionInfoLockedStateChange, TestSize.Level1
 }
 
 /**
+ * @tc.name: SetCallingSessionIdSessionListenser
+ * @tc.desc: SetCallingSessionIdSessionListenser Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, SetCallingSessionIdSessionListenser, TestSize.Level1)
+{
+    WLOGFI("SetCallingSessionIdSessionListenser begin!");
+    ASSERT_NE(session_, nullptr);
+    ProcessCallingSessionIdChangeFunc func;
+    session_->SetCallingSessionIdSessionListenser(std::move(func));
+    WLOGFI("SetCallingSessionIdSessionListenser end!");
+}
+
+/**
  * @tc.name: GetMainSession
  * @tc.desc: GetMainSession Test
  * @tc.type: FUNC

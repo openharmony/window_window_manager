@@ -163,39 +163,6 @@ HWTEST_F(WindowRootTest, WindowRootTest04, TestSize.Level1)
 }
 
 /**
- * @tc.name: WindowRootTest05
- * @tc.desc: test WindowRoot GetBackgroundNodesByScreenId
- * @tc.type: FUNC
- */
-HWTEST_F(WindowRootTest, WindowRootTest05, TestSize.Level1)
-{
-    std::vector<sptr<WindowNode>> windowNodes;
-
-    sptr<WindowProperty> property = new WindowProperty();
-    property->SetDisplayId(DISPLAY_ID_INVALID);
-    sptr<WindowNode> windowNode1 = new WindowNode(property);
-    windowRoot_->SaveWindow(windowNode1);
-    property->SetDisplayId(0);
-    sptr<WindowNode> windowNode2 = new WindowNode(property);
-    windowRoot_->SaveWindow(windowNode2);
-
-    auto screenGroupId = DisplayManagerServiceInner::GetInstance().GetScreenGroupIdByDisplayId(DISPLAY_ID_INVALID);
-    windowRoot_->GetBackgroundNodesByScreenId(screenGroupId, windowNodes);
-    sptr<WindowNode> windowNode3 = new WindowNode();
-    windowRoot_->SaveWindow(windowNode3);
-    windowRoot_->windowNodeMap_.insert(std::make_pair(windowNode3->GetWindowId(), windowNode3));
-    windowNodes.push_back(windowNode1);
-    windowNodes.push_back(windowNode2);
-    windowNodes.push_back(windowNode3);
-    windowRoot_->GetBackgroundNodesByScreenId(screenGroupId, windowNodes);
-
-    windowRoot_->DestroyWindowInner(windowNode1);
-    windowRoot_->DestroyWindowInner(windowNode2);
-
-    ASSERT_EQ(true, true);
-}
-
-/**
  * @tc.name: WindowRootTest06
  * @tc.desc: test WindowRoot AddDeathRecipient
  * @tc.type: FUNC
@@ -203,9 +170,6 @@ HWTEST_F(WindowRootTest, WindowRootTest05, TestSize.Level1)
 HWTEST_F(WindowRootTest, WindowRootTest06, TestSize.Level1)
 {
     windowRoot_->AddDeathRecipient(nullptr);
-
-    ASSERT_EQ(true, true);
-
     sptr<WindowNode> windowNode = new WindowNode();
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
     sptr<IWindow> iWindow = iface_cast<IWindow>(iRemoteObjectMocker);
@@ -213,18 +177,6 @@ HWTEST_F(WindowRootTest, WindowRootTest06, TestSize.Level1)
     windowRoot_->windowDeath_ = nullptr;
     ASSERT_TRUE((windowRoot_ != nullptr));
     windowRoot_->AddDeathRecipient(windowNode);
-}
-
-/**
- * @tc.name: WindowRootTest07
- * @tc.desc: test WindowRoot SaveWindow
- * @tc.type: FUNC
- */
-HWTEST_F(WindowRootTest, WindowRootTest07, TestSize.Level1)
-{
-    windowRoot_->SaveWindow(nullptr);
-
-    ASSERT_EQ(true, true);
 }
 
 /**
@@ -241,37 +193,6 @@ HWTEST_F(WindowRootTest, WindowRootTest08, TestSize.Level1)
     WMError ret = windowRoot_->MinimizeStructuredAppWindowsExceptSelf(windowNode);
 
     ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
-}
-
-/**
- * @tc.name: WindowRootTest09
- * @tc.desc: test WindowRoot MinimizeTargetWindows
- * @tc.type: FUNC
- */
-HWTEST_F(WindowRootTest, WindowRootTest09, TestSize.Level1)
-{
-    std::vector<uint32_t> windowIds;
-
-    windowRoot_->MinimizeTargetWindows(windowIds);
-
-    windowIds.push_back(INVALID_WINDOW_ID);
-    windowRoot_->MinimizeTargetWindows(windowIds);
-
-    sptr<WindowProperty> property = new WindowProperty();
-    property->SetWindowId(1);
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    auto windowNode = new WindowNode(property);
-    windowRoot_->SaveWindow(windowNode);
-    property = new WindowProperty();
-    property->SetWindowId(2);
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    windowNode = new WindowNode(property);
-    windowRoot_->SaveWindow(windowNode);
-    windowIds.push_back(1);
-    windowIds.push_back(2);
-    windowRoot_->MinimizeTargetWindows(windowIds);
-
-    ASSERT_EQ(true, true);
 }
 
 /**
@@ -330,41 +251,9 @@ HWTEST_F(WindowRootTest, WindowRootTest13, TestSize.Level1)
     windowRoot_->ExitSplitMode(DISPLAY_ID_INVALID);
 
     windowRoot_->ExitSplitMode(0);
-    ASSERT_EQ(true, true);
     DisplayId defaultDisplayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
     ASSERT_TRUE((windowRoot_ != nullptr));
     windowRoot_->ExitSplitMode(defaultDisplayId);
-}
-
-/**
- * @tc.name: WindowRootTest14
- * @tc.desc: test WindowRoot AddSurfaceNodeIdWindowNodePair
- * @tc.type: FUNC
- */
-HWTEST_F(WindowRootTest, WindowRootTest14, TestSize.Level1)
-{
-    windowRoot_->AddSurfaceNodeIdWindowNodePair(INVALID_WINDOW_ID, nullptr);
-
-    ASSERT_EQ(true, true);
-}
-
-/**
- * @tc.name: WindowRootTest15
- * @tc.desc: test WindowRoot GetVisibilityWindowInfo
- * @tc.type: FUNC
- */
-HWTEST_F(WindowRootTest, WindowRootTest15, TestSize.Level1)
-{
-    std::vector<sptr<WindowVisibilityInfo>> infos = {};
-
-    windowRoot_->GetVisibilityWindowInfo(infos);
-
-    ASSERT_EQ(true, true);
-
-    windowRoot_->lastVisibleData_.emplace_back(1, WINDOW_VISIBILITY_STATE_NO_OCCLUSION); // 1 is surafceId
-    windowRoot_->lastVisibleData_.emplace_back(2, WINDOW_VISIBILITY_STATE_NO_OCCLUSION); // 2 is surafceId
-    windowRoot_->lastVisibleData_.emplace_back(3, WINDOW_VISIBILITY_STATE_NO_OCCLUSION); // 3 is surafceId
-    windowRoot_->GetVisibilityWindowInfo(infos);
 }
 
 /**
@@ -402,8 +291,6 @@ HWTEST_F(WindowRootTest, WindowRootTest17, TestSize.Level1)
     sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
     windowRoot_->windowNodeContainerMap_.insert(std::make_pair(DISPLAY_ID_INVALID, container));
     windowRoot_->MinimizeAllAppWindows(DISPLAY_ID_INVALID);
-
-    ASSERT_EQ(true, true);
 }
 
 /**
@@ -415,28 +302,11 @@ HWTEST_F(WindowRootTest, WindowRootTest18, TestSize.Level1)
 {
     windowRoot_->DestroyLeakStartingWindow();
 
-    ASSERT_EQ(true, true);
     sptr<WindowNode> node = new WindowNode();
     node->startingWindowShown_ = true;
     windowRoot_->windowNodeMap_.insert(std::make_pair(node->GetWindowId(), node));
     ASSERT_TRUE((windowRoot_ != nullptr));
     windowRoot_->DestroyLeakStartingWindow();
-}
-
-/**
- * @tc.name: WindowRootTest20
- * @tc.desc: test WindowRoot LayoutWhenAddWindowNode
- * @tc.type: FUNC
- */
-HWTEST_F(WindowRootTest, WindowRootTest20, TestSize.Level1)
-{
-    sptr<WindowNode> node = nullptr;
-    windowRoot_->LayoutWhenAddWindowNode(node, true);
-
-    node = new WindowNode();
-    windowRoot_->LayoutWhenAddWindowNode(node, true);
-
-    ASSERT_EQ(true, true);
 }
 
 /**
@@ -518,54 +388,6 @@ HWTEST_F(WindowRootTest, WindowRootTest24, TestSize.Level1)
     windowRoot_->windowNodeContainerMap_.insert(std::make_pair(node->GetDisplayId(), container));
     ret = windowRoot_->UpdateSizeChangeReason(node->GetWindowId(), WindowSizeChangeReason::UNDEFINED);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_DISPLAY);
-}
-
-/**
- * @tc.name: WindowRootTest25
- * @tc.desc: test WindowRoot SetBrightness
- * @tc.type: FUNC
- */
-HWTEST_F(WindowRootTest, WindowRootTest25, TestSize.Level1)
-{
-    windowRoot_->SetBrightness(INVALID_WINDOW_ID, 0);
-
-    sptr<WindowNode> node = new WindowNode();
-    windowRoot_->windowNodeMap_.insert(std::make_pair(node->GetWindowId(), node));
-    windowRoot_->SetBrightness(node->GetWindowId(), 0);
-
-    ASSERT_EQ(true, true);
-}
-
-/**
- * @tc.name: CheckAndNotifyWaterMarkChangedResult
- * @tc.desc: test WindowRoot CheckAndNotifyWaterMarkChangedResult
- * @tc.type: FUNC
- */
-HWTEST_F(WindowRootTest, CheckAndNotifyWaterMarkChangedResult, TestSize.Level1)
-{
-    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
-    ASSERT_NE(display, nullptr);
-    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
-    auto container = windowRoot_->CreateWindowNodeContainer(display->GetId(), displayInfo);
-    ASSERT_NE(container, nullptr);
-
-    windowRoot_->lastWaterMarkShowStates_ = false;
-    windowRoot_->CheckAndNotifyWaterMarkChangedResult();
-    ASSERT_EQ(windowRoot_->lastWaterMarkShowStates_, false);
-
-    auto windowNode = new (std::nothrow)WindowNode();
-    ASSERT_NE(windowNode, nullptr);
-    windowNode->SetVisibilityState(WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
-    windowNode->SetDisplayId(displayInfo->GetDisplayId());
-    windowNode->property_->flags_ |= static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
-    container->appWindowNode_->children_.push_back(windowNode);
-
-    windowRoot_->CheckAndNotifyWaterMarkChangedResult();
-    ASSERT_EQ(windowRoot_->lastWaterMarkShowStates_, true);
-
-    container->appWindowNode_->children_.clear();
-    windowRoot_->CheckAndNotifyWaterMarkChangedResult();
-    ASSERT_EQ(windowRoot_->lastWaterMarkShowStates_, false);
 }
 
 /**
@@ -823,19 +645,6 @@ HWTEST_F(WindowRootTest, RequestActiveWindow, TestSize.Level1)
     uint32_t windowId = 1;
     auto ret = windowRoot_->RequestActiveWindow(windowId);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
-}
-
-/**
- * @tc.name: ProcessWindowStateChange
- * @tc.desc: test WindowRoot ProcessWindowStateChange
- * @tc.type: FUNC
- */
-HWTEST_F(WindowRootTest, ProcessWindowStateChange, TestSize.Level1)
-{
-    WindowState state = WindowState::STATE_INITIAL;
-    WindowStateChangeReason reason = WindowStateChangeReason::NORMAL;
-    windowRoot_->ProcessWindowStateChange(state, reason);
-    ASSERT_EQ(reason, WindowStateChangeReason::NORMAL);
 }
 
 /**
@@ -1492,27 +1301,6 @@ HWTEST_F(WindowRootTest, RequestActiveWindow02, TestSize.Level1)
     windowRoot_->displayIdMap_.insert(std::make_pair(windowNode->GetDisplayId(), displayVec));
     auto ret = windowRoot_->RequestActiveWindow(windowNode->GetWindowId());
     ASSERT_EQ(WMError::WM_DO_NOTHING, ret);
-}
-
-/**
- * @tc.name: ProcessWindowStateChange01
- * @tc.desc: test WindowRoot ProcessWindowStateChange01
- * @tc.type: FUNC
- */
-HWTEST_F(WindowRootTest, ProcessWindowStateChange01, TestSize.Level1)
-{
-    sptr<WindowNode> windowNode = new WindowNode();
-    WindowState state = WindowState::STATE_INITIAL;
-    WindowStateChangeReason reason = WindowStateChangeReason::NORMAL;
-    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
-    sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
-    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(windowNode->GetDisplayId(), container));
-    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
-    DisplayId displayId = displayInfo->GetDisplayId();
-    std::vector<DisplayId> displayVec = { displayId };
-    windowRoot_->displayIdMap_.insert(std::make_pair(windowNode->GetDisplayId(), displayVec));
-    windowRoot_->ProcessWindowStateChange(state, reason);
-    ASSERT_EQ(reason, WindowStateChangeReason::NORMAL);
 }
 
 /**

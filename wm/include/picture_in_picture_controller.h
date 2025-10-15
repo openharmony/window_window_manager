@@ -50,6 +50,9 @@ protected:
     wptr<PictureInPictureController> weakRef_ = nullptr;
     std::shared_ptr<XComponentController> mainWindowXComponentController_ = nullptr;
     int32_t firstHandleId_ = -1;
+
+private:
+    void DeletePIPMode();
 };
 } // namespace Rosen
 } // namespace OHOS
