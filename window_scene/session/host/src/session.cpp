@@ -2816,10 +2816,6 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
     if (CORRECTION_ENABLE && key == 0) {
         rotation = (rotation + ROTATION_90) % ROTATION_360;
     }
-    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
-        WSSnapshotHelper::GetInstance()->GetScreenStatus() == SCREEN_FOLDED) {
-        rotation = LANDSCAPE_INVERTED_ANGLE;
-    }
     auto rotate = WSSnapshotHelper::GetDisplayOrientation(rotation);
     if (persistentPixelMap || !SupportSnapshotAllSessionStatus()) {
         key = defaultStatus;
@@ -2846,10 +2842,6 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
             session->addSnapshotCallback_();
         }
         session->SetAddSnapshotCallback([]() {});
-        {
-            std::lock_guard<std::mutex> lock(session->saveSnapshotCallbackMutex_);
-            session->saveSnapshotCallback_();
-        }
         if (!requirePersist) {
             return;
         }
@@ -2867,12 +2859,12 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
                 "_" + std::to_string(key), true, ScenePersistentStorageType::MAXIMIZE_STATE);
         }
         session->scenePersistence_->ResetSnapshotCache();
-        Task removeSnapshotCallback = []() {};
+        Task saveSnapshotCallback = []() {};
         {
-            std::lock_guard lock(session->removeSnapshotCallbackMutex_);
-            removeSnapshotCallback = session->removeSnapshotCallback_;
+            std::lock_guard lock(session->saveSnapshotCallbackMutex_);
+            saveSnapshotCallback = session->saveSnapshotCallback_;
         }
-        session->scenePersistence_->SaveSnapshot(pixelMap, removeSnapshotCallback, key, rotate,
+        session->scenePersistence_->SaveSnapshot(pixelMap, saveSnapshotCallback, key, rotate,
             session->freeMultiWindow_.load());
         if (updateSnapshot) {
             session->SetExitSplitOnBackground(false);
@@ -3135,8 +3127,10 @@ void Session::UnregisterSessionChangeListeners()
     sessionInfoLockedStateChangeFunc_ = nullptr;
     contextTransparentFunc_ = nullptr;
     sessionRectChangeFunc_ = nullptr;
+    sessionWindowLimitsChangeFunc_ = nullptr;
     updateSessionLabelAndIconFunc_ = nullptr;
     onRaiseMainWindowAboveTarget_ = nullptr;
+    callingSessionIdChangeFunc_ = nullptr;
     WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", GetPersistentId());
 }
 
@@ -3198,7 +3192,9 @@ void Session::NotifySessionStateChange(const SessionState& state)
             static_cast<uint32_t>(state), session->GetPersistentId());
         if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
             session->keyboardStateChangeFunc_) {
-            session->keyboardStateChangeFunc_(state, session->GetSessionProperty()->GetKeyboardEffectOption());
+            const sptr<WindowSessionProperty>& property = session->GetSessionProperty();
+            session->keyboardStateChangeFunc_(
+                state, property->GetKeyboardEffectOption(), property->GetCallingSessionId());
         } else if (session->sessionStateChangeFunc_) {
             session->sessionStateChangeFunc_(state);
         } else {
@@ -4047,6 +4043,19 @@ void Session::SetKeyboardStateChangeListener(const NotifyKeyboardStateChangeFunc
         session->NotifySessionStateChange(newState);
         TLOGNI(WmsLogTag::WMS_KEYBOARD, "%{public}s id: %{public}d, state_: %{public}d, newState: %{public}d",
             where, session->GetPersistentId(), session->GetSessionState(), newState);
+    }, __func__);
+}
+
+void Session::SetCallingSessionIdSessionListenser(const ProcessCallingSessionIdChangeFunc&& func)
+{
+    TLOGD(WmsLogTag::DEFAULT, "in");
+    PostTask([weakThis = wptr(this), func = std::move(func), where = __func__]() {
+        auto session = weakThis.promote();
+        if (session == nullptr || func == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s session or func is null", where);
+            return;
+        }
+        session->callingSessionIdChangeFunc_ = std::move(func);
     }, __func__);
 }
 
@@ -5012,11 +5021,6 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     auto screenId = GetScreenId();
-    if (screenId == SCREEN_ID_INVALID) {
-        TLOGW(WmsLogTag::WMS_SCB,
-              "invalid screenId, %{public}s: %{public}s, sessionId: %{public}d, screenId:%{public}" PRIu64,
-              caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
-    }
     if (screenIdOfRSUIContext_ != screenId) {
         // Note: For the window corresponding to UIExtAbility, RSUIContext cannot be obtained
         // directly here because its server side is not SceneBoard. The acquisition of RSUIContext
@@ -5025,8 +5029,12 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
         rsUIContext_ = ScreenSessionManagerClient::GetInstance().GetRSUIContext(screenId);
         screenIdOfRSUIContext_ = screenId;
     }
+    if (rsUIContext_ == nullptr) {
+        TLOGI(WmsLogTag::WMS_SCB, "%{public}s: %{public}s, sessionId: %{public}d, screenId:%{public}" PRIu64,
+            caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
+    }
     TLOGD(WmsLogTag::WMS_SCB, "%{public}s: %{public}s, sessionId: %{public}d, screenId:%{public}" PRIu64,
-          caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
+            caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
     return rsUIContext_;
 }
 

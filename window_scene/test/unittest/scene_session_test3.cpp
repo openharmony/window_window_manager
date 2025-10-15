@@ -466,7 +466,10 @@ HWTEST_F(SceneSessionTest3, SetRestoreMainWindowCallback, TestSize.Level1)
     info.bundleName_ = "SetRestoreMainWindowCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
-    sceneSession->SetRestoreMainWindowCallback([] { return; });
+    sceneSession->SetRestoreMainWindowCallback([](
+        bool isAppSupportPhoneInPc, int32_t callingPid, uint32_t callingToken) {
+        return;
+    });
     ASSERT_NE(nullptr, sceneSession->onRestoreMainWindowFunc_);
 }
 

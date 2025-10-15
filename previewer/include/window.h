@@ -284,7 +284,7 @@ public:
     virtual bool IsTransparent() const = 0;
     virtual WMError SetBrightness(float brightness) = 0;
     virtual float GetBrightness() const = 0;
-    virtual WMError SetCallingWindow(uint32_t windowId) = 0;
+    virtual WMError ChangeCallingWindowId(uint32_t windowId) = 0;
     virtual WMError SetPrivacyMode(bool isPrivacyMode) = 0;
     virtual bool IsPrivacyMode() const = 0;
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) = 0;
@@ -487,7 +487,7 @@ public:
     virtual WMError RegisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
     virtual WMError UnregisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
     virtual WMError SetWindowLimits(WindowLimits& windowLimits, bool isForcible = false) { return WMError::WM_OK; }
-    virtual WMError GetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; }
+    virtual WMError GetWindowLimits(WindowLimits& windowLimits, bool getVirtualPixel = false) { return WMError::WM_OK; }
     virtual WMError EnableDrag(bool enableDrag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener)
     {
@@ -583,6 +583,18 @@ public:
     virtual WMError Recover(uint32_t reason = 0) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     virtual WMError Maximize(MaximizePresentation present) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Maximize the window with the specified presentation mode and waterfall resident state.
+     *
+     * @param presentation The presentation mode used for window layout when maximizing.
+     * @param waterfallState The waterfall resident state to apply when maximizing.
+     * @return WMError::WM_OK on success, or appropriate error code on failure.
+     */
+    virtual WMError Maximize(MaximizePresentation presentation, WaterfallResidentState waterfallState)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     virtual WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask)
     {
@@ -869,6 +881,21 @@ public:
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
+    /**
+     * @brief Set whether this window limits screen rotation when this window is shown.
+     *
+     * @param locked Screen rotation lock status to set.
+     * @return WMError::WM_OK on success, others means failed.
+     */
+    virtual WMError SetRotationLocked(bool locked) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    
+    /**
+     * @brief Get whether this window limits screen rotation when this window is shown.
+     * @param locked Screen rotation lock status to get.
+     *
+     * @return WMError::WM_OK on success, others means failed.
+     */
+    virtual WMError GetRotationLocked(bool& locked) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }

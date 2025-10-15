@@ -219,7 +219,7 @@ float WindowOption::GetBrightness() const
     return brightness_;
 }
 
-void WindowOption::SetCallingWindow(uint32_t windowId)
+void WindowOption::ChangeCallingWindowId(uint32_t windowId)
 {
     callingWindow_ = windowId;
 }
@@ -451,6 +451,16 @@ void WindowOption::SetSubWindowOutlineEnabled(bool outlineEnabled)
 bool WindowOption::IsSubWindowOutlineEnabled() const
 {
     return subWindowOutlineEnabled_;
+}
+
+int64_t WindowOption::GetStartModalExtensionTimeStamp() const
+{
+    return startModalExtensionTimeStamp_;
+}
+
+void WindowOption::SetStartModalExtensionTimeStamp(int64_t timeStamp)
+{
+    startModalExtensionTimeStamp_ = timeStamp;
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -655,6 +655,7 @@ void WindowAdapter::OnUserSwitch()
     ClearWindowAdapter();
     InitSSMProxy();
     ReregisterWindowManagerAgent();
+    RecoverWindowPropertyChangeFlag();
 }
 
 bool WindowAdapter::InitSSMProxy()
@@ -996,6 +997,15 @@ WMError WindowAdapter::UpdateSessionWindowVisibilityListener(int32_t persistentI
     return static_cast<WMError>(ret);
 }
 
+WMError WindowAdapter::UpdateSessionOcclusionStateListener(int32_t persistentId, bool haveListener)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
+    return wmsProxy->UpdateSessionOcclusionStateListener(persistentId, haveListener);
+}
+
 WMError WindowAdapter::ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
@@ -1107,13 +1117,15 @@ WMError WindowAdapter::RequestFocusStatusBySA(int32_t persistentId, bool isFocus
 }
 
 void WindowAdapter::AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
-    const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, bool isConstrainedModal)
+    const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, int64_t startModalExtensionTimeStamp,
+    bool isConstrainedModal)
 {
     INIT_PROXY_CHECK_RETURN();
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_IF_NULL(wmsProxy);
-    wmsProxy->AddExtensionWindowStageToSCB(sessionStage, token, surfaceNodeId, isConstrainedModal);
+    wmsProxy->AddExtensionWindowStageToSCB(sessionStage, token, surfaceNodeId, startModalExtensionTimeStamp,
+        isConstrainedModal);
 }
 
 void WindowAdapter::RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
@@ -1190,22 +1202,22 @@ WMError WindowAdapter::GetFreeMultiWindowEnableState(bool& enable)
     return static_cast<WMError>(wmsProxy->GetFreeMultiWindowEnableState(enable));
 }
 
-WMError WindowAdapter::GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus)
+WMError WindowAdapter::GetCallingWindowWindowStatus(uint32_t callingWindowId, WindowStatus& windowStatus)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
-    return static_cast<WMError>(wmsProxy->GetCallingWindowWindowStatus(persistentId, windowStatus));
+    return static_cast<WMError>(wmsProxy->GetCallingWindowWindowStatus(callingWindowId, windowStatus));
 }
 
-WMError WindowAdapter::GetCallingWindowRect(int32_t persistentId, Rect& rect)
+WMError WindowAdapter::GetCallingWindowRect(uint32_t callingWindowId, Rect& rect)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
-    return static_cast<WMError>(wmsProxy->GetCallingWindowRect(persistentId, rect));
+    return static_cast<WMError>(wmsProxy->GetCallingWindowRect(callingWindowId, rect));
 }
 
 WMError WindowAdapter::GetWindowModeType(WindowModeType& windowModeType)

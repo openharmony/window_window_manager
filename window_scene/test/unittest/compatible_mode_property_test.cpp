@@ -347,6 +347,33 @@ HWTEST_F(CompatibleModePropertyTest, CopyFrom, TestSize.Level1)
     EXPECT_EQ(property->IsAdaptToSimulationScale(), true);
 }
 
+/**
+
+@tc.name: SetIsFullScreenStart
+@tc.desc: SetIsFullScreenStart
+@tc.type: FUNC
+*/
+HWTEST_F(CompatibleModePropertyTest, SetIsFullScreenStart, TestSize.Level1)
+{
+    sptr<CompatibleModeProperty> property = sptr<CompatibleModeProperty>::MakeSptr();
+    property->SetIsFullScreenStart(true);
+    EXPECT_EQ(property->isFullScreenStart_, true);
+    property->SetIsFullScreenStart(false);
+    EXPECT_EQ(property->isFullScreenStart_, false);
+}
+/**
+
+@tc.name: IsFullScreenStart
+@tc.desc: IsFullScreenStart
+@tc.type: FUNC
+*/
+HWTEST_F(CompatibleModePropertyTest, IsFullScreenStart, TestSize.Level1)
+{
+    sptr<CompatibleModeProperty> property = sptr<CompatibleModeProperty>::MakeSptr();
+    EXPECT_EQ(property->IsFullScreenStart(), false);
+    property->isFullScreenStart_ = true;
+    EXPECT_EQ(property->IsFullScreenStart(), true);
+}
 
 /**
  * @tc.name: SetIsSupportRotateFullScreen

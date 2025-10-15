@@ -823,6 +823,23 @@ napi_value CreateJsBoundingRectsArrayObject(napi_env env, std::vector<DMRect> bo
     return arrayValue;
 }
 
+napi_value CreateJsBrightnessInfo(napi_env env, const ScreenBrightnessInfo& brightnessInfo)
+{
+    TLOGD(WmsLogTag::DMS, "called");
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Failed to get object");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "currentHeadroom", CreateJsValue(env, brightnessInfo.currentHeadroom));
+    napi_set_named_property(env, objValue, "maxHeadroom", CreateJsValue(env, brightnessInfo.maxHeadroom));
+    napi_set_named_property(env, objValue, "sdrNits", CreateJsValue(env, brightnessInfo.sdrNits));
+
+    return objValue;
+}
+
 void NapiSetNamedProperty(napi_env env, napi_value objValue, sptr<DisplayInfo> info)
 {
     napi_set_named_property(env, objValue, "id", CreateJsValue(env, static_cast<uint32_t>(info->GetDisplayId())));

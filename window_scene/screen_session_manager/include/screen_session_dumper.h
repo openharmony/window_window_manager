@@ -38,6 +38,7 @@ public:
     ~ScreenSessionDumper() = default;
 
     bool IsNumber(std::string str);
+    static bool IsConcurrentUser();
     void ExecuteDumpCmd();
     void DumpEventTracker(EventTracker& tracker);
     void DumpFreezedPidList(std::set<int32_t> pidList);
@@ -47,6 +48,8 @@ private:
     void ShowHelpInfo();
     void ShowAllScreenInfo();
     void ShowClientScreenInfo();
+    void ShowUserScreenRelation();
+    void AppendSectionLine();
     void ShowVisibleAreaDisplayInfo();
     void DumpFoldStatus();
     void DumpTentMode();
@@ -61,6 +64,7 @@ private:
     void DumpScreenInfoById(ScreenId id);
     void DumpVisibleAreaDisplayInfoById(DisplayId id);
     void DumpScreenPropertyById(ScreenId id);
+    void DumpScreenUserRelation(ScreenId id);
     void ExecuteInjectCmd();
     void ExecuteInjectCmd2();
 

@@ -601,7 +601,7 @@ HWTEST_F(sceneSessionManagerProxyTest, AddExtensionWindowStageToSCB, TestSize.Le
     ASSERT_NE(sessionStage, nullptr);
     sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(token, nullptr);
-    sceneSessionManagerProxy->AddExtensionWindowStageToSCB(sessionStage, token, 12345);
+    sceneSessionManagerProxy->AddExtensionWindowStageToSCB(sessionStage, token, 12345, -1);
 }
 
 /**
@@ -1088,6 +1088,46 @@ HWTEST_F(sceneSessionManagerProxyTest, RecoverWatermarkImageForApp01, TestSize.L
 
     remoteMocker->SetRequestResult(ERR_NONE);
     ret = proxy->RecoverWatermarkImageForApp(watermarkName);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: UpdateSessionOcclusionStateListener01
+ * @tc.desc: recover watermark image for app
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionOcclusionStateListener01, TestSize.Level1)
+{
+    auto tempProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    auto ret = tempProxy->UpdateSessionOcclusionStateListener(1, true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
+    ASSERT_NE(proxy, nullptr);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ret = proxy->UpdateSessionOcclusionStateListener(1, true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    ret = proxy->UpdateSessionOcclusionStateListener(1, true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    ret = proxy->UpdateSessionOcclusionStateListener(1, true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteBoolErrorFlag(false);
+
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ret = proxy->UpdateSessionOcclusionStateListener(1, true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    ret = proxy->UpdateSessionOcclusionStateListener(1, true);
     EXPECT_EQ(ret, WMError::WM_OK);
 }
 

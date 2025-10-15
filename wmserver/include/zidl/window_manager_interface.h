@@ -208,6 +208,10 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WMError UpdateSessionOcclusionStateListener(int32_t persistentId, bool haveListener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId)
     {
         return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
@@ -254,7 +258,8 @@ public:
         return WMError::WM_OK;
     }
     virtual void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
-        const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, bool isConstrainedModal = false) {}
+        const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, int64_t startModalExtensionTimeStamp,
+        bool isConstrainedModal = false) {}
     virtual void RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
         const sptr<IRemoteObject>& token, bool isConstrainedModal = false) {}
     virtual void UpdateModalExtensionRect(const sptr<IRemoteObject>& token, Rect rect) {}
@@ -281,11 +286,11 @@ public:
         return WSError::WS_OK;
     }
     virtual WSError GetFreeMultiWindowEnableState(bool& enable) { return WSError::WS_OK; }
-    virtual WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus)
+    virtual WMError GetCallingWindowWindowStatus(uint32_t callingWindowId, WindowStatus& windowStatus)
     {
         return WMError::WM_OK;
     }
-    virtual WMError GetCallingWindowRect(int32_t persistentId, Rect& rect)
+    virtual WMError GetCallingWindowRect(uint32_t callingWindowId, Rect& rect)
     {
         return WMError::WM_OK;
     }

@@ -192,6 +192,44 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayChangeInfoChanged, TestSize.
 }
 
 /**
+ * @tc.name: NotifyDisplayChangeInfoChanged
+ * @tc.desc: NotifyDisplayChangeInfoChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, NotifyBrightnessInfoChanged, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ScreenBrightnessInfo info;
+    auto proxy = sptr<DisplayManagerAgentProxy>::MakeSptr(nullptr);
+
+    proxy->NotifyBrightnessInfoChanged(0, info);
+    EXPECT_TRUE(g_logMsg.find("remote is nullptr") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->NotifyBrightnessInfoChanged(0, info);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    displayManagerAgentProxy->NotifyBrightnessInfoChanged(0, info);
+    EXPECT_TRUE(g_logMsg.find("Write screenId failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteFloatErrorFlag(true);
+    displayManagerAgentProxy->NotifyBrightnessInfoChanged(0, info);
+    EXPECT_TRUE(g_logMsg.find("write info failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    g_logMsg.clear();
+    displayManagerAgentProxy->NotifyBrightnessInfoChanged(0, info);
+    EXPECT_TRUE(g_logMsg.find("write info failed") != std::string::npos);
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
  * @tc.name: NotifyDisplayModeChanged01
  * @tc.desc: NotifyDisplayModeChanged
  * @tc.type: FUNC

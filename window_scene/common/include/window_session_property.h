@@ -82,6 +82,7 @@ public:
     void SetMaximizeMode(MaximizeMode mode);
     void SetWindowMode(WindowMode mode);
     void SetWindowLimits(const WindowLimits& windowLimits);
+    void SetWindowLimitsVP(const WindowLimits& windowLimits);
     void SetUserWindowLimits(const WindowLimits& windowLimits);
     void SetConfigWindowLimitsVP(const WindowLimits& windowLimitsVP);
     void SetLastLimitsVpr(float vpr);
@@ -157,6 +158,7 @@ public:
     MaximizeMode GetMaximizeMode() const;
     WindowMode GetWindowMode() const;
     WindowLimits GetWindowLimits() const;
+    WindowLimits GetWindowLimitsVP() const;
     WindowLimits GetUserWindowLimits() const;
     WindowLimits GetConfigWindowLimitsVP() const;
     float GetLastLimitsVpr() const;
@@ -267,6 +269,8 @@ public:
     bool GetPcAppInpadOrientationLandscape() const;
     void SetMobileAppInPadLayoutFullScreen(bool isMobileAppInPadLayoutFullScreen);
     bool GetMobileAppInPadLayoutFullScreen() const;
+    void SetRotationLocked(bool locked);
+    bool GetRotationLocked() const;
 
     /*
      * Window Lifecycle
@@ -336,6 +340,7 @@ public:
     bool IsSplitDisabled() const;
     bool IsWindowLimitDisabled() const;
     bool IsDecorFullscreenDisabled() const;
+    bool IsFullScreenStart() const;
     bool IsSupportRotateFullScreen() const;
     bool IsAdaptToSubWindow() const;
     bool IsAdaptToSimulationScale() const;
@@ -410,6 +415,7 @@ private:
     bool WriteActionUpdateExclusivelyHighlighted(Parcel& parcel);
     bool WriteActionUpdateFollowScreenChange(Parcel& parcel);
     bool WriteActionUpdateAspectRatio(Parcel& parcel);
+    bool WriteActionUpdateRotationLockChange(Parcel& parcel);
     void ReadActionUpdateTurnScreenOn(Parcel& parcel);
     void ReadActionUpdateKeepScreenOn(Parcel& parcel);
     void ReadActionUpdateViewKeepScreenOn(Parcel& parcel);
@@ -443,6 +449,7 @@ private:
     void ReadActionUpdateExclusivelyHighlighted(Parcel& parcel);
     void ReadActionUpdateFollowScreenChange(Parcel& parcel);
     void ReadActionUpdateAspectRatio(Parcel& parcel);
+    void ReadActionUpdateRotationLockChange(Parcel& parcel);
     std::string windowName_;
     SessionInfo sessionInfo_;
     mutable std::mutex windowRectMutex_;
@@ -483,8 +490,9 @@ private:
     WindowMode windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     WindowState windowState_ = WindowState::STATE_INITIAL;
     WindowLimits limits_;
-    WindowLimits userLimits_;
-    WindowLimits configLimitsVP_;
+    WindowLimits limitsVP_ = WindowLimits::DEFAULT_VP_LIMITS();
+    WindowLimits userLimits_ = WindowLimits::DEFAULT_VP_LIMITS();
+    WindowLimits configLimitsVP_ = WindowLimits::DEFAULT_VP_LIMITS();
     float lastVpr_ = 0.0f;
     PiPTemplateInfo pipTemplateInfo_ = {};
     FloatingBallTemplateInfo fbTemplateInfo_ = {};
@@ -616,6 +624,7 @@ private:
     bool isPcAppInpadSpecificSystemBarInvisible_ = false;
     bool isPcAppInpadOrientationLandscape_ = false;
     bool isMobileAppInPadLayoutFullScreen_ = false;
+    bool isRotationLock_ = false;
 
     sptr<CompatibleModeProperty> compatibleModeProperty_ = nullptr;
 
@@ -667,6 +676,9 @@ public:
     void SetDisableDecorFullscreen(bool disableDecorFullscreen);
     bool IsDecorFullscreenDisabled() const;
 
+    void SetIsFullScreenStart(bool isFullScreenStart);
+    bool IsFullScreenStart() const;
+
     void SetIsSupportRotateFullScreen(bool isSupportRotateFullScreen);
     bool IsSupportRotateFullScreen() const;
 
@@ -694,6 +706,7 @@ public:
         ss << "disableFullScreen_:" << disableFullScreen_<< " ";
         ss << "disableWindowLimit_:" << disableWindowLimit_<< " ";
         ss << "disableDecorFullscreen_:" << disableDecorFullscreen_<< " ";
+        ss << "isFullScreenStart_:" << isFullScreenStart_<< " ";
         ss << "isSupportRotateFullScreen_:" << isSupportRotateFullScreen_ << " ";
         ss << "isAdaptToSubWindow_:" << isAdaptToSubWindow_ << " ";
         ss << "isAdaptToSimulationScale_:" << isAdaptToSimulationScale_ << " ";
@@ -712,6 +725,7 @@ private:
     bool disableSplit_ { false };
     bool disableWindowLimit_ { false };
     bool disableDecorFullscreen_ { false };
+    bool isFullScreenStart_ { false };
     bool isSupportRotateFullScreen_ { false };
     bool isAdaptToSubWindow_ { false };
     bool isAdaptToSimulationScale_ { false };
@@ -765,18 +779,20 @@ struct AppForceLandscapeConfig : public Parcelable {
     std::string homePage_ = "";
     int32_t supportSplit_ = -1;
     std::string arkUIOptions_ = "";
+    bool ignoreOrientation_ = false;
 
     AppForceLandscapeConfig() {}
     AppForceLandscapeConfig(int32_t mode, const std::string& homePage, int32_t supportSplit,
-        const std::string& arkUIOptions) : mode_(mode), homePage_(homePage), supportSplit_(supportSplit),
-        arkUIOptions_(arkUIOptions) {}
+        const std::string& arkUIOptions, bool isIgnoreOrientation) : mode_(mode), homePage_(homePage),
+        supportSplit_(supportSplit), arkUIOptions_(arkUIOptions), ignoreOrientation_(isIgnoreOrientation) {}
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteInt32(mode_) ||
             !parcel.WriteString(homePage_) ||
             !parcel.WriteInt32(supportSplit_) ||
-            !parcel.WriteString(arkUIOptions_)) {
+            !parcel.WriteString(arkUIOptions_) ||
+            !parcel.WriteBool(ignoreOrientation_)) {
             return false;
         }
         return true;
@@ -791,7 +807,8 @@ struct AppForceLandscapeConfig : public Parcelable {
         if (!parcel.ReadInt32(config->mode_) ||
             !parcel.ReadString(config->homePage_) ||
             !parcel.ReadInt32(config->supportSplit_) ||
-            !parcel.ReadString(config->arkUIOptions_)) {
+            !parcel.ReadString(config->arkUIOptions_) ||
+            !parcel.ReadBool(config->ignoreOrientation_)) {
             return nullptr;
         }
         return config.release();

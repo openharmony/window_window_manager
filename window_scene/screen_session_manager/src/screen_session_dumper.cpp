@@ -23,6 +23,7 @@
 #include "screen_session_manager.h"
 #include "session_permission.h"
 #include "screen_rotation_property.h"
+#include "screen_scene_config.h"
 #include "screen_sensor_connector.h"
 #include "parameters.h"
 #include "fold_screen_controller/super_fold_state_manager.h"
@@ -125,6 +126,11 @@ bool ScreenSessionDumper::IsNumber(std::string str)
     return true;
 }
 
+bool ScreenSessionDumper::IsConcurrentUser()
+{
+    return ScreenSceneConfig::IsConcurrentUser();
+}
+
 void ScreenSessionDumper::OutputDumpInfo()
 {
     if (fd_ < 0) {
@@ -158,6 +164,10 @@ void ScreenSessionDumper::ExecuteDumpCmd()
         ShowAllScreenInfo();
         ShowVisibleAreaDisplayInfo();
         ShowClientScreenInfo();
+        if (IsConcurrentUser()) {
+            ShowUserScreenRelation();
+        }
+        AppendSectionLine();
     } else if (params_[0] == ARG_DUMP_FOLD_STATUS) {
         DumpFoldStatus();
     }
@@ -354,6 +364,21 @@ void ScreenSessionDumper::ShowClientScreenInfo()
 {
     std::string clientInfos = ScreenSessionManager::GetInstance().DumperClientScreenSessions();
     dumpInfo_.append(clientInfos);
+}
+
+void ScreenSessionDumper::ShowUserScreenRelation()
+{
+    std::ostringstream oss;
+    dumpInfo_.append("------- ConcurrentUser-Screen Relation --------\n");
+    std::vector<ScreenId> screenIds = ScreenSessionManager::GetInstance().GetAllScreenIds();
+    for (auto screenId : screenIds) {
+        DumpScreenUserRelation(screenId);
+    }
+}
+
+void ScreenSessionDumper::AppendSectionLine()
+{
+    dumpInfo_.append("-----------------------------------------------\n");
 }
 
 void ScreenSessionDumper::ShowVisibleAreaDisplayInfo()
@@ -709,6 +734,58 @@ void ScreenSessionDumper::DumpScreenPropertyById(ScreenId id)
         << screenProperty.GetDisplayGroupId() << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "MainDisplayIdOfGroup "
         << screenProperty.GetMainDisplayIdOfGroup() << std::endl;
+    dumpInfo_.append(oss.str());
+}
+
+void ScreenSessionDumper::DumpScreenUserRelation(ScreenId id)
+{
+    constexpr int maxLineWidth = 60;
+    const auto& tempMap = ScreenSessionManager::GetInstance().GetUserScreenMap();
+    std::vector<int32_t> userVector;
+    for (const auto& [userId, UserScreenInfo] : tempMap) {
+        if (UserScreenInfo.screenId == id) {
+            userVector.push_back(userId);
+        }
+    }
+    if (userVector.empty()) {
+        return;
+    }
+ 
+    std::ostringstream oss;
+    oss << std::left << std::setw(LINE_WIDTH) << "ScreenId:" << id << std::endl;
+ 
+    std::ostringstream userStream;
+    for (size_t i = 0; i < userVector.size(); ++i) {
+        if (i != 0) {
+            userStream << " ";
+        }
+        userStream << userVector[i];
+    }
+    std::string allUserIds = userStream.str();
+ 
+    std::string prefix = "User:";
+    int valueStartCol = LINE_WIDTH;
+    size_t pos = 0;
+    bool firstLine = true;
+    while (pos < allUserIds.size()) {
+        std::ostringstream lineOss;
+        if (firstLine) {
+            lineOss << std::left << std::setw(LINE_WIDTH) << prefix;
+        } else {
+            lineOss << std::left << std::setw(LINE_WIDTH) << "";
+        }
+        int remain = maxLineWidth - valueStartCol;
+        size_t nextBreak = allUserIds.find_last_of(" ", pos + remain);
+        if (nextBreak == std::string::npos || nextBreak <= pos) {
+            lineOss << allUserIds.substr(pos);
+            pos = allUserIds.size();
+        } else {
+            lineOss << allUserIds.substr(pos, nextBreak - pos);
+            pos = nextBreak + 1;
+        }
+        oss << lineOss.str() << "\n";
+        firstLine = false;
+    }
     dumpInfo_.append(oss.str());
 }
 

@@ -409,5 +409,38 @@ void JsDisplayListener::OnAvailableAreaChanged(DMRect area)
         TLOGE(WmsLogTag::DMS, "env is nullptr");
     }
 }
+
+void JsDisplayListener::OnBrightnessInfoChanged(DisplayId id, const ScreenBrightnessInfo& info)
+{
+    std::lock_guard<std::mutex> lock(mtx_);
+    TLOGI(WmsLogTag::DMS, "called");
+    if (jsCallBack_.empty()) {
+        TLOGE(WmsLogTag::DMS, "not register!");
+        return;
+    }
+    if (jsCallBack_.find(EVENT_BRIGHTNESS_INFO_CHANGED) == jsCallBack_.end()) {
+        TLOGE(WmsLogTag::DMS, "not this event, return");
+        return;
+    }
+    auto napiTask = [self = weakRef_, id, info, env = env_]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnBrightnessInfoChanged");
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGE(WmsLogTag::DMS, "[NAPI]this listener or env is nullptr");
+            return;
+        }
+        napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(id)), CreateJsBrightnessInfo(env, info)};
+        thisListener->CallJsMethod(EVENT_BRIGHTNESS_INFO_CHANGED, argv, ArraySize(argv));
+    };
+    
+    if (env_ != nullptr) {
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnBrightnessInfoChanged");
+        if (ret != napi_status::napi_ok) {
+            TLOGE(WmsLogTag::DMS, "Failed to sendEvent.");
+        }
+    } else {
+        TLOGE(WmsLogTag::DMS, "env is nullptr");
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
