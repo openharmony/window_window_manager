@@ -8440,7 +8440,27 @@ void JsSceneSession::ProcessRestartAppRegister()
 void JsSceneSession::OnRestartApp(const SessionInfo& info)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
-    auto task = [weakThis = wptr(this), info, persistentId = persistentId_, where = __func__, env = env_] {
+    std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
+    if (!info.isRestartApp_) {
+        SessionIdentityInfo identityInfo = { info.bundleName_, info.moduleName_, info.abilityName_,
+            info.appIndex_, info.appInstanceKey_, info.windowType_, info.isAtomicService_,
+            info.specifiedFlag_ };
+        sptr<SceneSession> sceneSession =
+            SceneSessionManager::GetInstance().GetSceneSessionByIdentityInfo(identityInfo);
+        if (!sceneSession) {
+            sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
+        } else {
+            sceneSession->NotifyRestart();
+        }
+        if (!sceneSession) {
+            TLOGE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr");
+            return;
+        }
+        sceneSession->SetSessionInfoCallerPersistentId(info.callerPersistentId_);
+        sceneSession->SetRestartApp(true);
+        sessionInfo = std::make_shared<SessionInfo>(sceneSession->GetSessionInfo());
+    }
+    auto task = [weakThis = wptr(this), sessionInfo, persistentId = persistentId_, where = __func__, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: jsSceneSession id:%{public}d has been destroyed",
@@ -8451,26 +8471,6 @@ void JsSceneSession::OnRestartApp(const SessionInfo& info)
         if (!jsCallBack) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: jsCallBack is nullptr", where);
             return;
-        }
-        std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
-        if (!info.isRestartApp_) {
-            SessionIdentityInfo identityInfo = { info.bundleName_, info.moduleName_, info.abilityName_,
-                info.appIndex_, info.appInstanceKey_, info.windowType_, info.isAtomicService_,
-                info.specifiedFlag_ };
-            sptr<SceneSession> sceneSession =
-                SceneSessionManager::GetInstance().GetSceneSessionByIdentityInfo(identityInfo);
-            if (!sceneSession) {
-                sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
-            } else {
-                sceneSession->NotifyRestart();
-            }
-            if (!sceneSession) {
-                TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: sceneSession is nullptr", where);
-                return;
-            }
-            sceneSession->SetSessionInfoCallerPersistentId(info.callerPersistentId_);
-            sceneSession->SetRestartApp(true);
-            sessionInfo = std::make_shared<SessionInfo>(sceneSession->GetSessionInfo());
         }
         napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
         if (jsSessionInfo == nullptr) {

@@ -358,7 +358,7 @@ public:
     bool GetSkipSelfWhenShowOnVirtualScreen() const;
     DisplayId GetDisplayId() const { return GetSessionProperty()->GetDisplayId(); }
     void SetRestartApp(bool restartApp);
-    bool GetRestartApp();
+    bool GetRestartApp() const;
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);

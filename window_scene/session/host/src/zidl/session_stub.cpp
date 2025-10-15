@@ -2418,7 +2418,7 @@ int SessionStub::HandleNotifyIsFullScreenInForceSplitMode(MessageParcel& data, M
 
 int SessionStub::HandleRestartApp(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "HandleRestartApp");
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
     std::shared_ptr<AAFwk::Want> want = std::shared_ptr<AAFwk::Want>(data.ReadParcelable<AAFwk::Want>());
     if (!want) {
         TLOGE(WmsLogTag::WMS_LIFE, "read want error");

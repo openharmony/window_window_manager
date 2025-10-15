@@ -3953,7 +3953,7 @@ WSError SessionProxy::RestartApp(const std::shared_ptr<AAFwk::Want>& want)
     MessageOption option;
     if (want == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "want is null");
-        return WSError::WS_ERROR_IPC_FAILED;
+        return WSError::WS_ERROR_INVALID_PARAM;
     }
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_LIFE, "WriteInterfaceToken failed");
