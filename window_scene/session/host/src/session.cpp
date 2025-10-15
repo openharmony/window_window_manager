@@ -3877,7 +3877,7 @@ void Session::SetRestartApp(bool restartApp)
     sessionInfo_.isRestartApp_ = restartApp;
 }
 
-bool Session::GetRestartApp()
+bool Session::GetRestartApp() const
 {
     return sessionInfo_.isRestartApp_;
 }
