@@ -2637,7 +2637,7 @@ HWTEST_F(ScreenSessionManagerTest, RecoveryResolutionEffect, TestSize.Level1)
     ASSERT_EQ(externalSession, screenSession2);
 
     auto ret = ssm_->RecoveryResolutionEffect();
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
 
     ssm_->curResolutionEffectEnable_ = true;
     ret = ssm_->RecoveryResolutionEffect();
@@ -2654,6 +2654,114 @@ HWTEST_F(ScreenSessionManagerTest, RecoveryResolutionEffect, TestSize.Level1)
     ssm_->curResolutionEffectEnable_ = false;
     ssm_->screenSessionMap_.erase(51);
     ssm_->screenSessionMap_.erase(52);
+}
+/**
+ * @tc.name: SetInternalScreenResolutionEffect
+ * @tc.desc: SetInternalScreenResolutionEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetInternalScreenResolutionEffect, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+
+    sptr<ScreenSession> screenSession = new ScreenSession(51, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, screenSession);
+    screenSession->SetScreenType(ScreenType::REAL);
+
+    DMRect targetRect = {0, 10, 3120, 2080};
+    ssm_->SetInternalScreenResolutionEffect(screenSession, targetRect);
+    EXPECT_EQ(screenSession->GetScreenProperty().GetBounds().rect_.width_, 3120);
+    EXPECT_EQ(screenSession->GetScreenProperty().GetBounds().rect_.height_, 2080);
+    EXPECT_EQ(screenSession->GetScreenProperty().GetMirrorWidth(), 3120);
+    EXPECT_EQ(screenSession->GetScreenProperty().GetMirrorHeight(), 2080);
+    EXPECT_EQ(screenSession->GetScreenProperty().GetValidWidth(), 3120);
+    EXPECT_EQ(screenSession->GetScreenProperty().GetValidHeight(), 2080);
+    EXPECT_EQ(screenSession->GetScreenProperty().GetInputOffsetY(), 10);
+}
+
+/**
+ * @tc.name: SetExternalScreenResolutionEffect
+ * @tc.desc: SetExternalScreenResolutionEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetExternalScreenResolutionEffect, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+
+    sptr<ScreenSession> screenSession = new ScreenSession(51, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, screenSession);
+    screenSession->SetScreenType(ScreenType::REAL);
+
+    DMRect targetRect = {0, 10, 3120, 2080};
+    ssm_->SetExternalScreenResolutionEffect(screenSession, targetRect);
+    EXPECT_EQ(screenSession->GetScreenProperty().GetMirrorWidth(), 3120);
+    EXPECT_EQ(screenSession->GetScreenProperty().GetMirrorHeight(), 2080);
+    auto phyScreenSession = ssm_->GetPhysicalScreenSession(screenSession->GetRSScreenId());
+    EXPECT_EQ(nullptr, phyScreenSession);
+}
+
+/**
+ * @tc.name: HandleVirtualScreenMirrorRegion
+ * @tc.desc: HandleVirtualScreenMirrorRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleVirtualScreenMirrorRegion, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+
+    sptr<ScreenSession> virtualSession = new ScreenSession(51, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, virtualSession);
+    virtualSession->SetVirtualScreenFlag(VirtualScreenFlag::CAST);
+    virtualSession->SetMirrorScreenType(MirrorScreenType::VIRTUAL_MIRROR);
+
+    sptr<ScreenSession> internalSession = new ScreenSession(52, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, internalSession);
+    internalSession->SetScreenType(ScreenType::REAL);
+    internalSession->isInternal_ = true;
+    RRect Bounds = RRect({ 0, 0, 100, 100}, 0.0f, 0.0f);
+    internalSession->SetBounds(Bounds);
+
+    bool ret = ssm_->HandleVirtualScreenMirrorRegion();
+    EXPECT_FALSE(ret);
+
+    ssm_->screenSessionMap_[51] = virtualSession;
+    ssm_->screenSessionMap_[52] = internalSession;
+    ret = ssm_->HandleVirtualScreenMirrorRegion();
+    EXPECT_TRUE(ret);
+    DMRect expectedRect1 = {0, 0, 0, 0};
+    EXPECT_EQ(virtualSession->GetMirrorScreenRegion().second, expectedRect1);
+    
+    ssm_->curResolutionEffectEnable_ = true;
+    ret = ssm_->HandleVirtualScreenMirrorRegion();
+    DMRect expectedRect2 = {0, 0, 100, 100};
+    EXPECT_EQ(virtualSession->GetMirrorScreenRegion().second, expectedRect2);
+    ssm_->curResolutionEffectEnable_ = false;
+    ssm_->screenSessionMap_.erase(51);
+    ssm_->screenSessionMap_.erase(52);
+}
+
+/**
+ * @tc.name: GetVirtualMirrorSession
+ * @tc.desc: GetVirtualMirrorSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetVirtualMirrorSession, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+
+    sptr<ScreenSession> virtualSession = new ScreenSession(51, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, virtualSession);
+    virtualSession->SetVirtualScreenFlag(VirtualScreenFlag::CAST);
+    virtualSession->SetMirrorScreenType(MirrorScreenType::VIRTUAL_MIRROR);
+
+    sptr<ScreenSession> screenSession = nullptr;
+    ssm_->GetVirtualMirrorSession(screenSession);
+    EXPECT_EQ(screenSession, nullptr);
+    ssm_->screenSessionMap_[51] = virtualSession;
+    ssm_->GetVirtualMirrorSession(screenSession);
+    EXPECT_EQ(screenSession, virtualSession);
+
+    ssm_->screenSessionMap_.erase(51);
 }
 
 /**
