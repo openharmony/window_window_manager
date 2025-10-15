@@ -521,6 +521,7 @@ public:
     void SetFirstSCBConnect(bool firstSCBConnect);
     // mirror screen
     bool HandleResolutionEffectChange();
+    bool HandleVirtualScreenMirrorRegion();
     bool GetStoredPidFromUid(int32_t uid, int32_t& agentPid) const;
     bool IsFreezed(const int32_t& agentPid, const DisplayManagerAgentType& agentType);
     bool isScreenShot_ = false;
@@ -997,6 +998,9 @@ private:
     bool RecoveryResolutionEffect();
     void RegisterSettingResolutionEffectObserver();
     void SetResolutionEffectFromSettingData();
+    void SetInternalScreenResolutionEffect(const sptr<ScreenSession>& internalSession, DMRect toRect);
+    void SetExternalScreenResolutionEffect(const sptr<ScreenSession>& externalSession, DMRect toRect);
+    void GetVirtualMirrorSession(sptr<ScreenSession>& virtualSession);
     std::atomic<bool> curResolutionEffectEnable_ = false;
     DMError SyncScreenPropertyChangedToServer(ScreenId screenId, const ScreenProperty& screenProperty) override;
     std::function<void(sptr<ScreenSession>& screenSession)> propertyChangedCallback_;
