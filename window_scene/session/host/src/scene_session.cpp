@@ -2187,8 +2187,8 @@ SessionInfo SceneSession::GetSessionInfoByWant(const std::shared_ptr<AAFwk::Want
     const sptr<SceneSession>& session)
 {
     SessionInfo info;
-    if (session->sessionInfo_.moduleName_ == want->GetElement().GetModuleName()
-        && session->sessionInfo_.abilityName_ == want->GetElement().GetAbilityName()) {
+    if (session->sessionInfo_.moduleName_ == want->GetElement().GetModuleName() &&
+        session->sessionInfo_.abilityName_ == want->GetElement().GetAbilityName()) {
         session->sessionInfo_.isRestartApp_ = true;
         session->sessionInfo_.callerPersistentId_ = INVALID_SESSION_ID;
         info = session->sessionInfo_;
