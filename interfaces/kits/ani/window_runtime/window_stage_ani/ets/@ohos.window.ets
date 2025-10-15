@@ -1849,18 +1849,6 @@ export interface SubWindowOptions {
   outlineEnabled?: boolean;
 }
 
-export class SubWindowOptionsInternal implements SubWindowOptions {
-  title: string;
-  decorEnabled: boolean;
-  isModal?: boolean;
-  isTopmost?: boolean;
-  modalityType?: ModalityType;
-  windowRect?: Rect;
-  maximizeSupported?: boolean;
-  zLevel?: number;
-  outlineEnabled?: boolean;
-}
-
 /**
  * Attribute of the window for UI service extension ability.
  *
@@ -1911,10 +1899,6 @@ export interface SystemWindowOptions {
    * @stagemodelonly
    * @since 14
    */
-  windowType: WindowType;
-}
-
-export class SystemWindowOptionsInternal implements SystemWindowOptions {
   windowType: WindowType;
 }
 
@@ -1985,11 +1969,189 @@ export interface ExtensionWindowConfig {
 }
 
 export class ExtensionWindowConfigInternal implements ExtensionWindowConfig {
-  windowName: string;
-  windowAttribute: ExtensionWindowAttribute;
-  windowRect: Rect;
-  subWindowOptions?: SubWindowOptions;
-  systemWindowOptions?: SystemWindowOptions;
+  static { loadLibrary('windowstageani_kit.z') }
+
+  private nativeObj: long = 0;
+  setNativeObj(nativeObj: long): void {
+      this.nativeObj = nativeObj;
+  }
+
+  set windowName(value: string) {
+    this.setWindowName(this.nativeObj, value);
+  }
+
+  get windowName(): string {
+    return this.getWindowName(this.nativeObj);
+  }
+
+  set windowAttribute(value: ExtensionWindowAttribute) {
+    this.setWindowAttribute(this.nativeObj, value);
+  }
+
+  get windowAttribute(): ExtensionWindowAttribute {
+    return this.getWindowAttribute(this.nativeObj);
+  }
+
+  set windowRect(value: Rect) {
+    this.setWindowRect(this.nativeObj, value);
+  }
+
+  get windowRect(): Rect {
+    return this.getWindowRect(this.nativeObj);
+  }
+
+  set subWindowOptions(value?: SubWindowOptions) {
+    this.setSubWindowOptions(this.nativeObj, value);
+  }
+
+  get subWindowOptions(): SubWindowOptions | undefined {
+    return this.getSubWindowOptions(this.nativeObj);
+  }
+
+  set systemWindowOptions(value?: SystemWindowOptions) {
+    this.setSystemWindowOptions(this.nativeObj, value);
+  }
+
+  get systemWindowOptions(): SystemWindowOptions | undefined {
+    return this.getSystemWindowOptions(this.nativeObj);
+  }
+
+  public native setWindowName(nativeObj: long, value: string): void;
+  public native getWindowName(nativeObj: long): string;
+  public native setWindowAttribute(nativeObj: long, value: ExtensionWindowAttribute): void;
+  public native getWindowAttribute(nativeObj: long): ExtensionWindowAttribute;
+  public native setWindowRect(nativeObj: long, value: Rect): void;
+  public native getWindowRect(nativeObj: long): Rect;
+  public native setSubWindowOptions(nativeObj: long, value?: SubWindowOptions): void;
+  public native getSubWindowOptions(nativeObj: long): SubWindowOptions;
+  public native setSystemWindowOptions(nativeObj: long, value?: SystemWindowOptions): void;
+  public native getSystemWindowOptions(nativeObj: long): SystemWindowOptions;
+}
+
+export class ExtConfigRect implements Rect {
+  static { loadLibrary('windowstageani_kit.z') }
+
+  private nativeObj: long = 0;
+  setNativeObj(nativeObj: long): void {
+      this.nativeObj = nativeObj;
+  }
+  
+  set left(value: int) {
+    this.setLeft(this.nativeObj, value);
+  }
+
+  get left(): int {
+    return this.getLeft(this.nativeObj);
+  }
+
+  set top(value: int) {
+    this.setTop(this.nativeObj, value);
+  }
+
+  get top(): int {
+    return this.getTop(this.nativeObj);
+  }
+
+  set width(value: int) {
+    this.setWidth(this.nativeObj, value);
+  }
+
+  get width(): int {
+    return this.getWidth(this.nativeObj);
+  }
+
+  set height(value: int) {
+    this.setHeight(this.nativeObj, value);
+  }
+
+  get height(): int {
+    return this.getHeight(this.nativeObj);
+  }
+
+  public native setLeft(nativeObj: long, value: int): void;
+  public native getLeft(nativeObj: long): int;
+  public native setTop(nativeObj: long, value: int): void;
+  public native getTop(nativeObj: long): int;
+  public native setWidth(nativeObj: long, value: int): void;
+  public native getWidth(nativeObj: long): int;
+  public native setHeight(nativeObj: long, value: int): void;
+  public native getHeight(nativeObj: long): int;
+}
+
+export class ExtConfigSubWindowOptions implements SubWindowOptions {
+  static { loadLibrary('windowstageani_kit.z') }
+
+  private nativeObj: long = 0;
+  setNativeObj(nativeObj: long): void {
+      this.nativeObj = nativeObj;
+  }
+
+  modalityType?: ModalityType;
+  windowRect?: Rect;
+  maximizeSupported?: boolean;
+  zLevel?: number;
+  outlineEnabled?: boolean;
+
+  set title(value: string) {
+    this.setTitle(this.nativeObj, value);
+  }
+
+  get title(): string {
+    return this.getTitle(this.nativeObj);
+  }
+
+  set decorEnabled(value: boolean) {
+    this.setDecorEnabled(this.nativeObj, value);
+  }
+
+  get decorEnabled(): boolean {
+    return this.getDecorEnabled(this.nativeObj);
+  }
+
+  set isModal(value?: boolean) {
+    this.setIsModal(this.nativeObj, value ?? false);
+  }
+
+  get isModal(): boolean | undefined {
+    return this.getIsModal(this.nativeObj);
+  }
+
+  set isTopmost(value?: boolean) {
+    this.setIsTopmost(this.nativeObj, value ?? false);
+  }
+
+  get isTopmost(): boolean | undefined {
+    return this.getIsTopmost(this.nativeObj);
+  }
+
+  public native setTitle(nativeObj: long, value: string): void;
+  public native getTitle(nativeObj: long): string;
+  public native setDecorEnabled(nativeObj: long, value: boolean): void;
+  public native getDecorEnabled(nativeObj: long): boolean;
+  public native setIsModal(nativeObj: long, value: boolean): void;
+  public native getIsModal(nativeObj: long): boolean;
+  public native setIsTopmost(nativeObj: long, value: boolean): void;
+  public native getIsTopmost(nativeObj: long): boolean; 
+}
+
+export class ExtConfigSystemWindowOptions implements SystemWindowOptions {
+  static { loadLibrary('windowstageani_kit.z') }
+
+  private nativeObj: long = 0;
+  setNativeObj(nativeObj: long): void {
+      this.nativeObj = nativeObj;
+  }
+
+  set windowType(value: WindowType) {
+    this.setWindowType(this.nativeObj, value);
+  }
+
+  get windowType(): WindowType {
+    return this.getWindowType(this.nativeObj);
+  }
+
+  public native setWindowType(nativeObj: long, value: WindowType): void;
+  public native getWindowType(nativeObj: long): WindowType;
 }
 
 export class WindowStageInternal implements WindowStage {

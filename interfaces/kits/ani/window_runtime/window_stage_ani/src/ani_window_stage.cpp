@@ -432,6 +432,7 @@ static ani_ref CreateSubWindow(ani_env* env, ani_object obj, ani_long nativeObj,
 
 extern "C" {
 using namespace OHOS::Rosen;
+ANI_EXPORT ani_status ExtensionWindowConfig_ANI_Constructor(ani_vm *vm, uint32_t *result);
 std::array g_methods = {
     ani_native_function {"loadContentSync",
         "JLstd/core/String;Larkui/stateManagement/storage/localStorage/LocalStorage;:V",
@@ -508,6 +509,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     AniWindowManager::AniWindowManagerInit(env, ns);
 
     OHOS::Rosen::ANI_Window_Constructor(vm, result);
+    ExtensionWindowConfig_ANI_Constructor(vm, result);
     return ANI_OK;
 }
 }

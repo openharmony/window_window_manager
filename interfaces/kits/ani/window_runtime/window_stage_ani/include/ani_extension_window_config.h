@@ -28,6 +28,45 @@ namespace Rosen {
 
 WINDOW_EXPORT ani_object CreateAniExtensionWindowConfig(ani_env* env,
     const std::shared_ptr<ExtensionWindowConfig>& extensionWindowConfig);
+
+class AniExtensionWindowConfig {
+public:
+    explicit AniExtensionWindowConfig(const std::shared_ptr<ExtensionWindowConfig>& extensionWindowConfig);
+    ~AniExtensionWindowConfig();
+
+    ani_string OnGetWindowName(ani_env* env);
+    ani_enum_item OnGetWindowAttribute(ani_env* env);
+    ani_object OnGetWindowRect(ani_env* env);
+    ani_int OnGetWindowRectLeft(ani_env* env);
+    ani_int OnGetWindowRectTop(ani_env* env);
+    ani_int OnGetWindowRectWidth(ani_env* env);
+    ani_int OnGetWindowRectHeight(ani_env* env);
+    ani_object OnGetSubWindowOptions(ani_env* env);
+    ani_string OnGetSubWindowOptionsTitle(ani_env* env);
+    ani_boolean OnGetSubWindowOptionsDecorEnabled(ani_env* env);
+    ani_boolean OnGetSubWindowOptionsIsModal(ani_env* env);
+    ani_boolean OnGetSubWindowOptionsIsTopmost(ani_env* env);
+    ani_object OnGetSystemWindowOptions(ani_env* env);
+    ani_enum_item OnGetSystemWindowOptionsWindowType(ani_env* env);
+
+    void OnSetWindowName(ani_env* env, ani_string value);
+    void OnSetWindowAttribute(ani_env* env, ani_enum_item value);
+    void OnSetWindowRect(ani_env* env, ani_object value);
+    void OnSetWindowRectLeft(ani_env* env, ani_int value);
+    void OnSetWindowRectTop(ani_env* env, ani_int value);
+    void OnSetWindowRectWidth(ani_env* env, ani_int value);
+    void OnSetWindowRectHeight(ani_env* env, ani_int value);
+    void OnSetSubWindowOptions(ani_env* env, ani_object value);
+    void OnSetSubWindowOptionsTitle(ani_env* env, ani_string value);
+    void OnSetSubWindowOptionsDecorEnabled(ani_env* env, ani_boolean value);
+    void OnSetSubWindowOptionsIsModal(ani_env* env, ani_boolean value);
+    void OnSetSubWindowOptionsIsTopmost(ani_env* env, ani_boolean value);
+    void OnSetSystemWindowOptions(ani_env* env, ani_object value);
+    void OnSetSystemWindowOptionsWindowType(ani_env* env, ani_enum_item value);
+
+private:
+    std::shared_ptr<ExtensionWindowConfig> extensionWindowConfig_;
+};
 } // namespace Rosen
 } // namespace OHOS
 #endif // OHOS_ANI_EXTENSION_WINDOW_CONFIG_H
