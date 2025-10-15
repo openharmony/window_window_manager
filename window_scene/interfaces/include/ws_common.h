@@ -1146,6 +1146,8 @@ enum class LifeCycleChangeReason {
 
     BACK_TO_DESKTOP,
 
+    SCREEN_LOCK,
+
     LAST_SCENE_TRANSFER,
 
     REASON_END,
