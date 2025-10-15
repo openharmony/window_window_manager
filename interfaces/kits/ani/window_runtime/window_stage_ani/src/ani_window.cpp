@@ -1603,8 +1603,8 @@ ani_object AniWindow::SetDragKeyFramePolicy(ani_env* env, ani_object aniKeyFrame
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] windowToken_ is nullptr");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    keyFramePolicy KeyFramePolicy;
-    if (!ParseKeyFramePolicy(env, aniKeyFramePolicy, keyFramePolicy)) {
+    KeyFramePolicy keyFramePolicy;
+    if (!AniWindowUtils::ParseKeyFramePolicy(env, aniKeyFramePolicy, keyFramePolicy)) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed to convert parameter to keyFramePolicy");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -1617,15 +1617,18 @@ ani_object AniWindow::SetDragKeyFramePolicy(ani_env* env, ani_object aniKeyFrame
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
 
-    WMError ret = windowToken_->SetDragKeyFramePolicy(keyFramePolicy);
-    if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "failed");
-        return AniWindowUtils::AniThrowError(env, WM_JS_TO_ERROR_CODE_MAP.at(ret));
+    const WMError ret = windowToken_->SetDragKeyFramePolicy(keyFramePolicy);
+    const WmErrorCode errorCode = AniWindowUtils::ToErrorCode(ret);
+    const uint32_t windowId = windowToken_->GetWindowId();
+    if (errorCode != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] failed, windowId: %{public}u, ret: %{public}d",
+            windowId, static_cast<int32_t>(ret));
+        return AniWindowUtils::AniThrowError(env, errorCode);
     }
     TLOGI(WmsLogTag::WMS_LAYOUT_PC,
-        "success: Window [%{public}u, %{public}s], keyFramePolicy %{public}s",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), keyFramePolicy.ToString().c_str());
-    return nativePixelMap;
+        "[ANI] success, windowId: %{public}u, keyFramePolicy: %{public}s",
+        windowToken_->GetWindowId(), keyFramePolicy.ToString().c_str());
+    return AniWindowUtils::CreateKeyFramePolicy(env, keyFramePolicy);
 }
 
 ani_object AniWindow::Snapshot(ani_env* env)

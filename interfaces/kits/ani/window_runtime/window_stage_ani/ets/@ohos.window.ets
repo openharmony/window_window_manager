@@ -639,16 +639,16 @@ namespace window {
     enable: boolean;
     interval?: long;
     distance?: int;
-    animationDuration: long;
-    animationDelay: long;
+    animationDuration?: long;
+    animationDelay?: long;
   }
 
   export class KeyFramePolicyInternal implements KeyFramePolicy {
     enable: boolean;
     interval?: long;
     distance?: int;
-    animationDuration: long;
-    animationDelay: long;
+    animationDuration?: long;
+    animationDelay?: long;
   }
 
 //enum WMError {
