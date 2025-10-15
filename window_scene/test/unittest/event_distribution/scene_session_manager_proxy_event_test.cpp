@@ -65,6 +65,7 @@ HWTEST_F(sceneSessionManagerProxyEventTest, SendCommonEvent, TestSize.Level1)
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
 
     // Failed to test write data.
+    datas.emplace_back(1);
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInt32ErrorFlag(true);
     MockMessageParcel::SetWriteInt32ErrorCount(1);

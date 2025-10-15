@@ -763,7 +763,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, UpdateWindowFlagsForLockCursor, TestSize
 {
     SessionInfo info;
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    session->persistendId_ = 5;
+    session->persistentId_ = 5;
     session->UpdateFocus(false);
     MMI::WindowInfo windowInfo;
     manager_->UpdateWindowFlagsForLockCursor(session, nullptr, windowInfo);

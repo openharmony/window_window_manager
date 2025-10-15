@@ -172,7 +172,7 @@ public:
         TRANS_ID_MINIMIZE_ALL_WINDOW,
         TRANS_ID_GLOBAL_COORDINATE_TO_RELATIVE_COORDINATE,
         TRANS_ID_UPDATE_OUTLINE,
-        TRANS_ID_SNED_COMMAND_EVENT,
+        TRANS_ID_SEND_COMMAND_EVENT,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;

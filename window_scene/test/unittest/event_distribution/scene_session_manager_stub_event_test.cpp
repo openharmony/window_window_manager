@@ -68,7 +68,8 @@ HWTEST_F(SceneSessionManagerStubEventTest, ProcessRemoteRequest, TestSize.Level1
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetReadInt32ErrorFlag(true);
     int res = stub_->ProcessRemoteRequest(
-        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SNED_COMMAND_EVENT), data, reply, option);
+        static_cast<uint32_t>(ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_SEND_COMMAND_EVENT),
+        data, reply, option);
     EXPECT_EQ(res, ERR_INVALID_DATA);
     MockMessageParcel::ClearAllErrorFlag();
 }

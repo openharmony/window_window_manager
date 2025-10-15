@@ -87,6 +87,7 @@ group("unittest") {
       ":wm_window_session_impl_test5",
       ":wm_window_test",
       "animation:wm_window_scene_session_impl_animation_test",
+      "event_distribution:wm_oh_window_event_test",
       "special_window:window_scene_session_impl_special_window_test",
       "ui_extension:wm_window_extension_session_impl_test"
     ]
@@ -882,6 +883,7 @@ ohos_static_library("wm_unittest_common") {
   visibility = [
     ":*",
     "animation:*",
+    "event_distribution:*"
     "layout:*",
     "rotation:*",
     "special_window:*",

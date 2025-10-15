@@ -687,7 +687,7 @@ void SceneInputManager::SetCurrentUserId(int32_t userId)
 void SceneInputManager::LockCursor(int32_t windowId, bool isCursorFollowMovement)
 {
     if (lockCursorInfo_ == nullptr) {
-        TLOGNE(WmsLogTag::WMS_EVENT, "sceneSessionDirty_ is nullptr");
+        TLOGNE(WmsLogTag::WMS_EVENT, "lockCursorInfo_ is nullptr");
         return;
     }
     lockCursorInfo_->isActivating = true;
@@ -699,7 +699,7 @@ void SceneInputManager::LockCursor(int32_t windowId, bool isCursorFollowMovement
 bool SceneInputManager::UnLockCursor(int32_t windowId)
 {
     if (lockCursorInfo_ == nullptr) {
-        TLOGNE(WmsLogTag::WMS_EVENT, "sceneSessionDirty_ is nullptr");
+        TLOGNE(WmsLogTag::WMS_EVENT, "lockCursorInfo_ is nullptr");
         return false;
     }
     if (!lockCursorInfo_->isActivating) {
