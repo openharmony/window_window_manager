@@ -1177,8 +1177,7 @@ void WindowSessionImpl::UpdateRectForResizeAnimation(const Rect& wmRect, const R
             RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
         }
         window->postTaskDone_ = true;
-    },
-    "WMS_WindowSessionImpl_UpdateRectForResizeAnimation");
+    }, "WMS_WindowSessionImpl_UpdateRectForResizeAnimation");
 }
 
 RSAnimationTimingCurve WindowSessionImpl::updateConfigCurve(const WindowAnimationCurve& configCurve,
