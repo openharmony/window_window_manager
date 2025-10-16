@@ -109,6 +109,7 @@ public:
     void ResizeAsync(ani_env* env, ani_int width, ani_int height);
     ani_object SetWindowLimits(ani_env* env, ani_object inWindowLimits, ani_object forcible);
     ani_object GetWindowLimits(ani_env* env);
+    ani_object GetWindowLimitsVP(ani_env* env);
     void SetAspectRatio(ani_env* env, ani_double ratio);
     void ResetAspectRatio(ani_env* env);
     void SetResizeByDragEnabled(ani_env* env, ani_boolean enable);

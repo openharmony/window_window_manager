@@ -1731,7 +1731,11 @@ ani_object AniWindow::SetWindowLimits(ani_env* env, ani_object inWindowLimits, a
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 
-    WindowLimits windowLimits = AniWindowUtils::ParseWindowLimits(env, inWindowLimits);
+    WindowLimits windowLimits;
+    if (!AniWindowUtils::ParseWindowLimits(env, inWindowLimits, windowLimits)) {
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    
     if (windowLimits.maxWidth_ < 0 || windowLimits.maxHeight_ < 0 ||
         windowLimits.minWidth_ < 0 || windowLimits.minHeight_ < 0) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "width or height should be greater than or equal to 0");
@@ -1781,6 +1785,31 @@ ani_object AniWindow::GetWindowLimits(ani_env* env)
 
     WindowLimits windowLimits;
     const WMError ret = windowToken_->GetWindowLimits(windowLimits);
+    const WmErrorCode errorCode = AniWindowUtils::ToErrorCode(ret);
+
+    const uint32_t windowId = windowToken_->GetWindowId();
+    if (errorCode != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] failed, windowId: %{public}u, ret: %{public}d",
+            windowId, static_cast<int32_t>(ret));
+        return AniWindowUtils::AniThrowError(env, errorCode);
+    }
+
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[ANI] success, windowId: %{public}u, maxW: %{public}u, maxH: %{public}u, "
+        "minW: %{public}u, minH: %{public}u", windowId, windowLimits.maxWidth_, windowLimits.maxHeight_,
+        windowLimits.minWidth_, windowLimits.minHeight_);
+    return AniWindowUtils::CreateAniWindowLimits(env, windowLimits);
+}
+
+/** @note @window.layout */
+ani_object AniWindow::GetWindowLimitsVP(ani_env* env)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is null");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+
+    WindowLimits windowLimits;
+    const WMError ret = windowToken_->GetWindowLimits(windowLimits, true);
     const WmErrorCode errorCode = AniWindowUtils::ToErrorCode(ret);
 
     const uint32_t windowId = windowToken_->GetWindowId();
@@ -2633,6 +2662,18 @@ static ani_object WindowGetWindowLimits(ani_env* env, ani_object obj, ani_long n
     return aniWindow->GetWindowLimits(env);
 }
 
+static ani_object WindowGetWindowLimitsVP(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    using namespace OHOS::Rosen;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (!aniWindow || !aniWindow->GetWindow()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    return aniWindow->GetWindowLimitsVP(env);
+}
+
 static void WindowSetAspectRatio(ani_env* env, ani_object obj, ani_long nativeObj, ani_double ratio)
 {
     using namespace OHOS::Rosen;
@@ -2930,6 +2971,8 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(WindowSetWindowLimits)},
         ani_native_function {"getWindowLimits", "J:L@ohos/window/window/WindowLimits;",
             reinterpret_cast<void *>(WindowGetWindowLimits)},
+        ani_native_function {"getWindowLimitsVP", "J:L@ohos/window/window/WindowLimits;",
+            reinterpret_cast<void *>(WindowGetWindowLimitsVP)},
         ani_native_function {"setAspectRatio", "JD:V",
             reinterpret_cast<void *>(WindowSetAspectRatio)},
         ani_native_function {"resetAspectRatio", "J:V",
