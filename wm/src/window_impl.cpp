@@ -4005,7 +4005,7 @@ void WindowImpl::UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         occupiedAreaInfo_ = info;
         WLOGFI("occupiedAreaeInfo changed, rect:[%{public}u, %{public}u, %{public}u, %{public}u]",
-            info->rect_.posX_,info->rect_.posY_, info->rect_.width_, info->rect_.height_);
+            info->rect_.posX_, info->rect_.posY_, info->rect_.width_, info->rect_.height_);
     }
     auto display = SingletonContainer::IsDestroyed() ? nullptr :
         SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
