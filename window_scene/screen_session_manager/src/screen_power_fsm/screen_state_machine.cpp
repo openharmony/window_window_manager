@@ -26,11 +26,6 @@ WM_IMPLEMENT_SINGLE_INSTANCE(ScreenStateMachine)
 
 ScreenStateMachine::ScreenStateMachine()
 {
-    timer_ = new ScreenStateTimer();
-    if (!timer_) {
-        TLOGE(WmsLogTag::DMS, "[ScreenPower FSM] Failed to create ScreenStateTimer");
-        return;
-    }
     SetTransitionState(ScreenTransitionState::SCREEN_INIT);
 }
 
@@ -101,12 +96,12 @@ bool ScreenStateMachine::HandlePowerStateChange(ScreenPowerEvent event, const Sc
         TLOGI(WmsLogTag::DMS, "[ScreenPower FSM] invalid transition");
         return false;
     }
-    timer_->StopTimer(static_cast<int32_t>(state));
+    timer_.StopTimer(static_cast<int32_t>(state));
     action = transition.action;
     if (action) {
         ret = action(event, type);
         if (transition.timeout > 0 && transition.timeoutCallback) {
-            timer_->StartTimer(static_cast<int32_t>(transition.targetState),
+            timer_.StartTimer(static_cast<int32_t>(transition.targetState),
                 transition.timeout, [this, &transition, event, type] {
                     transition.timeoutCallback(event, type);
                 });
@@ -116,7 +111,7 @@ bool ScreenStateMachine::HandlePowerStateChange(ScreenPowerEvent event, const Sc
         }
         isForceTrans_ = false;
         if (transition.timeout <= 0) {
-            timer_->StopTimer(static_cast<int32_t>(transition.targetState));
+            timer_.StopTimer(static_cast<int32_t>(transition.targetState));
         }
     }
     return ret;
