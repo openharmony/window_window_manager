@@ -373,7 +373,7 @@ public:
     /*
      * Keyboard
      */
-    WMError ShowKeyboard(uint32_t callingWindowId, KeyboardEffectOption effectOption) override;
+    WMError ShowKeyboard(uint32_t callingWindowId, uint64_t tgtDisplayId, KeyboardEffectOption effectOption) override;
 
     /*
      * RS Client Multi Instance
