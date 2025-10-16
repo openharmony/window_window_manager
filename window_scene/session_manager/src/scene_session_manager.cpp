@@ -10539,20 +10539,20 @@ WSError SceneSessionManager::BindDialogSessionTarget(uint64_t persistentId, sptr
 }
 
 void DisplayChangeListener::OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
-    std::vector<uint64_t>& surfaceNodeIds, bool isBlackList)
+    std::vector<uint64_t>& surfaceNodeIds, const std::vector<uint32_t>& needWindowTypeList)
 {
-    SceneSessionManager::GetInstance().GetSurfaceNodeIdsFromMissionIds(missionIds, surfaceNodeIds, isBlackList);
+    SceneSessionManager::GetInstance().GetSurfaceNodeIdsFromMissionIds(missionIds, surfaceNodeIds, needWindowTypeList);
 }
 
 WMError SceneSessionManager::GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
-    std::vector<uint64_t>& surfaceNodeIds, bool isBlackList)
+    std::vector<uint64_t>& surfaceNodeIds, const std::vector<uint32_t>& needWindowTypeList)
 {
     auto isSaCall = SessionPermission::IsSACalling();
     if (!isSaCall) {
         TLOGE(WmsLogTag::DEFAULT, "The interface only support for sa call");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    auto task = [this, &missionIds, &surfaceNodeIds, isBlackList]() {
+    auto task = [this, &missionIds, &surfaceNodeIds, needWindowTypeList]() {
         std::map<int32_t, sptr<SceneSession>>::iterator iter;
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (auto missionId : missionIds) {
@@ -10564,12 +10564,13 @@ WMError SceneSessionManager::GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_
             if (sceneSession == nullptr || sceneSession->GetSurfaceNode() == nullptr) {
                 continue;
             }
-            surfaceNodeIds.push_back(sceneSession->GetSurfaceNode()->GetId());
-            GetSurfaceNodeIdsFromSubSession(sceneSession, surfaceNodeIds);
-            if (isBlackList && sceneSession->GetLeashWinSurfaceNode()) {
-                surfaceNodeIds.push_back(missionId);
+            if (!needWindowTypeList.empty() && std::find(needWindowTypeList.begin(), needWindowTypeList.end(),
+                static_cast<uint32_t>(sceneSession->GetWindowType())) == needWindowTypeList.end()) {
                 continue;
             }
+            surfaceNodeIds.push_back(sceneSession->GetSurfaceNode()->GetId());
+            GetSurfaceNodeIdsFromSubSession(sceneSession, surfaceNodeIds);
+            surfaceNodeIds.push_back(missionId);
             if (sceneSession->GetLeashWinSurfaceNode()) {
                 surfaceNodeIds.push_back(sceneSession->GetLeashWinSurfaceNode()->GetId());
             }

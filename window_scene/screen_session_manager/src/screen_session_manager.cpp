@@ -218,6 +218,10 @@ constexpr int32_t PARAM_NUM_TEN = 10;
 const int32_t AOD_POWER_ON = 0;
 const int32_t AOD_POWER_OFF = 1;
 
+const std::string DEVICE_TYPE = system::GetParameter("const.product.devicetype", "unknown");
+const std::vector<std::string> CAPTURE_DEVICE = {"phone", "2in1", "tablet"};
+constexpr uint32_t FLOATING_BALL_TYPE = 2145;
+
 constexpr int32_t COLD_SWITCH_ANIMATE_TIMEOUT_MILLISECONDS = 3000;
 constexpr int32_t HOT_SWITCH_ANIMATE_TIMEOUT_MILLISECONDS = 0;
 
@@ -301,6 +305,7 @@ ScreenSessionManager::ScreenSessionManager()
     }
     SetFirstSCBConnect(true);
     WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), BootFinishedCallback, this);
+    isSupportCapture_ = IsSupportCapture();
 }
 
 bool SortByScreenId(const ScreenId& screenIdA, const ScreenId& screenIdB)
@@ -5658,7 +5663,7 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
     auto clientProxy = GetClientProxy();
     if (clientProxy && option.missionIds_.size() > 0) {
         std::vector<uint64_t> surfaceNodeIds;
-        clientProxy->OnGetSurfaceNodeIdsFromMissionIdsChanged(option.missionIds_, surfaceNodeIds, true);
+        clientProxy->OnGetSurfaceNodeIdsFromMissionIdsChanged(option.missionIds_, surfaceNodeIds);
         option.missionIds_ = surfaceNodeIds;
     }
     ScreenId rsId = rsInterface_.CreateVirtualScreen(option.name_, option.width_,
@@ -10266,7 +10271,7 @@ void ScreenSessionManager::SetVirtualScreenBlackList(ScreenId screenId, std::vec
         return;
     }
     std::vector<uint64_t> surfaceNodeIdsToRS;
-    clientProxy->OnGetSurfaceNodeIdsFromMissionIdsChanged(windowIdList, surfaceNodeIdsToRS, true);
+    clientProxy->OnGetSurfaceNodeIdsFromMissionIdsChanged(windowIdList, surfaceNodeIdsToRS);
     if (!surfaceIdList.empty()) {
         for (auto surfaceId : surfaceIdList) {
             auto it = std::find(surfaceNodeIdsToRS.begin(), surfaceNodeIdsToRS.end(), surfaceId);
@@ -11131,6 +11136,11 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenCapture(const Ca
         *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
         return nullptr;
     }
+    if (!isSupportCapture_) {
+        TLOGW(WmsLogTag::DMS, "device not support capture.");
+        *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
+        return nullptr;
+    }
     if (!Permission::CheckCallingPermission(CUSTOM_SCREEN_CAPTURE_PERMISSION) &&
         !Permission::CheckCallingPermission(CUSTOM_SCREEN_RECORDING_PERMISSION) && !SessionPermission::IsShellCall()) {
         TLOGE(WmsLogTag::DMS, "Permission Denied! clientName: %{public}s, pid: %{public}d.",
@@ -11179,12 +11189,20 @@ void ScreenSessionManager::ConvertWindowIdsToSurfaceNodeList(std::vector<uint64_
         TLOGE(WmsLogTag::DMS, "clientProxy_ is nullptr");
         return;
     }
-    clientProxy->OnGetSurfaceNodeIdsFromMissionIdsChanged(windowIdList, surfaceNodesList, true);
+    const std::vector<uint32_t> needWindowTypeList = { FLOATING_BALL_TYPE };
+    clientProxy->OnGetSurfaceNodeIdsFromMissionIdsChanged(windowIdList, surfaceNodesList, needWindowTypeList);
     std::ostringstream oss;
     for (size_t i = 0; i < surfaceNodesList.size(); ++i) {
         oss << surfaceNodesList[i] << ", ";
     }
     TLOGD(WmsLogTag::DMS, "capture option surfaceNodesList=%{public}s", oss.str().c_str());
+}
+
+bool ScreenSessionManager::IsSupportCapture()
+{
+    std::string tmp = DEVICE_TYPE;
+    std::transform(tmp.begin(), tmp.end(), tmp.begin(), ::tolower);
+    return std::find(CAPTURE_DEVICE.begin(), CAPTURE_DEVICE.end(), tmp) != CAPTURE_DEVICE.end();
 }
 
 sptr<DisplayInfo> ScreenSessionManager::GetPrimaryDisplayInfo()
