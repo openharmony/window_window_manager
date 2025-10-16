@@ -786,9 +786,34 @@ HWTEST_F(SessionStageProxyTest, SetUniqueVirtualPixelRatio, TestSize.Level1)
  */
 HWTEST_F(SessionStageProxyTest, UpdateAnimationSpeed, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     float speed = 2.0f;
     ASSERT_TRUE(sessionStage_ != nullptr);
+
+    sptr<SessionStageProxy> nullptrProxy = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    nullptrProxy->UpdateAnimationSpeed(speed);
+    EXPECT_TRUE(logMsg.find("remote is nullptr") != std::string::npos);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     sessionStage_->UpdateAnimationSpeed(speed);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    MockMessageParcel::SetWriteFloatErrorFlag(true);
+    sessionStage_->UpdateAnimationSpeed(speed);
+    EXPECT_TRUE(logMsg.find("Write speed failed") != std::string::npos);
+    MockMessageParcel::SetWriteFloatErrorFlag(false);
+
+    auto remoteMock = sptr<MockIRemoteObject>::MakeSptr();
+    remoteMock->sendRequestResult_ = ERR_TRANSACTION_FAILED;
+    sptr<SessionStageProxy> failSendProxy = sptr<SessionStageProxy>::MakeSptr(remoteMock);
+    failSendProxy->UpdateAnimationSpeed(speed);
+    EXPECT_TRUE(logMsg.find("SendRequest failed") != std::string::npos);
+
+    logMsg.clear();
+    sessionStage_->UpdateAnimationSpeed(speed);
+    EXPECT_TRUE(logMsg.find("SendRequest failed") == std::string::npos);
 }
 
 /**
