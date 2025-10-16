@@ -149,7 +149,7 @@ namespace uiExtensionHost {
       this.offSync(this.nativeObj, WINDOW_SIZE_CHANGE_CB, callback);
     }
 
-    getWindowAvoidArea(type: window.AvoidAreaType): window.AvoidArea {
+    public getWindowAvoidArea(type: window.AvoidAreaType): window.AvoidArea {
       let area: window.AvoidArea = new UIEAvoidArea();
       let ret = this.getWindowAvoidArea(this.nativeObj, type as int, area as object);
       if (ret !== WmErrorCode.WM_OK) {
@@ -158,7 +158,7 @@ namespace uiExtensionHost {
       return area;
     }
 
-    setWaterMarkFlag(enable: boolean): Promise<void> {
+    public setWaterMarkFlag(enable: boolean): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           let ret = this.setWaterMarkFlag(this.nativeObj, enable);
@@ -173,7 +173,7 @@ namespace uiExtensionHost {
       });
     }
 
-    hidePrivacyContentForHost(shouldHide: boolean): Promise<void> {
+    public hidePrivacyContentForHost(shouldHide: boolean): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           let ret = this.hidePrivacyContentForHost(this.nativeObj, shouldHide);
@@ -188,7 +188,7 @@ namespace uiExtensionHost {
       });
     }
 
-    hideNonSecureWindows(shouldHide: boolean): Promise<void> {
+    public hideNonSecureWindows(shouldHide: boolean): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           let ret = this.hideNonSecureWindows(this.nativeObj, shouldHide);
@@ -203,7 +203,7 @@ namespace uiExtensionHost {
       });
     }
 
-    createSubWindowWithOptions(name: string, subWindowOptions: window.SubWindowOptions): Promise<window.Window> {
+    public createSubWindowWithOptions(name: string, subWindowOptions: window.SubWindowOptions): Promise<window.Window> {
       return new Promise<window.Window>((resolve: (value: window.Window) => void, reject: (error: BusinessError) => void) => {
         taskpool.execute((): window.Window => {
           return this.createSubWindowWithOptions(this.nativeObj, name, subWindowOptions);
