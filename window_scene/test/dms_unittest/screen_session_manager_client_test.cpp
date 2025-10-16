@@ -810,11 +810,11 @@ HWTEST_F(ScreenSessionManagerClientTest, OnGetSurfaceNodeIdsFromMissionIdsChange
 }
 
 /**
- * @tc.name: OnGetSurfaceNodeIdsFromMissionIdsChanged02
+ * @tc.name: OnGetSurfaceNodeIdsFromMissionIdsChanged03
  * @tc.desc: OnGetSurfaceNodeIdsFromMissionIdsChanged test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientTest, OnGetSurfaceNodeIdsFromMissionIdsChanged02, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerClientTest, OnGetSurfaceNodeIdsFromMissionIdsChanged03, TestSize.Level1)
 {
     std::vector<uint64_t> missionIds = {0, 1};
     std::vector<uint64_t> surfaceNodeIds;
