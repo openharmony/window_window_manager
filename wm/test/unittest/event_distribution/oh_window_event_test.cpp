@@ -40,19 +40,19 @@ public:
     void TearDown() override;
 };
 
-void OHWindowTest::SetUpTestCase()
+void OHWindowEventTest::SetUpTestCase()
 {
 }
 
-void OHWindowTest::TearDownTestCase()
+void OHWindowEventTest::TearDownTestCase()
 {
 }
 
-void OHWindowTest::SetUp()
+void OHWindowEventTest::SetUp()
 {
 }
 
-void OHWindowTest::TearDown()
+void OHWindowEventTest::TearDown()
 {
 }
 
