@@ -678,7 +678,7 @@ HWTEST_F(SessionStageProxyTest, SetUniqueVirtualPixelRatio, TestSize.Level1)
 HWTEST_F(SessionStageProxyTest, UpdateAnimationSpeed, TestSize.Level1)
 {
     logMsg.clear();
-    LOG_SetCallback(logMsgCallback);
+    LOG_SetCallback(MyLogCallback);
     float speed = 2.0f;
     ASSERT_TRUE(sessionStage_ != nullptr);
 
