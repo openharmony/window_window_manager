@@ -814,13 +814,13 @@ HWTEST_F(WindowSceneSessionImplTest5, ShowKeyboard01, TestSize.Level1)
     effectOption.flowLightMode_ = KeyboardFlowLightMode::BACKGROUND_FLOW_LIGHT;
     effectOption.gradientMode_ = KeyboardGradientMode::LINEAR_GRADIENT;
     // normal value
-    ASSERT_EQ(keyboardWindow->ShowKeyboard(1000, effectOption), WMError::WM_ERROR_INVALID_WINDOW);
+    ASSERT_EQ(keyboardWindow->ShowKeyboard(1000, 0, effectOption), WMError::WM_ERROR_INVALID_WINDOW);
 
     effectOption.viewMode_ = KeyboardViewMode::VIEW_MODE_END;
     effectOption.flowLightMode_ = KeyboardFlowLightMode::END;
     effectOption.gradientMode_ = KeyboardGradientMode::END;
     // exception value
-    ASSERT_EQ(keyboardWindow->ShowKeyboard(1000, effectOption), WMError::WM_ERROR_INVALID_WINDOW);
+    ASSERT_EQ(keyboardWindow->ShowKeyboard(1000, 0, effectOption), WMError::WM_ERROR_INVALID_WINDOW);
     auto lastOption = keyboardWindow->property_->GetKeyboardEffectOption();
     ASSERT_EQ(lastOption.viewMode_, KeyboardViewMode::NON_IMMERSIVE_MODE);
 }

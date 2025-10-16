@@ -1931,7 +1931,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus, bo
     return ret;
 }
 
-WMError WindowImpl::ShowKeyboard(uint32_t callingWindowId, KeyboardEffectOption effectOption)
+WMError WindowImpl::ShowKeyboard(uint32_t callingWindowId, uint64_t tgtDisplayId, KeyboardEffectOption effectOption)
 {
     return Show();
 }

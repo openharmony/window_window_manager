@@ -437,6 +437,72 @@ namespace window {
     DRAG_END = 6,
   }
 
+  export enum WindowAnchor {
+    /**
+     * The value means window top left corner.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 20
+     */
+    TOP_START = 0,
+    /**
+     * The value means horizontal midpoint of the border on the window.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 20
+     */
+    TOP = 1,
+    /**
+     * The value means window top right corner.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 20
+     */
+    TOP_END = 2,
+    /**
+     * The value means vertical midpoint of the left border of the window.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 20
+     */
+    START = 3,
+    /**
+     * The value means window horizontal and vertical midpoint.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 20
+     */
+    CENTER = 4,
+    /**
+     * The value means vertical midpoint of the right border of the window.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 20
+     */
+    END = 5,
+    /**
+     * The value means window bottom left corner.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 20
+     */
+    BOTTOM_START = 6,
+    /**
+     * The value means horizontal midpoint of the lower border of the window.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 20
+     */
+    BOTTOM = 7,
+    /**
+     * The value means window bottom right corner.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 20
+     */
+    BOTTOM_END = 8,
+  }
+
   export interface Rect {
     /**
      * The left of the Rect.
@@ -1975,6 +2041,9 @@ export class WindowInternal implements Window {
     private native globalDisplayToClient(nativeObj: long, globalDisplayX: int, globalDisplayY: int): Position;
     private native setRotationLocked(nativeObj: long, locked: boolean): void;
     private native getRotationLocked(nativeObj: long): boolean;
+    private native setRelativePositionToParentWindowEnabled(nativeObj: long, enabled: boolean, anchor?: WindowAnchor,
+      offsetX?: int, offsetY?: int): void;
+    private native setWindowDelayRaiseOnDrag(nativeObj: long, isEnabled: boolean): void;
 
     public static transferStatic(input: Any): Object {
       return WindowInternal.nativeTransferStatic(ESValue.wrap(input));
@@ -2893,6 +2962,24 @@ export class WindowInternal implements Window {
     public getRotationLocked(): boolean {
       return this.getRotationLocked(this.nativeObj);
     }
+
+    public setRelativePositionToParentWindowEnabled(enabled: boolean, anchor?: WindowAnchor,
+      offsetX?: int, offsetY?: int): Promise<void> {
+      return new Promise<void>(
+        (resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
+          taskpool.execute((): void => {
+            this.setRelativePositionToParentWindowEnabled(this.nativeObj, enabled, anchor, offsetX, offsetY);
+          }).then((ret: NullishType) => {
+            resolve(undefined);
+          }).catch((err: NullishType) => {
+            reject(err as BusinessError);
+          });
+      });
+    }
+
+    public setWindowDelayRaiseOnDrag(isEnabled: boolean): void {
+      this.setWindowDelayRaiseOnDrag(this.nativeObj, isEnabled);
+    }
 }
 
 export interface Window {
@@ -2991,6 +3078,9 @@ export interface Window {
     globalDisplayToClient(globalDisplayX: int, globalDisplayY: int): Promise<Position>;
     setRotationLocked(locked: boolean): Promise<void>;
     getRotationLocked(): boolean;
+    setRelativePositionToParentWindowEnabled(enabled: boolean, anchor?: WindowAnchor,
+      offsetX?: int, offsetY?: int): Promise<void>;
+    setWindowDelayRaiseOnDrag(isEnabled: boolean): void;
 }
 
 export native function CreateWindowStage(scene: long): WindowStageInternal;

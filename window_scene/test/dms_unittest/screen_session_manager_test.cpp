@@ -176,6 +176,7 @@ HWTEST_F(ScreenSessionManagerTest, WakeUpBegin, TestSize.Level1)
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
     }
 
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_INIT);
     PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_POWER_KEY;
     ASSERT_EQ(true, ssm_->WakeUpBegin(reason));
 

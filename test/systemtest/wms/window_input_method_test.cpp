@@ -79,10 +79,11 @@ HWTEST_F(WindowInputMethodTest, ShowKeyboard01, TestSize.Level1)
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(windowInfo);
     ASSERT_NE(nullptr, fullWindow);
     uint32_t callingWindowId = 3;
+    uint64_t targetDisplayId = 0;
     KeyboardEffectOption effectOption;
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         sleep(TEST_SLEEP_SECOND);
-        EXPECT_EQ(WMError::WM_OK, fullWindow->ShowKeyboard(callingWindowId, effectOption));
+        EXPECT_EQ(WMError::WM_OK, fullWindow->ShowKeyboard(callingWindowId, targetDisplayId, effectOption));
         sleep(TEST_SLEEP_SECOND);
         EXPECT_EQ(WMError::WM_OK, fullWindow->ChangeKeyboardEffectOption(effectOption));
         sleep(TEST_SLEEP_SECOND);
@@ -90,7 +91,7 @@ HWTEST_F(WindowInputMethodTest, ShowKeyboard01, TestSize.Level1)
         return;
     }
     effectOption.viewMode_ = KeyboardViewMode::DARK_IMMERSIVE_MODE;
-    EXPECT_EQ(WMError::WM_OK, fullWindow->ShowKeyboard(callingWindowId, effectOption));
+    EXPECT_EQ(WMError::WM_OK, fullWindow->ShowKeyboard(callingWindowId, targetDisplayId, effectOption));
     sleep(TEST_SLEEP_SECOND);
 
     effectOption.viewMode_ = KeyboardViewMode::LIGHT_IMMERSIVE_MODE;

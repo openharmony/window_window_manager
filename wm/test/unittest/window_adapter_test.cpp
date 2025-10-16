@@ -470,7 +470,7 @@ HWTEST_F(WindowAdapterTest, ProcessModalExtensionPointDown, TestSize.Level1)
 HWTEST_F(WindowAdapterTest, AddExtensionWindowStageToSCB, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
-    windowAdapter.AddExtensionWindowStageToSCB(nullptr, nullptr, 0);
+    windowAdapter.AddExtensionWindowStageToSCB(nullptr, nullptr, 0, -1);
     auto ret = windowAdapter.InitWMSProxy();
     EXPECT_TRUE(ret);
 }

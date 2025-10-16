@@ -73,12 +73,14 @@ WindowExtensionSessionImpl::WindowExtensionSessionImpl(const sptr<WindowOption>&
 {
     if (property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL ||
         SessionHelper::IsSecureUIExtension(property_->GetUIExtensionUsage())) {
+        startModalExtensionTimeStamp_ = option->GetStartModalExtensionTimeStamp();
         extensionWindowFlags_.hideNonSecureWindowsFlag = true;
     }
     if ((isDensityFollowHost_ = option->GetIsDensityFollowHost())) {
         hostDensityValue_ = option->GetDensity();
     }
-    TLOGNI(WmsLogTag::WMS_UIEXT, "Uiext usage=%{public}u", property_->GetUIExtensionUsage());
+    TLOGNI(WmsLogTag::WMS_UIEXT, "Uiext usage=%{public}u, timeStamp=%{public}" PRId64,
+        property_->GetUIExtensionUsage(), startModalExtensionTimeStamp_);
     dataHandler_ = std::make_shared<Extension::ProviderDataHandler>();
     RegisterDataConsumer();
 }
@@ -166,7 +168,7 @@ void WindowExtensionSessionImpl::AddExtensionWindowStageToSCB(bool isConstrained
     }
 
     SingletonContainer::Get<WindowAdapter>().AddExtensionWindowStageToSCB(sptr<ISessionStage>(this), abilityToken_,
-        surfaceNode_->GetId(), isConstrainedModal);
+        surfaceNode_->GetId(), startModalExtensionTimeStamp_, isConstrainedModal);
 }
 
 void WindowExtensionSessionImpl::RemoveExtensionWindowStageFromSCB(bool isConstrainedModal)

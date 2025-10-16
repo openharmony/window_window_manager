@@ -283,7 +283,7 @@ WMError WindowAdapterLite::GetMainWindowInfos(int32_t topNum, std::vector<MainWi
 WMError WindowAdapterLite::UpdateAnimationSpeedWithPid(pid_t pid, float speed)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-    TLOGD(WmsLogTag::WMS_MAIN, "update animation speed with pid");
+    TLOGD(WmsLogTag::WMS_ANIMATION, "update animation speed with pid");
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->UpdateAnimationSpeedWithPid(pid, speed);
