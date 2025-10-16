@@ -563,6 +563,16 @@ void Session::NotifyPreLoadStartingWindowFinished()
     }
 }
 
+void Session::NotifyRestart()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (auto listenerPtr = listener.lock()) {
+            listenerPtr->OnRestart();
+        }
+    }
+}
+
 void Session::NotifyAddSnapshot(bool useFfrt, bool needPersist, bool needSaveSnapshot)
 {
     /*
@@ -1921,6 +1931,19 @@ void Session::SetTerminateSessionListener(NotifyTerminateSessionFunc&& func)
             return;
         }
         session->terminateSessionFunc_ = std::move(func);
+    }, where);
+}
+
+void Session::SetRestartAppListener(NotifyRestartAppFunc&& func)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), func = std::move(func), where] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
+            return;
+        }
+        session->restartAppFunc_ = std::move(func);
     }, where);
 }
 
@@ -3849,6 +3872,16 @@ void Session::SetHidingStartingWindow(bool hidingStartWindow)
 bool Session::GetHidingStartingWindow() const
 {
     return hidingStartWindow_;
+}
+
+void Session::SetRestartApp(bool restartApp)
+{
+    sessionInfo_.isRestartApp_ = restartApp;
+}
+
+bool Session::GetRestartApp() const
+{
+    return sessionInfo_.isRestartApp_;
 }
 
 WSError Session::SetLeashWindowAlpha(bool hidingStartWindow)

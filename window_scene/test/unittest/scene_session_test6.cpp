@@ -167,6 +167,86 @@ HWTEST_F(SceneSessionTest6, GetSceneSessionById01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckAbilityInfoByWant
+ * @tc.desc: CheckAbilityInfoByWant
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, CheckAbilityInfoByWant, TestSize.Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto want = std::make_shared<AAFwk::Want>();
+
+    sceneSession->specificCallback_ = nullptr;
+    bool ret = sceneSession->CheckAbilityInfoByWant(want);
+    EXPECT_FALSE(ret);
+
+    sptr<SceneSession::SpecificSessionCallback> callBack = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sceneSession->specificCallback_ = callBack;
+    ret = sceneSession->CheckAbilityInfoByWant(want);
+    EXPECT_FALSE(ret);
+
+    auto task = [](const std::shared_ptr<AAFwk::Want>& want) {
+        return true;
+    };
+    callBack->onCheckAbilityInfoByWantCallback_ = task;
+    ret = sceneSession->CheckAbilityInfoByWant(want);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: GetSessionInfoByWant
+ * @tc.desc: GetSessionInfoByWant
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, GetSessionInfoByWant, TestSize.Level1)
+{
+    SessionInfo info;
+    info.bundleName_ = "GetSessionInfoByWant";
+    info.moduleName_ = "GetSessionInfoByWant";
+    info.abilityName_ = "GetSessionInfoByWant";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto want = std::make_shared<AAFwk::Want>();
+    want->SetElementName("GetSessionInfoByWant", "GetSessionInfoByWant",
+        "GetSessionInfoByWant", "GetSessionInfoByWant");
+    SessionInfo ret = SceneSession::GetSessionInfoByWant(want, sceneSession);
+    EXPECT_EQ(ret.bundleName_, info.bundleName_);
+
+    want->SetElementName("deviceId", "bundleName",
+        "moduleName", "abilityName");
+    ret = SceneSession::GetSessionInfoByWant(want, sceneSession);
+    EXPECT_EQ(ret.bundleName_, want->GetElement().GetBundleName());
+}
+
+/**
+ * @tc.name: RestartApp
+ * @tc.desc: RestartApp
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, RestartApp, TestSize.Level1)
+{
+    SessionInfo info;
+    info.bundleName_ = "RestartApp";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    std::shared_ptr<AAFwk::Want> want = nullptr;
+    EXPECT_EQ(sceneSession->RestartApp(want), WSError::WS_ERROR_INVALID_PARAM);
+
+    want = std::make_shared<AAFwk::Want>();
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    EXPECT_EQ(sceneSession->RestartApp(want), WSError::WS_ERROR_INVALID_SESSION);
+
+    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession->state_ = SessionState::STATE_BACKGROUND;
+    EXPECT_EQ(sceneSession->RestartApp(want), WSError::WS_ERROR_INVALID_PERMISSION);
+
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    EXPECT_EQ(sceneSession->RestartApp(want), WSError::WS_ERROR_INVALID_OPERATION);
+
+    want->SetBundle(info.bundleName_);
+    EXPECT_EQ(sceneSession->RestartApp(want), WSError::WS_ERROR_INVALID_OPERATION);
+}
+
+/**
  * @tc.name: SetWindowAnchorInfoChangeFunc
  * @tc.desc: SetWindowAnchorInfoChangeFunc
  * @tc.type: FUNC
