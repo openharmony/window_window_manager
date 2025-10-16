@@ -310,15 +310,16 @@ ani_ref AniWindowStage::OnCreateSubWindow(ani_env* env, ani_string name)
 
     auto weakScene = windowScene_.lock();
     if (weakScene == nullptr) {
-        TLOGI(WmsLogTag::DEFAULT, "[ANI] WindowScene is nullptr");
-        return AniWindowUtils::CreateAniUndefined(env);
+        TLOGI(WmsLogTag::DEFAULT, "[ANI] Window scene is nullptr");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     sptr<Rosen::WindowOption> windowOption = new Rosen::WindowOption();
     windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
     auto window = weakScene->CreateWindow(windowName, windowOption);
     if (window == nullptr) {
-        return AniWindowUtils::CreateAniUndefined(env);
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Create window failed");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     return CreateAniWindowObject(env, window);
 }
