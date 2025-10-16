@@ -498,7 +498,7 @@ void WindowController::NotifyInputCallingWindowRectAndOccupiedAreaChange(const s
         type < static_cast<T>(AvoidAreaType::TYPE_END); type++) {
         auto avoidAreaType = static_cast<AvoidAreaType>(type);
         AvoidArea area = GetAvoidAreaByType(callingWindow->GetWindowId(), avoidAreaType);
-        WLOGFI("xyt node id: %{public}u, calling windowid:",
+        WLOGFI("xyt node id: %{public}u, calling windowid: %{public}u",
                 node->GetWindowId(), node->GetCallingWindow());
             avoidAreas[avoidAreaType] = area;
         avoidAreas[avoidAreaType] = area;
@@ -512,7 +512,7 @@ void WindowController::NotifyInputCallingWindowRectAndOccupiedAreaChange(const s
 
     FlushWindowInfo(callingWindow->GetWindowId());
     accessibilityConnection_->NotifyAccessibilityWindowInfo(callingWindow, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
-    WLOGFD("Calling windowId: %{public}u, calling winRect: [%{public}d, %{public}d, %{public}u, %{public}u], "
+    WLOGFI("Calling windowId: %{public}u, calling winRect: [%{public}d, %{public}d, %{public}u, %{public}u], "
         "occupiedArea: [%{public}d, %{public}d, %{public}u, %{public}u], safeHeight: %{public}u",
         callingWindow->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_,
         occupiedArea.posX_, occupiedArea.posY_, occupiedArea.width_, occupiedArea.height_, safeRect.height_);
