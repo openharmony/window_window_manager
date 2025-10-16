@@ -1871,7 +1871,8 @@ sptr<DisplayInfo> WindowSceneSessionImpl::GetDisplayInfo() const
     return display->GetDisplayInfo();
 }
 
-WMError WindowSceneSessionImpl::ShowKeyboard(uint32_t callingWindowId, KeyboardEffectOption effectOption)
+WMError WindowSceneSessionImpl::ShowKeyboard(
+    uint32_t callingWindowId, uint64_t tgtDisplayId, KeyboardEffectOption effectOption)
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "CallingWindowId: %{public}d, effect option: %{public}s",
         callingWindowId, effectOption.ToString().c_str());
@@ -1892,6 +1893,7 @@ WMError WindowSceneSessionImpl::ShowKeyboard(uint32_t callingWindowId, KeyboardE
     }
     property_->SetKeyboardEffectOption(effectOption);
     property_->SetCallingSessionId(callingWindowId);
+    property_->SetDisplayId(tgtDisplayId);
     return Show();
 }
 

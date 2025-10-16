@@ -521,7 +521,7 @@ private:
     void OnWindowMoving(DisplayId displayId, int32_t pointerX, int32_t pointerY);
     void UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
     void OnKeyboardStateChange(SessionState state, const KeyboardEffectOption& effectOption,
-        const uint32_t callingSessionId);
+        const uint32_t callingSessionId, const DisplayId targetDisplayId);
     void OnKeyboardEffectOptionChange(const KeyboardEffectOption& effectOption);
     void NotifyHighlightChange(bool isHighlight);
     void NotifyWindowAnchorInfoChange(const WindowAnchorInfo& windowAnchorInfo);
