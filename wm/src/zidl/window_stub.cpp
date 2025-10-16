@@ -234,9 +234,9 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
                     return ERR_INVALID_DATA;
                 }
                 std::shared_ptr<RSTransaction> transaction(rsTransaction);
-                UpdateOccupiedAreaAndRect(info, rect, {}, transaction);
+                UpdateOccupiedAreaAndRect(info, rect, avoidAreas, transaction);
             } else {
-                UpdateOccupiedAreaAndRect(info, rect, {});
+                UpdateOccupiedAreaAndRect(info, rect, avoidAreas);
             }
             break;
         }
