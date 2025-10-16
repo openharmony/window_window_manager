@@ -1436,7 +1436,7 @@ void WindowNodeContainer::NotifyIfKeyboardRegionChanged(const sptr<WindowNode>& 
             type < static_cast<T>(AvoidAreaType::TYPE_END); type++) {
             auto avoidAreaType = static_cast<AvoidAreaType>(type);
             AvoidArea area = GetAvoidAreaByType(node, avoidAreaType);
-            WLOGFI("xyt node id: %{public}u, calling windowid:",
+            WLOGFI("xyt node id: %{public}u, calling windowid: %{public}u",
                 node->GetWindowId(), node->GetCallingWindow());
             avoidAreas[avoidAreaType] = area;
         }
