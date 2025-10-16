@@ -29,11 +29,6 @@
 namespace OHOS::Rosen {
 struct SecSurfaceInfo;
 struct SecRectInfo;
-struct LockCursorInfo {
-    bool isActivating = false;
-    int32_t windowId = INVALID_WINDOW_ID;
-    bool isCursorFollowMovement = false;
-};
 MMI::Direction ConvertDegreeToMMIRotation(float degree);
 MMI::Rotation ConvertToMMIRotation(float degree);
 std::string DumpWindowInfo(const MMI::WindowInfo& info);
@@ -67,8 +62,7 @@ public:
 
     void NotifyWindowInfoChange(const sptr<SceneSession>& sceneSession,
         const WindowUpdateType& type, const bool startMoving = false);
-    std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::PixelMap>>>
-        GetFullWindowInfoList(std::shared_ptr<LockCursorInfo> lockCursorInfo = nullptr);
+    std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::PixelMap>>> GetFullWindowInfoList();
     void RegisterFlushWindowInfoCallback(FlushWindowInfoCallback&& callback);
     void ResetSessionDirty();
     void UpdateSecSurfaceInfo(const std::map<uint64_t, std::vector<SecSurfaceInfo>>& secSurfaceInfoMap);
@@ -81,7 +75,7 @@ private:
     std::vector<MMI::WindowInfo> FullSceneSessionInfoUpdate() const;
     bool IsFilterSession(const sptr<SceneSession>& sceneSession) const;
     std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> GetWindowInfo(const sptr<SceneSession>& sceneSession,
-        const WindowAction& action, std::shared_ptr<LockCursorInfo> lockCursorInfo = nullptr) const;
+        const WindowAction& action) const;
     SingleHandData GetSingleHandData(const sptr<SceneSession>& sceneSession) const;
     void CalNotRotateTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform,
         bool useUIExtension = false) const;
@@ -100,8 +94,7 @@ private:
     void UpdatePointerAreas(sptr<SceneSession> sceneSession, std::vector<int32_t>& pointerChangeAreas) const;
     void UpdateWindowFlags(DisplayId displayId, const sptr<SceneSession>& sceneSession,
         MMI::WindowInfo& windowInfo) const;
-    void UpdateWindowFlagsForLockCursor(const sptr<SceneSession>& sceneSession,
-        std::shared_ptr<LockCursorInfo> lockCursorInfo, MMI::WindowInfo& windowInfo) const;
+    void UpdateWindowFlagsForLockCursor(const sptr<SceneSession>& sceneSession, MMI::WindowInfo& windowInfo) const;
     void AddModalExtensionWindowInfo(std::vector<MMI::WindowInfo>& windowInfoList, MMI::WindowInfo windowInfo,
         const sptr<SceneSession>& sceneSession, const ExtensionWindowEventInfo& extensionInfo);
     void GetModalUIExtensionInfo(std::vector<MMI::WindowInfo>& windowInfoList,

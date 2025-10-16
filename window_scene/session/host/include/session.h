@@ -330,6 +330,8 @@ public:
     void SetSessionInfoWindowInputType(uint32_t windowInputType);
     void SetSessionInfoExpandInputFlag(uint32_t expandInputFlag);
     uint32_t GetSessionInfoExpandInputFlag() const;
+    void SetSessionInfoAdvancedFeatureFlag(uint32_t bitPPosition, bool value);
+    bool GetSessionInfoAdvancedFeatureFlag(uint32_t bitPPosition) const;
     void SetSessionInfoWindowMode(int32_t windowMode);
     const SessionInfo& GetSessionInfo() const;
     SessionInfo& EditSessionInfo();

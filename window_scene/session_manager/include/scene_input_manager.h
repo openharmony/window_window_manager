@@ -30,7 +30,6 @@ namespace OHOS {
 namespace Rosen {
 class SceneSessionDirtyManager;
 struct SecSurfaceInfo;
-struct LockCursorInfo;
 
 class SceneInputManager : public std::enable_shared_from_this<SceneInputManager> {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SceneInputManager)
@@ -95,8 +94,6 @@ private:
     std::vector<MMI::WindowInfo> lastWindowInfoList_;
     int32_t lastFocusId_ { -1 };
     int32_t focusedSessionId_ { -1 };
-
-    std::shared_ptr<LockCursorInfo> lockCursorInfo_;
 
     /*
      * Multi User

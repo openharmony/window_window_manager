@@ -761,39 +761,37 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithVoiceInputPrefix, TestS
  */
 HWTEST_F(SceneSessionDirtyManagerTest2, UpdateWindowFlagsForLockCursor, TestSize.Level2)
 {
+    
+    MMI::WindowInfo windowInfo;
+    manager_->UpdateWindowFlagsForLockCursor(nullptr, windowInfo);
+    EXPECT_EQ(windowInfo.flags, 0);
+
     SessionInfo info;
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     session->persistentId_ = 5;
     session->UpdateFocus(false);
-    MMI::WindowInfo windowInfo;
-    manager_->UpdateWindowFlagsForLockCursor(session, nullptr, windowInfo);
+    sceneSession->SetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_LOCK_CURSOR, false);
+    manager_->UpdateWindowFlagsForLockCursor(session, windowInfo);
     EXPECT_EQ(windowInfo.flags, 0);
+
+    sceneSession->SetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_LOCK_CURSOR, true);
+    manager_->UpdateWindowFlagsForLockCursor(session, windowInfo);
+    EXPECT_FALSE(sceneSession->GetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_LOCK_CURSOR));
 
     session->UpdateFocus(true);
-    manager_->UpdateWindowFlagsForLockCursor(session, nullptr, windowInfo);
+    sceneSession->SetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_LOCK_CURSOR, false);
+    manager_->UpdateWindowFlagsForLockCursor(session, windowInfo);
     EXPECT_EQ(windowInfo.flags, 0);
 
-    auto lockCursorInfo = std::make_shared<LockCursorInfo>();
-    lockCursorInfo->isActivating = false;
-    manager_->UpdateWindowFlagsForLockCursor(session, lockCursorInfo, windowInfo);
-    EXPECT_EQ(windowInfo.flags, 0);
-
-    lockCursorInfo->windowId = 2;
-    lockCursorInfo->isActivating = true;
-    manager_->UpdateWindowFlagsForLockCursor(session, lockCursorInfo, windowInfo);
-    EXPECT_FALSE(lockCursorInfo->isActivating);
-
-    lockCursorInfo->windowId = 5;
-    lockCursorInfo->isActivating = true;
-    lockCursorInfo->isCursorFollowMovement = false;
-    manager_->UpdateWindowFlagsForLockCursor(session, lockCursorInfo, windowInfo);
+    sceneSession->SetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_LOCK_CURSOR, true);
+    sceneSession->SetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_CURSOR_FOLLOW_MOVEMENT, false);
+    manager_->UpdateWindowFlagsForLockCursor(session, windowInfo);
     EXPECT_EQ(windowInfo.flags, 8);
 
-    lockCursorInfo->isActivating = true;
-    lockCursorInfo->isCursorFollowMovement = true;
-    manager_->UpdateWindowFlagsForLockCursor(session, lockCursorInfo, windowInfo);
+    sceneSession->SetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_LOCK_CURSOR, true);
+    sceneSession->SetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_CURSOR_FOLLOW_MOVEMENT, true);
+    manager_->UpdateWindowFlagsForLockCursor(session, windowInfo);
     EXPECT_EQ(windowInfo.flags, 24);
-}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

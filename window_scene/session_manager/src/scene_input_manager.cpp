@@ -208,7 +208,6 @@ WM_IMPLEMENT_SINGLE_INSTANCE(SceneInputManager)
 
 void SceneInputManager::Init()
 {
-    lockCursorInfo_ = std::make_shared<LockCursorInfo>();
     sceneSessionDirty_ = std::make_shared<SceneSessionDirtyManager>();
     eventLoop_ = AppExecFwk::EventRunner::Create(FLUSH_DISPLAY_INFO_THREAD);
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(eventLoop_);
@@ -231,7 +230,7 @@ void SceneInputManager::ResetSessionDirty()
 auto SceneInputManager::GetFullWindowInfoList() ->
     std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::PixelMap>>>
 {
-    return sceneSessionDirty_->GetFullWindowInfoList(lockCursorInfo_);
+    return sceneSessionDirty_->GetFullWindowInfoList();
 }
 
 std::vector<MMI::ScreenInfo> SceneInputManager::ConstructScreenInfos(
@@ -682,35 +681,6 @@ void SceneInputManager::SetCurrentUserId(int32_t userId)
     TLOGD(WmsLogTag::WMS_MULTI_USER, "Current userId=%{public}d", userId);
     currentUserId_ = userId;
     MMI::InputManager::GetInstance()->SetCurrentUser(userId);
-}
-
-void SceneInputManager::LockCursor(int32_t windowId, bool isCursorFollowMovement)
-{
-    if (lockCursorInfo_ == nullptr) {
-        TLOGNE(WmsLogTag::WMS_EVENT, "lockCursorInfo_ is nullptr");
-        return;
-    }
-    lockCursorInfo_->isActivating = true;
-    lockCursorInfo_->windowId = windowId;
-    lockCursorInfo_->isCursorFollowMovement = isCursorFollowMovement;
-    TLOGI(WmsLogTag::WMS_EVENT, "winId:%{public}d-%{public}d", windowId, isCursorFollowMovement);
-}
-
-bool SceneInputManager::UnLockCursor(int32_t windowId)
-{
-    if (lockCursorInfo_ == nullptr) {
-        TLOGNE(WmsLogTag::WMS_EVENT, "lockCursorInfo_ is nullptr");
-        return false;
-    }
-    if (!lockCursorInfo_->isActivating) {
-        TLOGI(WmsLogTag::WMS_EVENT, "winId:%{public}d-same", windowId);
-        return false;
-    }
-    lockCursorInfo_->isActivating = false;
-    lockCursorInfo_->windowId = windowId;
-    lockCursorInfo_->isCursorFollowMovement = false;
-    TLOGI(WmsLogTag::WMS_EVENT, "winId:%{public}d", windowId);
-    return true;
 }
 
 void SceneInputManager::UpdateDisplayAndWindowInfo(const std::vector<MMI::ScreenInfo>& screenInfos,
