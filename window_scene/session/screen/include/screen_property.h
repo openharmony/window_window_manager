@@ -109,6 +109,8 @@ public:
     void SetVirtualPixelRatio(float virtualPixelRatio);
     float GetVirtualPixelRatio() const;
 
+    void SetScreenDensityProperties(float screenDpi);
+
     void SetScreenRotation(Rotation rotation);
     void SetRotationAndScreenRotationOnly(Rotation rotation);
     Rotation GetScreenRotation() const;
