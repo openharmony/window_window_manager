@@ -755,6 +755,8 @@ public:
     bool IsPersistentImageFit() const;
     void DeletePersistentImageFit();
     bool SupportSnapshotAllSessionStatus() const;
+    bool SupportCacheLockedSessionSnapshot() const;
+    void ResetLockedCacheSnapshot();
     void InitSnapshotCapacity();
     SnapshotStatus GetSessionSnapshotStatus(LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT) const;
     uint32_t GetWindowSnapshotOrientation() const;

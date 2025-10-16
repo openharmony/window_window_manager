@@ -851,6 +851,7 @@ struct SystemSessionConfig : public Parcelable {
     bool skipRedundantWindowStatusNotifications_ = false;
     uint32_t supportFunctionType_ = 0;
     bool supportSnapshotAllSessionStatus_ = false;
+    bool supportCacheLockedSessionSnapshot_ = false;
     bool supportPreloadStartingWindow_ = false;
     bool supportCreateFloatWindow_ = false;
     float defaultCornerRadius_ = 0.0f; // default corner radius of window set by system config
@@ -915,6 +916,9 @@ struct SystemSessionConfig : public Parcelable {
         if (!parcel.WriteBool(supportSnapshotAllSessionStatus_)) {
             return false;
         }
+        if (!parcel.WriteBool(supportCacheLockedSessionSnapshot_)) {
+            return false;
+        }
         if (!parcel.WriteBool(supportPreloadStartingWindow_)) {
             return false;
         }
@@ -971,6 +975,7 @@ struct SystemSessionConfig : public Parcelable {
         config->skipRedundantWindowStatusNotifications_ = parcel.ReadBool();
         config->supportFunctionType_ = parcel.ReadUint32();
         config->supportSnapshotAllSessionStatus_ = parcel.ReadBool();
+        config->supportCacheLockedSessionSnapshot_ = parcel.ReadBool();
         config->supportPreloadStartingWindow_ = parcel.ReadBool();
         if (!parcel.ReadFloat(config->defaultCornerRadius_)) {
             delete config;
