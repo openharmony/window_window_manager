@@ -1274,6 +1274,45 @@ HWTEST_F(SceneSessionManagerTest8, RemoveSessionBlackList02, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
+    std::size_t count = 100
+    for (std::size_t i = 0; i < count; ++i) {
+        // 组装 key
+        std::string key = "bundle_" + std::to_string(i);
+
+        // 组装 value（一个 set）
+        std::unordered_set<std::string> rsSet;
+        rsSet.reserve(3);
+        const std::string idx = std::to_string(i);
+        rsSet.emplace("rs_" + idx + "_a");
+        rsSet.emplace("rs_" + idx + "_b");
+        rsSet.emplace("rs_" + idx + "_c");
+
+        // 移动插入，避免拷贝
+        ssm_->b  .emplace(std::move(key), std::move(rsSet));
+
+        ssm_->sessionRSBlackListConfigSet_.insert({ .windowId = i, .privacyWindowTag = key });
+    }
+    SessionInfo sessionInfo1;
+    sessionInfo1.bundleName_ = "test";
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    std::vector<sptr<SceneSession>> sceneSessionList;
+    sceneSessionList.emplace_back(sceneSession1);
+    std::unordered_set<std::string> privacyWindowTags;
+    auto ret = ssm_->RemoveSessionBlackList(sceneSessionList, privacyWindowTags);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: SessionBlackListSystemTest
+ * @tc.desc: test function : SessionBlackListSystemTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, SessionBlackListSystemTest, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
 
     SessionInfo sessionInfo1;
     sessionInfo1.bundleName_ = "test";
