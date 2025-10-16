@@ -682,7 +682,7 @@ HWTEST_F(SessionStageProxyTest, UpdateAnimationSpeed, TestSize.Level1)
     float speed = 2.0f;
     ASSERT_TRUE(sessionStage_ != nullptr);
 
-    sptr<SessionStageProxy> nullptrProxy = nullptr;
+    sptr<SessionStageProxy> nullptrProxy = sptr<SessionStageProxy>::MakeSptr(nullptr);
     nullptrProxy->UpdateAnimationSpeed(speed);
     EXPECT_TRUE(logMsg.find("remote is nullptr") != std::string::npos);
 
