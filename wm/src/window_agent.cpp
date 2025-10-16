@@ -133,7 +133,7 @@ WMError WindowAgent::UpdateOccupiedAreaAndRect(const sptr<OccupiedAreaChangeInfo
     if (property) {
         window_->UpdateRect(rect, property->GetDecoStatus(), WindowSizeChangeReason::UNDEFINED);
     }
-    window_->UpdateOccupiedAreaChangeInfo(info, {}, rsTransaction);
+    window_->UpdateOccupiedAreaChangeInfo(info, avoidAreas, rsTransaction);
     return WMError::WM_OK;
 }
 
