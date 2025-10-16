@@ -77,6 +77,9 @@ void SceneSessionMgrLiteLifecycleIpcTest(MessageParcel& parcel)
     SceneSessionManagerLite::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManagerLite::
         SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_BUNDLES),
         parcel, reply, option);
+    parcel.RewindRead(0);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManagerLite::
+        SceneSessionManagerLiteMessage::TRANS_ID_UPDATE_ANIMATION_SPEED_WITH_PID), parcel, reply, option);
 }
 
 void SceneSessionMgrLiteLifecycleIpcSecTest(MessageParcel& parcel)

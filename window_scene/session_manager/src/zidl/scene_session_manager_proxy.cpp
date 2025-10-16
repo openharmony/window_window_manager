@@ -2592,7 +2592,8 @@ void SceneSessionManagerProxy::ProcessModalExtensionPointDown(const sptr<IRemote
 }
 
 void SceneSessionManagerProxy::AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
-    const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, bool isConstrainedModal)
+    const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, int64_t startModalExtensionTimeStamp,
+    bool isConstrainedModal)
 {
     if (sessionStage == nullptr || token == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "input is nullptr");
@@ -2615,6 +2616,10 @@ void SceneSessionManagerProxy::AddExtensionWindowStageToSCB(const sptr<ISessionS
     }
     if (!data.WriteUint64(static_cast<uint64_t>(surfaceNodeId))) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Write surfaceNodeId failed");
+        return;
+    }
+    if (!data.WriteInt64(startModalExtensionTimeStamp)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write startModalExtensionTimeStamp failed");
         return;
     }
     if (!data.WriteBool(isConstrainedModal)) {

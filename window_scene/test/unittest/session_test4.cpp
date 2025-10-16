@@ -720,6 +720,41 @@ HWTEST_F(WindowSessionTest4, SetBackPressedListenser, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetRestartAppListener
+ * @tc.desc: SetRestartAppListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, SetRestartAppListener, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    int32_t result = 0;
+    session_->SetRestartAppListener([&result](const SessionInfo& info) {
+        result = 1;
+    });
+    usleep(waitSyncInNs_);
+    SessionInfo info;
+    session_->restartAppFunc_(info);
+    ASSERT_EQ(result, 1);
+}
+
+/**
+ * @tc.name: NotifyRestart
+ * @tc.desc: NotifyRestart Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, NotifyRestart, TestSize.Level1)
+{
+    SessionInfo info;
+    info.bundleName_ = "bundleName_";
+    info.moduleName_ = "moduleName_";
+    info.abilityName_ = "abilityName_";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->NotifyRestart();
+    ASSERT_NE(nullptr, sceneSession);
+}
+
+/**
  * @tc.name: SetUpdateSessionIconListener
  * @tc.desc: SetUpdateSessionIconListener Test
  * @tc.type: FUNC
@@ -1562,6 +1597,25 @@ HWTEST_F(WindowSessionTest4, SetIsShowDecorInFreeMultiWindow01, TestSize.Level1)
     session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     WSError result02 = session_->SetIsShowDecorInFreeMultiWindow(isShow);
     EXPECT_EQ(result02, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: UpdateRect
+ * @tc.desc: Test Case UpdateRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, UpdateRect, TestSize.Level1)
+{
+    WSRect rect;
+    SizeChangeReason reason = SizeChangeReason::SCENE_WITH_ANIMATION;
+    std::shared_ptr<RSTransaction> rsTransaction = std::make_shared<RSTransaction>();
+    std::shared_ptr<AvoidArea> avoidArea = std::make_shared<AvoidArea>();
+    session_->state_ = SessionState::STATE_CONNECT;
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(nullptr, mockSessionStage);
+    session_->sessionStage_ = mockSessionStage;
+    WSError res = session_->UpdateRect(rect, reason, "UpdateRect", rsTransaction);
+    ASSERT_EQ(WSError::WS_OK, res);
 }
 
 /**
