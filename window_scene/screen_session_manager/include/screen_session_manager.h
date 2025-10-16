@@ -468,6 +468,7 @@ public:
     void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;
     void ConvertWindowIdsToSurfaceNodeList(std::vector<uint64_t> windowIdList,
         std::vector<uint64_t>& surfaceNodesList);
+    bool IsSupportCapture();
     sptr<DisplayInfo> GetPrimaryDisplayInfo() override;
     DisplayId GetPrimaryDisplayId() override;
     std::shared_ptr<Media::PixelMap> GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
@@ -1005,6 +1006,7 @@ private:
     DMError SyncScreenPropertyChangedToServer(ScreenId screenId, const ScreenProperty& screenProperty) override;
     std::function<void(sptr<ScreenSession>& screenSession)> propertyChangedCallback_;
     std::mutex callbackMutex_;
+    bool isSupportCapture_ = false;
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {
