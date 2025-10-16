@@ -2896,6 +2896,14 @@ void SceneSessionManager::PerformRegisterInRequestSceneSession(sptr<SceneSession
 
 void SceneSessionManager::UpdateSceneSessionWant(const SessionInfo& sessionInfo)
 {
+    taskScheduler_->PostSyncTask([this, &sessionInfo] {
+        DoUpdateSceneSessionWant(sessionInfo);
+        return WMError::WM_OK;
+    }, __func__);
+}
+
+void SceneSessionManager::DoUpdateSceneSessionWant(const SessionInfo& sessionInfo)
+{
     if (sessionInfo.persistentId_ != 0) {
         auto session = GetSceneSession(sessionInfo.persistentId_);
         if (session != nullptr && sessionInfo.want != nullptr) {
