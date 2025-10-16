@@ -58,14 +58,14 @@ HWTEST_F(WindowSessionImplEventTest, LockCursor, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("LockCursor");
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->hostSession_ = nullptr;
     auto ret = window->LockCursor(1, true);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
 
     window->property_->persistentId_ = 10;
-    window->state_ = WindowState::STATE_SHOW;
-    sptr<SessionMocker> session = sptr<SessionStubMocker>::MakeSptr();
+    window->state_ = WindowState::STATE_SHOWN;
+    sptr<SessionStubMocker> session = sptr<SessionStubMocker>::MakeSptr();
     window->hostSession_ = session;
     ret = window->LockCursor(1, true);
     EXPECT_EQ(ret, WMError::WM_OK);
@@ -79,15 +79,15 @@ HWTEST_F(WindowSessionImplEventTest, LockCursor, TestSize.Level0)
 HWTEST_F(WindowSessionImplEventTest, UnLockCursor, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("LockCursor");
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    option->SetWindowName("UnLockCursor");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->hostSession_ = nullptr;
     auto ret = window->UnLockCursor(1);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
 
     window->property_->persistentId_ = 10;
-    window->state_ = WindowState::STATE_SHOW;
-    sptr<SessionMocker> session = sptr<SessionStubMocker>::MakeSptr();
+    window->state_ = WindowState::STATE_SHOWN;
+    sptr<SessionStubMocker> session = sptr<SessionStubMocker>::MakeSptr();
     window->hostSession_ = session;
     ret = window->UnLockCursor(1);
     EXPECT_EQ(ret, WMError::WM_OK);

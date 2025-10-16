@@ -884,7 +884,7 @@ ohos_static_library("wm_unittest_common") {
   visibility = [
     ":*",
     "animation:*",
-    "event_distribution:*"
+    "event_distribution:*",
     "layout:*",
     "rotation:*",
     "special_window:*",

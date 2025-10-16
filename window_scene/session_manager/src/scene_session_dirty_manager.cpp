@@ -36,6 +36,9 @@ constexpr int POINTER_CHANGE_AREA_DEFAULT = 0;
 constexpr int POINTER_CHANGE_AREA_FIVE = 5;
 constexpr unsigned int TRANSFORM_DATA_LEN = 9;
 constexpr int UPDATE_TASK_DURATION = 10;
+constexpr uint32_t MMI_FLAG_BIT_LOCK_CURSOR = 0x08;
+constexpr uint32_t MMI_FLAG_BIT_CURSOR_FOLLOW_MOVEMENT = 0x10;
+MMI::WindowInfo::FLAG_BIT_UNTOUCHABLE
 const std::string UPDATE_WINDOW_INFO_TASK = "UpdateWindowInfoTask";
 static int32_t g_screenRotationOffset = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 constexpr float ZORDER_UIEXTENSION_INDEX = 0.1;
@@ -852,9 +855,9 @@ void SceneSessionDirtyManager::UpdateWindowFlagsForLockCursor(const sptr<SceneSe
         lockCursorInfo->isActivating = false;
         return;
     }
-    windowInfo.flags |= 0x08;
+    windowInfo.flags |= MMI_FLAG_BIT_LOCK_CURSOR;
     if (lockCursorInfo->isCursorFollowMovement) {
-        windowInfo.flags |= 0x10;
+        windowInfo.flags |= MMI_FLAG_BIT_CURSOR_FOLLOW_MOVEMENT;
     }
 }
 

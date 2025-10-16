@@ -738,7 +738,7 @@ int32_t OH_WindowManager_LockCursor(int32_t windowId, bool isCursorFollowMovemen
     return errCode;
 }
 
-int32_t OH_WindowManager_UnLockCursor(int32_t windowId)
+int32_t OH_WindowManager_UnlockCursor(int32_t windowId)
 {
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
