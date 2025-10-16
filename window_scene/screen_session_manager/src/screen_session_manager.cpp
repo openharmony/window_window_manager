@@ -2930,6 +2930,7 @@ bool ScreenSessionManager::RecoveryResolutionEffect()
         TLOGI(WmsLogTag::DMS, "RealResolutionRect %{public}d %{public}d %{public}d %{public}d",
             RealResolutionRect.posX_, RealResolutionRect.posY_, RealResolutionRect.width_, RealResolutionRect.height_);
         SetInternalScreenResolutionEffect(internalSession, RealResolutionRect);
+        curResolutionEffectEnable_.store(false);
     }
     if (externalSession != nullptr) {
         DMRect externalRealRect = { 0, 0, externalSession->GetScreenProperty().GetScreenRealWidth(),
@@ -2938,7 +2939,6 @@ bool ScreenSessionManager::RecoveryResolutionEffect()
     }
     HandleCastVirtualScreenMirrorRegion();
     NotifyScreenModeChange();
-    curResolutionEffectEnable_.store(false);
     return true;
 }
 
