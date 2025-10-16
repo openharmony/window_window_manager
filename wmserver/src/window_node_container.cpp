@@ -1436,8 +1436,6 @@ void WindowNodeContainer::NotifyIfKeyboardRegionChanged(const sptr<WindowNode>& 
             type < static_cast<T>(AvoidAreaType::TYPE_END); type++) {
             auto avoidAreaType = static_cast<AvoidAreaType>(type);
             AvoidArea area = GetAvoidAreaByType(callingWindow, avoidAreaType);
-            WLOGFI("xyt container node id: %{public}u, calling windowid: %{public}u",
-                node->GetWindowId(), node->GetCallingWindow());
             avoidAreas[avoidAreaType] = area;
         }
         if (isAnimateTransactionEnabled_) {
@@ -1447,7 +1445,7 @@ void WindowNodeContainer::NotifyIfKeyboardRegionChanged(const sptr<WindowNode>& 
             callingWindow->GetWindowToken()->UpdateOccupiedAreaChangeInfo(info, avoidAreas);
         }
 
-        WLOGI("keyboard size change callingWindow: [%{public}s, %{public}u], "
+        WLOGD("keyboard size change callingWindow: [%{public}s, %{public}u], "
             "overlap rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
             callingWindow->GetWindowName().c_str(), callingWindow->GetWindowId(),
             overlapRect.posX_, overlapRect.posY_, overlapRect.width_, overlapRect.height_);
