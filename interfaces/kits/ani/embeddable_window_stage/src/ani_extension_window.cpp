@@ -111,9 +111,10 @@ WmErrorCode AniExtensionWindow::OnSetWaterMarkFlag(ani_env* env, ani_boolean ena
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     WMError ret = extensionWindow_->SetWaterMarkFlag(enable);
-    if (WM_JS_TO_ERROR_CODE_MAP.at(ret) != WmErrorCode::WM_OK) {
-        AniWindowUtils::AniThrowError(env, WM_JS_TO_ERROR_CODE_MAP.at(ret));
-        return WM_JS_TO_ERROR_CODE_MAP.at(ret);
+    WmErrorCode errorCode = AniWindowUtils::ToErrorCode(ret);
+    if (errorCode != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, errorCode);
+        return errorCode;
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "[ANI]finished, enable: %{public}u", enable);
     return WmErrorCode::WM_OK;
@@ -127,9 +128,10 @@ WmErrorCode AniExtensionWindow::OnHidePrivacyContentForHost(ani_env* env, ani_bo
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     WMError ret = extensionWindow_->HidePrivacyContentForHost(shouldHide);
-    if (WM_JS_TO_ERROR_CODE_MAP.at(ret) != WmErrorCode::WM_OK) {
-        AniWindowUtils::AniThrowError(env, WM_JS_TO_ERROR_CODE_MAP.at(ret));
-        return WM_JS_TO_ERROR_CODE_MAP.at(ret);
+    WmErrorCode errorCode = AniWindowUtils::ToErrorCode(ret);
+    if (errorCode != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, errorCode);
+        return errorCode;
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "[ANI]finished, shouldHide: %{public}u", shouldHide);
     return WmErrorCode::WM_OK;
@@ -155,7 +157,7 @@ WmErrorCode AniExtensionWindow::UnregisterListener(ani_env* env, ani_string type
     }
     std::string cbType;
     AniWindowUtils::GetStdString(env, type, cbType);
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] type:%{public}s", cbType.c_str());
+    TLOGI(WmsLogTag::WMS_UIEXT, "[ANI] type:%{public}s", cbType.c_str());
     sptr<Rosen::Window> window = extensionWindow_->GetWindow();
     return extensionRegisterManager_->UnregisterListener(window, cbType, CaseType::CASE_WINDOW, env, fn);
 }
@@ -168,7 +170,7 @@ WmErrorCode AniExtensionWindow::RegisterListener(ani_env* env, ani_string type, 
     }
     std::string cbType;
     AniWindowUtils::GetStdString(env, type, cbType);
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] type:%{public}s", cbType.c_str());
+    TLOGI(WmsLogTag::WMS_UIEXT, "[ANI] type:%{public}s", cbType.c_str());
     sptr<Rosen::Window> window = extensionWindow_->GetWindow();
     return extensionRegisterManager_->RegisterListener(window, cbType, CaseType::CASE_WINDOW, env, fn);
 }
@@ -191,9 +193,10 @@ WmErrorCode AniExtensionWindow::OnHideNonSecureWindows(ani_env* env, ani_boolean
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     WMError ret = extensionWindow_->HideNonSecureWindows(shouldHide);
-    if (WM_JS_TO_ERROR_CODE_MAP.at(ret) != WmErrorCode::WM_OK) {
-        AniWindowUtils::AniThrowError(env, WM_JS_TO_ERROR_CODE_MAP.at(ret));
-        return WM_JS_TO_ERROR_CODE_MAP.at(ret);
+    WmErrorCode errorCode = AniWindowUtils::ToErrorCode(ret);
+    if (errorCode != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, errorCode);
+        return errorCode;
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "[ANI]finished, shouldHide: %{public}u", shouldHide);
     return WmErrorCode::WM_OK;
@@ -244,9 +247,11 @@ ani_object AniExtensionWindow::OnCreateSubWindowWithOptions(ani_env* env, ani_st
 
 void AniExtensionWindow::OnOccupyEvents(ani_env* env, ani_int eventFlags)
 {
-    auto ret = WM_JS_TO_ERROR_CODE_MAP.at(extensionWindow_->OccupyEvents(eventFlags));
-    if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]OnOccupyEvents failed, code: %{public}d", ret);
+
+    auto ret = extensionWindow_->OccupyEvents(eventFlags);
+    WmErrorCode errorCode = AniWindowUtils::ToErrorCode(ret);
+    if (errorCode != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]OnOccupyEvents failed, code: %{public}d", errorCode);
         AniWindowUtils::AniThrowError(env, ret);
     }
 }
@@ -364,7 +369,7 @@ static ani_int ExtWindowGetWindowAvoidArea(ani_env* env, ani_object obj, ani_lon
     }
     WMError retCode = aniExtWinPtr->GetAvoidAreaByType(static_cast<AvoidAreaType>(areaType), avoidArea);
     if (retCode != WMError::WM_OK) {
-        return static_cast<ani_int>(WM_JS_TO_ERROR_CODE_MAP.at(retCode));
+        return static_cast<ani_int>(AniWindowUtils::ToErrorCode(retCode));
     }
     ret = ExtWindowSetRectMember(env, area, "<property>leftRect", avoidArea.leftRect_);
     if (ret != ANI_OK) {
@@ -411,7 +416,7 @@ static ani_int ExtWindowHidePrivacyContentForHost(ani_env* env, ani_object obj, 
 static void RegisterExtWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
     ani_object callback)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[ANI]");
     AniExtensionWindow* aniExtWinPtr = reinterpret_cast<AniExtensionWindow*>(nativeObj);
     if (aniExtWinPtr == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]aniExtWinPtr is nullptr");
@@ -420,7 +425,7 @@ static void RegisterExtWindowCallback(ani_env* env, ani_object obj, ani_long nat
 
     WmErrorCode ret = aniExtWinPtr->RegisterListener(env, type, callback);
     if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Register failde: %{public}d", static_cast<int32_t>(ret));
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Register failed: %{public}d", static_cast<int32_t>(ret));
         AniWindowUtils::AniThrowError(env, ret);
     }
 }
@@ -428,7 +433,7 @@ static void RegisterExtWindowCallback(ani_env* env, ani_object obj, ani_long nat
 static void UnregisterExtWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
     ani_object callback)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[ANI]");
     AniExtensionWindow* aniExtWinPtr = reinterpret_cast<AniExtensionWindow*>(nativeObj);
     if (aniExtWinPtr == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]aniExtWinPtr is nullptr");
@@ -477,7 +482,7 @@ static void ExtWindowOccupyEvents(ani_env* env, ani_object obj, ani_long nativeO
 
 static void ExtWindowOnRectChange(ani_env* env, ani_object obj, ani_long nativeObj, ani_int reason, ani_object callback)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[ANI]");
     AniExtensionWindow* aniExtWinPtr = reinterpret_cast<AniExtensionWindow*>(nativeObj);
     if (aniExtWinPtr == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]aniExtWinPtr is nullptr");
@@ -493,7 +498,7 @@ static void ExtWindowOnRectChange(ani_env* env, ani_object obj, ani_long nativeO
 
 static void ExtWindowOffRectChange(ani_env* env, ani_object obj, ani_long nativeObj, ani_object callback)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[ANI]");
     AniExtensionWindow* aniExtWinPtr = reinterpret_cast<AniExtensionWindow*>(nativeObj);
     if (aniExtWinPtr == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]aniExtWinPtr is nullptr");
