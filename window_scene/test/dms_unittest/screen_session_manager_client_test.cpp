@@ -818,7 +818,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnGetSurfaceNodeIdsFromMissionIdsChange
 {
     std::vector<uint64_t> missionIds = {0, 1};
     std::vector<uint64_t> surfaceNodeIds;
-    const std::vector<uint32_t> needWindowTypeList = "1234";
+    const std::vector<uint32_t> needWindowTypeList = {1234};
 
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
     screenSessionManagerClient_->displayChangeListener_ = nullptr;
