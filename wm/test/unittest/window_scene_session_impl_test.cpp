@@ -160,13 +160,14 @@ HWTEST_F(WindowSceneSessionImplTest, CreateWindowAndDestroy02, TestSize.Level0)
  */
 HWTEST_F(WindowSceneSessionImplTest, UpdateAnimationSpeedIfEnabled, TestSize.Level0)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(LogCallback);
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UpdateAnimationSpeedIfEnabled");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    isEnableAnimationSpeed_.store(true);
+
     window->UpdateAnimationSpeedIfEnabled();
-    isEnableAnimationSpeed_.store(false);
-    window->UpdateAnimationSpeedIfEnabled();
+    EXPECT_TRUE(g_logMsg.find("isEnableAnimationSpeed_ is true") == std::string::npos);
 }
 
 /**

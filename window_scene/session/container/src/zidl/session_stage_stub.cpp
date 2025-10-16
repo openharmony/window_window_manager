@@ -872,7 +872,7 @@ int SessionStageStub::HandleUpdateAnimationSpeed(MessageParcel& data, MessagePar
     TLOGD(WmsLogTag::WMS_ANIMATION, "HandleUpdateAnimationSpeed!");
     float speed = 0.0f;
     if (!data.ReadFloat(speed)) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "Read speed failed.");
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Read speed failed!");
         return ERR_INVALID_DATA;
     }
     UpdateAnimationSpeed(speed);
