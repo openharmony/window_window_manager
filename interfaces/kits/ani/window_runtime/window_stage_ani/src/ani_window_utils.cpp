@@ -421,6 +421,21 @@ ani_object AniWindowUtils::CreateAniWindowLimits(ani_env* env, const WindowLimit
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to create new obj");
         return AniWindowUtils::CreateAniUndefined(env);
     }
+    ani_enum pixelUnit;
+    ret = env->FindEnum("L@ohos/window/window/PixelUnit;", &pixelUnit);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to FindEnum");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    ani_enum_item pixelUnitItem;
+    
+    std::string itemName = GetPixelUnitString(windowLimits.pixelUnit_);
+    ret = env->Enum_GetEnumItemByName(pixelUnit, itemName.c_str(), &pixelUnitItem);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Enum_GetEnumItemByName failed");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
 
     CallAniMethodVoid(env, aniLimits, aniClass, "<set>maxWidth", nullptr,
         CreateBaseTypeObject<int>(env, windowLimits.maxWidth_));
@@ -430,6 +445,7 @@ ani_object AniWindowUtils::CreateAniWindowLimits(ani_env* env, const WindowLimit
         CreateBaseTypeObject<int>(env, windowLimits.minWidth_));
     CallAniMethodVoid(env, aniLimits, aniClass, "<set>minHeight", nullptr,
         CreateBaseTypeObject<int>(env, windowLimits.minHeight_));
+    CallAniMethodVoid(env, aniLimits, aniClass, "<set>pixelUnit", nullptr, pixelUnitItem);
     return aniLimits;
 }
 
@@ -1258,11 +1274,9 @@ void AniWindowUtils::GetSpecificBarStatus(sptr<Window>& window, const std::strin
         SystemBarSettingFlag::ENABLE_SETTING;
 }
 
-WindowLimits AniWindowUtils::ParseWindowLimits(ani_env* env, ani_object aniWindowLimits)
+bool AniWindowUtils::ParseWindowLimits(ani_env* env, ani_object aniWindowLimits, WindowLimits& windowLimits)
 {
-    WindowLimits windowLimits;
-    
-    auto getAndAssign = [&, where = __func__](const char* name, uint32_t& field) {
+    auto getAndAssign = [&, where = __func__](const char* name, uint32_t& field) -> ani_status {
         int value;
         ani_status ret = AniWindowUtils::GetPropertyIntObject(env, name, aniWindowLimits, value);
         if (ret == ANI_OK) {
@@ -1273,13 +1287,35 @@ WindowLimits AniWindowUtils::ParseWindowLimits(ani_env* env, ani_object aniWindo
                 TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: [ANI] Invalid %{public}s: %{public}d", where, name, value);
             }
         }
+        return ret;
     };
 
-    getAndAssign("maxWidth", windowLimits.maxWidth_);
-    getAndAssign("maxHeight", windowLimits.maxHeight_);
-    getAndAssign("minWidth", windowLimits.minWidth_);
-    getAndAssign("minHeight", windowLimits.minHeight_);
-    return windowLimits;
+    auto getAndAssignUnit = [&, where = __func__](const char* name, PixelUnit& field) -> ani_status {
+        uint32_t unitValue;
+        ani_ref unitValueObject;
+        ani_boolean isUndefined;
+        ani_status ret = env->Object_GetPropertyByName_Ref(aniWindowLimits, name, &unitValueObject);
+        env->Reference_IsUndefined(unitValueObject, &isUndefined);
+        if (isUndefined) {
+            field = PixelUnit::PX;
+            return ret;
+        }
+        ret = AniWindowUtils::GetEnumValue(env, static_cast<ani_enum_item>(unitValueObject), unitValue);
+        if (ret == ANI_OK) {
+            field = static_cast<PixelUnit>(unitValue);
+        } else {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s: [ANI] GetEnumValue failed, invalid %{public}s", where, name);
+        }
+        return ret;
+    };
+    if (getAndAssign("maxWidth", windowLimits.maxWidth_) != ANI_OK ||
+        getAndAssign("maxHeight", windowLimits.maxHeight_) != ANI_OK ||
+        getAndAssign("minWidth", windowLimits.minWidth_) != ANI_OK ||
+        getAndAssign("minHeight", windowLimits.minHeight_) != ANI_OK ||
+        getAndAssignUnit("pixelUnit", windowLimits.pixelUnit_) != ANI_OK) {
+        return false;
+    }
+    return true;
 }
 
 bool AniWindowUtils::CheckParaIsUndefined(ani_env* env, ani_object para)
@@ -1321,6 +1357,18 @@ ani_object AniWindowUtils::CreateAniPosition(ani_env* env, const Position& posit
     CallAniMethodVoid(env, aniPosition, aniClass, "<set>x", nullptr, ani_int(position.x));
     CallAniMethodVoid(env, aniPosition, aniClass, "<set>y", nullptr, ani_int(position.y));
     return aniPosition;
+}
+
+std::string AniWindowUtils::GetPixelUnitString(const PixelUnit& pixelUnit) {
+    switch (pixelUnit) {
+        case PixelUnit::PX:
+            return "PX";
+        case PixelUnit::VP:
+            return "VP";
+        default:
+            TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] GetPixelUnitString default");
+            return "PX";
+    }
 }
 
 WmErrorCode AniWindowUtils::ToErrorCode(WMError error, WmErrorCode defaultCode)

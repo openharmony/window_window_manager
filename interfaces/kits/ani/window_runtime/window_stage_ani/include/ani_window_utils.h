@@ -117,10 +117,10 @@ public:
         std::map<WindowType, SystemBarProperty>& systemBarProperties);
     static void GetWindowSnapshotConfiguration(ani_env* env, ani_object config,
         WindowSnapshotConfiguration& windowSnapshotConfiguration);
-    static WindowLimits ParseWindowLimits(ani_env* env, ani_object aniWindowLimits);
+    static bool ParseWindowLimits(ani_env* env, ani_object aniWindowLimits, WindowLimits& windowLimits);
     static bool CheckParaIsUndefined(ani_env* env, ani_object para);
     static ani_object CreateAniPosition(ani_env* env, const Position& position);
-
+    static std::string GetPixelUnitString(const PixelUnit& pixelUnit);
     /**
      * @brief Convert WMError to corresponding WmErrorCode.
      *
