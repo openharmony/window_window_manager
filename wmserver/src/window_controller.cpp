@@ -498,9 +498,8 @@ void WindowController::NotifyInputCallingWindowRectAndOccupiedAreaChange(const s
         type < static_cast<T>(AvoidAreaType::TYPE_END); type++) {
         auto avoidAreaType = static_cast<AvoidAreaType>(type);
         AvoidArea area = GetAvoidAreaByType(callingWindow->GetWindowId(), avoidAreaType);
-        WLOGFI("xyt node id: %{public}u, calling windowid: %{public}u",
-                node->GetWindowId(), node->GetCallingWindow());
-            avoidAreas[avoidAreaType] = area;
+        WLOGFI("xyt calling windowid: %{public}u", callingWindow->GetWindowId());
+        avoidAreas[avoidAreaType] = area;
         avoidAreas[avoidAreaType] = area;
     }
     auto rsTransaction = RSSyncTransactionAdapter::GetRSTransaction(callingWindow->GetRSUIContext());
