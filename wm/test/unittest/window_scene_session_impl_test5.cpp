@@ -417,7 +417,6 @@ HWTEST_F(WindowSceneSessionImplTest5, IsDefaultDensityEnabled02, TestSize.Level1
     EXPECT_EQ(window->IsDefaultDensityEnabled(), true);
 }
 
-
 /**
  * @tc.name: GetCustomDensity01
  * @tc.desc: GetCustomDensity
