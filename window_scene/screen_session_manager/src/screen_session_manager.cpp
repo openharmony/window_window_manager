@@ -2886,11 +2886,6 @@ bool ScreenSessionManager::SetResolutionEffect(ScreenId screenId,  uint32_t widt
         TLOGE(WmsLogTag::DMS, "only internal session valid");
         return false;
     }
-    if (internalSession->GetScreenProperty().GetBounds().rect_.width_ == width &&
-        internalSession->GetScreenProperty().GetBounds().rect_.height_ == height) {
-        TLOGE(WmsLogTag::DMS, "Resolution Effect set repeat");
-        return true;
-    }
     uint32_t realWidth = internalSession->GetScreenProperty().GetScreenRealWidth();
     uint32_t realHeight = internalSession->GetScreenProperty().GetScreenRealHeight();
     // Calculate the center position
@@ -2902,7 +2897,10 @@ bool ScreenSessionManager::SetResolutionEffect(ScreenId screenId,  uint32_t widt
     };
     TLOGI(WmsLogTag::DMS, "toRect %{public}d %{public}d %{public}d %{public}d",
         toRect.posX_, toRect.posY_, toRect.width_, toRect.height_);
-    SetInternalScreenResolutionEffect(internalSession, toRect);
+    if (internalSession->GetScreenProperty().GetBounds().rect_.width_ != width ||
+        internalSession->GetScreenProperty().GetBounds().rect_.height_ != height) {
+        SetInternalScreenResolutionEffect(internalSession, toRect);
+    }
     SetExternalScreenResolutionEffect(externalSession, toRect);
     HandleCastVirtualScreenMirrorRegion();
     NotifyScreenModeChange();
