@@ -720,6 +720,41 @@ HWTEST_F(WindowSessionTest4, SetBackPressedListenser, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetRestartAppListener
+ * @tc.desc: SetRestartAppListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, SetRestartAppListener, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    int32_t result = 0;
+    session_->SetRestartAppListener([&result](const SessionInfo& info) {
+        result = 1;
+    });
+    usleep(waitSyncInNs_);
+    SessionInfo info;
+    session_->restartAppFunc_(info);
+    ASSERT_EQ(result, 1);
+}
+
+/**
+ * @tc.name: NotifyRestart
+ * @tc.desc: NotifyRestart Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, NotifyRestart, TestSize.Level1)
+{
+    SessionInfo info;
+    info.bundleName_ = "bundleName_";
+    info.moduleName_ = "moduleName_";
+    info.abilityName_ = "abilityName_";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->NotifyRestart();
+    ASSERT_NE(nullptr, sceneSession);
+}
+
+/**
  * @tc.name: SetUpdateSessionIconListener
  * @tc.desc: SetUpdateSessionIconListener Test
  * @tc.type: FUNC

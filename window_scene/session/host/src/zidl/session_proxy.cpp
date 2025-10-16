@@ -3945,4 +3945,40 @@ WSError SessionProxy::NotifyIsFullScreenInForceSplitMode(bool isFullScreen)
     }
     return static_cast<WSError>(ret);
 }
+
+WSError SessionProxy::RestartApp(const std::shared_ptr<AAFwk::Want>& want)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (want == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "want is null");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteParcelable(want.get())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "write want failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    auto errCode = remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RESTART_APP), data, reply, option);
+    if (errCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed code: %{public}d", errCode);
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read reply failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(ret);
+}
 } // namespace OHOS::Rosen

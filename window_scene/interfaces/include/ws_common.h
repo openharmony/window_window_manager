@@ -447,6 +447,7 @@ struct SessionInfo {
     bool disableDelegator = false;
     bool reuseDelegatorWindow = false;
     bool isAbilityHook_ = false;
+    bool isRestartApp_ = false;
     std::string label_ = "";
     StartWindowType startWindowType_ = StartWindowType::DEFAULT;
     bool isSetStartWindowType_ = false;

@@ -114,6 +114,7 @@ enum class ListenerFuncType : uint32_t {
     FLOATING_BALL_STOP_CB,
     FLOATING_BALL_RESTORE_MAIN_WINDOW_CB,
     SCENE_OUTLINE_PARAMS_CHANGE_CB,
+    RESTART_APP_CB,
     CALLING_SESSION_ID_CHANGE_CB,
     ROTATION_LOCK_CHANGE_CB,
 };
@@ -438,6 +439,7 @@ private:
     void ProcessSetSubWindowSourceRegister();
     void ProcessAnimateToTargetPropertyRegister();
     void ProcessSceneOutlineParamsChangeRegister();
+    void ProcessRestartAppRegister();
 
     /*
      * Window Property
@@ -533,6 +535,7 @@ private:
     void OnAnimateToTargetProperty(const WindowAnimationProperty& animationProperty,
         const WindowAnimationOption& animationOption);
     void OnOutlineParamsChange(bool isOutlineEnabled, const OutlineStyleParams& outlineStyleParams);
+    void OnRestartApp(const SessionInfo& info);
     void OnCallingSessionIdChange(uint32_t callingSessionId);
 
     /*
