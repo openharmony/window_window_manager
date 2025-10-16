@@ -4767,7 +4767,7 @@ public:
      * @param isCursorFollowMovement
      * @return WM_OK means set success.
      */
-    virtual WMError UnLockCursor(int32_t windowId)
+    virtual WMError UnlockCursor(int32_t windowId)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }

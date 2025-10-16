@@ -114,7 +114,7 @@ HWTEST_F(SceneSessionManagerEventTest, LockCursor, TestSize.Level1)
 
     // The test dose not have the permission
     MockAccesstokenKit::MockAccessTokenKitRet(-1);
-    auto ret = ssm_->UnLockCursor(datas);
+    auto ret = ssm_->UnlockCursor(datas);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PERMISSION);
 
     // test checkDatas: The format is incorrect(size<1).
@@ -151,47 +151,47 @@ HWTEST_F(SceneSessionManagerEventTest, LockCursor, TestSize.Level1)
 }
 
 /**
- * @tc.name: UnLockCursor
- * @tc.desc: UnLockCursor
+ * @tc.name: UnlockCursor
+ * @tc.desc: UnlockCursor
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerEventTest, UnLockCursor, TestSize.Level1)
+HWTEST_F(SceneSessionManagerEventTest, UnlockCursor, TestSize.Level1)
 {
     std::vector<int32_t> datas;
 
     // The test dose not have the permission
     MockAccesstokenKit::MockAccessTokenKitRet(-1);
-    auto ret = ssm_->UnLockCursor(datas);
+    auto ret = ssm_->UnlockCursor(datas);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PERMISSION);
 
     // test checkDatas: The format is incorrect(size<1).
     MockAccesstokenKit::MockAccessTokenKitRet(0);
-    ret = ssm_->UnLockCursor(datas);
+    ret = ssm_->UnlockCursor(datas);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
     
     // test checkDatas: The format is incorrect(length error).
     datas.emplace_back(UNLOCK_CURSOR_LENGTH + 1);
-    ret = ssm_->UnLockCursor(datas);
+    ret = ssm_->UnlockCursor(datas);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
 
     // test checkDatas: The format is incorrect(size error).
     datas.clear();
     datas.emplace_back(UNLOCK_CURSOR_LENGTH);
-    ret = ssm_->UnLockCursor(datas);
+    ret = ssm_->UnlockCursor(datas);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
 
     // test normal process
     datas.clear();
     datas.emplace_back(UNLOCK_CURSOR_LENGTH);
     datas.emplace_back(1);
-    ret = ssm_->UnLockCursor(datas);
+    ret = ssm_->UnlockCursor(datas);
     EXPECT_EQ(ret, WMError::WM_OK);
 
     // test normal process(repeat)
     datas.clear();
     datas.emplace_back(UNLOCK_CURSOR_LENGTH);
     datas.emplace_back(1);
-    ret = ssm_->UnLockCursor(datas);
+    ret = ssm_->UnlockCursor(datas);
     EXPECT_EQ(ret, WMError::WM_OK);
 }
 } // namespace

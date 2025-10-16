@@ -758,7 +758,7 @@ int32_t OH_WindowManager_UnlockCursor(int32_t windowId)
             errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
             return;
         }
-        auto ret = window->UnLockCursor(windowId);
+        auto ret = window->UnlockCursor(windowId);
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.find(ret) == OH_WINDOW_TO_ERROR_CODE_MAP.end() ?
             WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL : OH_WINDOW_TO_ERROR_CODE_MAP.at(ret);
     }, __func__);

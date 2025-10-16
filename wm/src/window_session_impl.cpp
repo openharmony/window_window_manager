@@ -6566,7 +6566,7 @@ WMError WindowSessionImpl::LockCursor(int32_t windowId, bool isCursorFollowMovem
         static_cast<int32_t>(CommonEventCommand::LOCK_CURSOR), datas);
 }
 
-WMError WindowSessionImpl::UnLockCursor(int32_t windowId)
+WMError WindowSessionImpl::UnlockCursor(int32_t windowId)
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_EVENT, "session is invalid");
