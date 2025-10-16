@@ -220,14 +220,12 @@ bool AvoidAreaController::UpdateAvoidAreaIfNeed(const AvoidArea& avoidArea, cons
 
 AvoidPosType AvoidAreaController::CalculateOverlayRect(const sptr<WindowNode>& node,
     const sptr<WindowNode>& overlayNode, Rect& overlayRect) const
-{   
+{
     if (node->GetWindowId() == overlayNode->GetWindowId()) {
         WLOGE("overlay not support self. windowId %{public}u", node->GetWindowId());
         return AvoidPosType::AVOID_POS_UNKNOWN;
     }
     const Rect rect = node->GetWindowRect();
-    WLOGI("node_rect: %{public}d, %{public}d, %{public}d, %{public}d",
-        rect.width_, rect.height_, overlayRect.width_, overlayRect.height_);
     overlayRect = WindowHelper::GetOverlap(overlayNode->GetWindowRect(), rect, rect.posX_, rect.posY_);
     return  GetAvoidPosType(rect, overlayRect);
 }
@@ -286,8 +284,6 @@ AvoidArea AvoidAreaController::GetAvoidAreaByType(const sptr<WindowNode>& node, 
         WLOGFE("invalid WindowNode.");
         return {};
     }
-    WLOGFI("xyt node id: %{public}u, calling windowid: %{public}u",
-                node->GetWindowId(), node->GetCallingWindow());
     WindowMode windowMode = node->GetWindowMode();
     if (avoidAreaType != AvoidAreaType::TYPE_KEYBOARD &&
         windowMode != WindowMode::WINDOW_MODE_FULLSCREEN &&
