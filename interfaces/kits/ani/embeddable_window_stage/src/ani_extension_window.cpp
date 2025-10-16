@@ -247,7 +247,6 @@ ani_object AniExtensionWindow::OnCreateSubWindowWithOptions(ani_env* env, ani_st
 
 void AniExtensionWindow::OnOccupyEvents(ani_env* env, ani_int eventFlags)
 {
-
     auto ret = extensionWindow_->OccupyEvents(eventFlags);
     WmErrorCode errorCode = AniWindowUtils::ToErrorCode(ret);
     if (errorCode != WmErrorCode::WM_OK) {
