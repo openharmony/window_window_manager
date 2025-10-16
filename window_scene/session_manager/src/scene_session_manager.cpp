@@ -10548,7 +10548,7 @@ WMError SceneSessionManager::GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_
                 continue;
             }
             if (!needWindowTypeList.empty() && std::find(needWindowTypeList.begin(), needWindowTypeList.end(),
-                static_cast<uint32_t>(sceneSession->GetWindowMode())) != needWindowTypeList.end()) {
+                static_cast<uint32_t>(sceneSession->GetWindowType())) == needWindowTypeList.end()) {
                 continue;
             }
             surfaceNodeIds.push_back(sceneSession->GetSurfaceNode()->GetId());

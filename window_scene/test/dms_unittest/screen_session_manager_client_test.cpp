@@ -802,12 +802,27 @@ HWTEST_F(ScreenSessionManagerClientTest, OnGetSurfaceNodeIdsFromMissionIdsChange
  */
 HWTEST_F(ScreenSessionManagerClientTest, OnGetSurfaceNodeIdsFromMissionIdsChanged02, TestSize.Level1)
 {
-    std::vector<uint64_t> missionIds = {0, 1};
+    std::vector<uint64_t> missionIds = {0, 1, 2};
     std::vector<uint64_t> surfaceNodeIds;
 
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
-    screenSessionManagerClient_->displayChangeListener_ = nullptr;
     screenSessionManagerClient_->OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds);
+}
+
+/**
+ * @tc.name: OnGetSurfaceNodeIdsFromMissionIdsChanged02
+ * @tc.desc: OnGetSurfaceNodeIdsFromMissionIdsChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, OnGetSurfaceNodeIdsFromMissionIdsChanged02, TestSize.Level1)
+{
+    std::vector<uint64_t> missionIds = {0, 1};
+    std::vector<uint64_t> surfaceNodeIds;
+    const std::vector<uint32_t> needWindowTypeList = "1234";
+
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->displayChangeListener_ = nullptr;
+    screenSessionManagerClient_->OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds, needWindowTypeList);
 }
 
 /**
