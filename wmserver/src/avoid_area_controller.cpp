@@ -221,7 +221,7 @@ bool AvoidAreaController::UpdateAvoidAreaIfNeed(const AvoidArea& avoidArea, cons
 AvoidPosType AvoidAreaController::CalculateOverlayRect(const sptr<WindowNode>& node,
     const sptr<WindowNode>& overlayNode, Rect& overlayRect) const
 {   
-    WLOGFI("xyt node id: %{public}u, calling windowid:",
+    WLOGFI("xyt node id: %{public}u, calling windowid: %{public}u",
                 node->GetWindowId(), node->GetCallingWindow());
     if (node->GetWindowId() == overlayNode->GetWindowId()) {
         WLOGE("tanhong overlay not support self. windowId %{public}u", node->GetWindowId());
@@ -288,7 +288,7 @@ AvoidArea AvoidAreaController::GetAvoidAreaByType(const sptr<WindowNode>& node, 
         WLOGFE("tanhong invalid WindowNode.");
         return {};
     }
-    WLOGFI("xyt node id: %{public}u, calling windowid:",
+    WLOGFI("xyt node id: %{public}u, calling windowid: %{public}u",
                 node->GetWindowId(), node->GetCallingWindow());
     WindowMode windowMode = node->GetWindowMode();
     if (avoidAreaType != AvoidAreaType::TYPE_KEYBOARD &&
