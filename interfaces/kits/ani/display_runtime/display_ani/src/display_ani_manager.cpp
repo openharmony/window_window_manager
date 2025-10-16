@@ -289,6 +289,9 @@ DmErrorCode DisplayManagerAni::ProcessRegisterCallback(ani_env* env, std::string
     } else if (typeStr == ANI_EVENT_PRIVATE_MODE_CHANGE) {
         ret = DM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<DisplayManager>().RegisterPrivateWindowListener(displayAniListener));
+    } else if (typeStr == ANI_EVENT_BRIGHTNESS_INFO_CHANGED) {
+        ret = DM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<DisplayManager>().RegisterBrightnessInfoListener(displayAniListener));
     }
     return ret;
 }
@@ -379,6 +382,10 @@ DMError DisplayManagerAni::UnRegisterDisplayListenerWithType(std::string type, a
                 sptr<DisplayManager::IPrivateWindowListener> thisListener(it->second);
                 ret = SingletonContainer::Get<DisplayManager>().UnregisterPrivateWindowListener(thisListener);
                 TLOGI(WmsLogTag::DMS, "[ANI] UnRegisterDisplayListener privateWindowListener success");
+            } else if (type == ANI_EVENT_BRIGHTNESS_INFO_CHANGED) {
+                sptr<DisplayManager::IBrightnessInfoListener> thisListener(it->second);
+                ret = SingletonContainer::Get<DisplayManager>().UnregisterBrightnessInfoListener(thisListener);
+                TLOGI(WmsLogTag::DMS, "[ANI] UnRegisterDisplayListener brightnessInfoListener success");
             }
             jsCbMap_[type].erase(it);
             break;
@@ -422,6 +429,9 @@ DMError DisplayManagerAni::UnregisterAllDisplayListenerWithType(std::string type
         } else if (type == ANI_EVENT_PRIVATE_MODE_CHANGE) {
             sptr<DisplayManager::IPrivateWindowListener> thisListener(it->second);
             ret = SingletonContainer::Get<DisplayManager>().UnregisterPrivateWindowListener(thisListener);
+        } else if (type == ANI_EVENT_BRIGHTNESS_INFO_CHANGED) {
+            sptr<DisplayManager::IBrightnessInfoListener> thisListener(it->second);
+            ret = SingletonContainer::Get<DisplayManager>().UnregisterBrightnessInfoListener(thisListener);
         }
         jsCbMap_[type].erase(it++);
     }
@@ -484,6 +494,38 @@ void DisplayManagerAni::OnFinalizerDisplay(ani_env* env, ani_object displayObj)
         return;
     }
     DisplayAniUtils::DisposeAniDisplayObject(static_cast<DisplayId>(displayId));
+}
+
+ani_object DisplayManagerAni::GetBrightnessInfoAni(ani_env* env, ani_long displayId, ani_long nativeObj)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
+    DisplayManagerAni* displayManagerAni = reinterpret_cast<DisplayManagerAni*>(nativeObj);
+    if (displayManagerAni == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] displayManagerAni is nullptr");
+        return nullptr;
+    }
+    return displayManagerAni->OnGetBrightnessInfoAni(env, displayId);
+}
+
+ani_object DisplayManagerAni::OnGetBrightnessInfoAni(ani_env* env, ani_long displayId)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
+    ScreenBrightnessInfo brightnessInfo;
+    auto ret = SingletonContainer::Get<DisplayManager>().GetBrightnessInfo(displayId, brightnessInfo);
+    if (ret != DMError::DM_OK) {
+        if (ret == DMError::DM_ERROR_ILLEGAL_PARAM) {
+            AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM,
+                "JsDisplayManager::OnGetBrightnessInfoAni failed.");
+        } else {
+            AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_SYSTEM_INNORMAL,
+                "JsDisplayManager::OnGetBrightnessInfoAni failed.");
+        }
+        return nullptr;
+    } else {
+        ani_object brightnessObj = DisplayAniUtils::CreateBrightnessInfoObject(env);
+        DisplayAniUtils::CvtBrightnessInfo(env, brightnessObj, brightnessInfo);
+        return brightnessObj;
+    }
 }
 }
 }
