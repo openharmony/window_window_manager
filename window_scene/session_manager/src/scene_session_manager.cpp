@@ -5965,9 +5965,17 @@ WMError SceneSessionManager::LockCursor(const std::vector<int32_t>& datas)
         return WMError::WM_ERROR_ILLEGAL_PARAM;
     }
     int32_t windowId = datas[1];
+    
+    
+    if (sceneSession == nullptr) {
+        TLOGNE(WmsLogTag::WMS_EVENT, "session is nullptr");
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
     bool isCursorFollowMovement = static_cast<bool>(datas[2]);
-    SceneInputManager::GetInstance().LockCursor(windowId, isCursorFollowMovement);
-    FlushWindowInfoToMMI();
+    sceneSession->SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_LOCK_CURSOR, true);
+    sceneSession->SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_CURSOR_FOLLOW_MOVEMENT,
+        isCursorFollowMovement);
+    sceneSession->NotifySessionInfoChange();
     return WMError::WM_OK;
 }
 
@@ -5981,9 +5989,13 @@ WMError SceneSessionManager::UnLockCursor(const std::vector<int32_t>& datas)
         return WMError::WM_ERROR_ILLEGAL_PARAM;
     }
     int32_t windowId = datas[1];
-    if (SceneInputManager::GetInstance().UnLockCursor(windowId)) {
-        FlushWindowInfoToMMI();
+    auto sceneSession = GetSceneSession(windowId);
+    if (sceneSession == nullptr) {
+        TLOGNE(WmsLogTag::WMS_EVENT, "session is nullptr");
+        return WSError::WS_ERROR_INVALID_SESSION;
     }
+    sceneSession->SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_LOCK_CURSOR, false);
+    sceneSession->NotifySessionInfoChange();
     return WMError::WM_OK;
 }
 
