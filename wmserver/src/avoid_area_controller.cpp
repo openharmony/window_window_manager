@@ -221,14 +221,12 @@ bool AvoidAreaController::UpdateAvoidAreaIfNeed(const AvoidArea& avoidArea, cons
 AvoidPosType AvoidAreaController::CalculateOverlayRect(const sptr<WindowNode>& node,
     const sptr<WindowNode>& overlayNode, Rect& overlayRect) const
 {   
-    WLOGFI("xyt node id: %{public}u, calling windowid: %{public}u",
-                node->GetWindowId(), node->GetCallingWindow());
     if (node->GetWindowId() == overlayNode->GetWindowId()) {
-        WLOGE("tanhong overlay not support self. windowId %{public}u", node->GetWindowId());
+        WLOGE("overlay not support self. windowId %{public}u", node->GetWindowId());
         return AvoidPosType::AVOID_POS_UNKNOWN;
     }
     const Rect rect = node->GetWindowRect();
-    WLOGI("tanhong node_rect: %{public}d, %{public}d, %{public}d, %{public}d",
+    WLOGI("node_rect: %{public}d, %{public}d, %{public}d, %{public}d",
         rect.width_, rect.height_, overlayRect.width_, overlayRect.height_);
     overlayRect = WindowHelper::GetOverlap(overlayNode->GetWindowRect(), rect, rect.posX_, rect.posY_);
     return  GetAvoidPosType(rect, overlayRect);
@@ -285,7 +283,7 @@ AvoidArea AvoidAreaController::GetAvoidAreaByType(const sptr<WindowNode>& node, 
 {
     WLOGFD("avoidAreaType: %{public}u", avoidAreaType);
     if (node == nullptr) {
-        WLOGFE("tanhong invalid WindowNode.");
+        WLOGFE("invalid WindowNode.");
         return {};
     }
     WLOGFI("xyt node id: %{public}u, calling windowid: %{public}u",
@@ -295,7 +293,7 @@ AvoidArea AvoidAreaController::GetAvoidAreaByType(const sptr<WindowNode>& node, 
         windowMode != WindowMode::WINDOW_MODE_FULLSCREEN &&
         windowMode != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
         windowMode != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-        WLOGI("tanhong avoidAreaType: %{public}u, windowMode: %{public}u, return default avoid area.",
+        WLOGI("avoidAreaType: %{public}u, windowMode: %{public}u, return default avoid area.",
             avoidAreaType, windowMode);
         return {};
     }
@@ -341,11 +339,8 @@ AvoidArea AvoidAreaController::GetAvoidAreaSystemType(const sptr<WindowNode>& no
     AvoidPosType statusBarAvoidPosType = AvoidPosType::AVOID_POS_UNKNOWN;
     Rect navigationBarAvoidArea;
     AvoidPosType navigationBarAvoidPosType = AvoidPosType::AVOID_POS_UNKNOWN;
-    TLOGI(WmsLogTag::WMS_IMMS, "tanhong begin!");
     for (auto& iter : overlayWindowMap_) {
-        TLOGI(WmsLogTag::WMS_IMMS, "tanhong iter.second 111!");
         if (iter.second != nullptr) {
-            TLOGI(WmsLogTag::WMS_IMMS, "tanhong iter.second 222!");
             if (iter.second->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR) {
                 statusBarAvoidPosType = CalculateOverlayRect(node, iter.second, statusBarAvoidArea);
             }
