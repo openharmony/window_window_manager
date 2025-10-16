@@ -7655,19 +7655,20 @@ void JsSceneSession::ProcessKeyboardStateChangeRegister()
     }
     session->SetKeyboardStateChangeListener(
         [weakThis = wptr(this), where = __func__](
-            SessionState state, const KeyboardEffectOption& effectOption, uint32_t callingSessionId) {
+            SessionState state, const KeyboardEffectOption& effectOption, uint32_t callingSessionId,
+            DisplayId targetDisplayId) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s: jsSceneSession is null", where);
             return;
         }
-        jsSceneSession->OnKeyboardStateChange(state, effectOption, callingSessionId);
+        jsSceneSession->OnKeyboardStateChange(state, effectOption, callingSessionId, targetDisplayId);
     });
     TLOGD(WmsLogTag::WMS_KEYBOARD, "success");
 }
 
 void JsSceneSession::OnKeyboardStateChange(SessionState state, const KeyboardEffectOption& effectOption,
-    const uint32_t callingSessionId)
+    const uint32_t callingSessionId, DisplayId targetDisplayId)
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -7675,7 +7676,7 @@ void JsSceneSession::OnKeyboardStateChange(SessionState state, const KeyboardEff
         return;
     }
     auto task = [weakThis = wptr(this), persistentId = persistentId_, state, env = env_, effectOption, callingSessionId,
-        where = __func__] {
+        targetDisplayId, where = __func__] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "OnKeyboardStateChange jsSceneSession id:%{public}d has been destroyed",
@@ -7690,7 +7691,13 @@ void JsSceneSession::OnKeyboardStateChange(SessionState state, const KeyboardEff
         napi_value jsKeyboardStateObj = CreateJsValue(env, state);
         napi_value jsKeyboardEffectOptionObj = ConvertKeyboardEffectOptionToJsValue(env, effectOption);
         napi_value jsKeyboardCallingIdObj = CreateJsValue(env, callingSessionId);
-        napi_value argv[] = { jsKeyboardStateObj, jsKeyboardEffectOptionObj, jsKeyboardCallingIdObj };
+        napi_value jsKeyboardTargetDisplayId = CreateJsNumber(env, static_cast<int64_t>(targetDisplayId));
+        napi_value argv[] = {
+            jsKeyboardStateObj,
+            jsKeyboardEffectOptionObj,
+            jsKeyboardCallingIdObj,
+            jsKeyboardTargetDisplayId,
+        };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
         TLOGNI(WmsLogTag::WMS_KEYBOARD, "%{public}s: id: %{public}d, state: %{public}d, callingSessionId: %{public}u",
             where, persistentId, state, callingSessionId);
