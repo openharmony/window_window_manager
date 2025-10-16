@@ -48,6 +48,7 @@ public:
     static ani_boolean HasPrivateWindow(ani_env* env, ani_long displayId);
     static void GetAllDisplayPhysicalResolution(ani_env* env, ani_object arrayObj, ani_long nativeObj);
     static void FinalizerDisplay(ani_env* env, ani_object displayObj, ani_long nativeObj);
+    static ani_object GetBrightnessInfoAni(ani_env* env, ani_long displayId, ani_long nativeObj);
 private:
     void OnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
@@ -55,6 +56,7 @@ private:
     void OnGetAllDisplayPhysicalResolution(ani_env* env, ani_object arrayObj);
     void OnFinalizerDisplay(ani_env* env, ani_object displayObj);
     bool IsCallbackRegistered(ani_env* env, const std::string& type, ani_ref callback);
+    ani_object OnGetBrightnessInfoAni(ani_env* env, ani_long displayId);
     std::mutex mtx_;
     std::map<std::string, std::map<ani_ref, sptr<DisplayAniListener>>> jsCbMap_;
 };

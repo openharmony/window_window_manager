@@ -533,12 +533,21 @@ export function on<T>(type: string, callback: Callback<T>): void {
     syncOn(type, callback as object, displayMgrRef);
 }
 
-export native function syncOn(type: string, callback: object, nativeObj: long): void;
-
 export function off<T>(type: string, callback?: Callback<T>): void {
     syncOff(type, displayMgrRef, callback);
 }
 
+export type BrightnessCallback<T1, T2> = (id:T1, data:T2) => void;
+
+export function onBrightnessInfoChange<T1, T2>(callback: BrightnessCallback<T1, T2>): void {
+    syncOn('brightnessInfoChange', callback as object, displayMgrRef);
+}
+
+export function offBrightnessInfoChange<T1, T2>(callback?: BrightnessCallback<T1, T2>): void {
+    syncOff('brightnessInfoChange', displayMgrRef, callback);
+}
+
+export native function syncOn(type: string, callback: object, nativeObj: long): void;
 export native function syncOff(type: string, nativeObj: long, callback?: object) : void;
 
 export function displayEventCallBack(cb: object, cbArg: long): void {
@@ -629,6 +638,29 @@ export function disposeDisplay(display: DisplayImpl): void {
 }
 
 export native function finalizerDisplayNative(obj: object, nativeObj: long): void
+
+export interface BrightnessInfo {
+    readonly sdrNits: double;
+    readonly currentHeadroom: double;
+    readonly maxHeadroom: double;
+}
+
+export class ScreenBrightnessInfoImpl implements BrightnessInfo {
+    readonly sdrNits: double;
+    readonly currentHeadroom: double;
+    readonly maxHeadroom: double;
+}
+
+export function getBrightnessInfo(displayId: long): BrightnessInfo {
+    return getBrightnessInfoNative(displayId, displayMgrRef);
+}
+
+export function brightnessInfoChangeCallback(cb: object, cbArg: long, cbArgBrightness: BrightnessInfo): void {
+    const func = cb as (cbArg: long, cbArgBrightness: BrightnessInfo) => void;
+    func(cbArg, cbArgBrightness);
+}
+
+export native function getBrightnessInfoNative(display: long, displayMgrRef: long): BrightnessInfo;
 
 export let displayMgrRef: long;
 
