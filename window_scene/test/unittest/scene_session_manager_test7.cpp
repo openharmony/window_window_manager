@@ -2140,6 +2140,9 @@ HWTEST_F(SceneSessionManagerTest7, UpdateAnimationSpeedWithPid, TestSize.Level1)
     ASSERT_NE(sceneSession02, nullptr);
     ASSERT_NE(sceneSession03, nullptr);
     ASSERT_NE(sceneSession04, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(0, nullptr));
+    result = ssm_->UpdateAnimationSpeedWithPid(pid, speed);
+    EXPECT_EQ(result, WMError::WM_OK);
     sceneSession01->isVisible_ = false;
     sceneSession01->SetCallingPid(2);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession01));

@@ -1984,13 +1984,22 @@ HWTEST_F(WindowSessionImplTest, UpdateAnimationSpeed, TestSize.Level1)
  */
 HWTEST_F(WindowSessionImplTest, UpdateAllWindowSpeed, TestSize.Level1)
 {
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("UpdateAllWindowSpeed");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
-    window->UpdateAllWindowSpeed(1.0f);
     window->UpdateAllWindowSpeed(2.0f);
+    WindowSessionImpl::windowSessionMap_.clear();
+    window->windowSessionMap_.insert(std::make_pair("test1", std::make_pair(1, nullptr)));
+    window->UpdateAllWindowSpeed(2.0f);
+    WindowSessionImpl::windowSessionMap_.clear();
+    window->windowSessionMap_.insert(std::make_pair("test2", std::make_pair(1, window)));
+    window->rsUIDirector_ = nullptr;
+    window->UpdateAllWindowSpeed(2.0f);
+    EXPECT_TRUE(g_errLog.find("Failed to open implicit animation") != std::string::npos);
 }
 
 /**

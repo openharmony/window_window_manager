@@ -685,10 +685,13 @@ void WindowSceneSessionImpl::UpdateAnimationSpeedIfEnabled()
     if (!isEnableAnimationSpeed_.load()) {
         return;
     }
+
+    TLOGI(WmsLogTag::WMS_ANIMATION, "isEnableAnimationSpeed_ is true");
     auto rsUIContext = WindowSessionImpl::GetRSUIContext();
     auto implicitAnimator = rsUIContext ? rsUIContext->GetRSImplicitAnimator() : nullptr;
     if (implicitAnimator != nullptr) {
         implicitAnimator->ApplyAnimationSpeedMultiplier(animationSpeed_.load());
+        TLOGI(WmsLogTag::WMS_ANIMATION, "update animation speed success");
     }
 }
 
