@@ -1565,6 +1565,25 @@ HWTEST_F(WindowSessionTest4, SetIsShowDecorInFreeMultiWindow01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateRect
+ * @tc.desc: Test Case UpdateRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, UpdateRect, TestSize.Level1)
+{
+    WSRect rect;
+    SizeChangeReason reason = SizeChangeReason::SCENE_WITH_ANIMATION;
+    std::shared_ptr<RSTransaction> rsTransaction = std::make_shared<RSTransaction>();
+    std::shared_ptr<AvoidArea> avoidArea = std::make_shared<AvoidArea>();
+    session_->state_ = SessionState::STATE_CONNECT;
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(nullptr, mockSessionStage);
+    session_->sessionStage_ = mockSessionStage;
+    WSError res = session_->UpdateRect(rect, reason, "UpdateRect", rsTransaction);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
  * @tc.name: SetIsShowDecorInFreeMultiWindow 02
  * @tc.desc: Test Case SetIsShowDecorInFreeMultiWindow 02
  * @tc.type: FUNC
