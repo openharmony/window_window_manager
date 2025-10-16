@@ -221,7 +221,8 @@ public:
      */
     WSError SetActive(bool active) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
-        const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION },
+        const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION, 0,
+            WindowAnimationCurve::LINEAR, {0.0f, 0.0f, 0.0f, 0.0f} },
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {}) override;
     void UpdateDensity() override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override;
@@ -984,6 +985,11 @@ private:
     std::string GetRestoredRouterStack();
 
     bool CheckIfNeedCommitRsTransaction(WindowSizeChangeReason wmReason);
+    void UpdateRectForResizeAnimation(const Rect& wmRect, const Rect& preRect,
+        WindowSizeChangeReason wmReason, const SceneAnimationConfig& config,
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
+    RSAnimationTimingCurve updateConfigCurve(const WindowAnimationCurve& configCurve,
+        const std::array<float, ANIMATION_PARAM_SIZE> param);
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const SceneAnimationConfig& config, const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     void UpdateRectForPageRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
@@ -993,9 +999,6 @@ private:
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     void UpdateRectForOtherReasonTask(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction,
-        const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
-    void UpdateRectForResizeWithAnimation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
-        const RectAnimationConfig& rectAnimationConfig, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     void SubmitNoInteractionMonitorTask(int32_t eventId, const IWindowNoInteractionListenerSptr& listener);
     virtual WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) { return WMError::WM_OK; };

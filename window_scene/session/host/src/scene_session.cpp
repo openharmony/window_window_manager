@@ -6867,6 +6867,16 @@ WSError SceneSession::OnContainerModalEvent(const std::string& eventName, const 
     return WSError::WS_OK;
 }
 
+WSError SceneSession::SetSceneAnimationConfig(const SceneAnimationConfig& animationConfig)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "SetSceneAnimationConfig");
+    sceneAnimationConfig_.animationDelay_ = animationConfig.animationDelay_;
+    sceneAnimationConfig_.animationDuration_ = animationConfig.animationDuration_;
+    sceneAnimationConfig_.animationParam_ = animationConfig.animationParam_;
+    sceneAnimationConfig_.animationCurve_ = animationConfig.animationCurve_;
+    return WSError::WS_OK;
+}
+
 void SceneSession::RegisterSetLandscapeMultiWindowFunc(NotifyLandscapeMultiWindowSessionFunc&& callback)
 {
     PostTask([weakThis = wptr(this), callback = std::move(callback), where = __func__] {

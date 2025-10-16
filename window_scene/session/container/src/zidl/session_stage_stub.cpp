@@ -280,18 +280,18 @@ int SessionStageStub::HandleUpdateRect(MessageParcel& data, MessageParcel& reply
         TLOGE(WmsLogTag::WMS_LAYOUT, "read hasRSTransaction failed.");
         return -1;
     }
-    SceneAnimationConfig config { .rsTransaction_ = nullptr, .animationDuration_ = 0 };
+    sptr<SceneAnimationConfig> configPtr = data.ReadParcelable<SceneAnimationConfig>();
+    if (configPtr == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read SceneAnimationConfig failed");
+        return -1;
+    }
     if (hasRSTransaction) {
         std::shared_ptr<RSTransaction> transaction(data.ReadParcelable<RSTransaction>());
         if (!transaction) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "transaction unMarsh failed.");
             return -1;
         }
-        config.rsTransaction_ = transaction;
-    }
-    if (!data.ReadInt32(config.animationDuration_)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "read animationDuration failed");
-        return -1;
+        configPtr->rsTransaction_ = transaction;
     }
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
     uint32_t size = 0;
@@ -318,7 +318,7 @@ int SessionStageStub::HandleUpdateRect(MessageParcel& data, MessageParcel& reply
         }
         avoidAreas[static_cast<AvoidAreaType>(type)] = *area;
     }
-    WSError errCode = UpdateRect(rect, reason, config, avoidAreas);
+    WSError errCode = UpdateRect(rect, reason, *configPtr, avoidAreas);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

@@ -828,6 +828,7 @@ public:
     void SetSupportEnterWaterfallMode(bool isSupportEnter);
     void ThrowSlipDirectly(ThrowSlipMode throwSlipMode, const WSRectF& velocity);
     WSError GetWaterfallMode(bool& isWaterfallMode) override;
+    WSError SetSceneAnimationConfig(const SceneAnimationConfig& animationConfig);
 
     /*
      * Keyboard
