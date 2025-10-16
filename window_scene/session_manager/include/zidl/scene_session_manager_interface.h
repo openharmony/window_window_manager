@@ -489,7 +489,7 @@ public:
     {
         return WMError::WM_OK;
     }
-    virtual WMError UnLockCursor(const std::vector<int32_t>& datas)
+    virtual WMError UnlockCursor(const std::vector<int32_t>& datas)
     {
         return WMError::WM_OK;
     }

@@ -58,7 +58,7 @@ public:
     void SetCurrentUserId(int32_t userId);
 
     void LockCursor(int32_t windowId, bool isCursorFollowMovement);
-    bool UnLockCursor(int32_t windowId);
+    bool UnlockCursor(int32_t windowId);
 
 protected:
     SceneInputManager() = default;

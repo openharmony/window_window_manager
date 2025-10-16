@@ -5979,7 +5979,7 @@ WMError SceneSessionManager::LockCursor(const std::vector<int32_t>& datas)
     return WMError::WM_OK;
 }
 
-WMError SceneSessionManager::UnLockCursor(const std::vector<int32_t>& datas)
+WMError SceneSessionManager::UnlockCursor(const std::vector<int32_t>& datas)
 {
     if (!SessionPermission::VerifyCallingPermission(LOCK_WINDOW_CURSOR_PERMISSION)) {
         TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
