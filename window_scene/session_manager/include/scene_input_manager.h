@@ -30,7 +30,6 @@ namespace OHOS {
 namespace Rosen {
 class SceneSessionDirtyManager;
 struct SecSurfaceInfo;
-
 class SceneInputManager : public std::enable_shared_from_this<SceneInputManager> {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SceneInputManager)
 public:
@@ -56,9 +55,6 @@ public:
     void FlushEmptyInfoToMMI();
     void SetUserBackground(bool userBackground);
     void SetCurrentUserId(int32_t userId);
-
-    void LockCursor(int32_t windowId, bool isCursorFollowMovement);
-    bool UnlockCursor(int32_t windowId);
 
 protected:
     SceneInputManager() = default;
