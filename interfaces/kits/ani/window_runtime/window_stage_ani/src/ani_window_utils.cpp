@@ -949,6 +949,10 @@ ani_object AniWindowUtils::CreateAniMainWindowInfo(ani_env* env, const MainWindo
 ani_status AniWindowUtils::CheckPropertyNameUndefined(ani_env* env, const char* propertyName,
     ani_object object, bool& result)
 {
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] env is nullptr");
+        return ANI_ERROR;
+    }
     result = false;
     ani_ref ref;
     ani_status ret = env->Object_GetPropertyByName_Ref(object, propertyName, &ref);
@@ -969,8 +973,8 @@ ani_status AniWindowUtils::CheckPropertyNameUndefined(ani_env* env, const char* 
 
 bool AniWindowUtils::ParseKeyFramePolicy(ani_env* env, ani_object aniKeyFramePolicy, KeyFramePolicy& keyFramePolicy)
 {
-    if (CheckParaIsUndefined(env, aniKeyFramePolicy)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] aniKeyFramePolicy undefined");
+    if (env == nullptr || CheckParaIsUndefined(env, aniKeyFramePolicy)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] env is nullptr or aniKeyFramePolicy undefined");
         return false;
     }
 
@@ -1023,6 +1027,10 @@ bool AniWindowUtils::ParseKeyFramePolicy(ani_env* env, ani_object aniKeyFramePol
 
 ani_object AniWindowUtils::CreateKeyFramePolicy(ani_env* env, const KeyFramePolicy& keyFramePolicy)
 {
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] env is nullptr");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
     ani_class aniClass;
     if (env->FindClass("@ohos.window.window.KeyFramePolicyInternal", &aniClass) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] class not found");
