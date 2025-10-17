@@ -110,7 +110,7 @@ WMError WindowAgent::UpdateDisplayId(DisplayId from, DisplayId to)
 }
 
 WMError WindowAgent::UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info,
-    const std::map<AvoidAreaType, AvoidArea> avoidAreas,
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     if (window_ == nullptr) {
@@ -122,7 +122,7 @@ WMError WindowAgent::UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeI
 }
 
 WMError WindowAgent::UpdateOccupiedAreaAndRect(const sptr<OccupiedAreaChangeInfo>& info, const Rect& rect,
-    const std::map<AvoidAreaType, AvoidArea> avoidAreas,
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     if (window_ == nullptr) {
