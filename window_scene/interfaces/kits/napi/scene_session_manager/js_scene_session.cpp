@@ -6246,13 +6246,20 @@ napi_value JsSceneSession::OnNotifyPipActiveStatusChange(napi_env env, napi_call
         return NapiGetUndefined(env);
     }
 
-    PiPActiveStatus status;
+    int32_t status = -1;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], status)) {
         TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter, keep default: false");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
+    if (status <= -1 || status >= 2) {
+        TLOGE(WmsLogTag::WMS_PIP, "status value invalid, keep default: false");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    PiPActiveStatus status_ = static_cast<PiPActiveStatus>(status);
 
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -6261,7 +6268,7 @@ napi_value JsSceneSession::OnNotifyPipActiveStatusChange(napi_env env, napi_call
     }
 
     TLOGI(WmsLogTag::WMS_PIP, "persistId:%{public}d", persistentId_);
-    session->NotifyPipActiveStatusChange(status);
+    session->NotifyPipActiveStatusChange(status_);
     return NapiGetUndefined(env);
 }
 
