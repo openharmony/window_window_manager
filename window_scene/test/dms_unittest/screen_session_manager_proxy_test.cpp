@@ -1145,10 +1145,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetOrientation, TestSize.Level1)
     Orientation orientation = Orientation::BEGIN;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_NE(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->SetOrientation(screenId, orientation));
+                screenSessionManagerProxy->SetOrientation(screenId, orientation, false));
     } else {
         ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->SetOrientation(screenId, orientation));
+                screenSessionManagerProxy->SetOrientation(screenId, orientation, false));
     }
 }
 
@@ -2311,6 +2311,69 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetBrightnessInfo, TestSize.Level1)
     EXPECT_NE(brightnessInfo.currentHeadroom, 0);
     EXPECT_NE(brightnessInfo.maxHeadroom, 0);
     EXPECT_NE(brightnessInfo.sdrNits, 0);
+}
+
+/**
+ * @tc.name: SetOrientation
+ * @tc.desc: SetOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, SetOrientation02, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ScreenId screenId = 1234;
+    Orientation orientation = Orientation::HORIZONTAL;
+ 
+    // remote == nullptr
+    auto proxyNull = sptr<ScreenSessionManagerProxy>::MakeSptr(nullptr);
+    proxyNull->SetOrientation(screenId, orientation, false);
+    EXPECT_TRUE(logMsg.find("remote is null") != std::string::npos);
+ 
+    // WriteInterfaceToken failed
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<ScreenSessionManagerProxy> proxy = sptr<ScreenSessionManagerProxy>::MakeSptr(remoteMocker);
+    ASSERT_NE(proxy, nullptr);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    logMsg.clear();
+    proxy->SetOrientation(screenId, orientation, false);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+ 
+    // Write screenId failed
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    logMsg.clear();
+    proxy->SetOrientation(screenId, orientation, false);
+    EXPECT_TRUE(logMsg.find("Write screenId failed") != std::string::npos);
+ 
+    // Write orientation failed
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    logMsg.clear();
+    proxy->SetOrientation(screenId, orientation, false);
+    EXPECT_TRUE(logMsg.find("Write orientation failed") != std::string::npos);
+ 
+    // Write isFromNapi failed
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    logMsg.clear();
+    proxy->SetOrientation(screenId, orientation, false);
+    EXPECT_TRUE(logMsg.find("Write isFromNapi failed") != std::string::npos);
+ 
+    // SendRequest failed
+    MockMessageParcel::ClearAllErrorFlag();
+    logMsg.clear();
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    proxy->SetOrientation(screenId, orientation, false);
+    EXPECT_TRUE(logMsg.find("SendRequest failed") != std::string::npos);
+    remoteMocker->SetRequestResult(ERR_NONE);
+ 
+    MockMessageParcel::ClearAllErrorFlag();
+    logMsg.clear();
+    proxy->SetOrientation(screenId, orientation, false);
+    EXPECT_FALSE(logMsg.find("SendRequest failed") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 }
 }
