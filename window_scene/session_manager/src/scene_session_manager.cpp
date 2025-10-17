@@ -9596,6 +9596,13 @@ WSError SceneSessionManager::SetSessionIcon(const sptr<IRemoteObject>& token,
         TLOGE(WmsLogTag::WMS_MAIN, "The caller is not system-app, can not use system-api");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
+    return SetSessionIconInner(token, icon);
+}
+
+WSError SceneSessionManager::SetSessionIconInner(const sptr<IRemoteObject>& token,
+    const std::shared_ptr<Media::PixelMap>& icon)
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "in");
     const char* const where = __func__;
     auto task = [this, &token, &icon, where]() {
         auto sceneSession = FindSessionByToken(token);
@@ -9615,6 +9622,34 @@ WSError SceneSessionManager::SetSessionIcon(const sptr<IRemoteObject>& token,
         return WSError::WS_OK;
     };
     return taskScheduler_->PostSyncTask(task, where);
+}
+
+WSError SceneSessionManager::SetSessionIconForThirdParty(const sptr<IRemoteObject>& token,
+    const std::shared_ptr<Media::PixelMap>& icon)
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "in");
+    if (token == nullptr || icon == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "invalid param");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (!systemConfig_.IsPcWindow()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "device not support");
+        return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    auto sceneSession = FindSessionByToken(token);
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "fail to find session by token");
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "id: %{public}d is not main window", sceneSession->GetPersistentId());
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    if (icon->GetWidth() != icon->GetHeight()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "icon is not a square");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    return SetSessionIconInner(token, icon);
 }
 
 WSError SceneSessionManager::IsValidSessionIds(

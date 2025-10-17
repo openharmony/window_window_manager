@@ -116,6 +116,7 @@ public:
         TRANS_ID_REGISTER_PIP_CHG_LISTENER,
         TRANS_ID_UNREGISTER_PIP_CHG_LISTENER,
         TRANS_ID_UPDATE_ANIMATION_SPEED_WITH_PID,
+        TRANS_ID_SET_SESSION_ICON_FOR_THIRD_PARTY,
     };
 
     /*
@@ -140,6 +141,8 @@ public:
     virtual WSError ClearAllSessions() = 0;
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
     virtual WSError SetSessionIcon(const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon) = 0;
+    virtual WSError SetSessionIconForThirdParty(
+        const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon) = 0;
     virtual WSError RegisterIAbilityManagerCollaborator(int32_t type,
         const sptr<AAFwk::IAbilityManagerCollaborator>& impl) = 0;
     virtual WSError UnregisterIAbilityManagerCollaborator(int32_t type) = 0;
