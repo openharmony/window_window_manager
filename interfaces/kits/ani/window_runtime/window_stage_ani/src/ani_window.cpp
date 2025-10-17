@@ -1597,6 +1597,40 @@ ani_ref FindAniWindowObject(const std::string& windowName)
     return g_aniWindowMap[windowName];
 }
 
+ani_object AniWindow::SetDragKeyFramePolicy(ani_env* env, ani_object aniKeyFramePolicy)
+{
+    if (windowToken_ == nullptr || env == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] windowToken_ or env is nullptr");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    KeyFramePolicy keyFramePolicy;
+    if (!AniWindowUtils::ParseKeyFramePolicy(env, aniKeyFramePolicy, keyFramePolicy)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed to convert parameter to keyFramePolicy");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (!windowToken_->IsPcWindow()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] device not support");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+    }
+    if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] only main window is valid");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
+
+    const WMError ret = windowToken_->SetDragKeyFramePolicy(keyFramePolicy);
+    const WmErrorCode errorCode = AniWindowUtils::ToErrorCode(ret);
+    const uint32_t windowId = windowToken_->GetWindowId();
+    if (errorCode != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] failed, windowId: %{public}u, ret: %{public}d",
+            windowId, static_cast<int32_t>(ret));
+        return AniWindowUtils::AniThrowError(env, errorCode);
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC,
+        "[ANI] success, windowId: %{public}u, keyFramePolicy: %{public}s",
+        windowToken_->GetWindowId(), keyFramePolicy.ToString().c_str());
+    return AniWindowUtils::CreateKeyFramePolicy(env, keyFramePolicy);
+}
+
 ani_object AniWindow::Snapshot(ani_env* env)
 {
     if (windowToken_ == nullptr) {
@@ -2595,6 +2629,19 @@ static ani_int WindowSetSpecificSystemBarEnabled(ani_env* env, ani_object obj, a
     return ANI_OK;
 }
 
+static ani_object WindowSetDragKeyFramePolicy(ani_env* env, ani_object obj, ani_long nativeObj,
+    ani_object aniKeyFramePolicy)
+{
+    using namespace OHOS::Rosen;
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow == nullptr || env == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] aniWindow or env is nullptr");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    return aniWindow->SetDragKeyFramePolicy(env, aniKeyFramePolicy);
+}
+
 static ani_object Snapshot(ani_env* env, ani_object obj, ani_long nativeObj)
 {
     using namespace OHOS::Rosen;
@@ -2948,6 +2995,9 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(WindowSetSystemBarProperties)},
         ani_native_function {"setSpecificSystemBarEnabled", "JLstd/core/String;ZZ:I",
             reinterpret_cast<void *>(WindowSetSpecificSystemBarEnabled)},
+        ani_native_function {"setDragKeyFramePolicy",
+            "JL@ohos/window/window/KeyFramePolicy;:L@ohos/window/window/KeyFramePolicy;",
+            reinterpret_cast<void *>(WindowSetDragKeyFramePolicy)},
         ani_native_function {"snapshot", "J:L@ohos/multimedia/image/image/PixelMap;",
             reinterpret_cast<void *>(Snapshot)},
         ani_native_function {"hideNonSystemFloatingWindows", "JZ:V",
