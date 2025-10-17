@@ -577,6 +577,8 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowListener(RegisterListenerType
             return ProcessWindowRotationChangeRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::RECT_CHANGE_IN_GLOBAL_DISPLAY_CB):
             return ProcessRectChangeInGlobalDisplayRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::EXTENSION_SECURE_LIMIT_CHANGE_CB):
+            return ProcessExtensionSecureLimitChangeRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::WINDOW_STATUS_DID_CHANGE_CB):
             return ProcessWindowStatusDidChangeRegister(windowManagerListener, window, isRegister, env);
         default:
@@ -797,6 +799,22 @@ WmErrorCode AniWindowRegisterManager::ProcessRectChangeInGlobalDisplayRegister(c
         ret = window->RegisterRectChangeInGlobalDisplayListener(thisListener);
     } else {
         ret = window->UnregisterRectChangeInGlobalDisplayListener(thisListener);
+    }
+    return AniWindowUtils::ToErrorCode(ret);
+}
+
+WmErrorCode AniWindowRegisterManager::ProcessExtensionSecureLimitChangeRegister(const sptr<AniWindowListener>& listener,
+    const sptr<Window>& window, bool isRegister, ani_env* env)
+{
+    if (window == nullptr || listener == nullptr) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IExtensionSecureLimitChangeListener> thisListener(listener);
+    WMError ret = WMError::WM_OK;
+    if (isRegister) {
+        ret = window->RegisterExtensionSecureLimitChangeListener(thisListener);
+    } else {
+        ret = window->UnregisterExtensionSecureLimitChangeListener(thisListener);
     }
     return AniWindowUtils::ToErrorCode(ret);
 }

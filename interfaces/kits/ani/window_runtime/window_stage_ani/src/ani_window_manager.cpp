@@ -61,6 +61,8 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace wi
             reinterpret_cast<void *>(AniWindowManager::UnregisterWindowManagerCallback)},
         ani_native_function {"setWindowLayoutMode", "JL@ohos/window/window/WindowLayoutMode;:V",
             reinterpret_cast<void *>(AniWindowManager::SetWindowLayoutMode)},
+        ani_native_function {"shiftAppWindowTouchEventSync", "liii:",
+            reinterpret_cast<void *>(AniWindowManager::ShiftAppWindowTouchEvent)},
     };
     if ((ret = env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size())) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] bind ns func %{public}u", ret);
@@ -499,6 +501,39 @@ void AniWindowManager::SetWindowLayoutMode(ani_env* env, ani_long nativeObj, ani
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] aniWindowManager is nullptr");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
+}
+
+void AniWindowManager::ShiftAppWindowTouchEvent(ani_env* env, ani_long nativeObj, ani_int sourceWindowId,
+    ani_int targetWindowId, ani_int fingerId)
+{
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    if (aniWindowManager != nullptr) {
+        aniWindowManager->OnShiftAppWindowTouchEvent(env, sourceWindowId, targetWindowId, fingerId);
+    } else {
+        TLOGE(WmsLogTag::WMS_PC, "[ANI]aniWindowManager is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+}
+
+void AniWindowManager::OnShiftAppWindowTouchEvent(ani_env* env, ani_int sourceWindowId, ani_int targetWindowId,
+    ani_int fingerId)
+{
+    TLOGI(WmsLogTag::WMS_PC, "[ANI]sourceWindowId: %{public}d, targetWindowId: %{public}d, fingerId: %{public}d",
+        sourceWindowId, targetWindowId, fingerId);
+    if (sourceWindowId <= static_cast<int32_t>(INVALID_WINDOW_ID) ||
+        targetWindowId <= static_cast<int32_t>(INVALID_WINDOW_ID) ||
+        (fingerId <= static_cast<int32_t>(INVALID_FINGER_ID))) {
+        TLOGE(WmsLogTag::WMS_PC, "[ANI]invalid sourceWindowId or targetWindowId or fingerId");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM, "shiftAppWindowTouchEvent failed");
+        return;
+    }
+    WmErrorCode ret = AniWindowUtils::ToErrorCode(
+        SingletonContainer::Get<WindowManager>().ShiftAppWindowTouchEvent(sourceWindowId, targetWindowId, fingerId));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_PC, "[ANI]ShiftAppWindowTouchEvent failed, ret: %{public}d", ret);
+        AniWindowUtils::AniThrowError(env, ret, "ShiftAppWindowTouchEvent failed.");
+    }
+    return;
 }
 
 }  // namespace Rosen

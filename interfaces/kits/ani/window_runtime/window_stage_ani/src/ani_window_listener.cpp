@@ -696,6 +696,31 @@ void AniWindowListener::OnRectChangeInGlobalDisplay(const Rect& rect, WindowSize
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
+void AniWindowListener::OnSecureLimitChange(bool isLimit)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "isLimit: %{public}d", isLimit);
+    auto task = [self = weakRef_, isLimit, vm = vm_, where = __func__]() {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || vm == nullptr || thisListener->aniCallback_ == nullptr) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s: this listener, vm or callback is nullptr", where);
+            return;
+        }
+        ani_env* env = nullptr;
+        ani_status ret = vm->GetEnv(ANI_VERSION_1, &env);
+        if (ret != ANI_OK || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "[ANI]get env failed, ret:%{public}u", ret);
+            return;
+        }
+        AniWindowUtils::CallAniFunctionVoid(env, "@ohos.window.window", "runUiExtensionSecureLimitChangeCallback",
+            nullptr, thisListener->aniCallback_, isLimit);
+    };
+    if (!eventHandler_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "get main event handler failed!");
+        return;
+    }
+    eventHandler_->PostTask(task, __func__, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
 void AniWindowListener::OnWindowStatusDidChange(WindowStatus status)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI] status:%{public}u", status);

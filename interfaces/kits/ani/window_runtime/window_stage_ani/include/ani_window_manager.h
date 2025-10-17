@@ -42,6 +42,8 @@ public:
     static ani_object GetMainWindowSnapshot(
         ani_env* env, ani_long nativeObj, ani_object windowId, ani_object config);
     static ani_ref CreateWindow(ani_env* env, ani_long nativeObj, ani_object configuration);
+    static void ShiftAppWindowTouchEvent(ani_env* env, ani_long nativeObj,
+        ani_int sourceWindowId, ani_int targetWindowId, ani_int fingerId);
     static void RegisterWindowManagerCallback(ani_env* env, ani_long nativeObj, ani_string type, ani_ref callback);
     static void UnregisterWindowManagerCallback(ani_env* env, ani_long nativeObj, ani_string type, ani_ref callback);
     static void SetWindowLayoutMode(ani_env* env, ani_long nativeObj, ani_enum_item mode);
@@ -55,6 +57,7 @@ private:
     ani_object OnGetMainWindowSnapshot(
         ani_env* env, ani_object windowId, ani_object config);
     ani_ref OnCreateWindow(ani_env* env, ani_object configuration);
+    void OnShiftAppWindowTouchEvent(ani_env* env, ani_int sourceWindowId, ani_int targetWindowId, ani_int fingerId);
     void OnRegisterWindowManagerCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnUnregisterWindowManagerCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnSetWindowLayoutMode(ani_env* env, ani_enum_item mode);

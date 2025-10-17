@@ -23,6 +23,7 @@
 #include <want_params_wrapper.h>
 
 #include "accessibility_event_info.h"
+#include "ani.h"
 #include "display_info.h"
 #include "extension/extension_business_info.h"
 #include "extension_data_handler.h"
@@ -1136,6 +1137,49 @@ HWTEST_F(WindowExtensionSessionImplTest, NapiSetUIContent, Function | SmallTest 
 }
 
 /**
+ * @tc.name: AniSetUIContent
+ * @tc.desc: AniSetUIContent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, AniSetUIContent, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    std::string contentInfo = "AniSetUIContent test";
+    ani_env* env = nullptr;
+    ani_object storage = ani_object();
+    sptr<IRemoteObject> token;
+    window_->uiContent_ = nullptr;
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::UIEXTENSION_USAGE_END);
+    window_->focusState_ = std::nullopt;
+    window_->state_ = WindowState::STATE_HIDDEN;
+    ASSERT_EQ(WMError::WM_OK,
+        window_->AniSetUIContent(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
+
+    auto uiContent = std::make_shared<Ace::UIContentMocker>();
+    ASSERT_NE(nullptr, uiContent);
+    window_->uiContent_ = uiContent;
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::CONSTRAINED_EMBEDDED);
+    window_->focusState_ = true;
+    window_->state_ = WindowState::STATE_SHOWN;
+    ASSERT_EQ(WMError::WM_OK,
+        window_->AniSetUIContent(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
+    usleep(WAIT_SYNC_IN_NS);
+
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::MODAL);
+    ASSERT_EQ(WMError::WM_OK,
+        window_->AniSetUIContent(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::EMBEDDED);
+    ASSERT_EQ(WMError::WM_OK,
+        window_->AniSetUIContent(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::PREVIEW_EMBEDDED);
+    ASSERT_EQ(WMError::WM_OK,
+        window_->AniSetUIContent(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::UIEXTENSION_USAGE_END);
+    ASSERT_EQ(WMError::WM_OK,
+        window_->AniSetUIContent(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
+}
+
+/**
  * @tc.name: NapiSetUIContentByName
  * @tc.desc: NapiSetUIContentByName Test
  * @tc.type: FUNC
@@ -1161,6 +1205,35 @@ HWTEST_F(WindowExtensionSessionImplTest, NapiSetUIContentByName, Function | Smal
     window_->state_ = WindowState::STATE_SHOWN;
     ASSERT_EQ(WMError::WM_OK,
         window_->NapiSetUIContentByName(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
+    usleep(WAIT_SYNC_IN_NS);
+}
+
+/**
+ * @tc.name: AniSetUIContentByName
+ * @tc.desc: AniSetUIContentByName Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, AniSetUIContentByName, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    std::string contentInfo = "AniSetUIContentByName test";
+    ani_env* env = nullptr;
+    ani_object storage = ani_object();
+    sptr<IRemoteObject> token;
+    window_->uiContent_ = nullptr;
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::UIEXTENSION_USAGE_END);
+    window_->focusState_ = std::nullopt;
+    window_->state_ = WindowState::STATE_HIDDEN;
+    ASSERT_EQ(WMError::WM_OK,
+        window_->AniSetUIContentByName(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
+
+    auto uiContent = std::make_shared<Ace::UIContentMocker>();
+    window_->uiContent_ = uiContent;
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::CONSTRAINED_EMBEDDED);
+    window_->focusState_ = true;
+    window_->state_ = WindowState::STATE_SHOWN;
+    ASSERT_EQ(WMError::WM_OK,
+        window_->AniSetUIContentByName(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
     usleep(WAIT_SYNC_IN_NS);
 }
 
