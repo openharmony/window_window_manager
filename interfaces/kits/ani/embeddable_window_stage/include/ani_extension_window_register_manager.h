@@ -31,9 +31,9 @@ class AniExtensionWindowRegisterManager {
 public:
     AniExtensionWindowRegisterManager();
     ~AniExtensionWindowRegisterManager();
-    WmErrorCode RegisterListener(sptr<Window> window, const std::string& type,
+    WmErrorCode RegisterListener(sptr<Window>& window, const std::string& type,
         CaseType caseType, ani_env* env, ani_object fn);
-    WmErrorCode UnregisterListener(sptr<Window> window, const std::string& type,
+    WmErrorCode UnregisterListener(sptr<Window>& window, const std::string& type,
         CaseType caseType, ani_env* env, ani_object fn);
 
 private:
@@ -46,14 +46,14 @@ private:
     };
 
     bool IsCallbackRegistered(ani_env* env, const std::string& type, ani_object fn);
-    WmErrorCode ProcessWindowChangeRegister(sptr<AniExtensionWindowListener> listener,
-        sptr<Window> window, bool isRegister);
-    WmErrorCode ProcessAvoidAreaChangeRegister(sptr<AniExtensionWindowListener> listener,
-        sptr<Window> window, bool isRegister);
-    WmErrorCode ProcessLifeCycleEventRegister(sptr<AniExtensionWindowListener> listener,
-        sptr<Window> window, bool isRegister);
-    WmErrorCode ProcessWindowRectChangeRegister(sptr<AniExtensionWindowListener> listener,
-        sptr<Window> window, bool isRegister);
+    WmErrorCode ProcessWindowChangeRegister(sptr<AniExtensionWindowListener>& listener,
+        sptr<Window>& window, bool isRegister);
+    WmErrorCode ProcessAvoidAreaChangeRegister(sptr<AniExtensionWindowListener>& listener,
+        sptr<Window>& window, bool isRegister);
+    WmErrorCode ProcessLifeCycleEventRegister(sptr<AniExtensionWindowListener>& listener,
+        sptr<Window>& window, bool isRegister);
+    WmErrorCode ProcessWindowRectChangeRegister(sptr<AniExtensionWindowListener>& listener,
+        sptr<Window>& window, bool isRegister);
     WmErrorCode ProcessRegister(CaseType caseType, const sptr<AniExtensionWindowListener>& listener,
         const sptr<Window>& window, const std::string& type, bool isRegister);
     std::map<std::string, std::map<ani_ref, sptr<AniExtensionWindowListener>>> aniCbMap_;

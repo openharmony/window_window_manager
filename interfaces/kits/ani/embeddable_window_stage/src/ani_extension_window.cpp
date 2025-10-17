@@ -563,7 +563,7 @@ std::array extensionWindowHostNativeMethods = {
         reinterpret_cast<void *>(UnregisterExtWindowCallback)},
     };
 
-ANI_EXPORT ani_status ExtensionWindow_ANI_Constructor(ani_vm *vm, uint32_t *result)
+ANI_EXPORT ani_status ExtensionWindow_ANI_Constructor(ani_vm *vm, uint32_t* result)
 {
     using namespace OHOS::Rosen;
     TLOGD(WmsLogTag::WMS_UIEXT, "[ANI]Init ExtensionWindow begin");
@@ -591,7 +591,7 @@ ANI_EXPORT ani_status ExtensionWindow_ANI_Constructor(ani_vm *vm, uint32_t *resu
     return ANI_OK;
 }
 
-ANI_EXPORT ani_status ExtensionWindowHost_ANI_Constructor(ani_vm *vm, uint32_t *result)
+ANI_EXPORT ani_status ExtensionWindowHost_ANI_Constructor(ani_vm *vm, uint32_t* result)
 {
     using namespace OHOS::Rosen;
     TLOGD(WmsLogTag::WMS_UIEXT, "[ANI]Init ExtensionWindowHost begin");

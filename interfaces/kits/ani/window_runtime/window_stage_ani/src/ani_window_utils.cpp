@@ -252,9 +252,9 @@ bool AniWindowUtils::GetPropertyRectObject(ani_env* env, const char* propertyNam
     int32_t width = 0;
     int32_t height = 0;
     bool ret_bool = GetIntObject(env, "left", static_cast<ani_object>(windowRect), posX);
-    ret_bool |= GetIntObject(env, "top", static_cast<ani_object>(windowRect), posY);
-    ret_bool |= GetIntObject(env, "width", static_cast<ani_object>(windowRect), width);
-    ret_bool |= GetIntObject(env, "height", static_cast<ani_object>(windowRect), height);
+    ret_bool &= GetIntObject(env, "top", static_cast<ani_object>(windowRect), posY);
+    ret_bool &= GetIntObject(env, "width", static_cast<ani_object>(windowRect), width);
+    ret_bool &= GetIntObject(env, "height", static_cast<ani_object>(windowRect), height);
     if (!ret_bool) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] GetIntObject Failed");
         return false;
@@ -1449,6 +1449,10 @@ bool AniWindowUtils::ParseSubWindowOptions(ani_env *env, ani_object aniObject, c
 
 bool AniWindowUtils::ParseRectParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption)
 {
+    if (aniObject == nullptr || windowOption == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "aniObject or windowOption is null");
+        return false;
+    }
     ani_ref windowRectRef;
     ani_status ret = env->Object_GetPropertyByName_Ref(aniObject, "windowRect", &windowRectRef);
     if (ret != ANI_OK) {
@@ -1471,6 +1475,10 @@ bool AniWindowUtils::ParseRectParam(ani_env *env, ani_object aniObject, const sp
 
 bool AniWindowUtils::ParseModalityParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption)
 {
+    if (aniObject == nullptr || windowOption == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "aniObject or windowOption is null");
+        return false;
+    }
     bool isModal = false;
     GetPropertyBoolObject(env, "isModal", aniObject, isModal);
     if (isModal) {
@@ -1513,6 +1521,10 @@ bool AniWindowUtils::ParseModalityParam(ani_env *env, ani_object aniObject, cons
 
 bool AniWindowUtils::ParseZLevelParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption)
 {
+    if (aniObject == nullptr || windowOption == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "aniObject or windowOption is null");
+        return false;
+    }
     int zLevel = 0;
     bool isModal = false;
     if (GetPropertyIntObject(env, "zLevel", aniObject, zLevel) == ANI_OK) {

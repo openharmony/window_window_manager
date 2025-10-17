@@ -116,9 +116,9 @@ AniEmbeddableWindowStage* GetEmbeddableWindowStageFromEnv(ani_env* env, ani_clas
 }  // namespace OHOS
 
 extern "C" {
-ANI_EXPORT ani_status ExtensionWindow_ANI_Constructor(ani_vm *vm, uint32_t *result);
-ANI_EXPORT ani_status ExtensionWindowHost_ANI_Constructor(ani_vm *vm, uint32_t *result);
-ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+ANI_EXPORT ani_status ExtensionWindow_ANI_Constructor(ani_vm *vm, uint32_t* result);
+ANI_EXPORT ani_status ExtensionWindowHost_ANI_Constructor(ani_vm *vm, uint32_t* result);
+ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t* result)
 {
     using namespace OHOS::Rosen;
     ani_status ret;
