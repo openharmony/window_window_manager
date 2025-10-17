@@ -60,8 +60,8 @@ WmErrorCode AniExtensionWindowRegisterManager::ProcessWindowChangeRegister(sptr<
     return ret;
 }
 
-WmErrorCode AniExtensionWindowRegisterManager::ProcessAvoidAreaChangeRegister(sptr<AniExtensionWindowListener>& listener,
-    sptr<Window>& window, bool isRegister)
+WmErrorCode AniExtensionWindowRegisterManager::ProcessAvoidAreaChangeRegister(
+    sptr<AniExtensionWindowListener>& listener, sptr<Window>& window, bool isRegister)
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]window is nullptr");
@@ -225,7 +225,7 @@ WmErrorCode AniExtensionWindowRegisterManager::UnregisterListener(sptr<Window>& 
 }
 
 WmErrorCode AniExtensionWindowRegisterManager::ProcessRegister(CaseType caseType,
-    const sptr<AniExtensionWindowListener>& listener, const sptr<Window>& window, const std::string& type,
+    sptr<AniExtensionWindowListener>& listener, const sptr<Window>& window, const std::string& type,
     bool isRegister)
 {
     WmErrorCode ret = WmErrorCode::WM_OK;
