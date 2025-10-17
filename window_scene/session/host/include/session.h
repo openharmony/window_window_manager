@@ -241,6 +241,12 @@ public:
     void NotifyExtensionDetachToDisplay() override;
 
     /*
+     * Window Immersive
+     */
+    void UpdateStatusBarVisible(bool isStatusBarVisible) { isStatusBarVisible_ = isStatusBarVisible; }
+    bool IsStatusBarVisible() const;
+
+    /*
      * Cross Display Move Drag
      */
     std::shared_ptr<RSSurfaceNode> GetSurfaceNodeForMoveDrag() const;
@@ -280,13 +286,6 @@ public:
         if (task) {
             std::lock_guard lock(saveSnapshotCallbackMutex_);
             saveSnapshotCallback_ = std::move(task);
-        }
-    }
-    void SetRemoveSnapshotCallback(Task&& task)
-    {
-        if (task) {
-            std::lock_guard lock(removeSnapshotCallbackMutex_);
-            removeSnapshotCallback_ = std::move(task);
         }
     }
     void SetAddSnapshotCallback(Task&& task)
@@ -734,9 +733,8 @@ public:
     bool IsPersistentImageFit() const;
     bool SupportSnapshotAllSessionStatus() const;
     void InitSnapshotCapacity();
-    SnapshotStatus GetWindowStatus() const;
-    SnapshotStatus GetSessionStatus(ScreenLockReason reason = ScreenLockReason::DEFAULT) const;
-    uint32_t GetWindowOrientation() const;
+    SnapshotStatus GetSessionSnapshotStatus(ScreenLockReason reason = ScreenLockReason::DEFAULT) const;
+    uint32_t GetWindowSnapshotOrientation() const;
     uint32_t GetLastOrientation() const;
     bool HasSnapshotFreeMultiWindow();
     bool HasSnapshot(SnapshotStatus key);
@@ -1052,6 +1050,11 @@ private:
     bool bufferAvailable_ = false;
 
     /*
+     * Window Immersive
+     */
+    bool isStatusBarVisible_ = true;
+
+    /*
      * Multi Window
      */
     bool isMidScene_ = false;
@@ -1117,10 +1120,8 @@ private:
      */
     std::atomic<bool> enableAddSnapshot_ = true;
     Task saveSnapshotCallback_ = []() {};
-    Task removeSnapshotCallback_ = []() {};
     Task addSnapshotCallback_ = []() {};
     std::mutex saveSnapshotCallbackMutex_;
-    std::mutex removeSnapshotCallbackMutex_;
     std::mutex addSnapshotCallbackMutex_;
 
     /*

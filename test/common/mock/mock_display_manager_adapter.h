@@ -67,8 +67,8 @@ public:
     MOCK_METHOD2(SetVirtualScreenSurface, DMError(ScreenId screenId, sptr<Surface> surface));
     MOCK_METHOD1(GetScreenGroupInfoById, sptr<ScreenGroupInfo>(ScreenId screenId));
     MOCK_METHOD1(GetAllScreenInfos, DMError(std::vector<sptr<ScreenInfo>>& screenInfos));
-    MOCK_METHOD3(MakeMirror, DMError(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId,
-        ScreenId& screenGroupId));
+    MOCK_METHOD4(MakeMirror, DMError(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId,
+        ScreenId& screenGroupId, const RotationOption& rotationOption));
     MOCK_METHOD3(MakeExpand, DMError(std::vector<ScreenId> screenId, std::vector<Point> startPoint,
         ScreenId& screenGroupId));
     MOCK_METHOD2(SetScreenActiveMode, DMError(ScreenId screenId, uint32_t modeId));

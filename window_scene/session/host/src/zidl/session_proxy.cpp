@@ -953,9 +953,8 @@ WSError SessionProxy::UpdateSessionRect(const WSRect& rect, SizeChangeReason rea
     bool isGlobal, bool isFromMoveToGlobal, const MoveConfiguration& moveConfiguration,
     const RectAnimationConfig& rectAnimationConfig)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Rect [%{public}d, %{public}d, %{public}u, %{public}u] isGlobal %{public}d "
-        "isFromMoveToGlobal %{public}d moveConfiguration %{public}s", rect.posX_, rect.posY_,
-        rect.width_, rect.height_, isGlobal, isFromMoveToGlobal, moveConfiguration.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Rect:%{public}s global:%{public}d isFromMoveToGlobal:%{public}d cfg:%{public}s",
+        rect.ToString().c_str(), isGlobal, isFromMoveToGlobal, moveConfiguration.ToString().c_str());
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);

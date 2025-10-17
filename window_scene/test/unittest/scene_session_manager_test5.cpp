@@ -1148,9 +1148,9 @@ HWTEST_F(SceneSessionManagerTest5, InitSnapshotCache, TestSize.Level1)
     if (ssm_->systemConfig_.windowUIType_ == WindowUIType::PC_WINDOW) {
         ASSERT_EQ(ssm_->snapshotCapacity_, 50);
     } else if (ssm_->systemConfig_.windowUIType_ == WindowUIType::PAD_WINDOW) {
-        ASSERT_EQ(ssm_->snapshotCapacity_, 8);
+        ASSERT_EQ(ssm_->snapshotCapacity_, 0);
     } else {
-        ASSERT_EQ(ssm_->snapshotCapacity_, 3);
+        ASSERT_EQ(ssm_->snapshotCapacity_, 1);
     }
 }
 
@@ -1201,9 +1201,9 @@ HWTEST_F(SceneSessionManagerTest5, VisitSnapshotFromCache, TestSize.Level1)
     for (int32_t id = 30; id < 30 + ssm_->snapshotCapacity_; ++id) {
         ssm_->PutSnapshotToCache(id);
     }
-    ssm_->VisitSnapshotFromCache(30);
     ssm_->PutSnapshotToCache(30 + ssm_->snapshotCapacity_);
-    ASSERT_NE(sceneSession->snapshot_, nullptr);
+    ssm_->VisitSnapshotFromCache(30);
+    ASSERT_EQ(sceneSession->snapshot_, nullptr);
 }
 
 /**
@@ -1228,9 +1228,8 @@ HWTEST_F(SceneSessionManagerTest5, RemoveSnapshotFromCache, TestSize.Level1)
     for (int32_t id = 30; id < 30 + ssm_->snapshotCapacity_; ++id) {
         ssm_->PutSnapshotToCache(id);
     }
-    ssm_->RemoveSnapshotFromCache(31);
-    ssm_->PutSnapshotToCache(30 + ssm_->snapshotCapacity_);
-    ASSERT_NE(sceneSession->snapshot_, nullptr);
+    ssm_->RemoveSnapshotFromCache(30);
+    ASSERT_EQ(sceneSession->snapshot_, nullptr);
 }
 
 /**
@@ -1777,27 +1776,6 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus02, TestSize.Level1)
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest5, RegisterSaveSnapshotFunc, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    sptr<SceneSession> sceneSession = nullptr;
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ssm_->RegisterSaveSnapshotFunc(sceneSession));
-
-    SessionInfo info;
-    info.windowType_ = 1000;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->property_->SetPersistentId(1);
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, ssm_->RegisterSaveSnapshotFunc(sceneSession));
-
-    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    ASSERT_EQ(WSError::WS_OK, ssm_->RegisterSaveSnapshotFunc(sceneSession));
-}
-
-/**
- * @tc.name: RegisterRemoveSnapshotFunc
- * @tc.desc: RegisterRemoveSnapshotFunc Test
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest5, RegisterRemoveSnapshotFunc, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     sptr<SceneSession> sceneSession = nullptr;

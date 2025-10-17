@@ -146,7 +146,7 @@ constexpr uint64_t VIRTUAL_DISPLAY_ID = 999;
 constexpr uint32_t DEFAULT_LOCK_SCREEN_ZORDER = 2000;
 constexpr int32_t MAX_LOCK_STATUS_CACHE_SIZE = 1000;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PC = 50;
-constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PAD = 8;
+constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PAD = 0;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PHONE = 1;
 constexpr uint64_t NOTIFY_START_ABILITY_TIMEOUT = 4000;
 constexpr uint64_t START_UI_ABILITY_TIMEOUT = 5000;
@@ -1965,7 +1965,9 @@ WMError SceneSessionManager::AddSkipSelfWhenShowOnVirtualScreenList(const std::v
             }
             SetSkipEventOnCastPlusInner(persistentId, true);
         }
-        rsInterface_.SetVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
+        if (!isUserBackground_) {
+            rsInterface_.SetVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
+        }
         return WMError::WM_OK;
     };
     return taskScheduler_->PostSyncTask(task, __func__);
@@ -2003,7 +2005,9 @@ WMError SceneSessionManager::RemoveSkipSelfWhenShowOnVirtualScreenList(const std
             }
             SetSkipEventOnCastPlusInner(persistentId, false);
         }
-        rsInterface_.SetVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
+        if (!isUserBackground_) {
+            rsInterface_.SetVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
+        }
         return WMError::WM_OK;
     };
     return taskScheduler_->PostSyncTask(task, __func__);
@@ -2045,7 +2049,9 @@ void SceneSessionManager::SetSkipEventOnCastPlusInner(int32_t windowId, bool isS
         return;
     }
     sceneSession->GetSessionProperty()->SetSkipEventOnCastPlus(isSkip);
-    FlushWindowInfoToMMI(true);
+    if (!isUserBackground_) {
+        FlushWindowInfoToMMI(true);
+    }
 }
 
 sptr<KeyboardSession::KeyboardSessionCallback> SceneSessionManager::CreateKeyboardSessionCallback()
@@ -2404,8 +2410,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->SetIsLastFrameLayoutFinishedFunc([this](bool& isLayoutFinished) {
             return this->IsLastFrameLayoutFinished(isLayoutFinished);
         });
-        sceneSession->SetIsAINavigationBarAvoidAreaValidFunc([this](const AvoidArea& avoidArea, int32_t sessionBottom) {
-            return CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_, avoidArea, sessionBottom);
+        sceneSession->SetIsAINavigationBarAvoidAreaValidFunc([this](DisplayId displayId,
+                const AvoidArea& avoidArea, int32_t sessionBottom) {
+            return CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_[displayId], avoidArea, sessionBottom);
         });
         sceneSession->RegisterGetStatusBarAvoidHeightFunc([this](DisplayId displayId, WSRect& barArea) {
             return this->GetStatusBarAvoidHeight(displayId, barArea);
@@ -2758,9 +2765,6 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
     RegisterSaveSnapshotFunc(sceneSession);
     if (systemConfig_.IsPcOrPcMode()) {
         RegisterGetStartWindowConfigCallback(sceneSession);
-    }
-    if (systemConfig_.windowUIType_ == WindowUIType::PAD_WINDOW) {
-        RegisterRemoveSnapshotFunc(sceneSession);
     }
     // Skip FillSessionInfo when atomicService free-install start.
     if (!IsAtomicServiceFreeInstall(sessionInfo)) {
@@ -3278,22 +3282,6 @@ WSError SceneSessionManager::RegisterSaveSnapshotFunc(const sptr<SceneSession>& 
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::RegisterRemoveSnapshotFunc(const sptr<SceneSession>& sceneSession)
-{
-    if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "session is nullptr");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
-        return WSError::WS_ERROR_INVALID_WINDOW;
-    }
-    auto persistentId = sceneSession->GetPersistentId();
-    sceneSession->SetRemoveSnapshotCallback([this, persistentId]() {
-        this->RemoveSnapshotFromCache(persistentId);
-    });
-    return WSError::WS_OK;
-}
-
 void SceneSessionManager::ConfigSupportSnapshotAllSessionStatus()
 {
     TLOGI(WmsLogTag::WMS_PATTERN, "support");
@@ -3588,7 +3576,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         }
         WindowDestroyNotifyVisibility(sceneSession);
         NotifySessionUpdate(sceneSession->GetSessionInfo(), ActionType::SINGLE_CLOSE);
-        sceneSession->SetRemoveSnapshotCallback([this, persistentId]() {
+        sceneSession->SetSaveSnapshotCallback([this, persistentId]() {
             this->RemoveSnapshotFromCache(persistentId);
         });
         sceneSession->DisconnectTask(false, isSaveSnapshot);
@@ -11818,7 +11806,8 @@ void SceneSessionManager::UpdateRootSceneSessionAvoidArea(int32_t persistentId, 
         avoidAreaType < static_cast<T>(AvoidAreaType::TYPE_END); avoidAreaType++) {
         AvoidArea avoidArea = rootSceneSession_->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidAreaType));
         if (avoidAreaType == static_cast<T>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR) &&
-            !CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_, avoidArea,
+            !CheckAvoidAreaForAINavigationBar(
+                isAINavigationBarVisible_[rootSceneSession_->GetSessionProperty()->GetDisplayId()], avoidArea,
                 rootSceneSession_->GetSessionRect().height_)) {
             continue;
         }
@@ -11983,12 +11972,15 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
         bool isNeedUpdate = true;
         {
             std::unique_lock<std::shared_mutex> lock(currAINavigationBarAreaMapMutex_);
-            isNeedUpdate = isAINavigationBarVisible_ != isVisible ||
-                currAINavigationBarAreaMap_.count(displayId) == 0 ||
-                currAINavigationBarAreaMap_[displayId] != barArea;
+            if (isAINavigationBarVisible_.find(displayId) == isAINavigationBarVisible_.end()) {
+                isAINavigationBarVisible_[displayId] = false;
+            }
+            isNeedUpdate = isAINavigationBarVisible_[displayId] != isVisible ||
+                           currAINavigationBarAreaMap_.count(displayId) == 0 ||
+                           currAINavigationBarAreaMap_[displayId] != barArea;
+
             if (isNeedUpdate) {
-                isAINavigationBarVisible_ = isVisible;
-                currAINavigationBarAreaMap_.clear();
+                isAINavigationBarVisible_[displayId] = isVisible;
                 currAINavigationBarAreaMap_[displayId] = barArea;
             }
             if (isNeedUpdate && !isVisible && !barArea.IsEmpty()) {
@@ -16504,10 +16496,9 @@ DisplayId SceneSessionManager::UpdateSpecificSessionClientDisplayId(const sptr<W
 void SceneSessionManager::UpdateSessionDisplayIdBySessionInfo(
     sptr<SceneSession> sceneSession, const SessionInfo& sessionInfo)
 {
-    if (sceneSession->GetScreenId() == VIRTUAL_DISPLAY_ID &&
-        sceneSession->GetSessionProperty()->GetDisplayId() == VIRTUAL_DISPLAY_ID) {
+    if (sessionInfo.screenId_ != sceneSession->GetScreenId()) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s move display %{public}" PRIu64 " from %{public}" PRIu64,
-            sessionInfo.bundleName_.c_str(), sessionInfo.screenId_, VIRTUAL_DISPLAY_ID);
+            sessionInfo.bundleName_.c_str(), sessionInfo.screenId_, sceneSession->GetScreenId());
         sceneSession->SetScreenId(sessionInfo.screenId_);
         sceneSession->GetSessionProperty()->SetDisplayId(sessionInfo.screenId_);
     }
@@ -16879,7 +16870,7 @@ void SceneSessionManager::PackWindowPropertyChangeInfo(const sptr<SceneSession>&
         }
     }
     if (interestedFlags_ & static_cast<uint32_t>(SessionPropertyFlag::WINDOW_RECT)) {
-        WSRect wsrect = sceneSession->GetClientRect();
+        WSRect wsrect = sceneSession->GetSessionRect();
         Rect rect = { wsrect.posX_, wsrect.posY_, wsrect.width_, wsrect.height_ };
         windowPropertyChangeInfo[WindowInfoKey::WINDOW_RECT] = rect;
     }
