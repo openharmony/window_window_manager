@@ -3997,7 +3997,7 @@ void WindowImpl::UpdateDisplayId(DisplayId from, DisplayId to)
 }
 
 void WindowImpl::UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info,
-    const std::map<AvoidAreaType, AvoidArea> avoidAreas,
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     WLOGFD("Update OccupiedArea, id: %{public}u", property_->GetWindowId());
