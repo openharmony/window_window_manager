@@ -528,10 +528,10 @@ void AniWindowManager::OnShiftAppWindowTouchEvent(ani_env* env, ani_int sourceWi
         return;
     }
     WmErrorCode ret = AniWindowUtils::ToErrorCode(
-        SingletonContainer::Get<WindowManager>().ShiftAppWindowTouchEvent(sourceWindowId, targetWindowId, fingerId));
+        SingletonContainer::Get<WindowManager>().ShiftAppWindowPointerEvent(sourceWindowId, targetWindowId, fingerId));
     if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_PC, "[ANI]ShiftAppWindowTouchEvent failed, ret: %{public}d", ret);
-        AniWindowUtils::AniThrowError(env, ret, "ShiftAppWindowTouchEvent failed.");
+        TLOGE(WmsLogTag::WMS_PC, "[ANI]ShiftAppWindowPointerEvent failed, ret: %{public}d", ret);
+        AniWindowUtils::AniThrowError(env, ret, "shiftAppWindowTouchEvent failed!");
     }
     return;
 }
