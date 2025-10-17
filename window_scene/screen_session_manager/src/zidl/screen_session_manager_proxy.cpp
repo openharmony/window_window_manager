@@ -2204,7 +2204,8 @@ DMError ScreenSessionManagerProxy::GetPhysicalScreenIds(std::vector<ScreenId>& s
     return ret;
 }
 
-DMError OHOS::Rosen::ScreenSessionManagerProxy::SetOrientation(ScreenId screenId, Orientation orientation)
+DMError OHOS::Rosen::ScreenSessionManagerProxy::SetOrientation(ScreenId screenId,
+    Orientation orientation, bool isFromNapi)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -2225,6 +2226,10 @@ DMError OHOS::Rosen::ScreenSessionManagerProxy::SetOrientation(ScreenId screenId
     }
     if (!data.WriteUint32(static_cast<uint32_t>(orientation))) {
         TLOGW(WmsLogTag::DMS, "Write orientation failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(isFromNapi)) {
+        TLOGW(WmsLogTag::DMS, "Write isFromNapi failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_ORIENTATION),

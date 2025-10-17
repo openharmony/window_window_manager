@@ -978,10 +978,10 @@ HWTEST_F(ScreenSessionManagerTest, SetOrientation, TestSize.Level1)
     ScreenId id = 0;
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
     ssm_->screenSessionMap_[id] = screenSession;
-    ASSERT_EQ(DMError::DM_OK, ssm_->SetOrientation(id, orientation));
-    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetOrientation(SCREEN_ID_INVALID, orientation));
+    ASSERT_EQ(DMError::DM_OK, ssm_->SetOrientation(id, orientation, false));
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetOrientation(SCREEN_ID_INVALID, orientation, false));
     Orientation invalidOrientation = Orientation{20};
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->SetOrientation(id, invalidOrientation));
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->SetOrientation(id, invalidOrientation, false));
 }
 
 /**

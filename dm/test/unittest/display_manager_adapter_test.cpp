@@ -506,7 +506,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetSpecifiedScreenPower, TestSize.Level1)
 HWTEST_F(DisplayManagerAdapterTest, SetOrientation, TestSize.Level1)
 {
     Orientation orientation = Orientation::BEGIN;
-    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetOrientation(0, orientation);
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetOrientation(0, orientation, false);
     ASSERT_EQ(err, DMError::DM_OK);
 }
 
