@@ -5254,7 +5254,7 @@ DMError ScreenSessionManager::SetOrientation(ScreenId screenId, Orientation orie
     }
     // just for get orientation test
     screenSession->SetOrientation(orientation);
-    screenSession->ScreenOrientationChange(orientation, GetFoldDisplayMode(), bool isFromNapi);
+    screenSession->ScreenOrientationChange(orientation, GetFoldDisplayMode(), isFromNapi);
     return DMError::DM_OK;
 }
 
