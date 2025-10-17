@@ -48,7 +48,7 @@ bool g_isPcDevice = ScreenSceneConfig::GetExternalScreenDefaultMode() == "none";
 
 void ScreenTest::SetUpTestCase()
 {
-    sptr<screenInfo> screenInfo = sptr<screenInfo>::MakeSptr();
+    sptr<ScreenInfo> screenInfo = sptr<ScreenInfo>::MakeSptr();
     screen_ =  sptr<Screen>::MakeSptr(screenInfo);
     usleep(SLEEP_TIME_IN_US);
 }
