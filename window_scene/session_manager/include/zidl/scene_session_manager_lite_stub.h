@@ -56,6 +56,7 @@ private:
     int HandleUnlockSession(MessageParcel& data, MessageParcel& reply);
     int HandleMoveSessionsToForeground(MessageParcel& data, MessageParcel& reply);
     int HandleMoveSessionsToBackground(MessageParcel& data, MessageParcel& reply);
+    int HandleGetParentMainWindowId(MessageParcel& data, MessageParcel& reply);
     //for window manager service
     int HandleGetFocusSessionInfo(MessageParcel& data, MessageParcel& reply);
     int HandleRegisterWindowManagerAgent(MessageParcel& data, MessageParcel& reply);

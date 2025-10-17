@@ -6902,7 +6902,7 @@ void SceneSessionManager::NotifySessionForCallback(const sptr<SceneSession>& sce
         return;
     }
     TLOGI(WmsLogTag::DEFAULT, "NotifyClosed, id: %{public}d", sceneSession->GetPersistentId());
-    listenerController_->NotifySessionClosed(sceneSession->GetSessionInfo());
+    listenerController_->NotifySessionClosed(sceneSession->GetSessionInfo(), reason);
 }
 
 void SceneSessionManager::NotifyWindowInfoChangeFromSession(int32_t persistentId)

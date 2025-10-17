@@ -309,6 +309,7 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WMError::WM_OK;
     }
+    WMError GetParentMainWindowId(int32_t windowId, int32_t& mainWindowId) override { return WMError::WM_OK; }
     WMError UnregisterPipChgListenerByScreenId(int32_t screenId) override { return WMError::WM_OK; }
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override { return WMError::WM_OK; }
@@ -709,6 +710,21 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleClearAllSessions, TestSize.Level
     MessageParcel data;
     MessageParcel reply;
     auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleClearAllSessions(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetParentMainWindowId
+ * @tc.desc: test function : HandleGetParentMainWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetParentMainWindowId, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t windowId = 0;
+    data.WriteInt32(windowId);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetParentMainWindowId(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
