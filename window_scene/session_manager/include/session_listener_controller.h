@@ -65,7 +65,8 @@ public:
 
     bool IsListenerMapByBundleSizeReachLimit(bool isBundleNameListEmpty) const;
 
-    void NotifySessionClosed(const SessionInfo& sessionInfo);
+    void NotifySessionClosed(const SessionInfo& sessionInfo,
+        LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
 
     void NotifySessionSnapshotChanged(int32_t persistentId);
 

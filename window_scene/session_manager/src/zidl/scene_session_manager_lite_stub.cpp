@@ -186,6 +186,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleUpdateAnimationSpeedWithPid(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_DISPLAYID_BY_WINDOWID):
             return HandleGetDisplayIdByWindowId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_PARENT_WINDOW_ID):
+            return HandleGetParentMainWindowId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_SET_SESSION_ICON_FOR_THIRD_PARTY):
             return HandleSetSessionIconForThirdParty(data, reply);
         default:
@@ -585,6 +587,21 @@ int SceneSessionManagerLiteStub::HandleClearAllSessions(MessageParcel& data, Mes
 {
     WLOGFD("run HandleClearAllSessions!");
     WSError ret = ClearAllSessions();
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetParentMainWindowId(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "run HandleGetParentMainWindowId!");
+    int32_t windowId = 0;
+    if (!data.ReadInt32(windowId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read windowId failed.");
+        return ERR_INVALID_DATA;
+    }
+    int32_t parentId = 0;
+    WMError ret = GetParentMainWindowId(windowId, parentId);
+    reply.WriteInt32(parentId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }

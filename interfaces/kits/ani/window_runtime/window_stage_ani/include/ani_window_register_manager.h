@@ -103,6 +103,8 @@ private:
         const sptr<Window>& window, bool isRegister, ani_env* env);
     WmErrorCode ProcessWindowStatusDidChangeRegister(const sptr<AniWindowListener>& listener,
         const sptr<Window>& window, bool isRegister, ani_env* env);
+    WmErrorCode ProcessFreeWindowModeChangeRegister(const sptr<AniWindowListener>& listener,
+        const sptr<Window>& window, bool isRegister, ani_env* env);
     WmErrorCode ProcessListener(RegisterListenerType registerListenerType, CaseType caseType,
         const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister, ani_env* env,
         ani_long timeout);
