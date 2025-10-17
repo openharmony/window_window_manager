@@ -37,10 +37,10 @@ public:
     WMError UpdateWindowDragInfo(const PointInfo& point, DragEvent event) override;
     WMError UpdateDisplayId(DisplayId from, DisplayId to) override;
     WMError UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info,
-        const std::map<AvoidAreaType, AvoidArea> avoidAreas,
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     WMError UpdateOccupiedAreaAndRect(const sptr<OccupiedAreaChangeInfo>& info, const Rect& rect,
-        const std::map<AvoidAreaType, AvoidArea> avoidAreas,
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     WMError UpdateActiveStatus(bool isActive) override;
     sptr<WindowProperty> GetWindowProperty() override;
