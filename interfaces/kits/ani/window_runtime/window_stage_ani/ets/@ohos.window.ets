@@ -819,6 +819,22 @@ export enum RectType {
   RELATIVE_TO_PARENT_WINDOW = 1
 }
 
+export interface ShowWindowOptions {
+    /**
+     * Whether the window automatically gains focus when it is displayed by calling showWindow().
+     *
+     * @type { ?boolean }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 20
+     */
+    focusOnShow?: boolean;
+}
+
+export class ShowWindowOptionsInternal implements ShowWindowOptions {
+  focusOnShow?: boolean;
+}
+
 export interface SystemBarProperties {
     /**
      * The color of the status bar.
@@ -2015,8 +2031,11 @@ export class WindowInternal implements Window {
     private native setWaterMarkFlagSync(nativeObj: long, enable: boolean): void;
     private native setWindowFocusableSync(nativeObj: long, isFocusable: boolean): void;
     private native showWindowSync(nativeObj: long): void;
+    private native showWindowWithOptions(nativeObj: long, options: ShowWindowOptions): void;
     private native destroyWindowSync(nativeObj: long): void;
     private native isWindowShowingSync(nativeObj: long): boolean;
+    private native getParentWindow(nativeObj: long): Window;
+    private native setParentWindow(nativeObj: long, windowId: double): void;
     private native setContentAspectRatio(
       nativeObj: long, ratio: number, isPersistent: boolean, needUpdateRect: boolean): void;
     private native onSync(nativeObj: long, type: string, callback: object): void;
@@ -2656,6 +2675,18 @@ export class WindowInternal implements Window {
       });
     }
 
+    public showWindow(options: ShowWindowOptions): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.showWindowWithOptions(this.nativeObj, options);
+        }).then((ret: NullishType) :void => {
+          resolve(undefined);
+        }).catch((err: NullishType) :void => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
     public destroyWindow(callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.destroyWindowSync(this.nativeObj);
@@ -2680,6 +2711,22 @@ export class WindowInternal implements Window {
 
     public isWindowShowing(): boolean {
       return this.isWindowShowingSync(this.nativeObj);
+    }
+
+    public getParentWindow(): Window {
+      return this.getParentWindow(this.nativeObj);
+    }
+
+    public setParentWindow(windowId: number): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setParentWindow(this.nativeObj, windowId);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
     }
 
     public resizeAsync(width: int, height: int): Promise<void> {
@@ -3068,9 +3115,12 @@ export interface Window {
     setWindowFocusable(isFocusable: boolean, callback: AsyncCallback<void>): void;
     showWindow(callback: AsyncCallback<void>): void;
     showWindow(): Promise<void>;
+    showWindow(options: ShowWindowOptions): Promise<void>;
     destroyWindow(callback: AsyncCallback<void>): void;
     destroyWindow(): Promise<void>;
     isWindowShowing(): boolean;
+    getParentWindow(): Window;
+    setParentWindow(windowId: number): Promise<void>;
     setContentAspectRatio(ratio: number, isPersistent?: boolean, needUpdateRect?: boolean): Promise<void>;
     opacity(opacity: double): void;
     scale(scaleOptions: ScaleOptions): void;
