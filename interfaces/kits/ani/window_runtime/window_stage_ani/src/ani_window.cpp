@@ -1379,8 +1379,8 @@ void AniWindow::OnShowWindowWithOptions(ani_env* env, ani_object aniShowWindowOp
         return;
     }
     if (focusOnShow == false &&
-            (WindowHelper::IsModalSubWindow(weakWindow->GetType(), weakWindow->GetWindowFlags()) ||
-             WindowHelper::IsDialogWindow(weakWindow->GetType()))) {
+            (WindowHelper::IsModalSubWindow(window->GetType(), window->GetWindowFlags()) ||
+             WindowHelper::IsDialogWindow(window->GetType()))) {
         TLOGNE(WmsLogTag::WMS_FOCUS, "only normal sub window supports setting focusOnShow");
         return;
     }
