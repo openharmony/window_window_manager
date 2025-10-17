@@ -973,8 +973,8 @@ ani_status AniWindowUtils::CheckPropertyNameUndefined(ani_env* env, const char* 
 
 bool AniWindowUtils::ParseKeyFramePolicy(ani_env* env, ani_object aniKeyFramePolicy, KeyFramePolicy& keyFramePolicy)
 {
-    if (env == nullptr || CheckParaIsUndefined(env, aniKeyFramePolicy)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] env is nullptr or aniKeyFramePolicy undefined");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] env is nullptr");
         return false;
     }
 
@@ -1008,7 +1008,7 @@ bool AniWindowUtils::ParseKeyFramePolicy(ani_env* env, ani_object aniKeyFramePol
     }
     if (CheckPropertyNameUndefined(env, "animationDelay", aniKeyFramePolicy, propertyUndefined) != ANI_OK ||
         !propertyUndefined) {
-        if (GetPropertyLongObject(env, "animationDelay", aniKeyFramePolicy, longData) != ANI_OK || longData <= 0) {
+        if (GetPropertyLongObject(env, "animationDelay", aniKeyFramePolicy, longData) != ANI_OK || longData < 0) {
             TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed to convert parameter to animationDelay");
             return false;
         }
@@ -1016,7 +1016,7 @@ bool AniWindowUtils::ParseKeyFramePolicy(ani_env* env, ani_object aniKeyFramePol
     }
     if (CheckPropertyNameUndefined(env, "animationDuration", aniKeyFramePolicy, propertyUndefined) != ANI_OK ||
         !propertyUndefined) {
-        if (GetPropertyLongObject(env, "animationDuration", aniKeyFramePolicy, longData) != ANI_OK || longData <= 0) {
+        if (GetPropertyLongObject(env, "animationDuration", aniKeyFramePolicy, longData) != ANI_OK || longData < 0) {
             TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed to convert parameter to animationDuration");
             return false;
         }
