@@ -123,7 +123,7 @@ napi_value JsScreen::OnSetOrientation(napi_env env, napi_callback_info info)
     std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask = [this, orientation, env, task = napiAsyncTask.get()]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreen::OnSetOrientation");
-        DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(screen_->SetOrientation(orientation));
+        DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(screen_->SetScreenOrientation(orientation));
         if (ret == DmErrorCode::DM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
             TLOGNI(WmsLogTag::DMS, "OnSetOrientation success");

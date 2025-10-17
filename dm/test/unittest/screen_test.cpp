@@ -48,8 +48,8 @@ bool g_isPcDevice = ScreenSceneConfig::GetExternalScreenDefaultMode() == "none";
 
 void ScreenTest::SetUpTestCase()
 {
-    defaultScreenId_ = DisplayManager::GetInstance().GetDefaultDisplayId();
-    screen_ = ScreenManager::GetInstance().GetScreenById(defaultScreenId_);
+    sptr<screenInfo> screenInfo = sptr<screenInfo>::MakeSptr();
+    screen_ =  sptr<Screen>::MakeSptr(screenInfo);
     usleep(SLEEP_TIME_IN_US);
 }
 
@@ -357,7 +357,7 @@ HWTEST_F(ScreenTest, GetOrientation, TestSize.Level1)
 HWTEST_F(ScreenTest, SetOrientation, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), SetOrientation(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
+    EXPECT_CALL(m->Mock(), SetOrientation(_, _, _)).Times(1).WillOnce(Return(DMError::DM_OK));
     Orientation orientation = Orientation{0};
     auto res = screen_->SetOrientation(orientation);
     ASSERT_EQ(DMError::DM_OK, res);
@@ -478,6 +478,19 @@ HWTEST_F(ScreenTest, SetDefaultDensityDpi, TestSize.Level1)
     } else {
         ASSERT_NE(DMError::DM_OK, res);
     }
+}
+
+/**
+ * @tc.name: SetScreenOrientation
+ * @tc.desc: SetScreenOrientation
+ * @tc.type: FUNC
+ *
+ */
+HWTEST_F(ScreenTest, SetScreenOrientation, TestSize.Level1)
+{
+    Orientation orientation = Orientation::VERTICAL;
+    auto res = screen_->SetScreenOrientation(orientation);
+    ASSERT_NE(DMError::DM_OK, res);
 }
 }
 } // namespace Rosen
