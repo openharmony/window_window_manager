@@ -68,7 +68,6 @@ public:
     virtual WMError UpdateWindowDragInfo(const PointInfo& point, DragEvent event) = 0;
     virtual WMError UpdateDisplayId(DisplayId from, DisplayId to) = 0;
     virtual WMError UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info,
-        const std::map<AvoidAreaType, AvoidArea>& avoidAreas,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) = 0;
     virtual WMError UpdateActiveStatus(bool isActive) = 0;
     virtual sptr<WindowProperty> GetWindowProperty() = 0;
