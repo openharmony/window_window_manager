@@ -511,7 +511,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "setPiPControlEvent", moduleName, JsSceneSession::SetPiPControlEvent);
     BindNativeFunction(env, objValue, "notifyPipOcclusionChange", moduleName, JsSceneSession::NotifyPipOcclusionChange);
     BindNativeFunction(env, objValue, "notifyPipSizeChange", moduleName, JsSceneSession::NotifyPipSizeChange);
-    BindNativeFunction(env, objValue, "notifyPipActiveStatusChange", moduleName, 
+    BindNativeFunction(env, objValue, "notifyPipActiveStatusChange", moduleName,
         JsSceneSession::NotifyPipActiveWindowStatusChange);
     BindNativeFunction(env, objValue, "notifyDisplayStatusBarTemporarily", moduleName,
         JsSceneSession::NotifyDisplayStatusBarTemporarily);
@@ -6246,20 +6246,19 @@ napi_value JsSceneSession::OnNotifyPipActiveStatusChange(napi_env env, napi_call
         return NapiGetUndefined(env);
     }
 
-    int32_t status = -1;
+    PiPActiveStatus status = PiPActiveStatus::STATUS_UNKNOWN;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], status)) {
         TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter, keep default: false");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    if (status <= -1 || status >= 2) {
+    if (status <= PiPActiveStatus::STATUS_UNKNOWN || status > PiPActiveStatus::STATUS_SIDEBAR) {
         TLOGE(WmsLogTag::WMS_PIP, "status value invalid, keep default: false");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    PiPActiveStatus status_ = static_cast<PiPActiveStatus>(status);
 
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -6268,7 +6267,7 @@ napi_value JsSceneSession::OnNotifyPipActiveStatusChange(napi_env env, napi_call
     }
 
     TLOGI(WmsLogTag::WMS_PIP, "persistId:%{public}d", persistentId_);
-    session->NotifyPipActiveStatusChange(status_);
+    session->NotifyPipActiveStatusChange(status);
     return NapiGetUndefined(env);
 }
 
