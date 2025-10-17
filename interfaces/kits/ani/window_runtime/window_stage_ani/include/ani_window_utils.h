@@ -82,6 +82,10 @@ public:
     static void* GetAbilityContext(ani_env *env, ani_object aniObj);
     static ani_object CreateAniRectObject(ani_env* env, const Rect& rect);
     static ani_object CreateWindowsProperties(ani_env* env, const WindowPropertyInfo& windowPropertyInfo);
+    static ani_status CheckPropertyNameUndefined(ani_env* env, const char* propertyName,
+        ani_object object, bool& result);
+    static bool ParseKeyFramePolicy(ani_env* env, ani_object aniKeyFramePolicy, KeyFramePolicy& keyFramePolicy);
+    static ani_object CreateKeyFramePolicy(ani_env* env, const KeyFramePolicy& keyFramePolicy);
     static ani_object CreateAniPixelMapArray(ani_env* env,
         const std::vector<std::shared_ptr<Media::PixelMap>>& pixelMaps);
     static ani_object CreateAniMainWindowInfoArray(ani_env* env, const std::vector<sptr<MainWindowInfo>>& infos);
