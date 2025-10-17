@@ -70,6 +70,8 @@ public:
     static void UnregisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
         ani_ref callback);
     static void ShowWindow(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void ShowWindowWithOptions(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_object aniShowWindowOptions);
     static void DestroyWindow(ani_env* env, ani_object obj, ani_long nativeObj);
     static ani_boolean IsWindowShowing(ani_env* env, ani_object obj, ani_long nativeObj);
     static void Opacity(ani_env* env, ani_object obj, ani_long nativeObj, ani_double opacity);
@@ -90,6 +92,8 @@ public:
         ani_boolean enabled, ani_int anchor, ani_int offsetX, ani_int offsetY);
     static void SetWindowDelayRaiseOnDrag(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isEnabled);
 
+    ani_ref GetParentWindow(ani_env *env);
+    void SetParentWindow(ani_env* env, ani_double windowId);
     /*
      * Window Layout
      */
@@ -145,6 +149,7 @@ private:
     void OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback, ani_long timeout);
     void OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnShowWindow(ani_env* env);
+    void OnShowWindowWithOptions(ani_env* env, ani_object aniShowWindowOptions);
     void OnDestroyWindow(ani_env* env);
     ani_boolean OnIsWindowShowing(ani_env* env);
     void OnOpacity(ani_env* env, ani_double opacity);
