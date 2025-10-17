@@ -484,7 +484,6 @@ HWTEST_F(ScreenTest, SetDefaultDensityDpi, TestSize.Level1)
  * @tc.name: SetScreenOrientation
  * @tc.desc: SetScreenOrientation
  * @tc.type: FUNC
- *
  */
 HWTEST_F(ScreenTest, SetScreenOrientation, TestSize.Level1)
 {
