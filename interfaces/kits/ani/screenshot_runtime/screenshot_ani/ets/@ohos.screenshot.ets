@@ -55,8 +55,22 @@ export function save(options?: ScreenshotOptions): Promise<image.PixelMap> {
         });
     });
 }
+
+export function saveHdrPicture(hdrOptions?: HdrScreenshotOptions): Promise<Array<image.PixelMap>> {
+    return new Promise<Array<image.PixelMap>>((resolve: (value: Array<image.PixelMap>) => void, reject: (error: BusinessError) => void ) => {
+        taskpool.execute((): Array<image.PixelMap> => {
+            let res: Array<image.PixelMap> = saveHdrSync(hdrOptions);
+            return res;
+        }).then((ret: NullishType) => {
+            resolve(ret as Array<image.PixelMap>);
+        }).catch((err: NullishType) => {
+            reject(err as BusinessError);
+        });
+    });
+}
  
 native function saveSync(screenshotOptions?: ScreenshotOptions): image.PixelMap;
+native function saveHdrSync(hdrOptions?: HdrScreenshotOptions): Array<image.PixelMap>;
  
 export interface ScreenshotOptions {
     screenRect?: Rect;
@@ -83,6 +97,22 @@ export class ScreenshotOptionsImpl implements ScreenshotOptions{
  
     isNotificationNeeded?: boolean;
     
+    isCaptureFullOfScreen?: boolean;
+}
+
+export interface HdrScreenshotOptions {
+    displayId?: long;
+ 
+    isNotificationNeeded?: boolean;
+ 
+    isCaptureFullOfScreen?: boolean;
+}
+ 
+export class HdrScreenshotOptionsImpl implements HdrScreenshotOptions {
+    displayId?: long;
+ 
+    isNotificationNeeded?: boolean;
+ 
     isCaptureFullOfScreen?: boolean;
 }
  
