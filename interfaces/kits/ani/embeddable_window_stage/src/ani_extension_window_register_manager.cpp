@@ -225,7 +225,7 @@ WmErrorCode AniExtensionWindowRegisterManager::UnregisterListener(sptr<Window>& 
 }
 
 WmErrorCode AniExtensionWindowRegisterManager::ProcessRegister(CaseType caseType,
-    sptr<AniExtensionWindowListener>& listener, const sptr<Window>& window, const std::string& type,
+    sptr<AniExtensionWindowListener>& listener, sptr<Window>& window, const std::string& type,
     bool isRegister)
 {
     WmErrorCode ret = WmErrorCode::WM_OK;
