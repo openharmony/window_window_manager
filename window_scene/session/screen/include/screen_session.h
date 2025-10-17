@@ -163,6 +163,7 @@ public:
     DisplayOrientation CalcOrientationToDisplayOrientation(Orientation orientation);
     Rotation CalcRotationByDeviceOrientation(DisplayOrientation displayRotation,
         FoldDisplayMode foldDisplayMode, const RRect& boundsInRotationZero);
+    Rotation CalcRotationSystemInner(Orientation orientation, FoldDisplayMode foldDisplayMode) const;
     DisplayOrientation CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode);
     DisplayOrientation CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode);
     DisplayOrientation CalcDeviceOrientationWithBounds(Rotation rotation,
@@ -311,7 +312,7 @@ public:
     float GetValidSensorRotation();
     void HoverStatusChange(int32_t hoverStatus, bool needRotate = true);
     void CameraBackSelfieChange(bool isCameraBackSelfie);
-    void ScreenOrientationChange(Orientation orientation, FoldDisplayMode foldDisplayMode);
+    void ScreenOrientationChange(Orientation orientation, FoldDisplayMode foldDisplayMode, bool isFromNapi);
     void ScreenOrientationChange(float orientation);
     void ScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId);
     DMRect GetAvailableArea();

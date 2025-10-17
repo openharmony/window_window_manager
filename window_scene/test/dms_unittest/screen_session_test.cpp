@@ -2106,7 +2106,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test007, TestSize.Level1)
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     Orientation orientation = Orientation::UNSPECIFIED;
     int res = 0;
-    session->ScreenOrientationChange(orientation, FoldDisplayMode::UNKNOWN);
+    session->ScreenOrientationChange(orientation, FoldDisplayMode::UNKNOWN, false);
     ASSERT_EQ(res, 0);
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test007 end";
 }
@@ -4764,6 +4764,64 @@ HWTEST_F(ScreenSessionTest, TestPropertyChangeAllCases, TestSize.Level1)
         session->PropertyChange(screenProperty, reason);
         session->screenChangeListenerList_.clear();
     }
+}
+
+/**
+ * @tc.name  : CalcRotationSystemInner
+ * @tc.desc  : CalcRotationSystemInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CalcRotationSystemInner, TestSize.Level1)
+{
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
+    Orientation orientation = Orientation::UNSPECIFIED;
+    FoldDisplayMode foldDisplayMode = FoldDisplayMode::UNKNOWN;
+    Rotation rotation = screenSession->CalcRotationSystemInner(orientation, foldDisplayMode);
+    EXPECT_EQ(rotation, Rotation::ROTATION_0);
+ 
+    sptr<SupportedScreenModes> supportedScreenMode = sptr<SupportedScreenModes>::MakeSptr();
+    supportedScreenMode->id_ = 1;
+    supportedScreenMode->width_ = 1000;
+    supportedScreenMode->height_ = 2000;
+    supportedScreenMode->refreshRate_ = 90;
+    screenSession->modes_.emplace_back(supportedScreenMode);
+    screenSession->activeIdx_ = 0;
+    rotation = screenSession->CalcRotationSystemInner(orientation, foldDisplayMode);
+    EXPECT_EQ(rotation, Rotation::ROTATION_0);
+ 
+    orientation = Orientation::VERTICAL;
+    rotation = screenSession->CalcRotationSystemInner(orientation, foldDisplayMode);
+    EXPECT_EQ(rotation, Rotation::ROTATION_0);
+ 
+    orientation = Orientation::HORIZONTAL;
+    rotation = screenSession->CalcRotationSystemInner(orientation, foldDisplayMode);
+    EXPECT_EQ(rotation, Rotation::ROTATION_90);
+ 
+    orientation = Orientation::REVERSE_VERTICAL;
+    rotation = screenSession->CalcRotationSystemInner(orientation, foldDisplayMode);
+    EXPECT_EQ(rotation, Rotation::ROTATION_180);
+ 
+    orientation = Orientation::REVERSE_HORIZONTAL;
+    rotation = screenSession->CalcRotationSystemInner(orientation, foldDisplayMode);
+    EXPECT_EQ(rotation, Rotation::ROTATION_270);
+}
+ 
+/**
+ * @tc.name  : ScreenOrientationChange
+ * @tc.desc  : ScreenOrientationChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, ScreenOrientationChange, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    Orientation orientation = Orientation::UNSPECIFIED;
+    int res = 0;
+    session->ScreenOrientationChange(orientation, FoldDisplayMode::UNKNOWN, true);
+    EXPECT_TRUE(g_errLog.find("set orientation from napi") != std::string::npos);
+    LOG_SetCallback(nullptr);
+    g_errLog.clear();
 }
 } // namespace
 } // namespace Rosen

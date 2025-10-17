@@ -1212,10 +1212,10 @@ HWTEST_F(ScreenSessionManagerProxyUtTest, SetOrientation, TestSize.Level1)
     Orientation orientation = Orientation::BEGIN;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_NE(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->SetOrientation(screenId, orientation));
+                screenSessionManagerProxy->SetOrientation(screenId, orientation, false));
     } else {
         ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->SetOrientation(screenId, orientation));
+                screenSessionManagerProxy->SetOrientation(screenId, orientation, false));
     }
 }
 

@@ -753,7 +753,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
         case DisplayManagerMessage::TRANS_ID_SET_ORIENTATION: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             Orientation orientation = static_cast<Orientation>(data.ReadUint32());
-            DMError ret = SetOrientation(screenId, orientation);
+            bool isFromNapi = data.ReadBool();
+            DMError ret = SetOrientation(screenId, orientation, isFromNapi);
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
             break;
         }
