@@ -35,13 +35,19 @@ public:
     explicit AniExtensionWindow(const std::shared_ptr<Rosen::ExtensionWindow> extensionWindow, int32_t hostWindowId);
     AniExtensionWindow(const std::shared_ptr<Rosen::ExtensionWindow> extensionWindow,
         sptr<AAFwk::SessionInfo> sessionInfo);
-    static ani_object CreateAniExtensionWindow(ani_env* env, sptr<Rosen::Window> window, int32_t hostWindowId);
+    static ani_object CreateAniExtensionWindow(ani_env* env, sptr<Rosen::Window> window, int32_t hostWindowId,
+        bool isHost = true);
     WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea);
     WmErrorCode OnSetWaterMarkFlag(ani_env* env, ani_boolean enable);
     WmErrorCode OnHidePrivacyContentForHost(ani_env* env, ani_boolean shouldHide);
     WmErrorCode GetExtensionWindowRect(Rect& rect);
-    WmErrorCode RegisterListener(const std::string& cbType, ani_env* env, ani_object fn, ani_object fnArg);
-    WmErrorCode UnregisterListener(const std::string& cbType, ani_env* env, ani_object fn);
+    WmErrorCode RegisterListener(ani_env* env, ani_string type,  ani_object fn);
+    WmErrorCode UnregisterListener(ani_env* env, ani_string type, ani_object fn);
+    WmErrorCode OnHideNonSecureWindows(ani_env* env, ani_boolean shouldHide);
+    void OnOccupyEvents(ani_env* env, ani_int eventFlags);
+    ani_object OnCreateSubWindowWithOptions(ani_env* env, ani_string name, ani_object subWindowOptions);
+    WmErrorCode OnRegisterRectChangeCallback(ani_env* env, ani_int reason, ani_object fn);
+    WmErrorCode OnUnRegisterRectChangeCallback(ani_env* env, ani_object fn);
 private:
     bool IsExtensionWindowValid();
     std::shared_ptr<Rosen::ExtensionWindow> extensionWindow_;
