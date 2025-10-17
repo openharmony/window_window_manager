@@ -1337,8 +1337,8 @@ void AniWindow::OnShowWindow(ani_env* env)
     }
 }
 
-void AniWindow::ShowWindowWithOptions(ani_env* env, ani_object obj, 
-    ani_long nativeObj, ani_object aniShowWindowOptions) 
+void AniWindow::ShowWindowWithOptions(ani_env* env, ani_object obj,
+    ani_long nativeObj, ani_object aniShowWindowOptions)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
