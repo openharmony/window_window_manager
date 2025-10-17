@@ -54,7 +54,7 @@ private:
         sptr<Window>& window, bool isRegister);
     WmErrorCode ProcessWindowRectChangeRegister(sptr<AniExtensionWindowListener>& listener,
         sptr<Window>& window, bool isRegister);
-    WmErrorCode ProcessRegister(CaseType caseType, const sptr<AniExtensionWindowListener>& listener,
+    WmErrorCode ProcessRegister(CaseType caseType, sptr<AniExtensionWindowListener>& listener,
         const sptr<Window>& window, const std::string& type, bool isRegister);
     std::map<std::string, std::map<ani_ref, sptr<AniExtensionWindowListener>>> aniCbMap_;
     std::mutex mtx_;
