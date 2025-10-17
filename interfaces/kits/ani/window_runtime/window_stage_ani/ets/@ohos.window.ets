@@ -2041,6 +2041,7 @@ export class WindowInternal implements Window {
     private native globalDisplayToClient(nativeObj: long, globalDisplayX: int, globalDisplayY: int): Position;
     private native setRotationLocked(nativeObj: long, locked: boolean): void;
     private native getRotationLocked(nativeObj: long): boolean;
+    private native isInFreeWindowMode(nativeObj: long): boolean;
     private native setRelativePositionToParentWindowEnabled(nativeObj: long, enabled: boolean, anchor?: WindowAnchor,
       offsetX?: int, offsetY?: int): void;
     private native setWindowDelayRaiseOnDrag(nativeObj: long, isEnabled: boolean): void;
@@ -2979,6 +2980,20 @@ export class WindowInternal implements Window {
       return this.getRotationLocked(this.nativeObj);
     }
 
+    public isInFreeWindowMode(): boolean {
+      return this.isInFreeWindowMode(this.nativeObj);
+    }
+
+    public onFreeWindowModeChange(callback: Callback<boolean>): void {
+      let type = "FreeWindowModeChange";
+      this.onSync(this.nativeObj, type, callback);
+    }
+
+    public offFreeWindowModeChange(callback?: Callback<boolean>): void {
+      let type = "FreeWindowModeChange";
+      this.offSync(this.nativeObj, type, callback);
+    }
+
     public setRelativePositionToParentWindowEnabled(enabled: boolean, anchor?: WindowAnchor,
       offsetX?: int, offsetY?: int): Promise<void> {
       return new Promise<void>(
@@ -3098,6 +3113,9 @@ export interface Window {
     globalDisplayToClient(globalDisplayX: int, globalDisplayY: int): Promise<Position>;
     setRotationLocked(locked: boolean): Promise<void>;
     getRotationLocked(): boolean;
+    isInFreeWindowMode(): boolean;
+    onFreeWindowModeChange(callback: Callback<boolean>): void;
+    offFreeWindowModeChange(callback?: Callback<boolean>): void;
     setRelativePositionToParentWindowEnabled(enabled: boolean, anchor?: WindowAnchor,
       offsetX?: int, offsetY?: int): Promise<void>;
     setWindowDelayRaiseOnDrag(isEnabled: boolean): void;

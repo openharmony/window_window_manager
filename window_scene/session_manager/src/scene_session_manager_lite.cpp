@@ -444,4 +444,10 @@ WMError SceneSessionManagerLite::GetDisplayIdByWindowId(const std::vector<uint64
     WLOGFD("in");
     return SceneSessionManager::GetInstance().GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
 }
+
+WMError SceneSessionManagerLite::GetParentMainWindowId(int32_t windowId, int32_t& mainWindowId)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
+    return SceneSessionManager::GetInstance().GetParentMainWindowId(windowId, mainWindowId);
+}
 } // namespace OHOS::Rosen
