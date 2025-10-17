@@ -3011,7 +3011,7 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"setWaterMarkFlagSync", "JZ:V",
             reinterpret_cast<void *>(AniWindow::SetWaterMarkFlag)},
         ani_native_function {"raiseMainWindowAboveTargetSync", "JI:V",
-            reinterpret_cast<void *>(AniWindow::RaiseMainWindowAboveTarget)},    
+            reinterpret_cast<void *>(AniWindow::RaiseMainWindowAboveTarget)},
         ani_native_function {"setWindowFocusableSync", "JZ:V",
             reinterpret_cast<void *>(AniWindow::SetWindowFocusable)},
         ani_native_function {"setContentAspectRatio", "JDZZ:V",
