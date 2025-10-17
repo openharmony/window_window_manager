@@ -84,6 +84,7 @@ public:
         bool isHighlight));
     MOCK_METHOD1(SetDragActivated, WSError(bool dragActivated));
     MOCK_METHOD3(NotifyPipWindowSizeChange, WSError(double width, double height, double scale));
+    MOCK_METHOD1(NotifyPipActiveStatusChange, WSError(PiPActiveStatus status));
     MOCK_METHOD1(NotifyWindowCrossAxisChange, void(CrossAxisState state));
     MOCK_METHOD1(LinkKeyFrameCanvasNode, WSError(std::shared_ptr<RSCanvasNode>& rsCanvasNode));
     MOCK_METHOD1(SetKeyFramePolicy, WSError(KeyFramePolicy& keyFramePolicy));
