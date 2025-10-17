@@ -781,16 +781,16 @@ void ScreenSession::Disconnect()
 
 void ScreenSession::PropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason)
 {
-    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
-    property_ = newProperty;
+    SetScreenProperty(newProperty);
     if (reason == ScreenPropertyChangeReason::VIRTUAL_PIXEL_RATIO_CHANGE) {
         return;
     }
-    if (screenChangeListenerList_.empty()) {
+    auto listeners = GetScreenChangeListenerList();
+    if (listeners.empty()) {
         TLOGE(WmsLogTag::DMS, "screenChangeListenerList is empty.");
         return;
     }
-    for (auto& listener : screenChangeListenerList_) {
+    for (auto* listener : listeners) {
         if (!listener) {
             TLOGE(WmsLogTag::DMS, "screenChangeListener is null.");
             continue;
@@ -1931,7 +1931,8 @@ bool ScreenSessionGroup::GetRSDisplayNodeConfig(sptr<ScreenSession>& screenSessi
 }
 
 bool ScreenSessionGroup::AddChild(sptr<ScreenSession>& smsScreen, Point& startPoint,
-                                  sptr<ScreenSession> defaultScreenSession, bool isExtend)
+                                  sptr<ScreenSession> defaultScreenSession, bool isExtend,
+                                  const RotationOption& rotationOption)
 {
     if (smsScreen == nullptr) {
         TLOGE(WmsLogTag::DMS, "AddChild, smsScreen is nullptr.");
@@ -1949,6 +1950,9 @@ bool ScreenSessionGroup::AddChild(sptr<ScreenSession>& smsScreen, Point& startPo
     struct RSDisplayNodeConfig config;
     if (!GetRSDisplayNodeConfig(smsScreen, config, defaultScreenSession)) {
         return false;
+    }
+    if (rotationOption.needSetRotation_) {
+        config.mirrorSourceRotation = static_cast<uint32_t>(rotationOption.rotation_);
     }
     smsScreen->InitRSDisplayNode(config, startPoint, isExtend);
     smsScreen->lastGroupSmsId_ = smsScreen->groupSmsId_;
@@ -2697,5 +2701,11 @@ void ScreenSession::SetScreenAreaHeight(uint32_t screenAreaHeight)
 uint32_t ScreenSession::GetScreenAreaHeight() const
 {
     return property_.GetScreenAreaHeight();
+}
+
+std::vector<IScreenChangeListener*> ScreenSession::GetScreenChangeListenerList() const
+{
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
+    return screenChangeListenerList_;
 }
 } // namespace OHOS::Rosen

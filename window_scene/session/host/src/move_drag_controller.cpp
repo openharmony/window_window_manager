@@ -39,6 +39,14 @@
 #include "res_type.h"
 #endif
 
+#define RETURN_IF_NULL(param, ...)                                          \
+    do {                                                                    \
+        if (!param) {                                                       \
+            TLOGE(WmsLogTag::WMS_LAYOUT, "The %{public}s is null", #param); \
+            return __VA_ARGS__;                                             \
+        }                                                                   \
+    } while (false)                                                         \
+
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "MoveDragController"};
@@ -476,21 +484,25 @@ void MoveDragController::ProcessWindowDragHotAreaFunc(bool isSendHotAreaMessage,
 
 /** @note @window.drag */
 void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    const std::shared_ptr<RSSurfaceNode>& surfaceNode)
+                                               const std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
-    if (surfaceNode == nullptr || pointerEvent == nullptr || type_ == AreaType::UNDEFINED) {
+    RETURN_IF_NULL(surfaceNode);
+    RETURN_IF_NULL(pointerEvent);
+    if (type_ == AreaType::UNDEFINED) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Undefined area type");
         return;
     }
     auto actionType = pointerEvent->GetPointerAction();
     if (actionType == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         actionType == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
-        Gravity dragGravity = GRAVITY_MAP.at(type_);
-        if (dragGravity >= Gravity::TOP && dragGravity <= Gravity::BOTTOM_RIGHT) {
-            TLOGI(WmsLogTag::WMS_LAYOUT, "begin SetFrameGravity:%{public}d, type:%{public}d, id:%{public}d",
-                dragGravity, type_, persistentId_);
-            surfaceNode->SetFrameGravity(dragGravity);
-            RSTransactionAdapter::FlushImplicitTransaction(surfaceNode);
-        }
+        preDragGravity_ = surfaceNode->GetStagingProperties().GetFrameGravity();
+        Gravity dragGravity = GetGravity(type_);
+        surfaceNode->SetFrameGravity(dragGravity);
+        RSTransactionAdapter::FlushImplicitTransaction(surfaceNode);
+        TLOGI(WmsLogTag::WMS_LAYOUT,
+              "windowId: %{public}d, areaType: %{public}u, preDragGravity: %{public}d, dragGravity: %{public}d",
+              persistentId_, static_cast<uint32_t>(type_), static_cast<int32_t>(preDragGravity_.value()),
+              static_cast<int32_t>(dragGravity));
     }
 }
 
@@ -524,11 +536,34 @@ void MoveDragController::CalcDragTargetRect(const std::shared_ptr<MMI::PointerEv
 
 Gravity MoveDragController::GetGravity() const
 {
-    auto iter = GRAVITY_MAP.find(dragAreaType_);
-    if (iter != GRAVITY_MAP.end()) {
-        return iter->second;
+    return GetGravity(dragAreaType_);
+}
+
+Gravity MoveDragController::GetGravity(AreaType type) const
+{
+    auto iter = GRAVITY_MAP.find(type);
+    if (iter == GRAVITY_MAP.end()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "No corresponding gravity found, type %{public}u", static_cast<uint32_t>(type));
+        return Gravity::TOP_LEFT;
     }
-    return Gravity::TOP_LEFT;
+    return iter->second;
+}
+
+bool MoveDragController::RestoreToPreDragGravity(const std::shared_ptr<RSSurfaceNode>& surfaceNode)
+{
+    RETURN_IF_NULL(surfaceNode, false);
+    if (!preDragGravity_.has_value()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "No preDragGravity to restore");
+        return false;
+    }
+    Gravity currentGravity = surfaceNode->GetStagingProperties().GetFrameGravity();
+    surfaceNode->SetFrameGravity(preDragGravity_.value());
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode);
+    TLOGI(WmsLogTag::WMS_LAYOUT,
+          "windowId: %{public}d, currentGravity: %{public}d, restore preDragGravity: %{public}d",
+          persistentId_, static_cast<int32_t>(currentGravity), static_cast<int32_t>(preDragGravity_.value()));
+    preDragGravity_.reset();
+    return true;
 }
 
 /** @note @window.drag */
@@ -1169,17 +1204,13 @@ void MoveDragController::CalcFixedAspectRatioTranslateLimits(AreaType type)
     if (isDecorEnable_) {
         if (SessionUtils::ToLayoutWidth(minW, vpr_) < SessionUtils::ToLayoutHeight(minH, vpr_) * aspectRatio_) {
             minW = SessionUtils::ToWinWidth(SessionUtils::ToLayoutHeight(minH, vpr_) * aspectRatio_, vpr_);
-            minH = SessionUtils::ToLayoutHeight(minH, vpr_);
         } else {
             minH = SessionUtils::ToWinHeight(SessionUtils::ToLayoutWidth(minW, vpr_) / aspectRatio_, vpr_);
-            minW = SessionUtils::ToLayoutWidth(minW, vpr_);
         }
         if (SessionUtils::ToLayoutWidth(maxW, vpr_) < SessionUtils::ToLayoutHeight(maxH, vpr_) * aspectRatio_) {
             maxH = SessionUtils::ToWinHeight(SessionUtils::ToLayoutWidth(maxW, vpr_) / aspectRatio_, vpr_);
-            maxW = SessionUtils::ToLayoutWidth(maxW, vpr_);
         } else {
             maxW = SessionUtils::ToWinWidth(SessionUtils::ToLayoutHeight(maxH, vpr_) * aspectRatio_, vpr_);
-            maxH = SessionUtils::ToLayoutHeight(maxH, vpr_);
         }
     } else {
         // width = height * aspectRatio

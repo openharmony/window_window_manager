@@ -1167,6 +1167,33 @@ HWTEST_F(SceneSessionTest6, TestUpdateGlobalDisplayRectFromClient, Function | Sm
 }
 
 /**
+ * @tc.name: PatchAINavigationBarArea
+ * @tc.desc: PatchAINavigationBarArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, PatchAINavigationBarArea, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    AvoidArea avoidArea;
+    AvoidArea avoidAreaEmpty;
+    Rect rect = { 600, 2710, 500, 10 };
+    session->PatchAINavigationBarArea(avoidArea);
+    EXPECT_EQ(avoidArea, avoidAreaEmpty);
+    avoidArea.topRect_ = { 600, 2710, 500, 10 };
+    session->PatchAINavigationBarArea(avoidArea);
+    EXPECT_EQ(avoidArea.bottomRect_, rect);
+    avoidArea.topRect_ = { 0, 0, 0, 0 };
+    avoidArea.leftRect_ = { 600, 2710, 500, 10 };
+    session->PatchAINavigationBarArea(avoidArea);
+    EXPECT_EQ(avoidArea.bottomRect_, rect);
+    avoidArea.leftRect_ = { 0, 0, 0, 0 };
+    avoidArea.rightRect_ = { 600, 2710, 500, 10 };
+    session->PatchAINavigationBarArea(avoidArea);
+    EXPECT_EQ(avoidArea.bottomRect_, rect);
+}
+
+/**
  * @tc.name: SetWindowTransitionAnimation
  * @tc.desc: SetWindowTransitionAnimation
  * @tc.type: FUNC
@@ -1181,6 +1208,13 @@ HWTEST_F(SceneSessionTest6, SetWindowTransitionAnimation, Function | SmallTest |
 
     session->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     auto ret = session->SetWindowTransitionAnimation(transitionType, animation);
+    ASSERT_EQ(ret, WSError::WS_ERROR_DEVICE_NOT_SUPPORT);
+
+    session->GetSessionProperty()->SetIsPcAppInPad(true);
+    ret = session->SetWindowTransitionAnimation(transitionType, animation);
+    ASSERT_EQ(ret, WSError::WS_OK);
+    session->GetSessionProperty()->SetIsPcAppInPad(false);
+    ret = session->SetWindowTransitionAnimation(transitionType, animation);
     ASSERT_EQ(ret, WSError::WS_ERROR_DEVICE_NOT_SUPPORT);
 
     session->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
@@ -1201,6 +1235,44 @@ HWTEST_F(SceneSessionTest6, SetWindowTransitionAnimation, Function | SmallTest |
     session->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     ret = session->SetWindowTransitionAnimation(transitionType, animation);
     ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_CALLING);
+}
+
+/**
+ * @tc.name: TestRunAfterNVsyncs
+ * @tc.desc: Test RunAfterNVsyncs and RestoreGravityWhenDragEnd with various conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, TestRunAfterNVsyncs, TestSize.Level1)
+{
+    SessionInfo info;
+    auto session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    bool taskExecuted = false;
+
+    // Case 1: vsyncCount = 1
+    session->requestNextVsyncFunc_ = [](const std::shared_ptr<VsyncCallback>& cb) {
+        cb->onCallback(0, 0);
+    };
+    session->RunAfterNVsyncs(1, [&] { taskExecuted = true; });
+    EXPECT_TRUE(taskExecuted);
+
+    // Case 2: vsyncCount = 3
+    taskExecuted = false;
+    session->requestNextVsyncFunc_ = [](const std::shared_ptr<VsyncCallback>& cb) {
+        static int times = 0;
+        if (++times <= 3) cb->onCallback(0, 0);
+    };
+    session->RunAfterNVsyncs(3, [&] { taskExecuted = true; });
+    EXPECT_TRUE(taskExecuted);
+
+    // Case 3: requestNextVsyncFunc_ = nullptr
+    taskExecuted = false;
+    session->requestNextVsyncFunc_ = nullptr;
+    session->RunAfterNVsyncs(1, [&] { taskExecuted = true; });
+    EXPECT_FALSE(taskExecuted);
+
+    // Case 4: RestoreGravityWhenDragEnd will not crash
+    session->RestoreGravityWhenDragEnd();
+    SUCCEED();
 }
 } // namespace
 } // namespace Rosen

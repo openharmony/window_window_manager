@@ -550,7 +550,7 @@ napi_value JsFbController::OnUnregisterCallback(napi_env env, napi_callback_info
     size_t argc = NUMBER_TWO;
     napi_value argv[NUMBER_TWO] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc <= 0) {
+    if (argc == 0) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "JsFbController Params not match: %{public}zu", argc);
         return NapiThrowInvalidParam(env, "Params num not match");
     }

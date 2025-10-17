@@ -4249,6 +4249,8 @@ void WindowImpl::NotifyBeforeDestroy(std::string windowName)
         auto uiContent = std::move(uiContent_);
         uiContent_ = nullptr;
         uiContent->Destroy();
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "uiContent is Destroy, win=%{public}u, display=%{public}" PRIu64,
+            GetWindowId(), GetDisplayId());
     }
     if (notifyNativefunc_) {
         notifyNativefunc_(windowName);
