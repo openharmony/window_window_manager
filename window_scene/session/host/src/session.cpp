@@ -405,27 +405,27 @@ uint32_t Session::GetSessionInfoExpandInputFlag() const
     return sessionInfo_.expandInputFlag_;
 }
 
-void Session::SetSessionInfoAdvancedFeatureFlag(uint32_t bitPPosition, bool value)
+void Session::SetSessionInfoAdvancedFeatureFlag(uint32_t bitPosition, bool value)
 {
-    if (bitPPosition >= ADVANCED_FEATURE_BIT_MAX) {
+    if (bitPosition >= ADVANCED_FEATURE_BIT_MAX) {
         TLOGE(WmsLogTag::WMS_EVENT, "id:%{public}d, bitPPosition:%{public}u", GetPersistentId(), bitPPosition);
         return;
     }
     {
         std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
-        advancedFeatureFlag_.set(bitPPosition, value);
+        advancedFeatureFlag_.set(bitPosition, value);
     }
 }
 
-bool Session::GetSessionInfoAdvancedFeatureFlag(uint32_t bitPPosition) const
+bool Session::GetSessionInfoAdvancedFeatureFlag(uint32_t bitPosition) const
 {
-    if (bitPPosition >= ADVANCED_FEATURE_BIT_MAX) {
+    if (bitPosition >= ADVANCED_FEATURE_BIT_MAX) {
         TLOGE(WmsLogTag::WMS_EVENT, "id:%{public}d, bitPPosition:%{public}u", GetPersistentId(), bitPPosition);
         return;
     }
     {
         std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
-        return advancedFeatureFlag_.test(bitPPosition);
+        return advancedFeatureFlag_.test(bitPosition);
     }
 }
 
