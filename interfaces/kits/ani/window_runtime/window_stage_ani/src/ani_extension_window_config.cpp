@@ -330,9 +330,9 @@ void AniExtensionWindowConfig::OnSetWindowRect(ani_env* env, ani_object value)
     int32_t width = 0;
     int32_t height = 0;
     bool ret_bool = AniWindowUtils::GetIntObject(env, "left", value, posX);
-    ret_bool |= AniWindowUtils::GetIntObject(env, "top", value, posY);
-    ret_bool |= AniWindowUtils::GetIntObject(env, "width", value, width);
-    ret_bool |= AniWindowUtils::GetIntObject(env, "height", value, height);
+    ret_bool &= AniWindowUtils::GetIntObject(env, "top", value, posY);
+    ret_bool &= AniWindowUtils::GetIntObject(env, "width", value, width);
+    ret_bool &= AniWindowUtils::GetIntObject(env, "height", value, height);
     if (!ret_bool) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Get rect pos failed");
         return;
@@ -829,7 +829,7 @@ std::array extConfigSystemWindowOptionsMethods = {
         reinterpret_cast<void *>(SetSystemWindowOptionsWindowType)},
     };
 
-ani_status ExtConfig_Rect_ANI_Constructor(ani_vm *vm, uint32_t *result)
+ani_status ExtConfig_Rect_ANI_Constructor(ani_vm *vm, uint32_t* result)
 {
     using namespace OHOS::Rosen;
     TLOGD(WmsLogTag::WMS_UIEXT, "[ANI]Init ExtConfigRect begin");
@@ -857,7 +857,7 @@ ani_status ExtConfig_Rect_ANI_Constructor(ani_vm *vm, uint32_t *result)
     return ANI_OK;
 }
 
-ani_status ExtConfig_SubWindowOptions_ANI_Constructor(ani_vm *vm, uint32_t *result)
+ani_status ExtConfig_SubWindowOptions_ANI_Constructor(ani_vm *vm, uint32_t* result)
 {
     using namespace OHOS::Rosen;
     TLOGD(WmsLogTag::WMS_UIEXT, "[ANI]Init ExtensionWindowConfig begin");
@@ -885,7 +885,7 @@ ani_status ExtConfig_SubWindowOptions_ANI_Constructor(ani_vm *vm, uint32_t *resu
     return ANI_OK;
 }
 
-ani_status ExtConfig_SystemWindowOptions_ANI_Constructor(ani_vm *vm, uint32_t *result)
+ani_status ExtConfig_SystemWindowOptions_ANI_Constructor(ani_vm *vm, uint32_t* result)
 {
     using namespace OHOS::Rosen;
     TLOGD(WmsLogTag::WMS_UIEXT, "[ANI]Init ExtensionWindowConfig begin");
@@ -913,7 +913,7 @@ ani_status ExtConfig_SystemWindowOptions_ANI_Constructor(ani_vm *vm, uint32_t *r
     return ANI_OK;
 }
 
-ANI_EXPORT ani_status ExtensionWindowConfig_ANI_Constructor(ani_vm *vm, uint32_t *result)
+ANI_EXPORT ani_status ExtensionWindowConfig_ANI_Constructor(ani_vm *vm, uint32_t* result)
 {
     using namespace OHOS::Rosen;
     TLOGD(WmsLogTag::WMS_UIEXT, "[ANI]Init ExtensionWindowConfig begin");

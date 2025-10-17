@@ -43,8 +43,8 @@ AniExtensionWindowRegisterManager::~AniExtensionWindowRegisterManager()
 {
 }
 
-WmErrorCode AniExtensionWindowRegisterManager::ProcessWindowChangeRegister(sptr<AniExtensionWindowListener> listener,
-    sptr<Window> window, bool isRegister)
+WmErrorCode AniExtensionWindowRegisterManager::ProcessWindowChangeRegister(sptr<AniExtensionWindowListener>& listener,
+    sptr<Window>& window, bool isRegister)
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]window is nullptr");
@@ -60,8 +60,8 @@ WmErrorCode AniExtensionWindowRegisterManager::ProcessWindowChangeRegister(sptr<
     return ret;
 }
 
-WmErrorCode AniExtensionWindowRegisterManager::ProcessAvoidAreaChangeRegister(sptr<AniExtensionWindowListener> listener,
-    sptr<Window> window, bool isRegister)
+WmErrorCode AniExtensionWindowRegisterManager::ProcessAvoidAreaChangeRegister(sptr<AniExtensionWindowListener>& listener,
+    sptr<Window>& window, bool isRegister)
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]window is nullptr");
@@ -77,8 +77,8 @@ WmErrorCode AniExtensionWindowRegisterManager::ProcessAvoidAreaChangeRegister(sp
     return ret;
 }
 
-WmErrorCode AniExtensionWindowRegisterManager::ProcessLifeCycleEventRegister(sptr<AniExtensionWindowListener> listener,
-    sptr<Window> window, bool isRegister)
+WmErrorCode AniExtensionWindowRegisterManager::ProcessLifeCycleEventRegister(sptr<AniExtensionWindowListener>& listener,
+    sptr<Window>& window, bool isRegister)
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]window is nullptr");
@@ -95,7 +95,7 @@ WmErrorCode AniExtensionWindowRegisterManager::ProcessLifeCycleEventRegister(spt
 }
 
 WmErrorCode AniExtensionWindowRegisterManager::ProcessWindowRectChangeRegister(
-    sptr<AniExtensionWindowListener> listener, sptr<Window> window, bool isRegister)
+    sptr<AniExtensionWindowListener>& listener, sptr<Window>& window, bool isRegister)
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]window is nullptr");
@@ -129,7 +129,7 @@ bool AniExtensionWindowRegisterManager::IsCallbackRegistered(ani_env* env, const
     return false;
 }
 
-WmErrorCode AniExtensionWindowRegisterManager::RegisterListener(sptr<Window> window, const std::string& type,
+WmErrorCode AniExtensionWindowRegisterManager::RegisterListener(sptr<Window>& window, const std::string& type,
     CaseType caseType, ani_env* env, ani_object fn)
 {
     std::lock_guard<std::mutex> lock(mtx_);
@@ -161,7 +161,7 @@ WmErrorCode AniExtensionWindowRegisterManager::RegisterListener(sptr<Window> win
     return WmErrorCode::WM_OK;
 }
 
-WmErrorCode AniExtensionWindowRegisterManager::UnregisterListener(sptr<Window> window, const std::string& type,
+WmErrorCode AniExtensionWindowRegisterManager::UnregisterListener(sptr<Window>& window, const std::string& type,
     CaseType caseType, ani_env* env, ani_object fn)
 {
     std::lock_guard<std::mutex> lock(mtx_);
