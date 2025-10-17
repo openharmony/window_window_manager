@@ -10,7 +10,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License.f
  */
 
 #ifndef OHOS_WINDOW_INTERFACE_H
@@ -68,7 +68,7 @@ public:
     virtual WMError UpdateWindowDragInfo(const PointInfo& point, DragEvent event) = 0;
     virtual WMError UpdateDisplayId(DisplayId from, DisplayId to) = 0;
     virtual WMError UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info,
-        const std::map<AvoidAreaType, AvoidArea> avoidAreas,
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) = 0;
     virtual WMError UpdateActiveStatus(bool isActive) = 0;
     virtual sptr<WindowProperty> GetWindowProperty() = 0;
@@ -84,7 +84,7 @@ public:
     virtual WMError RestoreSplitWindowMode(uint32_t mode) = 0;
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent> event) = 0;
     virtual WMError UpdateOccupiedAreaAndRect(const sptr<OccupiedAreaChangeInfo>& info, const Rect& rect,
-        const std::map<AvoidAreaType, AvoidArea> avoidAreas,
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) = 0;
     virtual void NotifyForegroundInteractiveStatus(bool interactive) = 0;
     virtual void NotifyMMIServiceOnline(uint32_t winId) = 0;
