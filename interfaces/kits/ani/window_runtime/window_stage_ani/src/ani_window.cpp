@@ -2323,6 +2323,26 @@ bool AniWindow::OnGetRotationLocked(ani_env* env)
     return locked;
 }
 
+ani_boolean AniWindow::IsInFreeWindowMode(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    using namespace OHOS::Rosen;
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    return aniWindow != nullptr ? static_cast<ani_boolean>(aniWindow->OnIsInFreeWindowMode(env)) :
+        static_cast<ani_boolean>(false);
+}
+
+bool AniWindow::OnIsInFreeWindowMode(ani_env* env)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] window is null");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return false;
+    }
+    return windowToken_->IsPcOrPadFreeMultiWindowMode();
+}
+
 void AniWindow::SetWindowDelayRaiseOnDrag(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isEnabled)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "[ANI]");
@@ -3028,6 +3048,8 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::SetRotationLocked)},
         ani_native_function {"getRotationLocked", "J:Z",
             reinterpret_cast<void *>(AniWindow::GetRotationLocked)},
+        ani_native_function {"isInFreeWindowMode", "J:Z",
+            reinterpret_cast<void *>(AniWindow::IsInFreeWindowMode)},
         ani_native_function {"setWindowDelayRaiseOnDrag", "lz:",
             reinterpret_cast<void *>(AniWindow::SetWindowDelayRaiseOnDrag)},
         ani_native_function {"setRelativePositionToParentWindowEnabled",
