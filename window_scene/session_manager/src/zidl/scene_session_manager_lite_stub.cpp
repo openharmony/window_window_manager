@@ -228,6 +228,10 @@ int SceneSessionManagerLiteStub::HandleSetSessionIconForThirdParty(MessageParcel
 {
     TLOGD(WmsLogTag::WMS_MAIN, "in");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (token == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "token is null");
+        return ERR_INVALID_DATA;
+    }
     std::shared_ptr<Media::PixelMap> icon(data.ReadParcelable<Media::PixelMap>());
     if (icon == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "icon is null");
