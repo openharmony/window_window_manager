@@ -3493,11 +3493,11 @@ export class WindowInternal implements Window {
     }
 
     public onWindowHighlightChange(callback: Callback<boolean>): void {
-      this.onSync(this.nativeObj, "WindowHighlightChange", callback);
+      this.onSync(this.nativeObj, "windowHighlightChange", callback);
     }
 
     public offWindowHighlightChange(callback?: Callback<boolean>): void {
-      this.offSync(this.nativeObj, "WindowHighlightChange", callback);
+      this.offSync(this.nativeObj, "windowHighlightChange", callback);
     }
 
     public on<T>(type: string, callback: Callback<T>): void {
