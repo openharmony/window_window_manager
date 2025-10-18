@@ -34,6 +34,7 @@ public:
 private:
     int HandleSetSessionLabel(MessageParcel& data, MessageParcel& reply);
     int HandleSetSessionIcon(MessageParcel& data, MessageParcel& reply);
+    int HandleSetSessionIconForThirdParty(MessageParcel& data, MessageParcel& reply);
     int HandleIsValidSessionIds(MessageParcel& data, MessageParcel& reply);
     int HandlePendingSessionToForeground(MessageParcel& data, MessageParcel& reply);
     int HandlePendingSessionToBackground(MessageParcel& data, MessageParcel& reply);
