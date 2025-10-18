@@ -3775,8 +3775,8 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
     }
 
     uint64_t endDisplayId = moveDragController_->GetMoveDragEndDisplayId();
-    if ((endDisplayId == moveDragController_->GetMoveDragStartDisplayId() ||
-        !moveDragController_->IsSupportWindowDragCrossDisplay()) && !WindowHelper::IsInputWindow(GetWindowType())) {
+    if (endDisplayId == moveDragController_->GetMoveDragStartDisplayId() ||
+        !moveDragController_->IsSupportWindowDragCrossDisplay()) {
         NotifySessionRectChange(rect, reason);
         NotifySubSessionRectChangeByAnchor(rect, SizeChangeReason::UNDEFINED);
     } else {
