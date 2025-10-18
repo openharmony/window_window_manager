@@ -6085,6 +6085,7 @@ WMError WindowSessionImpl::UnregisterWindowVisibilityChangeListener(const IWindo
 WMError WindowSessionImpl::RegisterOcclusionStateChangeListener(const sptr<IOcclusionStateChangedListener>& listener)
 {
     auto persistentId = GetPersistentId();
+    bool isFirstRegister = false;
     {
         std::lock_guard<std::mutex> lockListener(occlusionStateChangeListenerMutex_);
         auto ret = RegisterListener(occlusionStateChangeListeners_[persistentId], listener);
@@ -6092,8 +6093,12 @@ WMError WindowSessionImpl::RegisterOcclusionStateChangeListener(const sptr<IOccl
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed: winId=%{public}d", persistentId);
             return ret;
         }
+        isFirstRegister = occlusionStateChangeListeners_[persistentId].size() == 1;
     }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d", persistentId);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d, isFirstRegister=%{public}d", persistentId, isFirstRegister);
+    if (!isFirstRegister) {
+        return WMError::WM_OK;
+    }
     auto ret = SingletonContainer::Get<WindowAdapter>().UpdateSessionOcclusionStateListener(persistentId, true);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "ipc failed: winId=%{public}d, retCode=%{public}d",
@@ -6107,6 +6112,7 @@ WMError WindowSessionImpl::RegisterOcclusionStateChangeListener(const sptr<IOccl
 WMError WindowSessionImpl::UnregisterOcclusionStateChangeListener(const sptr<IOcclusionStateChangedListener>& listener)
 {
     auto persistentId = GetPersistentId();
+    bool isLastUnregister = false;
     {
         std::lock_guard<std::mutex> lockListener(occlusionStateChangeListenerMutex_);
         auto ret = UnregisterListener(occlusionStateChangeListeners_[persistentId], listener);
@@ -6116,9 +6122,13 @@ WMError WindowSessionImpl::UnregisterOcclusionStateChangeListener(const sptr<IOc
         }
         if (occlusionStateChangeListeners_[persistentId].empty()) {
             occlusionStateChangeListeners_.erase(persistentId);
+            isLastUnregister = true;
         }
     }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d", persistentId);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d, isLastUnregister=%{public}d", persistentId, isLastUnregister);
+    if (!isLastUnregister) {
+        return WMError::WM_OK;
+    }
     auto ret = SingletonContainer::Get<WindowAdapter>().UpdateSessionOcclusionStateListener(persistentId, false);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "ipc failed: winId=%{public}d, retCode=%{public}d",

@@ -11468,17 +11468,19 @@ void SceneSessionManager::UpdateSubWindowVisibility(const sptr<SceneSession>& se
             if (subSession == nullptr) {
                 continue;
             }
-            if (GetSessionRSVisible(subSession, currVisibleData)) {
+            WindowVisibilityState subWinVisibleState = visibleState;
+            if (GetSessionRSVisible(subSession, currVisibleData, subWinVisibleState)) {
                 TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Update subwindow visibility for winId: %{public}d",
                     subSession->GetWindowId());
-                SetSessionVisibilityInfo(subSession, visibleState, windowVisibilityInfos, visibilityInfo);
+                SetSessionVisibilityInfo(subSession, subWinVisibleState, windowVisibilityInfos, visibilityInfo);
             }
         }
     }
 }
 
 bool SceneSessionManager::GetSessionRSVisible(const sptr<Session>& session,
-    const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData)
+    const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData,
+    WindowVisibilityState& sessionVisibleState)
 {
     bool sessionRSVisible = false;
     for (const auto& [surfaceId, visibleState] : currVisibleData) {
@@ -11489,6 +11491,7 @@ bool SceneSessionManager::GetSessionRSVisible(const sptr<Session>& session,
         if (session->GetWindowId() == visibilitySession->GetWindowId()) {
             if (visibleState < WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
                 sessionRSVisible = true;
+                sessionVisibleState = visibleState;
             }
             break;
         }
@@ -11643,9 +11646,10 @@ void SceneSessionManager::DealwithVisibilityChange(const std::vector<std::pair<u
         }
         if ((WindowHelper::IsSubWindow(session->GetWindowType()) ||
             session->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) && isVisible == true) {
+            WindowVisibilityState parentWinVisibleState = visibleState;
             if (session->GetParentSession() != nullptr &&
                 !session->GetParentSession()->IsSessionForeground() &&
-                !GetSessionRSVisible(session->GetParentSession(), currVisibleData)) {
+                !GetSessionRSVisible(session->GetParentSession(), currVisibleData, parentWinVisibleState)) {
                 continue;
             }
         }

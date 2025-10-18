@@ -904,7 +904,8 @@ private:
         std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos, std::string& visibilityInfo,
         const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
     bool GetSessionRSVisible(const sptr<Session>& session,
-        const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
+        const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData,
+        WindowVisibilityState& sessionVisibleState);
     std::string GetFloatWidth(const int width, float value);
 
     /*
