@@ -1686,7 +1686,7 @@ void SceneSession::SetSessionWindowLimitsChangeCallback(const NotifySessionWindo
                 windowLimits.ToString().c_str(), windowLimitsVP.ToString().c_str(), userWindowLimits.pixelUnit_);
             session->sessionWindowLimitsChangeFunc_(limitsToNotify);
         }
-        }, __func__);
+    }, __func__);
 }
 
 void SceneSession::SetSessionDisplayIdChangeCallback(NotifySessionDisplayIdChangeFunc&& func)
