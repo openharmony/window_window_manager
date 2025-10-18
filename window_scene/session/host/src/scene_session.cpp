@@ -1679,7 +1679,19 @@ void SceneSession::SetSessionWindowLimitsChangeCallback(const NotifySessionWindo
             return;
         }
         session->sessionWindowLimitsChangeFunc_ = func;
-        }, __func__);
+        if (session->sessionWindowLimitsChangeFunc_) {
+            const auto sessionProperty = session->GetSessionProperty();
+            WindowLimits windowLimits = sessionProperty->GetWindowLimits();
+            WindowLimits windowLimitsVP = sessionProperty->GetWindowLimitsVP();
+            WindowLimits userWindowLimits = sessionProperty->GetUserWindowLimits();
+            bool useVPLimits = (userWindowLimits.pixelUnit_ == PixelUnit::VP);
+            const WindowLimits& limitsToNotify = useVPLimits ? windowLimitsVP : windowLimits;
+            TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s, id:%{public}d, px:%{public}s, vp:%{public}s, "
+                "userLimitsUnit:%{public}u", where, session->GetPersistentId(),
+                windowLimits.ToString().c_str(), windowLimitsVP.ToString().c_str(), userWindowLimits.pixelUnit_);
+            session->sessionWindowLimitsChangeFunc_(limitsToNotify);
+        }
+    }, __func__);
 }
 
 void SceneSession::SetSessionDisplayIdChangeCallback(NotifySessionDisplayIdChangeFunc&& func)
