@@ -18,6 +18,7 @@
  
 #include "ani.h"
 #include "pixel_map.h"
+#include "pixel_map_taihe_ani.h"
 #include "singleton_container.h"
 #include "screenshot_ani_manager.h"
  
@@ -37,6 +38,10 @@ static ani_status CallAniFunctionVoid(ani_env* env, const char* ns,
 static void ConvertScreenshot(ani_env* env, std::shared_ptr<Media::PixelMap> image, ani_object obj);
  
 static ani_status GetScreenshotParam(ani_env* env, const std::unique_ptr<Param>& param, ani_object options);
+
+static ani_status GetHdrScreenshotParam(ani_env* env, const std::unique_ptr<HdrParam>& param, ani_object options);
+ 
+static ani_object CreateArrayPixelMap(ani_env* env, std::vector<std::shared_ptr<Media::PixelMap>> imageVec);
 
 static ani_status GetScreenshotSize(ani_env* env, const std::unique_ptr<Param>& param, ani_object options);
 
