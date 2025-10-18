@@ -1362,7 +1362,7 @@ void AniWindow::OnShowWindowWithOptions(ani_env* env, ani_object aniShowWindowOp
     if (!isFocusOnShowUndefined) {
         ani_boolean isFocusOnShow;
         env->Object_CallMethodByName_Boolean(static_cast<ani_object>(aniFocusOnShow),
-            "unboxed", "z", &isFocusOnShow);
+            "unboxed", ":z", &isFocusOnShow);
         focusOnShow = static_cast<bool>(isFocusOnShow);
     }
 
