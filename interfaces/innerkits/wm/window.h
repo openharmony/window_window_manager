@@ -4159,10 +4159,11 @@ public:
      * @brief Show keyboard window
      *
      * @param callingWindowId the id of calling window.
+     * @param targetDisplayId the id of target display
      * @param effectOption Keyboard will show with special effect option.
      * @return WM_OK means window show success, others means failed.
      */
-    virtual WMError ShowKeyboard(uint32_t callingWindowId, KeyboardEffectOption effectOption
+    virtual WMError ShowKeyboard(uint32_t callingWindowId, uint64_t targetDisplayId, KeyboardEffectOption effectOption
         = { KeyboardViewMode::NON_IMMERSIVE_MODE, KeyboardFlowLightMode::NONE, KeyboardGradientMode::NONE, 0 })
     {
         return WMError::WM_OK;

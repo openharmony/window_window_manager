@@ -310,15 +310,16 @@ ani_ref AniWindowStage::OnCreateSubWindow(ani_env* env, ani_string name)
 
     auto weakScene = windowScene_.lock();
     if (weakScene == nullptr) {
-        TLOGI(WmsLogTag::DEFAULT, "[ANI] WindowScene is nullptr");
-        return AniWindowUtils::CreateAniUndefined(env);
+        TLOGI(WmsLogTag::DEFAULT, "[ANI] Window scene is nullptr");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     sptr<Rosen::WindowOption> windowOption = new Rosen::WindowOption();
     windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
     auto window = weakScene->CreateWindow(windowName, windowOption);
     if (window == nullptr) {
-        return AniWindowUtils::CreateAniUndefined(env);
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Create window failed");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     return CreateAniWindowObject(env, window);
 }
@@ -432,6 +433,7 @@ static ani_ref CreateSubWindow(ani_env* env, ani_object obj, ani_long nativeObj,
 
 extern "C" {
 using namespace OHOS::Rosen;
+ANI_EXPORT ani_status ExtensionWindowConfig_ANI_Constructor(ani_vm *vm, uint32_t *result);
 std::array g_methods = {
     ani_native_function {"loadContentSync",
         "JLstd/core/String;Larkui/stateManagement/storage/localStorage/LocalStorage;:V",
@@ -508,6 +510,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     AniWindowManager::AniWindowManagerInit(env, ns);
 
     OHOS::Rosen::ANI_Window_Constructor(vm, result);
+    ExtensionWindowConfig_ANI_Constructor(vm, result);
     return ANI_OK;
 }
 }

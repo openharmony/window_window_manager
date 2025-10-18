@@ -1012,9 +1012,17 @@ void ScreenSession::ScreenExtendChange(ScreenId mainScreenId, ScreenId extendScr
     }
 }
 
-void ScreenSession::ScreenOrientationChange(Orientation orientation, FoldDisplayMode foldDisplayMode)
+void ScreenSession::ScreenOrientationChange(Orientation orientation,
+    FoldDisplayMode foldDisplayMode, bool isFromNapi)
 {
-    Rotation rotationAfter = CalcRotation(orientation, foldDisplayMode);
+    Rotation rotationAfter = Rotation::ROTATION_0;
+    if (isFromNapi) {
+        rotationAfter = CalcRotation(orientation, foldDisplayMode);
+        TLOGI(WmsLogTag::DMS, "set orientation from napi. rotationAfter: %{public}d", rotationAfter);
+    } else {
+        rotationAfter = CalcRotationSystemInner(orientation, foldDisplayMode);
+        TLOGI(WmsLogTag::DMS, "set orientation from inner. rotationAfter: %{public}d", rotationAfter);
+    }
     float screenRotation = ConvertRotationToFloat(rotationAfter);
     ScreenOrientationChange(screenRotation);
 }
@@ -1414,6 +1422,42 @@ void ScreenSession::SetScreenType(ScreenType type)
     property_.SetScreenType(type);
 }
 
+Rotation ScreenSession::CalcRotationSystemInner(Orientation orientation, FoldDisplayMode foldDisplayMode) const
+{
+    sptr<SupportedScreenModes> info = GetActiveScreenMode();
+    if (info == nullptr) {
+        return Rotation::ROTATION_0;
+    }
+    // vertical: phone(Plugin screen); horizontal: pad & external screen
+    bool isVerticalScreen = info->width_ < info->height_;
+    if (foldDisplayMode != FoldDisplayMode::UNKNOWN &&
+        (g_screenRotationOffSet == ROTATION_90 || g_screenRotationOffSet == ROTATION_270)) {
+        isVerticalScreen = info->width_ > info->height_;
+    }
+ 
+    switch (orientation) {
+        case Orientation::UNSPECIFIED: {
+            return Rotation::ROTATION_0;
+        }
+        case Orientation::VERTICAL: {
+            return isVerticalScreen ? Rotation::ROTATION_0 : Rotation::ROTATION_90;
+        }
+        case Orientation::HORIZONTAL: {
+            return isVerticalScreen ? Rotation::ROTATION_90 : Rotation::ROTATION_0;
+        }
+        case Orientation::REVERSE_VERTICAL: {
+            return isVerticalScreen ? Rotation::ROTATION_180 : Rotation::ROTATION_270;
+        }
+        case Orientation::REVERSE_HORIZONTAL: {
+            return isVerticalScreen ? Rotation::ROTATION_270 : Rotation::ROTATION_180;
+        }
+        default: {
+            TLOGE(WmsLogTag::DMS, "unknown orientation %{public}u", orientation);
+            return Rotation::ROTATION_0;
+        }
+    }
+}
+ 
 Rotation ScreenSession::CalcRotation(Orientation orientation, FoldDisplayMode foldDisplayMode)
 {
     Rotation deviceRotation = property_.GetDeviceRotation();
@@ -1426,12 +1470,12 @@ Rotation ScreenSession::CalcRotation(Orientation orientation, FoldDisplayMode fo
     DisplayOrientation displayOrientation = CalcOrientationToDisplayOrientation(orientation);
     return CalcRotationByDeviceOrientation(displayOrientation, foldDisplayMode, bounds);
 }
-
+ 
 bool ScreenSession::IsVertical(Rotation rotation) const
 {
     return rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180;
 }
-
+ 
 DisplayOrientation ScreenSession::CalcOrientationToDisplayOrientation(Orientation orientation)
 {
     DisplayOrientation displayRotation = DisplayOrientation::UNKNOWN;
@@ -1458,7 +1502,7 @@ DisplayOrientation ScreenSession::CalcOrientationToDisplayOrientation(Orientatio
     }
     return displayRotation;
 }
-
+ 
 Rotation ScreenSession::CalcRotationByDeviceOrientation(DisplayOrientation displayRotation,
     FoldDisplayMode foldDisplayMode, const RRect& boundsInRotationZero)
 {

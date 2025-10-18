@@ -85,6 +85,10 @@ public:
                          ani_object aniPresentation, ani_object aniAcrossDisplay);
     static void SetRotationLocked(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean locked);
     static ani_boolean GetRotationLocked(ani_env* env, ani_object obj, ani_long nativeObj);
+    static ani_boolean IsInFreeWindowMode(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void SetRelativePositionToParentWindowEnabled(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_boolean enabled, ani_int anchor, ani_int offsetX, ani_int offsetY);
+    static void SetWindowDelayRaiseOnDrag(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isEnabled);
 
     /*
      * Window Layout
@@ -104,6 +108,7 @@ public:
     void SetSystemBarProperties(ani_env* env, ani_object aniSystemBarProperties);
     ani_object SetSpecificSystemBarEnabled(ani_env* env, ani_string, ani_boolean enable,
         ani_boolean enableAnimation);
+    ani_object SetDragKeyFramePolicy(ani_env* env, ani_object aniKeyFramePolicy);
     ani_object Snapshot(ani_env* env);
     void HideNonSystemFloatingWindows(ani_env* env, ani_boolean shouldHide);
     void ResizeAsync(ani_env* env, ani_int width, ani_int height);
@@ -160,6 +165,10 @@ private:
         std::map<WindowType, SystemBarProperty>& systemBarProperties, sptr<Window> windowToken);
     void OnSetRotationLocked(ani_env* env, ani_boolean locked);
     bool OnGetRotationLocked(ani_env* env);
+    bool OnIsInFreeWindowMode(ani_env* env);
+    void OnSetWindowDelayRaiseOnDrag(ani_env* env, ani_boolean isEnabled);
+    void OnSetRelativePositionToParentWindowEnabled(ani_env* env, ani_boolean enabled,
+        ani_int anchor, ani_int offsetX, ani_int offsetY);
 
     /*
      * Window Layout

@@ -112,13 +112,14 @@ using NofitySessionLabelAndIconUpdatedFunc =
     std::function<void(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon)>;
 using NotifySessionGetTargetOrientationConfigInfoFunc = std::function<void(uint32_t targetOrientation)>;
 using NotifyKeyboardStateChangeFunc = std::function<void(SessionState state, const KeyboardEffectOption& effectOption,
-    const uint32_t callingSessionId)>;
+    const uint32_t callingSessionId, const DisplayId targetDisplayId)>;
 using NotifyHighlightChangeFunc = std::function<void(bool isHighlight)>;
 using NotifySurfaceBoundsChangeFunc = std::function<void(const WSRect& rect, bool isGlobal, bool needFlush)>;
 using HasRequestedVsyncFunc = std::function<WSError(bool& hasRequestedVsync)>;
 using RequestNextVsyncWhenModeChangeFunc = std::function<WSError(const std::shared_ptr<VsyncCallback>& vsyncCallback)>;
 using NotifyClearSubSessionFunc = std::function<void(const int32_t subPersistentId)>;
 using OutlineParamsChangeCallbackFunc = std::function<void(bool enabled, const OutlineStyleParams& outlineStyleParams)>;
+using NotifyRestartAppFunc = std::function<void(const SessionInfo& info)>;
 using ProcessCallingSessionIdChangeFunc = std::function<void(uint32_t callingSessionId)>;
 class ILifecycleListener {
 public:
@@ -140,6 +141,7 @@ public:
     virtual void OnAppRemoveStartingWindow() {}
     virtual void OnUpdateSnapshotWindow() {}
     virtual void OnPreLoadStartingWindowFinished() {}
+    virtual void OnRestart() {}
 };
 
 enum class LifeCycleTaskType : uint32_t {
@@ -211,6 +213,7 @@ public:
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker);
     WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
     std::string GetSessionLabel() const;
+    void SetRestartAppListener(NotifyRestartAppFunc&& func);
 
     /*
      * App Use Control
@@ -240,6 +243,7 @@ public:
     void NotifyRemoveSnapshot();
     void NotifyUpdateSnapshotWindow();
     void NotifyPreLoadStartingWindowFinished();
+    void NotifyRestart();
     void NotifyExtensionDied() override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
     void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
@@ -353,6 +357,8 @@ public:
     WSRect GetLayoutRect() const;
     bool GetSkipSelfWhenShowOnVirtualScreen() const;
     DisplayId GetDisplayId() const { return GetSessionProperty()->GetDisplayId(); }
+    void SetRestartApp(bool restartApp);
+    bool GetRestartApp() const;
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
@@ -749,6 +755,8 @@ public:
     bool IsPersistentImageFit() const;
     void DeletePersistentImageFit();
     bool SupportSnapshotAllSessionStatus() const;
+    bool SupportCacheLockedSessionSnapshot() const;
+    void ResetLockedCacheSnapshot();
     void InitSnapshotCapacity();
     SnapshotStatus GetSessionSnapshotStatus(LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT) const;
     uint32_t GetWindowSnapshotOrientation() const;
@@ -909,6 +917,7 @@ protected:
     NofitySessionLabelAndIconUpdatedFunc updateSessionLabelAndIconFunc_;
     NotifySessionGetTargetOrientationConfigInfoFunc sessionGetTargetOrientationConfigInfoFunc_;
     NotifyClearSubSessionFunc clearSubSessionFunc_;
+    NotifyRestartAppFunc restartAppFunc_;
 
     /*
      * Window Rotate Animation
@@ -968,6 +977,7 @@ protected:
     uint32_t uiNodeId_ = 0;
     std::map<MMI::WindowArea, WSRectF> windowAreas_;
     bool isTerminating_ = false;
+    SceneAnimationConfig sceneAnimationConfig_;
     float floatingScale_ = 1.0f;
     bool scbKeepKeyboardFlag_ = false;
     mutable std::shared_mutex dialogVecMutex_;

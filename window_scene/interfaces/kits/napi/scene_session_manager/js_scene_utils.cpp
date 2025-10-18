@@ -1771,6 +1771,8 @@ napi_value CreateJsSessionSizeChangeReason(napi_env env)
         static_cast<int32_t>(SizeChangeReason::RECOVER_IN_IMPLICIT)));
     napi_set_named_property(env, objValue, "SNAPSHOT_ROTATION", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::SNAPSHOT_ROTATION)));
+    napi_set_named_property(env, objValue, "SCENE_WITH_ANIMATION", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::SCENE_WITH_ANIMATION)));
     napi_set_named_property(env, objValue, "END", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::END)));
 
@@ -2680,5 +2682,53 @@ void MainThreadScheduler::RemoveMainThreadTaskByName(const std::string taskName)
     if (handler_ && !handler_->GetEventRunner()->IsCurrentRunnerThread()) {
         handler_->RemoveTask("wms:" + taskName);
     }
+}
+
+bool convertAnimConfigFromJs(napi_env env, napi_value jsObject, SceneAnimationConfig& config)
+{
+    napi_value jsDelay = nullptr;
+    napi_get_named_property(env, jsObject, "delay", &jsDelay);
+    napi_value jsDuration = nullptr;
+    napi_get_named_property(env, jsObject, "duration", &jsDuration);
+    napi_value jsAnimationCurve = nullptr;
+    napi_get_named_property(env, jsObject, "curve", &jsAnimationCurve);
+    napi_value jsParams = nullptr;
+    napi_get_named_property(env, jsObject, "param", &jsParams);
+    int32_t delay = 0;
+    int32_t duration = 0;
+    WindowAnimationCurve curve = WindowAnimationCurve::LINEAR;
+    if (GetType(env, jsDelay) != napi_undefined && !ConvertFromJsValue(env, jsDelay, delay)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to delay");
+        return false;
+    }
+    config.animationDelay_ = delay > 0 ? delay : 0;
+    if (GetType(env, jsDuration) != napi_undefined && !ConvertFromJsValue(env, jsDuration, duration)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to duration");
+        return false;
+    }
+    config.animationDuration_ = duration > 0 ? duration : 0;
+    if (GetType(env, jsAnimationCurve) != napi_undefined && !ConvertFromJsValue(env, jsAnimationCurve, curve)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to curve");
+        return false;
+    }
+    config.animationCurve_ = static_cast<WindowAnimationCurve>(curve);
+    if (jsParams != nullptr && GetType(env, jsParams) != napi_undefined) {
+        bool isArray = false;
+        if (napi_is_array(env, jsParams, &isArray) != napi_ok || !isArray) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "Params is not array");
+            return false;
+        }
+        for (uint32_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
+            napi_value element = nullptr;
+            double paramValue = 0.0;
+            if (napi_get_element(env, jsParams, i, &element) == napi_ok &&
+                napi_get_value_double(env, element, &paramValue) == napi_ok && paramValue >= 0) {
+                config.animationParam_[i] = static_cast<float>(paramValue);
+            } else {
+                config.animationParam_[i] = static_cast<float>(paramValue);
+            }
+        }
+    }
+    return true;
 }
 } // namespace OHOS::Rosen

@@ -103,6 +103,7 @@ DMError MultiScreenManager::VirtualScreenMirrorSwitch(const ScreenId mainScreenI
         return DMError::DM_ERROR_NULLPTR;
     }
     screenGroupId = mainScreen->groupSmsId_;
+    ScreenSessionManager::GetInstance().HandleCastVirtualScreenMirrorRegion();
     TLOGW(WmsLogTag::DMS, "end");
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:VirtualScreenMirrorSwitch end");
     return ret;

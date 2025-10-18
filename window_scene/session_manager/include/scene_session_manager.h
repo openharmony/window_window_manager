@@ -188,7 +188,7 @@ public:
     void OnScreenshot(DisplayId displayId) override;
     void OnImmersiveStateChange(ScreenId screenId, bool& immersive) override;
     void OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
-        std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false) override;
+        std::vector<uint64_t>& surfaceNodeIds, const std::vector<uint32_t>& needWindowTypeList = {}) override;
     void OnSetSurfaceNodeIds(DisplayId displayId, const std::vector<uint64_t>& surfaceNodeIds) override;
     void OnVirtualScreenDisconnected(DisplayId displayId) override;
 
@@ -223,6 +223,7 @@ public:
     void SetRootSceneContext(const std::weak_ptr<AbilityRuntime::Context>& contextWeak);
     sptr<RootSceneSession> GetRootSceneSession();
     sptr<SceneSession> GetSceneSession(int32_t persistentId);
+    bool CheckAbilityInfoByWant(const std::shared_ptr<AAFwk::Want>& want);
     sptr<SceneSession> GetMainParentSceneSession(int32_t persistentId,
         const std::map<int32_t, sptr<SceneSession>>& sessionMap);
     void PostFlushWindowInfoTask(FlushWindowInfoTask&& task, const std::string& taskName, const int delayTime);
@@ -459,7 +460,7 @@ public:
     void NotifySessionUpdate(const SessionInfo& sessionInfo, ActionType type,
         ScreenId fromScreenId = SCREEN_ID_INVALID);
     WMError GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
-        std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false);
+        std::vector<uint64_t>& surfaceNodeIds, const std::vector<uint32_t>& needWindowTypeList = {});
     WMError GetSurfaceNodeIdsFromSubSession(
         const sptr<SceneSession>& sceneSession, std::vector<uint64_t>& surfaceNodeIds);
     WMError UpdateSubSessionBlackList(const sptr<SceneSession>& sceneSession);
@@ -528,8 +529,8 @@ public:
     WMError CheckUIExtensionCreation(int32_t windowId, uint32_t tokenId, const AppExecFwk::ElementName& element,
         AppExecFwk::ExtensionAbilityType extensionAbilityType, int32_t& pid);
     void OnNotifyAboveLockScreen(const std::vector<int32_t>& windowIds);
-    void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
-        const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, bool isConstrainedModal = false) override;
+    void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, const sptr<IRemoteObject>& token,
+        uint64_t surfaceNodeId, int64_t startModalExtensionTimeStamp, bool isConstrainedModal = false) override;
     void RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
         const sptr<IRemoteObject>& token, bool isConstrainedModal = false) override;
     void UpdateModalExtensionRect(const sptr<IRemoteObject>& token, Rect rect) override;
@@ -827,6 +828,7 @@ public:
     WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
         uint32_t color, int32_t uid) override;
     void ConfigSupportSnapshotAllSessionStatus();
+    void ConfigSupportCacheLockedSessionSnapshot();
     void ConfigSupportPreloadStartingWindow();
     void PreLoadStartingWindow(sptr<SceneSession> sceneSession);
 
@@ -883,6 +885,7 @@ private:
     void ConfigSnapshotScale();
     void ConfigFreeMultiWindow();
     void LoadFreeMultiWindowConfig(bool enable);
+    void DoUpdateSceneSessionWant(const SessionInfo& sessionInfo);
 
     std::tuple<std::string, std::vector<float>> CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig);
     void LoadKeyboardAnimation(const WindowSceneConfig::ConfigItem& item, KeyboardSceneAnimationConfig& config);
@@ -944,6 +947,7 @@ private:
     int32_t StartUIAbilityBySCBTimeoutCheck(const sptr<SceneSession>& sceneSession,
         const sptr<AAFwk::SessionInfo>& abilitySessionInfo,
         const uint32_t& windowStateChangeReason, bool& isColdStart);
+    void ResetSessionInfoAfterStartUIAbility(const sptr<SceneSession>& sceneSession);
     sptr<SceneSession> GetHookedSessionByModuleName(const SessionInfo& sessionInfo);
     void RegisterHookSceneSessionActivationFunc(const sptr<SceneSession>& sceneSession);
     void SetSessionInfoStartWindowType(const sptr<SceneSession>& sceneSession);
