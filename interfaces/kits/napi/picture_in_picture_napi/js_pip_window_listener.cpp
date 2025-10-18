@@ -187,14 +187,11 @@ void JsPiPWindowListener::OnActiveStatusChange(const PiPActiveStatus& status)
 {
     TLOGI(WmsLogTag::WMS_PIP, "called, status: %{public}u", status);
     auto napiTask = [jsCallback = jsCallBack_, status, env = env_]() {
-        napi_value value = nullptr;
-        napi_create_object(env, &value);
-        if (value == nullptr) {
-            TLOGNE(WmsLogTag::WMS_PIP, "Failed to convert rect to jsObject");
+        if (jsCallback == nullptr) {
+            TLOGE(WmsLogTag::WMS_SYSTEM, "js callback is null");
             return;
         }
-        napi_set_named_property(env, value, "status", CreateJsValue(env, static_cast<int32_t>(status)));
-        napi_value argv[] = {value};
+        napi_value argv[] = {CreateJsValue(env, static_cast<int32_t>(status))};
         CallJsFunction(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
     };
     if (env_ != nullptr) {
