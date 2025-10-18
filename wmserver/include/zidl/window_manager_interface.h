@@ -376,7 +376,7 @@ public:
     /*
      * Window event
      */
-    virtual WMError SendCommonEvent(int32_t command, const std::vector<int32_t>& datas)
+    virtual WMError SendCommonEvent(int32_t command, const std::vector<int32_t>& parameters)
     {
         return WMError::WM_OK;
     }

@@ -110,35 +110,35 @@ namespace {
  */
 HWTEST_F(SceneSessionManagerEventTest, LockCursor, TestSize.Level1)
 {
-    std::vector<int32_t> datas;
+    std::vector<int32_t> parameters;
 
-    // The test dose not have the permission
+    // The test does not have the permission
     MockAccesstokenKit::MockAccessTokenKitRet(-1);
-    auto ret = ssm_->UnlockCursor(datas);
+    auto ret = ssm_->UnlockCursor(parameters);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PERMISSION);
 
     // Test checkDatas: The format is incorrect(size<1).
     MockAccesstokenKit::MockAccessTokenKitRet(0);
-    ret = ssm_->LockCursor(datas);
+    ret = ssm_->LockCursor(parameters);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
     
     // Test checkDatas: The format is incorrect(length error).
-    datas.emplace_back(LOCK_CURSOR_LENGTH + 1);
-    ret = ssm_->LockCursor(datas);
+    parameters.emplace_back(LOCK_CURSOR_LENGTH + 1);
+    ret = ssm_->LockCursor(parameters);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
 
     // Test checkDatas: The format is incorrect(size error).
-    datas.clear();
-    datas.emplace_back(LOCK_CURSOR_LENGTH);
-    ret = ssm_->LockCursor(datas);
+    parameters.clear();
+    parameters.emplace_back(LOCK_CURSOR_LENGTH);
+    ret = ssm_->LockCursor(parameters);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
 
     // Test： session is null
-    datas.clear();
-    datas.emplace_back(LOCK_CURSOR_LENGTH);
-    datas.emplace_back(1);
-    datas.emplace_back(1);
-    ret = ssm_->LockCursor(datas);
+    parameters.clear();
+    parameters.emplace_back(LOCK_CURSOR_LENGTH);
+    parameters.emplace_back(1);
+    parameters.emplace_back(1);
+    ret = ssm_->LockCursor(parameters);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_SESSION);
 
     SessionInfo info;
@@ -147,19 +147,19 @@ HWTEST_F(SceneSessionManagerEventTest, LockCursor, TestSize.Level1)
     ssm_->sceneSessionMap_.insert({ session->GetPersistentId(), session });
 
     // test normal process
-    datas.clear();
-    datas.emplace_back(LOCK_CURSOR_LENGTH);
-    datas.emplace_back(1);
-    datas.emplace_back(1);
-    ret = ssm_->LockCursor(datas);
+    parameters.clear();
+    parameters.emplace_back(LOCK_CURSOR_LENGTH);
+    parameters.emplace_back(1);
+    parameters.emplace_back(1);
+    ret = ssm_->LockCursor(parameters);
     EXPECT_EQ(ret, WMError::WM_OK);
 
     // test normal process
-    datas.clear();
-    datas.emplace_back(LOCK_CURSOR_LENGTH);
-    datas.emplace_back(1);
-    datas.emplace_back(0);
-    ret = ssm_->LockCursor(datas);
+    parameters.clear();
+    parameters.emplace_back(LOCK_CURSOR_LENGTH);
+    parameters.emplace_back(1);
+    parameters.emplace_back(0);
+    ret = ssm_->LockCursor(parameters);
     EXPECT_EQ(ret, WMError::WM_OK);
 }
 
@@ -170,34 +170,34 @@ HWTEST_F(SceneSessionManagerEventTest, LockCursor, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerEventTest, UnlockCursor, TestSize.Level1)
 {
-    std::vector<int32_t> datas;
+    std::vector<int32_t> parameters;
 
-    // The test dose not have the permission
+    // The test does not have the permission.
     MockAccesstokenKit::MockAccessTokenKitRet(-1);
-    auto ret = ssm_->UnlockCursor(datas);
+    auto ret = ssm_->UnlockCursor(parameters);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PERMISSION);
 
     // test checkDatas: The format is incorrect(size<1).
     MockAccesstokenKit::MockAccessTokenKitRet(0);
-    ret = ssm_->UnlockCursor(datas);
+    ret = ssm_->UnlockCursor(parameters);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
     
     // Test checkDatas: The format is incorrect(length error).
-    datas.emplace_back(UNLOCK_CURSOR_LENGTH + 1);
-    ret = ssm_->UnlockCursor(datas);
+    parameters.emplace_back(UNLOCK_CURSOR_LENGTH + 1);
+    ret = ssm_->UnlockCursor(parameters);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
 
     // Test checkDatas: The format is incorrect(size error).
-    datas.clear();
-    datas.emplace_back(UNLOCK_CURSOR_LENGTH);
-    ret = ssm_->UnlockCursor(datas);
+    parameters.clear();
+    parameters.emplace_back(UNLOCK_CURSOR_LENGTH);
+    ret = ssm_->UnlockCursor(parameters);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
 
-    // Test: session is null
-    datas.clear();
-    datas.emplace_back(UNLOCK_CURSOR_LENGTH);
-    datas.emplace_back(1);
-    ret = ssm_->UnlockCursor(datas);
+    // Test: session is null.
+    parameters.clear();
+    parameters.emplace_back(UNLOCK_CURSOR_LENGTH);
+    parameters.emplace_back(1);
+    ret = ssm_->UnlockCursor(parameters);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_SESSION);
 
     SessionInfo info;
@@ -206,17 +206,17 @@ HWTEST_F(SceneSessionManagerEventTest, UnlockCursor, TestSize.Level1)
     ssm_->sceneSessionMap_.insert({ session->GetPersistentId(), session });
 
     // test normal process
-    datas.clear();
-    datas.emplace_back(UNLOCK_CURSOR_LENGTH);
-    datas.emplace_back(1);
-    ret = ssm_->UnlockCursor(datas);
+    parameters.clear();
+    parameters.emplace_back(UNLOCK_CURSOR_LENGTH);
+    parameters.emplace_back(1);
+    ret = ssm_->UnlockCursor(parameters);
     EXPECT_EQ(ret, WMError::WM_OK);
 
     // test normal process(repeat)
-    datas.clear();
-    datas.emplace_back(UNLOCK_CURSOR_LENGTH);
-    datas.emplace_back(1);
-    ret = ssm_->UnlockCursor(datas);
+    parameters.clear();
+    parameters.emplace_back(UNLOCK_CURSOR_LENGTH);
+    parameters.emplace_back(1);
+    ret = ssm_->UnlockCursor(parameters);
     EXPECT_EQ(ret, WMError::WM_OK);
 }
 } // namespace

@@ -4751,9 +4751,9 @@ public:
     /**
      * @brief Set the window capture mouse cursor status.
      *
-     * @param windowId PointerEvent of Multi-Model Input.
-     * @param isCursorFollowMovement
-     * @return WM_OK means set success.
+     * @param windowId WindowId when window is created.
+     * @param isCursorFollowMovement Set mouse cursor lock mode.
+     * @return WM_OK the function call is successful.
      */
     virtual WMError LockCursor(int32_t windowId, bool isCursorFollowMovement)
     {
@@ -4763,9 +4763,9 @@ public:
     /**
      * @brief Set the window capture mouse cursor status.
      *
-     * @param windowId PointerEvent of Multi-Model Input.
-     * @param isCursorFollowMovement
-     * @return WM_OK means set success.
+     * @param windowId WindowId when window is created.
+     * @param isCursorFollowMovement Set mouse cursor lock mode.
+     * @return WM_OK the function call is successful.
      */
     virtual WMError UnlockCursor(int32_t windowId)
     {

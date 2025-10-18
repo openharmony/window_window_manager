@@ -482,15 +482,15 @@ public:
     /*
      * Window event
      */
-    WMError SendCommonEvent(int32_t command, const std::vector<int32_t>& datas) override
+    WMError SendCommonEvent(int32_t command, const std::vector<int32_t>& parameters) override
     {
         return WMError::WM_OK;
     }
-    virtual WMError LockCursor(const std::vector<int32_t>& datas)
+    virtual WMError LockCursor(const std::vector<int32_t>& parameters)
     {
         return WMError::WM_OK;
     }
-    virtual WMError UnlockCursor(const std::vector<int32_t>& datas)
+    virtual WMError UnlockCursor(const std::vector<int32_t>& parameters)
     {
         return WMError::WM_OK;
     }

@@ -72,8 +72,8 @@ HWTEST_F(WindowSessionImplEventTest, LockCursor, TestSize.Level0)
 }
 
 /**
- * @tc.name: LockCursor
- * @tc.desc: LockCursor
+ * @tc.name: UnlockCursor
+ * @tc.desc: UnlockCursor
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionImplEventTest, UnlockCursor, TestSize.Level0)

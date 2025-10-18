@@ -95,7 +95,7 @@ HWTEST_F(SceneSessionManagerStubEventTest, HandleSendCommonEvent, TestSize.Level
     res = stub_->HandleSendCommonEvent(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
-    // Failed to obtain datas.
+    // Failed to obtain parameters.
     MockMessageParcel::AddInt32Cache(static_cast<uint32_t>(CommonEventCommand::LOCK_CURSOR));
     MockMessageParcel::AddInt32Cache(LOCK_CURSOR_LENGTH);
     res = stub_->HandleSendCommonEvent(data, reply);

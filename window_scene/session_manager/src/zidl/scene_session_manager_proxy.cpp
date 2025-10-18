@@ -4238,7 +4238,7 @@ WMError SceneSessionManagerProxy::UpdateOutline(const sptr<IRemoteObject>& remot
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerProxy::SendCommonEvent(int32_t command, const std::vector<int32_t>& datas)
+WMError SceneSessionManagerProxy::SendCommonEvent(int32_t command, const std::vector<int32_t>& parameters)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -4252,7 +4252,7 @@ WMError SceneSessionManagerProxy::SendCommonEvent(int32_t command, const std::ve
         TLOGE(WmsLogTag::WMS_EVENT, "Write command failed.");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    for (auto dataInfo : datas) {
+    for (auto dataInfo : parameters) {
         if (!data.WriteInt32(dataInfo)) {
             TLOGE(WmsLogTag::WMS_EVENT, "Write dataInfo failed.");
             return WMError::WM_ERROR_IPC_FAILED;
