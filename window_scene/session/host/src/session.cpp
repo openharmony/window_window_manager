@@ -2716,10 +2716,6 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
     }
     auto key = GetSessionSnapshotStatus(reason);
     auto rotation = currentRotation_;
-    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
-        WSSnapshotHelper::GetInstance()->GetScreenStatus() == SCREEN_FOLDED) {
-        rotation = ROTATION_LANDSCAPE_INVERTED;
-    }
     auto rotate = WSSnapshotHelper::GetDisplayOrientation(rotation);
     if (persistentPixelMap || !SupportSnapshotAllSessionStatus()) {
         key = defaultStatus;
