@@ -2647,18 +2647,18 @@ int SceneSessionManagerStub::HandleSendCommonEvent(MessageParcel& data, MessageP
 {
     int32_t command = 0;
     if (!data.ReadInt32(command)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed");
+        TLOGE(WmsLogTag::WMS_EVENT, "Read size failed");
         return ERR_INVALID_DATA;
     }
 
     std::vector<int32_t> datas;
     int32_t length = 0;
     if (!data.ReadInt32(length)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed");
+        TLOGE(WmsLogTag::WMS_EVENT, "Read size failed");
         return ERR_INVALID_DATA;
     }
     if (length > COMMON_EVENT_COMMAND_MAX_LENGTH || length < 0) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Oot of range.");
+        TLOGE(WmsLogTag::WMS_EVENT, "Oot of range.");
         return ERR_INVALID_DATA;
     }
     datas.emplace_back(length);
@@ -2666,7 +2666,7 @@ int SceneSessionManagerStub::HandleSendCommonEvent(MessageParcel& data, MessageP
     int32_t info = 0;
     for (int i = 0; i < length; i++) {
         if (!data.ReadInt32(info)) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed");
+            TLOGE(WmsLogTag::WMS_EVENT, "Read size failed");
             return ERR_INVALID_DATA;
         }
         datas.emplace_back(info);

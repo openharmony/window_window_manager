@@ -5974,7 +5974,7 @@ WMError SceneSessionManager::LockCursor(const std::vector<int32_t>& datas)
     sceneSession->SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_LOCK_CURSOR, true);
     sceneSession->SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_CURSOR_FOLLOW_MOVEMENT,
         isCursorFollowMovement);
-    sceneSession->NotifySessionInfoChange();
+    sceneSession->UpdateSessionInfo();
     return WMError::WM_OK;
 }
 
@@ -5994,7 +5994,7 @@ WMError SceneSessionManager::UnlockCursor(const std::vector<int32_t>& datas)
         return WMError::WM_ERROR_INVALID_SESSION;
     }
     sceneSession->SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_LOCK_CURSOR, false);
-    sceneSession->NotifySessionInfoChange();
+    sceneSession->UpdateSessionInfo();
     return WMError::WM_OK;
 }
 

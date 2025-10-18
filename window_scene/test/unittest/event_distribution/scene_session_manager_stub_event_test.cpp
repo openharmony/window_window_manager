@@ -113,7 +113,6 @@ HWTEST_F(SceneSessionManagerStubEventTest, HandleSendCommonEvent, TestSize.Level
     // out of range (<0)
     MockMessageParcel::SetWriteUint32ErrorFlag(true);
     MockMessageParcel::AddInt32Cache(static_cast<uint32_t>(CommonEventCommand::LOCK_CURSOR));
-    MockMessageParcel::AddInt32Cache(LOCK_CURSOR_LENGTH);
     MockMessageParcel::AddInt32Cache(-1);
     res = stub_->HandleSendCommonEvent(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
@@ -121,7 +120,6 @@ HWTEST_F(SceneSessionManagerStubEventTest, HandleSendCommonEvent, TestSize.Level
     // out of range (>max)
     MockMessageParcel::SetWriteUint32ErrorFlag(true);
     MockMessageParcel::AddInt32Cache(static_cast<uint32_t>(CommonEventCommand::LOCK_CURSOR));
-    MockMessageParcel::AddInt32Cache(LOCK_CURSOR_LENGTH);
     MockMessageParcel::AddInt32Cache(COMMON_EVENT_COMMAND_MAX_LENGTH + 1);
     res = stub_->HandleSendCommonEvent(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
