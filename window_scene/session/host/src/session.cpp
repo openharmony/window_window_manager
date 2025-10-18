@@ -408,27 +408,31 @@ uint32_t Session::GetSessionInfoExpandInputFlag() const
 void Session::SetSessionInfoAdvancedFeatureFlag(uint32_t bitPosition, bool value)
 {
     if (bitPosition >= ADVANCED_FEATURE_BIT_MAX) {
-        TLOGE(WmsLogTag::WMS_EVENT, "id:%{public}d, bitPPosition:%{public}u", GetPersistentId(), bitPPosition);
+        TLOGE(WmsLogTag::WMS_EVENT, "id:%{public}d, bitPosition:%{public}u", GetPersistentId(), bitPosition);
         return;
     }
     {
         std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
-        advancedFeatureFlag_.set(bitPosition, value);
+        sessionInfo_.advancedFeatureFlag_.set(bitPosition, value);
     }
 }
 
-bool Session::GetSessionInfoAdvancedFeatureFlag(uint32_t bitPosition) const
+bool Session::GetSessionInfoAdvancedFeatureFlag(uint32_t bitPosition)
 {
     if (bitPosition >= ADVANCED_FEATURE_BIT_MAX) {
-        TLOGE(WmsLogTag::WMS_EVENT, "id:%{public}d, bitPPosition:%{public}u", GetPersistentId(), bitPPosition);
-        return;
+        TLOGE(WmsLogTag::WMS_EVENT, "id:%{public}d, bitPosition:%{public}u", GetPersistentId(), bitPosition);
+        return false;
     }
     {
         std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
-        return advancedFeatureFlag_.test(bitPosition);
+        return sessionInfo_.advancedFeatureFlag_.test(bitPosition);
     }
 }
 
+void Session::UpdateSessionInfo()
+{
+    NotifySessionInfoChange();
+}
 
 void Session::SetSessionInfoWindowMode(int32_t windowMode)
 {

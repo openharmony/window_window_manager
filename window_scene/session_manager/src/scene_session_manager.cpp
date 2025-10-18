@@ -5948,7 +5948,7 @@ bool SceneSessionManager::checkDatas(const std::vector<int32_t>& datas, const in
         TLOGE(WmsLogTag::WMS_EVENT, "The format is incorrect(length error).");
         return false;
     }
-    if (datas[0] != datas.size() - 1) {
+    if (datas[0] != static_cast<int32_t>(datas.size() - 1)) {
         TLOGE(WmsLogTag::WMS_EVENT, "The format is incorrect(size error).");
         return false;
     }
@@ -5965,11 +5965,10 @@ WMError SceneSessionManager::LockCursor(const std::vector<int32_t>& datas)
         return WMError::WM_ERROR_ILLEGAL_PARAM;
     }
     int32_t windowId = datas[1];
-    
-    
+    auto sceneSession = GetSceneSession(windowId);
     if (sceneSession == nullptr) {
         TLOGNE(WmsLogTag::WMS_EVENT, "session is nullptr");
-        return WSError::WS_ERROR_INVALID_SESSION;
+        return WMError::WM_ERROR_INVALID_SESSION;
     }
     bool isCursorFollowMovement = static_cast<bool>(datas[2]);
     sceneSession->SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_LOCK_CURSOR, true);
@@ -5992,7 +5991,7 @@ WMError SceneSessionManager::UnlockCursor(const std::vector<int32_t>& datas)
     auto sceneSession = GetSceneSession(windowId);
     if (sceneSession == nullptr) {
         TLOGNE(WmsLogTag::WMS_EVENT, "session is nullptr");
-        return WSError::WS_ERROR_INVALID_SESSION;
+        return WMError::WM_ERROR_INVALID_SESSION;
     }
     sceneSession->SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_LOCK_CURSOR, false);
     sceneSession->NotifySessionInfoChange();
@@ -11867,7 +11866,7 @@ void SceneSessionManager::NotifyAppUseControlListInner(
     std::vector<sptr<SceneSession>> mainSessions;
     std::vector<AppUseControlInfo> controlByBundleList;
     for (const auto& appUseControlInfo : controlList) {
-        if (appUseControlInfo.persistentId_ > INVALID_WINDOW_ID) {
+        if (appUseControlInfo.persistentId_ > static_cast<int32_t>(INVALID_WINDOW_ID)) {
             // control by peristentId
             TLOGI(WmsLogTag::WMS_MAIN, "control by id:%{public}d", appUseControlInfo.persistentId_);
             auto iter = sceneSessionMap_.find(appUseControlInfo.persistentId_);

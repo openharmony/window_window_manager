@@ -46,6 +46,7 @@ enum class CommonEventCommand : int32_t {
     LOCK_CURSOR = 0,
     UNLOCK_CURSOR,
 };
+constexpr int32_t COMMON_EVENT_COMMAND_MAX_LENGTH = 5;
 constexpr int32_t LOCK_CURSOR_LENGTH = 2;
 constexpr int32_t UNLOCK_CURSOR_LENGTH = 1;
 
