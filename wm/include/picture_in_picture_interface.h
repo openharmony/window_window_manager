@@ -96,9 +96,9 @@ public:
     virtual void OnPipStart(uint32_t controllerId, uint8_t requestId, uint64_t surfaceId) {}
 };
 
-class IPiPActiveStatusObserver : virtual public RefBase {
+class IPiPScreenStatusObserver : virtual public RefBase {
 public:
-    virtual void OnActiveStatusChange(const PiPActiveStatus& status) {}
+    virtual void OnScreenStatusChange(const PiPScreenStatus& status) {}
 };
 } // namespace Rosen
 } // namespace OHOS

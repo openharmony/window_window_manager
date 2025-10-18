@@ -78,9 +78,9 @@ void PictureInPictureControllerTest::SetUp() {}
 
 void PictureInPictureControllerTest::TearDown() {}
 
-class MockPiPActiveStatus : public IPiPActiveStatusObserver {
+class MockPiPScreenStatus : public IPiPScreenStatusObserver {
 public:
-    void OnActiveStatusChange(const PiPActiveStatus& status) override
+    void OnScreenStatusChange(const PiPScreenStatus& status) override
     {
         return;
     }
@@ -638,22 +638,22 @@ HWTEST_F(PictureInPictureControllerTest, DoControlEvent, TestSize.Level1)
 }
 
 /**
- * @tc.name: ActiveStatusChange
- * @tc.desc: ActiveStatusChange
+ * @tc.name: ScreenStatusChange
+ * @tc.desc: ScreenStatusChange
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureControllerTest, ActiveStatusChange, TestSize.Level1)
+HWTEST_F(PictureInPictureControllerTest, ScreenStatusChange, TestSize.Level1)
 {
     auto mw = sptr<MockWindow>::MakeSptr();
     ASSERT_NE(nullptr, mw);
     auto option = sptr<PipOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
     auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
-    auto listener = sptr<MockPiPActiveStatus>::MakeSptr();
+    auto listener = sptr<MockPiPScreenStatus>::MakeSptr();
 
-    pipControl->RegisterPiPActiveStatusChange(listener);
-    pipControl->ActiveStatusChange(PiPActiveStatus::STATUS_SIDEBAR);
-    ASSERT_EQ(PiPActiveStatus::STATUS_SIDEBAR, pipControl->curActiveStatus_);
+    pipControl->RegisterPiPScreenStatusChange(listener);
+    pipControl->ScreenStatusChange(PiPScreenStatus::STATUS_SIDEBAR);
+    ASSERT_EQ(PiPScreenStatus::STATUS_SIDEBAR, pipControl->curScreenStatus_);
 }
 
 /**

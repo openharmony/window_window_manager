@@ -227,7 +227,7 @@ static napi_value ExportControlType(napi_env env)
     return result;
 }
 
-static napi_value ExportActiveStatus(napi_env env)
+static napi_value ExportScreenStatus(napi_env env)
 {
     napi_value result = nullptr;
     napi_create_object(env, &result);
@@ -236,11 +236,11 @@ static napi_value ExportActiveStatus(napi_env env)
         return nullptr;
     }
     (void)SetNamedProperty(env, result, "STATUS_UNKNOWN",
-        static_cast<uint32_t>(PiPActiveStatus::STATUS_UNKNOWN));
+        static_cast<uint32_t>(PiPScreenStatus::STATUS_UNKNOWN));
     (void)SetNamedProperty(env, result, "STATUS_FOREGROUND",
-        static_cast<uint32_t>(PiPActiveStatus::STATUS_FOREGROUND));
+        static_cast<uint32_t>(PiPScreenStatus::STATUS_FOREGROUND));
     (void)SetNamedProperty(env, result, "STATUS_SIDEBAR",
-        static_cast<uint32_t>(PiPActiveStatus::STATUS_UNKNOWN));
+        static_cast<uint32_t>(PiPScreenStatus::STATUS_UNKNOWN));
     return result;
 }
 
@@ -255,7 +255,7 @@ napi_status InitEnums(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("PiPControlType", ExportControlType(env)),
         DECLARE_NAPI_PROPERTY("PiPControlStatus", ExportControlStatus(env)),
         DECLARE_NAPI_PROPERTY("VideoLiveControlGroup", ExportVideoLiveControlGroup(env)),
-        DECLARE_NAPI_PROPERTY("PiPActiveStatus", ExportActiveStatus(env)),
+        DECLARE_NAPI_PROPERTY("PiPScreenStatus", ExportScreenStatus(env)),
     };
     size_t count = sizeof(properties) / sizeof(napi_property_descriptor);
     return napi_define_properties(env, exports, count, properties);
