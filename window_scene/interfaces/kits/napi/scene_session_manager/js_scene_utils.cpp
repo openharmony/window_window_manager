@@ -1944,6 +1944,24 @@ napi_value CreateJsSessionPiPControlStatus(napi_env env)
     return objValue;
 }
 
+napi_value CreateJsSessionPiPActiveStatus(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "STATUS_UNKNOWN", CreateJsValue(env,
+        static_cast<int32_t>(PiPActiveStatus::STATUS_UNKNOWN)));
+    napi_set_named_property(env, objValue, "STATUS_FOREGROUND", CreateJsValue(env,
+        static_cast<int32_t>(PiPActiveStatus::STATUS_FOREGROUND)));
+    napi_set_named_property(env, objValue, "STATUS_SIDEBAR", CreateJsValue(env,
+        static_cast<int32_t>(PiPActiveStatus::STATUS_SIDEBAR)));
+    return objValue;
+}
+
 napi_value CreateJsSessionGravity(napi_env env)
 {
     napi_value objValue = nullptr;

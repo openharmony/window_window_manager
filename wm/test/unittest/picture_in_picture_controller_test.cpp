@@ -78,6 +78,14 @@ void PictureInPictureControllerTest::SetUp() {}
 
 void PictureInPictureControllerTest::TearDown() {}
 
+class MockPiPActiveStatus : public IPiPActiveStatusObserver {
+public:
+    void OnActiveStatusChange(const PiPActiveStatus& status) override
+    {
+        return;
+    }
+};
+
 namespace {
 /**
  * @tc.name: ShowPictureInPictureWindow01
@@ -627,6 +635,25 @@ HWTEST_F(PictureInPictureControllerTest, DoControlEvent, TestSize.Level1)
     pipControl->RegisterPiPControlObserver(listener);
     pipControl->DoControlEvent(controlType, status);
     ASSERT_EQ(1, pipControl->pipOption_->GetControlStatus().size());
+}
+
+/**
+ * @tc.name: ActiveStatusChange
+ * @tc.desc: ActiveStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, ActiveStatusChange, TestSize.Level1)
+{
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
+    auto listener = sptr<MockPiPActiveStatus>::MakeSptr();
+
+    pipControl->RegisterPiPActiveStatusChange(listener);
+    pipControl->ActiveStatusChange(PiPActiveStatus::STATUS_SIDEBAR);
+    ASSERT_EQ(PiPActiveStatus::STATUS_SIDEBAR, pipControl->curActiveStatus_);
 }
 
 /**
