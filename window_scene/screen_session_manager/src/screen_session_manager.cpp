@@ -3271,6 +3271,43 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSessionInner(ScreenId screenI
     return screenSession;
 }
 
+void ScreenSessionManager::SetupScreenDensityProperties(ScreenId screenId, ScreenProperty& property, RRect bounds)
+{
+    TLOGD(WmsLogTag::DMS, "Start to setup screen density properties");
+    ScreenId phyScreenId = GetPhyScreenId(screenId);
+    if (IsConcurrentUser()) {
+        bool found = false;
+        const std::vector<DisplayConfig>& displayConfigs = ScreenSceneConfig::GetDisplaysConfigs();
+        for (const auto& it : displayConfigs) {
+            if (it.physicalId == screenId && it.dpi) {
+                float screenDpi = static_cast<float>(it.dpi) / BASELINE_DENSITY;
+                TLOGI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64 ", DensityDpi: %{public}d", screenId, it.dpi);
+                property.SetScreenDensityProperties(screenDpi);
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            TLOGW(WmsLogTag::DMS, "find no match dpi, use default densityDpi_ = %{public}f", densityDpi_);
+            property.SetScreenDensityProperties(densityDpi_);
+        }
+    } else if (isDensityDpiLoad_) {
+        if (phyScreenId == SCREEN_ID_MAIN) {
+            TLOGW(WmsLogTag::DMS, "subDensityDpi_ = %{public}f", subDensityDpi_);
+            property.SetScreenDensityProperties(subDensityDpi_);
+        } else {
+            TLOGW(WmsLogTag::DMS, "densityDpi_ = %{public}f", densityDpi_);
+            property.SetScreenDensityProperties(densityDpi_);
+        }
+    } else if (!IsConcurrentUser() && !ScreenSceneConfig::GetDisplaysConfigs().empty()) {
+        // This branch is taken only in car device
+        TLOGW(WmsLogTag::DMS, "concurrentuser is disabled but display configurations exist in the XML");
+        property.SetScreenDensityProperties(carDefaultDensityDpi_);
+    } else {
+        property.UpdateVirtualPixelRatio(bounds);
+    }
+}
+
 void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenProperty& property)
 {
     int id = HiviewDFX::XCollie::GetInstance().SetTimer("CreateScreenPropertyCallRS", XCOLLIE_TIMEOUT_10S, nullptr,
@@ -3288,41 +3325,7 @@ void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenPropert
     TLOGW(WmsLogTag::DMS, "Call RS interface end, create ScreenProperty begin");
     InitScreenProperty(screenId, screenMode, screenCapability, property);
 
-    if (IsConcurrentUser()) {
-        bool found = false;
-        const std::vector<DisplayConfig>& displayConfigs = ScreenSceneConfig::GetDisplaysConfigs();
-        for (const auto& it : displayConfigs) {
-            if (it.physicalId == screenId && it.dpi) {
-                float screenDpi = static_cast<float>(it.dpi) / BASELINE_DENSITY;
-                TLOGI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64 ", DensityDpi: %{public}d", screenId, it.dpi);
-                property.SetVirtualPixelRatio(screenDpi);
-                property.SetDefaultDensity(screenDpi);
-                property.SetDensityInCurResolution(screenDpi);
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            TLOGW(WmsLogTag::DMS, "find no match dpi, use default densityDpi_ = %{public}f", densityDpi_);
-            property.SetVirtualPixelRatio(densityDpi_);
-            property.SetDefaultDensity(densityDpi_);
-            property.SetDensityInCurResolution(densityDpi_);
-        }
-    } else if (isDensityDpiLoad_) {
-        if (phyScreenId == SCREEN_ID_MAIN) {
-            TLOGW(WmsLogTag::DMS, "subDensityDpi_ = %{public}f", subDensityDpi_);
-            property.SetVirtualPixelRatio(subDensityDpi_);
-            property.SetDefaultDensity(subDensityDpi_);
-            property.SetDensityInCurResolution(subDensityDpi_);
-        } else {
-            TLOGW(WmsLogTag::DMS, "densityDpi_ = %{public}f", densityDpi_);
-            property.SetVirtualPixelRatio(densityDpi_);
-            property.SetDefaultDensity(densityDpi_);
-            property.SetDensityInCurResolution(densityDpi_);
-        }
-    } else {
-        property.UpdateVirtualPixelRatio(screenBounds);
-    }
+    SetupScreenDensityProperties(screenId, property, screenBounds);
     property.SetRefreshRate(screenRefreshRate);
     property.SetDefaultDeviceRotationOffset(defaultDeviceRotationOffset_);
 #ifdef FOLD_ABILITY_ENABLE
