@@ -75,6 +75,9 @@ namespace uiExtension {
     bottomRect: window.Rect;
   }
 
+  export native function destroyWindowProxy(nativeObj: long): void;
+  let windowProxyRegister = new FinalizationRegistry<long>(destroyWindowProxy);
+
   // API implementation
   export class UIExtensionInternal implements WindowProxy {
     static { loadLibrary("embeddablewindowstageani_kit.z") }
@@ -82,6 +85,7 @@ namespace uiExtension {
 
     private setNativeObj(nativeObj: long): void {
       this.nativeObj = nativeObj;
+      windowProxyRegister.register(this, nativeObj);
     }
 
     public native getProperties(nativeObj: long, property: object): int;

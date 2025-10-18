@@ -29,6 +29,7 @@
 #include "interop_js/hybridgref_ani.h"
 #include "interop_js/hybridgref_napi.h"
 #include "js_window_stage.h"
+#include "ani_extension_window_config.h"
 
 using OHOS::Rosen::WindowScene;
 
@@ -473,6 +474,7 @@ std::array g_functions = {
         "JLstd/core/String;:L@ohos/window/window/Window;",
         reinterpret_cast<void *>(AniWindowManager::FindWindow)},
     ani_native_function {"minimizeAllSync", "JJ:V", reinterpret_cast<void *>(AniWindowManager::MinimizeAll)},
+    ani_native_function {"destroyAniExtConfig", nullptr, reinterpret_cast<void *>(AniExtensionWindowConfig::Finalizer)},
 };
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)

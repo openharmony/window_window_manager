@@ -33,6 +33,10 @@ class AniExtensionWindowConfig {
 public:
     explicit AniExtensionWindowConfig(const std::shared_ptr<ExtensionWindowConfig>& extensionWindowConfig);
     ~AniExtensionWindowConfig();
+    ani_ref GetAniRef() { return aniRef_; }
+    void SetAniRef(const ani_ref& aniRef) { aniRef_ = aniRef; }
+    
+    static void Finalizer(ani_env* env, ani_long nativeObj);
 
     ani_string OnGetWindowName(ani_env* env);
     ani_enum_item OnGetWindowAttribute(ani_env* env);
@@ -66,6 +70,7 @@ public:
 
 private:
     std::shared_ptr<ExtensionWindowConfig> extensionWindowConfig_;
+    ani_ref aniRef_ = nullptr;
 };
 } // namespace Rosen
 } // namespace OHOS
