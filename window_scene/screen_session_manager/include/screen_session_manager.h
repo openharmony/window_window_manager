@@ -551,6 +551,7 @@ protected:
     void ReportHandleScreenEvent(ScreenEvent screenEvent, ScreenCombination screenCombination);
     void SetExtendedScreenFallbackPlan(ScreenId screenId);
     void WaitUpdateAvailableAreaForPc();
+    void SetupScreenDensityProperties(ScreenId screenId, ScreenProperty& property, RRect bounds);
     void CreateScreenProperty(ScreenId screenId, ScreenProperty& property);
     void InitExtendScreenDensity(sptr<ScreenSession> session, ScreenProperty property);
     void RegisterRefreshRateChangeListener();
@@ -836,6 +837,7 @@ private:
     bool isDensityDpiLoad_ = false;
     float densityDpi_ { 1.0f };
     float subDensityDpi_ { 1.0f };
+    float carDefaultDensityDpi_ { 2.0f };
     std::atomic<uint32_t> cachedSettingDpi_ {0};
     float pcModeDpi_ { 1.0f };
 

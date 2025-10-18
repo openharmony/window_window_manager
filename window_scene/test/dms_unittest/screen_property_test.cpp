@@ -30,6 +30,24 @@ class ScreenPropertyTest : public testing::Test {
 
 namespace {
 /**
+ * @tc.name: SetScreenDensityProperties
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, SetScreenDensityProperties, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetScreenRotation start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    float screenDpi = 5.0;
+    property->SetScreenDensityProperties(screenDpi);
+    ASSERT_EQ(property->GetVirtualPixelRatio(), screenDpi);
+    ASSERT_EQ(property->GetDefaultDensity(), screenDpi);
+    ASSERT_EQ(property->GetDensityInCurResolution(), screenDpi);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetScreenRotation end";
+}
+
+/**
  * @tc.name: SetScreenRotation
  * @tc.desc: normal function
  * @tc.type: FUNC
