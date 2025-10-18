@@ -332,7 +332,7 @@ public:
     uint32_t GetSessionInfoExpandInputFlag() const;
     void SetSessionInfoAdvancedFeatureFlag(uint32_t bitPosition, bool value);
     bool GetSessionInfoAdvancedFeatureFlag(uint32_t bitPosition);
-    void UpdateSessionInfo()
+    void UpdateSessionInfo();
     void SetSessionInfoWindowMode(int32_t windowMode);
     const SessionInfo& GetSessionInfo() const;
     SessionInfo& EditSessionInfo();
