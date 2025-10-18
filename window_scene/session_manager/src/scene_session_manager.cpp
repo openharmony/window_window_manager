@@ -5938,39 +5938,39 @@ void SceneSessionManager::PreLoadStartingWindow(sptr<SceneSession> sceneSession)
 /*
  * Window Event start
  */
-bool SceneSessionManager::checkDatas(const std::vector<int32_t>& datas, const int32_t length)
+bool SceneSessionManager::checkDatas(const std::vector<int32_t>& parameters, const int32_t length)
 {
-    if (datas.size() < 1) {
+    if (parameters.size() < 1) {
         TLOGE(WmsLogTag::WMS_EVENT, "The format is incorrect(size<1).");
         return false;
     }
-    if (datas[0] != length) {
+    if (parameters[0] != length) {
         TLOGE(WmsLogTag::WMS_EVENT, "The format is incorrect(length error).");
         return false;
     }
-    if (datas[0] != static_cast<int32_t>(datas.size() - 1)) {
+    if (parameters[0] != static_cast<int32_t>(parameters.size() - 1)) {
         TLOGE(WmsLogTag::WMS_EVENT, "The format is incorrect(size error).");
         return false;
     }
     return true;
 }
 
-WMError SceneSessionManager::LockCursor(const std::vector<int32_t>& datas)
+WMError SceneSessionManager::LockCursor(const std::vector<int32_t>& parameters)
 {
     if (!SessionPermission::VerifyCallingPermission(LOCK_WINDOW_CURSOR_PERMISSION)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
+        TLOGE(WmsLogTag::WMS_EVENT, "The caller has not permission granted");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    if (!checkDatas(datas, LOCK_CURSOR_LENGTH)) {
+    if (!checkDatas(parameters, LOCK_CURSOR_LENGTH)) {
         return WMError::WM_ERROR_ILLEGAL_PARAM;
     }
-    int32_t windowId = datas[1];
+    int32_t windowId = parameters[1];
     auto sceneSession = GetSceneSession(windowId);
     if (sceneSession == nullptr) {
         TLOGNE(WmsLogTag::WMS_EVENT, "session is nullptr");
         return WMError::WM_ERROR_INVALID_SESSION;
     }
-    bool isCursorFollowMovement = static_cast<bool>(datas[2]);
+    bool isCursorFollowMovement = static_cast<bool>(parameters[2]);
     sceneSession->SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_LOCK_CURSOR, true);
     sceneSession->SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_CURSOR_FOLLOW_MOVEMENT,
         isCursorFollowMovement);
@@ -5978,16 +5978,16 @@ WMError SceneSessionManager::LockCursor(const std::vector<int32_t>& datas)
     return WMError::WM_OK;
 }
 
-WMError SceneSessionManager::UnlockCursor(const std::vector<int32_t>& datas)
+WMError SceneSessionManager::UnlockCursor(const std::vector<int32_t>& parameters)
 {
     if (!SessionPermission::VerifyCallingPermission(LOCK_WINDOW_CURSOR_PERMISSION)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
+        TLOGE(WmsLogTag::WMS_EVENT, "The caller has not permission granted");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    if (!checkDatas(datas, UNLOCK_CURSOR_LENGTH)) {
+    if (!checkDatas(parameters, UNLOCK_CURSOR_LENGTH)) {
         return WMError::WM_ERROR_ILLEGAL_PARAM;
     }
-    int32_t windowId = datas[1];
+    int32_t windowId = parameters[1];
     auto sceneSession = GetSceneSession(windowId);
     if (sceneSession == nullptr) {
         TLOGNE(WmsLogTag::WMS_EVENT, "session is nullptr");

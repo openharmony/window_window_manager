@@ -6558,12 +6558,12 @@ WMError WindowSessionImpl::LockCursor(int32_t windowId, bool isCursorFollowMovem
         TLOGE(WmsLogTag::WMS_EVENT, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    std::vector<int32_t> datas;
-    datas.emplace_back(LOCK_CURSOR_LENGTH);
-    datas.emplace_back(windowId);
-    datas.emplace_back(static_cast<int32_t>(isCursorFollowMovement));
+    std::vector<int32_t> parameters;
+    parameters.emplace_back(LOCK_CURSOR_LENGTH);
+    parameters.emplace_back(windowId);
+    parameters.emplace_back(static_cast<int32_t>(isCursorFollowMovement));
     return SingletonContainer::Get<WindowAdapter>().SendCommonEvent(
-        static_cast<int32_t>(CommonEventCommand::LOCK_CURSOR), datas);
+        static_cast<int32_t>(CommonEventCommand::LOCK_CURSOR), parameters);
 }
 
 WMError WindowSessionImpl::UnlockCursor(int32_t windowId)
@@ -6572,11 +6572,11 @@ WMError WindowSessionImpl::UnlockCursor(int32_t windowId)
         TLOGE(WmsLogTag::WMS_EVENT, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    std::vector<int32_t> datas;
-    datas.emplace_back(UNLOCK_CURSOR_LENGTH);
-    datas.emplace_back(windowId);
+    std::vector<int32_t> parameters;
+    parameters.emplace_back(UNLOCK_CURSOR_LENGTH);
+    parameters.emplace_back(windowId);
     return SingletonContainer::Get<WindowAdapter>().SendCommonEvent(
-        static_cast<int32_t>(CommonEventCommand::UNLOCK_CURSOR), datas);
+        static_cast<int32_t>(CommonEventCommand::UNLOCK_CURSOR), parameters);
 }
 
 WMError WindowSessionImpl::SetKeyEventFilter(KeyEventFilterFunc filter)

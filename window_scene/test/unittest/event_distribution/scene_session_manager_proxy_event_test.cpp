@@ -52,47 +52,47 @@ HWTEST_F(sceneSessionManagerProxyEventTest, SendCommonEvent, TestSize.Level1)
 {
     sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
     auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
-    std::vector<int32_t> datas;
+    std::vector<int32_t> parameters;
     // Failed to test interface token.
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    auto ret = proxy->SendCommonEvent(1, datas);
+    auto ret = proxy->SendCommonEvent(1, parameters);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
 
     // Failed to test write command.
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInt32ErrorFlag(true);
-    ret = proxy->SendCommonEvent(1, datas);
+    ret = proxy->SendCommonEvent(1, parameters);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
 
     // Failed to test write data.
-    datas.emplace_back(1);
+    parameters.emplace_back(1);
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInt32ErrorFlag(true);
     MockMessageParcel::SetWriteInt32ErrorCount(1);
-    ret = proxy->SendCommonEvent(1, datas);
+    ret = proxy->SendCommonEvent(1, parameters);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
 
     // Failed to test remote.
     MockMessageParcel::ClearAllErrorFlag();
     auto ssmProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
-    ret = ssmProxy->SendCommonEvent(1, datas);
+    ret = ssmProxy->SendCommonEvent(1, parameters);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
 
     // Failed to test the SetRequestResult execution.
     remoteMocker->SetRequestResult(ERR_INVALID_DATA);
-    ret = proxy->SendCommonEvent(1, datas);
+    ret = proxy->SendCommonEvent(1, parameters);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
 
     // Failed to test read ret.
     remoteMocker->SetRequestResult(ERR_NONE);
     MockMessageParcel::SetReadInt32ErrorFlag(true);
-    ret = proxy->SendCommonEvent(1, datas);
+    ret = proxy->SendCommonEvent(1, parameters);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
 
     // The SetRequestResult test is successful.
     remoteMocker->SetRequestResult(ERR_NONE);
     MockMessageParcel::ClearAllErrorFlag();
-    ret = proxy->SendCommonEvent(1, datas);
+    ret = proxy->SendCommonEvent(1, parameters);
     EXPECT_EQ(ret, static_cast<WMError>(0));
 }
 } // namespace

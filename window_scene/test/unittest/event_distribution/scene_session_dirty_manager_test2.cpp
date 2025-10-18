@@ -761,7 +761,6 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithVoiceInputPrefix, TestS
  */
 HWTEST_F(SceneSessionDirtyManagerTest2, UpdateWindowFlagsForLockCursor, TestSize.Level2)
 {
-    
     MMI::WindowInfo windowInfo;
     manager_->UpdateWindowFlagsForLockCursor(nullptr, windowInfo);
     EXPECT_EQ(windowInfo.flags, 0);

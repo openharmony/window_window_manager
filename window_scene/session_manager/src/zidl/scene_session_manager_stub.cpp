@@ -2651,17 +2651,17 @@ int SceneSessionManagerStub::HandleSendCommonEvent(MessageParcel& data, MessageP
         return ERR_INVALID_DATA;
     }
 
-    std::vector<int32_t> datas;
+    std::vector<int32_t> parameters;
     int32_t length = 0;
     if (!data.ReadInt32(length)) {
         TLOGE(WmsLogTag::WMS_EVENT, "Read size failed");
         return ERR_INVALID_DATA;
     }
     if (length > COMMON_EVENT_COMMAND_MAX_LENGTH || length < 0) {
-        TLOGE(WmsLogTag::WMS_EVENT, "Oot of range.");
+        TLOGE(WmsLogTag::WMS_EVENT, "Out of range.");
         return ERR_INVALID_DATA;
     }
-    datas.emplace_back(length);
+    parameters.emplace_back(length);
 
     int32_t info = 0;
     for (int i = 0; i < length; i++) {
@@ -2669,16 +2669,16 @@ int SceneSessionManagerStub::HandleSendCommonEvent(MessageParcel& data, MessageP
             TLOGE(WmsLogTag::WMS_EVENT, "Read size failed");
             return ERR_INVALID_DATA;
         }
-        datas.emplace_back(info);
+        parameters.emplace_back(info);
     }
 
     WMError ret = WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     switch (command) {
         case static_cast<uint32_t>(CommonEventCommand::LOCK_CURSOR):
-            ret = LockCursor(datas);
+            ret = LockCursor(parameters);
             break;
         case static_cast<uint32_t>(CommonEventCommand::UNLOCK_CURSOR):
-            ret = UnlockCursor(datas);
+            ret = UnlockCursor(parameters);
             break;
         default:
             ret = WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
