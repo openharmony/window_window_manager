@@ -47,6 +47,13 @@ WSError SceneSessionManagerLite::SetSessionIcon(const sptr<IRemoteObject>& token
     return SceneSessionManager::GetInstance().SetSessionIcon(token, icon);
 }
 
+WSError SceneSessionManagerLite::SetSessionIconForThirdParty(const sptr<IRemoteObject>& token,
+    const std::shared_ptr<Media::PixelMap>& icon)
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "in");
+    return SceneSessionManager::GetInstance().SetSessionIconForThirdParty(token, icon);
+}
+
 WSError SceneSessionManagerLite::IsValidSessionIds(
     const std::vector<int32_t>& sessionIds, std::vector<bool>& results)
 {

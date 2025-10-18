@@ -358,6 +358,8 @@ public:
     void NotifySessionMovedToFront(int32_t persistentId);
     WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) override;
     WSError SetSessionIcon(const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon) override;
+    WSError SetSessionIconInner(const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon);
+    WSError SetSessionIconForThirdParty(const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon);
     WSError IsValidSessionIds(const std::vector<int32_t>& sessionIds, std::vector<bool>& results) override;
     void HandleTurnScreenOn(const sptr<SceneSession>& sceneSession);
     void HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock,
