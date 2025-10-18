@@ -78,12 +78,12 @@ HWTEST_F(sceneSessionManagerProxyEventTest, SendCommonEvent, TestSize.Level1)
     ret = ssmProxy->SendCommonEvent(1, datas);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
 
-    // Failed to test the SetRequestResult execution. 
+    // Failed to test the SetRequestResult execution.
     remoteMocker->SetRequestResult(ERR_INVALID_DATA);
     ret = proxy->SendCommonEvent(1, datas);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
 
-    // Failed to test read ret. 
+    // Failed to test read ret.
     remoteMocker->SetRequestResult(ERR_NONE);
     MockMessageParcel::SetReadInt32ErrorFlag(true);
     ret = proxy->SendCommonEvent(1, datas);

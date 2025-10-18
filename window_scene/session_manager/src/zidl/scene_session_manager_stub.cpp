@@ -2673,7 +2673,7 @@ int SceneSessionManagerStub::HandleSendCommonEvent(MessageParcel& data, MessageP
     }
 
     WMError ret = WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    switch(command) {
+    switch (command) {
         case static_cast<uint32_t>(CommonEventCommand::LOCK_CURSOR):
             ret = LockCursor(datas);
             break;

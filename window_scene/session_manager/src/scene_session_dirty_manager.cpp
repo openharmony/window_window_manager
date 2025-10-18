@@ -855,8 +855,7 @@ void SceneSessionDirtyManager::UpdateWindowFlagsForLockCursor(const sptr<SceneSe
     }
     if (sceneSession->GetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_CURSOR_FOLLOW_MOVEMENT)) {
         windowInfo.flags |= MMI_FLAG_BIT_CURSOR_FOLLOW_MOVEMENT;
-    } 
-    else {
+    } else {
         windowInfo.flags |= MMI_FLAG_BIT_LOCK_CURSOR;
     }
 }
