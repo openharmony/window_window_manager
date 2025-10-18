@@ -733,8 +733,8 @@ int32_t OH_WindowManager_LockCursor(int32_t windowId, bool isCursorFollowMovemen
         }
         auto ret = window->LockCursor(windowId, isCursorFollowMovement);
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.find(ret) == OH_WINDOW_TO_ERROR_CODE_MAP.end() ?
-            WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL : OH_WINDOW_TO_ERROR_CODE_MAP.at(ret);
-    }, __func__);
+            WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL :
+            OH_WINDOW_TO_ERROR_CODE_MAP.at(ret);}, __func__);
     return errCode;
 }
 
@@ -760,7 +760,7 @@ int32_t OH_WindowManager_UnlockCursor(int32_t windowId)
         }
         auto ret = window->UnlockCursor(windowId);
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.find(ret) == OH_WINDOW_TO_ERROR_CODE_MAP.end() ?
-            WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL : OH_WINDOW_TO_ERROR_CODE_MAP.at(ret);
-    }, __func__);
+            WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL :
+            OH_WINDOW_TO_ERROR_CODE_MAP.at(ret);}, __func__);
     return errCode;
 }

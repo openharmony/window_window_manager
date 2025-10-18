@@ -794,8 +794,6 @@ HWTEST_F(SceneSessionDirtyManagerTest2, UpdateWindowFlagsForLockCursor, TestSize
     session->SetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_CURSOR_FOLLOW_MOVEMENT, true);
     manager_->UpdateWindowFlagsForLockCursor(session, windowInfo);
     EXPECT_EQ(windowInfo.flags, 16);
-
-
 }
 } // namespace
 } // namespace Rosen
