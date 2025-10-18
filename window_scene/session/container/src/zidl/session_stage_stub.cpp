@@ -208,8 +208,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyWindowCrossAxisChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_PIPSIZE_CHANGE):
             return HandleNotifyPipSizeChange(data, reply);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_ACTIVE_STATUS_CHANGE):
-            return HandleNotifyPipActiveStatusChange(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SCREEN_STATUS_CHANGE):
+            return HandleNotifyPipScreenStatusChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_ATTACH_STATE_CHANGE):
             return HandleNotifyWindowAttachStateChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_ANIMATION_COMPLETED):
@@ -1102,15 +1102,15 @@ int SessionStageStub::HandleNotifyPipSizeChange(MessageParcel& data, MessageParc
     return ERR_NONE;
 }
 
-int SessionStageStub::HandleNotifyPipActiveStatusChange(MessageParcel& data, MessageParcel& reply)
+int SessionStageStub::HandleNotifyPipScreenStatusChange(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_PIP, "in");
     int32_t status;
     if (!data.ReadInt32(status)) {
         return ERR_INVALID_VALUE;
     }
-    PiPActiveStatus status_ = static_cast<PiPActiveStatus>(status);
-    NotifyPipActiveStatusChange(status_);
+    PiPScreenStatus status_ = static_cast<PiPScreenStatus>(status);
+    NotifyPipScreenStatusChange(status_);
     return ERR_NONE;
 }
 

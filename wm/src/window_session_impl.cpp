@@ -5910,13 +5910,13 @@ WSError WindowSessionImpl::NotifyPipWindowSizeChange(double width, double height
     return WSError::WS_OK;
 }
 
-WSError WindowSessionImpl::NotifyPipActiveStatusChange(PiPActiveStatus status)
+WSError WindowSessionImpl::NotifyPipScreenStatusChange(PiPScreenStatus status)
 {
     TLOGI(WmsLogTag::WMS_PIP, "status=%{public}u", status);
     auto task = [status]() {
-        PictureInPictureManager::DoActiveStatusChangeEvent(status);
+        PictureInPictureManager::DoScreenStatusChangeEvent(status);
     };
-    handler_->PostTask(task, "WMS_WindowSessionImpl_NotifyPipActiveStatusChange");
+    handler_->PostTask(task, "WMS_WindowSessionImpl_NotifyPipScreenStatusChange");
     return WSError::WS_OK;
 }
 

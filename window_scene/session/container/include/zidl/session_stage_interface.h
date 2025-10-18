@@ -186,7 +186,7 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError NotifyPipWindowSizeChange(double width, double height, double scale) = 0;
-    virtual WSError NotifyPipActiveStatusChange(PiPActiveStatus status) = 0;
+    virtual WSError NotifyPipScreenStatusChange(PiPScreenStatus status) = 0;
 
     /**
      * @brief Set the media control event to client.
