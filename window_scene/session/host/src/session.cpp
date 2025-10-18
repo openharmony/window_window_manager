@@ -563,6 +563,16 @@ void Session::NotifyPreLoadStartingWindowFinished()
     }
 }
 
+void Session::NotifyRestart()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (auto listenerPtr = listener.lock()) {
+            listenerPtr->OnRestart();
+        }
+    }
+}
+
 void Session::NotifyAddSnapshot(bool useFfrt, bool needPersist, bool needSaveSnapshot)
 {
     /*
@@ -1262,7 +1272,13 @@ WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason r
     }
     if (sessionStage_ != nullptr) {
         int32_t rotateAnimationDuration = GetRotateAnimationDuration();
-        SceneAnimationConfig config { .rsTransaction_ = rsTransaction, .animationDuration_ = rotateAnimationDuration };
+        SceneAnimationConfig config;
+        config.rsTransaction_ = rsTransaction;
+        config.animationDuration_ = rotateAnimationDuration;
+        if (reason == SizeChangeReason::SCENE_WITH_ANIMATION) {
+            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "UpdateRectWithLayoutInfo %{public}d", reason);
+            config = sceneAnimationConfig_;
+        }
         UpdateClientRectPosYAndDisplayId(updateRect);
         sessionStage_->UpdateRect(updateRect, reason, config, avoidAreas);
         SetClientRect(rect);
@@ -1915,6 +1931,19 @@ void Session::SetTerminateSessionListener(NotifyTerminateSessionFunc&& func)
             return;
         }
         session->terminateSessionFunc_ = std::move(func);
+    }, where);
+}
+
+void Session::SetRestartAppListener(NotifyRestartAppFunc&& func)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), func = std::move(func), where] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
+            return;
+        }
+        session->restartAppFunc_ = std::move(func);
     }, where);
 }
 
@@ -2816,17 +2845,14 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
     if (CORRECTION_ENABLE && key == 0) {
         rotation = (rotation + ROTATION_90) % ROTATION_360;
     }
-    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
-        WSSnapshotHelper::GetInstance()->GetScreenStatus() == SCREEN_FOLDED) {
-        rotation = LANDSCAPE_INVERTED_ANGLE;
-    }
     auto rotate = WSSnapshotHelper::GetDisplayOrientation(rotation);
     if (persistentPixelMap || !SupportSnapshotAllSessionStatus()) {
         key = defaultStatus;
         rotate = DisplayOrientation::PORTRAIT;
     }
+    bool needCacheSnapshot = (SupportCacheLockedSessionSnapshot() && reason == LifeCycleChangeReason::SCREEN_LOCK);
     auto task = [weakThis = wptr(this), runInFfrt = useFfrt, requirePersist = needPersist, persistentPixelMap,
-        updateSnapshot, key, rotate]() {
+        updateSnapshot, key, rotate, needCacheSnapshot]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
@@ -2864,7 +2890,7 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
         }
         session->scenePersistence_->ResetSnapshotCache();
         Task saveSnapshotCallback = []() {};
-        {
+        if (!needCacheSnapshot) {
             std::lock_guard lock(session->saveSnapshotCallbackMutex_);
             saveSnapshotCallback = session->saveSnapshotCallback_;
         }
@@ -2884,6 +2910,21 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
     std::string taskName = "Session::SaveSnapshot" + std::to_string(persistentId_);
     snapshotFfrtHelper->CancelTask(taskName);
     snapshotFfrtHelper->SubmitTask(std::move(task), taskName);
+}
+
+void Session::ResetLockedCacheSnapshot()
+{
+    if (!SupportCacheLockedSessionSnapshot()) {
+        return;
+    }
+    if (snapshot_) {
+        ResetSnapshot();
+    }
+}
+
+bool Session::SupportCacheLockedSessionSnapshot() const
+{
+    return systemConfig_.supportCacheLockedSessionSnapshot_;
 }
 
 void Session::SetFreeMultiWindow()
@@ -3198,7 +3239,7 @@ void Session::NotifySessionStateChange(const SessionState& state)
             session->keyboardStateChangeFunc_) {
             const sptr<WindowSessionProperty>& property = session->GetSessionProperty();
             session->keyboardStateChangeFunc_(
-                state, property->GetKeyboardEffectOption(), property->GetCallingSessionId());
+                state, property->GetKeyboardEffectOption(), property->GetCallingSessionId(), property->GetDisplayId());
         } else if (session->sessionStateChangeFunc_) {
             session->sessionStateChangeFunc_(state);
         } else {
@@ -3847,6 +3888,16 @@ void Session::SetHidingStartingWindow(bool hidingStartWindow)
 bool Session::GetHidingStartingWindow() const
 {
     return hidingStartWindow_;
+}
+
+void Session::SetRestartApp(bool restartApp)
+{
+    sessionInfo_.isRestartApp_ = restartApp;
+}
+
+bool Session::GetRestartApp() const
+{
+    return sessionInfo_.isRestartApp_;
 }
 
 WSError Session::SetLeashWindowAlpha(bool hidingStartWindow)

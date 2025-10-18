@@ -39,6 +39,33 @@
 namespace OHOS {
 namespace Rosen {
 constexpr Rect g_emptyRect = {0, 0, 0, 0};
+
+const std::map<ApiWindowType, std::string> API_TO_ANI_STRING_TYPE_MAP {
+    {ApiWindowType::TYPE_BASE,                 "TYPE_APP"                  },
+    {ApiWindowType::TYPE_APP,                  "TYPE_APP"                  },
+    {ApiWindowType::TYPE_SYSTEM_ALERT,         "TYPE_SYSTEM_ALERT"         },
+    {ApiWindowType::TYPE_INPUT_METHOD,         "TYPE_INPUT_METHOD"         },
+    {ApiWindowType::TYPE_STATUS_BAR,           "TYPE_STATUS_BAR"           },
+    {ApiWindowType::TYPE_PANEL,                "TYPE_PANEL"                },
+    {ApiWindowType::TYPE_KEYGUARD,             "TYPE_KEYGUARD"             },
+    {ApiWindowType::TYPE_VOLUME_OVERLAY,       "TYPE_VOLUME_OVERLAY"       },
+    {ApiWindowType::TYPE_NAVIGATION_BAR,       "TYPE_NAVIGATION_BAR"       },
+    {ApiWindowType::TYPE_FLOAT,                "TYPE_FLOAT"                },
+    {ApiWindowType::TYPE_WALLPAPER,            "TYPE_WALLPAPER"            },
+    {ApiWindowType::TYPE_DESKTOP,              "TYPE_DESKTOP"              },
+    {ApiWindowType::TYPE_LAUNCHER_RECENT,      "TYPE_LAUNCHER_RECENT"      },
+    {ApiWindowType::TYPE_LAUNCHER_DOCK,        "TYPE_LAUNCHER_DOCK"        },
+    {ApiWindowType::TYPE_VOICE_INTERACTION,    "TYPE_VOICE_INTERACTION"    },
+    {ApiWindowType::TYPE_POINTER,              "TYPE_POINTER"              },
+    {ApiWindowType::TYPE_FLOAT_CAMERA,         "TYPE_FLOAT_CAMERA"         },
+    {ApiWindowType::TYPE_DIALOG,               "TYPE_DIALOG"               },
+    {ApiWindowType::TYPE_SCREENSHOT,           "TYPE_SCREENSHOT"           },
+    {ApiWindowType::TYPE_SYSTEM_TOAST,         "TYPE_SYSTEM_TOAST"         },
+    {ApiWindowType::TYPE_DIVIDER,              "TYPE_DIVIDER"              },
+    {ApiWindowType::TYPE_GLOBAL_SEARCH,        "TYPE_GLOBAL_SEARCH"        },
+    {ApiWindowType::TYPE_HANDWRITE,            "TYPE_HANDWRITE"            },
+};
+
 class AniWindowUtils {
 public:
     static ani_status InitAniCreator(ani_env* env,
@@ -50,6 +77,7 @@ public:
     static ani_status GetPropertyIntObject(ani_env* env, const char* propertyName, ani_object object, int32_t& result);
     static ani_status GetPropertyDoubleObject(ani_env* env, const char* propertyName,
         ani_object object, double& result);
+    static ani_status GetPropertyBoolObject(ani_env* env, const char* propertyName, ani_object object, bool& result);
     static bool GetPropertyRectObject(ani_env* env, const char* propertyName,
         ani_object object, Rect& result);
     static bool GetIntObject(ani_env* env, const char* propertyName, ani_object object, int32_t& result);
@@ -82,6 +110,10 @@ public:
     static void* GetAbilityContext(ani_env *env, ani_object aniObj);
     static ani_object CreateAniRectObject(ani_env* env, const Rect& rect);
     static ani_object CreateWindowsProperties(ani_env* env, const WindowPropertyInfo& windowPropertyInfo);
+    static ani_status CheckPropertyNameUndefined(ani_env* env, const char* propertyName,
+        ani_object object, bool& result);
+    static bool ParseKeyFramePolicy(ani_env* env, ani_object aniKeyFramePolicy, KeyFramePolicy& keyFramePolicy);
+    static ani_object CreateKeyFramePolicy(ani_env* env, const KeyFramePolicy& keyFramePolicy);
     static ani_object CreateAniPixelMapArray(ani_env* env,
         const std::vector<std::shared_ptr<Media::PixelMap>>& pixelMaps);
     static ani_object CreateAniMainWindowInfoArray(ani_env* env, const std::vector<sptr<MainWindowInfo>>& infos);
@@ -115,6 +147,8 @@ public:
     static void GetSpecificBarStatus(sptr<Window>& window, const std::string& name,
         std::map<WindowType, SystemBarProperty>& newSystemBarProperties,
         std::map<WindowType, SystemBarProperty>& systemBarProperties);
+    static ani_object CreateOptionalBool(ani_env *env, ani_boolean value);
+    static ani_object CreateOptionalInt(ani_env *env, ani_int value);
     static void GetWindowSnapshotConfiguration(ani_env* env, ani_object config,
         WindowSnapshotConfiguration& windowSnapshotConfiguration);
     static WindowLimits ParseWindowLimits(ani_env* env, ani_object aniWindowLimits);
@@ -131,6 +165,11 @@ public:
      * @return Corresponding WmErrorCode or defaultCode if unmapped.
      */
     static WmErrorCode ToErrorCode(WMError error, WmErrorCode defaultCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    static bool ParseSubWindowOptions(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
+    static bool ParseRectParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
+    static bool ParseModalityParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
+    static bool ParseZLevelParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
+    static ani_object CreateAniWindow(ani_env* env, OHOS::sptr<OHOS::Rosen::Window>& window);
     template<typename T>
     static ani_object CreateBaseTypeObject(ani_env* env, T value);
 };

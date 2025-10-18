@@ -224,6 +224,11 @@ public:
      * Compatible Mode
      */
     WSError NotifyIsFullScreenInForceSplitMode(bool isFullScreen) override;
+
+    /**
+     * Restart app
+     */
+    WSError RestartApp(const std::shared_ptr<AAFwk::Want>& want) override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

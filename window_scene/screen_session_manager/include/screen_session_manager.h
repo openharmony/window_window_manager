@@ -167,7 +167,7 @@ public:
     DMError IsScreenRotationLocked(bool& isLocked) override;
     DMError SetScreenRotationLocked(bool isLocked) override;
     DMError SetScreenRotationLockedFromJs(bool isLocked) override;
-    DMError SetOrientation(ScreenId screenId, Orientation orientation) override;
+    DMError SetOrientation(ScreenId screenId, Orientation orientation, bool isFromNapi) override;
     bool SetRotation(ScreenId screenId, Rotation rotationAfter, bool isFromWindow);
     void SetSensorSubscriptionEnabled();
     bool SetRotationFromWindow(Rotation targetRotation);
@@ -468,6 +468,7 @@ public:
     void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;
     void ConvertWindowIdsToSurfaceNodeList(std::vector<uint64_t> windowIdList,
         std::vector<uint64_t>& surfaceNodesList);
+    bool IsSupportCapture();
     sptr<DisplayInfo> GetPrimaryDisplayInfo() override;
     DisplayId GetPrimaryDisplayId() override;
     std::shared_ptr<Media::PixelMap> GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
@@ -521,6 +522,7 @@ public:
     void SetFirstSCBConnect(bool firstSCBConnect);
     // mirror screen
     bool HandleResolutionEffectChange();
+    bool HandleCastVirtualScreenMirrorRegion();
     bool GetStoredPidFromUid(int32_t uid, int32_t& agentPid) const;
     bool IsFreezed(const int32_t& agentPid, const DisplayManagerAgentType& agentType);
     bool isScreenShot_ = false;
@@ -997,10 +999,14 @@ private:
     bool RecoveryResolutionEffect();
     void RegisterSettingResolutionEffectObserver();
     void SetResolutionEffectFromSettingData();
+    void SetInternalScreenResolutionEffect(const sptr<ScreenSession>& internalSession, DMRect toRect);
+    void SetExternalScreenResolutionEffect(const sptr<ScreenSession>& externalSession, DMRect toRect);
+    void GetCastVirtualMirrorSession(sptr<ScreenSession>& virtualSession);
     std::atomic<bool> curResolutionEffectEnable_ = false;
     DMError SyncScreenPropertyChangedToServer(ScreenId screenId, const ScreenProperty& screenProperty) override;
     std::function<void(sptr<ScreenSession>& screenSession)> propertyChangedCallback_;
     std::mutex callbackMutex_;
+    bool isSupportCapture_ = false;
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {

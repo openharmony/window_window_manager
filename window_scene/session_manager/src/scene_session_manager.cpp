@@ -157,7 +157,7 @@ constexpr uint32_t DEFAULT_LOCK_SCREEN_ZORDER = 2000;
 constexpr int32_t MAX_LOCK_STATUS_CACHE_SIZE = 1000;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PC = 50;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PAD = 0;
-constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PHONE = 1;
+constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PHONE = 0;
 constexpr uint64_t NOTIFY_START_ABILITY_TIMEOUT = 4000;
 constexpr uint64_t START_UI_ABILITY_TIMEOUT = 5000;
 constexpr int32_t FORCE_SPLIT_MODE = 5;
@@ -1734,6 +1734,23 @@ sptr<SceneSession> SceneSessionManager::GetSceneSession(int32_t persistentId)
     return nullptr;
 }
 
+bool SceneSessionManager::CheckAbilityInfoByWant(const std::shared_ptr<AAFwk::Want>& want)
+{
+    if (!bundleMgr_) {
+        TLOGE(WmsLogTag::WMS_LIFE, "bundleMgr is nullptr");
+        return false;
+    }
+    AppExecFwk::AbilityInfo abilityInfo;
+    if (!bundleMgr_->QueryAbilityInfo(*want,
+        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, currentUserId_, abilityInfo)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "ability not found %{public}s %{public}s %{public}s",
+            want->GetElement().GetBundleName().c_str(), want->GetElement().GetModuleName().c_str(),
+            want->GetElement().GetAbilityName().c_str());
+        return false;
+    }
+    return true;
+}
+
 bool SceneSessionManager::IsMainWindowByPersistentId(int32_t persistentId)
 {
     if (persistentId <= INVALID_SESSION_ID) {
@@ -1968,6 +1985,9 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     };
     specificCb->onGetSceneSessionByIdCallback_ = [this](int32_t persistentId) {
         return this->GetSceneSession(persistentId);
+    };
+    specificCb->onCheckAbilityInfoByWantCallback_ = [this](const std::shared_ptr<AAFwk::Want>& want) {
+        return this->CheckAbilityInfoByWant(want);
     };
     return specificCb;
 }
@@ -2896,6 +2916,14 @@ void SceneSessionManager::PerformRegisterInRequestSceneSession(sptr<SceneSession
 
 void SceneSessionManager::UpdateSceneSessionWant(const SessionInfo& sessionInfo)
 {
+    taskScheduler_->PostSyncTask([this, &sessionInfo] {
+        DoUpdateSceneSessionWant(sessionInfo);
+        return WMError::WM_OK;
+    }, __func__);
+}
+
+void SceneSessionManager::DoUpdateSceneSessionWant(const SessionInfo& sessionInfo)
+{
     if (sessionInfo.persistentId_ != 0) {
         auto session = GetSceneSession(sessionInfo.persistentId_);
         if (session != nullptr && sessionInfo.want != nullptr) {
@@ -2979,6 +3007,16 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
         TLOGW(WmsLogTag::WMS_LIFE, "Invalid callState:%{public}d", sessionInfo.callState_);
     }
     abilitySessionInfo->scenarios = sessionInfo.scenarios;
+    if (sessionInfo.isRestartApp_) {
+        TLOGI(WmsLogTag::WMS_LIFE, "restart app set caller session");
+        auto callerSession = GetSceneSession(sessionInfo.callerPersistentId_);
+        if (!callerSession) {
+            callerSession = sceneSession;
+        }
+        TLOGI(WmsLogTag::WMS_LIFE, "restart app caller session id: %{public}d",
+            callerSession->GetSessionInfo().persistentId_);
+        abilitySessionInfo->callerSession = sptr<ISession>(callerSession)->AsObject();
+    }
     TLOGI(WmsLogTag::WMS_LIFE, "Is SCB Call, set flag:%{public}d, persistentId:%{public}d, requestId:%{public}d",
         requestId == DEFAULT_REQUEST_FROM_SCB_ID, abilitySessionInfo->persistentId, requestId);
     return abilitySessionInfo;
@@ -3115,7 +3153,7 @@ int32_t SceneSessionManager::StartUIAbilityBySCBTimeoutCheck(const sptr<SceneSes
         int timerId = HiviewDFX::XCollie::GetInstance().SetTimer("WMS:SSM:StartUIAbilityBySCB",
             START_UI_ABILITY_TIMEOUT/1000, nullptr, nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
         auto result = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(abilitySessionInfo,
-            *coldStartFlag, windowStateChangeReason);
+            *coldStartFlag, windowStateChangeReason, sceneSession->GetSessionInfo().isRestartApp_);
         CloseAllFd(sceneSession->GetSessionInfo().want);
         HiviewDFX::XCollie::GetInstance().CancelTimer(timerId);
         *retCode = static_cast<int32_t>(result);
@@ -3228,6 +3266,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
             static_cast<uint32_t>(sceneSession->GetSessionInfo().isSystem_));
         errCode = StartUIAbilityBySCBTimeoutCheck(sceneSession, sceneSessionInfo,
             static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL), isColdStart);
+        ResetSessionInfoAfterStartUIAbility(sceneSession);
     } else {
         TLOGI(WmsLogTag::WMS_MAIN, "[id: %{public}d] Background switch on, isNewActive %{public}d state %{public}u "
             "reuseDelegatorWindow %{public}d", persistentId,
@@ -3267,6 +3306,11 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         sceneSession->UpdatePrivacyModeControlInfo();
     }
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::ResetSessionInfoAfterStartUIAbility(const sptr<SceneSession>& sceneSession) {
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
+    sceneSession->SetRestartApp(false);
 }
 
 void SceneSessionManager::AddRequestTaskInfo(sptr<SceneSession> sceneSession, int32_t requestId) {
@@ -3440,6 +3484,15 @@ void SceneSessionManager::ConfigSupportSnapshotAllSessionStatus()
         systemConfig_.supportSnapshotAllSessionStatus_ = true;
     };
     taskScheduler_->PostAsyncTask(task, "ConfigSupportSnapshotAllSessionStatus");
+}
+
+void SceneSessionManager::ConfigSupportCacheLockedSessionSnapshot()
+{
+    TLOGI(WmsLogTag::WMS_PATTERN, "support");
+    auto task = [this] {
+        systemConfig_.supportSnapshotAllSessionStatus_ = true;
+    };
+    taskScheduler_->PostAsyncTask(task, "ConfigSupportCacheLockedSessionSnapshot");
 }
 
 void SceneSessionManager::ConfigSupportPreloadStartingWindow()
@@ -6849,7 +6902,7 @@ void SceneSessionManager::NotifySessionForCallback(const sptr<SceneSession>& sce
         return;
     }
     TLOGI(WmsLogTag::DEFAULT, "NotifyClosed, id: %{public}d", sceneSession->GetPersistentId());
-    listenerController_->NotifySessionClosed(sceneSession->GetSessionInfo());
+    listenerController_->NotifySessionClosed(sceneSession->GetSessionInfo(), reason);
 }
 
 void SceneSessionManager::NotifyWindowInfoChangeFromSession(int32_t persistentId)
@@ -10486,20 +10539,20 @@ WSError SceneSessionManager::BindDialogSessionTarget(uint64_t persistentId, sptr
 }
 
 void DisplayChangeListener::OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
-    std::vector<uint64_t>& surfaceNodeIds, bool isBlackList)
+    std::vector<uint64_t>& surfaceNodeIds, const std::vector<uint32_t>& needWindowTypeList)
 {
-    SceneSessionManager::GetInstance().GetSurfaceNodeIdsFromMissionIds(missionIds, surfaceNodeIds, isBlackList);
+    SceneSessionManager::GetInstance().GetSurfaceNodeIdsFromMissionIds(missionIds, surfaceNodeIds, needWindowTypeList);
 }
 
 WMError SceneSessionManager::GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
-    std::vector<uint64_t>& surfaceNodeIds, bool isBlackList)
+    std::vector<uint64_t>& surfaceNodeIds, const std::vector<uint32_t>& needWindowTypeList)
 {
     auto isSaCall = SessionPermission::IsSACalling();
     if (!isSaCall) {
         TLOGE(WmsLogTag::DEFAULT, "The interface only support for sa call");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    auto task = [this, &missionIds, &surfaceNodeIds, isBlackList]() {
+    auto task = [this, &missionIds, &surfaceNodeIds, needWindowTypeList]() {
         std::map<int32_t, sptr<SceneSession>>::iterator iter;
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (auto missionId : missionIds) {
@@ -10511,12 +10564,13 @@ WMError SceneSessionManager::GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_
             if (sceneSession == nullptr || sceneSession->GetSurfaceNode() == nullptr) {
                 continue;
             }
-            surfaceNodeIds.push_back(sceneSession->GetSurfaceNode()->GetId());
-            GetSurfaceNodeIdsFromSubSession(sceneSession, surfaceNodeIds);
-            if (isBlackList && sceneSession->GetLeashWinSurfaceNode()) {
-                surfaceNodeIds.push_back(missionId);
+            if (!needWindowTypeList.empty() && std::find(needWindowTypeList.begin(), needWindowTypeList.end(),
+                static_cast<uint32_t>(sceneSession->GetWindowType())) == needWindowTypeList.end()) {
                 continue;
             }
+            surfaceNodeIds.push_back(sceneSession->GetSurfaceNode()->GetId());
+            GetSurfaceNodeIdsFromSubSession(sceneSession, surfaceNodeIds);
+            surfaceNodeIds.push_back(missionId);
             if (sceneSession->GetLeashWinSurfaceNode()) {
                 surfaceNodeIds.push_back(sceneSession->GetLeashWinSurfaceNode()->GetId());
             }
@@ -14433,7 +14487,7 @@ void SceneSessionManager::UpdateModalExtensionRect(const sptr<IRemoteObject>& to
             WSRect transRect = { globalRect.posX_, globalRect.posY_, globalRect.width_, globalRect.height_ };
             parentSession->TransformRelativeRectToGlobalRect(transRect);
             globalRect.posY_ = transRect.posY_;
-            ExtensionWindowEventInfo extensionInfo { persistentId, pid, globalRect, rect, true };
+            ExtensionWindowEventInfo extensionInfo { persistentId, pid, -1, globalRect, rect, true };
             TLOGNI(WmsLogTag::WMS_UIEXT, "%{public}s: pid: %{public}d, persistentId: %{public}d, "
                 "parentId: %{public}d, rect: %{public}s, globalRect: %{public}s, parentGlobalRect: %{public}s",
                 where, pid, persistentId, parentId, rect.ToString().c_str(), globalRect.ToString().c_str(),
@@ -14470,12 +14524,14 @@ void SceneSessionManager::ProcessModalExtensionPointDown(const sptr<IRemoteObjec
 }
 
 void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
-    const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, bool isConstrainedModal)
+    const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, int64_t startModalExtensionTimeStamp,
+    bool isConstrainedModal)
 {
     auto pid = IPCSkeleton::GetCallingRealPid();
     auto callingTokenId = IPCSkeleton::GetCallingTokenID();
     const char* const where = __func__;
-    auto task = [this, sessionStage, token, surfaceNodeId, isConstrainedModal, pid, callingTokenId, where]() {
+    auto task = [this, sessionStage, token, surfaceNodeId, startModalExtensionTimeStamp,
+        isConstrainedModal, pid, callingTokenId, where]() {
         if (sessionStage == nullptr || token == nullptr) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "input is nullptr");
             return;
@@ -14528,6 +14584,7 @@ void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>
             ExtensionWindowEventInfo extensionInfo {
                 .persistentId = persistentId,
                 .pid = pid,
+                .startModalExtensionTimeStamp = startModalExtensionTimeStamp,
             };
             if (!isConstrainedModal) {
                 parentSession->AddNormalModalUIExtension(extensionInfo);
