@@ -842,8 +842,9 @@ void SceneSessionDirtyManager::UpdateWindowFlagsForLockCursor(const sptr<SceneSe
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is null");
         return;
     }
+    auto lastLockCursor = sceneSession->GetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_LOCK_CURSOR);
     if (!sceneSession->IsFocused()) {
-        if ) {
+        if (lastLockCursor) {
             sceneSession->SetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_LOCK_CURSOR, false);
             TLOGW(WmsLogTag::WMS_EVENT, "LockCursor:Inconsistent focus ID:%{public}d", sceneSession->GetWindowId());
         }
@@ -852,9 +853,11 @@ void SceneSessionDirtyManager::UpdateWindowFlagsForLockCursor(const sptr<SceneSe
     if (!sceneSession->GetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_LOCK_CURSOR)) {
         return;
     }
-    windowInfo.flags |= MMI_FLAG_BIT_LOCK_CURSOR;
     if (sceneSession->GetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_CURSOR_FOLLOW_MOVEMENT)) {
         windowInfo.flags |= MMI_FLAG_BIT_CURSOR_FOLLOW_MOVEMENT;
+    } 
+    else {
+        windowInfo.flags |= MMI_FLAG_BIT_LOCK_CURSOR;
     }
 }
 

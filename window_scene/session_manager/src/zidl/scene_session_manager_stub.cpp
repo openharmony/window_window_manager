@@ -2657,6 +2657,10 @@ int SceneSessionManagerStub::HandleSendCommonEvent(MessageParcel& data, MessageP
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed");
         return ERR_INVALID_DATA;
     }
+    if (length > COMMON_EVENT_COMMAND_MAX_LENGTH || length < 0) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Oot of range.");
+        return ERR_INVALID_DATA;
+    }
     datas.emplace_back(length);
 
     int32_t info = 0;

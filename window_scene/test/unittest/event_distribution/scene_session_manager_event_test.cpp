@@ -117,21 +117,34 @@ HWTEST_F(SceneSessionManagerEventTest, LockCursor, TestSize.Level1)
     auto ret = ssm_->UnlockCursor(datas);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PERMISSION);
 
-    // test checkDatas: The format is incorrect(size<1).
+    // Test checkDatas: The format is incorrect(size<1).
     MockAccesstokenKit::MockAccessTokenKitRet(0);
     ret = ssm_->LockCursor(datas);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
     
-    // test checkDatas: The format is incorrect(length error).
+    // Test checkDatas: The format is incorrect(length error).
     datas.emplace_back(LOCK_CURSOR_LENGTH + 1);
     ret = ssm_->LockCursor(datas);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
 
-    // test checkDatas: The format is incorrect(size error).
+    // Test checkDatas: The format is incorrect(size error).
     datas.clear();
     datas.emplace_back(LOCK_CURSOR_LENGTH);
     ret = ssm_->LockCursor(datas);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
+
+    // Test： session is null
+    datas.clear();
+    datas.emplace_back(LOCK_CURSOR_LENGTH);
+    datas.emplace_back(1);
+    datas.emplace_back(1);
+    ret = ssm_->LockCursor(datas);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_SESSION);
+
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->persistentId_ = 1;
+    ssm_->sceneSessionMap_.insert({ session->GetPersistentId(), session });
 
     // test normal process
     datas.clear();
@@ -169,16 +182,28 @@ HWTEST_F(SceneSessionManagerEventTest, UnlockCursor, TestSize.Level1)
     ret = ssm_->UnlockCursor(datas);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
     
-    // test checkDatas: The format is incorrect(length error).
+    // Test checkDatas: The format is incorrect(length error).
     datas.emplace_back(UNLOCK_CURSOR_LENGTH + 1);
     ret = ssm_->UnlockCursor(datas);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
 
-    // test checkDatas: The format is incorrect(size error).
+    // Test checkDatas: The format is incorrect(size error).
     datas.clear();
     datas.emplace_back(UNLOCK_CURSOR_LENGTH);
     ret = ssm_->UnlockCursor(datas);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
+
+    // Test: session is null
+    datas.clear();
+    datas.emplace_back(UNLOCK_CURSOR_LENGTH);
+    datas.emplace_back(1);
+    ret = ssm_->UnlockCursor(datas);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_SESSION);
+
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->persistentId_ = 1;
+    ssm_->sceneSessionMap_.insert({ session->GetPersistentId(), session });
 
     // test normal process
     datas.clear();
