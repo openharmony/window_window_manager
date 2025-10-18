@@ -35,6 +35,10 @@ public:
     explicit AniExtensionWindow(const std::shared_ptr<Rosen::ExtensionWindow> extensionWindow, int32_t hostWindowId);
     AniExtensionWindow(const std::shared_ptr<Rosen::ExtensionWindow> extensionWindow,
         sptr<AAFwk::SessionInfo> sessionInfo);
+    ani_ref GetAniRef() { return aniRef_; }
+    void SetAniRef(const ani_ref& aniRef) { aniRef_ = aniRef; }
+    
+    static void Finalizer(ani_env* env, ani_long nativeObj);
     static ani_object CreateAniExtensionWindow(ani_env* env, sptr<Rosen::Window> window, int32_t hostWindowId,
         bool isHost = true);
     WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea);
@@ -54,6 +58,7 @@ private:
     int32_t hostWindowId_ = 0;
     sptr<AAFwk::SessionInfo> sessionInfo_ = nullptr;
     std::unique_ptr<AniExtensionWindowRegisterManager> extensionRegisterManager_ = nullptr;
+    ani_ref aniRef_ = nullptr;
 };
 
 }  // namespace Rosen
