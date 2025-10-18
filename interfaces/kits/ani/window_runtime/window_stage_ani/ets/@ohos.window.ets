@@ -821,7 +821,7 @@ export enum RectType {
 
 export interface ShowWindowOptions {
     /**
-     * Whether the window automatically gains focus when it is displayed by calling showWindow().
+     * Indicates whether the window get focus when it is showing
      *
      * @type { ?boolean }
      * @syscap SystemCapability.Window.SessionManager
