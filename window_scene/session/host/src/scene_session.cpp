@@ -3968,10 +3968,7 @@ void SceneSession::OnThrowSlipAnimationStateChange(bool isAnimating, bool isFull
         FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(AsyncTraceTaskId::THROW_SLIP_ANIMATION),
             "SceneSession::ThrowSlipAnimation(id:%d)", GetPersistentId());
     }
-    auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
-    if (leashWinSurfaceNode) {
-        leashWinSurfaceNode->SetUIFirstSwitch(isAnimating ? RSUIFirstSwitch::FORCE_DISABLE : RSUIFirstSwitch::NONE);
-    }
+    SetUIFirstSwitch(isAnimating ? RSUIFirstSwitch::FORCE_DISABLE : RSUIFirstSwitch::NONE);
     if (onThrowSlipAnimationStateChangeFunc_) {
         onThrowSlipAnimationStateChangeFunc_(isAnimating, isFullScreen);
     }
