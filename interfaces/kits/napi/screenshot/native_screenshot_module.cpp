@@ -596,10 +596,7 @@ napi_value CaptureFunc(napi_env env, napi_callback_info info)
     param->validInputParam = true;
     if (argc > 0 && GetType(env, argv[0]) == napi_object) {
         TLOGI(WmsLogTag::DMS, "argv[0]'s type is napi_object");
-        bool result = GetScreenshotParam(env, param, argv[0]);
-        if (!result) {
-            return nullptr;
-        }
+        GetScreenshotParam(env, param, argv[0]);
     } else {
         TLOGI(WmsLogTag::DMS, "use default.");
     }
