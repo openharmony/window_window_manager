@@ -493,10 +493,11 @@ void ScreenSessionManagerClient::OnUpdateFoldDisplayMode(FoldDisplayMode display
 }
 
 void ScreenSessionManagerClient::OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
-    std::vector<uint64_t>& surfaceNodeIds, const std::vector<uint32_t>& needWindowTypeList)
+    std::vector<uint64_t>& surfaceNodeIds, const std::vector<uint32_t>& needWindowTypeList, bool isNeedForceCheck)
 {
     if (displayChangeListener_) {
-        displayChangeListener_->OnGetSurfaceNodeIdsFromMissionIds(missionIds, surfaceNodeIds, needWindowTypeList);
+        displayChangeListener_->OnGetSurfaceNodeIdsFromMissionIds(missionIds, surfaceNodeIds,
+            needWindowTypeList, isNeedForceCheck);
     }
 }
 

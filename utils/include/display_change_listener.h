@@ -29,7 +29,8 @@ public:
     virtual void OnScreenshot(DisplayId displayId) = 0;
     virtual void OnImmersiveStateChange(ScreenId screenId, bool& immersive) { return; }
     virtual void OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
-        std::vector<uint64_t>& surfaceNodeIds, const std::vector<uint32_t>& needWindowTypeList = {}) { return; }
+        std::vector<uint64_t>& surfaceNodeIds, const std::vector<uint32_t>& needWindowTypeList = {},
+        bool isNeedForceCheck = false) { return; }
     virtual void OnSetSurfaceNodeIds(DisplayId displayId, const std::vector<uint64_t>& surfaceNodeIds) {}
     virtual void OnVirtualScreenDisconnected(DisplayId displayId) {}
     virtual void OnScreenFoldStatusChanged(const std::vector<std::string>& screenFoldInfo) { return; }
