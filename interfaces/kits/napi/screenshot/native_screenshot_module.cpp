@@ -210,23 +210,26 @@ static void IsNeedPointer(napi_env env, std::unique_ptr<Param> &param, napi_valu
     }
 }
 
-static bool ConvertWindowIdList(napi_env env, std::unique_ptr<Param>& param, napi_value& argv)
+static void ConvertWindowIdList(napi_env env, std::unique_ptr<Param>& param, napi_value& argv)
 {
+    param->validInputParam = false;
     napi_value blackWindowIds;
     napi_status status = napi_get_named_property(env, argv, "blackWindowIds", &blackWindowIds);
     if (status != napi_ok) {
         TLOGD(WmsLogTag::DMS, "no black window ids.");
-        return true;
+        param->validInputParam = true;
+        return;
     }
     uint32_t size = 0;
     if (GetType(env, blackWindowIds) != napi_object ||
         napi_get_array_length(env, blackWindowIds, &size) == napi_invalid_arg) {
-        TLOGW(WmsLogTag::DMS, "no surface id list");
-        return true;
+        TLOGD(WmsLogTag::DMS, "no surface id list");
+        param->validInputParam = true;
+        return;
     }
     if (size > MAX_ARRAY_SIZE) {
         TLOGE(WmsLogTag::DMS, "size bigger than 1024, size: %{public}u", size);
-        return false;
+        return;
     }
     std::vector<uint64_t> persistentIds;
     for (uint32_t i = 0; i < size; i++) {
@@ -234,14 +237,17 @@ static bool ConvertWindowIdList(napi_env env, std::unique_ptr<Param>& param, nap
         napi_value element = nullptr;
         napi_get_element(env, blackWindowIds, i, &element);
         if (napi_get_value_int64(env, element, &persistentId) != napi_ok) {
-            return false;
+            TLOGE(WmsLogTag::DMS, "window id is not number");
+            return;
         }
         if (persistentId < 0) {
+            TLOGE(WmsLogTag::DMS, "window id is negative: %{public}" PRId64, persistentId);
             continue;
         }
         param->option.blackWindowIds.push_back(static_cast<uint64_t>(persistentId));
     }
-    return true;
+    param->validInputParam = true;
+    return;
 }
 
 static void IsCaptureFullOfScreen(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
@@ -258,11 +264,11 @@ static void IsCaptureFullOfScreen(napi_env env, std::unique_ptr<Param> &param, n
     }
 }
 
-static bool GetScreenshotParam(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
+static void GetScreenshotParam(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
 {
     if (param == nullptr) {
         TLOGI(WmsLogTag::DMS, "param == nullptr, use default param");
-        return true;
+        return;
     }
     GetDisplayId(env, param, argv);
     GetRotation(env, param, argv);
@@ -271,7 +277,7 @@ static bool GetScreenshotParam(napi_env env, std::unique_ptr<Param> &param, napi
     IsNeedNotify(env, param, argv);
     IsNeedPointer(env, param, argv);
     IsCaptureFullOfScreen(env, param, argv);
-    return ConvertWindowIdList(env, param, argv);
+    ConvertWindowIdList(env, param, argv);
 }
 
 static void AsyncGetScreenshot(napi_env env, std::unique_ptr<Param> &param)
@@ -410,6 +416,7 @@ napi_value Resolve(napi_env env, std::unique_ptr<Param> &param)
     }
     TLOGI(WmsLogTag::DMS, "screen shot ret=%{public}d.", param->wret);
     if (isThrowError) {
+        TLOGE(WmsLogTag::DMS, "screen shot isThrowError ret=%{public}d.", param->wret);
         napi_throw(env, error);
         return error;
     }
@@ -544,6 +551,14 @@ napi_value PickFunc(napi_env env, napi_callback_info info)
 
 static void AsyncGetScreenCapture(napi_env env, std::unique_ptr<Param> &param)
 {
+    if (!param->validInputParam) {
+        TLOGE(WmsLogTag::DMS, "screen capture failed!");
+        param->wret = DmErrorCode::DM_ERROR_SYSTEM_INNORMAL;
+        param->errMessage = "Parameter error. Possible causes: "
+            "1. Mandatory parameters are left unspecified; "
+            "2. Incorrect parameter types.";
+        return;
+    }
     CaptureOption captureOption;
     captureOption.displayId_ = param->option.displayId;
     captureOption.isNeedNotify_ = param->option.isNeedNotify;
@@ -578,12 +593,10 @@ napi_value CaptureFunc(napi_env env, napi_callback_info info)
     }
     param->option.displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
     napi_ref ref = nullptr;
+    param->validInputParam = true;
     if (argc > 0 && GetType(env, argv[0]) == napi_object) {
         TLOGI(WmsLogTag::DMS, "argv[0]'s type is napi_object");
-        bool result = GetScreenshotParam(env, param, argv[0]);
-        if (!result) {
-            return nullptr;
-        }
+        GetScreenshotParam(env, param, argv[0]);
     } else {
         TLOGI(WmsLogTag::DMS, "use default.");
     }

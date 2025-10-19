@@ -11130,36 +11130,16 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenCapture(const Ca
     DmErrorCode* errorCode)
 {
     TLOGI(WmsLogTag::DMS, "enter!");
-    if (errorCode == nullptr) {
-        TLOGE(WmsLogTag::DMS, "param is null.");
-        return nullptr;
-    }
-    if (system::GetBoolParameter("persist.edm.disallow_screenshot", false)) {
-        TLOGW(WmsLogTag::DMS, "capture disabled by edm!");
-        *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
-        return nullptr;
-    }
-    if (!isSupportCapture_) {
-        TLOGW(WmsLogTag::DMS, "device not support capture.");
-        *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
-        return nullptr;
-    }
-    if (!Permission::CheckCallingPermission(CUSTOM_SCREEN_CAPTURE_PERMISSION) &&
-        !Permission::CheckCallingPermission(CUSTOM_SCREEN_RECORDING_PERMISSION) && !SessionPermission::IsShellCall()) {
-        TLOGE(WmsLogTag::DMS, "Permission Denied! clientName: %{public}s, pid: %{public}d.",
-            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingRealPid());
-        *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
-        return nullptr;
-    }
-    if (captureOption.displayId_ == DISPLAY_ID_INVALID ||
-        (captureOption.displayId_ == DISPLAY_ID_FAKE && !IsFakeDisplayExist())) {
-        TLOGE(WmsLogTag::DMS, "display id invalid.");
-        *errorCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
+    if (!checkCaptureParam(captureOption, errorCode)) {
         return nullptr;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetScreenCapture(%" PRIu64")", captureOption.displayId_);
     std::vector<uint64_t> surfaceNodesList;
-    ConvertWindowIdsToSurfaceNodeList(captureOption.blackWindowIdList_, surfaceNodesList);
+    ConvertWindowIdsToSurfaceNodeList(captureOption.blackWindowIdList_, surfaceNodesList, errorCode);
+    if (*errorCode != DmErrorCode::DM_OK) {
+        return nullptr;
+    }
+
     auto res = GetScreenSnapshot(captureOption.displayId_, false, false, surfaceNodesList);
     AddPermissionUsedRecord(CUSTOM_SCREEN_CAPTURE_PERMISSION,
         static_cast<int32_t>(res != nullptr), static_cast<int32_t>(res == nullptr));
@@ -11181,8 +11161,40 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenCapture(const Ca
     return res;
 }
 
+bool ScreenSessionManager::checkCaptureParam(const CaptureOption& captureOption, DmErrorCode* errorCode)
+{
+    if (errorCode == nullptr) {
+        TLOGE(WmsLogTag::DMS, "param is null.");
+        return false;
+    }
+    if (system::GetBoolParameter("persist.edm.disallow_screenshot", false)) {
+        TLOGW(WmsLogTag::DMS, "capture disabled by edm!");
+        *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
+        return false;
+    }
+    if (!isSupportCapture_) {
+        TLOGW(WmsLogTag::DMS, "device not support capture.");
+        *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
+        return false;
+    }
+    if (!Permission::CheckCallingPermission(CUSTOM_SCREEN_CAPTURE_PERMISSION) &&
+        !Permission::CheckCallingPermission(CUSTOM_SCREEN_RECORDING_PERMISSION) && !SessionPermission::IsShellCall()) {
+        TLOGE(WmsLogTag::DMS, "Permission Denied! clientName: %{public}s, pid: %{public}d.",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingRealPid());
+        *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
+        return false;
+    }
+    if (captureOption.displayId_ == DISPLAY_ID_INVALID ||
+        (captureOption.displayId_ == DISPLAY_ID_FAKE && !IsFakeDisplayExist())) {
+        TLOGE(WmsLogTag::DMS, "display id invalid.");
+        *errorCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
+        return false;
+    }
+    return true;
+}
+
 void ScreenSessionManager::ConvertWindowIdsToSurfaceNodeList(std::vector<uint64_t> windowIdList, 
-    std::vector<uint64_t>& surfaceNodesList)
+    std::vector<uint64_t>& surfaceNodesList, DmErrorCode* errorCode)
 {
     if (windowIdList.empty()) {
         return;
@@ -11193,7 +11205,12 @@ void ScreenSessionManager::ConvertWindowIdsToSurfaceNodeList(std::vector<uint64_
         return;
     }
     const std::vector<uint32_t> needWindowTypeList = { FLOATING_BALL_TYPE };
-    clientProxy->OnGetSurfaceNodeIdsFromMissionIdsChanged(windowIdList, surfaceNodesList, needWindowTypeList);
+    clientProxy->OnGetSurfaceNodeIdsFromMissionIdsChanged(windowIdList, surfaceNodesList, needWindowTypeList, true);
+    if (surfaceNodesList.empty()) {
+        *errorCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
+        TLOGE(WmsLogTag::DMS, "has invalid windowId. cannot trans surfaceNodeId.");
+        return;
+    }
     std::ostringstream oss;
     for (size_t i = 0; i < surfaceNodesList.size(); ++i) {
         oss << surfaceNodesList[i] << ", ";
