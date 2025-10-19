@@ -10539,33 +10539,46 @@ WSError SceneSessionManager::BindDialogSessionTarget(uint64_t persistentId, sptr
 }
 
 void DisplayChangeListener::OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
-    std::vector<uint64_t>& surfaceNodeIds, const std::vector<uint32_t>& needWindowTypeList)
+    std::vector<uint64_t>& surfaceNodeIds, const std::vector<uint32_t>& needWindowTypeList, bool isNeedForceCheck)
 {
-    SceneSessionManager::GetInstance().GetSurfaceNodeIdsFromMissionIds(missionIds, surfaceNodeIds, needWindowTypeList);
+    SceneSessionManager::GetInstance().GetSurfaceNodeIdsFromMissionIds(missionIds, surfaceNodeIds,
+        needWindowTypeList, isNeedForceCheck);
 }
 
 WMError SceneSessionManager::GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
-    std::vector<uint64_t>& surfaceNodeIds, const std::vector<uint32_t>& needWindowTypeList)
+    std::vector<uint64_t>& surfaceNodeIds, const std::vector<uint32_t>& needWindowTypeList, bool isNeedForceCheck)
 {
     auto isSaCall = SessionPermission::IsSACalling();
     if (!isSaCall) {
         TLOGE(WmsLogTag::DEFAULT, "The interface only support for sa call");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    auto task = [this, &missionIds, &surfaceNodeIds, needWindowTypeList]() {
+    auto task = [this, &missionIds, &surfaceNodeIds, &needWindowTypeList, isNeedForceCheck]() {
         std::map<int32_t, sptr<SceneSession>>::iterator iter;
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (auto missionId : missionIds) {
             iter = sceneSessionMap_.find(static_cast<int32_t>(missionId));
             if (iter == sceneSessionMap_.end()) {
+                if (isNeedForceCheck) {
+                    surfaceNodeIds.clear();
+                    return WMError::WM_ERROR_INVALID_WINDOW;
+                }
                 continue;
             }
             auto sceneSession = iter->second;
             if (sceneSession == nullptr || sceneSession->GetSurfaceNode() == nullptr) {
+                if (isNeedForceCheck) {
+                    surfaceNodeIds.clear();
+                    return WMError::WM_ERROR_INVALID_WINDOW;
+                }
                 continue;
             }
             if (!needWindowTypeList.empty() && std::find(needWindowTypeList.begin(), needWindowTypeList.end(),
                 static_cast<uint32_t>(sceneSession->GetWindowType())) == needWindowTypeList.end()) {
+                if (isNeedForceCheck) {
+                    surfaceNodeIds.clear();
+                    return WMError::WM_ERROR_INVALID_WINDOW;
+                }
                 continue;
             }
             surfaceNodeIds.push_back(sceneSession->GetSurfaceNode()->GetId());
