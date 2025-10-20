@@ -91,6 +91,14 @@ public:
     static void SetRelativePositionToParentWindowEnabled(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_boolean enabled, ani_int anchor, ani_int offsetX, ani_int offsetY);
     static void SetWindowDelayRaiseOnDrag(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isEnabled);
+    static void SetDefaultDensityEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enabled);
+    static void SetWindowContainerColor(ani_env* env, ani_object obj, ani_long nativeObj,
+        std::string activeColor, std::string inactiveColor);
+    static void SetWindowContainerModalColor(ani_env* env, ani_object obj, ani_long nativeObj,
+        std::string activeColor, std::string inactiveColor);
+    static bool IsMainWindowFullScreenAcrossDisplays(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void SetWindowShadowEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enable);
+    static bool IsImmersiveLayout(ani_env* env, ani_object obj, ani_long nativeObj);
 
     /*
      * Window Layout
@@ -112,6 +120,7 @@ public:
         ani_boolean enableAnimation);
     ani_object SetDragKeyFramePolicy(ani_env* env, ani_object aniKeyFramePolicy);
     ani_object Snapshot(ani_env* env);
+    ani_object SnapshotSync(ani_env* env);
     void HideNonSystemFloatingWindows(ani_env* env, ani_boolean shouldHide);
     void ResizeAsync(ani_env* env, ani_int width, ani_int height);
     ani_object SetWindowLimits(ani_env* env, ani_object inWindowLimits, ani_object forcible);
@@ -172,6 +181,12 @@ private:
     void OnSetWindowDelayRaiseOnDrag(ani_env* env, ani_boolean isEnabled);
     void OnSetRelativePositionToParentWindowEnabled(ani_env* env, ani_boolean enabled,
         ani_int anchor, ani_int offsetX, ani_int offsetY);
+    void OnSetDefaultDensityEnabled(ani_env* env, ani_boolean enabled);
+    void OnSetWindowContainerColor(ani_env* env, std::string activeColor, std::string inactiveColor);
+    void OnSetWindowContainerModalColor(ani_env* env, std::string activeColor, std::string inactiveColor);
+    bool OnIsMainWindowFullScreenAcrossDisplays(ani_env* env);
+    void OnSetWindowShadowEnabled(ani_env* env, ani_boolean enable);
+    bool OnIsImmersiveLayout(ani_env* env);
 
     /*
      * Window Layout
