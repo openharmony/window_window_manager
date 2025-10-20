@@ -22,6 +22,8 @@
 #include "ani_window_manager.h"
 #include "ani_window_utils.h"
 #include "permission.h"
+#include "pixel_map.h"
+#include "pixel_map_taihe_ani.h"
 #include "window_manager_hilog.h"
 #include "window_scene.h"
 #include "interop_js/arkts_esvalue.h"
@@ -34,10 +36,31 @@ using OHOS::Rosen::WindowScene;
 
 namespace OHOS {
 namespace Rosen {
+enum class ImageFit {
+    FILL,
+    CONTAIN,
+    COVER,
+    FIT_WIDTH,
+    FIT_HEIGHT,
+    NONE,
+    SCALE_DOWN,
+    TOP_LEFT,
+    TOP,
+    TOP_RIGHT,
+    LEFT,
+    CENTER,
+    RIGHT,
+    BOTTOM_LEFT,
+    BOTTOM,
+    BOTTOM_RIGHT,
+    MATRIX,
+};
 
 namespace {
 /* used for free, ani has no destructor right now, only free when aniObj freed */
 static std::map<ani_object, AniWindowStage*> g_localObjs;
+const uint32_t MIN_RESOURCE_ID = 0x1000000;
+const uint32_t MAX_RESOURCE_ID = 0xffffffff;
 } // namespace
 
 AniWindowStage::AniWindowStage(const std::shared_ptr<Rosen::WindowScene>& windowScene)
@@ -299,6 +322,187 @@ void AniWindowStage::OnSetShowOnLockScreen(ani_env* env, ani_boolean showOnLockS
     TLOGE(WmsLogTag::DEFAULT, "[ANI] OnSetShowOnLockScreen end!");
 }
 
+void AniWindowStage::SetImageForRecent(ani_env* env, ani_class cls, ani_long nativeObj, ani_object imageResourceId,
+    ani_int value)
+{
+    TLOGI(WmsLogTag::WMS_PATTERN, "[ANI]");
+    AniWindowStage* aniWindowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
+    if (aniWindowStage != nullptr) {
+        aniWindowStage->OnSetImageForRecent(env, imageResourceId, value);
+    } else {
+        TLOGE(WmsLogTag::WMS_PATTERN, "[ANI] aniWindowStage is nullptr");
+    }
+}
+
+void AniWindowStage::OnSetImageForRecent(ani_env* env, ani_object imageResource, ani_int value)
+{
+    auto windowScene = GetWindowScene().lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "[ANI]windowScene is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    auto mainWindow = windowScene->GetMainWindow();
+    if (mainWindow == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] mainWindow is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    ani_class longClass {};
+    env->FindClass("std.core.Long", &longClass);
+    ani_class pixelMapClass {};
+    env->FindClass("@ohos.multimedia.image.image.PixelMap", &pixelMapClass);
+    ani_boolean isLong = ANI_FALSE;
+    env->Object_InstanceOf(imageResource, longClass, &isLong);
+    ani_boolean isPixelMap = ANI_FALSE;
+    env->Object_InstanceOf(imageResource, pixelMapClass, &isPixelMap);
+ 
+    ani_long imageResourceId;
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    if (isLong) {
+        env->Object_CallMethodByName_Long(imageResource, "unboxed", ":l", &imageResourceId);
+        if (imageResourceId < MIN_RESOURCE_ID || imageResourceId > MAX_RESOURCE_ID) {
+            TLOGE(WmsLogTag::WMS_PATTERN, "imageResourceId invalid: %{public}d", static_cast<int32_t>(imageResourceId));
+            AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+            return;
+        }
+    } else if (isPixelMap) {
+        pixelMap = Media::PixelMapTaiheAni::GetNativePixelMap(env, imageResource);
+        if (pixelMap == nullptr) {
+            TLOGE(WmsLogTag::WMS_PATTERN, "Get pixelMap error");
+            AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+            return;
+        }
+    } else {
+        TLOGE(WmsLogTag::WMS_PATTERN, "imageResource invalid");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return;
+    }
+    if (value < static_cast<int32_t>(ImageFit::FILL) || value > static_cast<int32_t>(ImageFit::MATRIX)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "imageFit invalid: %{public}d", value);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_PATTERN, "imageFit: %{public}d", value);
+    ImageFit imageFit = static_cast<ImageFit>(value);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (pixelMap) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(mainWindow->SetImageForRecentPixelMap(pixelMap, imageFit));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(mainWindow->SetImageForRecent(imageResourceId, imageFit));
+    }
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret);
+        return;
+    }
+}
+
+void AniWindowStage::RemoveImageForRecent(ani_env* env, ani_class cls, ani_long nativeObj)
+{
+    TLOGI(WmsLogTag::WMS_PATTERN, "[ANI]");
+    AniWindowStage* aniWindowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
+    if (aniWindowStage != nullptr) {
+        aniWindowStage->OnRemoveImageForRecent(env);
+    } else {
+        TLOGE(WmsLogTag::WMS_PATTERN, "[ANI] aniWindowStage is nullptr");
+    }
+}
+ 
+void AniWindowStage::OnRemoveImageForRecent(ani_env* env)
+{
+    auto windowScene = GetWindowScene().lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "[ANI]windowScene is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    auto mainWindow = windowScene->GetMainWindow();
+    if (mainWindow == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] mainWindow is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(mainWindow->RemoveImageForRecent());
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret);
+        return;
+    }
+}
+
+void AniWindowStage::SetCustomDensity(ani_env* env, ani_object obj, ani_long nativeObj,
+    ani_double density, ani_boolean applyToSubWindow)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
+    AniWindowStage* aniWindowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
+    if (aniWindowStage != nullptr) {
+        aniWindowStage->OnSetCustomDensity(env, density, applyToSubWindow);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] aniWindowStage is nullptr");
+        return;
+    }
+}
+
+void AniWindowStage::OnSetCustomDensity(ani_env* env, ani_double density, ani_boolean applyToSubWindow)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
+    auto windowScene = GetWindowScene().lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI]windowScene is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    auto window = windowScene->GetMainWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] mainWindow is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+        window->SetCustomDensity(static_cast<float>(density), applyToSubWindow));
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u,%{public}s] set density=%{public}f, result=%{public}d",
+        window->GetWindowId(), window->GetWindowName().c_str(), density, ret);
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret);
+        return;
+    }
+}
+
+void AniWindowStage::SetDefaultDensityEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enabled)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
+    AniWindowStage* aniWindowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
+    if (aniWindowStage != nullptr) {
+        aniWindowStage->OnSetDefaultDensityEnabled(env, enabled);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] aniWindowStage is nullptr");
+        return;
+    }
+}
+
+void AniWindowStage::OnSetDefaultDensityEnabled(ani_env* env, ani_boolean enabled)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
+    auto windowScene = GetWindowScene().lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI]windowScene is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    auto window = windowScene->GetMainWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] mainWindow is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetDefaultDensityEnabled(enabled));
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u,%{public}s] enabled=%{public}u ret=%{public}u",
+        window->GetWindowId(), window->GetWindowName().c_str(), enabled, ret);
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret);
+        return;
+    }
+}
+
 ani_ref AniWindowStage::OnCreateSubWindow(ani_env* env, ani_string name)
 {
     std::string windowName;
@@ -454,6 +658,14 @@ std::array g_methods = {
         reinterpret_cast<void *>(AniWindowStage::NativeTransferStatic)},
     ani_native_function {"nativeTransferDynamic", "J:Lstd/interop/ESValue;",
         reinterpret_cast<void *>(AniWindowStage::NativeTransferDynamic)},
+    ani_native_function {"setImageForRecentSync", "lX{C{std.core.Long}C{@ohos.multimedia.image.image.PixelMap}}i:",
+        reinterpret_cast<void *>(AniWindowStage::SetImageForRecent)},
+    ani_native_function {"removeImageForRecentSync", "l:",
+        reinterpret_cast<void *>(AniWindowStage::RemoveImageForRecent)},
+    ani_native_function {"setCustomDensitySync", "ldz:",
+        reinterpret_cast<void *>(AniWindowStage::SetCustomDensity)},
+    ani_native_function {"setDefaultDensityEnabledSync", "lz:",
+        reinterpret_cast<void *>(AniWindowStage::SetDefaultDensityEnabled)},
 };
 
 std::array g_functions = {
@@ -491,9 +703,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         TLOGE(WmsLogTag::DEFAULT, "[ANI] can't find class %{public}u", ret);
         return ANI_NOT_FOUND;
     }
-    if ((ret = env->Class_BindNativeMethods(cls, g_methods.data(), g_methods.size())) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] bind fail %{public}u", ret);
-        return ANI_NOT_FOUND;
+    for (auto method : g_methods) {
+        if ((ret = env->Class_BindNativeMethods(cls, &method, 1u)) != ANI_OK) {
+            TLOGE(WmsLogTag::DEFAULT, "[ANI] bind window static method fail %{public}u, %{public}s, %{public}s",
+                ret, method.name, method.signature);
+            return ANI_NOT_FOUND;
+        }
     }
     *result = ANI_VERSION_1;
 
@@ -503,9 +718,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         TLOGE(WmsLogTag::DEFAULT, "[ANI] find ns %{public}u", ret);
         return ANI_NOT_FOUND;
     }
-    if ((ret = env->Namespace_BindNativeFunctions(ns, g_functions.data(), g_functions.size())) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] bind ns func %{public}u", ret);
-        return ANI_NOT_FOUND;
+    for (auto method : g_functions) {
+        if ((ret = env->Namespace_BindNativeFunctions(ns, &method, 1u)) != ANI_OK) {
+            TLOGE(WmsLogTag::DEFAULT, "[ANI] bind window static method fail %{public}u, %{public}s, %{public}s",
+                ret, method.name, method.signature);
+            return ANI_NOT_FOUND;
+        }
     }
     AniWindowManager::AniWindowManagerInit(env, ns);
 

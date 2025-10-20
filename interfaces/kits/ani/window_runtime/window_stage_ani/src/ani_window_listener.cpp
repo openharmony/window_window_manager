@@ -722,6 +722,52 @@ void AniWindowListener::OnWindowStatusDidChange(WindowStatus status)
         AppExecFwk::EventQueue::Priority::HIGH);
 }
 
+void AniWindowListener::OnAcrossDisplaysChanged(bool isAcrossDisplays)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
+    const char* const where = __func__;
+    auto task = [self = weakRef_, isAcrossDisplays, env = env_, where] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] %{public}s: listener or env is null", where);
+            return;
+        }
+        AniWindowUtils::CallAniFunctionVoid(env, "C{@ohos.window.window}",
+            "runMainWindowFullScreenAcrossDisplaysChangedCallback",
+            nullptr, thisListener->aniCallback_, static_cast<ani_boolean>(isAcrossDisplays));
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "[ANI] %{public}s: isAcrossDisplays=%{public}u",
+            where, isAcrossDisplays);
+    };
+    if (!eventHandler_) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] main event handler is null");
+        return;
+    }
+    eventHandler_->PostTask(task, "[ANI] wms:AniWindowListener::OnAcrossDisplaysChanged", 0,
+        AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
+void AniWindowListener::OnScreenshotAppEvent(ScreenshotEventType type)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
+    const char* const where = __func__;
+    auto task = [self = weakRef_, type, env = env_, where] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] %{public}s: listener or env is null", where);
+            return;
+        }
+        AniWindowUtils::CallAniFunctionVoid(env, "C{@ohos.window.window}",
+            "runScreenshotAppEvent",
+            nullptr, thisListener->aniCallback_, type);
+    };
+    if (!eventHandler_) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] main event handler is null");
+        return;
+    }
+    eventHandler_->PostTask(task, "[ANI] wms:AniWindowListener::OnScreenshotAppEvent", 0,
+        AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
 void AniWindowListener::OnFreeWindowModeChange(bool isInFreeWindowMode)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");

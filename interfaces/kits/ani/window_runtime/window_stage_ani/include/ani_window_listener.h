@@ -58,6 +58,8 @@ class AniWindowListener : public IWindowChangeListener,
                         public IRectChangeInGlobalDisplayListener,
                         public IWindowStatusDidChangeListener,
                         public IWindowRotationChangeListener,
+                        public IAcrossDisplaysChangeListener,
+                        public IScreenshotAppEventListener,
                         public IFreeWindowModeChangeListener {
 public:
     AniWindowListener(ani_env* env, ani_vm* vm, ani_ref callback, CaseType caseType)
@@ -108,6 +110,8 @@ public:
         RotationChangeResult& rotationChangeResult) override;
     void OnRectChangeInGlobalDisplay(const Rect& rect, WindowSizeChangeReason reason) override;
     void OnWindowStatusDidChange(WindowStatus status) override;
+    void OnAcrossDisplaysChanged(bool isAcrossDisplays) override;
+    void OnScreenshotAppEvent(ScreenshotEventType type) override;
     void OnFreeWindowModeChange(bool IsInFreeWindowMode) override;
 
     void AfterLifecycleForeground() override;
