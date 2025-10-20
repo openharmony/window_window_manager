@@ -23,6 +23,7 @@ namespace Rosen {
 namespace {
     const std::string PIP_CONTENT_PATH = "/system/etc/window/resources/pip_content.abc";
     const std::string DESTROY_TIMEOUT_TASK = "PipDestroyTimeout";
+    const int32_t INVALID_HANDLE_ID = -1;
 }
 
 PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption, sptr<Window> mainWindow,
@@ -140,18 +141,6 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
         DeletePIPMode();
     }
     return errCode;
-}
-
-void PictureInPictureController::DeletePIPMode()
-{
-    std::string navId = pipOption_->GetNavigationId();
-    if (!navId.empty()) {
-        auto navController = NavigationController::GetNavigationController(mainWindow_->GetUIContent(), navId);
-        if (navController) {
-            navController->DeletePIPMode(handleId_);
-            TLOGI(WmsLogTag::WMS_PIP, "Delete pip mode id: %{public}d", handleId_);
-        }
-    }
 }
 
 void PictureInPictureController::SetAutoStartEnabled(bool enable)
@@ -466,32 +455,43 @@ bool PictureInPictureController::IsPullPiPAndHandleNavigation()
         return false;
     }
     std::string navId = pipOption_->GetNavigationId();
-    auto navController = NavigationController::GetNavigationController(mainWindow_->GetUIContent(), navId);
-    if (navController) {
-        if (navController->IsNavDestinationInTopStack()) {
-            handleId_ = navController->GetTopHandle();
-            if (handleId_ == -1) {
-                TLOGE(WmsLogTag::WMS_PIP, "Get top handle error");
-                return false;
-            }
-            if (firstHandleId_ != -1) {
-                handleId_ = firstHandleId_;
-                navController->SetInPIPMode(handleId_);
-                TLOGI(WmsLogTag::WMS_PIP, "Cache first navigation");
-            } else {
-                TLOGI(WmsLogTag::WMS_PIP, "First top handle id: %{public}d", handleId_);
-                firstHandleId_ = handleId_;
-                navController->SetInPIPMode(handleId_);
-            }
-            return true;
-        } else {
-            TLOGE(WmsLogTag::WMS_PIP, "Top is not navDestination");
+    handleId_ = pipOption_->GetHandleId();
+    auto navController = GetNavigationController(navId);
+    if (navController == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "Get navController error");
+        return false;
+    }
+
+    if (handleId_ != INVALID_HANDLE_ID) {
+        navController->SetInPIPMode(handleId_);
+        TLOGI(WmsLogTag::WMS_PIP, "SetInPIPMode handleId_: %{public}d, top result: %{public}d",
+            handleId_, navController->GetTopHandle());
+        return true;
+    }
+
+    if (!navController->IsNavDestinationInTopStack()) {
+        TLOGE(WmsLogTag::WMS_PIP, "Top is not navDestination");
+        return false;
+    }
+
+    TLOGI(WmsLogTag::WMS_PIP, "IsPullPiPAndHandleNavigation IsNavDestinationInTopStack");
+    if (handleId_ == INVALID_HANDLE_ID) {
+        handleId_ = navController->GetTopHandle();
+        if (handleId_ == INVALID_HANDLE_ID) {
+            TLOGE(WmsLogTag::WMS_PIP, "Get top handle error");
             return false;
         }
-    } else {
-        TLOGE(WmsLogTag::WMS_PIP, "Get navController error");
+        if (firstHandleId_ != INVALID_HANDLE_ID) {
+            handleId_ = firstHandleId_;
+            navController->SetInPIPMode(handleId_);
+            TLOGI(WmsLogTag::WMS_PIP, "Cache first navigation");
+        } else {
+            TLOGI(WmsLogTag::WMS_PIP, "First top handle id: %{public}d", handleId_);
+            firstHandleId_ = handleId_;
+            navController->SetInPIPMode(handleId_);
+        }
     }
-    return false;
+    return true;
 }
 
 std::string PictureInPictureController::GetPiPNavigationId()
@@ -507,6 +507,27 @@ napi_ref PictureInPictureController::GetCustomNodeController()
 napi_ref PictureInPictureController::GetTypeNode() const
 {
     return pipOption_ == nullptr ? nullptr : pipOption_->GetTypeNodeRef();
+}
+
+NavigationController* PictureInPictureController::GetNavigationController(const std::string& navId)
+{
+    return NavigationController::GetNavigationController(mainWindow_->GetUIContent(), navId);
+}
+
+void PictureInPictureController::DeletePIPMode()
+{
+    if (mainWindow_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "Main window is null");
+        return;
+    }
+    std::string navId = pipOption_->GetNavigationId();
+    if (!navId.empty()) {
+        auto navController = GetNavigationController(navId);
+        if (navController) {
+            navController->DeletePIPMode(handleId_);
+            TLOGI(WmsLogTag::WMS_PIP, "Delete pip mode id: %{public}d", handleId_);
+        }
+    }
 }
 
 } // namespace Rosen

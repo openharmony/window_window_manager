@@ -55,6 +55,32 @@ public:
                  XComponentControllerErrorCode(std::shared_ptr<XComponentController> xComponentController));
 };
 
+class MockPictureInPictureController : public PictureInPictureController {
+public:
+    MockPictureInPictureController(sptr<PipOption> pipOption, sptr<Window> mainWindow, uint32_t mainWindowId,
+        napi_env env) : PictureInPictureController(pipOption, mainWindow, mainWindowId, env) {}
+    ~MockPictureInPictureController() {};
+    MOCK_METHOD1(GetNavigationController, NavigationController*(const std::string& navId));
+};
+
+class MockNavigationController : public NavigationController {
+public:
+    void SetInPIPMode(int32_t handle)
+    {
+        handle_ = handle;
+    }
+
+    void DeletePIPMode(int32_t handle)
+    {
+        handle_ = 0;
+    }
+
+    MOCK_METHOD0(IsNavDestinationInTopStack, bool());
+    MOCK_METHOD0(GetTopHandle, int32_t());
+public:
+    int handle_ {0};
+};
+
 class PictureInPictureControllerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -63,6 +89,9 @@ public:
     void TearDown() override;
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
+
+    sptr<MockPictureInPictureController> pipControl_ {nullptr};
+    std::shared_ptr<MockNavigationController> naviControl_ {nullptr};
 };
 
 void PictureInPictureControllerTest::SetUpTestCase() {}
@@ -74,9 +103,22 @@ void PictureInPictureControllerTest::TearDownTestCase()
 #endif
 }
 
-void PictureInPictureControllerTest::SetUp() {}
+void PictureInPictureControllerTest::SetUp()
+{
+    sptr<MockWindow> mw = sptr<MockWindow>::MakeSptr();
+    sptr<PipOption> option = sptr<PipOption>::MakeSptr();
+    uint32_t mainWindowId = 100;
+    pipControl_ = sptr<MockPictureInPictureController>::MakeSptr(option, mw, mainWindowId, nullptr);
+    ASSERT_NE(nullptr, pipControl_);
+    naviControl_ = std::make_shared<MockNavigationController>();
+    ASSERT_NE(nullptr, naviControl_);
+}
 
-void PictureInPictureControllerTest::TearDown() {}
+void PictureInPictureControllerTest::TearDown()
+{
+    pipControl_ = nullptr;
+    naviControl_ = nullptr;
+}
 
 namespace {
 /**
@@ -805,6 +847,109 @@ HWTEST_F(PictureInPictureControllerTest, IsPullPiPAndHandleNavigation, TestSize.
 }
 
 /**
+ * @tc.name: IsPullPiPAndHandleNavigation_01
+ * @tc.desc: IsPullPiPAndHandleNavigation should return false when GetNavigationController returns nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, IsPullPiPAndHandleNavigation_01, TestSize.Level1)
+{
+    pipControl_->pipOption_->SetTypeNodeEnabled(false);
+    pipControl_->pipOption_->SetNavigationId("navId");
+    EXPECT_CALL(*(pipControl_), GetNavigationController(_)).Times(1).WillOnce(Return(nullptr));
+    EXPECT_EQ(false, pipControl_->IsPullPiPAndHandleNavigation());
+}
+
+/**
+ * @tc.name: IsPullPiPAndHandleNavigation_02
+ * @tc.desc: IsPullPiPAndHandleNavigation should return false when Top is not navDestination
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, IsPullPiPAndHandleNavigation_02, TestSize.Level1)
+{
+    pipControl_->pipOption_->SetTypeNodeEnabled(false);
+    pipControl_->pipOption_->SetNavigationId("navId");
+
+    EXPECT_CALL(*(pipControl_), GetNavigationController(_)).Times(1).WillOnce(Return(naviControl_.get()));
+    EXPECT_CALL(*(naviControl_), IsNavDestinationInTopStack()).Times(1).WillOnce(Return(false));
+    EXPECT_EQ(false, pipControl_->IsPullPiPAndHandleNavigation());
+}
+
+/**
+ * @tc.name: IsPullPiPAndHandleNavigation_03
+ * @tc.desc: IsPullPiPAndHandleNavigation should return true when pipOption's handle_ is valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, IsPullPiPAndHandleNavigation_03, TestSize.Level1)
+{
+    pipControl_->pipOption_->SetTypeNodeEnabled(false);
+    pipControl_->pipOption_->SetNavigationId("navId");
+
+    pipControl_->pipOption_->SetHandleId(2);
+    EXPECT_CALL(*(pipControl_), GetNavigationController(_)).Times(1).WillOnce(Return(naviControl_.get()));
+    EXPECT_CALL(*(naviControl_), GetTopHandle()).Times(1).WillOnce(Return(1));
+    EXPECT_EQ(true, pipControl_->IsPullPiPAndHandleNavigation());
+}
+
+/**
+ * @tc.name: IsPullPiPAndHandleNavigation_04
+ * @tc.desc: IsPullPiPAndHandleNavigation should return false when GetTopHandle return -1
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, IsPullPiPAndHandleNavigation_04, TestSize.Level1)
+{
+    pipControl_->pipOption_->SetTypeNodeEnabled(false);
+    pipControl_->pipOption_->SetNavigationId("navId");
+
+    EXPECT_CALL(*(pipControl_), GetNavigationController(_)).Times(1).WillOnce(Return(naviControl_.get()));
+    EXPECT_CALL(*(naviControl_), IsNavDestinationInTopStack()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*(naviControl_), GetTopHandle()).Times(1).WillOnce(Return(-1));
+    EXPECT_EQ(false, pipControl_->IsPullPiPAndHandleNavigation());
+}
+
+/**
+ * @tc.name: IsPullPiPAndHandleNavigation_05
+ * @tc.desc: IsPullPiPAndHandleNavigation should return true, and firstHandleId_ should update by handleId_,
+             when firstHandleId_ == -1
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, IsPullPiPAndHandleNavigation_05, TestSize.Level1)
+{
+    pipControl_->pipOption_->SetTypeNodeEnabled(false);
+    pipControl_->pipOption_->SetNavigationId("navId");
+
+    EXPECT_CALL(*(pipControl_), GetNavigationController(_)).Times(1).WillOnce(Return(naviControl_.get()));
+    EXPECT_CALL(*(naviControl_), IsNavDestinationInTopStack()).Times(1).WillOnce(Return(true));
+
+    int32_t topHandle = 1;
+    EXPECT_CALL(*(naviControl_), GetTopHandle()).Times(1).WillOnce(Return(topHandle));
+    EXPECT_EQ(true, pipControl_->IsPullPiPAndHandleNavigation());
+    EXPECT_EQ(topHandle, pipControl_->firstHandleId_);
+    EXPECT_EQ(pipControl_->firstHandleId_, topHandle);
+}
+
+/**
+ * @tc.name: IsPullPiPAndHandleNavigation_06
+ * @tc.desc: IsPullPiPAndHandleNavigation should return true, and handleId_ should update by
+             pipControl_->firstHandleId_, when firstHandleId_ != -1
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, IsPullPiPAndHandleNavigation_06, TestSize.Level1)
+{
+    pipControl_->pipOption_->SetTypeNodeEnabled(false);
+    pipControl_->pipOption_->SetNavigationId("navId");
+
+    EXPECT_CALL(*(pipControl_), GetNavigationController(_)).Times(1).WillOnce(Return(naviControl_.get()));
+    EXPECT_CALL(*(naviControl_), IsNavDestinationInTopStack()).Times(1).WillOnce(Return(true));
+
+    int32_t topHandle = 1;
+    EXPECT_CALL(*(naviControl_), GetTopHandle()).Times(1).WillOnce(Return(topHandle));
+    pipControl_->firstHandleId_ = 2;
+    EXPECT_EQ(true, pipControl_->IsPullPiPAndHandleNavigation());
+    EXPECT_EQ(pipControl_->firstHandleId_, pipControl_->handleId_);
+    EXPECT_EQ(pipControl_->handleId_, 2);
+}
+
+/**
  * @tc.name: ResetExtController
  * @tc.desc: ResetExtController
  * @tc.type: FUNC
@@ -1226,6 +1371,62 @@ HWTEST_F(PictureInPictureControllerTest, GetPiPSettingSwitchStatus, TestSize.Lev
         std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
     EXPECT_EQ(false, pipControl->GetPiPSettingSwitchStatus());
     WindowSessionImpl::windowSessionMap_.clear();
+}
+
+/**
+ * @tc.name: DeletePIPMode
+ * @tc.desc: DeletePIPMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, DeletePIPMode_WhenMainWindowIsNull, TestSize.Level1)
+{
+    naviControl_->SetInPIPMode(10);
+    EXPECT_EQ(10, naviControl_->handle_);
+
+    pipControl_->mainWindow_ = nullptr;
+    pipControl_->DeletePIPMode();
+    EXPECT_EQ(10, naviControl_->handle_);
+}
+
+HWTEST_F(PictureInPictureControllerTest, DeletePIPMode_WhenNavigationIdIsEmpty, TestSize.Level1)
+{
+    naviControl_->SetInPIPMode(100);
+    EXPECT_EQ(100, naviControl_->handle_);
+
+    pipControl_->pipOption_->SetNavigationId("");
+    pipControl_->DeletePIPMode();
+    EXPECT_EQ(100, naviControl_->handle_);
+}
+
+HWTEST_F(PictureInPictureControllerTest, DeletePIPMode_WhenGetNavigationControllerReturnNull, TestSize.Level1)
+{
+    naviControl_->SetInPIPMode(20);
+    EXPECT_EQ(20, naviControl_->handle_);
+
+    EXPECT_CALL(*(pipControl_), GetNavigationController(_)).Times(1).WillOnce(Return(nullptr));
+    pipControl_->pipOption_->SetNavigationId("navId");
+    pipControl_->DeletePIPMode();
+    EXPECT_EQ(20, naviControl_->handle_);
+}
+
+HWTEST_F(PictureInPictureControllerTest, DeletePIPMode_WhenGetNavigationControllerReturnNotNull, TestSize.Level1)
+{
+    naviControl_->SetInPIPMode(30);
+    EXPECT_EQ(30, naviControl_->handle_);
+
+    EXPECT_CALL(*(pipControl_), GetNavigationController(_)).Times(1).WillOnce(Return(naviControl_.get()));
+    pipControl_->pipOption_->SetNavigationId("navId");
+    pipControl_->DeletePIPMode();
+    EXPECT_EQ(0, naviControl_->handle_);
+}
+
+HWTEST_F(PictureInPictureControllerTest, GetNavigationController, TestSize.Level1)
+{
+    sptr<MockWindow> mw = sptr<MockWindow>::MakeSptr();
+    sptr<PipOption> option = sptr<PipOption>::MakeSptr();
+    sptr<MockPictureInPictureController> pipControl =
+        sptr<MockPictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
+    EXPECT_EQ(nullptr, pipControl->GetNavigationController(""));
 }
 } // namespace
 } // namespace Rosen
