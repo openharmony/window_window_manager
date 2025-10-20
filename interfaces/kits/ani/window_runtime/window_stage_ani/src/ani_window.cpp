@@ -3124,7 +3124,7 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::ShowWindowWithOptions)},
         ani_native_function {"getParentWindow", "J:L@ohos/window/window/Window;",
             reinterpret_cast<void *>(GetParentWindow)},
-        ani_native_function {"setParentWindow", "JD:V",
+        ani_native_function {"setParentWindow", "JI:V",
             reinterpret_cast<void *>(SetParentWindow)},
         ani_native_function {"destroyWindowSync", nullptr,
             reinterpret_cast<void *>(AniWindow::DestroyWindow)},
