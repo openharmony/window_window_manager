@@ -2035,7 +2035,7 @@ export class WindowInternal implements Window {
     private native destroyWindowSync(nativeObj: long): void;
     private native isWindowShowingSync(nativeObj: long): boolean;
     private native getParentWindow(nativeObj: long): Window;
-    private native setParentWindow(nativeObj: long, windowId: double): void;
+    private native setParentWindow(nativeObj: long, windowId: int): void;
     private native setContentAspectRatio(
       nativeObj: long, ratio: number, isPersistent: boolean, needUpdateRect: boolean): void;
     private native onSync(nativeObj: long, type: string, callback: object): void;
@@ -2717,7 +2717,7 @@ export class WindowInternal implements Window {
       return this.getParentWindow(this.nativeObj);
     }
 
-    public setParentWindow(windowId: number): Promise<void> {
+    public setParentWindow(windowId: int): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setParentWindow(this.nativeObj, windowId);
@@ -3120,7 +3120,7 @@ export interface Window {
     destroyWindow(): Promise<void>;
     isWindowShowing(): boolean;
     getParentWindow(): Window;
-    setParentWindow(windowId: number): Promise<void>;
+    setParentWindow(windowId: int): Promise<void>;
     setContentAspectRatio(ratio: number, isPersistent?: boolean, needUpdateRect?: boolean): Promise<void>;
     opacity(opacity: double): void;
     scale(scaleOptions: ScaleOptions): void;
