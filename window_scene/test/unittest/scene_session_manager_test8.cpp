@@ -1328,7 +1328,7 @@ HWTEST_F(SceneSessionManagerTest8, RemoveSessionBlackList02, TestSize.Level1)
     auto ret = ssm_->SetScreenPrivacyWindowTagSwitch(1, privacyWindowTagVactor, true);
     EXPECT_EQ(WMError::WM_OK, ret);
 
-    auto ret = ssm_->SetScreenPrivacyWindowTagSwitch(1, privacyWindowTags, false);
+    ret = ssm_->SetScreenPrivacyWindowTagSwitch(1, privacyWindowTagVactor, false);
     EXPECT_EQ(WMError::WM_OK, ret);
 
     ret = ssm_->RemoveSessionBlackList(sceneSessionList, privacyWindowTags);
