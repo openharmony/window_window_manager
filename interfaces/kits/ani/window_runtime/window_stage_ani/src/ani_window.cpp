@@ -1379,8 +1379,8 @@ void AniWindow::OnShowWindowWithOptions(ani_env* env, ani_object aniShowWindowOp
         return;
     }
     if (focusOnShow == false &&
-            (WindowHelper::IsModalSubWindow(window->GetType(), window->GetWindowFlags()) ||
-             WindowHelper::IsDialogWindow(window->GetType()))) {
+        (WindowHelper::IsModalSubWindow(window->GetType(), window->GetWindowFlags()) || 
+        WindowHelper::IsDialogWindow(window->GetType()))) {
         TLOGNE(WmsLogTag::WMS_FOCUS, "only normal sub window supports setting focusOnShow");
         return;
     }
@@ -1454,7 +1454,7 @@ ani_boolean AniWindow::OnIsWindowShowing(ani_env* env)
     return ani_boolean(window->GetWindowState() == WindowState::STATE_SHOWN);
 }
 
-ani_ref AniWindow::GetParentWindow(ani_env *env)
+ani_ref AniWindow::GetParentWindow(ani_env* env)
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_SUB, "[ANI] WindowToken_ is nullptr");
