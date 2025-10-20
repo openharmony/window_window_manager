@@ -2613,7 +2613,7 @@ export class WindowInternal implements Window {
           hexStr += toHex(alpha);
         }
         hexStr += toHex(red) + toHex(green) + toHex(blue);
-        this.setWindowBackgroundColor(this.Obj, hexStr);
+        this.setWindowBackgroundColor(this.nativeObj, hexStr);
       }
     }
 
