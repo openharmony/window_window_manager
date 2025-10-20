@@ -837,13 +837,6 @@ public:
     void PreLoadStartingWindow(sptr<SceneSession> sceneSession);
 
     /*
-     * Window Event
-     */
-    bool checkDatas(const std::vector<int32_t>& parameters, const int32_t length);
-    WMError LockCursor(const std::vector<int32_t>& parameters) override;
-    WMError UnlockCursor(const std::vector<int32_t>& parameters) override;
-
-    /*
      * Window Animation
      */
     WMError AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,

@@ -372,14 +372,6 @@ public:
     {
         return WMError::WM_OK;
     }
-
-    /*
-     * Window event
-     */
-    virtual WMError SendCommonEvent(int32_t command, const std::vector<int32_t>& parameters)
-    {
-        return WMError::WM_OK;
-    }
 };
 }
 }

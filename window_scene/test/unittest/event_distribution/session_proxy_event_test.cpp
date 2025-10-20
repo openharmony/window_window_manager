@@ -16,8 +16,8 @@
 #include <gtest/gtest.h>
 #include "iremote_object_mocker.h"
 #include "mock/mock_message_parcel.h"
-#include "session_manager/include/zidl/scene_session_manager_interface.h"
-#include "session_manager/include/zidl/scene_session_manager_proxy.h"
+#include "session/host/include/zidl/session_interface.h"
+#include "session/host/include/zidl/session_proxy.h"
 #include "window_manager_agent.h"
 #include "zidl/window_manager_agent_interface.h"
 
@@ -25,7 +25,7 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
-class sceneSessionManagerProxyEventTest : public testing::Test {
+class SessionProxyEventTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -34,13 +34,13 @@ public:
     sptr<IRemoteObject> iRemoteObjectMocker;
 };
 
-void sceneSessionManagerProxyEventTest::SetUpTestCase() {}
+void SessionProxyEventTest::SetUpTestCase() {}
 
-void sceneSessionManagerProxyEventTest::TearDownTestCase() {}
+void SessionProxyEventTest::TearDownTestCase() {}
 
-void sceneSessionManagerProxyEventTest::SetUp() {}
+void SessionProxyEventTest::SetUp() {}
 
-void sceneSessionManagerProxyEventTest::TearDown() {}
+void SessionProxyEventTest::TearDown() {}
 
 namespace {
 /**
@@ -48,10 +48,10 @@ namespace {
  * @tc.desc: SendCommonEvent
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyEventTest, SendCommonEvent, TestSize.Level1)
+HWTEST_F(SessionProxyEventTest, SendCommonEvent, TestSize.Level1)
 {
     sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
-    auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
+    auto proxy = sptr<SessionProxy>::MakeSptr(remoteMocker);
     std::vector<int32_t> parameters;
     // Failed to test interface token.
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);

@@ -17,39 +17,39 @@
 #include <message_option.h>
 #include <message_parcel.h>
 
-#include "session_manager/include/scene_session_manager.h"
-#include "session_manager/include/zidl/scene_session_manager_interface.h"
-#include "session_manager/include/zidl/scene_session_manager_stub.h"
+#include "session/host/include/scene_session.h"
+#include "session/host/include/zidl/session_interface.h"
+#include "session/host/include/zidl/session_stub.h"
 #include "mock/mock_message_parcel.h"
 
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
-class SceneSessionManagerStubEventTest : public testing::Test {
+class SessionStubEventTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-    sptr<SceneSessionManagerStub> stub_;
+    sptr<SessionStub> stub_;
 };
 
-void SceneSessionManagerStubEventTest::SetUpTestCase()
+void SessionStubEventTest::SetUpTestCase()
 {
 }
 
-void SceneSessionManagerStubEventTest::TearDownTestCase()
+void SessionStubEventTest::TearDownTestCase()
 {
 }
 
-void SceneSessionManagerStubEventTest::SetUp()
+void SessionStubEventTest::SetUp()
 {
-    stub_ = sptr<SceneSessionManager>::MakeSptr();
-    SceneSessionManager::GetInstance().isUserBackground_ = true;
+    stub_ = sptr<SessionStubMocker>::MakeSptr();
+    EXPECT_NE(nullptr, stub_);
 }
 
-void SceneSessionManagerStubEventTest::TearDown()
+void SessionStubEventTest::TearDown()
 {
 }
 
@@ -59,7 +59,7 @@ namespace {
  * @tc.desc: test ProcessRemoteRequest
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubEventTest, ProcessRemoteRequest, TestSize.Level1)
+HWTEST_F(SessionStubEventTest, ProcessRemoteRequest, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -79,7 +79,7 @@ HWTEST_F(SceneSessionManagerStubEventTest, ProcessRemoteRequest, TestSize.Level1
  * @tc.desc: test HandleSendCommonEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubEventTest, HandleSendCommonEvent, TestSize.Level1)
+HWTEST_F(SessionStubEventTest, HandleSendCommonEvent, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;

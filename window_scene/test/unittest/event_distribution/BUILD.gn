@@ -136,7 +136,7 @@ ohos_unittest("ws_intention_event_manager_test") {
   ]
 }
 
-ohos_unittest("ws_scene_session_manager_event_test") {
+ohos_unittest("ws_scene_session_event_test") {
   module_out_path = module_out_path
 
   include_dirs = [
@@ -146,7 +146,7 @@ ohos_unittest("ws_scene_session_manager_event_test") {
 
   sources = [ 
     "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
-    "scene_session_manager_event_test.cpp",
+    "scene_session_event_test.cpp",
   ]
 
   deps = [
@@ -170,7 +170,7 @@ ohos_unittest("ws_scene_session_manager_event_test") {
   ]
 }
 
-ohos_unittest("ws_scene_session_manager_proxy_event_test") {
+ohos_unittest("ws_session_proxy_event_test") {
   module_out_path = module_out_path
 
   configs =
@@ -178,7 +178,7 @@ ohos_unittest("ws_scene_session_manager_proxy_event_test") {
 
   sources = [
     "../../mock/mock_message_parcel.cpp",
-    "scene_session_manager_proxy_event_test.cpp",
+    "session_proxy_event_test.cpp",
   ]
 
   defines = [ "ENABLE_MOCK_READ_INT32" ]
@@ -204,7 +204,7 @@ ohos_unittest("ws_scene_session_manager_proxy_event_test") {
   ]
 }
 
-ohos_unittest("ws_scene_session_manager_stub_event_test") {
+ohos_unittest("ws_session_stub_event_test") {
   module_out_path = module_out_path
 
   configs =
@@ -212,7 +212,7 @@ ohos_unittest("ws_scene_session_manager_stub_event_test") {
 
   sources = [
     "${window_base_path}/window_scene/test/mock/mock_message_parcel.cpp",
-    "scene_session_manager_stub_event_test.cpp",
+    "session_stub_event_test.cpp",
   ]
 
   defines = [ "ENABLE_MOCK_READ_INT32" ]

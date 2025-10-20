@@ -467,6 +467,13 @@ public:
     WSError SetSubWindowSource(SubWindowSource source) override;
 
     /*
+     * Window Event
+     */
+    bool checkDatas(const std::vector<int32_t>& parameters, const int32_t length);
+    WMError LockCursor(const std::vector<int32_t>& parameters) override;
+    WMError UnlockCursor(const std::vector<int32_t>& parameters) override;
+
+    /*
      * Window Immersive
      */
     WSError OnNeedAvoid(bool status) override;
