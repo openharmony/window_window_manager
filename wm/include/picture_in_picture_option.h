@@ -57,6 +57,9 @@ public:
     bool IsTypeNodeEnabled() const;
     uint32_t GetPipPriority(uint32_t pipTemplateType) const;
     void GetPiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo);
+    void SetHandleId(const int32_t handleId);
+    int32_t GetHandleId() const;
+
 private:
     void* contextPtr_ = nullptr;
     uint32_t templateType_  = 0;
@@ -72,6 +75,7 @@ private:
     napi_ref typeNode_ = nullptr;
     bool useTypeNode_ = false;
     napi_ref storage_ = nullptr;
+    int32_t handleId_ = -1;
 };
 }
 }

@@ -255,6 +255,34 @@ HWTEST_F(PictureInPictureOptionTest, GetPiPTemplateInfo, TestSize.Level1)
     option->GetPiPTemplateInfo(pipTemplateInfo);
     ASSERT_EQ(testValue, pipTemplateInfo.defaultWindowSizeType);
 }
+
+/**
+ * @tc.name: SetHandleId
+ * @tc.desc: SetHandleId
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureOptionTest, SetHandleId, TestSize.Level1)
+{
+    sptr<PipOption> option = sptr<PipOption>::MakeSptr();
+    int handleId = 10;
+    option->SetHandleId(handleId);
+    EXPECT_EQ(handleId, option->GetHandleId());
+}
+
+/**
+ * @tc.name: GetHandleId
+ * @tc.desc: GetHandleId
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureOptionTest, GetHandleId, TestSize.Level1)
+{
+    sptr<PipOption> option = sptr<PipOption>::MakeSptr();
+    EXPECT_EQ(-1, option->GetHandleId());
+
+    int handleId = 8;
+    option->SetHandleId(handleId);
+    EXPECT_EQ(handleId, option->GetHandleId());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
