@@ -657,6 +657,26 @@ HWTEST_F(PictureInPictureControllerTest, ScreenStatusChange, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RegisterPiPScreenStatusChange
+ * @tc.desc: RegisterPiPScreenStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, RegisterPiPScreenStatusChange, TestSize.Level1)
+{
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
+    auto listener = sptr<MockPiPScreenStatus>::MakeSptr();
+
+    pipControl->RegisterPiPScreenStatusChange(listener);
+    ASSERT_EQ(pipControl->pipScreenStatusObserver_.size(), 1);
+    pipControl->UnregisterPiPScreenStatusChange(listener);
+    ASSERT_EQ(pipControl->pipScreenStatusObserver_.size(), 0);
+}
+
+/**
  * @tc.name: PreRestorePictureInPicture
  * @tc.desc: PreRestorePictureInPicture
  * @tc.type: FUNC
