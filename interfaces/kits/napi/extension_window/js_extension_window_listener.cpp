@@ -110,7 +110,6 @@ void JsExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason r
         status = napi_close_handle_scope(eng, scope);
         if (status != napi_ok) {
             TLOGNW(WmsLogTag::WMS_UIEXT, "close handle scope failed");
-            return;
         }
     };
     if (reason == WindowSizeChangeReason::ROTATION) {
@@ -389,7 +388,6 @@ static void LifeCycleCallBack(LifeCycleEventType eventType, wptr<JsExtensionWind
         status = napi_close_handle_scope(eng, scope);
         if (status != napi_ok) {
             TLOGNW(WmsLogTag::WMS_UIEXT, "close handle scope failed");
-            return;
         }
     };
     if (!eventHandler) {
