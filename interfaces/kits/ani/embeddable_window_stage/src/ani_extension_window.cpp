@@ -266,7 +266,7 @@ ani_object AniExtensionWindow::OnCreateSubWindowWithOptions(ani_env* env, ani_st
         extensionWindow_->GetWindow()->NotifyModalUIExtensionMayBeCovered(false);
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "%{public}s end", windowName.c_str());
-    return AniWindow::CreateAniWindow(env, windowPtr);
+    return AniWindow::CreateAniWindow(env, window);
 }
 
 void AniExtensionWindow::OnOccupyEvents(ani_env* env, ani_int eventFlags)
