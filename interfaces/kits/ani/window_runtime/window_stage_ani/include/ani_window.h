@@ -82,7 +82,7 @@ public:
     static void Finalizer(ani_env* env, ani_long nativeObj);
     static void SetContentAspectRatio(ani_env* env, ani_object obj, ani_long nativeObj,
                                       ani_double ratio, ani_boolean isPersistent, ani_boolean needUpdateRect);
-    static ani_object AniWindow::CreateAniWindow(ani_env* env, OHOS::sptr<OHOS::Rosen::Window>& window);
+    static ani_object CreateAniWindow(ani_env* env, OHOS::sptr<OHOS::Rosen::Window>& window);
     static void Maximize(ani_env* env, ani_object obj, ani_long nativeObj,
                          ani_object aniPresentation, ani_object aniAcrossDisplay);
     static void SetRotationLocked(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean locked);
