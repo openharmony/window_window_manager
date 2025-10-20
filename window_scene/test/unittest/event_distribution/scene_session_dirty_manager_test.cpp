@@ -1146,6 +1146,11 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalTransformTest_02, TestSize.Level1)
     manager_->CalTransform(sceneSession, transform, testSingleHandData);
     ASSERT_EQ(transform, transform.Translate(translate)
         .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse());
+    
+    ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(FoldDisplayMode::COORDINATION);
+    manager_->CalTransform(sceneSession, transform, testSingleHandData);
+    ASSERT_EQ(transform, transform.Translate(translate)
+        .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse());
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.erase(screenId);
     ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(displayMode);
 }
