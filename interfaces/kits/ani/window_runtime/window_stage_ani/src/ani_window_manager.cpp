@@ -22,6 +22,8 @@
 #include "ani_window.h"
 #include "ani_window_utils.h"
 #include "permission.h"
+#include "pixel_map.h"
+#include "pixel_map_taihe_ani.h"
 #include "singleton_container.h"
 #include "window_manager.h"
 #include "window_manager_hilog.h"
@@ -61,10 +63,25 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace wi
             reinterpret_cast<void *>(AniWindowManager::UnregisterWindowManagerCallback)},
         ani_native_function {"setWindowLayoutMode", "JL@ohos/window/window/WindowLayoutMode;:V",
             reinterpret_cast<void *>(AniWindowManager::SetWindowLayoutMode)},
+        ani_native_function {"setWatermarkImageForAppWindowsSync",
+            "lC{@ohos.multimedia.image.image.PixelMap}:",
+            reinterpret_cast<void *>(AniWindowManager::SetWatermarkImageForAppWindows)},
+        ani_native_function {"getTopNavDestinationNameSync", "li:C{std.core.String}",
+            reinterpret_cast<void *>(AniWindowManager::GetTopNavDestinationName)},
+        ani_native_function {"getGlobalWindowModeSync", "lC{std.core.Long}:i",
+            reinterpret_cast<void *>(AniWindowManager::GetGlobalWindowMode)},
+        ani_native_function {"setStartWindowBackgroundColorSync",
+            "lC{std.core.String}C{std.core.String}l:",
+            reinterpret_cast<void *>(AniWindowManager::SetStartWindowBackgroundColor)},
+        ani_native_function {"notifyScreenshotEventSync", "lC{@ohos.window.window.ScreenshotEventType}:",
+            reinterpret_cast<void *>(AniWindowManager::NotifyScreenshotEvent)},
     };
-    if ((ret = env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size())) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] bind ns func %{public}u", ret);
-        return ANI_NOT_FOUND;
+    for (auto method : functions) {
+        if ((ret = env->Namespace_BindNativeFunctions(ns, &method, 1u)) != ANI_OK) {
+            TLOGE(WmsLogTag::DEFAULT, "[ANI] bind window static method fail %{public}u, %{public}s, %{public}s",
+                ret, method.name, method.signature);
+            return ANI_NOT_FOUND;
+        }
     }
 
     ani_function setObjFunc = nullptr;
@@ -198,6 +215,184 @@ ani_ref AniWindowManager::CreateWindow(ani_env* env, ani_long nativeObj, ani_obj
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
     return aniWindowManager != nullptr ? aniWindowManager->OnCreateWindow(env, configuration) : nullptr;
+}
+
+void AniWindowManager::SetWatermarkImageForAppWindows(ani_env* env, ani_long nativeObj, ani_object pixelMap)
+{
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    if (aniWindowManager != nullptr) {
+        aniWindowManager->OnSetWatermarkImageForAppWindows(env, pixelMap);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] aniWindowManager is nullptr");
+    }
+}
+
+void AniWindowManager::OnSetWatermarkImageForAppWindows(ani_env* env, ani_object pixelMap)
+{
+    std::shared_ptr<Media::PixelMap> localPixelMap = nullptr;
+    int32_t imgWidth = 0;
+    int32_t imgHeight = 0;
+    ani_boolean isUndefined;
+    env->Reference_IsUndefined(pixelMap, &isUndefined);
+    if (!isUndefined) {
+        localPixelMap = Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMap);
+        if (localPixelMap == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "parse image failed");
+            AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+            return;
+        }
+        imgWidth = localPixelMap->GetWidth();
+        imgHeight = localPixelMap->GetHeight();
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "isSetWatermark=%{public}d, imgWidth=%{public}d, imgHeight=%{public}d",
+        localPixelMap != nullptr, imgWidth, imgHeight);
+    auto retCode = SingletonContainer::Get<WindowManager>().SetWatermarkImageForApp(localPixelMap);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(retCode);
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] retCode: %{public}d", static_cast<int32_t>(retCode));
+        AniWindowUtils::AniThrowError(env, ret, "setWatermarkImageForAppWindowsSync failed.");
+        return;
+    }
+}
+
+ani_string AniWindowManager::GetTopNavDestinationName(ani_env* env, ani_long nativeObj, ani_int windowId)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    return aniWindowManager != nullptr ? aniWindowManager->OnGetTopNavDestinationName(env, windowId) : nullptr;
+}
+
+ani_string AniWindowManager::OnGetTopNavDestinationName(ani_env* env, ani_int windowId)
+{
+    ani_string result = nullptr;
+    if (static_cast<int32_t>(windowId) < 1) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid windowId: %{public}d", static_cast<int32_t>(windowId));
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+        return result;
+    }
+    std::string topNavDestName;
+    auto retCode = SingletonContainer::Get<WindowManager>().GetTopNavDestinationName(windowId, topNavDestName);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(retCode);
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] winId: %{public}d, topNavDestName: %{public}s, retCode: %{public}d",
+            static_cast<int32_t>(windowId), topNavDestName.c_str(), static_cast<int32_t>(retCode));
+        AniWindowUtils::AniThrowError(env, ret, "getTopNavDestinationNameSync failed.");
+        return result;
+    }
+    AniWindowUtils::GetAniString(env, topNavDestName, &result);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI] winId: %{public}d, topNavDestName: %{public}s",
+        static_cast<int32_t>(windowId), topNavDestName.c_str());
+    return result;
+}
+
+ani_int AniWindowManager::GetGlobalWindowMode(ani_env* env, ani_long nativeObj, ani_object displayId)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
+    ani_int result = 0;
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    return aniWindowManager != nullptr ? aniWindowManager->OnGetGlobalWindowMode(env, displayId) : result;
+}
+
+ani_int AniWindowManager::OnGetGlobalWindowMode(ani_env* env, ani_object nativeDisplayId)
+{
+    ani_int result = 0;
+    DisplayId displayId = DISPLAY_ID_INVALID;
+    ani_boolean isUndefined;
+    env->Reference_IsUndefined(nativeDisplayId, &isUndefined);
+    if (!isUndefined) {
+        ani_long aniDisplayId;
+        env->Object_CallMethodByName_Long(nativeDisplayId, "unboxed", ":l", &aniDisplayId);
+        if (aniDisplayId < 0) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid displayId value: %{public}" PRId64,
+                static_cast<int64_t>(aniDisplayId));
+            AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+            return result;
+        }
+        displayId = static_cast<DisplayId>(aniDisplayId);
+    }
+    GlobalWindowMode globalWinMode = GlobalWindowMode::UNKNOWN;
+    auto retCode = SingletonContainer::Get<WindowManager>().GetGlobalWindowMode(displayId, globalWinMode);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(retCode);
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "globalWinMode: %{public}u, retCode: %{public}d, displayId: %{public}" PRIu64,
+            static_cast<uint32_t>(globalWinMode), static_cast<int32_t>(retCode), displayId);
+        AniWindowUtils::AniThrowError(env, ret, "getTopNavDestinationNameSync failed.");
+        return result;
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "globalWinMode: %{public}u, displayId: %{public}" PRIu64,
+        static_cast<uint32_t>(globalWinMode), displayId);
+    result = static_cast<ani_int>(globalWinMode);
+    return result;
+}
+
+void AniWindowManager::SetStartWindowBackgroundColor(ani_env* env, ani_long nativeObj, ani_string moduleName,
+    ani_string abilityName, ani_long color)
+{
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    if (aniWindowManager != nullptr) {
+        aniWindowManager->OnSetStartWindowBackgroundColor(env, moduleName, abilityName, color);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] aniWindowManager is nullptr");
+    }
+}
+
+void AniWindowManager::OnSetStartWindowBackgroundColor(ani_env* env, ani_string moduleName, ani_string abilityName,
+    ani_long color)
+{
+    constexpr uint32_t maxNameLength = 200;
+    std::string moduleNameStr;
+    AniWindowUtils::GetStdString(env, moduleName, moduleNameStr);
+    if (moduleNameStr.length() > maxNameLength) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "[ANI] moduleName length out of range");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+        return;
+    }
+    std::string abilityNameStr;
+    AniWindowUtils::GetStdString(env, abilityName, abilityNameStr);
+    if (abilityNameStr.length() > maxNameLength) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "abilityName length out of range");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+        return;
+    }
+    uint32_t colorValue = static_cast<uint32_t>(color);
+    auto retCode = SingletonContainer::Get<WindowManager>().SetStartWindowBackgroundColor(
+        moduleNameStr, abilityNameStr, colorValue);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(retCode);
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] module=%{public}s, ability=%{public}s, color=%{public}u, ret=%{public}d",
+            moduleNameStr.c_str(), abilityNameStr.c_str(), colorValue, static_cast<int32_t>(retCode));
+        AniWindowUtils::AniThrowError(env, ret, "setStartWindowBackgroundColorSync failed.");
+        return;
+    }
+}
+
+void AniWindowManager::NotifyScreenshotEvent(ani_env* env, ani_long nativeObj, ani_enum_item eventType)
+{
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    if (aniWindowManager != nullptr) {
+        aniWindowManager->OnNotifyScreenshotEvent(env, eventType);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] aniWindowManager is nullptr");
+    }
+}
+
+void AniWindowManager::OnNotifyScreenshotEvent(ani_env* env, ani_enum_item eventType)
+{
+    uint32_t tempEventType;
+    ani_status ani_ret = AniWindowUtils::GetEnumValue(env, eventType, tempEventType);
+    if (ani_ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] GetEnumValue failed, ret: %{public}d", ani_ret);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return;
+    }
+    ScreenshotEventType screenshotEventType = static_cast<ScreenshotEventType>(tempEventType);
+    auto retCode = SingletonContainer::Get<WindowManager>().NotifyScreenshotEvent(screenshotEventType);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(retCode);
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] eventType: %{public}u, retCode: %{public}d",
+            tempEventType, static_cast<int32_t>(retCode));
+        AniWindowUtils::AniThrowError(env, ret, "notifyScreenshotEventSync failed.");
+    }
 }
 
 ani_ref CreateAniSystemWindow(ani_env* env, void* contextPtr, sptr<WindowOption> windowOption)

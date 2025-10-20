@@ -17,6 +17,7 @@ import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { UIContext } from '@ohos.arkui.UIContext';
 import BaseContext from 'application.BaseContext';
 import { ColorMetrics } from '@ohos.arkui.node';
+import { ImageFit } from '@ohos.arkui.component';
 import image from '@ohos.multimedia.image';
 import hilog from '@ohos.hilog';
 
@@ -2257,6 +2258,12 @@ export class WindowStageInternal implements WindowStage {
     public native setShowOnLockScreenSync(nativeObj:long, showOnLockScreen: boolean): void;
     public native getMainWindowSync(nativeObj: long): Window;
     public native createSubWindowSync(nativeObj: long, name: String): Window;
+
+    public native setImageForRecentSync(nativeObj: long, imageResource: long | image.PixelMap, value: int): void;
+    public native removeImageForRecentSync(nativeObj: long): void;
+    public native setCustomDensitySync(nativeObj: long, density: number, applyToSubWindow: boolean): void;
+    public native setDefaultDensityEnabledSync(nativeObj: long, enabled: boolean): void;
+
     native onSync(nativeObj: long, eventType: 'windowStageEvent', callback: Object): void;
     native offSync(nativeObj: long, eventType: 'windowStageEvent', callback?: Object): void;
 
@@ -2381,6 +2388,38 @@ export class WindowStageInternal implements WindowStage {
       }
     }
 
+    public setImageForRecent(imageResource: long | image.PixelMap, value: ImageFit): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setImageForRecentSync(this.nativeObj, imageResource, value as int);
+        }).then((ret: NullishType): void => {
+            resolve(undefined);
+        }).catch((err: NullishType): void => {
+            reject(err as BusinessError);
+        });
+      });
+    }
+ 
+    public removeImageForRecent(): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        try {
+          this.removeImageForRecentSync(this.nativeObj);
+          resolve(undefined);
+        } catch (err: Error) {
+          reject(err as BusinessError);
+        }
+      });
+    }
+
+    public setCustomDensity(density: double, applyToSubWindow?: boolean): void {
+        let isApplyToSubWindow = applyToSubWindow ? applyToSubWindow : false;
+        this.setCustomDensitySync(this.nativeObj, density, isApplyToSubWindow);
+    }
+
+    public setDefaultDensityEnabled(enabled: boolean): void {
+      this.setDefaultDensityEnabledSync(this.nativeObj, enabled);
+    }
+
 }
 
 export interface WindowStage {
@@ -2392,6 +2431,12 @@ export interface WindowStage {
     getMainWindow(callback: AsyncCallback<Window>): void;
     disableWindowDecor(): void;
     setShowOnLockScreen(showOnLockScreen: boolean): void;
+
+    setImageForRecent(imageResource: long | image.PixelMap, value: ImageFit): Promise<void>;
+    removeImageForRecent(): Promise<void>;
+    setCustomDensity(density: double, applyToSubWindow?: boolean): void;
+    setDefaultDensityEnabled(enabled: boolean): void;
+
     createSubWindow(name: string): Promise<Window>;
     createSubWindow(name: string, callback: AsyncCallback<Window>): void;
     on(eventType: 'windowStageEvent', callback: Callback<WindowStageEventType>): void;
@@ -2427,6 +2472,7 @@ export class WindowInternal implements Window {
     private native setSpecificSystemBarEnabled(nativeObj: long, name: String, enable: boolean, enableAnimation: boolean): int;
     private native setDragKeyFramePolicy(nativeObj: long, keyFramePolicy: KeyFramePolicy): KeyFramePolicy;
     private native snapshot(nativeObj: long): image.PixelMap;
+    private native snapshotSync(nativeObj: long): image.PixelMap;
     private native hideNonSystemFloatingWindows(nativeObj: long, shouldHide: boolean): void;
     private native opacity(nativeObj: long, opacity: double): void;
     private native scale(nativeObj: long, scaleOptions: ScaleOptions): void;
@@ -2481,6 +2527,12 @@ export class WindowInternal implements Window {
     private native setRelativePositionToParentWindowEnabled(nativeObj: long, enabled: boolean, anchor?: WindowAnchor,
       offsetX?: int, offsetY?: int): void;
     private native setWindowDelayRaiseOnDrag(nativeObj: long, isEnabled: boolean): void;
+    private native setDefaultDensityEnabled(nativeObj: long, enabled: boolean): void;
+    private native setWindowContainerColor(nativeObj: long, activeColor: string, inactiveColor: string): void;
+    private native setWindowContainerModalColor(nativeObj: long, activeColor: string, inactiveColor: string): void;
+    private native isMainWindowFullScreenAcrossDisplaysSync(nativeObj: long): boolean;
+    private native setWindowShadowEnabledSync(nativeObj: long, enable: boolean): void;
+    private native isImmersiveLayoutSync(nativeObj: long): boolean;
 
     public static transferStatic(input: Any): Object {
       return WindowInternal.nativeTransferStatic(ESValue.wrap(input));
@@ -2546,6 +2598,22 @@ export class WindowInternal implements Window {
     public setWindowBackgroundColor(color: string | ColorMetrics): void {
       if (color instanceof string) {
         this.setWindowBackgroundColor(this.nativeObj, color as string);
+      } else if (color instanceof ColorMetrics) {
+        const alpha = color.alpha;
+        const red = color.red;
+        const green = color.green;
+        const blue = color.blue;
+
+        const toHex = (value: number): string => {
+          return value.toString(16).padStart(2, '0').slice(-2);
+        };
+
+        let hexStr = '#';
+        if (alpha !== 255) {
+          hexStr += toHex(alpha);
+        }
+        hexStr += toHex(red) + toHex(green) + toHex(blue);
+        this.setWindowBackgroundColor(this.Obj, hexStr);
       }
     }
 
@@ -2729,6 +2797,10 @@ export class WindowInternal implements Window {
       }).catch((err: NullishType) => {
         callback(err as BusinessError, undefined);
       });
+    }
+
+    public snapshotSync(): image.PixelMap {
+      return this.snapshotSync(this.nativeObj);
     }
 
     public hideNonSystemFloatingWindows(shouldHide: boolean): Promise<void> {
@@ -3076,6 +3148,63 @@ export class WindowInternal implements Window {
 
     public offOcclusionStateChanged(callback?: Callback<OcclusionState>): void {
       this.offSync(this.nativeObj, 'occlusionStateChanged', callback);
+    }
+
+    public setDefaultDensityEnabled(enabled: boolean): void {
+      this.setDefaultDensityEnabled(this.nativeObj, enabled);
+    }
+
+    public setWindowContainerColor(activeColor: string, inactiveColor: string): void {
+      this.setWindowContainerColor(this.nativeObj, activeColor, inactiveColor);
+    }
+
+    public setWindowContainerModalColor(activeColor: string, inactiveColor: string): void {
+      this.setWindowContainerModalColor(this.nativeObj, activeColor, inactiveColor);
+    }
+
+    public onMainWindowFullScreenAcrossDisplaysChanged(callback: Callback<boolean>): void {
+      this.onSync(this.nativeObj, 'mainWindowFullScreenAcrossDisplaysChanged', callback);
+    }
+
+    public offMainWindowFullScreenAcrossDisplaysChanged(callback?: Callback<boolean>): void {
+      this.offSync(this.nativeObj, 'mainWindowFullScreenAcrossDisplaysChanged', callback);
+    }
+
+    public onScreenshotAppEvent(callback: Callback<ScreenshotEventType>): void {
+      this.onSync(this.nativeObj, 'screenshotAppEvent', callback);
+    }
+
+    public offScreenshotAppEvent(callback?: Callback<ScreenshotEventType>): void {
+      this.offSync(this.nativeObj, 'screenshotAppEvent', callback);
+    }
+
+    public setWindowShadowEnabled(enable: boolean): Promise<void> {
+      return new Promise<void>(
+        (resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+          taskpool.execute((): void => {
+              this.setWindowShadowEnabledSync(this.nativeObj, enable);
+          }).then((ret: NullishType) => {
+              resolve(undefined);
+          }).catch((err: NullishType) => {
+              reject(err as BusinessError);
+          });
+      });
+    }
+
+    public isMainWindowFullScreenAcrossDisplays(): Promise<boolean> {
+      return new Promise<boolean>((resolve: (value: boolean) => void, reject: (error: BusinessError) => void) => {
+          taskpool.execute((): boolean => {
+              return this.isMainWindowFullScreenAcrossDisplaysSync(this.nativeObj);
+          }).then((ret: NullishType) => {
+              resolve(ret as boolean);
+          }).catch((err: NullishType) => {
+              reject(err as BusinessError);
+          });
+      });
+    }
+
+    public isImmersiveLayout(): boolean {
+      return this.isImmersiveLayoutSync(this.nativeObj);
     }
 
     public onWindowStatusDidChange(callback: Callback<WindowStatusType>): void {
@@ -3473,6 +3602,21 @@ export class WindowInternal implements Window {
     }
 }
 
+export enum GlobalWindowMode {
+  FULLSCREEN = 1,
+  SPLIT = 1 << 1,
+  FLOAT = 1 << 2,
+  PIP = 1 << 3
+}
+
+export enum ScreenshotEventType {
+  SYSTEM_SCREENSHOT = 0,
+  SYSTEM_SCREENSHOT_ABORT = 1,
+  SCROLL_SHOT_START = 2,
+  SCROLL_SHOT_END = 3,
+  SCROLL_SHOT_ABORT = 4,
+}
+
 export interface Window {
     resize(width: int, height: int): Promise<void>;
     moveWindowTo(x: int, y: int): Promise<void>;
@@ -3499,6 +3643,7 @@ export interface Window {
     setDragKeyFramePolicy(keyFramePolicy: KeyFramePolicy): Promise<KeyFramePolicy>;
     snapshot(): Promise<image.PixelMap>;
     snapshot(callback: AsyncCallback<image.PixelMap | undefined>): void;
+    snapshotSync(): image.PixelMap;
     hideNonSystemFloatingWindows(shouldHide: boolean): Promise<void>;
     hideNonSystemFloatingWindows(shouldHide: boolean, callback: AsyncCallback<void>): void;
     setWindowColorSpace(colorSpace: ColorSpace): Promise<void>;
@@ -3581,6 +3726,16 @@ export interface Window {
     setRelativePositionToParentWindowEnabled(enabled: boolean, anchor?: WindowAnchor,
       offsetX?: int, offsetY?: int): Promise<void>;
     setWindowDelayRaiseOnDrag(isEnabled: boolean): void;
+    setDefaultDensityEnabled(enabled: boolean): void;
+    setWindowContainerColor(activeColor: string, inactiveColor: string): void;
+    setWindowContainerModalColor(activeColor: string, inactiveColor: string): void;
+    isMainWindowFullScreenAcrossDisplays(): Promise<boolean>;
+    setWindowShadowEnabled(enable: boolean): Promise<void>;
+    isImmersiveLayout(): boolean;
+    onScreenshotAppEvent(callback: Callback<ScreenshotEventType>): void;
+    offScreenshotAppEvent(callback: Callback<ScreenshotEventType>): void;
+    onMainWindowFullScreenAcrossDisplaysChanged(callback: Callback<boolean>): void;
+    offMainWindowFullScreenAcrossDisplaysChanged(callback?: Callback<boolean>): void;
 }
 
 export native function CreateWindowStage(scene: long): WindowStageInternal;
@@ -3600,7 +3755,74 @@ native function offSync(nativeObj: long, type: string, callback?: object): void;
 native function createWindowSync(nativeObj: long, config: Configuration): Window;
 native function shiftAppWindowFocusSync(nativeObj: long, sourceWindowId: int, targetWindowId: int): void;
 native function setWindowLayoutMode(nativeObj: long, mode: WindowLayoutMode): void;
+native function setWatermarkImageForAppWindowsSync(nativeObj: long, pixelMap: image.PixelMap | undefined): void;
+native function getTopNavDestinationNameSync(nativeObj: long, windowId: int): string;
+native function getGlobalWindowModeSync(nativeObj: long, displayId?: long): int;
+native function setStartWindowBackgroundColorSync(nativeObj: long, moduleName: string, abilityName: string,
+  color: long): void;
+native function notifyScreenshotEventSync(nativeObj: long, eventType: ScreenshotEventType): void;
 
+export function setWatermarkImageForAppWindows(pixelMap: image.PixelMap | undefined): Promise<void> {
+  return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+      taskpool.execute((): void => {
+          return setWatermarkImageForAppWindowsSync(nativeObj, pixelMap);
+      }).then((ret: NullishType) => {
+          resolve(undefined);
+      }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+      });
+  });
+}
+
+export function getTopNavDestinationName(windowId: int): Promise<string> {
+  return new Promise<string>((resolve: (value: string) => void, reject: (error: BusinessError) => void) => {
+      taskpool.execute((): string => {
+          return getTopNavDestinationNameSync(nativeObj, windowId);
+      }).then((ret: NullishType) => {
+          resolve(ret as string);
+      }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+      });
+  });
+}
+
+export function getGlobalWindowMode(displayId?: long): Promise<int> {
+  return new Promise<int>((resolve: (value: int) => void, reject: (error: BusinessError) => void): int => {
+      taskpool.execute((): int => {
+          return getGlobalWindowModeSync(nativeObj, displayId);
+      }).then((ret: NullishType) => {
+          resolve(ret as int);
+      }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+      });
+  });
+}
+
+export function setStartWindowBackgroundColor(moduleName: string, abilityName: string,
+  color: ColorMetrics): Promise<void> {
+  return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+      taskpool.execute((): void => {
+          return setStartWindowBackgroundColorSync(nativeObj, moduleName, abilityName,
+            (color.alpha << 24) | (color.red << 16) | (color.green << 8) | color.blue);
+      }).then((ret: NullishType) => {
+          resolve(undefined);
+      }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+      });
+  });
+}
+
+export function notifyScreenshotEvent(eventType: ScreenshotEventType): Promise<void> {
+  return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+      taskpool.execute((): void => {
+          return notifyScreenshotEventSync(nativeObj, eventType);
+      }).then((ret: NullishType) => {
+          resolve(undefined);
+      }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+      });
+  });
+}
 
 export function getLastWindow(ctx: BaseContext): Promise<Window> {
   return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void ) => {
@@ -3861,6 +4083,16 @@ function runWindowNoInteractionCallback(cb: object): void {
 function runWindowStageEventCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: WindowStageEventType) => void;
     func(cbArg as WindowStageEventType);
+}
+
+function runMainWindowFullScreenAcrossDisplaysChangedCallback(cb: object, cbArg: boolean): void {
+  const func = cb as (cbArg: boolean) => void;
+  func(cbArg as boolean);
+}
+
+function runScreenshotAppEvent(cb: object, cbArg: ScreenshotEventType): void {
+  const func = cb as (cbArg: ScreenshotEventType) => void;
+  func(cbArg as ScreenshotEventType);
 }
 
 function runRectChangeInGlobalDisplayCallback(cb: object, rect: object, reason: int): void {
