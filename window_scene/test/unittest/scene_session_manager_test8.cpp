@@ -1274,7 +1274,7 @@ HWTEST_F(SceneSessionManagerTest8, RemoveSessionBlackList02, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
-    std::size_t count = 100
+    std::size_t count = 100; 
     for (std::size_t i = 0; i < count; ++i) {
         // 组装 key
         std::string key = "bundle_" + std::to_string(i);
@@ -1294,7 +1294,7 @@ HWTEST_F(SceneSessionManagerTest8, RemoveSessionBlackList02, TestSize.Level1)
             ssm_->sessionRSBlackListConfigSet_.insert({ j, "rs_" + idx + "_b" });
             ssm_->sessionRSBlackListConfigSet_.insert({ j, "rs_" + idx + "_c" });
         }
-        ssm_->sessionRSBlackListConfigSet_[i] = ssm_->sessionRSBlackListConfigSet_;
+        ssm_->sessionBlackListInfoMap_[i] = ssm_->sessionRSBlackListConfigSet_;
 
         ssm_->screenRSBlackListConfigMap_ [i].insert({ "rs_" + idx + "_a" });
         ssm_->screenRSBlackListConfigMap_ [i].insert({ "rs_" + idx + "_b" });
