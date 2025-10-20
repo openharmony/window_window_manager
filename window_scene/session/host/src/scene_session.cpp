@@ -9821,4 +9821,65 @@ WMError SceneSession::HandleActionUpdateRotationLockChange(const sptr<WindowSess
     }, __func__);
     return WMError::WM_OK;
 }
+/*
+ * Window Event start
+ */
+bool SceneSession::checkDatas(const std::vector<int32_t>& parameters, const int32_t length)
+{
+    if (parameters.size() < 1) {
+        TLOGE(WmsLogTag::WMS_EVENT, "The format is incorrect(size<1).");
+        return false;
+    }
+    if (parameters[0] != length) {
+        TLOGE(WmsLogTag::WMS_EVENT, "The format is incorrect(length error).");
+        return false;
+    }
+    if (parameters[0] != static_cast<int32_t>(parameters.size() - 1)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "The format is incorrect(size error).");
+        return false;
+    }
+    return true;
+}
+
+WMError SceneSession::LockCursor(const std::vector<int32_t>& parameters)
+{
+    if (!SessionPermission::VerifyCallingPermission(LOCK_WINDOW_CURSOR_PERMISSION)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "The caller has not permission granted");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    if (!checkDatas(parameters, LOCK_CURSOR_LENGTH)) {
+        return WMError::WM_ERROR_ILLEGAL_PARAM;
+    }
+    if (parameters[1] == GetWindowId()) {
+        TLOGE(WmsLogTag::WMS_EVENT, "The windowId does not match.");
+        return WMError::WM_ERROR_INVALID_SESSION;
+    }
+    bool isCursorFollowMovement = static_cast<bool>(parameters[2]);
+    SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_LOCK_CURSOR, true);
+    SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_CURSOR_FOLLOW_MOVEMENT,
+        isCursorFollowMovement);
+    NotifySessionInfoChange();
+    return WMError::WM_OK;
+}
+
+WMError SceneSession::UnlockCursor(const std::vector<int32_t>& parameters)
+{
+    if (!SessionPermission::VerifyCallingPermission(LOCK_WINDOW_CURSOR_PERMISSION)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "The caller has not permission granted");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    if (!checkDatas(parameters, UNLOCK_CURSOR_LENGTH)) {
+        return WMError::WM_ERROR_ILLEGAL_PARAM;
+    }
+    if (parameters[1] == GetWindowId()) {
+        TLOGE(WmsLogTag::WMS_EVENT, "The windowId does not match.");
+        return WMError::WM_ERROR_INVALID_SESSION;
+    }
+    SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_LOCK_CURSOR, false);
+    NotifySessionInfoChange();
+    return WMError::WM_OK;
+}
+/*
+ * Window Event end
+ */
 } // namespace OHOS::Rosen

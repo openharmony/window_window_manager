@@ -478,22 +478,6 @@ public:
     {
         return WMError::WM_OK;
     }
-
-    /*
-     * Window event
-     */
-    WMError SendCommonEvent(int32_t command, const std::vector<int32_t>& parameters) override
-    {
-        return WMError::WM_OK;
-    }
-    virtual WMError LockCursor(const std::vector<int32_t>& parameters)
-    {
-        return WMError::WM_OK;
-    }
-    virtual WMError UnlockCursor(const std::vector<int32_t>& parameters)
-    {
-        return WMError::WM_OK;
-    }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

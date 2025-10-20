@@ -4237,44 +4237,4 @@ WMError SceneSessionManagerProxy::UpdateOutline(const sptr<IRemoteObject>& remot
     }
     return static_cast<WMError>(ret);
 }
-
-WMError SceneSessionManagerProxy::SendCommonEvent(int32_t command, const std::vector<int32_t>& parameters)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-    
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_EVENT, "Write interface token failed.");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt32(command)) {
-        TLOGE(WmsLogTag::WMS_EVENT, "Write command failed.");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    for (auto dataInfo : parameters) {
-        if (!data.WriteInt32(dataInfo)) {
-            TLOGE(WmsLogTag::WMS_EVENT, "Write dataInfo failed.");
-            return WMError::WM_ERROR_IPC_FAILED;
-        }
-    }
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "Remote is null.");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    auto sendRet = remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SEND_COMMAND_EVENT),
-        data, reply, option);
-    if (sendRet != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_EVENT, "Send request failed.code: %{public}d", sendRet);
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    int32_t ret = 0;
-    if (!reply.ReadInt32(ret)) {
-        TLOGE(WmsLogTag::WMS_EVENT, "Read reply failed.");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    return static_cast<WMError>(ret);
-}
-
 } // namespace OHOS::Rosen

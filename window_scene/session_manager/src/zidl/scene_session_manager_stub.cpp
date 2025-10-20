@@ -278,8 +278,6 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleMinimizeAllAppWindows(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_OUTLINE):
             return HandleUpdateOutline(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SEND_COMMAND_EVENT):
-            return HandleSendCommonEvent(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -2638,55 +2636,6 @@ int SceneSessionManagerStub::HandleUpdateOutline(MessageParcel& data, MessagePar
     WMError ret = UpdateOutline(remoteObject, *outlineParams);
     if (!reply.WriteUint32(static_cast<uint32_t>(ret))) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Write errCode failed.");
-        return ERR_INVALID_DATA;
-    }
-    return ERR_NONE;
-}
-
-int SceneSessionManagerStub::HandleSendCommonEvent(MessageParcel& data, MessageParcel& reply)
-{
-    int32_t command = 0;
-    if (!data.ReadInt32(command)) {
-        TLOGE(WmsLogTag::WMS_EVENT, "Read size failed");
-        return ERR_INVALID_DATA;
-    }
-
-    std::vector<int32_t> parameters;
-    int32_t length = 0;
-    if (!data.ReadInt32(length)) {
-        TLOGE(WmsLogTag::WMS_EVENT, "Read size failed");
-        return ERR_INVALID_DATA;
-    }
-    if (length > COMMON_EVENT_COMMAND_MAX_LENGTH || length < 0) {
-        TLOGE(WmsLogTag::WMS_EVENT, "Out of range.");
-        return ERR_INVALID_DATA;
-    }
-    parameters.emplace_back(length);
-
-    int32_t info = 0;
-    for (int i = 0; i < length; i++) {
-        if (!data.ReadInt32(info)) {
-            TLOGE(WmsLogTag::WMS_EVENT, "Read size failed");
-            return ERR_INVALID_DATA;
-        }
-        parameters.emplace_back(info);
-    }
-
-    WMError ret = WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    switch (command) {
-        case static_cast<uint32_t>(CommonEventCommand::LOCK_CURSOR):
-            ret = LockCursor(parameters);
-            break;
-        case static_cast<uint32_t>(CommonEventCommand::UNLOCK_CURSOR):
-            ret = UnlockCursor(parameters);
-            break;
-        default:
-            ret = WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-            break;
-    }
-
-    if (!reply.WriteUint32(static_cast<uint32_t>(ret))) {
-        TLOGE(WmsLogTag::WMS_EVENT, "Write errCode failed.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
