@@ -2591,11 +2591,11 @@ void ScreenSessionManager::UpdateDisplayHookInfo(int32_t uid, bool enable, const
     if (enable) {
         if (uid != 0) {
             displayHookMap_[uid] = hookInfo;
-            NotifyDisplayChangedByUid(screenSessionMapCopy, DisplayChangeEvent::DISPLAY_SIZE_CHANGED, uid);
         }
     } else {
         displayHookMap_.erase(uid);
     }
+    NotifyDisplayChangedByUid(screenSessionMapCopy, DisplayChangeEvent::DISPLAY_SIZE_CHANGED, uid);
 }
 
 void ScreenSessionManager::NotifyDisplayChangedByUid(const std::map<ScreenId, sptr<ScreenSession>>& screenSessionMap,
