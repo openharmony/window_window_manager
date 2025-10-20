@@ -92,7 +92,7 @@ public:
         ani_boolean enabled, ani_int anchor, ani_int offsetX, ani_int offsetY);
     static void SetWindowDelayRaiseOnDrag(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isEnabled);
 
-    ani_ref GetParentWindow(ani_env *env);
+    ani_ref GetParentWindow(ani_env* env);
     void SetParentWindow(ani_env* env, ani_int windowId);
     /*
      * Window Layout
