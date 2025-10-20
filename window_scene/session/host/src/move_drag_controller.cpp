@@ -1088,7 +1088,9 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
 WSRect MoveDragController::CalcFreeformTargetRect(AreaType type, int32_t tranX, int32_t tranY, WSRect originalRect)
 {
     WSRect targetRect = originalRect;
-    FixTranslateByLimits(tranX, tranY);
+    if (!isAdaptToDragScale_) {
+        FixTranslateByLimits(tranX, tranY);
+    }
     TLOGD(WmsLogTag::WMS_LAYOUT, "areaType:%{public}u", type);
     if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::LEFT)) {
         targetRect.posX_ += tranX;

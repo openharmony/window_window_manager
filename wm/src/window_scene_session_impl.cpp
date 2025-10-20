@@ -1418,7 +1418,7 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
             TLOGI(WmsLogTag::WMS_LAYOUT_PC, "winId: %{public}u, windowModeSupportType: %{public}u",
                 GetWindowId(), windowModeSupportType);
         }
-        if (property_->IsSupportRotateFullScreen()) {
+        if (property_->IsAdaptToDragScale()) {
             windowModeSupportType = (WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN |
                                      WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
         }
@@ -5779,6 +5779,14 @@ bool WindowSceneSessionImpl::ShouldSkipSupportWindowModeCheck(uint32_t windowMod
     bool isAvailableDevice =
         (windowSystemConfig_.IsPhoneWindow() || windowSystemConfig_.IsPadWindow()) && !IsFreeMultiWindowMode();
     if (isAvailableDevice && isMultiWindowMode) {
+        return true;
+    }
+
+    // padMode to FreeMultiWindowMode, the compatible mode application supports MODE_FLOATING and MODE_FULLSCREEN.
+    bool isCompatibleWindow = mode == WindowMode::WINDOW_MODE_FLOATING ||
+                              mode == WindowMode::WINDOW_MODE_FULLSCREEN;
+    bool isDragScale = property_->IsAdaptToDragScale();
+    if (IsFreeMultiWindowMode() && isCompatibleWindow && isDragScale) {
         return true;
     }
     return false;
