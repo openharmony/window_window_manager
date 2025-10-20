@@ -27,11 +27,11 @@ static std::map<ani_ref, AniExtensionWindowConfig*> localObjs;
 ani_enum_item GetAniModalityType(ani_env* env, ModalityType enumObj)
 {
     ani_enum enumType;
-    ani_enum_item enumItem;
     if (ANI_OK != env->FindEnum("L@ohos/window/window/ModalityType;", &enumType)) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] ModalityType not found");
         return enumItem;
     }
+    ani_enum_item enumItem = nullptr;
     env->Enum_GetEnumItemByIndex(enumType, static_cast<ani_int>(enumObj), &enumItem);
 
     return enumItem;
@@ -105,11 +105,11 @@ ani_enum_item GetAniWindowType(ani_env* env, int32_t apiType)
     }
 
     ani_enum enumType;
-    ani_enum_item enumItem;
     if (ANI_OK != env->FindEnum("L@ohos/window/window/WindowType;", &enumType)) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] WindowType not found");
         return enumItem;
     }
+    ani_enum_item enumItem = nullptr;
     env->Enum_GetEnumItemByName(enumType, typeName.c_str(), &enumItem);
 
     return enumItem;
@@ -162,11 +162,11 @@ ani_object CreatAniSystemWindowOptions(ani_env* env,
 ani_enum_item GetAniExtensionWindowAttribute(ani_env* env, ExtensionWindowAttribute enumObj)
 {
     ani_enum enumType;
-    ani_enum_item enumItem;
     if (ANI_OK != env->FindEnum("L@ohos/window/window/ExtensionWindowAttribute;", &enumType)) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] ExtensionWindowAttribute not found");
-        return enumItem;
+        return nullptr;
     }
+    ani_enum_item enumItem = nullptr;
     env->Enum_GetEnumItemByIndex(enumType, static_cast<ani_int>(enumObj), &enumItem);
 
     return enumItem;
