@@ -3490,7 +3490,7 @@ void SceneSessionManager::ConfigSupportCacheLockedSessionSnapshot()
 {
     TLOGI(WmsLogTag::WMS_PATTERN, "support");
     auto task = [this] {
-        systemConfig_.supportSnapshotAllSessionStatus_ = true;
+        systemConfig_.supportCacheLockedSessionSnapshot_ = true;
     };
     taskScheduler_->PostAsyncTask(task, "ConfigSupportCacheLockedSessionSnapshot");
 }
