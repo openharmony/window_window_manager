@@ -491,6 +491,7 @@ void Session::NotifyActivation()
             listenerPtr->OnActivation();
         }
     }
+    snapshotNeedCancel_.store(true);
 }
 
 void Session::NotifyConnect()
@@ -2852,10 +2853,14 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
     }
     bool needCacheSnapshot = (SupportCacheLockedSessionSnapshot() && reason == LifeCycleChangeReason::SCREEN_LOCK);
     auto task = [weakThis = wptr(this), runInFfrt = useFfrt, requirePersist = needPersist, persistentPixelMap,
-        updateSnapshot, key, rotate, needCacheSnapshot]() {
+        updateSnapshot, key, rotate, needCacheSnapshot, reason]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            return;
+        }
+        if (reason == LifeCycleChangeReason::QUICK_BATCH_BACKGROUND && session->snapshotNeedCancel_.load()) {
+            TLOGNW(WmsLogTag::WMS_LIFE, "snapshot canceled id %{public}d", session->GetPersistentId());
             return;
         }
         session->lastLayoutRect_ = session->layoutRect_;
