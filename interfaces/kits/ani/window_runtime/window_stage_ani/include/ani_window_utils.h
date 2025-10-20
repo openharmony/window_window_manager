@@ -169,7 +169,6 @@ public:
     static bool ParseRectParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
     static bool ParseModalityParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
     static bool ParseZLevelParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
-    static ani_object CreateAniWindow(ani_env* env, OHOS::sptr<OHOS::Rosen::Window>& window);
     template<typename T>
     static ani_object CreateBaseTypeObject(ani_env* env, T value);
 };

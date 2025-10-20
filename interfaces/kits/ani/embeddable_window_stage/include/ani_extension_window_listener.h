@@ -30,7 +30,7 @@
 namespace OHOS {
 namespace Rosen {
 constexpr const char* ETS_UIEXTENSION_HOST_NAMESPACE_DESCRIPTOR = "L@ohos/uiExtensionHost/uiExtensionHost;";
-constexpr const char* ETS_UIEXTENSION_NAMESPACE_DESCRIPTOR = "L@ohos/uiExtensionHost/uiExtension;";
+constexpr const char* ETS_UIEXTENSION_NAMESPACE_DESCRIPTOR = "L@ohos/arkui/uiExtension/uiExtension;";
 
 class AniExtensionWindowListener : public IWindowChangeListener,
                                    public IAvoidAreaChangedListener,
