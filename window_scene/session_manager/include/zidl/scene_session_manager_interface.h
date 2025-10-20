@@ -95,6 +95,7 @@ public:
         TRANS_ID_GET_PARENT_MAIN_WINDOW_ID,
         TRANS_ID_GET_UI_CONTENT_REMOTE_OBJ,
         TRANS_ID_UPDATE_WINDOW_VISIBILITY_LISTENER,
+        TRANS_ID_UPDATE_SESSION_OCCLUSION_STATE_LISTENER,
         TRANS_ID_SHIFT_APP_WINDOW_FOCUS,
         TRANS_ID_LIST_WINDOW_INFO,
         TRANS_ID_GET_WINDOW_LAYOUT_INFO,
@@ -355,8 +356,8 @@ public:
     {
         return WSError::WS_OK;
     }
-    void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
-        const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, bool isConstrainedModal) override {}
+    void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, const sptr<IRemoteObject>& token,
+        uint64_t surfaceNodeId, int64_t startModalExtensionTimeStamp, bool isConstrainedModal) override {}
     void RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
         const sptr<IRemoteObject>& token, bool isConstrainedModal) override {}
     void UpdateModalExtensionRect(const sptr<IRemoteObject>& token, Rect rect) override {}
@@ -382,11 +383,11 @@ public:
     {
         return WSError::WS_OK;
     }
-    WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus) override
+    WMError GetCallingWindowWindowStatus(uint32_t callingWindowId, WindowStatus& windowStatus) override
     {
         return WMError::WM_OK;
     }
-    WMError GetCallingWindowRect(int32_t persistentId, Rect& rect) override
+    WMError GetCallingWindowRect(uint32_t callingWindowId, Rect& rect) override
     {
         return WMError::WM_OK;
     }

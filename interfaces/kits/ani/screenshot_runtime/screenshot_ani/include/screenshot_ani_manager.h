@@ -43,13 +43,26 @@ struct Param {
     Media::Rect imageRect;
     bool isPick;
 };
+
+struct HdrParam {
+    DmErrorCode wret;
+    Option option;
+    std::string errMessage;
+    bool useInputOption;
+    bool validInputParam;
+    std::vector<std::shared_ptr<Media::PixelMap>> imageVec;
+    Media::Rect imageRect;
+    bool isPick;
+};
  
 class ScreenshotManagerAni {
 public:
     explicit ScreenshotManagerAni();
     static ani_object Save(ani_env* env, ani_object options);
+    static ani_object SaveHdrPicture(ani_env* env, ani_object options);
     static void InitScreenshotManagerAni(ani_namespace nsp, ani_env* env);
     static void GetScreenshot(ani_env *env, std::unique_ptr<Param> &param);
+    static void GetHdrScreenshot(ani_env* env, std::unique_ptr<HdrParam> &param);
 };
 }
 #endif

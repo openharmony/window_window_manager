@@ -215,7 +215,7 @@ public:
      *
      * @param windowId The window id of calling window.
      */
-    void SetCallingWindow(uint32_t windowId);
+    void ChangeCallingWindowId(uint32_t windowId);
 
     /**
      * @brief Set window main handler available.
@@ -633,6 +633,20 @@ public:
      */
     bool IsConstrainedModal() const;
 
+    /**
+     * @brief record the timestamp when the modal extension start.
+     *
+     * @param timeStamp the timestamp when modal extension start.
+     */
+    void SetStartModalExtensionTimeStamp(int64_t timeStamp);
+
+    /**
+     * @brief record the timestamp when the modal extension start.
+     *
+     * @return timeStamp the timestamp when modal extension start.
+     */
+    int64_t GetStartModalExtensionTimeStamp() const;
+
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
@@ -682,6 +696,7 @@ private:
     float density_ = 1.0f;
     bool isDensityFollowHost_ = false;
     bool isConstrainedModal_ = false;
+    int64_t startModalExtensionTimeStamp_ = -1;
 };
 } // namespace Rosen
 } // namespace OHOS

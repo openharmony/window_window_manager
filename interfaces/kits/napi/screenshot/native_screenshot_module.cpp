@@ -41,6 +41,7 @@ static const uint32_t PIXMAP_VECTOR_ONLY_SDR_SIZE = 1;
 static const uint32_t PIXMAP_VECTOR_SIZE = 2;
 static const uint32_t SDR_PIXMAP = 0;
 static const uint32_t HDR_PIXMAP = 1;
+static const uint32_t MAX_ARRAY_SIZE = 1024;
 struct Option {
     Media::Rect rect;
     Media::Size size;
@@ -49,6 +50,7 @@ struct Option {
     bool isNeedNotify = true;
     bool isNeedPointer = true;
     bool isCaptureFullOfScreen = false;
+    std::vector<uint64_t> blackWindowIds = {};
 };
 
 struct Param {
@@ -208,6 +210,46 @@ static void IsNeedPointer(napi_env env, std::unique_ptr<Param> &param, napi_valu
     }
 }
 
+static void ConvertWindowIdList(napi_env env, std::unique_ptr<Param>& param, napi_value& argv)
+{
+    param->validInputParam = false;
+    napi_value blackWindowIds;
+    napi_status status = napi_get_named_property(env, argv, "blackWindowIds", &blackWindowIds);
+    if (status != napi_ok) {
+        TLOGD(WmsLogTag::DMS, "no black window ids.");
+        param->validInputParam = true;
+        return;
+    }
+    uint32_t size = 0;
+    if (GetType(env, blackWindowIds) != napi_object ||
+        napi_get_array_length(env, blackWindowIds, &size) == napi_invalid_arg) {
+        TLOGD(WmsLogTag::DMS, "no surface id list");
+        param->validInputParam = true;
+        return;
+    }
+    if (size > MAX_ARRAY_SIZE) {
+        TLOGE(WmsLogTag::DMS, "size bigger than 1024, size: %{public}u", size);
+        return;
+    }
+    std::vector<uint64_t> persistentIds;
+    for (uint32_t i = 0; i < size; i++) {
+        int64_t persistentId = 0;
+        napi_value element = nullptr;
+        napi_get_element(env, blackWindowIds, i, &element);
+        if (napi_get_value_int64(env, element, &persistentId) != napi_ok) {
+            TLOGE(WmsLogTag::DMS, "window id is not number");
+            return;
+        }
+        if (persistentId < 0) {
+            TLOGE(WmsLogTag::DMS, "window id is negative: %{public}" PRId64, persistentId);
+            continue;
+        }
+        param->option.blackWindowIds.push_back(static_cast<uint64_t>(persistentId));
+    }
+    param->validInputParam = true;
+    return;
+}
+
 static void IsCaptureFullOfScreen(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
 {
     TLOGI(WmsLogTag::DMS, "Get Screenshot Option: isCaptureFullOfScreen");
@@ -235,6 +277,7 @@ static void GetScreenshotParam(napi_env env, std::unique_ptr<Param> &param, napi
     IsNeedNotify(env, param, argv);
     IsNeedPointer(env, param, argv);
     IsCaptureFullOfScreen(env, param, argv);
+    ConvertWindowIdList(env, param, argv);
 }
 
 static void AsyncGetScreenshot(napi_env env, std::unique_ptr<Param> &param)
@@ -373,6 +416,7 @@ napi_value Resolve(napi_env env, std::unique_ptr<Param> &param)
     }
     TLOGI(WmsLogTag::DMS, "screen shot ret=%{public}d.", param->wret);
     if (isThrowError) {
+        TLOGE(WmsLogTag::DMS, "screen shot isThrowError ret=%{public}d.", param->wret);
         napi_throw(env, error);
         return error;
     }
@@ -498,7 +542,7 @@ napi_value PickFunc(napi_env env, napi_callback_info info)
         param->validInputParam = true;
         NAPI_CALL(env, napi_create_reference(env, argv[0], 1, &ref));
     } else {  // 0 valid parameters
-        TLOGI(WmsLogTag::DMS, "argc == 0");
+        TLOGI(WmsLogTag::DMS, "argc != 0");
         param->validInputParam = true;
     }
     param->isPick = true;
@@ -507,12 +551,25 @@ napi_value PickFunc(napi_env env, napi_callback_info info)
 
 static void AsyncGetScreenCapture(napi_env env, std::unique_ptr<Param> &param)
 {
+    if (!param->validInputParam) {
+        TLOGE(WmsLogTag::DMS, "screen capture failed!");
+        param->wret = DmErrorCode::DM_ERROR_SYSTEM_INNORMAL;
+        param->errMessage = "Parameter error. Possible causes: "
+            "1. Mandatory parameters are left unspecified; "
+            "2. Incorrect parameter types.";
+        return;
+    }
     CaptureOption captureOption;
     captureOption.displayId_ = param->option.displayId;
     captureOption.isNeedNotify_ = param->option.isNeedNotify;
     captureOption.isNeedPointer_ = param->option.isNeedPointer;
-    TLOGI(WmsLogTag::DMS, "capture option isNeedNotify=%{public}d isNeedPointer=%{public}d",
-        captureOption.isNeedNotify_, captureOption.isNeedPointer_);
+    captureOption.blackWindowIdList_ = param->option.blackWindowIds;
+    std::ostringstream oss;
+    for (size_t i = 0; i < captureOption.blackWindowIdList_.size(); ++i) {
+        oss << captureOption.blackWindowIdList_[i] << ", ";
+    }
+    TLOGI(WmsLogTag::DMS, "capture option isNeedNotify=%{public}d isNeedPointer=%{public}d  blackWindowIds=%{public}s",
+        captureOption.isNeedNotify_, captureOption.isNeedPointer_, oss.str().c_str());
     param->image = DisplayManager::GetInstance().GetScreenCapture(captureOption, &param->wret);
     if (param->image == nullptr && param->wret == DmErrorCode::DM_OK) {
         TLOGI(WmsLogTag::DMS, "screen capture failed!");
@@ -536,6 +593,7 @@ napi_value CaptureFunc(napi_env env, napi_callback_info info)
     }
     param->option.displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
     napi_ref ref = nullptr;
+    param->validInputParam = true;
     if (argc > 0 && GetType(env, argv[0]) == napi_object) {
         TLOGI(WmsLogTag::DMS, "argv[0]'s type is napi_object");
         GetScreenshotParam(env, param, argv[0]);

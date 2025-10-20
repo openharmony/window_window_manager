@@ -73,7 +73,7 @@ public:
     void SetTouchable(bool touchable);
     void SetTurnScreenOn(bool turnScreenOn);
     void SetKeepScreenOn(bool keepScreenOn);
-    void SetCallingWindow(uint32_t windowId);
+    void ChangeCallingWindowId(uint32_t windowId);
     void SetInputEventCallingPid(int32_t pid);
     void SetCallingPid(int32_t pid);
     void SetCallingUid(int32_t uid);

@@ -167,7 +167,7 @@ public:
     DMError IsScreenRotationLocked(bool& isLocked) override;
     DMError SetScreenRotationLocked(bool isLocked) override;
     DMError SetScreenRotationLockedFromJs(bool isLocked) override;
-    DMError SetOrientation(ScreenId screenId, Orientation orientation) override;
+    DMError SetOrientation(ScreenId screenId, Orientation orientation, bool isFromNapi) override;
     bool SetRotation(ScreenId screenId, Rotation rotationAfter, bool isFromWindow);
     void SetSensorSubscriptionEnabled();
     bool SetRotationFromWindow(Rotation targetRotation);
@@ -339,6 +339,7 @@ public:
     void OnTentModeChanged(int tentType, int32_t hall = -1);
     void RegisterSettingDpiObserver();
     void RegisterSettingRotationObserver();
+    void NotifyBrightnessInfoChanged(ScreenId screenId, const BrightnessInfo& info);
 
     void OnConnect(ScreenId screenId) override {}
     void OnDisconnect(ScreenId screenId) override {}
@@ -464,7 +465,12 @@ public:
 
     std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
         DmErrorCode* errorCode = nullptr) override;
+    bool checkCaptureParam(const CaptureOption& captureOption,
+        DmErrorCode* errorCode = nullptr);
     void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;
+    void ConvertWindowIdsToSurfaceNodeList(std::vector<uint64_t> windowIdList,
+        std::vector<uint64_t>& surfaceNodesList, DmErrorCode* errorCode);
+    bool IsSupportCapture();
     sptr<DisplayInfo> GetPrimaryDisplayInfo() override;
     DisplayId GetPrimaryDisplayId() override;
     std::shared_ptr<Media::PixelMap> GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
@@ -500,6 +506,7 @@ public:
     bool GetKeyboardState() override;
     DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea) override;
+    DMError GetBrightnessInfo(DisplayId displayId, ScreenBrightnessInfo& brightnessInfo) override;
     DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) override;
     bool SetScreenOffset(ScreenId screenId, float offsetX, float offsetY);
     bool SynchronizePowerStatus(ScreenPowerState state) override;
@@ -517,12 +524,20 @@ public:
     void SetFirstSCBConnect(bool firstSCBConnect);
     // mirror screen
     bool HandleResolutionEffectChange();
+    bool HandleCastVirtualScreenMirrorRegion();
     bool GetStoredPidFromUid(int32_t uid, int32_t& agentPid) const;
     bool IsFreezed(const int32_t& agentPid, const DisplayManagerAgentType& agentType);
     bool isScreenShot_ = false;
     void NotifyAodOpCompletion(AodOP operation, int32_t result) override;
     void DoAodExitAndSetPower(ScreenId screenId, ScreenPowerStatus status);
     void DoAodExitAndSetPowerAllOff();
+    struct UserScreenInfo {
+        bool isActive;
+        ScreenId screenId;
+        int32_t pid;
+    };
+    std::map<int32_t, UserScreenInfo> GetUserScreenMap() const;
+
 protected:
     ScreenSessionManager();
     virtual ~ScreenSessionManager() = default;
@@ -538,6 +553,7 @@ protected:
     void ReportHandleScreenEvent(ScreenEvent screenEvent, ScreenCombination screenCombination);
     void SetExtendedScreenFallbackPlan(ScreenId screenId);
     void WaitUpdateAvailableAreaForPc();
+    void SetupScreenDensityProperties(ScreenId screenId, ScreenProperty& property, RRect bounds);
     void CreateScreenProperty(ScreenId screenId, ScreenProperty& property);
     void InitExtendScreenDensity(sptr<ScreenSession> session, ScreenProperty property);
     void RegisterRefreshRateChangeListener();
@@ -578,6 +594,8 @@ private:
     void ConfigureScreenSnapshotParams();
     void RegisterScreenChangeListener();
     void RegisterFoldNotSwitchingListener();
+    void RegisterBrightnessInfoChangeListener();
+    void UnregisterBrightnessInfoChangeListener();
     void OnHgmRefreshRateChange(uint32_t refreshRate);
     void UpdateSessionByActiveModeChange(sptr<ScreenSession> screenSession,
         sptr<ScreenSession> phyScreenSession, int32_t activeIdx);
@@ -711,7 +729,16 @@ private:
     DisplayId GetUserDisplayId(int32_t userId);
     int32_t GetActiveUserByDisplayId(DisplayId displayId);
     ScreenId GenerateSmsScreenId(ScreenId rsScreenId);
-    
+
+    void HandleSuperFoldDisplayInfoWhenKeyboardOn(const sptr<ScreenSession>& screenSession,
+        sptr<DisplayInfo>& displayInfo);
+    void HandleRotationCorrectionExemption(sptr<DisplayInfo>& displayInfo);
+    void GetRotationCorrectionExemptionListFromDatabase(bool isForce = false);
+    void RegisterRotationCorrectionExemptionListObserver();
+    std::shared_mutex rotationCorrectionExemptionMutex_;
+    std::vector<std::string> rotationCorrectionExemptionList_;
+    bool needReinstallExemptionList_ = true;
+
     class ScreenIdManager {
     friend class ScreenSessionGroup;
     public:
@@ -758,13 +785,8 @@ private:
         user101:  {isActive=false screenId=0  pid=2345}
         user102:  {isActive=true  screenId=6  pid=3456}
     */
-    struct userScreenInfo {
-        bool isActive;
-        ScreenId screenId;
-        int32_t pid;
-    };
-    std::map<int32_t, userScreenInfo> userScreenMap_;
-    std::mutex userScreenMapMutex_;
+    std::map<int32_t, UserScreenInfo> userScreenMap_;
+    mutable std::mutex userScreenMapMutex_;
     std::map<int32_t, sptr<IScreenSessionManagerClient>> clientProxyMap_;
     FoldDisplayMode oldScbDisplayMode_ = FoldDisplayMode::UNKNOWN;
 
@@ -817,6 +839,7 @@ private:
     bool isDensityDpiLoad_ = false;
     float densityDpi_ { 1.0f };
     float subDensityDpi_ { 1.0f };
+    float carDefaultDensityDpi_ { 2.0f };
     std::atomic<uint32_t> cachedSettingDpi_ {0};
     float pcModeDpi_ { 1.0f };
 
@@ -980,10 +1003,14 @@ private:
     bool RecoveryResolutionEffect();
     void RegisterSettingResolutionEffectObserver();
     void SetResolutionEffectFromSettingData();
+    void SetInternalScreenResolutionEffect(const sptr<ScreenSession>& internalSession, DMRect toRect);
+    void SetExternalScreenResolutionEffect(const sptr<ScreenSession>& externalSession, DMRect toRect);
+    void GetCastVirtualMirrorSession(sptr<ScreenSession>& virtualSession);
     std::atomic<bool> curResolutionEffectEnable_ = false;
     DMError SyncScreenPropertyChangedToServer(ScreenId screenId, const ScreenProperty& screenProperty) override;
     std::function<void(sptr<ScreenSession>& screenSession)> propertyChangedCallback_;
     std::mutex callbackMutex_;
+    bool isSupportCapture_ = false;
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {

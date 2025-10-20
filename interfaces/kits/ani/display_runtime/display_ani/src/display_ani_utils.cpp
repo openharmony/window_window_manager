@@ -320,6 +320,163 @@ ani_object DisplayAniUtils::CreateRectObject(ani_env *env)
     return rectObj;
 }
 
+ani_object DisplayAniUtils::CreatePositionObject(ani_env* env)
+{
+    ani_class aniClass{};
+    ani_status status = env->FindClass("@ohos.display.display.PostionImpl", &aniClass);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] class not found, status:%{public}d", static_cast<int32_t>(status));
+        return nullptr;
+    }
+    ani_method aniCtor;
+    auto ret = env->Class_FindMethod(aniClass, "<ctor>", ":V", &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Class_FindMethod failed");
+        return nullptr;
+    }
+    ani_object positionObj;
+    status = env->Object_New(aniClass, aniCtor, &positionObj);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] NewAniObject failed");
+        return nullptr;
+    }
+    return positionObj;
+}
+ 
+ani_object DisplayAniUtils::CreateRelativePostionObject(ani_env* env)
+{
+    ani_class aniClass{};
+    ani_status status = env->FindClass("@ohos.display.display.RelativePositionImpl", &aniClass);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] class not found, status:%{public}d", static_cast<int32_t>(status));
+        return nullptr;
+    }
+    ani_method aniCtor;
+    auto ret = env->Class_FindMethod(aniClass, "<ctor>", ":V", &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Class_FindMethod failed");
+        return nullptr;
+    }
+    ani_object rlativePostionObj;
+    status = env->Object_New(aniClass, aniCtor, &rlativePostionObj);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] NewAniObject failed");
+        return nullptr;
+    }
+    return rlativePostionObj;
+}
+ 
+DmErrorCode DisplayAniUtils::GetPositionFromAni(ani_env* env, Position& globalPosition, ani_object positionObj)
+{
+    ani_long positionX;
+    ani_long positionY;
+    if (ANI_OK != env->Object_GetFieldByName_Long(positionObj, "<property>x", &positionX) ||
+        ANI_OK != env->Object_GetFieldByName_Long(positionObj, "<property>y", &positionY)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get position failed");
+        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+    }
+    if (static_cast<int64_t>(positionX) < INT32_MIN || static_cast<int64_t>(positionX) > INT32_MAX ||
+        static_cast<int64_t>(positionY) < INT32_MIN || static_cast<int64_t>(positionY) > INT32_MAX) {
+        TLOGE(WmsLogTag::DMS, "[ANI] position x and y exceeded the range!");
+        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+    }
+    globalPosition.x = static_cast<int32_t>(positionX);
+    globalPosition.y = static_cast<int32_t>(positionY);
+    return DmErrorCode::DM_OK;
+}
+ 
+DmErrorCode DisplayAniUtils::SetPositionObj(ani_env* env, Position& globalPosition, ani_object positionObj)
+{
+    if (ANI_OK != env->Object_SetFieldByName_Long(positionObj, "<property>x", globalPosition.x)) {
+        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+    }
+    if (ANI_OK != env->Object_SetFieldByName_Long(positionObj, "<property>y", globalPosition.y)) {
+        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+    }
+    return DmErrorCode::DM_OK;
+}
+ 
+DmErrorCode DisplayAniUtils::GetRelativePostionFromAni(
+    ani_env* env, RelativePosition& relativePosition, ani_object relativePositionObj)
+{
+    ani_ref positionObj;
+    ani_long displayId;
+    if (ANI_OK != env->Object_GetFieldByName_Long(relativePositionObj, "<property>displayId", &displayId)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get displayId failed");
+        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+    }
+    relativePosition.displayId = static_cast<DisplayId>(displayId);
+    if (ANI_OK != env->Object_GetFieldByName_Ref(relativePositionObj, "<property>position", &positionObj)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get positionObj failed");
+        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+    }
+    DmErrorCode errcode = DisplayAniUtils::GetPositionFromAni(
+        env, relativePosition.position, static_cast<ani_object>(positionObj));
+    if (errcode != DmErrorCode::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get position from ani failed");
+        return errcode;
+    }
+    return DmErrorCode::DM_OK;
+}
+ 
+DmErrorCode DisplayAniUtils::SetRelativePostionObj(
+    ani_env* env, RelativePosition& relativePosition, ani_object relativePositionObj)
+{
+    ani_object PositionObj = CreatePositionObject(env);
+    if (PositionObj == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Create position object failed");
+        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+    }
+    if (ANI_OK != env->Object_SetFieldByName_Long(PositionObj, "<property>x", relativePosition.position.x)) {
+        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+    }
+    if (ANI_OK != env->Object_SetFieldByName_Long(PositionObj, "<property>y", relativePosition.position.y)) {
+        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+    }
+    if (ANI_OK != env->Object_SetFieldByName_Ref(relativePositionObj, "<property>position", PositionObj)) {
+        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+    }
+    if (ANI_OK != env->Object_SetFieldByName_Long(
+        relativePositionObj, "<property>displayId", relativePosition.displayId)) {
+        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+    }
+    return DmErrorCode::DM_OK;
+}
+ 
+void DisplayAniUtils::SetFoldCreaseRegion(ani_env* env, FoldCreaseRegion& region, ani_object foldCreaseRegionObj)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
+    uint64_t displayId = region.GetDisplayId();
+    std::vector<DMRect> rects = region.GetCreaseRects();
+    if (rects.size() == 0) {
+        TLOGE(WmsLogTag::DMS, "[ANI] rect length is zero.");
+        return;
+    }
+    if (ANI_OK != env->Object_SetFieldByName_Long(
+        foldCreaseRegionObj, "<property>displayId", (ani_long)displayId)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] set displayId field fail");
+        return;
+    }
+    ani_ref creaseRectsObj{};
+    if (ANI_OK != env->Object_GetFieldByName_Ref(foldCreaseRegionObj, "<property>creaseRects", &creaseRectsObj)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get ani_array len fail");
+    }
+    ani_int length;
+    if (ANI_OK != env->Object_GetPropertyByName_Int(static_cast<ani_object>(creaseRectsObj), "length", &length)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get ani_array len fail");
+    }
+    TLOGI(WmsLogTag::DMS, "[ANI] set FoldCreaseRegion property begin");
+    for (int i = 0; i < std::min(int(length), static_cast<int>(rects.size())); i++) {
+        ani_ref currentCrease;
+        if (ANI_OK != env->Object_CallMethodByName_Ref(static_cast<ani_object>(creaseRectsObj),
+            "$_get", "I:Lstd/core/Object;", &currentCrease, (ani_int)i)) {
+            TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail", (ani_int)i);
+        }
+        TLOGI(WmsLogTag::DMS, "current i: %{public}d", i);
+        DisplayAniUtils::ConvertRect(rects[i], static_cast<ani_object>(currentCrease), env);
+    }
+}
+
 std::shared_ptr<DisplayAni> DisplayAniUtils::FindAniDisplayObject(sptr<Display> display, DisplayId displayId)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] Try to find display %{public}" PRIu64" in g_AniDisplayMap", displayId);

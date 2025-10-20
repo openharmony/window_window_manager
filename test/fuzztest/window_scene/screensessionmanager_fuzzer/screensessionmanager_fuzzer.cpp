@@ -354,7 +354,7 @@ void ProxyInterfaceFuzzTestPart4(const uint8_t* data, size_t size)
 
     screenId = source.GetObject<ScreenId>();
     Orientation orientation = source.GetObject<Orientation>();
-    proxy->SetOrientation(screenId, orientation);
+    proxy->SetOrientation(screenId, orientation, false);
 
     bool isLocked = source.GetObject<bool>();
     proxy->SetScreenRotationLocked(isLocked);

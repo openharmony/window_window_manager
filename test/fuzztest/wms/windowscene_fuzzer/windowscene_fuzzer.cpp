@@ -134,7 +134,7 @@ size_t InitWindowOption2(WindowOption& windowOption, const uint8_t* data, size_t
     windowOption.SetBrightness(brightness);
     uint32_t callingWindow;
     startPos += GetObject<uint32_t>(callingWindow, data + startPos, size - startPos);
-    windowOption.SetCallingWindow(callingWindow);
+    windowOption.ChangeCallingWindowId(callingWindow);
     SystemBarProperty statusBarProperty;
     SystemBarProperty navigationBarProperty;
     startPos += GetObject<SystemBarProperty>(statusBarProperty, data + startPos, size - startPos);

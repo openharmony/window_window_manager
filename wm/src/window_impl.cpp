@@ -150,7 +150,7 @@ void WindowImpl::InitWindowProperty(const sptr<WindowOption>& option)
     property_->SetFocusable(option->GetFocusable());
     property_->SetTouchable(option->GetTouchable());
     property_->SetDisplayId(option->GetDisplayId());
-    property_->SetCallingWindow(option->GetCallingWindow());
+    property_->ChangeCallingWindowId(option->GetCallingWindow());
     property_->SetWindowFlags(option->GetWindowFlags());
     property_->SetHitOffset(option->GetHitOffset());
     property_->SetRequestedOrientation(option->GetRequestedOrientation());
@@ -1931,7 +1931,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus, bo
     return ret;
 }
 
-WMError WindowImpl::ShowKeyboard(KeyboardEffectOption effectOption)
+WMError WindowImpl::ShowKeyboard(uint32_t callingWindowId, uint64_t tgtDisplayId, KeyboardEffectOption effectOption)
 {
     return Show();
 }
@@ -2210,12 +2210,12 @@ float WindowImpl::GetBrightness() const
     return property_->GetBrightness();
 }
 
-WMError WindowImpl::SetCallingWindow(uint32_t windowId)
+WMError WindowImpl::ChangeCallingWindowId(uint32_t windowId)
 {
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    property_->SetCallingWindow(windowId);
+    property_->ChangeCallingWindowId(windowId);
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW);
 }
 

@@ -175,55 +175,21 @@ HWTEST_F(KeyboardSessionTest3, GetSessionScreenName01, TestSize.Level1)
 }
 
 /**
- * @tc.name: UseFocusIdIfCallingSessionIdInvalid01
+ * @tc.name: UseFocusIdIfCallingSessionIdInvalid001
  * @tc.desc: test function: UseFocusIdIfCallingSessionIdInvalid
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest3, UseFocusIdIfCallingSessionIdInvalid01, TestSize.Level1)
+HWTEST_F(KeyboardSessionTest3, UseFocusIdIfCallingSessionIdInvalid001, TestSize.Level1)
 {
-    auto keyboardSession =
-        GetKeyboardSession("UseFocusIdIfCallingSessionIdInvalid01", "UseFocusIdIfCallingSessionIdInvalid01");
+    auto keyboardSession = GetKeyboardSession("UseFocusIdIfCallingSessionIdInvalid001",
+        "UseFocusIdIfCallingSessionIdInvalid001");
     ASSERT_NE(keyboardSession, nullptr);
     sptr<KeyboardSession::KeyboardSessionCallback> keyboardCallback =
-        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
+        new (std::nothrow) KeyboardSession::KeyboardSessionCallback();
     ASSERT_NE(keyboardCallback, nullptr);
     keyboardSession->keyboardCallback_ = keyboardCallback;
     sptr<SceneSession> sceneSession = GetSceneSession("TestSceneSession", "TestSceneSession");
     ASSERT_NE(sceneSession, nullptr);
-    sceneSession->persistentId_ = 100;
-    keyboardSession->keyboardCallback_->onGetSceneSession =
-        [sceneSession](uint32_t callingSessionId) -> sptr<SceneSession> {
-        if (sceneSession->persistentId_ != callingSessionId) {
-            return nullptr;
-        }
-        return sceneSession;
-    };
-
-    keyboardSession->GetSessionProperty()->SetCallingSessionId(100);
-    keyboardSession->UseFocusIdIfCallingSessionIdInvalid();
-    auto resultId = keyboardSession->GetCallingSessionId();
-    ASSERT_EQ(resultId, 100);
-
-    keyboardSession->GetSessionProperty()->SetCallingSessionId(101);
-    keyboardSession->keyboardCallback_->onGetFocusedSessionId = []() -> int32_t { return 100; };
-    keyboardSession->UseFocusIdIfCallingSessionIdInvalid();
-    resultId = keyboardSession->GetCallingSessionId();
-    ASSERT_EQ(resultId, 100);
-}
-
-/**
- * @tc.name: UseFocusIdIfCallingSessionIdInvalid02
- * @tc.desc: test function: UseFocusIdIfCallingSessionIdInvalid
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest3, UseFocusIdIfCallingSessionIdInvalid02, TestSize.Level1)
-{
-    auto keyboardSession = GetKeyboardSession("UseFocusIdIfCallingSessionIdInvalid02",
-        "UseFocusIdIfCallingSessionIdInvalid02");
-    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCallback =
-        new (std::nothrow) KeyboardSession::KeyboardSessionCallback();
-    keyboardSession->keyboardCallback_ = keyboardCallback;
-    sptr<SceneSession> sceneSession = GetSceneSession("TestSceneSession", "TestSceneSession");
     sceneSession->persistentId_ = 100;
     keyboardSession->keyboardCallback_->onGetSceneSession =
         [sceneSession](uint32_t callingSessionId)->sptr<SceneSession> {
@@ -232,23 +198,97 @@ HWTEST_F(KeyboardSessionTest3, UseFocusIdIfCallingSessionIdInvalid02, TestSize.L
             }
             return sceneSession;
         };
-
-    keyboardSession->GetSessionProperty()->SetCallingSessionId(100);
-    keyboardSession->UseFocusIdIfCallingSessionIdInvalid();
+    
+    // calling session is invalid, calling id == focus id
+    keyboardSession->keyboardCallback_->onGetFocusedSessionId = []() -> int32_t { return 100; };
+    keyboardSession->GetSessionProperty()->SetCallingSessionId(1234);
+    sceneSession->GetSessionProperty()->SetDisplayId(11111);
+    keyboardSession->GetSessionProperty()->SetDisplayId(22222);
+    keyboardSession->UseFocusIdIfCallingSessionIdInvalid(100); // use calling session
     auto resultId = keyboardSession->GetCallingSessionId();
     EXPECT_EQ(resultId, 100);
 
-    keyboardSession->GetSessionProperty()->SetCallingSessionId(101);
-    keyboardSession->keyboardCallback_->onGetFocusedSessionId = []()->int32_t {
-        return 100;
-    };
-    keyboardSession->UseFocusIdIfCallingSessionIdInvalid();
+    // calling session is valid, display id matches
+    keyboardSession->keyboardCallback_->onGetFocusedSessionId = []() -> int32_t { return 777; };
+    keyboardSession->GetSessionProperty()->SetCallingSessionId(1234);
+    sceneSession->GetSessionProperty()->SetDisplayId(33333);
+    keyboardSession->GetSessionProperty()->SetDisplayId(33333);
+    keyboardSession->UseFocusIdIfCallingSessionIdInvalid(100); // use calling session
+    resultId = keyboardSession->GetCallingSessionId();
+    EXPECT_EQ(resultId, 100); // use calling session
+
+    // calling session is valid, neither condition is true
+    sceneSession->persistentId_ = 999;
+    keyboardSession->GetSessionProperty()->SetCallingSessionId(1234); // initial value, to be replaced
+    constexpr auto myFocusedSessionId = 4444;
+    keyboardSession->keyboardCallback_->onGetFocusedSessionId = []() -> int32_t { return myFocusedSessionId; };
+    keyboardSession->keyboardCallback_->onGetSceneSession =
+        [sceneSession](uint32_t callingSessionId) -> sptr<SceneSession> {
+            if (callingSessionId == 999 || callingSessionId == myFocusedSessionId) {
+                return sceneSession;
+            }
+            return nullptr;
+        };
+    sceneSession->GetSessionProperty()->SetDisplayId(11111); // display id mismatches
+    keyboardSession->GetSessionProperty()->SetDisplayId(22222);
+    keyboardSession->UseFocusIdIfCallingSessionIdInvalid(999); // calling id != focused id
+    resultId = keyboardSession->GetCallingSessionId();
+    EXPECT_EQ(resultId, 4444); // replaced with focused id
+}
+
+/**
+ * @tc.name: UseFocusIdIfCallingSessionIdInvalid002
+ * @tc.desc: test function: UseFocusIdIfCallingSessionIdInvalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest3, UseFocusIdIfCallingSessionIdInvalid002, TestSize.Level1)
+{
+    auto keyboardSession = GetKeyboardSession("UseFocusIdIfCallingSessionIdInvalid002",
+        "UseFocusIdIfCallingSessionIdInvalid002");
+    ASSERT_NE(keyboardSession, nullptr);
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCallback =
+        new (std::nothrow) KeyboardSession::KeyboardSessionCallback();
+    ASSERT_NE(keyboardCallback, nullptr);
+    keyboardSession->keyboardCallback_ = keyboardCallback;
+    sptr<SceneSession> sceneSession = GetSceneSession("TestSceneSession", "TestSceneSession");
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->persistentId_ = 100;
+    keyboardSession->keyboardCallback_->onGetSceneSession =
+        [sceneSession](uint32_t callingSessionId) -> sptr<SceneSession> {
+            if (sceneSession->persistentId_ == callingSessionId) {
+                return sceneSession;
+            }
+            return nullptr;
+        };
+    
+    // calling session is invalid, use focused id
+    keyboardSession->GetSessionProperty()->SetCallingSessionId(1234); // initial value, to be replaced by 100
+    keyboardSession->keyboardCallback_->onGetFocusedSessionId = []() -> int32_t { return 100; };
+    keyboardSession->keyboardCallback_->onGetSceneSession =
+        [sceneSession](uint32_t callingSessionId) -> sptr<SceneSession> {
+            if (callingSessionId == 100) {
+                return sceneSession; // return something for 100
+            }
+            return nullptr;
+        };
+    keyboardSession->UseFocusIdIfCallingSessionIdInvalid(123456); // invalid calling session id, use focused id
+    auto resultId = keyboardSession->GetCallingSessionId();
+    EXPECT_EQ(resultId, 100);
+
+    keyboardSession->keyboardCallback_->onCallingSessionIdChange = [](uint32_t) {};
+    // calling session is invalid, use focusesd id with callback
+    keyboardSession->GetSessionProperty()->SetCallingSessionId(1234); // initial value, to be replaced by 100
+    keyboardSession->keyboardCallback_->onGetFocusedSessionId = []() -> int32_t { return 100; };
+    keyboardSession->keyboardCallback_->onGetSceneSession =
+        [sceneSession](uint32_t callingSessionId) -> sptr<SceneSession> {
+            if (callingSessionId == 100) {
+                return sceneSession; // return something for 100
+            }
+            return nullptr;
+        };
+    keyboardSession->UseFocusIdIfCallingSessionIdInvalid(123456); // invalid calling session id, use focused id
     resultId = keyboardSession->GetCallingSessionId();
     EXPECT_EQ(resultId, 100);
-    keyboardSession->keyboardCallback_->onCallingSessionIdChange = nullptr;
-    keyboardSession->UseFocusIdIfCallingSessionIdInvalid();
-    keyboardSession->keyboardCallback_->onCallingSessionIdChange = [](int32_t callingSessionid) {};
-    keyboardSession->UseFocusIdIfCallingSessionIdInvalid();
 }
 
 /**

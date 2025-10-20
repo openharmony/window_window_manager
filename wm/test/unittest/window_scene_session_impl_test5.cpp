@@ -162,6 +162,73 @@ HWTEST_F(WindowSceneSessionImplTest5, HandleDownForCompatibleMode, TestSize.Leve
 }
 
 /**
+ * @tc.name: TestCheckWaterfallResidentState
+ * @tc.desc: Verify CheckWaterfallResidentState validates states correctly based on window type
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, TestCheckWaterfallResidentState, TestSize.Level1)
+{
+    auto option = sptr<WindowOption>::MakeSptr();
+    auto window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    // Case 1: Main window, any state should return true
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    EXPECT_TRUE(window->CheckWaterfallResidentState(WaterfallResidentState::UNCHANGED));
+    EXPECT_TRUE(window->CheckWaterfallResidentState(WaterfallResidentState::OPEN));
+    EXPECT_TRUE(window->CheckWaterfallResidentState(WaterfallResidentState::CLOSE));
+    EXPECT_TRUE(window->CheckWaterfallResidentState(WaterfallResidentState::CANCEL));
+
+    // Case 2: Sub window, only UNCHANGED or CANCEL should return true
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    EXPECT_TRUE(window->CheckWaterfallResidentState(WaterfallResidentState::UNCHANGED));
+    EXPECT_TRUE(window->CheckWaterfallResidentState(WaterfallResidentState::CANCEL));
+    EXPECT_FALSE(window->CheckWaterfallResidentState(WaterfallResidentState::OPEN));
+    EXPECT_FALSE(window->CheckWaterfallResidentState(WaterfallResidentState::CLOSE));
+}
+
+/**
+ * @tc.name: TestApplyMaximizePresentation
+ * @tc.desc: Verify ApplyMaximizePresentation sets immersive mode and hover flags correctly for all presentations
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, TestApplyMaximizePresentation, TestSize.Level1)
+{
+    auto option = sptr<WindowOption>::MakeSptr();
+    auto window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    // Case 1: ENTER_IMMERSIVE
+    window->ApplyMaximizePresentation(MaximizePresentation::ENTER_IMMERSIVE);
+    EXPECT_TRUE(window->enableImmersiveMode_);
+    EXPECT_TRUE(window->titleHoverShowEnabled_);
+    EXPECT_TRUE(window->dockHoverShowEnabled_);
+
+    // Case 2: EXIT_IMMERSIVE
+    window->ApplyMaximizePresentation(MaximizePresentation::EXIT_IMMERSIVE);
+    EXPECT_FALSE(window->enableImmersiveMode_);
+    EXPECT_TRUE(window->titleHoverShowEnabled_);
+    EXPECT_TRUE(window->dockHoverShowEnabled_);
+
+    // Case 3: ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER
+    window->ApplyMaximizePresentation(MaximizePresentation::ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER);
+    EXPECT_TRUE(window->enableImmersiveMode_);
+    EXPECT_FALSE(window->titleHoverShowEnabled_);
+    EXPECT_FALSE(window->dockHoverShowEnabled_);
+
+    // Case 4: FOLLOW_APP_IMMERSIVE_SETTING
+    window->enableImmersiveMode_ = false;
+    window->ApplyMaximizePresentation(MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING);
+    EXPECT_FALSE(window->enableImmersiveMode_);
+    EXPECT_TRUE(window->titleHoverShowEnabled_);
+    EXPECT_TRUE(window->dockHoverShowEnabled_);
+
+    // Case 5: Invalid enum value (default branch)
+    auto invalidPresentation = static_cast<MaximizePresentation>(999);
+    window->ApplyMaximizePresentation(invalidPresentation);
+    EXPECT_TRUE(window->titleHoverShowEnabled_);
+    EXPECT_TRUE(window->dockHoverShowEnabled_);
+}
+
+/**
  * @tc.name: Maximize
  * @tc.desc: Maximize
  * @tc.type: FUNC
@@ -203,6 +270,14 @@ HWTEST_F(WindowSceneSessionImplTest5, Maximize01, TestSize.Level1)
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     auto ret = window->Maximize(presentation);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+
+    // waterfallResidentState is invalid and windowType is invalid
+    ret = window->Maximize(presentation, WaterfallResidentState::OPEN);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+
+    // waterfallResidentState is valid but windowType is invalid
+    ret = window->Maximize(presentation, WaterfallResidentState::UNCHANGED);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
 
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->property_->SetWindowModeSupportType(0);
@@ -416,7 +491,6 @@ HWTEST_F(WindowSceneSessionImplTest5, IsDefaultDensityEnabled02, TestSize.Level1
     window->isEnableDefaultDensityWhenCreate_ = true;
     EXPECT_EQ(window->IsDefaultDensityEnabled(), true);
 }
-
 
 /**
  * @tc.name: GetCustomDensity01
@@ -740,13 +814,13 @@ HWTEST_F(WindowSceneSessionImplTest5, ShowKeyboard01, TestSize.Level1)
     effectOption.flowLightMode_ = KeyboardFlowLightMode::BACKGROUND_FLOW_LIGHT;
     effectOption.gradientMode_ = KeyboardGradientMode::LINEAR_GRADIENT;
     // normal value
-    ASSERT_EQ(keyboardWindow->ShowKeyboard(effectOption), WMError::WM_ERROR_INVALID_WINDOW);
+    ASSERT_EQ(keyboardWindow->ShowKeyboard(1000, 0, effectOption), WMError::WM_ERROR_INVALID_WINDOW);
 
     effectOption.viewMode_ = KeyboardViewMode::VIEW_MODE_END;
     effectOption.flowLightMode_ = KeyboardFlowLightMode::END;
     effectOption.gradientMode_ = KeyboardGradientMode::END;
     // exception value
-    ASSERT_EQ(keyboardWindow->ShowKeyboard(effectOption), WMError::WM_ERROR_INVALID_WINDOW);
+    ASSERT_EQ(keyboardWindow->ShowKeyboard(1000, 0, effectOption), WMError::WM_ERROR_INVALID_WINDOW);
     auto lastOption = keyboardWindow->property_->GetKeyboardEffectOption();
     ASSERT_EQ(lastOption.viewMode_, KeyboardViewMode::NON_IMMERSIVE_MODE);
 }
@@ -2426,6 +2500,13 @@ HWTEST_F(WindowSceneSessionImplTest5, TestSetContentAspectRatio, TestSize.Level1
         .Times(1).WillOnce(Return(WSError::WS_OK));
     ret = window->SetContentAspectRatio(ratio, isPersistent, needUpdateRect);
     EXPECT_EQ(ret, WMError::WM_OK);
+
+    // Case 6: is compatibility mode => WM_OK
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    property->SetCompatibleModeProperty(compatibleModeProperty);
+    ret = window->SetContentAspectRatio(ratio, isPersistent, needUpdateRect);
+    EXPECT_EQ(ret, WMError::WM_OK);
 }
 
 /**
@@ -2437,9 +2518,10 @@ HWTEST_F(WindowSceneSessionImplTest5, CalculateNewLimitsByLimits, TestSize.Level
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> testImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    WindowLimits customizedLimits = {200, 200, 10, 10, 0.0f, 0.0f, 1.0f};
+    WindowLimits customizedLimits = {200, 200, 10, 10, 0.0f, 0.0f, 1.0f, PixelUnit::VP};
     WindowLimits expectLimits;
     WindowLimits newLimits;
+    WindowLimits newLimitsVP = WindowLimits::DEFAULT_VP_LIMITS();
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(0);
     ASSERT_NE(nullptr, display);
     auto displayInfo = display->GetDisplayInfo();
@@ -2447,7 +2529,7 @@ HWTEST_F(WindowSceneSessionImplTest5, CalculateNewLimitsByLimits, TestSize.Level
     float virtualPixelRatio = testImpl->GetVirtualPixelRatio(displayInfo);
     testImpl->property_->SetDisplayId(0);
     testImpl->property_->SetConfigWindowLimitsVP(customizedLimits);
-    
+
     // set system limits
     testImpl->windowSystemConfig_.maxFloatingWindowSize_ = 6240;
     testImpl->windowSystemConfig_.miniWidthOfMainWindow_ = 1;
@@ -2462,32 +2544,61 @@ HWTEST_F(WindowSceneSessionImplTest5, CalculateNewLimitsByLimits, TestSize.Level
     customizedLimits = {200, 200, 10, 10, 0.0f, 0.0f, 1.0f};
     expectLimits ={200, 200, 10, 10, 0.0f, 0.0f, 1.0f};
     testImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    testImpl->CalculateNewLimitsByLimits(newLimits, customizedLimits, virtualPixelRatio);
-    EXPECT_EQ(customizedLimits.maxWidth_, static_cast<uint32_t>(expectLimits.maxWidth_ * virtualPixelRatio));
-    EXPECT_EQ(customizedLimits.maxHeight_, static_cast<uint32_t>(expectLimits.maxHeight_ * virtualPixelRatio));
-    EXPECT_EQ(customizedLimits.minWidth_, static_cast<uint32_t>(expectLimits.minWidth_ * virtualPixelRatio));
-    EXPECT_EQ(customizedLimits.minHeight_, static_cast<uint32_t>(expectLimits.minHeight_ * virtualPixelRatio));
+    testImpl->CalculateNewLimitsByLimits(newLimits, newLimitsVP, customizedLimits, virtualPixelRatio);
+    EXPECT_EQ(customizedLimits.maxWidth_, expectLimits.maxWidth_);
+    EXPECT_EQ(customizedLimits.maxHeight_, expectLimits.maxHeight_);
+    EXPECT_EQ(customizedLimits.minWidth_, expectLimits.minWidth_);
+    EXPECT_EQ(customizedLimits.minHeight_, expectLimits.minHeight_);
 
     // user set flag is false, window type is sys window
     testImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     customizedLimits = {200, 200, 10, 10, 0.0f, 0.0f, 1.0f};
     expectLimits ={200, 200, 10, 10, 0.0f, 0.0f, 1.0f};
-    testImpl->CalculateNewLimitsByLimits(newLimits, customizedLimits, virtualPixelRatio);
-    testImpl->CalculateNewLimitsByLimits(newLimits, customizedLimits, virtualPixelRatio);
-    EXPECT_EQ(customizedLimits.maxWidth_, static_cast<uint32_t>(expectLimits.maxWidth_ * virtualPixelRatio));
-    EXPECT_EQ(customizedLimits.maxHeight_, static_cast<uint32_t>(expectLimits.maxHeight_ * virtualPixelRatio));
+    testImpl->CalculateNewLimitsByLimits(newLimits, newLimitsVP, customizedLimits, virtualPixelRatio);
+    testImpl->CalculateNewLimitsByLimits(newLimits, newLimitsVP, customizedLimits, virtualPixelRatio);
+    EXPECT_EQ(customizedLimits.maxWidth_, expectLimits.maxWidth_);
+    EXPECT_EQ(customizedLimits.maxHeight_, expectLimits.maxHeight_);
     EXPECT_EQ(customizedLimits.minWidth_, expectLimits.minWidth_);
     EXPECT_EQ(customizedLimits.minHeight_, expectLimits.minHeight_);
+
     // user set flag is true
     testImpl->userLimitsSet_ = true;
     customizedLimits = {200, 200, 10, 10, 0.0f, 0.0f, 1.0f};
     WindowLimits userLimits = {900, 900, 100, 100, 0.0f, 0.0f, 1.0f};
     testImpl->property_->SetUserWindowLimits(userLimits);
-    testImpl->CalculateNewLimitsByLimits(newLimits, customizedLimits, virtualPixelRatio);
+    testImpl->CalculateNewLimitsByLimits(newLimits, newLimitsVP, customizedLimits, virtualPixelRatio);
     EXPECT_EQ(customizedLimits.maxWidth_, userLimits.maxWidth_);
     EXPECT_EQ(customizedLimits.maxHeight_, userLimits.maxHeight_);
     EXPECT_EQ(customizedLimits.minWidth_, userLimits.minWidth_);
     EXPECT_EQ(customizedLimits.minHeight_, userLimits.minHeight_);
+}
+
+/**
+ * @tc.name: SetDefaultDensityEnabled_forCompatMode
+ * @tc.desc: SetDefaultDensityEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, SetDefaultDensityEnabled_forCompatMode, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetDefaultDensityEnabled_forCompatMode");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->defaultDensityEnabledStageConfig_.store(false);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_SHOWN;
+    EXPECT_EQ(WMError::WM_OK, window->SetDefaultDensityEnabled(true));
+    EXPECT_TRUE(window->IsStageDefaultDensityEnabled());
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToSimulationScale(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_EQ(window->IsAdaptToSimulationScale(), true);
+    window->defaultDensityEnabledStageConfig_.store(false);
+    EXPECT_EQ(WMError::WM_OK, window->SetDefaultDensityEnabled(true));
+    EXPECT_FALSE(window->IsStageDefaultDensityEnabled());
 }
 
 /**

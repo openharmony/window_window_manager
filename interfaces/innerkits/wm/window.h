@@ -530,6 +530,16 @@ public:
 using IWindowVisibilityListenerSptr = sptr<IWindowVisibilityChangedListener>;
 
 /**
+ * @class IOcclusionStateChangedListener
+ *
+ * @brief Listener to observe the window occlusion state changed.
+ */
+class IOcclusionStateChangedListener : virtual public RefBase {
+public:
+    virtual void OnOcclusionStateChanged(const WindowVisibilityState state) {}
+};
+
+/**
  * @class IDisplayIdChangeListener
  *
  * @brief Listener to observe one window displayId changed.
@@ -1740,12 +1750,12 @@ public:
     virtual float GetBrightness() const { return 0.0f; }
 
     /**
-     * @brief Set calling window.
+     * @brief Change calling window id.
      *
-     * @param windowId Window id.
-     * @return WM_OK means set success, others means set failed.
+     * @param callingWindowId Window id.
+     * @return WM_OK means change success, others means change failed.
      */
-    virtual WMError SetCallingWindow(uint32_t windowId) { return WMError::WM_OK; }
+    virtual WMError ChangeCallingWindowId(uint32_t callingWindowId) { return WMError::WM_OK; }
 
     /**
      * @brief Set privacy mode of window.
@@ -2616,6 +2626,18 @@ public:
     }
 
     /**
+     * @brief Maximize the window with the specified presentation mode and waterfall resident state.
+     *
+     * @param presentation The presentation mode used for window layout when maximizing.
+     * @param waterfallState The waterfall resident state to apply when maximizing.
+     * @return WMError::WM_OK on success, or appropriate error code on failure.
+     */
+    virtual WMError Maximize(MaximizePresentation presentation, WaterfallResidentState waterfallState)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief maximize the main window according to MaximizeMode. called by ACE when maximize button is clicked.
      *
      * @return WMError
@@ -3044,6 +3066,28 @@ public:
     }
 
     /**
+     * @brief Register window occlusion state change listener.
+     *
+     * @param listener IOcclusionStateChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterOcclusionStateChangeListener(const sptr<IOcclusionStateChangedListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister window occlusion state change listener.
+     *
+     * @param listener IOcclusionStateChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterOcclusionStateChangeListener(const sptr<IOcclusionStateChangedListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Register window displayId change listener.
      *
      * @param listener IDisplayIdChangedListener.
@@ -3101,9 +3145,13 @@ public:
      * @brief Get the window limits of current window.
      *
      * @param windowLimits.
+     * @param getVirtualPixel Returns windowLimits in virtual pixels if the param is true, otherwise in physical pixels.
      * @return WMError.
      */
-    virtual WMError GetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError GetWindowLimits(WindowLimits& windowLimits, bool getVirtualPixel = false)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Set the window limits of current window.
@@ -3867,20 +3915,22 @@ public:
 
     /**
      * @brief get callingWindow windowStatus.
+     * @param callingWindowId
      * @param windowStatus
-     * @return WM_OK means set success, others means set Failed.
+     * @return WM_OK means get success, others means get Failed.
      */
-    virtual WMError GetCallingWindowWindowStatus(WindowStatus& windowStatus) const
+    virtual WMError GetCallingWindowWindowStatus(uint32_t callingWindowId, WindowStatus& windowStatus) const
     {
         return WMError::WM_OK;
     }
 
     /**
-     * @brief get callingWindow windowStatus
+     * @brief get callingWindow windowRect
+     * @param callingWindowId
      * @param rect.
-     * @return WM_OK means set success, others means set failed
+     * @return WM_OK means get success, others means get failed
      */
-    virtual WMError GetCallingWindowRect(Rect& rect) const
+    virtual WMError GetCallingWindowRect(uint32_t callingWindowId, Rect& rect) const
     {
         return WMError::WM_OK;
     }
@@ -4108,10 +4158,13 @@ public:
     /**
      * @brief Show keyboard window
      *
+     * @param callingWindowId the id of calling window.
+     * @param targetDisplayId the id of target display
      * @param effectOption Keyboard will show with special effect option.
      * @return WM_OK means window show success, others means failed.
      */
-    virtual WMError ShowKeyboard(KeyboardEffectOption effectOption)
+    virtual WMError ShowKeyboard(uint32_t callingWindowId, uint64_t targetDisplayId, KeyboardEffectOption effectOption
+        = { KeyboardViewMode::NON_IMMERSIVE_MODE, KeyboardFlowLightMode::NONE, KeyboardGradientMode::NONE, 0 })
     {
         return WMError::WM_OK;
     }
@@ -4730,6 +4783,22 @@ public:
     {
         return WMError::WM_OK;
     }
+
+    /**
+     * @brief Set whether this window limits screen rotation when this window is shown.
+     *
+     * @param locked Screen rotation lock status to set.
+     * @return WMError::WM_OK on success, others means failed.
+     */
+    virtual WMError SetRotationLocked(bool locked) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    
+    /**
+     * @brief Get whether this window limits screen rotation when this window is shown.
+     * @param locked Screen rotation lock status to get.
+     *
+     * @return WMError::WM_OK on success, others means failed.
+     */
+    virtual WMError GetRotationLocked(bool& locked) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }

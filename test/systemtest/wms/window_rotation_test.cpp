@@ -189,39 +189,6 @@ HWTEST_F(WindowRotationTest, WindowRotationTest2, TestSize.Level1)
 }
 
 /**
- * @tc.name: WindowRotationTest3
- * @tc.desc: create floating window with orientation property
- * @tc.type: FUNC
- */
-HWTEST_F(WindowRotationTest, WindowRotationTest3, TestSize.Level1)
-{
-    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
-    ASSERT_NE(display, nullptr);
-    auto curDisplayOrientation = display->GetOrientation();
-
-    fullInfo_.name = "fullscreen.3";
-    fullInfo_.orientation_ = Orientation::REVERSE_HORIZONTAL;
-    fullInfo_.mode = WindowMode::WINDOW_MODE_FLOATING;
-    const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
-    ASSERT_NE(nullptr, fullWindow);
-    activeWindows_.push_back(fullWindow);
-    ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, fullWindow->GetWindowMode());
-    sleep(SPLIT_TEST_SLEEP_S);
-
-    ASSERT_EQ(Orientation::REVERSE_HORIZONTAL, fullWindow->GetRequestedOrientation());
-    sleep(SPLIT_TEST_SLEEP_S);
-    ASSERT_EQ(curDisplayOrientation, display->GetOrientation());
-    sleep(SPLIT_TEST_SLEEP_S);
-
-    curDisplayOrientation = display->GetOrientation();
-    ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
-    sleep(SPLIT_TEST_SLEEP_S);
-    ASSERT_EQ(curDisplayOrientation, display->GetOrientation());
-    sleep(SPLIT_TEST_SLEEP_S);
-}
-
-/**
  * @tc.name: WindowRotationTest4
  * @tc.desc: create window with orientation after setting screen default orientation.
  * @tc.type: FUNC

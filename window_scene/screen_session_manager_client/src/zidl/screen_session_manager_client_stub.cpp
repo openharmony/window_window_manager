@@ -346,8 +346,10 @@ int ScreenSessionManagerClientStub::HandleOnGetSurfaceNodeIdsFromMissionIdsChang
     data.ReadUInt64Vector(&missionIds);
     std::vector<uint64_t> surfaceNodeIds;
     data.ReadUInt64Vector(&surfaceNodeIds);
-    bool isBlackList = data.ReadBool();
-    OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds, isBlackList);
+    std::vector<uint32_t> needWindowTypeList;
+    data.ReadUInt32Vector(&needWindowTypeList);
+    bool isNeedForceCheck = data.ReadBool();
+    OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds, needWindowTypeList, isNeedForceCheck);
     if (!reply.WriteUInt64Vector(surfaceNodeIds)) {
         TLOGE(WmsLogTag::DMS, "Write surfaceNodeIds failed");
         return ERR_TRANSACTION_FAILED;

@@ -45,21 +45,45 @@ public:
     ~SessionProxyTest() {}
 };
 namespace {
-
 /**
- * @tc.name: OnSessionEvent
- * @tc.desc: normal function
+ * @tc.name: TestOnSessionEvent
+ * @tc.desc: Verify OnSessionEvent handles various IPC conditions correctly
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyTest, OnSessionEvent, TestSize.Level1)
+HWTEST_F(SessionProxyTest, TestOnSessionEvent, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "SessionProxyTest: OnSessionEvent start";
-    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
+    auto sessionProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
     SessionEvent event = SessionEvent::EVENT_MAXIMIZE;
-    WSError res = sProxy->OnSessionEvent(event);
-    ASSERT_EQ(res, WSError::WS_OK);
-    GTEST_LOG_(INFO) << "SessionProxyTest: OnSessionEvent end";
+    SessionEventParam param { .waterfallResidentState = 0 };
+
+    // Case 1: Failed to write interface token
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->OnSessionEvent(event, param));
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    // Case 2: Failed to write eventId or waterfallResidentState
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->OnSessionEvent(event, param));
+    MockMessageParcel::SetWriteUint32ErrorFlag(false);
+
+    // Case 3: remote is nullptr
+    sptr<SessionProxy> nullProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, nullProxy->OnSessionEvent(event, param));
+
+    // Case 4: Failed to send request
+    mockRemote->sendRequestResult_ = ERR_TRANSACTION_FAILED;
+    sptr<SessionProxy> failProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, failProxy->OnSessionEvent(event, param));
+
+    // Case 5: Success when event is EVENT_MAXIMIZE
+    mockRemote->sendRequestResult_ = ERR_NONE;
+    sptr<SessionProxy> okProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WSError::WS_OK, okProxy->OnSessionEvent(event, param));
+
+    // Case 6: Success when event is not EVENT_MAXIMIZE
+    event = SessionEvent::EVENT_MINIMIZE;
+    EXPECT_EQ(WSError::WS_OK, okProxy->OnSessionEvent(event, param));
 }
 
 /**
@@ -2194,6 +2218,42 @@ HWTEST_F(SessionProxyTest, NotifyIsFullScreenInForceSplitMode, TestSize.Level3)
     mockRemote->sendRequestResult_ = ERR_NONE;
     sptr<SessionProxy> okProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
     EXPECT_EQ(WSError::WS_OK, okProxy->NotifyIsFullScreenInForceSplitMode(isFullScreen));
+}
+
+/**
+ * @tc.name: RestartApp
+ * @tc.desc: RestartApp test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, RestartApp, TestSize.Level3)
+{
+    auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
+    auto sessionProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    std::shared_ptr<AAFwk::Want> want = nullptr;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->RestartApp(want));
+
+    want = std::make_shared<AAFwk::Want>();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->RestartApp(want));
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->RestartApp(want));
+    MockMessageParcel::SetWriteParcelableErrorFlag(false);
+
+    sptr<SessionProxy> nullProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, nullProxy->RestartApp(want));
+
+    mockRemote->sendRequestResult_ = ERR_TRANSACTION_FAILED;
+    sptr<SessionProxy> failProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, failProxy->RestartApp(want));
+
+    mockRemote->sendRequestResult_ = ERR_NONE;
+    sptr<SessionProxy> okProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WSError::WS_OK, okProxy->RestartApp(want));
+    MockMessageParcel::ClearAllErrorFlag();
 }
 } // namespace
 } // namespace Rosen
