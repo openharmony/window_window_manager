@@ -110,7 +110,7 @@ void CheckWindowAgentFunctionsPart2(sptr<WindowAgent> agent, const uint8_t* data
     startPos += GetObject<OccupiedAreaType>(type, data + startPos, size - startPos);
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(type, rect);
     if (info != nullptr) {
-        agent->UpdateOccupiedAreaChangeInfo(info);
+        agent->UpdateOccupiedAreaChangeInfo(info, {});
     }
 
     bool boolVal;
