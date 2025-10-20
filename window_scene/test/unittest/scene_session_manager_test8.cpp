@@ -1287,10 +1287,26 @@ HWTEST_F(SceneSessionManagerTest8, RemoveSessionBlackList02, TestSize.Level1)
         rsSet.emplace("rs_" + idx + "_b");
         rsSet.emplace("rs_" + idx + "_c");
 
-        // 移动插入，避免拷贝
-        ssm_->b  .emplace(std::move(key), std::move(rsSet));
-
         ssm_->sessionRSBlackListConfigSet_.insert({ .windowId = i, .privacyWindowTag = key });
+        ssm_->bundleRSBlackListConfigMap_[key] = rsSet;
+        for (std::size_t j = 0; j < count; ++j) {
+            ssm_->sessionRSBlackListConfigSet_.insert({ j, "rs_" + idx + "_a" });
+            ssm_->sessionRSBlackListConfigSet_.insert({ j, "rs_" + idx + "_b" });
+            ssm_->sessionRSBlackListConfigSet_.insert({ j, "rs_" + idx + "_c" });
+        }
+        ssm_->sessionRSBlackListConfigSet_[i] = ssm_->sessionRSBlackListConfigSet_;
+
+        ssm_->screenRSBlackListConfigMap_ [i].insert({ "rs_" + idx + "_a" });
+        ssm_->screenRSBlackListConfigMap_ [i].insert({ "rs_" + idx + "_b" });
+        ssm_->screenRSBlackListConfigMap_ [i].insert({ "rs_" + idx + "_c" });
+        
+    }
+
+    for (std::size_t i = 0; i < count; ++i) {
+        SessionInfo sessionInfo;
+        sessionInfo.bundleName_ = "test";
+        sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+        ssm_->sceneSessionMap_.[i] = sceneSession;
     }
     SessionInfo sessionInfo1;
     sessionInfo1.bundleName_ = "test";
@@ -1298,10 +1314,31 @@ HWTEST_F(SceneSessionManagerTest8, RemoveSessionBlackList02, TestSize.Level1)
     std::vector<sptr<SceneSession>> sceneSessionList;
     sceneSessionList.emplace_back(sceneSession1);
     std::unordered_set<std::string> privacyWindowTags;
-    auto ret = ssm_->RemoveSessionBlackList(sceneSessionList, privacyWindowTags);
+    for (std::size_t i = 0; i < count; ++i) {
+        const std::string idx = std::to_string(i);
+        privacyWindowTags.insert("rs_" + idx + "_a");
+        privacyWindowTags.insert("rs_" + idx + "_b");
+        privacyWindowTags.insert("rs_" + idx + "_c");
+    }
+
+    auto ret = ssm_->SetScreenPrivacyWindowTagSwitch(1, privacyWindowTags, true);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    auto ret = ssm_->SetScreenPrivacyWindowTagSwitch(1, privacyWindowTags, false);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    ret = ssm_->RemoveSessionBlackList(sceneSessionList, privacyWindowTags);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    ret = ssm_->AddSessionBlackList(sceneSessionList, privacyWindowTags);
+
     EXPECT_EQ(WMError::WM_OK, ret);
 
     ssm_->sceneSessionMap_.clear();
+    ssm_->screenRSBlackListConfigMap_.clear();
+    ssm_->sessionRSBlackListConfigSet_.clear();
+    ssm_->sessionBlackListInfoMap_.clear();
+    ssm_->bundleRSBlackListConfigMap_.clear();
 }
 
 /**
