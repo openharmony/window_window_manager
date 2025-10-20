@@ -240,7 +240,7 @@ static napi_value ExportScreenStatus(napi_env env)
     (void)SetNamedProperty(env, result, "STATUS_FOREGROUND",
         static_cast<uint32_t>(PiPScreenStatus::STATUS_FOREGROUND));
     (void)SetNamedProperty(env, result, "STATUS_SIDEBAR",
-        static_cast<uint32_t>(PiPScreenStatus::STATUS_UNKNOWN));
+        static_cast<uint32_t>(PiPScreenStatus::STATUS_SIDEBAR));
     return result;
 }
 
