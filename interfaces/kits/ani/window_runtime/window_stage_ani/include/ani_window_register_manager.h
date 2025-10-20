@@ -103,6 +103,10 @@ private:
         const sptr<Window>& window, bool isRegister, ani_env* env);
     WmErrorCode ProcessWindowStatusDidChangeRegister(const sptr<AniWindowListener>& listener,
         const sptr<Window>& window, bool isRegister, ani_env* env);
+    WmErrorCode ProcessAcrossDisplaysChangeRegister(const sptr<AniWindowListener>& listener, const sptr<Window>& window,
+        bool isRegister, ani_env* env);
+    WmErrorCode ProcessScreenshotAppEventRegister(const sptr<AniWindowListener>& listener, const sptr<Window>& window,
+        bool isRegister, ani_env* env);
     WmErrorCode ProcessFreeWindowModeChangeRegister(const sptr<AniWindowListener>& listener,
         const sptr<Window>& window, bool isRegister, ani_env* env);
     WmErrorCode ProcessListener(RegisterListenerType registerListenerType, CaseType caseType,
