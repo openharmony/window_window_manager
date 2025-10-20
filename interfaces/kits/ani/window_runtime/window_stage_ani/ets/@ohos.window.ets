@@ -2393,9 +2393,9 @@ export class WindowStageInternal implements WindowStage {
         taskpool.execute((): void => {
           this.setImageForRecentSync(this.nativeObj, imageResource, value as int);
         }).then((ret: NullishType): void => {
-            resolve(undefined);
+          resolve(undefined);
         }).catch((err: NullishType): void => {
-            reject(err as BusinessError);
+          reject(err as BusinessError);
         });
       });
     }
@@ -2412,8 +2412,8 @@ export class WindowStageInternal implements WindowStage {
     }
 
     public setCustomDensity(density: double, applyToSubWindow?: boolean): void {
-        let isApplyToSubWindow = applyToSubWindow ? applyToSubWindow : false;
-        this.setCustomDensitySync(this.nativeObj, density, isApplyToSubWindow);
+      let isApplyToSubWindow = applyToSubWindow ? applyToSubWindow : false;
+      this.setCustomDensitySync(this.nativeObj, density, isApplyToSubWindow);
     }
 
     public setDefaultDensityEnabled(enabled: boolean): void {
@@ -3179,27 +3179,26 @@ export class WindowInternal implements Window {
     }
 
     public setWindowShadowEnabled(enable: boolean): Promise<void> {
-      return new Promise<void>(
-        (resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
-          taskpool.execute((): void => {
-              this.setWindowShadowEnabledSync(this.nativeObj, enable);
-          }).then((ret: NullishType) => {
-              resolve(undefined);
-          }).catch((err: NullishType) => {
-              reject(err as BusinessError);
-          });
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setWindowShadowEnabledSync(this.nativeObj, enable);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
       });
     }
 
     public isMainWindowFullScreenAcrossDisplays(): Promise<boolean> {
       return new Promise<boolean>((resolve: (value: boolean) => void, reject: (error: BusinessError) => void) => {
-          taskpool.execute((): boolean => {
-              return this.isMainWindowFullScreenAcrossDisplaysSync(this.nativeObj);
-          }).then((ret: NullishType) => {
-              resolve(ret as boolean);
-          }).catch((err: NullishType) => {
-              reject(err as BusinessError);
-          });
+        taskpool.execute((): boolean => {
+          return this.isMainWindowFullScreenAcrossDisplaysSync(this.nativeObj);
+        }).then((ret: NullishType) => {
+          resolve(ret as boolean);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
       });
     }
 
@@ -3744,7 +3743,7 @@ export native function CreateWindow(window: long): WindowInternal;
 
 let nativeObj: long;
 export function setNativeObj(nativeObject: long):void {
-    nativeObj = nativeObject;
+  nativeObj = nativeObject;
 }
 
 native function getLastWindowSync(nativeObj: long, ctx: BaseContext): Window;
@@ -3764,75 +3763,75 @@ native function notifyScreenshotEventSync(nativeObj: long, eventType: Screenshot
 
 export function setWatermarkImageForAppWindows(pixelMap: image.PixelMap | undefined): Promise<void> {
   return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
-      taskpool.execute((): void => {
-          return setWatermarkImageForAppWindowsSync(nativeObj, pixelMap);
-      }).then((ret: NullishType) => {
-          resolve(undefined);
-      }).catch((err: NullishType) => {
-          reject(err as BusinessError);
-      });
+    taskpool.execute((): void => {
+      return setWatermarkImageForAppWindowsSync(nativeObj, pixelMap);
+    }).then((ret: NullishType) => {
+      resolve(undefined);
+    }).catch((err: NullishType) => {
+      reject(err as BusinessError);
+    });
   });
 }
 
 export function getTopNavDestinationName(windowId: int): Promise<string> {
   return new Promise<string>((resolve: (value: string) => void, reject: (error: BusinessError) => void) => {
-      taskpool.execute((): string => {
-          return getTopNavDestinationNameSync(nativeObj, windowId);
-      }).then((ret: NullishType) => {
-          resolve(ret as string);
-      }).catch((err: NullishType) => {
-          reject(err as BusinessError);
-      });
+    taskpool.execute((): string => {
+      return getTopNavDestinationNameSync(nativeObj, windowId);
+    }).then((ret: NullishType) => {
+      resolve(ret as string);
+    }).catch((err: NullishType) => {
+      reject(err as BusinessError);
+    });
   });
 }
 
 export function getGlobalWindowMode(displayId?: long): Promise<int> {
   return new Promise<int>((resolve: (value: int) => void, reject: (error: BusinessError) => void): int => {
-      taskpool.execute((): int => {
-          return getGlobalWindowModeSync(nativeObj, displayId);
-      }).then((ret: NullishType) => {
-          resolve(ret as int);
-      }).catch((err: NullishType) => {
-          reject(err as BusinessError);
-      });
+    taskpool.execute((): int => {
+      return getGlobalWindowModeSync(nativeObj, displayId);
+    }).then((ret: NullishType) => {
+      resolve(ret as int);
+    }).catch((err: NullishType) => {
+      reject(err as BusinessError);
+    });
   });
 }
 
 export function setStartWindowBackgroundColor(moduleName: string, abilityName: string,
   color: ColorMetrics): Promise<void> {
   return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
-      taskpool.execute((): void => {
-          return setStartWindowBackgroundColorSync(nativeObj, moduleName, abilityName,
-            (color.alpha << 24) | (color.red << 16) | (color.green << 8) | color.blue);
-      }).then((ret: NullishType) => {
-          resolve(undefined);
-      }).catch((err: NullishType) => {
-          reject(err as BusinessError);
-      });
+    taskpool.execute((): void => {
+      return setStartWindowBackgroundColorSync(nativeObj, moduleName, abilityName,
+      (color.alpha << 24) | (color.red << 16) | (color.green << 8) | color.blue);
+    }).then((ret: NullishType) => {
+        resolve(undefined);
+    }).catch((err: NullishType) => {
+        reject(err as BusinessError);
+    });
   });
 }
 
 export function notifyScreenshotEvent(eventType: ScreenshotEventType): Promise<void> {
   return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
-      taskpool.execute((): void => {
-          return notifyScreenshotEventSync(nativeObj, eventType);
-      }).then((ret: NullishType) => {
-          resolve(undefined);
-      }).catch((err: NullishType) => {
-          reject(err as BusinessError);
-      });
+    taskpool.execute((): void => {
+      return notifyScreenshotEventSync(nativeObj, eventType);
+    }).then((ret: NullishType) => {
+      resolve(undefined);
+    }).catch((err: NullishType) => {
+      reject(err as BusinessError);
+    });
   });
 }
 
 export function getLastWindow(ctx: BaseContext): Promise<Window> {
   return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void ) => {
-      taskpool.execute((): Window => {
-          return getLastWindowSync(nativeObj, ctx);
-      }).then((ret: NullishType) => {
-          resolve(ret as Window);
-      }).catch((err: NullishType) => {
-          reject(err as BusinessError);
-      });
+    taskpool.execute((): Window => {
+      return getLastWindowSync(nativeObj, ctx);
+    }).then((ret: NullishType) => {
+      resolve(ret as Window);
+    }).catch((err: NullishType) => {
+      reject(err as BusinessError);
+    });
   }); 
 }
 
