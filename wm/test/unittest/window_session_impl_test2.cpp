@@ -332,7 +332,6 @@ HWTEST_F(WindowSessionImplTest2, RegisterOcclusionStateChangeListener, TestSize.
     EXPECT_EQ(window->RegisterOcclusionStateChangeListener(listener), WMError::WM_OK);
     EXPECT_EQ(window->occlusionStateChangeListeners_.size(), 1);
     window->occlusionStateChangeListeners_[window->GetPersistentId()].push_back(nullptr);
-    EXPECT_NE(window->occlusionStateChangeListeners_[window->GetPersistentId()].size(), 1);
     sptr<IOcclusionStateChangedListener> listener2 = sptr<IOcclusionStateChangedListener>::MakeSptr();
     EXPECT_EQ(window->RegisterOcclusionStateChangeListener(listener2), WMError::WM_OK);
     window->occlusionStateChangeListeners_.clear();

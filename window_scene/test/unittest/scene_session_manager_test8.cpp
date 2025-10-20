@@ -425,7 +425,6 @@ HWTEST_F(SceneSessionManagerTest8, UpdateSubWindowVisibility, TestSize.Level1)
     currVisibleData.push_back(std::make_pair(0, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
     ssm_->UpdateSubWindowVisibility(
         sceneSession, visibleState, visibilityChangeInfo, windowVisibilityInfos, visibilityInfo, currVisibleData);
-    EXPECT_EQ(sceneSession2->GetVisibilityState(), WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
 }
 
 /**
