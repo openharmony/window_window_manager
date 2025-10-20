@@ -42,14 +42,6 @@ using ISessionListener = AAFwk::IMissionListener;
 using SessionInfoBean = AAFwk::MissionInfo;
 using SessionSnapshot = AAFwk::MissionSnapshot;
 
-enum class CommonEventCommand : int32_t {
-    LOCK_CURSOR = 0,
-    UNLOCK_CURSOR,
-};
-constexpr int32_t COMMON_EVENT_COMMAND_MAX_LENGTH = 5;
-constexpr int32_t LOCK_CURSOR_LENGTH = 2;
-constexpr int32_t UNLOCK_CURSOR_LENGTH = 1;
-
 class ISceneSessionManager : public IWindowManager {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISceneSessionManager");
@@ -173,7 +165,6 @@ public:
         TRANS_ID_MINIMIZE_ALL_WINDOW,
         TRANS_ID_GLOBAL_COORDINATE_TO_RELATIVE_COORDINATE,
         TRANS_ID_UPDATE_OUTLINE,
-        TRANS_ID_SEND_COMMAND_EVENT,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;

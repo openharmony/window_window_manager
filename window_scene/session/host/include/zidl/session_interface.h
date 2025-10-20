@@ -652,7 +652,7 @@ public:
     /*
      * Window event
      */
-    WMError SendCommonEvent(int32_t command, const std::vector<int32_t>& parameters) override
+    virtual WMError SendCommonEvent(int32_t command, const std::vector<int32_t>& parameters)
     {
         return WMError::WM_OK;
     }

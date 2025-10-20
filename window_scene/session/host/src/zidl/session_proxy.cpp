@@ -4007,7 +4007,7 @@ WMError SessionProxy::SendCommonEvent(int32_t command, const std::vector<int32_t
         TLOGE(WmsLogTag::WMS_EVENT, "Remote is null.");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    auto sendRet = remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SEND_COMMAND_EVENT),
+    auto sendRet = remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_COMMAND_EVENT),
         data, reply, option);
     if (sendRet != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_EVENT, "Send request failed.code: %{public}d", sendRet);
