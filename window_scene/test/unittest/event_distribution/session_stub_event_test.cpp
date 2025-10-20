@@ -141,7 +141,7 @@ HWTEST_F(SessionStubEventTest, HandleSendCommonEvent, TestSize.Level1)
     MockMessageParcel::AddInt32Cache(UNLOCK_CURSOR_LENGTH);
     MockMessageParcel::AddInt32Cache(1);
     res = stub_->HandleSendCommonEvent(data, reply);
-    EXPECT_EQ(res, ERR_INVALID_DATA);
+    EXPECT_EQ(res, ERR_NONE);
 
     // Perform default behavior.
     MockMessageParcel::AddInt32Cache(10000);

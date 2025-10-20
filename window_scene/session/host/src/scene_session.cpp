@@ -9851,7 +9851,7 @@ WMError SceneSession::LockCursor(const std::vector<int32_t>& parameters)
     if (!checkDatas(parameters, LOCK_CURSOR_LENGTH)) {
         return WMError::WM_ERROR_ILLEGAL_PARAM;
     }
-    if (parameters[1] == GetWindowId()) {
+    if (parameters[1] != GetWindowId()) {
         TLOGE(WmsLogTag::WMS_EVENT, "The windowId does not match.");
         return WMError::WM_ERROR_INVALID_SESSION;
     }
@@ -9872,7 +9872,7 @@ WMError SceneSession::UnlockCursor(const std::vector<int32_t>& parameters)
     if (!checkDatas(parameters, UNLOCK_CURSOR_LENGTH)) {
         return WMError::WM_ERROR_ILLEGAL_PARAM;
     }
-    if (parameters[1] == GetWindowId()) {
+    if (parameters[1] != GetWindowId()) {
         TLOGE(WmsLogTag::WMS_EVENT, "The windowId does not match.");
         return WMError::WM_ERROR_INVALID_SESSION;
     }
