@@ -416,8 +416,16 @@ HWTEST_F(SceneSessionManagerTest8, UpdateSubWindowVisibility, TestSize.Level1)
     sceneSession2->SetParentSession(sceneSession2);
     EXPECT_EQ(1998, sceneSession2->GetParentSession()->GetWindowId());
     ssm_->sceneSessionMap_.emplace(0, sceneSession2);
+    sceneSession2->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    struct RSSurfaceNodeConfig config;
+    sceneSession2->surfaceNode_ = RSSurfaceNode::Create(config);
+    ASSERT_NE(sceneSession2->surfaceNode_, nullptr);
+    sceneSession2->surfaceNode_->id_ = 0;
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    currVisibleData.push_back(std::make_pair(0, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
     ssm_->UpdateSubWindowVisibility(
         sceneSession, visibleState, visibilityChangeInfo, windowVisibilityInfos, visibilityInfo, currVisibleData);
+    EXPECT_EQ(sceneSession2->GetVisibilityState(), WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
 }
 
 /**

@@ -6156,10 +6156,16 @@ WSError WindowSessionImpl::NotifyWindowOcclusionState(const WindowVisibilityStat
             persistentId, static_cast<uint32_t>(state));
         visibilityState = WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION;
     }
+    if (visibilityState == lastVisibilityState_) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d, sameVisibilityState=%{public}u",
+            persistentId, static_cast<uint32_t>(visibilityState));
+        return WSError::WS_OK;
+    }
+    lastVisibilityState_ = visibilityState;
     uint32_t notifyCounter = 0;
     for (auto& listener : listeners) {
         if (listener != nullptr) {
-            listener->OnOcclusionStateChanged(state);
+            listener->OnOcclusionStateChanged(visibilityState);
             notifyCounter++;
         }
     }
