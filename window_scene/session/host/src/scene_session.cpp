@@ -74,6 +74,7 @@
 
 namespace OHOS::Rosen {
 namespace {
+const std::string LOCK_WINDOW_CURSOR_PERMISSION = "ohos.permission.LOCK_WINDOW_CURSOR";
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSession" };
 const std::string DLP_INDEX = "ohos.dlp.params.index";
 const std::string ERROR_REASON_LOW_MEMORY_KILL = "LowMemoryKill";
