@@ -93,7 +93,7 @@ HWTEST_F(sceneSessionManagerProxyEventTest, SendCommonEvent, TestSize.Level1)
     remoteMocker->SetRequestResult(ERR_NONE);
     MockMessageParcel::ClearAllErrorFlag();
     ret = proxy->SendCommonEvent(1, parameters);
-    EXPECT_EQ(ret, static_cast<WMError>(0));
+    EXPECT_EQ(ret, WMError::WM_OK);
 }
 } // namespace
 } // namespace Rosen
