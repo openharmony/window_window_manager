@@ -1306,7 +1306,7 @@ HWTEST_F(SceneSessionManagerTest8, RemoveSessionBlackList02, TestSize.Level1)
         SessionInfo sessionInfo;
         sessionInfo.bundleName_ = "test";
         sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-        ssm_->sceneSessionMap_.[i] = sceneSession;
+        ssm_->sceneSessionMap_[i] = sceneSession;
     }
     SessionInfo sessionInfo1;
     sessionInfo1.bundleName_ = "test";
@@ -1314,14 +1314,18 @@ HWTEST_F(SceneSessionManagerTest8, RemoveSessionBlackList02, TestSize.Level1)
     std::vector<sptr<SceneSession>> sceneSessionList;
     sceneSessionList.emplace_back(sceneSession1);
     std::unordered_set<std::string> privacyWindowTags;
+    std::vector<std::string> privacyWindowTagVactor;
     for (std::size_t i = 0; i < count; ++i) {
         const std::string idx = std::to_string(i);
         privacyWindowTags.insert("rs_" + idx + "_a");
         privacyWindowTags.insert("rs_" + idx + "_b");
         privacyWindowTags.insert("rs_" + idx + "_c");
+        privacyWindowTagVactor.emplace_back("rs_" + idx + "_a");
+        privacyWindowTagVactor.emplace_back("rs_" + idx + "_b");
+        privacyWindowTagVactor.emplace_back("rs_" + idx + "_c");
     }
 
-    auto ret = ssm_->SetScreenPrivacyWindowTagSwitch(1, privacyWindowTags, true);
+    auto ret = ssm_->SetScreenPrivacyWindowTagSwitch(1, privacyWindowTagVactor, true);
     EXPECT_EQ(WMError::WM_OK, ret);
 
     auto ret = ssm_->SetScreenPrivacyWindowTagSwitch(1, privacyWindowTags, false);
