@@ -6564,7 +6564,7 @@ WMError WindowSessionImpl::LockCursor(int32_t windowId, bool isCursorFollowMovem
     parameters.emplace_back(static_cast<int32_t>(isCursorFollowMovement));
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    return hostSession->SendCommonEvent(tatic_cast<int32_t>(CommonEventCommand::LOCK_CURSOR), parameters);
+    return hostSession->SendCommonEvent(static_cast<int32_t>(CommonEventCommand::LOCK_CURSOR), parameters);
 }
 
 WMError WindowSessionImpl::UnlockCursor(int32_t windowId)
@@ -6578,7 +6578,7 @@ WMError WindowSessionImpl::UnlockCursor(int32_t windowId)
     parameters.emplace_back(windowId);
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    return hostSession->SendCommonEvent(tatic_cast<int32_t>(CommonEventCommand::UNLOCK_CURSOR), parameters);
+    return hostSession->SendCommonEvent(static_cast<int32_t>(CommonEventCommand::UNLOCK_CURSOR), parameters);
 }
 
 WMError WindowSessionImpl::SetKeyEventFilter(KeyEventFilterFunc filter)

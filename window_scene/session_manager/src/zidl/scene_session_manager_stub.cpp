@@ -2641,7 +2641,6 @@ int SceneSessionManagerStub::HandleUpdateOutline(MessageParcel& data, MessagePar
     return ERR_NONE;
 }
 
-
 int SceneSessionManagerStub::HandleConvertToRelativeCoordinateExtended(MessageParcel& data, MessageParcel& reply)
 {
     int32_t posX_ = 0;

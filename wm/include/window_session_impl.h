@@ -601,6 +601,9 @@ public:
 
     WSError UpdateIsShowDecorInFreeMultiWindow(bool isShow) override;
 
+    WMError LockCursor(int32_t windowId, bool isCursorFollowMovement) override;
+    WMError UnlockCursor(int32_t windowId) override;
+
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;

@@ -19,8 +19,10 @@
 
 #include "session/host/include/scene_session.h"
 #include "session/host/include/zidl/session_interface.h"
+#include "session/host/include/zidl/session_ipc_interface_code.h"
 #include "session/host/include/zidl/session_stub.h"
 #include "mock/mock_message_parcel.h"
+#include "mock/mock_session_stub.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -68,7 +70,7 @@ HWTEST_F(SessionStubEventTest, ProcessRemoteRequest, TestSize.Level1)
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetReadInt32ErrorFlag(true);
     int res = stub_->ProcessRemoteRequest(
-        static_cast<uint32_t>(ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_SEND_COMMAND_EVENT),
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_COMMAND_EVENT),
         data, reply, option);
     EXPECT_EQ(res, ERR_INVALID_DATA);
     MockMessageParcel::ClearAllErrorFlag();
