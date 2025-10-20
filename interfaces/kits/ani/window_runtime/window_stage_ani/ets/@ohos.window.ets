@@ -3804,9 +3804,9 @@ export function setStartWindowBackgroundColor(moduleName: string, abilityName: s
       return setStartWindowBackgroundColorSync(nativeObj, moduleName, abilityName,
       (color.alpha << 24) | (color.red << 16) | (color.green << 8) | color.blue);
     }).then((ret: NullishType) => {
-        resolve(undefined);
+      resolve(undefined);
     }).catch((err: NullishType) => {
-        reject(err as BusinessError);
+      reject(err as BusinessError);
     });
   });
 }
