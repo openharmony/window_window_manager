@@ -628,7 +628,7 @@ void DisplayManagerAni::OnDestroyVirtualScreen(ani_env* env, ani_long screenId)
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
     if (static_cast<int32_t>(screenId) < 0) {
         TLOGE(WmsLogTag::DMS, "[ANI] screenId is invalid: %{public}d", static_cast<int32_t>(screenId));
-        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "Invalid screenId");
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid screenId");
         return;
     }
     auto ret = DM_JS_TO_ERROR_CODE_MAP.at(
@@ -661,7 +661,7 @@ void DisplayManagerAni::OnSetVirtualScreenSurface(ani_env* env, ani_long screenI
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
     if (static_cast<int32_t>(screenId) < 0 || surfaceId == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI] Invalid param");
-        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "Invalid param");
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid param");
         return;
     }
     std::vector<ScreenId> screenIds;
@@ -669,7 +669,7 @@ void DisplayManagerAni::OnSetVirtualScreenSurface(ani_env* env, ani_long screenI
     sptr<Surface> surface;
     if (!DisplayAniUtils::GetSurfaceFromAni(env, surfaceId, surface)) {
         TLOGE(WmsLogTag::DMS, "[ANI] Failed to convert surface.");
-        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "Failed to convert surface.");
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert surface.");
         return;
     }
     auto ret = DM_JS_TO_ERROR_CODE_MAP.at(
@@ -701,7 +701,7 @@ void DisplayManagerAni::OnMakeUnique(ani_env* env, ani_long screenId)
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
     if (static_cast<int32_t>(screenId) < 0) {
         TLOGE(WmsLogTag::DMS, "[ANI] screenId is invalid: %{public}d", static_cast<int32_t>(screenId));
-        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "Invalid screenId");
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid screenId");
         return;
     }
     std::vector<ScreenId> screenIds;

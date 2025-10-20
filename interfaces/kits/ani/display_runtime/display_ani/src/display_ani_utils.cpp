@@ -177,7 +177,7 @@ ani_status DisplayAniUtils::CvtDisplay(sptr<Display> display, ani_env* env, ani_
     }
     env->Object_SetFieldByName_Int(obj, propName("refreshRate").c_str(), info->GetRefreshRate());
     env->Object_SetFieldByName_Int(obj, propName("rotation").c_str(), static_cast<uint32_t>(info->GetRotation()));
-    ani_status setfieldRes = env->Object_SetFieldByName_Double(obj, propName("width").c_str(),
+    ani_status setfieldRes = env->Object_SetFieldByName_Long(obj, propName("width").c_str(),
         static_cast<uint32_t>(info->GetWidth()));
     if (ANI_OK != setfieldRes) {
         TLOGE(WmsLogTag::DMS, "[ANI] set failed: %{public}d, %{public}u", info->GetWidth(), setfieldRes);
