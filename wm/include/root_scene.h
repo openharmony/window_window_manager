@@ -90,7 +90,6 @@ public:
      */
     WMError RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     WMError UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
-    void NotifyOccupiedAreaChangeForRoot(const sptr<OccupiedAreaChangeInfo>& info);
 
     /*
      * watch

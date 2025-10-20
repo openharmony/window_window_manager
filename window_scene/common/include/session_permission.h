@@ -40,6 +40,7 @@ public:
     static bool IsShellCall();
     static bool IsStartByHdcd();
     static bool IsStartedByInputMethod();
+    static bool IsKeyboardCallingProcess(int32_t pid, uint32_t callingWindowId);
     static bool IsSACalling();
     static bool VerifyCallingPermission(const std::string& permissionName);
     static bool VerifyPermissionByCallerToken(const uint32_t callerToken, const std::string& permissionName);

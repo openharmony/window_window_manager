@@ -1323,8 +1323,8 @@ HWTEST_F(SceneSessionTest4, UpdateAllModalUIExtensions, TestSize.Level1)
 
     Rect windowRect = { 100, 100, 100, 100 };
     Rect uiExtRect = { 0, 0, 100, 100 };
-    ExtensionWindowEventInfo extensionInfo { 1, 1, windowRect, uiExtRect, false };
-    ExtensionWindowEventInfo extensionInfo2 { 2, 2, windowRect, uiExtRect, true };
+    ExtensionWindowEventInfo extensionInfo { 1, 1, -1, windowRect, uiExtRect, false };
+    ExtensionWindowEventInfo extensionInfo2 { 2, 2, -1, windowRect, uiExtRect, true };
     sceneSession->modalUIExtensionInfoList_.push_back(extensionInfo);
     sceneSession->modalUIExtensionInfoList_.push_back(extensionInfo2);
     sceneSession->UpdateAllModalUIExtensions(newGlobalRect);
@@ -1542,6 +1542,14 @@ HWTEST_F(SceneSessionTest4, CheckGetMainWindowAvoidAreaAvailable, TestSize.Level
     session->SetSystemConfig(systemConfig);
     EXPECT_EQ(false, session->CheckGetMainWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FLOATING,
         AvoidAreaType::TYPE_SYSTEM));
+    
+    // pc
+    systemConfig.windowUIType_ = WindowUIType::PC_WINDOW;
+    systemConfig.freeMultiWindowEnable_ = false;
+    systemConfig.freeMultiWindowSupport_ = false;
+    session->SetSystemConfig(systemConfig);
+    EXPECT_EQ(false, session->CheckGetMainWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FLOATING,
+        AvoidAreaType::TYPE_SYSTEM));
 
     // phone
     systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
@@ -1630,6 +1638,15 @@ HWTEST_F(SceneSessionTest4, CheckGetSubWindowAvoidAreaAvailable, TestSize.Level1
     systemConfig.windowUIType_ = WindowUIType::PAD_WINDOW;
     systemConfig.freeMultiWindowEnable_ = true;
     systemConfig.freeMultiWindowSupport_ = true;
+    session->SetSystemConfig(systemConfig);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    session->SetSessionProperty(property);
+    EXPECT_EQ(false, session->CheckGetSubWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FLOATING,
+        AvoidAreaType::TYPE_SYSTEM));
+    
+    systemConfig.windowUIType_ = WindowUIType::PC_WINDOW;
+    systemConfig.freeMultiWindowEnable_ = false;
+    systemConfig.freeMultiWindowSupport_ = false;
     session->SetSystemConfig(systemConfig);
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     session->SetSessionProperty(property);

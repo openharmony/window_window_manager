@@ -720,6 +720,41 @@ HWTEST_F(WindowSessionTest4, SetBackPressedListenser, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetRestartAppListener
+ * @tc.desc: SetRestartAppListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, SetRestartAppListener, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    int32_t result = 0;
+    session_->SetRestartAppListener([&result](const SessionInfo& info) {
+        result = 1;
+    });
+    usleep(waitSyncInNs_);
+    SessionInfo info;
+    session_->restartAppFunc_(info);
+    ASSERT_EQ(result, 1);
+}
+
+/**
+ * @tc.name: NotifyRestart
+ * @tc.desc: NotifyRestart Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, NotifyRestart, TestSize.Level1)
+{
+    SessionInfo info;
+    info.bundleName_ = "bundleName_";
+    info.moduleName_ = "moduleName_";
+    info.abilityName_ = "abilityName_";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->NotifyRestart();
+    ASSERT_NE(nullptr, sceneSession);
+}
+
+/**
  * @tc.name: SetUpdateSessionIconListener
  * @tc.desc: SetUpdateSessionIconListener Test
  * @tc.type: FUNC
@@ -779,6 +814,20 @@ HWTEST_F(WindowSessionTest4, NotifySessionInfoLockedStateChange, TestSize.Level1
     session_->NotifySessionInfoLockedStateChange(true);
 
     WLOGFI("NotifySessionInfoLockedStateChange end!");
+}
+
+/**
+ * @tc.name: SetCallingSessionIdSessionListenser
+ * @tc.desc: SetCallingSessionIdSessionListenser Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, SetCallingSessionIdSessionListenser, TestSize.Level1)
+{
+    WLOGFI("SetCallingSessionIdSessionListenser begin!");
+    ASSERT_NE(session_, nullptr);
+    ProcessCallingSessionIdChangeFunc func;
+    session_->SetCallingSessionIdSessionListenser(std::move(func));
+    WLOGFI("SetCallingSessionIdSessionListenser end!");
 }
 
 /**
@@ -1551,6 +1600,25 @@ HWTEST_F(WindowSessionTest4, SetIsShowDecorInFreeMultiWindow01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateRect
+ * @tc.desc: Test Case UpdateRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, UpdateRect, TestSize.Level1)
+{
+    WSRect rect;
+    SizeChangeReason reason = SizeChangeReason::SCENE_WITH_ANIMATION;
+    std::shared_ptr<RSTransaction> rsTransaction = std::make_shared<RSTransaction>();
+    std::shared_ptr<AvoidArea> avoidArea = std::make_shared<AvoidArea>();
+    session_->state_ = SessionState::STATE_CONNECT;
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(nullptr, mockSessionStage);
+    session_->sessionStage_ = mockSessionStage;
+    WSError res = session_->UpdateRect(rect, reason, "UpdateRect", rsTransaction);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
  * @tc.name: SetIsShowDecorInFreeMultiWindow 02
  * @tc.desc: Test Case SetIsShowDecorInFreeMultiWindow 02
  * @tc.type: FUNC
@@ -1628,7 +1696,24 @@ HWTEST_F(WindowSessionTest4, UpdateSessionOutline01, TestSize.Level1)
     EXPECT_EQ(session_->outlineStyleParams_.outlineColor_, 0x000000ff); // 0x000000ff: color blue byte.
 }
 
+/**
+ * @tc.name: CheckEmptyKeyboardAvoidAreaIfNeeded 01
+ * @tc.desc: Test Case CheckEmptyKeyboardAvoidAreaIfNeeded 01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, CheckEmptyKeyboardAvoidAreaIfNeeded01, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    DisplayId displayId = 0;
+    session_->property_->SetDisplayId(displayId);
+    bool result = session_->CheckEmptyKeyboardAvoidAreaIfNeeded();
+    EXPECT_EQ(result, false);
 
+    displayId = 100;
+    session_->property_->SetDisplayId(displayId);
+    result = session_->CheckEmptyKeyboardAvoidAreaIfNeeded();
+    EXPECT_EQ(result, false);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

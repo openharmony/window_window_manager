@@ -200,6 +200,10 @@ WSError SessionStageProxy::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
+    if (!data.WriteParcelable(&config)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write SceneAnimationConfig failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     bool isInnerProcess = hasRSTransaction ? rsTransaction->GetInnerProcessFlag() : false;
     TLOGD(WmsLogTag::DEFAULT, "hasRSTransaction: %{public}d, isInnerProcess: %{public}d", hasRSTransaction,
         isInnerProcess);
@@ -212,12 +216,6 @@ WSError SessionStageProxy::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         }
         rsTransaction->SetParentPid(pid);
     }
-
-    if (!data.WriteInt32(config.animationDuration_)) {
-        TLOGE(WmsLogTag::DEFAULT, "Write animation duration failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
     if (!data.WriteUint32(avoidAreas.size())) {
         TLOGE(WmsLogTag::WMS_IMMS, "Write avoid area size failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -858,6 +856,39 @@ WSError SessionStageProxy::NotifyWindowVisibility(bool isVisible)
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
+}
+
+WSError SessionStageProxy::NotifyWindowOcclusionState(const WindowVisibilityState state)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write stage interfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(state))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write visibility state failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "stage remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    auto reqErrCode = remote->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_OCCLUSION_STATE),
+        data, reply, option);
+    if (reqErrCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "send stage request failed, errCode: %{public}d", reqErrCode);
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t errCode = 0;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read stage errcode failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(errCode);
 }
 
 WSError SessionStageProxy::UpdateWindowMode(WindowMode mode)

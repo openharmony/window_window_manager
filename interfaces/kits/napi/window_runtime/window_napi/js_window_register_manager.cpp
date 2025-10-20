@@ -52,6 +52,7 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     {WINDOW_STATUS_DID_CHANGE_CB, RegisterListenerType::WINDOW_STATUS_DID_CHANGE_CB},
     {WINDOW_TITLE_BUTTON_RECT_CHANGE_CB, RegisterListenerType::WINDOW_TITLE_BUTTON_RECT_CHANGE_CB},
     {WINDOW_VISIBILITY_CHANGE_CB, RegisterListenerType::WINDOW_VISIBILITY_CHANGE_CB},
+    {OCCLUSION_STATE_CHANGE_CB, RegisterListenerType::OCCLUSION_STATE_CHANGE_CB},
     {WINDOW_DISPLAYID_CHANGE_CB, RegisterListenerType::WINDOW_DISPLAYID_CHANGE_CB},
     {SYSTEM_DENSITY_CHANGE_CB, RegisterListenerType::SYSTEM_DENSITY_CHANGE_CB},
     {ACROSS_DISPLAYS_CHANGE_CB, RegisterListenerType::ACROSS_DISPLAYS_CHANGE_CB},
@@ -342,6 +343,28 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowVisibilityChangeRegister(sptr<
     return ret;
 }
 
+WmErrorCode JsWindowRegisterManager::ProcessOcclusionStateChangeRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
+{
+    if (window == nullptr || listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window or listener is null");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    WMError retCode = WMError::WM_OK;
+    sptr<IOcclusionStateChangedListener> thisListener(listener);
+    if (isRegister) {
+        retCode = window->RegisterOcclusionStateChangeListener(thisListener);
+    } else {
+        retCode = window->UnregisterOcclusionStateChangeListener(thisListener);
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "retCode=%{public}d", static_cast<int32_t>(retCode));
+    auto retErrCode = WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+    if (WM_JS_TO_ERROR_CODE_MAP.count(retCode) > 0) {
+        retErrCode = WM_JS_TO_ERROR_CODE_MAP.at(retCode);
+    }
+    return retErrCode;
+}
+
 WmErrorCode JsWindowRegisterManager::ProcessDisplayIdChangeRegister(const sptr<JsWindowListener>& listener,
     const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter)
 {
@@ -617,6 +640,8 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
                     parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_VISIBILITY_CHANGE_CB):
                 return ProcessWindowVisibilityChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::OCCLUSION_STATE_CHANGE_CB):
+                return ProcessOcclusionStateChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_DISPLAYID_CHANGE_CB):
                 return ProcessDisplayIdChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::SYSTEM_DENSITY_CHANGE_CB):

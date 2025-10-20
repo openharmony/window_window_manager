@@ -58,9 +58,9 @@ interface WaterfallDisplayAreaRects {
 
 export class WaterfallDisplayAreaRectsImpl implements WaterfallDisplayAreaRects {
     constructor() {
-        this.left = new RectImpl()
+        this.left = new RectImpl();
         this.right = new RectImpl();
-        this.top = new RectImpl()
+        this.top = new RectImpl();
         this.bottom = new RectImpl();
     }
     readonly left: Rect;
@@ -109,6 +109,34 @@ export class FoldCreaseRegionImpl implements FoldCreaseRegion {
     readonly displayId: long;
 
     readonly creaseRects: Array<Rect>;
+}
+
+export interface Position {
+    x: long;
+ 
+    y: long;
+}
+ 
+export class PostionImpl implements Position {
+    x: long;
+ 
+    y: long;
+}
+ 
+export interface RelativePosition {
+    displayId: long;
+ 
+    position: Position;
+}
+ 
+export class RelativePositionImpl implements RelativePosition {
+    constructor() {
+        this.position = new PostionImpl();
+    }
+ 
+    displayId: long;
+ 
+    position: Position;
 }
 
 export enum FoldDisplayMode {
@@ -244,6 +272,8 @@ export interface Display {
 
     getAvailableArea(): Promise<Rect>;
 
+    getLiveCreaseRegion(): FoldCreaseRegion;
+
     hasImmersiveWindow(callback: AsyncCallback<boolean>): void;
 
     hasImmersiveWindow(): Promise<boolean>;
@@ -378,6 +408,13 @@ export class DisplayImpl implements Display {
         })
     }
 
+    getLiveCreaseRegion(): FoldCreaseRegion {
+        let foldCreaseRegion: FoldCreaseRegion = new FoldCreaseRegionImpl();
+        this.getLiveCreaseRegionInternal(foldCreaseRegion as object);
+        minusCreaseRects(foldCreaseRegion);
+        return foldCreaseRegion;
+    }
+
     on(type: string, callback: Callback<Rect>): void {
         this.syncOn(type, callback as object);
     }
@@ -406,6 +443,7 @@ export class DisplayImpl implements Display {
     native syncOn(type: string, callback: object): void;
     native syncOff(type: string, callback?: object): void;
     native getAvailableAreaInternal(rect: Rect): void;
+    native getLiveCreaseRegionInternal(foldCreaseRegion: object):FoldCreaseRegion;
     native getCutoutInfoInternal(cutoutInfo: CutoutInfo): void;
     native hasImmersiveWindowInternal(): boolean;
 
@@ -623,6 +661,24 @@ export class DisplayPhysicalResolutionImpl implements DisplayPhysicalResolution{
 
     physicalHeight: long;
 }
+
+export function convertGlobalToRelativeCoordinate(position: Position, displayId?: long): RelativePosition {
+    let relativePostion: RelativePosition = new RelativePositionImpl();
+    convertGlobalToRelativeCoordinateNative(position, displayMgrRef, relativePostion, displayId);
+    return relativePostion;
+}
+ 
+export function convertRelativeToGlobalCoordinate(relativePosition: RelativePosition): Position {
+    let position: Position = new PostionImpl();
+    convertRelativeToGlobalCoordinateNative(relativePosition, displayMgrRef, position);
+    return position;
+}
+ 
+export native function convertGlobalToRelativeCoordinateNative(
+    position: Position, nativeObj: long, relativePostion: RelativePosition, displayId?: long): void;
+ 
+export native function convertRelativeToGlobalCoordinateNative(
+    relativePosition: RelativePosition, nativeObj: long, position: Position): void;
 
 export function disposeDisplay(display: DisplayImpl): void {
     finalizerDisplayNative(display as object, displayMgrRef);

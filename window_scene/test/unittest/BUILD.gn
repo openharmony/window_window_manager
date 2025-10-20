@@ -23,7 +23,6 @@ group("unittest") {
     ":ws_anomaly_detection_test",
     ":ws_compatible_mode_property_test",
     ":ws_dfx_hisysevent_test",
-    ":ws_distributed_client_test",
     ":ws_ffrt_helper_test",
     ":ws_main_session_lifecycle_test",
     ":ws_move_drag_controller_test",
@@ -92,6 +91,12 @@ group("unittest") {
     "window_pattern:window_pattern_starting_window_rdb_test",
     "window_recover:ws_window_recover_session_test",
   ]
+
+  defines = []
+  if (window_manager_feature_support_dmsfwk) {
+     deps += [ ":ws_distributed_client_test" ]
+     defines += [ "WINDOW_MANAGER_FEATURE_SUPPORT_DMSFWK" ]
+  }
 
   if (window_manager_use_sceneboard) {
     deps += [
@@ -1187,7 +1192,10 @@ ohos_unittest("ws_session_stage_proxy_test") {
 ohos_unittest("ws_session_stage_stub_test") {
   module_out_path = module_out_path
 
-  sources = [ "session_stage_stub_test.cpp" ]
+  sources = [
+    "${window_base_path}/window_scene/test/mock/mock_message_parcel.cpp",
+    "session_stage_stub_test.cpp",
+  ]
 
   deps = [ ":ws_unittest_common" ]
 
@@ -1339,10 +1347,13 @@ ohos_unittest("ws_session_stub_property_test") {
 ohos_unittest("ws_distributed_client_test") {
   module_out_path = module_out_path
 
-  sources = [
-    "../mock/mock_message_parcel.cpp",
-    "distributed_client_test.cpp",
-  ]
+  sources = [ "../mock/mock_message_parcel.cpp" ]
+  defines = []
+
+  if (window_manager_feature_support_dmsfwk) {
+    sources += [ "distributed_client_test.cpp" ]
+    defines += [ "WINDOW_MANAGER_FEATURE_SUPPORT_DMSFWK" ]
+  }
 
   deps = [ ":ws_unittest_common" ]
 

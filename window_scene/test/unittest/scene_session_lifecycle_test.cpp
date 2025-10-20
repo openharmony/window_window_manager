@@ -274,47 +274,6 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground07, TestSize.Level0)
 }
 
 /**
- * @tc.name: ForegroundTask01
- * @tc.desc: ForegroundTask function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionLifecycleTest, ForegroundTask01, TestSize.Level0)
-{
-    SessionInfo info;
-    info.abilityName_ = "ForegroundTask01";
-    info.bundleName_ = "ForegroundTask01";
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    session->SetSessionState(SessionState::STATE_CONNECT);
-    EXPECT_EQ(SessionState::STATE_CONNECT, session->GetSessionState());
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_EQ(false, session->isUIFirstEnabled_);
-    EXPECT_EQ(nullptr, session->GetLeashWinShadowSurfaceNode());
-    EXPECT_EQ(WSError::WS_OK, session->ForegroundTask(property));
-
-    session->isUIFirstEnabled_ = true;
-    EXPECT_EQ(true, session->isUIFirstEnabled_);
-    EXPECT_EQ(nullptr, session->GetLeashWinShadowSurfaceNode());
-    session->SetSessionState(SessionState::STATE_CONNECT);
-    EXPECT_EQ(WSError::WS_OK, session->ForegroundTask(property));
-
-    session->isUIFirstEnabled_ = true;
-    EXPECT_EQ(true, session->isUIFirstEnabled_);
-    struct RSSurfaceNodeConfig config;
-    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    EXPECT_NE(nullptr, surfaceNode);
-    session->SetLeashWinSurfaceNode(surfaceNode);
-    EXPECT_NE(nullptr, session->GetLeashWinShadowSurfaceNode());
-    session->SetSessionState(SessionState::STATE_CONNECT);
-    EXPECT_EQ(WSError::WS_OK, session->ForegroundTask(property));
-
-    session->isUIFirstEnabled_ = false;
-    EXPECT_EQ(false, session->isUIFirstEnabled_);
-    EXPECT_NE(nullptr, session->GetLeashWinShadowSurfaceNode());
-    session->SetSessionState(SessionState::STATE_CONNECT);
-    EXPECT_EQ(WSError::WS_OK, session->ForegroundTask(property));
-}
-
-/**
  * @tc.name: Background01
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -1157,11 +1116,9 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionForeground, TestSize.Level0)
     ASSERT_NE(mockSessionStage, nullptr);
     uint32_t reason = 1;
     bool withAnimation = true;
-    int ret = 1;
 
     sceneSession->sessionStage_ = mockSessionStage;
     sceneSession->NotifySessionForeground(reason, withAnimation);
-    ASSERT_EQ(ret, 1);
 }
 
 /**
@@ -1183,10 +1140,8 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionFullScreen, TestSize.Level0)
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_NE(mockSessionStage, nullptr);
     bool fullScreen = true;
-    int ret = 1;
     sceneSession->sessionStage_ = mockSessionStage;
     sceneSession->NotifySessionFullScreen(fullScreen);
-    ASSERT_EQ(ret, 1);
     sceneSession->sessionStage_ = nullptr;
     sceneSession->NotifySessionFullScreen(fullScreen);
 }
@@ -1214,11 +1169,9 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionBackground, TestSize.Level0)
     uint32_t reason = 1;
     bool withAnimation = true;
     bool isFromInnerkits = true;
-    int ret = 1;
 
     sceneSession->sessionStage_ = mockSessionStage;
     sceneSession->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
-    ASSERT_EQ(ret, 1);
 }
 
 /**

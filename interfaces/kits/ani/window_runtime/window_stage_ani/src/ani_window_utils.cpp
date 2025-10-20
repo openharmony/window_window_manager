@@ -977,6 +977,119 @@ ani_object AniWindowUtils::CreateAniMainWindowInfo(ani_env* env, const MainWindo
     return mainWindowInfo;
 }
 
+ani_status AniWindowUtils::CheckPropertyNameUndefined(ani_env* env, const char* propertyName,
+    ani_object object, bool& result)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] env is nullptr");
+        return ANI_ERROR;
+    }
+    result = false;
+    ani_ref ref;
+    ani_status ret = env->Object_GetPropertyByName_Ref(object, propertyName, &ref);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed, ret : %{public}u",
+            propertyName, static_cast<int32_t>(ret));
+        return ret;
+    }
+    ani_boolean isUndefined = false;
+    ret = env->Reference_IsUndefined(ref, &isUndefined);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
+        return ret;
+    }
+    result = isUndefined;
+    return ANI_OK;
+}
+
+bool AniWindowUtils::ParseKeyFramePolicy(ani_env* env, ani_object aniKeyFramePolicy, KeyFramePolicy& keyFramePolicy)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] env is nullptr");
+        return false;
+    }
+
+    ani_boolean enable = false;
+    if (env->Object_GetPropertyByName_Boolean(aniKeyFramePolicy, "enable", &enable) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed to convert parameter to enable");
+        return false;
+    }
+    keyFramePolicy.dragResizeType_ = enable ? DragResizeType::RESIZE_KEY_FRAME :
+        DragResizeType::RESIZE_TYPE_UNDEFINED;
+    
+    bool propertyUndefined = false;
+    int32_t distance = 0;
+    if (CheckPropertyNameUndefined(env, "distance", aniKeyFramePolicy, propertyUndefined) != ANI_OK ||
+        !propertyUndefined) {
+        if (GetPropertyIntObject(env, "distance", aniKeyFramePolicy, distance) != ANI_OK || distance < 0) {
+            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed to convert parameter to distance");
+            return false;
+        }
+        keyFramePolicy.distance_ = static_cast<uint32_t>(distance);
+    }
+
+    int64_t longData = 0;
+    if (CheckPropertyNameUndefined(env, "interval", aniKeyFramePolicy, propertyUndefined) != ANI_OK ||
+        !propertyUndefined) {
+        if (GetPropertyLongObject(env, "interval", aniKeyFramePolicy, longData) != ANI_OK || longData <= 0) {
+            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed to convert parameter to interval");
+            return false;
+        }
+        keyFramePolicy.interval_ = static_cast<uint32_t>(longData);
+    }
+    if (CheckPropertyNameUndefined(env, "animationDelay", aniKeyFramePolicy, propertyUndefined) != ANI_OK ||
+        !propertyUndefined) {
+        if (GetPropertyLongObject(env, "animationDelay", aniKeyFramePolicy, longData) != ANI_OK || longData < 0) {
+            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed to convert parameter to animationDelay");
+            return false;
+        }
+        keyFramePolicy.animationDelay_ = static_cast<uint32_t>(longData);
+    }
+    if (CheckPropertyNameUndefined(env, "animationDuration", aniKeyFramePolicy, propertyUndefined) != ANI_OK ||
+        !propertyUndefined) {
+        if (GetPropertyLongObject(env, "animationDuration", aniKeyFramePolicy, longData) != ANI_OK || longData < 0) {
+            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed to convert parameter to animationDuration");
+            return false;
+        }
+        keyFramePolicy.animationDuration_ = static_cast<uint32_t>(longData);
+    }
+    return true;
+}
+
+ani_object AniWindowUtils::CreateKeyFramePolicy(ani_env* env, const KeyFramePolicy& keyFramePolicy)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] env is nullptr");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_class aniClass;
+    if (env->FindClass("@ohos.window.window.KeyFramePolicyInternal", &aniClass) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_method ctor;
+    if (env->Class_FindMethod(aniClass, "<ctor>", nullptr, &ctor) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object aniKeyFramePolicy;
+    if (env->Object_New(aniClass, ctor, &aniKeyFramePolicy) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] fail to new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    CallAniMethodVoid(env, aniKeyFramePolicy, aniClass, "<set>enable", nullptr,
+        ani_boolean(keyFramePolicy.enabled()));
+    CallAniMethodVoid(env, aniKeyFramePolicy, aniClass, "<set>interval", nullptr,
+        CreateBaseTypeObject<long>(env, keyFramePolicy.interval_));
+    CallAniMethodVoid(env, aniKeyFramePolicy, aniClass, "<set>distance", nullptr,
+        CreateBaseTypeObject<int>(env, keyFramePolicy.distance_));
+    CallAniMethodVoid(env, aniKeyFramePolicy, aniClass, "<set>animationDuration", nullptr,
+        CreateBaseTypeObject<long>(env, keyFramePolicy.animationDuration_));
+    CallAniMethodVoid(env, aniKeyFramePolicy, aniClass, "<set>animationDelay", nullptr,
+        CreateBaseTypeObject<long>(env, keyFramePolicy.animationDelay_));
+    return aniKeyFramePolicy;
+}
+
 void AniWindowUtils::GetWindowSnapshotConfiguration(ani_env* env, ani_object config,
     WindowSnapshotConfiguration& windowSnapshotConfiguration)
 {

@@ -441,7 +441,7 @@ void ScreenSessionManagerClientProxy::OnDisplayStateChanged(DisplayId defaultDis
 }
 
 void ScreenSessionManagerClientProxy::OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
-    std::vector<uint64_t>& surfaceNodeIds, bool isBlackList)
+    std::vector<uint64_t>& surfaceNodeIds, const std::vector<uint32_t>& needWindowTypeList, bool isNeedForceCheck)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -464,8 +464,12 @@ void ScreenSessionManagerClientProxy::OnGetSurfaceNodeIdsFromMissionIdsChanged(s
         TLOGE(WmsLogTag::DMS, "Write surfaceNodeIds failed");
         return;
     }
-    if (!data.WriteBool(isBlackList)) {
-        TLOGE(WmsLogTag::DMS, "Write isBlackList failed");
+    if (!data.WriteUInt32Vector(needWindowTypeList)) {
+        TLOGE(WmsLogTag::DMS, "Write needWindowTypeList failed");
+        return;
+    }
+    if (!data.WriteBool(isNeedForceCheck)) {
+        TLOGE(WmsLogTag::DMS, "Write isNeedForceCheck failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(

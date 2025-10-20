@@ -184,6 +184,12 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleUpdateWindowModeByIdForUITest(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UPDATE_ANIMATION_SPEED_WITH_PID):
             return HandleUpdateAnimationSpeedWithPid(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_DISPLAYID_BY_WINDOWID):
+            return HandleGetDisplayIdByWindowId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_PARENT_WINDOW_ID):
+            return HandleGetParentMainWindowId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_SET_SESSION_ICON_FOR_THIRD_PARTY):
+            return HandleSetSessionIconForThirdParty(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -214,6 +220,24 @@ int SceneSessionManagerLiteStub::HandleSetSessionIcon(MessageParcel& data, Messa
         return ERR_INVALID_DATA;
     }
     WSError errCode = SetSessionIcon(token, icon);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleSetSessionIconForThirdParty(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "in");
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (token == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "token is null");
+        return ERR_INVALID_DATA;
+    }
+    std::shared_ptr<Media::PixelMap> icon(data.ReadParcelable<Media::PixelMap>());
+    if (icon == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "icon is null");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = SetSessionIconForThirdParty(token, icon);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
@@ -567,6 +591,21 @@ int SceneSessionManagerLiteStub::HandleClearAllSessions(MessageParcel& data, Mes
 {
     WLOGFD("run HandleClearAllSessions!");
     WSError ret = ClearAllSessions();
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetParentMainWindowId(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "run HandleGetParentMainWindowId!");
+    int32_t windowId = 0;
+    if (!data.ReadInt32(windowId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read windowId failed.");
+        return ERR_INVALID_DATA;
+    }
+    int32_t parentId = 0;
+    WMError ret = GetParentMainWindowId(windowId, parentId);
+    reply.WriteInt32(parentId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
@@ -1535,6 +1574,41 @@ int SceneSessionManagerLiteStub::HandleUnRegisterPipChgListener(MessageParcel& d
     }
     WMError ret = UnregisterPipChgListenerByScreenId(screenId);
     if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetDisplayIdByWindowId(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<uint64_t> windowIds;
+    if (!data.ReadUInt64Vector(&windowIds)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read windowIds Failed");
+        return ERR_INVALID_DATA;
+    }
+    if (windowIds.size() > MAX_VECTOR_SIZE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Vector is too big, size is %{public}" PRIu32,
+              static_cast<int32_t>(windowIds.size()));
+        return ERR_INVALID_DATA;
+    }
+    std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
+    WMError errCode = GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
+    if (!reply.WriteInt32(static_cast<int32_t>(windowDisplayIdMap.size()))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write windowDisplayIdMap size faild");
+        return ERR_INVALID_DATA;
+    }
+    for (auto it = windowDisplayIdMap.begin(); it != windowDisplayIdMap.end(); ++it) {
+        if (!reply.WriteUint64(it->first)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write windowId failed");
+            return ERR_INVALID_DATA;
+        }
+        if (!reply.WriteUint64(it->second)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write displayId failed");
+            return ERR_INVALID_DATA;
+        }
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write errCode fail.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

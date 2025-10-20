@@ -44,6 +44,7 @@ class AniWindowListener : public IWindowChangeListener,
                         public IWaterMarkFlagChangedListener,
                         public IGestureNavigationEnabledChangedListener,
                         public IWindowVisibilityChangedListener,
+                        public IOcclusionStateChangedListener,
                         public IWindowTitleButtonRectChangedListener,
                         public IWindowStatusChangeListener,
                         public IWindowNoInteractionListener,
@@ -56,7 +57,8 @@ class AniWindowListener : public IWindowChangeListener,
                         public IWindowStageLifeCycle,
                         public IRectChangeInGlobalDisplayListener,
                         public IWindowStatusDidChangeListener,
-                        public IWindowRotationChangeListener {
+                        public IWindowRotationChangeListener,
+                        public IFreeWindowModeChangeListener {
 public:
     AniWindowListener(ani_env* env, ani_vm* vm, ani_ref callback, CaseType caseType)
         : env_(env), vm_(vm), aniCallback_(callback), caseType_(caseType),
@@ -92,6 +94,7 @@ public:
     void SetTimeout(int64_t timeout) override;
     int64_t GetTimeout() const override;
     void OnWindowVisibilityChangedCallback(const bool isVisible) override;
+    void OnOcclusionStateChanged(const WindowVisibilityState state) override;
     void OnSystemDensityChanged(float density) override;
     void OnDisplayIdChanged(DisplayId displayId) override;
 
@@ -105,6 +108,7 @@ public:
         RotationChangeResult& rotationChangeResult) override;
     void OnRectChangeInGlobalDisplay(const Rect& rect, WindowSizeChangeReason reason) override;
     void OnWindowStatusDidChange(WindowStatus status) override;
+    void OnFreeWindowModeChange(bool IsInFreeWindowMode) override;
 
     void AfterLifecycleForeground() override;
     void AfterLifecycleBackground() override;

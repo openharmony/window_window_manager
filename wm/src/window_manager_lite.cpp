@@ -1314,5 +1314,15 @@ WMError WindowManagerLite::SendPointerEventForHover(const std::shared_ptr<MMI::P
     }
     return ret;
 }
+
+WMError WindowManagerLite::GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+    std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap)
+{
+    WMError ret = WindowAdapterLite::GetInstance(userId_)->GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed");
+    }
+    return ret;
+}
 } // namespace Rosen
 } // namespace OHOS

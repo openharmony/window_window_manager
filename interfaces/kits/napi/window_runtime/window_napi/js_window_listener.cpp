@@ -727,6 +727,26 @@ void JsWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
     }
 }
 
+void JsWindowListener::OnOcclusionStateChanged(const WindowVisibilityState state)
+{
+    const char* const where = __func__;
+    auto jsCallback = [self = weakRef_, state, where, env = env_] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: listener or env is null", where);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value argv[] = { CreateJsValue(env, static_cast<uint32_t>(state)) };
+        thisListener->CallJsMethod(OCCLUSION_STATE_CHANGE_CB.c_str(), argv, ArraySize(argv));
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: occlusionState=%{public}u", where, static_cast<uint32_t>(state));
+    };
+    napi_status status = napi_send_event(env_, jsCallback, napi_eprio_high, "OnOcclusionStateChanged");
+    if (status != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed to send event: retStatus=%{public}d", static_cast<int32_t>(status));
+    }
+}
+
 void JsWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect)
 {
     TLOGD(WmsLogTag::WMS_DECOR, "[NAPI]");

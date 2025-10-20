@@ -437,6 +437,72 @@ namespace window {
     DRAG_END = 6,
   }
 
+  export enum WindowAnchor {
+    /**
+     * The value means window top left corner.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 20
+     */
+    TOP_START = 0,
+    /**
+     * The value means horizontal midpoint of the border on the window.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 20
+     */
+    TOP = 1,
+    /**
+     * The value means window top right corner.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 20
+     */
+    TOP_END = 2,
+    /**
+     * The value means vertical midpoint of the left border of the window.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 20
+     */
+    START = 3,
+    /**
+     * The value means window horizontal and vertical midpoint.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 20
+     */
+    CENTER = 4,
+    /**
+     * The value means vertical midpoint of the right border of the window.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 20
+     */
+    END = 5,
+    /**
+     * The value means window bottom left corner.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 20
+     */
+    BOTTOM_START = 6,
+    /**
+     * The value means horizontal midpoint of the lower border of the window.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 20
+     */
+    BOTTOM = 7,
+    /**
+     * The value means window bottom right corner.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 20
+     */
+    BOTTOM_END = 8,
+  }
+
   export interface Rect {
     /**
      * The left of the Rect.
@@ -569,6 +635,22 @@ namespace window {
     y: int;
   }
 
+  export interface KeyFramePolicy {
+    enable: boolean;
+    interval?: long;
+    distance?: int;
+    animationDuration?: long;
+    animationDelay?: long;
+  }
+
+  export class KeyFramePolicyInternal implements KeyFramePolicy {
+    enable: boolean;
+    interval?: long;
+    distance?: int;
+    animationDuration?: long;
+    animationDelay?: long;
+  }
+
 //enum WMError {
     const WMError_WM_OK = 0
     const WMError_WM_DO_NOTHING = 1
@@ -647,6 +729,12 @@ export enum WindowStatusType {
     MINIMIZE = 3,
     FLOATING = 4,
     SPLIT_SCREEN = 5
+}
+
+export enum OcclusionState {
+    NO_OCCLUSION = 0,
+    PARTIAL_OCCLUSION = 1,
+    FULL_OCCLUSION = 2
 }
 
 export enum WindowStageEventType {
@@ -2344,6 +2432,7 @@ export class WindowInternal implements Window {
     private native setWindowLayoutFullScreen(nativeObj: long, isLayoutFullScreen: boolean): int;
     private native setWindowSystemBarProperties(nativeObj: long, systemBarProperties: SystemBarProperties): int;
     private native setSpecificSystemBarEnabled(nativeObj: long, name: String, enable: boolean, enableAnimation: boolean): int;
+    private native setDragKeyFramePolicy(nativeObj: long, keyFramePolicy: KeyFramePolicy): KeyFramePolicy;
     private native snapshot(nativeObj: long): image.PixelMap;
     private native hideNonSystemFloatingWindows(nativeObj: long, shouldHide: boolean): void;
     private native opacity(nativeObj: long, opacity: double): void;
@@ -2366,6 +2455,7 @@ export class WindowInternal implements Window {
     private native getWindowAvoidAreaSync(nativeObj: long, type: int): AvoidArea;
     private native getWindowAvoidAreaIgnoringVisibilitySync(nativeObj: long, type: int): AvoidArea;
     private native setWaterMarkFlagSync(nativeObj: long, enable: boolean): void;
+    private native raiseMainWindowAboveTargetSync(nativeObj: long, windowId: int): void;
     private native setWindowFocusableSync(nativeObj: long, isFocusable: boolean): void;
     private native showWindowSync(nativeObj: long): void;
     private native destroyWindowSync(nativeObj: long): void;
@@ -2380,6 +2470,7 @@ export class WindowInternal implements Window {
     private native getWindowLimits(nativeObj: long): WindowLimits;
     private native setAspectRatio(nativeObj: long, ratio: double): void;
     private native resetAspectRatio(nativeObj: long): void;
+    private native maximize(nativeObj: long, presentation?: MaximizePresentation, acrossDisplay?: boolean): void;
     private native setResizeByDragEnabled(nativeObj: long, enable: boolean): void;
     private native enableDrag(nativeObj: long, enable: boolean): void;
     private native moveWindowToGlobal(nativeObj: long, x: int, y: int, moveConfiguration?: MoveConfiguration): void;
@@ -2391,6 +2482,12 @@ export class WindowInternal implements Window {
     private native moveWindowToGlobalDisplay(nativeObj: long, x: int, y: int): void;
     private native clientToGlobalDisplay(nativeObj: long, winX: int, winY: int): Position;
     private native globalDisplayToClient(nativeObj: long, globalDisplayX: int, globalDisplayY: int): Position;
+    private native setRotationLocked(nativeObj: long, locked: boolean): void;
+    private native getRotationLocked(nativeObj: long): boolean;
+    private native isInFreeWindowMode(nativeObj: long): boolean;
+    private native setRelativePositionToParentWindowEnabled(nativeObj: long, enabled: boolean, anchor?: WindowAnchor,
+      offsetX?: int, offsetY?: int): void;
+    private native setWindowDelayRaiseOnDrag(nativeObj: long, isEnabled: boolean): void;
 
     public static transferStatic(input: Any): Object {
       return WindowInternal.nativeTransferStatic(ESValue.wrap(input));
@@ -2605,6 +2702,18 @@ export class WindowInternal implements Window {
                 reject(err as BusinessError);
             });
         });
+    }
+
+    public setDragKeyFramePolicy(keyFramePolicy: KeyFramePolicy): Promise<KeyFramePolicy> {
+      return new Promise<KeyFramePolicy>((resolve: (value: KeyFramePolicy) => void, reject: (error: BusinessError) => void) => {
+        taskpool.execute(() => {
+          return this.setDragKeyFramePolicy(this.nativeObj, keyFramePolicy);
+        }).then((ret: NullishType) => {
+          resolve(ret as KeyFramePolicy);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
     }
 
     public snapshot(): Promise<image.PixelMap> {
@@ -2909,6 +3018,18 @@ export class WindowInternal implements Window {
       });
     }
 
+    public raiseMainWindowAboveTarget(windowId: int): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.raiseMainWindowAboveTargetSync(this.nativeObj, windowId);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
     public setWindowFocusable(isFocusable: boolean): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
@@ -2954,6 +3075,30 @@ export class WindowInternal implements Window {
 
     public off<T>(type: string, callback?: Callback<T>): void {
       this.offSync(this.nativeObj, type, callback);
+    }
+
+    public onOcclusionStateChanged(callback: Callback<OcclusionState>): void {
+      this.onSync(this.nativeObj, 'occlusionStateChanged', callback);
+    }
+
+    public offOcclusionStateChanged(callback?: Callback<OcclusionState>): void {
+      this.offSync(this.nativeObj, 'occlusionStateChanged', callback);
+    }
+
+    public onWindowStatusDidChange(callback: Callback<WindowStatusType>): void {
+      this.onSync(this.nativeObj, 'windowStatusDidChange', callback);
+    }
+
+    public offWindowStatusDidChange(callback?: Callback<WindowStatusType>): void {
+      this.offSync(this.nativeObj, 'windowStatusDidChange', callback);
+    }
+
+    public onRectChangeInGlobalDisplay(callback: Callback<RectChangeOptions>): void {
+      this.onSync(this.nativeObj, 'rectChangeInGlobalDisplay', callback);
+    }
+
+    public offRectChangeInGlobalDisplay(callback?: Callback<RectChangeOptions>): void {
+      this.offSync(this.nativeObj, 'rectChangeInGlobalDisplay', callback);
     }
 
     public showWindow(callback: AsyncCallback<void>): void {
@@ -3080,6 +3225,18 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute(() => {
           this.resetAspectRatio(this.nativeObj);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public maximize(presentation?: MaximizePresentation, acrossDisplay?: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
+        taskpool.execute(() => {
+          this.maximize(this.nativeObj, presentation, acrossDisplay);
         }).then((ret: NullishType) => {
           resolve(undefined);
         }).catch((err: NullishType) => {
@@ -3273,6 +3430,54 @@ export class WindowInternal implements Window {
         });
       });
     }
+
+    public setRotationLocked(locked: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setRotationLocked(this.nativeObj, locked);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+    
+    public getRotationLocked(): boolean {
+      return this.getRotationLocked(this.nativeObj);
+    }
+
+    public isInFreeWindowMode(): boolean {
+      return this.isInFreeWindowMode(this.nativeObj);
+    }
+
+    public onFreeWindowModeChange(callback: Callback<boolean>): void {
+      let type = "FreeWindowModeChange";
+      this.onSync(this.nativeObj, type, callback);
+    }
+
+    public offFreeWindowModeChange(callback?: Callback<boolean>): void {
+      let type = "FreeWindowModeChange";
+      this.offSync(this.nativeObj, type, callback);
+    }
+
+    public setRelativePositionToParentWindowEnabled(enabled: boolean, anchor?: WindowAnchor,
+      offsetX?: int, offsetY?: int): Promise<void> {
+      return new Promise<void>(
+        (resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
+          taskpool.execute((): void => {
+            this.setRelativePositionToParentWindowEnabled(this.nativeObj, enabled, anchor, offsetX, offsetY);
+          }).then((ret: NullishType) => {
+            resolve(undefined);
+          }).catch((err: NullishType) => {
+            reject(err as BusinessError);
+          });
+      });
+    }
+
+    public setWindowDelayRaiseOnDrag(isEnabled: boolean): void {
+      this.setWindowDelayRaiseOnDrag(this.nativeObj, isEnabled);
+    }
 }
 
 export interface Window {
@@ -3298,6 +3503,7 @@ export interface Window {
     setWindowSystemBarProperties(systemBarProperties: SystemBarProperties): Promise<void>;
     setWindowSystemBarProperties(systemBarProperties: SystemBarProperties, callback: AsyncCallback<void>): void;
     setSpecificSystemBarEnabled(name: String, enable: boolean, enableAnimation?: boolean): Promise<void>;
+    setDragKeyFramePolicy(keyFramePolicy: KeyFramePolicy): Promise<KeyFramePolicy>;
     snapshot(): Promise<image.PixelMap>;
     snapshot(callback: AsyncCallback<image.PixelMap | undefined>): void;
     hideNonSystemFloatingWindows(shouldHide: boolean): Promise<void>;
@@ -3326,6 +3532,7 @@ export interface Window {
     getWindowAvoidAreaIgnoringVisibility(type: AvoidAreaType): AvoidArea;
     setWaterMarkFlag(enable: boolean): Promise<void>;
     setWaterMarkFlag(enable: boolean, callback: AsyncCallback<void>): void;
+    raiseMainWindowAboveTarget(windowId: int): Promise<void>;
     setWindowFocusable(isFocusable: boolean): Promise<void>;
     setWindowFocusable(isFocusable: boolean, callback: AsyncCallback<void>): void;
     showWindow(callback: AsyncCallback<void>): void;
@@ -3342,6 +3549,12 @@ export interface Window {
     on<T>(type: string, callback: Callback<T>): void;
     on<T>(type: 'noInteractionDetected', timeout: long, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;
+    onOcclusionStateChanged(callback: Callback<OcclusionState>): void;
+    offOcclusionStateChanged(callback?: Callback<OcclusionState>): void;
+    onWindowStatusDidChange(callback: Callback<WindowStatusType>): void;
+    offWindowStatusDidChange(callback?: Callback<WindowStatusType>): void;
+    onRectChangeInGlobalDisplay(callback: Callback<RectChangeOptions>): void;
+    offRectChangeInGlobalDisplay(callback?: Callback<RectChangeOptions>): void;
     resizeAsync(width: int, height: int): Promise<void>;
     setWindowLimits(windowLimits: WindowLimits): Promise<WindowLimits>;
     setWindowLimits(windowLimits: WindowLimits, isForcible: boolean): Promise<WindowLimits>;
@@ -3350,6 +3563,7 @@ export interface Window {
     setAspectRatio(ratio: double): Promise<void>;
     resetAspectRatio(callback: AsyncCallback<void>): void;
     resetAspectRatio(): Promise<void>;
+    maximize(presentation?: MaximizePresentation, acrossDisplay?: boolean): Promise<void>;
     setResizeByDragEnabled(enable: boolean, callback: AsyncCallback<void>): void;
     setResizeByDragEnabled(enable: boolean): Promise<void>;
     enableDrag(enable: boolean): Promise<void>;
@@ -3366,6 +3580,14 @@ export interface Window {
     moveWindowToGlobalDisplay(x: int, y: int): Promise<void>;
     clientToGlobalDisplay(winX: int, winY: int): Promise<Position>;
     globalDisplayToClient(globalDisplayX: int, globalDisplayY: int): Promise<Position>;
+    setRotationLocked(locked: boolean): Promise<void>;
+    getRotationLocked(): boolean;
+    isInFreeWindowMode(): boolean;
+    onFreeWindowModeChange(callback: Callback<boolean>): void;
+    offFreeWindowModeChange(callback?: Callback<boolean>): void;
+    setRelativePositionToParentWindowEnabled(enabled: boolean, anchor?: WindowAnchor,
+      offsetX?: int, offsetY?: int): Promise<void>;
+    setWindowDelayRaiseOnDrag(isEnabled: boolean): void;
 }
 
 export native function CreateWindowStage(scene: long): WindowStageInternal;
@@ -3621,6 +3843,11 @@ function runKeyboardDidHideCallback(cb: object, cbArg: object): void {
 function runWindowStatusCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: WindowStatusType) => void;
     func(cbArg as WindowStatusType);
+}
+
+function runOcclusionStateChangeCallback(cb: object, cbArg: int): void {
+    const func = cb as (cbArg: OcclusionState) => void;
+    func(cbArg as OcclusionState);
 }
 
 function runWindowTouchOutCallback(cb: object): void {

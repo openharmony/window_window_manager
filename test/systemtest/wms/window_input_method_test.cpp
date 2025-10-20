@@ -78,33 +78,35 @@ HWTEST_F(WindowInputMethodTest, ShowKeyboard01, TestSize.Level1)
     };
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(windowInfo);
     ASSERT_NE(nullptr, fullWindow);
+    uint32_t callingWindowId = 3;
+    uint64_t targetDisplayId = 0;
     KeyboardEffectOption effectOption;
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         sleep(TEST_SLEEP_SECOND);
-        ASSERT_EQ(WMError::WM_OK, fullWindow->ShowKeyboard(effectOption));
+        EXPECT_EQ(WMError::WM_OK, fullWindow->ShowKeyboard(callingWindowId, targetDisplayId, effectOption));
         sleep(TEST_SLEEP_SECOND);
-        ASSERT_EQ(WMError::WM_OK, fullWindow->ChangeKeyboardEffectOption(effectOption));
+        EXPECT_EQ(WMError::WM_OK, fullWindow->ChangeKeyboardEffectOption(effectOption));
         sleep(TEST_SLEEP_SECOND);
         fullWindow->Destroy();
         return;
     }
     effectOption.viewMode_ = KeyboardViewMode::DARK_IMMERSIVE_MODE;
-    ASSERT_EQ(WMError::WM_OK, fullWindow->ShowKeyboard(effectOption));
+    EXPECT_EQ(WMError::WM_OK, fullWindow->ShowKeyboard(callingWindowId, targetDisplayId, effectOption));
     sleep(TEST_SLEEP_SECOND);
 
     effectOption.viewMode_ = KeyboardViewMode::LIGHT_IMMERSIVE_MODE;
-    ASSERT_EQ(WMError::WM_OK, fullWindow->ChangeKeyboardEffectOption(effectOption));
+    EXPECT_EQ(WMError::WM_OK, fullWindow->ChangeKeyboardEffectOption(effectOption));
     sleep(TEST_SLEEP_SECOND);
 
     effectOption.viewMode_ = static_cast<KeyboardViewMode>(MAX_INT);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, fullWindow->ChangeKeyboardEffectOption(effectOption));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, fullWindow->ChangeKeyboardEffectOption(effectOption));
     sleep(TEST_SLEEP_SECOND);
 
-    ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
+    EXPECT_EQ(WMError::WM_OK, fullWindow->Hide());
     sleep(TEST_SLEEP_SECOND);
 
     effectOption.viewMode_ = KeyboardViewMode::DARK_IMMERSIVE_MODE;
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
               fullWindow->ChangeKeyboardEffectOption(effectOption));
     sleep(TEST_SLEEP_SECOND);
     fullWindow->Destroy();

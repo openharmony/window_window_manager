@@ -46,7 +46,8 @@ public:
     void OnImmersiveStateChanged(ScreenId screenId, bool& immersive) override;
     void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId) override;
     void OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
-        std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false) override;
+        std::vector<uint64_t>& surfaceNodeIds, const std::vector<uint32_t>& needWindowTypeList = {},
+        bool isNeedForceCheck = false) override;
     void OnSetSurfaceNodeIdsChanged(DisplayId displayId, const std::vector<uint64_t>& surfaceNodeIds) override;
     void OnVirtualScreenDisconnected(DisplayId displayId) override;
     void OnUpdateFoldDisplayMode(FoldDisplayMode displayMode) override;

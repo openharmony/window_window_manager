@@ -471,7 +471,9 @@ HWTEST_F(MainSessionTest, OnRestoreMainWindow, TestSize.Level1)
     session->onRestoreMainWindowFunc_ = nullptr;
     EXPECT_EQ(WSError::WS_OK, session->OnRestoreMainWindow());
 
-    NotifyRestoreMainWindowFunc func = [] { return; };
+    NotifyRestoreMainWindowFunc func = [](bool isAppSupportPhoneInPc, int32_t callingPid, uint32_t callingToken) {
+        return;
+    };
     session->onRestoreMainWindowFunc_ = func;
     EXPECT_EQ(WSError::WS_OK, session->OnRestoreMainWindow());
 }
@@ -493,7 +495,10 @@ HWTEST_F(MainSessionTest, OnRestoreMainWindow02, TestSize.Level1)
     EXPECT_EQ(testSession->OnRestoreMainWindow(), WSError::WS_OK);
 
     auto callbackFlag = 1;
-    testSession->onRestoreMainWindowFunc_ = [&callbackFlag]() { callbackFlag += 1; };
+    testSession->onRestoreMainWindowFunc_ = [&callbackFlag](
+        bool isAppSupportPhoneInPc, int32_t callingPid, uint32_t callingToken) {
+        callbackFlag += 1;
+    };
     testSession->OnRestoreMainWindow();
     EXPECT_EQ(callbackFlag, 2);
 }
@@ -959,7 +964,63 @@ HWTEST_F(MainSessionTest, NotifySubAndDialogFollowRectChange_scaleMode, TestSize
     };
     callBack->onGetSceneSessionByIdCallback_ = getSessionCallBack;
     mainSession->NotifySubAndDialogFollowRectChange(rect, false, false);
+    mainSession->callingPid_ = 1;
+    subSession1->callingPid_ = 2;
+    subSession2->callingPid_ = 3;
     EXPECT_EQ(resultRect, updateRect1);
+    EXPECT_EQ(resultRect, updateRect2);
+}
+
+/**
+ * @tc.name: NotifySubAndDialogFollowRectChange_compatMode
+ * @tc.desc: NotifySubAndDialogFollowRectChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, NotifySubAndDialogFollowRectChange_compatMode, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifySubAndDialogFollowRectChange_compatMode";
+    info.bundleName_ = "NotifySubAndDialogFollowRectChange_compatMode";
+    sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> subSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> subSession2 = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    WSRect updateRect1;
+    auto task1 = [&updateRect1](const WSRect& rect, bool isGlobal, bool needFlush) { updateRect1 = rect; };
+    mainSession->RegisterNotifySurfaceBoundsChangeFunc(subSession1->GetPersistentId(), std::move(task1));
+    WSRect updateRect2;
+    auto task2 = [&updateRect2](const WSRect& rect, bool isGlobal, bool needFlush) { updateRect2 = rect; };
+    mainSession->RegisterNotifySurfaceBoundsChangeFunc(subSession2->GetPersistentId(), std::move(task2));
+    EXPECT_NE(nullptr, mainSession->notifySurfaceBoundsChangeFuncMap_[subSession1->GetPersistentId()]);
+    float scaleX = 0.5f;
+    float scaleY = 0.5f;
+    mainSession->SetScale(scaleX, scaleY, 0.5f, 0.5f);
+    WSRect rect = { 100, 100, 400, 400 };
+    subSession1->isFollowParentLayout_ = true;
+    subSession2->isFollowParentLayout_ = true;
+    sptr<SceneSession::SpecificSessionCallback> callBack = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    mainSession->specificCallback_ = callBack;
+    auto getSessionCallBack = [&subSession1, &subSession2](int32_t persistentId) {
+        if (subSession1->GetPersistentId() == persistentId) {
+            return subSession1;
+        } else {
+            return subSession2;
+        }
+    };
+    callBack->onGetSceneSessionByIdCallback_ = getSessionCallBack;
+    mainSession->NotifySubAndDialogFollowRectChange(rect, false, false);
+    EXPECT_EQ(rect, updateRect1);
+    EXPECT_EQ(rect, updateRect2);
+
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    mainSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    WSRect resultRect = { 200, 200, 200, 200 };
+    mainSession->callingPid_ = 1;
+    subSession1->callingPid_ = 1;
+    subSession2->callingPid_ = 2;
+    mainSession->NotifySubAndDialogFollowRectChange(rect, false, false);
+    EXPECT_NE(resultRect, updateRect1);
     EXPECT_EQ(resultRect, updateRect2);
 }
 
@@ -979,6 +1040,43 @@ HWTEST_F(MainSessionTest, NotifyIsFullScreenInForceSplitMode, TestSize.Level3)
     testSession->RegisterForceSplitFullScreenChangeCallback([](uint32_t uid, bool isFullScreen) {});
     ret = testSession->NotifyIsFullScreenInForceSplitMode(true);
     EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: RestoreAspectRatioTest
+ * @tc.desc: Verify RestoreAspectRatio behavior under different conditions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, RestoreAspectRatioTest, TestSize.Level1)
+{
+    SessionInfo info;
+    sptr<MainSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
+    session->Session::SetAspectRatio(0.0f);
+
+    // Case 1: ratio nearly zero
+    {
+        float ratio = 0.0f;
+        bool ret = session->RestoreAspectRatio(ratio);
+        EXPECT_FALSE(ret);
+        EXPECT_FLOAT_EQ(session->GetAspectRatio(), 0.0f);
+    }
+
+    // Case 2: ratio valid, moveDragController_ is not nullptr
+    {
+        float ratio = 1.6f;
+        bool ret = session->RestoreAspectRatio(ratio);
+        EXPECT_TRUE(ret);
+        EXPECT_FLOAT_EQ(session->GetAspectRatio(), ratio);
+    }
+
+    // Case 3: ratio valid, moveDragController_ is nullptr
+    {
+        float ratio = 1.33f;
+        session->moveDragController_ = nullptr;
+        bool ret = session->RestoreAspectRatio(ratio);
+        EXPECT_TRUE(ret);
+        EXPECT_FLOAT_EQ(session->GetAspectRatio(), ratio);
+    }
 }
 } // namespace
 } // namespace Rosen

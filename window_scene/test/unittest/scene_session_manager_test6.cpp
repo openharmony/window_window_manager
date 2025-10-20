@@ -626,57 +626,37 @@ HWTEST_F(SceneSessionManagerTest6, ClearWatermarkForSession, TestSize.Level1)
 }
 
 /**
- * @tc.name: ClearWatermarkRecordWhenAppExit
- * @tc.desc: clare watermark record for app
+ * @tc.name: ClearProcessRecordWhenAppExit
+ * @tc.desc: clare process record for app
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest6, ClearWatermarkRecordWhenAppExit, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest6, ClearProcessRecordWhenAppExit, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
-    int32_t pid = IPCSkeleton::GetCallingRealPid();
+    int32_t pid = 100;
     std::string bundleName = "setAppWatermark";
     ssm_->appWatermarkPidMap_.clear();
-    auto oldSceneSessionMap = ssm_->sceneSessionMap_;
-    ssm_->sceneSessionMap_.clear();
-    ssm_->sceneSessionMap_.insert(std::make_pair(0, nullptr));
-
-    SessionInfo sessionInfo1;
-    sessionInfo1.bundleName_ = bundleName;
-    sessionInfo1.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    auto session1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
-    session1->SetCallingPid(pid);
-    session1->persistentId_ = 1;
-    ssm_->sceneSessionMap_.insert(std::make_pair(session1->GetPersistentId(), session1));
-
-    SessionInfo sessionInfo2;
-    sessionInfo2.bundleName_ = bundleName;
-    sessionInfo2.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    auto session2 = sptr<SceneSession>::MakeSptr(sessionInfo2, nullptr);
-    session2->SetCallingPid(pid);
-    ssm_->sceneSessionMap_.insert(std::make_pair(session2->GetPersistentId(), session2));
-
-    SessionInfo sessionInfo3;
-    sessionInfo3.bundleName_ = bundleName;
-    sessionInfo3.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    auto session3 = sptr<SceneSession>::MakeSptr(sessionInfo3, nullptr);
-    session3->SetCallingPid(pid);
-    session3->persistentId_ = 3;
-    ssm_->sceneSessionMap_.insert(std::make_pair(session3->GetPersistentId(), session3));
-
     ssm_->appWatermarkPidMap_[pid] = "watermarkName#1";
-    ssm_->ClearWatermarkRecordWhenAppExit(nullptr);
+    ssm_->ClearProcessRecordWhenAppExit({});
     EXPECT_EQ(ssm_->appWatermarkPidMap_.size(), 1);
-    ssm_->ClearWatermarkRecordWhenAppExit(session2);
-    EXPECT_EQ(ssm_->appWatermarkPidMap_.size(), 1);
-    ssm_->ClearWatermarkRecordWhenAppExit(session1);
-    EXPECT_EQ(ssm_->appWatermarkPidMap_.size(), 1);
-    ssm_->sceneSessionMap_.erase(session3->GetPersistentId());
-    ssm_->ClearWatermarkRecordWhenAppExit(session1);
-    EXPECT_EQ(ssm_->appWatermarkPidMap_.size(), 0);
-
     ssm_->appWatermarkPidMap_.clear();
-    ssm_->sceneSessionMap_.clear();
-    ssm_->sceneSessionMap_ = oldSceneSessionMap;
+}
+
+/**
+ * @tc.name: RegisterAppStateObserver
+ * @tc.desc: register app state ovserver
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, RegisterAppStateObserver, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->appStateObserver_ = nullptr;
+    ssm_->RegisterAppStateObserver();
+    ASSERT_NE(ssm_->appStateObserver_, nullptr);
+    ssm_->appStateObserver_->OnProcessDied({});
+    ssm_->appStateObserver_->RegisterProcessDiedNotifyFunc(nullptr);
+    ssm_->appStateObserver_->OnProcessDied({});
+    ssm_->appStateObserver_ = nullptr;
 }
 
 /**
@@ -1618,9 +1598,57 @@ HWTEST_F(SceneSessionManagerTest6, SetSessionVisibilityInfo02, TestSize.Level1)
     ssm_->sceneSessionMap_.insert({ 2, session2 });
     ssm_->windowVisibilityListenerSessionSet_.clear();
     ssm_->windowVisibilityListenerSessionSet_.insert(1);
+    ssm_->occlusionStateListenerSessionSet_.clear();
+    ssm_->occlusionStateListenerSessionSet_.insert(1);
     ssm_->SetSessionVisibilityInfo(session1, visibleState, windowVisibilityInfos, visibilityInfo);
     EXPECT_NE(windowVisibilityInfos.size(), 0);
     ssm_->sceneSessionMap_.clear();
+    ssm_->occlusionStateListenerSessionSet_.clear();
+}
+
+/**
+ * @tc.name: UpdateSessionOcclusionStateListener
+ * @tc.desc: update window occlusion state
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, UpdateSessionOcclusionStateListener, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    auto oldSceneSessionMap = ssm_->sceneSessionMap_;
+    ssm_->sceneSessionMap_.clear();
+    ssm_->occlusionStateListenerSessionSet_.clear();
+    auto result = ssm_->UpdateSessionOcclusionStateListener(100, false);
+    EXPECT_EQ(result, WMError::WM_DO_NOTHING);
+    EXPECT_EQ(ssm_->occlusionStateListenerSessionSet_.size(), 0);
+
+    SessionInfo sessionInfo1;
+    auto session1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    session1->persistentId_ = 1;
+    session1->sessionStage_ = nullptr;
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, session1));
+    result = ssm_->UpdateSessionOcclusionStateListener(session1->persistentId_, true);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(ssm_->occlusionStateListenerSessionSet_.size(), 1);
+
+    SessionInfo sessionInfo2;
+    sessionInfo2.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    auto session2 = sptr<SceneSession>::MakeSptr(sessionInfo2, nullptr);
+    session2->persistentId_ = 2;
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(mockSessionStage, nullptr);
+    session2->sessionStage_ = mockSessionStage;
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, session2));
+    result = ssm_->UpdateSessionOcclusionStateListener(session2->persistentId_, true);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(ssm_->occlusionStateListenerSessionSet_.size(), 2);
+
+    result = ssm_->UpdateSessionOcclusionStateListener(session1->persistentId_, false);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(ssm_->occlusionStateListenerSessionSet_.size(), 1);
+
+    ssm_->occlusionStateListenerSessionSet_.clear();
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_ = oldSceneSessionMap;
 }
 
 /**

@@ -527,6 +527,7 @@ HWTEST_F(SceneSessionManagerTest3, GetWindowLimits, TestSize.Level1)
     limits.maxWidth_ = 1000;
     limits.minWidth_ = 500;
     sceneSession->property_->SetWindowLimits(limits);
+    sceneSession->property_->SetWindowLimitsVP(limits);
 
     int32_t windowId = 1;
     WindowLimits windowlimits;
@@ -707,6 +708,39 @@ HWTEST_F(SceneSessionManagerTest3, SetAbilitySessionInfo2, TestSize.Level1)
     sptr<OHOS::AAFwk::SessionInfo> ret = ssm_->SetAbilitySessionInfo(sceneSession, true);
     ssm_->ClearRequestTaskInfo(1);
     EXPECT_EQ(ret->want.GetBundle(), "SetAbilitySessionInfo");
+}
+
+/**
+ * @tc.name: SetAbilitySessionInfo3
+ * @tc.desc: SceneSesionManager set ability session info
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, SetAbilitySessionInfo3, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetAbilitySessionInfo3";
+    info.bundleName_ = "SetAbilitySessionInfo3";
+    info.isRestartApp_ = true;
+    info.persistentId_ = 1;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert({1, sceneSession});
+
+    SessionInfo sessionInfo;
+    sessionInfo.abilityName_ = "SetAbilitySessionInfo3";
+    sessionInfo.bundleName_ = "SetAbilitySessionInfo3";
+    sessionInfo.isRestartApp_ = true;
+    sessionInfo.persistentId_ = 2;
+    sessionInfo.callerPersistentId_ = 1;
+    sptr<WindowSessionProperty> property;
+    sptr<SceneSession> createdSceneSession = ssm_->CreateSceneSession(sessionInfo, property);
+    ASSERT_NE(nullptr, createdSceneSession);
+
+    sptr<OHOS::AAFwk::SessionInfo> ret = ssm_->SetAbilitySessionInfo(sceneSession);
+    wASSERT_NE(nullptr, ret);
+
+    ret = ssm_->SetAbilitySessionInfo(createdSceneSession);
+    wASSERT_NE(nullptr, ret);
 }
  
 /**

@@ -165,6 +165,17 @@ public:
         virtual void OnScreenMagneticStateChanged([[maybe_unused]]bool isMagneticState) {}
     };
 
+    class IBrightnessInfoListener : public virtual RefBase {
+    public:
+        /**
+         * @brief Notify listeners when screen brightness info changed.
+         *
+         * @param displayId DisplayId.
+         * @param info ScreenBrightnessInfo.
+         */
+        virtual void OnBrightnessInfoChanged([[maybe_unused]]DisplayId displayId, const ScreenBrightnessInfo& info) {}
+    };
+
     class IAvailableAreaListener : public virtual RefBase {
     public:
         /**
@@ -613,6 +624,22 @@ public:
     DMError UnregisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener);
 
     /**
+     * @brief Register a listener for the event of brightness info changed.
+     *
+     * @param listener IBrightnessInfoListener.
+     * @return DM_OK means register success, others means register failed.
+     */
+    DMError RegisterBrightnessInfoListener(sptr<IBrightnessInfoListener> listener);
+
+    /**
+     * @brief Unregister an existed listener for the event of brightness info changed.
+     *
+     * @param listener IBrightnessInfoListener.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError UnregisterBrightnessInfoListener(sptr<IBrightnessInfoListener> listener);
+
+    /**
      * @brief Register a listener for the event of available  area changed.
      *
      * @param listener IAvailableAreaListener.
@@ -919,6 +946,15 @@ public:
      */
     DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea);
+    
+    /**
+     * @brief Get brightnessInfo of display
+     *
+     * @param DisplayId displayId.
+     * @param brightnessInfo ScreenBrightnessInfo.
+     * @return DM_OK means process get screenArea success.
+     */
+    DMError GetBrightnessInfo(DisplayId displayId, ScreenBrightnessInfo& brightnessInfo);
 
     /**
      * @brief Get primary display system dpi.

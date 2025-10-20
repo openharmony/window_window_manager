@@ -238,6 +238,31 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             );
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_GET_SCREEN_BRIGHTNESS_INFO: {
+            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+            ScreenBrightnessInfo brightnessInfo;
+            DMError ret = GetBrightnessInfo(displayId, brightnessInfo);
+            if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+                TLOGE(WmsLogTag::DMS, "write ret failed!");
+                break;
+            }
+            if (ret != DMError::DM_OK) {
+                break;
+            }
+            if (!reply.WriteFloat(brightnessInfo.currentHeadroom)) {
+                TLOGE(WmsLogTag::DMS, "write currentHeadroom failed!");
+                break;
+            }
+            if (!reply.WriteFloat(brightnessInfo.maxHeadroom)) {
+                TLOGE(WmsLogTag::DMS, "write maxHeadroom failed!");
+                break;
+            }
+            if (!reply.WriteFloat(brightnessInfo.sdrNits)) {
+                TLOGE(WmsLogTag::DMS, "write sdrNits failed!");
+                break;
+            }
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_CREATE_VIRTUAL_SCREEN: {
             std::string name = data.ReadString();
             uint32_t width = data.ReadUint32();
@@ -728,7 +753,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
         case DisplayManagerMessage::TRANS_ID_SET_ORIENTATION: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             Orientation orientation = static_cast<Orientation>(data.ReadUint32());
-            DMError ret = SetOrientation(screenId, orientation);
+            bool isFromNapi = data.ReadBool();
+            DMError ret = SetOrientation(screenId, orientation, isFromNapi);
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
             break;
         }
@@ -1521,9 +1547,22 @@ void ScreenSessionManagerStub::ProcSetVirtualScreenSecurityExemption(MessageParc
 void ScreenSessionManagerStub::ProcGetScreenCapture(MessageParcel& data, MessageParcel& reply)
 {
     CaptureOption option;
-    option.displayId_ = static_cast<DisplayId>(data.ReadUint64());
-    option.isNeedNotify_ = static_cast<bool>(data.ReadBool());
-    option.isNeedPointer_ = static_cast<bool>(data.ReadBool());
+    if (!data.ReadUint64(option.displayId_)) {
+        TLOGE(WmsLogTag::DMS, "Read displayId failed");
+        return;
+    }
+    if (!data.ReadBool(option.isNeedNotify_)) {
+        TLOGE(WmsLogTag::DMS, "Read isNeedNotify failed");
+        return;
+    }
+    if (!data.ReadBool(option.isNeedPointer_)) {
+        TLOGE(WmsLogTag::DMS, "Read isCaptureFullOfScreen failed");
+        return;
+    }
+    if (!data.ReadUInt64Vector(&option.blackWindowIdList_)) {
+        TLOGE(WmsLogTag::DMS, "Read node blackWindowIdList failed");
+        return;
+    }
     DmErrorCode errCode = DmErrorCode::DM_OK;
     std::shared_ptr<Media::PixelMap> capture = GetScreenCapture(option, &errCode);
     reply.WriteParcelable(capture == nullptr ? nullptr : capture.get());

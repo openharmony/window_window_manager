@@ -1300,18 +1300,6 @@ HWTEST_F(SceneSessionManagerTest7, UpdateNormalSessionAvoidArea02, TestSize.Leve
 }
 
 /**
- * @tc.name: RemoveProcessSnapshotSkip
- * @tc.desc: SceneSesionManager RemoveProcessSnapshotSkip
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest7, RemoveProcessSnapshotSkip, TestSize.Level1)
-{
-    ssm_->snapshotSkipPidSet_.insert(1);
-    ssm_->RemoveProcessSnapshotSkip(1);
-    ASSERT_EQ(ssm_->snapshotSkipPidSet_.find(1), ssm_->snapshotSkipPidSet_.end());
-}
-
-/**
  * @tc.name: SetSessionSnapshotSkipForAppProcess
  * @tc.desc: SceneSesionManager SetSessionSnapshotSkipForAppProcess
  * @tc.type: FUNC
@@ -1323,7 +1311,7 @@ HWTEST_F(SceneSessionManagerTest7, SetSessionSnapshotSkipForAppProcess, TestSize
     sceneSession->SetCallingPid(1000);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    sceneSession->surfaceNode_ = surfaceNode;
+    sceneSession->SetSurfaceNode(surfaceNode);
     ssm_->SetSessionSnapshotSkipForAppProcess(sceneSession);
     ASSERT_EQ(sceneSession->GetSessionProperty()->GetSnapshotSkip(), false);
 
@@ -1400,7 +1388,7 @@ HWTEST_F(SceneSessionManagerTest7, TestReportIncompleteScreenFoldStatusChangeEve
 HWTEST_F(SceneSessionManagerTest7, SetAppForceLandscapeConfig, TestSize.Level1)
 {
     std::string bundleName = "SetAppForceLandscapeConfig";
-    AppForceLandscapeConfig config = { 0, "MainPage", false, "ArkuiOptions" };
+    AppForceLandscapeConfig config = { 0, "MainPage", false, "ArkuiOptions", false };
     WSError result = ssm_->SetAppForceLandscapeConfig(bundleName, config);
     ASSERT_EQ(result, WSError::WS_OK);
 }
@@ -1616,7 +1604,7 @@ HWTEST_F(SceneSessionManagerTest7, SetSessionSnapshotSkipForAppBundleName, TestS
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, nullptr);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    sceneSession->surfaceNode_ = surfaceNode;
+    sceneSession->SetSurfaceNode(surfaceNode);
     ssm_->SetSessionSnapshotSkipForAppBundleName(sceneSession);
     ASSERT_EQ(sceneSession->GetSessionProperty()->GetSnapshotSkip(), false);
 
@@ -2140,6 +2128,9 @@ HWTEST_F(SceneSessionManagerTest7, UpdateAnimationSpeedWithPid, TestSize.Level1)
     ASSERT_NE(sceneSession02, nullptr);
     ASSERT_NE(sceneSession03, nullptr);
     ASSERT_NE(sceneSession04, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(0, nullptr));
+    result = ssm_->UpdateAnimationSpeedWithPid(pid, speed);
+    EXPECT_EQ(result, WMError::WM_OK);
     sceneSession01->isVisible_ = false;
     sceneSession01->SetCallingPid(2);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession01));
