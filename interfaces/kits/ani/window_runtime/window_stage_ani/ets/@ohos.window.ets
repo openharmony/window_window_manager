@@ -3802,7 +3802,7 @@ export function setStartWindowBackgroundColor(moduleName: string, abilityName: s
   return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
     taskpool.execute((): void => {
       return setStartWindowBackgroundColorSync(nativeObj, moduleName, abilityName,
-      (color.alpha << 24) | (color.red << 16) | (color.green << 8) | color.blue);
+        (color.alpha << 24) | (color.red << 16) | (color.green << 8) | color.blue);
     }).then((ret: NullishType) => {
       resolve(undefined);
     }).catch((err: NullishType) => {
