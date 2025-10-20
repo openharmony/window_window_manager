@@ -5732,17 +5732,7 @@ void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, Startin
         isDark = GetStartWindowColorFollowApp(sessionInfo) ? isAppDark : isSystemDark;
         CacheStartingWindowInfo(
             sessionInfo.bundleName_, sessionInfo.moduleName_, sessionInfo.abilityName_, startingWindowInfo, isDark);
-        if (startingWindowRdbMgr_ != nullptr) {
-            StartingWindowRdbItemKey itemKey = {
-                .bundleName = sessionInfo.bundleName_,
-                .moduleName = sessionInfo.moduleName_,
-                .abilityName = sessionInfo.abilityName_,
-                .darkMode = isDark,
-            };
-            if (!startingWindowRdbMgr_->InsertData(itemKey, startingWindowInfo)) {
-                TLOGW(WmsLogTag::WMS_PATTERN, "rdb insert faild");
-            }
-        }
+        InsertStartingWindowRdbTask(sessionInfo, startingWindowInfo, isDark);
         uint32_t updateRes = UpdateCachedColorToAppSet(
             sessionInfo.bundleName_, sessionInfo.moduleName_, sessionInfo.abilityName_, startingWindowInfo);
         TLOGI(WmsLogTag::WMS_PATTERN, "updateRes %{public}u, %{public}x",
@@ -5751,6 +5741,44 @@ void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, Startin
     TLOGW(WmsLogTag::WMS_PATTERN, "%{public}d, %{public}x", startingWindowInfo.configFileEnabled_,
         startingWindowInfo.configFileEnabled_ ? startingWindowInfo.backgroundColor_ :
                                                 startingWindowInfo.backgroundColorEarlyVersion_);
+}
+
+void SceneSessionManager::InsertStartingWindowRdbTask(
+    const SessionInfo& sessionInfo, const StartingWindowInfo& startingWindowInfo, bool isDark)
+{
+    StartingWindowRdbItemKey itemKey = {
+        .bundleName = sessionInfo.bundleName_,
+        .moduleName = sessionInfo.moduleName_,
+        .abilityName = sessionInfo.abilityName_,
+        .darkMode = isDark,
+    };
+    std::string keyStr = sessionInfo.bundleName_ + '_' +
+        sessionInfo.moduleName_ + '_' + sessionInfo.abilityName_ + std::to_string(isDark);
+    {
+        std::shared_lock<std::shared_mutex> lock(insertStartingWindowRdbSetMutex_);
+        if (insertStartingWindowRdbSet_.find(keyStr) != insertStartingWindowRdbSet_.end()) {
+            TLOGW(WmsLogTag::WMS_PATTERN, "task running %{public}s", keyStr.c_str());
+            return;
+        }
+    }
+    const char* const where = __func__;
+    auto insertTask = [this, itemKey, startingWindowInfo, keyStr, where]() {
+        {
+            std::unique_lock<std::shared_mutex> lock(insertStartingWindowRdbSetMutex_);
+            insertStartingWindowRdbSet_.insert(keyStr);
+        }
+        if (startingWindowRdbMgr_ == nullptr) {
+            TLOGNW(WmsLogTag::WMS_PATTERN, "%{public}s rdb manager is null", where);
+            return;
+        }
+        bool res = startingWindowRdbMgr_->InsertData(itemKey, startingWindowInfo);
+        {
+            std::unique_lock<std::shared_mutex> lock(insertStartingWindowRdbSetMutex_);
+            insertStartingWindowRdbSet_.erase(keyStr);
+        }
+        TLOGNI(WmsLogTag::WMS_PATTERN, "%{public}s res %{public}d", where, res);
+    };
+    ffrtQueueHelper_->SubmitTask(insertTask);
 }
 
 bool SceneSessionManager::GetStartingWindowInfoFromCache(
