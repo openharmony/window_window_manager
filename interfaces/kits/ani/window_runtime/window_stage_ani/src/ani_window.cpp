@@ -1473,7 +1473,7 @@ ani_ref AniWindow::GetParentWindow(ani_env *env)
     return CreateAniWindowObject(env, parentWindow);
 }
 
-void AniWindow::SetParentWindow(ani_env* env, ani_double windowId)
+void AniWindow::SetParentWindow(ani_env* env, ani_int windowId)
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_SUB, "[ANI] WindowToken_ is nullptr");
@@ -2826,7 +2826,7 @@ static ani_ref GetParentWindow(ani_env* env, ani_object obj, ani_long nativeObj)
     return aniWindow->GetParentWindow(env);
 }
 
-static void SetParentWindow(ani_env* env, ani_object obj, ani_long nativeObj, ani_double windowId)
+static void SetParentWindow(ani_env* env, ani_object obj, ani_long nativeObj, ani_int windowId)
 {
     using namespace OHOS::Rosen;
     TLOGI(WmsLogTag::WMS_SUB, "[ANI] start");
