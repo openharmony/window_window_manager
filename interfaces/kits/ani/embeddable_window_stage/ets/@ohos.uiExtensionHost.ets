@@ -88,6 +88,9 @@ namespace uiExtensionHost {
     uiExtensionHostWindowProxyRect: window.Rect;
   }
 
+  export native function destroyWindowProxy(nativeObj: long): void;
+  let windowProxyRegister = new FinalizationRegistry<long>(destroyWindowProxy);
+
   // API implementation
   export class UIExtensionHostInternal implements UIExtensionHostWindowProxy {
     static { loadLibrary("embeddablewindowstageani_kit.z") }
@@ -95,6 +98,7 @@ namespace uiExtensionHost {
 
     private setNativeObj(nativeObj: long): void {
       this.nativeObj = nativeObj;
+      windowProxyRegister.register(this, nativeObj);
     }
 
     private setAreaVisible(obj: window.AvoidArea, visible: boolean) {

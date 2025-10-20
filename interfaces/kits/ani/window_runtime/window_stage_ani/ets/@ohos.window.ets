@@ -2056,12 +2056,16 @@ export interface ExtensionWindowConfig {
   systemWindowOptions?: SystemWindowOptions;
 }
 
+export native function destroyAniExtConfig(nativeObj: long): void;
+let extConfigRegister = new FinalizationRegistry<long>(destroyAniExtConfig);
+
 export class ExtensionWindowConfigInternal implements ExtensionWindowConfig {
   static { loadLibrary('windowstageani_kit.z') }
 
   private nativeObj: long = 0;
   setNativeObj(nativeObj: long): void {
       this.nativeObj = nativeObj;
+      extConfigRegister.register(this, nativeObj);
   }
 
   set windowName(value: string) {
@@ -2122,6 +2126,7 @@ export class ExtConfigRect implements Rect {
   private nativeObj: long = 0;
   setNativeObj(nativeObj: long): void {
       this.nativeObj = nativeObj;
+      extConfigRegister.register(this, nativeObj);
   }
   
   set left(value: int) {
@@ -2172,6 +2177,7 @@ export class ExtConfigSubWindowOptions implements SubWindowOptions {
   private nativeObj: long = 0;
   setNativeObj(nativeObj: long): void {
       this.nativeObj = nativeObj;
+      extConfigRegister.register(this, nativeObj);
   }
 
   modalityType?: ModalityType;
@@ -2228,6 +2234,7 @@ export class ExtConfigSystemWindowOptions implements SystemWindowOptions {
   private nativeObj: long = 0;
   setNativeObj(nativeObj: long): void {
       this.nativeObj = nativeObj;
+      extConfigRegister.register(this, nativeObj);
   }
 
   set windowType(value: WindowType) {

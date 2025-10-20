@@ -2320,6 +2320,52 @@ ani_object AniWindow::HandlePositionTransform(
     return AniWindowUtils::CreateAniPosition(env, outPosition);
 }
 
+ani_object AniWindow::CreateAniWindow(ani_env* env, OHOS::sptr<OHOS::Rosen::Window>& window)
+__attribute__((no_sanitize("cfi")))
+{
+    using namespace OHOS::Rosen;
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] null env");
+        return nullptr;
+    }
+    TLOGD(WmsLogTag::DEFAULT, "[ANI] create wstage");
+
+    ani_status ret;
+    ani_class cls = nullptr;
+    if ((ret = env->FindClass("L@ohos/window/window/WindowInternal;", &cls)) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] null env %{public}u", ret);
+        return cls;
+    }
+
+    std::unique_ptr<AniWindow> uniqueWindow = std::make_unique<AniWindow>(window);
+
+    ani_field contextField;
+    if ((ret = env->Class_FindField(cls, "nativeObj", &contextField)) != ANI_OK) {
+        TLOGD(WmsLogTag::DEFAULT, "[ANI] get field fail %{public}u", ret);
+        return nullptr;
+    }
+
+    ani_method initFunc = nullptr;
+    if ((ret = env->Class_FindMethod(cls, "<ctor>", ":V", &initFunc)) != ANI_OK) {
+        TLOGD(WmsLogTag::DEFAULT, "[ANI] get ctor fail %{public}u", ret);
+        return nullptr;
+    }
+    ani_object obj = nullptr;
+    if ((ret = env->Object_New(cls, initFunc, &obj)) != ANI_OK) {
+        TLOGD(WmsLogTag::DEFAULT, "[ANI] obj new fail %{public}u", ret);
+        return nullptr;
+    }
+    ani_method setObjFunc = nullptr;
+    if ((ret = env->Class_FindMethod(cls, "setNativeObj", "J:V", &setObjFunc)) != ANI_OK) {
+        TLOGD(WmsLogTag::DEFAULT, "[ANI] get setNativeObj fail %{public}u", ret);
+        return nullptr;
+    }
+    env->Object_CallMethod_Void(obj, setObjFunc, reinterpret_cast<ani_long>(uniqueWindow.get()));
+    g_localObjs.insert(std::pair(obj, uniqueWindow.release()));
+
+    return obj;
+}
+
 void AniWindow::SetRotationLocked(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean locked)
 {
     TLOGD(WmsLogTag::WMS_ROTATION, "[ANI]");
@@ -2710,10 +2756,7 @@ static ani_object WindowCreate(ani_env* env, ani_long window)
     baseOp->SetWindowRect(baseWindowRect);
     baseOp->SetSystemBarProperty(windowType, barProperty);
     OHOS::sptr<Window> windowPtr = Window::Create("TestWindow", baseOp, nullptr);
-    ani_object obj = AniWindowUtils::CreateAniWindow(env, windowPtr); // just for test
-    std::unique_ptr<AniWindow> uniqueWindow = std::make_unique<AniWindow>(windowPtr);
-    g_localObjs.insert(std::pair(obj, uniqueWindow.release()));
-    return obj;
+    return AniWindow::CreateAniWindow(env, windowPtr); // just for test
 }
 
 static void WindowResizeAsync(ani_env* env, ani_object obj, ani_long nativeObj, ani_int width, ani_int height)
