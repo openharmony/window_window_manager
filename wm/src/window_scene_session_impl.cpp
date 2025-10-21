@@ -6514,11 +6514,26 @@ void WindowSceneSessionImpl::UpdateDensityInner(const sptr<DisplayInfo>& info)
     if (property_->GetUserWindowLimits().pixelUnit_ == PixelUnit::VP) {
         UpdateWindowSizeLimits();
         UpdateNewSize();
-        WMError ret = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
+    } else {
+        WindowLimits limitsPx = property_->GetWindowLimits();
+        WindowLimits limitsVp = WindowLimits::DEFAULT_VP_LIMITS();
+        float vpr = 1.0f;
+        WMError ret = WindowSessionImpl::GetVirtualPixelRatio(vpr);
         if (ret != WMError::WM_OK) {
-            WLOGFE("update window proeprty failed! id: %{public}u.", GetWindowId());
+            TLOGE(WmsLogTag::DEFAULT, "Id:%{public}d, get vpr failed", GetPersistentId());
             return;
         }
+        RecalculateVpLimitsByPx(limitsPx, limitsVp, vpr);
+        limitsPx.vpRatio_ = vpr;
+        limitsVp.vpRatio_ = vpr;
+        property_->SetWindowLimits(limitsPx);
+        property_->SetWindowLimitsVP(limitsVp);
+        property_->SetLastLimitsVpr(vpr);
+    }
+    WMError ret = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "update window property failed! id: %{public}u.", GetWindowId());
+        return;
     }
 
     NotifyDisplayInfoChange(info);
