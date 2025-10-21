@@ -568,6 +568,13 @@ HWTEST_F(WindowPatternSnapshotTest, SaveSnapshot02, TestSize.Level1)
     session_->SaveSnapshot(true);
     ASSERT_EQ(session_->snapshot_, nullptr);
 
+    session_->snapshotNeedCancel_ = false;
+    session_->SaveSnapshot(false, true, nullptr, false, LifeCycleChangeReason::QUICK_BATCH_BACKGROUND);
+    ASSERT_EQ(session_->snapshot_, nullptr);
+    session_->snapshotNeedCancel_ = true;
+    session_->SaveSnapshot(false, true, nullptr, false, LifeCycleChangeReason::QUICK_BATCH_BACKGROUND);
+    ASSERT_EQ(session_->snapshot_, nullptr);
+
     auto pixelMap = std::make_shared<Media::PixelMap>();
     session_->SaveSnapshot(false, true, pixelMap);
     ASSERT_NE(session_->snapshot_, nullptr);
@@ -575,6 +582,32 @@ HWTEST_F(WindowPatternSnapshotTest, SaveSnapshot02, TestSize.Level1)
     session_->freeMultiWindow_.store(true);
     session_->SaveSnapshot(false, true, pixelMap, false, LifeCycleChangeReason::EXPAND_TO_FOLD_SINGLE_POCKET);
     ASSERT_NE(session_->snapshot_, nullptr);
+
+    session_->systemConfig_.supportCacheLockedSessionSnapshot_ = true;
+    session_->SaveSnapshot(false, true, pixelMap, false, LifeCycleChangeReason::SCREEN_LOCK);
+    ASSERT_NE(session_->snapshot_, nullptr);
+}
+
+/**
+ * @tc.name: GetSnapshotPixelMap
+ * @tc.desc: GetSnapshotPixelMap Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternSnapshotTest, ResetLockedCacheSnapshot, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->systemConfig_.supportCacheLockedSessionSnapshot_ = false;
+    session_->snapshot_ = std::make_shared<Media::PixelMap>();
+    session_->ResetLockedCacheSnapshot();
+    ASSERT_NE(session_->snapshot_, nullptr);
+
+    session_->systemConfig_.supportCacheLockedSessionSnapshot_ = true;
+    session_->ResetLockedCacheSnapshot();
+    ASSERT_EQ(session_->snapshot_, nullptr);
+
+    session_->snapshot_ = nullptr;
+    session_->ResetLockedCacheSnapshot();
+    ASSERT_EQ(session_->snapshot_, nullptr);
 }
 
 /**

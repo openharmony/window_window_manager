@@ -1590,12 +1590,18 @@ int SceneSessionManagerStub::HandleAddExtensionWindowStageToSCB(MessageParcel& d
         TLOGE(WmsLogTag::WMS_UIEXT, "read surfaceNodeId failed");
         return ERR_INVALID_DATA;
     }
+    int64_t startModalExtensionTimeStamp = -1;
+    if (!data.ReadInt64(startModalExtensionTimeStamp)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read startModalExtensionTimeStamp failed");
+        return ERR_INVALID_DATA;
+    }
     bool isConstrainedModal = false;
     if (!data.ReadBool(isConstrainedModal)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "read isConstrainedModal failed");
         return ERR_INVALID_DATA;
     }
-    AddExtensionWindowStageToSCB(sessionStage, token, surfaceNodeId, isConstrainedModal);
+    AddExtensionWindowStageToSCB(sessionStage, token, surfaceNodeId, startModalExtensionTimeStamp,
+        isConstrainedModal);
     return ERR_NONE;
 }
 

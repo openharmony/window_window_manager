@@ -61,6 +61,22 @@ static ani_status CallAniFunctionVoid(ani_env* env, const char* ns,
 
 static ani_object CreateRectObject(ani_env* env);
 
+static ani_object CreatePositionObject(ani_env* env);
+ 
+static ani_object CreateRelativePostionObject(ani_env* env);
+ 
+static DmErrorCode GetPositionFromAni(ani_env* env, Position& globalPosition, ani_object positionObj);
+ 
+static DmErrorCode SetPositionObj(ani_env* env, Position& globalPosition, ani_object positionObj);
+ 
+static DmErrorCode GetRelativePostionFromAni(
+    ani_env* env, RelativePosition& relativePosition, ani_object relativePositionObj);
+ 
+static DmErrorCode SetRelativePostionObj(
+    ani_env* env, RelativePosition& relativePosition, ani_object relativePositionObj);
+ 
+static void SetFoldCreaseRegion(ani_env* env, FoldCreaseRegion& region, ani_object foldCreaseRegionObj);
+
 static std::shared_ptr<DisplayAni> FindAniDisplayObject(sptr<Display> display, DisplayId displayId);
 
 static void DisposeAniDisplayObject(DisplayId displayId);

@@ -772,10 +772,13 @@ void WindowSceneSessionImpl::UpdateAnimationSpeedIfEnabled()
     if (!isEnableAnimationSpeed_.load()) {
         return;
     }
+
+    TLOGI(WmsLogTag::WMS_ANIMATION, "isEnableAnimationSpeed_ is true");
     auto rsUIContext = WindowSessionImpl::GetRSUIContext();
     auto implicitAnimator = rsUIContext ? rsUIContext->GetRSImplicitAnimator() : nullptr;
     if (implicitAnimator != nullptr) {
         implicitAnimator->ApplyAnimationSpeedMultiplier(animationSpeed_.load());
+        TLOGI(WmsLogTag::WMS_ANIMATION, "update animation speed success");
     }
 }
 
@@ -1415,7 +1418,7 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
             TLOGI(WmsLogTag::WMS_LAYOUT_PC, "winId: %{public}u, windowModeSupportType: %{public}u",
                 GetWindowId(), windowModeSupportType);
         }
-        if (property_->IsSupportRotateFullScreen()) {
+        if (property_->IsAdaptToDragScale()) {
             windowModeSupportType = (WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN |
                                      WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
         }
@@ -1868,7 +1871,8 @@ sptr<DisplayInfo> WindowSceneSessionImpl::GetDisplayInfo() const
     return display->GetDisplayInfo();
 }
 
-WMError WindowSceneSessionImpl::ShowKeyboard(uint32_t callingWindowId, KeyboardEffectOption effectOption)
+WMError WindowSceneSessionImpl::ShowKeyboard(
+    uint32_t callingWindowId, uint64_t tgtDisplayId, KeyboardEffectOption effectOption)
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "CallingWindowId: %{public}d, effect option: %{public}s",
         callingWindowId, effectOption.ToString().c_str());
@@ -1889,6 +1893,7 @@ WMError WindowSceneSessionImpl::ShowKeyboard(uint32_t callingWindowId, KeyboardE
     }
     property_->SetKeyboardEffectOption(effectOption);
     property_->SetCallingSessionId(callingWindowId);
+    property_->SetDisplayId(tgtDisplayId);
     return Show();
 }
 
@@ -5774,6 +5779,14 @@ bool WindowSceneSessionImpl::ShouldSkipSupportWindowModeCheck(uint32_t windowMod
     bool isAvailableDevice =
         (windowSystemConfig_.IsPhoneWindow() || windowSystemConfig_.IsPadWindow()) && !IsFreeMultiWindowMode();
     if (isAvailableDevice && isMultiWindowMode) {
+        return true;
+    }
+
+    // padMode to FreeMultiWindowMode, the compatible mode application supports MODE_FLOATING and MODE_FULLSCREEN.
+    bool isCompatibleWindow = mode == WindowMode::WINDOW_MODE_FLOATING ||
+                              mode == WindowMode::WINDOW_MODE_FULLSCREEN;
+    bool isDragScale = property_->IsAdaptToDragScale();
+    if (IsFreeMultiWindowMode() && isCompatibleWindow && isDragScale) {
         return true;
     }
     return false;
