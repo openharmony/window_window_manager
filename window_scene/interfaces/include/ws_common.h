@@ -1220,6 +1220,11 @@ enum class LifeCycleChangeReason {
 
     LAST_SCENE_TRANSFER,
 
+    /*
+     * Drive batch of windows go background quickly
+     */
+    QUICK_BATCH_BACKGROUND,
+
     REASON_END,
 };
 
