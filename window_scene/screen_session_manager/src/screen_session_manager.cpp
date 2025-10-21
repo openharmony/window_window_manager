@@ -10422,13 +10422,11 @@ DMError ScreenSessionManager::GetDisplayCapability(std::string& capabilitInfo)
         return GetSuperFoldCapability(capabilitInfo);
     }
 
-    bool isWidthGreaterThanHeight = false;
-    auto displayInfo = GetDefaultDisplayInfo();
-    if (displayInfo != nullptr && (displayInfo->GetWidth() > displayInfo->GetHeight())) {
-        isWidthGreaterThanHeight = true;
-    }
+    std::string deviceTypeTmp = DEVICE_TYPE;
+    std::transform(deviceTypeTmp.begin(), deviceTypeTmp.end(), deviceTypeTmp.begin(), ::tolower);
+    bool isTvDevice = (deviceTypeTmp == "tv");
     std::vector<std::string> orientation = ORIENTATION_DEFAULT;
-    if ((g_isPcDevice && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) || isWidthGreaterThanHeight) {
+    if ((g_isPcDevice && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) || isTvDevice) {
         orientation = {"1", "0", "3", "2"};
     }
     nlohmann::ordered_json jsonDisplayCapabilityList;
