@@ -1368,6 +1368,63 @@ void AniWindow::OnShowWindow(ani_env* env)
     }
 }
 
+void AniWindow::ShowWindowWithOptions(ani_env* env, ani_object obj,
+    ani_long nativeObj, ani_object aniShowWindowOptions)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow != nullptr) {
+        aniWindow->OnShowWindowWithOptions(env, aniShowWindowOptions);
+    } else {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
+    }
+}
+
+void AniWindow::OnShowWindowWithOptions(ani_env* env, ani_object aniShowWindowOptions)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] ShowWindowWithOptions in");
+    auto window = GetWindow();
+
+    bool focusOnShow = true;
+    ani_ref aniFocusOnShow;
+    env->Object_GetPropertyByName_Ref(aniShowWindowOptions, "focusOnShow", &aniFocusOnShow);
+    ani_boolean isFocusOnShowUndefined;
+    env->Reference_IsUndefined(aniFocusOnShow, &isFocusOnShowUndefined);
+    if (!isFocusOnShowUndefined) {
+        ani_boolean isFocusOnShow;
+        env->Object_CallMethodByName_Boolean(static_cast<ani_object>(aniFocusOnShow),
+            "unboxed", ":z", &isFocusOnShow);
+        focusOnShow = static_cast<bool>(isFocusOnShow);
+    }
+
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] window is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    if (WindowHelper::IsMainWindowAndNotShown(window->GetType(), window->GetWindowState())) {
+        TLOGW(WmsLogTag::WMS_LIFE,
+            "window Type %{public}u and window state %{public}u is not supported, [%{public}u, %{public}s]",
+            static_cast<uint32_t>(window->GetType()), static_cast<uint32_t>(window->GetWindowState()),
+            window->GetWindowId(), window->GetWindowName().c_str());
+        return;
+    }
+    if (focusOnShow == false &&
+        (WindowHelper::IsModalSubWindow(window->GetType(), window->GetWindowFlags()) ||
+        WindowHelper::IsDialogWindow(window->GetType()))) {
+        TLOGNE(WmsLogTag::WMS_FOCUS, "only normal sub window supports setting focusOnShow");
+        return;
+    }
+    window->SetShowWithOptions(true);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->Show(0, false, focusOnShow, true));
+    TLOGI(WmsLogTag::WMS_LIFE, "Window [%{public}u, %{public}s] show with ret=%{public}d",
+        window->GetWindowId(), window->GetWindowName().c_str(), ret);
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret, "Window show failed");
+        return;
+    }
+}
+
 void AniWindow::DestroyWindow(ani_env* env, ani_object obj, ani_long nativeObj)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
@@ -1426,6 +1483,44 @@ ani_boolean AniWindow::OnIsWindowShowing(ani_env* env)
         return ani_boolean(false);
     }
     return ani_boolean(window->GetWindowState() == WindowState::STATE_SHOWN);
+}
+
+ani_ref AniWindow::GetParentWindow(ani_env* env)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "[ANI] WindowToken_ is nullptr");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    sptr<Window> parentWindow = nullptr;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetParentWindow(parentWindow));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_SUB, "[ANI] get failed, result=%{public}d", ret);
+        return AniWindowUtils::AniThrowError(env, ret);
+    }
+    if (parentWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "[ANI] parentWindow is nullptr");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARENT);
+    }
+    return CreateAniWindowObject(env, parentWindow);
+}
+
+void AniWindow::SetParentWindow(ani_env* env, ani_int windowId)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "[ANI] WindowToken_ is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    int32_t newParentWindowId = static_cast<int32_t>(windowId);
+    WMError ret = windowToken_->SetParentWindow(newParentWindowId);
+    if (ret != WMError::WM_OK) {
+        WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+        TLOGE(WmsLogTag::WMS_SUB, "[ANI] Set parent window failed");
+        AniWindowUtils::AniThrowError(env, wmErrorCode);
+    } else {
+        TLOGI(WmsLogTag::WMS_SUB, "[ANI] windowId: %{public}u set parent window id: %{public}u end",
+            windowToken_->GetWindowId(), newParentWindowId);
+    }
 }
 
 ani_object AniWindow::SetImmersiveModeEnabledState(ani_env* env, bool enable)
@@ -3035,6 +3130,30 @@ static ani_object WindowGetWindowLimits(ani_env* env, ani_object obj, ani_long n
     return aniWindow->GetWindowLimits(env);
 }
 
+static ani_ref GetParentWindow(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    using namespace OHOS::Rosen;
+    TLOGI(WmsLogTag::WMS_SUB, "[ANI] start");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "[ANI] windowToken is nullptr");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    return aniWindow->GetParentWindow(env);
+}
+
+static void SetParentWindow(ani_env* env, ani_object obj, ani_long nativeObj, ani_int windowId)
+{
+    using namespace OHOS::Rosen;
+    TLOGI(WmsLogTag::WMS_SUB, "[ANI] start");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "[ANI] windowToken is nullptr");
+        return;
+    }
+    aniWindow->SetParentWindow(env, windowId);
+}
+
 static void WindowSetAspectRatio(ani_env* env, ani_object obj, ani_long nativeObj, ani_double ratio)
 {
     using namespace OHOS::Rosen;
@@ -3324,6 +3443,12 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::UnregisterWindowCallback)},
         ani_native_function {"showWindowSync", nullptr,
             reinterpret_cast<void *>(AniWindow::ShowWindow)},
+        ani_native_function {"showWindowWithOptions", "JL@ohos/window/window/ShowWindowOptions;:V",
+            reinterpret_cast<void *>(AniWindow::ShowWindowWithOptions)},
+        ani_native_function {"getParentWindow", "J:L@ohos/window/window/Window;",
+            reinterpret_cast<void *>(GetParentWindow)},
+        ani_native_function {"setParentWindow", "JI:V",
+            reinterpret_cast<void *>(SetParentWindow)},
         ani_native_function {"destroyWindowSync", nullptr,
             reinterpret_cast<void *>(AniWindow::DestroyWindow)},
         ani_native_function {"isWindowShowingSync", nullptr,
