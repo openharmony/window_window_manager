@@ -3213,7 +3213,7 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
                 SystemBarSettingFlag::COLOR_SETTING : SystemBarSettingFlag::DEFAULT_SETTING;
             ret = updateSystemBarStyle(systemBarType, property);
         }
-        if (ret != WMError::WM_OK) {git 
+        if (ret != WMError::WM_OK) {
             TLOGE(WmsLogTag::WMS_IMMS, "set failed");
             return ret;
         }
