@@ -568,6 +568,13 @@ HWTEST_F(WindowPatternSnapshotTest, SaveSnapshot02, TestSize.Level1)
     session_->SaveSnapshot(true);
     ASSERT_EQ(session_->snapshot_, nullptr);
 
+    session_->snapshotNeedCancel_ = false;
+    session_->SaveSnapshot(false, true, nullptr, false, LifeCycleChangeReason::QUICK_BATCH_BACKGROUND);
+    ASSERT_EQ(session_->snapshot_, nullptr);
+    session_->snapshotNeedCancel_ = true;
+    session_->SaveSnapshot(false, true, nullptr, false, LifeCycleChangeReason::QUICK_BATCH_BACKGROUND);
+    ASSERT_EQ(session_->snapshot_, nullptr);
+
     auto pixelMap = std::make_shared<Media::PixelMap>();
     session_->SaveSnapshot(false, true, pixelMap);
     ASSERT_NE(session_->snapshot_, nullptr);

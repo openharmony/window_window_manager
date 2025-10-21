@@ -550,6 +550,7 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot, LifeCycleChangeR
         if (state == SessionState::STATE_BACKGROUND) {
             return WSError::WS_OK;
         }
+        session->snapshotNeedCancel_.store(false);
         auto ret = session->Session::Background();
         if (ret != WSError::WS_OK) {
             return ret;
