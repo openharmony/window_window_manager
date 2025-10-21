@@ -46,6 +46,9 @@ public:
     void SetUp() override;
     void TearDown() override;
     sptr<WindowSessionImpl> window_;
+private:
+    static constexpr int32_t PERSISTENT_ID_ONE = 1;
+    static constexpr int32_t PERSISTENT_ID_TWO = 2;
 };
 
 void WindowSessionImplTest3::SetUpTestCase() {}
@@ -1538,6 +1541,7 @@ HWTEST_F(WindowSessionImplTest3, UnregisterFreeWindowModeChangeListener, TestSiz
     EXPECT_EQ(WMError::WM_OK, ret1);
     window->Destroy();
 }
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

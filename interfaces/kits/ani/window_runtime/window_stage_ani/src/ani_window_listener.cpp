@@ -777,7 +777,7 @@ void AniWindowListener::OnFreeWindowModeChange(bool isInFreeWindowMode)
             TLOGE(WmsLogTag::DEFAULT, "[ANI]this listener, eng or callback is nullptr");
             return;
         }
-        AniWindowUtils::CallAniFunctionVoid(eng, "@ohos/window/window;", "runWindowListenerBooleanArgCallback",
+        AniWindowUtils::CallAniFunctionVoid(eng, "@ohos.window.window", "runWindowListenerBooleanArgCallback",
             nullptr, thisListener->aniCallback_, ani_boolean(isInFreeWindowMode));
     };
     if (!eventHandler_) {

@@ -8465,7 +8465,24 @@ void WindowSessionImpl::SwitchSubWindow(bool freeMultiWindowEnable, int32_t pare
             subWindowSession->SetFreeMultiWindowMode(freeMultiWindowEnable);
             subWindowSession->UpdateTitleButtonVisibility();
             subWindowSession->UpdateDecorEnable(true);
+            subWindowSession->NotifyFreeWindowModeChange(freeMultiWindowEnable);
             subWindowSession->SwitchSubWindow(freeMultiWindowEnable, subWindowSession->GetPersistentId());
+        }
+    }
+}
+
+void WindowSessionImpl::SwitchSystemWindow(bool freeMultiWindowEnable, int32_t parentId)
+{
+    std::lock_guard<std::recursive_mutex> lock(windowSessionMutex_);
+    if (windowSessionMap_.empty()) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "windowSessionMap is empty.");
+        return;
+    }
+    for (const auto& winPair : windowSessionMap_) {
+        auto systemWindowSession = winPair.second.second;
+        if (systemWindowSession && WindowHelper::IsSystemWindow(systemWindowSession->GetType())) {
+            systemWindowSession->SetFreeMultiWindowMode(freeMultiWindowEnable);
+            systemWindowSession->NotifyFreeWindowModeChange(freeMultiWindowEnable);
         }
     }
 }
