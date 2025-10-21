@@ -100,7 +100,10 @@ void JsExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason r
         napi_create_object(eng, &objValue);
         if (objValue == nullptr) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "Failed to convert rect to jsObject");
-            napi_close_handle_scope(eng, scope);
+            status = napi_close_handle_scope(eng, scope);
+            if (status != napi_ok) {
+                TLOGNW(WmsLogTag::WMS_UIEXT, "close handle scope failed");
+            }
             return;
         }
         napi_set_named_property(eng, objValue, "width", CreateJsValue(eng, rect.width_));
