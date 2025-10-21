@@ -951,14 +951,16 @@ void WindowSceneSessionImpl::UpdateDefaultStatusBarColor()
     statusBarProp.settingFlag_ = static_cast<SystemBarSettingFlag>(
         static_cast<uint32_t>(statusBarProp.settingFlag_) |
         static_cast<uint32_t>(SystemBarSettingFlag::FOLLOW_SETTING));
-    // tanhong
-    auto iter = systemBarPropertyForPageMap_.find(WindowType::WINDOW_TYPE_STATUS_BAR);
-    if (iter != systemBarPropertyForPageMap_.end() && iter->second.has_value()) {
-        SystemBarProperty prop = statusBarProp;
-        prop.enable_ = iter->second.enable_;
-        property_->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, prop);
-        NotifySpecificWindowSessionProperty(WindowType::WINDOW_TYPE_STATUS_BAR, prop);
-        property_->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProp);
+    {
+        std::lock_guard<std::mutex> lock(systemBarPropertyForPageMapMutex_);
+        auto iter = systemBarPropertyForPageMap_.find(WindowType::WINDOW_TYPE_STATUS_BAR);
+        if (iter != systemBarPropertyForPageMap_.end() && iter->second.has_value()) {
+            SystemBarProperty prop = statusBarProp;
+            prop.enable_ = iter->second.enable_;
+            property_->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, prop);
+            NotifySpecificWindowSessionProperty(WindowType::WINDOW_TYPE_STATUS_BAR, prop);
+            property_->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProp);
+        }
     }
     SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProp);
 }
@@ -3216,15 +3218,17 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
         }
         if (systemBarPropertyFlag.backgroundColorFlag || systemBarPropertyFlag.contentColorFlag) {
             property.settingFlag_ |= SystemBarSettingFlag::COLOR_SETTING;
-            // tanhong
-            auto iter = systemBarPropertyForPageMap_.find(WindowType::WINDOW_TYPE_STATUS_BAR);
-            if (iter != systemBarPropertyForPageMap_.end() && iter->second.has_value()) {
-                SystemBarProperty prop = property;
-                prop.enable_ = iter->second.enable_;
-                property_->SetSystemBarProperty(systemBarType, prop);
-                NotifySpecificWindowSessionProperty(systemBarType, prop);
-                property_->SetSystemBarProperty(systemBarType, property);
-                return WMError::WM_OK;
+            {
+                std::lock_guard<std::mutex> lock(systemBarPropertyForPageMapMutex_);
+                auto iter = systemBarPropertyForPageMap_.find(WindowType::WINDOW_TYPE_STATUS_BAR);
+                if (iter != systemBarPropertyForPageMap_.end() && iter->second.has_value()) {
+                    SystemBarProperty prop = property;
+                    prop.enable_ = iter->second.enable_;
+                    property_->SetSystemBarProperty(systemBarType, prop);
+                    NotifySpecificWindowSessionProperty(systemBarType, prop);
+                    property_->SetSystemBarProperty(systemBarType, property);
+                    return WMError::WM_OK;
+                }
             }
         }
         if (systemBarPropertyFlag.enableFlag || systemBarPropertyFlag.backgroundColorFlag ||
@@ -3300,9 +3304,11 @@ WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(WindowType type, std
         return WMError::WM_DO_NOTHING;
     }
     if (property == std::nullopt) {
+        {
+            std::lock_guard<std::mutex> lock(systemBarPropertyForPageMapMutex_);
+            systemBarPropertyForPageMap_[type] = std:nullopt;
+        }
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u property is nullptr use main window prop", GetWindowId());
-        // tanhong
-        systemBarPropertyForPageMap_[type] = std:nullopt;
         return NotifySpecificWindowSessionProperty(type, GetSystemBarPropertyByType(type));
     }
     TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}u "
@@ -3310,8 +3316,10 @@ WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(WindowType type, std
         GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type),
         property->enable_, property->backgroundColor_,
         property->contentColor_, property->enableAnimation_, property->settingFlag_);
-    // tanhong
-    systemBarPropertyForPageMap_[type] = property;
+    {
+        std::lock_guard<std::mutex> lock(systemBarPropertyForPageMapMutex_);
+        systemBarPropertyForPageMap_[type] = property;
+    }
     auto lastProperty = GetSystemBarPropertyByType(type);
     property_->SetSystemBarProperty(type, property.value());
     auto ret = NotifySpecificWindowSessionProperty(type, property.value());
