@@ -1949,7 +1949,7 @@ napi_value CreateJsSessionPiPScreenStatus(napi_env env)
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("Failed to create object!");
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to create object! objValue is null");
         return NapiGetUndefined(env);
     }
 
