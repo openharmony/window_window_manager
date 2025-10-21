@@ -1611,7 +1611,7 @@ bool AniWindowUtils::ParseModalityParam(ani_env *env, ani_object aniObject, cons
     ani_ref modalityTypeRef;
     ani_status ret = env->Object_GetPropertyByName_Ref(aniObject, "modalityType", &modalityTypeRef);
     ani_boolean isUndefined = false;
-    ret = env->Reference_IsUndefined(windowRectRef, &isUndefined);
+    ret = env->Reference_IsUndefined(modalityTypeRef, &isUndefined);
     ani_int modalityType;
     if (ret == ANI_OK && !isUndefined &&
         env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(modalityTypeRef), &modalityType)) {
