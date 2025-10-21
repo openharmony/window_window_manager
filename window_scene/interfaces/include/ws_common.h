@@ -1132,6 +1132,7 @@ enum class SystemAnimatedSceneType : uint32_t {
     SCENE_ENTER_MIN_WINDOW, // Enter the window minimization state
     SCENE_RECOVER_MIN_WINDOW, // Recover minimized window
     SCENE_SNAPSHOT_ROTATION, // Snapshot rotation
+    DRAG_WINDOW, // Enter scale window scene 
     SCENE_OTHERS, // 1.Default state 2.The state in which the animation ends
 };
 
