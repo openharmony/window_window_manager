@@ -100,14 +100,20 @@ void JsExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason r
         napi_create_object(eng, &objValue);
         if (objValue == nullptr) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "Failed to convert rect to jsObject");
-            napi_close_handle_scope(eng, scope);
+            status = napi_close_handle_scope(eng, scope);
+            if (status != napi_ok) {
+                TLOGNW(WmsLogTag::WMS_UIEXT, "close handle scope failed");
+            }
             return;
         }
         napi_set_named_property(eng, objValue, "width", CreateJsValue(eng, rect.width_));
         napi_set_named_property(eng, objValue, "height", CreateJsValue(eng, rect.height_));
         napi_value argv[] = {objValue};
         thisListener->CallJsMethod(WINDOW_SIZE_CHANGE_CB.c_str(), argv, ArraySize(argv));
-        napi_close_handle_scope(eng, scope);
+        status = napi_close_handle_scope(eng, scope);
+        if (status != napi_ok) {
+            TLOGNW(WmsLogTag::WMS_UIEXT, "close handle scope failed");
+        }
     };
     if (reason == WindowSizeChangeReason::ROTATION) {
         jsCallback();
@@ -382,7 +388,10 @@ static void LifeCycleCallBack(LifeCycleEventType eventType, wptr<JsExtensionWind
         }
         napi_value argv[] = {CreateJsValue(eng, static_cast<uint32_t>(eventType))};
         thisListener->CallJsMethod(LIFECYCLE_EVENT_CB.c_str(), argv, ArraySize(argv));
-        napi_close_handle_scope(eng, scope);
+        status = napi_close_handle_scope(eng, scope);
+        if (status != napi_ok) {
+            TLOGNW(WmsLogTag::WMS_UIEXT, "close handle scope failed");
+        }
     };
     if (!eventHandler) {
         TLOGE(WmsLogTag::WMS_UIEXT, "get main event handler failed!");
