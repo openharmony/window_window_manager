@@ -2902,8 +2902,8 @@ bool ScreenSessionManager::SetResolutionEffect(ScreenId screenId,  uint32_t widt
     };
     TLOGI(WmsLogTag::DMS, "toRect %{public}d %{public}d %{public}d %{public}d",
         toRect.posX_, toRect.posY_, toRect.width_, toRect.height_);
-    auto internelBounds = internalSession->GetScreenProperty().GetBounds();
-    if (internelBounds.rect_.width_ != width || internelBounds.rect_.height_ != height) {
+    auto internelProperty = internalSession->GetScreenProperty();
+    if (internelProperty.GetScreenAreaWidth() != width || internelProperty.GetScreenAreaHeight() != height) {
         SetInternalScreenResolutionEffect(internalSession, toRect);
     }
     SetExternalScreenResolutionEffect(externalSession, toRect);
@@ -2959,7 +2959,12 @@ void ScreenSessionManager::SetInternalScreenResolutionEffect(const sptr<ScreenSe
     NotifyDisplayChanged(internalSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
     // Black out invalid area
     OHOS::Rect rsRect = {targetRect.posX_, targetRect.posY_, targetRect.width_, targetRect.height_};
-    rsInterface_.SetScreenActiveRect(internalSession->GetScreenId(), rsRect);
+    auto ret = rsInterface_.SetScreenActiveRect(internalSession->GetScreenId(), rsRect);
+    if (ret != StatusCode::SUCCESS) {
+        TLOGE(WmsLogTag::DMS, "SetScreenActiveRect failed, ret %{public}d", ret);
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "SetScreenActiveRect success");
 }
 
 void ScreenSessionManager::SetExternalScreenResolutionEffect(const sptr<ScreenSession>& externalSession, DMRect& targetRect)
