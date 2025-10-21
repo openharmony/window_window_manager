@@ -325,11 +325,15 @@ HWTEST_F(WindowSessionImplTest2, RegisterOcclusionStateChangeListener, TestSize.
 {
     auto window = GetTestWindowImpl("RegisterOcclusionStateChangeListener");
     ASSERT_NE(window, nullptr);
+    window->property_->SetPersistentId(1);
     window->occlusionStateChangeListeners_.clear();
     EXPECT_NE(window->RegisterOcclusionStateChangeListener(nullptr), WMError::WM_OK);
     sptr<IOcclusionStateChangedListener> listener = sptr<IOcclusionStateChangedListener>::MakeSptr();
     EXPECT_EQ(window->RegisterOcclusionStateChangeListener(listener), WMError::WM_OK);
     EXPECT_EQ(window->occlusionStateChangeListeners_.size(), 1);
+    window->occlusionStateChangeListeners_[window->GetPersistentId()].push_back(nullptr);
+    sptr<IOcclusionStateChangedListener> listener2 = sptr<IOcclusionStateChangedListener>::MakeSptr();
+    EXPECT_EQ(window->RegisterOcclusionStateChangeListener(listener2), WMError::WM_OK);
     window->occlusionStateChangeListeners_.clear();
     window->Destroy();
 }
@@ -347,8 +351,11 @@ HWTEST_F(WindowSessionImplTest2, UnregisterOcclusionStateChangeListener, TestSiz
     EXPECT_NE(window->UnregisterOcclusionStateChangeListener(nullptr), WMError::WM_OK);
     sptr<IOcclusionStateChangedListener> listener = sptr<IOcclusionStateChangedListener>::MakeSptr();
     EXPECT_EQ(window->RegisterOcclusionStateChangeListener(listener), WMError::WM_OK);
-    EXPECT_EQ(window->occlusionStateChangeListeners_.size(), 1);
+    sptr<IOcclusionStateChangedListener> listener2 = sptr<IOcclusionStateChangedListener>::MakeSptr();
+    EXPECT_EQ(window->RegisterOcclusionStateChangeListener(listener2), WMError::WM_OK);
     EXPECT_EQ(window->UnregisterOcclusionStateChangeListener(listener), WMError::WM_OK);
+    EXPECT_EQ(window->occlusionStateChangeListeners_.size(), 1);
+    EXPECT_EQ(window->UnregisterOcclusionStateChangeListener(listener2), WMError::WM_OK);
     window->occlusionStateChangeListeners_.clear();
     EXPECT_EQ(window->occlusionStateChangeListeners_.size(), 0);
     window->Destroy();
@@ -368,6 +375,10 @@ HWTEST_F(WindowSessionImplTest2, NotifyWindowOcclusionState, TestSize.Level1)
     EXPECT_EQ(window->RegisterOcclusionStateChangeListener(listener), WMError::WM_OK);
     EXPECT_EQ(window->occlusionStateChangeListeners_.size(), 1);
     EXPECT_EQ(window->NotifyWindowOcclusionState(WindowVisibilityState::END), WSError::WS_OK);
+    EXPECT_EQ(window->lastVisibilityState_, WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+    EXPECT_EQ(window->NotifyWindowOcclusionState(WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION),
+        WSError::WS_OK);
+    EXPECT_EQ(window->lastVisibilityState_, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
     window->occlusionStateChangeListeners_.clear();
     window->Destroy();
 }

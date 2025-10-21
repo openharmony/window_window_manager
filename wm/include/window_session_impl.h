@@ -840,6 +840,7 @@ protected:
      */
     std::string colorMode_;
     bool hasDarkRes_;
+    WindowVisibilityState lastVisibilityState_ = WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION;
     std::unordered_set<std::string> containerColorList_;
     float lastSystemDensity_ = UNDEFINED_DENSITY;
     std::atomic<bool> isDefaultDensityEnabled_ = false;

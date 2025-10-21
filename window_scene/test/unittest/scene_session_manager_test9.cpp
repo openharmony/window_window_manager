@@ -1278,8 +1278,10 @@ HWTEST_F(SceneSessionManagerTest9, GetSessionRSVisible, TestSize.Level1)
     sceneSession02->persistentId_ = windowId;
     ssm_->sceneSessionMap_.insert(std::make_pair(0, sceneSession02));
 
-    bool actual = ssm_->GetSessionRSVisible(sceneSession01, currVisibleData);
+    WindowVisibilityState visibleState = WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION;
+    bool actual = ssm_->GetSessionRSVisible(sceneSession01, currVisibleData, visibleState);
     EXPECT_EQ(actual, true);
+    EXPECT_EQ(visibleState, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
 }
 
 /**
