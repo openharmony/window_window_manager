@@ -2926,15 +2926,13 @@ bool ScreenSessionManager::RecoveryResolutionEffect()
         TLOGE(WmsLogTag::DMS, "internalSession null");
         return false;
     }
-    if (curResolutionEffectEnable_.load()) {
-        auto internalPropery = internalSession->GetScreenProperty();
-        DMRect RealResolutionRect = { 0, 0, internalPropery.GetScreenRealWidth(),
-            internalPropery.GetScreenRealHeight()};
-        TLOGI(WmsLogTag::DMS, "RealResolutionRect %{public}d %{public}d %{public}d %{public}d",
-            RealResolutionRect.posX_, RealResolutionRect.posY_, RealResolutionRect.width_, RealResolutionRect.height_);
-        SetInternalScreenResolutionEffect(internalSession, RealResolutionRect);
-        curResolutionEffectEnable_.store(false);
-    }
+    auto internalPropery = internalSession->GetScreenProperty();
+    DMRect RealResolutionRect = { 0, 0, internalPropery.GetScreenRealWidth(),
+        internalPropery.GetScreenRealHeight()};
+    TLOGI(WmsLogTag::DMS, "RealResolutionRect %{public}d %{public}d %{public}d %{public}d",
+        RealResolutionRect.posX_, RealResolutionRect.posY_, RealResolutionRect.width_, RealResolutionRect.height_);
+    SetInternalScreenResolutionEffect(internalSession, RealResolutionRect);
+    curResolutionEffectEnable_.store(false);
     if (externalSession != nullptr) {
         auto externalPropery = externalSession->GetScreenProperty();
         DMRect externalRealRect = { 0, 0, externalPropery.GetScreenRealWidth(),
