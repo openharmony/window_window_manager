@@ -6552,35 +6552,6 @@ WMError WindowSessionImpl::InjectTouchEvent(const std::shared_ptr<MMI::PointerEv
     return WMError::WM_OK;
 }
 
-WMError WindowSessionImpl::LockCursor(int32_t windowId, bool isCursorFollowMovement)
-{
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_EVENT, "session is invalid");
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    std::vector<int32_t> parameters;
-    parameters.emplace_back(LOCK_CURSOR_LENGTH);
-    parameters.emplace_back(windowId);
-    parameters.emplace_back(static_cast<int32_t>(isCursorFollowMovement));
-    auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    return hostSession->SendCommonEvent(static_cast<int32_t>(CommonEventCommand::LOCK_CURSOR), parameters);
-}
-
-WMError WindowSessionImpl::UnlockCursor(int32_t windowId)
-{
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_EVENT, "session is invalid");
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    std::vector<int32_t> parameters;
-    parameters.emplace_back(UNLOCK_CURSOR_LENGTH);
-    parameters.emplace_back(windowId);
-    auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    return hostSession->SendCommonEvent(static_cast<int32_t>(CommonEventCommand::UNLOCK_CURSOR), parameters);
-}
-
 WMError WindowSessionImpl::SetKeyEventFilter(KeyEventFilterFunc filter)
 {
     std::unique_lock<std::mutex> lock(keyEventFilterMutex_);

@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "window_session_impl.h"
+#include "window_scene_session_impl.h"
 #include "mock_session.h"
 #include "mock_session_stub.h"
 
@@ -24,7 +24,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-class WindowSessionImplEventTest : public testing::Test {
+class WindowSceneSessionImplEventTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -32,19 +32,19 @@ public:
     void TearDown() override;
 };
 
-void WindowSessionImplEventTest::SetUpTestCase()
+void WindowSceneSessionImplEventTest::SetUpTestCase()
 {
 }
 
-void WindowSessionImplEventTest::TearDownTestCase()
+void WindowSceneSessionImplEventTest::TearDownTestCase()
 {
 }
 
-void WindowSessionImplEventTest::SetUp()
+void WindowSceneSessionImplEventTest::SetUp()
 {
 }
 
-void WindowSessionImplEventTest::TearDown()
+void WindowSceneSessionImplEventTest::TearDown()
 {
 }
 
@@ -54,7 +54,7 @@ namespace {
  * @tc.desc: LockCursor
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplEventTest, LockCursor, TestSize.Level0)
+HWTEST_F(WindowSceneSessionImplEventTest, LockCursor, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("LockCursor");
@@ -76,7 +76,7 @@ HWTEST_F(WindowSessionImplEventTest, LockCursor, TestSize.Level0)
  * @tc.desc: UnlockCursor
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplEventTest, UnlockCursor, TestSize.Level0)
+HWTEST_F(WindowSceneSessionImplEventTest, UnlockCursor, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UnlockCursor");
