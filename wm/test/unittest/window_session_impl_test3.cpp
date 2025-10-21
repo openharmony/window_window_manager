@@ -1542,6 +1542,34 @@ HWTEST_F(WindowSessionImplTest3, UnregisterFreeWindowModeChangeListener, TestSiz
     window->Destroy();
 }
 
+/**
+ * @tc.name: SwitchSystemWindow
+ * @tc.desc: SwitchSystemWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SwitchSystemWindow, Function | SmallTest | Level1)
+{
+    window_ = GetTestWindowImpl("GetUIContentWithId");
+    ASSERT_NE(window_, nullptr);
+    window_->windowSessionMap_.clear();
+    sptr<WindowOption> sysOption = sptr<WindowOption>::MakeSptr();
+    sysOption->SetWindowName("SwitchSystemWindow");
+    sysOption->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    sptr<WindowSessionImpl> sysWindow = sptr<WindowSessionImpl>::MakeSptr(sysOption);
+    ASSERT_NE(sysWindow, nullptr);
+    ASSERT_NE(sysWindow->property_, nullptr);
+    sysWindow->property_->SetPersistentId(PERSISTENT_ID_TWO);
+    sysWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    sysWindow->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    sysWindow->windowSystemConfig_.isSystemDecorEnable_ = true;
+    // cover empty map
+    sysWindow->SwitchSystemWindow(false, PERSISTENT_ID_ONE);
+ 
+    std::vector<sptr<WindowSessionImpl>> vec;
+    window_->windowSessionMap_.insert(std::make_pair("SwitchSystemWindow", std::make_pair(PERSISTENT_ID_ONE, sysWindow)));
+    window_->SwitchSystemWindow(true, PERSISTENT_ID_ONE);
+    EXPECT_EQ(sysWindow->windowSystemConfig_.freeMultiWindowEnable_, true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
