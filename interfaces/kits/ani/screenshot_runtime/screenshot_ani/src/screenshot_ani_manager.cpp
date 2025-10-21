@@ -28,6 +28,10 @@
 #include "ani_err_utils.h"
  
 namespace OHOS::Rosen {
+
+static const uint32_t PIXMAP_VECTOR_SIZE = 2;
+static const uint32_t SDR_PIXMAP = 0;
+static const uint32_t HDR_PIXMAP = 1;
  
 ScreenshotManagerAni::ScreenshotManagerAni()
 {
@@ -115,7 +119,74 @@ void ScreenshotManagerAni::GetScreenshot(ani_env *env, std::unique_ptr<Param> &p
         return;
     }
 }
- 
+
+ani_object ScreenshotManagerAni::SaveHdrPicture(ani_env* env, ani_object options)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
+    auto param = std::make_unique<HdrParam>();
+    param->option.displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
+    ani_boolean optionsUndefined = 0;
+    env->Reference_IsUndefined(options, &optionsUndefined);
+    param->validInputParam = true;
+    if (!optionsUndefined) {
+        param->useInputOption = true;
+        ani_status ret = ScreenshotAniUtils::GetHdrScreenshotParam(env, param, options);
+        if (ret != ANI_OK) {
+            AniErrUtils::ThrowBusinessError(
+                env, DmErrorCode::DM_ERROR_INVALID_PARAM, "get HDR screen shot param failed");
+            return nullptr;
+        }
+    }
+    param->isPick = false;
+    GetHdrScreenshot(env, param);
+    if (param->wret != DmErrorCode::DM_OK) {
+        AniErrUtils::ThrowBusinessError(env, param->wret, param->errMessage);
+        return ScreenshotAniUtils::CreateAniUndefined(env);
+    }
+    if (param->imageVec[SDR_PIXMAP] != nullptr) {
+        TLOGI(WmsLogTag::DMS, "save SDR pixelMap, currentId = %{public}d",
+            static_cast<int>(param->imageVec[SDR_PIXMAP]->currentId));
+    }
+    if (param->imageVec[HDR_PIXMAP] != nullptr) {
+        TLOGI(WmsLogTag::DMS, "save HDR pixelMap, currentId = %{public}d",
+            static_cast<int>(param->imageVec[HDR_PIXMAP]->currentId));
+    }
+    ani_object PixelMapAniObject = ScreenshotAniUtils::CreateArrayPixelMap(env, param->imageVec);
+    if (PixelMapAniObject == nullptr) {
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_SYSTEM_INNORMAL, "findclass system abnormally");
+        return nullptr;
+    }
+    return ScreenshotAniUtils::CreateArrayPixelMap(env, param->imageVec);
+}
+
+void ScreenshotManagerAni::GetHdrScreenshot(ani_env *env, std::unique_ptr<HdrParam> &param)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
+    if (!param->validInputParam) {
+        TLOGI(WmsLogTag::DMS, "[ANI] Get HdrScreenshot invalidInputParam");
+        param->imageVec = {};
+        param->wret = DmErrorCode::DM_ERROR_INVALID_PARAM;
+        param->errMessage = "[ANI] Get Screenshot Failed: Invalid input param";
+        return;
+    }
+    CaptureOption option = { param->option.displayId, param->option.isNeedNotify, true,
+        param->option.isCaptureFullOfScreen };
+    if (!option.isNeedNotify_) {
+        param->imageVec = DisplayManager::GetInstance().GetScreenHDRshotWithOption(option, param->wret);
+    } else {
+        TLOGI(WmsLogTag::DMS, "[ANI] Get Screenshot by default option");
+        param->imageVec = DisplayManager::GetInstance().GetScreenHDRshot(param->option.displayId, param->wret,
+            true, param->option.isCaptureFullOfScreen);
+    }
+    if ((param->imageVec.size() != PIXMAP_VECTOR_SIZE || param->imageVec[SDR_PIXMAP] == nullptr) &&
+        param->wret == DmErrorCode::DM_OK) {
+        TLOGI(WmsLogTag::DMS, "[ANI] Get Screenshot failed!");
+        param->wret = DmErrorCode::DM_ERROR_INVALID_SCREEN;
+        param->errMessage = "[ANI] Get Screenshot failed: Screenshot imageVec is nullptr";
+        return;
+    }
+}
+
 extern "C" {
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
@@ -136,6 +207,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     std::array funcs = {
         ani_native_function {"saveSync", nullptr,
             reinterpret_cast<void *>(ScreenshotManagerAni::Save)},
+        ani_native_function {"saveHdrSync", nullptr,
+            reinterpret_cast<void *>(ScreenshotManagerAni::SaveHdrPicture)},
     };
     if ((ret = env->Namespace_BindNativeFunctions(nsp, funcs.data(), funcs.size()))) {
         TLOGE(WmsLogTag::DMS, "[ANI] bind namespace fail %{public}u", ret);

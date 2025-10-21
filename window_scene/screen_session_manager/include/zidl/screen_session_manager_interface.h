@@ -80,7 +80,10 @@ public:
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    virtual DMError SetOrientation(ScreenId screenId, Orientation orientation) { return DMError::DM_OK; }
+    virtual DMError SetOrientation(ScreenId screenId, Orientation orientation, bool isFromNapi)
+    {
+        return DMError::DM_OK;
+    }
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode = nullptr,
         bool isUseDma = false, bool isCaptureFullOfScreen = false) { return nullptr; }
     virtual std::vector<std::shared_ptr<Media::PixelMap>> GetDisplayHDRSnapshot(

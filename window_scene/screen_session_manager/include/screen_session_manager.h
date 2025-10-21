@@ -167,7 +167,7 @@ public:
     DMError IsScreenRotationLocked(bool& isLocked) override;
     DMError SetScreenRotationLocked(bool isLocked) override;
     DMError SetScreenRotationLockedFromJs(bool isLocked) override;
-    DMError SetOrientation(ScreenId screenId, Orientation orientation) override;
+    DMError SetOrientation(ScreenId screenId, Orientation orientation, bool isFromNapi) override;
     bool SetRotation(ScreenId screenId, Rotation rotationAfter, bool isFromWindow);
     void SetSensorSubscriptionEnabled();
     bool SetRotationFromWindow(Rotation targetRotation);
@@ -465,9 +465,12 @@ public:
 
     std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
         DmErrorCode* errorCode = nullptr) override;
+    bool checkCaptureParam(const CaptureOption& captureOption,
+        DmErrorCode* errorCode = nullptr);
     void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;
     void ConvertWindowIdsToSurfaceNodeList(std::vector<uint64_t> windowIdList,
-        std::vector<uint64_t>& surfaceNodesList);
+        std::vector<uint64_t>& surfaceNodesList, DmErrorCode* errorCode);
+    bool IsSupportCapture();
     sptr<DisplayInfo> GetPrimaryDisplayInfo() override;
     DisplayId GetPrimaryDisplayId() override;
     std::shared_ptr<Media::PixelMap> GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
@@ -521,6 +524,7 @@ public:
     void SetFirstSCBConnect(bool firstSCBConnect);
     // mirror screen
     bool HandleResolutionEffectChange();
+    bool HandleCastVirtualScreenMirrorRegion();
     bool GetStoredPidFromUid(int32_t uid, int32_t& agentPid) const;
     bool IsFreezed(const int32_t& agentPid, const DisplayManagerAgentType& agentType);
     bool isScreenShot_ = false;
@@ -549,6 +553,7 @@ protected:
     void ReportHandleScreenEvent(ScreenEvent screenEvent, ScreenCombination screenCombination);
     void SetExtendedScreenFallbackPlan(ScreenId screenId);
     void WaitUpdateAvailableAreaForPc();
+    void SetupScreenDensityProperties(ScreenId screenId, ScreenProperty& property, RRect bounds);
     void CreateScreenProperty(ScreenId screenId, ScreenProperty& property);
     void InitExtendScreenDensity(sptr<ScreenSession> session, ScreenProperty property);
     void RegisterRefreshRateChangeListener();
@@ -834,6 +839,7 @@ private:
     bool isDensityDpiLoad_ = false;
     float densityDpi_ { 1.0f };
     float subDensityDpi_ { 1.0f };
+    float carDefaultDensityDpi_ { 2.0f };
     std::atomic<uint32_t> cachedSettingDpi_ {0};
     float pcModeDpi_ { 1.0f };
 
@@ -997,10 +1003,14 @@ private:
     bool RecoveryResolutionEffect();
     void RegisterSettingResolutionEffectObserver();
     void SetResolutionEffectFromSettingData();
+    void SetInternalScreenResolutionEffect(const sptr<ScreenSession>& internalSession, DMRect toRect);
+    void SetExternalScreenResolutionEffect(const sptr<ScreenSession>& externalSession, DMRect toRect);
+    void GetCastVirtualMirrorSession(sptr<ScreenSession>& virtualSession);
     std::atomic<bool> curResolutionEffectEnable_ = false;
     DMError SyncScreenPropertyChangedToServer(ScreenId screenId, const ScreenProperty& screenProperty) override;
     std::function<void(sptr<ScreenSession>& screenSession)> propertyChangedCallback_;
     std::mutex callbackMutex_;
+    bool isSupportCapture_ = false;
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {

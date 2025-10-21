@@ -101,11 +101,17 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
         if (session->GetKeyboardGravity() == SessionGravity::SESSION_GRAVITY_BOTTOM) {
             session->NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason::KEYBOARD_SHOW);
         }
-        session->GetSessionProperty()->SetKeyboardEffectOption(property->GetKeyboardEffectOption());
+        const auto targetDisplayId = property->GetDisplayId();
+        auto sessionProperty = session->GetSessionProperty();
+        sessionProperty->SetKeyboardEffectOption(property->GetKeyboardEffectOption());
+        sessionProperty->SetDisplayId(targetDisplayId);
         session->UseFocusIdIfCallingSessionIdInvalid(property->GetCallingSessionId());
         TLOGNI(WmsLogTag::WMS_KEYBOARD,
-            "Show keyboard session, id: %{public}d, calling id: %{public}d, effectOption: %{public}s",
-            session->GetPersistentId(), session->GetCallingSessionId(),
+            "Show keyboard session, id: %{public}d, calling id: %{public}d, targetDisplayId: %{public}" PRIu64 ", "
+            "effectOption: %{public}s",
+            session->GetPersistentId(),
+            session->GetCallingSessionId(),
+            targetDisplayId,
             property->GetKeyboardEffectOption().ToString().c_str());
         return session->SceneSession::Foreground(property);
     }, "Show");
@@ -644,11 +650,18 @@ void KeyboardSession::NotifySessionRectChange(const WSRect& rect,
 // Use focused session id when calling session id is invalid.
 void KeyboardSession::UseFocusIdIfCallingSessionIdInvalid(uint32_t callingSessionId)
 {
-    if (callingSessionId != INVALID_WINDOW_ID && GetSceneSession(callingSessionId) != nullptr) {
+    const auto focusedSessionId = static_cast<uint32_t>(GetFocusedSessionId());
+    if (const auto callingSession = GetSceneSession(callingSessionId)) {
         GetSessionProperty()->SetCallingSessionId(callingSessionId);
-        return;
+        // callingSession 合法时，并且当下面两个条件同时满足时；替换 callingSessionId 为 focusedSessionId
+        if (!(GetDisplayId() != callingSession->GetDisplayId() && callingSessionId != focusedSessionId)) {
+            // 有条件不满足，保持 callingSessionId 不变，直接返回
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "continue using callingSession id: %{public}d", callingSessionId);
+            return;
+        }
     }
-    uint32_t focusedSessionId = static_cast<uint32_t>(GetFocusedSessionId());
+
+    // 进行替换
     if (GetSceneSession(focusedSessionId) == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Focused session is null, id: %{public}d", focusedSessionId);
     } else {

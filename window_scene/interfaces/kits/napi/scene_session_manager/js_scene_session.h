@@ -114,6 +114,7 @@ enum class ListenerFuncType : uint32_t {
     FLOATING_BALL_STOP_CB,
     FLOATING_BALL_RESTORE_MAIN_WINDOW_CB,
     SCENE_OUTLINE_PARAMS_CHANGE_CB,
+    RESTART_APP_CB,
     CALLING_SESSION_ID_CHANGE_CB,
     ROTATION_LOCK_CHANGE_CB,
 };
@@ -266,6 +267,7 @@ private:
     static napi_value SetPcAppInpadCompatibleMode(napi_env env, napi_callback_info info);
     static napi_value SetPcAppInpadSpecificSystemBarInvisible(napi_env env, napi_callback_info info);
     static napi_value SetPcAppInpadOrientationLandscape(napi_env env, napi_callback_info info);
+    static napi_value UpdateSceneAnimationConfig(napi_env env, napi_callback_info info);
     static napi_value SetMobileAppInPadLayoutFullScreen(napi_env env, napi_callback_info info);
     /*
      * PC Window
@@ -360,6 +362,7 @@ private:
     napi_value OnSetPcAppInpadCompatibleMode(napi_env env, napi_callback_info info);
     napi_value OnSetPcAppInpadSpecificSystemBarInvisible(napi_env env, napi_callback_info info);
     napi_value OnSetPcAppInpadOrientationLandscape(napi_env env, napi_callback_info info);
+    napi_value OnUpdateSceneAnimationConfig(napi_env env, napi_callback_info info);
     napi_value OnSetMobileAppInPadLayoutFullScreen(napi_env env, napi_callback_info info);
 
     /*
@@ -436,6 +439,7 @@ private:
     void ProcessSetSubWindowSourceRegister();
     void ProcessAnimateToTargetPropertyRegister();
     void ProcessSceneOutlineParamsChangeRegister();
+    void ProcessRestartAppRegister();
 
     /*
      * Window Property
@@ -517,7 +521,7 @@ private:
     void OnWindowMoving(DisplayId displayId, int32_t pointerX, int32_t pointerY);
     void UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
     void OnKeyboardStateChange(SessionState state, const KeyboardEffectOption& effectOption,
-        const uint32_t callingSessionId);
+        const uint32_t callingSessionId, const DisplayId targetDisplayId);
     void OnKeyboardEffectOptionChange(const KeyboardEffectOption& effectOption);
     void NotifyHighlightChange(bool isHighlight);
     void NotifyWindowAnchorInfoChange(const WindowAnchorInfo& windowAnchorInfo);
@@ -531,6 +535,7 @@ private:
     void OnAnimateToTargetProperty(const WindowAnimationProperty& animationProperty,
         const WindowAnimationOption& animationOption);
     void OnOutlineParamsChange(bool isOutlineEnabled, const OutlineStyleParams& outlineStyleParams);
+    void OnRestartApp(const SessionInfo& info);
     void OnCallingSessionIdChange(uint32_t callingSessionId);
 
     /*

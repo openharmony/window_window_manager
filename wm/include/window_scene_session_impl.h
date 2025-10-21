@@ -34,7 +34,7 @@ public:
         bool isModuleAbilityHookEnd = false) override;
     WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
     WMError Show(uint32_t reason, bool withAnimation, bool withFocus, bool waitAttach) override;
-    WMError ShowKeyboard(uint32_t callingWindowId, KeyboardEffectOption effectOption) override;
+    WMError ShowKeyboard(uint32_t callingWindowId, uint64_t tgtDisplayId, KeyboardEffectOption effectOption) override;
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits, bool waitDetach) override;
     WMError Destroy(bool needNotifyServer, bool needClearListener = true, uint32_t reason = 0) override;

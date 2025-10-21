@@ -163,6 +163,7 @@ public:
     DisplayOrientation CalcOrientationToDisplayOrientation(Orientation orientation);
     Rotation CalcRotationByDeviceOrientation(DisplayOrientation displayRotation,
         FoldDisplayMode foldDisplayMode, const RRect& boundsInRotationZero);
+    Rotation CalcRotationSystemInner(Orientation orientation, FoldDisplayMode foldDisplayMode) const;
     DisplayOrientation CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode);
     DisplayOrientation CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode);
     DisplayOrientation CalcDeviceOrientationWithBounds(Rotation rotation,
@@ -242,6 +243,7 @@ public:
     ScreenId screenId_ {};
     ScreenId rsId_ {};
     ScreenId defaultScreenId_ = SCREEN_ID_INVALID;
+    ScreenId phyScreenId_ = SCREEN_ID_INVALID;
 
     void SetIsExtend(bool isExtend);
     bool GetIsExtend() const;
@@ -311,7 +313,7 @@ public:
     float GetValidSensorRotation();
     void HoverStatusChange(int32_t hoverStatus, bool needRotate = true);
     void CameraBackSelfieChange(bool isCameraBackSelfie);
-    void ScreenOrientationChange(Orientation orientation, FoldDisplayMode foldDisplayMode);
+    void ScreenOrientationChange(Orientation orientation, FoldDisplayMode foldDisplayMode, bool isFromNapi);
     void ScreenOrientationChange(float orientation);
     void ScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId);
     DMRect GetAvailableArea();
@@ -400,6 +402,8 @@ public:
 
     void UpdateMirrorWidth(uint32_t mirrorWidth);
     void UpdateMirrorHeight(uint32_t mirrorHeight);
+    ScreenId GetPhyScreenId();
+    void SetPhyScreenId(ScreenId screenId);
 
 private:
     bool IsVertical(Rotation rotation) const;

@@ -681,6 +681,39 @@ HWTEST_F(WindowPatternStartingWindowTest, GetStartWindowColorFollowApp, TestSize
     ssm_->startingWindowFollowAppMap_.clear();
     EXPECT_EQ(true, ssm_->startingWindowFollowAppMap_.empty());
 }
+
+/**
+ * @tc.name: InsertStartingWindowRdbTask
+ * @tc.desc: SceneSessionManager insert starting window info to rdb task
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternStartingWindowTest, InsertStartingWindowRdbTask, TestSize.Level0)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->insertStartingWindowRdbSet_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "bundleName";
+    sessionInfo.moduleName_ = "moduleName";
+    sessionInfo.abilityName_ = "abilityName";
+    bool isDark = true;
+    StartingWindowInfo info;
+    std::string keyStr = sessionInfo.bundleName_ + '_' +
+        sessionInfo.moduleName_ + '_' + sessionInfo.abilityName_ + std::to_string(isDark);
+    ssm_->insertStartingWindowRdbSet_.insert(keyStr);
+    ssm_->startingWindowRdbMgr_ = nullptr;
+    ssm_->InsertStartingWindowRdbTask(sessionInfo, info, isDark);
+    ASSERT_EQ(ssm_->startingWindowRdbMgr_, nullptr);
+    ssm_->insertStartingWindowRdbSet_.clear();
+    ssm_->InsertStartingWindowRdbTask(sessionInfo, info, isDark);
+    ASSERT_EQ(ssm_->startingWindowRdbMgr_, nullptr);
+
+    WmsRdbConfig config;
+    config.dbName = TEST_RDB_NAME;
+    config.dbPath = TEST_RDB_PATH;
+    ssm_->startingWindowRdbMgr_ = std::make_unique<StartingWindowRdbManager>(config);
+    ssm_->InsertStartingWindowRdbTask(sessionInfo, info, isDark);
+    ASSERT_NE(ssm_->startingWindowRdbMgr_, nullptr);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
