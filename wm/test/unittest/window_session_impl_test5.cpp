@@ -2044,7 +2044,7 @@ HWTEST_F(WindowSessionImplTest5, SwitchSubWindow, Function | SmallTest | Level1)
     subWindow->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     // freemultiwindowmode start
     EXPECT_EQ(subWindow->IsDecorEnable(), false);
-    // cover emprty map
+    // cover empty map
     subWindow->SwitchSubWindow(false, PERSISTENT_ID_ONE);
 
     std::vector<sptr<WindowSessionImpl>> vec;
