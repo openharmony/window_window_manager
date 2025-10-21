@@ -949,50 +949,54 @@ HWTEST_F(WindowSceneSessionImplTest5, UpdateSystemBarProperties, TestSize.Level0
     option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_SHOWN;
     std::unordered_map<WindowType, SystemBarProperty> systemBarProperties;
     std::unordered_map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
-    ASSERT_EQ(WMError::WM_OK, window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));
+    EXPECT_EQ(WMError::WM_OK, window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));
+    systemBarPropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = { false, false, false, false };
+    EXPECT_EQ(WMError::WM_OK, window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));
+    systemBarPropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = { true, true, false, false };
+    EXPECT_EQ(WMError::WM_OK, window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));
+    systemBarPropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = { true, false, true, false };
+    EXPECT_EQ(WMError::WM_OK, window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));
+    systemBarPropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = { true, false, false, true };
+    EXPECT_EQ(WMError::WM_OK, window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));
+    window->state_ = WindowState::STATE_DESTROYED;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
+        window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));
+    window->state_ = WindowState::STATE_SHOWN;
+    systemBarPropertyFlags[WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE] = { false, false, false, false };
+    EXPECT_EQ(WMError::WM_DO_NOTHING, window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));
 }
 
 /**
- * @tc.name: UpdateSystemBarProperties02
- * @tc.desc: UpdateSystemBarProperties02 test
+ * @tc.name: updateSystemBarStyle
+ * @tc.desc: updateSystemBarStyle test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest5, UpdateSystemBarProperties02, TestSize.Level0)
+HWTEST_F(WindowSceneSessionImplTest5, updateSystemBarStyle, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("UpdateSystemBarProperties02");
+    option->SetWindowName("updateSystemBarStyle");
     option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    window->hostSession_ = session;
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->property_->SetPersistentId(1);
-    window->state_ = WindowState::STATE_CREATED;
-
-    WindowType windowType1 = WindowType::WINDOW_TYPE_STATUS_BAR;
-    WindowType windowType2 = WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR;
-    SystemBarProperty systemBarProperty1 = SystemBarProperty();
-    SystemBarProperty systemBarProperty2 = SystemBarProperty(true, 100, 200);
-    SystemBarPropertyFlag systemBarPropertyFlag1 = {true, true, true, true};
-    SystemBarPropertyFlag systemBarPropertyFlag2 = {false, false, false, false};
-
-    std::unordered_map<WindowType, SystemBarProperty> systemBarProperties;
-    std::unordered_map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
-    systemBarProperties.insert({windowType1, systemBarProperty1});
-    systemBarPropertyFlags.insert({windowType2, systemBarPropertyFlag2});
-    ASSERT_EQ(WMError::WM_DO_NOTHING, window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));
-
-    systemBarProperties.insert({windowType2, systemBarProperty2});
-    systemBarPropertyFlags.insert({windowType1, systemBarPropertyFlag1});
-    ASSERT_EQ(WMError::WM_OK, window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));
-
-    window->state_ = WindowState::STATE_BOTTOM;
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
-            window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));
+    window->state_ = WindowState::STATE_DESTROYED;
+    auto type = WindowType::WINDOW_TYPE_STATUS_BAR;
+    SystemBarProperty systemBarProperty;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->updateSystemBarStyle(type, systemBarProperty));
+    window->state_ = WindowState::STATE_SHOWN;
+    systemBarPropertyForPageMap_[type] = std::nullopt;
+    EXPECT_EQ(WMError::WM_OK, window->updateSystemBarStyle(type, systemBarProperty));
+    std::optional<SystemBarProperty> property;
+    systemBarPropertyForPageMap_[type] = property;
+    EXPECT_EQ(WMError::WM_OK, window->updateSystemBarStyle(type, systemBarProperty));
 }
 
 /**
