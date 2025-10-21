@@ -4649,7 +4649,7 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"createSubWindowWithOptionsSync",
             "lC{std.core.String}C{@ohos.window.window.SubWindowOptions}:C{@ohos.window.window.Window}",
             reinterpret_cast<void *>(AniWindow::CreateSubWindowWithOptions)},
-        ani_native_function {"hideSync", "l: ",
+        ani_native_function {"hideSync", "l:",
             reinterpret_cast<void *>(AniWindow::Hide)},
     };
     for (auto method : methods) {
