@@ -1931,7 +1931,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus, bo
     return ret;
 }
 
-WMError WindowImpl::ShowKeyboard(uint32_t callingWindowId, KeyboardEffectOption effectOption)
+WMError WindowImpl::ShowKeyboard(uint32_t callingWindowId, uint64_t tgtDisplayId, KeyboardEffectOption effectOption)
 {
     return Show();
 }
@@ -3774,7 +3774,7 @@ void WindowImpl::UpdateViewportConfig(const Rect& rect, const sptr<Display>& dis
             config.SetOrientation(static_cast<int32_t>(displayInfo->GetDisplayOrientation()));
         }
     }
-    uiContent_->UpdateViewportConfig(config, reason, rsTransaction, avoidAreas);
+    uiContent_->UpdateViewportConfig(config, reason, rsTransaction, avoidAreas, occupiedAreaInfo_);
     WLOGFD("Id:%{public}u, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
         property_->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
 }
@@ -3997,9 +3997,19 @@ void WindowImpl::UpdateDisplayId(DisplayId from, DisplayId to)
 }
 
 void WindowImpl::UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info,
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     WLOGFD("Update OccupiedArea, id: %{public}u", property_->GetWindowId());
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        occupiedAreaInfo_ = info;
+        WLOGFI("occupiedAreaeInfo changed, rect:[%{public}u, %{public}u, %{public}u, %{public}u]",
+            info->rect_.posX_, info->rect_.posY_, info->rect_.width_, info->rect_.height_);
+    }
+    auto display = SingletonContainer::IsDestroyed() ? nullptr :
+        SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    UpdateViewportConfig(GetRect(), display, WindowSizeChangeReason::OCCUPIED_AREA_CHANGE, nullptr, avoidAreas);
     NotifyOccupiedAreaChange(info, rsTransaction);
 }
 

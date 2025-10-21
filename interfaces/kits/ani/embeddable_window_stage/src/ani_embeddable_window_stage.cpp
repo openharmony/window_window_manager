@@ -116,8 +116,9 @@ AniEmbeddableWindowStage* GetEmbeddableWindowStageFromEnv(ani_env* env, ani_clas
 }  // namespace OHOS
 
 extern "C" {
-ANI_EXPORT ani_status ExtensionWindow_ANI_Constructor(ani_vm *vm, uint32_t *result);
-ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+ANI_EXPORT ani_status ExtensionWindow_ANI_Constructor(ani_vm *vm, uint32_t* result);
+ANI_EXPORT ani_status ExtensionWindowHost_ANI_Constructor(ani_vm *vm, uint32_t* result);
+ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t* result)
 {
     using namespace OHOS::Rosen;
     ani_status ret;
@@ -134,6 +135,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
     *result = ANI_VERSION_1;
 
-    return ExtensionWindow_ANI_Constructor(vm, result);
+    ret = ExtensionWindow_ANI_Constructor(vm, result);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] Constructor ExtensionWindow failed: %{public}u", ret);
+        return ret;
+    }
+    ret = ExtensionWindowHost_ANI_Constructor(vm, result);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] Constructor ExtensionWindowHost failed: %{public}u", ret);
+        return ret;
+    }
+    return ANI_OK;
 }
 }

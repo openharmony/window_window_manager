@@ -183,6 +183,8 @@ private:
 
     // Compatible Mode
     int HandleNotifyIsFullScreenInForceSplitMode(MessageParcel& data, MessageParcel& reply);
+    
+    int HandleRestartApp(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 

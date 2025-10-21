@@ -36,7 +36,8 @@ public:
     MOCK_METHOD1(UpdateWindowState, WMError(WindowState state));
     MOCK_METHOD2(UpdateWindowDragInfo, WMError(const PointInfo& point, DragEvent event));
     MOCK_METHOD2(UpdateDisplayId, WMError(DisplayId from, DisplayId to));
-    MOCK_METHOD2(UpdateOccupiedAreaChangeInfo, WMError(const sptr<OccupiedAreaChangeInfo>& info,
+    MOCK_METHOD3(UpdateOccupiedAreaChangeInfo, WMError(const sptr<OccupiedAreaChangeInfo>& info,
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas,
         const std::shared_ptr<RSTransaction>& rsTransaction));
     MOCK_METHOD3(UpdateOccupiedAreaAndRect, WMError(const sptr<OccupiedAreaChangeInfo>& info,
         const Rect& rect, const std::shared_ptr<RSTransaction>& rsTransaction));

@@ -772,10 +772,13 @@ void WindowSceneSessionImpl::UpdateAnimationSpeedIfEnabled()
     if (!isEnableAnimationSpeed_.load()) {
         return;
     }
+
+    TLOGI(WmsLogTag::WMS_ANIMATION, "isEnableAnimationSpeed_ is true");
     auto rsUIContext = WindowSessionImpl::GetRSUIContext();
     auto implicitAnimator = rsUIContext ? rsUIContext->GetRSImplicitAnimator() : nullptr;
     if (implicitAnimator != nullptr) {
         implicitAnimator->ApplyAnimationSpeedMultiplier(animationSpeed_.load());
+        TLOGI(WmsLogTag::WMS_ANIMATION, "update animation speed success");
     }
 }
 
@@ -1415,7 +1418,7 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
             TLOGI(WmsLogTag::WMS_LAYOUT_PC, "winId: %{public}u, windowModeSupportType: %{public}u",
                 GetWindowId(), windowModeSupportType);
         }
-        if (property_->IsSupportRotateFullScreen()) {
+        if (property_->IsAdaptToDragScale()) {
             windowModeSupportType = (WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN |
                                      WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
         }
@@ -1868,7 +1871,8 @@ sptr<DisplayInfo> WindowSceneSessionImpl::GetDisplayInfo() const
     return display->GetDisplayInfo();
 }
 
-WMError WindowSceneSessionImpl::ShowKeyboard(uint32_t callingWindowId, KeyboardEffectOption effectOption)
+WMError WindowSceneSessionImpl::ShowKeyboard(
+    uint32_t callingWindowId, uint64_t tgtDisplayId, KeyboardEffectOption effectOption)
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "CallingWindowId: %{public}d, effect option: %{public}s",
         callingWindowId, effectOption.ToString().c_str());
@@ -1889,6 +1893,7 @@ WMError WindowSceneSessionImpl::ShowKeyboard(uint32_t callingWindowId, KeyboardE
     }
     property_->SetKeyboardEffectOption(effectOption);
     property_->SetCallingSessionId(callingWindowId);
+    property_->SetDisplayId(tgtDisplayId);
     return Show();
 }
 
@@ -5776,6 +5781,14 @@ bool WindowSceneSessionImpl::ShouldSkipSupportWindowModeCheck(uint32_t windowMod
     if (isAvailableDevice && isMultiWindowMode) {
         return true;
     }
+
+    // padMode to FreeMultiWindowMode, the compatible mode application supports MODE_FLOATING and MODE_FULLSCREEN.
+    bool isCompatibleWindow = mode == WindowMode::WINDOW_MODE_FLOATING ||
+                              mode == WindowMode::WINDOW_MODE_FULLSCREEN;
+    bool isDragScale = property_->IsAdaptToDragScale();
+    if (IsFreeMultiWindowMode() && isCompatibleWindow && isDragScale) {
+        return true;
+    }
     return false;
 }
 
@@ -6501,11 +6514,26 @@ void WindowSceneSessionImpl::UpdateDensityInner(const sptr<DisplayInfo>& info)
     if (property_->GetUserWindowLimits().pixelUnit_ == PixelUnit::VP) {
         UpdateWindowSizeLimits();
         UpdateNewSize();
-        WMError ret = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
+    } else {
+        WindowLimits limitsPx = property_->GetWindowLimits();
+        WindowLimits limitsVp = WindowLimits::DEFAULT_VP_LIMITS();
+        float vpr = 1.0f;
+        WMError ret = WindowSessionImpl::GetVirtualPixelRatio(vpr);
         if (ret != WMError::WM_OK) {
-            WLOGFE("update window proeprty failed! id: %{public}u.", GetWindowId());
+            TLOGE(WmsLogTag::DEFAULT, "Id:%{public}d, get vpr failed", GetPersistentId());
             return;
         }
+        RecalculateVpLimitsByPx(limitsPx, limitsVp, vpr);
+        limitsPx.vpRatio_ = vpr;
+        limitsVp.vpRatio_ = vpr;
+        property_->SetWindowLimits(limitsPx);
+        property_->SetWindowLimitsVP(limitsVp);
+        property_->SetLastLimitsVpr(vpr);
+    }
+    WMError ret = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "update window property failed! id: %{public}u.", GetWindowId());
+        return;
     }
 
     NotifyDisplayInfoChange(info);

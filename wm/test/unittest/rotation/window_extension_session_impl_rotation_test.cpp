@@ -147,7 +147,8 @@ HWTEST_F(WindowExtensionSessionImplRotationTest, UpdateRectForRotation02, TestSi
     wsRect.width_ = 50;
     window_->property_->SetUIExtensionUsage(UIExtensionUsage::CONSTRAINED_EMBEDDED);
     SizeChangeReason reason = SizeChangeReason::SNAPSHOT_ROTATION;
-    SceneAnimationConfig config { .rsTransaction_ = rsTransaction };
+    SceneAnimationConfig config = { rsTransaction, ROTATE_ANIMATION_DURATION,
+        0, WindowAnimationCurve::LINEAR, {0.0f, 0.0f, 0.0f, 0.0f } };
     WSError res = window_->UpdateRect(wsRect, reason, config);
     EXPECT_EQ(res, WSError::WS_OK);
 }

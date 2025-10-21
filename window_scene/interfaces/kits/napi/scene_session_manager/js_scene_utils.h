@@ -290,6 +290,7 @@ bool ConvertDragResizeTypeFromJs(napi_env env, napi_value value, DragResizeType&
 bool ConvertRectFromJsValue(napi_env env, napi_value jsObject, Rect& displayRect);
 bool ConvertInfoFromJsValue(napi_env env, napi_value jsObject, RotationChangeInfo& rotationChangeInfo);
 bool ConvertThrowSlipModeFromJs(napi_env env, napi_value value, ThrowSlipMode& throwSlipMode);
+bool convertAnimConfigFromJs(napi_env env, napi_value value, SceneAnimationConfig& config);
 template<class T>
 bool ParseJsValue(napi_env env, napi_value jsObject, const std::string& name, T& data)
 {

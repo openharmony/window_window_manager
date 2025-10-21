@@ -578,12 +578,12 @@ ScreenPowerState ScreenManagerAdapter::GetScreenPower()
     return ScreenPowerState::INVALID_STATE;
 }
 
-DMError ScreenManagerAdapter::SetOrientation(ScreenId screenId, Orientation orientation)
+DMError ScreenManagerAdapter::SetOrientation(ScreenId screenId, Orientation orientation, bool isFromNapi)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     if (screenSessionManagerServiceProxy_) {
-        return screenSessionManagerServiceProxy_->SetOrientation(screenId, orientation);
+        return screenSessionManagerServiceProxy_->SetOrientation(screenId, orientation, isFromNapi);
     }
 
     int32_t dmError;
