@@ -835,6 +835,7 @@ private:
     void ConfigSnapshotScale();
     void ConfigFreeMultiWindow();
     void LoadFreeMultiWindowConfig(bool enable);
+    void DoUpdateSceneSessionWant(const SessionInfo& sessionInfo);
 
     std::tuple<std::string, std::vector<float>> CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig);
     void LoadKeyboardAnimation(const WindowSceneConfig::ConfigItem& item, KeyboardSceneAnimationConfig& config);
