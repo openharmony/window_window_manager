@@ -253,7 +253,7 @@ void SceneSessionDirtyManager::CalTransform(const sptr<SceneSession>& sceneSessi
         FoldScreenStateInternel::IsSecondaryDisplayFoldDevice();
     TLOGD(WmsLogTag::WMS_EVENT, "wid:%{public}d, isRotate:%{public}d, isSystem:%{public}d,"
         " displayMode:%{public}d, foldScreenStateInternel:%{public}d, isRotateWindow:%{public}d,"
-        " isScreenLockWindow:%{public}d",sceneSession->GetWindowId(), isRotate, isSystem,
+        " isScreenLockWindow:%{public}d", sceneSession->GetWindowId(), isRotate, isSystem,
         displayMode, foldScreenStateInternel, isRotateWindow, isScreenLockWindow);
 
     if (isRotate || !isSystem || displayModeIsFull || displayModeIsGlobalFull ||
