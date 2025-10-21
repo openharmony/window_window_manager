@@ -429,11 +429,6 @@ bool Session::GetSessionInfoAdvancedFeatureFlag(uint32_t bitPosition)
     }
 }
 
-void Session::UpdateSessionInfo()
-{
-    NotifySessionInfoChange();
-}
-
 void Session::SetSessionInfoWindowMode(int32_t windowMode)
 {
     sessionInfo_.windowMode = windowMode;

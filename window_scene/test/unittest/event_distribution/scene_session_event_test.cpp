@@ -60,23 +60,23 @@ HWTEST_F(SceneSessionEventTest, LockCursor, TestSize.Level1)
     auto ret = sceneSession->LockCursor(parameters);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PERMISSION);
 
-    // Test checkDatas: The format is incorrect(size<1).
+    // Test Checkparameters: The format is incorrect(size<1).
     MockAccesstokenKit::MockAccessTokenKitRet(0);
     ret = sceneSession->LockCursor(parameters);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
     
-    // Test checkDatas: The format is incorrect(length error).
+    // Test Checkparameters: The format is incorrect(length error).
     parameters.emplace_back(LOCK_CURSOR_LENGTH + 1);
     ret = sceneSession->LockCursor(parameters);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
 
-    // Test checkDatas: The format is incorrect(size error).
+    // Test Checkparameters: The format is incorrect(size error).
     parameters.clear();
     parameters.emplace_back(LOCK_CURSOR_LENGTH);
     ret = sceneSession->LockCursor(parameters);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
 
-    // Test： session is null
+    // Test：session is null
     parameters.clear();
     parameters.emplace_back(LOCK_CURSOR_LENGTH);
     parameters.emplace_back(1);
@@ -84,7 +84,6 @@ HWTEST_F(SceneSessionEventTest, LockCursor, TestSize.Level1)
     sceneSession->persistentId_ = 2;
     ret = sceneSession->LockCursor(parameters);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_SESSION);
-
 
     // test normal process
     parameters.clear();
@@ -122,17 +121,17 @@ HWTEST_F(SceneSessionEventTest, UnlockCursor, TestSize.Level1)
     auto ret = sceneSession->UnlockCursor(parameters);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PERMISSION);
 
-    // test checkDatas: The format is incorrect(size<1).
+    // test Checkparameters: The format is incorrect(size<1).
     MockAccesstokenKit::MockAccessTokenKitRet(0);
     ret = sceneSession->UnlockCursor(parameters);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
     
-    // Test checkDatas: The format is incorrect(length error).
+    // Test Checkparameters: The format is incorrect(length error).
     parameters.emplace_back(UNLOCK_CURSOR_LENGTH + 1);
     ret = sceneSession->UnlockCursor(parameters);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
 
-    // Test checkDatas: The format is incorrect(size error).
+    // Test Checkparameters: The format is incorrect(size error).
     parameters.clear();
     parameters.emplace_back(UNLOCK_CURSOR_LENGTH);
     ret = sceneSession->UnlockCursor(parameters);
