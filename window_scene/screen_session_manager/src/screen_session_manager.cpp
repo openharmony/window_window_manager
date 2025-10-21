@@ -2902,8 +2902,8 @@ bool ScreenSessionManager::SetResolutionEffect(ScreenId screenId,  uint32_t widt
     };
     TLOGI(WmsLogTag::DMS, "toRect %{public}d %{public}d %{public}d %{public}d",
         toRect.posX_, toRect.posY_, toRect.width_, toRect.height_);
-    if (internalSession->GetScreenProperty().GetBounds().rect_.width_ != width ||
-        internalSession->GetScreenProperty().GetBounds().rect_.height_ != height) {
+    auto internelBounds = internalSession->GetScreenProperty().GetBounds();
+    if (internelBounds.rect_.width_ != width || internelBounds.rect_.height_ != height) {
         SetInternalScreenResolutionEffect(internalSession, toRect);
     }
     SetExternalScreenResolutionEffect(externalSession, toRect);
@@ -2927,17 +2927,18 @@ bool ScreenSessionManager::RecoveryResolutionEffect()
         return false;
     }
     if (curResolutionEffectEnable_.load()) {
-        DMRect RealResolutionRect = { 0, 0,
-            internalSession->GetScreenProperty().GetScreenRealWidth(),
-            internalSession->GetScreenProperty().GetScreenRealHeight()};
+        auto internalPropery = internalSession->GetScreenProperty();
+        DMRect RealResolutionRect = { 0, 0, internalPropery.GetScreenRealWidth(),
+            internalPropery.GetScreenRealHeight()};
         TLOGI(WmsLogTag::DMS, "RealResolutionRect %{public}d %{public}d %{public}d %{public}d",
             RealResolutionRect.posX_, RealResolutionRect.posY_, RealResolutionRect.width_, RealResolutionRect.height_);
         SetInternalScreenResolutionEffect(internalSession, RealResolutionRect);
         curResolutionEffectEnable_.store(false);
     }
     if (externalSession != nullptr) {
-        DMRect externalRealRect = { 0, 0, externalSession->GetScreenProperty().GetScreenRealWidth(),
-            externalSession->GetScreenProperty().GetScreenRealHeight()};
+        auto externalPropery = externalSession->GetScreenProperty();
+        DMRect externalRealRect = { 0, 0, externalPropery.GetScreenRealWidth(),
+            externalPropery.GetScreenRealHeight()};
         SetExternalScreenResolutionEffect(externalSession, externalRealRect);
     }
     HandleCastVirtualScreenMirrorRegion();
@@ -2945,7 +2946,7 @@ bool ScreenSessionManager::RecoveryResolutionEffect()
     return true;
 }
 
-void ScreenSessionManager::SetInternalScreenResolutionEffect(const sptr<ScreenSession>& internalSession, DMRect targetRect)
+void ScreenSessionManager::SetInternalScreenResolutionEffect(const sptr<ScreenSession>& internalSession, DMRect& targetRect)
 {
     if (internalSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "internalSession null");
@@ -2957,12 +2958,11 @@ void ScreenSessionManager::SetInternalScreenResolutionEffect(const sptr<ScreenSe
     NotifyScreenChanged(internalSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
     NotifyDisplayChanged(internalSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
     // Black out invalid area
-    auto displaynode = internalSession->GetDisplayNode();
-    displaynode->SetClipToBounds(true);
-    RSTransactionAdapter::FlushImplicitTransaction(internalSession->GetRSUIContext());
+    OHOS::Rect rsRect = {targetRect.posX_, targetRect.posY_, targetRect.width_, targetRect.height_};
+    rsInterface_.SetScreenActiveRect(internalSession->GetScreenId(), rsRect);
 }
 
-void ScreenSessionManager::SetExternalScreenResolutionEffect(const sptr<ScreenSession>& externalSession, DMRect targetRect)
+void ScreenSessionManager::SetExternalScreenResolutionEffect(const sptr<ScreenSession>& externalSession, DMRect& targetRect)
 {
     if (externalSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "externalSession null");
