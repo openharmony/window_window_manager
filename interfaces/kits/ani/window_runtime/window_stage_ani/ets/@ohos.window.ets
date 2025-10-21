@@ -3627,12 +3627,12 @@ export class WindowInternal implements Window {
     }
 
     public onFreeWindowModeChange(callback: Callback<boolean>): void {
-      let type = "FreeWindowModeChange";
+      let type = "freeWindowModeChange";
       this.onSync(this.nativeObj, type, callback);
     }
 
     public offFreeWindowModeChange(callback?: Callback<boolean>): void {
-      let type = "FreeWindowModeChange";
+      let type = "freeWindowModeChange";
       this.offSync(this.nativeObj, type, callback);
     }
 
