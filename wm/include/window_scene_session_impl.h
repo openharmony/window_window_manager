@@ -450,6 +450,7 @@ private:
     bool dockHoverShowEnabled_ = true;
     void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);
     void MobileAppInPadLayoutFullScreenChange(bool statusBarEnable, bool navigationEnable);
+    WMError updateSystemBarStyle(WindowType type, SystemBarProperty property);
     std::mutex systemBarPropertyForPageMapMutex_;
     std::unordered_map<WindowType, std::optional<SystemBarProperty>> systemBarPropertyForPageMap_;
 
