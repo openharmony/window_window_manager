@@ -248,16 +248,16 @@ void SceneSessionDirtyManager::CalTransform(const sptr<SceneSession>& sceneSessi
     bool displayModeIsFull = static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::FULL;
     bool displayModeIsGlobalFull = displayMode == FoldDisplayMode::GLOBAL_FULL;
     bool displayModeIsMain = static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::MAIN;
+    bool displayModeIsCoordination = static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::COORDINATION;
     bool foldScreenStateInternel = FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
         FoldScreenStateInternel::IsSecondaryDisplayFoldDevice();
     TLOGD(WmsLogTag::WMS_EVENT, "wid:%{public}d, isRotate:%{public}d, isSystem:%{public}d,"
-        " displayModeIsFull:%{public}d, displayModeIsGlobalFull:%{public}d, displayModeIsMain:%{public}d,"
-        " foldScreenStateInternel:%{public}d, isRotateWindow:%{public}d, isScreenLockWindow:%{public}d",
-        sceneSession->GetWindowId(), isRotate, isSystem, displayModeIsFull, displayModeIsGlobalFull,
-        displayModeIsMain, foldScreenStateInternel, isRotateWindow, isScreenLockWindow);
+        " displayMode:%{public}d, foldScreenStateInternel:%{public}d, isRotateWindow:%{public}d,"
+        " isScreenLockWindow:%{public}d", sceneSession->GetWindowId(), isRotate, isSystem,
+        displayMode, foldScreenStateInternel, isRotateWindow, isScreenLockWindow);
 
     if (isRotate || !isSystem || displayModeIsFull || displayModeIsGlobalFull ||
-        (displayModeIsMain && foldScreenStateInternel)) {
+        (displayModeIsMain && foldScreenStateInternel) || displayModeIsCoordination) {
         if (isScreenLockWindow && isRotateWindow && ((displayModeIsMain && foldScreenStateInternel) ||
             (displayModeIsFull && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()))) {
             CalSpecialNotRotateTransform(sceneSession, screenProperty, transform, useUIExtension);
