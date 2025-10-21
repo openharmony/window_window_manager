@@ -8473,7 +8473,7 @@ void WindowSessionImpl::SwitchSubWindow(bool freeMultiWindowEnable, int32_t pare
 
 void WindowSessionImpl::SwitchSystemWindow(bool freeMultiWindowEnable, int32_t parentId)
 {
-    std::lock_guard<std::recursive_mutex> lock(windowSessionMutex_);
+    std::lock_guard<std::shared_mutex> lock(windowSessionMutex_);
     if (windowSessionMap_.empty()) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "windowSessionMap is empty.");
         return;

@@ -1566,7 +1566,8 @@ HWTEST_F(WindowSessionImplTest3, SwitchSystemWindow, Function | SmallTest | Leve
     sysWindow->SwitchSystemWindow(false, PERSISTENT_ID_ONE);
  
     std::vector<sptr<WindowSessionImpl>> vec;
-    window_->windowSessionMap_.insert(std::make_pair("SwitchSystemWindow", std::make_pair(PERSISTENT_ID_ONE, sysWindow)));
+    window_->windowSessionMap_.insert(std::make_pair("SwitchSystemWindow",
+        std::make_pair(PERSISTENT_ID_ONE, sysWindow)));
     window_->SwitchSystemWindow(true, PERSISTENT_ID_ONE);
     EXPECT_EQ(sysWindow->windowSystemConfig_.freeMultiWindowEnable_, true);
 }
