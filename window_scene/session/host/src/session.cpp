@@ -1397,7 +1397,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     property->SetWindowRect(rect);
     if (GetSessionInfo().isPrelaunch_) {
         auto displayId = property->GetDisplayId();
-        std::map<ScreenId, ScreenProperty> screenProperties = 
+        std::map<ScreenId, ScreenProperty> screenProperties =
             Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
         if (screenProperties.find(displayId) != screenProperties.end()) {
             auto screenProperty = screenProperties[displayId];
