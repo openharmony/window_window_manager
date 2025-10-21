@@ -68,6 +68,7 @@ public:
     virtual WMError UpdateWindowDragInfo(const PointInfo& point, DragEvent event) = 0;
     virtual WMError UpdateDisplayId(DisplayId from, DisplayId to) = 0;
     virtual WMError UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info,
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) = 0;
     virtual WMError UpdateActiveStatus(bool isActive) = 0;
     virtual sptr<WindowProperty> GetWindowProperty() = 0;
@@ -83,6 +84,7 @@ public:
     virtual WMError RestoreSplitWindowMode(uint32_t mode) = 0;
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent> event) = 0;
     virtual WMError UpdateOccupiedAreaAndRect(const sptr<OccupiedAreaChangeInfo>& info, const Rect& rect,
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) = 0;
     virtual void NotifyForegroundInteractiveStatus(bool interactive) = 0;
     virtual void NotifyMMIServiceOnline(uint32_t winId) = 0;

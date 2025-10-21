@@ -85,8 +85,8 @@ public:
     WMError AniSetUIContentByName(const std::string& contentName, ani_env* env, ani_object storage,
         BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override {}
-    WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
-        const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION },
+    WSError UpdateRect(const WSRect& rect, SizeChangeReason reason, const SceneAnimationConfig& config = {
+        nullptr, ROTATE_ANIMATION_DURATION, 0, WindowAnimationCurve::LINEAR, {0.0f, 0.0f, 0.0f, 0.0f} },
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {}) override;
 
     WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = Rect::EMPTY_RECT,
@@ -275,6 +275,7 @@ private:
     std::vector<sptr<IKeyboardDidHideListener>> keyboardDidHideListenerList_;
     std::vector<sptr<IOccupiedAreaChangeListener>> occupiedAreaChangeListenerList_;
     uint32_t hostStatusBarContentColor_ { 0 };
+    int64_t startModalExtensionTimeStamp_ = -1;
 
     /*
      * PC Fold Screen

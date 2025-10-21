@@ -1113,12 +1113,8 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         UpdateRectForRotation(wmRect, preRect, wmReason, config, avoidAreas);
     } else if (handler_ != nullptr && wmReason == WindowSizeChangeReason::PAGE_ROTATION) {
         UpdateRectForPageRotation(wmRect, preRect, wmReason, config, avoidAreas);
-    } else if (handler_ != nullptr && wmReason == WindowSizeChangeReason::RESIZE_WITH_ANIMATION) {
-        RectAnimationConfig rectAnimationConfig = property_->GetRectAnimationConfig();
-        TLOGI(WmsLogTag::WMS_LAYOUT, "rectAnimationConfig.duration: %{public}d", rectAnimationConfig.duration);
-        postTaskDone_ = false;
-        UpdateRectForResizeWithAnimation(wmRect, preRect, wmReason, rectAnimationConfig,
-            config.rsTransaction_, avoidAreas);
+    } else if (handler_ != nullptr && wmReason == WindowSizeChangeReason::SCENE_WITH_ANIMATION) {
+        UpdateRectForResizeAnimation(wmRect, preRect, wmReason, config, avoidAreas);
     } else {
         UpdateRectForOtherReason(wmRect, preRect, wmReason, config.rsTransaction_, avoidAreas);
     }
@@ -1146,6 +1142,79 @@ void WindowSessionImpl::UpdateVirtualPixelRatio(const sptr<Display>& display)
     }
     virtualPixelRatio_ = GetVirtualPixelRatio(displayInfo);
     TLOGD(WmsLogTag::WMS_LAYOUT, "virtualPixelRatio: %{public}f", virtualPixelRatio_);
+}
+
+void WindowSessionImpl::UpdateRectForResizeAnimation(const Rect& wmRect, const Rect& preRect,
+    WindowSizeChangeReason wmReason, const SceneAnimationConfig& config,
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
+{
+    handler_->PostTask([weak = wptr(this), wmReason, wmRect, preRect, config, avoidAreas]() mutable {
+        HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::UpdateRectForResizeAnimation");
+        auto window = weak.promote();
+        if (!window) {
+            return;
+        }
+        auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(window->property_->GetDisplayId());
+        sptr<DisplayInfo> displayInfo = display ? display->GetDisplayInfo() : nullptr;
+        auto rsUIContext = window->GetRSUIContext();
+        std::array<float, ANIMATION_PARAM_SIZE> param = config.animationParam_;
+        RSAnimationTimingCurve curve = window->updateConfigCurve(config.animationCurve_, param);
+        std::shared_ptr<RSTransaction> rsTransaction = config.rsTransaction_;
+        if (rsTransaction) {
+            RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
+            rsTransaction->Begin();
+        }
+
+        RSAnimationTimingProtocol protocol;
+        protocol.SetDuration(config.animationDuration_);
+        protocol.SetStartDelay(config.animationDelay_);
+        RSNode::OpenImplicitAnimation(rsUIContext, protocol, curve, nullptr);
+        if ((wmRect != preRect) || (wmReason != window->lastSizeChangeReason_)) {
+            window->NotifySizeChange(wmRect, wmReason);
+            window->lastSizeChangeReason_ = wmReason;
+        }
+        window->UpdateViewportConfig(wmRect, wmReason, rsTransaction, displayInfo, avoidAreas);
+        RSNode::CloseImplicitAnimation(rsUIContext);
+        if (rsTransaction) {
+            rsTransaction->Commit();
+        } else {
+            RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
+        }
+        window->postTaskDone_ = true;
+    }, "WMS_WindowSessionImpl_UpdateRectForResizeAnimation");
+}
+
+RSAnimationTimingCurve WindowSessionImpl::updateConfigCurve(const WindowAnimationCurve& configCurve,
+    const std::array<float, ANIMATION_PARAM_SIZE> param)
+{
+    RSAnimationTimingCurve curve;
+    const float paramFirst = param[0]; // 0: the first parameter of the passed animation curve.
+    const float paramSecond = param[1]; // 1: the second parameter of the passed animation curve.
+    const float paramThird = param[2]; // 2: the third parameter of the passed animation curve.
+    const float paramFourth = param[3]; // 3: the fourth parameter of the passed animation curve.
+    switch (configCurve) {
+        case WindowAnimationCurve::LINEAR:
+            TLOGD(WmsLogTag::WMS_LAYOUT, "Linear params");
+            curve = RSAnimationTimingCurve::LINEAR;
+            break;
+        case WindowAnimationCurve::INTERPOLATION_SPRING:
+            TLOGD(WmsLogTag::WMS_LAYOUT, "Spring params: %{public}f, %{public}f, %{public}f, %{public}f",
+                paramFirst, paramSecond, paramThird, paramFourth);
+            curve = RSAnimationTimingCurve::CreateInterpolatingSpring(paramFirst,
+                paramSecond, paramThird, paramFourth);
+            break;
+        case WindowAnimationCurve::CUBIC_BEZIER:
+            TLOGD(WmsLogTag::WMS_LAYOUT, "Bezier params: %{public}f, %{public}f, %{public}f, %{public}f",
+                paramFirst, paramSecond, paramThird, paramFourth);
+            curve = RSAnimationTimingCurve::CreateCubicCurve(paramFirst, paramSecond,
+                paramThird, paramFourth);
+            break;
+        default:
+            TLOGW(WmsLogTag::WMS_LAYOUT, "Unknown curve type: %{public}d, using LINEAR as default",
+                static_cast<int>(configCurve));
+            curve = RSAnimationTimingCurve::LINEAR;
+    }
+    return curve;
 }
 
 void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& preRect,
@@ -1328,49 +1397,6 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
     }
 }
 
-void WindowSessionImpl::UpdateRectForResizeWithAnimation(const Rect& wmRect, const Rect& preRect,
-    WindowSizeChangeReason wmReason, const RectAnimationConfig& rectAnimationConfig,
-    const std::shared_ptr<RSTransaction>& rsTransaction,
-    const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
-{
-    if (handler_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "handler is null!");
-        return;
-    }
-    auto task = [weakThis = wptr(this), wmReason, wmRect, preRect, rectAnimationConfig,
-        rsTransaction, avoidAreas]() mutable {
-        HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::UpdateRectForResizeWithAnimation");
-        auto window = weakThis.promote();
-        if (!window) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "window is null, updateRectForResizeWithAnimation failed");
-            return;
-        }
-        auto rsUIContext = window->GetRSUIContext();
-        if (rsTransaction) {
-            RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
-            rsTransaction->Begin();
-        }
-        RSAnimationTimingProtocol protocol;
-        protocol.SetDuration(rectAnimationConfig.duration);
-        auto curve = RSAnimationTimingCurve::CreateCubicCurve(rectAnimationConfig.x1,
-            rectAnimationConfig.y1, rectAnimationConfig.x2, rectAnimationConfig.y2);
-        RSNode::OpenImplicitAnimation(rsUIContext, protocol, curve, nullptr);
-        if (wmRect != preRect || wmReason != window->lastSizeChangeReason_) {
-            window->NotifySizeChange(wmRect, wmReason);
-            window->lastSizeChangeReason_ = wmReason;
-        }
-        window->UpdateViewportConfig(wmRect, wmReason, rsTransaction, nullptr, avoidAreas);
-        RSNode::CloseImplicitAnimation(rsUIContext);
-        if (rsTransaction) {
-            rsTransaction->Commit();
-        } else {
-            RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
-        }
-        window->postTaskDone_ = true;
-    };
-    handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForResizeWithAnimation");
-}
-
 void WindowSessionImpl::NotifyAfterUIContentReady()
 {
     auto uiContent = GetUIContentSharedPtr();
@@ -1500,13 +1526,13 @@ void WindowSessionImpl::SetUniqueVirtualPixelRatio(bool useUniqueDensity, float 
 void WindowSessionImpl::UpdateAnimationSpeed(float speed)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), speed, where, this] {
+    auto task = [weakThis = wptr(this), speed, where] {
         auto window = weakThis.promote();
         if (window == nullptr) {
             TLOGW(WmsLogTag::WMS_ANIMATION, "%{public}s: window is nullptr", where);
             return;
         }
-        UpdateAllWindowSpeed(speed);
+        window->UpdateAllWindowSpeed(speed);
         isEnableAnimationSpeed_.store(!FoldScreenStateInternel::FloatEqualAbs(speed, 1.0f));
         animationSpeed_.store(speed);
     };
@@ -1524,7 +1550,7 @@ void WindowSessionImpl::UpdateAllWindowSpeed(float speed)
         auto rsUIContext = WindowSession->GetRSUIContext();
         auto implicitAnimator = rsUIContext ? rsUIContext->GetRSImplicitAnimator() : nullptr;
         if (implicitAnimator == nullptr) {
-            TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to open implicit animtion");
+            TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to open implicit animation");
             continue;
         }
         implicitAnimator->ApplyAnimationSpeedMultiplier(speed);
@@ -2244,11 +2270,11 @@ void WindowSessionImpl::SetForceSplitEnable(AppForceLandscapeConfig& config)
     bool isForceSplit = (config.mode_ == FORCE_SPLIT_MODE || config.mode_ == NAV_FORCE_SPLIT_MODE);
     bool isRouter = (config.supportSplit_ == FORCE_SPLIT_MODE);
     TLOGI(WmsLogTag::DEFAULT, "windowId: %{public}u, isForceSplit: %{public}u, homePage: %{public}s, "
-        "supportSplit: %{public}d, isRouter: %{public}u, arkUIOptions: %{public}s",
+        "supportSplit: %{public}d, isRouter: %{public}u, arkUIOptions: %{public}s, ignoreOrientation: %{public}d",
         GetWindowId(), isForceSplit, config.homePage_.c_str(), config.supportSplit_, isRouter,
-        config.arkUIOptions_.c_str());
+        config.arkUIOptions_.c_str(), config.ignoreOrientation_);
     uiContent->SetForceSplitConfig(config.arkUIOptions_);
-    uiContent->SetForceSplitEnable(isForceSplit, config.homePage_, isRouter);
+    uiContent->SetForceSplitEnable(isForceSplit, config.homePage_, isRouter, config.ignoreOrientation_);
 }
 
 void WindowSessionImpl::SetAppHookWindowInfo(const HookWindowInfo& hookWindowInfo)
@@ -6059,6 +6085,7 @@ WMError WindowSessionImpl::UnregisterWindowVisibilityChangeListener(const IWindo
 WMError WindowSessionImpl::RegisterOcclusionStateChangeListener(const sptr<IOcclusionStateChangedListener>& listener)
 {
     auto persistentId = GetPersistentId();
+    bool isFirstRegister = false;
     {
         std::lock_guard<std::mutex> lockListener(occlusionStateChangeListenerMutex_);
         auto ret = RegisterListener(occlusionStateChangeListeners_[persistentId], listener);
@@ -6066,8 +6093,12 @@ WMError WindowSessionImpl::RegisterOcclusionStateChangeListener(const sptr<IOccl
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed: winId=%{public}d", persistentId);
             return ret;
         }
+        isFirstRegister = occlusionStateChangeListeners_[persistentId].size() == 1;
     }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d", persistentId);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d, isFirstRegister=%{public}d", persistentId, isFirstRegister);
+    if (!isFirstRegister) {
+        return WMError::WM_OK;
+    }
     auto ret = SingletonContainer::Get<WindowAdapter>().UpdateSessionOcclusionStateListener(persistentId, true);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "ipc failed: winId=%{public}d, retCode=%{public}d",
@@ -6081,6 +6112,7 @@ WMError WindowSessionImpl::RegisterOcclusionStateChangeListener(const sptr<IOccl
 WMError WindowSessionImpl::UnregisterOcclusionStateChangeListener(const sptr<IOcclusionStateChangedListener>& listener)
 {
     auto persistentId = GetPersistentId();
+    bool isLastUnregister = false;
     {
         std::lock_guard<std::mutex> lockListener(occlusionStateChangeListenerMutex_);
         auto ret = UnregisterListener(occlusionStateChangeListeners_[persistentId], listener);
@@ -6090,9 +6122,13 @@ WMError WindowSessionImpl::UnregisterOcclusionStateChangeListener(const sptr<IOc
         }
         if (occlusionStateChangeListeners_[persistentId].empty()) {
             occlusionStateChangeListeners_.erase(persistentId);
+            isLastUnregister = true;
         }
     }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d", persistentId);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d, isLastUnregister=%{public}d", persistentId, isLastUnregister);
+    if (!isLastUnregister) {
+        return WMError::WM_OK;
+    }
     auto ret = SingletonContainer::Get<WindowAdapter>().UpdateSessionOcclusionStateListener(persistentId, false);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "ipc failed: winId=%{public}d, retCode=%{public}d",
@@ -6120,10 +6156,16 @@ WSError WindowSessionImpl::NotifyWindowOcclusionState(const WindowVisibilityStat
             persistentId, static_cast<uint32_t>(state));
         visibilityState = WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION;
     }
+    if (visibilityState == lastVisibilityState_) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d, sameVisibilityState=%{public}u",
+            persistentId, static_cast<uint32_t>(visibilityState));
+        return WSError::WS_OK;
+    }
+    lastVisibilityState_ = visibilityState;
     uint32_t notifyCounter = 0;
     for (auto& listener : listeners) {
         if (listener != nullptr) {
-            listener->OnOcclusionStateChanged(state);
+            listener->OnOcclusionStateChanged(visibilityState);
             notifyCounter++;
         }
     }

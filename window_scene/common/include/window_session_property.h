@@ -779,18 +779,20 @@ struct AppForceLandscapeConfig : public Parcelable {
     std::string homePage_ = "";
     int32_t supportSplit_ = -1;
     std::string arkUIOptions_ = "";
+    bool ignoreOrientation_ = false;
 
     AppForceLandscapeConfig() {}
     AppForceLandscapeConfig(int32_t mode, const std::string& homePage, int32_t supportSplit,
-        const std::string& arkUIOptions) : mode_(mode), homePage_(homePage), supportSplit_(supportSplit),
-        arkUIOptions_(arkUIOptions) {}
+        const std::string& arkUIOptions, bool isIgnoreOrientation) : mode_(mode), homePage_(homePage),
+        supportSplit_(supportSplit), arkUIOptions_(arkUIOptions), ignoreOrientation_(isIgnoreOrientation) {}
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteInt32(mode_) ||
             !parcel.WriteString(homePage_) ||
             !parcel.WriteInt32(supportSplit_) ||
-            !parcel.WriteString(arkUIOptions_)) {
+            !parcel.WriteString(arkUIOptions_) ||
+            !parcel.WriteBool(ignoreOrientation_)) {
             return false;
         }
         return true;
@@ -805,7 +807,8 @@ struct AppForceLandscapeConfig : public Parcelable {
         if (!parcel.ReadInt32(config->mode_) ||
             !parcel.ReadString(config->homePage_) ||
             !parcel.ReadInt32(config->supportSplit_) ||
-            !parcel.ReadString(config->arkUIOptions_)) {
+            !parcel.ReadString(config->arkUIOptions_) ||
+            !parcel.ReadBool(config->ignoreOrientation_)) {
             return nullptr;
         }
         return config.release();
@@ -848,6 +851,7 @@ struct SystemSessionConfig : public Parcelable {
     bool skipRedundantWindowStatusNotifications_ = false;
     uint32_t supportFunctionType_ = 0;
     bool supportSnapshotAllSessionStatus_ = false;
+    bool supportCacheLockedSessionSnapshot_ = false;
     bool supportPreloadStartingWindow_ = false;
     bool supportCreateFloatWindow_ = false;
     float defaultCornerRadius_ = 0.0f; // default corner radius of window set by system config
@@ -912,6 +916,9 @@ struct SystemSessionConfig : public Parcelable {
         if (!parcel.WriteBool(supportSnapshotAllSessionStatus_)) {
             return false;
         }
+        if (!parcel.WriteBool(supportCacheLockedSessionSnapshot_)) {
+            return false;
+        }
         if (!parcel.WriteBool(supportPreloadStartingWindow_)) {
             return false;
         }
@@ -968,6 +975,7 @@ struct SystemSessionConfig : public Parcelable {
         config->skipRedundantWindowStatusNotifications_ = parcel.ReadBool();
         config->supportFunctionType_ = parcel.ReadUint32();
         config->supportSnapshotAllSessionStatus_ = parcel.ReadBool();
+        config->supportCacheLockedSessionSnapshot_ = parcel.ReadBool();
         config->supportPreloadStartingWindow_ = parcel.ReadBool();
         if (!parcel.ReadFloat(config->defaultCornerRadius_)) {
             delete config;

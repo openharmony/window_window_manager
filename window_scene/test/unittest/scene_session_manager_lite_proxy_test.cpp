@@ -144,7 +144,37 @@ HWTEST_F(sceneSessionManagerLiteProxyTest, UpdateAnimationSpeedWithPid, TestSize
         sptr<SceneSessionManagerLiteProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sceneSessionManagerLiteProxy, nullptr);
 
+    MockMessageParcel::ClearAllErrorFlag();
     EXPECT_EQ(WMError::WM_OK, sceneSessionManagerLiteProxy->UpdateAnimationSpeedWithPid(10000, 2.0f));
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    WMError errCode = sceneSessionManagerLiteProxy->UpdateAnimationSpeedWithPid(10000, 2.0f);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    errCode = sceneSessionManagerLiteProxy->UpdateAnimationSpeedWithPid(10000, 2.0f);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+
+    MockMessageParcel::SetWriteFloatErrorFlag(true);
+    errCode = sceneSessionManagerLiteProxy->UpdateAnimationSpeedWithPid(10000, 2.0f);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteFloatErrorFlag(false);
+
+    sptr<SceneSessionManagerLiteProxy> nullptrProxy =
+        sptr<SceneSessionManagerLiteProxy>::MakeSptr(nullptr);
+    errCode = nullptrProxy->UpdateAnimationSpeedWithPid(10000, 2.0f);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+
+    iRemoteObjectMocker->SetRequestResult(1);
+    errCode = sceneSessionManagerLiteProxy->UpdateAnimationSpeedWithPid(10000, 2.0f);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    iRemoteObjectMocker->SetRequestResult(0);
+
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    errCode = sceneSessionManagerLiteProxy->UpdateAnimationSpeedWithPid(10000, 2.0f);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
 }
 
 /**

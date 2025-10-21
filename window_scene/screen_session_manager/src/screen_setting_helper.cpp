@@ -755,7 +755,7 @@ bool ScreenSettingHelper::GetResolutionEffect(bool& enable, const std::string& s
         TLOGE(WmsLogTag::DMS, "split failed, data size: %{public}d", dataSize);
         return false;
     }
-    for (auto infoString : screenResolutionEffectSet) {
+    for (auto& infoString : screenResolutionEffectSet) {
         std::vector<std::string> infoVector = {};
         split = SplitString(infoVector, infoString, ' ');
         dataSize = infoVector.size();

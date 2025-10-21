@@ -34,6 +34,7 @@ public:
 private:
     int HandleSetSessionLabel(MessageParcel& data, MessageParcel& reply);
     int HandleSetSessionIcon(MessageParcel& data, MessageParcel& reply);
+    int HandleSetSessionIconForThirdParty(MessageParcel& data, MessageParcel& reply);
     int HandleIsValidSessionIds(MessageParcel& data, MessageParcel& reply);
     int HandlePendingSessionToForeground(MessageParcel& data, MessageParcel& reply);
     int HandlePendingSessionToBackground(MessageParcel& data, MessageParcel& reply);
@@ -56,6 +57,7 @@ private:
     int HandleUnlockSession(MessageParcel& data, MessageParcel& reply);
     int HandleMoveSessionsToForeground(MessageParcel& data, MessageParcel& reply);
     int HandleMoveSessionsToBackground(MessageParcel& data, MessageParcel& reply);
+    int HandleGetParentMainWindowId(MessageParcel& data, MessageParcel& reply);
     //for window manager service
     int HandleGetFocusSessionInfo(MessageParcel& data, MessageParcel& reply);
     int HandleRegisterWindowManagerAgent(MessageParcel& data, MessageParcel& reply);

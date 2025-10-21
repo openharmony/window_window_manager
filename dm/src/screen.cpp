@@ -120,7 +120,13 @@ bool Screen::IsReal() const
 DMError Screen::SetOrientation(Orientation orientation) const
 {
     TLOGD(WmsLogTag::DMS, "Orientation %{public}u", orientation);
-    return SingletonContainer::Get<ScreenManagerAdapter>().SetOrientation(GetId(), orientation);
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetOrientation(GetId(), orientation, false);
+}
+
+DMError Screen::SetScreenOrientation(Orientation orientation) const
+{
+    TLOGD(WmsLogTag::DMS, "Orientation %{public}u", orientation);
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetOrientation(GetId(), orientation, true);
 }
 
 DMError Screen::GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts) const

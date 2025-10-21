@@ -103,6 +103,34 @@ void DisplayAni::GetAvailableArea(ani_env* env, ani_object obj, ani_object avail
     DisplayAniUtils::ConvertRect(area, availableAreaObj, env);
 }
 
+void DisplayAni::GetLiveCreaseRegion(ani_env* env, ani_object obj, ani_object foldCreaseRegionObj)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
+        return;
+    }
+    ani_long id;
+    env->Object_GetFieldByName_Long(obj, "<property>id", &id);
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(id);
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] can not find display.");
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_SCREEN,
+            "JsDisplay::GetAvailableArea failed, can not find display.");
+        return;
+    }
+    FoldCreaseRegion region;
+    DMError nativeErrorCode = display->GetLiveCreaseRegion(region);
+    auto errorCodeMapping = DM_JS_TO_ERROR_CODE_MAP.find(nativeErrorCode);
+    if (errorCodeMapping == DM_JS_TO_ERROR_CODE_MAP.end()) {
+        TLOGE(WmsLogTag::DMS, "Unrecognized DMError: %{public}d", static_cast<int32_t>(nativeErrorCode));
+        AniErrUtils::ThrowBusinessError(env,
+            DmErrorCode::DM_ERROR_INVALID_PARAM, "JsDisplay::GetAvailableArea failed.");
+        return;
+    }
+    DisplayAniUtils::SetFoldCreaseRegion(env, region, foldCreaseRegionObj);
+}
+
 ani_boolean DisplayAni::HasImmersiveWindow(ani_env* env, ani_object obj)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
@@ -423,6 +451,10 @@ ani_status DisplayAni::NspBindNativeFunctions(ani_env* env, ani_namespace nsp)
             reinterpret_cast<void *>(DisplayManagerAni::HasPrivateWindow)},
         ani_native_function {"getAllDisplayPhysicalResolutionNative", nullptr,
             reinterpret_cast<void *>(DisplayManagerAni::GetAllDisplayPhysicalResolution)},
+        ani_native_function {"convertGlobalToRelativeCoordinateNative", nullptr,
+            reinterpret_cast<void *>(DisplayManagerAni::ConvertGlobalToRelativeCoordinate)},
+        ani_native_function {"convertRelativeToGlobalCoordinateNative", nullptr,
+            reinterpret_cast<void *>(DisplayManagerAni::ConvertRelativeToGlobalCoordinate)},
         ani_native_function {"isCaptured", nullptr, reinterpret_cast<void *>(DisplayManagerAni::IsCaptured)},
         ani_native_function {"finalizerDisplayNative", nullptr,
             reinterpret_cast<void *>(DisplayManagerAni::FinalizerDisplay)},
@@ -442,6 +474,8 @@ ani_status DisplayAni::ClassBindNativeFunctions(ani_env* env, ani_class displayC
             reinterpret_cast<void *>(DisplayAni::GetCutoutInfo)},
         ani_native_function {"getAvailableAreaInternal", "C{@ohos.display.display.Rect}:",
             reinterpret_cast<void *>(DisplayAni::GetAvailableArea)},
+        ani_native_function {"getLiveCreaseRegionInternal", nullptr,
+            reinterpret_cast<void *>(DisplayAni::GetLiveCreaseRegion)},
         ani_native_function {"hasImmersiveWindowInternal", ":z",
             reinterpret_cast<void *>(DisplayAni::HasImmersiveWindow)},
         ani_native_function {"syncOn", nullptr,
