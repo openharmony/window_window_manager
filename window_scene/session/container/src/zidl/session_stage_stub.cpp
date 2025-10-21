@@ -1107,6 +1107,7 @@ int SessionStageStub::HandleNotifyPipScreenStatusChange(MessageParcel& data, Mes
     TLOGD(WmsLogTag::WMS_PIP, "in");
     int32_t status;
     if (!data.ReadInt32(status)) {
+        TLOGE(WmsLogTag::WMS_PIP, "Read screen status failed.");
         return ERR_INVALID_VALUE;
     }
     PiPScreenStatus status_ = static_cast<PiPScreenStatus>(status);

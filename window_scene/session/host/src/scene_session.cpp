@@ -3142,6 +3142,7 @@ WSError SceneSession::NotifyPipScreenStatusChange(PiPScreenStatus status)
 {
     TLOGI(WmsLogTag::WMS_PIP, "status: %{public}u", status);
     if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_PIP, "sessionStage is null");
         return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->NotifyPipScreenStatusChange(status);
