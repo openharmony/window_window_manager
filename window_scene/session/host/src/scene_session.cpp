@@ -9825,7 +9825,7 @@ WMError SceneSession::HandleActionUpdateRotationLockChange(const sptr<WindowSess
 /*
  * Window Event start
  */
-bool SceneSession::Checkparameters(const std::vector<int32_t>& parameters, const int32_t length)
+bool SceneSession::CheckParameters(const std::vector<int32_t>& parameters, const int32_t length)
 {
     if (parameters.size() < 1) {
         TLOGE(WmsLogTag::WMS_EVENT, "The format is incorrect(size<1).");
@@ -9848,7 +9848,7 @@ WMError SceneSession::LockCursor(const std::vector<int32_t>& parameters)
         TLOGE(WmsLogTag::WMS_EVENT, "The caller has not permission granted");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    if (!Checkparameters(parameters, LOCK_CURSOR_LENGTH)) {
+    if (!CheckParameters(parameters, LOCK_CURSOR_LENGTH)) {
         return WMError::WM_ERROR_ILLEGAL_PARAM;
     }
     if (parameters[1] != GetWindowId()) {
@@ -9869,7 +9869,7 @@ WMError SceneSession::UnlockCursor(const std::vector<int32_t>& parameters)
         TLOGE(WmsLogTag::WMS_EVENT, "The caller has not permission granted");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    if (!Checkparameters(parameters, UNLOCK_CURSOR_LENGTH)) {
+    if (!CheckParameters(parameters, UNLOCK_CURSOR_LENGTH)) {
         return WMError::WM_ERROR_ILLEGAL_PARAM;
     }
     if (parameters[1] != GetWindowId()) {
