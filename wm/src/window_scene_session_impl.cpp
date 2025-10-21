@@ -3211,7 +3211,6 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
             if (ret != WMError::WM_OK) {
                 return ret;
             }
-            property_->SetSystemBarProperty(systemBarType, statusBarProp);
         }
         if (systemBarPropertyFlag.enableFlag || systemBarPropertyFlag.backgroundColorFlag ||
             systemBarPropertyFlag.contentColorFlag || systemBarPropertyFlag.enableAnimationFlag) {
@@ -3240,11 +3239,9 @@ WMError WindowSceneSessionImpl::updateSystemBarStyle(WindowType type, SystemBarP
             isNeedUpdate = true;
         }
     }
-    auto ret = WMError::WM_OK;
-    if (isNeedUpdate) {
-        ret = SetSystemBarProperty(type, systemBarProperty);
-    } else {
-        ret = SetSystemBarProperty(type, property);
+    auto ret = SetSystemBarProperty(type, isNeedUpdate ? systemBarProperty : property);
+    if (ret == WMError::WM_OK) {
+        property_->SetSystemBarProperty(systemBarType, statusBarProp);
     }
     return ret;
 }
