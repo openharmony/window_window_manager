@@ -452,6 +452,7 @@ struct SessionInfo {
     StartWindowType startWindowType_ = StartWindowType::DEFAULT;
     bool isSetStartWindowType_ = false;
     int32_t scenarios = 0;
+    bool isPrelaunch_ = false;
 
     /*
      * Keyboard
