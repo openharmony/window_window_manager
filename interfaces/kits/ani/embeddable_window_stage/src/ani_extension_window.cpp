@@ -111,10 +111,11 @@ ani_object AniExtensionWindow::CreateAniExtensionWindow(ani_env* env, sptr<Rosen
     env->Object_CallMethod_Void(obj, setObjFunc, reinterpret_cast<ani_long>(aniExtensionWindow.get()));
     ani_ref ref = nullptr;
     if (env->GlobalReference_Create(obj, &ref) == ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] create global ref fail");
         aniExtensionWindow->SetAniRef(ref);
         localObjs.insert(std::pair(ref, aniExtensionWindow.release()));
-    };
+    } else {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] create global ref fail");
+    }
     return obj;
 }
 
@@ -322,19 +323,19 @@ WmErrorCode AniExtensionWindow::OnUnRegisterRectChangeCallback(ani_env* env, ani
 static ani_status ExtWindowSetRect(ani_env* env, ani_object obj, OHOS::Rosen::Rect& rect)
 {
     ani_status ret {};
-    if ((ret = env->Object_SetFieldByName_Double(obj, "<property>left", rect.posX_)) != ANI_OK) {
+    if ((ret = env->Object_SetFieldByName_Int(obj, "<property>left", rect.posX_)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Set left field failed, ret: %{public}u", ret);
         return ret;
     }
-    if ((ret = env->Object_SetFieldByName_Double(obj, "<property>top", rect.posY_)) != ANI_OK) {
+    if ((ret = env->Object_SetFieldByName_Int(obj, "<property>top", rect.posY_)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Set top field failed, ret: %{public}u", ret);
         return ret;
     }
-    if ((ret = env->Object_SetFieldByName_Double(obj, "<property>width", rect.width_)) != ANI_OK) {
+    if ((ret = env->Object_SetFieldByName_Int(obj, "<property>width", rect.width_)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Set width field failed, ret: %{public}u", ret);
         return ret;
     }
-    if ((ret = env->Object_SetFieldByName_Double(obj, "<property>height", rect.height_)) != ANI_OK) {
+    if ((ret = env->Object_SetFieldByName_Int(obj, "<property>height", rect.height_)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Set height field failed, ret: %{public}u", ret);
         return ret;
     }
