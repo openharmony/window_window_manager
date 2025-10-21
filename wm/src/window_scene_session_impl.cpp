@@ -3229,17 +3229,17 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
 
 WMError WindowSceneSessionImpl::updateSystemBarStyle(WindowType type, SystemBarProperty property)
 {
-    bool isNeedUpdate = false;
+    bool isUsedPageEnabled = false;
     {
         std::lock_guard<std::mutex> lock(systemBarPropertyForPageMapMutex_);
         SystemBarProperty systemBarProperty = property;
         auto iter = systemBarPropertyForPageMap_.find(systemBarType);
         if (iter != systemBarPropertyForPageMap_.end() && iter->second.has_value()) {    
             systemBarProperty.enable_ = iter->second.value().enable_;
-            isNeedUpdate = true;
+            isUsedPageEnabled = true;
         }
     }
-    auto ret = SetSystemBarProperty(type, isNeedUpdate ? systemBarProperty : property);
+    auto ret = SetSystemBarProperty(type, isUsedPageEnabled ? systemBarProperty : property);
     if (ret == WMError::WM_OK) {
         property_->SetSystemBarProperty(systemBarType, statusBarProp);
     }
