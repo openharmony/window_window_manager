@@ -5045,7 +5045,7 @@ void SceneSession::SetUIFirstSwitch(RSUIFirstSwitch uiFirstSwitch)
 void SceneSession::CloneWindow(NodeId surfaceNodeId, bool needOffScreen)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::CloneWindow");
-    AutoRSTransaction trans(GetRSUIContext());
+    AutoRSTransaction trans(GetRSShadowContext());
     if (auto shadowSurfaceNode = GetShadowSurfaceNode()) {
         TLOGI(WmsLogTag::WMS_PC, "%{public}s this: %{public}" PRIu64 " cloned: %{public}" PRIu64,
             shadowSurfaceNode->GetName().c_str(), shadowSurfaceNode->GetId(), surfaceNodeId);

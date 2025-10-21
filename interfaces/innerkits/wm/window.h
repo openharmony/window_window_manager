@@ -4758,7 +4758,7 @@ public:
     /**
      * @brief Check if the current device is in free window mode.
      *
-     * @return true means is in free window mdoe, false means not in free window mdoe.
+     * @return true means is in free window mode, false means not in free window mode.
      */
     virtual bool IsInFreeWindowMode() const { return false; }
 

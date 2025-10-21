@@ -2757,7 +2757,6 @@ bool AniWindow::OnGetRotationLocked(ani_env* env)
 
 ani_boolean AniWindow::IsInFreeWindowMode(ani_env* env, ani_object obj, ani_long nativeObj)
 {
-    using namespace OHOS::Rosen;
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     return aniWindow != nullptr ? static_cast<ani_boolean>(aniWindow->OnIsInFreeWindowMode(env)) :
@@ -2766,7 +2765,6 @@ ani_boolean AniWindow::IsInFreeWindowMode(ani_env* env, ani_object obj, ani_long
 
 bool AniWindow::OnIsInFreeWindowMode(ani_env* env)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] window is null");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
