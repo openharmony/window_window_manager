@@ -956,13 +956,14 @@ void WindowSceneSessionImpl::UpdateDefaultStatusBarColor()
         auto iter = systemBarPropertyForPageMap_.find(WindowType::WINDOW_TYPE_STATUS_BAR);
         if (iter != systemBarPropertyForPageMap_.end() && iter->second.has_value()) {
             SystemBarProperty prop = statusBarProp;
-            prop.enable_ = iter->second.enable_;
+            prop.enable_ = iter->second.value().enable_;
             property_->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, prop);
             NotifySpecificWindowSessionProperty(WindowType::WINDOW_TYPE_STATUS_BAR, prop);
             property_->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProp);
+        } else {
+            SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProp);
         }
     }
-    SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProp);
 }
 
 void WindowSceneSessionImpl::InitSystemSessionDragEnable()
@@ -3220,10 +3221,10 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
             property.settingFlag_ |= SystemBarSettingFlag::COLOR_SETTING;
             {
                 std::lock_guard<std::mutex> lock(systemBarPropertyForPageMapMutex_);
-                auto iter = systemBarPropertyForPageMap_.find(WindowType::WINDOW_TYPE_STATUS_BAR);
+                auto iter = systemBarPropertyForPageMap_.find(systemBarType);
                 if (iter != systemBarPropertyForPageMap_.end() && iter->second.has_value()) {
                     SystemBarProperty prop = property;
-                    prop.enable_ = iter->second.enable_;
+                    prop.enable_ = iter->second.value().enable_;
                     property_->SetSystemBarProperty(systemBarType, prop);
                     NotifySpecificWindowSessionProperty(systemBarType, prop);
                     property_->SetSystemBarProperty(systemBarType, property);
@@ -3306,7 +3307,7 @@ WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(WindowType type, std
     if (property == std::nullopt) {
         {
             std::lock_guard<std::mutex> lock(systemBarPropertyForPageMapMutex_);
-            systemBarPropertyForPageMap_[type] = std:nullopt;
+            systemBarPropertyForPageMap_[type] = std::nullopt;
         }
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u property is nullptr use main window prop", GetWindowId());
         return NotifySpecificWindowSessionProperty(type, GetSystemBarPropertyByType(type));
