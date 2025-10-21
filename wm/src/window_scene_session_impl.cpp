@@ -951,19 +951,7 @@ void WindowSceneSessionImpl::UpdateDefaultStatusBarColor()
     statusBarProp.settingFlag_ = static_cast<SystemBarSettingFlag>(
         static_cast<uint32_t>(statusBarProp.settingFlag_) |
         static_cast<uint32_t>(SystemBarSettingFlag::FOLLOW_SETTING));
-    {
-        std::lock_guard<std::mutex> lock(systemBarPropertyForPageMapMutex_);
-        auto iter = systemBarPropertyForPageMap_.find(WindowType::WINDOW_TYPE_STATUS_BAR);
-        if (iter != systemBarPropertyForPageMap_.end() && iter->second.has_value()) {
-            SystemBarProperty prop = statusBarProp;
-            prop.enable_ = iter->second.value().enable_;
-            property_->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, prop);
-            NotifySpecificWindowSessionProperty(WindowType::WINDOW_TYPE_STATUS_BAR, prop);
-            property_->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProp);
-        } else {
-            SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProp);
-        }
-    }
+    updateSystemBarStyle(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProp);
 }
 
 void WindowSceneSessionImpl::InitSystemSessionDragEnable()
@@ -3219,18 +3207,11 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
         }
         if (systemBarPropertyFlag.backgroundColorFlag || systemBarPropertyFlag.contentColorFlag) {
             property.settingFlag_ |= SystemBarSettingFlag::COLOR_SETTING;
-            {
-                std::lock_guard<std::mutex> lock(systemBarPropertyForPageMapMutex_);
-                auto iter = systemBarPropertyForPageMap_.find(systemBarType);
-                if (iter != systemBarPropertyForPageMap_.end() && iter->second.has_value()) {
-                    SystemBarProperty prop = property;
-                    prop.enable_ = iter->second.value().enable_;
-                    property_->SetSystemBarProperty(systemBarType, prop);
-                    NotifySpecificWindowSessionProperty(systemBarType, prop);
-                    property_->SetSystemBarProperty(systemBarType, property);
-                    return WMError::WM_OK;
-                }
+            auto ret = updateSystemBarStyle(WindowType type, SystemBarProperty property);
+            if (ret != WMError::WM_OK) {
+                return ret;
             }
+            property_->SetSystemBarProperty(systemBarType, statusBarProp);
         }
         if (systemBarPropertyFlag.enableFlag || systemBarPropertyFlag.backgroundColorFlag ||
             systemBarPropertyFlag.contentColorFlag || systemBarPropertyFlag.enableAnimationFlag) {
@@ -3245,6 +3226,27 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
         GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
     MobileAppInPadLayoutFullScreenChange(statusProperty.enable_, navigationIndicatorPorperty.enable_);
     return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::updateSystemBarStyle(WindowType type, SystemBarProperty property)
+{
+    bool isNeedUpdate = false;
+    {
+        std::lock_guard<std::mutex> lock(systemBarPropertyForPageMapMutex_);
+        SystemBarProperty systemBarProperty = property;
+        auto iter = systemBarPropertyForPageMap_.find(systemBarType);
+        if (iter != systemBarPropertyForPageMap_.end() && iter->second.has_value()) {    
+            systemBarProperty.enable_ = iter->second.value().enable_;
+            isNeedUpdate = true;
+        }
+    }
+    auto ret = WMError::WM_OK;
+    if (isNeedUpdate) {
+        ret = SetSystemBarProperty(type, systemBarProperty);
+    } else {
+        ret = SetSystemBarProperty(type, property);
+    }
+    return ret;
 }
 
 void WindowSceneSessionImpl::MobileAppInPadLayoutFullScreenChange(bool statusBarEnable, bool navigationEnable)
