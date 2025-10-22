@@ -511,8 +511,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "setPiPControlEvent", moduleName, JsSceneSession::SetPiPControlEvent);
     BindNativeFunction(env, objValue, "notifyPipOcclusionChange", moduleName, JsSceneSession::NotifyPipOcclusionChange);
     BindNativeFunction(env, objValue, "notifyPipSizeChange", moduleName, JsSceneSession::NotifyPipSizeChange);
-    BindNativeFunction(env, objValue, "notifyPipScreenStatusChange", moduleName,
-        JsSceneSession::NotifyPipScreenWindowStatusChange);
+    BindNativeFunction(env, objValue, "notifyPipActiveStatusChange", moduleName,
+        JsSceneSession::NotifyPipActiveWindowStatusChange);
     BindNativeFunction(env, objValue, "notifyDisplayStatusBarTemporarily", moduleName,
         JsSceneSession::NotifyDisplayStatusBarTemporarily);
     BindNativeFunction(env, objValue, "setTemporarilyShowWhenLocked", moduleName,
@@ -2614,11 +2614,11 @@ napi_value JsSceneSession::NotifyPipSizeChange(napi_env env, napi_callback_info 
     return (me != nullptr) ? me->OnNotifyPipSizeChange(env, info) : nullptr;
 }
 
-napi_value JsSceneSession::NotifyPipScreenWindowStatusChange(napi_env env, napi_callback_info info)
+napi_value JsSceneSession::NotifyPipActiveWindowStatusChange(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_PIP, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
-    return (me != nullptr) ? me->OnNotifyPipScreenStatusChange(env, info) : nullptr;
+    return (me != nullptr) ? me->OnNotifyPiPActiveStatusChange(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::NotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info)
@@ -6234,7 +6234,7 @@ napi_value JsSceneSession::OnNotifyPipSizeChange(napi_env env, napi_callback_inf
     return NapiGetUndefined(env);
 }
 
-napi_value JsSceneSession::OnNotifyPipScreenStatusChange(napi_env env, napi_callback_info info)
+napi_value JsSceneSession::OnNotifyPiPActiveStatusChange(napi_env env, napi_callback_info info)
 {
     size_t argc = ARG_COUNT_1;
     napi_value argv[ARG_COUNT_1] = {nullptr};
@@ -6246,15 +6246,9 @@ napi_value JsSceneSession::OnNotifyPipScreenStatusChange(napi_env env, napi_call
         return NapiGetUndefined(env);
     }
 
-    PiPScreenStatus status = PiPScreenStatus::STATUS_UNKNOWN;
+    bool status = false;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], status)) {
         TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter, keep default: false");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    if (status <= PiPScreenStatus::STATUS_UNKNOWN || status > PiPScreenStatus::STATUS_SIDEBAR) {
-        TLOGE(WmsLogTag::WMS_PIP, "status value invalid, keep default: false");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -6267,7 +6261,7 @@ napi_value JsSceneSession::OnNotifyPipScreenStatusChange(napi_env env, napi_call
     }
 
     TLOGI(WmsLogTag::WMS_PIP, "persistId:%{public}d", persistentId_);
-    session->NotifyPipScreenStatusChange(status);
+    session->NotifyPiPActiveStatusChange(status);
     return NapiGetUndefined(env);
 }
 

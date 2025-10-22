@@ -1462,7 +1462,7 @@ WSError SessionStageProxy::NotifyPipWindowSizeChange(double width, double height
     return WSError::WS_OK;
 }
 
-WSError SessionStageProxy::NotifyPipScreenStatusChange(PiPScreenStatus status)
+WSError SessionStageProxy::NotifyPiPActiveStatusChange(bool status)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1472,7 +1472,7 @@ WSError SessionStageProxy::NotifyPipScreenStatusChange(PiPScreenStatus status)
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    if (!data.WriteInt32(static_cast<int32_t>(status))) {
+    if (!data.WriteBool(static_cast<int32_t>(status))) {
         TLOGE(WmsLogTag::WMS_PIP, "Write state failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -1483,7 +1483,7 @@ WSError SessionStageProxy::NotifyPipScreenStatusChange(PiPScreenStatus status)
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SCREEN_STATUS_CHANGE),
+    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_ACTIVE_STATUS_CHANGE),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_PIP, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
