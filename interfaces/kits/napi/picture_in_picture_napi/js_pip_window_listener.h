@@ -26,7 +26,8 @@ class JsPiPWindowListener : public IPiPLifeCycle,
                             public IPiPActionObserver,
                             public IPiPControlObserver,
                             public IPiPWindowSize,
-                            public IPiPTypeNodeObserver {
+                            public IPiPTypeNodeObserver,
+                            public IPiPScreenStatusObserver {
 public:
     JsPiPWindowListener(napi_env env, const std::shared_ptr<NativeReference>& callback)
         : env_(env), jsCallBack_(callback) {}
@@ -42,6 +43,7 @@ public:
     void OnControlEvent(PiPControlType controlType, PiPControlStatus statusCode) override;
     void OnPipSizeChange(const PiPWindowSize& size) override;
     void OnPipTypeNodeChange(const napi_ref nodeRef) override;
+    void OnScreenStatusChange(const PiPScreenStatus& status) override;
 
 private:
     void OnPipListenerCallback(PiPState state, int32_t errorCode);

@@ -183,5 +183,25 @@ void JsPiPWindowListener::OnPipTypeNodeChange(const napi_ref nodeRef)
     }
 }
 
+void JsPiPWindowListener::OnScreenStatusChange(const PiPScreenStatus& status)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "called, status: %{public}u", status);
+    auto napiTask = [jsCallback = jsCallBack_, status, env = env_]() {
+        if (jsCallback == nullptr) {
+            TLOGE(WmsLogTag::WMS_SYSTEM, "js callback is null");
+            return;
+        }
+        napi_value argv[] = {CreateJsValue(env, static_cast<int32_t>(status))};
+        CallJsFunction(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
+    };
+    if (env_ != nullptr) {
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnScreenStatusChange");
+        if (ret != napi_status::napi_ok) {
+            TLOGE(WmsLogTag::WMS_PIP, "Failed to SendEvent");
+        }
+    } else {
+        TLOGE(WmsLogTag::WMS_PIP, "env is nullptr");
+    }
+}
 } // namespace Rosen
 } // namespace OHOS

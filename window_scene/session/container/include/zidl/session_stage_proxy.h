@@ -74,6 +74,7 @@ public:
     WSError SetPipActionEvent(const std::string& action, int32_t status) override;
     WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status) override;
     WSError NotifyPipWindowSizeChange(double width, double height, double scale) override;
+    WSError NotifyPipScreenStatusChange(PiPScreenStatus status) override;
     WSError UpdateDisplayId(uint64_t displayId) override;
     void NotifyDisplayMove(DisplayId from, DisplayId to) override;
     WSError SwitchFreeMultiWindow(bool enable) override;

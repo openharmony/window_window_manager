@@ -302,6 +302,14 @@ void PictureInPictureManager::PipSizeChange(double width, double height, double 
     }
 }
 
+void PictureInPictureManager::DoScreenStatusChangeEvent(PiPScreenStatus status)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "in");
+    if (auto controller = GetActiveController()) {
+        controller->ScreenStatusChange(status);
+    }
+}
+
 bool PictureInPictureManager::GetPipEnabled()
 {
     return true;

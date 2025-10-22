@@ -30,6 +30,7 @@ namespace {
     const std::string CONTROL_PANEL_ACTION_EVENT_CB = "controlPanelActionEvent";
     const std::string CONTROL_EVENT_CB = "controlEvent";
     const std::string SIZE_CHANGE_CB = "pipWindowSizeChange";
+    const std::string SCREEN_STATUS_CHANGE_CB = "screenStatusChange";
 }
 
 void BindFunctions(napi_env env, napi_value object, const char* moduleName)
@@ -74,6 +75,7 @@ JsPipController::JsPipController(const sptr<PictureInPictureController>& pipCont
         { CONTROL_PANEL_ACTION_EVENT_CB, ListenerType::CONTROL_PANEL_ACTION_EVENT_CB },
         { CONTROL_EVENT_CB, ListenerType::CONTROL_EVENT_CB },
         { SIZE_CHANGE_CB, ListenerType::SIZE_CHANGE_CB },
+        { SCREEN_STATUS_CHANGE_CB, ListenerType::SCREEN_STATUS_CHANGE_CB },
     };
 }
 
@@ -497,6 +499,9 @@ WmErrorCode JsPipController::RegisterListenerWithType(napi_env env, const std::s
         case ListenerType::SIZE_CHANGE_CB:
             ProcessSizeChangeRegister(pipWindowListener);
             break;
+        case ListenerType::SCREEN_STATUS_CHANGE_CB:
+            ProcessScreenStatusChangeRegister(pipWindowListener);
+            break;
         default:
             break;
     }
@@ -562,6 +567,16 @@ void JsPipController::ProcessSizeChangeRegister(const sptr<JsPiPWindowListener>&
     pipController_->RegisterPiPWindowSize(thisListener);
 }
 
+void JsPipController::ProcessScreenStatusChangeRegister(const sptr<JsPiPWindowListener>& listener)
+{
+    if (pipController_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "controller is nullptr");
+        return;
+    }
+    sptr<IPiPScreenStatusObserver> thisListener(listener);
+    pipController_->RegisterPiPScreenStatusChange(listener);
+}
+
 void JsPipController::ProcessStateChangeUnRegister(const sptr<JsPiPWindowListener>& listener)
 {
     if (pipController_ == nullptr) {
@@ -600,6 +615,16 @@ void JsPipController::ProcessSizeChangeUnRegister(const sptr<JsPiPWindowListener
     }
     sptr<IPiPWindowSize> thisListener(listener);
     pipController_->UnregisterPiPWindowSize(thisListener);
+}
+
+void JsPipController::ProcessScreenStatusChangeUnRegister(const sptr<JsPiPWindowListener>& listener)
+{
+    if (pipController_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "controller is nullptr");
+        return;
+    }
+    sptr<IPiPScreenStatusObserver> thisListener(listener);
+    pipController_->UnregisterPiPScreenStatusChange(listener);
 }
 
 napi_value JsPipController::UnregisterCallback(napi_env env, napi_callback_info info)
@@ -693,6 +718,9 @@ WmErrorCode JsPipController::UnRegisterListener(const std::string& type,
             break;
         case ListenerType::SIZE_CHANGE_CB:
             ProcessSizeChangeUnRegister(pipWindowListener);
+            break;
+        case ListenerType::SCREEN_STATUS_CHANGE_CB:
+            ProcessScreenStatusChangeUnRegister(pipWindowListener);
             break;
         default:
             break;
