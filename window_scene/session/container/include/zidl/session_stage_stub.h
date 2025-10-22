@@ -96,7 +96,7 @@ private:
     int HandleNotifyHighlightChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyWindowCrossAxisChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyPipSizeChange(MessageParcel& data, MessageParcel& reply);
-    int HandleNotifyPipScreenStatusChange(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyPiPActiveStatusChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyRotationProperty(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyWindowAttachStateChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyKeyboardAnimationCompleted(MessageParcel& data, MessageParcel& reply);

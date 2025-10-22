@@ -3138,14 +3138,14 @@ WSError SceneSession::NotifyPipWindowSizeChange(double width, double height, dou
     return sessionStage_->NotifyPipWindowSizeChange(width, height, scale);
 }
 
-WSError SceneSession::NotifyPipScreenStatusChange(PiPScreenStatus status)
+WSError SceneSession::NotifyPiPActiveStatusChange(bool status)
 {
     TLOGI(WmsLogTag::WMS_PIP, "status: %{public}u", status);
     if (!sessionStage_) {
         TLOGE(WmsLogTag::WMS_PIP, "sessionStage is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    return sessionStage_->NotifyPipScreenStatusChange(status);
+    return sessionStage_->NotifyPiPActiveStatusChange(status);
 }
 
 void SceneSession::RegisterProcessPrepareClosePiPCallback(NotifyPrepareClosePiPSessionFunc&& callback)

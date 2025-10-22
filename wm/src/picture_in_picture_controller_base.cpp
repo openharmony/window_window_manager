@@ -434,16 +434,16 @@ uint64_t PictureInPictureControllerBase::GetSurfaceId() const
     return surfaceId_;
 }
 
-void PictureInPictureControllerBase::ScreenStatusChange(PiPScreenStatus status)
+void PictureInPictureControllerBase::ActiveStatusChange(bool status)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "notify screen status: %{public}u", status);
-    curScreenStatus_ = status;
-    for (auto& listener : pipScreenStatusObserver_) {
+    TLOGI(WmsLogTag::WMS_PIP, "notify active status: %{public}u", status);
+    curActiveStatus_ = status;
+    for (auto& listener : PiPActiveStatusObserver_) {
         if (listener == nullptr) {
-            TLOGE(WmsLogTag::WMS_PIP, "screen status listener is nullptr");
+            TLOGE(WmsLogTag::WMS_PIP, "screen active listener is nullptr");
             continue;
         }
-        listener->OnScreenStatusChange(status);
+        listener->OnActiveStatusChange(status);
     }
 }
 
@@ -489,9 +489,9 @@ WMError PictureInPictureControllerBase::RegisterPiPStart(const sptr<IPiPStartObs
     return RegisterListener(pipStartListeners_, listener);
 }
 
-WMError PictureInPictureControllerBase::RegisterPiPScreenStatusChange(const sptr<IPiPScreenStatusObserver>& listener)
+WMError PictureInPictureControllerBase::RegisterPiPActiveStatusChange(const sptr<IPiPActiveStatusObserver>& listener)
 {
-    return RegisterListener(pipScreenStatusObserver_, listener);
+    return RegisterListener(PiPActiveStatusObserver_, listener);
 }
 
 WMError PictureInPictureControllerBase::UnregisterPiPLifecycle(const sptr<IPiPLifeCycle>& listener)
@@ -524,9 +524,9 @@ WMError PictureInPictureControllerBase::UnregisterPiPStart(const sptr<IPiPStartO
     return UnregisterListener(pipStartListeners_, listener);
 }
 
-WMError PictureInPictureControllerBase::UnregisterPiPScreenStatusChange(const sptr<IPiPScreenStatusObserver>& listener)
+WMError PictureInPictureControllerBase::UnregisterPiPActiveStatusChange(const sptr<IPiPActiveStatusObserver>& listener)
 {
-    return UnregisterListener(pipScreenStatusObserver_, listener);
+    return UnregisterListener(PiPActiveStatusObserver_, listener);
 }
 
 void PictureInPictureControllerBase::UnregisterAllPiPLifecycle()
