@@ -2948,10 +2948,14 @@ void ScreenSessionManager::SetInternalScreenResolutionEffect(const sptr<ScreenSe
         return;
     }
     // Setting the display area of the internal screen
+    auto oldProperty = internalSession->GetScreenProperty();
     internalSession->UpdatePropertyByResolution(targetRect);
     internalSession->PropertyChange(internalSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
-    NotifyScreenChanged(internalSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
-    NotifyDisplayChanged(internalSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
+    if (oldProperty.GetScreenAreaWidth() != targetRect.width_ ||
+        oldProperty.GetScreenAreaHeight() != targetRect.height_) {
+        NotifyScreenChanged(internalSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
+        NotifyDisplayChanged(internalSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
+    }
     // Black out invalid area
     auto displaynode = internalSession->GetDisplayNode();
     displaynode->SetClipToBounds(true);
