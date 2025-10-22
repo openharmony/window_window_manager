@@ -2902,10 +2902,7 @@ bool ScreenSessionManager::SetResolutionEffect(ScreenId screenId,  uint32_t widt
     };
     TLOGI(WmsLogTag::DMS, "toRect %{public}d %{public}d %{public}d %{public}d",
         toRect.posX_, toRect.posY_, toRect.width_, toRect.height_);
-    auto internelProperty = internalSession->GetScreenProperty();
-    if (internelProperty.GetScreenAreaWidth() != width || internelProperty.GetScreenAreaHeight() != height) {
-        SetInternalScreenResolutionEffect(internalSession, toRect);
-    }
+    SetInternalScreenResolutionEffect(internalSession, toRect);
     SetExternalScreenResolutionEffect(externalSession, toRect);
     HandleCastVirtualScreenMirrorRegion();
     NotifyScreenModeChange();
