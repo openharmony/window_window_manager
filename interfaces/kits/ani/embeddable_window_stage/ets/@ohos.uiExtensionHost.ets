@@ -48,11 +48,6 @@ namespace uiExtensionHost {
     f(fnArg);
   }
 
-  function avoidAreaChangeCallback(cb: object, area: object, type: int): void {
-    const func = cb as (data: window.AvoidAreaOptions) => void;
-    func({type: type as window.AvoidAreaType, area: area as window.AvoidArea});
-  }
-
   function keyboardHeightChangeCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: number) => void;
     func(cbArg as number);

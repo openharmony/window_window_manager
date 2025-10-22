@@ -72,10 +72,11 @@ ani_object CreatAniSubWindowOptions(ani_env* env, const std::shared_ptr<Extensio
     env->Object_CallMethod_Void(aniOptions, setObjFunc, reinterpret_cast<ani_long>(config.get()));
     ani_ref ref = nullptr;
     if (env->GlobalReference_Create(aniOptions, &ref) == ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] create global ref fail");
         config->SetAniRef(ref);
         localObjs.insert(std::pair(ref, config.release()));
-    };
+    } else {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] create global ref fail");
+    }
 
     SubWindowOptions subWindowOptions = extensionWindowConfig->subWindowOptions;
     AniWindowUtils::CallAniMethodVoid(env, aniOptions, aniClass, "<set>zLevel", nullptr,
@@ -151,10 +152,11 @@ ani_object CreatAniSystemWindowOptions(ani_env* env,
     env->Object_CallMethod_Void(aniOptions, setObjFunc, reinterpret_cast<ani_long>(config.get()));
     ani_ref ref = nullptr;
     if (env->GlobalReference_Create(aniOptions, &ref) == ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] create global ref fail");
         config->SetAniRef(ref);
         localObjs.insert(std::pair(ref, config.release()));
-    };
+    } else {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] create global ref fail");
+    }
     
     return aniOptions;
 }
@@ -207,10 +209,11 @@ ani_object CreatAniRect(ani_env* env, const std::shared_ptr<ExtensionWindowConfi
     env->Object_CallMethod_Void(aniRect, setObjFunc, reinterpret_cast<ani_long>(config.get()));
     ani_ref ref = nullptr;
     if (env->GlobalReference_Create(aniRect, &ref) == ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] create global ref fail");
         config->SetAniRef(ref);
         localObjs.insert(std::pair(ref, config.release()));
-    };
+    } else {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] create global ref fail");
+    }
     
     return aniRect;
 }
@@ -247,10 +250,11 @@ ani_object CreateAniExtensionWindowConfig(ani_env* env,
     env->Object_CallMethod_Void(aniConfig, setObjFunc, reinterpret_cast<ani_long>(config.get()));
     ani_ref ref = nullptr;
     if (env->GlobalReference_Create(aniConfig, &ref) == ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] create global ref fail");
         config->SetAniRef(ref);
         localObjs.insert(std::pair(ref, config.release()));
-    };
+    } else {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] create global ref fail");
+    }
 
     return aniConfig;
 }
