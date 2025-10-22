@@ -814,6 +814,22 @@ HWTEST_F(WindowSessionImplTest4, SetPiPControlEvent, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyPipScreenStatusChange
+ * @tc.desc: NotifyPipScreenStatusChange Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, NotifyPipScreenStatusChange, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: NotifyPipScreenStatusChange start";
+    auto option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyPipScreenStatusChange");
+    auto window = sptr<WindowSessionImpl>::MakeSptr(option);
+    WSError res = window->NotifyPipScreenStatusChange(PiPScreenStatus::STATUS_SIDEBAR);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: NotifyPipScreenStatusChange end";
+}
+
+/**
  * @tc.name: SetUIContentInner
  * @tc.desc: SetUIContentInner Test
  * @tc.type: FUNC

@@ -5936,6 +5936,16 @@ WSError WindowSessionImpl::NotifyPipWindowSizeChange(double width, double height
     return WSError::WS_OK;
 }
 
+WSError WindowSessionImpl::NotifyPipScreenStatusChange(PiPScreenStatus status)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "status=%{public}u", status);
+    auto task = [status]() {
+        PictureInPictureManager::DoScreenStatusChangeEvent(status);
+    };
+    handler_->PostTask(task, "WMS_WindowSessionImpl_NotifyPipScreenStatusChange");
+    return WSError::WS_OK;
+}
+
 WSError WindowSessionImpl::SendFbActionEvent(const std::string& action)
 {
     TLOGI(WmsLogTag::WMS_SYSTEM, "action: %{public}s", action.c_str());

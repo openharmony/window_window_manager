@@ -95,6 +95,11 @@ public:
     // native callback
     virtual void OnPipStart(uint32_t controllerId, uint8_t requestId, uint64_t surfaceId) {}
 };
+
+class IPiPScreenStatusObserver : virtual public RefBase {
+public:
+    virtual void OnScreenStatusChange(const PiPScreenStatus& status) {}
+};
 } // namespace Rosen
 } // namespace OHOS
 #endif //OHOS_PICTURE_IN_PICTURE_INTERFACE_H

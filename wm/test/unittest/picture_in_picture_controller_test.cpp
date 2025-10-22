@@ -78,6 +78,14 @@ void PictureInPictureControllerTest::SetUp() {}
 
 void PictureInPictureControllerTest::TearDown() {}
 
+class MockPiPScreenStatus : public IPiPScreenStatusObserver {
+public:
+    void OnScreenStatusChange(const PiPScreenStatus& status) override
+    {
+        return;
+    }
+};
+
 namespace {
 /**
  * @tc.name: ShowPictureInPictureWindow01
@@ -627,6 +635,45 @@ HWTEST_F(PictureInPictureControllerTest, DoControlEvent, TestSize.Level1)
     pipControl->RegisterPiPControlObserver(listener);
     pipControl->DoControlEvent(controlType, status);
     ASSERT_EQ(1, pipControl->pipOption_->GetControlStatus().size());
+}
+
+/**
+ * @tc.name: ScreenStatusChange
+ * @tc.desc: ScreenStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, ScreenStatusChange, TestSize.Level1)
+{
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
+    auto listener = sptr<MockPiPScreenStatus>::MakeSptr();
+
+    pipControl->RegisterPiPScreenStatusChange(listener);
+    pipControl->ScreenStatusChange(PiPScreenStatus::STATUS_SIDEBAR);
+    ASSERT_EQ(PiPScreenStatus::STATUS_SIDEBAR, pipControl->curScreenStatus_);
+}
+
+/**
+ * @tc.name: RegisterPiPScreenStatusChange
+ * @tc.desc: RegisterPiPScreenStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, RegisterPiPScreenStatusChange, TestSize.Level1)
+{
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
+    auto listener = sptr<MockPiPScreenStatus>::MakeSptr();
+
+    pipControl->RegisterPiPScreenStatusChange(listener);
+    ASSERT_EQ(pipControl->pipScreenStatusObserver_.size(), 1);
+    pipControl->UnregisterPiPScreenStatusChange(listener);
+    ASSERT_EQ(pipControl->pipScreenStatusObserver_.size(), 0);
 }
 
 /**
