@@ -738,6 +738,11 @@ export enum OcclusionState {
     FULL_OCCLUSION = 2
 }
 
+export enum PixelUnit {
+    PX = 0,
+    VP = 1,
+}
+
 export enum WindowStageEventType {
     SHOWN = 1,
     ACTIVE = 2,
@@ -1691,6 +1696,15 @@ export interface WindowLimits {
      * @since 12
      */
     minHeight?: int;
+
+    /**
+     * The unit of window limits.
+     *
+     * @type { ?PixelUnit }
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 22 dynamic&static
+     */
+    pixelUnit?:PixelUnit;
 }
 
 export class WindowLimitsInternal implements WindowLimits {
@@ -1698,6 +1712,7 @@ export class WindowLimitsInternal implements WindowLimits {
     maxHeight?: int;
     minWidth?: int;
     minHeight?: int;
+    pixelUnit?: PixelUnit;
 }
 
 /**
@@ -2533,6 +2548,7 @@ export class WindowInternal implements Window {
     private native resizeAsync(nativeObj: long, width: int, height: int): void;
     private native setWindowLimits(nativeObj: long, windowLimits: WindowLimits, isForcible?: boolean): WindowLimits;
     private native getWindowLimits(nativeObj: long): WindowLimits;
+    private native getWindowLimitsVP(nativeObj: long): WindowLimits;
     private native setAspectRatio(nativeObj: long, ratio: double): void;
     private native resetAspectRatio(nativeObj: long): void;
     private native maximize(nativeObj: long, presentation?: MaximizePresentation, acrossDisplay?: boolean): void;
@@ -3364,6 +3380,10 @@ export class WindowInternal implements Window {
       return this.getWindowLimits(this.nativeObj);
     }
 
+    public getWindowLimitsVP(): WindowLimits {
+      return this.getWindowLimitsVP(this.nativeObj);
+    }
+
     public setAspectRatio(ratio: double, callback: AsyncCallback<void>) {
       taskpool.execute(() => {
         this.setAspectRatio(this.nativeObj, ratio);
@@ -3753,6 +3773,7 @@ export interface Window {
     setWindowLimits(windowLimits: WindowLimits): Promise<WindowLimits>;
     setWindowLimits(windowLimits: WindowLimits, isForcible: boolean): Promise<WindowLimits>;
     getWindowLimits(): WindowLimits;
+    getWindowLimitsVP(): WindowLimits;
     setAspectRatio(ratio: double, callback: AsyncCallback<void>): void;
     setAspectRatio(ratio: double): Promise<void>;
     resetAspectRatio(callback: AsyncCallback<void>): void;
