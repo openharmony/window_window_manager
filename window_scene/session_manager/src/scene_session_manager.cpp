@@ -1744,7 +1744,6 @@ bool SceneSessionManager::CheckAbilityInfoByWant(const std::shared_ptr<AAFwk::Wa
         TLOGE(WmsLogTag::WMS_LIFE, "want is nullptr");
         return false;
     }
-    
     if (!bundleMgr_->QueryAbilityInfo(*want,
         AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, currentUserId_, abilityInfo)) {
         TLOGE(WmsLogTag::WMS_LIFE, "ability not found %{public}s %{public}s %{public}s",
