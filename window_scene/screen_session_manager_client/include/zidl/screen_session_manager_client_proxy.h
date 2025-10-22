@@ -31,8 +31,8 @@ public:
     void OnScreenConnectionChanged(SessionOption option, ScreenEvent screenEvent) override;
     void OnPropertyChanged(ScreenId screenId,
         const ScreenProperty& property, ScreenPropertyChangeReason reason) override;
-    void OnFoldPropertyChanged(ScreenId screenId, const ScreenProperty& property, ScreenPropertyChangeReason reason,
-            FoldDisplayMode displayMode) override;
+    bool OnFoldPropertyChange(ScreenId screenId, const ScreenProperty& property,
+        ScreenPropertyChangeReason reason, FoldDisplayMode displayMode, ScreenProperty& midProperty) override;
     void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason) override;
     void OnSensorRotationChanged(ScreenId screenId, float sensorRotation) override;
