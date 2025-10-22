@@ -3232,7 +3232,7 @@ WMError WindowSceneSessionImpl::updateSystemBarStyle(WindowType type, SystemBarP
     {
         std::lock_guard<std::mutex> lock(systemBarPropertyForPageMapMutex_);
         auto iter = systemBarPropertyForPageMap_.find(type);
-        if (iter != systemBarPropertyForPageMap_.end() && iter->second.has_value()) {    
+        if (iter != systemBarPropertyForPageMap_.end() && iter->second.has_value()) {
             systemBarProperty.enable_ = iter->second.value().enable_;
             isUsedPageEnabled = true;
         }
