@@ -43,6 +43,7 @@ public:
     DMError UnregisterAbnormalScreenConnectChangeListener(sptr<IAbnormalScreenConnectChangeListener> listener);
     DMError GetPhysicalScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos);
     void OnRemoteDied();
+    void DlcloseClearResource();
 
 private:
     void NotifyScreenConnect(sptr<ScreenInfo> info);
@@ -439,6 +440,14 @@ DMError ScreenManagerLite::Impl::GetPhysicalScreenInfos(std::vector<sptr<ScreenI
 sptr<ScreenInfo> ScreenManagerLite::GetScreenInfoById(ScreenId screenId)
 {
     return SingletonContainer::Get<ScreenManagerAdapterLite>().GetScreenInfo(screenId);
+}
+
+extern "C" __attribute__((destructor)) void ScreenManagerLite::Impl::DlcloseClearResource()
+{
+    // clear stub callback when dlclose
+    TLOGI(WmsLogTag::DMS, "enter");
+    SingletonContainer::Get<ScreenManagerAdapterLite>().Clear();
+    ScreenManagerLite::DestroyInstance();
 }
 
 void ScreenManagerLite::Impl::OnRemoteDied()

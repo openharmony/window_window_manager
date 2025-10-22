@@ -23,6 +23,7 @@ namespace Rosen {
 public:                                              \
     static className& GetInstance();                 \
     static bool SetInstance(className* newInstance); \
+    static void DestroyInstance();                    \
     className(const className&) = delete;            \
     className& operator=(const className&) = delete; \
     className(className&&) = delete;                 \
@@ -56,6 +57,14 @@ protected:                                     \
         }                                                      \
         singleton_ = newInstance;                              \
         return true;                                           \
+    }                                                          \
+    void className::DestroyInstance()                          \
+    {                                                          \
+        std::lock_guard<std::mutex> lock(singletonMutex_);     \
+        if (!singleton_) {                                     \
+            delete singleton_;                                 \
+            singleton_ = nullptr;                              \
+        }                                                      \
     }
 
 } // namespace Rosen
