@@ -46,7 +46,6 @@ const std::string MAIN_TP = "0";
 const std::string SUB_TP = "1";
 const int32_t REMOVE_DISPLAY_NODE = 0;
 const int32_t ADD_DISPLAY_NODE = 1;
-const uint32_t CHANGE_MODE_TASK_NUM = 3;
 constexpr float VERTICAL_ROTATION = 0.0F;
 constexpr float VERTICAL_ROTATION_REVERSE = 180.0F;
 } // namespace
@@ -118,7 +117,7 @@ void DualDisplayFoldPolicy::GetFoldCreaseRect(bool isVertical,
 void DualDisplayFoldPolicy::SetdisplayModeChangeStatus(bool status, bool isOnBootAnimation)
 {
     if (status) {
-        pengdingTask_ = CHANGE_MODE_TASK_NUM;
+        pengdingTask_ = isOnBootAnimation ? FOLD_TO_EXPAND_ONBOOTANIMATION_TASK_NUM : FOLD_TO_EXPAND_TASK_NUM;
         startTimePoint_ = std::chrono::steady_clock::now();
         displayModeChangeRunning_ = status;
     } else {
