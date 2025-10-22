@@ -1456,6 +1456,8 @@ private:
     WMError UnregisterDisplayIdChangedListener(const sptr<IWindowInfoChangedListener>& listener);
     WMError RegisterRectChangedListener(const sptr<IWindowInfoChangedListener>& listener);
     WMError UnregisterRectChangedListener(const sptr<IWindowInfoChangedListener>& listener);
+    WMError RegisterGlobalRectChangedListener(const sptr<IWindowInfoChangedListener>& listener);
+    WMError UnregisterGlobalRectChangedListener(const sptr<IWindowInfoChangedListener>& listener);
     WMError RegisterWindowModeChangedListenerForPropertyChange(const sptr<IWindowInfoChangedListener>& listener);
     WMError UnregisterWindowModeChangedListenerForPropertyChange(const sptr<IWindowInfoChangedListener>& listener);
     WMError RegisterFloatingScaleChangedListener(const sptr<IWindowInfoChangedListener>& listener);

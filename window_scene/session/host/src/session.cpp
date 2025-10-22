@@ -3844,6 +3844,7 @@ void Session::SetSessionGlobalRect(const WSRect& rect)
 {
     if (layoutController_->SetSessionGlobalRect(rect)) {
         dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::GLOBAL_RECT);
+        AddPropertyDirtyFlags(static_cast<uint32_t>(SessionPropertyFlag::WINDOW_GLOBAL_RECT));
     }
 }
 
