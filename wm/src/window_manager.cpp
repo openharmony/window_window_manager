@@ -84,6 +84,8 @@ public:
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info);
     void NotifyWindowRectChange(
         const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
+    void NotifyWindowGlobalRectChange(
+        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
     void NotifyWMSWindowDestroyed(const WindowLifeCycleInfo& lifeCycleInfo, void* jsWindowNapiValue);
 
     static inline SingletonDelegator<WindowManager> delegator_;
@@ -528,6 +530,21 @@ void WindowManager::Impl::NotifyWindowRectChange(
         windowRectChangeListeners = windowRectChangeListeners_;
     }
     for (auto &listener : windowRectChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnWindowInfoChanged(windowInfoList);
+        }
+    }
+}
+
+void WindowManager::Impl::NotifyWindowGlobalRectChange(
+    const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList)
+{
+    std::vector<sptr<IWindowInfoChangedListener>> windowGlobalRectChangeListeners;
+    {
+        std::unique_lock<std::shared_mutex> lock(listenerMutex_);
+        windowGlobalRectChangeListeners = windowGlobalRectChangeListeners_;
+    }
+    for (auto &listener : windowGlobalRectChangeListeners) {
         if (listener != nullptr) {
             listener->OnWindowInfoChanged(windowInfoList);
         }
@@ -1122,8 +1139,8 @@ WMError WindowManager::RegisterGloabalRectChangedListener(const sptr<IWindowInfo
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "RegisterWindowPropertyChangeAgent failed!");
         pImpl_->windowPropertyChangeAgent_ = nullptr;
     } else {
-        auto iter = std::find(pImpl_->windowGlobalRectChangeListeners_.begin(), pImpl_->windowGlobalRectChangeListeners_.end(),
-            listener);
+        auto iter = std::find(pImpl_->windowGlobalRectChangeListeners_.begin(),
+            pImpl_->windowGlobalRectChangeListeners_.end(), listener);
         if (iter != pImpl_->windowGlobalRectChangeListeners_.end()) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Listener is already registered.");
             return WMError::WM_OK;
@@ -1141,7 +1158,8 @@ WMError WindowManager::UnregisterGlobalRectChangedListener(const sptr<IWindowInf
     }
     std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
     pImpl_->windowGlobalRectChangeListeners_.erase(std::remove_if(pImpl_->windowGlobalRectChangeListeners_.begin(),
-        pImpl_->windowGlobalRectChangeListeners_.end(), [listener](sptr<IWindowInfoChangedListener> registeredListener) {
+        pImpl_->windowGlobalRectChangeListeners_.end(),
+        [listener](sptr<IWindowInfoChangedListener> registeredListener) {
             return registeredListener == listener;
         }), pImpl_->windowGlobalRectChangeListeners_.end());
     uint32_t interestInfo = 0;
@@ -1157,7 +1175,8 @@ WMError WindowManager::UnregisterGlobalRectChangedListener(const sptr<IWindowInf
     }
     WMError ret = WMError::WM_OK;
     if (pImpl_->windowGlobalRectChangeListeners_.empty() && pImpl_->windowPropertyChangeAgent_ != nullptr) {
-        ret = WindowAdapter::GetInstance(userId_)->UnregisterWindowPropertyChangeAgent(WindowInfoKey::WINDOW_GLOBAL_RECT,
+        ret =
+            WindowAdapter::GetInstance(userId_)->UnregisterWindowPropertyChangeAgent(WindowInfoKey::WINDOW_GLOBAL_RECT,
             interestInfo, pImpl_->windowPropertyChangeAgent_);
         if (ret == WMError::WM_OK) {
             pImpl_->windowPropertyChangeAgent_ = nullptr;
@@ -2475,7 +2494,7 @@ WMError WindowManager::ProcessRegisterWindowInfoChangeCallback(WindowInfoKey obs
         case WindowInfoKey::MID_SCENE :
             return RegisterMidSceneChangedListener(listener);
         case WindowInfoKey::WINDOW_GLOBAL_RECT :
-            return RegisterGloablRectChangedListener(listener);
+            return RegisterGloabalRectChangedListener(listener);
         default:
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Invalid observedInfo: %{public}d", static_cast<uint32_t>(observedInfo));
             return WMError::WM_ERROR_INVALID_PARAM;
@@ -2607,6 +2626,10 @@ void WindowManager::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
     if (propertyDirtyFlags & static_cast<int32_t>(WindowInfoKey::MID_SCENE)) {
         pImpl_->NotifyMidSceneStatusChange(windowInfoList);
     }
+    if (propertyDirtyFlags & static_cast<int32_t>(WindowInfoKey::WINDOW_GLOBAL_RECT)) {
+        pImpl_->NotifyWindowGlobalRectChange(windowInfoList);
+    }
+
 }
 
 WMError WindowManager::AnimateTo(int32_t windowId, WindowAnimationProperty animationProperty,
