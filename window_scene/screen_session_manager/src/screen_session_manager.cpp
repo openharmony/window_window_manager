@@ -2956,13 +2956,9 @@ void ScreenSessionManager::SetInternalScreenResolutionEffect(const sptr<ScreenSe
     NotifyScreenChanged(internalSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
     NotifyDisplayChanged(internalSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
     // Black out invalid area
-    OHOS::Rect rsRect = {targetRect.posX_, targetRect.posY_, targetRect.width_, targetRect.height_};
-    auto ret = rsInterface_.SetScreenActiveRect(internalSession->GetScreenId(), rsRect);
-    if (ret != StatusCode::SUCCESS) {
-        TLOGE(WmsLogTag::DMS, "SetScreenActiveRect failed, ret %{public}d", ret);
-        return;
-    }
-    TLOGI(WmsLogTag::DMS, "SetScreenActiveRect success");
+    auto displaynode = internalSession->GetDisplayNode();	
+    displaynode->SetClipToBounds(true);	
+    RSTransactionAdapter::FlushImplicitTransaction(internalSession->GetRSUIContext());
 }
 
 void ScreenSessionManager::SetExternalScreenResolutionEffect(const sptr<ScreenSession>& externalSession, DMRect& targetRect)
