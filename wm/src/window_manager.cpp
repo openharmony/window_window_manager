@@ -1113,7 +1113,7 @@ WMError WindowManager::UnregisterRectChangedListener(const sptr<IWindowInfoChang
     return ret;
 }
 
-WMError WindowManager::RegisterGloabalRectChangedListener(const sptr<IWindowInfoChangedListener>& listener)
+WMError WindowManager::RegisterGlobalRectChangedListener(const sptr<IWindowInfoChangedListener>& listener)
 {
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
@@ -2494,7 +2494,7 @@ WMError WindowManager::ProcessRegisterWindowInfoChangeCallback(WindowInfoKey obs
         case WindowInfoKey::MID_SCENE :
             return RegisterMidSceneChangedListener(listener);
         case WindowInfoKey::WINDOW_GLOBAL_RECT :
-            return RegisterGloabalRectChangedListener(listener);
+            return RegisterGlobalRectChangedListener(listener);
         default:
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Invalid observedInfo: %{public}d", static_cast<uint32_t>(observedInfo));
             return WMError::WM_ERROR_INVALID_PARAM;
