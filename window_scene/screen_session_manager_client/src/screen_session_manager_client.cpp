@@ -164,25 +164,22 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(SessionOption option,
                 option.screenId_, static_cast<int>(screenEvent), option.rsId_);
         }
     }
-    auto task = [this, option, screenEvent] {
+    if (screenEvent == ScreenEvent::DISCONNECTED) {
         HandleScreenDisconnectEvent(option, screenEvent);
-    };
-    ffrtQueueHelper_->SubmitTaskToHead(std::move(task));
+    }
 }
 
 void ScreenSessionManagerClient::HandleScreenDisconnectEvent(SessionOption option, ScreenEvent screenEvent)
 {
-    if (screenEvent == ScreenEvent::DISCONNECTED) {
-        if (HandleScreenDisconnection(option)) {
-            connectedScreenSet_.erase(option.screenId_);
-            TLOGI(WmsLogTag::DMS,
-                "screen event wait disconnecting, sId: %{public}" PRIu64 " sEvent: %{public}d rsId: %{public}" PRIu64,
-                option.screenId_, static_cast<int>(screenEvent), option.rsId_);
-        } else {
-            TLOGI(WmsLogTag::DMS,
-                "screen event not disconent, sId: %{public}" PRIu64 " sEvent: %{public}d rsId: %{public}" PRIu64,
-                option.screenId_, static_cast<int>(screenEvent), option.rsId_);
-        }
+    if (HandleScreenDisconnection(option)) {
+        connectedScreenSet_.erase(option.screenId_);
+        TLOGI(WmsLogTag::DMS,
+            "screen event wait disconnecting, sId: %{public}" PRIu64 " sEvent: %{public}d rsId: %{public}" PRIu64,
+            option.screenId_, static_cast<int>(screenEvent), option.rsId_);
+    } else {
+        TLOGI(WmsLogTag::DMS,
+            "screen event not disconent, sId: %{public}" PRIu64 " sEvent: %{public}d rsId: %{public}" PRIu64,
+            option.screenId_, static_cast<int>(screenEvent), option.rsId_);
     }
 }
 
