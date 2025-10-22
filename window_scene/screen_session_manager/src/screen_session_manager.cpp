@@ -2956,8 +2956,8 @@ void ScreenSessionManager::SetInternalScreenResolutionEffect(const sptr<ScreenSe
     NotifyScreenChanged(internalSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
     NotifyDisplayChanged(internalSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
     // Black out invalid area
-    auto displaynode = internalSession->GetDisplayNode();	
-    displaynode->SetClipToBounds(true);	
+    auto displaynode = internalSession->GetDisplayNode();
+    displaynode->SetClipToBounds(true);
     RSTransactionAdapter::FlushImplicitTransaction(internalSession->GetRSUIContext());
 }
 

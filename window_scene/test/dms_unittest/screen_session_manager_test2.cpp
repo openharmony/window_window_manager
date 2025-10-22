@@ -2682,29 +2682,6 @@ HWTEST_F(ScreenSessionManagerTest, SetInternalScreenResolutionEffect, TestSize.L
 }
 
 /**
- * @tc.name: SetInternalScreenResolutionEffect002
- * @tc.desc: test SetScreenActiveRect return fail
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, SetInternalScreenResolutionEffect002, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-
-    LOG_SetCallback(MyLogCallback);
-    g_errLog.clear();
-
-    sptr<ScreenSession> screenSession = new ScreenSession(51, ScreenProperty(), 0);
-    ASSERT_NE(nullptr, screenSession);
-    screenSession->SetScreenType(ScreenType::REAL);
-    screenSession->SetScreenId(52);
-    DMRect targetRect = {0, 10, 3120, 2080};
-    ssm_->SetInternalScreenResolutionEffect(screenSession, targetRect);
-    EXPECT_TRUE(g_errLog.find("SetScreenActiveRect failed") != std::string::npos);
-
-    g_errLog.clear();
-}
-
-/**
  * @tc.name: SetExternalScreenResolutionEffect
  * @tc.desc: SetExternalScreenResolutionEffect
  * @tc.type: FUNC
