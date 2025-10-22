@@ -429,9 +429,7 @@ DMError ScreenManagerLite::Impl::GetPhysicalScreenInfos(std::vector<sptr<ScreenI
         return ret;
     }
     for (const auto& screenInfo : allScreenInfos) {
-        if (screenInfo->GetType() == ScreenType::REAL) {
-            screenInfos.push_back(screenInfo);
-        }
+        screenInfos.push_back(screenInfo);
     }
     return DMError::DM_OK;
 }
