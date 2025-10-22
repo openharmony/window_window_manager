@@ -1096,7 +1096,7 @@ WMError WindowManager::UnregisterRectChangedListener(const sptr<IWindowInfoChang
     return ret;
 }
 
-WMError WindowManager::RegisterRectChangedListener(const sptr<IWindowInfoChangedListener>& listener)
+WMError WindowManager::RegisterGloabalRectChangedListener(const sptr<IWindowInfoChangedListener>& listener)
 {
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
@@ -1133,7 +1133,7 @@ WMError WindowManager::RegisterRectChangedListener(const sptr<IWindowInfoChanged
     return ret;
 }
 
-WMError WindowManager::UnregisterRectChangedListener(const sptr<IWindowInfoChangedListener>& listener)
+WMError WindowManager::UnregisterGlobalRectChangedListener(const sptr<IWindowInfoChangedListener>& listener)
 {
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");

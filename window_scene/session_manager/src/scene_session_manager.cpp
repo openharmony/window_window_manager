@@ -17819,6 +17819,11 @@ void SceneSessionManager::PackWindowPropertyChangeInfo(const sptr<SceneSession>&
     if (interestedFlags_ & static_cast<uint32_t>(SessionPropertyFlag::MID_SCENE)) {
         windowPropertyChangeInfo[WindowInfoKey::MID_SCENE] = sceneSession->GetIsMidScene();
     }
+    if (interestedFlags_ & static_cast<uint32_t>(SessionPropertyFlag::WINDOW_GLOBAL_RECT)) {
+        WSRect wsrect = sceneSession->GetSessionGlobalRect();
+        Rect globalRect = { wsrect.posX_, wsrect.posY_, wsrect.width_, wsrect.height_ };
+        windowPropertyChangeInfo[WindowInfoKey::WINDOW_GLOBAL_RECT] = globalRect;
+    }
 }
 
 WSError SceneSessionManager::UseImplicitAnimation(int32_t hostWindowId, bool useImplicit)

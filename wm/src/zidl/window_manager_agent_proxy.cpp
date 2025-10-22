@@ -607,20 +607,20 @@ bool WindowManagerAgentProxy::WriteWindowChangeInfoValue(MessageParcel& data,
             break;
         }
         case WindowInfoKey::WINDOW_RECT : {
-            Rect rect = std::get<Rect>(windowInfoPair.second);
-            if (!data.WriteInt32(rect.posX_)) {
+            Rect globalRect = std::get<Rect>(windowInfoPair.second);
+            if (!data.WriteInt32(globalRect.posX_)) {
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write posX failed");
                 return false;
             }
-            if (!data.WriteInt32(rect.posY_)) {
+            if (!data.WriteInt32(globalRect.posY_)) {
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write posY failed");
                 return false;
             }
-            if (!data.WriteUint32(rect.width_)) {
+            if (!data.WriteUint32(globalRect.width_)) {
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write Width failed");
                 return false;
             }
-            if (!data.WriteUint32(rect.height_)) {
+            if (!data.WriteUint32(globalRect.height_)) {
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write Height failed");
                 return false;
             }
@@ -636,6 +636,26 @@ bool WindowManagerAgentProxy::WriteWindowChangeInfoValue(MessageParcel& data,
         case WindowInfoKey::MID_SCENE : {
             if (!data.WriteBool(std::get<bool>(windowInfoPair.second))) {
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write bool failed");
+                return false;
+            }
+            break;
+        }
+        case WindowInfoKey::WINDOW_GLOBAL_RECT : {
+            Rect rect = std::get<Rect>(windowInfoPair.second);
+            if (!data.WriteInt32(rect.posX_)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write posX failed");
+                return false;
+            }
+            if (!data.WriteInt32(rect.posY_)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write posY failed");
+                return false;
+            }
+            if (!data.WriteUint32(rect.width_)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write Width failed");
+                return false;
+            }
+            if (!data.WriteUint32(rect.height_)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write Height failed");
                 return false;
             }
             break;
