@@ -45,6 +45,11 @@ namespace uiExtension {
     func({ rect: rect as window.Rect, reason: reason as RectChangeReason });
   }
 
+  function avoidAreaChangeCallback(cb: object, area: object, type: int): void {
+    const func = cb as (data: AvoidAreaInfo) => void;
+    func({type: type as window.AvoidAreaType, area: area as window.AvoidArea});
+  }
+
   class UIEProperties implements WindowProxyProperties {
     constructor() {
       this.uiExtensionHostWindowProxyRect = new UIERect();

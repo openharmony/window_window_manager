@@ -134,11 +134,11 @@ WmErrorCode AniExtensionWindowRegisterManager::RegisterListener(sptr<Window>& wi
 {
     std::lock_guard<std::mutex> lock(mtx_);
     if (IsCallbackRegistered(env, type, fn)) {
-        return WmErrorCode::WM_ERROR_REPEAT_OPERATION;
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     if (listenerCodeMap_[caseType].count(type) == 0) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Type %{public}s listener is not supported", type.c_str());
-        return WmErrorCode::WM_ERROR_INVALID_PARAM;
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     ani_status ret {};
     ani_ref fnRef {};
@@ -167,11 +167,11 @@ WmErrorCode AniExtensionWindowRegisterManager::UnregisterListener(sptr<Window>& 
     std::lock_guard<std::mutex> lock(mtx_);
     if (aniCbMap_.empty() || aniCbMap_.find(type) == aniCbMap_.end()) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Type %{public}s listener was not registered", type.c_str());
-        return WmErrorCode::WM_ERROR_INVALID_PARAM;
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     if (listenerCodeMap_[caseType].count(type) == 0) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Type %{public}s listener is not supported", type.c_str());
-        return WmErrorCode::WM_ERROR_INVALID_PARAM;
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     ani_boolean isUndefined = ANI_FALSE;
     env->Reference_IsUndefined(static_cast<ani_ref>(fn), &isUndefined);

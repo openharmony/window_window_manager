@@ -110,7 +110,7 @@ void AniExtensionWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, A
             return;
         }
         auto nativeAvoidArea = AniWindowUtils::CreateAniAvoidArea(eng, avoidArea, type);
-        AniWindowUtils::CallAniFunctionVoid(eng, ETS_UIEXTENSION_HOST_NAMESPACE_DESCRIPTOR, ETS_AVOID_AREA_CHANGE_CB,
+        AniWindowUtils::CallAniFunctionVoid(eng, ETS_UIEXTENSION_NAMESPACE_DESCRIPTOR, ETS_AVOID_AREA_CHANGE_CB,
             nullptr, thisListener->aniCallback_, nativeAvoidArea, static_cast<ani_int>(type));
     };
     if (!eventHandler_) {
@@ -136,7 +136,7 @@ void AniExtensionWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>
         }
         AniWindowUtils::CallAniFunctionVoid(eng, ETS_UIEXTENSION_HOST_NAMESPACE_DESCRIPTOR,
             ETS_KEYBOARD_HEIGHT_CHANGE_CB, nullptr, thisListener->aniCallback_,
-            static_cast<ani_double>(info->rect_.height_));
+            static_cast<ani_int>(info->rect_.height_));
     };
     if (!eventHandler_) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Get main event handler failed!");
