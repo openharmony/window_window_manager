@@ -176,21 +176,22 @@ HWTEST_F(SceneSessionTest6, CheckAbilityInfoByWant, TestSize.Level1)
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     auto want = std::make_shared<AAFwk::Want>();
+    AppExecFwk::AbilityInfo abilityInfo;
 
     sceneSession->specificCallback_ = nullptr;
-    bool ret = sceneSession->CheckAbilityInfoByWant(want);
+    bool ret = sceneSession->CheckAbilityInfoByWant(want, abilityInfo);
     EXPECT_FALSE(ret);
 
     sptr<SceneSession::SpecificSessionCallback> callBack = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sceneSession->specificCallback_ = callBack;
-    ret = sceneSession->CheckAbilityInfoByWant(want);
+    ret = sceneSession->CheckAbilityInfoByWant(want, abilityInfo);
     EXPECT_FALSE(ret);
 
-    auto task = [](const std::shared_ptr<AAFwk::Want>& want) {
+    auto task = [](const std::shared_ptr<AAFwk::Want>& want, AppExecFwk::AbilityInfo& abilityInfo) {
         return true;
     };
     callBack->onCheckAbilityInfoByWantCallback_ = task;
-    ret = sceneSession->CheckAbilityInfoByWant(want);
+    ret = sceneSession->CheckAbilityInfoByWant(want, abilityInfo);
     EXPECT_TRUE(ret);
 }
 
