@@ -2629,7 +2629,6 @@ void WindowManager::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
     if (propertyDirtyFlags & static_cast<int32_t>(WindowInfoKey::WINDOW_GLOBAL_RECT)) {
         pImpl_->NotifyWindowGlobalRectChange(windowInfoList);
     }
-
 }
 
 WMError WindowManager::AnimateTo(int32_t windowId, WindowAnimationProperty animationProperty,
