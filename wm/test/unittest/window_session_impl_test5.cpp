@@ -979,7 +979,7 @@ HWTEST_F(WindowSessionImplTest5, GetWindowScaleCoordinate01, Function | SmallTes
     int32_t id = 1;
     mainWindow->property_->SetPersistentId(id);
     mainWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    CursorInfo cursorInfo;
+    CursorInfo cursorInfo { 1, 1, 1, 1 };
     auto res = mainWindow->GetWindowScaleCoordinate(id, cursorInfo);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
     WindowSessionImpl::windowSessionMap_.clear();
@@ -1036,6 +1036,16 @@ HWTEST_F(WindowSessionImplTest5, GetWindowScaleCoordinate02, Function | SmallTes
     int32_t id = 1;
     CursorInfo cursorInfo;
     auto res = extensionWindow->GetWindowScaleCoordinate(id, cursorInfo);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+    cursorInfo.width = 1;
+    res = extensionWindow->GetWindowScaleCoordinate(id, cursorInfo);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+    cursorInfo.width = -1;
+    cursorInfo.height = 1;
+    res = extensionWindow->GetWindowScaleCoordinate(id, cursorInfo);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+    cursorInfo.width = 1;
+    res = extensionWindow->GetWindowScaleCoordinate(id, cursorInfo);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
     extensionWindow->property_->SetParentPersistentId(id);
     extensionWindow->property_->SetParentId(id);

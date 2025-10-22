@@ -758,6 +758,10 @@ sptr<WindowSessionImpl> WindowSessionImpl::GetScaleWindow(uint32_t windowId)
 
 WMError WindowSessionImpl::GetWindowScaleCoordinate(uint32_t windowId, CursorInfo& cursorInfo)
 {
+    if (cursorInfo.isInvalid()) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "id:%{public}d cursorInfo is invalid", windowId);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
     sptr<WindowSessionImpl> window = GetScaleWindow(windowId);
     if (!window) {
         TLOGE(WmsLogTag::WMS_COMPAT, "find window id:%{public}d failed", windowId);
