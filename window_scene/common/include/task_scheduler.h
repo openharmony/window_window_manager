@@ -29,15 +29,15 @@ void FinishTraceForSyncTask();
 class TaskScheduler {
 public:
     explicit TaskScheduler(const std::string& threadName);
-    ~TaskScheduler() = default;
+    virtual ~TaskScheduler() = default;
 
     std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler();
 
     using Task = std::function<void()>;
-    void PostAsyncTask(Task&& task, const std::string& name, int64_t delayTime = 0);
+    virtual void PostAsyncTask(Task&& task, const std::string& name, int64_t delayTime = 0);
     void PostTask(Task&& task, const std::string& name, int64_t delayTime = 0);
     void RemoveTask(const std::string& name);
-    void PostVoidSyncTask(Task&& task, const std::string& name = "ssmTask");
+    virtual void PostVoidSyncTask(Task&& task, const std::string& name = "ssmTask");
     template<typename SyncTask, typename Return = std::invoke_result_t<SyncTask>>
     Return PostSyncTask(SyncTask&& task, const std::string& name = "ssmTask")
     {
@@ -74,10 +74,12 @@ public:
     void AddExportTask(std::string taskName, Task&& task);
 
 private:
-    void ExecuteExportTask();
     std::unordered_map<std::string, Task> exportFuncMap_; // ONLY Accessed in OS_SceneSession
-    std::shared_ptr<AppExecFwk::EventHandler> handler_;
     std::shared_ptr<AppExecFwk::EventHandler> exportHandler_;
+
+protected:
+    void ExecuteExportTask();
+    std::shared_ptr<AppExecFwk::EventHandler> handler_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_TASK_SCHEDULER_H

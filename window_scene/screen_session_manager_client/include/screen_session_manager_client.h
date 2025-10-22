@@ -133,8 +133,8 @@ public:
     std::shared_ptr<Media::PixelMap> GetScreenSnapshotWithAllWindows(ScreenId screenId, float scaleX, float scaleY,
         bool isNeedCheckDrmAndSurfaceLock);
     void OnScreenPropertyChanged(ScreenId screenId, float rotation, RRect bounds);
-    void OnFoldPropertyChanged(ScreenId screenId, const ScreenProperty& property, ScreenPropertyChangeReason reason,
-        FoldDisplayMode displayMode) override;
+    bool OnFoldPropertyChange(ScreenId screenId, const ScreenProperty& property,
+        ScreenPropertyChangeReason reason, FoldDisplayMode displayMode, ScreenProperty& midProperty) override;
 
     /*
      * RS Client Multi Instance

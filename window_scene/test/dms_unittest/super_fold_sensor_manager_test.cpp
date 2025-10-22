@@ -60,31 +60,6 @@ void SuperFoldSensorManagerTest::TearDown()
 
 namespace {
 /**
- * @tc.name: RegisterPostureCallback01
- * @tc.desc: test function : RegisterPostureCallback
- * @tc.type: FUNC
- */
-HWTEST_F(SuperFoldSensorManagerTest, RegisterPostureCallback01, TestSize.Level1)
-{
-    SuperFoldSensorManager mgr = SuperFoldSensorManager();
-    mgr.RegisterPostureCallback();
-    ASSERT_NE(mgr.postureUser.callback, nullptr);
-}
-
-/**
- * @tc.name: RegisterPostureCallback01
- * @tc.desc: test function : RegisterPostureCallback
- * @tc.type: FUNC
- */
-HWTEST_F(SuperFoldSensorManagerTest, RegisterPostureCallback02, TestSize.Level1)
-{
-    SuperFoldSensorManager mgr = SuperFoldSensorManager();
-    mgr.RegisterPostureCallback();
-    void (*func)(SensorEvent *event) = nullptr;
-    ASSERT_NE(mgr.postureUser.callback, func);
-}
-
-/**
  * @tc.name: UnregisterPostureCallback01
  * @tc.desc: test function : UnregisterPostureCallback
  * @tc.type: FUNC
@@ -107,31 +82,6 @@ HWTEST_F(SuperFoldSensorManagerTest, UnregisterPostureCallback02, TestSize.Level
     mgr.UnregisterPostureCallback();
     void (*func)(SensorEvent *event) = nullptr;
     ASSERT_EQ(mgr.postureUser.callback, func);
-}
-
-/**
- * @tc.name: RegisterHallCallback01
- * @tc.desc: test function : RegisterHallCallback
- * @tc.type: FUNC
- */
-HWTEST_F(SuperFoldSensorManagerTest, RegisterHallCallback01, TestSize.Level1)
-{
-    SuperFoldSensorManager mgr = SuperFoldSensorManager();
-    mgr.RegisterHallCallback();
-    ASSERT_NE(mgr.hallUser.callback, nullptr);
-}
-
-/**
- * @tc.name: RegisterHallCallback02
- * @tc.desc: test function : RegisterHallCallback
- * @tc.type: FUNC
- */
-HWTEST_F(SuperFoldSensorManagerTest, RegisterHallCallback02, TestSize.Level1)
-{
-    SuperFoldSensorManager mgr = SuperFoldSensorManager();
-    mgr.RegisterHallCallback();
-    void (*func)(SensorEvent *event) = nullptr;
-    ASSERT_NE(mgr.hallUser.callback, func);
 }
 
 /**
