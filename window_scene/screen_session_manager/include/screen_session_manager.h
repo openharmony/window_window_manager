@@ -453,7 +453,7 @@ public:
      */
     void SwitchUser() override;
     void SetDefaultMultiScreenModeWhenSwitchUser() override;
-    void SwitchScbNodeHandle(int32_t userId, int32_t newScbPid, bool coldBoot);
+    void SwitchScbNodeHandle(int32_t newUserId, int32_t newScbPid, bool coldBoot);
     void HotSwitch(int32_t newUserId, int32_t newScbPid);
     void AddScbClientDeathRecipient(const sptr<IScreenSessionManagerClient>& scbClient, int32_t scbPid);
     void ScbClientDeathCallback(int32_t deathScbPid);
@@ -531,12 +531,17 @@ public:
     void NotifyAodOpCompletion(AodOP operation, int32_t result) override;
     void DoAodExitAndSetPower(ScreenId screenId, ScreenPowerStatus status);
     void DoAodExitAndSetPowerAllOff();
-    struct UserScreenInfo {
-        bool isActive;
-        ScreenId screenId;
+
+    // Function used for displayConcurrentUserMap_ under concurrent scenario
+    struct UserInfo {
+        bool isForeground;
         int32_t pid;
     };
-    std::map<int32_t, UserScreenInfo> GetUserScreenMap() const;
+    const std::map<DisplayId, std::map<int32_t, UserInfo>> GetDisplayConcurrentUserMap() const;
+    int32_t GetForegroundConcurrentUser(DisplayId displayId) const;
+    void SetDisplayConcurrentUserMap(DisplayId displayId, int32_t userId, bool isForeground, int32_t pid);
+    void RemoveUserByPid(int32_t pid);
+    bool CheckPidInDeathPidVector(int32_t pid) const;
 
 protected:
     ScreenSessionManager();
@@ -724,10 +729,8 @@ private:
     /**
      * multi user concurrency
      */
-    void RemoveUserByPid(int32_t pid);
-    void ActiveUser(int32_t userId);
-    DisplayId GetUserDisplayId(int32_t userId);
-    int32_t GetActiveUserByDisplayId(DisplayId displayId);
+    bool ActiveUser(int32_t newUserId, int32_t& oldUserId, int32_t newScbPid);
+    DisplayId GetUserDisplayId(int32_t targetUserId) const;
     ScreenId GenerateSmsScreenId(ScreenId rsScreenId);
 
     void HandleSuperFoldDisplayInfoWhenKeyboardOn(const sptr<ScreenSession>& screenSession,
@@ -780,13 +783,17 @@ private:
     std::mutex multiClientProxyMapMutex_;
 
     /*
-        example:
-        user100:  {isActive=true  screenId=0  pid=1234}
-        user101:  {isActive=false screenId=0  pid=2345}
-        user102:  {isActive=true  screenId=6  pid=3456}
-    */
-    std::map<int32_t, UserScreenInfo> userScreenMap_;
-    mutable std::mutex userScreenMapMutex_;
+     * This map stores per-display and per-user information specifically for concurrent scenarios
+     * Structure: displayId -> (userId -> UserInfo)
+     * example:
+     * displayId 0: userId 100: isForeground=false pid=1234
+     *              userId 102: isForeground=true  pid=2345
+     * displayId 1: userId 101: isForeground=false pid=3456
+     *              userId 103: isForeground=true  pid=4567
+     */
+    std::map<DisplayId, std::map<int32_t, UserInfo>> displayConcurrentUserMap_;
+    mutable std::mutex displayConcurrentUserMapMutex_;
+    std::vector<int32_t> deathPidVector_ {};
     std::map<int32_t, sptr<IScreenSessionManagerClient>> clientProxyMap_;
     FoldDisplayMode oldScbDisplayMode_ = FoldDisplayMode::UNKNOWN;
 
@@ -839,7 +846,6 @@ private:
     bool isDensityDpiLoad_ = false;
     float densityDpi_ { 1.0f };
     float subDensityDpi_ { 1.0f };
-    float carDefaultDensityDpi_ { 2.0f };
     std::atomic<uint32_t> cachedSettingDpi_ {0};
     float pcModeDpi_ { 1.0f };
 
