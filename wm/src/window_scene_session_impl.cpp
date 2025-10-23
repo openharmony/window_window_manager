@@ -951,7 +951,8 @@ void WindowSceneSessionImpl::UpdateDefaultStatusBarColor()
     statusBarProp.settingFlag_ = static_cast<SystemBarSettingFlag>(
         static_cast<uint32_t>(statusBarProp.settingFlag_) |
         static_cast<uint32_t>(SystemBarSettingFlag::FOLLOW_SETTING));
-    updateSystemBarStyle(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProp);
+    SystemBarPropertyFlag systemBarPropertyFlag = { false, false, true, false };
+    UpdateSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProp, systemBarPropertyFlag);
 }
 
 void WindowSceneSessionImpl::InitSystemSessionDragEnable()
@@ -3195,24 +3196,19 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
         auto property = GetSystemBarPropertyByType(systemBarType);
         property.enable_ = systemBarPropertyFlag.enableFlag ?
             systemBarProperties.at(systemBarType).enable_ : property.enable_;
+        property.settingFlag_ |= systemBarPropertyFlag.enableFlag ?
+            SystemBarSettingFlag::ENABLE_SETTING | SystemBarSettingFlag::DEFAULT_SETTING;
         property.backgroundColor_ = systemBarPropertyFlag.backgroundColorFlag ?
             systemBarProperties.at(systemBarType).backgroundColor_ : property.backgroundColor_;
         property.contentColor_ = systemBarPropertyFlag.contentColorFlag ?
             systemBarProperties.at(systemBarType).contentColor_ : property.contentColor_;
+        property.settingFlag_ |=
+            (systemBarPropertyFlag.backgroundColorFlag || systemBarPropertyFlag.contentColorFlag) ?
+            SystemBarSettingFlag::COLOR_SETTING | SystemBarSettingFlag::DEFAULT_SETTING;
         property.enableAnimation_ = systemBarPropertyFlag.enableAnimationFlag ?
             systemBarProperties.at(systemBarType).enableAnimation_ : property.enableAnimation_;
-        auto ret = WMError::WM_OK;
-        if (systemBarPropertyFlag.enableFlag) {
-            property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
-            ret = SetSystemBarProperty(systemBarType, property);
-        }
-        if (systemBarPropertyFlag.backgroundColorFlag || systemBarPropertyFlag.contentColorFlag ||
-            systemBarPropertyFlag.enableAnimationFlag) {
-            property.settingFlag_ |=
-                (systemBarPropertyFlag.backgroundColorFlag || systemBarPropertyFlag.contentColorFlag) ?
-                SystemBarSettingFlag::COLOR_SETTING : SystemBarSettingFlag::DEFAULT_SETTING;
-            ret = updateSystemBarStyle(systemBarType, property);
-        }
+
+        auto ret = UpdateSystemBarProperty(systemBarType, property, systemBarPropertyFlag);
         if (ret != WMError::WM_OK) {
             TLOGE(WmsLogTag::WMS_IMMS, "set failed");
             return ret;
@@ -3225,19 +3221,27 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::updateSystemBarStyle(WindowType type, SystemBarProperty property)
+WMError WindowSceneSessionImpl::UpdateSystemBarProperty(
+    WindowType type, SystemBarProperty& systemBarProperty SystemBarPropertyFlag& systemBarPropertyFlag)
 {
-    SystemBarProperty systemBarProperty = property;
     bool isUsedPageEnabled = false;
     {
         std::lock_guard<std::mutex> lock(systemBarPropertyForPageMapMutex_);
         auto iter = systemBarPropertyForPageMap_.find(type);
-        if (iter != systemBarPropertyForPageMap_.end() && iter->second.has_value()) {    
-            systemBarProperty.enable_ = iter->second.value().enable_;
+        if (iter != systemBarPropertyForPageMap_.end() && iter->second.has_value()) {
+            auto& prop = *iter->second;
+            prop.enable_ =  systemBarPropertyFlag.enableFlag ? systemBarProperty.enable_ : prop.enable_;
+            prop.backgroundColor_ =  systemBarPropertyFlag.backgroundColorFlag ?
+                systemBarProperty.backgroundColor_ : prop.backgroundColor_;
+            prop.contentColor_ =  systemBarPropertyFlag.contentColorFlag ?
+                systemBarProperty.contentColor_ : prop.contentColor_;
+            prop.enableAnimation_ =  systemBarPropertyFlag.enableAnimationFlag ?
+                systemBarProperty.enableAnimation_ : prop.enableAnimation_;
+            prop.settingFlag_ |=  systemBarProperty.settingFlag_;
             isUsedPageEnabled = true;
         }
     }
-    auto ret = SetSystemBarProperty(type, isUsedPageEnabled ? systemBarProperty : property);
+    auto ret = SetSystemBarProperty(type, isUsedPageEnabled ? systemBarPropertyForPageMap_[type].value() : property);
     if (ret == WMError::WM_OK) {
         property_->SetSystemBarProperty(type, property);
     }
