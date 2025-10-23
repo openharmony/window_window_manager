@@ -3180,7 +3180,6 @@ public:
         return WMError::WM_OK;
     }
 
-
     /*
      * @brief Set System Bar Property for page
      *
