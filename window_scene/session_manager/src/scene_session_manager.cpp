@@ -3312,7 +3312,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
 }
 
 void SceneSessionManager::ResetSessionInfoAfterStartUIAbility(const sptr<SceneSession>& sceneSession) {
-    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
     if (sceneSession->GetRestartApp()) {
         sceneSession->SetRestartApp(false);
         sceneSession->GetSessionProperty()->SetIsNeedUpdateWindowMode(true);
