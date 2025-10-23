@@ -833,7 +833,7 @@ HWTEST_F(WindowManagerAgentProxyTest, WriteWindowChangeInfoValue01, TestSize.Lev
     windowInfo = Rect({0, 0, 0, 0});
     windowInfoPair = std::make_pair(WindowInfoKey::WINDOW_GLOBAL_RECT, windowInfo);
     ret = windowManagerAgentProxy->WriteWindowChangeInfoValue(data, windowInfoPair);
-    EXPECT_EQ(ret, true); 
+    EXPECT_EQ(ret, true);
 
     windowInfo = 0;
     windowInfoPair = std::make_pair(WindowInfoKey::NONE, windowInfo);
