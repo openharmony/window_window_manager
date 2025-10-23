@@ -3168,6 +3168,20 @@ public:
     }
 
     /*
+     * @brief Update SystemBar Property.
+     *
+     * @param type type of system bar
+     * @param property System Bar Property
+     * @param systemBarPropertyFlag is System Bar Property Flag
+     */
+    virtual WMError UpdateSystemBarProperty(
+        WindowType type, SystemBarProperty& systemBarProperty SystemBarPropertyFlag& systemBarPropertyFlag)
+    {
+        return WMError::WM_OK;
+    }
+
+
+    /*
      * @brief Set System Bar Property for page
      *
      * @param type WINDOW_TYPE_STATUS_BAR or WINDOW_TYPE_NAVIGATION_INDICATOR
