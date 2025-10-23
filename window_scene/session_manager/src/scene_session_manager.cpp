@@ -1989,8 +1989,9 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onGetSceneSessionByIdCallback_ = [this](int32_t persistentId) {
         return this->GetSceneSession(persistentId);
     };
-    specificCb->onCheckAbilityInfoByWantCallback_ = [this](const std::shared_ptr<AAFwk::Want>& want) {
-        return this->CheckAbilityInfoByWant(want);
+    specificCb->onCheckAbilityInfoByWantCallback_ = [this](const std::shared_ptr<AAFwk::Want>& want,
+        AppExecFwk::AbilityInfo& abilityInfo) {
+        return this->CheckAbilityInfoByWant(want, abilityInfo);
     };
     return specificCb;
 }
