@@ -1569,7 +1569,7 @@ bool AniWindowUtils::ParseRectParam(ani_env *env, ani_object aniObject, const sp
     ani_ref windowRectRef;
     ani_status ret = env->Object_GetPropertyByName_Ref(aniObject, "windowRect", &windowRectRef);
     ani_boolean isUndefined = false;
-    ret = env->Reference_IsUndefined(windowRectRef, &isUndefined);
+    env->Reference_IsUndefined(windowRectRef, &isUndefined);
     if (ret != ANI_OK || isUndefined) {
         return true;
     }
