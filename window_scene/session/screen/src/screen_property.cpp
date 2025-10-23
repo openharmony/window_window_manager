@@ -192,9 +192,9 @@ float ScreenProperty::GetDensity()
 
 void ScreenProperty::SetScreenDensityProperties(float screenDpi)
 {
-    this->SetVirtualPixelRatio(screenDpi);
-    this->SetDefaultDensity(screenDpi);
-    this->SetDensityInCurResolution(screenDpi);
+    SetVirtualPixelRatio(screenDpi);
+    SetDefaultDensity(screenDpi);
+    SetDensityInCurResolution(screenDpi);
 }
 
 float ScreenProperty::GetDefaultDensity()
