@@ -678,6 +678,27 @@ HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo10, TestSize.Level1)
     data.WriteBool(true);
     EXPECT_TRUE(stub_->ReadWindowInfo(data, windowInfo));
 }
+
+/**
+ * @tc.name: ReadWindowInfo11
+ * @tc.desc: test WINDOW_GLOBAL_RECT
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo11, TestSize.Level1)
+{
+    MessageParcel data;
+    std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowInfo;
+
+    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
+    data.WriteInt32(static_cast<int32_t>(WindowInfoKey::WINDOW_GLOBAL_RECT));
+    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
+    data.WriteInt32(static_cast<int32_t>(WindowInfoKey::WINDOW_GLOBAL_RECT));
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteUint32(0);
+    data.WriteUint32(0);
+    EXPECT_TRUE(stub_->ReadWindowInfo(data, windowInfo));
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
