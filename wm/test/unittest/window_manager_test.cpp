@@ -2341,9 +2341,9 @@ HWTEST_F(WindowManagerTest, RegisterGlobalRectChangedListener01, Function | Smal
 {
     auto& windowManager = WindowManager::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->windowPropertyChangeAgent_;
-    auto oldListeners = windowManager.pImpl_->windowGloabalRectChangeListeners_;
+    auto oldListeners = windowManager.pImpl_->windowGlobalRectChangeListeners_;
     windowManager.pImpl_->windowPropertyChangeAgent_ = nullptr;
-    windowManager.pImpl_->windowGloabalRectChangeListeners_.clear();
+    windowManager.pImpl_->windowGlobalRectChangeListeners_.clear();
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterGlobalRectChangedListener(nullptr));
  
     sptr<TestWindowGlobalRectChangedListener> listener = sptr<TestWindowGlobalRectChangedListener>::MakeSptr();
@@ -2351,15 +2351,15 @@ HWTEST_F(WindowManagerTest, RegisterGlobalRectChangedListener01, Function | Smal
  
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     EXPECT_EQ(WMError::WM_OK, windowManager.RegisterGlobalRectChangedListener(listener));
-    EXPECT_EQ(0, windowManager.pImpl_->windowGloabalRectChangeListeners_.size());
+    EXPECT_EQ(0, windowManager.pImpl_->windowGlobalRectChangeListeners_.size());
  
     // to check that the same listner can not be registered twice
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     EXPECT_EQ(WMError::WM_OK, windowManager.RegisterGlobalRectChangedListener(listener));
-    EXPECT_EQ(0, windowManager.pImpl_->windowGloabalRectChangeListeners_.size());
+    EXPECT_EQ(0, windowManager.pImpl_->windowGlobalRectChangeListeners_.size());
  
     windowManager.pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
-    windowManager.pImpl_->windowGloabalRectChangeListeners_ = oldListeners;
+    windowManager.pImpl_->windowGlobalRectChangeListeners_ = oldListeners;
 }
 
 /**
@@ -2371,9 +2371,9 @@ HWTEST_F(WindowManagerTest, UnregisterGlobalRectChangedListener01, Function | Sm
 {
     auto& windowManager = WindowManager::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->windowPropertyChangeAgent_;
-    auto oldListeners = windowManager.pImpl_->windowGloabalRectChangeListeners_;
+    auto oldListeners = windowManager.pImpl_->windowGlobalRectChangeListeners_;
     windowManager.pImpl_->windowPropertyChangeAgent_ = sptr<WindowManagerAgent>::MakeSptr();
-    windowManager.pImpl_->windowGloabalRectChangeListeners_.clear();
+    windowManager.pImpl_->windowGlobalRectChangeListeners_.clear();
 
     // check nullpter
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterGlobalRectChangedListener(nullptr));
@@ -2384,18 +2384,18 @@ HWTEST_F(WindowManagerTest, UnregisterGlobalRectChangedListener01, Function | Sm
 
     windowManager.RegisterGlobalRectChangedListener(listener1);
     windowManager.RegisterGlobalRectChangedListener(listener2);
-    EXPECT_EQ(0, windowManager.pImpl_->windowGloabalRectChangeListeners_.size());
+    EXPECT_EQ(0, windowManager.pImpl_->windowGlobalRectChangeListeners_.size());
 
     EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterGlobalRectChangedListener(listener1));
     EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterGlobalRectChangedListener(listener2));
-    EXPECT_EQ(0, windowManager.pImpl_->windowGloabalRectChangeListeners_.size());
+    EXPECT_EQ(0, windowManager.pImpl_->windowGlobalRectChangeListeners_.size());
 
-    windowManager.pImpl_->windowGloabalRectChangeListeners_.emplace_back(listener1);
+    windowManager.pImpl_->windowGlobalRectChangeListeners_.emplace_back(listener1);
     EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterGlobalRectChangedListener(listener1));
-    EXPECT_EQ(0, windowManager.pImpl_->windowGloabalRectChangeListeners_.size());
+    EXPECT_EQ(0, windowManager.pImpl_->windowGlobalRectChangeListeners_.size());
 
     windowManager.pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
-    windowManager.pImpl_->windowGloabalRectChangeListeners_ = oldListeners;
+    windowManager.pImpl_->windowGlobalRectChangeListeners_ = oldListeners;
 }
 
 /**
