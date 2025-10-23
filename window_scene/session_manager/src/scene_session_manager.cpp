@@ -3011,8 +3011,7 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     }
     abilitySessionInfo->scenarios = sessionInfo.scenarios;
     if (sessionInfo.isRestartApp_) {
-        TLOGI(WmsLogTag::WMS_LIFE, "restart app set caller session");
-        auto callerSession = GetSceneSession(sessionInfo.callerPersistentId_);
+        auto callerSession = GetSceneSession(sessionInfo.restartCallerPersistentId_);
         if (!callerSession) {
             callerSession = sceneSession;
         }

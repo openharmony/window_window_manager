@@ -8499,7 +8499,7 @@ void JsSceneSession::OnRestartApp(const SessionInfo& info)
             TLOGE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr");
             return;
         }
-        sceneSession->SetSessionInfoCallerPersistentId(info.callerPersistentId_);
+        sceneSession->SetRestartCallerPersistentId(info.restartCallerPersistentId_);
         sceneSession->SetRestartApp(true);
         sessionInfo = std::make_shared<SessionInfo>(sceneSession->GetSessionInfo());
     }

@@ -3905,6 +3905,16 @@ bool Session::GetRestartApp() const
     return sessionInfo_.isRestartApp_;
 }
 
+void Session::SetRestartCallerPersistentId(int32_t restartCallerPersistentId)
+{
+    sessionInfo_.restartCallerPersistentId_ = restartCallerPersistentId;
+}
+
+int32_t Session::GetRestartCallerPersistentId() const
+{
+    return sessionInfo_.restartCallerPersistentId_;
+}
+
 WSError Session::SetLeashWindowAlpha(bool hidingStartWindow)
 {
     auto leashSurfaceNode = GetLeashWinSurfaceNode();
