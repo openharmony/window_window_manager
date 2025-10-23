@@ -233,8 +233,8 @@ public:
         { return WMError::WM_OK; }
     virtual void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
         SystemBarProperty& property) {}
-    virtual WMError UpdateSystemBarProperty(
-        WindowType type, SystemBarProperty& systemBarProperty SystemBarPropertyFlag& systemBarPropertyFlag)
+    virtual WMError UpdateSystemBarPropertyForPage(
+        WindowType type, SystemBarProperty& systemBarProperty, SystemBarPropertyFlag& systemBarPropertyFlag)
     {
         return WMError::WM_OK;
     }

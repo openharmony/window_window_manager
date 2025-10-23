@@ -3432,7 +3432,7 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
         window->UpdateSpecificSystemBarEnabled(systemBarEnable, systemBarEnableAnimation, property);
         SystemBarPropertyFlag propertyFlag = { true, false, false, true };
         auto errCode =
-            WM_JS_TO_ERROR_CODE_MAP.at(window->UpdateSystemBarProperty(systemBarType, property, propertyFlag));
+            WM_JS_TO_ERROR_CODE_MAP.at(window->UpdateSystemBarPropertyForPage(systemBarType, property, propertyFlag));
         if (errCode == WmErrorCode::WM_OK) {
             window->NotifySystemBarPropertyUpdate(systemBarType, property);
             task->Resolve(env, NapiGetUndefined(env));
