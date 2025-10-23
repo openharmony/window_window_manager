@@ -3168,14 +3168,14 @@ public:
     }
 
     /*
-     * @brief Update SystemBar Property.
+     * @brief Update SystemBar Property For Page
      *
      * @param type type of system bar
      * @param property System Bar Property
      * @param systemBarPropertyFlag is System Bar Property Flag
      */
-    virtual WMError UpdateSystemBarProperty(
-        WindowType type, SystemBarProperty& systemBarProperty SystemBarPropertyFlag& systemBarPropertyFlag)
+    virtual WMError UpdateSystemBarPropertyForPage(
+        WindowType type, SystemBarProperty& systemBarProperty, SystemBarPropertyFlag& systemBarPropertyFlag)
     {
         return WMError::WM_OK;
     }

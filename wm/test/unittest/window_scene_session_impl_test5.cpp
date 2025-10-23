@@ -966,11 +966,11 @@ HWTEST_F(WindowSceneSessionImplTest5, UpdateSystemBarProperties, TestSize.Level0
 }
 
 /**
- * @tc.name: UpdateSystemBarProperty
- * @tc.desc: UpdateSystemBarProperty test
+ * @tc.name: UpdateSystemBarPropertyForPage
+ * @tc.desc: UpdateSystemBarPropertyForPage test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest5, UpdateSystemBarProperty, TestSize.Level0)
+HWTEST_F(WindowSceneSessionImplTest5, UpdateSystemBarPropertyForPage, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UpdateSystemBarProperty");
@@ -985,14 +985,14 @@ HWTEST_F(WindowSceneSessionImplTest5, UpdateSystemBarProperty, TestSize.Level0)
     SystemBarProperty systemBarProperty;
     SystemBarPropertyFlag systemBarPropertyFlag;
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
-        window->UpdateSystemBarProperty(type, systemBarProperty, systemBarPropertyFlag));
+        window->UpdateSystemBarPropertyForPage(type, systemBarProperty, systemBarPropertyFlag));
     window->state_ = WindowState::STATE_SHOWN;
-    EXPECT_EQ(WMError::WM_OK, window->UpdateSystemBarProperty(type, systemBarProperty, systemBarPropertyFlag));
+    EXPECT_EQ(WMError::WM_OK, window->UpdateSystemBarPropertyForPage(type, systemBarProperty, systemBarPropertyFlag));
     window->systemBarPropertyForPageMap_[type] = std::nullopt;
-    EXPECT_EQ(WMError::WM_OK, window->UpdateSystemBarProperty(type, systemBarProperty, systemBarPropertyFlag));
+    EXPECT_EQ(WMError::WM_OK, window->UpdateSystemBarPropertyForPage(type, systemBarProperty, systemBarPropertyFlag));
     std::optional<SystemBarProperty> property;
     window->systemBarPropertyForPageMap_[type] = property;
-    EXPECT_EQ(WMError::WM_OK, window->UpdateSystemBarProperty(type, systemBarProperty, systemBarPropertyFlag));
+    EXPECT_EQ(WMError::WM_OK, window->UpdateSystemBarPropertyForPage(type, systemBarProperty, systemBarPropertyFlag));
 }
 
 /**

@@ -952,7 +952,7 @@ void WindowSceneSessionImpl::UpdateDefaultStatusBarColor()
         static_cast<uint32_t>(statusBarProp.settingFlag_) |
         static_cast<uint32_t>(SystemBarSettingFlag::FOLLOW_SETTING));
     SystemBarPropertyFlag systemBarPropertyFlag = { false, false, true, false };
-    UpdateSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProp, systemBarPropertyFlag);
+    UpdateSystemBarPropertyForPage(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProp, systemBarPropertyFlag);
 }
 
 void WindowSceneSessionImpl::InitSystemSessionDragEnable()
@@ -3197,18 +3197,18 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
         property.enable_ = systemBarPropertyFlag.enableFlag ?
             systemBarProperties.at(systemBarType).enable_ : property.enable_;
         property.settingFlag_ |= systemBarPropertyFlag.enableFlag ?
-            SystemBarSettingFlag::ENABLE_SETTING | SystemBarSettingFlag::DEFAULT_SETTING;
+            SystemBarSettingFlag::ENABLE_SETTING : SystemBarSettingFlag::DEFAULT_SETTING;
         property.backgroundColor_ = systemBarPropertyFlag.backgroundColorFlag ?
             systemBarProperties.at(systemBarType).backgroundColor_ : property.backgroundColor_;
         property.contentColor_ = systemBarPropertyFlag.contentColorFlag ?
             systemBarProperties.at(systemBarType).contentColor_ : property.contentColor_;
         property.settingFlag_ |=
             (systemBarPropertyFlag.backgroundColorFlag || systemBarPropertyFlag.contentColorFlag) ?
-            SystemBarSettingFlag::COLOR_SETTING | SystemBarSettingFlag::DEFAULT_SETTING;
+            SystemBarSettingFlag::COLOR_SETTING : SystemBarSettingFlag::DEFAULT_SETTING;
         property.enableAnimation_ = systemBarPropertyFlag.enableAnimationFlag ?
             systemBarProperties.at(systemBarType).enableAnimation_ : property.enableAnimation_;
 
-        auto ret = UpdateSystemBarProperty(systemBarType, property, systemBarPropertyFlag);
+        auto ret = UpdateSystemBarPropertyForPage(systemBarType, property, systemBarPropertyFlag);
         if (ret != WMError::WM_OK) {
             TLOGE(WmsLogTag::WMS_IMMS, "set failed");
             return ret;
@@ -3221,8 +3221,8 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::UpdateSystemBarProperty(
-    WindowType type, SystemBarProperty& systemBarProperty SystemBarPropertyFlag& systemBarPropertyFlag)
+WMError WindowSceneSessionImpl::UpdateSystemBarPropertyForPage(
+    WindowType type, SystemBarProperty& systemBarProperty, SystemBarPropertyFlag& systemBarPropertyFlag)
 {
     bool isUsedPageEnabled = false;
     {
@@ -3241,9 +3241,10 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperty(
             isUsedPageEnabled = true;
         }
     }
-    auto ret = SetSystemBarProperty(type, isUsedPageEnabled ? systemBarPropertyForPageMap_[type].value() : property);
+    auto ret = SetSystemBarProperty(type,
+        isUsedPageEnabled ? systemBarPropertyForPageMap_[type].value() : systemBarProperty);
     if (ret == WMError::WM_OK) {
-        property_->SetSystemBarProperty(type, property);
+        property_->SetSystemBarProperty(type, systemBarProperty);
     }
     return ret;
 }
