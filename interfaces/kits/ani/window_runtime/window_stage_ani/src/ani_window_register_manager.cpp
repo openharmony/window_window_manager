@@ -55,6 +55,7 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     {SYSTEM_DENSITY_CHANGE_CB, RegisterListenerType::SYSTEM_DENSITY_CHANGE_CB},
     {WINDOW_ROTATION_CHANGE_CB, RegisterListenerType::WINDOW_ROTATION_CHANGE_CB},
     {RECT_CHANGE_IN_GLOBAL_DISPLAY_CB, RegisterListenerType::RECT_CHANGE_IN_GLOBAL_DISPLAY_CB},
+    {EXTENSION_SECURE_LIMIT_CHANGE_CB, RegisterListenerType::EXTENSION_SECURE_LIMIT_CHANGE_CB},
     {WINDOW_STATUS_DID_CHANGE_CB, RegisterListenerType::WINDOW_STATUS_DID_CHANGE_CB},
     {ACROSS_DISPLAYS_CHANGE_CB, RegisterListenerType::ACROSS_DISPLAYS_CHANGE_CB},
     {SCREENSHOT_APP_EVENT_CB, RegisterListenerType::SCREENSHOT_APP_EVENT_CB},
@@ -580,6 +581,8 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowListener(RegisterListenerType
             return ProcessWindowRotationChangeRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::RECT_CHANGE_IN_GLOBAL_DISPLAY_CB):
             return ProcessRectChangeInGlobalDisplayRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::EXTENSION_SECURE_LIMIT_CHANGE_CB):
+            return ProcessExtensionSecureLimitChangeRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::WINDOW_STATUS_DID_CHANGE_CB):
             return ProcessWindowStatusDidChangeRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::ACROSS_DISPLAYS_CHANGE_CB):
@@ -806,6 +809,22 @@ WmErrorCode AniWindowRegisterManager::ProcessRectChangeInGlobalDisplayRegister(c
         ret = window->RegisterRectChangeInGlobalDisplayListener(thisListener);
     } else {
         ret = window->UnregisterRectChangeInGlobalDisplayListener(thisListener);
+    }
+    return AniWindowUtils::ToErrorCode(ret);
+}
+
+WmErrorCode AniWindowRegisterManager::ProcessExtensionSecureLimitChangeRegister(const sptr<AniWindowListener>& listener,
+    const sptr<Window>& window, bool isRegister, ani_env* env)
+{
+    if (window == nullptr || listener == nullptr) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IExtensionSecureLimitChangeListener> thisListener(listener);
+    WMError ret = WMError::WM_OK;
+    if (isRegister) {
+        ret = window->RegisterExtensionSecureLimitChangeListener(thisListener);
+    } else {
+        ret = window->UnregisterExtensionSecureLimitChangeListener(thisListener);
     }
     return AniWindowUtils::ToErrorCode(ret);
 }
