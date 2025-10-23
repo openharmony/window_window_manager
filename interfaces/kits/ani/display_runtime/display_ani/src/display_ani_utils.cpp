@@ -499,5 +499,48 @@ void DisplayAniUtils::DisposeAniDisplayObject(DisplayId displayId)
         g_AniDisplayMap.erase(displayId);
     }
 }
+
+ani_status DisplayAniUtils::CvtBrightnessInfo(ani_env* env, ani_object obj, ScreenBrightnessInfo brightnessInfo)
+{
+    ani_status ret = env->Object_SetFieldByName_Double(obj, "<property>sdrNits", brightnessInfo.sdrNits);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI]Set sdrNits failed, ret: %{public}u", ret);
+        return ret;
+    }
+    ret = env->Object_SetFieldByName_Double(obj, "<property>currentHeadroom", brightnessInfo.currentHeadroom);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI]Set currentHeadroom failed, ret: %{public}u", ret);
+        return ret;
+    }
+    ret = env->Object_SetFieldByName_Double(obj, "<property>maxHeadroom", brightnessInfo.maxHeadroom);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI]Set maxHeadroom failed, ret: %{public}u", ret);
+        return ret;
+    }
+    return ret;
+}
+
+ani_object DisplayAniUtils::CreateBrightnessInfoObject(ani_env* env)
+{
+    ani_class aniClass{};
+    ani_status status = env->FindClass("@ohos.display.display.ScreenBrightnessInfoImpl", &aniClass);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] class not found, status:%{public}d", static_cast<int32_t>(status));
+        return nullptr;
+    }
+    ani_method aniCtor;
+    auto ret = env->Class_FindMethod(aniClass, "<ctor>", ":V", &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Class_FindMethod failed");
+        return nullptr;
+    }
+    ani_object brightnessInfoObj;
+    status = env->Object_New(aniClass, aniCtor, &brightnessInfoObj);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] NewAniObject failed");
+        return nullptr;
+    }
+    return brightnessInfoObj;
+}
 }
 }
