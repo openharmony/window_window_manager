@@ -2347,8 +2347,14 @@ HWTEST_F(WindowSceneSessionImplTest5, GetDragAreaByDownEvent02, TestSize.Level2)
     pointerItem.SetWindowX(1);
     pointerItem.SetWindowY(1);
     windowSceneSessionImpl->property_->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+    windowSceneSessionImpl->property_->SetDragEnabled(true);
+    windowSceneSessionImpl->SetDragActivated(true);
     AreaType dragType = windowSceneSessionImpl->GetDragAreaByDownEvent(pointerEvent, pointerItem);
     EXPECT_EQ(dragType, AreaType::LEFT_TOP);
+    windowSceneSessionImpl->property_->SetDragEnabled(false);
+    windowSceneSessionImpl->SetDragActivated(false);
+    dragType = windowSceneSessionImpl->GetDragAreaByDownEvent(pointerEvent, pointerItem);
+    EXPECT_EQ(dragType, AreaType::UNDEFINED);
 }
 
 /**
