@@ -3905,6 +3905,16 @@ bool Session::GetRestartApp() const
     return sessionInfo_.isRestartApp_;
 }
 
+void Session::SetRestartInSameProcess(bool restartInSameProcess)
+{
+    sessionInfo_.isRestartInSameProcess_ = restartInSameProcess;
+}
+
+bool Session::GetRestartInSameProcess() const
+{
+    return sessionInfo_.isRestartInSameProcess_;
+}
+
 void Session::SetRestartCallerPersistentId(int32_t restartCallerPersistentId)
 {
     sessionInfo_.restartCallerPersistentId_ = restartCallerPersistentId;
