@@ -1003,8 +1003,8 @@ private:
     bool RecoveryResolutionEffect();
     void RegisterSettingResolutionEffectObserver();
     void SetResolutionEffectFromSettingData();
-    void SetInternalScreenResolutionEffect(const sptr<ScreenSession>& internalSession, DMRect toRect);
-    void SetExternalScreenResolutionEffect(const sptr<ScreenSession>& externalSession, DMRect toRect);
+    void SetInternalScreenResolutionEffect(const sptr<ScreenSession>& internalSession, DMRect& toRect);
+    void SetExternalScreenResolutionEffect(const sptr<ScreenSession>& externalSession, DMRect& toRect);
     void GetCastVirtualMirrorSession(sptr<ScreenSession>& virtualSession);
     std::atomic<bool> curResolutionEffectEnable_ = false;
     DMError SyncScreenPropertyChangedToServer(ScreenId screenId, const ScreenProperty& screenProperty) override;
