@@ -2284,12 +2284,12 @@ HWTEST_F(WindowManagerTest, RegisterRectChangedListener01, Function | SmallTest 
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
  
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    EXPECT_EQ(WMError::WM_OK, windowManager.RegisterRectChangedListener(listener));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.RegisterRectChangedListener(listener));
     EXPECT_EQ(0, windowManager.pImpl_->windowRectChangeListeners_.size());
  
     // to check that the same listner can not be registered twice
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    EXPECT_EQ(WMError::WM_OK, windowManager.RegisterRectChangedListener(listener));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.RegisterRectChangedListener(listener));
     EXPECT_EQ(0, windowManager.pImpl_->windowRectChangeListeners_.size());
  
     windowManager.pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
@@ -2314,7 +2314,7 @@ HWTEST_F(WindowManagerTest, UnregisterRectChangedListener01, Function | SmallTes
 
     sptr<TestWindowRectChangedListener> listener1 = sptr<TestWindowRectChangedListener>::MakeSptr();
     sptr<TestWindowRectChangedListener> listener2 = sptr<TestWindowRectChangedListener>::MakeSptr();
-    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterRectChangedListener(listener1));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.UnregisterRectChangedListener(listener1));
 
     windowManager.RegisterRectChangedListener(listener1);
     windowManager.RegisterRectChangedListener(listener2);
@@ -2350,12 +2350,12 @@ HWTEST_F(WindowManagerTest, RegisterGlobalRectChangedListener01, Function | Smal
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
  
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    EXPECT_EQ(WMError::WM_OK, windowManager.RegisterGlobalRectChangedListener(listener));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.RegisterGlobalRectChangedListener(listener));
     EXPECT_EQ(0, windowManager.pImpl_->windowGlobalRectChangeListeners_.size());
  
     // to check that the same listner can not be registered twice
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    EXPECT_EQ(WMError::WM_OK, windowManager.RegisterGlobalRectChangedListener(listener));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.RegisterGlobalRectChangedListener(listener));
     EXPECT_EQ(0, windowManager.pImpl_->windowGlobalRectChangeListeners_.size());
  
     windowManager.pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
@@ -2380,7 +2380,7 @@ HWTEST_F(WindowManagerTest, UnregisterGlobalRectChangedListener01, Function | Sm
 
     sptr<TestWindowGlobalRectChangedListener> listener1 = sptr<TestWindowGlobalRectChangedListener>::MakeSptr();
     sptr<TestWindowGlobalRectChangedListener> listener2 = sptr<TestWindowGlobalRectChangedListener>::MakeSptr();
-    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterGlobalRectChangedListener(listener1));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.UnregisterGlobalRectChangedListener(listener1));
 
     windowManager.RegisterGlobalRectChangedListener(listener1);
     windowManager.RegisterGlobalRectChangedListener(listener2);
