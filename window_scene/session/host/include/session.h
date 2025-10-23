@@ -359,6 +359,8 @@ public:
     DisplayId GetDisplayId() const { return GetSessionProperty()->GetDisplayId(); }
     void SetRestartApp(bool restartApp);
     bool GetRestartApp() const;
+    void SetRestartInSameProcess(bool restartInSameProcess);
+    bool GetRestartInSameProcess() const;
     void SetRestartCallerPersistentId(int32_t restartCallerPersistentId);
     int32_t GetRestartCallerPersistentId() const;
 
