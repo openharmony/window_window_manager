@@ -2210,7 +2210,7 @@ SessionInfo SceneSession::GetSessionInfoByWant(const std::shared_ptr<AAFwk::Want
     if (session->sessionInfo_.moduleName_ == want->GetElement().GetModuleName() &&
         session->sessionInfo_.abilityName_ == want->GetElement().GetAbilityName()) {
         session->sessionInfo_.isRestartApp_ = true;
-        session->sessionInfo_.callerPersistentId_ = INVALID_SESSION_ID;
+        session->sessionInfo_.restartCallerPersistentId_ = INVALID_SESSION_ID;
         info = session->sessionInfo_;
     } else {
         info.abilityName_ = want->GetElement().GetAbilityName();
@@ -2222,6 +2222,7 @@ SessionInfo SceneSession::GetSessionInfoByWant(const std::shared_ptr<AAFwk::Want
         TLOGI(WmsLogTag::WMS_LIFE, "the new session info, appindex:%{public}d, appInstanceKey:%{public}s",
             info.appIndex_, info.appInstanceKey_.c_str());
         info.callerPersistentId_ = session->GetPersistentId();
+        info.restartCallerPersistentId_ = session->GetPersistentId();
     }
     return info;
 }
