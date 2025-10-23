@@ -1086,6 +1086,26 @@ HWTEST_F(SessionStageStubTest, HandleNotifyWindowCrossAxisChange, TestSize.Level
 }
 
 /**
+ * @tc.name: HandleNotifyPiPActiveStatusChange
+ * @tc.desc: test function : HandleNotifyPiPActiveStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyPiPActiveStatusChange, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_ACTIVE_STATUS_CHANGE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteBool(true);
+    ASSERT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+
+    MessageParcel data1;
+    data1.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    EXPECT_EQ(sessionStageStub_->OnRemoteRequest(code, data1, reply, option), ERR_INVALID_VALUE);
+}
+
+/**
  * @tc.name: HandleNotifyRotationChange
  * @tc.desc: test function : HandleNotifyRotationChange
  * @tc.type: FUNC
