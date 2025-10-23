@@ -3312,8 +3312,12 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
 }
 
 void SceneSessionManager::ResetSessionInfoAfterStartUIAbility(const sptr<SceneSession>& sceneSession) {
-    TLOGI(WmsLogTag::WMS_LIFE, "in");
-    sceneSession->SetRestartApp(false);
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    if (sceneSession->GetRestartApp()) {
+        sceneSession->SetRestartApp(false);
+        sceneSession->GetSessionProperty()->SetIsNeedUpdateWindowMode(true);
+        sceneSession->SetRestartInSameProcess(true);
+    }
 }
 
 void SceneSessionManager::AddRequestTaskInfo(sptr<SceneSession> sceneSession, int32_t requestId) {

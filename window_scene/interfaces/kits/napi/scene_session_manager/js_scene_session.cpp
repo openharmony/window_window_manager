@@ -8470,17 +8470,17 @@ void JsSceneSession::ProcessRestartAppRegister()
         TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    session->SetRestartAppListener([weakThis = wptr(this)](const SessionInfo& info) {
+    session->SetRestartAppListener([weakThis = wptr(this)](const SessionInfo& info, int32_t callingPid) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
             return;
         }
-        jsSceneSession->OnRestartApp(info);
+        jsSceneSession->OnRestartApp(info, callingPid);
     });
 }
 
-void JsSceneSession::OnRestartApp(const SessionInfo& info)
+void JsSceneSession::OnRestartApp(const SessionInfo& info, int32_t callingPid)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
@@ -8493,7 +8493,12 @@ void JsSceneSession::OnRestartApp(const SessionInfo& info)
         if (!sceneSession) {
             sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
         } else {
-            sceneSession->NotifyRestart();
+            if (sceneSession->GetCallingPid() == callingPid) {
+                sceneSession->NotifyRestart();
+            } else {
+                TLOGI(WmsLogTag::WMS_LIFE, "restart app callerSession not in same process:%{public}d", callingPid);
+                sceneSession->SetRestartInSameProcess(false);
+            }
         }
         if (!sceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr");
