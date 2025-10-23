@@ -574,7 +574,7 @@ void JsPipController::ProcessActiveStatusChangeRegister(const sptr<JsPiPWindowLi
         return;
     }
     sptr<IPiPActiveStatusObserver> thisListener(listener);
-    pipController_->RegisterPiPActiveStatusChange(listener);
+    pipController_->RegisterPiPActiveStatusChange(thisListener);
 }
 
 void JsPipController::ProcessStateChangeUnRegister(const sptr<JsPiPWindowListener>& listener)
@@ -624,7 +624,7 @@ void JsPipController::ProcessActiveStatusChangeUnRegister(const sptr<JsPiPWindow
         return;
     }
     sptr<IPiPActiveStatusObserver> thisListener(listener);
-    pipController_->UnregisterPiPActiveStatusChange(listener);
+    pipController_->UnregisterPiPActiveStatusChange(thisListener);
 }
 
 napi_value JsPipController::UnregisterCallback(napi_env env, napi_callback_info info)
