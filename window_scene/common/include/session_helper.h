@@ -126,7 +126,7 @@ public:
     }
 
     static AreaType GetAreaType(int32_t pointWinX, int32_t pointWinY,
-        int32_t sourceType, int outside, float vpr, const WSRect& rect)
+        int32_t sourceType, int outside, float vpr, const WSRect& rect, const WindowLimits& limits)
     {
         int32_t insideCorner = WINDOW_FRAME_CORNER_WIDTH * vpr;
         int32_t insideEdge = WINDOW_FRAME_WIDTH * vpr;
@@ -144,23 +144,30 @@ public:
         int32_t bottomOut = rect.height_ + outside;
 
         auto isInRange = [](int32_t min, int32_t max, int32_t value) { return min <= value && value <= max; };
+        bool isWidthDraggable = limits.minWidth_ < limits.maxWidth_;
+        bool isHeightDraggable = limits.minHeight_ < limits.maxHeight_;
+        bool bothWidthHeightDraggable = isWidthDraggable && isHeightDraggable;
 
         AreaType type;
-        if (isInRange(leftOut, leftCorner, pointWinX) && isInRange(topOut, topCorner, pointWinY)) {
+        if (bothWidthHeightDraggable && isInRange(leftOut, leftCorner, pointWinX) &&
+            isInRange(topOut, topCorner, pointWinY)) {
             type = AreaType::LEFT_TOP;
-        } else if (isInRange(rightCorner, rightOut, pointWinX) && isInRange(topOut, topCorner, pointWinY)) {
+        } else if (bothWidthHeightDraggable && isInRange(rightCorner, rightOut, pointWinX) &&
+            isInRange(topOut, topCorner, pointWinY)) {
             type = AreaType::RIGHT_TOP;
-        } else if (isInRange(rightCorner, rightOut, pointWinX) && isInRange(bottomCorner, bottomOut, pointWinY)) {
+        } else if (bothWidthHeightDraggable && isInRange(rightCorner, rightOut, pointWinX) &&
+            isInRange(bottomCorner, bottomOut, pointWinY)) {
             type = AreaType::RIGHT_BOTTOM;
-        } else if (isInRange(leftOut, leftCorner, pointWinX) && isInRange(bottomCorner, bottomOut, pointWinY)) {
+        } else if (bothWidthHeightDraggable && isInRange(leftOut, leftCorner, pointWinX) &&
+            isInRange(bottomCorner, bottomOut, pointWinY)) {
             type = AreaType::LEFT_BOTTOM;
-        } else if (isInRange(leftOut, leftIn, pointWinX)) {
+        } else if (isWidthDraggable && isInRange(leftOut, leftIn, pointWinX)) {
             type = AreaType::LEFT;
-        } else if (isInRange(topOut, topIn, pointWinY)) {
+        } else if (isHeightDraggable && isInRange(topOut, topIn, pointWinY)) {
             type = AreaType::TOP;
-        } else if (isInRange(rightIn, rightOut, pointWinX)) {
+        } else if (isWidthDraggable && isInRange(rightIn, rightOut, pointWinX)) {
             type = AreaType::RIGHT;
-        } else if (isInRange(bottomIn, bottomOut, pointWinY)) {
+        } else if (isHeightDraggable && isInRange(bottomIn, bottomOut, pointWinY)) {
             type = AreaType::BOTTOM;
         } else {
             type = AreaType::UNDEFINED;

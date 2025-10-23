@@ -1437,6 +1437,16 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateDefaultHotAreas2, TestSize.Level1)
     empty.clear();
     manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
     ASSERT_EQ(empty[0].x, 0);
+
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    empty.clear();
+    manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
+    ASSERT_EQ(empty[0].x, 0);
+    sceneSession->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    empty.clear();
+    manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
+    ASSERT_EQ(empty[0].x, 0);
 }
 
 /**

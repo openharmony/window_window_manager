@@ -1162,9 +1162,15 @@ AreaType WindowSceneSessionImpl::GetDragAreaByDownEvent(const std::shared_ptr<MM
     int32_t winY = pointerItem.GetWindowY();
     WindowType windowType = property_->GetWindowType();
     bool isSystemDraggableType = WindowHelper::IsSystemWindow(windowType) && IsWindowDraggable();
+    bool isFloatingDraggableType =
+        property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && IsWindowDraggable();
     const auto& rect = SessionHelper::TransferToWSRect(GetRect());
-    if (property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING || isSystemDraggableType) {
-        dragType = SessionHelper::GetAreaType(winX, winY, sourceType, outside, vpr, rect);
+    auto limits = property_->GetWindowLimits();
+    TLOGD(WmsLogTag::WMS_EVENT, "%{public}s [minWidth,maxWidth,minHeight,maxHeight]: %{public}d,"
+        " %{public}d, %{public}d, %{public}d", GetWindowName().c_str(), limits.minWidth_,
+        limits.maxWidth_, limits.minHeight_, limits.maxHeight_);
+    if (isFloatingDraggableType || isSystemDraggableType) {
+        dragType = SessionHelper::GetAreaType(winX, winY, sourceType, outside, vpr, rect, limits);
     }
     return dragType;
 }
