@@ -1028,6 +1028,7 @@ protected:
     std::mutex fbClickMutex_;
     uint8_t fbClickCnt_ {0};
     FloatingBallTemplateInfo fbTemplateInfo_ = {};
+    mutable std::mutex fbTemplateMutex_;
 
     /*
      * Window Lifecycle

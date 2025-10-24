@@ -588,11 +588,13 @@ WSError SystemSession::SendFbActionEvent(const std::string& action)
 
 FloatingBallTemplateInfo SystemSession::GetFbTemplateInfo() const
 {
+    std::lock_guard<std::mutex> lock(fbTemplateMutex_);
     return fbTemplateInfo_;
 }
 
 void SystemSession::SetFbTemplateInfo(const FloatingBallTemplateInfo& fbTemplateInfo)
 {
+    std::lock_guard<std::mutex> lock(fbTemplateMutex_);
     fbTemplateInfo_ = fbTemplateInfo;
 }
 
