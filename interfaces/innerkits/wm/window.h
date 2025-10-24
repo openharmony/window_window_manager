@@ -4756,6 +4756,31 @@ public:
     {
         return WMError::WM_OK;
     }
+
+    /**
+     * @brief Lock the mouse cursor restricting it to a specified window area, and also control whether the cursor
+     *        follows movement. Only supported by the focus window; the lock is automatically released when the
+     *        window loses focus.
+     *
+     * @param windowId WindowId when window is created.
+     * @param isCursorFollowMovement Set mouse cursor lock mode.
+     * @return Returns the status code of the execution.
+     */
+    virtual WMError LockCursor(int32_t windowId, bool isCursorFollowMovement)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Clear the window mouse cursor status. Revert to mouse cursor free movement mode.
+     *
+     * @param windowId WindowId when window is created.
+     * @return Returns the status code of the execution.
+     */
+    virtual WMError UnlockCursor(int32_t windowId)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
  
     /**
      * @brief Calculate whether the pointerEvent hits the title bar.

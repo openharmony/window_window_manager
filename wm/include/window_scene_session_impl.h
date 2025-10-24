@@ -337,6 +337,12 @@ public:
     WSError CloseSpecificScene() override;
     WMError SetSubWindowSource(SubWindowSource source) override;
 
+    /*
+     * Window Event
+     */
+    WMError LockCursor(int32_t windowId, bool isCursorFollowMovement) override;
+    WMError UnlockCursor(int32_t windowId) override;
+
 protected:
     WMError CreateAndConnectSpecificSession();
     WMError CreateSystemWindow(WindowType type);
