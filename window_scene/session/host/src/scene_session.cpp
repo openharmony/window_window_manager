@@ -2164,7 +2164,8 @@ WSError SceneSession::RestartApp(const std::shared_ptr<AAFwk::Want>& want)
         TLOGE(WmsLogTag::WMS_LIFE, "want is null");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    return PostSyncTask([weakThis = wptr(this), want, where = __func__] {
+    int32_t callingPid = IPCSkeleton::GetCallingPid();
+    return PostSyncTask([weakThis = wptr(this), want, callingPid, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: session is null", where);
@@ -2185,17 +2186,19 @@ WSError SceneSession::RestartApp(const std::shared_ptr<AAFwk::Want>& want)
                 where, session->sessionInfo_.bundleName_.c_str(), want->GetElement().GetBundleName().c_str());
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
-        if (!session->CheckAbilityInfoByWant(want)) {
+        AppExecFwk::AbilityInfo abilityInfo;
+        if (!session->CheckAndGetAbilityInfoByWant(want, abilityInfo)) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: ability info is null, ability name:%{public}s",
                 where, want->GetElement().GetAbilityName().c_str());
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
+        want->SetModuleName(abilityInfo.moduleName);
         SessionInfo info = GetSessionInfoByWant(want, session);
         if (info.isRestartApp_) {
             session->NotifyRestart();
         }
         if (session->restartAppFunc_) {
-            session->restartAppFunc_(info);
+            session->restartAppFunc_(info, callingPid);
         }
         return WSError::WS_OK;
     }, __func__);
@@ -2207,8 +2210,9 @@ SessionInfo SceneSession::GetSessionInfoByWant(const std::shared_ptr<AAFwk::Want
     SessionInfo info;
     if (session->sessionInfo_.moduleName_ == want->GetElement().GetModuleName() &&
         session->sessionInfo_.abilityName_ == want->GetElement().GetAbilityName()) {
+        session->sessionInfo_.want = want;
         session->sessionInfo_.isRestartApp_ = true;
-        session->sessionInfo_.callerPersistentId_ = INVALID_SESSION_ID;
+        session->sessionInfo_.restartCallerPersistentId_ = INVALID_SESSION_ID;
         info = session->sessionInfo_;
     } else {
         info.abilityName_ = want->GetElement().GetAbilityName();
@@ -2220,6 +2224,8 @@ SessionInfo SceneSession::GetSessionInfoByWant(const std::shared_ptr<AAFwk::Want
         TLOGI(WmsLogTag::WMS_LIFE, "the new session info, appindex:%{public}d, appInstanceKey:%{public}s",
             info.appIndex_, info.appInstanceKey_.c_str());
         info.callerPersistentId_ = session->GetPersistentId();
+        info.want = want;
+        info.restartCallerPersistentId_ = session->GetPersistentId();
     }
     return info;
 }
@@ -7953,13 +7959,14 @@ sptr<SceneSession> SceneSession::GetSceneSessionById(int32_t sessionId) const
     return specificCallback_->onGetSceneSessionByIdCallback_(sessionId);
 }
 
-bool SceneSession::CheckAbilityInfoByWant(const std::shared_ptr<AAFwk::Want>& want) const
+bool SceneSession::CheckAndGetAbilityInfoByWant(const std::shared_ptr<AAFwk::Want>& want,
+    AppExecFwk::AbilityInfo& abilityInfo) const
 {
-    if (specificCallback_ == nullptr || specificCallback_->onCheckAbilityInfoByWantCallback_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "specificCallback or onCheckAbilityInfoByWantCallback is null");
+    if (specificCallback_ == nullptr || specificCallback_->onCheckAndGetAbilityInfoByWantCallback_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "specificCallback or onCheckAndGetAbilityInfoByWantCallback is null");
         return false;
     }
-    return specificCallback_->onCheckAbilityInfoByWantCallback_(want);
+    return specificCallback_->onCheckAndGetAbilityInfoByWantCallback_(want, abilityInfo);
 }
 
 
