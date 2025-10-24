@@ -640,6 +640,26 @@ bool WindowManagerAgentProxy::WriteWindowChangeInfoValue(MessageParcel& data,
             }
             break;
         }
+        case WindowInfoKey::WINDOW_GLOBAL_RECT : {
+            Rect globalRect = std::get<Rect>(windowInfoPair.second);
+            if (!data.WriteInt32(globalRect.posX_)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write posX failed");
+                return false;
+            }
+            if (!data.WriteInt32(globalRect.posY_)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write posY failed");
+                return false;
+            }
+            if (!data.WriteUint32(globalRect.width_)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write Width failed");
+                return false;
+            }
+            if (!data.WriteUint32(globalRect.height_)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write Height failed");
+                return false;
+            }
+            break;
+        }
         default : {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Unknown WindowInfoKey: %{public}d",
                 static_cast<int32_t>(windowInfoPair.first));
