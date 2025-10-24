@@ -119,7 +119,7 @@ using HasRequestedVsyncFunc = std::function<WSError(bool& hasRequestedVsync)>;
 using RequestNextVsyncWhenModeChangeFunc = std::function<WSError(const std::shared_ptr<VsyncCallback>& vsyncCallback)>;
 using NotifyClearSubSessionFunc = std::function<void(const int32_t subPersistentId)>;
 using OutlineParamsChangeCallbackFunc = std::function<void(bool enabled, const OutlineStyleParams& outlineStyleParams)>;
-using NotifyRestartAppFunc = std::function<void(const SessionInfo& info)>;
+using NotifyRestartAppFunc = std::function<void(const SessionInfo& info, int32_t callingPid)>;
 using ProcessCallingSessionIdChangeFunc = std::function<void(uint32_t callingSessionId)>;
 class ILifecycleListener {
 public:
@@ -359,6 +359,10 @@ public:
     DisplayId GetDisplayId() const { return GetSessionProperty()->GetDisplayId(); }
     void SetRestartApp(bool restartApp);
     bool GetRestartApp() const;
+    void SetRestartInSameProcess(bool restartInSameProcess);
+    bool GetRestartInSameProcess() const;
+    void SetRestartCallerPersistentId(int32_t restartCallerPersistentId);
+    int32_t GetRestartCallerPersistentId() const;
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
