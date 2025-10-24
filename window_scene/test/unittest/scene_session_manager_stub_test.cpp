@@ -395,6 +395,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdPendingSessionToForeground, TestSiz
     uint32_t code =
         static_cast<uint32_t>(ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_PENDING_SESSION_TO_FOREGROUND);
 
+    data.WriteInt32(1);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, ERR_NONE);
 }
@@ -2154,6 +2155,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleAddExtensionWindowStageToSCB, TestSi
     data.WriteRemoteObject(token);
     data.WriteUint64(12345);
     data.WriteBool(false);
+    data.WriteInt64(0);
     res = stub_->HandleAddExtensionWindowStageToSCB(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
