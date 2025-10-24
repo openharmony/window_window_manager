@@ -1401,7 +1401,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
         const std::map<ScreenId, ScreenProperty>& screenProperties =
             Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
         if (screenProperties.find(displayId) != screenProperties.end()) {
-            auto screenProperty = screenProperties[displayId];
+            auto screenProperty = screenProperties.at(displayId);
             int32_t width = screenProperty.GetBounds().rect_.GetWidth();
             int32_t height = screenProperty.GetBounds().rect_.GetHeight();
             TLOGI(WmsLogTag::WMS_MAIN, "update prelaunch rect[0, 0, %{public}d, %{public}d] "
