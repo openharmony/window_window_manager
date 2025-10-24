@@ -729,6 +729,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
             TLOGI(WmsLogTag::WMS_LIFE, "create failed not system or sub type, type: %{public}d", type);
             return WMError::WM_ERROR_INVALID_CALLING;
         }
+        InitSubSessionDragEnable();
         isEnableDefaultDensityWhenCreate_ = windowOption_->IsDefaultDensityEnabled();
         ret = CreateAndConnectSpecificSession();
     }
@@ -1014,6 +1015,15 @@ void WindowSceneSessionImpl::UpdateDefaultStatusBarColor()
         static_cast<uint32_t>(statusBarProp.settingFlag_) |
         static_cast<uint32_t>(SystemBarSettingFlag::FOLLOW_SETTING));
     SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProp);
+}
+
+void WindowSceneSessionImpl::InitSubSessionDragEnable()
+{
+    if (WindowHelper::IsSubWindow(GetType()) && !IsPcOrPadFreeMultiWindowMode()) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "windId: %{public}d init subWindow dragEnable false",
+            property_->GetPersistentId());
+        property_->SetDragEnabled(false);
+    }
 }
 
 void WindowSceneSessionImpl::InitSystemSessionDragEnable()
