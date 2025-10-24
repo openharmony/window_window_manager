@@ -15,6 +15,9 @@
 
 #ifndef MOCK_MESSAGE_PARCEL_H
 #define MOCK_MESSAGE_PARCEL_H
+
+#include "window_manager_hilog.h"
+
 namespace OHOS {
 namespace Rosen {
 class MockMessageParcel {
@@ -39,6 +42,8 @@ public:
     static void SetReadFloatErrorFlag(bool flag);
     static void SetReadStringVectorErrorFlag(bool flag);
     static void SetReadStringErrorFlag(bool flag);
+    static void SetWriteInt32ErrorCount(int count);
+    static void AddInt32Cache(int32_t value);
 };
 }
 }

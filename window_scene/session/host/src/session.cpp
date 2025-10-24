@@ -61,6 +61,7 @@ constexpr int64_t STATE_DETECT_DELAYTIME = 3 * 1000;
 constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
 constexpr int32_t TIMES_TO_WAIT_FOR_VSYNC_ONECE = 1;
 constexpr int32_t TIMES_TO_WAIT_FOR_VSYNC_TWICE = 2;
+
 const std::map<SessionState, bool> ATTACH_MAP = {
     { SessionState::STATE_DISCONNECT, false },
     { SessionState::STATE_CONNECT, false },
@@ -402,6 +403,30 @@ void Session::SetSessionInfoExpandInputFlag(uint32_t expandInputFlag)
 uint32_t Session::GetSessionInfoExpandInputFlag() const
 {
     return sessionInfo_.expandInputFlag_;
+}
+
+void Session::SetSessionInfoAdvancedFeatureFlag(uint32_t bitPosition, bool value)
+{
+    if (bitPosition >= ADVANCED_FEATURE_BIT_MAX) {
+        TLOGE(WmsLogTag::WMS_EVENT, "id:%{public}d, bitPosition:%{public}u", GetPersistentId(), bitPosition);
+        return;
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+        sessionInfo_.advancedFeatureFlag_.set(bitPosition, value);
+    }
+}
+
+bool Session::GetSessionInfoAdvancedFeatureFlag(uint32_t bitPosition)
+{
+    if (bitPosition >= ADVANCED_FEATURE_BIT_MAX) {
+        TLOGE(WmsLogTag::WMS_EVENT, "id:%{public}d, bitPosition:%{public}u", GetPersistentId(), bitPosition);
+        return false;
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+        return sessionInfo_.advancedFeatureFlag_.test(bitPosition);
+    }
 }
 
 void Session::SetSessionInfoWindowMode(int32_t windowMode)

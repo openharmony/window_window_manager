@@ -41,6 +41,7 @@ class RSSurfaceNode;
 using ISessionListener = AAFwk::IMissionListener;
 using SessionInfoBean = AAFwk::MissionInfo;
 using SessionSnapshot = AAFwk::MissionSnapshot;
+
 class ISceneSessionManager : public IWindowManager {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISceneSessionManager");
