@@ -254,6 +254,7 @@ HWTEST_F(SessionStageProxyTest, UpdateFocus01, TestSize.Level1)
     MockMessageParcel::SetWriteParcelableErrorFlag(true);
     res = sessionStage_->UpdateFocus(info, focus);
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+    MockMessageParcel::ClearAllErrorFlag();
 }
 
 /**
@@ -289,6 +290,7 @@ HWTEST_F(SessionStageProxyTest, NotifyHighlightChange01, TestSize.Level1)
     MockMessageParcel::SetWriteParcelableErrorFlag(true);
     res = sessionStage_->NotifyHighlightChange(info, isHighlight);
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+    MockMessageParcel::ClearAllErrorFlag();
 }
 
 /**
