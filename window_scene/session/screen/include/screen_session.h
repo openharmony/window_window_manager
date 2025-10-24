@@ -402,6 +402,14 @@ public:
 
     void UpdateMirrorWidth(uint32_t mirrorWidth);
     void UpdateMirrorHeight(uint32_t mirrorHeight);
+    void SetCurrentValidHeight(int32_t currentValidHeight);
+    int32_t GetCurrentValidHeight() const;
+    void SetIsPreFakeInUse(bool isPreFakeInUse);
+    bool GetIsPreFakeInUse() const;
+    void SetIsKeyboardOn(bool isKeyboardOn);
+    bool GetIsKeyboardOn() const;
+    void SetFloatRotation(float rotation);
+    void ModifyScreenPropertyWithLock(float rotation, RRect bounds);
     ScreenId GetPhyScreenId();
     void SetPhyScreenId(ScreenId screenId);
 

@@ -549,7 +549,7 @@ void SecondaryDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> sc
 void SecondaryDisplayFoldPolicy::HandlePropertyChange(sptr<ScreenSession> screenSession, ScreenProperty& ScreenProperty,
     ScreenPropertyChangeReason reason, FoldDisplayMode displayMode, bool isNeedNotifyFoldProperty)
 {
-    if (ScreenSessionManager::GetInstance().GetClientProxy()) {
+    if (!ScreenSessionManager::GetInstance().GetClientProxy()) {
         bool firstSCBConnect = ScreenSessionManager::GetInstance().GetFirstSCBConnect();
         screenSession->UpdatePropertyByFoldControl(ScreenProperty, displayMode, firstSCBConnect);
         auto oldScreenProperty = screenSession->GetScreenProperty();

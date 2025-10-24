@@ -354,13 +354,15 @@ void ScreenSessionManagerClient::HandleSystemKeyboardOffPropertyChange(sptr<Scre
 
 void ScreenSessionManagerClient::OnScreenPropertyChanged(ScreenId screenId, float rotation, RRect bounds)
 {
+    TLOGI(WmsLogTag::DMS, "OnScreenPropertyChanged,screenId: %{public}" PRIu64
+        ", rotation:%{public}f, width:%{public}f, height:%{public}f", screenId,
+        rotation, bounds.rect_.GetWidth(), bounds.rect_.GetHeight());
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
         TLOGE(WmsLogTag::DMS, "screenSession is null");
         return;
     }
-    screenSession->GetScreenProperty().SetRotation(rotation);
-    screenSession->GetScreenProperty().SetBounds(bounds);
+    screenSession->ModifyScreenPropertyWithLock(rotation, bounds);
     if (!screenSessionManager_) {
         TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return;
@@ -368,15 +370,15 @@ void ScreenSessionManagerClient::OnScreenPropertyChanged(ScreenId screenId, floa
     screenSessionManager_->SyncScreenPropertyChangedToServer(screenId, screenSession->GetScreenProperty());
 }
 
-void ScreenSessionManagerClient::OnFoldPropertyChanged(ScreenId screenId, const ScreenProperty& property,
-    ScreenPropertyChangeReason reason, FoldDisplayMode displayMode)
+bool ScreenSessionManagerClient::OnFoldPropertyChange(ScreenId screenId, const ScreenProperty& property,
+    ScreenPropertyChangeReason reason, FoldDisplayMode displayMode, ScreenProperty& screenProperty)
 {
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
         TLOGE(WmsLogTag::DMS, "screenSession is null");
-        return;
+        return false;
     }
-    ScreenProperty screenProperty = screenSession->GetScreenProperty();
+    screenProperty = screenSession->GetScreenProperty();
     screenProperty.SetDpiPhyBounds(property.GetPhyWidth(), property.GetPhyHeight());
     screenProperty.SetPhyBounds(property.GetPhyBounds());
     screenProperty.SetBounds(property.GetBounds());
@@ -395,6 +397,7 @@ void ScreenSessionManagerClient::OnFoldPropertyChanged(ScreenId screenId, const 
         screenProperty.SetValidWidth(screenProperty.GetBounds().rect_.GetWidth());
     }
     screenSession->PropertyChange(screenProperty, reason);
+    return true;
 }
 
 void ScreenSessionManagerClient::OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
