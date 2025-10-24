@@ -2187,7 +2187,7 @@ WSError SceneSession::RestartApp(const std::shared_ptr<AAFwk::Want>& want)
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
         AppExecFwk::AbilityInfo abilityInfo;
-        if (!session->CheckAbilityInfoByWant(want, abilityInfo)) {
+        if (!session->CheckAndGetAbilityInfoByWant(want, abilityInfo)) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: ability info is null, ability name:%{public}s",
                 where, want->GetElement().GetAbilityName().c_str());
             return WSError::WS_ERROR_INVALID_OPERATION;
@@ -7949,14 +7949,14 @@ sptr<SceneSession> SceneSession::GetSceneSessionById(int32_t sessionId) const
     return specificCallback_->onGetSceneSessionByIdCallback_(sessionId);
 }
 
-bool SceneSession::CheckAbilityInfoByWant(const std::shared_ptr<AAFwk::Want>& want,
+bool SceneSession::CheckAndGetAbilityInfoByWant(const std::shared_ptr<AAFwk::Want>& want,
     AppExecFwk::AbilityInfo& abilityInfo) const
 {
-    if (specificCallback_ == nullptr || specificCallback_->onCheckAbilityInfoByWantCallback_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "specificCallback or onCheckAbilityInfoByWantCallback is null");
+    if (specificCallback_ == nullptr || specificCallback_->onCheckAndGetAbilityInfoByWantCallback_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "specificCallback or onCheckAndGetAbilityInfoByWantCallback is null");
         return false;
     }
-    return specificCallback_->onCheckAbilityInfoByWantCallback_(want, abilityInfo);
+    return specificCallback_->onCheckAndGetAbilityInfoByWantCallback_(want, abilityInfo);
 }
 
 

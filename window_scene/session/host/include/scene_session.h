@@ -131,7 +131,7 @@ using GetNextAvoidAreaRectInfoFunc = std::function<WSError(DisplayId displayId, 
 using NotifyFollowParentRectFunc = std::function<void(bool isFollow)>;
 using NotifyWindowAnchorInfoChangeFunc = std::function<void(const WindowAnchorInfo& windowAnchorInfo)>;
 using GetSceneSessionByIdCallback = std::function<sptr<SceneSession>(int32_t sessionId)>;
-using CheckAbilityInfoByWantCallback = std::function<bool(const std::shared_ptr<AAFwk::Want>& want,
+using CheckAndGetAbilityInfoByWantCallback = std::function<bool(const std::shared_ptr<AAFwk::Want>& want,
     AppExecFwk::AbilityInfo& abilityInfo)>;
 using NotifySetParentSessionFunc = std::function<void(int32_t oldParentWindowId, int32_t newParentWindowId)>;
 using NotifyUpdateFlagFunc = std::function<void(const std::string& flag)>;
@@ -193,7 +193,7 @@ public:
         NotifyWindowSystemBarPropertyChangeFunc onNotifyWindowSystemBarPropertyChangeFunc_;
         GetKeyboardOccupiedAreaWithRotationCallback onKeyboardRotationChange_;
         GetSceneSessionByIdCallback onGetSceneSessionByIdCallback_;
-        CheckAbilityInfoByWantCallback onCheckAbilityInfoByWantCallback_;
+        CheckAndGetAbilityInfoByWantCallback onCheckAndGetAbilityInfoByWantCallback_;
         NotifyFollowScreenChangeFunc onUpdateFollowScreenChange_;
         NotifyRotationLockChangeFunc onRotationLockChange_;
     };
@@ -231,7 +231,8 @@ public:
     bool GetScreenWidthAndHeightFromClient(const sptr<WindowSessionProperty>& sessionProperty,
         uint32_t& screenWidth, uint32_t& screenHeight);
     sptr<SceneSession> GetSceneSessionById(int32_t sessionId) const;
-    bool CheckAbilityInfoByWant(const std::shared_ptr<AAFwk::Want>& want, AppExecFwk::AbilityInfo& abilityInfo) const;
+    bool CheckAndGetAbilityInfoByWant(const std::shared_ptr<AAFwk::Want>& want,
+        AppExecFwk::AbilityInfo& abilityInfo) const;
 
     WSError UpdateActiveStatus(bool isActive) override;
     WSError OnSessionEvent(SessionEvent event, const SessionEventParam& param = {}) override;
