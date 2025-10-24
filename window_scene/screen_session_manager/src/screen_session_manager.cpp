@@ -80,12 +80,13 @@
 #include "screen_aod_plugin.h"
 #include "wm_single_instance.h"
 #include "dms_global_mutex.h"
+#include "dms_task_scheduler.h"
 #include "screen_session_manager_adapter.h"
 #include "zidl/idisplay_manager_agent.h"
 
 namespace OHOS::Rosen {
 namespace {
-#if (defined(aarch64) || defined(x86_64))
+#if (defined(__aarch64__) || defined(__x86_64__))
 const std::string EXT_PLUGIN_SO_PATH = "/system/lib64/libdm_extension.z.so";
 #else
 const std::string EXT_PLUGIN_SO_PATH = "/system/lib/libdm_extension.z.so";
@@ -249,7 +250,7 @@ inline int32_t GetUserIdByCallingUid()
 
 WM_IMPLEMENT_SINGLE_INSTANCE(ScreenSessionManager)
 
-void LoadDmsExtension()
+void ScreenSessionManager::LoadDmsExtension()
 {
     TLOGE(WmsLogTag::DMS, "LoadDmsExtension start");
     void* handler = nullptr;
@@ -265,12 +266,12 @@ void LoadDmsExtension()
         usleep(SLEEP_TIME_US);
     } while (!handler && cnt < retryTimes);
 }
-bool GetScreenSessionMngSystemAbility()
+bool ScreenSessionManager::GetScreenSessionMngSystemAbility()
 {
-    LoadDmsExtension();
+    ScreenSessionManager::LoadDmsExtension();
     return SystemAbility::MakeAndRegisterAbility(&ScreenSessionManager::GetInstance());
 }
-const bool REGISTER_RESULT = !SceneBoardJudgement::IsSceneBoardEnabled() ? false : GetScreenSessionMngSystemAbility();
+const bool REGISTER_RESULT = !SceneBoardJudgement::IsSceneBoardEnabled() ? false : ScreenSessionManager::GetScreenSessionMngSystemAbility();
 
 ScreenSessionManager::ScreenSessionManager()
     : SystemAbility(DISPLAY_MANAGER_SERVICE_SA_ID, true), rsInterface_(RSInterfaces::GetInstance())
@@ -279,8 +280,8 @@ ScreenSessionManager::ScreenSessionManager()
     LoadScreenSceneXml();
     screenOffDelay_ = CV_WAIT_SCREENOFF_MS;
     screenOnDelay_ = CV_WAIT_SCREENON_MS;
-    taskScheduler_ = std::make_shared<TaskScheduler>(SCREEN_SESSION_MANAGER_THREAD);
-    screenPowerTaskScheduler_ = std::make_shared<TaskScheduler>(SCREEN_SESSION_MANAGER_SCREEN_POWER_THREAD);
+    taskScheduler_ = std::make_shared<SafeTaskScheduler>(SCREEN_SESSION_MANAGER_THREAD);
+    screenPowerTaskScheduler_ = std::make_shared<SafeTaskScheduler>(SCREEN_SESSION_MANAGER_SCREEN_POWER_THREAD);
     ffrtQueueHelper_ = std::make_shared<FfrtQueueHelper>();
     screenCutoutController_ = new (std::nothrow) ScreenCutoutController();
     if (!screenCutoutController_) {
@@ -1185,6 +1186,10 @@ void ScreenSessionManager::SendCastEvent(const bool &isPlugIn)
 
 void ScreenSessionManager::NotifyCastWhenScreenConnectChange(bool isConnected)
 {
+    if (g_isPcDevice) {
+        TLOGI(WmsLogTag::DMS, "pc device");
+        return;
+    }
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "permission denied! calling: %{public}s, pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
@@ -2671,6 +2676,10 @@ bool ScreenSessionManager::IsFreezed(const int32_t& agentPid, const DisplayManag
 
 void ScreenSessionManager::NotifyScreenChanged(sptr<ScreenInfo> screenInfo, ScreenChangeEvent event)
 {
+    if (screenInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "error, screenInfo is nullptr.");
+        return;
+    }
     {
         std::lock_guard<std::mutex> lock(lastStatusUpdateMutex_);
         lastScreenChangeEvent_ = event;
@@ -8931,7 +8940,25 @@ void ScreenSessionManager::OnFoldPropertyChange(ScreenId screenId, const ScreenP
         TLOGE(WmsLogTag::DMS, "clientProxy_ is null");
         return;
     }
-    clientProxy->OnFoldPropertyChanged(screenId, newProperty, reason, displayMode);
+
+    // 1. Configure properties prior to notifying the application.
+    // 2. The reset operation is triggered subsequent to SCB completing property calculations.
+    ScreenProperty midProperty;
+    bool result = clientProxy->OnFoldPropertyChange(screenId, newProperty, reason, displayMode, midProperty);
+    if (!result) {
+        TLOGE(WmsLogTag::DMS, "ipc failed");
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "OnFoldPropertyChange get process data,screenId: %{public}" PRIu64
+        ", rotation:%{public}f, width:%{public}f, height:%{public}f", screenId,
+        midProperty.GetRotation(), midProperty.GetBounds().rect_.GetWidth(), midProperty.GetBounds().rect_.GetHeight());
+
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Cannot get ScreenSession, screenId: %{public}" PRIu64 "", screenId);
+        return;
+    }
+    screenSession->SetScreenProperty(midProperty);
 }
 
 void ScreenSessionManager::OnPowerStatusChange(DisplayPowerEvent event, EventStatus status,
@@ -12602,6 +12629,11 @@ void ScreenSessionManager::SetFirstSCBConnect(bool firstSCBConnect)
 
 DMError ScreenSessionManager::SyncScreenPropertyChangedToServer(ScreenId screenId, const ScreenProperty& screenProperty)
 {
+    auto bounds = screenProperty.GetBounds();
+    TLOGI(WmsLogTag::DMS, "SyncScreenPropertyChangedToServer screenId: %{public}" PRIu64
+        ", rotation:%{public}f, width:%{public}f, height:%{public}f", screenId,
+        screenProperty.GetRotation(), bounds.rect_.GetWidth(), bounds.rect_.GetHeight());
+
     auto serverScreenSession = GetScreenSession(screenId);
     if (serverScreenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "cannot get screenInfo: %{public}" PRIu64, screenId);

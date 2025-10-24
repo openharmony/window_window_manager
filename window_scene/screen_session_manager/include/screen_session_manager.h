@@ -537,6 +537,7 @@ public:
         int32_t pid;
     };
     std::map<int32_t, UserScreenInfo> GetUserScreenMap() const;
+    static bool GetScreenSessionMngSystemAbility();
 
 protected:
     ScreenSessionManager();
@@ -583,7 +584,7 @@ protected:
 
 private:
     void OnStart() override;
-    void LoadDmsExtension();
+    static void LoadDmsExtension();
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
     void Init();
     void LoadScreenSceneXml();
