@@ -1734,7 +1734,8 @@ sptr<SceneSession> SceneSessionManager::GetSceneSession(int32_t persistentId)
     return nullptr;
 }
 
-bool SceneSessionManager::CheckAbilityInfoByWant(const std::shared_ptr<AAFwk::Want>& want, AppExecFwk::AbilityInfo& abilityInfo)
+bool SceneSessionManager::CheckAndGetAbilityInfoByWant(const std::shared_ptr<AAFwk::Want>& want,
+    AppExecFwk::AbilityInfo& abilityInfo)
 {
     if (!bundleMgr_) {
         TLOGE(WmsLogTag::WMS_LIFE, "bundleMgr is nullptr");
@@ -1989,9 +1990,9 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onGetSceneSessionByIdCallback_ = [this](int32_t persistentId) {
         return this->GetSceneSession(persistentId);
     };
-    specificCb->onCheckAbilityInfoByWantCallback_ = [this](const std::shared_ptr<AAFwk::Want>& want,
+    specificCb->onCheckAndGetAbilityInfoByWantCallback_ = [this](const std::shared_ptr<AAFwk::Want>& want,
         AppExecFwk::AbilityInfo& abilityInfo) {
-        return this->CheckAbilityInfoByWant(want, abilityInfo);
+        return this->CheckAndGetAbilityInfoByWant(want, abilityInfo);
     };
     return specificCb;
 }
