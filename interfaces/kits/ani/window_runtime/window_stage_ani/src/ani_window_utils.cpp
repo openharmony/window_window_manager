@@ -1718,5 +1718,28 @@ bool AniWindowUtils::ParseZLevelParam(ani_env *env, ani_object aniObject, const 
     TLOGI(WmsLogTag::WMS_SUB, "zLevel: %{public}d", zLevel);
     return true;
 }
+
+void AniWindowUtils::ConvertImageFit(ImageFit& dst, const Ark_ImageFit& src)
+{
+    switch (src) {
+        case ARK_IMAGE_FIT_CONTAIN: dst = ImageFit::CONTAIN; break;
+        case ARK_IMAGE_FIT_COVER: dst = ImageFit::COVER; break;
+        case ARK_IMAGE_FIT_AUTO: dst = ImageFit::FITWIDTH; break;
+        case ARK_IMAGE_FIT_FILL: dst = ImageFit::FILL; break;
+        case ARK_IMAGE_FIT_SCALE_DOWN: dst = ImageFit::SCALE_DOWN; break;
+        case ARK_IMAGE_FIT_NONE: dst = ImageFit::NONE; break;
+        case ARK_IMAGE_FIT_TOP_START: dst = ImageFit::TOP_LEFT; break;
+        case ARK_IMAGE_FIT_TOP: dst = ImageFit::TOP; break;
+        case ARK_IMAGE_FIT_TOP_END: dst = ImageFit::TOP_END; break;
+        case ARK_IMAGE_FIT_START: dst = ImageFit::START; break;
+        case ARK_IMAGE_FIT_CENTER: dst = ImageFit::CENTER; break;
+        case ARK_IMAGE_FIT_END: dst = ImageFit::END; break;
+        case ARK_IMAGE_FIT_BOTTOM_START: dst = ImageFit::BOTTOM_START; break;
+        case ARK_IMAGE_FIT_BOTTOM: dst = ImageFit::BOTTOM; break;
+        case ARK_IMAGE_FIT_BOTTOM_END: dst = ImageFit::CONTAIN; break;
+        case ARK_IMAGE_FIT_MATRIX: dst = ImageFit::MATRIX; break;
+        default: TLOGE(WmsLogTag::DEFAULT, "imageFit: %{public}d", src);
+    }
+}
 } // namespace Rosen
 } // namespace OHOS

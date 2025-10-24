@@ -37,31 +37,12 @@ using OHOS::Rosen::WindowScene;
 
 namespace OHOS {
 namespace Rosen {
-enum class ImageFit {
-    FILL,
-    CONTAIN,
-    COVER,
-    FIT_WIDTH,
-    FIT_HEIGHT,
-    NONE,
-    SCALE_DOWN,
-    TOP_LEFT,
-    TOP,
-    TOP_RIGHT,
-    LEFT,
-    CENTER,
-    RIGHT,
-    BOTTOM_LEFT,
-    BOTTOM,
-    BOTTOM_RIGHT,
-    MATRIX,
-};
-
 namespace {
 /* used for free, ani has no destructor right now, only free when aniObj freed */
 static std::map<ani_object, AniWindowStage*> g_localObjs;
 const uint32_t MIN_RESOURCE_ID = 0x1000000;
 const uint32_t MAX_RESOURCE_ID = 0xffffffff;
+
 } // namespace
 
 AniWindowStage::AniWindowStage(const std::shared_ptr<Rosen::WindowScene>& windowScene)
@@ -384,8 +365,10 @@ void AniWindowStage::OnSetImageForRecent(ani_env* env, ani_object imageResource,
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
         return;
     }
-    TLOGI(WmsLogTag::WMS_PATTERN, "imageFit: %{public}d", value);
-    ImageFit imageFit = static_cast<ImageFit>(value);
+    Ark_ImageFit arkImageFit = static_cast<Ark_ImageFit>(value);
+    ImageFit imageFit;
+    AniWindowUtils::ConvertImageFit(imageFit, arkImageFit);
+    TLOGI(WmsLogTag::WMS_PATTERN, "value: %{public}d, imageFit: %{public}d", value, imageFit);
     WmErrorCode ret = WmErrorCode::WM_OK;
     if (pixelMap) {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(mainWindow->SetImageForRecentPixelMap(pixelMap, imageFit));

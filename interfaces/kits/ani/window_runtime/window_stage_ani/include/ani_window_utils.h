@@ -66,6 +66,45 @@ const std::map<ApiWindowType, std::string> API_TO_ANI_STRING_TYPE_MAP {
     {ApiWindowType::TYPE_HANDWRITE,            "TYPE_HANDWRITE"            },
 };
 
+enum class ImageFit {
+    FILL,
+    CONTAIN,
+    COVER,
+    FITWIDTH,
+    FITHEIGHT,
+    NONE,
+    SCALE_DOWN,
+    TOP_LEFT,
+    TOP,
+    TOP_END,
+    START,
+    CENTER,
+    END,
+    BOTTOM_START,
+    BOTTOM,
+    BOTTOM_END,
+    MATRIX,
+};
+
+typedef enum Ark_ImageFit {
+    ARK_IMAGE_FIT_CONTAIN = 0,
+    ARK_IMAGE_FIT_COVER = 1,
+    ARK_IMAGE_FIT_AUTO = 2,
+    ARK_IMAGE_FIT_FILL = 3,
+    ARK_IMAGE_FIT_SCALE_DOWN = 4,
+    ARK_IMAGE_FIT_NONE = 5,
+    ARK_IMAGE_FIT_TOP_START = 7,
+    ARK_IMAGE_FIT_TOP = 8,
+    ARK_IMAGE_FIT_TOP_END = 9,
+    ARK_IMAGE_FIT_START = 10,
+    ARK_IMAGE_FIT_CENTER = 11,
+    ARK_IMAGE_FIT_END = 12,
+    ARK_IMAGE_FIT_BOTTOM_START = 13,
+    ARK_IMAGE_FIT_BOTTOM = 14,
+    ARK_IMAGE_FIT_BOTTOM_END = 15,
+    ARK_IMAGE_FIT_MATRIX = 16,
+} Ark_ImageFit;
+
 class AniWindowUtils {
 public:
     static ani_status InitAniCreator(ani_env* env,
@@ -171,6 +210,7 @@ public:
     static bool ParseZLevelParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
     template<typename T>
     static ani_object CreateBaseTypeObject(ani_env* env, T value);
+    static void ConvertImageFit(ImageFit& dst, const Ark_ImageFit& src);
 };
 
 template<typename T>
