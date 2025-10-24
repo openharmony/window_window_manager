@@ -486,6 +486,7 @@ private:
     void RecoverSessionProperty();
     WMError UpdateColorMode(const std::shared_ptr<AppExecFwk::Configuration>& configuration = nullptr);
     void InitSystemSessionDragEnable();
+    void InitSubSessionDragEnable();
     bool IsSystemDensityChanged(const sptr<DisplayInfo>& displayInfo);
     bool IsDefaultDensityEnabled();
     float GetMainWindowCustomDensity();
