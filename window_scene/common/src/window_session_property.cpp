@@ -864,11 +864,13 @@ PiPTemplateInfo WindowSessionProperty::GetPiPTemplateInfo() const
 
 void WindowSessionProperty::SetFbTemplateInfo(const FloatingBallTemplateInfo& fbTemplateInfo)
 {
+    std::lock_guard<std::mutex> lock(fbTemplateMutex_);
     fbTemplateInfo_ = fbTemplateInfo;
 }
 
 FloatingBallTemplateInfo WindowSessionProperty::GetFbTemplateInfo() const
 {
+    std::lock_guard<std::mutex> lock(fbTemplateMutex_);
     return fbTemplateInfo_;
 }
 
