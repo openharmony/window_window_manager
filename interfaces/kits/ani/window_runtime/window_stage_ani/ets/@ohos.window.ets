@@ -2302,6 +2302,14 @@ export class WindowStageInternal implements WindowStage {
       this.offSync(this.nativeObj, eventType, callback);
     }
 
+    public onWindowStageEvent(callback: Callback<void>): void {
+      this.onSync(this.nativeObj, 'windowStageEvent', callback);
+    }
+
+    public offWindowStageEvent(callback?: Callback<void>): void {
+      this.offSync(this.nativeObj, 'windowStageEvent', callback);
+    }
+
     public onWindowStageClose(callback: Callback<void>): void {
       this.onSync(this.nativeObj, 'windowStageClose', callback);
     }
@@ -2335,6 +2343,8 @@ export interface WindowStage {
     setImageForRecent(imgResourceId: long, value: ImageFit): Promise<void>;
     on(eventType: 'windowStageEvent', callback: Callback<WindowStageEventType>): void;
     off(eventType: 'windowStageEvent', callback?: Callback<WindowStageEventType>): void;
+    onWindowStageEvent(callback: Callback<void>): void;
+    offWindowStageEvent(callback?: Callback<void>): void;
     onWindowStageClose(callback: Callback<void>): void;
     offWindowStageClose(callback?: Callback<void>): void;
 }
@@ -3869,12 +3879,28 @@ export class WindowInternal implements Window {
       this.offSync(this.nativeObj, 'windowWillClose', callback);
     }
 
+    public onSubWindowClose(callback: Callback<void>): void {
+      this.onSync(this.nativeObj, 'subWindowClose', callback);
+    }
+
+    public offSubWindowClose(callback?: Callback<void>): void {
+      this.offSync(this.nativeObj, 'subWindowClose', callback);
+    }
+
     public onWindowTitleButtonRectChange(callback: Callback<TitleButtonRect>): void {
       this.onSync(this.nativeObj, 'windowTitleButtonRect', callback);
     }
 
     public offWindowTitleButtonRectChange(callback?: Callback<TitleButtonRect>): void {
       this.offSync(this.nativeObj, 'windowTitleButtonRect', callback);
+    }
+
+    public onWindowEvent(callback: Callback<WindowEventType>): void {
+      this.onSync(this.nativeObj, 'windowEvent', callback);
+    }
+
+    public offWindowEvent(callback?: Callback<WindowEventType>): void {
+      this.offSync(this.nativeObj, 'windowEvent', callback);
     }
 }
 
@@ -4057,8 +4083,12 @@ export interface Window {
     offWindowRectChange(callback?: Callback<RectChangeOptions>): void;
     onWindowWillClose(callback: Callback<Promise<boolean>>): void;
     offWindowWillClose(callback?: Callback<Promise<boolean>>): void;
+    onSubWindowClose(callback: Callback<void>): void;
+    offSubWindowClose(callback?: Callback<void>): void;
     onWindowTitleButtonRectChange(callback: Callback<TitleButtonRect>): void;
     offWindowTitleButtonRectChange(callback?: Callback<TitleButtonRect>): void;
+    onWindowEvent(callback: Callback<WindowEventType>): void;
+    offWindowEvent(callback?: Callback<WindowEventType>): void;
 }
 
 export native function CreateWindowStage(scene: long): WindowStageInternal;
