@@ -496,6 +496,7 @@ private:
     float lastVpr_ = 0.0f;
     PiPTemplateInfo pipTemplateInfo_ = {};
     FloatingBallTemplateInfo fbTemplateInfo_ = {};
+    mutable std::mutex fbTemplateMutex_;
     KeyboardLayoutParams keyboardLayoutParams_;
     uint32_t windowModeSupportType_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
