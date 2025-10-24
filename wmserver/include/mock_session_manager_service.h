@@ -23,6 +23,8 @@
 #include "mock_session_manager_interface_stub.h"
 #include "wm_single_instance.h"
 #include "zidl/session_manager_service_recover_interface.h"
+#include "scene_session_manager_lite_interface.h"
+#include "scene_session_manager_interface.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -49,6 +51,10 @@ public:
     ErrCode GetSessionManagerServiceByUserId(int32_t userId, sptr<IRemoteObject>& sessionManagerService) override;
     void NotifyWMSConnected(int32_t userId, int32_t screenId, bool isColdStart);
     void NotifyNotKillService() {}
+    ErrCode GetSceneSessionManagerLiteByClient(int32_t userId, sptr<IRemoteObject>& sceneSessionManagerLite) override;
+    ErrCode GetSceneSessionManagerByClient(int32_t userId, sptr<IRemoteObject>& sceneSessionManager) override;
+    sptr<ISceneSessionManagerLite> GetSceneSessionManagerLiteBySA(int32_t userId);
+    sptr<ISceneSessionManager> GetSceneSessionManagerBySA(int32_t userId);
 
     /*
      * Window Recover
@@ -68,11 +74,6 @@ public:
         const std::vector<std::string>& bundleNameList) override;
     ErrCode SetSnapshotSkipByIdNamesMap(const std::unordered_map<int32_t,
         std::vector<std::string>>& userIdAndBunldeNames) override;
-
-    ErrCode GetSceneSessionManagerLiteByUserId(int32_t userId,
-        sptr<IRemoteObject>& sceneSessionManagerLite) override;
-    ErrCode GetSceneSessionManagerByUserId(int32_t userId,
-        sptr<IRemoteObject>& sceneSessionManager) override;
 
 protected:
     MockSessionManagerService();
@@ -96,7 +97,7 @@ private:
     };
     sptr<SMSDeathRecipient> GetSMSDeathRecipientByUserId(int32_t userId);
     void RemoveSMSDeathRecipientByUserId(int32_t userId);
-    sptr<IRemoteObject> GetSessionManagerServiceByUserId(int32_t userId);
+    virtual sptr<IRemoteObject> GetSessionManagerServiceInner(int32_t userId);
     void RemoveSessionManagerServiceByUserId(int32_t userId);
     bool RegisterMockSessionManagerService();
     ErrCode ValidateParameters(int32_t clientUserId, int32_t userId) const;
@@ -121,9 +122,14 @@ private:
     void ShowHelpInfo(std::string& dumpInfo);
     void ShowAceDumpHelp(std::string& dumpInfo);
     void ShowIllegalArgsInfo(std::string& dumpInfo);
+    virtual sptr<IRemoteObject> GetSceneSessionManagerInner(int32_t userId, bool isLite);
+    virtual ErrCode CheckClientIsSystemUser();
+    sptr<IRemoteObject> GetSceneSessionManagerFromCache(int32_t userId, bool isLite);
+    void UpdateSceneSessionManagerFromCache(int32_t userId, bool isLite, sptr<IRemoteObject>& sceneSessionManager);
+    template <typename T>
+    ErrCode GetSceneSessionManagerByUserIdImpl(int32_t userId, sptr<T>& result, bool isLite, bool checkClient);
+    void RemoveFromMap(std::map<int32_t, sptr<IRemoteObject>>& map, std::mutex& mutex, int32_t userId);
 
-    ErrCode GetSceneSessionManagerCommon(int32_t userId, sptr<IRemoteObject>& result, bool isLite);
-    
     /*
      * Window Snapshot
      */
@@ -144,14 +150,18 @@ private:
      */
     int32_t defaultWMSUserId_;
     int32_t defaultScreenId_;
-    std::mutex userId2ScreenIdMapMutex_;
+    std::mutex userId2ScreenIdMapMutex_;            
     std::map<int32_t, int32_t> userId2ScreenIdMap_;
     std::shared_mutex smsDeathRecipientMapLock_;
     std::map<int32_t, sptr<SMSDeathRecipient>> smsDeathRecipientMap_;
-    std::shared_mutex sessionManagerServiceMapLock_;
+    std::mutex sessionManagerServiceMapMutex_;
     std::map<int32_t, sptr<IRemoteObject>> sessionManagerServiceMap_;
     std::mutex wmsConnectionStatusLock_;
     std::map<int32_t, bool> wmsConnectionStatusMap_;
+    std::mutex sceneSessionManagerLiteMapMutex_;
+    std::map<int32_t, sptr<IRemoteObject>> sceneSessionManagerLiteMap_;
+    std::mutex sceneSessionManagerMapMutex_;
+    std::map<int32_t, sptr<IRemoteObject>> sceneSessionManagerMap_;
 
     /*
      * Window Recover
