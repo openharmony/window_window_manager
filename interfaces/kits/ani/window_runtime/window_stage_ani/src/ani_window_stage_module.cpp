@@ -126,7 +126,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindowStage::SetImageForRecent)},
         ani_native_function {"createSubWindowSync", "lC{std.core.String}:C{@ohos.window.window.Window}",
             reinterpret_cast<void *>(CreateSubWindow)},
-        ani_native_function {"getSubWindowSync", "l:C{escompat.Array}",
+        ani_native_function {"getSubWindowSync", "l:C{std.core.Array}",
             reinterpret_cast<void *>(AniWindowStage::GetSubWindow)},
         ani_native_function {"createSubWindowWithOptionsSync",
             "lC{std.core.String}C{@ohos.window.window.SubWindowOptions}:C{@ohos.window.window.Window}",
