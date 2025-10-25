@@ -294,6 +294,7 @@ public:
     void UpdateDragEvent(const PointInfo& point, DragEvent event);
     void UpdateDisplayId(DisplayId from, DisplayId to);
     void UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info,
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UpdateActiveStatus(bool isActive);
     void NotifyTouchOutside();
@@ -374,6 +375,7 @@ public:
      * Keyboard
      */
     WMError ShowKeyboard(KeyboardEffectOption effectOption) override;
+    sptr<OccupiedAreaChangeInfo> occupiedAreaInfo_ = nullptr;
 
     /*
      * RS Client Multi Instance
