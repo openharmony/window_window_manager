@@ -3021,6 +3021,7 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
             callerSession->GetSessionInfo().persistentId_);
         abilitySessionInfo->callerSession = sptr<ISession>(callerSession)->AsObject();
     }
+    abilitySessionInfo->isPrelaunch = sessionInfo.isPrelaunch_;
     TLOGI(WmsLogTag::WMS_LIFE, "Is SCB Call, set flag:%{public}d, persistentId:%{public}d, requestId:%{public}d",
         requestId == DEFAULT_REQUEST_FROM_SCB_ID, abilitySessionInfo->persistentId, requestId);
     return abilitySessionInfo;
