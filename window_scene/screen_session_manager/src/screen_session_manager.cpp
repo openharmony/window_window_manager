@@ -4145,8 +4145,8 @@ bool ScreenSessionManager::SetDisplayState(DisplayState state)
         // mark has received aod notification during power callback.
         aodNotifyFlag_ = AodStatus::UNKNOWN;
         ScreenPowerEvent screenPowerEvent = ScreenPowerEvent::SET_DISPLAY_STATE;
-        auto iter = POWER_STATUS_CHANGE_MAP.find(state);
-        if (iter != POWER_STATUS_CHANGE_MAP.end()) {
+        auto iter = POWER_STATE_CHANGE_MAP.find(state);
+        if (iter != POWER_STATE_CHANGE_MAP.end()) {
             screenPowerEvent = iter->second;
         }
         bool ret = ScreenStateMachine::GetInstance().HandlePowerStateChange(screenPowerEvent, type);

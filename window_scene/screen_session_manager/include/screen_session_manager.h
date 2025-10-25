@@ -61,7 +61,7 @@ static const std::map<ScreenPowerStatus, DisplayPowerEvent> SCREEN_STATUS_POWER_
     {ScreenPowerStatus::POWER_STATUS_DOZE_SUSPEND, DisplayPowerEvent::DISPLAY_DOZE_SUSPEND}
 };
 
-static const std::map<DisplayState, ScreenPowerEvent> POWER_STATUS_CHANGE_MAP = {
+static const std::map<DisplayState, ScreenPowerEvent> POWER_STATE_CHANGE_MAP = {
     {DisplayState::DOZE, ScreenPowerEvent::SET_DISPLAY_STATE_DOZE},
     {DisplayState::DOZE_SUSPEND, DisplayPowerEvent::SET_DISPLAY_STATE_DOZE_SUSPEND}
 };
