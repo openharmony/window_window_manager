@@ -9291,7 +9291,6 @@ void ScreenSessionManager::RecoverMultiScreenModeWhenSwitchUser(std::vector<int3
             extendScreenConnected = true;
             extendScreenId = screenId;
             RecoverMultiScreenMode(screenSession);
-            FlushDisplayNodeWhenSwitchUser(oldScbPids, newScbPid, screenSession);
         } else if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL &&
             !screenSession->GetIsExtend()) {
             SetExtendedScreenFallbackPlan(screenId);
@@ -9304,18 +9303,6 @@ void ScreenSessionManager::RecoverMultiScreenModeWhenSwitchUser(std::vector<int3
             OnExtendScreenConnectStatusChange(extendScreenId, ExtendScreenConnectStatus::DISCONNECT);
         }
     }
-}
-
-void ScreenSessionManager::FlushDisplayNodeWhenSwitchUser(std::vector<int32_t> oldScbPids, int32_t newScbPid,
-    sptr<ScreenSession> screenSession)
-{
-    auto displayNode = screenSession->GetDisplayNode();
-    if (displayNode == nullptr) {
-        TLOGE(WmsLogTag::DMS, "display node is null");
-        return;
-    }
-    displayNode->SetScbNodePid(oldScbPids, newScbPid);
-    RSTransactionAdapter::FlushImplicitTransaction(screenSession->GetRSUIContext());
 }
 
 bool ScreenSessionManager::HandleSwitchPcMode()
@@ -9519,6 +9506,10 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
         {
             std::lock_guard<std::mutex> lock(userScreenMapMutex_);
             userScreenMap_[userId] = {false, SCREEN_ID_DEFAULT, newScbPid};
+        }
+        {
+            std::lock_guard<std::recursive_mutex> lock(userPidMapMutex_);
+            userPidMap_[userId] = newScbPid;
         }
         std::ostringstream oss;
         oss << "set client userId: " << userId << " clientName: " << SysCapUtil::GetClientName();
@@ -12165,12 +12156,60 @@ DMError ScreenSessionManager::SetVirtualScreenAutoRotation(ScreenId screenId, bo
     return DMError::DM_OK;
 }
 
+void ScreenSessionManager::CheckPidAndClearModifiers(int32_t userId, std::shared_ptr<RSDisplayNode>& displayNode)
+{
+    if (displayNode == nullptr) {
+        TLOGE(WmsLogTag::DMS, "diplayNode is null");
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "userId: %{public}d, displayNodeId: %{public}" PRIu64 "", userId, displayNode->GetId());
+    int32_t newScbPid = -1;
+    {
+        std::lock_guard<std::recursive_mutex> lock(userPidMapMutex_);
+        auto pidIter = userPidMap_.find(userId);
+        if (pidIter == userPidMap_.end()) {
+            TLOGE(WmsLogTag::DMS, "user not found in userPidMap");
+            return;
+        }
+        newScbPid = pidIter->second;
+    }
+    int32_t currentNodePid = -1;
+    {
+        std::lock_guard<std::recursive_mutex> lock(userDisplayNodeMapMutex_);
+        auto nodeIter = displayNodePidMap_.find(displayNode->GetId());
+        if (nodeIter == displayNodePidMap_.end()) {
+            TLOGE(WmsLogTag::DMS, "display node not found in nodePidMap");
+            return;
+        }
+        currentNodePid = nodeIter->second;
+        TLOGI(WmsLogTag::DMS, "displayNode's old pid: %{public}d, newScbPid: %{public}d", nodeIter->second, newScbPid);
+        if (currentNodePid == newScbPid) {
+            return;
+        }
+        nodeIter->second = newScbPid;
+    }
+    TLOGI(WmsLogTag::DMS, "pid changed, clear modifiers");
+    displayNode->ClearModifierByPid(currentNodePid);
+}
+
 void ScreenSessionManager::AddOrUpdateUserDisplayNode(int32_t userId, ScreenId screenId,
     std::shared_ptr<RSDisplayNode>& displayNode)
 {
     TLOGI(WmsLogTag::DMS, "userId: %{public}d, screenId: %{public}" PRIu64 "", userId, screenId);
+    if (displayNode == nullptr) {
+        TLOGE(WmsLogTag::DMS, "display node is nullptr");
+        return;
+    }
     std::lock_guard<std::recursive_mutex> lock(userDisplayNodeMapMutex_);
     userDisplayNodeMap_[userId].insert_or_assign(screenId, displayNode);
+    {
+        std::lock_guard<std::recursive_mutex> lock(userPidMapMutex_);
+        auto pidIter = userPidMap_.find(userId);
+        if (pidIter != userPidMap_.end()) {
+            displayNodePidMap_[displayNode->GetId()] = pidIter->second;
+        }
+    }
+    TLOGI(WmsLogTag::DMS, "success");
 }
 
 void ScreenSessionManager::RemoveUserDisplayNode(int32_t userId, ScreenId screenId)
@@ -12188,6 +12227,10 @@ void ScreenSessionManager::RemoveUserDisplayNode(int32_t userId, ScreenId screen
     }
     TLOGI(WmsLogTag::DMS, "remove displayNode, userId: %{public}d, screenId %{public}" PRIu64 "",
         userId, screenId);
+    auto displayNode = userDisplayNodeMap_[userId][screenId];
+    if (displayNode != nullptr) {
+        displayNodePidMap_.erase(displayNode->GetId());
+    }
     userDisplayNodeMap_[userId].erase(screenId);
     if (userDisplayNodeMap_[userId].size() <= 0) {
         userDisplayNodeMap_.erase(userId);
@@ -12229,6 +12272,7 @@ void ScreenSessionManager::SwitchUserDealUserDisplayNode(int32_t newUserId)
         }
         TLOGI(WmsLogTag::DMS, "start set new user displayNode, newUserId: %{public}d", newUserId);
         auto screenId = screenSession->GetScreenId();
+        phyScreenIds.emplace_back(screenId);
         if (newUserDisplayNodeMap.find(screenId) == newUserDisplayNodeMap.end()) {
             Rosen::RSDisplayNodeConfig rsConfig;
             rsConfig.screenId = screenId;
@@ -12241,9 +12285,15 @@ void ScreenSessionManager::SwitchUserDealUserDisplayNode(int32_t newUserId)
             TLOGI(WmsLogTag::DMS, "screen id %{public}" PRIu64 "", screenId);
             AddOrUpdateUserDisplayNode(newUserId, screenId, displayNode);
         } else {
-            screenSession->SetDisplayNode(newUserDisplayNodeMap[screenId]);
+            auto displayNode = newUserDisplayNodeMap[screenId];
+            if (displayNode == nullptr) {
+                TLOGE(WmsLogTag::DMS, "displayNode in map is nullptr");
+                continue;
+            }
+            CheckPidAndClearModifiers(newUserId, displayNode);
+            screenSession->SetDisplayNode(displayNode);
+            RSTransactionAdapter::FlushImplicitTransaction(screenSession->GetRSUIContext());
         }
-        phyScreenIds.emplace_back(screenId);
     }
     for (auto newUserMapIt : newUserDisplayNodeMap) {
         auto screenId = newUserMapIt.first;
