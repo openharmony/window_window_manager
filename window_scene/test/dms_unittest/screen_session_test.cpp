@@ -46,7 +46,8 @@ public:
         (const ScreenProperty& newProperty, ScreenPropertyChangeReason reason, ScreenId screenId), (override));
     MOCK_METHOD(void, OnPowerStatusChange,
         (DisplayPowerEvent event, EventStatus status, PowerStateChangeReason reason), (override));
-    MOCK_METHOD(void, OnSensorRotationChange, (float sensorRotation, ScreenId screenId), (override));
+    MOCK_METHOD(void, OnSensorRotationChange,
+        (float sensorRotation, ScreenId screenId, bool isSwitchUser), (override));
     MOCK_METHOD(void, OnScreenOrientationChange, (float screenOrientation, ScreenId screenId), (override));
     MOCK_METHOD(void, OnScreenRotationLockedChange, (bool isLocked, ScreenId screenId), (override));
     MOCK_METHOD(void, OnScreenExtendChange, (ScreenId mainScreenId, ScreenId extendScreenId), (override));

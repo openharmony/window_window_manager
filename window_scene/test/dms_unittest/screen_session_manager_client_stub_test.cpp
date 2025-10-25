@@ -649,6 +649,7 @@ HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnScreenOrientationChanged, T
     data.WriteUint64(screenId);
     float screenOrientation = 0;
     data.WriteFloat(screenOrientation);
+    data.WriteBool(false);
 
     int ret = screenSessionManagerClientStub_->HandleOnScreenOrientationChanged(data, reply);
     EXPECT_EQ(ret, 0);

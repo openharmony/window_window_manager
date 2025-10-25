@@ -71,7 +71,7 @@ public:
             ScreenPropertyChangeReason reason, FoldDisplayMode displayMode, ScreenProperty& midProperty) = 0;
     virtual void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason) = 0;
-    virtual void OnSensorRotationChanged(ScreenId screenId, float sensorRotation) = 0;
+    virtual void OnSensorRotationChanged(ScreenId screenId, float sensorRotation, bool isSwitchUser) = 0;
     virtual void OnHoverStatusChanged(ScreenId screenId, int32_t hoverStatus, bool needRotate = true) = 0;
     virtual void OnScreenOrientationChanged(ScreenId screenId, float screenOrientation) = 0;
     virtual void OnScreenRotationLockedChanged(ScreenId screenId, bool isLocked) = 0;
