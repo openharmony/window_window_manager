@@ -3420,7 +3420,7 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
     const char* const where = __func__;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask = [weakToken = wptr<Window>(windowToken_), env, task = napiAsyncTask,
-        systemBarType, systemBarEnable, systemBarEnableAnimation, where] {
+        systemBarType, systemBarEnable, systemBarEnableAnimation, argc, where] {
         auto window = weakToken.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is nullptr", where);
@@ -3430,7 +3430,7 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
         }
         auto property = window->GetSystemBarPropertyByType(systemBarType);
         window->UpdateSpecificSystemBarEnabled(systemBarEnable, systemBarEnableAnimation, property);
-        SystemBarPropertyFlag propertyFlag = { true, false, false, true };
+        SystemBarPropertyFlag propertyFlag = { true, false, false, argc <= ARG_COUNT_TWO ? false : true };
         auto errCode =
             WM_JS_TO_ERROR_CODE_MAP.at(window->UpdateSystemBarPropertyForPage(systemBarType, property, propertyFlag));
         if (errCode == WmErrorCode::WM_OK) {
