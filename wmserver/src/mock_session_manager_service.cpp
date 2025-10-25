@@ -1113,14 +1113,16 @@ sptr<ISceneSessionManager> MockSessionManagerService::GetSceneSessionManagerBySA
     return result;
 }
 
-template ErrCode MockSessionManagerService::GetSceneSessionManagerByUserIdImpl<ISceneSessionManagerLite>(int32_t userId,
-                                                                              sptr<ISceneSessionManagerLite>& result,
-                                                                              bool isLite,
-                                                                              bool checkClient);
-template ErrCode MockSessionManagerService::GetSceneSessionManagerByUserIdImpl<ISceneSessionManager>(int32_t userId,
-                                                                          sptr<ISceneSessionManager>& result,
-                                                                          bool isLite,
-                                                                          bool checkClient);
+template ErrCode MockSessionManagerService::GetSceneSessionManagerByUserIdImpl<ISceneSessionManagerLite>(
+    int32_t userId,
+    sptr<ISceneSessionManagerLite>& result,
+    bool isLite,
+    bool checkClient);
+template ErrCode MockSessionManagerService::GetSceneSessionManagerByUserIdImpl<ISceneSessionManager>(
+    int32_t userId,
+    sptr<ISceneSessionManager>& result,
+    bool isLite,
+    bool checkClient);
 template <typename T>
 ErrCode MockSessionManagerService::GetSceneSessionManagerByUserIdImpl(int32_t userId,
                                                                       sptr<T>& result,
@@ -1201,8 +1203,8 @@ sptr<IRemoteObject> MockSessionManagerService::GetSceneSessionManagerFromCache(i
 }
 
 void MockSessionManagerService::UpdateSceneSessionManagerFromCache(int32_t userId,
-                                                              bool isLite,
-                                                              sptr<IRemoteObject>& sceneSessionManager)
+                                                                   bool isLite,
+                                                                   sptr<IRemoteObject>& sceneSessionManager)
 {
     if (sceneSessionManager == nullptr) {
         TLOGW(WmsLogTag::WMS_MULTI_USER, "ssm is nullptr userId: %{public}d", userId);
