@@ -320,6 +320,33 @@ void AniWindowListener::OnKeyboardDidHide(const KeyboardPanelInfo& keyboardPanel
         nullptr, thisListener->aniCallback_, AniWindowUtils::CreateAniKeyboardInfo(env_, keyboardPanelInfo));
 }
 
+void AniWindowListener::OnKeyboardWillShow(const KeyboardAnimationInfo& keyboardAnimationInfo,
+    const KeyboardAnimationCurve& curve)
+{
+    KeyboardWillAnimateWithName(keyboardAnimationInfo, KEYBOARD_WILL_SHOW_CB, curve);
+}
+
+void AniWindowListener::OnKeyboardWillHide(const KeyboardAnimationInfo& keyboardAnimationInfo,
+    const KeyboardAnimationCurve& curve)
+{
+    KeyboardWillAnimateWithName(keyboardAnimationInfo, KEYBOARD_WILL_HIDE_CB, curve);
+}
+
+void AniWindowListener::KeyboardWillAnimateWithName(const KeyboardAnimationInfo& keyboardAnimationInfo,
+    const std::string& callBackName, const KeyboardAnimationCurve& curve)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD,
+        "keyboardAnimationInfo, beginRect: %{public}s, endRect: %{public}s",
+        keyboardAnimationInfo.beginRect.ToString().c_str(), keyboardAnimationInfo.endRect.ToString().c_str());
+    auto thisListener = weakRef_.promote();
+    if (thisListener == nullptr || env_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "this listener or env is nullptr.");
+        return;
+    }
+    AniWindowUtils::CallAniFunctionVoid(env_, "L@ohos/window/window;", nullptr, nullptr,
+        thisListener->aniCallback_, AniWindowUtils::CreateAniAnimationInfo(env_, keyboardAnimationInfo, curve));
+}
+
 void AniWindowListener::OnTouchOutside() const
 {
     TLOGI(WmsLogTag::WMS_EVENT, "[ANI]in");
