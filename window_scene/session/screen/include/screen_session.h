@@ -310,7 +310,7 @@ public:
     // notify scb
     void SensorRotationChange(Rotation sensorRotation);
     void SensorRotationChange(float sensorRotation);
-    void SensorRotationChange(Rotation sensorRotation, bool isSwitchUser);
+    void SensorRotationChange(float sensorRotation, bool isSwitchUser);
     float GetValidSensorRotation();
     void HoverStatusChange(int32_t hoverStatus, bool needRotate = true);
     void CameraBackSelfieChange(bool isCameraBackSelfie);
