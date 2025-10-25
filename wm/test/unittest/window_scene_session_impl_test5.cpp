@@ -959,8 +959,9 @@ HWTEST_F(WindowSceneSessionImplTest5, UpdateSystemBarProperties, TestSize.Level0
     systemBarPropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = { false, false, false, false };
     EXPECT_EQ(WMError::WM_OK, window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));
     systemBarPropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = { true, false, true, false };
-    EXPECT_EQ(WMError::WM_OK, window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));    
+    EXPECT_EQ(WMError::WM_OK, window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));
     window->state_ = WindowState::STATE_DESTROYED;
+    systemBarPropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = { true, true, false, false };
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
         window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));
     window->state_ = WindowState::STATE_SHOWN;
