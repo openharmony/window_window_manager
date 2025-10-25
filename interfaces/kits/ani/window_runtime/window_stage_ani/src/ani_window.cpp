@@ -2712,7 +2712,13 @@ __attribute__((no_sanitize("cfi")))
         return nullptr;
     }
     env->Object_CallMethod_Void(obj, setObjFunc, reinterpret_cast<ani_long>(uniqueWindow.get()));
-    g_localObjs.insert(std::pair(obj, uniqueWindow.release()));
+    ani_ref ref = nullptr;
+    if (env->GlobalReference_Create(obj, &ref) == ANI_OK) {
+        uniqueWindow->SetAniRef(ref);
+        g_localObjs.insert(std::pair(ref, uniqueWindow.release()));
+    } else {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] create global ref fail");
+    }
 
     return obj;
 }
