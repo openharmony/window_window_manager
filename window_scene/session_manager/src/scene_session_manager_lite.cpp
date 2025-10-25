@@ -257,6 +257,12 @@ WMError SceneSessionManagerLite::GetAllMainWindowInfos(std::vector<MainWindowInf
     return SceneSessionManager::GetInstance().GetAllMainWindowInfos(infos);
 }
 
+WMError SceneSessionManagerLite::GetMainWindowInfoByToken(const sptr<IRemoteObject>& abilityToken,
+    MainWindowInfo& windowInfo)
+{
+    return SceneSessionManager::GetInstance().GetMainWindowInfoByToken(abilityToken, windowInfo);
+}
+
 WMError SceneSessionManagerLite::ClearMainSessions(const std::vector<int32_t>& persistentIds,
     std::vector<int32_t>& clearFailedIds)
 {

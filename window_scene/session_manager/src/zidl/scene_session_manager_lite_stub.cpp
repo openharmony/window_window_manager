@@ -190,6 +190,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleGetParentMainWindowId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_SET_SESSION_ICON_FOR_THIRD_PARTY):
             return HandleSetSessionIconForThirdParty(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_MAIN_WINDOW_INFO_BY_TOKEN):
+            return HandleGetMainWindowInfoByToken(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -959,6 +961,30 @@ int SceneSessionManagerLiteStub::HandleGetAllMainWindowInfos(MessageParcel& data
         }
     }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetMainWindowInfoByToken(MessageParcel& data, MessageParcel& reply)
+{
+    sptr<IRemoteObject> abilityToken = data.ReadRemoteObject();
+    if (!abilityToken) {
+        TLOGE(WmsLogTag::WMS_MAIN, "AbilityToken is null.");
+        return ERR_INVALID_DATA;
+    }
+    MainWindowInfo info;
+    WMError errCode = GetMainWindowInfoByToken(abilityToken, info);
+    if (errCode != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteParcelable(&info)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Failed to WriteParcelable.");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Failed to write errCode.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

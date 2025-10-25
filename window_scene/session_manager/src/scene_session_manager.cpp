@@ -15729,6 +15729,32 @@ WMError SceneSessionManager::GetAllMainWindowInfos(std::vector<MainWindowInfo>& 
     return WMError::WM_OK;
 }
 
+WMError SceneSessionManager::GetMainWindowInfoByToken(const sptr<IRemoteObject>& abilityToken,
+    MainWindowInfo& windowInfo) const
+{
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "permission denied.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    auto task = [this, abilityToken, &windowInfo] {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [_, session] : sceneSessionMap_) {
+            if (session && session->GetAbilityToken() == abilityToken) {
+                windowInfo.pid_ = session->GetCallingPid();
+                windowInfo.bundleName_ = session->GetSessionInfo().bundleName_;
+                windowInfo.persistentId_ = session->GetPersistentId();
+                windowInfo.displayId_ = session->GetDisplayId();
+                TLOGI(WmsLogTag::WMS_MAIN, "find success id:%{public}d, displayId:%{public}" PRIu64"",
+                    session->GetPersistentId(), session->GetDisplayId());
+                return WMError::WM_OK;
+            }
+        }
+        TLOGW(WmsLogTag::WMS_MAIN, "find failed.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    };
+    return taskScheduler_->PostSyncTask(task, __func__);
+}
+
 WMError SceneSessionManager::GetAllMainWindowInfo(std::vector<sptr<MainWindowInfo>>& infos)
 {
     if (!systemConfig_.IsPcWindow()) {
