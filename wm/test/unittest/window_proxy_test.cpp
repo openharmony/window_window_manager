@@ -156,7 +156,7 @@ HWTEST_F(WindowProxyTest, UpdateOccupiedAreaChangeInfo01, TestSize.Level1)
 {
     Rect overlapRect = { 0, 0, 0, 0 };
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT, overlapRect);
-    WMError err = windowProxy_->UpdateOccupiedAreaChangeInfo(info);
+    WMError err = windowProxy_->UpdateOccupiedAreaChangeInfo(info, {});
     ASSERT_EQ(err, WMError::WM_OK);
 }
 
