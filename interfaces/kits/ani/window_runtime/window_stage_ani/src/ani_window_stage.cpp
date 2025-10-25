@@ -366,7 +366,7 @@ void AniWindowStage::OnSetImageForRecent(ani_env* env, ani_object imageResource,
         return;
     }
     Ark_ImageFit arkImageFit = static_cast<Ark_ImageFit>(value);
-    ImageFit imageFit;
+    ImageFit imageFit = ImageFit::FILL;
     AniWindowUtils::ConvertImageFit(imageFit, arkImageFit);
     TLOGI(WmsLogTag::WMS_PATTERN, "value: %{public}d, imageFit: %{public}d", value, imageFit);
     WmErrorCode ret = WmErrorCode::WM_OK;
