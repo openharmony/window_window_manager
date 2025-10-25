@@ -22,10 +22,10 @@
 
 namespace OHOS {
 namespace Rosen {
-    std::map<DmErrorCode, std::string> errCodeMap = {
-        {DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT, "Capability not supported."},
-        {DmErrorCode::DM_ERROR_SYSTEM_INNORMAL, "This display manager service works abnormally."},
-        {DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "Parameter error. Possible cause: 1. Invalid parameter range."}
+std::map<DmErrorCode, std::string> errCodeMap = {
+    {DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT, "Capability not supported."},
+    {DmErrorCode::DM_ERROR_SYSTEM_INNORMAL, "This display manager service works abnormally."},
+    {DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "Parameter error. Possible cause: 1. Invalid parameter range."}
 };
 
 napi_value JsDisplayManagerInit(napi_env env, napi_value exportObj);
