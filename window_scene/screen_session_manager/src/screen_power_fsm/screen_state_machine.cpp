@@ -202,6 +202,8 @@ void ScreenStateMachine::InitStateMachineTbl()
         ScreenTransitionState::SCREEN_ON, &ScreenStateMachine::DoSetScreenPower};
     stateMachine_[{ScreenTransitionState::SCREEN_OFF, ScreenPowerEvent::POWER_OFF_DIRECTLY}] = {
         ScreenTransitionState::SCREEN_OFF, &ScreenStateMachine::DoSetScreenPower};
+    stateMachine_[{ScreenTransitionState::SCREEN_OFF, ScreenPowerEvent::E_ADVANCED_ON}] = {	
+        ScreenTransitionState::SCREEN_ADVANCED_ON, &ScreenStateMachine::DoSetScreenPower};
     stateMachine_[{ScreenTransitionState::SCREEN_OFF, ScreenPowerEvent::SET_DISPLAY_STATE_DOZE}] = {
         ScreenTransitionState::SCREEN_DOZE, &ScreenStateMachine::DoSetDisplayState};
     stateMachine_[{ScreenTransitionState::SCREEN_OFF, ScreenPowerEvent::SET_DISPLAY_STATE_DOZE_SUSPEND}] = {
