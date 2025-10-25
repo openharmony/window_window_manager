@@ -2176,7 +2176,18 @@ HWTEST_F(ScreenSessionManagerTest, RemoveRotationCorrection, TestSize.Level1)
     auto afterRotation = ssm_->RemoveRotationCorrection(Rotation::ROTATION_270);
     EXPECT_EQ(afterRotation, Rotation::ROTATION_270);
 }
- 
+
+/**
+ * @tc.name: RemoveRotationCorrection
+ * @tc.desc: RemoveRotationCorrection02
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RemoveRotationCorrection02, TestSize.Level1)
+{
+    auto afterRotation = ssm_->RemoveRotationCorrection(Rotation::ROTATION_270, FoldDisplayMode::MAIN);
+    EXPECT_EQ(afterRotation, Rotation::ROTATION_270);
+}
+
 /**
  * @tc.name: GetConfigCorrectionByDisplayMode
  * @tc.desc: GetConfigCorrectionByDisplayMode
@@ -2834,6 +2845,18 @@ HWTEST_F(ScreenSessionManagerTest, GetBrightnessInfo, TestSize.Level1)
     EXPECT_NE(brightnessInfo.maxHeadroom, 0);
     EXPECT_NE(brightnessInfo.sdrNits, 0);
     GTEST_LOG_(INFO) << "GetBrightnessInfo end";
+}
+
+/**
+ * @tc.name: MockFoldDisplayModeAfterRotation
+ * @tc.desc: test get and set foldDisplayModeAfterRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, MockFoldDisplayModeAfterRotation, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->SetFoldDisplayModeAfterRotation(FoldDisplayMode::FULL);
+    EXPECT_EQ(ssm_->GetFoldDisplayModeAfterRotation(), FoldDisplayMode::FULL);
 }
 }
 }
