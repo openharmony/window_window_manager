@@ -41,6 +41,7 @@ ohos_shared_library("window_scene_common") {
     "src/extension_data_handler.cpp",
     "src/session_permission.cpp",
     "src/task_scheduler.cpp",
+    "src/dms_task_scheduler.cpp",
     "src/window_session_property.cpp",
   ]
 

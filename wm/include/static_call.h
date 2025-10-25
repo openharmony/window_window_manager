@@ -37,6 +37,7 @@ public:
 
 protected:
     StaticCall() = default;
+    virtual ~StaticCall() = default;
     
 private:
     static inline SingletonDelegator<StaticCall> delegator_;

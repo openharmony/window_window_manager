@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
 #define OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
 
+#include <bitset>
 #include <charconv>
 #include <inttypes.h>
 #include <iomanip>
@@ -56,6 +57,10 @@ constexpr uint32_t COLOR_BLACK = 0xff000000;
 const std::string WINDOW_SCREEN_LOCK_PREFIX = "windowLock_";
 const std::string VIEW_SCREEN_LOCK_PREFIX = "viewLock_";
 constexpr int32_t DEFAULT_INVALID_WINDOW_MODE = 0;
+
+constexpr uint32_t ADVANCED_FEATURE_BIT_MAX = 32;
+constexpr uint32_t ADVANCED_FEATURE_BIT_LOCK_CURSOR = 0x00;
+constexpr uint32_t ADVANCED_FEATURE_BIT_CURSOR_FOLLOW_MOVEMENT = 0x01;
 
 enum class WSError : int32_t {
     WS_OK = 0,
@@ -433,6 +438,7 @@ struct SessionInfo {
     bool isCastSession_ = false;
     uint32_t windowInputType_ = 0;
     uint32_t expandInputFlag_ = 0;
+    std::bitset<ADVANCED_FEATURE_BIT_MAX> advancedFeatureFlag_ = 0;
     std::string continueSessionId_ = "";
     bool isCalledRightlyByCallerId_ = false;
     bool fullScreenStart_ = false;
@@ -448,6 +454,8 @@ struct SessionInfo {
     bool reuseDelegatorWindow = false;
     bool isAbilityHook_ = false;
     bool isRestartApp_ = false;
+    bool isRestartInSameProcess_ = true;
+    int32_t restartCallerPersistentId_ = INVALID_SESSION_ID;
     std::string label_ = "";
     StartWindowType startWindowType_ = StartWindowType::DEFAULT;
     bool isSetStartWindowType_ = false;
@@ -1178,6 +1186,7 @@ enum class SessionPropertyFlag {
     WINDOW_MODE = 1 << 7,
     FLOATING_SCALE = 1 << 8,
     MID_SCENE = 1 << 9,
+    WINDOW_GLOBAL_RECT = 1 << 10,
 };
 
 /**

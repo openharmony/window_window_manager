@@ -1734,13 +1734,17 @@ sptr<SceneSession> SceneSessionManager::GetSceneSession(int32_t persistentId)
     return nullptr;
 }
 
-bool SceneSessionManager::CheckAbilityInfoByWant(const std::shared_ptr<AAFwk::Want>& want)
+bool SceneSessionManager::CheckAndGetAbilityInfoByWant(const std::shared_ptr<AAFwk::Want>& want,
+    AppExecFwk::AbilityInfo& abilityInfo)
 {
     if (!bundleMgr_) {
         TLOGE(WmsLogTag::WMS_LIFE, "bundleMgr is nullptr");
         return false;
     }
-    AppExecFwk::AbilityInfo abilityInfo;
+    if (!want) {
+        TLOGE(WmsLogTag::WMS_LIFE, "want is nullptr");
+        return false;
+    }
     if (!bundleMgr_->QueryAbilityInfo(*want,
         AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, currentUserId_, abilityInfo)) {
         TLOGE(WmsLogTag::WMS_LIFE, "ability not found %{public}s %{public}s %{public}s",
@@ -1986,8 +1990,9 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onGetSceneSessionByIdCallback_ = [this](int32_t persistentId) {
         return this->GetSceneSession(persistentId);
     };
-    specificCb->onCheckAbilityInfoByWantCallback_ = [this](const std::shared_ptr<AAFwk::Want>& want) {
-        return this->CheckAbilityInfoByWant(want);
+    specificCb->onCheckAndGetAbilityInfoByWantCallback_ = [this](const std::shared_ptr<AAFwk::Want>& want,
+        AppExecFwk::AbilityInfo& abilityInfo) {
+        return this->CheckAndGetAbilityInfoByWant(want, abilityInfo);
     };
     return specificCb;
 }
@@ -3008,8 +3013,7 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     }
     abilitySessionInfo->scenarios = sessionInfo.scenarios;
     if (sessionInfo.isRestartApp_) {
-        TLOGI(WmsLogTag::WMS_LIFE, "restart app set caller session");
-        auto callerSession = GetSceneSession(sessionInfo.callerPersistentId_);
+        auto callerSession = GetSceneSession(sessionInfo.restartCallerPersistentId_);
         if (!callerSession) {
             callerSession = sceneSession;
         }
@@ -3310,7 +3314,11 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
 
 void SceneSessionManager::ResetSessionInfoAfterStartUIAbility(const sptr<SceneSession>& sceneSession) {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
-    sceneSession->SetRestartApp(false);
+    if (sceneSession->GetRestartApp()) {
+        sceneSession->SetRestartApp(false);
+        sceneSession->GetSessionProperty()->SetIsNeedUpdateWindowMode(true);
+        sceneSession->SetRestartInSameProcess(true);
+    }
 }
 
 void SceneSessionManager::AddRequestTaskInfo(sptr<SceneSession> sceneSession, int32_t requestId) {
@@ -17818,6 +17826,11 @@ void SceneSessionManager::PackWindowPropertyChangeInfo(const sptr<SceneSession>&
     }
     if (interestedFlags_ & static_cast<uint32_t>(SessionPropertyFlag::MID_SCENE)) {
         windowPropertyChangeInfo[WindowInfoKey::MID_SCENE] = sceneSession->GetIsMidScene();
+    }
+    if (interestedFlags_ & static_cast<uint32_t>(SessionPropertyFlag::WINDOW_GLOBAL_RECT)) {
+        WSRect wsrect = sceneSession->GetSessionGlobalRect();
+        Rect globalRect = { wsrect.posX_, wsrect.posY_, wsrect.width_, wsrect.height_ };
+        windowPropertyChangeInfo[WindowInfoKey::WINDOW_GLOBAL_RECT] = globalRect;
     }
 }
 

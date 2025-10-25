@@ -543,6 +543,8 @@ public:
     void RemoveUserByPid(int32_t pid);
     bool CheckPidInDeathPidVector(int32_t pid) const;
 
+    static bool GetScreenSessionMngSystemAbility();
+
 protected:
     ScreenSessionManager();
     virtual ~ScreenSessionManager() = default;
@@ -588,7 +590,7 @@ protected:
 
 private:
     void OnStart() override;
-    void LoadDmsExtension();
+    static void LoadDmsExtension();
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
     void Init();
     void LoadScreenSceneXml();

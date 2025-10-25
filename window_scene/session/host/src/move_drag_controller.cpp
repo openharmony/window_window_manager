@@ -1056,8 +1056,9 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
         vpr_ = 1.5f;  // 1.5f: default virtual pixel ratio
     }
     int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? HOTZONE_POINTER * vpr_ : HOTZONE_TOUCH * vpr_;
+    limits_ = property->GetWindowLimits();
     type_ = SessionHelper::GetAreaType(pointerItem.GetWindowX(), pointerItem.GetWindowY(), sourceType, outside, vpr_,
-        moveDragProperty_.originalRect_);
+        moveDragProperty_.originalRect_, limits_);
     dragAreaType_ = SessionHelper::GetAreaTypeForScaleResize(pointerItem.GetWindowX(), pointerItem.GetWindowY(),
         outside, moveDragProperty_.originalRect_);
     TLOGI(WmsLogTag::WMS_LAYOUT, "pointWinX:%{public}d, pointWinY:%{public}d, outside:%{public}d, vpr:%{public}f, "
@@ -1067,7 +1068,6 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
         return false;
     }
     InitDecorValue(property, sysConfig);
-    limits_ = property->GetWindowLimits();
     isAdaptToDragScale_ = property->IsAdaptToDragScale();
     moveDragProperty_.pointerId_ = pointerItem.GetOriginPointerId();
     moveDragProperty_.pointerType_ = sourceType;

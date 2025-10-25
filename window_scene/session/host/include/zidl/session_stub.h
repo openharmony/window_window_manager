@@ -185,6 +185,9 @@ private:
     int HandleNotifyIsFullScreenInForceSplitMode(MessageParcel& data, MessageParcel& reply);
     
     int HandleRestartApp(MessageParcel& data, MessageParcel& reply);
+
+    // Window Event
+    int HandleSendCommonEvent(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 

@@ -1662,6 +1662,7 @@ enum class WindowInfoKey : int32_t {
     WINDOW_MODE = 1 << 7,
     FLOATING_SCALE = 1 << 8,
     MID_SCENE = 1 << 9,
+    WINDOW_GLOBAL_RECT = 1 << 10,
 };
 
 /*

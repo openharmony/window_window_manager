@@ -537,7 +537,7 @@ private:
     void OnAnimateToTargetProperty(const WindowAnimationProperty& animationProperty,
         const WindowAnimationOption& animationOption);
     void OnOutlineParamsChange(bool isOutlineEnabled, const OutlineStyleParams& outlineStyleParams);
-    void OnRestartApp(const SessionInfo& info);
+    void OnRestartApp(const SessionInfo& info, int32_t callingPid);
     void OnCallingSessionIdChange(uint32_t callingSessionId);
 
     /*

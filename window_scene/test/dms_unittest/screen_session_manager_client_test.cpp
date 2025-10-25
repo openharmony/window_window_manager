@@ -614,11 +614,12 @@ HWTEST_F(ScreenSessionManagerClientTest, OnFoldPropertyChanged, TestSize.Level1)
 {
     ScreenId screenId = 0;
     ScreenProperty property;
+    ScreenProperty midProperty;
     ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::UNDEFINED;
     FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
 
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
-    screenSessionManagerClient_->OnFoldPropertyChanged(screenId, property, reason, displayMode);
+    screenSessionManagerClient_->OnFoldPropertyChanged(screenId, property, reason, displayMode, midProperty);
 }
 
 /**
