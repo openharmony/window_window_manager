@@ -84,6 +84,7 @@ public:
     WMError UpdateAnimationSpeedWithPid(pid_t pid, float speed) override;
     WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo) override;
     WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) override;
+    WMError GetMainWindowInfoByToken(const sptr<IRemoteObject>& abilityToken, MainWindowInfo& windowInfo) override;
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds) override;
     WSError RaiseWindowToTop(int32_t persistentId) override;
     WSError RegisterIAbilityManagerCollaborator(int32_t type,
