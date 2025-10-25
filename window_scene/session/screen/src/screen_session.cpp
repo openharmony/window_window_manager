@@ -947,6 +947,11 @@ void ScreenSession::SensorRotationChange(Rotation sensorRotation)
 
 void ScreenSession::SensorRotationChange(float sensorRotation)
 {
+    SensorRotationChange(rotation, false);
+}
+
+void ScreenSession::SensorRotationChange(float sensorRotation, bool isSwitchUser)
+{
     std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     if (sensorRotation >= 0.0f) {
         currentValidSensorRotation_ = sensorRotation;
@@ -957,7 +962,7 @@ void ScreenSession::SensorRotationChange(float sensorRotation)
             TLOGE(WmsLogTag::DMS, "screenChangeListener is null.");
             continue;
         }
-        listener->OnSensorRotationChange(sensorRotation, screenId_);
+        listener->OnSensorRotationChange(sensorRotation, screenId_, isSwitchUser);
     }
 }
 
@@ -1252,7 +1257,7 @@ void ScreenSession::UpdateRotationAfterBoot(bool foldToExpand)
 void ScreenSession::UpdateValidRotationToScb()
 {
     TLOGI(WmsLogTag::DMS, "Rotation: %{public}f", currentValidSensorRotation_);
-    SensorRotationChange(currentValidSensorRotation_);
+    SensorRotationChange(currentValidSensorRotation_, true);
 }
 
 sptr<SupportedScreenModes> ScreenSession::GetActiveScreenMode() const
