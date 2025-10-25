@@ -1113,11 +1113,11 @@ sptr<ISceneSessionManager> MockSessionManagerService::GetSceneSessionManagerBySA
     return result;
 }
 
-template ErrCode GetSceneSessionManagerByUserIdImpl<ISceneSessionManagerLite>(int32_t userId,
+template ErrCode MockSessionManagerService::GetSceneSessionManagerByUserIdImpl<ISceneSessionManagerLite>(int32_t userId,
                                                                               sptr<ISceneSessionManagerLite>& result,
                                                                               bool isLite,
                                                                               bool checkClient);
-template ErrCode GetSceneSessionManagerByUserIdImpl<ISceneSessionManager>(int32_t userId,
+template ErrCode MockSessionManagerService::GetSceneSessionManagerByUserIdImpl<ISceneSessionManager>(int32_t userId,
                                                                           sptr<ISceneSessionManager>& result,
                                                                           bool isLite,
                                                                           bool checkClient);
@@ -1138,13 +1138,14 @@ ErrCode MockSessionManagerService::GetSceneSessionManagerByUserIdImpl(int32_t us
             return err;
         }
     }
-    auto sessionManagerServiceProxyObject = GetSessionManagerServiceInner(userId, isLite);
-    if (sessionManagerServiceProxyObject == nullptr) {
+    auto sceneSessionManagerProxyObject = GetSceneSessionManagerInner(userId, isLite);
+    if (sceneSessionManagerProxyObject == nullptr) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "smsProxy null");
+        return ERR_DEAD_OBJECT;
     }
-    result = iface_cast<T>(sessionManagerServiceProxyObject);
+    result = iface_cast<T>(sceneSessionManagerProxyObject);
     if (!result) {
-        TLOGE(WmsLogTag::WMS_MULTI_USER, "smsProxy iface_cast null");
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "ssmProxy iface_cast null");
         return ERR_DEAD_OBJECT;
     }
     return ERR_OK;
@@ -1158,12 +1159,12 @@ sptr<IRemoteObject> MockSessionManagerService::GetSceneSessionManagerInner(int32
     }
     auto sessionManagerService = GetSessionManagerServiceInner(userId);
     if (sessionManagerService == nullptr) {
-        TLOGE(WmsLogTag::WMS_MULTI_USER, "SSM is nullptr, userId: %{public}d", userId);
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "SMS is nullptr, userId: %{public}d", userId);
         return nullptr;
     }
     sptr<ISessionManagerService> sessionManagerServiceProxy = iface_cast<ISessionManagerService>(sessionManagerService);
     if (sessionManagerServiceProxy == nullptr) {
-        TLOGE(WmsLogTag::WMS_MULTI_USER, "SMSProxy is nullptr, userId: %{public}d", userId);
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "SMSProxy iface_cast null, userId: %{public}d", userId);
         return nullptr;
     }
     SSMRemoteObject = isLite ? sessionManagerServiceProxy->GetSceneSessionManagerLite()
@@ -1199,7 +1200,7 @@ sptr<IRemoteObject> MockSessionManagerService::GetSceneSessionManagerFromCache(i
     return nullptr;
 }
 
-MockSessionManagerService::UpdateSceneSessionManagerFromCache(int32_t userId,
+void MockSessionManagerService::UpdateSceneSessionManagerFromCache(int32_t userId,
                                                               bool isLite,
                                                               sptr<IRemoteObject>& sceneSessionManager)
 {

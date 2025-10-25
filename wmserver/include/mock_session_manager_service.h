@@ -150,7 +150,7 @@ private:
      */
     int32_t defaultWMSUserId_;
     int32_t defaultScreenId_;
-    std::mutex userId2ScreenIdMapMutex_;            
+    std::mutex userId2ScreenIdMapMutex_;
     std::map<int32_t, int32_t> userId2ScreenIdMap_;
     std::shared_mutex smsDeathRecipientMapLock_;
     std::map<int32_t, sptr<SMSDeathRecipient>> smsDeathRecipientMap_;
