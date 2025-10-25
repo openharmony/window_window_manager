@@ -1626,7 +1626,7 @@ bool AniWindowUtils::ParseRectParam(ani_env *env, ani_object aniObject, const sp
     ani_ref windowRectRef;
     ani_status ret = env->Object_GetPropertyByName_Ref(aniObject, "windowRect", &windowRectRef);
     ani_boolean isUndefined = false;
-    ret = env->Reference_IsUndefined(windowRectRef, &isUndefined);
+    env->Reference_IsUndefined(windowRectRef, &isUndefined);
     if (ret != ANI_OK || isUndefined) {
         return true;
     }
@@ -1668,10 +1668,10 @@ bool AniWindowUtils::ParseModalityParam(ani_env *env, ani_object aniObject, cons
     ani_ref modalityTypeRef;
     ani_status ret = env->Object_GetPropertyByName_Ref(aniObject, "modalityType", &modalityTypeRef);
     ani_boolean isUndefined = false;
-    ret = env->Reference_IsUndefined(modalityTypeRef, &isUndefined);
+    env->Reference_IsUndefined(modalityTypeRef, &isUndefined);
     ani_int modalityType;
     if (ret == ANI_OK && !isUndefined &&
-        env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(modalityTypeRef), &modalityType)) {
+        env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(modalityTypeRef), &modalityType) == ANI_OK) {
         if (!isModal) {
             TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow not support modalityType");
             return false;

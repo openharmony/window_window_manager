@@ -3544,9 +3544,16 @@ WMError WindowSessionImpl::SetDecorVisible(bool isVisible)
         return WMError::WM_ERROR_NULLPTR;
     }
     uiContent->SetContainerModalTitleVisible(isVisible, true);
-    if (auto hostSession = GetHostSession()) {
-        hostSession->SetDecorVisible(isVisible);
-    }
+    handler_->PostTask([weakWindow = wptr(this), isVisible, where = __func__] {
+        auto window = weakWindow.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_DECOR, "%{public}s: window is null", where);
+            return;
+        }
+        if (auto hostSession = window->GetHostSession()) {
+            hostSession->SetDecorVisible(isVisible);
+        }
+    }, __func__);
     TLOGD(WmsLogTag::WMS_DECOR, "end");
     return WMError::WM_OK;
 }
