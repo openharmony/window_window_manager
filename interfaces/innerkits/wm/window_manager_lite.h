@@ -183,6 +183,15 @@ public:
     WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const;
 
     /**
+     * @brief Get main window info by ability token
+     *
+     * @param abilityToken ability token
+     * @param windowInfo main window info
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetMainWindowInfoByToken(const sptr<IRemoteObject>& abilityToken, MainWindowInfo& windowInfo);
+
+    /**
      * @brief Clear a specified set of sessions.
      *
      * @param persistentIds a vector of session persistentId.

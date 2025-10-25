@@ -763,6 +763,7 @@ public:
     int32_t StartUIAbilityBySCB(sptr<SceneSession>& sceneSessions);
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
     WMError GetAllMainWindowInfo(std::vector<sptr<MainWindowInfo>>& infos) override;
+    WMError GetMainWindowInfoByToken(const sptr<IRemoteObject>& abilityToken, MainWindowInfo& windowInfo) const;
     WMError GetMainWindowSnapshot(const std::vector<int32_t>& windowIds, const WindowSnapshotConfiguration& config,
         const sptr<IRemoteObject>& callback) override;
     WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo);

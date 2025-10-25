@@ -168,6 +168,10 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         infos.push_back(mainWindowInfo);
         return WMError::WM_OK;
     }
+    WMError GetMainWindowInfoByToken(const sptr<IRemoteObject>& abilityToken, MainWindowInfo& windowInfo) override
+    {
+        return WMError::WM_OK;
+    }
     WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo) override
     {
         return WMError::WM_OK;
@@ -1013,6 +1017,21 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetAllMainWindowInfos, TestSize.
     MessageParcel data;
     MessageParcel reply;
     auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetAllMainWindowInfos(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetMainWindowInfoByToken
+ * @tc.desc: test function : HandleGetMainWindowInfoByToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetMainWindowInfoByToken, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IRemoteObject> token = sptr<MockIRemoteObject>::MakeSptr();
+    data.WriteRemoteObject(token);
+    auto res = sceneSessionManagerLiteStub_->HandleGetMainWindowInfoByToken(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
