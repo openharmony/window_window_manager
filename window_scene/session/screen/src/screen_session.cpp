@@ -947,7 +947,7 @@ void ScreenSession::SensorRotationChange(Rotation sensorRotation)
 
 void ScreenSession::SensorRotationChange(float sensorRotation)
 {
-    SensorRotationChange(rotation, false);
+    SensorRotationChange(sensorRotation, false);
 }
 
 void ScreenSession::SensorRotationChange(float sensorRotation, bool isSwitchUser)
