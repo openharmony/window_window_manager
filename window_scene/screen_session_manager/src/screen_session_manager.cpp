@@ -2170,7 +2170,7 @@ void ScreenSessionManager::HandleRotationCorrectionExemption(sptr<DisplayInfo>& 
         FoldDisplayMode foldDisplayMode = GetFoldDisplayMode();
         FoldDisplayMode foldDisplayModeAfterRotation = GetFoldDisplayModeAfterRotation();
         if (foldDisplayModeAfterRotation != FoldDisplayMode::UNKNOWN) {
-            foldDisplayMode = foldDisplayModeAfterRotation
+            foldDisplayMode = foldDisplayModeAfterRotation;
         }
         Rotation rotation = RemoveRotationCorrection(displayInfo->GetRotation(), foldDisplayMode);
         displayInfo->SetRotation(rotation);
@@ -12525,7 +12525,7 @@ Rotation ScreenSessionManager::RemoveRotationCorrection(Rotation rotation, FoldD
         static_cast<uint32_t>(correctionRotation) + ROTATION_MOD) % ROTATION_MOD);
 }
 
-RotatiFoldDisplayModeon ScreenSessionManager::GetFoldDisplayModeAfterRotation() const
+FoldDisplayMode ScreenSessionManager::GetFoldDisplayModeAfterRotation() const
 {
     return foldDisplayModeAfterRotation_.load();
 }
