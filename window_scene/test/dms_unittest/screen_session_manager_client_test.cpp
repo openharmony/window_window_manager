@@ -633,7 +633,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnSensorRotationChanged01, TestSize.Lev
     float sensorRotation = 0;
 
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
-    screenSessionManagerClient_->OnSensorRotationChanged(screenId, sensorRotation);
+    screenSessionManagerClient_->OnSensorRotationChanged(screenId, sensorRotation, false);
 }
 
 /**
@@ -647,7 +647,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnSensorRotationChanged02, TestSize.Lev
     float sensorRotation = 90.0f;
 
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
-    screenSessionManagerClient_->OnSensorRotationChanged(screenId, sensorRotation);
+    screenSessionManagerClient_->OnSensorRotationChanged(screenId, sensorRotation, false);
 }
 
 /**

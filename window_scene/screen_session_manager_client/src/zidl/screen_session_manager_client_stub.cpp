@@ -287,7 +287,8 @@ int ScreenSessionManagerClientStub::HandleOnSensorRotationChanged(MessageParcel&
     TLOGD(WmsLogTag::DMS, "enter");
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     auto sensorRotation = data.ReadFloat();
-    OnSensorRotationChanged(screenId, sensorRotation);
+    auto isSwitchUser = data.ReadBool();
+    OnSensorRotationChanged(screenId, sensorRotation, isSwitchUser);
     return ERR_NONE;
 }
 

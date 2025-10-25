@@ -4842,7 +4842,7 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
             float sensorRotation = screenSession->GetSensorRotation();
             TLOGI(WmsLogTag::DMS, "sensorRotation: %{public}f", sensorRotation);
             if (sensorRotation >= 0.0f) {
-                that.OnSensorRotationChange(sensorRotation, screenId);
+                that.OnSensorRotationChange(sensorRotation, screenId, false);
             }
             screenSession->PropertyChange(screenSession->GetScreenProperty(),
                 ScreenPropertyChangeReason::SUPER_FOLD_STATUS_CHANGE);
@@ -8986,7 +8986,7 @@ void ScreenSessionManager::OnPowerStatusChange(DisplayPowerEvent event, EventSta
     clientProxy->OnPowerStatusChanged(event, status, reason);
 }
 
-void ScreenSessionManager::OnSensorRotationChange(float sensorRotation, ScreenId screenId)
+void ScreenSessionManager::OnSensorRotationChange(float sensorRotation, ScreenId screenId, bool isSwitchUser)
 {
     TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " sensorRotation: %{public}f", screenId, sensorRotation);
     auto clientProxy = GetClientProxy();
@@ -8994,7 +8994,7 @@ void ScreenSessionManager::OnSensorRotationChange(float sensorRotation, ScreenId
         TLOGI(WmsLogTag::DMS, "clientProxy_ is null");
         return;
     }
-    clientProxy->OnSensorRotationChanged(screenId, sensorRotation);
+    clientProxy->OnSensorRotationChanged(screenId, sensorRotation, isSwitchUser);
 }
 
 void ScreenSessionManager::OnHoverStatusChange(int32_t hoverStatus, bool needRotate, ScreenId screenId)
