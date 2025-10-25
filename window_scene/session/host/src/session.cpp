@@ -1421,6 +1421,20 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     Rect rect = {winRect.posX_, winRect.posY_, static_cast<uint32_t>(winRect.width_),
         static_cast<uint32_t>(winRect.height_)};
     property->SetWindowRect(rect);
+    // Check if the current session is prelaunch and set the session rect based on the screen size.
+    if (GetSessionInfo().isPrelaunch_) {
+        auto displayId = property->GetDisplayId();
+        const std::map<ScreenId, ScreenProperty>& screenProperties =
+            Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+        if (screenProperties.find(displayId) != screenProperties.end()) {
+            auto screenProperty = screenProperties.at(displayId);
+            int32_t width = screenProperty.GetBounds().rect_.GetWidth();
+            int32_t height = screenProperty.GetBounds().rect_.GetHeight();
+            TLOGI(WmsLogTag::WMS_MAIN, "update prelaunch rect[0, 0, %{public}d, %{public}d] "
+                "when session connect", width, height);
+            SetSessionRect({0, 0, width, height});
+        }
+    }
     property->SetPersistentId(GetPersistentId());
     property->SetAppIndex(GetSessionInfo().appIndex_);
     property->SetFullScreenStart(GetSessionInfo().fullScreenStart_);
