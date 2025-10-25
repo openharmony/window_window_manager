@@ -209,7 +209,7 @@ HWTEST_F(MockSessionManagerServiceTest, GetSMSDeathRecipientByUserId, TestSize.L
  */
 HWTEST_F(MockSessionManagerServiceTest, GetSessionManagerServiceInner, TestSize.Level1)
 {
-    auto sessionManagerService = MockSessionManagerService::GetInstance().GetSessionManagerServiceByUserId(100);
+    auto sessionManagerService = MockSessionManagerService::GetInstance().GetSessionManagerServiceInner(100);
     ASSERT_EQ(nullptr, sessionManagerService);
     MockSessionManagerService::GetInstance().RemoveSessionManagerServiceByUserId(100);
 }

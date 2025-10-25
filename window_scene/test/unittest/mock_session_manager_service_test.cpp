@@ -780,11 +780,11 @@ HWTEST(MockSessionManagerServiceTest, GetSceneSessionManagerLiteBySA, TestSize.L
 {
     MockMockSessionManagerService mockMockSms;
     int32_t userId = 100;
-    EXPECT_CALL(mockMockSms, GetSceneSessionManagerInner(userId, false)).WillOnce(Return(nullptr));
+    EXPECT_CALL(mockMockSms, GetSceneSessionManagerInner(userId, true)).WillOnce(Return(nullptr));
     auto result = mockMockSms.GetSceneSessionManagerLiteBySA(userId);
     EXPECT_EQ(result, nullptr);
     sptr<IRemoteObject> mockRemoteObject = SceneSessionManagerLite::GetInstance().AsObject();
-    EXPECT_CALL(mockMockSms, GetSceneSessionManagerInner(userId, false)).WillOnce(Return(mockRemoteObject));
+    EXPECT_CALL(mockMockSms, GetSceneSessionManagerInner(userId, true)).WillOnce(Return(mockRemoteObject));
     result = mockMockSms.GetSceneSessionManagerLiteBySA(userId);
     EXPECT_NE(result, nullptr);
 }
@@ -798,11 +798,11 @@ HWTEST(MockSessionManagerServiceTest, GetSceneSessionManagerBySA, TestSize.Level
 {
     MockMockSessionManagerService mockMockSms;
     int32_t userId = 100;
-    EXPECT_CALL(mockMockSms, GetSceneSessionManagerInner(userId, true)).WillOnce(Return(nullptr));
+    EXPECT_CALL(mockMockSms, GetSceneSessionManagerInner(userId, false)).WillOnce(Return(nullptr));
     auto result = mockMockSms.GetSceneSessionManagerBySA(userId);
     EXPECT_EQ(result, nullptr);
     sptr<IRemoteObject> mockRemoteObject = SceneSessionManager::GetInstance().AsObject();
-    EXPECT_CALL(mockMockSms, GetSceneSessionManagerInner(userId, true)).WillOnce(Return(mockRemoteObject));
+    EXPECT_CALL(mockMockSms, GetSceneSessionManagerInner(userId, false)).WillOnce(Return(mockRemoteObject));
     result = mockMockSms.GetSceneSessionManagerBySA(userId);
     EXPECT_NE(result, nullptr);
 }
