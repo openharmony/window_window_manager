@@ -521,7 +521,7 @@ public:
     Rotation RemoveRotationCorrection(Rotation rotation);
     Rotation RemoveRotationCorrection(Rotation rotation, FoldDisplayMode foldDisplayMode);
     FoldDisplayMode GetFoldDisplayModeAfterRotation() const;
-    void SetFoldDisplayModeAfterRotation(FoldDisplayMode foldDisplayMode) const;
+    void SetFoldDisplayModeAfterRotation(FoldDisplayMode foldDisplayMode);
     void NotifySwitchUserAnimationFinish() override;
     bool GetFirstSCBConnect();
     void SetFirstSCBConnect(bool firstSCBConnect);
