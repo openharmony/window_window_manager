@@ -956,7 +956,10 @@ HWTEST_F(WindowSceneSessionImplTest5, UpdateSystemBarProperties, TestSize.Level0
     std::unordered_map<WindowType, SystemBarProperty> systemBarProperties;
     systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR] = SystemBarProperty();
     std::unordered_map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
+    systemBarPropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = { false, false, false, false };
     EXPECT_EQ(WMError::WM_OK, window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));
+    systemBarPropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = { true, false, true, false };
+    EXPECT_EQ(WMError::WM_OK, window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));    
     window->state_ = WindowState::STATE_DESTROYED;
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
         window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));
@@ -990,8 +993,7 @@ HWTEST_F(WindowSceneSessionImplTest5, UpdateSystemBarPropertyForPage, TestSize.L
     EXPECT_EQ(WMError::WM_OK, window->UpdateSystemBarPropertyForPage(type, systemBarProperty, systemBarPropertyFlag));
     window->systemBarPropertyForPageMap_[type] = std::nullopt;
     EXPECT_EQ(WMError::WM_OK, window->UpdateSystemBarPropertyForPage(type, systemBarProperty, systemBarPropertyFlag));
-    std::optional<SystemBarProperty> property;
-    window->systemBarPropertyForPageMap_[type] = property;
+    window->systemBarPropertyForPageMap_[type] = systemBarProperty;
     EXPECT_EQ(WMError::WM_OK, window->UpdateSystemBarPropertyForPage(type, systemBarProperty, systemBarPropertyFlag));
 }
 
