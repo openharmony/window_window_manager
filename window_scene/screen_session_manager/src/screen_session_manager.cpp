@@ -2167,7 +2167,12 @@ void ScreenSessionManager::HandleRotationCorrectionExemption(sptr<DisplayInfo>& 
     std::string bundleName = SysCapUtil::GetBundleName();
     if (std::find(rotationCorrectionExemptionList.begin(), rotationCorrectionExemptionList.end(), bundleName) !=
         rotationCorrectionExemptionList.end()) {
-        Rotation rotation = RemoveRotationCorrection(displayInfo->GetRotation());
+        FoldDisplayMode foldDisplayMode = GetFoldDisplayMode();
+        FoldDisplayMode foldDisplayModeAfterRotation = GetFoldDisplayModeAfterRotation();
+        if (foldDisplayModeAfterRotation != FoldDisplayMode::UNKNOWN) {
+            foldDisplayMode = foldDisplayModeAfterRotation;
+        }
+        Rotation rotation = RemoveRotationCorrection(displayInfo->GetRotation(), foldDisplayMode);
         displayInfo->SetRotation(rotation);
         TLOGI(WmsLogTag::DMS, "rotation: %{public}d, bundleName: %{public}s", rotation, bundleName.c_str());
     }
@@ -5191,7 +5196,6 @@ void ScreenSessionManager::UpdateScreenDirectionInfo(ScreenId screenId, const Sc
 void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
     ScreenPropertyChangeType screenPropertyChangeType, bool isSwitchUser)
 {
-    SetFirstSCBConnect(false);
     std::ostringstream oss;
     std::string changeType = TransferPropertyChangeTypeToString(screenPropertyChangeType);
     oss << "screenId: " << screenId << " rotation: " << rotation << " width: " << bounds.rect_.width_ \
@@ -5218,6 +5222,8 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
         }
         NotifyScreenModeChange();
     }
+    SetFoldDisplayModeAfterRotation(GetFoldDisplayMode());
+    SetFirstSCBConnect(false);
     sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
     NotifyAndPublishEvent(displayInfo, screenId, screenSession);
 }
@@ -8720,15 +8726,15 @@ void ScreenSessionManager::NotifyFoldStatusChanged(FoldStatus foldStatus)
         }
     }
     if (screenSession != nullptr && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
-        // 维护外屏独立dpi
         if (foldStatus == FoldStatus::FOLDED) {
             // sub screen default rotation offset is 270
             screenSession->SetDefaultDeviceRotationOffset(270);
             auto property = screenSession->GetScreenProperty();
-            densityDpi_ = property.GetDensity();
             SetVirtualPixelRatio(GetDefaultScreenId(), subDensityDpi_);
         } else {
-            SetVirtualPixelRatio(GetDefaultScreenId(), densityDpi_);
+            float dpi = static_cast<float>(cachedSettingDpi_) / BASELINE_DENSITY;
+            TLOGI(WmsLogTag::DMS, "Set inner screen dpi: %{public}f", dpi);
+            SetVirtualPixelRatio(GetDefaultScreenId(), dpi);
         }
     }
     ScreenSessionManagerAdapter::GetInstance().NotifyFoldStatusChanged(foldStatus);
@@ -12564,9 +12570,25 @@ bool ScreenSessionManager::SynchronizePowerStatus(ScreenPowerState state)
 
 Rotation ScreenSessionManager::RemoveRotationCorrection(Rotation rotation)
 {
-    auto correctionRotation = GetConfigCorrectionByDisplayMode(GetFoldDisplayMode());
+    return RemoveRotationCorrection(rotation, GetFoldDisplayMode());
+}
+
+Rotation ScreenSessionManager::RemoveRotationCorrection(Rotation rotation, FoldDisplayMode foldDisplayMode)
+{
+    auto correctionRotation = GetConfigCorrectionByDisplayMode(foldDisplayMode);
     return static_cast<Rotation>((static_cast<uint32_t>(rotation) -
         static_cast<uint32_t>(correctionRotation) + ROTATION_MOD) % ROTATION_MOD);
+}
+
+FoldDisplayMode ScreenSessionManager::GetFoldDisplayModeAfterRotation() const
+{
+    return foldDisplayModeAfterRotation_.load();
+}
+
+void ScreenSessionManager::SetFoldDisplayModeAfterRotation(FoldDisplayMode foldDisplayMode)
+{
+    foldDisplayModeAfterRotation_.store(foldDisplayMode);
+    TLOGI(WmsLogTag::DMS, "foldDisplayModeAfterRotation: %{public}d", foldDisplayMode);
 }
  
 Rotation ScreenSessionManager::GetConfigCorrectionByDisplayMode(FoldDisplayMode displayMode)
