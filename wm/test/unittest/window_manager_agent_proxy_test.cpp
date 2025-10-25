@@ -830,6 +830,11 @@ HWTEST_F(WindowManagerAgentProxyTest, WriteWindowChangeInfoValue01, TestSize.Lev
     ret = windowManagerAgentProxy->WriteWindowChangeInfoValue(data, windowInfoPair);
     EXPECT_EQ(ret, true);
 
+    windowInfo = Rect({0, 0, 0, 0});
+    windowInfoPair = std::make_pair(WindowInfoKey::WINDOW_GLOBAL_RECT, windowInfo);
+    ret = windowManagerAgentProxy->WriteWindowChangeInfoValue(data, windowInfoPair);
+    EXPECT_EQ(ret, true);
+
     windowInfo = 0;
     windowInfoPair = std::make_pair(WindowInfoKey::NONE, windowInfo);
     ret = windowManagerAgentProxy->WriteWindowChangeInfoValue(data, windowInfoPair);
@@ -907,6 +912,13 @@ HWTEST_F(WindowManagerAgentProxyTest, WriteWindowChangeInfoValue03, TestSize.Lev
     MockMessageParcel::SetWriteUint32ErrorFlag(true);
     windowInfo = WindowMode::WINDOW_MODE_FULLSCREEN;
     windowInfoPair = std::make_pair(WindowInfoKey::WINDOW_MODE, windowInfo);
+    ret = windowManagerAgentProxy->WriteWindowChangeInfoValue(data, windowInfoPair);
+    EXPECT_EQ(ret, false);
+
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    windowInfo = Rect({0, 0, 0, 0});
+    windowInfoPair = std::make_pair(WindowInfoKey::WINDOW_GLOBAL_RECT, windowInfo);
     ret = windowManagerAgentProxy->WriteWindowChangeInfoValue(data, windowInfoPair);
     EXPECT_EQ(ret, false);
 

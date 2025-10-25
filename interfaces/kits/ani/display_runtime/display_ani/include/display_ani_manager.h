@@ -52,6 +52,7 @@ public:
     static void ConvertRelativeToGlobalCoordinate(
         ani_env* env, ani_object relativePostionObj, ani_long nativeObj, ani_object positionObj);
     static void FinalizerDisplay(ani_env* env, ani_object displayObj, ani_long nativeObj);
+    static ani_object GetBrightnessInfoAni(ani_env* env, ani_long displayId, ani_long nativeObj);
 private:
     void OnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
@@ -63,6 +64,7 @@ private:
         ani_env* env, ani_object relativePostionObj, ani_object positionObj);
     void OnFinalizerDisplay(ani_env* env, ani_object displayObj);
     bool IsCallbackRegistered(ani_env* env, const std::string& type, ani_ref callback);
+    ani_object OnGetBrightnessInfoAni(ani_env* env, ani_long displayId);
     std::mutex mtx_;
     std::map<std::string, std::map<ani_ref, sptr<DisplayAniListener>>> jsCbMap_;
 };

@@ -80,6 +80,10 @@ static void SetFoldCreaseRegion(ani_env* env, FoldCreaseRegion& region, ani_obje
 static std::shared_ptr<DisplayAni> FindAniDisplayObject(sptr<Display> display, DisplayId displayId);
 
 static void DisposeAniDisplayObject(DisplayId displayId);
+
+static ani_status CvtBrightnessInfo(ani_env* env, ani_object obj, ScreenBrightnessInfo brightnessInfo);
+
+static ani_object CreateBrightnessInfoObject(ani_env* env);
 };
 }
 }

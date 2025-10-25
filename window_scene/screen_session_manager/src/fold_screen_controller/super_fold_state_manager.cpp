@@ -479,10 +479,10 @@ void SuperFoldStateManager::HandleDisplayNotify(SuperFoldStatusChangeEvents chan
         return;
     }
     screenSession->UpdateSuperFoldStatusChangeEvent(changeEvent);
-    screenSession->GetScreenProperty().SetIsPreFakeInUse(screenSession->GetScreenProperty().GetIsFakeInUse());
+    screenSession->SetIsPreFakeInUse(screenSession->GetScreenProperty().GetIsFakeInUse());
     int32_t currentValidHeight = GetCurrentValidHeight(screenSession);
-    screenSession->GetScreenProperty().SetCurrentValidHeight(currentValidHeight);
-    screenSession->GetScreenProperty().SetIsKeyboardOn(isKeyboardOn_);
+    screenSession->SetCurrentValidHeight(currentValidHeight);
+    screenSession->SetIsKeyboardOn(isKeyboardOn_);
     TLOGI(WmsLogTag::DMS, "validHeight:  %{public}d, isKeyboardOn: %{public}d", currentValidHeight, isKeyboardOn_);
     screenSession->NotifyClientPropertyChange(screenSession->GetScreenProperty(),
         ScreenPropertyChangeReason::SUPER_FOLD_STATUS_CHANGE);
@@ -643,7 +643,7 @@ void SuperFoldStateManager::HandleKeyboardOnDisplayNotify(sptr<ScreenSession>& s
 {
     TLOGI(WmsLogTag::DMS, "SuperFoldStateManager HandleKeyboardOnDisplayNotify");
     bool currFakeInUse = screenSession->GetScreenProperty().GetIsPreFakeInUse();
-    screenSession->GetScreenProperty().SetIsPreFakeInUse(screenSession->GetScreenProperty().GetIsFakeInUse());
+    screenSession->SetIsPreFakeInUse(screenSession->GetScreenProperty().GetIsFakeInUse());
     screenSession->SetIsBScreenHalf(true);
     sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
     sptr<DisplayInfo> fakeDisplayInfo = fakeScreenSession->ConvertToDisplayInfo();

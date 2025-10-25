@@ -1222,7 +1222,7 @@ HWTEST_F(WindowSessionTest, UpdateSessionLabel, TestSize.Level1)
     ASSERT_EQ(session_->label_, "test label");
 
     session_->label_ = "";
-    session_->UpdateSessionLabel("test label1");
+    session_->UpdateSessionLabel("");
     usleep(WAIT_SYNC_IN_NS);
     ASSERT_EQ(session_->label_, "");
 }

@@ -3256,8 +3256,16 @@ export class WindowInternal implements Window {
       this.onNoInteractionDetected(this.nativeObj, type, timeout, callback as WindowVoidCallback);
     }
 
+    public onUiExtensionSecureLimitChange(callback: Callback<boolean>): void {
+      this.onSync(this.nativeObj, 'uiExtensionSecureLimitChange', callback);
+    }
+
     public off<T>(type: string, callback?: Callback<T>): void {
       this.offSync(this.nativeObj, type, callback);
+    }
+
+    public offUiExtensionSecureLimitChange(callback?: Callback<boolean>): void {
+      this.offSync(this.nativeObj, 'uiExtensionSecureLimitChange', callback);
     }
 
     public onOcclusionStateChanged(callback: Callback<OcclusionState>): void {
@@ -3859,7 +3867,9 @@ export interface Window {
     setShadow(radius: double, color?: string, offsetX?: double, offsetY?: double): void;
     on<T>(type: string, callback: Callback<T>): void;
     on<T>(type: 'noInteractionDetected', timeout: long, callback: Callback<T>): void;
+    onUiExtensionSecureLimitChange(callback: Callback<boolean>): void;
     off<T>(type: string, callback?: Callback<T>): void;
+    offUiExtensionSecureLimitChange(callback?: Callback<boolean>): void;
     onOcclusionStateChanged(callback: Callback<OcclusionState>): void;
     offOcclusionStateChanged(callback?: Callback<OcclusionState>): void;
     onWindowStatusDidChange(callback: Callback<WindowStatusType>): void;
@@ -3930,6 +3940,8 @@ native function onSync(nativeObj: long, type: string, callback: object): void;
 native function offSync(nativeObj: long, type: string, callback?: object): void;
 native function createWindowSync(nativeObj: long, config: Configuration): Window;
 native function shiftAppWindowFocusSync(nativeObj: long, sourceWindowId: int, targetWindowId: int): void;
+native function shiftAppWindowTouchEventSync(nativeObj: long, sourceWindowId: int, targetWindowId: int,
+  fingerId: int): void;
 native function setWindowLayoutMode(nativeObj: long, mode: WindowLayoutMode): void;
 native function setWatermarkImageForAppWindowsSync(nativeObj: long, pixelMap: image.PixelMap | undefined): void;
 native function getTopNavDestinationNameSync(nativeObj: long, windowId: int): string;
@@ -4080,6 +4092,18 @@ export function shiftAppWindowFocus(sourceWindowId: int, targetWindowId: int): P
       }).catch((err: NullishType) => {
           reject(err as BusinessError);
       });
+  });
+}
+
+export function shiftAppWindowTouchEvent(sourceWindowId: int, targetWindowId: int, fingerId: int): Promise<void> {
+  return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+    taskpool.execute((): void => {
+      return shiftAppWindowTouchEventSync(nativeObj, sourceWindowId, targetWindowId, fingerId);
+    }).then((ret: NullishType) => {
+      resolve(undefined);
+    }).catch((err: NullishType) => {
+      reject(err as BusinessError);
+    });
   });
 }
 
@@ -4274,6 +4298,11 @@ function runScreenshotAppEvent(cb: object, cbArg: ScreenshotEventType): void {
 function runRectChangeInGlobalDisplayCallback(cb: object, rect: object, reason: int): void {
   const func = cb as (data: RectChangeOptions) => void;
   func({rect: rect as Rect, reason: reason as RectChangeReason});
+}
+
+function runUiExtensionSecureLimitChangeCallback(cb: object, cbArg: boolean): void {
+  const func = cb as (cbArg: boolean) => void;
+  func(cbArg);
 }
 
 function runWindowStatusDidChangeCallback(cb: object, windowStatus: int): void {
