@@ -50,7 +50,7 @@ public:
             ScreenPropertyChangeReason reason, FoldDisplayMode mode) {}
     virtual void OnPowerStatusChange(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason) {}
-    virtual void OnSensorRotationChange(float sensorRotation, ScreenId screenId) {}
+    virtual void OnSensorRotationChange(float sensorRotation, ScreenId screenId, bool isSwitchUser) {}
     virtual void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) {}
     virtual void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) {}
     virtual void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) {}
@@ -310,6 +310,7 @@ public:
     // notify scb
     void SensorRotationChange(Rotation sensorRotation);
     void SensorRotationChange(float sensorRotation);
+    void SensorRotationChange(float sensorRotation, bool isSwitchUser);
     float GetValidSensorRotation();
     void HoverStatusChange(int32_t hoverStatus, bool needRotate = true);
     void CameraBackSelfieChange(bool isCameraBackSelfie);

@@ -35,7 +35,7 @@ public:
         ScreenPropertyChangeReason reason, FoldDisplayMode displayMode, ScreenProperty& midProperty) override;
     void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason) override;
-    void OnSensorRotationChanged(ScreenId screenId, float sensorRotation) override;
+    void OnSensorRotationChanged(ScreenId screenId, float sensorRotation, bool isSwitchUser) override;
     void OnHoverStatusChanged(ScreenId screenId, int32_t hoverStatus, bool needRotate = true) override;
     void OnScreenOrientationChanged(ScreenId screenId, float screenOrientation) override;
     void OnScreenExtendChanged(ScreenId mainScreenId, ScreenId extendScreenId) override;
