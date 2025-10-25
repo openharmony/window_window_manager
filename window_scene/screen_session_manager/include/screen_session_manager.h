@@ -519,6 +519,9 @@ public:
     void RemoveScreenCastInfo(ScreenId screenId);
     Rotation GetConfigCorrectionByDisplayMode(FoldDisplayMode displayMode);
     Rotation RemoveRotationCorrection(Rotation rotation);
+    Rotation RemoveRotationCorrection(Rotation rotation, FoldDisplayMode foldDisplayMode);
+    FoldDisplayMode GetFoldDisplayModeAfterRotation() const;
+    void SetFoldDisplayModeAfterRotation(FoldDisplayMode foldDisplayMode) const;
     void NotifySwitchUserAnimationFinish() override;
     bool GetFirstSCBConnect();
     void SetFirstSCBConnect(bool firstSCBConnect);
@@ -1012,6 +1015,7 @@ private:
     std::function<void(sptr<ScreenSession>& screenSession)> propertyChangedCallback_;
     std::mutex callbackMutex_;
     bool isSupportCapture_ = false;
+    std::atomic<FoldDisplayMode> foldDisplayModeAfterRotation_ = FoldDisplayMode::UNKNOWN;
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {
