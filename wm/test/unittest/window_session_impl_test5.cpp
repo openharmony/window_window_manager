@@ -46,6 +46,7 @@ namespace {
         g_errLog += msg;
     }
 }
+static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 class WindowSessionImplTest5 : public testing::Test {
 public:
     static void SetUpTestCase();
