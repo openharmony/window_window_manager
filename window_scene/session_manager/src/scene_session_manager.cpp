@@ -2079,22 +2079,25 @@ WMError SceneSessionManager::SetScreenPrivacyWindowTagSwitch(
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    if (enable) {
-        for (const auto& privacyWindowTag : privacyWindowTags) {
-            screenRSBlackListConfigMap_[screenId].insert({ .privacyWindowTag = privacyWindowTag });
-        }
-        FlushSessionBlackListInfoMapWhenAdd(screenId);
-    } else {
-        for (const auto& privacyWindowTag : privacyWindowTags) {
-            screenRSBlackListConfigMap_[screenId].erase({ .privacyWindowTag = privacyWindowTag });
-            if (screenRSBlackListConfigMap_[screenId].empty()) {
-                screenRSBlackListConfigMap_.erase(screenId);
-                break;
+    auto task = [this, screenId, &privacyWindowTags, enable]() {
+        if (enable) {
+            for (const auto& privacyWindowTag : privacyWindowTags) {
+                screenRSBlackListConfigMap_[screenId].insert({ .privacyWindowTag = privacyWindowTag });
             }
+            FlushSessionBlackListInfoMapWhenAdd(screenId);
+        } else {
+            for (const auto& privacyWindowTag : privacyWindowTags) {
+                screenRSBlackListConfigMap_[screenId].erase({ .privacyWindowTag = privacyWindowTag });
+                if (screenRSBlackListConfigMap_[screenId].empty()) {
+                    screenRSBlackListConfigMap_.erase(screenId);
+                    break;
+                }
+            }
+            FlushSessionBlackListInfoMapWhenRemove(screenId);
         }
-        FlushSessionBlackListInfoMapWhenRemove(screenId);
-    }
-    return WMError::WM_OK;
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, __func__);
 }
 
 void SceneSessionManager::SetSkipEventOnCastPlusInner(int32_t windowId, bool isSkip)
@@ -10608,20 +10611,23 @@ WMError SceneSessionManager::AddSessionBlackList(
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    for (const auto& bundleName : bundleNames) {
-        bundleRSBlackListConfigMap_.insert({ bundleName, {} });
-        bundleRSBlackListConfigMap_[bundleName].insert(privacyWindowTags.begin(), privacyWindowTags.end());
-    }
-    std::vector<sptr<SceneSession>> sceneSessionList;
-    {
-        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        for (const auto& [_, sceneSession] : sceneSessionMap_) {
-            if (sceneSession && bundleNames.find(sceneSession->GetSessionInfo().bundleName_) != bundleNames.end()) {
-                sceneSessionList.emplace_back(sceneSession);
+    auto task = [this, &bundleNames, &privacyWindowTags]() {
+        for (const auto& bundleName : bundleNames) {
+            bundleRSBlackListConfigMap_.insert({ bundleName, {} });
+            bundleRSBlackListConfigMap_[bundleName].insert(privacyWindowTags.begin(), privacyWindowTags.end());
+        }
+        std::vector<sptr<SceneSession>> sceneSessionList;
+        {
+            std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+            for (const auto& [_, sceneSession] : sceneSessionMap_) {
+                if (sceneSession && bundleNames.find(sceneSession->GetSessionInfo().bundleName_) != bundleNames.end()) {
+                    sceneSessionList.emplace_back(sceneSession);
+                }
             }
         }
-    }
-    return AddSessionBlackList(sceneSessionList, privacyWindowTags);
+        return AddSessionBlackList(sceneSessionList, privacyWindowTags);
+    };
+    return taskScheduler_->PostSyncTask(task, __func__);
 }
 
 WMError SceneSessionManager::AddSessionBlackList(const std::vector<sptr<SceneSession>>& sceneSessionList,
@@ -10643,25 +10649,28 @@ WMError SceneSessionManager::RemoveSessionBlackList(
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    for (const auto& bundleName : bundleNames) {
-        bundleRSBlackListConfigMap_.insert({ bundleName, {} });
-        for(const auto& privacyWindowTag : privacyWindowTags) {
-            bundleRSBlackListConfigMap_[bundleName].erase(privacyWindowTag);
-        }
-        if (bundleRSBlackListConfigMap_[bundleName].empty()) {
-            bundleRSBlackListConfigMap_.erase(bundleName);
-        }
-    }
-    std::vector<sptr<SceneSession>> sceneSessionList;
-    {
-        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        for (const auto& [_, sceneSession] : sceneSessionMap_) {
-            if (sceneSession && bundleNames.find(sceneSession->GetSessionInfo().bundleName_) != bundleNames.end()) {
-                sceneSessionList.emplace_back(sceneSession);
+    auto task = [this, &bundleNames, &privacyWindowTags]() {
+        for (const auto& bundleName : bundleNames) {
+            bundleRSBlackListConfigMap_.insert({ bundleName, {} });
+            for(const auto& privacyWindowTag : privacyWindowTags) {
+                bundleRSBlackListConfigMap_[bundleName].erase(privacyWindowTag);
+            }
+            if (bundleRSBlackListConfigMap_[bundleName].empty()) {
+                bundleRSBlackListConfigMap_.erase(bundleName);
             }
         }
-    }
-    return RemoveSessionBlackList(sceneSessionList, privacyWindowTags);
+        std::vector<sptr<SceneSession>> sceneSessionList;
+        {
+            std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+            for (const auto& [_, sceneSession] : sceneSessionMap_) {
+                if (sceneSession && bundleNames.find(sceneSession->GetSessionInfo().bundleName_) != bundleNames.end()) {
+                    sceneSessionList.emplace_back(sceneSession);
+                }
+            }
+        }
+        return RemoveSessionBlackList(sceneSessionList, privacyWindowTags);
+    };
+    return taskScheduler_->PostSyncTask(task, __func__);
 }
 
 WMError SceneSessionManager::RemoveSessionBlackList(const std::vector<sptr<SceneSession>>& sceneSessionList,
