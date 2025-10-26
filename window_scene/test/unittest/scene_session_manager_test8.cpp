@@ -1274,6 +1274,28 @@ HWTEST_F(SceneSessionManagerTest8, RemoveSessionBlackList02, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
+
+    SessionInfo sessionInfo1;
+    sessionInfo1.bundleName_ = "test";
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    std::vector<sptr<SceneSession>> sceneSessionList;
+    sceneSessionList.emplace_back(sceneSession1);
+    std::unordered_set<std::string> privacyWindowTags;
+    auto ret = ssm_->RemoveSessionBlackList(sceneSessionList, privacyWindowTags);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: SessionBlackListSystemTest
+ * @tc.desc: test function : SessionBlackListSystemTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, SessionBlackListSystemTest, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
     std::size_t count = 100; 
     for (std::size_t i = 0; i < count; ++i) {
         // 组装 key
@@ -1343,28 +1365,6 @@ HWTEST_F(SceneSessionManagerTest8, RemoveSessionBlackList02, TestSize.Level1)
     ssm_->sessionRSBlackListConfigSet_.clear();
     ssm_->sessionBlackListInfoMap_.clear();
     ssm_->bundleRSBlackListConfigMap_.clear();
-}
-
-/**
- * @tc.name: SessionBlackListSystemTest
- * @tc.desc: test function : SessionBlackListSystemTest
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest8, SessionBlackListSystemTest, TestSize.Level1)
-{
-    ASSERT_NE(nullptr, ssm_);
-    ssm_->sceneSessionMap_.clear();
-
-    SessionInfo sessionInfo1;
-    sessionInfo1.bundleName_ = "test";
-    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
-    std::vector<sptr<SceneSession>> sceneSessionList;
-    sceneSessionList.emplace_back(sceneSession1);
-    std::unordered_set<std::string> privacyWindowTags;
-    auto ret = ssm_->RemoveSessionBlackList(sceneSessionList, privacyWindowTags);
-    EXPECT_EQ(WMError::WM_OK, ret);
-
-    ssm_->sceneSessionMap_.clear();
 }
 
 /**
