@@ -52,6 +52,10 @@ private:
         bool isRegister, ani_env* env);
     WmErrorCode ProcessKeyboardDidHideRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
+    WmErrorCode ProcessKeyboardWillShowRegister(sptr<AniWindowListener> listener, const sptr<Window>& window,
+        bool isRegister, ani_env* env);
+    WmErrorCode ProcessKeyboardWillHideRegister(sptr<AniWindowListener> listener, const sptr<Window>& window,
+        bool isRegister, ani_env* env);
     WmErrorCode ProcessSystemBarChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window, bool isRegister,
     ani_env* env);
     WmErrorCode ProcessTouchOutsideRegister(sptr<AniWindowListener> listener, sptr<Window> window, bool isRegister,
