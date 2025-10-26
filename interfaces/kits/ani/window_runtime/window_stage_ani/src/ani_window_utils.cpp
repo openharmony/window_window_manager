@@ -814,6 +814,10 @@ ani_object AniWindowUtils::CreateAniAnimationConfig(ani_env* env, const Keyboard
             }
         }
         ret = CallAniMethodVoid(env, aniConfig, aniClass, "<set>param", nullptr, params);
+        if (ret != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to set param");
+            return AniWindowUtils::CreateAniUndefined(env);
+        }
     }
     return aniConfig;
 }
