@@ -1277,7 +1277,6 @@ void WindowSessionImpl::UpdateRectForPageRotation(const Rect& wmRect, const Rect
     handler_->PostTask(
         [weak = wptr(this), wmReason, wmRect, preRect, config, avoidAreas]() mutable {
             HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::UpdateRectForPageRotation");
-            TLOGI(WmsLogTag::WMS_ROTATION,"wjq windowOrientation");
             auto window = weak.promote();
             if (!window) {
                 return;
