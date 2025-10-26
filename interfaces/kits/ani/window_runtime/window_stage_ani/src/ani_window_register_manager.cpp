@@ -39,6 +39,8 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     {KEYBOARD_HEIGHT_CHANGE_CB, RegisterListenerType::KEYBOARD_HEIGHT_CHANGE_CB},
     {KEYBOARD_DID_SHOW_CB, RegisterListenerType::KEYBOARD_DID_SHOW_CB},
     {KEYBOARD_DID_HIDE_CB, RegisterListenerType::KEYBOARD_DID_HIDE_CB},
+    {KEYBOARD_WILL_SHOW_CB, RegisterListenerType::KEYBOARD_WILL_SHOW_CB},
+    {KEYBOARD_WILL_HIDE_CB, RegisterListenerType::KEYBOARD_WILL_HIDE_CB},
     {TOUCH_OUTSIDE_CB, RegisterListenerType::TOUCH_OUTSIDE_CB},
     {SCREENSHOT_EVENT_CB, RegisterListenerType::SCREENSHOT_EVENT_CB},
     {DIALOG_TARGET_TOUCH_CB, RegisterListenerType::DIALOG_TARGET_TOUCH_CB},
@@ -254,6 +256,40 @@ WmErrorCode AniWindowRegisterManager::ProcessKeyboardDidHideRegister(sptr<AniWin
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterKeyboardDidHideListener(thisListener));
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterKeyboardDidHideListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode AniWindowRegisterManager::ProcessKeyboardWillShowRegister(sptr<AniWindowListener> listener,
+    const sptr<Window>& window, bool isRegister, ani_env* env)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI]Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IKeyboardWillShowListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterKeyboardWillShowListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterKeyboardWillShowListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode AniWindowRegisterManager::ProcessKeyboardWillHideRegister(sptr<AniWindowListener> listener,
+    const sptr<Window>& window, bool isRegister, ani_env* env)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI]Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IKeyboardWillHideListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterKeyboardWillHideListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterKeyboardWillHideListener(thisListener));
     }
     return ret;
 }
@@ -549,6 +585,10 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowListener(RegisterListenerType
             return ProcessKeyboardDidShowRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::KEYBOARD_DID_HIDE_CB):
             return ProcessKeyboardDidHideRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::KEYBOARD_WILL_SHOW_CB):
+            return ProcessKeyboardWillShowRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::KEYBOARD_WILL_HIDE_CB):
+            return ProcessKeyboardWillHideRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::TOUCH_OUTSIDE_CB):
             return ProcessTouchOutsideRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::DIALOG_TARGET_TOUCH_CB):

@@ -28,6 +28,7 @@ export type WindowStatusCallback = (data: window.WindowStatusType) => void;
 export type WindowVoidCallback = () => void;
 export type KeyboardHeightChangeCallback = (data: int) => void;
 export type KeyboardDidShowOrHideCallback = (data: window.KeyboardInfo) => void;
+export type KeyboardWillShowOrHideCallback = (data: window.KeyboardInfo) => void;
 const DOMAIN = 0x4200;
 const TAG = '[ANI]';
 const WM_ERROR_INVALID_PARAM = 401;
@@ -3256,12 +3257,28 @@ export class WindowInternal implements Window {
       this.onNoInteractionDetected(this.nativeObj, type, timeout, callback as WindowVoidCallback);
     }
 
+    public onKeyboardWillShow(callback: Callback<KeyboardInfo>): void {
+      this.onSync(this.nativeObj, 'KeyboardWillShow', callback);
+    }
+
+    public onKeyboardWillHide(callback: Callback<KeyboardInfo>): void {
+      this.onSync(this.nativeObj, 'KeyboardWillHide', callback);
+    }
+
     public onUiExtensionSecureLimitChange(callback: Callback<boolean>): void {
       this.onSync(this.nativeObj, 'uiExtensionSecureLimitChange', callback);
     }
 
     public off<T>(type: string, callback?: Callback<T>): void {
       this.offSync(this.nativeObj, type, callback);
+    }
+
+    public offKeyboardWillShow(callback?: Callback<KeyboardInfo>): void {
+      this.offSync(this.nativeObj, 'KeyboardWillShow', callback);
+    }
+
+    public offKeyboardWillHide(callback?: Callback<KeyboardInfo>): void {
+      this.offSync(this.nativeObj, 'KeyboardWillHide', callback);
     }
 
     public offUiExtensionSecureLimitChange(callback?: Callback<boolean>): void {
@@ -3867,8 +3884,12 @@ export interface Window {
     setShadow(radius: double, color?: string, offsetX?: double, offsetY?: double): void;
     on<T>(type: string, callback: Callback<T>): void;
     on<T>(type: 'noInteractionDetected', timeout: long, callback: Callback<T>): void;
+    onKeyboardWillShow(callback: Callback<KeyboardInfo>): void;
+    onKeyboardWillHide(callback: Callback<KeyboardInfo>): void;
     onUiExtensionSecureLimitChange(callback: Callback<boolean>): void;
     off<T>(type: string, callback?: Callback<T>): void;
+    offKeyboardWillShow(callback?: Callback<KeyboardInfo>): void;
+    offKeyboardWillHide(callback?: Callback<KeyboardInfo>): void;
     offUiExtensionSecureLimitChange(callback?: Callback<boolean>): void;
     onOcclusionStateChanged(callback: Callback<OcclusionState>): void;
     offOcclusionStateChanged(callback?: Callback<OcclusionState>): void;
@@ -4251,6 +4272,16 @@ function runKeyboardDidShowCallback(cb: object, cbArg: object): void {
 }
 
 function runKeyboardDidHideCallback(cb: object, cbArg: object): void {
+    const func = cb as (cbArg: KeyboardInfo) => void;
+    func(cbArg as KeyboardInfo);
+}
+
+function runKeyboardWillShowCallback(cb: object, cbArg: object): void {
+    const func = cb as (cbArg: KeyboardInfo) => void;
+    func(cbArg as KeyboardInfo);
+}
+
+function runKeyboardWillHideCallback(cb: object, cbArg: object): void {
     const func = cb as (cbArg: KeyboardInfo) => void;
     func(cbArg as KeyboardInfo);
 }
