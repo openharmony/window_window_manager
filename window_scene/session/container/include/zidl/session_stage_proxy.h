@@ -86,6 +86,7 @@ public:
     void UpdateAnimationSpeed(float speed) override;
     void NotifySessionFullScreen(bool fullScreen) override;
     WSError NotifyTargetRotationInfo(OrientationInfo& Info) override;
+    WSError NotifyPageRotationIsIgnored() override;
     RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo) override;
 
     // UIExtension
