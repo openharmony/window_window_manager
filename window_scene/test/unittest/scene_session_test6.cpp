@@ -1627,6 +1627,22 @@ HWTEST_F(SceneSessionTest6, HandleActionUpdateRotationLockChange, TestSize.Level
     ret = sceneSession->HandleActionUpdateRotationLockChange(property, action);
     EXPECT_EQ(ret, WMError::WM_OK);
 }
+
+/**
+ * @tc.name: NotifyPageRotationIsIgnored
+ * @tc.desc: NotifyPageRotationIsIgnored function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, NotifyPageRotationIsIgnored, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyPageRotationIsIgnored";
+    info.bundleName_ = "NotifyPageRotationIsIgnored";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, session);
+    auto ret = session->NotifyPageRotationIsIgnored();
+    EXPECT_EQ(WSError::WS_OK, ret);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

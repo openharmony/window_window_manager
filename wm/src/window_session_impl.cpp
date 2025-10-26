@@ -1274,9 +1274,10 @@ void WindowSessionImpl::UpdateRectForPageRotation(const Rect& wmRect, const Rect
     WindowSizeChangeReason wmReason, const SceneAnimationConfig& config,
     const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
-    handler_->PostImmediateTask(
+    handler_->PostTask(
         [weak = wptr(this), wmReason, wmRect, preRect, config, avoidAreas]() mutable {
             HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::UpdateRectForPageRotation");
+            TLOGI(WmsLogTag::WMS_ROTATION,"wjq windowOrientation");
             auto window = weak.promote();
             if (!window) {
                 return;
@@ -1293,10 +1294,7 @@ void WindowSessionImpl::UpdateRectForPageRotation(const Rect& wmRect, const Rect
             }
             window->UpdateVirtualPixelRatio(display);
             const std::shared_ptr<RSTransaction>& rsTransaction = config.rsTransaction_;
-            if (rsTransaction) {
-                RSTransactionAdapter::FlushImplicitTransaction(window->GetRSUIContext());
-                rsTransaction->Begin();
-            }
+            window->BeginRSTransaction(rsTransaction);
             if ((wmRect != preRect) || (wmReason != window->lastSizeChangeReason_)) {
                 window->NotifySizeChange(wmRect, wmReason);
                 window->lastSizeChangeReason_ = wmReason;
@@ -1320,6 +1318,24 @@ void WindowSessionImpl::UpdateRectForPageRotation(const Rect& wmRect, const Rect
             window->postTaskDone_ = true;
         },
         "WMS_WindowSessionImpl_UpdateRectForPageRotation");
+}
+
+void WindowSessionImpl::BeginRSTransaction(const std::shared_ptr<RSTransaction>& rsTransaction) const
+{
+    if (!rsTransaction) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "rsTransaction is null");
+        return;
+    }
+    auto rsUIContext = GetRSUIContext();
+    if (!rsUIContext) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "RSUIContext is null");
+        return;
+    }
+    auto rsTransHandler = rsUIContext->GetRSTransaction();
+    rsTransaction->SetTransactionHandler(rsTransHandler);
+    RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
+    rsTransaction->Begin();
+    TLOGI(WmsLogTag::WMS_ROTATION, "rsTransaction begin");
 }
 
 void WindowSessionImpl::UpdateCurrentWindowOrientation(DisplayOrientation displayOrientation)
@@ -3076,7 +3092,7 @@ void WindowSessionImpl::SetRequestedOrientation(Orientation orientation, bool ne
     }
     TLOGI(WmsLogTag::WMS_MAIN, "id:%{public}u lastReqOrientation:%{public}u target:%{public}u state:%{public}u",
         GetPersistentId(), property_->GetRequestedOrientation(), orientation, state_);
-    if (!isNeededForciblySetOrientation(orientation)) {
+    if (!isNeededForciblySetOrientation(orientation) && needAnimation) {
         return;
     }
     if (property_->IsSupportRotateFullScreen()) {
@@ -8285,6 +8301,13 @@ void WindowSessionImpl::NotifyClientWindowSize()
         sptr<DisplayInfo> displayInfo = display ? display->GetDisplayInfo() : nullptr;
         UpdateViewportConfig(windowRect, WindowSizeChangeReason::UNDEFINED, nullptr, displayInfo);
     }
+}
+
+WSError WindowSessionImpl::NotifyPageRotationIsIgnored()
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "in");
+    NotifyClientOrientationChange();
+    return WSError::WS_OK;
 }
 
 WSError WindowSessionImpl::SetCurrentRotation(int32_t currentRotation)
