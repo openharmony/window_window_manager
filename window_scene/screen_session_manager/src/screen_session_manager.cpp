@@ -12241,7 +12241,7 @@ DMError ScreenSessionManager::SetVirtualScreenAutoRotation(ScreenId screenId, bo
 void ScreenSessionManager::CheckPidAndClearModifiers(int32_t userId, std::shared_ptr<RSDisplayNode>& displayNode)
 {
     if (displayNode == nullptr) {
-        TLOGE(WmsLogTag::DMS, "diplayNode is null");
+        TLOGE(WmsLogTag::DMS, "diplay node is nullptr");
         return;
     }
     TLOGI(WmsLogTag::DMS, "userId: %{public}d, displayNodeId: %{public}" PRIu64 "", userId, displayNode->GetId());
