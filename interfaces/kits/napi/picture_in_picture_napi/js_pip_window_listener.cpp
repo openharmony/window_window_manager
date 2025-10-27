@@ -183,7 +183,7 @@ void JsPiPWindowListener::OnPipTypeNodeChange(const napi_ref nodeRef)
     }
 }
 
-void JsPiPWindowListener::OnActiveStatusChange(const bool& status)
+void JsPiPWindowListener::OnActiveStatusChange(bool status)
 {
     TLOGI(WmsLogTag::WMS_PIP, "called, status: %{public}u", status);
     auto napiTask = [jsCallback = jsCallBack_, status, env = env_]() {
