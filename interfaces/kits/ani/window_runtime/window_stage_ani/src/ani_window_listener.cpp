@@ -320,6 +320,33 @@ void AniWindowListener::OnKeyboardDidHide(const KeyboardPanelInfo& keyboardPanel
         nullptr, thisListener->aniCallback_, AniWindowUtils::CreateAniKeyboardInfo(env_, keyboardPanelInfo));
 }
 
+void AniWindowListener::OnKeyboardWillShow(const KeyboardAnimationInfo& keyboardAnimationInfo,
+    const KeyboardAnimationCurve& curve)
+{
+    KeyboardWillAnimateWithName(keyboardAnimationInfo, KEYBOARD_WILL_SHOW_CB, curve);
+}
+
+void AniWindowListener::OnKeyboardWillHide(const KeyboardAnimationInfo& keyboardAnimationInfo,
+    const KeyboardAnimationCurve& curve)
+{
+    KeyboardWillAnimateWithName(keyboardAnimationInfo, KEYBOARD_WILL_HIDE_CB, curve);
+}
+
+void AniWindowListener::KeyboardWillAnimateWithName(const KeyboardAnimationInfo& keyboardAnimationInfo,
+    const std::string& callBackName, const KeyboardAnimationCurve& curve)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD,
+        "keyboardAnimationInfo, beginRect: %{public}s, endRect: %{public}s",
+        keyboardAnimationInfo.beginRect.ToString().c_str(), keyboardAnimationInfo.endRect.ToString().c_str());
+    auto thisListener = weakRef_.promote();
+    if (thisListener == nullptr || env_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "this listener or env is nullptr.");
+        return;
+    }
+    AniWindowUtils::CallAniFunctionVoid(env_, "L@ohos/window/window;", nullptr, nullptr,
+        thisListener->aniCallback_, AniWindowUtils::CreateAniAnimationInfo(env_, keyboardAnimationInfo, curve));
+}
+
 void AniWindowListener::OnTouchOutside() const
 {
     TLOGI(WmsLogTag::WMS_EVENT, "[ANI]in");
@@ -694,6 +721,31 @@ void AniWindowListener::OnRectChangeInGlobalDisplay(const Rect& rect, WindowSize
     }
     eventHandler_->PostTask(task, "wms:AniWindowListener::RectChangeInGlobalDisplayCallback", 0,
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
+void AniWindowListener::OnSecureLimitChange(bool isLimit)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "isLimit: %{public}d", isLimit);
+    auto task = [self = weakRef_, isLimit, vm = vm_, where = __func__]() {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || vm == nullptr || thisListener->aniCallback_ == nullptr) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s: this listener, vm or callback is nullptr", where);
+            return;
+        }
+        ani_env* env = nullptr;
+        ani_status ret = vm->GetEnv(ANI_VERSION_1, &env);
+        if (ret != ANI_OK || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "[ANI]get env failed, ret:%{public}u", ret);
+            return;
+        }
+        AniWindowUtils::CallAniFunctionVoid(env, "@ohos.window.window", "runUiExtensionSecureLimitChangeCallback",
+            nullptr, thisListener->aniCallback_, isLimit);
+    };
+    if (!eventHandler_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "get main event handler failed!");
+        return;
+    }
+    eventHandler_->PostTask(task, __func__, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 void AniWindowListener::OnWindowStatusDidChange(WindowStatus status)

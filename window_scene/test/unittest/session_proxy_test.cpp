@@ -2232,7 +2232,7 @@ HWTEST_F(SessionProxyTest, RestartApp, TestSize.Level3)
     std::shared_ptr<AAFwk::Want> want = nullptr;
 
     MockMessageParcel::ClearAllErrorFlag();
-    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->RestartApp(want));
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, sessionProxy->RestartApp(want));
 
     want = std::make_shared<AAFwk::Want>();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);

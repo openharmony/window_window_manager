@@ -1828,6 +1828,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetDefaultDensityEnabled02, TestSize.Level
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetDefaultDensityEnabled02");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->isDefaultDensityEnabled_ = true;
     ASSERT_EQ(true, window->GetDefaultDensityEnabled());
 }
 
@@ -1965,6 +1966,8 @@ HWTEST_F(WindowSceneSessionImplTest2, GetVirtualPixelRatio03, TestSize.Level1)
     sptr<WindowSceneSessionImpl> subWindow = sptr<WindowSceneSessionImpl>::MakeSptr(subOption);
     subWindow->property_->SetParentPersistentId(window->GetWindowId());
 
+    displayInfo->SetDefaultVirtualPixelRatio(defautDensity);
+    displayInfo->SetVirtualPixelRatio(defautDensity);
     WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(
         window->GetWindowName(), std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
     ASSERT_EQ(defautDensity, subWindow->GetVirtualPixelRatio(displayInfo));
@@ -2005,6 +2008,8 @@ HWTEST_F(WindowSceneSessionImplTest2, GetVirtualPixelRatio04, TestSize.Level1)
 
     WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(
         window->GetWindowName(), std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
+    displayInfo->SetDefaultVirtualPixelRatio(defautDensity);
+    displayInfo->SetVirtualPixelRatio(defautDensity);
     ASSERT_EQ(defautDensity, subWindow->GetVirtualPixelRatio(displayInfo));
     WindowSceneSessionImpl::windowSessionMap_.erase(window->GetWindowName());
 }

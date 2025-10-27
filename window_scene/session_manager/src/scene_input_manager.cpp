@@ -568,20 +568,22 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
     focusedSessionId_ = SceneSessionManager::GetInstance().GetFocusedSessionId();
     std::unordered_map<int32_t, MMI::Rect> currWindowDefaultHotArea;
     static std::unordered_map<int32_t, MMI::Rect> lastWindowDefaultHotArea;
+    MMI::WindowInfo focusedWindow;
     for (auto& e : windowInfoList) {
-        idListStream << e.id << "|" << e.flags << "|" << e.zOrder << "|"
+        idListStream << e.id << "|" << e.displayId << "|" << e.flags << "|" << e.zOrder << "|"
                      << e.pid << "|" << e.agentPid << "|" << e.defaultHotAreas.size();
 
         if (e.defaultHotAreas.size() > 0) {
             auto iter = lastWindowDefaultHotArea.find(e.id);
             if (iter == lastWindowDefaultHotArea.end() || iter->second != e.defaultHotAreas[0]) {
-                idListStream << "|" << e.defaultHotAreas[0].x << "|" << e.defaultHotAreas[0].y
-                             << "|" << e.defaultHotAreas[0].width << "|" << e.defaultHotAreas[0].height;
+                idListStream << "|" << e.defaultHotAreas[0].x << "," << e.defaultHotAreas[0].y
+                             << "," << e.defaultHotAreas[0].width << "," << e.defaultHotAreas[0].height;
             }
             currWindowDefaultHotArea.insert({e.id, e.defaultHotAreas[0]});
         }
-        idListStream << ",";
+        idListStream << ";";
         if ((focusedSessionId_ == e.id) && (e.id == e.agentWindowId)) {
+            focusedWindow = e;
             UpdateFocusedSessionId(focusedSessionId_);
         }
         if (e.uiExtentionWindowInfo.size() > 0) {
@@ -591,8 +593,12 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
     }
     lastWindowDefaultHotArea = currWindowDefaultHotArea;
     SingleHandTransform transform = SceneSessionManager::GetInstance().GetNormalSingleHandTransform();
-    idListStream << focusedSessionId_ << "|" << transform.posX << "|" << transform.posY
-        << "|" << transform.scaleX << "|" << transform.scaleY;
+    idListStream << focusedSessionId_ << "|" << transform.posX << "," << transform.posY
+        << "|" << transform.scaleX << "," << transform.scaleY;
+    if (focusedWindow.defaultHotAreas.size() > 0) {
+        idListStream << "|" << focusedWindow.defaultHotAreas[0].x << "," << focusedWindow.defaultHotAreas[0].y << ","
+                     << focusedWindow.defaultHotAreas[0].width << "," << focusedWindow.defaultHotAreas[0].height;
+    }
     std::string idList = idListStream.str();
     if (lastIdList != idList) {
         windowEventID++;

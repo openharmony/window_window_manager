@@ -50,7 +50,7 @@ public:
             ScreenPropertyChangeReason reason, FoldDisplayMode mode) {}
     virtual void OnPowerStatusChange(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason) {}
-    virtual void OnSensorRotationChange(float sensorRotation, ScreenId screenId) {}
+    virtual void OnSensorRotationChange(float sensorRotation, ScreenId screenId, bool isSwitchUser) {}
     virtual void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) {}
     virtual void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) {}
     virtual void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) {}
@@ -310,6 +310,7 @@ public:
     // notify scb
     void SensorRotationChange(Rotation sensorRotation);
     void SensorRotationChange(float sensorRotation);
+    void SensorRotationChange(float sensorRotation, bool isSwitchUser);
     float GetValidSensorRotation();
     void HoverStatusChange(int32_t hoverStatus, bool needRotate = true);
     void CameraBackSelfieChange(bool isCameraBackSelfie);
@@ -402,6 +403,14 @@ public:
 
     void UpdateMirrorWidth(uint32_t mirrorWidth);
     void UpdateMirrorHeight(uint32_t mirrorHeight);
+    void SetCurrentValidHeight(int32_t currentValidHeight);
+    int32_t GetCurrentValidHeight() const;
+    void SetIsPreFakeInUse(bool isPreFakeInUse);
+    bool GetIsPreFakeInUse() const;
+    void SetIsKeyboardOn(bool isKeyboardOn);
+    bool GetIsKeyboardOn() const;
+    void SetFloatRotation(float rotation);
+    void ModifyScreenPropertyWithLock(float rotation, RRect bounds);
     ScreenId GetPhyScreenId();
     void SetPhyScreenId(ScreenId screenId);
 

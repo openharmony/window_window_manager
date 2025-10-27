@@ -396,6 +396,16 @@ bool WindowManagerAgentStub::ReadWindowInfo(MessageParcel& data,
             windowInfo[windowInfoKey] = value;
             break;
         }
+        case WindowInfoKey::WINDOW_GLOBAL_RECT : {
+            Rect globalRect = Rect::EMPTY_RECT;
+            if (!data.ReadInt32(globalRect.posX_) || !data.ReadInt32(globalRect.posY_) ||
+                !data.ReadUint32(globalRect.width_) || !data.ReadUint32(globalRect.height_)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read globalRect failed");
+                return false;
+            }
+            windowInfo[windowInfoKey] = globalRect;
+            break;
+        }
         default : {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "unknown WindowInfoKey");
             return false;

@@ -47,6 +47,7 @@ public:
     virtual WMError UpdateAnimationSpeedWithPid(pid_t pid, float speed) { return WMError::WM_OK; }
     virtual WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo) = 0;
     virtual WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) = 0;
+    virtual WMError GetMainWindowInfoByToken(const sptr<IRemoteObject>& abilityToken, MainWindowInfo& windowInfo) = 0;
     virtual WMError ClearMainSessions(const std::vector<int32_t>& persistentIds,
         std::vector<int32_t>& clearFailedIds) = 0;
     virtual WSError RaiseWindowToTop(int32_t persistentId) { return WSError::WS_OK; }

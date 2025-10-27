@@ -728,12 +728,13 @@ HWTEST_F(WindowSessionTest4, SetRestartAppListener, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     int32_t result = 0;
-    session_->SetRestartAppListener([&result](const SessionInfo& info) {
+    session_->SetRestartAppListener([&result](const SessionInfo& info, int32_t callingPid) {
         result = 1;
     });
     usleep(waitSyncInNs_);
     SessionInfo info;
-    session_->restartAppFunc_(info);
+    int32_t callingPid = 0;
+    session_->restartAppFunc_(info, callingPid);
     ASSERT_EQ(result, 1);
 }
 

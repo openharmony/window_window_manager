@@ -84,6 +84,8 @@ public:
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info);
     void NotifyWindowRectChange(
         const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
+    void NotifyWindowGlobalRectChange(
+        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
     void NotifyWMSWindowDestroyed(const WindowLifeCycleInfo& lifeCycleInfo, void* jsWindowNapiValue);
 
     static inline SingletonDelegator<WindowManager> delegator_;
@@ -123,6 +125,7 @@ public:
     std::vector<sptr<IWindowInfoChangedListener>> windowDisplayIdChangeListeners_;
     sptr<WindowManagerAgent> windowPropertyChangeAgent_;
     std::vector<sptr<IWindowInfoChangedListener>> windowRectChangeListeners_;
+    std::vector<sptr<IWindowInfoChangedListener>> windowGlobalRectChangeListeners_;
     std::vector<sptr<IWindowInfoChangedListener>> windowModeChangeListeners_;
     std::vector<sptr<IWindowInfoChangedListener>> floatingScaleChangeListeners_;
     std::vector<sptr<IWindowInfoChangedListener>> midSceneStatusChangeListeners_;
@@ -527,6 +530,21 @@ void WindowManager::Impl::NotifyWindowRectChange(
         windowRectChangeListeners = windowRectChangeListeners_;
     }
     for (auto &listener : windowRectChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnWindowInfoChanged(windowInfoList);
+        }
+    }
+}
+
+void WindowManager::Impl::NotifyWindowGlobalRectChange(
+    const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList)
+{
+    std::vector<sptr<IWindowInfoChangedListener>> windowGlobalRectChangeListeners;
+    {
+        std::unique_lock<std::shared_mutex> lock(listenerMutex_);
+        windowGlobalRectChangeListeners = windowGlobalRectChangeListeners_;
+    }
+    for (auto &listener : windowGlobalRectChangeListeners) {
         if (listener != nullptr) {
             listener->OnWindowInfoChanged(windowInfoList);
         }
@@ -1087,6 +1105,78 @@ WMError WindowManager::UnregisterRectChangedListener(const sptr<IWindowInfoChang
     WMError ret = WMError::WM_OK;
     if (pImpl_->windowRectChangeListeners_.empty() && pImpl_->windowPropertyChangeAgent_ != nullptr) {
         ret = WindowAdapter::GetInstance(userId_)->UnregisterWindowPropertyChangeAgent(WindowInfoKey::WINDOW_RECT,
+            interestInfo, pImpl_->windowPropertyChangeAgent_);
+        if (ret == WMError::WM_OK) {
+            pImpl_->windowPropertyChangeAgent_ = nullptr;
+        }
+    }
+    return ret;
+}
+
+WMError WindowManager::RegisterGlobalRectChangedListener(const sptr<IWindowInfoChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->windowPropertyChangeAgent_ == nullptr) {
+        pImpl_->windowPropertyChangeAgent_ = new WindowManagerAgent();
+    }
+    uint32_t interestInfo = 0;
+    for (auto windowInfoKey : listener->GetInterestInfo()) {
+        if (interestInfoMap_.find(windowInfoKey) == interestInfoMap_.end()) {
+            interestInfoMap_[windowInfoKey] = 1;
+        } else {
+            interestInfoMap_[windowInfoKey]++;
+        }
+        interestInfo |= static_cast<uint32_t>(windowInfoKey);
+    }
+    ret = WindowAdapter::GetInstance(userId_)->RegisterWindowPropertyChangeAgent(
+        WindowInfoKey::WINDOW_GLOBAL_RECT, interestInfo, pImpl_->windowPropertyChangeAgent_);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "RegisterWindowPropertyChangeAgent failed!");
+        pImpl_->windowPropertyChangeAgent_ = nullptr;
+    } else {
+        auto iter = std::find(pImpl_->windowGlobalRectChangeListeners_.begin(),
+            pImpl_->windowGlobalRectChangeListeners_.end(), listener);
+        if (iter != pImpl_->windowGlobalRectChangeListeners_.end()) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Listener is already registered.");
+            return WMError::WM_OK;
+        }
+        pImpl_->windowGlobalRectChangeListeners_.emplace_back(listener);
+    }
+    return ret;
+}
+
+WMError WindowManager::UnregisterGlobalRectChangedListener(const sptr<IWindowInfoChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+    pImpl_->windowGlobalRectChangeListeners_.erase(std::remove_if(pImpl_->windowGlobalRectChangeListeners_.begin(),
+        pImpl_->windowGlobalRectChangeListeners_.end(),
+        [listener](sptr<IWindowInfoChangedListener> registeredListener) {
+            return registeredListener == listener;
+        }), pImpl_->windowGlobalRectChangeListeners_.end());
+    uint32_t interestInfo = 0;
+    for (auto windowInfoKey : listener->GetInterestInfo()) {
+        if (interestInfoMap_.find(windowInfoKey) == interestInfoMap_.end()) {
+            continue;
+        } else if (interestInfoMap_[windowInfoKey] == 1) {
+            interestInfoMap_.erase(windowInfoKey);
+            interestInfo |= static_cast<uint32_t>(windowInfoKey);
+        } else {
+            interestInfoMap_[windowInfoKey]--;
+        }
+    }
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->windowGlobalRectChangeListeners_.empty() && pImpl_->windowPropertyChangeAgent_ != nullptr) {
+        ret =
+            WindowAdapter::GetInstance(userId_)->UnregisterWindowPropertyChangeAgent(WindowInfoKey::WINDOW_GLOBAL_RECT,
             interestInfo, pImpl_->windowPropertyChangeAgent_);
         if (ret == WMError::WM_OK) {
             pImpl_->windowPropertyChangeAgent_ = nullptr;
@@ -2403,6 +2493,8 @@ WMError WindowManager::ProcessRegisterWindowInfoChangeCallback(WindowInfoKey obs
             return RegisterFloatingScaleChangedListener(listener);
         case WindowInfoKey::MID_SCENE :
             return RegisterMidSceneChangedListener(listener);
+        case WindowInfoKey::WINDOW_GLOBAL_RECT :
+            return RegisterGlobalRectChangedListener(listener);
         default:
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Invalid observedInfo: %{public}d", static_cast<uint32_t>(observedInfo));
             return WMError::WM_ERROR_INVALID_PARAM;
@@ -2425,6 +2517,8 @@ WMError WindowManager::ProcessUnregisterWindowInfoChangeCallback(WindowInfoKey o
             return UnregisterFloatingScaleChangedListener(listener);
         case WindowInfoKey::MID_SCENE :
             return UnregisterMidSceneChangedListener(listener);
+        case WindowInfoKey::WINDOW_GLOBAL_RECT :
+            return UnregisterGlobalRectChangedListener(listener);
         default:
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Invalid observedInfo: %{public}d", static_cast<uint32_t>(observedInfo));
             return WMError::WM_ERROR_INVALID_PARAM;
@@ -2531,6 +2625,9 @@ void WindowManager::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
     }
     if (propertyDirtyFlags & static_cast<int32_t>(WindowInfoKey::MID_SCENE)) {
         pImpl_->NotifyMidSceneStatusChange(windowInfoList);
+    }
+    if (propertyDirtyFlags & static_cast<int32_t>(WindowInfoKey::WINDOW_GLOBAL_RECT)) {
+        pImpl_->NotifyWindowGlobalRectChange(windowInfoList);
     }
 }
 

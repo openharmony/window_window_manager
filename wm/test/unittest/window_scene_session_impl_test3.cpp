@@ -1900,6 +1900,31 @@ HWTEST_F(WindowSceneSessionImplTest3, PreLayoutOnShow, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InitSystemSessionDragEnable_IsSubOrNot
+ * @tc.desc: InitSystemSessionDragEnable Test, is Sub window or not
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, InitSystemSessionDragEnable_IsSubOrNot, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+
+    window->property_->SetDragEnabled(true);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    window->InitSystemSessionDragEnable();
+    ASSERT_EQ(window->property_->GetDragEnabled(), false);
+
+    window->property_->SetDragEnabled(true);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    window->InitSystemSessionDragEnable();
+    ASSERT_EQ(window->property_->GetDragEnabled(), true);
+}
+
+/**
  * @tc.name: InitSystemSessionDragEnable_IsDialogOrNot
  * @tc.desc: InitSystemSessionDragEnable Test, is dialog window or not
  * @tc.type: FUNC

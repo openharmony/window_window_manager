@@ -37,6 +37,8 @@ class AniWindowListener : public IWindowChangeListener,
                         public IOccupiedAreaChangeListener,
                         public IKeyboardDidShowListener,
                         public IKeyboardDidHideListener,
+                        public IKeyboardWillShowListener,
+                        public IKeyboardWillHideListener,
                         public ITouchOutsideListener,
                         public IScreenshotListener,
                         public IDialogTargetTouchListener,
@@ -56,6 +58,7 @@ class AniWindowListener : public IWindowChangeListener,
                         public IDisplayIdChangeListener,
                         public IWindowStageLifeCycle,
                         public IRectChangeInGlobalDisplayListener,
+                        public IExtensionSecureLimitChangeListener,
                         public IWindowStatusDidChangeListener,
                         public IWindowRotationChangeListener,
                         public IAcrossDisplaysChangeListener,
@@ -84,6 +87,10 @@ public:
     void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo) override;
+    void OnKeyboardWillShow(const KeyboardAnimationInfo& keyboardAnimationInfo,
+        const KeyboardAnimationCurve& curve) override;
+    void OnKeyboardWillHide(const KeyboardAnimationInfo& keyboardAnimationInfo,
+        const KeyboardAnimationCurve& curve) override;
     void OnKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo) override;
     void OnTouchOutside() const override;
     void OnDialogTargetTouch() const override;
@@ -109,6 +116,7 @@ public:
     void OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
         RotationChangeResult& rotationChangeResult) override;
     void OnRectChangeInGlobalDisplay(const Rect& rect, WindowSizeChangeReason reason) override;
+    void OnSecureLimitChange(bool isLimit) override;
     void OnWindowStatusDidChange(WindowStatus status) override;
     void OnAcrossDisplaysChanged(bool isAcrossDisplays) override;
     void OnScreenshotAppEvent(ScreenshotEventType type) override;
@@ -121,6 +129,9 @@ public:
 
 private:
     void OnLastStrongRef(const void *) override;
+
+    void KeyboardWillAnimateWithName(const KeyboardAnimationInfo& keyboardAnimationInfo,
+        const std::string& callBackName, const KeyboardAnimationCurve& curve);
 
     Rect currRect_ = {0, 0, 0, 0};
     WindowState state_ {WindowState::STATE_INITIAL};

@@ -39,6 +39,8 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     {KEYBOARD_HEIGHT_CHANGE_CB, RegisterListenerType::KEYBOARD_HEIGHT_CHANGE_CB},
     {KEYBOARD_DID_SHOW_CB, RegisterListenerType::KEYBOARD_DID_SHOW_CB},
     {KEYBOARD_DID_HIDE_CB, RegisterListenerType::KEYBOARD_DID_HIDE_CB},
+    {KEYBOARD_WILL_SHOW_CB, RegisterListenerType::KEYBOARD_WILL_SHOW_CB},
+    {KEYBOARD_WILL_HIDE_CB, RegisterListenerType::KEYBOARD_WILL_HIDE_CB},
     {TOUCH_OUTSIDE_CB, RegisterListenerType::TOUCH_OUTSIDE_CB},
     {SCREENSHOT_EVENT_CB, RegisterListenerType::SCREENSHOT_EVENT_CB},
     {DIALOG_TARGET_TOUCH_CB, RegisterListenerType::DIALOG_TARGET_TOUCH_CB},
@@ -55,6 +57,7 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     {SYSTEM_DENSITY_CHANGE_CB, RegisterListenerType::SYSTEM_DENSITY_CHANGE_CB},
     {WINDOW_ROTATION_CHANGE_CB, RegisterListenerType::WINDOW_ROTATION_CHANGE_CB},
     {RECT_CHANGE_IN_GLOBAL_DISPLAY_CB, RegisterListenerType::RECT_CHANGE_IN_GLOBAL_DISPLAY_CB},
+    {EXTENSION_SECURE_LIMIT_CHANGE_CB, RegisterListenerType::EXTENSION_SECURE_LIMIT_CHANGE_CB},
     {WINDOW_STATUS_DID_CHANGE_CB, RegisterListenerType::WINDOW_STATUS_DID_CHANGE_CB},
     {ACROSS_DISPLAYS_CHANGE_CB, RegisterListenerType::ACROSS_DISPLAYS_CHANGE_CB},
     {SCREENSHOT_APP_EVENT_CB, RegisterListenerType::SCREENSHOT_APP_EVENT_CB},
@@ -253,6 +256,40 @@ WmErrorCode AniWindowRegisterManager::ProcessKeyboardDidHideRegister(sptr<AniWin
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterKeyboardDidHideListener(thisListener));
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterKeyboardDidHideListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode AniWindowRegisterManager::ProcessKeyboardWillShowRegister(sptr<AniWindowListener> listener,
+    const sptr<Window>& window, bool isRegister, ani_env* env)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI]Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IKeyboardWillShowListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterKeyboardWillShowListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterKeyboardWillShowListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode AniWindowRegisterManager::ProcessKeyboardWillHideRegister(sptr<AniWindowListener> listener,
+    const sptr<Window>& window, bool isRegister, ani_env* env)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI]Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IKeyboardWillHideListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterKeyboardWillHideListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterKeyboardWillHideListener(thisListener));
     }
     return ret;
 }
@@ -548,6 +585,10 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowListener(RegisterListenerType
             return ProcessKeyboardDidShowRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::KEYBOARD_DID_HIDE_CB):
             return ProcessKeyboardDidHideRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::KEYBOARD_WILL_SHOW_CB):
+            return ProcessKeyboardWillShowRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::KEYBOARD_WILL_HIDE_CB):
+            return ProcessKeyboardWillHideRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::TOUCH_OUTSIDE_CB):
             return ProcessTouchOutsideRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::DIALOG_TARGET_TOUCH_CB):
@@ -580,6 +621,8 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowListener(RegisterListenerType
             return ProcessWindowRotationChangeRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::RECT_CHANGE_IN_GLOBAL_DISPLAY_CB):
             return ProcessRectChangeInGlobalDisplayRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::EXTENSION_SECURE_LIMIT_CHANGE_CB):
+            return ProcessExtensionSecureLimitChangeRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::WINDOW_STATUS_DID_CHANGE_CB):
             return ProcessWindowStatusDidChangeRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::ACROSS_DISPLAYS_CHANGE_CB):
@@ -806,6 +849,22 @@ WmErrorCode AniWindowRegisterManager::ProcessRectChangeInGlobalDisplayRegister(c
         ret = window->RegisterRectChangeInGlobalDisplayListener(thisListener);
     } else {
         ret = window->UnregisterRectChangeInGlobalDisplayListener(thisListener);
+    }
+    return AniWindowUtils::ToErrorCode(ret);
+}
+
+WmErrorCode AniWindowRegisterManager::ProcessExtensionSecureLimitChangeRegister(const sptr<AniWindowListener>& listener,
+    const sptr<Window>& window, bool isRegister, ani_env* env)
+{
+    if (window == nullptr || listener == nullptr) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IExtensionSecureLimitChangeListener> thisListener(listener);
+    WMError ret = WMError::WM_OK;
+    if (isRegister) {
+        ret = window->RegisterExtensionSecureLimitChangeListener(thisListener);
+    } else {
+        ret = window->UnregisterExtensionSecureLimitChangeListener(thisListener);
     }
     return AniWindowUtils::ToErrorCode(ret);
 }

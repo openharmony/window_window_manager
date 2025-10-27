@@ -331,6 +331,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyIsFullScreenInForceSplitMode(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RESTART_APP):
             return HandleRestartApp(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_COMMAND_EVENT):
+            return HandleSendCommonEvent(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -867,6 +869,10 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         return ERR_INVALID_DATA;
     }
     abilitySessionInfo->windowCreateParams.reset(data.ReadParcelable<WindowCreateParams>());
+    if (!data.ReadBool(abilitySessionInfo->isPrelaunch)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read isPrelaunch failed.");
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = PendingSessionActivation(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -2427,6 +2433,55 @@ int SessionStub::HandleRestartApp(MessageParcel& data, MessageParcel& reply)
     WSError errCode = RestartApp(want);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_LIFE, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSendCommonEvent(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t command = 0;
+    if (!data.ReadInt32(command)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Read size failed");
+        return ERR_INVALID_DATA;
+    }
+
+    std::vector<int32_t> parameters;
+    int32_t length = 0;
+    if (!data.ReadInt32(length)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Read size failed");
+        return ERR_INVALID_DATA;
+    }
+    if (length > COMMON_EVENT_COMMAND_MAX_LENGTH || length < 0) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Out of range.");
+        return ERR_INVALID_DATA;
+    }
+    parameters.emplace_back(length);
+
+    int32_t info = 0;
+    for (int i = 0; i < length; i++) {
+        if (!data.ReadInt32(info)) {
+            TLOGE(WmsLogTag::WMS_EVENT, "Read size failed");
+            return ERR_INVALID_DATA;
+        }
+        parameters.emplace_back(info);
+    }
+
+    WMError ret = WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    switch (command) {
+        case static_cast<uint32_t>(CommonEventCommand::LOCK_CURSOR):
+            ret = LockCursor(parameters);
+            break;
+        case static_cast<uint32_t>(CommonEventCommand::UNLOCK_CURSOR):
+            ret = UnlockCursor(parameters);
+            break;
+        default:
+            ret = WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+            break;
+    }
+
+    if (!reply.WriteUint32(static_cast<uint32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Write errCode failed.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
