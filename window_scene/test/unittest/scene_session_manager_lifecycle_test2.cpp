@@ -297,8 +297,8 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, NotifyWindowStateErrorFromMMI, TestS
 {
     ssm_->sceneSessionMap_.clear();
     SessionInfo info;
-    info.abilityName_ = "SceneSessionManagerLifecycleTest2";
-    info.bundleName_ = "NotifyWindowStateErrorFromMMI";
+    info.abilityName_ = "testAbilityName";
+    info.bundleName_ = "testBundleName";
     info.screenId_ = 0;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
@@ -306,14 +306,17 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, NotifyWindowStateErrorFromMMI, TestS
     ASSERT_NE(nullptr, property);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sceneSession->property_ = property;
+    sceneSession->SetScbCoreEnabled(true);
     sceneSession->SetCallingPid(100);
 
     SessionInfo info1;
-    info1.abilityName_ = "SceneSessionManagerLifecycleTest2";
-    info1.bundleName_ = "NotifyWindowStateErrorFromMMI1";
+    info1.abilityName_ = "testAbilityName1";
+    info1.bundleName_ = "testBundleName1";
     info1.screenId_ = 0;
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
     ASSERT_NE(nullptr, sceneSession1);
+    sceneSession1->property_ = property;
+    sceneSession1->SetScbCoreEnabled(true);
     sceneSession1->SetCallingPid(200);
 
     SessionInfo info2;
@@ -332,8 +335,13 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, NotifyWindowStateErrorFromMMI, TestS
     ssm_->sceneSessionMap_.insert({ 10087, sceneSession1 });
     ssm_->sceneSessionMap_.insert({ 10088, sceneSession2 });
     ssm_->sceneSessionMap_.insert({ 10089, nullptr });
+
     ssm_->NotifyWindowStateErrorFromMMI(-1, 10086);
+
     ssm_->NotifyWindowStateErrorFromMMI(100, 10086);
+    ssm_->NotifyWindowStateErrorFromMMI(100, 10088);
+    
+    ssm_->NotifyWindowStateErrorFromMMI(201, 10087);
 }
 
 /**

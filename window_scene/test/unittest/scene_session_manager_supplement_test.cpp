@@ -269,6 +269,28 @@ HWTEST_F(SceneSessionManagerSupplementTest, RequestSceneSessionActivationInnerTe
 }
 
 /**
+ * @tc.name: RequestSceneSessionActivationInnerTest_02
+ * @tc.desc: SceneSessionManagerSupplementTest RequestSceneSessionActivationInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, RequestSceneSessionActivationInnerTest_02,
+        TestSize.Level1)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "testBundleName";
+    sessionInfo.abilityName_ = "testAbilityName";
+    sessionInfo.ancoSceneState = AncoSceneState::NOTIFY_START_FAILED;
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->SetScbCoreEnabled(true);
+    auto ret = ssm_->RequestSceneSessionActivationInner(sceneSession, true);
+    ASSERT_EQ(ret, WSError::WS_ERROR_PRE_HANDLE_COLLABORATOR_FAILED);
+}
+
+/**
  * @tc.name: NotifyCollaboratorAfterStart
  * @tc.desc: SceneSessionManagerSupplementTest NotifyCollaboratorAfterStart
  * @tc.type: FUNC
