@@ -577,6 +577,8 @@ public:
     bool IsUserPageOrientation(Orientation orientation) const;
     bool isNeededForciblySetOrientation(Orientation orientation) override;
     WMError SetFollowScreenChange(bool isFollowScreenChange) override;
+    void BeginRSTransaction(const std::shared_ptr<RSTransaction>& rsTransaction) const;
+    WSError NotifyPageRotationIsIgnored() override;
 
     /*
      * UIExtension

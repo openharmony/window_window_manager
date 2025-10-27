@@ -276,6 +276,7 @@ public:
     virtual void NotifyKeyboardAnimationWillBegin(const KeyboardAnimationInfo& keyboardAnimationInfo,
         const std::shared_ptr<RSTransaction>& rsTransaction) {};
     virtual WSError NotifyTargetRotationInfo(OrientationInfo& info) { return WSError::WS_DO_NOTHING; }
+    virtual WSError NotifyPageRotationIsIgnored() { return WSError::WS_DO_NOTHING; }
     virtual RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo)
     {
         return { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0, } };

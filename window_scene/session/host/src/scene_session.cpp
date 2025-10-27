@@ -9042,6 +9042,25 @@ WSError SceneSession::NotifyRotationProperty(uint32_t rotation, uint32_t width, 
     return WSError::WS_OK;
 }
 
+WSError SceneSession::NotifyPageRotationIsIgnored()
+{
+    PostTask(
+        [weakThis = wptr(this), where = __func__] {
+            auto session = weakThis.promote();
+            if (!session) {
+                TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s session is null", where);
+                return;
+            }
+            if (!session->sessionStage_) {
+                TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s sessionStage is null", where);
+                return;
+            }
+            session->sessionStage_->NotifyPageRotationIsIgnored();
+        },
+        __func__);
+    return WSError::WS_OK;
+}
+
 WSError SceneSession::ConvertRotationToOrientation(uint32_t rotation,
     uint32_t width, uint32_t height, uint32_t& orientation)
 {
