@@ -179,6 +179,7 @@ enum AncoSceneState: int32_t {
     NOTIFY_LOAD,
     NOTIFY_UPDATE,
     NOTIFY_FOREGROUND,
+    NOTIFY_START_FAILED,
 };
 
 /**
