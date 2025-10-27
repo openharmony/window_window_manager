@@ -2035,7 +2035,7 @@ HWTEST_F(SceneSessionManagerTest6, GetSurfaceNodeldsFromMissionIds01, TestSize.L
     // 测试转换闪控球为空的流程的流程
     std::vector<uint64_t> surfaceNodesListFBAndAnother;
     std::vector<uint64_t> missionIdFBAnother={1, 5};
-    error = ssm_->GetSurfaceNodeIdsFromMissionIds(missionIdFBAndAnother, surfaceNodesListFBAndAnother, 
+    error = ssm_->GetSurfaceNodeIdsFromMissionIds(missionIdFBAndAnother, surfaceNodesListFBAndAnother,
         needWindowTypeList, true);
     EXPECT_EQ(error, WMError::WM_ERROR_INVALID_WINDOW);
     error = ssm_->GetSurfaceNodeIdsFromMissionIds(missionIdFBAndAnother, surfaceNodesListFBAndAnother,
