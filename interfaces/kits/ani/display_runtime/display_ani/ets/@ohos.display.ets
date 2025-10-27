@@ -606,6 +606,10 @@ export function onCaptureStatusChange(callback: Callback<boolean>): void {
     syncOn('captureStatusChange', callback as object, displayMgrRef);
 }
 
+export function onFoldDisplayModeChange(callback: Callback<FoldDisplayMode>): void {
+    syncOn('foldDisplayModeChange', callback as object, displayMgrRef);
+}
+
 export native function syncOn(type: string, callback: object, nativeObj: long): void;
 
 export function offAdd(callback?: Callback<long>): void {
@@ -634,6 +638,10 @@ export function offFoldAngleChange(callback?: Callback<Array<double>>): void {
 
 export function offCaptureStatusChange(callback?: Callback<boolean>): void {
     syncOff('captureStatusChange', displayMgrRef, callback);
+}
+
+export function offFoldDisplayModeChange(callback?: Callback<FoldDisplayMode>): void {
+    syncOff('foldDisplayModeChange', displayMgrRef, callback);
 }
 
 export native function syncOff(type: string, nativeObj: long, callback?: object) : void;

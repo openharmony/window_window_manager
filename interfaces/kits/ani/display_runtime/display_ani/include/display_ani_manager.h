@@ -63,7 +63,6 @@ private:
     void OnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnSetFoldDisplayModeReasonAni(ani_env* env, ani_int mode, ani_string reason);
-    void OnSetFoldDisplayModeAni(ani_env* env, ani_int mode);
     void OnGetCurrentFoldCreaseRegion(ani_env* env, ani_object obj);
     void OnGetAllDisplayPhysicalResolution(ani_env* env, ani_object arrayObj);
     void OnSetFoldStatusLockedAni(ani_env* env, ani_boolean locked);
