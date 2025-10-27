@@ -1140,9 +1140,6 @@ ErrCode MockSessionManagerService::GetSceneSessionManagerByUserIdImpl(int32_t us
             return err;
         }
     }
-    if (userId == INVALID_USER_ID || userId == SYSTEM_USERID) {
-        userId = defaultWMSUserId;
-    }
     auto sceneSessionManagerProxyObject = GetSceneSessionManagerInner(userId, isLite);
     if (sceneSessionManagerProxyObject == nullptr) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "smsProxy null");
