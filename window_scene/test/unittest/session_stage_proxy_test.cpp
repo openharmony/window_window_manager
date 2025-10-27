@@ -947,6 +947,44 @@ HWTEST_F(SessionStageProxyTest, NotifyTargetRotationInfo, Function | SmallTest |
 }
 
 /**
+ * @tc.name: NotifyPageRotationIsIgnored
+ * @tc.desc: test function : NotifyPageRotationIsIgnored
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyPageRotationIsIgnored, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionStageProxyTest: NotifyPageRotationIsIgnored start";
+    MockMessageParcel::ClearAllErrorFlag();
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SessionStageProxy> sessionStageProxy = sptr<SessionStageProxy>::MakeSptr(remoteMocker);
+
+    // Case 1: Failed to write interface token
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    WSError errCode = sessionStageProxy->NotifyPageRotationIsIgnored();
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+   // Case 2: remote is nullptr
+    sptr<SessionStageProxy> nullProxy = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    errCode = nullProxy->NotifyPageRotationIsIgnored();
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+
+    // Case 3: Failed to send request
+    remoteMocker->SetRequestResult(ERR_TRANSACTION_FAILED);
+    errCode = sessionStageProxy->NotifyPageRotationIsIgnored();
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    // Case 4: Success
+    errCode = sessionStageProxy->NotifyPageRotationIsIgnored();
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+    EXPECT_EQ(errCode, WSError::WS_OK);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    GTEST_LOG_(INFO) << "SessionStageProxyTest: NotifyPageRotationIsIgnored end";
+}
+
+/**
  * @tc.name: SetCurrentRotation
  * @tc.desc: test function : SetCurrentRotation
  * @tc.type: FUNC
