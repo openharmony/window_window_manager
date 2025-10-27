@@ -1901,6 +1901,7 @@ HWTEST_F(SceneSessionManagerTest5, GetNextFocusableSessionWhenFloatWindowExist, 
     EXPECT_EQ(result, nullptr);
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     ssm_->systemConfig_.freeMultiWindowEnable_ = true;
+    ssm_->systemConfig_.freeMultiWindowSupport_ = true;
     result = ssm_->GetNextFocusableSessionWhenFloatWindowExist(DEFAULT_DISPLAY_ID, sceneSession->GetPersistentId());
     EXPECT_EQ(result, nullptr);
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
@@ -1920,6 +1921,7 @@ HWTEST_F(SceneSessionManagerTest5, GetNextFocusableSessionWhenFloatWindowExist, 
     EXPECT_EQ(result, nullptr);
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sceneSession->property_->windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    ssm_->systemConfig_.freeMultiWindowEnable_ = false;
     result = ssm_->GetNextFocusableSessionWhenFloatWindowExist(DEFAULT_DISPLAY_ID, sceneSession->GetPersistentId());
     ASSERT_NE(result, nullptr);
     EXPECT_EQ(result->GetPersistentId(), sceneSession1->GetPersistentId());
