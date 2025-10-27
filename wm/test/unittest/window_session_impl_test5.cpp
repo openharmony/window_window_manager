@@ -30,6 +30,7 @@
 #include "window_helper.h"
 #include "window_session_impl.h"
 #include "wm_common.h"
+#include "window_manager_hilog.h"
 #include <transaction/rs_transaction.h>
 
 using namespace testing;
@@ -37,6 +38,14 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_errLog;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        g_errLog += msg;
+    }
+}
 static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 class WindowSessionImplTest5 : public testing::Test {
 public:
@@ -854,6 +863,60 @@ HWTEST_F(WindowSessionImplTest5, ConvertInvalidOrientation, Function | SmallTest
     window->SetRequestedOrientation(Orientation::INVALID, false);
     EXPECT_EQ(window->ConvertInvalidOrientation(), Orientation::USER_PAGE_ROTATION_PORTRAIT);
     GTEST_LOG_(INFO) << "WindowSessionImplTest5: ConvertInvalidOrientation end";
+}
+
+/**
+ * @tc.name: NotifyPageRotationIsIgnored()
+ * @tc.desc: NotifyPageRotationIsIgnored()
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, NotifyPageRotationIsIgnored, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: NotifyPageRotationIsIgnored start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetDisplayId(0);
+    option->SetWindowName("NotifyPageRotationIsIgnored");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_CREATED;
+
+    EXPECT_EQ(window->NotifyPageRotationIsIgnored(), WSError::WS_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: NotifyPageRotationIsIgnored end";
+}
+
+/**
+ * @tc.name: BeginRSTransaction()
+ * @tc.desc: BeginRSTransaction()
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, BeginRSTransaction, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: BeginRSTransaction start";
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetDisplayId(0);
+    option->SetWindowName("NotifyPageRotationIsIgnored");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_CREATED;
+
+    std::shared_ptr<RSTransaction> rsTransaction = nullptr;
+    window->BeginRSTransaction(rsTransaction);
+    EXPECT_TRUE(g_errLog.find("rsTransaction is null") != std::string::npos);
+    
+    std::shared_ptr<RSTransaction> rsTransaction1 = std::make_shared<RSTransaction>();
+    rsTransaction1->syncId_ = 1;
+    rsTransaction1->isOpenSyncTransaction_ = true;
+    window->BeginRSTransaction(rsTransaction1);
+    EXPECT_TRUE(g_errLog.find("rsTransaction begin") != std::string::npos);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: BeginRSTransaction end";
 }
 
 /**

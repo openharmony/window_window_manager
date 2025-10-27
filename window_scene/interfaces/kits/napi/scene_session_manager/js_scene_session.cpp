@@ -570,6 +570,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "addSidebarBlur", moduleName, JsSceneSession::AddSidebarBlur);
     BindNativeFunction(env, objValue, "setSidebarBlur", moduleName, JsSceneSession::SetSidebarBlur);
     BindNativeFunction(env, objValue, "notifyRotationProperty", moduleName, JsSceneSession::NotifyRotationProperty);
+    BindNativeFunction(env, objValue, "notifyPageRotationIsIgnored", moduleName,
+        JsSceneSession::NotifyPageRotationIsIgnored);
     BindNativeFunction(env, objValue, "setCurrentRotation", moduleName, JsSceneSession::SetCurrentRotation);
     BindNativeFunction(env, objValue, "setSidebarBlurMaximize", moduleName, JsSceneSession::SetSidebarBlurMaximize);
     BindNativeFunction(env, objValue, "toggleCompatibleMode", moduleName, JsSceneSession::ToggleCompatibleMode);
@@ -2866,6 +2868,13 @@ napi_value JsSceneSession::NotifyRotationProperty(napi_env env, napi_callback_in
     TLOGD(WmsLogTag::WMS_ROTATION, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnNotifyRotationProperty(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::NotifyPageRotationIsIgnored(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnNotifyPageRotationIsIgnored(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetSnapshotSkip(napi_env env, napi_callback_info info)
@@ -7636,6 +7645,17 @@ napi_value JsSceneSession::OnNotifyRotationProperty(napi_env env, napi_callback_
         "call NotifyRotationProperty rotation:%{public}d, width=%{public}d, height=%{pubilc}d",
         rotation, width, height);
     session->NotifyRotationProperty(rotation, width, height);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnNotifyPageRotationIsIgnored(napi_env env, napi_callback_info info)
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->NotifyPageRotationIsIgnored();
     return NapiGetUndefined(env);
 }
 
