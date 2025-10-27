@@ -51,6 +51,11 @@ void PipOption::SetNavigationId(const std::string& navigationId)
     navigationId_ = navigationId;
 }
 
+void PipOption::SetHandleId(const int32_t handleId)
+{
+    handleId_ = handleId;
+}
+
 void PipOption::SetPipTemplate(uint32_t templateType)
 {
     templateType_ = templateType;
@@ -136,6 +141,11 @@ void* PipOption::GetContext() const
 std::string PipOption::GetNavigationId() const
 {
     return navigationId_;
+}
+
+int32_t PipOption::GetHandleId() const
+{
+    return handleId_;
 }
 
 uint32_t PipOption::GetPipTemplate()

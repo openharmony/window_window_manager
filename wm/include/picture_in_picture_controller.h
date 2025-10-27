@@ -53,6 +53,7 @@ protected:
 
 private:
     void DeletePIPMode();
+    virtual NavigationController* GetNavigationController(const std::string& navId);
 };
 } // namespace Rosen
 } // namespace OHOS
