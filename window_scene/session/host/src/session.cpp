@@ -61,6 +61,7 @@ constexpr int64_t STATE_DETECT_DELAYTIME = 3 * 1000;
 constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
 constexpr int32_t TIMES_TO_WAIT_FOR_VSYNC_ONECE = 1;
 constexpr int32_t TIMES_TO_WAIT_FOR_VSYNC_TWICE = 2;
+
 const std::map<SessionState, bool> ATTACH_MAP = {
     { SessionState::STATE_DISCONNECT, false },
     { SessionState::STATE_CONNECT, false },
@@ -402,6 +403,30 @@ void Session::SetSessionInfoExpandInputFlag(uint32_t expandInputFlag)
 uint32_t Session::GetSessionInfoExpandInputFlag() const
 {
     return sessionInfo_.expandInputFlag_;
+}
+
+void Session::SetSessionInfoAdvancedFeatureFlag(uint32_t bitPosition, bool value)
+{
+    if (bitPosition >= ADVANCED_FEATURE_BIT_MAX) {
+        TLOGE(WmsLogTag::WMS_EVENT, "id:%{public}d, bitPosition:%{public}u", GetPersistentId(), bitPosition);
+        return;
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+        sessionInfo_.advancedFeatureFlag_.set(bitPosition, value);
+    }
+}
+
+bool Session::GetSessionInfoAdvancedFeatureFlag(uint32_t bitPosition)
+{
+    if (bitPosition >= ADVANCED_FEATURE_BIT_MAX) {
+        TLOGE(WmsLogTag::WMS_EVENT, "id:%{public}d, bitPosition:%{public}u", GetPersistentId(), bitPosition);
+        return false;
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+        return sessionInfo_.advancedFeatureFlag_.test(bitPosition);
+    }
 }
 
 void Session::SetSessionInfoWindowMode(int32_t windowMode)
@@ -1396,6 +1421,20 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     Rect rect = {winRect.posX_, winRect.posY_, static_cast<uint32_t>(winRect.width_),
         static_cast<uint32_t>(winRect.height_)};
     property->SetWindowRect(rect);
+    // Check if the current session is prelaunch and set the session rect based on the screen size.
+    if (GetSessionInfo().isPrelaunch_) {
+        auto displayId = property->GetDisplayId();
+        const std::map<ScreenId, ScreenProperty>& screenProperties =
+            Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+        if (screenProperties.find(displayId) != screenProperties.end()) {
+            auto screenProperty = screenProperties.at(displayId);
+            int32_t width = screenProperty.GetBounds().rect_.GetWidth();
+            int32_t height = screenProperty.GetBounds().rect_.GetHeight();
+            TLOGI(WmsLogTag::WMS_MAIN, "update prelaunch rect[0, 0, %{public}d, %{public}d] "
+                "when session connect", width, height);
+            SetSessionRect({0, 0, width, height});
+        }
+    }
     property->SetPersistentId(GetPersistentId());
     property->SetAppIndex(GetSessionInfo().appIndex_);
     property->SetFullScreenStart(GetSessionInfo().fullScreenStart_);
@@ -3844,6 +3883,7 @@ void Session::SetSessionGlobalRect(const WSRect& rect)
 {
     if (layoutController_->SetSessionGlobalRect(rect)) {
         dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::GLOBAL_RECT);
+        AddPropertyDirtyFlags(static_cast<uint32_t>(SessionPropertyFlag::WINDOW_GLOBAL_RECT));
     }
 }
 
@@ -3903,6 +3943,26 @@ void Session::SetRestartApp(bool restartApp)
 bool Session::GetRestartApp() const
 {
     return sessionInfo_.isRestartApp_;
+}
+
+void Session::SetRestartInSameProcess(bool restartInSameProcess)
+{
+    sessionInfo_.isRestartInSameProcess_ = restartInSameProcess;
+}
+
+bool Session::GetRestartInSameProcess() const
+{
+    return sessionInfo_.isRestartInSameProcess_;
+}
+
+void Session::SetRestartCallerPersistentId(int32_t restartCallerPersistentId)
+{
+    sessionInfo_.restartCallerPersistentId_ = restartCallerPersistentId;
+}
+
+int32_t Session::GetRestartCallerPersistentId() const
+{
+    return sessionInfo_.restartCallerPersistentId_;
 }
 
 WSError Session::SetLeashWindowAlpha(bool hidingStartWindow)

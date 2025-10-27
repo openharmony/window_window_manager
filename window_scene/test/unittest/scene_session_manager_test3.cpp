@@ -737,10 +737,10 @@ HWTEST_F(SceneSessionManagerTest3, SetAbilitySessionInfo3, TestSize.Level1)
     ASSERT_NE(nullptr, createdSceneSession);
 
     sptr<OHOS::AAFwk::SessionInfo> ret = ssm_->SetAbilitySessionInfo(sceneSession);
-    wASSERT_NE(nullptr, ret);
+    ASSERT_NE(nullptr, ret);
 
     ret = ssm_->SetAbilitySessionInfo(createdSceneSession);
-    wASSERT_NE(nullptr, ret);
+    ASSERT_NE(nullptr, ret);
 }
  
 /**

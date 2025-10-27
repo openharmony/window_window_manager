@@ -67,11 +67,11 @@ public:
     virtual void OnScreenConnectionChanged(SessionOption option, ScreenEvent screenEvent) = 0;
     virtual void OnPropertyChanged(ScreenId screenId,
         const ScreenProperty& property, ScreenPropertyChangeReason reason) = 0;
-    virtual void OnFoldPropertyChanged(ScreenId screenId, const ScreenProperty& property,
-            ScreenPropertyChangeReason reason, FoldDisplayMode displayMode) = 0;
+    virtual bool OnFoldPropertyChange(ScreenId screenId, const ScreenProperty& property,
+            ScreenPropertyChangeReason reason, FoldDisplayMode displayMode, ScreenProperty& midProperty) = 0;
     virtual void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason) = 0;
-    virtual void OnSensorRotationChanged(ScreenId screenId, float sensorRotation) = 0;
+    virtual void OnSensorRotationChanged(ScreenId screenId, float sensorRotation, bool isSwitchUser) = 0;
     virtual void OnHoverStatusChanged(ScreenId screenId, int32_t hoverStatus, bool needRotate = true) = 0;
     virtual void OnScreenOrientationChanged(ScreenId screenId, float screenOrientation) = 0;
     virtual void OnScreenRotationLockedChanged(ScreenId screenId, bool isLocked) = 0;

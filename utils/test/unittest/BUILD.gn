@@ -40,6 +40,7 @@ group("unittest") {
     ":utils_wm_math_test",
     ":utils_wm_occlusion_region_test",
     ":wm_window_frame_trace_impl_test",
+    ":utils_dms_global_mutex_test",
   ]
   if (!window_manager_use_sceneboard) {
     deps += [
@@ -316,6 +317,16 @@ ohos_unittest("utils_display_physical_resolution_test") {
   module_out_path = module_out_path
 
   sources = [ "display_physical_resolution_test.cpp" ]
+
+  deps = [ ":utils_unittest_common" ]
+
+  external_deps = test_external_deps
+}
+
+ohos_unittest("utils_dms_global_mutex_test") {
+  module_out_path = module_out_path
+
+  sources = [ "dms_global_mutex_test.cpp" ]
 
   deps = [ ":utils_unittest_common" ]
 

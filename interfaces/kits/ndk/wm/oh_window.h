@@ -343,7 +343,41 @@ int32_t OH_WindowManager_GetMainWindowSnapshot(int32_t* windowIdList, size_t win
  * @since 21
  */
 void OH_WindowManager_ReleaseMainWindowSnapshot(const OH_PixelmapNative* snapshotPixelMapList);
-    
+
+/**
+ * @brief Lock the mouse cursor restricting it to a specified window area, and also control whether the cursor follows
+ *        movement. Only supported by the focus window; the lock is automatically released when the window loses focus.
+ *
+ * @permission ohos.permission.LOCK_WINDOW_CURSOR
+ * @param windowId WindowId when window is created.
+ * @param isCursorFollowMovement Set mouse cursor lock mode.
+ *        If true:the cursor follow the mouse movement.
+ *        If false:the cursor does not follow the mouse.
+ * @return Returns the status code of the execution.
+ *         {@link WS_OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_NO_PERMISSION} permission verification failed.
+ *         {@link WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED} capability not supported.
+ *         {@link WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL} this window state is abnormal.
+ *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL} the window manager service works abnormally.
+ * @since 22
+ */
+int32_t OH_WindowManager_LockCursor(int32_t windowId, bool isCursorFollowMovement);
+
+/**
+ * @brief Clear the window mouse cursor status. Revert to mouse cursor free movement mode.
+ *
+ * @permission ohos.permission.LOCK_WINDOW_CURSOR
+ * @param windowId WindowId when window is created.
+ * @return Returns the status code of the execution.
+ *         {@link WS_OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_NO_PERMISSION} permission verification failed.
+ *         {@link WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED} capability not supported.
+ *         {@link WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL} this window state is abnormal.
+ *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL} the window manager service works abnormally.
+ * @since 22
+ */
+int32_t OH_WindowManager_UnlockCursor(int32_t windowId);
+
 #ifdef __cplusplus
 }
 #endif

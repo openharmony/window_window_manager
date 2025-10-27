@@ -32,6 +32,8 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
+constexpr uint32_t ANIMATION_FOUR_PARAMS_SIZE = 4;
+const std::string INTERPOLATINGSPRING  = "interpolatingSpring";
 
 std::mutex g_aniCreatorsMutex;
 std::unordered_map<std::string, std::pair<ani_class, std::unordered_map<std::string, ani_method>>> globalAniCreators;
@@ -50,6 +52,36 @@ std::string GetHexColor(uint32_t color)
     return finalColor;
 }
 }
+
+ani_ref CreateDouble(ani_env* env, double value)
+{
+    static constexpr const char* className = "std.core.Double";
+    ani_class doubleCls {};
+    ani_status ret = env->FindClass(className, &doubleCls);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] Find class double failed. %{public}d", ret);
+        ani_ref undefinedRef;
+        env->GetUndefined(&undefinedRef);
+        return undefinedRef;
+    }
+    ani_method ctor {};
+    ret = env->Class_FindMethod(doubleCls, "<ctor>", "d:", &ctor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] Find ctor method failed. %{public}d", ret);
+        ani_ref undefinedRef;
+        env->GetUndefined(&undefinedRef);
+        return undefinedRef;
+    }
+    ani_object obj {};
+    if (env->Object_New(doubleCls, ctor, &obj, static_cast<ani_double>(value)) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] new double object failed");
+        ani_ref undefinedRef;
+        env->GetUndefined(&undefinedRef);
+        return undefinedRef;
+    }
+    return obj;
+}
+
 ani_status AniWindowUtils::GetStdString(ani_env *env, ani_string ani_str, std::string &result)
 {
     ani_size strSize;
@@ -712,6 +744,132 @@ ani_object AniWindowUtils::CreateAniKeyboardInfo(ani_env* env, const KeyboardPan
         CreateAniRect(env, keyboardPanelInfo.endRect_));
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to set endRect");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    return keyboardInfo;
+}
+
+ani_object AniWindowUtils::CreateAniAnimationConfig(ani_env* env, const KeyboardAnimationCurve& curve)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "[ANI]");
+    ani_class aniClass;
+    ani_status ret = env->FindClass("L@ohos/window/window/WindowAnimationConfigInternal;", &aniClass);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_method aniCtor;
+    ret = env->Class_FindMethod(aniClass, "<ctor>", nullptr, &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object aniConfig;
+    ret = env->Object_New(aniClass, aniCtor, &aniConfig);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] fail to new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    if (curve.curveType_ == INTERPOLATINGSPRING) {
+        ani_enum aniAnimationCurveType;
+        ret = env->FindEnum("@ohos.window.window.WindowAnimationCurve", &aniAnimationCurveType);
+        if (ret != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] Find enum animationType failed");
+            return AniWindowUtils::CreateAniUndefined(env);
+        }
+        ani_enum_item animationCurveTypeItem;
+        std::string itemName = curve.curveType_;
+        ret = env->Enum_GetEnumItemByName(aniAnimationCurveType, itemName.c_str(), &animationCurveTypeItem);
+        if (ret != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] Get enum item %{public}s failed. ret: %{public}d",
+                itemName.c_str(), ret);
+            return AniWindowUtils::CreateAniUndefined(env);
+        }
+        ret = CallAniMethodVoid(env, aniConfig, aniClass, "<set>curve", nullptr, animationCurveTypeItem);
+        if (ret != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to set curve");
+            return AniWindowUtils::CreateAniUndefined(env);
+        }
+    }
+
+    ret = CallAniMethodVoid(env, aniConfig, aniClass, "<set>duration", nullptr,
+        ani_int(curve.duration_));
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to set duration");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    auto paramSize = curve.curveParams_.size();
+    if (paramSize == ANIMATION_FOUR_PARAMS_SIZE) {
+        ani_array_ref params = nullptr;
+        if (env->Array_New_Ref(aniClass, ANIMATION_PARAM_SIZE, static_cast<ani_ref>(CreateAniUndefined(env)),
+            &params) != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] create array failed");
+            return AniWindowUtils::CreateAniUndefined(env);
+        }
+        for (uint32_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
+            if (env->Array_Set_Ref(params, i, CreateDouble(env, curve.curveParams_[i])) != ANI_OK) {
+                TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] set params failed at %{public}d", i);
+                return AniWindowUtils::CreateAniUndefined(env);
+            }
+        }
+        ret = CallAniMethodVoid(env, aniConfig, aniClass, "<set>param", nullptr, params);
+        if (ret != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to set param");
+            return AniWindowUtils::CreateAniUndefined(env);
+        }
+    }
+    return aniConfig;
+}
+
+ani_object AniWindowUtils::CreateAniAnimationInfo(ani_env* env, const KeyboardAnimationInfo& keyboardAnimationInfo,
+    const KeyboardAnimationCurve& curve)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "[ANI]");
+    ani_class aniClass;
+    ani_status ret = env->FindClass("L@ohos/window/window/KeyboardInfoInternal;", &aniClass);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_method aniCtor;
+    ret = env->Class_FindMethod(aniClass, "<ctor>", nullptr, &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object keyboardInfo;
+    ret = env->Object_New(aniClass, aniCtor, &keyboardInfo);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    ret = CallAniMethodVoid(env, keyboardInfo, aniClass, "<set>beginRect", nullptr,
+        CreateAniRect(env, keyboardAnimationInfo.beginRect));
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to set beginRect");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    ret = CallAniMethodVoid(env, keyboardInfo, aniClass, "<set>endRect", nullptr,
+        CreateAniRect(env, keyboardAnimationInfo.endRect));
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to set endRect");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    ret = CallAniMethodVoid(env, keyboardInfo, aniClass, "<set>animated", nullptr,
+        CreateOptionalBool(env, static_cast<ani_boolean>(keyboardAnimationInfo.withAnimation)));
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to set animated");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    ret = CallAniMethodVoid(env, keyboardInfo, aniClass, "<set>config", nullptr,
+        CreateAniAnimationConfig(env, curve));
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to set config");
         return AniWindowUtils::CreateAniUndefined(env);
     }
     return keyboardInfo;
@@ -1626,7 +1784,7 @@ bool AniWindowUtils::ParseRectParam(ani_env *env, ani_object aniObject, const sp
     ani_ref windowRectRef;
     ani_status ret = env->Object_GetPropertyByName_Ref(aniObject, "windowRect", &windowRectRef);
     ani_boolean isUndefined = false;
-    ret = env->Reference_IsUndefined(windowRectRef, &isUndefined);
+    env->Reference_IsUndefined(windowRectRef, &isUndefined);
     if (ret != ANI_OK || isUndefined) {
         return true;
     }
@@ -1668,10 +1826,10 @@ bool AniWindowUtils::ParseModalityParam(ani_env *env, ani_object aniObject, cons
     ani_ref modalityTypeRef;
     ani_status ret = env->Object_GetPropertyByName_Ref(aniObject, "modalityType", &modalityTypeRef);
     ani_boolean isUndefined = false;
-    ret = env->Reference_IsUndefined(modalityTypeRef, &isUndefined);
+    env->Reference_IsUndefined(modalityTypeRef, &isUndefined);
     ani_int modalityType;
     if (ret == ANI_OK && !isUndefined &&
-        env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(modalityTypeRef), &modalityType)) {
+        env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(modalityTypeRef), &modalityType) == ANI_OK) {
         if (!isModal) {
             TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow not support modalityType");
             return false;

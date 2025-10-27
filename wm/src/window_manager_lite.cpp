@@ -893,6 +893,12 @@ WMError WindowManagerLite::GetAllMainWindowInfos(std::vector<MainWindowInfo>& in
     return WindowAdapterLite::GetInstance(userId_)->GetAllMainWindowInfos(infos);
 }
 
+WMError WindowManagerLite::GetMainWindowInfoByToken(const sptr<IRemoteObject>& abilityToken,
+    MainWindowInfo& windowInfo)
+{
+    return WindowAdapterLite::GetInstance(userId_)->GetMainWindowInfoByToken(abilityToken, windowInfo);
+}
+
 WMError WindowManagerLite::ClearMainSessions(const std::vector<int32_t>& persistentIds)
 {
     if (persistentIds.empty()) {

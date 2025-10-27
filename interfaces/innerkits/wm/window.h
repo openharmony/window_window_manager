@@ -2319,19 +2319,28 @@ public:
     {
         return WMError::WM_OK;
     }
+    virtual WMError AniSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
+        BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
+        AppExecFwk::Ability* ability = nullptr)
+    {
+        return WMError::WM_OK;
+    }
 
     /**
      * @brief set window ui content
      *
      * @param contentName content info path
-     * @param env Napi environment
-     * @param storage Napi storage
+     * @param env Napi or ani environment
+     * @param storage Napi or ani storage
      * @param type restore type
      * @param token parent token
      * @param ability Ability instance
      * @return WMError
      */
     virtual WMError NapiSetUIContentByName(const std::string& contentName, napi_env env, napi_value storage,
+        BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
+        AppExecFwk::Ability* ability = nullptr) { return WMError::WM_OK; }
+    virtual WMError AniSetUIContentByName(const std::string& contentName, ani_env* env, ani_object storage,
         BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
         AppExecFwk::Ability* ability = nullptr) { return WMError::WM_OK; }
 
@@ -4746,6 +4755,31 @@ public:
     virtual WMError UnregisterWindowTitleChangeListener(const sptr<IWindowTitleChangeListener>& listener)
     {
         return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Lock the mouse cursor restricting it to a specified window area, and also control whether the cursor
+     *        follows movement. Only supported by the focus window; the lock is automatically released when the
+     *        window loses focus.
+     *
+     * @param windowId WindowId when window is created.
+     * @param isCursorFollowMovement Set mouse cursor lock mode.
+     * @return Returns the status code of the execution.
+     */
+    virtual WMError LockCursor(int32_t windowId, bool isCursorFollowMovement)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Clear the window mouse cursor status. Revert to mouse cursor free movement mode.
+     *
+     * @param windowId WindowId when window is created.
+     * @return Returns the status code of the execution.
+     */
+    virtual WMError UnlockCursor(int32_t windowId)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
  
     /**

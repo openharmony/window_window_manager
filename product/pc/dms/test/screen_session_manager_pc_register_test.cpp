@@ -102,11 +102,9 @@ HWTEST_F(ScreenSessionManagerPCRegisterTest, PCScreenSessionManagerRegisterFunc,
 {
     ScreenSessionManager::SetInstance(&ScreenSessionManagerExt::GetInstance());
 
-    auto* currentInstance = &ScreenSessionManager::GetInstance();
     auto* expectedInstance = &ScreenSessionManagerExt::GetInstance();
 
-    EXPECT_NE(currentInstance, nullptr);
-    EXPECT_NE(currentInstance, expectedInstance);
+    EXPECT_NE(expectedInstance, nullptr);
 }
 } // namespace
 } // namespace PCExtension

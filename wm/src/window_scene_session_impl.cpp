@@ -729,6 +729,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
             TLOGI(WmsLogTag::WMS_LIFE, "create failed not system or sub type, type: %{public}d", type);
             return WMError::WM_ERROR_INVALID_CALLING;
         }
+        InitSubSessionDragEnable();
         isEnableDefaultDensityWhenCreate_ = windowOption_->IsDefaultDensityEnabled();
         ret = CreateAndConnectSpecificSession();
     }
@@ -1014,6 +1015,15 @@ void WindowSceneSessionImpl::UpdateDefaultStatusBarColor()
         static_cast<uint32_t>(statusBarProp.settingFlag_) |
         static_cast<uint32_t>(SystemBarSettingFlag::FOLLOW_SETTING));
     SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProp);
+}
+
+void WindowSceneSessionImpl::InitSubSessionDragEnable()
+{
+    if (WindowHelper::IsSubWindow(GetType()) && !IsPcOrPadFreeMultiWindowMode()) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "windId: %{public}d init subWindow dragEnable false",
+            property_->GetPersistentId());
+        property_->SetDragEnabled(false);
+    }
 }
 
 void WindowSceneSessionImpl::InitSystemSessionDragEnable()
@@ -7572,6 +7582,38 @@ WSError WindowSceneSessionImpl::CloseSpecificScene()
         window->Close();
     }, __func__);
     return WSError::WS_OK;
+}
+
+/*
+ * Window Event
+ */
+WMError WindowSceneSessionImpl::LockCursor(int32_t windowId, bool isCursorFollowMovement)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_EVENT, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    std::vector<int32_t> parameters;
+    parameters.emplace_back(LOCK_CURSOR_LENGTH);
+    parameters.emplace_back(windowId);
+    parameters.emplace_back(static_cast<int32_t>(isCursorFollowMovement));
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    return hostSession->SendCommonEvent(static_cast<int32_t>(CommonEventCommand::LOCK_CURSOR), parameters);
+}
+
+WMError WindowSceneSessionImpl::UnlockCursor(int32_t windowId)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_EVENT, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    std::vector<int32_t> parameters;
+    parameters.emplace_back(UNLOCK_CURSOR_LENGTH);
+    parameters.emplace_back(windowId);
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    return hostSession->SendCommonEvent(static_cast<int32_t>(CommonEventCommand::UNLOCK_CURSOR), parameters);
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -687,6 +687,16 @@ bool NapiIsCallable(napi_env env, napi_value value)
     return result;
 }
 
+std::string GetBrightnessInfoErrorMsg(DmErrorCode errCode)
+{
+    auto it = brightnessInfoErrCodeMap.find(errCode);
+    if (it != brightnessInfoErrCodeMap.end()) {
+        return it->second;
+    } else {
+        return "Unknown error code.";
+    }
+}
+
 napi_value OnRegisterDisplayManagerCallback(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::DMS, "OnRegisterDisplayManagerCallback is called");
@@ -723,11 +733,14 @@ napi_value OnRegisterDisplayManagerCallback(napi_env env, napi_callback_info inf
     DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(RegisterDisplayListenerWithType(env, cbType, value));
     if (ret != DmErrorCode::DM_OK) {
         DmErrorCode errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
+        std::string errMsg = "Failed to register display listener with type";
         if (ret == DmErrorCode::DM_ERROR_NOT_SYSTEM_APP) {
             errCode = ret;
+        } else if (cbType == EVENT_BRIGHTNESS_INFO_CHANGED) {
+            errCode = ret;
+            errMsg = GetBrightnessInfoErrorMsg(errCode);
         }
         TLOGE(WmsLogTag::DMS, "Failed to register display listener with type");
-        std::string errMsg = "Failed to register display listener with type";
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(errCode), errMsg));
         return NapiGetUndefined(env);
     }

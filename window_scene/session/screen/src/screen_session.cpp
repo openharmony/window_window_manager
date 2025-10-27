@@ -947,6 +947,11 @@ void ScreenSession::SensorRotationChange(Rotation sensorRotation)
 
 void ScreenSession::SensorRotationChange(float sensorRotation)
 {
+    SensorRotationChange(sensorRotation, false);
+}
+
+void ScreenSession::SensorRotationChange(float sensorRotation, bool isSwitchUser)
+{
     std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     if (sensorRotation >= 0.0f) {
         currentValidSensorRotation_ = sensorRotation;
@@ -957,7 +962,7 @@ void ScreenSession::SensorRotationChange(float sensorRotation)
             TLOGE(WmsLogTag::DMS, "screenChangeListener is null.");
             continue;
         }
-        listener->OnSensorRotationChange(sensorRotation, screenId_);
+        listener->OnSensorRotationChange(sensorRotation, screenId_, isSwitchUser);
     }
 }
 
@@ -1252,7 +1257,7 @@ void ScreenSession::UpdateRotationAfterBoot(bool foldToExpand)
 void ScreenSession::UpdateValidRotationToScb()
 {
     TLOGI(WmsLogTag::DMS, "Rotation: %{public}f", currentValidSensorRotation_);
-    SensorRotationChange(currentValidSensorRotation_);
+    SensorRotationChange(currentValidSensorRotation_, true);
 }
 
 sptr<SupportedScreenModes> ScreenSession::GetActiveScreenMode() const
@@ -3014,6 +3019,48 @@ void ScreenSession::UpdateSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents
 SuperFoldStatusChangeEvents ScreenSession::GetSuperFoldStatusChangeEvent()
 {
     return property_.GetSuperFoldStatusChangeEvent();
+}
+
+void ScreenSession::SetCurrentValidHeight(int32_t currentValidHeight)
+{
+    property_.SetCurrentValidHeight(currentValidHeight);
+}
+ 
+int32_t ScreenSession::GetCurrentValidHeight() const
+{
+    return property_.GetCurrentValidHeight();
+}
+ 
+void ScreenSession::SetIsPreFakeInUse(bool isPreFakeInUse)
+{
+    property_.SetIsPreFakeInUse(isPreFakeInUse);
+}
+ 
+bool ScreenSession::GetIsPreFakeInUse() const
+{
+    return property_.GetIsPreFakeInUse();
+}
+ 
+void ScreenSession::SetIsKeyboardOn(bool isKeyboardOn)
+{
+    property_.SetIsKeyboardOn(isKeyboardOn);
+}
+ 
+bool ScreenSession::GetIsKeyboardOn() const
+{
+    return property_.GetIsKeyboardOn();
+}
+ 
+void ScreenSession::SetFloatRotation(float rotation)
+{
+    property_.SetRotation(rotation);
+}
+ 
+void ScreenSession::ModifyScreenPropertyWithLock(float rotation, RRect bounds)
+{
+    std::lock_guard<std::mutex> lock(propertyMutex_);
+    SetFloatRotation(rotation);
+    SetBounds(bounds);
 }
 
 ScreenId ScreenSession::GetPhyScreenId()

@@ -263,7 +263,12 @@ int ScreenSessionManagerClientStub::HandleOnFoldPropertyChanged(MessageParcel& d
     }
     auto reason = static_cast<ScreenPropertyChangeReason>(data.ReadUint32());
     auto displayMode = static_cast<FoldDisplayMode>(data.ReadUint32());
-    OnFoldPropertyChanged(screenId, property, reason, displayMode);
+    ScreenProperty midProperty;
+    bool valid = OnFoldPropertyChange(screenId, property, reason, displayMode, midProperty);
+    if (!valid || !RSMarshallingHelper::Marshalling(reply, midProperty)) {
+        TLOGE(WmsLogTag::DMS, "Write screenProperty failed");
+        return ERR_TRANSACTION_FAILED;
+    }
     return ERR_NONE;
 }
 
@@ -282,7 +287,8 @@ int ScreenSessionManagerClientStub::HandleOnSensorRotationChanged(MessageParcel&
     TLOGD(WmsLogTag::DMS, "enter");
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     auto sensorRotation = data.ReadFloat();
-    OnSensorRotationChanged(screenId, sensorRotation);
+    auto isSwitchUser = data.ReadBool();
+    OnSensorRotationChanged(screenId, sensorRotation, isSwitchUser);
     return ERR_NONE;
 }
 

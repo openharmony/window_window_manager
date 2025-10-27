@@ -739,11 +739,17 @@ void ScreenSessionDumper::DumpScreenPropertyById(ScreenId id)
 
 void ScreenSessionDumper::DumpScreenUserRelation(ScreenId id)
 {
-    constexpr int maxLineWidth = 60;
-    const auto& tempMap = ScreenSessionManager::GetInstance().GetUserScreenMap();
+    const auto& manager = ScreenSessionManager::GetInstance();
+    const std::map<DisplayId, std::map<int32_t, ScreenSessionManager::UserInfo>> tempMap
+        = manager.GetDisplayConcurrentUserMap();
     std::vector<int32_t> userVector;
-    for (const auto& [userId, UserScreenInfo] : tempMap) {
-        if (UserScreenInfo.screenId == id) {
+    auto it = tempMap.find(id);
+    if (it == tempMap.end()) {
+        return;
+    }
+    const auto& userMap = it->second;
+    for (const auto& [userId, UserInfo] : userMap) {
+        if (!manager.CheckPidInDeathPidVector(UserInfo.pid)) {
             userVector.push_back(userId);
         }
     }
@@ -752,40 +758,16 @@ void ScreenSessionDumper::DumpScreenUserRelation(ScreenId id)
     }
  
     std::ostringstream oss;
-    oss << std::left << std::setw(LINE_WIDTH) << "ScreenId:" << id << std::endl;
- 
-    std::ostringstream userStream;
-    for (size_t i = 0; i < userVector.size(); ++i) {
+    oss << std::left << std::setw(LINE_WIDTH) << "DisplayId:" << id << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "User:";
+    for (size_t i = 0; i < userVector.size(); i++) {
         if (i != 0) {
-            userStream << " ";
+            oss << " ";
         }
-        userStream << userVector[i];
+        oss << userVector[i];
     }
-    std::string allUserIds = userStream.str();
- 
-    std::string prefix = "User:";
-    int valueStartCol = LINE_WIDTH;
-    size_t pos = 0;
-    bool firstLine = true;
-    while (pos < allUserIds.size()) {
-        std::ostringstream lineOss;
-        if (firstLine) {
-            lineOss << std::left << std::setw(LINE_WIDTH) << prefix;
-        } else {
-            lineOss << std::left << std::setw(LINE_WIDTH) << "";
-        }
-        int remain = maxLineWidth - valueStartCol;
-        size_t nextBreak = allUserIds.find_last_of(" ", pos + remain);
-        if (nextBreak == std::string::npos || nextBreak <= pos) {
-            lineOss << allUserIds.substr(pos);
-            pos = allUserIds.size();
-        } else {
-            lineOss << allUserIds.substr(pos, nextBreak - pos);
-            pos = nextBreak + 1;
-        }
-        oss << lineOss.str() << "\n";
-        firstLine = false;
-    }
+    oss << std::endl;
+
     dumpInfo_.append(oss.str());
 }
 

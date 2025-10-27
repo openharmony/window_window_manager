@@ -20,7 +20,7 @@ namespace Rosen {
 namespace DmUtils {
 
 std::timed_mutex HoldLock::resMtx;
-std::chrono::steady_clock::time_point HoldLock::lockTime;
+thread_local bool HoldLock::lockStatus(false);
 } // namespace DmUtils
 } // namespace Rosen
 } // namespace OHOS
