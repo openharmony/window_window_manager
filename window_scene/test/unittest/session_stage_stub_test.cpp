@@ -1182,6 +1182,22 @@ HWTEST_F(SessionStageStubTest, HandleNotifyRotationProperty, Function | SmallTes
 }
 
 /**
+ * @tc.name: HandleNotifyPageRotationIsIgnored
+ * @tc.desc: test function : HandleNotifyPageRotationIsIgnored
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyPageRotationIsIgnored, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_PAGE_ROTATION_ISIGNORED);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
  * @tc.name: HandleNotifyAppForceLandscapeConfigUpdated
  * @tc.desc: test function : HandleNotifyAppForceLandscapeConfigUpdated
  * @tc.type: FUNC

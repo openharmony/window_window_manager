@@ -218,6 +218,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyKeyboardAnimationWillBegin(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ROTATION_PROPERTY):
             return HandleNotifyRotationProperty(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_PAGE_ROTATION_ISIGNORED):
+            return HandleNotifyPageRotationIsIgnored(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ROTATION_CHANGE):
             return HandleNotifyRotationChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_CURRENT_ROTATION):
@@ -1181,6 +1183,13 @@ int SessionStageStub::HandleNotifyRotationProperty(MessageParcel& data, MessageP
 
     OrientationInfo info = { rotation, rect, avoidAreas };
     NotifyTargetRotationInfo(info);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyPageRotationIsIgnored(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "in");
+    NotifyPageRotationIsIgnored();
     return ERR_NONE;
 }
 
