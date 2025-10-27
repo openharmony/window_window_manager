@@ -257,12 +257,13 @@ void MockSessionManagerService::RemoveSMSDeathRecipientByUserId(int32_t userId)
 {
     TLOGI(WmsLogTag::WMS_MULTI_USER, "userId: %{public}d", userId);
     auto sessionManagerService = GetSessionManagerServiceInner(userId);
+    if (sessionManagerService == nullptr) {
+        return;
+    }
     std::unique_lock<std::shared_mutex> lock(smsDeathRecipientMapLock_);
     auto iter = smsDeathRecipientMap_.find(userId);
     if (iter != smsDeathRecipientMap_.end() && iter->second) {
-        if (sessionManagerService != nullptr) {
-            sessionManagerService->RemoveDeathRecipient(iter->second);
-        }
+        sessionManagerService->RemoveDeathRecipient(iter->second);
     }
 }
 
@@ -1171,13 +1172,14 @@ sptr<IRemoteObject> MockSessionManagerService::GetSceneSessionManagerInner(int32
     }
     SSMRemoteObject = isLite ? sessionManagerServiceProxy->GetSceneSessionManagerLite()
                              : sessionManagerServiceProxy->GetSceneSessionManager();
-    UpdateSceneSessionManagerFromCache(userId, isLite, SSMRemoteObject);
     if (SSMRemoteObject == nullptr) {
         TLOGE(WmsLogTag::WMS_MULTI_USER,
               "SSMRemoteObject is null, userId: %{public}d, isLite: %{public}d",
               userId,
               isLite);
+        return nullptr;
     }
+    UpdateSceneSessionManagerFromCache(userId, isLite, SSMRemoteObject);
     return SSMRemoteObject;
 }
 
