@@ -306,7 +306,7 @@ void AniWindowStage::OnSetShowOnLockScreen(ani_env* env, ani_boolean showOnLockS
     }
     auto windowScene = GetWindowScene().lock();
     if (windowScene == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]windowScene is nullptr!");
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] windowScene is nullptr!");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
