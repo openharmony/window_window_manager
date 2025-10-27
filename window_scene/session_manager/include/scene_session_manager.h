@@ -963,6 +963,7 @@ private:
     void CloseAllFd(std::shared_ptr<AAFwk::Want>& want);
     WMError CheckWindowIds(
         const std::vector<int32_t>& windowIds, const sptr<IRemoteObject>& callback);
+    void RegisterWindowStateErrorCallbackToMMI();
 
     /*
      * Window Focus
