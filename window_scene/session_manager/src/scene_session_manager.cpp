@@ -453,13 +453,6 @@ void SceneSessionManager::Init()
     // DFX
     SessionChangeRecorder::GetInstance().Init();
 
-    // MMI window state error check
-    int32_t retCode = MMI::InputManager::GetInstance()->
-        RegisterWindowStateErrorCallback([this](int32_t pid, int32_t persistentId) {
-        this->NotifyWindowStateErrorFromMMI(pid, persistentId);
-    });
-    TLOGI(WmsLogTag::WMS_EVENT, "register WindowStateError callback with ret: %{public}d", retCode);
-
     if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_)) {
         MultiInstanceManager::GetInstance().Init(bundleMgr_, taskScheduler_);
         MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
@@ -1695,6 +1688,16 @@ void SceneSessionManager::RegisterRootSceneSession()
     }
 }
 
+void SceneSessionManager::RegisterWindowStateErrorCallbackToMMI()
+{
+    // MMI window state error check
+    int32_t retCode =
+        MMI::InputManager::GetInstance()->RegisterWindowStateErrorCallback([this](int32_t pid, int32_t persistentId) {
+        this->NotifyWindowStateErrorFromMMI(pid, persistentId);
+    });
+    TLOGW(WmsLogTag::WMS_EVENT, "register WindowStateError callback to MMI with ret: %{public}d", retCode);
+}    
+
 sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
 {
     return rootSceneSession_;
@@ -2802,6 +2805,8 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             if (isPreHandleSuccess) {
                 NotifySessionCreate(sceneSession, sceneSession->GetSessionInfo());
                 sceneSession->SetSessionInfoAncoSceneState(AncoSceneState::NOTIFY_CREATE);
+            } else {
+                sceneSession->SetSessionInfoAncoSceneState(AncoSceneState::NOTIFY_START_FAILED);
             }
         }
         {
@@ -3107,6 +3112,9 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
 void SceneSessionManager::NotifyAmsPendingSessionWhenFail(uint32_t resultCode, std::string resultMessage,
         int32_t requestId, int32_t persistentId)
 {
+    if (requestId <= 0) {
+        return;
+    }
     TLOGE(WmsLogTag::WMS_LIFE, "failed, requestId:%{public}d", requestId);
     RemoveRequestTaskInfo(persistentId, requestId);
     ffrtQueueHelper_->SubmitTask([requestId]{
@@ -3231,15 +3239,20 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
             RequestSessionFocusImmediately(persistentId);
         }
     }
+    if (sceneSession->GetSessionInfo().ancoSceneState == AncoSceneState::NOTIFY_START_FAILED) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[id: %{public}d] preHandle collaborator failed when requestSession.", persistentId);
+        sceneSession->NotifySessionExceptionWithOptions(SetAbilitySessionInfo(sceneSession), "preHandleAncoFailed", true);
+        NotifyAmsPendingSessionWhenFail(static_cast<uint32_t>(RequestResultCode::FAIL),
+            "", sceneSession->GetSessionInfo().requestId, sceneSession->GetPersistentId());
+        return WSError::WS_ERROR_PRE_HANDLE_COLLABORATOR_FAILED;
+    }
     if (sceneSession->GetSessionInfo().ancoSceneState < AncoSceneState::NOTIFY_CREATE) {
         FillSessionInfo(sceneSession);
         if (CheckCollaboratorType(sceneSession->GetCollaboratorType()) &&
             !PreHandleCollaborator(sceneSession, persistentId)) {
-            TLOGE(WmsLogTag::WMS_LIFE, "[id: %{public}d] ancoSceneState: %{public}d",
+            TLOGE(WmsLogTag::WMS_LIFE, "[id: %{public}d] preHandle collaborator failed, ancoSceneState: %{public}d",
                 persistentId, sceneSession->GetSessionInfo().ancoSceneState);
-            ExceptionInfo exceptionInfo;
-            exceptionInfo.needRemoveSession = true;
-            sceneSession->NotifySessionExceptionInner(SetAbilitySessionInfo(sceneSession), exceptionInfo);
+            sceneSession->NotifySessionExceptionWithOptions(SetAbilitySessionInfo(sceneSession), "preHandleAncoFailed", true);
             NotifyAmsPendingSessionWhenFail(static_cast<uint32_t>(RequestResultCode::FAIL),
                 "", sceneSession->GetSessionInfo().requestId, sceneSession->GetPersistentId());
             return WSError::WS_ERROR_PRE_HANDLE_COLLABORATOR_FAILED;
@@ -5240,6 +5253,7 @@ WSError SceneSessionManager::InitUserInfo(int32_t userId, std::string& fileDir)
         RegisterRootSceneSession();
         RegisterSecSurfaceInfoListener();
         RegisterConstrainedModalUIExtInfoListener();
+        RegisterWindowStateErrorCallbackToMMI();
         return WSError::WS_OK;
     }, __func__);
 }
@@ -10525,9 +10539,9 @@ void SceneSessionManager::NotifyWindowStateErrorFromMMI(int32_t pid, int32_t per
                 continue;
             }
             auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
-            TLOGNI(WmsLogTag::WMS_LIFE, "terminate session, persistentId: %{public}d",
+            TLOGNI(WmsLogTag::WMS_LIFE, "notify session exception from MMI, persistentId: %{public}d",
                 abilitySessionInfo->persistentId);
-            sceneSession->TerminateSessionNew(abilitySessionInfo, false, false);
+            sceneSession->NotifySessionExceptionWithOptions(abilitySessionInfo, "NotifyWindowStateErrorFromMMI", true);
         }
     };
     // delay 2000ms, wait for hidumper

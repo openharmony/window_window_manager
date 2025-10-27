@@ -6861,11 +6861,6 @@ WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo>
             session->RemoveLifeCycleTask(LifeCycleTaskType::STOP);
             return WSError::WS_ERROR_INVALID_PARAM;
         }
-        if (session->isTerminating_) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s is terminating, return!", where);
-            session->RemoveLifeCycleTask(LifeCycleTaskType::STOP);
-            return WSError::WS_ERROR_INVALID_OPERATION;
-        }
         session->isTerminating_ = true;
         SessionInfo info;
         info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
@@ -6899,6 +6894,15 @@ WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abil
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     return NotifySessionExceptionInner(abilitySessionInfo, exceptionInfo, true);
+}
+
+WSError SceneSession::NotifySessionExceptionWithOptions(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
+    const std::string& reason, bool needRemoveSession)
+{
+    ExceptionInfo exceptionInfo;
+    exceptionInfo.needRemoveSession = needRemoveSession;
+    abilitySessionInfo->errorReason = reason;
+    return NotifySessionExceptionInner(abilitySessionInfo, exceptionInfo, false, false);
 }
 
 WSRect SceneSession::GetLastSafeRect() const

@@ -2923,6 +2923,30 @@ HWTEST_F(SceneSessionManagerTest12, CheckPrepareTerminateEnabled01, TestSize.Lev
 }
 
 /**
+ * @tc.name: RegisterWindowStateErrorCallbackToMMI001
+ * @tc.desc: test function : RegisterWindowStateErrorCallbackToMMI
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RegisterWindowStateErrorCallbackToMMI001, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->isPrepareTerminateEnable_ = false;
+    ssm_->RegisterWindowStateErrorCallbackToMMI();
+}
+ 
+/**
+ * @tc.name: NotifyAmsPendingSessionWhenFail001
+ * @tc.desc: test function : NotifyAmsPendingSessionWhenFail
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifyAmsPendingSessionWhenFail001, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->NotifyAmsPendingSessionWhenFail(static_cast<uint32_t>(RequestResultCode::FAIL), "startFailed", -1, 100);
+    ssm_->NotifyAmsPendingSessionWhenFail(static_cast<uint32_t>(RequestResultCode::FAIL), "startFailed", 100, 100);
+}
+
+/**
  * @tc.name: PendingSessionToBackground
  * @tc.desc: test function : PendingSessionToBackground
  * @tc.type: FUNC

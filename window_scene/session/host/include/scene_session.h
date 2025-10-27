@@ -299,6 +299,8 @@ public:
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> info) override;
     WSError NotifySessionException(
         const sptr<AAFwk::SessionInfo> info, const ExceptionInfo& exceptionInfo) override;
+    WSError NotifySessionExceptionWithOptions(
+        const sptr<AAFwk::SessionInfo> info, const std::string& reason, bool needRemoveSession);
     WSError NotifySessionExceptionInner(
         const sptr<AAFwk::SessionInfo> info, const ExceptionInfo& exceptionInfo,
         bool isFromClient = false, bool startFail = false);
