@@ -1296,12 +1296,9 @@ HWTEST_F(SceneSessionManagerTest8, SessionBlackListSystemTest, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
-    std::size_t count = 100; 
+    std::size_t count = 100;
     for (std::size_t i = 0; i < count; ++i) {
-        // 组装 key
         std::string key = "bundle_" + std::to_string(i);
-
-        // 组装 value（一个 set）
         std::unordered_set<std::string> rsSet;
         rsSet.reserve(3);
         const std::string idx = std::to_string(i);
@@ -1321,7 +1318,6 @@ HWTEST_F(SceneSessionManagerTest8, SessionBlackListSystemTest, TestSize.Level1)
         ssm_->screenRSBlackListConfigMap_ [i].insert({ "rs_" + idx + "_a" });
         ssm_->screenRSBlackListConfigMap_ [i].insert({ "rs_" + idx + "_b" });
         ssm_->screenRSBlackListConfigMap_ [i].insert({ "rs_" + idx + "_c" });
-        
     }
 
     for (std::size_t i = 0; i < count; ++i) {
@@ -1357,7 +1353,6 @@ HWTEST_F(SceneSessionManagerTest8, SessionBlackListSystemTest, TestSize.Level1)
     EXPECT_EQ(WMError::WM_OK, ret);
 
     ret = ssm_->AddSessionBlackList(sceneSessionList, privacyWindowTags);
-
     EXPECT_EQ(WMError::WM_OK, ret);
 
     ssm_->sceneSessionMap_.clear();
