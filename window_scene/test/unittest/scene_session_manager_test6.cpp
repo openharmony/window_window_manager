@@ -1938,14 +1938,14 @@ HWTEST_F(SceneSessionManagerTest6, IsValidSessionIds, TestSize.Level1)
 }
 
 /**
-*@tc.name:GetSurfaceNodeldsFromMissionIds01
-*@tc.desc:IsValidSessionlds
+*@tc.name:GetSurfaceNodeIdsFromMissionIds01
+*@tc.desc:IsValidSessionIds
 *@tc.type:FUNC
 */
 HWTEST_F(SceneSessionManagerTest6, GetSurfaceNodeldsFromMissionIds01, TestSize.Level1)
 {
     std::vector<int32_t> sessionIds = {1, 2, 3, 4, 5};
-    //sessionInfo是闪控球的id 1并且有surfaceNode
+    // sessionInfo是闪控球的id 1并且有surfaceNode
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest2";
     sessionInfo.abilityName_ = "DumpSessionWithId";
@@ -2029,12 +2029,12 @@ HWTEST_F(SceneSessionManagerTest6, GetSurfaceNodeldsFromMissionIds01, TestSize.L
     // 测试list为空正常的流程的流程
     std::vector<uint64_t> surfaceNodesListOKEmpty;
     std::vector<uint64_t> missionIdOKEmpty = {1};
-    error ssm_->GetSurfaceNodeIdsFromMissionIds(missionIdOKEmpty, surfaceNodesListOKEmpty);
+    error = ssm_->GetSurfaceNodeIdsFromMissionIds(missionIdOKEmpty, surfaceNodesListOKEmpty);
     EXPECT_EQ(error, WMError::WM_OK);
 
     // 测试转换闪控球为空的流程的流程
     std::vector<uint64_t> surfaceNodesListFBAndAnother;
-    std::vector<uint64_t> missionIdFBAnother={1, 5};
+    std::vector<uint64_t> missionIdFBAndAnother = {1, 5};
     error = ssm_->GetSurfaceNodeIdsFromMissionIds(missionIdFBAndAnother, surfaceNodesListFBAndAnother,
         needWindowTypeList, true);
     EXPECT_EQ(error, WMError::WM_ERROR_INVALID_WINDOW);
