@@ -519,6 +519,10 @@ void DisplayManagerAni::OnConvertGlobalToRelativeCoordinate(
                 globalPosition, relativePosition));
     } else {
         env->Object_CallMethodByName_Long(displayId, "unboxed", ":l", &displayIdTmp);
+        if (displayIdTmp < 0) {
+            AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "displayID less than 0");
+            return;
+        }
         errCode = DM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<DisplayManager>().ConvertGlobalCoordinateToRelativeWithDisplayId(globalPosition,
                 static_cast<DisplayId>(displayIdTmp), relativePosition));

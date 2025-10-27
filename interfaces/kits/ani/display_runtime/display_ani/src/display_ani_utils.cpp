@@ -405,6 +405,10 @@ DmErrorCode DisplayAniUtils::GetRelativePostionFromAni(
         TLOGE(WmsLogTag::DMS, "[ANI] get displayId failed");
         return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
     }
+    if (displayId < 0) {
+        TLOGE(WmsLogTag::DMS, "[ANI] displayID less than 0.");
+        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+    }
     relativePosition.displayId = static_cast<DisplayId>(displayId);
     if (ANI_OK != env->Object_GetFieldByName_Ref(relativePositionObj, "<property>position", &positionObj)) {
         TLOGE(WmsLogTag::DMS, "[ANI] get positionObj failed");
