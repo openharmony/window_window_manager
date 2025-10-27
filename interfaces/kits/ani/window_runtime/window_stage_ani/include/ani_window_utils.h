@@ -67,7 +67,7 @@ const std::map<ApiWindowType, std::string> API_TO_ANI_STRING_TYPE_MAP {
 };
 
 enum class ImageFit {
-    FILL,
+    FILL = 0,
     CONTAIN,
     COVER,
     FITWIDTH,
@@ -86,7 +86,7 @@ enum class ImageFit {
     MATRIX,
 };
 
-typedef enum Ark_ImageFit {
+enum class Ark_ImageFit {
     ARK_IMAGE_FIT_CONTAIN = 0,
     ARK_IMAGE_FIT_COVER = 1,
     ARK_IMAGE_FIT_AUTO = 2,
@@ -103,7 +103,7 @@ typedef enum Ark_ImageFit {
     ARK_IMAGE_FIT_BOTTOM = 14,
     ARK_IMAGE_FIT_BOTTOM_END = 15,
     ARK_IMAGE_FIT_MATRIX = 16,
-} Ark_ImageFit;
+};
 
 class AniWindowUtils {
 public:
