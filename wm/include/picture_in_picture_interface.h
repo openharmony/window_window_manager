@@ -98,7 +98,7 @@ public:
 
 class IPiPActiveStatusObserver : virtual public RefBase {
 public:
-    virtual void OnActiveStatusChange(const bool& status) {}
+    virtual void OnActiveStatusChange(bool status) {}
 };
 } // namespace Rosen
 } // namespace OHOS

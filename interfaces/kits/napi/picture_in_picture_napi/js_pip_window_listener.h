@@ -43,7 +43,7 @@ public:
     void OnControlEvent(PiPControlType controlType, PiPControlStatus statusCode) override;
     void OnPipSizeChange(const PiPWindowSize& size) override;
     void OnPipTypeNodeChange(const napi_ref nodeRef) override;
-    void OnActiveStatusChange(const bool& status) override;
+    void OnActiveStatusChange(bool status) override;
 
 private:
     void OnPipListenerCallback(PiPState state, int32_t errorCode);

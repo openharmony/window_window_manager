@@ -80,7 +80,7 @@ void PictureInPictureControllerTest::TearDown() {}
 
 class MockPiPActiveStatus : public IPiPActiveStatusObserver {
 public:
-    void OnActiveStatusChange(const bool& status) override
+    void OnActiveStatusChange(bool status) override
     {
         return;
     }
