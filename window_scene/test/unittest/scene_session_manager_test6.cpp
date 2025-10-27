@@ -1938,6 +1938,112 @@ HWTEST_F(SceneSessionManagerTest6, IsValidSessionIds, TestSize.Level1)
 }
 
 /**
+*@tc.name:GetSurfaceNodeldsFromMissionIds01
+*@tc.desc:IsValidSessionlds
+*@tc.type:FUNC
+*/
+HWTEST_F(SceneSessionManagerTest6, GetSurfaceNodeldsFromMissionIds01, TestSize.Level1)
+{
+    std::vector<int32_t> sessionIds = {1, 2, 3, 4, 5};
+    //sessionInfo是闪控球的id 1并且有surfaceNode
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
+    sessionInfo.abilityName_ = "DumpSessionWithId";
+    sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_FB);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    // 设置surfaceNode
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    sceneSession->SetSurfaceNode(surfaceNode);
+
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+
+    // sessionInfo1是空指针
+    sptr<SceneSession> sceneSession1 = nullptr;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession1));
+
+    // sessionInfo3是pip类型的id 3 surfaceNode为空
+    SessionInfo sessionInfo3;
+    sessionInfo3.bundleName_ = "SceneSessionManagerTest3";;
+    sessionInfo3.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_PIP);
+    auto session3 = sptr<SceneSession>::MakeSptr(sessionInfo3, nullptr);
+    session3->SetSurfaceNode(nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(3, session3));
+
+    // sessionInfo5是selection的id 5并且有surfacenNode
+    SessionInfo sessionInfo5;
+    sessionInfo5.bundleName_ = "SceneSessionManagerTest5";
+    sessionInfo5.abilityName_ = "DumpSessionWithId5";
+    sessionInfo5.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_SELECTION);
+    sptr<SceneSession> sceneSession5 = sptr<SceneSession>::MakeSptr(sessionInfo5, nullptr);
+    ASSERT_NE(nullptr, sceneSession5);
+    // 设置surfaceNode
+    struct RSSurfaceNodeConfig config5;
+    std::shared_ptr<RSSurfaceNode> surfaceNode5 = RSSurfaceNode::Create(config5);
+    sceneSession5->SetSurfaceNode(surfaceNode5);
+    ssm_->sceneSessionMap_.insert(std::make_pair(5, sceneSession5));
+    // 设置公共参数
+    const std::vector<uint32_t> needWindowTypeList = { 2145 };
+    WMError error = WMError::WM_OK;
+
+    // 测试正常过滤的流程
+    std::vector<uint64_t> surfaceNodesListNormal;
+    std::vector<uint64_t> missionIdNormal = {1};
+    error = ssm_->GetSurfaceNodeIdsFromMissionIds(missionIdNormal, surfaceNodesListNormal,
+        needWindowTypeList);
+    EXPECT_EQ(error, WMError::WM_OK);
+
+    // 测试不存在的ID的流程的流程
+    std::vector<uint64_t> surfaceNodesListNoExist;
+    std::vector<uint64_t> missionIdNoExist = {100};
+    error = ssm_->GetSurfaceNodeIdsFromMissionIds(missionIdNoExist, surfaceNodesListNoExist,
+        needWindowTypeList, true);
+    EXPECT_EQ(error, WMError::WM_ERROR_INVALID_WINDOW);
+    error = ssm_->GetSurfaceNodeIdsFromMissionIds(missionIdNoExist, surfaceNodesListNoExist,
+        needWindowTypeList, false);
+    EXPECT_EQ(error, WMError::WM_OK);
+
+    // 测试scensession为空的流程的流程
+    std::vector<uint64_t> surfaceNodesListSceneNull;
+    std::vector<uint64_t> missionIdSceneNull = {2};
+    error = ssm_->GetSurfaceNodeIdsFromMissionIds(missionIdSceneNull, surfaceNodesListSceneNull,
+        needWindowTypeList, true);
+    EXPECT_EQ(error, WMError::WM_ERROR_INVALID_WINDOW);
+    error = ssm_->GetSurfaceNodeIdsFromMissionIds(missionIdSceneNull, surfaceNodesListSceneNull,
+        needWindowTypeList, false);
+    EXPECT_EQ(error, WMError::WM_OK);
+
+    // 测试GetSurfaceNode为空的流程的流程
+    std::vector<uint64_t> surfaceNodesListSurfaceNull;
+    std::vector<uint64_t> missionIdSurfaceNull = {3};
+    error = ssm_->GetSurfaceNodeIdsFromMissionIds(missionIdSurfaceNull, surfaceNodesListSurfaceNull,
+        needWindowTypeList, true);
+    EXPECT_EQ(error, WMError::WM_ERROR_INVALID_WINDOW);
+    error = ssm_->GetSurfaceNodeIdsFromMissionIds(missionIdSurfaceNull, surfaceNodesListSurfaceNull,
+        needWindowTypeList, false);
+    EXPECT_EQ(error, WMError::WM_OK);
+
+    // 测试list为空正常的流程的流程
+    std::vector<uint64_t> surfaceNodesListOKEmpty;
+    std::vector<uint64_t> missionIdOKEmpty = {1};
+    error ssm_->GetSurfaceNodeIdsFromMissionIds(missionIdOKEmpty, surfaceNodesListOKEmpty);
+    EXPECT_EQ(error, WMError::WM_OK);
+
+    // 测试转换闪控球为空的流程的流程
+    std::vector<uint64_t> surfaceNodesListFBAndAnother;
+    std::vector<uint64_t> missionIdFBAnother={1, 5};
+    error = ssm_->GetSurfaceNodeIdsFromMissionIds(missionIdFBAndAnother, surfaceNodesListFBAndAnother, 
+        needWindowTypeList, true);
+    EXPECT_EQ(error, WMError::WM_ERROR_INVALID_WINDOW);
+    error = ssm_->GetSurfaceNodeIdsFromMissionIds(missionIdFBAndAnother, surfaceNodesListFBAndAnother,
+        needWindowTypeList, false);
+    EXPECT_EQ(error, WMError::WM_OK);
+}
+
+/**
  * @tc.name: DeleteStateDetectTask
  * @tc.desc: DeleteStateDetectTask
  * @tc.type: FUNC
