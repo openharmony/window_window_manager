@@ -42,7 +42,6 @@ namespace {
 static std::map<ani_object, AniWindowStage*> g_localObjs;
 const uint32_t MIN_RESOURCE_ID = 0x1000000;
 const uint32_t MAX_RESOURCE_ID = 0xffffffff;
-
 } // namespace
 
 AniWindowStage::AniWindowStage(const std::shared_ptr<Rosen::WindowScene>& windowScene)
