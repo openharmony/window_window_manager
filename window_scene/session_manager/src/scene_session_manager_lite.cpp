@@ -47,6 +47,13 @@ WSError SceneSessionManagerLite::SetSessionIcon(const sptr<IRemoteObject>& token
     return SceneSessionManager::GetInstance().SetSessionIcon(token, icon);
 }
 
+WSError SceneSessionManagerLite::SetSessionIconForThirdParty(const sptr<IRemoteObject>& token,
+    const std::shared_ptr<Media::PixelMap>& icon)
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "in");
+    return SceneSessionManager::GetInstance().SetSessionIconForThirdParty(token, icon);
+}
+
 WSError SceneSessionManagerLite::IsValidSessionIds(
     const std::vector<int32_t>& sessionIds, std::vector<bool>& results)
 {
@@ -250,6 +257,12 @@ WMError SceneSessionManagerLite::GetAllMainWindowInfos(std::vector<MainWindowInf
     return SceneSessionManager::GetInstance().GetAllMainWindowInfos(infos);
 }
 
+WMError SceneSessionManagerLite::GetMainWindowInfoByToken(const sptr<IRemoteObject>& abilityToken,
+    MainWindowInfo& windowInfo)
+{
+    return SceneSessionManager::GetInstance().GetMainWindowInfoByToken(abilityToken, windowInfo);
+}
+
 WMError SceneSessionManagerLite::ClearMainSessions(const std::vector<int32_t>& persistentIds,
     std::vector<int32_t>& clearFailedIds)
 {
@@ -429,5 +442,18 @@ WMError SceneSessionManagerLite::UnregisterPipChgListenerByScreenId(int32_t scre
 {
     WLOGFD("in");
     return SceneSessionManager::GetInstance().UnregisterPipChgListenerByScreenId(screenId);
+}
+
+WMError SceneSessionManagerLite::GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+    std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap)
+{
+    WLOGFD("in");
+    return SceneSessionManager::GetInstance().GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
+}
+
+WMError SceneSessionManagerLite::GetParentMainWindowId(int32_t windowId, int32_t& mainWindowId)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
+    return SceneSessionManager::GetInstance().GetParentMainWindowId(windowId, mainWindowId);
 }
 } // namespace OHOS::Rosen

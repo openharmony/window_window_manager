@@ -125,7 +125,7 @@ public:
     virtual bool IsTransparent() const override;
     virtual WMError SetBrightness(float brightness) override;
     virtual float GetBrightness() const override;
-    virtual WMError SetCallingWindow(uint32_t windowId) override;
+    virtual WMError ChangeCallingWindowId(uint32_t windowId) override;
     virtual WMError SetPrivacyMode(bool isPrivacyMode) override;
     virtual bool IsPrivacyMode() const override;
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;

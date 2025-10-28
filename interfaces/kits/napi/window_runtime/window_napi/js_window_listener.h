@@ -51,6 +51,7 @@ const std::string DIALOG_DEATH_RECIPIENT_CB = "dialogDeathRecipient";
 const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
 const std::string WATER_MARK_FLAG_CHANGE_CB = "waterMarkFlagChange";
 const std::string WINDOW_VISIBILITY_CHANGE_CB = "windowVisibilityChange";
+const std::string OCCLUSION_STATE_CHANGE_CB = "occlusionStateChanged";
 const std::string WINDOW_DISPLAYID_CHANGE_CB = "displayIdChange";
 const std::string SYSTEM_DENSITY_CHANGE_CB = "systemDensityChange";
 const std::string ACROSS_DISPLAYS_CHANGE_CB = "mainWindowFullScreenAcrossDisplaysChanged";
@@ -66,6 +67,7 @@ const std::string EXTENSION_SECURE_LIMIT_CHANGE_CB = "uiExtensionSecureLimitChan
 const std::string WINDOW_HIGHLIGHT_CHANGE_CB = "windowHighlightChange";
 const std::string WINDOW_WILL_CLOSE_CB = "windowWillClose";
 const std::string WINDOW_ROTATION_CHANGE_CB = "rotationChange";
+const std::string FREE_WINDOW_MODE_CHANGE_CB = "freeWindowModeChange";
 
 class JsWindowListener : public IWindowChangeListener,
                          public ISystemBarChangedListener,
@@ -81,6 +83,7 @@ class JsWindowListener : public IWindowChangeListener,
                          public IWaterMarkFlagChangedListener,
                          public IGestureNavigationEnabledChangedListener,
                          public IWindowVisibilityChangedListener,
+                         public IOcclusionStateChangedListener,
                          public IDisplayIdChangeListener,
                          public ISystemDensityChangeListener,
                          public IAcrossDisplaysChangeListener,
@@ -99,7 +102,8 @@ class JsWindowListener : public IWindowChangeListener,
                          public IKeyboardWillShowListener,
                          public IKeyboardWillHideListener,
                          public IKeyboardDidShowListener,
-                         public IKeyboardDidHideListener {
+                         public IKeyboardDidHideListener,
+                         public IFreeWindowModeChangeListener {
 public:
     JsWindowListener(napi_env env, std::shared_ptr<NativeReference> callback, CaseType caseType)
         : env_(env), jsCallBack_(callback), caseType_(caseType), weakRef_(wptr<JsWindowListener> (this)) {}
@@ -139,6 +143,7 @@ public:
     napi_value CallJsMethod(const char* methodName, napi_value const * argv = nullptr, size_t argc = 0);
     void SetMainEventHandler();
     void OnWindowVisibilityChangedCallback(const bool isVisible) override;
+    void OnOcclusionStateChanged(const WindowVisibilityState state) override;
     void OnDisplayIdChanged(DisplayId displayId) override;
     void OnSystemDensityChanged(float density) override;
     void OnAcrossDisplaysChanged(bool isAcrossDisplays) override;
@@ -155,6 +160,7 @@ public:
      */
     void OnRectChange(Rect rect, WindowSizeChangeReason reason) override;
     void OnRectChangeInGlobalDisplay(const Rect& rect, WindowSizeChangeReason reason) override;
+    void OnFreeWindowModeChange(bool isInFreeWindowMode) override;
 
     void OnSecureLimitChange(bool isLimit) override;
     void OnWindowHighlightChange(bool isHighlight) override;

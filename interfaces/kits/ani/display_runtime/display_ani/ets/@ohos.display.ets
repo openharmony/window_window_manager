@@ -58,9 +58,9 @@ interface WaterfallDisplayAreaRects {
 
 export class WaterfallDisplayAreaRectsImpl implements WaterfallDisplayAreaRects {
     constructor() {
-        this.left = new RectImpl()
+        this.left = new RectImpl();
         this.right = new RectImpl();
-        this.top = new RectImpl()
+        this.top = new RectImpl();
         this.bottom = new RectImpl();
     }
     readonly left: Rect;
@@ -109,6 +109,34 @@ export class FoldCreaseRegionImpl implements FoldCreaseRegion {
     readonly displayId: long;
 
     readonly creaseRects: Array<Rect>;
+}
+
+export interface Position {
+    x: long;
+ 
+    y: long;
+}
+ 
+export class PostionImpl implements Position {
+    x: long;
+ 
+    y: long;
+}
+ 
+export interface RelativePosition {
+    displayId: long;
+ 
+    position: Position;
+}
+ 
+export class RelativePositionImpl implements RelativePosition {
+    constructor() {
+        this.position = new PostionImpl();
+    }
+ 
+    displayId: long;
+ 
+    position: Position;
 }
 
 export enum FoldDisplayMode {
@@ -244,6 +272,8 @@ export interface Display {
 
     getAvailableArea(): Promise<Rect>;
 
+    getLiveCreaseRegion(): FoldCreaseRegion;
+
     hasImmersiveWindow(callback: AsyncCallback<boolean>): void;
 
     hasImmersiveWindow(): Promise<boolean>;
@@ -378,6 +408,13 @@ export class DisplayImpl implements Display {
         })
     }
 
+    getLiveCreaseRegion(): FoldCreaseRegion {
+        let foldCreaseRegion: FoldCreaseRegion = new FoldCreaseRegionImpl();
+        this.getLiveCreaseRegionInternal(foldCreaseRegion as object);
+        minusCreaseRects(foldCreaseRegion);
+        return foldCreaseRegion;
+    }
+
     on(type: string, callback: Callback<Rect>): void {
         this.syncOn(type, callback as object);
     }
@@ -406,6 +443,7 @@ export class DisplayImpl implements Display {
     native syncOn(type: string, callback: object): void;
     native syncOff(type: string, callback?: object): void;
     native getAvailableAreaInternal(rect: Rect): void;
+    native getLiveCreaseRegionInternal(foldCreaseRegion: object):FoldCreaseRegion;
     native getCutoutInfoInternal(cutoutInfo: CutoutInfo): void;
     native hasImmersiveWindowInternal(): boolean;
 
@@ -533,12 +571,21 @@ export function on<T>(type: string, callback: Callback<T>): void {
     syncOn(type, callback as object, displayMgrRef);
 }
 
-export native function syncOn(type: string, callback: object, nativeObj: long): void;
-
 export function off<T>(type: string, callback?: Callback<T>): void {
     syncOff(type, displayMgrRef, callback);
 }
 
+export type BrightnessCallback<T1, T2> = (id:T1, data:T2) => void;
+
+export function onBrightnessInfoChange<T1, T2>(callback: BrightnessCallback<T1, T2>): void {
+    syncOn('brightnessInfoChange', callback as object, displayMgrRef);
+}
+
+export function offBrightnessInfoChange<T1, T2>(callback?: BrightnessCallback<T1, T2>): void {
+    syncOff('brightnessInfoChange', displayMgrRef, callback);
+}
+
+export native function syncOn(type: string, callback: object, nativeObj: long): void;
 export native function syncOff(type: string, nativeObj: long, callback?: object) : void;
 
 export function displayEventCallBack(cb: object, cbArg: long): void {
@@ -624,11 +671,52 @@ export class DisplayPhysicalResolutionImpl implements DisplayPhysicalResolution{
     physicalHeight: long;
 }
 
+export function convertGlobalToRelativeCoordinate(position: Position, displayId?: long): RelativePosition {
+    let relativePostion: RelativePosition = new RelativePositionImpl();
+    convertGlobalToRelativeCoordinateNative(position, displayMgrRef, relativePostion, displayId);
+    return relativePostion;
+}
+ 
+export function convertRelativeToGlobalCoordinate(relativePosition: RelativePosition): Position {
+    let position: Position = new PostionImpl();
+    convertRelativeToGlobalCoordinateNative(relativePosition, displayMgrRef, position);
+    return position;
+}
+ 
+export native function convertGlobalToRelativeCoordinateNative(
+    position: Position, nativeObj: long, relativePostion: RelativePosition, displayId?: long): void;
+ 
+export native function convertRelativeToGlobalCoordinateNative(
+    relativePosition: RelativePosition, nativeObj: long, position: Position): void;
+
 export function disposeDisplay(display: DisplayImpl): void {
     finalizerDisplayNative(display as object, displayMgrRef);
 }
 
 export native function finalizerDisplayNative(obj: object, nativeObj: long): void
+
+export interface BrightnessInfo {
+    readonly sdrNits: double;
+    readonly currentHeadroom: double;
+    readonly maxHeadroom: double;
+}
+
+export class ScreenBrightnessInfoImpl implements BrightnessInfo {
+    readonly sdrNits: double;
+    readonly currentHeadroom: double;
+    readonly maxHeadroom: double;
+}
+
+export function getBrightnessInfo(displayId: long): BrightnessInfo {
+    return getBrightnessInfoNative(displayId, displayMgrRef);
+}
+
+export function brightnessInfoChangeCallback(cb: object, cbArg: long, cbArgBrightness: BrightnessInfo): void {
+    const func = cb as (cbArg: long, cbArgBrightness: BrightnessInfo) => void;
+    func(cbArg, cbArgBrightness);
+}
+
+export native function getBrightnessInfoNative(display: long, displayMgrRef: long): BrightnessInfo;
 
 export let displayMgrRef: long;
 

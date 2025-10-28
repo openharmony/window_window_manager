@@ -92,6 +92,17 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
         case TRANS_ID_ON_SCREEN_MAGNETIC_STATE_CHANGED: {
             return ProcScreenMagneticStatechanged(data);
         }
+        case TRANS_ID_ON_BRIGHTNESS_INFO_CHANGED: {
+            DisplayId id;
+            ScreenBrightnessInfo info;
+            if (!data.ReadUint64(id) || !data.ReadFloat(info.currentHeadroom) ||
+                !data.ReadFloat(info.maxHeadroom) || !data.ReadFloat(info.sdrNits)) {
+                TLOGE(WmsLogTag::DMS, "Read brightnessInfo failed");
+                return -1;
+            }
+            NotifyBrightnessInfoChanged(id, info);
+            break;
+        }
         case TRANS_ID_ON_SCREEN_MODE_CHANGED: {
             std::vector<sptr<ScreenInfo>> screenInfos;
             if (!MarshallingHelper::UnmarshallingVectorParcelableObj<ScreenInfo>(data, screenInfos)) {

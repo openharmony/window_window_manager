@@ -61,7 +61,7 @@ private:
         ScreenId screenId) override;
     void OnPowerStatusChange(DisplayPowerEvent event, EventStatus eventStatus,
         PowerStateChangeReason reason) override;
-    void OnSensorRotationChange(float sensorRotation, ScreenId screenId) override;
+    void OnSensorRotationChange(float sensorRotation, ScreenId screenId, bool isSwitchUser) override;
     void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) override;
     void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) override;
     void OnScreenDensityChange();

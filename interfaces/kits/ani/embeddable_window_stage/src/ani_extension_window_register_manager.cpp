@@ -31,6 +31,7 @@ AniExtensionWindowRegisterManager::AniExtensionWindowRegisterManager()
         {WINDOW_SIZE_CHANGE_CB, ListenerType::WINDOW_SIZE_CHANGE_CB},
         {AVOID_AREA_CHANGE_CB, ListenerType::AVOID_AREA_CHANGE_CB},
         {WINDOW_EVENT_CB, ListenerType::WINDOW_EVENT_CB},
+        {WINDOW_RECT_CHANGE_CB, ListenerType::WINDOW_RECT_CHANGE_CB},
     };
     // white register list for window stage
     listenerCodeMap_[CaseType::CASE_STAGE] = {
@@ -42,8 +43,8 @@ AniExtensionWindowRegisterManager::~AniExtensionWindowRegisterManager()
 {
 }
 
-WmErrorCode AniExtensionWindowRegisterManager::ProcessWindowChangeRegister(sptr<AniExtensionWindowListener> listener,
-    sptr<Window> window, bool isRegister)
+WmErrorCode AniExtensionWindowRegisterManager::ProcessWindowChangeRegister(sptr<AniExtensionWindowListener>& listener,
+    sptr<Window>& window, bool isRegister)
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]window is nullptr");
@@ -59,8 +60,8 @@ WmErrorCode AniExtensionWindowRegisterManager::ProcessWindowChangeRegister(sptr<
     return ret;
 }
 
-WmErrorCode AniExtensionWindowRegisterManager::ProcessAvoidAreaChangeRegister(sptr<AniExtensionWindowListener> listener,
-    sptr<Window> window, bool isRegister)
+WmErrorCode AniExtensionWindowRegisterManager::ProcessAvoidAreaChangeRegister(
+    sptr<AniExtensionWindowListener>& listener, sptr<Window>& window, bool isRegister)
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]window is nullptr");
@@ -76,8 +77,8 @@ WmErrorCode AniExtensionWindowRegisterManager::ProcessAvoidAreaChangeRegister(sp
     return ret;
 }
 
-WmErrorCode AniExtensionWindowRegisterManager::ProcessLifeCycleEventRegister(sptr<AniExtensionWindowListener> listener,
-    sptr<Window> window, bool isRegister)
+WmErrorCode AniExtensionWindowRegisterManager::ProcessLifeCycleEventRegister(sptr<AniExtensionWindowListener>& listener,
+    sptr<Window>& window, bool isRegister)
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]window is nullptr");
@@ -89,6 +90,22 @@ WmErrorCode AniExtensionWindowRegisterManager::ProcessLifeCycleEventRegister(spt
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterLifeCycleListener(thisListener));
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterLifeCycleListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode AniExtensionWindowRegisterManager::ProcessWindowRectChangeRegister(
+    sptr<AniExtensionWindowListener>& listener, sptr<Window>& window, bool isRegister)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowRectChangeListener(listener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowRectChangeListener(listener));
     }
     return ret;
 }
@@ -112,16 +129,16 @@ bool AniExtensionWindowRegisterManager::IsCallbackRegistered(ani_env* env, const
     return false;
 }
 
-WmErrorCode AniExtensionWindowRegisterManager::RegisterListener(sptr<Window> window, const std::string& type,
-    CaseType caseType, ani_env* env, ani_object fn, ani_object fnArg)
+WmErrorCode AniExtensionWindowRegisterManager::RegisterListener(sptr<Window>& window, const std::string& type,
+    CaseType caseType, ani_env* env, ani_object fn)
 {
     std::lock_guard<std::mutex> lock(mtx_);
     if (IsCallbackRegistered(env, type, fn)) {
-        return WmErrorCode::WM_ERROR_REPEAT_OPERATION;
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     if (listenerCodeMap_[caseType].count(type) == 0) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Type %{public}s listener is not supported", type.c_str());
-        return WmErrorCode::WM_ERROR_INVALID_PARAM;
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     ani_status ret {};
     ani_ref fnRef {};
@@ -129,21 +146,13 @@ WmErrorCode AniExtensionWindowRegisterManager::RegisterListener(sptr<Window> win
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Create fn global reference failed, ret: %{public}u", ret);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     };
-    ani_ref fnArgRef {};
-    if ((ret = env->GlobalReference_Create(fnArg, &fnArgRef)) != ANI_OK) {
-        env->GlobalReference_Delete(fnRef);
-        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Create fnArg global reference failed, ret: %{public}u", ret);
-        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-    };
-    sptr<AniExtensionWindowListener> extensionWindowListener =
-        sptr<AniExtensionWindowListener>::MakeSptr(env, fnRef, fnArgRef);
+    sptr<AniExtensionWindowListener> extensionWindowListener = sptr<AniExtensionWindowListener>::MakeSptr(env, fnRef);
     extensionWindowListener->SetMainEventHandler();
     WmErrorCode retCode = ProcessRegister(caseType, extensionWindowListener, window, type, true);
     if (retCode != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Register type %{public}s listener failed, ret: %{public}d",
             type.c_str(), retCode);
         env->GlobalReference_Delete(fnRef);
-        env->GlobalReference_Delete(fnArgRef);
         return retCode;
     }
     aniCbMap_[type][fnRef] = extensionWindowListener;
@@ -152,17 +161,17 @@ WmErrorCode AniExtensionWindowRegisterManager::RegisterListener(sptr<Window> win
     return WmErrorCode::WM_OK;
 }
 
-WmErrorCode AniExtensionWindowRegisterManager::UnregisterListener(sptr<Window> window, const std::string& type,
+WmErrorCode AniExtensionWindowRegisterManager::UnregisterListener(sptr<Window>& window, const std::string& type,
     CaseType caseType, ani_env* env, ani_object fn)
 {
     std::lock_guard<std::mutex> lock(mtx_);
     if (aniCbMap_.empty() || aniCbMap_.find(type) == aniCbMap_.end()) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Type %{public}s listener was not registered", type.c_str());
-        return WmErrorCode::WM_ERROR_INVALID_PARAM;
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     if (listenerCodeMap_[caseType].count(type) == 0) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Type %{public}s listener is not supported", type.c_str());
-        return WmErrorCode::WM_ERROR_INVALID_PARAM;
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     ani_boolean isUndefined = ANI_FALSE;
     env->Reference_IsUndefined(static_cast<ani_ref>(fn), &isUndefined);
@@ -216,7 +225,7 @@ WmErrorCode AniExtensionWindowRegisterManager::UnregisterListener(sptr<Window> w
 }
 
 WmErrorCode AniExtensionWindowRegisterManager::ProcessRegister(CaseType caseType,
-    const sptr<AniExtensionWindowListener>& listener, const sptr<Window>& window, const std::string& type,
+    sptr<AniExtensionWindowListener>& listener, sptr<Window>& window, const std::string& type,
     bool isRegister)
 {
     WmErrorCode ret = WmErrorCode::WM_OK;
@@ -230,6 +239,9 @@ WmErrorCode AniExtensionWindowRegisterManager::ProcessRegister(CaseType caseType
                 break;
             case ListenerType::WINDOW_EVENT_CB:
                 ret = ProcessLifeCycleEventRegister(listener, window, isRegister);
+                break;
+            case ListenerType::WINDOW_RECT_CHANGE_CB:
+                ret = ProcessWindowRectChangeRegister(listener, window, isRegister);
                 break;
             default:
                 break;

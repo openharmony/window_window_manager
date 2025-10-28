@@ -36,6 +36,8 @@ constexpr int POINTER_CHANGE_AREA_DEFAULT = 0;
 constexpr int POINTER_CHANGE_AREA_FIVE = 5;
 constexpr unsigned int TRANSFORM_DATA_LEN = 9;
 constexpr int UPDATE_TASK_DURATION = 10;
+constexpr uint32_t MMI_FLAG_BIT_LOCK_CURSOR_NOT_FOLLOW_MOVEMENT = 0x08;
+constexpr uint32_t MMI_FLAG_BIT_LOCK_CURSOR_FOLLOW_MOVEMENT = 0x10;
 const std::string UPDATE_WINDOW_INFO_TASK = "UpdateWindowInfoTask";
 static int32_t g_screenRotationOffset = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 constexpr float ZORDER_UIEXTENSION_INDEX = 0.1;
@@ -248,16 +250,16 @@ void SceneSessionDirtyManager::CalTransform(const sptr<SceneSession>& sceneSessi
     bool displayModeIsFull = static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::FULL;
     bool displayModeIsGlobalFull = displayMode == FoldDisplayMode::GLOBAL_FULL;
     bool displayModeIsMain = static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::MAIN;
+    bool displayModeIsCoordination = static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::COORDINATION;
     bool foldScreenStateInternel = FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
         FoldScreenStateInternel::IsSecondaryDisplayFoldDevice();
     TLOGD(WmsLogTag::WMS_EVENT, "wid:%{public}d, isRotate:%{public}d, isSystem:%{public}d,"
-        " displayModeIsFull:%{public}d, displayModeIsGlobalFull:%{public}d, displayModeIsMain:%{public}d,"
-        " foldScreenStateInternel:%{public}d, isRotateWindow:%{public}d, isScreenLockWindow:%{public}d",
-        sceneSession->GetWindowId(), isRotate, isSystem, displayModeIsFull, displayModeIsGlobalFull,
-        displayModeIsMain, foldScreenStateInternel, isRotateWindow, isScreenLockWindow);
+        " displayMode:%{public}d, foldScreenStateInternel:%{public}d, isRotateWindow:%{public}d,"
+        " isScreenLockWindow:%{public}d", sceneSession->GetWindowId(), isRotate, isSystem,
+        displayMode, foldScreenStateInternel, isRotateWindow, isScreenLockWindow);
 
     if (isRotate || !isSystem || displayModeIsFull || displayModeIsGlobalFull ||
-        (displayModeIsMain && foldScreenStateInternel)) {
+        (displayModeIsMain && foldScreenStateInternel) || displayModeIsCoordination) {
         if (isScreenLockWindow && isRotateWindow && ((displayModeIsMain && foldScreenStateInternel) ||
             (displayModeIsFull && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()))) {
             CalSpecialNotRotateTransform(sceneSession, screenProperty, transform, useUIExtension);
@@ -327,8 +329,10 @@ void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSes
         sceneSession->IsDragAccessible();
     bool isSingleHandAffectedWindow = singleHandData.mode != SingleHandMode::MIDDLE &&
         windowSessionProperty->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN;
+    bool isWindowSplit = windowSessionProperty->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+        windowSessionProperty->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
     if ((isAppPipWindow || isAppMainWindow || (isSystemOrSubWindow && isDragAccessibleWindow)) &&
-        !isMidScene && !isSingleHandAffectedWindow) {
+        !isMidScene && !isSingleHandAffectedWindow && !isWindowSplit) {
         float vpr = 1.5f; // 1.5: default vp
         auto sessionProperty = sceneSession->GetSessionProperty();
         if (sessionProperty != nullptr) {
@@ -833,6 +837,31 @@ void SceneSessionDirtyManager::UpdateWindowFlags(DisplayId displayId, const sptr
     }
 }
 
+void SceneSessionDirtyManager::UpdateWindowFlagsForLockCursor(const sptr<SceneSession>& sceneSession,
+    MMI::WindowInfo& windowInfo) const
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is null");
+        return;
+    }
+    auto lastLockCursor = sceneSession->GetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_LOCK_CURSOR);
+    if (!sceneSession->IsFocused()) {
+        if (lastLockCursor) {
+            sceneSession->SetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_LOCK_CURSOR, false);
+            TLOGW(WmsLogTag::WMS_EVENT, "LockCursor:Inconsistent focus ID:%{public}d", sceneSession->GetWindowId());
+        }
+        return;
+    }
+    if (!sceneSession->GetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_LOCK_CURSOR)) {
+        return;
+    }
+    if (sceneSession->GetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_CURSOR_FOLLOW_MOVEMENT)) {
+        windowInfo.flags |= MMI_FLAG_BIT_LOCK_CURSOR_FOLLOW_MOVEMENT;
+    } else {
+        windowInfo.flags |= MMI_FLAG_BIT_LOCK_CURSOR_NOT_FOLLOW_MOVEMENT;
+    }
+}
+
 std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyManager::GetWindowInfo(
     const sptr<SceneSession>& sceneSession, const WindowAction& action) const
 {
@@ -906,6 +935,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     if (expandInputFlag & static_cast<uint32_t>(ExpandInputFlag::WINDOW_DISABLE_USER_ACTION)) {
         windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_DISABLE_USER_ACTION;
     }
+    UpdateWindowFlagsForLockCursor(sceneSession, windowInfo);
     UpdatePrivacyMode(sceneSession, windowInfo);
     windowInfo.uiExtentionWindowInfo = GetSecSurfaceWindowinfoList(sceneSession, windowInfo, transform);
     return {windowInfo, pixelMap};

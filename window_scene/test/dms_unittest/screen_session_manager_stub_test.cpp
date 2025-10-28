@@ -30,7 +30,13 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
+    std::string g_logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        g_logMsg = msg;
+    }
+    constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 }
 class ScreenSessionManagerStubTest : public testing::Test {
 public:
@@ -60,45 +66,6 @@ void ScreenSessionManagerStubTest::TearDown()
 }
 
 namespace {
-/**
- * @tc.name: OnRemoteRequest01
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, ATC_OnRemoteRequest_NormalCase, TestSize.Level0)
-{
-    ScreenSessionManagerStub stub;
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    uint32_t code = 1;
-
-    int32_t expectedResult = 0;
-    int32_t actualResult = stub.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(actualResult, expectedResult);
-}
-
-/**
-
-@tc.name : OnRemoteRequest_ShouldReturnCorrectResult_WhenOnRemoteRequestInnerFails
-
-@tc.number: OnRemoteRequestTest_002
-
-@tc.desc : 测试当 OnRemoteRequestInner 失败时,OnRemoteRequest 返回正确的结果
-*/
-HWTEST_F(ScreenSessionManagerStubTest, ATC_OnRemoteRequest_FailureCase, TestSize.Level0)
-{
-    ScreenSessionManagerStub stub;
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    uint32_t code = 1;
-
-    int32_t expectedResult = -1;
-    int32_t actualResult = stub.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(actualResult, expectedResult);
-}
-
 HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest01, TestSize.Level1)
 {
     MessageParcel data;
@@ -2892,6 +2859,31 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest133, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnRemoteRequest13301
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest13301, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    ScreenId id = 0;
+    data.WriteUint64(static_cast<uint64_t>(id));
+    data.WriteBool(true);
+    data.WriteBool(true);
+    data.WriteBool(true);
+    uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_CAPTURE);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_TRUE(g_logMsg.find("Read node blackWindowIdList failed") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
  * @tc.name: OnRemoteRequest134
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -3306,6 +3298,25 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest154, Function | SmallTest 
     data.WriteUint32(1u);
     data.WriteUint32(1u);
     uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SCREEN_AREA_OF_DISPLAY_AREA);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: OnRemoteRequest40
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest155, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    data.WriteUint64(0);
+    uint32_t code = static_cast<uint32_t>(
+        DisplayManagerMessage::TRANS_ID_SCREEN_GET_SCREEN_BRIGHTNESS_INFO);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }

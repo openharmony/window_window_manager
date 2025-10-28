@@ -50,7 +50,7 @@ public:
             ScreenPropertyChangeReason reason, FoldDisplayMode mode) {}
     virtual void OnPowerStatusChange(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason) {}
-    virtual void OnSensorRotationChange(float sensorRotation, ScreenId screenId) {}
+    virtual void OnSensorRotationChange(float sensorRotation, ScreenId screenId, bool isSwitchUser) {}
     virtual void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) {}
     virtual void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) {}
     virtual void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) {}
@@ -155,10 +155,15 @@ public:
     void SetFakeScreenSession(sptr<ScreenSession> screenSession);
     sptr<ScreenSession> GetFakeScreenSession() const;
     void UpdatePropertyByActiveMode();
+    void UpdatePropertyByActiveModeChange();
     std::shared_ptr<RSDisplayNode> GetDisplayNode() const;
     void ReleaseDisplayNode();
 
-    Rotation CalcRotation(Orientation orientation, FoldDisplayMode foldDisplayMode) const;
+    Rotation CalcRotation(Orientation orientation, FoldDisplayMode foldDisplayMode);
+    DisplayOrientation CalcOrientationToDisplayOrientation(Orientation orientation);
+    Rotation CalcRotationByDeviceOrientation(DisplayOrientation displayRotation,
+        FoldDisplayMode foldDisplayMode, const RRect& boundsInRotationZero);
+    Rotation CalcRotationSystemInner(Orientation orientation, FoldDisplayMode foldDisplayMode) const;
     DisplayOrientation CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode);
     DisplayOrientation CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode);
     DisplayOrientation CalcDeviceOrientationWithBounds(Rotation rotation,
@@ -238,6 +243,7 @@ public:
     ScreenId screenId_ {};
     ScreenId rsId_ {};
     ScreenId defaultScreenId_ = SCREEN_ID_INVALID;
+    ScreenId phyScreenId_ = SCREEN_ID_INVALID;
 
     void SetIsExtend(bool isExtend);
     bool GetIsExtend() const;
@@ -304,10 +310,11 @@ public:
     // notify scb
     void SensorRotationChange(Rotation sensorRotation);
     void SensorRotationChange(float sensorRotation);
+    void SensorRotationChange(float sensorRotation, bool isSwitchUser);
     float GetValidSensorRotation();
     void HoverStatusChange(int32_t hoverStatus, bool needRotate = true);
     void CameraBackSelfieChange(bool isCameraBackSelfie);
-    void ScreenOrientationChange(Orientation orientation, FoldDisplayMode foldDisplayMode);
+    void ScreenOrientationChange(Orientation orientation, FoldDisplayMode foldDisplayMode, bool isFromNapi);
     void ScreenOrientationChange(float orientation);
     void ScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId);
     DMRect GetAvailableArea();
@@ -396,6 +403,16 @@ public:
 
     void UpdateMirrorWidth(uint32_t mirrorWidth);
     void UpdateMirrorHeight(uint32_t mirrorHeight);
+    void SetCurrentValidHeight(int32_t currentValidHeight);
+    int32_t GetCurrentValidHeight() const;
+    void SetIsPreFakeInUse(bool isPreFakeInUse);
+    bool GetIsPreFakeInUse() const;
+    void SetIsKeyboardOn(bool isKeyboardOn);
+    bool GetIsKeyboardOn() const;
+    void SetFloatRotation(float rotation);
+    void ModifyScreenPropertyWithLock(float rotation, RRect bounds);
+    ScreenId GetPhyScreenId();
+    void SetPhyScreenId(ScreenId screenId);
 
 private:
     bool IsVertical(Rotation rotation) const;

@@ -456,5 +456,43 @@ ani_status DisplayAniListener::CallAniMethodVoid(ani_object object, const char* 
     va_end(args);
     return ret;
 }
+
+void DisplayAniListener::OnBrightnessInfoChanged(DisplayId id, const ScreenBrightnessInfo& brightnessInfo)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] brightnessInfoChange is called, displayId: %{public}" PRIu64"", id);
+    auto thisListener = weakRef_.promote();
+    if (thisListener == nullptr || env_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] this listener or env is nullptr");
+        return;
+    }
+    std::lock_guard<std::mutex> lock(aniCallbackMtx_);
+    if (aniCallback_.empty()) {
+        TLOGE(WmsLogTag::DMS, "[ANI] OnBrightnessInfoChanged not register!");
+        return;
+    }
+    if (env_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
+        return;
+    }
+    auto it = aniCallback_.find(ANI_EVENT_BRIGHTNESS_INFO_CHANGED);
+    if (it == aniCallback_.end()) {
+        TLOGE(WmsLogTag::DMS, "[ANI] OnBrightnessInfoChanged not this event, return");
+        return;
+    }
+    for (auto oneAniCallback : it->second) {
+        auto task = [env = env_, oneAniCallback, id, screenBrightness = brightnessInfo] () {
+            ani_object obj = DisplayAniUtils::CreateBrightnessInfoObject(env);
+            DisplayAniUtils::CvtBrightnessInfo(env, obj, screenBrightness);
+            DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "brightnessInfoChangeCallback",
+                nullptr, oneAniCallback, id, obj);
+        };
+        if (!eventHandler_) {
+            TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
+            return;
+        }
+        eventHandler_->PostTask(task, "dms:AniDisplayListener::BrightnessInfoChangeCallback", 0,
+            AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    }
+}
 }
 }

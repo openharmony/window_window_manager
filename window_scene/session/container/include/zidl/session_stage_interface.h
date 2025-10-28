@@ -55,7 +55,8 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
-        const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION },
+        const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION,
+            0, WindowAnimationCurve::LINEAR, {0.0f, 0.0f, 0.0f, 0.0f} },
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {}) = 0;
 
     /**
@@ -131,6 +132,7 @@ public:
     virtual void DumpSessionElementInfo(const std::vector<std::string>& params) = 0;
     virtual WSError NotifyTouchOutside() = 0;
     virtual WSError NotifyWindowVisibility(bool isVisible) = 0;
+    virtual WSError NotifyWindowOcclusionState(const WindowVisibilityState state) = 0;
     virtual WSError UpdateWindowMode(WindowMode mode) = 0;
     virtual WSError GetTopNavDestinationName(std::string& topNavDestName) = 0;
     virtual WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) = 0;
@@ -185,6 +187,7 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError NotifyPipWindowSizeChange(double width, double height, double scale) = 0;
+    virtual WSError NotifyPipScreenStatusChange(PiPScreenStatus status) = 0;
 
     /**
      * @brief Set the media control event to client.
@@ -273,6 +276,7 @@ public:
     virtual void NotifyKeyboardAnimationWillBegin(const KeyboardAnimationInfo& keyboardAnimationInfo,
         const std::shared_ptr<RSTransaction>& rsTransaction) {};
     virtual WSError NotifyTargetRotationInfo(OrientationInfo& info) { return WSError::WS_DO_NOTHING; }
+    virtual WSError NotifyPageRotationIsIgnored() { return WSError::WS_DO_NOTHING; }
     virtual RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo)
     {
         return { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0, } };

@@ -209,7 +209,7 @@ public:
     virtual bool IsTransparent() const override;
     virtual WMError SetBrightness(float brightness) override;
     virtual float GetBrightness() const override;
-    virtual WMError SetCallingWindow(uint32_t windowId) override;
+    virtual WMError ChangeCallingWindowId(uint32_t windowId) override;
     virtual WMError SetPrivacyMode(bool isPrivacyMode) override;
     virtual bool IsPrivacyMode() const override;
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
@@ -296,6 +296,7 @@ public:
     void UpdateDragEvent(const PointInfo& point, DragEvent event);
     void UpdateDisplayId(DisplayId from, DisplayId to);
     void UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info,
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UpdateActiveStatus(bool isActive);
     void NotifyTouchOutside();
@@ -375,7 +376,9 @@ public:
     /*
      * Keyboard
      */
-    WMError ShowKeyboard(KeyboardEffectOption effectOption) override;
+    WMError ShowKeyboard(uint32_t callingWindowId, uint64_t tgtDisplayId,
+        KeyboardEffectOption effectOption) override;
+    sptr<OccupiedAreaChangeInfo> occupiedAreaInfo_ = nullptr;
 
     /*
      * RS Client Multi Instance

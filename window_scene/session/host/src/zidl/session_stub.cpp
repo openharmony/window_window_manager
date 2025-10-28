@@ -329,6 +329,10 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetFrameRectForPartialZoomIn(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_IS_FULL_SCREEN_IN_FORCE_SPLIT):
             return HandleNotifyIsFullScreenInForceSplitMode(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RESTART_APP):
+            return HandleRestartApp(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_COMMAND_EVENT):
+            return HandleSendCommonEvent(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -561,6 +565,17 @@ int SessionStub::HandleRemoveStartingWindow(MessageParcel& data, MessageParcel& 
 }
 // LCOV_EXCL_STOP
 
+bool ReadEventParam(MessageParcel& data, SessionEvent event, SessionEventParam& param)
+{
+    if (event == SessionEvent::EVENT_MAXIMIZE) {
+        if (!data.ReadUint32(param.waterfallResidentState)) {
+            TLOGE(WmsLogTag::WMS_EVENT, "Failed to read waterfallResidentState");
+            return false;
+        }
+    }
+    return true;
+}
+
 int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_EVENT, "In!");
@@ -570,12 +585,16 @@ int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
         return ERR_INVALID_DATA;
     }
     TLOGD(WmsLogTag::WMS_EVENT, "eventId: %{public}d", eventId);
-    if (eventId < static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE) ||
-        eventId >= static_cast<uint32_t>(SessionEvent::EVENT_END)) {
+    auto event = static_cast<SessionEvent>(eventId);
+    if (event < SessionEvent::EVENT_MAXIMIZE || event >= SessionEvent::EVENT_END) {
         TLOGE(WmsLogTag::WMS_EVENT, "Invalid eventId: %{public}d", eventId);
         return ERR_INVALID_DATA;
     }
-    WSError errCode = OnSessionEvent(static_cast<SessionEvent>(eventId));
+    SessionEventParam param;
+    if (!ReadEventParam(data, event, param)) {
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = OnSessionEvent(event, param);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -850,6 +869,10 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         return ERR_INVALID_DATA;
     }
     abilitySessionInfo->windowCreateParams.reset(data.ReadParcelable<WindowCreateParams>());
+    if (!data.ReadBool(abilitySessionInfo->isPrelaunch)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read isPrelaunch failed.");
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = PendingSessionActivation(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -1687,8 +1710,7 @@ int SessionStub::HandleSetDecorVisible(MessageParcel& data, MessageParcel& reply
         TLOGE(WmsLogTag::WMS_DECOR, "Failed to read isVisible");
         return ERR_INVALID_DATA;
     }
-    WSError ret = SetDecorVisible(isVisible);
-    reply.WriteInt32(static_cast<int32_t>(ret));
+    SetDecorVisible(isVisible);
     return ERR_NONE;
 }
 
@@ -2395,6 +2417,71 @@ int SessionStub::HandleNotifyIsFullScreenInForceSplitMode(MessageParcel& data, M
     WSError errCode = NotifyIsFullScreenInForceSplitMode(isFullScreen);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_COMPAT, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleRestartApp(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    std::shared_ptr<AAFwk::Want> want = std::shared_ptr<AAFwk::Want>(data.ReadParcelable<AAFwk::Want>());
+    if (!want) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read want error");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = RestartApp(want);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSendCommonEvent(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t command = 0;
+    if (!data.ReadInt32(command)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Read size failed");
+        return ERR_INVALID_DATA;
+    }
+
+    std::vector<int32_t> parameters;
+    int32_t length = 0;
+    if (!data.ReadInt32(length)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Read size failed");
+        return ERR_INVALID_DATA;
+    }
+    if (length > COMMON_EVENT_COMMAND_MAX_LENGTH || length < 0) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Out of range.");
+        return ERR_INVALID_DATA;
+    }
+    parameters.emplace_back(length);
+
+    int32_t info = 0;
+    for (int i = 0; i < length; i++) {
+        if (!data.ReadInt32(info)) {
+            TLOGE(WmsLogTag::WMS_EVENT, "Read size failed");
+            return ERR_INVALID_DATA;
+        }
+        parameters.emplace_back(info);
+    }
+
+    WMError ret = WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    switch (command) {
+        case static_cast<uint32_t>(CommonEventCommand::LOCK_CURSOR):
+            ret = LockCursor(parameters);
+            break;
+        case static_cast<uint32_t>(CommonEventCommand::UNLOCK_CURSOR):
+            ret = UnlockCursor(parameters);
+            break;
+        default:
+            ret = WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+            break;
+    }
+
+    if (!reply.WriteUint32(static_cast<uint32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Write errCode failed.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

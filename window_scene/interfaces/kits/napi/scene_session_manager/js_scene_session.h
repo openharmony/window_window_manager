@@ -35,6 +35,7 @@ enum class ListenerFuncType : uint32_t {
     BUFFER_AVAILABLE_CHANGE_CB,
     SESSION_EVENT_CB,
     SESSION_RECT_CHANGE_CB,
+    SESSION_WINDOW_LIMITS_CHANGE_CB,
     SESSION_PIP_CONTROL_STATUS_CHANGE_CB,
     SESSION_AUTO_START_PIP_CB,
     CREATE_SUB_SESSION_CB,
@@ -113,6 +114,9 @@ enum class ListenerFuncType : uint32_t {
     FLOATING_BALL_STOP_CB,
     FLOATING_BALL_RESTORE_MAIN_WINDOW_CB,
     SCENE_OUTLINE_PARAMS_CHANGE_CB,
+    RESTART_APP_CB,
+    CALLING_SESSION_ID_CHANGE_CB,
+    ROTATION_LOCK_CHANGE_CB,
 };
 
 class SceneSession;
@@ -203,6 +207,7 @@ private:
     static napi_value SetPipActionEvent(napi_env env, napi_callback_info info);
     static napi_value NotifyPipOcclusionChange(napi_env env, napi_callback_info info);
     static napi_value NotifyPipSizeChange(napi_env env, napi_callback_info info);
+    static napi_value NotifyPipScreenWindowStatusChange(napi_env env, napi_callback_info info);
     static napi_value SetPiPControlEvent(napi_env env, napi_callback_info info);
     static napi_value NotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info);
     static napi_value SetSkipDraw(napi_env env, napi_callback_info info);
@@ -251,6 +256,7 @@ private:
     static napi_value AddSidebarBlur(napi_env env, napi_callback_info info);
     static napi_value SetSidebarBlur(napi_env env, napi_callback_info info);
     static napi_value NotifyRotationProperty(napi_env env, napi_callback_info info);
+    static napi_value NotifyPageRotationIsIgnored(napi_env env, napi_callback_info info);
     static napi_value SetCurrentRotation(napi_env env, napi_callback_info info);
     static napi_value SetSidebarBlurMaximize(napi_env env, napi_callback_info info);
     static napi_value RequestSpecificSessionClose(napi_env env, napi_callback_info info);
@@ -263,6 +269,7 @@ private:
     static napi_value SetPcAppInpadCompatibleMode(napi_env env, napi_callback_info info);
     static napi_value SetPcAppInpadSpecificSystemBarInvisible(napi_env env, napi_callback_info info);
     static napi_value SetPcAppInpadOrientationLandscape(napi_env env, napi_callback_info info);
+    static napi_value UpdateSceneAnimationConfig(napi_env env, napi_callback_info info);
     static napi_value SetMobileAppInPadLayoutFullScreen(napi_env env, napi_callback_info info);
     /*
      * PC Window
@@ -307,6 +314,7 @@ private:
     napi_value OnSetPiPControlEvent(napi_env env, napi_callback_info info);
     napi_value OnNotifyPipOcclusionChange(napi_env env, napi_callback_info info);
     napi_value OnNotifyPipSizeChange(napi_env env, napi_callback_info info);
+    napi_value OnNotifyPipScreenStatusChange(napi_env env, napi_callback_info info);
     napi_value OnNotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info);
     napi_value OnSetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
     napi_value OnSetSkipDraw(napi_env env, napi_callback_info info);
@@ -348,6 +356,7 @@ private:
     napi_value OnAddSidebarBlur(napi_env env, napi_callback_info info);
     napi_value OnSetSidebarBlur(napi_env env, napi_callback_info info);
     napi_value OnNotifyRotationProperty(napi_env env, napi_callback_info info);
+    napi_value OnNotifyPageRotationIsIgnored(napi_env env, napi_callback_info info);
     napi_value OnNotifyRotationChange(napi_env env, napi_callback_info info);
     napi_value OnSetCurrentRotation(napi_env env, napi_callback_info info);
     napi_value OnSetSidebarBlurMaximize(napi_env env, napi_callback_info info);
@@ -357,6 +366,7 @@ private:
     napi_value OnSetPcAppInpadCompatibleMode(napi_env env, napi_callback_info info);
     napi_value OnSetPcAppInpadSpecificSystemBarInvisible(napi_env env, napi_callback_info info);
     napi_value OnSetPcAppInpadOrientationLandscape(napi_env env, napi_callback_info info);
+    napi_value OnUpdateSceneAnimationConfig(napi_env env, napi_callback_info info);
     napi_value OnSetMobileAppInPadLayoutFullScreen(napi_env env, napi_callback_info info);
 
     /*
@@ -371,6 +381,7 @@ private:
     void ProcessClearSubSessionRegister();
     void ProcessBindDialogTargetRegister();
     void ProcessSessionRectChangeRegister();
+    void ProcessSessionWindowLimitsChangeRegister();
     void ProcessFloatingBallUpdateRegister();
     void ProcessFloatingBallStopRegister();
     void ProcessFloatingBallRestoreMainWindowRegister();
@@ -421,6 +432,7 @@ private:
     void ProcessWindowMovingRegister();
     void ProcessUpdateSessionLabelAndIconRegister();
     void ProcessKeyboardStateChangeRegister();
+    void ProcessCallingSessionIdChangeRegister();
     void ProcessKeyboardEffectOptionChangeRegister();
     void ProcessSetHighlightChangeRegister();
     void ProcessWindowAnchorInfoChangeRegister();
@@ -431,12 +443,14 @@ private:
     void ProcessSetSubWindowSourceRegister();
     void ProcessAnimateToTargetPropertyRegister();
     void ProcessSceneOutlineParamsChangeRegister();
+    void ProcessRestartAppRegister();
 
     /*
      * Window Property
     */
     void ProcessSetWindowCornerRadiusRegister();
     void ProcessSetWindowShadowsRegister();
+    void ProcessRotationLockChangeRegister();
 
     /*
      * PC Window Layout
@@ -459,6 +473,7 @@ private:
     void OnSessionRectChange(const WSRect& rect,
         SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID,
         const RectAnimationConfig& rectAnimationConfig = {});
+    void OnSessionWindowLimitsChange(const WindowLimits& windowlimits);
     void OnFloatingBallUpdate(const FloatingBallTemplateInfo& fbTemplateInfo);
     void OnFloatingBallStop();
     void OnFloatingBallRestoreMainWindow(const std::shared_ptr<AAFwk::Want>& want);
@@ -501,7 +516,7 @@ private:
     void OnDefaultDensityEnabled(bool isDefaultDensityEnabled);
     void OnWindowShadowEnableChange(bool isEnabled);
     void OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true, bool isDockHoverShown = true);
-    void RestoreMainWindow();
+    void RestoreMainWindow(bool isAppSupportPhoneInPc, int32_t callingPid, uint32_t callingToken);
     void NotifyFrameLayoutFinish();
     void ProcessPrivacyModeChangeRegister();
     void NotifyPrivacyModeChange(bool isPrivacyMode);
@@ -509,7 +524,8 @@ private:
     void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl, bool isControlRecentOnly);
     void OnWindowMoving(DisplayId displayId, int32_t pointerX, int32_t pointerY);
     void UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
-    void OnKeyboardStateChange(SessionState state, const KeyboardEffectOption& effectOption);
+    void OnKeyboardStateChange(SessionState state, const KeyboardEffectOption& effectOption,
+        const uint32_t callingSessionId, const DisplayId targetDisplayId);
     void OnKeyboardEffectOptionChange(const KeyboardEffectOption& effectOption);
     void NotifyHighlightChange(bool isHighlight);
     void NotifyWindowAnchorInfoChange(const WindowAnchorInfo& windowAnchorInfo);
@@ -523,12 +539,15 @@ private:
     void OnAnimateToTargetProperty(const WindowAnimationProperty& animationProperty,
         const WindowAnimationOption& animationOption);
     void OnOutlineParamsChange(bool isOutlineEnabled, const OutlineStyleParams& outlineStyleParams);
+    void OnRestartApp(const SessionInfo& info, int32_t callingPid);
+    void OnCallingSessionIdChange(uint32_t callingSessionId);
 
     /*
      * Window Property
     */
     void OnSetWindowCornerRadius(float cornerRadius);
     void OnSetWindowShadows(const ShadowsInfo& shadowsInfo);
+    void OnRotationLockChange(bool locked);
 
     /*
      * PC Window Layout

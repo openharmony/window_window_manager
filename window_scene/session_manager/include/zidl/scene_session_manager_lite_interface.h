@@ -99,6 +99,7 @@ public:
         TRANS_ID_PENDING_SESSION_TO_BACKGROUND_BY_PERSISTENTID,
         TRANS_ID_CREATE_NEW_INSTANCE_KEY,
         TRANS_ID_GET_ROUTER_STACK_INFO,
+        TRANS_ID_GET_DISPLAYID_BY_WINDOWID,
         TRANS_ID_REMOVE_INSTANCE_KEY,
         TRANS_ID_TRANSFER_SESSION_TO_TARGET_SCREEN,
         TRANS_ID_PENDING_SESSION_TO_BACKGROUND,
@@ -115,6 +116,9 @@ public:
         TRANS_ID_REGISTER_PIP_CHG_LISTENER,
         TRANS_ID_UNREGISTER_PIP_CHG_LISTENER,
         TRANS_ID_UPDATE_ANIMATION_SPEED_WITH_PID,
+        TRANS_ID_GET_PARENT_WINDOW_ID,
+        TRANS_ID_SET_SESSION_ICON_FOR_THIRD_PARTY,
+        TRANS_ID_GET_MAIN_WINDOW_INFO_BY_TOKEN,
     };
 
     /*
@@ -137,8 +141,11 @@ public:
         const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker = false) = 0;
     virtual WSError ClearSession(int32_t persistentId) = 0;
     virtual WSError ClearAllSessions() = 0;
+    virtual WMError GetParentMainWindowId(int32_t windowId, int32_t& mainWindowId) = 0;
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
     virtual WSError SetSessionIcon(const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon) = 0;
+    virtual WSError SetSessionIconForThirdParty(
+        const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon) = 0;
     virtual WSError RegisterIAbilityManagerCollaborator(int32_t type,
         const sptr<AAFwk::IAbilityManagerCollaborator>& impl) = 0;
     virtual WSError UnregisterIAbilityManagerCollaborator(int32_t type) = 0;

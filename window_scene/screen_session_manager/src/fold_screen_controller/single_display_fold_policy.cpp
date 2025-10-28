@@ -132,16 +132,20 @@ void SingleDisplayFoldPolicy::SetdisplayModeChangeStatus(bool status, bool isOnB
     }
 }
 
-void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode, DisplayModeChangeReason reason)
+bool SingleDisplayFoldPolicy::CheckDisplayModeChange(FoldDisplayMode displayMode, bool isForce)
 {
+    if (isForce) {
+        TLOGI(WmsLogTag::DMS, "force change displayMode");
+        return true;
+    }
     if (isClearingBootAnimation_) {
         TLOGI(WmsLogTag::DMS, "clearing bootAnimation not change displayMode");
-        return;
+        return false;
     }
     SetLastCacheDisplayMode(displayMode);
     if (GetModeChangeRunningStatus()) {
         TLOGW(WmsLogTag::DMS, "last process not complete, skip mode: %{public}d", displayMode);
-        return;
+        return false;
     }
     TLOGI(WmsLogTag::DMS, "start change displaymode: %{public}d, lastElapsedMs: %{public}" PRId64 "ms",
         displayMode, getFoldingElapsedMs());
@@ -151,8 +155,27 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         if (currentDisplayMode_ == displayMode) {
             TLOGW(WmsLogTag::DMS, "ChangeScreenDisplayMode already in displayMode %{public}d", displayMode);
-            return;
+            return false;
         }
+    }
+    return true;
+}
+
+void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode, DisplayModeChangeReason reason)
+{
+    if (!CheckDisplayModeChange(displayMode, false)) {
+        return;
+    }
+    ChangeScreenDisplayModeInner(displayMode, reason);
+    ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
+    ScreenSessionManager::GetInstance().SwitchScrollParam(displayMode);
+}
+
+void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode, bool isForce,
+    DisplayModeChangeReason reason)
+{
+    if (!CheckDisplayModeChange(displayMode, isForce)) {
+        return;
     }
     ChangeScreenDisplayModeInner(displayMode, reason);
     ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
@@ -276,9 +299,7 @@ void SingleDisplayFoldPolicy::RecoverWhenBootAnimationExit()
 {
     TLOGI(WmsLogTag::DMS, "CurrentScreen(%{public}" PRIu64 ")", screenId_);
     FoldDisplayMode displayMode = GetModeMatchStatus();
-    if (currentDisplayMode_ != displayMode) {
-        ChangeScreenDisplayMode(displayMode);
-    }
+    ChangeScreenDisplayMode(displayMode);
 }
 
 void SingleDisplayFoldPolicy::UpdateForPhyScreenPropertyChange()
@@ -492,6 +513,7 @@ void SingleDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> scree
 {
     std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
     screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenId);
+    screenSession->SetPhyScreenId(screenId);
     if (!ScreenSessionManager::GetInstance().GetClientProxy()) {
         ScreenProperty property = screenSession->UpdatePropertyByFoldControl(screenProperty_);
         screenSession->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);

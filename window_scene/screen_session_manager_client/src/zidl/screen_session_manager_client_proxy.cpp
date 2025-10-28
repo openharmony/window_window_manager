@@ -186,13 +186,13 @@ void ScreenSessionManagerClientProxy::OnPropertyChanged(ScreenId screenId,
     }
 }
 
-void ScreenSessionManagerClientProxy::OnFoldPropertyChanged(ScreenId screenId, const ScreenProperty& property,
-    ScreenPropertyChangeReason reason, FoldDisplayMode displayMode)
+bool ScreenSessionManagerClientProxy::OnFoldPropertyChange(ScreenId screenId, const ScreenProperty& property,
+    ScreenPropertyChangeReason reason, FoldDisplayMode displayMode, ScreenProperty& midProperty)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::DMS, "remote is nullptr");
-        return;
+        return false;
     }
 
     MessageParcel data;
@@ -200,30 +200,35 @@ void ScreenSessionManagerClientProxy::OnFoldPropertyChanged(ScreenId screenId, c
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
-        return;
+        return false;
     }
     if (!data.WriteUint64(screenId)) {
         TLOGE(WmsLogTag::DMS, "Write screenId failed");
-        return;
+        return false;
     }
     if (!RSMarshallingHelper::Marshalling(data, property)) {
         TLOGE(WmsLogTag::DMS, "Write property failed");
-        return;
+        return false;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
         TLOGE(WmsLogTag::DMS, "Write reason failed");
-        return;
+        return false;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(displayMode))) {
         TLOGE(WmsLogTag::DMS, "Write displayMode failed");
-        return;
+        return false;
     }
     if (remote->SendRequest(
         static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_FOLD_PROPERTY_CHANGED),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::DMS, "SendRequest failed");
-        return;
+        return false;
     }
+    if (!RSMarshallingHelper::Unmarshalling(reply, midProperty)) {
+        TLOGE(WmsLogTag::DMS, "read property failed");
+        return false;
+    }
+    return true;
 }
 
 void ScreenSessionManagerClientProxy::OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
@@ -261,7 +266,8 @@ void ScreenSessionManagerClientProxy::OnPowerStatusChanged(DisplayPowerEvent eve
     }
 }
 
-void ScreenSessionManagerClientProxy::OnSensorRotationChanged(ScreenId screenId, float sensorRotation)
+void ScreenSessionManagerClientProxy::OnSensorRotationChanged(ScreenId screenId,
+    float sensorRotation, bool isSwitchUser)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -282,6 +288,10 @@ void ScreenSessionManagerClientProxy::OnSensorRotationChanged(ScreenId screenId,
     }
     if (!data.WriteFloat(sensorRotation)) {
         TLOGE(WmsLogTag::DMS, "Write sensorRotation failed");
+        return;
+    }
+    if (!data.WriteBool(isSwitchUser)) {
+        TLOGE(WmsLogTag::DMS, "Write isSwitchUser failed");
         return;
     }
     if (remote->SendRequest(
@@ -441,7 +451,7 @@ void ScreenSessionManagerClientProxy::OnDisplayStateChanged(DisplayId defaultDis
 }
 
 void ScreenSessionManagerClientProxy::OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
-    std::vector<uint64_t>& surfaceNodeIds, bool isBlackList)
+    std::vector<uint64_t>& surfaceNodeIds, const std::vector<uint32_t>& needWindowTypeList, bool isNeedForceCheck)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -464,8 +474,12 @@ void ScreenSessionManagerClientProxy::OnGetSurfaceNodeIdsFromMissionIdsChanged(s
         TLOGE(WmsLogTag::DMS, "Write surfaceNodeIds failed");
         return;
     }
-    if (!data.WriteBool(isBlackList)) {
-        TLOGE(WmsLogTag::DMS, "Write isBlackList failed");
+    if (!data.WriteUInt32Vector(needWindowTypeList)) {
+        TLOGE(WmsLogTag::DMS, "Write needWindowTypeList failed");
+        return;
+    }
+    if (!data.WriteBool(isNeedForceCheck)) {
+        TLOGE(WmsLogTag::DMS, "Write isNeedForceCheck failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(

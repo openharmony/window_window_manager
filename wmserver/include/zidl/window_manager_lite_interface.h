@@ -47,6 +47,7 @@ public:
     virtual WMError UpdateAnimationSpeedWithPid(pid_t pid, float speed) { return WMError::WM_OK; }
     virtual WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo) = 0;
     virtual WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) = 0;
+    virtual WMError GetMainWindowInfoByToken(const sptr<IRemoteObject>& abilityToken, MainWindowInfo& windowInfo) = 0;
     virtual WMError ClearMainSessions(const std::vector<int32_t>& persistentIds,
         std::vector<int32_t>& clearFailedIds) = 0;
     virtual WSError RaiseWindowToTop(int32_t persistentId) { return WSError::WS_OK; }
@@ -61,6 +62,8 @@ public:
         std::vector<sptr<WindowInfo>>& infos) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WSError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
         { return WSError::WS_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+        std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) = 0;
 };
 }
 }

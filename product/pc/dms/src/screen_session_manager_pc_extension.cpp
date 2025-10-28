@@ -122,7 +122,9 @@ void ScreenSessionManagerExt::ScreenConnectionChanged(sptr<ScreenSession> screen
         return;
     }
 #endif
-    if (clientProxy) {
+    if (IsConcurrentUser()) {
+        NotifyUserClientProxy(screenSession, screenId, screenEvent);
+    } else if (clientProxy) {
         {
             std::unique_lock<std::mutex> lock(displayAddMutex_);
             needWaitAvailableArea_ = true;
@@ -146,10 +148,4 @@ void ScreenSessionManagerExt::ScreenConnectionChanged(sptr<ScreenSession> screen
 bool ScreenSessionManagerExt::IsNeedAddInputServiceAbility()
 {
     return true;
-}
-
-void ScreenSessionManagerExt::NotifyCastWhenScreenConnectChange(bool isConnected)
-{
-    TLOGI(WmsLogTag::DMS, "pc device");
-    return;
 }

@@ -158,6 +158,19 @@ static bool GetControlGroupFromJs(napi_env env, napi_value controlGroup, std::ve
     return true;
 }
 
+template <class T>
+static void GetPipOptionParamFromJs(napi_env env, napi_value optionObject,
+                                    const std::string& propertyName, T& property)
+{
+    napi_value propertyValue = nullptr;
+    napi_status status = napi_get_named_property(env, optionObject, propertyName.c_str(), &propertyValue);
+    if (status != napi_ok || propertyValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "napi_get_named_property failed, propertyName: %{public}s", propertyName.c_str());
+        return;
+    }
+    ConvertFromJsValue(env, propertyValue, property);
+}
+
 static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionObject, PipOption& option)
 {
     napi_value contextPtrValue = nullptr;
@@ -165,7 +178,6 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     napi_value templateTypeValue = nullptr;
     napi_value widthValue = nullptr;
     napi_value heightValue = nullptr;
-    napi_value defaultWindowSizeTypeValue = nullptr;
     napi_value xComponentControllerValue = nullptr;
     napi_value controlGroup = nullptr;
     napi_value nodeController = nullptr;
@@ -178,13 +190,13 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     uint32_t height = 0;
     uint32_t defaultWindowSizeType = 0;
     std::vector<std::uint32_t> controls;
+    int32_t handleId = -1;
 
     napi_get_named_property(env, optionObject, "context", &contextPtrValue);
     napi_get_named_property(env, optionObject, "navigationId", &navigationIdValue);
     napi_get_named_property(env, optionObject, "templateType", &templateTypeValue);
     napi_get_named_property(env, optionObject, "contentWidth", &widthValue);
     napi_get_named_property(env, optionObject, "contentHeight", &heightValue);
-    napi_get_named_property(env, optionObject, "defaultWindowSizeType", &defaultWindowSizeTypeValue);
     napi_get_named_property(env, optionObject, "componentController", &xComponentControllerValue);
     napi_get_named_property(env, optionObject, "controlGroups", &controlGroup);
     napi_get_named_property(env, optionObject, "customUIController", &nodeController);
@@ -196,8 +208,9 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     ConvertFromJsValue(env, templateTypeValue, templateType);
     ConvertFromJsValue(env, widthValue, width);
     ConvertFromJsValue(env, heightValue, height);
-    ConvertFromJsValue(env, defaultWindowSizeTypeValue, defaultWindowSizeType);
+    GetPipOptionParamFromJs(env, optionObject, "defaultWindowSizeType", defaultWindowSizeType);
     GetControlGroupFromJs(env, controlGroup, controls, templateType);
+    GetPipOptionParamFromJs(env, optionObject, "handleId", handleId);
     std::shared_ptr<XComponentController> xComponentControllerResult =
         XComponentController::GetXComponentControllerFromNapiValue(env, xComponentControllerValue);
     option.SetContext(contextPtr);

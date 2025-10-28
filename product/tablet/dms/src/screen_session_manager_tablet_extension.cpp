@@ -69,8 +69,3 @@ bool ScreenSessionManagerExt::IsNeedAddInputServiceAbility()
 {
     return COMBINE_FUNC(IsNeedAddInputServiceAbility());
 }
-
-void ScreenSessionManagerExt::NotifyCastWhenScreenConnectChange(bool isConnected)
-{
-    COMBINE_FUNC(NotifyCastWhenScreenConnectChange(bool isConnected));
-}

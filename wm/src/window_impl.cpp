@@ -150,7 +150,7 @@ void WindowImpl::InitWindowProperty(const sptr<WindowOption>& option)
     property_->SetFocusable(option->GetFocusable());
     property_->SetTouchable(option->GetTouchable());
     property_->SetDisplayId(option->GetDisplayId());
-    property_->SetCallingWindow(option->GetCallingWindow());
+    property_->ChangeCallingWindowId(option->GetCallingWindow());
     property_->SetWindowFlags(option->GetWindowFlags());
     property_->SetHitOffset(option->GetHitOffset());
     property_->SetRequestedOrientation(option->GetRequestedOrientation());
@@ -1937,7 +1937,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus, bo
     return ret;
 }
 
-WMError WindowImpl::ShowKeyboard(KeyboardEffectOption effectOption)
+WMError WindowImpl::ShowKeyboard(uint32_t callingWindowId, uint64_t tgtDisplayId, KeyboardEffectOption effectOption)
 {
     return Show();
 }
@@ -2216,12 +2216,12 @@ float WindowImpl::GetBrightness() const
     return property_->GetBrightness();
 }
 
-WMError WindowImpl::SetCallingWindow(uint32_t windowId)
+WMError WindowImpl::ChangeCallingWindowId(uint32_t windowId)
 {
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    property_->SetCallingWindow(windowId);
+    property_->ChangeCallingWindowId(windowId);
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW);
 }
 
@@ -3780,7 +3780,7 @@ void WindowImpl::UpdateViewportConfig(const Rect& rect, const sptr<Display>& dis
             config.SetOrientation(static_cast<int32_t>(displayInfo->GetDisplayOrientation()));
         }
     }
-    uiContent_->UpdateViewportConfig(config, reason, rsTransaction, avoidAreas);
+    uiContent_->UpdateViewportConfig(config, reason, rsTransaction, avoidAreas, occupiedAreaInfo_);
     WLOGFD("Id:%{public}u, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
         property_->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
 }
@@ -4003,9 +4003,19 @@ void WindowImpl::UpdateDisplayId(DisplayId from, DisplayId to)
 }
 
 void WindowImpl::UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info,
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     WLOGFD("Update OccupiedArea, id: %{public}u", property_->GetWindowId());
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        occupiedAreaInfo_ = info;
+        WLOGFI("occupiedAreaeInfo changed, rect:[%{public}u, %{public}u, %{public}u, %{public}u]",
+            info->rect_.posX_, info->rect_.posY_, info->rect_.width_, info->rect_.height_);
+    }
+    auto display = SingletonContainer::IsDestroyed() ? nullptr :
+        SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    UpdateViewportConfig(GetRect(), display, WindowSizeChangeReason::OCCUPIED_AREA_CHANGE, nullptr, avoidAreas);
     NotifyOccupiedAreaChange(info, rsTransaction);
 }
 

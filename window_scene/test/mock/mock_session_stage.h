@@ -59,6 +59,7 @@ public:
     MOCK_METHOD2(UpdateTitleInTargetPos, WSError(bool isShow, int32_t height));
     MOCK_METHOD2(NotifyDensityFollowHost, WSError(bool isFollowHost, float densityValue));
     MOCK_METHOD1(NotifyWindowVisibility, WSError(bool isVisible));
+    MOCK_METHOD1(NotifyWindowOcclusionState, WSError(const WindowVisibilityState state));
     MOCK_METHOD1(NotifyTransformChange, void(const Transform& transform));
     MOCK_METHOD1(NotifySingleHandTransformChange, void(const SingleHandTransform& singleHandTransform));
     MOCK_METHOD1(NotifyDialogStateChange, WSError(bool isForeground));
@@ -83,6 +84,7 @@ public:
         bool isHighlight));
     MOCK_METHOD1(SetDragActivated, WSError(bool dragActivated));
     MOCK_METHOD3(NotifyPipWindowSizeChange, WSError(double width, double height, double scale));
+    MOCK_METHOD1(NotifyPipScreenStatusChange, WSError(PiPScreenStatus status));
     MOCK_METHOD1(NotifyWindowCrossAxisChange, void(CrossAxisState state));
     MOCK_METHOD1(LinkKeyFrameCanvasNode, WSError(std::shared_ptr<RSCanvasNode>& rsCanvasNode));
     MOCK_METHOD1(SetKeyFramePolicy, WSError(KeyFramePolicy& keyFramePolicy));

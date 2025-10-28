@@ -105,9 +105,9 @@ void WindowNode::SetKeepScreenOn(bool keepScreenOn)
     property_->SetKeepScreenOn(keepScreenOn);
 }
 
-void WindowNode::SetCallingWindow(uint32_t windowId)
+void WindowNode::ChangeCallingWindowId(uint32_t windowId)
 {
-    property_->SetCallingWindow(windowId);
+    property_->ChangeCallingWindowId(windowId);
 }
 
 uint32_t WindowNode::GetCallingWindow() const

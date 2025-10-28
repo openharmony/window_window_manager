@@ -132,7 +132,7 @@ public:
     virtual DMError GetScreenSupportedColorGamuts(ScreenId screenId,
         std::vector<ScreenColorGamut>& colorGamuts) override;
 
-    virtual DMError SetOrientation(ScreenId screenId, Orientation orientation) override;
+    virtual DMError SetOrientation(ScreenId screenId, Orientation orientation, bool isFromNapi) override;
     virtual DMError SetScreenRotationLocked(bool isLocked) override;
     virtual DMError SetScreenRotationLockedFromJs(bool isLocked) override;
     virtual DMError IsScreenRotationLocked(bool& isLocked) override;
@@ -241,6 +241,7 @@ public:
     void NotifyScreenMaskAppear() override;
     DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea) override;
+    DMError GetBrightnessInfo(DisplayId displayId, ScreenBrightnessInfo& brightnessInfo) override;
     DMError SetPrimaryDisplaySystemDpi(float dpi) override;
     DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) override;
     DMError SetScreenPrivacyWindowTagSwitch(ScreenId screenId, const std::vector<std::string>& privacyWindowTag,

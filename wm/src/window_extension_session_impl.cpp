@@ -73,12 +73,14 @@ WindowExtensionSessionImpl::WindowExtensionSessionImpl(const sptr<WindowOption>&
 {
     if (property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL ||
         SessionHelper::IsSecureUIExtension(property_->GetUIExtensionUsage())) {
+        startModalExtensionTimeStamp_ = option->GetStartModalExtensionTimeStamp();
         extensionWindowFlags_.hideNonSecureWindowsFlag = true;
     }
     if ((isDensityFollowHost_ = option->GetIsDensityFollowHost())) {
         hostDensityValue_ = option->GetDensity();
     }
-    TLOGNI(WmsLogTag::WMS_UIEXT, "Uiext usage=%{public}u", property_->GetUIExtensionUsage());
+    TLOGNI(WmsLogTag::WMS_UIEXT, "Uiext usage=%{public}u, timeStamp=%{public}" PRId64,
+        property_->GetUIExtensionUsage(), startModalExtensionTimeStamp_);
     dataHandler_ = std::make_shared<Extension::ProviderDataHandler>();
     RegisterDataConsumer();
 }
@@ -166,7 +168,7 @@ void WindowExtensionSessionImpl::AddExtensionWindowStageToSCB(bool isConstrained
     }
 
     SingletonContainer::Get<WindowAdapter>().AddExtensionWindowStageToSCB(sptr<ISessionStage>(this), abilityToken_,
-        surfaceNode_->GetId(), isConstrainedModal);
+        surfaceNode_->GetId(), startModalExtensionTimeStamp_, isConstrainedModal);
 }
 
 void WindowExtensionSessionImpl::RemoveExtensionWindowStageFromSCB(bool isConstrainedModal)
@@ -758,52 +760,59 @@ void WindowExtensionSessionImpl::ArkUIFrameworkSupport()
     }
 }
 
-std::unique_ptr<Ace::UIContent> WindowExtensionSessionImpl::UIContentCreate(AppExecFwk::Ability* ability, void* env,
-    int isAni)
+std::unique_ptr<Ace::UIContent> WindowExtensionSessionImpl::CreateUIContent(AppExecFwk::Ability* ability, void* env,
+    EnvironmentType envType)
 {
-    if (isAni) {
-        return  ability != nullptr ? Ace::UIContent::Create(ability) :
-            Ace::UIContent::CreateWithAniEnv(context_.get(), reinterpret_cast<ani_env*>(env));
+    if (envType == EnvironmentType::ANI) {
+        return ability != nullptr ? Ace::UIContent::Create(ability) :
+            Ace::UIContent::CreateWithAniEnv(GetContext().get(), reinterpret_cast<ani_env*>(env));
     } else {
-        return  ability != nullptr ? Ace::UIContent::Create(ability) :
-            Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
+        return ability != nullptr ? Ace::UIContent::Create(ability) :
+            Ace::UIContent::Create(GetContext().get(), reinterpret_cast<NativeEngine*>(env));
     }
-}
- 
-WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
-    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
-{
-    return NapiSetUIContentInner(contentInfo, env, storage, type, token, ability, 1);
 }
  
 WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
     BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
-    return NapiSetUIContentInner(contentInfo, env, storage, type, token, ability, 0);
+    return SetUIContentInner(contentInfo, env, storage, token, ability, false, EnvironmentType::NAPI);
 }
- 
-WMError WindowExtensionSessionImpl::NapiSetUIContentInner(const std::string& contentInfo, void* env, void* storage,
-    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability, int isAni)
+
+WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
+    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
-    return SetUIContentInner(contentInfo, env, storage, token, ability, false, isAni);
+    return SetUIContentInner(contentInfo, env, storage, token, ability, false, EnvironmentType::ANI);
+}
+
+WMError WindowExtensionSessionImpl::AniSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
+    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
+{
+    return SetUIContentInner(contentInfo, env, storage, token, ability, false, EnvironmentType::ANI);
 }
 
 WMError WindowExtensionSessionImpl::NapiSetUIContentByName(const std::string& contentName, napi_env env,
     napi_value storage, BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "name: %{public}s", contentName.c_str());
-    return SetUIContentInner(contentName, env, storage, token, ability, true);
+    return SetUIContentInner(contentName, env, storage, token, ability, true, EnvironmentType::NAPI);
+}
+
+WMError WindowExtensionSessionImpl::AniSetUIContentByName(const std::string& contentName, ani_env* env,
+    ani_object storage, BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "name: %{public}s", contentName.c_str());
+    return SetUIContentInner(contentName, env, storage, token, ability, true, EnvironmentType::ANI);
 }
 
 WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& contentInfo, void* env, void* storage,
-    sptr<IRemoteObject> token, AppExecFwk::Ability* ability, bool initByName, int isAni)
+    sptr<IRemoteObject> token, AppExecFwk::Ability* ability, bool initByName, EnvironmentType envType)
 {
     WLOGFD("%{public}s state:%{public}u", contentInfo.c_str(), state_);
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->Destroy();
     }
     {
-        std::unique_ptr<Ace::UIContent> uiContent = UIContentCreate(ability, (void*)env, isAni);
+        std::unique_ptr<Ace::UIContent> uiContent = CreateUIContent(ability, static_cast<void*>(env), envType);
         if (uiContent == nullptr) {
             WLOGFE("failed, id: %{public}d", GetPersistentId());
             return WMError::WM_ERROR_NULLPTR;
@@ -821,16 +830,18 @@ WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& content
         }
         uiContent->SetHostParams(extensionConfig_);
         if (initByName) {
-            if (isAni) {
-                uiContent->InitializeByNameWithAniStorage(this, contentInfo, (ani_object)storage);
+            if (envType == EnvironmentType::ANI) {
+                uiContent->InitializeByNameWithAniStorage(this, contentInfo, static_cast<ani_object>(storage));
             } else {
-                uiContent->InitializeByName(this, contentInfo, (napi_value)storage, property_->GetParentId());
+                uiContent->InitializeByName(this, contentInfo, static_cast<napi_value>(storage),
+                    property_->GetParentId());
             }
         } else {
-            if (isAni) {
-                uiContent->InitializeWithAniStorage(this, contentInfo, (ani_object)storage, property_->GetParentId());
+            if (envType == EnvironmentType::ANI) {
+                uiContent->InitializeWithAniStorage(this, contentInfo, static_cast<ani_object>(storage),
+                    property_->GetParentId());
             } else {
-                uiContent->Initialize(this, contentInfo, (napi_value)storage, property_->GetParentId());
+                uiContent->Initialize(this, contentInfo, static_cast<napi_value>(storage), property_->GetParentId());
             }
         }
         // make uiContent available after Initialize/Restore

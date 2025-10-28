@@ -52,6 +52,10 @@ private:
         bool isRegister, ani_env* env);
     WmErrorCode ProcessKeyboardDidHideRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
+    WmErrorCode ProcessKeyboardWillShowRegister(sptr<AniWindowListener> listener, const sptr<Window>& window,
+        bool isRegister, ani_env* env);
+    WmErrorCode ProcessKeyboardWillHideRegister(sptr<AniWindowListener> listener, const sptr<Window>& window,
+        bool isRegister, ani_env* env);
     WmErrorCode ProcessSystemBarChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window, bool isRegister,
     ani_env* env);
     WmErrorCode ProcessTouchOutsideRegister(sptr<AniWindowListener> listener, sptr<Window> window, bool isRegister,
@@ -70,6 +74,8 @@ private:
         sptr<Window> window, bool isRegister, ani_env* env);
     WmErrorCode ProcessWindowVisibilityChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
+    WmErrorCode ProcessOcclusionStateChangeRegister(const sptr<AniWindowListener>& listener, sptr<Window> window,
+        bool isRegister, ani_env* env);
     WmErrorCode ProcessSystemDensityChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
     WmErrorCode ProcessDisplayIdChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
@@ -86,6 +92,8 @@ private:
         bool isRegister, ani_env* env);
     WmErrorCode ProcessMainWindowCloseRegister(const sptr<AniWindowListener>& listener, const sptr<Window>& window,
         bool isRegister, ani_env* env);
+    WmErrorCode ProcessExtensionSecureLimitChangeRegister(const sptr<AniWindowListener>& listener,
+        const sptr<Window>& window, bool isRegister, ani_env* env);
     WmErrorCode ProcessWindowStageListener(RegisterListenerType registerListenerType,
         const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,
         ani_env* env);
@@ -100,6 +108,12 @@ private:
     WmErrorCode ProcessRectChangeInGlobalDisplayRegister(const sptr<AniWindowListener>& listener,
         const sptr<Window>& window, bool isRegister, ani_env* env);
     WmErrorCode ProcessWindowStatusDidChangeRegister(const sptr<AniWindowListener>& listener,
+        const sptr<Window>& window, bool isRegister, ani_env* env);
+    WmErrorCode ProcessAcrossDisplaysChangeRegister(const sptr<AniWindowListener>& listener, const sptr<Window>& window,
+        bool isRegister, ani_env* env);
+    WmErrorCode ProcessScreenshotAppEventRegister(const sptr<AniWindowListener>& listener, const sptr<Window>& window,
+        bool isRegister, ani_env* env);
+    WmErrorCode ProcessFreeWindowModeChangeRegister(const sptr<AniWindowListener>& listener,
         const sptr<Window>& window, bool isRegister, ani_env* env);
     WmErrorCode ProcessListener(RegisterListenerType registerListenerType, CaseType caseType,
         const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister, ani_env* env,

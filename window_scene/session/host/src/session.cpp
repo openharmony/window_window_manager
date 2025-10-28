@@ -43,6 +43,7 @@
 #include "session/host/include/pc_fold_screen_manager.h"
 #include "perform_reporter.h"
 #include "session/host/include/scene_persistent_storage.h"
+#include "screen_manager.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -60,6 +61,7 @@ constexpr int64_t STATE_DETECT_DELAYTIME = 3 * 1000;
 constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
 constexpr int32_t TIMES_TO_WAIT_FOR_VSYNC_ONECE = 1;
 constexpr int32_t TIMES_TO_WAIT_FOR_VSYNC_TWICE = 2;
+
 const std::map<SessionState, bool> ATTACH_MAP = {
     { SessionState::STATE_DISCONNECT, false },
     { SessionState::STATE_CONNECT, false },
@@ -80,6 +82,7 @@ const bool CORRECTION_ENABLE = system::GetIntParameter<int32_t>("const.system.se
 const uint32_t ROTATION_90 = 90;
 const uint32_t ROTATION_360 = 360;
 const uint32_t ROTATION_LANDSCAPE_INVERTED = 3;
+const std::string APP_CAST_SCREEN_NAME = "HwCast_AppModeDisplay";
 } // namespace
 
 std::shared_ptr<AppExecFwk::EventHandler> Session::mainHandler_;
@@ -402,6 +405,30 @@ uint32_t Session::GetSessionInfoExpandInputFlag() const
     return sessionInfo_.expandInputFlag_;
 }
 
+void Session::SetSessionInfoAdvancedFeatureFlag(uint32_t bitPosition, bool value)
+{
+    if (bitPosition >= ADVANCED_FEATURE_BIT_MAX) {
+        TLOGE(WmsLogTag::WMS_EVENT, "id:%{public}d, bitPosition:%{public}u", GetPersistentId(), bitPosition);
+        return;
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+        sessionInfo_.advancedFeatureFlag_.set(bitPosition, value);
+    }
+}
+
+bool Session::GetSessionInfoAdvancedFeatureFlag(uint32_t bitPosition)
+{
+    if (bitPosition >= ADVANCED_FEATURE_BIT_MAX) {
+        TLOGE(WmsLogTag::WMS_EVENT, "id:%{public}d, bitPosition:%{public}u", GetPersistentId(), bitPosition);
+        return false;
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+        return sessionInfo_.advancedFeatureFlag_.test(bitPosition);
+    }
+}
+
 void Session::SetSessionInfoWindowMode(int32_t windowMode)
 {
     sessionInfo_.windowMode = windowMode;
@@ -489,6 +516,7 @@ void Session::NotifyActivation()
             listenerPtr->OnActivation();
         }
     }
+    snapshotNeedCancel_.store(true);
 }
 
 void Session::NotifyConnect()
@@ -557,6 +585,16 @@ void Session::NotifyPreLoadStartingWindowFinished()
     for (auto& listener : lifecycleListeners) {
         if (auto listenerPtr = listener.lock()) {
             listenerPtr->OnPreLoadStartingWindowFinished();
+        }
+    }
+}
+
+void Session::NotifyRestart()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (auto listenerPtr = listener.lock()) {
+            listenerPtr->OnRestart();
         }
     }
 }
@@ -1260,7 +1298,13 @@ WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason r
     }
     if (sessionStage_ != nullptr) {
         int32_t rotateAnimationDuration = GetRotateAnimationDuration();
-        SceneAnimationConfig config { .rsTransaction_ = rsTransaction, .animationDuration_ = rotateAnimationDuration };
+        SceneAnimationConfig config;
+        config.rsTransaction_ = rsTransaction;
+        config.animationDuration_ = rotateAnimationDuration;
+        if (reason == SizeChangeReason::SCENE_WITH_ANIMATION) {
+            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "UpdateRectWithLayoutInfo %{public}d", reason);
+            config = sceneAnimationConfig_;
+        }
         UpdateClientRectPosYAndDisplayId(updateRect);
         sessionStage_->UpdateRect(updateRect, reason, config, avoidAreas);
         SetClientRect(rect);
@@ -1377,6 +1421,20 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     Rect rect = {winRect.posX_, winRect.posY_, static_cast<uint32_t>(winRect.width_),
         static_cast<uint32_t>(winRect.height_)};
     property->SetWindowRect(rect);
+    // Check if the current session is prelaunch and set the session rect based on the screen size.
+    if (GetSessionInfo().isPrelaunch_) {
+        auto displayId = property->GetDisplayId();
+        const std::map<ScreenId, ScreenProperty>& screenProperties =
+            Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+        if (screenProperties.find(displayId) != screenProperties.end()) {
+            auto screenProperty = screenProperties.at(displayId);
+            int32_t width = screenProperty.GetBounds().rect_.GetWidth();
+            int32_t height = screenProperty.GetBounds().rect_.GetHeight();
+            TLOGI(WmsLogTag::WMS_MAIN, "update prelaunch rect[0, 0, %{public}d, %{public}d] "
+                "when session connect", width, height);
+            SetSessionRect({0, 0, width, height});
+        }
+    }
     property->SetPersistentId(GetPersistentId());
     property->SetAppIndex(GetSessionInfo().appIndex_);
     property->SetFullScreenStart(GetSessionInfo().fullScreenStart_);
@@ -1604,19 +1662,15 @@ WSError Session::Disconnect(bool isFromClient, const std::string& identityToken)
     if (mainHandler_) {
         std::shared_ptr<RSSurfaceNode> surfaceNode;
         std::shared_ptr<RSSurfaceNode> shadowSurfaceNode;
-        std::shared_ptr<RSSurfaceNode> leashWinShadowSurfaceNode;
         {
             std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
             surfaceNode_.swap(surfaceNode);
             shadowSurfaceNode.swap(shadowSurfaceNode_);
-            leashWinShadowSurfaceNode.swap(leashWinShadowSurfaceNode_);
         }
         mainHandler_->PostTask([surfaceNode = std::move(surfaceNode),
-                                shadowSurfaceNode = std::move(shadowSurfaceNode),
-                                leashWinShadowSurfaceNode = std::move(leashWinShadowSurfaceNode)]() mutable {
+                                shadowSurfaceNode = std::move(shadowSurfaceNode)]() mutable {
             surfaceNode.reset();
             shadowSurfaceNode.reset();
-            leashWinShadowSurfaceNode.reset();
         });
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
@@ -1917,6 +1971,19 @@ void Session::SetTerminateSessionListener(NotifyTerminateSessionFunc&& func)
             return;
         }
         session->terminateSessionFunc_ = std::move(func);
+    }, where);
+}
+
+void Session::SetRestartAppListener(NotifyRestartAppFunc&& func)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), func = std::move(func), where] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
+            return;
+        }
+        session->restartAppFunc_ = std::move(func);
     }, where);
 }
 
@@ -2818,20 +2885,21 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
     if (CORRECTION_ENABLE && key == 0) {
         rotation = (rotation + ROTATION_90) % ROTATION_360;
     }
-    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
-        WSSnapshotHelper::GetInstance()->GetScreenStatus() == SCREEN_FOLDED) {
-        rotation = ROTATION_LANDSCAPE_INVERTED;
-    }
     auto rotate = WSSnapshotHelper::GetDisplayOrientation(rotation);
     if (persistentPixelMap || !SupportSnapshotAllSessionStatus()) {
         key = defaultStatus;
         rotate = DisplayOrientation::PORTRAIT;
     }
+    bool needCacheSnapshot = (SupportCacheLockedSessionSnapshot() && reason == LifeCycleChangeReason::SCREEN_LOCK);
     auto task = [weakThis = wptr(this), runInFfrt = useFfrt, requirePersist = needPersist, persistentPixelMap,
-        updateSnapshot, key, rotate]() {
+        updateSnapshot, key, rotate, needCacheSnapshot, reason]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            return;
+        }
+        if (reason == LifeCycleChangeReason::QUICK_BATCH_BACKGROUND && session->snapshotNeedCancel_.load()) {
+            TLOGNW(WmsLogTag::WMS_LIFE, "snapshot canceled id %{public}d", session->GetPersistentId());
             return;
         }
         session->lastLayoutRect_ = session->layoutRect_;
@@ -2848,10 +2916,6 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
             session->addSnapshotCallback_();
         }
         session->SetAddSnapshotCallback([]() {});
-        {
-            std::lock_guard<std::mutex> lock(session->saveSnapshotCallbackMutex_);
-            session->saveSnapshotCallback_();
-        }
         if (!requirePersist) {
             return;
         }
@@ -2869,12 +2933,12 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
                 "_" + std::to_string(key), true, ScenePersistentStorageType::MAXIMIZE_STATE);
         }
         session->scenePersistence_->ResetSnapshotCache();
-        Task removeSnapshotCallback = []() {};
-        {
-            std::lock_guard lock(session->removeSnapshotCallbackMutex_);
-            removeSnapshotCallback = session->removeSnapshotCallback_;
+        Task saveSnapshotCallback = []() {};
+        if (!needCacheSnapshot) {
+            std::lock_guard lock(session->saveSnapshotCallbackMutex_);
+            saveSnapshotCallback = session->saveSnapshotCallback_;
         }
-        session->scenePersistence_->SaveSnapshot(pixelMap, removeSnapshotCallback, key, rotate,
+        session->scenePersistence_->SaveSnapshot(pixelMap, saveSnapshotCallback, key, rotate,
             session->freeMultiWindow_.load());
         if (updateSnapshot) {
             session->SetExitSplitOnBackground(false);
@@ -2890,6 +2954,21 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
     std::string taskName = "Session::SaveSnapshot" + std::to_string(persistentId_);
     snapshotFfrtHelper->CancelTask(taskName);
     snapshotFfrtHelper->SubmitTask(std::move(task), taskName);
+}
+
+void Session::ResetLockedCacheSnapshot()
+{
+    if (!SupportCacheLockedSessionSnapshot()) {
+        return;
+    }
+    if (snapshot_) {
+        ResetSnapshot();
+    }
+}
+
+bool Session::SupportCacheLockedSessionSnapshot() const
+{
+    return systemConfig_.supportCacheLockedSessionSnapshot_;
 }
 
 void Session::SetFreeMultiWindow()
@@ -3137,8 +3216,10 @@ void Session::UnregisterSessionChangeListeners()
     sessionInfoLockedStateChangeFunc_ = nullptr;
     contextTransparentFunc_ = nullptr;
     sessionRectChangeFunc_ = nullptr;
+    sessionWindowLimitsChangeFunc_ = nullptr;
     updateSessionLabelAndIconFunc_ = nullptr;
     onRaiseMainWindowAboveTarget_ = nullptr;
+    callingSessionIdChangeFunc_ = nullptr;
     WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", GetPersistentId());
 }
 
@@ -3200,7 +3281,9 @@ void Session::NotifySessionStateChange(const SessionState& state)
             static_cast<uint32_t>(state), session->GetPersistentId());
         if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
             session->keyboardStateChangeFunc_) {
-            session->keyboardStateChangeFunc_(state, session->GetSessionProperty()->GetKeyboardEffectOption());
+            const sptr<WindowSessionProperty>& property = session->GetSessionProperty();
+            session->keyboardStateChangeFunc_(
+                state, property->GetKeyboardEffectOption(), property->GetCallingSessionId(), property->GetDisplayId());
         } else if (session->sessionStateChangeFunc_) {
             session->sessionStateChangeFunc_(state);
         } else {
@@ -3800,6 +3883,7 @@ void Session::SetSessionGlobalRect(const WSRect& rect)
 {
     if (layoutController_->SetSessionGlobalRect(rect)) {
         dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::GLOBAL_RECT);
+        AddPropertyDirtyFlags(static_cast<uint32_t>(SessionPropertyFlag::WINDOW_GLOBAL_RECT));
     }
 }
 
@@ -3849,6 +3933,36 @@ void Session::SetHidingStartingWindow(bool hidingStartWindow)
 bool Session::GetHidingStartingWindow() const
 {
     return hidingStartWindow_;
+}
+
+void Session::SetRestartApp(bool restartApp)
+{
+    sessionInfo_.isRestartApp_ = restartApp;
+}
+
+bool Session::GetRestartApp() const
+{
+    return sessionInfo_.isRestartApp_;
+}
+
+void Session::SetRestartInSameProcess(bool restartInSameProcess)
+{
+    sessionInfo_.isRestartInSameProcess_ = restartInSameProcess;
+}
+
+bool Session::GetRestartInSameProcess() const
+{
+    return sessionInfo_.isRestartInSameProcess_;
+}
+
+void Session::SetRestartCallerPersistentId(int32_t restartCallerPersistentId)
+{
+    sessionInfo_.restartCallerPersistentId_ = restartCallerPersistentId;
+}
+
+int32_t Session::GetRestartCallerPersistentId() const
+{
+    return sessionInfo_.restartCallerPersistentId_;
 }
 
 WSError Session::SetLeashWindowAlpha(bool hidingStartWindow)
@@ -4021,6 +4135,11 @@ bool Session::CheckEmptyKeyboardAvoidAreaIfNeeded() const
     bool isPhoneOrPadNotFreeMultiWindow = isPhoneNotFreeMultiWindow || isPadNotFreeMultiWindow;
     TLOGI(WmsLogTag::WMS_LIFE, "check keyboard avoid area, isPhoneNotFreeMultiWindow: %{public}d, "
         "isPadNotFreeMultiWindow: %{public}d", isPhoneNotFreeMultiWindow, isPadNotFreeMultiWindow);
+    auto screen = ScreenManager::GetInstance().GetScreenById(property_->GetDisplayId());
+    if (screen != nullptr && screen->GetName() == APP_CAST_SCREEN_NAME) {
+        TLOGI(WmsLogTag::WMS_LIFE, "app cast screen");
+        return true;
+    }
     return (isMainFloating || isParentFloating) && !isMidScene && isPhoneOrPadNotFreeMultiWindow;
 }
 
@@ -4044,6 +4163,19 @@ void Session::SetKeyboardStateChangeListener(const NotifyKeyboardStateChangeFunc
         session->NotifySessionStateChange(newState);
         TLOGNI(WmsLogTag::WMS_KEYBOARD, "%{public}s id: %{public}d, state_: %{public}d, newState: %{public}d",
             where, session->GetPersistentId(), session->GetSessionState(), newState);
+    }, __func__);
+}
+
+void Session::SetCallingSessionIdSessionListenser(const ProcessCallingSessionIdChangeFunc&& func)
+{
+    TLOGD(WmsLogTag::DEFAULT, "in");
+    PostTask([weakThis = wptr(this), func = std::move(func), where = __func__]() {
+        auto session = weakThis.promote();
+        if (session == nullptr || func == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s session or func is null", where);
+            return;
+        }
+        session->callingSessionIdChangeFunc_ = std::move(func);
     }, __func__);
 }
 
@@ -4927,6 +5059,9 @@ void Session::DeletePersistentImageFit()
         Rosen::ScenePersistentStorage::Delete("SetImageForRecent_" + std::to_string(GetPersistentId()),
             Rosen::ScenePersistentStorageType::MAXIMIZE_STATE);
     }
+    if (scenePersistence_) {
+        scenePersistence_->ClearSnapshotPath();
+    }
 }
 
 void Session::SetGlobalDisplayRect(const WSRect& rect)
@@ -5006,11 +5141,6 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     auto screenId = GetScreenId();
-    if (screenId == SCREEN_ID_INVALID) {
-        TLOGW(WmsLogTag::WMS_SCB,
-              "invalid screenId, %{public}s: %{public}s, sessionId: %{public}d, screenId:%{public}" PRIu64,
-              caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
-    }
     if (screenIdOfRSUIContext_ != screenId) {
         // Note: For the window corresponding to UIExtAbility, RSUIContext cannot be obtained
         // directly here because its server side is not SceneBoard. The acquisition of RSUIContext
@@ -5019,8 +5149,12 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
         rsUIContext_ = ScreenSessionManagerClient::GetInstance().GetRSUIContext(screenId);
         screenIdOfRSUIContext_ = screenId;
     }
+    if (rsUIContext_ == nullptr) {
+        TLOGI(WmsLogTag::WMS_SCB, "%{public}s: %{public}s, sessionId: %{public}d, screenId:%{public}" PRIu64,
+            caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
+    }
     TLOGD(WmsLogTag::WMS_SCB, "%{public}s: %{public}s, sessionId: %{public}d, screenId:%{public}" PRIu64,
-          caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
+            caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
     return rsUIContext_;
 }
 

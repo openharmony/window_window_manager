@@ -1321,6 +1321,7 @@ bool ConvertCompatibleModePropertyFromJs(napi_env env, napi_value value, Compati
         {"disableSplit", &CompatibleModeProperty::SetDisableSplit},
         {"disableWindowLimit", &CompatibleModeProperty::SetDisableWindowLimit},
         {"disableDecorFullscreen", &CompatibleModeProperty::SetDisableDecorFullscreen},
+        {"isFullScreenStart", &CompatibleModeProperty::SetIsFullScreenStart},
         {"isSupportRotateFullScreen", &CompatibleModeProperty::SetIsSupportRotateFullScreen},
         {"isAdaptToSubWindow", &CompatibleModeProperty::SetIsAdaptToSubWindow},
         {"isAdaptToSimulationScale", &CompatibleModeProperty::SetIsAdaptToSimulationScale},
@@ -1770,6 +1771,8 @@ napi_value CreateJsSessionSizeChangeReason(napi_env env)
         static_cast<int32_t>(SizeChangeReason::RECOVER_IN_IMPLICIT)));
     napi_set_named_property(env, objValue, "SNAPSHOT_ROTATION", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::SNAPSHOT_ROTATION)));
+    napi_set_named_property(env, objValue, "SCENE_WITH_ANIMATION", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::SCENE_WITH_ANIMATION)));
     napi_set_named_property(env, objValue, "END", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::END)));
 
@@ -1943,6 +1946,24 @@ napi_value CreateJsSessionPiPControlStatus(napi_env env)
     return objValue;
 }
 
+napi_value CreateJsSessionPiPScreenStatus(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to create object! objValue is null");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "STATUS_UNKNOWN", CreateJsValue(env,
+        static_cast<int32_t>(PiPScreenStatus::STATUS_UNKNOWN)));
+    napi_set_named_property(env, objValue, "STATUS_FOREGROUND", CreateJsValue(env,
+        static_cast<int32_t>(PiPScreenStatus::STATUS_FOREGROUND)));
+    napi_set_named_property(env, objValue, "STATUS_SIDEBAR", CreateJsValue(env,
+        static_cast<int32_t>(PiPScreenStatus::STATUS_SIDEBAR)));
+    return objValue;
+}
+
 napi_value CreateJsSessionGravity(napi_env env)
 {
     napi_value objValue = nullptr;
@@ -2058,6 +2079,7 @@ napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& para
     napi_set_named_property(env, objValue, "sessionHeight", CreateJsValue(env, param.sessionHeight_));
     napi_set_named_property(env, objValue, "dragResizeType", CreateJsValue(env, param.dragResizeType));
     napi_set_named_property(env, objValue, "gravity", CreateJsValue(env, param.gravity));
+    napi_set_named_property(env, objValue, "waterfallResidentState", CreateJsValue(env, param.waterfallResidentState));
     return objValue;
 }
 
@@ -2590,6 +2612,48 @@ napi_value CreateWindowAnchorType(napi_env env)
     return objValue;
 }
 
+napi_value CreatePixelUnitType(napi_env env)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Env is nullptr");
+        return nullptr;
+    }
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to get object");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "PX",
+        CreateJsValue(env, static_cast<uint32_t>(PixelUnit::PX)));
+    napi_set_named_property(env, objValue, "VP",
+        CreateJsValue(env, static_cast<uint32_t>(PixelUnit::VP)));
+    return objValue;
+}
+
+napi_value CreateWaterfallResidentState(napi_env env)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "env is nullptr");
+        return nullptr;
+    }
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to create object");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "UNCHANGED",
+        CreateJsValue(env, static_cast<uint32_t>(WaterfallResidentState::UNCHANGED)));
+    napi_set_named_property(env, objValue, "OPEN",
+        CreateJsValue(env, static_cast<uint32_t>(WaterfallResidentState::OPEN)));
+    napi_set_named_property(env, objValue, "CLOSE",
+        CreateJsValue(env, static_cast<uint32_t>(WaterfallResidentState::CLOSE)));
+    napi_set_named_property(env, objValue, "CANCEL",
+        CreateJsValue(env, static_cast<uint32_t>(WaterfallResidentState::CANCEL)));
+    return objValue;
+}
+
 MainThreadScheduler::MainThreadScheduler(napi_env env)
     : env_(env)
 {
@@ -2636,5 +2700,53 @@ void MainThreadScheduler::RemoveMainThreadTaskByName(const std::string taskName)
     if (handler_ && !handler_->GetEventRunner()->IsCurrentRunnerThread()) {
         handler_->RemoveTask("wms:" + taskName);
     }
+}
+
+bool convertAnimConfigFromJs(napi_env env, napi_value jsObject, SceneAnimationConfig& config)
+{
+    napi_value jsDelay = nullptr;
+    napi_get_named_property(env, jsObject, "delay", &jsDelay);
+    napi_value jsDuration = nullptr;
+    napi_get_named_property(env, jsObject, "duration", &jsDuration);
+    napi_value jsAnimationCurve = nullptr;
+    napi_get_named_property(env, jsObject, "curve", &jsAnimationCurve);
+    napi_value jsParams = nullptr;
+    napi_get_named_property(env, jsObject, "param", &jsParams);
+    int32_t delay = 0;
+    int32_t duration = 0;
+    WindowAnimationCurve curve = WindowAnimationCurve::LINEAR;
+    if (GetType(env, jsDelay) != napi_undefined && !ConvertFromJsValue(env, jsDelay, delay)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to delay");
+        return false;
+    }
+    config.animationDelay_ = delay > 0 ? delay : 0;
+    if (GetType(env, jsDuration) != napi_undefined && !ConvertFromJsValue(env, jsDuration, duration)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to duration");
+        return false;
+    }
+    config.animationDuration_ = duration > 0 ? duration : 0;
+    if (GetType(env, jsAnimationCurve) != napi_undefined && !ConvertFromJsValue(env, jsAnimationCurve, curve)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to curve");
+        return false;
+    }
+    config.animationCurve_ = static_cast<WindowAnimationCurve>(curve);
+    if (jsParams != nullptr && GetType(env, jsParams) != napi_undefined) {
+        bool isArray = false;
+        if (napi_is_array(env, jsParams, &isArray) != napi_ok || !isArray) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "Params is not array");
+            return false;
+        }
+        for (uint32_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
+            napi_value element = nullptr;
+            double paramValue = 0.0;
+            if (napi_get_element(env, jsParams, i, &element) == napi_ok &&
+                napi_get_value_double(env, element, &paramValue) == napi_ok && paramValue >= 0) {
+                config.animationParam_[i] = static_cast<float>(paramValue);
+            } else {
+                config.animationParam_[i] = static_cast<float>(paramValue);
+            }
+        }
+    }
+    return true;
 }
 } // namespace OHOS::Rosen

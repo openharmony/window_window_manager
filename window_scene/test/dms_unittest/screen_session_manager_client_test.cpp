@@ -614,11 +614,12 @@ HWTEST_F(ScreenSessionManagerClientTest, OnFoldPropertyChanged, TestSize.Level1)
 {
     ScreenId screenId = 0;
     ScreenProperty property;
+    ScreenProperty midProperty;
     ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::UNDEFINED;
     FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
 
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
-    screenSessionManagerClient_->OnFoldPropertyChanged(screenId, property, reason, displayMode);
+    screenSessionManagerClient_->OnFoldPropertyChanged(screenId, property, reason, displayMode, midProperty);
 }
 
 /**
@@ -632,7 +633,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnSensorRotationChanged01, TestSize.Lev
     float sensorRotation = 0;
 
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
-    screenSessionManagerClient_->OnSensorRotationChanged(screenId, sensorRotation);
+    screenSessionManagerClient_->OnSensorRotationChanged(screenId, sensorRotation, false);
 }
 
 /**
@@ -646,7 +647,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnSensorRotationChanged02, TestSize.Lev
     float sensorRotation = 90.0f;
 
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
-    screenSessionManagerClient_->OnSensorRotationChanged(screenId, sensorRotation);
+    screenSessionManagerClient_->OnSensorRotationChanged(screenId, sensorRotation, false);
 }
 
 /**
@@ -790,10 +791,9 @@ HWTEST_F(ScreenSessionManagerClientTest, OnGetSurfaceNodeIdsFromMissionIdsChange
 {
     std::vector<uint64_t> missionIds = {0, 1};
     std::vector<uint64_t> surfaceNodeIds;
-    bool isBlackList = false;
 
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
-    screenSessionManagerClient_->OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds, isBlackList);
+    screenSessionManagerClient_->OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds);
 }
 
 /**
@@ -803,13 +803,28 @@ HWTEST_F(ScreenSessionManagerClientTest, OnGetSurfaceNodeIdsFromMissionIdsChange
  */
 HWTEST_F(ScreenSessionManagerClientTest, OnGetSurfaceNodeIdsFromMissionIdsChanged02, TestSize.Level1)
 {
+    std::vector<uint64_t> missionIds = {0, 1, 2};
+    std::vector<uint64_t> surfaceNodeIds;
+
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds);
+}
+
+/**
+ * @tc.name: OnGetSurfaceNodeIdsFromMissionIdsChanged03
+ * @tc.desc: OnGetSurfaceNodeIdsFromMissionIdsChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, OnGetSurfaceNodeIdsFromMissionIdsChanged03, TestSize.Level1)
+{
     std::vector<uint64_t> missionIds = {0, 1};
     std::vector<uint64_t> surfaceNodeIds;
-    bool isBlackList = false;
+    const std::vector<uint32_t> needWindowTypeList = {1234};
 
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
     screenSessionManagerClient_->displayChangeListener_ = nullptr;
-    screenSessionManagerClient_->OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds, isBlackList);
+    screenSessionManagerClient_->OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds,
+        needWindowTypeList);
 }
 
 /**

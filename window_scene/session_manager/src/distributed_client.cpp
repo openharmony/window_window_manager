@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#ifdef WINDOW_MANAGER_FEATURE_SUPPORT_DMSFWK
 #include "distributed_client.h"
 
 #include "ability_manager_errors.h"
@@ -189,3 +190,4 @@ int32_t DistributedClient::SetMissionContinueState(int32_t missionId, const AAFw
 }
 } // namespace Rosen
 } // namespace OHOS
+#endif

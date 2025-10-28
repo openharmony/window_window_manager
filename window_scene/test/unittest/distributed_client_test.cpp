@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#ifdef WINDOW_MANAGER_FEATURE_SUPPORT_DMSFWK
 #include <gtest/gtest.h>
 
 #include "ability_manager_errors.h"
@@ -236,3 +237,4 @@ HWTEST_F(DistributedClientTest, SetMissionContinueState03, TestSize.Level1)
 }
 } // namespace Rosen
 } // namespace OHOS
+#endif

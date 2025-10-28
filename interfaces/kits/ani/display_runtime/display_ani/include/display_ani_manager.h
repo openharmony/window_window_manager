@@ -47,14 +47,24 @@ public:
         sptr<DisplayAniListener> displayAniListener);
     static ani_boolean HasPrivateWindow(ani_env* env, ani_long displayId);
     static void GetAllDisplayPhysicalResolution(ani_env* env, ani_object arrayObj, ani_long nativeObj);
+    static void ConvertGlobalToRelativeCoordinate(
+        ani_env* env, ani_object positionObj, ani_long nativeObj, ani_object relativePostionObj, ani_object displayId);
+    static void ConvertRelativeToGlobalCoordinate(
+        ani_env* env, ani_object relativePostionObj, ani_long nativeObj, ani_object positionObj);
     static void FinalizerDisplay(ani_env* env, ani_object displayObj, ani_long nativeObj);
+    static ani_object GetBrightnessInfoAni(ani_env* env, ani_long displayId, ani_long nativeObj);
 private:
     void OnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnGetCurrentFoldCreaseRegion(ani_env* env, ani_object obj);
     void OnGetAllDisplayPhysicalResolution(ani_env* env, ani_object arrayObj);
+    void OnConvertGlobalToRelativeCoordinate(
+        ani_env* env, ani_object positionObj, ani_object displayId, ani_object relativePostionObj);
+    void OnConvertRelativeToGlobalCoordinate(
+        ani_env* env, ani_object relativePostionObj, ani_object positionObj);
     void OnFinalizerDisplay(ani_env* env, ani_object displayObj);
     bool IsCallbackRegistered(ani_env* env, const std::string& type, ani_ref callback);
+    ani_object OnGetBrightnessInfoAni(ani_env* env, ani_long displayId);
     std::mutex mtx_;
     std::map<std::string, std::map<ani_ref, sptr<DisplayAniListener>>> jsCbMap_;
 };

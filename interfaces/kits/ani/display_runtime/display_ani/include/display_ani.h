@@ -28,6 +28,7 @@ public:
 
     static void GetCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutInfoObj);
     static void GetAvailableArea(ani_env* env, ani_object obj, ani_object availableAreaObj);
+    static void GetLiveCreaseRegion(ani_env* env, ani_object obj, ani_object foldCreaseRegionObj);
     static ani_boolean HasImmersiveWindow(ani_env* env, ani_object obj);
     static void RegisterCallback(ani_env* env, ani_object obj, ani_string type, ani_ref aniCallback);
     static void UnRegisterCallback(ani_env* env, ani_object obj, ani_string type, ani_ref aniCallback);

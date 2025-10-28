@@ -21,6 +21,7 @@
 #include "ani.h"
 #include "ani_window_register_manager.h"
 #include "window.h"
+#include "wm_animation_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -54,6 +55,7 @@ public:
     static void SetUIContent(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path);
     static void SetWindowKeepScreenOn(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isKeepScreenOn);
     static void SetWaterMarkFlag(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enable);
+    static void RaiseMainWindowAboveTarget(ani_env* env, ani_object obj, ani_long nativeObj, ani_int windowId);
     static void SetWindowFocusable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isFocusable);
     static void LoadContent(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_string path, ani_object storage);
@@ -70,6 +72,8 @@ public:
     static void UnregisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
         ani_ref callback);
     static void ShowWindow(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void ShowWindowWithOptions(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_object aniShowWindowOptions);
     static void DestroyWindow(ani_env* env, ani_object obj, ani_long nativeObj);
     static ani_boolean IsWindowShowing(ani_env* env, ani_object obj, ani_long nativeObj);
     static void Opacity(ani_env* env, ani_object obj, ani_long nativeObj, ani_double opacity);
@@ -81,7 +85,26 @@ public:
     static void Finalizer(ani_env* env, ani_long nativeObj);
     static void SetContentAspectRatio(ani_env* env, ani_object obj, ani_long nativeObj,
                                       ani_double ratio, ani_boolean isPersistent, ani_boolean needUpdateRect);
+    static ani_object CreateAniWindow(ani_env* env, OHOS::sptr<OHOS::Rosen::Window>& window);
+    static void Maximize(ani_env* env, ani_object obj, ani_long nativeObj,
+                         ani_object aniPresentation, ani_object aniAcrossDisplay);
+    static void SetRotationLocked(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean locked);
+    static ani_boolean GetRotationLocked(ani_env* env, ani_object obj, ani_long nativeObj);
+    static ani_boolean IsInFreeWindowMode(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void SetRelativePositionToParentWindowEnabled(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_boolean enabled, ani_int anchor, ani_int offsetX, ani_int offsetY);
+    static void SetWindowDelayRaiseOnDrag(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isEnabled);
+    static void SetDefaultDensityEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enabled);
+    static void SetWindowContainerColor(ani_env* env, ani_object obj, ani_long nativeObj,
+        std::string activeColor, std::string inactiveColor);
+    static void SetWindowContainerModalColor(ani_env* env, ani_object obj, ani_long nativeObj,
+        std::string activeColor, std::string inactiveColor);
+    static bool IsMainWindowFullScreenAcrossDisplays(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void SetWindowShadowEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enable);
+    static bool IsImmersiveLayout(ani_env* env, ani_object obj, ani_long nativeObj);
 
+    ani_ref GetParentWindow(ani_env* env);
+    void SetParentWindow(ani_env* env, ani_int windowId);
     /*
      * Window Layout
      */
@@ -100,11 +123,14 @@ public:
     void SetSystemBarProperties(ani_env* env, ani_object aniSystemBarProperties);
     ani_object SetSpecificSystemBarEnabled(ani_env* env, ani_string name, ani_boolean enable,
         ani_object enableAnimation);
+    ani_object SetDragKeyFramePolicy(ani_env* env, ani_object aniKeyFramePolicy);
     ani_object Snapshot(ani_env* env);
+    ani_object SnapshotSync(ani_env* env);
     void HideNonSystemFloatingWindows(ani_env* env, ani_boolean shouldHide);
     void ResizeAsync(ani_env* env, ani_int width, ani_int height);
     ani_object SetWindowLimits(ani_env* env, ani_object inWindowLimits, ani_object forcible);
     ani_object GetWindowLimits(ani_env* env);
+    ani_object GetWindowLimitsVP(ani_env* env);
     void SetAspectRatio(ani_env* env, ani_double ratio);
     void ResetAspectRatio(ani_env* env);
     void SetResizeByDragEnabled(ani_env* env, ani_boolean enable);
@@ -119,6 +145,13 @@ public:
     ani_object HandlePositionTransform(ani_env* env, ani_int x, ani_int y,
         std::function<WMError(sptr<Window>&, const Position&, Position&)> transformFunc);
 
+    /*
+     * Window animation
+     */
+    static void SetWindowTransitionAnimation(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_enum_item transitionType, ani_object animation);
+    static ani_object GetWindowTransitionAnimation(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_enum_item transitionType);
 private:
     void OnSetWindowColorSpace(ani_env* env, ani_int colorSpace);
     void OnSetPreferredOrientation(ani_env* env, ani_int orientation);
@@ -127,6 +160,7 @@ private:
     void OnSetUIContent(ani_env* env, ani_string path);
     void OnSetWindowKeepScreenOn(ani_env* env, ani_boolean isKeepScreenOn);
     void OnSetWaterMarkFlag(ani_env* env, ani_boolean enable);
+    void OnRaiseMainWindowAboveTarget(ani_env* env, ani_int windowId);
     void OnSetWindowFocusable(ani_env* env, ani_boolean isFocusable);
     void OnLoadContent(ani_env* env, ani_string path, ani_object storage);
     void OnSetWindowSystemBarEnable(ani_env* env, ani_object nameAry);
@@ -137,6 +171,7 @@ private:
     void OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback, ani_long timeout);
     void OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnShowWindow(ani_env* env);
+    void OnShowWindowWithOptions(ani_env* env, ani_object aniShowWindowOptions);
     void OnDestroyWindow(ani_env* env);
     ani_boolean OnIsWindowShowing(ani_env* env);
     void OnOpacity(ani_env* env, ani_double opacity);
@@ -154,12 +189,31 @@ private:
         const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, sptr<Window> windowToken);
     WMError SetSystemBarPropertiesByFlags(std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags,
         std::map<WindowType, SystemBarProperty>& systemBarProperties, sptr<Window> windowToken);
+    void OnSetRotationLocked(ani_env* env, ani_boolean locked);
+    bool OnGetRotationLocked(ani_env* env);
+    bool OnIsInFreeWindowMode(ani_env* env);
+    void OnSetWindowDelayRaiseOnDrag(ani_env* env, ani_boolean isEnabled);
+    void OnSetRelativePositionToParentWindowEnabled(ani_env* env, ani_boolean enabled,
+        ani_int anchor, ani_int offsetX, ani_int offsetY);
+    void OnSetDefaultDensityEnabled(ani_env* env, ani_boolean enabled);
+    void OnSetWindowContainerColor(ani_env* env, std::string activeColor, std::string inactiveColor);
+    void OnSetWindowContainerModalColor(ani_env* env, std::string activeColor, std::string inactiveColor);
+    bool OnIsMainWindowFullScreenAcrossDisplays(ani_env* env);
+    void OnSetWindowShadowEnabled(ani_env* env, ani_boolean enable);
+    bool OnIsImmersiveLayout(ani_env* env);
 
     /*
      * Window Layout
      */
     void OnSetContentAspectRatio(
         ani_env* env, ani_double ratio, ani_boolean isPersistent, ani_boolean needUpdateRect);
+    void OnMaximize(ani_env* env, ani_object aniPresentation, ani_object aniAcrossDisplay);
+
+    /*
+     * Window animation
+     */
+    void OnSetWindowTransitionAnimation(ani_env* env, ani_enum_item transitionType, ani_object animation);
+    ani_object OnGetWindowTransitionAnimation(ani_env* env, ani_enum_item transitionType);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<AniWindowRegisterManager> registerManager_ = nullptr;

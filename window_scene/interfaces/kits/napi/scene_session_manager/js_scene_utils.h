@@ -236,6 +236,7 @@ napi_value CreateJsSessionSizeChangeReason(napi_env env);
 napi_value CreateJsRSUIFirstSwitch(napi_env env);
 napi_value CreateJsSessionPiPControlType(napi_env env);
 napi_value CreateJsSessionPiPControlStatus(napi_env env);
+napi_value CreateJsSessionPiPScreenStatus(napi_env env);
 napi_value CreateJsSessionGravity(napi_env env);
 napi_value CreateJsSessionDragResizeType(napi_env env);
 void CreatePiPSizeChangeReason(napi_env env, napi_value objValue);
@@ -246,6 +247,7 @@ napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& para
 napi_value CreateRotationChangeType(napi_env env);
 napi_value CreateRectType(napi_env env);
 napi_value CreateWindowAnchorType(napi_env env);
+napi_value CreatePixelUnitType(napi_env env);
 napi_value CreateJsWindowAnchorInfo(napi_env env, const WindowAnchorInfo& windowAnchorInfo);
 napi_value CreateSupportType(napi_env env);
 napi_value SubWindowModalTypeInit(napi_env env);
@@ -276,6 +278,7 @@ napi_value ConvertTransitionAnimationToJsValue(napi_env env,
 napi_value ConvertWindowAnimationPropertyToJsValue(napi_env env,
     const WindowAnimationProperty& animationProperty);
 napi_value ConvertKeyboardEffectOptionToJsValue(napi_env env, const KeyboardEffectOption& effectOption);
+napi_value CreateWaterfallResidentState(napi_env env);
 bool NapiIsCallable(napi_env env, napi_value value);
 bool ConvertRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect);
 bool ConvertSessionRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect);
@@ -288,6 +291,7 @@ bool ConvertDragResizeTypeFromJs(napi_env env, napi_value value, DragResizeType&
 bool ConvertRectFromJsValue(napi_env env, napi_value jsObject, Rect& displayRect);
 bool ConvertInfoFromJsValue(napi_env env, napi_value jsObject, RotationChangeInfo& rotationChangeInfo);
 bool ConvertThrowSlipModeFromJs(napi_env env, napi_value value, ThrowSlipMode& throwSlipMode);
+bool convertAnimConfigFromJs(napi_env env, napi_value value, SceneAnimationConfig& config);
 template<class T>
 bool ParseJsValue(napi_env env, napi_value jsObject, const std::string& name, T& data)
 {

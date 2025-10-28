@@ -94,7 +94,7 @@ constexpr float COMPACT_NORMAL_SCALE = 1.0f;
 /*
  * Window outline
  */
-constexpr uint32_t OUTLINE_COLOR_DEFAULT = 0xff64bb5c; // Default color, ARGB formate.
+constexpr uint32_t OUTLINE_COLOR_DEFAULT = 0xff64bb5c; // Default color, ARGB format.
 constexpr uint32_t OUTLINE_WIDTH_MIN = 1; // vp
 constexpr uint32_t OUTLINE_WIDTH_DEFAULT = 4; // vp
 constexpr uint32_t OUTLINE_WIDTH_MAX = 8; // vp
@@ -375,6 +375,7 @@ enum class WMError : int32_t {
     WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED,
     WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED,
     WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED,
+    WM_ERROR_INVALID_WINDOW_TYPE,
 };
 
 /**
@@ -414,6 +415,7 @@ enum class WmErrorCode : int32_t {
     WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED = 1300026,
     WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED = 1300027,
     WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED = 1300028,
+    WM_ERROR_INVALID_WINDOW_TYPE = 1300029,
 };
 
 /**
@@ -574,6 +576,7 @@ enum class WindowSizeChangeReason : uint32_t {
     SCREEN_RELATIVE_POSITION_CHANGE,
     ROOT_SCENE_CHANGE,
     SNAPSHOT_ROTATION = 37,
+    SCENE_WITH_ANIMATION,
     FULL_SCREEN_IN_FORCE_SPLIT,
     END,
 };
@@ -1217,6 +1220,7 @@ enum class UIExtensionUsage : uint32_t {
 struct ExtensionWindowEventInfo {
     int32_t persistentId = 0;
     int32_t pid = -1;
+    int64_t startModalExtensionTimeStamp = -1;
     Rect windowRect { 0, 0, 0, 0 }; // Calculated from global rect and UIExtension windowRect
     Rect uiExtRect { 0, 0, 0, 0 };  // Transferred from arkUI
     bool hasUpdatedRect = false;
@@ -1625,6 +1629,15 @@ enum class PiPState : int32_t {
 };
 
 /**
+ * @brief Enumerates picture in picture screen status.
+ */
+enum class PiPScreenStatus : int32_t {
+    STATUS_UNKNOWN = -1,
+    STATUS_FOREGROUND = 0,
+    STATUS_SIDEBAR = 1,
+};
+
+/**
  * @brief Enumerates picture in picture control status.
  */
 enum class PiPControlStatus : int32_t {
@@ -1802,6 +1815,14 @@ struct VsyncCallback {
     OnCallback onCallback;
 };
 
+/**
+ * @brief Enumerates window size unit type.
+ */
+enum class PixelUnit : uint32_t {
+    PX = 0, // Physical pixel
+    VP = 1, // Virtual pixel
+};
+
 struct WindowLimits {
     uint32_t maxWidth_ = static_cast<uint32_t>(INT32_MAX); // The width and height are no larger than INT32_MAX.
     uint32_t maxHeight_ = static_cast<uint32_t>(INT32_MAX);
@@ -1810,6 +1831,7 @@ struct WindowLimits {
     float maxRatio_ = FLT_MAX;
     float minRatio_ = 0.0f;
     float vpRatio_ = 1.0f;
+    PixelUnit pixelUnit_ = PixelUnit::PX;
 
     WindowLimits() {}
     WindowLimits(uint32_t maxWidth, uint32_t maxHeight, uint32_t minWidth, uint32_t minHeight, float maxRatio,
@@ -1818,6 +1840,10 @@ struct WindowLimits {
     WindowLimits(uint32_t maxWidth, uint32_t maxHeight, uint32_t minWidth, uint32_t minHeight, float maxRatio,
         float minRatio, float vpRatio) : maxWidth_(maxWidth), maxHeight_(maxHeight), minWidth_(minWidth),
         minHeight_(minHeight), maxRatio_(maxRatio), minRatio_(minRatio), vpRatio_(vpRatio) {}
+    WindowLimits(uint32_t maxWidth, uint32_t maxHeight, uint32_t minWidth, uint32_t minHeight, float maxRatio,
+        float minRatio, float vpRatio, PixelUnit pixelUnit) : maxWidth_(maxWidth), maxHeight_(maxHeight),
+        minWidth_(minWidth), minHeight_(minHeight), maxRatio_(maxRatio), minRatio_(minRatio), vpRatio_(vpRatio),
+        pixelUnit_(pixelUnit) {}
 
     void Clip(uint32_t clipWidth, uint32_t clipHeight)
     {
@@ -1853,13 +1879,27 @@ struct WindowLimits {
         return minWidth_ <= maxWidth_ && minHeight_ <= maxHeight_;
     }
 
+    static const WindowLimits DEFAULT_VP_LIMITS()
+    {
+        return {
+            static_cast<uint32_t>(INT32_MAX),  // maxWidth
+            static_cast<uint32_t>(INT32_MAX),  // maxHeight
+            1,                                 // minWidth
+            1,                                 // minHeight
+            FLT_MAX,                           // maxRatio
+            0.0f,                              // minRatio
+            1.0f,                              // vpRatio
+            PixelUnit::VP                      // pixelUnit
+        };
+    }
+
     std::string ToString() const
     {
         constexpr int precision = 6;
         std::ostringstream oss;
         oss << "[" << maxWidth_ << " " << maxHeight_ << " " << minWidth_ << " " << minHeight_
             << " " << std::fixed << std::setprecision(precision) << maxRatio_ << " " << minRatio_
-            << " " << vpRatio_ << "]";
+            << " " << vpRatio_ << " " << static_cast<uint32_t>(pixelUnit_) << "]";
         return oss.str();
     }
 };
@@ -2551,6 +2591,11 @@ struct KeyboardEffectOption : public Parcelable {
     KeyboardGradientMode gradientMode_ = KeyboardGradientMode::NONE;
     uint32_t blurHeight_ = 0;
 
+    KeyboardEffectOption() {}
+    KeyboardEffectOption(KeyboardViewMode viewMode, KeyboardFlowLightMode flowLightMode,
+        KeyboardGradientMode gradientMode, uint32_t blurHeight) : viewMode_(viewMode), flowLightMode_(flowLightMode),
+        gradientMode_(gradientMode), blurHeight_(blurHeight) {}
+
     virtual bool Marshalling(Parcel& parcel) const override
     {
         return (parcel.WriteUint32(static_cast<uint32_t>(viewMode_)) &&
@@ -2735,6 +2780,7 @@ enum class WindowInfoKey : int32_t {
     WINDOW_MODE = 1 << 7,
     FLOATING_SCALE = 1 << 8,
     MID_SCENE = 1 << 9,
+    WINDOW_GLOBAL_RECT = 1 << 10,
 };
 
 /**
@@ -3184,7 +3230,7 @@ struct OutlineParams : public Parcelable {
             return nullptr;
         }
         for (uint32_t i = 0; i < size; i++) {
-            int32_t persistentId;
+            int32_t persistentId = 0;
             if (!parcel.ReadInt32(persistentId)) {
                 return nullptr;
             }
@@ -3216,6 +3262,24 @@ struct OutlineParams : public Parcelable {
         oss << "], outlineStyleParams=";
         return oss.str() + outlineStyleParams_.ToString();
     }
+};
+
+/**
+ * @enum WaterfallResidentState
+ * @brief Represents the resident (persistent) state control of the waterfall layout.
+ */
+enum class WaterfallResidentState : uint32_t {
+    /** The resident state and the current waterfall state remain unchanged. */
+    UNCHANGED = 0,
+
+    /** Enable the resident state and enter the waterfall layout. */
+    OPEN = 1,
+
+    /** Disable the resident state and exit the waterfall layout. */
+    CLOSE = 2,
+
+    /** Disable the resident state but keep the current waterfall layout state unchanged. */
+    CANCEL = 3,
 };
 }
 }

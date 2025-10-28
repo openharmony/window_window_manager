@@ -33,73 +33,57 @@ class HoldLock {
 public:
     HoldLock()
     {
+        // "counter" is used to resolve deadlock issues caused by nested tasks within the same thread.
+        // "lockStatus" is used to prevent task delay canuse by prolonged lock retention.
         if (++counter() == 1) {
-            while (!resMtx.try_lock_for(TRY_LOCK_TIMEOUT)) {
-                if (CheckTimeout()) {
-                    resMtx.unlock();
-                }
+            // max try lock for 2 times, 1 second
+            // if lock success, execute Serial Run Mode, else roll back to Concurrent Run Mode
+            if ((resMtx.try_lock()) || (lockStatus && resMtx.try_lock_for(TRY_LOCK_TIMEOUT))) {
+                lockStatus = true;
+            } else {
+                lockStatus = false;
+                TLOGD(WmsLogTag::DMS, "[HoldLock] try lock fail");
             }
-            lockTime = std::chrono::steady_clock::now();
-            TLOGD(WmsLogTag::DMS, "timed_mutex:Lock acquired at time: %{public}lld",
-                  std::chrono::duration_cast<std::chrono::milliseconds>(lockTime.time_since_epoch()).count());
         }
     }
 
     ~HoldLock()
     {
-        if (--counter() == 0) {
-            lockTime = std::chrono::steady_clock::now();
-            TLOGD(WmsLogTag::DMS, "timed_mutex:Last instance released lock at: %{public}lld",
-                  std::chrono::duration_cast<std::chrono::milliseconds>(lockTime.time_since_epoch()).count());
+        if (--counter() == 0 && lockStatus) {
             resMtx.unlock();
         }
-        TLOGD(WmsLogTag::DMS, "timed_mutex:~HoldLock: %{public}d", counter());
     }
     static bool ForceUnlock()
     {
         auto threadLocked = --counter() >= 0;
-        if (threadLocked) {
-            lockTime = std::chrono::steady_clock::now();
+        if (threadLocked && lockStatus) {
             resMtx.unlock();
+            return true;
         }
-        return threadLocked;
+        return false;
     }
 
     static void ForceLock(bool hasLock)
     {
         ++counter();
         if (hasLock) {
-            while (!resMtx.try_lock_for(TRY_LOCK_TIMEOUT)) {
-                if (CheckTimeout()) {
-                    resMtx.unlock();
-                }
+            if ((resMtx.try_lock()) || (lockStatus && resMtx.try_lock_for(TRY_LOCK_TIMEOUT))) {
+                lockStatus = true;
+            } else {
+                lockStatus = false;
+                TLOGD(WmsLogTag::DMS, "[ForceLock] try lock fail");
             }
         }
-        lockTime = std::chrono::steady_clock::now();
     }
 
 private:
-    static std::chrono::steady_clock::time_point lockTime;
     static std::timed_mutex resMtx;
-    static constexpr std::chrono::milliseconds TRY_LOCK_TIMEOUT{ 1000 };
-    static constexpr std::chrono::milliseconds MAX_LOCK_INTERVAL{ 8 * TRY_LOCK_TIMEOUT };
+    static thread_local bool lockStatus;
+    static constexpr std::chrono::milliseconds TRY_LOCK_TIMEOUT{ 50 };
     static int& counter()
     {
         static thread_local int _count = 0;
         return _count;
-    }
-
-    static bool CheckTimeout()
-    {
-        auto currentTime = std::chrono::steady_clock::now();
-        auto currentMs = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime.time_since_epoch()).count();
-        auto interval = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lockTime).count();
-        if (interval > MAX_LOCK_INTERVAL.count()) {
-            TLOGE(WmsLogTag::DMS, "timed_mutex:timeout currentTime:%{public}lld interval:%{public}lld",
-                  currentMs, interval);
-            return true;
-        }
-        return false;
     }
 };
 
@@ -150,12 +134,4 @@ bool safe_wait_for(std::condition_variable& cv,
 
 } // namespace DmUtils
 } // namespace OHOS::Rosen
-
-#define POST_LOCKED_TASK(handler, task, ...)              \
-    handler->PostTask(                                    \
-        [&]() {                                           \
-            DmUtils::HoldLock postTask_lock;              \
-            task();                                       \
-        },                                                \
-        ##__VA_ARGS__)
 #endif // WINDOW_WINDOW_MANAGER_UTILS_DMS_GLOBAL_MUTEX_H

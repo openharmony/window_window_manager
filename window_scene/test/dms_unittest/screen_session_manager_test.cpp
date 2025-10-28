@@ -176,6 +176,7 @@ HWTEST_F(ScreenSessionManagerTest, WakeUpBegin, TestSize.Level1)
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
     }
 
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_INIT);
     PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_POWER_KEY;
     ASSERT_EQ(true, ssm_->WakeUpBegin(reason));
 
@@ -977,10 +978,10 @@ HWTEST_F(ScreenSessionManagerTest, SetOrientation, TestSize.Level1)
     ScreenId id = 0;
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
     ssm_->screenSessionMap_[id] = screenSession;
-    ASSERT_EQ(DMError::DM_OK, ssm_->SetOrientation(id, orientation));
-    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetOrientation(SCREEN_ID_INVALID, orientation));
+    ASSERT_EQ(DMError::DM_OK, ssm_->SetOrientation(id, orientation, false));
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetOrientation(SCREEN_ID_INVALID, orientation, false));
     Orientation invalidOrientation = Orientation{20};
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->SetOrientation(id, invalidOrientation));
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->SetOrientation(id, invalidOrientation, false));
 }
 
 /**
@@ -1282,23 +1283,6 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenInfoById, TestSize.Level1)
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "GetScreenInfoById";
     ASSERT_EQ(ssm_->GetScreenInfoById(1), nullptr);
-}
-
-/**
- * @tc.name: SetScreenActiveMode
- * @tc.desc: SetScreenActiveMode virtual screen
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode, TestSize.Level1)
-{
-#ifdef WM_SCREEN_ACTIVE_MODE_ENABLE
-    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
-    VirtualScreenOption virtualOption;
-    virtualOption.name_ = "SetScreenActiveMode";
-    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-    ASSERT_EQ(ssm_->SetScreenActiveMode(screenId, 0), DMError::DM_OK);
-    ssm_->DestroyVirtualScreen(screenId);
-#endif
 }
 
 /**

@@ -893,6 +893,12 @@ WMError WindowManagerLite::GetAllMainWindowInfos(std::vector<MainWindowInfo>& in
     return WindowAdapterLite::GetInstance(userId_)->GetAllMainWindowInfos(infos);
 }
 
+WMError WindowManagerLite::GetMainWindowInfoByToken(const sptr<IRemoteObject>& abilityToken,
+    MainWindowInfo& windowInfo)
+{
+    return WindowAdapterLite::GetInstance(userId_)->GetMainWindowInfoByToken(abilityToken, windowInfo);
+}
+
 WMError WindowManagerLite::ClearMainSessions(const std::vector<int32_t>& persistentIds)
 {
     if (persistentIds.empty()) {
@@ -1311,6 +1317,16 @@ WMError WindowManagerLite::SendPointerEventForHover(const std::shared_ptr<MMI::P
     WMError ret = WindowAdapterLite::GetInstance(userId_)->SendPointerEventForHover(pointerEvent);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_EVENT, "send failed");
+    }
+    return ret;
+}
+
+WMError WindowManagerLite::GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+    std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap)
+{
+    WMError ret = WindowAdapterLite::GetInstance(userId_)->GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed");
     }
     return ret;
 }

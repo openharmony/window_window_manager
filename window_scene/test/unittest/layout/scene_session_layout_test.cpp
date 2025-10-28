@@ -225,6 +225,32 @@ HWTEST_F(SceneSessionLayoutTest, UpdateRectInner02, TestSize.Level0)
 }
 
 /**
+ * @tc.name: UpdateRectInner03
+ * @tc.desc: UpdateRectInner03
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, UpdateRectInner03, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateRectInner03";
+    info.bundleName_ = "UpdateRectInner03";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    SessionUIParam uiParam;
+    // test drag move reason return false
+    SizeChangeReason reason = SizeChangeReason::DRAG_MOVE;
+    EXPECT_EQ(false, sceneSession->UpdateRectInner(uiParam, reason));
+    // test other reason return false
+    sceneSession->isVisible_ = true;
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    reason = SizeChangeReason::UNDEFINED;
+    sceneSession->SetForegroundInteractiveStatus(true);
+    sceneSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
+    sceneSession->isSubWindowResizingOrMoving_ = true;
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    EXPECT_EQ(true, sceneSession->UpdateRectInner(uiParam, reason));
+}
+
+/**
  * @tc.name: NotifyClientToUpdateRect
  * @tc.desc: NotifyClientToUpdateRect function01
  * @tc.type: FUNC
@@ -326,6 +352,70 @@ HWTEST_F(SceneSessionLayoutTest, HandleActionUpdateWindowLimits, TestSize.Level1
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS;
     WMError res = sceneSession->HandleActionUpdateWindowLimits(property, action);
     EXPECT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: HandleActionUpdateWindowLimits2
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, HandleActionUpdateWindowLimits2, TestSize.Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    WindowLimits windowLimitsPX = { 2000, 2000, 2000, 2000, 0.0f, 0.0f, 0.0f, PixelUnit::PX };
+    property->SetWindowLimits(windowLimitsPX);
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS;
+    WMError res = sceneSession->HandleActionUpdateWindowLimits(property, action);
+    EXPECT_EQ(WMError::WM_OK, res);
+
+    WindowLimits windowLimitsVP = { 1000, 1000, 1000, 1000, 0.0f, 0.0f, 0.0f, PixelUnit::VP };
+    property->SetWindowLimitsVP(windowLimitsVP);
+    res = sceneSession->HandleActionUpdateWindowLimits(property, action);
+    EXPECT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: NotifySessionWindowLimitschange
+ * @tc.desc: NotifySessionWindowLimitschange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, NotifySessionWindowLimitschange, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSessionRectChangeCallback";
+    info.bundleName_ = "SetSessionRectChangeCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    WindowLimits expectedMainLimits = { 2000, 2000, 100, 100, 0.0f, 0.0f, 0.0f, PixelUnit::VP };
+    bool callbackTriggered = false;
+    WindowLimits receivedMainLimits;
+
+    // Case 1: sessionWindowLimitsChangeFunc_ is null
+    sceneSession->NotifySessionWindowLimitsChange(expectedMainLimits);
+    EXPECT_TRUE(callbackTriggered == false);
+    EXPECT_NE(receivedMainLimits.minWidth_, expectedMainLimits.minWidth_);
+    EXPECT_NE(receivedMainLimits.minHeight_, expectedMainLimits.minHeight_);
+    EXPECT_NE(receivedMainLimits.maxWidth_, expectedMainLimits.maxWidth_);
+    EXPECT_NE(receivedMainLimits.maxHeight_, expectedMainLimits.maxHeight_);
+    EXPECT_NE(receivedMainLimits.pixelUnit_, expectedMainLimits.pixelUnit_);
+
+    // Case 2: sessionWindowLimitsChangeFunc_ is not null
+    sceneSession->SetSessionWindowLimitsChangeCallback(
+        [&](const WindowLimits& mainLimits) {
+            callbackTriggered = true;
+            receivedMainLimits = mainLimits;
+        }
+    );
+    sceneSession->NotifySessionWindowLimitsChange(expectedMainLimits);
+    EXPECT_TRUE(callbackTriggered);
+    EXPECT_EQ(receivedMainLimits.minWidth_, expectedMainLimits.minWidth_);
+    EXPECT_EQ(receivedMainLimits.minHeight_, expectedMainLimits.minHeight_);
+    EXPECT_EQ(receivedMainLimits.maxWidth_, expectedMainLimits.maxWidth_);
+    EXPECT_EQ(receivedMainLimits.maxHeight_, expectedMainLimits.maxHeight_);
+    EXPECT_EQ(receivedMainLimits.pixelUnit_, expectedMainLimits.pixelUnit_);
 }
 
 /**

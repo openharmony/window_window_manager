@@ -814,6 +814,22 @@ HWTEST_F(WindowSessionImplTest4, SetPiPControlEvent, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyPipScreenStatusChange
+ * @tc.desc: NotifyPipScreenStatusChange Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, NotifyPipScreenStatusChange, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: NotifyPipScreenStatusChange start";
+    auto option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyPipScreenStatusChange");
+    auto window = sptr<WindowSessionImpl>::MakeSptr(option);
+    WSError res = window->NotifyPipScreenStatusChange(PiPScreenStatus::STATUS_SIDEBAR);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: NotifyPipScreenStatusChange end";
+}
+
+/**
  * @tc.name: SetUIContentInner
  * @tc.desc: SetUIContentInner Test
  * @tc.type: FUNC
@@ -871,14 +887,15 @@ HWTEST_F(WindowSessionImplTest4, GetCallingWindowRect, TestSize.Level1)
     option->SetWindowName("GetCallingWindowRect");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     Rect rect = { 0, 0, 0, 0 };
-    WMError retCode = window->GetCallingWindowRect(rect);
+    WMError retCode = window->GetCallingWindowRect(1, rect);
     ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
-    window->GetCallingWindowRect(rect);
+    retCode = window->GetCallingWindowRect(1, rect);
+    ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_PERMISSION);
 }
 
 /**
@@ -893,7 +910,7 @@ HWTEST_F(WindowSessionImplTest4, GetCallingWindowWindowStatus, TestSize.Level1)
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, window);
     WindowStatus windowStatus = WindowStatus::WINDOW_STATUS_UNDEFINED;
-    WMError retCode = window->GetCallingWindowWindowStatus(windowStatus);
+    WMError retCode = window->GetCallingWindowWindowStatus(1, windowStatus);
     ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
@@ -901,7 +918,8 @@ HWTEST_F(WindowSessionImplTest4, GetCallingWindowWindowStatus, TestSize.Level1)
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
-    window->GetCallingWindowWindowStatus(windowStatus);
+    retCode = window->GetCallingWindowWindowStatus(1, windowStatus);
+    ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_PERMISSION);
 }
 
 /**
@@ -2990,6 +3008,62 @@ HWTEST_F(WindowSessionImplTest4, NotifyAppForceLandscapeConfigUpdated, TestSize.
     EXPECT_EQ(res, WSError::WS_DO_NOTHING);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: NotifyAppForceLandscapeConfigUpdated end";
+}
+
+/**
+ * @tc.name: IsStageDefaultDensityEnabled01
+ * @tc.desc: Main Window
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, IsStageDefaultDensityEnabled01, TestSize.Level1)
+{
+    sptr<WindowOption> mainWindowOption = sptr<WindowOption>::MakeSptr();
+    mainWindowOption->SetWindowName("mainWindow");
+    sptr<WindowSessionImpl> mainWindowSession = sptr<WindowSessionImpl>::MakeSptr(mainWindowOption);
+    mainWindowSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    mainWindowSession->context_ = abilityContext_;
+    mainWindowSession->defaultDensityEnabledStageConfig_.store(false);
+    mainWindowSession->windowSessionMap_.["mainWindow"] =
+        std::pair<int32_t, sptr<WindowSessionImpl>>(1, mainWindowSession);
+
+    mainWindowSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    mainWindowSession->defaultDensityEnabledStageConfig_.store(true);
+    EXPECT_TRUE(mainWindowSession->IsStageDefaultDensityEnabled());
+
+    window->defaultDensityEnabledStageConfig_.store(false);
+    EXPECT_FALSE(mainWindowSession->IsStageDefaultDensityEnabled());
+}
+
+/**
+ * @tc.name: IsStageDefaultDensityEnabled02
+ * @tc.desc: Sub Window
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, IsStageDefaultDensityEnabled02, TestSize.Level1)
+{
+    sptr<WindowOption> mainWindowOption = sptr<WindowOption>::MakeSptr();
+    mainWindowOption->SetWindowName("mainWindow");
+    sptr<WindowSessionImpl> mainWindowSession = sptr<WindowSessionImpl>::MakeSptr(mainWindowOption);
+    mainWindowSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    mainWindowSession->context_ = abilityContext_;
+    mainWindowSession->defaultDensityEnabledStageConfig_.store(false);
+    mainWindowSession->windowSessionMap_.["mainWindow"] =
+        std::pair<int32_t, sptr<WindowSessionImpl>>(1, mainWindowSession);
+
+    sptr<WindowOption> subWindowOption = sptr<WindowOption>::MakeSptr();
+    subWindowOption->SetWindowName("subWindow");
+    sptr<WindowSessionImpl> subWindowSession = sptr<WindowSessionImpl>::MakeSptr(subWindowOption);
+    subWindowSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    subWindowSession->context_ = abilityContext_;
+    subWindowSession->defaultDensityEnabledStageConfig_.store(true);
+    WindowSessionImpl::windowSessionMap_.insert(std::make_pair("subWindow", subWindowSession));
+    subWindowSession->windowSessionMap_.["subWindow"] =
+        std::pair<int32_t, sptr<WindowSessionImpl>>(2, subWindowSession);
+
+    EXPECT_FALSE(subWindowSession->IsStageDefaultDensityEnabled());
+
+    mainWindowSession->defaultDensityEnabledStageConfig_.store(true);
+    EXPECT_TRUE(subWindowSession->IsStageDefaultDensityEnabled());
 }
 }
 } // namespace

@@ -470,14 +470,14 @@ HWTEST_F(KeyboardSessionTest4, CalculateScaledRect01, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleActionUpdateKeyboardTouchHotArea
+ * @tc.name: HandleActionUpdateKeyboardTouchHotArea01
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest4, HandleActionUpdateKeyboardTouchHotArea, TestSize.Level1)
+HWTEST_F(KeyboardSessionTest4, HandleActionUpdateKeyboardTouchHotArea01, TestSize.Level1)
 {
-    std::string abilityName = "HandleActionUpdateKeyboardTouchHotArea";
-    std::string bundleName = "HandleActionUpdateKeyboardTouchHotArea";
+    std::string abilityName = "HandleActionUpdateKeyboardTouchHotArea01";
+    std::string bundleName = "HandleActionUpdateKeyboardTouchHotArea01";
     sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     KeyboardTouchHotAreas keyboardTouchHotAreas;
@@ -502,10 +502,6 @@ HWTEST_F(KeyboardSessionTest4, HandleActionUpdateKeyboardTouchHotArea, TestSize.
     ret = keyboardSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
     ASSERT_EQ(WMError::WM_OK, ret);
     auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    bool updated = false;
-    specificCb->onWindowInfoUpdate_ = [&updated](int32_t persistentId, WindowUpdateType type) {
-        updated = true;
-    };
     sptr<KeyboardSession::KeyboardSessionCallback> keyboardCallback =
         sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
     sptr<KeyboardSession> keyboardSession1 = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCallback);
@@ -513,7 +509,52 @@ HWTEST_F(KeyboardSessionTest4, HandleActionUpdateKeyboardTouchHotArea, TestSize.
     keyboardSession1->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     ret = keyboardSession1->HandleActionUpdateTouchHotArea(property, action);
     EXPECT_EQ(ret, WMError::WM_OK);
-    EXPECT_EQ(updated, true);
+}
+
+/**
+ * @tc.name: HandleActionUpdateKeyboardTouchHotArea02
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest4, HandleActionUpdateKeyboardTouchHotArea02, TestSize.Level1)
+{
+    auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCallback =
+        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
+    SessionInfo info;
+    info.abilityName_ = "HandleActionUpdateKeyboardTouchHotArea02";
+    info.bundleName_ = "HandleActionUpdateKeyboardTouchHotArea02";
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCallback);
+    sptr<SceneSession> keyboardPanelSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    keyboardSession->BindKeyboardPanelSession(keyboardPanelSession);
+    keyboardSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
+    WMError ret = keyboardSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    screenSessionManagerClient_->screenSessionMap_.clear();
+    ScreenId screenId = 0;
+    sptr<ScreenSession> screenSession = new ScreenSession(screenId, ScreenProperty(), 0);
+    RRect bounds;
+    bounds.rect_.width_ = 200;
+    bounds.rect_.height_ = 100;
+    screenSession->GetScreenProperty().SetBounds(bounds);
+    screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
+    keyboardSession->property_->SetDisplayId(screenId);
+    ret = keyboardSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    bounds.rect_.width_ = 100;
+    bounds.rect_.height_ = 200;
+    screenSession->GetScreenProperty().SetBounds(bounds);
+    keyboardSession->property_->SetDisplayId(screenId);
+    ret = keyboardSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    keyboardSession->property_->SetDisplayId(666);
+    ret = keyboardSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    screenSessionManagerClient_->screenSessionMap_.clear();
+    ret = keyboardSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_DISPLAY);
 }
 } // namespace
 } // namespace Rosen

@@ -115,11 +115,37 @@ HWTEST_F(SessionStageStubTest, HandleUpdateRect, TestSize.Level1)
     data.WriteUint32(1);
     data.WriteUint32(1);
     data.WriteBool(false);
-    data.WriteInt32(1);
+    sptr<SceneAnimationConfig> animationConfigInfo = sptr<SceneAnimationConfig>::MakeSptr();
+    data.WriteParcelable(animationConfigInfo);
     data.WriteUint32(0);
     uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SIZE_CHANGE);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
     ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleUpdateRect
+ * @tc.desc: test function : HandleUpdateRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateRect01, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteInt32(1);
+    data.WriteInt32(1);
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteBool(false);
+    sptr<SceneAnimationConfig> animationConfigInfo = nullptr;
+    data.WriteParcelable(animationConfigInfo);
+    data.WriteUint32(0);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SIZE_CHANGE);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(-1, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
 
 /**
@@ -639,6 +665,23 @@ HWTEST_F(SessionStageStubTest, HandleNotifyWindowVisibilityChange, TestSize.Leve
 }
 
 /**
+ * @tc.name: HandleNotifyWindowOcclusionState
+ * @tc.desc: test function : HandleNotifyWindowOcclusionState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyWindowOcclusionState, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_OCCLUSION_STATE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteUint32(static_cast<uint32_t>(WindowVisibilityState::END) + 1);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    EXPECT_EQ(sessionStageStub_->OnRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+}
+
+/**
  * @tc.name: HandleNotifyTransformChange
  * @tc.desc: test function : HandleNotifyTransformChange
  * @tc.type: FUNC
@@ -1136,6 +1179,22 @@ HWTEST_F(SessionStageStubTest, HandleNotifyRotationProperty, Function | SmallTes
     uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ROTATION_PROPERTY);
     EXPECT_TRUE(sessionStageStub_ != nullptr);
     EXPECT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleNotifyPageRotationIsIgnored
+ * @tc.desc: test function : HandleNotifyPageRotationIsIgnored
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyPageRotationIsIgnored, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_PAGE_ROTATION_ISIGNORED);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
 
 /**
