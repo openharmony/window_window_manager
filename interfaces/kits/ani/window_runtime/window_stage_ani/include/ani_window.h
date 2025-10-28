@@ -98,8 +98,8 @@ public:
     ani_boolean IsWindowSupportWideGamut(ani_env* env);
     ani_object SetWindowLayoutFullScreen(ani_env* env, ani_boolean isLayoutFullScreen);
     void SetSystemBarProperties(ani_env* env, ani_object aniSystemBarProperties);
-    ani_object SetSpecificSystemBarEnabled(ani_env* env, ani_string, ani_boolean enable,
-        ani_boolean enableAnimation);
+    ani_object SetSpecificSystemBarEnabled(ani_env* env, ani_string name, ani_boolean enable,
+        ani_object enableAnimation);
     ani_object Snapshot(ani_env* env);
     void HideNonSystemFloatingWindows(ani_env* env, ani_boolean shouldHide);
     void ResizeAsync(ani_env* env, ani_int width, ani_int height);
