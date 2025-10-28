@@ -1693,11 +1693,9 @@ ani_object AniWindow::SetSpecificSystemBarEnabled(ani_env* env, ani_string name,
     systemBarProperty.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
     auto err = WM_JS_TO_ERROR_CODE_MAP.at(
         windowToken_->UpdateSystemBarPropertyForPage(type, systemBarProperty, propertyFlag));
-
     if (err == WmErrorCode::WM_OK) {
         return AniWindowUtils::CreateAniUndefined(env);
     }
-
     TLOGE(WmsLogTag::WMS_IMMS, "SetSpecificSystemBarEnabled failed, ret = %{public}d", err);
     return AniWindowUtils::AniThrowError(env, err);
 }
