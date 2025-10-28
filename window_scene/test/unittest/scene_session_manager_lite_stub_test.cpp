@@ -402,16 +402,51 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleIsValidSessionIds, TestSize.Leve
 }
 
 /**
- * @tc.name: HandlePendingSessionToForeground
+ * @tc.name: HandlePendingSessionToForeground_InvalidToken
  * @tc.desc: test function : HandlePendingSessionToForeground
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLiteStubTest, HandlePendingSessionToForeground, TestSize.Level1)
+HWTEST_F(SceneSessionManagerLiteStubTest, HandlePendingSessionToForeground_InvalidToken, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandlePendingSessionToForeground(data, reply);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandlePendingSessionToForeground(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
+}
+
+/**
+ * @tc.name: HandlePendingSessionToForeground_Fail
+ * @tc.desc: test function : HandlePendingSessionToForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandlePendingSessionToForeground_Fail, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    data.WriteRemoteObject(token);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandlePendingSessionToForeground(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+}
+
+/**
+ * @tc.name: HandlePendingSessionToForeground_Success
+ * @tc.desc: test function : HandlePendingSessionToForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandlePendingSessionToForeground_Success, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    int32_t windowMode = static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN);
+    data.WriteRemoteObject(token);
+    data.WriteInt32(windowMode);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandlePendingSessionToForeground(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
 }
 
 /**
