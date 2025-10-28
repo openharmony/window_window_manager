@@ -389,9 +389,10 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdPendingSessionToForeground, TestSiz
 
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
     sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
+    int32_t windowMode = static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN);
     ASSERT_NE(nullptr, windowManagerAgent);
     data.WriteRemoteObject(windowManagerAgent->AsObject());
-
+    data.WriteInt32(windowMode);
     uint32_t code =
         static_cast<uint32_t>(ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_PENDING_SESSION_TO_FOREGROUND);
 
