@@ -1942,7 +1942,7 @@ HWTEST_F(SceneSessionManagerTest6, IsValidSessionIds, TestSize.Level1)
 *@tc.desc:IsValidSessionIds
 *@tc.type:FUNC
 */
-HWTEST_F(SceneSessionManagerTest6, GetSurfaceNodeldsFromMissionIds01, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest6, GetSurfaceNodeIdsFromMissionIds01, TestSize.Level1)
 {
     std::vector<int32_t> sessionIds = {1, 2, 3, 4, 5};
     // sessionInfo是闪控球的id 1并且有surfaceNode
