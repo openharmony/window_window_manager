@@ -367,6 +367,42 @@ HWTEST_F(sceneSessionManagerLiteProxyTest, NotifyAppUseControlList, TestSize.Lev
     EXPECT_EQ(errCode, WSError::WS_ERROR_INVALID_PARAM);
 }
 
+/**
+ * @tc.name: PendingSessionToForeground_Fail
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerLiteProxyTest, PendingSessionToForeground_Fail, TestSize.Level1)
+{
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    int32_t windowMode = static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sptr<SceneSessionManagerLiteProxy> sceneSessionManagerLiteProxy =
+        sptr<SceneSessionManagerLiteProxy>::MakeSptr(token);
+    ASSERT_NE(sceneSessionManagerLiteProxy, nullptr);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    WSError errCode = sceneSessionManagerLiteProxy->PendingSessionToForeground(token, windowMode);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: PendingSessionToForeground_Success
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerLiteProxyTest, PendingSessionToForeground_Success, TestSize.Level1)
+{
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    int32_t windowMode = static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sptr<SceneSessionManagerLiteProxy> sceneSessionManagerLiteProxy =
+        sptr<SceneSessionManagerLiteProxy>::MakeSptr(token);
+    ASSERT_NE(sceneSessionManagerLiteProxy, nullptr);
+    MockMessageParcel::ClearAllErrorFlag();
+    WSError errCode = sceneSessionManagerLiteProxy->PendingSessionToForeground(token, windowMode);
+    EXPECT_EQ(errCode, WSError::WS_OK);
+}
+
 HWTEST_F(sceneSessionManagerLiteProxyTest, UnregPipChgListenerByScreenId_WriteTokenFailed, TestSize.Level1)
 {
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
