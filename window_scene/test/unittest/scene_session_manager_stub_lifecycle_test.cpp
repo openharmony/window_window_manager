@@ -113,7 +113,6 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandlePendingSessionToForeground_
     sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(token, nullptr);
     data.WriteRemoteObject(token);
-
     int res = stub_->HandlePendingSessionToForeground(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 }
