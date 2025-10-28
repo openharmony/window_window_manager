@@ -343,6 +343,8 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, NotifyWindowStateErrorFromMMI, TestS
  */
 HWTEST_F(SceneSessionManagerLifecycleTest2, GetAllMainWindowInfo, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     ssm_->sceneSessionMap_.clear();
     SessionInfo info;
     info.abilityName_ = "SceneSessionManagerLifecycleTest2";
@@ -373,6 +375,13 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, GetAllMainWindowInfo, TestSize.Level
  
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     EXPECT_EQ(ssm_->GetAllMainWindowInfo(infos), WMError::WM_OK);
+
+    infos.clear();
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->SetSessionState(SessionState::STATE_DISCONNECT);
+    EXPECT_EQ(ssm_->GetAllMainWindowInfo(infos), WMError::WM_OK);
+    EXPECT_EQ(static_cast<int32_t>(infos.size()), 0);
+    EXPECT_TRUE(g_logMsg.find("session is nullptr or sessionState is disconnect") != std::string::npos);
 }
  
 /**

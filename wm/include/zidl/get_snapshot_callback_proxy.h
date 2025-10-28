@@ -32,6 +32,8 @@ public:
  
 private:
     static inline BrokerDelegator<GetSnapshotCallbackProxy> delegator_;
+
+    bool WritePixelMapData(MessageParcel& data, const std::vector<std::shared_ptr<OHOS::Media::PixelMap>>& pixelMaps);
 };
 } // namespace Rosen
 } // namespace OHOS

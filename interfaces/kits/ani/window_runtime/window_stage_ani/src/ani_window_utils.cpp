@@ -1091,14 +1091,24 @@ ani_object AniWindowUtils::CreateAniPixelMapArray(ani_env* env,
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
     }
     for (size_t i = 0; i < pixelMaps.size(); i++) {
+        if (pixelMaps[i] == nullptr) {
+            auto status = env->Array_Set_Ref(pixelMapArray, i, AniWindowUtils::CreateAniUndefined(env));
+            if (status != ANI_OK) {
+                TLOGW(WmsLogTag::WMS_LIFE, "[ANI] pixelMap is nullptr, status: %{public}d", status);
+            }
+            continue;
+        }
         auto nativePixelMap = OHOS::Media::PixelMapTaiheAni::CreateEtsPixelMap(env, pixelMaps[i]);
         if (nativePixelMap == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "Create native pixelmap is nullptr!");
-            return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
-        }
-        if (env->Array_Set_Ref(pixelMapArray, i, nativePixelMap) != ANI_OK) {
-            TLOGE(WmsLogTag::WMS_LIFE, "[ANI] create pixelMapArray failed");
-            return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+            auto status = env->Array_Set_Ref(pixelMapArray, i, AniWindowUtils::CreateAniUndefined(env));
+            if (status != ANI_OK) {
+                TLOGW(WmsLogTag::WMS_LIFE, "[ANI] nativePixelMap is nullptr, status: %{public}d", status);
+            }
+        } else {
+            auto status = env->Array_Set_Ref(pixelMapArray, i, nativePixelMap);
+            if (status != ANI_OK) {
+                TLOGE(WmsLogTag::WMS_LIFE, "[ANI] set nativePixelMap failed: %{public}d", status);
+            }
         }
     }
     return pixelMapArray;
