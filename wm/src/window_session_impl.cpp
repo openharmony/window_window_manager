@@ -8491,6 +8491,19 @@ WMError WindowSessionImpl::GetPiPSettingSwitchStatus(bool& switchStatus) const
     return SingletonContainer::Get<WindowAdapter>().GetPiPSettingSwitchStatus(switchStatus);
 }
 
+void WindowSessionImpl::SetPipParentWindowId(uint32_t windowId) const
+{
+    TLOGI(WmsLogTag::WMS_PIP, "ParentWindowId:%{public}u", windowId);
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_PIP, "HostSession is invalid");
+        return;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
+
+    hostSession->SetPipParentWindowId(windowId);
+}
+
 void WindowSessionImpl::SwitchSubWindow(bool freeMultiWindowEnable, int32_t parentId)
 {
     std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);

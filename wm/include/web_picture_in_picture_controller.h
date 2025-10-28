@@ -42,6 +42,7 @@ public:
     void RestorePictureInPictureWindow() override;
     WMError SetXComponentController(std::shared_ptr<XComponentController> xComponentController) override;
     uint8_t GetWebRequestId() override;
+    WMError SetPipParentWindowId(uint32_t windowId) override;
 
 protected:
     WMError CreatePictureInPictureWindow(StartPipType startType) override;

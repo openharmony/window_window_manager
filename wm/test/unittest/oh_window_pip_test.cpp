@@ -325,6 +325,26 @@ HWTEST_F(OHWindowPipTest, OH_PictureInPicture_SetPipControlEnabled, TestSize.Lev
 }
 
 /**
+ * @tc.name: OH_PictureInPicture_SetPipParentWindowId
+ * @tc.desc: OH_PictureInPicture_SetPipParentWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHWindowPipTest, OH_PictureInPicture_SetPipParentWindowId, TestSize.Level1)
+{
+    uint32_t pipControllerId_ = 0;
+    uint32_t windowId = 200;
+    auto ret = OH_PictureInPicture_SetPipParentWindowId(pipControllerId_, 0);
+    EXPECT_EQ(ret, WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM);
+    ret = OH_PictureInPicture_SetPipParentWindowId(10000, windowId);
+    EXPECT_EQ(ret, WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM);
+    OH_PictureInPicture_CreatePip(pipConfig, &pipControllerId_);
+
+    ret = OH_PictureInPicture_SetPipParentWindowId(pipControllerId_, windowId);
+    EXPECT_EQ(ret, WindowManager_ErrorCode::OK);
+    OH_PictureInPicture_DeletePip(pipControllerId_);
+}
+
+/**
  * @tc.name: OH_PictureInPicture_RegisterStartPipCallback
  * @tc.desc: OH_PictureInPicture_RegisterStartPipCallback
  * @tc.type: FUNC

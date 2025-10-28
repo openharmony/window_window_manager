@@ -47,8 +47,6 @@ WMError WebPictureInPictureController::CreatePictureInPictureWindow(StartPipType
     }
     TLOGI(WmsLogTag::WMS_PIP, "mainWindow:%{public}u, mainWindowState:%{public}u",
         mainWindowId_, mainWindow_->GetWindowState());
-    mainWindowLifeCycleListener_ = sptr<PictureInPictureControllerBase::WindowLifeCycleListener>::MakeSptr();
-    mainWindow_->RegisterLifeCycleListener(mainWindowLifeCycleListener_);
     if (mainWindow_->GetWindowState() != WindowState::STATE_SHOWN) {
         TLOGE(WmsLogTag::WMS_PIP, "mainWindow is not shown. create failed.");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
@@ -196,6 +194,29 @@ uint8_t WebPictureInPictureController::GetWebRequestId()
         webRequestId_++;
     }
     return res;
+}
+
+WMError WebPictureInPictureController::SetPipParentWindowId(uint32_t windowId)
+{
+    if (mainWindow_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "mainWindow is null");
+        return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
+    }
+    auto newMainWindow = WindowSceneSessionImpl::GetMainWindowWithId(windowId);
+    if (newMainWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "mainWindow not found: %{public}u", windowId);
+        return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
+    }
+    mainWindow_ = newMainWindow;
+    mainWindowId_ = windowId;
+    if (window_ == nullptr) {
+        TLOGI(WmsLogTag::WMS_PIP, "window is null");
+        return WMError::WM_OK;
+
+    }
+    TLOGI(WmsLogTag::WMS_PIP, "parentWindowId: %{public}u", windowId);
+    window_->SetPipParentWindowId(windowId);
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

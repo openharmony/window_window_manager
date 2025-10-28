@@ -174,6 +174,9 @@ protected:
     virtual void ResetExtController() {};
     virtual void NotifyNodeUpdate(napi_ref nodeRef) {};
 
+    // web
+    virtual WMError SetPipParentWindowId(uint32_t windowId) { return WMError::WM_OK; };
+
 private:
     wptr<PictureInPictureControllerBase> weakRef_ = nullptr;
 };

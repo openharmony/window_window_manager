@@ -44,6 +44,7 @@ const std::string WINDOW_MOVING_CB = "windowMoving";
 const std::string SESSION_PIP_CONTROL_STATUS_CHANGE_CB = "sessionPiPControlStatusChange";
 const std::string SESSION_AUTO_START_PIP_CB = "autoStartPiP";
 const std::string UPDATE_PIP_TEMPLATE_INFO_CB = "updatePiPTemplateInfo";
+const std::string SET_PIP_PARENT_WINDOWID_CB = "setPiPParentWindowId";
 const std::string CREATE_SUB_SESSION_CB = "createSpecificSession";
 const std::string CLEAR_SUB_SESSION_CB = "clearSubSession";
 const std::string WINDOW_ANCHOR_INFO_CHANGE_CB = "windowAnchorInfoChange";
@@ -214,6 +215,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {UPDATE_FLAG_CB,                        ListenerFuncType::UPDATE_FLAG_CB},
     {Z_LEVEL_CHANGE_CB,                     ListenerFuncType::Z_LEVEL_CHANGE_CB},
     {UPDATE_PIP_TEMPLATE_INFO_CB,           ListenerFuncType::UPDATE_PIP_TEMPLATE_INFO_CB},
+    {SET_PIP_PARENT_WINDOWID_CB,            ListenerFuncType::SET_PIP_PARENT_WINDOWID_CB},
     {UPDATE_FOLLOW_SCREEN_CHANGE_CB,        ListenerFuncType::UPDATE_FOLLOW_SCREEN_CHANGE_CB},
     {USE_IMPLICITANIMATION_CB,              ListenerFuncType::USE_IMPLICIT_ANIMATION_CB},
     {WINDOW_ANCHOR_INFO_CHANGE_CB,          ListenerFuncType::WINDOW_ANCHOR_INFO_CHANGE_CB},
@@ -1548,6 +1550,24 @@ void JsSceneSession::ProcessUpdatePiPTemplateInfoRegister()
             return;
         }
         jsSceneSession->OnUpdatePiPTemplateInfo(pipTemplateInfo);
+    });
+    TLOGI(WmsLogTag::WMS_PIP, "success");
+}
+
+void JsSceneSession::ProcessSetPiPParentWindowIdRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    session->SetPipParentWindowIdCallback([weakThis = wptr(this)](uint32_t windowId) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_PIP, "jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->OnSetPiPParentWindowId(windowId);
     });
     TLOGI(WmsLogTag::WMS_PIP, "success");
 }
@@ -3067,6 +3087,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
         case static_cast<uint32_t>(ListenerFuncType::UPDATE_PIP_TEMPLATE_INFO_CB):
             ProcessUpdatePiPTemplateInfoRegister();
             break;
+        case static_cast<uint32_t>(ListenerFuncType::SET_PIP_PARENT_WINDOWID_CB):
+            ProcessSetPiPParentWindowIdRegister();
+            break;
         case static_cast<uint32_t>(ListenerFuncType::CREATE_SUB_SESSION_CB):
             ProcessCreateSubSessionRegister();
             break;
@@ -4301,6 +4324,28 @@ void JsSceneSession::OnUpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo)
         }
         napi_value pipTemplateInfoValue = CreatePipTemplateInfo(env, pipTemplateInfo);
         napi_value argv[] = {pipTemplateInfoValue};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, __func__);
+}
+
+void JsSceneSession::OnSetPiPParentWindowId(uint32_t windowId)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "PiPParentWindowId: %{public}u", windowId);
+    auto task = [weakThis = wptr(this), persistentId = persistentId_,
+        windowId, env = env_] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_PIP, "jsSceneSession id:%{public}d has been destroyed", persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(SET_PIP_PARENT_WINDOWID_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_PIP, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value parentWindowIdValue = CreateJsValue(env, windowId);
+        napi_value argv[] = {parentWindowIdValue};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, __func__);
