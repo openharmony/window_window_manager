@@ -14,12 +14,20 @@
  */
  
 #include <gtest/gtest.h>
+#include "hilog/log.h"
 #include "get_snapshot_callback.h"
 #include "wm_common.h"
  
 using namespace testing;
 using namespace testing::ext;
- 
+namespace {
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        logMsg += msg;
+    }
+}
 namespace OHOS {
 namespace Rosen {
 class GetSnapshotCallbackTest : public testing::Test {
@@ -88,6 +96,7 @@ HWTEST_F(GetSnapshotCallbackTest, OnRemoteRequest, TestSize.Level1)
     data.WriteInterfaceToken(GetSnapshotCallback::GetDescriptor());
     EXPECT_EQ(getStub->OnRemoteRequest(code, data, reply, option), ERR_NONE);
 }
+
 /**
  * @tc.name: HandleOnReceived
  * @tc.desc: HandleOnReceived Test
@@ -107,6 +116,29 @@ HWTEST_F(GetSnapshotCallbackTest, HandleOnReceived, TestSize.Level1)
     data.WriteInt32(0);
     data.WriteInt32(1);
     EXPECT_EQ(getStub->HandleOnReceived(data, reply), ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleOnReceived01
+ * @tc.desc: HandleOnReceived01 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(GetSnapshotCallbackTest, HandleOnReceived01, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<GetSnapshotCallback> getStub = sptr<GetSnapshotCallback>::MakeSptr();
+    EXPECT_EQ(getStub->HandleOnReceived(data, reply), ERR_NONE);
+
+    data.WriteInt32(0);
+    data.WriteInt32(1);
+    getStub->HandleOnReceived(data, reply);
+    EXPECT_TRUE(logMsg.find("read nullptrLen failed") != std::string::npos);
+    data.WriteInt32(0);
+    data.WriteInt32(2);
+    EXPECT_TRUE(logMsg.find("pixelMaps size") != std::string::npos);
 }
 }
 } // namespace Rosen
