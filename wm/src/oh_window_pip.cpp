@@ -285,6 +285,20 @@ int32_t OH_PictureInPicture_SetPipControlEnabled(uint32_t controllerId, PictureI
         enabled));
 }
 
+int32_t OH_PictureInPicture_SetPipParentWindowId(uint32_t controllerId, uint32_t windowId)
+{
+    if (windowId <= 0) {
+        TLOGE(WmsLogTag::WMS_PIP, "windowId invalid: %{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
+    auto pipController = GetControllerFromId(controllerId);
+    if (pipController == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found: %{public}d", controllerId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
+    return GetErrorCodeFromWMError(pipController->SetPipParentWindowId(windowId));
+}
+
 int32_t OH_PictureInPicture_SetPipInitialSurfaceRect(uint32_t controllerId, int32_t positionX, int32_t positionY,
     uint32_t width, uint32_t height)
 {

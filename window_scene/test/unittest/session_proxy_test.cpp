@@ -495,6 +495,43 @@ HWTEST_F(SessionProxyTest, UpdatePiPTemplateInfo, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetPipParentWindowId
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionProxyTest, SetPipParentWindowId, Function | SmallTest | Level2)
+{
+    auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
+    auto sessionProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    uint32_t windowId = 100;
+ 
+    // Case 1: Failed to write interface token
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->SetPipParentWindowId(windowId));
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+ 
+    // Case 2: Failed to write windowId
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->SetPipParentWindowId(windowId));
+    MockMessageParcel::SetWriteUint32ErrorFlag(false);
+ 
+    // Case 3: remote is nullptr
+    sptr<SessionProxy> nullProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, nullProxy->SetPipParentWindowId(windowId));
+ 
+    // Case 4: Failed to send request
+    mockRemote->sendRequestResult_ = ERR_TRANSACTION_FAILED;
+    sptr<SessionProxy> failProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, failProxy->SetPipParentWindowId(windowId));
+ 
+    // Case 5: Success
+    mockRemote->sendRequestResult_ = ERR_NONE;
+    sptr<SessionProxy> okProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WSError::WS_OK, okProxy->SetPipParentWindowId(windowId));
+}
+
+/**
  * @tc.name: SetWindowAnchorInfo
  * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC

@@ -4713,6 +4713,14 @@ public:
     virtual WMError GetPiPSettingSwitchStatus(bool& switchStatus) const { return WMError::WM_OK; }
 
     /**
+     * @brief Set parent windowId of picture-in-picture window.
+     *
+     * @param windowId parent windowId of picture-in-picture window.
+     * @return WMError::WM_OK means set success, otherwise failed.
+     */
+    virtual void SetPipParentWindowId(uint32_t windowId) const {}
+
+    /**
      * @brief return true if current window is anco, otherwise return false
      */
     virtual bool IsAnco() const

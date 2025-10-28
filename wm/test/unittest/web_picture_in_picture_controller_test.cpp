@@ -19,6 +19,7 @@
 #include "picture_in_picture_controller.h"
 #include "picture_in_picture_manager.h"
 #include "window.h"
+#include "window_session_impl.h"
 #include "wm_common.h"
 #include "xcomponent_controller.h"
 #include "ability_context_impl.h"
@@ -252,6 +253,39 @@ HWTEST_F(WebPictureInPictureControllerTest, UpdateWinRectByComponent, TestSize.L
     webPipControl->UpdateWinRectByComponent();
     EXPECT_EQ(webPipControl->windowRect_.posX_, 0);
     EXPECT_EQ(webPipControl->windowRect_.posY_, 0);
+}
+
+/**
+ * @tc.name: SetPipParentWindowId
+ * @tc.desc: SetPipParentWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPictureInPictureControllerTest, SetPipParentWindowId, TestSize.Level1)
+{
+    auto webPipControl = sptr<WebPictureInPictureController>::MakeSptr(config);
+    uint32_t windowId = 10000;
+    webPipControl->mainWindow_  = nullptr;
+    EXPECT_EQ(webPipControl->SetPipParentWindowId(windowId), WMError::WM_ERROR_PIP_STATE_ABNORMALLY);
+ 
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    webPipControl->mainWindow_ = mw;
+    EXPECT_EQ(webPipControl->SetPipParentWindowId(windowId), WMError::WM_ERROR_PIP_STATE_ABNORMALLY);
+ 
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetPipParentWindowId");
+    
+    sptr<WindowSessionImpl> session = sptr<WindowSessionImpl>::MakeSptr(option);
+    string winName = "testSetPipParentWindowId";
+    WindowSessionImpl::windowSessionMap_.insert(
+        std::make_pair(winName, std::pair<int32_t, sptr<WindowSessionImpl>>(windowId, session)));
+    webPipControl->window_ = nullptr;
+    EXPECT_EQ(webPipControl->SetPipParentWindowId(windowId), WMError::WM_OK);
+ 
+    auto mw1 = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw1);
+    webPipControl->window_ = mw1;
+    EXPECT_EQ(webPipControl->SetPipParentWindowId(windowId), WMError::WM_OK);
 }
 }
 }
