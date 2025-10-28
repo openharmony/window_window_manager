@@ -3429,8 +3429,10 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
             return;
         }
         auto property = window->GetSystemBarPropertyByType(systemBarType);
-        window->UpdateSpecificSystemBarEnabled(systemBarEnable, systemBarEnableAnimation, property);
-        SystemBarPropertyFlag propertyFlag = { true, false, false, argc <= ARG_COUNT_TWO ? false : true };
+        auto isSetAnimation = argc > ARG_COUNT_TWO;
+        window->UpdateSpecificSystemBarEnabled(systemBarEnable,
+            isSetAnimation ? systemBarEnableAnimation : property.enable_, property);
+        SystemBarPropertyFlag propertyFlag = { true, false, false, isSetAnimation };
         auto errCode =
             WM_JS_TO_ERROR_CODE_MAP.at(window->UpdateSystemBarPropertyForPage(systemBarType, property, propertyFlag));
         if (errCode == WmErrorCode::WM_OK) {

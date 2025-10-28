@@ -3222,8 +3222,7 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
 }
 
 WMError WindowSceneSessionImpl::UpdateSystemBarPropertyForPage(WindowType type,
-                                                               const SystemBarProperty& systemBarProperty,
-                                                               const SystemBarPropertyFlag& systemBarPropertyFlag)
+    const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag)
 {
     bool isUsedPageEnabled = false;
     {
