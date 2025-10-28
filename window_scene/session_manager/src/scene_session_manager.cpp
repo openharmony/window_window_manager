@@ -3271,7 +3271,9 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     if (!systemConfig_.backgroundswitch || sceneSession->GetSessionProperty()->GetIsAppSupportPhoneInPc()) {
         TLOGI(WmsLogTag::WMS_MAIN, "[id: %{public}d] Begin StartUIAbility, system: %{public}u", persistentId,
             static_cast<uint32_t>(sceneSession->GetSessionInfo().isSystem_));
-        sceneSession->GetSessionInfo().want->RemoveParam("targetGrantBundleName");
+        if (sceneSession->GetSessionInfo().want != nullptr) {
+            sceneSession->GetSessionInfo().want->RemoveParam("targetGrantBundleName");
+        }
         errCode = StartUIAbilityBySCBTimeoutCheck(sceneSession, sceneSessionInfo,
             static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL), isColdStart);
         ResetSessionInfoAfterStartUIAbility(sceneSession);
@@ -3284,7 +3286,9 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
             sceneSession->GetSessionInfo().reuseDelegatorWindow) {
             TLOGI(WmsLogTag::WMS_MAIN, "Call StartUIAbility: %{public}d system: %{public}u", persistentId,
                 static_cast<uint32_t>(sceneSession->GetSessionInfo().isSystem_));
-            sceneSession->GetSessionInfo().want->RemoveParam("targetGrantBundleName");
+            if (sceneSession->GetSessionInfo().want != nullptr) {
+                sceneSession->GetSessionInfo().want->RemoveParam("targetGrantBundleName");
+            }
             errCode = StartUIAbilityBySCBTimeoutCheck(sceneSession, sceneSessionInfo,
                 static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL), isColdStart);
         } else {
