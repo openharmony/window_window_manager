@@ -57,6 +57,7 @@ constexpr uint32_t COLOR_BLACK = 0xff000000;
 const std::string WINDOW_SCREEN_LOCK_PREFIX = "windowLock_";
 const std::string VIEW_SCREEN_LOCK_PREFIX = "viewLock_";
 constexpr int32_t DEFAULT_INVALID_WINDOW_MODE = 0;
+constexpr uint32_t ICON_MAX_SIZE = 128 * 1024 * 1024;
 
 constexpr uint32_t ADVANCED_FEATURE_BIT_MAX = 32;
 constexpr uint32_t ADVANCED_FEATURE_BIT_LOCK_CURSOR = 0x00;
