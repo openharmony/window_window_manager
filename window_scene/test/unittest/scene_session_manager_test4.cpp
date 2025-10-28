@@ -1612,6 +1612,9 @@ HWTEST_F(SceneSessionManagerTest4, RegisterSessionExceptionFunc, TestSize.Level1
     sessionInfo.persistentId_ = 2;
     result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, exceptionInfo, false);
     EXPECT_EQ(result, WSError::WS_OK);
+
+    result = sceneSession->NotifySessionExceptionWithOptions(abilitySessionInfo, "sessionExceptionTest", false);
+    EXPECT_EQ(result, WSError::WS_OK);
     usleep(WAIT_SYNC_IN_NS);
 }
 

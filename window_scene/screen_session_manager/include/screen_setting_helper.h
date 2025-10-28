@@ -26,6 +26,7 @@
 #include "screen_edid_parse.h"
 #include "setting_observer.h"
 #include "dm_common.h"
+#include "nlohmann/json.hpp"
 
 namespace OHOS {
 namespace Rosen {
@@ -54,6 +55,7 @@ public:
     static std::map<std::string, MultiScreenInfo> GetMultiScreenInfo(const std::string& key = SETTING_SCREEN_MODE_KEY);
     static bool GetScreenMode(MultiScreenInfo& info, const std::string& inputString);
     static bool UpdateScreenMode(MultiScreenInfo& info, uint32_t mode, bool isExternal);
+    static bool GetScreenActiveMode(MultiScreenInfo& info, const std::string& inputString);
     static bool GetScreenRelativePosition(MultiScreenInfo& info, const std::string& inputString);
     static ScreenShape GetScreenShape(ScreenId screenId);
     static void RegisterSettingWireCastObserver(SettingObserver::UpdateFunc func);
@@ -71,6 +73,36 @@ public:
         const std::string& key = SETTING_RESOLUTION_EFFECT_KEY);
     static void RegisterSettingResolutionEffectObserver(SettingObserver::UpdateFunc func);
     static void UnregisterSettingResolutionEffectObserver();
+    static void RegisterRotationCorrectionExemptionListObserver(SettingObserver::UpdateFunc func);
+    static void UnregisterRotationCorrectionExemptionListObserver();
+    static bool GetRotationCorrectionExemptionList(std::vector<std::string>& exemptionApps,
+        const std::string& key = SETTING_COMPATIBLE_APP_STRATEGY_KEY);
+    static void GetCorrectionExemptionListFromJson(const std::string& exemptionListJsonStr,
+        std::vector<std::string>& exemptionApps);
+    template<typename T>
+    static bool GetJsonValue(const nlohmann::json& payload, const std::string& key, T& result)
+    {
+        if (!payload.contains(key)) {
+            return false;
+        }
+        if constexpr (std::is_same_v<T, std::string>) {
+            if (payload[key].is_string()) {
+                result = payload[key].get<std::string>();
+                return true;
+            }
+        } else if constexpr (std::is_same_v<T, bool>) {
+            if (payload[key].is_boolean()) {
+                result = payload[key].get<bool>();
+                return true;
+            }
+        } else if constexpr (std::is_arithmetic_v<T>) {
+            if (payload[key].is_number()) {
+                result = payload[key].get<int32_t>();
+                return true;
+            }
+        }
+        return false;
+    }
 private:
     static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};
     static const constexpr char* SETTING_CAST_KEY {"huaweicast.data.privacy_projection_state"};
@@ -80,6 +112,7 @@ private:
     static const constexpr char* SETTING_EXTEND_DPI_KEY {"user_set_dpi_extend"};
     static const constexpr char* SETTING_DURING_CALL_KEY {"during_call_state"};
     static const constexpr char* SETTING_RESOLUTION_EFFECT_KEY {"user_set_resolution_effect_select"};
+    static const constexpr char* SETTING_COMPATIBLE_APP_STRATEGY_KEY {"COMPATIBLE_APP_STRATEGY"};
     static const constexpr uint32_t BASE_TEN = 10;
     static sptr<SettingObserver> dpiObserver_;
     static sptr<SettingObserver> castObserver_;
@@ -88,6 +121,7 @@ private:
     static sptr<SettingObserver> extendScreenDpiObserver_;
     static sptr<SettingObserver> duringCallStateObserver_;
     static sptr<SettingObserver> resolutionEffectObserver_;
+    static sptr<SettingObserver> correctionExemptionListObserver_;
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -67,6 +67,7 @@ private:
     int HandleUpdateTitleInTargetPos(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyDensityFollowHost(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyWindowVisibilityChange(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyWindowOcclusionState(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyTransformChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySingleHandTransformChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyDialogStateChange(MessageParcel& data, MessageParcel& reply);
@@ -95,7 +96,9 @@ private:
     int HandleNotifyHighlightChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyWindowCrossAxisChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyPipSizeChange(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyPipScreenStatusChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyRotationProperty(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyPageRotationIsIgnored(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyWindowAttachStateChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyKeyboardAnimationCompleted(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyKeyboardAnimationWillBegin(MessageParcel& data, MessageParcel& reply);

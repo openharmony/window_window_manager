@@ -289,6 +289,9 @@ DmErrorCode DisplayManagerAni::ProcessRegisterCallback(ani_env* env, std::string
     } else if (typeStr == ANI_EVENT_PRIVATE_MODE_CHANGE) {
         ret = DM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<DisplayManager>().RegisterPrivateWindowListener(displayAniListener));
+    } else if (typeStr == ANI_EVENT_BRIGHTNESS_INFO_CHANGED) {
+        ret = DM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<DisplayManager>().RegisterBrightnessInfoListener(displayAniListener));
     }
     return ret;
 }
@@ -379,6 +382,10 @@ DMError DisplayManagerAni::UnRegisterDisplayListenerWithType(std::string type, a
                 sptr<DisplayManager::IPrivateWindowListener> thisListener(it->second);
                 ret = SingletonContainer::Get<DisplayManager>().UnregisterPrivateWindowListener(thisListener);
                 TLOGI(WmsLogTag::DMS, "[ANI] UnRegisterDisplayListener privateWindowListener success");
+            } else if (type == ANI_EVENT_BRIGHTNESS_INFO_CHANGED) {
+                sptr<DisplayManager::IBrightnessInfoListener> thisListener(it->second);
+                ret = SingletonContainer::Get<DisplayManager>().UnregisterBrightnessInfoListener(thisListener);
+                TLOGI(WmsLogTag::DMS, "[ANI] UnRegisterDisplayListener brightnessInfoListener success");
             }
             jsCbMap_[type].erase(it);
             break;
@@ -422,6 +429,9 @@ DMError DisplayManagerAni::UnregisterAllDisplayListenerWithType(std::string type
         } else if (type == ANI_EVENT_PRIVATE_MODE_CHANGE) {
             sptr<DisplayManager::IPrivateWindowListener> thisListener(it->second);
             ret = SingletonContainer::Get<DisplayManager>().UnregisterPrivateWindowListener(thisListener);
+        } else if (type == ANI_EVENT_BRIGHTNESS_INFO_CHANGED) {
+            sptr<DisplayManager::IBrightnessInfoListener> thisListener(it->second);
+            ret = SingletonContainer::Get<DisplayManager>().UnregisterBrightnessInfoListener(thisListener);
         }
         jsCbMap_[type].erase(it++);
     }
@@ -468,6 +478,110 @@ void DisplayManagerAni::OnGetAllDisplayPhysicalResolution(ani_env* env, ani_obje
     }
 }
 
+void DisplayManagerAni::ConvertGlobalToRelativeCoordinate(
+    ani_env* env, ani_object positionObj, ani_long nativeObj, ani_object relativePostionObj, ani_object displayId)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
+        return;
+    }
+    DisplayManagerAni* displayManagerAni = reinterpret_cast<DisplayManagerAni*>(nativeObj);
+    if (displayManagerAni != nullptr) {
+        displayManagerAni->OnConvertGlobalToRelativeCoordinate(env, positionObj, displayId, relativePostionObj);
+    } else {
+        TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
+    }
+}
+ 
+void DisplayManagerAni::OnConvertGlobalToRelativeCoordinate(
+    ani_env* env, ani_object positionObj, ani_object displayId, ani_object relativePostionObj)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
+    Position globalPosition;
+    RelativePosition relativePosition;
+    ani_long displayIdTmp;
+    DmErrorCode errCode = DisplayAniUtils::GetPositionFromAni(env, globalPosition, positionObj);
+    if (errCode != DmErrorCode::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get position");
+        AniErrUtils::ThrowBusinessError(env, errCode, "Failed to get position");
+        return;
+    }
+    ani_boolean isUndefined;
+    ani_status ret = env->Reference_IsUndefined(static_cast<ani_ref>(displayId), &isUndefined);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to check ref is undefined, ret %{public}d", ret);
+        return;
+    }
+    if (isUndefined) {
+        errCode = DM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<DisplayManager>().ConvertGlobalCoordinateToRelative(
+                globalPosition, relativePosition));
+    } else {
+        env->Object_CallMethodByName_Long(displayId, "unboxed", ":l", &displayIdTmp);
+        if (displayIdTmp < 0) {
+            AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "displayID less than 0");
+            return;
+        }
+        errCode = DM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<DisplayManager>().ConvertGlobalCoordinateToRelativeWithDisplayId(globalPosition,
+                static_cast<DisplayId>(displayIdTmp), relativePosition));
+    }
+    if (errCode != DmErrorCode::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to convert global coordinare to relative");
+        AniErrUtils::ThrowBusinessError(env, errCode, "Failed to convert global coordinare to relative");
+        return;
+    }
+    errCode = DisplayAniUtils::SetRelativePostionObj(env, relativePosition, relativePostionObj);
+    if (errCode != DmErrorCode::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to set relative Postion");
+        AniErrUtils::ThrowBusinessError(env, errCode, "Failed to set relative Postion");
+        return;
+    }
+}
+ 
+void DisplayManagerAni::ConvertRelativeToGlobalCoordinate(
+    ani_env* env, ani_object relativePostionObj, ani_long nativeObj, ani_object positionObj)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
+        return;
+    }
+    DisplayManagerAni* displayManagerAni = reinterpret_cast<DisplayManagerAni*>(nativeObj);
+    if (displayManagerAni != nullptr) {
+        displayManagerAni->OnConvertRelativeToGlobalCoordinate(env, relativePostionObj, positionObj);
+    } else {
+        TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
+    }
+}
+ 
+void DisplayManagerAni::OnConvertRelativeToGlobalCoordinate(
+    ani_env* env, ani_object relativePostionObj, ani_object positionObj)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
+    Position globalPosition;
+    RelativePosition relativePosition;
+    DmErrorCode errCode = DisplayAniUtils::GetRelativePostionFromAni(env, relativePosition, relativePostionObj);
+    if (errCode != DmErrorCode::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get relativePostion");
+        AniErrUtils::ThrowBusinessError(env, errCode, "Failed to get relativePostion");
+        return;
+    }
+    errCode = DM_JS_TO_ERROR_CODE_MAP.at(
+        SingletonContainer::Get<DisplayManager>().ConvertRelativeCoordinateToGlobal(relativePosition, globalPosition));
+    if (errCode != DmErrorCode::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to convert relativeCoordinate to globalPosition");
+        AniErrUtils::ThrowBusinessError(env, errCode, "Failed to convert relativeCoordinate to globalPosition");
+        return;
+    }
+    errCode = DisplayAniUtils::SetPositionObj(env, globalPosition, positionObj);
+    if (errCode != DmErrorCode::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to set globalPosition");
+        AniErrUtils::ThrowBusinessError(env, errCode, "Failed to set globalPosition");
+    }
+}
+
 void DisplayManagerAni::FinalizerDisplay(ani_env* env, ani_object displayObj, ani_long nativeObj)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] DMS FinalizerDisplayNative begin");
@@ -484,6 +598,38 @@ void DisplayManagerAni::OnFinalizerDisplay(ani_env* env, ani_object displayObj)
         return;
     }
     DisplayAniUtils::DisposeAniDisplayObject(static_cast<DisplayId>(displayId));
+}
+
+ani_object DisplayManagerAni::GetBrightnessInfoAni(ani_env* env, ani_long displayId, ani_long nativeObj)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
+    DisplayManagerAni* displayManagerAni = reinterpret_cast<DisplayManagerAni*>(nativeObj);
+    if (displayManagerAni == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] displayManagerAni is nullptr");
+        return nullptr;
+    }
+    return displayManagerAni->OnGetBrightnessInfoAni(env, displayId);
+}
+
+ani_object DisplayManagerAni::OnGetBrightnessInfoAni(ani_env* env, ani_long displayId)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
+    ScreenBrightnessInfo brightnessInfo;
+    auto ret = SingletonContainer::Get<DisplayManager>().GetBrightnessInfo(displayId, brightnessInfo);
+    if (ret != DMError::DM_OK) {
+        if (ret == DMError::DM_ERROR_ILLEGAL_PARAM) {
+            AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM,
+                "JsDisplayManager::OnGetBrightnessInfoAni failed.");
+        } else {
+            AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_SYSTEM_INNORMAL,
+                "JsDisplayManager::OnGetBrightnessInfoAni failed.");
+        }
+        return nullptr;
+    } else {
+        ani_object brightnessObj = DisplayAniUtils::CreateBrightnessInfoObject(env);
+        DisplayAniUtils::CvtBrightnessInfo(env, brightnessObj, brightnessInfo);
+        return brightnessObj;
+    }
 }
 }
 }

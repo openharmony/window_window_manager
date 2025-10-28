@@ -52,6 +52,7 @@ public:
     void ConstructKeyboardCallingWindowTestData(sptr<SceneSession>& callingSession,
                                                 sptr<KeyboardSession>& keyboardSession,
                                                 sptr<SceneSession>& statusBarSession);
+    RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
 
 private:
     sptr<KeyboardSession> GetKeyboardSession(const std::string& abilityName, const std::string& bundleName);
@@ -150,6 +151,17 @@ sptr<KSSceneSessionMocker> KeyboardSessionTest2::GetSceneSessionMocker(const std
     sptr<KSSceneSessionMocker> mockSession = sptr<KSSceneSessionMocker>::MakeSptr(info, nullptr);
 
     return mockSession;
+}
+
+RSSurfaceNode::SharedPtr KeyboardSessionTest2::CreateRSSurfaceNode()
+{
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    rsSurfaceNodeConfig.SurfaceNodeName = "KeyboardSessionTest2SurfaceNode";
+    auto surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig);
+    if (surfaceNode == nullptr) {
+        GTEST_LOG_(INFO) << "KeyboardSessionTest2::CreateRSSurfaceNode surfaceNode is nullptr";
+    }
+    return surfaceNode;
 }
 
 namespace {
@@ -397,6 +409,8 @@ HWTEST_F(KeyboardSessionTest2, HandleMoveDragSurfaceNode01, Function | SmallTest
     sptr<SceneSession> panelSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(panelSession, nullptr);
     keyboardSession->BindKeyboardPanelSession(panelSession);
+    keyboardSession->SetFindScenePanelRsNodeByZOrderFunc(
+        [this](uint64_t screenId, uint32_t targetZOrder) { return CreateRSSurfaceNode(); });
     keyboardSession->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_MOVE);
     EXPECT_TRUE(g_logMsg.find("keyboardPanelSurfaceNode is null") != std::string::npos);
 

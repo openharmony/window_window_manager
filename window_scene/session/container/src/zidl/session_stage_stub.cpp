@@ -152,6 +152,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyDensityFollowHost(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_VISIBILITY_CHANGE):
             return HandleNotifyWindowVisibilityChange(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_OCCLUSION_STATE):
+            return HandleNotifyWindowOcclusionState(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TRANSFORM_CHANGE):
             return HandleNotifyTransformChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SINGLE_HAND_TRANSFORM):
@@ -206,6 +208,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyWindowCrossAxisChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_PIPSIZE_CHANGE):
             return HandleNotifyPipSizeChange(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SCREEN_STATUS_CHANGE):
+            return HandleNotifyPipScreenStatusChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_ATTACH_STATE_CHANGE):
             return HandleNotifyWindowAttachStateChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_ANIMATION_COMPLETED):
@@ -214,6 +218,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyKeyboardAnimationWillBegin(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ROTATION_PROPERTY):
             return HandleNotifyRotationProperty(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_PAGE_ROTATION_ISIGNORED):
+            return HandleNotifyPageRotationIsIgnored(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ROTATION_CHANGE):
             return HandleNotifyRotationChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_CURRENT_ROTATION):
@@ -278,18 +284,18 @@ int SessionStageStub::HandleUpdateRect(MessageParcel& data, MessageParcel& reply
         TLOGE(WmsLogTag::WMS_LAYOUT, "read hasRSTransaction failed.");
         return -1;
     }
-    SceneAnimationConfig config { .rsTransaction_ = nullptr, .animationDuration_ = 0 };
+    sptr<SceneAnimationConfig> configPtr = data.ReadParcelable<SceneAnimationConfig>();
+    if (configPtr == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read SceneAnimationConfig failed");
+        return -1;
+    }
     if (hasRSTransaction) {
         std::shared_ptr<RSTransaction> transaction(data.ReadParcelable<RSTransaction>());
         if (!transaction) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "transaction unMarsh failed.");
             return -1;
         }
-        config.rsTransaction_ = transaction;
-    }
-    if (!data.ReadInt32(config.animationDuration_)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "read animationDuration failed");
-        return -1;
+        configPtr->rsTransaction_ = transaction;
     }
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
     uint32_t size = 0;
@@ -316,7 +322,7 @@ int SessionStageStub::HandleUpdateRect(MessageParcel& data, MessageParcel& reply
         }
         avoidAreas[static_cast<AvoidAreaType>(type)] = *area;
     }
-    WSError errCode = UpdateRect(rect, reason, config, avoidAreas);
+    WSError errCode = UpdateRect(rect, reason, *configPtr, avoidAreas);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -648,6 +654,25 @@ int SessionStageStub::HandleNotifyWindowVisibilityChange(MessageParcel& data, Me
     return ERR_NONE;
 }
 
+int SessionStageStub::HandleNotifyWindowOcclusionState(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t state = static_cast<uint32_t>(WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
+    if (!data.ReadUint32(state)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read visibility state failed");
+        return ERR_INVALID_DATA;
+    }
+    if (state > static_cast<uint32_t>(WindowVisibilityState::END)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid visibility state: %{public}u", state);
+        return ERR_INVALID_DATA;
+    }
+    auto errCode = NotifyWindowOcclusionState(static_cast<WindowVisibilityState>(state));
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write failed: errCode=%{public}d", static_cast<int32_t>(errCode));
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SessionStageStub::HandleNotifyForegroundInteractiveStatus(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("NotifyForegroundInteractiveStatus!");
@@ -881,7 +906,7 @@ int SessionStageStub::HandleUpdateAnimationSpeed(MessageParcel& data, MessagePar
     TLOGD(WmsLogTag::WMS_ANIMATION, "HandleUpdateAnimationSpeed!");
     float speed = 0.0f;
     if (!data.ReadFloat(speed)) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "Read speed failed.");
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Read speed failed!");
         return ERR_INVALID_DATA;
     }
     UpdateAnimationSpeed(speed);
@@ -1079,6 +1104,19 @@ int SessionStageStub::HandleNotifyPipSizeChange(MessageParcel& data, MessageParc
     return ERR_NONE;
 }
 
+int SessionStageStub::HandleNotifyPipScreenStatusChange(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_PIP, "in");
+    int32_t status;
+    if (!data.ReadInt32(status)) {
+        TLOGE(WmsLogTag::WMS_PIP, "Read screen status failed.");
+        return ERR_INVALID_VALUE;
+    }
+    PiPScreenStatus status_ = static_cast<PiPScreenStatus>(status);
+    NotifyPipScreenStatusChange(status_);
+    return ERR_NONE;
+}
+
 int SessionStageStub::HandleNotifyWindowAttachStateChange(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_SUB, "in");
@@ -1145,6 +1183,13 @@ int SessionStageStub::HandleNotifyRotationProperty(MessageParcel& data, MessageP
 
     OrientationInfo info = { rotation, rect, avoidAreas };
     NotifyTargetRotationInfo(info);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyPageRotationIsIgnored(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "in");
+    NotifyPageRotationIsIgnored();
     return ERR_NONE;
 }
 

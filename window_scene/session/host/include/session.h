@@ -55,6 +55,7 @@ class RSTransaction;
 class Session;
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect,
     SizeChangeReason reason, DisplayId displayId, const RectAnimationConfig& rectAnimationConfig)>;
+using NotifySessionWindowLimitsChangeFunc = std::function<void(const WindowLimits& windowLimits)>;
 using NotifySessionDisplayIdChangeFunc = std::function<void(uint64_t displayId)>;
 using NotifyUpdateFloatingBallFunc = std::function<void(const FloatingBallTemplateInfo& fbTemplateInfo)>;
 using NotifyStopFloatingBallFunc = std::function<void()>;
@@ -110,13 +111,16 @@ using UpdateTransitionAnimationFunc = std::function<void(WindowTransitionType ty
 using NofitySessionLabelAndIconUpdatedFunc =
     std::function<void(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon)>;
 using NotifySessionGetTargetOrientationConfigInfoFunc = std::function<void(uint32_t targetOrientation)>;
-using NotifyKeyboardStateChangeFunc = std::function<void(SessionState state, const KeyboardEffectOption& effectOption)>;
+using NotifyKeyboardStateChangeFunc = std::function<void(SessionState state, const KeyboardEffectOption& effectOption,
+    const uint32_t callingSessionId, const DisplayId targetDisplayId)>;
 using NotifyHighlightChangeFunc = std::function<void(bool isHighlight)>;
 using NotifySurfaceBoundsChangeFunc = std::function<void(const WSRect& rect, bool isGlobal, bool needFlush)>;
 using HasRequestedVsyncFunc = std::function<WSError(bool& hasRequestedVsync)>;
 using RequestNextVsyncWhenModeChangeFunc = std::function<WSError(const std::shared_ptr<VsyncCallback>& vsyncCallback)>;
 using NotifyClearSubSessionFunc = std::function<void(const int32_t subPersistentId)>;
 using OutlineParamsChangeCallbackFunc = std::function<void(bool enabled, const OutlineStyleParams& outlineStyleParams)>;
+using NotifyRestartAppFunc = std::function<void(const SessionInfo& info, int32_t callingPid)>;
+using ProcessCallingSessionIdChangeFunc = std::function<void(uint32_t callingSessionId)>;
 class ILifecycleListener {
 public:
     virtual void OnActivation() {}
@@ -137,6 +141,7 @@ public:
     virtual void OnAppRemoveStartingWindow() {}
     virtual void OnUpdateSnapshotWindow() {}
     virtual void OnPreLoadStartingWindowFinished() {}
+    virtual void OnRestart() {}
 };
 
 enum class LifeCycleTaskType : uint32_t {
@@ -208,6 +213,7 @@ public:
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker);
     WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
     std::string GetSessionLabel() const;
+    void SetRestartAppListener(NotifyRestartAppFunc&& func);
 
     /*
      * App Use Control
@@ -237,6 +243,7 @@ public:
     void NotifyRemoveSnapshot();
     void NotifyUpdateSnapshotWindow();
     void NotifyPreLoadStartingWindowFinished();
+    void NotifyRestart();
     void NotifyExtensionDied() override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
     void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
@@ -293,13 +300,6 @@ public:
             saveSnapshotCallback_ = std::move(task);
         }
     }
-    void SetRemoveSnapshotCallback(Task&& task)
-    {
-        if (task) {
-            std::lock_guard lock(removeSnapshotCallbackMutex_);
-            removeSnapshotCallback_ = std::move(task);
-        }
-    }
     void SetAddSnapshotCallback(Task&& task)
     {
         if (task) {
@@ -330,6 +330,8 @@ public:
     void SetSessionInfoWindowInputType(uint32_t windowInputType);
     void SetSessionInfoExpandInputFlag(uint32_t expandInputFlag);
     uint32_t GetSessionInfoExpandInputFlag() const;
+    void SetSessionInfoAdvancedFeatureFlag(uint32_t bitPosition, bool value);
+    bool GetSessionInfoAdvancedFeatureFlag(uint32_t bitPosition);
     void SetSessionInfoWindowMode(int32_t windowMode);
     const SessionInfo& GetSessionInfo() const;
     SessionInfo& EditSessionInfo();
@@ -357,6 +359,12 @@ public:
     WSRect GetLayoutRect() const;
     bool GetSkipSelfWhenShowOnVirtualScreen() const;
     DisplayId GetDisplayId() const { return GetSessionProperty()->GetDisplayId(); }
+    void SetRestartApp(bool restartApp);
+    bool GetRestartApp() const;
+    void SetRestartInSameProcess(bool restartInSameProcess);
+    bool GetRestartInSameProcess() const;
+    void SetRestartCallerPersistentId(int32_t restartCallerPersistentId);
+    int32_t GetRestartCallerPersistentId() const;
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
@@ -549,6 +557,7 @@ public:
     void SetAbilityToken(sptr<IRemoteObject> token);
     sptr<IRemoteObject> GetAbilityToken() const;
     WindowMode GetWindowMode() const;
+    void SetCallingSessionIdSessionListenser(const ProcessCallingSessionIdChangeFunc&& func);
 
     /*
      * Window ZOrder
@@ -750,7 +759,10 @@ public:
     void SetBorderUnoccupied(bool borderUnoccupied = false);
     bool GetBorderUnoccupied() const;
     bool IsPersistentImageFit() const;
+    void DeletePersistentImageFit();
     bool SupportSnapshotAllSessionStatus() const;
+    bool SupportCacheLockedSessionSnapshot() const;
+    void ResetLockedCacheSnapshot();
     void InitSnapshotCapacity();
     SnapshotStatus GetSessionSnapshotStatus(LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT) const;
     uint32_t GetWindowSnapshotOrientation() const;
@@ -853,6 +865,7 @@ protected:
     std::shared_ptr<RSSurfaceNode> shadowSurfaceNode_;
     mutable std::mutex snapshotMutex_;
     std::shared_ptr<Media::PixelMap> snapshot_;
+    std::atomic<bool> snapshotNeedCancel_ = false;
     sptr<ISessionStage> sessionStage_;
     std::mutex lifeCycleTaskQueueMutex_;
     std::list<sptr<SessionLifeCycleTask>> lifeCycleTaskQueue_;
@@ -911,6 +924,7 @@ protected:
     NofitySessionLabelAndIconUpdatedFunc updateSessionLabelAndIconFunc_;
     NotifySessionGetTargetOrientationConfigInfoFunc sessionGetTargetOrientationConfigInfoFunc_;
     NotifyClearSubSessionFunc clearSubSessionFunc_;
+    NotifyRestartAppFunc restartAppFunc_;
 
     /*
      * Window Rotate Animation
@@ -930,6 +944,7 @@ protected:
     WSRect lastLayoutRect_; // rect saved when go background
     WSRect layoutRect_;     // rect of root view
     NotifySessionRectChangeFunc sessionRectChangeFunc_;
+    NotifySessionWindowLimitsChangeFunc sessionWindowLimitsChangeFunc_;
     NotifySessionDisplayIdChangeFunc sessionDisplayIdChangeFunc_;
     NotifyUpdateFloatingBallFunc updateFloatingBallFunc_;
     NotifyStopFloatingBallFunc stopFloatingBallFunc_;
@@ -969,6 +984,7 @@ protected:
     uint32_t uiNodeId_ = 0;
     std::map<MMI::WindowArea, WSRectF> windowAreas_;
     bool isTerminating_ = false;
+    SceneAnimationConfig sceneAnimationConfig_;
     float floatingScale_ = 1.0f;
     bool scbKeepKeyboardFlag_ = false;
     mutable std::shared_mutex dialogVecMutex_;
@@ -1013,6 +1029,7 @@ protected:
      * Keyboard Window
      */
     NotifyKeyboardStateChangeFunc keyboardStateChangeFunc_;
+    ProcessCallingSessionIdChangeFunc callingSessionIdChangeFunc_;
 
     /*
      * Window Property
@@ -1157,17 +1174,14 @@ private:
      */
     std::atomic<bool> enableAddSnapshot_ = true;
     Task saveSnapshotCallback_ = []() {};
-    Task removeSnapshotCallback_ = []() {};
     Task addSnapshotCallback_ = []() {};
     std::mutex saveSnapshotCallbackMutex_;
-    std::mutex removeSnapshotCallbackMutex_;
     std::mutex addSnapshotCallbackMutex_;
 
     /*
      * Window Pattern
      */
     bool borderUnoccupied_ = false;
-    void DeletePersistentImageFit();
     uint32_t GetBackgroundColor() const;
 
     /*

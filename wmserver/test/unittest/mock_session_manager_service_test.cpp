@@ -203,20 +203,20 @@ HWTEST_F(MockSessionManagerServiceTest, GetSMSDeathRecipientByUserId, TestSize.L
 }
 
 /**
- * @tc.name: GetSessionManagerServiceByUserId
- * @tc.desc: GetSessionManagerServiceByUserId/RemoveSessionManagerServiceByUserId
+ * @tc.name: GetSessionManagerServiceInner
+ * @tc.desc: GetSessionManagerServiceInner/RemoveSessionManagerServiceByUserId
  * @tc.type: FUNC
  */
-HWTEST_F(MockSessionManagerServiceTest, GetSessionManagerServiceByUserId, TestSize.Level1)
+HWTEST_F(MockSessionManagerServiceTest, GetSessionManagerServiceInner, TestSize.Level1)
 {
-    auto sessionManagerService = MockSessionManagerService::GetInstance().GetSessionManagerServiceByUserId(100);
+    auto sessionManagerService = MockSessionManagerService::GetInstance().GetSessionManagerServiceInner(100);
     ASSERT_EQ(nullptr, sessionManagerService);
     MockSessionManagerService::GetInstance().RemoveSessionManagerServiceByUserId(100);
 }
 
 /**
- * @tc.name: GetSessionManagerServiceByUserId
- * @tc.desc: GetSessionManagerServiceByUserId/RemoveSessionManagerServiceByUserId
+ * @tc.name: GetProcessSurfaceNodeIdByPersistentId
+ * @tc.desc: GetProcessSurfaceNodeIdByPersistentId
  * @tc.type: FUNC
  */
 HWTEST_F(MockSessionManagerServiceTest, GetProcessSurfaceNodeIdByPersistentId, TestSize.Level1)

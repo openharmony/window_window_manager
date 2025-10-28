@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
 #define OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
 
+#include <bitset>
 #include <charconv>
 #include <inttypes.h>
 #include <iomanip>
@@ -56,6 +57,10 @@ constexpr uint32_t COLOR_BLACK = 0xff000000;
 const std::string WINDOW_SCREEN_LOCK_PREFIX = "windowLock_";
 const std::string VIEW_SCREEN_LOCK_PREFIX = "viewLock_";
 constexpr int32_t DEFAULT_INVALID_WINDOW_MODE = 0;
+
+constexpr uint32_t ADVANCED_FEATURE_BIT_MAX = 32;
+constexpr uint32_t ADVANCED_FEATURE_BIT_LOCK_CURSOR = 0x00;
+constexpr uint32_t ADVANCED_FEATURE_BIT_CURSOR_FOLLOW_MOVEMENT = 0x01;
 
 enum class WSError : int32_t {
     WS_OK = 0,
@@ -174,6 +179,7 @@ enum AncoSceneState: int32_t {
     NOTIFY_LOAD,
     NOTIFY_UPDATE,
     NOTIFY_FOREGROUND,
+    NOTIFY_START_FAILED,
 };
 
 /**
@@ -433,6 +439,7 @@ struct SessionInfo {
     bool isCastSession_ = false;
     uint32_t windowInputType_ = 0;
     uint32_t expandInputFlag_ = 0;
+    std::bitset<ADVANCED_FEATURE_BIT_MAX> advancedFeatureFlag_ = 0;
     std::string continueSessionId_ = "";
     bool isCalledRightlyByCallerId_ = false;
     bool fullScreenStart_ = false;
@@ -447,10 +454,14 @@ struct SessionInfo {
     bool disableDelegator = false;
     bool reuseDelegatorWindow = false;
     bool isAbilityHook_ = false;
+    bool isRestartApp_ = false;
+    bool isRestartInSameProcess_ = true;
+    int32_t restartCallerPersistentId_ = INVALID_SESSION_ID;
     std::string label_ = "";
     StartWindowType startWindowType_ = StartWindowType::DEFAULT;
     bool isSetStartWindowType_ = false;
     int32_t scenarios = 0;
+    bool isPrelaunch_ = false;
 
     /*
      * Keyboard
@@ -568,6 +579,7 @@ enum class SizeChangeReason : uint32_t {
     OCCUPIED_AREA_CHANGE = 34,
     SCREEN_RELATIVE_POSITION_CHANGE,
     SNAPSHOT_ROTATION = 37,
+    SCENE_WITH_ANIMATION,
     END,
 };
 
@@ -979,9 +991,77 @@ struct DeviceScreenConfig {
     bool isRightPowerButton_ = true;
 };
 
-struct SceneAnimationConfig {
+struct SceneAnimationConfig : public Parcelable {
     std::shared_ptr<RSTransaction> rsTransaction_ = nullptr;
     int32_t animationDuration_ = ROTATE_ANIMATION_DURATION;
+    uint32_t animationDelay_ = 0;
+    WindowAnimationCurve animationCurve_ = WindowAnimationCurve::LINEAR;
+    std::array<float, ANIMATION_PARAM_SIZE> animationParam_ = {0.0f, 0.0f, 0.0f, 0.0f};
+
+    SceneAnimationConfig() = default;
+
+    SceneAnimationConfig(
+        std::shared_ptr<RSTransaction> rsTransaction,
+        int32_t animationDuration,
+        uint32_t animationDelay,
+        WindowAnimationCurve animationCurve,
+        const std::array<float, ANIMATION_PARAM_SIZE>& animationParam)
+        : rsTransaction_(std::move(rsTransaction)),
+          animationDuration_(animationDuration),
+          animationDelay_(animationDelay),
+          animationCurve_(animationCurve),
+          animationParam_(animationParam) {}
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        bool hasTransaction = (rsTransaction_ != nullptr);
+        if (!parcel.WriteBool(hasTransaction)) {
+            return false;
+        }
+        if (!parcel.WriteInt32(animationDuration_)) {
+            return false;
+        }
+        if (!parcel.WriteUint32(animationDelay_)) {
+            return false;
+        }
+        if (!parcel.WriteUint32(static_cast<uint32_t>(animationCurve_))) {
+            return false;
+        }
+        for (size_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
+            if (!parcel.WriteFloat(animationParam_[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    static SceneAnimationConfig* Unmarshalling(Parcel& parcel)
+    {
+        auto config = new SceneAnimationConfig();
+        bool hasTransaction = false;
+        int32_t animationDuration;
+        uint32_t animationDelay;
+        uint32_t animationCurveValue;
+        std::array<float, ANIMATION_PARAM_SIZE> animationParam;
+        if (!parcel.ReadBool(hasTransaction) ||
+            !parcel.ReadInt32(animationDuration) ||
+            !parcel.ReadUint32(animationDelay) ||
+            !parcel.ReadUint32(animationCurveValue)) {
+            delete config;
+            return nullptr;
+        }
+        for (size_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
+            if (!parcel.ReadFloat(animationParam[i])) {
+                delete config;
+                return nullptr;
+            }
+        }
+        config->animationDuration_ = animationDuration;
+        config->animationDelay_ = animationDelay;
+        config->animationCurve_ = static_cast<WindowAnimationCurve>(animationCurveValue);
+        config->animationParam_ = animationParam;
+        return config;
+    }
 };
 
 struct RotateAnimationConfig {
@@ -995,6 +1075,7 @@ struct SessionEventParam {
     int32_t sessionHeight_ = 0;
     uint32_t dragResizeType = 0;
     uint32_t gravity = 0;
+    uint32_t waterfallResidentState = 0;
 };
 
 struct BackgroundParams {
@@ -1061,6 +1142,7 @@ enum class SystemAnimatedSceneType : uint32_t {
     SCENE_ENTER_MIN_WINDOW, // Enter the window minimization state
     SCENE_RECOVER_MIN_WINDOW, // Recover minimized window
     SCENE_SNAPSHOT_ROTATION, // Snapshot rotation
+    DRAG_WINDOW, // Enter scale window scene
     SCENE_OTHERS, // 1.Default state 2.The state in which the animation ends
 };
 
@@ -1106,6 +1188,7 @@ enum class SessionPropertyFlag {
     WINDOW_MODE = 1 << 7,
     FLOATING_SCALE = 1 << 8,
     MID_SCENE = 1 << 9,
+    WINDOW_GLOBAL_RECT = 1 << 10,
 };
 
 /**
@@ -1145,7 +1228,14 @@ enum class LifeCycleChangeReason {
 
     BACK_TO_DESKTOP,
 
+    SCREEN_LOCK,
+
     LAST_SCENE_TRANSFER,
+
+    /*
+     * Drive batch of windows go background quickly
+     */
+    QUICK_BATCH_BACKGROUND,
 
     REASON_END,
 };

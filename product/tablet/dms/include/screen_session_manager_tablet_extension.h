@@ -21,7 +21,7 @@
 #include "screen_session_manager.h"
 #include "window_manager_hilog.h"
 #include <mutex>
-#include <threads.h>
+#include <thread>
 #include "screen_session_manager_pc_extension.h"
 #include "screen_session_manager_phone_extension.h"
 
@@ -38,7 +38,6 @@ public:
     void OnScreenChangeDefault(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason);
     void ScreenConnectionChanged(sptr<ScreenSession> screenSession, ScreenId screenId,
         ScreenEvent screenEvent, bool phyMirrorEnable);
-    void NotifyCastWhenScreenConnectChange(bool isConnected);
     bool IsNeedAddInputServiceAbility();
 };
 }

@@ -367,6 +367,27 @@ namespace {
     }
 
     /**
+     * @tc.name: OnRemoteRequest17
+     * @tc.desc: TRANS_ID_ON_BRIGHTNESS_INFO_CHANGED
+     * @tc.type: FUNC
+     */
+    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest17, TestSize.Level1)
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        MessageOption option;
+
+        data.WriteInterfaceToken(DisplayManagerAgentStub::GetDescriptor());
+        data.WriteInt32(0);
+        data.WriteInt32(0);
+        data.WriteUint32(1);
+        data.WriteUint32(1);
+        uint32_t code = static_cast<uint32_t>(IDisplayManagerAgent::TRANS_ID_ON_BRIGHTNESS_INFO_CHANGED);
+        int res = stub_->OnRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(res, -1);
+    }
+
+    /**
      * @tc.name: ProcPrivateWindowList
      * @tc.desc: ProcPrivateWindowList test
      * @tc.type: FUNC

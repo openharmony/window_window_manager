@@ -93,7 +93,7 @@ private:
     WSRect GetPanelRect() const;
 
     void SetCallingSessionId(uint32_t callingSessionId) override;
-    void UseFocusIdIfCallingSessionIdInvalid();
+    void UseFocusIdIfCallingSessionIdInvalid(uint32_t callingSessionId);
     void NotifyKeyboardPanelInfoChange(WSRect rect, bool isKeyboardPanelShow);
     bool CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingSession, bool isCallingSessionFloating);
     WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;

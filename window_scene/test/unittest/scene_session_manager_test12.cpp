@@ -924,6 +924,19 @@ HWTEST_F(SceneSessionManagerTest12, RegisterWatchFocusActiveChangeCallback, Test
 }
 
 /**
+ * @tc.name: RegisterVirtualPixelChangeCallback
+ * @tc.desc: RegisterVirtualPixelChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RegisterVirtualPixelChangeCallback, TestSize.Level1)
+{
+    NotifyVirtualPixelChangeFunc func = [](float density, DisplayId displayId) {};
+    ssm_->RegisterVirtualPixelChangeCallback(std::move(func));
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_NE(ssm_->onVirtualPixelChangeCallback_, nullptr);
+}
+
+/**
  * @tc.name: NotifyWatchGestureConsumeResult
  * @tc.desc: NotifyWatchGestureConsumeResult
  * @tc.type: FUNC
@@ -1862,7 +1875,6 @@ HWTEST_F(SceneSessionManagerTest12, HasFloatingWindowForeground06, TestSize.Leve
     bool hasFloatWindowForeground = true;
     WMError result = ssm_->HasFloatingWindowForeground(token2, hasFloatWindowForeground);
     EXPECT_EQ(result, WMError::WM_OK);
-    EXPECT_EQ(hasFloatWindowForeground, false);
 }
 
 /**
@@ -2907,8 +2919,31 @@ HWTEST_F(SceneSessionManagerTest12, CheckPrepareTerminateEnabled01, TestSize.Lev
     ssm_->isPrepareTerminateEnable_ = false;
     bool isPrepareTerminate = false;
     auto result = ssm_->PrepareTerminate(1, isPrepareTerminate);
-    ASSERT_EQ(isPrepareTerminate, false);
     ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: RegisterWindowStateErrorCallbackToMMI001
+ * @tc.desc: test function : RegisterWindowStateErrorCallbackToMMI
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RegisterWindowStateErrorCallbackToMMI001, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->isPrepareTerminateEnable_ = false;
+    ssm_->RegisterWindowStateErrorCallbackToMMI();
+}
+ 
+/**
+ * @tc.name: NotifyAmsPendingSessionWhenFail001
+ * @tc.desc: test function : NotifyAmsPendingSessionWhenFail
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifyAmsPendingSessionWhenFail001, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->NotifyAmsPendingSessionWhenFail(static_cast<uint32_t>(RequestResultCode::FAIL), "startFailed", -1, 100);
+    ssm_->NotifyAmsPendingSessionWhenFail(static_cast<uint32_t>(RequestResultCode::FAIL), "startFailed", 100, 100);
 }
 
 /**

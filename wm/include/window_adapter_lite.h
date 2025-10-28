@@ -57,6 +57,7 @@ public:
     WMError RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
     WMError UnregisterWMSConnectionChangedListener();
     virtual WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos);
+    virtual WMError GetMainWindowInfoByToken(const sptr<IRemoteObject>& abilityToken, MainWindowInfo& windowInfo);
     virtual WMError ClearMainSessions(const std::vector<int32_t>& persistentIds);
     virtual WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType);
@@ -67,6 +68,8 @@ public:
     virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos);
     virtual WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos);
     virtual WMError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    virtual WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+       std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap);
 
     ~WindowAdapterLite() override;
 

@@ -1146,6 +1146,11 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalTransformTest_02, TestSize.Level1)
     manager_->CalTransform(sceneSession, transform, testSingleHandData);
     ASSERT_EQ(transform, transform.Translate(translate)
         .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse());
+    
+    ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(FoldDisplayMode::COORDINATION);
+    manager_->CalTransform(sceneSession, transform, testSingleHandData);
+    ASSERT_EQ(transform, transform.Translate(translate)
+        .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse());
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.erase(screenId);
     ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(displayMode);
 }
@@ -1429,6 +1434,16 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateDefaultHotAreas2, TestSize.Level1)
     manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
     ASSERT_EQ(empty[0].x, -offset);
     sceneSession->dragActivated_ = false;
+    empty.clear();
+    manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
+    ASSERT_EQ(empty[0].x, 0);
+
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    empty.clear();
+    manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
+    ASSERT_EQ(empty[0].x, 0);
+    sceneSession->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
     empty.clear();
     manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
     ASSERT_EQ(empty[0].x, 0);

@@ -123,7 +123,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow01, TestSize.Level1)
     ASSERT_NE(nullptr, scene);
 
     Rect fltWindRect = GetRectWithVpr(0, 0, 400, 600);
-    sptr<Window> fltWin = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT, fltWindRect);
+    sptr<Window> fltWin = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT_CAMERA, fltWindRect);
     ASSERT_NE(nullptr, fltWin);
     ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());
@@ -144,7 +144,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow02, TestSize.Level1)
     ASSERT_NE(nullptr, scene);
 
     Rect fltWindRect = GetRectWithVpr(0, 0, 400, 600);
-    sptr<Window> fltWin = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT, fltWindRect);
+    sptr<Window> fltWin = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT_CAMERA, fltWindRect);
     ASSERT_NE(nullptr, fltWin);
     ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());
@@ -167,7 +167,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow03, TestSize.Level1)
     ASSERT_NE(nullptr, scene);
 
     Rect fltWindRect = GetRectWithVpr(0, 0, 400, 600);
-    sptr<Window> fltWin = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT, fltWindRect);
+    sptr<Window> fltWin = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT_CAMERA, fltWindRect);
     ASSERT_NE(nullptr, fltWin);
     ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());
@@ -191,7 +191,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow04, TestSize.Level1)
     ASSERT_NE(nullptr, scene);
 
     Rect fltWindRect = GetRectWithVpr(0, 0, 400, 600);
-    sptr<Window> fltWin = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT, fltWindRect);
+    sptr<Window> fltWin = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT_CAMERA, fltWindRect);
     ASSERT_NE(nullptr, fltWin);
     ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());

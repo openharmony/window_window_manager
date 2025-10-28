@@ -165,7 +165,7 @@ void SessionListenerController::NotifySessionIconChanged(int32_t persistentId,
     CallListeners(&ISessionListener::OnMissionIconUpdated, persistentId, icon);
 }
 
-void SessionListenerController::NotifySessionClosed(const SessionInfo& sessionInfo)
+void SessionListenerController::NotifySessionClosed(const SessionInfo& sessionInfo, LifeCycleChangeReason reason)
 {
     int32_t persistentId = sessionInfo.persistentId_;
     if (persistentId == -1) {
@@ -173,7 +173,7 @@ void SessionListenerController::NotifySessionClosed(const SessionInfo& sessionIn
     }
     WLOGFI("Id:%{public}d", persistentId);
     CallListeners(&ISessionListener::OnMissionClosed, persistentId);
-    NotifySessionLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::DESTROYED, sessionInfo);
+    NotifySessionLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::DESTROYED, sessionInfo, reason);
 }
 
 void SessionListenerController::NotifySessionLabelUpdated(int32_t persistentId)
@@ -421,8 +421,8 @@ void SessionListenerController::NotifySessionLifecycleEvent(ISessionLifecycleLis
                 TLOGE(WmsLogTag::WMS_LIFE, "controller is null.");
                 return;
             }
-            TLOGI(WmsLogTag::WMS_LIFE, "start notify listeners, bundleName:%{public}s, Id:%{public}d, state:%{public}d"
-                "reason: %{public}u",
+            TLOGI(WmsLogTag::WMS_LIFE, "start notify listeners, bundleName:%{public}s, Id:%{public}d, event:%{public}d"
+                ", reason: %{public}u",
                 bundleName.c_str(), persistentId, event, payload.lifeCycleChangeReason_);
         
             controller->NotifyListeners(controller->listenerMapById_, persistentId, event, payload);

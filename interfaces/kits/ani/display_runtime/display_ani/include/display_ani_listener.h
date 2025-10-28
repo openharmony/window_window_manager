@@ -32,7 +32,8 @@ class DisplayAniListener : public DisplayManager::IDisplayListener,
                           public DisplayManager::IFoldAngleListener,
                           public DisplayManager::ICaptureStatusListener,
                           public DisplayManager::IDisplayModeListener,
-                          public DisplayManager::IAvailableAreaListener {
+                          public DisplayManager::IAvailableAreaListener,
+                          public DisplayManager::IBrightnessInfoListener {
 public:
     DisplayAniListener(ani_env* env)
         : env_(env), weakRef_(wptr<DisplayAniListener> (this)) {}
@@ -52,6 +53,7 @@ public:
     void OnAvailableAreaChanged(DMRect area) override;
     ani_status CallAniMethodVoid(ani_object object, const char* cls,
         const char* method, const char* signature, ...);
+    void OnBrightnessInfoChanged(DisplayId id, const ScreenBrightnessInfo& info) override;
 
 private:
     ani_env* env_;
@@ -69,6 +71,7 @@ const std::string ANI_EVENT_FOLD_ANGLE_CHANGED = "foldAngleChange";
 const std::string ANI_EVENT_CAPTURE_STATUS_CHANGED = "captureStatusChange";
 const std::string ANI_EVENT_DISPLAY_MODE_CHANGED = "foldDisplayModeChange";
 const std::string ANI_EVENT_AVAILABLE_AREA_CHANGED = "availableAreaChange";
+const std::string ANI_EVENT_BRIGHTNESS_INFO_CHANGED = "brightnessInfoChange";
 }  // namespace Rosen
 }  // namespace OHOS
 #endif

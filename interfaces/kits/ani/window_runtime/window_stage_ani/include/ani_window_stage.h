@@ -43,6 +43,13 @@ class AniWindowStage {
     static void UnregisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
         ani_ref callback);
 
+    static void SetImageForRecent(ani_env* env, ani_class cls, ani_long nativeObj, ani_object imageResource,
+        ani_int value);
+    static void RemoveImageForRecent(ani_env* env, ani_class cls, ani_long nativeObj);
+    static void SetCustomDensity(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_double density, ani_boolean applyToSubWindow);
+    static void SetDefaultDensityEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enabled);
+
     std::weak_ptr<WindowScene> GetWindowScene() { return windowScene_; }
     ani_ref GetMainWindow(ani_env* env);
     ani_boolean WindowIsWindowSupportWideGamut(ani_env* env, ani_class cls, ani_object obj);
@@ -53,6 +60,12 @@ private:
     void OnSetShowOnLockScreen(ani_env* env, ani_boolean showOnLockScreen);
     void OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
+
+    void OnSetImageForRecent(ani_env* env, ani_object imageResource, ani_int value);
+    void OnRemoveImageForRecent(ani_env* env);
+    void OnSetCustomDensity(ani_env* env, ani_double density, ani_boolean applyToSubWindow);
+    void OnSetDefaultDensityEnabled(ani_env* env, ani_boolean enabled);
+
     std::weak_ptr<WindowScene> windowScene_;
     std::unique_ptr<AniWindowRegisterManager> registerManager_ = nullptr;
 };

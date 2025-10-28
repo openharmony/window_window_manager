@@ -713,3 +713,57 @@ void OH_WindowManager_ReleaseMainWindowSnapshot(const OH_PixelmapNative* snapsho
 {
     WINDOW_MANAGER_FREE_MEMORY(snapshotPixelMapList);
 }
+
+int32_t OH_WindowManager_LockCursor(int32_t windowId, bool isCursorFollowMovement)
+{
+    auto eventHandler = GetMainEventHandler();
+    if (eventHandler == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "eventHandler is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+    }
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+    eventHandler->PostSyncTask([windowId, isCursorFollowMovement, &errCode, where = __func__] {
+        auto window = Window::GetWindowWithId(windowId);
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s window is null, windowId:%{public}d", where, windowId);
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+            return;
+        }
+        if (!window->IsFocused()) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s window is not focused, windowId:%{public}d", where, windowId);
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+            return;
+        }
+        auto ret = window->LockCursor(windowId, isCursorFollowMovement);
+        errCode = OH_WINDOW_TO_ERROR_CODE_MAP.find(ret) == OH_WINDOW_TO_ERROR_CODE_MAP.end() ?
+            WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL : OH_WINDOW_TO_ERROR_CODE_MAP.at(ret);
+        }, __func__);
+    return errCode;
+}
+
+int32_t OH_WindowManager_UnlockCursor(int32_t windowId)
+{
+    auto eventHandler = GetMainEventHandler();
+    if (eventHandler == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "eventHandler is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+    }
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+    eventHandler->PostSyncTask([windowId, &errCode, where = __func__] {
+        auto window = Window::GetWindowWithId(windowId);
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s window is null, windowId:%{public}d", where, windowId);
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+            return;
+        }
+        if (!window->IsFocused()) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s window is not focused, windowId:%{public}d", where, windowId);
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+            return;
+        }
+        auto ret = window->UnlockCursor(windowId);
+        errCode = OH_WINDOW_TO_ERROR_CODE_MAP.find(ret) == OH_WINDOW_TO_ERROR_CODE_MAP.end() ?
+            WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL : OH_WINDOW_TO_ERROR_CODE_MAP.at(ret);
+        }, __func__);
+    return errCode;
+}

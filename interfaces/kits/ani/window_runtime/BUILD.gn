@@ -49,6 +49,7 @@ ohos_shared_library("windowstageani_kit") {
     "window_stage_ani/src/ani_window_register_manager.cpp",
     "window_stage_ani/src/ani_window_stage.cpp",
     "window_stage_ani/src/ani_window_utils.cpp",
+    "window_stage_ani/src/ani_extension_window_config.cpp",
   ]
 
   configs = [
@@ -65,6 +66,7 @@ ohos_shared_library("windowstageani_kit") {
     "../../../../wm:libwm",
     "../../../../interfaces/kits/napi/window_runtime:window_native_kit",
     "../../../../interfaces/kits/napi/window_runtime:windowstage_kit",
+    "${window_base_path}/interfaces/kits/ani/window_animation:ani_window_animation_utils",
   ]
 
   external_deps = [

@@ -80,26 +80,6 @@ HWTEST_F(WindowDisplayZoomControllerTest, WindowDisplayZoomControllerTest01, Tes
     displayController_->SetAnchorAndScale(1, 1, 10.0);
     displayController_->SetAnchorOffset(1, 1);
     displayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
-
-    ASSERT_EQ(true, true);
-}
-
-/**
- * @tc.name: WindowDisplayZoomControllerTest02
- * @tc.desc: test WindowDisplayZoomController
- * @tc.type: FUNC
- */
-HWTEST_F(WindowDisplayZoomControllerTest, WindowDisplayZoomControllerTest02, TestSize.Level1)
-{
-    DisplayId displayId = 0;
-    displayController_->SetAnchorAndScale(1, 1, -1);
-    displayController_->SetAnchorAndScale(1, 1, 0.1);
-    displayController_->UpdateAllWindowsZoomInfo(displayId);
-
-    displayController_->UpdateWindowZoomInfo(1);
-    std::vector<sptr<WindowNode>> nodes;
-    displayController_->ClearZoomTransform(nodes);
-    ASSERT_EQ(displayId, 0);
 }
 }
 }

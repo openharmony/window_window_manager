@@ -23,6 +23,11 @@
 #include "refbase.h"
  
 namespace OHOS::Rosen {
+
+static const uint32_t PIXMAP_VECTOR_ONLY_SDR_SIZE = 1;
+static const uint32_t PIXMAP_VECTOR_SIZE = 2;
+static const uint32_t HDR_PIXMAP = 1;
+
 ani_status ScreenshotAniUtils::GetStdString(ani_env* env, ani_string ani_str, std::string& result)
 {
     ani_size strSize;
@@ -134,6 +139,69 @@ ani_status ScreenshotAniUtils::GetScreenshotParam(ani_env* env, const std::uniqu
         TLOGE(WmsLogTag::DMS, "[ANI] get screenshot rect failed");
         return ret;
     }
+    return ANI_OK;
+}
+
+ani_object ScreenshotAniUtils::CreateArrayPixelMap(
+    ani_env* env, std::vector<std::shared_ptr<Media::PixelMap>> imageVec)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
+    ani_class cls;
+    if (env->FindClass("L@ohos/multimedia/image/image/PixelMap;", &cls) != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] class not found");
+        return nullptr;
+    }
+    ani_size arrayLength = static_cast<ani_size>(PIXMAP_VECTOR_ONLY_SDR_SIZE);
+    if (imageVec[HDR_PIXMAP] != nullptr) {
+        arrayLength = static_cast<ani_size>(PIXMAP_VECTOR_SIZE);
+    }
+    ani_array_ref pixelMapArray = nullptr;
+    if (env->Array_New_Ref(cls, arrayLength, ScreenshotAniUtils::CreateAniUndefined(env), &pixelMapArray) != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] create array failed");
+        return nullptr;
+    }
+    for (size_t i = 0; i < arrayLength; i++) {
+        auto nativePixelMap = Media::PixelMapTaiheAni::CreateEtsPixelMap(env, imageVec[i]);
+        if (nativePixelMap == nullptr) {
+            TLOGE(WmsLogTag::DMS, "[ANI] Create native pixelmap is nullptr!");
+            return nullptr;
+        }
+        if (env->Array_Set_Ref(pixelMapArray, i, nativePixelMap) != ANI_OK) {
+            TLOGE(WmsLogTag::DMS, "[ANI] create pixelMapArray failed!");
+            return nullptr;
+        }
+    }
+    return pixelMapArray;
+}
+ 
+ani_status ScreenshotAniUtils::GetHdrScreenshotParam(ani_env* env, const std::unique_ptr<HdrParam>& param,
+    ani_object options)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
+    if (param == nullptr) {
+        TLOGI(WmsLogTag::DMS, "[ANI] null param");
+        return ANI_INVALID_ARGS;
+    }
+    ani_long displayId = 0;
+    ani_status ret = ReadOptionalLongField(env, options, "displayId", displayId);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get displayId failed");
+        return ret;
+    }
+    param->option.displayId = static_cast<DisplayId>(displayId);
+ 
+    ret = ReadOptionalBoolField(env, options, "isNotificationNeeded", param->option.isNeedNotify);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get isNotificationNeeded failed");
+        return ret;
+    }
+ 
+    ret = ReadOptionalBoolField(env, options, "isCaptureFullOfScreen", param->option.isCaptureFullOfScreen);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get isCaptureFullOfScreen failed");
+        return ret;
+    }
+ 
     return ANI_OK;
 }
 

@@ -99,6 +99,10 @@ const std::map<uint64_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
         &WindowSessionProperty::WriteActionUpdateFollowScreenChange),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_SHADOW_ENABLED),
         &WindowSessionProperty::WriteActionUpdateWindowShadowEnabled),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO),
+        &WindowSessionProperty::WriteActionUpdateAspectRatio),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_ROTATION_LOCK_CHANGE),
+        &WindowSessionProperty::WriteActionUpdateRotationLockChange),
 };
 
 const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncMap_ {
@@ -174,6 +178,10 @@ const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
         &WindowSessionProperty::ReadActionUpdateFollowScreenChange),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_SHADOW_ENABLED),
         &WindowSessionProperty::ReadActionUpdateWindowShadowEnabled),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO),
+        &WindowSessionProperty::ReadActionUpdateAspectRatio),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_ROTATION_LOCK_CHANGE),
+        &WindowSessionProperty::ReadActionUpdateRotationLockChange),
 };
 
 WindowSessionProperty::WindowSessionProperty(const sptr<WindowSessionProperty>& property)
@@ -666,6 +674,16 @@ WindowLimits WindowSessionProperty::GetWindowLimits() const
     return limits_;
 }
 
+void WindowSessionProperty::SetWindowLimitsVP(const WindowLimits& windowLimits)
+{
+    limitsVP_ = windowLimits;
+}
+
+WindowLimits WindowSessionProperty::GetWindowLimitsVP() const
+{
+    return limitsVP_;
+}
+
 void WindowSessionProperty::SetWindowMode(WindowMode mode)
 {
     windowMode_ = mode;
@@ -846,11 +864,13 @@ PiPTemplateInfo WindowSessionProperty::GetPiPTemplateInfo() const
 
 void WindowSessionProperty::SetFbTemplateInfo(const FloatingBallTemplateInfo& fbTemplateInfo)
 {
+    std::lock_guard<std::mutex> lock(fbTemplateMutex_);
     fbTemplateInfo_ = fbTemplateInfo;
 }
 
 FloatingBallTemplateInfo WindowSessionProperty::GetFbTemplateInfo() const
 {
+    std::lock_guard<std::mutex> lock(fbTemplateMutex_);
     return fbTemplateInfo_;
 }
 
@@ -900,22 +920,52 @@ bool WindowSessionProperty::GetUseControlState() const
     return isUseControlState_;
 }
 
+void WindowSessionProperty::SetRotationLocked(bool locked)
+{
+    isRotationLock_ = locked;
+}
+ 
+bool WindowSessionProperty::GetRotationLocked() const
+{
+    return isRotationLock_;
+}
+
 bool WindowSessionProperty::MarshallingWindowLimits(Parcel& parcel) const
 {
-    if (parcel.WriteUint32(limits_.maxWidth_) &&
-        parcel.WriteUint32(limits_.maxHeight_) && parcel.WriteUint32(limits_.minWidth_) &&
-        parcel.WriteUint32(limits_.minHeight_) && parcel.WriteFloat(limits_.maxRatio_) &&
-        parcel.WriteFloat(limits_.minRatio_) && parcel.WriteFloat(limits_.vpRatio_)) {
-        return true;
-    }
-    return false;
+    auto writeWindowLimits = [&parcel](const WindowLimits& limits) -> bool {
+        return parcel.WriteUint32(limits.maxWidth_) &&
+               parcel.WriteUint32(limits.maxHeight_) &&
+               parcel.WriteUint32(limits.minWidth_) &&
+               parcel.WriteUint32(limits.minHeight_) &&
+               parcel.WriteFloat(limits.maxRatio_) &&
+               parcel.WriteFloat(limits.minRatio_) &&
+               parcel.WriteFloat(limits.vpRatio_) &&
+               parcel.WriteUint32(static_cast<uint32_t>(limits.pixelUnit_));
+    };
+
+    return writeWindowLimits(limits_) &&
+           writeWindowLimits(limitsVP_) &&
+           writeWindowLimits(userLimits_);
 }
 
 void WindowSessionProperty::UnmarshallingWindowLimits(Parcel& parcel, WindowSessionProperty* property)
 {
-    WindowLimits windowLimits = { parcel.ReadUint32(), parcel.ReadUint32(), parcel.ReadUint32(),
-        parcel.ReadUint32(), parcel.ReadFloat(), parcel.ReadFloat(), parcel.ReadFloat() };
-    property->SetWindowLimits(windowLimits);
+    auto readWindowLimits = [&parcel]() -> WindowLimits {
+        return {
+            parcel.ReadUint32(),  // maxWidth
+            parcel.ReadUint32(),  // maxHeight
+            parcel.ReadUint32(),  // minWidth
+            parcel.ReadUint32(),  // minHeight
+            parcel.ReadFloat(),   // maxRatio
+            parcel.ReadFloat(),   // minRatio
+            parcel.ReadFloat(),   // vpRatio
+            static_cast<PixelUnit>(parcel.ReadUint32())  // pixelUnit
+        };
+    };
+
+    property->SetWindowLimits(readWindowLimits());
+    property->SetWindowLimitsVP(readWindowLimits());
+    property->SetUserWindowLimits(readWindowLimits());
 }
 
 bool WindowSessionProperty::MarshallingSystemBarMap(Parcel& parcel) const
@@ -1372,7 +1422,9 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteString(ancoRealBundleName_) &&
         parcel.WriteBool(isShowDecorInFreeMultiWindow_) &&
         parcel.WriteBool(isMobileAppInPadLayoutFullScreen_) &&
-        parcel.WriteBool(isFullScreenInForceSplitMode_);
+        parcel.WriteBool(isFullScreenInForceSplitMode_) &&
+        parcel.WriteFloat(aspectRatio_) &&
+        parcel.WriteBool(isRotationLock_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1492,6 +1544,8 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsShowDecorInFreeMultiWindow(parcel.ReadBool());
     property->SetMobileAppInPadLayoutFullScreen(parcel.ReadBool());
     property->SetIsFullScreenInForceSplitMode(parcel.ReadBool());
+    property->SetAspectRatio(parcel.ReadFloat());
+    property->SetRotationLocked(parcel.ReadBool());
     return property;
 }
 
@@ -1537,6 +1591,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     windowMode_ = property->windowMode_;
     windowState_ = property->windowState_;
     limits_ = property->limits_;
+    limitsVP_ = property->limitsVP_;
     userLimits_ = property->userLimits_;
     configLimitsVP_ = property->configLimitsVP_;
     lastVpr_ = property->lastVpr_;
@@ -1606,6 +1661,8 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     }
     isShowDecorInFreeMultiWindow_ = property->isShowDecorInFreeMultiWindow_;
     isMobileAppInPadLayoutFullScreen_ = property->isMobileAppInPadLayoutFullScreen_;
+    aspectRatio_ = property->aspectRatio_;
+    isRotationLock_ = property->isRotationLock_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -1782,6 +1839,16 @@ bool WindowSessionProperty::WriteActionUpdateWindowShadowEnabled(Parcel& parcel)
     return parcel.WriteBool(windowShadowEnabled_);
 }
 
+bool WindowSessionProperty::WriteActionUpdateAspectRatio(Parcel& parcel)
+{
+    return parcel.WriteFloat(aspectRatio_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateRotationLockChange(Parcel& parcel)
+{
+    return parcel.WriteBool(isRotationLock_);
+}
+
 void WindowSessionProperty::Read(Parcel& parcel, WSPropertyChangeAction action)
 {
     const auto funcIter = readFuncMap_.find(static_cast<uint64_t>(action));
@@ -1956,6 +2023,16 @@ void WindowSessionProperty::ReadActionUpdateFollowScreenChange(Parcel& parcel)
 void WindowSessionProperty::ReadActionUpdateWindowShadowEnabled(Parcel& parcel)
 {
     SetWindowShadowEnabled(parcel.ReadBool());
+}
+
+void WindowSessionProperty::ReadActionUpdateAspectRatio(Parcel& parcel)
+{
+    SetAspectRatio(parcel.ReadFloat());
+}
+
+void WindowSessionProperty::ReadActionUpdateRotationLockChange(Parcel& parcel)
+{
+    SetRotationLocked(parcel.ReadBool());
 }
 
 void WindowSessionProperty::SetTransform(const Transform& trans)
@@ -2314,6 +2391,11 @@ bool WindowSessionProperty::IsDecorFullscreenDisabled() const
     return compatibleModeProperty_ && compatibleModeProperty_->IsDecorFullscreenDisabled();
 }
 
+bool WindowSessionProperty::IsFullScreenStart() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsFullScreenStart();
+}
+
 bool WindowSessionProperty::IsSupportRotateFullScreen() const
 {
     return compatibleModeProperty_ && compatibleModeProperty_->IsSupportRotateFullScreen();
@@ -2499,6 +2581,16 @@ bool CompatibleModeProperty::IsDecorFullscreenDisabled() const
     return disableDecorFullscreen_;
 }
 
+void CompatibleModeProperty::SetIsFullScreenStart(bool isFullScreenStart)
+{
+    isFullScreenStart_ = isFullScreenStart;
+}
+
+bool CompatibleModeProperty::IsFullScreenStart() const
+{
+    return isFullScreenStart_;
+}
+
 void CompatibleModeProperty::SetIsSupportRotateFullScreen(bool isSupportRotateFullScreen)
 {
     isSupportRotateFullScreen_ = isSupportRotateFullScreen;
@@ -2542,6 +2634,7 @@ bool CompatibleModeProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(disableSplit_) &&
         parcel.WriteBool(disableWindowLimit_) &&
         parcel.WriteBool(disableDecorFullscreen_) &&
+        parcel.WriteBool(isFullScreenStart_) &&
         parcel.WriteBool(isSupportRotateFullScreen_) &&
         parcel.WriteBool(isAdaptToSubWindow_) &&
         parcel.WriteBool(isAdaptToSimulationScale_);
@@ -2564,6 +2657,7 @@ CompatibleModeProperty* CompatibleModeProperty::Unmarshalling(Parcel& parcel)
     property->disableSplit_ = parcel.ReadBool();
     property->disableWindowLimit_ = parcel.ReadBool();
     property->disableDecorFullscreen_ = parcel.ReadBool();
+    property->isFullScreenStart_ = parcel.ReadBool();
     property->isSupportRotateFullScreen_ = parcel.ReadBool();
     property->isAdaptToSubWindow_ = parcel.ReadBool();
     property->isAdaptToSimulationScale_ = parcel.ReadBool();
@@ -2641,6 +2735,16 @@ void WindowSessionProperty::SetIsShowDecorInFreeMultiWindow(bool isShow)
 bool WindowSessionProperty::GetIsShowDecorInFreeMultiWindow() const
 {
     return isShowDecorInFreeMultiWindow_;
+}
+
+void WindowSessionProperty::SetAspectRatio(float ratio)
+{
+    aspectRatio_ = ratio;
+}
+
+float WindowSessionProperty::GetAspectRatio() const
+{
+    return aspectRatio_;
 }
 } // namespace Rosen
 } // namespace OHOS

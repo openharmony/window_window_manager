@@ -151,6 +151,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleNotifyWindowExtensionVisibilityChange(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_WINDOW_VISIBILITY_LISTENER):
             return HandleUpdateSessionWindowVisibilityListener(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_SESSION_OCCLUSION_STATE_LISTENER):
+            return HandleUpdateSessionOcclusionStateListener(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SHIFT_APP_WINDOW_FOCUS):
             return HandleShiftAppWindowFocus(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_LIST_WINDOW_INFO):
@@ -256,6 +258,10 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleUseImplicitAnimation(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_IMAGE_FOR_RECENT):
             return HandleSetImageForRecent(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_IMAGE_FOR_RECENT_PIXELMAP):
+            return HandleSetImageForRecentPixelMap(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REMOVE_IMAGE_FOR_RECENT):
+            return HandleRemoveImageForRecent(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ANIMATE_TO_WINDOW):
             return HandleAnimateTo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_CREATE_UI_EFFECT_CONTROLLER):
@@ -1339,6 +1345,26 @@ int SceneSessionManagerStub::HandleUpdateSessionWindowVisibilityListener(Message
     return ERR_NONE;
 }
 
+int SceneSessionManagerStub::HandleUpdateSessionOcclusionStateListener(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read persistentId fail");
+        return ERR_INVALID_DATA;
+    }
+    bool haveListener = false;
+    if (!data.ReadBool(haveListener)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read haveListener fail");
+        return ERR_INVALID_DATA;
+    }
+    auto errCode = UpdateSessionOcclusionStateListener(persistentId, haveListener);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write error code failed");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SceneSessionManagerStub::HandleShiftAppWindowFocus(MessageParcel& data, MessageParcel& reply)
 {
     int32_t sourcePersistentId = 0;
@@ -1564,12 +1590,18 @@ int SceneSessionManagerStub::HandleAddExtensionWindowStageToSCB(MessageParcel& d
         TLOGE(WmsLogTag::WMS_UIEXT, "read surfaceNodeId failed");
         return ERR_INVALID_DATA;
     }
+    int64_t startModalExtensionTimeStamp = -1;
+    if (!data.ReadInt64(startModalExtensionTimeStamp)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read startModalExtensionTimeStamp failed");
+        return ERR_INVALID_DATA;
+    }
     bool isConstrainedModal = false;
     if (!data.ReadBool(isConstrainedModal)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "read isConstrainedModal failed");
         return ERR_INVALID_DATA;
     }
-    AddExtensionWindowStageToSCB(sessionStage, token, surfaceNodeId, isConstrainedModal);
+    AddExtensionWindowStageToSCB(sessionStage, token, surfaceNodeId, startModalExtensionTimeStamp,
+        isConstrainedModal);
     return ERR_NONE;
 }
 
@@ -1736,16 +1768,16 @@ int SceneSessionManagerStub::HandleGetFreeMultiWindowEnableState(MessageParcel& 
 int SceneSessionManagerStub::HandleGetCallingWindowWindowStatus(MessageParcel&data, MessageParcel&reply)
 {
     TLOGD(WmsLogTag::WMS_KEYBOARD, "In!");
-    int32_t persistentId;
-    if (!data.ReadInt32(persistentId)) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "read persistentId failed");
+    uint32_t callingWindowId;
+    if (!data.ReadUint32(callingWindowId)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "read callingWindowId failed");
         return ERR_INVALID_DATA;
     }
     WindowStatus windowStatus = WindowStatus::WINDOW_STATUS_UNDEFINED;
-    WMError ret = GetCallingWindowWindowStatus(persistentId, windowStatus);
+    WMError ret = GetCallingWindowWindowStatus(callingWindowId, windowStatus);
     reply.WriteUint32(static_cast<int32_t>(ret));
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to GetCallingWindowWindowStatus(%{public}d)", persistentId);
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to GetCallingWindowWindowStatus(%{public}u)", callingWindowId);
         return ERR_INVALID_DATA;
     }
     reply.WriteUint32(static_cast<uint32_t>(windowStatus));
@@ -1755,16 +1787,16 @@ int SceneSessionManagerStub::HandleGetCallingWindowWindowStatus(MessageParcel&da
 int SceneSessionManagerStub::HandleGetCallingWindowRect(MessageParcel&data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_KEYBOARD, "In!");
-    int32_t persistentId;
-    if (!data.ReadInt32(persistentId)) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "read persistentId failed");
+    uint32_t callingWindowId;
+    if (!data.ReadUint32(callingWindowId)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "read callingWindowId failed");
         return ERR_INVALID_DATA;
     }
     Rect rect = {0, 0, 0, 0};
-    WMError ret = GetCallingWindowRect(persistentId, rect);
+    WMError ret = GetCallingWindowRect(callingWindowId, rect);
     reply.WriteInt32(static_cast<int32_t>(ret));
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to GetCallingWindowRect(%{public}d)", persistentId);
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to GetCallingWindowRect(%{public}u)", callingWindowId);
         return ERR_INVALID_DATA;
     }
     reply.WriteInt32(rect.posX_);
@@ -2141,6 +2173,46 @@ int SceneSessionManagerStub::HandleSetImageForRecent(MessageParcel& data, Messag
         return ERR_INVALID_DATA;
     }
     WMError errCode = SetImageForRecent(imgResourceId, static_cast<ImageFit>(imageFit), persistentId);
+    if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSetImageForRecentPixelMap(MessageParcel& data, MessageParcel& reply)
+{
+    std::shared_ptr<Media::PixelMap> pixelMap(data.ReadParcelable<Media::PixelMap>());
+    if (!pixelMap) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Read pixelMap failed.");
+        return ERR_INVALID_DATA;
+    }
+    uint32_t imageFit = 0;
+    if (!data.ReadUint32(imageFit)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Read imageFit failed.");
+        return ERR_INVALID_DATA;
+    }
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Read persistentId failed.");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = SetImageForRecentPixelMap(pixelMap, static_cast<ImageFit>(imageFit), persistentId);
+    if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleRemoveImageForRecent(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Read persistentId failed.");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = RemoveImageForRecent(persistentId);
     if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Write errCode failed.");
         return ERR_INVALID_DATA;

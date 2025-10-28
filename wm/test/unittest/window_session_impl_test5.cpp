@@ -30,12 +30,23 @@
 #include "window_helper.h"
 #include "window_session_impl.h"
 #include "wm_common.h"
+#include "window_manager_hilog.h"
+#include <transaction/rs_transaction.h>
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_errLog;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        g_errLog += msg;
+    }
+}
+static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 class WindowSessionImplTest5 : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -425,7 +436,8 @@ HWTEST_F(WindowSessionImplTest5, UpdateRectForPageRotation, Function | SmallTest
     Rect preRect = { 0, 0, 0, 0 };
     WindowSizeChangeReason wmReason = WindowSizeChangeReason::PAGE_ROTATION;
     std::shared_ptr<RSTransaction> rsTransaction;
-    SceneAnimationConfig config { .rsTransaction_ = rsTransaction };
+    SceneAnimationConfig config = {rsTransaction, ROTATE_ANIMATION_DURATION,
+    0, WindowAnimationCurve::LINEAR, {0.0f, 0.0f, 0.0f, 0.0f} };
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
     std::shared_ptr<AvoidArea> avoidArea = std::make_shared<AvoidArea>();
     avoidArea->topRect_ = { 1, 0, 0, 0 };
@@ -447,6 +459,128 @@ HWTEST_F(WindowSessionImplTest5, UpdateRectForPageRotation, Function | SmallTest
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: UpdateRectForPageRotation end";
 }
 
+/**
+ * @tc.name: UpdateRectForResizeAnimation
+ * @tc.desc: UpdateRectForResizeAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, UpdateRectForResizeAnimation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: UpdateRectForResizeAnimation start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetDisplayId(0);
+    option->SetWindowName("UpdateRectForResizeAnimation");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    auto runner = AppExecFwk::EventRunner::Create("UpdateRectForResizeAnimation");
+    std::shared_ptr<AppExecFwk::EventHandler> handler = std::make_shared<AppExecFwk::EventHandler>(runner);
+    runner->Run();
+    window->handler_ = handler;
+    std::shared_ptr<RSTransaction> rsTransaction;
+    SceneAnimationConfig config{ rsTransaction, ROTATE_ANIMATION_DURATION,
+    0, WindowAnimationCurve::LINEAR, {0.0f, 0.0f, 0.0f, 0.0f} };
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+    std::shared_ptr<AvoidArea> avoidArea = std::make_shared<AvoidArea>();
+    Rect preRect = { 0, 0, 0, 0 };
+    avoidArea->topRect_ = { 1, 0, 0, 0 };
+    avoidArea->leftRect_ = { 0, 1, 0, 0 };
+    avoidArea->rightRect_ = { 0, 0, 1, 0 };
+    avoidArea->bottomRect_ = { 0, 0, 0, 1 };
+    AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM;
+    avoidAreas[type] = *avoidArea;
+    window->property_->SetWindowRect(preRect);
+    window->postTaskDone_ = false;
+    WSRect rect = { 0, 0, 50, 50 };
+    SizeChangeReason reason = SizeChangeReason::SCENE_WITH_ANIMATION;
+    auto res = window->UpdateRect(rect, reason, config, avoidAreas);
+    EXPECT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: UpdateRectForResizeAnimation end";
+}
+ 
+/**
+ * @tc.name: UpdateRectForResizeAnimation01
+ * @tc.desc: UpdateRectForResizeAnimation01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, UpdateRectForResizeAnimation01, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: UpdateRectForResizeAnimation01 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetDisplayId(0);
+    option->SetWindowName("UpdateRectForResizeAnimation01");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    auto runner = AppExecFwk::EventRunner::Create("UpdateRectForResizeAnimation01");
+    std::shared_ptr<AppExecFwk::EventHandler> handler = std::make_shared<AppExecFwk::EventHandler>(runner);
+    runner->Run();
+    window->handler_ = handler;
+    WindowSizeChangeReason wmReason = WindowSizeChangeReason::SCENE_WITH_ANIMATION;
+    std::shared_ptr<RSTransaction> rsTransaction = std::make_shared<RSTransaction>();
+    SceneAnimationConfig config = { rsTransaction, ROTATE_ANIMATION_DURATION,
+    0, WindowAnimationCurve::LINEAR, {0.0f, 0.0f, 0.0f, 0.0f} };
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+    std::shared_ptr<AvoidArea> avoidArea = std::make_shared<AvoidArea>();
+    Rect wmRect = { 0, 0, 0, 0 };
+    Rect preRect = { 0, 0, 0, 0 };
+    avoidArea->topRect_ = { 1, 0, 0, 0 };
+    avoidArea->leftRect_ = { 0, 1, 0, 0 };
+    avoidArea->rightRect_ = { 0, 0, 1, 0 };
+    avoidArea->bottomRect_ = { 0, 0, 0, 1 };
+    AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM;
+    avoidAreas[type] = *avoidArea;
+    window->property_->SetWindowRect(preRect);
+    window->postTaskDone_ = false;
+    window->UpdateRectForResizeAnimation(wmRect, preRect, wmReason, config, avoidAreas);
+    usleep(WAIT_SYNC_IN_NS);
+ 
+    config.animationCurve_ = WindowAnimationCurve::INTERPOLATION_SPRING;
+    window->UpdateRectForResizeAnimation(wmRect, preRect, wmReason, config, avoidAreas);
+    usleep(WAIT_SYNC_IN_NS);
+ 
+    config.animationCurve_ = WindowAnimationCurve::CUBIC_BEZIER;
+    window->UpdateRectForResizeAnimation(wmRect, preRect, wmReason, config, avoidAreas);
+    usleep(WAIT_SYNC_IN_NS);
+    
+    EXPECT_EQ(window->postTaskDone_, true);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: UpdateRectForResizeAnimation01 end";
+}
+ 
+/**
+ * @tc.name: UpdateRectForResizeAnimation02
+ * @tc.desc: UpdateRectForResizeAnimation02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, UpdateRectForResizeAnimation02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: UpdateRectForResizeAnimation02 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetDisplayId(0);
+    option->SetWindowName("UpdateRectForResizeAnimation02");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    auto runner = AppExecFwk::EventRunner::Create("UpdateRectForResizeAnimation02");
+    std::shared_ptr<AppExecFwk::EventHandler> handler = std::make_shared<AppExecFwk::EventHandler>(runner);
+    runner->Run();
+    window->handler_ = handler;
+    WindowSizeChangeReason wmReason = WindowSizeChangeReason::SCENE_WITH_ANIMATION;
+    std::shared_ptr<RSTransaction> rsTransaction;
+    SceneAnimationConfig config = { rsTransaction, ROTATE_ANIMATION_DURATION,
+        0, WindowAnimationCurve::LINEAR, {0.0f, 0.0f, 0.0f, 0.0f} };
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+    std::shared_ptr<AvoidArea> avoidArea = std::make_shared<AvoidArea>();
+    Rect wmRect = { 0, 0, 0, 0 };
+    Rect preRect = { 0, 0, 0, 0 };
+    avoidArea->topRect_ = { 1, 0, 0, 0 };
+    avoidArea->leftRect_ = { 0, 1, 0, 0 };
+    avoidArea->rightRect_ = { 0, 0, 1, 0 };
+    avoidArea->bottomRect_ = { 0, 0, 0, 1 };
+    AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM;
+    avoidAreas[type] = *avoidArea;
+    window->property_->SetWindowRect(preRect);
+    window->postTaskDone_ = false;
+    window->UpdateRectForResizeAnimation(wmRect, preRect, wmReason, config, avoidAreas);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(window->postTaskDone_, true);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: UpdateRectForResizeAnimation02 end";
+}
+ 
 /**
  * @tc.name: RegisterPreferredOrientationChangeListener
  * @tc.desc: RegisterPreferredOrientationChangeListener Test
@@ -729,6 +863,60 @@ HWTEST_F(WindowSessionImplTest5, ConvertInvalidOrientation, Function | SmallTest
     window->SetRequestedOrientation(Orientation::INVALID, false);
     EXPECT_EQ(window->ConvertInvalidOrientation(), Orientation::USER_PAGE_ROTATION_PORTRAIT);
     GTEST_LOG_(INFO) << "WindowSessionImplTest5: ConvertInvalidOrientation end";
+}
+
+/**
+ * @tc.name: NotifyPageRotationIsIgnored()
+ * @tc.desc: NotifyPageRotationIsIgnored()
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, NotifyPageRotationIsIgnored, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: NotifyPageRotationIsIgnored start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetDisplayId(0);
+    option->SetWindowName("NotifyPageRotationIsIgnored");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_CREATED;
+
+    EXPECT_EQ(window->NotifyPageRotationIsIgnored(), WSError::WS_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: NotifyPageRotationIsIgnored end";
+}
+
+/**
+ * @tc.name: BeginRSTransaction()
+ * @tc.desc: BeginRSTransaction()
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, BeginRSTransaction, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: BeginRSTransaction start";
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetDisplayId(0);
+    option->SetWindowName("NotifyPageRotationIsIgnored");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_CREATED;
+
+    std::shared_ptr<RSTransaction> rsTransaction = nullptr;
+    window->BeginRSTransaction(rsTransaction);
+    EXPECT_TRUE(g_errLog.find("rsTransaction is null") != std::string::npos);
+    
+    std::shared_ptr<RSTransaction> rsTransaction1 = std::make_shared<RSTransaction>();
+    rsTransaction1->syncId_ = 1;
+    rsTransaction1->isOpenSyncTransaction_ = true;
+    window->BeginRSTransaction(rsTransaction1);
+    EXPECT_TRUE(g_errLog.find("rsTransaction begin") != std::string::npos);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: BeginRSTransaction end";
 }
 
 /**
@@ -1919,7 +2107,7 @@ HWTEST_F(WindowSessionImplTest5, SwitchSubWindow, Function | SmallTest | Level1)
     subWindow->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     // freemultiwindowmode start
     EXPECT_EQ(subWindow->IsDecorEnable(), false);
-    // cover emprty map
+    // cover empty map
     subWindow->SwitchSubWindow(false, PERSISTENT_ID_ONE);
 
     std::vector<sptr<WindowSessionImpl>> vec;

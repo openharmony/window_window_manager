@@ -227,6 +227,23 @@ static napi_value ExportControlType(napi_env env)
     return result;
 }
 
+static napi_value ExportScreenStatus(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+    if (result == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to get object");
+        return nullptr;
+    }
+    (void)SetNamedProperty(env, result, "STATUS_UNKNOWN",
+        static_cast<uint32_t>(PiPScreenStatus::STATUS_UNKNOWN));
+    (void)SetNamedProperty(env, result, "STATUS_FOREGROUND",
+        static_cast<uint32_t>(PiPScreenStatus::STATUS_FOREGROUND));
+    (void)SetNamedProperty(env, result, "STATUS_SIDEBAR",
+        static_cast<uint32_t>(PiPScreenStatus::STATUS_SIDEBAR));
+    return result;
+}
+
 napi_status InitEnums(napi_env env, napi_value exports)
 {
     const napi_property_descriptor properties[] = {
@@ -238,6 +255,7 @@ napi_status InitEnums(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("PiPControlType", ExportControlType(env)),
         DECLARE_NAPI_PROPERTY("PiPControlStatus", ExportControlStatus(env)),
         DECLARE_NAPI_PROPERTY("VideoLiveControlGroup", ExportVideoLiveControlGroup(env)),
+        DECLARE_NAPI_PROPERTY("PiPScreenStatus", ExportScreenStatus(env)),
     };
     size_t count = sizeof(properties) / sizeof(napi_property_descriptor);
     return napi_define_properties(env, exports, count, properties);

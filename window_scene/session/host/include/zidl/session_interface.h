@@ -32,6 +32,15 @@ class RSSurfaceNode;
 class RSCanvasNode;
 class RSTransaction;
 enum class ImageFit;
+
+enum class CommonEventCommand : int32_t {
+    LOCK_CURSOR = 0,
+    UNLOCK_CURSOR,
+};
+constexpr int32_t COMMON_EVENT_COMMAND_MAX_LENGTH = 5;
+constexpr int32_t LOCK_CURSOR_LENGTH = 2;
+constexpr int32_t UNLOCK_CURSOR_LENGTH = 1;
+
 class ISession : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISession");
@@ -57,9 +66,10 @@ public:
      * This interface will take effect after touch down event.
      *
      * @param event Indicates the {@link SessionEvent}
+     * @param param Indicates the {@link SessionEventParam}
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError OnSessionEvent(SessionEvent event) { return WSError::WS_OK; }
+    virtual WSError OnSessionEvent(SessionEvent event, const SessionEventParam& param = {}) { return WSError::WS_OK; }
 
     /**
      * @brief Receive session event from application.
@@ -439,6 +449,25 @@ public:
     virtual WSError OnSetImageForRecent(uint32_t imgResourceId, ImageFit ImageFit) { return WSError::WS_OK; }
 
     /**
+     * @brief Callback for set image for recent.
+     *
+     * @param pixelMap recent image.
+     * @param imageFit imageFit.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnSetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, ImageFit ImageFit)
+    {
+        return WSError::WS_OK;
+    }
+
+    /**
+     * @brief Callback for remove image for recent.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnSetImageForRecent() { return WSError::WS_OK; }
+
+    /**
      * @brief Callback for setting to radius of window.
      *
      * @param cornerRadius corner radius of window.
@@ -613,6 +642,27 @@ public:
     virtual WSError NotifyIsFullScreenInForceSplitMode(bool isFullScreen)
     {
         return WSError::WS_OK;
+    }
+
+    virtual WSError RestartApp(const std::shared_ptr<AAFwk::Want>& want)
+    {
+        return WSError::WS_OK;
+    }
+    
+    /*
+     * Window event
+     */
+    virtual WMError SendCommonEvent(int32_t command, const std::vector<int32_t>& parameters)
+    {
+        return WMError::WM_OK;
+    }
+    virtual WMError LockCursor(const std::vector<int32_t>& parameters)
+    {
+        return WMError::WM_OK;
+    }
+    virtual WMError UnlockCursor(const std::vector<int32_t>& parameters)
+    {
+        return WMError::WM_OK;
     }
 };
 } // namespace OHOS::Rosen

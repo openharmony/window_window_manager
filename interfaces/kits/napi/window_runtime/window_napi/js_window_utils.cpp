@@ -179,6 +179,22 @@ napi_value GlobalWindowModeInit(napi_env env)
     return objValue;
 }
 
+napi_value WindowOcclusionStateInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(env, objValue, "NO_OCCLUSION", CreateJsValue(env,
+        static_cast<int32_t>(WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION)));
+    napi_set_named_property(env, objValue, "PARTIAL_OCCLUSION", CreateJsValue(env,
+        static_cast<int32_t>(WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION)));
+    napi_set_named_property(env, objValue, "FULL_OCCLUSION", CreateJsValue(env,
+        static_cast<int32_t>(WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION)));
+    return objValue;
+}
+
 napi_value ScreenshotEventTypeInit(napi_env env)
 {
     CHECK_NAPI_ENV_RETURN_IF_NULL(env);
@@ -331,6 +347,19 @@ napi_value WindowAnchorInit(napi_env env)
         static_cast<int32_t>(WindowAnchor::BOTTOM)));
     napi_set_named_property(env, objValue, "BOTTOM_END", CreateJsValue(env,
         static_cast<int32_t>(WindowAnchor::BOTTOM_END)));
+    return objValue;
+}
+
+napi_value PixelUnitInit(napi_env env)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "PX", CreateJsValue(env,
+        static_cast<int32_t>(PixelUnit::PX)));
+    napi_set_named_property(env, objValue, "VP", CreateJsValue(env,
+        static_cast<int32_t>(PixelUnit::VP)));
     return objValue;
 }
 
@@ -1260,6 +1289,7 @@ napi_value GetWindowLimitsAndConvertToJsValue(napi_env env, const WindowLimits& 
     napi_set_named_property(env, objValue, "maxHeight", CreateJsValue(env, windowLimits.maxHeight_));
     napi_set_named_property(env, objValue, "minWidth", CreateJsValue(env, windowLimits.minWidth_));
     napi_set_named_property(env, objValue, "minHeight", CreateJsValue(env, windowLimits.minHeight_));
+    napi_set_named_property(env, objValue, "pixelUnit", CreateJsValue(env, windowLimits.pixelUnit_));
     return objValue;
 }
 

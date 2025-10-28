@@ -466,7 +466,10 @@ HWTEST_F(SceneSessionTest3, SetRestoreMainWindowCallback, TestSize.Level1)
     info.bundleName_ = "SetRestoreMainWindowCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
-    sceneSession->SetRestoreMainWindowCallback([] { return; });
+    sceneSession->SetRestoreMainWindowCallback([](
+        bool isAppSupportPhoneInPc, int32_t callingPid, uint32_t callingToken) {
+        return;
+    });
     ASSERT_NE(nullptr, sceneSession->onRestoreMainWindowFunc_);
 }
 
@@ -725,6 +728,22 @@ HWTEST_F(SceneSessionTest3, NotifyPipWindowSizeChange, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
     auto res = sceneSession->NotifyPipWindowSizeChange(width, height, scale);
+    EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: NotifyPipScreenStatusChange
+ * @tc.desc: NotifyPipScreenStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, NotifyPipScreenStatusChange, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyPipScreenStatusChange";
+    info.bundleName_ = "NotifyPipScreenStatusChange";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    auto res = sceneSession->NotifyPipScreenStatusChange(PiPScreenStatus::STATUS_FOREGROUND);
     EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
 }
 

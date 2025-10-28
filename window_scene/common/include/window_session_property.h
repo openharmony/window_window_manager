@@ -82,6 +82,7 @@ public:
     void SetMaximizeMode(MaximizeMode mode);
     void SetWindowMode(WindowMode mode);
     void SetWindowLimits(const WindowLimits& windowLimits);
+    void SetWindowLimitsVP(const WindowLimits& windowLimits);
     void SetUserWindowLimits(const WindowLimits& windowLimits);
     void SetConfigWindowLimitsVP(const WindowLimits& windowLimitsVP);
     void SetLastLimitsVpr(float vpr);
@@ -157,6 +158,7 @@ public:
     MaximizeMode GetMaximizeMode() const;
     WindowMode GetWindowMode() const;
     WindowLimits GetWindowLimits() const;
+    WindowLimits GetWindowLimitsVP() const;
     WindowLimits GetUserWindowLimits() const;
     WindowLimits GetConfigWindowLimitsVP() const;
     float GetLastLimitsVpr() const;
@@ -267,6 +269,8 @@ public:
     bool GetPcAppInpadOrientationLandscape() const;
     void SetMobileAppInPadLayoutFullScreen(bool isMobileAppInPadLayoutFullScreen);
     bool GetMobileAppInPadLayoutFullScreen() const;
+    void SetRotationLocked(bool locked);
+    bool GetRotationLocked() const;
 
     /*
      * Window Lifecycle
@@ -336,6 +340,7 @@ public:
     bool IsSplitDisabled() const;
     bool IsWindowLimitDisabled() const;
     bool IsDecorFullscreenDisabled() const;
+    bool IsFullScreenStart() const;
     bool IsSupportRotateFullScreen() const;
     bool IsAdaptToSubWindow() const;
     bool IsAdaptToSimulationScale() const;
@@ -362,6 +367,12 @@ public:
 
     void SetIsShowDecorInFreeMultiWindow(bool isShow);
     bool GetIsShowDecorInFreeMultiWindow() const;
+
+    /*
+     * Window Layout
+     */
+    void SetAspectRatio(float ratio);
+    float GetAspectRatio() const;
 
 private:
     void setTouchHotAreasInner(const std::vector<Rect>& rects, std::vector<Rect>& touchHotAreas);
@@ -403,6 +414,8 @@ private:
     bool WriteActionUpdateBackgroundAlpha(Parcel& parcel);
     bool WriteActionUpdateExclusivelyHighlighted(Parcel& parcel);
     bool WriteActionUpdateFollowScreenChange(Parcel& parcel);
+    bool WriteActionUpdateAspectRatio(Parcel& parcel);
+    bool WriteActionUpdateRotationLockChange(Parcel& parcel);
     void ReadActionUpdateTurnScreenOn(Parcel& parcel);
     void ReadActionUpdateKeepScreenOn(Parcel& parcel);
     void ReadActionUpdateViewKeepScreenOn(Parcel& parcel);
@@ -435,6 +448,8 @@ private:
     void ReadActionUpdateBackgroundAlpha(Parcel& parcel);
     void ReadActionUpdateExclusivelyHighlighted(Parcel& parcel);
     void ReadActionUpdateFollowScreenChange(Parcel& parcel);
+    void ReadActionUpdateAspectRatio(Parcel& parcel);
+    void ReadActionUpdateRotationLockChange(Parcel& parcel);
     std::string windowName_;
     SessionInfo sessionInfo_;
     mutable std::mutex windowRectMutex_;
@@ -475,11 +490,13 @@ private:
     WindowMode windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     WindowState windowState_ = WindowState::STATE_INITIAL;
     WindowLimits limits_;
-    WindowLimits userLimits_;
-    WindowLimits configLimitsVP_;
+    WindowLimits limitsVP_ = WindowLimits::DEFAULT_VP_LIMITS();
+    WindowLimits userLimits_ = WindowLimits::DEFAULT_VP_LIMITS();
+    WindowLimits configLimitsVP_ = WindowLimits::DEFAULT_VP_LIMITS();
     float lastVpr_ = 0.0f;
     PiPTemplateInfo pipTemplateInfo_ = {};
     FloatingBallTemplateInfo fbTemplateInfo_ = {};
+    mutable std::mutex fbTemplateMutex_;
     KeyboardLayoutParams keyboardLayoutParams_;
     uint32_t windowModeSupportType_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
@@ -608,6 +625,7 @@ private:
     bool isPcAppInpadSpecificSystemBarInvisible_ = false;
     bool isPcAppInpadOrientationLandscape_ = false;
     bool isMobileAppInPadLayoutFullScreen_ = false;
+    bool isRotationLock_ = false;
 
     sptr<CompatibleModeProperty> compatibleModeProperty_ = nullptr;
 
@@ -617,6 +635,11 @@ private:
     std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>> transitionAnimationConfig_;
 
     bool isShowDecorInFreeMultiWindow_ { true };
+
+    /*
+     * Window Layout
+     */
+    float aspectRatio_ { 0.0f };
 };
 
 class CompatibleModeProperty : public Parcelable {
@@ -654,6 +677,9 @@ public:
     void SetDisableDecorFullscreen(bool disableDecorFullscreen);
     bool IsDecorFullscreenDisabled() const;
 
+    void SetIsFullScreenStart(bool isFullScreenStart);
+    bool IsFullScreenStart() const;
+
     void SetIsSupportRotateFullScreen(bool isSupportRotateFullScreen);
     bool IsSupportRotateFullScreen() const;
 
@@ -681,6 +707,7 @@ public:
         ss << "disableFullScreen_:" << disableFullScreen_<< " ";
         ss << "disableWindowLimit_:" << disableWindowLimit_<< " ";
         ss << "disableDecorFullscreen_:" << disableDecorFullscreen_<< " ";
+        ss << "isFullScreenStart_:" << isFullScreenStart_<< " ";
         ss << "isSupportRotateFullScreen_:" << isSupportRotateFullScreen_ << " ";
         ss << "isAdaptToSubWindow_:" << isAdaptToSubWindow_ << " ";
         ss << "isAdaptToSimulationScale_:" << isAdaptToSimulationScale_ << " ";
@@ -699,6 +726,7 @@ private:
     bool disableSplit_ { false };
     bool disableWindowLimit_ { false };
     bool disableDecorFullscreen_ { false };
+    bool isFullScreenStart_ { false };
     bool isSupportRotateFullScreen_ { false };
     bool isAdaptToSubWindow_ { false };
     bool isAdaptToSimulationScale_ { false };
@@ -752,18 +780,20 @@ struct AppForceLandscapeConfig : public Parcelable {
     std::string homePage_ = "";
     int32_t supportSplit_ = -1;
     std::string arkUIOptions_ = "";
+    bool ignoreOrientation_ = false;
 
     AppForceLandscapeConfig() {}
     AppForceLandscapeConfig(int32_t mode, const std::string& homePage, int32_t supportSplit,
-        const std::string& arkUIOptions) : mode_(mode), homePage_(homePage), supportSplit_(supportSplit),
-        arkUIOptions_(arkUIOptions) {}
+        const std::string& arkUIOptions, bool isIgnoreOrientation) : mode_(mode), homePage_(homePage),
+        supportSplit_(supportSplit), arkUIOptions_(arkUIOptions), ignoreOrientation_(isIgnoreOrientation) {}
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteInt32(mode_) ||
             !parcel.WriteString(homePage_) ||
             !parcel.WriteInt32(supportSplit_) ||
-            !parcel.WriteString(arkUIOptions_)) {
+            !parcel.WriteString(arkUIOptions_) ||
+            !parcel.WriteBool(ignoreOrientation_)) {
             return false;
         }
         return true;
@@ -778,7 +808,8 @@ struct AppForceLandscapeConfig : public Parcelable {
         if (!parcel.ReadInt32(config->mode_) ||
             !parcel.ReadString(config->homePage_) ||
             !parcel.ReadInt32(config->supportSplit_) ||
-            !parcel.ReadString(config->arkUIOptions_)) {
+            !parcel.ReadString(config->arkUIOptions_) ||
+            !parcel.ReadBool(config->ignoreOrientation_)) {
             return nullptr;
         }
         return config.release();
@@ -821,6 +852,7 @@ struct SystemSessionConfig : public Parcelable {
     bool skipRedundantWindowStatusNotifications_ = false;
     uint32_t supportFunctionType_ = 0;
     bool supportSnapshotAllSessionStatus_ = false;
+    bool supportCacheLockedSessionSnapshot_ = false;
     bool supportPreloadStartingWindow_ = false;
     bool supportCreateFloatWindow_ = false;
     float defaultCornerRadius_ = 0.0f; // default corner radius of window set by system config
@@ -885,6 +917,9 @@ struct SystemSessionConfig : public Parcelable {
         if (!parcel.WriteBool(supportSnapshotAllSessionStatus_)) {
             return false;
         }
+        if (!parcel.WriteBool(supportCacheLockedSessionSnapshot_)) {
+            return false;
+        }
         if (!parcel.WriteBool(supportPreloadStartingWindow_)) {
             return false;
         }
@@ -941,6 +976,7 @@ struct SystemSessionConfig : public Parcelable {
         config->skipRedundantWindowStatusNotifications_ = parcel.ReadBool();
         config->supportFunctionType_ = parcel.ReadUint32();
         config->supportSnapshotAllSessionStatus_ = parcel.ReadBool();
+        config->supportCacheLockedSessionSnapshot_ = parcel.ReadBool();
         config->supportPreloadStartingWindow_ = parcel.ReadBool();
         if (!parcel.ReadFloat(config->defaultCornerRadius_)) {
             delete config;

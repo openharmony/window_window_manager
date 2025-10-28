@@ -80,7 +80,10 @@ public:
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    virtual DMError SetOrientation(ScreenId screenId, Orientation orientation) { return DMError::DM_OK; }
+    virtual DMError SetOrientation(ScreenId screenId, Orientation orientation, bool isFromNapi)
+    {
+        return DMError::DM_OK;
+    }
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode = nullptr,
         bool isUseDma = false, bool isCaptureFullOfScreen = false) { return nullptr; }
     virtual std::vector<std::shared_ptr<Media::PixelMap>> GetDisplayHDRSnapshot(
@@ -385,6 +388,8 @@ public:
     virtual uint32_t GetDeviceStatus() { return 0; }
     virtual DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea) { return DMError::DM_OK; }
+    virtual DMError GetBrightnessInfo(DisplayId displayId,
+        ScreenBrightnessInfo& brightnessInfo) { return DMError::DM_OK; }
     virtual DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) { return DMError::DM_OK; }
     virtual DMError SetScreenPrivacyWindowTagSwitch(ScreenId screenId, const std::vector<std::string>& privacyWindowTag,
         bool enable) { return DMError::DM_OK; }

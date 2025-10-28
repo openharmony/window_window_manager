@@ -46,6 +46,9 @@ public:
     void SetUp() override;
     void TearDown() override;
     sptr<WindowSessionImpl> window_;
+private:
+    static constexpr int32_t PERSISTENT_ID_ONE = 1;
+    static constexpr int32_t PERSISTENT_ID_TWO = 2;
 };
 
 void WindowSessionImplTest3::SetUpTestCase() {}
@@ -174,16 +177,16 @@ HWTEST_F(WindowSessionImplTest3, SetForceSplitEnable, TestSize.Level1)
 
     int32_t FORCE_SPLIT_MODE = 5;
     int32_t NAV_FORCE_SPLIT_MODE = 6;
-    AppForceLandscapeConfig config = { FORCE_SPLIT_MODE, "MainPage", true, "ArkuiOptions" };
+    AppForceLandscapeConfig config = { FORCE_SPLIT_MODE, "MainPage", true, "ArkuiOptions", false };
     window_->SetForceSplitEnable(config);
 
-    config = { FORCE_SPLIT_MODE, "MainPage", false, "ArkuiOptions" };
+    config = { FORCE_SPLIT_MODE, "MainPage", false, "ArkuiOptions", false };
     window_->SetForceSplitEnable(config);
 
-    config = { NAV_FORCE_SPLIT_MODE, "MainPage", true, "ArkuiOptions" };
+    config = { NAV_FORCE_SPLIT_MODE, "MainPage", true, "ArkuiOptions", false };
     window_->SetForceSplitEnable(config);
 
-    config = { NAV_FORCE_SPLIT_MODE, "MainPage", false, "ArkuiOptions" };
+    config = { NAV_FORCE_SPLIT_MODE, "MainPage", false, "ArkuiOptions", false };
     window_->SetForceSplitEnable(config);
     EXPECT_TRUE(logMsg.find("uiContent is null!") != std::string::npos);
     LOG_SetCallback(nullptr);
@@ -1494,6 +1497,79 @@ HWTEST_F(WindowSessionImplTest3, UpdateSubWindowInfo, TestSize.Level1)
     EXPECT_EQ(subWindow->context_, nullptr);
     EXPECT_EQ(WMError::WM_OK, subWindow->Destroy(true));
     EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
+}
+
+/**
+ * @tc.name: RegisterFreeWindowModeChangeListener
+ * @tc.desc: RegisterFreeWindowModeChangeListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, RegisterFreeWindowModeChangeListener, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("freeWindow1");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    sptr<IFreeWindowModeChangeListener> listener = sptr<IFreeWindowModeChangeListener>::MakeSptr();
+    auto ret = window->RegisterFreeWindowModeChangeListener(listener);
+    window->NotifyFreeWindowModeChange(true);
+    EXPECT_EQ(WMError::WM_OK, ret);
+ 
+    listener = nullptr;
+    window->NotifyFreeWindowModeChange(true);
+    ret = window->RegisterFreeWindowModeChangeListener(listener);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    window->Destroy();
+}
+ 
+/**
+ * @tc.name: UnregisterFreeWindowModeChangeListener
+ * @tc.desc: UnregisterFreeWindowModeChangeListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, UnregisterFreeWindowModeChangeListener, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("freeWindow2");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(2);
+    sptr<IFreeWindowModeChangeListener> listener = sptr<IFreeWindowModeChangeListener>::MakeSptr();
+    auto ret = window->RegisterFreeWindowModeChangeListener(listener);
+    EXPECT_EQ(WMError::WM_OK, ret);
+ 
+    auto ret1 = window->UnregisterFreeWindowModeChangeListener((listener));
+    EXPECT_EQ(WMError::WM_OK, ret1);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: SwitchSystemWindow
+ * @tc.desc: SwitchSystemWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SwitchSystemWindow, Function | SmallTest | Level1)
+{
+    window_ = GetTestWindowImpl("GetUIContentWithId");
+    ASSERT_NE(window_, nullptr);
+    window_->windowSessionMap_.clear();
+    sptr<WindowOption> sysOption = sptr<WindowOption>::MakeSptr();
+    sysOption->SetWindowName("SwitchSystemWindow");
+    sysOption->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    sptr<WindowSessionImpl> sysWindow = sptr<WindowSessionImpl>::MakeSptr(sysOption);
+    ASSERT_NE(sysWindow, nullptr);
+    ASSERT_NE(sysWindow->property_, nullptr);
+    sysWindow->property_->SetPersistentId(PERSISTENT_ID_TWO);
+    sysWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    sysWindow->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    sysWindow->windowSystemConfig_.isSystemDecorEnable_ = true;
+    // cover empty map
+    sysWindow->SwitchSystemWindow(false, PERSISTENT_ID_ONE);
+ 
+    std::vector<sptr<WindowSessionImpl>> vec;
+    window_->windowSessionMap_.insert(std::make_pair("SwitchSystemWindow",
+        std::make_pair(PERSISTENT_ID_ONE, sysWindow)));
+    window_->SwitchSystemWindow(true, PERSISTENT_ID_ONE);
+    EXPECT_EQ(sysWindow->windowSystemConfig_.freeMultiWindowEnable_, true);
 }
 } // namespace
 } // namespace Rosen

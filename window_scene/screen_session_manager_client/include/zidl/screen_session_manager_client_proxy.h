@@ -31,11 +31,11 @@ public:
     void OnScreenConnectionChanged(SessionOption option, ScreenEvent screenEvent) override;
     void OnPropertyChanged(ScreenId screenId,
         const ScreenProperty& property, ScreenPropertyChangeReason reason) override;
-    void OnFoldPropertyChanged(ScreenId screenId, const ScreenProperty& property, ScreenPropertyChangeReason reason,
-            FoldDisplayMode displayMode) override;
+    bool OnFoldPropertyChange(ScreenId screenId, const ScreenProperty& property,
+        ScreenPropertyChangeReason reason, FoldDisplayMode displayMode, ScreenProperty& midProperty) override;
     void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason) override;
-    void OnSensorRotationChanged(ScreenId screenId, float sensorRotation) override;
+    void OnSensorRotationChanged(ScreenId screenId, float sensorRotation, bool isSwitchUser) override;
     void OnHoverStatusChanged(ScreenId screenId, int32_t hoverStatus, bool needRotate = true) override;
     void OnScreenOrientationChanged(ScreenId screenId, float screenOrientation) override;
     void OnScreenExtendChanged(ScreenId mainScreenId, ScreenId extendScreenId) override;
@@ -46,7 +46,8 @@ public:
     void OnImmersiveStateChanged(ScreenId screenId, bool& immersive) override;
     void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId) override;
     void OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
-        std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false) override;
+        std::vector<uint64_t>& surfaceNodeIds, const std::vector<uint32_t>& needWindowTypeList = {},
+        bool isNeedForceCheck = false) override;
     void OnSetSurfaceNodeIdsChanged(DisplayId displayId, const std::vector<uint64_t>& surfaceNodeIds) override;
     void OnVirtualScreenDisconnected(DisplayId displayId) override;
     void OnUpdateFoldDisplayMode(FoldDisplayMode displayMode) override;

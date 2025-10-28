@@ -32,7 +32,9 @@
         "window_manager_feature_cam_mode",
         "window_manager_feature_multi_usr",
         "window_manager_feature_screenless",
-        "window_manager_feature_asbng_path"
+        "window_manager_feature_asbng_path",
+        "window_manager_feature_support_dsoftbus",
+        "window_manager_feature_support_dmsfwk"
       ],
       "adapted_system_type": [ "standard" ],
       "rom": "8000KB",
@@ -505,6 +507,16 @@
           {
             "type": "so",
             "name": "//foundation/window/window_manager/interfaces/kits/napi/window_animation:window_animation_utils",
+            "header": {
+              "header_files": [
+                "wm_animation_common.h"
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/innerkits/wm"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/interfaces/kits/ani/window_animation:ani_window_animation_utils",
             "header": {
               "header_files": [
                 "wm_animation_common.h"

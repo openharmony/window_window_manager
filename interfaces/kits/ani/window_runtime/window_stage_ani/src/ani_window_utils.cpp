@@ -32,6 +32,8 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
+constexpr uint32_t ANIMATION_FOUR_PARAMS_SIZE = 4;
+const std::string INTERPOLATINGSPRING  = "interpolatingSpring";
 
 std::mutex g_aniCreatorsMutex;
 std::unordered_map<std::string, std::pair<ani_class, std::unordered_map<std::string, ani_method>>> globalAniCreators;
@@ -50,6 +52,36 @@ std::string GetHexColor(uint32_t color)
     return finalColor;
 }
 }
+
+ani_ref CreateDouble(ani_env* env, double value)
+{
+    static constexpr const char* className = "std.core.Double";
+    ani_class doubleCls {};
+    ani_status ret = env->FindClass(className, &doubleCls);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] Find class double failed. %{public}d", ret);
+        ani_ref undefinedRef;
+        env->GetUndefined(&undefinedRef);
+        return undefinedRef;
+    }
+    ani_method ctor {};
+    ret = env->Class_FindMethod(doubleCls, "<ctor>", "d:", &ctor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] Find ctor method failed. %{public}d", ret);
+        ani_ref undefinedRef;
+        env->GetUndefined(&undefinedRef);
+        return undefinedRef;
+    }
+    ani_object obj {};
+    if (env->Object_New(doubleCls, ctor, &obj, static_cast<ani_double>(value)) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] new double object failed");
+        ani_ref undefinedRef;
+        env->GetUndefined(&undefinedRef);
+        return undefinedRef;
+    }
+    return obj;
+}
+
 ani_status AniWindowUtils::GetStdString(ani_env *env, ani_string ani_str, std::string &result)
 {
     ani_size strSize;
@@ -157,6 +189,38 @@ ani_status AniWindowUtils::GetPropertyDoubleObject(ani_env* env, const char* pro
     return ret;
 }
 
+ani_status AniWindowUtils::GetPropertyBoolObject(ani_env* env, const char* propertyName,
+    ani_object object, bool& result)
+{
+    ani_ref bool_ref;
+    ani_status ret = env->Object_GetPropertyByName_Ref(object, propertyName, &bool_ref);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed, ret : %{public}u",
+            propertyName, static_cast<int32_t>(ret));
+        return ret;
+    }
+    ani_boolean isUndefined;
+    ret = env->Reference_IsUndefined(bool_ref, &isUndefined);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
+        return ret;
+    }
+    if (isUndefined) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] %{public}s is Undefined Now", propertyName);
+        return ANI_ERROR;
+    }
+
+    ani_boolean bool_value;
+    ret = env->Object_CallMethodByName_Boolean(static_cast<ani_object>(bool_ref), "unboxed", ":Z", &bool_value);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
+        return ret;
+    }
+    result = static_cast<bool>(bool_value);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] %{public}s is: %{public}d", propertyName, result);
+    return ret;
+}
+
 ani_status AniWindowUtils::GetPropertyLongObject(ani_env* env, const char* propertyName, ani_object object,
                                                  int64_t& result)
 {
@@ -179,7 +243,6 @@ ani_status AniWindowUtils::GetPropertyLongObject(ani_env* env, const char* prope
         TLOGE(WmsLogTag::DEFAULT, "[ANI] %{public}s is Undefined Now", propertyName);
         return ANI_ERROR;
     }
-
     ani_long long_value;
     ret = env->Object_CallMethodByName_Long(static_cast<ani_object>(long_ref), "unboxed", ":J", &long_value);
     if (ret != ANI_OK) {
@@ -221,9 +284,9 @@ bool AniWindowUtils::GetPropertyRectObject(ani_env* env, const char* propertyNam
     int32_t width = 0;
     int32_t height = 0;
     bool ret_bool = GetIntObject(env, "left", static_cast<ani_object>(windowRect), posX);
-    ret_bool |= GetIntObject(env, "top", static_cast<ani_object>(windowRect), posY);
-    ret_bool |= GetIntObject(env, "width", static_cast<ani_object>(windowRect), width);
-    ret_bool |= GetIntObject(env, "height", static_cast<ani_object>(windowRect), height);
+    ret_bool &= GetIntObject(env, "top", static_cast<ani_object>(windowRect), posY);
+    ret_bool &= GetIntObject(env, "width", static_cast<ani_object>(windowRect), width);
+    ret_bool &= GetIntObject(env, "height", static_cast<ani_object>(windowRect), height);
     if (!ret_bool) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] GetIntObject Failed");
         return false;
@@ -421,6 +484,21 @@ ani_object AniWindowUtils::CreateAniWindowLimits(ani_env* env, const WindowLimit
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to create new obj");
         return AniWindowUtils::CreateAniUndefined(env);
     }
+    ani_enum pixelUnit;
+    ret = env->FindEnum("L@ohos/window/window/PixelUnit;", &pixelUnit);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to FindEnum");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    ani_enum_item pixelUnitItem;
+    
+    std::string itemName = GetPixelUnitString(windowLimits.pixelUnit_);
+    ret = env->Enum_GetEnumItemByName(pixelUnit, itemName.c_str(), &pixelUnitItem);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Enum_GetEnumItemByName failed");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
 
     CallAniMethodVoid(env, aniLimits, aniClass, "<set>maxWidth", nullptr,
         CreateBaseTypeObject<int>(env, windowLimits.maxWidth_));
@@ -430,6 +508,7 @@ ani_object AniWindowUtils::CreateAniWindowLimits(ani_env* env, const WindowLimit
         CreateBaseTypeObject<int>(env, windowLimits.minWidth_));
     CallAniMethodVoid(env, aniLimits, aniClass, "<set>minHeight", nullptr,
         CreateBaseTypeObject<int>(env, windowLimits.minHeight_));
+    CallAniMethodVoid(env, aniLimits, aniClass, "<set>pixelUnit", nullptr, pixelUnitItem);
     return aniLimits;
 }
 
@@ -655,10 +734,144 @@ ani_object AniWindowUtils::CreateAniKeyboardInfo(ani_env* env, const KeyboardPan
         TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to new obj");
         return AniWindowUtils::CreateAniUndefined(env);
     }
-    CallAniMethodVoid(env, keyboardInfo, aniClass, "<set>beginRect", nullptr,
+    ret = CallAniMethodVoid(env, keyboardInfo, aniClass, "<set>beginRect", nullptr,
         CreateAniRect(env, keyboardPanelInfo.beginRect_));
-    CallAniMethodVoid(env, keyboardInfo, aniClass, "<set>endRect", nullptr,
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to set beginRect");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ret = CallAniMethodVoid(env, keyboardInfo, aniClass, "<set>endRect", nullptr,
         CreateAniRect(env, keyboardPanelInfo.endRect_));
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to set endRect");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    return keyboardInfo;
+}
+
+ani_object AniWindowUtils::CreateAniAnimationConfig(ani_env* env, const KeyboardAnimationCurve& curve)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "[ANI]");
+    ani_class aniClass;
+    ani_status ret = env->FindClass("L@ohos/window/window/WindowAnimationConfigInternal;", &aniClass);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_method aniCtor;
+    ret = env->Class_FindMethod(aniClass, "<ctor>", nullptr, &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object aniConfig;
+    ret = env->Object_New(aniClass, aniCtor, &aniConfig);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] fail to new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    if (curve.curveType_ == INTERPOLATINGSPRING) {
+        ani_enum aniAnimationCurveType;
+        ret = env->FindEnum("@ohos.window.window.WindowAnimationCurve", &aniAnimationCurveType);
+        if (ret != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] Find enum animationType failed");
+            return AniWindowUtils::CreateAniUndefined(env);
+        }
+        ani_enum_item animationCurveTypeItem;
+        std::string itemName = curve.curveType_;
+        ret = env->Enum_GetEnumItemByName(aniAnimationCurveType, itemName.c_str(), &animationCurveTypeItem);
+        if (ret != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] Get enum item %{public}s failed. ret: %{public}d",
+                itemName.c_str(), ret);
+            return AniWindowUtils::CreateAniUndefined(env);
+        }
+        ret = CallAniMethodVoid(env, aniConfig, aniClass, "<set>curve", nullptr, animationCurveTypeItem);
+        if (ret != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to set curve");
+            return AniWindowUtils::CreateAniUndefined(env);
+        }
+    }
+
+    ret = CallAniMethodVoid(env, aniConfig, aniClass, "<set>duration", nullptr,
+        ani_int(curve.duration_));
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to set duration");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    auto paramSize = curve.curveParams_.size();
+    if (paramSize == ANIMATION_FOUR_PARAMS_SIZE) {
+        ani_array_ref params = nullptr;
+        if (env->Array_New_Ref(aniClass, ANIMATION_PARAM_SIZE, static_cast<ani_ref>(CreateAniUndefined(env)),
+            &params) != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] create array failed");
+            return AniWindowUtils::CreateAniUndefined(env);
+        }
+        for (uint32_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
+            if (env->Array_Set_Ref(params, i, CreateDouble(env, curve.curveParams_[i])) != ANI_OK) {
+                TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] set params failed at %{public}d", i);
+                return AniWindowUtils::CreateAniUndefined(env);
+            }
+        }
+        ret = CallAniMethodVoid(env, aniConfig, aniClass, "<set>param", nullptr, params);
+        if (ret != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to set param");
+            return AniWindowUtils::CreateAniUndefined(env);
+        }
+    }
+    return aniConfig;
+}
+
+ani_object AniWindowUtils::CreateAniAnimationInfo(ani_env* env, const KeyboardAnimationInfo& keyboardAnimationInfo,
+    const KeyboardAnimationCurve& curve)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "[ANI]");
+    ani_class aniClass;
+    ani_status ret = env->FindClass("L@ohos/window/window/KeyboardInfoInternal;", &aniClass);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_method aniCtor;
+    ret = env->Class_FindMethod(aniClass, "<ctor>", nullptr, &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object keyboardInfo;
+    ret = env->Object_New(aniClass, aniCtor, &keyboardInfo);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    ret = CallAniMethodVoid(env, keyboardInfo, aniClass, "<set>beginRect", nullptr,
+        CreateAniRect(env, keyboardAnimationInfo.beginRect));
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to set beginRect");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    ret = CallAniMethodVoid(env, keyboardInfo, aniClass, "<set>endRect", nullptr,
+        CreateAniRect(env, keyboardAnimationInfo.endRect));
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to set endRect");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    ret = CallAniMethodVoid(env, keyboardInfo, aniClass, "<set>animated", nullptr,
+        CreateOptionalBool(env, static_cast<ani_boolean>(keyboardAnimationInfo.withAnimation)));
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to set animated");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    ret = CallAniMethodVoid(env, keyboardInfo, aniClass, "<set>config", nullptr,
+        CreateAniAnimationConfig(env, curve));
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to set config");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
     return keyboardInfo;
 }
 
@@ -944,6 +1157,119 @@ ani_object AniWindowUtils::CreateAniMainWindowInfo(ani_env* env, const MainWindo
     CallAniMethodVoid(env, mainWindowInfo, aniClass, "<set>windowId", nullptr, ani_double(info.persistentId_));
     CallAniMethodVoid(env, mainWindowInfo, aniClass, "<set>label", nullptr, label);
     return mainWindowInfo;
+}
+
+ani_status AniWindowUtils::CheckPropertyNameUndefined(ani_env* env, const char* propertyName,
+    ani_object object, bool& result)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] env is nullptr");
+        return ANI_ERROR;
+    }
+    result = false;
+    ani_ref ref;
+    ani_status ret = env->Object_GetPropertyByName_Ref(object, propertyName, &ref);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed, ret : %{public}u",
+            propertyName, static_cast<int32_t>(ret));
+        return ret;
+    }
+    ani_boolean isUndefined = false;
+    ret = env->Reference_IsUndefined(ref, &isUndefined);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
+        return ret;
+    }
+    result = isUndefined;
+    return ANI_OK;
+}
+
+bool AniWindowUtils::ParseKeyFramePolicy(ani_env* env, ani_object aniKeyFramePolicy, KeyFramePolicy& keyFramePolicy)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] env is nullptr");
+        return false;
+    }
+
+    ani_boolean enable = false;
+    if (env->Object_GetPropertyByName_Boolean(aniKeyFramePolicy, "enable", &enable) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed to convert parameter to enable");
+        return false;
+    }
+    keyFramePolicy.dragResizeType_ = enable ? DragResizeType::RESIZE_KEY_FRAME :
+        DragResizeType::RESIZE_TYPE_UNDEFINED;
+    
+    bool propertyUndefined = false;
+    int32_t distance = 0;
+    if (CheckPropertyNameUndefined(env, "distance", aniKeyFramePolicy, propertyUndefined) != ANI_OK ||
+        !propertyUndefined) {
+        if (GetPropertyIntObject(env, "distance", aniKeyFramePolicy, distance) != ANI_OK || distance < 0) {
+            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed to convert parameter to distance");
+            return false;
+        }
+        keyFramePolicy.distance_ = static_cast<uint32_t>(distance);
+    }
+
+    int64_t longData = 0;
+    if (CheckPropertyNameUndefined(env, "interval", aniKeyFramePolicy, propertyUndefined) != ANI_OK ||
+        !propertyUndefined) {
+        if (GetPropertyLongObject(env, "interval", aniKeyFramePolicy, longData) != ANI_OK || longData <= 0) {
+            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed to convert parameter to interval");
+            return false;
+        }
+        keyFramePolicy.interval_ = static_cast<uint32_t>(longData);
+    }
+    if (CheckPropertyNameUndefined(env, "animationDelay", aniKeyFramePolicy, propertyUndefined) != ANI_OK ||
+        !propertyUndefined) {
+        if (GetPropertyLongObject(env, "animationDelay", aniKeyFramePolicy, longData) != ANI_OK || longData < 0) {
+            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed to convert parameter to animationDelay");
+            return false;
+        }
+        keyFramePolicy.animationDelay_ = static_cast<uint32_t>(longData);
+    }
+    if (CheckPropertyNameUndefined(env, "animationDuration", aniKeyFramePolicy, propertyUndefined) != ANI_OK ||
+        !propertyUndefined) {
+        if (GetPropertyLongObject(env, "animationDuration", aniKeyFramePolicy, longData) != ANI_OK || longData < 0) {
+            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed to convert parameter to animationDuration");
+            return false;
+        }
+        keyFramePolicy.animationDuration_ = static_cast<uint32_t>(longData);
+    }
+    return true;
+}
+
+ani_object AniWindowUtils::CreateKeyFramePolicy(ani_env* env, const KeyFramePolicy& keyFramePolicy)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] env is nullptr");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_class aniClass;
+    if (env->FindClass("@ohos.window.window.KeyFramePolicyInternal", &aniClass) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_method ctor;
+    if (env->Class_FindMethod(aniClass, "<ctor>", nullptr, &ctor) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object aniKeyFramePolicy;
+    if (env->Object_New(aniClass, ctor, &aniKeyFramePolicy) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] fail to new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    CallAniMethodVoid(env, aniKeyFramePolicy, aniClass, "<set>enable", nullptr,
+        ani_boolean(keyFramePolicy.enabled()));
+    CallAniMethodVoid(env, aniKeyFramePolicy, aniClass, "<set>interval", nullptr,
+        CreateBaseTypeObject<long>(env, keyFramePolicy.interval_));
+    CallAniMethodVoid(env, aniKeyFramePolicy, aniClass, "<set>distance", nullptr,
+        CreateBaseTypeObject<int>(env, keyFramePolicy.distance_));
+    CallAniMethodVoid(env, aniKeyFramePolicy, aniClass, "<set>animationDuration", nullptr,
+        CreateBaseTypeObject<long>(env, keyFramePolicy.animationDuration_));
+    CallAniMethodVoid(env, aniKeyFramePolicy, aniClass, "<set>animationDelay", nullptr,
+        CreateBaseTypeObject<long>(env, keyFramePolicy.animationDelay_));
+    return aniKeyFramePolicy;
 }
 
 void AniWindowUtils::GetWindowSnapshotConfiguration(ani_env* env, ani_object config,
@@ -1254,11 +1580,9 @@ void* AniWindowUtils::GetAbilityContext(ani_env *env, ani_object aniObj)
     return (void*)nativeContextLong;
 }
 
-WindowLimits AniWindowUtils::ParseWindowLimits(ani_env* env, ani_object aniWindowLimits)
+bool AniWindowUtils::ParseWindowLimits(ani_env* env, ani_object aniWindowLimits, WindowLimits& windowLimits)
 {
-    WindowLimits windowLimits;
-    
-    auto getAndAssign = [&, where = __func__](const char* name, uint32_t& field) {
+    auto getAndAssign = [&, where = __func__](const char* name, uint32_t& field) -> ani_status {
         int value;
         ani_status ret = AniWindowUtils::GetPropertyIntObject(env, name, aniWindowLimits, value);
         if (ret == ANI_OK) {
@@ -1269,13 +1593,35 @@ WindowLimits AniWindowUtils::ParseWindowLimits(ani_env* env, ani_object aniWindo
                 TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: [ANI] Invalid %{public}s: %{public}d", where, name, value);
             }
         }
+        return ret;
     };
 
-    getAndAssign("maxWidth", windowLimits.maxWidth_);
-    getAndAssign("maxHeight", windowLimits.maxHeight_);
-    getAndAssign("minWidth", windowLimits.minWidth_);
-    getAndAssign("minHeight", windowLimits.minHeight_);
-    return windowLimits;
+    auto getAndAssignUnit = [&, where = __func__](const char* name, PixelUnit& field) -> ani_status {
+        uint32_t unitValue;
+        ani_ref unitValueObject;
+        ani_boolean isUndefined;
+        ani_status ret = env->Object_GetPropertyByName_Ref(aniWindowLimits, name, &unitValueObject);
+        env->Reference_IsUndefined(unitValueObject, &isUndefined);
+        if (isUndefined) {
+            field = PixelUnit::PX;
+            return ret;
+        }
+        ret = AniWindowUtils::GetEnumValue(env, static_cast<ani_enum_item>(unitValueObject), unitValue);
+        if (ret == ANI_OK) {
+            field = static_cast<PixelUnit>(unitValue);
+        } else {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s: [ANI] GetEnumValue failed, invalid %{public}s", where, name);
+        }
+        return ret;
+    };
+    if (getAndAssign("maxWidth", windowLimits.maxWidth_) != ANI_OK ||
+        getAndAssign("maxHeight", windowLimits.maxHeight_) != ANI_OK ||
+        getAndAssign("minWidth", windowLimits.minWidth_) != ANI_OK ||
+        getAndAssign("minHeight", windowLimits.minHeight_) != ANI_OK ||
+        getAndAssignUnit("pixelUnit", windowLimits.pixelUnit_) != ANI_OK) {
+        return false;
+    }
+    return true;
 }
 
 bool AniWindowUtils::CheckParaIsUndefined(ani_env* env, ani_object para)
@@ -1319,6 +1665,19 @@ ani_object AniWindowUtils::CreateAniPosition(ani_env* env, const Position& posit
     return aniPosition;
 }
 
+std::string AniWindowUtils::GetPixelUnitString(const PixelUnit& pixelUnit)
+{
+    switch (pixelUnit) {
+        case PixelUnit::PX:
+            return "PX";
+        case PixelUnit::VP:
+            return "VP";
+        default:
+            TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] GetPixelUnitString default");
+            return "PX";
+    }
+}
+
 WmErrorCode AniWindowUtils::ToErrorCode(WMError error, WmErrorCode defaultCode)
 {
     auto it = WM_JS_TO_ERROR_CODE_MAP.find(error);
@@ -1329,6 +1688,212 @@ WmErrorCode AniWindowUtils::ToErrorCode(WMError error, WmErrorCode defaultCode)
         "[ANI] Unknown error: %{public}d, return defaultCode: %{public}d",
         static_cast<int32_t>(error), static_cast<int32_t>(defaultCode));
     return defaultCode;
+}
+
+ani_object AniWindowUtils::CreateOptionalBool(ani_env *env, ani_boolean value)
+{
+    ani_class intClass;
+    ani_status ret = env->FindClass("std.core.Boolean", &intClass);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_method aniCtor;
+    ret = env->Class_FindMethod(intClass, "<ctor>", "z:", &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object obj {};
+    if (env->Object_New(intClass, aniCtor, &obj, value) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to allocate Boolean");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    
+    return obj;
+}
+
+ani_object AniWindowUtils::CreateOptionalInt(ani_env *env, ani_int value)
+{
+    ani_class intClass;
+    ani_status ret = env->FindClass("std.core.Int", &intClass);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_method aniCtor;
+    ret = env->Class_FindMethod(intClass, "<ctor>", "i:", &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object obj {};
+    if (env->Object_New(intClass, aniCtor, &obj, value) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to allocate Int");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    
+    return obj;
+}
+
+bool AniWindowUtils::ParseSubWindowOptions(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption)
+{
+    if (aniObject == nullptr || windowOption == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "aniObject or windowOption is null");
+        return false;
+    }
+    ani_ref titleRef;
+    env->Object_GetPropertyByName_Ref(aniObject, "title", &titleRef);
+    std::string title;
+    ani_status ret = GetStdString(env, static_cast<ani_string>(titleRef), title);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to title");
+        return false;
+    }
+    ani_boolean decorEnabled = false;
+    env->Object_GetPropertyByName_Boolean(aniObject, "decorEnabled", &decorEnabled);
+
+    // optional
+    bool maximizeSupported = false;
+    GetPropertyBoolObject(env, "maximizeSupported", aniObject, maximizeSupported);
+    bool outlineEnabled = false;
+    GetPropertyBoolObject(env, "outlineEnabled", aniObject, outlineEnabled);
+    windowOption->SetSubWindowTitle(title);
+    windowOption->SetSubWindowDecorEnable(decorEnabled);
+    windowOption->SetSubWindowMaximizeSupported(maximizeSupported);
+    windowOption->SetSubWindowOutlineEnabled(outlineEnabled);
+    if (!ParseRectParam(env, aniObject, windowOption)) {
+        return false;
+    }
+    if (!ParseModalityParam(env, aniObject, windowOption)) {
+        return false;
+    }
+    return ParseZLevelParam(env, aniObject, windowOption);
+}
+
+bool AniWindowUtils::ParseRectParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption)
+{
+    if (aniObject == nullptr || windowOption == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "aniObject or windowOption is null");
+        return false;
+    }
+    ani_ref windowRectRef;
+    ani_status ret = env->Object_GetPropertyByName_Ref(aniObject, "windowRect", &windowRectRef);
+    ani_boolean isUndefined = false;
+    env->Reference_IsUndefined(windowRectRef, &isUndefined);
+    if (ret != ANI_OK || isUndefined) {
+        return true;
+    }
+    Rect windowRect;
+    if (!GetPropertyRectObject(env, "windowRect", aniObject, windowRect)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] GetPropertyRectObject failed");
+        return false;
+    }
+    
+    if (windowRect.width_ <= 0 || windowRect.height_ <= 0) {
+        TLOGE(WmsLogTag::WMS_SUB, "width or height should greater than 0!");
+        return false;
+    }
+    windowOption->SetWindowRect(windowRect);
+    TLOGI(WmsLogTag::WMS_SUB, "windowRect: %{public}s", windowRect.ToString().c_str());
+    return true;
+}
+
+bool AniWindowUtils::ParseModalityParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption)
+{
+    if (aniObject == nullptr || windowOption == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "aniObject or windowOption is null");
+        return false;
+    }
+    bool isModal = false;
+    GetPropertyBoolObject(env, "isModal", aniObject, isModal);
+    if (isModal) {
+        windowOption->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
+    }
+
+    bool isTopmost = false;
+    GetPropertyBoolObject(env, "isTopmost", aniObject, isTopmost);
+    if (!isModal && isTopmost) {
+        TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow not support topmost");
+        return false;
+    }
+    windowOption->SetWindowTopmost(isTopmost);
+    
+    ani_ref modalityTypeRef;
+    ani_status ret = env->Object_GetPropertyByName_Ref(aniObject, "modalityType", &modalityTypeRef);
+    ani_boolean isUndefined = false;
+    env->Reference_IsUndefined(modalityTypeRef, &isUndefined);
+    ani_int modalityType;
+    if (ret == ANI_OK && !isUndefined &&
+        env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(modalityTypeRef), &modalityType) == ANI_OK) {
+        if (!isModal) {
+            TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow not support modalityType");
+            return false;
+        }
+        using T = std::underlying_type_t<ApiModalityType>;
+        T apiModalityType = static_cast<T>(modalityType);
+        if (apiModalityType >= static_cast<T>(ApiModalityType::BEGIN) &&
+            apiModalityType <= static_cast<T>(ApiModalityType::END)) {
+            auto type = JS_TO_NATIVE_MODALITY_TYPE_MAP.at(static_cast<ApiModalityType>(apiModalityType));
+            if (type == ModalityType::APPLICATION_MODALITY) {
+                windowOption->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
+            }
+        } else {
+            TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to modalityType");
+            return false;
+        }
+    }
+    TLOGI(WmsLogTag::WMS_SUB, "isModal: %{public}d, isTopmost: %{public}d, WindowFlag: %{public}d",
+        isModal, isTopmost, windowOption->GetWindowFlags());
+    return true;
+}
+
+bool AniWindowUtils::ParseZLevelParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption)
+{
+    if (aniObject == nullptr || windowOption == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "aniObject or windowOption is null");
+        return false;
+    }
+    int zLevel = 0;
+    bool isModal = false;
+    if (GetPropertyIntObject(env, "zLevel", aniObject, zLevel) == ANI_OK) {
+        if (zLevel < MINIMUM_Z_LEVEL || zLevel > MAXIMUM_Z_LEVEL) {
+            TLOGE(WmsLogTag::WMS_SUB, "zLevel value %{public}d exceeds valid range [-10000, 10000]!", zLevel);
+            return false;
+        }
+        if (GetPropertyBoolObject(env, "isModal", aniObject, isModal) == ANI_OK) {
+            if (isModal) {
+                TLOGE(WmsLogTag::WMS_SUB, "modal window not support custom zLevel");
+                return false;
+            }
+        }
+        windowOption->SetSubWindowZLevel(zLevel);
+    }
+    TLOGI(WmsLogTag::WMS_SUB, "zLevel: %{public}d", zLevel);
+    return true;
+}
+
+void AniWindowUtils::ConvertImageFit(ImageFit& dst, const Ark_ImageFit& src)
+{
+    switch (src) {
+        case Ark_ImageFit::ARK_IMAGE_FIT_CONTAIN: dst = ImageFit::CONTAIN; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_COVER: dst = ImageFit::COVER; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_AUTO: dst = ImageFit::FITWIDTH; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_FILL: dst = ImageFit::FILL; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_SCALE_DOWN: dst = ImageFit::SCALE_DOWN; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_NONE: dst = ImageFit::NONE; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_TOP_START: dst = ImageFit::TOP_LEFT; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_TOP: dst = ImageFit::TOP; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_TOP_END: dst = ImageFit::TOP_END; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_START: dst = ImageFit::START; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_CENTER: dst = ImageFit::CENTER; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_END: dst = ImageFit::END; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_BOTTOM_START: dst = ImageFit::BOTTOM_START; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_BOTTOM: dst = ImageFit::BOTTOM; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_BOTTOM_END: dst = ImageFit::CONTAIN; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_MATRIX: dst = ImageFit::MATRIX; break;
+        default: TLOGE(WmsLogTag::DEFAULT, "imageFit: %{public}d", src);
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

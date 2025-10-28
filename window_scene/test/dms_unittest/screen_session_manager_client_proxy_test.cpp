@@ -166,7 +166,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnSensorRotationChanged, TestSize.
     float sensorRotation = 0;
 
     ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
-    screenSessionManagerClientProxy_->OnSensorRotationChanged(screenId, sensorRotation);
+    screenSessionManagerClientProxy_->OnSensorRotationChanged(screenId, sensorRotation, false);
 }
 
 /**
@@ -238,9 +238,8 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnGetSurfaceNodeIdsFromMissionIdsC
 {
     std::vector<uint64_t> missionIds = {0, 1};
     std::vector<uint64_t> surfaceNodeIds;
-    bool isBlackList = false;
     ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
-    screenSessionManagerClientProxy_->OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds, isBlackList);
+    screenSessionManagerClientProxy_->OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds);
 }
 
 /**
@@ -591,6 +590,62 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnAnimationFinish, TestSize.Level1
     remoteMocker->SetRequestResult(ERR_NONE);
     proxy->OnAnimationFinish();
     MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+* @tc.name: OnSensorRotationChanged02
+* @tc.desc: OnSensorRotationChanged02 test
+* @tc.type: FUNC
+*/
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnSensorRotationChanged02, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    ScreenId screenId = 666;
+    float sensorRotation = 90.f;
+    bool isSwitchUser = false;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    auto proxy = sptr<ScreenSessionManagerClientProxy>::MakeSptr(nullptr);
+    proxy->OnSensorRotationChanged(screenId, sensorRotation, isSwitchUser);
+    EXPECT_TRUE(logMsg.find("remote is nullptr") != std::string::npos);
+    logMsg.clear();
+
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    proxy = sptr<ScreenSessionManagerClientProxy>::MakeSptr(remoteMocker);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ASSERT_NE(proxy, nullptr);
+    proxy->OnSensorRotationChanged(screenId, sensorRotation, isSwitchUser);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+    logMsg.clear();
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    ASSERT_NE(proxy, nullptr);
+    proxy->OnSensorRotationChanged(screenId, sensorRotation, isSwitchUser);
+    EXPECT_TRUE(logMsg.find("Write screenId failed") != std::string::npos);
+    logMsg.clear();
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    ASSERT_NE(proxy, nullptr);
+    proxy->OnSensorRotationChanged(screenId, sensorRotation, isSwitchUser);
+    EXPECT_TRUE(logMsg.find("Write isSwitchUser failed") != std::string::npos);
+    logMsg.clear();
+
+    MockMessageParcel::ClearAllErrorFlag();
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    proxy->OnSensorRotationChanged(screenId, sensorRotation, isSwitchUser);
+    EXPECT_TRUE(logMsg.find("SendRequest failed") != std::string::npos);
+    logMsg.clear();
+
+    remoteMocker->SetRequestResult(ERR_NONE);
+    proxy->OnSensorRotationChanged(screenId, sensorRotation, isSwitchUser);
+    EXPECT_FALSE(logMsg.find("SendRequest failed") != std::string::npos);
+    logMsg.clear();
+    LOG_SetCallback(nullptr);
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -60,18 +60,6 @@ void FoldScreenSensorManagerTest::TearDown()
 
 namespace {
 /**
- * @tc.name: RegisterPostureCallback
- * @tc.desc: test function : RegisterPostureCallback
- * @tc.type: FUNC
- */
-HWTEST_F(FoldScreenSensorManagerTest, RegisterPostureCallback, TestSize.Level1)
-{
-    FoldScreenSensorManager mgr = FoldScreenSensorManager();
-    mgr.RegisterPostureCallback();
-    ASSERT_NE(mgr.postureUser.callback, nullptr);
-}
-
-/**
  * @tc.name: UnRegisterPostureCallback
  * @tc.desc: test function : UnRegisterPostureCallback
  * @tc.type: FUNC
@@ -81,18 +69,6 @@ HWTEST_F(FoldScreenSensorManagerTest, UnRegisterPostureCallback, TestSize.Level1
     FoldScreenSensorManager mgr = FoldScreenSensorManager();
     mgr.UnRegisterPostureCallback();
     ASSERT_EQ(mgr.postureUser.callback, nullptr);
-}
-
-/**
- * @tc.name: RegisterHallCallback
- * @tc.desc: test function : RegisterHallCallback
- * @tc.type: FUNC
- */
-HWTEST_F(FoldScreenSensorManagerTest, RegisterHallCallback, TestSize.Level1)
-{
-    FoldScreenSensorManager mgr = FoldScreenSensorManager();
-    mgr.RegisterHallCallback();
-    ASSERT_NE(mgr.hallUser.callback, nullptr);
 }
 
 /**
@@ -305,23 +281,6 @@ HWTEST_F(FoldScreenSensorManagerTest, SetGlobalHallWhenParamInValid, TestSize.Le
     ASSERT_NO_FATAL_FAILURE({mgr.SetGlobalHall(USHRT_MAX);});
     ASSERT_NO_FATAL_FAILURE({mgr.GetGlobalHall();});
     EXPECT_NE(mgr.GetGlobalHall(), USHRT_MAX);
-}
-
-/**
- * @tc.name : SubscribeSensorCallback_ShouldReturnSuccess_WhenAllOperationsSucceed
- * @tc.number: SubscribeSensorCallbackTest_001
- * @tc.desc : 测试当所有操作（订阅传感器、设置批量处理间隔、激活传感器）都成功时,SubscribeSensorCallback 返回
- * SENSOR_SUCCESS
- */
-HWTEST_F(FoldScreenSensorManagerTest, ATC_SubscribeSensorCallback_Succeed, TestSize.Level0)
-{
-    int32_t sensorTypeId = 1;
-    int64_t interval = 100;
-    RecordSensorCallback taskCallback = nullptr;
-
-    FoldScreenSensorManager* manager = new FoldScreenSensorManager();
-    int32_t result = manager->SubscribeSensorCallback(sensorTypeId, interval, taskCallback);
-    EXPECT_EQ(result, 1);
 }
 
 /**

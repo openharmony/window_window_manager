@@ -48,6 +48,7 @@ public:
     DMError UnregisterDisplayModeListener(sptr<IDisplayModeListener> listener);
     DMError RegisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener);
     DMError UnregisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener);
+    void DlcloseClearResource();
     void OnRemoteDied();
     sptr<DisplayLite> GetDisplayById(DisplayId displayId);
     /*
@@ -724,6 +725,14 @@ void DisplayManagerLite::Impl::ClearDisplayStateCallback()
             DisplayManagerAgentType::DISPLAY_STATE_LISTENER);
         displayStateAgent_ = nullptr;
     }
+}
+
+extern "C" __attribute__((destructor)) void DisplayManagerLite::Impl::DlcloseClearResource()
+{
+    // clear stub callback when dlclose
+    TLOGI(WmsLogTag::DMS, "enter");
+    SingletonContainer::Get<DisplayManagerAdapterLite>().Clear();
+    DisplayManagerAdapterLite::DestroyInstance();
 }
 
 void DisplayManagerLite::Impl::ClearFoldStatusCallback()

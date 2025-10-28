@@ -530,6 +530,16 @@ public:
 using IWindowVisibilityListenerSptr = sptr<IWindowVisibilityChangedListener>;
 
 /**
+ * @class IOcclusionStateChangedListener
+ *
+ * @brief Listener to observe the window occlusion state changed.
+ */
+class IOcclusionStateChangedListener : virtual public RefBase {
+public:
+    virtual void OnOcclusionStateChanged(const WindowVisibilityState state) {}
+};
+
+/**
  * @class IDisplayIdChangeListener
  *
  * @brief Listener to observe one window displayId changed.
@@ -871,6 +881,21 @@ public:
      */
     virtual void OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
         RotationChangeResult& rotationChangeResult) {}
+};
+
+/**
+ * @class IFreeWindowModeChangeListener
+ *
+ * @brief IFreeWindowModeChangeListener is used to observe the free window mode when it changed.
+ */
+class IFreeWindowModeChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when free window mode changed.
+     *
+     * @param isInFreeWindowMode Whether in free window mode.
+     */
+    virtual void OnFreeWindowModeChange(bool isInFreeWindowMode) {}
 };
 
 static WMError DefaultCreateErrCode = WMError::WM_OK;
@@ -1248,6 +1273,28 @@ public:
      * @return WM_OK means set success, others means failed.
      */
     virtual WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Set static Image resource for recent.
+     *
+     * @param pixelMap recent image.
+     * @param imageFit imageFit of static image.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, ImageFit imageFit)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Remove static Image resource for recent.
+     *
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError RemoveImageForRecent()
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -1703,12 +1750,12 @@ public:
     virtual float GetBrightness() const { return 0.0f; }
 
     /**
-     * @brief Set calling window.
+     * @brief Change calling window id.
      *
-     * @param windowId Window id.
-     * @return WM_OK means set success, others means set failed.
+     * @param callingWindowId Window id.
+     * @return WM_OK means change success, others means change failed.
      */
-    virtual WMError SetCallingWindow(uint32_t windowId) { return WMError::WM_OK; }
+    virtual WMError ChangeCallingWindowId(uint32_t callingWindowId) { return WMError::WM_OK; }
 
     /**
      * @brief Set privacy mode of window.
@@ -2272,19 +2319,28 @@ public:
     {
         return WMError::WM_OK;
     }
+    virtual WMError AniSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
+        BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
+        AppExecFwk::Ability* ability = nullptr)
+    {
+        return WMError::WM_OK;
+    }
 
     /**
      * @brief set window ui content
      *
      * @param contentName content info path
-     * @param env Napi environment
-     * @param storage Napi storage
+     * @param env Napi or ani environment
+     * @param storage Napi or ani storage
      * @param type restore type
      * @param token parent token
      * @param ability Ability instance
      * @return WMError
      */
     virtual WMError NapiSetUIContentByName(const std::string& contentName, napi_env env, napi_value storage,
+        BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
+        AppExecFwk::Ability* ability = nullptr) { return WMError::WM_OK; }
+    virtual WMError AniSetUIContentByName(const std::string& contentName, ani_env* env, ani_object storage,
         BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
         AppExecFwk::Ability* ability = nullptr) { return WMError::WM_OK; }
 
@@ -2574,6 +2630,18 @@ public:
      * @return WM_OK means maximize window ok, others means failed.
      */
     virtual WMError Maximize(MaximizePresentation presentation)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Maximize the window with the specified presentation mode and waterfall resident state.
+     *
+     * @param presentation The presentation mode used for window layout when maximizing.
+     * @param waterfallState The waterfall resident state to apply when maximizing.
+     * @return WMError::WM_OK on success, or appropriate error code on failure.
+     */
+    virtual WMError Maximize(MaximizePresentation presentation, WaterfallResidentState waterfallState)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -3007,6 +3075,28 @@ public:
     }
 
     /**
+     * @brief Register window occlusion state change listener.
+     *
+     * @param listener IOcclusionStateChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterOcclusionStateChangeListener(const sptr<IOcclusionStateChangedListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister window occlusion state change listener.
+     *
+     * @param listener IOcclusionStateChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterOcclusionStateChangeListener(const sptr<IOcclusionStateChangedListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Register window displayId change listener.
      *
      * @param listener IDisplayIdChangedListener.
@@ -3064,9 +3154,13 @@ public:
      * @brief Get the window limits of current window.
      *
      * @param windowLimits.
+     * @param getVirtualPixel Returns windowLimits in virtual pixels if the param is true, otherwise in physical pixels.
      * @return WMError.
      */
-    virtual WMError GetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError GetWindowLimits(WindowLimits& windowLimits, bool getVirtualPixel = false)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Set the window limits of current window.
@@ -3843,20 +3937,22 @@ public:
 
     /**
      * @brief get callingWindow windowStatus.
+     * @param callingWindowId
      * @param windowStatus
-     * @return WM_OK means set success, others means set Failed.
+     * @return WM_OK means get success, others means get Failed.
      */
-    virtual WMError GetCallingWindowWindowStatus(WindowStatus& windowStatus) const
+    virtual WMError GetCallingWindowWindowStatus(uint32_t callingWindowId, WindowStatus& windowStatus) const
     {
         return WMError::WM_OK;
     }
 
     /**
-     * @brief get callingWindow windowStatus
+     * @brief get callingWindow windowRect
+     * @param callingWindowId
      * @param rect.
-     * @return WM_OK means set success, others means set failed
+     * @return WM_OK means get success, others means get failed
      */
-    virtual WMError GetCallingWindowRect(Rect& rect) const
+    virtual WMError GetCallingWindowRect(uint32_t callingWindowId, Rect& rect) const
     {
         return WMError::WM_OK;
     }
@@ -4084,10 +4180,13 @@ public:
     /**
      * @brief Show keyboard window
      *
+     * @param callingWindowId the id of calling window.
+     * @param targetDisplayId the id of target display
      * @param effectOption Keyboard will show with special effect option.
      * @return WM_OK means window show success, others means failed.
      */
-    virtual WMError ShowKeyboard(KeyboardEffectOption effectOption)
+    virtual WMError ShowKeyboard(uint32_t callingWindowId, uint64_t targetDisplayId, KeyboardEffectOption effectOption
+        = { KeyboardViewMode::NON_IMMERSIVE_MODE, KeyboardFlowLightMode::NONE, KeyboardGradientMode::NONE, 0 })
     {
         return WMError::WM_OK;
     }
@@ -4670,6 +4769,31 @@ public:
     {
         return WMError::WM_OK;
     }
+
+    /**
+     * @brief Lock the mouse cursor restricting it to a specified window area, and also control whether the cursor
+     *        follows movement. Only supported by the focus window; the lock is automatically released when the
+     *        window loses focus.
+     *
+     * @param windowId WindowId when window is created.
+     * @param isCursorFollowMovement Set mouse cursor lock mode.
+     * @return Returns the status code of the execution.
+     */
+    virtual WMError LockCursor(int32_t windowId, bool isCursorFollowMovement)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Clear the window mouse cursor status. Revert to mouse cursor free movement mode.
+     *
+     * @param windowId WindowId when window is created.
+     * @return Returns the status code of the execution.
+     */
+    virtual WMError UnlockCursor(int32_t windowId)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
  
     /**
      * @brief Calculate whether the pointerEvent hits the title bar.
@@ -4677,6 +4801,51 @@ public:
      * @param hitTitleBar true means hit title bar success, false means not hit title bar.
      */
     virtual bool IsHitTitleBar(std::shared_ptr<MMI::PointerEvent>& pointerEvent) const { return false; }
+
+    /**
+     * @brief Check if the current device is in free window mode.
+     *
+     * @return true means is in free window mode, false means not in free window mode.
+     */
+    virtual bool IsInFreeWindowMode() const { return false; }
+
+    /**
+     * @brief register a listener to listen whether the window is in free window mode.
+     *
+     * @param listener IFreeWindowModeChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterFreeWindowModeChangeListener(const sptr<IFreeWindowModeChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+ 
+    /**
+     * @brief Unregister the IFreeWindowModeChangeListener.
+     *
+     * @param listener IFreeWindowModeChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterFreeWindowModeChangeListener(const sptr<IFreeWindowModeChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Set whether this window limits screen rotation when this window is shown.
+     *
+     * @param locked Screen rotation lock status to set.
+     * @return WMError::WM_OK on success, others means failed.
+     */
+    virtual WMError SetRotationLocked(bool locked) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    
+    /**
+     * @brief Get whether this window limits screen rotation when this window is shown.
+     * @param locked Screen rotation lock status to get.
+     *
+     * @return WMError::WM_OK on success, others means failed.
+     */
+    virtual WMError GetRotationLocked(bool& locked) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }

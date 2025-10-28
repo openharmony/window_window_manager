@@ -395,6 +395,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdPendingSessionToForeground, TestSiz
     uint32_t code =
         static_cast<uint32_t>(ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_PENDING_SESSION_TO_FOREGROUND);
 
+    data.WriteInt32(1);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, ERR_NONE);
 }
@@ -2141,11 +2142,20 @@ HWTEST_F(SceneSessionManagerStubTest, HandleAddExtensionWindowStageToSCB, TestSi
     res = stub_->HandleAddExtensionWindowStageToSCB(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
+    ASSERT_NE(nullptr, sessionStage);
+    data.WriteRemoteObject(sessionStage->AsObject());
+    ASSERT_NE(token, nullptr);
+    data.WriteRemoteObject(token);
+    data.WriteInt64(-1);
+    res = stub_->HandleAddExtensionWindowStageToSCB(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
     data.WriteRemoteObject(sessionStage->AsObject());
     ASSERT_NE(token, nullptr);
     data.WriteRemoteObject(token);
     data.WriteUint64(12345);
     data.WriteBool(false);
+    data.WriteInt64(0);
     res = stub_->HandleAddExtensionWindowStageToSCB(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
@@ -2572,6 +2582,70 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetImageForRecent, TestSize.Level1)
     data.WriteInt32(persistentId);
     int res = stub_->HandleSetImageForRecent(data, reply);
     EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleSetImageForRecentPixelMap
+ * @tc.desc: test HandleSetImageForRecentPixelMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetImageForRecentPixelMap, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ImageFit imageFit = ImageFit::FILL;
+    int32_t persistentId = 1;
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    data.WriteParcelable(pixelMap.get());
+    data.WriteUint32(static_cast<uint32_t>(imageFit));
+    data.WriteInt32(persistentId);
+    int res = stub_->HandleSetImageForRecentPixelMap(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    // create pixelMap
+    const uint32_t colors[1] = { 0x6f0000ff };
+    uint32_t colorsLength = sizeof(colors) / sizeof(colors[0]);
+    const int32_t offset = 0;
+    Media::InitializationOptions opts;
+    opts.size.width = 1;
+    opts.size.height = 1;
+    opts.pixelFormat = Media::PixelFormat::RGBA_8888;
+    opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+    int32_t stride = opts.size.width;
+    std::shared_ptr<Media::PixelMap> pixelMap1 = Media::PixelMap::Create(colors, colorsLength, offset, stride, opts);
+
+    data.WriteParcelable(pixelMap.get());
+    res = stub_->HandleSetImageForRecentPixelMap(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteParcelable(pixelMap.get());
+    data.WriteUint32(static_cast<uint32_t>(imageFit));
+    res = stub_->HandleSetImageForRecentPixelMap(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteParcelable(pixelMap.get());
+    data.WriteUint32(static_cast<uint32_t>(imageFit));
+    data.WriteInt32(persistentId);
+    res = stub_->HandleSetImageForRecentPixelMap(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleRemoveImageForRecent
+ * @tc.desc: test HandleRemoveImageForRecent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleRemoveImageForRecent, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t persistentId = 1;
+    data.WriteInt32(persistentId);
+    int res = stub_->HandleRemoveImageForRecent(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+
+    res = stub_->HandleRemoveImageForRecent(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**

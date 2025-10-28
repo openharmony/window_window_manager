@@ -104,12 +104,30 @@ HWTEST_F(SessionStageProxyTest, UpdateRect, TestSize.Level1)
     WSRect rect;
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     ASSERT_TRUE((sessionStage_ != nullptr));
-    WSError res = sessionStage_->UpdateRect(rect, reason);
-    ASSERT_EQ(WSError::WS_OK, res);
     std::shared_ptr<RSTransaction> rsTransaction = std::make_shared<RSTransaction>();
-    SceneAnimationConfig config{ .rsTransaction_ = rsTransaction };
-    res = sessionStage_->UpdateRect(rect, reason, config);
+    SceneAnimationConfig config{ rsTransaction, ROTATE_ANIMATION_DURATION,
+        0, WindowAnimationCurve::LINEAR, {0.0f, 0.0f, 0.0f, 0.0f} };
+    WSError res = sessionStage_->UpdateRect(rect, reason, config);
     ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: UpdateRect01
+ * @tc.desc: test function : UpdateRect01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, UpdateRect01, TestSize.Level1)
+{
+    WSRect rect;
+    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    std::shared_ptr<RSTransaction> rsTransaction = std::make_shared<RSTransaction>();
+    SceneAnimationConfig config{ rsTransaction, ROTATE_ANIMATION_DURATION,
+    0, WindowAnimationCurve::LINEAR, {0.0f, 0.0f, 0.0f, 0.0f} };
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    WSError res = sessionStage_->UpdateRect(rect, reason, config);
+    MockMessageParcel::ClearAllErrorFlag();
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
 }
 
 /**
@@ -236,6 +254,7 @@ HWTEST_F(SessionStageProxyTest, UpdateFocus01, TestSize.Level1)
     MockMessageParcel::SetWriteParcelableErrorFlag(true);
     res = sessionStage_->UpdateFocus(info, focus);
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+    MockMessageParcel::ClearAllErrorFlag();
 }
 
 /**
@@ -271,6 +290,7 @@ HWTEST_F(SessionStageProxyTest, NotifyHighlightChange01, TestSize.Level1)
     MockMessageParcel::SetWriteParcelableErrorFlag(true);
     res = sessionStage_->NotifyHighlightChange(info, isHighlight);
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+    MockMessageParcel::ClearAllErrorFlag();
 }
 
 /**
@@ -607,6 +627,43 @@ HWTEST_F(SessionStageProxyTest, NotifyTransformChange, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyWindowOcclusionState
+ * @tc.desc: notify the occlusion state
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyWindowOcclusionState, TestSize.Level1)
+{
+    auto state = WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION;
+    auto tempProxy = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    auto ret = tempProxy->NotifyWindowOcclusionState(state);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SessionStageProxy> proxy = sptr<SessionStageProxy>::MakeSptr(remoteMocker);
+    ASSERT_NE(proxy, nullptr);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ret = proxy->NotifyWindowOcclusionState(state);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    ret = proxy->NotifyWindowOcclusionState(state);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteUint32ErrorFlag(false);
+
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ret = proxy->NotifyWindowOcclusionState(state);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+
+    remoteMocker->SetRequestResult(ERR_NONE);
+    ret = proxy->NotifyWindowOcclusionState(state);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
  * @tc.name: NotifyWindowVisibility
  * @tc.desc: test function : NotifyWindowVisibility
  * @tc.type: FUNC
@@ -731,9 +788,34 @@ HWTEST_F(SessionStageProxyTest, SetUniqueVirtualPixelRatio, TestSize.Level1)
  */
 HWTEST_F(SessionStageProxyTest, UpdateAnimationSpeed, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     float speed = 2.0f;
     ASSERT_TRUE(sessionStage_ != nullptr);
+
+    sptr<SessionStageProxy> nullptrProxy = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    nullptrProxy->UpdateAnimationSpeed(speed);
+    EXPECT_TRUE(logMsg.find("remote is nullptr") != std::string::npos);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     sessionStage_->UpdateAnimationSpeed(speed);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    MockMessageParcel::SetWriteFloatErrorFlag(true);
+    sessionStage_->UpdateAnimationSpeed(speed);
+    EXPECT_TRUE(logMsg.find("Write speed failed") != std::string::npos);
+    MockMessageParcel::SetWriteFloatErrorFlag(false);
+
+    auto remoteMock = sptr<MockIRemoteObject>::MakeSptr();
+    remoteMock->sendRequestResult_ = ERR_TRANSACTION_FAILED;
+    sptr<SessionStageProxy> failSendProxy = sptr<SessionStageProxy>::MakeSptr(remoteMock);
+    failSendProxy->UpdateAnimationSpeed(speed);
+    EXPECT_TRUE(logMsg.find("SendRequest failed") != std::string::npos);
+
+    logMsg.clear();
+    sessionStage_->UpdateAnimationSpeed(speed);
+    EXPECT_TRUE(logMsg.find("SendRequest failed") == std::string::npos);
 }
 
 /**
@@ -862,6 +944,44 @@ HWTEST_F(SessionStageProxyTest, NotifyTargetRotationInfo, Function | SmallTest |
     ASSERT_TRUE(sessionStage_ != nullptr);
     WSError res = sessionStage_->NotifyTargetRotationInfo(info);
     ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: NotifyPageRotationIsIgnored
+ * @tc.desc: test function : NotifyPageRotationIsIgnored
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyPageRotationIsIgnored, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionStageProxyTest: NotifyPageRotationIsIgnored start";
+    MockMessageParcel::ClearAllErrorFlag();
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SessionStageProxy> sessionStageProxy = sptr<SessionStageProxy>::MakeSptr(remoteMocker);
+
+    // Case 1: Failed to write interface token
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    WSError errCode = sessionStageProxy->NotifyPageRotationIsIgnored();
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+   // Case 2: remote is nullptr
+    sptr<SessionStageProxy> nullProxy = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    errCode = nullProxy->NotifyPageRotationIsIgnored();
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+
+    // Case 3: Failed to send request
+    remoteMocker->SetRequestResult(ERR_TRANSACTION_FAILED);
+    errCode = sessionStageProxy->NotifyPageRotationIsIgnored();
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    // Case 4: Success
+    errCode = sessionStageProxy->NotifyPageRotationIsIgnored();
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+    EXPECT_EQ(errCode, WSError::WS_OK);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    GTEST_LOG_(INFO) << "SessionStageProxyTest: NotifyPageRotationIsIgnored end";
 }
 
 /**

@@ -39,6 +39,72 @@
 namespace OHOS {
 namespace Rosen {
 constexpr Rect g_emptyRect = {0, 0, 0, 0};
+
+const std::map<ApiWindowType, std::string> API_TO_ANI_STRING_TYPE_MAP {
+    {ApiWindowType::TYPE_BASE,                 "TYPE_APP"                  },
+    {ApiWindowType::TYPE_APP,                  "TYPE_APP"                  },
+    {ApiWindowType::TYPE_SYSTEM_ALERT,         "TYPE_SYSTEM_ALERT"         },
+    {ApiWindowType::TYPE_INPUT_METHOD,         "TYPE_INPUT_METHOD"         },
+    {ApiWindowType::TYPE_STATUS_BAR,           "TYPE_STATUS_BAR"           },
+    {ApiWindowType::TYPE_PANEL,                "TYPE_PANEL"                },
+    {ApiWindowType::TYPE_KEYGUARD,             "TYPE_KEYGUARD"             },
+    {ApiWindowType::TYPE_VOLUME_OVERLAY,       "TYPE_VOLUME_OVERLAY"       },
+    {ApiWindowType::TYPE_NAVIGATION_BAR,       "TYPE_NAVIGATION_BAR"       },
+    {ApiWindowType::TYPE_FLOAT,                "TYPE_FLOAT"                },
+    {ApiWindowType::TYPE_WALLPAPER,            "TYPE_WALLPAPER"            },
+    {ApiWindowType::TYPE_DESKTOP,              "TYPE_DESKTOP"              },
+    {ApiWindowType::TYPE_LAUNCHER_RECENT,      "TYPE_LAUNCHER_RECENT"      },
+    {ApiWindowType::TYPE_LAUNCHER_DOCK,        "TYPE_LAUNCHER_DOCK"        },
+    {ApiWindowType::TYPE_VOICE_INTERACTION,    "TYPE_VOICE_INTERACTION"    },
+    {ApiWindowType::TYPE_POINTER,              "TYPE_POINTER"              },
+    {ApiWindowType::TYPE_FLOAT_CAMERA,         "TYPE_FLOAT_CAMERA"         },
+    {ApiWindowType::TYPE_DIALOG,               "TYPE_DIALOG"               },
+    {ApiWindowType::TYPE_SCREENSHOT,           "TYPE_SCREENSHOT"           },
+    {ApiWindowType::TYPE_SYSTEM_TOAST,         "TYPE_SYSTEM_TOAST"         },
+    {ApiWindowType::TYPE_DIVIDER,              "TYPE_DIVIDER"              },
+    {ApiWindowType::TYPE_GLOBAL_SEARCH,        "TYPE_GLOBAL_SEARCH"        },
+    {ApiWindowType::TYPE_HANDWRITE,            "TYPE_HANDWRITE"            },
+};
+
+enum class ImageFit {
+    FILL = 0,
+    CONTAIN,
+    COVER,
+    FITWIDTH,
+    FITHEIGHT,
+    NONE,
+    SCALE_DOWN,
+    TOP_LEFT,
+    TOP,
+    TOP_END,
+    START,
+    CENTER,
+    END,
+    BOTTOM_START,
+    BOTTOM,
+    BOTTOM_END,
+    MATRIX,
+};
+
+enum class Ark_ImageFit {
+    ARK_IMAGE_FIT_CONTAIN = 0,
+    ARK_IMAGE_FIT_COVER = 1,
+    ARK_IMAGE_FIT_AUTO = 2,
+    ARK_IMAGE_FIT_FILL = 3,
+    ARK_IMAGE_FIT_SCALE_DOWN = 4,
+    ARK_IMAGE_FIT_NONE = 5,
+    ARK_IMAGE_FIT_TOP_START = 7,
+    ARK_IMAGE_FIT_TOP = 8,
+    ARK_IMAGE_FIT_TOP_END = 9,
+    ARK_IMAGE_FIT_START = 10,
+    ARK_IMAGE_FIT_CENTER = 11,
+    ARK_IMAGE_FIT_END = 12,
+    ARK_IMAGE_FIT_BOTTOM_START = 13,
+    ARK_IMAGE_FIT_BOTTOM = 14,
+    ARK_IMAGE_FIT_BOTTOM_END = 15,
+    ARK_IMAGE_FIT_MATRIX = 16,
+};
+
 class AniWindowUtils {
 public:
     static ani_status InitAniCreator(ani_env* env,
@@ -50,6 +116,7 @@ public:
     static ani_status GetPropertyIntObject(ani_env* env, const char* propertyName, ani_object object, int32_t& result);
     static ani_status GetPropertyDoubleObject(ani_env* env, const char* propertyName,
         ani_object object, double& result);
+    static ani_status GetPropertyBoolObject(ani_env* env, const char* propertyName, ani_object object, bool& result);
     static bool GetPropertyRectObject(ani_env* env, const char* propertyName,
         ani_object object, Rect& result);
     static bool GetIntObject(ani_env* env, const char* propertyName, ani_object object, int32_t& result);
@@ -71,6 +138,9 @@ public:
     static ani_object CreateAniRotationChangeInfo(ani_env* env, const RotationChangeInfo& info);
     static void ParseRotationChangeResult(ani_env* env, ani_object obj, RotationChangeResult& rotationChangeResult);
     static ani_object CreateAniKeyboardInfo(ani_env* env, const KeyboardPanelInfo& keyboardPanelInfo);
+    static ani_object CreateAniAnimationInfo(ani_env* env, const KeyboardAnimationInfo& keyboardAnimationInfo,
+        const KeyboardAnimationCurve& curve);
+    static ani_object CreateAniAnimationConfig(ani_env* env, const KeyboardAnimationCurve& curve);
     static ani_status CallAniFunctionVoid(ani_env *env, const char* ns, const char* func, const char* signature, ...);
     static ani_status CallAniMethodVoid(ani_env* env, ani_object object, const char* cls,
         const char* method, const char* signature, ...);
@@ -82,6 +152,10 @@ public:
     static void* GetAbilityContext(ani_env *env, ani_object aniObj);
     static ani_object CreateAniRectObject(ani_env* env, const Rect& rect);
     static ani_object CreateWindowsProperties(ani_env* env, const WindowPropertyInfo& windowPropertyInfo);
+    static ani_status CheckPropertyNameUndefined(ani_env* env, const char* propertyName,
+        ani_object object, bool& result);
+    static bool ParseKeyFramePolicy(ani_env* env, ani_object aniKeyFramePolicy, KeyFramePolicy& keyFramePolicy);
+    static ani_object CreateKeyFramePolicy(ani_env* env, const KeyFramePolicy& keyFramePolicy);
     static ani_object CreateAniPixelMapArray(ani_env* env,
         const std::vector<std::shared_ptr<Media::PixelMap>>& pixelMaps);
     static ani_object CreateAniMainWindowInfoArray(ani_env* env, const std::vector<sptr<MainWindowInfo>>& infos);
@@ -110,12 +184,14 @@ public:
     static bool GetSpecificBarStatus(ani_env* env,
         ani_string aniName, ani_boolean aniEnable, ani_object aniAnimation,
         WindowType& type, SystemBarProperty& systemBarProperty, SystemBarPropertyFlag& systemBarPropertyFlag);
+    static ani_object CreateOptionalBool(ani_env *env, ani_boolean value);
+    static ani_object CreateOptionalInt(ani_env *env, ani_int value);
     static void GetWindowSnapshotConfiguration(ani_env* env, ani_object config,
         WindowSnapshotConfiguration& windowSnapshotConfiguration);
-    static WindowLimits ParseWindowLimits(ani_env* env, ani_object aniWindowLimits);
+    static bool ParseWindowLimits(ani_env* env, ani_object aniWindowLimits, WindowLimits& windowLimits);
     static bool CheckParaIsUndefined(ani_env* env, ani_object para);
     static ani_object CreateAniPosition(ani_env* env, const Position& position);
-
+    static std::string GetPixelUnitString(const PixelUnit& pixelUnit);
     /**
      * @brief Convert WMError to corresponding WmErrorCode.
      *
@@ -126,8 +202,13 @@ public:
      * @return Corresponding WmErrorCode or defaultCode if unmapped.
      */
     static WmErrorCode ToErrorCode(WMError error, WmErrorCode defaultCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    static bool ParseSubWindowOptions(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
+    static bool ParseRectParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
+    static bool ParseModalityParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
+    static bool ParseZLevelParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
     template<typename T>
     static ani_object CreateBaseTypeObject(ani_env* env, T value);
+    static void ConvertImageFit(ImageFit& dst, const Ark_ImageFit& src);
 };
 
 template<typename T>

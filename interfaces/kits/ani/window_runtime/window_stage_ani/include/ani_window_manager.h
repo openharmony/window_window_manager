@@ -42,6 +42,14 @@ public:
     static ani_object GetMainWindowSnapshot(
         ani_env* env, ani_long nativeObj, ani_object windowId, ani_object config);
     static ani_ref CreateWindow(ani_env* env, ani_long nativeObj, ani_object configuration);
+    static void ShiftAppWindowTouchEvent(ani_env* env, ani_long nativeObj,
+        ani_int sourceWindowId, ani_int targetWindowId, ani_int fingerId);
+    static void SetWatermarkImageForAppWindows(ani_env* env, ani_long nativeObj, ani_object pixelMap);
+    static ani_string GetTopNavDestinationName(ani_env* env, ani_long nativeObj, ani_int windowId);
+    static ani_int GetGlobalWindowMode(ani_env* env, ani_long nativeObj, ani_object displayId);
+    static void SetStartWindowBackgroundColor(ani_env* env, ani_long nativeObj, ani_string moduleName,
+        ani_string abilityName, ani_long color);
+    static void NotifyScreenshotEvent(ani_env* env, ani_long nativeObj, ani_enum_item eventType);
     static void RegisterWindowManagerCallback(ani_env* env, ani_long nativeObj, ani_string type, ani_ref callback);
     static void UnregisterWindowManagerCallback(ani_env* env, ani_long nativeObj, ani_string type, ani_ref callback);
     static void SetWindowLayoutMode(ani_env* env, ani_long nativeObj, ani_enum_item mode);
@@ -55,6 +63,13 @@ private:
     ani_object OnGetMainWindowSnapshot(
         ani_env* env, ani_object windowId, ani_object config);
     ani_ref OnCreateWindow(ani_env* env, ani_object configuration);
+    void OnShiftAppWindowTouchEvent(ani_env* env, ani_int sourceWindowId, ani_int targetWindowId, ani_int fingerId);
+    void OnSetWatermarkImageForAppWindows(ani_env* env, ani_object pixelMap);
+    ani_string OnGetTopNavDestinationName(ani_env* env, ani_int windowId);
+    ani_int OnGetGlobalWindowMode(ani_env* env, ani_object nativeDisplayId);
+    void OnSetStartWindowBackgroundColor(ani_env* env, ani_string moduleName, ani_string abilityName,
+        ani_long color);
+    void OnNotifyScreenshotEvent(ani_env* env, ani_enum_item eventType);
     void OnRegisterWindowManagerCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnUnregisterWindowManagerCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnSetWindowLayoutMode(ani_env* env, ani_enum_item mode);

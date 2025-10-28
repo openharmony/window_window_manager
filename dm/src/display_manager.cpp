@@ -125,6 +125,8 @@ public:
     DMError UnregisterAvailableAreaListener(sptr<IAvailableAreaListener> listener, DisplayId displayId);
     DMError RegisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener);
     DMError UnregisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener);
+    DMError RegisterBrightnessInfoListener(sptr<IBrightnessInfoListener> listener);
+    DMError UnregisterBrightnessInfoListener(sptr<IBrightnessInfoListener> listener);
     sptr<Display> GetDisplayByScreenId(ScreenId screenId);
     DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy);
     DMError ResetAllFreezeStatus();
@@ -135,6 +137,7 @@ public:
     sptr<CutoutInfo> GetCutoutInfoWithRotation(Rotation rotation);
     DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea);
+    DMError GetBrightnessInfo(DisplayId dispalyId, ScreenBrightnessInfo& brightnessInfo);
     DMError ConvertRelativeCoordinateToGlobal(const RelativePosition& relativePosition, Position& position);
     DMError ConvertGlobalCoordinateToRelative(const Position& globalPosition, RelativePosition& relativePosition);
     DMError ConvertGlobalCoordinateToRelativeWithDisplayId(const Position& globalPosition, DisplayId displayId,
@@ -211,6 +214,10 @@ private:
     std::set<sptr<IScreenMagneticStateListener>> screenMagneticStateListeners_;
     class DisplayManagerScreenMagneticStateAgent;
     sptr<DisplayManagerScreenMagneticStateAgent> screenMagneticStateListenerAgent_;
+    void NotifyBrightnessInfoChanged(DisplayId displayId, const ScreenBrightnessInfo& info);
+    std::set<sptr<IBrightnessInfoListener>> brightnessInfoListeners_;
+    class DisplayManagerBrightnessInfoAgent;
+    sptr<DisplayManagerBrightnessInfoAgent> brightnessInfoListenerAgent_;
 };
 
 class DisplayManager::Impl::DisplayManagerListener : public DisplayManagerAgentDefault {
@@ -436,6 +443,21 @@ public:
     virtual void NotifyScreenMagneticStateChanged(bool isMagneticState) override
     {
         pImpl_->NotifyScreenMagneticStateChanged(isMagneticState);
+    }
+private:
+    sptr<Impl> pImpl_;
+};
+
+class DisplayManager::Impl::DisplayManagerBrightnessInfoAgent : public DisplayManagerAgentDefault {
+public:
+    explicit DisplayManagerBrightnessInfoAgent(sptr<Impl> impl) : pImpl_(impl)
+    {
+    }
+    ~DisplayManagerBrightnessInfoAgent() = default;
+    
+    virtual void NotifyBrightnessInfoChanged(DisplayId displayId, const ScreenBrightnessInfo& info) override
+    {
+        pImpl_->NotifyBrightnessInfoChanged(displayId, info);
     }
 private:
     sptr<Impl> pImpl_;
@@ -1853,6 +1875,20 @@ void DisplayManager::Impl::NotifyScreenMagneticStateChanged(bool isMagneticState
     }
 }
 
+void DisplayManager::Impl::NotifyBrightnessInfoChanged(DisplayId displayId, const ScreenBrightnessInfo& info)
+{
+    std::set<sptr<IBrightnessInfoListener>> brightnessInfoListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        brightnessInfoListeners = brightnessInfoListeners_;
+    }
+    for (auto& listener : brightnessInfoListeners) {
+        if (listener != nullptr) {
+            listener->OnBrightnessInfoChanged(displayId, info);
+        }
+    }
+}
+
 void DisplayManager::Impl::NotifyAvailableAreaChanged(DMRect rect, DisplayId displayId)
 {
     std::set<sptr<IAvailableAreaListener>> availableAreaListeners;
@@ -2015,6 +2051,61 @@ DMError DisplayManager::Impl::RegisterAvailableAreaListener(sptr<IAvailableAreaL
     } else {
         TLOGD(WmsLogTag::DMS, "IAvailableAreaListener register success");
         availableAreaListeners_.insert(listener);
+    }
+    return ret;
+}
+
+DMError DisplayManager::RegisterBrightnessInfoListener(sptr<IBrightnessInfoListener> listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::DMS, "RegisterBrightnessInfoListener listener is nullptr");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return pImpl_->RegisterBrightnessInfoListener(listener);
+}
+
+DMError DisplayManager::Impl::RegisterBrightnessInfoListener(sptr<IBrightnessInfoListener> listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    DMError ret = DMError::DM_OK;
+    if (brightnessInfoListenerAgent_ == nullptr) {
+        brightnessInfoListenerAgent_ = new DisplayManagerBrightnessInfoAgent(this);
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
+            brightnessInfoListenerAgent_, DisplayManagerAgentType::BRIGHTNESS_INFO_CHANGED_LISTENER);
+    }
+    if (ret != DMError::DM_OK) {
+        TLOGW(WmsLogTag::DMS, "RegisterBrightnessInfoListener failed");
+        brightnessInfoListenerAgent_ = nullptr;
+    } else {
+        TLOGD(WmsLogTag::DMS, "IBrightnessInfoListener register success");
+        brightnessInfoListeners_.insert(listener);
+    }
+    return ret;
+}
+
+DMError DisplayManager::UnregisterBrightnessInfoListener(sptr<IBrightnessInfoListener> listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::DMS, "UnregisterBrightnessInfoListener is nullptr");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return pImpl_->UnregisterBrightnessInfoListener(listener);
+}
+
+DMError DisplayManager::Impl::UnregisterBrightnessInfoListener(sptr<IBrightnessInfoListener> listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    auto iter = std::find(brightnessInfoListeners_.begin(), brightnessInfoListeners_.end(), listener);
+    if (iter == brightnessInfoListeners_.end()) {
+        TLOGE(WmsLogTag::DMS, "could not find this listener");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    brightnessInfoListeners_.erase(iter);
+    DMError ret = DMError::DM_OK;
+    if (brightnessInfoListeners_.empty()) {
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
+            brightnessInfoListenerAgent_, DisplayManagerAgentType::BRIGHTNESS_INFO_CHANGED_LISTENER);
+        brightnessInfoListenerAgent_ = nullptr;
     }
     return ret;
 }
@@ -2389,6 +2480,7 @@ void DisplayManager::Impl::OnRemoteDied()
     foldStatusListenerAgent_ = nullptr;
     foldAngleListenerAgent_ = nullptr;
     captureStatusListenerAgent_ = nullptr;
+    brightnessInfoListenerAgent_ = nullptr;
 }
 
 void DisplayManager::OnRemoteDied()
@@ -2642,6 +2734,16 @@ DMError DisplayManager::Impl::GetScreenAreaOfDisplayArea(DisplayId displayId, co
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().GetScreenAreaOfDisplayArea(
         displayId, displayArea, screenId, screenArea);
+}
+
+DMError DisplayManager::GetBrightnessInfo(DisplayId displayId, ScreenBrightnessInfo& brightnessInfo)
+{
+    return pImpl_->GetBrightnessInfo(displayId, brightnessInfo);
+}
+
+DMError DisplayManager::Impl::GetBrightnessInfo(DisplayId displayId, ScreenBrightnessInfo& brightnessInfo)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetBrightnessInfo(displayId, brightnessInfo);
 }
 
 DMError DisplayManager::ConvertRelativeCoordinateToGlobal(const RelativePosition& relativePosition, Position& position)

@@ -207,6 +207,20 @@ bool SessionPermission::IsStartedByInputMethod()
 #endif // IMF_ENABLE
 }
 
+bool SessionPermission::IsKeyboardCallingProcess(int32_t pid, uint32_t callingWindowId)
+{
+#ifdef IMF_ENABLE
+    auto imc = MiscServices::InputMethodController::GetInstance();
+    if (!imc) {
+        TLOGE(WmsLogTag::DEFAULT, "InputMethodController is nullptr");
+        return false;
+    }
+    return imc->IsKeyboardCallingProcess(pid, callingWindowId);
+#else
+    return false;
+#endif
+}
+
 bool SessionPermission::IsSameBundleNameAsCalling(const std::string& bundleName)
 {
     if (bundleName == "") {

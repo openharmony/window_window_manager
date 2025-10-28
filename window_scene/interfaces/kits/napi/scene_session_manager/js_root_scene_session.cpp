@@ -411,6 +411,9 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
         TLOGE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr");
         return;
     }
+    if (info.isPrelaunch_) {
+        sceneSession->EditSessionInfo().isPrelaunch_ = info.isPrelaunch_;
+    }
 
     if (info.want != nullptr) {
         bool isNeedBackToOther = info.want->GetBoolParam(AAFwk::Want::PARAM_BACK_TO_OTHER_MISSION_STACK, false);
@@ -541,6 +544,7 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
             }
             info.persistentId_ = sceneSession->GetPersistentId();
             sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
+            sceneSession->SetDefaultDisplayIdIfNeed();
         }
     }
     return sceneSession;

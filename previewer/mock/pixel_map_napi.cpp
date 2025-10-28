@@ -40,5 +40,10 @@ napi_value PixelMapNapi::CreatePixelMap(napi_env env, std::shared_ptr<PixelMap> 
 {
     return nullptr;
 }
+
+std::shared_ptr<PixelMap> PixelMapNapi::GetPixelMap(napi_env env, napi_value pixelmap)
+{
+    return nullptr;
+}
 }  // namespace Media
 }  // namespace OHOS

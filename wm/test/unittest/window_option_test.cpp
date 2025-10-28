@@ -377,14 +377,14 @@ HWTEST_F(WindowOptionTest, Brightness, TestSize.Level1)
 }
 
 /**
- * @tc.name: CallingWindow
- * @tc.desc: CallingWindow setter/getter test
+ * @tc.name: ChangeCallingWindowId
+ * @tc.desc: ChangeCallingWindowId setter/getter test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, CallingWindow, TestSize.Level1)
+HWTEST_F(WindowOptionTest, ChangeCallingWindowId, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
-    option->SetCallingWindow(1);
+    option->ChangeCallingWindowId(1);
     ASSERT_EQ(1, option->GetCallingWindow());
 }
 

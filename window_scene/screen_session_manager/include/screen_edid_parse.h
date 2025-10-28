@@ -44,6 +44,7 @@ struct MultiScreenInfo {
     MultiScreenMode multiScreenMode;
     MultiScreenPositionOptions mainScreenOption;
     MultiScreenPositionOptions secondaryScreenOption;
+    int32_t activeId;
 };
 
 struct BaseEdid {
