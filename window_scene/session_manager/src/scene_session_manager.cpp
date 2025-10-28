@@ -3248,6 +3248,8 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     sceneSession->NotifyActivation();
     auto sceneSessionInfo = SetAbilitySessionInfo(sceneSession, requestId, true);
     sceneSessionInfo->isNewWant = isNewActive;
+    sceneSessionInfo->targetGrantBundleName =
+    sceneSession->GetSessionInfo().GetWantSafely().GetStringParam("targetGrantBundleName");
     if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
         sceneSessionInfo->want.SetParam(AncoConsts::ANCO_MISSION_ID, sceneSessionInfo->persistentId);
         sceneSessionInfo->collaboratorType = sceneSession->GetCollaboratorType();
@@ -3269,6 +3271,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     if (!systemConfig_.backgroundswitch || sceneSession->GetSessionProperty()->GetIsAppSupportPhoneInPc()) {
         TLOGI(WmsLogTag::WMS_MAIN, "[id: %{public}d] Begin StartUIAbility, system: %{public}u", persistentId,
             static_cast<uint32_t>(sceneSession->GetSessionInfo().isSystem_));
+        sceneSession->GetSessionInfo().want.RemoveParam("targetGrantBundleName");
         errCode = StartUIAbilityBySCBTimeoutCheck(sceneSession, sceneSessionInfo,
             static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL), isColdStart);
         ResetSessionInfoAfterStartUIAbility(sceneSession);
@@ -3281,6 +3284,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
             sceneSession->GetSessionInfo().reuseDelegatorWindow) {
             TLOGI(WmsLogTag::WMS_MAIN, "Call StartUIAbility: %{public}d system: %{public}u", persistentId,
                 static_cast<uint32_t>(sceneSession->GetSessionInfo().isSystem_));
+            sceneSession->GetSessionInfo().want.RemoveParam("targetGrantBundleName");
             errCode = StartUIAbilityBySCBTimeoutCheck(sceneSession, sceneSessionInfo,
                 static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL), isColdStart);
         } else {
@@ -9684,6 +9688,10 @@ WSError SceneSessionManager::SetSessionIconForThirdParty(const sptr<IRemoteObjec
     }
     if (icon->GetWidth() != icon->GetHeight()) {
         TLOGE(WmsLogTag::WMS_MAIN, "icon is not a square");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (icon->GetCapacity() > ICON_MAX_SIZE) {
+        TLOGE(WmsLogTag::WMS_MAIN, "icon is too large");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     return SetSessionIconInner(token, icon);
