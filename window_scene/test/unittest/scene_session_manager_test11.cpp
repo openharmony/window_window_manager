@@ -1724,9 +1724,11 @@ HWTEST_F(SceneSessionManagerTest11, ConfigSupportCreateFloatWindow, TestSize.Lev
 HWTEST_F(SceneSessionManagerTest11, ConfigDockAutoHide, TestSize.Level0)
 {
     ssm_->ConfigDockAutoHide(true);
+    usleep(WAIT_SYNC_IN_NS);
     EXPECT_TRUE(ssm_->systemConfig_.isDockAutoHide_);
 
     ssm_->ConfigDockAutoHide(false);
+    usleep(WAIT_SYNC_IN_NS);
     EXPECT_FALSE(ssm_->systemConfig_.isDockAutoHide_);
 }
 } // namespace
