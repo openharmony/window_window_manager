@@ -147,6 +147,23 @@ HWTEST_F(sceneSessionManagerProxyLifecycleTest, GetVisibilityWindowInfo, TestSiz
 }
 
 /**
+ * @tc.name: PendingSessionToForeground_Success
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyLifecycleTest, PendingSessionToForeground_Success, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sceneSessionManagerProxy, nullptr);
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    int32_t windowMode = static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN);
+    WSError errCode = sceneSessionManagerProxy->PendingSessionToForeground(token, windowMode);
+    EXPECT_EQ(errCode, WSError::WS_OK);
+}
+
+/**
  * @tc.name: GetAllMainWindowInfo
  * @tc.desc: normal function
  * @tc.type: FUNC
