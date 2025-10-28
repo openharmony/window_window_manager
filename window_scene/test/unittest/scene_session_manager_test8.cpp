@@ -1106,7 +1106,7 @@ HWTEST_F(SceneSessionManagerTest8, PackWindowPropertyChangeInfo01, TestSize.Leve
 
     std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowPropertyChangeInfo;
     ssm_->PackWindowPropertyChangeInfo(sceneSession1, windowPropertyChangeInfo);
-    EXPECT_EQ(windowPropertyChangeInfo.size(), 10);
+    EXPECT_EQ(windowPropertyChangeInfo.size(), 11);
 }
 
 /**
@@ -1292,6 +1292,81 @@ HWTEST_F(SceneSessionManagerTest8, RemoveSessionBlackList02, TestSize.Level1)
     EXPECT_EQ(WMError::WM_OK, ret);
 
     ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: SessionBlackListSystemTest
+ * @tc.desc: test function : SessionBlackListSystemTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, SessionBlackListSystemTest, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    std::size_t count = 100;
+    for (std::size_t i = 0; i < count; ++i) {
+        std::string key = "bundle_" + std::to_string(i);
+        std::unordered_set<std::string> rsSet;
+        rsSet.reserve(3);
+        const std::string idx = std::to_string(i);
+        rsSet.emplace("rs_" + idx + "_a");
+        rsSet.emplace("rs_" + idx + "_b");
+        rsSet.emplace("rs_" + idx + "_c");
+
+        ssm_->sessionRSBlackListConfigSet_.insert({ .windowId = i, .privacyWindowTag = key });
+        ssm_->bundleRSBlackListConfigMap_[key] = rsSet;
+        for (std::size_t j = 0; j < count; ++j) {
+            ssm_->sessionRSBlackListConfigSet_.insert({ j, "rs_" + idx + "_a" });
+            ssm_->sessionRSBlackListConfigSet_.insert({ j, "rs_" + idx + "_b" });
+            ssm_->sessionRSBlackListConfigSet_.insert({ j, "rs_" + idx + "_c" });
+        }
+        ssm_->sessionBlackListInfoMap_[i] = ssm_->sessionRSBlackListConfigSet_;
+
+        ssm_->screenRSBlackListConfigMap_ [i].insert({ "rs_" + idx + "_a" });
+        ssm_->screenRSBlackListConfigMap_ [i].insert({ "rs_" + idx + "_b" });
+        ssm_->screenRSBlackListConfigMap_ [i].insert({ "rs_" + idx + "_c" });
+    }
+
+    for (std::size_t i = 0; i < count; ++i) {
+        SessionInfo sessionInfo;
+        sessionInfo.bundleName_ = "test";
+        sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+        ssm_->sceneSessionMap_[i] = sceneSession;
+    }
+    SessionInfo sessionInfo1;
+    sessionInfo1.bundleName_ = "test";
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    std::vector<sptr<SceneSession>> sceneSessionList;
+    sceneSessionList.emplace_back(sceneSession1);
+    std::unordered_set<std::string> privacyWindowTags;
+    std::vector<std::string> privacyWindowTagVactor;
+    for (std::size_t i = 0; i < count; ++i) {
+        const std::string idx = std::to_string(i);
+        privacyWindowTags.insert("rs_" + idx + "_a");
+        privacyWindowTags.insert("rs_" + idx + "_b");
+        privacyWindowTags.insert("rs_" + idx + "_c");
+        privacyWindowTagVactor.emplace_back("rs_" + idx + "_a");
+        privacyWindowTagVactor.emplace_back("rs_" + idx + "_b");
+        privacyWindowTagVactor.emplace_back("rs_" + idx + "_c");
+    }
+
+    auto ret = ssm_->SetScreenPrivacyWindowTagSwitch(1, privacyWindowTagVactor, true);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    ret = ssm_->SetScreenPrivacyWindowTagSwitch(1, privacyWindowTagVactor, false);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    ret = ssm_->RemoveSessionBlackList(sceneSessionList, privacyWindowTags);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    ret = ssm_->AddSessionBlackList(sceneSessionList, privacyWindowTags);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    ssm_->sceneSessionMap_.clear();
+    ssm_->screenRSBlackListConfigMap_.clear();
+    ssm_->sessionRSBlackListConfigSet_.clear();
+    ssm_->sessionBlackListInfoMap_.clear();
+    ssm_->bundleRSBlackListConfigMap_.clear();
 }
 
 /**
