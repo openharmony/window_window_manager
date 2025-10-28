@@ -3175,8 +3175,7 @@ public:
      * @param systemBarPropertyFlag is System Bar Property Flag
      */
     virtual WMError UpdateSystemBarPropertyForPage(WindowType type,
-                                                   const SystemBarProperty& systemBarProperty,
-                                                   const SystemBarPropertyFlag& systemBarPropertyFlag)
+        const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag)
     {
         return WMError::WM_OK;
     }
