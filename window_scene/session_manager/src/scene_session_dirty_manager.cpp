@@ -598,6 +598,7 @@ void SceneSessionDirtyManager::AddModalExtensionWindowInfo(std::vector<MMI::Wind
 
     windowInfo.agentWindowId = extensionInfo.persistentId;
     windowInfo.pid = extensionInfo.pid;
+    windowInfo.agentPid = extensionInfo.pid;
     std::vector<int32_t> pointerChangeAreas(POINTER_CHANGE_AREA_COUNT, 0);
     windowInfo.pointerChangeAreas = std::move(pointerChangeAreas);
     windowInfo.zOrder = windowInfo.zOrder + ZORDER_UIEXTENSION_INDEX;
@@ -659,6 +660,7 @@ std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::Pixel
             iter->second->GetZOrder() > sceneSessionValue->GetZOrder()) {
             windowInfo.agentWindowId = static_cast<int32_t>(iter->second->GetPersistentId());
             windowInfo.pid = static_cast<int32_t>(iter->second->GetCallingPid());
+            windowInfo.agentPid = static_cast<int32_t>(iter->second->GetCallingPid());
         } else {
             GetModalUIExtensionInfo(windowInfoList, sceneSessionValue, windowInfo);
         }
@@ -805,7 +807,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     auto pixelMap = windowSessionProperty->GetWindowMask();
     MMI::WindowInfo windowInfo = {
         .id = windowId,
-        .pid = sceneSession->IsStartMoving() ? static_cast<int32_t>(getpid()) : pid,
+        .pid = pid,
         .uid = uid,
         .area = { ceil(singleHandData.scaleX * windowRect.posX_ + singleHandData.singleHandX),
                   ceil(singleHandData.scaleX * windowRect.posY_ + singleHandData.singleHandY),
@@ -824,6 +826,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
         .windowType = static_cast<int32_t>(windowType),
         .isSkipSelfWhenShowOnVirtualScreen = sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus(),
         .windowNameType = windowNameType,
+        .agentPid = sceneSession->IsStartMoving() ? static_cast<int32_t>(getpid()) : pid,
     };
     UpdateWindowFlags(displayId, sceneSession, windowInfo);
     if (windowSessionProperty->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING)) {
@@ -936,6 +939,7 @@ MMI::WindowInfo SceneSessionDirtyManager::MakeWindowInfoFormHostWindow(const MMI
     MMI::WindowInfo windowinfo;
     windowinfo.id = hostWindowinfo.id;
     windowinfo.pid = hostWindowinfo.pid;
+    windowinfo.agentPid = hostWindowinfo.pid;
     windowinfo.uid = hostWindowinfo.uid;
     windowinfo.area = hostWindowinfo.area;
     windowinfo.agentWindowId = hostWindowinfo.agentWindowId;
@@ -995,6 +999,7 @@ MMI::WindowInfo SceneSessionDirtyManager::GetHostComponentWindowInfo(const SecSu
     }
     for (const auto& secRectInfo : secRectInfoList) {
         windowinfo.pid = secSurfaceInfo.hostPid;
+        windowinfo.agentPid = secSurfaceInfo.hostPid;
         MMI::Rect hotArea = { secRectInfo.relativeCoords.GetLeft(), secRectInfo.relativeCoords.GetTop(),
             secRectInfo.relativeCoords.GetWidth(), secRectInfo.relativeCoords.GetHeight() };
         windowinfo.defaultHotAreas.emplace_back(hotArea);
@@ -1019,6 +1024,7 @@ MMI::WindowInfo SceneSessionDirtyManager::GetSecComponentWindowInfo(const SecSur
     }
     windowinfo.agentWindowId = windowinfo.id;
     windowinfo.pid = secSurfaceInfo.uiExtensionPid;
+    windowinfo.agentPid = secSurfaceInfo.uiExtensionPid;
     windowinfo.privacyUIFlag = true;
     auto transform = CoordinateSystemHostWindowToScreen(hostTransform, secRectInfo);
     windowinfo.area = CalRectInScreen(transform, secRectInfo);
