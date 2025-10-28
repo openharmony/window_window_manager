@@ -425,7 +425,7 @@ WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarPropert
 WMError WindowImpl::UpdateSystemBarPropertyForPage(WindowType type,
     const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag)
 {
-    return SetSpecificBarProperty(type, property);
+    return SetSpecificBarProperty(type, systemBarProperty);
 }
 
 WMError WindowImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
