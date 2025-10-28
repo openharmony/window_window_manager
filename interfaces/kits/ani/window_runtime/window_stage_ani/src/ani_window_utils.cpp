@@ -1524,8 +1524,8 @@ void AniWindowUtils::UpdateSystemBarProperties(std::map<WindowType, SystemBarPro
 }
 
 bool AniWindowUtils::GetSpecificBarStatus(ani_env* env,
-        ani_string aniName, ani_boolean aniEnable, ani_object aniAnimation,
-        WindowType& type, SystemBarProperty& systemBarProperty, SystemBarPropertyFlag& systemBarPropertyFlag)
+    ani_string aniName, ani_boolean aniEnable, ani_object aniAnimation,
+    WindowType& type, SystemBarProperty& systemBarProperty, SystemBarPropertyFlag& systemBarPropertyFlag)
 {
     std::string barName;
     GetStdString(env, aniName, barName);
