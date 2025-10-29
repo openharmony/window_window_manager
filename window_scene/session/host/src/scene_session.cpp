@@ -1408,6 +1408,19 @@ void SceneSession::RegisterFollowScreenChangeCallback(NotifyFollowScreenChangeFu
     }, __func__);
 }
 
+void SceneSession::RegisterSnapshotSkipChangeCallback(NotifySnapshotSkipChangeFunc&& callback)
+{
+    PostTask([weakThis = wptr(this), callback = std::move(callback), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
+            return;
+        }
+        session->onSnapshotSkipChangeFunc_ = std::move(callback);
+        session->onSnapshotSkipChangeFunc_(session->GetSessionProperty()->GetSnapshotSkip());
+    }, __func__);
+}
+
 WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
 {
     return PostSyncTask([weakThis = wptr(this), mode, where = __func__] {
@@ -6483,6 +6496,16 @@ WMError SceneSession::HandleActionUpdatePrivacyMode(const sptr<WindowSessionProp
 WMError SceneSession::HandleActionUpdateSnapshotSkip(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
+    PostTask([weakThis = wptr(this), isSkip = property->GetSnapshotSkip()] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "session is null");
+            return;
+        }
+        if (session->onSnapshotSkipChangeFunc_) {
+            session->onSnapshotSkipChangeFunc_(isSkip);
+        }
+    }, __func__);
     return SetSnapshotSkip(property->GetSnapshotSkip());
 }
 
