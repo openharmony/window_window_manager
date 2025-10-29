@@ -540,7 +540,8 @@ export function getAllDisplays(callback: AsyncCallback<Array<Display>>): void {
         getAllDisplaysSyncNative(res);
         minusDisplayArray(res);
         callback(null, res);
-    } catch (err: BusinessError) {
+    } catch (err) {
+        err = err as BusinessError;
         callback(err, res);
     }
     return;
