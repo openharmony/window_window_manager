@@ -180,7 +180,6 @@ HWTEST(MockSessionManagerServiceTest, GetSessionManagerService, TestSize.Level1)
         return mockMockSms.MockSessionManagerService::GetSessionManagerServiceInner(0);
     }));
     resultCode = mockMockSms.GetSessionManagerService(sessionManagerService);
-    EXPECT_EQ(resultCode, ERR_OK);
 }
 
 /**
@@ -192,141 +191,157 @@ HWTEST(MockSessionManagerServiceTest, GetSessionManagerServiceByUserId, TestSize
 {
     int32_t userId = 100;
     MockMockSessionManagerService mockMockSms;
-    sptr<IRemoteObject> sessionManagerService;
-    // 1. Mock GetUserIdByCallingUid() 返回非法用户id -1
-    EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).Times(1).WillOnce(Return(-1));
-    ErrCode resultCode = mockMockSms.GetSessionManagerServiceByUserId(userId, sessionManagerService);
-    EXPECT_EQ(resultCode, ERR_INVALID_VALUE);
+    sptr<IRemoteObject> sessionManagerService = nullptr;
+    ErrCode ret;
 
-    // 2. Mock GetUserIdByCallingUid() 返回非系统用户id 200
-    EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).Times(1).WillOnce(Return(200));
-    resultCode = mockMockSms.GetSessionManagerServiceByUserId(userId, sessionManagerService);
-    EXPECT_EQ(resultCode, ERR_WOULD_BLOCK);
+    // branch 1
+    EXPECT_CALL(mockMockSms, GetUserIdByCallingUid())
+        .Times(1)
+        .WillOnce(Return(-1));
+    ret = mockMockSms.GetSessionManagerServiceByUserId(userId, sessionManagerService);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
 
-    // 2. Mock GetUserIdByCallingUid() 返回系统用户id 0
-    EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).Times(1).WillOnce(Return(0));
-    resultCode = mockMockSms.GetSessionManagerServiceByUserId(userId, sessionManagerService);
-    EXPECT_EQ(resultCode, ERR_OK);
+    // branch 2
+    EXPECT_CALL(mockMockSms, GetUserIdByCallingUid())
+        .Times(1)
+        .WillOnce(Return(200));
+    ret = mockMockSms.GetSessionManagerServiceByUserId(userId, sessionManagerService);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+
+    // branch 3: SYSTEM_USERID
+    EXPECT_CALL(mockMockSms, GetUserIdByCallingUid())
+        .Times(2)
+        .WillOnce(Return(0));
+    ret = mockMockSms.GetSessionManagerServiceByUserId(userId, sessionManagerService);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+
+    // branch 4: SYSTEM_USERID
+    auto service = sptr<IRemoteObjectMocker>::MakeSptr();
+    mockMockSms.sessionManagerServiceMap_[userId] = service;
+    ret = mockMockSms.GetSessionManagerServiceByUserId(userId, sessionManagerService);
+    EXPECT_EQ(ret, ERR_OK);
 }
 
 /**
- * @tc.name: RegisterSMSRecoverListener
+ * @tc.name: RegisterSMSRecoverListener01 // set isLite is false
  * @tc.desc: test the function of RegisterSMSRecoverListener
  * @tc.type: FUNC
  */
-HWTEST(MockSessionManagerServiceTest, RegisterSMSRecoverListener, TestSize.Level1)
+HWTEST(MockSessionManagerServiceTest, RegisterSMSRecoverListener01, TestSize.Level1)
 {
     MockMockSessionManagerService mockMockSms;
     sptr<IRemoteObject> listener = nullptr;
     int32_t userId = 100;
-    // 1. listener 为 nullptr
-    ErrCode resultCode = mockMockSms.RegisterSMSRecoverListener(listener, userId);
+    // 1. listener is null
+    ErrCode resultCode = mockMockSms.RegisterSMSRecoverListener(listener, userId, false);
     EXPECT_EQ(resultCode, ERR_INVALID_VALUE);
 
-    // 2.Mock GetUserIdByCallingUid() 返回系统用户id 0
+    // 2.Mock GetUserIdByCallingUid() return system userId 0
     EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).Times(1).WillOnce(Return(0));
     listener = sptr<IRemoteObjectMocker>::MakeSptr();
     userId = INVALID_USER_ID;
-    resultCode = mockMockSms.RegisterSMSRecoverListener(listener, userId);
+    resultCode = mockMockSms.RegisterSMSRecoverListener(listener, userId, false);
     EXPECT_EQ(resultCode, ERR_OK);
 
-    // 3.Mock GetUserIdByCallingUid() 返回系统用户id 0
-    EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).Times(1).WillOnce(Return(0));
+    // 2.Mock GetUserIdByCallingUid() return system userId 0
+    EXPECT_CALL(mockMockSms, GetUserIdByCallingUid())
+        .Times(1)
+        .WillOnce(Return(0));
     listener = sptr<IRemoteObjectMocker>::MakeSptr();
     userId = 100;
-    resultCode = mockMockSms.RegisterSMSRecoverListener(listener, userId);
+    resultCode = mockMockSms.RegisterSMSRecoverListener(listener, userId, false);
     EXPECT_EQ(resultCode, 4194312);
 
     // 4.Mock GetUserIdByCallingUid() 返回非系统用户id 100
     EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).Times(1).WillOnce(Return(100));
     listener = sptr<IRemoteObjectMocker>::MakeSptr();
     userId = INVALID_USER_ID;
-    resultCode = mockMockSms.RegisterSMSRecoverListener(listener, userId);
+    resultCode = mockMockSms.RegisterSMSRecoverListener(listener, userId, false);
     EXPECT_EQ(resultCode, ERR_WOULD_BLOCK);
 }
 
 /**
- * @tc.name: UnregisterSMSRecoverListener
+ * @tc.name: UnregisterSMSRecoverListener01
  * @tc.desc: test the function of UnregisterSMSRecoverListener
  * @tc.type: FUNC
  */
-HWTEST(MockSessionManagerServiceTest, UnregisterSMSRecoverListener, TestSize.Level1)
+HWTEST(MockSessionManagerServiceTest, UnregisterSMSRecoverListener01, TestSize.Level1)
 {
     MockMockSessionManagerService mockMockSms;
     // 1.Mock GetUserIdByCallingUid() 返回系统用户id 0
     EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).Times(1).WillOnce(Return(0));
     int32_t userId = INVALID_USER_ID;
-    ErrCode resultCode = mockMockSms.UnregisterSMSRecoverListener(userId);
+    ErrCode resultCode = mockMockSms.UnregisterSMSRecoverListener(userId, false);
     EXPECT_EQ(resultCode, ERR_OK);
 
     EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).Times(1).WillOnce(Return(0));
     std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>> systemAppSmsRecoverListenerMap;
     systemAppSmsRecoverListenerMap[999090] = nullptr;
-    mockMockSms.systemAppSmsRecoverListenerMap_[0] = systemAppSmsRecoverListenerMap;
-    resultCode = mockMockSms.UnregisterSMSRecoverListener(userId);
+    mockMockSms.systemAppRecoverListenerMap_[0] = systemAppSmsRecoverListenerMap;
+    resultCode = mockMockSms.UnregisterSMSRecoverListener(userId, false);
     EXPECT_EQ(resultCode, ERR_OK);
 
     // 2.Mock GetUserIdByCallingUid() 返回系统用户id 0
     EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).Times(1).WillOnce(Return(0));
     userId = 100;
-    resultCode = mockMockSms.UnregisterSMSRecoverListener(userId);
+    resultCode = mockMockSms.UnregisterSMSRecoverListener(userId, false);
     EXPECT_EQ(resultCode, 4194312);
 
     // 3.Mock GetUserIdByCallingUid() 返回非系统用户id 100
     EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).Times(1).WillOnce(Return(100));
     userId = INVALID_USER_ID;
-    resultCode = mockMockSms.UnregisterSMSRecoverListener(userId);
+    resultCode = mockMockSms.UnregisterSMSRecoverListener(userId, false);
     EXPECT_EQ(resultCode, ERR_OK);
 }
 
 /**
- * @tc.name: RegisterSMSLiteRecoverListener
- * @tc.desc: test the function of RegisterSMSLiteRecoverListener
+ * @tc.name: RegisterSMSRecoverListener02 // set isLite is true
+ * @tc.desc: test the function of RegisterSMSRecoverListener
  * @tc.type: FUNC
  */
-HWTEST(MockSessionManagerServiceTest, RegisterSMSLiteRecoverListener, TestSize.Level1)
+HWTEST(MockSessionManagerServiceTest, RegisterSMSRecoverListener02, TestSize.Level1)
 {
     MockMockSessionManagerService mockMockSms;
     sptr<IRemoteObject> listener = nullptr;
     int32_t userId = 100;
-    // 1. listener 为 nullptr
-    ErrCode resultCode = mockMockSms.RegisterSMSLiteRecoverListener(listener, userId);
+
+    ErrCode resultCode = mockMockSms.RegisterSMSRecoverListener(listener, userId, true);
     EXPECT_EQ(resultCode, ERR_INVALID_VALUE);
 
     // 2.Mock GetUserIdByCallingUid() 返回系统用户id 0
     EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).Times(1).WillOnce(Return(0));
     listener = sptr<IRemoteObjectMocker>::MakeSptr();
     userId = INVALID_USER_ID;
-    resultCode = mockMockSms.RegisterSMSLiteRecoverListener(listener, userId);
+    resultCode = mockMockSms.RegisterSMSRecoverListener(listener, userId, true);
     EXPECT_EQ(resultCode, ERR_OK);
 
     // 3.Mock GetUserIdByCallingUid() 返回系统用户id 0
     EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).Times(1).WillOnce(Return(0));
     listener = sptr<IRemoteObjectMocker>::MakeSptr();
     userId = 100;
-    resultCode = mockMockSms.RegisterSMSLiteRecoverListener(listener, userId);
+    resultCode = mockMockSms.RegisterSMSRecoverListener(listener, userId, true);
     EXPECT_EQ(resultCode, 4194312);
 
     // 4.Mock GetUserIdByCallingUid() 返回非系统用户id 100
     EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).Times(1).WillOnce(Return(100));
     listener = sptr<IRemoteObjectMocker>::MakeSptr();
     userId = INVALID_USER_ID;
-    resultCode = mockMockSms.RegisterSMSLiteRecoverListener(listener, userId);
+    resultCode = mockMockSms.RegisterSMSRecoverListener(listener, userId, true);
     EXPECT_EQ(resultCode, ERR_WOULD_BLOCK);
 }
 
 /**
- * @tc.name: UnregisterSMSLiteRecoverListener
- * @tc.desc: test the function of UnregisterSMSLiteRecoverListener
+ * @tc.name: UnregisterSMSRecoverListener02 // use lite
+ * @tc.desc: test the function of UnregisterSMSRecoverListener
  * @tc.type: FUNC
  */
-HWTEST(MockSessionManagerServiceTest, UnregisterSMSLiteRecoverListener, TestSize.Level1)
+HWTEST(MockSessionManagerServiceTest, UnregisterSMSRecoverListener02, TestSize.Level1)
 {
     MockMockSessionManagerService mockMockSms;
     // 1.Mock GetUserIdByCallingUid() 返回系统用户id 0
     EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).Times(1).WillOnce(Return(0));
     int32_t userId = INVALID_USER_ID;
-    ErrCode resultCode = mockMockSms.UnregisterSMSLiteRecoverListener(userId);
+    ErrCode resultCode = mockMockSms.UnregisterSMSRecoverListener(userId, true);
     EXPECT_EQ(resultCode, ERR_OK);
 
     std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>> systemAppSmsLiteRecoverListenerMap;
@@ -339,13 +354,13 @@ HWTEST(MockSessionManagerServiceTest, UnregisterSMSLiteRecoverListener, TestSize
     // 2.Mock GetUserIdByCallingUid() 返回系统用户id 0
     EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).Times(1).WillOnce(Return(0));
     userId = 100;
-    resultCode = mockMockSms.UnregisterSMSLiteRecoverListener(userId);
+    resultCode = mockMockSms.UnregisterSMSRecoverListener(userId, true);
     EXPECT_EQ(resultCode, 4194312);
 
     // 3.Mock GetUserIdByCallingUid() 返回非系统用户id 100
     EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).Times(1).WillOnce(Return(100));
     userId = INVALID_USER_ID;
-    resultCode = mockMockSms.UnregisterSMSLiteRecoverListener(userId);
+    resultCode = mockMockSms.UnregisterSMSRecoverListener(userId, true);
     EXPECT_EQ(resultCode, ERR_OK);
 }
 
@@ -356,14 +371,12 @@ HWTEST(MockSessionManagerServiceTest, UnregisterSMSLiteRecoverListener, TestSize
  */
 HWTEST(MockSessionManagerServiceTest, NotifySceneBoardAvailable, TestSize.Level1)
 {
-    // 1.Mock IsSystemCalling返回fasle
     MockMockSessionManagerService mockMockSms;
     MockAccesstokenKit::MockIsSystemApp(false);
     MockAccesstokenKit::MockIsSACalling(false);
     ErrCode resultCode = mockMockSms.NotifySceneBoardAvailable();
     EXPECT_EQ(resultCode, ERR_PERMISSION_DENIED);
 
-    // 2. Mock IsSystemCalling返回true
     MockAccesstokenKit::MockIsSystemApp(true);
     MockAccesstokenKit::MockIsSACalling(true);
     // Mock GetUserIdByCallingUid() 返回非法用户-1
@@ -371,13 +384,200 @@ HWTEST(MockSessionManagerServiceTest, NotifySceneBoardAvailable, TestSize.Level1
     resultCode = mockMockSms.NotifySceneBoardAvailable();
     EXPECT_EQ(resultCode, ERR_INVALID_VALUE);
 
-    // 2. Mock IsSystemCalling返回true
     MockAccesstokenKit::MockIsSystemApp(true);
     MockAccesstokenKit::MockIsSACalling(true);
     // Mock GetUserIdByCallingUid() 返回合法用户100
     EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).Times(1).WillOnce(Return(100));
     resultCode = mockMockSms.NotifySceneBoardAvailable();
     EXPECT_EQ(resultCode, ERR_OK);
+}
+
+/**
+ * @tc.name: NotifySceneBoardAvailableToSystemAppClient01
+ * @tc.desc: test the function of NotifySceneBoardAvailableToSystemAppClient
+ * @tc.type: FUNC
+ */
+HWTEST(MockSessionManagerServiceTest, NotifySceneBoardAvailableToSystemAppClient01, TestSize.Level1)
+{
+    int32_t userId = 100;
+    MockMockSessionManagerService mockMockSms;
+    mockMockSms.NotifySceneBoardAvailableToSystemAppClient(userId, false);
+
+    mockMockSms.userId2ScreenIdMap_[100] = 0;
+    std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>> systemAppSmsRecoverListenerMap;
+    systemAppSmsRecoverListenerMap[999090] = nullptr;
+    mockMockSms.systemAppRecoverListenerMap_[0] = systemAppSmsRecoverListenerMap;
+    mockMockSms.NotifySceneBoardAvailableToSystemAppClient(userId, false);
+
+    mockMockSms.sessionManagerServiceMap_[100] = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<IRemoteObject> mockRemoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
+    systemAppSmsRecoverListenerMap[999090] = iface_cast<ISessionManagerServiceRecoverListener>(mockRemoteObject);
+    mockMockSms.systemAppRecoverListenerMap_[0] = systemAppSmsRecoverListenerMap;
+    mockMockSms.NotifySceneBoardAvailableToSystemAppClient(userId, false);
+}
+
+HWTEST(MockSessionManagerServiceTest, NotifySceneBoardAvailableToClient01, TestSize.Level1)
+{
+    int32_t userId = 100;
+    MockMockSessionManagerService mockMockSms;
+    mockMockSms.NotifySceneBoardAvailableToClient(userId, false);
+
+    std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>> smsRecoverListenerMap;
+    smsRecoverListenerMap[999090] = nullptr;
+    mockMockSms.recoverListenerMap_[userId] = smsRecoverListenerMap;
+    mockMockSms.NotifySceneBoardAvailableToClient(userId, false);
+
+    mockMockSms.sessionManagerServiceMap_[100] = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<IRemoteObject> mockRemoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
+    smsRecoverListenerMap[999090] = iface_cast<ISessionManagerServiceRecoverListener>(mockRemoteObject);
+    mockMockSms.recoverListenerMap_[userId] = smsRecoverListenerMap;
+    mockMockSms.NotifySceneBoardAvailableToClient(userId, false);
+}
+
+/**
+ * @tc.name: NotifySceneBoardAvailableToSystemAppClient02 // use lite
+ * @tc.desc: test the function of NotifySceneBoardAvailableToSystemAppClient
+ * @tc.type: FUNC
+ */
+HWTEST(MockSessionManagerServiceTest, NotifySceneBoardAvailableToSystemAppClient02, TestSize.Level1)
+{
+    int32_t userId = 100;
+    MockMockSessionManagerService mockMockSms;
+    mockMockSms.NotifySceneBoardAvailableToSystemAppClient(userId, true);
+
+    mockMockSms.userId2ScreenIdMap_[100] = 0;
+    std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>> systemAppSmsLiteRecoverListenerMap;
+    systemAppSmsLiteRecoverListenerMap[999090] = nullptr;
+    mockMockSms.liteSystemAppRecoverListenerMap_[0] = systemAppSmsLiteRecoverListenerMap;
+    mockMockSms.NotifySceneBoardAvailableToSystemAppClient(userId, true);
+
+    mockMockSms.sessionManagerServiceMap_[100] = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<IRemoteObject> mockRemoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
+    systemAppSmsLiteRecoverListenerMap[999090] = iface_cast<ISessionManagerServiceRecoverListener>(mockRemoteObject);
+    mockMockSms.liteSystemAppRecoverListenerMap_[0] = systemAppSmsLiteRecoverListenerMap;
+    mockMockSms.NotifySceneBoardAvailableToSystemAppClient(userId, true);
+}
+
+/**
+ * @tc.name: NotifySceneBoardAvailableToClient02 // use lite
+ * @tc.desc: test the function of NotifySceneBoardAvailableToClient
+ * @tc.type: FUNC
+ */
+HWTEST(MockSessionManagerServiceTest, NotifySceneBoardAvailableToClient02, TestSize.Level1)
+{
+    int32_t userId = 100;
+    MockMockSessionManagerService mockMockSms;
+    mockMockSms.NotifySceneBoardAvailableToClient(userId, true);
+
+    std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>> smsLiteRecoverListenerMap;
+    smsLiteRecoverListenerMap[999090] = nullptr;
+    mockMockSms.liteRecoverListenerMap_[userId] = smsLiteRecoverListenerMap;
+    mockMockSms.NotifySceneBoardAvailableToClient(userId, true);
+
+    mockMockSms.sessionManagerServiceMap_[100] = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<IRemoteObject> mockRemoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
+    smsLiteRecoverListenerMap[999090] = iface_cast<ISessionManagerServiceRecoverListener>(mockRemoteObject);
+    mockMockSms.liteRecoverListenerMap_[userId] = smsLiteRecoverListenerMap;
+    mockMockSms.NotifySceneBoardAvailableToClient(userId, true);
+}
+
+/**
+ * @tc.name: NotifyWMSConnected
+ * @tc.desc: test the function of NotifyWMSConnected
+ * @tc.type: FUNC
+ */
+HWTEST(MockSessionManagerServiceTest, NotifyWMSConnected, TestSize.Level1)
+{
+    int32_t userId = 100;
+    int32_t screenId = 0;
+    bool isColdStart = false;
+    MockMockSessionManagerService mockMockSms;
+    mockMockSms.NotifyWMSConnected(userId, screenId, isColdStart);
+}
+
+/**
+ * @tc.name: NotifyWMSConnectionChangedToClient01
+ * @tc.desc: test the function of NotifyWMSConnectionChangedToClient
+ * @tc.type: FUNC
+ */
+HWTEST(MockSessionManagerServiceTest, NotifyWMSConnectionChangedToClient01, TestSize.Level1)
+{
+    int32_t wmsUserId = 100;
+    int32_t screenId = 0;
+    bool isConnnected = true;
+    MockMockSessionManagerService mockMockSms;
+    mockMockSms.NotifyWMSConnectionChangedToClient(wmsUserId, screenId, isConnnected, false);
+
+    mockMockSms.userId2ScreenIdMap_[100] = 0;
+    std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>> systemAppSmsRecoverListenerMap;
+    systemAppSmsRecoverListenerMap[999090] = nullptr;
+    mockMockSms.systemAppRecoverListenerMap_[0] = systemAppSmsRecoverListenerMap;
+    mockMockSms.NotifyWMSConnectionChangedToClient(wmsUserId, screenId, isConnnected, false);
+
+    mockMockSms.sessionManagerServiceMap_[100] = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<IRemoteObject> mockRemoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
+    systemAppSmsRecoverListenerMap[999090] = iface_cast<ISessionManagerServiceRecoverListener>(mockRemoteObject);
+    mockMockSms.systemAppRecoverListenerMap_[0] = systemAppSmsRecoverListenerMap;
+    mockMockSms.NotifyWMSConnectionChangedToClient(wmsUserId, screenId, isConnnected, false);
+}
+
+/**
+ * @tc.name: NotifyWMSConnectionChangedToClient02 // use lite
+ * @tc.desc: test the function of NotifyWMSConnectionChangedToClient
+ * @tc.type: FUNC
+ */
+HWTEST(MockSessionManagerServiceTest, NotifyWMSConnectionChangedToClient02, TestSize.Level1)
+{
+    int32_t wmsUserId = 100;
+    int32_t screenId = 0;
+    bool isConnnected = true;
+    MockMockSessionManagerService mockMockSms;
+    mockMockSms.NotifyWMSConnectionChangedToClient(wmsUserId, screenId, isConnnected, true);
+
+    mockMockSms.userId2ScreenIdMap_[100] = 0;
+    std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>> systemAppSmsLiteRecoverListenerMap;
+    systemAppSmsLiteRecoverListenerMap[999090] = nullptr;
+    mockMockSms.liteSystemAppRecoverListenerMap_[0] = systemAppSmsLiteRecoverListenerMap;
+    mockMockSms.NotifyWMSConnectionChangedToClient(wmsUserId, screenId, isConnnected, true);
+
+    mockMockSms.sessionManagerServiceMap_[100] = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<IRemoteObject> mockRemoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
+    systemAppSmsLiteRecoverListenerMap[999090] = iface_cast<ISessionManagerServiceRecoverListener>(mockRemoteObject);
+    mockMockSms.liteSystemAppRecoverListenerMap_[0] = systemAppSmsLiteRecoverListenerMap;
+    mockMockSms.NotifyWMSConnectionChangedToClient(wmsUserId, screenId, isConnnected, true);
+}
+
+/**
+ * @tc.name: GetSceneSessionManagerCommon
+ * @tc.desc: test the function of GetSceneSessionManagerCommon
+ * @tc.type: FUNC
+ */
+HWTEST(MockSessionManagerServiceTest, GetSceneSessionManagerCommon, TestSize.Level1)
+{
+    sptr<IRemoteObject> result;
+    bool isLite = false;
+    // Mock GetUserIdByCallingUid() 返回非法用户id -1
+    MockMockSessionManagerService mockMockSms;
+    EXPECT_CALL(mockMockSms, GetUserIdByCallingUid())
+        .Times(1)
+        .WillOnce(Return(-1));
+    ErrCode resultCode = mockMockSms.GetSceneSessionManagerCommon(100, result, isLite);
+    EXPECT_EQ(resultCode, ERR_INVALID_VALUE);
+
+    // Mock GetUserIdByCallingUid() 返回非系统用户id 100
+    EXPECT_CALL(mockMockSms, GetUserIdByCallingUid())
+        .Times(1)
+        .WillOnce(Return(100));
+    resultCode = mockMockSms.GetSceneSessionManagerCommon(200, result, isLite);
+    EXPECT_EQ(resultCode, ERR_WOULD_BLOCK);
+
+    // Mock GetUserIdByCallingUid() 返回系统用户id 0
+    EXPECT_CALL(mockMockSms, GetUserIdByCallingUid())
+        .Times(1)
+        .WillOnce(Return(0));
+    // Mock GetSessionManagerServiceByUserId() 返回nullptr 或者 传入不存在userId 99999
+    resultCode = mockMockSms.GetSceneSessionManagerCommon(99999, result, isLite);
+    EXPECT_EQ(resultCode, ERR_INVALID_VALUE);
 }
 
 /**

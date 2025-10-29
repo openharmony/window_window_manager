@@ -68,28 +68,25 @@ WindowAdapterLite::WindowAdapterLite(const int32_t userId) : userId_(userId) {}
 
 WindowAdapterLite& WindowAdapterLite::GetInstance()
 {
-    static sptr<WindowAdapterLite> instance = new WindowAdapterLite();
+    static auto instance = sptr<WindowAdapterLite>::MakeSptr();
     return *instance;
 }
 
-sptr<WindowAdapterLite> WindowAdapterLite::GetInstance(const int32_t userId)
+WindowAdapterLite& WindowAdapterLite::GetInstance(const int32_t userId)
 {
-    sptr<WindowAdapterLite> instance = nullptr;
-
     if (userId <= INVALID_USER_ID) {
-        instance = &WindowAdapterLite::GetInstance();
-        return instance;
+        return GetInstance();
     }
     // multi-instance mode
     std::lock_guard<std::mutex> lock(windowAdapterLiteMapMutex_);
     auto iter = windowAdapterLiteMap_.find(userId);
-    if (iter != windowAdapterLiteMap_.end()) {
-        return iter->second;
+    if (iter != windowAdapterLiteMap_.end() && iter->second) {
+        return *iter->second;
     }
-    TLOGI(WmsLogTag::WMS_MULTI_USER, "create new instance userId: %{public}d", userId);
-    instance = new WindowAdapterLite(userId);
+    auto instance = sptr<WindowAdapterLite>::MakeSptr(userId);
     windowAdapterLiteMap_.insert({ userId, instance });
-    return instance;
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "get new instance, userId: %{public}d", userId);
+    return *windowAdapterLiteMap_[userId];
 }
 
 WMError WindowAdapterLite::RegisterWindowManagerAgent(WindowManagerAgentType type,
@@ -177,7 +174,7 @@ bool WindowAdapterLite::InitSSMProxy()
     if (isProxyValid_) {
         return true;
     }
-    windowManagerServiceProxy_ = SessionManagerLite::GetInstance(userId_)->GetSceneSessionManagerLiteProxy();
+    windowManagerServiceProxy_ = SessionManagerLite::GetInstance(userId_).GetSceneSessionManagerLiteProxy();
     if (!windowManagerServiceProxy_) {
         TLOGE(WmsLogTag::WMS_SCB, "windowManagerServiceProxy_ is null");
         return false;
@@ -195,7 +192,7 @@ bool WindowAdapterLite::InitSSMProxy()
     // U0 system user needs to subscribe OnUserSwitch event
     int32_t clientUserId = GetUserIdByUid(getuid());
     if (clientUserId == SYSTEM_USERID && !isRegisteredUserSwitchListener_) {
-        SessionManagerLite::GetInstance(userId_)->RegisterUserSwitchListener([weakThis = wptr(this)] {
+        SessionManagerLite::GetInstance(userId_).RegisterUserSwitchListener([weakThis = wptr(this)] {
             auto windowAdapter = weakThis.promote();
             if (!windowAdapter) {
                 TLOGE(WmsLogTag::WMS_SCB, "window adapter is null");
@@ -242,8 +239,8 @@ void WMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
         return;
     }
     TLOGI(WmsLogTag::WMS_SCB, "wms lite OnRemoteDied");
-    WindowAdapterLite::GetInstance(userId_)->ClearWindowAdapter();
-    SessionManagerLite::GetInstance(userId_)->ClearSessionManagerProxy();
+    WindowAdapterLite::GetInstance(userId_).ClearWindowAdapter();
+    SessionManagerLite::GetInstance(userId_).ClearSessionManagerProxy();
 }
 
 void WindowAdapterLite::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId)
@@ -354,13 +351,13 @@ WMError WindowAdapterLite::RaiseWindowToTop(int32_t persistentId)
 WMError WindowAdapterLite::RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc)
 {
     TLOGD(WmsLogTag::WMS_MULTI_USER, "register listener");
-    return SessionManagerLite::GetInstance(userId_)->RegisterWMSConnectionChangedListener(callbackFunc);
+    return SessionManagerLite::GetInstance(userId_).RegisterWMSConnectionChangedListener(callbackFunc);
 }
 
 WMError WindowAdapterLite::UnregisterWMSConnectionChangedListener()
 {
     TLOGD(WmsLogTag::WMS_MULTI_USER, "unregister wms connection changed listener");
-    return SessionManagerLite::GetInstance(userId_)->UnregisterWMSConnectionChangedListener();
+    return SessionManagerLite::GetInstance(userId_).UnregisterWMSConnectionChangedListener();
 }
 
 WMError WindowAdapterLite::GetWindowStyleType(WindowStyleType& windowStyleType)
