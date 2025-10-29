@@ -3888,11 +3888,11 @@ export class WindowInternal implements Window {
     }
 
     public onWindowTitleButtonRectChange(callback: Callback<TitleButtonRect>): void {
-      this.onSync(this.nativeObj, 'windowTitleButtonRect', callback);
+      this.onSync(this.nativeObj, 'windowTitleButtonRectChange', callback);
     }
 
     public offWindowTitleButtonRectChange(callback?: Callback<TitleButtonRect>): void {
-      this.offSync(this.nativeObj, 'windowTitleButtonRect', callback);
+      this.offSync(this.nativeObj, 'windowTitleButtonRectChange', callback);
     }
 
     public onWindowEvent(callback: Callback<WindowEventType>): void {
