@@ -1565,6 +1565,38 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetPipEnableByScreenId_ReadBoolF
     data.WriteInt32(1);
     EXPECT_EQ(sceneSessionManagerLiteStub_->HandleSetPipEnableByScreenId(data, reply), ERR_INVALID_DATA);
 }
+
+/**
+ * @tc.name: HandleGetDisplayIdByWindowId01
+ * @tc.desc: test HandleGetDisplayIdByWindowId01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetDisplayIdByWindowId01, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    const std::vector<uint64_t> windowIds = (200, 0);
+    data.WriteUInt64Vector(windowIds);
+
+    int res = sceneSessionManagerLiteStub_->HandleGetDisplayIdByWindowId(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+}
+
+/**
+ * @tc.name: HandleGetDisplayIdByWindowId02
+ * @tc.desc: test HandleGetDisplayIdByWindowId02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetDisplayIdByWindowId02, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    const std::vector<uint64_t> windowIds = {1, 2};
+    data.WriteUInt64Vector(windowIds);
+
+    int res = sceneSessionManagerLiteStub_->HandleGetDisplayIdByWindowId(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
