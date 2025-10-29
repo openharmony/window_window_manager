@@ -102,7 +102,13 @@ HWTEST_F(OHWindowEventTest, OH_WindowManager_LockCursor, TestSize.Level0)
     int32_t windowId = 1;
     // Failed to obtain null window
     auto ret = OH_WindowManager_LockCursor(windowId, true);
-    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL), ret);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL), ret);
+    windowId = 0;
+    ret = OH_WindowManager_LockCursor(windowId, false);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
+    windowId = -1;
+    ret = OH_WindowManager_LockCursor(windowId, false);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
 }
 
 /**
@@ -115,7 +121,13 @@ HWTEST_F(OHWindowEventTest, OH_WindowManager_UnlockCursor, TestSize.Level0)
     int32_t windowId = 1;
     // Failed to obtain null window
     auto ret = OH_WindowManager_UnlockCursor(windowId);
-    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL), ret);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL), ret);
+    windowId = 0;
+    ret = OH_WindowManager_UnlockCursor(windowId);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
+    windowId = -1;
+    ret = OH_WindowManager_UnlockCursor(windowId);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
 }
 }
 } // namespace Rosen

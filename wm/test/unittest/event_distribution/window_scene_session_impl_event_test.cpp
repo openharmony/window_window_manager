@@ -58,7 +58,7 @@ HWTEST_F(WindowSceneSessionImplEventTest, LockCursor, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("LockCursor");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->hostSession_ = nullptr;
     auto ret = window->LockCursor(1, true);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
@@ -80,7 +80,7 @@ HWTEST_F(WindowSceneSessionImplEventTest, UnlockCursor, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UnlockCursor");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->hostSession_ = nullptr;
     auto ret = window->UnlockCursor(1);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
