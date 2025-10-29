@@ -374,14 +374,14 @@ int32_t OH_PictureInPicture_SetPipControlEnabled(uint32_t controllerId, PictureI
  * @brief Set the picture-in-picture parent window ID.
  *
  * @param controllerId The picture-in-picture controller ID.
- * @param windowId The parent window ID of picture-in-picture window.
+ * @param windowId The picture-in-picture parent window ID.
  * @return Return the result code.
  *         {@link OK} the function call is successful.
  *         {@link WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM} parameter error.
  *         {@link WINDOW_MANAGER_ERRORCODE_PIP_INTERNAL_ERROR} pip internal error.
  * @since 20
  */
-int32_t OH_PictureInPicture_SetPipParentWindowId(uint32_t controllerId, uint32_t windowId);
+int32_t OH_PictureInPicture_SetParentWindowId(uint32_t controllerId, uint32_t windowId);
 
 /**
  * @brief Set picture-in-picture initial surface rect.

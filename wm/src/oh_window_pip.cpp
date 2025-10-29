@@ -285,7 +285,7 @@ int32_t OH_PictureInPicture_SetPipControlEnabled(uint32_t controllerId, PictureI
         enabled));
 }
 
-int32_t OH_PictureInPicture_SetPipParentWindowId(uint32_t controllerId, uint32_t windowId)
+int32_t OH_PictureInPicture_SetParentWindowId(uint32_t controllerId, uint32_t windowId)
 {
     if (windowId <= 0) {
         TLOGE(WmsLogTag::WMS_PIP, "windowId invalid: %{public}d", windowId);
