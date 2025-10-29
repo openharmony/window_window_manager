@@ -212,7 +212,6 @@ WMError WebPictureInPictureController::SetPipParentWindowId(uint32_t windowId)
     if (window_ == nullptr) {
         TLOGI(WmsLogTag::WMS_PIP, "window is null");
         return WMError::WM_OK;
-
     }
     TLOGI(WmsLogTag::WMS_PIP, "parentWindowId: %{public}u", windowId);
     window_->SetPipParentWindowId(windowId);
