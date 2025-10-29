@@ -117,6 +117,7 @@ enum class ListenerFuncType : uint32_t {
     RESTART_APP_CB,
     CALLING_SESSION_ID_CHANGE_CB,
     ROTATION_LOCK_CHANGE_CB,
+    SNAPSHOT_SKIP_CHANGE_CB,
 };
 
 class SceneSession;
@@ -451,6 +452,7 @@ private:
     void ProcessSetWindowCornerRadiusRegister();
     void ProcessSetWindowShadowsRegister();
     void ProcessRotationLockChangeRegister();
+    void ProcessSnapshotSkipChangeRegister();
 
     /*
      * PC Window Layout
@@ -548,6 +550,7 @@ private:
     void OnSetWindowCornerRadius(float cornerRadius);
     void OnSetWindowShadows(const ShadowsInfo& shadowsInfo);
     void OnRotationLockChange(bool locked);
+    void OnSnapshotSkipChange(bool isSkip);
 
     /*
      * PC Window Layout

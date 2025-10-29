@@ -118,6 +118,7 @@ const std::string SCENE_OUTLINE_PARAMS_CHANGE_CB = "sceneOutlineParamsChange";
 const std::string RESTART_APP_CB = "restartApp";
 const std::string CALLING_SESSION_ID_CHANGE_CB = "callingWindowIdChange";
 const std::string ROTATION_LOCK_CHANGE_CB = "rotationLockChange";
+const std::string SNAPSHOT_SKIP_CHANGE_CB = "snapshotSkipChange";
 
 constexpr int ARG_COUNT_1 = 1;
 constexpr int ARG_COUNT_2 = 2;
@@ -228,6 +229,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {RESTART_APP_CB,                        ListenerFuncType::RESTART_APP_CB},
     {CALLING_SESSION_ID_CHANGE_CB,          ListenerFuncType::CALLING_SESSION_ID_CHANGE_CB},
     {ROTATION_LOCK_CHANGE_CB,               ListenerFuncType::ROTATION_LOCK_CHANGE_CB},
+    {SNAPSHOT_SKIP_CHANGE_CB,               ListenerFuncType::SNAPSHOT_SKIP_CHANGE_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -3291,6 +3293,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::ROTATION_LOCK_CHANGE_CB):
             ProcessRotationLockChangeRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::SNAPSHOT_SKIP_CHANGE_CB):
+            ProcessSnapshotSkipChangeRegister();
             break;
         default:
             break;
@@ -8134,6 +8139,44 @@ napi_value JsSceneSession::OnSetSnapshotSkip(napi_env env, napi_callback_info in
         return NapiGetUndefined(env);
     }
     return NapiGetUndefined(env);
+}
+
+void JsSceneSession::ProcessSnapshotSkipChangeRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    session->RegisterSnapshotSkipChangeCallback([weakThis = wptr(this)](bool isSkip) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->OnSnapshotSkipChange(isSkip);
+    });
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "success");
+}
+
+void JsSceneSession::OnSnapshotSkipChange(bool isSkip)
+{
+    taskScheduler_->PostMainThreadTask([weakThis = wptr(this), persistentId = persistentId_, isSkip, env = env_] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "jsSceneSession id:%{public}d has been destroyed", persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(SNAPSHOT_SKIP_CHANGE_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "jsCallBack is nullptr");
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "isSkip change to %{public}d", isSkip);
+        napi_value jsIsSkip = CreateJsValue(env, isSkip);
+        napi_value argv[] = { jsIsSkip };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    }, __func__);
 }
 
 napi_value JsSceneSession::OnAddSidebarBlur(napi_env env, napi_callback_info info)

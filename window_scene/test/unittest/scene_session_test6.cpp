@@ -1643,6 +1643,48 @@ HWTEST_F(SceneSessionTest6, NotifyPageRotationIsIgnored, TestSize.Level1)
     auto ret = session->NotifyPageRotationIsIgnored();
     EXPECT_EQ(WSError::WS_OK, ret);
 }
+
+/*
+ * @tc.name: RegisterSnapshotSkipChangeCallback
+ * @tc.desc: RegisterSnapshotSkipChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, RegisterSnapshotSkipChangeCallback, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "RegisterSnapshotSkipChangeCallback";
+    info.bundleName_ = "RegisterSnapshotSkipChangeCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->onSnapshotSkipChangeFunc_ = nullptr;
+    NotifySnapshotSkipChangeFunc func = [](bool isSkip) {};
+    sceneSession->RegisterSnapshotSkipChangeCallback(std::move(func));
+    EXPECT_NE(sceneSession->onSnapshotSkipChangeFunc_, nullptr);
+}
+ 
+/**
+ * @tc.name: HandleActionUpdateSnapshotSkip
+ * @tc.desc: HandleActionUpdateSnapshotSkip
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, HandleActionUpdateSnapshotSkip, TestSize.Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(nullptr, sceneSession);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    sceneSession->shadowSurfaceNode_ = surfaceNode;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetSnapshotSkip(false);
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP;
+    WMError ret = sceneSession->HandleActionUpdateSnapshotSkip(property, action);
+    EXPECT_EQ(ret, WMError::WM_OK);
+ 
+    NotifySnapshotSkipChangeFunc func = [](bool isSkip) {};
+    sceneSession->RegisterSnapshotSkipChangeCallback(std::move(func));
+    ret = sceneSession->HandleActionUpdateSnapshotSkip(property, action);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
