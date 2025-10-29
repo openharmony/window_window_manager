@@ -18,7 +18,6 @@
 
 #include <functional>
 #include <iremote_stub.h>
-#include <shared_mutex>
 
 #include "imock_session_manager_interface.h"
 #include "session_manager_service_interface.h"
@@ -32,16 +31,16 @@ namespace OHOS::Rosen {
 class SessionManagerLite;
 class SessionManagerServiceLiteRecoverListener : public IRemoteStub<ISessionManagerServiceRecoverListener> {
 public:
-    explicit SessionManagerServiceLiteRecoverListener(sptr<SessionManagerLite> sml);
+    explicit SessionManagerServiceLiteRecoverListener(int32_t userId);
     int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
     void OnSessionManagerServiceRecover(const sptr<IRemoteObject>& sessionManagerService) override;
-    void OnWMSConnectionChanged(int32_t userId,
+    void OnWMSConnectionChanged(int32_t wmsUserId,
                                 int32_t screenId,
                                 bool isConnected,
                                 const sptr<IRemoteObject>& sessionManagerService) override;
 
 private:
-    sptr<SessionManagerLite> sessionManagerLite_;
+    int32_t userId_;
 };
 
 class SSMDeathRecipientLite : public IRemoteObject::DeathRecipient {
@@ -65,7 +64,7 @@ private:
 class SessionManagerLite : public RefBase {
     WM_DECLARE_SINGLE_INSTANCE_BASE(SessionManagerLite);
 public:
-    static sptr<SessionManagerLite> GetInstance(const int32_t userId);
+    static SessionManagerLite& GetInstance(const int32_t userId);
 
     void ClearSessionManagerProxy();
     void Clear();
@@ -88,6 +87,7 @@ public:
     WMError UnregisterWMSConnectionChangedListener();
     void OnWMSConnectionChanged(
         int32_t userId, int32_t screenId, bool isConnected, const sptr<ISessionManagerService>& sessionManagerService);
+
     using UserSwitchCallbackFunc = std::function<void()>;
     void RegisterUserSwitchListener(const UserSwitchCallbackFunc& callbackFunc);
 
@@ -96,11 +96,11 @@ public:
      */
     void RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService);
 
-protected:
+private:
+    friend class sptr<SessionManagerLite>;
     SessionManagerLite(const int32_t userId = INVALID_USER_ID);
     ~SessionManagerLite() override;
 
-private:
     void InitSessionManagerServiceProxy();
     void InitSceneSessionManagerLiteProxy();
     void InitScreenSessionManagerLiteProxy();
@@ -117,7 +117,7 @@ private:
     static std::unordered_map<int32_t, sptr<SessionManagerLite>> sessionManagerLiteMap_;
     static std::mutex sessionManagerLiteMapMutex_;
     void OnUserSwitch(const sptr<ISessionManagerService>& sessionManagerService);
-    void OnWMSConnectionChangedCallback(int32_t userId, int32_t screenId, bool isConnected, bool isCallbackRegistered);
+    void OnWMSConnectionChangedCallback(int32_t userId, int32_t screenId, bool isConnected);
 
     /*
      * Window Recover
@@ -145,6 +145,8 @@ private:
      * Multi User
      */
     UserSwitchCallbackFunc userSwitchCallbackFunc_ = nullptr;
+    std::mutex userSwitchCallbackFuncMutex_;
+
     std::mutex wmsConnectionMutex_;
     int32_t currentWMSUserId_ = INVALID_USER_ID;
     int32_t currentScreenId_ = DEFAULT_SCREEN_ID;

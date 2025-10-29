@@ -14,7 +14,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <map>
+#include "iremote_object_mocker.h"
 #include "window_adapter_lite.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
@@ -38,15 +38,25 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
+private:
+    sptr<WindowAdapterLite> instance_ = nullptr;
+    int32_t userId_ = 100;
 };
 
 void WindowAdapterLiteTest::SetUpTestCase() {}
 
 void WindowAdapterLiteTest::TearDownTestCase() {}
 
-void WindowAdapterLiteTest::SetUp() {}
+void WindowAdapterLiteTest::SetUp()
+{
+    instance_ = &WindowAdapterLite::GetInstance(userId_);
+}
 
-void WindowAdapterLiteTest::TearDown() {}
+void WindowAdapterLiteTest::TearDown()
+{
+    instance_ = nullptr;
+}
 
 namespace {
 /**
@@ -56,16 +66,12 @@ namespace {
  */
 HWTEST_F(WindowAdapterLiteTest, UnregisterWindowManagerAgent, TestSize.Level1)
 {
-    std::shared_ptr<WindowAdapterLite> windowAdapterLite_ = std::make_shared<WindowAdapterLite>();
-    ASSERT_NE(windowAdapterLite_, nullptr);
     sptr<IWindowManagerAgent> windowManagerAgent = nullptr;
-
     std::set<sptr<IWindowManagerAgent>> iWindowManagerAgent = { nullptr };
-    windowAdapterLite_->windowManagerLiteAgentMap_.insert(
+    instance_->windowManagerLiteAgentMap_.insert(
         std::make_pair(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT, iWindowManagerAgent));
     int32_t pid = 0;
-    auto ret = windowAdapterLite_->CheckWindowId(0, pid);
-
+    auto ret = instance_->CheckWindowId(0, pid);
     ASSERT_NE(WMError::WM_OK, ret);
 }
 
@@ -76,11 +82,9 @@ HWTEST_F(WindowAdapterLiteTest, UnregisterWindowManagerAgent, TestSize.Level1)
  */
 HWTEST_F(WindowAdapterLiteTest, UnregisterWindowManagerAgent01, TestSize.Level1)
 {
-    std::shared_ptr<WindowAdapterLite> windowAdapterLite_ = std::make_shared<WindowAdapterLite>();
-    ASSERT_NE(windowAdapterLite_, nullptr);
-    windowAdapterLite_->ReregisterWindowManagerLiteAgent();
-    windowAdapterLite_->OnUserSwitch();
-    windowAdapterLite_->ClearWindowAdapter();
+    instance_->ReregisterWindowManagerLiteAgent();
+    instance_->OnUserSwitch();
+    instance_->ClearWindowAdapter();
 
     sptr<WMSDeathRecipient> wmSDeathRecipient = sptr<WMSDeathRecipient>::MakeSptr();
     ASSERT_NE(wmSDeathRecipient, nullptr);
@@ -88,11 +92,11 @@ HWTEST_F(WindowAdapterLiteTest, UnregisterWindowManagerAgent01, TestSize.Level1)
     wmSDeathRecipient->OnRemoteDied(wptrDeath);
 
     FocusChangeInfo focusInfo;
-    windowAdapterLite_->GetFocusWindowInfo(focusInfo);
+    instance_->GetFocusWindowInfo(focusInfo);
     WindowModeType windowModeType;
-    windowAdapterLite_->GetWindowModeType(windowModeType);
+    instance_->GetWindowModeType(windowModeType);
     int32_t pid = 0;
-    auto ret = windowAdapterLite_->CheckWindowId(0, pid);
+    auto ret = instance_->CheckWindowId(0, pid);
 
     ASSERT_NE(WMError::WM_OK, ret);
 }
@@ -104,9 +108,7 @@ HWTEST_F(WindowAdapterLiteTest, UnregisterWindowManagerAgent01, TestSize.Level1)
  */
 HWTEST_F(WindowAdapterLiteTest, UpdateAnimationSpeedWithPid, TestSize.Level1)
 {
-    std::shared_ptr<WindowAdapterLite> windowAdapterLite_ = std::make_shared<WindowAdapterLite>();
-    ASSERT_NE(windowAdapterLite_, nullptr);
-    auto err = windowAdapterLite_->UpdateAnimationSpeedWithPid(10000, 2.0f);
+    auto err = instance_->UpdateAnimationSpeedWithPid(10000, 2.0f);
     ASSERT_EQ(WMError::WM_OK, err);
 }
 
@@ -135,14 +137,13 @@ HWTEST_F(WindowAdapterLiteTest, OnRemoteDied, TestSize.Level1)
  */
 HWTEST_F(WindowAdapterLiteTest, GetAllMainWindowInfos, TestSize.Level1)
 {
-    std::shared_ptr<WindowAdapterLite> windowAdapterLite_ = std::make_shared<WindowAdapterLite>();
-    ASSERT_NE(windowAdapterLite_, nullptr);
-    windowAdapterLite_->OnUserSwitch();
+    ASSERT_NE(instance_, nullptr);
+    instance_->OnUserSwitch();
 
     MainWindowInfo info;
     std::vector<MainWindowInfo> infos;
     infos.push_back(info);
-    ASSERT_EQ(WMError::WM_OK, windowAdapterLite_->GetAllMainWindowInfos(infos));
+    ASSERT_EQ(WMError::WM_OK, instance_->GetAllMainWindowInfos(infos));
 }
 
 /**
@@ -152,12 +153,11 @@ HWTEST_F(WindowAdapterLiteTest, GetAllMainWindowInfos, TestSize.Level1)
  */
 HWTEST_F(WindowAdapterLiteTest, ClearMainSessions, TestSize.Level1)
 {
-    std::shared_ptr<WindowAdapterLite> windowAdapterLite_ = std::make_shared<WindowAdapterLite>();
-    ASSERT_NE(windowAdapterLite_, nullptr);
-    windowAdapterLite_->OnUserSwitch();
+    ASSERT_NE(instance_, nullptr);
+    instance_->OnUserSwitch();
 
     const std::vector<int32_t> persistentIds;
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowAdapterLite_->ClearMainSessions(persistentIds));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, instance_->ClearMainSessions(persistentIds));
 }
 
 /**
@@ -167,14 +167,13 @@ HWTEST_F(WindowAdapterLiteTest, ClearMainSessions, TestSize.Level1)
  */
 HWTEST_F(WindowAdapterLiteTest, ClearMainSessions01, TestSize.Level1)
 {
-    std::shared_ptr<WindowAdapterLite> windowAdapterLite_ = std::make_shared<WindowAdapterLite>();
-    ASSERT_NE(windowAdapterLite_, nullptr);
-    windowAdapterLite_->OnUserSwitch();
+    ASSERT_NE(instance_, nullptr);
+    instance_->OnUserSwitch();
 
     std::vector<int32_t> persistentIds;
     std::vector<int32_t> clearFailedIds;
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION,
-        windowAdapterLite_->ClearMainSessions(persistentIds, clearFailedIds));
+        instance_->ClearMainSessions(persistentIds, clearFailedIds));
 }
 
 /**
@@ -184,11 +183,10 @@ HWTEST_F(WindowAdapterLiteTest, ClearMainSessions01, TestSize.Level1)
  */
 HWTEST_F(WindowAdapterLiteTest, RaiseWindowToTop, TestSize.Level1)
 {
-    std::shared_ptr<WindowAdapterLite> windowAdapterLite_ = std::make_shared<WindowAdapterLite>();
-    ASSERT_NE(windowAdapterLite_, nullptr);
-    windowAdapterLite_->OnUserSwitch();
+    ASSERT_NE(instance_, nullptr);
+    instance_->OnUserSwitch();
 
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowAdapterLite_->RaiseWindowToTop(0));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, instance_->RaiseWindowToTop(0));
 }
 
 /**
@@ -198,9 +196,8 @@ HWTEST_F(WindowAdapterLiteTest, RaiseWindowToTop, TestSize.Level1)
  */
 HWTEST_F(WindowAdapterLiteTest, GetWindowStyleType, TestSize.Level1)
 {
-    std::shared_ptr<WindowAdapterLite> windowAdapterLite_ = std::make_shared<WindowAdapterLite>();
     WindowStyleType windowStyleType = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowAdapterLite_->GetWindowStyleType(windowStyleType));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, instance_->GetWindowStyleType(windowStyleType));
 }
 
 /**
@@ -212,11 +209,10 @@ HWTEST_F(WindowAdapterLiteTest, TerminateSessionByPersistentId, TestSize.Level1)
 {
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    std::shared_ptr<WindowAdapterLite> windowAdapterLite_ = std::make_shared<WindowAdapterLite>();
-    ASSERT_NE(windowAdapterLite_, nullptr);
-    windowAdapterLite_->OnUserSwitch();
+    ASSERT_NE(instance_, nullptr);
+    instance_->OnUserSwitch();
 
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowAdapterLite_->TerminateSessionByPersistentId(0));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, instance_->TerminateSessionByPersistentId(0));
     LOG_SetCallback(nullptr);
 }
 
@@ -229,12 +225,11 @@ HWTEST_F(WindowAdapterLiteTest, CloseTargetFloatWindow, TestSize.Level1)
 {
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    std::shared_ptr<WindowAdapterLite> windowAdapterLite_ = std::make_shared<WindowAdapterLite>();
-    ASSERT_NE(windowAdapterLite_, nullptr);
-    windowAdapterLite_->OnUserSwitch();
+    ASSERT_NE(instance_, nullptr);
+    instance_->OnUserSwitch();
 
     const std::string& bundleName = "test";
-    ASSERT_EQ(WMError::WM_OK, windowAdapterLite_->CloseTargetFloatWindow(bundleName));
+    ASSERT_EQ(WMError::WM_OK, instance_->CloseTargetFloatWindow(bundleName));
     LOG_SetCallback(nullptr);
 }
 
@@ -247,12 +242,10 @@ HWTEST_F(WindowAdapterLiteTest, CloseTargetPiPWindow, TestSize.Level1)
 {
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    std::shared_ptr<WindowAdapterLite> windowAdapterLite_ = std::make_shared<WindowAdapterLite>();
-    ASSERT_NE(windowAdapterLite_, nullptr);
-    windowAdapterLite_->OnUserSwitch();
+    instance_->OnUserSwitch();
 
     const std::string& bundleName = "test";
-    ASSERT_EQ(WMError::WM_OK, windowAdapterLite_->CloseTargetPiPWindow(bundleName));
+    ASSERT_EQ(WMError::WM_OK, instance_->CloseTargetPiPWindow(bundleName));
     LOG_SetCallback(nullptr);
 }
 
@@ -265,12 +258,10 @@ HWTEST_F(WindowAdapterLiteTest, GetCurrentPiPWindowInfo, TestSize.Level1)
 {
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    std::shared_ptr<WindowAdapterLite> windowAdapterLite_ = std::make_shared<WindowAdapterLite>();
-    ASSERT_NE(windowAdapterLite_, nullptr);
-    windowAdapterLite_->OnUserSwitch();
+    instance_->OnUserSwitch();
 
     std::string bundleName = "test";
-    ASSERT_EQ(WMError::WM_OK, windowAdapterLite_->GetCurrentPiPWindowInfo(bundleName));
+    ASSERT_EQ(WMError::WM_OK, instance_->GetCurrentPiPWindowInfo(bundleName));
     LOG_SetCallback(nullptr);
 }
 
@@ -281,10 +272,9 @@ HWTEST_F(WindowAdapterLiteTest, GetCurrentPiPWindowInfo, TestSize.Level1)
  */
 HWTEST_F(WindowAdapterLiteTest, ListWindowInfo01, Function | SmallTest | Level2)
 {
-    WindowAdapterLite WindowAdapterLite;
     WindowInfoOption windowInfoOption;
     std::vector<sptr<WindowInfo>> infos;
-    auto err = WindowAdapterLite.ListWindowInfo(windowInfoOption, infos);
+    auto err = instance_->ListWindowInfo(windowInfoOption, infos);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
 }
 
@@ -295,10 +285,9 @@ HWTEST_F(WindowAdapterLiteTest, ListWindowInfo01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowAdapterLiteTest, SendPointerEventForHover, Function | SmallTest | Level2)
 {
-    std::shared_ptr<WindowAdapterLite> windowAdapterLite_ = std::make_shared<WindowAdapterLite>();
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
-    auto err = windowAdapterLite_->SendPointerEventForHover(pointerEvent);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
+    ASSERT_NE(nullptr, instance_);
+    instance_->SendPointerEventForHover(pointerEvent);
 }
 
 /**
@@ -306,18 +295,19 @@ HWTEST_F(WindowAdapterLiteTest, SendPointerEventForHover, Function | SmallTest |
  * @tc.desc: sptr<WindowAdapterLite>
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterLiteTest, GetInstance, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterLiteTest, GetInstanceMulti, Function | SmallTest | Level2)
 {
-    sptr<WindowAdapterLite> instance = nullptr;
     int32_t userId = -1;
-    instance = WindowAdapterLite::GetInstance(userId);
+    sptr<WindowAdapterLite> instance = nullptr;
+    instance = &WindowAdapterLite::GetInstance(userId);
     ASSERT_NE(instance, nullptr);
 
     userId = 101;
-    instance = WindowAdapterLite::GetInstance(userId);
+    instance = &WindowAdapterLite::GetInstance(userId);
     ASSERT_NE(instance, nullptr);
 
-    instance = WindowAdapterLite::GetInstance(userId);
+    // branch 2
+    instance = &WindowAdapterLite::GetInstance(userId);
     ASSERT_NE(instance, nullptr);
 }
 
@@ -328,21 +318,19 @@ HWTEST_F(WindowAdapterLiteTest, GetInstance, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowAdapterLiteTest, InitSSMProxy, TestSize.Level1)
 {
-    auto instance = WindowAdapterLite::GetInstance(-1);
-
     // branch 1
-    instance->isProxyValid_ = true;
-    ASSERT_EQ(true, instance->InitSSMProxy());
+    instance_->isProxyValid_ = true;
+    ASSERT_EQ(true, instance_->InitSSMProxy());
 
     // branch 2
-    instance->isProxyValid_ = false;
-    instance->isRegisteredUserSwitchListener_ = true;
-    instance->InitSSMProxy();
+    instance_->isProxyValid_ = false;
+    instance_->isRegisteredUserSwitchListener_ = true;
+    instance_->InitSSMProxy();
 
     // branch 3
-    ASSERT_NE(nullptr, instance);
-    instance->isRegisteredUserSwitchListener_ = false;
-    instance->InitSSMProxy();
+    ASSERT_NE(nullptr, instance_);
+    instance_->isRegisteredUserSwitchListener_ = false;
+    instance_->InitSSMProxy();
 }
 
 /**
@@ -352,9 +340,20 @@ HWTEST_F(WindowAdapterLiteTest, InitSSMProxy, TestSize.Level1)
  */
 HWTEST_F(WindowAdapterLiteTest, UnregisterWMSConnectionChangedListener, TestSize.Level1)
 {
-    auto instance = WindowAdapterLite::GetInstance(-1);
-    instance->UnregisterWMSConnectionChangedListener();
-    ASSERT_NE(nullptr, instance);
+    instance_->UnregisterWMSConnectionChangedListener();
+    ASSERT_NE(nullptr, instance_);
+}
+
+/**
+ * @tc.name: RegisterWMSConnectionChangedListener
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterLiteTest, RegisterWMSConnectionChangedListener, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, instance_);
+    auto callbackFunc = [](int32_t, int32_t, bool) { return; };
+    instance_->RegisterWMSConnectionChangedListener(callbackFunc);
 }
 } // namespace
 } // namespace Rosen

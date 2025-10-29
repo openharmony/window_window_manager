@@ -38,7 +38,7 @@ private:
 class WindowAdapterLite : public RefBase {
     WM_DECLARE_SINGLE_INSTANCE_BASE(WindowAdapterLite);
 public:
-    static sptr<WindowAdapterLite> GetInstance(const int32_t userId);
+    static WindowAdapterLite& GetInstance(const int32_t userId);
 
     using WMSConnectionChangedCallbackFunc = std::function<void(int32_t, int32_t, bool)>;
     virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID);
@@ -71,10 +71,11 @@ public:
     virtual WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
        std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap);
 
-    ~WindowAdapterLite() override;
-
 private:
+    friend class sptr<WindowAdapterLite>;
+    ~WindowAdapterLite() override;
     WindowAdapterLite(const int32_t userId = INVALID_USER_ID);
+
     static inline SingletonDelegator<WindowAdapterLite> delegator;
     bool InitSSMProxy();
 
