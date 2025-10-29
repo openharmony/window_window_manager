@@ -2028,23 +2028,6 @@ HWTEST_F(SceneSessionTest4, SetWinRectWhenUpdateRectTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdatePiPTemplateInfoTest
- * @tc.desc: UpdatePiPTemplateInfo function test
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, UpdatePiPTemplateInfoTest, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "UpdatePiPTemplateInfo";
-    info.bundleName_ = "UpdatePiPTemplateInfo";
-    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
-    sceneSession->isTerminating_ = false;
-    PiPTemplateInfo templateInfo;
-    auto result = sceneSession->UpdatePiPTemplateInfo(templateInfo);
-    ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
  * @tc.name: SetPipParentWindowIdTest
  * @tc.desc: SetPipParentWindowId function test
  * @tc.type: FUNC
@@ -2068,6 +2051,23 @@ HWTEST_F(SceneSessionTest4, SetPipParentWindowIdTest, Function | SmallTest | Lev
  
     sceneSession->isTerminating_ = true;
     result = sceneSession->SetPipParentWindowId(id);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: UpdatePiPTemplateInfoTest
+ * @tc.desc: UpdatePiPTemplateInfo function test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, UpdatePiPTemplateInfoTest, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdatePiPTemplateInfo";
+    info.bundleName_ = "UpdatePiPTemplateInfo";
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    sceneSession->isTerminating_ = false;
+    PiPTemplateInfo templateInfo;
+    auto result = sceneSession->UpdatePiPTemplateInfo(templateInfo);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 }
