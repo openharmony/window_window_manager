@@ -2043,6 +2043,22 @@ HWTEST_F(SceneSessionTest4, UpdatePiPTemplateInfoTest, Function | SmallTest | Le
     auto result = sceneSession->UpdatePiPTemplateInfo(templateInfo);
     ASSERT_EQ(result, WSError::WS_OK);
 }
+
+/**
+ * @tc.name: RegisterGetIsDockAutoHideFunc
+ * @tc.desc: RegisterGetIsDockAutoHideFunc function test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, RegisterGetIsDockAutoHideFunc, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    EXCEPT_NE(sceneSession, nullptr);
+    sceneSession->RegisterGetIsDockAutoHideFunc([](){ return false; });
+    EXCEPT_NE(sceneSession->onGetIsDockAutoHideFunc_, nullptr);
+}
 }
 }
 }

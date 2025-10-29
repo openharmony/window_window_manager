@@ -140,6 +140,7 @@ public:
      * PC Window
      */
     static napi_value GetWindowLimits(napi_env env, napi_callback_info info);
+    static napi_value SetIsDockAutoHide(napi_env env, napi_callback_info info);
 
     /*
      * Multi Instance
@@ -268,6 +269,8 @@ private:
     napi_value OnGetWindowLimits(napi_env env, napi_callback_info info);
     void RegisterVirtualPixelRatioChangeCallback();
     void OnVirtualPixelChange(float density, DisplayId displayId);
+    napi_value OnSetIsDockAutoHide(napi_env env, napi_callback_info info);
+
     /*
      * Multi Instance
      */
