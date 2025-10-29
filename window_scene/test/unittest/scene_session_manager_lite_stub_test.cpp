@@ -1323,6 +1323,23 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetRecentMainSessionInfoList, Fu
 }
 
 /**
+ * @tc.name: HandleCreateNewInstanceKey
+ * @tc.desc: test function : HandleCreateNewInstanceKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleCreateNewInstanceKey, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    std::string bundleName = "bundleName";
+    data.WriteString(bundleName);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleCreateNewInstanceKey(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
  * @tc.name: HandlePendingSessionToBackgroundByPersistentId
  * @tc.desc: test function : HandlePendingSessionToBackgroundByPersistentId
  * @tc.type: FUNC
