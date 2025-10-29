@@ -72,7 +72,29 @@ void DisplayManagerAni::SetFoldDisplayModeReasonAni(ani_env* env, ani_int mode, 
         TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
     }
 }
- 
+
+void DisplayManagerAni::SetFoldDisplayModeAni(ani_env* env, ani_int mode, ani_long nativeObj)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI]");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
+        return;
+    }
+    DisplayManagerAni* displayManagerAni = reinterpret_cast<DisplayManagerAni*>(nativeObj);
+    if (displayManagerAni != nullptr) {
+        std::string reason = "";
+        ani_string reasonAni;
+        ani_status status = DisplayAniUtils::GetAniString(env, reason, &reasonAni);
+        if (status != ANI_OK) {
+            TLOGE(WmsLogTag::DMS, "[ANI] GetAniString failed, ani_status = %{public}d", status);
+            return;
+        }
+        displayManagerAni->OnSetFoldDisplayModeReasonAni(env, mode, reasonAni);
+    } else {
+        TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
+    }
+}
+
 void DisplayManagerAni::OnSetFoldDisplayModeReasonAni(ani_env* env, ani_int mode, ani_string reason)
 {
     TLOGI(WmsLogTag::DMS, "[ANI]");
@@ -84,27 +106,6 @@ void DisplayManagerAni::OnSetFoldDisplayModeReasonAni(ani_env* env, ani_int mode
     if (errCode != DmErrorCode::DM_OK) {
         AniErrUtils::ThrowBusinessError(env, errCode, "SetFoldDisplayModeAni failed");
     }
-}
- 
-void DisplayManagerAni::SetFoldDisplayModeAni(ani_env* env, ani_int mode, ani_long nativeObj)
-{
-    TLOGI(WmsLogTag::DMS, "[ANI]");
-    if (env == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
-        return;
-    }
-    DisplayManagerAni* displayManagerAni = reinterpret_cast<DisplayManagerAni*>(nativeObj);
-    if (displayManagerAni != nullptr) {
-        displayManagerAni->OnSetFoldDisplayModeAni(env, mode);
-    } else {
-        TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
-    }
-}
- 
-void DisplayManagerAni::OnSetFoldDisplayModeAni(ani_env* env, ani_int mode)
-{
-    TLOGI(WmsLogTag::DMS, "[ANI] mode: %{public}d", static_cast<FoldDisplayMode>(mode));
-    SingletonContainer::Get<DisplayManager>().SetFoldDisplayMode(static_cast<FoldDisplayMode>(mode));
 }
  
 void DisplayManagerAni::SetFoldStatusLockedAni(ani_env* env, ani_boolean locked, ani_long nativeObj)
