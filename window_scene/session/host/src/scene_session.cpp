@@ -3945,8 +3945,9 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
         return false;
     }
     CompatibilityModeWindowScaleTransfer(rect, true);
-    int32_t statusBarHeight = IsLayoutFullScreen() ? 0 : GetStatusBarHeight();
-    int32_t dockHeight = IsLayoutFullScreen() ? 0 : GetDockHeight();
+    bool isDockAutoHide = onGetIsDockAutoHideFunc_ ? onGetIsDockAutoHideFunc_() : false;
+    int32_t statusBarHeight = (IsLayoutFullScreen() || isDockAutoHide) ? 0 : GetStatusBarHeight();
+    int32_t dockHeight = (IsLayoutFullScreen() || isDockAutoHide) ? 0 : GetDockHeight();
     bool ret = pcFoldScreenController_->ThrowSlip(GetScreenId(), rect, statusBarHeight, dockHeight);
     if (!ret) {
         TLOGD(WmsLogTag::WMS_LAYOUT_PC, "no throw slip");
@@ -7878,6 +7879,11 @@ void SceneSession::RegisterGetStatusBarAvoidHeightFunc(GetStatusBarAvoidHeightFu
 void SceneSession::RegisterGetStatusBarConstantlyShowFunc(GetStatusBarConstantlyShowFunc&& callback)
 {
     onGetStatusBarConstantlyShowFunc_ = std::move(callback);
+}
+
+void SceneSession::RegisterGetIsDockAutoHideFunc(GetIsDockAutoHideFunc&& func)
+{
+    onGetIsDockAutoHideFunc_ = std::move(func);
 }
 
 WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config)

@@ -122,6 +122,7 @@ using NotifyAvoidAreaChangeCallback = std::function<void(const sptr<AvoidArea>& 
 using NotifySetSupportedWindowModesFunc = std::function<void(
     std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes)>;
 using GetStatusBarAvoidHeightFunc = std::function<void(DisplayId displayId, WSRect& barArea)>;
+using GetIsDockAutoHideFunc = std::function<bool()>;
 using GetStatusBarConstantlyShowFunc = std::function<void(DisplayId displayId, bool& isVisible)>;
 using NotifySetWindowCornerRadiusFunc = std::function<void(float cornerRadius)>;
 using GetKeyboardOccupiedAreaWithRotationCallback =
@@ -511,6 +512,7 @@ public:
     void MarkAvoidAreaAsDirty();
     virtual void RecalculatePanelRectForAvoidArea(WSRect& panelRect) {}
     void RegisterGetStatusBarAvoidHeightFunc(GetStatusBarAvoidHeightFunc&& func);
+    void RegisterGetIsDockAutoHideFunc(GetIsDockAutoHideFunc&& func);
     void RegisterGetStatusBarConstantlyShowFunc(GetStatusBarConstantlyShowFunc&& func);
     void HookAvoidAreaInCompatibleMode(const WSRect& rect, AvoidAreaType avoidAreaType, AvoidArea& avoidArea) const;
 
@@ -952,6 +954,7 @@ protected:
     NotifyNeedAvoidFunc onNeedAvoid_;
     NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
     GetStatusBarAvoidHeightFunc onGetStatusBarAvoidHeightFunc_;
+    GetIsDockAutoHideFunc onGetIsDockAutoHideFunc_;
     GetStatusBarConstantlyShowFunc onGetStatusBarConstantlyShowFunc_;
     void PrintAvoidAreaInfo(DisplayId displayId,
         AvoidAreaType type, const WSRect& winRect, const WSRect& avoidRect) const;

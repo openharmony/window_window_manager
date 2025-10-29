@@ -2218,6 +2218,14 @@ WMError SceneSessionManager::GetWindowLimits(int32_t windowId, WindowLimits& win
     return WMError::WM_OK;
 }
 
+void SceneSessionManager::ConfigDockAutoHide(bool isDockAutoHide) {
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ConfigDockAutoHide: isDockAutoHide %{public}d", isDockAutoHide);
+    auto task = [this, isDockAutoHide] {
+        systemConfig_.isDockAutoHide_ = isDockAutoHide;
+    };
+    return taskScheduler_->PostAsyncTask(task, "ConfigDockAutoHide");
+}
+
 uint32_t SceneSessionManager::GetLockScreenZOrder()
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -2526,6 +2534,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         });
         sceneSession->SetFindScenePanelRsNodeByZOrderFunc([this](uint64_t screenId, uint32_t targetZOrder) {
             return this->findScenePanelRsNodeByZOrderFunc_(screenId, targetZOrder);
+        });
+        sceneSession->RegisterGetIsDockAutoHideFunc([this]() {
+            return systemConfig_.isDockAutoHide_;
         });
         sceneSession->RegisterForceSplitFullScreenChangeCallback([this](uint32_t uid, bool isFullScreen) {
             this->NotifyIsFullScreenInForceSplitMode(uid, isFullScreen);

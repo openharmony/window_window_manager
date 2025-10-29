@@ -848,6 +848,7 @@ struct SystemSessionConfig : public Parcelable {
     // Product configuration
     bool supportFollowParentWindowLayout_ = false;
     bool supportFollowRelativePositionToParent_ = false;
+    bool isDockAutoHide_ = false;
     bool supportZLevel_ = false;
     bool skipRedundantWindowStatusNotifications_ = false;
     uint32_t supportFunctionType_ = 0;
@@ -908,6 +909,9 @@ struct SystemSessionConfig : public Parcelable {
             return false;
         }
         if (!parcel.WriteBool(supportFollowRelativePositionToParent_)) {
+            return false;
+        }
+        if (!parcel.WriteBool(isDockAutoHide_)) {
             return false;
         }
         if (!parcel.WriteBool(supportZLevel_) ||
@@ -972,6 +976,7 @@ struct SystemSessionConfig : public Parcelable {
         config->maxMidSceneNum_ = parcel.ReadUint32();
         config->supportFollowParentWindowLayout_ = parcel.ReadBool();
         config->supportFollowRelativePositionToParent_ = parcel.ReadBool();
+        config->isDockAutoHide_ = parcel.ReadBool();
         config->supportZLevel_ = parcel.ReadBool();
         config->skipRedundantWindowStatusNotifications_ = parcel.ReadBool();
         config->supportFunctionType_ = parcel.ReadUint32();
