@@ -713,6 +713,10 @@ void OH_WindowManager_ReleaseMainWindowSnapshot(const OH_PixelmapNative* snapsho
 
 int32_t OH_WindowManager_LockCursor(int32_t windowId, bool isCursorFollowMovement)
 {
+    if (windowId <= 0) {
+        TLOGE(WmsLogTag::WMS_EVENT, "windowId is invalid, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+    }
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "eventHandler is null, windowId:%{public}d", windowId);
@@ -740,6 +744,10 @@ int32_t OH_WindowManager_LockCursor(int32_t windowId, bool isCursorFollowMovemen
 
 int32_t OH_WindowManager_UnlockCursor(int32_t windowId)
 {
+    if (windowId <= 0) {
+        TLOGE(WmsLogTag::WMS_EVENT, "windowId is invalid, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+    }
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "eventHandler is null, windowId:%{public}d", windowId);
