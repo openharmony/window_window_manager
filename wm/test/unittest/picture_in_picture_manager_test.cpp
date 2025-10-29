@@ -442,6 +442,26 @@ HWTEST_F(PictureInPictureManagerTest, DoDestroy, TestSize.Level1)
     PictureInPictureManager::DoDestroy();
     ASSERT_EQ(pipController->curState_, PiPWindowState::STATE_STOPPED);
 }
+
+/**
+ * @tc.name: DoActiveStatusChangeEvent
+ * @tc.desc: DoActiveStatusChangeEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, DoActiveStatusChangeEvent, TestSize.Level1)
+{
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipController = sptr<PictureInPictureController>::MakeSptr(option, nullptr, 100, nullptr);
+    ASSERT_NE(pipController, nullptr);
+
+    PictureInPictureManager::activeController_ = pipController;
+    pipController->window_ = mw;
+    PictureInPictureManager::DoActiveStatusChangeEvent(true);
+    ASSERT_EQ(pipController->curActiveStatus_, true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

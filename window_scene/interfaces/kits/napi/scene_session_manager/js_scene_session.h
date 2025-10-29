@@ -207,7 +207,7 @@ private:
     static napi_value SetPipActionEvent(napi_env env, napi_callback_info info);
     static napi_value NotifyPipOcclusionChange(napi_env env, napi_callback_info info);
     static napi_value NotifyPipSizeChange(napi_env env, napi_callback_info info);
-    static napi_value NotifyPipScreenWindowStatusChange(napi_env env, napi_callback_info info);
+    static napi_value NotifyPipActiveWindowStatusChange(napi_env env, napi_callback_info info);
     static napi_value SetPiPControlEvent(napi_env env, napi_callback_info info);
     static napi_value NotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info);
     static napi_value SetSkipDraw(napi_env env, napi_callback_info info);
@@ -314,7 +314,7 @@ private:
     napi_value OnSetPiPControlEvent(napi_env env, napi_callback_info info);
     napi_value OnNotifyPipOcclusionChange(napi_env env, napi_callback_info info);
     napi_value OnNotifyPipSizeChange(napi_env env, napi_callback_info info);
-    napi_value OnNotifyPipScreenStatusChange(napi_env env, napi_callback_info info);
+    napi_value OnNotifyPiPActiveStatusChange(napi_env env, napi_callback_info info);
     napi_value OnNotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info);
     napi_value OnSetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
     napi_value OnSetSkipDraw(napi_env env, napi_callback_info info);

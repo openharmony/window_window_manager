@@ -1158,6 +1158,35 @@ HWTEST_F(SessionStageProxyTest, SendFbActionEvent, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyPiPActiveStatusChange
+ * @tc.desc: test function : NotifyPiPActiveStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyPiPActiveStatusChange, TestSize.Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionStage_->NotifyPiPActiveStatusChange(true));
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    ASSERT_EQ(WSError::WS_OK, sessionStage_->NotifyPiPActiveStatusChange(true));
+
+    sptr<SessionStageProxy> sProxy = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sProxy->NotifyPiPActiveStatusChange(true));
+
+    auto remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    remoteMocker->sendRequestResult_ = 1;
+    sptr<SessionStageProxy> sessionStage = sptr<SessionStageProxy>::MakeSptr(remoteMocker);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionStage->NotifyPiPActiveStatusChange(true));
+
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionStage_->NotifyPiPActiveStatusChange(true));
+    MockMessageParcel::SetWriteBoolErrorFlag(false);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
  * @tc.name: TestUpdateGlobalDisplayRectFromServer
  * @tc.desc: Test UpdateGlobalDisplayRectFromServer behavior in various IPC scenarios
  * @tc.type: FUNC
