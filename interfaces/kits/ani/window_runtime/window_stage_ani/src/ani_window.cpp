@@ -3007,8 +3007,8 @@ ani_object AniWindow::SetRaiseByClickEnabled(ani_env* env, ani_boolean enable)
         TLOGE(WmsLogTag::WMS_FOCUS, "[ANI] windowToken_ is nullptr");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    WMError ret = windowToken_->SetRaiseByClickEnabled(static_cast<bool>(enable));
-    if (ret != WMError::WM_OK) {
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetRaiseByClickEnabled(static_cast<bool>(enable)));
+    if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_FOCUS, "[ANI] SetRaiseByClickEnabled set error");
         return AniWindowUtils::AniThrowError(env, ret);
     }
@@ -3020,8 +3020,8 @@ ani_object AniWindow::SetExclusivelyHighlighted(ani_env* env, ani_boolean exclus
     if (windowToken_ == nullptr) {
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    WMError ret = windowToken_->SetExclusivelyHighlighted(static_cast<bool>(exclusivelyHighlighted));
-    if (ret != WMError::WM_OK) {
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetExclusivelyHighlighted(static_cast<bool>(exclusivelyHighlighted)));
+    if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_FOCUS, "[ANI] Set exclusively highlighted failed");
         return AniWindowUtils::AniThrowError(env, ret);
     }
