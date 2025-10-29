@@ -162,23 +162,8 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         topNInfo.push_back(mainWindowInfo);
         return WMError::WM_OK;
     }
-    WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) override
-    {
-        MainWindowInfo mainWindowInfo;
-        infos.push_back(mainWindowInfo);
-        return WMError::WM_OK;
-    }
     WMError GetMainWindowInfoByToken(const sptr<IRemoteObject>& abilityToken, MainWindowInfo& windowInfo) override
     {
-        return WMError::WM_OK;
-    }
-    WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo) override
-    {
-        return WMError::WM_OK;
-    }
-    WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds) override
-    {
-        clearFailedIds.push_back(1);
         return WMError::WM_OK;
     }
     WSError RaiseWindowToTop(int32_t persistentId) override
@@ -193,6 +178,21 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     WSError UnregisterIAbilityManagerCollaborator(int32_t type) override
     {
         return WSError::WS_OK;
+    }
+    WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) override
+    {
+        MainWindowInfo mainWindowInfo;
+        infos.push_back(mainWindowInfo);
+        return WMError::WM_OK;
+    }
+    WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds) override
+    {
+        clearFailedIds.push_back(1);
+        return WMError::WM_OK;
     }
     WMError GetWindowStyleType(WindowStyleType& windowStyleType) override
     {
@@ -970,53 +970,6 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnregisterWindowManagerAgent, Te
 }
 
 /**
- * @tc.name: HandleListWindowInfo
- * @tc.desc: test function : HandleListWindowInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerLiteStubTest, HandleListWindowInfo, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    DisplayId displayId = 0;
-    int32_t windowId = 0;
-    data.WriteUint8(static_cast<WindowInfoFilterOptionDataType>(WindowInfoFilterOption::ALL));
-    data.WriteUint8(static_cast<WindowInfoTypeOptionDataType>(WindowInfoTypeOption::ALL));
-    data.WriteUint64(displayId);
-    data.WriteInt32(windowId);
-    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleListWindowInfo(data, reply);
-    EXPECT_EQ(ERR_NONE, res);
-}
-
-/**
- * @tc.name: HandleGetVisibilityWindowInfo
- * @tc.desc: test function : HandleGetVisibilityWindowInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetVisibilityWindowInfo, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetVisibilityWindowInfo(data, reply);
-    EXPECT_EQ(ERR_NONE, res);
-}
-
-/**
- * @tc.name: HandleGetMainWinodowInfo
- * @tc.desc: test function : HandleGetMainWinodowInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetMainWinodowInfo, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    int32_t numMax = 100;
-    data.WriteInt32(numMax);
-    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetMainWinodowInfo(data, reply);
-    EXPECT_EQ(ERR_NONE, res);
-}
-
-/**
  * @tc.name: HandleUpdateAnimationSpeedWithPid
  * @tc.desc: test HandleUpdateAnimationSpeedWithPid
  * @tc.type: FUNC
@@ -1040,6 +993,71 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleUpdateAnimationSpeedWithPid, Tes
     res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleUpdateAnimationSpeedWithPid(data, reply);
     EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleListWindowInfo
+ * @tc.desc: test function : HandleListWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleListWindowInfo, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    DisplayId displayId = 0;
+    int32_t windowId = 0;
+    data.WriteUint8(static_cast<WindowInfoFilterOptionDataType>(WindowInfoFilterOption::ALL));
+    data.WriteUint8(static_cast<WindowInfoTypeOptionDataType>(WindowInfoTypeOption::ALL));
+    data.WriteUint64(displayId);
+    data.WriteInt32(windowId);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleListWindowInfo(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetVisibilityWindowInfo
+ * @tc.desc: test function : HandleGetVisibilityWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetVisibilityWindowInfo, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetVisibilityWindowInfo(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetMainWinodowInfo
+ * @tc.desc: test function : HandleGetMainWinodowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetMainWinodowInfo, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t numMax = 100;
+    data.WriteInt32(numMax);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetMainWinodowInfo(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleRaiseWindowToTop
+ * @tc.desc: test function : HandleRaiseWindowToTop
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleRaiseWindowToTop, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t persistentId = 65535;
+    data.WriteInt32(persistentId);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleRaiseWindowToTop(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
 }
 
 /**
@@ -1082,21 +1100,6 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleClearMainSessions, TestSize.Leve
     std::vector<int32_t> persistentIds = { 1, 2, 3 };
     data.WriteInt32Vector(persistentIds);
     auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleClearMainSessions(data, reply);
-    EXPECT_EQ(ERR_NONE, res);
-}
-
-/**
- * @tc.name: HandleRaiseWindowToTop
- * @tc.desc: test function : HandleRaiseWindowToTop
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerLiteStubTest, HandleRaiseWindowToTop, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    int32_t persistentId = 65535;
-    data.WriteInt32(persistentId);
-    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleRaiseWindowToTop(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
