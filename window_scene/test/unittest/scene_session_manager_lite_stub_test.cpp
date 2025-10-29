@@ -1366,6 +1366,76 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandlePendingSessionToBackgroundByPers
 }
 
 /**
+ * @tc.name: HandleRemoveInstanceKey
+ * @tc.desc: test function : HandleRemoveInstanceKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleRemoveInstanceKey, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    std::string bundleName = "bundleName";
+    std::string instanceKey = "instanceKey";
+    data.WriteString(bundleName);
+    data.WriteString(instanceKey);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleRemoveInstanceKey(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandlePendingSessionToBackground_ShouldReturnInvalidData_WhenTokenIsNull
+ * @tc.desc: test function : HandlePendingSessionToBackgroundTest_001
+ * @tc.type: 测试当 token 为 nullptr 时,函数应返回 ERR_INVALID_DATA
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandlePendingSessionToBackgroundTest_001, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    int result = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandlePendingSessionToBackground(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandlePendingSessionToBackground_ShouldReturnInvalidData_WhenReadBoolFailed
+ * @tc.desc: test function : HandlePendingSessionToBackgroundTest_002
+ * @tc.type: 测试当读取 shouldBackToCaller 失败时,函数应返回 ERR_INVALID_DATA
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandlePendingSessionToBackgroundTest_002, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    data.WriteRemoteObject(token);
+
+    int result = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandlePendingSessionToBackground(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandlePendingSessionToBackground_ShouldReturnInvalidData_WhenPendingSessionToBackgroundSucceeds
+ * @tc.desc: test function : HandlePendingSessionToBackgroundTest_003
+ * @tc.type: 测试当 wantParams 为 nullptr 时,函数应返回 ERR_NONE
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandlePendingSessionToBackgroundTest_003, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    data.WriteRemoteObject(token);
+    data.WriteInt32(1);
+    data.writebool(true);
+
+    int result = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandlePendingSessionToBackground(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleUpdateKioskAppList
  * @tc.desc: test function : HandleUpdateKioskAppList
  * @tc.type: FUNC
