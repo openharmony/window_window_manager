@@ -8156,7 +8156,6 @@ void JsSceneSession::ProcessSnapshotSkipChangeRegister()
         }
         jsSceneSession->OnSnapshotSkipChange(isSkip);
     });
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "success");
 }
 
 void JsSceneSession::OnSnapshotSkipChange(bool isSkip)
