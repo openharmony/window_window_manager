@@ -342,7 +342,7 @@ public:
     WSError SetPipActionEvent(const std::string& action, int32_t status);
     WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status);
     WSError NotifyPipWindowSizeChange(double width, double height, double scale);
-    WSError NotifyPipScreenStatusChange(PiPScreenStatus status);
+    WSError NotifyPiPActiveStatusChange(bool status);
     void RegisterProcessPrepareClosePiPCallback(NotifyPrepareClosePiPSessionFunc&& callback);
 
     void RequestHideKeyboard(bool isAppColdStart = false);
