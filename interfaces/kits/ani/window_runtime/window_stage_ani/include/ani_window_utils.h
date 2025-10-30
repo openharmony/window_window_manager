@@ -36,6 +36,14 @@
 #include "wm_common.h"
 #include "pixel_map.h"
 
+#define RETURN_IF_NULL(param, ...)                                             \
+    do {                                                                       \
+        if (!param) {                                                          \
+            TLOGE(WmsLogTag::DEFAULT, "[ANI] The %{public}s is null", #param); \
+            return __VA_ARGS__;                                                \
+        }                                                                      \
+    } while (false)                                                            \
+
 namespace OHOS {
 namespace Rosen {
 constexpr Rect g_emptyRect = {0, 0, 0, 0};
@@ -192,16 +200,48 @@ public:
     static bool CheckParaIsUndefined(ani_env* env, ani_object para);
     static ani_object CreateAniPosition(ani_env* env, const Position& position);
     static std::string GetPixelUnitString(const PixelUnit& pixelUnit);
+
     /**
      * @brief Convert WMError to corresponding WmErrorCode.
-     *
-     * If the WMError is not found in the mapping, returns the given default code.
      *
      * @param error WMError value to convert.
      * @param defaultCode Value to return if mapping is not found (default: WM_ERROR_STATE_ABNORMALLY).
      * @return Corresponding WmErrorCode or defaultCode if unmapped.
      */
     static WmErrorCode ToErrorCode(WMError error, WmErrorCode defaultCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+
+    /**
+     * @brief Checks whether a given ANI object is an instance of the specified class
+     *
+     * @param env The ANI environment.
+     * @param obj The ANI object to be checked.
+     * @param className The fully qualified name of the class to check against.
+     * @return true if obj is an instance of the specified class, false otherwise.
+     */
+    static bool IsInstanceOf(ani_env* env, ani_object obj, const char* className);
+
+    /**
+     * @brief Extracts all elements from an ANI array object into a vector of ani_refs.
+     *
+     * @param env The ANI environment.
+     * @param arrayObj The ANI array object from which to extract elements.
+     * @return A vector containing ani_ref references to each valid element.
+     *         Returns an empty vector if the input is invalid or the extraction fails.
+     */
+    static std::vector<ani_ref> ExtractArrayElements(ani_env* env, ani_object arrayObj);
+
+    /**
+     * @brief Extracts enum values from an ANI array into a vector of type EnumType.
+     *
+     * @tparam EnumType The enumeration type to which each ANI enum item should be converted.
+     * @param env The ANI environment.
+     * @param enumArrayObj The ANI array object containing enum items.
+     * @return A vector containing converted enum values of type EnumType.
+     *         Returns an empty vector if the input is invalid or conversion fails.
+     */
+    template <typename EnumType>
+    static std::vector<EnumType> ExtractEnumValues(ani_env* env, ani_object enumArrayObj);
+
     static bool ParseSubWindowOptions(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
     static bool ParseRectParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
     static bool ParseModalityParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
@@ -277,6 +317,6 @@ ani_object AniWindowUtils::CreateBaseTypeObject(ani_env* env, T value)
     }
     return obj;
 }
-}
-}
+} // namespace Rosen
+} // namespace OHOS
 #endif
