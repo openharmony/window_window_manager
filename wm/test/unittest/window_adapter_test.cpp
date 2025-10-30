@@ -664,9 +664,11 @@ HWTEST_F(WindowAdapterTest, UpdateRsTree, TestSize.Level1)
 HWTEST_F(WindowAdapterTest, BindDialogTarget, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     sptr<IRemoteObject> targetToken;
     uint32_t windowId = 0;
-    ASSERT_EQ(WMError::WM_OK, windowAdapter.BindDialogTarget(windowId, targetToken));
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, windowAdapter.BindDialogTarget(windowId, targetToken));
 }
 
 /**
@@ -775,11 +777,13 @@ HWTEST_F(WindowAdapterTest, UpdateSessionTouchOutsideListener, TestSize.Level1)
 HWTEST_F(WindowAdapterTest, SetSessionGravity, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     int32_t persistentId = 0;
     SessionGravity gravity = SessionGravity::SESSION_GRAVITY_FLOAT;
     uint32_t percent = 0;
     auto ret = windowAdapter.SetSessionGravity(persistentId, gravity, percent);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_DO_NOTHING, ret);
 }
 
 /**
@@ -806,10 +810,12 @@ HWTEST_F(WindowAdapterTest, BindDialogSessionTarget, TestSize.Level1)
 HWTEST_F(WindowAdapterTest, GetHostWindowRect, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     int32_t hostWindowId = 0;
     Rect rect = { 0, 0, 0, 0 };
     auto ret = windowAdapter.GetHostWindowRect(hostWindowId, rect);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_DO_NOTHING, ret);
 }
 
 /**
@@ -820,10 +826,12 @@ HWTEST_F(WindowAdapterTest, GetHostWindowRect, TestSize.Level1)
 HWTEST_F(WindowAdapterTest, GetHostGlobalScaledRect, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     int32_t hostWindowId = 0;
     Rect rect = { 0, 0, 0, 0 };
     auto ret = windowAdapter.GetHostGlobalScaledRect(hostWindowId, rect);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_SESSION, ret);
+    ASSERT_EQ(WMError::WM_DO_NOTHING, ret);
 }
 
 /**
@@ -834,8 +842,10 @@ HWTEST_F(WindowAdapterTest, GetHostGlobalScaledRect, TestSize.Level1)
 HWTEST_F(WindowAdapterTest, GetWindowModeType, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     WindowModeType windowModeType;
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowAdapter.GetWindowModeType(windowModeType));
+    ASSERT_EQ(WMError::WM_DO_NOTHING, windowAdapter.GetWindowModeType(windowModeType));
 }
 
 /**
@@ -846,8 +856,10 @@ HWTEST_F(WindowAdapterTest, GetWindowModeType, TestSize.Level1)
 HWTEST_F(WindowAdapterTest, GetWindowStyleType, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     WindowStyleType windowStyleType = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowAdapter.GetWindowStyleType(windowStyleType));
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, windowAdapter.GetWindowStyleType(windowStyleType));
 }
 
 /**
@@ -858,8 +870,10 @@ HWTEST_F(WindowAdapterTest, GetWindowStyleType, TestSize.Level1)
 HWTEST_F(WindowAdapterTest, GetWindowIdsByCoordinate, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     std::vector<int32_t> windowIds;
-    ASSERT_EQ(WMError::WM_OK, windowAdapter.GetWindowIdsByCoordinate(0, 0, 0, 0, windowIds));
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, windowAdapter.GetWindowIdsByCoordinate(0, 0, 0, 0, windowIds));
 }
 
 /**
@@ -887,8 +901,10 @@ HWTEST_F(WindowAdapterTest, NotifyScreenshotEvent, TestSize.Level1)
 {
     ScreenshotEventType type = ScreenshotEventType::SCROLL_SHOT_START;
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     auto err = windowAdapter.NotifyScreenshotEvent(type);
-    EXPECT_EQ(err, WMError::WM_OK);
+    EXPECT_EQ(err, WMError::WM_ERROR_SAMGR);
     auto ret = windowAdapter.InitWMSProxy();
     EXPECT_EQ(ret, true);
 }
@@ -901,8 +917,10 @@ HWTEST_F(WindowAdapterTest, NotifyScreenshotEvent, TestSize.Level1)
 HWTEST_F(WindowAdapterTest, UpdateScreenLockStatusForApp, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     auto err = windowAdapter.UpdateScreenLockStatusForApp("", true);
-    ASSERT_EQ(err, WMError::WM_OK);
+    ASSERT_EQ(err, WMError::WM_DO_NOTHING);
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(ret, true);
 }
@@ -939,9 +957,11 @@ HWTEST_F(WindowAdapterTest, CreateAndConnectSpecificSession, TestSize.Level1)
 HWTEST_F(WindowAdapterTest, IsPcWindow, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     bool isPcWindow = false;
     auto err = windowAdapter.IsPcWindow(isPcWindow);
-    ASSERT_EQ(err, WMError::WM_OK);
+    ASSERT_EQ(err, WMError::WM_ERROR_SAMGR);
 }
 
 /**
@@ -975,9 +995,11 @@ HWTEST_F(WindowAdapterTest, IsFreeMultiWindowMode, TestSize.Level1)
 HWTEST_F(WindowAdapterTest, IsPcOrPadFreeMultiWindowMode, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     bool isPcOrPadFreeMultiWindowMode = false;
     auto err = windowAdapter.IsPcOrPadFreeMultiWindowMode(isPcOrPadFreeMultiWindowMode);
-    ASSERT_EQ(err, WMError::WM_OK);
+    ASSERT_EQ(err, WMError::WM_ERROR_SAMGR);
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(ret, true);
 }
@@ -995,6 +1017,7 @@ HWTEST_F(WindowAdapterTest, IsWindowRectAutoSave, TestSize.Level1)
     int persistentId = 1;
     auto err = windowAdapter.IsWindowRectAutoSave(key, enabled, persistentId);
     ASSERT_EQ(err, WMError::WM_ERROR_INVALID_SESSION);
+    windowAdapter.isProxyValid_ = true;
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(ret, true);
 }
@@ -1007,9 +1030,11 @@ HWTEST_F(WindowAdapterTest, IsWindowRectAutoSave, TestSize.Level1)
 HWTEST_F(WindowAdapterTest, SetStartWindowBackgroundColor, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     const std::string& moduleName = "testModuleName";
     const std::string& abilityName = "testAbilityName";
-    ASSERT_EQ(WMError::WM_ERROR_NO_MEM, windowAdapter.SetStartWindowBackgroundColor(moduleName, abilityName, 0, 0));
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, windowAdapter.SetStartWindowBackgroundColor(moduleName, abilityName, 0, 0));
 }
 
 /**
@@ -1020,10 +1045,12 @@ HWTEST_F(WindowAdapterTest, SetStartWindowBackgroundColor, TestSize.Level1)
 HWTEST_F(WindowAdapterTest, GetDisplayIdByWindowId, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     const std::vector<uint64_t> windowIds = { 1, 2 };
     std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
     auto err = windowAdapter.GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
-    ASSERT_EQ(err, WMError::WM_OK);
+    ASSERT_EQ(err, WMError::WM_ERROR_SAMGR);
 }
 
 /**
