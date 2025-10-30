@@ -13522,6 +13522,7 @@ WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64
     sceneSession->UpdateDensity();
     if (fromScreenId != screenId) {
         sceneSession->AddPropertyDirtyFlags(static_cast<uint32_t>(SessionPropertyFlag::DISPLAY_ID));
+        sceneSession->MarkAvoidAreaAsDirty();
     }
     uint64_t displayId = screenId;
     if (sceneSession->IsPcFoldDevice() && PcFoldScreenManager::GetInstance().IsHalfFolded(displayId)) {
