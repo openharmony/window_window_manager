@@ -6145,31 +6145,34 @@ DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<Scre
     return DoMakeMirror(mainScreenId, mirrorScreenIds, DMRect::NONE(), screenGroupId, rotationOption, forceMirror);
 }
 
-DMError ScreenSessionManager::MakeMirrorForRecord(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
+DMError ScreenSessionManager::MakeMirrorForRecord(std::vector<ScreenId>& mainScreenIds, std::vector<ScreenId>& mirrorScreenIds,
     ScreenId& screenGroupId)
 {
 #ifdef FOLD_ABILITY_ENABLE
-    TLOGW(WmsLogTag::DMS, "start");
-    ScreenId realScreenId = mainScreenId;
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && mainScreenId == DISPLAY_ID_FAKE) {
-        if (!SuperFoldPolicy::GetInstance().IsFakeDisplayExist()) {
-            TLOGE(WmsLogTag::DMS, "fake display is not exist!");
-            return DMError::DM_ERROR_INVALID_PARAM;
+    auto realScreenId = SuperFoldPolicy::GetInstance().GetRealScreenId(mainScreenIds);
+    TLOGI(WmsLogTag::DMS, "realScreenId: %{public}llu", static_cast<uint64_t>(realScreenId));
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && realScreenId != SCREEN_ID_INVALID) {
+        DMRect mainScreenRect = SuperFoldPolicy::GetInstance().GetRecordRect(mainScreenIds);
+        std::ostringstream oss;
+        oss << "Rect: x: " << mainScreenRect.posX_ << 
+            "y: " << mainScreenRect.posY_ <<
+            "width: " << mainScreenRect.width_ <<
+            "height: " << mainScreenRect.height_;
+        TLOGI(WmsLogTag::DMS, "mainScreenRect: %{public}s", oss.str().c_str());
+        auto makeResult = DoMakeMirror(realScreenId, mirrorScreenIds, mainScreenRect, screenGroupId);
+        if (makeResult == DMError::DM_OK) {
+            SuperFoldStateManager::GetInstance().AddMirrorVirtualScreenIds(mirrorScreenIds);
         }
-        realScreenId = 0;
+        return makeResult;
     }
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
-        SuperFoldPolicy::GetInstance().IsNeedSetSnapshotRect(mainScreenId)) {
-        DMRect mainScreenRect = SuperFoldPolicy::GetInstance().GetRecordRect(mainScreenId);
-        return DoMakeMirror(realScreenId, mirrorScreenIds, mainScreenRect, screenGroupId);
-    }
-    if (foldScreenController_ != nullptr && FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
-        DMRect mainScreenRegion = DMRect::NONE();
-        foldScreenController_->SetMainScreenRegion(mainScreenRegion);
-        return DoMakeMirror(mainScreenId, mirrorScreenIds, mainScreenRegion, screenGroupId);
+    return DMError::DM_ERROR_INVALID_PARAM;
+#else
+    if (mainScreenIds.size() == 1) {
+        return DoMakeMirror(mainScreenIds[0], mirrorScreenIds, DMRect::NONE(), screenGroupId);
+    } else {
+        return DMError::DM_ERROR_INVALID_PARAM;
     }
 #endif
-    return DoMakeMirror(mainScreenId, mirrorScreenIds, DMRect::NONE(), screenGroupId);
 }
 
 
@@ -6252,6 +6255,11 @@ DMError ScreenSessionManager::StopMirror(const std::vector<ScreenId>& mirrorScre
         TLOGE(WmsLogTag::DMS, "failed.");
         return ret;
     }
+#ifdef FOLD_ABILITY_ENABLE
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        SuperFoldStateManager::GetInstance().ClearMirrorVirtualScreenIds(mirrorScreenIds);
+    }
+#endif
     ScreenSettingHelper::UnregisterSettingCastObserver();
 
     return DMError::DM_OK;

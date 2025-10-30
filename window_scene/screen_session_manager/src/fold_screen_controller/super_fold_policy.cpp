@@ -73,7 +73,7 @@ Drawing::Rect SuperFoldPolicy::GetSnapshotRect(DisplayId displayId, bool isCaptu
     return snapshotRect;
 }
 
-DMRect SuperFoldPolicy::GetRecordRect(DisplayId displayId)
+DMRect SuperFoldPolicy::GetRecordRect(std::vector<ScreenId> screenIds)
 {
     DMRect recordRect = {0, 0, 0, 0};
     auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_DEFAULT);
@@ -84,29 +84,51 @@ DMRect SuperFoldPolicy::GetRecordRect(DisplayId displayId)
     }
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
     DMRect creaseRect = screenProperty.GetCreaseRect();
-    auto fakeInfo =  ScreenSessionManager::GetInstance().GetDisplayInfoById(DISPLAY_ID_FAKE);
-    if (displayId == DISPLAY_ID_FAKE) {
+    SuperFoldStatus status = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    auto fakeInfo = ScreenSessionManager::GetInstance().GetDisplayInfoById(DISPLAY_ID_FAKE);
+    if ((std::find(screenIds.begin(), screenIds.end(), DISPLAY_ID_FAKE) != screenIds.end()) && screenIds.size() == 1) {
+        // record for 999
         if (fakeInfo != nullptr) {
             recordRect = {0, defaultInfo->GetHeight() + static_cast<int32_t>(creaseRect.height_),
                 defaultInfo->GetWidth(), fakeInfo->GetHeight()};
         }
-    } else {
-        SuperFoldStatus status = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    } else if ((std::find(screenIds.begin(), screenIds.end(), DEFAULT_DISPLAY_ID) != screenIds.end())
+        && screenIds.size() == 1) {
+        // record for 0 for one display
         bool isSystemKeyboardOn = SuperFoldStateManager::GetInstance().GetSystemKeyboardStatus();
-        if (status == SuperFoldStatus::KEYBOARD || fakeInfo != nullptr || isSystemKeyboardOn) {
-            recordRect = {0, 0, defaultInfo->GetWidth(), defaultInfo->GetHeight()};
-        } else {
+        if (status == SuperFoldStatus::EXPANDED) {
             recordRect = {0, 0, 0, 0};
+        } else if (status == SuperFoldStatus::KEYBOARD || fakeInfo != nullptr || isSystemKeyboardOn) {
+            recordRect = {0, 0, defaultInfo->GetWidth(), defaultInfo->GetHeight()};
         }
     }
     std::ostringstream oss;
-    oss << "snapshot displayId: " << static_cast<uint32_t>(displayId)
-        << " left: 0"
+    oss << "snapshot left: 0"
         << " top:" << recordRect.posY_
         << " right:" << recordRect.width_
         << " bottom:" << recordRect.height_;
     TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
     return recordRect;
+}
+
+ScreenId SuperFoldPolicy::GetRealScreenId(std::vector<ScreenId> screenIds)
+{
+    if (screenIds.empty() || screenIds.size() > 2) {
+        TLOGE(WmsLogTag::DMS, "mainScreenIds null");
+        return SCREEN_ID_INVALID;
+    }
+    if (screenIds.size() == 1) {
+        if ((screenIds[0] == SCREEN_ID_DEFAULT || screenIds[0] == DISPLAY_ID_FAKE)) {
+            TLOGI(WmsLogTag::DMS, "screenId: %{public}lu", static_cast<uint64_t>(screenIds[0]));
+            return SCREEN_ID_DEFAULT;
+        }
+    } else if (std::find(screenIds.begin(), screenIds.end(), SCREEN_ID_DEFAULT) != screenIds.end()
+        && std::find(screenIds.begin(), screenIds.end(), DISPLAY_ID_FAKE) != screenIds.end()) {
+        TLOGI(WmsLogTag::DMS, "screenId: %{public}lu, %{public}lu",
+            static_cast<uint64_t>(screenIds[0]), static_cast<uint64_t>(screenIds[1]));
+        return SCREEN_ID_DEFAULT;
+    }
+    return SCREEN_ID_INVALID;
 }
 
 } // namespace OHOS::Rosen

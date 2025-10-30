@@ -884,13 +884,13 @@ DMError ScreenManagerAdapter::MakeMirror(ScreenId mainScreenId, std::vector<Scre
     return ConvertToDMError(errCode, dmError);
 }
 
-DMError ScreenManagerAdapter::MakeMirrorForRecord(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId,
-    ScreenId& screenGroupId)
+DMError ScreenManagerAdapter::MakeMirrorForRecord(std::vector<ScreenId>& mainScreenIds,
+    std::vector<ScreenId>& mirrorScreenIds, ScreenId& screenGroupId)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     if (screenSessionManagerServiceProxy_) {
-        return screenSessionManagerServiceProxy_->MakeMirrorForRecord(mainScreenId, mirrorScreenId, screenGroupId);
+        return screenSessionManagerServiceProxy_->MakeMirrorForRecord(mainScreenIds, mirrorScreenIds, screenGroupId);
     }
 
     return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;

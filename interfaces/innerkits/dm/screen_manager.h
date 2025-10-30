@@ -121,7 +121,7 @@ public:
      * @param screenGroupId Screen group id.
      * @return DM_OK means make mirror success, others means make mirror failed.
      */
-    DMError MakeMirrorForRecord(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId,
+    DMError MakeMirrorForRecord(std::vector<ScreenId>& mainScreenIds, std::vector<ScreenId>& mirrorScreenIds,
         ScreenId& screenGroupId);
 
     /**

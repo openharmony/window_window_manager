@@ -46,6 +46,11 @@ const std::string FOLD_CREASE_DELIMITER = ",;";
 constexpr ScreenId SCREEN_ID_FULL = 0;
 const int32_t SCREEN_WIDTH_INDEX = 2;
 const int32_t CREASE_WIDTH_INDEX = 3;
+constexpr uint32_t DISPLAY_A_HEIGHT = 3296;
+constexpr uint32_t DISPLAY_A_WIDTH = 2472;
+constexpr uint32_t DISPLAY_B_HEIGHT = 1608;
+constexpr OHOS::Rect FULL_SCREEN_RECORD_RECT = {0, 0, 0, 0};
+constexpr OHOS::Rect HALF_FOLD_B_SCREEN_RECORD_RECT = {0, 0, 0, 0};
 }
 
 void SuperFoldStateManager::DoAngleChangeFolded(SuperFoldStatusChangeEvents event)
@@ -335,6 +340,9 @@ void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEve
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:HandleSuperFoldStatusChange");
         action(event);
         TransferState(nextState);
+        if (ScreenSessionManager::GetInstance().IsCaptured()) {
+            ModifyMirrorScreenVisibleRect(curState, nextState);
+        }
         lock.unlock();
         ReportNotifySuperFoldStatusChange(static_cast<int32_t>(curState), static_cast<int32_t>(nextState), curAngle);
         HandleDisplayNotify(event);
@@ -348,6 +356,82 @@ void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEve
         ScreenSessionManager::GetInstance().OnSuperFoldStatusChange(screenId, curState_.load());
         ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(
             MatchSuperFoldStatusToFoldStatus(curState_.load()));
+    }
+}
+
+void SuperFoldStateManager::ModifyMirrorScreenVisibleRect(SuperFoldStatus preState, SuperFoldStatus curState)
+{
+    TLOGI(WmsLogTag::DMS, "begin");
+    OHOS::Rect rsRect;
+    if (curState == SuperFoldStatus::EXPANDED ||
+        (preState == SuperFoldStatus::EXPANDED && curState == SuperFoldStatus::HALF_FOLDED)) {
+        rsRect = FULL_SCREEN_RECORD_RECT;
+    } else if ((preState == SuperFoldStatus::HALF_FOLDED && curState == SuperFoldStatus::KEYBOARD) ||
+        (preState == SuperFoldStatus::KEYBOARD && curState == SuperFoldStatus::HALF_FOLDED)) {
+        rsRect = HALF_FOLD_B_SCREEN_RECORD_RECT;
+    } else {
+        TLOGI(WmsLogTag::DMS, "not update record rect");
+        return;
+    }
+    std::vector<ScreenId> mirrorScreenIds;
+    {
+        std::unique_lock<std::mutex> lock(mirrorScreenIdsMutex_);
+        mirrorScreenIds = mirrorScreenIds_;
+    }
+    for (auto screenId : mirrorScreenIds) {
+        ScreenId rsId = SCREEN_ID_INVALID;
+        ScreenSessionManager::GetInstance().ConvertScreenIdToRsScreenId(screenId, rsId);
+        TLOGI(WmsLogTag::DMS, "handle mirror ScreenId: %{public}lu, rsId:  %{public}lu", screenId, rsId);
+        RSInterfaces::GetInstance().SetMirrorScreenVisibleRect(rsId, rsRect);
+    }
+}
+
+void SuperFoldStateManager::ModifyMirrorScreenVisibleRect(bool isTpKeyboardOn)
+{
+    OHOS::Rect rsRect;
+    SuperFoldStatus curStatus = GetCurrentStatus();
+    if (ScreenSessionManager::GetInstance().IsCaptured() && isTpKeyboardOn) {
+        rsRect = HALF_FOLD_B_SCREEN_RECORD_RECT;
+    } else if (ScreenSessionManager::GetInstance().IsCaptured() && !isTpKeyboardOn) {
+        if (curStatus == SuperFoldStatus::HALF_FOLDED) {
+            rsRect = FULL_SCREEN_RECORD_RECT;
+        } else if (curStatus == SuperFoldStatus::KEYBOARD) {
+            rsRect = HALF_FOLD_B_SCREEN_RECORD_RECT;
+        }
+    }
+
+    std::vector<ScreenId> mirrorScreenIds;
+    {
+        std::unique_lock<std::mutex> lock(mirrorScreenIdsMutex_);
+        mirrorScreenIds = mirrorScreenIds_;
+    }
+    for (auto screenId : mirrorScreenIds) {
+        ScreenId rsId = SCREEN_ID_INVALID;
+        ScreenSessionManager::GetInstance().ConvertScreenIdToRsScreenId(screenId, rsId);
+        TLOGI(WmsLogTag::DMS, "handle mirror ScreenId: %{public}lu, rsId:  %{public}lu", screenId, rsId);
+        RSInterfaces::GetInstance().SetMirrorScreenVisibleRect(rsId, rsRect);
+    }
+}
+
+void SuperFoldStateManager::AddMirrorVirtualScreenIds(const std::vector<ScreenId>& screenIds)
+{
+    std::unique_lock<std::mutex> lock(mirrorScreenIdsMutex_);
+    for (const auto& screenId : screenIds) {
+        auto it = std::find(mirrorScreenIds_.begin(), mirrorScreenIds_.end(), screenId);
+        if (it == mirrorScreenIds_.end()) {
+            mirrorScreenIds_.emplace_back(screenId);
+        }
+    }
+}
+
+void SuperFoldStateManager::ClearMirrorVirtualScreenIds(const std::vector<ScreenId>& screenIds)
+{
+    std::unique_lock<std::mutex> lock(mirrorScreenIdsMutex_);
+    for (const auto& screenId : screenIds) {
+        auto it = std::find(mirrorScreenIds_.begin(), mirrorScreenIds_.end(), screenId);
+        if (it != mirrorScreenIds_.end()) {
+            mirrorScreenIds_.erase(it);
+        }
     }
 }
 
@@ -706,6 +790,7 @@ void SuperFoldStateManager::HandleSystemKeyboardStatusDisplayNotify(
         TLOGD(WmsLogTag::DMS, "paw: %{public}u, pah: %{public}u",
             screenSession->GetPointerActiveWidth(), screenSession->GetPointerActiveHeight());
     }
+    ModifyMirrorScreenVisibleRect(isTpKeyboardOn);
 }
 
 int32_t SuperFoldStateManager::GetCurrentValidHeight(sptr<ScreenSession> screenSession)

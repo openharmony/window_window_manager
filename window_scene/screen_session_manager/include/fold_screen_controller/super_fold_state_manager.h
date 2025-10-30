@@ -88,6 +88,9 @@ public:
 
     void HandleSuperFoldDisplayCallback(sptr<ScreenSession>& screenSession);
 
+    void AddMirrorVirtualScreenIds(const std::vector<ScreenId>& screenIds);
+    void ClearMirrorVirtualScreenIds(const std::vector<ScreenId>& screenIds);
+
 private:
     std::atomic<SuperFoldStatus> curState_ = SuperFoldStatus::UNKNOWN;
     sptr<FoldCreaseRegion> currentSuperFoldCreaseRegion_ = nullptr;
@@ -135,6 +138,12 @@ private:
 
     static bool ChangeScreenState(bool toHalf);
     int32_t GetCurrentValidHeight(sptr<ScreenSession> screenSession);
+    // physical mode change
+    void ModifyMirrorScreenVisibleRect(SuperFoldStatus preState, SuperFoldStatus curState);
+    // virtual keyboard change
+    void ModifyMirrorScreenVisibleRect(bool isTpKeyBoardOn);
+    std::vector<ScreenId> mirrorScreenIds_;
+    std::mutex mirrorScreenIdsMutex_;
 
     uint32_t GetFoldCreaseHeight() const;
     DMError RefreshMirrorRegionInner(sptr<ScreenSession>& mainScreenSession, sptr<ScreenSession>& secondarySession);
