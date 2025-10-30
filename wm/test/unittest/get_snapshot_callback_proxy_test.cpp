@@ -121,6 +121,26 @@ HWTEST_F(GetSnapshotCallbackProxyTest, OnReceived01, TestSize.Level1)
     logMsg.clear();
     MockMessageParcel::ClearAllErrorFlag();
 }
+
+/**
+ * @tc.name: WritePixelMapData
+ * @tc.desc: WritePixelMapData Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(GetSnapshotCallbackProxyTest, WritePixelMapData, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<MockIRemoteObject> iRemoteObjectMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<GetSnapshotCallbackProxy> sProxy = sptr<GetSnapshotCallbackProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+
+    WMError errCode = WMError::WM_OK;
+    sProxy->OnReceived(errCode, pixelMaps_);
+    EXPECT_TRUE(logMsg.find("write pixelMap failed") == std::string::npos);
+    logMsg.clear();
+    MockMessageParcel::ClearAllErrorFlag();
+}
 }
 } // namespace Rosen
 } // namespace OHOS
