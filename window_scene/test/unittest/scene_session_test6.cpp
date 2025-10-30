@@ -1656,6 +1656,8 @@ HWTEST_F(SceneSessionTest6, RegisterSnapshotSkipChangeCallback, TestSize.Level1)
     info.bundleName_ = "RegisterSnapshotSkipChangeCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->onSnapshotSkipChangeFunc_ = nullptr;
+    sceneSession->RegisterSnapshotSkipChangeCallback(nullptr);
+    EXPECT_EQ(sceneSession->onSnapshotSkipChangeFunc_, nullptr);
     NotifySnapshotSkipChangeFunc func = [](bool isSkip) {};
     sceneSession->RegisterSnapshotSkipChangeCallback(std::move(func));
     EXPECT_NE(sceneSession->onSnapshotSkipChangeFunc_, nullptr);
