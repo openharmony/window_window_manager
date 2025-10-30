@@ -3748,11 +3748,9 @@ export class WindowInternal implements Window {
 
     public clientToGlobalDisplay(winX: int, winY: int): Position {
       return this.clientToGlobalDisplay(this.nativeObj, winX, winY);
-    }
 
     public globalDisplayToClient(globalDisplayX: int, globalDisplayY: int): Position {
       return this.globalDisplayToClient(this.nativeObj, globalDisplayX, globalDisplayY);
-    }
 
     public setRotationLocked(locked: boolean): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
