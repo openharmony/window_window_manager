@@ -1438,8 +1438,8 @@ DMError ScreenSessionManagerProxy::MakeMirror(ScreenId mainScreenId, std::vector
     return ret;
 }
 
-DMError ScreenSessionManagerProxy::MakeMirrorForRecord(ScreenId mainScreenId,
-    std::vector<ScreenId> mirrorScreenIds, ScreenId& screenGroupId)
+DMError ScreenSessionManagerProxy::MakeMirrorForRecord(std::vector<ScreenId>& mainScreenIds,
+    std::vector<ScreenId>& mirrorScreenIds, ScreenId& screenGroupId)
 {
     TLOGW(WmsLogTag::DMS, "SCB: ENTER");
     sptr<IRemoteObject> remote = Remote();
@@ -1455,7 +1455,7 @@ DMError ScreenSessionManagerProxy::MakeMirrorForRecord(ScreenId mainScreenId,
         TLOGE(WmsLogTag::DMS, "SCB: WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
-    bool res = data.WriteUint64(static_cast<uint64_t>(mainScreenId)) &&
+    bool res = data.WriteUInt64Vector(mainScreenIds) &&
         data.WriteUInt64Vector(mirrorScreenIds);
     if (!res) {
         TLOGE(WmsLogTag::DMS, "SCB: data write failed");

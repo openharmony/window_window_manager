@@ -492,7 +492,7 @@ DMError ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> m
         TLOGW(WmsLogTag::DMS, "Make Mirror failed. MirrorScreenId size bigger than %{public}u.", MAX_SCREEN_SIZE);
         return DMError::DM_ERROR_INVALID_PARAM;
     }
-    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MakeMirror(mainScreenId, mirrorScreenId,
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MakeMirror(mainScreenIds, mirrorScreenIds,
         screenGroupId);
     if (screenGroupId == SCREEN_ID_INVALID) {
         TLOGE(WmsLogTag::DMS, "create mirror failed");
@@ -500,15 +500,14 @@ DMError ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> m
     return ret;
 }
 
-DMError ScreenManager::MakeMirrorForRecord(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId,
-    ScreenId& screenGroupId)
+DMError ScreenManager::MakeMirrorForRecord(std::vector<ScreenId>& mainScreenIds,
+    std::vector<ScreenId>& mirrorScreenIds, ScreenId& screenGroupId)
 {
-    TLOGI(WmsLogTag::DMS, "Make mirror for screen: %{public}" PRIu64"", mainScreenId);
     if (mirrorScreenId.size() > MAX_SCREEN_SIZE) {
         TLOGW(WmsLogTag::DMS, "Make Mirror failed. MirrorScreenId size bigger than %{public}u.", MAX_SCREEN_SIZE);
         return DMError::DM_ERROR_INVALID_PARAM;
     }
-    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MakeMirrorForRecord(mainScreenId, mirrorScreenId,
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MakeMirrorForRecord(mainScreenIds, mirrorScreenIds,
         screenGroupId);
     if (screenGroupId == SCREEN_ID_INVALID) {
         TLOGE(WmsLogTag::DMS, "create mirror failed");
