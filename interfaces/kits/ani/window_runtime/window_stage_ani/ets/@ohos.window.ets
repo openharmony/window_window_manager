@@ -18,6 +18,7 @@ import { UIContext } from '@ohos.arkui.UIContext';
 import BaseContext from 'application.BaseContext';
 import { ColorMetrics } from '@ohos.arkui.node';
 import { ImageFit } from '@ohos.arkui.component';
+import bundleManager from '@ohos.bundle.bundleManager';
 import image from '@ohos.multimedia.image';
 import hilog from '@ohos.hilog';
 
@@ -2373,6 +2374,11 @@ export class WindowStageInternal implements WindowStage {
     public native removeImageForRecentSync(nativeObj: long): void;
     public native setCustomDensitySync(nativeObj: long, density: number, applyToSubWindow: boolean): void;
     public native setDefaultDensityEnabledSync(nativeObj: long, enabled: boolean): void;
+    public native setSupportedWindowModes(
+      nativeObj: long, supportedWindowModes: Array<bundleManager.SupportWindowMode>): void;
+    public native setSupportedWindowModes(
+      nativeObj: long, supportedWindowModes: Array<bundleManager.SupportWindowMode>,
+      grayOutMaximizeButton: boolean): void;
 
     native onSync(nativeObj: long, eventType: 'windowStageEvent', callback: Object): void;
     native offSync(nativeObj: long, eventType: 'windowStageEvent', callback?: Object): void;
@@ -2530,6 +2536,30 @@ export class WindowStageInternal implements WindowStage {
       this.setDefaultDensityEnabledSync(this.nativeObj, enabled);
     }
 
+    public setSupportedWindowModes(supportedWindowModes: Array<bundleManager.SupportWindowMode>): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) => {
+        taskpool.execute(() => {
+          this.setSupportedWindowModes(this.nativeObj, supportedWindowModes);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public setSupportedWindowModes(
+      supportedWindowModes: Array<bundleManager.SupportWindowMode>, grayOutMaximizeButton: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) => {
+        taskpool.execute(() => {
+          this.setSupportedWindowModes(this.nativeObj, supportedWindowModes, grayOutMaximizeButton);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
 }
 
 export interface WindowStage {
@@ -2546,9 +2576,12 @@ export interface WindowStage {
     removeImageForRecent(): Promise<void>;
     setCustomDensity(density: double, applyToSubWindow?: boolean): void;
     setDefaultDensityEnabled(enabled: boolean): void;
-
     createSubWindow(name: string): Promise<Window>;
     createSubWindow(name: string, callback: AsyncCallback<Window>): void;
+    setSupportedWindowModes(supportedWindowModes: Array<bundleManager.SupportWindowMode>): Promise<void>;
+    setSupportedWindowModes(
+      supportedWindowModes: Array<bundleManager.SupportWindowMode>, grayOutMaximizeButton: boolean): Promise<void>;
+
     on(eventType: 'windowStageEvent', callback: Callback<WindowStageEventType>): void;
     off(eventType: 'windowStageEvent', callback?: Callback<WindowStageEventType>): void;
 }
@@ -2625,6 +2658,7 @@ export class WindowInternal implements Window {
     private native setAspectRatio(nativeObj: long, ratio: double): void;
     private native resetAspectRatio(nativeObj: long): void;
     private native maximize(nativeObj: long, presentation?: MaximizePresentation, acrossDisplay?: boolean): void;
+    private native stopMoving(nativeObj: long): void;
     private native setResizeByDragEnabled(nativeObj: long, enable: boolean): void;
     private native enableDrag(nativeObj: long, enable: boolean): void;
     private native moveWindowToGlobal(nativeObj: long, x: int, y: int, moveConfiguration?: MoveConfiguration): void;
@@ -3538,6 +3572,18 @@ export class WindowInternal implements Window {
       });
     }
 
+    public stopMoving(): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute(() => {
+          this.stopMoving(this.nativeObj);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
     public setResizeByDragEnabled(enable: boolean, callback: AsyncCallback<void>) {
       taskpool.execute(() => {
         this.setResizeByDragEnabled(this.nativeObj, enable);
@@ -3700,28 +3746,12 @@ export class WindowInternal implements Window {
       });
     }
 
-    public clientToGlobalDisplay(winX: int, winY: int): Promise<Position> {
-      return new Promise<Position>((resolve: (value: Position) => void, reject: (error: BusinessError) => void) => {
-        taskpool.execute(() => {
-          return this.clientToGlobalDisplay(this.nativeObj, winX, winY);
-        }).then((ret: NullishType) => {
-          resolve(ret as Position);
-        }).catch((err: NullishType) => {
-          reject(err as BusinessError);
-        });
-      });
+    public clientToGlobalDisplay(winX: int, winY: int): Position {
+      return this.clientToGlobalDisplay(this.nativeObj, winX, winY);
     }
 
-    public globalDisplayToClient(globalDisplayX: int, globalDisplayY: int): Promise<Position> {
-      return new Promise<Position>((resolve: (value: Position) => void, reject: (error: BusinessError) => void) => {
-        taskpool.execute(() => {
-          return this.globalDisplayToClient(this.nativeObj, globalDisplayX, globalDisplayY);
-        }).then((ret: NullishType) => {
-          resolve(ret as Position);
-        }).catch((err: NullishType) => {
-          reject(err as BusinessError);
-        });
-      });
+    public globalDisplayToClient(globalDisplayX: int, globalDisplayY: int): Position {
+      return this.globalDisplayToClient(this.nativeObj, globalDisplayX, globalDisplayY);
     }
 
     public setRotationLocked(locked: boolean): Promise<void> {
@@ -3904,6 +3934,7 @@ export interface Window {
     resetAspectRatio(callback: AsyncCallback<void>): void;
     resetAspectRatio(): Promise<void>;
     maximize(presentation?: MaximizePresentation, acrossDisplay?: boolean): Promise<void>;
+    stopMoving(): Promise<void>;
     setResizeByDragEnabled(enable: boolean, callback: AsyncCallback<void>): void;
     setResizeByDragEnabled(enable: boolean): Promise<void>;
     enableDrag(enable: boolean): Promise<void>;
@@ -3918,8 +3949,8 @@ export interface Window {
     setFollowParentWindowLayoutEnabled(enabled: boolean): Promise<void>;
     setFollowParentMultiScreenPolicy(enabled: boolean): Promise<void>;
     moveWindowToGlobalDisplay(x: int, y: int): Promise<void>;
-    clientToGlobalDisplay(winX: int, winY: int): Promise<Position>;
-    globalDisplayToClient(globalDisplayX: int, globalDisplayY: int): Promise<Position>;
+    clientToGlobalDisplay(winX: int, winY: int): Position;
+    globalDisplayToClient(globalDisplayX: int, globalDisplayY: int): Position;
     setRotationLocked(locked: boolean): Promise<void>;
     getRotationLocked(): boolean;
     isInFreeWindowMode(): boolean;
