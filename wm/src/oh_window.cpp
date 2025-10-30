@@ -281,8 +281,9 @@ int32_t OH_WindowManager_SetWindowStatusBarEnabled(int32_t windowId, bool enable
         property.settingFlag_ = static_cast<SystemBarSettingFlag>(
             static_cast<uint32_t>(property.settingFlag_) | static_cast<uint32_t>(SystemBarSettingFlag::ENABLE_SETTING));
         property.enableAnimation_ = enableAnimation;
+        SystemBarPropertyFlag propertyFlag = { true, false, false, true };
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(
-            window->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+            window->UpdateSystemBarPropertyForPage(WindowType::WINDOW_TYPE_STATUS_BAR, property, propertyFlag));
     }, __func__);
     return errCode;
 }
@@ -311,8 +312,9 @@ int32_t OH_WindowManager_SetWindowStatusBarColor(int32_t windowId, int32_t color
         property.contentColor_ = color;
         property.settingFlag_ = static_cast<SystemBarSettingFlag>(
             static_cast<uint32_t>(property.settingFlag_) | static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING));
+        SystemBarPropertyFlag propertyFlag = { false, false, true, false };
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(
-            window->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+            window->UpdateSystemBarPropertyForPage(WindowType::WINDOW_TYPE_STATUS_BAR, property, propertyFlag));
     }, __func__);
     return errCode;
 }
@@ -342,8 +344,9 @@ int32_t OH_WindowManager_SetWindowNavigationBarEnabled(int32_t windowId, bool en
         property.settingFlag_ = static_cast<SystemBarSettingFlag>(
             static_cast<uint32_t>(property.settingFlag_) | static_cast<uint32_t>(SystemBarSettingFlag::ENABLE_SETTING));
         property.enableAnimation_ = enableAnimation;
+        SystemBarPropertyFlag propertyFlag = { true, false, false, true };
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(
-            window->SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR, property));
+            window->UpdateSystemBarPropertyForPage(WindowType::WINDOW_TYPE_NAVIGATION_BAR, property, propertyFlag));
     }, __func__);
     return errCode;
 }

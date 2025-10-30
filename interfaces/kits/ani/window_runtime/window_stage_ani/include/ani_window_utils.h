@@ -181,14 +181,9 @@ public:
         std::map<WindowType, SystemBarPropertyFlag>& propertyFlags);
     static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& systemBarProperties,
             const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, sptr<Window> windowToken);
-    static bool SetSpecificSystemBarEnabled(ani_env* env,
-        std::map<WindowType, SystemBarProperty>& systemBarProperties,
-        ani_string aniName,
-        ani_boolean aniEnable,
-        ani_boolean aniEnableAnimation);
-    static void GetSpecificBarStatus(sptr<Window>& window, const std::string& name,
-        std::map<WindowType, SystemBarProperty>& newSystemBarProperties,
-        std::map<WindowType, SystemBarProperty>& systemBarProperties);
+    static bool GetSpecificBarStatus(ani_env* env,
+        ani_string aniName, ani_boolean aniEnable, ani_object aniAnimation,
+        WindowType& type, SystemBarProperty& systemBarProperty, SystemBarPropertyFlag& systemBarPropertyFlag);
     static ani_object CreateOptionalBool(ani_env *env, ani_boolean value);
     static ani_object CreateOptionalInt(ani_env *env, ani_int value);
     static void GetWindowSnapshotConfiguration(ani_env* env, ani_object config,
