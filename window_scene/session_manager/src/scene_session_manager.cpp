@@ -15815,7 +15815,8 @@ WMError SceneSessionManager::GetAllMainWindowInfo(std::vector<sptr<MainWindowInf
     }
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [_, session] : sceneSessionMap_) {
-        if (session == nullptr) {
+        if (session == nullptr || session->GetSessionState() == SessionState::STATE_DISCONNECT) {
+            TLOGW(WmsLogTag::WMS_LIFE, "session is nullptr or sessionState is disconnect");
             continue;
         }
         if (WindowHelper::IsMainWindow(session->GetWindowType())) {

@@ -194,6 +194,38 @@ void TransformedToWindowManagerAvoidArea(const AvoidArea& allAvoidArea, WindowMa
     TransformedToWindowManagerRect(allAvoidArea.rightRect_, avoidArea->rightRect);
     TransformedToWindowManagerRect(allAvoidArea.bottomRect_, avoidArea->bottomRect);
 }
+
+void RegisterCallBackFunc(const OHOS::sptr<GetSnapshotCallback>& getSnapshotCallback,
+    OH_WindowManager_WindowSnapshotCallback callback)
+{
+    getSnapshotCallback->RegisterFunc([callback]
+        (WMError errCode, const std::vector<std::shared_ptr<OHOS::Media::PixelMap>>& pixelMaps) {
+            if (!callback) {
+                TLOGNE(WmsLogTag::WMS_LIFE, "callback is nullptr");
+                return;
+            }
+            if (errCode != WMError::WM_OK) {
+                TLOGNE(WmsLogTag::WMS_LIFE, "error: %{public}d", static_cast<int32_t>(errCode));
+                callback(nullptr, 0);
+                return;
+            }
+            const OH_PixelmapNative** pixelmapArray = new const OH_PixelmapNative* [pixelMaps.size()];
+            if (pixelmapArray == nullptr) {
+                TLOGNE(WmsLogTag::WMS_LIFE, "alloc failed");
+                callback(nullptr, 0);
+                return;
+            }
+            for (size_t i = 0; i < pixelMaps.size(); i++) {
+                if (!pixelMaps[i]) {
+                    pixelmapArray[i] = nullptr;
+                } else {
+                    pixelmapArray[i] = new OH_PixelmapNative(pixelMaps[i]);
+                }
+            }
+            size_t count = pixelMaps.size();
+            callback(pixelmapArray, count);
+        });
+}
 } // namespace
 
 int32_t OH_WindowManager_GetWindowAvoidArea(
@@ -675,29 +707,7 @@ int32_t OH_WindowManager_GetMainWindowSnapshot(int32_t* windowIdList, size_t win
         TransformedToWindowSnapshotConfig(windowSnapshotConfiguration, config);
         std::vector<int32_t> windowIdVector(windowIdList, windowIdList + windowIdListSize);
         OHOS::sptr<GetSnapshotCallback> getSnapshotCallback = OHOS::sptr<GetSnapshotCallback>::MakeSptr();
-        getSnapshotCallback->RegisterFunc([callback, where = __func__]
-            (WMError errCode, const std::vector<std::shared_ptr<OHOS::Media::PixelMap>>& pixelMaps) {
-                if (!callback) {
-                    TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s callback is nullptr", where);
-                    return;
-                }
-                if (errCode != WMError::WM_OK) {
-                    TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s error: %{public}d", where, static_cast<int32_t>(errCode));
-                    callback(nullptr, 0);
-                    return;
-                }
-                const OH_PixelmapNative** pixelmapArray = new const OH_PixelmapNative* [pixelMaps.size()];
-                if (pixelmapArray == nullptr) {
-                    TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s alloc failed", where);
-                    callback(nullptr, 0);
-                    return;
-                }
-                for (size_t i = 0; i < pixelMaps.size(); i++) {
-                    pixelmapArray[i] = new OH_PixelmapNative(pixelMaps[i]);
-                }
-                size_t count = pixelMaps.size();
-                callback(pixelmapArray, count);
-            });
+        RegisterCallBackFunc(getSnapshotCallback, callback);
         auto ret = SingletonContainer::Get<WindowManager>().GetMainWindowSnapshot(
             windowIdVector, windowSnapshotConfiguration, getSnapshotCallback->AsObject());
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.find(ret) == OH_WINDOW_TO_ERROR_CODE_MAP.end() ?

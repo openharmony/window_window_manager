@@ -38,6 +38,8 @@ int GetSnapshotCallbackStub::HandleOnReceived(MessageParcel& data, MessageParcel
     std::vector<std::shared_ptr<OHOS::Media::PixelMap>> pixelMaps;
     int32_t errCode = 0;
     int32_t len = 0;
+    int32_t nullptrLen = 0;
+    std::vector<int32_t> nullptrVectors;
     if (!data.ReadInt32(errCode)) {
         TLOGE(WmsLogTag::WMS_LIFE, "read errcode failed");
         OnReceived(WMError::WM_ERROR_SYSTEM_ABNORMALLY, pixelMaps);
@@ -56,6 +58,23 @@ int GetSnapshotCallbackStub::HandleOnReceived(MessageParcel& data, MessageParcel
     pixelMaps.resize(size);
     for (size_t i = 0; i < size; i++) {
         pixelMaps[i] = std::shared_ptr<OHOS::Media::PixelMap>(OHOS::Media::PixelMap::Unmarshalling(data));
+    }
+    if (!data.ReadInt32(nullptrLen)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read nullptrLen failed");
+    }
+    if (nullptrLen > 0) {
+        int32_t index = 0;
+        for (size_t i = 0; i < static_cast<size_t>(nullptrLen); i++) {
+            if (!data.ReadInt32(index)) {
+                OnReceived(static_cast<WMError>(errCode), pixelMaps);
+                return ERR_NONE;
+            }
+            if (index > static_cast<int32_t>(pixelMaps.size())) {
+                OnReceived(static_cast<WMError>(errCode), pixelMaps);
+                return ERR_NONE;
+            }
+            pixelMaps.insert(pixelMaps.begin() + index, nullptr);
+        }
     }
     TLOGI(WmsLogTag::WMS_LIFE, "pixelMaps size: %{public}zu, size: %{public}zu", pixelMaps.size(), size);
     OnReceived(static_cast<WMError>(errCode), pixelMaps);
