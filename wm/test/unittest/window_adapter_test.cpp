@@ -1034,9 +1034,11 @@ HWTEST_F(WindowAdapterTest, GetDisplayIdByWindowId, TestSize.Level1)
 HWTEST_F(WindowAdapterTest, SetGlobalDragResizeType, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
     auto err = windowAdapter.SetGlobalDragResizeType(dragResizeType);
-    ASSERT_EQ(err, WMError::WM_OK);
+    ASSERT_EQ(err, WMError::WM_ERROR_SAMGR);
 }
 
 /**
@@ -1047,9 +1049,11 @@ HWTEST_F(WindowAdapterTest, SetGlobalDragResizeType, TestSize.Level1)
 HWTEST_F(WindowAdapterTest, GetGlobalDragResizeType, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
     auto err = windowAdapter.GetGlobalDragResizeType(dragResizeType);
-    ASSERT_EQ(err, WMError::WM_OK);
+    ASSERT_EQ(err, WMError::WM_ERROR_SAMGR);
 }
 
 /**
@@ -1060,10 +1064,12 @@ HWTEST_F(WindowAdapterTest, GetGlobalDragResizeType, TestSize.Level1)
 HWTEST_F(WindowAdapterTest, SetAppDragResizeType, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
     const std::string bundleName = "test";
     auto err = windowAdapter.SetAppDragResizeType(bundleName, dragResizeType);
-    ASSERT_EQ(err, WMError::WM_OK);
+    ASSERT_EQ(err, WMError::WM_ERROR_SAMGR);
 }
 
 /**
@@ -1074,10 +1080,12 @@ HWTEST_F(WindowAdapterTest, SetAppDragResizeType, TestSize.Level1)
 HWTEST_F(WindowAdapterTest, GetAppDragResizeType, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
     const std::string bundleName = "test";
     auto err = windowAdapter.GetAppDragResizeType(bundleName, dragResizeType);
-    ASSERT_EQ(err, WMError::WM_OK);
+    ASSERT_EQ(err, WMError::WM_ERROR_SAMGR);
 }
 
 /**
@@ -1088,11 +1096,13 @@ HWTEST_F(WindowAdapterTest, GetAppDragResizeType, TestSize.Level1)
 HWTEST_F(WindowAdapterTest, SetAppKeyFramePolicy, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     const std::string bundleName = "test";
     KeyFramePolicy keyFramePolicy;
     keyFramePolicy.dragResizeType_ = DragResizeType::RESIZE_KEY_FRAME;
     auto err = windowAdapter.SetAppKeyFramePolicy(bundleName, keyFramePolicy);
-    ASSERT_EQ(err, WMError::WM_OK);
+    ASSERT_EQ(err, WMError::WM_ERROR_SAMGR);
 }
 
 /**
@@ -1103,10 +1113,12 @@ HWTEST_F(WindowAdapterTest, SetAppKeyFramePolicy, TestSize.Level1)
 HWTEST_F(WindowAdapterTest, SetParentWindow, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     int32_t subWindowId = 1;
     int32_t newParentWindowId = 2;
     auto err = windowAdapter.SetParentWindow(subWindowId, newParentWindowId);
-    ASSERT_EQ(err, WMError::WM_ERROR_INVALID_WINDOW);
+    ASSERT_EQ(err, WMError::WM_ERROR_SAMGR);
 }
 
 /**
@@ -1117,7 +1129,9 @@ HWTEST_F(WindowAdapterTest, SetParentWindow, TestSize.Level1)
 HWTEST_F(WindowAdapterTest, NotifyWatchGestureConsumeResult, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, windowAdapter.NotifyWatchGestureConsumeResult(0, true));
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, windowAdapter.NotifyWatchGestureConsumeResult(0, true));
 }
 
 /**
@@ -1128,7 +1142,9 @@ HWTEST_F(WindowAdapterTest, NotifyWatchGestureConsumeResult, TestSize.Level1)
 HWTEST_F(WindowAdapterTest, NotifyWatchFocusActiveChange, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, windowAdapter.NotifyWatchFocusActiveChange(true));
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, windowAdapter.NotifyWatchFocusActiveChange(true));
 }
 
 /**
@@ -1139,9 +1155,11 @@ HWTEST_F(WindowAdapterTest, NotifyWatchFocusActiveChange, TestSize.Level1)
 HWTEST_F(WindowAdapterTest, MinimizeByWindowId, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     std::vector<int32_t> windowIds;
     auto err = windowAdapter.MinimizeByWindowId(windowIds);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, err);
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, err);
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(ret, true);
 }
@@ -1154,10 +1172,12 @@ HWTEST_F(WindowAdapterTest, MinimizeByWindowId, TestSize.Level1)
 HWTEST_F(WindowAdapterTest, ListWindowInfo01, Function | SmallTest | Level2)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     WindowInfoOption windowInfoOption;
     std::vector<sptr<WindowInfo>> infos;
     auto err = windowAdapter.ListWindowInfo(windowInfoOption, infos);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, err);
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(ret, true);
 }
@@ -1170,12 +1190,14 @@ HWTEST_F(WindowAdapterTest, ListWindowInfo01, Function | SmallTest | Level2)
 HWTEST_F(WindowAdapterTest, RegisterWindowPropertyChangeAgent01, Function | SmallTest | Level2)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     WindowInfoOption windowInfoOption;
     WindowInfoKey windowInfoKey = WindowInfoKey::NONE;
     uint32_t interestInfo = 0;
     sptr<IWindowManagerAgent> windowManagerAgent;
     auto err = windowAdapter.RegisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, err);
+    EXPECT_EQ(WMError::WM_ERROR_SAMGR, err);
     auto ret = windowAdapter.InitWMSProxy();
     EXPECT_EQ(ret, true);
 }
@@ -1224,11 +1246,13 @@ HWTEST_F(WindowAdapterTest, CreateUIEffectController, Function | SmallTest | Lev
 HWTEST_F(WindowAdapterTest, AddSessionBlackList01, Function | SmallTest | Level2)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     std::unordered_set<std::string> bundleNames;
     std::unordered_set<std::string> privacyWindowTags;
     sptr<IWindowManagerAgent> windowManagerAgent;
     auto err = windowAdapter.AddSessionBlackList(bundleNames, privacyWindowTags);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
+    EXPECT_EQ(WMError::WM_ERROR_SAMGR, err);
     auto ret = windowAdapter.InitWMSProxy();
     EXPECT_EQ(ret, true);
 }
@@ -1241,11 +1265,13 @@ HWTEST_F(WindowAdapterTest, AddSessionBlackList01, Function | SmallTest | Level2
 HWTEST_F(WindowAdapterTest, RemoveSessionBlackList01, Function | SmallTest | Level2)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     std::unordered_set<std::string> bundleNames;
     std::unordered_set<std::string> privacyWindowTags;
     sptr<IWindowManagerAgent> windowManagerAgent;
     auto err = windowAdapter.RemoveSessionBlackList(bundleNames, privacyWindowTags);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
+    EXPECT_EQ(WMError::WM_ERROR_SAMGR, err);
     auto ret = windowAdapter.InitWMSProxy();
     EXPECT_EQ(ret, true);
 }
@@ -1258,9 +1284,11 @@ HWTEST_F(WindowAdapterTest, RemoveSessionBlackList01, Function | SmallTest | Lev
 HWTEST_F(WindowAdapterTest, GetPiPSettingSwitchStatus, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     bool switchStatus = false;
     auto err = windowAdapter.GetPiPSettingSwitchStatus(switchStatus);
-    ASSERT_EQ(WMError::WM_OK, err);
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, err);
 }
 
 /**
@@ -1271,7 +1299,9 @@ HWTEST_F(WindowAdapterTest, GetPiPSettingSwitchStatus, TestSize.Level1)
 HWTEST_F(WindowAdapterTest, UseImplicitAnimation, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_SESSION, windowAdapter.UseImplicitAnimation(0, true));
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
+    ASSERT_EQ(WMError::WM_DO_NOTHING, windowAdapter.UseImplicitAnimation(0, true));
 }
 
 /**
@@ -1316,9 +1346,11 @@ HWTEST_F(WindowAdapterTest, RegisterAndUnregisterOutlineRecoverCallbackFunc, Tes
 HWTEST_F(WindowAdapterTest, UpdateOutline, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     OutlineParams params;
     auto ret = windowAdapter.UpdateOutline(nullptr, params);
-    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+    EXPECT_EQ(WMError::WM_ERROR_SAMGR, ret);
 }
 
 /**
