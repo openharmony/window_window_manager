@@ -557,7 +557,7 @@ void AniWindowStage::OnSetSupportedWindowModesWithGrayOutMaximizeButton(
     }
     auto supportedWindowModes =
         AniWindowUtils::ExtractEnumValues<AppExecFwk::SupportWindowMode>(env, aniSupportedWindowModes);
-    WMError ret = window->SetSupportedWindowModes(supportedWindowModes, grayOutMaximizeButton);
+    WMError ret = window->SetSupportedWindowModes(supportedWindowModes, static_cast<bool>(grayOutMaximizeButton));
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC,
               "[ANI] Failed, windowId: %{public}u, ret: %{public}d",
