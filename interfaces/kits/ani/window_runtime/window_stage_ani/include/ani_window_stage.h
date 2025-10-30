@@ -29,7 +29,7 @@ namespace Rosen {
 #endif
 
 class AniWindowStage {
-    public:
+public:
     explicit AniWindowStage(const std::shared_ptr<Rosen::WindowScene>& windowScene);
     ~AniWindowStage();
     static ani_object NativeTransferStatic(ani_env* aniEnv, ani_class cls, ani_object input);
@@ -49,6 +49,11 @@ class AniWindowStage {
     static void SetCustomDensity(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_double density, ani_boolean applyToSubWindow);
     static void SetDefaultDensityEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enabled);
+    static void SetSupportedWindowModes(
+        ani_env* env, ani_object obj, ani_long nativeObj, ani_object aniSupportedWindowModes);
+    static void SetSupportedWindowModesWithGrayOutMaximizeButton(
+        ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_object aniSupportedWindowModes, ani_boolean grayOutMaximizeButton);
 
     std::weak_ptr<WindowScene> GetWindowScene() { return windowScene_; }
     ani_ref GetMainWindow(ani_env* env);
@@ -65,6 +70,9 @@ private:
     void OnRemoveImageForRecent(ani_env* env);
     void OnSetCustomDensity(ani_env* env, ani_double density, ani_boolean applyToSubWindow);
     void OnSetDefaultDensityEnabled(ani_env* env, ani_boolean enabled);
+    void OnSetSupportedWindowModes(ani_env* env, ani_object aniSupportedWindowModes);
+    void OnSetSupportedWindowModesWithGrayOutMaximizeButton(
+        ani_env* env, ani_object aniSupportedWindowModes, ani_boolean grayOutMaximizeButton);
 
     std::weak_ptr<WindowScene> windowScene_;
     std::unique_ptr<AniWindowRegisterManager> registerManager_ = nullptr;
