@@ -42,6 +42,7 @@ static void SensorHallDataCallback(SensorEvent *event)
 namespace OHOS {
 namespace Rosen {
 namespace {
+constexpr float DUAL_INVALID_ANGLE_VALUE = -1.0F;
 constexpr float ANGLE_MAX_VAL = 180.0F;
 constexpr int32_t SENSOR_SUCCESS = 0;
 constexpr int32_t SENSOR_FAILURE = 1;
@@ -265,6 +266,9 @@ void FoldScreenSensorManager::HandleHallData(const SensorEvent* const event)
     globalHall = static_cast<uint16_t>((*extHallData).hall);
     if (globalHall == USHRT_MAX || std::isless(globalAngle, ANGLE_MIN_VAL) ||
         std::isgreater(globalAngle, ANGLE_MAX_VAL + ACCURACY_ERROR_FOR_ALTA)) {
+        if (HandleAbnormalAngle()) {
+            return;
+        }
         TLOGE(WmsLogTag::DMS, "Invalid value, hall value is: %{public}u, angle value is: %{public}f.",
             globalHall, globalAngle);
         return;
@@ -274,6 +278,19 @@ void FoldScreenSensorManager::HandleHallData(const SensorEvent* const event)
         globalAngle = ANGLE_MIN_VAL;
     }
     sensorFoldStateManager_->HandleHallChange(globalAngle, globalHall, foldScreenPolicy_);
+}
+
+bool FoldScreenSensorManager::HandleAbnormalAngle()
+{
+    if (FoldScreenStateInternel::FloatEqualAbs(globalAngle, DUAL_INVALID_ANGLE_VALUE)
+        && globalHall == 0 && !registerPosture_) {
+        globalAngle = ANGLE_MIN_VAL;
+        TLOGI(WmsLogTag::DMS, "hall value is: %{public}u, let angle value is: %{public}f, continue",
+            globalHall, globalAngle);
+        sensorFoldStateManager_->HandleHallChange(globalAngle, globalHall, foldScreenPolicy_);
+        return true;
+    }
+    return false;
 }
 
 void FoldScreenSensorManager::RegisterApplicationStateObserver()
