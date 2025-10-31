@@ -73,6 +73,11 @@ struct CursorInfo {
     double top = -1.0;
     double width = -1.0;
     double height = -1.0;
+
+    bool isInvalid() const
+    {
+        return width <= 0 || height <= 0;
+    }
 };
 
 using IKBWillShowListener = IKeyboardWillShowListener;
