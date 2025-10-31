@@ -3040,9 +3040,12 @@ void ScreenSessionManager::SetInternalScreenResolutionEffect(const sptr<ScreenSe
         NotifyDisplayChanged(internalSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
     }
     // Black out invalid area
-    auto displaynode = internalSession->GetDisplayNode();
-    displaynode->SetClipToBounds(true);
-    RSTransactionAdapter::FlushImplicitTransaction(internalSession->GetRSUIContext());
+    auto clientProxy = GetClientProxy();
+    if (clientProxy == nullptr) {
+        TLOGE(WmsLogTag::DMS, "clientProxy_ is null");
+        return;
+    }
+    clientProxy->SetInternalClipToBounds(internalSession->GetScreenId(), true);
 }
 
 void ScreenSessionManager::SetExternalScreenResolutionEffect(const sptr<ScreenSession>& externalSession, DMRect& targetRect)
