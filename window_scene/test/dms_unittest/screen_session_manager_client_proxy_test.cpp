@@ -648,6 +648,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnSensorRotationChanged02, TestSiz
     LOG_SetCallback(nullptr);
 }
 
+ 
 /**
  * @tc.name: SetInternalClipToBounds
  * @tc.desc: SetInternalClipToBounds test
@@ -677,9 +678,16 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, SetInternalClipToBounds, TestSize.
     logMsg.clear();
 
     MockMessageParcel::ClearAllErrorFlag();
-    MockMessageParcel::SetWriteUint32ErrorFlag(true);
-    ASSERT_NE(proxy, nullptr);
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
     proxy->SetInternalClipToBounds(screenId, clipToBounds);
+    EXPECT_TRUE(logMsg.find("Write screenId failed") != std::string::npos);
+    logMsg.clear();
+ 
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    proxy->SetInternalClipToBounds(screenId, clipToBounds);
+    EXPECT_TRUE(logMsg.find("Write clipToBounds failed") != std::string::npos);
+    logMsg.clear();
 
     MockMessageParcel::ClearAllErrorFlag();
     remoteMocker->SetRequestResult(ERR_INVALID_DATA);
@@ -688,6 +696,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, SetInternalClipToBounds, TestSize.
     remoteMocker->SetRequestResult(ERR_NONE);
     proxy->SetInternalClipToBounds(screenId, clipToBounds);
     logMsg.clear();
+    MockMessageParcel::ClearAllErrorFlag();
 }
 } // namespace Rosen
 } // namespace OHOS
