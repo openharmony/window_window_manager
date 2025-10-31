@@ -516,10 +516,8 @@ void AniWindowStage::OnSetSupportedWindowModes(ani_env* env, ani_object aniSuppo
         AniWindowUtils::ExtractEnumValues<AppExecFwk::SupportWindowMode>(env, aniSupportedWindowModes);
     WMError ret = window->SetSupportedWindowModes(supportedWindowModes);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC,
-              "[ANI] Failed, windowId: %{public}u, ret: %{public}d",
-              window->GetWindowId(),
-              static_cast<int32_t>(ret));
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed, windowId: %{public}u, ret: %{public}d",
+              window->GetWindowId(), static_cast<int32_t>(ret));
         AniWindowUtils::AniThrowError(env, AniWindowUtils::ToErrorCode(ret));
         return;
     }
@@ -559,10 +557,8 @@ void AniWindowStage::OnSetSupportedWindowModesWithGrayOutMaximizeButton(
         AniWindowUtils::ExtractEnumValues<AppExecFwk::SupportWindowMode>(env, aniSupportedWindowModes);
     WMError ret = window->SetSupportedWindowModes(supportedWindowModes, static_cast<bool>(grayOutMaximizeButton));
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC,
-              "[ANI] Failed, windowId: %{public}u, ret: %{public}d",
-              window->GetWindowId(),
-              static_cast<int32_t>(ret));
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed, windowId: %{public}u, ret: %{public}d",
+              window->GetWindowId(), static_cast<int32_t>(ret));
         AniWindowUtils::AniThrowError(env, AniWindowUtils::ToErrorCode(ret));
         return;
     }
