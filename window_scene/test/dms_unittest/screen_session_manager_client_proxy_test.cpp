@@ -647,7 +647,6 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnSensorRotationChanged02, TestSiz
     logMsg.clear();
     LOG_SetCallback(nullptr);
 }
-
  
 /**
  * @tc.name: SetInternalClipToBounds
