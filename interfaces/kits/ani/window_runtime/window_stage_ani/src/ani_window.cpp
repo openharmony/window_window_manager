@@ -1630,7 +1630,7 @@ ani_object AniWindow::SetWindowLayoutFullScreen(ani_env* env, ani_boolean isLayo
         return AniWindowUtils::CreateAniUndefined(env);
     }
 
-    WMErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetLayoutFullScreen(static_cast<bool>(isLayoutFullScreen)));
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetLayoutFullScreen(static_cast<bool>(isLayoutFullScreen)));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_IMMS, "[ANI] fullscreen set error");
         return AniWindowUtils::AniThrowError(env, ret);
@@ -1918,8 +1918,8 @@ void AniWindow::OnSetWindowContainerColor(ani_env* env, ani_string activeColor, 
             "[window][setWindowContainerColor]msg: invalid window");
         return;
     }
-    std::string stdActiveColor = activeColor;
-    std::string stdInactiveColor = inactiveColor;
+    std::string stdActiveColor;
+    std::string stdInactiveColor;
     AniWindowUtils::GetStdString(env, activeColor, stdActiveColor);
     AniWindowUtils::GetStdString(env, inactiveColor, stdInactiveColor);
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
@@ -1948,7 +1948,7 @@ void AniWindow::SetWindowContainerModalColor(ani_env* env, ani_object obj, ani_l
     aniWindow->OnSetWindowContainerModalColor(env, activeColor, inactiveColor);
 }
 
-void AniWindow::OnSetWindowContainerModalColor(ani_env* env, ani_stri ng activeColor, ani_string inactiveColor)
+void AniWindow::OnSetWindowContainerModalColor(ani_env* env, ani_string activeColor, ani_string inactiveColor)
 {
     if (!windowToken_) {
         TLOGE(WmsLogTag::WMS_DECOR, "[ANI] window is nullptr");
@@ -1956,8 +1956,8 @@ void AniWindow::OnSetWindowContainerModalColor(ani_env* env, ani_stri ng activeC
             "[window][setWindowContainerModalColor]msg: invalid window");
         return;
     }
-    std::string stdActiveColor = activeColor;
-    std::string stdInactiveColor = inactiveColor;
+    std::string stdActiveColor;
+    std::string stdInactiveColor;
     AniWindowUtils::GetStdString(env, activeColor, stdActiveColor);
     AniWindowUtils::GetStdString(env, inactiveColor, stdInactiveColor);
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
