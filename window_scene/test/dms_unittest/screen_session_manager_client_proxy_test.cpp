@@ -648,35 +648,46 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnSensorRotationChanged02, TestSiz
     LOG_SetCallback(nullptr);
 }
 
-void ScreenSessionManagerClientProxy::SetInternalClipToBounds(ScreenId screenId, bool clipToBounds)
+/**
+ * @tc.name: SetInternalClipToBounds
+ * @tc.desc: SetInternalClipToBounds test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientProxyTest, SetInternalClipToBounds, TestSize.Level1)
 {
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::DMS, "remote is nullptr");
-        return;
-    }
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
 
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
-        return;
-    }
-    if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
-        TLOGE(WmsLogTag::DMS, "Write screenId failed");
-        return;
-    }
-    if (!data.WriteBool(clipToBounds)) {
-        TLOGE(WmsLogTag::DMS, "Write clipToBounds failed");
-        return;
-    }
-    if (remote->SendRequest(
-        static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_SET_INTERNAL_CLIPTOBOUNDS),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::DMS, "SendRequest failed");
-        return;
-    }
+    ScreenId screenId = 0;
+    bool clipToBounds = true;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    auto proxy = sptr<ScreenSessionManagerClientProxy>::MakeSptr(nullptr);
+    proxy->SetInternalClipToBounds(screenId, clipToBounds);
+    EXPECT_TRUE(logMsg.find("remote is nullptr") != std::string::npos);
+    logMsg.clear();
+
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    proxy = sptr<ScreenSessionManagerClientProxy>::MakeSptr(remoteMocker);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ASSERT_NE(proxy, nullptr);
+    proxy->SetInternalClipToBounds(screenId, clipToBounds);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+    logMsg.clear();
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    ASSERT_NE(proxy, nullptr);
+    proxy->SetInternalClipToBounds(screenId, clipToBounds);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    proxy->SetInternalClipToBounds(screenId, clipToBounds);
+    EXPECT_TRUE(logMsg.find("SendRequest failed") != std::string::npos);
+    remoteMocker->SetRequestResult(ERR_NONE);
+    proxy->SetInternalClipToBounds(screenId, clipToBounds);
+    logMsg.clear();
 }
 } // namespace Rosen
 } // namespace OHOS
