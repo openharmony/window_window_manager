@@ -1561,8 +1561,9 @@ void ScreenSessionManagerClient::SetInternalClipToBounds(ScreenId screenId, bool
     sptr<ScreenSession> internalSession = nullptr;
     {
         std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
-        if (screenSessionMap_.find(screenId) != screenSessionMap_.end()) {
-            internalSession = screenSessionMap_[screenId];
+        auto iter = screenSessionMap_.find(screenId);
+        if (iter != screenSessionMap_.end()) {
+            internalSession = iter->second;
         }
     }
     if (internalSession == nullptr) {
