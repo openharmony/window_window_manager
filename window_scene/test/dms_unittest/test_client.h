@@ -66,7 +66,7 @@ public:
     std::string OnDumperClientScreenSessions() override { return ""; };
     void OnScreenModeChanged(ScreenModeChangeEvent screenModeChangeEvent) override {};
     void OnAnimationFinish() override {};
-    void SetInternalClipToBounds(ScreenId screenId, bool clipToBounds) override {};  
+    void SetInternalClipToBounds(ScreenId screenId, bool clipToBounds) override {};
     sptr<IRemoteObject> AsObject() override {return testPtr;};
     sptr<IRemoteObject> testPtr;
 };
