@@ -1566,7 +1566,6 @@ int SessionStub::HandleSetPipParentWindowId(MessageParcel& data, MessageParcel& 
         TLOGE(WmsLogTag::WMS_PIP, "write errCode fail.");
         return ERR_INVALID_DATA;
     }
-    TLOGI(WmsLogTag::WMS_PIP, "in HandleSetPipParentWindowId");
     return ERR_NONE;
 }
 
