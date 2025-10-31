@@ -23,6 +23,7 @@ loadLibrary('displayani_kit.z');
 
 const DISPLAY_ARRAY_LENGTH = 15;  
 const CUTO_ARRAY_LENGTH = 5;  
+const ERROR_INVALID_PARAM = 401;
 
 export interface Rect {
     left: long;
@@ -729,6 +730,9 @@ export class DisplayPhysicalResolutionImpl implements DisplayPhysicalResolution{
 }
 
 export function makeUnique(screenId: long): Promise<void> {
+    if (screenId < 0) {
+        throw new BusinessError(ERROR_INVALID_PARAM, new Error(`[ANI] screenId is invalid: ${screenId}`));
+    }
     return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
         taskpool.execute((): void => {
             makeUniqueNative(screenId, displayMgrRef);
@@ -792,6 +796,9 @@ export function createVirtualScreen(config: VirtualScreenConfig): Promise<long> 
 export native function createVirtualScreenNative(config: object, nativeObj: long): long;
  
 export function destroyVirtualScreen(screenId: long): Promise<void> {
+    if (screenId < 0) {
+        throw new BusinessError(ERROR_INVALID_PARAM, new Error(`[ANI] screenId is invalid: ${screenId}`));
+    }
     return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
         taskpool.execute((): void => {
             destroyVirtualScreenNative(screenId, displayMgrRef);
@@ -806,6 +813,9 @@ export function destroyVirtualScreen(screenId: long): Promise<void> {
 export native function destroyVirtualScreenNative(screenId: long, nativeObj: long): void;
  
 export function setVirtualScreenSurface(screenId: long, surfaceId: string): Promise<void> {
+    if (screenId < 0) {
+        throw new BusinessError(ERROR_INVALID_PARAM, new Error(`[ANI] screenId is invalid: ${screenId}`));
+    }
     return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
         taskpool.execute((): void => {
             setVirtualScreenSurfaceNative(screenId, surfaceId, displayMgrRef);
