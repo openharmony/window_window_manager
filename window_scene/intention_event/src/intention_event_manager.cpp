@@ -230,7 +230,7 @@ void IntentionEventManager::InputEventListener::SendKeyEventConsumedResultToSCB(
     if ((keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_TAB ||
         keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ENTER) &&
         keyEvent->GetKeyAction() == MMI::KeyEvent::KEY_ACTION_DOWN) {
-        TLOGD(WmsLogTag::WMS_EVENT, "keyCode:%{public}d, isConsumed:%{public}d",
+        TLOGD(WmsLogTag::WMS_EVENT, "keyCode:%{private}d, isConsumed:%{public}d",
             keyEvent->GetKeyCode(), isConsumed);
         SceneSessionManager::GetInstance().NotifyWatchGestureConsumeResult(keyEvent->GetKeyCode(), isConsumed);
     }
