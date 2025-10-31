@@ -97,13 +97,11 @@ public:
         return WMError::WM_OK;
     }
     WMError UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info,
-        const std::map<AvoidAreaType, AvoidArea> avoidAreas,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override
     {
         return WMError::WM_OK;
     }
     WMError UpdateOccupiedAreaAndRect(const sptr<OccupiedAreaChangeInfo>& info, const Rect& rect,
-        const std::map<AvoidAreaType, AvoidArea> avoidAreas,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override
     {
         return WMError::WM_OK;

@@ -110,19 +110,17 @@ WMError WindowAgent::UpdateDisplayId(DisplayId from, DisplayId to)
 }
 
 WMError WindowAgent::UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info,
-    const std::map<AvoidAreaType, AvoidArea>& avoidAreas,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     if (window_ == nullptr) {
         WLOGFE("window is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    window_->UpdateOccupiedAreaChangeInfo(info, avoidAreas, rsTransaction);
+    window_->UpdateOccupiedAreaChangeInfo(info, rsTransaction);
     return WMError::WM_OK;
 }
 
 WMError WindowAgent::UpdateOccupiedAreaAndRect(const sptr<OccupiedAreaChangeInfo>& info, const Rect& rect,
-    const std::map<AvoidAreaType, AvoidArea>& avoidAreas,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     if (window_ == nullptr) {
@@ -133,7 +131,7 @@ WMError WindowAgent::UpdateOccupiedAreaAndRect(const sptr<OccupiedAreaChangeInfo
     if (property) {
         window_->UpdateRect(rect, property->GetDecoStatus(), WindowSizeChangeReason::UNDEFINED);
     }
-    window_->UpdateOccupiedAreaChangeInfo(info, avoidAreas, rsTransaction);
+    window_->UpdateOccupiedAreaChangeInfo(info, rsTransaction);
     return WMError::WM_OK;
 }
 

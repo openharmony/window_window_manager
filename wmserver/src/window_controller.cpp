@@ -492,20 +492,12 @@ void WindowController::NotifyInputCallingWindowRectAndOccupiedAreaChange(const s
     const Rect& safeRect = WindowHelper::GetOverlap(occupiedArea, rect, 0, 0);
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT,
         safeRect, safeRect.height_);
-    std::map<AvoidAreaType, AvoidArea> avoidAreas = {};
-    using T = std::underlying_type_t<AvoidAreaType>;
-    for (T type = static_cast<T>(AvoidAreaType::TYPE_START);
-        type < static_cast<T>(AvoidAreaType::TYPE_END); type++) {
-        auto avoidAreaType = static_cast<AvoidAreaType>(type);
-        AvoidArea area = GetAvoidAreaByType(callingWindow->GetWindowId(), avoidAreaType);
-        avoidAreas[avoidAreaType] = area;
-        avoidAreas[avoidAreaType] = area;
-    }
+
     auto rsTransaction = RSSyncTransactionAdapter::GetRSTransaction(callingWindow->GetRSUIContext());
     if (WindowNodeContainer::GetAnimateTransactionEnabled() && rsTransaction) {
-        callingWindow->GetWindowToken()->UpdateOccupiedAreaAndRect(info, rect, avoidAreas, rsTransaction);
+        callingWindow->GetWindowToken()->UpdateOccupiedAreaAndRect(info, rect, rsTransaction);
     } else {
-        callingWindow->GetWindowToken()->UpdateOccupiedAreaAndRect(info, rect, avoidAreas);
+        callingWindow->GetWindowToken()->UpdateOccupiedAreaAndRect(info, rect);
     }
 
     FlushWindowInfo(callingWindow->GetWindowId());
