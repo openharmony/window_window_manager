@@ -1630,7 +1630,8 @@ ani_object AniWindow::SetWindowLayoutFullScreen(ani_env* env, ani_boolean isLayo
         return AniWindowUtils::CreateAniUndefined(env);
     }
 
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetLayoutFullScreen(static_cast<bool>(isLayoutFullScreen)));
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+        windowToken_->SetLayoutFullScreen(static_cast<bool>(isLayoutFullScreen)));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_IMMS, "[ANI] fullscreen set error");
         return AniWindowUtils::AniThrowError(env, ret);
