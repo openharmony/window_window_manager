@@ -1723,7 +1723,7 @@ bool AniWindowUtils::IsInstanceOf(ani_env* env, ani_object obj, const char* clas
               className, static_cast<int32_t>(ret));
         return false;
     }
-    return isInstance;
+    return static_cast<bool>(isInstance);
 }
 
 std::vector<ani_ref> AniWindowUtils::ExtractArrayElements(ani_env* env, ani_object arrayObj)
