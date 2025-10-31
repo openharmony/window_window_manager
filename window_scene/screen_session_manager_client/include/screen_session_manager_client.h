@@ -128,6 +128,7 @@ public:
     void NotifySwitchUserAnimationFinish(const std::string& description);
     void RegisterSwitchUserAnimationNotification(const std::string& description);
     void OnAnimationFinish() override;
+    void SetInternalClipToBounds(ScreenId screenId, bool clipToBounds) override;
     DMError SetPrimaryDisplaySystemDpi(float dpi);
     void FreezeScreen(ScreenId screenId, bool isFreeze);
     std::shared_ptr<Media::PixelMap> GetScreenSnapshotWithAllWindows(ScreenId screenId, float scaleX, float scaleY,

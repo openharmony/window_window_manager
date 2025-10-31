@@ -157,6 +157,10 @@ void ScreenSessionManagerClientStub::InitScreenChangeMap()
         [this](MessageParcel& data, MessageParcel& reply) {
         return HandleOnAnimationFinish(data, reply);
     };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_SET_INTERNAL_CLIPTOBOUNDS] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleSetInternalClipToBounds(data, reply);
+    };
 }
 
 ScreenSessionManagerClientStub::ScreenSessionManagerClientStub()
@@ -557,6 +561,15 @@ int ScreenSessionManagerClientStub::HandleOnScreenModeChanged(MessageParcel& dat
 int ScreenSessionManagerClientStub::HandleOnAnimationFinish(MessageParcel& data, MessageParcel& reply)
 {
     OnAnimationFinish();
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleSetInternalClipToBounds(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::DMS, "enter");
+    auto mainScreenId = static_cast<ScreenId>(data.ReadUint64());
+    auto clipToBounds = data.ReadBool();
+    SetInternalClipToBounds(mainScreenId, clipToBounds);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

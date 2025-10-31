@@ -1555,4 +1555,27 @@ void ScreenSessionManagerClient::OnAnimationFinish()
     std::lock_guard<std::mutex> lock(animateFinishNotificationSetMutex_);
     animateFinishNotificationSet_.clear();
 }
+
+void ScreenSessionManagerClient::SetInternalClipToBounds(ScreenId screenId, bool clipToBounds)
+{
+    sptr<ScreenSession> internalSession = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+        if (screenSessionMap_.find(screenId) != screenSessionMap_.end()) {
+            internalSession = screenSessionMap_[screenId];
+        }
+    }
+    if (internalSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenSession is null");
+        return;
+    }
+    auto displayNode = internalSession->GetDisplayNode();
+    if (displayNode != nullptr) {
+        TLOGI(WmsLogTag::DMS, "Screen %{public}lu displayNode cliptobounds set to %{public}d",
+            screenId, clipToBounds);
+        displayNode->SetClipToBounds(clipToBounds);
+        RSTransactionAdapter::FlushImplicitTransaction(displayNode);
+    }
+    TLOGI(WmsLogTag::DMS, "SetInternalClipToBounds end");
+}
 } // namespace OHOS::Rosen
