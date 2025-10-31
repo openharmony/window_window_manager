@@ -1630,10 +1630,10 @@ ani_object AniWindow::SetWindowLayoutFullScreen(ani_env* env, ani_boolean isLayo
         return AniWindowUtils::CreateAniUndefined(env);
     }
 
-    WMError ret = windowToken_->SetLayoutFullScreen(static_cast<bool>(isLayoutFullScreen));
-    if (ret != WMError::WM_OK) {
+    WMErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetLayoutFullScreen(static_cast<bool>(isLayoutFullScreen)));
+    if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_IMMS, "[ANI] fullscreen set error");
-        return AniWindowUtils::CreateAniUndefined(env);
+        return AniWindowUtils::AniThrowError(env, ret);
     }
     return 0;
 }
@@ -1997,8 +1997,6 @@ bool AniWindow::OnIsMainWindowFullScreenAcrossDisplays(ani_env* env)
     bool isAcrossDisplaysPtr = false;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
         windowToken_->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplaysPtr));
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u, isAcrossDisplays: %{public}u, "
-        "result: %{public}d", windowToken_->GetWindowId(), isAcrossDisplaysPtr, ret);
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed, ret %{public}d", ret);
         AniWindowUtils::AniThrowError(env, ret,
