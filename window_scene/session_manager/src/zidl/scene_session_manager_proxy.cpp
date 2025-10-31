@@ -2052,7 +2052,7 @@ WMError SceneSessionManagerProxy::GetTopWindowId(uint32_t mainWinId, uint32_t& t
 
 WMError SceneSessionManagerProxy::NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed)
 {
-    TLOGD(WmsLogTag::WMS_EVENT, "keyCode:%{private}d isConsumed:%{public}d", keyCode, isConsumed);
+    TLOGD(WmsLogTag::WMS_EVENT, "isConsumed:%{public}d", isConsumed);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
