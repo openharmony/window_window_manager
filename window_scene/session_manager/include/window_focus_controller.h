@@ -83,6 +83,7 @@ private:
     std::unordered_map<DisplayId, sptr<FocusGroup>> focusGroupMap_;
     std::unordered_map<DisplayId, DisplayGroupId> displayId2GroupIdMap_;
     std::unordered_map<DisplayId, DisplayGroupId> deletedDisplayId2GroupIdMap_;
+    std::mutex focusGroupMapMutex_;
 };
 }
 }
