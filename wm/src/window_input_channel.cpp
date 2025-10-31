@@ -67,7 +67,7 @@ __attribute__((no_sanitize("cfi"))) void WindowInputChannel::HandleKeyEvent(
         TLOGE(WmsLogTag::WMS_EVENT, "window_ is nullptr");
         return;
     }
-    WLOGFD("Receive key event, Id: %{public}u,", window_->GetWindowId());
+    WLOGFD("Receive key event, Id: %{public}u", window_->GetWindowId());
     if (window_->GetType() == WindowType::WINDOW_TYPE_DIALOG) {
         if (keyEvent->GetAgentWindowId() != keyEvent->GetTargetWindowId()) {
             window_->NotifyTouchDialogTarget();
