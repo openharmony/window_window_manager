@@ -1899,7 +1899,7 @@ void AniWindow::OnSetDefaultDensityEnabled(ani_env* env, ani_boolean enabled)
 }
 
 void AniWindow::SetWindowContainerColor(ani_env* env, ani_object obj, ani_long nativeObj,
-    std::string activeColor, std::string inactiveColor)
+    ani_string activeColor, ani_string inactiveColor)
 {
     TLOGI(WmsLogTag::WMS_DECOR, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
@@ -1911,7 +1911,7 @@ void AniWindow::SetWindowContainerColor(ani_env* env, ani_object obj, ani_long n
     aniWindow->OnSetWindowContainerColor(env, activeColor, inactiveColor);
 }
 
-void AniWindow::OnSetWindowContainerColor(ani_env* env, std::string activeColor, std::string inactiveColor)
+void AniWindow::OnSetWindowContainerColor(ani_env* env, ani_string activeColor, ani_string inactiveColor)
 {
     if (!windowToken_) {
         TLOGE(WmsLogTag::WMS_DECOR, "[ANI] window is nullptr");
@@ -1919,9 +1919,14 @@ void AniWindow::OnSetWindowContainerColor(ani_env* env, std::string activeColor,
             "[window][setWindowContainerColor]msg: invalid window");
         return;
     }
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetWindowContainerColor(activeColor, inactiveColor));
+    std::string stdActiveColor = activeColor;
+    std::string stdInactiveColor = inactiveColor;
+    AniWindowUtils::GetStdString(env, activeColor, stdActiveColor);
+    AniWindowUtils::GetStdString(env, inactiveColor, stdInactiveColor);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+        windowToken_->SetWindowContainerColor(stdActiveColor, stdInactiveColor));
     TLOGI(WmsLogTag::WMS_DECOR, "winId: %{public}u set activeColor: %{public}s, inactiveColor: %{public}s"
-        ", result: %{public}d", windowToken_->GetWindowId(), activeColor.c_str(), inactiveColor.c_str(), ret);
+        ", result: %{public}d", windowToken_->GetWindowId(), stdActiveColor.c_str(), stdInactiveColor.c_str(), ret);
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_DECOR, "set window container color failed!");
         AniWindowUtils::AniThrowError(env, ret,
@@ -1932,7 +1937,7 @@ void AniWindow::OnSetWindowContainerColor(ani_env* env, std::string activeColor,
 }
 
 void AniWindow::SetWindowContainerModalColor(ani_env* env, ani_object obj, ani_long nativeObj,
-    std::string activeColor, std::string inactiveColor)
+    ani_string activeColor, ani_string inactiveColor)
 {
     TLOGI(WmsLogTag::WMS_DECOR, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
@@ -1944,7 +1949,7 @@ void AniWindow::SetWindowContainerModalColor(ani_env* env, ani_object obj, ani_l
     aniWindow->OnSetWindowContainerModalColor(env, activeColor, inactiveColor);
 }
 
-void AniWindow::OnSetWindowContainerModalColor(ani_env* env, std::string activeColor, std::string inactiveColor)
+void AniWindow::OnSetWindowContainerModalColor(ani_env* env, ani_stri ng activeColor, ani_string inactiveColor)
 {
     if (!windowToken_) {
         TLOGE(WmsLogTag::WMS_DECOR, "[ANI] window is nullptr");
@@ -1952,11 +1957,15 @@ void AniWindow::OnSetWindowContainerModalColor(ani_env* env, std::string activeC
             "[window][setWindowContainerModalColor]msg: invalid window");
         return;
     }
+    std::string stdActiveColor = activeColor;
+    std::string stdInactiveColor = inactiveColor;
+    AniWindowUtils::GetStdString(env, activeColor, stdActiveColor);
+    AniWindowUtils::GetStdString(env, inactiveColor, stdInactiveColor);
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
-        windowToken_->SetWindowContainerModalColor(activeColor, inactiveColor));
+        windowToken_->SetWindowContainerModalColor(stdActiveColor, stdInactiveColor));
     TLOGI(WmsLogTag::WMS_DECOR, "Window [%{public}u, %{public}s] set activeColor: %{public}s,"
         " inactiveColor: %{public}s, result: %{public}d", windowToken_->GetWindowId(),
-        windowToken_->GetWindowName().c_str(), activeColor.c_str(), inactiveColor.c_str(), ret);
+        windowToken_->GetWindowName().c_str(), stdActiveColor.c_str(), stdInactiveColor.c_str(), ret);
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_DECOR, "set window container modal color failed!");
         AniWindowUtils::AniThrowError(env, ret,
