@@ -946,6 +946,71 @@ HWTEST_F(SceneSessionLayoutTest, UpdateWindowModeForUITest01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleMoveDragEnd
+ * @tc.desc: HandleMoveDragEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, HandleMoveDragEnd, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleMoveDragEnd";
+    info.bundleName_ = "HandleMoveDragEnd";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->subSession_.push_back(subSession);
+    sceneSession->moveDragController_ =
+        sptr<MoveDragController>::MakeSptr(sceneSession->GetPersistentId(), sceneSession->GetWindowType());
+    subSession->state_ = SessionState::STATE_FOREGROUND;
+    const uint64_t startDisplayId = 0;
+    const uint64_t endDisplayId = 12;
+    WSRect rect = { 0, 0, 1000, 1000 };
+
+    // Case1: Not cross screen
+    sceneSession->GetSessionProperty()->SetDisplayId(startDisplayId);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->GetMoveDragController()->winType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    subSession->GetSessionProperty()->SetDisplayId(startDisplayId);
+    sceneSession->GetMoveDragController()->moveDragStartDisplayId_ = startDisplayId;
+    sceneSession->GetMoveDragController()->moveDragEndDisplayId_ = startDisplayId;
+    subSession->SetShouldFollowParentWhenShow(true);
+    sceneSession->HandleMoveDragEnd(rect, SizeChangeReason::UNDEFINED);
+    EXPECT_EQ(subSession->GetShouldFollowParentWhenShow(), true);
+
+    // Case2: Not supported across screen
+    sceneSession->GetSessionProperty()->SetDisplayId(startDisplayId);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_DESKTOP);
+    sceneSession->GetMoveDragController()->winType_ = WindowType::WINDOW_TYPE_DESKTOP;
+    subSession->GetSessionProperty()->SetDisplayId(startDisplayId);
+    sceneSession->GetMoveDragController()->moveDragStartDisplayId_ = startDisplayId;
+    sceneSession->GetMoveDragController()->moveDragEndDisplayId_ = endDisplayId;
+    subSession->SetShouldFollowParentWhenShow(true);
+    sceneSession->HandleMoveDragEnd(rect, SizeChangeReason::UNDEFINED);
+    EXPECT_EQ(subSession->GetShouldFollowParentWhenShow(), true);
+
+    // Case3: Support cross screen and cross screen
+    sceneSession->GetSessionProperty()->SetDisplayId(startDisplayId);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->GetMoveDragController()->winType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    subSession->GetSessionProperty()->SetDisplayId(startDisplayId);
+    sceneSession->GetMoveDragController()->moveDragStartDisplayId_ = startDisplayId;
+    sceneSession->GetMoveDragController()->moveDragEndDisplayId_ = endDisplayId;
+    subSession->SetShouldFollowParentWhenShow(true);
+    sceneSession->HandleMoveDragEnd(rect, SizeChangeReason::UNDEFINED);
+    EXPECT_EQ(subSession->GetShouldFollowParentWhenShow(), false);
+
+    // Case4: Not cross screen and not supported across screen
+    sceneSession->GetSessionProperty()->SetDisplayId(startDisplayId);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_DESKTOP);
+    sceneSession->GetMoveDragController()->winType_ = WindowType::WINDOW_TYPE_DESKTOP;
+    subSession->GetSessionProperty()->SetDisplayId(startDisplayId);
+    sceneSession->GetMoveDragController()->moveDragStartDisplayId_ = startDisplayId;
+    sceneSession->GetMoveDragController()->moveDragEndDisplayId_ = startDisplayId;
+    subSession->SetShouldFollowParentWhenShow(true);
+    sceneSession->HandleMoveDragEnd(rect, SizeChangeReason::UNDEFINED);
+    EXPECT_EQ(subSession->GetShouldFollowParentWhenShow(), true);
+}
+
+/**
  * @tc.name: SetMoveAvailableArea01
  * @tc.desc: SetMoveAvailableArea01
  * @tc.type: FUNC
