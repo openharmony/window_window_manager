@@ -200,11 +200,11 @@ HWTEST_F(WindowAgentTest, UpdateOccupiedAreaChangeInfo, TestSize.Level1)
 {
     Rect overlapRect = { 0, 0, 0, 0 };
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT, overlapRect);
-    WMError err = windowAgent_->UpdateOccupiedAreaChangeInfo(info, {});
+    WMError err = windowAgent_->UpdateOccupiedAreaChangeInfo(info);
     ASSERT_EQ(err, WMError::WM_OK);
 
     windowAgent_->window_ = nullptr;
-    err = windowAgent_->UpdateOccupiedAreaChangeInfo(info, {});
+    err = windowAgent_->UpdateOccupiedAreaChangeInfo(info);
     ASSERT_EQ(err, WMError::WM_ERROR_NULLPTR);
 }
 
@@ -223,11 +223,11 @@ HWTEST_F(WindowAgentTest, UpdateOccupiedAreaAndRect, TestSize.Level1)
     }
     auto rsTransaction = RSSyncTransactionAdapter::GetRSTransaction(rsUIContext);
 
-    WMError err = windowAgent_->UpdateOccupiedAreaAndRect(info, overlapRect, {}, rsTransaction);
+    WMError err = windowAgent_->UpdateOccupiedAreaAndRect(info, overlapRect, rsTransaction);
     ASSERT_EQ(err, WMError::WM_OK);
 
     windowAgent_->window_ = nullptr;
-    err = windowAgent_->UpdateOccupiedAreaAndRect(info, overlapRect, {}, rsTransaction);
+    err = windowAgent_->UpdateOccupiedAreaAndRect(info, overlapRect, rsTransaction);
     ASSERT_EQ(err, WMError::WM_ERROR_NULLPTR);
 }
 

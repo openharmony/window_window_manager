@@ -25,7 +25,6 @@
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
 #include <transaction/rs_sync_transaction_controller.h>
-#include <type_traits>
 
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
 #include <display_power_mgr_client.h>
@@ -1430,19 +1429,11 @@ void WindowNodeContainer::NotifyIfKeyboardRegionChanged(const sptr<WindowNode>& 
         }
         sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT,
             overlapRect, textFieldPositionY, textFieldHeight);
-        std::map<AvoidAreaType, AvoidArea> avoidAreas = {};
-        using T = std::underlying_type_t<AvoidAreaType>;
-        for (T type = static_cast<T>(AvoidAreaType::TYPE_START);
-            type < static_cast<T>(AvoidAreaType::TYPE_END); type++) {
-            auto avoidAreaType = static_cast<AvoidAreaType>(type);
-            AvoidArea area = GetAvoidAreaByType(callingWindow, avoidAreaType);
-            avoidAreas[avoidAreaType] = area;
-        }
         if (isAnimateTransactionEnabled_) {
             auto rsTransaction = RSSyncTransactionAdapter::GetRSTransaction(node->GetRSUIContext());
-            callingWindow->GetWindowToken()->UpdateOccupiedAreaChangeInfo(info, avoidAreas, rsTransaction);
+            callingWindow->GetWindowToken()->UpdateOccupiedAreaChangeInfo(info, rsTransaction);
         } else {
-            callingWindow->GetWindowToken()->UpdateOccupiedAreaChangeInfo(info, avoidAreas);
+            callingWindow->GetWindowToken()->UpdateOccupiedAreaChangeInfo(info);
         }
 
         WLOGD("keyboard size change callingWindow: [%{public}s, %{public}u], "
