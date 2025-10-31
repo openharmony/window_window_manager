@@ -1886,7 +1886,6 @@ void AniWindow::OnSetDefaultDensityEnabled(ani_env* env, ani_boolean enabled)
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
-    windowToken_->SetWindowDefaultDensityEnabled(static_cast<bool>(enabled));
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
         windowToken_->SetWindowDefaultDensityEnabled(static_cast<bool>(enabled)));
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI] winId: %{public}u set enabled=%{public}u result=%{public}d",
