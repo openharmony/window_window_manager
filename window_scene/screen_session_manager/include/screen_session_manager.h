@@ -205,6 +205,7 @@ public:
     void SetMultiScreenFrameControl(void);
     bool IsPhysicalScreenAndInUse(sptr<ScreenSession> screenSession) const;
     bool HandleFoldScreenSessionCreate(ScreenId screenId);
+    DMError CheckVirtualScreenPermission();
 
     void ChangeScreenGroup(sptr<ScreenSessionGroup> group, const std::vector<ScreenId>& screens,
              const std::vector<Point>& startPoints, bool filterScreen, ScreenCombination combination,

@@ -2411,6 +2411,26 @@ void ScreenSessionManager::CalculateSecondryXYPosition(sptr<ScreenSession> first
     NotifyDisplayChanged(secondaryScreenSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
 }
 
+DMError ScreenSessionManager::CheckVirtualScreenPermission()
+{
+    bool isCallingByThirdParty = Permission::CheckCallingPermission(ACCESS_VIRTUAL_SCREEN_PERMISSION);
+    if (isCallingByThirdParty) {
+        return DMError::DM_OK;
+    }
+    if (SessionPermission::IsShellCall()) {
+        return DMError::DM_OK;
+    }
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::DMS, "Permission Denied, sys or shell");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    if (!Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) {
+        TLOGE(WmsLogTag::DMS, "Permission Denied, capture");
+        return DMError::DM_ERROR_INVALID_PERMISSION;
+    }
+    return DMError::DM_OK;
+}
+
 sptr<ScreenInfo> ScreenSessionManager::GetScreenInfoById(ScreenId screenId)
 {
     if (!SessionPermission::IsSystemCalling() &&
@@ -5739,15 +5759,11 @@ void ScreenSessionManager::AddVirtualScreenDeathRecipient(const sptr<IRemoteObje
 ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
                                                    const sptr<IRemoteObject>& displayManagerAgent)
 {
-    if (!Permission::IsSystemCalling() && !SessionPermission::IsShellCall() &&
-        !Permission::CheckCallingPermission(ACCESS_VIRTUAL_SCREEN_PERMISSION)) {
+    DMError err = CheckVirtualScreenPermission();
+    if (err == DMError::DM_ERROR_INVALID_PERMISSION) {
+        return ERROR_ID_NO_PERMISSION;
+    } else if (err == DMError::DM_ERROR_NOT_SYSTEM_APP) {
         return ERROR_ID_NOT_SYSTEM_APP;
-    }
-    if (!(Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) &&
-        !SessionPermission::IsShellCall() && !Permission::CheckCallingPermission(ACCESS_VIRTUAL_SCREEN_PERMISSION)) {
-        TLOGE(WmsLogTag::DMS, "Permission Denied! calling: %{public}s, pid: %{public}d",
-            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
-        return SCREEN_ID_INVALID;
     }
     if (option.virtualScreenType_ != VirtualScreenType::SCREEN_RECORDING) {
         ExitCoordination("CreateVirtualScreen(cast)");
@@ -5808,11 +5824,9 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
 DMError ScreenSessionManager::SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface)
 {
     bool isCallingByThirdParty = Permission::CheckCallingPermission(ACCESS_VIRTUAL_SCREEN_PERMISSION);
-    if (!(Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) &&
-        !SessionPermission::IsShellCall() && !isCallingByThirdParty) {
-        TLOGE(WmsLogTag::DMS, "Permission Denied! calling: %{public}s, pid: %{public}d",
-            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
-        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    DMError err = CheckVirtualScreenPermission();
+    if (err != DMError::DM_OK) {
+        return err;
     }
     if (surface == nullptr) {
         TLOGE(WmsLogTag::DMS, "surface is null");
