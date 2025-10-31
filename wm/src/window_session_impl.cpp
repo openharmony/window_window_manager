@@ -6436,7 +6436,7 @@ WSError WindowSessionImpl::NotifyDisplayIdChange(DisplayId displayId)
 
 WMError WindowSessionImpl::NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed)
 {
-    TLOGD(WmsLogTag::WMS_EVENT, "keyCode:%{public}d, isConsumed:%{public}d", keyCode, isConsumed);
+    TLOGD(WmsLogTag::WMS_EVENT, "keyCode:%{private}d, isConsumed:%{public}d", keyCode, isConsumed);
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -6651,7 +6651,7 @@ bool WindowSessionImpl::FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
     std::lock_guard<std::mutex> lock(keyEventFilterMutex_);
     if (keyEventFilter_ != nullptr) {
         bool isFilter = keyEventFilter_(*keyEvent.get());
-        TLOGE(WmsLogTag::WMS_SYSTEM, "keyCode:%{public}d isFilter:%{public}d",
+        TLOGE(WmsLogTag::WMS_SYSTEM, "keyCode:%{private}d isFilter:%{public}d",
             keyEvent->GetKeyCode(), isFilter);
         if (isFilter) {
             keyEvent->MarkProcessed();
@@ -6703,7 +6703,7 @@ void WindowSessionImpl::NotifyConsumeResultToFloatWindow
     if ((keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_TAB ||
          keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ENTER) && !GetWatchGestureConsumed() &&
         keyEvent->GetKeyAction() == MMI::KeyEvent::KEY_ACTION_DOWN) {
-        TLOGD(WmsLogTag::WMS_EVENT, "wid:%{public}u, keyCode:%{public}d, isConsumed:%{public}d",
+        TLOGD(WmsLogTag::WMS_EVENT, "wid:%{public}u, keyCode:%{private}d, isConsumed:%{public}d",
             GetWindowId(), keyEvent->GetKeyCode(), isConsumed);
         NotifyWatchGestureConsumeResult(keyEvent->GetKeyCode(), isConsumed);
     }
