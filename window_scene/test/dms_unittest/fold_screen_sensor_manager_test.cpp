@@ -162,6 +162,36 @@ HWTEST_F(FoldScreenSensorManagerTest, HandleHallData, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleHallDataWhenAngleMinusOne
+ * @tc.desc: test function : HandleHallData
+ * @tc.type: FUNC
+ */
+HWTEST_F(FoldScreenSensorManagerTest, HandleHallDataWhenAngleMinusOne, TestSize.Level1)
+{
+    FoldScreenSensorManager mgr = FoldScreenSensorManager();
+    mgr.SetSensorFoldStateManager(new SensorFoldStateManager());
+    mgr.registerPosture_ = false;
+    mgr.SetGlobalAngle(-1.0F);
+    mgr.SetGlobalHall(1);
+
+    FoldScreenSensorManager::ExtHallData hallData = {
+        .flag = (1 << 1),
+        .hall = 0,
+    };
+    SensorEvent hallEvent = {
+        .data = reinterpret_cast<uint8_t *>(&hallData),
+        .dataLen = sizeof(FoldScreenSensorManager::ExtHallData),
+    };
+    mgr.HandleHallData(&hallEvent);
+    EXPECT_EQ(mgr.globalAngle, ANGLE_MIN_VAL);
+
+    mgr.globalAngle = -2.0F;
+    mgr.globalHall = 0;
+    mgr.HandleHallData(&hallEvent);
+    EXPECT_EQ(mgr.globalAngle, -2.0F);
+}
+
+/**
  * @tc.name: TriggerDisplaySwitch
  * @tc.desc: test function : TriggerDisplaySwitch
  * @tc.type: FUNC
@@ -177,7 +207,7 @@ HWTEST_F(FoldScreenSensorManagerTest, TriggerDisplaySwitch, TestSize.Level1)
     mgr.registerPosture_ = true;
     mgr.TriggerDisplaySwitch();
     if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
-        EXPECT_EQ(mgr.globalAngle, 85);
+        EXPECT_EQ(mgr.globalAngle, 110);
     } else if (SceneBoardJudgement::IsSceneBoardEnabled() || FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         EXPECT_EQ(mgr.globalAngle, 25);
     } else {
