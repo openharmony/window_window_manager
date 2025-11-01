@@ -453,6 +453,12 @@ void Session::SetAppInstanceKey(const std::string& appInstanceKey)
     sessionInfo_.appInstanceKey_ = appInstanceKey;
 }
 
+std::shared_ptr<AppExecFwk::AbilityInfo> Session::GetSessionInfoAbilityInfo()
+{
+    std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+    return sessionInfo_.abilityInfo;
+}
+
 std::string Session::GetAppInstanceKey() const
 {
     return sessionInfo_.appInstanceKey_;

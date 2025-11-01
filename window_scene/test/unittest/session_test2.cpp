@@ -866,6 +866,18 @@ HWTEST_F(WindowSessionTest2, SetSessionInfoAbilityInfo, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetSessionInfoAbilityInfo
+ * @tc.desc: GetSessionInfoAbilityInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, GetSessionInfoAbilityInfo, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->sessionInfo_.abilityInfo = nullptr;
+    EXPECT_EQ(nullptr, session_->GetSessionInfoAbilityInfo());
+}
+
+/**
  * @tc.name: SetSessionInfoWant
  * @tc.desc: SetSessionInfoWant Test
  * @tc.type: FUNC
