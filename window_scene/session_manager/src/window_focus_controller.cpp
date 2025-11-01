@@ -83,8 +83,8 @@ WSError WindowFocusController::AddFocusGroup(DisplayGroupId displayGroupId, Disp
         } else {
             iter->second->displayIds_.insert(displayId);
         }
+        LogDisplayIds();
     }
-    LogDisplayIds();
     if (deletedDisplayId2GroupIdMap_.find(displayId) != deletedDisplayId2GroupIdMap_.end()) {
         deletedDisplayId2GroupIdMap_.erase(displayId);
     }
@@ -211,18 +211,15 @@ void WindowFocusController::LogDisplayIds()
 {
     std::ostringstream oss;
     {
-        {
-            std::lock_guard<std::mutex> lock(focusGroupMapMutex_);
-            for (auto it = focusGroupMap_.begin(); it != focusGroupMap_.end(); it++) {
-                oss << "focusGroupId: " << it->first << ", displayids:";
-                auto displayIds = it->second->displayIds_;
-                for (auto it2 = displayIds.begin(); it2 != displayIds.end(); it2++) {
-                    oss << *it2;
-                    if (std::next(it2) != displayIds.end()) {
-                        oss << ",";
-                    } else {
-                        oss << ";";
-                    }
+        for (auto it = focusGroupMap_.begin(); it != focusGroupMap_.end(); it++) {
+            oss << "focusGroupId: " << it->first << ", displayids:";
+            auto displayIds = it->second->displayIds_;
+            for (auto it2 = displayIds.begin(); it2 != displayIds.end(); it2++) {
+                oss << *it2;
+                if (std::next(it2) != displayIds.end()) {
+                    oss << ",";
+                } else {
+                    oss << ";";
                 }
             }
         }
