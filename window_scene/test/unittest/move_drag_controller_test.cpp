@@ -16,7 +16,6 @@
 #include <gtest/gtest.h>
 #include <memory>
 
-#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include <pointer_event.h>
 #include "session/host/include/move_drag_controller.h"
 #include "session/host/include/session.h"
@@ -48,9 +47,6 @@ void MoveDragControllerTest::SetUpTestCase() {}
 
 void MoveDragControllerTest::TearDownTestCase()
 {
-#ifdef RS_ENABLE_VK
-    RSModifiersDrawThread::Destroy();
-#endif
 }
 
 void MoveDragControllerTest::SetUp()

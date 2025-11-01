@@ -18,7 +18,6 @@
 #include <gmock/gmock.h>
 #include "ability_context_impl.h"
 #include "mock_session.h"
-#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "parameters.h"
 #include "picture_in_picture_controller.h"
 #include "picture_in_picture_manager.h"
@@ -98,9 +97,6 @@ void PictureInPictureControllerTest::SetUpTestCase() {}
 
 void PictureInPictureControllerTest::TearDownTestCase()
 {
-#ifdef RS_ENABLE_VK
-    RSModifiersDrawThread::Destroy();
-#endif
 }
 
 void PictureInPictureControllerTest::SetUp()

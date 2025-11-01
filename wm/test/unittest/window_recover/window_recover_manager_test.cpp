@@ -22,7 +22,6 @@
 #include "singleton_mocker.h"
 #include "window_scene_session_impl.h"
 #include "window_session_impl.h"
-#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -41,9 +40,6 @@ void WindowRecoverManagerTest::SetUpTestCase() {}
 
 void WindowRecoverManagerTest::TearDownTestCase()
 {
-#ifdef RS_ENABLE_VK
-    RSModifiersDrawThread::Destroy();
-#endif
 }
 
 void WindowRecoverManagerTest::SetUp() {}

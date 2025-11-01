@@ -21,7 +21,6 @@
 #include "window_extension_client_stub_impl.h"
 #include "iremote_object_mocker.h"
 #include "window_extension_session_impl.h"
-#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -45,9 +44,6 @@ void WindowExtensionStubImplTest::SetUpTestCase()
 
 void WindowExtensionStubImplTest::TearDownTestCase()
 {
-#ifdef RS_ENABLE_VK
-    RSModifiersDrawThread::Destroy();
-#endif
 }
 
 void WindowExtensionStubImplTest::SetUp()
