@@ -8317,7 +8317,7 @@ bool SceneSession::UpdateInteractiveInner(bool interactive)
     if (GetForegroundInteractiveStatus() == interactive) {
         return false;
     }
-    NotifyAddOrRemoveSnapshotWindow(interactive);
+    NotifyAddOrRemoveSnapshotWindow(interactive && IsSessionForeground());
     SetForegroundInteractiveStatus(interactive);
     NotifyClientToUpdateInteractive(interactive);
     return true;
@@ -8328,7 +8328,7 @@ void SceneSession::NotifyAddOrRemoveSnapshotWindow(bool interactive)
     auto needSaveSnapshot = ScenePersistentStorage::HasKey("SetImageForRecent_" + std::to_string(GetPersistentId()),
         ScenePersistentStorageType::MAXIMIZE_STATE);
     // persistent imageFit exist, add snapshot when interactive is false.
-    if (needSaveSnapshot && !GetShowRecent()) {
+    if (needSaveSnapshot) {
         TLOGI(WmsLogTag::WMS_PATTERN, "Add or remove static image from window, interactive:%{public}d", interactive);
         PostTask([weakThis = wptr(this), interactive, where = __func__] {
             auto session = weakThis.promote();

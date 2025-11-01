@@ -1065,6 +1065,30 @@ HWTEST_F(WindowPatternSnapshotTest, RemoveImageForRecent, TestSize.Level1)
     EXPECT_EQ(ret, WMError::WM_OK);
     ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
 }
+
+/**
+ * @tc.name: NotifyAddOrRemoveSnapshotWindow
+ * @tc.desc: NotifyAddOrRemoveSnapshotWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternSnapshotTest, NotifyAddOrRemoveSnapshotWindow, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    SessionInfo info;
+    info.abilityName_ = "NotifyAddOrRemoveSnapshotWindow";
+    info.bundleName_ = "NotifyAddOrRemoveSnapshotWindow";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ScenePersistentStorage::InitDir("/data/Snapshot");
+
+    sceneSession->NotifyAddOrRemoveSnapshotWindow(true);
+    EXPECT_TRUE(g_logMsg.find("NotifyAddOrRemoveSnapshotWindow") == std::string::npos);
+
+    ScenePersistentStorage::Insert("SetImageForRecent_" + std::to_string(sceneSession->persistentId_),
+        0, ScenePersistentStorageType::MAXIMIZE_STATE);
+    sceneSession->NotifyAddOrRemoveSnapshotWindow(true);
+    EXPECT_TRUE(g_logMsg.find("NotifyAddOrRemoveSnapshotWindow") != std::string::npos);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
