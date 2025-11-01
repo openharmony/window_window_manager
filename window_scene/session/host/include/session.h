@@ -666,6 +666,7 @@ public:
     virtual bool IsNeedSyncScenePanelGlobalPosition() { return true; }
     void SetAppInstanceKey(const std::string& appInstanceKey);
     std::string GetAppInstanceKey() const;
+    std::shared_ptr<AppExecFwk::AbilityInfo> GetSessionInfoAbilityInfo();
 
     /*
      * Starting Window
