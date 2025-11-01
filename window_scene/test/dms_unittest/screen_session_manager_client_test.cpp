@@ -2026,5 +2026,39 @@ HWTEST_F(ScreenSessionManagerClientTest, NotifyIsFullScreenInForceSplitMode, Tes
     EXPECT_TRUE(logMsg.find("screenSessionManager_ is null") != std::string::npos);
     LOG_SetCallback(nullptr);
 }
+
+/**
+ * @tc.name: SetInternalClipToBounds
+ * @tc.desc: SetInternalClipToBounds test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SetInternalClipToBounds, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(screenSessionManagerClient_, nullptr);
+
+    RRect bounds;
+    sptr<ScreenSession> screenSession1 = sptr<ScreenSession>::MakeSptr(50, ScreenProperty(), 0);
+    screenSessionManagerClient_->screenSessionMap_[50] = screenSession1;
+
+    screenSessionManagerClient_->SetInternalClipToBounds(51, true);
+    EXPECT_TRUE(logMsg.find("screenSession is null") != std::string::npos);
+    logMsg.clear();
+
+    screenSessionManagerClient_->SetInternalClipToBounds(50, true);
+    EXPECT_TRUE(logMsg.find("displayNode cliptobounds set to") != std::string::npos);
+    logMsg.clear();
+
+    sptr<ScreenSession> screenSession2 = sptr<ScreenSession>::MakeSptr(51, ScreenProperty(), 0);
+    screenSession2->displayNode_ = nullptr;
+    screenSessionManagerClient_->screenSessionMap_[51] = screenSession2;
+    screenSessionManagerClient_->SetInternalClipToBounds(51, true);
+    EXPECT_TRUE(logMsg.find("SetInternalClipToBounds end") != std::string::npos);
+    logMsg.clear();
+
+    screenSessionManagerClient_->screenSessionMap_.erase(50);
+    screenSessionManagerClient_->screenSessionMap_.erase(51);
+}
 } // namespace Rosen
 } // namespace OHOS
