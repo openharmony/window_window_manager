@@ -50,7 +50,7 @@ constexpr uint32_t DISPLAY_A_HEIGHT = 3296;
 constexpr uint32_t DISPLAY_A_WIDTH = 2472;
 constexpr uint32_t DISPLAY_B_HEIGHT = 1608;
 constexpr OHOS::Rect FULL_SCREEN_RECORD_RECT = {0, 0, 0, 0};
-constexpr OHOS::Rect HALF_FOLD_B_SCREEN_RECORD_RECT = {0, 0, 0, 0};
+constexpr OHOS::Rect HALF_FOLD_B_SCREEN_RECORD_RECT = {0, 0, DISPLAY_A_WIDTH, DISPLAY_B_HEIGHT};
 }
 
 void SuperFoldStateManager::DoAngleChangeFolded(SuperFoldStatusChangeEvents event)
@@ -381,23 +381,21 @@ void SuperFoldStateManager::ModifyMirrorScreenVisibleRect(SuperFoldStatus preSta
     for (auto screenId : mirrorScreenIds) {
         ScreenId rsId = SCREEN_ID_INVALID;
         ScreenSessionManager::GetInstance().ConvertScreenIdToRsScreenId(screenId, rsId);
-        TLOGI(WmsLogTag::DMS, "handle mirror ScreenId: %{public}lu, rsId:  %{public}lu", screenId, rsId);
+        TLOGI(WmsLogTag::DMS, "handle mirror ScreenId: %{public}" PRIu64 ", rsId:  %{public}" PRIu64, screenId, rsId);
         RSInterfaces::GetInstance().SetMirrorScreenVisibleRect(rsId, rsRect);
     }
 }
 
 void SuperFoldStateManager::ModifyMirrorScreenVisibleRect(bool isTpKeyboardOn)
 {
+    // modify rect caused by tp keyboard without foldstatus change
     OHOS::Rect rsRect;
     SuperFoldStatus curStatus = GetCurrentStatus();
-    if (ScreenSessionManager::GetInstance().IsCaptured() && isTpKeyboardOn) {
+    if (isTpKeyboardOn || (!isTpKeyboardOn && curStatus == SuperFoldStatus::HALF_FOLDED)) {
         rsRect = HALF_FOLD_B_SCREEN_RECORD_RECT;
-    } else if (ScreenSessionManager::GetInstance().IsCaptured() && !isTpKeyboardOn) {
-        if (curStatus == SuperFoldStatus::HALF_FOLDED) {
-            rsRect = FULL_SCREEN_RECORD_RECT;
-        } else if (curStatus == SuperFoldStatus::KEYBOARD) {
-            rsRect = HALF_FOLD_B_SCREEN_RECORD_RECT;
-        }
+    } else {
+        TLOGI(WmsLogTag::DMS, "caused by foldstatus change, return");
+        return;
     }
 
     std::vector<ScreenId> mirrorScreenIds;
@@ -408,7 +406,7 @@ void SuperFoldStateManager::ModifyMirrorScreenVisibleRect(bool isTpKeyboardOn)
     for (auto screenId : mirrorScreenIds) {
         ScreenId rsId = SCREEN_ID_INVALID;
         ScreenSessionManager::GetInstance().ConvertScreenIdToRsScreenId(screenId, rsId);
-        TLOGI(WmsLogTag::DMS, "handle mirror ScreenId: %{public}lu, rsId:  %{public}lu", screenId, rsId);
+        TLOGI(WmsLogTag::DMS, "handle mirror ScreenId: %{public}" PRIu64 ", rsId:  %{public}" PRIu64, screenId, rsId);
         RSInterfaces::GetInstance().SetMirrorScreenVisibleRect(rsId, rsRect);
     }
 }
@@ -790,7 +788,9 @@ void SuperFoldStateManager::HandleSystemKeyboardStatusDisplayNotify(
         TLOGD(WmsLogTag::DMS, "paw: %{public}u, pah: %{public}u",
             screenSession->GetPointerActiveWidth(), screenSession->GetPointerActiveHeight());
     }
-    ModifyMirrorScreenVisibleRect(isTpKeyboardOn);
+    if (ScreenSessionManager::GetInstance().IsCaptured()) {
+        ModifyMirrorScreenVisibleRect(isTpKeyboardOn);
+    }
 }
 
 int32_t SuperFoldStateManager::GetCurrentValidHeight(sptr<ScreenSession> screenSession)
