@@ -21,6 +21,8 @@ WM_IMPLEMENT_SINGLE_INSTANCE(SuperFoldPolicy)
 namespace {
 constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
 constexpr ScreenId SCREEN_ID_DEFAULT = 0;
+constexpr uint64_t SCREEN_ID_SIZE_MAX = 2;
+constexpr uint64_t SCREEN_ID_SIZE_ONE = 1;
 }
 
 bool SuperFoldPolicy::IsFakeDisplayExist()
@@ -113,18 +115,18 @@ DMRect SuperFoldPolicy::GetRecordRect(std::vector<ScreenId> screenIds)
 
 ScreenId SuperFoldPolicy::GetRealScreenId(std::vector<ScreenId> screenIds)
 {
-    if (screenIds.empty() || screenIds.size() > 2) {
+    if (screenIds.empty() || screenIds.size() > SCREEN_ID_SIZE_MAX) {
         TLOGE(WmsLogTag::DMS, "mainScreenIds null");
         return SCREEN_ID_INVALID;
     }
-    if (screenIds.size() == 1) {
+    if (screenIds.size() == SCREEN_ID_SIZE_ONE) {
         if ((screenIds[0] == SCREEN_ID_DEFAULT || screenIds[0] == DISPLAY_ID_FAKE)) {
-            TLOGI(WmsLogTag::DMS, "screenId: %{public}lu", static_cast<uint64_t>(screenIds[0]));
+            TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64, static_cast<uint64_t>(screenIds[0]));
             return SCREEN_ID_DEFAULT;
         }
     } else if (std::find(screenIds.begin(), screenIds.end(), SCREEN_ID_DEFAULT) != screenIds.end()
         && std::find(screenIds.begin(), screenIds.end(), DISPLAY_ID_FAKE) != screenIds.end()) {
-        TLOGI(WmsLogTag::DMS, "screenId: %{public}lu, %{public}lu",
+        TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 ", %{public}" PRIu64,
             static_cast<uint64_t>(screenIds[0]), static_cast<uint64_t>(screenIds[1]));
         return SCREEN_ID_DEFAULT;
     }
