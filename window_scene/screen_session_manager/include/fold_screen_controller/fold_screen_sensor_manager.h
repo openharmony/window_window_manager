@@ -120,6 +120,7 @@ private:
     SensorUser hallUser {};
 
     void NotifyFoldAngleChanged(float foldAngle);
+    bool HandleAbnormalAngle();
 
     FoldScreenSensorManager();
 
