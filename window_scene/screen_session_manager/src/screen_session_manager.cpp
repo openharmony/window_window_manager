@@ -3904,7 +3904,7 @@ bool ScreenSessionManager::WakeUpBegin(PowerStateChangeReason reason)
     if (ScreenStateMachine::GetInstance().GetTransitionState() == ScreenTransitionState::SCREEN_INIT) {
         return DoWakeUpBegin(reason);
     } else {
-        return ScreenStateMachine::GetInstance().HandlePowerStateChange(ScreenPowerEvent::POWER_ON, type);
+        return ScreenStateMachine::GetInstance().HandlePowerStateChange(ScreenPowerEvent::WAKEUP_BEGIN, type);
     }
 }
 
@@ -3962,7 +3962,7 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
     if (ScreenStateMachine::GetInstance().GetTransitionState() == ScreenTransitionState::SCREEN_INIT) {
         return DoSuspendBegin(reason);
     } else {
-        return ScreenStateMachine::GetInstance().HandlePowerStateChange(ScreenPowerEvent::POWER_OFF, type);
+        return ScreenStateMachine::GetInstance().HandlePowerStateChange(ScreenPowerEvent::SUSPEND_BEGIN, type);
     }
 }
 
