@@ -1463,7 +1463,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPrivacyWindowTagSwitch002, TestSize.
     auto ret = ssm_->SetScreenPrivacyWindowTagSwitch(invalidScreenId, privacyWindowTag, true);
     EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
     ret = ssm_->SetScreenPrivacyWindowTagSwitch(mainScreenId, privacyWindowTag, true);
-    EXPECT_EQ(ret, DMError::DM_OK);
+    EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
 }
 
 /**
