@@ -4737,7 +4737,7 @@ void SceneSessionManager::SetOutsideDownEventListener(const ProcessOutsideDownEv
 
 WMError SceneSessionManager::NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed)
 {
-    TLOGD(WmsLogTag::WMS_EVENT, "keyCode:%{public}d isConsumed:%{public}d", keyCode, isConsumed);
+    TLOGD(WmsLogTag::WMS_EVENT, "isConsumed:%{public}d", isConsumed);
     if (onWatchGestureConsumeResultFunc_) {
         onWatchGestureConsumeResultFunc_(keyCode, isConsumed);
     } else {
