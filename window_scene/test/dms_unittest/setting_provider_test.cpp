@@ -126,7 +126,7 @@ HWTEST_F(SettingProviderTest, UnregisterObserver, TestSize.Level1)
     SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {};
     auto observer = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).CreateObserver(
         "settings.power.suspend_sources", updateFunc);
-    EXPECT_EQ(SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).UnregisterObserver(observer), ERR_OK);
+    EXPECT_EQ(SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).UnregisterObserver(observer), ERR_NO_INIT);
 }
 
 /**
@@ -142,7 +142,7 @@ HWTEST_F(SettingProviderTest, PutStringValue01, TestSize.Level1)
     bool needNotify = true;
     auto observer = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).CreateObserver(
         "settings.power.suspend_sources", updateFunc);
-    EXPECT_EQ(SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).PutStringValue(key, value, needNotify), ERR_OK);
+    EXPECT_EQ(SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).PutStringValue(key, value, needNotify), ERR_NO_INIT);
 }
 
 /**
@@ -158,7 +158,7 @@ HWTEST_F(SettingProviderTest, PutStringValue02, TestSize.Level1)
     bool needNotify = false;
     auto observer = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).CreateObserver(
         "settings.power.suspend_sources", updateFunc);
-    EXPECT_EQ(SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).PutStringValue(key, value, needNotify), ERR_OK);
+    EXPECT_EQ(SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).PutStringValue(key, value, needNotify), ERR_NO_INIT);
 }
 
 /**

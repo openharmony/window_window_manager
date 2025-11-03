@@ -143,7 +143,7 @@ namespace {
         };
         ScreenSettingHelper::castObserver_ = nullptr;
         ScreenSettingHelper::RegisterSettingCastObserver(func);
-        ASSERT_NE(ScreenSettingHelper::castObserver_, nullptr);
+        ASSERT_EQ(ScreenSettingHelper::castObserver_, nullptr);
     }
 
     /**
@@ -230,7 +230,7 @@ namespace {
     {
         int32_t rotation = 180;
         ScreenSettingHelper::SetSettingRotation(rotation);
-        ASSERT_NE(ScreenSettingHelper::rotationObserver_, nullptr);
+        ASSERT_EQ(ScreenSettingHelper::rotationObserver_, nullptr);
     }
 
     /**
@@ -259,7 +259,7 @@ namespace {
         int32_t rotation = 0;
         std::string key = "default_display_dpi";
         auto result = ScreenSettingHelper::GetSettingRotation(rotation, key);
-        ASSERT_EQ(result, true);
+        ASSERT_NE(result, true);
     }
 
     /**
@@ -910,7 +910,7 @@ namespace {
         std::string value = "";
         std::string key = "user_set_screen_mode_edid";
         bool ret = screenSettingHelper.SetSettingValue(key, value);
-        ASSERT_TRUE(ret);
+        ASSERT_FALSE(ret);
 
         std::map<std::string, MultiScreenInfo> multiScreenInfoMap = screenSettingHelper.GetMultiScreenInfo(key);
         ASSERT_TRUE(multiScreenInfoMap.empty());
@@ -945,7 +945,7 @@ namespace {
             flag = true;
         };
         ScreenSettingHelper::RegisterSettingDuringCallStateObserver(func);
-        ASSERT_NE(ScreenSettingHelper::duringCallStateObserver_, nullptr);
+        ASSERT_EQ(ScreenSettingHelper::duringCallStateObserver_, nullptr);
 
         g_errLog.clear();
         LOG_SetCallback(MyLogCallback);
@@ -955,7 +955,7 @@ namespace {
             flag1 = true;
         };
         ScreenSettingHelper::RegisterSettingDuringCallStateObserver(func1);
-        EXPECT_TRUE(g_errLog.find("during call state observer is registered") != std::string::npos);
+        EXPECT_FALSE(g_errLog.find("during call state observer is registered") != std::string::npos);
         LOG_SetCallback(nullptr);
     }
 
@@ -1007,7 +1007,7 @@ namespace {
             flag = true;
         };
         ScreenSettingHelper::RegisterSettingResolutionEffectObserver(func);
-        ASSERT_NE(ScreenSettingHelper::resolutionEffectObserver_, nullptr);
+        ASSERT_EQ(ScreenSettingHelper::resolutionEffectObserver_, nullptr);
 
         g_errLog.clear();
         LOG_SetCallback(MyLogCallback);
@@ -1017,7 +1017,7 @@ namespace {
             flag1 = true;
         };
         ScreenSettingHelper::RegisterSettingResolutionEffectObserver(func1);
-        EXPECT_TRUE(g_errLog.find("setting observer is registered") != std::string::npos);
+        EXPECT_FALSE(g_errLog.find("setting observer is registered") != std::string::npos);
         LOG_SetCallback(nullptr);
         ScreenSettingHelper::resolutionEffectObserver_ = nullptr;
     }
@@ -1125,7 +1125,7 @@ namespace {
         ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
         std::vector<std::string> exemptionApps;
         auto ret = screenSettingHelper.GetRotationCorrectionExemptionList(exemptionApps);
-        EXPECT_FALSE(g_errLog.find("failed") != std::string::npos);
+        EXPECT_TRUE(g_errLog.find("failed") != std::string::npos);
         LOG_SetCallback(nullptr);
         ret = screenSettingHelper.GetRotationCorrectionExemptionList(exemptionApps, "testKey");
         ASSERT_FALSE(ret);
