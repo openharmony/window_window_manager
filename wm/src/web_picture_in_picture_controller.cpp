@@ -200,12 +200,12 @@ WMError WebPictureInPictureController::SetPipParentWindowId(uint32_t windowId)
 {
     if (mainWindow_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "mainWindow is null");
-        return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
+        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
     auto newMainWindow = WindowSceneSessionImpl::GetMainWindowWithId(windowId);
     if (newMainWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "mainWindow not found: %{public}u", windowId);
-        return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
+        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
     mainWindow_ = newMainWindow;
     mainWindowId_ = windowId;
@@ -214,8 +214,7 @@ WMError WebPictureInPictureController::SetPipParentWindowId(uint32_t windowId)
         return WMError::WM_OK;
     }
     TLOGI(WmsLogTag::WMS_PIP, "parentWindowId: %{public}u", windowId);
-    window_->SetPipParentWindowId(windowId);
-    return WMError::WM_OK;
+    return window_->SetPipParentWindowId(windowId);
 }
 } // namespace Rosen
 } // namespace OHOS

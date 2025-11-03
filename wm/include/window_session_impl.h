@@ -386,7 +386,7 @@ public:
     void SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height) override;
     void UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo) override;
     WMError GetPiPSettingSwitchStatus(bool& switchStatus) const override;
-    void SetPipParentWindowId(uint32_t windowId) const override;
+    WMError SetPipParentWindowId(uint32_t windowId) const override;
 
     WMError UpdateFloatingBall(const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,
         const std::shared_ptr<Media::PixelMap>& icon) override;
