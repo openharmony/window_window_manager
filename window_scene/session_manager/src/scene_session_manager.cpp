@@ -470,6 +470,7 @@ void SceneSessionManager::Init()
     RegisterAppStateObserver();
 
     InitSnapshotCache();
+    WSSnapshotHelper::GetInstance()->SetWindowScreenStatus(DisplayManager::GetInstance().GetFoldStatus());
 }
 
 void SceneSessionManager::RegisterSessionRecoverStateChangeListener()
