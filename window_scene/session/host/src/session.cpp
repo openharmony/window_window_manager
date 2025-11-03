@@ -2751,12 +2751,13 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
         }
         if (session->freeMultiWindow_.load()) {
             session->scenePersistence_->SetHasSnapshotFreeMultiWindow(true);
-            ScenePersistentStorage::Insert("Snapshot_" + std::to_string(session->persistentId_), true,
-                ScenePersistentStorageType::MAXIMIZE_STATE);
+            ScenePersistentStorage::Insert("Snapshot_" + session->GetSessionInfo().bundleName_ + "_"
+                + std::to_string(session->persistentId_), 0, ScenePersistentStorageType::MAXIMIZE_STATE);
         } else {
             session->scenePersistence_->SetHasSnapshot(true, key);
-            ScenePersistentStorage::Insert("Snapshot_" + std::to_string(session->persistentId_) +
-                "_" + std::to_string(key), true, ScenePersistentStorageType::MAXIMIZE_STATE);
+            ScenePersistentStorage::Insert("Snapshot_" + session->GetSessionInfo().bundleName_ + "_"
+                + std::to_string(session->persistentId_) + "_" + std::to_string(key),
+                static_cast<int32_t>(rotate), ScenePersistentStorageType::MAXIMIZE_STATE);
         }
         session->scenePersistence_->ResetSnapshotCache();
         Task saveSnapshotCallback = []() {};
@@ -2804,38 +2805,43 @@ void Session::DeleteHasSnapshot()
 
 void Session::DeleteHasSnapshot(SnapshotStatus key)
 {
-    auto hasSnapshot = ScenePersistentStorage::HasKey("Snapshot_" + std::to_string(persistentId_) +
-        "_" + std::to_string(key), ScenePersistentStorageType::MAXIMIZE_STATE);
+    auto hasSnapshot = ScenePersistentStorage::HasKey("Snapshot_" + sessionInfo_.bundleName_ +
+        "_" + std::to_string(persistentId_) + "_" + std::to_string(key), ScenePersistentStorageType::MAXIMIZE_STATE);
     if (hasSnapshot) {
-        ScenePersistentStorage::Delete("Snapshot_" + std::to_string(persistentId_) +
+        ScenePersistentStorage::Delete("Snapshot_" + sessionInfo_.bundleName_ + "_" + std::to_string(persistentId_) +
             "_" + std::to_string(key), ScenePersistentStorageType::MAXIMIZE_STATE);
     }
 }
 
 void Session::DeleteHasSnapshotFreeMultiWindow()
 {
-    auto hasSnapshotFreeMultiWindow = ScenePersistentStorage::HasKey("Snapshot_" + std::to_string(persistentId_),
-        ScenePersistentStorageType::MAXIMIZE_STATE);
+    auto hasSnapshotFreeMultiWindow = ScenePersistentStorage::HasKey("Snapshot_" + sessionInfo_.bundleName_ +
+        "_" + std::to_string(persistentId_), ScenePersistentStorageType::MAXIMIZE_STATE);
     if (hasSnapshotFreeMultiWindow) {
-        ScenePersistentStorage::Delete("Snapshot_" + std::to_string(persistentId_),
+        ScenePersistentStorage::Delete("Snapshot_" + sessionInfo_.bundleName_ + "_" + std::to_string(persistentId_),
             ScenePersistentStorageType::MAXIMIZE_STATE);
     }
 }
 
 bool Session::HasSnapshot(SnapshotStatus key)
 {
-    auto hasSnapshot = ScenePersistentStorage::HasKey("Snapshot_" + std::to_string(persistentId_) +
-        "_" + std::to_string(key), ScenePersistentStorageType::MAXIMIZE_STATE);
+    auto hasSnapshot = ScenePersistentStorage::HasKey("Snapshot_" + sessionInfo_.bundleName_ +
+        "_" + std::to_string(persistentId_) + "_" + std::to_string(key), ScenePersistentStorageType::MAXIMIZE_STATE);
     if (hasSnapshot && scenePersistence_) {
         scenePersistence_->SetHasSnapshot(true, key);
+        int32_t rotate = 0;
+        ScenePersistentStorage::Get("Snapshot_" + sessionInfo_.bundleName_ +
+            "_" + std::to_string(persistentId_) + "_" + std::to_string(key),
+            rotate, ScenePersistentStorageType::MAXIMIZE_STATE);
+        scenePersistence_->rotate_[key] = static_cast<DisplayOrientation>(rotate);
     }
     return hasSnapshot;
 }
 
 bool Session::HasSnapshotFreeMultiWindow()
 {
-    auto hasSnapshotFreeMultiWindow = ScenePersistentStorage::HasKey("Snapshot_" + std::to_string(persistentId_),
-        ScenePersistentStorageType::MAXIMIZE_STATE);
+    auto hasSnapshotFreeMultiWindow = ScenePersistentStorage::HasKey("Snapshot_" + sessionInfo_.bundleName_ +
+        "_"  + std::to_string(persistentId_), ScenePersistentStorageType::MAXIMIZE_STATE);
     if (hasSnapshotFreeMultiWindow && scenePersistence_) {
         freeMultiWindow_.store(true);
         scenePersistence_->SetHasSnapshotFreeMultiWindow(true);
@@ -2845,12 +2851,13 @@ bool Session::HasSnapshotFreeMultiWindow()
 
 bool Session::HasSnapshot()
 {
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "HasSnapshot[%d][%s]",
+        persistentId_, sessionInfo_.bundleName_.c_str());
+    bool hasSnapshot = false;
     for (uint32_t screenStatus = SCREEN_UNKNOWN; screenStatus < SCREEN_COUNT; screenStatus++) {
-        if (HasSnapshot(screenStatus)) {
-            return true;
-        }
+        hasSnapshot = hasSnapshot || HasSnapshot(screenStatus);
     }
-    return HasSnapshotFreeMultiWindow();
+    return hasSnapshot || HasSnapshotFreeMultiWindow();
 }
 
 void Session::InitSnapshotCapacity()
@@ -2873,6 +2880,14 @@ bool Session::IsPersistentImageFit() const
 bool Session::SupportSnapshotAllSessionStatus() const
 {
     return (!IsPersistentImageFit() && (capacity_ != defaultCapacity));
+}
+
+SnapshotStatus Session::GetScreenSnapshotStatus() const
+{
+    if (!SupportSnapshotAllSessionStatus()) {
+        return defaultStatus;
+    }
+    return WSSnapshotHelper::GetInstance()->GetScreenStatus();
 }
 
 SnapshotStatus Session::GetSessionSnapshotStatus(ScreenLockReason reason) const
@@ -4524,7 +4539,7 @@ std::shared_ptr<Media::PixelMap> Session::GetSnapshotPixelMap(const float oriSca
     if (scenePersistence_ == nullptr) {
         return nullptr;
     }
-    auto key = WSSnapshotHelper::GetInstance()->GetScreenStatus();
+    auto key = GetScreenSnapshotStatus();
     return scenePersistence_->IsSavingSnapshot(key, freeMultiWindow_.load()) ? GetSnapshot() :
         scenePersistence_->GetLocalSnapshotPixelMap(oriScale, newScale, key, freeMultiWindow_.load());
 }
