@@ -237,7 +237,7 @@ void WindowEventChannel::PrintKeyEvent(const std::shared_ptr<MMI::KeyEvent>& eve
         return;
     }
     std::vector<MMI::KeyEvent::KeyItem> eventItems = event->GetKeyItems();
-     WLOGFD("KeyAction:%{public}s,keyItemsCount:%{public}zu",
+    WLOGFD("KeyAction:%{public}s,keyItemsCount:%{public}zu",
         MMI::KeyEvent::ActionToString(event->GetKeyAction()), eventItems.size());
     for (const auto &item : eventItems) {
         WLOGFD("IsPressed:%{public}d,GetUnicode:%{public}d", item.IsPressed(), item.GetUnicode());
