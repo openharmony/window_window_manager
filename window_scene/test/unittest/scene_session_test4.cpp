@@ -2055,9 +2055,9 @@ HWTEST_F(SceneSessionTest4, RegisterGetIsDockAutoHideFunc, Function | SmallTest 
     info.abilityName_ = "test";
     info.bundleName_ = "test";
     sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
-    EXCEPT_NE(sceneSession, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
     sceneSession->RegisterGetIsDockAutoHideFunc([](){ return false; });
-    EXCEPT_NE(sceneSession->onGetIsDockAutoHideFunc_, nullptr);
+    EXPECT_NE(sceneSession->onGetIsDockAutoHideFunc_, nullptr);
 }
 }
 }
