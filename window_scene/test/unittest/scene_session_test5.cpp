@@ -1988,6 +1988,8 @@ HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceBounds03, TestSize.Level1)
     WSRect globalRect = { 0, 0, 100, 100 };
     session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG_END);
     EXPECT_EQ(session->moveDragController_->GetStartDragFlag(), true);
+    session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG_MOVE);
+    EXPECT_EQ(session->moveDragController_->GetStartDragFlag(), true);
     PcFoldScreenManager::GetInstance().displayId_ = oldDisplayId;
     PcFoldScreenManager::GetInstance().screenFoldStatus_ = oldScreenFoldStatus;
 }
