@@ -175,7 +175,7 @@ protected:
     virtual void NotifyNodeUpdate(napi_ref nodeRef) {};
 
     // web
-    virtual WMError SetPipParentWindowId(uint32_t windowId) { return WMError::WM_OK; };
+    virtual WMError SetPipParentWindowId(uint32_t windowId) { return WMError::WM_ERROR_PIP_INTERNAL_ERROR; };
 
 private:
     wptr<PictureInPictureControllerBase> weakRef_ = nullptr;

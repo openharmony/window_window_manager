@@ -8491,17 +8491,20 @@ WMError WindowSessionImpl::GetPiPSettingSwitchStatus(bool& switchStatus) const
     return SingletonContainer::Get<WindowAdapter>().GetPiPSettingSwitchStatus(switchStatus);
 }
 
-void WindowSessionImpl::SetPipParentWindowId(uint32_t windowId) const
+WMError WindowSessionImpl::SetPipParentWindowId(uint32_t windowId) const
 {
     TLOGI(WmsLogTag::WMS_PIP, "ParentWindowId:%{public}u", windowId);
     if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_PIP, "HostSession is invalid");
-        return;
+        TLOGE(WmsLogTag::WMS_PIP, "session is invalid");
+        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
     auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
-
-    hostSession->SetPipParentWindowId(windowId);
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_PIP_INTERNAL_ERROR);
+    auto ret = hostSession->SetPipParentWindowId(windowId);
+    if (ret != WSError::WS_OK) {
+        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
+    }
+    return WMError::WM_OK;
 }
 
 void WindowSessionImpl::SwitchSubWindow(bool freeMultiWindowEnable, int32_t parentId)

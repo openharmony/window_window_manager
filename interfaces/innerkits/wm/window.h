@@ -4718,7 +4718,7 @@ public:
      * @param windowId parent windowId of picture-in-picture window.
      * @return WMError::WM_OK means set success, otherwise failed.
      */
-    virtual void SetPipParentWindowId(uint32_t windowId) const {}
+    virtual WMError SetPipParentWindowId(uint32_t windowId) const { return WMError::WM_OK; }
 
     /**
      * @brief return true if current window is anco, otherwise return false

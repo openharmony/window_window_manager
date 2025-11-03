@@ -195,8 +195,7 @@ WMError WebPictureInPictureControllerInterface::setPiPControlEnabled(PiPControlT
 WMError WebPictureInPictureControllerInterface::SetPipParentWindowId(uint32_t windowId)
 {
     if (auto pipController = sptrWebPipController_) {
-        pipController->SetPipParentWindowId(windowId);
-        return WMError::WM_OK;
+        return pipController->SetPipParentWindowId(windowId);
     } else {
         TLOGE(WmsLogTag::WMS_PIP, "webPipController is nullptr");
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
