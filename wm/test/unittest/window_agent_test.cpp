@@ -16,7 +16,6 @@
 #include <gtest/gtest.h>
 #include <transaction/rs_sync_transaction_controller.h>
 
-#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "rs_adapter.h"
 #include "window_agent.h"
 #include "window_manager_hilog.h"
@@ -47,9 +46,6 @@ void WindowAgentTest::SetUpTestCase() {}
 
 void WindowAgentTest::TearDownTestCase()
 {
-#ifdef RS_ENABLE_VK
-    RSModifiersDrawThread::Destroy();
-#endif
 }
 
 void WindowAgentTest::SetUp()

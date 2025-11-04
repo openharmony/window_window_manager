@@ -17,7 +17,6 @@
 #include "input_manager.h"
 #include "input_transfer_station.h"
 #include "mock_window_adapter.h"
-#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "singleton_mocker.h"
 #include "window_impl.h"
 #include "window_manager_hilog.h"
@@ -48,9 +47,6 @@ void InputTransferStationTest::SetUpTestCase() {}
 
 void InputTransferStationTest::TearDownTestCase()
 {
-#ifdef RS_ENABLE_VK
-    RSModifiersDrawThread::Destroy();
-#endif
 }
 
 void InputTransferStationTest::SetUp()

@@ -16,7 +16,6 @@
 #include <gtest/gtest.h>
 #include "mock_session.h"
 #include "mock_uicontent.h"
-#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "window_scene_session_impl.h"
 
 using namespace testing;
@@ -37,9 +36,6 @@ void WindowSceneEffectTest::SetUpTestCase() {}
 
 void WindowSceneEffectTest::TearDownTestCase()
 {
-#ifdef RS_ENABLE_VK
-    RSModifiersDrawThread::Destroy();
-#endif
 }
 
 void WindowSceneEffectTest::SetUp() {}

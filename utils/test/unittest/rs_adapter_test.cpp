@@ -18,7 +18,6 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "ui/rs_surface_node.h"
 
 using namespace testing;
@@ -45,9 +44,6 @@ public:
         rsNode_.reset();
         rsUIContext_.reset();
         rsUIDirector_.reset();
-#ifdef RS_ENABLE_VK
-        RSModifiersDrawThread::Destroy();
-#endif
     }
 
     void SetUp() override {}
