@@ -1236,13 +1236,7 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
         window->UpdateVirtualPixelRatio(display);
         auto rsUIContext = window->GetRSUIContext();
         const std::shared_ptr<RSTransaction>& rsTransaction = config.rsTransaction_;
-        if (rsTransaction) {
-            if (rsUIContext) {
-                rsTransaction->SetTransactionHandler(rsUIContext->GetRSTransaction());
-            }
-            RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
-            rsTransaction->Begin();
-        }
+        window->BeginRSTransaction(rsTransaction);
         window->rotationAnimationCount_++;
         RSAnimationTimingProtocol protocol;
         protocol.SetDuration(config.animationDuration_);
@@ -1333,12 +1327,9 @@ void WindowSessionImpl::BeginRSTransaction(const std::shared_ptr<RSTransaction>&
         return;
     }
     auto rsUIContext = GetRSUIContext();
-    if (!rsUIContext) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "RSUIContext is null");
-        return;
+    if (rsUIContext) {
+        rsTransaction->SetTransactionHandler(rsUIContext->GetRSTransaction());
     }
-    auto rsTransHandler = rsUIContext->GetRSTransaction();
-    rsTransaction->SetTransactionHandler(rsTransHandler);
     RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
     rsTransaction->Begin();
     TLOGI(WmsLogTag::WMS_ROTATION, "rsTransaction begin");
