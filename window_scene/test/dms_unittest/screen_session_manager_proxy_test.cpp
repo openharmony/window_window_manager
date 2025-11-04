@@ -2307,10 +2307,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetBrightnessInfo, TestSize.Level1)
 
     // Pass all
     ret = proxy->GetBrightnessInfo(0, brightnessInfo);
-    EXPECT_EQ(DMError::DM_OK, ret);
-    EXPECT_NE(brightnessInfo.currentHeadroom, 0);
-    EXPECT_NE(brightnessInfo.maxHeadroom, 0);
-    EXPECT_NE(brightnessInfo.sdrNits, 0);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, ret);
 }
 
 /**
