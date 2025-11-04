@@ -765,6 +765,7 @@ public:
     bool SupportCacheLockedSessionSnapshot() const;
     void ResetLockedCacheSnapshot();
     void InitSnapshotCapacity();
+    SnapshotStatus GetScreenSnapshotStatus() const;
     SnapshotStatus GetSessionSnapshotStatus(LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT) const;
     uint32_t GetWindowSnapshotOrientation() const;
     uint32_t GetLastOrientation() const;
