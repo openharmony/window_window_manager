@@ -679,8 +679,8 @@ bool DisplayManagerLite::Impl::SetDisplayState(DisplayState state, DisplayStateC
             }
             if (callback == nullptr) {
                 TLOGI(WmsLogTag::DMS, "[UL_POWER]Invalid callback received");
+                return false;
             }
-            return false;
         }
         displayStateCallback_ = callback;
 
