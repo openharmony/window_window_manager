@@ -583,6 +583,10 @@ WMError SceneSession::NotifySnapshotUpdate()
             TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s: session is null", where);
             return;
         }
+        if (session->IsAnco()) {
+            TLOGNI(WmsLogTag::WMS_PATTERN, "%{public}s: id: %{public}d, is anco", where, session->GetPersistentId());
+            return;
+        }
         TLOGNI(WmsLogTag::WMS_PATTERN, "%{public}s: id: %{public}d", where, session->GetPersistentId());
         if (WindowHelper::IsMainWindow(session->GetWindowType())) {
             session->SaveSnapshot(true, true, nullptr, true);
