@@ -2028,6 +2028,33 @@ HWTEST_F(SceneSessionTest4, SetWinRectWhenUpdateRectTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetPipParentWindowIdTest
+ * @tc.desc: SetPipParentWindowId function test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, SetPipParentWindowIdTest, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetPipParentWindowId";
+    info.bundleName_ = "SetPipParentWindowId";
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    sceneSession->isTerminating_ = false;
+    uint32_t id = 100;
+    auto result = sceneSession->SetPipParentWindowId(id);
+    ASSERT_EQ(result, WSError::WS_OK);
+ 
+    auto cb = [](uint32_t windowId) {};
+    sceneSession->SetPipParentWindowIdCallback(cb);
+ 
+    result = sceneSession->SetPipParentWindowId(id);
+    ASSERT_EQ(result, WSError::WS_OK);
+ 
+    sceneSession->isTerminating_ = true;
+    result = sceneSession->SetPipParentWindowId(id);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: UpdatePiPTemplateInfoTest
  * @tc.desc: UpdatePiPTemplateInfo function test
  * @tc.type: FUNC

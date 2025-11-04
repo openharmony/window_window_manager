@@ -102,6 +102,7 @@ enum class ListenerFuncType : uint32_t {
     Z_LEVEL_CHANGE_CB,
     SESSION_GET_TARGET_ORIENTATION_CONFIG_INFO_CB,
     UPDATE_PIP_TEMPLATE_INFO_CB,
+    SET_PIP_PARENT_WINDOWID_CB,
     UPDATE_FOLLOW_SCREEN_CHANGE_CB,
     USE_IMPLICIT_ANIMATION_CB,
     WINDOW_ANCHOR_INFO_CHANGE_CB,
@@ -440,6 +441,7 @@ private:
     void ProcessFollowParentRectRegister();
     void ProcessGetTargetOrientationConfigInfoRegister();
     void ProcessUpdatePiPTemplateInfoRegister();
+    void ProcessSetPiPParentWindowIdRegister();
     void ProcessUseImplicitAnimationChangeRegister();
     void ProcessSetSubWindowSourceRegister();
     void ProcessAnimateToTargetPropertyRegister();
@@ -535,6 +537,7 @@ private:
     void OnGetTargetOrientationConfigInfo(uint32_t targetOrientation);
     void OnRotationChange(int32_t persistentId, bool isRegister);
     void OnUpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo);
+    void OnSetPiPParentWindowId(uint32_t windowId);
     void OnUpdateFollowScreenChange(bool isFollowScreenChange);
     void OnUseImplicitAnimationChange(bool useImplicit);
     void NotifySetSubWindowSource(SubWindowSource source);
