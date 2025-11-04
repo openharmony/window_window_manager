@@ -3077,6 +3077,14 @@ bool Session::SupportSnapshotAllSessionStatus() const
     return (!IsPersistentImageFit() && (capacity_ != defaultCapacity));
 }
 
+SnapshotStatus Session::GetScreenSnapshotStatus() const
+{
+    if (!SupportSnapshotAllSessionStatus()) {
+        return defaultStatus;
+    }
+    return WSSnapshotHelper::GetInstance()->GetScreenStatus();
+}
+
 SnapshotStatus Session::GetSessionSnapshotStatus(LifeCycleChangeReason reason) const
 {
     if (!SupportSnapshotAllSessionStatus()) {
@@ -4800,7 +4808,7 @@ std::shared_ptr<Media::PixelMap> Session::GetSnapshotPixelMap(const float oriSca
     if (scenePersistence_ == nullptr) {
         return nullptr;
     }
-    auto key = WSSnapshotHelper::GetInstance()->GetScreenStatus();
+    auto key = GetScreenSnapshotStatus();
     return scenePersistence_->IsSavingSnapshot(key, freeMultiWindow_.load()) ? GetSnapshot() :
         scenePersistence_->GetLocalSnapshotPixelMap(oriScale, newScale, key, freeMultiWindow_.load());
 }
