@@ -1703,11 +1703,11 @@ HWTEST_F(SceneSessionTest6, NotifySnapshotUpdate, TestSize.Level1)
     EXPECT_EQ(ret, WMError::WM_OK);
 
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    WMError ret = sceneSession->NotifySnapshotUpdate();
+    ret = sceneSession->NotifySnapshotUpdate();
     EXPECT_EQ(ret, WMError::WM_OK);
 
     sceneSession->collaboratorType_ = static_cast<int32_t>(CollaboratorType::RESERVE_TYPE);
-    WMError ret = sceneSession->NotifySnapshotUpdate();
+    ret = sceneSession->NotifySnapshotUpdate();
     EXPECT_EQ(ret, WMError::WM_OK);
 }
 } // namespace
