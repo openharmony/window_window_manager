@@ -65,6 +65,7 @@ using NotifySessionPiPControlStatusChangeFunc = std::function<void(WsPiPControlT
 using NotifyAutoStartPiPStatusChangeFunc = std::function<void(bool isAutoStart, uint32_t priority,
     uint32_t width, uint32_t height)>;
 using NotifyUpdatePiPTemplateInfoFunc = std::function<void(PiPTemplateInfo& pipTemplateInfo)>;
+using NotifySetPipParentWindowIdFunc = std::function<void(uint32_t windowId)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId, SessionEventParam param)>;
 using NotifySessionTopmostChangeFunc = std::function<void(const bool topmost)>;
 using NotifySubSessionZLevelChangeFunc = std::function<void(const int32_t zLevel)>;
@@ -345,6 +346,8 @@ public:
     WSError NotifyPipWindowSizeChange(double width, double height, double scale);
     WSError NotifyPiPActiveStatusChange(bool status);
     void RegisterProcessPrepareClosePiPCallback(NotifyPrepareClosePiPSessionFunc&& callback);
+    void SetPipParentWindowIdCallback(NotifySetPipParentWindowIdFunc&& func);
+    WSError SetPipParentWindowId(uint32_t windowId) override;
 
     void RequestHideKeyboard(bool isAppColdStart = false);
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
@@ -1267,6 +1270,7 @@ private:
     NotifySessionPiPControlStatusChangeFunc sessionPiPControlStatusChangeFunc_;
     NotifyAutoStartPiPStatusChangeFunc autoStartPiPStatusChangeFunc_;
     NotifyUpdatePiPTemplateInfoFunc updatePiPTemplateInfoCallbackFunc_;
+    NotifySetPipParentWindowIdFunc setPipParentWindowIdFunc_;
     PiPTemplateInfo pipTemplateInfo_ = {};
 
     NotifyForceSplitFunc forceSplitFunc_;

@@ -1847,6 +1847,37 @@ void SceneSession::SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPS
     }, __func__);
 }
 
+void SceneSession::SetPipParentWindowIdCallback(NotifySetPipParentWindowIdFunc&& func)
+{
+    auto task = [weakThis = wptr(this), func = std::move(func), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_PIP, "%{public}s session is null", where);
+            return;
+        }
+        session->setPipParentWindowIdFunc_ = std::move(func);
+    };
+    PostTask(task, __func__);
+}
+
+WSError SceneSession::SetPipParentWindowId(uint32_t windowId)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "PipParentWindowId: %{public}u", windowId);
+    auto task = [weakThis = wptr(this), windowId, where = __func__]() mutable {
+        auto session = weakThis.promote();
+        if (!session || session->isTerminating_) {
+            TLOGNE(WmsLogTag::WMS_PIP, "%{public}s session is null or is terminating", where);
+            return;
+        }
+        if (session->setPipParentWindowIdFunc_) {
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::SetPipParentWindowId");
+            session->setPipParentWindowIdFunc_(windowId);
+        }
+    };
+    PostTask(task, __func__);
+    return WSError::WS_OK;
+}
+
 /** @note @window.layout */
 void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason,
     const MoveConfiguration& moveConfiguration, const RectAnimationConfig& rectAnimationConfig)

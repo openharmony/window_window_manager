@@ -359,6 +359,17 @@ public:
         return WSError::WS_OK;
     }
 
+    /**
+     * @brief Set parent windowId of picture-in-picture window.
+     *
+     * @param windowId parent windowId of picture-in-picture window.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SetPipParentWindowId(uint32_t windowId)
+    {
+        return WSError::WS_OK;
+    }
+
     virtual WSError ProcessPointDownSession(int32_t posX, int32_t posY) { return WSError::WS_OK; }
     virtual WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool isExecuteDelayRaise = false) { return WSError::WS_OK; }
