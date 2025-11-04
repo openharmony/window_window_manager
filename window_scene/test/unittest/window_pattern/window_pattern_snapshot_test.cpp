@@ -713,6 +713,24 @@ HWTEST_F(WindowPatternSnapshotTest, InitSnapshotCapacity, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetScreenSnapshotStatus
+ * @tc.desc: GetScreenSnapshotStatus Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternSnapshotTest, GetScreenSnapshotStatus, TestSize.Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->capacity_ = defaultCapacity;
+    auto ret = sceneSession->GetScreenSnapshotStatus();
+    EXPECT_EQ(ret, defaultStatus);
+
+    sceneSession->capacity_ = maxCapacity;
+    sceneSession->GetScreenSnapshotStatus();
+    EXPECT_EQ(ret, WSSnapshotHelper::GetInstance()->GetScreenStatus());
+}
+
+/**
  * @tc.name: GetSessionSnapshotStatus
  * @tc.desc: GetSessionSnapshotStatus Test
  * @tc.type: FUNC
