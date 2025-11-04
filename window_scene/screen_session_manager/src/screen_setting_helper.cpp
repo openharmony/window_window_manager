@@ -64,6 +64,7 @@ const std::string ENABLE_RESOLUTION_EFFECT = "1";
 constexpr int32_t EXPECT_SCREEN_RESOLUTION_EFFECT_SIZE = 2;
 constexpr int32_t INDEX_SCREEN_RESOLUTION_EFFECT_SN = 0;
 constexpr int32_t INDEX_SCREEN_RESOLUTION_EFFECT_EN = 1;
+constexpr int32_t CORRECTION_EXEMPTION_MODE = 8;
 
 void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc func)
 {
@@ -830,13 +831,15 @@ void ScreenSettingHelper::GetCorrectionExemptionListFromJson(const std::string& 
         const std::string& key = it.key();
         const nlohmann::json& value = it.value();
         std::string name = "";
+        int32_t mode = -1;
         bool exemptNaturalDirectionCorrect = false;
         GetJsonValue(value, "name", name);
         if (name.empty()) {
             continue;
         }
+        GetJsonValue(value, "mode", mode);
         GetJsonValue(value, "exemptNaturalDirectionCorrect", exemptNaturalDirectionCorrect);
-        if (exemptNaturalDirectionCorrect) {
+        if (exemptNaturalDirectionCorrect && mode == CORRECTION_EXEMPTION_MODE) {
             exemptionApps.emplace_back(name);
         }
     }
