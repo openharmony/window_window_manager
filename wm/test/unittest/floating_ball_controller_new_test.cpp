@@ -19,7 +19,6 @@
 #include "ability_context_impl.h"
 #include "floating_ball_controller.h"
 #include "floating_ball_manager.h"
-#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "parameters.h"
 #include "window.h"
 #include "wm_common.h"
@@ -97,9 +96,6 @@ void FloatingBallControllerNewTest::SetUpTestCase()
 
 void FloatingBallControllerNewTest::TearDownTestCase()
 {
-#ifdef RS_ENABLE_VK
-    RSModifiersDrawThread::Destroy();
-#endif
 }
 
 void FloatingBallControllerNewTest::SetUp()

@@ -16,7 +16,6 @@
 // gtest
 #include <gtest/gtest.h>
 #include "avoid_area_controller.h"
-#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "window_manager.h"
 #include "window_test_utils.h"
 #include "wm_common.h"
@@ -48,9 +47,6 @@ void WindowSplitImmersiveTest::SetUpTestCase() {}
 
 void WindowSplitImmersiveTest::TearDownTestCase()
 {
-#ifdef RS_ENABLE_VK
-    RSModifiersDrawThread::Destroy();
-#endif
 }
 
 void WindowSplitImmersiveTest::SetUp()

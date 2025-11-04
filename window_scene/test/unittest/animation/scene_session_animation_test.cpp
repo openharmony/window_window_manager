@@ -19,7 +19,6 @@
 #include "input_event.h"
 #include "key_event.h"
 #include "mock/mock_session_stage.h"
-#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "pointer_event.h"
 
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
@@ -68,9 +67,6 @@ void SceneSessionAnimationTest::SetUpTestCase() {}
 
 void SceneSessionAnimationTest::TearDownTestCase()
 {
-#ifdef RS_ENABLE_VK
-    RSModifiersDrawThread::Destroy();
-#endif
 }
 
 void SceneSessionAnimationTest::SetUp() {}
