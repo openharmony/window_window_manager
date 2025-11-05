@@ -1715,6 +1715,19 @@ HWTEST_F(WindowSessionTest4, CheckEmptyKeyboardAvoidAreaIfNeeded01, TestSize.Lev
     result = session_->CheckEmptyKeyboardAvoidAreaIfNeeded();
     EXPECT_EQ(result, false);
 }
+
+/**
+ * @tc.name: PrelaunchCheck
+ * @tc.desc: Test Case PrelaunchCheck
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, PrelaunchCheck, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetPrelaunch();
+    bool result = session_->IsPrelaunch();
+    EXPECT_EQ(result, false);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
