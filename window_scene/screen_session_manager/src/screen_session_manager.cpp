@@ -9037,7 +9037,7 @@ void ScreenSessionManager::OnFoldPropertyChange(ScreenId screenId, const ScreenP
     ScreenProperty midProperty;
     bool result = clientProxy->OnFoldPropertyChange(screenId, newProperty, reason, displayMode, midProperty);
     if (!result) {
-        TLOGE(WmsLogTag::DMS, "ipc failed");
+        TLOGE(WmsLogTag::DMS, "result is failed");
         return;
     }
     TLOGI(WmsLogTag::DMS, "OnFoldPropertyChange get process data,screenId: %{public}" PRIu64
