@@ -613,11 +613,11 @@ void SuperFoldStateManager::HandleKeyboardOnDisplayNotifyInServer(sptr<ScreenSes
     screenSession->UpdatePropertyByFakeInUse(false);
     screenSession->SetIsBScreenHalf(true);
     int32_t validheight = GetCurrentValidHeight(screenSession);
-    if (screenBounds.rect_GetWidth() < screenBounds.rect_GetHeight()) {
+    if (screenBounds.rect_GetWidth() < screenBounds.rect_.GetHeight()) {
         screenSession->SetValidHeight(validheight);
-        screenSession->SetValidWidth(screeBounds.rect.GetWidth());
+        screenSession->SetValidWidth(screenBounds.rect_.GetWidth());
     } else {
-        screenSession->SetValidWidth(screeBounds.rect.GetHeight());
+        screenSession->SetValidWidth(screenBounds.rect_.GetHeight());
         screenSession->SetValidHeight(validheight);
     }
     screenSession->SetScreenAreaHeight(DISPLAY_B_HEIGHT);
@@ -679,11 +679,11 @@ void SuperFoldStateManager::HandleSystemKeyboardStatusDisplayNotifyInServer(
         ScreenSessionManager::GetInstance().NotifyDisplayDestroy(fakeDisplayId);
         auto screenBounds = screenSession->GetScreenProperty().GetBounds();
         int32_t validheight = GetCurrentValidHeight(screenSession);
-        if (screenBounds.rect_GetWidth() < screenBounds.rect_GetHeight()) {
-            screenSession->SetPointerActiveWidth(static_cast<uint32_t>(screeBounds.rect.GetWidth()));
+        if (screenBounds.rect_GetWidth() < screenBounds.rect_.GetHeight()) {
+            screenSession->SetPointerActiveWidth(static_cast<uint32_t>(screenBounds.rect_.GetWidth()));
             screenSession->SetPointerActiveHeight(static_cast<uint32_t>(validheight));
         } else {
-            screenSession->SetPointerActiveWidth(static_cast<uint32_t>(screeBounds.rect.GetHeight()));
+            screenSession->SetPointerActiveWidth(static_cast<uint32_t>(screenBounds.rect.GetHeight()));
             screenSession->SetPointerActiveHeight(static_cast<uint32_t>(validheight));
         }
         TLOGD(WmsLogTag::DMS, " vh: %{public}d, paw: %{public}u, pah: %{public}u", validheight,
