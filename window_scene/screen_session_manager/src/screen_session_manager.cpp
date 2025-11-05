@@ -3305,6 +3305,12 @@ sptr<ScreenSession> ScreenSessionManager::CreatePhysicalMirrorSessionInner(Scree
         return nullptr;
     }
     MultiScreenManager::GetInstance().MultiScreenReportDataToRss(SCREEN_EXTEND, MULTI_SCREEN_ENTER_STR);
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        TLOGI(WmsLogTag::DMS, "set ExtendConnect flag = true");
+        SetIsExtendScreenConnected(true);
+        extendScreenConnectStatus_.store(ExtendScreenConnectStatus::CONNECT);
+        OnExtendScreenConnectStatusChange(screenId, ExtendScreenConnectStatus::CONNECT);
+    }
     if (g_isPcDevice) {
         // pc is none, pad&&phone is mirror
         InitExtendScreenProperty(screenId, screenSession, property);
