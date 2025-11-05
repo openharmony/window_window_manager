@@ -493,8 +493,7 @@ void SuperFoldStateManager::HandleDisplayNotify(SuperFoldStatusChangeEvents chan
     }
 }
 
-void SuperFoldStateManager::HandleSuperFoldDisplayInServer(sptr<ScreenSession>& screenSession, 
-SuperFoldStatusChangeEvents changeEvent)
+void SuperFoldStateManager::HandleSuperFoldDisplayInServer(sptr<ScreenSession>& screenSession, SuperFoldStatusChangeEvents changeEvent)
 {
     switch (changeEvent) {
         case SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED: {
