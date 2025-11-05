@@ -790,6 +790,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, UpdateWindowFlagsForLockCursor, TestSize
     manager_->UpdateWindowFlagsForLockCursor(session, windowInfo);
     EXPECT_EQ(windowInfo.flags, MMI_FLAG_BIT_LOCK_CURSOR_NOT_FOLLOW_MOVEMENT);
 
+    windowInfo.flags = 0;
     session->SetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_LOCK_CURSOR, true);
     session->SetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_CURSOR_FOLLOW_MOVEMENT, true);
     manager_->UpdateWindowFlagsForLockCursor(session, windowInfo);
