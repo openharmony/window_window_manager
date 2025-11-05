@@ -1550,6 +1550,18 @@ void ScreenSessionManagerClient::RegisterSwitchUserAnimationNotification(const s
     animateFinishDescriptionSet_.insert(description);
 }
 
+void ScreenSessionManagerClient::NotifySwitchUserAnimationFinishByWindow()
+{
+    {
+        std::shared_lock<std::shared_mutex> descriptionLock(animateFinishDescriptionSetMutex_);
+        if (!animateFinishDescriptionSet_.empty()) {
+            TLOGI(WmsLogTag::DMS, "description set is not empty, will ignore notification by window");
+            return;
+        }
+    }
+    TLOGI(WmsLogTag::DMS, "notify animation finished by window");
+    screenSessionManager_->NotifySwitchUserAnimationFinish();
+}
 void ScreenSessionManagerClient::OnAnimationFinish()
 {
     std::lock_guard<std::mutex> lock(animateFinishNotificationSetMutex_);
