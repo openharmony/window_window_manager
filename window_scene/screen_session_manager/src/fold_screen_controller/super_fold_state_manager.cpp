@@ -683,7 +683,7 @@ void SuperFoldStateManager::HandleSystemKeyboardStatusDisplayNotifyInServer(
             screenSession->SetPointerActiveWidth(static_cast<uint32_t>(screenBounds.rect_.GetWidth()));
             screenSession->SetPointerActiveHeight(static_cast<uint32_t>(validheight));
         } else {
-            screenSession->SetPointerActiveWidth(static_cast<uint32_t>(screenBounds.rect.GetHeight()));
+            screenSession->SetPointerActiveWidth(static_cast<uint32_t>(screenBounds.rect_.GetHeight()));
             screenSession->SetPointerActiveHeight(static_cast<uint32_t>(validheight));
         }
         TLOGD(WmsLogTag::DMS, " vh: %{public}d, paw: %{public}u, pah: %{public}u", validheight,
