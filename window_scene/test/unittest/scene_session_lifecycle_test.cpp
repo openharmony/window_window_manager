@@ -574,6 +574,11 @@ HWTEST_F(SceneSessionLifecycleTest, DisconnectTask02, TestSize.Level0)
     sceneSession->isActive_ = true;
     result = sceneSession->DisconnectTask(false, true);
     ASSERT_EQ(result, WSError::WS_OK);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_EQ(result, WSError::WS_OK);
+    sceneSession->sessionInfo_.isPrelaunch_ = true;
+    result = sceneSession->DisconnectTask(false, true);
+    ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**
