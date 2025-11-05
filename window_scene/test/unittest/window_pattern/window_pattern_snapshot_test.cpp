@@ -726,7 +726,7 @@ HWTEST_F(WindowPatternSnapshotTest, GetScreenSnapshotStatus, TestSize.Level1)
     EXPECT_EQ(ret, defaultStatus);
 
     sceneSession->capacity_ = maxCapacity;
-    sceneSession->GetScreenSnapshotStatus();
+    ret = sceneSession->GetScreenSnapshotStatus();
     EXPECT_EQ(ret, WSSnapshotHelper::GetInstance()->GetScreenStatus());
 }
 
