@@ -891,11 +891,11 @@ int32_t SuperFoldStateManager::GetCurrentValidHeight(sptr<ScreenSession> screenS
         }
     }
     TLOGE(WmsLogTag::DMS, "Get CreaseRects failed, validheight is half of height");
-    auto screeBounds = screenSession->GetScreenProperty().GetBounds();
-    if (screeBounds.rect_.GetWidth() < screeBounds.rect_.GetHeight()) {
-        return screeBounds.rect_.GetHeight() / HEIGHT_HALF;
+    auto screenBounds = screenSession->GetScreenProperty().GetBounds();
+    if (screenBounds.rect_.GetWidth() < screenBounds.rect_.GetHeight()) {
+        return screenBounds.rect_.GetHeight() / HEIGHT_HALF;
     } else {
-        return screeBounds.rect_.GetWidth() / HEIGHT_HALF;
+        return screenBounds.rect_.GetWidth() / HEIGHT_HALF;
     }
 }
 
