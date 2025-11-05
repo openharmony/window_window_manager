@@ -682,6 +682,11 @@ WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
                 session->GetPersistentId());
             session->UpdateLifecyclePausedInner();
         }
+        if (session->sessionInfo_.isPrelaunch_) {
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s Remove prelaunch session id: %{public}d", where,
+                session->GetPersistentId());
+            session->sessionInfo_.isPrelaunch_ = false;
+        }
         if (isFromClient) {
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s Client need notify destroy session, id: %{public}d",
                 where, session->GetPersistentId());
