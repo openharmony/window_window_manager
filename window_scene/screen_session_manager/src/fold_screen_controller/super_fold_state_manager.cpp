@@ -613,7 +613,7 @@ void SuperFoldStateManager::HandleKeyboardOnDisplayNotifyInServer(sptr<ScreenSes
     screenSession->UpdatePropertyByFakeInUse(false);
     screenSession->SetIsBScreenHalf(true);
     int32_t validheight = GetCurrentValidHeight(screenSession);
-    if (screenBounds.rect_GetWidth() < screenBounds.rect_.GetHeight()) {
+    if (screenBounds.rect_.GetWidth() < screenBounds.rect_.GetHeight()) {
         screenSession->SetValidHeight(validheight);
         screenSession->SetValidWidth(screenBounds.rect_.GetWidth());
     } else {
@@ -679,7 +679,7 @@ void SuperFoldStateManager::HandleSystemKeyboardStatusDisplayNotifyInServer(
         ScreenSessionManager::GetInstance().NotifyDisplayDestroy(fakeDisplayId);
         auto screenBounds = screenSession->GetScreenProperty().GetBounds();
         int32_t validheight = GetCurrentValidHeight(screenSession);
-        if (screenBounds.rect_GetWidth() < screenBounds.rect_.GetHeight()) {
+        if (screenBounds.rect_.GetWidth() < screenBounds.rect_.GetHeight()) {
             screenSession->SetPointerActiveWidth(static_cast<uint32_t>(screenBounds.rect_.GetWidth()));
             screenSession->SetPointerActiveHeight(static_cast<uint32_t>(validheight));
         } else {
