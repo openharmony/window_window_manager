@@ -513,7 +513,7 @@ SuperFoldStatusChangeEvents changeEvent)
             break;
         }
         case SuperFoldStatusChangeEvents::KEYBOARD_OFF: {
-            OriginalHandleKeyboardOffDisplayNotifyInServer(screenSession);
+            HandleKeyboardOffDisplayNotifyInServer(screenSession);
             TLOGI(WmsLogTag::DMS, "handle keyboard off");
             break;
         }
