@@ -30,8 +30,6 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr int LINE_WIDTH = 30;
-constexpr uint32_t DISPLAY_A_HEIGHT = 3296;
-constexpr uint32_t DISPLAY_B_HEIGHT = 1608;
 } // namespace
 
 WM_IMPLEMENT_SINGLE_INSTANCE(ScreenSessionManagerClient)
