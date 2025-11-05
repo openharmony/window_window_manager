@@ -1800,6 +1800,7 @@ private:
 
     std::string GetCallerSessionColorMode(const SessionInfo& sessionInfo);
     void NotifySessionScreenLockedChange(bool isScreenLocked);
+    void SetBufferAvailable(sptr<SceneSession>& sceneSession);
 
     /*
      * Compatible Mode
