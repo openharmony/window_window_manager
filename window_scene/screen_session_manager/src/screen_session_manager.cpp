@@ -151,7 +151,6 @@ constexpr uint32_t OLED_60_HZ = 60;
 #endif
 constexpr uint32_t FOUR_K_WIDTH = 3840;
 constexpr uint32_t THREE_K_WIDTH = 3000;
-constexpr uint32_t DISPLAY_B_HEIGHT = 1608;
 
 const int32_t ROTATE_POLICY = system::GetIntParameter("const.window.device.rotate_policy", 0);
 constexpr int32_t FOLDABLE_DEVICE { 2 };
