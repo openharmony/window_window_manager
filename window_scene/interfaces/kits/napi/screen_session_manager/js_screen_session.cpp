@@ -72,6 +72,8 @@ napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& scre
         CreateJsValue(env, static_cast<int64_t>(screenSession->GetDisplayGroupId())));
     napi_set_named_property(env, objValue, "mainDisplayIdOfGroup",
         CreateJsValue(env, static_cast<int64_t>(screenSession->GetMainDisplayIdOfGroup())));
+    napi_set_named_property(env, objValue, "isRealScreen",
+        CreateJsValue(env, screenSession->GetIsRealScreen()));
 
     const char* moduleName = "JsScreenSession";
     BindNativeFunction(env, objValue, "on", moduleName, JsScreenSession::RegisterCallback);
