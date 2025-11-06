@@ -1735,6 +1735,15 @@ void WindowSceneSessionImpl::UpdateWindowSizeLimits()
     newLimitsVP.vpRatio_ = virtualPixelRatio;
     CalculateNewLimitsByRatio(newLimits, newLimitsVP, customizedLimits);
 
+    // When the system window has not been set with 'setWindowLimits',
+    // manually change its minimum width and height limit to 1 px.
+    if (WindowHelper::IsSystemWindowButNotDialog(GetType()) && !userLimitsSet_) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, set min limits to 1 px, preMinW:%{public}u, preMinH:%{public}u",
+            GetPersistentId(), newLimits.minWidth_, newLimits.minHeight_);
+        newLimits.minWidth_ = 1;
+        newLimits.minHeight_ = 1;
+    }
+
     property_->SetWindowLimits(newLimits);
     property_->SetWindowLimitsVP(newLimitsVP);
     property_->SetLastLimitsVpr(virtualPixelRatio);
@@ -2547,9 +2556,12 @@ void WindowSceneSessionImpl::UpdateFloatingWindowSizeBySizeLimits(uint32_t& widt
     }
     // get new limit config with the settings of system and app
     const auto& sizeLimits = property_->GetWindowLimits();
-    // limit minimum size of floating window
-    width = std::max(sizeLimits.minWidth_, width);
-    height = std::max(sizeLimits.minHeight_, height);
+    // limit minimum size of floating (not system type) window
+    if (!WindowHelper::IsSystemWindow(property_->GetWindowType()) ||
+        property_->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+        width = std::max(sizeLimits.minWidth_, width);
+        height = std::max(sizeLimits.minHeight_, height);
+    }
     width = std::min(sizeLimits.maxWidth_, width);
     height = std::min(sizeLimits.maxHeight_, height);
     if (height == 0) {
