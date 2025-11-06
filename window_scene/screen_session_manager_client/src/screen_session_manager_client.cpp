@@ -1166,6 +1166,7 @@ bool ScreenSessionManagerClient::HandleScreenConnection(SessionOption option)
         extraScreenSessionMap_[option.screenId_] = screenSession;
     }
     screenSession->SetRotationCorrectionMap(option.rotationCorrectionMap_);
+    screenSession->SetSupportsFocus(option.supportsFocus_);
     NotifyClientScreenConnect(screenSession);
     return true;
 }
@@ -1578,5 +1579,17 @@ void ScreenSessionManagerClient::SetInternalClipToBounds(ScreenId screenId, bool
         RSTransactionAdapter::FlushImplicitTransaction(displayNode);
     }
     TLOGI(WmsLogTag::DMS, "SetInternalClipToBounds end");
+}
+
+bool ScreenSessionManagerClient::GetSupportsFocus(DisplayId displayId)
+{
+    auto screenSession = GetScreenSession(displayId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "getSupportFocus screenSession is nullptr");
+        return false;
+    }
+    bool supportsFocus = screenSession->GetSupportsFocus();
+    TLOGD(WmsLogTag::DMS, "displayId:%{public}" PRIu64", supportsFocus:%{public}d", displayId, supportsFocus);
+    return supportsFocus;
 }
 } // namespace OHOS::Rosen

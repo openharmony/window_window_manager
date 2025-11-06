@@ -7971,6 +7971,10 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(DisplayId displayId, cons
             TLOGD(WmsLogTag::WMS_FOCUS, "click cannot request focus from full screen window!");
             return WSError::WS_DO_NOTHING;
         }
+        if (!ScreenSessionManagerClient::GetInstance().GetSupportsFocus(displayId)) {
+            TLOGW(WmsLogTag::WMS_FOCUS, "screen of current window is not allowed to be focused");
+            return WSError::WS_DO_NOTHING;
+        }
     }
     return WSError::WS_OK;
 }
@@ -8013,8 +8017,13 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
         if (session == nullptr) {
             return false;
         }
-        if (windowFocusController_->GetDisplayGroupId(session->GetSessionProperty()->GetDisplayId()) !=
+        auto currentSessionDisplayId = session->GetDisplayId();
+        if (windowFocusController_->GetDisplayGroupId(currentSessionDisplayId) !=
             displayGroupId) {
+            return false;
+        }
+        if (!ScreenSessionManagerClient::GetInstance().GetSupportsFocus(currentSessionDisplayId)) {
+            TLOGW(WmsLogTag::WMS_FOCUS, "screen of current window is not allowed to be focused");
             return false;
         }
         if (session->GetForceHideState() != ForceHideState::NOT_HIDDEN) {
@@ -8048,13 +8057,22 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSessionWhenFloatWindowEx
     if (!isPhoneOrPadWithoutPcMode) {
         return nullptr;
     }
-    auto topFloatingSession = GetTopFloatingSession(displayGroupId, persistentId);
     auto sceneSession = GetSceneSession(persistentId);
-    if (topFloatingSession != nullptr && SessionHelper::IsMainWindow(sceneSession->GetWindowType()) &&
-        sceneSession->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        return topFloatingSession;
+    if (sceneSession == nullptr || !SessionHelper::IsMainWindow(sceneSession->GetWindowType()) ||
+        sceneSession->GetWindowMode() != WindowMode::WINDOW_MODE_FULLSCREEN) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "current scene session unqualified, id: %{public}d", persistentId);
+        return nullptr;
     }
-    return nullptr;
+    auto topFloatingSession = GetTopFloatingSession(displayGroupId, persistentId);
+    if (topFloatingSession == nullptr) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "no top floating session found");
+        return nullptr;
+    }
+    if (!ScreenSessionManagerClient::GetInstance().GetSupportsFocus(topFloatingSession->GetDisplayId())) {
+        TLOGW(WmsLogTag::WMS_FOCUS, "screen of current window is not allowed to be focused");
+        return nullptr;
+    }
+    return topFloatingSession;
 }
 
 sptr<SceneSession> SceneSessionManager::GetTopFloatingSession(DisplayId displayGroupId, int32_t persistentId)

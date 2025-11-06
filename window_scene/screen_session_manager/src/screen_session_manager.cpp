@@ -5821,6 +5821,7 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
     }
     virtualScreenCount_ = virtualScreenCount_ + 1;
     NotifyCaptureStatusChanged();
+    SetConfigForInputmethod(smsScreenId, option);
     return smsScreenId;
 }
 
@@ -11529,6 +11530,7 @@ SessionOption ScreenSessionManager::GetSessionOption(sptr<ScreenSession> screenS
         .innerName_ = screenSession->GetInnerName(),
         .screenId_ = screenSession->GetScreenId(),
         .rotationCorrectionMap_ = screenSession->GetRotationCorrectionMap(),
+        .supportsFocus_ = screenSession->GetSupportsFocus()
     };
     return option;
 }
@@ -11542,6 +11544,7 @@ SessionOption ScreenSessionManager::GetSessionOption(sptr<ScreenSession> screenS
         .innerName_ = screenSession->GetInnerName(),
         .screenId_ = screenId,
         .rotationCorrectionMap_ = screenSession->GetRotationCorrectionMap(),
+        .supportsFocus_ = screenSession->GetSupportsFocus()
     };
     return option;
 }
@@ -12874,5 +12877,22 @@ void ScreenSessionManager::DoAodExitAndSetPowerAllOff()
         SetRSScreenPowerStatusExt(screenId, ScreenPowerStatus::POWER_STATUS_OFF);
     }
 #endif
+}
+
+void ScreenSessionManager::SetConfigForInputmethod(ScreenId screenId, VirtualScreenOption option)
+{
+    auto screenSession = GetScreenSession(screenId);
+    TLOGD(WmsLogTag::DMS, "screenId:%{public}" PRIu64", supportsFocus:%{public}d, supportsInput:%{public}d",
+        screenId, option.supportsFocus_, option.supportsInput_);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
+        return;
+    }
+    screenSession->SetSupportsFocus(option.supportsFocus_);
+    if (option.supportsFocus_) {
+        screenSession->SetSupportsInput(option.supportsInput_);
+    } else {
+        screenSession->SetSupportsInput(false);
+    }
 }
 } // namespace OHOS::Rosen

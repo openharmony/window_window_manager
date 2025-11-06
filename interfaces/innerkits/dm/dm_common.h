@@ -732,6 +732,7 @@ struct SessionOption {
     std::string innerName_;
     ScreenId screenId_;
     std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap_;
+    bool supportsFocus_ {true};
 };
 
 /**
