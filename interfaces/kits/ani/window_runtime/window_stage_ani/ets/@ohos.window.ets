@@ -2367,6 +2367,7 @@ export class WindowInternal implements Window {
     private static native nativeTransferStatic(input: ESValue): Object;
     private static native nativeTransferDynamic(nativeObj: long): ESValue;
 
+    private native throwIfWindowInvalid(nativeObj: long): void;
     private native setFollowParentWindowLayoutEnabled(nativeObj: long, enabled: boolean): void;
     private native setWindowDelayRaiseOnDrag(nativeObj: long, isEnabled: boolean): void;
     private native getParentWindow(nativeObj: long): Window;
@@ -2617,6 +2618,7 @@ export class WindowInternal implements Window {
     }
 
     public startMoving(): Promise<void> {
+      this.throwIfWindowInvalid(this.nativeObj);
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute((): void => {
           this.startMoving(this.nativeObj);
