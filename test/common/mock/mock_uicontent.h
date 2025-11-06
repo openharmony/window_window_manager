@@ -60,6 +60,7 @@ public:
         const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info));
     MOCK_METHOD2(UpdateWindowMode, void(OHOS::Rosen::WindowMode mode, bool hasDeco));
     MOCK_METHOD2(GetTopNavDestinationInfo, std::string(bool onlyFullScreen, bool needParam));
+    MOCK_METHOD1(SetFrameMetricsCallBack, void(std::function<void(FrameMetrics info)>&& callback)));
     MOCK_METHOD4(HideWindowTitleButton, void(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose));
     MOCK_METHOD2(UpdateTitleInTargetPos, void(bool isShow, int32_t height));
     MOCK_METHOD0(GetBackgroundColor, uint32_t());
