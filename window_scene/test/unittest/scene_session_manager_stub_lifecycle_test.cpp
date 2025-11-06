@@ -102,20 +102,37 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleRecoverAndReconnectSceneSes
 }
 
 /**
- * @tc.name: HandlePendingSessionToForeground
- * @tc.desc: test HandlePendingSessionToForeground
+ * @tc.name: HandlePendingSessionToForeground_Fail
+ * @tc.desc: test function : HandlePendingSessionToForeground
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubLifecycleTest, HandlePendingSessionToForeground, TestSize.Level1)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandlePendingSessionToForeground_Fail, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-
-    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
-    data.WriteRemoteObject(windowManagerAgent->AsObject());
-
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(token, nullptr);
+    data.WriteRemoteObject(token);
     int res = stub_->HandlePendingSessionToForeground(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+}
+
+/**
+ * @tc.name: HandlePendingSessionToForeground_Success
+ * @tc.desc: test function : HandlePendingSessionToForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandlePendingSessionToForeground_Success, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(token, nullptr);
+    int32_t windowMode = static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN);
+    data.WriteRemoteObject(token);
+    data.WriteInt32(windowMode);
+    int res = stub_->HandlePendingSessionToForeground(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
 }
 
 /**

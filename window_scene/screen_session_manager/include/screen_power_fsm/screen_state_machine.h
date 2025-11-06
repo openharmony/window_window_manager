@@ -62,6 +62,8 @@ enum class ScreenPowerEvent {
     E_DOZE_SUSPEND,
     E_DOZE,
     DMS_POWER_CB_END,
+    WAKEUP_BEGIN,
+    SUSPEND_BEGIN,
     SCREEN_POWER_EVENT_MAX,
 };
 

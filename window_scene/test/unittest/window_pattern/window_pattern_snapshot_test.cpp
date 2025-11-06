@@ -713,6 +713,24 @@ HWTEST_F(WindowPatternSnapshotTest, InitSnapshotCapacity, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetScreenSnapshotStatus
+ * @tc.desc: GetScreenSnapshotStatus Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternSnapshotTest, GetScreenSnapshotStatus, TestSize.Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->capacity_ = defaultCapacity;
+    auto ret = sceneSession->GetScreenSnapshotStatus();
+    EXPECT_EQ(ret, defaultStatus);
+
+    sceneSession->capacity_ = maxCapacity;
+    ret = sceneSession->GetScreenSnapshotStatus();
+    EXPECT_EQ(ret, WSSnapshotHelper::GetInstance()->GetScreenStatus());
+}
+
+/**
  * @tc.name: GetSessionSnapshotStatus
  * @tc.desc: GetSessionSnapshotStatus Test
  * @tc.type: FUNC
@@ -903,15 +921,16 @@ HWTEST_F(WindowPatternSnapshotTest, DeleteHasSnapshot, TestSize.Level1)
     session_->SaveSnapshot(false, true, pixelMap);
 
     auto key = defaultStatus;
-    ScenePersistentStorage::Insert("Snapshot_" + std::to_string(session_->persistentId_) +
-        "_" + std::to_string(key), true, ScenePersistentStorageType::MAXIMIZE_STATE);
+    ScenePersistentStorage::Insert("Snapshot_" + session_->sessionInfo_.bundleName_ +
+        "_" + std::to_string(session_->persistentId_) + "_" + std::to_string(key),
+        0, ScenePersistentStorageType::MAXIMIZE_STATE);
     EXPECT_EQ(session_->HasSnapshot(), true);
     session_->DeleteHasSnapshot(key);
     session_->scenePersistence_ = nullptr;
     EXPECT_EQ(session_->HasSnapshot(key), false);
 
-    ScenePersistentStorage::Insert("Snapshot_" + std::to_string(session_->persistentId_),
-        true, ScenePersistentStorageType::MAXIMIZE_STATE);
+    ScenePersistentStorage::Insert("Snapshot_" + session_->sessionInfo_.bundleName_ +
+        "_" + std::to_string(session_->persistentId_), 0, ScenePersistentStorageType::MAXIMIZE_STATE);
     session_->freeMultiWindow_.store(true);
     session_->SaveSnapshot(false, true, pixelMap);
     EXPECT_EQ(session_->HasSnapshot(), true);
@@ -1064,6 +1083,30 @@ HWTEST_F(WindowPatternSnapshotTest, RemoveImageForRecent, TestSize.Level1)
     ret = ssm_->RemoveImageForRecent(sceneSession->GetPersistentId());
     EXPECT_EQ(ret, WMError::WM_OK);
     ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
+}
+
+/**
+ * @tc.name: NotifyAddOrRemoveSnapshotWindow
+ * @tc.desc: NotifyAddOrRemoveSnapshotWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternSnapshotTest, NotifyAddOrRemoveSnapshotWindow, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    SessionInfo info;
+    info.abilityName_ = "NotifyAddOrRemoveSnapshotWindow";
+    info.bundleName_ = "NotifyAddOrRemoveSnapshotWindow";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ScenePersistentStorage::InitDir("/data/Snapshot");
+
+    sceneSession->NotifyAddOrRemoveSnapshotWindow(true);
+    EXPECT_TRUE(g_logMsg.find("NotifyAddOrRemoveSnapshotWindow") == std::string::npos);
+
+    ScenePersistentStorage::Insert("SetImageForRecent_" + std::to_string(sceneSession->persistentId_),
+        0, ScenePersistentStorageType::MAXIMIZE_STATE);
+    sceneSession->NotifyAddOrRemoveSnapshotWindow(true);
+    EXPECT_TRUE(g_logMsg.find("NotifyAddOrRemoveSnapshotWindow") != std::string::npos);
 }
 } // namespace
 } // namespace Rosen

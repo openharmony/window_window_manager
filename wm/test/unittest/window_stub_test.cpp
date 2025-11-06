@@ -16,7 +16,6 @@
 #include <gtest/gtest.h>
 #include "window_agent.h"
 #include "window_stub.h"
-#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -35,9 +34,6 @@ void WindowStubTest::SetUpTestCase() {}
 
 void WindowStubTest::TearDownTestCase()
 {
-#ifdef RS_ENABLE_VK
-    RSModifiersDrawThread::Destroy();
-#endif
 }
 
 void WindowStubTest::SetUp()

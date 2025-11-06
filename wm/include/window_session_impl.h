@@ -73,6 +73,11 @@ struct CursorInfo {
     double top = -1.0;
     double width = -1.0;
     double height = -1.0;
+
+    bool isInvalid() const
+    {
+        return width <= 0 || height <= 0;
+    }
 };
 
 using IKBWillShowListener = IKeyboardWillShowListener;
@@ -380,12 +385,13 @@ public:
     WSError SetPipActionEvent(const std::string& action, int32_t status) override;
     WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status) override;
     WSError NotifyPipWindowSizeChange(double width, double height, double scale) override;
-    WSError NotifyPipScreenStatusChange(PiPScreenStatus status) override;
+    WSError NotifyPiPActiveStatusChange(bool status) override;
     void UpdatePiPRect(const Rect& rect, WindowSizeChangeReason reason) override;
     void UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status) override;
     void SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height) override;
     void UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo) override;
     WMError GetPiPSettingSwitchStatus(bool& switchStatus) const override;
+    WMError SetPipParentWindowId(uint32_t windowId) const override;
 
     WMError UpdateFloatingBall(const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,
         const std::shared_ptr<Media::PixelMap>& icon) override;

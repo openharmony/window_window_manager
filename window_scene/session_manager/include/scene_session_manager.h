@@ -410,6 +410,8 @@ public:
     WMError GetWindowLimits(int32_t windowId, WindowLimits& windowLimits);
     void RegisterVirtualPixelChangeCallback(NotifyVirtualPixelChangeFunc&& func);
     NotifyVirtualPixelChangeFunc onVirtualPixelChangeCallback_;
+    void ConfigDockAutoHide(bool isDockAutoHide);
+
     /*
      * Sub Window
      */

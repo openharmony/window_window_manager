@@ -583,6 +583,10 @@ WMError SceneSession::NotifySnapshotUpdate()
             TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s: session is null", where);
             return;
         }
+        if (session->IsAnco()) {
+            TLOGNI(WmsLogTag::WMS_PATTERN, "%{public}s: id: %{public}d, is anco", where, session->GetPersistentId());
+            return;
+        }
         TLOGNI(WmsLogTag::WMS_PATTERN, "%{public}s: id: %{public}d", where, session->GetPersistentId());
         if (WindowHelper::IsMainWindow(session->GetWindowType())) {
             session->SaveSnapshot(true, true, nullptr, true);
@@ -677,6 +681,11 @@ WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s Notify scene session id: %{public}d paused", where,
                 session->GetPersistentId());
             session->UpdateLifecyclePausedInner();
+        }
+        if (session->sessionInfo_.isPrelaunch_) {
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s Remove prelaunch session id: %{public}d", where,
+                session->GetPersistentId());
+            session->sessionInfo_.isPrelaunch_ = false;
         }
         if (isFromClient) {
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s Client need notify destroy session, id: %{public}d",
@@ -1408,6 +1417,19 @@ void SceneSession::RegisterFollowScreenChangeCallback(NotifyFollowScreenChangeFu
     }, __func__);
 }
 
+void SceneSession::RegisterSnapshotSkipChangeCallback(NotifySnapshotSkipChangeFunc&& callback)
+{
+    PostTask([weakThis = wptr(this), callback = std::move(callback), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session || !callback) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s session or callback is null", where);
+            return;
+        }
+        session->onSnapshotSkipChangeFunc_ = std::move(callback);
+        session->onSnapshotSkipChangeFunc_(session->GetSessionProperty()->GetSnapshotSkip());
+    }, __func__);
+}
+
 WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
 {
     return PostSyncTask([weakThis = wptr(this), mode, where = __func__] {
@@ -1832,6 +1854,37 @@ void SceneSession::SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPS
         }
         session->autoStartPiPStatusChangeFunc_ = func;
     }, __func__);
+}
+
+void SceneSession::SetPipParentWindowIdCallback(NotifySetPipParentWindowIdFunc&& func)
+{
+    auto task = [weakThis = wptr(this), func = std::move(func), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_PIP, "%{public}s session is null", where);
+            return;
+        }
+        session->setPipParentWindowIdFunc_ = std::move(func);
+    };
+    PostTask(task, __func__);
+}
+
+WSError SceneSession::SetPipParentWindowId(uint32_t windowId)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "PipParentWindowId: %{public}u", windowId);
+    auto task = [weakThis = wptr(this), windowId, where = __func__]() mutable {
+        auto session = weakThis.promote();
+        if (!session || session->isTerminating_) {
+            TLOGNE(WmsLogTag::WMS_PIP, "%{public}s session is null or is terminating", where);
+            return;
+        }
+        if (session->setPipParentWindowIdFunc_) {
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::SetPipParentWindowId");
+            session->setPipParentWindowIdFunc_(windowId);
+        }
+    };
+    PostTask(task, __func__);
+    return WSError::WS_OK;
 }
 
 /** @note @window.layout */
@@ -3231,14 +3284,14 @@ WSError SceneSession::NotifyPipWindowSizeChange(double width, double height, dou
     return sessionStage_->NotifyPipWindowSizeChange(width, height, scale);
 }
 
-WSError SceneSession::NotifyPipScreenStatusChange(PiPScreenStatus status)
+WSError SceneSession::NotifyPiPActiveStatusChange(bool status)
 {
     TLOGI(WmsLogTag::WMS_PIP, "status: %{public}u", status);
     if (!sessionStage_) {
         TLOGE(WmsLogTag::WMS_PIP, "sessionStage is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    return sessionStage_->NotifyPipScreenStatusChange(status);
+    return sessionStage_->NotifyPiPActiveStatusChange(status);
 }
 
 void SceneSession::RegisterProcessPrepareClosePiPCallback(NotifyPrepareClosePiPSessionFunc&& callback)
@@ -3805,8 +3858,8 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
     }
 
     uint64_t endDisplayId = moveDragController_->GetMoveDragEndDisplayId();
-    if ((endDisplayId == moveDragController_->GetMoveDragStartDisplayId() ||
-        !moveDragController_->IsSupportWindowDragCrossDisplay()) && !WindowHelper::IsInputWindow(GetWindowType())) {
+    if (endDisplayId == moveDragController_->GetMoveDragStartDisplayId() ||
+        !moveDragController_->IsSupportWindowDragCrossDisplay()) {
         NotifySessionRectChange(rect, reason);
         NotifySubSessionRectChangeByAnchor(rect, SizeChangeReason::UNDEFINED);
     } else {
@@ -3945,8 +3998,9 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
         return false;
     }
     CompatibilityModeWindowScaleTransfer(rect, true);
-    int32_t statusBarHeight = IsLayoutFullScreen() ? 0 : GetStatusBarHeight();
-    int32_t dockHeight = IsLayoutFullScreen() ? 0 : GetDockHeight();
+    bool isDockAutoHide = onGetIsDockAutoHideFunc_ ? onGetIsDockAutoHideFunc_() : false;
+    int32_t statusBarHeight = (IsLayoutFullScreen() || isDockAutoHide) ? 0 : GetStatusBarHeight();
+    int32_t dockHeight = (IsLayoutFullScreen() || isDockAutoHide) ? 0 : GetDockHeight();
     bool ret = pcFoldScreenController_->ThrowSlip(GetScreenId(), rect, statusBarHeight, dockHeight);
     if (!ret) {
         TLOGD(WmsLogTag::WMS_LAYOUT_PC, "no throw slip");
@@ -6482,6 +6536,16 @@ WMError SceneSession::HandleActionUpdatePrivacyMode(const sptr<WindowSessionProp
 WMError SceneSession::HandleActionUpdateSnapshotSkip(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
+    PostTask([weakThis = wptr(this), isSkip = property->GetSnapshotSkip()] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "session is null");
+            return;
+        }
+        if (session->onSnapshotSkipChangeFunc_) {
+            session->onSnapshotSkipChangeFunc_(isSkip);
+        }
+    }, __func__);
     return SetSnapshotSkip(property->GetSnapshotSkip());
 }
 
@@ -7880,6 +7944,11 @@ void SceneSession::RegisterGetStatusBarConstantlyShowFunc(GetStatusBarConstantly
     onGetStatusBarConstantlyShowFunc_ = std::move(callback);
 }
 
+void SceneSession::RegisterGetIsDockAutoHideFunc(GetIsDockAutoHideFunc&& func)
+{
+    onGetIsDockAutoHideFunc_ = std::move(func);
+}
+
 WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config)
 {
     if (forceSplitFunc_ == nullptr) {
@@ -8311,7 +8380,7 @@ bool SceneSession::UpdateInteractiveInner(bool interactive)
     if (GetForegroundInteractiveStatus() == interactive) {
         return false;
     }
-    NotifyAddOrRemoveSnapshotWindow(interactive);
+    NotifyAddOrRemoveSnapshotWindow(interactive && IsSessionForeground());
     SetForegroundInteractiveStatus(interactive);
     NotifyClientToUpdateInteractive(interactive);
     return true;
@@ -8322,7 +8391,7 @@ void SceneSession::NotifyAddOrRemoveSnapshotWindow(bool interactive)
     auto needSaveSnapshot = ScenePersistentStorage::HasKey("SetImageForRecent_" + std::to_string(GetPersistentId()),
         ScenePersistentStorageType::MAXIMIZE_STATE);
     // persistent imageFit exist, add snapshot when interactive is false.
-    if (needSaveSnapshot && !GetShowRecent()) {
+    if (needSaveSnapshot) {
         TLOGI(WmsLogTag::WMS_PATTERN, "Add or remove static image from window, interactive:%{public}d", interactive);
         PostTask([weakThis = wptr(this), interactive, where = __func__] {
             auto session = weakThis.promote();

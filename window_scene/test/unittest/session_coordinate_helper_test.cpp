@@ -15,7 +15,6 @@
 
 #include <gtest/gtest.h>
 
-#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "session/host/include/session_coordinate_helper.h"
 
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
@@ -49,9 +48,6 @@ void SessionCoordinateHelperTest::SetUpTestCase() {}
 
 void SessionCoordinateHelperTest::TearDownTestCase()
 {
-#ifdef RS_ENABLE_VK
-    RSModifiersDrawThread::Destroy();
-#endif
 }
 
 sptr<ScreenSession> SessionCoordinateHelperTest::CreateScreen(

@@ -74,21 +74,21 @@ public:
     void PipSizeChange(double width, double height, double scale);
     void PreRestorePictureInPicture();
     void GetPipPossible(bool& pipPossible);
-    void ScreenStatusChange(PiPScreenStatus status);
+    void ActiveStatusChange(bool status);
     WMError RegisterPiPLifecycle(const sptr<IPiPLifeCycle>& listener);
     WMError RegisterPiPActionObserver(const sptr<IPiPActionObserver>& listener);
     WMError RegisterPiPControlObserver(const sptr<IPiPControlObserver>& listener);
     WMError RegisterPiPWindowSize(const sptr<IPiPWindowSize>& listener);
     WMError RegisterPiPTypeNodeChange(const sptr<IPiPTypeNodeObserver>& listener);
     WMError RegisterPiPStart(const sptr<IPiPStartObserver>& listener);
-    WMError RegisterPiPScreenStatusChange(const sptr<IPiPScreenStatusObserver>& listener);
+    WMError RegisterPiPActiveStatusChange(const sptr<IPiPActiveStatusObserver>& listener);
     WMError UnregisterPiPLifecycle(const sptr<IPiPLifeCycle>& listener);
     WMError UnregisterPiPActionObserver(const sptr<IPiPActionObserver>& listener);
     WMError UnregisterPiPControlObserver(const sptr<IPiPControlObserver>& listener);
     WMError UnregisterPiPWindowSize(const sptr<IPiPWindowSize>& listener);
     WMError UnRegisterPiPTypeNodeChange(const sptr<IPiPTypeNodeObserver>& listener);
     WMError UnregisterPiPStart(const sptr<IPiPStartObserver>& listener);
-    WMError UnregisterPiPScreenStatusChange(const sptr<IPiPScreenStatusObserver>& listener);
+    WMError UnregisterPiPActiveStatusChange(const sptr<IPiPActiveStatusObserver>& listener);
     void UnregisterAllPiPLifecycle();
     void UnregisterAllPiPControlObserver();
     void UnregisterAllPiPWindowSize();
@@ -149,7 +149,7 @@ protected:
     std::vector<sptr<IPiPWindowSize>> pipWindowSizeListeners_;
     std::vector<sptr<IPiPTypeNodeObserver>> pipTypeNodeObserver_;
     std::vector<sptr<IPiPStartObserver>> pipStartListeners_;
-    std::vector<sptr<IPiPScreenStatusObserver>> pipScreenStatusObserver_;
+    std::vector<sptr<IPiPActiveStatusObserver>> PiPActiveStatusObserver_;
     sptr<Window> window_ = nullptr;
     sptr<Window> mainWindow_ = nullptr;
     sptr<IWindowLifeCycle> mainWindowLifeCycleListener_ = nullptr;
@@ -157,7 +157,7 @@ protected:
     Rect windowRect_ = {0, 0, 0, 0};
     bool isAutoStartEnabled_ = false;
     PiPWindowState curState_ = PiPWindowState::STATE_UNDEFINED;
-    PiPScreenStatus curScreenStatus_ = PiPScreenStatus::STATUS_UNKNOWN;
+    bool curActiveStatus_ = false;
     std::shared_ptr<XComponentController> pipXComponentController_ = nullptr;
     napi_env env_ = nullptr;
     bool isStoppedFromClient_ = false;
@@ -173,6 +173,9 @@ protected:
     // normal
     virtual void ResetExtController() {};
     virtual void NotifyNodeUpdate(napi_ref nodeRef) {};
+
+    // web
+    virtual WMError SetPipParentWindowId(uint32_t windowId) { return WMError::WM_ERROR_PIP_INTERNAL_ERROR; };
 
 private:
     wptr<PictureInPictureControllerBase> weakRef_ = nullptr;

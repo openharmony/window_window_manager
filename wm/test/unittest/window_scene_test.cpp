@@ -16,7 +16,6 @@
 #include <configuration.h>
 #include <gtest/gtest.h>
 #include "ability_context_impl.h"
-#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "mock_static_call.h"
 #include "singleton_mocker.h"
 #include "window_impl.h"
@@ -44,9 +43,6 @@ void WindowSceneTest::SetUpTestCase() {}
 
 void WindowSceneTest::TearDownTestCase()
 {
-#ifdef RS_ENABLE_VK
-    RSModifiersDrawThread::Destroy();
-#endif
 }
 
 void WindowSceneTest::SetUp()

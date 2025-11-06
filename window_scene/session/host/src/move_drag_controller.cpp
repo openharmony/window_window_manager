@@ -509,7 +509,7 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
 bool MoveDragController::IsSupportWindowDragCrossDisplay()
 {
     return !WindowHelper::IsSystemWindow(winType_) || winType_ == WindowType::WINDOW_TYPE_FLOAT ||
-            winType_ == WindowType::WINDOW_TYPE_SCREENSHOT;
+            winType_ == WindowType::WINDOW_TYPE_SCREENSHOT || WindowHelper::IsInputWindow(winType_);
 }
 
 /** @note @window.drag */

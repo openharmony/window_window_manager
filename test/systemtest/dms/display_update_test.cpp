@@ -18,7 +18,6 @@
 #include "common_test_utils.h"
 #include "display_manager.h"
 #include "display_change_info.h"
-#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "window_manager_hilog.h"
 #include "window.h"
 
@@ -52,9 +51,6 @@ void DisplayUpdateTest::SetUpTestCase()
 
 void DisplayUpdateTest::TearDownTestCase()
 {
-#ifdef RS_ENABLE_VK
-    RSModifiersDrawThread::Destroy();
-#endif
 }
 
 void DisplayUpdateTest::SetUp()

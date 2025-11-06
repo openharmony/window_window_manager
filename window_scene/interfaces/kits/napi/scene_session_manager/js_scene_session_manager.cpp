@@ -143,7 +143,6 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "ProcessMode", CreateJsSessionProcessMode(env));
     napi_set_named_property(env, exportObj, "PiPControlType", CreateJsSessionPiPControlType(env));
     napi_set_named_property(env, exportObj, "PiPControlStatus", CreateJsSessionPiPControlStatus(env));
-    napi_set_named_property(env, exportObj, "PiPScreenStatus", CreateJsSessionPiPScreenStatus(env));
     napi_set_named_property(env, exportObj, "Gravity", CreateJsSessionGravity(env));
     napi_set_named_property(env, exportObj, "DragResizeType", CreateJsSessionDragResizeType(env));
     napi_set_named_property(env, exportObj, "RotationChangeType", CreateRotationChangeType(env));
@@ -260,6 +259,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::SetMaximizeFullScreen);
     BindNativeFunction(env, exportObj, "getWindowLimits", moduleName,
         JsSceneSessionManager::GetWindowLimits);
+    BindNativeFunction(env, exportObj, "setIsDockAutoHide", moduleName,
+        JsSceneSessionManager::SetIsDockAutoHide);
     BindNativeFunction(env, exportObj, "notifyEnterRecentTask", moduleName,
         JsSceneSessionManager::NotifyEnterRecentTask);
     BindNativeFunction(env, exportObj, "updateDisplayHookInfo", moduleName,
@@ -1258,6 +1259,13 @@ napi_value JsSceneSessionManager::GetWindowLimits(napi_env env, napi_callback_in
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetWindowLimits(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::SetIsDockAutoHide(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSetIsDockAutoHide(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::GetFreeMultiWindowConfig(napi_env env, napi_callback_info info)
@@ -4062,6 +4070,28 @@ napi_value JsSceneSessionManager::OnGetWindowLimits(napi_env env, napi_callback_
         return NapiGetUndefined(env);
     }
     return jsWindowLimitsObj;
+}
+
+napi_value JsSceneSessionManager::OnSetIsDockAutoHide(napi_env env, napi_callback_info info)
+{
+    size_t argc = 1;
+    napi_value argv[1] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isDockAutoHide = false;
+    if (!ConvertFromJsValue(env, argv[0], isDockAutoHide)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to isDockAutoHide bool value");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().ConfigDockAutoHide(isDockAutoHide);
+    return NapiGetUndefined(env);
 }
 
 napi_value JsSceneSessionManager::OnNotifyEnterRecentTask(napi_env env, napi_callback_info info)

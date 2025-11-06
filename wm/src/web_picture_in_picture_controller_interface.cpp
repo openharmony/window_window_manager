@@ -192,6 +192,16 @@ WMError WebPictureInPictureControllerInterface::setPiPControlEnabled(PiPControlT
     }
 }
 
+WMError WebPictureInPictureControllerInterface::SetPipParentWindowId(uint32_t windowId)
+{
+    if (auto pipController = sptrWebPipController_) {
+        return pipController->SetPipParentWindowId(windowId);
+    } else {
+        TLOGE(WmsLogTag::WMS_PIP, "webPipController is nullptr");
+        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
+    }
+}
+
 WMError WebPictureInPictureControllerInterface::SetPipInitialSurfaceRect(int32_t positionX, int32_t positionY,
     uint32_t width, uint32_t height)
 {

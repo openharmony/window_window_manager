@@ -17,7 +17,6 @@
 #include <gtest/gtest.h>
 #include "ability_context_impl.h"
 #include "ipc_skeleton.h"
-#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "window.h"
 #include "window_manager.h"
 #include "window_option.h"
@@ -55,9 +54,6 @@ void WindowSystemToastWindowTest::SetUpTestCase()
 
 void WindowSystemToastWindowTest::TearDownTestCase()
 {
-#ifdef RS_ENABLE_VK
-    RSModifiersDrawThread::Destroy();
-#endif
 }
 
 void WindowSystemToastWindowTest::SetUp() {}

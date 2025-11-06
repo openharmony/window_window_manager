@@ -34,17 +34,8 @@ void GetSnapshotCallbackProxy::OnReceived(WMError errCode,
         TLOGE(WmsLogTag::WMS_LIFE, "write error code failed");
         return;
     }
-    int32_t len = static_cast<int32_t>(pixelMaps.size());
-    if (!data.WriteInt32(len)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "write size failed");
+    if (!WritePixelMapData(data, pixelMaps)) {
         return;
-    }
-    size_t size = static_cast<size_t>(len);
-    for (size_t i = 0; i < size; i++) {
-        if (pixelMaps[i] == nullptr || !pixelMaps[i]->Marshalling(data)) {
-            TLOGE(WmsLogTag::WMS_LIFE, "write pixelMap failed");
-            continue;
-        }
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -56,5 +47,48 @@ void GetSnapshotCallbackProxy::OnReceived(WMError errCode,
         TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed.");
         return;
     }
+}
+
+bool GetSnapshotCallbackProxy::WritePixelMapData(MessageParcel& data,
+    const std::vector<std::shared_ptr<OHOS::Media::PixelMap>>& pixelMaps)
+{
+    std::vector<int32_t> nullptrVectors;
+    for (size_t i = 0; i < pixelMaps.size(); i++) {
+        if (pixelMaps[i] == nullptr) {
+            nullptrVectors.push_back(static_cast<int32_t>(i));
+        }
+    }
+    int32_t len = static_cast<int32_t>(pixelMaps.size() - nullptrVectors.size());
+    if (!data.WriteInt32(len)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "write size failed");
+        return false;
+    }
+    for (size_t i = 0; i < pixelMaps.size(); i++) {
+        if (pixelMaps[i] == nullptr) {
+            continue;
+        }
+        if (!pixelMaps[i]->Marshalling(data)) {
+            TLOGE(WmsLogTag::WMS_LIFE, "write pixelMap failed");
+            return false;
+        }
+    }
+    if (nullptrVectors.size() > 0) {
+        if (!data.WriteInt32(static_cast<int32_t>(nullptrVectors.size()))) {
+            TLOGE(WmsLogTag::WMS_LIFE, "write nullptrVectors size failed");
+            return false;
+        }
+        for (size_t i = 0; i < nullptrVectors.size(); i++) {
+            if (!data.WriteInt32(nullptrVectors[i])) {
+                TLOGE(WmsLogTag::WMS_LIFE, "write nullptrVectors failed");
+                return false;
+            }
+        }
+    } else {
+        if (!data.WriteInt32(0)) {
+            TLOGE(WmsLogTag::WMS_LIFE, "write nullptrVectors size zero failed");
+            return false;
+        }
+    }
+    return true;
 }
 }

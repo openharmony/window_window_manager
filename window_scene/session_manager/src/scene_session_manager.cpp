@@ -470,6 +470,7 @@ void SceneSessionManager::Init()
     RegisterAppStateObserver();
 
     InitSnapshotCache();
+    WSSnapshotHelper::GetInstance()->SetWindowScreenStatus(DisplayManager::GetInstance().GetFoldStatus());
 }
 
 void SceneSessionManager::RegisterSessionRecoverStateChangeListener()
@@ -2107,22 +2108,25 @@ WMError SceneSessionManager::SetScreenPrivacyWindowTagSwitch(
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    if (enable) {
-        for (const auto& privacyWindowTag : privacyWindowTags) {
-            screenRSBlackListConfigMap_[screenId].insert({ .privacyWindowTag = privacyWindowTag });
-        }
-        FlushSessionBlackListInfoMapWhenAdd(screenId);
-    } else {
-        for (const auto& privacyWindowTag : privacyWindowTags) {
-            screenRSBlackListConfigMap_[screenId].erase({ .privacyWindowTag = privacyWindowTag });
-            if (screenRSBlackListConfigMap_[screenId].empty()) {
-                screenRSBlackListConfigMap_.erase(screenId);
-                break;
+    auto task = [this, screenId, &privacyWindowTags, enable]() {
+        if (enable) {
+            for (const auto& privacyWindowTag : privacyWindowTags) {
+                screenRSBlackListConfigMap_[screenId].insert({ .privacyWindowTag = privacyWindowTag });
             }
+            FlushSessionBlackListInfoMapWhenAdd(screenId);
+        } else {
+            for (const auto& privacyWindowTag : privacyWindowTags) {
+                screenRSBlackListConfigMap_[screenId].erase({ .privacyWindowTag = privacyWindowTag });
+                if (screenRSBlackListConfigMap_[screenId].empty()) {
+                    screenRSBlackListConfigMap_.erase(screenId);
+                    break;
+                }
+            }
+            FlushSessionBlackListInfoMapWhenRemove(screenId);
         }
-        FlushSessionBlackListInfoMapWhenRemove(screenId);
-    }
-    return WMError::WM_OK;
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, __func__);
 }
 
 void SceneSessionManager::SetSkipEventOnCastPlusInner(int32_t windowId, bool isSkip)
@@ -2213,6 +2217,14 @@ WMError SceneSessionManager::GetWindowLimits(int32_t windowId, WindowLimits& win
         windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_, windowLimits.vpRatio_,
         windowLimits.pixelUnit_);
     return WMError::WM_OK;
+}
+
+void SceneSessionManager::ConfigDockAutoHide(bool isDockAutoHide) {
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ConfigDockAutoHide: isDockAutoHide %{public}d", isDockAutoHide);
+    auto task = [this, isDockAutoHide] {
+        systemConfig_.isDockAutoHide_ = isDockAutoHide;
+    };
+    return taskScheduler_->PostAsyncTask(task, "ConfigDockAutoHide");
 }
 
 uint32_t SceneSessionManager::GetLockScreenZOrder()
@@ -2523,6 +2535,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         });
         sceneSession->SetFindScenePanelRsNodeByZOrderFunc([this](uint64_t screenId, uint32_t targetZOrder) {
             return this->findScenePanelRsNodeByZOrderFunc_(screenId, targetZOrder);
+        });
+        sceneSession->RegisterGetIsDockAutoHideFunc([this]() {
+            return systemConfig_.isDockAutoHide_;
         });
         sceneSession->RegisterForceSplitFullScreenChangeCallback([this](uint32_t uid, bool isFullScreen) {
             this->NotifyIsFullScreenInForceSplitMode(uid, isFullScreen);
@@ -3261,6 +3276,8 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     sceneSession->NotifyActivation();
     auto sceneSessionInfo = SetAbilitySessionInfo(sceneSession, requestId, true);
     sceneSessionInfo->isNewWant = isNewActive;
+    sceneSessionInfo->targetGrantBundleName =
+        sceneSession->GetSessionInfo().GetWantSafely().GetStringParam("targetGrantBundleName");
     if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
         sceneSessionInfo->want.SetParam(AncoConsts::ANCO_MISSION_ID, sceneSessionInfo->persistentId);
         sceneSessionInfo->collaboratorType = sceneSession->GetCollaboratorType();
@@ -3282,6 +3299,9 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     if (!systemConfig_.backgroundswitch || sceneSession->GetSessionProperty()->GetIsAppSupportPhoneInPc()) {
         TLOGI(WmsLogTag::WMS_MAIN, "[id: %{public}d] Begin StartUIAbility, system: %{public}u", persistentId,
             static_cast<uint32_t>(sceneSession->GetSessionInfo().isSystem_));
+        if (sceneSession->GetSessionInfo().want != nullptr) {
+            sceneSession->GetSessionInfo().want->RemoveParam("targetGrantBundleName");
+        }
         errCode = StartUIAbilityBySCBTimeoutCheck(sceneSession, sceneSessionInfo,
             static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL), isColdStart);
         ResetSessionInfoAfterStartUIAbility(sceneSession);
@@ -3294,6 +3314,9 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
             sceneSession->GetSessionInfo().reuseDelegatorWindow) {
             TLOGI(WmsLogTag::WMS_MAIN, "Call StartUIAbility: %{public}d system: %{public}u", persistentId,
                 static_cast<uint32_t>(sceneSession->GetSessionInfo().isSystem_));
+            if (sceneSession->GetSessionInfo().want != nullptr) {
+                sceneSession->GetSessionInfo().want->RemoveParam("targetGrantBundleName");
+            }
             errCode = StartUIAbilityBySCBTimeoutCheck(sceneSession, sceneSessionInfo,
                 static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL), isColdStart);
         } else {
@@ -5011,7 +5034,7 @@ void SceneSessionManager::SetOutsideDownEventListener(const ProcessOutsideDownEv
 
 WMError SceneSessionManager::NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed)
 {
-    TLOGD(WmsLogTag::WMS_EVENT, "keyCode:%{public}d isConsumed:%{public}d", keyCode, isConsumed);
+    TLOGD(WmsLogTag::WMS_EVENT, "isConsumed:%{public}d", isConsumed);
     if (onWatchGestureConsumeResultFunc_) {
         onWatchGestureConsumeResultFunc_(keyCode, isConsumed);
     } else {
@@ -9571,7 +9594,7 @@ void SceneSessionManager::NotifyCompleteFirstFrameDrawing(int32_t persistentId)
     TLOGI(WmsLogTag::WMS_MAIN, " id: %{public}d, app info: [%{public}s %{public}s %{public}s]",
         sceneSession->GetPersistentId(), sessionInfo.bundleName_.c_str(),
         sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str());
-    auto abilityInfo = sessionInfo.abilityInfo;
+    auto abilityInfo = sceneSession->GetSessionInfoAbilityInfo();
     if (abilityInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, " abilityInfo is null, Id: %{public}d", persistentId);
         return;
@@ -9698,6 +9721,10 @@ WSError SceneSessionManager::SetSessionIconForThirdParty(const sptr<IRemoteObjec
     }
     if (icon->GetWidth() != icon->GetHeight()) {
         TLOGE(WmsLogTag::WMS_MAIN, "icon is not a square");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (icon->GetCapacity() > ICON_MAX_SIZE) {
+        TLOGE(WmsLogTag::WMS_MAIN, "icon is too large");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     return SetSessionIconInner(token, icon);
@@ -10761,20 +10788,23 @@ WMError SceneSessionManager::AddSessionBlackList(
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    for (const auto& bundleName : bundleNames) {
-        bundleRSBlackListConfigMap_.insert({ bundleName, {} });
-        bundleRSBlackListConfigMap_[bundleName].insert(privacyWindowTags.begin(), privacyWindowTags.end());
-    }
-    std::vector<sptr<SceneSession>> sceneSessionList;
-    {
-        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        for (const auto& [_, sceneSession] : sceneSessionMap_) {
-            if (sceneSession && bundleNames.find(sceneSession->GetSessionInfo().bundleName_) != bundleNames.end()) {
-                sceneSessionList.emplace_back(sceneSession);
+    auto task = [this, &bundleNames, &privacyWindowTags]() {
+        for (const auto& bundleName : bundleNames) {
+            bundleRSBlackListConfigMap_.insert({ bundleName, {} });
+            bundleRSBlackListConfigMap_[bundleName].insert(privacyWindowTags.begin(), privacyWindowTags.end());
+        }
+        std::vector<sptr<SceneSession>> sceneSessionList;
+        {
+            std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+            for (const auto& [_, sceneSession] : sceneSessionMap_) {
+                if (sceneSession && bundleNames.find(sceneSession->GetSessionInfo().bundleName_) != bundleNames.end()) {
+                    sceneSessionList.emplace_back(sceneSession);
+                }
             }
         }
-    }
-    return AddSessionBlackList(sceneSessionList, privacyWindowTags);
+        return AddSessionBlackList(sceneSessionList, privacyWindowTags);
+    };
+    return taskScheduler_->PostSyncTask(task, __func__);
 }
 
 WMError SceneSessionManager::AddSessionBlackList(const std::vector<sptr<SceneSession>>& sceneSessionList,
@@ -10796,25 +10826,28 @@ WMError SceneSessionManager::RemoveSessionBlackList(
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    for (const auto& bundleName : bundleNames) {
-        bundleRSBlackListConfigMap_.insert({ bundleName, {} });
-        for(const auto& privacyWindowTag : privacyWindowTags) {
-            bundleRSBlackListConfigMap_[bundleName].erase(privacyWindowTag);
-        }
-        if (bundleRSBlackListConfigMap_[bundleName].empty()) {
-            bundleRSBlackListConfigMap_.erase(bundleName);
-        }
-    }
-    std::vector<sptr<SceneSession>> sceneSessionList;
-    {
-        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        for (const auto& [_, sceneSession] : sceneSessionMap_) {
-            if (sceneSession && bundleNames.find(sceneSession->GetSessionInfo().bundleName_) != bundleNames.end()) {
-                sceneSessionList.emplace_back(sceneSession);
+    auto task = [this, &bundleNames, &privacyWindowTags]() {
+        for (const auto& bundleName : bundleNames) {
+            bundleRSBlackListConfigMap_.insert({ bundleName, {} });
+            for(const auto& privacyWindowTag : privacyWindowTags) {
+                bundleRSBlackListConfigMap_[bundleName].erase(privacyWindowTag);
+            }
+            if (bundleRSBlackListConfigMap_[bundleName].empty()) {
+                bundleRSBlackListConfigMap_.erase(bundleName);
             }
         }
-    }
-    return RemoveSessionBlackList(sceneSessionList, privacyWindowTags);
+        std::vector<sptr<SceneSession>> sceneSessionList;
+        {
+            std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+            for (const auto& [_, sceneSession] : sceneSessionMap_) {
+                if (sceneSession && bundleNames.find(sceneSession->GetSessionInfo().bundleName_) != bundleNames.end()) {
+                    sceneSessionList.emplace_back(sceneSession);
+                }
+            }
+        }
+        return RemoveSessionBlackList(sceneSessionList, privacyWindowTags);
+    };
+    return taskScheduler_->PostSyncTask(task, __func__);
 }
 
 WMError SceneSessionManager::RemoveSessionBlackList(const std::vector<sptr<SceneSession>>& sceneSessionList,
@@ -13490,6 +13523,7 @@ WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64
     sceneSession->UpdateDensity();
     if (fromScreenId != screenId) {
         sceneSession->AddPropertyDirtyFlags(static_cast<uint32_t>(SessionPropertyFlag::DISPLAY_ID));
+        sceneSession->MarkAvoidAreaAsDirty();
     }
     uint64_t displayId = screenId;
     if (sceneSession->IsPcFoldDevice() && PcFoldScreenManager::GetInstance().IsHalfFolded(displayId)) {
@@ -15782,7 +15816,8 @@ WMError SceneSessionManager::GetAllMainWindowInfo(std::vector<sptr<MainWindowInf
     }
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [_, session] : sceneSessionMap_) {
-        if (session == nullptr) {
+        if (session == nullptr || session->GetSessionState() == SessionState::STATE_DISCONNECT) {
+            TLOGW(WmsLogTag::WMS_LIFE, "session is nullptr or sessionState is disconnect");
             continue;
         }
         if (WindowHelper::IsMainWindow(session->GetWindowType())) {

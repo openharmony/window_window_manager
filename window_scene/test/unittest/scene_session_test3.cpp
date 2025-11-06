@@ -732,18 +732,18 @@ HWTEST_F(SceneSessionTest3, NotifyPipWindowSizeChange, TestSize.Level1)
 }
 
 /**
- * @tc.name: NotifyPipScreenStatusChange
- * @tc.desc: NotifyPipScreenStatusChange
+ * @tc.name: NotifyPiPActiveStatusChange
+ * @tc.desc: NotifyPiPActiveStatusChange
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, NotifyPipScreenStatusChange, TestSize.Level1)
+HWTEST_F(SceneSessionTest3, NotifyPiPActiveStatusChange, TestSize.Level1)
 {
     SessionInfo info;
-    info.abilityName_ = "NotifyPipScreenStatusChange";
-    info.bundleName_ = "NotifyPipScreenStatusChange";
+    info.abilityName_ = "NotifyPiPActiveStatusChange";
+    info.bundleName_ = "NotifyPiPActiveStatusChange";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
-    auto res = sceneSession->NotifyPipScreenStatusChange(PiPScreenStatus::STATUS_FOREGROUND);
+    auto res = sceneSession->NotifyPiPActiveStatusChange(true);
     EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
 }
 

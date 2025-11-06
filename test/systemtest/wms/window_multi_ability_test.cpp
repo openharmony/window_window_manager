@@ -15,7 +15,6 @@
 
 // gtest
 #include <gtest/gtest.h>
-#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "scene_board_judgement.h"
 #include "window_test_utils.h"
 
@@ -37,9 +36,6 @@ void WindowMultiAbilityTest::SetUpTestCase() {}
 
 void WindowMultiAbilityTest::TearDownTestCase()
 {
-#ifdef RS_ENABLE_VK
-    RSModifiersDrawThread::Destroy();
-#endif
 }
 
 void WindowMultiAbilityTest::SetUp() {}

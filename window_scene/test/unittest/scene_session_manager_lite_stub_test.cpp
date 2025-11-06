@@ -162,23 +162,8 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         topNInfo.push_back(mainWindowInfo);
         return WMError::WM_OK;
     }
-    WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) override
-    {
-        MainWindowInfo mainWindowInfo;
-        infos.push_back(mainWindowInfo);
-        return WMError::WM_OK;
-    }
     WMError GetMainWindowInfoByToken(const sptr<IRemoteObject>& abilityToken, MainWindowInfo& windowInfo) override
     {
-        return WMError::WM_OK;
-    }
-    WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo) override
-    {
-        return WMError::WM_OK;
-    }
-    WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds) override
-    {
-        clearFailedIds.push_back(1);
         return WMError::WM_OK;
     }
     WSError RaiseWindowToTop(int32_t persistentId) override
@@ -193,6 +178,21 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     WSError UnregisterIAbilityManagerCollaborator(int32_t type) override
     {
         return WSError::WS_OK;
+    }
+    WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) override
+    {
+        MainWindowInfo mainWindowInfo;
+        infos.push_back(mainWindowInfo);
+        return WMError::WM_OK;
+    }
+    WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds) override
+    {
+        clearFailedIds.push_back(1);
+        return WMError::WM_OK;
     }
     WMError GetWindowStyleType(WindowStyleType& windowStyleType) override
     {
@@ -402,16 +402,51 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleIsValidSessionIds, TestSize.Leve
 }
 
 /**
- * @tc.name: HandlePendingSessionToForeground
+ * @tc.name: HandlePendingSessionToForeground_InvalidToken
  * @tc.desc: test function : HandlePendingSessionToForeground
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLiteStubTest, HandlePendingSessionToForeground, TestSize.Level1)
+HWTEST_F(SceneSessionManagerLiteStubTest, HandlePendingSessionToForeground_InvalidToken, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandlePendingSessionToForeground(data, reply);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandlePendingSessionToForeground(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
+}
+
+/**
+ * @tc.name: HandlePendingSessionToForeground_Fail
+ * @tc.desc: test function : HandlePendingSessionToForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandlePendingSessionToForeground_Fail, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    data.WriteRemoteObject(token);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandlePendingSessionToForeground(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+}
+
+/**
+ * @tc.name: HandlePendingSessionToForeground_Success
+ * @tc.desc: test function : HandlePendingSessionToForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandlePendingSessionToForeground_Success, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    int32_t windowMode = static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN);
+    data.WriteRemoteObject(token);
+    data.WriteInt32(windowMode);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandlePendingSessionToForeground(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
 }
 
 /**
@@ -935,53 +970,6 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnregisterWindowManagerAgent, Te
 }
 
 /**
- * @tc.name: HandleListWindowInfo
- * @tc.desc: test function : HandleListWindowInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerLiteStubTest, HandleListWindowInfo, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    DisplayId displayId = 0;
-    int32_t windowId = 0;
-    data.WriteUint8(static_cast<WindowInfoFilterOptionDataType>(WindowInfoFilterOption::ALL));
-    data.WriteUint8(static_cast<WindowInfoTypeOptionDataType>(WindowInfoTypeOption::ALL));
-    data.WriteUint64(displayId);
-    data.WriteInt32(windowId);
-    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleListWindowInfo(data, reply);
-    EXPECT_EQ(ERR_NONE, res);
-}
-
-/**
- * @tc.name: HandleGetVisibilityWindowInfo
- * @tc.desc: test function : HandleGetVisibilityWindowInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetVisibilityWindowInfo, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetVisibilityWindowInfo(data, reply);
-    EXPECT_EQ(ERR_NONE, res);
-}
-
-/**
- * @tc.name: HandleGetMainWinodowInfo
- * @tc.desc: test function : HandleGetMainWinodowInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetMainWinodowInfo, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    int32_t numMax = 100;
-    data.WriteInt32(numMax);
-    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetMainWinodowInfo(data, reply);
-    EXPECT_EQ(ERR_NONE, res);
-}
-
-/**
  * @tc.name: HandleUpdateAnimationSpeedWithPid
  * @tc.desc: test HandleUpdateAnimationSpeedWithPid
  * @tc.type: FUNC
@@ -1005,6 +993,71 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleUpdateAnimationSpeedWithPid, Tes
     res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleUpdateAnimationSpeedWithPid(data, reply);
     EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleListWindowInfo
+ * @tc.desc: test function : HandleListWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleListWindowInfo, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    DisplayId displayId = 0;
+    int32_t windowId = 0;
+    data.WriteUint8(static_cast<WindowInfoFilterOptionDataType>(WindowInfoFilterOption::ALL));
+    data.WriteUint8(static_cast<WindowInfoTypeOptionDataType>(WindowInfoTypeOption::ALL));
+    data.WriteUint64(displayId);
+    data.WriteInt32(windowId);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleListWindowInfo(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetVisibilityWindowInfo
+ * @tc.desc: test function : HandleGetVisibilityWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetVisibilityWindowInfo, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetVisibilityWindowInfo(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetMainWinodowInfo
+ * @tc.desc: test function : HandleGetMainWinodowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetMainWinodowInfo, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t numMax = 100;
+    data.WriteInt32(numMax);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetMainWinodowInfo(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleRaiseWindowToTop
+ * @tc.desc: test function : HandleRaiseWindowToTop
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleRaiseWindowToTop, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t persistentId = 65535;
+    data.WriteInt32(persistentId);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleRaiseWindowToTop(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
 }
 
 /**
@@ -1047,21 +1100,6 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleClearMainSessions, TestSize.Leve
     std::vector<int32_t> persistentIds = { 1, 2, 3 };
     data.WriteInt32Vector(persistentIds);
     auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleClearMainSessions(data, reply);
-    EXPECT_EQ(ERR_NONE, res);
-}
-
-/**
- * @tc.name: HandleRaiseWindowToTop
- * @tc.desc: test function : HandleRaiseWindowToTop
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerLiteStubTest, HandleRaiseWindowToTop, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    int32_t persistentId = 65535;
-    data.WriteInt32(persistentId);
-    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleRaiseWindowToTop(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -1285,6 +1323,23 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetRecentMainSessionInfoList, Fu
 }
 
 /**
+ * @tc.name: HandleCreateNewInstanceKey
+ * @tc.desc: test function : HandleCreateNewInstanceKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleCreateNewInstanceKey, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    std::string bundleName = "bundleName";
+    data.WriteString(bundleName);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleCreateNewInstanceKey(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
  * @tc.name: HandlePendingSessionToBackgroundByPersistentId
  * @tc.desc: test function : HandlePendingSessionToBackgroundByPersistentId
  * @tc.type: FUNC
@@ -1308,6 +1363,76 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandlePendingSessionToBackgroundByPers
     res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundByPersistentId(data2, reply);
     EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleRemoveInstanceKey
+ * @tc.desc: test function : HandleRemoveInstanceKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleRemoveInstanceKey, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    std::string bundleName = "bundleName";
+    std::string instanceKey = "instanceKey";
+    data.WriteString(bundleName);
+    data.WriteString(instanceKey);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleRemoveInstanceKey(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandlePendingSessionToBackground_ShouldReturnInvalidData_WhenTokenIsNull
+ * @tc.desc: test function : HandlePendingSessionToBackgroundTest_001
+ * @tc.type: 测试当 token 为 nullptr 时,函数应返回 ERR_INVALID_DATA
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandlePendingSessionToBackgroundTest_001, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    int result = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandlePendingSessionToBackground(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandlePendingSessionToBackground_ShouldReturnInvalidData_WhenReadBoolFailed
+ * @tc.desc: test function : HandlePendingSessionToBackgroundTest_002
+ * @tc.type: 测试当读取 shouldBackToCaller 失败时,函数应返回 ERR_INVALID_DATA
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandlePendingSessionToBackgroundTest_002, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    data.WriteRemoteObject(token);
+
+    int result = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandlePendingSessionToBackground(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandlePendingSessionToBackground_ShouldReturnInvalidData_WhenPendingSessionToBackgroundSucceeds
+ * @tc.desc: test function : HandlePendingSessionToBackgroundTest_003
+ * @tc.type: 测试当 wantParams 为 nullptr 时,函数应返回 ERR_NONE
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandlePendingSessionToBackgroundTest_003, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    data.WriteRemoteObject(token);
+    data.WriteInt32(1);
+    data.writebool(true);
+
+    int result = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandlePendingSessionToBackground(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
 }
 
 /**
@@ -1526,6 +1651,38 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetPipEnableByScreenId_ReadBoolF
     MessageParcel reply;
     data.WriteInt32(1);
     EXPECT_EQ(sceneSessionManagerLiteStub_->HandleSetPipEnableByScreenId(data, reply), ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleGetDisplayIdByWindowId01
+ * @tc.desc: test HandleGetDisplayIdByWindowId01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetDisplayIdByWindowId01, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    const std::vector<uint64_t> windowIds = (200, 0);
+    data.WriteUInt64Vector(windowIds);
+
+    int res = sceneSessionManagerLiteStub_->HandleGetDisplayIdByWindowId(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+}
+
+/**
+ * @tc.name: HandleGetDisplayIdByWindowId02
+ * @tc.desc: test HandleGetDisplayIdByWindowId02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetDisplayIdByWindowId02, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    const std::vector<uint64_t> windowIds = {1, 2};
+    data.WriteUInt64Vector(windowIds);
+
+    int res = sceneSessionManagerLiteStub_->HandleGetDisplayIdByWindowId(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
 }
 } // namespace
 } // namespace Rosen

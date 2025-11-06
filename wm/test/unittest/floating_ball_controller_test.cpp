@@ -21,7 +21,6 @@
 #include "floating_ball_manager.h"
 #include "floating_ball_report.h"
 #include "singleton_mocker.h"
-#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "parameters.h"
 #include "window.h"
 #include "wm_common.h"
@@ -100,9 +99,6 @@ void FloatingBallControllerTest::SetUpTestCase()
 
 void FloatingBallControllerTest::TearDownTestCase()
 {
-#ifdef RS_ENABLE_VK
-    RSModifiersDrawThread::Destroy();
-#endif
 }
 
 void FloatingBallControllerTest::SetUp()

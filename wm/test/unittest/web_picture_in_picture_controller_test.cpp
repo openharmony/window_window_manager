@@ -253,6 +253,24 @@ HWTEST_F(WebPictureInPictureControllerTest, UpdateWinRectByComponent, TestSize.L
     EXPECT_EQ(webPipControl->windowRect_.posX_, 0);
     EXPECT_EQ(webPipControl->windowRect_.posY_, 0);
 }
+
+/**
+ * @tc.name: SetPipParentWindowId
+ * @tc.desc: SetPipParentWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPictureInPictureControllerTest, SetPipParentWindowId, TestSize.Level1)
+{
+    auto webPipControl = sptr<WebPictureInPictureController>::MakeSptr(config);
+    uint32_t windowId = 10000;
+    webPipControl->mainWindow_  = nullptr;
+    EXPECT_EQ(webPipControl->SetPipParentWindowId(windowId), WMError::WM_ERROR_PIP_STATE_ABNORMALLY);
+ 
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    webPipControl->mainWindow_ = mw;
+    EXPECT_EQ(webPipControl->SetPipParentWindowId(windowId), WMError::WM_ERROR_PIP_STATE_ABNORMALLY);
+}
 }
 }
 }

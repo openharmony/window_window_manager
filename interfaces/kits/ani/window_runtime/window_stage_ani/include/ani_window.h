@@ -88,6 +88,7 @@ public:
     static ani_object CreateAniWindow(ani_env* env, OHOS::sptr<OHOS::Rosen::Window>& window);
     static void Maximize(ani_env* env, ani_object obj, ani_long nativeObj,
                          ani_object aniPresentation, ani_object aniAcrossDisplay);
+    static void StopMoving(ani_env* env, ani_object obj, ani_long nativeObj);
     static void SetRotationLocked(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean locked);
     static ani_boolean GetRotationLocked(ani_env* env, ani_object obj, ani_long nativeObj);
     static ani_boolean IsInFreeWindowMode(ani_env* env, ani_object obj, ani_long nativeObj);
@@ -96,9 +97,9 @@ public:
     static void SetWindowDelayRaiseOnDrag(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isEnabled);
     static void SetDefaultDensityEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enabled);
     static void SetWindowContainerColor(ani_env* env, ani_object obj, ani_long nativeObj,
-        std::string activeColor, std::string inactiveColor);
+        ani_string activeColor, ani_string inactiveColor);
     static void SetWindowContainerModalColor(ani_env* env, ani_object obj, ani_long nativeObj,
-        std::string activeColor, std::string inactiveColor);
+        ani_string activeColor, ani_string inactiveColor);
     static bool IsMainWindowFullScreenAcrossDisplays(ani_env* env, ani_object obj, ani_long nativeObj);
     static void SetWindowShadowEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enable);
     static bool IsImmersiveLayout(ani_env* env, ani_object obj, ani_long nativeObj);
@@ -196,8 +197,8 @@ private:
     void OnSetRelativePositionToParentWindowEnabled(ani_env* env, ani_boolean enabled,
         ani_int anchor, ani_int offsetX, ani_int offsetY);
     void OnSetDefaultDensityEnabled(ani_env* env, ani_boolean enabled);
-    void OnSetWindowContainerColor(ani_env* env, std::string activeColor, std::string inactiveColor);
-    void OnSetWindowContainerModalColor(ani_env* env, std::string activeColor, std::string inactiveColor);
+    void OnSetWindowContainerColor(ani_env* env, ani_string activeColor, ani_string inactiveColor);
+    void OnSetWindowContainerModalColor(ani_env* env, ani_string activeColor, ani_string inactiveColor);
     bool OnIsMainWindowFullScreenAcrossDisplays(ani_env* env);
     void OnSetWindowShadowEnabled(ani_env* env, ani_boolean enable);
     bool OnIsImmersiveLayout(ani_env* env);
@@ -208,6 +209,7 @@ private:
     void OnSetContentAspectRatio(
         ani_env* env, ani_double ratio, ani_boolean isPersistent, ani_boolean needUpdateRect);
     void OnMaximize(ani_env* env, ani_object aniPresentation, ani_object aniAcrossDisplay);
+    void OnStopMoving(ani_env* env);
 
     /*
      * Window animation

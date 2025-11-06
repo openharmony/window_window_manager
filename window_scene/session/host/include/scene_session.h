@@ -65,6 +65,7 @@ using NotifySessionPiPControlStatusChangeFunc = std::function<void(WsPiPControlT
 using NotifyAutoStartPiPStatusChangeFunc = std::function<void(bool isAutoStart, uint32_t priority,
     uint32_t width, uint32_t height)>;
 using NotifyUpdatePiPTemplateInfoFunc = std::function<void(PiPTemplateInfo& pipTemplateInfo)>;
+using NotifySetPipParentWindowIdFunc = std::function<void(uint32_t windowId)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId, SessionEventParam param)>;
 using NotifySessionTopmostChangeFunc = std::function<void(const bool topmost)>;
 using NotifySubSessionZLevelChangeFunc = std::function<void(const int32_t zLevel)>;
@@ -122,6 +123,7 @@ using NotifyAvoidAreaChangeCallback = std::function<void(const sptr<AvoidArea>& 
 using NotifySetSupportedWindowModesFunc = std::function<void(
     std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes)>;
 using GetStatusBarAvoidHeightFunc = std::function<void(DisplayId displayId, WSRect& barArea)>;
+using GetIsDockAutoHideFunc = std::function<bool()>;
 using GetStatusBarConstantlyShowFunc = std::function<void(DisplayId displayId, bool& isVisible)>;
 using NotifySetWindowCornerRadiusFunc = std::function<void(float cornerRadius)>;
 using GetKeyboardOccupiedAreaWithRotationCallback =
@@ -155,6 +157,7 @@ using FindScenePanelRsNodeByZOrderFunc = std::function<std::shared_ptr<Rosen::RS
     uint32_t targetZOrder)>;
 using ForceSplitFullScreenChangeCallback = std::function<void(uint32_t uid, bool isFullScreen)>;
 using NotifyRotationLockChangeFunc = std::function<void(bool locked)>;
+using NotifySnapshotSkipChangeFunc = std::function<void(bool isSkip)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -341,8 +344,10 @@ public:
     WSError SetPipActionEvent(const std::string& action, int32_t status);
     WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status);
     WSError NotifyPipWindowSizeChange(double width, double height, double scale);
-    WSError NotifyPipScreenStatusChange(PiPScreenStatus status);
+    WSError NotifyPiPActiveStatusChange(bool status);
     void RegisterProcessPrepareClosePiPCallback(NotifyPrepareClosePiPSessionFunc&& callback);
+    void SetPipParentWindowIdCallback(NotifySetPipParentWindowIdFunc&& func);
+    WSError SetPipParentWindowId(uint32_t windowId) override;
 
     void RequestHideKeyboard(bool isAppColdStart = false);
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
@@ -511,6 +516,7 @@ public:
     void MarkAvoidAreaAsDirty();
     virtual void RecalculatePanelRectForAvoidArea(WSRect& panelRect) {}
     void RegisterGetStatusBarAvoidHeightFunc(GetStatusBarAvoidHeightFunc&& func);
+    void RegisterGetIsDockAutoHideFunc(GetIsDockAutoHideFunc&& func);
     void RegisterGetStatusBarConstantlyShowFunc(GetStatusBarConstantlyShowFunc&& func);
     void HookAvoidAreaInCompatibleMode(const WSRect& rect, AvoidAreaType avoidAreaType, AvoidArea& avoidArea) const;
 
@@ -904,6 +910,7 @@ public:
     WMError OnUpdateColorMode(const std::string& colorMode, bool hasDarkRes) override;
     std::string GetAbilityColorMode() const;
     void SetSecurityLayerWhenEnterForeground();
+    void RegisterSnapshotSkipChangeCallback(NotifySnapshotSkipChangeFunc&& callback);
 
     /*
      * Window Pattern
@@ -952,6 +959,7 @@ protected:
     NotifyNeedAvoidFunc onNeedAvoid_;
     NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
     GetStatusBarAvoidHeightFunc onGetStatusBarAvoidHeightFunc_;
+    GetIsDockAutoHideFunc onGetIsDockAutoHideFunc_;
     GetStatusBarConstantlyShowFunc onGetStatusBarConstantlyShowFunc_;
     void PrintAvoidAreaInfo(DisplayId displayId,
         AvoidAreaType type, const WSRect& winRect, const WSRect& avoidRect) const;
@@ -1262,6 +1270,7 @@ private:
     NotifySessionPiPControlStatusChangeFunc sessionPiPControlStatusChangeFunc_;
     NotifyAutoStartPiPStatusChangeFunc autoStartPiPStatusChangeFunc_;
     NotifyUpdatePiPTemplateInfoFunc updatePiPTemplateInfoCallbackFunc_;
+    NotifySetPipParentWindowIdFunc setPipParentWindowIdFunc_;
     PiPTemplateInfo pipTemplateInfo_ = {};
 
     NotifyForceSplitFunc forceSplitFunc_;
@@ -1455,6 +1464,7 @@ private:
     mutable std::mutex colorModeMutex_;
     NotifySetWindowShadowsFunc onSetWindowShadowsFunc_;
     UpdateScreenshotAppEventRegisteredFunc updateScreenshotAppEventRegisteredFunc_;
+    NotifySnapshotSkipChangeFunc onSnapshotSkipChangeFunc_;
 
     /*
      * PC Window Sidebar Blur

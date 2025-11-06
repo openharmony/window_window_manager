@@ -666,6 +666,7 @@ public:
     virtual bool IsNeedSyncScenePanelGlobalPosition() { return true; }
     void SetAppInstanceKey(const std::string& appInstanceKey);
     std::string GetAppInstanceKey() const;
+    std::shared_ptr<AppExecFwk::AbilityInfo> GetSessionInfoAbilityInfo();
 
     /*
      * Starting Window
@@ -764,6 +765,7 @@ public:
     bool SupportCacheLockedSessionSnapshot() const;
     void ResetLockedCacheSnapshot();
     void InitSnapshotCapacity();
+    SnapshotStatus GetScreenSnapshotStatus() const;
     SnapshotStatus GetSessionSnapshotStatus(LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT) const;
     uint32_t GetWindowSnapshotOrientation() const;
     uint32_t GetLastOrientation() const;
@@ -793,6 +795,12 @@ public:
     void SetOutlineParamsChangeCallback(OutlineParamsChangeCallbackFunc&& func);
 
     WSError SetIsShowDecorInFreeMultiWindow(bool isShow);
+
+    /*
+     * Prelaunch check
+     */
+    void SetPrelaunch();
+    bool IsPrelaunch() const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -1201,6 +1209,12 @@ private:
     bool isOutlineEnabled_ = false;
     OutlineStyleParams outlineStyleParams_;
     OutlineParamsChangeCallbackFunc outlineParamsChangeCallback_;
+
+    /*
+     * Prelaunch check
+     */
+    uint64_t prelaunchStart_ = 0;
+    bool prelaunchEnable_ = false;
 };
 } // namespace OHOS::Rosen
 
