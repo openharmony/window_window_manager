@@ -19,7 +19,6 @@
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "display_manager_agent_default.h"
 #include "common_test_utils.h"
-#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "test_client.h"
 
 using namespace testing;
@@ -50,9 +49,6 @@ void MultiScreenManagerTest::SetUpTestCase()
 
 void MultiScreenManagerTest::TearDownTestCase()
 {
-#ifdef RS_ENABLE_VK
-    RSModifiersDrawThread::Destroy();
-#endif
     usleep(SLEEP_TIME_IN_US);
 }
 

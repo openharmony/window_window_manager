@@ -102,6 +102,7 @@ enum class ListenerFuncType : uint32_t {
     Z_LEVEL_CHANGE_CB,
     SESSION_GET_TARGET_ORIENTATION_CONFIG_INFO_CB,
     UPDATE_PIP_TEMPLATE_INFO_CB,
+    SET_PIP_PARENT_WINDOWID_CB,
     UPDATE_FOLLOW_SCREEN_CHANGE_CB,
     USE_IMPLICIT_ANIMATION_CB,
     WINDOW_ANCHOR_INFO_CHANGE_CB,
@@ -117,6 +118,7 @@ enum class ListenerFuncType : uint32_t {
     RESTART_APP_CB,
     CALLING_SESSION_ID_CHANGE_CB,
     ROTATION_LOCK_CHANGE_CB,
+    SNAPSHOT_SKIP_CHANGE_CB,
 };
 
 class SceneSession;
@@ -207,7 +209,7 @@ private:
     static napi_value SetPipActionEvent(napi_env env, napi_callback_info info);
     static napi_value NotifyPipOcclusionChange(napi_env env, napi_callback_info info);
     static napi_value NotifyPipSizeChange(napi_env env, napi_callback_info info);
-    static napi_value NotifyPipScreenWindowStatusChange(napi_env env, napi_callback_info info);
+    static napi_value NotifyPipActiveWindowStatusChange(napi_env env, napi_callback_info info);
     static napi_value SetPiPControlEvent(napi_env env, napi_callback_info info);
     static napi_value NotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info);
     static napi_value SetSkipDraw(napi_env env, napi_callback_info info);
@@ -314,7 +316,7 @@ private:
     napi_value OnSetPiPControlEvent(napi_env env, napi_callback_info info);
     napi_value OnNotifyPipOcclusionChange(napi_env env, napi_callback_info info);
     napi_value OnNotifyPipSizeChange(napi_env env, napi_callback_info info);
-    napi_value OnNotifyPipScreenStatusChange(napi_env env, napi_callback_info info);
+    napi_value OnNotifyPiPActiveStatusChange(napi_env env, napi_callback_info info);
     napi_value OnNotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info);
     napi_value OnSetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
     napi_value OnSetSkipDraw(napi_env env, napi_callback_info info);
@@ -439,6 +441,7 @@ private:
     void ProcessFollowParentRectRegister();
     void ProcessGetTargetOrientationConfigInfoRegister();
     void ProcessUpdatePiPTemplateInfoRegister();
+    void ProcessSetPiPParentWindowIdRegister();
     void ProcessUseImplicitAnimationChangeRegister();
     void ProcessSetSubWindowSourceRegister();
     void ProcessAnimateToTargetPropertyRegister();
@@ -451,6 +454,7 @@ private:
     void ProcessSetWindowCornerRadiusRegister();
     void ProcessSetWindowShadowsRegister();
     void ProcessRotationLockChangeRegister();
+    void ProcessSnapshotSkipChangeRegister();
 
     /*
      * PC Window Layout
@@ -533,6 +537,7 @@ private:
     void OnGetTargetOrientationConfigInfo(uint32_t targetOrientation);
     void OnRotationChange(int32_t persistentId, bool isRegister);
     void OnUpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo);
+    void OnSetPiPParentWindowId(uint32_t windowId);
     void OnUpdateFollowScreenChange(bool isFollowScreenChange);
     void OnUseImplicitAnimationChange(bool useImplicit);
     void NotifySetSubWindowSource(SubWindowSource source);
@@ -548,6 +553,7 @@ private:
     void OnSetWindowCornerRadius(float cornerRadius);
     void OnSetWindowShadows(const ShadowsInfo& shadowsInfo);
     void OnRotationLockChange(bool locked);
+    void OnSnapshotSkipChange(bool isSkip);
 
     /*
      * PC Window Layout

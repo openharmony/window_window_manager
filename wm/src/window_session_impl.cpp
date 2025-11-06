@@ -758,6 +758,10 @@ sptr<WindowSessionImpl> WindowSessionImpl::GetScaleWindow(uint32_t windowId)
 
 WMError WindowSessionImpl::GetWindowScaleCoordinate(uint32_t windowId, CursorInfo& cursorInfo)
 {
+    if (cursorInfo.isInvalid()) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "id:%{public}d cursorInfo is invalid", windowId);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
     sptr<WindowSessionImpl> window = GetScaleWindow(windowId);
     if (!window) {
         TLOGE(WmsLogTag::WMS_COMPAT, "find window id:%{public}d failed", windowId);
@@ -1232,10 +1236,7 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
         window->UpdateVirtualPixelRatio(display);
         auto rsUIContext = window->GetRSUIContext();
         const std::shared_ptr<RSTransaction>& rsTransaction = config.rsTransaction_;
-        if (rsTransaction) {
-            RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
-            rsTransaction->Begin();
-        }
+        window->BeginRSTransaction(rsTransaction);
         window->rotationAnimationCount_++;
         RSAnimationTimingProtocol protocol;
         protocol.SetDuration(config.animationDuration_);
@@ -1326,12 +1327,9 @@ void WindowSessionImpl::BeginRSTransaction(const std::shared_ptr<RSTransaction>&
         return;
     }
     auto rsUIContext = GetRSUIContext();
-    if (!rsUIContext) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "RSUIContext is null");
-        return;
+    if (rsUIContext) {
+        rsTransaction->SetTransactionHandler(rsUIContext->GetRSTransaction());
     }
-    auto rsTransHandler = rsUIContext->GetRSTransaction();
-    rsTransaction->SetTransactionHandler(rsTransHandler);
     RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
     rsTransaction->Begin();
     TLOGI(WmsLogTag::WMS_ROTATION, "rsTransaction begin");
@@ -5958,13 +5956,13 @@ WSError WindowSessionImpl::NotifyPipWindowSizeChange(double width, double height
     return WSError::WS_OK;
 }
 
-WSError WindowSessionImpl::NotifyPipScreenStatusChange(PiPScreenStatus status)
+WSError WindowSessionImpl::NotifyPiPActiveStatusChange(bool status)
 {
     TLOGI(WmsLogTag::WMS_PIP, "status=%{public}u", status);
     auto task = [status]() {
-        PictureInPictureManager::DoScreenStatusChangeEvent(status);
+        PictureInPictureManager::DoActiveStatusChangeEvent(status);
     };
-    handler_->PostTask(task, "WMS_WindowSessionImpl_NotifyPipScreenStatusChange");
+    handler_->PostTask(task, "WMS_WindowSessionImpl_NotifyPiPActiveStatusChange");
     return WSError::WS_OK;
 }
 
@@ -6432,7 +6430,7 @@ WSError WindowSessionImpl::NotifyDisplayIdChange(DisplayId displayId)
 
 WMError WindowSessionImpl::NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed)
 {
-    TLOGD(WmsLogTag::WMS_EVENT, "keyCode:%{public}d, isConsumed:%{public}d", keyCode, isConsumed);
+    TLOGD(WmsLogTag::WMS_EVENT, "isConsumed:%{public}d", isConsumed);
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -6647,8 +6645,7 @@ bool WindowSessionImpl::FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
     std::lock_guard<std::mutex> lock(keyEventFilterMutex_);
     if (keyEventFilter_ != nullptr) {
         bool isFilter = keyEventFilter_(*keyEvent.get());
-        TLOGE(WmsLogTag::WMS_SYSTEM, "keyCode:%{public}d isFilter:%{public}d",
-            keyEvent->GetKeyCode(), isFilter);
+        TLOGE(WmsLogTag::WMS_SYSTEM, "isFilter:%{public}d", isFilter);
         if (isFilter) {
             keyEvent->MarkProcessed();
             return true;
@@ -6699,8 +6696,7 @@ void WindowSessionImpl::NotifyConsumeResultToFloatWindow
     if ((keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_TAB ||
          keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ENTER) && !GetWatchGestureConsumed() &&
         keyEvent->GetKeyAction() == MMI::KeyEvent::KEY_ACTION_DOWN) {
-        TLOGD(WmsLogTag::WMS_EVENT, "wid:%{public}u, keyCode:%{public}d, isConsumed:%{public}d",
-            GetWindowId(), keyEvent->GetKeyCode(), isConsumed);
+        TLOGD(WmsLogTag::WMS_EVENT, "wid:%{public}u, isConsumed:%{public}d", GetWindowId(), isConsumed);
         NotifyWatchGestureConsumeResult(keyEvent->GetKeyCode(), isConsumed);
     }
 }
@@ -8489,6 +8485,22 @@ WMError WindowSessionImpl::GetPiPSettingSwitchStatus(bool& switchStatus) const
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     return SingletonContainer::Get<WindowAdapter>().GetPiPSettingSwitchStatus(switchStatus);
+}
+
+WMError WindowSessionImpl::SetPipParentWindowId(uint32_t windowId) const
+{
+    TLOGI(WmsLogTag::WMS_PIP, "ParentWindowId:%{public}u", windowId);
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_PIP, "session is invalid");
+        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_PIP_INTERNAL_ERROR);
+    auto ret = hostSession->SetPipParentWindowId(windowId);
+    if (ret != WSError::WS_OK) {
+        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
+    }
+    return WMError::WM_OK;
 }
 
 void WindowSessionImpl::SwitchSubWindow(bool freeMultiWindowEnable, int32_t parentId)

@@ -110,6 +110,7 @@ public:
     WSError UpdatePiPControlStatus(WsPiPControlType controlType, WsPiPControlStatus status) override;
     WSError SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height) override;
     WSError UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo) override;
+    WSError SetPipParentWindowId(uint32_t windowId) override;
 
     WMError UpdateFloatingBall(const FloatingBallTemplateInfo& fbTemplateInfo) override;
     WMError RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& want) override;

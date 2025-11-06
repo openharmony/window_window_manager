@@ -1091,14 +1091,24 @@ ani_object AniWindowUtils::CreateAniPixelMapArray(ani_env* env,
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
     }
     for (size_t i = 0; i < pixelMaps.size(); i++) {
+        if (pixelMaps[i] == nullptr) {
+            auto status = env->Array_Set_Ref(pixelMapArray, i, AniWindowUtils::CreateAniUndefined(env));
+            if (status != ANI_OK) {
+                TLOGW(WmsLogTag::WMS_LIFE, "[ANI] pixelMap is nullptr, status: %{public}d", status);
+            }
+            continue;
+        }
         auto nativePixelMap = OHOS::Media::PixelMapTaiheAni::CreateEtsPixelMap(env, pixelMaps[i]);
         if (nativePixelMap == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "Create native pixelmap is nullptr!");
-            return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
-        }
-        if (env->Array_Set_Ref(pixelMapArray, i, nativePixelMap) != ANI_OK) {
-            TLOGE(WmsLogTag::WMS_LIFE, "[ANI] create pixelMapArray failed");
-            return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+            auto status = env->Array_Set_Ref(pixelMapArray, i, AniWindowUtils::CreateAniUndefined(env));
+            if (status != ANI_OK) {
+                TLOGW(WmsLogTag::WMS_LIFE, "[ANI] nativePixelMap is nullptr, status: %{public}d", status);
+            }
+        } else {
+            auto status = env->Array_Set_Ref(pixelMapArray, i, nativePixelMap);
+            if (status != ANI_OK) {
+                TLOGE(WmsLogTag::WMS_LIFE, "[ANI] set nativePixelMap failed: %{public}d", status);
+            }
         }
     }
     return pixelMapArray;
@@ -1688,6 +1698,64 @@ WmErrorCode AniWindowUtils::ToErrorCode(WMError error, WmErrorCode defaultCode)
         "[ANI] Unknown error: %{public}d, return defaultCode: %{public}d",
         static_cast<int32_t>(error), static_cast<int32_t>(defaultCode));
     return defaultCode;
+}
+
+bool AniWindowUtils::IsInstanceOf(ani_env* env, ani_object obj, const char* className)
+{
+    RETURN_IF_NULL(env, false);
+    RETURN_IF_NULL(obj, false);
+    RETURN_IF_NULL(className, false);
+
+    ani_class cls;
+    ani_status ret = env->FindClass(className, &cls);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT,
+              "[ANI] Failed to find class %{public}s, ret: %{public}d",
+              className, static_cast<int32_t>(ret));
+        return false;
+    }
+
+    ani_boolean isInstance = ANI_FALSE;
+    ret = env->Object_InstanceOf(obj, cls, &isInstance);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT,
+              "[ANI] Failed to check instance of %{public}s, ret: %{public}d",
+              className, static_cast<int32_t>(ret));
+        return false;
+    }
+    return static_cast<bool>(isInstance);
+}
+
+std::vector<ani_ref> AniWindowUtils::ExtractArrayElements(ani_env* env, ani_object arrayObj)
+{
+    std::vector<ani_ref> result;
+    RETURN_IF_NULL(env, result);
+    RETURN_IF_NULL(arrayObj, result);
+
+    if (!IsInstanceOf(env, arrayObj, "escompat.Array")) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] The arrayObj is not instance of escompat.Array");
+        return result;
+    }
+
+    ani_array aniArray = static_cast<ani_array>(arrayObj);
+    ani_int length = 0;
+    ani_status ret = env->Object_GetPropertyByName_Int(aniArray, "length", &length);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to get array length, ret: %{public}d", static_cast<int32_t>(ret));
+        return result;
+    }
+    for (ani_int i = 0; i < length; ++i) {
+        ani_ref element = nullptr;
+        ret = env->Array_Get(aniArray, i, &element);
+        if (ret != ANI_OK) {
+            TLOGE(WmsLogTag::DEFAULT,
+                  "[ANI] Failed to get array element at index %{public}d, ret: %{public}d",
+                  i, static_cast<int32_t>(ret));
+            continue;
+        }
+        result.push_back(element);
+    }
+    return result;
 }
 
 ani_object AniWindowUtils::CreateOptionalBool(ani_env *env, ani_boolean value)

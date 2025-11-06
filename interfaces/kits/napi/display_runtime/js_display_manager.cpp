@@ -1057,8 +1057,11 @@ napi_value OnCreateVirtualScreen(napi_env env, napi_callback_info info)
         auto screen = SingletonContainer::Get<ScreenManager>().GetScreenById(screenId);
         if (screen == nullptr) {
             DmErrorCode ret = DmErrorCode::DM_ERROR_INVALID_SCREEN;
+            TLOGNI(WmsLogTag::DMS, "screenId is %{public}" PRIu64"", screenId);
             if (screenId == ERROR_ID_NOT_SYSTEM_APP) {
                 ret = DmErrorCode::DM_ERROR_NO_PERMISSION;
+            } else if (screenId == ERROR_ID_NO_PERMISSION) {
+                ret =  DmErrorCode::DM_ERROR_NO_PERMISSION;
             }
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(ret), "CreateVirtualScreen failed."));
             TLOGNE(WmsLogTag::DMS, "JsDisplayManager::CreateVirtualScreen failed.");

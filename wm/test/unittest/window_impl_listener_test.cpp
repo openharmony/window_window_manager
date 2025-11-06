@@ -14,7 +14,6 @@
  */
 
 #include <gtest/gtest.h>
-#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "window_impl.h"
 
 using namespace testing;
@@ -35,9 +34,6 @@ void WindowImplListenerTest::SetUpTestCase() {}
 
 void WindowImplListenerTest::TearDownTestCase()
 {
-#ifdef RS_ENABLE_VK
-    RSModifiersDrawThread::Destroy();
-#endif
 }
 
 void WindowImplListenerTest::SetUp()

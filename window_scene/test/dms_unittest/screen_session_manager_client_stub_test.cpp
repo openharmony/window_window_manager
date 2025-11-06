@@ -1034,5 +1034,22 @@ HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnAnimationFinish, TestSize.L
     auto ret = screenSessionManagerClientStub_->HandleOnAnimationFinish(data, reply);
     EXPECT_EQ(ret, 0);
 }
+
+/**
+ * @tc.name: HandleSetInternalClipToBounds
+ * @tc.desc: HandleSetInternalClipToBounds test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientStubTest, HandleSetInternalClipToBounds, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
+    data.WriteUint64(0);
+    data.WriteBool(true);
+    int ret = screenSessionManagerClientStub_->HandleSetInternalClipToBounds(data, reply);
+    EXPECT_EQ(ret, 0);
+}
 } // namespace Rosen
 } // namespace OHOS

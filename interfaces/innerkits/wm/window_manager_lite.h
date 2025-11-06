@@ -41,7 +41,7 @@ class WindowManagerLite : public RefBase {
     friend class WMSDeathRecipient;
     friend class SSMDeathRecipient;
 public:
-    static sptr<WindowManagerLite> GetInstance(const int32_t userId);
+    static WindowManagerLite& GetInstance(const int32_t userId);
     static WMError RemoveInstanceByUserId(const int32_t userId);
 
     /**
@@ -396,19 +396,18 @@ public:
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap);
 
-    ~WindowManagerLite() override;
-
 private:
-    WindowManagerLite(const int32_t userId = INVALID_USER_ID);
-
     std::recursive_mutex mutex_;
     class Impl;
     std::unique_ptr<Impl> pImpl_;
-    bool destroyed_ = false;
 
     /**
      * Multi user and multi screen
      */
+    friend class sptr<WindowManagerLite>;
+    WindowManagerLite(const int32_t userId = INVALID_USER_ID);
+    ~WindowManagerLite() override;
+
     int32_t userId_;
     static std::unordered_map<int32_t, sptr<WindowManagerLite>> windowManagerLiteMap_;
     static std::mutex windowManagerLiteMapMutex_;

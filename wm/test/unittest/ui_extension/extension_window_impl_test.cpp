@@ -17,7 +17,6 @@
 
 #include "extension_window_impl.h"
 #include "mock_window_extension_session_impl.h"
-#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -36,9 +35,6 @@ void ExtensionWindowImplTest::SetUpTestCase() {}
 
 void ExtensionWindowImplTest::TearDownTestCase()
 {
-#ifdef RS_ENABLE_VK
-    RSModifiersDrawThread::Destroy();
-#endif
 }
 
 void ExtensionWindowImplTest::SetUp() {}

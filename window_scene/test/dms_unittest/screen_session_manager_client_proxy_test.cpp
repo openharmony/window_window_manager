@@ -647,5 +647,55 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnSensorRotationChanged02, TestSiz
     logMsg.clear();
     LOG_SetCallback(nullptr);
 }
+ 
+/**
+ * @tc.name: SetInternalClipToBounds
+ * @tc.desc: SetInternalClipToBounds test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientProxyTest, SetInternalClipToBounds, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    ScreenId screenId = 0;
+    bool clipToBounds = true;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    auto proxy = sptr<ScreenSessionManagerClientProxy>::MakeSptr(nullptr);
+    proxy->SetInternalClipToBounds(screenId, clipToBounds);
+    EXPECT_TRUE(logMsg.find("remote is nullptr") != std::string::npos);
+    logMsg.clear();
+
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    proxy = sptr<ScreenSessionManagerClientProxy>::MakeSptr(remoteMocker);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ASSERT_NE(proxy, nullptr);
+    proxy->SetInternalClipToBounds(screenId, clipToBounds);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+    logMsg.clear();
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    proxy->SetInternalClipToBounds(screenId, clipToBounds);
+    EXPECT_TRUE(logMsg.find("Write screenId failed") != std::string::npos);
+    logMsg.clear();
+ 
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    proxy->SetInternalClipToBounds(screenId, clipToBounds);
+    EXPECT_TRUE(logMsg.find("Write clipToBounds failed") != std::string::npos);
+    logMsg.clear();
+
+    MockMessageParcel::ClearAllErrorFlag();
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    proxy->SetInternalClipToBounds(screenId, clipToBounds);
+    EXPECT_TRUE(logMsg.find("SendRequest failed") != std::string::npos);
+    remoteMocker->SetRequestResult(ERR_NONE);
+    proxy->SetInternalClipToBounds(screenId, clipToBounds);
+    logMsg.clear();
+    MockMessageParcel::ClearAllErrorFlag();
+}
 } // namespace Rosen
 } // namespace OHOS

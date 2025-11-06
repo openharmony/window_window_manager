@@ -715,6 +715,22 @@ HWTEST_F(SessionStubTest, HandleUpdatePiPTemplateInfo, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: HandleSetPipParentWindowId
+ * @tc.desc: sessionStub HandleSetPipParentWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetPipParentWindowId, Function | SmallTest | Level2)
+
+{
+    ASSERT_NE(session_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleSetPipParentWindowId(data, reply));
+    data.WriteUint32(100);
+    ASSERT_EQ(ERR_NONE, session_->HandleSetPipParentWindowId(data, reply));
+}
+
+/**
  * @tc.name: HandleSetWindowTransitionAnimation
  * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC

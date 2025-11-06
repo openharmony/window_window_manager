@@ -44,6 +44,7 @@ const std::string WINDOW_MOVING_CB = "windowMoving";
 const std::string SESSION_PIP_CONTROL_STATUS_CHANGE_CB = "sessionPiPControlStatusChange";
 const std::string SESSION_AUTO_START_PIP_CB = "autoStartPiP";
 const std::string UPDATE_PIP_TEMPLATE_INFO_CB = "updatePiPTemplateInfo";
+const std::string SET_PIP_PARENT_WINDOWID_CB = "setPiPParentWindowId";
 const std::string CREATE_SUB_SESSION_CB = "createSpecificSession";
 const std::string CLEAR_SUB_SESSION_CB = "clearSubSession";
 const std::string WINDOW_ANCHOR_INFO_CHANGE_CB = "windowAnchorInfoChange";
@@ -118,6 +119,7 @@ const std::string SCENE_OUTLINE_PARAMS_CHANGE_CB = "sceneOutlineParamsChange";
 const std::string RESTART_APP_CB = "restartApp";
 const std::string CALLING_SESSION_ID_CHANGE_CB = "callingWindowIdChange";
 const std::string ROTATION_LOCK_CHANGE_CB = "rotationLockChange";
+const std::string SNAPSHOT_SKIP_CHANGE_CB = "snapshotSkipChange";
 
 constexpr int ARG_COUNT_1 = 1;
 constexpr int ARG_COUNT_2 = 2;
@@ -214,6 +216,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {UPDATE_FLAG_CB,                        ListenerFuncType::UPDATE_FLAG_CB},
     {Z_LEVEL_CHANGE_CB,                     ListenerFuncType::Z_LEVEL_CHANGE_CB},
     {UPDATE_PIP_TEMPLATE_INFO_CB,           ListenerFuncType::UPDATE_PIP_TEMPLATE_INFO_CB},
+    {SET_PIP_PARENT_WINDOWID_CB,            ListenerFuncType::SET_PIP_PARENT_WINDOWID_CB},
     {UPDATE_FOLLOW_SCREEN_CHANGE_CB,        ListenerFuncType::UPDATE_FOLLOW_SCREEN_CHANGE_CB},
     {USE_IMPLICITANIMATION_CB,              ListenerFuncType::USE_IMPLICIT_ANIMATION_CB},
     {WINDOW_ANCHOR_INFO_CHANGE_CB,          ListenerFuncType::WINDOW_ANCHOR_INFO_CHANGE_CB},
@@ -228,6 +231,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {RESTART_APP_CB,                        ListenerFuncType::RESTART_APP_CB},
     {CALLING_SESSION_ID_CHANGE_CB,          ListenerFuncType::CALLING_SESSION_ID_CHANGE_CB},
     {ROTATION_LOCK_CHANGE_CB,               ListenerFuncType::ROTATION_LOCK_CHANGE_CB},
+    {SNAPSHOT_SKIP_CHANGE_CB,               ListenerFuncType::SNAPSHOT_SKIP_CHANGE_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -515,8 +519,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "setPiPControlEvent", moduleName, JsSceneSession::SetPiPControlEvent);
     BindNativeFunction(env, objValue, "notifyPipOcclusionChange", moduleName, JsSceneSession::NotifyPipOcclusionChange);
     BindNativeFunction(env, objValue, "notifyPipSizeChange", moduleName, JsSceneSession::NotifyPipSizeChange);
-    BindNativeFunction(env, objValue, "notifyPipScreenStatusChange", moduleName,
-        JsSceneSession::NotifyPipScreenWindowStatusChange);
+    BindNativeFunction(env, objValue, "notifyPipActiveStatusChange", moduleName,
+        JsSceneSession::NotifyPipActiveWindowStatusChange);
     BindNativeFunction(env, objValue, "notifyDisplayStatusBarTemporarily", moduleName,
         JsSceneSession::NotifyDisplayStatusBarTemporarily);
     BindNativeFunction(env, objValue, "setTemporarilyShowWhenLocked", moduleName,
@@ -1548,6 +1552,24 @@ void JsSceneSession::ProcessUpdatePiPTemplateInfoRegister()
             return;
         }
         jsSceneSession->OnUpdatePiPTemplateInfo(pipTemplateInfo);
+    });
+    TLOGI(WmsLogTag::WMS_PIP, "success");
+}
+
+void JsSceneSession::ProcessSetPiPParentWindowIdRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    session->SetPipParentWindowIdCallback([weakThis = wptr(this)](uint32_t windowId) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_PIP, "jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->OnSetPiPParentWindowId(windowId);
     });
     TLOGI(WmsLogTag::WMS_PIP, "success");
 }
@@ -2622,11 +2644,11 @@ napi_value JsSceneSession::NotifyPipSizeChange(napi_env env, napi_callback_info 
     return (me != nullptr) ? me->OnNotifyPipSizeChange(env, info) : nullptr;
 }
 
-napi_value JsSceneSession::NotifyPipScreenWindowStatusChange(napi_env env, napi_callback_info info)
+napi_value JsSceneSession::NotifyPipActiveWindowStatusChange(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_PIP, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
-    return (me != nullptr) ? me->OnNotifyPipScreenStatusChange(env, info) : nullptr;
+    return (me != nullptr) ? me->OnNotifyPiPActiveStatusChange(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::NotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info)
@@ -3067,6 +3089,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
         case static_cast<uint32_t>(ListenerFuncType::UPDATE_PIP_TEMPLATE_INFO_CB):
             ProcessUpdatePiPTemplateInfoRegister();
             break;
+        case static_cast<uint32_t>(ListenerFuncType::SET_PIP_PARENT_WINDOWID_CB):
+            ProcessSetPiPParentWindowIdRegister();
+            break;
         case static_cast<uint32_t>(ListenerFuncType::CREATE_SUB_SESSION_CB):
             ProcessCreateSubSessionRegister();
             break;
@@ -3291,6 +3316,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::ROTATION_LOCK_CHANGE_CB):
             ProcessRotationLockChangeRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::SNAPSHOT_SKIP_CHANGE_CB):
+            ProcessSnapshotSkipChangeRegister();
             break;
         default:
             break;
@@ -4301,6 +4329,28 @@ void JsSceneSession::OnUpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo)
         }
         napi_value pipTemplateInfoValue = CreatePipTemplateInfo(env, pipTemplateInfo);
         napi_value argv[] = {pipTemplateInfoValue};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, __func__);
+}
+
+void JsSceneSession::OnSetPiPParentWindowId(uint32_t windowId)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "PiPParentWindowId: %{public}u", windowId);
+    auto task = [weakThis = wptr(this), persistentId = persistentId_,
+        windowId, env = env_] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_PIP, "jsSceneSession id:%{public}d has been destroyed", persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(SET_PIP_PARENT_WINDOWID_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_PIP, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value parentWindowIdValue = CreateJsValue(env, windowId);
+        napi_value argv[] = {parentWindowIdValue};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, __func__);
@@ -6262,7 +6312,7 @@ napi_value JsSceneSession::OnNotifyPipSizeChange(napi_env env, napi_callback_inf
     return NapiGetUndefined(env);
 }
 
-napi_value JsSceneSession::OnNotifyPipScreenStatusChange(napi_env env, napi_callback_info info)
+napi_value JsSceneSession::OnNotifyPiPActiveStatusChange(napi_env env, napi_callback_info info)
 {
     size_t argc = ARG_COUNT_1;
     napi_value argv[ARG_COUNT_1] = {nullptr};
@@ -6274,15 +6324,9 @@ napi_value JsSceneSession::OnNotifyPipScreenStatusChange(napi_env env, napi_call
         return NapiGetUndefined(env);
     }
 
-    PiPScreenStatus status = PiPScreenStatus::STATUS_UNKNOWN;
+    bool status = false;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], status)) {
         TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter, keep default: false");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    if (status <= PiPScreenStatus::STATUS_UNKNOWN || status > PiPScreenStatus::STATUS_SIDEBAR) {
-        TLOGE(WmsLogTag::WMS_PIP, "status value invalid, keep default: false");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -6295,7 +6339,7 @@ napi_value JsSceneSession::OnNotifyPipScreenStatusChange(napi_env env, napi_call
     }
 
     TLOGI(WmsLogTag::WMS_PIP, "persistId:%{public}d", persistentId_);
-    session->NotifyPipScreenStatusChange(status);
+    session->NotifyPiPActiveStatusChange(status);
     return NapiGetUndefined(env);
 }
 
@@ -8134,6 +8178,43 @@ napi_value JsSceneSession::OnSetSnapshotSkip(napi_env env, napi_callback_info in
         return NapiGetUndefined(env);
     }
     return NapiGetUndefined(env);
+}
+
+void JsSceneSession::ProcessSnapshotSkipChangeRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    session->RegisterSnapshotSkipChangeCallback([weakThis = wptr(this)](bool isSkip) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->OnSnapshotSkipChange(isSkip);
+    });
+}
+
+void JsSceneSession::OnSnapshotSkipChange(bool isSkip)
+{
+    taskScheduler_->PostMainThreadTask([weakThis = wptr(this), persistentId = persistentId_, isSkip, env = env_] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "jsSceneSession id:%{public}d has been destroyed", persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(SNAPSHOT_SKIP_CHANGE_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "jsCallBack is nullptr");
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "isSkip change to %{public}d", isSkip);
+        napi_value jsIsSkip = CreateJsValue(env, isSkip);
+        napi_value argv[] = { jsIsSkip };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    }, __func__);
 }
 
 napi_value JsSceneSession::OnAddSidebarBlur(napi_env env, napi_callback_info info)

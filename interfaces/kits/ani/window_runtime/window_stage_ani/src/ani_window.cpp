@@ -1630,10 +1630,11 @@ ani_object AniWindow::SetWindowLayoutFullScreen(ani_env* env, ani_boolean isLayo
         return AniWindowUtils::CreateAniUndefined(env);
     }
 
-    WMError ret = windowToken_->SetLayoutFullScreen(static_cast<bool>(isLayoutFullScreen));
-    if (ret != WMError::WM_OK) {
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+        windowToken_->SetLayoutFullScreen(static_cast<bool>(isLayoutFullScreen)));
+    if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_IMMS, "[ANI] fullscreen set error");
-        return AniWindowUtils::CreateAniUndefined(env);
+        return AniWindowUtils::AniThrowError(env, ret);
     }
     return 0;
 }
@@ -1720,7 +1721,7 @@ ani_object AniWindow::SetDragKeyFramePolicy(ani_env* env, ani_object aniKeyFrame
     KeyFramePolicy keyFramePolicy;
     if (!AniWindowUtils::ParseKeyFramePolicy(env, aniKeyFramePolicy, keyFramePolicy)) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed to convert parameter to keyFramePolicy");
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
     }
     if (!windowToken_->IsPcWindow()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] device not support");
@@ -1886,7 +1887,6 @@ void AniWindow::OnSetDefaultDensityEnabled(ani_env* env, ani_boolean enabled)
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
-    windowToken_->SetWindowDefaultDensityEnabled(static_cast<bool>(enabled));
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
         windowToken_->SetWindowDefaultDensityEnabled(static_cast<bool>(enabled)));
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI] winId: %{public}u set enabled=%{public}u result=%{public}d",
@@ -1899,7 +1899,7 @@ void AniWindow::OnSetDefaultDensityEnabled(ani_env* env, ani_boolean enabled)
 }
 
 void AniWindow::SetWindowContainerColor(ani_env* env, ani_object obj, ani_long nativeObj,
-    std::string activeColor, std::string inactiveColor)
+    ani_string activeColor, ani_string inactiveColor)
 {
     TLOGI(WmsLogTag::WMS_DECOR, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
@@ -1911,7 +1911,7 @@ void AniWindow::SetWindowContainerColor(ani_env* env, ani_object obj, ani_long n
     aniWindow->OnSetWindowContainerColor(env, activeColor, inactiveColor);
 }
 
-void AniWindow::OnSetWindowContainerColor(ani_env* env, std::string activeColor, std::string inactiveColor)
+void AniWindow::OnSetWindowContainerColor(ani_env* env, ani_string activeColor, ani_string inactiveColor)
 {
     if (!windowToken_) {
         TLOGE(WmsLogTag::WMS_DECOR, "[ANI] window is nullptr");
@@ -1919,9 +1919,14 @@ void AniWindow::OnSetWindowContainerColor(ani_env* env, std::string activeColor,
             "[window][setWindowContainerColor]msg: invalid window");
         return;
     }
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetWindowContainerColor(activeColor, inactiveColor));
+    std::string stdActiveColor;
+    std::string stdInactiveColor;
+    AniWindowUtils::GetStdString(env, activeColor, stdActiveColor);
+    AniWindowUtils::GetStdString(env, inactiveColor, stdInactiveColor);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+        windowToken_->SetWindowContainerColor(stdActiveColor, stdInactiveColor));
     TLOGI(WmsLogTag::WMS_DECOR, "winId: %{public}u set activeColor: %{public}s, inactiveColor: %{public}s"
-        ", result: %{public}d", windowToken_->GetWindowId(), activeColor.c_str(), inactiveColor.c_str(), ret);
+        ", result: %{public}d", windowToken_->GetWindowId(), stdActiveColor.c_str(), stdInactiveColor.c_str(), ret);
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_DECOR, "set window container color failed!");
         AniWindowUtils::AniThrowError(env, ret,
@@ -1932,7 +1937,7 @@ void AniWindow::OnSetWindowContainerColor(ani_env* env, std::string activeColor,
 }
 
 void AniWindow::SetWindowContainerModalColor(ani_env* env, ani_object obj, ani_long nativeObj,
-    std::string activeColor, std::string inactiveColor)
+    ani_string activeColor, ani_string inactiveColor)
 {
     TLOGI(WmsLogTag::WMS_DECOR, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
@@ -1944,7 +1949,7 @@ void AniWindow::SetWindowContainerModalColor(ani_env* env, ani_object obj, ani_l
     aniWindow->OnSetWindowContainerModalColor(env, activeColor, inactiveColor);
 }
 
-void AniWindow::OnSetWindowContainerModalColor(ani_env* env, std::string activeColor, std::string inactiveColor)
+void AniWindow::OnSetWindowContainerModalColor(ani_env* env, ani_string activeColor, ani_string inactiveColor)
 {
     if (!windowToken_) {
         TLOGE(WmsLogTag::WMS_DECOR, "[ANI] window is nullptr");
@@ -1952,11 +1957,15 @@ void AniWindow::OnSetWindowContainerModalColor(ani_env* env, std::string activeC
             "[window][setWindowContainerModalColor]msg: invalid window");
         return;
     }
+    std::string stdActiveColor;
+    std::string stdInactiveColor;
+    AniWindowUtils::GetStdString(env, activeColor, stdActiveColor);
+    AniWindowUtils::GetStdString(env, inactiveColor, stdInactiveColor);
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
-        windowToken_->SetWindowContainerModalColor(activeColor, inactiveColor));
+        windowToken_->SetWindowContainerModalColor(stdActiveColor, stdInactiveColor));
     TLOGI(WmsLogTag::WMS_DECOR, "Window [%{public}u, %{public}s] set activeColor: %{public}s,"
         " inactiveColor: %{public}s, result: %{public}d", windowToken_->GetWindowId(),
-        windowToken_->GetWindowName().c_str(), activeColor.c_str(), inactiveColor.c_str(), ret);
+        windowToken_->GetWindowName().c_str(), stdActiveColor.c_str(), stdInactiveColor.c_str(), ret);
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_DECOR, "set window container modal color failed!");
         AniWindowUtils::AniThrowError(env, ret,
@@ -1989,8 +1998,6 @@ bool AniWindow::OnIsMainWindowFullScreenAcrossDisplays(ani_env* env)
     bool isAcrossDisplaysPtr = false;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
         windowToken_->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplaysPtr));
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u, isAcrossDisplays: %{public}u, "
-        "result: %{public}d", windowToken_->GetWindowId(), isAcrossDisplaysPtr, ret);
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed, ret %{public}d", ret);
         AniWindowUtils::AniThrowError(env, ret,
@@ -2351,6 +2358,35 @@ void AniWindow::OnMaximize(ani_env* env, ani_object aniPresentation, ani_object 
           windowToken_->GetWindowId(),
           static_cast<int32_t>(*presentationOpt),
           static_cast<uint32_t>(*waterfallResidentStateOpt));
+}
+
+void AniWindow::StopMoving(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (!aniWindow) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] aniWindow is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    aniWindow->OnStopMoving(env);
+}
+
+void AniWindow::OnStopMoving(ani_env* env)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] window is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    WmErrorCode ret = windowToken_->StopMoveWindow();
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed, windowId: %{public}u, ret: %{public}d",
+              windowToken_->GetWindowId(), static_cast<int32_t>(ret));
+        AniWindowUtils::AniThrowError(env, ret);
+        return;
+    }
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Success, windowId: %{public}u", windowToken_->GetWindowId());
 }
 
 /** @note @window.layout */
@@ -3610,6 +3646,8 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(WindowResetAspectRatio)},
         ani_native_function {"maximize", "JL@ohos/window/window/MaximizePresentation;Lstd/core/Boolean;:V",
             reinterpret_cast<void *>(AniWindow::Maximize)},
+        ani_native_function {"stopMoving", "l:",
+            reinterpret_cast<void *>(AniWindow::StopMoving)},
         ani_native_function {"setResizeByDragEnabled", "JZ:V",
             reinterpret_cast<void *>(WindowSetResizeByDragEnabled)},
         ani_native_function {"enableDrag", "JZ:V",

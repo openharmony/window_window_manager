@@ -126,7 +126,7 @@ HWTEST_F(SessionStubEventTest, HandleSendCommonEvent, TestSize.Level1)
     res = stub_->HandleSendCommonEvent(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
-    // Successded to lock cursor.
+    // lock cursor.
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetReadInt32ErrorFlag(true);
     MockMessageParcel::AddInt32Cache(static_cast<uint32_t>(CommonEventCommand::LOCK_CURSOR));
@@ -136,7 +136,7 @@ HWTEST_F(SessionStubEventTest, HandleSendCommonEvent, TestSize.Level1)
     res = stub_->HandleSendCommonEvent(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 
-    // Successded to unlock cursor.
+    // unlock cursor.
     MockMessageParcel::AddInt32Cache(static_cast<uint32_t>(CommonEventCommand::UNLOCK_CURSOR));
     MockMessageParcel::AddInt32Cache(UNLOCK_CURSOR_LENGTH);
     MockMessageParcel::AddInt32Cache(1);

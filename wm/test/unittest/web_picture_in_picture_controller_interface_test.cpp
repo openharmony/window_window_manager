@@ -205,6 +205,21 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, setPiPControlEnabled, TestS
 }
 
 /**
+ * @tc.name: SetPipParentWindowId
+ * @tc.desc: SetPipParentWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPictureInPictureControllerInterfaceTest, SetPipParentWindowId, TestSize.Level1)
+{
+    uint32_t windowId = 200;
+    WMError ret =controller->SetPipParentWindowId(windowId);
+    EXPECT_EQ(ret, WMError::WM_ERROR_PIP_INTERNAL_ERROR);
+    controller->Create(pipConfig);
+    ret = controller->SetPipParentWindowId(windowId);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
  * @tc.name: RegisterStartPipListener
  * @tc.desc: RegisterStartPipListener
  * @tc.type: FUNC

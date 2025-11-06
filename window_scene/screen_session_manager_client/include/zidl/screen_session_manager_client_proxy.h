@@ -69,6 +69,7 @@ public:
     void OnBeforeScreenPropertyChanged(FoldStatus foldStatus) override;
     void OnScreenModeChanged(ScreenModeChangeEvent screenModeChangeEvent) override;
     void OnAnimationFinish() override;
+    void SetInternalClipToBounds(ScreenId screenId, bool clipToBounds) override;
 private:
     static inline BrokerDelegator<ScreenSessionManagerClientProxy> delegator_;
     bool ScreenConnectWriteParam(SessionOption& SessionOption,

@@ -486,6 +486,85 @@ void AniWindowStage::OnSetDefaultDensityEnabled(ani_env* env, ani_boolean enable
     }
 }
 
+void AniWindowStage::SetSupportedWindowModes(
+    ani_env* env, ani_object obj, ani_long nativeObj, ani_object aniSupportedWindowModes)
+{
+    AniWindowStage* aniWindowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
+    if (aniWindowStage == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] aniWindowStage is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    aniWindowStage->OnSetSupportedWindowModes(env, aniSupportedWindowModes);
+}
+
+void AniWindowStage::OnSetSupportedWindowModes(ani_env* env, ani_object aniSupportedWindowModes)
+{
+    auto windowScene = windowScene_.lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] windowScene is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    auto window = windowScene->GetMainWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] mainWindow is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    auto supportedWindowModes =
+        AniWindowUtils::ExtractEnumValues<AppExecFwk::SupportWindowMode>(env, aniSupportedWindowModes);
+    WMError ret = window->SetSupportedWindowModes(supportedWindowModes);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed, windowId: %{public}u, ret: %{public}d",
+              window->GetWindowId(), static_cast<int32_t>(ret));
+        AniWindowUtils::AniThrowError(env, AniWindowUtils::ToErrorCode(ret));
+        return;
+    }
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Success, windowId: %{public}u", window->GetWindowId());
+}
+
+void AniWindowStage::SetSupportedWindowModesWithGrayOutMaximizeButton(
+    ani_env* env, ani_object obj, ani_long nativeObj,
+    ani_object supportedWindowModes, ani_boolean grayOutMaximizeButton)
+{
+    AniWindowStage* aniWindowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
+    if (aniWindowStage == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] aniWindowStage is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    aniWindowStage->OnSetSupportedWindowModesWithGrayOutMaximizeButton(
+        env, supportedWindowModes, grayOutMaximizeButton);
+}
+
+void AniWindowStage::OnSetSupportedWindowModesWithGrayOutMaximizeButton(
+    ani_env* env, ani_object aniSupportedWindowModes, ani_boolean grayOutMaximizeButton)
+{
+    auto windowScene = windowScene_.lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] windowScene is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    auto window = windowScene->GetMainWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] mainWindow is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    auto supportedWindowModes =
+        AniWindowUtils::ExtractEnumValues<AppExecFwk::SupportWindowMode>(env, aniSupportedWindowModes);
+    WMError ret = window->SetSupportedWindowModes(supportedWindowModes, static_cast<bool>(grayOutMaximizeButton));
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed, windowId: %{public}u, ret: %{public}d",
+              window->GetWindowId(), static_cast<int32_t>(ret));
+        AniWindowUtils::AniThrowError(env, AniWindowUtils::ToErrorCode(ret));
+        return;
+    }
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Success, windowId: %{public}u", window->GetWindowId());
+}
+
 ani_ref AniWindowStage::OnCreateSubWindow(ani_env* env, ani_string name)
 {
     std::string windowName;
@@ -649,6 +728,10 @@ std::array g_methods = {
         reinterpret_cast<void *>(AniWindowStage::SetCustomDensity)},
     ani_native_function {"setDefaultDensityEnabledSync", "lz:",
         reinterpret_cast<void *>(AniWindowStage::SetDefaultDensityEnabled)},
+    ani_native_function {"setSupportedWindowModes", "lC{escompat.Array}:",
+        reinterpret_cast<void *>(AniWindowStage::SetSupportedWindowModes)},
+    ani_native_function {"setSupportedWindowModes", "lC{escompat.Array}z:",
+        reinterpret_cast<void *>(AniWindowStage::SetSupportedWindowModesWithGrayOutMaximizeButton)},
 };
 
 std::array g_functions = {

@@ -183,7 +183,7 @@ void JsPiPWindowListener::OnPipTypeNodeChange(const napi_ref nodeRef)
     }
 }
 
-void JsPiPWindowListener::OnScreenStatusChange(const PiPScreenStatus& status)
+void JsPiPWindowListener::OnActiveStatusChange(bool status)
 {
     TLOGI(WmsLogTag::WMS_PIP, "called, status: %{public}u", status);
     auto napiTask = [jsCallback = jsCallBack_, status, env = env_]() {
@@ -195,7 +195,7 @@ void JsPiPWindowListener::OnScreenStatusChange(const PiPScreenStatus& status)
         CallJsFunction(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnScreenStatusChange");
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnActiveStatusChange");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::WMS_PIP, "Failed to SendEvent");
         }

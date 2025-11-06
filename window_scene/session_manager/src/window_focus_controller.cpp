@@ -73,16 +73,18 @@ WSError WindowFocusController::AddFocusGroup(DisplayGroupId displayGroupId, Disp
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     displayId2GroupIdMap_[displayId] = displayGroupId;
-    auto iter = focusGroupMap_.find(displayGroupId);
-    if (iter == focusGroupMap_.end()) {
-        sptr<FocusGroup> focusGroup = sptr<FocusGroup>::MakeSptr(displayGroupId);
-        focusGroup->displayIds_.insert(displayId);
-        focusGroupMap_.insert(std::make_pair(displayGroupId, focusGroup));
-        LogDisplayIds();
-    } else {
-        iter->second->displayIds_.insert(displayId);
-        LogDisplayIds();
+    {
+        std::lock_guard<std::mutex> lock(focusGroupMapMutex_);
+        auto iter = focusGroupMap_.find(displayGroupId);
+        if (iter == focusGroupMap_.end()) {
+            sptr<FocusGroup> focusGroup = sptr<FocusGroup>::MakeSptr(displayGroupId);
+            focusGroup->displayIds_.insert(displayId);
+            focusGroupMap_.insert(std::make_pair(displayGroupId, focusGroup));
+        } else {
+            iter->second->displayIds_.insert(displayId);
+        }
     }
+    LogDisplayIds();
     if (deletedDisplayId2GroupIdMap_.find(displayId) != deletedDisplayId2GroupIdMap_.end()) {
         deletedDisplayId2GroupIdMap_.erase(displayId);
     }
@@ -100,15 +102,18 @@ WSError WindowFocusController::RemoveFocusGroup(DisplayGroupId displayGroupId, D
         TLOGE(WmsLogTag::WMS_FOCUS, "displayId invalid");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    auto iter = focusGroupMap_.find(displayGroupId);
-    if (iter != focusGroupMap_.end()) {
-        auto displayIds = iter->second->displayIds_;
-        displayIds.erase(displayId);
-        if (displayIds.size() == 0) {
-            focusGroupMap_.erase(displayGroupId);
+    {
+        std::lock_guard<std::mutex> lock(focusGroupMapMutex_);
+        auto iter = focusGroupMap_.find(displayGroupId);
+        if (iter != focusGroupMap_.end()) {
+            auto displayIds = iter->second->displayIds_;
+            displayIds.erase(displayId);
+            if (displayIds.size() == 0) {
+                focusGroupMap_.erase(displayGroupId);
+            }
+        } else {
+            TLOGE(WmsLogTag::WMS_FOCUS, "displayGroupId invalid, displayGroupId: %{public}" PRIu64, displayGroupId);
         }
-    } else {
-        TLOGE(WmsLogTag::WMS_FOCUS, "displayGroupId invalid, displayGroupId: %{public}" PRIu64, displayGroupId);
     }
     displayId2GroupIdMap_.erase(displayId);
     deletedDisplayId2GroupIdMap_[displayId] = displayGroupId;
@@ -120,6 +125,7 @@ WSError WindowFocusController::RemoveFocusGroup(DisplayGroupId displayGroupId, D
 sptr<FocusGroup> WindowFocusController::GetFocusGroupInner(DisplayId displayId)
 {
     DisplayId displayGroupId = GetDisplayGroupId(displayId);
+    std::lock_guard<std::mutex> lock(focusGroupMapMutex_);
     if (displayGroupId == DEFAULT_DISPLAY_ID) {
         return focusGroupMap_[DEFAULT_DISPLAY_ID];
     }
@@ -157,6 +163,7 @@ sptr<FocusGroup> WindowFocusController::GetFocusGroup(DisplayId displayId)
 std::vector<std::pair<DisplayId, int32_t>> WindowFocusController::GetAllFocusedSessionList() const
 {
     std::vector<std::pair<DisplayId, int32_t>> allFocusGroup;
+    std::lock_guard<std::mutex> lock(focusGroupMapMutex_);
     for (const auto& elem : focusGroupMap_) {
         auto curFocusGroup = elem.second;
         if (curFocusGroup == nullptr) {
@@ -204,15 +211,18 @@ void WindowFocusController::LogDisplayIds()
 {
     std::ostringstream oss;
     {
-        for (auto it = focusGroupMap_.begin(); it != focusGroupMap_.end(); it++) {
-            oss << "focusGroupId: " << it->first << ", displayids:";
-            auto displayIds = it->second->displayIds_;
-            for (auto it2 = displayIds.begin(); it2 != displayIds.end(); it2++) {
-                oss << *it2;
-                if (std::next(it2) != displayIds.end()) {
-                    oss << ",";
-                } else {
-                    oss << ";";
+        {
+            std::lock_guard<std::mutex> lock(focusGroupMapMutex_);
+            for (auto it = focusGroupMap_.begin(); it != focusGroupMap_.end(); it++) {
+                oss << "focusGroupId: " << it->first << ", displayids:";
+                auto displayIds = it->second->displayIds_;
+                for (auto it2 = displayIds.begin(); it2 != displayIds.end(); it2++) {
+                    oss << *it2;
+                    if (std::next(it2) != displayIds.end()) {
+                        oss << ",";
+                    } else {
+                        oss << ";";
+                    }
                 }
             }
         }

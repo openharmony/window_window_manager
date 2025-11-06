@@ -52,7 +52,7 @@ public:
     static void DoActionEvent(const std::string& actionName, int32_t status);
     static void DoControlEvent(PiPControlType controlType, PiPControlStatus status);
     static void PipSizeChange(double width, double height, double scale);
-    static void DoScreenStatusChangeEvent(PiPScreenStatus status);
+    static void DoActiveStatusChangeEvent(bool status);
     static void AutoStartPipWindow();
     static void DoDestroy();
     static bool GetPipEnabled();
