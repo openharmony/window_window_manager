@@ -150,8 +150,9 @@ std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> WindowSessionImpl:
 std::mutex WindowSessionImpl::occlusionStateChangeListenerMutex_;
 std::unordered_map<int32_t,
     std::vector<sptr<IOcclusionStateChangedListener>>> WindowSessionImpl::occlusionStateChangeListeners_;
-std::mutex frameMetricsChangeListenerMutex_;
-std::unordered_map<int32_t, std::vector<sptr<IFrameMetricsChangedListener>>> frameMetricsChangeListeners_;
+std::mutex WindowSessionImpl::frameMetricsChangeListenerMutex_;
+std::unordered_map<int32_t,
+    std::vector<sptr<IFrameMetricsChangedListener>>> WindowSessionImpl::frameMetricsChangeListeners_;
 std::mutex WindowSessionImpl::displayIdChangeListenerMutex_;
 std::map<int32_t, std::vector<IDisplayIdChangeListenerSptr>> WindowSessionImpl::displayIdChangeListeners_;
 std::mutex WindowSessionImpl::systemDensityChangeListenerMutex_;
