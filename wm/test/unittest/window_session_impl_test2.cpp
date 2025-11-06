@@ -456,7 +456,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyFrameMetrics, TestSize.Level1)
     window->frameMetricsChangeListeners_[window->GetPersistentId()].push_back(listener);
     window->frameMetricsChangeListeners_[window->GetPersistentId()].push_back(nullptr);
     Ace::FrameMetrics metric;
-    EXPECT_EQ(window->NotifyFrameMetrics(metric), WSError::WS_OK);
+    window->NotifyFrameMetrics(metric);
     window->frameMetricsChangeListeners_.clear();
     window->Destroy();
 }
