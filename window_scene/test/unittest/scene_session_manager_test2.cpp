@@ -2407,6 +2407,84 @@ HWTEST_F(SceneSessionManagerTest2, RecoverAndConnectSpecificSession, TestSize.Le
 }
 
 /**
+ * @tc.name: UpdateGestureBackEnabled
+ * @tc.desc: UpdateGestureBackEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, UpdateGestureBackEnabled, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo sessionInfo;
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sptr<SceneSession> nextSession = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    ASSERT_NE(nextSession, nullptr);
+    sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    nextSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    ssm_->sceneSessionMap_.inster({ 1, sceneSession });
+    ssm_->sceneSessionMap_.inster({ 2, nextSession });
+    sceneSession->persistentId_ = 1;
+    nextSession->persistentId_ = 2;
+
+    sceneSession->isEnableGestureBack_ = false;
+    sceneSession->isEnableGestureBackHadSet_ = true;
+    ssm_->UpdateGestureBackEnabled(1);
+    sceneSession->isEnableGestureBack_ = true;
+    ssm_->UpdateGestureBackEnabled(1);
+
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    ssm_->NotifyEnterRecentTask(false);
+    EXPECT_EQ(ssm_->enterRecent_.load(), false);
+    sceneSession->UpdateFocus(true);
+    EXPECT_EQ(sceneSession->IsFocus(), true);
+    ssm_->UpdateGestureBackEnabled(1, 2);
+    sleep(WAIT_SLEEP_TIME);
+    sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
+    ssm_->UpdateGestureBackEnabled(1, 2);
+    sleep(WAIT_SLEEP_TIME);
+
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ssm_->UpdateGestureBackEnabled(1);
+    sleep(WAIT_SLEEP_TIME);
+
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
+    ssm_->UpdateGestureBackEnabled(1);
+    sleep(WAIT_SLEEP_TIME);
+
+    sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sceneSession->SetSessionState(SessionState::STATE_DISCONNECT);
+    ssm_->UpdateGestureBackEnabled(1);
+    sleep(WAIT_SLEEP_TIME);
+
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    ssm_->NotifyEnterRecentTask(true);
+    ssm_->UpdateGestureBackEnabled(1);
+    sleep(WAIT_SLEEP_TIME);
+
+    ssm_->NotifyEnterRecentTask(false);
+    ssm_->UpdateGestureBackEnabled(1, 2);
+    sleep(WAIT_SLEEP_TIME);
+    sceneSession->UpdateFocus(false);
+    ssm_->UpdateGestureBackEnabled(1);
+    sleep(WAIT_SLEEP_TIME);
+
+    ssm_->UpdateGestureBackEnabled(1, 3);
+    sleep(WAIT_SLEEP_TIME);
+    nextSession->property_->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    ssm_->UpdateGestureBackEnabled(1, 2);
+    sleep(WAIT_SLEEP_TIME);
+    sceneSession->UpdateFocus(true);
+    ssm_->UpdateGestureBackEnabled(1, 2);
+    sleep(WAIT_SLEEP_TIME);
+
+    ssm_->sceneSessionMap_.erase(1);
+    ssm_->sceneSessionMap_.erase(2);
+}
+
+/**
  * @tc.name: RecoverAndConnectSpecificSession02
  * @tc.desc: RecoverAndConnectSpecificSession02
  * @tc.type: FUNC
