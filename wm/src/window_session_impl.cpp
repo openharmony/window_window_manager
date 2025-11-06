@@ -6288,11 +6288,11 @@ void WindowSessionImpl::NotifyFrameMetrics(const Ace::FrameMetrics& info)
         }
     }
     uint32_t notifyCounter = 0;
-    FrameMetrics metric;
-    metric.firstDrawFrame_ = info.firstDrawFrame;
-    metric.inputHandlingDuration_ = info.inputHandlingDuration;
-    metric.layoutMeasureDuration_ = info.layoutMeasureDuration;
-    metric.vsyncTimestamp_ = info.vsyncTimestamp;
+    FrameMetrics metrics;
+    metrics.firstDrawFrame_ = info.firstDrawFrame;
+    metrics.inputHandlingDuration_ = info.inputHandlingDuration;
+    metrics.layoutMeasureDuration_ = info.layoutMeasureDuration;
+    metrics.vsyncTimestamp_ = info.vsyncTimestamp;
     for (auto& listener : listeners) {
         if (listener != nullptr) {
             listener->OnFrameMetricsChanged(metrics);
