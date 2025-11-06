@@ -162,6 +162,21 @@ ani_object AniWindow::NativeTransferDynamic(ani_env* aniEnv, ani_class cls, ani_
     return result;
 }
 
+void AniWindow::ThrowIfWindowInvalid(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    auto window = aniWindow->GetWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] window is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+}
+
 void AniWindow::SetWindowColorSpace(ani_env* env, ani_object obj, ani_long nativeObj, ani_int colorSpace)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI] colorSpace:%{public}d", static_cast<int32_t>(colorSpace));
@@ -4455,6 +4470,8 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_NOT_FOUND;
     }
     std::array methods = {
+        ani_native_function {"throwIfWindowInvalid", "l:",
+            reinterpret_cast<void *>(AniWindow::ThrowIfWindowInvalid)},
         ani_native_function {"setFollowParentWindowLayoutEnabled", "lz:",
             reinterpret_cast<void *>(SetFollowParentWindowLayoutEnabled)},
         ani_native_function {"setWindowDelayRaiseOnDrag", "lz:",
