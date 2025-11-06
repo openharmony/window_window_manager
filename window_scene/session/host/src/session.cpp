@@ -2009,6 +2009,13 @@ void Session::RemoveLifeCycleTask(const LifeCycleTaskType& taskType)
     PostTask(std::move(frontLifeCycleTask->task), frontLifeCycleTask->name);
 }
 
+void Session::ClearLifeCycleTask()
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "Clear lifeCyleTask, PersistentId=%{public}d", persistentId_);
+    std::lock_guard<std::mutex> lock(lifeCycleTaskQueueMutex_);
+    lifeCycleTaskQueue_.clear();
+}
+
 void Session::PostLifeCycleTask(Task&& task, const std::string& name, const LifeCycleTaskType& taskType)
 {
     sptr<SessionLifeCycleTask> frontLifeCycleTask = nullptr;
