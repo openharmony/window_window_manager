@@ -233,6 +233,8 @@ public:
     bool GetIsAbilityHook() const;
     void SetFollowScreenChange(bool isFollowScreenChange);
     bool GetFollowScreenChange() const;
+    void SetStatusBarHeight(int32_t statusBarHeight);
+    int32_t GetStatusBarHeight() const;
 
     /*
      * Sub Window
@@ -596,6 +598,8 @@ private:
      */
     uint32_t avoidAreaOption_ = 0;
 
+    int32_t statusBarHeight_ = 0;
+    
     /*
      * Window Focus
      */
