@@ -275,6 +275,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             VirtualScreenType virtualScreenType = static_cast<VirtualScreenType>(data.ReadUint32());
             bool isSecurity = data.ReadBool();
             VirtualScreenFlag virtualScreenFlag = static_cast<VirtualScreenFlag>(data.ReadUint32());
+            bool supportsFocus = data.ReadBool();
+            bool supportsInput = data.ReadBool();
             bool isSurfaceValid = data.ReadBool();
             sptr<Surface> surface = nullptr;
             if (isSurfaceValid) {
@@ -294,7 +296,9 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
                 .missionIds_ = missionIds,
                 .virtualScreenType_ = virtualScreenType,
                 .isSecurity_ = isSecurity,
-                .virtualScreenFlag_ = virtualScreenFlag
+                .virtualScreenFlag_ = virtualScreenFlag,
+                .supportsFocus_ = supportsFocus,
+                .supportsInput_ = supportsInput
             };
             ScreenId screenId = CreateVirtualScreen(virScrOption, virtualScreenAgent);
             static_cast<void>(reply.WriteUint64(static_cast<uint64_t>(screenId)));
