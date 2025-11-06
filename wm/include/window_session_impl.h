@@ -292,6 +292,9 @@ public:
     WMError RegisterOcclusionStateChangeListener(const sptr<IOcclusionStateChangedListener>& listener) override;
     WMError UnregisterOcclusionStateChangeListener(const sptr<IOcclusionStateChangedListener>& listener) override;
     WSError NotifyWindowOcclusionState(const WindowVisibilityState state) override;
+    WMError RegisterFrameMetricsChangeListener(const sptr<IFrameMetricsChangedListener>& listener) override;
+    WMError UnregisterFrameMetricsChangeListener(const sptr<IFrameMetricsChangedListener>& listener) override;
+    void NotifyFrameMetrics(const FrameMetrics& metrics);
     WMError RegisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener) override;
     WMError UnregisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener) override;
     WMError RegisterSystemDensityChangeListener(const ISystemDensityChangeListenerSptr& listener) override;
@@ -1068,6 +1071,8 @@ private:
     static std::mutex occlusionStateChangeListenerMutex_;
     static std::unordered_map<int32_t,
         std::vector<sptr<IOcclusionStateChangedListener>>> occlusionStateChangeListeners_;
+    static std::mutex frameMetricsChangeListenerMutex_;
+    static std::unordered_map<int32_t, std::vector<sptr<IFrameMetricsChangedListener>>> frameMetricsChangeListeners_;
     static std::map<int32_t, std::vector<sptr<ISystemBarPropertyListener>>> systemBarPropertyListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowStageLifeCycle>>> windowStageLifecycleListeners_;

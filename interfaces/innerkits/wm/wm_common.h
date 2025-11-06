@@ -1551,6 +1551,51 @@ struct ExceptionInfo : public Parcelable {
 };
 
 /**
+ * @struct FrameMetrics
+ *
+ * @brief frame metrics info.
+ */
+struct FrameMetrics : public Parcelable {
+    bool firstDrawFrame_ = false;
+    uint32_t inputHandlingDuration_ = 0;
+    uint32_t layoutMeasureDuration_ = 0;
+    uint32_t vsyncTimestamp_ = 0;
+
+    /**
+     * @brief Marshalling FrameMetrics.
+     *
+     * @param parcel Package of FrameMetrics.
+     * @return True means marshall success, false means marshall failed.
+     */
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteBool(firstDrawFrame_) &&
+               parcel.WriteUint32(inputHandlingDuration_) &&
+               parcel.WriteUint32(layoutMeasureDuration_) &&
+               parcel.WriteUint32(vsyncTimestamp_);
+    }
+
+    /**
+     * @brief Unmarshalling FrameMetrics.
+     *
+     * @param parcel Package of FrameMetrics.
+     * @return FrameMetrics object.
+     */
+    static FrameMetrics* Unmarshalling(Parcel& parcel)
+    {
+        auto info = new FrameMetrics();
+        if (!parcel.ReadBool(info->firstDrawFrame_) ||
+            !parcel.ReadUint32(info->inputHandlingDuration_) ||
+            !parcel.ReadUint32(info->layoutMeasureDuration_) ||
+            !parcel.ReadUint32(info->vsyncTimestamp_)) {
+            delete info;
+            return nullptr;
+        }
+        return info;
+    }
+};
+
+/**
  * @brief Enumerates window update type.
  */
 enum class WindowUpdateType : int32_t {

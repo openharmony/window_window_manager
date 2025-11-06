@@ -540,6 +540,16 @@ public:
 };
 
 /**
+ * @class IFrameMetricsChangedListener
+ *
+ * @brief Listener to observe the window frame metrics changed.
+ */
+class IFrameMetricsChangedListener : virtual public RefBase {
+public:
+    virtual void OnFrameMetricsChanged(const FrameMetrics& metrics) {}
+};
+
+/**
  * @class IDisplayIdChangeListener
  *
  * @brief Listener to observe one window displayId changed.
@@ -3092,6 +3102,28 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     virtual WMError UnregisterOcclusionStateChangeListener(const sptr<IOcclusionStateChangedListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Register window frame metrics change listener.
+     *
+     * @param listener IFrameMetricsChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterFrameMetricsChangeListener(const sptr<IFrameMetricsChangedListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister window frame metrics change listener.
+     *
+     * @param listener IFrameMetricsChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterFrameMetricsChangeListener(const sptr<IFrameMetricsChangedListener>& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
