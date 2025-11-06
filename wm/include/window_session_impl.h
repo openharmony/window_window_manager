@@ -317,6 +317,10 @@ public:
         const AAFwk::Want& data);
     virtual WMError HandleUnregisterHostWindowRectChangeListener(uint32_t code, int32_t persistentId,
         const AAFwk::Want& data);
+    virtual WMError HandleRegisterHostRectChangeInGlobalDisplayListener(uint32_t code, int32_t persistentId,
+        const AAFwk::Want& data);
+    virtual WMError HandleUnregisterHostRectChangeInGlobalDisplayListener(uint32_t code, int32_t persistentId,
+        const AAFwk::Want& data);
     virtual WMError HandleUIExtRegisterKeyboardDidShowListener(uint32_t code, int32_t persistentId,
         const AAFwk::Want& data);
     virtual WMError HandleUIExtUnregisterKeyboardDidShowListener(uint32_t code, int32_t persistentId,
@@ -445,9 +449,9 @@ public:
     WMError UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
     WMError RegisterWindowTitleChangeListener(const sptr<IWindowTitleChangeListener>& listener) override;
     WMError UnregisterWindowTitleChangeListener(const sptr<IWindowTitleChangeListener>& listener) override;
-    WMError RegisterRectChangeInGlobalDisplayListener(
+    virtual WMError RegisterRectChangeInGlobalDisplayListener(
         const sptr<IRectChangeInGlobalDisplayListener>& listener) override;
-    WMError UnregisterRectChangeInGlobalDisplayListener(
+    virtual WMError UnregisterRectChangeInGlobalDisplayListener(
         const sptr<IRectChangeInGlobalDisplayListener>& listener) override;
     WMError RegisterExtensionSecureLimitChangeListener(
         const sptr<IExtensionSecureLimitChangeListener>& listener) override;
@@ -642,6 +646,7 @@ protected:
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
     void NotifyGlobalDisplayRectChange(const Rect& rect, WindowSizeChangeReason reason);
     void NotifyUIExtHostWindowRectChangeListeners(const Rect rect, const WindowSizeChangeReason reason);
+    void NotifyUIExtHostRectChangeInGlobalDisplayListeners(const Rect& rect, const WindowSizeChangeReason reason);
     static sptr<Window> FindWindowById(uint32_t winId);
     void NotifyWindowStatusChange(WindowMode mode);
     void NotifyTransformChange(const Transform& transForm) override;
@@ -679,6 +684,7 @@ protected:
     std::unordered_set<int32_t> rectChangeUIExtListenerIds_;
     std::unordered_set<int32_t> keyboardDidShowUIExtListenerIds_;
     std::unordered_set<int32_t> keyboardDidHideUIExtListenerIds_;
+    std::unordered_set<int32_t> rectChangeInGlobalDisplayUIExtListenerIds;
     std::unordered_map<int32_t, sptr<IKeyboardDidShowListener>> keyboardDidShowUIExtListeners_;
     std::unordered_map<int32_t, sptr<IKeyboardDidHideListener>> keyboardDidHideUIExtListeners_;
     void WriteKeyboardInfoToWant(AAFwk::Want& want, const KeyboardPanelInfo& keyboardPanelInfo) const;
