@@ -2011,7 +2011,7 @@ void Session::RemoveLifeCycleTask(const LifeCycleTaskType& taskType)
 
 void Session::ClearLifeCycleTask()
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "Clear lifeCyleTask, PersistentId=%{public}d", persistentId_);
+    TLOGI(WmsLogTag::WMS_LIFE, "Clear LifeCycleTask, PersistentId=%{public}d", persistentId_);
     std::lock_guard<std::mutex> lock(lifeCycleTaskQueueMutex_);
     lifeCycleTaskQueue_.clear();
 }
