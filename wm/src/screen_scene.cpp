@@ -102,7 +102,7 @@ void ScreenScene::LoadContent(const std::string& contentUrl, napi_env env, napi_
         TLOGE(WmsLogTag::DMS, "uiContent_ is nullptr!");
         return;
     }
-
+    TLOGW(WmsLogTag::DMS, "load concent");
     uiContent_->Initialize(this, contentUrl, storage);
     uiContent_->Foreground();
     uiContent_->SetFrameLayoutFinishCallback(std::move(frameLayoutFinishCb_));
