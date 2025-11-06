@@ -150,6 +150,8 @@ std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> WindowSessionImpl:
 std::mutex WindowSessionImpl::occlusionStateChangeListenerMutex_;
 std::unordered_map<int32_t,
     std::vector<sptr<IOcclusionStateChangedListener>>> WindowSessionImpl::occlusionStateChangeListeners_;
+std::mutex frameMetricsChangeListenerMutex_;
+std::unordered_map<int32_t, std::vector<sptr<IFrameMetricsChangedListener>>> frameMetricsChangeListeners_;
 std::mutex WindowSessionImpl::displayIdChangeListenerMutex_;
 std::map<int32_t, std::vector<IDisplayIdChangeListenerSptr>> WindowSessionImpl::displayIdChangeListeners_;
 std::mutex WindowSessionImpl::systemDensityChangeListenerMutex_;
@@ -6208,6 +6210,96 @@ WSError WindowSessionImpl::NotifyWindowOcclusionState(const WindowVisibilityStat
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d, visibilityState=%{public}u, notifyCounter=%{public}u",
         persistentId, static_cast<uint32_t>(visibilityState), notifyCounter);
     return WSError::WS_OK;
+}
+
+WMError WindowSessionImpl::RegisterFrameMetricsChangeListener(const sptr<IFrameMetricsChangedListener>& listener)
+{
+    auto persistentId = GetPersistentId();
+    bool isFirstRegister = false;
+    {
+        std::lock_guard<std::mutex> lockListener(frameMetricsChangeListenerMutex_);
+        auto ret = RegisterListener(frameMetricsChangeListeners_[persistentId], listener);
+        if (ret != WMError::WM_OK) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed: winId=%{public}d", persistentId);
+            return ret;
+        }
+        isFirstRegister = frameMetricsChangeListeners_[persistentId].size() == 1;
+    }
+    if (!isFirstRegister) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "register another: winId=%{public}d", persistentId);
+        return WMError::WM_OK;
+    }
+    auto uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null: winId=%{public}d", persistentId);
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    uiContent->SetFrameMetricsCallBack([weak = wptr(this), where = __func__](Ace::FrameMetrics info) {
+        auto window = weak.promote();
+        if (!window) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: window is null", where);
+            return;
+        }
+        window->NotifyFrameMetrics({.firstDrawFrame_ = info.firstDrawFrame,
+                                    .inputHandlingDuration_ = info.inputHandlingDuration,
+                                    .layoutMeasureDuration_ = info.layoutMeasureDuration,
+                                    .vsyncTimestamp_ = info.vsyncTimestamp});
+    });
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "register to arkui: winId=%{public}d", persistentId);
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::UnregisterFrameMetricsChangeListener(const sptr<IFrameMetricsChangedListener>& listener)
+{
+    auto persistentId = GetPersistentId();
+    bool isLastUnregister = false;
+    {
+        std::lock_guard<std::mutex> lockListener(frameMetricsChangeListenerMutex_);
+        auto ret = UnregisterListener(frameMetricsChangeListeners_[persistentId], listener);
+        if (ret != WMError::WM_OK) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed: winId=%{public}d", persistentId);
+            return ret;
+        }
+        if (frameMetricsChangeListeners_[persistentId].empty()) {
+            frameMetricsChangeListeners_.erase(persistentId);
+            isLastUnregister = true;
+        }
+    }
+    if (!isLastUnregister) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "unregister another: winId=%{public}d", persistentId);
+        return WMError::WM_OK;
+    }
+    auto uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null: winId=%{public}d", persistentId);
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    uiContent->SetFrameMetricsCallBack(nullptr);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "unregister to arkui: winId=%{public}d", persistentId);
+    return WMError::WM_OK;
+}
+
+void WindowSessionImpl::NotifyFrameMetrics(const FrameMetrics& metrics)
+{
+    auto persistentId = GetPersistentId();
+    std::vector<sptr<IFrameMetricsChangedListener>> listeners;
+    {
+        std::lock_guard<std::mutex> lockListener(frameMetricsChangeListenerMutex_);
+        for (auto& listener : frameMetricsChangeListeners_[persistentId]) {
+            listeners.push_back(listener);
+        }
+    }
+    uint32_t notifyCounter = 0;
+    for (auto& listener : listeners) {
+        if (listener != nullptr) {
+            listener->OnFrameMetricsChanged(metrics);
+            notifyCounter++;
+        }
+    }
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d, notifyCounter=%{public}u, firstDrawFrame=%{public}d, "
+        "inputHandlingDuration=%{public}d, layoutMeasureDuration=%{public}d, vsyncTimestamp=%{public}d",
+        persistentId, notifyCounter, metrics.firstDrawFrame_, metrics.inputHandlingDuration_,
+        metrics.layoutMeasureDuration_, metrics.vsyncTimestamp_);
 }
 
 WMError WindowSessionImpl::RegisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener)
