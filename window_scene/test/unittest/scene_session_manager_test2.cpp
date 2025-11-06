@@ -2421,8 +2421,8 @@ HWTEST_F(SceneSessionManagerTest2, UpdateGestureBackEnabled, TestSize.Level1)
     ASSERT_NE(nextSession, nullptr);
     sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
     nextSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ssm_->sceneSessionMap_.inster({ 1, sceneSession });
-    ssm_->sceneSessionMap_.inster({ 2, nextSession });
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
+    ssm_->sceneSessionMap_.insert({ 2, nextSession });
     sceneSession->persistentId_ = 1;
     nextSession->persistentId_ = 2;
 
@@ -2438,7 +2438,7 @@ HWTEST_F(SceneSessionManagerTest2, UpdateGestureBackEnabled, TestSize.Level1)
     ssm_->NotifyEnterRecentTask(false);
     EXPECT_EQ(ssm_->enterRecent_.load(), false);
     sceneSession->UpdateFocus(true);
-    EXPECT_EQ(sceneSession->IsFocus(), true);
+    EXPECT_EQ(sceneSession->IsFocused(), true);
     ssm_->UpdateGestureBackEnabled(1, 2);
     sleep(WAIT_SLEEP_TIME);
     sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
