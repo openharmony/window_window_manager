@@ -6299,10 +6299,10 @@ void WindowSessionImpl::NotifyFrameMetrics(const FrameMetrics& metrics)
             notifyCounter++;
         }
     }
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d, notifyCounter=%{public}u, firstDrawFrame=%{public}d, "
-        "inputHandlingDuration=%{public}d, layoutMeasureDuration=%{public}d, vsyncTimestamp=%{public}d",
-        persistentId, notifyCounter, metrics.firstDrawFrame_, metrics.inputHandlingDuration_,
-        metrics.layoutMeasureDuration_, metrics.vsyncTimestamp_);
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d, notifyCounter=%{public}u, firstDrawFrame=%{public}" PRIu64
+        ", inputHandlingDuration=%{public}" PRIu64 ", layoutMeasureDuration=%{public}" PRIu64
+        ", vsyncTimestamp=%{public}" PRIu64, persistentId, notifyCounter, metrics.firstDrawFrame_,
+        metrics.inputHandlingDuration_, metrics.layoutMeasureDuration_, metrics.vsyncTimestamp_);
 }
 
 WMError WindowSessionImpl::RegisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener)
