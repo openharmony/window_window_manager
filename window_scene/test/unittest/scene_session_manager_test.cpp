@@ -1690,6 +1690,84 @@ HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreate, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TestGetScreenName
+ * @tc.desc: Test get screenName;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, TestGetScreenName, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestGetScreenName start";
+    int32_t persistentId = 2000;
+    ASSERT_EQ(ssm_->getScreenName(persistentId), "");
+
+    SessionInfo info1;
+    info1.abilityName_ = "test1";
+    info1.bundleName_ = "test2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info1, nullptr);
+    ssm_->sceneSessionMap_[persistentId] = sceneSession;
+    ASSERT_EQ(ssm_->getScreenName(persistentId), "");
+
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    ASSERT_EQ(ssm_->getScreenName(persistentId), "");
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    sceneSession->SetSessionProperty(property);
+    ASSERT_EQ(ssm_->getScreenName(persistentId), "");
+
+    property->SetDisplayId(-1ULL);
+    sceneSession->SetSessionProperty(property);
+    ssm_->sceneSessionMap_[persistentId] = sceneSession;
+    ASSERT_EQ(ssm_->getScreenName(persistentId), "");
+
+    uint64_t displayId = 1000;
+    property->SetDisplayId(displayId);
+    sceneSession->SetSessionProperty(property);
+    ssm_->sceneSessionMap_[persistentId] = sceneSession;
+    ASSERT_EQ(ssm_->getScreenName(persistentId), "");
+
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert({displayId, screenSession});
+    ASSERT_EQ(ssm_->getScreenName(persistentId), "UNKNOWN");
+
+    screenSession->SetName("SuperLauncher");
+    ASSERT_EQ(ssm_->getScreenName(persistentId), "SuperLauncher");
+    ssm_->sceneSessionMap_.clear();
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
+}
+
+/**
+ * @tc.name: TestIsEnablePiPCreateOnSuperLauncher
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreateOnSuperLauncher, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestIsEnablePiPCreateOnSuperLauncher start";
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    Rect reqRect = { 0, 0, 10, 10 };
+    property->SetRequestRect(reqRect);
+    property->SetParentPersistentId(100);
+
+    SessionInfo info1;
+    info1.abilityName_ = "test1";
+    info1.bundleName_ = "test2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info1, nullptr);
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    ssm_->sceneSessionMap_.insert({100, sceneSession});
+
+    uint64_t displayId = 2000;
+    property->SetDisplayId(displayId);
+    sceneSession->SetSessionProperty(property);
+    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    sptr<ScreenSession> screenSession = new ScreenSession();
+    screenSession->SetName("SuperLauncher");
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert({displayId, screenSession});
+    ssm_->isScreenLocked_ = true;
+    ASSERT_TRUE(ssm_->IsEnablePiPCreate(property));
+}
+
+/**
  * @tc.name: TestIsPiPForbidden
  * @tc.desc: Test if pip window is forbidden to use;
  * @tc.type: FUNC
