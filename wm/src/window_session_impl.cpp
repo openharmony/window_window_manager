@@ -6240,10 +6240,12 @@ WMError WindowSessionImpl::RegisterFrameMetricsChangeListener(const sptr<IFrameM
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: window is null", where);
             return;
         }
-        window->NotifyFrameMetrics({.firstDrawFrame_ = info.firstDrawFrame,
-                                    .inputHandlingDuration_ = info.inputHandlingDuration,
-                                    .layoutMeasureDuration_ = info.layoutMeasureDuration,
-                                    .vsyncTimestamp_ = info.vsyncTimestamp});
+        FrameMetrics metric;
+        metric.firstDrawFrame_ = info.firstDrawFrame;
+        metric.inputHandlingDuration_ = info.inputHandlingDuration;
+        metric.layoutMeasureDuration_ = info.layoutMeasureDuration;
+        metric.vsyncTimestamp_ = info.vsyncTimestamp;
+        window->NotifyFrameMetrics(metric);
     });
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "register to arkui: winId=%{public}d", persistentId);
     return WMError::WM_OK;

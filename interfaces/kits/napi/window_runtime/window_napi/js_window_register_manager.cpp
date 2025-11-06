@@ -374,7 +374,7 @@ WmErrorCode JsWindowRegisterManager::ProcessFrameMetricsMeasuredChangeRegister(s
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     WMError retCode = WMError::WM_OK;
-    sptr<IOcclusionStateChangedListener> thisListener(listener);
+    sptr<IFrameMetricsChangedListener> thisListener(listener);
     if (isRegister) {
         retCode = window->RegisterFrameMetricsChangeListener(thisListener);
     } else {
