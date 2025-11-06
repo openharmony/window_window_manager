@@ -6216,6 +6216,11 @@ WSError WindowSessionImpl::NotifyWindowOcclusionState(const WindowVisibilityStat
 WMError WindowSessionImpl::RegisterFrameMetricsChangeListener(const sptr<IFrameMetricsChangedListener>& listener)
 {
     auto persistentId = GetPersistentId();
+    auto uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null: winId=%{public}d", persistentId);
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     bool isFirstRegister = false;
     {
         std::lock_guard<std::mutex> lockListener(frameMetricsChangeListenerMutex_);
@@ -6230,23 +6235,13 @@ WMError WindowSessionImpl::RegisterFrameMetricsChangeListener(const sptr<IFrameM
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "register another: winId=%{public}d", persistentId);
         return WMError::WM_OK;
     }
-    auto uiContent = GetUIContentSharedPtr();
-    if (uiContent == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null: winId=%{public}d", persistentId);
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
     uiContent->SetFrameMetricsCallBack([weak = wptr(this), where = __func__](Ace::FrameMetrics info) {
         auto window = weak.promote();
         if (!window) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: window is null", where);
             return;
         }
-        FrameMetrics metric;
-        metric.firstDrawFrame_ = info.firstDrawFrame;
-        metric.inputHandlingDuration_ = info.inputHandlingDuration;
-        metric.layoutMeasureDuration_ = info.layoutMeasureDuration;
-        metric.vsyncTimestamp_ = info.vsyncTimestamp;
-        window->NotifyFrameMetrics(metric);
+        window->NotifyFrameMetrics(info);
     });
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "register to arkui: winId=%{public}d", persistentId);
     return WMError::WM_OK;
@@ -6255,6 +6250,11 @@ WMError WindowSessionImpl::RegisterFrameMetricsChangeListener(const sptr<IFrameM
 WMError WindowSessionImpl::UnregisterFrameMetricsChangeListener(const sptr<IFrameMetricsChangedListener>& listener)
 {
     auto persistentId = GetPersistentId();
+    auto uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null: winId=%{public}d", persistentId);
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     bool isLastUnregister = false;
     {
         std::lock_guard<std::mutex> lockListener(frameMetricsChangeListenerMutex_);
@@ -6272,17 +6272,12 @@ WMError WindowSessionImpl::UnregisterFrameMetricsChangeListener(const sptr<IFram
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "unregister another: winId=%{public}d", persistentId);
         return WMError::WM_OK;
     }
-    auto uiContent = GetUIContentSharedPtr();
-    if (uiContent == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null: winId=%{public}d", persistentId);
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
     uiContent->SetFrameMetricsCallBack(nullptr);
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "unregister to arkui: winId=%{public}d", persistentId);
     return WMError::WM_OK;
 }
 
-void WindowSessionImpl::NotifyFrameMetrics(const FrameMetrics& metrics)
+void WindowSessionImpl::NotifyFrameMetrics(const Ace::FrameMetrics& info)
 {
     auto persistentId = GetPersistentId();
     std::vector<sptr<IFrameMetricsChangedListener>> listeners;
@@ -6293,6 +6288,11 @@ void WindowSessionImpl::NotifyFrameMetrics(const FrameMetrics& metrics)
         }
     }
     uint32_t notifyCounter = 0;
+    FrameMetrics metric;
+    metric.firstDrawFrame_ = info.firstDrawFrame;
+    metric.inputHandlingDuration_ = info.inputHandlingDuration;
+    metric.layoutMeasureDuration_ = info.layoutMeasureDuration;
+    metric.vsyncTimestamp_ = info.vsyncTimestamp;
     for (auto& listener : listeners) {
         if (listener != nullptr) {
             listener->OnFrameMetricsChanged(metrics);

@@ -384,6 +384,84 @@ HWTEST_F(WindowSessionImplTest2, NotifyWindowOcclusionState, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RegisterFrameMetricsChangeListener
+ * @tc.desc: register occlusion state change listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, RegisterFrameMetricsChangeListener, TestSize.Level1)
+{
+    auto window = GetTestWindowImpl("RegisterFrameMetricsChangeListener");
+    ASSERT_NE(window, nullptr);
+    window->property_->SetPersistentId(1);
+    window->frameMetricsChangeListeners_.clear();
+    window->uiContent_ = nullptr;
+    EXPECT_NE(window->RegisterFrameMetricsChangeListener(nullptr), WMError::WM_OK);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    EXPECT_NE(window->RegisterFrameMetricsChangeListener(nullptr), WMError::WM_OK);
+    Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window->uiContent_.get());
+    EXPECT_CALL(*content, SetFrameMetricsCallBack(_));
+    sptr<IFrameMetricsChangedListener> listener = sptr<IFrameMetricsChangedListener>::MakeSptr();
+    EXPECT_EQ(window->RegisterFrameMetricsChangeListener(listener), WMError::WM_OK);
+    EXPECT_EQ(window->frameMetricsChangeListeners_.size(), 1);
+    sptr<IFrameMetricsChangedListener> listener2 = sptr<IFrameMetricsChangedListener>::MakeSptr();
+    window->frameMetricsChangeListeners_[window->GetPersistentId()].push_back(listener2);
+    sptr<IFrameMetricsChangedListener> listener3 = sptr<IFrameMetricsChangedListener>::MakeSptr();
+    EXPECT_EQ(window->RegisterFrameMetricsChangeListener(listener3), WMError::WM_OK);
+    window->frameMetricsChangeListeners_.clear();
+    window->Destroy();
+}
+
+/**
+ * @tc.name: UnregisterFrameMetricsChangeListener
+ * @tc.desc: unregister occlusion state change listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, UnregisterFrameMetricsChangeListener, TestSize.Level1)
+{
+    auto window = GetTestWindowImpl("UnregisterFrameMetricsChangeListener");
+    ASSERT_NE(window, nullptr);
+    window->property_->SetPersistentId(1);
+    window->frameMetricsChangeListeners_.clear();
+    window->uiContent_ = nullptr;
+    EXPECT_NE(window->RegisterFrameMetricsChangeListener(nullptr), WMError::WM_OK);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    EXPECT_NE(window->UnregisterFrameMetricsChangeListener(nullptr), WMError::WM_OK);
+    Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window->uiContent_.get());
+    EXPECT_CALL(*content, SetFrameMetricsCallBack(_));
+    sptr<IFrameMetricsChangedListener> listener = sptr<IFrameMetricsChangedListener>::MakeSptr();
+    EXPECT_EQ(window->RegisterFrameMetricsChangeListener(listener), WMError::WM_OK);
+    sptr<IFrameMetricsChangedListener> listener2 = sptr<IFrameMetricsChangedListener>::MakeSptr();
+    EXPECT_EQ(window->RegisterFrameMetricsChangeListener(listener2), WMError::WM_OK);
+    EXPECT_EQ(window->UnregisterFrameMetricsChangeListener(listener), WMError::WM_OK);
+    EXPECT_EQ(window->frameMetricsChangeListeners_.size(), 1);
+    EXPECT_CALL(*content, SetFrameMetricsCallBack(_));
+    EXPECT_EQ(window->UnregisterFrameMetricsChangeListener(listener2), WMError::WM_OK);
+    window->frameMetricsChangeListeners_.clear();
+    EXPECT_EQ(window->frameMetricsChangeListeners_.size(), 0);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: NotifyFrameMetrics
+ * @tc.desc: unregister occlusion state change listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, NotifyFrameMetrics, TestSize.Level1)
+{
+    auto window = GetTestWindowImpl("NotifyFrameMetrics");
+    ASSERT_NE(window, nullptr);
+    window->property_->SetPersistentId(1);
+    window->frameMetricsChangeListeners_.clear();
+    sptr<IFrameMetricsChangedListener> listener = sptr<IFrameMetricsChangedListener>::MakeSptr();
+    window->frameMetricsChangeListeners_[window->GetPersistentId()].push_back(listener);
+    window->frameMetricsChangeListeners_[window->GetPersistentId()].push_back(nullptr);
+    Ace::FrameMetrics metric;
+    EXPECT_EQ(window->NotifyFrameMetrics(metric), WSError::WS_OK);
+    window->frameMetricsChangeListeners_.clear();
+    window->Destroy();
+}
+
+/**
  * @tc.name: UpdateViewportConfig_KeyFrame
  * @tc.desc: UpdateViewportConfig_KeyFrame
  * @tc.type: FUNC
