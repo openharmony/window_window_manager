@@ -759,9 +759,10 @@ void JsWindowListener::OnFrameMetricsChanged(const FrameMetrics& metrics)
         HandleScope handleScope(env);
         napi_value argv[] = { ConvertFrameMetricsToJsValue(env, metrics) };
         thisListener->CallJsMethod(FRAME_METRICS_MEASURED_CHANGE_CB.c_str(), argv, ArraySize(argv));
-        TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: firstDrawFrame=%{public}d, inputHandlingDuration=%{public}d, "
-            "layoutMeasureDuration=%{public}d, vsyncTimestamp=%{public}d", where, metrics.firstDrawFrame_,
-            metrics.inputHandlingDuration_, metrics.layoutMeasureDuration_, metrics.vsyncTimestamp_);
+        TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: firstDrawFrame=%{public}" PRIu64
+            ", inputHandlingDuration=%{public}" PRIu64 ", layoutMeasureDuration=%{public}" PRIu64
+            ", vsyncTimestamp=%{public}" PRIu64, where, metrics.firstDrawFrame_, metrics.inputHandlingDuration_,
+            metrics.layoutMeasureDuration_, metrics.vsyncTimestamp_);
     };
     napi_status status = napi_send_event(env_, jsCallback, napi_eprio_high, "OnFrameMetricsChanged");
     if (status != napi_status::napi_ok) {
