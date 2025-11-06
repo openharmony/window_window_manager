@@ -1663,6 +1663,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isMobileAppInPadLayoutFullScreen_ = property->isMobileAppInPadLayoutFullScreen_;
     aspectRatio_ = property->aspectRatio_;
     isRotationLock_ = property->isRotationLock_;
+    statusBarHeight_ = property->statusBarHeight_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -2745,6 +2746,16 @@ void WindowSessionProperty::SetAspectRatio(float ratio)
 float WindowSessionProperty::GetAspectRatio() const
 {
     return aspectRatio_;
+}
+
+void WindowSessionProperty::SetStatusBarHeight(int32_t statusBarHeight)
+{
+    statusBarHeight_ = statusBarHeight;
+}
+ 
+int32_t WindowSessionProperty::GetStatusBarHeight() const
+{
+    return statusBarHeight_;
 }
 } // namespace Rosen
 } // namespace OHOS
