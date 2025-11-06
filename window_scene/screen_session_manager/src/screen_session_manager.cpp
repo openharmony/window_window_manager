@@ -12145,8 +12145,9 @@ void ScreenSessionManager::CalculateRotatedDisplay(Rotation rotation, const DMRe
         }
     }
     Rotation phyOffsetRotation = ConvertIntToRotation(phyOffset);
-    uint32_t correctedRotation = (static_cast<uint32_t>(rotation) + static_cast<uint32_t>(phyOffsetRotation)) %
-        ROTATION_MOD;
+    auto rotaionOffset = GetConfigCorrectionByDisplayMode(GetFoldDisplayMode());
+    uint32_t correctedRotation = (static_cast<uint32_t>(rotation) + static_cast<uint32_t>(phyOffsetRotation)
+        - static_cast<uint32_t>(rotaionOffset)) % ROTATION_MOD;
     DMRect displayRegionCopy = displayRegion;
     DMRect displayAreaCopy = displayArea;
     switch (static_cast<Rotation>(correctedRotation)) {
