@@ -1311,9 +1311,12 @@ napi_value ConvertFrameMetricsToJsValue(napi_env env, const FrameMetrics& metric
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
 
     napi_set_named_property(env, objValue, "firstDrawFrame", CreateJsValue(env, metrics.firstDrawFrame_));
-    napi_set_named_property(env, objValue, "inputHandlingDuration", CreateJsValue(env, metrics.inputHandlingDuration_));
-    napi_set_named_property(env, objValue, "layoutMeasureDuration", CreateJsValue(env, metrics.layoutMeasureDuration_));
-    napi_set_named_property(env, objValue, "vsyncTimestamp", CreateJsValue(env, metrics.vsyncTimestamp_));
+    napi_set_named_property(env, objValue, "inputHandlingDuration",
+        CreateJsValue(env, static_cast<int64_t>(metrics.inputHandlingDuration_)));
+    napi_set_named_property(env, objValue, "layoutMeasureDuration",
+        CreateJsValue(env, static_cast<int64_t>(metrics.layoutMeasureDuration_)));
+    napi_set_named_property(env, objValue, "vsyncTimestamp",
+        CreateJsValue(env, static_cast<int64_t>(metrics.vsyncTimestamp_)));
     return objValue;
 }
 
