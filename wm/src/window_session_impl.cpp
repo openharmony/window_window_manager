@@ -6299,7 +6299,7 @@ void WindowSessionImpl::NotifyFrameMetrics(const Ace::FrameMetrics& info)
             notifyCounter++;
         }
     }
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d, notifyCounter=%{public}u, firstDrawFrame=%{public}" PRIu64
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d, notifyCounter=%{public}u, firstDrawFrame=%{public}d"
         ", inputHandlingDuration=%{public}" PRIu64 ", layoutMeasureDuration=%{public}" PRIu64
         ", vsyncTimestamp=%{public}" PRIu64, persistentId, notifyCounter, metrics.firstDrawFrame_,
         metrics.inputHandlingDuration_, metrics.layoutMeasureDuration_, metrics.vsyncTimestamp_);
