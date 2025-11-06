@@ -1765,6 +1765,7 @@ HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreateOnSuperLauncher, TestSize
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert({displayId, screenSession});
     ssm_->isScreenLocked_ = true;
     ASSERT_TRUE(ssm_->IsEnablePiPCreate(property));
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
 }
 
 /**
