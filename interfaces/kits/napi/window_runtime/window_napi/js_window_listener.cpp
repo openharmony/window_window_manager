@@ -764,7 +764,7 @@ void JsWindowListener::OnFrameMetricsChanged(const FrameMetrics& metrics)
             ", vsyncTimestamp=%{public}" PRIu64, where, metrics.firstDrawFrame_, metrics.inputHandlingDuration_,
             metrics.layoutMeasureDuration_, metrics.vsyncTimestamp_);
     };
-    napi_status status = napi_send_event(env_, jsCallback, napi_eprio_high, "OnFrameMetricsChanged");
+    napi_status status = napi_send_event(env_, jsCallback, napi_eprio_immediate, "OnFrameMetricsChanged");
     if (status != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed to send event: retStatus=%{public}d", static_cast<int32_t>(status));
     }
