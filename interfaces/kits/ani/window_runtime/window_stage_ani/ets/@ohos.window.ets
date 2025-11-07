@@ -1329,6 +1329,58 @@ export class WindowPropertiesInternal implements WindowProperties {
 }
 
 /**
+  * Frame metrics
+  *
+  * @interface FrameMetrics
+  * @syscap SystemCapability.Window.SessionManager
+  * @since 22 dynamic&static
+  */
+export interface FrameMetrics {
+  /**
+    * Indicates whether the first frame of the window.
+    *
+    * @type { boolean }
+    * @syscap SystemCapability.Window.SessionManager
+    * @since 22 dynamic&static
+    */
+  firstDrawFrame: boolean;
+
+  /**
+    * Indicates the number of nanoseconds elapsed in the input handling stage of a frame.
+    *
+    * @type { long }
+    * @syscap SystemCapability.Window.SessionManager
+    * @since 22 dynamic&static
+    */
+  inputHandlingDuration: long;
+
+  /**
+    * Indicates the number of nanoseconds elapsed in the layout measure stage of a frame.
+    *
+    * @type { long }
+    * @syscap SystemCapability.Window.SessionManager
+    * @since 22 dynamic&static
+    */
+  layoutMeasureDuration: long;
+
+  /**
+    * Indicates the timestamp of the actual vsync for this frame. The value is expressed in nanoseconds.
+    *
+    * @type { long }
+    * @syscap SystemCapability.Window.SessionManager
+    * @since 22 dynamic&static
+    */
+  vsyncTimestamp: long;
+}
+
+export class FrameMetricsInternal implements FrameMetrics {
+  firstDrawFrame: boolean;
+  inputHandlingDuration: long;
+  layoutMeasureDuration: long;
+  vsyncTimestamp: long;
+}
+
+/**
   * Describes the scale options of window
   *
   * @interface ScaleOptions
@@ -3324,6 +3376,14 @@ export class WindowInternal implements Window {
       this.offSync(this.nativeObj, 'occlusionStateChanged', callback);
     }
 
+    public onFrameMetricsMeasured(callback: Callback<FrameMetrics>): void {
+      this.onSync(this.nativeObj, 'frameMetricsMeasured', callback);
+    }
+
+    public offFrameMetricsMeasured(callback: Callback<FrameMetrics>): void {
+      this.offSync(this.nativeObj, 'frameMetricsMeasured', callback);
+    }
+
     public setDefaultDensityEnabled(enabled: boolean): void {
       this.setDefaultDensityEnabled(this.nativeObj, enabled);
     }
@@ -3920,6 +3980,8 @@ export interface Window {
     offUiExtensionSecureLimitChange(callback?: Callback<boolean>): void;
     onOcclusionStateChanged(callback: Callback<OcclusionState>): void;
     offOcclusionStateChanged(callback?: Callback<OcclusionState>): void;
+    onFrameMetricsMeasured(callback: Callback<FrameMetrics>): void;
+    offFrameMetricsMeasured(callback: Callback<FrameMetrics>): void;
     onWindowStatusDidChange(callback: Callback<WindowStatusType>): void;
     offWindowStatusDidChange(callback?: Callback<WindowStatusType>): void;
     onRectChangeInGlobalDisplay(callback: Callback<RectChangeOptions>): void;
@@ -4322,6 +4384,11 @@ function runWindowStatusCallback(cb: object, cbArg: int): void {
 function runOcclusionStateChangeCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: OcclusionState) => void;
     func(cbArg as OcclusionState);
+}
+
+function runFrameMetricsChangeCallback(cb: object, cbArg: object): void {
+    const func = cb as (cbArg: FrameMetrics) => void;
+    func(cbArg as FrameMetrics);
 }
 
 function runWindowTouchOutCallback(cb: object): void {

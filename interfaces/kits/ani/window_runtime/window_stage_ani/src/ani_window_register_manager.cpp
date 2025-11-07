@@ -49,6 +49,7 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     {WINDOW_TITLE_BUTTON_RECT_CHANGE_CB, RegisterListenerType::WINDOW_TITLE_BUTTON_RECT_CHANGE_CB},
     {WINDOW_VISIBILITY_CHANGE_CB, RegisterListenerType::WINDOW_VISIBILITY_CHANGE_CB},
     {OCCLUSION_STATE_CHANGE_CB, RegisterListenerType::OCCLUSION_STATE_CHANGE_CB},
+    {FRAME_METRICS_MEASURED_CHANGE_CB, RegisterListenerType::FRAME_METRICS_MEASURED_CHANGE_CB},
     {WINDOW_NO_INTERACTION_DETECT_CB, RegisterListenerType::WINDOW_NO_INTERACTION_DETECT_CB},
     {WINDOW_RECT_CHANGE_CB, RegisterListenerType::WINDOW_RECT_CHANGE_CB},
     {SUB_WINDOW_CLOSE_CB, RegisterListenerType::SUB_WINDOW_CLOSE_CB},
@@ -431,6 +432,28 @@ WmErrorCode AniWindowRegisterManager::ProcessOcclusionStateChangeRegister(const 
     return retErrCode;
 }
 
+WmErrorCode AniWindowRegisterManager::ProcessFrameMetricsMeasuredChangeRegister(const sptr<AniWindowListener>& listener,
+    sptr<Window> window, bool isRegister, ani_env* env)
+{
+    if (window == nullptr || listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] window or listener is null");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    WMError retCode = WMError::WM_OK;
+    sptr<IFrameMetricsChangedListener> thisListener(listener);
+    if (isRegister) {
+        retCode = window->RegisterFrameMetricsChangeListener(thisListener);
+    } else {
+        retCode = window->UnregisterFrameMetricsChangeListener(thisListener);
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI] retCode=%{public}d", static_cast<int32_t>(retCode));
+    auto retErrCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    if (WM_JS_TO_ERROR_CODE_MAP.count(retCode) > 0) {
+        retErrCode = WM_JS_TO_ERROR_CODE_MAP.at(retCode);
+    }
+    return retErrCode;
+}
+
 WmErrorCode AniWindowRegisterManager::ProcessScreenshotRegister(sptr<AniWindowListener> listener,
     sptr<Window> window, bool isRegister, ani_env* env)
 {
@@ -607,6 +630,8 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowListener(RegisterListenerType
             return ProcessWindowVisibilityChangeRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::OCCLUSION_STATE_CHANGE_CB):
             return ProcessOcclusionStateChangeRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::FRAME_METRICS_MEASURED_CHANGE_CB):
+                return ProcessFrameMetricsMeasuredChangeRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::WINDOW_RECT_CHANGE_CB):
             return ProcessWindowRectChangeRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::SUB_WINDOW_CLOSE_CB):
