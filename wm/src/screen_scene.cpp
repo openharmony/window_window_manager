@@ -78,7 +78,7 @@ WMError ScreenScene::Destroy(uint32_t reason)
         };
     }
     if (handler_) {
-        handler_->PostTask(task, "ScreenScene:Destroy");
+        handler_->PostSyncTask(task, "ScreenScene:Destroy");
     } else {
         task();
     }
