@@ -2144,7 +2144,7 @@ export class WindowStageInternal implements WindowStage {
       try {
         this.loadContentSync(this.nativeObj, path, storage);
         callback(new BusinessError(), undefined);
-      } catch (err: Error) {
+      } catch (err) {
         callback(err as BusinessError, undefined);
       }
     }
@@ -2154,7 +2154,7 @@ export class WindowStageInternal implements WindowStage {
         try {
           this.loadContentSync(this.nativeObj, path, storage);
           resolve(undefined);
-        } catch (err: Error) {
+        } catch (err) {
           reject(err as BusinessError);
         }
       });
@@ -2164,7 +2164,7 @@ export class WindowStageInternal implements WindowStage {
         try {
         this.loadContentSync(this.nativeObj, path, undefined);
         callback(new BusinessError(), undefined);
-      } catch (err: Error) {
+      } catch (err) {
         callback(err as BusinessError, undefined);
       }
     }
@@ -3087,7 +3087,7 @@ export class WindowInternal implements Window {
         try {
           this.setUIContentSync(this.nativeObj, path);
           resolve(undefined);
-        } catch (err: Error) {
+        } catch (err) {
           reject(err as BusinessError);
         }
       });
@@ -3097,7 +3097,7 @@ export class WindowInternal implements Window {
       try {
         this.setUIContentSync(this.nativeObj, path);
         callback(new BusinessError(), undefined);
-      } catch (err: Error) {
+      } catch (err) {
         callback(err as BusinessError, undefined);
       }
     }
@@ -3107,7 +3107,7 @@ export class WindowInternal implements Window {
         try {
           this.loadContentSync(this.nativeObj, path, storage);
           resolve(undefined);
-        } catch (err: Error) {
+        } catch (err) {
           reject(err as BusinessError);
         }
       });
@@ -3117,7 +3117,7 @@ export class WindowInternal implements Window {
       try {
         this.loadContentSync(this.nativeObj, path, storage);
         callback(new BusinessError(), undefined);
-      } catch (err: Error) {
+      } catch (err) {
         callback(err as BusinessError, undefined);
       }
     }
@@ -3127,7 +3127,7 @@ export class WindowInternal implements Window {
         try {
           this.loadContentSync(this.nativeObj, path);
           resolve(undefined);
-        } catch (err: Error) {
+        } catch (err) {
           reject(err as BusinessError);
         }
       });
@@ -3137,7 +3137,7 @@ export class WindowInternal implements Window {
       try {
         this.loadContentSync(this.nativeObj, path);
         callback(new BusinessError(), undefined);
-      } catch (err: Error) {
+      } catch (err) {
         callback(err as BusinessError, undefined);
       }
     }
