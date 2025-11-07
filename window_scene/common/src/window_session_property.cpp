@@ -2748,12 +2748,12 @@ float WindowSessionProperty::GetAspectRatio() const
     return aspectRatio_;
 }
 
-void WindowSessionProperty::SetStatusBarHeight(int32_t statusBarHeight)
+void WindowSessionProperty::SetStatusBarHeightInImmersive(int32_t statusBarHeight)
 {
     statusBarHeight_ = statusBarHeight;
 }
  
-int32_t WindowSessionProperty::GetStatusBarHeight() const
+int32_t WindowSessionProperty::GetStatusBarHeightInImmersive() const
 {
     return statusBarHeight_;
 }
