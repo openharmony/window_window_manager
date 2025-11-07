@@ -4117,8 +4117,7 @@ WSError SceneSessionManager::CheckSubSessionStartedByExtension(const sptr<IRemot
             return WSError::WS_OK;
         }
     }
-    if (info.extensionAbilityType == AppExecFwk::ExtensionAbilityType::UNSPECIFIED &&
-        SessionPermission::IsSystemCalling()) {
+    if (SessionPermission::IsSystemCalling()) {
         TLOGD(WmsLogTag::WMS_UIEXT, "is system app");
         return WSError::WS_OK;
     }
