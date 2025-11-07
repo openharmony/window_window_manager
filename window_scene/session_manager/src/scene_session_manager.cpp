@@ -3740,7 +3740,8 @@ void SceneSessionManager::BuildCancelPointerEvent(const std::shared_ptr<MMI::Poi
 
 void SceneSessionManager::SendCancelEventBeforeEraseSession(const sptr<SceneSession>& sceneSession)
 {
-    auto task = [this, needCancelEventSceneSession = sceneSession] {
+    auto task = [this, weakSceneSession = wptr(sceneSession)] {
+        auto needCancelEventSceneSession = weakSceneSession.promote();
         if (needCancelEventSceneSession == nullptr) {
             TLOGI(WmsLogTag::WMS_EVENT, "scenesession is nullptr, needn't send cancel event");
             return;
@@ -3774,6 +3775,7 @@ void SceneSessionManager::EraseSceneSessionMapById(int32_t persistentId)
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession != nullptr) {
         RemovePreLoadStartingWindowFromMap(sceneSession->GetSessionInfo());
+        sceneSession->ClearLifeCycleTask();
     } else {
         TLOGW(WmsLogTag::WMS_PATTERN, "session is nullptr id: %{public}d", persistentId);
     }
