@@ -422,6 +422,12 @@ WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarPropert
     return SetSpecificBarProperty(type, property);
 }
 
+WMError WindowImpl::UpdateSystemBarPropertyForPage(WindowType type,
+    const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag)
+{
+    return SetSpecificBarProperty(type, systemBarProperty);
+}
+
 WMError WindowImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
 {
     WLOGI("Window %{public}u type %{public}u enable:%{public}u, bgColor:%{public}x, Color:%{public}x",

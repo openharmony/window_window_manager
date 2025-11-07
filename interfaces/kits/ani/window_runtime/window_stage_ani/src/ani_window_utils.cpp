@@ -674,27 +674,38 @@ void AniWindowUtils::UpdateSystemBarProperties(std::map<WindowType, SystemBarPro
     return;
 }
 
-bool AniWindowUtils::SetSpecificSystemBarEnabled(ani_env* env,
-                                                 std::map<WindowType,
-                                                 SystemBarProperty>& systemBarProperties,
-                                                 ani_string aniName,
-                                                 ani_boolean aniEnable,
-                                                 ani_boolean aniEnableAnimation)
+bool AniWindowUtils::GetSpecificBarStatus(ani_env* env,
+    ani_string aniName, ani_boolean aniEnable, ani_object aniAnimation,
+    WindowType& type, SystemBarProperty& systemBarProperty, SystemBarPropertyFlag& systemBarPropertyFlag)
 {
     std::string barName;
     GetStdString(env, aniName, barName);
-    bool enable = static_cast<bool>(aniEnable);
-    bool enableAnimation = static_cast<bool>(aniEnableAnimation);
-
     if (barName.compare("status") == 0) {
-        systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = enable;
-        systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_ = enableAnimation;
+        type = WindowType::WINDOW_TYPE_STATUS_BAR;
     } else if (barName.compare("navigation") == 0) {
-        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = enable;
-        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableAnimation_ = enableAnimation;
+        type = WindowType::WINDOW_TYPE_NAVIGATION_BAR;
     } else if (barName.compare("navigationIndicator") == 0) {
-        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enable_ = enable;
-        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enableAnimation_ = enableAnimation;
+        type = WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR;
+    } else {
+        TLOGE(WmsLogTag::WMS_IMMS, "[ANI] name is invalid");
+        return false;
+    }
+    systemBarProperty.enable_ = static_cast<bool>(aniEnable);
+    systemBarPropertyFlag.enableFlag = true;
+
+    ani_boolean isUndefined;
+    if (env->Reference_IsUndefined(aniAnimation, &isUndefined) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "[ANI] check boolean_object failed");
+        return false;
+    }
+    if (!isUndefined) {
+        ani_boolean bool_value;
+        if (env->Object_CallMethodByName_Boolean(aniAnimation, "unboxed", "z", &bool_value) != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_IMMS, "[ANI] Object_CallMethodByName_Boolean failed");
+            return false;
+        }
+        systemBarProperty.enableAnimation_ = static_cast<bool>(bool_value);
+        systemBarPropertyFlag.enableAnimationFlag = true;
     }
     return true;
 }
@@ -718,21 +729,6 @@ void* AniWindowUtils::GetAbilityContext(ani_env *env, ani_object aniObj)
         return nullptr;
     }
     return (void*)nativeContextLong;
-}
-
-void AniWindowUtils::GetSpecificBarStatus(sptr<Window>& window, const std::string& name,
-    std::map<WindowType, SystemBarProperty>& newSystemBarProperties,
-    std::map<WindowType, SystemBarProperty>& systemBarProperties)
-{
-    auto type = (name.compare("status") == 0) ? WindowType::WINDOW_TYPE_STATUS_BAR :
-                (name.compare("navigation") == 0) ? WindowType::WINDOW_TYPE_NAVIGATION_BAR :
-                WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR;
-    auto property = window->GetSystemBarPropertyByType(type);
-    systemBarProperties[type] = property;
-    systemBarProperties[type].enable_ = newSystemBarProperties[type].enable_;
-    systemBarProperties[type].enableAnimation_ = newSystemBarProperties[type].enableAnimation_;
-    systemBarProperties[type].settingFlag_ = systemBarProperties[type].settingFlag_ |
-        SystemBarSettingFlag::ENABLE_SETTING;
 }
 
 WmErrorCode AniWindowUtils::ToErrorCode(WMError error, WmErrorCode defaultCode)
