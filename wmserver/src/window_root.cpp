@@ -401,7 +401,7 @@ void WindowRoot::GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<Unre
         int32_t curWindowId = static_cast<int32_t>(winId);
         if (curWindowId == windowId) {
             WLOGFI("windowId: %{public}d is parameter chosen", curWindowId);
-            FillUnreliableWindowInfo(windowNode, infos);
+            FillUnreliableWindowInfo(windowNode, infos);   
             continue;
         }
         if (!windowNode->currentVisibility_) {
