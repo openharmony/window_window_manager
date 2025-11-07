@@ -113,8 +113,6 @@ const std::string SCENE_BOARD_APP_IDENTIFIER = "";
 const std::string SCENE_SESSION_MANAGER_THREAD = "OS_SceneSessionManager";
 const std::string WINDOW_INFO_REPORT_THREAD = "OS_WindowInfoReportThread";
 const std::string SUPER_LAUNCHER = "SuperLauncher";
-const std::string HICAR = "HiCar";
-const std::string PAD_WITH_CAR = "PadWithCar";
 constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
 constexpr const char* ATOMIC_SERVICE_SESSION_ID = "com.ohos.param.sessionId";
 constexpr uint32_t MAX_BRIGHTNESS = 255;
@@ -208,6 +206,11 @@ const std::unordered_set<std::string> LAYOUT_INFO_WHITELIST = {
     "status_bar_battery_panel",
     "status_bar_focus_mode_paddle",
     "SCBStatusBar"
+};
+
+const std::unordered_set<std::string> PIP_SCENE_BLACKLIST = {
+    "PadWithCar",
+    "HiCar"
 };
 
 const std::chrono::milliseconds WAIT_TIME(3 * 1000); // 3 * 1000 wait for 3s
@@ -4287,7 +4290,7 @@ bool SceneSessionManager::IsPiPForbidden(const sptr<WindowSessionProperty>& prop
         return false;
     }
     std::string screenName = screenSession->GetName();
-    if (type == WindowType::WINDOW_TYPE_PIP && (screenName == HICAR || screenName == PAD_WITH_CAR)) {
+    if (type == WindowType::WINDOW_TYPE_PIP && PIP_SCENE_BLACKLIST.find(screenName) != PIP_SCENE_BLACKLIST.end()) {
         TLOGI(WmsLogTag::WMS_PIP, "screen name %{public}s", screenName.c_str());
         return true;
     }
