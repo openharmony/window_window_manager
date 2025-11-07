@@ -582,6 +582,7 @@ public:
     void SetFrameLayoutFinishListener(const NotifyFrameLayoutFinishFunc& func);
     void NotifyScreenshot();
     void RemoveLifeCycleTask(const LifeCycleTaskType& taskType);
+    void ClearLifeCycleTask();
     void PostLifeCycleTask(Task &&task, const std::string& name, const LifeCycleTaskType& taskType);
     WSError UpdateMaximizeMode(bool isMaximize);
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
