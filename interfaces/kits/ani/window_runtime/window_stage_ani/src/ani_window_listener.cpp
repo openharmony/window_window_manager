@@ -535,6 +535,30 @@ void AniWindowListener::OnOcclusionStateChanged(const WindowVisibilityState stat
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
+void AniWindowListener::OnFrameMetricsChanged(const FrameMetrics& metrics)
+{
+    const char* const where = __func__;
+    auto task = [self = weakRef_, metrics, where, env = env_] () {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] %{public}s: listener or env is null", where);
+            return;
+        }
+        AniWindowUtils::CallAniFunctionVoid(env, "L@ohos/window/window;", "runFrameMetricsChangeCallback",
+            nullptr, thisListener->aniCallback_, AniWindowUtils::CreateAniFrameMetrics(env, metrics));
+        TLOGND(WmsLogTag::WMS_ATTRIBUTE, "[ANI] %{public}s: firstDrawFrame=%{public}d"
+            ", inputHandlingDuration=%{public}" PRIu64 ", layoutMeasureDuration=%{public}" PRIu64
+            ", vsyncTimestamp=%{public}" PRIu64, where, metrics.firstDrawFrame_, metrics.inputHandlingDuration_,
+            metrics.layoutMeasureDuration_, metrics.vsyncTimestamp_);
+    };
+    if (!eventHandler_) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] main event handler is null");
+        return;
+    }
+    eventHandler_->PostTask(task, "[ANI] wms:AniWindowListener::OnFrameMetricsChanged", 0,
+        AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
 void AniWindowListener::OnWindowHighlightChange(bool isHighlight)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
