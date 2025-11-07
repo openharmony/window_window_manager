@@ -604,7 +604,6 @@ void AniWindowStage::RegisterWindowCallback(ani_env* env, ani_object obj, ani_lo
 
 void AniWindowStage::OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     auto windowScene = GetWindowScene().lock();
     if (windowScene == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI]windowScene is nullptr!");
@@ -623,7 +622,6 @@ void AniWindowStage::OnRegisterWindowCallback(ani_env* env, ani_string type, ani
     WmErrorCode ret = registerManager_->RegisterListener(mainWindow, cbType, CaseType::CASE_STAGE, env, callback, 0);
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret);
-        return;
     }
 }
 
@@ -641,7 +639,6 @@ void AniWindowStage::UnregisterWindowCallback(ani_env* env, ani_object obj, ani_
 
 void AniWindowStage::OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     auto windowScene = GetWindowScene().lock();
     if (windowScene == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI]windowScene is nullptr!");
