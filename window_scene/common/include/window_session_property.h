@@ -233,8 +233,8 @@ public:
     bool GetIsAbilityHook() const;
     void SetFollowScreenChange(bool isFollowScreenChange);
     bool GetFollowScreenChange() const;
-    void SetStatusBarHeight(int32_t statusBarHeight);
-    int32_t GetStatusBarHeight() const;
+    void SetStatusBarHeightInImmersive(int32_t statusBarHeight);
+    int32_t GetStatusBarHeightInImmersive() const;
 
     /*
      * Sub Window
