@@ -831,7 +831,8 @@ WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& content
         uiContent->SetHostParams(extensionConfig_);
         if (initByName) {
             if (envType == EnvironmentType::ANI) {
-                uiContent->InitializeByNameWithAniStorage(this, contentInfo, static_cast<ani_object>(storage));
+                uiContent->InitializeByNameWithAniStorage(this, contentInfo, static_cast<ani_object>(storage),
+                    property_->GetParentId());
             } else {
                 uiContent->InitializeByName(this, contentInfo, static_cast<napi_value>(storage),
                     property_->GetParentId());
