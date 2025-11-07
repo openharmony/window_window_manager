@@ -176,7 +176,7 @@ static void GetAndSetContext(napi_env env, napi_value optionObject, PipOption& o
     napi_value contextPtrValue = nullptr;
     void* contextPtr = nullptr;
     napi_get_named_property(env, optionObject, "context", &contextPtrValue);
-    napi_unwarp(env, contextPtrValue, &contextPtr);
+    napi_unwrap(env, contextPtrValue, &contextPtr);
     option.SetContext(contextPtr);
 }
 
