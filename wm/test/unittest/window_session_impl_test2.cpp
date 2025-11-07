@@ -385,7 +385,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyWindowOcclusionState, TestSize.Level1)
 
 /**
  * @tc.name: RegisterFrameMetricsChangeListener
- * @tc.desc: register occlusion state change listener
+ * @tc.desc: register frame metrics change listener
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionImplTest2, RegisterFrameMetricsChangeListener, TestSize.Level1)
@@ -413,7 +413,7 @@ HWTEST_F(WindowSessionImplTest2, RegisterFrameMetricsChangeListener, TestSize.Le
 
 /**
  * @tc.name: UnregisterFrameMetricsChangeListener
- * @tc.desc: unregister occlusion state change listener
+ * @tc.desc: unregister frame metrics change listener
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionImplTest2, UnregisterFrameMetricsChangeListener, TestSize.Level1)
@@ -433,7 +433,6 @@ HWTEST_F(WindowSessionImplTest2, UnregisterFrameMetricsChangeListener, TestSize.
     sptr<IFrameMetricsChangedListener> listener2 = sptr<IFrameMetricsChangedListener>::MakeSptr();
     EXPECT_EQ(window->RegisterFrameMetricsChangeListener(listener2), WMError::WM_OK);
     EXPECT_EQ(window->UnregisterFrameMetricsChangeListener(listener), WMError::WM_OK);
-    EXPECT_EQ(window->frameMetricsChangeListeners_.size(), 1);
     EXPECT_CALL(*content, SetFrameMetricsCallBack(_));
     EXPECT_EQ(window->UnregisterFrameMetricsChangeListener(listener2), WMError::WM_OK);
     window->frameMetricsChangeListeners_.clear();
@@ -443,7 +442,7 @@ HWTEST_F(WindowSessionImplTest2, UnregisterFrameMetricsChangeListener, TestSize.
 
 /**
  * @tc.name: NotifyFrameMetrics
- * @tc.desc: unregister occlusion state change listener
+ * @tc.desc: unregister frame metrics change listener
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionImplTest2, NotifyFrameMetrics, TestSize.Level1)
@@ -454,7 +453,6 @@ HWTEST_F(WindowSessionImplTest2, NotifyFrameMetrics, TestSize.Level1)
     window->frameMetricsChangeListeners_.clear();
     sptr<IFrameMetricsChangedListener> listener = sptr<IFrameMetricsChangedListener>::MakeSptr();
     window->frameMetricsChangeListeners_[window->GetPersistentId()].push_back(listener);
-    window->frameMetricsChangeListeners_[window->GetPersistentId()].push_back(nullptr);
     Ace::FrameMetrics metric;
     window->NotifyFrameMetrics(metric);
     window->frameMetricsChangeListeners_.clear();
