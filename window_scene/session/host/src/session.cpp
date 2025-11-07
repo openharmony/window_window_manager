@@ -3044,7 +3044,7 @@ bool Session::HasSnapshot()
         persistentId_, sessionInfo_.bundleName_.c_str());
     bool hasSnapshot = false;
     for (uint32_t screenStatus = SCREEN_UNKNOWN; screenStatus < SCREEN_COUNT; screenStatus++) {
-        hasSnapshot = hasSnapshot || HasSnapshot(screenStatus);
+        hasSnapshot |= HasSnapshot(screenStatus);
     }
     return hasSnapshot || HasSnapshotFreeMultiWindow();
 }
