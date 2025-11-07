@@ -4430,7 +4430,7 @@ bool WindowSessionImpl::IsHitTitleBar(std::shared_ptr<MMI::PointerEvent>& pointe
     }
     Rect windowRect = property_->GetWindowRect();
     int32_t decorHeight = uiContent->GetContainerModalTitleHeight();
-    int32_t statusBarHeight = property_->GetStatusBarHeight();
+    int32_t statusBarHeight = property_->GetStatusBarHeightInImmersive();
     MMI::PointerEvent::PointerItem pointerItem;
     bool isValidPointItem = pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     bool isHitTitleBarX = pointerItem.GetDisplayX() > windowRect.posX_
@@ -5780,7 +5780,7 @@ void WindowSessionImpl::NotifyTitleChange(bool isShow, int32_t height)
     int32_t posX = property_->GetWindowRect().posX_;
     int32_t posY = property_->GetWindowRect().posY_;
     int32_t decorHeight = uiContent->GetContainerModalTitleHeight();
-    property_->SetStatusBarHeight(height);
+    property_->SetStatusBarHeightInImmersive(height);
     Rect rect = {posX, posY + height, width, decorHeight};
     for (auto& listener : windowTitleChangeListeners) {
         if (listener != nullptr) {
