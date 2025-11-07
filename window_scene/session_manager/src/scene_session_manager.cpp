@@ -208,7 +208,7 @@ const std::unordered_set<std::string> LAYOUT_INFO_WHITELIST = {
     "SCBStatusBar"
 };
 
-const std::unordered_set<std::string> PIP_SCENE_BLACKLIST = {
+const std::unordered_set<std::string> PIP_SCENE_FORBID_LIST = {
     "PadWithCar",
     "HiCar"
 };
@@ -4290,7 +4290,7 @@ bool SceneSessionManager::IsPiPForbidden(const sptr<WindowSessionProperty>& prop
         return false;
     }
     std::string screenName = screenSession->GetName();
-    if (type == WindowType::WINDOW_TYPE_PIP && PIP_SCENE_BLACKLIST.find(screenName) != PIP_SCENE_BLACKLIST.end()) {
+    if (type == WindowType::WINDOW_TYPE_PIP && PIP_SCENE_FORBID_LIST.find(screenName) != PIP_SCENE_FORBID_LIST.end()) {
         TLOGI(WmsLogTag::WMS_PIP, "screen name %{public}s", screenName.c_str());
         return true;
     }
