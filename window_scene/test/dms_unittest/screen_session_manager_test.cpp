@@ -7429,6 +7429,41 @@ HWTEST_F(ScreenSessionManagerTest, UpdateCoordinationRefreshRate, TestSize.Level
     ssm_->UpdateCoordinationRefreshRate(refreshRate);
     EXPECT_TRUE(ssm_->GetScreenSession(0));
 }
+
+/**
+ * @tc.name: SetConfigForInputmethod
+ * @tc.desc: SetConfigForInputmethod
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetConfigForInputmethod, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "testVirtualOption";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    VirtualScreenOption option;
+    option.supportsFocus_ = false;
+    option.supportsInput_ = false;
+    ssm_->SetConfigForInputmethod(screenId, option);
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+    EXPECT_EQ(screenSession->GetSupportsFocus(), false);
+    EXPECT_EQ(screenSession->GetSupportsInput(), false);
+
+    option.supportsFocus_ = true;
+    option.supportsInput_ = true;
+    ssm_->SetConfigForInputmethod(screenId, option);
+    screenSession = ssm_->GetScreenSession(screenId);
+    EXPECT_EQ(screenSession->GetSupportsFocus(), true);
+    EXPECT_EQ(screenSession->GetSupportsInput(), true);
+
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    screenId++;
+    ssm_->SetConfigForInputmethod(screenId, option);
+    EXPECT_TRUE(logMsg.find("screenSession is nullptr!") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -6467,6 +6467,10 @@ WMError SceneSession::HandleActionUpdateWindowShadowEnabled(const sptr<WindowSes
 WMError SceneSession::HandleActionUpdateFocusable(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
+    if (!ScreenSessionManagerClient::GetInstance().GetSupportsFocus(GetSessionProperty()->GetDisplayId())) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "screen of current window is not allowed to be focused");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
     SetFocusable(property->GetFocusable());
     NotifySessionChangeByActionNotifyManager(property, action);
     return WMError::WM_OK;
