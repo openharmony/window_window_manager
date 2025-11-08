@@ -4604,7 +4604,6 @@ HWTEST_F(ScreenSessionTest, RemoveRotationCorrection, TestSize.Level1)
  
     rotation = static_cast<Rotation>(100);
     session->RemoveRotationCorrection(rotation, FoldDisplayMode::FULL);
-    GTEST_SKIP();
 }
  
 /**
@@ -4709,7 +4708,6 @@ HWTEST_F(ScreenSessionTest, AddRotationCorrection, TestSize.Level1)
  
     rotation = static_cast<Rotation>(100);
     session->AddRotationCorrection(rotation, FoldDisplayMode::FULL);
-    GTEST_SKIP();
 }
 
 /**
