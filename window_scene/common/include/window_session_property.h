@@ -598,7 +598,7 @@ private:
      */
     uint32_t avoidAreaOption_ = 0;
 
-    int32_t statusBarHeight_ = 0;
+    int32_t statusBarHeightInImmersive_ = 0;
     
     /*
      * Window Focus
