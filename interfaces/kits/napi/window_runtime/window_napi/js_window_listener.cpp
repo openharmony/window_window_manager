@@ -757,7 +757,12 @@ void JsWindowListener::OnFrameMetricsChanged(const FrameMetrics& metrics)
             return;
         }
         HandleScope handleScope(env);
-        napi_value argv[] = { ConvertFrameMetricsToJsValue(env, metrics) };
+        napi_value metricsValue = ConvertFrameMetricsToJsValue(env, metrics);
+        if (metricsValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: ConvertFrameMetricsToJsValue failed", where);
+            return;
+        }
+        napi_value argv[] = { metricsValue };
         thisListener->CallJsMethod(FRAME_METRICS_MEASURED_CHANGE_CB.c_str(), argv, ArraySize(argv));
         TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: firstDrawFrame=%{public}d"
             ", inputHandlingDuration=%{public}" PRIu64 ", layoutMeasureDuration=%{public}" PRIu64
