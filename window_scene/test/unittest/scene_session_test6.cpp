@@ -1710,6 +1710,38 @@ HWTEST_F(SceneSessionTest6, NotifySnapshotUpdate, TestSize.Level1)
     ret = sceneSession->NotifySnapshotUpdate();
     EXPECT_EQ(ret, WMError::WM_OK);
 }
+
+/**
+ * @tc.name: GetMoveRectForWindowDrag_Test
+ * @tc.desc: GetMoveRectForWindowDrag_Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, GetMoveRectForWindowDrag, TestSize.Level0)
+{
+    SessionInfo info;
+    // Case 1: sessionProperty is null
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->property_ = nullptr;
+    WSRect rect1 = session->GetMoveRectForWindowDrag();
+    EXPECT_EQ(rect1, session->GetGlobalOrWinRect());
+
+    // Case 2: Window type is WINDOW_TYPE_INPUT_METHOD_FLOAT and keyboardPanelSession_ is not null
+    session->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    session->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    session->keyboardPanelSession_ = sptr<SceneSession>::MakeSptr(info, nullptr);
+    WSRect rect2 = session->GetMoveRectForWindowDrag();
+    EXPECT_EQ(rect2, session->keyboardPanelSession_->GetSessionRect());
+
+    // Case 3: Window type is WINDOW_TYPE_INPUT_METHOD_FLOAT and keyboardPanelSession_ is null
+    session->keyboardPanelSession_ = nullptr;
+    WSRect rect3 = session->GetMoveRectForWindowDrag();
+    EXPECT_EQ(rect3, session->GetGlobalOrWinRect());
+
+    // Case 4: Window type is not WINDOW_TYPE_INPUT_METHOD_FLOAT
+    session->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    WSRect rect4 = session->GetMoveRectForWindowDrag();
+    EXPECT_EQ(rect4, session->GetGlobalOrWinRect());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
