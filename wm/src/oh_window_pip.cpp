@@ -287,11 +287,6 @@ int32_t OH_PictureInPicture_SetPipControlEnabled(uint32_t controllerId, PictureI
 
 int32_t OH_PictureInPicture_SetParentWindowId(uint32_t controllerId, uint32_t windowId)
 {
-    const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "");
-    if (multiWindowUIType != "FreeFormMultiWindow") {
-        TLOGE(WmsLogTag::WMS_PIP, "device not support");
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
     if (windowId <= 0) {
         TLOGE(WmsLogTag::WMS_PIP, "windowId invalid: %{public}d", windowId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
