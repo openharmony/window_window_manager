@@ -70,20 +70,16 @@ namespace {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
         dualDisplayFoldPolicy.ChangeScreenDisplayMode(FoldDisplayMode::UNKNOWN);
-        FoldDisplayMode mode = ssm_.GetFoldDisplayMode();
-        ASSERT_EQ(mode, ssm_.GetFoldDisplayMode());
+        EXPECT_FALSE(dualDisplayFoldPolicy.onBootAnimation_);
 
         dualDisplayFoldPolicy.ChangeScreenDisplayMode(FoldDisplayMode::SUB);
-        mode = ssm_.GetFoldDisplayMode();
-        ASSERT_EQ(mode, ssm_.GetFoldDisplayMode());
+        EXPECT_FALSE(dualDisplayFoldPolicy.onBootAnimation_);
 
         dualDisplayFoldPolicy.ChangeScreenDisplayMode(FoldDisplayMode::MAIN);
-        mode = ssm_.GetFoldDisplayMode();
-        ASSERT_EQ(mode, ssm_.GetFoldDisplayMode());
+        EXPECT_FALSE(dualDisplayFoldPolicy.onBootAnimation_);
 
         dualDisplayFoldPolicy.ChangeScreenDisplayMode(FoldDisplayMode::COORDINATION);
-        mode = ssm_.GetFoldDisplayMode();
-        ASSERT_EQ(mode, ssm_.GetFoldDisplayMode());
+        EXPECT_FALSE(dualDisplayFoldPolicy.onBootAnimation_);
     }
 
     /**
@@ -125,8 +121,7 @@ namespace {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
         dualDisplayFoldPolicy.SendSensorResult(FoldStatus::UNKNOWN);
-        FoldDisplayMode mode = ssm_.GetFoldDisplayMode();
-        ASSERT_EQ(mode, ssm_.GetFoldDisplayMode());
+        EXPECT_FALSE(dualDisplayFoldPolicy.onBootAnimation_);
     }
 
     /**
@@ -184,8 +179,7 @@ namespace {
         dualDisplayFoldPolicy.currentFoldStatus_ = FoldStatus::UNKNOWN;
         dualDisplayFoldPolicy.currentDisplayMode_ = FoldDisplayMode::MAIN;
         dualDisplayFoldPolicy.RecoverWhenBootAnimationExit();
-        FoldDisplayMode mode = ssm_.GetFoldDisplayMode();
-        ASSERT_EQ(mode, ssm_.GetFoldDisplayMode());
+        ASSERT_FALSE(dualDisplayFoldPolicy.onBootAnimation_);
     }
 
     /**
@@ -200,8 +194,7 @@ namespace {
         dualDisplayFoldPolicy.currentFoldStatus_ = FoldStatus::UNKNOWN;
         dualDisplayFoldPolicy.currentDisplayMode_ = FoldDisplayMode::MAIN;
         dualDisplayFoldPolicy.UpdateForPhyScreenPropertyChange();
-        FoldDisplayMode mode = ssm_.GetFoldDisplayMode();
-        ASSERT_EQ(mode, ssm_.GetFoldDisplayMode());
+        ASSERT_FALSE(dualDisplayFoldPolicy.onBootAnimation_);
     }
 
     /**
@@ -218,8 +211,7 @@ namespace {
         ScreenId offScreenId = 0;
         ScreenId onScreenId = 5;
         dualDisplayFoldPolicy.ChangeScreenDisplayModeInner(screenSession, offScreenId, onScreenId);
-        int res = 0;
-        ASSERT_EQ(res, 0);
+        ASSERT_EQ(dualDisplayFoldPolicy.GetCurrentScreenId(), 5);
     }
 
     /**
@@ -271,8 +263,7 @@ namespace {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
         dualDisplayFoldPolicy.UpdateForPhyScreenPropertyChange();
-        FoldDisplayMode mode = ssm_.GetFoldDisplayMode();
-        ASSERT_EQ(mode, ssm_.GetFoldDisplayMode());
+        ASSERT_FALSE(dualDisplayFoldPolicy.onBootAnimation_);
     }
 
     /**
