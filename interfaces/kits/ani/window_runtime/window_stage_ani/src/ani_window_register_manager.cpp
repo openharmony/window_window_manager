@@ -631,7 +631,7 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowListener(RegisterListenerType
         case static_cast<uint32_t>(RegisterListenerType::OCCLUSION_STATE_CHANGE_CB):
             return ProcessOcclusionStateChangeRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::FRAME_METRICS_MEASURED_CHANGE_CB):
-                return ProcessFrameMetricsMeasuredChangeRegister(windowManagerListener, window, isRegister, env);
+            return ProcessFrameMetricsMeasuredChangeRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::WINDOW_RECT_CHANGE_CB):
             return ProcessWindowRectChangeRegister(windowManagerListener, window, isRegister, env);
         case static_cast<uint32_t>(RegisterListenerType::SUB_WINDOW_CLOSE_CB):

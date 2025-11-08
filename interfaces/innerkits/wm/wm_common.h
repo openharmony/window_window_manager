@@ -1583,15 +1583,14 @@ struct FrameMetrics : public Parcelable {
      */
     static FrameMetrics* Unmarshalling(Parcel& parcel)
     {
-        auto info = new FrameMetrics();
+        auto info = std::make_shared<FrameMetrics>();
         if (!parcel.ReadBool(info->firstDrawFrame_) ||
             !parcel.ReadUint64(info->inputHandlingDuration_) ||
             !parcel.ReadUint64(info->layoutMeasureDuration_) ||
             !parcel.ReadUint64(info->vsyncTimestamp_)) {
-            delete info;
             return nullptr;
         }
-        return info;
+        return info.get();
     }
 };
 
