@@ -102,7 +102,7 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, ChangeScreenDisplayMode, TestSize.Level
     ScreenId screenId = 0;
     auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
     if (nullptr == screenSession) {
-        return;
+        GTEST_SKIP();
     }
     displayMode = FoldDisplayMode::MAIN;
     policy.ChangeScreenDisplayMode(displayMode);
@@ -386,14 +386,20 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SetStatusGlobalFullActiveRectAndTpFeatu
  */
 HWTEST_F(SecondaryDisplayFoldPolicyTest, ReportFoldDisplayModeChange, TestSize.Level1)
 {
-    ONLY_FOR_SECONDARY_DISPLAY_FOLD
+    if (!FoldScreenStateInternel::ISSecondaryDisplayFoldDevice()) {
+        return;
+    }
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
     SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
 
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
     policy.ReportFoldDisplayModeChange(displayMode);
-    EXPECT_EQ(FoldDisplayMode::UNKNOWN, displayMode);
+    EXPECT_TRUE(g_errLog.find("write HiSysEvent error") == std::string::npos);
+    g_errLog.clear();
+    LOG_SetCallback(nullptr);
 
     displayMode = FoldDisplayMode::FULL;
     policy.ReportFoldDisplayModeChange(displayMode);

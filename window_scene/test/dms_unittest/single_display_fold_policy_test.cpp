@@ -249,9 +249,13 @@ HWTEST_F(SingleDisplayFoldPolicyTest, ReportFoldDisplayModeChange, TestSize.Leve
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
     SingleDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
 
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
     policy.ReportFoldDisplayModeChange(displayMode);
-    EXPECT_EQ(FoldDisplayMode::UNKNOWN, displayMode);
+    EXPECT_TRUE(g_errLog.find("Write HiSysEvent error") == std::string::npos);
+    g_errLog.clear();
+    LOG_SetCallback(nullptr);
 
     displayMode = FoldDisplayMode::FULL;
     policy.ReportFoldDisplayModeChange(displayMode);

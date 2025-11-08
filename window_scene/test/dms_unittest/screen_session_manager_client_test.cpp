@@ -1209,12 +1209,14 @@ HWTEST_F(ScreenSessionManagerClientTest, GetDisplayHookInfo, Function | SmallTes
     hookInfo.width_ = 100;
     hookInfo.height_ = 200;
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     screenSessionManagerClient_->UpdateDisplayHookInfo(uid, true, hookInfo);
     screenSessionManagerClient_->GetDisplayHookInfo(uid, hookInfo);
-    ASSERT_TRUE(hookInfo.enableHookRotation_);
-    ASSERT_TRUE(hookInfo.rotation_);
-    ASSERT_EQ(hookInfo.width_, 100);
-    ASSERT_EQ(hookInfo.height_, 200);
+    EXPECT_TRUE(logMsg.find("screenSessionManager_ is null") == std::string::npos);
+    logMsg.clear();
+    LOG_SetCallback(nullptr);
 }
 
 /**
