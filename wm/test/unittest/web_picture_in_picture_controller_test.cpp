@@ -261,14 +261,14 @@ HWTEST_F(WebPictureInPictureControllerTest, UpdateWinRectByComponent, TestSize.L
  */
 HWTEST_F(WebPictureInPictureControllerTest, SetPipParentWindowId, TestSize.Level1)
 {
+    auto webPipControl = sptr<WebPictureInPictureController>::MakeSptr(config);
+    uint32_t windowId = 10000;
     const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "");
     bool isPC = multiWindowUIType == "FreeFormMultiWindow";
     if (!isPC) {
         EXPECT_EQ(webPipControl->SetPipParentWindowId(windowId), WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
         return;
     }
-    auto webPipControl = sptr<WebPictureInPictureController>::MakeSptr(config);
-    uint32_t windowId = 10000;
     webPipControl->mainWindow_  = nullptr;
     EXPECT_EQ(webPipControl->SetPipParentWindowId(windowId), WMError::WM_ERROR_PIP_INTERNAL_ERROR);
  
