@@ -126,6 +126,7 @@ public:
     void NotifyExtendScreenDestroyFinish();
     void NotifyScreenMaskAppear();
     void NotifySwitchUserAnimationFinish(const std::string& description);
+    void NotifySwitchUserAnimationFinishByWindow();
     void RegisterSwitchUserAnimationNotification(const std::string& description);
     void OnAnimationFinish() override;
     void SetInternalClipToBounds(ScreenId screenId, bool clipToBounds) override;
