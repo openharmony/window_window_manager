@@ -2549,8 +2549,33 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->SetSingleHandTransform(singleHandTransform_);
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, displayId: %{public}" PRIu64,
             sceneSession->GetPersistentId(), sceneSession->GetSessionProperty()->GetDisplayId());
+        SetBufferAvailable(sceneSession);
     }
     return sceneSession;
+}
+
+void SceneSessionManager::SetBufferAvailable(sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "scene session is nullptr");
+        return;
+    }
+    const auto type = sceneSession->GetWindowType();
+    TLOGI(WmsLogTag::WMS_SCB, "id: %{public}d, type: %{public}d", sceneSession->GetPersistentId(), type);
+    if (type == WindowType::WINDOW_TYPE_DESKTOP || type == WindowType::WINDOW_TYPE_KEYGUARD ||
+        type == WindowType::WINDOW_TYPE_WALLPAPER) {
+        TLOGI(WmsLogTag::WMS_SCB, "enter buffer available callback");
+        auto surfaceNode = sceneSession->GetSurfaceNode();
+        if (surfaceNode == nullptr) {
+            TLOGE(WmsLogTag::WMS_SCB, "surface node is nullptr");
+            return;
+        }
+        surfaceNode->SetBufferAvailableCallback([where = __func__]() {
+            TLOGNE(WmsLogTag::WMS_SCB, "%{public}s BufferAvailableCallback called", where);
+            ScreenSessionManagerClient::GetInstance().NotifySwitchUserAnimationFinishByWindow();
+        });
+        RSTransactionAdapter::FlushImplicitTransaction(surfaceNode);
+    }
 }
 
 void SceneSessionManager::GetEffectiveDragResizeType(DragResizeType& dragResizeType)
