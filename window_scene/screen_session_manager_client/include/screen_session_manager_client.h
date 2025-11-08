@@ -143,6 +143,7 @@ public:
      */
     std::shared_ptr<RSUIDirector> GetRSUIDirector(ScreenId screenId);
     std::shared_ptr<RSUIContext> GetRSUIContext(ScreenId screenId);
+    bool GetSupportsFocus(DisplayId displayId);
 
 protected:
     ScreenSessionManagerClient() = default;

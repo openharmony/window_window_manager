@@ -2794,8 +2794,14 @@ WMError WindowSessionImpl::SetFocusable(bool isFocusable)
     }
     TLOGI(WmsLogTag::WMS_FOCUS, "set focusable: windowId=%{public}d, isFocusable=%{public}d",
         property_->GetPersistentId(), isFocusable);
+    bool curIsFocusable = GetFocusable();
     property_->SetFocusable(isFocusable);
-    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
+    WMError ret = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
+    if (ret != WMError::WM_OK) {
+        property_->SetFocusable(curIsFocusable);
+        return ret;
+    }
+    return WMError::WM_OK;
 }
 
 bool WindowSessionImpl::GetFocusable() const
