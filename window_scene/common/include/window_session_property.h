@@ -233,7 +233,7 @@ public:
     bool GetIsAbilityHook() const;
     void SetFollowScreenChange(bool isFollowScreenChange);
     bool GetFollowScreenChange() const;
-    void SetStatusBarHeightInImmersive(int32_t statusBarHeight);
+    void SetStatusBarHeightInImmersive(int32_t statusBarHeightInImmersive);
     int32_t GetStatusBarHeightInImmersive() const;
 
     /*
