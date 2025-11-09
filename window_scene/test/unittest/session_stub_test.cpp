@@ -1298,6 +1298,14 @@ HWTEST_F(SessionStubTest, HandleGetTargetOrientationConfigInfo, Function | Small
     data.WriteUint32(1);
     data.WriteBool(true);
     data.WriteUint32(1);
+    
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteBool(true);
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteBool(true);
+    data.WriteUint32(1);
     auto result1 = session_->HandleGetTargetOrientationConfigInfo(data, reply);
     EXPECT_EQ(result1, ERR_NONE);
 }
