@@ -1259,29 +1259,109 @@ int SessionStub::HandleGetTargetOrientationConfigInfo(MessageParcel& data, Messa
 {
     TLOGD(WmsLogTag::WMS_ROTATION, "in");
     Orientation targetOrientation = static_cast<Orientation>(data.ReadUint32());
-    std::map<Rosen::WindowType, Rosen::SystemBarProperty> properties;
-    uint32_t size = data.ReadUint32();
-    constexpr uint32_t maxMapSize = 100;
-    if (size > maxMapSize) {
+    std::map<Rosen::WindowType, Rosen::SystemBarProperty> targetProperties;
+    std::map<Rosen::WindowType, Rosen::SystemBarProperty> currentProperties;
+    uint32_t targetPropertiesSize = 0;
+    if (!data.ReadUint32(targetPropertiesSize)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read targetPropertiesSize error");
+        return ERR_INVALID_DATA;
+    }
+    constexpr uint32_t WINDOW_TYPE_MAX_SIZE = 100;
+    if (targetPropertiesSize > WINDOW_TYPE_MAX_SIZE) {
         TLOGE(WmsLogTag::WMS_ROTATION, "size is invalid");
         return ERR_INVALID_DATA;
     }
-    for (uint32_t i = 0; i < size; i++) {
-        uint32_t type = data.ReadUint32();
-        if (type < static_cast<uint32_t>(WindowType::APP_WINDOW_BASE) ||
-            type > static_cast<uint32_t>(WindowType::WINDOW_TYPE_UI_EXTENSION)) {
-            TLOGD(WmsLogTag::WMS_ROTATION, "read type failed");
+    for (uint32_t i = 0; i < targetPropertiesSize; i++) {
+        uint32_t type = 0;
+        if (!data.ReadUint32(type)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "read type error");
             return ERR_INVALID_DATA;
         }
-        bool enable = data.ReadBool();
-        uint32_t backgroundColor = data.ReadUint32();
-        uint32_t contentColor = data.ReadUint32();
-        bool enableAnimation = data.ReadBool();
-        SystemBarSettingFlag settingFlag = static_cast<SystemBarSettingFlag>(data.ReadUint32());
+        if (type < static_cast<uint32_t>(WindowType::APP_WINDOW_BASE) ||
+            type > static_cast<uint32_t>(WindowType::WINDOW_TYPE_UI_EXTENSION)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "type is invalid");
+            return ERR_INVALID_DATA;
+        }
+        bool enable = false;
+        uint32_t backgroundColor = 0;
+        uint32_t contentColor = 0;
+        bool enableAnimation = false;
+        uint32_t settingFlagNumber = 0;
+        if (!data.ReadBool(enable)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "read enable error");
+            return ERR_INVALID_DATA;
+        }
+        if (!data.ReadUint32(backgroundColor)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "read backgroundColor error");
+            return ERR_INVALID_DATA;
+        }
+        if (!data.ReadUint32(contentColor)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "read contentColor error");
+            return ERR_INVALID_DATA;
+        }
+        if (!data.ReadBool(enableAnimation)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "read enableAnimation error");
+            return ERR_INVALID_DATA;
+        }
+        if (!data.ReadUint32(settingFlagNumber)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "read settingFlagNumber error");
+            return ERR_INVALID_DATA;
+        }
+        SystemBarSettingFlag settingFlag = static_cast<SystemBarSettingFlag>(settingFlagNumber);
         SystemBarProperty property = { enable, backgroundColor, contentColor, enableAnimation, settingFlag };
-        properties[static_cast<WindowType>(type)] = property;
+        targetProperties[static_cast<WindowType>(type)] = property;
     }
-    WSError errCode = GetTargetOrientationConfigInfo(targetOrientation, properties);
+
+    uint32_t currentPropertiesSize = 0;
+    if (!data.ReadUint32(currentPropertiesSize)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read currentPropertiesSize error");
+        return ERR_INVALID_DATA;
+    }
+    if (currentPropertiesSize > WINDOW_TYPE_MAX_SIZE) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "currentPropertiesSize is invalid");
+        return ERR_INVALID_DATA;
+    }
+    for (uint32_t i = 0; i < currentPropertiesSize; i++) {
+        uint32_t type = 0;
+        if (!data.ReadUint32(type)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "read current type error");
+            return ERR_INVALID_DATA;
+        }
+        if (type < static_cast<uint32_t>(WindowType::APP_WINDOW_BASE) ||
+            type > static_cast<uint32_t>(WindowType::WINDOW_TYPE_UI_EXTENSION)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "current type is invalid");
+            return ERR_INVALID_DATA;
+        }
+        bool enable = false;
+        uint32_t backgroundColor = 0;
+        uint32_t contentColor = 0;
+        bool enableAnimation = false;
+        uint32_t settingFlagNumber = 0;
+        if (!data.ReadBool(enable)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "read current enable error");
+            return ERR_INVALID_DATA;
+        }
+        if (!data.ReadUint32(backgroundColor)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "read current backgroundColor error");
+            return ERR_INVALID_DATA;
+        }
+        if (!data.ReadUint32(contentColor)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "read current contentColor error");
+            return ERR_INVALID_DATA;
+        }
+        if (!data.ReadBool(enableAnimation)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "read current enableAnimation error");
+            return ERR_INVALID_DATA;
+        }
+        if (!data.ReadUint32(settingFlagNumber)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "read current settingFlagNumber error");
+            return ERR_INVALID_DATA;
+        }
+        SystemBarSettingFlag settingFlag = static_cast<SystemBarSettingFlag>(settingFlagNumber);
+        SystemBarProperty property = { enable, backgroundColor, contentColor, enableAnimation, settingFlag };
+        currentProperties[static_cast<WindowType>(type)] = property;
+    }
+    WSError errCode = GetTargetOrientationConfigInfo(targetOrientation, targetProperties, currentProperties);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
