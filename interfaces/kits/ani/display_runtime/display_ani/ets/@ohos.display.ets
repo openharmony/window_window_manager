@@ -19,7 +19,7 @@ import hdrCapability from '@ohos.graphics.hdrCapability';
 
 export default namespace display {
 
-loadLibrary('displayani_kit.z');
+loadLibraryWithPermissionCheck("displayani_kit.z", "@ohos.display");
 
 const DISPLAY_ARRAY_LENGTH = 15;
 const CUTO_ARRAY_LENGTH = 5;
@@ -284,7 +284,7 @@ export interface Display {
 }
 
 export class DisplayImpl implements Display {
-    static { loadLibrary("displayani_kit.z"); }
+    static { loadLibraryWithPermissionCheck("displayani_kit.z", "@ohos.display"); }
 
     constructor() {
         this.colorSpaces = new Array<colorSpaceManager.ColorSpace>();
