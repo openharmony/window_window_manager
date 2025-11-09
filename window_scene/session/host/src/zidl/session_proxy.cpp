@@ -1524,7 +1524,8 @@ WSError SessionProxy::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
 
 
 WSError SessionProxy::GetTargetOrientationConfigInfo(Orientation targetOrientation,
-    const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& properties)
+    const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& targetProperties,
+    const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& currentProperties)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1537,11 +1538,36 @@ WSError SessionProxy::GetTargetOrientationConfigInfo(Orientation targetOrientati
         TLOGE(WmsLogTag::WMS_ROTATION, "write orientation error");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteUint32(static_cast<uint32_t>(properties.size()))) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "write size error");
+    if (!data.WriteUint32(static_cast<uint32_t>(targetProperties.size()))) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "write targetProperties size error");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    for (const auto& [type, systemBarProperty] : properties) {
+    for (const auto& [type, systemBarProperty] : targetProperties) {
+        if (!data.WriteUint32(static_cast<uint32_t>(type))) {
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+        if (!data.WriteBool(systemBarProperty.enable_)) {
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+        if (!data.WriteUint32(systemBarProperty.backgroundColor_)) {
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+        if (!data.WriteUint32(systemBarProperty.contentColor_)) {
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+        if (!data.WriteBool(systemBarProperty.enableAnimation_)) {
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+        if (!data.WriteUint32(static_cast<uint32_t>(systemBarProperty.settingFlag_))) {
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+    }
+
+    if (!data.WriteUint32(static_cast<uint32_t>(currentProperties.size()))) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "write currentProperties size error");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    for (const auto& [type, systemBarProperty] : currentProperties) {
         if (!data.WriteUint32(static_cast<uint32_t>(type))) {
             return WSError::WS_ERROR_IPC_FAILED;
         }
