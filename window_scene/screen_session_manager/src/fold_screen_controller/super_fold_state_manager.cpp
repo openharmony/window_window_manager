@@ -46,9 +46,6 @@ const std::string FOLD_CREASE_DELIMITER = ",;";
 constexpr ScreenId SCREEN_ID_FULL = 0;
 const int32_t SCREEN_WIDTH_INDEX = 2;
 const int32_t CREASE_WIDTH_INDEX = 3;
-constexpr uint32_t DISPLAY_A_HEIGHT = 3296;
-constexpr uint32_t DISPLAY_A_WIDTH = 2472;
-constexpr uint32_t DISPLAY_B_HEIGHT = 1608;
 constexpr OHOS::Rect FULL_SCREEN_RECORD_RECT = {0, 0, 0, 0};
 constexpr OHOS::Rect HALF_FOLD_B_SCREEN_RECORD_RECT = {0, 0, DISPLAY_A_WIDTH, DISPLAY_B_HEIGHT};
 }

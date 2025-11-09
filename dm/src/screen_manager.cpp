@@ -22,6 +22,7 @@
 
 #include "display_manager_adapter.h"
 #include "display_manager_agent_default.h"
+#include "string_util.h"
 #include "permission.h"
 #include "singleton_delegator.h"
 #include "window_manager_hilog.h"
@@ -503,6 +504,8 @@ DMError ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> m
 DMError ScreenManager::MakeMirrorForRecord(std::vector<ScreenId>& mainScreenIds,
     std::vector<ScreenId>& mirrorScreenIds, ScreenId& screenGroupId)
 {
+    std::string mainScreenIdsStr = StringUtil::VectorToString(mainScreenIds);
+    TLOGI(WmsLogTag::DMS, "Make mirror for screens: %{public}s", mainScreenIdsStr.c_str());
     if (mirrorScreenIds.size() > MAX_SCREEN_SIZE) {
         TLOGW(WmsLogTag::DMS, "Make Mirror failed. MirrorScreenId size bigger than %{public}u.", MAX_SCREEN_SIZE);
         return DMError::DM_ERROR_INVALID_PARAM;

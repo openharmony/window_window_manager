@@ -19,11 +19,42 @@
 #include <charconv>
 #include <string>
 
+#include "dm_common.h"
+
 namespace OHOS {
 namespace Rosen {
+const std::string NOT_TOSTRING_SUPPORTED = "not support to_string conversion";
+
 class StringUtil {
 public:
     static std::string Trim(std::string s);
+
+    template<typename T>
+    static constexpr bool CanToString()
+    {
+        if (std::is_same<T, uint64_t>::value ||
+            std::is_same<T, int64_t>::value ||
+            std::is_same<T, uint32_t>::value ||
+            std::is_same<T, int32_t>::value ||
+            std::is_same<T, bool>::value) {
+            return true;
+        }
+        return false;
+    }
+
+    template<typename T>
+    static std::string VectorToString(const std::vector<T>& vec)
+    {
+        std::string str = "[ ";
+        if (!CanToString<T>()) {
+            return NOT_TOSTRING_SUPPORTED;
+        }
+        for (auto item : vec) {
+            str = str + std::to_string(item) + " ";
+        }
+        str += "]";
+        return str;
+    }
 
     static inline bool ConvertStringToInt32(const std::string& str, int32_t& num)
     {

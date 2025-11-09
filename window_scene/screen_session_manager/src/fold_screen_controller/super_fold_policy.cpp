@@ -75,7 +75,7 @@ Drawing::Rect SuperFoldPolicy::GetSnapshotRect(DisplayId displayId, bool isCaptu
     return snapshotRect;
 }
 
-DMRect SuperFoldPolicy::GetRecordRect(std::vector<ScreenId> screenIds)
+DMRect SuperFoldPolicy::GetRecordRect(const std::vector<ScreenId>& screenIds)
 {
     DMRect recordRect = {0, 0, 0, 0};
     auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_DEFAULT);
@@ -89,7 +89,7 @@ DMRect SuperFoldPolicy::GetRecordRect(std::vector<ScreenId> screenIds)
     SuperFoldStatus status = SuperFoldStateManager::GetInstance().GetCurrentStatus();
     auto fakeInfo = ScreenSessionManager::GetInstance().GetDisplayInfoById(DISPLAY_ID_FAKE);
     if ((std::find(screenIds.begin(), screenIds.end(), DISPLAY_ID_FAKE) != screenIds.end()) && screenIds.size() == 1) {
-        // record for 999
+        // record for fake screensession
         if (fakeInfo != nullptr) {
             recordRect = {0, defaultInfo->GetHeight() + static_cast<int32_t>(creaseRect.height_),
                 defaultInfo->GetWidth(), fakeInfo->GetHeight()};
@@ -113,7 +113,7 @@ DMRect SuperFoldPolicy::GetRecordRect(std::vector<ScreenId> screenIds)
     return recordRect;
 }
 
-ScreenId SuperFoldPolicy::GetRealScreenId(std::vector<ScreenId> screenIds)
+ScreenId SuperFoldPolicy::GetRealScreenId(const std::vector<ScreenId>& screenIds)
 {
     if (screenIds.empty() || screenIds.size() > SCREEN_ID_SIZE_MAX) {
         TLOGE(WmsLogTag::DMS, "mainScreenIds null");
