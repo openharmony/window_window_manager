@@ -404,6 +404,10 @@ void WindowRoot::GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<Unre
             FillUnreliableWindowInfo(windowNode, infos);
             continue;
         }
+        if (windowNode->GetWindowProperty()->GetTouchable()) {
+            TLOGND(WmsLogTag::WMS_ATTRIBUTE, "PersistentId: %{public}d is touchable", curWindowId);
+            continue;
+        }
         if (!windowNode->currentVisibility_) {
             WLOGFD("windowId: %{public}d is not visible", curWindowId);
             continue;
