@@ -340,7 +340,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowSkipSnapShot, TestSize.Level1)
 {
     sptr<Window> window1 = CreateWindow("test", WindowMode::WINDOW_MODE_FULLSCREEN, Rect {0, 0, 0, 0});
     if (window1 == nullptr) {
-        return;
+        GTEST_SKIP();
     }
     ASSERT_NE(nullptr, window1);
     // 10:rect.posX_, 120:rect.posY_, 650:rect.width, 500:rect.height
