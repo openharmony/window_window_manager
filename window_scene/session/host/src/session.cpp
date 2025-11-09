@@ -2932,7 +2932,8 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
         if (session->freeMultiWindow_.load()) {
             session->scenePersistence_->SetHasSnapshotFreeMultiWindow(true);
             ScenePersistentStorage::Insert("Snapshot_" + session->GetSessionInfo().bundleName_ + "_"
-                + std::to_string(session->persistentId_), static_cast<int32_t>(session->GetWindowMode()), ScenePersistentStorageType::MAXIMIZE_STATE);
+                + std::to_string(session->persistentId_), static_cast<int32_t>(session->GetWindowMode()),
+                ScenePersistentStorageType::MAXIMIZE_STATE);
         } else {
             session->scenePersistence_->SetHasSnapshot(true, key);
             ScenePersistentStorage::Insert("Snapshot_" + session->GetSessionInfo().bundleName_ + "_"
