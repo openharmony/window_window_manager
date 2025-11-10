@@ -492,7 +492,10 @@ void JsScreenSession::CallJsCallback(const std::string& callbackType)
         UnRegisterScreenChangeListener();
     }
     wptr<ScreenSession> screenSessionWeak(screenSession_);
-    auto asyncTask = [jsCallbackRef = GetJSCallback(callbackType), callbackType, screenSessionWeak, env = env_]() {
+    auto jsCallbackRef = GetJSCallback(callbackType);
+    // ensure CallJsCallback ends before asyncTask, prevent jsCallbackRef deref not in js thread.
+    std::lock_guard<std::mutex> lock(callbackMutex_);
+    auto asyncTask = [jsCallbackRef, callbackType, screenSessionWeak, env = env_, &callbackMutex = callbackMutex_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenSession::CallJsCallback");
         if (jsCallbackRef == nullptr) {
             TLOGNE(WmsLogTag::DMS, "Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
@@ -503,6 +506,7 @@ void JsScreenSession::CallJsCallback(const std::string& callbackType)
             TLOGNE(WmsLogTag::DMS, "Call js callback %{public}s failed, method is null!", callbackType.c_str());
             return;
         }
+        std::lock_guard<std::mutex> lock(callbackMutex);
         if (callbackType == ON_CONNECTION_CALLBACK || callbackType == ON_DISCONNECTION_CALLBACK) {
             auto screenSession = screenSessionWeak.promote();
             if (screenSession == nullptr) {

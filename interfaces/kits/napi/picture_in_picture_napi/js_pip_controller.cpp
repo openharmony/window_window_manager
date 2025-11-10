@@ -428,7 +428,7 @@ napi_value JsPipController::OnGetPiPSettingSwitch(napi_env env, napi_callback_in
         }
         task->Resolve(env, CreateJsValue(env, pipController->GetPiPSettingSwitchStatus()));
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnGetPiPSettingSwitch") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Send event failed"));
     }
