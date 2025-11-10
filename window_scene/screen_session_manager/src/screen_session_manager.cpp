@@ -6145,8 +6145,8 @@ DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<Scre
     return DoMakeMirror(mainScreenId, mirrorScreenIds, DMRect::NONE(), screenGroupId, rotationOption, forceMirror);
 }
 
-DMError ScreenSessionManager::MakeMirrorForRecord(std::vector<ScreenId>& mainScreenIds, std::vector<ScreenId>& mirrorScreenIds,
-    ScreenId& screenGroupId)
+DMError ScreenSessionManager::MakeMirrorForRecord(const std::vector<ScreenId>& mainScreenIds,
+    std::vector<ScreenId>& mirrorScreenIds, ScreenId& screenGroupId)
 {
 #ifdef FOLD_ABILITY_ENABLE
     auto realScreenId = SuperFoldPolicy::GetInstance().GetRealScreenId(mainScreenIds);

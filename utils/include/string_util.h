@@ -23,7 +23,6 @@
 
 namespace OHOS {
 namespace Rosen {
-const std::string NOT_TOSTRING_SUPPORTED = "not support to_string conversion";
 
 class StringUtil {
 public:
@@ -43,17 +42,17 @@ public:
     }
 
     template<typename T>
-    static std::string VectorToString(const std::vector<T>& vec)
+    static bool VectorToString(const std::vector<T>& vec, std::string& str)
     {
-        std::string str = "[ ";
+        str = "[ ";
         if (!CanToString<T>()) {
-            return NOT_TOSTRING_SUPPORTED;
+            return false;
         }
         for (auto item : vec) {
             str = str + std::to_string(item) + " ";
         }
         str += "]";
-        return str;
+        return true;
     }
 
     static inline bool ConvertStringToInt32(const std::string& str, int32_t& num)

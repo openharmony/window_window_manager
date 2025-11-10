@@ -884,7 +884,7 @@ DMError ScreenManagerAdapter::MakeMirror(ScreenId mainScreenId, std::vector<Scre
     return ConvertToDMError(errCode, dmError);
 }
 
-DMError ScreenManagerAdapter::MakeMirrorForRecord(std::vector<ScreenId>& mainScreenIds,
+DMError ScreenManagerAdapter::MakeMirrorForRecord(const std::vector<ScreenId>& mainScreenIds,
     std::vector<ScreenId>& mirrorScreenIds, ScreenId& screenGroupId)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
