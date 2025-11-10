@@ -102,7 +102,7 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, ChangeScreenDisplayMode, TestSize.Level
     ScreenId screenId = 0;
     auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
     if (nullptr == screenSession) {
-        GTEST_SKIP();
+        return;
     }
     displayMode = FoldDisplayMode::MAIN;
     policy.ChangeScreenDisplayMode(displayMode);
@@ -386,7 +386,7 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SetStatusGlobalFullActiveRectAndTpFeatu
  */
 HWTEST_F(SecondaryDisplayFoldPolicyTest, ReportFoldDisplayModeChange, TestSize.Level1)
 {
-    if (!FoldScreenStateInternel::ISSecondaryDisplayFoldDevice()) {
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         return;
     }
     std::recursive_mutex displayInfoMutex;
