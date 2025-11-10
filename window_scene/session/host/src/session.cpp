@@ -2903,7 +2903,7 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
             return;
         }
         session->lastLayoutRect_ = session->layoutRect_;
-        auto pixelMap = persistentPixelMap ? persistentPixelMap : session->Snapshot(runInFfrt);
+        auto pixelMap = persistentPixelMap ? persistentPixelMap : session->Snapshot(runInFfrt, 0.0f, updateSnapshot);
         if (pixelMap == nullptr) {
             return;
         }
@@ -3052,7 +3052,7 @@ bool Session::HasSnapshot()
         persistentId_, sessionInfo_.bundleName_.c_str());
     bool hasSnapshot = false;
     for (uint32_t screenStatus = SCREEN_UNKNOWN; screenStatus < SCREEN_COUNT; screenStatus++) {
-        hasSnapshot = hasSnapshot || HasSnapshot(screenStatus);
+        hasSnapshot |= HasSnapshot(screenStatus);
     }
     return hasSnapshot || HasSnapshotFreeMultiWindow();
 }
