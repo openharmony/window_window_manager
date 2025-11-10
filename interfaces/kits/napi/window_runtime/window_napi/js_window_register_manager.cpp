@@ -53,6 +53,7 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     {WINDOW_TITLE_BUTTON_RECT_CHANGE_CB, RegisterListenerType::WINDOW_TITLE_BUTTON_RECT_CHANGE_CB},
     {WINDOW_VISIBILITY_CHANGE_CB, RegisterListenerType::WINDOW_VISIBILITY_CHANGE_CB},
     {OCCLUSION_STATE_CHANGE_CB, RegisterListenerType::OCCLUSION_STATE_CHANGE_CB},
+    {FRAME_METRICS_MEASURED_CHANGE_CB, RegisterListenerType::FRAME_METRICS_MEASURED_CHANGE_CB},
     {WINDOW_DISPLAYID_CHANGE_CB, RegisterListenerType::WINDOW_DISPLAYID_CHANGE_CB},
     {SYSTEM_DENSITY_CHANGE_CB, RegisterListenerType::SYSTEM_DENSITY_CHANGE_CB},
     {ACROSS_DISPLAYS_CHANGE_CB, RegisterListenerType::ACROSS_DISPLAYS_CHANGE_CB},
@@ -365,6 +366,28 @@ WmErrorCode JsWindowRegisterManager::ProcessOcclusionStateChangeRegister(sptr<Js
     return retErrCode;
 }
 
+WmErrorCode JsWindowRegisterManager::ProcessFrameMetricsMeasuredChangeRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
+{
+    if (window == nullptr || listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window or listener is null");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    WMError retCode = WMError::WM_OK;
+    sptr<IFrameMetricsChangedListener> thisListener(listener);
+    if (isRegister) {
+        retCode = window->RegisterFrameMetricsChangeListener(thisListener);
+    } else {
+        retCode = window->UnregisterFrameMetricsChangeListener(thisListener);
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "retCode=%{public}d", static_cast<int32_t>(retCode));
+    auto retErrCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    if (WM_JS_TO_ERROR_CODE_MAP.count(retCode) > 0) {
+        retErrCode = WM_JS_TO_ERROR_CODE_MAP.at(retCode);
+    }
+    return retErrCode;
+}
+
 WmErrorCode JsWindowRegisterManager::ProcessDisplayIdChangeRegister(const sptr<JsWindowListener>& listener,
     const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter)
 {
@@ -642,6 +665,9 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
                 return ProcessWindowVisibilityChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::OCCLUSION_STATE_CHANGE_CB):
                 return ProcessOcclusionStateChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::FRAME_METRICS_MEASURED_CHANGE_CB):
+                return ProcessFrameMetricsMeasuredChangeRegister(windowManagerListener, window, isRegister, env,
+                    parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_DISPLAYID_CHANGE_CB):
                 return ProcessDisplayIdChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::SYSTEM_DENSITY_CHANGE_CB):
