@@ -943,7 +943,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event, const SessionEventParam
                 session->HookStartMoveRect(currRect, session->GetSessionRect());
                 session->pcFoldScreenController_->RecordStartMoveRect(currRect, session->IsFullScreenMovable());
             }
-            WSRect rect = session->GetGlobalOrWinRect();
+            WSRect rect = session->GetMoveRectForWindowDrag();
             if (session->IsFullScreenMovable()) {
                 session->UpdateFullScreenWaterfallMode(false);
                 rect = session->moveDragController_->GetFullScreenToFloatingRect(session->GetSessionRect(),
@@ -2996,6 +2996,21 @@ WSRect SceneSession::GetSessionGlobalRectWithSingleHandScale()
     return rectWithTransform;
 }
 
+WSRect SceneSession::GetMoveRectForWindowDrag()
+{
+    auto property = GetSessionProperty();
+    if (!property) {
+        return GetGlobalOrWinRect();
+    }
+    if (property->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        return GetGlobalOrWinRect();
+    }
+    if (keyboardPanelSession_ != nullptr) {
+        return keyboardPanelSession_->GetSessionRect();
+    }
+    return GetGlobalOrWinRect();
+}
+
 void SceneSession::AddUIExtSurfaceNodeId(uint64_t surfaceNodeId, int32_t persistentId)
 {
     std::unique_lock<std::shared_mutex> lock(uiExtNodeIdToPersistentIdMapMutex_);
@@ -3451,10 +3466,11 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
             pointerEvent->MarkProcessed();
             return WSError::WS_OK;
         }
+        WSRect moveDragRect = GetMoveRectForWindowDrag();
         if ((WindowHelper::IsMainWindow(windowType) ||
              WindowHelper::IsSubWindow(windowType) ||
              WindowHelper::IsSystemWindow(windowType)) && !isFollowParentLayout_ &&
-            moveDragController_->ConsumeMoveEvent(pointerEvent, GetSessionRect())) {
+            moveDragController_->ConsumeMoveEvent(pointerEvent, moveDragRect)) {
             PresentFocusIfNeed(pointerEvent->GetPointerAction());
             pointerEvent->MarkProcessed();
             Session::TransferPointerEvent(pointerEvent, needNotifyClient, isExecuteDelayRaise);
