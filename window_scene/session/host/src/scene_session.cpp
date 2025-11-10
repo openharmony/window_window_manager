@@ -6905,10 +6905,9 @@ WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
 WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
     const ExceptionInfo& exceptionInfo, bool isFromClient, bool startFail)
 {
-    PostLifeCycleTask([weakThis = wptr(this), weakAbilitySessionInfo = wptr(abilitySessionInfo), exceptionInfo,
+    PostLifeCycleTask([weakThis = wptr(this), abilitySessionInfo, exceptionInfo,
         isFromClient, startFail, where = __func__] {
         auto session = weakThis.promote();
-        auto abilitySessionInfo = weakAbilitySessionInfo.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
