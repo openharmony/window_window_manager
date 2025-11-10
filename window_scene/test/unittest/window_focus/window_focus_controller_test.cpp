@@ -27,7 +27,7 @@ namespace Rosen {
 namespace {
     std::string g_logMsg;
     void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
-                       const char* msg)
+       const char* msg)
     {
         g_logMsg += msg;
     }
@@ -137,7 +137,7 @@ HWTEST_F(WindowFocusControllerTest, RemoveFocusGroup02, TestSize.Level1)
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, res);
 
     res = wfc->RemoveFocusGroup(1000, 1000);
-    EXPECT_TRUE(g_logMsg.find("displayId invalid") != std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("displayGroupId invalid") != std::string::npos);
 
     wfc->AddFocusGroup(0, 0);
     res = wfc->RemoveFocusGroup(0, 0);
@@ -157,7 +157,7 @@ HWTEST_F(WindowFocusControllerTest, GetFocusGroupInner, TestSize.Level1)
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<WindowFocusController> wfc = sptr<WindowFocusController>::MakeSptr();
-    WSError res = wfc->GetFocusGroupInner(DEFAULT_DISPLAY_ID);
+    sptr<FocusGroup> res = wfc->GetFocusGroupInner(DEFAULT_DISPLAY_ID);
     EXPECT_EQ(wfc->focusGroupMap_[DEFAULT_DISPLAY_ID], res);
 
     wfc->displayId2GroupIdMap_.insert({ 1001, 1001 });
@@ -211,13 +211,13 @@ HWTEST_F(WindowFocusControllerTest, LogDisplayIds, TestSize.Level1)
 
     wfc->focusGroupMap_.clear();
     wfc->AddFocusGroup(100, 100);
-    res = wfc->LogDisplayIds();
+    wfc->LogDisplayIds();
     EXPECT_TRUE(g_logMsg.find(", displayids:100;") != std::string::npos);
 
     wfc->focusGroupMap_.clear();
     wfc->AddFocusGroup(101, 101);
     wfc->AddFocusGroup(102, 102);
-    res = wfc->LogDisplayIds();
+    wfc->LogDisplayIds();
     EXPECT_TRUE(g_logMsg.find(", displayids:102;") != std::string::npos);
 
     LOG_SetCallback(nullptr);
