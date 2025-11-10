@@ -75,7 +75,7 @@ public:
 
 protected:
     MockSessionManagerService();
-    virtual ~MockSessionManagerService() = default;
+    virtual ~MockSessionManagerService();
 
 private:
     /*
@@ -145,7 +145,7 @@ private:
     std::mutex defaultWMSUserIdMutex_;
     DisplayId defaultScreenId_;
     std::mutex userId2ScreenIdMapMutex_;
-    std::map<int32_t, int32_t> userId2ScreenIdMap_;
+    std::map<int32_t, DisplayId> userId2ScreenIdMap_;
     std::shared_mutex smsDeathRecipientMapLock_;
     std::map<int32_t, sptr<SMSDeathRecipient>> smsDeathRecipientMap_;
     std::mutex sessionManagerServiceMapMutex_;
@@ -161,14 +161,14 @@ private:
      * Window Recover
      */
     std::map<int32_t, SMSRecoverListenerMap> recoverListenerMap_;
-    std::shared_mutex recoverListenerMutex_;
+    std::mutex recoverListenerMutex_;
     std::map<int32_t, SMSRecoverListenerMap> liteRecoverListenerMap_;
-    std::shared_mutex liteRecoverListenerMutex_;
+    std::mutex liteRecoverListenerMutex_;
 
     std::map<DisplayId, SMSRecoverListenerMap> systemAppRecoverListenerMap_;
-    std::shared_mutex systemAppRecoverListenerMutex_;
+    std::mutex systemAppRecoverListenerMutex_;
     std::map<DisplayId, SMSRecoverListenerMap> liteSystemAppRecoverListenerMap_;
-    std::shared_mutex liteSystemAppRecoverListenerMutex_;
+    std::mutex liteSystemAppRecoverListenerMutex_;
 
     /*
      * Window Snapshot
