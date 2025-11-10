@@ -27,7 +27,7 @@ namespace Rosen {
 namespace {
     std::string g_logMsg;
     void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
-       const char* msg)
+                       const char* msg)
     {
         g_logMsg += msg;
     }
