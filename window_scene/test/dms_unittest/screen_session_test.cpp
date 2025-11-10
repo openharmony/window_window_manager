@@ -1583,7 +1583,7 @@ HWTEST_F(ScreenSessionTest, InitRSDisplayNode, TestSize.Level1)
     RSDisplayNodeConfig config;
     Point startPoint;
     sessionGroup.InitRSDisplayNode(config, startPoint);
-    SUCCESS();
+    SUCCEED();
     GTEST_LOG_(INFO) << "ScreenSessionTest: InitRSDisplayNode end";
 }
 
