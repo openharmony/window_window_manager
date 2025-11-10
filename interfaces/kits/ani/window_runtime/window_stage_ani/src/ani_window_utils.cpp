@@ -632,6 +632,54 @@ ani_object AniWindowUtils::CreateAniSystemBarRegionTint(ani_env* env, const Syst
     return regionTint;
 }
 
+ani_object AniWindowUtils::CreateAniFrameMetrics(ani_env* env, const FrameMetrics& metrics)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
+    ani_class aniClass;
+    ani_status ret = env->FindClass("L@ohos/window/window/FrameMetricsInternal;", &aniClass);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_method aniCtor;
+    ret = env->Class_FindMethod(aniClass, "<ctor>", nullptr, &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object frameMetrics;
+    ret = env->Object_New(aniClass, aniCtor, &frameMetrics);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] failed to new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ret = CallAniMethodVoid(env, frameMetrics, aniClass, "<set>firstDrawFrame", nullptr,
+        CreateOptionalBool(env, static_cast<ani_boolean>(metrics.firstDrawFrame_)));
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] failed to set firstDrawFrame");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ret = CallAniMethodVoid(env, frameMetrics, aniClass, "<set>inputHandlingDuration", nullptr,
+        ani_long(metrics.inputHandlingDuration_));
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] failed to set inputHandlingDuration");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ret = CallAniMethodVoid(env, frameMetrics, aniClass, "<set>layoutMeasureDuration", nullptr,
+        ani_long(metrics.layoutMeasureDuration_));
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] failed to set layoutMeasureDuration");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ret = CallAniMethodVoid(env, frameMetrics, aniClass, "<set>vsyncTimestamp", nullptr,
+        ani_long(metrics.vsyncTimestamp_));
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] failed to set vsyncTimestamp");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    return frameMetrics;
+}
+
 ani_object AniWindowUtils::CreateAniRotationChangeInfo(ani_env* env, const RotationChangeInfo& info)
 {
     TLOGI(WmsLogTag::WMS_ROTATION, "[ANI]");

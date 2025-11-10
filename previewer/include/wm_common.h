@@ -1106,6 +1106,50 @@ struct VsyncCallback {
 };
 
 /**
+ * @struct FrameMetrics
+ *
+ * @brief frame metrics info.
+ */
+struct FrameMetrics : public Parcelable {
+    bool firstDrawFrame_ = false;
+    uint64_t inputHandlingDuration_ = 0;
+    uint64_t layoutMeasureDuration_ = 0;
+    uint64_t vsyncTimestamp_ = 0;
+
+    /**
+     * @brief Marshalling FrameMetrics.
+     *
+     * @param parcel Package of FrameMetrics.
+     * @return True means marshall success, false means marshall failed.
+     */
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteBool(firstDrawFrame_) &&
+               parcel.WriteUint64(inputHandlingDuration_) &&
+               parcel.WriteUint64(layoutMeasureDuration_) &&
+               parcel.WriteUint64(vsyncTimestamp_);
+    }
+
+    /**
+     * @brief Unmarshalling FrameMetrics.
+     *
+     * @param parcel Package of FrameMetrics.
+     * @return FrameMetrics object.
+     */
+    static FrameMetrics* Unmarshalling(Parcel& parcel)
+    {
+        auto info = std::make_unique<FrameMetrics>();
+        if (!parcel.ReadBool(info->firstDrawFrame_) ||
+            !parcel.ReadUint64(info->inputHandlingDuration_) ||
+            !parcel.ReadUint64(info->layoutMeasureDuration_) ||
+            !parcel.ReadUint64(info->vsyncTimestamp_)) {
+            return nullptr;
+        }
+        return info.release();
+    }
+};
+
+/**
  * @brief Enumerates window update type.
  */
 enum class WindowUpdateType : int32_t {

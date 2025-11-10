@@ -1305,6 +1305,21 @@ napi_value ConvertTitleButtonAreaToJsValue(napi_env env, const TitleButtonRect& 
     return objValue;
 }
 
+napi_value ConvertFrameMetricsToJsValue(napi_env env, const FrameMetrics& metrics)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(env, objValue, "firstDrawFrame", CreateJsValue(env, metrics.firstDrawFrame_));
+    napi_set_named_property(env, objValue, "inputHandlingDuration",
+        CreateJsValue(env, static_cast<int64_t>(metrics.inputHandlingDuration_)));
+    napi_set_named_property(env, objValue, "layoutMeasureDuration",
+        CreateJsValue(env, static_cast<int64_t>(metrics.layoutMeasureDuration_)));
+    napi_set_named_property(env, objValue, "vsyncTimestamp",
+        CreateJsValue(env, static_cast<int64_t>(metrics.vsyncTimestamp_)));
+    return objValue;
+}
+
 napi_value ConvertWindowDensityInfoToJsValue(napi_env env, const WindowDensityInfo& windowDensityInfo)
 {
     napi_value objValue = nullptr;
