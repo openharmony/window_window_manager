@@ -2647,13 +2647,15 @@ int SceneSessionManagerStub::HandleConvertToRelativeCoordinateExtended(MessagePa
     int32_t posY_ = 0;
     uint32_t width_ = 0;
     uint32_t height_ = 0;
-    if (!data.ReadInt32(posX_) || !data.ReadInt32(posY_) || !data.ReadUint32(width_) || !data.ReadUint32(height_)) {
+    DisplayId newDisplayId = 0;
+    if (!data.ReadInt32(posX_) || !data.ReadInt32(posY_) ||
+        !data.ReadUint32(width_) || !data.ReadUint32(height_) ||
+        !data.ReadUint64(newDisplayId)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Read window infos failed.");
         return ERR_TRANSACTION_FAILED;
     }
     Rect rect = {posX_, posY_, width_, height_};
     Rect newRect;
-    DisplayId newDisplayId = 0;
     WMError errCode = ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
     if (!reply.WriteInt32(static_cast<int32_t>(newRect.posX_)) ||
         !reply.WriteInt32(static_cast<int32_t>(newRect.posY_)) ||
