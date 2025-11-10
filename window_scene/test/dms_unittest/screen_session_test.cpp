@@ -2066,7 +2066,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test005, TestSize.Level1)
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test005 start";
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ScreenProperty newProperty;
-    session->PropertyChange(newproperty, ScreenPropertyChangeReason::UNDEFINED);
+    session->PropertyChange(newProperty, ScreenPropertyChangeReason::UNDEFINED);
     GTEST_SKIP();
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test005 end";
 }
