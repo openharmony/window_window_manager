@@ -306,7 +306,7 @@ HWTEST_F(DisplayChangeTest, CheckDisplaySizeChange02, TestSize.Level1)
                     break;
                 }
             }
-            ASSERT_TRUE(sizeMatched) << "Screen resolution did not match target mode after " << (maxRetries * sleepMs) << "ms wait";
+            ASSERT_TRUE(sizeMatched);
             ASSERT_EQ(true, CheckDisplayChangeEventCallback(true));
             sptr<Display> defaultDisplay = DisplayManager::GetInstance().GetDisplayById(defaultDisplayId_);
             ASSERT_NE(nullptr, defaultDisplay);

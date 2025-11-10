@@ -206,15 +206,15 @@ HWTEST_F(DisplayPowerTest, set_display_state_001, TestSize.Level1)
  * @tc.desc: Call SetDisplayState to set a value already set and check the return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerTest, set_display_state_002, TestSize.Level1)	
-{	
-    DisplayState initialState = DisplayManager::GetInstance().GetDisplayState(defaultId_);	
-    bool ret = DisplayManager::GetInstance().SetDisplayState(initialState, callback_);	
-    ASSERT_EQ(false, ret);	
-    DisplayState stateGet = DisplayManager::GetInstance().GetDisplayState(defaultId_);	
-    ASSERT_EQ(stateGet, initialState);	
-    CheckDisplayStateCallback(false);	
-    ASSERT_EQ(false, isDisplayStateCallbackCalled_);	
+HWTEST_F(DisplayPowerTest, set_display_state_002, TestSize.Level1)
+{
+    DisplayState initialState = DisplayManager::GetInstance().GetDisplayState(defaultId_);
+    bool ret = DisplayManager::GetInstance().SetDisplayState(initialState, callback_);
+    ASSERT_EQ(false, ret);
+    DisplayState stateGet = DisplayManager::GetInstance().GetDisplayState(defaultId_);
+    ASSERT_EQ(stateGet, initialState);
+    CheckDisplayStateCallback(false);
+    ASSERT_EQ(false, isDisplayStateCallbackCalled_);
 }
 
 /**
