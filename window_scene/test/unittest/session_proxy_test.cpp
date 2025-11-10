@@ -1742,10 +1742,16 @@ HWTEST_F(SessionProxyTest, GetTargetOrientationConfigInfo, Function | SmallTest 
     ASSERT_NE(iRemoteObjectMocker, nullptr);
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
-    std::map<Rosen::WindowType, Rosen::SystemBarProperty> properties;
-    Rosen::SystemBarProperty statusBarProperty;
-    properties[Rosen::WindowType::WINDOW_TYPE_STATUS_BAR] = statusBarProperty;
-    WSError res = sProxy->GetTargetOrientationConfigInfo(Orientation::USER_ROTATION_PORTRAIT, properties);
+
+    std::map<Rosen::WindowType, Rosen::SystemBarProperty> targetProperties;
+    Rosen::SystemBarProperty targetStatusBarProperty;
+    targetProperties[Rosen::WindowType::WINDOW_TYPE_STATUS_BAR] = targetStatusBarProperty;
+
+    std::map<Rosen::WindowType, Rosen::SystemBarProperty> currentProperties;
+    Rosen::SystemBarProperty currentStatusBarProperty;
+    currentProperties[Rosen::WindowType::WINDOW_TYPE_STATUS_BAR] = currentStatusBarProperty;
+    WSError res = sProxy->GetTargetOrientationConfigInfo(Orientation::USER_ROTATION_PORTRAIT,
+        targetProperties, currentProperties);
     ASSERT_EQ(res, WSError::WS_OK);
 }
 

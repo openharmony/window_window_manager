@@ -111,7 +111,7 @@ HWTEST_F(DisplayTest, SetWaterfallCompression01, TestSize.Level1)
     DisplayCutoutController::SetWaterfallAreaCompressionSizeWhenHorizontal(testSizeOrigin);
     ASSERT_EQ(testSizeOrigin, DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal());
     DisplayCutoutController::SetWaterfallAreaCompressionEnableWhenHorzontal(isCompressionEnableOrigin);
-    ASSERT_EQ(isWaterfallDisplayOrigin, DisplayCutoutController::IsWaterfallAreaCompressionEnableWhenHorizontal());
+    ASSERT_EQ(isCompressionEnableOrigin, DisplayCutoutController::IsWaterfallAreaCompressionEnableWhenHorizontal());
     DisplayCutoutController::SetIsWaterfallDisplay(isWaterfallDisplayOrigin);
     ASSERT_EQ(isWaterfallDisplayOrigin, DisplayCutoutController::IsWaterfallDisplay());
 }
@@ -149,7 +149,7 @@ HWTEST_F(DisplayTest, SetWaterfallCompression02, TestSize.Level1)
     DisplayCutoutController::SetWaterfallAreaCompressionSizeWhenHorizontal(testSizeOrigin);
     ASSERT_EQ(testSizeOrigin, DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal());
     DisplayCutoutController::SetWaterfallAreaCompressionEnableWhenHorzontal(isCompressionEnableOrigin);
-    ASSERT_EQ(isWaterfallDisplayOrigin, DisplayCutoutController::IsWaterfallAreaCompressionEnableWhenHorizontal());
+    ASSERT_EQ(isCompressionEnableOrigin, DisplayCutoutController::IsWaterfallAreaCompressionEnableWhenHorizontal());
     DisplayCutoutController::SetIsWaterfallDisplay(isWaterfallDisplayOrigin);
     ASSERT_EQ(isWaterfallDisplayOrigin, DisplayCutoutController::IsWaterfallDisplay());
 }

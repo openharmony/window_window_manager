@@ -233,6 +233,8 @@ public:
     bool GetIsAbilityHook() const;
     void SetFollowScreenChange(bool isFollowScreenChange);
     bool GetFollowScreenChange() const;
+    void SetStatusBarHeightInImmersive(int32_t statusBarHeightInImmersive);
+    int32_t GetStatusBarHeightInImmersive() const;
 
     /*
      * Sub Window
@@ -596,6 +598,8 @@ private:
      */
     uint32_t avoidAreaOption_ = 0;
 
+    int32_t statusBarHeightInImmersive_ = 0;
+    
     /*
      * Window Focus
      */

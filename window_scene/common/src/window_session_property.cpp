@@ -1663,6 +1663,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isMobileAppInPadLayoutFullScreen_ = property->isMobileAppInPadLayoutFullScreen_;
     aspectRatio_ = property->aspectRatio_;
     isRotationLock_ = property->isRotationLock_;
+    statusBarHeightInImmersive_ = property->statusBarHeightInImmersive_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -2745,6 +2746,16 @@ void WindowSessionProperty::SetAspectRatio(float ratio)
 float WindowSessionProperty::GetAspectRatio() const
 {
     return aspectRatio_;
+}
+
+void WindowSessionProperty::SetStatusBarHeightInImmersive(int32_t statusBarHeightInImmersive)
+{
+    statusBarHeightInImmersive_ = statusBarHeightInImmersive;
+}
+ 
+int32_t WindowSessionProperty::GetStatusBarHeightInImmersive() const
+{
+    return statusBarHeightInImmersive_;
 }
 } // namespace Rosen
 } // namespace OHOS

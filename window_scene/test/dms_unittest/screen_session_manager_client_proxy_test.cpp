@@ -564,6 +564,11 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, ScreenConnectWriteParam, TestSize.
     MockMessageParcel::SetWriteUint32ErrorFlag(true);
     ret = proxy->ScreenConnectWriteParam(option, screenEvent, data);
     EXPECT_FALSE(ret);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    ret = proxy->ScreenConnectWriteParam(option, screenEvent, data);
+    EXPECT_FALSE(ret);
 }
 
 /**
