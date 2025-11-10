@@ -403,6 +403,21 @@ HWTEST_F(DisplayManagerAdapterLiteTest, GetPhysicalScreenIds, TestSize.Level1)
     auto ret = SingletonContainer::Get<ScreenManagerAdapterLite>().GetPhysicalScreenIds(screenIds);
     EXPECT_EQ(ret, DMError::DM_OK);
 }
+
+/**
+ * @tc.name: SetResolution
+ * @tc.desc: SetResolution
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, SetResolution, TestSize.Level1)
+{
+    ScreenId id = 0;
+    uint32_t width = 1080;
+    uint32_t height = 2400;
+    float vpr = 2.8;
+    auto ret = SingletonContainer::Get<ScreenManagerAdapterLite>().SetResolution(id, width, height, vpr);
+    EXPECT_EQ(ret, DMError::DM_OK);
+}
 }
 }
 }

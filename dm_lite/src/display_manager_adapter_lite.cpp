@@ -425,4 +425,12 @@ bool ScreenManagerAdapterLite::SynchronizePowerStatus(ScreenPowerState state)
 
     return displayManagerServiceProxy_->SynchronizePowerStatus(state);
 }
+
+DMError ScreenManagerAdapterLite::SetResolution(ScreenId screenId, uint32_t width, uint32_t height,
+    float virtualPixelRatio)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->SetResolution(screenId, width, height, virtualPixelRatio);
+}
 } // namespace OHOS::Rosen

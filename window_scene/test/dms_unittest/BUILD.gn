@@ -30,6 +30,7 @@ group("unittest") {
     ":ws_screen_session_manager_lite_proxy_test",
     ":ws_screen_session_manager_lite_stub_test",
     ":ws_screen_session_manager_lite_test",
+    ":ws_screen_session_manager_lite_proxy_mock_test",
     ":ws_screen_session_manager_stub_test",
     ":ws_screen_session_publish_test",
     ":ws_screen_session_test",
@@ -441,6 +442,21 @@ ohos_unittest("ws_screen_session_manager_client_test") {
 
   external_deps = test_external_deps
   external_deps += [ "init:libbegetutil" ]
+}
+
+ohos_unittest("ws_screen_session_manager_lite_proxy_mock_test") {
+  module_out_path = module_out_path
+
+  sources = [
+    "../mock/mock_message_parcel.cpp",
+    "screen_session_manager_lite_proxy_mock_test.cpp",
+    "${window_base_path}/window_scene/screen_session_manager/src/zidl/screen_session_manager_lite_proxy.cpp",
+  ]
+
+  include_dirs = [ "../mock" ]
+
+  deps = [ ":ws_unittest_common" ]
+  external_deps = test_external_deps
 }
 
 ohos_unittest("ws_screen_session_manager_lite_proxy_test") {

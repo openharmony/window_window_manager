@@ -2802,6 +2802,7 @@ DMError ScreenSessionManager::SetVirtualPixelRatio(ScreenId screenId, float virt
             screenId);
         return DMError::DM_ERROR_NULLPTR;
     }
+    virtualPixelRatio *= screenSession->GetVprScaleRatio();
     // less to 1e-6 mean equal
     if (fabs(screenSession->GetScreenProperty().GetVirtualPixelRatio() - virtualPixelRatio) < 1e-6) {
         TLOGE(WmsLogTag::DMS,
@@ -2884,45 +2885,46 @@ DMError ScreenSessionManager::SetResolution(ScreenId screenId, uint32_t width, u
     TLOGI(WmsLogTag::DMS,
         "ScreenId: %{public}" PRIu64 ", w: %{public}u, h: %{public}u, virtualPixelRatio: %{public}f",
         screenId, width, height, virtualPixelRatio);
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS, "permission denied! calling: %{public}s, pid: %{public}d",
-            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
-        return DMError::DM_ERROR_NOT_SYSTEM_APP;
-    }
-    if (screenId == SCREEN_ID_INVALID) {
-        TLOGE(WmsLogTag::DMS, "invalid screenId");
-        return DMError::DM_ERROR_NULLPTR;
+    DMError ret = CheckSetResolutionIsValid(screenId, width, height, virtualPixelRatio);
+    if (ret != DMError::DM_OK) {
+        return ret;
     }
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "Get ScreenSession failed");
         return DMError::DM_ERROR_NULLPTR;
     }
-    sptr<SupportedScreenModes> screenSessionModes = screenSession->GetActiveScreenMode();
-    if (screenSessionModes == nullptr) {
-        return DMError::DM_ERROR_NULLPTR;
-    }
-    if (width <= 0 || width > screenSessionModes->width_ ||
-        height <= 0 || height > screenSessionModes->height_ ||
-        virtualPixelRatio < (static_cast<float>(DOT_PER_INCH_MINIMUM_VALUE) / DOT_PER_INCH) ||
-        virtualPixelRatio > (static_cast<float>(DOT_PER_INCH_MAXIMUM_VALUE) / DOT_PER_INCH)) {
-        TLOGE(WmsLogTag::DMS, "invalid param! w:%{public}u h:%{public}u min:%{public}f max:%{public}f",
-            screenSessionModes->width_, screenSessionModes->height_,
-            static_cast<float>(DOT_PER_INCH_MINIMUM_VALUE) / DOT_PER_INCH,
-            static_cast<float>(DOT_PER_INCH_MAXIMUM_VALUE) / DOT_PER_INCH);
-        return DMError::DM_ERROR_INVALID_PARAM;
+    screenSession->FreezeScreen(true);
+    if (rsInterface_.SetRogScreenResolution(screenId, width, height) != 0) {
+        TLOGE(WmsLogTag::DMS, "Failed to SetRogScreenResolution");
+        screenSession->FreezeScreen(false);
+        return DMError::DM_ERROR_IPC_FAILED;
     }
     screenSession->SetDensityInCurResolution(virtualPixelRatio);
-    DMError ret = SetVirtualPixelRatio(screenId, virtualPixelRatio);
+    screenSession->SetDefaultDensity(virtualPixelRatio);
+    uint32_t defaultResolutionDpi = virtualPixelRatio * BASELINE_DENSITY;
+    (void)ScreenSettingHelper::SetSettingDefaultDpi(defaultResolutionDpi, SET_SETTING_DPI_KEY);
+
+    float defaultVirtualPixelRatio = static_cast<float>(defaultDpi) / BASELINE_DENSITY;
+    float vprScaleRatio = virtualPixelRatio / defaultVirtualPixelRatio;
+    screenSession->SetVprScaleRatio(vprScaleRatio);
+    ret = SetVirtualPixelRatio(screenId, defaultVirtualPixelRatio);
     if (ret != DMError::DM_OK) {
         TLOGE(WmsLogTag::DMS, "Failed to setVirtualPixelRatio when settingResolution");
         screenSession->SetDensityInCurResolution(screenSession->GetScreenProperty().GetVirtualPixelRatio());
+        screenSession->SetDefaultDensity(screenSession->GetScreenProperty().GetVirtualPixelRatio());
+        (void)ScreenSettingHelper::SetSettingDefaultDpi(defaultDpi, SET_SETTING_DPI_KEY);
+        screenSession->SetVprScaleRatio(1.0f);
+        screenSession->FreezeScreen(false);
         return ret;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetResolution(%" PRIu64", %u, %u, %f)",
         screenId, width, height, virtualPixelRatio);
     screenSession->UpdatePropertyByResolution(width, height);
-    screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
+    screenSession->PropertyChange(screenSession->GetScreenProperty(),
+        ScreenPropertyChangeReason::CHANGE_MODE);
+    NotifyDisplayStateChange(screenId, screenSession->ConvertToDisplayInfo(),
+        {}, DisplayStateChangeType::RESOLUTION_CHANGE);
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
     NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
     return DMError::DM_OK;
@@ -12900,5 +12902,39 @@ void ScreenSessionManager::SetConfigForInputmethod(ScreenId screenId, VirtualScr
     } else {
         screenSession->SetSupportsInput(false);
     }
+}
+
+DMError ScreenSessionManager::CheckSetResolutionIsValid(ScreenId screenId, uint32_t width, uint32_t height,
+    float virtualPixelRatio)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "SetResolution permission denied! calling pid: %{public}d", IPCSkeleton::GetCallingPid());
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    if (screenId == SCREEN_ID_INVALID) {
+        TLOGE(WmsLogTag::DMS, "invalid screenId");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Get ScreenSession failed");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    sptr<SupportedScreenModes> screenSessionModes = screenSession->GetActiveScreenMode();
+    if (screenSessionModes == nullptr) {
+        TLOGE(WmsLogTag::DMS, "SetResolution: Get active screenMode failed");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    if (width <= 0 || width > screenSessionModes->width_ ||
+        height <= 0 || height > screenSessionModes->height_ ||
+        virtualPixelRatio < (static_cast<float>(DOT_PER_INCH_MINIMUM_VALUE) / DOT_PER_INCH) ||
+        virtualPixelRatio > (static_cast<float>(DOT_PER_INCH_MAXIMUM_VALUE) / DOT_PER_INCH)) {
+        TLOGE(WmsLogTag::DMS, "invalid param! w:%{public}u h:%{public}u min:%{public}f max:%{public}f",
+            screenSessionModes->width_, screenSessionModes->height_,
+            static_cast<float>(DOT_PER_INCH_MINIMUM_VALUE) / DOT_PER_INCH,
+            static_cast<float>(DOT_PER_INCH_MAXIMUM_VALUE) / DOT_PER_INCH);
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    return DMError::DM_OK;
 }
 } // namespace OHOS::Rosen

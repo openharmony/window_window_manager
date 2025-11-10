@@ -417,6 +417,8 @@ public:
     void SetSupportsFocus(bool focus);
     bool GetSupportsInput() const;
     void SetSupportsInput(bool input);
+    void SetVprScaleRatio(float vprScaleRatio);
+    float GetVprScaleRatio() const;
 
 private:
     bool IsVertical(Rotation rotation) const;
@@ -474,6 +476,7 @@ private:
     uint64_t sessionId_;
     bool lastCloseHdrStatus_ = false;
     mutable std::shared_mutex modesMutex_;
+    float vprScaleRatio_ { 1.0f };
 
     void RemoveRotationCorrection(Rotation& rotation, FoldDisplayMode foldDisplayMode);
     void AddRotationCorrection(Rotation& rotation, FoldDisplayMode displayMode);
