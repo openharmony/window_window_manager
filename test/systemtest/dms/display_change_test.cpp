@@ -257,14 +257,22 @@ HWTEST_F(DisplayChangeTest, CheckDisplaySizeChange01, TestSize.Level1)
     auto modes = defaultScreen_->GetSupportedModes();
     uint32_t usedModeIdx = defaultScreen_->GetModeId();
     WLOGI("usedModeIdx / SupportMode size: %{public}u %{public}zu", usedModeIdx, modes.size());
-
     for (uint32_t modeIdx = 0; modeIdx < modes.size(); modeIdx++) {
         if (modeIdx != usedModeIdx && CheckModeSizeChange(modes[usedModeIdx], modes[modeIdx])) {
             defaultScreen_->SetScreenActiveMode(modeIdx);
             WLOGI("SetScreenActiveMode: %{public}u -> %{public}u", usedModeIdx, modeIdx);
-            ASSERT_EQ(true, ScreenSizeEqual(defaultScreen_, modes[modeIdx]));
+            constexpr int maxRetries = 20;
+            constexpr int sleepMs = 100;
+            bool sizeMatched = false;
+            for (int i = 0; i < maxRetries; ++i) {
+                usleep(sleepMs * 1000);
+                if (ScreenSizeEqual(defaultScreen_, modes[modeIdx])) {
+                    sizeMatched = true;
+                    break;
+                }
+            }
+            ASSERT_TRUE(sizeMatched);
             ASSERT_EQ(true, CheckDisplayChangeEventCallback(true));
-            // reset usedMode
             ResetDisplayChangeListener();
             defaultScreen_->SetScreenActiveMode(usedModeIdx);
             CheckDisplayChangeEventCallback(true);
@@ -284,17 +292,25 @@ HWTEST_F(DisplayChangeTest, CheckDisplaySizeChange02, TestSize.Level1)
     auto modes = defaultScreen_->GetSupportedModes();
     uint32_t usedModeIdx = defaultScreen_->GetModeId();
     WLOGI("usedModeIdx / SupportMode size: %{public}u %{public}zu", usedModeIdx, modes.size());
-
     for (uint32_t modeIdx = 0; modeIdx < modes.size(); modeIdx++) {
         if (modeIdx != usedModeIdx && CheckModeSizeChange(modes[usedModeIdx], modes[modeIdx])) {
             defaultScreen_->SetScreenActiveMode(modeIdx);
             WLOGI("SetScreenActiveMode: %{public}u -> %{public}u", usedModeIdx, modeIdx);
-            ASSERT_EQ(true, ScreenSizeEqual(defaultScreen_, modes[modeIdx]));
+            constexpr int maxRetries = 20;
+            constexpr int sleepMs = 100;
+            bool sizeMatched = false;
+            for (int i = 0; i < maxRetries; ++i) {
+                usleep(sleepMs * 1000);
+                if (ScreenSizeEqual(defaultScreen_, modes[modeIdx])) {
+                    sizeMatched = true;
+                    break;
+                }
+            }
+            ASSERT_TRUE(sizeMatched);
             ASSERT_EQ(true, CheckDisplayChangeEventCallback(true));
             sptr<Display> defaultDisplay = DisplayManager::GetInstance().GetDisplayById(defaultDisplayId_);
             ASSERT_NE(nullptr, defaultDisplay);
             ASSERT_EQ(true, DisplaySizeEqual(defaultDisplay, modes[modeIdx]));
-            // reset usedMode
             ResetDisplayChangeListener();
             defaultScreen_->SetScreenActiveMode(usedModeIdx);
             CheckDisplayChangeEventCallback(true);

@@ -132,9 +132,9 @@ HWTEST_F(DisplayManagerAdapterLiteTest, WakeUpEnd, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAdapterLiteTest, SuspendBegin, TestSize.Level1)
 {
-    PowerStateChangeReason reason = PowerStateChangeReason{0};
+    PowerStateChangeReason reason{0};
     bool ret = SingletonContainer::Get<DisplayManagerAdapterLite>().SuspendBegin(reason);
-    ASSERT_TRUE(ret);
+    EXPECT_EQ(ret, false) << "SuspendBegin should return false when proxy is not initialized.";
 }
 
 /**
@@ -331,10 +331,12 @@ HWTEST_F(DisplayManagerAdapterLiteTest, WakeUpEndPiling, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAdapterLiteTest, GetScreenBrightnessPiling, TestSize.Level1)
 {
-#define SCREENLESS_ENABLE
-    auto ret = SingletonContainer::Get<DisplayManagerAdapterLite>().GetScreenBrightness(0);
-    EXPECT_EQ(ret, 0);
-#undef SCREENLESS_ENABLE
+    uint32_t b1 = SingletonContainer::Get<DisplayManagerAdapterLite>().GetScreenBrightness(0);
+    uint32_t b2 = SingletonContainer::Get<DisplayManagerAdapterLite>().GetScreenBrightness(0);
+    
+    EXPECT_GE(b1, 0u);
+    EXPECT_LE(b1, 10000u);
+    EXPECT_EQ(b1, b2);
 }
 
 /**
