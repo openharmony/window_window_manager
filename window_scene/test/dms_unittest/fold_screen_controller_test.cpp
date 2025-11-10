@@ -332,10 +332,14 @@ namespace {
         std::recursive_mutex mutex;
         FoldScreenController fsc_(mutex, std::shared_ptr<TaskScheduler>());
 
+        g_errLog.clear();
+        LOG_SetCallback(MyLogCallback);
         bool onBootAnimation = false;
         fsc_.foldScreenPolicy_ = nullptr;
         fsc_.SetOnBootAnimation(onBootAnimation);
-        ASSERT_EQ(onBootAnimation, false);
+        EXPECT_TRUE(g_errLog.find("foldScreenPolicy_is null") != std::string::npos);
+        g_errLog.clear();
+        LOG_SetCallback(nullptr);
     }
 
     /**
@@ -348,10 +352,14 @@ namespace {
         std::recursive_mutex mutex;
         FoldScreenController fsc_(mutex, std::shared_ptr<TaskScheduler>());
 
+        g_errLog.clear();
+        LOG_SetCallback(MyLogCallback);
         bool onBootAnimation = true;
         fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
         fsc_.SetOnBootAnimation(onBootAnimation);
-        ASSERT_EQ(onBootAnimation, true);
+        EXPECT_TRUE(g_errLog.find("foldScreenPolicy_is null") == std::string::npos);
+        g_errLog.clear();
+        LOG_SetCallback(nullptr);
     }
 
     /**

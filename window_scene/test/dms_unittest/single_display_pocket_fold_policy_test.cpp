@@ -29,6 +29,14 @@
 using namespace testing;
 using namespace testing::ext;
 
+namespace {
+    std::string g_logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_logMsg = msg;
+    }
+}
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -273,13 +281,18 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, ReportFoldDisplayModeChange, TestSiz
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
     SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
 
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
     policy.ReportFoldDisplayModeChange(displayMode);
-    EXPECT_EQ(FoldDisplayMode::UNKNOWN, displayMode);
-
+    EXPECT_TRUE(g_logMsg.find("Write HiSysEvent error") == std::string::npos);
+    
+    g_logMsg.clear();
     displayMode = FoldDisplayMode::FULL;
     policy.ReportFoldDisplayModeChange(displayMode);
-    EXPECT_NE(FoldDisplayMode::UNKNOWN, displayMode);
+    EXPECT_TRUE(g_logMsg.find("Write HiSysEvent error") == std::string::npos);
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
 }
 
 /**

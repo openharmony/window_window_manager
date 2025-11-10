@@ -29,6 +29,14 @@
 using namespace testing;
 using namespace testing::ext;
 
+namespace {
+    std::string g_logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_logMsg = msg;
+    }
+}
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -156,7 +164,7 @@ HWTEST_F(ScreenSceneConfigTest, ReadIntNumbersConfigInfo, TestSize.Level1)
     auto configFilePath = ScreenSceneConfig::GetConfigPath("etc/window/resources/display_manager_config.xml");
     xmlDocPtr docPtr = xmlReadFile(configFilePath.c_str(), nullptr, XML_PARSE_NOBLANKS);
     if (docPtr == nullptr) {
-        return;
+        GTEST_SKIP();
     }
 
     xmlNodePtr rootPtr = xmlDocGetRootElement(docPtr);
@@ -252,7 +260,7 @@ HWTEST_F(ScreenSceneConfigTest, ReadEnableConfigInfo, TestSize.Level1)
     auto configFilePath = ScreenSceneConfig::GetConfigPath("etc/window/resources/display_manager_config.xml");
     xmlDocPtr docPtr = xmlReadFile(configFilePath.c_str(), nullptr, XML_PARSE_NOBLANKS);
     if (docPtr == nullptr) {
-        return;
+        GTEST_SKIP();
     }
 
     xmlNodePtr rootPtr = xmlDocGetRootElement(docPtr);
@@ -299,7 +307,7 @@ HWTEST_F(ScreenSceneConfigTest, ReadStringConfigInfo, TestSize.Level1)
     auto configFilePath = ScreenSceneConfig::GetConfigPath("etc/window/resources/display_manager_config.xml");
     xmlDocPtr docPtr = xmlReadFile(configFilePath.c_str(), nullptr, XML_PARSE_NOBLANKS);
     if (docPtr == nullptr) {
-        return;
+        GTEST_SKIP();
     }
 
     xmlNodePtr rootPtr = xmlDocGetRootElement(docPtr);
@@ -698,9 +706,12 @@ HWTEST_F(ScreenSceneConfigTest, SetSubCutoutSvgPath01, TestSize.Level1)
  */
 HWTEST_F(ScreenSceneConfigTest, SetCurvedCompressionAreaInLandscape, TestSize.Level1)
 {
-    int res = 0;
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     ScreenSceneConfig::SetCurvedCompressionAreaInLandscape();
-    ASSERT_EQ(0, res);
+    EXPECT_TRUE(g_logMsg.find("waterfallAreaCompressionSizeWhenHorzontal value is not exist") == std::string::npos);
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -797,9 +808,15 @@ HWTEST_F(ScreenSceneConfigTest, GetCurvedCompressionAreaInLandscape03, TestSize.
  */
 HWTEST_F(ScreenSceneConfigTest, ReadStringListConfigInfo01, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     xmlNodePtr rootNode = nullptr;
     ScreenSceneConfig::ReadStringListConfigInfo(rootNode, "");
-    EXPECT_EQ(rootNode, nullptr);
+    EXPECT_TRUE(g_logMsg.find("get root element failed") == std::string::npos &&
+        g_logMsg.find("rootContext is null") == std::string::npos &&
+        g_logMsg.find("invalid node") == std::string::npos);
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
 }
 
 /**
