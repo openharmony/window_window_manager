@@ -1647,6 +1647,7 @@ HWTEST_F(SceneSessionManagerTest, TestNotifyEnterRecentTask, TestSize.Level1)
 HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreate, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestIsEnablePiPCreate start";
+    ASSERT_TRUE(!ssm_->IsEnablePiPCreate(nullptr));
     ssm_->isScreenLocked_ = true;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_TRUE(!ssm_->IsEnablePiPCreate(property));
@@ -1697,7 +1698,6 @@ HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreate, TestSize.Level1)
 HWTEST_F(SceneSessionManagerTest, TestGetScreenName, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestGetScreenName start";
-    ASSERT_TRUE(!ssm_->IsEnablePiPCreate(nullptr));
     int32_t persistentId = 2000;
     ASSERT_EQ(ssm_->getScreenName(persistentId), "");
 
