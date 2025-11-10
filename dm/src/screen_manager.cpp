@@ -501,11 +501,13 @@ DMError ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> m
     return ret;
 }
 
-DMError ScreenManager::MakeMirrorForRecord(std::vector<ScreenId>& mainScreenIds,
+DMError ScreenManager::MakeMirrorForRecord(const std::vector<ScreenId>& mainScreenIds,
     std::vector<ScreenId>& mirrorScreenIds, ScreenId& screenGroupId)
 {
-    std::string mainScreenIdsStr = StringUtil::VectorToString(mainScreenIds);
-    TLOGI(WmsLogTag::DMS, "Make mirror for screens: %{public}s", mainScreenIdsStr.c_str());
+    std::string mainScreenIdsStr = "";
+    if (!StringUtil::VectorToString(mainScreenIds, mainScreenIdsStr)) {
+        TLOGI(WmsLogTag::DMS, "Make mirror for screens: %{public}s", mainScreenIdsStr.c_str());
+    }
     if (mirrorScreenIds.size() > MAX_SCREEN_SIZE) {
         TLOGW(WmsLogTag::DMS, "Make Mirror failed. MirrorScreenId size bigger than %{public}u.", MAX_SCREEN_SIZE);
         return DMError::DM_ERROR_INVALID_PARAM;

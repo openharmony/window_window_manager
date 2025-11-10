@@ -1438,7 +1438,7 @@ DMError ScreenSessionManagerProxy::MakeMirror(ScreenId mainScreenId, std::vector
     return ret;
 }
 
-DMError ScreenSessionManagerProxy::MakeMirrorForRecord(std::vector<ScreenId>& mainScreenIds,
+DMError ScreenSessionManagerProxy::MakeMirrorForRecord(const std::vector<ScreenId>& mainScreenIds,
     std::vector<ScreenId>& mirrorScreenIds, ScreenId& screenGroupId)
 {
     TLOGW(WmsLogTag::DMS, "SCB: ENTER");
