@@ -2813,7 +2813,6 @@ WSError SceneSessionManagerProxy::GetHostGlobalScaledRect(int32_t hostWindowId, 
 WMError SceneSessionManagerProxy::ConvertToRelativeCoordinateExtended(
     const Rect& rect, Rect& newRect, DisplayId& newDisplayId)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -2822,7 +2821,8 @@ WMError SceneSessionManagerProxy::ConvertToRelativeCoordinateExtended(
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteInt32(rect.posX_) || !data.WriteInt32(rect.posY_) ||
-        !data.WriteUint32(rect.width_) || !data.WriteUint32(rect.height_)) {
+        !data.WriteUint32(rect.width_) || !data.WriteUint32(rect.height_) ||
+        !data.WriteUint64(newDisplayId)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to write rect");
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -2843,8 +2843,7 @@ WMError SceneSessionManagerProxy::ConvertToRelativeCoordinateExtended(
     int32_t posY = 0;
     uint32_t width = 0;
     uint32_t height = 0;
-    if (!reply.ReadInt32(posX) || !reply.ReadInt32(posY) ||
-        !reply.ReadUint32(width) || !reply.ReadUint32(height)) {
+    if (!reply.ReadInt32(posX) || !reply.ReadInt32(posY) || !reply.ReadUint32(width) || !reply.ReadUint32(height)) {
         TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "Failed to read rect");
         return WMError::WM_ERROR_IPC_FAILED;
     }
