@@ -8040,8 +8040,15 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
     bool previousFocusedSessionFound = false;
     DisplayId displayGroupId = windowFocusController_->GetDisplayGroupId(displayId);
     sptr<SceneSession> nextFocusableSession = nullptr;
-    auto func = [this, persistentId, &previousFocusedSessionFound, &nextFocusableSession, displayGroupId](sptr<SceneSession> session) {
+    auto func = [this, persistentId, &previousFocusedSessionFound, &nextFocusableSession, &previousFocusedSessionZOrder, displayGroupId](sptr<SceneSession> session) {
         if (session == nullptr) {
+            return false;
+        }
+        if (session->GetPersistentId() == persistentId) {
+            previousFocusedSessionFound = true;
+            return false;
+        }
+        if (!previousFocusedSessionFound) {
             return false;
         }
         auto currentSessionDisplayId = session->GetDisplayId();
@@ -8059,11 +8066,14 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
         }
         if (previousFocusedSessionFound && session->CheckFocusable() &&
             session->IsVisibleNotBackground() && IsParentSessionVisible(session)) {
-            nextFocusableSession = session;
-            return true;
-        }
-        if (session->GetPersistentId() == persistentId) {
-            previousFocusedSessionFound = true;
+            if (session->GetWindowType() != WindowType::WINDOW_TYPE_DESKTOP) {
+                nextFocusableSession = session;
+                return true;
+            }
+            if (currentSessionDisplayId == displayId) {
+                nextFocusableSession = session;
+                return true;
+            }
         }
         return false;
     };
