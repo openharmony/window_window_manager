@@ -1227,7 +1227,7 @@ private:
     /*
      * Gesture Back
      */
-    void UpdateGestureBackEnabled(int32_t persistentId);
+    void UpdateGestureBackEnabled(int32_t curId, int32_t nextId = INVALID_SESSION_ID);
     std::unordered_set<int32_t> gestureBackEnableWindowIdSet_; // ONLY Accessed on OS_sceneSession thread
 
     /*

@@ -8322,6 +8322,7 @@ WSError SceneSessionManager::ShiftFocus(DisplayId displayId, const sptr<SceneSes
         nextId = nextSession->GetPersistentId();
     }
     UpdateFocusStatus(displayId, nextSession, true, focusNotifyInfo);
+    UpdateGestureBackEnabled(focusedId, nextId);
     UpdateHighlightStatus(displayId, focusedSession, nextSession, isProactiveUnfocus);
     if (shiftFocusFunc_ != nullptr) {
         auto displayGroupId = windowFocusController_->GetDisplayGroupId(displayId);
@@ -12548,26 +12549,33 @@ void SceneSessionManager::GetKeyboardOccupiedAreaWithRotation(
     avoidAreas.emplace_back(keyboardOccupiedArea);
 }
 
-void SceneSessionManager::UpdateGestureBackEnabled(int32_t persistentId)
+void SceneSessionManager::UpdateGestureBackEnabled(int32_t curId, int32_t nextId)
 {
-    auto task = [this, persistentId, where = __func__] {
-        auto sceneSession = GetSceneSession(persistentId);
+    auto task = [this, curId, nextId, where = __func__] {
+        auto sceneSession = GetSceneSession(curId);
         if (sceneSession == nullptr || !sceneSession->GetEnableGestureBackHadSet()) {
             TLOGND(WmsLogTag::WMS_IMMS, "sceneSession is nullptr or not set Gesture Back enable");
             return;
         }
         auto needEnableGestureBack = sceneSession->GetGestureBackEnabled();
         if (needEnableGestureBack) {
-            gestureBackEnableWindowIdSet_.erase(persistentId);
+            gestureBackEnableWindowIdSet_.erase(curId);
         } else {
-            gestureBackEnableWindowIdSet_.insert(persistentId);
+            gestureBackEnableWindowIdSet_.insert(curId);
         }
         if (sceneSession->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
             sceneSession->GetWindowMode() != WindowMode::WINDOW_MODE_FULLSCREEN ||
             (sceneSession->GetSessionState() != SessionState::STATE_FOREGROUND &&
              sceneSession->GetSessionState() != SessionState::STATE_ACTIVE) ||
-            enterRecent_.load() || !sceneSession->IsFocused()) {
+            enterRecent_.load() || (nextId == INVALID_SESSION_ID && !sceneSession->IsFocused())) {
             needEnableGestureBack = true;
+        }
+        if (nextId != INVALID_SESSION_ID) {
+            auto nextSession = GetSceneSession(nextId);
+            if (nextSession != nullptr && !sceneSession->IsFocused()) {
+                auto type = nextSession->GetSessionProperty()->GetWindowType();
+                needEnableGestureBack = type != WindowType::WINDOW_TYPE_PIP ? true : needEnableGestureBack;
+            }
         }
         if (gestureNavigationEnabledChangeFunc_ != nullptr) {
             gestureNavigationEnabledChangeFunc_(needEnableGestureBack,
@@ -12576,7 +12584,7 @@ void SceneSessionManager::UpdateGestureBackEnabled(int32_t persistentId)
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s callback func is null", where);
         }
     };
-    taskScheduler_->PostAsyncTask(task, "UpdateGestureBackEnabled: PID: " + std::to_string(persistentId));
+    taskScheduler_->PostAsyncTask(task, "UpdateGestureBackEnabled: PID: " + std::to_string(curId));
 }
 
 WSError SceneSessionManager::NotifyStatusBarShowStatus(int32_t persistentId, bool isVisible)
