@@ -56,19 +56,25 @@ HWTEST_F(ScreenPropertyTest, SetScreenRotation, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "ScreenPropertyTest: SetScreenRotation start";
     ScreenProperty* property = new(std::nothrow) ScreenProperty();
-    int64_t ret = 0;
     Rotation rotation = Rotation::ROTATION_0;
     property->SetScreenRotation(rotation);
+    float initialRotationValue = property->GetRotation();
+    ASSERT_FLOAT_EQ(initialRotationValue, 0.0f);
 
     rotation = Rotation::ROTATION_90;
     property->SetScreenRotation(rotation);
+    initialRotationValue = property->GetRotation();
+    ASSERT_FLOAT_EQ(initialRotationValue, 90.0f);
 
     rotation = Rotation::ROTATION_180;
     property->SetScreenRotation(rotation);
+    initialRotationValue = property->GetRotation();
+    ASSERT_FLOAT_EQ(initialRotationValue, 180.0f);
 
     rotation = Rotation::ROTATION_270;
     property->SetScreenRotation(rotation);
-    ASSERT_EQ(ret, 0);
+    initialRotationValue = property->GetRotation();
+    ASSERT_FLOAT_EQ(initialRotationValue, 270.0f);
     delete property;
     GTEST_LOG_(INFO) << "ScreenPropertyTest: SetScreenRotation end";
 }
@@ -254,24 +260,26 @@ HWTEST_F(ScreenPropertyTest, UpdateVirtualPixelRatio, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenPropertyTest: UpdateVirtualPixelRatio start";
     ScreenProperty* property = new(std::nothrow) ScreenProperty();
-    int64_t ret = 0;
     RRect bounds;
     bounds.rect_.width_ = 1344;
     bounds.rect_.height_ = 2772;
 
     property->UpdateVirtualPixelRatio(bounds);
+    ASSERT_EQ(property->GetVirtualPixelRatio(), 3.5f);
 
     bounds.rect_.height_ = 1111;
     property->UpdateVirtualPixelRatio(bounds);
+    ASSERT_EQ(property->GetVirtualPixelRatio(), 1.5f);
 
     bounds.rect_.width_ = 1111;
     bounds.rect_.height_ = 2772;
     property->UpdateVirtualPixelRatio(bounds);
+    ASSERT_EQ(property->GetVirtualPixelRatio(), 1.5f);
 
     bounds.rect_.width_ = 1111;
     bounds.rect_.height_ = 1111;
     property->UpdateVirtualPixelRatio(bounds);
-    ASSERT_EQ(ret, 0);
+    ASSERT_EQ(property->GetVirtualPixelRatio(), 1.5f);
     delete property;
     GTEST_LOG_(INFO) << "ScreenPropertyTest: UpdateVirtualPixelRatio end";
 }
@@ -292,19 +300,22 @@ HWTEST_F(ScreenPropertyTest, SetBounds, TestSize.Level1)
 
     uint32_t phyWidth = UINT32_MAX;
     property->SetPhyWidth(phyWidth);
-    uint32_t phyHeigth = UINT32_MAX;
-    property->SetPhyHeight(phyHeigth);
+    uint32_t phyHeight = UINT32_MAX;
+    property->SetPhyHeight(phyHeight);
     property->SetBounds(bounds);
+    ASSERT_EQ(property->GetBounds().rect_.width_, 1344);
+    ASSERT_EQ(property->GetBounds().rect_.height_, 2722);
 
     bounds.rect_.width_ = 2772;
     bounds.rect_.height_ = 1344;
 
     uint32_t phyWidth1 = 2772;
     property->SetPhyWidth(phyWidth1);
-    uint32_t phyHeigth1 = 1344;
-    property->SetPhyHeight(phyHeigth1);
+    uint32_t phyHeight1 = 1344;
+    property->SetPhyHeight(phyHeight1);
     property->SetBounds(bounds);
-    ASSERT_EQ(ret, 0);
+    ASSERT_EQ(property->GetBounds().rect_.width_, 2772);
+    ASSERT_EQ(property->GetBounds().rect_.height_, 1344);
     delete property;
     GTEST_LOG_(INFO) << "ScreenPropertyTest: SetBounds end";
 }
@@ -318,14 +329,23 @@ HWTEST_F(ScreenPropertyTest, CalculateXYDpi, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenPropertyTest: CalculateXYDpi start";
     ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    RRect Phybounds;
+    Phybounds.rect_.width_ = 2772;
+    Phybounds.rect_.height_ = 1344;
+    property->SetPhyBounds(Phybounds);
+
     uint32_t phyWidth = 0;
     uint32_t phyHeight = 0;
-    int ret = 0;
     property->CalculateXYDpi(phyWidth, phyHeight);
+    EXPECT_FLOAT_EQ(property->GetXDpi(), 0);
+    EXPECT_FLOAT_EQ(property->GetYDpi(), 0);
+
     phyWidth = 1;
     phyHeight = 1;
     property->CalculateXYDpi(phyWidth, phyHeight);
-    ASSERT_EQ(ret, 0);
+    EXPECT_FLOAT_EQ(property->GetXDpi(), 70408.797);
+    EXPECT_FLOAT_EQ(property->GetYDpi(), 34137.6);
+
     delete property;
     GTEST_LOG_(INFO) << "ScreenPropertyTest: CalculateXYDpi end";
 }
