@@ -104,8 +104,8 @@ HWTEST_F(ScreenTest, SetScreenActiveMode01, TestSize.Level1)
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenTest, SetScreenActiveMode02, TestSize.Level1)
-{                                              
-    uint32_t invalidModeId = 999999;  
+{
+    uint32_t invalidModeId = 999999;
     DMError result = screen_->SetScreenActiveMode(invalidModeId);
     ASSERT_EQ(result, DMError::DM_ERROR_INVALID_PARAM);
 }

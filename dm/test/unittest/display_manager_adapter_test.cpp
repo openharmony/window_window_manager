@@ -543,7 +543,11 @@ HWTEST_F(DisplayManagerAdapterTest, SuspendBegin, TestSize.Level1)
     PowerStateChangeReason reason = PowerStateChangeReason::POWER_BUTTON;
     bool ret = SingletonContainer::Get<DisplayManagerAdapter>().SuspendBegin(reason);
 
+<<<<<<< HEAD
     EXPECT_EQ(ret, false) << "SuspendBegin should return false when service proxy is not initialized in unit test environment.";
+=======
+    EXPECT_EQ(ret, false);
+>>>>>>> 7bf36913da... refix of tdd
 }
 
 /**
