@@ -499,6 +499,7 @@ void WindowController::NotifyInputCallingWindowRectAndOccupiedAreaChange(const s
         auto avoidAreaType = static_cast<AvoidAreaType>(type);
         AvoidArea area = GetAvoidAreaByType(callingWindow->GetWindowId(), avoidAreaType);
         avoidAreas[avoidAreaType] = area;
+        avoidAreas[avoidAreaType] = area;
     }
     auto rsTransaction = RSSyncTransactionAdapter::GetRSTransaction(callingWindow->GetRSUIContext());
     if (WindowNodeContainer::GetAnimateTransactionEnabled() && rsTransaction) {
