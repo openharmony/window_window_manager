@@ -4245,6 +4245,10 @@ std::string SceneSessionManager::getScreenName(int32_t persistentId)
 
 bool SceneSessionManager::IsEnablePiPCreate(const sptr<WindowSessionProperty>& property)
 {
+    if (property == nullptr) {
+        TLOGI(WmsLogTag::WMS_PIP, "property is nullptr.");
+        return false;
+    }
     std::string screenName = getScreenName(property->GetParentPersistentId());
     if (isScreenLocked_ && screenName != SUPER_LAUNCHER) {
         TLOGI(WmsLogTag::WMS_PIP, "skip create pip window as screen locked.");

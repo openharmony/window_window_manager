@@ -1697,6 +1697,7 @@ HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreate, TestSize.Level1)
 HWTEST_F(SceneSessionManagerTest, TestGetScreenName, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestGetScreenName start";
+    ASSERT_TRUE(!ssm_->IsEnablePiPCreate(nullptr));
     int32_t persistentId = 2000;
     ASSERT_EQ(ssm_->getScreenName(persistentId), "");
 
@@ -1732,8 +1733,8 @@ HWTEST_F(SceneSessionManagerTest, TestGetScreenName, TestSize.Level1)
 
     screenSession->SetName("SuperLauncher");
     ASSERT_EQ(ssm_->getScreenName(persistentId), "SuperLauncher");
-    ssm_->sceneSessionMap_.clear();
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
+    ssm_->sceneSessionMap_.erase(2000);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.erase(1000);
 }
 
 /**
@@ -1765,7 +1766,7 @@ HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreateOnSuperLauncher, TestSize
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert({displayId, screenSession});
     ssm_->isScreenLocked_ = true;
     ASSERT_TRUE(ssm_->IsEnablePiPCreate(property));
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.erase(2000);
 }
 
 /**
