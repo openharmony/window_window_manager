@@ -271,7 +271,7 @@ HWTEST_F(DisplayChangeTest, CheckDisplaySizeChange01, TestSize.Level1)
                     break;
                 }
             }
-            ASSERT_TRUE(sizeMatched) << "Screen resolution did not match target mode after " << (maxRetries * sleepMs) << "ms wait";
+            ASSERT_TRUE(sizeMatched);
             ASSERT_EQ(true, CheckDisplayChangeEventCallback(true));
             ResetDisplayChangeListener();
             defaultScreen_->SetScreenActiveMode(usedModeIdx);
