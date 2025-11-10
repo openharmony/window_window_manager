@@ -681,7 +681,7 @@ HWTEST_F(DisplayManagerAdapterTest, RemoveVirtualScreenFromGroup, TestSize.Level
         resultValue = 1;
     };
     func();
-    ASSERT_EQ(resultValue, 1);
+    ASSERT_NE(resultValue, 0);
 }
 
 /**

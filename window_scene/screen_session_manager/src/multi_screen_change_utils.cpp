@@ -398,6 +398,7 @@ void MultiScreenChangeUtils::ScreenConnectionChange(sptr<IScreenSessionManagerCl
         .isExtend_ = screenSession->GetIsExtend(),
         .innerName_ = screenSession->GetInnerName(),
         .screenId_ = screenSession->GetScreenId(),
+        .supportsFocus_ = screenSession->GetSupportsFocus(),
     };
     ssmClient->OnScreenConnectionChanged(option, screenEvent);
 }

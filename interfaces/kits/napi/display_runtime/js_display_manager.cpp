@@ -1520,6 +1520,16 @@ DmErrorCode GetVirtualScreenOptionFromJs(napi_env env, napi_value optionObject, 
     if (!GetSurfaceFromJs(env, surfaceIdNapiValue, option.surface_)) {
         return DmErrorCode::DM_ERROR_INVALID_PARAM;
     }
+
+    napi_value supportsFocus = nullptr;
+    napi_status status = napi_get_named_property(env, optionObject, "supportsFocus", &supportsFocus);
+    if (status != napi_ok) {
+        TLOGE(WmsLogTag::DMS, "Failed to get parameter to supportsFocus.");
+        return DmErrorCode::DM_ERROR_INVALID_PARAM;
+    }
+    if (!ConvertFromJsValue(env, supportsFocus, option.supportsFocus_)) {
+        TLOGE(WmsLogTag::DMS, "No supportsFocus parameter to convert");
+    }
     return DmErrorCode::DM_OK;
 }
 

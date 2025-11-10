@@ -3876,11 +3876,7 @@ export class WindowInternal implements Window {
     }
 
     public getWindowTransitionAnimation(transitionType: WindowTransitionType): TransitionAnimation | undefined {
-      let ret = this.getWindowTransitionAnimationSync(this.nativeObj, transitionType);
-      if (ret === undefined) {
-        return ret;
-      }
-      return ret as TransitionAnimation;
+      return this.getWindowTransitionAnimationSync(this.nativeObj, transitionType);
     }
 }
 

@@ -67,6 +67,13 @@ class UIContent;
 class ViewportConfig;
 }
 
+namespace OHOS::Rosen {
+struct ViewportConfigAndAvoidArea {
+    std::shared_ptr<Ace::ViewportConfig> config;
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+};
+}
+
 namespace OHOS::Media {
 class PixelMap;
 }
@@ -2439,14 +2446,17 @@ public:
      * @brief Get the Target Orientation ConfigInfo.
      *
      * @param targetOrientation target Orientation.
-     * @param properties systemBar properties
-     * @param config Viewport config.
-     * @param avoidAreas avoidArea information
+     * @param targetProperties systemBar target properties
+     * @param currentProperties systemBar current properties
+     * @param targetViewportConfigAndAvoidArea target viewport config and avoidArea information.
+     * @param currentViewportConfigAndAvoidArea current viewport config and avoidArea information.
      * @return WMError
      */
     virtual WMError GetTargetOrientationConfigInfo(Orientation targetOrientation,
-        const std::map<WindowType, SystemBarProperty>& properties, Ace::ViewportConfig& config,
-        std::map<AvoidAreaType, AvoidArea>& avoidAreas)
+        const std::map<WindowType, SystemBarProperty>& targetProperties,
+        const std::map<WindowType, SystemBarProperty>& currentProperties,
+        ViewportConfigAndAvoidArea& targetViewportConfigAndAvoidArea,
+        ViewportConfigAndAvoidArea& currentViewportConfigAndAvoidArea)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }

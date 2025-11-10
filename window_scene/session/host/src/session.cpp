@@ -61,6 +61,7 @@ constexpr int64_t STATE_DETECT_DELAYTIME = 3 * 1000;
 constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
 constexpr int32_t TIMES_TO_WAIT_FOR_VSYNC_ONECE = 1;
 constexpr int32_t TIMES_TO_WAIT_FOR_VSYNC_TWICE = 2;
+const uint64_t PRELAUNCH_DONE_TIME = system::GetIntParameter("window.prelaunchDoneTime", 6000);
 
 const std::map<SessionState, bool> ATTACH_MAP = {
     { SessionState::STATE_DISCONNECT, false },
@@ -1427,20 +1428,6 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     Rect rect = {winRect.posX_, winRect.posY_, static_cast<uint32_t>(winRect.width_),
         static_cast<uint32_t>(winRect.height_)};
     property->SetWindowRect(rect);
-    // Check if the current session is prelaunch and set the session rect based on the screen size.
-    if (GetSessionInfo().isPrelaunch_) {
-        auto displayId = property->GetDisplayId();
-        const std::map<ScreenId, ScreenProperty>& screenProperties =
-            Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
-        if (screenProperties.find(displayId) != screenProperties.end()) {
-            auto screenProperty = screenProperties.at(displayId);
-            int32_t width = screenProperty.GetBounds().rect_.GetWidth();
-            int32_t height = screenProperty.GetBounds().rect_.GetHeight();
-            TLOGI(WmsLogTag::WMS_MAIN, "update prelaunch rect[0, 0, %{public}d, %{public}d] "
-                "when session connect", width, height);
-            SetSessionRect({0, 0, width, height});
-        }
-    }
     property->SetPersistentId(GetPersistentId());
     property->SetAppIndex(GetSessionInfo().appIndex_);
     property->SetFullScreenStart(GetSessionInfo().fullScreenStart_);
@@ -2020,6 +2007,13 @@ void Session::RemoveLifeCycleTask(const LifeCycleTaskType& taskType)
         }
     }
     PostTask(std::move(frontLifeCycleTask->task), frontLifeCycleTask->name);
+}
+
+void Session::ClearLifeCycleTask()
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "Clear LifeCycleTask, PersistentId=%{public}d", persistentId_);
+    std::lock_guard<std::mutex> lock(lifeCycleTaskQueueMutex_);
+    lifeCycleTaskQueue_.clear();
 }
 
 void Session::PostLifeCycleTask(Task&& task, const std::string& name, const LifeCycleTaskType& taskType)
@@ -2932,7 +2926,8 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
         if (session->freeMultiWindow_.load()) {
             session->scenePersistence_->SetHasSnapshotFreeMultiWindow(true);
             ScenePersistentStorage::Insert("Snapshot_" + session->GetSessionInfo().bundleName_ + "_"
-                + std::to_string(session->persistentId_), 0, ScenePersistentStorageType::MAXIMIZE_STATE);
+                + std::to_string(session->persistentId_), static_cast<int32_t>(session->GetWindowMode()),
+                ScenePersistentStorageType::MAXIMIZE_STATE);
         } else {
             session->scenePersistence_->SetHasSnapshot(true, key);
             ScenePersistentStorage::Insert("Snapshot_" + session->GetSessionInfo().bundleName_ + "_"
@@ -3040,6 +3035,13 @@ bool Session::HasSnapshotFreeMultiWindow()
     if (hasSnapshotFreeMultiWindow && scenePersistence_) {
         freeMultiWindow_.store(true);
         scenePersistence_->SetHasSnapshotFreeMultiWindow(true);
+        int32_t windowMode = 0;
+        ScenePersistentStorage::Get("Snapshot_" + sessionInfo_.bundleName_ +
+            "_" + std::to_string(persistentId_), windowMode, ScenePersistentStorageType::MAXIMIZE_STATE);
+        if (static_cast<WindowMode>(windowMode) == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            static_cast<WindowMode>(windowMode) == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+            SetExitSplitOnBackground(true);
+        }
     }
     return hasSnapshotFreeMultiWindow;
 }
@@ -5216,5 +5218,23 @@ WSError Session::SetIsShowDecorInFreeMultiWindow(bool isShow)
         return sessionStage_->UpdateIsShowDecorInFreeMultiWindow(isShow);
     }
     return WSError::WS_OK;
+}
+
+void Session::SetPrelaunch()
+{
+    prelaunchStart_ = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count());
+    TLOGI(WmsLogTag::WMS_LIFE, "SetPrelaunch timestamp: %{public}" PRIu64, prelaunchStart_);
+    sessionInfo_.isPrelaunch_ = true;
+}
+
+bool Session::IsPrelaunch() const
+{
+    uint64_t nowTimeStamp = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count());
+    if (sessionInfo_.isPrelaunch_) {
+        TLOGI(WmsLogTag::WMS_LIFE, "IsPrelaunch now - start: %{public}" PRIu64, nowTimeStamp - prelaunchStart_);
+    }
+    return sessionInfo_.isPrelaunch_ && nowTimeStamp - prelaunchStart_ > PRELAUNCH_DONE_TIME;
 }
 } // namespace OHOS::Rosen

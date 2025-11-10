@@ -151,7 +151,6 @@ constexpr uint32_t OLED_60_HZ = 60;
 #endif
 constexpr uint32_t FOUR_K_WIDTH = 3840;
 constexpr uint32_t THREE_K_WIDTH = 3000;
-constexpr uint32_t DISPLAY_B_HEIGHT = 1608;
 
 const int32_t ROTATE_POLICY = system::GetIntParameter("const.window.device.rotate_policy", 0);
 constexpr int32_t FOLDABLE_DEVICE { 2 };
@@ -3305,6 +3304,12 @@ sptr<ScreenSession> ScreenSessionManager::CreatePhysicalMirrorSessionInner(Scree
         return nullptr;
     }
     MultiScreenManager::GetInstance().MultiScreenReportDataToRss(SCREEN_EXTEND, MULTI_SCREEN_ENTER_STR);
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        TLOGI(WmsLogTag::DMS, "set ExtendConnect flag = true");
+        SetIsExtendScreenConnected(true);
+        extendScreenConnectStatus_.store(ExtendScreenConnectStatus::CONNECT);
+        OnExtendScreenConnectStatusChange(screenId, ExtendScreenConnectStatus::CONNECT);
+    }
     if (g_isPcDevice) {
         // pc is none, pad&&phone is mirror
         InitExtendScreenProperty(screenId, screenSession, property);
@@ -5821,6 +5826,7 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
     }
     virtualScreenCount_ = virtualScreenCount_ + 1;
     NotifyCaptureStatusChanged();
+    SetConfigForInputmethod(smsScreenId, option);
     return smsScreenId;
 }
 
@@ -8633,7 +8639,6 @@ void ScreenSessionManager::HandleExtendScreenConnect(ScreenId screenId)
         TLOGI(WmsLogTag::DMS, "not super fold display device.");
         return;
     }
-    SetIsExtendScreenConnected(true);
     SuperFoldSensorManager::GetInstance().HandleScreenConnectChange();
     extendScreenConnectStatus_.store(ExtendScreenConnectStatus::CONNECT);
     OnExtendScreenConnectStatusChange(screenId, ExtendScreenConnectStatus::CONNECT);
@@ -9037,7 +9042,7 @@ void ScreenSessionManager::OnFoldPropertyChange(ScreenId screenId, const ScreenP
     ScreenProperty midProperty;
     bool result = clientProxy->OnFoldPropertyChange(screenId, newProperty, reason, displayMode, midProperty);
     if (!result) {
-        TLOGE(WmsLogTag::DMS, "ipc failed");
+        TLOGE(WmsLogTag::DMS, "result is failed");
         return;
     }
     TLOGI(WmsLogTag::DMS, "OnFoldPropertyChange get process data,screenId: %{public}" PRIu64
@@ -11529,6 +11534,7 @@ SessionOption ScreenSessionManager::GetSessionOption(sptr<ScreenSession> screenS
         .innerName_ = screenSession->GetInnerName(),
         .screenId_ = screenSession->GetScreenId(),
         .rotationCorrectionMap_ = screenSession->GetRotationCorrectionMap(),
+        .supportsFocus_ = screenSession->GetSupportsFocus()
     };
     return option;
 }
@@ -11542,6 +11548,7 @@ SessionOption ScreenSessionManager::GetSessionOption(sptr<ScreenSession> screenS
         .innerName_ = screenSession->GetInnerName(),
         .screenId_ = screenId,
         .rotationCorrectionMap_ = screenSession->GetRotationCorrectionMap(),
+        .supportsFocus_ = screenSession->GetSupportsFocus()
     };
     return option;
 }
@@ -12140,8 +12147,9 @@ void ScreenSessionManager::CalculateRotatedDisplay(Rotation rotation, const DMRe
         }
     }
     Rotation phyOffsetRotation = ConvertIntToRotation(phyOffset);
-    uint32_t correctedRotation = (static_cast<uint32_t>(rotation) + static_cast<uint32_t>(phyOffsetRotation)) %
-        ROTATION_MOD;
+    auto rotaionOffset = GetConfigCorrectionByDisplayMode(GetFoldDisplayMode());
+    uint32_t correctedRotation = (static_cast<uint32_t>(rotation) + static_cast<uint32_t>(phyOffsetRotation)
+        - static_cast<uint32_t>(rotaionOffset)) % ROTATION_MOD;
     DMRect displayRegionCopy = displayRegion;
     DMRect displayAreaCopy = displayArea;
     switch (static_cast<Rotation>(correctedRotation)) {
@@ -12874,5 +12882,22 @@ void ScreenSessionManager::DoAodExitAndSetPowerAllOff()
         SetRSScreenPowerStatusExt(screenId, ScreenPowerStatus::POWER_STATUS_OFF);
     }
 #endif
+}
+
+void ScreenSessionManager::SetConfigForInputmethod(ScreenId screenId, VirtualScreenOption option)
+{
+    auto screenSession = GetScreenSession(screenId);
+    TLOGD(WmsLogTag::DMS, "screenId:%{public}" PRIu64", supportsFocus:%{public}d, supportsInput:%{public}d",
+        screenId, option.supportsFocus_, option.supportsInput_);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
+        return;
+    }
+    screenSession->SetSupportsFocus(option.supportsFocus_);
+    if (option.supportsFocus_) {
+        screenSession->SetSupportsInput(option.supportsInput_);
+    } else {
+        screenSession->SetSupportsInput(false);
+    }
 }
 } // namespace OHOS::Rosen

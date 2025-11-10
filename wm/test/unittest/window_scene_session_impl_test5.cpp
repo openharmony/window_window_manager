@@ -1774,11 +1774,21 @@ HWTEST_F(WindowSceneSessionImplTest5, GetTargetOrientationConfigInfo, Function |
     option->SetDisplayId(0);
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     Orientation targetOrientation = Orientation::USER_ROTATION_PORTRAIT;
-    std::map<Rosen::WindowType, Rosen::SystemBarProperty> properties;
-    Rosen::SystemBarProperty statusBarProperty;
-    properties[Rosen::WindowType::WINDOW_TYPE_STATUS_BAR] = statusBarProperty;
-    Ace::ViewportConfig config;
-    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+
+    std::map<Rosen::WindowType, Rosen::SystemBarProperty> targetProperties;
+    Rosen::SystemBarProperty targetStatusBarProperty;
+    targetProperties[Rosen::WindowType::WINDOW_TYPE_STATUS_BAR] = targetStatusBarProperty;
+    std::make_shared<Ace::ViewportConfig> targetConfig;
+    std::map<AvoidAreaType, AvoidArea> targetAvoidAreas;
+    Rosen::ViewportConfigAndAvoidArea targetViewportConfigAndAvoidArea = { targetConfig, targetAvoidAreas };
+
+    std::map<Rosen::WindowType, Rosen::SystemBarProperty> currentProperties;
+    Rosen::SystemBarProperty currentStatusBarProperty;
+    currentProperties[Rosen::WindowType::WINDOW_TYPE_STATUS_BAR] = currentStatusBarProperty;
+    std::make_shared<Ace::ViewportConfig> currentConfig;
+    std::map<AvoidAreaType, AvoidArea> currentAvoidAreas;
+    Rosen::ViewportConfigAndAvoidArea currentViewportConfigAndAvoidArea = { currentConfig, currentAvoidAreas };
+
     window->getTargetInfoCallback_ = sptr<FutureCallback>::MakeSptr();
 
     window->property_->SetPersistentId(1);
@@ -1789,10 +1799,12 @@ HWTEST_F(WindowSceneSessionImplTest5, GetTargetOrientationConfigInfo, Function |
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->state_ = WindowState::STATE_CREATED;
     EXPECT_EQ(WMError::WM_OK,
-    window->GetTargetOrientationConfigInfo(targetOrientation, properties, config, avoidAreas));
+    window->GetTargetOrientationConfigInfo(targetOrientation, targetProperties,
+        currentProperties, targetViewportConfigAndAvoidArea, currentViewportConfigAndAvoidArea));
     targetOrientation = Orientation::INVALID;
     EXPECT_EQ(WMError::WM_OK,
-    window->GetTargetOrientationConfigInfo(targetOrientation, properties, config, avoidAreas));
+    window->GetTargetOrientationConfigInfo(targetOrientation, targetProperties,
+        currentProperties, targetViewportConfigAndAvoidArea, currentViewportConfigAndAvoidArea));
 }
 
 /**
@@ -2023,6 +2035,12 @@ HWTEST_F(WindowSceneSessionImplTest5, NotifyTargetRotationInfo, Function | Small
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
     info.avoidAreas = avoidAreas;
 
+    OrientationInfo currentInfo;
+    currentInfo.rotation = 90;
+    currentInfo.rect = {0, 0, 50, 50};
+    std::map<AvoidAreaType, AvoidArea> currentAvoidAreas;
+    currentInfo.avoidAreas = currentAvoidAreas;
+
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
@@ -2030,7 +2048,7 @@ HWTEST_F(WindowSceneSessionImplTest5, NotifyTargetRotationInfo, Function | Small
     window->property_->SetWindowName("NotifyTargetRotationInfo");
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->state_ = WindowState::STATE_CREATED;
-    EXPECT_EQ(WSError::WS_DO_NOTHING, window->NotifyTargetRotationInfo(info));
+    EXPECT_EQ(WSError::WS_DO_NOTHING, window->NotifyTargetRotationInfo(info, currentInfo));
 }
 
 /**

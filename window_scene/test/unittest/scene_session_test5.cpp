@@ -2868,10 +2868,11 @@ HWTEST_F(SceneSessionTest5, GetTargetOrientationConfigInfo, Function | SmallTest
     EXPECT_NE(sceneSession, nullptr);
 
     Orientation orientation = Orientation::USER_ROTATION_PORTRAIT;
-    std::map<Rosen::WindowType, Rosen::SystemBarProperty> properties;
+    std::map<Rosen::WindowType, Rosen::SystemBarProperty> targetProperties;
+    std::map<Rosen::WindowType, Rosen::SystemBarProperty> currentProperties;
     NotifySessionGetTargetOrientationConfigInfoFunc func = [](uint32_t targetOrientation) {};
     sceneSession->sessionGetTargetOrientationConfigInfoFunc_ = func;
-    sceneSession->GetTargetOrientationConfigInfo(orientation, properties);
+    sceneSession->GetTargetOrientationConfigInfo(orientation, targetProperties, currentProperties);
     EXPECT_NE(sceneSession->sessionGetTargetOrientationConfigInfoFunc_, nullptr);
 }
 

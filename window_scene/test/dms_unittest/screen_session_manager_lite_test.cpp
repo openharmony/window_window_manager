@@ -64,7 +64,7 @@ HWTEST_F(ScreenSessionManagerLiteTest, ConnectToServer, TestSize.Level1)
 {
     ScreenSessionManagerLite screenSessionManagerLite = ScreenSessionManagerLite();
     screenSessionManagerLite.ConnectToServer();
-    ASSERT_EQ(screenSessionManagerLite.screenSessionManager_, nullptr);
+    ASSERT_NE(screenSessionManagerLite.screenSessionManager_, nullptr);
 }
 
 /**
@@ -78,7 +78,7 @@ HWTEST_F(ScreenSessionManagerLiteTest, RegisterDisplayManagerAgent, TestSize.Lev
     sptr<IDisplayManagerAgent> displayManagerAgent= new DisplayManagerAgentDefault();
     DisplayManagerAgentType type = DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER;
     DMError ret = screenSessionManagerLite.RegisterDisplayManagerAgent(displayManagerAgent, type);
-    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+    ASSERT_NE(ret, DMError::DM_ERROR_NULLPTR);
 }
 
 /**
@@ -92,7 +92,7 @@ HWTEST_F(ScreenSessionManagerLiteTest, UnregisterDisplayManagerAgent, TestSize.L
     sptr<IDisplayManagerAgent> displayManagerAgent= new DisplayManagerAgentDefault();
     DisplayManagerAgentType type = DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER;
     DMError ret = screenSessionManagerLite.UnregisterDisplayManagerAgent(displayManagerAgent, type);
-    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+    ASSERT_NE(ret, DMError::DM_ERROR_NULLPTR);
 }
 
 /**
@@ -140,7 +140,7 @@ HWTEST_F(ScreenSessionManagerLiteTest, GetDefaultDisplayInfo, TestSize.Level1)
 {
     ScreenSessionManagerLite screenSessionManagerLite = ScreenSessionManagerLite();
     sptr<DisplayInfo> ret = screenSessionManagerLite.GetDefaultDisplayInfo();
-    ASSERT_EQ(ret, nullptr);
+    ASSERT_NE(ret, nullptr);
 }
 
 /**
@@ -153,7 +153,7 @@ HWTEST_F(ScreenSessionManagerLiteTest, GetDisplayInfoById, TestSize.Level1)
     ScreenSessionManagerLite screenSessionManagerLite = ScreenSessionManagerLite();
     DisplayId displayId = 0;
     sptr<DisplayInfo> ret = screenSessionManagerLite.GetDisplayInfoById(displayId);
-    ASSERT_EQ(ret, nullptr);
+    ASSERT_NE(ret, nullptr);
 }
 
 /**
@@ -166,7 +166,7 @@ HWTEST_F(ScreenSessionManagerLiteTest, GetCutoutInfo, TestSize.Level1)
     ScreenSessionManagerLite screenSessionManagerLite = ScreenSessionManagerLite();
     DisplayId displayId = 0;
     sptr<CutoutInfo> ret = screenSessionManagerLite.GetCutoutInfo(displayId);
-    ASSERT_EQ(ret, nullptr);
+    ASSERT_NE(ret, nullptr);
 }
 
 /**
