@@ -2903,7 +2903,7 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
             return;
         }
         session->lastLayoutRect_ = session->layoutRect_;
-        auto pixelMap = persistentPixelMap ? persistentPixelMap : session->Snapshot(runInFfrt);
+        auto pixelMap = persistentPixelMap ? persistentPixelMap : session->Snapshot(runInFfrt, 0.0f, updateSnapshot);
         if (pixelMap == nullptr) {
             return;
         }
