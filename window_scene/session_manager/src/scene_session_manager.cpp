@@ -8040,7 +8040,7 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
     bool previousFocusedSessionFound = false;
     DisplayId displayGroupId = windowFocusController_->GetDisplayGroupId(displayId);
     sptr<SceneSession> nextFocusableSession = nullptr;
-    auto func = [this, persistentId, &previousFocusedSessionFound, &nextFocusableSession, &previousFocusedSessionZOrder, displayGroupId](sptr<SceneSession> session) {
+    auto func = [this, persistentId, &previousFocusedSessionFound, &nextFocusableSession, displayGroupId](sptr<SceneSession> session) {
         if (session == nullptr) {
             return false;
         }
