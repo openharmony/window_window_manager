@@ -9845,6 +9845,31 @@ void ScreenSessionManager::SetPhysicalRotationClientInner(ScreenId screenId, int
     TLOGI(WmsLogTag::DMS, "SetPhysicalRotationClientInner end");
 }
 
+void ScreenSessionManager::HandleDefaultMultiScreenMode(sptr<ScreenSession> internalSession,
+    sptr<ScreenSession> screenSession)
+{
+    if (internalSession == nullptr || screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Session is nullptr");
+        return;
+    }
+    ScreenId innerRsId = internalSession->GetRSScreenId();
+    ScreenId externalRsId = screenSession->GetRSScreenId();
+    if (innerRsId == externalRsId) {
+        TLOGW(WmsLogTag::DMS, "same rsId: %{public}" PRIu64, innerRsId);
+        return;
+    }
+    if (IS_SUPPORT_PC_MODE) {
+        TLOGI(WmsLogTag::DMS, "default mode mirror");
+        SetMultiScreenMode(innerRsId, externalRsId, MultiScreenMode::SCREEN_MIRROR);
+        ReportHandleScreenEvent(ScreenEvent::CONNECTED, ScreenCombination::SCREEN_MIRROR);
+    } else {
+        TLOGI(WmsLogTag::DMS, "default mode extend");
+        SetMultiScreenMode(innerRsId, externalRsId, MultiScreenMode::SCREEN_EXTEND);
+        SetMultiScreenDefaultRelativePosition();
+        ReportHandleScreenEvent(ScreenEvent::CONNECTED, ScreenCombination::SCREEN_EXTEND);
+    }
+}
+
 void ScreenSessionManager::RecoverMultiScreenMode(sptr<ScreenSession> screenSession)
 {
     if (screenSession == nullptr) {
@@ -9861,19 +9886,7 @@ void ScreenSessionManager::RecoverMultiScreenMode(sptr<ScreenSession> screenSess
     }
     sptr<ScreenSession> internalSession = GetInternalScreenSession();
     if (!RecoverRestoredMultiScreenMode(screenSession)) {
-        if (internalSession == nullptr) {
-            TLOGE(WmsLogTag::DMS, "internalSession is nullptr");
-            return;
-        }
-        ScreenId innerRsId = internalSession->GetRSScreenId();
-        ScreenId externalRsId = screenSession->GetRSScreenId();
-        if (innerRsId == externalRsId) {
-            TLOGW(WmsLogTag::DMS, "same rsId: %{public}" PRIu64, innerRsId);
-            return;
-        }
-        SetMultiScreenMode(innerRsId, externalRsId, MultiScreenMode::SCREEN_EXTEND);
-        ReportHandleScreenEvent(ScreenEvent::CONNECTED, ScreenCombination::SCREEN_EXTEND);
-        SetMultiScreenDefaultRelativePosition();
+        HandleDefaultMultiScreenMode(internalSession, screenSession);
     }
     sptr<ScreenSession> newInternalSession = GetInternalScreenSession();
     if (newInternalSession != nullptr && internalSession != nullptr &&
