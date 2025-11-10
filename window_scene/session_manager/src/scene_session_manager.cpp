@@ -8037,18 +8037,19 @@ void SceneSessionManager::DumpAllSessionFocusableInfo(int32_t persistentId)
 sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displayId, int32_t persistentId)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "id: %{public}d", persistentId);
-    bool previousFocusedSessionFound = false;
+    bool preFocusedSessionFound = false;
     DisplayId displayGroupId = windowFocusController_->GetDisplayGroupId(displayId);
     sptr<SceneSession> nextFocusableSession = nullptr;
-    auto func = [this, persistentId, &previousFocusedSessionFound, &nextFocusableSession, displayGroupId](sptr<SceneSession> session) {
+    auto func = [this, persistentId, &preFocusedSessionFound, &nextFocusableSession,
+        displayGroupId, displayId](sptr<SceneSession> session) {
         if (session == nullptr) {
             return false;
         }
         if (session->GetPersistentId() == persistentId) {
-            previousFocusedSessionFound = true;
+            preFocusedSessionFound = true;
             return false;
         }
-        if (!previousFocusedSessionFound) {
+        if (!preFocusedSessionFound) {
             return false;
         }
         auto currentSessionDisplayId = session->GetDisplayId();
@@ -8064,7 +8065,7 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
             TLOGND(WmsLogTag::WMS_FOCUS, "the window hide id: %{public}d", persistentId);
             return false;
         }
-        if (previousFocusedSessionFound && session->CheckFocusable() &&
+        if (preFocusedSessionFound && session->CheckFocusable() &&
             session->IsVisibleNotBackground() && IsParentSessionVisible(session)) {
             if (session->GetWindowType() != WindowType::WINDOW_TYPE_DESKTOP) {
                 nextFocusableSession = session;
