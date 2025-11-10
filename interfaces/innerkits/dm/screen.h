@@ -40,6 +40,8 @@ struct VirtualScreenOption {
     VirtualScreenType virtualScreenType_ {VirtualScreenType::UNKNOWN};
     bool isSecurity_ {true};
     VirtualScreenFlag virtualScreenFlag_ {VirtualScreenFlag::DEFAULT};
+    bool supportsFocus_ {true};
+    bool supportsInput_ {true};
 };
 
 class Screen : public RefBase {

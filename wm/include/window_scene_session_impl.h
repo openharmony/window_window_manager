@@ -164,9 +164,11 @@ public:
     void UpdateDensity() override;
     WSError UpdateOrientation() override;
     WMError GetTargetOrientationConfigInfo(Orientation targetOrientation,
-        const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& properties, Ace::ViewportConfig& config,
-        std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
-    WSError NotifyTargetRotationInfo(OrientationInfo& info) override;
+        const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& targetProperties,
+        const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& currentProperties,
+        ViewportConfigAndAvoidArea& targetViewportConfigAndAvoidArea,
+        ViewportConfigAndAvoidArea& currentViewportConfigAndAvoidArea) override;
+    WSError NotifyTargetRotationInfo(OrientationInfo& info, OrientationInfo& currentInfo) override;
     WSError UpdateDisplayId(uint64_t displayId) override;
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams params) override;
     WMError CheckAndModifyWindowRect(uint32_t& width, uint32_t& height) override;

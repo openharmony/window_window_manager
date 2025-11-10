@@ -930,7 +930,28 @@ HWTEST_F(WindowPatternSnapshotTest, DeleteHasSnapshot, TestSize.Level1)
     EXPECT_EQ(session_->HasSnapshot(key), false);
 
     ScenePersistentStorage::Insert("Snapshot_" + session_->sessionInfo_.bundleName_ +
-        "_" + std::to_string(session_->persistentId_), 0, ScenePersistentStorageType::MAXIMIZE_STATE);
+        "_" + std::to_string(session_->persistentId_), static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN),
+        ScenePersistentStorageType::MAXIMIZE_STATE);
+    session_->freeMultiWindow_.store(true);
+    session_->SaveSnapshot(false, true, pixelMap);
+    EXPECT_EQ(session_->HasSnapshot(), true);
+    session_->DeleteHasSnapshotFreeMultiWindow();
+    session_->scenePersistence_ = scenePersistence;
+    EXPECT_EQ(session_->HasSnapshot(), false);
+
+    ScenePersistentStorage::Insert("Snapshot_" + session_->sessionInfo_.bundleName_ +
+        "_" + std::to_string(session_->persistentId_), static_cast<int32_t>(WindowMode::WINDOW_MODE_SPLIT_PRIMARY),
+        ScenePersistentStorageType::MAXIMIZE_STATE);
+    session_->freeMultiWindow_.store(true);
+    session_->SaveSnapshot(false, true, pixelMap);
+    EXPECT_EQ(session_->HasSnapshot(), true);
+    session_->DeleteHasSnapshotFreeMultiWindow();
+    session_->scenePersistence_ = scenePersistence;
+    EXPECT_EQ(session_->HasSnapshot(), false);
+
+    ScenePersistentStorage::Insert("Snapshot_" + session_->sessionInfo_.bundleName_ +
+        "_" + std::to_string(session_->persistentId_), static_cast<int32_t>(WindowMode::WINDOW_MODE_SPLIT_SECONDARY),
+        ScenePersistentStorageType::MAXIMIZE_STATE);
     session_->freeMultiWindow_.store(true);
     session_->SaveSnapshot(false, true, pixelMap);
     EXPECT_EQ(session_->HasSnapshot(), true);
