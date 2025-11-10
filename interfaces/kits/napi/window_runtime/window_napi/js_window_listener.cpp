@@ -705,7 +705,7 @@ void JsWindowListener::OnAcrossDisplaysChanged(bool isAcrossDisplays)
         napi_value argv[] = { CreateJsValue(env, isAcrossDisplays) };
         thisListener->CallJsMethod(ACROSS_DISPLAYS_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
-    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+    if (napi_send_event(env_, jsCallback, napi_eprio_high, "OnAcrossDisplaysChanged") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to send event");
     }
 }
@@ -876,7 +876,7 @@ void JsWindowListener::OnRectChangeInGlobalDisplay(const Rect& rect, WindowSizeC
         napi_value argv[] = { jsRectChangeOptions };
         listener->CallJsMethod(RECT_CHANGE_IN_GLOBAL_DISPLAY_CB.c_str(), argv, ArraySize(argv));
     };
-    if (napi_send_event(env_, jsCallback, napi_eprio_immediate) != napi_ok) {
+    if (napi_send_event(env_, jsCallback, napi_eprio_immediate, "OnRectChangeInGlobalDisplay") != napi_ok) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to send event");
     }
 }

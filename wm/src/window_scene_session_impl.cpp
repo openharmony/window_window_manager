@@ -1735,6 +1735,15 @@ void WindowSceneSessionImpl::UpdateWindowSizeLimits()
     newLimitsVP.vpRatio_ = virtualPixelRatio;
     CalculateNewLimitsByRatio(newLimits, newLimitsVP, customizedLimits);
 
+    // When the system window has not been set with 'setWindowLimits',
+    // manually change its minimum width and height limit to 1 px.
+    if (WindowHelper::IsSystemWindowButNotDialog(GetType()) && !userLimitsSet_) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, set min limits to 1 px, preMinW:%{public}u, preMinH:%{public}u",
+            GetPersistentId(), newLimits.minWidth_, newLimits.minHeight_);
+        newLimits.minWidth_ = 1;
+        newLimits.minHeight_ = 1;
+    }
+
     property_->SetWindowLimits(newLimits);
     property_->SetWindowLimitsVP(newLimitsVP);
     property_->SetLastLimitsVpr(virtualPixelRatio);
@@ -2547,9 +2556,12 @@ void WindowSceneSessionImpl::UpdateFloatingWindowSizeBySizeLimits(uint32_t& widt
     }
     // get new limit config with the settings of system and app
     const auto& sizeLimits = property_->GetWindowLimits();
-    // limit minimum size of floating window
-    width = std::max(sizeLimits.minWidth_, width);
-    height = std::max(sizeLimits.minHeight_, height);
+    // limit minimum size of floating (not system type) window
+    if (!WindowHelper::IsSystemWindow(property_->GetWindowType()) ||
+        property_->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+        width = std::max(sizeLimits.minWidth_, width);
+        height = std::max(sizeLimits.minHeight_, height);
+    }
     width = std::min(sizeLimits.maxWidth_, width);
     height = std::min(sizeLimits.maxHeight_, height);
     if (height == 0) {
@@ -2730,15 +2742,19 @@ WMError WindowSceneSessionImpl::UpdateWindowModeForUITest(int32_t updateMode)
 }
 
 WMError WindowSceneSessionImpl::GetTargetOrientationConfigInfo(Orientation targetOrientation,
-    const std::map<WindowType, SystemBarProperty>& properties, Ace::ViewportConfig& config,
-    std::map<AvoidAreaType, AvoidArea>& avoidAreas)
+    const std::map<WindowType, SystemBarProperty>& targetProperties,
+    const std::map<WindowType, SystemBarProperty>& currentProperties,
+    ViewportConfigAndAvoidArea& targetViewportConfigAndAvoidArea,
+    ViewportConfigAndAvoidArea& currentViewportConfigAndAvoidArea)
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    std::map<WindowType, SystemBarProperty> pageProperties;
-    GetSystemBarPropertyForPage(properties, pageProperties);
+    std::map<WindowType, SystemBarProperty> targetPageProperties;
+    std::map<WindowType, SystemBarProperty> currentPageProperties;
+    GetSystemBarPropertyForPage(targetProperties, targetPageProperties);
+    GetSystemBarPropertyForPage(currentProperties, currentPageProperties);
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
 
@@ -2755,21 +2771,30 @@ WMError WindowSceneSessionImpl::GetTargetOrientationConfigInfo(Orientation targe
     WSError ret;
     if (targetOrientation == Orientation::INVALID) {
         Orientation requestedOrientation = ConvertInvalidOrientation();
-        ret = hostSession->GetTargetOrientationConfigInfo(requestedOrientation, pageProperties);
+        ret = hostSession->GetTargetOrientationConfigInfo(requestedOrientation,
+            targetPageProperties, currentPageProperties);
     } else {
-        ret = hostSession->GetTargetOrientationConfigInfo(targetOrientation, pageProperties);
+        ret = hostSession->GetTargetOrientationConfigInfo(targetOrientation,
+            targetPageProperties, currentPageProperties);
     }
     getTargetInfoCallback_->ResetGetTargetRotationLock();
-    OrientationInfo info = getTargetInfoCallback_->GetTargetOrientationResult(WINDOW_PAGE_ROTATION_TIMEOUT);
-    avoidAreas = info.avoidAreas;
-    config = FillTargetOrientationConfig(info, displayInfo, GetDisplayId());
+    std::pair<OrientationInfo, OrientationInfo> infoResult =
+        getTargetInfoCallback_->GetTargetOrientationResult(WINDOW_PAGE_ROTATION_TIMEOUT);
+    OrientationInfo info = infoResult.first;
+    OrientationInfo currentInfo = infoResult.second;
+    Ace::ViewportConfig config = FillTargetOrientationConfig(info, displayInfo, GetDisplayId());
+    targetViewportConfigAndAvoidArea.config = std::make_shared<Ace::ViewportConfig>(config);
+    targetViewportConfigAndAvoidArea.avoidAreas = info.avoidAreas;
+    Ace::ViewportConfig currentConfig = FillTargetOrientationConfig(currentInfo, displayInfo, GetDisplayId());
+    currentViewportConfigAndAvoidArea.config = std::make_shared<Ace::ViewportConfig>(currentConfig);
+    currentViewportConfigAndAvoidArea.avoidAreas = currentInfo.avoidAreas;
     TLOGI(WmsLogTag::WMS_ROTATION,
         "win:%{public}u, rotate:%{public}d, rect:%{public}s, avoidAreas:%{public}s,%{public}s,%{public}s,%{public}s",
         GetWindowId(), info.rotation, info.rect.ToString().c_str(),
-        avoidAreas[AvoidAreaType::TYPE_SYSTEM].ToString().c_str(),
-        avoidAreas[AvoidAreaType::TYPE_CUTOUT].ToString().c_str(),
-        avoidAreas[AvoidAreaType::TYPE_KEYBOARD].ToString().c_str(),
-        avoidAreas[AvoidAreaType::TYPE_NAVIGATION_INDICATOR].ToString().c_str());
+        info.avoidAreas[AvoidAreaType::TYPE_SYSTEM].ToString().c_str(),
+        info.avoidAreas[AvoidAreaType::TYPE_CUTOUT].ToString().c_str(),
+        info.avoidAreas[AvoidAreaType::TYPE_KEYBOARD].ToString().c_str(),
+        info.avoidAreas[AvoidAreaType::TYPE_NAVIGATION_INDICATOR].ToString().c_str());
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "GetTargetOrientationConfigInfo: targetOrientation:%u, rotation:%d, rect:%s",
         static_cast<uint32_t>(targetOrientation), info.rotation, info.rect.ToString().c_str());
@@ -2800,11 +2825,11 @@ Ace::ViewportConfig WindowSceneSessionImpl::FillTargetOrientationConfig(
     return config;
 }
 
-WSError WindowSceneSessionImpl::NotifyTargetRotationInfo(OrientationInfo& info)
+WSError WindowSceneSessionImpl::NotifyTargetRotationInfo(OrientationInfo& info, OrientationInfo& cuurentInfo)
 {
     WSError ret = WSError::WS_OK;
     if (getTargetInfoCallback_) {
-        ret = getTargetInfoCallback_->OnUpdateTargetOrientationInfo(info);
+        ret = getTargetInfoCallback_->OnUpdateTargetOrientationInfo(info, cuurentInfo);
     }
     return ret;
 }

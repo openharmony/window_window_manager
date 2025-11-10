@@ -582,6 +582,7 @@ public:
     void SetFrameLayoutFinishListener(const NotifyFrameLayoutFinishFunc& func);
     void NotifyScreenshot();
     void RemoveLifeCycleTask(const LifeCycleTaskType& taskType);
+    void ClearLifeCycleTask();
     void PostLifeCycleTask(Task &&task, const std::string& name, const LifeCycleTaskType& taskType);
     WSError UpdateMaximizeMode(bool isMaximize);
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
@@ -795,6 +796,12 @@ public:
     void SetOutlineParamsChangeCallback(OutlineParamsChangeCallbackFunc&& func);
 
     WSError SetIsShowDecorInFreeMultiWindow(bool isShow);
+
+    /*
+     * Prelaunch check
+     */
+    void SetPrelaunch();
+    bool IsPrelaunch() const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -1203,6 +1210,12 @@ private:
     bool isOutlineEnabled_ = false;
     OutlineStyleParams outlineStyleParams_;
     OutlineParamsChangeCallbackFunc outlineParamsChangeCallback_;
+
+    /*
+     * Prelaunch check
+     */
+    uint64_t prelaunchStart_ = 0;
+    bool prelaunchEnable_ = false;
 };
 } // namespace OHOS::Rosen
 

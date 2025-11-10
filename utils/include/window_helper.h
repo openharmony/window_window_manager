@@ -138,6 +138,11 @@ public:
         return (IsBelowSystemWindow(type) || IsAboveSystemWindow(type) || IsSystemSubWindow(type));
     }
 
+    static inline bool IsSystemWindowButNotDialog(WindowType type)
+    {
+        return IsSystemWindow(type) && !IsDialogWindow(type);
+    }
+
     static inline bool IsUIExtensionWindow(WindowType type)
     {
         return (type == WindowType::WINDOW_TYPE_UI_EXTENSION);

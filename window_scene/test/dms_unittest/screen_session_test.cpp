@@ -4824,6 +4824,72 @@ HWTEST_F(ScreenSessionTest, ScreenOrientationChange, TestSize.Level1)
     LOG_SetCallback(nullptr);
     g_errLog.clear();
 }
+
+/**
+ * @tc.name  : GetSupportsFocus
+ * @tc.desc  : GetSupportsFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetSupportsFocus, TestSize.Level1)
+{
+    ScreenId screenId = 10000;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
+    auto supportInput = session->GetSupportsFocus();
+    EXPECT_EQ(supportInput, true);
+}
+
+/**
+ * @tc.name  : SetSupportsFocus
+ * @tc.desc  : SetSupportsFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetSupportsFocus, TestSize.Level1)
+{
+    ScreenId screenId = 10000;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
+    session->SetSupportsFocus(false);
+    auto supportInput = session->GetSupportsFocus();
+    EXPECT_EQ(supportInput, false);
+
+    session->SetSupportsFocus(true);
+    supportInput = session->GetSupportsFocus();
+    EXPECT_EQ(supportInput, true);
+}
+
+/**
+ * @tc.name  : GetSupportsInput
+ * @tc.desc  : GetSupportsInput
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetSupportsInput, TestSize.Level1)
+{
+    ScreenId screenId = 10000;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
+    auto supportInput = session->GetSupportsInput();
+    EXPECT_EQ(supportInput, true);
+}
+
+/**
+ * @tc.name  : SetSupportsInput
+ * @tc.desc  : SetSupportsInput
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetSupportsInput, TestSize.Level1)
+{
+    ScreenId screenId = 10000;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
+    session->SetSupportsInput(false);
+    auto supportInput = session->GetSupportsInput();
+    EXPECT_EQ(supportInput, false);
+
+    session->SetSupportsInput(true);
+    supportInput = session->GetSupportsInput();
+    EXPECT_EQ(supportInput, true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

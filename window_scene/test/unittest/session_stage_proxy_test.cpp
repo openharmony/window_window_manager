@@ -941,8 +941,9 @@ HWTEST_F(SessionStageProxyTest, NotifyRotationChange, Function | SmallTest | Lev
 HWTEST_F(SessionStageProxyTest, NotifyTargetRotationInfo, Function | SmallTest | Level1)
 {
     OrientationInfo info;
+    OrientationInfo currenInfo;
     ASSERT_TRUE(sessionStage_ != nullptr);
-    WSError res = sessionStage_->NotifyTargetRotationInfo(info);
+    WSError res = sessionStage_->NotifyTargetRotationInfo(info, currenInfo);
     ASSERT_EQ(WSError::WS_OK, res);
 }
 

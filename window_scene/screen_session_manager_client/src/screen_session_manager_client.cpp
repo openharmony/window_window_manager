@@ -30,8 +30,6 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr int LINE_WIDTH = 30;
-constexpr uint32_t DISPLAY_A_HEIGHT = 3296;
-constexpr uint32_t DISPLAY_B_HEIGHT = 1608;
 } // namespace
 
 WM_IMPLEMENT_SINGLE_INSTANCE(ScreenSessionManagerClient)
@@ -1166,6 +1164,7 @@ bool ScreenSessionManagerClient::HandleScreenConnection(SessionOption option)
         extraScreenSessionMap_[option.screenId_] = screenSession;
     }
     screenSession->SetRotationCorrectionMap(option.rotationCorrectionMap_);
+    screenSession->SetSupportsFocus(option.supportsFocus_);
     NotifyClientScreenConnect(screenSession);
     return true;
 }
@@ -1550,6 +1549,18 @@ void ScreenSessionManagerClient::RegisterSwitchUserAnimationNotification(const s
     animateFinishDescriptionSet_.insert(description);
 }
 
+void ScreenSessionManagerClient::NotifySwitchUserAnimationFinishByWindow()
+{
+    {
+        std::shared_lock<std::shared_mutex> descriptionLock(animateFinishDescriptionSetMutex_);
+        if (!animateFinishDescriptionSet_.empty()) {
+            TLOGI(WmsLogTag::DMS, "description set is not empty, will ignore notification by window");
+            return;
+        }
+    }
+    TLOGI(WmsLogTag::DMS, "notify animation finished by window");
+    screenSessionManager_->NotifySwitchUserAnimationFinish();
+}
 void ScreenSessionManagerClient::OnAnimationFinish()
 {
     std::lock_guard<std::mutex> lock(animateFinishNotificationSetMutex_);
@@ -1578,5 +1589,17 @@ void ScreenSessionManagerClient::SetInternalClipToBounds(ScreenId screenId, bool
         RSTransactionAdapter::FlushImplicitTransaction(displayNode);
     }
     TLOGI(WmsLogTag::DMS, "SetInternalClipToBounds end");
+}
+
+bool ScreenSessionManagerClient::GetSupportsFocus(DisplayId displayId)
+{
+    auto screenSession = GetScreenSession(displayId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "getSupportFocus screenSession is nullptr");
+        return false;
+    }
+    bool supportsFocus = screenSession->GetSupportsFocus();
+    TLOGD(WmsLogTag::DMS, "displayId:%{public}" PRIu64", supportsFocus:%{public}d", displayId, supportsFocus);
+    return supportsFocus;
 }
 } // namespace OHOS::Rosen
