@@ -139,8 +139,8 @@ public:
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId, const RotationOption& rotationOption = {Rotation::ROTATION_0, false},
         bool forceMirror = false) override;
-    virtual DMError MakeMirrorForRecord(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
-        ScreenId& screenGroupId) override;
+    virtual DMError MakeMirrorForRecord(const std::vector<ScreenId>& mainScreenIds,
+        std::vector<ScreenId>& mirrorScreenIds, ScreenId& screenGroupId) override;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         DMRect mainScreenRegion, ScreenId& screenGroupId) override;
     virtual DMError SetMultiScreenMode(ScreenId mainScreenId, ScreenId secondaryScreenId,
