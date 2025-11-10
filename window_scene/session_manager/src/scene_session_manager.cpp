@@ -12912,6 +12912,7 @@ void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, spt
 {
     TLOGD(WmsLogTag::DEFAULT, "type: %{public}u", type);
     switch (type) {
+        case DisplayStateChangeType::RESOLUTION_CHANGE:
         case DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE: {
             SceneSessionManager::GetInstance().ProcessVirtualPixelRatioChange(defaultDisplayId,
                 displayInfo, displayInfoMap, type);

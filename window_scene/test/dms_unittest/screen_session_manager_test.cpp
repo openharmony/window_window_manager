@@ -1531,7 +1531,13 @@ HWTEST_F(ScreenSessionManagerTest, SetResolution, TestSize.Level1)
     mode->width_ = 1;
     mode->height_ = 1;
     screenSession->modes_ = {mode};
+
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->SetResolution(screenId, 100, 100, 0.5));
+
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->SetResolution(screenId, 0, 0, 0.5));
+
+    ScreenId invalidScreenId = -1;
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetResolution(invalidScreenId, 100, 100, 0.5));
     ssm_->DestroyVirtualScreen(screenId);
 }
 

@@ -747,6 +747,8 @@ private:
     void HandleRotationCorrectionExemption(sptr<DisplayInfo>& displayInfo);
     void GetRotationCorrectionExemptionListFromDatabase(bool isForce = false);
     void RegisterRotationCorrectionExemptionListObserver();
+    DMError CheckSetResolutionIsValid(ScreenId screenId, uint32_t width, uint32_t height,
+        float virtualPixelRatio);
     std::shared_mutex rotationCorrectionExemptionMutex_;
     std::vector<std::string> rotationCorrectionExemptionList_;
     bool needReinstallExemptionList_ = true;
