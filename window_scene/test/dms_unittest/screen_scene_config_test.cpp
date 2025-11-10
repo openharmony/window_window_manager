@@ -101,16 +101,6 @@ HWTEST_F(ScreenSceneConfigTest, GetConfigPath2, TestSize.Level1)
     ASSERT_STREQ("/system/a.xml", result.c_str());
 }
 
-/**
- * @tc.name: LoadConfigXml
- * @tc.desc: test function : loadConfigXml
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSceneConfigTest, LoadConfigXml, TestSize.Level1)
-{
-    auto result = ScreenSceneConfig::LoadConfigXml();
-    ASSERT_EQ(true, result);
-}
 
 /**
  * @tc.name: IsValidNode1

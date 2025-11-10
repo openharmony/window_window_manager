@@ -9253,7 +9253,8 @@ napi_value JsWindow::OnSetRelativePositionToParentWindowEnabled(napi_env env, na
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "set window anchor info failed."));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    napi_status status = napi_send_event(env, asyncTask, napi_eprio_high, "OnSetRelativePositionToParentWindowEnabled");
+    if (status != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][setRelativePositionToParentWindowEnabled]msg: send event failed"));
     }

@@ -1027,6 +1027,7 @@ private:
     void GetCastVirtualMirrorSession(sptr<ScreenSession>& virtualSession);
     std::atomic<bool> curResolutionEffectEnable_ = false;
     DMError SyncScreenPropertyChangedToServer(ScreenId screenId, const ScreenProperty& screenProperty) override;
+    void SetConfigForInputmethod(ScreenId screenId, VirtualScreenOption option);
     std::function<void(sptr<ScreenSession>& screenSession)> propertyChangedCallback_;
     std::mutex callbackMutex_;
     bool isSupportCapture_ = false;
