@@ -57,6 +57,7 @@ const std::string DM_ERROR_MSG_NOT_SUPPORT_COOR_WHEN_TENTMODE =
 constexpr uint32_t DISPLAY_A_HEIGHT = 3296;
 constexpr uint32_t DISPLAY_B_HEIGHT = 1608;
 }
+constexpr uint32_t DISPLAY_A_WIDTH = 2472;
 
 /**
  * @struct HookInfo.
