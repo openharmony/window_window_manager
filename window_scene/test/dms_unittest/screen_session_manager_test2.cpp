@@ -44,6 +44,7 @@ constexpr ScreenId SCREEN_ID_FULL = 0;
 constexpr ScreenId SCREEN_ID_MAIN = 5;
 const bool CORRECTION_ENABLE = system::GetIntParameter<int32_t>("const.system.sensor_correction_enable", 0) == 1;
 bool g_isPcDevice = ScreenSceneConfig::GetExternalScreenDefaultMode() == "none";
+bool IS_SUPPORT_PC_MODE = system::GetBoolParameter("const.window.support_window_pcmode_switch", false);
 }
 namespace {
     std::string g_errLog;
@@ -2857,6 +2858,82 @@ HWTEST_F(ScreenSessionManagerTest, MockFoldDisplayModeAfterRotation, TestSize.Le
     ASSERT_NE(ssm_, nullptr);
     ssm_->SetFoldDisplayModeAfterRotation(FoldDisplayMode::FULL);
     EXPECT_EQ(ssm_->GetFoldDisplayModeAfterRotation(), FoldDisplayMode::FULL);
+}
+
+/**
+ * @tc.name: HandleDefaultMultiScreenModeTest1
+ * @tc.desc: Test HandleDefaultMultiScreenMode when session null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleDefaultMultiScreenModeTest1, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    sptr<ScreenSession> Session1 = nullptr;
+    sptr<ScreenSession> Session2 = nullptr;
+    sptr<ScreenSession> Session3 = new ScreenSession(51, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, Session3);
+
+    ssm_->HandleDefaultMultiScreenMode(Session1, Session2);
+    EXPECT_TRUE(g_errLog.find("Session is nullptr") != std::string::npos);
+    g_errLog.clear();
+
+    ssm_->HandleDefaultMultiScreenMode(Session3, Session2);
+    EXPECT_TRUE(g_errLog.find("Session is nullptr") != std::string::npos);
+    g_errLog.clear();
+
+    ssm_->HandleDefaultMultiScreenMode(Session2, Session3);
+    EXPECT_TRUE(g_errLog.find("Session is nullptr") != std::string::npos);
+    g_errLog.clear();
+}
+
+/**
+ * @tc.name: HandleDefaultMultiScreenModeTest2
+ * @tc.desc: Test HandleDefaultMultiScreenMode with same rsid screen Session
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleDefaultMultiScreenModeTest2, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    sptr<ScreenSession> Session1 = new ScreenSession(51, ScreenProperty(), 0);
+    sptr<ScreenSession> Session2 = new ScreenSession(51, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, Session1);
+    ASSERT_NE(nullptr, Session2);
+
+    ssm_->HandleDefaultMultiScreenMode(Session1, Session2);
+    EXPECT_TRUE(g_errLog.find("same rsId") != std::string::npos);
+    g_errLog.clear();
+}
+
+/**
+ * @tc.name: HandleDefaultMultiScreenModeTest3
+ * @tc.desc: Test HandleDefaultMultiScreenMode with same rsid screen Session
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleDefaultMultiScreenModeTest3, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    sptr<ScreenSession> Session1 = new ScreenSession(51, ScreenProperty(), 0);
+    sptr<ScreenSession> Session2 = new ScreenSession(52, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, Session1);
+    ASSERT_NE(nullptr, Session2);
+    Session1.rsId_ = 51;
+    Session2.rsId_ = 52;
+    ssm_->HandleDefaultMultiScreenMode(Session1, Session2);
+    if (IS_SUPPORT_PC_MODE) {
+        EXPECT_TRUE(g_errLog.find("default mode mirror") != std::string::npos);
+    } else {
+        EXPECT_TRUE(g_errLog.find("default mode extend") != std::string::npos);
+    }
+    g_errLog.clear();
 }
 }
 }

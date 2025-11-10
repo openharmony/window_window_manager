@@ -563,6 +563,7 @@ protected:
     bool IsDefaultMirrorMode(ScreenId screenId);
     bool needWaitAvailableArea_ = false;
     bool RecoverRestoredMultiScreenMode(sptr<ScreenSession> screenSession);
+    void HandleDefaultMultiScreenMode(sptr<ScreenSession> internalSession, sptr<ScreenSession> screenSession);
     void SetMultiScreenDefaultRelativePosition();
     void ReportHandleScreenEvent(ScreenEvent screenEvent, ScreenCombination screenCombination);
     void SetExtendedScreenFallbackPlan(ScreenId screenId);
