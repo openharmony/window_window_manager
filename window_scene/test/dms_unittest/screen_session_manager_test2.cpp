@@ -2925,8 +2925,8 @@ HWTEST_F(ScreenSessionManagerTest, HandleDefaultMultiScreenModeTest3, TestSize.L
     sptr<ScreenSession> Session2 = new ScreenSession(52, ScreenProperty(), 0);
     ASSERT_NE(nullptr, Session1);
     ASSERT_NE(nullptr, Session2);
-    Session1.rsId_ = 51;
-    Session2.rsId_ = 52;
+    Session1->rsId_ = 51;
+    Session2->rsId_ = 52;
     ssm_->HandleDefaultMultiScreenMode(Session1, Session2);
     if (IS_SUPPORT_PC_MODE) {
         EXPECT_TRUE(g_errLog.find("default mode mirror") != std::string::npos);
