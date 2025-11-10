@@ -43,8 +43,8 @@ constexpr uint32_t PC_MODE_DPI = 304;
 constexpr ScreenId SCREEN_ID_FULL = 0;
 constexpr ScreenId SCREEN_ID_MAIN = 5;
 const bool CORRECTION_ENABLE = system::GetIntParameter<int32_t>("const.system.sensor_correction_enable", 0) == 1;
+const bool IS_SUPPORT_PC_MODE = system::GetBoolParameter("const.window.support_window_pcmode_switch", false);
 bool g_isPcDevice = ScreenSceneConfig::GetExternalScreenDefaultMode() == "none";
-bool IS_SUPPORT_PC_MODE = system::GetBoolParameter("const.window.support_window_pcmode_switch", false);
 }
 namespace {
     std::string g_errLog;
