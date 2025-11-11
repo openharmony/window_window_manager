@@ -169,6 +169,17 @@ public:
      * @return ScreenInfo object.
      */
     sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId);
+
+    /**
+     * @brief Set system resolution.
+     *
+     * @param width resolution width.
+     * @param height resolution height.
+     * @param dpi resolution dpi.
+     * @return DM_OK indicates success in setting the resolution, other error codes indicate failure.
+     */
+    DMError SetResolution(uint32_t width, uint32_t height, uint32_t dpi);
+
 private:
     ScreenManagerLite();
     ~ScreenManagerLite();

@@ -132,8 +132,7 @@ void ScreenSessionManagerExt::ScreenConnectionChanged(sptr<ScreenSession> screen
         clientProxy->OnScreenConnectionChanged(GetSessionOption(screenSession, screenId), screenEvent);
         sptr<ScreenSession> internalSession = GetInternalScreenSession();
         if (!RecoverRestoredMultiScreenMode(screenSession)) {
-            SetMultiScreenDefaultRelativePosition();
-            ReportHandleScreenEvent(ScreenEvent::CONNECTED, ScreenCombination::SCREEN_EXTEND);
+            HandleDefaultMultiScreenMode(internalSession, screenSession);
         }
         sptr<ScreenSession> newInternalSession = GetInternalScreenSession();
         if (newInternalSession != nullptr && internalSession != nullptr &&

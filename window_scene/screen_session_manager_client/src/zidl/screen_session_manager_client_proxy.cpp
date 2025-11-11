@@ -86,6 +86,10 @@ bool ScreenSessionManagerClientProxy::ScreenConnectWriteParam(SessionOption& Ses
             return false;
         }
     }
+    if (!data.WriteBool(SessionOption.supportsFocus_)) {
+        TLOGE(WmsLogTag::DMS, "Write supportsFocus failed");
+        return false;
+    }
     return true;
 }
 

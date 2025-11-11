@@ -22,6 +22,7 @@
 
 #include "display_manager_adapter.h"
 #include "display_manager_agent_default.h"
+#include "string_util.h"
 #include "permission.h"
 #include "singleton_delegator.h"
 #include "window_manager_hilog.h"
@@ -500,15 +501,18 @@ DMError ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> m
     return ret;
 }
 
-DMError ScreenManager::MakeMirrorForRecord(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId,
-    ScreenId& screenGroupId)
+DMError ScreenManager::MakeMirrorForRecord(const std::vector<ScreenId>& mainScreenIds,
+    std::vector<ScreenId>& mirrorScreenIds, ScreenId& screenGroupId)
 {
-    TLOGI(WmsLogTag::DMS, "Make mirror for screen: %{public}" PRIu64"", mainScreenId);
-    if (mirrorScreenId.size() > MAX_SCREEN_SIZE) {
+    std::string mainScreenIdsStr = "";
+    if (!StringUtil::VectorToString(mainScreenIds, mainScreenIdsStr)) {
+        TLOGI(WmsLogTag::DMS, "Make mirror for screens: %{public}s", mainScreenIdsStr.c_str());
+    }
+    if (mirrorScreenIds.size() > MAX_SCREEN_SIZE) {
         TLOGW(WmsLogTag::DMS, "Make Mirror failed. MirrorScreenId size bigger than %{public}u.", MAX_SCREEN_SIZE);
         return DMError::DM_ERROR_INVALID_PARAM;
     }
-    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MakeMirrorForRecord(mainScreenId, mirrorScreenId,
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MakeMirrorForRecord(mainScreenIds, mirrorScreenIds,
         screenGroupId);
     if (screenGroupId == SCREEN_ID_INVALID) {
         TLOGE(WmsLogTag::DMS, "create mirror failed");

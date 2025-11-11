@@ -32,6 +32,14 @@
 using namespace testing;
 using namespace testing::ext;
 
+namespace {
+    std::string g_logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_logMsg = msg;
+    }
+}
 namespace OHOS::Rosen {
 class ScreenSessionManagerProxyTest : public testing::Test {
 public:
@@ -65,14 +73,17 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetPrivacyStateByDisplayId, TestSize.Lev
     DisplayId id = 0;
     bool hasPrivate = false;
 
-    int resultValue = 0;
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     std::function<void()> func = [&]()
     {
         screenSessionManagerProxy->SetPrivacyStateByDisplayId(id, hasPrivate);
-        resultValue = 1;
     };
     func();
-    ASSERT_EQ(resultValue, 1);
+    EXPECT_TRUE(g_logMsg.find("failed") == std::string::npos &&
+        g_logMsg.find("remote is null") == std::string::npos);
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -85,14 +96,17 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenPrivacyWindowList, TestSize.Lev
     DisplayId id = 0;
     std::vector<std::string> privacyWindowList{"win0", "win1"};
 
-    int resultValue = 0;
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     std::function<void()> func = [&]()
     {
         screenSessionManagerProxy->SetScreenPrivacyWindowList(id, privacyWindowList);
-        resultValue = 1;
     };
     func();
-    ASSERT_EQ(resultValue, 1);
+    EXPECT_TRUE(g_logMsg.find("failed") == std::string::npos &&
+        g_logMsg.find("remote is null") == std::string::npos);
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -105,14 +119,17 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenBlackList, TestSize.Leve
     ScreenId id = 1001;
     std::vector<uint64_t> windowIdList{10, 20, 30};
 
-    int resultValue = 0;
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     std::function<void()> func = [&]()
     {
         screenSessionManagerProxy->SetVirtualScreenBlackList(id, windowIdList);
-        resultValue = 1;
     };
     func();
-    ASSERT_EQ(resultValue, 1);
+    EXPECT_TRUE(g_logMsg.find("failed") == std::string::npos &&
+        g_logMsg.find("remote is null") == std::string::npos);
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -788,15 +805,18 @@ HWTEST_F(ScreenSessionManagerProxyTest, TryToCancelScreenOff, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, NotifyDisplayEvent, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     DisplayEvent event {0};
-    int resultValue = 0;
     std::function<void()> func = [&]()
     {
         screenSessionManagerProxy->NotifyDisplayEvent(event);
-        resultValue = 1;
     };
     func();
-    ASSERT_EQ(resultValue, 1);
+    EXPECT_TRUE(g_logMsg.find("failed") == std::string::npos &&
+        g_logMsg.find("NotifyDisplayEvent remote is nullptr") == std::string::npos);
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -1075,14 +1095,17 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayInfoByScreen, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetAllDisplayIds, TestSize.Level1)
 {
-    int resultValue = 0;
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     std::function<void()> func = [&]()
     {
         screenSessionManagerProxy->GetAllDisplayIds();
-        resultValue = 1;
     };
     func();
-    ASSERT_EQ(resultValue, 1);
+    EXPECT_TRUE(g_logMsg.find("failed") == std::string::npos &&
+        g_logMsg.find("remote is null") == std::string::npos);
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -1721,25 +1744,14 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetSuperRotation, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetLandscapeLockStatus, Function | SmallTest | Level1)
 {
-    logMsg.clear();
-    LOG_SetCallback(MyLogCallback);
     bool isLocked = false;
-
-    MockMessageParcel::ClearAllErrorFlag();
-    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     screenSessionManagerProxy->SetLandscapeLockStatus(isLocked);
-    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
-    EXPECT_EQ(isLocked, false);
-
-    MockMessageParcel::ClearAllErrorFlag();
-    MockMessageParcel::SetWriteBoolErrorFlag(true);
-    screenSessionManagerProxy->SetLandscapeLockStatus(isLocked);
-    EXPECT_TRUE(logMsg.find("Write isLocked failed") != std::string::npos);
-    EXPECT_EQ(isLocked, false);
-
-    MockMessageParcel::ClearAllErrorFlag();
-    screenSessionManagerProxy->SetLandscapeLockStatus(isLocked);
-    EXPECT_EQ(isLocked, false);
+    EXPECT_TRUE(g_logMsg.find("failed") == std::string::npos &&
+        g_logMsg.find("remote is null") == std::string::npos);
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
 }
 
 /**

@@ -273,6 +273,7 @@ public:
     WSError UpdateGlobalDisplayRectFromClient(const WSRect& rect, SizeChangeReason reason) override;
     void NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform);
     WSRect GetSessionGlobalRectWithSingleHandScale();
+    WSRect GetMoveRectForWindowDrag();
     void UpdateSessionState(SessionState state) override;
     WSError NotifyClientToUpdateRect(const std::string& updateReason,
         std::shared_ptr<RSTransaction> rsTransaction) override;
@@ -493,7 +494,8 @@ public:
         const WSRect& rect = WSRect::EMPTY_RECT) override;
     WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
     WSError GetTargetOrientationConfigInfo(Orientation targetOrientation,
-        const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& properties) override;
+        const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& targetProperties,
+        const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& currentProperties) override;
     void SetSessionGetTargetOrientationConfigInfoCallback(
         const NotifySessionGetTargetOrientationConfigInfoFunc& func);
     WSError SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty);
@@ -1102,6 +1104,8 @@ private:
      */
     void SetSystemBarPropertyForRotation(const std::map<WindowType, SystemBarProperty>& properties);
     std::map<Rosen::WindowType, Rosen::SystemBarProperty>& GetSystemBarPropertyForRotation();
+    void SetCurrentSystemBarPropertyForRotation(const std::map<WindowType, SystemBarProperty>& properties);
+    std::map<Rosen::WindowType, Rosen::SystemBarProperty>& GetCurrentSystemBarPropertyForRotation();
     void GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea, bool ignoreVisibility = false);
     void GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea);
@@ -1432,6 +1436,7 @@ private:
      * Window Immersive
      */
     std::map<Rosen::WindowType, Rosen::SystemBarProperty> targetSystemBarProperty_;
+    std::map<Rosen::WindowType, Rosen::SystemBarProperty> currentSystemBarProperty_;
     std::atomic_bool isDisplayStatusBarTemporarily_ { false };
     IsLastFrameLayoutFinishedFunc isLastFrameLayoutFinishedFunc_;
     IsAINavigationBarAvoidAreaValidFunc isAINavigationBarAvoidAreaValid_;

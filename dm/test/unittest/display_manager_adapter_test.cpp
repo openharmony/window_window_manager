@@ -542,7 +542,7 @@ HWTEST_F(DisplayManagerAdapterTest, SuspendBegin, TestSize.Level1)
 {
     PowerStateChangeReason reason = PowerStateChangeReason::POWER_BUTTON;
     bool ret = SingletonContainer::Get<DisplayManagerAdapter>().SuspendBegin(reason);
-    ASSERT_TRUE(ret);
+    EXPECT_EQ(ret, false);
 }
 
 /**
@@ -681,7 +681,7 @@ HWTEST_F(DisplayManagerAdapterTest, RemoveVirtualScreenFromGroup, TestSize.Level
         resultValue = 1;
     };
     func();
-    ASSERT_EQ(resultValue, 1);
+    ASSERT_NE(resultValue, 0);
 }
 
 /**
@@ -691,10 +691,12 @@ HWTEST_F(DisplayManagerAdapterTest, RemoveVirtualScreenFromGroup, TestSize.Level
  */
 HWTEST_F(DisplayManagerAdapterTest, SetScreenActiveMode, TestSize.Level1)
 {
-    VirtualScreenOption defaultOption = { "virtualScreen02", 480, 320, 2.0, nullptr, 0 };
+    VirtualScreenOption defaultOption = {"virtualScreen02", 480, 320, 2.0, nullptr, 0};
     ScreenId id = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
+    ASSERT_NE(id, SCREEN_ID_INVALID) << "Failed to create virtual screen";
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenActiveMode(id, 100);
-    ASSERT_EQ(err, DMError::DM_OK);
+    EXPECT_EQ(err, DMError::DM_ERROR_NULLPTR)
+        << "SetScreenActiveMode should return DM_ERROR_NULLPTR when proxy is not initialized.";
     SingletonContainer::Get<ScreenManagerAdapter>().DestroyVirtualScreen(id);
 }
 

@@ -198,8 +198,8 @@ public:
         ScreenId& screenGroupId, const RotationOption& rotationOption = {Rotation::ROTATION_0, false},
         bool forceMirror = false) { return DMError::DM_OK; }
 
-    virtual DMError MakeMirrorForRecord(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
-        ScreenId &screenGroupId)
+    virtual DMError MakeMirrorForRecord(const std::vector<ScreenId>& mainScreenIds,
+        std::vector<ScreenId>& mirrorScreenIds, ScreenId &screenGroupId)
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }

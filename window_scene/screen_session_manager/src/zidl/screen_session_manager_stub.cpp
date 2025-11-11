@@ -275,6 +275,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             VirtualScreenType virtualScreenType = static_cast<VirtualScreenType>(data.ReadUint32());
             bool isSecurity = data.ReadBool();
             VirtualScreenFlag virtualScreenFlag = static_cast<VirtualScreenFlag>(data.ReadUint32());
+            bool supportsFocus = data.ReadBool();
+            bool supportsInput = data.ReadBool();
             bool isSurfaceValid = data.ReadBool();
             sptr<Surface> surface = nullptr;
             if (isSurfaceValid) {
@@ -294,7 +296,9 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
                 .missionIds_ = missionIds,
                 .virtualScreenType_ = virtualScreenType,
                 .isSecurity_ = isSecurity,
-                .virtualScreenFlag_ = virtualScreenFlag
+                .virtualScreenFlag_ = virtualScreenFlag,
+                .supportsFocus_ = supportsFocus,
+                .supportsInput_ = supportsInput
             };
             ScreenId screenId = CreateVirtualScreen(virScrOption, virtualScreenAgent);
             static_cast<void>(reply.WriteUint64(static_cast<uint64_t>(screenId)));
@@ -415,14 +419,18 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_MIRROR_FOR_RECORD: {
-            ScreenId mainScreenId = static_cast<ScreenId>(data.ReadUint64());
-            std::vector<ScreenId> mirrorScreenId;
-            if (!data.ReadUInt64Vector(&mirrorScreenId)) {
-                TLOGE(WmsLogTag::DMS, "fail to receive mirror screen in stub. screen:%{public}" PRIu64"", mainScreenId);
+            std::vector<ScreenId> mainScreenIds;
+            if (!data.ReadUInt64Vector(&mainScreenIds)) {
+                TLOGE(WmsLogTag::DMS, "fail to receive mirror screen in stub.");
+                break;
+            }
+            std::vector<ScreenId> mirrorScreenIds;
+            if (!data.ReadUInt64Vector(&mirrorScreenIds)) {
+                TLOGE(WmsLogTag::DMS, "fail to receive mirror screen in stub.");
                 break;
             }
             ScreenId screenGroupId = INVALID_SCREEN_ID;
-            DMError ret = MakeMirrorForRecord(mainScreenId, mirrorScreenId, screenGroupId);
+            DMError ret = MakeMirrorForRecord(mainScreenIds, mirrorScreenIds, screenGroupId);
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
             static_cast<void>(reply.WriteUint64(static_cast<uint64_t>(screenGroupId)));
             break;

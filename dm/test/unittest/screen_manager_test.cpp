@@ -786,11 +786,11 @@ HWTEST_F(ScreenManagerTest, SetScreenSkipProtectedWindow, TestSize.Level1)
  */
 HWTEST_F(ScreenManagerTest, MakeMirrorForRecord01, TestSize.Level1)
 {
-    ScreenId mainScreenId = 1;
+    std::vector<ScreenId> mainScreenIds = {1};
     std::vector<ScreenId> miirrorScreenId(MAX_SCREEN_SIZE + 1);
     ScreenId screenGroupId;
 
-    DMError result = ScreenManager::GetInstance().MakeMirrorForRecord(mainScreenId, miirrorScreenId, screenGroupId);
+    DMError result = ScreenManager::GetInstance().MakeMirrorForRecord(mainScreenIds, miirrorScreenId, screenGroupId);
 
     EXPECT_EQ(result, DMError::DM_ERROR_INVALID_PARAM);
 }
@@ -803,11 +803,11 @@ HWTEST_F(ScreenManagerTest, MakeMirrorForRecord01, TestSize.Level1)
  */
 HWTEST_F(ScreenManagerTest, MakeMirrorForRecord02, TestSize.Level1)
 {
-    ScreenId mainScreenId = 1;
+    std::vector<ScreenId> mainScreenIds = {1};
     std::vector<ScreenId> miirrorScreenId(MAX_SCREEN_SIZE - 1);
     ScreenId screenGroupId = 2;
 
-    DMError result = ScreenManager::GetInstance().MakeMirrorForRecord(mainScreenId, miirrorScreenId, screenGroupId);
+    DMError result = ScreenManager::GetInstance().MakeMirrorForRecord(mainScreenIds, miirrorScreenId, screenGroupId);
 
     EXPECT_EQ(result, DMError::DM_ERROR_NULLPTR);
 }
@@ -820,11 +820,11 @@ HWTEST_F(ScreenManagerTest, MakeMirrorForRecord02, TestSize.Level1)
  */
 HWTEST_F(ScreenManagerTest, MakeMirrorForRecord03, TestSize.Level1)
 {
-    ScreenId mainScreenId = 1;
+    std::vector<ScreenId> mainScreenIds = {1};
     std::vector<ScreenId> miirrorScreenId(MAX_SCREEN_SIZE - 1);
     ScreenId screenGroupId = SCREEN_ID_INVALID;
 
-    DMError result = ScreenManager::GetInstance().MakeMirrorForRecord(mainScreenId, miirrorScreenId, screenGroupId);
+    DMError result = ScreenManager::GetInstance().MakeMirrorForRecord(mainScreenIds, miirrorScreenId, screenGroupId);
 
     EXPECT_EQ(result, DMError::DM_ERROR_NULLPTR);
 }

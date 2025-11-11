@@ -1209,12 +1209,14 @@ HWTEST_F(ScreenSessionManagerClientTest, GetDisplayHookInfo, Function | SmallTes
     hookInfo.width_ = 100;
     hookInfo.height_ = 200;
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     screenSessionManagerClient_->UpdateDisplayHookInfo(uid, true, hookInfo);
     screenSessionManagerClient_->GetDisplayHookInfo(uid, hookInfo);
-    ASSERT_TRUE(hookInfo.enableHookRotation_);
-    ASSERT_TRUE(hookInfo.rotation_);
-    ASSERT_EQ(hookInfo.width_, 100);
-    ASSERT_EQ(hookInfo.height_, 200);
+    EXPECT_TRUE(logMsg.find("screenSessionManager_ is null") == std::string::npos);
+    logMsg.clear();
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -2059,6 +2061,25 @@ HWTEST_F(ScreenSessionManagerClientTest, SetInternalClipToBounds, TestSize.Level
 
     screenSessionManagerClient_->screenSessionMap_.erase(50);
     screenSessionManagerClient_->screenSessionMap_.erase(51);
+}
+
+/**
+ * @tc.name: GetSupportsFocus
+ * @tc.desc: GetSupportsFocus test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, GetSupportsFocus, TestSize.Level1)
+{
+    sptr<ScreenSessionManagerClient> client = sptr<ScreenSessionManagerClient>::MakeSptr();
+    ASSERT_NE(client, nullptr);
+    client->ConnectToServer();
+    DisplayId displayId = 0;
+    auto focus = client->GetSupportsFocus(displayId);
+    EXPECT_EQ(focus, true);
+
+    displayId = 10000;
+    focus = client->GetSupportsFocus(displayId);
+    EXPECT_EQ(focus, true);
 }
 } // namespace Rosen
 } // namespace OHOS

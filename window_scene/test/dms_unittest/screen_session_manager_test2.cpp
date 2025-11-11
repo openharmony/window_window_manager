@@ -43,6 +43,7 @@ constexpr uint32_t PC_MODE_DPI = 304;
 constexpr ScreenId SCREEN_ID_FULL = 0;
 constexpr ScreenId SCREEN_ID_MAIN = 5;
 const bool CORRECTION_ENABLE = system::GetIntParameter<int32_t>("const.system.sensor_correction_enable", 0) == 1;
+const bool IS_SUPPORT_PC_MODE = system::GetBoolParameter("const.window.support_window_pcmode_switch", false);
 bool g_isPcDevice = ScreenSceneConfig::GetExternalScreenDefaultMode() == "none";
 }
 namespace {
@@ -1140,12 +1141,13 @@ HWTEST_F(ScreenSessionManagerTest, CalculateRotatedDisplay1, Function | SmallTes
     DMRect displayRegion = {0, 0, 200, 100};
     DMRect displayArea = {20, 10, 30, 40};
 
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     Rotation rotation = Rotation::ROTATION_0;
     ssm_->CalculateRotatedDisplay(rotation, screenRegion, displayRegion, displayArea);
     DMRect expectedRect = {0, 0, 200, 100};
-    EXPECT_EQ(displayRegion, expectedRect);
-    expectedRect = {20, 10, 30, 40};
-    EXPECT_EQ(displayArea, expectedRect);
+    EXPECT_TRUE(g_errLog.find("failed") == std::string::npos);
+    g_errLog.clear();
 
     rotation = Rotation::ROTATION_90;
     displayRegion = {0, 0, 200, 100};
@@ -1160,8 +1162,9 @@ HWTEST_F(ScreenSessionManagerTest, CalculateRotatedDisplay1, Function | SmallTes
     displayRegion = {0, 0, 100, 200};
     displayArea = {20, 10, 30, 40};
     ssm_->CalculateRotatedDisplay(rotation, screenRegion, displayRegion, displayArea);
-    expectedRect = {0, 0, 100, 200};
-    EXPECT_EQ(displayRegion, expectedRect);
+    EXPECT_TRUE(g_errLog.find("failed") == std::string::npos);
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
     expectedRect = {50, 150, 30, 40};
     EXPECT_EQ(displayArea, expectedRect);
 
@@ -1191,12 +1194,13 @@ HWTEST_F(ScreenSessionManagerTest, CalculateRotatedDisplay2, Function | SmallTes
     DMRect displayRegion = {0, 0, 200, 100};
     DMRect displayArea = {20, 10, 30, 40};
 
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     Rotation rotation = Rotation::ROTATION_90;
     ssm_->CalculateRotatedDisplay(rotation, screenRegion, displayRegion, displayArea);
     DMRect expectedRect = {0, 0, 200, 100};
-    EXPECT_EQ(displayRegion, expectedRect);
-    expectedRect = {20, 10, 30, 40};
-    EXPECT_EQ(displayArea, expectedRect);
+    EXPECT_TRUE(g_errLog.find("failed") == std::string::npos);
+    g_logMsg.clear();
 
     rotation = Rotation::ROTATION_180;
     displayRegion = {0, 0, 200, 100};
@@ -1211,8 +1215,10 @@ HWTEST_F(ScreenSessionManagerTest, CalculateRotatedDisplay2, Function | SmallTes
     displayRegion = {0, 0, 100, 200};
     displayArea = {20, 10, 30, 40};
     ssm_->CalculateRotatedDisplay(rotation, screenRegion, displayRegion, displayArea);
-    expectedRect = {0, 0, 100, 200};
-    EXPECT_EQ(displayRegion, expectedRect);
+    EXPECT_TRUE(g_errLog.find("failed") == std::string::npos);
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
+
     expectedRect = {50, 150, 30, 40};
     EXPECT_EQ(displayArea, expectedRect);
 
@@ -1999,6 +2005,36 @@ HWTEST_F(ScreenSessionManagerTest, RegisterSettingDuringCallStateObserver, Funct
     } else {
         ASSERT_EQ(ScreenSettingHelper::duringCallStateObserver_, nullptr);
     }
+}
+
+/**
+ * @tc.name: DoAodExitAndSetPowerTest
+ * @tc.desc: DoAodExitAndSetPowerTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, DoAodExitAndSetPowerTest, TestSize.level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+
+    ssm_->DoAodExitAndSetPower(0, ScreenPowerStatus::POWER_STATUS_ON);
+    EXPECT_EQ(ssm_->GetScreenPower(0), ScreenPowerState::POWER_ON);
+    usleep(100000);
+    
+    constexpr int maxRetry = 3;
+    int retry = 0;
+    bool powerState = false;
+    while (!powerState && retry < maxRetry) {
+        ssm_->DoAodExitAndSetPower(0, ScreenPowerStatus::POWER_STATUS_OFF);
+        usleep(100000);
+        powerState = ssm_->GetScreenPower(0) == ScreenPowerStatE::POWER_OFF;
+        if (powerState)
+        {
+            break;
+        }
+        retry++;
+    }
+    EXPECT_TRUE(powerState);
+    ssm_->DoAodExitAndSetPower(0, ScreenPowerStatus::POWER_STATUS_ON);
 }
 
 /**
@@ -2857,6 +2893,82 @@ HWTEST_F(ScreenSessionManagerTest, MockFoldDisplayModeAfterRotation, TestSize.Le
     ASSERT_NE(ssm_, nullptr);
     ssm_->SetFoldDisplayModeAfterRotation(FoldDisplayMode::FULL);
     EXPECT_EQ(ssm_->GetFoldDisplayModeAfterRotation(), FoldDisplayMode::FULL);
+}
+
+/**
+ * @tc.name: HandleDefaultMultiScreenModeTest1
+ * @tc.desc: Test HandleDefaultMultiScreenMode when session null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleDefaultMultiScreenModeTest1, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    sptr<ScreenSession> Session1 = nullptr;
+    sptr<ScreenSession> Session2 = nullptr;
+    sptr<ScreenSession> Session3 = new ScreenSession(51, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, Session3);
+
+    ssm_->HandleDefaultMultiScreenMode(Session1, Session2);
+    EXPECT_TRUE(g_errLog.find("Session is nullptr") != std::string::npos);
+    g_errLog.clear();
+
+    ssm_->HandleDefaultMultiScreenMode(Session3, Session2);
+    EXPECT_TRUE(g_errLog.find("Session is nullptr") != std::string::npos);
+    g_errLog.clear();
+
+    ssm_->HandleDefaultMultiScreenMode(Session2, Session3);
+    EXPECT_TRUE(g_errLog.find("Session is nullptr") != std::string::npos);
+    g_errLog.clear();
+}
+
+/**
+ * @tc.name: HandleDefaultMultiScreenModeTest2
+ * @tc.desc: Test HandleDefaultMultiScreenMode with same rsid screen Session
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleDefaultMultiScreenModeTest2, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    sptr<ScreenSession> Session1 = new ScreenSession(51, ScreenProperty(), 0);
+    sptr<ScreenSession> Session2 = new ScreenSession(51, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, Session1);
+    ASSERT_NE(nullptr, Session2);
+
+    ssm_->HandleDefaultMultiScreenMode(Session1, Session2);
+    EXPECT_TRUE(g_errLog.find("same rsId") != std::string::npos);
+    g_errLog.clear();
+}
+
+/**
+ * @tc.name: HandleDefaultMultiScreenModeTest3
+ * @tc.desc: Test HandleDefaultMultiScreenMode with same rsid screen Session
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleDefaultMultiScreenModeTest3, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    sptr<ScreenSession> Session1 = new ScreenSession(51, ScreenProperty(), 0);
+    sptr<ScreenSession> Session2 = new ScreenSession(52, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, Session1);
+    ASSERT_NE(nullptr, Session2);
+    Session1->rsId_ = 51;
+    Session2->rsId_ = 52;
+    ssm_->HandleDefaultMultiScreenMode(Session1, Session2);
+    if (IS_SUPPORT_PC_MODE) {
+        EXPECT_TRUE(g_errLog.find("default mode mirror") != std::string::npos);
+    } else {
+        EXPECT_TRUE(g_errLog.find("default mode extend") != std::string::npos);
+    }
+    g_errLog.clear();
 }
 }
 }

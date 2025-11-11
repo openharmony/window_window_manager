@@ -943,7 +943,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event, const SessionEventParam
                 session->HookStartMoveRect(currRect, session->GetSessionRect());
                 session->pcFoldScreenController_->RecordStartMoveRect(currRect, session->IsFullScreenMovable());
             }
-            WSRect rect = session->GetGlobalOrWinRect();
+            WSRect rect = session->GetMoveRectForWindowDrag();
             if (session->IsFullScreenMovable()) {
                 session->UpdateFullScreenWaterfallMode(false);
                 rect = session->moveDragController_->GetFullScreenToFloatingRect(session->GetSessionRect(),
@@ -2996,6 +2996,21 @@ WSRect SceneSession::GetSessionGlobalRectWithSingleHandScale()
     return rectWithTransform;
 }
 
+WSRect SceneSession::GetMoveRectForWindowDrag()
+{
+    auto property = GetSessionProperty();
+    if (!property) {
+        return GetGlobalOrWinRect();
+    }
+    if (property->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        return GetGlobalOrWinRect();
+    }
+    if (keyboardPanelSession_ != nullptr) {
+        return keyboardPanelSession_->GetSessionRect();
+    }
+    return GetGlobalOrWinRect();
+}
+
 void SceneSession::AddUIExtSurfaceNodeId(uint64_t surfaceNodeId, int32_t persistentId)
 {
     std::unique_lock<std::shared_mutex> lock(uiExtNodeIdToPersistentIdMapMutex_);
@@ -3451,10 +3466,11 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
             pointerEvent->MarkProcessed();
             return WSError::WS_OK;
         }
+        WSRect moveDragRect = GetMoveRectForWindowDrag();
         if ((WindowHelper::IsMainWindow(windowType) ||
              WindowHelper::IsSubWindow(windowType) ||
              WindowHelper::IsSystemWindow(windowType)) && !isFollowParentLayout_ &&
-            moveDragController_->ConsumeMoveEvent(pointerEvent, GetSessionRect())) {
+            moveDragController_->ConsumeMoveEvent(pointerEvent, moveDragRect)) {
             PresentFocusIfNeed(pointerEvent->GetPointerAction());
             pointerEvent->MarkProcessed();
             Session::TransferPointerEvent(pointerEvent, needNotifyClient, isExecuteDelayRaise);
@@ -3782,7 +3798,10 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
     if (moveDragController_ && moveDragController_->GetPointerType() == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN &&
         pcFoldScreenController_ && pcFoldScreenController_->IsAllowThrowSlip(GetScreenId()) &&
         (reason == SizeChangeReason::DRAG_MOVE || reason == SizeChangeReason::DRAG_END)) {
-        if (pcFoldScreenController_->NeedFollowHandAnimation()) {
+        bool hasAnimation = reason == SizeChangeReason::DRAG_END && pcFoldScreenController_->NeedFollowHandAnimation();
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "reason=%{public}u, hasAnimation=%{public}d",
+            static_cast<uint32_t>(reason), hasAnimation);
+        if (hasAnimation) {
             auto movingPair = std::make_pair(pcFoldScreenController_->GetMovingTimingProtocol(),
                 pcFoldScreenController_->GetMovingTimingCurve());
             SetSurfaceBoundsWithAnimation(movingPair, globalRect, nullptr, isGlobal);
@@ -6467,6 +6486,10 @@ WMError SceneSession::HandleActionUpdateWindowShadowEnabled(const sptr<WindowSes
 WMError SceneSession::HandleActionUpdateFocusable(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
+    if (!ScreenSessionManagerClient::GetInstance().GetSupportsFocus(GetSessionProperty()->GetDisplayId())) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "screen of current window is not allowed to be focused");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
     SetFocusable(property->GetFocusable());
     NotifySessionChangeByActionNotifyManager(property, action);
     return WMError::WM_OK;
@@ -6905,9 +6928,10 @@ WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
 WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
     const ExceptionInfo& exceptionInfo, bool isFromClient, bool startFail)
 {
-    PostLifeCycleTask([weakThis = wptr(this), abilitySessionInfo, exceptionInfo,
+    PostLifeCycleTask([weakThis = wptr(this), weakAbilitySessionInfo = wptr(abilitySessionInfo), exceptionInfo,
         isFromClient, startFail, where = __func__] {
         auto session = weakThis.promote();
+        auto abilitySessionInfo = weakAbilitySessionInfo.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
@@ -9062,16 +9086,18 @@ void SceneSession::SetSessionGetTargetOrientationConfigInfoCallback(
 }
 
 WSError SceneSession::GetTargetOrientationConfigInfo(Orientation targetOrientation,
-    const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& properties)
+    const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& targetProperties,
+    const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& currentProperties)
 {
     PostTask(
-        [weakThis = wptr(this), targetOrientation, properties, where = __func__] {
+        [weakThis = wptr(this), targetOrientation, targetProperties, currentProperties, where = __func__] {
             auto session = weakThis.promote();
             if (!session) {
                 TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s session is null", where);
                 return WSError::WS_ERROR_NULLPTR;
             }
-            session->SetSystemBarPropertyForRotation(properties);
+            session->SetSystemBarPropertyForRotation(targetProperties);
+            session->SetCurrentSystemBarPropertyForRotation(currentProperties);
             if (session->sessionGetTargetOrientationConfigInfoFunc_) {
                 session->sessionGetTargetOrientationConfigInfoFunc_(static_cast<uint32_t>(targetOrientation));
             }
@@ -9109,7 +9135,25 @@ WSError SceneSession::NotifyRotationProperty(uint32_t rotation, uint32_t width, 
             }
             Rect rect = { wsrect.posX_, wsrect.posY_, wsrect.width_, wsrect.height_ };
             OrientationInfo info = { orientation, rect, avoidAreas };
-            session->sessionStage_->NotifyTargetRotationInfo(info);
+
+            WSRect currentWsrect = session->GetSessionRect();
+            auto currentProperties = session->GetCurrentSystemBarPropertyForRotation();
+            std::map<AvoidAreaType, AvoidArea> currentAvoidAreas;
+            uint32_t currentOrientation = 0;
+            uint32_t currentRotation = static_cast<uint32_t>(session->GetCurrentRotation());
+            WSError currentRet = session->ConvertRotationToOrientation(currentRotation,
+                currentWsrect.width_, currentWsrect.height_, currentOrientation);
+            if (currentRet != WSError::WS_OK) {
+                TLOGNE(WmsLogTag::WMS_ROTATION, "failed to convert currentWsrect Rotation to Orientation");
+                return currentRet;
+            }
+            // Orientation type is required here
+            session->GetAvoidAreasByRotation(
+                static_cast<Rotation>(currentOrientation), currentWsrect, currentProperties, currentAvoidAreas);
+            Rect currentRect =
+                { currentWsrect.posX_, currentWsrect.posY_,currentWsrect.width_, currentWsrect.height_ };
+            OrientationInfo currentInfo = { currentOrientation, currentRect, currentAvoidAreas };
+            session->sessionStage_->NotifyTargetRotationInfo(info, currentInfo);
             return WSError::WS_OK;
         }, __func__);
     return WSError::WS_OK;
@@ -9164,6 +9208,17 @@ void SceneSession::SetSystemBarPropertyForRotation(
 std::map<Rosen::WindowType, Rosen::SystemBarProperty>& SceneSession::GetSystemBarPropertyForRotation()
 {
     return targetSystemBarProperty_;
+}
+
+void SceneSession::SetCurrentSystemBarPropertyForRotation(
+    const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& properties)
+{
+    currentSystemBarProperty_ = properties;
+}
+
+std::map<Rosen::WindowType, Rosen::SystemBarProperty>& SceneSession::GetCurrentSystemBarPropertyForRotation()
+{
+    return currentSystemBarProperty_;
 }
 
 void SceneSession::AddRSNodeModifier(bool isDark, const std::shared_ptr<RSBaseNode>& rsNode)

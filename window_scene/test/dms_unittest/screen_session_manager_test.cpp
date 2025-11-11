@@ -1413,19 +1413,29 @@ HWTEST_F(ScreenSessionManagerTest, UpdateDisplayHookInfo002, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerTest, GetDisplayHookInfo, Function | SmallTest | Level2)
 {
-    int32_t uid = 0;
+    int32_t uid = 10086;
     DMHookInfo hookInfo;
     hookInfo.enableHookRotation_ = true;
-    hookInfo.rotation_ = true;
-    hookInfo.density_ = 1.1;
-    hookInfo.width_ = 100;
-    hookInfo.height_ = 200;
+    hookInfo.rotation_ = false;
+    hookInfo.density_ = 2.5f;
+    hookInfo.width_ = 1920;
+    hookInfo.height_ = 1080;
+
     ssm_->UpdateDisplayHookInfo(uid, true, hookInfo);
-    ssm_->GetDisplayHookInfo(uid, hookInfo);
-    ASSERT_TRUE(hookInfo.enableHookRotation_);
-    ASSERT_TRUE(hookInfo.rotation_);
-    ASSERT_EQ(hookInfo.width_, 100);
-    ASSERT_EQ(hookInfo.height_, 200);
+
+    DMHookInfo actualInfo;
+    actualInfo.enableHookRotation_ = false;
+    actualInfo.rotation_ = true;
+    actualInfo.density_ = -1.0f;
+    actualInfo.width_ = -1;
+    actualInfo.height_ = -1;
+    ssm_->GetDisplayHookInfo(uid, actualInfo);
+
+    EXPECT_EQ(actualInfo.enableHookRotation_, hookInfo.enableHookRotation_);
+    EXPECT_EQ(actualInfo.rotation_, hookInfo.rotation_);
+    EXPECT_FLOAT_EQ(actualInfo.density_, hookInfo.density_);
+    EXPECT_EQ(actualInfo.width_, hookInfo.width_);
+    EXPECT_EQ(actualInfo.height_, hookInfo.height_);
 }
 
 /**
@@ -1521,7 +1531,13 @@ HWTEST_F(ScreenSessionManagerTest, SetResolution, TestSize.Level1)
     mode->width_ = 1;
     mode->height_ = 1;
     screenSession->modes_ = {mode};
+
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->SetResolution(screenId, 100, 100, 0.5));
+
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->SetResolution(screenId, 0, 0, 0.5));
+
+    ScreenId invalidScreenId = -1;
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetResolution(invalidScreenId, 100, 100, 0.5));
     ssm_->DestroyVirtualScreen(screenId);
 }
 
@@ -2170,15 +2186,16 @@ HWTEST_F(ScreenSessionManagerTest, NotifyFoldStatusChanged, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerTest, NotifyPrivateWindowListChanged, TestSize.Level1)
 {
-    DisplayId id = 0;
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr) << "ScreenSessionManager instance is null";
+
+    DisplayId id = 100;
     std::vector<std::string> privacyWindowList{"win0", "win1"};
-    if (ssm_ != nullptr)
-    {
-        ssm_->NotifyPrivateWindowListChanged(id, privacyWindowList);
-        ASSERT_EQ(0, 0);
-    } else {
-        ASSERT_EQ(1, 0);
-    }
+    ssm_->NotifyPrivateWindowListChanged(id, privacyWindowList);
+
+    EXPECT_TRUE(g_logMsg.find("agent is null") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -2220,14 +2237,24 @@ HWTEST_F(ScreenSessionManagerTest, SetPrivacyStateByDisplayId02, TestSize.Level1
  * @tc.desc: SetScreenPrivacyWindowList test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, SetScreenPrivacyWindowList, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerTest, SetScreenPrivacyWindowList, Function | SmallTest | Level1)
 {
-    DisplayId id = 0;
-    std::vector<std::string> privacyWindowList{"win0", "win1"};
-    sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
-    ASSERT_NE(nullptr, screenSession);
-    ssm_->SetScreenPrivacyWindowList(id, privacyWindowList);
-    ASSERT_EQ(0, 0);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
+
+    DisplayId invalidId = 999;
+    std::vector<std::string> windowList{ "win0" };
+    ScreenSessionManager::GetInstance().SetScreenPrivacyWindowList(invalidId, windowList);
+
+    std::string expectedKeyword = "Permission Denied";
+    bool found = (g_logMsg.find(expectedKeyword) != std::string::npos);
+    EXPECT_TRUE(found) << "Expected log to contain '" << expectedKeyword
+                       << "', but got: " << g_logMsg;
+
+    MockAccesstokenKit::ChangeMockStateToInit();
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -7266,7 +7293,7 @@ HWTEST_F(ScreenSessionManagerTest, HandleSwitchPcMode, TestSize.Level1)
     if (!IS_SUPPORT_PC_MODE) {
         bool isPcDevice = ssm_->HandleSwitchPcMode();
         ASSERT_EQ(isPcDevice, g_isPcDevice);
-        return;
+        GTEST_SKIP();
     }
     bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
     bool isPcDevice = ssm_->HandleSwitchPcMode();
@@ -7428,6 +7455,41 @@ HWTEST_F(ScreenSessionManagerTest, UpdateCoordinationRefreshRate, TestSize.Level
     ssm_->SetCoordinationFlag(true);
     ssm_->UpdateCoordinationRefreshRate(refreshRate);
     EXPECT_TRUE(ssm_->GetScreenSession(0));
+}
+
+/**
+ * @tc.name: SetConfigForInputmethod
+ * @tc.desc: SetConfigForInputmethod
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetConfigForInputmethod, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "testVirtualOption";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    VirtualScreenOption option;
+    option.supportsFocus_ = false;
+    option.supportsInput_ = false;
+    ssm_->SetConfigForInputmethod(screenId, option);
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+    EXPECT_EQ(screenSession->GetSupportsFocus(), false);
+    EXPECT_EQ(screenSession->GetSupportsInput(), false);
+
+    option.supportsFocus_ = true;
+    option.supportsInput_ = true;
+    ssm_->SetConfigForInputmethod(screenId, option);
+    screenSession = ssm_->GetScreenSession(screenId);
+    EXPECT_EQ(screenSession->GetSupportsFocus(), true);
+    EXPECT_EQ(screenSession->GetSupportsInput(), true);
+
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    screenId++;
+    ssm_->SetConfigForInputmethod(screenId, option);
+    EXPECT_TRUE(logMsg.find("screenSession is nullptr!") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 }
 } // namespace Rosen

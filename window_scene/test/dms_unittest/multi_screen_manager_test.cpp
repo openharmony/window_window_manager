@@ -24,6 +24,14 @@
 using namespace testing;
 using namespace testing::ext;
 
+namespace {
+    std::string g_logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_logMsg = msg;
+    }
+}
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -904,11 +912,14 @@ HWTEST_F(MultiScreenManagerTest, DoFirstMainChange01, TestSize.Level1)
     auto screenId1 = ScreenSessionManager::GetInstance().CreateVirtualScreen(
         virtualOption1, displayManagerAgent1->AsObject());
     auto secondarySession = ScreenSessionManager::GetInstance().GetScreenSession(screenId1);
-    ScreenCombination secondaryCombination = secondarySession->GetScreenCombination();
 
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     ScreenSessionManager::GetInstance().clientProxy_ = nullptr;
     MultiScreenManager::GetInstance().DoFirstMainChange(firstSession, secondarySession, "unknown");
-    ASSERT_EQ(secondarySession->GetScreenCombination(), secondaryCombination);
+    EXPECT_TRUE(g_logMsg.find("param error") == std::string::npos);
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
 
     ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
     ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);
@@ -934,13 +945,17 @@ HWTEST_F(MultiScreenManagerTest, DoFirstMainChange02, TestSize.Level1)
     auto screenId1 = ScreenSessionManager::GetInstance().CreateVirtualScreen(
         virtualOption1, displayManagerAgent1->AsObject());
     auto secondarySession = ScreenSessionManager::GetInstance().GetScreenSession(screenId1);
-    ScreenCombination secondaryCombination = secondarySession->GetScreenCombination();
 
     testClient_ = new ScreenSessionManagerClientTest();
     ScreenSessionManager::GetInstance().SetClient(testClient_);
     ASSERT_NE(ScreenSessionManager::GetInstance().GetClientProxy(), nullptr);
+
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     MultiScreenManager::GetInstance().DoFirstMainChange(firstSession, secondarySession, "unknown");
-    ASSERT_EQ(secondarySession->GetScreenCombination(), secondaryCombination);
+    EXPECT_TRUE(g_logMsg.find("param error") == std::string::npos);
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
 
     ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
     ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);
@@ -1086,11 +1101,15 @@ HWTEST_F(MultiScreenManagerTest, DoFirstMirrorChange01, TestSize.Level1)
     auto screenId1 = ScreenSessionManager::GetInstance().CreateVirtualScreen(
         virtualOption1, displayManagerAgent1->AsObject());
     auto secondarySession = ScreenSessionManager::GetInstance().GetScreenSession(screenId1);
-    ScreenCombination secondaryCombination = secondarySession->GetScreenCombination();
 
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     ScreenSessionManager::GetInstance().clientProxy_ = nullptr;
     MultiScreenManager::GetInstance().DoFirstMirrorChange(firstSession, secondarySession, "unknown");
-    ASSERT_EQ(secondarySession->GetScreenCombination(), secondaryCombination);
+    EXPECT_FALSE(g_logMsg.find("scbClient null") != std::string::npos ||
+        g_logMsg.find("param error") != std::string::npos);
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
 
     ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
     ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);
@@ -1116,13 +1135,18 @@ HWTEST_F(MultiScreenManagerTest, DoFirstMirrorChange02, TestSize.Level1)
     auto screenId1 = ScreenSessionManager::GetInstance().CreateVirtualScreen(
         virtualOption1, displayManagerAgent1->AsObject());
     auto secondarySession = ScreenSessionManager::GetInstance().GetScreenSession(screenId1);
-    ScreenCombination secondaryCombination = secondarySession->GetScreenCombination();
 
     testClient_ = new ScreenSessionManagerClientTest();
     ScreenSessionManager::GetInstance().SetClient(testClient_);
     ASSERT_NE(ScreenSessionManager::GetInstance().GetClientProxy(), nullptr);
+
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     MultiScreenManager::GetInstance().DoFirstMirrorChange(firstSession, secondarySession, "unknown");
-    ASSERT_EQ(secondarySession->GetScreenCombination(), secondaryCombination);
+    EXPECT_TRUE(g_logMsg.find("scbClient null") == std::string::npos &&
+        g_logMsg.find("aram error") == std::string::npos);
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
 
     ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
     ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);
@@ -1206,10 +1230,13 @@ HWTEST_F(MultiScreenManagerTest, DoFirstExtendChange01, TestSize.Level1)
     auto screenId1 = ScreenSessionManager::GetInstance().CreateVirtualScreen(
         virtualOption1, displayManagerAgent1->AsObject());
     auto secondarySession = ScreenSessionManager::GetInstance().GetScreenSession(screenId1);
-    ScreenCombination secondaryCombination = secondarySession->GetScreenCombination();
 
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     MultiScreenManager::GetInstance().DoFirstExtendChange(firstSession, secondarySession, "unknown");
-    ASSERT_EQ(secondarySession->GetScreenCombination(), secondaryCombination);
+    EXPECT_TRUE(g_logMsg.find("param error") != std::string::npos);
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
 
     ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
     ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);

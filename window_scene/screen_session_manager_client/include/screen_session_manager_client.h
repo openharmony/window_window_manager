@@ -126,6 +126,7 @@ public:
     void NotifyExtendScreenDestroyFinish();
     void NotifyScreenMaskAppear();
     void NotifySwitchUserAnimationFinish(const std::string& description);
+    void NotifySwitchUserAnimationFinishByWindow();
     void RegisterSwitchUserAnimationNotification(const std::string& description);
     void OnAnimationFinish() override;
     void SetInternalClipToBounds(ScreenId screenId, bool clipToBounds) override;
@@ -142,6 +143,7 @@ public:
      */
     std::shared_ptr<RSUIDirector> GetRSUIDirector(ScreenId screenId);
     std::shared_ptr<RSUIContext> GetRSUIContext(ScreenId screenId);
+    bool GetSupportsFocus(DisplayId displayId);
 
 protected:
     ScreenSessionManagerClient() = default;
