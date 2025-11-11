@@ -467,6 +467,26 @@ HWTEST_F(DisplayManagerLiteProxyTest, SetSystemKeyboardStatus02, TestSize.Level1
     auto ret = displayManagerLiteProxy->SetSystemKeyboardStatus(false);
     ASSERT_NE(ret, DMError::DM_OK);
 }
+
+/**
+ * @tc.name: SetResolution
+ * @tc.desc: SetResolution
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerLiteProxyTest, SetResolution, TestSize.Level1)
+{
+    SingletonContainer::Get<DisplayManagerAdapterLite>().InitDMSProxy();
+    sptr<IRemoteObject> impl =
+        SingletonContainer::Get<DisplayManagerAdapterLite>().displayManagerServiceProxy_->AsObject();
+    sptr<DisplayManagerLiteProxy> displayManagerLiteProxy = new DisplayManagerLiteProxy(impl);
+
+    ScreenId id = 0;
+    uint32_t width = 1080;
+    uint32_t height = 2400;
+    float vpr = 2.8;
+    auto ret = displayManagerLiteProxy->SetResolution(id, width, height, vpr);
+    ASSERT_NE(ret, DMError::DM_OK);
+}
 }
 }
 }

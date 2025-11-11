@@ -79,6 +79,7 @@ public:
     sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId);
     bool GetKeyboardState();
     bool SynchronizePowerStatus(ScreenPowerState state);
+    DMError SetResolution(ScreenId screenId, uint32_t width, uint32_t height, float virtualPixelRatio);
 private:
     static inline DMError ConvertToDMError(ErrCode errCode, int32_t dmError);
     sptr<IRemoteObject> Remote()

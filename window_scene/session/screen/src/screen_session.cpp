@@ -3094,4 +3094,14 @@ void ScreenSession::SetSupportsInput(bool input)
 {
     supportsInput_.store(input);
 }
+
+void ScreenSession::SetVprScaleRatio(float vprScaleRatio)
+{
+    vprScaleRatio_ = vprScaleRatio;
+}
+
+float ScreenSession::GetVprScaleRatio() const
+{
+    return vprScaleRatio_;
+}
 } // namespace OHOS::Rosen
