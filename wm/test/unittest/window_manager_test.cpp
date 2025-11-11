@@ -446,8 +446,8 @@ HWTEST_F(WindowManagerTest, UnregisterCameraFloatWindowChangedListener01, TestSi
 
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
     instance_->pImpl_->cameraFloatWindowChangedListeners_.clear();
-    ASSERT_EQ(0,instance_->lpImpl_->cameraFloatWindowChangedListeners_.size());
-    auto ret = windowAdapter->RegisterWindowManagerAgent(type,nullptr);
+    ASSERT_EQ(0, instance_->lpImpl_->cameraFloatWindowChangedListeners_.size());
+    auto ret = windowAdapter->RegisterWindowManagerAgent(type, nullptr);
     ASSERT_EQ(WMError::WM_ERROR_SAMGR, ret);
 
     instance_->RegisterCameraFloatWindowChangedListener(listener1);
@@ -2749,7 +2749,6 @@ HWTEST_F(WindowManagerTest, GetAllMainWindowInfo, TestSize.Level1)
     std::vector<sptr<MainWindowInfo>> infos;
     WMError ret = instance_->GetAllMainWindowInfo(infos);
     ASSERT_NE(WMError::WM_ERROR_SAMGR, ret);
-    
 }
 
 /**
