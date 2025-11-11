@@ -389,6 +389,8 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetScreenShape(property_.GetScreenShape());
     displayInfo->SetOriginRotation(property_.GetScreenRotation());
     displayInfo->SetSupportedRefreshRate(GetSupportedRefreshRate());
+    displayInfo->SetSupportsFocus(GetSupportsFocus());
+    displayInfo->SetSupportsInput(GetSupportsInput());
     return displayInfo;
 }
 
@@ -3071,5 +3073,35 @@ ScreenId ScreenSession::GetPhyScreenId()
 void ScreenSession::SetPhyScreenId(ScreenId screenId)
 {
     phyScreenId_ = screenId;
+}
+
+bool ScreenSession::GetSupportsFocus() const
+{
+    return supportsFocus_.load();
+}
+
+void ScreenSession::SetSupportsFocus(bool focus)
+{
+    supportsFocus_.store(focus);
+}
+
+bool ScreenSession::GetSupportsInput() const
+{
+    return supportsInput_.load();
+}
+
+void ScreenSession::SetSupportsInput(bool input)
+{
+    supportsInput_.store(input);
+}
+
+void ScreenSession::SetVprScaleRatio(float vprScaleRatio)
+{
+    vprScaleRatio_ = vprScaleRatio;
+}
+
+float ScreenSession::GetVprScaleRatio() const
+{
+    return vprScaleRatio_;
 }
 } // namespace OHOS::Rosen

@@ -67,6 +67,13 @@ class UIContent;
 class ViewportConfig;
 }
 
+namespace OHOS::Rosen {
+struct ViewportConfigAndAvoidArea {
+    std::shared_ptr<Ace::ViewportConfig> config;
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+};
+}
+
 namespace OHOS::Media {
 class PixelMap;
 }
@@ -537,6 +544,16 @@ using IWindowVisibilityListenerSptr = sptr<IWindowVisibilityChangedListener>;
 class IOcclusionStateChangedListener : virtual public RefBase {
 public:
     virtual void OnOcclusionStateChanged(const WindowVisibilityState state) {}
+};
+
+/**
+ * @class IFrameMetricsChangedListener
+ *
+ * @brief Listener to observe the window frame metrics changed.
+ */
+class IFrameMetricsChangedListener : virtual public RefBase {
+public:
+    virtual void OnFrameMetricsChanged(const FrameMetrics& metrics) {}
 };
 
 /**
@@ -2429,14 +2446,17 @@ public:
      * @brief Get the Target Orientation ConfigInfo.
      *
      * @param targetOrientation target Orientation.
-     * @param properties systemBar properties
-     * @param config Viewport config.
-     * @param avoidAreas avoidArea information
+     * @param targetProperties systemBar target properties
+     * @param currentProperties systemBar current properties
+     * @param targetViewportConfigAndAvoidArea target viewport config and avoidArea information.
+     * @param currentViewportConfigAndAvoidArea current viewport config and avoidArea information.
      * @return WMError
      */
     virtual WMError GetTargetOrientationConfigInfo(Orientation targetOrientation,
-        const std::map<WindowType, SystemBarProperty>& properties, Ace::ViewportConfig& config,
-        std::map<AvoidAreaType, AvoidArea>& avoidAreas)
+        const std::map<WindowType, SystemBarProperty>& targetProperties,
+        const std::map<WindowType, SystemBarProperty>& currentProperties,
+        ViewportConfigAndAvoidArea& targetViewportConfigAndAvoidArea,
+        ViewportConfigAndAvoidArea& currentViewportConfigAndAvoidArea)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -3092,6 +3112,28 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     virtual WMError UnregisterOcclusionStateChangeListener(const sptr<IOcclusionStateChangedListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Register window frame metrics change listener.
+     *
+     * @param listener IFrameMetricsChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterFrameMetricsChangeListener(const sptr<IFrameMetricsChangedListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister window frame metrics change listener.
+     *
+     * @param listener IFrameMetricsChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterFrameMetricsChangeListener(const sptr<IFrameMetricsChangedListener>& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }

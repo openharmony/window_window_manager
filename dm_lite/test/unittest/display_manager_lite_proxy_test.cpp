@@ -321,17 +321,16 @@ HWTEST_F(DisplayManagerLiteProxyTest, SuspendEnd, TestSize.Level1)
  * @tc.desc: SetDisplayState
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerLiteProxyTest, SetDisplayState, TestSize.Level1)
+HWTEST_F(DisplayManagerLiteProxyTest, SetDisplayState, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<DisplayManagerAdapterLite>().InitDMSProxy();
     sptr<IRemoteObject> impl =
         SingletonContainer::Get<DisplayManagerAdapterLite>().displayManagerServiceProxy_->AsObject();
+    ASSERT_NE(impl, nullptr);
     sptr<DisplayManagerLiteProxy> displayManagerLiteProxy = new DisplayManagerLiteProxy(impl);
-
+    ASSERT_NE(displayManagerLiteProxy, nullptr);
     DisplayState state {1};
     displayManagerLiteProxy->SetDisplayState(state);
-    int resultValue = 0;
-    ASSERT_EQ(resultValue, 0);
 }
 
 /**
@@ -424,22 +423,15 @@ HWTEST_F(DisplayManagerLiteProxyTest, GetDisplayState, TestSize.Level1)
  * @tc.desc: GetAllDisplayIds
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerLiteProxyTest, GetAllDisplayIds, TestSize.Level1)
+HWTEST_F(DisplayManagerLiteProxyTest, GetAllDisplayIds, Function | SmallTest | Level1)
 {
-    SingletonContainer::Get<DisplayManagerAdapterLite>().InitDMSProxy();
+    auto& adapter = SingletonContainer::Get<DisplayManagerAdapterLite>();
+    adapter.InitDMSProxy();
+    auto ids1 = adapter.GetAllDisplayIds(100);
+    auto ids2 = adapter.GetAllDisplayIds(-1);
 
-    sptr<IRemoteObject> impl =
-        SingletonContainer::Get<DisplayManagerAdapterLite>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerLiteProxy> displayManagerLiteProxy = new DisplayManagerLiteProxy(impl);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerLiteProxy->GetAllDisplayIds();
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    EXPECT_FALSE(ids1.empty());
+    EXPECT_EQ(ids1, ids2);
 }
 
 /**
@@ -473,6 +465,26 @@ HWTEST_F(DisplayManagerLiteProxyTest, SetSystemKeyboardStatus02, TestSize.Level1
     sptr<DisplayManagerLiteProxy> displayManagerLiteProxy = new DisplayManagerLiteProxy(impl);
 
     auto ret = displayManagerLiteProxy->SetSystemKeyboardStatus(false);
+    ASSERT_NE(ret, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: SetResolution
+ * @tc.desc: SetResolution
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerLiteProxyTest, SetResolution, TestSize.Level1)
+{
+    SingletonContainer::Get<DisplayManagerAdapterLite>().InitDMSProxy();
+    sptr<IRemoteObject> impl =
+        SingletonContainer::Get<DisplayManagerAdapterLite>().displayManagerServiceProxy_->AsObject();
+    sptr<DisplayManagerLiteProxy> displayManagerLiteProxy = new DisplayManagerLiteProxy(impl);
+
+    ScreenId id = 0;
+    uint32_t width = 1080;
+    uint32_t height = 2400;
+    float vpr = 2.8;
+    auto ret = displayManagerLiteProxy->SetResolution(id, width, height, vpr);
     ASSERT_NE(ret, DMError::DM_OK);
 }
 }

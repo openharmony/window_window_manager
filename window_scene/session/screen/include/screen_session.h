@@ -413,6 +413,12 @@ public:
     void ModifyScreenPropertyWithLock(float rotation, RRect bounds);
     ScreenId GetPhyScreenId();
     void SetPhyScreenId(ScreenId screenId);
+    bool GetSupportsFocus() const;
+    void SetSupportsFocus(bool focus);
+    bool GetSupportsInput() const;
+    void SetSupportsInput(bool input);
+    void SetVprScaleRatio(float vprScaleRatio);
+    float GetVprScaleRatio() const;
 
 private:
     bool IsVertical(Rotation rotation) const;
@@ -470,6 +476,7 @@ private:
     uint64_t sessionId_;
     bool lastCloseHdrStatus_ = false;
     mutable std::shared_mutex modesMutex_;
+    float vprScaleRatio_ { 1.0f };
 
     void RemoveRotationCorrection(Rotation& rotation, FoldDisplayMode foldDisplayMode);
     void AddRotationCorrection(Rotation& rotation, FoldDisplayMode displayMode);
@@ -482,6 +489,8 @@ private:
     std::shared_ptr<RSUIDirector> rsUIDirector_;
 
     inline static std::atomic<uint64_t> sessionIdGenerator_ { 0 };
+    std::atomic<bool> supportsFocus_ { true };
+    std::atomic<bool> supportsInput_ { true };
 };
 
 class ScreenSessionGroup : public ScreenSession {

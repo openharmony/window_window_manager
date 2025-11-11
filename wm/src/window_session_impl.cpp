@@ -150,6 +150,9 @@ std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> WindowSessionImpl:
 std::mutex WindowSessionImpl::occlusionStateChangeListenerMutex_;
 std::unordered_map<int32_t,
     std::vector<sptr<IOcclusionStateChangedListener>>> WindowSessionImpl::occlusionStateChangeListeners_;
+std::mutex WindowSessionImpl::frameMetricsChangeListenerMutex_;
+std::unordered_map<int32_t,
+    std::vector<sptr<IFrameMetricsChangedListener>>> WindowSessionImpl::frameMetricsChangeListeners_;
 std::mutex WindowSessionImpl::displayIdChangeListenerMutex_;
 std::map<int32_t, std::vector<IDisplayIdChangeListenerSptr>> WindowSessionImpl::displayIdChangeListeners_;
 std::mutex WindowSessionImpl::systemDensityChangeListenerMutex_;
@@ -2794,8 +2797,14 @@ WMError WindowSessionImpl::SetFocusable(bool isFocusable)
     }
     TLOGI(WmsLogTag::WMS_FOCUS, "set focusable: windowId=%{public}d, isFocusable=%{public}d",
         property_->GetPersistentId(), isFocusable);
+    bool curIsFocusable = GetFocusable();
     property_->SetFocusable(isFocusable);
-    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
+    WMError ret = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
+    if (ret != WMError::WM_OK) {
+        property_->SetFocusable(curIsFocusable);
+        return ret;
+    }
+    return WMError::WM_OK;
 }
 
 bool WindowSessionImpl::GetFocusable() const
@@ -4430,12 +4439,13 @@ bool WindowSessionImpl::IsHitTitleBar(std::shared_ptr<MMI::PointerEvent>& pointe
     }
     Rect windowRect = property_->GetWindowRect();
     int32_t decorHeight = uiContent->GetContainerModalTitleHeight();
+    int32_t statusBarHeight = property_->GetStatusBarHeightInImmersive();
     MMI::PointerEvent::PointerItem pointerItem;
     bool isValidPointItem = pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     bool isHitTitleBarX = pointerItem.GetDisplayX() > windowRect.posX_
         && pointerItem.GetDisplayX() < windowRect.posX_ + windowRect.width_;
-    bool isHitTitleBarY = pointerItem.GetDisplayY() > windowRect.posY_
-        && pointerItem.GetDisplayY() < windowRect.posY_ + decorHeight;
+    bool isHitTitleBarY = pointerItem.GetDisplayY() > windowRect.posY_ + statusBarHeight
+        && pointerItem.GetDisplayY() < windowRect.posY_ + decorHeight + statusBarHeight;
     bool isHitTitleBar = isValidPointItem && isHitTitleBarX && isHitTitleBarY;
     if (isHitTitleBar) {
         TLOGI(WmsLogTag::WMS_DECOR, "hitTitleBar success");
@@ -5779,7 +5789,8 @@ void WindowSessionImpl::NotifyTitleChange(bool isShow, int32_t height)
     int32_t posX = property_->GetWindowRect().posX_;
     int32_t posY = property_->GetWindowRect().posY_;
     int32_t decorHeight = uiContent->GetContainerModalTitleHeight();
-    Rect rect = {posX, posY, posX + width, posY + decorHeight};
+    property_->SetStatusBarHeightInImmersive(height);
+    Rect rect = {posX, posY + height, width, decorHeight};
     for (auto& listener : windowTitleChangeListeners) {
         if (listener != nullptr) {
             TLOGI(WmsLogTag::WMS_IMMS, "NotifyTitleChange, the title bar is show? %{public}d", isShow);
@@ -6202,6 +6213,98 @@ WSError WindowSessionImpl::NotifyWindowOcclusionState(const WindowVisibilityStat
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d, visibilityState=%{public}u, notifyCounter=%{public}u",
         persistentId, static_cast<uint32_t>(visibilityState), notifyCounter);
     return WSError::WS_OK;
+}
+
+WMError WindowSessionImpl::RegisterFrameMetricsChangeListener(const sptr<IFrameMetricsChangedListener>& listener)
+{
+    auto persistentId = GetPersistentId();
+    auto uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null: winId=%{public}d", persistentId);
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    bool isFirstRegister = false;
+    {
+        std::lock_guard<std::mutex> lockListener(frameMetricsChangeListenerMutex_);
+        auto ret = RegisterListener(frameMetricsChangeListeners_[persistentId], listener);
+        if (ret != WMError::WM_OK) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed: winId=%{public}d", persistentId);
+            return ret;
+        }
+        isFirstRegister = frameMetricsChangeListeners_[persistentId].size() == 1;
+    }
+    if (!isFirstRegister) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "register another: winId=%{public}d", persistentId);
+        return WMError::WM_OK;
+    }
+    uiContent->SetFrameMetricsCallBack([weak = wptr(this), where = __func__](Ace::FrameMetrics info) {
+        auto window = weak.promote();
+        if (!window) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: window is null", where);
+            return;
+        }
+        window->NotifyFrameMetrics(info);
+    });
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "register to arkui: winId=%{public}d", persistentId);
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::UnregisterFrameMetricsChangeListener(const sptr<IFrameMetricsChangedListener>& listener)
+{
+    auto persistentId = GetPersistentId();
+    auto uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null: winId=%{public}d", persistentId);
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    bool isLastUnregister = false;
+    {
+        std::lock_guard<std::mutex> lockListener(frameMetricsChangeListenerMutex_);
+        auto ret = UnregisterListener(frameMetricsChangeListeners_[persistentId], listener);
+        if (ret != WMError::WM_OK) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed: winId=%{public}d", persistentId);
+            return ret;
+        }
+        if (frameMetricsChangeListeners_[persistentId].empty()) {
+            frameMetricsChangeListeners_.erase(persistentId);
+            isLastUnregister = true;
+        }
+    }
+    if (!isLastUnregister) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "unregister another: winId=%{public}d", persistentId);
+        return WMError::WM_OK;
+    }
+    uiContent->SetFrameMetricsCallBack(nullptr);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "unregister to arkui: winId=%{public}d", persistentId);
+    return WMError::WM_OK;
+}
+
+void WindowSessionImpl::NotifyFrameMetrics(const Ace::FrameMetrics& info)
+{
+    auto persistentId = GetPersistentId();
+    std::vector<sptr<IFrameMetricsChangedListener>> listeners;
+    {
+        std::lock_guard<std::mutex> lockListener(frameMetricsChangeListenerMutex_);
+        for (auto& listener : frameMetricsChangeListeners_[persistentId]) {
+            listeners.push_back(listener);
+        }
+    }
+    uint32_t notifyCounter = 0;
+    FrameMetrics metrics;
+    metrics.firstDrawFrame_ = info.firstDrawFrame;
+    metrics.inputHandlingDuration_ = info.inputHandlingDuration;
+    metrics.layoutMeasureDuration_ = info.layoutMeasureDuration;
+    metrics.vsyncTimestamp_ = info.vsyncTimestamp;
+    for (auto& listener : listeners) {
+        if (listener != nullptr) {
+            listener->OnFrameMetricsChanged(metrics);
+            notifyCounter++;
+        }
+    }
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d, notifyCounter=%{public}u, firstDrawFrame=%{public}d"
+        ", inputHandlingDuration=%{public}" PRIu64 ", layoutMeasureDuration=%{public}" PRIu64
+        ", vsyncTimestamp=%{public}" PRIu64, persistentId, notifyCounter, metrics.firstDrawFrame_,
+        metrics.inputHandlingDuration_, metrics.layoutMeasureDuration_, metrics.vsyncTimestamp_);
 }
 
 WMError WindowSessionImpl::RegisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener)

@@ -54,10 +54,10 @@ WSError FutureCallback::OnUpdateGlobalDisplayRect(
     return WSError::WS_DO_NOTHING;
 }
 
-WSError FutureCallback::OnUpdateTargetOrientationInfo(OrientationInfo& info)
+WSError FutureCallback::OnUpdateTargetOrientationInfo(OrientationInfo& info, OrientationInfo& currentInfo)
 {
     TLOGI(WmsLogTag::WMS_ROTATION, "update the target orientation info");
-    getTargetRotationFuture_.SetValue(info);
+    getTargetRotationFuture_.SetValue(std::make_pair(info, currentInfo));
     return WSError::WS_DO_NOTHING;
 }
 
@@ -81,12 +81,12 @@ Rect FutureCallback::GetMoveWindowToGlobalDisplayAsyncResult(long timeoutMs)
 {
     return moveWindowToGlobalDisplayFuture_.GetResult(timeoutMs);
 }
-// LCOV_EXCL_STOP
 
-OrientationInfo FutureCallback::GetTargetOrientationResult(long timeoutMs)
+std::pair<OrientationInfo, OrientationInfo> FutureCallback::GetTargetOrientationResult(long timeoutMs)
 {
     return getTargetRotationFuture_.GetResult(timeoutMs);
 }
+// LCOV_EXCL_STOP
 
 RotationChangeResult FutureCallback::GetRotationResult(long timeoutMs)
 {

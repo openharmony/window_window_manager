@@ -2549,8 +2549,33 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->SetSingleHandTransform(singleHandTransform_);
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, displayId: %{public}" PRIu64,
             sceneSession->GetPersistentId(), sceneSession->GetSessionProperty()->GetDisplayId());
+        SetBufferAvailable(sceneSession);
     }
     return sceneSession;
+}
+
+void SceneSessionManager::SetBufferAvailable(sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "scene session is nullptr");
+        return;
+    }
+    const auto type = sceneSession->GetWindowType();
+    TLOGI(WmsLogTag::WMS_SCB, "id: %{public}d, type: %{public}d", sceneSession->GetPersistentId(), type);
+    if (type == WindowType::WINDOW_TYPE_DESKTOP || type == WindowType::WINDOW_TYPE_KEYGUARD ||
+        type == WindowType::WINDOW_TYPE_WALLPAPER) {
+        TLOGI(WmsLogTag::WMS_SCB, "enter buffer available callback");
+        auto surfaceNode = sceneSession->GetSurfaceNode();
+        if (surfaceNode == nullptr) {
+            TLOGE(WmsLogTag::WMS_SCB, "surface node is nullptr");
+            return;
+        }
+        surfaceNode->SetBufferAvailableCallback([where = __func__]() {
+            TLOGNE(WmsLogTag::WMS_SCB, "%{public}s BufferAvailableCallback called", where);
+            ScreenSessionManagerClient::GetInstance().NotifySwitchUserAnimationFinishByWindow();
+        });
+        RSTransactionAdapter::FlushImplicitTransaction(surfaceNode);
+    }
 }
 
 void SceneSessionManager::GetEffectiveDragResizeType(DragResizeType& dragResizeType)
@@ -3740,7 +3765,8 @@ void SceneSessionManager::BuildCancelPointerEvent(const std::shared_ptr<MMI::Poi
 
 void SceneSessionManager::SendCancelEventBeforeEraseSession(const sptr<SceneSession>& sceneSession)
 {
-    auto task = [this, needCancelEventSceneSession = sceneSession] {
+    auto task = [this, weakSceneSession = wptr(sceneSession)] {
+        auto needCancelEventSceneSession = weakSceneSession.promote();
         if (needCancelEventSceneSession == nullptr) {
             TLOGI(WmsLogTag::WMS_EVENT, "scenesession is nullptr, needn't send cancel event");
             return;
@@ -3774,6 +3800,7 @@ void SceneSessionManager::EraseSceneSessionMapById(int32_t persistentId)
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession != nullptr) {
         RemovePreLoadStartingWindowFromMap(sceneSession->GetSessionInfo());
+        sceneSession->ClearLifeCycleTask();
     } else {
         TLOGW(WmsLogTag::WMS_PATTERN, "session is nullptr id: %{public}d", persistentId);
     }
@@ -4117,8 +4144,7 @@ WSError SceneSessionManager::CheckSubSessionStartedByExtension(const sptr<IRemot
             return WSError::WS_OK;
         }
     }
-    if (info.extensionAbilityType == AppExecFwk::ExtensionAbilityType::UNSPECIFIED &&
-        SessionPermission::IsSystemCalling()) {
+    if (SessionPermission::IsSystemCalling()) {
         TLOGD(WmsLogTag::WMS_UIEXT, "is system app");
         return WSError::WS_OK;
     }
@@ -7972,6 +7998,10 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(DisplayId displayId, cons
             TLOGD(WmsLogTag::WMS_FOCUS, "click cannot request focus from full screen window!");
             return WSError::WS_DO_NOTHING;
         }
+        if (!ScreenSessionManagerClient::GetInstance().GetSupportsFocus(displayId)) {
+            TLOGW(WmsLogTag::WMS_FOCUS, "screen of current window is not allowed to be focused");
+            return WSError::WS_DO_NOTHING;
+        }
     }
     return WSError::WS_OK;
 }
@@ -8014,8 +8044,13 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
         if (session == nullptr) {
             return false;
         }
-        if (windowFocusController_->GetDisplayGroupId(session->GetSessionProperty()->GetDisplayId()) !=
+        auto currentSessionDisplayId = session->GetDisplayId();
+        if (windowFocusController_->GetDisplayGroupId(currentSessionDisplayId) !=
             displayGroupId) {
+            return false;
+        }
+        if (!ScreenSessionManagerClient::GetInstance().GetSupportsFocus(currentSessionDisplayId)) {
+            TLOGW(WmsLogTag::WMS_FOCUS, "screen of current window is not allowed to be focused");
             return false;
         }
         if (session->GetForceHideState() != ForceHideState::NOT_HIDDEN) {
@@ -8049,13 +8084,22 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSessionWhenFloatWindowEx
     if (!isPhoneOrPadWithoutPcMode) {
         return nullptr;
     }
-    auto topFloatingSession = GetTopFloatingSession(displayGroupId, persistentId);
     auto sceneSession = GetSceneSession(persistentId);
-    if (topFloatingSession != nullptr && SessionHelper::IsMainWindow(sceneSession->GetWindowType()) &&
-        sceneSession->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        return topFloatingSession;
+    if (sceneSession == nullptr || !SessionHelper::IsMainWindow(sceneSession->GetWindowType()) ||
+        sceneSession->GetWindowMode() != WindowMode::WINDOW_MODE_FULLSCREEN) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "current scene session unqualified, id: %{public}d", persistentId);
+        return nullptr;
     }
-    return nullptr;
+    auto topFloatingSession = GetTopFloatingSession(displayGroupId, persistentId);
+    if (topFloatingSession == nullptr) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "no top floating session found");
+        return nullptr;
+    }
+    if (!ScreenSessionManagerClient::GetInstance().GetSupportsFocus(topFloatingSession->GetDisplayId())) {
+        TLOGW(WmsLogTag::WMS_FOCUS, "screen of current window is not allowed to be focused");
+        return nullptr;
+    }
+    return topFloatingSession;
 }
 
 sptr<SceneSession> SceneSessionManager::GetTopFloatingSession(DisplayId displayGroupId, int32_t persistentId)
@@ -8278,6 +8322,7 @@ WSError SceneSessionManager::ShiftFocus(DisplayId displayId, const sptr<SceneSes
         nextId = nextSession->GetPersistentId();
     }
     UpdateFocusStatus(displayId, nextSession, true, focusNotifyInfo);
+    UpdateGestureBackEnabled(focusedId, nextId);
     UpdateHighlightStatus(displayId, focusedSession, nextSession, isProactiveUnfocus);
     if (shiftFocusFunc_ != nullptr) {
         auto displayGroupId = windowFocusController_->GetDisplayGroupId(displayId);
@@ -12504,26 +12549,33 @@ void SceneSessionManager::GetKeyboardOccupiedAreaWithRotation(
     avoidAreas.emplace_back(keyboardOccupiedArea);
 }
 
-void SceneSessionManager::UpdateGestureBackEnabled(int32_t persistentId)
+void SceneSessionManager::UpdateGestureBackEnabled(int32_t curId, int32_t nextId)
 {
-    auto task = [this, persistentId, where = __func__] {
-        auto sceneSession = GetSceneSession(persistentId);
+    auto task = [this, curId, nextId, where = __func__] {
+        auto sceneSession = GetSceneSession(curId);
         if (sceneSession == nullptr || !sceneSession->GetEnableGestureBackHadSet()) {
             TLOGND(WmsLogTag::WMS_IMMS, "sceneSession is nullptr or not set Gesture Back enable");
             return;
         }
         auto needEnableGestureBack = sceneSession->GetGestureBackEnabled();
         if (needEnableGestureBack) {
-            gestureBackEnableWindowIdSet_.erase(persistentId);
+            gestureBackEnableWindowIdSet_.erase(curId);
         } else {
-            gestureBackEnableWindowIdSet_.insert(persistentId);
+            gestureBackEnableWindowIdSet_.insert(curId);
         }
         if (sceneSession->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
             sceneSession->GetWindowMode() != WindowMode::WINDOW_MODE_FULLSCREEN ||
             (sceneSession->GetSessionState() != SessionState::STATE_FOREGROUND &&
              sceneSession->GetSessionState() != SessionState::STATE_ACTIVE) ||
-            enterRecent_.load() || !sceneSession->IsFocused()) {
+            enterRecent_.load() || (nextId == INVALID_SESSION_ID && !sceneSession->IsFocused())) {
             needEnableGestureBack = true;
+        }
+        if (nextId != INVALID_SESSION_ID) {
+            auto nextSession = GetSceneSession(nextId);
+            if (nextSession != nullptr && !sceneSession->IsFocused()) {
+                auto type = nextSession->GetSessionProperty()->GetWindowType();
+                needEnableGestureBack = type != WindowType::WINDOW_TYPE_PIP ? true : needEnableGestureBack;
+            }
         }
         if (gestureNavigationEnabledChangeFunc_ != nullptr) {
             gestureNavigationEnabledChangeFunc_(needEnableGestureBack,
@@ -12532,7 +12584,7 @@ void SceneSessionManager::UpdateGestureBackEnabled(int32_t persistentId)
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s callback func is null", where);
         }
     };
-    taskScheduler_->PostAsyncTask(task, "UpdateGestureBackEnabled: PID: " + std::to_string(persistentId));
+    taskScheduler_->PostAsyncTask(task, "UpdateGestureBackEnabled: PID: " + std::to_string(curId));
 }
 
 WSError SceneSessionManager::NotifyStatusBarShowStatus(int32_t persistentId, bool isVisible)
@@ -12860,6 +12912,7 @@ void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, spt
 {
     TLOGD(WmsLogTag::DEFAULT, "type: %{public}u", type);
     switch (type) {
+        case DisplayStateChangeType::RESOLUTION_CHANGE:
         case DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE: {
             SceneSessionManager::GetInstance().ProcessVirtualPixelRatioChange(defaultDisplayId,
                 displayInfo, displayInfoMap, type);

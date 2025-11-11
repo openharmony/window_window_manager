@@ -226,13 +226,15 @@ int ScreenSessionManagerClientStub::HandleOnScreenConnectionChanged(MessageParce
         }
         rotationCorrectionMap.insert({static_cast<FoldDisplayMode>(foldDisplayMode), offset});
     }
+    bool supportsFocus = data.ReadBool();
     SessionOption option = {
         .rsId_ = rsId,
         .name_ = name,
         .isExtend_ = isExtend,
         .innerName_ = innerName,
         .screenId_ = screenId,
-        .rotationCorrectionMap_ = rotationCorrectionMap
+        .rotationCorrectionMap_ = rotationCorrectionMap,
+        .supportsFocus_ = supportsFocus
     };
     OnScreenConnectionChanged(option, screenEvent);
     return ERR_NONE;

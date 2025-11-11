@@ -1180,8 +1180,50 @@ int SessionStageStub::HandleNotifyRotationProperty(MessageParcel& data, MessageP
         avoidAreas[static_cast<AvoidAreaType>(type)] = *area;
     }
 
+    uint32_t currentRotation = 0;
+    if (!data.ReadUint32(currentRotation)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read current rotation failed");
+        return ERR_INVALID_VALUE;
+    }
+
+    Rect currentRect = {0, 0, 0, 0};
+    if (!data.ReadInt32(currentRect.posX_) || !data.ReadInt32(currentRect.posY_) ||
+        !data.ReadUint32(currentRect.width_) ||!data.ReadUint32(currentRect.height_)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read current rect failed");
+        return ERR_INVALID_VALUE;
+    }
+    std::map<AvoidAreaType, AvoidArea> currentAvoidAreas;
+    uint32_t currentSize = 0;
+    if (!data.ReadUint32(currentSize)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read current avoid area size failed");
+        return ERR_INVALID_VALUE;
+    }
+    if (currentSize > AVOID_AREA_TYPE_MAX_SIZE) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "current avoid area size is invalid");
+        return ERR_INVALID_VALUE;
+    }
+    for (uint32_t i = 0; i < currentSize; i++) {
+        uint32_t type = 0;
+        if (!data.ReadUint32(type)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "read current avoid area type failed");
+            return ERR_INVALID_VALUE;
+        }
+        if (type < static_cast<uint32_t>(AvoidAreaType::TYPE_START) ||
+            type >= static_cast<uint32_t>(AvoidAreaType::TYPE_END)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "current avoid area type invalid");
+            return ERR_INVALID_VALUE;
+        }
+        sptr<AvoidArea> currentArea = data.ReadParcelable<AvoidArea>();
+        if (currentArea == nullptr) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "read current avoid area failed");
+            return ERR_INVALID_VALUE;
+        }
+        currentAvoidAreas[static_cast<AvoidAreaType>(type)] = *currentArea;
+    }
+
     OrientationInfo info = { rotation, rect, avoidAreas };
-    NotifyTargetRotationInfo(info);
+    OrientationInfo currentInfo = { currentRotation, currentRect, currentAvoidAreas };
+    NotifyTargetRotationInfo(info, currentInfo);
     return ERR_NONE;
 }
 

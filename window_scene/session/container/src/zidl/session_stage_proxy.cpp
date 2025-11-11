@@ -2090,7 +2090,7 @@ void SessionStageProxy::NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo
     }
 }
 
-WSError SessionStageProxy::NotifyTargetRotationInfo(OrientationInfo& info)
+WSError SessionStageProxy::NotifyTargetRotationInfo(OrientationInfo& info, OrientationInfo& currentInfo)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2123,6 +2123,33 @@ WSError SessionStageProxy::NotifyTargetRotationInfo(OrientationInfo& info)
         }
         if (!data.WriteParcelable(&avoidArea)) {
             TLOGE(WmsLogTag::WMS_ROTATION, "write avoid area failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+    }
+
+    if (!data.WriteUint32(currentInfo.rotation)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "write currentInfo rotation failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteInt32(currentInfo.rect.posX_) || !data.WriteInt32(currentInfo.rect.posY_) ||
+        !data.WriteUint32(currentInfo.rect.width_) || !data.WriteUint32(currentInfo.rect.height_)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "write currentInfo rect failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteUint32(static_cast<uint32_t>(currentInfo.avoidAreas.size()))) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "write currentInfo avoid area size failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    for (const auto& [type, avoidArea] : currentInfo.avoidAreas) {
+        if (!data.WriteUint32(static_cast<uint32_t>(type))) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "write currentInfo avoid area type failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+        if (!data.WriteParcelable(&avoidArea)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "write currentInfo avoid area failed");
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }

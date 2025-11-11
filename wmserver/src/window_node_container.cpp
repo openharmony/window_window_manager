@@ -1438,6 +1438,9 @@ void WindowNodeContainer::NotifyIfKeyboardRegionChanged(const sptr<WindowNode>& 
             AvoidArea area = GetAvoidAreaByType(callingWindow, avoidAreaType);
             avoidAreas[avoidAreaType] = area;
         }
+        if (callingWindow->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
+            avoidAreas = {};
+        }
         if (isAnimateTransactionEnabled_) {
             auto rsTransaction = RSSyncTransactionAdapter::GetRSTransaction(node->GetRSUIContext());
             callingWindow->GetWindowToken()->UpdateOccupiedAreaChangeInfo(info, avoidAreas, rsTransaction);
@@ -1445,7 +1448,7 @@ void WindowNodeContainer::NotifyIfKeyboardRegionChanged(const sptr<WindowNode>& 
             callingWindow->GetWindowToken()->UpdateOccupiedAreaChangeInfo(info, avoidAreas);
         }
 
-        WLOGD("keyboard size change callingWindow: [%{public}s, %{public}u], "
+        WLOGI("keyboard size change callingWindow: [%{public}s, %{public}u], "
             "overlap rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
             callingWindow->GetWindowName().c_str(), callingWindow->GetWindowId(),
             overlapRect.posX_, overlapRect.posY_, overlapRect.width_, overlapRect.height_);
