@@ -167,7 +167,7 @@ HWTEST_F(WindowFocusControllerTest, GetFocusGroupInner, TestSize.Level1)
     wfc->AddFocusGroup(100, 100);
     wfc->displayId2GroupIdMap_.insert({ 100, 100 });
     res = wfc->GetFocusGroupInner(100);
-    EXPECT_EQ(wfc->focusGroupMap_[100], res);
+    EXPECT_EQ(wfc->focusGroupMap_.at(100), res);
 
     LOG_SetCallback(nullptr);
     GTEST_LOG_(INFO) << "WindowFocusControllerTest::GetFocusGroupInner end";
