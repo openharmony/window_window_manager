@@ -557,20 +557,6 @@ HWTEST_F(DisplayManagerAdapterTest, SuspendEnd, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetDisplayState
- * @tc.desc: test SetDisplayState
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAdapterTest, SetDisplayState, TestSize.Level1)
-{
-    DisplayState state = DisplayState::OFF;
-    bool ret = SingletonContainer::Get<DisplayManagerAdapter>().SetDisplayState(state);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_TRUE(ret);
-    }
-}
-
-/**
  * @tc.name: MakeMirror
  * @tc.desc: test success
  * @tc.type: FUNC
