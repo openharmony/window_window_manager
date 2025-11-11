@@ -7395,7 +7395,7 @@ WMError WindowSceneSessionImpl::SetCustomDensity(float density, bool applyToSubW
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is nullptr");
             continue;
         }
-        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Id=%{public}u UpdateDensity", window->GetWindowId());
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Id=%{public}d UpdateDensity", window->GetWindowId());
         window->SetDefaultDensityEnabledValue(false);
         if (applyToSubWindow) {
             window->UpdateDensity();
