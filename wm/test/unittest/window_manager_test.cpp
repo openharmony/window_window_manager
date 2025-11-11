@@ -725,7 +725,8 @@ HWTEST_F(WindowManagerTest, UnregisterGestureNavigationEnabledChangedListener, T
 
     ASSERT_EQ(WMError::WM_OK, instance_->UnregisterGestureNavigationEnabledChangedListener(listener1));
     ASSERT_EQ(WMError::WM_OK, instance_->UnregisterGestureNavigationEnabledChangedListener(listener2));
-    ASSERT_EQ(0, instance_->pImpl_->gestureNavigationEnabledListeners_.size());	
+    
+    ASSERT_EQ(0, instance_->pImpl_->gestureNavigationEnabledListeners_.size());
     ASSERT_EQ(nullptr, instance_->pImpl_->gestureNavigationEnabledAgent_);
 
     // if agent == nullptr, it can not be crashed.
@@ -1772,7 +1773,6 @@ HWTEST_F(WindowManagerTest, RegisterVisibilityStateChangedListener01, Function |
     sptr<TestWindowVisibilityStateListener> listener = sptr<TestWindowVisibilityStateListener>::MakeSptr();
     instance_->RegisterVisibilityStateChangedListener(listener);
 
-    // to check that the same listner can not be registered twice	
     instance_->RegisterVisibilityStateChangedListener(listener);
     instance_->pImpl_->windowVisibilityStateListenerAgent_ = oldWindowManagerAgent;
     instance_->pImpl_->windowVisibilityStateListeners_ = oldListeners;
@@ -1831,7 +1831,6 @@ HWTEST_F(WindowManagerTest, RegisterDisplayIdChangedListener01, Function | Small
     sptr<TestWindowDisplayIdChangeListener> listener = sptr<TestWindowDisplayIdChangeListener>::MakeSptr();
     instance_->RegisterVisibilityStateChangedListener(listener);
 
-    // to check that the same listner can not be registered twice	
     instance_->RegisterVisibilityStateChangedListener(listener);
 
     instance_->pImpl_->WindowDisplayIdChangeListenerAgent_ = oldWindowManagerAgent;
