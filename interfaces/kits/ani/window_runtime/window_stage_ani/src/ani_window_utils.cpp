@@ -826,7 +826,7 @@ ani_object AniWindowUtils::CreateAniAnimationConfig(ani_env* env, const Keyboard
             return AniWindowUtils::CreateAniUndefined(env);
         }
         ani_enum_item animationCurveTypeItem;
-        std::string itemName = curve.curveType_;
+        std::string itemName = "INTERPOLATION_SPRING";
         ret = env->Enum_GetEnumItemByName(aniAnimationCurveType, itemName.c_str(), &animationCurveTypeItem);
         if (ret != ANI_OK) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] Get enum item %{public}s failed. ret: %{public}d",
@@ -841,7 +841,7 @@ ani_object AniWindowUtils::CreateAniAnimationConfig(ani_env* env, const Keyboard
     }
 
     ret = CallAniMethodVoid(env, aniConfig, aniClass, "<set>duration", nullptr,
-        ani_int(curve.duration_));
+        CreateBaseTypeObject(env, curve.duration_));
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to set duration");
         return AniWindowUtils::CreateAniUndefined(env);
