@@ -3065,16 +3065,6 @@ void ScreenSession::ModifyScreenPropertyWithLock(float rotation, RRect bounds)
     SetBounds(bounds);
 }
 
-ScreenId ScreenSession::GetPhyScreenId()
-{
-    return phyScreenId_;
-}
-
-void ScreenSession::SetPhyScreenId(ScreenId screenId)
-{
-    phyScreenId_ = screenId;
-}
-
 bool ScreenSession::GetSupportsFocus() const
 {
     return supportsFocus_.load();

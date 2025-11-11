@@ -243,7 +243,6 @@ public:
     ScreenId screenId_ {};
     ScreenId rsId_ {};
     ScreenId defaultScreenId_ = SCREEN_ID_INVALID;
-    ScreenId phyScreenId_ = SCREEN_ID_INVALID;
 
     void SetIsExtend(bool isExtend);
     bool GetIsExtend() const;
@@ -411,8 +410,6 @@ public:
     bool GetIsKeyboardOn() const;
     void SetFloatRotation(float rotation);
     void ModifyScreenPropertyWithLock(float rotation, RRect bounds);
-    ScreenId GetPhyScreenId();
-    void SetPhyScreenId(ScreenId screenId);
     bool GetSupportsFocus() const;
     void SetSupportsFocus(bool focus);
     bool GetSupportsInput() const;
