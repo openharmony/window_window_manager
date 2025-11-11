@@ -878,6 +878,8 @@ public:
     virtual void CalculateOccupiedAreaAfterUIRefresh() {}
     virtual WMError HandleActionUpdateKeyboardTouchHotArea(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) { return WMError::WM_OK; }
+    virtual void HandleKeyboardMoveDragEnd(const WSRect& rect, SizeChangeReason reason = SizeChangeReason::UNDEFINED,
+        DisplayId displayId = DISPLAY_ID_INVALID) { return; }
 
     /*
      * Window Focus
