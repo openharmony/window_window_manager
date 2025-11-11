@@ -5302,6 +5302,7 @@ WSError SceneSessionManager::InitUserInfo(int32_t userId, std::string& fileDir)
         RegisterRootSceneSession();
         RegisterSecSurfaceInfoListener();
         RegisterConstrainedModalUIExtInfoListener();
+        InitStartingWindowRdb(fileDir + "/StartingWindowRdb/");
         RegisterWindowStateErrorCallbackToMMI();
         return WSError::WS_OK;
     }, __func__);
@@ -5701,7 +5702,7 @@ void SceneSessionManager::UpdateAllStartingWindowRdb()
     auto loadTask = [this, where]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:UpdateAllStartingWindowRdb");
         if (bundleMgr_ == nullptr) {
-            TLOGNE(WmsLogTag::WMS_PATTERN, "bundleMgr is nullptr");
+            TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s bundleMgr is nullptr", where);
             return;
         }
         std::vector<AppExecFwk::BundleInfo> bundleInfos;
@@ -5712,7 +5713,7 @@ void SceneSessionManager::UpdateAllStartingWindowRdb()
             static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_ONLY_WITH_LAUNCHER_ABILITY),
             bundleInfos, currentUserId_));
         if (ret != 0) {
-            TLOGNE(WmsLogTag::WMS_PATTERN, "GetBundleInfosV9 error:%{public}d", ret);
+            TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s GetBundleInfosV9 error:%{public}d", where, ret);
             return;
         }
         std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>> inputValues;
@@ -5720,11 +5721,15 @@ void SceneSessionManager::UpdateAllStartingWindowRdb()
         for (const auto& bundleInfo : bundleInfos) {
             GetBundleStartingWindowInfos(isDark, bundleInfo, inputValues);
         }
+        if (startingWindowRdbMgr_ == nullptr) {
+            TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s rdb manager is nullptr", where);
+            return;
+        }
         int64_t outInsertNum = -1;
         auto batchInsertRes = startingWindowRdbMgr_->BatchInsert(outInsertNum, inputValues);
-        TLOGNI(WmsLogTag::WMS_PATTERN, "res: %{public}d, bundles: %{public}zu, insert: %{public}" PRId64,
-            batchInsertRes, bundleInfos.size(), outInsertNum);
-        };
+        TLOGNI(WmsLogTag::WMS_PATTERN, "%{public}s res: %{public}d, bundles: %{public}zu, insert: %{public}" PRId64,
+            where, batchInsertRes, bundleInfos.size(), outInsertNum);
+    };
     ffrtQueueHelper_->SubmitTask(loadTask);
 }
 
@@ -5804,7 +5809,17 @@ void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, Startin
         isDark = GetStartWindowColorFollowApp(sessionInfo) ? isAppDark : isSystemDark;
         CacheStartingWindowInfo(
             sessionInfo.bundleName_, sessionInfo.moduleName_, sessionInfo.abilityName_, startingWindowInfo, isDark);
-        InsertStartingWindowRdbTask(sessionInfo, startingWindowInfo, isDark);
+        if (startingWindowRdbMgr_ != nullptr) {	
+            StartingWindowRdbItemKey itemKey = {
+                .bundleName = sessionInfo.bundleName_,
+                .moduleName = sessionInfo.moduleName_,
+                .abilityName = sessionInfo.abilityName_,
+                .darkMode = isDark,
+            };
+            if (!startingWindowRdbMgr_->InsertData(itemKey, startingWindowInfo)) {
+                TLOGW(WmsLogTag::WMS_PATTERN, "rdb insert faild");
+            }
+        }
         uint32_t updateRes = UpdateCachedColorToAppSet(
             sessionInfo.bundleName_, sessionInfo.moduleName_, sessionInfo.abilityName_, startingWindowInfo);
         TLOGI(WmsLogTag::WMS_PATTERN, "updateRes %{public}u, %{public}x",
@@ -5813,44 +5828,6 @@ void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, Startin
     TLOGW(WmsLogTag::WMS_PATTERN, "%{public}d, %{public}x", startingWindowInfo.configFileEnabled_,
         startingWindowInfo.configFileEnabled_ ? startingWindowInfo.backgroundColor_ :
                                                 startingWindowInfo.backgroundColorEarlyVersion_);
-}
-
-void SceneSessionManager::InsertStartingWindowRdbTask(
-    const SessionInfo& sessionInfo, const StartingWindowInfo& startingWindowInfo, bool isDark)
-{
-    StartingWindowRdbItemKey itemKey = {
-        .bundleName = sessionInfo.bundleName_,
-        .moduleName = sessionInfo.moduleName_,
-        .abilityName = sessionInfo.abilityName_,
-        .darkMode = isDark,
-    };
-    std::string keyStr = sessionInfo.bundleName_ + '_' +
-        sessionInfo.moduleName_ + '_' + sessionInfo.abilityName_ + std::to_string(isDark);
-    {
-        std::shared_lock<std::shared_mutex> lock(insertStartingWindowRdbSetMutex_);
-        if (insertStartingWindowRdbSet_.find(keyStr) != insertStartingWindowRdbSet_.end()) {
-            TLOGW(WmsLogTag::WMS_PATTERN, "task running %{public}s", keyStr.c_str());
-            return;
-        }
-    }
-    const char* const where = __func__;
-    auto insertTask = [this, itemKey, startingWindowInfo, keyStr, where]() {
-        {
-            std::unique_lock<std::shared_mutex> lock(insertStartingWindowRdbSetMutex_);
-            insertStartingWindowRdbSet_.insert(keyStr);
-        }
-        if (startingWindowRdbMgr_ == nullptr) {
-            TLOGNW(WmsLogTag::WMS_PATTERN, "%{public}s rdb manager is null", where);
-            return;
-        }
-        bool res = startingWindowRdbMgr_->InsertData(itemKey, startingWindowInfo);
-        {
-            std::unique_lock<std::shared_mutex> lock(insertStartingWindowRdbSetMutex_);
-            insertStartingWindowRdbSet_.erase(keyStr);
-        }
-        TLOGNI(WmsLogTag::WMS_PATTERN, "%{public}s res %{public}d", where, res);
-    };
-    ffrtQueueHelper_->SubmitTask(insertTask);
 }
 
 bool SceneSessionManager::GetStartingWindowInfoFromCache(
@@ -5925,12 +5902,18 @@ uint32_t SceneSessionManager::UpdateCachedColorToAppSet(const std::string& bundl
             return static_cast<uint32_t>(UpdateStartingWindowColorCacheResult::INFO_MAP_BUNDLE_NOT_FOUND);
         }
         auto& infoMap = iter->second;
-        auto infoIter = infoMap.find(key);
-        if (infoIter == infoMap.end()) {
-            return static_cast<uint32_t>(UpdateStartingWindowColorCacheResult::INFO_MAP_BUNDLE_NOT_FOUND);
+        bool keyPairFound = false;
+        for (bool darkMode : {false, true}) {
+            auto infoIter = infoMap.find(key + std::to_string(darkMode));
+            if (infoIter != infoMap.end()) {
+                infoIter->second.backgroundColorEarlyVersion_ = color;
+                infoIter->second.backgroundColor_ = color;
+                keyPairFound = true;
+            }
         }
-        infoIter->second.backgroundColorEarlyVersion_ = color;
-        infoIter->second.backgroundColor_ = color;
+        if (!keyPairFound) {
+            return static_cast<uint32_t>(UpdateStartingWindowColorCacheResult::INFO_MAP_KEY_PAIR_NOT_FOUND);
+        }
     }
     return static_cast<uint32_t>(UpdateStartingWindowColorCacheResult::SUCCESS);
 }
