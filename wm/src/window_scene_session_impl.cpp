@@ -6428,8 +6428,9 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is nullptr");
             continue;
         }
-        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Id=%{public}d UpdateDensity", window->GetWindowId());
-        window->SetDefaultDensityEnabledValue(enabled);
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Id=%{public}u set=%{public}u",
+            window->GetWindowId(), window->IsStageDefaultDensityEnabled());
+        window->SetDefaultDensityEnabledValue(window->IsStageDefaultDensityEnabled());
         window->UpdateDensity();
     }
     return WMError::WM_OK;
@@ -7394,7 +7395,7 @@ WMError WindowSceneSessionImpl::SetCustomDensity(float density, bool applyToSubW
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is nullptr");
             continue;
         }
-        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Id=%{public}d UpdateDensity", window->GetWindowId());
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Id=%{public}u UpdateDensity", window->GetWindowId());
         window->SetDefaultDensityEnabledValue(false);
         if (applyToSubWindow) {
             window->UpdateDensity();
