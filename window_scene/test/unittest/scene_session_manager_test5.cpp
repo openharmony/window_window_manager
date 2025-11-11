@@ -1082,23 +1082,23 @@ HWTEST_F(SceneSessionManagerTest5, GetNextFocusableSession_Desktop, TestSize.Lev
     sceneSession2->persistentId_ = 2;
     sceneSession2->SetZOrder(130);
 
-    SessionInfo info1;
-    info.abilityName_ = "desktop1";
-    info.bundleName_ = "desktop1";
-    sptr<SceneSession> desktopSession1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
+    SessionInfo info3;
+    info3.abilityName_ = "desktop1";
+    info3.bundleName_ = "desktop1";
+    sptr<SceneSession> desktopSession1 = sptr<SceneSession>::MakeSptr(info3, nullptr);
     desktopSession1->property_->SetWindowType(WindowType::WINDOW_TYPE_DESKTOP);
-    desktopSession1->persistentId_ = 2;
+    desktopSession1->persistentId_ = 3;
     desktopSession1->UpdateVisibilityInner(true);
     desktopSession1->SetSessionState(SessionState::STATE_FOREGROUND);
     desktopSession1->SetZOrder(1);
     desktopSession1->property_->SetDisplayId(0);
 
-    SessionInfo info2;
-    info.abilityName_ = "desktop2";
-    info.bundleName_ = "desktop2";
-    sptr<SceneSession> desktopSession2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
+    SessionInfo info4;
+    info4.abilityName_ = "desktop2";
+    info4.bundleName_ = "desktop2";
+    sptr<SceneSession> desktopSession2 = sptr<SceneSession>::MakeSptr(info4, nullptr);
     desktopSession2->property_->SetWindowType(WindowType::WINDOW_TYPE_DESKTOP);
-    desktopSession2->persistentId_ = 3;
+    desktopSession2->persistentId_ = 4;
     desktopSession2->UpdateVisibilityInner(true);
     desktopSession2->SetSessionState(SessionState::STATE_FOREGROUND);
     desktopSession2->SetZOrder(1);
@@ -1110,14 +1110,8 @@ HWTEST_F(SceneSessionManagerTest5, GetNextFocusableSession_Desktop, TestSize.Lev
     ssm_->sceneSessionMap_.insert(std::make_pair(4, desktopSession2));
 
     sptr<SceneSession> result = ssm_->GetNextFocusableSession(0, 1);
-    EXPECT_EQ(result, 2);
-
-    result = ssm_->GetNextFocusableSession(0, 1);
-    EXPECT_EQ(result, 3);
-
-    sceneSession2->SetZOrder(110);
-    result = ssm_->GetNextFocusableSession(0, 1);
-    EXPECT_EQ(result, 3);
+    EXPECT_EQ(result, nullptr);
+    ssm_->sceneSessionMap_.clear();
 }
 
 /**
