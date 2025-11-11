@@ -323,17 +323,17 @@ void AniWindowListener::OnKeyboardDidHide(const KeyboardPanelInfo& keyboardPanel
 void AniWindowListener::OnKeyboardWillShow(const KeyboardAnimationInfo& keyboardAnimationInfo,
     const KeyboardAnimationCurve& curve)
 {
-    KeyboardWillAnimateWithName(keyboardAnimationInfo, KEYBOARD_WILL_SHOW_CB, curve);
+    KeyboardWillAnimateWithName(keyboardAnimationInfo, "runKeyboardWillShowCallback", curve);
 }
 
 void AniWindowListener::OnKeyboardWillHide(const KeyboardAnimationInfo& keyboardAnimationInfo,
     const KeyboardAnimationCurve& curve)
 {
-    KeyboardWillAnimateWithName(keyboardAnimationInfo, KEYBOARD_WILL_HIDE_CB, curve);
+    KeyboardWillAnimateWithName(keyboardAnimationInfo, "runKeyboardWillHideCallback", curve);
 }
 
 void AniWindowListener::KeyboardWillAnimateWithName(const KeyboardAnimationInfo& keyboardAnimationInfo,
-    const std::string& callBackName, const KeyboardAnimationCurve& curve)
+    const char* fn, const KeyboardAnimationCurve& curve)
 {
     TLOGD(WmsLogTag::WMS_KEYBOARD,
         "keyboardAnimationInfo, beginRect: %{public}s, endRect: %{public}s",
@@ -343,7 +343,7 @@ void AniWindowListener::KeyboardWillAnimateWithName(const KeyboardAnimationInfo&
         TLOGE(WmsLogTag::WMS_KEYBOARD, "this listener or env is nullptr.");
         return;
     }
-    AniWindowUtils::CallAniFunctionVoid(env_, "L@ohos/window/window;", nullptr, nullptr,
+    AniWindowUtils::CallAniFunctionVoid(env_, "L@ohos/window/window;", fn, nullptr,
         thisListener->aniCallback_, AniWindowUtils::CreateAniAnimationInfo(env_, keyboardAnimationInfo, curve));
 }
 

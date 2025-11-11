@@ -133,7 +133,7 @@ private:
     void OnLastStrongRef(const void *) override;
 
     void KeyboardWillAnimateWithName(const KeyboardAnimationInfo& keyboardAnimationInfo,
-        const std::string& callBackName, const KeyboardAnimationCurve& curve);
+        const char* fn, const KeyboardAnimationCurve& curve);
 
     Rect currRect_ = {0, 0, 0, 0};
     WindowState state_ {WindowState::STATE_INITIAL};
