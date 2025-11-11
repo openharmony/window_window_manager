@@ -38,8 +38,8 @@ void DropEmbeddableWindowStageByAni(ani_object aniObj)
     auto obj = localObjs.find(reinterpret_cast<ani_object>(aniObj));
     if (obj != localObjs.end()) {
         delete obj->second;
+        localObjs.erase(obj);
     }
-    localObjs.erase(obj);
 }
 
 AniEmbeddableWindowStage* GetEmbeddableWindowStageFromAni(void* aniObj)
