@@ -5912,7 +5912,7 @@ uint32_t SceneSessionManager::UpdateCachedColorToAppSet(const std::string& bundl
             }
         }
         if (!keyPairFound) {
-            return static_cast<uint32_t>(UpdateStartingWindowColorCacheResult::INFO_MAP_BUNDLE_NOT_FOUND);
+            return static_cast<uint32_t>(UpdateStartingWindowColorCacheResult::INFO_MAP_KEY_PAIR_NOT_FOUND);
         }
     }
     return static_cast<uint32_t>(UpdateStartingWindowColorCacheResult::SUCCESS);
