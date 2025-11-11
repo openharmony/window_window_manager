@@ -3765,8 +3765,7 @@ void SceneSessionManager::BuildCancelPointerEvent(const std::shared_ptr<MMI::Poi
 
 void SceneSessionManager::SendCancelEventBeforeEraseSession(const sptr<SceneSession>& sceneSession)
 {
-    auto task = [this, weakSceneSession = wptr(sceneSession)] {
-        auto needCancelEventSceneSession = weakSceneSession.promote();
+    auto task = [this, needCancelEventSceneSession = sceneSession] {
         if (needCancelEventSceneSession == nullptr) {
             TLOGI(WmsLogTag::WMS_EVENT, "scenesession is nullptr, needn't send cancel event");
             return;
