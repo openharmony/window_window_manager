@@ -1965,6 +1965,36 @@ HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceBounds02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleMoveDragSurfaceBounds03
+ * @tc.desc: HandleMoveDragSurfaceBounds for fold pc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceBounds03, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleMoveDragSurfaceBounds03";
+    info.bundleName_ = "HandleMoveDragSurfaceBounds03";
+    sptr<MainSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
+    session->SetScreenId(0);
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(1000, session->GetWindowType());
+    session->moveDragController_->moveDragProperty_.pointerType_ = MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+    session->moveDragController_->SetStartDragFlag(true);
+    ASSERT_NE(session->pcFoldScreenController_, nullptr);
+    auto oldDisplayId = PcFoldScreenManager::GetInstance().displayId_;
+    auto oldScreenFoldStatus = PcFoldScreenManager::GetInstance().screenFoldStatus_;
+    PcFoldScreenManager::GetInstance().displayId_ = session->GetScreenId();
+    PcFoldScreenManager::GetInstance().screenFoldStatus_ = SuperFoldStatus::HALF_FOLDED;
+    WSRect rect = { 0, 0, 100, 100 };
+    WSRect globalRect = { 0, 0, 100, 100 };
+    session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG_END);
+    EXPECT_EQ(session->moveDragController_->GetStartDragFlag(), true);
+    session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG_MOVE);
+    EXPECT_EQ(session->moveDragController_->GetStartDragFlag(), true);
+    PcFoldScreenManager::GetInstance().displayId_ = oldDisplayId;
+    PcFoldScreenManager::GetInstance().screenFoldStatus_ = oldScreenFoldStatus;
+}
+
+/**
  * @tc.name: OnNextVsyncReceivedWhenDrag
  * @tc.desc: OnNextVsyncReceivedWhenDrag
  * @tc.type: FUNC

@@ -3798,7 +3798,10 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
     if (moveDragController_ && moveDragController_->GetPointerType() == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN &&
         pcFoldScreenController_ && pcFoldScreenController_->IsAllowThrowSlip(GetScreenId()) &&
         (reason == SizeChangeReason::DRAG_MOVE || reason == SizeChangeReason::DRAG_END)) {
-        if (pcFoldScreenController_->NeedFollowHandAnimation()) {
+        bool hasAnimation = reason == SizeChangeReason::DRAG_END && pcFoldScreenController_->NeedFollowHandAnimation();
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "reason=%{public}u, hasAnimation=%{public}d",
+            static_cast<uint32_t>(reason), hasAnimation);
+        if (hasAnimation) {
             auto movingPair = std::make_pair(pcFoldScreenController_->GetMovingTimingProtocol(),
                 pcFoldScreenController_->GetMovingTimingCurve());
             SetSurfaceBoundsWithAnimation(movingPair, globalRect, nullptr, isGlobal);
