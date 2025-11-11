@@ -129,21 +129,30 @@ public:
         int32_t sourceType, int outside, float vpr, const WSRect& rect, const WindowLimits& limits)
     {
         int32_t insideCorner = WINDOW_FRAME_CORNER_WIDTH * vpr;
+        int32_t insideCornerTouch = WINDOW_FRAME_CORNER_TOUCH_WIDTH * vpr;
         int32_t insideEdge = WINDOW_FRAME_WIDTH * vpr;
         int32_t leftOut = -outside;
         int32_t leftIn = insideEdge;
         int32_t leftCorner = insideCorner;
+        int32_t leftCornerTouch = insideCornerTouch;
         int32_t rightCorner = rect.width_ - insideCorner;
+        int32_t rightCornerTouch = rect.width_ - insideCornerTouch;
         int32_t rightIn = rect.width_ - insideEdge;
         int32_t rightOut = rect.width_ + outside;
         int32_t topOut = -outside;
         int32_t topIn = insideEdge;
         int32_t topCorner = insideCorner;
+        int32_t topCornerTouch = insideCornerTouch;
         int32_t bottomCorner = rect.height_ - insideCorner;
+        int32_t bottomCornerTouch = rect.height_ - insideCornerTouch;
         int32_t bottomIn = rect.height_ - insideEdge;
         int32_t bottomOut = rect.height_ + outside;
 
         auto isInRange = [](int32_t min, int32_t max, int32_t value) { return min <= value && value <= max; };
+        auto isInRect = [pointWinX, pointWinY, &isInRange](int32_t xMin, int32_t xMax, int32_t yMin, int32_t yMax) {
+            return isInRange(xMin, xMax, pointWinX) && isInRange(yMin, yMax, pointWinY);
+        };
+
         bool isWidthDraggable = limits.minWidth_ < limits.maxWidth_;
         bool isHeightDraggable = limits.minHeight_ < limits.maxHeight_;
         bool bothWidthHeightDraggable = isWidthDraggable && isHeightDraggable;
@@ -171,6 +180,22 @@ public:
             type = AreaType::BOTTOM;
         } else {
             type = AreaType::UNDEFINED;
+        }
+
+        if (sourceType == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+            if (isInRect(leftOut, leftCornerTouch, topOut, topCorner) ||
+                isInRect(leftOut, leftCorner, topOut, topCornerTouch)) {
+                type = AreaType::LEFT_TOP;
+            } else if (isInRect(leftOut, leftCornerTouch, bottomCorner, bottomOut) ||
+                isInRect(leftOut, leftCorner, bottomCornerTouch, bottomOut)) {
+                type = AreaType::LEFT_BOTTOM;
+            } else if (isInRect(rightCornerTouch, rightOut, topOut, topCorner) ||
+                isInRect(rightCorner, rightOut, topOut, topCornerTouch)) {
+                type = AreaType::RIGHT_TOP;
+            } else if (isInRect(rightCorner, rightOut, bottomCornerTouch, bottomOut) ||
+                isInRect(rightCornerTouch, rightOut, bottomCorner, bottomOut)) {
+                type = AreaType::RIGHT_BOTTOM;
+            }
         }
         return type;
     }
