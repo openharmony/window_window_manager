@@ -538,7 +538,6 @@ HWTEST_F(WindowManagerTest, RegisterWindowUpdateListener01, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, UnregisterWindowUpdateListener01, TestSize.Level1)
 {
-    auto instance_ = WindowManager::GetInstance(-1);
     auto oldWindowManagerAgent = instance_->pImpl_->windowUpdateListenerAgent_;
     auto oldListeners = instance_->pImpl_->windowUpdateListeners_;
     instance_->pImpl_->windowUpdateListenerAgent_ = sptr<WindowManagerAgent>::MakeSptr();
@@ -629,7 +628,6 @@ HWTEST_F(WindowManagerTest, RegisterSystemBarChangedListener01, TestSize.Level1)
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 
     sptr<ISystemBarChangedListener> listener = sptr<TestSystemBarChangedListener>::MakeSptr();
-    auto windowAdapter = WindowAdapter::GetInstance(-1);
     ASSERT_NE(nullptr, windowAdapter);
     windowAdapter->isProxyValid_ = true;
     windowAdapter->windowManagerServiceProxy_ = nullptr;
@@ -695,7 +693,6 @@ HWTEST_F(WindowManagerTest, RegisterWaterMarkFlagChangedListener01, TestSize.Lev
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, instance_->RegisterWaterMarkFlagChangedListener(nullptr));
 
     auto listener = sptr<TestWaterMarkFlagChangeListener>::MakeSptr();
-    auto windowAdapter = WindowAdapter::GetInstance(-1);
     ASSERT_NE(nullptr, windowAdapter);
     windowAdapter->isProxyValid_ = true;
     windowAdapter->windowManagerServiceProxy_ = nullptr;
@@ -1951,7 +1948,6 @@ HWTEST_F(WindowManagerTest, UnregisterVisibilityStateChangedListener01, Function
     // check nullpter
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, instance_->UnregisterVisibilityStateChangedListener(nullptr));
 
-    auto windowAdapter = WindowAdapter::GetInstance(-1);
     ASSERT_NE(nullptr, windowAdapter);
     windowAdapter->isProxyValid_ = true;
     windowAdapter->windowManagerServiceProxy_ = nullptr;
