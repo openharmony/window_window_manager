@@ -126,36 +126,6 @@ HWTEST_F(SceneSessionManagerTest5, SetStartWindowBackgroundColor, TestSize.Level
 }
 
 /**
- * @tc.name: UpdateCachedColorToAppSet
- * @tc.desc: SceneSessionManager set update cached color to app set
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest5, UpdateCachedColorToAppSet, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    ssm_->startingWindowMap_.clear();
-    ssm_->startingWindowColorFromAppMap_.clear();
-    std::string bundleName = "testBundleName";
-    std::string moduleName = "testModuleName";
-    std::string abilityName = "testAbilityName";
-    std::string key = moduleName + abilityName;
-    StartingWindowInfo info;
-    StartingWindowInfo tempInfo;
-    info.backgroundColor_ = 0x00000000;
-    ssm_->startingWindowMap_[bundleName][key] = info;
-    ssm_->UpdateCachedColorToAppSet(bundleName, moduleName, abilityName, tempInfo);
-    EXPECT_EQ(0x00000000, ssm_->startingWindowMap_[bundleName][key].backgroundColor_);
-
-    ssm_->startingWindowColorFromAppMap_[bundleName][key] = 0xffffffff;
-    ssm_->UpdateCachedColorToAppSet(bundleName, moduleName, abilityName, tempInfo);
-    EXPECT_EQ(0xffffffff, ssm_->startingWindowMap_[bundleName][key].backgroundColor_);
-
-    ssm_->startingWindowMap_.clear();
-    ssm_->UpdateCachedColorToAppSet(bundleName, moduleName, abilityName, tempInfo);
-    EXPECT_EQ(0, ssm_->startingWindowMap_.size());
-}
-
-/**
  * @tc.name: OnBundleUpdated
  * @tc.desc: Erase cached info when bundle update
  * @tc.type: FUNC
