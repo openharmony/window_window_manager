@@ -8053,8 +8053,7 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
             return false;
         }
         auto currentSessionDisplayId = session->GetDisplayId();
-        if (windowFocusController_->GetDisplayGroupId(currentSessionDisplayId) !=
-            displayGroupId) {
+        if (windowFocusController_->GetDisplayGroupId(currentSessionDisplayId) != displayGroupId) {
             return false;
         }
         if (!ScreenSessionManagerClient::GetInstance().GetSupportsFocus(currentSessionDisplayId)) {
@@ -8067,11 +8066,7 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
         }
         if (preFocusedSessionFound && session->CheckFocusable() &&
             session->IsVisibleNotBackground() && IsParentSessionVisible(session)) {
-            if (session->GetWindowType() != WindowType::WINDOW_TYPE_DESKTOP) {
-                nextFocusableSession = session;
-                return true;
-            }
-            if (currentSessionDisplayId == displayId) {
+            if (session->GetWindowType() != WindowType::WINDOW_TYPE_DESKTOP || currentSessionDisplayId == displayId) {
                 nextFocusableSession = session;
                 return true;
             }
