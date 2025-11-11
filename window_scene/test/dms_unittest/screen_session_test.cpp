@@ -4886,6 +4886,20 @@ HWTEST_F(ScreenSessionTest, SetSupportsInput, TestSize.Level1)
     supportInput = session->GetSupportsInput();
     EXPECT_EQ(supportInput, true);
 }
+
+/**
+ * @tc.name  : SetAndGetCurrentRotationCorrection
+ * @tc.desc  : SetSupportsInput
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetAndGetCurrentRotationCorrection, TestSize.Level1)
+{
+    ScreenId screenId = 10000;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
+    session->SetCurrentRotationCorrection(Rotation::ROTATION_270);
+    EXPECT_EQ(session->GetCurrentRotationCorrection(), Rotation::ROTATION_270);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
