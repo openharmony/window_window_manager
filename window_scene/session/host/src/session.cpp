@@ -2555,7 +2555,9 @@ void Session::PresentFocusIfPointDown()
         FocusChangeReason reason = FocusChangeReason::CLICK;
         NotifyRequestFocusStatusNotifyManager(true, false, reason);
     }
-    NotifyClick();
+    if (NeedRequestToTop()) {
+        NotifyClick();
+    }
 }
 
 void Session::HandlePointDownDialog()
@@ -2654,7 +2656,9 @@ WSError Session::HandlePointerEventForFocus(const std::shared_ptr<MMI::PointerEv
         if (!isFocused_ && GetFocusable()) {
             NotifyRequestFocusStatusNotifyManager(true, false, FocusChangeReason::CLICK);
         }
-        NotifyClick();
+        if (NeedRequestToTop()) {
+            NotifyClick();
+        }
     }
     return WSError::WS_OK;
 }
@@ -3428,8 +3432,15 @@ void Session::PresentFocusIfNeed(int32_t pointerAction, int32_t sourceType)
             FocusChangeReason reason = FocusChangeReason::CLICK;
             NotifyRequestFocusStatusNotifyManager(true, false, reason);
         }
-        NotifyClick();
+        if (NeedRequestToTop()) {
+            NotifyClick();
+        }
     }
+}
+
+bool Session::NeedRequestToTop() cosnt
+{
+    return WindowHelper::IsMainWindow(GetWindowType()) ? GetSessionProperty()->GetRaiseEnabled() : true;
 }
 
 WSError Session::UpdateFocus(bool isFocused)

@@ -663,6 +663,13 @@ napi_value JsWindow::SetRaiseByClickEnabled(napi_env env, napi_callback_info inf
     return (me != nullptr) ? me->OnSetRaiseByClickEnabled(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetMainWindowRaiseByClickEnabled(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DEFAULT, "SetMainWindowRaiseByClickEnabled");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetMainWindowRaiseByClickEnabled(env, info) : nullptr;
+}
+
 napi_value JsWindow::HideNonSystemFloatingWindows(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
@@ -5097,6 +5104,59 @@ napi_value JsWindow::OnSetRaiseByClickEnabled(napi_env env, napi_callback_info i
                 where, window->GetWindowId(), window->GetWindowName().c_str());
         };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetRaiseByClickEnabled") != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env,
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
+    }
+    return result;
+}
+
+napi_value JsWindow::OnSetMainWindowRaiseByClickEnabled(napi_env env, napi_callback_info info)
+{
+    WMError errCode = WMError::WM_OK;
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1 || argc > 2) { // 2: maximum params num
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Argc is invalid: %{public}zu", argc);
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
+    bool raiseEnabled = true;
+    if (!ConvertFromJsValue(env, argv[0], raiseEnabled)) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Failed to convert parameter to raiseEnabled");
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (!Permission::IsSystemCallingOrStartByHdcd(true)) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "permission denied, require system application");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP,
+            "[window][setMainWindowRaiseByClickEnabled]msg: Permission denied."));
+    }
+    napi_value lastParam = (argc <= 1) ? nullptr : (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask =
+        [weakToken = wptr<Window>(windowToken_), raiseEnabled, env, errCode, task = napiAsyncTask, where = __func__] {
+            auto window = weakToken.promote();
+            if (window == nullptr) {
+                TLOGNE(WmsLogTag::WMS_HIERARCHY, "%{public}s: window is nullptr", where);
+                task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+                return;
+            }
+            if (errCode != WMError::WM_OK) {
+                WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
+                task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "Invalidate params."));
+                return;
+            }
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetMainWindowRaiseByClickEnabled(raiseEnabled));
+            if (ret == WmErrorCode::WM_OK) {
+                task->Resolve(env, NapiGetUndefined(env));
+            } else {
+                task->Reject(env, JsErrUtils::CreateJsError(env, ret, "set raiseEnabled failed"));
+            }
+            TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s: main window [%{public}u, %{public}s] set raiseEnabled end",
+                where, window->GetWindowId(), window->GetWindowName().c_str());
+        };
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetMainWindowRaiseByClickEnabled") !=
+        napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
@@ -9561,6 +9621,8 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "maximize", moduleName, JsWindow::Maximize);
     BindNativeFunction(env, object, "setResizeByDragEnabled", moduleName, JsWindow::SetResizeByDragEnabled);
     BindNativeFunction(env, object, "setRaiseByClickEnabled", moduleName, JsWindow::SetRaiseByClickEnabled);
+    BindNativeFunction(env, object, "setMainWindowRaiseByClickEnabled", moduleName,
+        JsWindow::SetMainWindowRaiseByClickEnabled);
     BindNativeFunction(env, object, "raiseAboveTarget", moduleName, JsWindow::RaiseAboveTarget);
     BindNativeFunction(env, object, "raiseMainWindowAboveTarget", moduleName, JsWindow::RaiseMainWindowAboveTarget);
     BindNativeFunction(env, object, "hideNonSystemFloatingWindows", moduleName,
