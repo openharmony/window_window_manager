@@ -3878,7 +3878,7 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
 
     uint64_t endDisplayId = moveDragController_->GetMoveDragEndDisplayId();
     if (endDisplayId == moveDragController_->GetMoveDragStartDisplayId() ||
-        !moveDragController_->IsSupportWindowDragCrossDisplay()) {
+        !IsCrossDisplayDragSupported()) {
         NotifySessionRectChange(rect, reason);
         HandleKeyboardMoveDragEnd(rect, reason);
         NotifySubSessionRectChangeByAnchor(rect, SizeChangeReason::UNDEFINED);
@@ -4185,12 +4185,14 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
         return;
     }
     UpdateKeyFrameState(reason, rect);
-    WSRect relativeRect = moveDragController_->GetTargetRect(reason == SizeChangeReason::DRAG_END ?
-        MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY :
-        MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
-    WSRect globalRect = moveDragController_->GetTargetRect(reason == SizeChangeReason::DRAG_END ?
-        MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY :
-        MoveDragController::TargetRectCoordinate::GLOBAL);
+    WSRect relativeRect = moveDragController_->GetTargetRect(
+        (reason == SizeChangeReason::DRAG_END && IsCrossDisplayDragSupported()) ?
+            MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY :
+            MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
+    WSRect globalRect =  moveDragController_->GetTargetRect(
+        (reason == SizeChangeReason::DRAG_END && IsCrossDisplayDragSupported()) ?
+            MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY :
+            MoveDragController::TargetRectCoordinate::GLOBAL);
     HandleMoveDragSurfaceNode(reason);
     HandleMoveDragSurfaceBounds(relativeRect, globalRect, reason);
     if (reason == SizeChangeReason::DRAG_END) {
@@ -4238,9 +4240,11 @@ bool SceneSession::DragResizeWhenEndFilter(SizeChangeReason reason)
             TLOGI(WmsLogTag::WMS_LAYOUT_PC, "trigger client rect change by scb, "
                 "isPcOrPcMode: %{public}d", systemConfig_.IsPcWindow());
             WSRect relativeRect = moveDragController_->GetTargetRect(
-                (systemConfig_.IsPcWindow() && GetDragResizeTypeDuringDrag() == DragResizeType::RESIZE_WHEN_DRAG_END) ?
-                MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY :
-                MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY);
+                (systemConfig_.IsPcWindow() &&
+                 GetDragResizeTypeDuringDrag() == DragResizeType::RESIZE_WHEN_DRAG_END &&
+                 IsCrossDisplayDragSupported()) ?
+                    MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY :
+                    MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY);
             HandleMoveDragEnd(relativeRect, reason);
             SetUIFirstSwitch(RSUIFirstSwitch::NONE);
         }
@@ -10051,4 +10055,23 @@ WMError SceneSession::UnlockCursor(const std::vector<int32_t>& parameters)
 /*
  * Window Event end
  */
+
+bool SceneSession::IsCrossDisplayDragSupported() const
+{
+    if (IsAnco()) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Cross display drag is not supported for ANCO windows");
+        return false;
+    }
+
+    auto windowType = GetWindowType();
+    bool isSupported = !WindowHelper::IsSystemWindow(windowType) ||
+                       windowType == WindowType::WINDOW_TYPE_FLOAT ||
+                       windowType == WindowType::WINDOW_TYPE_SCREENSHOT ||
+                       WindowHelper::IsInputWindow(windowType);
+
+    TLOGD(WmsLogTag::WMS_LAYOUT,
+          "windowType: %{public}u, isSupported: %{public}d",
+          static_cast<uint32_t>(windowType), isSupported);
+    return isSupported;
+}
 } // namespace OHOS::Rosen
