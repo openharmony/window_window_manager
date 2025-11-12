@@ -572,6 +572,11 @@ HWTEST_F(SceneSessionTest2, ChangeSessionVisibilityWithStatusBar, TestSize.Level
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     result = sceneSession->ChangeSessionVisibilityWithStatusBar(abilitySessionInfo, false);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+
+    sceneSession->isTerminating_ = true;
+    sptr<AAFwk::SessionInfo> terminatingMock = sptr<AAFwk::SessionInfo>::MakeSptr();
+    result = sceneSession->ChangeSessionVisibilityWithStatusBar(abilitySessionInfo, false);
+    ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**
