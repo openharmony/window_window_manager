@@ -1129,6 +1129,7 @@ private:
     /*
      * Window Layout
      */
+    void UpdateRectChangeListenerRegisterStatus();
     WSRect layoutRect_;
     std::atomic_bool windowSizeChanged_ = false;
     std::atomic_bool enableFrameLayoutFinishCb_ = false;
