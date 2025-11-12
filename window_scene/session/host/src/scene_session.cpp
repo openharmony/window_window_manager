@@ -5643,6 +5643,10 @@ WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s abilitySessionInfo is null", where);
             return WSError::WS_ERROR_NULLPTR;
         }
+        if (session->isTerminating_) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s id:%{public}d is terminating", where, session->GetPersistentId());
+            return WSError::WS_ERROR_INVALID_OPERATION;
+        }
 
         SessionInfo info;
         info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
