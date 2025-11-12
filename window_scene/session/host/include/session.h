@@ -503,6 +503,7 @@ public:
     bool GetStartingBeforeVisible() const;
     bool IsFocused() const;
     bool GetFocused() const;
+    bool NeedRequestToTop() const;
     virtual WSError UpdateFocus(bool isFocused);
     virtual void PresentFocusIfPointDown();
     WSError RequestFocus(bool isFocused) override;
