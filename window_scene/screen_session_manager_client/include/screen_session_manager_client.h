@@ -190,6 +190,7 @@ private:
         bool isKeyboardOn, int32_t validHeight);
     void HandleSystemKeyboardOffPropertyChange(sptr<ScreenSession>& screenSession, SuperFoldStatus currentStatus,
         bool isKeyboardOn);
+    void UpdateWidthAndHeight(const sptr<ScreenSession>& screenSession, const RRect* bounds, ScreenId screenId);
 
     mutable std::mutex screenSessionMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;

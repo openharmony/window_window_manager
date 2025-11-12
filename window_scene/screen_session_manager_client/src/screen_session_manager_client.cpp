@@ -1094,26 +1094,50 @@ void ScreenSessionManagerClient::UpdatePropertyWhenSwitchUser(const sptr <Screen
         ScreenPropertyChangeType::UNSPECIFIED, bounds);
     screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, rotation,
         ScreenPropertyChangeType::UNSPECIFIED, true);
-    ScreenProperty property = screenSessionManager_->GetScreenProperty(screenId);
-    if (property.GetValidHeight() == INT32_MAX || property.GetValidHeight() == 0) {
-        TLOGW(WmsLogTag::DMS, "invalid property, validheight is bounds");
-        screenSession->SetValidHeight(bounds.rect_.GetHeight());
-    } else {
-        screenSession->SetValidHeight(property.GetValidHeight());
-    }
-    if (property.GetValidWidth() == INT32_MAX || property.GetValidWidth() == 0) {
-        TLOGW(WmsLogTag::DMS, "invalid property, validwidth is bounds");
-        screenSession->SetValidWidth(bounds.rect_.GetWidth());
-    } else {
-        screenSession->SetValidWidth(property.GetValidWidth());
-    }
+    UpdateWidthAndHeight(screenSession, &bounds, screenId);
     TLOGI(WmsLogTag::DMS, "get property by screenId=%{public}" PRIu64 ", "
         "bounds width=%{public}f, bounds height=%{public}f, "
         "pointerActiveWidth=%{public}u, pointerActiveHeight=%{public}u, "
-        "validWidth=%{public}d, validHeight=%{public}d",
+        "validWidth=%{public}d, validHeight=%{public}d, "
+        "screenAreaWidth=%{public}d, screenAreaHeight=%{public}d",
         screenId, bounds.rect_.GetWidth(), bounds.rect_.GetHeight(),
         screenSession->GetPointerActiveWidth(), screenSession->GetPointerActiveHeight(),
-        screenSession->GetValidWidth(), screenSession->GetValidHeight());
+        screenSession->GetValidWidth(), screenSession->GetValidHeight(),
+        screenSession->GetScreenAreaWidth(), screenSession->GetScreenAreaHeight());
+}
+
+void ScreenSessionManagerClient::UpdateWidthAndHeight(const sptr<ScreenSession>& screenSession,
+    const RRect* bounds, ScreenId screenId)
+{
+    if (screenSession == nullptr || bounds == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Invalid parameters: screenSession or bounds is null");
+        return;
+    }
+    ScreenProperty property = screenSessionManager_->GetScreenProperty(screenId);
+    if (property.GetValidHeight() == UINT32_MAX || property.GetValidHeight() == 0) {
+        TLOGW(WmsLogTag::DMS, "invalid property, validheight is bounds");
+        screenSession->SetValidHeight(bounds->rect_.GetHeight());
+    } else {
+        screenSession->SetValidHeight(property.GetValidHeight());
+    }
+    if (property.GetValidWidth() == UINT32_MAX || property.GetValidWidth() == 0) {
+        TLOGW(WmsLogTag::DMS, "invalid property, validwidth is bounds");
+        screenSession->SetValidWidth(bounds->rect_.GetWidth());
+    } else {
+        screenSession->SetValidWidth(property.GetValidWidth());
+    }
+    if (property.GetScreenAreaWidth() == 0) {
+        TLOGW(WmsLogTag::DMS, "invalid property, screenAreaWidth is bounds");
+        screenSession->SetScreenAreaWidth(bounds->rect_.GetWidth());
+    } else {
+        screenSession->SetScreenAreaWidth(property.GetScreenAreaWidth());
+    }
+    if (property.GetScreenAreaHeight() == 0) {
+        TLOGW(WmsLogTag::DMS, "invalid property, screenAreaHeight is bounds");
+        screenSession->SetScreenAreaHeight(bounds->rect_.GetHeight());
+    } else {
+        screenSession->SetScreenAreaHeight(property.GetScreenAreaHeight());
+    }
 }
 
 void ScreenSessionManagerClient::NotifyClientScreenConnect(sptr<ScreenSession>& screenSession)
