@@ -88,6 +88,8 @@ public:
     void SetLastLimitsVpr(float vpr);
     void SetSystemBarProperty(WindowType type, const SystemBarProperty& property);
     void SetKeyboardLayoutParams(const KeyboardLayoutParams& params);
+    void AddKeyboardLayoutParams(const uint64_t screenId, const KeyboardLayoutParams& params);
+    void ClearCachedKeyboardParamsOnScreenDisconnected(const uint64_t screenId);
     void SetDecorEnable(bool isDecorEnable);
     void SetAnimationFlag(uint32_t animationFlag);
     void SetTransform(const Transform& trans);
@@ -101,6 +103,8 @@ public:
     void SetFloatingWindowAppType(bool isAppType);
     void SetTouchHotAreas(const std::vector<Rect>& rects);
     void SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas& keyboardTouchHotAreas);
+    void AddKeyboardTouchHotAreas(const uint64_t screenId, const KeyboardTouchHotAreas& keyboardTouchHotAreas);
+    void ClearCachedKeyboardHotAreasOnScreenDisconnected(const uint64_t screenId);
     void KeepKeyboardOnFocus(bool keepKeyboardFlag);
     void SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMode);
     void SetCallingSessionId(uint32_t sessionId);
@@ -170,6 +174,8 @@ public:
     bool IsFloatingWindowAppType() const;
     void GetTouchHotAreas(std::vector<Rect>& rects) const;
     KeyboardTouchHotAreas GetKeyboardTouchHotAreas() const;
+    void GetKeyboardTouchHotAreasByScreenId(
+        const uint64_t screenId, KeyboardTouchHotAreas& keyboardTouchHotAreas);
     bool GetKeepKeyboardFlag() const;
     uint32_t GetCallingSessionId() const;
     PiPTemplateInfo GetPiPTemplateInfo() const;
@@ -177,6 +183,8 @@ public:
     std::shared_ptr<Media::PixelMap> GetWindowMask() const;
     bool GetIsShaped() const;
     KeyboardLayoutParams GetKeyboardLayoutParams() const;
+    void GetKeyboardLayoutParamsByScreenId(
+        const uint64_t screenId, KeyboardLayoutParams& keyboardLayoutParams);
     bool GetIsAppSupportPhoneInPc() const;
     bool GetIsPcAppInPad() const;
     bool GetIsAtomicService() const;
@@ -500,6 +508,7 @@ private:
     FloatingBallTemplateInfo fbTemplateInfo_ = {};
     mutable std::mutex fbTemplateMutex_;
     KeyboardLayoutParams keyboardLayoutParams_;
+    std::map<uint64_t, KeyboardLayoutParams> keyboardLayoutParamsMap_;
     uint32_t windowModeSupportType_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
         { WindowType::WINDOW_TYPE_STATUS_BAR,           SystemBarProperty(true, 0x00FFFFFF, 0xFF000000) },
@@ -512,8 +521,10 @@ private:
     Transform trans_;
     bool isFloatingWindowAppType_ = false;
     mutable std::mutex touchHotAreasMutex_;
+    mutable std::mutex keyboardParamsMutex_;
     std::vector<Rect> touchHotAreas_;  // coordinates relative to window.
     KeyboardTouchHotAreas keyboardTouchHotAreas_;  // coordinates relative to window.
+    std::map<uint64_t, KeyboardTouchHotAreas> keyboardTouchHotAreasMap_;
     bool hideNonSystemFloatingWindows_ = false;
     bool isSkipSelfWhenShowOnVirtualScreen_ = false;
     bool isSkipEventOnCastPlus_ = false;
