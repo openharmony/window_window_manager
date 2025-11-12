@@ -378,6 +378,8 @@ public:
     void SetRotationCorrectionMap(std::unordered_map<FoldDisplayMode, int32_t>& rotationCorrectionMap);
     std::unordered_map<FoldDisplayMode, int32_t> GetRotationCorrectionMap();
     Rotation GetRotationCorrection(FoldDisplayMode foldDisplayMode);
+    void SetCurrentRotationCorrection(Rotation currentRotationCorrection);
+    Rotation GetCurrentRotationCorrection() const;
 
     /*
      * RS Client Multi Instance
@@ -482,6 +484,7 @@ private:
     void AddRotationCorrection(Rotation& rotation, FoldDisplayMode displayMode);
     std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap_;
     std::shared_mutex rotationCorrectionMutex_;
+    std::atomic<Rotation> currentRotationCorrection_ { Rotation::ROTATION_0 };
 
     /*
      * RS Client Multi Instance
