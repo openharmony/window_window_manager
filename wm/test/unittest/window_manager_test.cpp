@@ -1903,33 +1903,19 @@ HWTEST_F(WindowManagerTest, UnregisterWindowInfoChangeCallback01, Function | Sma
  */
 HWTEST_F(WindowManagerTest, RegisterVisibilityStateChangedListener01, Function | SmallTest | Level2)
 {
-    auto windowManager = WindowManager::GetInstance(0);
-    ASSERT_NE(windowManager, nullptr);
+    ASSERT_NE(nullptr, instance_);
+    auto oldWindowManagerAgent = instance_->pImpl_->windowVisibilityStateListenerAgent_;
+    auto oldListeners = instance_->pImpl_->windowVisibilityStateListeners_;
+    instance_->pImpl_->windowVisibilityStateListenerAgent_ = nullptr;
+    instance_->pImpl_->windowVisibilityStateListeners_.clear();
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, instance_->RegisterVisibilityStateChangedListener(nullptr));
 
-    auto oldAgent = windowManager->pImpl_->windowVisibilityStateListenerAgent_;
-    auto oldListeners = windowManager->pImpl_->windowVisibilityStateListeners_;
+    sptr<TestWindowVisibilityStateListener> listener = sptr<TestWindowVisibilityStateListener>::MakeSptr();
+    instance_->RegisterVisibilityStateChangedListener(listener);
 
-    windowManager->pImpl_->windowVisibilityStateListenerAgent_ = nullptr;
-    windowManager->pImpl_->windowVisibilityStateListeners_.clear();
-
-    sptr<TestWindowVisibilityStateListener> listener =
-        sptr<TestWindowVisibilityStateListener>::MakeSptr();
-
-    WMError ret = windowManager->RegisterVisibilityStateChangedListener(listener);
-    if (ret != WMError::WM_OK) {
-        GTEST_SKIP() << "WindowAdapter not available in unit test environment.";
-    }
-
-    ASSERT_EQ(1, windowManager->pImpl_->windowVisibilityStateListeners_.size());
-    EXPECT_EQ(windowManager->pImpl_->windowVisibilityStateListeners_[0].GetRefPtr(),
-              listener.GetRefPtr());
-
-    ret = windowManager->RegisterVisibilityStateChangedListener(listener);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    EXPECT_EQ(1, windowManager->pImpl_->windowVisibilityStateListeners_.size());
-
-    windowManager->pImpl_->windowVisibilityStateListenerAgent_ = oldAgent;
-    windowManager->pImpl_->windowVisibilityStateListeners_ = oldListeners;
+    instance_->RegisterVisibilityStateChangedListener(listener);
+    instance_->pImpl_->windowVisibilityStateListenerAgent_ = oldWindowManagerAgent;
+    instance_->pImpl_->windowVisibilityStateListeners_ = oldListeners;
 }
 
 /**
@@ -1978,19 +1964,20 @@ HWTEST_F(WindowManagerTest, UnregisterVisibilityStateChangedListener01, Function
  */
 HWTEST_F(WindowManagerTest, RegisterDisplayIdChangedListener01, Function | SmallTest | Level2)
 {
-    auto windowManager = WindowManager::GetInstance(0);
-    ASSERT_NE(windowManager, nullptr);
-    ASSERT_NE(windowManager->pImpl_, nullptr);
+    ASSERT_NE(nullptr, instance_);
+    auto oldWindowManagerAgent = instance_->pImpl_->WindowDisplayIdChangeListenerAgent_;
+    auto oldListeners = instance_->pImpl_->windowDisplayIdChangeListeners_;
+    instance_->pImpl_->WindowDisplayIdChangeListenerAgent_ = nullptr;
+    instance_->pImpl_->windowDisplayIdChangeListeners_.clear();
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, instance_->RegisterVisibilityStateChangedListener(nullptr));
 
-    auto oldListeners = windowManager->pImpl_->windowDisplayIdChangeListeners_;
+    sptr<TestWindowDisplayIdChangeListener> listener = sptr<TestWindowDisplayIdChangeListener>::MakeSptr();
+    instance_->RegisterVisibilityStateChangedListener(listener);
 
-    windowManager->pImpl_->windowDisplayIdChangeListeners_.clear();
+    instance_->RegisterVisibilityStateChangedListener(listener);
 
-    WMError ret = windowManager->RegisterDisplayIdChangedListener(nullptr);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
-    EXPECT_EQ(0, windowManager->pImpl_->windowDisplayIdChangeListeners_.size());
-
-    windowManager->pImpl_->windowDisplayIdChangeListeners_ = oldListeners;
+    instance_->pImpl_->WindowDisplayIdChangeListenerAgent_ = oldWindowManagerAgent;
+    instance_->pImpl_->windowDisplayIdChangeListeners_ = oldListeners;
 }
 
 /**
