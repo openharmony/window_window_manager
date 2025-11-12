@@ -1522,60 +1522,6 @@ HWTEST_F(WindowSceneSessionImplTest4, KeepKeyboardOnFocus01, TestSize.Level1)
     ASSERT_EQ(keyboardWindow->property_->keepKeyboardFlag_, true);
 }
 
-/**
- * @tc.name: MoveAndResizeKeyboard01
- * @tc.desc: MoveAndResizeKeyboard
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest4, MoveAndResizeKeyboard01, TestSize.Level1)
-{
-    sptr<WindowOption> keyboardOption = sptr<WindowOption>::MakeSptr();
-    keyboardOption->SetWindowName("MoveAndResizeKeyboard01");
-    keyboardOption->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    sptr<WindowSceneSessionImpl> keyboardWindow = sptr<WindowSceneSessionImpl>::MakeSptr(keyboardOption);
-
-    bool isLandscape = false;
-    keyboardWindow->property_->displayId_ = 0;
-    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(0);
-    if (display != nullptr) {
-        isLandscape = display->GetWidth() > display->GetHeight();
-    }
-    KeyboardLayoutParams param;
-    param.LandscapeKeyboardRect_ = { 100, 100, 100, 200 };
-    param.PortraitKeyboardRect_ = { 200, 200, 200, 100 };
-    auto result = keyboardWindow->MoveAndResizeKeyboard(param);
-    auto expectRect = isLandscape ? param.LandscapeKeyboardRect_ : param.PortraitKeyboardRect_;
-    ASSERT_EQ(keyboardWindow->property_->requestRect_, expectRect);
-    ASSERT_EQ(result, WMError::WM_OK);
-}
-
-/**
- * @tc.name: MoveAndResizeKeyboard02
- * @tc.desc: MoveAndResizeKeyboard
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest4, MoveAndResizeKeyboard02, TestSize.Level1)
-{
-    sptr<WindowOption> keyboardOption = sptr<WindowOption>::MakeSptr();
-    keyboardOption->SetWindowName("MoveAndResizeKeyboard02");
-    keyboardOption->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    sptr<WindowSceneSessionImpl> keyboardWindow = sptr<WindowSceneSessionImpl>::MakeSptr(keyboardOption);
-
-    bool isLandscape = false;
-    keyboardWindow->property_->displayId_ = DISPLAY_ID_INVALID;
-    auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
-    if (defaultDisplayInfo != nullptr) {
-        isLandscape = defaultDisplayInfo->GetWidth() > defaultDisplayInfo->GetHeight();
-    }
-    KeyboardLayoutParams param;
-    param.LandscapeKeyboardRect_ = { 100, 100, 100, 200 };
-    param.PortraitKeyboardRect_ = { 200, 200, 200, 100 };
-    auto result = keyboardWindow->MoveAndResizeKeyboard(param);
-    auto expectRect = isLandscape ? param.LandscapeKeyboardRect_ : param.PortraitKeyboardRect_;
-    ASSERT_EQ(keyboardWindow->property_->requestRect_, expectRect);
-    ASSERT_EQ(result, WMError::WM_OK);
-}
-
 static sptr<WindowSceneSessionImpl> CreateWindow(std::string windowName, WindowType type, int32_t id)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();

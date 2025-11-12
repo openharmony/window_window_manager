@@ -423,6 +423,7 @@ void SceneSessionManager::Init()
     ScreenSessionManagerClient::GetInstance().RegisterDisplayChangeListener(sptr<DisplayChangeListener>::MakeSptr());
     ScreenSessionManagerClient::GetInstance().RegisterScreenConnectionChangeListener(
         sptr<ScreenConnectionChangeListener>::MakeSptr());
+    SingletonContainer::Get<ScreenManager>().RegisterScreenListener(sptr<ScreenListener>::MakeSptr());
 
     // create handler for inner command at server
     eventLoop_ = AppExecFwk::EventRunner::Create(WINDOW_INFO_REPORT_THREAD);
@@ -12979,6 +12980,27 @@ void SceneSessionManager::OnScreenshot(DisplayId displayId)
             }
         }
     }, "OnScreenshot:PID:" + std::to_string(displayId));
+}
+
+void ScreenListener::OnDisconnect(ScreenId screenId)
+{
+    SceneSessionManager::GetInstance().OnDisconnect(screenId);
+}
+
+void SceneSessionManager::OnDisconnect(ScreenId screenId)
+{
+    taskScheduler_->PostAsyncTask([this, screenId]() {
+        // Clear cached data for the disconnected screen.
+        const auto& keyboardSessionVec = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+        for (const auto& keyboardSession : keyboardSessionVec) {
+            if (!keyboardSession) {
+                continue;
+            }
+            keyboardSession->GetSessionProperty()->ClearCachedKeyboardHotAreasOnScreenDisconnected(screenId);
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "Clear cached k-hotAreas: %{public}d, dispId: %{public}" PRIu64,
+                keyboardSession->GetPersistentId(), screenId);
+        }
+    }, "OnDisconnect:screenId:" + std::to_string(screenId));    
 }
 
 WMError SceneSessionManager::NotifyScreenshotEvent(ScreenshotEventType type)

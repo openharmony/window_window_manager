@@ -61,6 +61,7 @@
 #include "zidl/session_lifecycle_listener_interface.h"
 #include "zidl/session_router_stack_listener.h"
 #include "zidl/pip_change_listener.h"
+#include "screen_manager.h"
 
 namespace OHOS::AAFwk {
 class SessionInfo;
@@ -203,6 +204,13 @@ class ScreenConnectionChangeListener : public IScreenConnectionChangeListener {
 public:
     void OnScreenConnected(const sptr<ScreenSession>& screenSession) override;
     void OnScreenDisconnected(const sptr<ScreenSession>& screenSession) override;
+};
+
+class ScreenListener : public ScreenManager::IScreenListener {
+public:
+    void OnConnect(ScreenId screenId) override {};
+    void OnDisconnect(ScreenId screenId) override;
+    void OnChange(ScreenId screenId) override {};
 };
 
 class AppStateObserver : public AppExecFwk::ApplicationStateObserverStub {
@@ -527,6 +535,7 @@ public:
         int32_t persistentId, Rotation rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas);
     void ReportKeyboardCreateException(sptr<SceneSession>& keyboardSession);
     void ConfigSupportFunctionType(SupportFunctionType funcType);
+    void OnDisconnect(ScreenId screenId);
 
     /*
      * UIExtension
