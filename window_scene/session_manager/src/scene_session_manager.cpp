@@ -4226,10 +4226,6 @@ std::string SceneSessionManager::getScreenName(int32_t persistentId)
         return "";
     }
     sptr<WindowSessionProperty> sessionProperty = session->GetSessionProperty();
-    if (sessionProperty == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "invalid sessionProperty");
-        return "";
-    }
     DisplayId screenId = sessionProperty->GetDisplayId();
     if (screenId == SCREEN_ID_INVALID) {
         TLOGE(WmsLogTag::WMS_PIP, "invalid screenId");
