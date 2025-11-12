@@ -12982,11 +12982,6 @@ void SceneSessionManager::OnScreenshot(DisplayId displayId)
     }, "OnScreenshot:PID:" + std::to_string(displayId));
 }
 
-void ScreenListener::OnDisconnect(ScreenId screenId)
-{
-    SceneSessionManager::GetInstance().OnDisconnect(screenId);
-}
-
 void SceneSessionManager::OnDisconnect(ScreenId screenId)
 {
     taskScheduler_->PostAsyncTask([this, screenId]() {

@@ -382,10 +382,10 @@ static void UpdateKeyboardHotAreasInner(const sptr<SceneSession>& sceneSession, 
     }
     const auto& screenProperty = screensProperties[displayId];
     auto displayRect = screenProperty.GetBounds().rect_;
-    int32_t dispWidth = displayRect.GetWidth();
-    int32_t dispHeight = displayRect.GetHeight();
-    bool isLandscape = dispWidth > dispHeight;
-    if (dispWidth == dispHeight) {
+    int32_t displayWidth = displayRect.GetWidth();
+    int32_t displayHeight = displayRect.GetHeight();
+    bool isLandscape = displayWidth > displayHeight;
+    if (displayWidth == displayHeight) {
         DisplayOrientation orientation = screenProperty.GetDisplayOrientation();
         if (orientation == DisplayOrientation::UNKNOWN) {
             TLOGW(WmsLogTag::WMS_KEYBOARD, "Display orientation is UNKNOWN");

@@ -206,13 +206,6 @@ public:
     void OnScreenDisconnected(const sptr<ScreenSession>& screenSession) override;
 };
 
-class ScreenListener : public ScreenManager::IScreenListener {
-public:
-    void OnConnect(ScreenId screenId) override {};
-    void OnDisconnect(ScreenId screenId) override;
-    void OnChange(ScreenId screenId) override {};
-};
-
 class AppStateObserver : public AppExecFwk::ApplicationStateObserverStub {
 public:
     void OnProcessDied(const AppExecFwk::ProcessData& processData) override;

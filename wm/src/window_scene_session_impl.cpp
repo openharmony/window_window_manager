@@ -1766,6 +1766,10 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<Display
         TLOGW(WmsLogTag::WMS_LIFE, "uiContent is null");
         return;
     }
+    if (info == nullptr) {
+        TLOGW(WmsLogTag::WMS_LIFE, "display info is null");
+        return;
+    }
     if (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         uint64_t screenId = info->GetScreenId();
         KeyboardLayoutParams params;
