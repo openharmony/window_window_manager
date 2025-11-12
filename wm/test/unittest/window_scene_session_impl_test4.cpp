@@ -25,6 +25,7 @@
 #include "singleton_mocker.h"
 #include "window_scene_session_impl.h"
 #include "window_session_impl.h"
+#include "wm_common.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1502,6 +1503,61 @@ HWTEST_F(WindowSceneSessionImplTest4, PreLayoutOnShow01, TestSize.Level1)
     ASSERT_EQ(window->GetRect(), originRect);
     window->PreLayoutOnShow(WindowType::WINDOW_TYPE_APP_SUB_WINDOW, displayInfo);
     ASSERT_EQ(window->GetRect(), testRect);
+}
+
+/**
+ * @tc.name: PreLayoutOnShow02
+ * @tc.desc: PreLayoutOnShow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, PreLayoutOnShow02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("PreLayoutOnShow02");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(2345);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_NE(nullptr, window->uiContent_);
+
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+    displayInfo->name_ = "Cooperation"; // 白名单
+
+    KeyboardLayoutParams tmpParams;
+    const Rect expected = {1, 2, 3, 4};
+    tmpParams.PortraitKeyboardRect_ = expected;
+
+    window->property_->SetKeyboardLayoutParams(tmpParams);
+    window->PreLayoutOnShow(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, displayInfo);
+    ASSERT_EQ(window->property_->windowRect_, expected);
+
+    tmpParams.displayId_ = 0;
+    window->property_->AddKeyboardLayoutParams(0, tmpParams);
+    window->PreLayoutOnShow(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, displayInfo);
+    ASSERT_EQ(window->property_->windowRect_, expected);
+}
+
+/**
+ * @tc.name: IsLandscape
+ * @tc.desc: IsLandscape
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, IsLandscape, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsLandscape");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(2345);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, window->hostSession_);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_NE(nullptr, window->uiContent_);
+    window->IsLandscape(0);
+    EXPECT_FALSE(window->IsLandscape(1234));
+    EXPECT_FALSE(window->IsLandscape(DISPLAY_ID_INVALID));
 }
 
 /**

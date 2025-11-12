@@ -254,6 +254,39 @@ HWTEST_F(WindowSceneSessionImplTest3, AdjustKeyboardLayout, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TestWindowScreenListenerOnDisconnectBehavior
+ * @tc.desc: TestWindowScreenListenerOnDisconnectBehavior
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, TestWindowScreenListenerOnDisconnectBehavior, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("WindowScreenListenerTest");
+
+    sptr<WindowSceneSessionImpl> windowSession1 = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSession1);
+    windowSession1->property_->SetPersistentId(1);
+    windowSession1->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    windowSession1->property_->keyboardLayoutParamsMap_[0] = {};
+
+    sptr<WindowSceneSessionImpl> windowSession2 = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSession2);
+    windowSession2->property_->SetPersistentId(2);
+    windowSession2->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    windowSession2->property_->keyboardLayoutParamsMap_[0] = {};
+
+    WindowSceneSessionImpl::windowSessionMap_["WindowName1"] = {1, windowSession1};
+    WindowSceneSessionImpl::windowSessionMap_["WindowName2"] = {2, windowSession2};
+
+    WindowSceneSessionImpl::WindowScreenListener listener;
+    listener.OnDisconnect(0);
+    EXPECT_EQ(windowSession1->property_->keyboardLayoutParamsMap_.size(), 1); // should not clear the layout
+    EXPECT_EQ(windowSession2->property_->keyboardLayoutParamsMap_.size(), 0); // should clear the layout
+    WindowSceneSessionImpl::windowSessionMap_.erase("WindowName1");
+    WindowSceneSessionImpl::windowSessionMap_.erase("WindowName2");
+}
+
+/**
  * @tc.name: UpdateSubWindowState
  * @tc.desc: UpdateSubWindowState
  * @tc.type: FUNC
