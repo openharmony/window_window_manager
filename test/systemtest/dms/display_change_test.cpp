@@ -22,6 +22,7 @@
 #include "screen_manager.h"
 #include "screen_manager/rs_screen_mode_info.h"
 #include "window_manager_hilog.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -253,6 +254,9 @@ HWTEST_F(DisplayChangeTest, CheckDisplayStateChange01, TestSize.Level1)
  */
 HWTEST_F(DisplayChangeTest, CheckDisplaySizeChange01, TestSize.Level1)
 {
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP();
+    }
     WLOGI("CheckDisplaySizeChange01");
     auto modes = defaultScreen_->GetSupportedModes();
     uint32_t usedModeIdx = defaultScreen_->GetModeId();
@@ -288,6 +292,9 @@ HWTEST_F(DisplayChangeTest, CheckDisplaySizeChange01, TestSize.Level1)
  */
 HWTEST_F(DisplayChangeTest, CheckDisplaySizeChange02, TestSize.Level1)
 {
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP();
+    }
     WLOGI("CheckDisplaySizeChange02");
     auto modes = defaultScreen_->GetSupportedModes();
     uint32_t usedModeIdx = defaultScreen_->GetModeId();
