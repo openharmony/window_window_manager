@@ -39,7 +39,7 @@ MainSession::MainSession(const SessionInfo& info, const sptr<SpecificSessionCall
         scenePersistence_->RenameSnapshotFromOldPersistentId(info.persistentId_);
     }
     pcFoldScreenController_ = sptr<PcFoldScreenController>::MakeSptr(wptr(this), GetPersistentId());
-    moveDragController_ = sptr<MoveDragController>::MakeSptr(GetPersistentId(), GetWindowType());
+    moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(this));
     if (specificCallback != nullptr &&
         specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
         moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback->onWindowInputPidChangeCallback_);
