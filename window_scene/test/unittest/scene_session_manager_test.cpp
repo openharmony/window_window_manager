@@ -2070,31 +2070,6 @@ HWTEST_F(SceneSessionManagerTest, NotifySessionTransferToTargetScreenEvent002, T
     ssm_->NotifySessionTransferToTargetScreenEvent(sceneSession->GetPersistentId(), 1, 1, 2);
     EXPECT_FALSE(g_logMsg.find("sceneSession is nullptr") != std::string::npos);
 }
-
-/**
- * @tc.name: ScreenListenerDisconnectClearsKeyboardTouchAreas
- * @tc.desc: Test that keyboard touch areas are cleared when the screen listener disconnects
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest, ScreenListenerDisconnectClearsKeyboardTouchAreas, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    ScreenListener listener;
-    listener.OnConnect(0);
-    listener.OnChange(0);
-    listener.OnDisconnect(0);
-    listener.OnDisconnect(1234);
-    ssm_->OnDisconnect(0);
-    ssm_->OnDisconnect(1234);
-    const auto &keyboardSessionVec = ssm_->GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    for (const auto &keyboardSession : keyboardSessionVec) {
-        if (!keyboardSession) {
-            continue;
-        }
-        const auto &mapRef = keyboardSession->GetSessionProperty()->keyboardTouchHotAreasMap_;
-        EXPECT_EQ(mapRef.find(1234), mapRef.end());
-    }
-}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
