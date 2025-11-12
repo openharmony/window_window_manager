@@ -423,7 +423,6 @@ void SceneSessionManager::Init()
     ScreenSessionManagerClient::GetInstance().RegisterDisplayChangeListener(sptr<DisplayChangeListener>::MakeSptr());
     ScreenSessionManagerClient::GetInstance().RegisterScreenConnectionChangeListener(
         sptr<ScreenConnectionChangeListener>::MakeSptr());
-    SingletonContainer::Get<ScreenManager>().RegisterScreenListener(sptr<ScreenListener>::MakeSptr());
 
     // create handler for inner command at server
     eventLoop_ = AppExecFwk::EventRunner::Create(WINDOW_INFO_REPORT_THREAD);
