@@ -107,7 +107,6 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
         sessionProperty->SetKeyboardEffectOption(property->GetKeyboardEffectOption());
         sessionProperty->SetDisplayId(targetDisplayId);
         session->UseFocusIdIfCallingSessionIdInvalid(property->GetCallingSessionId());
-        session->UpdateKeyboardHotAreasOnShow(sessionProperty, targetDisplayId);
         TLOGNI(WmsLogTag::WMS_KEYBOARD,
             "Show keyboard session, id: %{public}d, calling id: %{public}d, targetDisplayId: %{public}" PRIu64 ", "
             "effectOption: %{public}s",
@@ -315,11 +314,11 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
         TLOGNI(WmsLogTag::WMS_KEYBOARD, "Adjust keyboard layout, keyboardId: %{public}d, gravity: %{public}u, "
             "landscapeAvoidHeight: %{public}d, portraitAvoidHeight: %{public}d, "
             "Landscape: %{public}s, Portrait: %{public}s, LandscapePanel: %{public}s, "
-            "PortraitPanel: %{public}s, request: %{public}s, dispId: %{public}" PRIu64, session->GetPersistentId(),
+            "PortraitPanel: %{public}s, dispId: %{public}" PRIu64, session->GetPersistentId(),
             static_cast<uint32_t>(params.gravity_), params.landscapeAvoidHeight_, params.portraitAvoidHeight_,
             params.LandscapeKeyboardRect_.ToString().c_str(), params.PortraitKeyboardRect_.ToString().c_str(),
             params.LandscapePanelRect_.ToString().c_str(), params.PortraitPanelRect_.ToString().c_str(),
-            session->GetSessionRequestRect().ToString().c_str(), params.displayId_);
+            params.displayId_);
         return WSError::WS_OK;
     }, "AdjustKeyboardLayout");
     return WSError::WS_OK;
@@ -1202,7 +1201,6 @@ WMError KeyboardSession::HandleActionUpdateKeyboardTouchHotArea(const sptr<Windo
     sessionProperty->SetTouchHotAreas(keyboardHotAreas);
     keyboardPanelSession_->GetSessionProperty()->SetTouchHotAreas(panelHotAreas);
     sessionProperty->SetKeyboardTouchHotAreas(keyboardTouchHotAreas);
-    sessionProperty->AddKeyboardTouchHotAreas(displayId, keyboardTouchHotAreas);
     return WMError::WM_OK;
 }
 
