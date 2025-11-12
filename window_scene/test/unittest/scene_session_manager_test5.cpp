@@ -1026,6 +1026,65 @@ HWTEST_F(SceneSessionManagerTest5, GetNextFocusableSession, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetNextFocusableSession_Desktop
+ * @tc.desc: Get desktop with extend screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, GetNextFocusableSession_Desktop, TestSize.Level1)
+{
+    int32_t persistentId = 0;
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->sceneSessionMap_.clear();
+
+    SessionInfo info1;
+    info1.abilityName_ = "testWindow1";
+    info1.bundleName_ = "testWindow1";
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
+    sceneSession1->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession1->persistentId_ = 1;
+    sceneSession1->SetZOrder(120);
+
+    SessionInfo info2;
+    info2.abilityName_ = "testWindow2";
+    info2.bundleName_ = "testWindow2";
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
+    sceneSession2->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession2->persistentId_ = 2;
+    sceneSession2->SetZOrder(130);
+
+    SessionInfo info3;
+    info3.abilityName_ = "desktop1";
+    info3.bundleName_ = "desktop1";
+    sptr<SceneSession> desktopSession1 = sptr<SceneSession>::MakeSptr(info3, nullptr);
+    desktopSession1->property_->SetWindowType(WindowType::WINDOW_TYPE_DESKTOP);
+    desktopSession1->persistentId_ = 3;
+    desktopSession1->UpdateVisibilityInner(true);
+    desktopSession1->SetSessionState(SessionState::STATE_FOREGROUND);
+    desktopSession1->SetZOrder(1);
+    desktopSession1->property_->SetDisplayId(0);
+
+    SessionInfo info4;
+    info4.abilityName_ = "desktop2";
+    info4.bundleName_ = "desktop2";
+    sptr<SceneSession> desktopSession2 = sptr<SceneSession>::MakeSptr(info4, nullptr);
+    desktopSession2->property_->SetWindowType(WindowType::WINDOW_TYPE_DESKTOP);
+    desktopSession2->persistentId_ = 4;
+    desktopSession2->UpdateVisibilityInner(true);
+    desktopSession2->SetSessionState(SessionState::STATE_FOREGROUND);
+    desktopSession2->SetZOrder(1);
+    desktopSession2->property_->SetDisplayId(11);
+
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession1));
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession2));
+    ssm_->sceneSessionMap_.insert(std::make_pair(3, desktopSession1));
+    ssm_->sceneSessionMap_.insert(std::make_pair(4, desktopSession2));
+
+    sptr<SceneSession> result = ssm_->GetNextFocusableSession(0, 1);
+    EXPECT_EQ(result, nullptr);
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
  * @tc.name: GetTopNearestBlockingFocusSession
  * @tc.desc: GetTopNearestBlockingFocusSession
  * @tc.type: FUNC
