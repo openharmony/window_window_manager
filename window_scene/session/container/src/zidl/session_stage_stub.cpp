@@ -194,10 +194,10 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetSupportEnterWaterfallMode(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_EXTENSION_DATA):
             return HandleExtensionHostData(data, reply, option);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_LINK_KEYFRAME_CANVAS_NODE):
-            return HandleLinkKeyFrameCanvasNode(data, reply);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_KEYFRAME_POLICY):
-            return HandleSetKeyFramePolicy(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_LINK_KEYFRAME_NODE):
+            return HandleLinkKeyFrameNode(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_STAGE_KEYFRAME_POLICY):
+            return HandleSetStageKeyFramePolicy(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_CONTAINER_MODAL_EVENT):
             return HandleSendContainerModalEvent(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_DRAG_ACTIVATED):
@@ -1011,19 +1011,19 @@ int SessionStageStub::HandleExtensionHostData(MessageParcel& data, MessageParcel
     return ERR_NONE;
 }
 
-int SessionStageStub::HandleLinkKeyFrameCanvasNode(MessageParcel& data, MessageParcel& reply)
+int SessionStageStub::HandleLinkKeyFrameNode(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
-    auto rsCanvasNode = RSCanvasNode::Unmarshalling(data);
-    if (!rsCanvasNode) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "fail get rsCanvasNode");
+    auto rsKeyFrameNode = RSWindowKeyFrameNode::Unmarshalling(data);
+    if (!rsKeyFrameNode) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "fail get rsKeyFrameNode");
         return ERR_INVALID_DATA;
     }
-    LinkKeyFrameCanvasNode(rsCanvasNode);
+    LinkKeyFrameNode(rsKeyFrameNode);
     return ERR_NONE;
 }
 
-int SessionStageStub::HandleSetKeyFramePolicy(MessageParcel& data, MessageParcel& reply)
+int SessionStageStub::HandleSetStageKeyFramePolicy(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     sptr<KeyFramePolicy> keyFramePolicy = data.ReadParcelable<KeyFramePolicy>();
@@ -1031,7 +1031,7 @@ int SessionStageStub::HandleSetKeyFramePolicy(MessageParcel& data, MessageParcel
         TLOGE(WmsLogTag::WMS_LAYOUT, "Read keyFramePolicy failed.");
         return ERR_INVALID_DATA;
     }
-    SetKeyFramePolicy(*keyFramePolicy);
+    SetStageKeyFramePolicy(*keyFramePolicy);
     return ERR_NONE;
 }
 

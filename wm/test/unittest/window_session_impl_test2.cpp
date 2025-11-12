@@ -472,7 +472,7 @@ HWTEST_F(WindowSessionImplTest2, UpdateViewportConfig_KeyFrame, TestSize.Level1)
     sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
     KeyFramePolicy keyFramePolicy;
-    window->SetKeyFramePolicy(keyFramePolicy);
+    window->SetStageKeyFramePolicy(keyFramePolicy);
     WindowSizeChangeReason reason = WindowSizeChangeReason::UNDEFINED;
     window->UpdateViewportConfig(rect, reason, nullptr, displayInfo, avoidAreas);
     ASSERT_EQ(window->keyFramePolicy_.stopping_, false);
@@ -499,27 +499,27 @@ HWTEST_F(WindowSessionImplTest2, RegisterKeyFrameCallback, TestSize.Level1)
 }
 
 /**
- * @tc.name: LinkKeyFrameCanvasNode
- * @tc.desc: LinkKeyFrameCanvasNode
+ * @tc.name: LinkKeyFrameNode
+ * @tc.desc: LinkKeyFrameNode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, LinkKeyFrameCanvasNode, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest2, LinkKeyFrameNode, TestSize.Level1)
 {
-    auto window = GetTestWindowImpl("LinkKeyFrameCanvasNode");
+    auto window = GetTestWindowImpl("LinkKeyFrameNode");
     ASSERT_NE(window, nullptr);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     auto hostSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    auto rsCanvasNode = RSCanvasNode::Create();
+    auto rsKeyFrameNode = RSWindowKeyFrameNode::Create();
     window->uiContent_ = nullptr;
     window->hostSession_ = nullptr;
-    ASSERT_EQ(window->LinkKeyFrameCanvasNode(rsCanvasNode), WSError::WS_ERROR_NULLPTR);
+    ASSERT_EQ(window->LinkKeyFrameNode(rsKeyFrameNode), WSError::WS_ERROR_NULLPTR);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    ASSERT_EQ(window->LinkKeyFrameCanvasNode(rsCanvasNode), WSError::WS_ERROR_NULLPTR);
+    ASSERT_EQ(window->LinkKeyFrameNode(rsKeyFrameNode), WSError::WS_ERROR_NULLPTR);
     window->uiContent_ = nullptr;
     window->hostSession_ = hostSession;
-    ASSERT_EQ(window->LinkKeyFrameCanvasNode(rsCanvasNode), WSError::WS_ERROR_NULLPTR);
+    ASSERT_EQ(window->LinkKeyFrameNode(rsKeyFrameNode), WSError::WS_ERROR_NULLPTR);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    ASSERT_EQ(window->LinkKeyFrameCanvasNode(rsCanvasNode), WSError::WS_OK);
+    ASSERT_EQ(window->LinkKeyFrameNode(rsKeyFrameNode), WSError::WS_OK);
     window->Destroy();
 }
 
