@@ -875,21 +875,21 @@ HWTEST_F(SceneSessionTest5, UpdateKeyFrameCloneNode, Function | SmallTest | Leve
     EXPECT_NE(session, nullptr);
     auto sessionStage = sptr<SessionStageMocker>::MakeSptr();
     EXPECT_NE(nullptr, sessionStage);
-    auto rsCanvasNode = RSCanvasNode::Create();
-    EXPECT_NE(nullptr, rsCanvasNode);
-    std::shared_ptr<RSCanvasNode> rsCanvasNodeNull = nullptr;
+    auto rsKeyFrameNode = RSWindowKeyFrameNode::Create();
+    EXPECT_NE(nullptr, rsKeyFrameNode);
+    std::shared_ptr<RSWindowKeyFrameNode> rsKeyFrameNodeNull = nullptr;
     auto rsTransaction = std::make_shared<RSTransaction>();
     EXPECT_NE(nullptr, rsTransaction);
     std::shared_ptr<RSTransaction> rsTransactionNull = nullptr;
 
-    session->keyFrameCloneNode_ = rsCanvasNode;
-    EXPECT_EQ(session->UpdateKeyFrameCloneNode(rsCanvasNode, rsTransaction), WSError::WS_OK);
+    session->keyFrameCloneNode_ = rsKeyFrameNode;
+    EXPECT_EQ(session->UpdateKeyFrameCloneNode(rsKeyFrameNode, rsTransaction), WSError::WS_OK);
     session->keyFrameCloneNode_ = nullptr;
-    EXPECT_EQ(session->UpdateKeyFrameCloneNode(rsCanvasNodeNull, rsTransaction), WSError::WS_ERROR_NULLPTR);
-    EXPECT_EQ(session->UpdateKeyFrameCloneNode(rsCanvasNode, rsTransaction), WSError::WS_ERROR_NULLPTR);
+    EXPECT_EQ(session->UpdateKeyFrameCloneNode(rsKeyFrameNodeNull, rsTransaction), WSError::WS_ERROR_NULLPTR);
+    EXPECT_EQ(session->UpdateKeyFrameCloneNode(rsKeyFrameNode, rsTransaction), WSError::WS_ERROR_NULLPTR);
     session->sessionStage_ = sessionStage;
-    EXPECT_EQ(session->UpdateKeyFrameCloneNode(rsCanvasNode, rsTransactionNull), WSError::WS_OK);
-    EXPECT_EQ(session->UpdateKeyFrameCloneNode(rsCanvasNode, rsTransaction), WSError::WS_OK);
+    EXPECT_EQ(session->UpdateKeyFrameCloneNode(rsKeyFrameNode, rsTransactionNull), WSError::WS_OK);
+    EXPECT_EQ(session->UpdateKeyFrameCloneNode(rsKeyFrameNode, rsTransaction), WSError::WS_OK);
 }
 
 /**
@@ -908,8 +908,8 @@ HWTEST_F(SceneSessionTest5, UpdateKeyFrameState, Function | SmallTest | Level2)
     EXPECT_NE(nullptr, moveDragController);
     auto sessionStage = sptr<SessionStageMocker>::MakeSptr();
     EXPECT_NE(nullptr, sessionStage);
-    auto rsCanvasNode = RSCanvasNode::Create();
-    EXPECT_NE(nullptr, rsCanvasNode);
+    auto rsKeyFrameNode = RSWindowKeyFrameNode::Create();
+    EXPECT_NE(nullptr, rsKeyFrameNode);
     auto rsTransaction = std::make_shared<RSTransaction>();
     EXPECT_NE(nullptr, rsTransaction);
 
@@ -929,7 +929,7 @@ HWTEST_F(SceneSessionTest5, UpdateKeyFrameState, Function | SmallTest | Level2)
     EXPECT_EQ(session->keyFramePolicy_.running_, false);
     session->moveDragController_->isStartDrag_ = true;
     session->UpdateKeyFrameState(reason, rect);
-    session->SetKeyFramePolicy(keyFramePolicy);
+    session->SetDragKeyFramePolicy(keyFramePolicy);
     session->UpdateKeyFrameState(reason, rect);
     EXPECT_EQ(session->keyFramePolicy_.running_, true);
     session->SetAppDragResizeType(DragResizeType::RESIZE_WHEN_DRAG_END);
@@ -938,7 +938,7 @@ HWTEST_F(SceneSessionTest5, UpdateKeyFrameState, Function | SmallTest | Level2)
     session->SetAppDragResizeType(DragResizeType::RESIZE_TYPE_UNDEFINED);
     session->UpdateKeyFrameState(reason, rect);
     EXPECT_EQ(session->keyFramePolicy_.running_, true);
-    session->keyFrameCloneNode_ = rsCanvasNode;
+    session->keyFrameCloneNode_ = rsKeyFrameNode;
     reason = SizeChangeReason::DRAG;
     session->UpdateKeyFrameState(reason, rect);
     EXPECT_EQ(session->lastKeyFrameDragRect_, rect);
