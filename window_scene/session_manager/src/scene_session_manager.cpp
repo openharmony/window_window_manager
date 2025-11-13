@@ -3380,7 +3380,7 @@ void SceneSessionManager::AddRequestTaskInfo(sptr<SceneSession> sceneSession, in
         requestIdToWantMapSize = requestIdToWantMap.size();
     }
     TLOGI(WmsLogTag::WMS_LIFE, "persistentId:%{public}d, requestId:%{public}d, "
-        "infoMap size:%{public}lu, wantMap size:%{public}lu",
+        "infoMap size:%{public}zu, wantMap size:%{public}zu",
         persistentId, requestId, requestTaskInfoMap.size(), requestIdToWantMapSize);
 }
  
