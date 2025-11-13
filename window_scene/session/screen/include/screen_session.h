@@ -243,7 +243,6 @@ public:
     ScreenId screenId_ {};
     ScreenId rsId_ {};
     ScreenId defaultScreenId_ = SCREEN_ID_INVALID;
-    ScreenId phyScreenId_ = SCREEN_ID_INVALID;
 
     void SetIsExtend(bool isExtend);
     bool GetIsExtend() const;
@@ -378,6 +377,8 @@ public:
     void SetRotationCorrectionMap(std::unordered_map<FoldDisplayMode, int32_t>& rotationCorrectionMap);
     std::unordered_map<FoldDisplayMode, int32_t> GetRotationCorrectionMap();
     Rotation GetRotationCorrection(FoldDisplayMode foldDisplayMode);
+    void SetCurrentRotationCorrection(Rotation currentRotationCorrection);
+    Rotation GetCurrentRotationCorrection() const;
 
     /*
      * RS Client Multi Instance
@@ -411,8 +412,6 @@ public:
     bool GetIsKeyboardOn() const;
     void SetFloatRotation(float rotation);
     void ModifyScreenPropertyWithLock(float rotation, RRect bounds);
-    ScreenId GetPhyScreenId();
-    void SetPhyScreenId(ScreenId screenId);
     bool GetSupportsFocus() const;
     void SetSupportsFocus(bool focus);
     bool GetSupportsInput() const;
@@ -482,6 +481,7 @@ private:
     void AddRotationCorrection(Rotation& rotation, FoldDisplayMode displayMode);
     std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap_;
     std::shared_mutex rotationCorrectionMutex_;
+    std::atomic<Rotation> currentRotationCorrection_ { Rotation::ROTATION_0 };
 
     /*
      * RS Client Multi Instance

@@ -387,7 +387,10 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetTranslateX(property_.GetTranslateX());
     displayInfo->SetTranslateY(property_.GetTranslateY());
     displayInfo->SetScreenShape(property_.GetScreenShape());
-    displayInfo->SetOriginRotation(property_.GetScreenRotation());
+    // calculate physical sensor rotation
+    Rotation originRotation = static_cast<Rotation>(static_cast<uint32_t>(property_.GetScreenRotation()) -
+        static_cast<uint32_t>(GetCurrentRotationCorrection()) + SECONDARY_ROTATION_MOD);
+    displayInfo->SetOriginRotation(originRotation);
     displayInfo->SetSupportedRefreshRate(GetSupportedRefreshRate());
     displayInfo->SetSupportsFocus(GetSupportsFocus());
     displayInfo->SetSupportsInput(GetSupportsInput());
@@ -1159,6 +1162,7 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, Fold
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
     property_.SetDisplayOrientation(displayOrientation);
+    SetCurrentRotationCorrection(GetRotationCorrection(foldDisplayMode));
     if (!isBScreenHalf_ || property_.GetIsFakeInUse()) {
         property_.SetValidHeight(bounds.rect_.GetHeight());
         property_.SetValidWidth(bounds.rect_.GetWidth());
@@ -3065,16 +3069,6 @@ void ScreenSession::ModifyScreenPropertyWithLock(float rotation, RRect bounds)
     SetBounds(bounds);
 }
 
-ScreenId ScreenSession::GetPhyScreenId()
-{
-    return phyScreenId_;
-}
-
-void ScreenSession::SetPhyScreenId(ScreenId screenId)
-{
-    phyScreenId_ = screenId;
-}
-
 bool ScreenSession::GetSupportsFocus() const
 {
     return supportsFocus_.load();
@@ -3103,5 +3097,15 @@ void ScreenSession::SetVprScaleRatio(float vprScaleRatio)
 float ScreenSession::GetVprScaleRatio() const
 {
     return vprScaleRatio_;
+}
+
+void ScreenSession::SetCurrentRotationCorrection(Rotation currentRotationCorrection)
+{
+    currentRotationCorrection_.store(currentRotationCorrection);
+}
+
+Rotation ScreenSession::GetCurrentRotationCorrection() const
+{
+    return currentRotationCorrection_.load();
 }
 } // namespace OHOS::Rosen
