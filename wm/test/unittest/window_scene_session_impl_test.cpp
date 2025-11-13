@@ -688,7 +688,6 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession16, TestSize
     EXPECT_EQ(WMError::WM_OK, windowSceneSession->Create(abilityContext_, session));
     EXPECT_EQ(WMError::WM_OK, windowSceneSession->Show());
     EXPECT_EQ(WMError::WM_OK, windowSceneSession->Destroy(true));
-    windowSceneSession->RegisterListenerForKeyboard();
 }
 
 /**
@@ -717,6 +716,9 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession17, TestSize
     EXPECT_EQ(WMError::WM_OK, windowSceneSession->Create(abilityContext_, session));
     EXPECT_EQ(WMError::WM_OK, windowSceneSession->Show());
     EXPECT_EQ(WMError::WM_OK, windowSceneSession->Destroy(true));
+    windowSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    windowSceneSession->RegisterListenerForKeyboard();
+    windowSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     windowSceneSession->RegisterListenerForKeyboard();
 }
 

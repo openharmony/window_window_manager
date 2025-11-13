@@ -1534,6 +1534,7 @@ HWTEST_F(WindowSceneSessionImplTest4, PreLayoutOnShow02, TestSize.Level1)
     ASSERT_EQ(window->property_->windowRect_, expected);
 
     tmpParams.displayId_ = 0;
+    displayInfo->screenId_ = 0;
     window->property_->AddKeyboardLayoutParams(0, tmpParams);
     window->PreLayoutOnShow(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, displayInfo);
     ASSERT_EQ(window->property_->windowRect_, expected);
