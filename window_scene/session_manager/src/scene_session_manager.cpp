@@ -12981,22 +12981,6 @@ void SceneSessionManager::OnScreenshot(DisplayId displayId)
     }, "OnScreenshot:PID:" + std::to_string(displayId));
 }
 
-void SceneSessionManager::OnDisconnect(ScreenId screenId)
-{
-    taskScheduler_->PostAsyncTask([this, screenId]() {
-        // Clear cached data for the disconnected screen.
-        const auto& keyboardSessionVec = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-        for (const auto& keyboardSession : keyboardSessionVec) {
-            if (!keyboardSession) {
-                continue;
-            }
-            keyboardSession->GetSessionProperty()->ClearCachedKeyboardHotAreasOnScreenDisconnected(screenId);
-            TLOGI(WmsLogTag::WMS_KEYBOARD, "Clear cached k-hotAreas: %{public}d, dispId: %{public}" PRIu64,
-                keyboardSession->GetPersistentId(), screenId);
-        }
-    }, "OnDisconnect:screenId:" + std::to_string(screenId));    
-}
-
 WMError SceneSessionManager::NotifyScreenshotEvent(ScreenshotEventType type)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "event: %{public}d", type);

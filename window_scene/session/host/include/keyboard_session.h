@@ -126,7 +126,6 @@ private:
     NotifyKeyboarEffectOptionChangeFunc changeKeyboardEffectOptionFunc_;
     WMError IsLandscape(uint64_t screenId, bool& isLandscape);
     void PrintRectsInfo(const std::vector<Rect>& rects, const std::string& infoTag);
-    void UpdateKeyboardHotAreasOnShow(sptr<WindowSessionProperty>& sessionProperty, uint64_t targetDisplayId);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_KEYBOARD_SESSION_H

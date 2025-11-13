@@ -119,32 +119,6 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
     return WSError::WS_OK;
 }
 
-void KeyboardSession::UpdateKeyboardHotAreasOnShow(
-    sptr<WindowSessionProperty>& sessionProperty, uint64_t targetDisplayId)
-{
-    KeyboardTouchHotAreas keyboardTouchHotAreas;
-    sessionProperty->GetKeyboardTouchHotAreasByScreenId(targetDisplayId, keyboardTouchHotAreas);
-    if (keyboardTouchHotAreas.isKeyboardEmpty() && keyboardTouchHotAreas.isPanelEmpty()) {
-        TLOGW(WmsLogTag::WMS_KEYBOARD, "Update k-hotAreas failed, %{public}" PRIu64, targetDisplayId);
-        return;
-    }
-    KeyboardTouchHotAreas lastKeyboardHotAreas = sessionProperty->GetKeyboardTouchHotAreas();
-    bool isLandscape = false;
-    if (lastKeyboardHotAreas != keyboardTouchHotAreas &&
-        IsLandscape(targetDisplayId, isLandscape) == WMError::WM_OK) {
-        auto panelSession = GetKeyboardPanelSession();
-        std::vector<Rect>& keyboardHotAreas = isLandscape ?
-            keyboardTouchHotAreas.landscapeKeyboardHotAreas_ : keyboardTouchHotAreas.portraitKeyboardHotAreas_;
-        std::vector<Rect>& panelHotAreas = isLandscape ?
-            keyboardTouchHotAreas.landscapePanelHotAreas_ : keyboardTouchHotAreas.portraitPanelHotAreas_;
-        sessionProperty->SetTouchHotAreas(keyboardHotAreas);
-        panelSession->GetSessionProperty()->SetTouchHotAreas(panelHotAreas);
-        sessionProperty->SetKeyboardTouchHotAreas(keyboardTouchHotAreas);
-        PrintRectsInfo(keyboardHotAreas, "Update keyboardHotAreas");
-        PrintRectsInfo(panelHotAreas, "Update panelHotAreas");
-    }
-}
-
 WSError KeyboardSession::Hide()
 {
     if (!CheckPermissionWithPropertyAnimation(GetSessionProperty())) {

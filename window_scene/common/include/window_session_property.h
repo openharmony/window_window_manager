@@ -103,8 +103,6 @@ public:
     void SetFloatingWindowAppType(bool isAppType);
     void SetTouchHotAreas(const std::vector<Rect>& rects);
     void SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas& keyboardTouchHotAreas);
-    void AddKeyboardTouchHotAreas(const uint64_t screenId, const KeyboardTouchHotAreas& keyboardTouchHotAreas);
-    void ClearCachedKeyboardHotAreasOnScreenDisconnected(const uint64_t screenId);
     void KeepKeyboardOnFocus(bool keepKeyboardFlag);
     void SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMode);
     void SetCallingSessionId(uint32_t sessionId);
@@ -174,8 +172,6 @@ public:
     bool IsFloatingWindowAppType() const;
     void GetTouchHotAreas(std::vector<Rect>& rects) const;
     KeyboardTouchHotAreas GetKeyboardTouchHotAreas() const;
-    void GetKeyboardTouchHotAreasByScreenId(
-        const uint64_t screenId, KeyboardTouchHotAreas& keyboardTouchHotAreas);
     bool GetKeepKeyboardFlag() const;
     uint32_t GetCallingSessionId() const;
     PiPTemplateInfo GetPiPTemplateInfo() const;

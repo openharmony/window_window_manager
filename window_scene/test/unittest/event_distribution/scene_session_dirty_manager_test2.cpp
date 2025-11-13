@@ -797,37 +797,6 @@ HWTEST_F(SceneSessionDirtyManagerTest2, UpdateWindowFlagsForLockCursor, TestSize
     manager_->UpdateWindowFlagsForLockCursor(session, windowInfo);
     EXPECT_EQ(windowInfo.flags, MMI_FLAG_BIT_LOCK_CURSOR_FOLLOW_MOVEMENT);
 }
-
-HWTEST_F(SceneSessionDirtyManagerTest2, UpdateHotareasWithOrWithoutHotAreas, TestSize.Level2)
-{
-    SessionInfo info;
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(session, nullptr);
-    session->persistentId_ = 5;
-
-    std::vector<MMI::Rect> touchHotAreas;
-    std::vector<MMI::Rect> pointerHotAreas;
-    KeyboardTouchHotAreas areas;
-    areas.landscapeKeyboardHotAreas_.push_back(Rect{ 1, 2, 3, 4 });
-    areas.portraitKeyboardHotAreas_.push_back(Rect{ 1, 2, 3, 4 });
-    areas.landscapePanelHotAreas_.push_back(Rect{ 1, 2, 3, 4 });
-    areas.portraitPanelHotAreas_.push_back(Rect{ 1, 2, 3, 4 });
-    session->property_->AddKeyboardTouchHotAreas(0, areas);
-    session->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    manager_->UpdateHotAreas(session, touchHotAreas, pointerHotAreas);
-    EXPECT_EQ(session->GetWindowType(), WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT); // bogus
-
-    ScreenId screenId = 0;
-    ScreenSessionConfig config;
-    auto screenSession = sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
-    areas.displayId_ = 0;
-    session->property_->keyboardTouchHotAreas_ = areas;
-    session->property_->SetDisplayId(0);
-    manager_->UpdateHotAreas(session, touchHotAreas, pointerHotAreas);
-    EXPECT_EQ(session->GetWindowType(), WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT); // bogus
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
-}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
