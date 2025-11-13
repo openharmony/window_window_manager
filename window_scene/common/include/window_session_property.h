@@ -520,7 +520,6 @@ private:
     mutable std::mutex keyboardParamsMutex_;
     std::vector<Rect> touchHotAreas_;  // coordinates relative to window.
     KeyboardTouchHotAreas keyboardTouchHotAreas_;  // coordinates relative to window.
-    std::map<uint64_t, KeyboardTouchHotAreas> keyboardTouchHotAreasMap_;
     bool hideNonSystemFloatingWindows_ = false;
     bool isSkipSelfWhenShowOnVirtualScreen_ = false;
     bool isSkipEventOnCastPlus_ = false;

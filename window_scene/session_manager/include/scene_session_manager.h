@@ -61,7 +61,6 @@
 #include "zidl/session_lifecycle_listener_interface.h"
 #include "zidl/session_router_stack_listener.h"
 #include "zidl/pip_change_listener.h"
-#include "screen_manager.h"
 
 namespace OHOS::AAFwk {
 class SessionInfo;
