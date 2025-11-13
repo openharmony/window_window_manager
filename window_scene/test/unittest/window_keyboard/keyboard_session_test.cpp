@@ -676,49 +676,6 @@ HWTEST_F(KeyboardSessionTest, ChangeKeyboardEffectOption, TestSize.Level1)
     auto lastOption = keyboardSession->property_->GetKeyboardEffectOption();
     ASSERT_EQ(lastOption.viewMode_, KeyboardViewMode::DARK_IMMERSIVE_MODE);
 }
-
-/**
- * @tc.name: Show03WithAndWithoutValidHotAreas
- * @tc.desc: test Show with and without valid hot areas
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest, Show03WithAndWithoutValidHotAreas, TestSize.Level0)
-{
-    SessionInfo info;
-    info.abilityName_ = "Show03WithAndWithoutValidHotAreas";
-    info.bundleName_ = "Show03WithAndWithoutValidHotAreas";
-
-    sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCb, nullptr);
-    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
-        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
-    EXPECT_NE(keyboardCb, nullptr);
-    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
-    EXPECT_NE(keyboardSession, nullptr);
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    keyboardSession->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    property->SetDisplayId(1234);
-    ASSERT_EQ(WSError::WS_OK, keyboardSession->Show(property));
-
-    property->SetDisplayId(0);
-    KeyboardTouchHotAreas hotAreas;
-    hotAreas.landscapeKeyboardHotAreas_.push_back({ 1, 2, 3, 4 });
-    hotAreas.portraitKeyboardHotAreas_.push_back({ 1, 2, 3, 4 });
-    hotAreas.landscapePanelHotAreas_.push_back({ 1, 2, 3, 4 });
-    hotAreas.portraitPanelHotAreas_.push_back({ 1, 2, 3, 4 });
-    keyboardSession->property_->SetKeyboardTouchHotAreas(hotAreas);
-    ASSERT_EQ(WSError::WS_OK, keyboardSession->Show(property));
-
-    SessionInfo infoPanel;
-    infoPanel.abilityName_ = "Show03WithAndWithoutValidHotAreas_Panel";
-    infoPanel.bundleName_ = "Show03WithAndWithoutValidHotAreas_Panel";
-    sptr<SceneSession> panelSession = sptr<SceneSession>::MakeSptr(infoPanel, specificCb);
-    ASSERT_NE(panelSession, nullptr);
-    keyboardSession->BindKeyboardPanelSession(panelSession);
-    keyboardSession->property_->AddKeyboardTouchHotAreas(0, hotAreas);
-    ASSERT_EQ(WSError::WS_OK, keyboardSession->Show(property));
-}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

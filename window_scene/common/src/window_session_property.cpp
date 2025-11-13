@@ -879,42 +879,6 @@ KeyboardTouchHotAreas WindowSessionProperty::GetKeyboardTouchHotAreas() const
     return keyboardTouchHotAreas_;
 }
 
-void WindowSessionProperty::AddKeyboardTouchHotAreas(
-    const uint64_t screenId, const KeyboardTouchHotAreas& keyboardTouchHotAreas)
-{
-    std::lock_guard lock(touchHotAreasMutex_);
-    if (screenId != DISPLAY_ID_INVALID) {
-        keyboardTouchHotAreasMap_[screenId] = keyboardTouchHotAreas;
-    }
-}
-
-void WindowSessionProperty::ClearCachedKeyboardHotAreasOnScreenDisconnected(const uint64_t screenId)
-{
-    std::lock_guard lock(touchHotAreasMutex_);
-    auto it = keyboardTouchHotAreasMap_.find(screenId);
-    if (it == keyboardTouchHotAreasMap_.end()) {
-        return;
-    }
-    keyboardTouchHotAreasMap_.erase(it);
-}
-
-void WindowSessionProperty::GetKeyboardTouchHotAreasByScreenId(
-    const uint64_t screenId, KeyboardTouchHotAreas& keyboardTouchHotAreas)
-{
-    std::lock_guard lock(touchHotAreasMutex_);
-    auto it = keyboardTouchHotAreasMap_.find(screenId);
-    if (it == keyboardTouchHotAreasMap_.end()) {
-        TLOGW(WmsLogTag::WMS_KEYBOARD, "Get keyboardHotAreas failed, %{public}" PRIu64, screenId);
-        return;
-    }
-    const KeyboardTouchHotAreas& hotAreas = it->second;
-    keyboardTouchHotAreas.landscapeKeyboardHotAreas_ = hotAreas.landscapeKeyboardHotAreas_;
-    keyboardTouchHotAreas.portraitKeyboardHotAreas_ = hotAreas.portraitKeyboardHotAreas_;
-    keyboardTouchHotAreas.landscapePanelHotAreas_ = hotAreas.landscapePanelHotAreas_;
-    keyboardTouchHotAreas.portraitPanelHotAreas_ = hotAreas.portraitPanelHotAreas_;
-    keyboardTouchHotAreas.displayId_ = hotAreas.displayId_;
-}
-
 void WindowSessionProperty::KeepKeyboardOnFocus(bool keepKeyboardFlag)
 {
     keepKeyboardFlag_ = keepKeyboardFlag;
