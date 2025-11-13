@@ -25,6 +25,8 @@
 #include "ui/rs_surface_node.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
+#include "window_session_property.h"
+#include "wm_common.h"
 
 using namespace testing;
 using namespace testing::ext;

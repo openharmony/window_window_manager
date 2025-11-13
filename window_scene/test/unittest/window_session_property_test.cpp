@@ -1727,6 +1727,103 @@ HWTEST_F(WindowSessionPropertyTest, GetRotationLocked, TestSize.Level0)
     property->isRotationLock_ = false;
     EXPECT_EQ(property->GetRotationLocked(), false);
 }
+
+/**
+ * @tc.name: AddKeyboardLayoutParams
+ * @tc.desc: Test AddKeyboardLayoutParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, AddKeyboardLayoutParams, TestSize.Level0)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_TRUE(property->keyboardLayoutParamsMap_.empty());
+    uint64_t screenId = 1;
+    KeyboardLayoutParams params;
+    const Rect expectedRect = { 1, 2, 3, 4 };
+    params.LandscapeKeyboardRect_ = expectedRect;
+    params.LandscapePanelRect_ = expectedRect;
+    params.PortraitKeyboardRect_ = expectedRect;
+    params.PortraitPanelRect_ = expectedRect;
+    params.displayId_ = 10;
+    params.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
+    property->AddKeyboardLayoutParams(screenId, params);
+    ASSERT_EQ(property->keyboardLayoutParamsMap_.size(), 1);
+    const auto value = property->keyboardLayoutParamsMap_[screenId];
+    EXPECT_EQ(value.displayId_, 10);
+    EXPECT_EQ(value.gravity_, WindowGravity::WINDOW_GRAVITY_BOTTOM);
+    EXPECT_EQ(value.LandscapeKeyboardRect_, expectedRect);
+    EXPECT_EQ(value.LandscapePanelRect_, expectedRect);
+    EXPECT_EQ(value.PortraitKeyboardRect_, expectedRect);
+    EXPECT_EQ(value.PortraitPanelRect_, expectedRect);
+}
+
+HWTEST_F(WindowSessionPropertyTest, AddKeyboardLayoutParams_InvalidDisplayId, TestSize.Level0)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_TRUE(property->keyboardLayoutParamsMap_.empty());
+
+    // adding with invalid displayid results in a no-op
+    KeyboardLayoutParams params;
+    property->AddKeyboardLayoutParams(DISPLAY_ID_INVALID, params);
+    ASSERT_TRUE(property->keyboardLayoutParamsMap_.empty());
+}
+
+/**
+ * @tc.name: ClearCachedKeyboardParamsOnScreenDisconnected
+ * @tc.desc: Test ClearCachedKeyboardParamsOnScreenDisconnected
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, ClearCachedKeyboardParamsOnScreenDisconnected, TestSize.Level0)
+{
+    auto property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_TRUE(property->keyboardLayoutParamsMap_.empty());
+    property->ClearCachedKeyboardParamsOnScreenDisconnected(1); // should be no-op
+    ASSERT_TRUE(property->keyboardLayoutParamsMap_.empty());
+
+    // insert two entries
+    KeyboardLayoutParams params1, params2;
+    property->AddKeyboardLayoutParams(1, params1);
+    property->AddKeyboardLayoutParams(2, params2);
+    ASSERT_EQ(property->keyboardLayoutParamsMap_.size(), 2);
+
+    property->ClearCachedKeyboardParamsOnScreenDisconnected(1);
+    ASSERT_EQ(property->keyboardLayoutParamsMap_.size(), 1);
+    EXPECT_TRUE(property->keyboardLayoutParamsMap_.find(1) == property->keyboardLayoutParamsMap_.end());
+    EXPECT_TRUE(property->keyboardLayoutParamsMap_.find(2) != property->keyboardLayoutParamsMap_.end());
+
+    // clear an invalid screenId results in no-op
+    property->ClearCachedKeyboardParamsOnScreenDisconnected(3);
+    ASSERT_EQ(property->keyboardLayoutParamsMap_.size(), 1);
+    EXPECT_TRUE(property->keyboardLayoutParamsMap_.find(2) != property->keyboardLayoutParamsMap_.end());
+}
+
+/**
+ * @tc.name: GetKeyboardLayoutParamsByScreenId
+ * @tc.desc: Test GetKeyboardLayoutParamsByScreenId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetKeyboardLayoutParamsByScreenId, TestSize.Level0)
+{
+    auto property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_TRUE(property->keyboardLayoutParamsMap_.empty());
+
+    KeyboardLayoutParams params;
+    const Rect defaultRect = { 1, 2, 3, 4 };
+    params.LandscapeKeyboardRect_ = defaultRect;
+    params.displayId_ = 1234;
+    property->GetKeyboardLayoutParamsByScreenId(1, params); // should be no-op
+    ASSERT_EQ(params.LandscapeKeyboardRect_, defaultRect);
+    ASSERT_EQ(params.displayId_, 1234);
+
+    KeyboardLayoutParams insertedParams;
+    insertedParams.LandscapeKeyboardRect_ = { 5, 6, 7, 8 };
+    insertedParams.displayId_ = 5678;
+    property->AddKeyboardLayoutParams(1, insertedParams);
+    ASSERT_EQ(property->keyboardLayoutParamsMap_.size(), 1);
+    property->GetKeyboardLayoutParamsByScreenId(1, params);
+    EXPECT_EQ(params.LandscapeKeyboardRect_, insertedParams.LandscapeKeyboardRect_);
+    EXPECT_EQ(params.displayId_, insertedParams.displayId_);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -706,6 +706,7 @@ void WindowSessionProperty::SetWindowState(WindowState state)
 
 void WindowSessionProperty::SetKeyboardLayoutParams(const KeyboardLayoutParams& params)
 {
+    std::lock_guard<std::mutex> lock(keyboardParamsMutex_);
     keyboardLayoutParams_.gravity_ = params.gravity_;
     keyboardLayoutParams_.landscapeAvoidHeight_ = params.landscapeAvoidHeight_;
     keyboardLayoutParams_.portraitAvoidHeight_ = params.portraitAvoidHeight_;
@@ -713,11 +714,56 @@ void WindowSessionProperty::SetKeyboardLayoutParams(const KeyboardLayoutParams& 
     keyboardLayoutParams_.PortraitKeyboardRect_ = params.PortraitKeyboardRect_;
     keyboardLayoutParams_.LandscapePanelRect_ = params.LandscapePanelRect_;
     keyboardLayoutParams_.PortraitPanelRect_ = params.PortraitPanelRect_;
+    keyboardLayoutParams_.displayId_ = params.displayId_;
 }
 
 KeyboardLayoutParams WindowSessionProperty::GetKeyboardLayoutParams() const
 {
+    std::lock_guard<std::mutex> lock(keyboardParamsMutex_);
     return keyboardLayoutParams_;
+}
+
+void WindowSessionProperty::AddKeyboardLayoutParams(const uint64_t screenId, const KeyboardLayoutParams& params)
+{
+    std::lock_guard<std::mutex> lock(keyboardParamsMutex_);
+    if (screenId != DISPLAY_ID_INVALID) {
+        keyboardLayoutParamsMap_[screenId] = params;
+    }
+}
+
+void WindowSessionProperty::ClearCachedKeyboardParamsOnScreenDisconnected(const uint64_t screenId)
+{
+    std::lock_guard<std::mutex> lock(keyboardParamsMutex_);
+    auto it = keyboardLayoutParamsMap_.find(screenId);
+    if (it == keyboardLayoutParamsMap_.end()) {
+        return;
+    }
+    keyboardLayoutParamsMap_.erase(it);
+}
+
+void WindowSessionProperty::GetKeyboardLayoutParamsByScreenId(
+    const uint64_t screenId, KeyboardLayoutParams& keyboardLayoutParams)
+{
+    std::lock_guard<std::mutex> lock(keyboardParamsMutex_);
+    auto it = keyboardLayoutParamsMap_.find(screenId);
+    if (it == keyboardLayoutParamsMap_.end()) {
+        TLOGW(WmsLogTag::WMS_KEYBOARD, "Get keyboardParams failed, %{public}" PRIu64, screenId);
+        return;
+    }
+    const KeyboardLayoutParams& params = it->second;
+    keyboardLayoutParams.gravity_ = params.gravity_;
+    keyboardLayoutParams.landscapeAvoidHeight_ = params.landscapeAvoidHeight_;
+    keyboardLayoutParams.portraitAvoidHeight_ = params.portraitAvoidHeight_;
+    keyboardLayoutParams.LandscapeKeyboardRect_ = params.LandscapeKeyboardRect_;
+    keyboardLayoutParams.PortraitKeyboardRect_ = params.PortraitKeyboardRect_;
+    keyboardLayoutParams.LandscapePanelRect_ = params.LandscapePanelRect_;
+    keyboardLayoutParams.PortraitPanelRect_ = params.PortraitPanelRect_;
+    keyboardLayoutParams.displayId_ = params.displayId_;
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Get keyboardParams: %{public}u|%{public}d|%{public}d|%{public}s|%{public}s|"
+        "%{public}s|%{public}s|%{public}" PRIu64, static_cast<uint32_t>(params.gravity_),
+        params.landscapeAvoidHeight_, params.portraitAvoidHeight_, params.LandscapeKeyboardRect_.ToString().c_str(),
+        params.PortraitKeyboardRect_.ToString().c_str(), params.LandscapePanelRect_.ToString().c_str(),
+        params.PortraitPanelRect_.ToString().c_str(), params.displayId_);
 }
 
 void WindowSessionProperty::SetDecorEnable(bool isDecorEnable)
@@ -814,6 +860,7 @@ void WindowSessionProperty::SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas
             keyboardTouchHotAreas.landscapePanelHotAreas_, keyboardTouchHotAreas_.landscapePanelHotAreas_);
         setTouchHotAreasInner(
             keyboardTouchHotAreas.portraitPanelHotAreas_, keyboardTouchHotAreas_.portraitPanelHotAreas_);
+        keyboardTouchHotAreas_.displayId_ = keyboardTouchHotAreas.displayId_;
     }
     if (touchHotAreasChangeCallback_) {
         touchHotAreasChangeCallback_();
@@ -1036,7 +1083,8 @@ bool WindowSessionProperty::MarshallingKeyboardTouchHotAreas(Parcel& parcel) con
     return MarshallingTouchHotAreasInner(keyboardTouchHotAreas_.landscapeKeyboardHotAreas_, parcel) &&
            MarshallingTouchHotAreasInner(keyboardTouchHotAreas_.portraitKeyboardHotAreas_, parcel) &&
            MarshallingTouchHotAreasInner(keyboardTouchHotAreas_.landscapePanelHotAreas_, parcel) &&
-           MarshallingTouchHotAreasInner(keyboardTouchHotAreas_.portraitPanelHotAreas_, parcel);
+           MarshallingTouchHotAreasInner(keyboardTouchHotAreas_.portraitPanelHotAreas_, parcel) &&
+           parcel.WriteUint64(keyboardTouchHotAreas_.displayId_);
 }
 
 void WindowSessionProperty::UnmarshallingTouchHotAreasInner(Parcel& parcel, std::vector<Rect>& touchHotAreas)
@@ -1062,6 +1110,7 @@ void WindowSessionProperty::UnmarshallingKeyboardTouchHotAreas(Parcel& parcel, W
     UnmarshallingTouchHotAreasInner(parcel, property->keyboardTouchHotAreas_.portraitKeyboardHotAreas_);
     UnmarshallingTouchHotAreasInner(parcel, property->keyboardTouchHotAreas_.landscapePanelHotAreas_);
     UnmarshallingTouchHotAreasInner(parcel, property->keyboardTouchHotAreas_.portraitPanelHotAreas_);
+    property->keyboardTouchHotAreas_.displayId_ = parcel.ReadUint64();
 }
 
 bool WindowSessionProperty::MarshallingPiPTemplateInfo(Parcel& parcel) const

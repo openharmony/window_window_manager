@@ -36,6 +36,7 @@ namespace OHOS::Rosen {
 namespace {
     constexpr float MOVE_DRAG_POSITION_Z = 100.5f;
     constexpr int32_t INSERT_TO_THE_END = -1;
+    const std::string COOPERATION_DISPLAY_NAME = "Cooperation";
 }
 KeyboardSession::KeyboardSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback,
     const sptr<KeyboardSessionCallback>& keyboardCallback)
@@ -287,11 +288,11 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
         TLOGNI(WmsLogTag::WMS_KEYBOARD, "Adjust keyboard layout, keyboardId: %{public}d, gravity: %{public}u, "
             "landscapeAvoidHeight: %{public}d, portraitAvoidHeight: %{public}d, "
             "Landscape: %{public}s, Portrait: %{public}s, LandscapePanel: %{public}s, "
-            "PortraitPanel: %{public}s, request: %{public}s", session->GetPersistentId(),
+            "PortraitPanel: %{public}s, dispId: %{public}" PRIu64, session->GetPersistentId(),
             static_cast<uint32_t>(params.gravity_), params.landscapeAvoidHeight_, params.portraitAvoidHeight_,
             params.LandscapeKeyboardRect_.ToString().c_str(), params.PortraitKeyboardRect_.ToString().c_str(),
             params.LandscapePanelRect_.ToString().c_str(), params.PortraitPanelRect_.ToString().c_str(),
-            session->GetSessionRequestRect().ToString().c_str());
+            params.displayId_);
         return WSError::WS_OK;
     }, "AdjustKeyboardLayout");
     return WSError::WS_OK;
@@ -1153,7 +1154,31 @@ WMError KeyboardSession::HandleActionUpdateKeyboardTouchHotArea(const sptr<Windo
     if (GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         return WMError::WM_ERROR_INVALID_TYPE;
     }
-    auto displayId = GetSessionProperty()->GetDisplayId();
+    auto sessionProperty = GetSessionProperty();
+    KeyboardTouchHotAreas keyboardTouchHotAreas = property->GetKeyboardTouchHotAreas();
+    auto displayId = (keyboardTouchHotAreas.displayId_ == DISPLAY_ID_INVALID) ?
+        sessionProperty->GetDisplayId() : keyboardTouchHotAreas.displayId_;
+    bool isLandscape = false;
+    WMError ret = IsLandscape(displayId, isLandscape);
+    if (ret != WMError::WM_OK) {
+        return ret;
+    }
+    std::vector<Rect>& keyboardHotAreas = isLandscape ?
+        keyboardTouchHotAreas.landscapeKeyboardHotAreas_ : keyboardTouchHotAreas.portraitKeyboardHotAreas_;
+    std::vector<Rect>& panelHotAreas = isLandscape ?
+        keyboardTouchHotAreas.landscapePanelHotAreas_ : keyboardTouchHotAreas.portraitPanelHotAreas_;
+    if (keyboardTouchHotAreas != sessionProperty->GetKeyboardTouchHotAreas()) {
+        PrintRectsInfo(keyboardHotAreas, "keyboardHotAreas");
+        PrintRectsInfo(panelHotAreas, "panelHotAreas");
+    }
+    sessionProperty->SetTouchHotAreas(keyboardHotAreas);
+    keyboardPanelSession_->GetSessionProperty()->SetTouchHotAreas(panelHotAreas);
+    sessionProperty->SetKeyboardTouchHotAreas(keyboardTouchHotAreas);
+    return WMError::WM_OK;
+}
+
+WMError KeyboardSession::IsLandscape(uint64_t displayId, bool& isLandscape)
+{
     ScreenProperty screenProperty;
     std::map<ScreenId, ScreenProperty> screensProperties =
         ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
@@ -1165,13 +1190,17 @@ WMError KeyboardSession::HandleActionUpdateKeyboardTouchHotArea(const sptr<Windo
             ",invalid displayId: %{public}" PRIu64"", screenId, displayId);
         if (screensProperties.find(screenId) != screensProperties.end()) {
             screenProperty = screensProperties[screenId];
+            displayId = screenId;
         } else {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "invalid screen id: %{public}" PRIu64, screenId);
             return WMError::WM_ERROR_INVALID_DISPLAY;
         }
     }
-    bool isLandscape = screenProperty.GetBounds().rect_.GetWidth() > screenProperty.GetBounds().rect_.GetHeight();
-    if (screenProperty.GetBounds().rect_.GetWidth() == screenProperty.GetBounds().rect_.GetHeight()) {
+    auto displayRect = screenProperty.GetBounds().rect_;
+    int32_t displayWidth = displayRect.GetWidth();
+    int32_t displayHeight = displayRect.GetHeight();
+    isLandscape = displayWidth > displayHeight;
+    if (displayWidth == displayHeight) {
         DisplayOrientation orientation = screenProperty.GetDisplayOrientation();
         if (orientation == DisplayOrientation::UNKNOWN) {
             TLOGW(WmsLogTag::WMS_KEYBOARD, "Display orientation is UNKNOWN");
@@ -1179,16 +1208,20 @@ WMError KeyboardSession::HandleActionUpdateKeyboardTouchHotArea(const sptr<Windo
         isLandscape = (orientation == DisplayOrientation::LANDSCAPE ||
             orientation == DisplayOrientation::LANDSCAPE_INVERTED);
     }
-    if (isLandscape) {
-        GetSessionProperty()->SetTouchHotAreas(property->GetKeyboardTouchHotAreas().landscapeKeyboardHotAreas_);
-        keyboardPanelSession_->GetSessionProperty()->SetTouchHotAreas(
-            property->GetKeyboardTouchHotAreas().landscapePanelHotAreas_);
-    } else {
-        GetSessionProperty()->SetTouchHotAreas(property->GetKeyboardTouchHotAreas().portraitKeyboardHotAreas_);
-        keyboardPanelSession_->GetSessionProperty()->SetTouchHotAreas(
-            property->GetKeyboardTouchHotAreas().portraitPanelHotAreas_);
-    }
-    GetSessionProperty()->SetKeyboardTouchHotAreas(property->GetKeyboardTouchHotAreas());
+    auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
+    std::string dispName = (display != nullptr) ? display->GetName() : "UNKNOWN";
+    isLandscape = isLandscape || (dispName == COOPERATION_DISPLAY_NAME);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "s-displayInfo: %{public}" PRIu64 ", %{public}d|%{public}d|%{public}d|%{public}s",
+        displayId, displayWidth, displayHeight, isLandscape, dispName.c_str());
     return WMError::WM_OK;
+}
+
+void KeyboardSession::PrintRectsInfo(const std::vector<Rect>& rects, const std::string& infoTag)
+{
+    std::ostringstream oss;
+    for (const auto& rect : rects) {
+        oss << "[" << rect.posX_ << "," << rect.posY_ << "," << rect.width_ << "," << rect.height_ << "]";
+    }
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "%{public}s: %{public}s", infoTag.c_str(), oss.str().c_str());
 }
 } // namespace OHOS::Rosen

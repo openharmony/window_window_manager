@@ -25,6 +25,7 @@
 #include "session_manager/include/scene_session_manager.h"
 #include "transaction/rs_uiextension_data.h"
 #include "window_helper.h"
+#include "wm_common.h"
 
 using namespace testing;
 using namespace testing::ext;

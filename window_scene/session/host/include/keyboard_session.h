@@ -122,6 +122,8 @@ private:
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;
     bool isKeyboardSyncTransactionOpen_ = false;
     NotifyKeyboarEffectOptionChangeFunc changeKeyboardEffectOptionFunc_;
+    WMError IsLandscape(uint64_t screenId, bool& isLandscape);
+    void PrintRectsInfo(const std::vector<Rect>& rects, const std::string& infoTag);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_KEYBOARD_SESSION_H
