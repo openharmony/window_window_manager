@@ -18,6 +18,7 @@
 
 #include "window_session_impl.h"
 #include "window_manager.h"
+#include "screen_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -49,6 +50,12 @@ public:
     bool IsStartMoving() override;
     WindowMode GetWindowMode() const override;
     WMError SetHookTargetElementInfo(const AppExecFwk::ElementName& elementName) override;
+    class WindowScreenListener : public ScreenManager::IScreenListener {
+    public:
+        void OnConnect(ScreenId screenId) override {};
+        void OnDisconnect(ScreenId screenId) override;
+        void OnChange(ScreenId screenId) override {};
+    };
 
     /*
      * Window Layout
@@ -468,8 +475,6 @@ private:
      * Window Immersive
      */
     void UpdateDefaultStatusBarColor();
-    bool IsLandscape();
-    WMError MoveAndResizeKeyboard(const KeyboardLayoutParams& params);
     bool userLimitsSet_ = false;
     bool forceLimits_ = false;
     bool enableDefaultAnimation_ = true;
@@ -486,6 +491,13 @@ private:
         const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag) override;
     std::mutex systemBarPropertyForPageMapMutex_;
     std::unordered_map<WindowType, std::optional<SystemBarProperty>> systemBarPropertyForPageMap_;
+
+    /*
+     * keyboard
+     */
+    WMError MoveAndResizeKeyboard(const KeyboardLayoutParams& params);
+    bool IsLandscape(uint64_t screenId);
+    void RegisterListenerForKeyboard();
 
     /*
      * Gesture Back
