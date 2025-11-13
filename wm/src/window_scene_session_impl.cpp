@@ -6257,6 +6257,9 @@ void WindowSceneSessionImpl::UpdateNewSize()
             return;
         }
     }
+    if (GetType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        return;
+    }
 
     uint32_t width = windowRect.width_;
     uint32_t height = windowRect.height_;

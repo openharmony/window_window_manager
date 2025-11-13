@@ -3880,9 +3880,11 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
     if (endDisplayId == moveDragController_->GetMoveDragStartDisplayId() ||
         !moveDragController_->IsSupportWindowDragCrossDisplay()) {
         NotifySessionRectChange(rect, reason);
+        HandleKeyboardMoveDragEnd(rect, reason);
         NotifySubSessionRectChangeByAnchor(rect, SizeChangeReason::UNDEFINED);
     } else {
         NotifySessionRectChange(rect, reason, endDisplayId);
+        HandleKeyboardMoveDragEnd(rect, reason, endDisplayId);
         NotifySubSessionRectChangeByAnchor(rect, SizeChangeReason::UNDEFINED, endDisplayId);
         CheckSubSessionShouldFollowParent(endDisplayId);
     }

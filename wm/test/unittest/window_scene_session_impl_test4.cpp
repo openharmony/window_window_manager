@@ -1431,6 +1431,8 @@ HWTEST_F(WindowSceneSessionImplTest4, UpdateNewSize02, TestSize.Level1)
     subWindow->property_->SetRequestRect(windowRect);
     subWindow->windowSystemConfig_.freeMultiWindowSupport_ = false;
     subWindow->UpdateNewSize();
+    subWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    subWindow->UpdateNewSize();
     ASSERT_NE(nullptr, subWindow->property_);
 }
 
