@@ -2691,7 +2691,7 @@ export class WindowInternal implements Window {
     private native getWindowAvoidAreaIgnoringVisibilitySync(nativeObj: long, type: int): AvoidArea;
     private native setWaterMarkFlagSync(nativeObj: long, enable: boolean): void;
     private native raiseMainWindowAboveTargetSync(nativeObj: long, windowId: int): void;
-    private native setMainWindowRaiseByClickEnabled(nativeObj: long, windowId: int): void;
+    private native setMainWindowRaiseByClickEnabledSync(nativeObj: long, enable: boolean): void;
     private native setWindowFocusableSync(nativeObj: long, isFocusable: boolean): void;
     private native showWindowSync(nativeObj: long): void;
     private native showWindowWithOptions(nativeObj: long, options: ShowWindowOptions): void;
@@ -3301,7 +3301,7 @@ export class WindowInternal implements Window {
     public setMainWindowRaiseByClickEnabled(enable: boolean): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
-          this.setMainWindowRaiseByClickEnabled(this.nativeObj, enable);
+          this.setMainWindowRaiseByClickEnabledSync(this.nativeObj, enable);
         }).then((ret: NullishType) => {
           resolve(undefined);
         }).catch((err: NullishType) => {

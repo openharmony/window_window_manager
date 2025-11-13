@@ -812,7 +812,7 @@ void AniWindow::OnSetMainWindowRaiseByClickEnabled(ani_env* env, ani_boolean ena
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
         return;
     }
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetMainWindowRaiseByClickEnabled(windowId));
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetMainWindowRaiseByClickEnabled(enable));
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret, "SetMainWindowRaiseByClickEnabled failed.");
         return;
@@ -3626,7 +3626,7 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::SetWaterMarkFlag)},
         ani_native_function {"raiseMainWindowAboveTargetSync", "JI:V",
             reinterpret_cast<void *>(AniWindow::RaiseMainWindowAboveTarget)},
-        ani_native_function {"setMainWindowRaiseByClickEnabled", "JI:V",
+        ani_native_function {"setMainWindowRaiseByClickEnabledSync", "JZ:V",
             reinterpret_cast<void *>(AniWindow::SetMainWindowRaiseByClickEnabled)},
         ani_native_function {"setWindowFocusableSync", "JZ:V",
             reinterpret_cast<void *>(AniWindow::SetWindowFocusable)},
