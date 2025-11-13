@@ -764,6 +764,7 @@ HWTEST_F(WindowSessionTest3, PresentFocusIfNeed03, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     int32_t pointerAction = MMI::PointerEvent::POINTER_ACTION_DOWN;
+    int32_t sourceType = MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
     session_->property_->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
     session_->PresentFocusIfNeed(pointerAction, sourceType);
 
