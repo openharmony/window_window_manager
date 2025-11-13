@@ -660,7 +660,8 @@ WMError WindowManager::UnregisterWMSConnectionChangedListener()
     return WMError::WM_OK;
 }
 
-WMError WindowManager::RegisterFocusChangedListener(const sptr<IFocusChangedListener>& listener, bool strongRegister)
+WMError WindowManager::RegisterFocusChangedListener(const sptr<IFocusChangedListener>& listener,
+    bool recoverableOnFault)
 {
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "listener is null");
@@ -681,7 +682,7 @@ WMError WindowManager::RegisterFocusChangedListener(const sptr<IFocusChangedList
     {
         std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
         if (ret != WMError::WM_OK) {
-            if (strongRegister) {
+            if (recoverableOnFault) {
                 TLOGW(WmsLogTag::WMS_FOCUS, "sceneboard fault, activate the fallback solution");
                 WindowAdapter::GetInstance(userId_).RegisterWindowManagerAgentWhenSCBFault(
                     WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS, pImpl_->focusChangedListenerAgent_);

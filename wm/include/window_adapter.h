@@ -72,7 +72,7 @@ public:
     virtual WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
     void RegisterWindowManagerAgentWhenSCBFault(WindowManagerAgentType type,
-                                                const sptr<IWindowManagerAgent>& windowManagerAgent);
+        const sptr<IWindowManagerAgent>& windowManagerAgent);
     virtual WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
     WMError RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
