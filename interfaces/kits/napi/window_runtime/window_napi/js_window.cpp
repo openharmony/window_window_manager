@@ -5158,8 +5158,8 @@ napi_value JsWindow::OnSetMainWindowRaiseByClickEnabled(napi_env env, napi_callb
                 where, window->GetWindowId(), raiseEnabled);
         };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "SetMainWindowRaiseByClickEnabled") != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env,
-            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
+        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setMainWindowRaiseByClickEnabled]msg: failed to send event"));
     }
     return result;
 }
