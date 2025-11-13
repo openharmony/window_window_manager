@@ -81,10 +81,8 @@ public:
 
 protected:
     void EnableCallingSessionAvoidArea() override;
-    void NotifySessionRectChange(const WSRect& rect,
-        SizeChangeReason reason = SizeChangeReason::UNDEFINED,
-        DisplayId displayId = DISPLAY_ID_INVALID,
-        const RectAnimationConfig& rectAnimationConfig = {}) override;
+    void HandleKeyboardMoveDragEnd(const WSRect& rect, SizeChangeReason reason = SizeChangeReason::UNDEFINED,
+        DisplayId displayId = DISPLAY_ID_INVALID) override;
     void RestoreCallingSession(uint32_t callingId, const std::shared_ptr<RSTransaction>& rsTransaction) override;
 
 private:

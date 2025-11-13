@@ -603,10 +603,9 @@ void KeyboardSession::RestoreCallingSession(uint32_t callingId, const std::share
     callingSession->SetOriPosYBeforeRaisedByKeyboard(0); // 0: default value
 }
 
-void KeyboardSession::NotifySessionRectChange(const WSRect& rect,
-    SizeChangeReason reason, DisplayId displayId, const RectAnimationConfig& rectAnimationConfig)
+void KeyboardSession::HandleKeyboardMoveDragEnd(const WSRect& rect, SizeChangeReason reason, DisplayId displayId)
 {
-    PostTask([weakThis = wptr(this), rect, reason, displayId, rectAnimationConfig, where = __func__] {
+    PostTask([weakThis = wptr(this), rect, reason, displayId, where = __func__] {
         auto session = weakThis.promote();
         if (session == nullptr) {
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s session is null", where);

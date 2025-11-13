@@ -327,25 +327,24 @@ HWTEST_F(KeyboardSessionTest3, SetSurfaceBounds01, TestSize.Level1)
 }
 
 /**
- * @tc.name: NotifySessionRectChange01
- * @tc.desc: test function: NotifySessionRectChange
+ * @tc.name: HandleKeyboardMoveDragEnd01
+ * @tc.desc: test function: HandleKeyboardMoveDragEnd
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest3, NotifySessionRectChange01, TestSize.Level1)
+HWTEST_F(KeyboardSessionTest3, HandleKeyboardMoveDragEnd01, TestSize.Level1)
 {
-    auto keyboardSession = GetKeyboardSession("NotifySessionRectChange01", "NotifySessionRectChange01");
+    auto keyboardSession = GetKeyboardSession("HandleKeyboardMoveDragEnd01", "HandleKeyboardMoveDragEnd01");
     ASSERT_NE(keyboardSession, nullptr);
     keyboardSession->adjustKeyboardLayoutFunc_ = [](const KeyboardLayoutParams& params) {};
 
     WSRect rect = { 50, 50, 900, 900 };
-    keyboardSession->NotifySessionRectChange(rect, SizeChangeReason::DRAG_END, -1);
-    keyboardSession->NotifySessionRectChange(rect, SizeChangeReason::DRAG_END, 11);
+    keyboardSession->HandleKeyboardMoveDragEnd(rect, SizeChangeReason::DRAG_END, -1);
+    keyboardSession->HandleKeyboardMoveDragEnd(rect, SizeChangeReason::DRAG_END, 11);
     keyboardSession->sessionRectChangeFunc_ = [](const WSRect& rect,
                                                  SizeChangeReason reason,
-                                                 DisplayId displayId,
-                                                 const RectAnimationConfig& rectAnimationConfig) { return; };
-    keyboardSession->NotifySessionRectChange(rect, SizeChangeReason::DRAG_END, -1);
-    keyboardSession->NotifySessionRectChange(rect, SizeChangeReason::DRAG_END, 11);
+                                                 DisplayId displayId) { return; };
+    keyboardSession->HandleKeyboardMoveDragEnd(rect, SizeChangeReason::DRAG_END, -1);
+    keyboardSession->HandleKeyboardMoveDragEnd(rect, SizeChangeReason::DRAG_END, 11);
 }
 
 /**
