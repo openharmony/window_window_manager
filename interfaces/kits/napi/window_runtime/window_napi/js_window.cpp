@@ -5118,12 +5118,12 @@ napi_value JsWindow::OnSetMainWindowRaiseByClickEnabled(napi_env env, napi_callb
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1 || argc > 2) { // 2: maximum params num
         TLOGE(WmsLogTag::WMS_HIERARCHY, "Argc is invalid: %{public}zu", argc);
-        errCode = WMError::WM_ERROR_INVALID_PARAM;
+        errCode = WMError::WM_DO_NOTHING;
     }
     bool raiseEnabled = true;
     if (!ConvertFromJsValue(env, argv[0], raiseEnabled)) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "Failed to convert parameter to raiseEnabled");
-        errCode = WMError::WM_ERROR_INVALID_PARAM;
+        errCode = WMError::WM_DO_NOTHING;
     }
     if (!Permission::IsSystemCallingOrStartByHdcd(true)) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "permission denied, require system application");
