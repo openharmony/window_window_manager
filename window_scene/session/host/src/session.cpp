@@ -2557,6 +2557,8 @@ void Session::PresentFocusIfPointDown()
     }
     if (NeedRequestToTop()) {
         NotifyClick();
+    } else {
+        TLOGI(WmsLogTag::WMS_FOCUS, "do not need to request to top");
     }
 }
 
@@ -2658,6 +2660,8 @@ WSError Session::HandlePointerEventForFocus(const std::shared_ptr<MMI::PointerEv
         }
         if (NeedRequestToTop()) {
             NotifyClick();
+        } else {
+            TLOGI(WmsLogTag::WMS_FOCUS, "do not need to request to top");
         }
     }
     return WSError::WS_OK;
@@ -3434,11 +3438,13 @@ void Session::PresentFocusIfNeed(int32_t pointerAction, int32_t sourceType)
         }
         if (NeedRequestToTop()) {
             NotifyClick();
+        } else {
+            TLOGI(WmsLogTag::WMS_FOCUS, "do not need to request to top");
         }
     }
 }
 
-bool Session::NeedRequestToTop() cosnt
+bool Session::NeedRequestToTop() const
 {
     return WindowHelper::IsMainWindow(GetWindowType()) ? GetSessionProperty()->GetRaiseEnabled() : true;
 }

@@ -335,6 +335,22 @@ HWTEST_F(WindowSessionTest3, PresentFocusIfPointDown, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PresentFocusIfPointDown01
+ * @tc.desc: PresentFocusIfPointDown Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, PresentFocusIfPointDown01, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->property_->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    session_->PresentFocusIfPointDown();
+
+    session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    session_->property_->SetRaiseEnabled(false);
+    session_->PresentFocusIfPointDown();
+}
+
+/**
  * @tc.name: TransferPointerEvent06
  * @tc.desc: TransferPointerEvent Test
  * @tc.type: FUNC
@@ -737,6 +753,40 @@ HWTEST_F(WindowSessionTest3, PresentFocusIfNeed02, TestSize.Level1)
     sourceType = MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
     session_->PresentFocusIfNeed(pointerAction, sourceType);
     EXPECT_EQ(hasNotifyManagerToRequestFocus, true);
+}
+
+/**
+ * @tc.name: PresentFocusIfNeed03
+ * @tc.desc: PresentFocusIfNeed Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, PresentFocusIfNeed03, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    int32_t pointerAction = MMI::PointerEvent::POINTER_ACTION_DOWN;
+    session_->property_->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    session_->PresentFocusIfNeed(pointerAction, sourceType);
+
+    session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    session_->property_->SetRaiseEnabled(false);
+    session_->PresentFocusIfNeed(pointerAction, sourceType);
+}
+
+/**
+ * @tc.name: NeedRequestToTop
+ * @tc.desc: NeedRequestToTop Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, NeedRequestToTop, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->property_->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    EXPECT_EQ(session_->NeedRequestToTop(), true);
+    session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    session_->property_->SetRaiseEnabled(false);
+    EXPECT_EQ(session_->NeedRequestToTop(), false);
+    session_->property_->SetRaiseEnabled(true);
+    EXPECT_EQ(session_->NeedRequestToTop(), true);
 }
 
 /**
