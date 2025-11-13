@@ -1699,39 +1699,39 @@ HWTEST_F(SceneSessionManagerTest, TestGetScreenName, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestGetScreenName start";
     int32_t persistentId = 2000;
-    EXPECT_EQ(ssm_->getScreenName(persistentId), "");
+    EXPECT_EQ(ssm_->GetScreenName(persistentId), "");
 
     SessionInfo info1;
     info1.abilityName_ = "test1";
     info1.bundleName_ = "test2";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info1, nullptr);
     ssm_->sceneSessionMap_[persistentId] = sceneSession;
-    EXPECT_EQ(ssm_->getScreenName(persistentId), "");
+    EXPECT_EQ(ssm_->GetScreenName(persistentId), "");
 
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
-    EXPECT_EQ(ssm_->getScreenName(persistentId), "");
+    EXPECT_EQ(ssm_->GetScreenName(persistentId), "");
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->SetSessionProperty(property);
-    EXPECT_EQ(ssm_->getScreenName(persistentId), "");
+    EXPECT_EQ(ssm_->GetScreenName(persistentId), "");
 
     property->SetDisplayId(-1ULL);
     sceneSession->SetSessionProperty(property);
     ssm_->sceneSessionMap_[persistentId] = sceneSession;
-    EXPECT_EQ(ssm_->getScreenName(persistentId), "");
+    EXPECT_EQ(ssm_->GetScreenName(persistentId), "");
 
     uint64_t displayId = 1000;
     property->SetDisplayId(displayId);
     sceneSession->SetSessionProperty(property);
     ssm_->sceneSessionMap_[persistentId] = sceneSession;
-    EXPECT_EQ(ssm_->getScreenName(persistentId), "");
+    EXPECT_EQ(ssm_->GetScreenName(persistentId), "");
 
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert({displayId, screenSession});
-    EXPECT_EQ(ssm_->getScreenName(persistentId), "UNKNOWN");
+    EXPECT_EQ(ssm_->GetScreenName(persistentId), "UNKNOWN");
 
     screenSession->SetName("SuperLauncher");
-    EXPECT_EQ(ssm_->getScreenName(persistentId), "SuperLauncher");
+    EXPECT_EQ(ssm_->GetScreenName(persistentId), "SuperLauncher");
     ssm_->sceneSessionMap_.erase(2000);
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.erase(1000);
 }

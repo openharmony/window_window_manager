@@ -4218,7 +4218,7 @@ bool SceneSessionManager::CheckPiPPriority(const PiPTemplateInfo& pipTemplateInf
     return true;
 }
 
-std::string SceneSessionManager::getScreenName(int32_t persistentId)
+std::string SceneSessionManager::GetScreenName(int32_t persistentId)
 {
     auto session = GetSceneSession(persistentId);
     if (session == nullptr) {
@@ -4245,7 +4245,7 @@ bool SceneSessionManager::IsEnablePiPCreate(const sptr<WindowSessionProperty>& p
         TLOGI(WmsLogTag::WMS_PIP, "property is nullptr.");
         return false;
     }
-    std::string screenName = getScreenName(property->GetParentPersistentId());
+    std::string screenName = GetScreenName(property->GetParentPersistentId());
     if (isScreenLocked_ && screenName != SUPER_LAUNCHER) {
         TLOGI(WmsLogTag::WMS_PIP, "skip create pip window as screen locked.");
         return false;
