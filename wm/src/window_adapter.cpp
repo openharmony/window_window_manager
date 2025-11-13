@@ -191,12 +191,10 @@ WMError WindowAdapter::RegisterWindowManagerAgent(WindowManagerAgentType type,
 }
 
 void WindowAdapter::RegisterWindowManagerAgentWhenSCBFault(WindowManagerAgentType type,
-                                                           const sptr<IWindowManagerAgent>& windowManagerAgent)
+    const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
-    /**
-     * Note: sceneboard is restarting due to a failure,
-     * the listener will be re-registered during the "independent recovery" process.
-     */
+    // Note: sceneboard is restarting due to a failure, the listener will be re-registered
+    // during the "independent recovery" process.
     TLOGI(WmsLogTag::WMS_SCB, "enter");
     std::lock_guard<std::mutex> lock(windowManagerAgentFaultMapMutex_);
     if (windowManagerAgentFaultMap_.find(type) == windowManagerAgentFaultMap_.end()) {
