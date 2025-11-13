@@ -660,10 +660,10 @@ WMError WindowManager::UnregisterWMSConnectionChangedListener()
     return WMError::WM_OK;
 }
 
-WMError WindowManager::RegisterFocusChangedListener(const sptr<IFocusChangedListener>& listener)
+WMError WindowManager::RegisterFocusChangedListener(const sptr<IFocusChangedListener>& listener, bool strongRegister)
 {
     if (listener == nullptr) {
-        WLOGFE("listener could not be null");
+        TLOGE(WmsLogTag::WMS_FOCUS, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
     }
 
@@ -672,7 +672,7 @@ WMError WindowManager::RegisterFocusChangedListener(const sptr<IFocusChangedList
     {
         std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
         if (pImpl_->focusChangedListenerAgent_ == nullptr) {
-            pImpl_->focusChangedListenerAgent_ = new WindowManagerAgent();
+            pImpl_->focusChangedListenerAgent_ = sptr<WindowManagerAgent>::MakeSptr();
         }
         focusChangedListenerAgentBack = pImpl_->focusChangedListenerAgent_;
     }
@@ -681,9 +681,17 @@ WMError WindowManager::RegisterFocusChangedListener(const sptr<IFocusChangedList
     {
         std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
         if (ret != WMError::WM_OK) {
-            TLOGE(WmsLogTag::WMS_FOCUS, "RegisterWindowManagerAgent failed!");
-            pImpl_->focusChangedListenerAgent_ = nullptr;
-        } else {
+            if (strongRegister) {
+                TLOGW(WmsLogTag::WMS_FOCUS, "sceneboard fault, activate the fallback solution");
+                WindowAdapter::GetInstance(userId_).RegisterWindowManagerAgentWhenSCBFault(
+                    WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS, pImpl_->focusChangedListenerAgent_);
+                ret = WMError::WM_OK;
+            } else {
+                TLOGE(WmsLogTag::WMS_FOCUS, "RegisterWindowManagerAgent failed!");
+                pImpl_->focusChangedListenerAgent_ = nullptr;
+            }
+        }
+        if (ret == WMError::WM_OK) {
             auto iter = std::find(
                 pImpl_->focusChangedListeners_.begin(), pImpl_->focusChangedListeners_.end(), listener);
             if (iter != pImpl_->focusChangedListeners_.end()) {
