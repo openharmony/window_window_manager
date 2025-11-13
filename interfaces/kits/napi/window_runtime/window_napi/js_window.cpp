@@ -5143,20 +5143,21 @@ napi_value JsWindow::OnSetMainWindowRaiseByClickEnabled(napi_env env, napi_callb
             }
             if (errCode != WMError::WM_OK) {
                 WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
-                task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "Invalidate params."));
+                task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode,
+                    "[window][setMainWindowRaiseByClickEnabled]msg: Invalidate params."));
                 return;
             }
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetMainWindowRaiseByClickEnabled(raiseEnabled));
             if (ret == WmErrorCode::WM_OK) {
                 task->Resolve(env, NapiGetUndefined(env));
             } else {
-                task->Reject(env, JsErrUtils::CreateJsError(env, ret, "set raiseEnabled failed"));
+                task->Reject(env, JsErrUtils::CreateJsError(env, ret,
+                    "[window][setMainWindowRaiseByClickEnabled]msg: set raiseEnabled failed"));
             }
             TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s: main window %{public}u set raiseEnabled : %{public}d",
                 where, window->GetWindowId(), raiseEnabled);
         };
-    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetMainWindowRaiseByClickEnabled") !=
-        napi_status::napi_ok) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "SetMainWindowRaiseByClickEnabled") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
