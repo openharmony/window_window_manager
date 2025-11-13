@@ -171,6 +171,7 @@ enum CollaboratorType : int32_t {
     DEFAULT_TYPE = 0,
     RESERVE_TYPE,
     OTHERS_TYPE,
+    REDIRECT_TYPE,
 };
 
 enum AncoSceneState: int32_t {

@@ -152,6 +152,7 @@ private:
     void ProcessSessionUpdateFollowScreenChange();
     void OnSessionLockStateChange(bool isLockedState);
     sptr<SceneSession> GenSceneSession(SessionInfo& info, bool needAddRequestInfo = false);
+    void ReuseSession(sptr<SceneSession>& sceneSession, SessionInfo& info);
     void AddRequestTaskInfo(sptr<SceneSession> sceneSession, int32_t requestId, bool needAddRequestInfo);
     void PendingSessionActivation(SessionInfo& info);
     void PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo);
