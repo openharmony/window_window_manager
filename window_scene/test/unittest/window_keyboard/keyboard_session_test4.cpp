@@ -556,6 +556,19 @@ HWTEST_F(KeyboardSessionTest4, HandleActionUpdateKeyboardTouchHotArea02, TestSiz
     ret = keyboardSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_DISPLAY);
 }
+
+/**
+ * @tc.name: TestIsLandscapeWithValidSession
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest4, TestIsLandscapeWithValidSession, TestSize.Level1)
+{
+    sptr<KeyboardSession> keyboardSession = GetKeyboardSession("IsLandscape", "IsLandscape");
+    bool isLandscape = false;
+    EXPECT_EQ(keyboardSession->IsLandscape(0, isLandscape), WMError::WM_OK);
+    EXPECT_EQ(keyboardSession->IsLandscape(1234, isLandscape), WMError::WM_ERROR_INVALID_DISPLAY);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

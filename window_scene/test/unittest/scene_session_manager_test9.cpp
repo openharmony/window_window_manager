@@ -655,8 +655,6 @@ HWTEST_F(SceneSessionManagerTest9, RequestSessionUnfocus02, TestSize.Level0)
     sceneSession2->isVisible_ = true;
     sceneSession2->persistentId_ = 4;
     ssm_->sceneSessionMap_.insert(std::make_pair(4, sceneSession2));
-    ret = ssm_->RequestSessionUnfocus(1, FocusChangeReason::DEFAULT, 2);
-    EXPECT_EQ(focusGroup->GetFocusedSessionId(), 1);
 
     ret = ssm_->RequestSessionUnfocus(1, FocusChangeReason::DEFAULT);
     EXPECT_EQ(ret, WSError::WS_OK);

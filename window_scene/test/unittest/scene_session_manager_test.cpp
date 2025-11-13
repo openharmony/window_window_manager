@@ -28,6 +28,7 @@
 #include "window_manager_agent.h"
 #include "window_manager_hilog.h"
 #include "session_manager.h"
+#include "wm_common.h"
 #include "zidl/window_manager_agent_interface.h"
 #include "mock/mock_accesstoken_kit.h"
 #include "mock/mock_session_stage.h"

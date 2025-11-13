@@ -1827,8 +1827,8 @@ void SceneSession::SetUpdatePiPTemplateInfoCallback(NotifyUpdatePiPTemplateInfoF
 WSError SceneSession::UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo)
 {
     TLOGI(WmsLogTag::WMS_PIP, "UpdatePiPTemplateInfo, pipTemplateType: %{public}u, priority: %{public}d, "
-        "defaultWindowSizeType: %{public}d", pipTemplateInfo.pipTemplateType, pipTemplateInfo.priority,
-        pipTemplateInfo.defaultWindowSizeType);
+        "defaultWindowSizeType: %{public}d, cornerAdsorptionEnabled: %{public}d", pipTemplateInfo.pipTemplateType,
+        pipTemplateInfo.priority, pipTemplateInfo.defaultWindowSizeType, pipTemplateInfo.cornerAdsorptionEnabled);
     auto task = [weakThis = wptr(this), pipTemplateInfo = std::move(pipTemplateInfo), where = __func__]() mutable {
         auto session = weakThis.promote();
         if (!session || session->isTerminating_) {
@@ -3880,9 +3880,11 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
     if (endDisplayId == moveDragController_->GetMoveDragStartDisplayId() ||
         !moveDragController_->IsSupportWindowDragCrossDisplay()) {
         NotifySessionRectChange(rect, reason);
+        HandleKeyboardMoveDragEnd(rect, reason);
         NotifySubSessionRectChangeByAnchor(rect, SizeChangeReason::UNDEFINED);
     } else {
         NotifySessionRectChange(rect, reason, endDisplayId);
+        HandleKeyboardMoveDragEnd(rect, reason, endDisplayId);
         NotifySubSessionRectChangeByAnchor(rect, SizeChangeReason::UNDEFINED, endDisplayId);
         CheckSubSessionShouldFollowParent(endDisplayId);
     }
@@ -5643,6 +5645,10 @@ WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s abilitySessionInfo is null", where);
             return WSError::WS_ERROR_NULLPTR;
         }
+        if (session->isTerminating_) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s id:%{public}d is terminating", where, session->GetPersistentId());
+            return WSError::WS_ERROR_INVALID_OPERATION;
+        }
 
         SessionInfo info;
         info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
@@ -6928,10 +6934,9 @@ WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
 WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
     const ExceptionInfo& exceptionInfo, bool isFromClient, bool startFail)
 {
-    PostLifeCycleTask([weakThis = wptr(this), weakAbilitySessionInfo = wptr(abilitySessionInfo), exceptionInfo,
+    PostLifeCycleTask([weakThis = wptr(this), abilitySessionInfo, exceptionInfo,
         isFromClient, startFail, where = __func__] {
         auto session = weakThis.promote();
-        auto abilitySessionInfo = weakAbilitySessionInfo.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;

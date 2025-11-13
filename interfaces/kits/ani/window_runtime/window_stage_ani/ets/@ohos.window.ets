@@ -3354,11 +3354,11 @@ export class WindowInternal implements Window {
     }
 
     public onKeyboardWillShow(callback: Callback<KeyboardInfo>): void {
-      this.onSync(this.nativeObj, 'KeyboardWillShow', callback);
+      this.onSync(this.nativeObj, 'keyboardWillShow', callback);
     }
 
     public onKeyboardWillHide(callback: Callback<KeyboardInfo>): void {
-      this.onSync(this.nativeObj, 'KeyboardWillHide', callback);
+      this.onSync(this.nativeObj, 'keyboardWillHide', callback);
     }
 
     public onUiExtensionSecureLimitChange(callback: Callback<boolean>): void {
@@ -3370,11 +3370,11 @@ export class WindowInternal implements Window {
     }
 
     public offKeyboardWillShow(callback?: Callback<KeyboardInfo>): void {
-      this.offSync(this.nativeObj, 'KeyboardWillShow', callback);
+      this.offSync(this.nativeObj, 'keyboardWillShow', callback);
     }
 
     public offKeyboardWillHide(callback?: Callback<KeyboardInfo>): void {
-      this.offSync(this.nativeObj, 'KeyboardWillHide', callback);
+      this.offSync(this.nativeObj, 'keyboardWillHide', callback);
     }
 
     public offUiExtensionSecureLimitChange(callback?: Callback<boolean>): void {

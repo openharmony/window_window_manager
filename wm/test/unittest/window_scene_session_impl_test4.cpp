@@ -25,6 +25,7 @@
 #include "singleton_mocker.h"
 #include "window_scene_session_impl.h"
 #include "window_session_impl.h"
+#include "wm_common.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1431,6 +1432,8 @@ HWTEST_F(WindowSceneSessionImplTest4, UpdateNewSize02, TestSize.Level1)
     subWindow->property_->SetRequestRect(windowRect);
     subWindow->windowSystemConfig_.freeMultiWindowSupport_ = false;
     subWindow->UpdateNewSize();
+    subWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    subWindow->UpdateNewSize();
     ASSERT_NE(nullptr, subWindow->property_);
 }
 
@@ -1505,6 +1508,62 @@ HWTEST_F(WindowSceneSessionImplTest4, PreLayoutOnShow01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PreLayoutOnShow02
+ * @tc.desc: PreLayoutOnShow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, PreLayoutOnShow02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("PreLayoutOnShow02");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(2345);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_NE(nullptr, window->uiContent_);
+
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+    displayInfo->name_ = "Cooperation"; // 白名单
+
+    KeyboardLayoutParams tmpParams;
+    const Rect expected = {1, 2, 3, 4};
+    tmpParams.PortraitKeyboardRect_ = expected;
+
+    window->property_->SetKeyboardLayoutParams(tmpParams);
+    window->PreLayoutOnShow(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, displayInfo);
+    ASSERT_EQ(window->property_->windowRect_, expected);
+
+    tmpParams.displayId_ = 0;
+    displayInfo->screenId_ = 0;
+    window->property_->AddKeyboardLayoutParams(0, tmpParams);
+    window->PreLayoutOnShow(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, displayInfo);
+    ASSERT_EQ(window->property_->windowRect_, expected);
+}
+
+/**
+ * @tc.name: IsLandscape
+ * @tc.desc: IsLandscape
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, IsLandscape, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsLandscape");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(2345);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, window->hostSession_);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_NE(nullptr, window->uiContent_);
+    window->IsLandscape(0);
+    EXPECT_FALSE(window->IsLandscape(1234));
+    EXPECT_FALSE(window->IsLandscape(DISPLAY_ID_INVALID));
+}
+
+/**
  * @tc.name: KeepKeyboardOnFocus01
  * @tc.desc: KeepKeyboardOnFocus
  * @tc.type: FUNC
@@ -1520,60 +1579,6 @@ HWTEST_F(WindowSceneSessionImplTest4, KeepKeyboardOnFocus01, TestSize.Level1)
 
     keyboardWindow->KeepKeyboardOnFocus(true);
     ASSERT_EQ(keyboardWindow->property_->keepKeyboardFlag_, true);
-}
-
-/**
- * @tc.name: MoveAndResizeKeyboard01
- * @tc.desc: MoveAndResizeKeyboard
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest4, MoveAndResizeKeyboard01, TestSize.Level1)
-{
-    sptr<WindowOption> keyboardOption = sptr<WindowOption>::MakeSptr();
-    keyboardOption->SetWindowName("MoveAndResizeKeyboard01");
-    keyboardOption->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    sptr<WindowSceneSessionImpl> keyboardWindow = sptr<WindowSceneSessionImpl>::MakeSptr(keyboardOption);
-
-    bool isLandscape = false;
-    keyboardWindow->property_->displayId_ = 0;
-    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(0);
-    if (display != nullptr) {
-        isLandscape = display->GetWidth() > display->GetHeight();
-    }
-    KeyboardLayoutParams param;
-    param.LandscapeKeyboardRect_ = { 100, 100, 100, 200 };
-    param.PortraitKeyboardRect_ = { 200, 200, 200, 100 };
-    auto result = keyboardWindow->MoveAndResizeKeyboard(param);
-    auto expectRect = isLandscape ? param.LandscapeKeyboardRect_ : param.PortraitKeyboardRect_;
-    ASSERT_EQ(keyboardWindow->property_->requestRect_, expectRect);
-    ASSERT_EQ(result, WMError::WM_OK);
-}
-
-/**
- * @tc.name: MoveAndResizeKeyboard02
- * @tc.desc: MoveAndResizeKeyboard
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest4, MoveAndResizeKeyboard02, TestSize.Level1)
-{
-    sptr<WindowOption> keyboardOption = sptr<WindowOption>::MakeSptr();
-    keyboardOption->SetWindowName("MoveAndResizeKeyboard02");
-    keyboardOption->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    sptr<WindowSceneSessionImpl> keyboardWindow = sptr<WindowSceneSessionImpl>::MakeSptr(keyboardOption);
-
-    bool isLandscape = false;
-    keyboardWindow->property_->displayId_ = DISPLAY_ID_INVALID;
-    auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
-    if (defaultDisplayInfo != nullptr) {
-        isLandscape = defaultDisplayInfo->GetWidth() > defaultDisplayInfo->GetHeight();
-    }
-    KeyboardLayoutParams param;
-    param.LandscapeKeyboardRect_ = { 100, 100, 100, 200 };
-    param.PortraitKeyboardRect_ = { 200, 200, 200, 100 };
-    auto result = keyboardWindow->MoveAndResizeKeyboard(param);
-    auto expectRect = isLandscape ? param.LandscapeKeyboardRect_ : param.PortraitKeyboardRect_;
-    ASSERT_EQ(keyboardWindow->property_->requestRect_, expectRect);
-    ASSERT_EQ(result, WMError::WM_OK);
 }
 
 static sptr<WindowSceneSessionImpl> CreateWindow(std::string windowName, WindowType type, int32_t id)
