@@ -474,6 +474,7 @@ public:
     virtual void SetContentInfoCallback(const ContentInfoCallback& callback) = 0;
     virtual WMError SetResizeByDragEnabled(bool dragEnabled) = 0;
     virtual WMError SetRaiseByClickEnabled(bool raiseEnabled) = 0;
+    virtual WMError SetRaiseByClickEnabled(bool raiseEnabled) = 0;
     virtual WMError RaiseAboveTarget(int32_t subWindowId) = 0;
     virtual WMError SetTopmost(bool topmost) { return WMError::WM_OK; }
     virtual bool IsTopmost() const { return false; }
