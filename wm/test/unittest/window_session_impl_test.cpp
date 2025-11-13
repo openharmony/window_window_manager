@@ -1940,6 +1940,9 @@ HWTEST_F(WindowSessionImplTest, SetMainWindowRaiseByClickEnabled, TestSize.Level
 
 
     window->property_->SetParentPersistentId(1);
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
     window->SetMainWindowRaiseByClickEnabled(false);
     ASSERT_EQ(window->property_->GetRaiseEnabled(), false);
 }
