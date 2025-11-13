@@ -2556,7 +2556,7 @@ void Session::PresentFocusIfPointDown()
         NotifyRequestFocusStatusNotifyManager(true, false, reason);
     }
     if (NeedRequestToTop()) {
-        NotifyClick();
+        NotifyClick(false);
     } else {
         TLOGI(WmsLogTag::WMS_FOCUS, "do not need to request to top");
     }
@@ -2659,7 +2659,7 @@ WSError Session::HandlePointerEventForFocus(const std::shared_ptr<MMI::PointerEv
             NotifyRequestFocusStatusNotifyManager(true, false, FocusChangeReason::CLICK);
         }
         if (NeedRequestToTop()) {
-            NotifyClick();
+            NotifyClick(false);
         } else {
             TLOGI(WmsLogTag::WMS_FOCUS, "do not need to request to top");
         }
@@ -3437,7 +3437,7 @@ void Session::PresentFocusIfNeed(int32_t pointerAction, int32_t sourceType)
             NotifyRequestFocusStatusNotifyManager(true, false, reason);
         }
         if (NeedRequestToTop()) {
-            NotifyClick();
+            NotifyClick(false);
         } else {
             TLOGI(WmsLogTag::WMS_FOCUS, "do not need to request to top");
         }
