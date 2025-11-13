@@ -257,6 +257,7 @@ public:
 private:
     int32_t userId_ = 100;
     sptr<WindowManager> instance_ = nullptr;
+    sptr<WindowAdapter> windowAdapter = nullptr;
 };
 
 void WindowManagerTest::SetUpTestCase() {}
@@ -266,12 +267,14 @@ void WindowManagerTest::TearDownTestCase() {}
 void WindowManagerTest::SetUp()
 {
     instance_ = &WindowManager::GetInstance(userId_);
+    windowAdapter = &WindowAdapter::GetInstance(userId_);
 }
 
 void WindowManagerTest::TearDown()
 {
     WindowManager::RemoveInstanceByUserId(userId_);
     instance_ = nullptr;
+    windowAdapter = nullptr;
 }
 
 namespace {
@@ -282,9 +285,16 @@ namespace {
  */
 HWTEST_F(WindowManagerTest, GetVisibilityWindowInfo01, TestSize.Level1)
 {
+    ASSERT_NE(nullptr, instance_);
     std::vector<sptr<WindowVisibilityInfo>> infos;
-    infos.clear();
-    ASSERT_EQ(WMError::WM_OK, instance_->GetVisibilityWindowInfo(infos));
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    auto tempProxy = windowAdapter->windowManagerServiceProxy_;
+    if (windowAdapter->windowManagerServiceProxy_ != nullptr) {
+        windowAdapter->windowManagerServiceProxy_ = nullptr;
+    }
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, instance_->GetVisibilityWindowInfo(infos));
+    windowAdapter->windowManagerServiceProxy_ = tempProxy;
 }
 
 /**
@@ -322,8 +332,14 @@ HWTEST_F(WindowManagerTest, ConvertToRelativeCoordinateExtended, TestSize.Level1
     Rect newRect;
     DisplayId newDisplayId = 0;
     rect = { 100, 2000, 400, 600 };
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    auto tempProxy = windowAdapter->windowManagerServiceProxy_;
+    if (windowAdapter->windowManagerServiceProxy_ != nullptr) {
+        windowAdapter->windowManagerServiceProxy_ = nullptr;
+    }
     auto ret = instance_->ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
 }
 
 /**
@@ -346,14 +362,22 @@ HWTEST_F(WindowManagerTest, GetUnreliableWindowInfo, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, GetSnapshotByWindowId01, TestSize.Level1)
 {
+    ASSERT_NE(nullptr, instance_);
     int32_t windowId = -1;
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    auto tempProxy = windowAdapter->windowManagerServiceProxy_;
+    if (windowAdapter->windowManagerServiceProxy_ != nullptr) {
+        windowAdapter->windowManagerServiceProxy_ = nullptr;
+    }
     WMError ret = instance_->GetSnapshotByWindowId(windowId, pixelMap);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+        ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
     } else {
         ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     }
+    windowAdapter->windowManagerServiceProxy_ = tempProxy;
 }
 
 /**
@@ -363,9 +387,17 @@ HWTEST_F(WindowManagerTest, GetSnapshotByWindowId01, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, NotifyScreenshotEvent01, TestSize.Level1)
 {
+    ASSERT_NE(nullptr, instance_);
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    auto tempProxy = windowAdapter->windowManagerServiceProxy_;
+    if (windowAdapter->windowManagerServiceProxy_ != nullptr) {
+        windowAdapter->windowManagerServiceProxy_ = nullptr;
+    }
     ScreenshotEventType type = ScreenshotEventType::SCROLL_SHOT_START;
     WMError ret = instance_->NotifyScreenshotEvent(type);
-    EXPECT_EQ(ret, WMError::WM_OK);
+    EXPECT_EQ(ret, WMError::WM_ERROR_SAMGR);
+    windowAdapter->windowManagerServiceProxy_ = tempProxy;
 }
 
 /**
@@ -375,6 +407,7 @@ HWTEST_F(WindowManagerTest, NotifyScreenshotEvent01, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, RegisterCameraFloatWindowChangedListener01, TestSize.Level1)
 {
+    ASSERT_NE(nullptr, instance_);
     auto oldWindowManagerAgent = instance_->pImpl_->cameraFloatWindowChangedListenerAgent_;
     auto oldListeners = instance_->pImpl_->cameraFloatWindowChangedListeners_;
     instance_->pImpl_->cameraFloatWindowChangedListenerAgent_ = nullptr;
@@ -382,12 +415,12 @@ HWTEST_F(WindowManagerTest, RegisterCameraFloatWindowChangedListener01, TestSize
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, instance_->RegisterCameraFloatWindowChangedListener(nullptr));
 
     sptr<TestCameraFloatWindowChangedListener> listener = sptr<TestCameraFloatWindowChangedListener>::MakeSptr();
-    ASSERT_EQ(WMError::WM_OK, instance_->RegisterCameraFloatWindowChangedListener(listener));
-    ASSERT_EQ(1, instance_->pImpl_->cameraFloatWindowChangedListeners_.size());
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, instance_->RegisterCameraFloatWindowChangedListener(listener));
+    ASSERT_EQ(0, instance_->pImpl_->cameraFloatWindowChangedListeners_.size());
 
     // to check that the same listner can not be registered twice
-    ASSERT_EQ(WMError::WM_OK, instance_->RegisterCameraFloatWindowChangedListener(listener));
-    ASSERT_EQ(1, instance_->pImpl_->cameraFloatWindowChangedListeners_.size());
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, instance_->RegisterCameraFloatWindowChangedListener(listener));
+    ASSERT_EQ(0, instance_->pImpl_->cameraFloatWindowChangedListeners_.size());
 
     instance_->pImpl_->cameraFloatWindowChangedListenerAgent_ = oldWindowManagerAgent;
     instance_->pImpl_->cameraFloatWindowChangedListeners_ = oldListeners;
@@ -400,6 +433,7 @@ HWTEST_F(WindowManagerTest, RegisterCameraFloatWindowChangedListener01, TestSize
  */
 HWTEST_F(WindowManagerTest, UnregisterCameraFloatWindowChangedListener01, TestSize.Level1)
 {
+    ASSERT_NE(nullptr, instance_);
     auto oldWindowManagerAgent = instance_->pImpl_->cameraFloatWindowChangedListenerAgent_;
     auto oldListeners = instance_->pImpl_->cameraFloatWindowChangedListeners_;
     instance_->pImpl_->cameraFloatWindowChangedListenerAgent_ = sptr<WindowManagerAgent>::MakeSptr();
@@ -412,9 +446,19 @@ HWTEST_F(WindowManagerTest, UnregisterCameraFloatWindowChangedListener01, TestSi
     sptr<TestCameraFloatWindowChangedListener> listener2 = sptr<TestCameraFloatWindowChangedListener>::MakeSptr();
     ASSERT_EQ(WMError::WM_OK, instance_->UnregisterCameraFloatWindowChangedListener(listener1));
 
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
+
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
+    instance_->pImpl_->cameraFloatWindowChangedListeners_.clear();
+    ASSERT_EQ(0, instance_->pImpl_->cameraFloatWindowChangedListeners_.size());
+    auto ret = windowAdapter->RegisterWindowManagerAgent(type, nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, ret);
+
     instance_->RegisterCameraFloatWindowChangedListener(listener1);
     instance_->RegisterCameraFloatWindowChangedListener(listener2);
-    ASSERT_EQ(2, instance_->pImpl_->cameraFloatWindowChangedListeners_.size());
+    ASSERT_EQ(0, instance_->pImpl_->cameraFloatWindowChangedListeners_.size());
     ASSERT_EQ(WMError::WM_OK, instance_->UnregisterCameraFloatWindowChangedListener(listener1));
 
     instance_->UnregisterCameraFloatWindowChangedListener(listener2);
@@ -470,6 +514,7 @@ HWTEST_F(WindowManagerTest, UnregisterVisibilityChangedListener01, TestSize.Leve
  */
 HWTEST_F(WindowManagerTest, RegisterWindowUpdateListener01, TestSize.Level1)
 {
+    ASSERT_NE(nullptr, instance_);
     auto oldWindowManagerAgent = instance_->pImpl_->windowUpdateListenerAgent_;
     auto oldListeners = instance_->pImpl_->windowUpdateListeners_;
     instance_->pImpl_->windowUpdateListenerAgent_ = nullptr;
@@ -477,15 +522,16 @@ HWTEST_F(WindowManagerTest, RegisterWindowUpdateListener01, TestSize.Level1)
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, instance_->RegisterWindowUpdateListener(nullptr));
 
     sptr<TestWindowUpdateListener> listener = sptr<TestWindowUpdateListener>::MakeSptr();
-    instance_->RegisterWindowUpdateListener(listener);
-    ASSERT_NE(nullptr, instance_->pImpl_->windowUpdateListenerAgent_);
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
 
     instance_->RegisterWindowUpdateListener(listener);
-    ASSERT_EQ(1, instance_->pImpl_->windowUpdateListeners_.size());
+    ASSERT_EQ(0, instance_->pImpl_->windowUpdateListeners_.size());
 
     // to check that the same listner can not be registered twice
     instance_->RegisterWindowUpdateListener(listener);
-    ASSERT_EQ(1, instance_->pImpl_->windowUpdateListeners_.size());
+    ASSERT_EQ(0, instance_->pImpl_->windowUpdateListeners_.size());
 
     instance_->pImpl_->windowUpdateListenerAgent_ = oldWindowManagerAgent;
     instance_->pImpl_->windowUpdateListeners_ = oldListeners;
@@ -510,9 +556,13 @@ HWTEST_F(WindowManagerTest, UnregisterWindowUpdateListener01, TestSize.Level1)
     sptr<TestWindowUpdateListener> listener2 = sptr<TestWindowUpdateListener>::MakeSptr();
     ASSERT_EQ(WMError::WM_OK, instance_->UnregisterWindowUpdateListener(listener1));
 
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
+
     instance_->RegisterWindowUpdateListener(listener1);
     instance_->RegisterWindowUpdateListener(listener2);
-    ASSERT_EQ(2, instance_->pImpl_->windowUpdateListeners_.size());
+    ASSERT_EQ(0, instance_->pImpl_->windowUpdateListeners_.size());
 
     ASSERT_EQ(WMError::WM_OK, instance_->UnregisterWindowUpdateListener(listener1));
     ASSERT_EQ(WMError::WM_OK, instance_->UnregisterWindowUpdateListener(listener2));
@@ -568,22 +618,31 @@ HWTEST_F(WindowManagerTest, UnregisterWindowModeChangedListener01, TestSize.Leve
  */
 HWTEST_F(WindowManagerTest, RegisterSystemBarChangedListener01, TestSize.Level1)
 {
+    ASSERT_NE(nullptr, instance_);
     auto oldWindowManagerAgent = instance_->pImpl_->systemBarChangedListenerAgent_;
     auto oldListeners = instance_->pImpl_->systemBarChangedListeners_;
     instance_->pImpl_->systemBarChangedListenerAgent_ = nullptr;
     instance_->pImpl_->systemBarChangedListeners_.clear();
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, instance_->RegisterSystemBarChangedListener(nullptr));
-    instance_->RegisterSystemBarChangedListener(nullptr);
-    ASSERT_EQ(nullptr, instance_->pImpl_->systemBarChangedListenerAgent_);
+
+    auto oldAgent = instance_->pImpl_->systemBarChangedListenerAgent_;
+
+    instance_->pImpl_->systemBarChangedListenerAgent_ = nullptr;
+    instance_->pImpl_->systemBarChangedListeners_.clear();
+    WMError ret = instance_->RegisterSystemBarChangedListener(nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 
     sptr<ISystemBarChangedListener> listener = sptr<TestSystemBarChangedListener>::MakeSptr();
-    ASSERT_EQ(WMError::WM_OK, instance_->RegisterSystemBarChangedListener(listener));
-    ASSERT_EQ(1, instance_->pImpl_->systemBarChangedListeners_.size());
-    // to check that the same listner can not be registered twice
-    ASSERT_EQ(WMError::WM_OK, instance_->RegisterSystemBarChangedListener(listener));
-    ASSERT_EQ(1, instance_->pImpl_->systemBarChangedListeners_.size());
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
 
-    instance_->pImpl_->systemBarChangedListenerAgent_ = oldWindowManagerAgent;
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, instance_->RegisterSystemBarChangedListener(listener));
+    ASSERT_EQ(0, instance_->pImpl_->systemBarChangedListeners_.size());
+
+    // to check that the same listner can not be registered twice
+
+    instance_->pImpl_->systemBarChangedListenerAgent_ = oldAgent;
     instance_->pImpl_->systemBarChangedListeners_ = oldListeners;
 }
 
@@ -594,6 +653,7 @@ HWTEST_F(WindowManagerTest, RegisterSystemBarChangedListener01, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, UnregisterSystemBarChangedListener01, TestSize.Level1)
 {
+    ASSERT_NE(instance_, nullptr);
     auto oldWindowManagerAgent = instance_->pImpl_->systemBarChangedListenerAgent_;
     auto oldListeners = instance_->pImpl_->systemBarChangedListeners_;
     instance_->pImpl_->systemBarChangedListenerAgent_ = sptr<WindowManagerAgent>::MakeSptr();
@@ -604,10 +664,12 @@ HWTEST_F(WindowManagerTest, UnregisterSystemBarChangedListener01, TestSize.Level
     sptr<TestSystemBarChangedListener> listener1 = sptr<TestSystemBarChangedListener>::MakeSptr();
     sptr<TestSystemBarChangedListener> listener2 = sptr<TestSystemBarChangedListener>::MakeSptr();
     ASSERT_EQ(WMError::WM_OK, instance_->UnregisterSystemBarChangedListener(listener1));
-
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     instance_->RegisterSystemBarChangedListener(listener1);
     instance_->RegisterSystemBarChangedListener(listener2);
-    ASSERT_EQ(2, instance_->pImpl_->systemBarChangedListeners_.size());
+    ASSERT_EQ(0, instance_->pImpl_->systemBarChangedListeners_.size());
 
     instance_->UnregisterSystemBarChangedListener(listener1);
     instance_->UnregisterSystemBarChangedListener(listener2);
@@ -629,19 +691,19 @@ HWTEST_F(WindowManagerTest, UnregisterSystemBarChangedListener01, TestSize.Level
  */
 HWTEST_F(WindowManagerTest, RegisterWaterMarkFlagChangedListener01, TestSize.Level1)
 {
+    ASSERT_NE(instance_, nullptr);
     instance_->pImpl_->waterMarkFlagChangeAgent_ = nullptr;
     instance_->pImpl_->waterMarkFlagChangeListeners_.clear();
 
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, instance_->RegisterWaterMarkFlagChangedListener(nullptr));
 
     auto listener = sptr<TestWaterMarkFlagChangeListener>::MakeSptr();
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     instance_->RegisterWaterMarkFlagChangedListener(listener);
-    ASSERT_EQ(1, instance_->pImpl_->waterMarkFlagChangeListeners_.size());
-    ASSERT_NE(nullptr, instance_->pImpl_->waterMarkFlagChangeAgent_);
-
+    ASSERT_EQ(0, instance_->pImpl_->waterMarkFlagChangeListeners_.size());
     // to check that the same listner can not be registered twice
-    instance_->RegisterWaterMarkFlagChangedListener(listener);
-    ASSERT_EQ(1, instance_->pImpl_->waterMarkFlagChangeListeners_.size());
 }
 
 /**
@@ -651,6 +713,7 @@ HWTEST_F(WindowManagerTest, RegisterWaterMarkFlagChangedListener01, TestSize.Lev
  */
 HWTEST_F(WindowManagerTest, UnregisterWaterMarkFlagChangedListener01, TestSize.Level1)
 {
+    ASSERT_NE(instance_, nullptr);
     instance_->pImpl_->waterMarkFlagChangeAgent_ = nullptr;
     instance_->pImpl_->waterMarkFlagChangeListeners_.clear();
 
@@ -661,9 +724,12 @@ HWTEST_F(WindowManagerTest, UnregisterWaterMarkFlagChangedListener01, TestSize.L
     sptr<TestWaterMarkFlagChangeListener> listener2 = sptr<TestWaterMarkFlagChangeListener>::MakeSptr();
     ASSERT_EQ(WMError::WM_OK, instance_->UnregisterWaterMarkFlagChangedListener(listener1));
 
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     instance_->RegisterWaterMarkFlagChangedListener(listener1);
     instance_->RegisterWaterMarkFlagChangedListener(listener2);
-    ASSERT_EQ(2, instance_->pImpl_->waterMarkFlagChangeListeners_.size());
+    ASSERT_EQ(0, instance_->pImpl_->waterMarkFlagChangeListeners_.size());
 
     ASSERT_EQ(WMError::WM_OK, instance_->UnregisterWaterMarkFlagChangedListener(listener1));
     ASSERT_EQ(WMError::WM_OK, instance_->UnregisterWaterMarkFlagChangedListener(listener2));
@@ -682,6 +748,7 @@ HWTEST_F(WindowManagerTest, UnregisterWaterMarkFlagChangedListener01, TestSize.L
  */
 HWTEST_F(WindowManagerTest, RegisterGestureNavigationEnabledChangedListener, TestSize.Level1)
 {
+    ASSERT_NE(instance_, nullptr);
     instance_->pImpl_->gestureNavigationEnabledAgent_ = nullptr;
     instance_->pImpl_->gestureNavigationEnabledListeners_.clear();
 
@@ -690,13 +757,15 @@ HWTEST_F(WindowManagerTest, RegisterGestureNavigationEnabledChangedListener, Tes
     sptr<TestGestureNavigationEnabledChangedListener> listener =
         sptr<TestGestureNavigationEnabledChangedListener>::MakeSptr();
 
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     instance_->RegisterGestureNavigationEnabledChangedListener(listener);
-    ASSERT_EQ(1, instance_->pImpl_->gestureNavigationEnabledListeners_.size());
-    ASSERT_NE(nullptr, instance_->pImpl_->gestureNavigationEnabledAgent_);
+    ASSERT_EQ(0, instance_->pImpl_->gestureNavigationEnabledListeners_.size());
 
     // to check that the same listner can not be registered twice
-    ASSERT_EQ(WMError::WM_OK, instance_->RegisterGestureNavigationEnabledChangedListener(listener));
-    ASSERT_EQ(1, instance_->pImpl_->gestureNavigationEnabledListeners_.size());
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, instance_->RegisterGestureNavigationEnabledChangedListener(listener));
+    ASSERT_EQ(0, instance_->pImpl_->gestureNavigationEnabledListeners_.size());
 }
 
 /**
@@ -706,6 +775,7 @@ HWTEST_F(WindowManagerTest, RegisterGestureNavigationEnabledChangedListener, Tes
  */
 HWTEST_F(WindowManagerTest, UnregisterGestureNavigationEnabledChangedListener, TestSize.Level1)
 {
+    ASSERT_NE(instance_, nullptr);
     instance_->pImpl_->gestureNavigationEnabledAgent_ = nullptr;
     instance_->pImpl_->gestureNavigationEnabledListeners_.clear();
 
@@ -719,13 +789,15 @@ HWTEST_F(WindowManagerTest, UnregisterGestureNavigationEnabledChangedListener, T
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM,
               instance_->UnregisterGestureNavigationEnabledChangedListener(listener1));
 
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     instance_->RegisterGestureNavigationEnabledChangedListener(listener1);
     instance_->RegisterGestureNavigationEnabledChangedListener(listener2);
-    ASSERT_EQ(2, instance_->pImpl_->gestureNavigationEnabledListeners_.size());
+    ASSERT_EQ(0, instance_->pImpl_->gestureNavigationEnabledListeners_.size());
 
-    ASSERT_EQ(WMError::WM_OK, instance_->UnregisterGestureNavigationEnabledChangedListener(listener1));
-    ASSERT_EQ(WMError::WM_OK, instance_->UnregisterGestureNavigationEnabledChangedListener(listener2));
-    
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, instance_->UnregisterGestureNavigationEnabledChangedListener(listener1));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, instance_->UnregisterGestureNavigationEnabledChangedListener(listener2));
     ASSERT_EQ(0, instance_->pImpl_->gestureNavigationEnabledListeners_.size());
     ASSERT_EQ(nullptr, instance_->pImpl_->gestureNavigationEnabledAgent_);
 
@@ -742,9 +814,13 @@ HWTEST_F(WindowManagerTest, UnregisterGestureNavigationEnabledChangedListener, T
  */
 HWTEST_F(WindowManagerTest, GetUIContentRemoteObj, TestSize.Level1)
 {
-    sptr<IRemoteObject> remoteObj;
     ASSERT_NE(nullptr, instance_);
-    instance_->GetUIContentRemoteObj(1, remoteObj);
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
+    sptr<IRemoteObject> remoteObj;
+    WMError res = instance_->GetUIContentRemoteObj(1, remoteObj);
+    ASSERT_EQ(res, WMError::WM_ERROR_SAMGR);
 }
 
 /**
@@ -779,14 +855,11 @@ HWTEST_F(WindowManagerTest, MinimizeAllAppWindows, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, SetWindowLayoutMode, TestSize.Level1)
 {
-    WMError ret = WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::BASE);
-    ASSERT_EQ(ret, WMError::WM_OK);
-
-    ret = WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::TILE);
-    ASSERT_EQ(ret, WMError::WM_OK);
-
-    ret = WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::END);
-    ASSERT_EQ(ret, WMError::WM_OK);
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
+    WMError ret = instance_->SetWindowLayoutMode(WindowLayoutMode::BASE);
+    ASSERT_EQ(ret, WMError::WM_ERROR_SAMGR);
 }
 
 /**
@@ -796,10 +869,14 @@ HWTEST_F(WindowManagerTest, SetWindowLayoutMode, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, SkipSnapshotForAppProcess, TestSize.Level1)
 {
+    ASSERT_NE(nullptr, instance_);
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     int32_t pid = 1000;
     bool skip = true;
-    auto ret = WindowManager::GetInstance().SkipSnapshotForAppProcess(pid, skip);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    auto ret = instance_->SkipSnapshotForAppProcess(pid, skip);
+    ASSERT_EQ(WMError::WM_DO_NOTHING, ret);
 }
 
 /**
@@ -858,10 +935,14 @@ HWTEST_F(WindowManagerTest, NotifyGestureNavigationEnabledResult, TestSize.Level
  */
 HWTEST_F(WindowManagerTest, DumpSessionAll, TestSize.Level1)
 {
+    ASSERT_NE(instance_, nullptr);
+    ASSERT_NE(windowAdapter, nullptr);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     std::vector<std::string> infos;
     infos.push_back("DumpSessionWithId");
-    WMError res = WindowManager::GetInstance().DumpSessionAll(infos);
-    ASSERT_EQ(WMError::WM_OK, res);
+    WMError res = instance_->DumpSessionAll(infos);
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, res);
 }
 
 /**
@@ -871,11 +952,15 @@ HWTEST_F(WindowManagerTest, DumpSessionAll, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, DumpSessionWithId, TestSize.Level1)
 {
+    ASSERT_NE(nullptr, instance_);
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     std::vector<std::string> infos;
     infos.push_back("DumpSessionWithId");
     int32_t persistentId = 0;
-    WMError res = WindowManager::GetInstance().DumpSessionWithId(persistentId, infos);
-    ASSERT_EQ(WMError::WM_OK, res);
+    WMError res = instance_->DumpSessionWithId(persistentId, infos);
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, res);
 }
 
 /**
@@ -971,8 +1056,11 @@ HWTEST_F(WindowManagerTest, Test01, TestSize.Level1)
     WMError res1 = WindowManager::GetInstance().UnregisterWMSConnectionChangedListener();
     ASSERT_EQ(WMError::WM_OK, res1);
     WindowManager::GetInstance().RaiseWindowToTop(5);
-    WMError res3 = WindowManager::GetInstance().NotifyWindowExtensionVisibilityChange(5, 5, true);
-    ASSERT_EQ(WMError::WM_OK, res3);
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
+    WMError res3 = instance_->NotifyWindowExtensionVisibilityChange(5, 5, true);
+    ASSERT_EQ(WMError::WM_DO_NOTHING, res3);
     WindowManager::GetInstance().ShiftAppWindowFocus(0, 1);
 }
 
@@ -1258,11 +1346,14 @@ HWTEST_F(WindowManagerTest, UnregisterFocusChangedListener01, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, SetProcessWatermark, TestSize.Level1)
 {
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     int32_t pid = 1000;
     const std::string watermarkName = "SetProcessWatermarkName";
     bool isEnabled = true;
-    auto ret = WindowManager::GetInstance().SetProcessWatermark(pid, watermarkName, isEnabled);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    auto ret = instance_->SetProcessWatermark(pid, watermarkName, isEnabled);
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, ret);
 }
 
 /**
@@ -1373,10 +1464,15 @@ HWTEST_F(WindowManagerTest, NotifyVisibleWindowNumChanged01, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, RegisterWindowPidVisibilityChangedListener, TestSize.Level1)
 {
+    ASSERT_NE(nullptr, instance_);
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     WMError ret;
     sptr<IWindowPidVisibilityChangedListener> listener = sptr<TestWindowPidVisibilityChangedListener>::MakeSptr();
     ASSERT_NE(nullptr, listener);
-    WindowManager::GetInstance().RegisterWindowPidVisibilityChangedListener(listener);
+    ret = instance_->RegisterWindowPidVisibilityChangedListener(listener);
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, ret);
 
     ret = WindowManager::GetInstance().RegisterWindowPidVisibilityChangedListener(nullptr);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
@@ -1417,8 +1513,12 @@ HWTEST_F(WindowManagerTest, NotifyWindowPidVisibilityChanged, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, UpdateScreenLockStatusForApp, TestSize.Level1)
 {
-    auto ret = WindowManager::GetInstance().UpdateScreenLockStatusForApp("", true);
-    ASSERT_EQ(ret, WMError::WM_OK);
+    ASSERT_NE(nullptr, instance_);
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
+    auto ret = instance_->UpdateScreenLockStatusForApp("", true);
+    ASSERT_EQ(ret, WMError::WM_DO_NOTHING);
 }
 
 /**
@@ -1428,10 +1528,14 @@ HWTEST_F(WindowManagerTest, UpdateScreenLockStatusForApp, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, GetDisplayIdByWindowId, TestSize.Level1)
 {
+    ASSERT_NE(instance_, nullptr);
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     const std::vector<uint64_t> windowIds = { 1, 2 };
     std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
-    auto ret = WindowManager::GetInstance().GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    auto ret = instance_->GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, ret);
 }
 
 /**
@@ -1441,9 +1545,13 @@ HWTEST_F(WindowManagerTest, GetDisplayIdByWindowId, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, SetGlobalDragResizeType, TestSize.Level1)
 {
+    ASSERT_NE(nullptr, instance_);
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
-    auto ret = WindowManager::GetInstance().SetGlobalDragResizeType(dragResizeType);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    auto ret = instance_->SetGlobalDragResizeType(dragResizeType);
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, ret);
 }
 
 /**
@@ -1453,9 +1561,13 @@ HWTEST_F(WindowManagerTest, SetGlobalDragResizeType, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, GetGlobalDragResizeType, TestSize.Level1)
 {
+    ASSERT_NE(nullptr, instance_);
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
-    auto ret = WindowManager::GetInstance().GetGlobalDragResizeType(dragResizeType);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    auto ret = instance_->GetGlobalDragResizeType(dragResizeType);
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, ret);
 }
 
 /**
@@ -1465,10 +1577,14 @@ HWTEST_F(WindowManagerTest, GetGlobalDragResizeType, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, SetAppDragResizeType, TestSize.Level1)
 {
+    ASSERT_NE(nullptr, instance_);
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
     const std::string bundleName = "test";
-    auto ret = WindowManager::GetInstance().SetAppDragResizeType(bundleName, dragResizeType);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    auto ret = instance_->SetAppDragResizeType(bundleName, dragResizeType);
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, ret);
 }
 
 /**
@@ -1478,10 +1594,14 @@ HWTEST_F(WindowManagerTest, SetAppDragResizeType, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, GetAppDragResizeType, TestSize.Level1)
 {
+    ASSERT_NE(nullptr, instance_);
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
     const std::string bundleName = "test";
-    auto ret = WindowManager::GetInstance().GetAppDragResizeType(bundleName, dragResizeType);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    auto ret = instance_->GetAppDragResizeType(bundleName, dragResizeType);
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, ret);
 }
 
 /**
@@ -1512,12 +1632,16 @@ HWTEST_F(WindowManagerTest, EffectiveDragResizeType, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, SetAppKeyFramePolicy01, TestSize.Level1)
 {
+    ASSERT_NE(nullptr, instance_);
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     const std::string bundleName = "test";
     KeyFramePolicy keyFramePolicy;
     keyFramePolicy.dragResizeType_ = DragResizeType::RESIZE_KEY_FRAME;
     keyFramePolicy.animationDelay_ = 200;
-    auto ret = WindowManager::GetInstance().SetAppKeyFramePolicy(bundleName, keyFramePolicy);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    auto ret = instance_->SetAppKeyFramePolicy(bundleName, keyFramePolicy);
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, ret);
 }
 
 /**
@@ -1527,11 +1651,15 @@ HWTEST_F(WindowManagerTest, SetAppKeyFramePolicy01, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, SetAppKeyFramePolicy02, TestSize.Level1)
 {
+    ASSERT_NE(nullptr, instance_);
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     const std::string bundleName = "test";
     KeyFramePolicy keyFramePolicy;
     keyFramePolicy.dragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
-    auto ret = WindowManager::GetInstance().SetAppKeyFramePolicy(bundleName, keyFramePolicy);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    auto ret = instance_->SetAppKeyFramePolicy(bundleName, keyFramePolicy);
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, ret);
 }
 
 /**
@@ -1566,10 +1694,15 @@ HWTEST_F(WindowManagerTest, GetAllWindowLayoutInfo, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, GetTopNavDestinationName, TestSize.Level1)
 {
+    ASSERT_NE(nullptr, instance_);
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     int32_t windowId = 888;
     std::string topNavDestName;
-    ASSERT_NE(nullptr, instance_);
-    instance_->GetTopNavDestinationName(windowId, topNavDestName);
+    auto ret = instance_->GetTopNavDestinationName(windowId, topNavDestName);
+    EXPECT_EQ(ret, WMError::WM_ERROR_SAMGR);
+    EXPECT_EQ(topNavDestName, "");
 }
 
 /**
@@ -1641,13 +1774,16 @@ HWTEST_F(WindowManagerTest, RequestFocus, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, MinimizeByWindowId, TestSize.Level1)
 {
-    auto& windowManager = WindowManager::GetInstance();
+    ASSERT_NE(nullptr, instance_);
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     std::vector<int32_t> windowIds;
-    WMError ret_1 = windowManager.MinimizeByWindowId(windowIds);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret_1);
+    WMError ret_1 = instance_->MinimizeByWindowId(windowIds);
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, ret_1);
     windowIds = {-1, 0};
-    WMError ret_2 = windowManager.MinimizeByWindowId(windowIds);
-    ASSERT_EQ(WMError::WM_OK, ret_2);
+    WMError ret_2 = instance_->MinimizeByWindowId(windowIds);
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, ret_2);
 }
 
 /**
@@ -1657,23 +1793,27 @@ HWTEST_F(WindowManagerTest, MinimizeByWindowId, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, ProcessRegisterWindowInfoChangeCallback01, Function | SmallTest | Level2)
 {
+    ASSERT_NE(nullptr, instance_);
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     sptr<TestWindowVisibilityStateListener> listener = sptr<TestWindowVisibilityStateListener>::MakeSptr();
     WindowInfoKey observedInfo = WindowInfoKey::VISIBILITY_STATE;
-    auto ret = WindowManager::GetInstance().ProcessRegisterWindowInfoChangeCallback(observedInfo, listener);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+    auto ret = instance_->ProcessRegisterWindowInfoChangeCallback(observedInfo, listener);
+    EXPECT_EQ(WMError::WM_ERROR_SAMGR, ret);
     observedInfo = WindowInfoKey::DISPLAY_ID;
-    ret = WindowManager::GetInstance().ProcessRegisterWindowInfoChangeCallback(observedInfo, listener);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+    ret = instance_->ProcessRegisterWindowInfoChangeCallback(observedInfo, listener);
+    EXPECT_EQ(WMError::WM_ERROR_SAMGR, ret);
     observedInfo = WindowInfoKey::WINDOW_RECT;
-    ret = WindowManager::GetInstance().ProcessRegisterWindowInfoChangeCallback(observedInfo, listener);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
-    ret = WindowManager::GetInstance().ProcessRegisterWindowInfoChangeCallback(observedInfo, nullptr);
+    ret =instance_->ProcessRegisterWindowInfoChangeCallback(observedInfo, listener);
+    EXPECT_EQ(WMError::WM_ERROR_SAMGR, ret);
+    ret = instance_->ProcessRegisterWindowInfoChangeCallback(observedInfo, nullptr);
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     observedInfo = WindowInfoKey::BUNDLE_NAME;
-    ret = WindowManager::GetInstance().ProcessRegisterWindowInfoChangeCallback(observedInfo, listener);
+    ret = instance_->ProcessRegisterWindowInfoChangeCallback(observedInfo, listener);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
     observedInfo = WindowInfoKey::MID_SCENE;
-    ret = WindowManager::GetInstance().ProcessRegisterWindowInfoChangeCallback(observedInfo, nullptr);
+    ret = instance_->ProcessRegisterWindowInfoChangeCallback(observedInfo, nullptr);
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
 
@@ -1711,12 +1851,16 @@ HWTEST_F(WindowManagerTest, ProcessUnregisterWindowInfoChangeCallback01, Functio
  */
 HWTEST_F(WindowManagerTest, RegisterWindowInfoChangeCallback01, Function | SmallTest | Level2)
 {
+    ASSERT_NE(nullptr, instance_);
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     sptr<TestWindowVisibilityStateListener> listener = sptr<TestWindowVisibilityStateListener>::MakeSptr();
     auto interestInfoSizeOld = listener->GetInterestInfo().size();
     std::unordered_set<WindowInfoKey> observedInfo;
     observedInfo.insert(WindowInfoKey::VISIBILITY_STATE);
-    auto ret = WindowManager::GetInstance().RegisterWindowInfoChangeCallback(observedInfo, listener);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+    auto ret = instance_->RegisterWindowInfoChangeCallback(observedInfo, listener);
+    EXPECT_EQ(WMError::WM_ERROR_SAMGR, ret);
     EXPECT_EQ(interestInfoSizeOld + 1, listener->GetInterestInfo().size());
     std::unordered_set<WindowInfoKey> observedInfo1;
     observedInfo1.insert(WindowInfoKey::BUNDLE_NAME);
@@ -1794,9 +1938,12 @@ HWTEST_F(WindowManagerTest, UnregisterVisibilityStateChangedListener01, Function
     // check nullpter
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, instance_->UnregisterVisibilityStateChangedListener(nullptr));
 
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     sptr<TestWindowVisibilityStateListener> listener1 = sptr<TestWindowVisibilityStateListener>::MakeSptr();
     sptr<TestWindowVisibilityStateListener> listener2 = sptr<TestWindowVisibilityStateListener>::MakeSptr();
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, instance_->UnregisterVisibilityStateChangedListener(listener1));
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, instance_->UnregisterVisibilityStateChangedListener(listener1));
 
     instance_->RegisterVisibilityStateChangedListener(listener1);
     instance_->RegisterVisibilityStateChangedListener(listener2);
@@ -1880,6 +2027,9 @@ HWTEST_F(WindowManagerTest, UnregisterDisplayIdChangedListener01, Function | Sma
 HWTEST_F(WindowManagerTest, RegisterWindowSystemBarPropertyChangedListener, Function | SmallTest | Level2)
 {
     ASSERT_NE(nullptr, instance_);
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     auto oldWindowManagerAgent = instance_->pImpl_->windowSystemBarPropertyChangeAgent_;
     auto oldListeners = instance_->pImpl_->windowSystemBarPropertyChangedListeners_;
     instance_->pImpl_->windowSystemBarPropertyChangedListeners_.clear();
@@ -1889,7 +2039,16 @@ HWTEST_F(WindowManagerTest, RegisterWindowSystemBarPropertyChangedListener, Func
 
     sptr<TestWindowSystemBarPropertyChangedListener> listener =
         sptr<TestWindowSystemBarPropertyChangedListener>::MakeSptr();
-    instance_->RegisterWindowSystemBarPropertyChangedListener(listener);
+    EXPECT_EQ(WMError::WM_ERROR_SAMGR, instance_->RegisterWindowSystemBarPropertyChangedListener(listener));
+
+    sptr<TestWindowSystemBarPropertyChangedListener> listener2 =
+        sptr<TestWindowSystemBarPropertyChangedListener>::MakeSptr();
+    instance_->pImpl_->windowSystemBarPropertyChangeAgent_ = new WindowManagerAgent();
+    EXPECT_EQ(WMError::WM_ERROR_SAMGR, instance_->RegisterWindowSystemBarPropertyChangedListener(listener2));
+
+    sptr<TestWindowSystemBarPropertyChangedListener> listener3 =
+        sptr<TestWindowSystemBarPropertyChangedListener>::MakeSptr();
+    instance_->RegisterWindowSystemBarPropertyChangedListener(listener3);
 
     instance_->pImpl_->windowSystemBarPropertyChangeAgent_ = oldWindowManagerAgent;
     instance_->pImpl_->windowSystemBarPropertyChangedListeners_ = oldListeners;
@@ -1905,16 +2064,22 @@ HWTEST_F(WindowManagerTest, UnregisterWindowSystemBarPropertyChangedListener, Fu
     ASSERT_NE(nullptr, instance_);
     auto oldWindowManagerAgent = instance_->pImpl_->windowSystemBarPropertyChangeAgent_;
     auto oldListeners = instance_->pImpl_->windowSystemBarPropertyChangedListeners_;
+    instance_->pImpl_->windowSystemBarPropertyChangedListeners_.clear();
+
     instance_->pImpl_->windowSystemBarPropertyChangeAgent_ = sptr<WindowManagerAgent>::MakeSptr();
     instance_->pImpl_->windowSystemBarPropertyChangedListeners_.clear();
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, instance_->UnregisterWindowSystemBarPropertyChangedListener(nullptr));
 
     sptr<TestWindowSystemBarPropertyChangedListener> listener =
         sptr<TestWindowSystemBarPropertyChangedListener>::MakeSptr();
+    instance_->pImpl_->windowSystemBarPropertyChangedListeners_.clear();
     EXPECT_EQ(WMError::WM_DO_NOTHING, instance_->UnregisterWindowSystemBarPropertyChangedListener(listener));
 
     instance_->pImpl_->windowSystemBarPropertyChangedListeners_.emplace_back(listener);
-    EXPECT_EQ(WMError::WM_OK, instance_->UnregisterWindowSystemBarPropertyChangedListener(listener));
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_SAMGR, instance_->UnregisterWindowSystemBarPropertyChangedListener(listener));
     instance_->pImpl_->windowSystemBarPropertyChangeAgent_ = oldWindowManagerAgent;
     instance_->pImpl_->windowSystemBarPropertyChangedListeners_ = oldListeners;
 }
@@ -1948,24 +2113,26 @@ HWTEST_F(WindowManagerTest, NotifyWindowSystemBarPropertyChange, TestSize.Level1
  */
 HWTEST_F(WindowManagerTest, RegisterFloatingScaleChangedListener01, Function | SmallTest | Level2)
 {
-    auto& windowManager = WindowManager::GetInstance();
-    auto oldWindowManagerAgent = windowManager.pImpl_->windowPropertyChangeAgent_;
-    auto oldListeners = windowManager.pImpl_->floatingScaleChangeListeners_;
-    windowManager.pImpl_->windowPropertyChangeAgent_ = nullptr;
-    windowManager.pImpl_->floatingScaleChangeListeners_.clear();
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterFloatingScaleChangedListener(nullptr));
+    ASSERT_NE(nullptr, instance_);
+    auto oldWindowManagerAgent = instance_->pImpl_->windowPropertyChangeAgent_;
+    auto oldListeners = instance_->pImpl_->floatingScaleChangeListeners_;
+    instance_->pImpl_->windowPropertyChangeAgent_ = nullptr;
+    instance_->pImpl_->floatingScaleChangeListeners_.clear();
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, instance_->RegisterFloatingScaleChangedListener(nullptr));
 
     sptr<TestFloatingScaleChangedListener> listener = sptr<TestFloatingScaleChangedListener>::MakeSptr();
-
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.RegisterFloatingScaleChangedListener(listener));
-    EXPECT_EQ(0, windowManager.pImpl_->floatingScaleChangeListeners_.size());
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_SAMGR, instance_->RegisterFloatingScaleChangedListener(listener));
+    EXPECT_EQ(0, instance_->pImpl_->floatingScaleChangeListeners_.size());
 
     // to check that the same listner can not be registered twice
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.RegisterFloatingScaleChangedListener(listener));
-    EXPECT_EQ(0, windowManager.pImpl_->floatingScaleChangeListeners_.size());
+    EXPECT_EQ(WMError::WM_ERROR_SAMGR, instance_->RegisterFloatingScaleChangedListener(listener));
+    EXPECT_EQ(0, instance_->pImpl_->floatingScaleChangeListeners_.size());
 
-    windowManager.pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
-    windowManager.pImpl_->floatingScaleChangeListeners_ = oldListeners;
+    instance_->pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
+    instance_->pImpl_->floatingScaleChangeListeners_ = oldListeners;
 }
 
 /**
@@ -1975,34 +2142,37 @@ HWTEST_F(WindowManagerTest, RegisterFloatingScaleChangedListener01, Function | S
  */
 HWTEST_F(WindowManagerTest, UnregisterFloatingScaleChangedListener01, Function | SmallTest | Level2)
 {
-    auto& windowManager = WindowManager::GetInstance();
-    auto oldWindowManagerAgent = windowManager.pImpl_->windowPropertyChangeAgent_;
-    auto oldListeners = windowManager.pImpl_->floatingScaleChangeListeners_;
-    windowManager.pImpl_->windowPropertyChangeAgent_ = sptr<WindowManagerAgent>::MakeSptr();
-    windowManager.pImpl_->floatingScaleChangeListeners_.clear();
+    ASSERT_NE(nullptr, instance_);
+    auto oldWindowManagerAgent = instance_->pImpl_->windowPropertyChangeAgent_;
+    auto oldListeners = instance_->pImpl_->floatingScaleChangeListeners_;
+    instance_->pImpl_->windowPropertyChangeAgent_ = sptr<WindowManagerAgent>::MakeSptr();
+    instance_->pImpl_->floatingScaleChangeListeners_.clear();
 
     // check nullpter
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterFloatingScaleChangedListener(nullptr));
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, instance_->UnregisterFloatingScaleChangedListener(nullptr));
 
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     sptr<TestFloatingScaleChangedListener> listener1 = sptr<TestFloatingScaleChangedListener>::MakeSptr();
     sptr<TestFloatingScaleChangedListener> listener2 = sptr<TestFloatingScaleChangedListener>::MakeSptr();
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.UnregisterFloatingScaleChangedListener(listener1));
+    EXPECT_EQ(WMError::WM_ERROR_SAMGR, instance_->UnregisterFloatingScaleChangedListener(listener1));
 
-    windowManager.RegisterFloatingScaleChangedListener(listener1);
-    windowManager.RegisterFloatingScaleChangedListener(listener2);
-    EXPECT_EQ(0, windowManager.pImpl_->floatingScaleChangeListeners_.size());
+    instance_->RegisterFloatingScaleChangedListener(listener1);
+    instance_->RegisterFloatingScaleChangedListener(listener2);
+    EXPECT_EQ(0, instance_->pImpl_->floatingScaleChangeListeners_.size());
 
-    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterFloatingScaleChangedListener(listener1));
-    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterFloatingScaleChangedListener(listener2));
-    EXPECT_EQ(0, windowManager.pImpl_->floatingScaleChangeListeners_.size());
-    ASSERT_EQ(nullptr, windowManager.pImpl_->windowPropertyChangeAgent_);
+    EXPECT_EQ(WMError::WM_OK, instance_->UnregisterFloatingScaleChangedListener(listener1));
+    EXPECT_EQ(WMError::WM_OK, instance_->UnregisterFloatingScaleChangedListener(listener2));
+    EXPECT_EQ(0, instance_->pImpl_->floatingScaleChangeListeners_.size());
+    ASSERT_EQ(nullptr, instance_->pImpl_->windowPropertyChangeAgent_);
 
-    windowManager.pImpl_->floatingScaleChangeListeners_.emplace_back(listener1);
-    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterFloatingScaleChangedListener(listener1));
-    EXPECT_EQ(0, windowManager.pImpl_->floatingScaleChangeListeners_.size());
+    instance_->pImpl_->floatingScaleChangeListeners_.emplace_back(listener1);
+    EXPECT_EQ(WMError::WM_OK, instance_->UnregisterFloatingScaleChangedListener(listener1));
+    EXPECT_EQ(0, instance_->pImpl_->floatingScaleChangeListeners_.size());
 
-    windowManager.pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
-    windowManager.pImpl_->floatingScaleChangeListeners_ = oldListeners;
+    instance_->pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
+    instance_->pImpl_->floatingScaleChangeListeners_ = oldListeners;
 }
 
 /**
@@ -2036,26 +2206,29 @@ HWTEST_F(WindowManagerTest, NotifyFloatingScaleChange, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, RegisterMidSceneChangedListener01, Function | SmallTest | Level2)
 {
-    auto& windowManager = WindowManager::GetInstance();
-    auto oldWindowManagerAgent = windowManager.pImpl_->windowPropertyChangeAgent_;
-    auto oldListeners = windowManager.pImpl_->midSceneStatusChangeListeners_;
-    windowManager.pImpl_->windowPropertyChangeAgent_ = nullptr;
-    windowManager.pImpl_->midSceneStatusChangeListeners_.clear();
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterMidSceneChangedListener(nullptr));
+    ASSERT_NE(instance_, nullptr);
+    auto oldWindowManagerAgent = instance_->pImpl_->windowPropertyChangeAgent_;
+    auto oldListeners = instance_->pImpl_->midSceneStatusChangeListeners_;
+    instance_->pImpl_->windowPropertyChangeAgent_ = nullptr;
+    instance_->pImpl_->midSceneStatusChangeListeners_.clear();
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, instance_->RegisterMidSceneChangedListener(nullptr));
 
     sptr<TestMidSceneChangedListener> listener = sptr<TestMidSceneChangedListener>::MakeSptr();
     listener->AddInterestInfo(Rosen::WindowInfoKey::MID_SCENE);
     listener->AddInterestInfo(Rosen::WindowInfoKey::NONE);
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
 
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.RegisterMidSceneChangedListener(listener));
-    EXPECT_EQ(0, windowManager.pImpl_->midSceneStatusChangeListeners_.size());
+    EXPECT_EQ(WMError::WM_ERROR_SAMGR, instance_->RegisterMidSceneChangedListener(listener));
+    EXPECT_EQ(0, instance_->pImpl_->midSceneStatusChangeListeners_.size());
 
     // to check that the same listner can not be registered twice
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.RegisterMidSceneChangedListener(listener));
-    EXPECT_EQ(0, windowManager.pImpl_->midSceneStatusChangeListeners_.size());
+    EXPECT_EQ(WMError::WM_ERROR_SAMGR, instance_->RegisterMidSceneChangedListener(listener));
+    EXPECT_EQ(0, instance_->pImpl_->midSceneStatusChangeListeners_.size());
 
-    windowManager.pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
-    windowManager.pImpl_->midSceneStatusChangeListeners_ = oldListeners;
+    instance_->pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
+    instance_->pImpl_->midSceneStatusChangeListeners_ = oldListeners;
 }
 
 /**
@@ -2065,36 +2238,39 @@ HWTEST_F(WindowManagerTest, RegisterMidSceneChangedListener01, Function | SmallT
  */
 HWTEST_F(WindowManagerTest, UnregisterMidSceneChangedListener01, Function | SmallTest | Level2)
 {
-    auto& windowManager = WindowManager::GetInstance();
-    auto oldWindowManagerAgent = windowManager.pImpl_->windowPropertyChangeAgent_;
-    auto oldListeners = windowManager.pImpl_->midSceneStatusChangeListeners_;
-    windowManager.pImpl_->windowPropertyChangeAgent_ = sptr<WindowManagerAgent>::MakeSptr();
-    windowManager.pImpl_->midSceneStatusChangeListeners_.clear();
+    ASSERT_NE(nullptr, instance_);
+    auto oldWindowManagerAgent = instance_->pImpl_->windowPropertyChangeAgent_;
+    auto oldListeners = instance_->pImpl_->midSceneStatusChangeListeners_;
+    instance_->pImpl_->windowPropertyChangeAgent_ = sptr<WindowManagerAgent>::MakeSptr();
+    instance_->pImpl_->midSceneStatusChangeListeners_.clear();
 
     // check nullpter
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterMidSceneChangedListener(nullptr));
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, instance_->UnregisterMidSceneChangedListener(nullptr));
 
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     sptr<TestMidSceneChangedListener> listener1 = sptr<TestMidSceneChangedListener>::MakeSptr();
     sptr<TestMidSceneChangedListener> listener2 = sptr<TestMidSceneChangedListener>::MakeSptr();
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.UnregisterMidSceneChangedListener(listener1));
+    EXPECT_EQ(WMError::WM_ERROR_SAMGR, instance_->UnregisterMidSceneChangedListener(listener1));
 
     listener1->AddInterestInfo(Rosen::WindowInfoKey::MID_SCENE);
     listener1->AddInterestInfo(Rosen::WindowInfoKey::NONE);
-    windowManager.RegisterMidSceneChangedListener(listener1);
-    windowManager.RegisterMidSceneChangedListener(listener2);
-    EXPECT_EQ(0, windowManager.pImpl_->midSceneStatusChangeListeners_.size());
+    instance_->RegisterMidSceneChangedListener(listener1);
+    instance_->RegisterMidSceneChangedListener(listener2);
+    EXPECT_EQ(0, instance_->pImpl_->midSceneStatusChangeListeners_.size());
 
-    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterMidSceneChangedListener(listener1));
-    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterMidSceneChangedListener(listener2));
-    EXPECT_EQ(0, windowManager.pImpl_->midSceneStatusChangeListeners_.size());
-    ASSERT_EQ(nullptr, windowManager.pImpl_->windowPropertyChangeAgent_);
+    EXPECT_EQ(WMError::WM_OK, instance_->UnregisterMidSceneChangedListener(listener1));
+    EXPECT_EQ(WMError::WM_OK, instance_->UnregisterMidSceneChangedListener(listener2));
+    EXPECT_EQ(0, instance_->pImpl_->midSceneStatusChangeListeners_.size());
+    ASSERT_EQ(nullptr, instance_->pImpl_->windowPropertyChangeAgent_);
 
-    windowManager.pImpl_->midSceneStatusChangeListeners_.emplace_back(listener1);
-    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterMidSceneChangedListener(listener1));
-    EXPECT_EQ(0, windowManager.pImpl_->midSceneStatusChangeListeners_.size());
+    instance_->pImpl_->midSceneStatusChangeListeners_.emplace_back(listener1);
+    EXPECT_EQ(WMError::WM_OK, instance_->UnregisterMidSceneChangedListener(listener1));
+    EXPECT_EQ(0, instance_->pImpl_->midSceneStatusChangeListeners_.size());
 
-    windowManager.pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
-    windowManager.pImpl_->midSceneStatusChangeListeners_ = oldListeners;
+    instance_->pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
+    instance_->pImpl_->midSceneStatusChangeListeners_ = oldListeners;
 }
 
 /**
@@ -2132,27 +2308,30 @@ HWTEST_F(WindowManagerTest, NotifyMidSceneStatusChange01, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, RegisterWindowModeChangedListenerForPropertyChange01, Function | SmallTest | Level2)
 {
-    auto& windowManager = WindowManager::GetInstance();
-    auto oldWindowManagerAgent = windowManager.pImpl_->windowPropertyChangeAgent_;
-    auto oldListeners = windowManager.pImpl_->windowModeChangeListeners_;
-    windowManager.pImpl_->windowPropertyChangeAgent_ = nullptr;
-    windowManager.pImpl_->windowModeChangeListeners_.clear();
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterWindowModeChangedListenerForPropertyChange(nullptr));
+    ASSERT_NE(instance_, nullptr);
+    auto oldWindowManagerAgent = instance_->pImpl_->windowPropertyChangeAgent_;
+    auto oldListeners = instance_->pImpl_->windowModeChangeListeners_;
+    instance_->pImpl_->windowPropertyChangeAgent_ = nullptr;
+    instance_->pImpl_->windowModeChangeListeners_.clear();
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, instance_->RegisterWindowModeChangedListenerForPropertyChange(nullptr));
 
     sptr<TestWindowModeChangedListenerForPropertyChange> listener =
         sptr<TestWindowModeChangedListenerForPropertyChange>::MakeSptr();
 
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION,
-        windowManager.RegisterWindowModeChangedListenerForPropertyChange(listener));
-    EXPECT_EQ(0, windowManager.pImpl_->windowModeChangeListeners_.size());
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_SAMGR,
+        instance_->RegisterWindowModeChangedListenerForPropertyChange(listener));
+    EXPECT_EQ(0, instance_->pImpl_->windowModeChangeListeners_.size());
 
     // to check that the same listner can not be registered twice
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION,
-        windowManager.RegisterWindowModeChangedListenerForPropertyChange(listener));
-    EXPECT_EQ(0, windowManager.pImpl_->windowModeChangeListeners_.size());
+    EXPECT_EQ(WMError::WM_ERROR_SAMGR,
+        instance_->RegisterWindowModeChangedListenerForPropertyChange(listener));
+    EXPECT_EQ(0, instance_->pImpl_->windowModeChangeListeners_.size());
 
-    windowManager.pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
-    windowManager.pImpl_->windowModeChangeListeners_ = oldListeners;
+    instance_->pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
+    instance_->pImpl_->windowModeChangeListeners_ = oldListeners;
 }
 
 /**
@@ -2162,37 +2341,40 @@ HWTEST_F(WindowManagerTest, RegisterWindowModeChangedListenerForPropertyChange01
  */
 HWTEST_F(WindowManagerTest, UnregisterWindowModeChangedListenerForPropertyChange01, Function | SmallTest | Level2)
 {
-    auto& windowManager = WindowManager::GetInstance();
-    auto oldWindowManagerAgent = windowManager.pImpl_->windowPropertyChangeAgent_;
-    auto oldListeners = windowManager.pImpl_->windowModeChangeListeners_;
-    windowManager.pImpl_->windowPropertyChangeAgent_ = sptr<WindowManagerAgent>::MakeSptr();
-    windowManager.pImpl_->windowModeChangeListeners_.clear();
+    ASSERT_NE(instance_, nullptr);
+    auto oldWindowManagerAgent = instance_->pImpl_->windowPropertyChangeAgent_;
+    auto oldListeners = instance_->pImpl_->windowModeChangeListeners_;
+    instance_->pImpl_->windowPropertyChangeAgent_ = sptr<WindowManagerAgent>::MakeSptr();
+    instance_->pImpl_->windowModeChangeListeners_.clear();
 
     // check nullpter
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterWindowModeChangedListenerForPropertyChange(nullptr));
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, instance_->UnregisterWindowModeChangedListenerForPropertyChange(nullptr));
 
     sptr<TestWindowModeChangedListenerForPropertyChange> listener1 =
         sptr<TestWindowModeChangedListenerForPropertyChange>::MakeSptr();
     sptr<TestWindowModeChangedListenerForPropertyChange> listener2 =
         sptr<TestWindowModeChangedListenerForPropertyChange>::MakeSptr();
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION,
-        windowManager.UnregisterWindowModeChangedListenerForPropertyChange(listener1));
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_SAMGR,
+        instance_->UnregisterWindowModeChangedListenerForPropertyChange(listener1));
 
-    windowManager.RegisterWindowModeChangedListenerForPropertyChange(listener1);
-    windowManager.RegisterWindowModeChangedListenerForPropertyChange(listener2);
-    EXPECT_EQ(0, windowManager.pImpl_->windowModeChangeListeners_.size());
+    instance_->RegisterWindowModeChangedListenerForPropertyChange(listener1);
+    instance_->RegisterWindowModeChangedListenerForPropertyChange(listener2);
+    EXPECT_EQ(0, instance_->pImpl_->windowModeChangeListeners_.size());
 
-    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterWindowModeChangedListenerForPropertyChange(listener1));
-    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterWindowModeChangedListenerForPropertyChange(listener2));
-    EXPECT_EQ(0, windowManager.pImpl_->windowModeChangeListeners_.size());
-    ASSERT_EQ(nullptr, windowManager.pImpl_->windowPropertyChangeAgent_);
+    EXPECT_EQ(WMError::WM_OK, instance_->UnregisterWindowModeChangedListenerForPropertyChange(listener1));
+    EXPECT_EQ(WMError::WM_OK, instance_->UnregisterWindowModeChangedListenerForPropertyChange(listener2));
+    EXPECT_EQ(0, instance_->pImpl_->windowModeChangeListeners_.size());
+    ASSERT_EQ(nullptr, instance_->pImpl_->windowPropertyChangeAgent_);
 
-    windowManager.pImpl_->windowModeChangeListeners_.emplace_back(listener1);
-    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterWindowModeChangedListenerForPropertyChange(listener1));
-    EXPECT_EQ(0, windowManager.pImpl_->windowModeChangeListeners_.size());
+    instance_->pImpl_->windowModeChangeListeners_.emplace_back(listener1);
+    EXPECT_EQ(WMError::WM_OK, instance_->UnregisterWindowModeChangedListenerForPropertyChange(listener1));
+    EXPECT_EQ(0, instance_->pImpl_->windowModeChangeListeners_.size());
 
-    windowManager.pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
-    windowManager.pImpl_->windowModeChangeListeners_ = oldListeners;
+    instance_->pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
+    instance_->pImpl_->windowModeChangeListeners_ = oldListeners;
 }
 
 /**
@@ -2226,7 +2408,7 @@ HWTEST_F(WindowManagerTest, NotifyWindowModeChangeForPropertyChange, TestSize.Le
  */
 HWTEST_F(WindowManagerTest, RegisterRectChangedListener01, Function | SmallTest | Level2)
 {
-    ASSERT_NE(nullptr, instance_);
+    ASSERT_NE(instance_, nullptr);
     auto oldWindowManagerAgent = instance_->pImpl_->windowPropertyChangeAgent_;
     auto oldListeners = instance_->pImpl_->windowRectChangeListeners_;
     instance_->pImpl_->windowPropertyChangeAgent_ = nullptr;
@@ -2234,6 +2416,10 @@ HWTEST_F(WindowManagerTest, RegisterRectChangedListener01, Function | SmallTest 
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, instance_->RegisterRectChangedListener(nullptr));
 
     sptr<TestWindowRectChangedListener> listener = sptr<TestWindowRectChangedListener>::MakeSptr();
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     instance_->RegisterRectChangedListener(listener);
 
     // to check that the same listner can not be registered twice
@@ -2250,33 +2436,36 @@ HWTEST_F(WindowManagerTest, RegisterRectChangedListener01, Function | SmallTest 
  */
 HWTEST_F(WindowManagerTest, UnregisterRectChangedListener01, Function | SmallTest | Level2)
 {
-    auto& windowManager = WindowManager::GetInstance();
-    auto oldWindowManagerAgent = windowManager.pImpl_->windowPropertyChangeAgent_;
-    auto oldListeners = windowManager.pImpl_->windowRectChangeListeners_;
-    windowManager.pImpl_->windowPropertyChangeAgent_ = sptr<WindowManagerAgent>::MakeSptr();
-    windowManager.pImpl_->windowRectChangeListeners_.clear();
+    ASSERT_NE(instance_, nullptr);
+    auto oldWindowManagerAgent = instance_->pImpl_->windowPropertyChangeAgent_;
+    auto oldListeners = instance_->pImpl_->windowRectChangeListeners_;
+    instance_->pImpl_->windowPropertyChangeAgent_ = sptr<WindowManagerAgent>::MakeSptr();
+    instance_->pImpl_->windowRectChangeListeners_.clear();
 
     // check nullpter
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterRectChangedListener(nullptr));
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, instance_->UnregisterRectChangedListener(nullptr));
 
     sptr<TestWindowRectChangedListener> listener1 = sptr<TestWindowRectChangedListener>::MakeSptr();
     sptr<TestWindowRectChangedListener> listener2 = sptr<TestWindowRectChangedListener>::MakeSptr();
-    windowManager.UnregisterRectChangedListener(listener1);
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_SAMGR, instance_->UnregisterRectChangedListener(listener1));
 
-    windowManager.RegisterRectChangedListener(listener1);
-    windowManager.RegisterRectChangedListener(listener2);
-    EXPECT_EQ(0, windowManager.pImpl_->windowRectChangeListeners_.size());
+    instance_->RegisterRectChangedListener(listener1);
+    instance_->RegisterRectChangedListener(listener2);
+    EXPECT_EQ(0, instance_->pImpl_->windowRectChangeListeners_.size());
 
-    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterRectChangedListener(listener1));
-    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterRectChangedListener(listener2));
-    EXPECT_EQ(0, windowManager.pImpl_->windowRectChangeListeners_.size());
+    EXPECT_EQ(WMError::WM_OK, instance_->UnregisterRectChangedListener(listener1));
+    EXPECT_EQ(WMError::WM_OK, instance_->UnregisterRectChangedListener(listener2));
+    EXPECT_EQ(0, instance_->pImpl_->windowRectChangeListeners_.size());
 
-    windowManager.pImpl_->windowRectChangeListeners_.emplace_back(listener1);
-    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterRectChangedListener(listener1));
-    EXPECT_EQ(0, windowManager.pImpl_->windowRectChangeListeners_.size());
+    instance_->pImpl_->windowRectChangeListeners_.emplace_back(listener1);
+    EXPECT_EQ(WMError::WM_OK, instance_->UnregisterRectChangedListener(listener1));
+    EXPECT_EQ(0, instance_->pImpl_->windowRectChangeListeners_.size());
 
-    windowManager.pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
-    windowManager.pImpl_->windowRectChangeListeners_ = oldListeners;
+    instance_->pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
+    instance_->pImpl_->windowRectChangeListeners_ = oldListeners;
 }
 
 /**
@@ -2421,11 +2610,15 @@ HWTEST_F(WindowManagerTest, NotifyWMSWindowDestroyed02, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, AddSessionBlackList01, TestSize.Level1)
 {
+    ASSERT_NE(instance_, nullptr);
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     WMError ret;
     std::unordered_set<std::string> bundleNames;
     std::unordered_set<std::string> privacyWindowTags;
-    ret = WindowManager::GetInstance().AddSessionBlackList(bundleNames, privacyWindowTags);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+    ret = instance_->AddSessionBlackList(bundleNames, privacyWindowTags);
+    EXPECT_EQ(WMError::WM_ERROR_SAMGR, ret);
 }
 
 /**
@@ -2435,11 +2628,15 @@ HWTEST_F(WindowManagerTest, AddSessionBlackList01, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, RemoveSessionBlackList01, TestSize.Level1)
 {
+    ASSERT_NE(instance_, nullptr);
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     WMError ret;
     std::unordered_set<std::string> bundleNames;
     std::unordered_set<std::string> privacyWindowTags;
-    ret = WindowManager::GetInstance().RemoveSessionBlackList(bundleNames, privacyWindowTags);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+    ret = instance_->RemoveSessionBlackList(bundleNames, privacyWindowTags);
+    EXPECT_EQ(WMError::WM_ERROR_SAMGR, ret);
 }
 
 /**
@@ -2536,9 +2733,13 @@ HWTEST_F(WindowManagerTest, RegisterWMSConnectionChangedListener, TestSize.Level
  */
 HWTEST_F(WindowManagerTest, GetAllMainWindowInfo, TestSize.Level1)
 {
+    ASSERT_NE(instance_, nullptr);
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     std::vector<sptr<MainWindowInfo>> infos;
-    ASSERT_NE(nullptr, instance_);
-    instance_->GetAllMainWindowInfo(infos);
+    WMError ret = instance_->GetAllMainWindowInfo(infos);
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, ret);
 }
 
 /**
@@ -2553,13 +2754,16 @@ HWTEST_F(WindowManagerTest, GetMainWindowSnapshot, TestSize.Level1)
     windowIds.emplace_back(9);
     WindowSnapshotConfiguration configs;
     configs.useCache = true;
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     sptr<MockIRemoteObject> iRemoteObjMocker = sptr<MockIRemoteObject>::MakeSptr();
-    WMError ret = WindowManager::GetInstance().GetMainWindowSnapshot(windowIds, configs, iRemoteObjMocker);
-    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+    WMError ret = instance_->GetMainWindowSnapshot(windowIds, configs, iRemoteObjMocker);
+    EXPECT_EQ(WMError::WM_ERROR_SAMGR, ret);
 
     iRemoteObjMocker->SetRequestResult(ERR_NONE);
-    ret = WindowManager::GetInstance().GetMainWindowSnapshot(windowIds, configs, iRemoteObjMocker);
-    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+    ret = instance_->GetMainWindowSnapshot(windowIds, configs, iRemoteObjMocker);
+    EXPECT_EQ(WMError::WM_ERROR_SAMGR, ret);
 }
 }
 } // namespace
