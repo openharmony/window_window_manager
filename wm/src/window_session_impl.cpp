@@ -2976,7 +2976,7 @@ WMError WindowSessionImpl::SetRaiseByClickEnabled(bool raiseEnabled)
 /** @note @window.hierarchy */
 WMError WindowSessionImpl::SetMainWindowRaiseByClickEnabled(bool raiseEnabled)
 {
-    WLOGFD("%{public}d", raiseEnabled);
+    WLOGFD("id: %{public}d, enable: %{public}d", GetPersistentId(), raiseEnabled);
     if (!WindowHelper::IsMainWindow(GetType())) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "Window id: %{public}d Must be app main window!",
               GetPersistentId());

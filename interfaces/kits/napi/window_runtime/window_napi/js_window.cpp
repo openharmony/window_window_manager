@@ -5152,8 +5152,8 @@ napi_value JsWindow::OnSetMainWindowRaiseByClickEnabled(napi_env env, napi_callb
             } else {
                 task->Reject(env, JsErrUtils::CreateJsError(env, ret, "set raiseEnabled failed"));
             }
-            TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s: main window [%{public}u, %{public}s] set raiseEnabled end",
-                where, window->GetWindowId(), window->GetWindowName().c_str());
+            TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s: main window %{public}u set raiseEnabled : %{public}d",
+                where, window->GetWindowId(), raiseEnabled);
         };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetMainWindowRaiseByClickEnabled") !=
         napi_status::napi_ok) {
