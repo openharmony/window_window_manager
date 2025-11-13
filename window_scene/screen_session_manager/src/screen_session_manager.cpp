@@ -3769,7 +3769,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
         screenSessionFake->SetSupportedRefreshRate(std::move(supportedRefreshRateFake));
     }
     RegisterRefreshRateChangeListener();
-    session->SetPhyScreenId(screenId);
+    session->SetRSScreenId(screenId);
     TLOGW(WmsLogTag::DMS, "CreateScreenSession success. ScreenId: %{public}" PRIu64 "", screenId);
     return session;
 }
@@ -3844,8 +3844,8 @@ DMError ScreenSessionManager::GetBrightnessInfo(DisplayId displayId, ScreenBrigh
         TLOGE(WmsLogTag::DMS, "GetScreenSession failed");
         return DMError::DM_ERROR_ILLEGAL_PARAM;
     }
-    if (screenSession->GetPhyScreenId() != SCREEN_ID_INVALID) {
-        displayId = screenSession->GetPhyScreenId();
+    if (screenSession->rsId_ != SCREEN_ID_INVALID) {
+        displayId = screenSession->rsId_;
     }
     if (static_cast<uint64_t>(displayId) != HPR_SPECAIL_DISPLAY_ID) {
         screenId = displayId;
@@ -8975,12 +8975,16 @@ void ScreenSessionManager::NotifyBrightnessInfoChanged(ScreenId rsId, const Brig
         std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
         for (const auto& iter : screenSessionMap_) {
             auto session = iter.second;
-            if (session != nullptr && session->GetPhyScreenId() == rsId) {
+            if (session != nullptr && session->rsId_ == smsScreenId) {
                 logicalScreenId = session->GetScreenId();
                 TLOGI(WmsLogTag::DMS, "transform rsId %{public}" PRIu64"to logicalScreenId %{public}" PRIu64" ", rsId, logicalScreenId);
                 break;
             }
         }
+    }
+    if (logicalScreenId != 0) {
+        TLOGD(WmsLogTag::DMS, "ignore transform rsId %{public}" PRIu64"to logicalScreenId %{public}" PRIu64" ", rsId, logicalScreenId);
+        return;
     }
     
     ScreenBrightnessInfo screenBrightnessInfo;
