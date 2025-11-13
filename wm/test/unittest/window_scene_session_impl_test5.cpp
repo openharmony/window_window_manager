@@ -2436,6 +2436,51 @@ HWTEST_F(WindowSceneSessionImplTest5, GetDragAreaByDownEvent04, TestSize.Level2)
 }
 
 /**
+ * @tc.name: GetDragAreaByDownEvent05
+ * @tc.desc: Test corner finger touch drag hot zone
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, GetDragAreaByDownEvent05, TestSize.Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetDragAreaByDownEvent05");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
+    pointerEvent->SetSourceType(2);
+    MMI::PointerEvent::PointerItem pointerItem;
+
+    windowSceneSessionImpl->SetUniqueVirtualPixelRatio(true, 1.0f);
+    Rect rect = {100, 100, 1000, 1000};
+    windowSceneSessionImpl->property_->SetWindowRect(rect);
+    
+    pointerItem.SetWindowX(10);
+    pointerItem.SetWindowY(30);
+    windowSceneSessionImpl->property_->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+    AreaType dragType = windowSceneSessionImpl->GetDragAreaByDownEvent(pointerEvent, pointerItem);
+    EXPECT_EQ(dragType, AreaType::LEFT_TOP);
+
+    pointerItem.SetWindowX(990);
+    pointerItem.SetWindowY(30);
+    dragType = windowSceneSessionImpl->GetDragAreaByDownEvent(pointerEvent, pointerItem);
+    EXPECT_EQ(dragType, AreaType::RIGHT_TOP);
+
+    pointerItem.SetWindowX(990);
+    pointerItem.SetWindowY(970);
+    dragType = windowSceneSessionImpl->GetDragAreaByDownEvent(pointerEvent, pointerItem);
+    EXPECT_EQ(dragType, AreaType::RIGHT_BOTTOM);
+
+    pointerItem.SetWindowX(10);
+    pointerItem.SetWindowY(970);
+    dragType = windowSceneSessionImpl->GetDragAreaByDownEvent(pointerEvent, pointerItem);
+    EXPECT_EQ(dragType, AreaType::LEFT_BOTTOM);
+
+    pointerEvent->SetSourceType(1);
+    dragType = windowSceneSessionImpl->GetDragAreaByDownEvent(pointerEvent, pointerItem);
+    EXPECT_EQ(dragType, AreaType::UNDEFINED);
+}
+
+/**
  * @tc.name: UpdateImmersiveBySwitchMode
  * @tc.desc: Test UpdateImmersiveBySwitchMode
  * @tc.type: FUNC
