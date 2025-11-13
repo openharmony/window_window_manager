@@ -71,6 +71,8 @@ public:
     virtual WMError BindDialogTarget(uint32_t& windowId, sptr<IRemoteObject> targetToken);
     virtual WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
+    void RegisterWindowManagerAgentWhenSCBFault(WindowManagerAgentType type,
+                                                const sptr<IWindowManagerAgent>& windowManagerAgent);
     virtual WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
     WMError RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
@@ -261,6 +263,7 @@ private:
      * Window Recover
      */
     void ReregisterWindowManagerAgent();
+    void ReregisterWindowManagerFaultAgent();
     void WindowManagerAndSessionRecover();
     WMError RecoverWindowPropertyChangeFlag();
     uint32_t observedFlags_;
@@ -279,6 +282,9 @@ private:
     std::mutex effectMutex_;
     std::map<int32_t, UIEffectRecoverCallbackFunc> uiEffectRecoverCallbackFuncMap_;
     bool recoverInitialized_ = false;
+
+    std::map<WindowManagerAgentType, std::set<sptr<IWindowManagerAgent>>> windowManagerAgentFaultMap_;
+    std::mutex windowManagerAgentFaultMapMutex_;
 
     std::mutex outlineMutex_;
     OutlineRecoverCallbackFunc outlineRecoverCallbackFunc_;
