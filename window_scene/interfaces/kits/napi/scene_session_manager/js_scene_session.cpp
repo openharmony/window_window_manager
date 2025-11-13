@@ -284,6 +284,8 @@ static napi_value CreatePipTemplateInfo(napi_env env, const PiPTemplateInfo& pip
         CreateJsValue(env, pipTemplateInfo.priority));
     napi_set_named_property(env, pipTemplateInfoValue, "defaultWindowSizeType",
         CreateJsValue(env, pipTemplateInfo.defaultWindowSizeType));
+    napi_set_named_property(env, pipTemplateInfoValue, "cornerAdsorptionEnabled",
+        CreateJsValue(env, pipTemplateInfo.cornerAdsorptionEnabled));
     napi_value controlArrayValue = nullptr;
     std::vector<std::uint32_t> controlGroups = pipTemplateInfo.controlGroup;
     napi_create_array_with_length(env, controlGroups.size(), &controlArrayValue);
@@ -4315,8 +4317,9 @@ void JsSceneSession::OnAutoStartPiPStatusChange(bool isAutoStart, uint32_t prior
 void JsSceneSession::OnUpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo)
 {
     TLOGI(WmsLogTag::WMS_PIP, "pipTemplateType: %{public}u, priority: %{public}d, "
-        "defaultWindowSizeType: %{public}d", pipTemplateInfo.pipTemplateType, pipTemplateInfo.priority,
-        pipTemplateInfo.defaultWindowSizeType);
+        "defaultWindowSizeType: %{public}d, cornerAdsorptionEnabled: %{public}d",
+        pipTemplateInfo.pipTemplateType, pipTemplateInfo.priority, pipTemplateInfo.defaultWindowSizeType,
+        pipTemplateInfo.cornerAdsorptionEnabled);
     auto task = [weakThis = wptr(this), persistentId = persistentId_,
         pipTemplateInfo = std::move(pipTemplateInfo), env = env_] {
         auto jsSceneSession = weakThis.promote();

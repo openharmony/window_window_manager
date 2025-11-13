@@ -1717,6 +1717,7 @@ struct PiPTemplateInfo : public Parcelable {
     std::vector<PiPControlStatusInfo> pipControlStatusInfoList;
     std::vector<PiPControlEnableInfo> pipControlEnableInfoList;
     uint32_t defaultWindowSizeType{0};
+    bool cornerAdsorptionEnabled{true};
 
     PiPTemplateInfo() {}
 
@@ -1749,6 +1750,9 @@ struct PiPTemplateInfo : public Parcelable {
             }
         }
         if (!parcel.WriteUint32(defaultWindowSizeType)) {
+            return false;
+        }
+        if (!parcel.WriteBool(cornerAdsorptionEnabled)) {
             return false;
         }
         return true;
@@ -1796,6 +1800,10 @@ struct PiPTemplateInfo : public Parcelable {
             pipTemplateInfo->pipControlEnableInfoList.emplace_back(info);
         }
         if (!parcel.ReadUint32(pipTemplateInfo->defaultWindowSizeType)) {
+            delete pipTemplateInfo;
+            return nullptr;
+        }
+        if (!parcel.ReadBool(pipTemplateInfo->cornerAdsorptionEnabled)) {
             delete pipTemplateInfo;
             return nullptr;
         }

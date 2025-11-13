@@ -7516,8 +7516,8 @@ void WindowSessionImpl::UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo)
         return;
     }
     TLOGI(WmsLogTag::WMS_PIP, "UpdatePiPTemplateInfo, pipTemplateType: %{public}u, priority: %{public}d, "
-        "defaultWindowSizeType: %{public}d", pipTemplateInfo.pipTemplateType, pipTemplateInfo.priority,
-        pipTemplateInfo.defaultWindowSizeType);
+        "defaultWindowSizeType: %{public}d, cornerAdsorptionEnabled: %{public}d", pipTemplateInfo.pipTemplateType,
+        pipTemplateInfo.priority, pipTemplateInfo.defaultWindowSizeType,  pipTemplateInfo.cornerAdsorptionEnabled);
     if (auto hostSession = GetHostSession()) {
         hostSession->UpdatePiPTemplateInfo(pipTemplateInfo);
     }
