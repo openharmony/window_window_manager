@@ -1424,7 +1424,7 @@ private:
     std::shared_mutex pipChgListenerMapMutex_;
     std::map<int32_t, sptr<IPipChangeListener>> pipChgListenerMap_;
     bool CheckPiPPriority(const PiPTemplateInfo& pipTemplateInfo, DisplayId displayId = 0);
-    std::string getScreenName(int32_t persistentId);
+    std::string GetScreenName(int32_t persistentId);
     bool IsEnablePiPCreate(const sptr<WindowSessionProperty>& property);
     bool IsPiPForbidden(const sptr<WindowSessionProperty>& property, const WindowType& type);
     bool IsLastPiPWindowVisible(uint64_t surfaceId, WindowVisibilityState lastVisibilityState);
