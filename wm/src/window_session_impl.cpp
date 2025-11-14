@@ -6546,6 +6546,73 @@ WMError WindowSessionImpl::UnregisterWindowRotationChangeListener(const sptr<IWi
     return ret;
 }
 
+
+template<typename T>
+EnableIfSame<T, IWindowSupportRotationListener, std::vector<sptr<IWindowSupportRotationListener>>>
+    WindowSessionImpl::GetListeners(DisplayId displayId)
+{
+    std::vector<sptr<IWindowSupportRotationListener>> windowSupportRotationListener;
+    for (auto& listener : windowSupportRotationListeners_[displayId]) {
+        windowSupportRotationListener.push_back(listener);
+    }
+    return windowSupportRotationListener;
+}
+
+WMError WindowSessionImpl::RegisterWindowSupportRotationListener(const sptr<IWindowSupportRotationListener>& listener,
+    DisplayId displayId)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    WMError ret = WMError::WM_OK;
+    {
+        std::lock_guard<std::mutex> lockListener(windowSupportRotationListenerMutex_);
+        ret = RegisterListener(windowSupportRotationListeners_[displayId], listener);
+    }
+    auto hostSession = GetHostSession();
+    if (hostSession != nullptr && ret == WMError::WM_OK) {
+        hostSession->NotifySupportRotationRegistered(displayId);
+    }
+    return ret;
+}
+
+WMError WindowSessionImpl::UnregisterWindowSupportRotationListener(const sptr<IWindowSupportRotationListener>& listener,
+    DisplayId displayId)
+{
+    WMError ret = WMError::WM_OK;
+    bool windowRotationChangeListenerEmpty = false;
+    {
+        std::lock_guard<std::mutex> lockListener(windowSupportRotationListenerMutex_);
+        ret = UnregisterListener(windowSupportRotationListeners_[displayId], listener);
+    }
+    return ret;
+}
+
+void WindowSessionImpl::NotifySupportRotationChange(const SupportRotationInfo& supportRotationInfo)
+{
+    std::vector<sptr<IWindowSupportRotationListener>> windowSupportRotationListener;
+    {
+        std::lock_guard<std::mutex> lockListener(windowSupportRotationListenerMutex_);
+        windowSupportRotationListener = GetListeners<IWindowSupportRotationListener>(suppoortRotationInfo->displayId_);
+    }
+    handler_->PostTask(
+        [weakThis = wptr(this), windowSupportRotationListener, supportRotationInfo] {
+            TLOGI(WmsLogTag::WMS_ROTATION, "post task to notify listener.");
+            auto window = weakThis.promote();
+            if (window == nullptr) {
+                TLOGE(WmsLogTag::WMS_ROTATION, "window is null");
+                return;
+            }
+            for (auto& listener : windowSupportRotationListener) {
+                if (listener == nullptr) {
+                    continue;
+                }
+                listener->OnSupportRotationChange(supportRotationInfo);
+            }
+        }, __func__);
+}
+
 template<typename T>
 EnableIfSame<T, IWindowVisibilityChangedListener, std::vector<IWindowVisibilityListenerSptr>> WindowSessionImpl::GetListeners()
 {

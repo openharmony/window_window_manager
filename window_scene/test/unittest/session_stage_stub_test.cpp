@@ -1560,6 +1560,22 @@ HWTEST_F(SessionStageStubTest, HandleUpdateIsShowDecorInFreeMultiWindow02, TestS
     ASSERT_TRUE(sessionStageStub_ != nullptr);
     EXPECT_EQ(ERR_NONE, sessionStageStub_->HandleUpdateIsShowDecorInFreeMultiWindow(data, reply));
 }
+
+/**
+ * @tc.name: HandleNotifySupportRotationChange
+ * @tc.desc: test function : HandleNotifySupportRotationChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifySupportRotationChange, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    SupportRotationInfo info = { 0, 1, { true, true, true, true }, { true, true, true, true }, "test" };
+    info.marshalling(data);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->HandleNotifySupportRotationChange(data, reply));
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

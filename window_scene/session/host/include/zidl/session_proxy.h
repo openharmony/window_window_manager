@@ -209,6 +209,7 @@ public:
      * window rotation
      */
     WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) override;
+    WSError NotifySupportRotationRegistered(DisplayId displayId) override;
 
     /*
      * window focus
