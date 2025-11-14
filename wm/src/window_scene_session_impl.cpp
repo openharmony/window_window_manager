@@ -3849,7 +3849,6 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation, Wate
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
     hostSession->OnTitleAndDockHoverShowChange(titleHoverShowEnabled_, dockHoverShowEnabled_);
-    SetLayoutFullScreenByApiVersion(enableImmersiveMode_);
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "present: %{public}d, enableImmersiveMode_:%{public}d!",
         presentation, enableImmersiveMode_.load());
     SessionEventParam param;
@@ -5902,9 +5901,6 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
         WLOGFE("%{public}u do not support mode: %{public}u",
             GetWindowId(), static_cast<uint32_t>(mode));
         return WSError::WS_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
-    }
-    if (mode != WindowMode::WINDOW_MODE_FULLSCREEN) {
-        UpdateIsShowDecorInFreeMultiWindow(true);
     }
     WMError ret = UpdateWindowModeImmediately(mode);
 
