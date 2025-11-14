@@ -104,6 +104,7 @@ private:
     int HandleGetIsHighlighted(MessageParcel& data, MessageParcel& reply);
     int ReadOneAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo);
     int ReadOnePendingSessionActivationConfig(MessageParcel& data, PendingSessionActivationConfig& config);
+    int HandleNotifySupportRotationRegistered(MessageParcel& data, MessageParcel& reply);
 
     // extension extension
     int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);

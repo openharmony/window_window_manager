@@ -1360,4 +1360,13 @@ int SessionStageStub::HandleUpdateIsShowDecorInFreeMultiWindow(MessageParcel& da
     }
     return ERR_NONE;
 }
+
+int SessionStageStub::HandleNotifySupportRotationChange(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "called!");
+    SupportRotationInfo supportRotationInfo;
+    supportRotationInfo.Unmarshalling(data);
+    NotifySupportRotationChange(supportRotationInfo);
+    return ERR_NONE;
+}
 } // namespace OHOS::Rosen

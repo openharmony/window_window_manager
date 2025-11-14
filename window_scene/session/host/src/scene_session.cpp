@@ -2208,6 +2208,20 @@ void SceneSession::RegisterSubSessionZLevelChangeCallback(NotifySubSessionZLevel
     }, __func__);
 }
 
+void SceneSession::NotifySupportRotationRegistered(DisplayId displayId)
+{
+   PostTask([weakThis = wptr(this), displayId = displayId, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s: session is nullptr", where);
+            return;
+        }
+        if (session->notifySupportRotationRegisteredFunc_) {
+            session->notifySupportRotationRegisteredFunc_(displayId);
+        }
+    }, __func__);
+}
+
 /** @note @window.hierarchy */
 WSError SceneSession::RaiseToAppTop()
 {
@@ -9723,6 +9737,30 @@ bool SceneSession::IsSubWindowOutlineEnabled() const
         return sessionProperty->IsSubWindowOutlineEnabled();
     }
     return false;
+}
+
+void SceneSession::RegisterNotifySupportRotationRegisteredCallback(NotifySupportRotationRegisteredFunc&& func)
+{
+    PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s session or func is null", where);
+            return;
+        }
+        session->notifySupportRotationRegisteredFunc_ = std::move(func);
+    }, __func__);
+}
+
+void SceneSession::UnregisterNotifySupportRotationRegisteredCallback()
+{
+    PostTask([weakThis = wptr(this), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s session or func is null", where);
+            return;
+        }
+        session->notifySupportRotationRegisteredFunc_ = nullptr;
+    }, __func__);
 }
 
 /**
