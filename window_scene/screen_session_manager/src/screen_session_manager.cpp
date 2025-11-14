@@ -486,15 +486,7 @@ void ScreenSessionManager::Init()
         screenEventTracker_.RecordEvent("Dms load motion plugin failed.");
         TLOGW(WmsLogTag::DMS, "load motion plugin failed.");
     }
-    static bool isNeedLoadAodLib = FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
-        FoldScreenStateInternel::IsDualDisplayFoldDevice() ||
-        FoldScreenStateInternel::IsSingleDisplayFoldDevice() ||
-        FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice();
-    if (isNeedLoadAodLib) {
-        if (!LoadAodLib()) {
-            TLOGE(WmsLogTag::DMS, "load aod lib failed");
-        }
-    }
+    LoadAodLib();
     RegisterScreenChangeListener();
     if(FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         RegisterFoldNotSwitchingListener();
@@ -509,6 +501,19 @@ void ScreenSessionManager::Init()
     // publish init
     ScreenSessionPublish::GetInstance().InitPublishEvents();
     screenEventTracker_.RecordEvent("Dms init end.");
+}
+
+void ScreenSessionManager::LoadAodLib()
+{
+    static bool isNeedLoadAodLib = FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
+        FoldScreenStateInternel::IsDualDisplayFoldDevice() ||
+        FoldScreenStateInternel::IsSingleDisplayFoldDevice() ||
+        FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice();
+    if (isNeedLoadAodLib) {
+        if (!LoadAodLib()) {
+            TLOGE(WmsLogTag::DMS, "load aod lib failed");
+        }
+    }
 }
 
 void ScreenSessionManager::OnStart()
