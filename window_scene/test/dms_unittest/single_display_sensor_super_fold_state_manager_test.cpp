@@ -68,7 +68,7 @@ HWTEST_F(SingleDisplaySensorSuperFoldStateManagerTest, HandleAngleChange, TestSi
     sptr<FoldScreenPolicy> foldScreenPolicy = nullptr;
     SingleDisplaySensorSuperFoldStateManager manager;
     manager.HandleAngleChange(angel, hall, foldScreenPolicy);
-    EXPECT_TRUE(manager.mState_, FoldStatus::UNKNOWN);
+    EXPECT_EQ(manager.mState_, FoldStatus::UNKNOWN);
 }
 
 /**
@@ -86,7 +86,7 @@ HWTEST_F(SingleDisplaySensorSuperFoldStateManagerTest, HandleHallChange, TestSiz
     sptr<FoldScreenPolicy> foldScreenPolicy = nullptr;
     SingleDisplaySensorSuperFoldStateManager manager;
     manager.HandleHallChange(angel, hall, foldScreenPolicy);
-    EXPECT_TRUE(manager.mState_, FoldStatus::UNKNOWN);
+    EXPECT_EQ(manager.mState_, FoldStatus::UNKNOWN);
 }
 
 /**
