@@ -647,9 +647,11 @@ public:
      * @brief Register focus changed listener.
      *
      * @param listener IFocusChangedListener.
+     * @param recoverableOnFault Indicates whether to forcibly register a listener.
      * @return WM_OK means register success, others means register failed.
      */
-    WMError RegisterFocusChangedListener(const sptr<IFocusChangedListener>& listener);
+    WMError RegisterFocusChangedListener(const sptr<IFocusChangedListener>& listener,
+        bool recoverableOnFault = false);
 
     /**
      * @brief Unregister focus changed listener.

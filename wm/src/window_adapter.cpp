@@ -190,6 +190,19 @@ WMError WindowAdapter::RegisterWindowManagerAgent(WindowManagerAgentType type,
     return wmsProxy->RegisterWindowManagerAgent(type, windowManagerAgent);
 }
 
+void WindowAdapter::RegisterWindowManagerAgentWhenSCBFault(WindowManagerAgentType type,
+    const sptr<IWindowManagerAgent>& windowManagerAgent)
+{
+    // Note: sceneboard is restarting due to a failure, the listener will be re-registered
+    // during the "independent recovery" process.
+    TLOGI(WmsLogTag::WMS_SCB, "enter");
+    std::lock_guard<std::mutex> lock(windowManagerAgentFaultMapMutex_);
+    if (windowManagerAgentFaultMap_.find(type) == windowManagerAgentFaultMap_.end()) {
+        windowManagerAgentFaultMap_[type] = std::set<sptr<IWindowManagerAgent>>();
+    }
+    windowManagerAgentFaultMap_[type].insert(windowManagerAgent);
+}
+
 WMError WindowAdapter::UnregisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
@@ -630,20 +643,70 @@ WMError  WindowAdapter::RecoverWindowPropertyChangeFlag()
 
 void WindowAdapter::ReregisterWindowManagerAgent()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (!windowManagerServiceProxy_ || !windowManagerServiceProxy_->AsObject()) {
-        TLOGE(WmsLogTag::WMS_RECOVER, "proxy is null");
-        return;
-    }
-    for (const auto& it : windowManagerAgentMap_) {
-        TLOGI(WmsLogTag::WMS_RECOVER, "Window manager agent type=%{public}" PRIu32 ", size=%{public}" PRIu64,
-            it.first, static_cast<uint64_t>(it.second.size()));
-        for (auto& agent : it.second) {
-            if (windowManagerServiceProxy_->RegisterWindowManagerAgent(it.first, agent) != WMError::WM_OK) {
-                TLOGE(WmsLogTag::WMS_RECOVER, "failed");
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!windowManagerServiceProxy_ || !windowManagerServiceProxy_->AsObject()) {
+            TLOGE(WmsLogTag::WMS_RECOVER, "proxy is null");
+            return;
+        }
+        for (const auto& it : windowManagerAgentMap_) {
+            TLOGI(WmsLogTag::WMS_RECOVER, "Window manager agent type=%{public}" PRIu32 ", size=%{public}" PRIu64,
+                it.first, static_cast<uint64_t>(it.second.size()));
+            for (auto& agent : it.second) {
+                if (windowManagerServiceProxy_->RegisterWindowManagerAgent(it.first, agent) != WMError::WM_OK) {
+                    TLOGE(WmsLogTag::WMS_RECOVER, "failed");
+                }
             }
         }
     }
+    // Note: Recover the listener that was registered during the SCB failure.
+    ReregisterWindowManagerFaultAgent();
+}
+
+void WindowAdapter::ReregisterWindowManagerFaultAgent()
+{
+    sptr<IWindowManager> proxy = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!windowManagerServiceProxy_ || !windowManagerServiceProxy_->AsObject()) {
+            TLOGE(WmsLogTag::WMS_RECOVER, "proxy is null");
+            return;
+        }
+        proxy = windowManagerServiceProxy_;
+    }
+    std::map<WindowManagerAgentType, std::set<sptr<IWindowManagerAgent>>> tempMap;
+    {
+        std::lock_guard<std::mutex> lock(windowManagerAgentFaultMapMutex_);
+        if (windowManagerAgentFaultMap_.empty()) {
+            return;
+        }
+        tempMap = windowManagerAgentFaultMap_;
+        windowManagerAgentFaultMap_.clear();
+    }
+    TLOGI(WmsLogTag::WMS_RECOVER, "begin Re-register failure agent");
+    for (const auto& it : tempMap) {
+        TLOGI(WmsLogTag::WMS_RECOVER, "agent type: %{public}" PRIu32 ", size=%{public}zu",
+            it.first, it.second.size());
+        for (auto& agent : it.second) {
+            if (proxy->RegisterWindowManagerAgent(it.first, agent) != WMError::WM_OK) {
+                TLOGW(WmsLogTag::WMS_RECOVER, "register agent failed");
+            }
+        }
+    }
+
+    // After register successfully, add the listener from fault agentMap to the normal agentMap.
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (auto& pair : tempMap) {
+        auto key = pair.first;
+        auto& agentSet = pair.second;
+        auto it = windowManagerAgentMap_.find(key);
+        if (it != windowManagerAgentMap_.end()) {
+            it->second.insert(std::make_move_iterator(agentSet.begin()), std::make_move_iterator(agentSet.end()));
+        } else {
+            windowManagerAgentMap_.insert({ key, std::move(agentSet) });
+        }
+    }
+    TLOGI(WmsLogTag::WMS_RECOVER, "end");
 }
 
 void WindowAdapter::OnUserSwitch()
