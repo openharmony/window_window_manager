@@ -2945,8 +2945,7 @@ void ScreenSessionManager::HandleResolutionEffectChangeWhenRotate()
     if (internalSession->GetRotation() == Rotation::ROTATION_90 ||
         internalSession->GetRotation() == Rotation::ROTATION_270) {
         HandleResolutionEffectChange();
-    }
-    else {
+    } else {
         RecoveryResolutionEffect();
 #ifdef FOLD_ABILITY_ENABLE
         SuperFoldStateManager::GetInstance().RefreshExternalRegion();
