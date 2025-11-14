@@ -2874,6 +2874,12 @@ bool Session::GetEnableAddSnapshot() const
     return enableAddSnapshot_;
 }
 
+void Session::SetBufferNameForPixelMap(const char* functionName, std::shared_ptr<Media::PixelMap> pixelMap)
+{
+    std::string functionNameStr = (functionName != nullptr) ? functionName : "unknown";
+    pixelMap->SetMemoryName(functionNameStr + '_' + std::to_string(GetPersistentId()));
+}
+
 void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media::PixelMap> persistentPixelMap,
     bool updateSnapshot, LifeCycleChangeReason reason)
 {
@@ -2891,8 +2897,9 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
         rotate = DisplayOrientation::PORTRAIT;
     }
     bool needCacheSnapshot = (SupportCacheLockedSessionSnapshot() && reason == LifeCycleChangeReason::SCREEN_LOCK);
+    const char* const where = __func__;
     auto task = [weakThis = wptr(this), runInFfrt = useFfrt, requirePersist = needPersist, persistentPixelMap,
-        updateSnapshot, key, rotate, needCacheSnapshot, reason]() {
+        updateSnapshot, key, rotate, needCacheSnapshot, reason, where]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
@@ -2907,6 +2914,7 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
         if (pixelMap == nullptr) {
             return;
         }
+        session->SetBufferNameForPixelMap(where, pixelMap);
         {
             std::lock_guard<std::mutex> lock(session->snapshotMutex_);
             session->snapshot_ = pixelMap;
