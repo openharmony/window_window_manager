@@ -3934,6 +3934,30 @@ void WindowSessionImpl::NotifyWindowTitleButtonRectChange(TitleButtonRect titleB
     }
 }
 
+void WindowSessionImpl::UpdateRectChangeListenerRegisterStatus()
+{
+    auto windowId = GetPersistentId();
+    auto hostSession = GetHostSession();
+    if (!hostSession) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "hostSession is null, windowId: %{public}d", windowId);
+        return;
+    }
+
+    auto isRegisteredIn = [windowId](auto& listeners, auto& mutex) {
+        std::lock_guard<std::mutex> lock(mutex);
+        auto it = listeners.find(windowId);
+        return it != listeners.end() && !it->second.empty();
+    };
+    bool isRegistered = isRegisteredIn(windowRectChangeListeners_, windowRectChangeListenerMutex_) ||
+                        isRegisteredIn(rectChangeInGlobalDisplayListeners_, rectChangeInGlobalDisplayListenerMutex_);
+
+    auto ret = hostSession->UpdateRectChangeListenerRegistered(isRegistered);
+    if (ret != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed, ret: %{public}d, windowId: %{public}d, isRegistered: %{public}d",
+              static_cast<int32_t>(ret), windowId, isRegistered);
+    }
+}
+
 template<typename T>
 EnableIfSame<T, IWindowRectChangeListener,
     std::vector<sptr<IWindowRectChangeListener>>> WindowSessionImpl::GetListeners()
@@ -3947,31 +3971,26 @@ EnableIfSame<T, IWindowRectChangeListener,
 
 WMError WindowSessionImpl::RegisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener)
 {
-    WMError ret = WMError::WM_OK;
+    WMError ret = WMError::WM_DO_NOTHING;
     {
         std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
         ret = RegisterListener(windowRectChangeListeners_[GetPersistentId()], listener);
     }
-    auto hostSession = GetHostSession();
-    if (hostSession != nullptr && ret == WMError::WM_OK) {
-        hostSession->UpdateRectChangeListenerRegistered(true);
+    if (ret == WMError::WM_OK) {
+        UpdateRectChangeListenerRegisterStatus();
     }
     return ret;
 }
 
 WMError WindowSessionImpl::UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener)
 {
-    WMError ret = WMError::WM_OK;
-    bool windowRectChangeListenersEmpty = false;
+    WMError ret = WMError::WM_DO_NOTHING;
     {
         std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
         ret = UnregisterListener(windowRectChangeListeners_[GetPersistentId()], listener);
-        windowRectChangeListenersEmpty = windowRectChangeListeners_.count(GetPersistentId()) == 0 ||
-                                         windowRectChangeListeners_[GetPersistentId()].empty();
     }
-    auto hostSession = GetHostSession();
-    if (hostSession != nullptr && windowRectChangeListenersEmpty) {
-        hostSession->UpdateRectChangeListenerRegistered(false);
+    if (ret == WMError::WM_OK) {
+        UpdateRectChangeListenerRegisterStatus();
     }
     return ret;
 }
@@ -3991,15 +4010,29 @@ EnableIfSame<T, IRectChangeInGlobalDisplayListener,
 WMError WindowSessionImpl::RegisterRectChangeInGlobalDisplayListener(
     const sptr<IRectChangeInGlobalDisplayListener>& listener)
 {
-    std::lock_guard<std::mutex> lock(rectChangeInGlobalDisplayListenerMutex_);
-    return RegisterListener(rectChangeInGlobalDisplayListeners_[GetPersistentId()], listener);
+    WMError ret = WMError::WM_DO_NOTHING;
+    {
+        std::lock_guard<std::mutex> lock(rectChangeInGlobalDisplayListenerMutex_);
+        ret = RegisterListener(rectChangeInGlobalDisplayListeners_[GetPersistentId()], listener);
+    }
+    if (ret == WMError::WM_OK) {
+        UpdateRectChangeListenerRegisterStatus();
+    }
+    return ret;
 }
 
 WMError WindowSessionImpl::UnregisterRectChangeInGlobalDisplayListener(
     const sptr<IRectChangeInGlobalDisplayListener>& listener)
 {
-    std::lock_guard<std::mutex> lock(rectChangeInGlobalDisplayListenerMutex_);
-    return UnregisterListener(rectChangeInGlobalDisplayListeners_[GetPersistentId()], listener);
+    WMError ret = WMError::WM_DO_NOTHING;
+    {
+        std::lock_guard<std::mutex> lock(rectChangeInGlobalDisplayListenerMutex_);
+        ret = UnregisterListener(rectChangeInGlobalDisplayListeners_[GetPersistentId()], listener);
+    }
+    if (ret == WMError::WM_OK) {
+        UpdateRectChangeListenerRegisterStatus();
+    }
+    return ret;
 }
 
 template<typename T>
@@ -4329,15 +4362,7 @@ void WindowSessionImpl::RecoverSessionListener()
             SingletonContainer::Get<WindowAdapter>().UpdateSessionOcclusionStateListener(persistentId, true);
         }
     }
-    {
-        std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
-        if (windowRectChangeListeners_.find(persistentId) != windowRectChangeListeners_.end() &&
-            !windowRectChangeListeners_[persistentId].empty()) {
-            if (auto hostSession = GetHostSession()) {
-                hostSession->UpdateRectChangeListenerRegistered(true);
-            }
-        }
-    }
+    UpdateRectChangeListenerRegisterStatus();
     {
         std::lock_guard<std::mutex> lockListener(windowRotationChangeListenerMutex_);
         if (windowRotationChangeListeners_.find(persistentId) != windowRotationChangeListeners_.end() &&
