@@ -1978,10 +1978,19 @@ HWTEST_F(WindowSessionImplTest5, TestRegisterRectChangeInGlobalDisplayListener, 
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetPersistentId(123);
 
+    // Case 1: Register successfully
     auto listener = sptr<MockRectChangeInGlobalDisplayListener>::MakeSptr();
-
     auto result = window->RegisterRectChangeInGlobalDisplayListener(listener);
     EXPECT_EQ(result, WMError::WM_OK);
+
+    // Case 2: Register the same listener again
+    result = window->RegisterRectChangeInGlobalDisplayListener(listener);
+    EXPECT_EQ(result, WMError::WM_OK);
+
+    // Case 3: Register nullptr listener
+    sptr<IRectChangeInGlobalDisplayListener> nullListener = nullptr;
+    result = window->RegisterRectChangeInGlobalDisplayListener(nullListener);
+    EXPECT_EQ(result, WMError::WM_ERROR_NULLPTR);
 
     {
         std::lock_guard<std::mutex> lock(window->rectChangeInGlobalDisplayListenerMutex_);
@@ -2003,8 +2012,18 @@ HWTEST_F(WindowSessionImplTest5, TestUnregisterRectChangeInGlobalDisplayListener
     auto listener = sptr<MockRectChangeInGlobalDisplayListener>::MakeSptr();
     window->RegisterRectChangeInGlobalDisplayListener(listener);
 
+    // Case 1: Unregister successfully
     auto result = window->UnregisterRectChangeInGlobalDisplayListener(listener);
     EXPECT_EQ(result, WMError::WM_OK);
+
+    // Case 2: Unregister the same listener again
+    result = window->UnregisterRectChangeInGlobalDisplayListener(listener);
+    EXPECT_EQ(result, WMError::WM_OK);
+
+    // Case 3: Unregister nullptr listener
+    sptr<IRectChangeInGlobalDisplayListener> nullListener = nullptr;
+    result = window->UnregisterRectChangeInGlobalDisplayListener(nullListener);
+    EXPECT_EQ(result, WMError::WM_ERROR_NULLPTR);
 
     {
         std::lock_guard<std::mutex> lock(window->rectChangeInGlobalDisplayListenerMutex_);
