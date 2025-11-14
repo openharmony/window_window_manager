@@ -275,7 +275,7 @@ HWTEST_F(WebPictureInPictureControllerTest, SetPipParentWindowId, TestSize.Level
     auto mw = sptr<MockWindow>::MakeSptr();
     ASSERT_NE(nullptr, mw);
     webPipControl->mainWindow_ = mw;
-    EXPECT_EQ(webPipControl->SetPipParentWindowId(windowId), WMError::WM_ERROR_PIP_INTERNAL_ERROR);
+    EXPECT_EQ(webPipControl->SetPipParentWindowId(windowId), WMError::WM_ERROR_INVALID_PARAM);
 }
 }
 }
