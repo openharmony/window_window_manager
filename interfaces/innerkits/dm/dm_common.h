@@ -746,7 +746,8 @@ enum class DMDeviceStatus: uint32_t {
     STATUS_FOLDED,
     STATUS_TENT_HOVER,
     STATUS_TENT,
-    STATUS_GLOBAL_FULL
+    STATUS_GLOBAL_FULL,
+    STATUS_EXPAND
 };
 
 /**
