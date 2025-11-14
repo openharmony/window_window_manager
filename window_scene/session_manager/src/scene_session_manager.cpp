@@ -3380,7 +3380,7 @@ void SceneSessionManager::AddRequestTaskInfo(sptr<SceneSession> sceneSession, in
         requestIdToWantMapSize = requestIdToWantMap.size();
     }
     TLOGI(WmsLogTag::WMS_LIFE, "persistentId:%{public}d, requestId:%{public}d, "
-        "infoMap size:%{public}u, wantMap size:%{public}u",
+        "infoMap size:%{public}zu, wantMap size:%{public}zu",
         persistentId, requestId, requestTaskInfoMap.size(), requestIdToWantMapSize);
 }
  
@@ -3396,7 +3396,7 @@ void SceneSessionManager::RemoveRequestTaskInfo(int32_t persistentId, int32_t re
         requestTaskInfoMap[persistentId]->requestIdToWantMap.erase(requestId);
     }
     TLOGI(WmsLogTag::WMS_LIFE, "persistentId:%{public}d, requestId:%{public}d, "
-        "infoMap size:%{public}u, wantMap size:%{public}u",
+        "infoMap size:%{public}zu, wantMap size:%{public}zu",
         persistentId, requestId, requestTaskInfoMap.size(),
         requestTaskInfoMap[persistentId]->requestIdToWantMap.size());
 }
