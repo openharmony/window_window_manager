@@ -112,6 +112,7 @@ const std::string SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
 const std::string SCENE_BOARD_APP_IDENTIFIER = "";
 const std::string SCENE_SESSION_MANAGER_THREAD = "OS_SceneSessionManager";
 const std::string WINDOW_INFO_REPORT_THREAD = "OS_WindowInfoReportThread";
+const std::string SUPER_LAUNCHER = "SuperLauncher";
 constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
 constexpr const char* ATOMIC_SERVICE_SESSION_ID = "com.ohos.param.sessionId";
 constexpr uint32_t MAX_BRIGHTNESS = 255;
@@ -205,6 +206,11 @@ const std::unordered_set<std::string> LAYOUT_INFO_WHITELIST = {
     "status_bar_battery_panel",
     "status_bar_focus_mode_paddle",
     "SCBStatusBar"
+};
+
+const std::unordered_set<std::string> PIP_SCENE_FORBID_LIST = {
+    "PadWithCar",
+    "HiCar"
 };
 
 const std::chrono::milliseconds WAIT_TIME(3 * 1000); // 3 * 1000 wait for 3s
@@ -4237,9 +4243,35 @@ bool SceneSessionManager::CheckPiPPriority(const PiPTemplateInfo& pipTemplateInf
     return true;
 }
 
+std::string SceneSessionManager::GetScreenName(int32_t persistentId)
+{
+    auto session = GetSceneSession(persistentId);
+    if (session == nullptr) {
+        TLOGI(WmsLogTag::WMS_PIP, "session is null, persistentId=%{public}d", persistentId);
+        return "";
+    }
+    sptr<WindowSessionProperty> sessionProperty = session->GetSessionProperty();
+    DisplayId screenId = sessionProperty->GetDisplayId();
+    if (screenId == SCREEN_ID_INVALID) {
+        TLOGE(WmsLogTag::WMS_PIP, "invalid screenId");
+        return "";
+    }
+    sptr<ScreenSession> screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "invalid screenSession");
+        return "";
+    }
+    return screenSession->GetName();
+}
+
 bool SceneSessionManager::IsEnablePiPCreate(const sptr<WindowSessionProperty>& property)
 {
-    if (isScreenLocked_) {
+    if (property == nullptr) {
+        TLOGI(WmsLogTag::WMS_PIP, "property is nullptr.");
+        return false;
+    }
+    std::string screenName = GetScreenName(property->GetParentPersistentId());
+    if (isScreenLocked_ && screenName != SUPER_LAUNCHER) {
         TLOGI(WmsLogTag::WMS_PIP, "skip create pip window as screen locked.");
         return false;
     }
@@ -4283,8 +4315,7 @@ bool SceneSessionManager::IsPiPForbidden(const sptr<WindowSessionProperty>& prop
         return false;
     }
     std::string screenName = screenSession->GetName();
-    if (type == WindowType::WINDOW_TYPE_PIP &&
-       (screenName == "HiCar" || screenName == "SuperLauncher" || screenName == "PadWithCar")) {
+    if (type == WindowType::WINDOW_TYPE_PIP && PIP_SCENE_FORBID_LIST.find(screenName) != PIP_SCENE_FORBID_LIST.end()) {
         TLOGI(WmsLogTag::WMS_PIP, "screen name %{public}s", screenName.c_str());
         return true;
     }
