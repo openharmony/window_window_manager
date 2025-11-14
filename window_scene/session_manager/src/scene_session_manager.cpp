@@ -18367,7 +18367,7 @@ void SceneSessionManager::NotifySessionScreenLockedChange(bool isScreenLocked) {
         return;
     }
     const bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
-    const bool isShow = !(isScreenLocked && (systemConfig_.IsFreeMultiWindowMode() && !isPcMode));
+    const bool isShow = !(isScreenLocked && !isPcMode);
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [_, sceneSession] : sceneSessionMap_) {
         if (sceneSession == nullptr || !(sceneSession->GetSessionProperty()->GetWindowFlags() &
