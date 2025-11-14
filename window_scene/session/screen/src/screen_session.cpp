@@ -35,6 +35,8 @@ namespace {
 static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 // 0: 横扫屏; 1: 竖扫屏. 默认为0
 static const int32_t g_screenScanType = system::GetIntParameter<int32_t>("const.window.screen.scan_type", 0);
+const int32_t ROTATE_POLICY = system::GetIntParameter("const.window.device.rotate_policy", 0);
+const int32_t ROTATE_STRATEGY_SCREEN = 1;
 static const int32_t SCAN_TYPE_VERTICAL = 1;
 static const int32_t ROTATION_90 = 1;
 static const int32_t ROTATION_270 = 3;
@@ -769,15 +771,21 @@ void ScreenSession::UpdatePropertyByResolution(uint32_t width, uint32_t height)
 
 void ScreenSession::UpdatePropertyByResolution(const DMRect& rect)
 {
+    auto rectWithRotaion = rect;
+    if (ROTATE_POLICY == ROTATE_STRATEGY_SCREEN &&
+        (property_.GetScreenRotation() == Rotation::ROTATION_90 ||
+        property_.GetScreenRotation() == Rotation::ROTATION_270)) {
+        std::swap(rectWithRotaion.width_, rectWithRotaion.height_);
+    }
     auto screenBounds = property_.GetBounds();
     screenBounds.rect_.left_ = rect.posX_;
     screenBounds.rect_.top_ = rect.posY_;
-    screenBounds.rect_.width_ = rect.width_;
-    screenBounds.rect_.height_ = rect.height_;
+    screenBounds.rect_.width_ = rectWithRotaion.width_;
+    screenBounds.rect_.height_ = rectWithRotaion.height_;
     property_.SetBounds(screenBounds);
     // Determine whether the touch is in a valid area.
-    property_.SetValidWidth(rect.width_);
-    property_.SetValidHeight(rect.height_);
+    property_.SetValidWidth(rectWithRotaion.width_);
+    property_.SetValidHeight(rectWithRotaion.height_);
     property_.SetInputOffset(rect.posX_, rect.posY_);
     // It is used to calculate the original screen size
     property_.SetScreenAreaWidth(rect.width_);
