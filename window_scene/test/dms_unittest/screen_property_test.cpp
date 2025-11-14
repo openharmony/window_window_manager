@@ -304,7 +304,7 @@ HWTEST_F(ScreenPropertyTest, SetBounds, TestSize.Level1)
     property->SetPhyHeight(phyHeight);
     property->SetBounds(bounds);
     ASSERT_EQ(property->GetBounds().rect_.width_, 1344);
-    ASSERT_EQ(property->GetBounds().rect_.height_, 2722);
+    ASSERT_EQ(property->GetBounds().rect_.height_, 2772);
 
     bounds.rect_.width_ = 2772;
     bounds.rect_.height_ = 1344;
