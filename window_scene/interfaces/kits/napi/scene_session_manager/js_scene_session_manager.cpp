@@ -318,6 +318,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::UpdateRecentMainSessionInfos);
     BindNativeFunction(env, exportObj, "supportSnapshotAllSessionStatus", moduleName,
         JsSceneSessionManager::SupportSnapshotAllSessionStatus);
+    BindNativeFunction(env, exportObj, "supportCacheLockedSessionSnapshot", moduleName,
+        JsSceneSessionManager::SupportCacheLockedSessionSnapshot);
     BindNativeFunction(env, exportObj, "setUIEffectControllerAliveInUI", moduleName,
         JsSceneSessionManager::SetUIEffectControllerAliveInUI);
     BindNativeFunction(env, exportObj, "setPiPSettingSwitchStatus", moduleName,
@@ -3640,6 +3642,19 @@ napi_value JsSceneSessionManager::SupportSnapshotAllSessionStatus(napi_env env, 
 napi_value JsSceneSessionManager::OnSupportSnapshotAllSessionStatus(napi_env env, napi_callback_info info)
 {
     SceneSessionManager::GetInstance().ConfigSupportSnapshotAllSessionStatus();
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::SupportCacheLockedSessionSnapshot(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_PATTERN, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSupportCacheLockedSessionSnapshot(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::OnSupportCacheLockedSessionSnapshot(napi_env env, napi_callback_info info)
+{
+    SceneSessionManager::GetInstance().ConfigSupportCacheLockedSessionSnapshot();
     return NapiGetUndefined(env);
 }
 

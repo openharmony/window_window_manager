@@ -573,8 +573,34 @@ HWTEST_F(WindowPatternSnapshotTest, SaveSnapshot02, TestSize.Level1)
     ASSERT_NE(session_->snapshot_, nullptr);
 
     session_->freeMultiWindow_.store(true);
-    session_->SaveSnapshot(false, true, pixelMap, false, BackgroundReason::EXPAND_TO_FOLD_SINGLE_POCKET);
+    session_->SaveSnapshot(false, true, pixelMap, false, ScreenLockReason::EXPAND_TO_FOLD_SINGLE_POCKET);
     ASSERT_NE(session_->snapshot_, nullptr);
+
+    session_->systemConfig_.supportCacheLockedSessionSnapshot_ = true;
+    session_->SaveSnapshot(false, true, pixelMap, false, ScreenLockReason::SCREEN_LOCK);
+    ASSERT_NE(session_->snapshot_, nullptr);
+}
+
+/**
+ * @tc.name: GetSnapshotPixelMap
+ * @tc.desc: GetSnapshotPixelMap Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternSnapshotTest, ResetLockedCacheSnapshot, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->systemConfig_.supportCacheLockedSessionSnapshot_ = false;
+    session_->snapshot_ = std::make_shared<Media::PixelMap>();
+    session_->ResetLockedCacheSnapshot();
+    ASSERT_NE(session_->snapshot_, nullptr);
+
+    session_->systemConfig_.supportCacheLockedSessionSnapshot_ = true;
+    session_->ResetLockedCacheSnapshot();
+    ASSERT_EQ(session_->snapshot_, nullptr);
+
+    session_->snapshot_ = nullptr;
+    session_->ResetLockedCacheSnapshot();
+    ASSERT_EQ(session_->snapshot_, nullptr);
 }
 
 /**

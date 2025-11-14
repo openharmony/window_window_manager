@@ -1081,6 +1081,8 @@ enum class ScreenLockReason {
      * Expanded to folded on single pocket
      */
     EXPAND_TO_FOLD_SINGLE_POCKET,
+
+    SCREEN_LOCK,
 };
 
 enum class AsyncTraceTaskId: int32_t {
