@@ -479,6 +479,7 @@ private:
 
     void RemoveRotationCorrection(Rotation& rotation, FoldDisplayMode foldDisplayMode);
     void AddRotationCorrection(Rotation& rotation, FoldDisplayMode displayMode);
+    Rotation GetTargetRotationWithBounds(Rotation rotation, const RRect& bounds, uint32_t rotationOffset);
     std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap_;
     std::shared_mutex rotationCorrectionMutex_;
     std::atomic<Rotation> currentRotationCorrection_ { Rotation::ROTATION_0 };
