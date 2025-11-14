@@ -2568,6 +2568,43 @@ HWTEST_F(ScreenSessionManagerTest, FirstSCBConnect, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleResolutionEffectChangeWhenRotate
+ * @tc.desc: HandleResolutionEffectChangeWhenRotate
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleResolutionEffectChangeWhenRotate, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        GTEST_SKIP();
+    }
+    LOG_SetCallback(MyLogCallback);
+    g_errLog.clear();
+
+    sptr<ScreenSession> screenSession = new ScreenSession(51, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, screenSession);
+    screenSession->SetIsCurrentInUse(true);
+    screenSession->SetScreenType(ScreenType::REAL);
+    screenSession->isInternal_ = true;
+
+    ssm_->HandleResolutionEffectChangeWhenRotate();
+    EXPECT_FALSE(g_errLog.find("Internal Session null") != std::string::npos);
+    g_errLog.clear();
+
+    screenSession->property_.UpdateScreenRotation(Rotation::ROTATION_90);
+    ssm_->screenSessionMap_[51] = screenSession;
+    ssm_->HandleResolutionEffectChangeWhenRotate();
+    EXPECT_FALSE(g_errLog.find("start") != std::string::npos);
+    g_errLog.clear();
+
+    screenSession->property_.UpdateScreenRotation(Rotation::ROTATION_0);
+    ssm_->HandleResolutionEffectChangeWhenRotate();
+    EXPECT_FALSE(g_errLog.find("recovery inner and external screen resolution") != std::string::npos);
+    g_errLog.clear();
+    ssm_->screenSessionMap_.erase(51);
+}
+
+/**
  * @tc.name: HandleResolutionEffectChange
  * @tc.desc: HandleResolutionEffectChange
  * @tc.type: FUNC

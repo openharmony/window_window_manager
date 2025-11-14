@@ -2930,9 +2930,33 @@ DMError ScreenSessionManager::SetResolution(ScreenId screenId, uint32_t width, u
     return DMError::DM_OK;
 }
 
+void ScreenSessionManager::HandleResolutionEffectChangeWhenRotate()
+{
+    TLOGI(WmsLogTag::DMS, "start");
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        TLOGE(WmsLogTag::DMS, "not support");
+        return;
+    }
+    sptr<ScreenSession> internalSession = GetInternalScreenSession();
+    if (internalSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Internal Session null");
+        return;
+    }
+    if (internalSession->GetRotation() == Rotation::ROTATION_90 ||
+        internalSession->GetRotation() == Rotation::ROTATION_270) {
+        HandleResolutionEffectChange();
+    }
+    else {
+        RecoveryResolutionEffect();
+#ifdef FOLD_ABILITY_ENABLE
+        SuperFoldStateManager::GetInstance().RefreshExternalRegion();
+#endif
+    }
+}
+
 bool ScreenSessionManager::HandleResolutionEffectChange()
 {
-    if (!g_isPcDevice || FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+    if (!g_isPcDevice) {
         TLOGE(WmsLogTag::DMS, "not support");
         return false;
     }
@@ -2946,12 +2970,22 @@ bool ScreenSessionManager::HandleResolutionEffectChange()
         RecoveryResolutionEffect();
         return false;
     }
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
+        (internalSession->GetRotation() == Rotation::ROTATION_0 ||
+        internalSession->GetRotation() == Rotation::ROTATION_180)) {
+        TLOGI(WmsLogTag::DMS, "SuperFoldDisplayDevice Vertical");
+        return false;
+    }
     bool effectFlag = false;
     ScreenSettingHelper::GetResolutionEffect(effectFlag, externalSession->GetSerialNumber());
     uint32_t innerWidth = internalSession->GetScreenProperty().GetScreenRealWidth();
     uint32_t innerHeight = internalSession->GetScreenProperty().GetScreenRealHeight();
     uint32_t externalWidth = externalSession->GetScreenProperty().GetScreenRealWidth();
     uint32_t externalHeight = externalSession->GetScreenProperty().GetScreenRealHeight();
+    if (internalSession->GetRotation() == Rotation::ROTATION_90 ||
+        internalSession->GetRotation() == Rotation::ROTATION_270) {
+        std::swap(externalWidth, externalHeight);
+    }
     uint32_t targetWidth = innerWidth;
     uint32_t targetHeight = innerHeight;
     if (innerHeight == 0 || externalHeight == 0) {
@@ -2979,7 +3013,7 @@ bool ScreenSessionManager::HandleResolutionEffectChange()
 
 bool ScreenSessionManager::SetResolutionEffect(ScreenId screenId,  uint32_t width, uint32_t height)
 {
-    if (!g_isPcDevice || FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+    if (!g_isPcDevice) {
         TLOGW(WmsLogTag::DMS, "not support");
         return false;
     }
@@ -3016,7 +3050,7 @@ bool ScreenSessionManager::SetResolutionEffect(ScreenId screenId,  uint32_t widt
 
 bool ScreenSessionManager::RecoveryResolutionEffect()
 {
-    if (!g_isPcDevice || FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+    if (!g_isPcDevice) {
         TLOGW(WmsLogTag::DMS, "not support");
         return false;
     }
@@ -3095,7 +3129,7 @@ void ScreenSessionManager::SetExternalScreenResolutionEffect(const sptr<ScreenSe
 
 bool ScreenSessionManager::HandleCastVirtualScreenMirrorRegion()
 {
-    if (!g_isPcDevice || FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+    if (!g_isPcDevice) {
         TLOGW(WmsLogTag::DMS, "not support");
         return false;
     }
@@ -5334,6 +5368,7 @@ void ScreenSessionManager::UpdateScreenRotationPropertyForRs(sptr<ScreenSession>
         // Rs is used to mark the end of the rotation animation
         TLOGI(WmsLogTag::DMS, "DisableCacheForRotation");
         RSInterfaces::GetInstance().DisableCacheForRotation();
+        HandleResolutionEffectChangeWhenRotate();
         return;
     } else if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY ||
         screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY_NOT_NOTIFY) {
