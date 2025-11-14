@@ -535,6 +535,7 @@ void WindowAdapter::OnUserSwitch()
     ClearWindowAdapter();
     InitSSMProxy();
     ReregisterWindowManagerAgent();
+    RecoverWindowPropertyChangeFlag();
 }
 
 bool WindowAdapter::InitSSMProxy()

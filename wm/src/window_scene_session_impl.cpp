@@ -661,6 +661,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         RegisterWindowInspectorCallback();
         SetPcAppInpadSpecificSystemBarInvisible();
         SetPcAppInpadOrientationLandscape();
+        SetDefaultDensityEnabledValue(IsStageDefaultDensityEnabled());
     }
     TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, id:%{public}d], state:%{public}u, "
         "mode:%{public}u, enableDefaultDensity:%{public}d, displayId:%{public}" PRIu64,
@@ -5833,7 +5834,7 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
-    if (defaultDensityEnabledGlobalConfig_ == enabled) {
+    if (IsStageDefaultDensityEnabled() == enabled) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "defaultDensityEnabledGlobalConfig not change");
         return WMError::WM_OK;
     }
@@ -5842,7 +5843,7 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
         hostSession->OnDefaultDensityEnabled(enabled);
     }
 
-    defaultDensityEnabledGlobalConfig_ = enabled;
+    defaultDensityEnabledStageConfig_.store(enabled);
     SetDefaultDensityEnabledValue(enabled);
 
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
@@ -5852,8 +5853,9 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is nullptr");
             continue;
         }
-        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Id=%{public}d UpdateDensity", window->GetWindowId());
-        window->SetDefaultDensityEnabledValue(enabled);
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Id=%{public}u set=%{public}u",
+            window->GetWindowId(), window->IsStageDefaultDensityEnabled());
+        window->SetDefaultDensityEnabledValue(window->IsStageDefaultDensityEnabled());
         window->UpdateDensity();
     }
     return WMError::WM_OK;
@@ -6757,7 +6759,7 @@ WMError WindowSceneSessionImpl::SetCustomDensity(float density, bool applyToSubW
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u set density not change", GetWindowId());
         return WMError::WM_OK;
     }
-    defaultDensityEnabledGlobalConfig_ = false;
+    defaultDensityEnabledStageConfig_.store(false);
     SetDefaultDensityEnabledValue(false);
     customDensity_ = density;
     UpdateDensity();
