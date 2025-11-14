@@ -1029,6 +1029,9 @@ private:
     void SetExternalScreenResolutionEffect(const sptr<ScreenSession>& externalSession, DMRect& toRect);
     void GetCastVirtualMirrorSession(sptr<ScreenSession>& virtualSession);
     void HandleResolutionEffectChangeWhenRotate();
+    void CalculateTargetResolution(const sptr<ScreenSession>& internalSession,
+        const sptr<ScreenSession>& externalSession, const bool& effectFlag,
+        uint32_t& targetWidth, uint32_t& targetHeight);
     std::atomic<bool> curResolutionEffectEnable_ = false;
     DMError SyncScreenPropertyChangedToServer(ScreenId screenId, const ScreenProperty& screenProperty) override;
     void SetConfigForInputmethod(ScreenId screenId, VirtualScreenOption option);

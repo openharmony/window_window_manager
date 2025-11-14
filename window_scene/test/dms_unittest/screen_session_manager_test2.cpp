@@ -2566,7 +2566,6 @@ HWTEST_F(ScreenSessionManagerTest, FirstSCBConnect, TestSize.Level1)
     ssm_->SetFirstSCBConnect(false);
     EXPECT_FALSE(ssm_->GetFirstSCBConnect());
 }
-
 /**
  * @tc.name: HandleResolutionEffectChangeWhenRotate
  * @tc.desc: HandleResolutionEffectChangeWhenRotate
@@ -2602,6 +2601,54 @@ HWTEST_F(ScreenSessionManagerTest, HandleResolutionEffectChangeWhenRotate, TestS
     EXPECT_FALSE(g_errLog.find("recovery inner and external screen resolution") != std::string::npos);
     g_errLog.clear();
     ssm_->screenSessionMap_.erase(51);
+}
+
+/**
+ * @tc.name: CalculateTargetResolution
+ * @tc.desc: CalculateTargetResolution
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CalculateTargetResolution1, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+
+    sptr<ScreenSession> screenSession1 = new ScreenSession(51, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, screenSession1);
+    screenSession1->property_.SetScreenRealWidth(3120);
+    screenSession1->property_.SetScreenRealWidth(2080);
+    screenSession1->property_.UpdateScreenRotation(Rotation::ROTATION_0);
+    sptr<ScreenSession> screenSession2 = new ScreenSession(52, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, screenSession2);
+    screenSession2->property_.SetScreenRealWidth(1920);
+    screenSession2->property_.SetScreenRealWidth(0);
+    uint32_t width = 0;
+    uint32_t height = 0;
+
+    ssm_->CalculateTargetResolution(screenSession1, screenSession2, false, width, height);
+    EXPECT_EQ(width, 0);
+    EXPECT_EQ(height, 0);
+
+    screenSession2->property_.SetScreenRealWidth(1080);
+    ssm_->CalculateTargetResolution(screenSession1, screenSession2, false, width, height);
+    EXPECT_EQ(width, 3120);
+    EXPECT_EQ(height, 2080);
+
+    ssm_->CalculateTargetResolution(screenSession1, screenSession2, true, width, height);
+    EXPECT_EQ(width, 3120);
+    EXPECT_EQ(height, 1755);
+
+    screenSession2->property_.SetScreenRealWidth(1280);
+    screenSession2->property_.SetScreenRealWidth(1024);
+    ssm_->CalculateTargetResolution(screenSession1, screenSession2, true, width, height);
+    EXPECT_EQ(width, 2600);
+    EXPECT_EQ(height, 2080);
+
+    screenSession1->property_.SetScreenRealWidth(2080);
+    screenSession1->property_.SetScreenRealWidth(3120);
+    screenSession1->property_.UpdateScreenRotation(Rotation::ROTATION_90);
+    ssm_->CalculateTargetResolution(screenSession1, screenSession2, true, width, height);
+    EXPECT_EQ(width, 2080);
+    EXPECT_EQ(height, 2600);
 }
 
 /**
