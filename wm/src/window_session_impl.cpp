@@ -215,7 +215,6 @@ std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWi
 std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> WindowSessionImpl::windowStatusChangeListeners_;
 std::map<int32_t, std::vector<sptr<IWindowStatusDidChangeListener>>> WindowSessionImpl::windowStatusDidChangeListeners_;
 bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
-std::atomic<bool> WindowSessionImpl::defaultDensityEnabledGlobalConfig_ = false;
 
 #define CALL_LIFECYCLE_LISTENER(windowLifecycleCb, listeners) \
     do {                                                      \
@@ -318,7 +317,6 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     }
     WindowHelper::SplitStringByDelimiter(
         system::GetParameter("const.window.containerColorLists", ""), ",", containerColorList_);
-    SetDefaultDensityEnabledValue(defaultDensityEnabledGlobalConfig_);
 }
 
 bool WindowSessionImpl::IsPcWindow() const
@@ -6080,6 +6078,16 @@ WMError WindowSessionImpl::SetWindowDefaultDensityEnabled(bool enabled)
 void WindowSessionImpl::SetDefaultDensityEnabledValue(bool enabled)
 {
     isDefaultDensityEnabled_.store(enabled);
+}
+
+bool WindowSessionImpl::IsStageDefaultDensityEnabled()
+{
+    if (GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+        return defaultDensityEnabledStageConfig_.load();
+    } else {
+        auto mainWindow = FindMainWindowWithContext();
+        return mainWindow ? mainWindow->defaultDensityEnabledStageConfig_.load() : false;
+    }
 }
 
 WSError WindowSessionImpl::NotifyWindowVisibility(bool isVisible)

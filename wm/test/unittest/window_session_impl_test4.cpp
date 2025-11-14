@@ -2939,6 +2939,62 @@ HWTEST_F(WindowSessionImplTest4, NotifyAppForceLandscapeConfigUpdated, TestSize.
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: NotifyAppForceLandscapeConfigUpdated end";
 }
+
+/**
+ * @tc.name: IsStageDefaultDensityEnabled01
+ * @tc.desc: Main Window
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, IsStageDefaultDensityEnabled01, TestSize.Level1)
+{
+    sptr<WindowOption> mainWindowOption = sptr<WindowOption>::MakeSptr();
+    mainWindowOption->SetWindowName("mainWindow");
+    sptr<WindowSessionImpl> mainWindowSession = sptr<WindowSessionImpl>::MakeSptr(mainWindowOption);
+    mainWindowSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    mainWindowSession->context_ = abilityContext_;
+    mainWindowSession->defaultDensityEnabledStageConfig_.store(false);
+    mainWindowSession->windowSessionMap_["mainWindow"] =
+        std::pair<int32_t, sptr<WindowSessionImpl>>(1, mainWindowSession);
+
+    mainWindowSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    mainWindowSession->defaultDensityEnabledStageConfig_.store(true);
+    EXPECT_TRUE(mainWindowSession->IsStageDefaultDensityEnabled());
+
+    window->defaultDensityEnabledStageConfig_.store(false);
+    EXPECT_FALSE(mainWindowSession->IsStageDefaultDensityEnabled());
+}
+
+/**
+ * @tc.name: IsStageDefaultDensityEnabled02
+ * @tc.desc: Sub Window
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, IsStageDefaultDensityEnabled02, TestSize.Level1)
+{
+    sptr<WindowOption> mainWindowOption = sptr<WindowOption>::MakeSptr();
+    mainWindowOption->SetWindowName("mainWindow");
+    sptr<WindowSessionImpl> mainWindowSession = sptr<WindowSessionImpl>::MakeSptr(mainWindowOption);
+    mainWindowSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    mainWindowSession->context_ = abilityContext_;
+    mainWindowSession->defaultDensityEnabledStageConfig_.store(false);
+    mainWindowSession->windowSessionMap_["mainWindow"] =
+        std::pair<int32_t, sptr<WindowSessionImpl>>(1, mainWindowSession);
+
+    sptr<WindowOption> subWindowOption = sptr<WindowOption>::MakeSptr();
+    subWindowOption->SetWindowName("subWindow");
+    sptr<WindowSessionImpl> subWindowSession = sptr<WindowSessionImpl>::MakeSptr(subWindowOption);
+    subWindowSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    subWindowSession->context_ = abilityContext_;
+    subWindowSession->defaultDensityEnabledStageConfig_.store(true);
+    WindowSessionImpl::windowSessionMap_.insert(std::make_pair("subWindow", subWindowSession));
+    subWindowSession->windowSessionMap_["subWindow"] =
+        std::pair<int32_t, sptr<WindowSessionImpl>>(2, subWindowSession);
+
+    EXPECT_FALSE(subWindowSession->IsStageDefaultDensityEnabled());
+
+    mainWindowSession->defaultDensityEnabledStageConfig_.store(true);
+    EXPECT_TRUE(subWindowSession->IsStageDefaultDensityEnabled());
+}
 }
 } // namespace
 } // namespace Rosen
