@@ -53,8 +53,6 @@ private:
     sptr<FoldScreenPolicy> foldScreenPolicy_;
     sptr<SensorFoldStateManager> sensorFoldStateManager_;
 
-    SensorUser postureUser {};
-    SensorUser hallUser {};
     std::vector<float> globalAngle_ = {-1.0F, -1.0F, -1.0F};
     std::vector<uint16_t> globalHall_ = {USHRT_MAX, USHRT_MAX};
     bool registerPosture_ = false;

@@ -21,9 +21,18 @@
 #include "window_manager_hilog.h"
 #include "screen_session_manager.h"
 #include "scene_board_judgement.h"
+#include "fold_screen_controller/secondary_fold_sensor_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
+namespace {
+std::string g_logMsg;
+void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+    const char* msg)
+{
+    g_logMsg = msg;
+}
+}
 
 namespace OHOS {
 namespace Rosen {
@@ -41,8 +50,10 @@ public:
     void TearDown() override;
 };
 
+ScreenSessionManager *ssm_;
 void SuperFoldSensorManagerTest::SetUpTestCase()
 {
+    ssm_ = &ScreenSessionManager::GetInstance();
 }
 
 void SuperFoldSensorManagerTest::TearDownTestCase()
@@ -68,7 +79,7 @@ HWTEST_F(SuperFoldSensorManagerTest, UnregisterPostureCallback01, TestSize.Level
 {
     SuperFoldSensorManager mgr = SuperFoldSensorManager();
     mgr.UnregisterPostureCallback();
-    ASSERT_EQ(mgr.postureUser.callback, nullptr);
+    ASSERT_FALSE(SecondaryFoldSensorManager::GetInstance().IsPostureUserCallbackInvalid());
 }
 
 /**
@@ -81,7 +92,7 @@ HWTEST_F(SuperFoldSensorManagerTest, UnregisterPostureCallback02, TestSize.Level
     SuperFoldSensorManager mgr = SuperFoldSensorManager();
     mgr.UnregisterPostureCallback();
     void (*func)(SensorEvent *event) = nullptr;
-    ASSERT_EQ(mgr.postureUser.callback, func);
+    ASSERT_FALSE(SecondaryFoldSensorManager::GetInstance().IsPostureUserCallbackInvalid());
 }
 
 /**
@@ -93,7 +104,7 @@ HWTEST_F(SuperFoldSensorManagerTest, UnregisterHallCallback01, TestSize.Level1)
 {
     SuperFoldSensorManager mgr = SuperFoldSensorManager();
     mgr.UnregisterHallCallback();
-    ASSERT_EQ(mgr.hallUser.callback, nullptr);
+    ASSERT_FALSE(SecondaryFoldSensorManager::GetInstance().IsHallUserCallbackInvalid());
 }
 
 /**
@@ -106,7 +117,31 @@ HWTEST_F(SuperFoldSensorManagerTest, UnregisterHallCallback02, TestSize.Level1)
     SuperFoldSensorManager mgr = SuperFoldSensorManager();
     mgr.UnregisterHallCallback();
     void (*func)(SensorEvent *event) = nullptr;
-    ASSERT_EQ(mgr.hallUser.callback, func);
+    ASSERT_FALSE(SecondaryFoldSensorManager::GetInstance().IsHallUserCallbackInvalid());
+}
+
+/**
+ * @tc.name: UnRegisterHallCallback03
+ * @tc.desc: test function : UnRegisterHallCallback
+ * @tc.type: FUNC
+*/
+HWTEST_F(SuperFoldSensorManagerTest, UnRegisterHallCallback03, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    SuperFoldSensorManager manager;
+    manager.RegisterHallCallback();
+    manager.UnregisterHallCallback();
+
+    if (!(ssm_->IsFoldable())) {
+        GTEST_SKIP();
+    }
+    EXPECT_TRUE(g_logMsg.find("success.") != std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("FoldScreenSensorManager.RegisterHallCallback failed.") == std::string::npos);
+
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
 }
 
 /**
