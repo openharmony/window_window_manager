@@ -2978,6 +2978,19 @@ bool ScreenSessionManager::HandleResolutionEffectChange()
     }
     bool effectFlag = false;
     ScreenSettingHelper::GetResolutionEffect(effectFlag, externalSession->GetSerialNumber());
+    uint32_t targetWidth = 0;
+    uint32_t targetHeight = 0;
+    CalculateTargetResolution(internalSession, externalSession, effectFlag, targetWidth, targetHeight);
+    if (targetWidth != 0 && targetHeight !=0) {
+        SetResolutionEffect(internalSession->GetScreenId(), targetWidth, targetHeight);
+    }
+    return true;
+}
+
+void ScreenSessionManager::CalculateTargetResolution(const sptr<ScreenSession>& internalSession,
+    const sptr<ScreenSession>& externalSession, const bool& effectFlag,
+    uint32_t& targetWidth, uint32_t& targetHeight)
+{
     uint32_t innerWidth = internalSession->GetScreenProperty().GetScreenRealWidth();
     uint32_t innerHeight = internalSession->GetScreenProperty().GetScreenRealHeight();
     uint32_t externalWidth = externalSession->GetScreenProperty().GetScreenRealWidth();
@@ -2986,16 +2999,16 @@ bool ScreenSessionManager::HandleResolutionEffectChange()
         internalSession->GetRotation() == Rotation::ROTATION_270) {
         std::swap(externalWidth, externalHeight);
     }
-    uint32_t targetWidth = innerWidth;
-    uint32_t targetHeight = innerHeight;
+    targetWidth = innerWidth;
+    targetHeight = innerHeight;
     if (innerHeight == 0 || externalHeight == 0) {
-        return false;
+        return;
     }
     float innerResolution = static_cast<float>(innerWidth) / innerHeight;
     float externalResolution = static_cast<float>(externalWidth) / externalHeight;
     float diffResolution = innerResolution - externalResolution;
     if (externalResolution == 0) {
-        return false;
+        return;
     }
     if (effectFlag && std::fabs(diffResolution) >= FLT_EPSILON) {
         if (externalResolution > innerResolution ) {
@@ -3007,8 +3020,6 @@ bool ScreenSessionManager::HandleResolutionEffectChange()
     } else {
         curResolutionEffectEnable_.store(false);
     }
-    SetResolutionEffect(internalSession->GetScreenId(), targetWidth, targetHeight);
-    return true;
 }
 
 bool ScreenSessionManager::SetResolutionEffect(ScreenId screenId,  uint32_t width, uint32_t height)
