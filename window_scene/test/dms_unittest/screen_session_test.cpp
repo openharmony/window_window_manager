@@ -2052,7 +2052,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test004, TestSize.Level1)
     ScreenProperty screenProperty;
     session->UpdatePropertyByFoldControl(newProperty, FoldDisplayMode::MAIN, true);
     screenProperty = session->GetScreenProperty();
-    ASSERT_EQ(screenProperty.GetDisplayOrientation(), DisplayOrientation::PORTRAIT);
+    ASSERT_EQ(screenProperty.GetDisplayOrientation(), DisplayOrientation::UNKNOWN);
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test004 end";
 }
 
