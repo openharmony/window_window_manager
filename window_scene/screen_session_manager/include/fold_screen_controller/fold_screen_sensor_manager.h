@@ -55,7 +55,9 @@ public:
 
     void HandleSensorData(const SensorEvent* const event);
 
-    void UnSubscribeSensorCallback();
+    int32_t  UnSubscribeSensorCallback(int32_t sensorTypeId);
+
+    void CleanupCallback(int32_t sensorTypeId);
 
     typedef bool (*IsFwdSensorEvent)(const SensorEvent* event);
 
@@ -114,10 +116,6 @@ private:
     std::recursive_mutex mutex_;
 
     FoldStatus mState_ = FoldStatus::UNKNOWN;
-
-    SensorUser postureUser {};
-
-    SensorUser hallUser {};
 
     void NotifyFoldAngleChanged(float foldAngle);
     bool HandleAbnormalAngle();

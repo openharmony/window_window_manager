@@ -67,10 +67,6 @@ private:
     
     std::recursive_mutex mutex_;
  
-    SensorUser postureUser {};
- 
-    SensorUser hallUser {};
- 
     float curAngle_ = 170.0F;
 
     int32_t curInterval_ = 0;

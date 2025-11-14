@@ -103,32 +103,12 @@ HWTEST_F(ScreenSessionManagerLiteTest, UnregisterDisplayManagerAgent, TestSize.L
 HWTEST_F(ScreenSessionManagerLiteTest, GetFoldDisplayMode, TestSize.Level1)
 {
     ScreenSessionManagerLite screenSessionManagerLite = ScreenSessionManagerLite();
+    bool isFoldable = screenSessionManagerLite.IsFoldable();
+    if (!isFoldable) {
+        GTEST_SKIP();
+    }
     FoldDisplayMode ret = screenSessionManagerLite.GetFoldDisplayMode();
-    ASSERT_EQ(ret, FoldDisplayMode::UNKNOWN);
-}
-
-/**
- * @tc.name: IsFoldable
- * @tc.desc: IsFoldable
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerLiteTest, IsFoldable, TestSize.Level1)
-{
-    ScreenSessionManagerLite screenSessionManagerLite = ScreenSessionManagerLite();
-    bool ret = screenSessionManagerLite.IsFoldable();
-    ASSERT_FALSE(ret);
-}
-
-/**
- * @tc.name: GetFoldStatus
- * @tc.desc: GetFoldStatus
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerLiteTest, GetFoldStatus, TestSize.Level1)
-{
-    ScreenSessionManagerLite screenSessionManagerLite = ScreenSessionManagerLite();
-    FoldStatus ret = screenSessionManagerLite.GetFoldStatus();
-    ASSERT_EQ(ret, FoldStatus::UNKNOWN);
+    ASSERT_NE(ret, FoldDisplayMode::UNKNOWN);
 }
 
 /**

@@ -36,7 +36,7 @@ constexpr uint32_t  MAX_CREASE_REGION_SIZE = 20;
 int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
     MessageOption& option)
 {
-    DmUtils::HoldLock callback_lock;
+    DmUtils::HoldLock callbackLock;
     int32_t result = OnRemoteRequestInner(code, data, reply, option);
     return result;
 }
