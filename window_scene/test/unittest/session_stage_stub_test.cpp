@@ -28,7 +28,7 @@
 #include "window_manager_agent.h"
 #include "ws_common.h"
 #include "zidl/window_manager_agent_interface.h"
-#include <feature/window_keyframe/rs_window_keyframe_node.h>
+#include "feature/window_keyframe/rs_window_keyframe_node.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1155,7 +1155,7 @@ HWTEST_F(SessionStageStubTest, HandleLinkKeyFrameNode, Function | SmallTest | Le
     data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
     auto rsKeyFrameNode = RSWindowKeyFrameNode::Create();
     ASSERT_NE(rsKeyFrameNode, nullptr);
-    ASSERT_EQ(rsKeyFrameNode->Marshalling(data), true);
+    ASSERT_EQ(rsKeyFrameNode->WriteToParcel(data), true);
     uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_LINK_KEYFRAME_NODE);
     EXPECT_TRUE(sessionStageStub_ != nullptr);
     EXPECT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));

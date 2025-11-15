@@ -1411,7 +1411,7 @@ HWTEST_F(SessionStubTest, HandleUpdateKeyFrameCloneNode, Function | SmallTest | 
     MessageParcel reply;
     auto rsKeyFrameNode = RSWindowKeyFrameNode::Create();
     ASSERT_NE(rsKeyFrameNode, nullptr);
-    ASSERT_EQ(rsKeyFrameNode->Marshalling(data), true);
+    ASSERT_EQ(rsKeyFrameNode->WriteToParcel(data), true);
     auto rsTransaction = std::make_shared<RSTransaction>();
     ASSERT_NE(rsTransaction, nullptr);
     ASSERT_EQ(data.WriteParcelable(rsTransaction.get()), true);

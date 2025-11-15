@@ -524,16 +524,16 @@ HWTEST_F(WindowSessionImplTest2, LinkKeyFrameNode, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetKeyFramePolicy
- * @tc.desc: SetKeyFramePolicy
+ * @tc.name: SetStageKeyFramePolicy
+ * @tc.desc: SetStageKeyFramePolicy
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, SetKeyFramePolicy, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest2, SetStageKeyFramePolicy, TestSize.Level1)
 {
-    auto window = GetTestWindowImpl("SetKeyFramePolicy");
+    auto window = GetTestWindowImpl("SetStageKeyFramePolicy");
     ASSERT_NE(window, nullptr);
     KeyFramePolicy keyFramePolicy;
-    ASSERT_EQ(window->SetKeyFramePolicy(keyFramePolicy), WSError::WS_OK);
+    ASSERT_EQ(window->SetStageKeyFramePolicy(keyFramePolicy), WSError::WS_OK);
     ASSERT_EQ(window->keyFramePolicy_, keyFramePolicy);
     window->Destroy();
 }

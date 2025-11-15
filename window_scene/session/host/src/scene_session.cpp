@@ -4315,7 +4315,7 @@ WSError SceneSession::UpdateKeyFrameCloneNode(std::shared_ptr<RSWindowKeyFrameNo
     return WSError::WS_OK;
 }
 
-KeyFramePolicy GetKeyFramePolicy() const
+KeyFramePolicy SceneSession::GetKeyFramePolicy() const
 {
     std::lock_guard<std::mutex> lock(keyFrameMutex_);
     return keyFramePolicy_;
@@ -4351,7 +4351,7 @@ void SceneSession::UpdateKeyFrameState(SizeChangeReason reason, const WSRect& re
     }
     if (reason == SizeChangeReason::DRAG_START && moveDragController_->GetStartDragFlag()) {
         TLOGD(WmsLogTag::WMS_LAYOUT_PC, "key frame start check");
-        KeyFramePolicy keyFramePolicy = GetKeyFramePolicy();
+        auto keyFramePolicy = GetKeyFramePolicy();
         if (!keyFramePolicy.enabled() || GetAppDragResizeType() == DragResizeType::RESIZE_WHEN_DRAG_END) {
             UpdateKeyFramePolicy(false, keyFramePolicy.stopping_);
             return;
@@ -4378,7 +4378,7 @@ void SceneSession::UpdateKeyFrameState(SizeChangeReason reason, const WSRect& re
         RSTransactionAdapter::FlushImplicitTransaction(GetRSUIContext());
     } else if (reason == SizeChangeReason::DRAG_END) {
         TLOGI(WmsLogTag::WMS_LAYOUT_PC, "key frame stopping");
-        UpdateKeyFrameCloneNode(false, true);
+        UpdateKeyFramePolicy(false, true);
         sessionStage_->SetStageKeyFramePolicy(GetKeyFramePolicy());
         keyFrameCloneNode_ = nullptr;
     }
@@ -4389,7 +4389,8 @@ void SceneSession::InitKeyFrameState(const WSRect& rect)
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "key frame start init");
     uint64_t timeStamp = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count());
-    UpdateKeyFrameCloneNode(true, false);
+    keyFrameCloneNode_ = nullptr;
+    UpdateKeyFramePolicy(true, false);
     keyFrameAnimating_ = false;
     lastKeyFrameStamp_ = timeStamp;
     lastKeyFrameRect_ = rect;
