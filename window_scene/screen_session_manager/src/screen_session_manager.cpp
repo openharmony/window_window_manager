@@ -2937,6 +2937,7 @@ void ScreenSessionManager::HandleResolutionEffectChangeWhenRotate()
         TLOGE(WmsLogTag::DMS, "not support");
         return;
     }
+#ifdef FOLD_ABILITY_ENABLE
     sptr<ScreenSession> internalSession = GetInternalScreenSession();
     if (internalSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "Internal Session null");
@@ -2947,7 +2948,6 @@ void ScreenSessionManager::HandleResolutionEffectChangeWhenRotate()
         HandleResolutionEffectChange();
     } else {
         RecoveryResolutionEffect();
-#ifdef FOLD_ABILITY_ENABLE
         SuperFoldStateManager::GetInstance().RefreshExternalRegion();
 #endif
     }
