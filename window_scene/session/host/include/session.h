@@ -293,6 +293,16 @@ public:
     void SaveSnapshot(bool useFfrt, bool needPersist = true,
         std::shared_ptr<Media::PixelMap> persistentPixelMap = nullptr, bool updateSnapshot = false,
         LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
+    bool CheckSurfaceNodeForSnapshot(std::shared_ptr<RSSurfaceNode> surfaceNode) const;
+    bool GetNeedUseBlurSnapshot() const;
+    void UpdateAppLockSnapshot(ControlAppType type, ControlInfo controlInfo);
+    virtual bool GetIsPrivacyMode() const { return false; };
+    virtual ControlInfo GetAppControlInfo(ControlAppType type) const
+    {
+        ControlInfo controlInfo = { .isNeedControl = false, .isControlRecentOnly = false };
+        return controlInfo;
+    };
+    bool GetAppLockControl() const { return isAppLockControl_.load(); };
     void SetSaveSnapshotCallback(Task&& task)
     {
         if (task) {
@@ -773,6 +783,9 @@ public:
     bool HasSnapshotFreeMultiWindow();
     bool HasSnapshot(SnapshotStatus key);
     bool HasSnapshot();
+    void SetHasSnapshot(SnapshotStatus key, DisplayOrientation rotate);
+    std::string GetSnapshotPersistentKey();
+    std::string GetSnapshotPersistentKey(SnapshotStatus key);
     void DeleteHasSnapshot();
     void DeleteHasSnapshot(SnapshotStatus key);
     void DeleteHasSnapshotFreeMultiWindow();
@@ -1190,6 +1203,8 @@ private:
     /*
      * Window Pattern
      */
+    std::atomic<bool> isSnapshotBlur_ { false };
+    std::atomic<bool> isAppLockControl_ { false };
     bool borderUnoccupied_ = false;
     uint32_t GetBackgroundColor() const;
 

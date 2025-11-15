@@ -1261,6 +1261,7 @@ void SceneSession::NotifyUpdateAppUseControl(ControlAppType type, const ControlI
             return;
         }
         session->appUseControlMap_[type] = controlInfo;
+        session->UpdateAppLockSnapshot(type, controlInfo);
         if (session->onUpdateAppUseControlFunc_) {
             bool isAppUseControl = (controlInfo.isNeedControl && !controlInfo.isControlRecentOnly);
             bool isAppUseControlChanged = (session->isAppUseControl_ != isAppUseControl);

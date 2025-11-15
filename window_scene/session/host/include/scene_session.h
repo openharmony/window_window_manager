@@ -921,6 +921,15 @@ public:
     */
     void NotifyWindowAttachStateListenerRegistered(bool registered) override;
     WMError NotifySnapshotUpdate() override;
+    bool GetIsPrivacyMode() const override { return isPrivacyMode_; };
+    ControlInfo GetAppControlInfo(ControlAppType type) const override
+    {
+        if (appUseControlMap_.find(type) == appUseControlMap_.end()) {
+            ControlInfo controlInfo = { .isNeedControl = false, .isControlRecentOnly = false };
+            return controlInfo;
+        }
+        return appUseControlMap_.at(type);
+    };
 
     /**
      * Window Transition Animation For PC
