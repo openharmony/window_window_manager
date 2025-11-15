@@ -5130,9 +5130,8 @@ napi_value JsWindow::OnSetMainWindowRaiseByClickEnabled(napi_env env, napi_callb
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP,
             "[window][setMainWindowRaiseByClickEnabled]msg: Permission denied."));
     }
-    napi_value lastParam = (argc <= 1) ? nullptr : (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
     napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask =
         [weakToken = wptr<Window>(windowToken_), raiseEnabled, env, errCode, task = napiAsyncTask, where = __func__] {
             auto window = weakToken.promote();
