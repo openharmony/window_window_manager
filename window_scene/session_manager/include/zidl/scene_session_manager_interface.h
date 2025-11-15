@@ -475,6 +475,7 @@ public:
     {
         return WMError::WM_OK;
     }
+    WMError NotifySupportRotationRegistered() { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

@@ -154,6 +154,7 @@ using NotifyAppUseControlListFunc =
     std::function<void(ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)>;
 using NotifyRootSceneAvoidAreaChangeFunc = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type,
     const sptr<OccupiedAreaChangeInfo>& info)>;
+using NotifySupportRotationRegisteredFunc = std::function<void()>;
 using NotifyWatchGestureConsumeResultFunc = std::function<void(int32_t keyCode, bool isConsumed)>;
 using NotifyWatchFocusActiveChangeFunc = std::function<void(bool isActive)>;
 using GetRSNodeByStringIDFunc = std::function<std::shared_ptr<Rosen::RSNode>(const std::string& id)>;
@@ -684,6 +685,11 @@ public:
     WMError UnsetPipEnableByScreenId(int32_t screenId);
     WMError RegisterPipChgListenerByScreenId(int32_t screenId, const sptr<IPipChangeListener>& listener);
     WMError UnregisterPipChgListenerByScreenId(int32_t screenId);
+
+    /*
+     * Window Rotation
+     */
+    void SetSupportRotationRegisteredListener(const NotifySupportRotationRegisteredFunc& func);
 
      /*
      * FloatingBall Window
@@ -1306,6 +1312,9 @@ private:
      * Window Rotate Animation
      */
     RotateAnimationConfig rotateAnimationConfig_;
+    NotifySupportRotationRegisteredFunc supportRotationRegisteredListener_;
+    void NotifySupportRotationChange(const SuppoortRotationInfo& supportRotationInfo);
+    void NotifySupportRotationRegistered();
 
     /*
      * PiP Window
