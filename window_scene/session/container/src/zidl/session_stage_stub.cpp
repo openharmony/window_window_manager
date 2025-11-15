@@ -1014,7 +1014,7 @@ int SessionStageStub::HandleExtensionHostData(MessageParcel& data, MessageParcel
 int SessionStageStub::HandleLinkKeyFrameNode(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
-    auto rsKeyFrameNode = RSWindowKeyFrameNode::Unmarshalling(data);
+    auto rsKeyFrameNode = RSWindowKeyFrameNode->ReadFromParcel(data);
     if (!rsKeyFrameNode) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "fail get rsKeyFrameNode");
         return ERR_INVALID_DATA;

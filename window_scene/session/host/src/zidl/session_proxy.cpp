@@ -3216,7 +3216,7 @@ WSError SessionProxy::UpdateKeyFrameCloneNode(std::shared_ptr<RSWindowKeyFrameNo
         TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!rsKeyFrameNode || !rsKeyFrameNode->Marshalling(data)) {
+    if (!rsKeyFrameNode || !rsKeyFrameNode->WriteToParcel(data)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "write rsKeyFrameNode failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }

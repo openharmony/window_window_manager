@@ -1767,7 +1767,7 @@ WSError SessionStageProxy::LinkKeyFrameNode(std::shared_ptr<RSWindowKeyFrameNode
         TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!rsKeyFrameNode || !rsKeyFrameNode->Marshalling(data)) {
+    if (!rsKeyFrameNode || !rsKeyFrameNode->WriteToParcel(data)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write rsKeyFrameNode failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
