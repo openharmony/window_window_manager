@@ -1566,6 +1566,14 @@ WMError WindowAdapter::AddSessionBlackList(
     return wmsProxy->AddSessionBlackList(bundleNames, privacyWindowTags);
 }
 
+WMError WindowAdapter::NotifySupportRotationRegistered()
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->NotifySupportRotationRegistered();
+}
+
 WMError WindowAdapter::RemoveSessionBlackList(
     const std::unordered_set<std::string>& bundleNames, const std::unordered_set<std::string>& privacyWindowTags)
 {

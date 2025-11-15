@@ -166,6 +166,7 @@ public:
         TRANS_ID_GLOBAL_COORDINATE_TO_RELATIVE_COORDINATE,
         TRANS_ID_UPDATE_OUTLINE,
         TRANS_ID_SET_SPECIFIC_WINDOW_ZINDEX,
+        TRANS_ID_SUPPORT_ROTATION_REGISTERED,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;

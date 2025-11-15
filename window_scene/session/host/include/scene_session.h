@@ -1119,11 +1119,6 @@ protected:
     virtual void RestoreCallingSession(uint32_t callingId, const std::shared_ptr<RSTransaction>& rsTransaction) {}
     bool keyboardAvoidAreaActive_ = true;
 
-    /*
-     * Window Rotation
-     */
-    NotifySupportRotationRegisteredFunc notifySupportRotationRegisteredFunc_;
-
 private:
     void NotifyAccessibilityVisibilityChange();
     void CalculateCombinedExtWindowFlags();

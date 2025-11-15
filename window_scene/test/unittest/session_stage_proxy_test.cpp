@@ -963,19 +963,6 @@ HWTEST_F(SessionStageProxyTest, NotifyRotationChange, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: NotifySupportRotationChange
- * @tc.desc: test function : NotifySupportRotationChange
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageProxyTest, NotifySupportRotationChange, Function | SmallTest | Level1)
-{
-    ASSERT_TRUE(sessionStage_ != nullptr);
-    SupportRotationInfo info = { 0, 1, { true, true, true, true }, { true, true, true, true }, "test" };
-    sessionStage_->NotifySupportRotationChange(info);
-    // 验证
-}
-
-/**
  * @tc.name: NotifyTargetRotationInfo
  * @tc.desc: test function : NotifyTargetRotationInfo
  * @tc.type: FUNC

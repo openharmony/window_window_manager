@@ -1580,23 +1580,6 @@ HWTEST_F(SessionProxyTest, UpdateRotationChangeRegistered, Function | SmallTest 
 }
 
 /**
- * @tc.name: NotifySupportRotationRegistered
- * @tc.desc: NotifySupportRotationRegistered test
- * @tc.type: FUNC
- */
-HWTEST_F(SessionProxyTest, NotifySupportRotationRegistered, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "SessionProxyTest: NotifySupportRotationRegistered start";
-    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_NE(iRemoteObjectMocker, nullptr);
-    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
-    ASSERT_NE(sProxy, nullptr);
-    WSError res = sProxy->NotifySupportRotationRegistered(0);
-    ASSERT_EQ(res, WSError::WS_OK);
-    GTEST_LOG_(INFO) << "SessionProxyTest: NotifySupportRotationRegistered start";
-}
-
-/**
  * @tc.name: UpdateScreenshotAppEventRegistered
  * @tc.desc: UpdateScreenshotAppEventRegistered test
  * @tc.type: FUNC

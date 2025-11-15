@@ -284,7 +284,6 @@ public:
     {
         return { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0, } };
     }
-    virtual void NotifySupportRotationChange(const SupportRotationInfo& supportRotationInfo) {}
     virtual WSError SetCurrentRotation(int32_t currentRotation) = 0;
     virtual WSError NotifyAppForceLandscapeConfigUpdated() = 0;
     virtual WSError NotifyAppHookWindowInfoUpdated() = 0;

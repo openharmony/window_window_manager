@@ -40,6 +40,7 @@ enum class WindowManagerAgentType : uint32_t {
     WINDOW_MANAGER_AGENT_TYPE_CALLING_DISPLAY,
     WINDOW_MANAGER_AGENT_TYPE_PROPERTY,
     WINDOW_MANAGER_AGENT_STATUS_BAR_PROPERTY,
+    WINDOW_MANAGER_AGENT_SUPPORT_ROTATION,
     WINDOW_MANAGER_AGENT_TYPE_END,
 };
 
@@ -65,6 +66,7 @@ public:
         TRANS_ID_NOTIFY_CALLING_DISPLAY_CHANGE,
         TRANS_ID_NOTIFY_WINDOW_PROPERTY_CHANGE,
         TRANS_ID_NOTIFY_WINDOW_SYSTEM_BAR_PROPERTY_CHANGE,
+        TRANS_ID_NOTIFY_WINDOW_SUPPORT_ROTATION_CHANGE,
     };
 
     virtual void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) = 0;
@@ -87,6 +89,7 @@ public:
     virtual void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground) = 0;
     virtual void NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
         const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList) = 0;
+    virtual void NotifySupportRotationChange(const SuppoortRotationInfo& supportRotationInfo) = 0s;
 };
 } // namespace Rosen
 } // namespace OHOS

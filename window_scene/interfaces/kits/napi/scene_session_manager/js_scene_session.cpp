@@ -218,7 +218,6 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {UPDATE_PIP_TEMPLATE_INFO_CB,           ListenerFuncType::UPDATE_PIP_TEMPLATE_INFO_CB},
     {SET_PIP_PARENT_WINDOWID_CB,            ListenerFuncType::SET_PIP_PARENT_WINDOWID_CB},
     {UPDATE_FOLLOW_SCREEN_CHANGE_CB,        ListenerFuncType::UPDATE_FOLLOW_SCREEN_CHANGE_CB},
-    {NOTIFY_SUPPORT_ROTATION_REGISTERED_CB, ListenerFuncType::NOTIFY_SUPPORT_ROTATION_REGISTERED_CB},
     {USE_IMPLICITANIMATION_CB,              ListenerFuncType::USE_IMPLICIT_ANIMATION_CB},
     {WINDOW_ANCHOR_INFO_CHANGE_CB,          ListenerFuncType::WINDOW_ANCHOR_INFO_CHANGE_CB},
     {SET_WINDOW_SHADOWS_CB,                 ListenerFuncType::SET_WINDOW_SHADOWS_CB},
@@ -455,8 +454,6 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
         CreateJsValue(env, static_cast<int32_t>(session->GetSubWindowZLevel())));
     napi_set_named_property(env, objValue, "subWindowOutlineEnabled",
         CreateJsValue(env, session->IsSubWindowOutlineEnabled()));
-    napi_set_named_property(env, objValue, "SupportRotationInfo",
-        CreateSupportRotationInfoJsValue(env));
     ParseMetadataConfiguration(env, objValue, session);
     sptr<WindowSessionProperty> sessionProperty = session->GetSessionProperty();
     if (sessionProperty != nullptr) {
@@ -1086,44 +1083,6 @@ void JsSceneSession::OnUseImplicitAnimationChange(bool useImplicit)
     };
     taskScheduler_->PostMainThreadTask(task, funcName);
 }
-
-void JsSceneSession::ProcessSupportRotationRegister()
-{
-    auto session = weakSession_.promote();
-    if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "session is nullptr, id:%{public}d", persistentId_);
-        return;
-    }
-    session->RegisterNotifySupportRotationRegisteredCallback([weakThis = wptr(this)](DisplayId displayId) {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s jsSceneSession is null");
-            return;
-        }
-        jsSceneSession->OnNotifySupportRotationRegistered(displayId);
-    });
-}
-
-void JsSceneSession::OnNotifySupportRotationRegistered(DisplayId displayId)
-{
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, displayId = displayId, env = env_] {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s jsSceneSession has been destroyed");
-            return;
-        }
-        auto jsCallBack = jsSceneSession->GetJSCallback(NOTIFY_SUPPORT_ROTATION_REGISTERED_CB);
-        if (!jsCallBack) {
-            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s jsCallBack is nullptr");
-            return;
-        }
-        napi_value jsDisplayId = CreateJsValue(env, displayId);
-        napi_value argv[] = { jsDisplayId };
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-    };
-    taskScheduler_->PostMainThreadTask(task, __func__);
-}
-
 
 void JsSceneSession::ProcessRestoreMainWindowRegister()
 {
@@ -3089,31 +3048,6 @@ napi_value JsSceneSession::OnRegisterCallback(napi_env env, napi_callback_info i
     return NapiGetUndefined(env);
 }
 
-napi_value JsSceneSession::OnNotifySupportRotationChange(napi_env env, napi_callback_info info)
-{
-    size_t argc = ARGC_FOUR;
-    napi_value argv[ARGC_FOUR] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != ARGC_ONE) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "Argc count is invalid: %{public}zu", argc);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-                                      "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    SuppoortRotationInfo supportRotationInfo;
-    napi_value supportRotationInfoObj = argv[0];
-    if (supportRotationInfoObj == nullptr) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to get supportRotationInfoObj");
-        return NapiGetUndefined(env);
-    }
-    if (!ConvertSupportRotationInfoFromJsValue(env, supportRotationInfoObj, supportRotationInfo)) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to supportRotationInfo");
-        return NapiGetUndefined(env);
-    }
-    session->NotifySupportRotationChange(supportRotationInfo);
-    return NapiGetUndefined(env);
-}
-
 void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
 {
     switch (static_cast<uint32_t>(listenerFuncType)) {
@@ -3350,9 +3284,6 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::UPDATE_FOLLOW_SCREEN_CHANGE_CB):
             ProcessSessionUpdateFollowScreenChange();
-            break;
-        case static_cast<uint32_t>(ListenerFuncType::NOTIFY_SUPPORT_ROTATION_REGISTERED_CB):
-            ProcessSupportRotationRegister();
             break;
         case static_cast<uint32_t>(ListenerFuncType::USE_IMPLICIT_ANIMATION_CB):
             ProcessUseImplicitAnimationChangeRegister();
