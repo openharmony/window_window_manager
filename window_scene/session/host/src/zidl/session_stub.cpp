@@ -2143,7 +2143,7 @@ int SessionStub::HandleKeyFrameAnimateEnd(MessageParcel& data, MessageParcel& re
 int SessionStub::HandleUpdateKeyFrameCloneNode(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "In");
-    auto rsKeyFrameNode = RSWindowKeyFrameNode->ReadFromParcel(data);
+    auto rsKeyFrameNode = RSWindowKeyFrameNode::ReadFromParcel(data);
     if (rsKeyFrameNode == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "fail get rsKeyFrameNode");
         return ERR_INVALID_DATA;
