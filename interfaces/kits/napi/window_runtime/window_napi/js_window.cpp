@@ -5129,6 +5129,7 @@ napi_value JsWindow::OnSetMainWindowRaiseByClickEnabled(napi_env env, napi_callb
         TLOGE(WmsLogTag::WMS_HIERARCHY, "permission denied, require system application");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP,
             "[window][setMainWindowRaiseByClickEnabled]msg: Permission denied."));
+        return NapiGetUndefined(env);
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
