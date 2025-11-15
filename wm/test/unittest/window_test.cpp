@@ -2260,8 +2260,8 @@ HWTEST_F(WindowTest, SetResizeByDragEnabled, TestSize.Level1)
 HWTEST_F(WindowTest, SetMainWindowRaiseByClickEnabled, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
-    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetMainWindowRaiseByClickEnabled(true));
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetMainWindowRaiseByClickEnabled(true));
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
