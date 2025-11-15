@@ -4838,7 +4838,7 @@ void SceneSessionManager::SetStartPiPFailedListener(NotifyStartPiPFailedFunc&& f
 
 void SceneSessionManager::SetSupportRotationRegisteredListener(const NotifySupportRotationRegisteredFunc& func)
 {
-    SupportRotationRegisteredListener_ = func;
+    supportRotationRegisteredListener_ = func;
 }
 
 void SceneSessionManager::RegisterCreateSubSessionListener(int32_t persistentId,
@@ -18661,7 +18661,7 @@ void SceneSessionManager::NotifySupportRotationRegistered()
     if (supportRotationRegisteredListener_) {
         supportRotationRegisteredListener_();
     } else {
-        TLOGE(WmsLogTag::WMS_ROTATION, "SupportRotationRegisteredListener_ is null");
+        TLOGE(WmsLogTag::WMS_ROTATION, "supportRotationRegisteredListener_ is null");
     }
 }
 } // namespace OHOS::Rosen

@@ -2680,7 +2680,7 @@ int SceneSessionManagerStub::HandleConvertToRelativeCoordinateExtended(MessagePa
 
 int SceneSessionManagerStub::HandleNotifySupportRotationRegistered(MessageParcel& data, MessageParcel& reply)
 {
-    NotifySupportRotationRegistered(displayId);
+    NotifySupportRotationRegistered();
     return ERR_NONE;
 }
 

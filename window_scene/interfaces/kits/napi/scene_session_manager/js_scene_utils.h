@@ -293,6 +293,7 @@ bool ConvertThrowSlipModeFromJs(napi_env env, napi_value value, ThrowSlipMode& t
 bool convertAnimConfigFromJs(napi_env env, napi_value value, SceneAnimationConfig& config);
 bool ConvertSupportRotationInfoFromJsValue(napi_env env, napi_value jsObject,
     SuppoortRotationInfo& suppoortRotationInfo);
+bool ParseBoolArrayValueFromJsValue(napi_env env, napi_value array, std::vector<bool>& vector);
 template<class T>
 bool ParseJsValue(napi_env env, napi_value jsObject, const std::string& name, T& data)
 {
