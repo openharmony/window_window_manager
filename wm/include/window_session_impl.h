@@ -143,6 +143,7 @@ public:
 
     WMError SetResizeByDragEnabled(bool dragEnabled) override;
     WMError SetRaiseByClickEnabled(bool raiseEnabled) override;
+    WMError SetMainWindowRaiseByClickEnabled(bool raiseEnabled) override;
     WMError HideNonSystemFloatingWindows(bool shouldHide) override;
     WMError SetSingleFrameComposerEnabled(bool enable) override;
     bool IsFloatingWindowAppType() const override;
