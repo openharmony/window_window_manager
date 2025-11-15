@@ -6788,22 +6788,30 @@ bool WindowSessionImpl::FilterPointerEvent(const std::shared_ptr<MMI::PointerEve
     auto sourceType = pointerEvent->GetSourceType();
     auto action = pointerEvent->GetPointerAction();
     if (sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
-        std::lock_guard<std::mutex> lock(touchEventFilterMutex_);
-        if (touchEventFilter_ == nullptr) {
-            TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "touch event filter null");
-            return false;
+        TouchEventFilterFunc touchEventFilter = nullptr;
+        {
+            std::lock_guard<std::mutex> lock(touchEventFilterMutex_);
+            if (touchEventFilter_ == nullptr) {
+                TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "touch event filter null");
+                return false;
+            }
+            touchEventFilter = touchEventFilter_;
         }
-        isFiltered = touchEventFilter_(*pointerEvent.get());
+        isFiltered = touchEventFilter(*pointerEvent.get());
     } else if (sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
                (action != OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
                 action != OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE &&
                 action != OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_END)) {
-        std::lock_guard<std::mutex> lock(mouseEventFilterMutex_);
-        if (mouseEventFilter_ == nullptr) {
-            TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "mouse event filter null");
-            return false;
+        MouseEventFilterFunc mouseEventFilter = nullptr;
+        {
+            std::lock_guard<std::mutex> lock(mouseEventFilterMutex_);
+            if (mouseEventFilter_ == nullptr) {
+                TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "mouse event filter null");
+                return false;
+            }
+            mouseEventFilter = mouseEventFilter_;
         }
-        isFiltered = mouseEventFilter_(*pointerEvent.get());
+        isFiltered = mouseEventFilter(*pointerEvent.get());
     }
     if (isFiltered) {
         if (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
