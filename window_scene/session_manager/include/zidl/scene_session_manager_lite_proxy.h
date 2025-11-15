@@ -79,6 +79,7 @@ public:
         AppExecFwk::ExtensionAbilityType extensionAbilityType, int32_t& pid) override;
     WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) override;
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
+    WMError UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease) override;
     WMError GetWindowModeType(WindowModeType& windowModeType) override;
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo) override;
     WMError UpdateAnimationSpeedWithPid(pid_t pid, float speed) override;
