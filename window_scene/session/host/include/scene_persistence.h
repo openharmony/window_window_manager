@@ -45,7 +45,7 @@ public:
     bool HasSnapshot() const;
     bool HasSnapshot(SnapshotStatus key, bool freeMultiWindow = false) const;
     void ClearSnapshotPath();
-    void ClearSnapshot(SnapshotStatus key);
+    void ClearSnapshot();
     bool IsSnapshotExisted(SnapshotStatus key = defaultStatus);
     std::string GetSnapshotFilePath(SnapshotStatus& key, bool useKey = false, bool freeMultiWindow = false);
     bool FindClosestFormSnapshot(SnapshotStatus& key);
