@@ -388,8 +388,8 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetTranslateY(property_.GetTranslateY());
     displayInfo->SetScreenShape(property_.GetScreenShape());
     // calculate physical sensor rotation
-    Rotation originRotation = static_cast<Rotation>(static_cast<uint32_t>(property_.GetScreenRotation()) -
-        static_cast<uint32_t>(GetCurrentRotationCorrection()) + SECONDARY_ROTATION_MOD);
+    Rotation originRotation = static_cast<Rotation>((static_cast<uint32_t>(property_.GetScreenRotation()) -
+        static_cast<uint32_t>(GetCurrentRotationCorrection()) + SECONDARY_ROTATION_MOD) % SECONDARY_ROTATION_MOD);
     displayInfo->SetOriginRotation(originRotation);
     displayInfo->SetSupportedRefreshRate(GetSupportedRefreshRate());
     displayInfo->SetSupportsFocus(GetSupportsFocus());
