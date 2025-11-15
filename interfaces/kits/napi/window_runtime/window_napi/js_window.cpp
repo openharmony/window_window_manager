@@ -5113,10 +5113,10 @@ napi_value JsWindow::OnSetRaiseByClickEnabled(napi_env env, napi_callback_info i
 napi_value JsWindow::OnSetMainWindowRaiseByClickEnabled(napi_env env, napi_callback_info info)
 {
     WMError errCode = WMError::WM_OK;
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = ONE_PARAMS_SIZE;
+    napi_value argv[ONE_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 1 || argc > 2) { // 2: maximum params num
+    if (argc != ARG_COUNT_ONE) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "Argc is invalid: %{public}zu", argc);
         errCode = WMError::WM_DO_NOTHING;
     }
