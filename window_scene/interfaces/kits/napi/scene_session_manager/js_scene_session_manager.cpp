@@ -86,6 +86,7 @@ const std::string SCENE_SESSION_DESTRUCT_CB = "sceneSessionDestruct";
 const std::string SCENE_SESSION_TRANSFER_TO_TARGET_SCREEN_CB = "sceneSessionTransferToTargetScreen";
 const std::string UPDATE_KIOSK_APP_LIST_CB = "updateKioskAppList";
 const std::string KIOSK_MODE_CHANGE_CB = "kioskModeChange";
+const std::string NOTIFY_SUPPORT_ROTATION_REGISTERED_CB = "notifySupportRotationRegistered";
 const std::string UI_EFFECT_SET_PARAMS_CB = "uiEffectSetParams";
 const std::string UI_EFFECT_ANIMATE_TO_CB = "uiEffectAnimateTo";
 const std::string VIRTUAL_DENSITY_CHANGE_CB = "virtualDensityChange";
@@ -112,6 +113,7 @@ const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {SCENE_SESSION_TRANSFER_TO_TARGET_SCREEN_CB,    ListenerFunctionType::SCENE_SESSION_TRANSFER_TO_TARGET_SCREEN_CB},
     {UPDATE_KIOSK_APP_LIST_CB,     ListenerFunctionType::UPDATE_KIOSK_APP_LIST_CB},
     {KIOSK_MODE_CHANGE_CB,         ListenerFunctionType::KIOSK_MODE_CHANGE_CB},
+    {NOTIFY_SUPPORT_ROTATION_REGISTERED_CB, ListenerFunctionType::NOTIFY_SUPPORT_ROTATION_REGISTERED_CB},
     {UI_EFFECT_SET_PARAMS_CB,       ListenerFunctionType::UI_EFFECT_SET_PARAMS_CB},
     {UI_EFFECT_ANIMATE_TO_CB,      ListenerFunctionType::UI_EFFECT_ANIMATE_TO_CB},
     {VIRTUAL_DENSITY_CHANGE_CB,   ListenerFunctionType::VIRTUAL_DENSITY_CHANGE_CB},
@@ -343,6 +345,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::UpdateAppBoundSystemTrayStatus);
     BindNativeFunction(env, exportObj, "getPipDeviceCollaborationPolicy", moduleName,
         JsSceneSessionManager::GetPipDeviceCollaborationPolicy);
+    BindNativeFunction(env, exportObj, "notifySupportRotationChange", moduleName,
+        JsSceneSessionManager::NotifySupportRotationChange);
     return NapiGetUndefined(env);
 }
 
@@ -607,6 +611,19 @@ void JsSceneSessionManager::OnStartPiPFailed(DisplayId displayId)
     taskScheduler_->PostMainThreadTask(task, __func__);
 }
 
+void JsSceneSessionManager::OnSupportRotationRegistered()
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "[NAPI]");
+    auto task = [jsCallBack = GetJSCallback(START_PIP_FAILED_CB), env = env_] {
+        if (jsCallBack == nullptr) {
+            TLOGNE(WmsLogTag::WMS_PIP, "jsCallBack is nullptr");
+            return;
+        }
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, {}, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, __func__);
+}
+
 void JsSceneSessionManager::ProcessCreateSystemSessionRegister()
 {
     NotifyCreateSystemSessionFunc func = [this](const sptr<SceneSession>& session) {
@@ -809,6 +826,14 @@ void JsSceneSessionManager::ProcessStartPiPFailedRegister()
     SceneSessionManager::GetInstance().SetStartPiPFailedListener([this](DisplayId displayId) {
         TLOGNI(WmsLogTag::WMS_PIP, "NotifyStartPiPFailedFunc");
         this->OnStartPiPFailed(displayId);
+    });
+}
+
+void JsSceneSessionManager::ProcessSupportRotationRegister()
+{
+    SceneSessionManager::GetInstance().SetSupportRotationRegisteredListener([this]() {
+        TLOGNI(WmsLogTag::WMS_ROTATION, "NotifySupportRotationRegisteredFunc");
+        this->OnSupportRotationRegistered();
     });
 }
 
@@ -5589,5 +5614,37 @@ void JsSceneSessionManager::OnVirtualPixelChange(float density, DisplayId displa
             napi_value argv[] = { densityValue, displayIdValue };
             napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
         }, __func__);
+}
+
+napi_value JsSceneSessionManager::NotifySupportRotationChange(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnNotifySupportRotationChange(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::OnNotifySupportRotationChange(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Argc count is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SuppoortRotationInfo supportRotationInfo;
+    napi_value supportRotationInfoObj = argv[0];
+    if (supportRotationInfoObj == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to get supportRotationInfoObj");
+        return NapiGetUndefined(env);
+    }
+    if (!ConvertSupportRotationInfoFromJsValue(env, supportRotationInfoObj, supportRotationInfo)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to supportRotationInfo");
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().NotifySupportRotationChange(supportRotationInfo);
+    return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen

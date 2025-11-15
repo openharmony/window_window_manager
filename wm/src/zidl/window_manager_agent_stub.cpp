@@ -260,6 +260,11 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
             break;
         }
+        case WindowManagerAgentMsg::TRANS_ID_NOTIFY_WINDOW_SUPPORT_ROTATION_CHANGE: {
+            SupportRotationInfo supportRotationInfo;
+            supportRotationInfo.Unmarshalling(data);
+            NotifySupportRotationChange(supportRotationInfo);
+        }
         default:
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

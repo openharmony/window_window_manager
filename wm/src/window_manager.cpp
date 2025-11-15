@@ -80,6 +80,7 @@ public:
     void NotifyWindowGlobalRectChange(
         const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
     void NotifyWMSWindowDestroyed(const WindowLifeCycleInfo& lifeCycleInfo, void* jsWindowNapiValue);
+    void NotifySupportRotationChange(const SupportRotationInfo& supportRotationInfo)
 
     static inline SingletonDelegator<WindowManager> delegator_;
 
@@ -558,6 +559,19 @@ void WindowManager::Impl::NotifyWMSWindowDestroyed(const WindowLifeCycleInfo& li
         return;
     }
     wmsWindowDestroyedListener->OnWindowDestroyed(lifeCycleInfo, jsWindowNapiValue);
+}
+
+void WindowManager::Impl::NotifySupportRotationChange(const SupportRotationInfo& supportRotationInfo)
+{
+    std::vector<sptr<IWindowSupportRotationListener>> windowSupportRotationListener;
+    {
+        std::shared_lock<std::shared_mutex> lock(listenerMutex_);
+        windowSupportRotationListener = windowSupportRotationListeners_;
+    }
+    for (auto& listener : windowSupportRotationListener) {
+        TLOGD(WmsLogTag::WMS_ROTATION, "Notify supportRotationInfo to caller");
+        listener->OnSupportRotationChange(supportRotationInfo);
+    }
 }
 
 WindowManager::WindowManager(const int32_t userId) : userId_(userId),
@@ -2577,6 +2591,51 @@ WMError WindowManager::UnregisterWindowInfoChangeCallback(const std::unordered_s
     }
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s", observedInfoForLog.str().c_str());
     return ret;
+}
+
+WMError WindowManager::RegisterWindowSupportRotationListener(const sptr<IWindowSupportRotationListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    {
+        std::lock_guard<std::mutex> lockListener(pImpl_->mutex_);
+        auto iter = std::find(pImpl_->windowSupportRotationListeners_.begin(),
+            pImpl_->windowSupportRotationListeners_.end(), listener);
+        if (iter != pImpl_->windowSupportRotationListeners_.end()) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "Listener is already registered.");
+            return WMError::WM_OK;
+        }
+        pImpl_->windowSupportRotationListeners_.emplace_back(listener);
+    }
+
+    WMError ret = WindowAdapter::GetInstance(userId_)->NotifySupportRotationRegistered();
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "get window visibility info failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::UnregisterWindowSupportRotationListener(const sptr<IWindowSupportRotationListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Listener can not be null.");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    {
+        std::lock_guard<std::mutex> lockListener(pImpl_->mutex_);
+        pImpl_->windowSupportRotationListeners_.erase(std::remove_if(pImpl_->windowSupportRotationListeners_.begin(),
+        pImpl_->windowSupportRotationListeners_.end(),
+        [listener](sptr<IWindowSupportRotationListener>registeredListener) { return registeredListener == listener; }),
+        pImpl_->windowSupportRotationListeners_.end());
+    }
+    return WMError::WM_OK;
+}
+
+void WindowManager::NotifySupportRotationChange(const SupportRotationInfo& supportRotationInfo)
+{
+    pImpl_->NotifySupportRotationChange(supportRotationInfo);
 }
 
 void WindowManager::SetIsModuleHookOffToSet(const std::string& moduleName)

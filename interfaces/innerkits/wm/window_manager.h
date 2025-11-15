@@ -498,6 +498,71 @@ public:
 };
 
 /**
+ * @brief support rotation of current application
+ */
+struct SupportRotationInfo : public Parcelable {
+    DisplayId displayId_;
+    int32_t persistentId_;
+    std::vector<bool> containerSupportRotation_;
+    std::vector<bool> sceneSupportRotation_;
+    std::string supportRotationChangeReason_;
+
+    SupportRotationInfo() {}
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if(!parcel.WriteUint64(static_cast<uint64_t>(displayId_))) {
+            return false;
+        }
+        if(!parcel.WriteInt32(persistentId_)) {
+            return false;
+        }
+        for(int i = 0; i < 4; i++) {
+            if(!parcel.WriteBool(containerSupportRotation_[i])) {
+                return false;
+            }
+        }
+        for(int i = 0; i < 4; i++) {
+            if(!parcel.WriteBool(sceneSupportRotation_[i])) {
+                return false;
+            }
+        }
+        if(!parcel.WriteString(supportRotationChangeReason_)) {
+            return false;
+        }
+    }
+
+    static SupportRotationInfo* Unmarshalling(Parcel& parcel)
+    {
+        SupportRotationInfo* supportRotationInfo = new SupportRotationInfo();
+        if(!parcel.ReadUint64(supportRotationInfo->displayId_)) {
+            delete supportRotationInfo;
+            return nullptr;
+        }
+        if(!parcel.ReadInt32(supportRotationInfo->persistentId_)) {
+            delete supportRotationInfo;
+            return nullptr;
+        }
+        for(int i = 0; i < 4; i++) {
+            if(!parcel.ReadBool(supportRotationInfo->containerSupportRotation_[i])) {
+                delete supportRotationInfo;
+                return nullptr;
+            }
+        }
+        for(int i = 0; i < 4; i++) {
+            if(!parcel.ReadBool(supportRotationInfo->sceneSupportRotation_[i])) {
+                delete supportRotationInfo;
+                return nullptr;
+            }
+        }
+        if(!parcel.ReadString(supportRotationInfo->supportRotationChangeReason_)) {
+            delete supportRotationInfo;
+            return nullptr;
+        }
+    }
+}
+
+/**
  * @class IWindowUpdateListener
  *
  * @brief Listener to observe window update.
@@ -608,6 +673,22 @@ public:
      * @param isForeground the state of the bundle in PiP State.
      */
     virtual void OnPiPStateChanged(const std::string& bundleName, bool isForeground) = 0;
+};
+
+/*
+ * @class IWindowSupportRotationListener
+ *
+ * @brief IWindowSupportRotationListener is used to observe the window support rotation change.
+ */
+class IWindowSupportRotationListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window support rotation change
+     *
+     * @param supportRotationInfo information of support rotation
+     *
+     */
+    virtual void OnSupportRotationChange(const SuppoortRotationInfo& supportRotationInfo) {}
 };
 
 /**
@@ -1366,6 +1447,28 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterWindowLifeCycleCallback(const sptr<IWindowLifeCycleListener>& listener);
+
+    /**
+     * @brief Register window support rotation change listener.
+     *
+     * @param listener IWindowSupportRotationListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowSupportRotationListener(const sptr<IWindowSupportRotationListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister window support rotation change listener.
+     *
+     * @param listener IWindowSupportRotationListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowSupportRotationListener(const sptr<IWindowSupportRotationListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Unregister window lifecycle status changed callback.

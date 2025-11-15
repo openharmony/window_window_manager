@@ -2258,28 +2258,6 @@ RotationChangeResult SessionStageProxy::NotifyRotationChange(const RotationChang
     return rotationChangeResult;
 }
 
-void SessionStageProxy::NotifySupportRotationChange(const SupportRotationInfo& supportRotationInfo)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-    if (!data.WriteParcelable(&supportRotationInfo)) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "supportRotationInfo marshalling failed");
-        return;
-    }
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "remote is null");
-        return;
-    }
-    int sendCode = remote->SendRequest(
-        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SUPPORT_ROTATION_CHANGE),
-        data, reply, option);
-    if (sendCode != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "SendRequest failed, code: %{public}d", sendCode);
-    }
-}
-
 void SessionStageProxy::NotifyKeyboardAnimationWillBegin(const KeyboardAnimationInfo& keyboardAnimationInfo,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {

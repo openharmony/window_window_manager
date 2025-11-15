@@ -4836,6 +4836,11 @@ void SceneSessionManager::SetStartPiPFailedListener(NotifyStartPiPFailedFunc&& f
     startPiPFailedFunc_ = std::move(func);
 }
 
+void SceneSessionManager::SetSupportRotationRegisteredListener(const NotifySupportRotationRegisteredFunc& func)
+{
+    SupportRotationRegisteredListener_ = func;
+}
+
 void SceneSessionManager::RegisterCreateSubSessionListener(int32_t persistentId,
     const NotifyCreateSubSessionFunc& func)
 {
@@ -11934,6 +11939,11 @@ void SceneSessionManager::DealwithDrawingContentChange(const std::vector<std::pa
     }
 }
 
+void SceneSessionManager::NotifySupportRotationChange(const SuppoortRotationInfo& supportRotationInfo)
+{
+    SessionManagerAgentController::GetInstance().NotifySupportRotationChange(supportRotationInfo);
+}
+
 WSError SceneSessionManager::NotifyAppUseControlList(
     ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)
 {
@@ -18644,5 +18654,14 @@ bool SceneSessionManager::IsAppBoundSystemTray(int32_t callingPid, uint32_t call
         return it->second.count(callingPid) > 0;
     }
     return false;
+}
+
+void SceneSessionManager::NotifySupportRotationRegistered()
+{
+    if (supportRotationRegisteredListener_) {
+        supportRotationRegisteredListener_();
+    } else {
+        TLOGE(WmsLogTag::WMS_ROTATION, "SupportRotationRegisteredListener_ is null");
+    }
 }
 } // namespace OHOS::Rosen

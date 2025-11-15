@@ -1152,22 +1152,6 @@ HWTEST_F(SessionStubTest, HandleUpdateRotationChangeListenerRegistered, Function
 }
 
 /**
- * @tc.name: HandleNotifySupportRotationRegistered
- * @tc.desc: sessionStub HandleNotifySupportRotationRegistered
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStubTest, HandleNotifySupportRotationRegistered, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    data.WriteUint32(0);
-    auto result = session_->HandleNotifySupportRotationRegistered(data, reply);
-    ASSERT_EQ(result, ERR_NONE);
-    result = session_->HandleNotifySupportRotationRegistered(data, reply);
-    ASSERT_EQ(result, ERR_INVALID_DATA);
-}
-
-/**
  * @tc.name: HandleUpdateScreenshotAppEventRegistered
  * @tc.desc: sessionStub HandleUpdateScreenshotAppEventRegistered
  * @tc.type: FUNC
