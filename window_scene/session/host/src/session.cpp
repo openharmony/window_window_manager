@@ -3437,7 +3437,7 @@ bool Session::IsNeedRequestToTop() const
     return WindowHelper::IsMainWindow(GetWindowType()) ? GetSessionProperty()->GetRaiseEnabled() : true;
 }
 
-void NotifyClickIfNeed()
+void Session::NotifyClickIfNeed()
 {
     if (IsNeedRequestToTop()) {
         NotifyClick(false);
