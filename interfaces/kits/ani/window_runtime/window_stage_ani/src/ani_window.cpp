@@ -788,6 +788,37 @@ void AniWindow::OnRaiseMainWindowAboveTarget(ani_env* env, ani_int windowId)
     }
 }
 
+void AniWindow::SetMainWindowRaiseByClickEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enable)
+{
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow != nullptr) {
+        aniWindow->OnSetMainWindowRaiseByClickEnabled(env, enable);
+    } else {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] aniWindow is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+}
+
+void AniWindow::OnSetMainWindowRaiseByClickEnabled(ani_env* env, ani_boolean enable)
+{
+    auto window = GetWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] window is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    if (!Permission::IsSystemCallingOrStartByHdcd(true)) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "permission denied, require system application");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetMainWindowRaiseByClickEnabled(enable));
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret, "SetMainWindowRaiseByClickEnabled failed.");
+        return;
+    }
+}
+
 void AniWindow::SetWindowFocusable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isFocusable)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "[ANI]");
@@ -3595,6 +3626,8 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::SetWaterMarkFlag)},
         ani_native_function {"raiseMainWindowAboveTargetSync", "JI:V",
             reinterpret_cast<void *>(AniWindow::RaiseMainWindowAboveTarget)},
+        ani_native_function {"setMainWindowRaiseByClickEnabledSync", "JZ:V",
+            reinterpret_cast<void *>(AniWindow::SetMainWindowRaiseByClickEnabled)},
         ani_native_function {"setWindowFocusableSync", "JZ:V",
             reinterpret_cast<void *>(AniWindow::SetWindowFocusable)},
         ani_native_function {"setContentAspectRatio", "JDZZ:V",
