@@ -774,20 +774,20 @@ HWTEST_F(WindowSessionTest3, PresentFocusIfNeed03, TestSize.Level1)
 }
 
 /**
- * @tc.name: NeedRequestToTop
- * @tc.desc: NeedRequestToTop Test
+ * @tc.name: IsNeedRequestToTop
+ * @tc.desc: IsNeedRequestToTop Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest3, NeedRequestToTop, TestSize.Level1)
+HWTEST_F(WindowSessionTest3, IsNeedRequestToTop, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     session_->property_->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
-    EXPECT_EQ(session_->NeedRequestToTop(), true);
+    EXPECT_EQ(session_->IsNeedRequestToTop(), true);
     session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     session_->property_->SetRaiseEnabled(false);
-    EXPECT_EQ(session_->NeedRequestToTop(), false);
+    EXPECT_EQ(session_->IsNeedRequestToTop(), false);
     session_->property_->SetRaiseEnabled(true);
-    EXPECT_EQ(session_->NeedRequestToTop(), true);
+    EXPECT_EQ(session_->IsNeedRequestToTop(), true);
 }
 
 /**
