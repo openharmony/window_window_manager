@@ -427,6 +427,7 @@ private:
     WMError NotifyWindowStyleChange(WindowStyleType type);
     void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
         WindowUpdateType type) const;
+    WMError UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease);
     WMError NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo);
     WMError ProcessRegisterWindowInfoChangeCallback(WindowInfoKey observedInfo,
         const sptr<IWindowInfoChangedListener>& listener);
