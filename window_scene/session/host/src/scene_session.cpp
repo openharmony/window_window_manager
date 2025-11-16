@@ -1260,7 +1260,7 @@ void SceneSession::NotifyUpdateAppUseControl(ControlAppType type, const ControlI
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return;
         }
-        session->appUseControlMap_[type] = controlInfo;
+        session->SetAppControlInfo(type, controlInfo);
         session->UpdateAppLockSnapshot(type, controlInfo);
         if (session->onUpdateAppUseControlFunc_) {
             bool isAppUseControl = (controlInfo.isNeedControl && !controlInfo.isControlRecentOnly);
@@ -1291,11 +1291,12 @@ void SceneSession::UpdatePrivacyModeControlInfo()
     if ((property && property->GetPrivacyMode()) || HasChildSessionInPrivacyMode()) {
         isPrivacyMode = true;
     }
-    if (!isPrivacyMode && appUseControlMap_.find(ControlAppType::PRIVACY_WINDOW) == appUseControlMap_.end()) {
+    ControlInfo controlInfo;
+    if (!isPrivacyMode && !GetAppControlInfo(ControlAppType::PRIVACY_WINDOW, controlInfo)) {
         TLOGI(WmsLogTag::WMS_LIFE, "no need to update privacy mode control info");
         return;
     }
-    ControlInfo controlInfo = { .isNeedControl = isPrivacyMode, .isControlRecentOnly = true };
+    controlInfo = { .isNeedControl = isPrivacyMode, .isControlRecentOnly = true };
     NotifyUpdateAppUseControl(ControlAppType::PRIVACY_WINDOW, controlInfo);
 }
 
