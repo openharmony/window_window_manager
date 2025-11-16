@@ -2831,8 +2831,9 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
 bool Session::GetNeedUseBlurSnapshot() const
 {
     bool isPrivacyMode = GetIsPrivacyMode();
-    ControlInfo controlInfo = GetAppControlInfo(ControlAppType::APP_LOCK);
-    bool needUseBlurSnapshot = isPrivacyMode || controlInfo.isNeedControl;
+    ControlInfo controlInfo;
+    bool isAppControl = GetAppControlInfo(ControlAppType::APP_LOCK, controlInfo);
+    bool needUseBlurSnapshot = isPrivacyMode || (isAppControl && controlInfo.isNeedControl);
     if (needUseBlurSnapshot) {
         TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d, isPrivacyMode: %{public}d, isAppLock: %{public}d",
             persistentId_, isPrivacyMode, controlInfo.isNeedControl);

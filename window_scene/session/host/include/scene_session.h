@@ -922,13 +922,21 @@ public:
     void NotifyWindowAttachStateListenerRegistered(bool registered) override;
     WMError NotifySnapshotUpdate() override;
     bool GetIsPrivacyMode() const override { return isPrivacyMode_; };
-    ControlInfo GetAppControlInfo(ControlAppType type) const override
+    void SetAppControlInfo(ControlAppType type, ControlInfo controlInfo) override
     {
-        if (appUseControlMap_.find(type) == appUseControlMap_.end()) {
-            ControlInfo controlInfo = { .isNeedControl = false, .isControlRecentOnly = false };
-            return controlInfo;
+        std::lock_guard lock(appUseControlMapMutex_);
+        appUseControlMap_[type] = controlInfo;
+    };
+    bool GetAppControlInfo(ControlAppType type, ControlInfo& controlInfo) const override
+    {
+        std::lock_guard lock(appUseControlMapMutex_);
+        auto it = appUseControlMap_.find(type);
+        if (it == appUseControlMap_.end()) {
+            controlInfo = { .isNeedControl = false, .isControlRecentOnly = false };
+            return false;
         }
-        return appUseControlMap_.at(type);
+        controlInfo = it->second;
+        return true;
     };
 
     /**
@@ -1072,6 +1080,7 @@ protected:
     ClearCallbackMapFunc clearCallbackMapFunc_;
     UpdateAppUseControlFunc onUpdateAppUseControlFunc_;
     std::unordered_map<ControlAppType, ControlInfo> appUseControlMap_;
+    mutable std::mutex appUseControlMapMutex_;
     GetAllAppUseControlMapFunc onGetAllAppUseControlMapFunc_;
 
     /*

@@ -297,10 +297,11 @@ public:
     bool GetNeedUseBlurSnapshot() const;
     void UpdateAppLockSnapshot(ControlAppType type, ControlInfo controlInfo);
     virtual bool GetIsPrivacyMode() const { return false; };
-    virtual ControlInfo GetAppControlInfo(ControlAppType type) const
+    virtual void SetAppControlInfo(ControlAppType type, ControlInfo controlInfo) {};
+    virtual bool GetAppControlInfo(ControlAppType type, ControlInfo& controlInfo) const
     {
-        ControlInfo controlInfo = { .isNeedControl = false, .isControlRecentOnly = false };
-        return controlInfo;
+        controlInfo = { .isNeedControl = false, .isControlRecentOnly = false };
+        return false;
     };
     bool GetAppLockControl() const { return isAppLockControl_.load(); };
     void SetSaveSnapshotCallback(Task&& task)
