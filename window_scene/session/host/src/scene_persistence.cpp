@@ -385,14 +385,13 @@ bool ScenePersistence::HasSnapshot(SnapshotStatus key, bool freeMultiWindow) con
     return hasSnapshot_[key];
 }
 
-void ScenePersistence::ClearSnapshot(SnapshotStatus key)
+void ScenePersistence::ClearSnapshot()
 {
     std::lock_guard lock(hasSnapshotMutex_);
     for (auto& hasSnapshot : hasSnapshot_) {
         hasSnapshot = false;
     }
     hasSnapshotFreeMultiWindow_ = false;
-    hasSnapshot_[key] = true;
 }
 
 bool ScenePersistence::IsSnapshotExisted(SnapshotStatus key)

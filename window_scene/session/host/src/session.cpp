@@ -2789,40 +2789,33 @@ WSError Session::TransferFocusStateEvent(bool focusState)
 std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scaleParam, bool useCurWindow) const
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Snapshot[%d][%s]", persistentId_, sessionInfo_.bundleName_.c_str());
-    if (scenePersistence_ == nullptr) {
-        return nullptr;
-    }
     auto surfaceNode = GetSurfaceNode();
-    auto key = GetSessionSnapshotStatus();
-    auto isPersistentImageFit = IsPersistentImageFit();
-    if (isPersistentImageFit) key = defaultStatus;
-    if (!surfaceNode || !surfaceNode->IsBufferAvailable()) {
-        scenePersistence_->SetHasSnapshot(false, key);
-        scenePersistence_->SetHasSnapshotFreeMultiWindow(false);
+    if (!CheckSurfaceNodeForSnapshot(surfaceNode)) {
         return nullptr;
     }
     auto callback = std::make_shared<SurfaceCaptureFuture>();
     auto scaleValue = (scaleParam < 0.0f || std::fabs(scaleParam) < std::numeric_limits<float>::min()) ?
         snapshotScale_ : scaleParam;
-    uint32_t backGroundColor = GetBackgroundColor();
     RSSurfaceCaptureConfig config = {
         .scaleX = scaleValue,
         .scaleY = scaleValue,
         .useDma = true,
         .useCurWindow = useCurWindow,
-        .backGroundColor = backGroundColor,
+        .backGroundColor = GetBackgroundColor(),
     };
-    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode, callback, config);
+    bool ret = false;
+    if (GetNeedUseBlurSnapshot()) {
+        float blurRadius = 200.0f;
+        ret = RSInterfaces::GetInstance().TakeSurfaceCaptureWithBlur(surfaceNode, callback, config, blurRadius);
+    } else {
+        ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode, callback, config);
+    }
     if (!ret) {
         TLOGE(WmsLogTag::WMS_MAIN, "TakeSurfaceCapture failed");
         return nullptr;
     }
     constexpr int32_t FFRT_SNAPSHOT_TIMEOUT_MS = 5000;
     auto pixelMap = callback->GetResult(runInFfrt ? FFRT_SNAPSHOT_TIMEOUT_MS : SNAPSHOT_TIMEOUT_MS);
-    if (isPersistentImageFit && GetSnapshot()) {
-        TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d", persistentId_);
-        pixelMap = GetSnapshot();
-    }
     if (pixelMap != nullptr) {
         TLOGI(WmsLogTag::WMS_MAIN, "Save snapshot WxH=%{public}dx%{public}d, id: %{public}d, uniqueId: %{public}d",
             pixelMap->GetWidth(), pixelMap->GetHeight(), persistentId_, pixelMap->GetUniqueId());
@@ -2833,6 +2826,62 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
     }
     TLOGE(WmsLogTag::WMS_MAIN, "Save snapshot failed, id: %{public}d", persistentId_);
     return nullptr;
+}
+
+bool Session::GetNeedUseBlurSnapshot() const
+{
+    bool isPrivacyMode = GetIsPrivacyMode();
+    ControlInfo controlInfo;
+    bool isAppControl = GetAppControlInfo(ControlAppType::APP_LOCK, controlInfo);
+    bool needUseBlurSnapshot = isPrivacyMode || (isAppControl && controlInfo.isNeedControl);
+    if (needUseBlurSnapshot) {
+        TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d, isPrivacyMode: %{public}d, isAppLock: %{public}d",
+            persistentId_, isPrivacyMode, controlInfo.isNeedControl);
+    }
+    return needUseBlurSnapshot;
+}
+
+bool Session::CheckSurfaceNodeForSnapshot(std::shared_ptr<RSSurfaceNode> surfaceNode) const
+{
+    if (scenePersistence_ == nullptr) {
+        return false;
+    }
+    if (IsPersistentImageFit()) {
+        return false;
+    }
+    auto key = GetSessionSnapshotStatus();
+    if (!surfaceNode || !surfaceNode->IsBufferAvailable()) {
+        scenePersistence_->SetHasSnapshot(false, key);
+        scenePersistence_->SetHasSnapshotFreeMultiWindow(false);
+        return false;
+    }
+    return true;
+}
+
+void Session::UpdateAppLockSnapshot(ControlAppType type, ControlInfo controlInfo)
+{
+    if (!WindowHelper::IsMainWindow(GetWindowType())) {
+        return;
+    }
+    if (type != ControlAppType::APP_LOCK) {
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d, isAppLock: %{public}d", persistentId_, controlInfo.isNeedControl);
+    isAppLockControl_.store(controlInfo.isNeedControl);
+    if (controlInfo.isNeedControl == isSnapshotBlur_.load()) {
+        return;
+    }
+    if (IsPersistentImageFit()) {
+        return;
+    }
+    if (GetSessionState() != SessionState::STATE_BACKGROUND) {
+        if (!controlInfo.isNeedControl) {
+            NotifyRemoveSnapshot();
+        }
+        return;
+    }
+    NotifyAddSnapshot(true, false, false);
+    SaveSnapshot(true, true, nullptr, true);
 }
 
 uint32_t Session::GetBackgroundColor() const
@@ -2890,6 +2939,7 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
         key = defaultStatus;
         rotate = DisplayOrientation::PORTRAIT;
     }
+    isSnapshotBlur_.store(GetNeedUseBlurSnapshot());
     bool needCacheSnapshot = (SupportCacheLockedSessionSnapshot() && reason == LifeCycleChangeReason::SCREEN_LOCK);
     auto task = [weakThis = wptr(this), runInFfrt = useFfrt, requirePersist = needPersist, persistentPixelMap,
         updateSnapshot, key, rotate, needCacheSnapshot, reason]() {
@@ -2923,17 +2973,12 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
             TLOGNE(WmsLogTag::WMS_PATTERN, "scenePersistence_ is null");
             return;
         }
-        if (session->freeMultiWindow_.load()) {
-            session->scenePersistence_->SetHasSnapshotFreeMultiWindow(true);
-            ScenePersistentStorage::Insert("Snapshot_" + session->GetSessionInfo().bundleName_ + "_"
-                + std::to_string(session->persistentId_), static_cast<int32_t>(session->GetWindowMode()),
-                ScenePersistentStorageType::MAXIMIZE_STATE);
-        } else {
-            session->scenePersistence_->SetHasSnapshot(true, key);
-            ScenePersistentStorage::Insert("Snapshot_" + session->GetSessionInfo().bundleName_ + "_"
-                + std::to_string(session->persistentId_) + "_" + std::to_string(key),
-                static_cast<int32_t>(rotate), ScenePersistentStorageType::MAXIMIZE_STATE);
+        if (updateSnapshot) {
+            session->DeleteHasSnapshot();
+            session->scenePersistence_->ClearSnapshot();
+            session->NotifyUpdateSnapshotWindow();
         }
+        session->SetHasSnapshot(key, rotate);
         session->scenePersistence_->ResetSnapshotCache();
         Task saveSnapshotCallback = []() {};
         if (!needCacheSnapshot) {
@@ -2942,11 +2987,6 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
         }
         session->scenePersistence_->SaveSnapshot(pixelMap, saveSnapshotCallback, key, rotate,
             session->freeMultiWindow_.load());
-        if (updateSnapshot) {
-            session->SetExitSplitOnBackground(false);
-            session->scenePersistence_->ClearSnapshot(key);
-            session->NotifyUpdateSnapshotWindow();
-        }
     };
     if (!useFfrt) {
         task();
@@ -2956,6 +2996,33 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
     std::string taskName = "Session::SaveSnapshot" + std::to_string(persistentId_);
     snapshotFfrtHelper->CancelTask(taskName);
     snapshotFfrtHelper->SubmitTask(std::move(task), taskName);
+}
+
+std::string Session::GetSnapshotPersistentKey()
+{
+    return "Snapshot_" + sessionInfo_.bundleName_ + "_" + std::to_string(persistentId_);
+}
+
+std::string Session::GetSnapshotPersistentKey(SnapshotStatus key)
+{
+    return "Snapshot_" + sessionInfo_.bundleName_ + "_"+ std::to_string(persistentId_) + "_" + std::to_string(key);
+}
+
+void Session::SetHasSnapshot(SnapshotStatus key, DisplayOrientation rotate)
+{
+    if (!scenePersistence_) {
+        TLOGNE(WmsLogTag::WMS_PATTERN, "scenePersistence is null");
+        return;
+    }
+    if (freeMultiWindow_.load()) {
+        scenePersistence_->SetHasSnapshotFreeMultiWindow(true);
+        ScenePersistentStorage::Insert(GetSnapshotPersistentKey(), static_cast<int32_t>(GetWindowMode()),
+            ScenePersistentStorageType::MAXIMIZE_STATE);
+    } else {
+        scenePersistence_->SetHasSnapshot(true, key);
+        ScenePersistentStorage::Insert(GetSnapshotPersistentKey(key),
+            static_cast<int32_t>(rotate), ScenePersistentStorageType::MAXIMIZE_STATE);
+    }
 }
 
 void Session::ResetLockedCacheSnapshot()
