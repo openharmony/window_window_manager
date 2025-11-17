@@ -57,7 +57,6 @@ enum class MoveDirection : uint32_t {
 class MoveDragController : public ScreenManager::IScreenListener {
 public:
     MoveDragController(wptr<SceneSession> sceneSession);
-    MoveDragController(int32_t persistentId, WindowType winType);
     ~MoveDragController() = default;
 
     /*
@@ -311,8 +310,8 @@ private:
     WindowDecoration decoration_;
     MoveDragProperty moveDragProperty_;
     MoveDragCallback moveDragCallback_;
-    int32_t persistentId_;
-    WindowType winType_;
+    int32_t persistentId_ = INVALID_WINDOW_ID;
+    WindowType winType_ = WindowType::APP_WINDOW_BASE;
 
     enum class DragType : uint32_t {
         DRAG_UNDEFINED,

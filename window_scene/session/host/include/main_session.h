@@ -24,6 +24,8 @@ public:
     MainSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
     ~MainSession();
 
+    void OnFirstStrongRef(const void*) override;
+
     WSError Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property = nullptr,
         sptr<IRemoteObject> token = nullptr, int32_t pid = -1, int32_t uid = -1) override;

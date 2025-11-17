@@ -857,6 +857,18 @@ bool SceneSession::IsDragZooming() const
     return moveDragController_ ? moveDragController_->GetStartDragFlag() : false;
 }
 
+bool SceneSession::IsCrossDisplayDragSupported() const
+{
+    if (IsAnco()) {
+        return false;
+    }
+    auto windowType = GetWindowType();
+    return !WindowHelper::IsSystemWindow(windowType) ||
+           windowType == WindowType::WINDOW_TYPE_FLOAT ||
+           windowType == WindowType::WINDOW_TYPE_SCREENSHOT ||
+           WindowHelper::IsInputWindow(windowType);
+}
+
 bool SceneSession::IsAnyParentSessionDragMoving() const
 {
     if (SessionHelper::IsMainWindow(GetWindowType())) {
@@ -4185,14 +4197,13 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
         return;
     }
     UpdateKeyFrameState(reason, rect);
-    WSRect relativeRect = moveDragController_->GetTargetRect(
-        (reason == SizeChangeReason::DRAG_END && IsCrossDisplayDragSupported()) ?
-            MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY :
-            MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
-    WSRect globalRect =  moveDragController_->GetTargetRect(
-        (reason == SizeChangeReason::DRAG_END && IsCrossDisplayDragSupported()) ?
-            MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY :
-            MoveDragController::TargetRectCoordinate::GLOBAL);
+    bool isRelatedToEndDisplay = reason == SizeChangeReason::DRAG_END && IsCrossDisplayDragSupported();
+    WSRect relativeRect = moveDragController_->GetTargetRect(isRelatedToEndDisplay ?
+        MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY :
+        MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
+    WSRect globalRect = moveDragController_->GetTargetRect(isRelatedToEndDisplay ?
+        MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY :
+        MoveDragController::TargetRectCoordinate::GLOBAL);
     HandleMoveDragSurfaceNode(reason);
     HandleMoveDragSurfaceBounds(relativeRect, globalRect, reason);
     if (reason == SizeChangeReason::DRAG_END) {
@@ -4239,12 +4250,13 @@ bool SceneSession::DragResizeWhenEndFilter(SizeChangeReason reason)
         } else {
             TLOGI(WmsLogTag::WMS_LAYOUT_PC, "trigger client rect change by scb, "
                 "isPcOrPcMode: %{public}d", systemConfig_.IsPcWindow());
+            bool isRelatedToStartDisplay = (systemConfig_.IsPcWindow() &&
+                                            GetDragResizeTypeDuringDrag() == DragResizeType::RESIZE_WHEN_DRAG_END) ||
+                                           !IsCrossDisplayDragSupported();
             WSRect relativeRect = moveDragController_->GetTargetRect(
-                (systemConfig_.IsPcWindow() &&
-                 GetDragResizeTypeDuringDrag() == DragResizeType::RESIZE_WHEN_DRAG_END &&
-                 IsCrossDisplayDragSupported()) ?
-                    MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY :
-                    MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY);
+                isRelatedToStartDisplay ?
+                MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY :
+                MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY);
             HandleMoveDragEnd(relativeRect, reason);
             SetUIFirstSwitch(RSUIFirstSwitch::NONE);
         }
@@ -8715,7 +8727,7 @@ WindowDecoration SceneSession::GetWindowDecoration() const
         std::lock_guard lock(customDecorHeightMutex_);
         auto decorHeightVp = customDecorHeight_ != 0 ? customDecorHeight_ : defaultTopDecorHeightVp;
         TLOGD(WmsLogTag::WMS_DECOR, "%{public}s: decorHeight: %{public}d, vpr: %{public}f", where, decorHeightVp, vpr);
-        return static_cast<uint32_t>(decorHeightVp * vpr);
+        return static_cast<uint32_t>(std::round(decorHeightVp * vpr));
     };
     // Only the top decoration (title bar) currently has height. Left, right, and bottom are set to 0 by default.
     // If future specifications introduce additional decorations, this return value should be updated accordingly.
@@ -10055,23 +10067,4 @@ WMError SceneSession::UnlockCursor(const std::vector<int32_t>& parameters)
 /*
  * Window Event end
  */
-
-bool SceneSession::IsCrossDisplayDragSupported() const
-{
-    if (IsAnco()) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "Cross display drag is not supported for ANCO windows");
-        return false;
-    }
-
-    auto windowType = GetWindowType();
-    bool isSupported = !WindowHelper::IsSystemWindow(windowType) ||
-                       windowType == WindowType::WINDOW_TYPE_FLOAT ||
-                       windowType == WindowType::WINDOW_TYPE_SCREENSHOT ||
-                       WindowHelper::IsInputWindow(windowType);
-
-    TLOGD(WmsLogTag::WMS_LAYOUT,
-          "windowType: %{public}u, isSupported: %{public}d",
-          static_cast<uint32_t>(windowType), isSupported);
-    return isSupported;
-}
 } // namespace OHOS::Rosen
