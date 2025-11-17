@@ -208,7 +208,7 @@ WSError SessionStageProxy::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     TLOGD(WmsLogTag::DEFAULT, "hasRSTransaction: %{public}d, isInnerProcess: %{public}d", hasRSTransaction,
         isInnerProcess);
     if (!data.WriteBool(isInnerProcess)) {
-        WLOGFE("Write has isInnerProcess failed");
+        TLOGE(WmsLogTag::DEFAULT, "Write has isInnerProcess failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (hasRSTransaction && !isInnerProcess) {
