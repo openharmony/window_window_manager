@@ -43,6 +43,9 @@ public:
     static void SetReadStringVectorErrorFlag(bool flag);
     static void SetReadStringErrorFlag(bool flag);
     static void SetWriteInt32ErrorCount(int count);
+    static void SetWriteBoolErrorCount(int count);
+    static void SetWriteParcelableErrorCount(int count);
+    static void SetWriteUint32ErrorCount(int count);
     static void AddInt32Cache(int32_t value);
 };
 }

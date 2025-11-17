@@ -207,6 +207,10 @@ WSError SessionStageProxy::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     bool isInnerProcess = hasRSTransaction ? rsTransaction->GetInnerProcessFlag() : false;
     TLOGD(WmsLogTag::DEFAULT, "hasRSTransaction: %{public}d, isInnerProcess: %{public}d", hasRSTransaction,
         isInnerProcess);
+    if (!data.WriteBool(isInnerProcess)) {
+        WLOGFE("Write has isInnerProcess failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     if (hasRSTransaction && !isInnerProcess) {
         auto pid = rsTransaction->GetParentPid();
         rsTransaction->SetParentPid(getprocpid());
