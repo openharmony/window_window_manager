@@ -809,6 +809,7 @@ void ScreenSessionManager::ConfigureScreenSnapshotParams()
 }
 // LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 void ScreenSessionManager::RegisterScreenChangeListener()
 {
     TLOGI(WmsLogTag::DMS, "start");
@@ -870,6 +871,7 @@ void ScreenSessionManager::RegisterFirstFrameCommitCallback()
     };
     RSInterfaces::GetInstance().RegisterFirstFrameCommitCallback(DmUtils::wrap_callback(callback));
 }
+// LCOV_EXCL_STOP
 
 void ScreenSessionManager::RegisterRefreshRateChangeListener()
 {
@@ -12658,6 +12660,7 @@ void ScreenSessionManager::UpdateCoordinationRefreshRate(uint32_t refreshRate)
     NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::UPDATE_REFRESHRATE);
 }
 
+// LCOV_EXCL_START
 bool ScreenSessionManager::SynchronizePowerStatus(ScreenPowerState state)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
@@ -12961,4 +12964,5 @@ DMError ScreenSessionManager::CheckSetResolutionIsValid(ScreenId screenId, uint3
     }
     return DMError::DM_OK;
 }
+// LCOV_EXCL_STOP
 } // namespace OHOS::Rosen
