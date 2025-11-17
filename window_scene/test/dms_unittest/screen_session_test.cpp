@@ -4917,16 +4917,16 @@ HWTEST_F(ScreenSessionTest, UpdatePropertyByResolution2, TestSize.Level1)
     DMRect rect = {0, 0, 1, 2};
     session->property_.UpdateScreenRotation(Rotation::ROTATION_0);
     session->UpdatePropertyByResolution(rect);
-    EXPECT_EQ(session->GetScreenProperty().GetValidWidth().rect_.width_, 1);
-    EXPECT_EQ(session->GetScreenProperty().GetValidWeight().rect_.height_, 2);
+    EXPECT_EQ(session->GetScreenProperty().GetValidWidth(), 1);
+    EXPECT_EQ(session->GetScreenProperty().GetValidWeight(), 2);
     session->property_.UpdateScreenRotation(Rotation::ROTATION_90);
     session->UpdatePropertyByResolution(rect);
-    EXPECT_EQ(session->GetScreenProperty().GetValidWidth().rect_.width_, 2);
-    EXPECT_EQ(session->GetScreenProperty().GetValidWeight().rect_.height_, 1);
+    EXPECT_EQ(session->GetScreenProperty().GetValidWidth(), 2);
+    EXPECT_EQ(session->GetScreenProperty().GetValidWeight(), 1);
     session->property_.UpdateScreenRotation(Rotation::ROTATION_270);
     session->UpdatePropertyByResolution(rect);
-    EXPECT_EQ(session->GetScreenProperty().GetValidWidth().rect_.width_, 2);
-    EXPECT_EQ(session->GetScreenProperty().GetValidWeight().rect_.height_, 1);
+    EXPECT_EQ(session->GetScreenProperty().GetValidWidth(), 2);
+    EXPECT_EQ(session->GetScreenProperty().GetValidWeight(), 1);
 }
 } // namespace
 } // namespace Rosen
