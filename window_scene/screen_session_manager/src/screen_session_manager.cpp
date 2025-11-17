@@ -2587,8 +2587,8 @@ void ScreenSessionManager::UpdateSessionByActiveModeChange(sptr<ScreenSession> s
         screenSession->UpdatePropertyByActiveMode();
     } else {
         ScreenProperty property = screenSession->GetScreenProperty();
-        int32_t startXcopy = static_cast<int32_t>(property.GetStartX());
-        int32_t startYcopy = static_cast<int32_t>(property.GetStartY());
+        uint32_t startXcopy = property.GetStartX();
+        uint32_t startYcopy = property.GetStartY();
         int32_t retxCopy = property.GetX();
         int32_t retyCopy = property.GetY();
         phyScreenSession->activeIdx_ = activeIdx;
