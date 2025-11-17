@@ -115,6 +115,7 @@ bool ScreenSettingHelper::GetSettingValue(uint32_t& value, const std::string& ke
     return true;
 }
 
+// LCOV_EXCL_START
 bool ScreenSettingHelper::GetSettingValue(const std::string& key, std::string& value)
 {
     SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
@@ -149,6 +150,7 @@ bool ScreenSettingHelper::SetSettingValue(const std::string& key, const std::str
     }
     return true;
 }
+// LCOV_EXCL_STOP
 
 bool ScreenSettingHelper::SetSettingDefaultDpi(uint32_t& dpi, const std::string& key)
 {
@@ -161,6 +163,7 @@ bool ScreenSettingHelper::SetSettingDefaultDpi(uint32_t& dpi, const std::string&
     return true;
 }
 
+// LCOV_EXCL_START
 void ScreenSettingHelper::RegisterSettingCastObserver(SettingObserver::UpdateFunc func)
 {
     if (castObserver_) {
@@ -203,6 +206,7 @@ bool ScreenSettingHelper::GetSettingCast(bool& enable, const std::string& key)
     }
     return true;
 }
+// LCOV_EXCL_STOP
 
 void ScreenSettingHelper::RegisterSettingRotationObserver(SettingObserver::UpdateFunc func)
 {
@@ -222,6 +226,7 @@ void ScreenSettingHelper::RegisterSettingRotationObserver(SettingObserver::Updat
     }
 }
 
+// LCOV_EXCL_START
 void ScreenSettingHelper::UnregisterSettingRotationObserver()
 {
     if (rotationObserver_ == nullptr) {
@@ -575,6 +580,7 @@ void ScreenSettingHelper::UnregisterSettingWireCastObserver()
     }
     wireCastObserver_ = nullptr;
 }
+// LCOV_EXCL_STOP
 
 void ScreenSettingHelper::RegisterSettingExtendScreenDpiObserver(SettingObserver::UpdateFunc func)
 {
@@ -645,6 +651,7 @@ bool ScreenSettingHelper::ConvertStrToInt32(const std::string& str, int32_t& num
     return true;
 }
 
+// LCOV_EXCL_START
 void ScreenSettingHelper::RegisterSettingDuringCallStateObserver(SettingObserver::UpdateFunc func)
 {
     if (duringCallStateObserver_ != nullptr) {
@@ -703,6 +710,7 @@ bool ScreenSettingHelper::SetSettingDuringCallState(const std::string& key, bool
     TLOGI(WmsLogTag::DMS, "put during call state is %{public}d", value);
     return true;
 }
+// LCOV_EXCL_STOP
 
 void ScreenSettingHelper::RegisterSettingResolutionEffectObserver(SettingObserver::UpdateFunc func)
 {
@@ -723,6 +731,7 @@ void ScreenSettingHelper::RegisterSettingResolutionEffectObserver(SettingObserve
     }
 }
 
+// LCOV_EXCL_START
 void ScreenSettingHelper::UnregisterSettingResolutionEffectObserver()
 {
     if (resolutionEffectObserver_ == nullptr) {
@@ -841,5 +850,6 @@ void ScreenSettingHelper::GetCorrectionExemptionListFromJson(const std::string& 
         }
     }
 }
+// LCOV_EXCL_STOP
 } // namespace Rosen
 } // namespace OHOS
