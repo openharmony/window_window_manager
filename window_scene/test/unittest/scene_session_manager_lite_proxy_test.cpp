@@ -281,7 +281,7 @@ HWTEST_F(sceneSessionManagerLiteProxyTest, UpdateScreenLockStatusForApp, TestSiz
     auto ret = tempProxy->UpdateScreenLockStatusForApp("", true);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
 
-    sptr<IRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
     auto proxy = sptr<SceneSessionManagerLiteProxy>::MakeSptr(remoteMocker);
     ASSERT_NE(proxy, nullptr);
 
