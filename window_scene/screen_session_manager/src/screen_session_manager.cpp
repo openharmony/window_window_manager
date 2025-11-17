@@ -3006,6 +3006,8 @@ void ScreenSessionManager::CalculateTargetResolution(const sptr<ScreenSession>& 
     float innerResolution = static_cast<float>(innerWidth) / innerHeight;
     float externalResolution = static_cast<float>(externalWidth) / externalHeight;
     float diffResolution = innerResolution - externalResolution;
+    TLOGI(WmsLogTag::DMS, "innerResolution:%{public}f, externalResolution %{public}f",
+        innerResolution, externalResolution);
     if (externalResolution == 0) {
         return;
     }
