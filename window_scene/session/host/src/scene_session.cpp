@@ -7724,7 +7724,7 @@ void SceneSession::SetTemporarilyShowWhenLocked(bool isTemporarilyShowWhenLocked
         isTemporarilyShowWhenLocked);
     if (systemConfig_.freeMultiWindowSupport_) {
         const bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
-        const bool isShow = !(isTemporarilyShowWhenLocked && (systemConfig_.IsFreeMultiWindowMode() && !isPcMode));
+        const bool isShow = !(isTemporarilyShowWhenLocked && !isPcMode);
         GetSessionProperty()->SetIsShowDecorInFreeMultiWindow(isShow);
         SetIsShowDecorInFreeMultiWindow(isShow);
     }
