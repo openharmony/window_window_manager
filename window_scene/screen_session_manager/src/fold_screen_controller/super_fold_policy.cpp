@@ -120,9 +120,11 @@ ScreenId SuperFoldPolicy::GetRealScreenId(const std::vector<ScreenId>& screenIds
         return SCREEN_ID_INVALID;
     }
     if (screenIds.size() == SCREEN_ID_SIZE_ONE) {
+        TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64, static_cast<uint64_t>(screenIds[0]));
         if ((screenIds[0] == SCREEN_ID_DEFAULT || screenIds[0] == DISPLAY_ID_FAKE)) {
-            TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64, static_cast<uint64_t>(screenIds[0]));
             return SCREEN_ID_DEFAULT;
+        } else {
+            return screenIds[0];
         }
     } else if (std::find(screenIds.begin(), screenIds.end(), SCREEN_ID_DEFAULT) != screenIds.end()
         && std::find(screenIds.begin(), screenIds.end(), DISPLAY_ID_FAKE) != screenIds.end()) {
