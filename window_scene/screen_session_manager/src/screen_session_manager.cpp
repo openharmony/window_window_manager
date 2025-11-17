@@ -2602,6 +2602,10 @@ void ScreenSessionManager::UpdateSessionByActiveModeChange(sptr<ScreenSession> s
         screenSession->SetStartPosition(startXcopy, startYcopy);
         screenSession->SetXYPosition(retxCopy, retyCopy);
         screenSession->SetScreenOffScreenRendering();
+        HandleResolutionEffectChange();
+        if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+            SuperFoldStateManager::GetInstance().RefreshExternalRegion();
+        }
     }
     TLOGI(WmsLogTag::DMS, "end");
 }
