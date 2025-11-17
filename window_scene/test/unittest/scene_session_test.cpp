@@ -1103,7 +1103,7 @@ HWTEST_F(SceneSessionTest, NotifySessionRectChange, TestSize.Level1)
 
     auto oriProperty = sceneSession->GetSessionProperty();
     sceneSession->property_ = oriProperty;
-    auto moveDragController = sptr<MoveDragController>::MakeSptr(2024, sceneSession->GetWindowType());
+    auto moveDragController = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     sceneSession->moveDragController_ = moveDragController;
     SizeChangeReason reason = { SizeChangeReason::DRAG };
     sceneSession->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
@@ -1430,7 +1430,7 @@ HWTEST_F(SceneSessionTest, TransferPointerEventDecorDialog, TestSize.Level1)
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(12, WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
     std::shared_ptr<MMI::PointerEvent> pointerEvent_ = MMI::PointerEvent::Create();
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
@@ -1778,7 +1778,7 @@ HWTEST_F(SceneSessionTest, OnSessionEvent, TestSize.Level1)
     info.bundleName_ = "OnSessionEvent";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(1, WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     sceneSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
     sceneSession->moveDragController_->isStartDrag_ = true;
     sceneSession->moveDragController_->hasPointDown_ = true;

@@ -57,17 +57,7 @@ MoveDragController::MoveDragController(wptr<SceneSession> sceneSession) : sceneS
     if (auto session = sceneSession.promote()) {
         persistentId_ = session->GetPersistentId();
         winType_ = session->GetWindowType();
-    } else {
-        persistentId_ = INVALID_WINDOW_ID;
-        winType_ = WindowType::APP_WINDOW_BASE;
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to get session info, sceneSession is null");
     }
-}
-
-MoveDragController::MoveDragController(int32_t persistentId, WindowType winType)
-{
-    persistentId_ = persistentId;
-    winType_ = winType;
 }
 
 void MoveDragController::OnConnect(ScreenId id)

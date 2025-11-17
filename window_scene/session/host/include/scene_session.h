@@ -800,6 +800,7 @@ public:
     WSError SetMoveAvailableArea(DisplayId displayId);
     bool IsDragMoving() const override;
     bool IsDragZooming() const override;
+    bool IsCrossDisplayDragSupported() const;
     // KeyFrame
     WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
         std::shared_ptr<RSTransaction>& rsTransaction) override;
@@ -835,7 +836,6 @@ public:
     void RegisterAppHookWindowInfoFunc(GetHookWindowInfoFunc&& func);
     WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
     void SetFindScenePanelRsNodeByZOrderFunc(FindScenePanelRsNodeByZOrderFunc&& func);
-    bool IsCrossDisplayDragSupported() const;
 
     /*
      * Gesture Back
