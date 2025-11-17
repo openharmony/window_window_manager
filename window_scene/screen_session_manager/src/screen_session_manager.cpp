@@ -2569,7 +2569,6 @@ DMError ScreenSessionManager::SetScreenActiveMode(ScreenId screenId, uint32_t mo
     ReportScreenModeChangeEvent(screenMode, ret);
     int32_t activeId = screenMode.GetScreenModeId();
     UpdateSessionByActiveModeChange(screenSession, phyScreenSession, activeId);
-    HandleResolutionEffectChange();
     CheckAndNotifyChangeMode(screenBounds, screenSession);
     CheckAndNotifyRefreshRate(refreshRate, screenSession);
 #endif
@@ -2587,6 +2586,11 @@ void ScreenSessionManager::UpdateSessionByActiveModeChange(sptr<ScreenSession> s
         screenSession->activeIdx_ = activeIdx;
         screenSession->UpdatePropertyByActiveMode();
     } else {
+        ScreenProperty property = screenSession->GetScreenProperty();
+        uint32_t startXcopy = property.GetStartX();
+        uint32_t startYcopy = property.GetStartY();
+        int32_t retxCopy = property.GetX();
+        int32_t retyCopy = property.GetY();
         phyScreenSession->activeIdx_ = activeIdx;
         phyScreenSession->UpdatePropertyByActiveModeChange();
         InitExtendScreenProperty(phyScreenSession->GetScreenId(), phyScreenSession,
@@ -2594,7 +2598,13 @@ void ScreenSessionManager::UpdateSessionByActiveModeChange(sptr<ScreenSession> s
         ScreenProperty PhyProperty = phyScreenSession->GetScreenProperty();
         screenSession->SetScreenProperty(PhyProperty);
         screenSession->activeIdx_ = activeIdx;
+        screenSession->SetStartPosition(startXcopy, startYcopy);
+        screenSession->SetXYPosition(retxCopy, retyCopy);
         screenSession->SetScreenOffScreenRendering();
+        HandleResolutionEffectChange();
+        if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+            SuperFoldStateManager::GetInstance().RefreshExternalRegion();
+        }
     }
     TLOGI(WmsLogTag::DMS, "end");
 }
