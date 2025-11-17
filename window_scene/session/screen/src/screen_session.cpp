@@ -35,8 +35,6 @@ namespace {
 static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 // 0: 横扫屏; 1: 竖扫屏. 默认为0
 static const int32_t g_screenScanType = system::GetIntParameter<int32_t>("const.window.screen.scan_type", 0);
-const int32_t ROTATE_POLICY = system::GetIntParameter("const.window.device.rotate_policy", 0);
-const int32_t ROTATE_STRATEGY_SCREEN = 1;
 static const int32_t SCAN_TYPE_VERTICAL = 1;
 static const int32_t ROTATION_90 = 1;
 static const int32_t ROTATION_270 = 3;

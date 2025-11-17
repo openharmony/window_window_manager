@@ -4914,27 +4914,19 @@ HWTEST_F(ScreenSessionTest, UpdatePropertyByResolution2, TestSize.Level1)
     ScreenId screenId = 10000;
     ScreenProperty screenProperty;
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
-    int32_t rotatePolicy = system::GetIntParameter("const.window.device.rotate_policy", 0);
     DMRect rect = {0, 0, 1, 2};
-    if (rotatePolicy == 1) {
-        session->property_.UpdateScreenRotation(Rotation::ROTATION_0);
-        session->UpdatePropertyByResolution(rect);
-        EXPECT_EQ(session->GetScreenProperty().GetBounds().rect_.width_, 1);
-        EXPECT_EQ(session->GetScreenProperty().GetBounds().rect_.height_, 2);
-        session->property_.UpdateScreenRotation(Rotation::ROTATION_90);
-        session->UpdatePropertyByResolution(rect);
-        EXPECT_EQ(session->GetScreenProperty().GetBounds().rect_.width_, 2);
-        EXPECT_EQ(session->GetScreenProperty().GetBounds().rect_.height_, 1);
-    } else if (rotatePolicy == 0) {
-        session->property_.UpdateScreenRotation(Rotation::ROTATION_0);
-        session->UpdatePropertyByResolution(rect);
-        EXPECT_EQ(session->GetScreenProperty().GetBounds().rect_.width_, 1);
-        EXPECT_EQ(session->GetScreenProperty().GetBounds().rect_.height_, 2);
-        session->property_.UpdateScreenRotation(Rotation::ROTATION_90);
-        session->UpdatePropertyByResolution(rect);
-        EXPECT_EQ(session->GetScreenProperty().GetBounds().rect_.width_, 1);
-        EXPECT_EQ(session->GetScreenProperty().GetBounds().rect_.height_, 2);
-    }
+    session->property_.UpdateScreenRotation(Rotation::ROTATION_0);
+    session->UpdatePropertyByResolution(rect);
+    EXPECT_EQ(session->GetScreenProperty().GetBounds().rect_.width_, 1);
+    EXPECT_EQ(session->GetScreenProperty().GetBounds().rect_.height_, 2);
+    session->property_.UpdateScreenRotation(Rotation::ROTATION_90);
+    session->UpdatePropertyByResolution(rect);
+    EXPECT_EQ(session->GetScreenProperty().GetBounds().rect_.width_, 2);
+    EXPECT_EQ(session->GetScreenProperty().GetBounds().rect_.height_, 1);
+    session->property_.UpdateScreenRotation(Rotation::ROTATION_270);
+    session->UpdatePropertyByResolution(rect);
+    EXPECT_EQ(session->GetScreenProperty().GetBounds().rect_.width_, 1);
+    EXPECT_EQ(session->GetScreenProperty().GetBounds().rect_.height_, 2);
 }
 } // namespace
 } // namespace Rosen
