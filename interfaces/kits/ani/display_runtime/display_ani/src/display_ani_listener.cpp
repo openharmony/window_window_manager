@@ -308,7 +308,7 @@ void DisplayAniListener::OnFoldAngleChanged(std::vector<float> foldAngles)
         auto it = aniCallback_.find(ANI_EVENT_FOLD_ANGLE_CHANGED);
         for (auto oneAniCallback : it->second) {
             auto task = [env = env_, oneAniCallback, foldAngles] () {
-                ani_array_double cbArray;
+                ani_array cbArray;
                 DisplayAniUtils::CreateAniArrayDouble(env, foldAngles.size(), &cbArray, foldAngles);
                 DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "foldAngleChangeCallback",
                     nullptr, oneAniCallback, cbArray);

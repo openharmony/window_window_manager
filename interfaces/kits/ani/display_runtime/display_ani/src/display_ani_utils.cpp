@@ -53,6 +53,37 @@ static const std::map<DisplayState,      DisplayStateMode> NATIVE_TO_JS_DISPLAY_
     { DisplayState::ON_SUSPEND,   DisplayStateMode::STATE_ON_SUSPEND   },
 };
 
+ani_method unboxInt {};
+
+ani_ref g_intCls {};
+
+template<typename T>
+ani_status unbox(ani_env *env, ani_object obj, T *result)
+{
+    return ANI_INVALID_TYPE;
+}
+
+template<>
+ani_status unbox<ani_int>(ani_env *env, ani_object obj, ani_int *result)
+{
+    if (g_intCls == nullptr) {
+        ani_class intCls {};
+        auto status = env->FindClass("std.core.Int", &intCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->GlobalReference_Create(intCls, &g_intCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->Class_FindMethod(intCls, "toInt", ":i", &unboxInt);
+        if (status != ANI_OK) {
+            return status;
+        }
+    }
+    return env->Object_CallMethod_Int(obj, unboxInt, result);
+}
+
 
 void DisplayAniUtils::ConvertRect(DMRect rect, ani_object rectObj, ani_env* env)
 {
@@ -90,7 +121,7 @@ void DisplayAniUtils::ConvertDisplayPhysicalResolution(std::vector<DisplayPhysic
 
     for (uint32_t i = 0; i < displayPhysicalArray.size() && i < static_cast<uint32_t>(arrayObjLen); i++) {
         ani_ref obj;
-        env->Object_CallMethodByName_Ref(arrayObj, "$_get", "i:C{std.core.Object}", &obj, (ani_int)i);
+        env->Object_CallMethodByName_Ref(arrayObj, "$_get", "I:Lstd/core/Object;", &obj, (ani_int)i);
         env->Object_SetFieldByName_Int(static_cast<ani_object>(obj), "foldDisplayMode_",
             static_cast<ani_int>(displayPhysicalArray[i].foldDisplayMode_));
         env->Object_SetFieldByName_Long(static_cast<ani_object>(obj), "<property>physicalWidth",
@@ -124,11 +155,10 @@ ani_status DisplayAniUtils::CvtDisplay(sptr<Display> display, ani_env* env, ani_
     if (ANI_OK != setfieldid) {
         TLOGE(WmsLogTag::DMS, "[ANI] set id failed: %{public}d", setfieldid);
     }
-    const ani_size stringLength = info->GetName().size();
     TLOGI(WmsLogTag::DMS, "[ANI] display = %{public}u, name = %{public}s",
         static_cast<uint32_t>(info->GetDisplayId()), info->GetName().c_str());
     ani_string str = nullptr;
-    env->String_NewUTF8(info->GetName().data(), stringLength, &str);
+    env->String_NewUTF8(info->GetName().data(), info->GetName().size(), &str);
     env->Object_SetFieldByName_Ref(obj, "<property>name", str);
     env->Object_SetFieldByName_Boolean(obj, "<property>alive", info->GetAliveStatus());
     if (NATIVE_TO_JS_DISPLAY_STATE_MAP.count(info->GetDisplayState()) != 0) {
@@ -145,6 +175,12 @@ ani_status DisplayAniUtils::CvtDisplay(sptr<Display> display, ani_env* env, ani_
     if (ANI_OK != setfieldRes) {
         TLOGE(WmsLogTag::DMS, "[ANI] set failed: %{public}d, %{public}u", info->GetWidth(), setfieldRes);
     }
+    CvtDisplayHelper(display, env, obj, info);
+    return ANI_OK;
+}
+
+void DisplayAniUtils::CvtDisplayHelper(sptr<Display> display, ani_env* env, ani_object obj, sptr<DisplayInfo> info)
+{
     env->Object_SetFieldByName_Long(obj, "<property>height", display->GetHeight());
     env->Object_SetFieldByName_Long(obj, "<property>availableWidth", info->GetAvailableWidth());
     env->Object_SetFieldByName_Long(obj, "<property>availableHeight", info->GetAvailableHeight());
@@ -159,8 +195,10 @@ ani_status DisplayAniUtils::CvtDisplay(sptr<Display> display, ani_env* env, ani_
         env, "@ohos.display.display.ScreenShape", static_cast<ani_size>(info->GetScreenShape())));
     if (info->GetDisplaySourceMode() == DisplaySourceMode::MAIN ||
         info->GetDisplaySourceMode() == DisplaySourceMode::EXTEND) {
-        env->Object_SetFieldByName_Long(obj, "<property>x", info->GetX());
-        env->Object_SetFieldByName_Long(obj, "<property>y", info->GetY());
+        env->Object_SetFieldByName_Ref(obj, "<property>x",
+            DisplayAniUtils::CreateOptionalInt(env, static_cast<ani_int>(info->GetX())));
+        env->Object_SetFieldByName_Ref(obj, "<property>y",
+            DisplayAniUtils::CreateOptionalInt(env, static_cast<ani_int>(info->GetY())));
     } else {
         env->Object_SetFieldByName_Ref(obj, "<property>x", DisplayAniUtils::CreateAniUndefined(env));
         env->Object_SetFieldByName_Ref(obj, "<property>y", DisplayAniUtils::CreateAniUndefined(env));
@@ -171,43 +209,116 @@ ani_status DisplayAniUtils::CvtDisplay(sptr<Display> display, ani_env* env, ani_
     auto hdrFormats = info->GetHdrFormats();
     auto supportedRefreshRates = info->GetSupportedRefreshRate();
     if (colorSpaces.size() != 0) {
-        ani_array_int colorSpacesAni;
+        ani_array colorSpacesAni;
         CreateAniArrayInt(env, colorSpaces.size(), &colorSpacesAni, colorSpaces);
         env->Object_SetFieldByName_Ref(obj, "<property>colorSpaces", static_cast<ani_ref>(colorSpacesAni));
     }
     if (hdrFormats.size() != 0) {
-        ani_array_int hdrFormatsAni;
+        ani_array hdrFormatsAni;
         CreateAniArrayInt(env, hdrFormats.size(), &hdrFormatsAni, hdrFormats);
         env->Object_SetFieldByName_Ref(obj, "<property>hdrFormats", static_cast<ani_ref>(hdrFormatsAni));
     }
     if (supportedRefreshRates.size() != 0) {
-        ani_array_int supportedRefreshRatesAni;
+        ani_array supportedRefreshRatesAni;
         CreateAniArrayInt(env, hdrFormats.size(), &supportedRefreshRatesAni, supportedRefreshRates);
         env->Object_SetFieldByName_Ref(obj, "<property>supportedRefreshRates",
             static_cast<ani_ref>(supportedRefreshRatesAni));
     }
-    return ANI_OK;
 }
 
-void DisplayAniUtils::CreateAniArrayInt(ani_env* env, ani_size size, ani_array_int *aniArray, std::vector<uint32_t> vec)
+ani_object DisplayAniUtils::CreateOptionalInt(ani_env *env, ani_int value)
 {
-    if (ANI_OK != env->Array_New_Int(size, aniArray)) {
-        TLOGE(WmsLogTag::DMS, "[ANI] create colorSpace array error");
+    ani_class intClass;
+    ani_status ret = env->FindClass("std.core.Int", &intClass);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] class not found");
+        return DisplayAniUtils::CreateAniUndefined(env);
+    }
+    ani_method aniCtor;
+    ret = env->Class_FindMethod(intClass, "<ctor>", "i:", &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] ctor not found");
+        return DisplayAniUtils::CreateAniUndefined(env);
+    }
+    ani_object obj {};
+    if (env->Object_New(intClass, aniCtor, &obj, value) != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Failed to allocate Int");
+        return DisplayAniUtils::CreateAniUndefined(env);
+    }
+    return obj;
+}
+
+void DisplayAniUtils::CreateAniArrayInt(ani_env* env, ani_size size, ani_array *aniArray, std::vector<uint32_t> vec)
+{
+    ani_ref undefinedRef {};
+    if (ANI_OK != env->GetUndefined(&undefinedRef)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] GetUndefined error");
+        return;
+    }
+    if (ANI_OK != env->Array_New(size, undefinedRef, aniArray)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] create colorSpace aniArray error");
+        return;
     }
     ani_int* aniArrayBuf = reinterpret_cast<ani_int *>(vec.data());
-    if (ANI_OK != env->Array_SetRegion_Int(*aniArray, 0, size, aniArrayBuf)) {
-        TLOGE(WmsLogTag::DMS, "[ANI] Array set region int error");
+    ani_class intCls {};
+    ani_method intCtor {};
+    if (ANI_OK != env->FindClass("std.core.Int", &intCls)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Find std.core.Int error");
+        return;
+    }
+    if (ANI_OK != env->Class_FindMethod(intCls, "<ctor>", "i:", &intCtor)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Find Int Ctor error");
+        return;
+    }
+    for (ani_size i = 0; i < size; ++i) {
+        ani_object intObj {};
+        if (ANI_OK != env->Object_New(intCls, intCtor, &intObj, aniArrayBuf[i])) {
+            TLOGE(WmsLogTag::DMS, "[ANI] Object_New error");
+            return;
+        }
+        if (ANI_OK != env->Array_Set(*aniArray, i, intObj)) {
+            TLOGE(WmsLogTag::DMS, "[ANI] Array_Set int error");
+            return;
+        }
     }
 }
 
 void DisplayAniUtils::CreateAniArrayDouble(ani_env* env, ani_size size,
-    ani_array_double *aniArray, std::vector<float> vec)
+    ani_array *aniArray, std::vector<float> vec)
 {
-    env->Array_New_Double(size, aniArray);
+    ani_ref undefinedRef {};
+    if (ANI_OK != env->GetUndefined(&undefinedRef)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] GetUndefined error");
+        return;
+    }
+    if (ANI_OK != env->Array_New(size, undefinedRef, aniArray)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] create colorSpace array error");
+        return;
+    }
     std::vector<double> vecDoubles;
     std::copy(vec.begin(), vec.end(), std::back_inserter(vecDoubles));
     ani_double* aniArrayBuf = reinterpret_cast<ani_double *>(vecDoubles.data());
-    env->Array_SetRegion_Double(*aniArray, 0, size, aniArrayBuf);
+    ani_class doubleCls {};
+    ani_method doubleCtor {};
+    if (ANI_OK != env->FindClass("std.core.Double", &doubleCls)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Find std.core.Double error");
+        return;
+    }
+    if (ANI_OK != env->Class_FindMethod(doubleCls, "<ctor>", "d:", &doubleCtor)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Find Double Ctor error");
+        return;
+    }
+    for (ani_size i = 0; i < size; ++i) {
+        ani_object doubleObj {};
+        if (ANI_OK != env->Object_New(doubleCls, doubleCtor, &doubleObj, aniArrayBuf[i])) {
+            TLOGE(WmsLogTag::DMS, "[ANI] Object_New error");
+            return;
+        }
+        if (ANI_OK != env->Array_Set(*aniArray, i, doubleObj)) {
+            TLOGE(WmsLogTag::DMS, "[ANI] Array_Set int error");
+            return;
+        }
+    }
 }
 
 ani_status DisplayAniUtils::GetStdString(ani_env *env, ani_string ani_str, std::string &result)
@@ -226,6 +337,39 @@ ani_status DisplayAniUtils::GetStdString(ani_env *env, ani_string ani_str, std::
     }
     utf8_buffer[bytes_written] = '\0';
     result = std::string(utf8_buffer);
+    return ret;
+}
+
+ani_status DisplayAniUtils::GetAniArrayInt(ani_env* env, ani_object arrayObj, std::vector<int32_t>& result)
+{
+    ani_int length;
+    ani_status ret = env->Object_GetPropertyByName_Int(arrayObj, "length", &length);
+    if (ANI_OK != ret) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get ani_array len fail");
+        return ret;
+    }
+    auto array = reinterpret_cast<ani_array>(arrayObj);
+    std::vector<ani_int> nativeArray(length);
+ 
+    for (auto i = 0; i < length; i++) {
+        ani_ref intRef {};
+        ani_int intValue {};
+        auto status = env->Array_Get(array, i, &intRef);
+        if (status != ANI_OK) {
+            TLOGE(WmsLogTag::DMS, "Array_Get failed, status: %{public}d", status);
+            return status;
+        }
+        status = unbox(env, static_cast<ani_object>(intRef), &intValue);
+        if (status != ANI_OK) {
+            TLOGE(WmsLogTag::DMS, "Unbox failed, status: %{public}d", status);
+            return status;
+        }
+        nativeArray[i] = intValue;
+    }
+    result.resize(length);
+    for (ani_int i = 0; i < length; i++) {
+        result[i] = static_cast<int32_t>(nativeArray[i]);
+    }
     return ret;
 }
 
@@ -259,6 +403,80 @@ ani_object DisplayAniUtils::CreateAniUndefined(ani_env* env)
     ani_ref aniRef;
     env->GetUndefined(&aniRef);
     return static_cast<ani_object>(aniRef);
+}
+
+DmErrorCode DisplayAniUtils::GetVirtualScreenOptionFromAni(
+    ani_env* env, ani_object virtualScreenConfigObj, VirtualScreenOption& option)
+{
+    ani_ref nameAni = nullptr;
+    std::string nameStr;
+    ani_long width = 0;
+    ani_long height = 0;
+    ani_double density = 0;
+    ani_ref surfaceId = nullptr;
+    env->Object_GetPropertyByName_Ref(virtualScreenConfigObj, "<property>name", &nameAni);
+    if (DisplayAniUtils::GetStdString(env, static_cast<ani_string>(nameAni), option.name_) != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to convert parameter to name.");
+        return DmErrorCode::DM_ERROR_INVALID_PARAM;
+    }
+    if (env->Object_GetPropertyByName_Long(virtualScreenConfigObj, "<property>width",
+        &width) != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to convert parameter to width.");
+        return DmErrorCode::DM_ERROR_INVALID_PARAM;
+    }
+    if (env->Object_GetPropertyByName_Long(virtualScreenConfigObj, "<property>height",
+        &height) != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to convert parameter to height.");
+        return DmErrorCode::DM_ERROR_INVALID_PARAM;
+    }
+    if (env->Object_GetPropertyByName_Double(virtualScreenConfigObj, "<property>density",
+        &density) != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to convert parameter to density.");
+        return DmErrorCode::DM_ERROR_INVALID_PARAM;
+    }
+    option.width_ = static_cast<uint32_t>(width);
+    option.height_ = static_cast<uint32_t>(height);
+    option.density_ = static_cast<float>(density);
+ 
+    env->Object_GetPropertyByName_Ref(virtualScreenConfigObj, "<property>surfaceId",
+        &surfaceId);
+    if (!DisplayAniUtils::GetSurfaceFromAni(env, static_cast<ani_string>(surfaceId), option.surface_)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Failed to convert surface.");
+        return DmErrorCode::DM_ERROR_INVALID_PARAM;
+    }
+    return DmErrorCode::DM_OK;
+}
+ 
+bool DisplayAniUtils::GetSurfaceFromAni(ani_env* env, ani_string surfaceIdAniValue, sptr<Surface>& surface)
+{
+    if (surfaceIdAniValue == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Failed to convert parameter to surface. Invalidate params.");
+        return false;
+    }
+    ani_size strSize;
+    ani_status ret = env->String_GetUTF8Size(surfaceIdAniValue, &strSize);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Failed to get UTF8 size ret:%{public}d.", static_cast<int32_t>(ret));
+        return false;
+    }
+    std::vector<char> buffer(strSize + 1);
+    char* utf8_buffer = buffer.data();
+    ani_size bytes_writen = 0;
+    ret = env->String_GetUTF8(surfaceIdAniValue, utf8_buffer, strSize + 1, &bytes_writen);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Failed to get UTF8 ret:%{public}d.", static_cast<int32_t>(ret));
+        return false;
+    }
+    utf8_buffer[bytes_writen] = '\0';
+    std::string surfaceStr = std::string(utf8_buffer);
+    uint64_t surfaceId = 0;
+    std::istringstream inputStream(surfaceStr);
+    inputStream >> surfaceId;
+    surface = SurfaceUtils::GetInstance()->GetSurface(surfaceId);
+    if (surface == nullptr) {
+        TLOGI(WmsLogTag::DMS, "[ANI] GetSurfaceFromAni failed, surfaceId:%{public}" PRIu64"", surfaceId);
+    }
+    return true;
 }
 
 ani_status DisplayAniUtils::GetAniString(ani_env* env, const std::string& str, ani_string* result)
@@ -306,7 +524,7 @@ ani_object DisplayAniUtils::CreateRectObject(ani_env *env)
         return nullptr;
     }
     ani_method aniCtor;
-    auto ret = env->Class_FindMethod(aniClass, "<ctor>", ":V", &aniCtor);
+    auto ret = env->Class_FindMethod(aniClass, "<ctor>", ":", &aniCtor);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] Class_FindMethod failed");
         return nullptr;

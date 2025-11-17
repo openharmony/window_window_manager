@@ -68,9 +68,37 @@ export function saveHdrPicture(hdrOptions?: HdrScreenshotOptions): Promise<Array
         });
     });
 }
+
+export function capture(options?: CaptureOption): Promise<image.PixelMap> {
+    return new Promise<image.PixelMap>((resolve: (value: image.PixelMap) => void, reject: (error: BusinessError) => void ) => {
+        taskpool.execute((): image.PixelMap => {
+            let res: image.PixelMap = captureSync(options);
+            return res;
+        }).then((ret: NullishType) => {
+            resolve(ret as image.PixelMap);
+        }).catch((err: NullishType) => {
+            reject(err as BusinessError);
+        });
+    });
+}
+
+export function pick(): Promise<PickInfo> {
+    return new Promise<PickInfo>((resolve: (value: PickInfo) => void, reject: (error: BusinessError) => void ) => {
+        taskpool.execute((): PickInfo => {
+            let res: PickInfo = pickSync();
+            return res;
+        }).then((ret: NullishType) => {
+            resolve(ret as PickInfo);
+        }).catch((err: NullishType) => {
+            reject(err as BusinessError);
+        });
+    });
+}
  
 native function saveSync(screenshotOptions?: ScreenshotOptions): image.PixelMap;
 native function saveHdrSync(hdrOptions?: HdrScreenshotOptions): Array<image.PixelMap>;
+native function captureSync(options?: CaptureOption): image.PixelMap;
+native function pickSync(): PickInfo;
  
 export interface ScreenshotOptions {
     screenRect?: Rect;
@@ -147,5 +175,24 @@ export class RectImpl implements Rect {
  
     height: long;
 }
+
+export interface CaptureOption {
+    displayId?: Long;
+}
  
+export class CaptureOptionImpl implements CaptureOption {
+    displayId?: Long;
+}
+ 
+export interface PickInfo {
+    pickRect: Rect;
+ 
+    pixelMap: image.PixelMap;
+}
+ 
+export class PickInfoImpl implements PickInfo {
+    pickRect: Rect;
+ 
+    pixelMap: image.PixelMap;
+}
 }
