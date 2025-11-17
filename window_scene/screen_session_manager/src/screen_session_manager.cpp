@@ -2569,7 +2569,6 @@ DMError ScreenSessionManager::SetScreenActiveMode(ScreenId screenId, uint32_t mo
     ReportScreenModeChangeEvent(screenMode, ret);
     int32_t activeId = screenMode.GetScreenModeId();
     UpdateSessionByActiveModeChange(screenSession, phyScreenSession, activeId);
-    HandleResolutionEffectChange();
     CheckAndNotifyChangeMode(screenBounds, screenSession);
     CheckAndNotifyRefreshRate(refreshRate, screenSession);
 #endif
