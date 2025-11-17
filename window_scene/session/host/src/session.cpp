@@ -2555,7 +2555,7 @@ void Session::PresentFocusIfPointDown()
         FocusChangeReason reason = FocusChangeReason::CLICK;
         NotifyRequestFocusStatusNotifyManager(true, false, reason);
     }
-    NotifyClick();
+    NotifyClick(false);
 }
 
 void Session::HandlePointDownDialog()
@@ -2654,7 +2654,7 @@ WSError Session::HandlePointerEventForFocus(const std::shared_ptr<MMI::PointerEv
         if (!isFocused_ && GetFocusable()) {
             NotifyRequestFocusStatusNotifyManager(true, false, FocusChangeReason::CLICK);
         }
-        NotifyClick();
+        NotifyClick(false);
     }
     return WSError::WS_OK;
 }
@@ -3428,7 +3428,7 @@ void Session::PresentFocusIfNeed(int32_t pointerAction, int32_t sourceType)
             FocusChangeReason reason = FocusChangeReason::CLICK;
             NotifyRequestFocusStatusNotifyManager(true, false, reason);
         }
-        NotifyClick();
+        NotifyClick(false);
     }
 }
 

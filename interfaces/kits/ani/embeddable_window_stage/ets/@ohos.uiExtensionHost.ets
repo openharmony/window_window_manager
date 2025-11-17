@@ -88,7 +88,7 @@ namespace uiExtensionHost {
 
   // API implementation
   export class UIExtensionHostInternal implements UIExtensionHostWindowProxy {
-    static { loadLibrary("embeddablewindowstageani_kit.z") }
+    static { loadLibrary("embeddablewindowstageani_module.z") }
     private nativeObj: long = 0;
 
     private setNativeObj(nativeObj: long): void {

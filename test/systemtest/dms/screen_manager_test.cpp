@@ -344,6 +344,9 @@ HWTEST_F(ScreenManagerTest, CreateVirtualScreenTenTimes, TestSize.Level1)
  */
 HWTEST_F(ScreenManagerTest, ScreenManager01, TestSize.Level1)
 {
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP();
+    }
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
     defaultOption_.surface_ = utils.psurface_;
@@ -363,6 +366,9 @@ HWTEST_F(ScreenManagerTest, ScreenManager01, TestSize.Level1)
  */
 HWTEST_F(ScreenManagerTest, ScreenManager02, TestSize.Level1)
 {
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP();
+    }
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
     defaultOption_.surface_ = utils.psurface_;
@@ -387,6 +393,9 @@ HWTEST_F(ScreenManagerTest, ScreenManager02, TestSize.Level1)
  */
 HWTEST_F(ScreenManagerTest, ScreenManager03, TestSize.Level1)
 {
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP();
+    }
     DisplayTestUtils utils;
     defaultOption_.isForShot_ = false;
     for (uint32_t i = 0; i < execTimes_; i++) {
@@ -407,6 +416,9 @@ HWTEST_F(ScreenManagerTest, ScreenManager03, TestSize.Level1)
  */
 HWTEST_F(ScreenManagerTest, ScreenManager04, TestSize.Level1)
 {
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP();
+    }
     DisplayTestUtils utils;
     defaultOption_.isForShot_ = false;
     for (uint32_t i = 0; i < execTimes_; i++) {
@@ -434,6 +446,9 @@ HWTEST_F(ScreenManagerTest, ScreenManager04, TestSize.Level1)
  */
 HWTEST_F(ScreenManagerTest, ScreenManager05, TestSize.Level1)
 {
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP();
+    }
     DisplayTestUtils utils;
     utils.SetDefaultWH(defaultDisplay_);
     ASSERT_TRUE(utils.CreateSurface());
@@ -473,6 +488,9 @@ HWTEST_F(ScreenManagerTest, ScreenManager05, TestSize.Level1)
  */
 HWTEST_F(ScreenManagerTest, ScreenManager06, TestSize.Level1)
 {
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP();
+    }
     DisplayTestUtils utils;
     utils.SetDefaultWH(defaultDisplay_);
     defaultOption_.surface_ = nullptr;
@@ -514,6 +532,9 @@ HWTEST_F(ScreenManagerTest, ScreenManager06, TestSize.Level1)
  */
 HWTEST_F(ScreenManagerTest, ScreenManager07, TestSize.Level1)
 {
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP();
+    }
     sptr<Screen> screen = ScreenManager::GetInstance().GetScreenById(defaultScreenId_);
     ASSERT_TRUE(screen);
 

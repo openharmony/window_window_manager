@@ -1977,6 +1977,7 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
             rootScene->LoadContent(contentUrl, env, storage, context);
             ScenePersistentStorage::InitDir(context->GetPreferencesDir());
             SceneSessionManager::GetInstance().InitPersistentStorage();
+            SceneSessionManager::GetInstance().UpdateAllStartingWindowRdb();
         });
     RegisterRootSceneCallbacksOnSSManager();
     RegisterSSManagerCallbacksOnRootScene();

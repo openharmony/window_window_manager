@@ -366,7 +366,7 @@ void AniWindowStage::OnSetImageForRecent(ani_env* env, ani_object imageResource,
     }
     Ark_ImageFit arkImageFit = static_cast<Ark_ImageFit>(value);
     ImageFit imageFit = ImageFit::FILL;
-    AniWindowUtils::ConvertImageFit(imageFit, arkImageFit);
+    ConvertImageFit(imageFit, arkImageFit);
     TLOGI(WmsLogTag::WMS_PATTERN, "value: %{public}d, imageFit: %{public}d", value, imageFit);
     WmErrorCode ret = WmErrorCode::WM_OK;
     if (pixelMap) {
@@ -377,6 +377,29 @@ void AniWindowStage::OnSetImageForRecent(ani_env* env, ani_object imageResource,
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret);
         return;
+    }
+}
+
+void AniWindowStage::ConvertImageFit(ImageFit& dst, const Ark_ImageFit& src)
+{
+    switch (src) {
+        case Ark_ImageFit::ARK_IMAGE_FIT_CONTAIN: dst = ImageFit::CONTAIN; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_COVER: dst = ImageFit::COVER; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_AUTO: dst = ImageFit::FITWIDTH; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_FILL: dst = ImageFit::FILL; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_SCALE_DOWN: dst = ImageFit::SCALE_DOWN; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_NONE: dst = ImageFit::NONE; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_TOP_START: dst = ImageFit::TOP_LEFT; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_TOP: dst = ImageFit::TOP; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_TOP_END: dst = ImageFit::TOP_END; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_START: dst = ImageFit::START; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_CENTER: dst = ImageFit::CENTER; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_END: dst = ImageFit::END; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_BOTTOM_START: dst = ImageFit::BOTTOM_START; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_BOTTOM: dst = ImageFit::BOTTOM; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_BOTTOM_END: dst = ImageFit::CONTAIN; break;
+        case Ark_ImageFit::ARK_IMAGE_FIT_MATRIX: dst = ImageFit::MATRIX; break;
+        default: TLOGE(WmsLogTag::DEFAULT, "imageFit: %{public}d", src);
     }
 }
 
@@ -483,6 +506,40 @@ void AniWindowStage::OnSetDefaultDensityEnabled(ani_env* env, ani_boolean enable
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret);
         return;
+    }
+}
+
+void AniWindowStage::RemoveStartingWindow(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    TLOGD(WmsLogTag::WMS_STARTUP_PAGE, "[ANI] start");
+    AniWindowStage* windowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
+    if (windowStage == nullptr || windowStage->GetWindowScene().lock() == nullptr) {
+        TLOGD(WmsLogTag::WMS_STARTUP_PAGE, "[ANI] windowStage is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    windowStage->OnRemoveStartingWindow(env);
+}
+
+void AniWindowStage::OnRemoveStartingWindow(ani_env* env)
+{
+    TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "[ANI]");
+    auto windowScene = GetWindowScene().lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "[ANI] windowScene is null");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    auto window = windowScene->GetMainWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "[ANI] window is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->NotifyRemoveStartingWindow());
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "[ANI] Notify remove starting window failed");
+        AniWindowUtils::AniThrowError(env, ret);
     }
 }
 
@@ -662,137 +719,3 @@ void AniWindowStage::OnUnregisterWindowCallback(ani_env* env, ani_string type, a
 }
 }  // namespace Rosen
 }  // namespace OHOS
-
-static ani_object WindowStageCreate(ani_env* env, ani_long scene)
-{
-    using namespace OHOS::Rosen;
-    std::shared_ptr<WindowScene> scenePtr;
-    return CreateAniWindowStage(env, scenePtr); // just for test
-}
-
-static ani_ref WindowGetMainWindow(ani_env* env, ani_object obj, ani_long nativeObj)
-{
-    using namespace OHOS::Rosen;
-    TLOGD(WmsLogTag::DEFAULT, "[ANI]");
-    AniWindowStage* windowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
-    if (windowStage == nullptr || windowStage->GetWindowScene().lock() == nullptr) {
-        TLOGD(WmsLogTag::DEFAULT, "[ANI] windowStage is nullptr");
-        return AniWindowUtils::CreateAniUndefined(env);
-    }
-    return windowStage->GetMainWindow(env);
-}
-
-static ani_ref CreateSubWindow(ani_env* env, ani_object obj, ani_long nativeObj, ani_string name)
-{
-    using namespace OHOS::Rosen;
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    AniWindowStage* windowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
-    if (windowStage == nullptr || windowStage->GetWindowScene().lock() == nullptr) {
-        TLOGD(WmsLogTag::DEFAULT, "[ANI] windowStage is nullptr");
-        return AniWindowUtils::CreateAniUndefined(env);
-    }
-    return windowStage->OnCreateSubWindow(env, name);
-}
-
-extern "C" {
-using namespace OHOS::Rosen;
-ANI_EXPORT ani_status ExtensionWindowConfig_ANI_Constructor(ani_vm *vm, uint32_t *result);
-std::array g_methods = {
-    ani_native_function {"loadContentSync",
-        "JLstd/core/String;Larkui/stateManagement/storage/localStorage/LocalStorage;:V",
-        reinterpret_cast<void *>(AniWindowStage::LoadContent)},
-    ani_native_function {"disableWindowDecorSync", nullptr,
-        reinterpret_cast<void *>(AniWindowStage::DisableWindowDecor)},
-    ani_native_function {"setShowOnLockScreenSync",
-        nullptr, reinterpret_cast<void *>(AniWindowStage::SetShowOnLockScreen)},
-    ani_native_function {"getMainWindowSync", "J:L@ohos/window/window/Window;",
-        reinterpret_cast<void *>(WindowGetMainWindow)},
-    ani_native_function {"createSubWindowSync", "lC{std.core.String}:C{@ohos.window.window.Window}",
-        reinterpret_cast<void *>(CreateSubWindow)},
-    ani_native_function {"onSync", nullptr,
-        reinterpret_cast<void *>(AniWindowStage::RegisterWindowCallback)},
-    ani_native_function {"offSync", nullptr,
-        reinterpret_cast<void *>(AniWindowStage::UnregisterWindowCallback)},
-    ani_native_function {"nativeTransferStatic", "Lstd/interop/ESValue;:Lstd/core/Object;",
-        reinterpret_cast<void *>(AniWindowStage::NativeTransferStatic)},
-    ani_native_function {"nativeTransferDynamic", "J:Lstd/interop/ESValue;",
-        reinterpret_cast<void *>(AniWindowStage::NativeTransferDynamic)},
-    ani_native_function {"setImageForRecentSync", "lX{C{std.core.Long}C{@ohos.multimedia.image.image.PixelMap}}i:",
-        reinterpret_cast<void *>(AniWindowStage::SetImageForRecent)},
-    ani_native_function {"removeImageForRecentSync", "l:",
-        reinterpret_cast<void *>(AniWindowStage::RemoveImageForRecent)},
-    ani_native_function {"setCustomDensitySync", "ldz:",
-        reinterpret_cast<void *>(AniWindowStage::SetCustomDensity)},
-    ani_native_function {"setDefaultDensityEnabledSync", "lz:",
-        reinterpret_cast<void *>(AniWindowStage::SetDefaultDensityEnabled)},
-    ani_native_function {"setSupportedWindowModes", "lC{escompat.Array}:",
-        reinterpret_cast<void *>(AniWindowStage::SetSupportedWindowModes)},
-    ani_native_function {"setSupportedWindowModes", "lC{escompat.Array}z:",
-        reinterpret_cast<void *>(AniWindowStage::SetSupportedWindowModesWithGrayOutMaximizeButton)},
-};
-
-std::array g_functions = {
-    ani_native_function {"CreateWindowStage", "J:L@ohos/window/window/WindowStageInternal;",
-        reinterpret_cast<void *>(WindowStageCreate)},
-    ani_native_function {"getLastWindowSync", nullptr, reinterpret_cast<void *>(AniWindowManager::GetLastWindow)},
-    ani_native_function {"shiftAppWindowFocusSync", "JII:V",
-        reinterpret_cast<void *>(AniWindowManager::ShiftAppWindowFocus)},
-    ani_native_function {"getAllMainWindowInfo", "J:Lescompat/Array;",
-        reinterpret_cast<void *>(AniWindowManager::GetAllMainWindowInfo)},
-    ani_native_function {"getMainWindowSnapshot",
-        "JLescompat/Array;L@ohos/window/window/WindowSnapshotConfiguration;:Lescompat/Array;",
-        reinterpret_cast<void *>(AniWindowManager::GetMainWindowSnapshot)},
-    ani_native_function {"createWindowSync",
-        "lC{@ohos.window.window.Configuration}:C{@ohos.window.window.Window}",
-        reinterpret_cast<void *>(AniWindowManager::CreateWindow)},
-    ani_native_function {"findWindowSync",
-        "JLstd/core/String;:L@ohos/window/window/Window;",
-        reinterpret_cast<void *>(AniWindowManager::FindWindow)},
-    ani_native_function {"minimizeAllSync", "JJ:V", reinterpret_cast<void *>(AniWindowManager::MinimizeAll)},
-    ani_native_function {"destroyAniExtConfig", nullptr, reinterpret_cast<void *>(AniExtensionWindowConfig::Finalizer)},
-};
-
-ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
-{
-    using namespace OHOS::Rosen;
-    ani_status ret;
-    ani_env* env;
-    if ((ret = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] null env");
-        return ANI_NOT_FOUND;
-    }
-
-    ani_class cls = nullptr;
-    if ((ret = env->FindClass("L@ohos/window/window/WindowStageInternal;", &cls)) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] can't find class %{public}u", ret);
-        return ANI_NOT_FOUND;
-    }
-    for (auto method : g_methods) {
-        if ((ret = env->Class_BindNativeMethods(cls, &method, 1u)) != ANI_OK) {
-            TLOGE(WmsLogTag::DEFAULT, "[ANI] bind window static method fail %{public}u, %{public}s, %{public}s",
-                ret, method.name, method.signature);
-            return ANI_NOT_FOUND;
-        }
-    }
-    *result = ANI_VERSION_1;
-
-    // just for test
-    ani_namespace ns;
-    if ((ret = env->FindNamespace("L@ohos/window/window;", &ns)) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] find ns %{public}u", ret);
-        return ANI_NOT_FOUND;
-    }
-    for (auto method : g_functions) {
-        if ((ret = env->Namespace_BindNativeFunctions(ns, &method, 1u)) != ANI_OK) {
-            TLOGE(WmsLogTag::DEFAULT, "[ANI] bind window static method fail %{public}u, %{public}s, %{public}s",
-                ret, method.name, method.signature);
-            return ANI_NOT_FOUND;
-        }
-    }
-    AniWindowManager::AniWindowManagerInit(env, ns);
-
-    OHOS::Rosen::ANI_Window_Constructor(vm, result);
-    ExtensionWindowConfig_ANI_Constructor(vm, result);
-    return ANI_OK;
-}
-}

@@ -825,6 +825,7 @@ public:
     void VisitSnapshotFromCache(int32_t persistentId);
     void PutSnapshotToCache(int32_t persistentId);
     void RemoveSnapshotFromCache(int32_t persistentId);
+    void UpdateAllStartingWindowRdb();
     void GetStartupPage(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
     std::shared_ptr<Media::PixelMap> GetPreLoadStartingWindow(const SessionInfo& sessionInfo);
     void RemovePreLoadStartingWindowFromMap(const SessionInfo& sessionInfo);
@@ -1424,6 +1425,7 @@ private:
     std::shared_mutex pipChgListenerMapMutex_;
     std::map<int32_t, sptr<IPipChangeListener>> pipChgListenerMap_;
     bool CheckPiPPriority(const PiPTemplateInfo& pipTemplateInfo, DisplayId displayId = 0);
+    std::string GetScreenName(int32_t persistentId);
     bool IsEnablePiPCreate(const sptr<WindowSessionProperty>& property);
     bool IsPiPForbidden(const sptr<WindowSessionProperty>& property, const WindowType& type);
     bool IsLastPiPWindowVisible(uint64_t surfaceId, WindowVisibilityState lastVisibilityState);
@@ -1747,8 +1749,6 @@ private:
     std::unordered_map<std::string, std::unordered_set<std::string>> startingWindowFollowAppMap_;
     std::unordered_set<std::string> emptyStartupResource_;
     std::atomic<bool> delayRemoveSnapshot_ = false;
-    std::shared_mutex insertStartingWindowRdbSetMutex_;
-    std::unordered_set<std::string> insertStartingWindowRdbSet_;
     void InitStartingWindowRdb(const std::string& rdbPath);
     bool GetStartingWindowInfoFromCache(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo,
         bool isDark);
@@ -1770,8 +1770,6 @@ private:
         std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>>& outValues);
     void CacheStartingWindowInfo(const std::string& bundleName, const std::string& moduleName,
         const std::string& abilityName, const StartingWindowInfo& startingWindowInfo, bool isDark);
-    void InsertStartingWindowRdbTask(
-        const SessionInfo& sessionInfo, const StartingWindowInfo& startingWindowInfo, bool isDark);
     bool CheckAndGetPreLoadResourceId(const StartingWindowInfo& startingWindowInfo, uint32_t& resId);
     std::unique_ptr<StartingWindowRdbManager> startingWindowRdbMgr_;
     std::unique_ptr<LruCache> snapshotLruCache_;
@@ -1784,7 +1782,6 @@ private:
     WMError SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, ImageFit imageFit,
         int32_t persistentId) override;
     WMError RemoveImageForRecent(int32_t persistentId) override;
-    void UpdateAllStartingWindowRdb();
 
     RecoverState recoverState_ = RecoverState::RECOVER_END;
     OutlineParams recoverOutlineParams_;

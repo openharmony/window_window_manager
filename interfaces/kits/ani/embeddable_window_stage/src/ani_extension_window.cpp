@@ -59,8 +59,8 @@ void AniExtensionWindow::Finalizer(ani_env* env, ani_long nativeObj)
         auto obj = localObjs.find(reinterpret_cast<ani_ref>(extensionWindow->GetAniRef()));
         if (obj != localObjs.end()) {
             delete obj->second;
+            localObjs.erase(obj);
         }
-        localObjs.erase(obj);
         env->GlobalReference_Delete(extensionWindow->GetAniRef());
     } else {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] extensionWindow is nullptr");

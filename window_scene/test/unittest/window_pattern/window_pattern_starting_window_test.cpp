@@ -683,36 +683,35 @@ HWTEST_F(WindowPatternStartingWindowTest, GetStartWindowColorFollowApp, TestSize
 }
 
 /**
- * @tc.name: InsertStartingWindowRdbTask
- * @tc.desc: SceneSessionManager insert starting window info to rdb task
+ * @tc.name: UpdateCachedColorToAppSet
+ * @tc.desc: SceneSessionManager set update cached color to app set
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, InsertStartingWindowRdbTask, TestSize.Level0)
+HWTEST_F(WindowPatternStartingWindowTest, UpdateCachedColorToAppSet, TestSize.Level0)
 {
     ASSERT_NE(ssm_, nullptr);
-    ssm_->insertStartingWindowRdbSet_.clear();
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "bundleName";
-    sessionInfo.moduleName_ = "moduleName";
-    sessionInfo.abilityName_ = "abilityName";
-    bool isDark = true;
+    ssm_->startingWindowMap_.clear();
+    ssm_->startingWindowColorFromAppMap_.clear();
+    std::string bundleName = "testBundleName";
+    std::string moduleName = "testModuleName";
+    std::string abilityName = "testAbilityName";
+    std::string keyForCached = moduleName + abilityName + std::to_string(true);
+    std::string keyForAppSet = moduleName + abilityName;
     StartingWindowInfo info;
-    std::string keyStr = sessionInfo.bundleName_ + '_' +
-        sessionInfo.moduleName_ + '_' + sessionInfo.abilityName_ + std::to_string(isDark);
-    ssm_->insertStartingWindowRdbSet_.insert(keyStr);
-    ssm_->startingWindowRdbMgr_ = nullptr;
-    ssm_->InsertStartingWindowRdbTask(sessionInfo, info, isDark);
-    ASSERT_EQ(ssm_->startingWindowRdbMgr_, nullptr);
-    ssm_->insertStartingWindowRdbSet_.clear();
-    ssm_->InsertStartingWindowRdbTask(sessionInfo, info, isDark);
-    ASSERT_EQ(ssm_->startingWindowRdbMgr_, nullptr);
+    StartingWindowInfo tempInfo;
+    info.backgroundColor_ = 0x00000000;
+    ssm_->startingWindowMap_[bundleName][keyForCached] = info;
+    ssm_->startingWindowMap_[bundleName][keyForAppSet + std::to_string(false)] = info;
+    ssm_->UpdateCachedColorToAppSet(bundleName, moduleName, abilityName, tempInfo);
+    EXPECT_EQ(0x00000000, ssm_->startingWindowMap_[bundleName][keyForCached].backgroundColor_);
 
-    WmsRdbConfig config;
-    config.dbName = TEST_RDB_NAME;
-    config.dbPath = TEST_RDB_PATH;
-    ssm_->startingWindowRdbMgr_ = std::make_unique<StartingWindowRdbManager>(config);
-    ssm_->InsertStartingWindowRdbTask(sessionInfo, info, isDark);
-    ASSERT_NE(ssm_->startingWindowRdbMgr_, nullptr);
+    ssm_->startingWindowColorFromAppMap_[bundleName][keyForAppSet] = 0xffffffff;
+    ssm_->UpdateCachedColorToAppSet(bundleName, moduleName, abilityName, tempInfo);
+    EXPECT_EQ(0xffffffff, ssm_->startingWindowMap_[bundleName][keyForCached].backgroundColor_);
+
+    ssm_->startingWindowMap_.clear();
+    ssm_->UpdateCachedColorToAppSet(bundleName, moduleName, abilityName, tempInfo);
+    EXPECT_EQ(0, ssm_->startingWindowMap_.size());
 }
 } // namespace
 } // namespace Rosen
