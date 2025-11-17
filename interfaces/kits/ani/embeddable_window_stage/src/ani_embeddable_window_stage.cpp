@@ -114,37 +114,3 @@ AniEmbeddableWindowStage* GetEmbeddableWindowStageFromEnv(ani_env* env, ani_clas
 }
 }  // namespace Rosen
 }  // namespace OHOS
-
-extern "C" {
-ANI_EXPORT ani_status ExtensionWindow_ANI_Constructor(ani_vm *vm, uint32_t* result);
-ANI_EXPORT ani_status ExtensionWindowHost_ANI_Constructor(ani_vm *vm, uint32_t* result);
-ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t* result)
-{
-    using namespace OHOS::Rosen;
-    ani_status ret;
-    ani_env* env;
-    if ((ret = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] null env");
-        return ANI_NOT_FOUND;
-    }
-
-    ani_class cls = nullptr;
-    if ((ret = env->FindClass("L@ohos/window/window/WindowStage;", &cls)) != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] null env %{public}u", ret);
-        return ANI_NOT_FOUND;
-    }
-    *result = ANI_VERSION_1;
-
-    ret = ExtensionWindow_ANI_Constructor(vm, result);
-    if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] Constructor ExtensionWindow failed: %{public}u", ret);
-        return ret;
-    }
-    ret = ExtensionWindowHost_ANI_Constructor(vm, result);
-    if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] Constructor ExtensionWindowHost failed: %{public}u", ret);
-        return ret;
-    }
-    return ANI_OK;
-}
-}

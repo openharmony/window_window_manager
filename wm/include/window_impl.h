@@ -497,6 +497,7 @@ private:
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     void UpdateDecorEnable(bool needNotify = false);
     WMError SetFloatingMaximize(bool isEnter);
+    void CustomHideAnimation();
 
     std::unique_ptr<Ace::UIContent> UIContentCreate(AppExecFwk::Ability* ability, void* env, int isAni);
     Ace::UIContentErrorCode UIContentInitByName(Ace::UIContent*, const std::string&, void* storage, int isAni);
@@ -547,7 +548,6 @@ private:
     static std::map<uint32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> occupiedAreaChangeListeners_;
     static std::map<uint32_t, sptr<IDialogDeathRecipientListener>> dialogDeathRecipientListener_;
     std::shared_ptr<IInputEventConsumer> inputEventConsumer_;
-    sptr<IAnimationTransitionController> animationTransitionController_;
     NotifyNativeWinDestroyFunc notifyNativefunc_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     std::string name_;
@@ -593,6 +593,12 @@ private:
     std::atomic<float> virtualPixelRatio_ = 1.0f;
 
     std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
+
+    /*
+     * Window animation
+     */
+    static std::mutex transitionControllerMutex_;
+    std::vector<sptr<IAnimationTransitionController>> animationTransitionControllers_;
 
     /*
      * RS Client Multi Instance
