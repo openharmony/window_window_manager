@@ -18,11 +18,11 @@ config("window_common_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
-    "../common",
-    "../../../innerkits/wm",
-    "../../../innerkits/dm",
-    "../../../../wm/include",
     "../../../../utils/include",
+    "../../../../wm/include",
+    "../../../innerkits/dm",
+    "../../../innerkits/wm",
+    "../common",
   ]
 }
 
@@ -43,6 +43,7 @@ ohos_shared_library("windowstageani_kit") {
   }
   sources = [
     "window_stage_ani/src/ani_err_utils.cpp",
+    "window_stage_ani/src/ani_extension_window_config.cpp",
     "window_stage_ani/src/ani_transition_controller.cpp",
     "window_stage_ani/src/ani_window.cpp",
     "window_stage_ani/src/ani_window_listener.cpp",
@@ -50,7 +51,6 @@ ohos_shared_library("windowstageani_kit") {
     "window_stage_ani/src/ani_window_register_manager.cpp",
     "window_stage_ani/src/ani_window_stage.cpp",
     "window_stage_ani/src/ani_window_utils.cpp",
-    "window_stage_ani/src/ani_extension_window_config.cpp",
   ]
 
   configs = [
@@ -62,12 +62,12 @@ ohos_shared_library("windowstageani_kit") {
   public_configs = [ ":windowstage_kit_public_config" ]
 
   deps = [
+    "${window_base_path}/interfaces/kits/ani/window_animation:ani_window_animation_utils",
+    "../../../../interfaces/kits/napi/window_runtime:window_native_kit",
+    "../../../../interfaces/kits/napi/window_runtime:windowstage_kit",
     "../../../../utils:libwmutil",
     "../../../../utils:libwmutil_base",
     "../../../../wm:libwm",
-    "../../../../interfaces/kits/napi/window_runtime:window_native_kit",
-    "../../../../interfaces/kits/napi/window_runtime:windowstage_kit",
-    "${window_base_path}/interfaces/kits/ani/window_animation:ani_window_animation_utils",
   ]
 
   external_deps = [
@@ -85,8 +85,8 @@ ohos_shared_library("windowstageani_kit") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "image_framework:image",
-    "image_framework:image_taihe",
     "image_framework:image_native",
+    "image_framework:image_taihe",
     "ipc:ipc_napi",
     "ipc:ipc_single",
     "napi:ace_napi",
@@ -121,14 +121,13 @@ ohos_shared_library("windowstageani_module") {
   public_configs = [ ":windowstage_kit_public_config" ]
 
   deps = [
+    "${window_base_path}/interfaces/kits/ani/window_animation:ani_window_animation_utils",
+    "../../../../interfaces/kits/napi/window_runtime:window_native_kit",
+    "../../../../interfaces/kits/napi/window_runtime:windowstage_kit",
     "../../../../utils:libwmutil",
     "../../../../utils:libwmutil_base",
     "../../../../wm:libwm",
     ":windowstageani_kit",
-    "../../../../interfaces/kits/napi/window_runtime:window_native_kit",
-    "../../../../interfaces/kits/napi/window_runtime:windowstage_kit",
-    "${window_base_path}/interfaces/kits/ani/window_animation:ani_window_animation_utils",
-    
   ]
 
   external_deps = [
@@ -144,8 +143,8 @@ ohos_shared_library("windowstageani_module") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "image_framework:image",
-    "image_framework:image_taihe",
     "image_framework:image_native",
+    "image_framework:image_taihe",
     "ipc:ipc_napi",
     "ipc:ipc_single",
     "napi:ace_napi",
