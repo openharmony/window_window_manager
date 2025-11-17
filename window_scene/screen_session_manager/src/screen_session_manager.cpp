@@ -2949,8 +2949,8 @@ void ScreenSessionManager::HandleResolutionEffectChangeWhenRotate()
     } else {
         RecoveryResolutionEffect();
         SuperFoldStateManager::GetInstance().RefreshExternalRegion();
-#endif
     }
+#endif
 }
 
 bool ScreenSessionManager::HandleResolutionEffectChange()
@@ -2980,7 +2980,7 @@ bool ScreenSessionManager::HandleResolutionEffectChange()
     uint32_t targetWidth = 0;
     uint32_t targetHeight = 0;
     CalculateTargetResolution(internalSession, externalSession, effectFlag, targetWidth, targetHeight);
-    if (targetWidth != 0 && targetHeight !=0) {
+    if (targetWidth != 0 && targetHeight != 0) {
         SetResolutionEffect(internalSession->GetScreenId(), targetWidth, targetHeight);
     }
     return true;
