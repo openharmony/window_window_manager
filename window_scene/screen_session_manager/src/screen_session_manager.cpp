@@ -2587,6 +2587,11 @@ void ScreenSessionManager::UpdateSessionByActiveModeChange(sptr<ScreenSession> s
         screenSession->activeIdx_ = activeIdx;
         screenSession->UpdatePropertyByActiveMode();
     } else {
+        ScreenProperty property = screenSession->GetScreenProperty();
+        int32_t startXcopy = static_cast<int32_t>(property.GetStartX());
+        int32_t startYcopy = static_cast<int32_t>(property.GetStartY());
+        int32_t retxCopy = property.GetX();
+        int32_t retyCopy = property.GetY();
         phyScreenSession->activeIdx_ = activeIdx;
         phyScreenSession->UpdatePropertyByActiveModeChange();
         InitExtendScreenProperty(phyScreenSession->GetScreenId(), phyScreenSession,
@@ -2594,6 +2599,8 @@ void ScreenSessionManager::UpdateSessionByActiveModeChange(sptr<ScreenSession> s
         ScreenProperty PhyProperty = phyScreenSession->GetScreenProperty();
         screenSession->SetScreenProperty(PhyProperty);
         screenSession->activeIdx_ = activeIdx;
+        screenSession->SetStartPosition(startXcopy, startYcopy);
+        screenSession->SetXYPosition(retxCopy, retyCopy);
         screenSession->SetScreenOffScreenRendering();
     }
     TLOGI(WmsLogTag::DMS, "end");
