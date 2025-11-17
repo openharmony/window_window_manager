@@ -4918,15 +4918,15 @@ HWTEST_F(ScreenSessionTest, UpdatePropertyByResolution2, TestSize.Level1)
     session->property_.UpdateScreenRotation(Rotation::ROTATION_0);
     session->UpdatePropertyByResolution(rect);
     EXPECT_EQ(session->GetScreenProperty().GetValidWidth(), 1);
-    EXPECT_EQ(session->GetScreenProperty().GetValidWeight(), 2);
+    EXPECT_EQ(session->GetScreenProperty().GetValidHeight(), 2);
     session->property_.UpdateScreenRotation(Rotation::ROTATION_90);
     session->UpdatePropertyByResolution(rect);
     EXPECT_EQ(session->GetScreenProperty().GetValidWidth(), 2);
-    EXPECT_EQ(session->GetScreenProperty().GetValidWeight(), 1);
+    EXPECT_EQ(session->GetScreenProperty().GetValidHeight(), 1);
     session->property_.UpdateScreenRotation(Rotation::ROTATION_270);
     session->UpdatePropertyByResolution(rect);
     EXPECT_EQ(session->GetScreenProperty().GetValidWidth(), 2);
-    EXPECT_EQ(session->GetScreenProperty().GetValidWeight(), 1);
+    EXPECT_EQ(session->GetScreenProperty().GetValidHeight(), 1);
 }
 } // namespace
 } // namespace Rosen
