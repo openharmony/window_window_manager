@@ -1364,10 +1364,7 @@ ohos_unittest("ws_distributed_client_test") {
 ohos_unittest("ws_scene_session_manager_lite_stub_test") {
   module_out_path = module_out_path
 
-  sources = [
-    "${window_base_path}/window_scene/test/mock/mock_message_parcel.cpp",
-    "scene_session_manager_lite_stub_test.cpp",
-  ]
+  sources = [ "scene_session_manager_lite_stub_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
 

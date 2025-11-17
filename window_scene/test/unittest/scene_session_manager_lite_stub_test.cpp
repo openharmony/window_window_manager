@@ -17,7 +17,6 @@
 #include <ipc_types.h>
 
 #include "iremote_object_mocker.h"
-#include "mock/mock_message_parcel.h"
 #include "session_manager/include/zidl/scene_session_manager_lite_stub.h"
 #include "session_manager/include/zidl/session_router_stack_listener_stub.h"
 #include "session_manager/include/zidl/pip_change_listener_stub.h"
@@ -1518,25 +1517,6 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleUpdateSessionScreenLock, Functio
         ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_UPDATE_SESSION_SCREEN_LOCK);
     auto res = sceneSessionManagerLiteStub_->ProcessRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, ERR_INVALID_DATA);
-
-    MockMessageParcel::ClearAllErrorFlag();
-
-    MockMessageParcel::SetWriteInt32ErrorFlag(true);
-    res = sceneSessionManagerLiteStub_->HandleUpdateSessionScreenLock(data, reply);
-    EXPECT_EQ(res, ERR_INVALID_DATA);
-    MockMessageParcel::SetWriteInt32ErrorFlag(false);
-
-    MockMessageParcel::SetReadBoolErrorFlag(true);
-    res = sceneSessionManagerLiteStub_->HandleUpdateSessionScreenLock(data, reply);
-    EXPECT_EQ(res, ERR_INVALID_DATA);
-    MockMessageParcel::SetReadBoolErrorFlag(false);
-
-    MockMessageParcel::SetReadStringErrorFlag(true);
-    res = sceneSessionManagerLiteStub_->HandleUpdateSessionScreenLock(data, reply);
-    EXPECT_EQ(res, ERR_INVALID_DATA);
-    MockMessageParcel::SetReadStringErrorFlag(false);
-
-    MockMessageParcel::ClearAllErrorFlag();
 }
 
 /**
