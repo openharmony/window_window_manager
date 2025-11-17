@@ -1070,7 +1070,7 @@ HWTEST_F(WindowImplTest5, AdjustWindowAnimationFlag, TestSize.Level1)
     sptr<IAnimationTransitionController> animationTransitionController =
         sptr<IAnimationTransitionController>::MakeSptr();
     ASSERT_NE(animationTransitionController, nullptr);
-    window->animationTransitionController_ = animationTransitionController;
+    window->animationTransitionControllers_.push_back(animationTransitionController);
 
     window->AdjustWindowAnimationFlag(true);
 
@@ -1078,7 +1078,7 @@ HWTEST_F(WindowImplTest5, AdjustWindowAnimationFlag, TestSize.Level1)
     window->needDefaultAnimation_ = true;
     window->AdjustWindowAnimationFlag(true);
 
-    window->animationTransitionController_ = nullptr;
+    window->animationTransitionControllers_.clear();
     window->needDefaultAnimation_ = false;
     window->AdjustWindowAnimationFlag(true);
 

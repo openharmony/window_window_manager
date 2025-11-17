@@ -99,6 +99,8 @@ std::map<uint32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> WindowImpl::o
 std::map<uint32_t, sptr<IDialogDeathRecipientListener>> WindowImpl::dialogDeathRecipientListener_;
 std::recursive_mutex WindowImpl::globalMutex_;
 std::shared_mutex WindowImpl::windowMapMutex_;
+std::mutex WindowImpl::transitionControllerMutex_;
+
 int g_constructorCnt = 0;
 int g_deConstructorCnt = 0;
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
@@ -1820,10 +1822,10 @@ void WindowImpl::AdjustWindowAnimationFlag(bool withAnimation)
     // use custom animation when transitionController exists; else use default animation
     WindowType winType = property_->GetWindowType();
     bool isAppWindow = WindowHelper::IsAppWindow(winType);
-    if (withAnimation && !isAppWindow && animationTransitionController_) {
+    if (withAnimation && !isAppWindow && !animationTransitionControllers_.empty()) {
         // use custom animation
         property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
-    } else if ((isAppWindow && needDefaultAnimation_) || (withAnimation && !animationTransitionController_)) {
+    } else if ((isAppWindow && needDefaultAnimation_) || (withAnimation && animationTransitionControllers_.empty())) {
         // use default animation
         property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::DEFAULT));
     } else if (winType == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
@@ -1987,13 +1989,28 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerki
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
         NotifyAfterDidBackground(reason);
     }
-    uint32_t animationFlag = property_->GetAnimationFlag();
-    if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
-        animationTransitionController_->AnimationForHidden();
-    }
+    CustomHideAnimation();
+
     ResetMoveOrDragState();
     escKeyEventTriggered_ = false;
     return ret;
+}
+
+void WindowImpl::CustomHideAnimation()
+{
+    uint32_t animationFlag = property_->GetAnimationFlag();
+    if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        std::vector<sptr<IAnimationTransitionController>> animationTransitionControllers;
+        {
+            std::lock_guard<std::mutex> lockListener(transitionControllerMutex_);
+            animationTransitionControllers = animationTransitionControllers_;
+        }
+        for (auto animationTransitionController : animationTransitionControllers) {
+            if (animationTransitionController != nullptr) {
+                animationTransitionController->AnimationForHidden();
+            }
+        }
+    }
 }
 
 WMError WindowImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal, MoveConfiguration moveConfiguration)
@@ -2688,9 +2705,15 @@ WMError WindowImpl::RegisterAnimationTransitionController(const sptr<IAnimationT
         WLOGFE("listener is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    animationTransitionController_ = listener;
+    {
+        std::lock_guard<std::mutex> lockListener(transitionControllerMutex_);
+        if (std::find(animationTransitionControllers_.begin(), animationTransitionControllers_.end(), listener) ==
+            animationTransitionControllers_.end()) {
+            animationTransitionControllers_.push_back(listener);
+        }
+    }
     wptr<WindowProperty> propertyToken(property_);
-    wptr<IAnimationTransitionController> animationTransitionControllerToken(animationTransitionController_);
+    wptr<IAnimationTransitionController> animationTransitionControllerToken(listener);
     if (uiContent_) {
         uiContent_->SetNextFrameLayoutCallback([propertyToken, animationTransitionControllerToken]() {
             auto property = propertyToken.promote();
@@ -2700,7 +2723,7 @@ WMError WindowImpl::RegisterAnimationTransitionController(const sptr<IAnimationT
             }
             uint32_t animationFlag = property->GetAnimationFlag();
             if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
-                // CustomAnimation is enabled when animationTransitionController_ exists
+                // CustomAnimation is enabled when animationTransitionController exists
                 animationTransitionController->AnimationForShown();
             }
         });

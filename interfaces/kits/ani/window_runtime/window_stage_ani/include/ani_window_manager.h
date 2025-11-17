@@ -44,7 +44,15 @@ public:
     static ani_ref CreateWindow(ani_env* env, ani_long nativeObj, ani_object configuration);
     static void ShiftAppWindowTouchEvent(ani_env* env, ani_long nativeObj,
         ani_int sourceWindowId, ani_int targetWindowId, ani_int fingerId);
+    static void ShiftAppWindowPointerEvent(ani_env* env, ani_long nativeObj,
+        ani_int sourceWindowId, ani_int targetWindowId);
     static void SetWatermarkImageForAppWindows(ani_env* env, ani_long nativeObj, ani_object pixelMap);
+    static ani_object GetAllWindowLayoutInfo(ani_env* env, ani_long nativeObj, ani_long displayId);
+    static ani_object GetSnapshot(ani_env* env, ani_long nativeObj, ani_double windowId);
+    static ani_object GetVisibleWindowInfo(ani_env* env, ani_long nativeObj);
+    static void SetGestureNavigationEnabled(ani_env* env, ani_long nativeObj, ani_boolean enabled);
+    static void SetWaterMarkImage(ani_env* env, ani_long nativeObj, ani_object nativePixelMap, ani_boolean enabled);
+    static ani_object GetWindowsByCoordinate(ani_env* env, ani_long nativeObj, ani_object getWindowsParam);
     static ani_string GetTopNavDestinationName(ani_env* env, ani_long nativeObj, ani_int windowId);
     static ani_int GetGlobalWindowMode(ani_env* env, ani_long nativeObj, ani_object displayId);
     static void SetStartWindowBackgroundColor(ani_env* env, ani_long nativeObj, ani_string moduleName,
@@ -63,6 +71,7 @@ private:
     ani_object OnGetMainWindowSnapshot(
         ani_env* env, ani_object windowId, ani_object config);
     ani_ref OnCreateWindow(ani_env* env, ani_object configuration);
+    void OnShiftAppWindowPointerEvent(ani_env* env, ani_int sourceWindowId, ani_int targetWindowId);
     void OnShiftAppWindowTouchEvent(ani_env* env, ani_int sourceWindowId, ani_int targetWindowId, ani_int fingerId);
     void OnSetWatermarkImageForAppWindows(ani_env* env, ani_object pixelMap);
     ani_string OnGetTopNavDestinationName(ani_env* env, ani_int windowId);
@@ -73,6 +82,12 @@ private:
     void OnRegisterWindowManagerCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnUnregisterWindowManagerCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnSetWindowLayoutMode(ani_env* env, ani_enum_item mode);
+    ani_object OnGetAllWindowLayoutInfo(ani_env* env, ani_long displayId);
+    ani_object OnGetSnapshot(ani_env* env, ani_double windowId);
+    ani_object OnGetVisibleWindowInfo(ani_env* env);
+    void OnSetGestureNavigationEnabled(ani_env* env, ani_boolean enabled);
+    void OnSetWaterMarkImage(ani_env* env, ani_object nativePixelMap, ani_boolean enabled);
+    ani_object OnGetWindowsByCoordinate(ani_env* env, ani_object getWindowsParam);
 
     std::unique_ptr<AniWindowRegisterManager> registerManager_ = nullptr;
 };
