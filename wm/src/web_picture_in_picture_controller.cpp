@@ -211,7 +211,7 @@ WMError WebPictureInPictureController::SetPipParentWindowId(uint32_t windowId)
     auto newMainWindow = WindowSceneSessionImpl::GetMainWindowWithId(windowId);
     if (newMainWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "mainWindow not found: %{public}u", windowId);
-        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
+        return WMError::WM_ERROR_INVALID_PARAM;
     }
     mainWindow_ = newMainWindow;
     mainWindowId_ = windowId;
