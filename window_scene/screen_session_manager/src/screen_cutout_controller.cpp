@@ -45,7 +45,6 @@ sptr<CutoutInfo> ScreenCutoutController::GetScreenCutoutInfo(DisplayId displayId
 sptr<CutoutInfo> ScreenCutoutController::GetScreenCutoutInfo(DisplayId displayId, uint32_t width,
                                                              uint32_t height, Rotation rotation) const
 {
-    rotation = ScreenSessionManager::GetInstance().RemoveRotationCorrection(rotation);
     std::vector<DMRect> boundaryRects;
     GetCutoutArea(displayId, width, height, rotation, boundaryRects);
 

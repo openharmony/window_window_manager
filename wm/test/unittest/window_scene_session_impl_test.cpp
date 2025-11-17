@@ -691,6 +691,38 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession16, TestSize
 }
 
 /**
+ * @tc.name: CreateAndConnectSpecificSession17
+ * @tc.desc: CreateAndConnectSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession17, TestSize.Level0)
+{
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("CreateAndConnectSpecificSession17");
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    windowSceneSession->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, windowSceneSession->CreateAndConnectSpecificSession());
+    windowSceneSession->property_->SetPersistentId(102); // 102 is persistentId
+    windowSceneSession->property_->SetParentPersistentId(100); // 100 is parentPersistentId
+    windowSceneSession->property_->SetParentId(100); // 100 is parentId
+    windowSceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    EXPECT_EQ(WMError::WM_OK, windowSceneSession->Create(abilityContext_, session));
+    EXPECT_EQ(WMError::WM_OK, windowSceneSession->Show());
+    EXPECT_EQ(WMError::WM_OK, windowSceneSession->Destroy(true));
+    windowSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    windowSceneSession->RegisterListenerForKeyboard();
+    windowSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    windowSceneSession->RegisterListenerForKeyboard();
+}
+
+/**
  * @tc.name: IsValidSystemWindowType01
  * @tc.desc: IsValidSystemWindowType
  * @tc.type: FUNC

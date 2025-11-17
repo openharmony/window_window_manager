@@ -1717,6 +1717,7 @@ struct PiPTemplateInfo : public Parcelable {
     std::vector<PiPControlStatusInfo> pipControlStatusInfoList;
     std::vector<PiPControlEnableInfo> pipControlEnableInfoList;
     uint32_t defaultWindowSizeType{0};
+    bool cornerAdsorptionEnabled{true};
 
     PiPTemplateInfo() {}
 
@@ -1749,6 +1750,9 @@ struct PiPTemplateInfo : public Parcelable {
             }
         }
         if (!parcel.WriteUint32(defaultWindowSizeType)) {
+            return false;
+        }
+        if (!parcel.WriteBool(cornerAdsorptionEnabled)) {
             return false;
         }
         return true;
@@ -1796,6 +1800,10 @@ struct PiPTemplateInfo : public Parcelable {
             pipTemplateInfo->pipControlEnableInfoList.emplace_back(info);
         }
         if (!parcel.ReadUint32(pipTemplateInfo->defaultWindowSizeType)) {
+            delete pipTemplateInfo;
+            return nullptr;
+        }
+        if (!parcel.ReadBool(pipTemplateInfo->cornerAdsorptionEnabled)) {
             delete pipTemplateInfo;
             return nullptr;
         }
@@ -2551,6 +2559,7 @@ struct KeyboardLayoutParams : public Parcelable {
     virtual bool Marshalling(Parcel& parcel) const override
     {
         return (parcel.WriteUint32(static_cast<uint32_t>(gravity_)) &&
+                parcel.WriteUint64(displayId_) &&
                 parcel.WriteInt32(landscapeAvoidHeight_) &&
                 parcel.WriteInt32(portraitAvoidHeight_) &&
                 WriteParcel(parcel, LandscapeKeyboardRect_) &&
@@ -2564,6 +2573,7 @@ struct KeyboardLayoutParams : public Parcelable {
         KeyboardLayoutParams* params = new KeyboardLayoutParams();
         uint32_t gravity;
         if (parcel.ReadUint32(gravity) &&
+            parcel.ReadUint64(params->displayId_) &&
             parcel.ReadInt32(params->landscapeAvoidHeight_) &&
             parcel.ReadInt32(params->portraitAvoidHeight_) &&
             ReadParcel(parcel, params->LandscapeKeyboardRect_) &&
@@ -2588,6 +2598,7 @@ struct KeyboardTouchHotAreas {
     std::vector<Rect> portraitKeyboardHotAreas_;
     std::vector<Rect> landscapePanelHotAreas_;
     std::vector<Rect> portraitPanelHotAreas_;
+    uint64_t displayId_ = DISPLAY_ID_INVALID;
 
     bool isKeyboardEmpty() const
     {
@@ -2597,6 +2608,20 @@ struct KeyboardTouchHotAreas {
     bool isPanelEmpty() const
     {
         return (landscapePanelHotAreas_.empty() || portraitPanelHotAreas_.empty());
+    }
+
+    bool operator==(const KeyboardTouchHotAreas& other) const
+    {
+        return (landscapeKeyboardHotAreas_ == other.landscapeKeyboardHotAreas_ &&
+                portraitKeyboardHotAreas_ == other.portraitKeyboardHotAreas_ &&
+                landscapePanelHotAreas_ == other.landscapePanelHotAreas_ &&
+                portraitPanelHotAreas_ == other.portraitPanelHotAreas_ &&
+                displayId_ == other.displayId_);
+    }
+
+    bool operator!=(const KeyboardTouchHotAreas& other) const
+    {
+        return !this->operator==(other);
     }
 };
 

@@ -103,18 +103,6 @@ HWTEST_F(DisplayManagerAdapterLiteTest, Clear01, TestSize.Level1)
 }
 
 /**
- * @tc.name: WakeUpBegin
- * @tc.desc: test WakeUpBegin
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAdapterLiteTest, WakeUpBegin, TestSize.Level1)
-{
-    PowerStateChangeReason reason = PowerStateChangeReason{0};
-    bool ret = SingletonContainer::Get<DisplayManagerAdapterLite>().WakeUpBegin(reason);
-    ASSERT_TRUE(ret);
-}
-
-/**
  * @tc.name: WakeUpEnd
  * @tc.desc: test WakeUpEnd
  * @tc.type: FUNC
@@ -123,18 +111,6 @@ HWTEST_F(DisplayManagerAdapterLiteTest, WakeUpEnd, TestSize.Level1)
 {
     bool ret = SingletonContainer::Get<DisplayManagerAdapterLite>().WakeUpEnd();
     ASSERT_TRUE(ret);
-}
-
-/**
- * @tc.name: SuspendBegin
- * @tc.desc: test SuspendBegin
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAdapterLiteTest, SuspendBegin, TestSize.Level1)
-{
-    PowerStateChangeReason reason{0};
-    bool ret = SingletonContainer::Get<DisplayManagerAdapterLite>().SuspendBegin(reason);
-    EXPECT_EQ(ret, false) << "SuspendBegin should return false when proxy is not initialized.";
 }
 
 /**

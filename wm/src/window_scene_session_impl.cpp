@@ -139,6 +139,7 @@ constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 constexpr int32_t API_VERSION_18 = 18;
 constexpr uint32_t SNAPSHOT_TIMEOUT = 2000; // MS
 constexpr uint32_t REASON_MAXIMIZE_MODE_CHANGE = 1;
+const std::string COOPERATION_DISPLAY_NAME = "Cooperation";
 
 bool IsValueInRange(double value, double lowerBound, double upperBound)
 {
@@ -201,6 +202,7 @@ void UpdateLimitIfInRange(uint32_t& currentLimit, uint32_t newLimit, uint32_t mi
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
 using WindowSessionImplMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
 std::mutex WindowSceneSessionImpl::windowAttachStateChangeListenerMutex_;
+std::mutex WindowSceneSessionImpl::transitionControllerMutex_;
 
 WindowSceneSessionImpl::WindowSceneSessionImpl(const sptr<WindowOption>& option,
     const std::shared_ptr<RSUIContext>& rsUIContext) : WindowSessionImpl(option, rsUIContext)
@@ -759,6 +761,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         SetPcAppInpadSpecificSystemBarInvisible();
         SetPcAppInpadOrientationLandscape();
         SetDefaultDensityEnabledValue(IsStageDefaultDensityEnabled());
+        RegisterListenerForKeyboard();
     }
     UpdateAnimationSpeedIfEnabled();
     TLOGI(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, id:%{public}d], state:%{public}u, "
@@ -766,6 +769,14 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         property_->GetWindowName().c_str(), property_->GetPersistentId(), state_, GetWindowMode(),
         isEnableDefaultDensityWhenCreate_, property_->GetDisplayId());
     return ret;
+}
+
+void WindowSceneSessionImpl::RegisterListenerForKeyboard()
+{
+    if (GetType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        return;
+    }
+    SingletonContainer::Get<ScreenManager>().RegisterScreenListener(sptr<WindowScreenListener>::MakeSptr());
 }
 
 void WindowSceneSessionImpl::UpdateAnimationSpeedIfEnabled()
@@ -1756,6 +1767,19 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<Display
         TLOGW(WmsLogTag::WMS_LIFE, "uiContent is null");
         return;
     }
+    if (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT && info != nullptr) {
+        uint64_t screenId = info->GetScreenId();
+        KeyboardLayoutParams params;
+        property_->GetKeyboardLayoutParamsByScreenId(screenId, params);
+        if (params.isEmpty()) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Update prelayout failed, %{public}" PRIu64, screenId);
+        } else {
+            std::string dispName = info->GetName();
+            Rect newRect = (info->GetWidth() > info->GetHeight() || dispName == COOPERATION_DISPLAY_NAME) ?
+                            params.LandscapeKeyboardRect_ : params.PortraitKeyboardRect_;
+            property_->SetRequestRect(newRect);
+        }
+    }
     const auto& requestRect = GetRequestRect();
     TLOGI(WmsLogTag::WMS_LIFE, "name: %{public}s, id: %{public}d, type: %{public}u, requestRect:%{public}s",
         property_->GetWindowName().c_str(), GetPersistentId(), type, requestRect.ToString().c_str());
@@ -1899,8 +1923,8 @@ sptr<DisplayInfo> WindowSceneSessionImpl::GetDisplayInfo() const
 WMError WindowSceneSessionImpl::ShowKeyboard(
     uint32_t callingWindowId, uint64_t tgtDisplayId, KeyboardEffectOption effectOption)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "CallingWindowId: %{public}d, effect option: %{public}s",
-        callingWindowId, effectOption.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "CallingWindowId: %{public}d, effect option: %{public}s, %{public}" PRIu64,
+        callingWindowId, effectOption.ToString().c_str(), tgtDisplayId);
     if (effectOption.viewMode_ >= KeyboardViewMode::VIEW_MODE_END) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid view mode: %{public}u. Use default mode",
             static_cast<uint32_t>(effectOption.viewMode_));
@@ -2027,17 +2051,32 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
             hasFirstNotifyInteractive_ = false;
         }
     }
-    uint32_t animationFlag = property_->GetAnimationFlag();
-    if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
-        animationTransitionController_->AnimationForHidden();
-        RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
-    }
+    CustomHideAnimation();
+    
     NotifyWindowStatusChange(GetWindowMode());
     NotifyWindowStatusDidChange(GetWindowMode());
     escKeyEventTriggered_ = false;
     TLOGI(WmsLogTag::WMS_LIFE, "Window hide success [id:%{public}d, type: %{public}d",
         property_->GetPersistentId(), type);
     return res;
+}
+
+void WindowSceneSessionImpl::CustomHideAnimation()
+{
+    uint32_t animationFlag = property_->GetAnimationFlag();
+    if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        std::vector<sptr<IAnimationTransitionController>> animationTransitionControllers;
+        {
+            std::lock_guard<std::mutex> lockListener(transitionControllerMutex_);
+            animationTransitionControllers = animationTransitionControllers_;
+        }
+        for (auto animationTransitionController : animationTransitionControllers) {
+            if (animationTransitionController != nullptr) {
+                animationTransitionController->AnimationForHidden();
+            }
+        }
+        RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
+    }
 }
 
 WMError WindowSceneSessionImpl::NotifyDrawingCompleted()
@@ -5567,9 +5606,16 @@ WMError WindowSceneSessionImpl::RegisterAnimationTransitionController(
         TLOGE(WmsLogTag::WMS_SYSTEM, "listener is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    animationTransitionController_ = listener;
+    {
+        std::lock_guard<std::mutex> lockListener(transitionControllerMutex_);
+        if (std::find(animationTransitionControllers_.begin(), animationTransitionControllers_.end(), listener) ==
+            animationTransitionControllers_.end()) {
+            animationTransitionControllers_.push_back(listener);
+        }
+    }
+
     wptr<WindowSessionProperty> propertyWeak(property_);
-    wptr<IAnimationTransitionController> animationTransitionControllerWeak(animationTransitionController_);
+    wptr<IAnimationTransitionController> animationTransitionControllerWeak(listener);
 
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->SetNextFrameLayoutCallback([propertyWeak, animationTransitionControllerWeak]() {
@@ -5581,7 +5627,7 @@ WMError WindowSceneSessionImpl::RegisterAnimationTransitionController(
             }
             uint32_t animationFlag = property->GetAnimationFlag();
             if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
-                // CustomAnimation is enabled when animationTransitionController_ exists
+                // CustomAnimation is enabled when animationTransitionController exists
                 animationTransitionController->AnimationForShown();
             }
             TLOGI(WmsLogTag::WMS_SYSTEM, "AnimationForShown excute sucess %{public}d!", property->GetPersistentId());
@@ -5623,10 +5669,10 @@ void WindowSceneSessionImpl::AdjustWindowAnimationFlag(bool withAnimation)
     // use custom animation when transitionController exists; else use default animation
     WindowType winType = property_->GetWindowType();
     bool isAppWindow = WindowHelper::IsAppWindow(winType);
-    if (withAnimation && !isAppWindow && animationTransitionController_) {
+    if (withAnimation && !isAppWindow && !animationTransitionControllers_.empty()) {
         // use custom animation
         property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
-    } else if ((isAppWindow && enableDefaultAnimation_) || (withAnimation && !animationTransitionController_)) {
+    } else if ((isAppWindow && enableDefaultAnimation_) || (withAnimation && animationTransitionControllers_.empty())) {
         // use default animation
         property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::DEFAULT));
     } else {
@@ -5722,7 +5768,7 @@ WMError WindowSceneSessionImpl::SetKeyboardTouchHotAreas(const KeyboardTouchHotA
     std::vector<Rect> lastTouchHotAreas;
     property_->GetTouchHotAreas(lastTouchHotAreas);
     KeyboardTouchHotAreas lastKeyboardTouchHotAreas = property_->GetKeyboardTouchHotAreas();
-    if (IsLandscape()) {
+    if (IsLandscape(hotAreas.displayId_)) {
         property_->SetTouchHotAreas(hotAreas.landscapeKeyboardHotAreas_);
     } else {
         property_->SetTouchHotAreas(hotAreas.portraitKeyboardHotAreas_);
@@ -6257,6 +6303,9 @@ void WindowSceneSessionImpl::UpdateNewSize()
             return;
         }
     }
+    if (GetType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        return;
+    }
 
     uint32_t width = windowRect.width_;
     uint32_t height = windowRect.height_;
@@ -6428,8 +6477,9 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is nullptr");
             continue;
         }
-        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Id=%{public}d UpdateDensity", window->GetWindowId());
-        window->SetDefaultDensityEnabledValue(enabled);
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Id=%{public}u set=%{public}u",
+            window->GetWindowId(), window->IsStageDefaultDensityEnabled());
+        window->SetDefaultDensityEnabledValue(window->IsStageDefaultDensityEnabled());
         window->UpdateDensity();
     }
     return WMError::WM_OK;
@@ -6770,14 +6820,17 @@ void WindowSceneSessionImpl::NotifyDisplayInfoChange(const sptr<DisplayInfo>& in
     SingletonContainer::Get<WindowManager>().NotifyDisplayInfoChange(token, displayId, density, orientation);
 }
 
-bool WindowSceneSessionImpl::IsLandscape()
+bool WindowSceneSessionImpl::IsLandscape(uint64_t displayId)
 {
     int32_t displayWidth = 0;
     int32_t displayHeight = 0;
-    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    std::string dispName = "UNKNOWN";
+    displayId = (displayId == DISPLAY_ID_INVALID) ? property_->GetDisplayId() : displayId;
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
     if (display != nullptr) {
         displayWidth = display->GetWidth();
         displayHeight = display->GetHeight();
+        dispName = display->GetName();
     } else {
         auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
         if (defaultDisplayInfo != nullptr) {
@@ -6786,7 +6839,7 @@ bool WindowSceneSessionImpl::IsLandscape()
         }
     }
     bool isLandscape = displayWidth > displayHeight;
-    if (displayWidth == displayHeight) {
+    if (displayWidth == displayHeight && display != nullptr) {
         sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
         if (displayInfo == nullptr) {
             TLOGE(WmsLogTag::DMS, "displayInfo is nullptr");
@@ -6799,12 +6852,15 @@ bool WindowSceneSessionImpl::IsLandscape()
         isLandscape = (orientation == DisplayOrientation::LANDSCAPE ||
             orientation == DisplayOrientation::LANDSCAPE_INVERTED);
     }
+    isLandscape = isLandscape || (dispName == COOPERATION_DISPLAY_NAME);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "c-displayInfo: %{public}" PRIu64 ", %{public}d|%{public}d|%{public}d, %{public}s",
+        displayId, displayWidth, displayHeight, isLandscape, dispName.c_str());
     return isLandscape;
 }
 
 WMError WindowSceneSessionImpl::MoveAndResizeKeyboard(const KeyboardLayoutParams& params)
 {
-    bool isLandscape = IsLandscape();
+    bool isLandscape = IsLandscape(params.displayId_);
     Rect newRect = isLandscape ? params.LandscapeKeyboardRect_ : params.PortraitKeyboardRect_;
     property_->SetRequestRect(newRect);
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, newRect: %{public}s, isLandscape: %{public}d",
@@ -6817,11 +6873,12 @@ WMError WindowSceneSessionImpl::AdjustKeyboardLayout(const KeyboardLayoutParams 
     TLOGI(WmsLogTag::WMS_KEYBOARD, "g: %{public}u, "
         "LAvoid: %{public}d, PAvoid: %{public}d, "
         "LRect: %{public}s, PRect: %{public}s, "
-        "LPRect: %{public}s, PPRect: %{public}s",
+        "LPRect: %{public}s, PPRect: %{public}s, dispId: %{public}" PRIu64,
         static_cast<uint32_t>(params.gravity_), params.landscapeAvoidHeight_, params.portraitAvoidHeight_,
         params.LandscapeKeyboardRect_.ToString().c_str(), params.PortraitKeyboardRect_.ToString().c_str(),
-        params.LandscapePanelRect_.ToString().c_str(), params.PortraitPanelRect_.ToString().c_str());
+        params.LandscapePanelRect_.ToString().c_str(), params.PortraitPanelRect_.ToString().c_str(), params.displayId_);
     property_->SetKeyboardLayoutParams(params);
+    property_->AddKeyboardLayoutParams(params.displayId_, params);
     auto ret = MoveAndResizeKeyboard(params);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard move and resize failed");
@@ -6831,6 +6888,19 @@ WMError WindowSceneSessionImpl::AdjustKeyboardLayout(const KeyboardLayoutParams 
         return static_cast<WMError>(hostSession->AdjustKeyboardLayout(params));
     }
     return WMError::WM_OK;
+}
+
+void WindowSceneSessionImpl::WindowScreenListener::OnDisconnect(ScreenId screenId)
+{
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+    for (const auto& [_, windPair] : windowSessionMap_) {
+        if (windPair.second->GetType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+            auto& window = windPair.second;
+            window->GetProperty()->ClearCachedKeyboardParamsOnScreenDisconnected(screenId);
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "Clear cached keyboardParams: %{public}d, dispId: %{public}" PRIu64,
+                window->GetProperty()->GetPersistentId(), screenId);
+        }
+    }
 }
 
 WMError WindowSceneSessionImpl::SetImmersiveModeEnabledState(bool enable)

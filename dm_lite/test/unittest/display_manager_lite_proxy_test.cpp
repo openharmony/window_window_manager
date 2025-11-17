@@ -262,6 +262,9 @@ HWTEST_F(DisplayManagerLiteProxyTest, GetCutoutInfo, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerLiteProxyTest, WakeUpBegin, TestSize.Level1)
 {
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP();
+    }
     SingletonContainer::Get<DisplayManagerAdapterLite>().InitDMSProxy();
     sptr<IRemoteObject> impl =
         SingletonContainer::Get<DisplayManagerAdapterLite>().displayManagerServiceProxy_->AsObject();

@@ -48,6 +48,7 @@ const std::string SCREENSHOT_WINDOW_NAME_PREFIX = "ScreenShotWindow";
 const std::string PREVIEW_WINDOW_NAME_PREFIX = "PreviewWindow";
 const std::string VOICEINPUT_WINDOW_NAME_PREFIX = "__VoiceHardwareInput";
 const std::string SCREEN_LOCK_WINDOW = "scbScreenLock";
+const std::string COOPERATION_DISPLAY_NAME = "Cooperation";
 } // namespace
 
 static bool operator==(const MMI::Rect left, const MMI::Rect right)
@@ -370,15 +371,21 @@ static void UpdateKeyboardHotAreasInner(const sptr<SceneSession>& sceneSession, 
         sceneSession->GetKeyboardSession() : sceneSession;
     auto sessionProperty = session->GetSessionProperty();
     KeyboardTouchHotAreas keyboardTouchHotAreas = sessionProperty->GetKeyboardTouchHotAreas();
-    auto displayId = sessionProperty->GetDisplayId();
+    auto displayId = (keyboardTouchHotAreas.displayId_ == DISPLAY_ID_INVALID) ?
+                     sessionProperty->GetDisplayId() :
+                     keyboardTouchHotAreas.displayId_;
     std::map<ScreenId, ScreenProperty> screensProperties =
         ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
     if (screensProperties.find(displayId) == screensProperties.end()) {
+        TLOGW(WmsLogTag::WMS_KEYBOARD, "Set k-hotAreas failed: %{public}" PRIu64, displayId);
         return;
     }
     const auto& screenProperty = screensProperties[displayId];
-    bool isLandscape = screenProperty.GetBounds().rect_.GetWidth() > screenProperty.GetBounds().rect_.GetHeight();
-    if (screenProperty.GetBounds().rect_.GetWidth() == screenProperty.GetBounds().rect_.GetHeight()) {
+    auto displayRect = screenProperty.GetBounds().rect_;
+    int32_t displayWidth = displayRect.GetWidth();
+    int32_t displayHeight = displayRect.GetHeight();
+    bool isLandscape = displayWidth > displayHeight;
+    if (displayWidth == displayHeight) {
         DisplayOrientation orientation = screenProperty.GetDisplayOrientation();
         if (orientation == DisplayOrientation::UNKNOWN) {
             TLOGW(WmsLogTag::WMS_KEYBOARD, "Display orientation is UNKNOWN");
@@ -386,6 +393,9 @@ static void UpdateKeyboardHotAreasInner(const sptr<SceneSession>& sceneSession, 
         isLandscape = (orientation == DisplayOrientation::LANDSCAPE ||
             orientation == DisplayOrientation::LANDSCAPE_INVERTED);
     }
+    auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
+    std::string dispName = (display != nullptr) ? display->GetName() : "UNKNOWN";
+    isLandscape = isLandscape || (dispName == COOPERATION_DISPLAY_NAME);
     if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         if (keyboardTouchHotAreas.isKeyboardEmpty()) {
             return;
