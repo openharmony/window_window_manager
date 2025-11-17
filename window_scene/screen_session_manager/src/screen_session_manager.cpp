@@ -9472,11 +9472,17 @@ void ScreenSessionManager::SwitchModeHandleExternalScreen(bool isSwitchToPcMode)
         }
     }
     TLOGI(WmsLogTag::DMS, "screenIds:%{public}s", oss.str().c_str());
-    if (hasExternalScreen && !isSwitchToPcMode) {
+    if (hasExternalScreen) {
         ScreenId screenGroupId = SCREEN_GROUP_ID_DEFAULT;
         MakeMirror(SCREEN_ID_DEFAULT, externalScreenIds, screenGroupId);
-        TLOGI(WmsLogTag::DMS, "notify cast screen connect");
-        NotifyCastWhenScreenConnectChange(true);
+        if (!isSwitchToPcMode) {
+            TLOGI(WmsLogTag::DMS, "notify cast screen connect");
+            NotifyCastWhenScreenConnectChange(true);
+            ScreenPowerUtils::EnablePowerForceTimingOut();
+            DisablePowerOffRenderControl(SCREEN_ID_FULL);
+        } else {
+            ScreenPowerUtils::DisablePowerForceTimingOut();
+        }
     }
     SwitchModeOffScreenRenderingAdapter(externalScreenIds);
     ConfigureDpi();
