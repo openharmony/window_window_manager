@@ -5903,10 +5903,11 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
             GetWindowId(), static_cast<uint32_t>(mode));
         return WSError::WS_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
     }
-    WMError ret = UpdateWindowModeImmediately(mode);
     if (mode != WindowMode::WINDOW_MODE_FULLSCREEN) {
         UpdateIsShowDecorInFreeMultiWindow(true);
     }
+    WMError ret = UpdateWindowModeImmediately(mode);
+
     if (windowSystemConfig_.IsPcWindow()) {
         if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
             ret = SetLayoutFullScreenByApiVersion(true);
