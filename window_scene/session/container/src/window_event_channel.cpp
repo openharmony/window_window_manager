@@ -233,11 +233,10 @@ void WindowEventChannel::PrintKeyEvent(const std::shared_ptr<MMI::KeyEvent>& eve
         return;
     }
     std::vector<MMI::KeyEvent::KeyItem> eventItems = event->GetKeyItems();
-    WLOGFD("KeyCode:%{public}d,KeyAction:%{public}s,keyItemsCount:%{public}zu", event->GetKeyCode(),
+    WLOGFD("KeyAction:%{public}s,keyItemsCount:%{public}zu",
         MMI::KeyEvent::ActionToString(event->GetKeyAction()), eventItems.size());
     for (const auto &item : eventItems) {
-        WLOGFD("KeyCode:%{public}d,IsPressed:%{public}d,GetUnicode:%{public}d",
-            item.GetKeyCode(), item.IsPressed(), item.GetUnicode());
+        WLOGFD("IsPressed:%{public}d,GetUnicode:%{public}d", item.IsPressed(), item.GetUnicode());
     }
 }
 
