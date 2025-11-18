@@ -1785,6 +1785,11 @@ HWTEST_F(SessionProxyTest, UpdateKeyFrameCloneNode, Function | SmallTest | Level
     auto rsTransaction = std::make_shared<RSTransaction>();
     ASSERT_NE(rsTransaction, nullptr);
     ASSERT_EQ(sProxy->UpdateKeyFrameCloneNode(rsKeyFrameNode, rsTransaction), WSError::WS_OK);
+
+    rsKeyFrameNode.reset();
+    rsTransaction.reset();
+    ASSERT_EQ(sProxy->UpdateKeyFrameCloneNode(rsKeyFrameNode, rsTransaction), WSError::WS_ERROR_IPC_FAILED);
+
 }
 
 /**
