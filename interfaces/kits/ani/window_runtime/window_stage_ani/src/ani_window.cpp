@@ -22,9 +22,11 @@
 
 #include "ani.h"
 #include "ani_err_utils.h"
+#include "ani_remote_object.h"
 #include "ani_transition_controller.h"
 #include "ani_window_utils.h"
 #include "ani_window_animation_utils.h"
+#include "ets_request_info.h"
 #include "interop_js/arkts_esvalue.h"
 #include "interop_js/arkts_interop_js_api.h"
 #include "interop_js/hybridgref_ani.h"
@@ -2367,6 +2369,66 @@ void AniWindow::SetParentWindow(ani_env* env, ani_int windowId)
         TLOGI(WmsLogTag::WMS_SUB, "[ANI] windowId: %{public}u set parent window id: %{public}u end",
             windowToken_->GetWindowId(), newParentWindowId);
     }
+}
+
+void AniWindow::BindDialogTarget(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_object argv, ani_ref deathCallback)
+{
+    TLOGI(WmsLogTag::WMS_DIALOG, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow != nullptr) {
+        return aniWindow->OnBindDialogTarget(env, argv, deathCallback);
+    } else {
+        TLOGE(WmsLogTag::WMS_DIALOG, "[ANI] aniWindow is nullptr");
+    }
+}
+
+void AniWindow::OnBindDialogTarget(ani_env* env, ani_object argv, ani_ref deathCallback)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "[ANI] window is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "permission denied, require system application!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+        return;
+    }
+
+    sptr<IRemoteObject> token = GetBindDialogToken(env, argv);
+    if (token == nullptr) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "token is null!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return;
+    }
+
+    registerManager_->RegisterListener(windowToken_, "dialogDeathRecipient",
+        CaseType::CASE_WINDOW, env, deathCallback, 0.0);
+    wptr<Window> weakToken(windowToken_);
+    auto window = weakToken.promote();
+    if (window == nullptr) {
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->BindDialogTarget(token));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "[ANI] bind dialog target failed, result=%{public}d", ret);
+        AniWindowUtils::AniThrowError(env, ret, "Bind Dialog Target failed");
+    }
+    TLOGI(WmsLogTag::WMS_SYSTEM, "BindDialogTarget end, window [%{public}u, %{public}s]",
+        window->GetWindowId(), window->GetWindowName().c_str());    
+}
+
+static sptr<IRemoteObject> GetBindDialogToken(ani_env* env, ani_object argv) 
+{
+    sptr<IRemoteObject> token = AniGetNativeRemoteObject(env, argv);
+    if (token != nullptr) {
+        return token;
+    }
+    std::shared_ptr<AbilityRuntime::RequestInfo> requestInfo = 
+        AbilityRuntime::RequestInfo::UnwrapRequestInfo(env, argv);
+    return (requestInfo != nullptr) ? requestInfo->GetToken() : nullptr;
 }
 
 ani_object AniWindow::GetTransitionController(ani_env* env, ani_object obj, ani_long nativeObj)
@@ -5446,6 +5508,10 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(GetParentWindow)},
         ani_native_function {"setParentWindow", "JI:V",
             reinterpret_cast<void *>(SetParentWindow)},
+        ani_native_function {"bindDialogTargetWithRemoteObjectSync", nullptr,
+            reinterpret_cast<void *>(AniWindow::BindDialogTarget)},
+        ani_native_function {"bindDialogTargetWithRequestInfoSync", nullptr,
+            reinterpret_cast<void *>(AniWindow::BindDialogTarget)},
         ani_native_function {"destroyWindowSync", nullptr,
             reinterpret_cast<void *>(AniWindow::DestroyWindow)},
         ani_native_function {"isWindowShowingSync", nullptr,
