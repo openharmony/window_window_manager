@@ -22,7 +22,7 @@ import bundleManager from '@ohos.bundle.bundleManager';
 import image from '@ohos.multimedia.image';
 import hilog from '@ohos.hilog';
 import rpc from '@ohos.rpc';
-import dialogRequest from '@ohos.app.ability.dialogRequest'；
+import dialogRequest from '@ohos.app.ability.dialogRequest';
 
 export type AsyncCallbackVoid = (err: BusinessError) => void;
 export type WindowEventCallback = (data: window.WindowEventType) => void;
