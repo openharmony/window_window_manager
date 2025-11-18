@@ -2871,6 +2871,8 @@ export class WindowInternal implements Window {
     private native destroyWindowSync(nativeObj: long): void;
     private native isWindowShowingSync(nativeObj: long): boolean;
     private native isWindowHighlightedSync(nativeObj: long): boolean;
+    private native hideWithAnimationSync(nativeObj: long): void;
+    private native showWithAnimationSync(nativeObj: long): void;
     private native getParentWindow(nativeObj: long): Window;
     private native setParentWindow(nativeObj: long, windowId: int): void;
     private native setContentAspectRatio(
@@ -4204,6 +4206,50 @@ export class WindowInternal implements Window {
       return this.isWindowHighlightedSync(this.nativeObj);
     }
 
+    public hideWithAnimation(callback: AsyncCallback<void>): void {
+      taskpool.execute((): void => {
+        this.hideWithAnimationSync(this.nativeObj);
+      }).then((ret: NullishType) => {
+        callback(new BusinessError(), undefined);
+      }).catch((err: NullishType) => {
+        callback(err as BusinessError, undefined);
+      });
+    }
+
+    public hideWithAnimation(): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.hideWithAnimationSync(this.nativeObj);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public showWithAnimation(callback: AsyncCallback<void>): void {
+      taskpool.execute((): void => {
+        this.showWithAnimationSync(this.nativeObj);
+      }).then((ret: NullishType) => {
+        callback(new BusinessError(), undefined);
+      }).catch((err: NullishType) => {
+        callback(err as BusinessError, undefined);
+      });
+    }
+
+    public showWithAnimation(): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.showWithAnimationSync(this.nativeObj);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
     public getParentWindow(): Window {
       return this.getParentWindow(this.nativeObj);
     }
@@ -4725,6 +4771,10 @@ export interface Window {
     destroyWindow(): Promise<void>;
     isWindowShowing(): boolean;
     isWindowHighlighted(): boolean;
+    hideWithAnimation(callback: AsyncCallback<void>): void;
+    hideWithAnimation(): Promise<void>;
+    showWithAnimation(callback: AsyncCallback<void>): void;
+    showWithAnimation(): Promise<void>;
     getParentWindow(): Window;
     setParentWindow(windowId: int): Promise<void>;
     setContentAspectRatio(ratio: number, isPersistent?: boolean, needUpdateRect?: boolean): Promise<void>;
