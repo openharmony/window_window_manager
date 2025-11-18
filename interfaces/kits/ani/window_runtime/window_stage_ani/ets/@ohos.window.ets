@@ -2540,8 +2540,10 @@ export class WindowStageInternal implements WindowStage {
       nativeObj: long, supportedWindowModes: Array<bundleManager.SupportWindowMode>,
       grayOutMaximizeButton: boolean): void;
 
-    native onSync(nativeObj: long, eventType: 'windowStageEvent', callback: Object): void;
-    native offSync(nativeObj: long, eventType: 'windowStageEvent', callback?: Object): void;
+    public native getSubWindowSync(nativeObj: long): Array<Window>;
+    public native createSubWindowWithOptionsSync(nativeObj: long, name: string, options: SubWindowOptions): Window;
+    native onSync(nativeObj: long, eventType: string, callback: Object): void;
+    native offSync(nativeObj: long, eventType: string, callback?: Object): void;
 
     public loadContent(path: string, storage: LocalStorage, callback: AsyncCallback<void>): void {
       try {
@@ -2641,12 +2643,47 @@ export class WindowStageInternal implements WindowStage {
         }).catch((err: NullishType) => {
         });
     }
+
+    public getSubWindow(): Promise<Array<Window>> {
+      return new Promise<Array<Window>>((resolve: (value: Array<Window>) => void,
+        reject: (error: BusinessError) => void) => {
+          taskpool.execute((): Array<Window> => {
+              return this.getSubWindowSync(this.nativeObj);
+          }).then((ret: NullishType) => {
+              resolve(ret as Array<Window>);
+          }).catch((err: NullishType) => {
+              reject(err as BusinessError);
+          });
+      });
+    }
+
+    public getSubWindow(callback: AsyncCallback<Array<Window>>): void {
+      taskpool.execute((): Array<Window> => {
+          return this.getSubWindowSync(this.nativeObj);
+      }).then((ret: NullishType) => {
+          callback(new BusinessError(), ret as Array<Window>);
+      }).catch((err: NullishType) => {
+          callback(err as BusinessError, undefined);
+      });
+    }
+
+    public createSubWindowWithOptions(name: string, options: SubWindowOptions): Promise<Window> {
+      return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void) => {
+          taskpool.execute((): Window => {
+              return this.createSubWindowWithOptionsSync(this.nativeObj, name, options);
+          }).then((ret: NullishType) => {
+              resolve(ret as Window);
+          }).catch((err: NullishType) => {
+              reject(err as BusinessError);
+          });
+      });
+    }
     
-    public on(eventType: 'windowStageEvent', callback: Callback<WindowStageEventType>): void {
+    public on<T>(eventType: string, callback: Callback<T>): void {
       this.onSync(this.nativeObj, eventType, callback);
     }
 
-    public off(eventType: 'windowStageEvent', callback?: Callback<WindowStageEventType>): void {
+    public off<T>(eventType: string, callback?: Callback<T>): void {
       this.offSync(this.nativeObj, eventType, callback);
     }
 
@@ -2743,6 +2780,14 @@ export class WindowStageInternal implements WindowStage {
         });
       });
     }
+
+    public onWindowStageEvent(callback: Callback<WindowStageEventType>): void {
+      this.onSync(this.nativeObj, 'windowStageEvent', callback);
+    }
+
+    public offWindowStageEvent(callback?: Callback<WindowStageEventType>): void {
+      this.offSync(this.nativeObj, 'windowStageEvent', callback);
+    }
 }
 
 export interface WindowStage {
@@ -2767,8 +2812,13 @@ export interface WindowStage {
     setSupportedWindowModes(
       supportedWindowModes: Array<bundleManager.SupportWindowMode>, grayOutMaximizeButton: boolean): Promise<void>;
 
-    on(eventType: 'windowStageEvent', callback: Callback<WindowStageEventType>): void;
-    off(eventType: 'windowStageEvent', callback?: Callback<WindowStageEventType>): void;
+    getSubWindow(): Promise<Array<Window>>;
+    getSubWindow(callback: AsyncCallback<Array<Window>>): void;
+    createSubWindowWithOptions(name: string, options: SubWindowOptions): Promise<Window>;
+    on<T>(eventType: string, callback: Callback<T>): void;
+    off<T>(eventType: string, callback?: Callback<T>): void;
+    onWindowStageEvent(callback: Callback<WindowStageEventType>): void;
+    offWindowStageEvent(callback?: Callback<WindowStageEventType>): void;
 }
 
 export class WindowInternal implements Window {
@@ -2779,6 +2829,10 @@ export class WindowInternal implements Window {
     public setNativeObj(nativeObj: long): void {
         this.nativeObj = nativeObj;
     }
+
+    private native hideSync(nativeObj: long): void;
+    private native createSubWindowWithOptionsSync(nativeObj: long, name: string, options: SubWindowOptions): Window;
+    private native restore(nativeObj: long): void;
 
     private static native nativeTransferStatic(input: ESValue): Object;
     private static native nativeTransferDynamic(nativeObj: long): ESValue;
@@ -2918,6 +2972,53 @@ export class WindowInternal implements Window {
         animation: TransitionAnimation): void;
     private native getWindowTransitionAnimationSync(nativeObj: long,
       transitionType: WindowTransitionType): TransitionAnimation | undefined;
+
+    public hide(): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void,
+        reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.hideSync(this.nativeObj);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public hide(callback: AsyncCallback<void>): void {
+      taskpool.execute((): void => {
+        this.hideSync(this.nativeObj);
+      }).then((ret: NullishType) => {
+        callback(new BusinessError(), undefined);
+      }).catch((err: NullishType) => {
+        callback(err as BusinessError, undefined);
+      });
+    }
+
+    public createSubWindowWithOptions(name: string, options: SubWindowOptions): Promise<Window> {
+      return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void) => {
+        taskpool.execute((): Window => {
+          return this.createSubWindowWithOptionsSync(this.nativeObj, name, options); 
+        }).then((ret: NullishType) => {
+          resolve(ret as Window);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public restore(): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
+        taskpool.execute((): void => {
+          this.restore(this.nativeObj);
+        }).then((ret: NullishType): void => {
+          resolve(undefined);
+        }).catch((err: NullishType): void => {
+          reject(err as BusinessError);
+        });
+      });
+    }  
 
     public static transferStatic(input: Any): Object {
       return WindowInternal.nativeTransferStatic(ESValue.wrap(input));
@@ -4599,6 +4700,22 @@ export class WindowInternal implements Window {
     public keepKeyboardOnFocus(keepKeyboardFlag: boolean): void {
       this.keepKeyboardOnFocusSync(this.nativeObj, keepKeyboardFlag);
     }
+
+    public onWindowEvent(callback: Callback<WindowEventType>): void {
+      this.onSync(this.nativeObj, 'windowEvent', callback);
+    }
+
+    public offWindowEvent(callback?: Callback<WindowEventType>): void {
+      this.offSync(this.nativeObj, 'windowEvent', callback);
+    }
+
+    public onSubWindowClose(callback: Callback<void>): void {
+      this.onSync(this.nativeObj, 'subWindowClose', callback);
+    }
+
+    public offSubWindowClose(callback?: Callback<void>): void {
+      this.offSync(this.nativeObj, 'subWindowClose', callback);
+    }
 }
 
 export enum GlobalWindowMode {
@@ -4617,6 +4734,10 @@ export enum ScreenshotEventType {
 }
 
 export interface Window {
+    hide(): Promise<void>;
+    hide(callback: AsyncCallback<void>): void;
+    createSubWindowWithOptions(name: string, options: SubWindowOptions): Promise<Window>;
+    restore(): Promise<void>;
     resize(width: int, height: int): Promise<void>;
     moveWindowTo(x: int, y: int): Promise<void>;
     resize(width: int, height: int, callback: AsyncCallback<void>): void;
@@ -4833,6 +4954,10 @@ export interface Window {
     setWindowTransitionAnimation(transitionType: WindowTransitionType, animation: TransitionAnimation): Promise<void>;
     getWindowTransitionAnimation(transitionType: WindowTransitionType): TransitionAnimation | undefined;
     keepKeyboardOnFocus(enable: boolean): void;
+    onWindowEvent(callback: Callback<WindowEventType>): void;
+    offWindowEvent(callback?: Callback<WindowEventType>): void;
+    onSubWindowClose(callback: Callback<void>): void;
+    offSubWindowClose(callback?: Callback<void>): void;
 }
 
 export native function CreateWindowStage(scene: long): WindowStageInternal;
@@ -4867,6 +4992,29 @@ native function getGlobalWindowModeSync(nativeObj: long, displayId?: long): int;
 native function setStartWindowBackgroundColorSync(nativeObj: long, moduleName: string, abilityName: string,
   color: long): void;
 native function notifyScreenshotEventSync(nativeObj: long, eventType: ScreenshotEventType): void;
+native function toggleShownStateForAllAppWindowsSync(nativeObj: long): void;
+
+export function toggleShownStateForAllAppWindows(callback: AsyncCallback<void>): void {
+      taskpool.execute((): void => {
+          toggleShownStateForAllAppWindowsSync(nativeObj);
+      }).then((ret: NullishType) => {
+          callback(new BusinessError(), undefined);
+      }).catch((err: NullishType) => {
+          callback(err as BusinessError, undefined);
+      });
+}
+
+export function toggleShownStateForAllAppWindows(): Promise<void> {
+  return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+    taskpool.execute((): void => {
+        return toggleShownStateForAllAppWindowsSync(nativeObj);
+    }).then((ret: NullishType) => {
+        resolve(undefined);
+    }).catch((err: NullishType) => {
+        reject(err as BusinessError);
+    });
+  });
+}
 
 export function setWatermarkImageForAppWindows(pixelMap: image.PixelMap | undefined): Promise<void> {
   return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {

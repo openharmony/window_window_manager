@@ -87,6 +87,9 @@ public:
     static void SetCustomDensity(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_double density, ani_boolean applyToSubWindow);
     static void SetDefaultDensityEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enabled);
+    static ani_object GetSubWindow(ani_env* env, ani_object obj, ani_long nativeObj);
+    static ani_object CreateSubWindowWithOptions(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_string name, ani_object options);
     static void RemoveStartingWindow(ani_env* env, ani_object obj, ani_long nativeObj);
     static void SetSupportedWindowModes(
         ani_env* env, ani_object obj, ani_long nativeObj, ani_object aniSupportedWindowModes);
@@ -111,6 +114,8 @@ private:
     void OnSetSupportedWindowModes(ani_env* env, ani_object aniSupportedWindowModes);
     void OnSetSupportedWindowModesWithGrayOutMaximizeButton(
         ani_env* env, ani_object aniSupportedWindowModes, ani_boolean grayOutMaximizeButton);
+    ani_object OnGetSubWindow(ani_env* env);
+    ani_object OnCreateSubWindowWithOptions(ani_env* env, ani_string name, ani_object options);
     void OnRemoveStartingWindow(ani_env* env);
 
     static void ConvertImageFit(ImageFit& dst, const Ark_ImageFit& src);

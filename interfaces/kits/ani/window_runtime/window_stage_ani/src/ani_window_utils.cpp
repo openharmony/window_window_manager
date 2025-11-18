@@ -883,6 +883,24 @@ ani_object AniWindowUtils::CreateAniAvoidArea(ani_env* env, const AvoidArea& avo
     return aniAvoidArea;
 }
 
+ani_object AniWindowUtils::CreateAniWindowArray(ani_env* env, std::vector<ani_ref>& windows)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    ani_array windowArray = nullptr;
+
+    if (env->Array_New(windows.size(), CreateAniUndefined(env), &windowArray) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] create array fail");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    for (size_t i = 0; i < windows.size(); i++) {
+        if (env->Array_Set(windowArray, i, windows[i]) != ANI_OK) {
+            TLOGE(WmsLogTag::DEFAULT, "[ANI] set window array failed");
+            return AniWindowUtils::CreateAniUndefined(env);
+        }
+    }
+    return windowArray;
+}
+
 ani_object AniWindowUtils::CreateAniSystemBarTintState(ani_env* env, DisplayId displayId,
     const SystemBarRegionTints& tints)
 {
@@ -2452,5 +2470,138 @@ bool AniWindowUtils::ParseZLevelParam(ani_env *env, ani_object aniObject, const 
     TLOGI(WmsLogTag::WMS_SUB, "zLevel: %{public}d", zLevel);
     return true;
 }
+
+bool AniWindowUtils::ParseSubWindowOption(ani_env* env, ani_object jsObject, const sptr<WindowOption>& windowOption)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] null env");
+        return false;
+    }
+    if (jsObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "jsObject is null");
+        return false;
+    }
+    if (windowOption == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "windowOption is null");
+        return false;
+    }
+    std::string title;
+    ani_ref result;
+    ani_status titleResult = env->Object_GetPropertyByName_Ref(jsObject, "title", &result);
+    if (titleResult != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to get title");
+        return false;
+    }
+    ani_string aniResult = reinterpret_cast<ani_string>(result);
+    ani_status optionFirst = AniWindowUtils::GetStdString(env, aniResult, title);
+    if (optionFirst != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to title");
+        return false;
+    }
+    ani_boolean decorEnabled;
+    auto ret = env->Object_GetPropertyByName_Boolean(jsObject, "decorEnabled", &decorEnabled);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to decorEnabled");
+        return false;
+    }
+    windowOption->SetSubWindowTitle(title);
+    windowOption->SetSubWindowDecorEnable(decorEnabled);
+    if (!ParseRectParams(env, jsObject, windowOption)) {
+        return false;
+    }
+    if (!ParseModalityParams(env, jsObject, windowOption)) {
+        return false;
+    }
+    return ParseZLevelParams(env, jsObject, windowOption);
+}
+
+bool AniWindowUtils::ParseModalityParams(ani_env* env, ani_object jsObject, const sptr<WindowOption>& windowOption)
+{
+    ani_boolean isModal { false };
+    env->Object_GetPropertyByName_Boolean(jsObject, "isModal", &isModal);
+    if (isModal) {
+        windowOption->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
+    }
+    ani_boolean isTopmost { false };
+    env->Object_GetPropertyByName_Boolean(jsObject, "isTopmost", &isTopmost);
+    if (!isModal && isTopmost) {
+        TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow not support topmost");
+        return false;
+    }
+    windowOption->SetWindowTopmost(isTopmost);
+    ani_int aniModalityType { 0 };
+    auto ret = env->Object_GetPropertyByName_Int(jsObject, "modalityType", &aniModalityType);
+    ApiModalityType apiModalityType = static_cast<ApiModalityType>(static_cast<uint32_t>(aniModalityType));
+    if (ret == ANI_OK) {
+        if (!isModal) {
+            TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow not support modalityType");
+            return false;
+        }
+        using T = std::underlying_type_t<ApiModalityType>;
+        T modalityType = static_cast<T>(apiModalityType);
+        if (modalityType >= static_cast<T>(ApiModalityType::BEGIN) &&
+            modalityType <= static_cast<T>(ApiModalityType::END)) {
+            auto type = JS_TO_NATIVE_MODALITY_TYPE_MAP.at(apiModalityType);
+            if (type == ModalityType::APPLICATION_MODALITY) {
+                windowOption->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
+            }
+        } else {
+            TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to modalityType");
+            return false;
+        }
+    }
+    TLOGI(WmsLogTag::WMS_SUB, "isModal: %{public}d, isTopmost: %{public}d, WindowFlag: %{public}d",
+        isModal, isTopmost, windowOption->GetWindowFlags());
+    return true;
+}
+
+bool AniWindowUtils::ParseZLevelParams(ani_env* env, ani_object jsObject, const sptr<WindowOption>& windowOption)
+{
+    ani_int zLevel { 0 };
+    ani_status ani_zLevel = env->Object_GetPropertyByName_Int(jsObject, "zLevel", &zLevel);
+    ani_boolean isModal { 0 };
+    ani_status ani_isModal = env->Object_GetPropertyByName_Boolean(jsObject, "isModal", &isModal);
+    if (ani_zLevel == ANI_OK) {
+        if (zLevel < MINIMUM_Z_LEVEL || zLevel > MAXIMUM_Z_LEVEL) {
+            TLOGE(WmsLogTag::WMS_SUB, "zLevel value %{public}d exceeds valid range [-10000, 10000]!", zLevel);
+            return false;
+        }
+        if (ani_isModal == ANI_OK) {
+            if (isModal) {
+                TLOGE(WmsLogTag::WMS_SUB, "modal window not support custom zLevel");
+                return false;
+            }
+        }
+        windowOption->SetSubWindowZLevel(zLevel);
+    }
+    TLOGI(WmsLogTag::WMS_SUB, "zLevel: %{public}d", zLevel);
+    return true;
+}
+
+bool AniWindowUtils::ParseRectParams(ani_env* env, ani_object jsObject, const sptr<WindowOption>& windowOption)
+{
+    ani_ref rectRef;
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(jsObject, "windowRect", &rectRef)) {
+        TLOGE(WmsLogTag::WMS_SUB, "get windowRect fail");
+        return false;
+    }
+    ani_boolean isUndefined;
+    if (ANI_OK != env->Reference_IsUndefined(rectRef, &isUndefined) || isUndefined) {
+        TLOGI(WmsLogTag::WMS_SUB, "windowRect is undefined");
+        return true;
+    }
+    Rect windowRect;
+    if (!GetPropertyRectObject(env, "windowRect", (ani_object)rectRef, windowRect)) {
+        return false;
+    }
+    if (windowRect.width_ <= 0 || windowRect.height_ <= 0) {
+        TLOGE(WmsLogTag::WMS_SUB, "width or height should greater than 0!");
+        return false;
+    }
+    TLOGI(WmsLogTag::WMS_SUB, "windowRect: %{public}s", windowRect.ToString().c_str());
+    windowOption->SetWindowRect(windowRect);
+    return true;
+}
+
 } // namespace Rosen
 } // namespace OHOS
