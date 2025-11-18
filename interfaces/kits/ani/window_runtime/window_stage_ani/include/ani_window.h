@@ -72,6 +72,8 @@ public:
     static ani_boolean IsFocused(ani_env* env, ani_object obj, ani_long nativeObj);
     static void LoadContent(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_string path, ani_object storage);
+    static void LoadContentByName(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_string path, ani_object storage);
     static void SetWindowSystemBarEnable(ani_env* env, ani_object obj, ani_long nativeObj, ani_object nameAry);
     static void SetWindowTouchable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isTouchable);
     static void SetDialogBackGestureEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enabled);
@@ -231,7 +233,7 @@ private:
     void OnRequestFocus(ani_env* env, ani_boolean isFocused);
     void OnSetSubWindowModal(ani_env* env, ani_boolean isModal);
     void OnSetSubWindowModalType(ani_env* env, ani_boolean isModal, ani_int modalityType);
-    void OnLoadContent(ani_env* env, ani_string path, ani_object storage);
+    void OnLoadContent(ani_env* env, ani_string path, ani_object storage, bool isLoadByName);
     void OnSetWindowSystemBarEnable(ani_env* env, ani_object nameAry);
     void OnSetWindowTouchable(ani_env* env, ani_boolean isTouchable);
     void OnSetDialogBackGestureEnabled(ani_env* env, ani_boolean enabled);

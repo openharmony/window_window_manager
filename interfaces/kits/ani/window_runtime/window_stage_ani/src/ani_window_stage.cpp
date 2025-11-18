@@ -114,13 +114,25 @@ void AniWindowStage::LoadContent(ani_env* env, ani_object obj, ani_long nativeOb
     TLOGI(WmsLogTag::WMS_LIFE, "[ANI]");
     AniWindowStage* aniWindowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
     if (aniWindowStage != nullptr) {
-        aniWindowStage->OnLoadContent(env, path, storage);
+        aniWindowStage->OnLoadContent(env, path, storage, false);
     } else {
         TLOGE(WmsLogTag::WMS_LIFE, "[ANI] aniWindowStage is nullptr");
     }
 }
 
-void AniWindowStage::OnLoadContent(ani_env* env, ani_string path, ani_object storage)
+void AniWindowStage::LoadContentByName(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path,
+    ani_object storage)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "[ANI]");
+    AniWindowStage* aniWindowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
+    if (aniWindowStage != nullptr) {
+        aniWindowStage->OnLoadContent(env, path, storage, true);
+    } else {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] aniWindowStage is nullptr");
+    }
+}
+
+void AniWindowStage::OnLoadContent(ani_env* env, ani_string path, ani_object storage, bool isLoadByName)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "[ANI]");
     auto windowScene = GetWindowScene().lock();
@@ -137,7 +149,12 @@ void AniWindowStage::OnLoadContent(ani_env* env, ani_string path, ani_object sto
     }
     std::string contentPath;
     AniWindowUtils::GetStdString(env, path, contentPath);
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(mainWindow->NapiSetUIContent(contentPath, env, storage));
+    WmErrorCode ret;
+    if (isLoadByName) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(mainWindow->AniSetUIContentByName(contentPath, env, storage));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(mainWindow->AniSetUIContent(contentPath, env, storage));
+    }
     TLOGI(WmsLogTag::WMS_LIFE, "[ANI] Window [%{public}u, %{public}s] load content end, ret=%{public}d",
         mainWindow->GetWindowId(), mainWindow->GetWindowName().c_str(), ret);
     if (ret != WmErrorCode::WM_OK) {

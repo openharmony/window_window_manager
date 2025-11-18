@@ -2525,6 +2525,7 @@ export class WindowStageInternal implements WindowStage {
     private static native nativeTransferStatic(input: ESValue): Object;
     private static native nativeTransferDynamic(nativeObj: long): ESValue;
     public native loadContentSync(nativeObj: long, path: string, storage?: LocalStorage): void;
+    public native loadContentByNameSync(nativeObj: long, path: string, storage?: LocalStorage): void;
     public native disableWindowDecorSync(nativeObj:long): void;
     public native setShowOnLockScreenSync(nativeObj:long, showOnLockScreen: boolean): void;
     public native setWindowModal(nativeObj: long, isModal: boolean): void;
@@ -2575,7 +2576,36 @@ export class WindowStageInternal implements WindowStage {
         callback(err as BusinessError, undefined);
       }
     }
-  
+
+    public loadContentByName(name: string, storage: LocalStorage, callback: AsyncCallback<void>): void {
+      try {
+        this.loadContentByNameSync(this.nativeObj, name, storage);
+        callback(new BusinessError(), undefined);
+      } catch (err: Error) {
+        callback(err as BusinessError, undefined);
+      }
+    }
+
+    public loadContentByName(name: string, storage?: LocalStorage): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        try {
+          this.loadContentByNameSync(this.nativeObj, name, storage);
+          resolve(undefined);
+        } catch (err: Error) {
+          reject(err as BusinessError);
+        }
+      });
+    }
+
+    public loadContentByName(name: string, callback: AsyncCallback<void>): void {
+      try {
+        this.loadContentByNameSync(this.nativeObj, name, undefined);
+        callback(new BusinessError(), undefined);
+      } catch (err: Error) {
+        callback(err as BusinessError, undefined);
+      }
+    }
+
     public disableWindowDecor(): void {
         this.disableWindowDecorSync(this.nativeObj);
     }
@@ -2796,6 +2826,9 @@ export interface WindowStage {
     loadContent(path: string, storage: LocalStorage, callback: AsyncCallback<void>): void;
     loadContent(path: string, storage?: LocalStorage): Promise<void>;
     loadContent(path: string, callback: AsyncCallback<void>): void;
+    loadContentByName(name: string, storage: LocalStorage, callback: AsyncCallback<void>): void;
+    loadContentByName(name: string, storage?: LocalStorage): Promise<void>;
+    loadContentByName(name: string, callback: AsyncCallback<void>): void;
     getMainWindowSync(): Window;
     getMainWindow(): Promise<Window>;
     getMainWindow(callback: AsyncCallback<Window>): void;
@@ -2885,6 +2918,7 @@ export class WindowInternal implements Window {
     private native recoverSync(nativeObj: long): void;
     private native setUIContentSync(nativeObj: long, path: string): void;
     private native loadContentSync(nativeObj: long, path: string, storage?: LocalStorage): void;
+    private native loadContentByNameSync(nativeObj: long, path: string, storage?: LocalStorage): void;
     private native setWindowKeepScreenOnSync(nativeObj: long, isKeepScreenOn: boolean): void;
     private native setWindowSystemBarEnableSync(nativeObj: long, names: Array<'status' | 'navigation'>): void;
     private native setWindowTouchableSync(nativeObj: long, isTouchable: boolean): void;
@@ -3551,6 +3585,35 @@ export class WindowInternal implements Window {
     public loadContent(path: string, callback: AsyncCallback<void>): void {
       try {
         this.loadContentSync(this.nativeObj, path, undefined);
+        callback(new BusinessError(), undefined);
+      } catch (err: Error) {
+        callback(err as BusinessError, undefined);
+      }
+    }
+
+    public loadContentByName(name: string, storage: LocalStorage, callback: AsyncCallback<void>): void {
+      try {
+        this.loadContentByNameSync(this.nativeObj, name, storage);
+        callback(new BusinessError(), undefined);
+      } catch (err: Error) {
+        callback(err as BusinessError, undefined);
+      }
+    }
+
+    public loadContentByName(name: string, storage?: LocalStorage): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        try {
+          this.loadContentByNameSync(this.nativeObj, name, storage);
+          resolve(undefined);
+        } catch (err: Error) {
+          reject(err as BusinessError);
+        }
+      });
+    }
+
+    public loadContentByName(name: string, callback: AsyncCallback<void>): void {
+      try {
+        this.loadContentByNameSync(this.nativeObj, name, undefined);
         callback(new BusinessError(), undefined);
       } catch (err: Error) {
         callback(err as BusinessError, undefined);
@@ -4835,6 +4898,9 @@ export interface Window {
     loadContent(path: string, storage: LocalStorage, callback: AsyncCallback<void>): void;
     loadContent(path: string): Promise<void>;
     loadContent(path: string, callback: AsyncCallback<void>): void;
+    loadContentByName(name: string, storage: LocalStorage, callback: AsyncCallback<void>): void;
+    loadContentByName(name: string, storage?: LocalStorage): Promise<void>;
+    loadContentByName(name: string, callback: AsyncCallback<void>): void;
     onAvoidAreaChange(callback: Callback<AvoidAreaOptions>): void;
     offAvoidAreaChange(callback?: Callback<AvoidAreaOptions>): void;
     onDisplayIdChange(callback: Callback<long>): void;
