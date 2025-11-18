@@ -97,6 +97,8 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace wi
         ani_native_function {"getWindowsByCoordinate",
             "lC{@ohos.window.window.GetWindowsByCoordinateParam}:C{escompat.Array}",
             reinterpret_cast<void *>(AniWindowManager::GetWindowsByCoordinate)},
+        ani_native_function {"toggleShownStateForAllAppWindowsSync", "l:",
+            reinterpret_cast<void *>(AniWindowManager::ToggleShownStateForAllAppWindows)},
     };
     for (auto method : functions) {
         if ((ret = env->Namespace_BindNativeFunctions(ns, &method, 1u)) != ANI_OK) {
@@ -978,6 +980,27 @@ ani_object AniWindowManager::OnGetWindowsByCoordinate(ani_env* env, ani_object g
         windows[i] = CreateAniWindowObject(env, window);
     }
     return AniWindowUtils::CreateAniWindowArray(env, windows);
+}
+
+void AniWindowManager::OnToggleShownStateForAllAppWindows(ani_env* env)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+        SingletonContainer::Get<WindowManager>().ToggleShownStateForAllAppWindows());
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret, "ToggleShownStateForAllAppWindows failed.");
+    }
+}
+
+void AniWindowManager::ToggleShownStateForAllAppWindows(ani_env* env, ani_long nativeObj)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    if (aniWindowManager != nullptr) {
+        return aniWindowManager->OnToggleShownStateForAllAppWindows(env);
+    } else {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindowManager is nullptr");
+    }
 }
 
 }  // namespace Rosen

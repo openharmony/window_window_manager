@@ -165,6 +165,94 @@ ani_ref AniWindowStage::GetMainWindow(ani_env* env)
     return CreateAniWindowObject(env, windowScene);
 }
 
+ani_object AniWindowStage::GetSubWindow(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "[ANI]");
+    AniWindowStage* aniWindowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
+    if (aniWindowStage == nullptr || aniWindowStage->GetMainWindow(env) == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] aniWindowStage is nullptr!");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    return aniWindowStage->OnGetSubWindow(env);
+}
+
+ani_object AniWindowStage::OnGetSubWindow(ani_env* env)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "[ANI]");
+    auto windowScene = GetWindowScene().lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] Window scene is nullptr");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    std::vector<sptr<Window>> subWindowVec = windowScene->GetSubWindow();
+    TLOGI(WmsLogTag::WMS_LIFE, "Get sub windows, size = %{public}zu", subWindowVec.size());
+
+    std::vector<ani_ref> windows(subWindowVec.size());
+    for (size_t i = 0; i < subWindowVec.size(); i++) {
+        windows[i] = CreateAniWindowObject(env, subWindowVec[i]);
+    }
+    return AniWindowUtils::CreateAniWindowArray(env, windows);
+}
+
+ani_object AniWindowStage::CreateSubWindowWithOptions(ani_env* env, ani_object obj, ani_long nativeObj,
+    ani_string name, ani_object options)
+{
+    TLOGI(WmsLogTag::WMS_SUB, "[ANI]");
+    AniWindowStage* aniWindowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
+    if (aniWindowStage != nullptr) {
+        return aniWindowStage->OnCreateSubWindowWithOptions(env, name, options);
+    } else {
+        TLOGE(WmsLogTag::WMS_SUB, "[ANI] aniWindowStage is nullptr");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+}
+
+ani_object AniWindowStage::OnCreateSubWindowWithOptions(ani_env* env, ani_string name, ani_object options)
+{
+    auto windowScene = GetWindowScene().lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "WindowScene is null");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    std::string windowName;
+    ani_status window_name = AniWindowUtils::GetStdString(env, name, windowName);
+    if (window_name != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to windowName");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    sptr<WindowOption> windowOption = sptr<WindowOption>::MakeSptr();
+    if (!AniWindowUtils::ParseSubWindowOption(env, options, windowOption)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to options");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    if ((windowOption->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL)) &&
+        !windowScene->GetMainWindow()->IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_SUB, "device not support");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    if (windowOption->GetWindowTopmost() && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::WMS_SUB, "Modal subWindow has topmost, but no system permission");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    windowOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    windowOption->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    windowOption->SetOnlySupportSceneBoard(true);
+    auto window = windowScene->CreateWindow(windowName, windowOption);
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "create window failed");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "get window failed");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    TLOGI(WmsLogTag::WMS_SUB, "Create sub window %{public}s end", windowName.c_str());
+    return static_cast<ani_object>(CreateAniWindowObject(env, window));
+}
+
 void DropWindowStageByAni(ani_object aniObj)
 {
     auto obj = g_localObjs.find(reinterpret_cast<ani_object>(aniObj));

@@ -134,8 +134,13 @@ public:
     static ani_object GetTransitionController(ani_env* env, ani_object obj, ani_long nativeObj);
     static void KeepKeyboardOnFocus(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean keepKeyboardFlag);
 
+    static ani_object CreateSubWindowWithOptions(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_string name, ani_object options);
+    static void Hide(ani_env* env, ani_object obj, ani_long nativeObj);
+
     ani_ref GetParentWindow(ani_env* env);
     void SetParentWindow(ani_env* env, ani_int windowId);
+    void Restore(ani_env* env);
     /*
      * Window Layout
      */
@@ -202,6 +207,8 @@ public:
     static ani_object GetWindowTransitionAnimation(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_enum_item transitionType);
 private:
+    ani_object OnCreateSubWindowWithOptions(ani_env* env, ani_string name, ani_object options);
+    void OnHide(ani_env* env);
     void OnSetWindowColorSpace(ani_env* env, ani_int colorSpace);
     void OnSetPreferredOrientation(ani_env* env, ani_int orientation);
     ani_int OnGetPreferredOrientation(ani_env* env);

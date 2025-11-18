@@ -111,6 +111,7 @@ public:
     static ani_object CreateAniWindowLimits(ani_env* env, const WindowLimits& windowLimits);
     static ani_object CreateAniAvoidArea(ani_env* env, const AvoidArea& avoidArea,
         AvoidAreaType type, bool useActualVisibility = false);
+    static ani_object CreateAniWindowArray(ani_env* env, std::vector<ani_ref>& windows);
     static ani_object CreateAniFrameMetrics(ani_env* env, const FrameMetrics& metrics);
     static ani_object CreateAniSystemBarTintState(ani_env* env, DisplayId displayId, const SystemBarRegionTints& tints);
     static ani_object CreateAniSystemBarRegionTint(ani_env* env, const SystemBarRegionTint& tint);
@@ -223,6 +224,10 @@ public:
     static bool ParseRectParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
     static bool ParseModalityParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
     static bool ParseZLevelParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
+    static bool ParseSubWindowOption(ani_env* env, ani_object jsObject, const sptr<WindowOption>& windowOption);
+    static bool ParseRectParams(ani_env* env, ani_object jsObject, const sptr<WindowOption>& windowOption);
+    static bool ParseModalityParams(ani_env* env, ani_object jsObject, const sptr<WindowOption>& windowOption);
+    static bool ParseZLevelParams(ani_env* env, ani_object jsObject, const sptr<WindowOption>& windowOption);
     template<typename T>
     static ani_object CreateBaseTypeObject(ani_env* env, T value);
 };
