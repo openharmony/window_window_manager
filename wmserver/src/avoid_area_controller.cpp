@@ -71,7 +71,7 @@ void AvoidAreaController::AddOrRemoveOverlayWindowIfNeed(const sptr<WindowNode>&
     WindowGravity windowGravity;
     uint32_t percent;
     overlayNode->GetWindowGravity(windowGravity, percent);
-    if (!WindowHelper::IsOverlayWindow(overlayNode->GetWindowType()) ||	
+    if (!WindowHelper::IsOverlayWindow(overlayNode->GetWindowType()) ||
         windowGravity == WindowGravity::WINDOW_GRAVITY_FLOAT) {
         WLOGE("IsOverlayWindow Failed.");
         return;
