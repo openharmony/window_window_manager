@@ -98,6 +98,11 @@ public:
     WMError RegisterSessionLifecycleListenerByBundles(const sptr<ISessionLifecycleListener>& listener,
         const std::vector<std::string>& bundleNameList) override;
     WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener) override;
+    WMError SetGlobalDragResizeType(DragResizeType dragResizeType) override;
+    WMError GetGlobalDragResizeType(DragResizeType& dragResizeType) override;
+    WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType) override;
+    WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType) override;
+    WMError SetAppKeyFramePolicy(const std::string& bundleName, const KeyFramePolicy& keyFramePolicy) override;
     WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) override;
     WMError TransferSessionToTargetScreen(const TransferSessionInfo& info) override;
     WSError GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList) override;

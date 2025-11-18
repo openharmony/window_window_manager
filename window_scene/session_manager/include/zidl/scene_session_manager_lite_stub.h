@@ -65,6 +65,11 @@ private:
     int HandleCheckWindowId(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateWindowModeByIdForUITest(MessageParcel& data, MessageParcel& reply);
     int HandleCheckUIExtensionCreation(MessageParcel& data, MessageParcel& reply);
+    int HandleSetGlobalDragResizeType(MessageParcel& data, MessageParcel& reply);
+    int HandleGetGlobalDragResizeType(MessageParcel& data, MessageParcel& reply);
+    int HandleSetAppDragResizeType(MessageParcel& data, MessageParcel& reply);
+    int HandleGetAppDragResizeType(MessageParcel& data, MessageParcel& reply);
+    int HandleSetAppKeyFramePolicy(MessageParcel& data, MessageParcel& reply);
     int HandleListWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetVisibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetWindowModeType(MessageParcel& data, MessageParcel& reply);

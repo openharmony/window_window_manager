@@ -360,6 +360,37 @@ WMError SceneSessionManagerLite::UnregisterSessionLifecycleListener(const sptr<I
     return SceneSessionManager::GetInstance().UnregisterSessionLifecycleListener(listener);
 }
 
+WMError SceneSessionManagerLite::SetGlobalDragResizeType(DragResizeType dragResizeType)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "in");
+    return SceneSessionManager::GetInstance().SetGlobalDragResizeType(dragResizeType);
+}
+
+WMError SceneSessionManagerLite::GetGlobalDragResizeType(DragResizeType& dragResizeType)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "in");
+    return SceneSessionManager::GetInstance().GetGlobalDragResizeType(dragResizeType);
+}
+
+WMError SceneSessionManagerLite::SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "in");
+    return SceneSessionManager::GetInstance().SetAppDragResizeType(bundleName, dragResizeType);
+}
+
+WMError SceneSessionManagerLite::GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "in");
+    return SceneSessionManager::GetInstance().GetAppDragResizeType(bundleName, dragResizeType);
+}
+
+WMError SceneSessionManagerLite::SetAppKeyFramePolicy(const std::string& bundleName,
+    const KeyFramePolicy& keyFramePolicy)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "in");
+    return SceneSessionManager::GetInstance().SetAppKeyFramePolicy(bundleName, keyFramePolicy);
+}
+
 WMError SceneSessionManagerLite::ListWindowInfo(const WindowInfoOption& windowInfoOption,
     std::vector<sptr<WindowInfo>>& infos)
 {
