@@ -2874,7 +2874,7 @@ bool Session::GetEnableAddSnapshot() const
     return enableAddSnapshot_;
 }
 
-void Session::SetBufferNameForPixelMap(const char* functionName, std::shared_ptr<Media::PixelMap> pixelMap)
+void Session::SetBufferNameForPixelMap(const char* functionName, const std::shared_ptr<Media::PixelMap>& pixelMap)
 {
     std::string functionNameStr = (functionName != nullptr) ? functionName : "unknown";
     pixelMap->SetMemoryName(functionNameStr + '_' + std::to_string(GetPersistentId()));
