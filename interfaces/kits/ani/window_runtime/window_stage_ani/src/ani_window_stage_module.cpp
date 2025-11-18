@@ -21,6 +21,7 @@
 #include "ani_window.h"
 #include "ani_window_manager.h"
 #include "ani_window_utils.h"
+#include "ani_transition_controller.h"
 #include "permission.h"
 #include "pixel_map.h"
 #include "pixel_map_taihe_ani.h"
@@ -93,7 +94,7 @@ std::array g_methods = {
         reinterpret_cast<void *>(AniWindowStage::SetCustomDensity)},
     ani_native_function {"setDefaultDensityEnabledSync", "lz:",
         reinterpret_cast<void *>(AniWindowStage::SetDefaultDensityEnabled)},
-    ani_native_function {"removeStartingWindow", "l:",
+    ani_native_function {"removeStartingWindowSync", "l:",
         reinterpret_cast<void *>(AniWindowStage::RemoveStartingWindow)},
     ani_native_function {"setSupportedWindowModes", "lC{escompat.Array}:",
         reinterpret_cast<void *>(AniWindowStage::SetSupportedWindowModes)},
@@ -159,7 +160,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         }
     }
     AniWindowManager::AniWindowManagerInit(env, ns);
-
+    OHOS::Rosen::ANI_Transition_Controller_Constructor(vm, result);
     OHOS::Rosen::ANI_Window_Constructor(vm, result);
     ExtensionWindowConfig_ANI_Constructor(vm, result);
     return ANI_OK;
