@@ -4900,6 +4900,34 @@ HWTEST_F(ScreenSessionTest, SetAndGetCurrentRotationCorrection, TestSize.Level1)
     session->SetCurrentRotationCorrection(Rotation::ROTATION_270);
     EXPECT_EQ(session->GetCurrentRotationCorrection(), Rotation::ROTATION_270);
 }
+
+/**
+ * @tc.name  : UpdatePropertyByResolution2
+ * @tc.desc  : test UpdatePropertyByResolution Different rotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdatePropertyByResolution2, TestSize.Level1)
+{
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        GTEST_SKIP();
+    }
+    ScreenId screenId = 10000;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
+    DMRect rect = {0, 0, 1, 2};
+    session->property_.UpdateScreenRotation(Rotation::ROTATION_0);
+    session->UpdatePropertyByResolution(rect);
+    EXPECT_EQ(session->GetScreenProperty().GetValidWidth(), 1);
+    EXPECT_EQ(session->GetScreenProperty().GetValidHeight(), 2);
+    session->property_.UpdateScreenRotation(Rotation::ROTATION_90);
+    session->UpdatePropertyByResolution(rect);
+    EXPECT_EQ(session->GetScreenProperty().GetValidWidth(), 2);
+    EXPECT_EQ(session->GetScreenProperty().GetValidHeight(), 1);
+    session->property_.UpdateScreenRotation(Rotation::ROTATION_270);
+    session->UpdatePropertyByResolution(rect);
+    EXPECT_EQ(session->GetScreenProperty().GetValidWidth(), 2);
+    EXPECT_EQ(session->GetScreenProperty().GetValidHeight(), 1);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

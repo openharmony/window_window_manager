@@ -769,6 +769,12 @@ void ScreenSession::UpdatePropertyByResolution(uint32_t width, uint32_t height)
 
 void ScreenSession::UpdatePropertyByResolution(const DMRect& rect)
 {
+    auto rectWithRotaion = rect;
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
+        (property_.GetScreenRotation() == Rotation::ROTATION_90 ||
+        property_.GetScreenRotation() == Rotation::ROTATION_270)) {
+        std::swap(rectWithRotaion.width_, rectWithRotaion.height_);
+    }
     auto screenBounds = property_.GetBounds();
     screenBounds.rect_.left_ = rect.posX_;
     screenBounds.rect_.top_ = rect.posY_;
@@ -776,8 +782,8 @@ void ScreenSession::UpdatePropertyByResolution(const DMRect& rect)
     screenBounds.rect_.height_ = rect.height_;
     property_.SetBounds(screenBounds);
     // Determine whether the touch is in a valid area.
-    property_.SetValidWidth(rect.width_);
-    property_.SetValidHeight(rect.height_);
+    property_.SetValidWidth(rectWithRotaion.width_);
+    property_.SetValidHeight(rectWithRotaion.height_);
     property_.SetInputOffset(rect.posX_, rect.posY_);
     // It is used to calculate the original screen size
     property_.SetScreenAreaWidth(rect.width_);
