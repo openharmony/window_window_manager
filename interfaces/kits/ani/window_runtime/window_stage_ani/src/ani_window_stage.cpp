@@ -153,7 +153,7 @@ void AniWindowStage::OnLoadContent(ani_env* env, ani_string path, ani_object sto
     if (isLoadByName) {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(mainWindow->AniSetUIContentByName(contentPath, env, storage));
     } else {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(mainWindow->AniSetUIContent(contentPath, env, storage));
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(mainWindow->NapiSetUIContent(contentPath, env, storage));
     }
     TLOGI(WmsLogTag::WMS_LIFE, "[ANI] Window [%{public}u, %{public}s] load content end, ret=%{public}d",
         mainWindow->GetWindowId(), mainWindow->GetWindowName().c_str(), ret);

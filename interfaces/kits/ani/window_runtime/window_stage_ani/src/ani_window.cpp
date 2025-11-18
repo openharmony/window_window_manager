@@ -1518,7 +1518,7 @@ void AniWindow::OnLoadContent(ani_env* env, ani_string path, ani_object storage,
     if (isLoadByName) {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->AniSetUIContentByName(contentPath, env, storage));
     } else {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->AniSetUIContent(contentPath, env, storage));
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->NapiSetUIContent(contentPath, env, storage));
     }
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret, "Window load content failed");
@@ -5441,7 +5441,7 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::LoadContent)},
         ani_native_function {"loadContentByNameSync",
             "JLstd/core/String;Larkui/stateManagement/storage/localStorage/LocalStorage;:V",
-            reinterpret_cast<void *>(AniWindow::LoadContent)},
+            reinterpret_cast<void *>(AniWindow::LoadContentByName)},
         ani_native_function {"setWindowKeepScreenOnSync", "JZ:V",
             reinterpret_cast<void *>(AniWindow::SetWindowKeepScreenOn)},
         ani_native_function {"setWindowSystemBarEnableSync", "JLescompat/Array;:V",
