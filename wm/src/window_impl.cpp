@@ -2962,7 +2962,7 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     int32_t keyCode = keyEvent->GetKeyCode();
     int32_t keyAction = keyEvent->GetKeyAction();
-    WLOGFD("KeyCode: %{public}d, action: %{public}d", keyCode, keyAction);
+    WLOGFD("action: %{public}d", keyAction);
     bool shouldMarkProcess = true;
     if (keyCode == MMI::KeyEvent::KEYCODE_BACK && keyAction == MMI::KeyEvent::KEY_ACTION_UP) {
         HandleBackKeyPressedEvent(keyEvent);

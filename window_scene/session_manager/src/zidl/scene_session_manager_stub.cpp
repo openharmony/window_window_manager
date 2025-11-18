@@ -1165,7 +1165,7 @@ int SceneSessionManagerStub::HandleWatchGestureConsumeResult(MessageParcel& data
         TLOGE(WmsLogTag::WMS_EVENT, "read isConsumed failed");
         return ERR_INVALID_DATA;
     }
-    TLOGD(WmsLogTag::WMS_EVENT, "keyCode:%{public}d isConsumed:%{public}d", keyCode, isConsumed);
+    TLOGD(WmsLogTag::WMS_EVENT, "isConsumed:%{public}d", isConsumed);
     WMError ret = NotifyWatchGestureConsumeResult(keyCode, isConsumed);
     if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
         return ERR_INVALID_DATA;
