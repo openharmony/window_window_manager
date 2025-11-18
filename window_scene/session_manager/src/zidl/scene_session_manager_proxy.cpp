@@ -2516,6 +2516,38 @@ WSError SceneSessionManagerProxy::ShiftAppWindowFocus(int32_t sourcePersistentId
     return static_cast<WSError>(reply.ReadInt32());
 }
 
+WSError SceneSessionManagerProxy::SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex)
+{
+    TLOGI("run SetSpecificSystemWindowZIndex");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE("Write interface token failed.");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (!data.WriteUint32(windowType)) {
+        TLOGE("Write sourcePersistentId failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (!data.WriteInt32(zIndex)) {
+        TLOGE("Write targetPersistentId failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE("remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_SET_SPECIFIC_WINDOW_ZINDEX),
+        data, reply, option) != ERR_NONE) {
+        TLOGE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
 void SceneSessionManagerProxy::UpdateModalExtensionRect(const sptr<IRemoteObject>& token, Rect rect)
 {
     MessageOption option(MessageOption::TF_SYNC);

@@ -65,6 +65,7 @@ constexpr int ARG_INDEX_FOUR = 4;
 constexpr int32_t RESTYPE_RECLAIM = 100001;
 const std::string RES_PARAM_RECLAIM_TAG = "reclaimTag";
 const std::string CREATE_SYSTEM_SESSION_CB = "createSpecificSession";
+const std::string SET_SPECIFIC_SESSION_ZINDE_CB = "SetSpecificWindowZIndex";
 const std::string CREATE_KEYBOARD_SESSION_CB = "createKeyboardSession";
 const std::string RECOVER_SCENE_SESSION_CB = "recoverSceneSession";
 const std::string STATUS_BAR_ENABLED_CHANGE_CB = "statusBarEnabledChange";
@@ -114,6 +115,7 @@ const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {UI_EFFECT_SET_PARAMS_CB,       ListenerFunctionType::UI_EFFECT_SET_PARAMS_CB},
     {UI_EFFECT_ANIMATE_TO_CB,      ListenerFunctionType::UI_EFFECT_ANIMATE_TO_CB},
     {VIRTUAL_DENSITY_CHANGE_CB,   ListenerFunctionType::VIRTUAL_DENSITY_CHANGE_CB},
+    {SET_SPECIFIC_SESSION_ZINDE_CB,     ListenerFunctionType::SET_SPECIFIC_SESSION_ZINDE_CB},
 };
 } // namespace
 
@@ -376,6 +378,21 @@ void JsSceneSessionManager::OnCreateSystemSession(const sptr<SceneSession>& scen
     taskScheduler_->PostMainThreadTask(task, "OnCreateSystemSession");
 }
 
+void JsSceneSessionManager::OnSetSpecificWindowZIndex(WindowType windowType, int32_t zIndex)
+{
+    TLOGI(WmsLogTag::WMS_FOCUS, "windowType: %{public}d, zIndex: %{public}d", windowType, zIndex);
+    auto task = [this, persistentId, jsCallBack = GetJSCallback(SET_SPECIFIC_SESSION_ZINDE_CB), env = env_, displayGroupId]() {
+        if (jsCallBack == nullptr) {
+            TLOGNE(WmsLogTag::WMS_FOCUS, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value argv[] = { CreateJsValue(env, static_cast<int32_t>(windowType)),
+                              CreateJsValue(env, zIndex) };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "OnSetSpecificWindowZIndex, WindowType:" + std::to_string(windowType));
+}
+
 void JsSceneSessionManager::OnCreateKeyboardSession(const sptr<SceneSession>& keyboardSession,
     const sptr<SceneSession>& panelSession)
 {
@@ -593,6 +610,16 @@ void JsSceneSessionManager::ProcessCreateSystemSessionRegister()
         this->OnCreateSystemSession(session);
     };
     SceneSessionManager::GetInstance().SetCreateSystemSessionListener(func);
+}
+
+/** @note @window.hierarchy */
+void JsSceneSessionManager::RegisterSetSpecificWindowZIndexCallback()
+{
+    NotifyCreateSystemSessionFunc func = [this](WindowType windowType, int32_t zIndex) {
+        TLOGNI(WmsLogTag::WMS_FOCUS, "set specifc zIndex callback");
+        this->OnSetSpecificWindowZIndex(windowType, zIndex);
+    };
+    SceneSessionManager::GetInstance().SetSpecificWindowZIndexListener(func);
 }
 
 void JsSceneSessionManager::ProcessCreateKeyboardSessionRegister()
@@ -1634,6 +1661,9 @@ void JsSceneSessionManager::ProcessRegisterCallback(ListenerFunctionType listene
             break;
         case ListenerFunctionType::VIRTUAL_DENSITY_CHANGE_CB:
             RegisterVirtualPixelRatioChangeCallback();
+            break;
+        case ListenerFunctionType::SET_SPECIFIC_SESSION_ZINDE_CB:
+            RegisterSetSpecificWindowZIndexCallback();
             break;
         default:
             break;

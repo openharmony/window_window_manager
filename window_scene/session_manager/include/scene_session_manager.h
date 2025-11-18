@@ -175,6 +175,7 @@ using FindScenePanelRsNodeByZOrderFunc = std::function<std::shared_ptr<Rosen::RS
 using NotifyAppProcessDiedFunc = std::function<void(const AppExecFwk::ProcessData& processData)>;
 using ConvertSystemConfigFunc = std::function<void(const std::string& configItem)>;
 using NotifyVirtualPixelChangeFunc = std::function<void(float density, DisplayId displayId)>;
+using NotifySetSpecificWindowZIndexFunc = std::function<void(WindowType windowType, int32_t zIndex)>;
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
     void OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInfo>& debugInfos) override;
@@ -338,6 +339,12 @@ public:
     WSError AddFocusGroup(DisplayGroupId displayGroupId, DisplayId displayId);
     WSError RemoveFocusGroup(DisplayGroupId displayGroupId, DisplayId displayId);
     WSError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+
+    /*
+     * Window Hierarchy
+     */
+    WSError SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex) override;
+    void SetSpecificWindowZIndexListener(const NotifySetSpecificWindowZIndexFunc& func);
 
     WSError UpdateWindowMode(int32_t persistentId, int32_t windowMode);
     WSError SendTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex);
@@ -1315,6 +1322,11 @@ private:
     FocusChangeReason focusChangeReason_ = FocusChangeReason::DEFAULT;
     bool needBlockNotifyFocusStatusUntilForeground_ { false };
     bool needBlockNotifyUnfocusStatus_ { false };
+
+    /*
+     * Window Hierarchy
+     */
+    NotifySetSpecificWindowZIndexFunc setSpecificWindowZIndexFunc_;
 
     /*
      * DFX

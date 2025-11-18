@@ -1076,6 +1076,15 @@ WMError WindowAdapter::ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t t
         wmsProxy->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId));
 }
 
+WMError WindowAdapter::SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(
+        wmsProxy->SetSpecificSystemWindowZIndex(windowType, zIndex));
+}
+
 void WindowAdapter::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
