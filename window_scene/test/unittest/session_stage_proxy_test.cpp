@@ -1023,6 +1023,10 @@ HWTEST_F(SessionStageProxyTest, LinkKeyFrameNode, Function | SmallTest | Level1)
     ASSERT_NE(rsKeyFrameNode, nullptr);
     WSError res = sessionStage_->LinkKeyFrameNode(rsKeyFrameNode);
     ASSERT_EQ(WSError::WS_OK, res);
+
+    rsKeyFrameNode.reset();
+    WSError res = sessionStage_->LinkKeyFrameNode(rsKeyFrameNode);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);   
 }
 
 /**
