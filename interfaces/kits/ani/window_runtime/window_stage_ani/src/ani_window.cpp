@@ -2330,6 +2330,82 @@ ani_boolean AniWindow::OnIsWindowHighlighted(ani_env* env)
     return ani_boolean(isHighlighted);
 }
 
+void AniWindow::HideWithAnimation(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    TLOGI(WmsLogTag::WMS_ANIMATION, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow != nullptr) {
+        aniWindow->OnHideWithAnimation(env);
+    } else {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] aniWindow is nullptr");
+    }
+}
+
+void AniWindow::OnHideWithAnimation(ani_env* env)
+{
+    TLOGI(WmsLogTag::WMS_ANIMATION, "[ANI]");
+    if (!Permission::IsSystemCallingOrStartByHdcd(true)) {
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+        return;
+    }
+    auto window = GetWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] window is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    auto winType = window->GetType();
+    if (!WindowHelper::IsSystemWindow(winType)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION,
+            "window Type %{public}u is not supported", static_cast<uint32_t>(winType));
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->Hide(0, true, false));
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret, "Window show failed");
+        return;
+    }
+}
+
+void AniWindow::ShowWithAnimation(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    TLOGI(WmsLogTag::WMS_ANIMATION, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow != nullptr) {
+        aniWindow->OnShowWithAnimation(env);
+    } else {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] aniWindow is nullptr");
+    }
+}
+
+void AniWindow::OnShowWithAnimation(ani_env* env)
+{
+    TLOGI(WmsLogTag::WMS_ANIMATION, "[ANI]");
+    if (!Permission::IsSystemCallingOrStartByHdcd(true)) {
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+        return;
+    }
+    auto window = GetWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] window is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    auto winType = window->GetType();
+    if (!WindowHelper::IsSystemWindow(winType)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION,
+            "window Type %{public}u is not supported", static_cast<uint32_t>(winType));
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->Show(0, true, true));
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret, "Window show failed");
+        return;
+    }
+}
+
 ani_ref AniWindow::GetParentWindow(ani_env* env)
 {
     if (windowToken_ == nullptr) {
@@ -5315,6 +5391,10 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::DestroyWindow)},
         ani_native_function {"isWindowShowingSync", nullptr,
             reinterpret_cast<void *>(AniWindow::IsWindowShowing)},
+        ani_native_function {"hideWithAnimationSync", nullptr,
+            reinterpret_cast<void *>(AniWindow::HideWithAnimation)},
+        ani_native_function {"showWithAnimationSync", nullptr,
+            reinterpret_cast<void *>(AniWindow::ShowWithAnimation)},
         ani_native_function {"getTransitionControllerSync", "l:C{@ohos.window.window.TransitionController}",
             reinterpret_cast<void *>(AniWindow::GetTransitionController)},
         ani_native_function {"nativeTransferStatic", "Lstd/interop/ESValue;:Lstd/core/Object;",

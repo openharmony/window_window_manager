@@ -93,6 +93,8 @@ public:
     static void DestroyWindow(ani_env* env, ani_object obj, ani_long nativeObj);
     static ani_boolean IsWindowShowing(ani_env* env, ani_object obj, ani_long nativeObj);
     static ani_boolean IsWindowHighlighted(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void HideWithAnimation(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void ShowWithAnimation(ani_env* env, ani_object obj, ani_long nativeObj);
     static void Opacity(ani_env* env, ani_object obj, ani_long nativeObj, ani_double opacity);
     static void Scale(ani_env* env, ani_object obj, ani_long nativeObj, ani_object scaleOptions);
     static void Translate(ani_env* env, ani_object obj, ani_long nativeObj, ani_object translateOptions);
@@ -238,6 +240,8 @@ private:
     void OnDestroyWindow(ani_env* env);
     ani_boolean OnIsWindowShowing(ani_env* env);
     ani_boolean OnIsWindowHighlighted(ani_env* env);
+    void OnHideWithAnimation(ani_env* env);
+    void OnShowWithAnimation(ani_env* env);
     void OnOpacity(ani_env* env, ani_double opacity);
     void OnScale(ani_env* env, ani_object scaleOptions);
     void OnTranslate(ani_env* env, ani_object translateOptions);
