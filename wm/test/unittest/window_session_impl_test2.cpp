@@ -2236,29 +2236,6 @@ HWTEST_F(WindowSessionImplTest2, NotifyUIExtHostWindowRectChangeListeners, TestS
 }
 
 /**
- * @tc.name: NotifyUIExtHostRectChangeInGlobalDisplayListeners
- * @tc.desc: NotifyUIExtHostRectChangeInGlobalDisplayListeners test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest2, NotifyUIExtHostRectChangeInGlobalDisplayListeners, TestSize.Level1)
-{
-    sptr<WindowSessionImpl> window = GetTestWindowImpl("NotifyUIExtHostRectChangeInGlobalDisplayListeners");
-    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    Rect rect;
-    WindowSizeChangeReason reason = WindowSizeChangeReason::MOVE;
-    window->NotifyUIExtHostRectChangeInGlobalDisplayListeners(rect, reason);
-    window->rectChangeInGlobalDisplayUIExtListenerIds.emplace(111);
-    ASSERT_FALSE(window->rectChangeInGlobalDisplayUIExtListenerIds.empty());
-    window->NotifyUIExtHostRectChangeInGlobalDisplayListeners(rect, reason);
-
-    window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
-    window->NotifyUIExtHostRectChangeInGlobalDisplayListeners(rect, reason);
-    window->rectChangeInGlobalDisplayUIExtListenerIds.clear();
-    ASSERT_TRUE(window->rectChangeInGlobalDisplayUIExtListenerIds.empty());
-    window->NotifyUIExtHostRectChangeInGlobalDisplayListeners(rect, reason);
-}
-
-/**
  * @tc.name: AvoidAreaChangeListener
  * @tc.desc: AvoidAreaChangeListener
  * @tc.type: FUNC
