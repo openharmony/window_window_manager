@@ -6952,7 +6952,7 @@ sptr<ScreenSessionGroup> ScreenSessionManager::AddAsFirstScreenLocked(sptr<Scree
     }
     screenGroup->groupSmsId_ = 1;
     Point point;
-    if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "none") {
+    if (g_isPcDevice) {
         if (IsExtendMode()) {
             point = {newScreen->GetScreenProperty().GetStartX(), newScreen->GetScreenProperty().GetStartY()};
         }
@@ -9497,17 +9497,19 @@ bool ScreenSessionManager::HandleSwitchPcMode()
     if (system::GetBoolParameter(IS_PC_MODE_KEY, false)) {
         TLOGI(WmsLogTag::DMS, "PcMode change isPcDevice true");
         g_isPcDevice = true;
-        SwitchModeHandleExternalScreen(true);
     } else {
         TLOGI(WmsLogTag::DMS, "PadMode change isPcDevice false");
         g_isPcDevice = false;
-        SwitchModeHandleExternalScreen(false);
     }
     return g_isPcDevice;
 }
 
 void ScreenSessionManager::SwitchModeHandleExternalScreen(bool isSwitchToPcMode)
 {
+    if(!IS_SUPPORT_PC_MODE){
+        return;
+    }
+    ConfigureDpi();
     std::ostringstream oss;
     std::vector<ScreenId> externalScreenIds;
     bool hasExternalScreen = false;
@@ -9527,6 +9529,7 @@ void ScreenSessionManager::SwitchModeHandleExternalScreen(bool isSwitchToPcMode)
                     VirtualScreenFlag::DEFAULT : VirtualScreenFlag::CAST);
                 oss << screenId << ",";
                 SwitchModeOffScreenRenderingResetScreenProperty(screenSession, isSwitchToPcMode);
+                screenSession->SetDensityInCurResolution(densityDpi_);
             }
         }
     }
@@ -9537,6 +9540,7 @@ void ScreenSessionManager::SwitchModeHandleExternalScreen(bool isSwitchToPcMode)
         if (!isSwitchToPcMode) {
             TLOGI(WmsLogTag::DMS, "notify cast screen connect");
             NotifyCastWhenScreenConnectChange(true);
+            NotifyScreenModeChange();
             ScreenPowerUtils::EnablePowerForceTimingOut();
             DisablePowerOffRenderControl(SCREEN_ID_FULL);
         } else {
@@ -9544,7 +9548,6 @@ void ScreenSessionManager::SwitchModeHandleExternalScreen(bool isSwitchToPcMode)
         }
     }
     SwitchModeOffScreenRenderingAdapter(externalScreenIds);
-    ConfigureDpi();
     SetExtendScreenDpi();
 }
 
@@ -9667,7 +9670,7 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
         TLOGE(WmsLogTag::DMS, "SetClient client is null");
         return;
     }
-    HandleSwitchPcMode();
+    bool isPcMode = HandleSwitchPcMode();
     if (g_isPcDevice && userSwitching_) {
         std::unique_lock<std::mutex> lock(switchUserMutex_);
         if (DmUtils::safe_wait_for(switchUserCV_, lock, std::chrono::milliseconds(CV_WAIT_USERSWITCH_MS)) == std::cv_status::timeout) {
@@ -9678,6 +9681,7 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
     {
         std::unique_lock<std::mutex> lock(oldScbPidsMutex_);
         SetClientProxy(client);
+        SwitchModeHandleExternalScreen(isPcMode);
         auto userId = GetUserIdByCallingUid();
         auto newScbPid = IPCSkeleton::GetCallingPid();
         {
