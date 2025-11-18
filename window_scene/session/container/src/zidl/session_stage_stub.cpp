@@ -289,7 +289,12 @@ int SessionStageStub::HandleUpdateRect(MessageParcel& data, MessageParcel& reply
         TLOGE(WmsLogTag::WMS_LAYOUT, "Read SceneAnimationConfig failed");
         return -1;
     }
-    if (hasRSTransaction) {
+    bool isInnerProcess = false;
+    if (!data.ReadBool(isInnerProcess)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read isInnerProcess failed.");
+        return -1;
+    }
+    if (hasRSTransaction && !isInnerProcess) {
         std::shared_ptr<RSTransaction> transaction(data.ReadParcelable<RSTransaction>());
         if (!transaction) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "transaction unMarsh failed.");
