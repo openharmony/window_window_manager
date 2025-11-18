@@ -74,6 +74,8 @@ public:
     static ani_object NativeTransferDynamic(ani_env* aniEnv, ani_class cls, ani_long nativeObj);
     static void LoadContent(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_string path, ani_object storage);
+    static void LoadContentByName(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_string path, ani_object storage);
     static void DisableWindowDecor(ani_env* env, ani_object obj, ani_long nativeObj);
     static void SetShowOnLockScreen(ani_env* env, ani_class cls, ani_long nativeObj, ani_boolean showOnLockScreen);
     static void RegisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
@@ -101,7 +103,7 @@ public:
     ani_boolean WindowIsWindowSupportWideGamut(ani_env* env, ani_class cls, ani_object obj);
     ani_ref OnCreateSubWindow(ani_env *env, ani_string name);
 private:
-    void OnLoadContent(ani_env* env, ani_string path, ani_object storage);
+    void OnLoadContent(ani_env* env, ani_string path, ani_object storage, bool isLoadByName);
     void OnDisableWindowDecor(ani_env* env);
     void OnSetShowOnLockScreen(ani_env* env, ani_boolean showOnLockScreen);
     void OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);

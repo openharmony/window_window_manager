@@ -1485,13 +1485,25 @@ void AniWindow::LoadContent(ani_env* env, ani_object obj, ani_long nativeObj, an
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow != nullptr) {
-        aniWindow->OnLoadContent(env, path, storage);
+        aniWindow->OnLoadContent(env, path, storage, false);
     } else {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
     }
 }
 
-void AniWindow::OnLoadContent(ani_env* env, ani_string path, ani_object storage)
+void AniWindow::LoadContentByName(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path,
+    ani_object storage)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow != nullptr) {
+        aniWindow->OnLoadContent(env, path, storage, true);
+    } else {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
+    }
+}
+
+void AniWindow::OnLoadContent(ani_env* env, ani_string path, ani_object storage, bool isLoadByName)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     auto window = GetWindow();
@@ -1502,7 +1514,12 @@ void AniWindow::OnLoadContent(ani_env* env, ani_string path, ani_object storage)
     }
     std::string contentPath;
     AniWindowUtils::GetStdString(env, path, contentPath);
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->NapiSetUIContent(contentPath, env, storage));
+    WmErrorCode ret;
+    if (isLoadByName) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->AniSetUIContentByName(contentPath, env, storage));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->AniSetUIContent(contentPath, env, storage));
+    }
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret, "Window load content failed");
     }
@@ -2372,7 +2389,7 @@ void AniWindow::SetParentWindow(ani_env* env, ani_int windowId)
 }
 
 void AniWindow::BindDialogTarget(ani_env* env, ani_object obj, ani_long nativeObj,
-        ani_object argv, ani_ref deathCallback)
+    ani_object argv, ani_ref deathCallback)
 {
     TLOGI(WmsLogTag::WMS_DIALOG, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
@@ -2417,16 +2434,16 @@ void AniWindow::OnBindDialogTarget(ani_env* env, ani_object argv, ani_ref deathC
         AniWindowUtils::AniThrowError(env, ret, "Bind Dialog Target failed");
     }
     TLOGI(WmsLogTag::WMS_SYSTEM, "BindDialogTarget end, window [%{public}u, %{public}s]",
-        window->GetWindowId(), window->GetWindowName().c_str());    
+        window->GetWindowId(), window->GetWindowName().c_str());
 }
 
-static sptr<IRemoteObject> GetBindDialogToken(ani_env* env, ani_object argv) 
+static sptr<IRemoteObject> GetBindDialogToken(ani_env* env, ani_object argv)
 {
     sptr<IRemoteObject> token = AniGetNativeRemoteObject(env, argv);
     if (token != nullptr) {
         return token;
     }
-    std::shared_ptr<AbilityRuntime::RequestInfo> requestInfo = 
+    std::shared_ptr<AbilityRuntime::RequestInfo> requestInfo =
         AbilityRuntime::RequestInfo::UnwrapRequestInfo(env, argv);
     return (requestInfo != nullptr) ? requestInfo->GetToken() : nullptr;
 }
@@ -5420,6 +5437,9 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"setUIContentSync", "JLstd/core/String;:V",
             reinterpret_cast<void *>(AniWindow::SetUIContent)},
         ani_native_function {"loadContentSync",
+            "JLstd/core/String;Larkui/stateManagement/storage/localStorage/LocalStorage;:V",
+            reinterpret_cast<void *>(AniWindow::LoadContent)},
+        ani_native_function {"loadContentByNameSync",
             "JLstd/core/String;Larkui/stateManagement/storage/localStorage/LocalStorage;:V",
             reinterpret_cast<void *>(AniWindow::LoadContent)},
         ani_native_function {"setWindowKeepScreenOnSync", "JZ:V",
