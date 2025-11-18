@@ -1077,6 +1077,15 @@ public:
     WMError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId);
 
     /**
+     * @brief Set zIndex of the specific system window with window type.
+     *
+     * @param windowType Window type of the specific system window
+     * @param zIndex  The value of ZIndex
+     * @return WM_OK means set zIndex success, others means failed.
+     */
+    WMError SetSpecificSystemWindowZIndex(WindowType windowType, int32_t zIndex);
+
+    /**
      * @brief Set start window background color.
      *
      * @param moduleName Module name that needs to be set

@@ -278,6 +278,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleMinimizeAllAppWindows(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_OUTLINE):
             return HandleUpdateOutline(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SPECIFIC_WINDOW_ZINDEX):
+            return HandleSetSpecificWindowZIndex(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -2669,6 +2671,28 @@ int SceneSessionManagerStub::HandleConvertToRelativeCoordinateExtended(MessagePa
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write errCode failed.");
         return ERR_TRANSACTION_FAILED;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSetSpecificWindowZIndex(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGI(WmsLogTag::WMS_FOCUS, "in");
+    uint32_t windowTypeValue = 0;
+    if (!data.ReadUint32(windowTypeValue)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read windowType failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    WindowType windowType = static_cast<WindowType>(windowTypeValue);
+    int32_t zIndex = 0;
+    if (!data.ReadInt32(zIndex)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "read zIndex failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError ret = SetSpecificWindowZIndex(windowType, zIndex);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write errCode fail");
+        return ERR_INVALID_DATA;
     }
     return ERR_NONE;
 }

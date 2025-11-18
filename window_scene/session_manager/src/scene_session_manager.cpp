@@ -4803,6 +4803,11 @@ void SceneSessionManager::SetCreateSystemSessionListener(const NotifyCreateSyste
     createSystemSessionFunc_ = func;
 }
 
+void SceneSessionManager::SetSpecificWindowZIndexListener(const NotifySetSpecificWindowZIndexFunc& func)
+{
+    setSpecificWindowZIndexFunc_ = func;
+}
+
 void SceneSessionManager::SetCreateKeyboardSessionListener(const NotifyCreateKeyboardSessionFunc& func)
 {
     createKeyboardSessionFunc_ = func;
@@ -14150,6 +14155,16 @@ WSError SceneSessionManager::ShiftAppWindowFocus(int32_t sourcePersistentId, int
     targetSession->NotifyClick(true, false);
     FocusChangeReason reason = FocusChangeReason::CLIENT_REQUEST;
     return RequestSessionFocus(targetPersistentId, false, reason);
+}
+
+/** @note @window.hierarchy */
+WSError SceneSessionManager::SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex)
+{
+    TLOGI(WmsLogTag::WMS_FOCUS, "windowType: %{public}d, zIndex: %{public}d", windowType, zIndex);
+    if (setSpecificWindowZIndexFunc_) {
+        setSpecificWindowZIndexFunc_(windowType, zIndex);
+    }
+    return WSError::WS_OK;
 }
 
 WSError SceneSessionManager::GetAppMainSceneSession(int32_t persistentId, sptr<SceneSession>& sceneSession)
