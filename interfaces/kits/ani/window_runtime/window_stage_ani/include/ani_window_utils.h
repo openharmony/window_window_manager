@@ -74,45 +74,6 @@ const std::map<ApiWindowType, std::string> API_TO_ANI_STRING_TYPE_MAP {
     {ApiWindowType::TYPE_HANDWRITE,            "TYPE_HANDWRITE"            },
 };
 
-enum class ImageFit {
-    FILL = 0,
-    CONTAIN,
-    COVER,
-    FITWIDTH,
-    FITHEIGHT,
-    NONE,
-    SCALE_DOWN,
-    TOP_LEFT,
-    TOP,
-    TOP_END,
-    START,
-    CENTER,
-    END,
-    BOTTOM_START,
-    BOTTOM,
-    BOTTOM_END,
-    MATRIX,
-};
-
-enum class Ark_ImageFit {
-    ARK_IMAGE_FIT_CONTAIN = 0,
-    ARK_IMAGE_FIT_COVER = 1,
-    ARK_IMAGE_FIT_AUTO = 2,
-    ARK_IMAGE_FIT_FILL = 3,
-    ARK_IMAGE_FIT_SCALE_DOWN = 4,
-    ARK_IMAGE_FIT_NONE = 5,
-    ARK_IMAGE_FIT_TOP_START = 7,
-    ARK_IMAGE_FIT_TOP = 8,
-    ARK_IMAGE_FIT_TOP_END = 9,
-    ARK_IMAGE_FIT_START = 10,
-    ARK_IMAGE_FIT_CENTER = 11,
-    ARK_IMAGE_FIT_END = 12,
-    ARK_IMAGE_FIT_BOTTOM_START = 13,
-    ARK_IMAGE_FIT_BOTTOM = 14,
-    ARK_IMAGE_FIT_BOTTOM_END = 15,
-    ARK_IMAGE_FIT_MATRIX = 16,
-};
-
 class AniWindowUtils {
 public:
     static ani_status InitAniCreator(ani_env* env,
@@ -136,6 +97,15 @@ public:
     static ani_object CreateAniUndefined(ani_env* env);
     static ani_object AniThrowError(ani_env* env, WMError errorCode, std::string msg = "");
     static ani_object AniThrowError(ani_env* env, WmErrorCode errorCode, std::string msg = "");
+    static ani_object CreateAniStatusBarProperty(ani_env* env, const SystemBarProperty& prop);
+    static ani_object CreateAniWindowDensityInfo(ani_env* env, const WindowDensityInfo& info);
+    static ani_object CreateAniWindowSystemBarProperties(ani_env* env, const SystemBarProperty& status,
+        const SystemBarProperty& navigation);
+    static ani_object CreateAniWindowLayoutInfo(ani_env* env, const WindowLayoutInfo& info);
+    static ani_object CreateAniWindowLayoutInfoArray(ani_env* env, const std::vector<sptr<WindowLayoutInfo>>& infos);
+    static ani_object CreateAniWindowInfo(ani_env* env, const WindowVisibilityInfo& info);
+    static ani_object CreateAniWindowInfoArray(ani_env* env, const std::vector<sptr<WindowVisibilityInfo>>& infos);
+    static ani_object CreateAniWindowArray(ani_env* env, std::vector<ani_ref>& windows);
     static ani_object CreateAniSize(ani_env* env, int32_t width, int32_t height);
     static ani_object CreateAniRect(ani_env* env, const Rect& rect);
     static ani_object CreateAniWindowLimits(ani_env* env, const WindowLimits& windowLimits);
@@ -193,6 +163,12 @@ public:
     static bool GetSpecificBarStatus(ani_env* env,
         ani_string aniName, ani_boolean aniEnable, ani_object aniAnimation,
         WindowType& type, SystemBarProperty& systemBarProperty, SystemBarPropertyFlag& systemBarPropertyFlag);
+    static bool ParseWindowMask(ani_env* env, ani_array windowMaskArray,
+        std::vector<std::vector<uint32_t>>& windowMask);
+    static bool ParseWindowMaskInnerValue(ani_env* env, ani_array innerArray, std::vector<uint32_t>& elementArray);
+    static WmErrorCode ParseTouchableAreas(ani_env* env, ani_array rects, const Rect& windowRect,
+        std::vector<Rect>& touchableAreas);
+    static bool ParseAndCheckRect(ani_env* env, ani_object rect, const Rect& windowRect, Rect& touchableRect);
     static ani_object CreateOptionalBool(ani_env *env, ani_boolean value);
     static ani_object CreateOptionalInt(ani_env *env, ani_int value);
     static void GetWindowSnapshotConfiguration(ani_env* env, ani_object config,
@@ -249,7 +225,6 @@ public:
     static bool ParseZLevelParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
     template<typename T>
     static ani_object CreateBaseTypeObject(ani_env* env, T value);
-    static void ConvertImageFit(ImageFit& dst, const Ark_ImageFit& src);
 };
 
 template <typename EnumType>

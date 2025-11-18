@@ -341,11 +341,11 @@ HWTEST_F(WindowSceneSessionImplTest4, AdjustWindowAnimationFlag, TestSize.Level1
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
 
     windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
-    windowSceneSessionImpl->animationTransitionController_ = sptr<IAnimationTransitionController>::MakeSptr();
+    windowSceneSessionImpl->animationTransitionControllers_.push_back(sptr<IAnimationTransitionController>::MakeSptr());
     windowSceneSessionImpl->AdjustWindowAnimationFlag(true);
     auto ret = windowSceneSessionImpl->property_->GetAnimationFlag();
     EXPECT_EQ(3, ret);
-    windowSceneSessionImpl->animationTransitionController_ = nullptr;
+    windowSceneSessionImpl->animationTransitionControllers_.clear();
     windowSceneSessionImpl->AdjustWindowAnimationFlag(true);
     ret = windowSceneSessionImpl->property_->GetAnimationFlag();
     EXPECT_EQ(1, ret);
