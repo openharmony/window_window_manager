@@ -1789,7 +1789,6 @@ HWTEST_F(SessionProxyTest, UpdateKeyFrameCloneNode, Function | SmallTest | Level
     rsKeyFrameNode.reset();
     rsTransaction.reset();
     ASSERT_EQ(sProxy->UpdateKeyFrameCloneNode(rsKeyFrameNode, rsTransaction), WSError::WS_ERROR_IPC_FAILED);
-
 }
 
 /**
