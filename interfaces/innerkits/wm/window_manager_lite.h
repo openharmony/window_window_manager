@@ -85,6 +85,15 @@ public:
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const;
 
     /**
+     * @brief update screen lock status.
+     *
+     * @param bundleName bundle name of app.
+     * @param isRelease whether release the screen lock.
+     * @return WM_OK means update success, others means update failed.
+     */
+    WMError UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease);
+
+    /**
      * @brief Get focus window.
      *
      * @param focusInfo Focus window info.
@@ -377,15 +386,6 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) const;
-
-    /**
-     * @brief update screen lock status.
-     *
-     * @param bundleName bundle name of app.
-     * @param isRelease whether release the screen lock.
-     * @return WM_OK means update success, others means update failed.
-     */
-    WMError UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease);
 
     /**
      * @brief Send pointer event for hover.
