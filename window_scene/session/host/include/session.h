@@ -793,6 +793,7 @@ public:
     void DeleteHasSnapshot(SnapshotStatus key);
     void DeleteHasSnapshotFreeMultiWindow();
     void SetFreeMultiWindow();
+    void SetBufferNameForPixelMap(const char* functionName, const std::shared_ptr<Media::PixelMap>& pixelMap);
     std::atomic<bool> freeMultiWindow_ { false };
 
     /*

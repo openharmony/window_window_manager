@@ -6036,6 +6036,7 @@ void SceneSessionManager::PreLoadStartingWindow(sptr<SceneSession> sceneSession)
             TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s pixelMap is nullptr", where);
             return;
         }
+        sceneSession->SetBufferNameForPixelMap(where, pixelMap);
         std::string key = sessionInfo.bundleName_ + '_' + sessionInfo.moduleName_ + '_' + sessionInfo.abilityName_;
         {
             std::unique_lock<std::shared_mutex> lock(preLoadstartingWindowMapMutex_);
