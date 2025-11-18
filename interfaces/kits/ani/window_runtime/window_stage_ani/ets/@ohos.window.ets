@@ -21,6 +21,8 @@ import { ImageFit } from '@ohos.arkui.component';
 import bundleManager from '@ohos.bundle.bundleManager';
 import image from '@ohos.multimedia.image';
 import hilog from '@ohos.hilog';
+import rpc from '@ohos.rpc';
+import dialogRequest from '@ohos.app.ability.dialogRequest'；
 
 export type AsyncCallbackVoid = (err: BusinessError) => void;
 export type WindowEventCallback = (data: window.WindowEventType) => void;
@@ -2932,6 +2934,10 @@ export class WindowInternal implements Window {
     private native onSync(nativeObj: long, type: string, callback: object): void;
     private native onNoInteractionDetected(nativeObj: long, type: string, timeout: long, callback: Object): void;
     private native offSync(nativeObj: long, type: string, callback?: object): void;
+    private native bindDialogTargetWithRemoteObjectSync(nativeObj: long, token: rpc.RemoteObject,
+      deathCallback: object): void;
+    private native bindDialogTargetWithRequestInfoSync(nativeObj: long, requestInfo: dialogRequest.RequestInfo,
+      deathCallback: object): void;
     private native resizeAsync(nativeObj: long, width: int, height: int): void;
     private native setWindowLimits(nativeObj: long, windowLimits: WindowLimits, isForcible?: boolean): WindowLimits;
     private native getWindowLimits(nativeObj: long): WindowLimits;
@@ -4321,6 +4327,52 @@ export class WindowInternal implements Window {
       });
     }
 
+    public bindDialogTarget(token: rpc.RemoteObject, deathCallback: Callback<void>): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.bindDialogTargetWithRemoteObjectSync(this.nativeObj, token, deathCallback);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public bindDialogTarget(token: rpc.RemoteObject, deathCallback: Callback<void>, 
+      callback: AsyncCallback<void>): void {
+      taskpool.execute((): void => {
+        this.bindDialogTargetWithRemoteObjectSync(this.nativeObj, brightness);
+      }).then((ret: NullishType) => {
+        callback(new BusinessError(), undefined);
+      }).catch((err: NullishType) => {
+        callback(err as BusinessError, undefined);
+      });
+    }
+
+    public bindDialogTarget(requestInfo: dialogRequest.RequestInfo, deathCallback: Callback<void>): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.bindDialogTargetWithRequestInfoSync(this.nativeObj, requestInfo, deathCallback);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public bindDialogTarget(requestInfo: dialogRequest.RequestInfo, deathCallback: Callback<void>, 
+      callback: AsyncCallback<void>): void {
+      taskpool.execute((): void => {
+        this.bindDialogTargetWithRequestInfoSync(this.nativeObj, brightness);
+      }).then((ret: NullishType) => {
+        callback(new BusinessError(), undefined);
+      }).catch((err: NullishType) => {
+        callback(err as BusinessError, undefined);
+      });
+    }
+
     public resizeAsync(width: int, height: int): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute(() => {
@@ -4848,6 +4900,12 @@ export interface Window {
     isWindowHighlighted(): boolean;
     getParentWindow(): Window;
     setParentWindow(windowId: int): Promise<void>;
+    bindDialogTarget(token: rpc.RemoteObject, deathCallback: Callback<void>): Promise<void>;
+    bindDialogTarget(token: rpc.RemoteObject, deathCallback: Callback<void>,
+      callback: AsyncCallback<void>): void;
+    bindDialogTarget(requestInfo: dialogRequest.RequestInfo, deathCallback: Callback<void>): Promise<void>;
+    bindDialogTarget(requestInfo: dialogRequest.RequestInfo, deathCallback: Callback<void>,
+      callback: AsyncCallback<void>): void;
     setContentAspectRatio(ratio: number, isPersistent?: boolean, needUpdateRect?: boolean): Promise<void>;
     opacity(opacity: double): void;
     scale(scaleOptions: ScaleOptions): void;

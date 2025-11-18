@@ -90,6 +90,8 @@ public:
     static void ShowWindow(ani_env* env, ani_object obj, ani_long nativeObj);
     static void ShowWindowWithOptions(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_object aniShowWindowOptions);
+    static void BindDialogTarget(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_object argv, ani_ref deathCallback);
     static void DestroyWindow(ani_env* env, ani_object obj, ani_long nativeObj);
     static ani_boolean IsWindowShowing(ani_env* env, ani_object obj, ani_long nativeObj);
     static ani_boolean IsWindowHighlighted(ani_env* env, ani_object obj, ani_long nativeObj);
@@ -242,6 +244,7 @@ private:
     void OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnShowWindow(ani_env* env);
     void OnShowWindowWithOptions(ani_env* env, ani_object aniShowWindowOptions);
+    void OnBindDialogTarget(ani_env* env, ani_object argv, ani_ref deathCallback);
     void OnDestroyWindow(ani_env* env);
     ani_boolean OnIsWindowShowing(ani_env* env);
     ani_boolean OnIsWindowHighlighted(ani_env* env);
