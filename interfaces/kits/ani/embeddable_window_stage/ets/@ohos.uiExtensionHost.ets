@@ -129,9 +129,9 @@ namespace uiExtensionHost {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setWaterMarkFlag(this.nativeObj, enable);
-        }).then((ret: NullishType) :void => {
+        }).then((ret: Any) :void => {
           resolve(undefined);
-        }).catch((err: NullishType) :void => {
+        }).catch((err: Any) :void => {
           reject(err as BusinessError);
         });
       });
@@ -141,9 +141,9 @@ namespace uiExtensionHost {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.hidePrivacyContentForHost(this.nativeObj, shouldHide);
-        }).then((ret: NullishType) :void => {
+        }).then((ret: Any) :void => {
           resolve(undefined);
-        }).catch((err: NullishType) :void => {
+        }).catch((err: Any) :void => {
           reject(err as BusinessError);
         });
       });
