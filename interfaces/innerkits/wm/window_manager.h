@@ -1216,7 +1216,7 @@ public:
      * this priority is highest.
      *
      * @param dragResizeType global drag resize type to set
-     * @return WM_OK means get success, others means failed.
+     * @return WM_OK means set success, others means failed.
      */
     WMError SetGlobalDragResizeType(DragResizeType dragResizeType);
 
@@ -1235,7 +1235,7 @@ public:
      *
      * @param bundleName bundleName of specific app
      * @param dragResizeType drag resize type to set
-     * @return WM_OK means get success, others means failed.
+     * @return WM_OK means set success, others means failed.
      */
     WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType);
 
@@ -1261,7 +1261,7 @@ public:
      *
      * @param bundleName bundleName of specific app
      * @param keyFramePolicy param of key frame
-     * @return WM_OK means get success, others means failed.
+     * @return WM_OK means set success, others means failed.
      */
     WMError SetAppKeyFramePolicy(const std::string& bundleName, const KeyFramePolicy& keyFramePolicy);
 
