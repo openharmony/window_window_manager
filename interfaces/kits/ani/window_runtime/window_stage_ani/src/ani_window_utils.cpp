@@ -883,7 +883,7 @@ ani_object AniWindowUtils::CreateAniAvoidArea(ani_env* env, const AvoidArea& avo
     return aniAvoidArea;
 }
 
-ani_object AniWindowUtils::CreateAniWindowArray(ani_env* env, std::vector<ani_ref>& windows)
+ani_object AniWindowUtils::CreateAniWindowsArray(ani_env* env, std::vector<ani_ref>& windows)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     ani_array windowArray = nullptr;
