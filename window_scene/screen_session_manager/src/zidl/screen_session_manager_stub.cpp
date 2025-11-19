@@ -956,7 +956,19 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
                 break;
             }
             std::vector<DisplayId> displayIds;
-            DMError ret = MakeUniqueScreen(uniqueScreenIds, displayIds);
+            UniqueScreenRotationOptions rotationOptions;
+            if (!data.ReadBool(rotationOptions.isRotationLocked_)) {
+                TLOGE(WmsLogTag::DMS, "failed to receive rotationOptions isRotationLocked in stub");
+                break;
+            }
+            if (!data.ReadInt32(rotationOptions.rotation_)) {
+                TLOGE(WmsLogTag::DMS, "failed to receive rotationOptions rotation in stub");
+                break;
+            }
+            TLOGD(WmsLogTag::DMS,
+                  "IPC Stub received unique screen lock parameters, isRotationLocked: %{public}d, rotation: %{public}d",
+                  rotationOptions.isRotationLocked_, rotationOptions.rotation_);
+            DMError ret = MakeUniqueScreen(uniqueScreenIds, displayIds, rotationOptions);
             reply.WriteUInt64Vector(displayIds);
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
             break;

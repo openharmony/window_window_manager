@@ -151,6 +151,9 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(SessionOption option,
         }
     }
     if (screenEvent == ScreenEvent::CONNECTED) {
+        TLOGD(WmsLogTag::DMS, "ScreenSessionManagerClient processing callback, isRotationLocked: %{public}d"
+              "rotation: %{public}d, rotationOrientationMap: %{public}s",
+              option.isRotationLocked_, option.rotation_, MapToString(option.rotationOrientationMap_).c_str());
         if (HandleScreenConnection(option)) {
             connectedScreenSet_.insert(option.screenId_);
             TLOGI(WmsLogTag::DMS,
@@ -1189,6 +1192,17 @@ bool ScreenSessionManagerClient::HandleScreenConnection(SessionOption option)
     }
     screenSession->SetRotationCorrectionMap(option.rotationCorrectionMap_);
     screenSession->SetSupportsFocus(option.supportsFocus_);
+    screenSession->SetUniqueRotationLock(option.isRotationLocked_);
+    screenSession->SetUniqueRotation(option.rotation_);
+    if (screenSession->GetUniqueRotationOrientationMap().size() != ROTATION_NUM) {
+        screenSession->SetUniqueRotationOrientationMap(option.rotationOrientationMap_);
+    }
+    TLOGD(WmsLogTag::DMS, "Set unique screen rotation property in screenSession,"
+          "isUniqueRotationLocked: %{public}d, uniqueRotation: %{public}d"
+          "uniqueRotationOrientationMap: %{public}s",
+          screenSession->GetUniqueRotationLock(), screenSession->GetUniqueRotation(),
+          MapToString(screenSession->GetUniqueRotationOrientationMap()).c_str());
+
     NotifyClientScreenConnect(screenSession);
     return true;
 }

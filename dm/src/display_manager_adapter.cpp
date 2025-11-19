@@ -1419,12 +1419,12 @@ DMError ScreenManagerAdapter::ResizeVirtualScreen(ScreenId screenId, uint32_t wi
 }
 
 DMError ScreenManagerAdapter::MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
-    std::vector<DisplayId>& displayIds)
+    std::vector<DisplayId>& displayIds, const UniqueScreenRotationOptions& rotationOptions)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     if (screenSessionManagerServiceProxy_) {
-        return screenSessionManagerServiceProxy_->MakeUniqueScreen(screenIds, displayIds);
+        return screenSessionManagerServiceProxy_->MakeUniqueScreen(screenIds, displayIds, rotationOptions);
     }
 
     return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;

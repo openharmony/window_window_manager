@@ -270,7 +270,7 @@ public:
     }
 
     virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
-        std::vector<DisplayId>& displayIds) { return DMError::DM_OK; }
+        std::vector<DisplayId>& displayIds, const UniqueScreenRotationOptions& options) { return DMError::DM_OK; }
 
     virtual void SetClient(const sptr<IScreenSessionManagerClient>& client) {}
     virtual void SwitchUser() {}

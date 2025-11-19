@@ -173,9 +173,30 @@ public:
      * @brief Make screens as unique-screen.
      *
      * @param screenIds Unique screen ids.
+     * @param rotationOptions Parameter controlling whether screen rotation is locked when creating unique screen
+     * @return DM_OK means make unique screen success, others means make unique failed.
+     */
+    DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
+        const UniqueScreenRotationOptions& rotationOptions);
+
+    /**
+     * @brief Make screens as unique-screen.
+     *
+     * @param screenIds Unique screen ids.
      * @return DM_OK means make unique screen success, others means make unique failed.
      */
     DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds);
+
+    /**
+     * @brief Make screens as unique-screen.
+     *
+     * @param screenIds Unique screen ids.
+     * @param displayIds Unique display ids.
+     * @param rotationOptions Parameter controlling whether screen rotation is locked when creating unique screen
+     * @return DM_OK means make unique screen success, others means make unique failed.
+     */
+    DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds, std::vector<DisplayId>& displayIds,
+        const UniqueScreenRotationOptions& rotationOptions);
 
     /**
      * @brief Make screens as unique-screen.
