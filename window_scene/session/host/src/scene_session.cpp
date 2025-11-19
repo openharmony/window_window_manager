@@ -944,7 +944,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event, const SessionEventParam
                 session->pcFoldScreenController_->RecordStartMoveRect(currRect, session->IsFullScreenMovable());
             }
             WSRect rect = session->GetMoveRectForWindowDrag();
-            if (session->IsFullScreenMovable()) {//
+            if (session->IsFullScreenMovable() || (session->IsSplitMovable() && !session->IsFreeMultiWindowMode())) {
                 session->UpdateFullScreenWaterfallMode(false);
                 rect = session->moveDragController_->GetFullScreenToFloatingRect(session->GetSessionRect(),
                     session->GetSessionRequestRect());
@@ -3554,9 +3554,15 @@ bool SceneSession::IsMovableWindowType() const
     }
 
     return property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
-        property->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-        property->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
-        IsFullScreenMovable();
+        IsSplitMovable() || IsFullScreenMovable();
+}
+
+bool SceneSession::IsSplitMovable() const
+{
+    auto property = GetSessionProperty();
+    return (property->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+        property->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
+        WindowHelper::IsWindowModeSupported(property->GetWindowModeSupportType(), WindowMode::WINDOW_MODE_FLOATING);
 }
 
 bool SceneSession::IsFullScreenMovable() const
