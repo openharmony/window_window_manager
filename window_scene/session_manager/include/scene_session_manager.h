@@ -1771,7 +1771,7 @@ private:
     void CacheStartingWindowInfo(const std::string& bundleName, const std::string& moduleName,
         const std::string& abilityName, const StartingWindowInfo& startingWindowInfo, bool isDark);
     bool CheckAndGetPreLoadResourceId(const StartingWindowInfo& startingWindowInfo, uint32_t& resId);
-    std::unique_ptr<StartingWindowRdbManager> startingWindowRdbMgr_;
+    std::shared_ptr<StartingWindowRdbManager> startingWindowRdbMgr_;
     std::unique_ptr<LruCache> snapshotLruCache_;
     std::size_t snapshotCapacity_ = 0;
     bool GetIconFromDesk(const SessionInfo& sessionInfo, std::string& startupPagePath) const;
