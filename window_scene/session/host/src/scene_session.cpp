@@ -8470,6 +8470,10 @@ bool SceneSession::UpdateRectInner(const SessionUIParam& uiParam, SizeChangeReas
     if (reason == SizeChangeReason::PAGE_ROTATION) {
         dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
     }
+    if (reason == SizeChangeReason::DRAG_END) {
+        sessionInfo_.cursorDragFlag_ = false;
+        sessionInfo_.cursorDragCount_ = 0;
+    }
     // During the drag move, prohibit vSync from refreshing UI parameters to the server
     if (reason == SizeChangeReason::DRAG_MOVE ||
         !((NotifyServerToUpdateRect(uiParam, reason) || IsDirtyWindow()) && PipelineNeedNotifyClientToUpdateRect())) {
