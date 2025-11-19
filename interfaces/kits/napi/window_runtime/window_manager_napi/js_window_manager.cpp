@@ -1363,31 +1363,37 @@ napi_value JsWindowManager::OnSetStartWindowBackgroundColor(napi_env env, napi_c
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARGC_THREE) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setStartWindowBackgroundColor]msg: Mandatory parameters are left unspecified");
     }
     constexpr uint32_t maxNameLength = 200;
     std::string moduleName;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], moduleName)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to moduleName");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setStartWindowBackgroundColor]msg: ModuleName has incorrect parameter types");
     }
     if (moduleName.length() > maxNameLength) {
         TLOGE(WmsLogTag::WMS_PATTERN, "moduleName length out of range");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM,
+            "[window][setStartWindowBackgroundColor]msg: ModuleName length out of range");
     }
     std::string abilityName;
     if (!ConvertFromJsValue(env, argv[INDEX_ONE], abilityName)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to abilityName");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setStartWindowBackgroundColor]msg: AbilityName has incorrect parameter types");
     }
     if (abilityName.length() > maxNameLength) {
         TLOGE(WmsLogTag::WMS_PATTERN, "abilityName length out of range");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM,
+            "[window][setStartWindowBackgroundColor]msg: AbilityName length out of range");
     }
     uint32_t color = 0;
     if (!ParseColorMetrics(env, argv[ARGC_TWO], color)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to color");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setStartWindowBackgroundColor]msg: Failed to convert parameter to color");
     }
 
     napi_value result = nullptr;
@@ -1398,12 +1404,14 @@ napi_value JsWindowManager::OnSetStartWindowBackgroundColor(napi_env env, napi_c
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "setStartWindowBackground failed"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret,
+                "[window][setStartWindowBackgroundColor]"));
         }
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetStartWindowBackgroundColor") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
-            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY), "send event failed"));
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,
+                "[window][setStartWindowBackgroundColor]msg: Send event failed"));
     }
     return result;
 }
@@ -1415,17 +1423,20 @@ napi_value JsWindowManager::OnGetAllWindowLayoutInfo(napi_env env, napi_callback
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARGC_ONE) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][getAllWindowLayoutInfo]msg: Mandatory parameters are left unspecified");
     }
     int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], displayId)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to displayId");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][getAllWindowLayoutInfo]msg: Incorrect parameter types");
     }
     if (displayId < 0 ||
         SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid displayId");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][getAllWindowLayoutInfo]msg: Parameter verification failed");
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
@@ -1437,13 +1448,14 @@ napi_value JsWindowManager::OnGetAllWindowLayoutInfo(napi_env env, napi_callback
             task->Resolve(env, CreateJsWindowLayoutInfoArrayObject(env, infos));
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s success", where);
         } else {
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "failed"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "[window][getAllWindowLayoutInfo]"));
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s failed", where);
         }
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnGetAllWindowLayoutInfo") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
-            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                "[window][getAllWindowLayoutInfo]Send event failed"));
     }
     return result;
 }
@@ -1561,7 +1573,8 @@ napi_value JsWindowManager::OnGetGlobalWindowMode(napi_env env, napi_callback_in
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc > ARGC_ONE) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM,
+            "[window][getGlobalWindowMode]Invalid parameter range");
     }
     DisplayId displayId = DISPLAY_ID_INVALID;
     if (argc == ARGC_ONE) {
@@ -1571,12 +1584,14 @@ napi_value JsWindowManager::OnGetGlobalWindowMode(napi_env env, napi_callback_in
             napi_typeof(env, argv[INDEX_ZERO], &paramType);
             if (paramType != napi_undefined && paramType != napi_null) {
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed to convert parameter to displayId");
-                return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+                return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM,
+                    "[window][getGlobalWindowMode]msg: The parameter format is incorrect");
             }
             TLOGI(WmsLogTag::WMS_ATTRIBUTE, "explicit set undefined or null");
         } else if (inputDisplayId < 0) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid displayId value: %{public}" PRId64, inputDisplayId);
-            return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM,
+                "[window][getGlobalWindowMode]msg: Invalid parameter range");
         } else {
             displayId = static_cast<DisplayId>(inputDisplayId);
         }
@@ -1593,13 +1608,14 @@ napi_value JsWindowManager::OnGetGlobalWindowMode(napi_env env, napi_callback_in
         } else {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s failed, errCode: %{public}d, displayId: %{public}" PRIu64,
                 where, static_cast<int32_t>(errCode), displayId);
-            task->Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(errCode), "failed"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(errCode),
+                "[window][getGlobalWindowMode]"));
         }
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnGetGlobalWindowMode") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "send event failed, displayId: %{public}" PRIu64, displayId);
         napiAsyncTask->Reject(env,
-            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY), "send event failed"));
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY), "Send event failed"));
     }
     return result;
 }
@@ -1657,16 +1673,18 @@ napi_value JsWindowManager::OnGetVisibleWindowInfo(napi_env env, napi_callback_i
 {
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "device not support!");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, "[window][getVisibleWindowInfo]");
     }
     uint32_t apiVersion = SysCapUtil::GetApiCompatibleVersion();
     if (apiVersion < API_VERSION_18 && !Permission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!, api%{public}u", apiVersion);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP,
+            "[window][getVisibleWindowInfo]msg: Not system app");
     } else if (apiVersion >= API_VERSION_18 &&
                !CheckCallingPermission(PermissionConstants::PERMISSION_VISIBLE_WINDOW_INFO)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!, api%{public}u", apiVersion);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_NO_PERMISSION);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NO_PERMISSION,
+            "[window][getVisibleWindowInfo]msg: Need permission VISIBLE_WINDOW_INFO");
     }
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -1683,12 +1701,14 @@ napi_value JsWindowManager::OnGetVisibleWindowInfo(napi_env env, napi_callback_i
             TLOGND(WmsLogTag::WMS_ATTRIBUTE, "OnGetVisibleWindowInfo success");
         } else {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "OnGetVisibleWindowInfo failed");
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "OnGetVisibleWindowInfo failed"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret,
+                "[window][getVisibleWindowInfo]msg: GetVisibilityWindowInfo failed"));
         }
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnGetVisibleWindowInfo") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
-            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][getVisibleWindowInfo]msg: Failed to send event"));
     }
     return result;
 }
@@ -1699,17 +1719,20 @@ napi_value JsWindowManager::OnGetWindowsByCoordinate(napi_env env, napi_callback
     napi_value argv[ARGC_FOUR] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE || argc > ARGC_FOUR) { // min param num 1, max param num 4
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][getWindowsByCoordinate]msg: Mandatory parameters are left unspecified");
     }
     int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], displayId)) {
         TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to displayId");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][getWindowsByCoordinate]msg: Incorrect parameter types");
     }
     if (displayId < 0 ||
         SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
         TLOGE(WmsLogTag::WMS_PC, "invalid displayId");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][getWindowsByCoordinate]msg: Parameter verification failed");
     }
     int32_t windowNumber = 0;
     if (argc > ARGC_ONE && !ConvertFromJsValue(env, argv[ARGC_ONE], windowNumber)) {
@@ -1736,12 +1759,13 @@ napi_value JsWindowManager::OnGetWindowsByCoordinate(napi_env env, napi_callback
             }
             task->Resolve(env, CreateJsWindowArrayObject(env, windows));
         } else {
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "getWindowsByCoordinate failed"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "[window][getWindowsByCoordinate]"));
         }
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnGetWindowsByCoordinate") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
-            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                "[window][getWindowsByCoordinate]msg: Send event failed"));
     }
     return result;
 }
