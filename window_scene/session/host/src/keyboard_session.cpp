@@ -260,10 +260,6 @@ bool KeyboardSession::isNeedProcessKeyboardOccupiedAreaInfo(
         lastParams.LandscapePanelRect_ != params.LandscapePanelRect_ ||
         lastParams.PortraitPanelRect_ != params.PortraitPanelRect_);
     
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "IsForeground: %{public}d, isParamschanged: %{public}d"
-        "isKeyboardRectsChanged: %{public}d, isValidAvoidHeight of lastParams: %{public}d"
-        "isValidAvoidHeight of params: %{public}d", IsSessionForeground(), lastParams != params,
-        isKeyboardRectsChanged, lastParams.isValidAvoidHeight(), params.isValidAvoidHeight());
     return IsSessionForeground() && lastParams != params && !isKeyboardRectsChanged &&
         lastParams.isValidAvoidHeight() && params.isValidAvoidHeight();
 }
