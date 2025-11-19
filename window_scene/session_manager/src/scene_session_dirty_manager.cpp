@@ -875,7 +875,7 @@ void SceneSessionDirtyManager::UpdateWindowFlagsForLockCursor(const sptr<SceneSe
     if (sceneSession->GetSessionInfoCursorDragFlag()) {
         int32_t count = sceneSession->GetSessionInfoCursorDragCount();
         sceneSession->SetSessionInfoCursorDragCount(++count);
-        windowInfo.agentPid = getpid(),
+        windowInfo.agentPid = getpid();
         if (count > CURSOR_DRAG_COUNT_MAX) {
             sceneSession->SetSessionInfoCursorDragFlag(false);
             sceneSession->SetSessionInfoCursorDragCount(0);
