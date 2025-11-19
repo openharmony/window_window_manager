@@ -407,6 +407,39 @@ std::map<std::string, MultiScreenInfo> ScreenSettingHelper::GetMultiScreenInfo(c
     return multiScreenInfoMap;
 }
 
+std::map<std::string, MultiScreenInfo> ScreenSettingHelper::GetResolutionMode(const std::string& key)
+{
+    std::map<std::string, SupportedScreenModes> resolutionMap = {};
+    std::string value = "";
+    SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = settingProvider.GetStringValueMultiUser(key, value);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+        return resolutionMap;
+    }
+    std::string validString = RemoveInvalidChar(value);
+    std::vector<std::string> restoredScreen = {};
+    bool split = SplitString(restoredScreen, validString, ',');
+    if (!split) {
+        TLOGE(WmsLogTag::DMS, "split screen failed");
+        return resolutionMap;
+    }
+    for (auto infoString : restoredScreen) {
+        std::vector<std::string> infoVector = {};
+        split = SplitString(infoVector, infoString, ';');
+        if (!split || infoVector.size() != VALID_MULTI_SCREEN_INFO_SIZE) {
+            TLOGE(WmsLogTag::DMS, "split info failed");
+            continue;
+        }
+        SupportedScreenModes info = {};
+        if (!GetScreenActiveMode(info, infoVector[INDEX_SCREEN_MODE])) {
+            continue;
+        }
+        resolutionMap[infoVector[INDEX_SCREEN_INFO]] = info;
+    }
+    return resolutionMap;
+}
+
 bool ScreenSettingHelper::GetScreenMode(MultiScreenInfo& info, const std::string& inputString)
 {
     std::vector<std::string> screenMode = {};

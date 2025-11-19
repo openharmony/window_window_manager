@@ -122,10 +122,14 @@ void MultiScreenChangeUtils::ScreenMainPositionChange(sptr<ScreenSession>& inner
     innerScreen->SetXYPosition(0, 0);
     innerScreen->PropertyChange(innerScreen->GetScreenProperty(),
         ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
+    ScreenSessionManager::GetInstance().SetPhysicalStartPosition(innerScreen, 0, 0);
+    ScreenSessionManager::GetInstance().SetPhysicalXYPosition(innerScreen, 0, 0);
     externalScreen->SetStartPosition(0, 0);
     externalScreen->SetXYPosition(0, 0);
     externalScreen->PropertyChange(externalScreen->GetScreenProperty(),
         ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
+    ScreenSessionManager::GetInstance().SetPhysicalStartPosition(innerScreen, 0, 0);
+    ScreenSessionManager::GetInstance().SetPhysicalXYPosition(innerScreen, 0, 0);
     {
         std::shared_ptr<RSDisplayNode> innerNode = innerScreen->GetDisplayNode();
         std::shared_ptr<RSDisplayNode> externalNode = externalScreen->GetDisplayNode();

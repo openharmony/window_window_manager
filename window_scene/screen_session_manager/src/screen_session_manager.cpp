@@ -1340,7 +1340,7 @@ bool ScreenSessionManager::RecoverRestoredMultiScreenMode(sptr<ScreenSession> sc
     auto info = multiScreenInfoMap[serialNumber];
     if (info.outerOnly) {
         SetIsOuterOnlyMode(true);
-        RecoverScreenActiveMode(info.secondaryScreenOption.screenId_, info.activeId);
+        RecoverScreenActiveMode(info.secondaryScreenOption.screenId_);
         MultiScreenModeChange(SCREEN_ID_OUTER_ONLY, SCREEN_ID_OUTER_ONLY, "off");
         return true;
     }
@@ -1353,12 +1353,12 @@ bool ScreenSessionManager::RecoverRestoredMultiScreenMode(sptr<ScreenSession> sc
         TLOGI(WmsLogTag::DMS, "extend screen is main");
         info.mainScreenOption.screenId_ = screenSession->GetRSScreenId();
         info.secondaryScreenOption.screenId_ = internalSession->GetRSScreenId();
-        RecoverScreenActiveMode(info.mainScreenOption.screenId_, info.activeId);
+        RecoverScreenActiveMode(info.mainScreenOption.screenId_);
     } else {
         TLOGI(WmsLogTag::DMS, "extend screen is not main");
         info.mainScreenOption.screenId_ = internalSession->GetRSScreenId();
         info.secondaryScreenOption.screenId_ = screenSession->GetRSScreenId();
-        RecoverScreenActiveMode(info.secondaryScreenOption.screenId_, info.activeId);
+        RecoverScreenActiveMode(info.secondaryScreenOption.screenId_);
     }
     if (info.multiScreenMode == MultiScreenMode::SCREEN_MIRROR) {
         SetMultiScreenMode(info.mainScreenOption.screenId_, info.secondaryScreenOption.screenId_, info.multiScreenMode);
@@ -1378,19 +1378,84 @@ bool ScreenSessionManager::RecoverRestoredMultiScreenMode(sptr<ScreenSession> sc
 #endif
 }
 
-void ScreenSessionManager::RecoverScreenActiveMode(ScreenId screenId, int32_t activeIdx)
+void ScreenSessionManager::RecoverScreenActiveMode(ScreenId rsScreenId)
 {
-    sptr<ScreenSession> screenSession = GetScreenSessionByRsId(screenId);
-    if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "screenSession is null");
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetScreenPower");
+    auto state = RSInterfaces::GetInstance().GetScreenPowerStatus(rsScreenId);
+    if(state != ScreenPowerStatus::POWER_STATUS_ON){
+        TLOGW(WmsLogTag::DMS,"rsid:%{public}" PRIu64",screen power is : %{public}u,on need recover",
+            rsScreenId,static_cast<uint32_t>(state));
         return;
     }
-    DMError ret = DMError::DM_OK;
-    ret = SetScreenActiveMode(screenSession->GetScreenId(), activeIdx);
+    sptr<ScreenSession> screenSession = GetScreenSessionByRsId(screenId);
+    if (!screenSession) {
+        TLOGE(WmsLogTag::DMS, "screenSession is nullptr, rsid: %{public}" PRIu64, rsScreenId);
+        return;
+    }
+    std::vector<sptr<SupportedScreenModes>> modes = screenSession->GetScreenMode();
+    if(modes.empty()) {
+        TLOGE(WmsLogTag::DMS, "mode is empty");
+        return;
+    }
+    uint32_t activeId = -1;
+    std::map<std::string,SupportedScreenModes> resolutionMap = ScreenSettingHelper::GetResolutionMode();
+    std::string serialNumber = screenSession->GetSerialNumber();
+    if(CheckResolutionMode(resolutionMap,serialNumber)) {
+        auto info = resolutionMap[serialNumber];
+        activeId = GetActiveIdxInMode(modes,info);
+    } else {
+        activeId = modes.size() - 1;
+    }
+    TLOGI(WmsLogTag::DMS, "activeId: %{public}d", activeId);
+    if(activeId == -1) {
+        TLOGE(WmsLogTag::DMS, "no matching resolution, activeId: %{public}d", activeId);
+        return;
+    }
+    DMError ret = SetScreenActiveMode(screenSession->GetScreenId(), activeId);
     if (ret != DMError::DM_OK) {
         TLOGE(WmsLogTag::DMS, "recover error, rsid:%{public}"  PRIu64", activeIdx:%{public}d",
             screenId, activeIdx);
+    }      
+}
+int32_t ScreenSessionManager::GetActiveIdxInModes(const std::vector<sptr<SupportedScreenModes>>& modes,
+                          const SupportedScreenModes& edidInfo)
+{
+    for(size_t i = 0; i < modes.size(); ++i)
+    {
+        const auto& mode = modes[i];
+        if(mode == nullptr){
+            TLOGE(WmsLogTag::DMS, "mode is nullptr!");
+            continue;
+        }
+        TLOGI(WmsLogTag::DMS, "supportmodelist, id:%{public}u, w:%{public}u, h:%{public}u, refreshRate:%{public}u",
+            mode->id_, mode->width_, mode->height_, mode->refreshRate_);
+        if(mode->width_ == edidInfo.width_ &&
+           mode->height_ == edidInfo.height_ &&
+           mode->refreshRate_ == edidInfo.refreshRate_) {
+            TLOGW(WmsLogTag::DMS,
+                "remode, index:%{public}u, modeid: %{public}u, w:%{public}u, w:%{public}u, refreshRate:%{public}u"
+                static_cast<int32_t>(i),mode->id_, mode->width_, mode->height_, mode->refreshRate_);
+            return static_cast<int32_t>(i);
+           }
     }
+    return -1;
+}
+bool ScreenSessionManager::CheckResolutionMode(std::map<std::string, MultiScreenInfo> resolutionMap,
+    const std::string& serialNumber)
+{
+    if (resolutionMap.empty()) {
+        TLOGE(WmsLogTag::DMS, "no restored screen, use default mode!");
+        return false;
+    }
+    if (serialNumber.size() == 0) {
+        TLOGE(WmsLogTag::DMS, "serialNumber empty!");
+        return false;
+    }
+    if (resolutionMap.find(serialNumber) == resolutionMap.end()) {
+        TLOGE(WmsLogTag::DMS, "screen not found, use default mode!");
+        return false;
+    }
+    return true;
 }
 
 bool ScreenSessionManager::CheckMultiScreenInfoMap(std::map<std::string, MultiScreenInfo> multiScreenInfoMap,
@@ -1895,7 +1960,9 @@ void ScreenSessionManager::ResetInternalScreenSession(sptr<ScreenSession>& inner
     /* reset relative position */
     innerScreen->SetStartPosition(0, 0);
     externalScreen->SetStartPosition(0, 0);
-
+    SetPhysicalStartPosition(innerScreen, 0, 0);
+    SetPhysicalXYPosition(externalScreen, 0, 0);
+    
     /* reset combination */
     innerScreen->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
     externalScreen->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
@@ -2381,11 +2448,13 @@ void ScreenSessionManager::CalculateXYPosition(sptr<ScreenSession> firstScreenSe
     if (firstScreenSession != nullptr &&
         firstScreenSession->GetScreenCombination() == ScreenCombination::SCREEN_MAIN) {
         firstScreenSession->SetXYPosition(0, 0);
+        SetPhysicalXYPosition(firstScreenSession, 0, 0);
         NotifyDisplayChanged(firstScreenSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
         CalculateSecondryXYPosition(firstScreenSession, secondaryScreenSession);
     } else if (secondaryScreenSession != nullptr &&
         secondaryScreenSession->GetScreenCombination() == ScreenCombination::SCREEN_MAIN) {
         secondaryScreenSession->SetXYPosition(0, 0);
+        SetPhysicalXYPosition(secondaryScreenSession, 0, 0);
         NotifyDisplayChanged(secondaryScreenSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
         CalculateSecondryXYPosition(secondaryScreenSession, firstScreenSession);
     } else {
@@ -2409,7 +2478,36 @@ void ScreenSessionManager::CalculateSecondryXYPosition(sptr<ScreenSession> first
     int32_t secondaryX = -firstStartX + secondaryStartX;
     int32_t secondaryY = -firstStartY + secondaryStartY;
     secondaryScreenSession->SetXYPosition(secondaryX, secondaryY);
+    SetPhysicalXYPosition(secondaryScreenSession, secondaryX, secondaryY);
     NotifyDisplayChanged(secondaryScreenSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
+}
+
+void ScreenSessionManager::SetPhysicalXYPosition(sptr<ScreenSession> screenSession, int32_t x, int32_t y)
+{
+    if(screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS,"screenSession is nullptr");
+        return;
+    }
+    sptr<ScreenSession> physicalScreen = GetPhysicalScreenSession(screenSession->GetRSScreenId());
+    if(physicalScreen == nullptr) {
+        TLOGE(WmsLogTag::DMS,"physicalScreen is nullptr");
+        return;
+    }
+    physicalScreen->SetXYPosition(x,y);
+}
+
+void ScreenSessionManager::SetPhysicalStartPosition(sptr<ScreenSession> screenSession, uint32_t startX, uint32_t startY)
+{
+    if(screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS,"screenSession is nullptr");
+        return;
+    }
+    sptr<ScreenSession> physicalScreen = GetPhysicalScreenSession(screenSession->GetRSScreenId());
+    if(physicalScreen == nullptr) {
+        TLOGE(WmsLogTag::DMS,"physicalScreen is nullptr");
+        return;
+    }
+    physicalScreen->SetStartPosition(x,y);
 }
 
 DMError ScreenSessionManager::CheckVirtualScreenPermission()
@@ -4867,7 +4965,7 @@ void ScreenSessionManager::CallRsSetScreenPowerStatusSync(ScreenId screenId, Scr
             return;
         }
         auto activeId = screenSession->GetActiveId();
-        RecoverScreenActiveMode(screenId, activeId);
+        RecoverScreenActiveMode(screenId);
         TLOGI(WmsLogTag::DMS, "set screen active mode, rsid:%{public}" PRId64 ", activeId:%{public}u",
             screenId, activeId);
     }
