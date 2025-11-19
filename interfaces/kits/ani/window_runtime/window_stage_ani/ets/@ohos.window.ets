@@ -4405,7 +4405,7 @@ export class WindowInternal implements Window {
     public bindDialogTarget(token: rpc.RemoteObject, deathCallback: Callback<void>, 
       callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
-        this.bindDialogTargetWithRemoteObjectSync(this.nativeObj, brightness);
+        this.bindDialogTargetWithRemoteObjectSync(this.nativeObj, token, deathCallback);
       }).then((ret: NullishType) => {
         callback(new BusinessError(), undefined);
       }).catch((err: NullishType) => {
@@ -4428,7 +4428,7 @@ export class WindowInternal implements Window {
     public bindDialogTarget(requestInfo: dialogRequest.RequestInfo, deathCallback: Callback<void>, 
       callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
-        this.bindDialogTargetWithRequestInfoSync(this.nativeObj, brightness);
+        this.bindDialogTargetWithRequestInfoSync(this.nativeObj, requestInfo, deathCallback);
       }).then((ret: NullishType) => {
         callback(new BusinessError(), undefined);
       }).catch((err: NullishType) => {
