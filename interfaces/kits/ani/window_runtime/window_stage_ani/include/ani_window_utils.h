@@ -111,7 +111,7 @@ public:
     static ani_object CreateAniWindowLimits(ani_env* env, const WindowLimits& windowLimits);
     static ani_object CreateAniAvoidArea(ani_env* env, const AvoidArea& avoidArea,
         AvoidAreaType type, bool useActualVisibility = false);
-    static ani_object CreateAniWindowArray(ani_env* env, std::vector<ani_ref>& windows);
+    static ani_object CreateAniWindowsArray(ani_env* env, std::vector<ani_ref>& windows);
     static ani_object CreateAniFrameMetrics(ani_env* env, const FrameMetrics& metrics);
     static ani_object CreateAniSystemBarTintState(ani_env* env, DisplayId displayId, const SystemBarRegionTints& tints);
     static ani_object CreateAniSystemBarRegionTint(ani_env* env, const SystemBarRegionTint& tint);

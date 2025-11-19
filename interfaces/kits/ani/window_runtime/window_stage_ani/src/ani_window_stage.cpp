@@ -208,7 +208,7 @@ ani_object AniWindowStage::OnGetSubWindow(ani_env* env)
     for (size_t i = 0; i < subWindowVec.size(); i++) {
         windows[i] = CreateAniWindowObject(env, subWindowVec[i]);
     }
-    return AniWindowUtils::CreateAniWindowArray(env, windows);
+    return AniWindowUtils::CreateAniWindowsArray(env, windows);
 }
 
 ani_object AniWindowStage::CreateSubWindowWithOptions(ani_env* env, ani_object obj, ani_long nativeObj,
