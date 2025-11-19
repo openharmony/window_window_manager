@@ -37,6 +37,7 @@ public:
     }
     void AddInputWindow(const sptr<Window>& window);
     void RemoveInputWindow(uint32_t windowId);
+    void InjectTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void MarkRegisterToMMI()
     {
         isRegisteredMMI_ = true;
