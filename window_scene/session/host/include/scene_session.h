@@ -712,6 +712,10 @@ public:
     WMError NotifyDisableDelegatorChange() override;
     virtual void SetRecentSessionState(RecentSessionInfo& info, const SessionState& state) {}
     void RegisterGetStartWindowConfigFunc(GetStartWindowTypeFunc&& func);
+    void RegisterIsAppBoundSystemTrayCallback(
+        const std::function<bool(int32_t callingPid, uint32_t callingToken, const std::string &instanceKey)>& callback);
+    std::function<bool(int32_t callingPid, uint32_t callingToken, const std::string &instanceKey)>
+        isAppBoundSystemTrayCallback_;
 
     /*
      * Window Decor

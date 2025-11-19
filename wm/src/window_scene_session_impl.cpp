@@ -4007,7 +4007,11 @@ WMError WindowSceneSessionImpl::Restore()
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
-    hostSession->OnRestoreMainWindow();
+    WSError ret = hostSession->OnRestoreMainWindow();
+    if (ret != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "OnRestoreMainWindow result is: %{public}d", static_cast<int32_t>(ret));
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
     return WMError::WM_OK;
 }
 
