@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "window_input_redistribute_client.h"
 #include "window_input_redistribute_impl.h"
 #include "input_transfer_station.h"
@@ -31,12 +32,12 @@ void WindowInputRedistributeClient::UnRegisterInputEventRedistribute(
     WindowInputRedistributeImpl::GetInstance().UnRegisterInputEventRedistribute(recipientInfo);
 }
 
-void WindowInputRedistributeClient::SendInputEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
+void WindowInputRedistributeClient::SendInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     InputTransferStation::GetInstance().HandleInputEvent(keyEvent);
 }
 
-void WindowInputRedistributeClient::SendInputEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+void WindowInputRedistributeClient::SendInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     InputTransferStation::GetInstance().InjectTouchEvent(pointerEvent);
 }

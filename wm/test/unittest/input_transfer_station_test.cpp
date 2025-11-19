@@ -87,6 +87,8 @@ HWTEST_F(InputTransferStationTest, AddInputWindow, TestSize.Level0)
     InputTransferStation::GetInstance().AddInputWindow(window_);
     InputTransferStation::GetInstance().isGameControllerLoaded_ = false;
     InputTransferStation::GetInstance().AddInputWindow(window_);
+    InputTransferStation::GetInstance().LoadTouchPredictor();
+    InputTransferStation::GetInstance().LoadTouchPredictor();
     ASSERT_EQ(true, InputTransferStation::GetInstance().isGameControllerLoaded_);
 }
 

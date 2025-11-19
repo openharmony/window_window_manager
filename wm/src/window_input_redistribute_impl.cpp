@@ -12,12 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "window_input_redistribute_log.h"
+
+#include "window_input_redistribute_impl.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
-WM_IMPLEMENT_SINGLE_INSTANCE(WindowInputRedistributeImpl);
+WM_IMPLEMENT_SINGLE_INSTANCE(WindowInputRedistributeImpl)
 
 std::optional<RecipientResources> WindowInputRedistributeImpl::GetRecipientResources(InputEventType type,
     InputRedistributeTiming timing)
@@ -28,7 +29,7 @@ std::optional<RecipientResources> WindowInputRedistributeImpl::GetRecipientResou
             static_cast<uint32_t>(type), static_cast<uint32_t>(timing));
         return std::nullopt;
     }
-    
+
     const auto& [recipientVectorRef, mutexRef] = it->second;
     return RecipientResources{recipientVectorRef.get(), mutexRef.get()};
 }
@@ -36,7 +37,7 @@ std::optional<RecipientResources> WindowInputRedistributeImpl::GetRecipientResou
 static void insertSorted(std::vector<IInputEventRecipientInfo>& vec, const IInputEventRecipientInfo& recipientInfo)
 {
     auto it = std::find_if(vec.begin(), vec.end(), [&recipientInfo](const IInputEventRecipientInfo& info) {
-        return info.identity = recipientInfo.identity;
+        return info.identity == recipientInfo.identity;
     });
     if (it != vec.end()) {
         *it = recipientInfo;
@@ -70,7 +71,8 @@ void WindowInputRedistributeImpl::RegisterInputEventRedistribute(const IInputEve
             static_cast<uint32_t>(recipientInfo.identity), static_cast<uint32_t>(recipientInfo.timing));
         return;
     }
-
+    TLOGI(WmsLogTag::WMS_EVENT, "register identity:%{public}d,timing:%{public}d",
+        static_cast<uint32_t>(recipientInfo.identity), static_cast<uint32_t>(recipientInfo.timing));
     InsertRecipientCallback(recipientInfo);
 }
 
@@ -82,7 +84,7 @@ void WindowInputRedistributeImpl::RemoveRecipientCallback(const IInputEventRecip
     }
     auto& [recipientComponentArray, mtx] = *resources;
     std::lock_guard<std::mutex> lock(mtx);
-    
+
     auto identity = recipientInfo.identity;
     auto iter = std::remove_if(recipientComponentArray.begin(), recipientComponentArray.end(),
         [identity](const IInputEventRecipientInfo& info) {
@@ -91,50 +93,53 @@ void WindowInputRedistributeImpl::RemoveRecipientCallback(const IInputEventRecip
     recipientComponentArray.erase(iter, recipientComponentArray.end());
 }
 
-void WindowInputRedistributeImpl::UnRegisterInputEventRedistribute(const IInputEventRecipientInfo& recipientInfo) {
+void WindowInputRedistributeImpl::UnRegisterInputEventRedistribute(const IInputEventRecipientInfo& recipientInfo)
+{
     if (recipientInfo.identity >= InputRedistributeIdentity::IDENTITY_INVALID ||
         recipientInfo.timing >= InputRedistributeTiming::REDISTRIBUTE_INVALID_TIMING) {
         TLOGE(WmsLogTag::WMS_EVENT, "unRegister recipient:%{public}d at invalid timing %{public}d",
             static_cast<uint32_t>(recipientInfo.identity), static_cast<uint32_t>(recipientInfo.timing));
         return;
     }
-
+    TLOGI(WmsLogTag::WMS_EVENT, "unregister identity:%{public}d,timing:%{public}d",
+        static_cast<uint32_t>(recipientInfo.identity), static_cast<uint32_t>(recipientInfo.timing));
     RemoveRecipientCallback(recipientInfo);
 }
 
-static void LogEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, InputRedistributeIdentity identity) {
+static void LogEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, const InputRedistributeIdentity& identity)
+{
     TLOGI(WmsLogTag::WMS_EVENT, "keyId:%{public}d,recipient:%{public}d",
-        keyEvent->GetId(), static_cast<uint32_t>(recipientInfo.identity));
+        keyEvent->GetId(), static_cast<uint32_t>(identity));
 }
 
-static void LogEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, InputRedistributeIdentity identity) {
+static void LogEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const InputRedistributeIdentity& identity)
+{
     int32_t action = pointerEvent->GetPointerAction();
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE &&
         action != MMI::PointerEvent::POINTER_ACTION_PULL_MOVE &&
         action != MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE) {
         TLOGI(WmsLogTag::WMS_EVENT, "pointerId:%{public}d,recipient:%{public}d",
-            pointerEvent->GetId(), static_cast<uint32_t>(recipientInfo.identity));
+            pointerEvent->GetId(), static_cast<uint32_t>(identity));
     } else {
         TLOGD(WmsLogTag::WMS_EVENT, "pointerId:%{public}d,recipient:%{public}d",
-            pointerEvent->GetId(), static_cast<uint32_t>(recipientInfo.identity));
+            pointerEvent->GetId(), static_cast<uint32_t>(identity));
     }
 }
 
 template <typename EventType>
 typename std::enable_if<
     std::is_same<EventType, MMI::KeyEvent>::value ||
-    std::is_same<EventType, MMI::PointerEvent>::value,
-    bool>::type
-processSendEvent(std::mutex& mtx, std::vector<IInputEventRecipientInfo>& recipientArray,
-    const std::shared_ptr<EventType>& event)
+    std::is_same<EventType, MMI::PointerEvent>::value, bool>::type
+processSendEvent(std::mutex& mtx,
+    std::vector<IInputEventRecipientInfo>& recipientArray, const std::shared_ptr<EventType>& event)
 {
     if (event == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "send event failed, event is nullptr");
-        return;
+        return false;
     }
     std::lock_guard<std::mutex> lock(mtx);
     for (const auto& recipientInfo : recipientArray) {
-        std::shared_ptr<IIputEventRecipientCallback> recipient = recipientInfo->recipient;
+        std::shared_ptr<IInputEventRecipientCallback> recipient = recipientInfo.recipient;
         if (recipient == nullptr) {
             continue;
         }
@@ -144,7 +149,7 @@ processSendEvent(std::mutex& mtx, std::vector<IInputEventRecipientInfo>& recipie
             return true;
         }
     }
-    return true;
+    return false;
 }
 
 bool WindowInputRedistributeImpl::SendEvent(

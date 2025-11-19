@@ -47,6 +47,7 @@ group("unittest") {
     ":wm_window_impl_test5",
     ":wm_window_input_channel_test",
     ":wm_window_input_intercept_test",
+    ":wm_window_event_subscriber_test",
     ":wm_window_inspector_test",
     ":wm_window_manager_agent_proxy_test",
     ":wm_window_manager_stub_proxy_test",
@@ -828,6 +829,16 @@ ohos_unittest("ws_window_prepare_terminate_test") {
   module_out_path = module_out_path
 
   sources = [ "window_prepare_terminate_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wm_window_event_subscriber_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_event_subscriber_test.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
 

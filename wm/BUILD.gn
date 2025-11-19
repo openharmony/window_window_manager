@@ -97,6 +97,7 @@ ohos_static_library("libwm_static") {
     "src/window_scene.cpp",
     "src/window_scene_session_impl.cpp",
     "src/window_session_impl.cpp",
+    "src/window_event_subscriber.cpp",
     "src/window_input_redistribute_client.cpp",
     "src/window_input_redistribute_impl.cpp",
     "src/zidl/pattern_detach_callback_proxy.cpp",
@@ -151,6 +152,7 @@ ohos_static_library("libwm_static") {
     "ipc:ipc_single",
     "napi:ace_napi",
     "samgr:samgr_proxy",
+    "common_event_service:cesfwk_innerkits",
   ]
 
   defines = []
@@ -250,6 +252,7 @@ ohos_shared_library("libwm") {
     "src/window_scene.cpp",
     "src/window_scene_session_impl.cpp",
     "src/window_session_impl.cpp",
+    "src/window_event_subscriber.cpp",
     "src/window_input_redistribute_client.cpp",
     "src/window_input_redistribute_impl.cpp",
     "src/zidl/pattern_detach_callback_proxy.cpp",

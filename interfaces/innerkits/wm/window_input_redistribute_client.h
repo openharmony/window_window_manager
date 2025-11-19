@@ -15,6 +15,7 @@
 
 #ifndef OHOS_ROSEN_WINDOW_INPUT_REDISTRIBUTE_CLIENT_H
 #define OHOS_ROSEN_WINDOW_INPUT_REDISTRIBUTE_CLIENT_H
+
 #include "window.h"
 
 namespace OHOS {
@@ -22,8 +23,8 @@ namespace Rosen {
 constexpr uint32_t DEFAULT_REDISTRIBUTE_PRIORITY = 1000;
 
 /**
- * enum InputRedistributeIdentity
- * 
+ * @enum InputRedistributeIdentity
+ *
  * @brief the identity identifier of the input event receiving module.
  */
 enum class InputRedistributeIdentity : uint32_t {
@@ -34,8 +35,8 @@ enum class InputRedistributeIdentity : uint32_t {
 };
 
 /**
- * enum InputRedistributeTiming
- * 
+ * @enum InputRedistributeTiming
+ *
  * @brief the timing of event redistribution: before or after the component.
  */
 enum class InputRedistributeTiming : uint32_t {
@@ -45,9 +46,9 @@ enum class InputRedistributeTiming : uint32_t {
 };
 
 /**
- * enum InputAfterRedistributeBehavior
- * 
- * @brief the module's behavior after receiving input, 
+ * @enum InputAfterRedistributeBehavior
+ *
+ * @brief the module's behavior after receiving input,
  *  if return BEHAVIOR_INTERCEPT, it will not be distribute downwards.
  */
 enum class InputAfterRedistributeBehavior : uint32_t {
@@ -62,12 +63,12 @@ enum class InputEventType : uint32_t {
     INVALID,
 };
 
-class IIputEventRecipientCallback {
+class IInputEventRecipientCallback {
 public:
-    IIputEventRecipientCallback() = default;
-    virtual ~IIputEventRecipientCallback() = default;
-    virtual InputAfterRedistributeBehavior OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) = 0;
-    virtual InputAfterRedistributeBehavior OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) = 0;
+    IInputEventRecipientCallback() = default;
+    virtual ~IInputEventRecipientCallback() = default;
+    virtual InputAfterRedistributeBehavior OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;
+    virtual InputAfterRedistributeBehavior OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) = 0;
 };
 
 /**
@@ -83,9 +84,14 @@ struct IInputEventRecipientInfo {
     InputRedistributeTiming timing = InputRedistributeTiming::REDISTRIBUTE_INVALID_TIMING;
     InputEventType type = InputEventType::INVALID;
     uint32_t priority = DEFAULT_REDISTRIBUTE_PRIORITY;
-    std::shared_ptr<IIputEventRecipientCallback> recipient = nullptr;
+    std::shared_ptr<IInputEventRecipientCallback> recipient = nullptr;
 };
 
+/**
+ * @class WindowInputRedistributeClient
+ *
+ * @brief Used by all module want receive input event.
+ */
 class WindowInputRedistributeClient {
 public:
     /**
@@ -104,13 +110,13 @@ public:
      * Send key event.
      * @param keyEvent keyEvent of Multi-Model Input.
      */
-    static void SendInputEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent);
+    static void SendInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
 
     /**
      * Send pointer event.
      * @param pointerEvent pointerEvent of Multi-Model Input.
      */
-    static void SendInputEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    static void SendInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 };
 }
 }
