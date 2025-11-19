@@ -899,6 +899,32 @@ HWTEST_F(KeyboardSessionTest2, RaiseCallingSession09, TestSize.Level1)
     ASSERT_NE(nullptr, occupiedAreaInfo);
     EXPECT_EQ(60, occupiedAreaInfo->safeHeight_);
 }
+
+/**
+ * @tc.name: isNeedProcessKeyboardOccupiedAreaInfo
+ * @tc.desc: isNeedProcessKeyboardOccupiedAreaInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest2, isNeedProcessKeyboardOccupiedAreaInfo, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "isNeedProcessKeyboardOccupiedAreaInfo";
+    info.bundleName_ = "isNeedProcessKeyboardOccupiedAreaInfo";
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
+        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
+    EXPECT_NE(keyboardCb, nullptr);
+    sptr<SceneSession::SpecificSessionCallback> specificCb =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(specificCb, nullptr);
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
+    EXPECT_NE(keyboardSession, nullptr);
+    KeyboardLayoutParams params;
+    KeyboardLayoutParams lastParams = params;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    keyboardSession->SetSessionProperty(property);
+    EXPECT_FALSE(keyboardSEssion->isNeedProcessKeyboardOccupiedAreaInfo(params, lastParams));
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

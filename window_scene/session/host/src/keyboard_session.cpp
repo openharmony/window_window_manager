@@ -251,6 +251,23 @@ uint32_t KeyboardSession::GetCallingSessionId()
     return sessionProperty->GetCallingSessionId();
 }
 
+bool KeyboardSession::isNeedProcessKeyboardOccupiedAreaInfo(
+    const KeyboardLayoutParams& params, const KeyboardLayoutParams& lastParams)
+{
+    bool isKeyboardRectsChanged = (
+        lastParams.LandscapeKeyboardRect_ != params.LandscapeKeyboardRect_ ||
+        lastParams.PortraitKeyboardRect_ != params.PortraitKeyboardRect_ ||
+        lastParams.LandscapePanelRect_ != params.LandscapePanelRect_ ||
+        lastParams.PortraitPanelRect_ != params.PortraitPanelRect_);
+    
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "IsForeground: %{public}d, isParamschanged: %{public}d"
+        "isKeyboardRectsChanged: %{public}, isValidAvoidHeight of lastParams: %{public}d"
+        "isValidAvoidHeight of params: %{public}d", IsSessionForeground(), lastParams != params,
+        isKeyboardRectsChanged, lastParams.isValidAvoidHeight(), params.isValidAvoidHeight());
+    return IsSessionForeground() && lastParams != params && !isKeyboardRectsChanged &&
+        lastParams.isValidAvoidHeight() && params.isValidAvoidHeight();
+}
+
 WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params)
 {
     PostTask([weakThis = wptr(this), params]() -> WSError {
@@ -273,10 +290,8 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
             }
             session->SetWindowAnimationFlag(true);
         }
-        // avoidHeight is set, notify avoidArea in case ui params don't flush
-        if (lastParams != params && session->IsSessionForeground() && params.landscapeAvoidHeight_ >= 0 &&
-            params.portraitAvoidHeight_ >= 0 && lastParams.landscapeAvoidHeight_ >= 0 &&
-            lastParams.portraitAvoidHeight_ >= 0) {
+        // avoidHeight is set and keyboardLayourParams is not changed, notify avoidArea in case ui params don't flush
+        if (isNeedProcessKeyboardOccupiedAreaInfo(params, lastParams)) {
             TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard avoidHeight is set, id: %{public}d",
                 session->GetCallingSessionId());
             session->ProcessKeyboardOccupiedAreaInfo(session->GetCallingSessionId(), true, false);
