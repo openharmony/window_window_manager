@@ -114,6 +114,8 @@ private:
         const WSRect& panelRect, sptr<OccupiedAreaChangeInfo>& occupiedAreaInfo);
     void CloseRSTransaction();
     bool stateChanged_ = false;
+    bool isNeedProcessKeyboardOccupiedAreaInfo(
+        const KeyboardLayoutParams& params, const KeyboardLayoutParams& lastParams);
     void CalculateOccupiedAreaAfterUIRefresh() override;
     WSRect CalculateScaledRect(WSRect sessionRect, float scaleX, float scaleY);
     WMError HandleActionUpdateKeyboardTouchHotArea(const sptr<WindowSessionProperty>& property,
