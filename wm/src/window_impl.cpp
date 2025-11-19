@@ -99,7 +99,6 @@ std::map<uint32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> WindowImpl::o
 std::map<uint32_t, sptr<IDialogDeathRecipientListener>> WindowImpl::dialogDeathRecipientListener_;
 std::recursive_mutex WindowImpl::globalMutex_;
 std::shared_mutex WindowImpl::windowMapMutex_;
-std::mutex WindowImpl::transitionControllerMutex_;
 
 int g_constructorCnt = 0;
 int g_deConstructorCnt = 0;
