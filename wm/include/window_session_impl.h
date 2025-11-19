@@ -449,9 +449,9 @@ public:
     WMError UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
     WMError RegisterWindowTitleChangeListener(const sptr<IWindowTitleChangeListener>& listener) override;
     WMError UnregisterWindowTitleChangeListener(const sptr<IWindowTitleChangeListener>& listener) override;
-    virtual WMError RegisterRectChangeInGlobalDisplayListener(
+    WMError RegisterRectChangeInGlobalDisplayListener(
         const sptr<IRectChangeInGlobalDisplayListener>& listener) override;
-    virtual WMError UnregisterRectChangeInGlobalDisplayListener(
+    WMError UnregisterRectChangeInGlobalDisplayListener(
         const sptr<IRectChangeInGlobalDisplayListener>& listener) override;
     WMError RegisterExtensionSecureLimitChangeListener(
         const sptr<IExtensionSecureLimitChangeListener>& listener) override;
