@@ -2388,6 +2388,17 @@ void AniWindow::SetParentWindow(ani_env* env, ani_int windowId)
     }
 }
 
+static sptr<IRemoteObject> GetBindDialogToken(ani_env* env, ani_object argv)
+{
+    sptr<IRemoteObject> token = AniGetNativeRemoteObject(env, argv);
+    if (token != nullptr) {
+        return token;
+    }
+    std::shared_ptr<AbilityRuntime::RequestInfo> requestInfo =
+        AbilityRuntime::RequestInfo::UnwrapRequestInfo(env, argv);
+    return (requestInfo != nullptr) ? requestInfo->GetToken() : nullptr;
+}
+
 void AniWindow::BindDialogTarget(ani_env* env, ani_object obj, ani_long nativeObj,
     ani_object argv, ani_ref deathCallback)
 {
@@ -2435,17 +2446,6 @@ void AniWindow::OnBindDialogTarget(ani_env* env, ani_object argv, ani_ref deathC
     }
     TLOGI(WmsLogTag::WMS_SYSTEM, "BindDialogTarget end, window [%{public}u, %{public}s]",
         window->GetWindowId(), window->GetWindowName().c_str());
-}
-
-static sptr<IRemoteObject> GetBindDialogToken(ani_env* env, ani_object argv)
-{
-    sptr<IRemoteObject> token = AniGetNativeRemoteObject(env, argv);
-    if (token != nullptr) {
-        return token;
-    }
-    std::shared_ptr<AbilityRuntime::RequestInfo> requestInfo =
-        AbilityRuntime::RequestInfo::UnwrapRequestInfo(env, argv);
-    return (requestInfo != nullptr) ? requestInfo->GetToken() : nullptr;
 }
 
 ani_object AniWindow::GetTransitionController(ani_env* env, ani_object obj, ani_long nativeObj)
