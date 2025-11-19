@@ -532,7 +532,10 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, ScreenConnectWriteParam, TestSize.
         .rsId_ = 0,
         .isExtend_ = false,
         .screenId_ = 0,
-        .rotationCorrectionMap_ = rotationCorrectionMap
+        .rotationCorrectionMap_ = rotationCorrectionMap,
+        .isRotationLocked_ = true,
+        .rotation_ = 1,
+        .rotationOrientationMap_ = {{0, 0}, {1, 1}, {2, 2}, {3, 3}}
     };
     sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
     auto proxy = sptr<ScreenSessionManagerClientProxy>::MakeSptr(remoteMocker);

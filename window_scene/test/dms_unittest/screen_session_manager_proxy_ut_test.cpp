@@ -1578,7 +1578,8 @@ HWTEST_F(ScreenSessionManagerProxyUtTest, MakeUniqueScreen, TestSize.Level1)
 {
     const std::vector<ScreenId> screenIds {1001, 1002, 1003};
     std::vector<DisplayId> displayIds;
-    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, screenSessionManagerProxy->MakeUniqueScreen(screenIds, displayIds));
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, screenSessionManagerProxy->MakeUniqueScreen(screenIds, displayIds,
+        UniqueScreenRotationOptions()));
 }
 
 /**

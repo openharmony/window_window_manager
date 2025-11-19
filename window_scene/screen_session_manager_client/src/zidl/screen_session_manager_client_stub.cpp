@@ -207,12 +207,49 @@ int ScreenSessionManagerClientStub::HandleOnScreenConnectionChanged(MessageParce
     auto innerName = data.ReadString();
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     auto screenEvent = static_cast<ScreenEvent>(data.ReadUint8());
+
+    std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap;
+    if (ReadRotationCorrectionMap(data, rotationCorrectionMap) != ERR_NONE) {
+        return ERR_INVALID_DATA;
+    }
+    bool supportsFocus = data.ReadBool();
+    UniqueScreenRotationOptions rotationOptions;
+    if (ReadRotationOptions(data, rotationOptions) != ERR_NONE) {
+        return ERR_INVALID_DATA;
+    }
+    std::map<int32_t, int32_t> rotationOrientationMap;
+    if (ReadRotationOrientationMap(data, rotationOrientationMap) != ERR_NONE) {
+        return ERR_INVALID_DATA;
+    }
+
+    SessionOption option = {
+        .rsId_ = rsId,
+        .name_ = name,
+        .isExtend_ = isExtend,
+        .innerName_ = innerName,
+        .screenId_ = screenId,
+        .rotationCorrectionMap_ = rotationCorrectionMap,
+        .supportsFocus_ = supportsFocus,
+        .isRotationLocked_ = rotationOptions.isRotationLocked_,
+        .rotation_ = rotationOptions.rotation_,
+        .rotationOrientationMap_ = rotationOrientationMap
+    };
+    TLOGD(WmsLogTag::DMS,
+        "ClientStub received callback parameters, isRotationLocked: %{public}d, rotation: %{public}d, "
+        "rotationOrientationMap: %{public}s",
+        option.isRotationLocked_, option.rotation_, MapToString(option.rotationOrientationMap_).c_str());
+    OnScreenConnectionChanged(option, screenEvent);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::ReadRotationCorrectionMap(MessageParcel& data,
+    std::unordered_map<FoldDisplayMode, int32_t>& rotationCorrectionMap)
+{
     uint64_t size = 0;
     if (!data.ReadUint64(size)) {
         TLOGE(WmsLogTag::DMS, "Failed to read size");
         return ERR_INVALID_DATA;
     }
-    std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap;
     for (uint64_t i = 0; i < size; i++) {
         uint32_t foldDisplayMode = 0;
         if (!data.ReadUint32(foldDisplayMode)) {
@@ -226,17 +263,40 @@ int ScreenSessionManagerClientStub::HandleOnScreenConnectionChanged(MessageParce
         }
         rotationCorrectionMap.insert({static_cast<FoldDisplayMode>(foldDisplayMode), offset});
     }
-    bool supportsFocus = data.ReadBool();
-    SessionOption option = {
-        .rsId_ = rsId,
-        .name_ = name,
-        .isExtend_ = isExtend,
-        .innerName_ = innerName,
-        .screenId_ = screenId,
-        .rotationCorrectionMap_ = rotationCorrectionMap,
-        .supportsFocus_ = supportsFocus
-    };
-    OnScreenConnectionChanged(option, screenEvent);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::ReadRotationOptions(MessageParcel& data,
+    UniqueScreenRotationOptions& rotationOptions)
+{
+    if (!data.ReadBool(rotationOptions.isRotationLocked_)) {
+        TLOGE(WmsLogTag::DMS, "Failed to read isRotationLocked");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadInt32(rotationOptions.rotation_)) {
+        TLOGE(WmsLogTag::DMS, "Failed to read rotation");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::ReadRotationOrientationMap(MessageParcel& data,
+    std::map<int32_t, int32_t>& rotationOrientationMap)
+{
+    uint64_t mapSize = 0;
+    if (!data.ReadUint64(mapSize)) {
+        TLOGE(WmsLogTag::DMS, "Failed to read rotationOrientationMap size");
+        return ERR_INVALID_DATA;
+    }
+    for (uint64_t i = 0; i < mapSize; ++i) {
+        int32_t key;
+        int32_t value;
+        if (!data.ReadInt32(key) || !data.ReadInt32(value)) {
+            TLOGE(WmsLogTag::DMS, "Failed to read rotationOrientationMap");
+            return ERR_INVALID_DATA;
+        }
+        rotationOrientationMap[key] = value;
+    }
     return ERR_NONE;
 }
 
