@@ -49,6 +49,7 @@ const std::string PREVIEW_WINDOW_NAME_PREFIX = "PreviewWindow";
 const std::string VOICEINPUT_WINDOW_NAME_PREFIX = "__VoiceHardwareInput";
 const std::string SCREEN_LOCK_WINDOW = "scbScreenLock";
 const std::string COOPERATION_DISPLAY_NAME = "Cooperation";
+constexpr int32_t CURSOR_DRAG_COUNT_MAX = 1;
 } // namespace
 
 static bool operator==(const MMI::Rect left, const MMI::Rect right)
@@ -873,9 +874,9 @@ void SceneSessionDirtyManager::UpdateWindowFlagsForLockCursor(const sptr<SceneSe
     }
     if (sceneSession->GetSessionInfoCursorDragFlag()) {
         int32_t count = sceneSession->GetSessionInfoCursorDragCount();
-        sceneSession->SetSessionInfoCursorDragCount(count++);
+        sceneSession->SetSessionInfoCursorDragCount(++count);
         windowInfo.agentPid = getpid(),
-        if (count > 1) {
+        if (count > CURSOR_DRAG_COUNT_MAX) {
             sceneSession->SetSessionInfoCursorDragFlag(false);
             sceneSession->SetSessionInfoCursorDragCount(0);
         }
