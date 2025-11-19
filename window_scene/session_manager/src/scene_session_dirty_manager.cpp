@@ -865,6 +865,23 @@ void SceneSessionDirtyManager::UpdateWindowFlagsForLockCursor(const sptr<SceneSe
     if (!sceneSession->GetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_LOCK_CURSOR)) {
         return;
     }
+    if (sceneSession->IsDragMoving() || sceneSession->IsDragZooming()) {
+        sceneSession->SetSessionInfoCursorDragFlag(true);
+        sceneSession->SetSessionInfoCursorDragCount(0);
+        TLOGI(WmsLogTag::WMS_EVENT, "in moving or drag WId:%{public}d", sceneSession->GetWindowId());
+        return;
+    }
+    if (sceneSession->GetSessionInfoCursorDragFlag()) {
+        int32_t count = sceneSession->GetSessionInfoCursorDragCount();
+        sceneSession->SetSessionInfoCursorDragCount(count++);
+        windowInfo.agentPid = getpid(),
+        if (count > 1) {
+            sceneSession->SetSessionInfoCursorDragFlag(false);
+            sceneSession->SetSessionInfoCursorDragCount(0);
+        }
+        TLOGI(WmsLogTag::WMS_EVENT, "cursorDragFlag_ delay 1 time, WId:%{public}d", sceneSession->GetWindowId());
+        return;
+    }
     if (sceneSession->GetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_CURSOR_FOLLOW_MOVEMENT)) {
         windowInfo.flags |= MMI_FLAG_BIT_LOCK_CURSOR_FOLLOW_MOVEMENT;
     } else {

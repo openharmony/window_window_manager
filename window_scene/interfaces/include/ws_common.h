@@ -441,6 +441,8 @@ struct SessionInfo {
     uint32_t windowInputType_ = 0;
     uint32_t expandInputFlag_ = 0;
     std::bitset<ADVANCED_FEATURE_BIT_MAX> advancedFeatureFlag_ = 0;
+    bool cursorDragFlag_ = false;
+    int32_t cursorDragCount_ = 0;
     std::string continueSessionId_ = "";
     bool isCalledRightlyByCallerId_ = false;
     bool fullScreenStart_ = false;
