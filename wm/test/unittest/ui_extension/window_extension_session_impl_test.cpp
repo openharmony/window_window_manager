@@ -628,6 +628,52 @@ HWTEST_F(WindowExtensionSessionImplTest, UnregisterHostWindowRectChangeListener,
 }
 
 /**
+ * @tc.name: RegisterRectChangeInGlobalDisplayListener
+ * @tc.desc: RegisterRectChangeInGlobalDisplayListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, RegisterRectChangeInGlobalDisplayListener, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("RegisterRectChangeInGlobalDisplayListener");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->property_->SetPersistentId(1);
+    ASSERT_NE(0, window->GetPersistentId());
+    window->dataHandler_ = nullptr;
+    sptr<IRectChangeInGlobalDisplayListener> listener = nullptr;
+
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->RegisterRectChangeInGlobalDisplayListener(listener));
+    window->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, window->RegisterRectChangeInGlobalDisplayListener(listener));
+    listener = sptr<IRectChangeInGlobalDisplayListener>::MakeSptr();
+    EXPECT_EQ(WMError::WM_OK, window->RegisterRectChangeInGlobalDisplayListener(listener));
+    // Test listener alreday registered
+    EXPECT_EQ(WMError::WM_OK, window->RegisterRectChangeInGlobalDisplayListener(listener));
+}
+
+/**
+ * @tc.name: UnregisterRectChangeInGlobalDisplayListener
+ * @tc.desc: UnregisterRectChangeInGlobalDisplayListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UnregisterRectChangeInGlobalDisplayListener, TestSize.Level1)
+{
+    window_->dataHandler_ = nullptr;
+    sptr<IRectChangeInGlobalDisplayListener> listener = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, window_->UnregisterRectChangeInGlobalDisplayListener(listener));
+
+    listener = sptr<IRectChangeInGlobalDisplayListener>::MakeSptr();
+    window_->rectChangeInGlobalDisplayUIExtListenerIds.emplace(111);
+    EXPECT_EQ(WMError::WM_OK, window_->UnregisterRectChangeInGlobalDisplayListener(listener));
+    window_->rectChangeInGlobalDisplayUIExtListenerIds.clear();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window_->UnregisterRectChangeInGlobalDisplayListener(listener));
+    window_->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
+    EXPECT_EQ(WMError::WM_OK, window_->UnregisterRectChangeInGlobalDisplayListener(listener));
+}
+
+/**
  * @tc.name: TriggerBindModalUIExtension01
  * @tc.desc: TriggerBindModalUIExtension01 Test
  * @tc.type: FUNC
@@ -2906,6 +2952,27 @@ HWTEST_F(WindowExtensionSessionImplTest, OnHostWindowRectChange, TestSize.Level1
 }
 
 /**
+ * @tc.name: OnHostRectChangeInGlobalDisplay
+ * @tc.desc: OnHostRectChangeInGlobalDisplay Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, OnHostRectChangeInGlobalDisplay, TestSize.Level1)
+{
+    window_->property_->SetPersistentId(1);
+    AAFwk::Want want;
+    std::optional<AAFwk::Want> reply = std::make_optional<AAFwk::Want>();
+    window_->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
+    sptr<IRectChangeInGlobalDisplayListener> listener = sptr<IRectChangeInGlobalDisplayListener>::MakeSptr();
+    window_->RegisterRectChangeInGlobalDisplayListener(listener);
+
+    EXPECT_EQ(WMError::WM_OK, window_->OnHostRectChangeInGlobalDisplay(std::move(want), reply));
+    window_->rectChangeInGlobalDisplayUIExtListenerIds.emplace(111);
+    EXPECT_EQ(WMError::WM_OK, window_->OnHostRectChangeInGlobalDisplay(std::move(want), reply));
+    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    EXPECT_EQ(WMError::WM_OK, window_->OnHostRectChangeInGlobalDisplay(std::move(want), reply));
+}
+
+/**
  * @tc.name: OnResyncExtensionConfig
  * @tc.desc: OnResyncExtensionConfig Test
  * @tc.type: FUNC
@@ -2979,6 +3046,10 @@ HWTEST_F(WindowExtensionSessionImplTest, OnExtensionMessage, TestSize.Level1)
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->OnExtensionMessage(code, persistentId, want));
     code = static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->OnExtensionMessage(code, persistentId, want));
+    code = static_cast<uint32_t>(Extension::Businesscode::REGISTER_HOST_RECT_CHANGE_IN_GLOBAL_DISPLAY_LISTENER);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->OnExtensionMessage(code, persistentId, want));
+    code = static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_HOST_RECT_CHANGE_IN_GLOBAL_DISPLAY_LISTENER);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->OnExtensionMessage(code, persistentId, want));
 
     window->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
     code = static_cast<uint32_t>(Extension::Businesscode::NOTIFY_HOST_WINDOW_TO_RAISE);
@@ -2990,6 +3061,12 @@ HWTEST_F(WindowExtensionSessionImplTest, OnExtensionMessage, TestSize.Level1)
     ASSERT_FALSE(window->rectChangeUIExtListenerIds_.empty());
     EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
     window->rectChangeUIExtListenerIds_.clear();
+    EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
+
+    code = static_cast<uint32_t>(Extension::Businesscode::REGISTER_HOST_RECT_CHANGE_IN_GLOBAL_DISPLAY_LISTENER);
+    EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
+    code = static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_HOST_RECT_CHANGE_IN_GLOBAL_DISPLAY_LISTENER);
+    window->rectChangeInGlobalDisplayUIExtListenerIds.emplace(111);
     EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
 }
 

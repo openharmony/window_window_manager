@@ -5748,6 +5748,7 @@ void WindowSessionImpl::NotifyGlobalDisplayRectChange(const Rect& rect, WindowSi
             listener->OnRectChangeInGlobalDisplay(hookedRect, reason);
         }
     }
+    NotifyUIExtHostRectChangeInGlobalDisplayListeners(rect, reason);
 }
 
 void WindowSessionImpl::NotifyUIExtHostWindowRectChangeListeners(const Rect rect, const WindowSizeChangeReason reason)
@@ -5767,6 +5768,27 @@ void WindowSessionImpl::NotifyUIExtHostWindowRectChangeListeners(const Rect rect
         uiContent->SendUIExtProprtyByPersistentId(
             static_cast<uint32_t>(Extension::Businesscode::NOTIFY_HOST_WINDOW_RECT_CHANGE), rectWant,
             rectChangeUIExtListenerIds_, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+    }
+}
+
+void WindowSessionImpl::NotifyUIExtHostRectChangeInGlobalDisplayListeners(const Rect& rect,
+    const WindowSizeChangeReason reason)
+{
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    CHECK_UI_CONTENT_RETURN_IF_NULL(uiContent);
+    bool isUIExtensionWindow = WindowHelper::IsUIExtensionWindow(GetType());
+    if (!isUIExtensionWindow && !rectChangeInGlobalDisplayUIExtListenerIds.empty()) {
+        TLOGI(WmsLogTag::WMS_UIEXT, "rectChangeInGlobalDisplayUIExtListenerIds size: %{public}zu",
+            rectChangeInGlobalDisplayUIExtListenerIds.size());
+        AAFwk::Want rectWant;
+        rectWant.SetParam(Extension::RECT_X, rect.posX_);
+        rectWant.SetParam(Extension::RECT_Y, rect.posY_);
+        rectWant.SetParam(Extension::RECT_WIDTH, static_cast<int32_t>(rect.width_));
+        rectWant.SetParam(Extension::RECT_HEIGHT, static_cast<int32_t>(rect.height_));
+        rectWant.SetParam(Extension::RECT_CHANGE_REASON, static_cast<int32_t>(reason));
+        uiContent->SendUIExtProprtyByPersistentId(
+            static_cast<uint32_t>(Extension::Businesscode::NOTIFY_HOST_RECT_CHANGE_IN_GLOBAL_DISPLAY), rectWant,
+            rectChangeInGlobalDisplayUIExtListenerIds, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
     }
 }
 
@@ -8331,6 +8353,14 @@ WMError WindowSessionImpl::OnExtensionMessage(uint32_t code, int32_t persistentI
             return HandleUIExtUnregisterKeyboardDidHideListener(code, persistentId, data);
             break;
         }
+        case static_cast<uint32_t>(Extension::Businesscode::REGISTER_HOST_RECT_CHANGE_IN_GLOBAL_DISPLAY_LISTENER): {
+            return HandleRegisterHostRectChangeInGlobalDisplayListener(code, persistentId, data);
+            break;
+        }
+        case static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_HOST_RECT_CHANGE_IN_GLOBAL_DISPLAY_LISTENER): {
+            return HandleUnregisterHostRectChangeInGlobalDisplayListener(code, persistentId, data);
+            break;
+        }
         default: {
             TLOGI(WmsLogTag::WMS_UIEXT, "Message was not processed, businessCode: %{public}u", code);
             break;
@@ -8367,6 +8397,24 @@ WMError WindowSessionImpl::HandleUnregisterHostWindowRectChangeListener(uint32_t
     TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
     rectChangeUIExtListenerIds_.erase(persistentId);
     TLOGI(WmsLogTag::WMS_UIEXT, "persistentId: %{public}d unregister rect change listener", persistentId);
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::HandleRegisterHostRectChangeInGlobalDisplayListener(uint32_t code, int32_t persistentId,
+    const AAFwk::Want& data)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
+    rectChangeInGlobalDisplayUIExtListenerIds.emplace(persistentId);
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistentId: %{public}d register rect change in global display", persistentId);
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::HandleUnregisterHostRectChangeInGlobalDisplayListener(uint32_t code, int32_t persistentId,
+    const AAFwk::Want& data)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
+    rectChangeInGlobalDisplayUIExtListenerIds.erase(persistentId);
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistentId: %{public}d unregister rect change in global display", persistentId);
     return WMError::WM_OK;
 }
 

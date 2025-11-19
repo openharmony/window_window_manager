@@ -1571,6 +1571,29 @@ HWTEST_F(WindowSessionImplTest3, SwitchSystemWindow, Function | SmallTest | Leve
     window_->SwitchSystemWindow(true, PERSISTENT_ID_ONE);
     EXPECT_EQ(sysWindow->windowSystemConfig_.freeMultiWindowEnable_, true);
 }
+
+/**
+ * @tc.name: NotifyUIExtHostRectChangeInGlobalDisplayListeners
+ * @tc.desc: NotifyUIExtHostRectChangeInGlobalDisplayListeners test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, NotifyUIExtHostRectChangeInGlobalDisplayListeners, TestSize.Level1)
+{
+    sptr<WindowSessionImpl> window = GetTestWindowImpl("NotifyUIExtHostRectChangeInGlobalDisplayListeners");
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    Rect rect;
+    WindowSizeChangeReason reason = WindowSizeChangeReason::MOVE;
+    window->NotifyUIExtHostRectChangeInGlobalDisplayListeners(rect, reason);
+    window->rectChangeInGlobalDisplayUIExtListenerIds.emplace(111);
+    ASSERT_FALSE(window->rectChangeInGlobalDisplayUIExtListenerIds.empty());
+    window->NotifyUIExtHostRectChangeInGlobalDisplayListeners(rect, reason);
+
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    window->NotifyUIExtHostRectChangeInGlobalDisplayListeners(rect, reason);
+    window->rectChangeInGlobalDisplayUIExtListenerIds.clear();
+    ASSERT_TRUE(window->rectChangeInGlobalDisplayUIExtListenerIds.empty());
+    window->NotifyUIExtHostRectChangeInGlobalDisplayListeners(rect, reason);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
