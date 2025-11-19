@@ -177,6 +177,15 @@ void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& 
     window_->SetTouchEvent(action);
 }
 
+void WindowInputChannel::InjectTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    if (window_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "window_ is nullptr, id:%{public}d", pointerEvent->GetId());
+        return;
+    }
+    window_->InjectTouchEvent(pointerEvent);
+}
+
 void WindowInputChannel::Destroy()
 {
     std::lock_guard<std::mutex> lock(mtx_);

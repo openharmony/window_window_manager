@@ -18,7 +18,7 @@
 
 #include <memory>
 #include <mutex>
-#include "window.h"
+#include "input_manager.h"
 #include "window_input_redistribute_client.h"
 #include "wm_single_instance.h"
 
@@ -26,12 +26,12 @@ namespace OHOS {
 namespace Rosen {
 
 struct RecipientResources {
-    std::vector<IIputEventRecipientCallback>& recipientVector;
+    std::vector<IInputEventRecipientInfo>& recipientVector;
     std::mutex& mtx;
 };
 
 class WindowInputRedistributeImpl : public RefBase {
-    WM_DECLARE_SINGLE_INSTANCE(WindowInputRedistributeImpl);
+    WM_DECLARE_SINGLE_INSTANCE_BASE(WindowInputRedistributeImpl);
 public:
     void RegisterInputEventRedistribute(const IInputEventRecipientInfo& recipientInfo);
     void UnRegisterInputEventRedistribute(const IInputEventRecipientInfo& recipientInfo);
@@ -61,13 +61,13 @@ private:
     WindowInputRedistributeImpl()
         : recipientMap_({
             {{InputEventType::KEY_EVENT, InputRedistributeTiming::REDISTRIBUTE_BEFORE_SEND_TO_COMPONENT},
-            {std::ref(recipientKeyBeforeComponentArray_), std::ref(mutexKeyBeforeComponent_)}},
+             {std::ref(recipientKeyBeforeComponentArray_), std::ref(mutexKeyBeforeComponent_)}},
             {{InputEventType::KEY_EVENT, InputRedistributeTiming::REDISTRIBUTE_AFTER_SEND_TO_COMPONENT},
-            {std::ref(recipientKeyAfterComponentArray_), std::ref(mutexKeyAfterComponent_)}},
+             {std::ref(recipientKeyAfterComponentArray_), std::ref(mutexKeyAfterComponent_)}},
             {{InputEventType::POINTER_EVENT, InputRedistributeTiming::REDISTRIBUTE_BEFORE_SEND_TO_COMPONENT},
-            {std::ref(recipientPointerBeforeComponentArray_), std::ref(mutexPointerBeforeComponent_)}},
+             {std::ref(recipientPointerBeforeComponentArray_), std::ref(mutexPointerBeforeComponent_)}},
             {{InputEventType::POINTER_EVENT, InputRedistributeTiming::REDISTRIBUTE_AFTER_SEND_TO_COMPONENT},
-            {std::ref(recipientPointerAfterComponentArray_), std::ref(mutexPointerAfterComponent_)}},
+             {std::ref(recipientPointerAfterComponentArray_), std::ref(mutexPointerAfterComponent_)}}
         }) {}
 };
 }
