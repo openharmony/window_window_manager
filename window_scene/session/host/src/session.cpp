@@ -57,7 +57,7 @@ constexpr float INNER_ANGLE_VP = 16.0f;
 constexpr uint32_t MAX_LIFE_CYCLE_TASK_IN_QUEUE = 15;
 constexpr int64_t LIFE_CYCLE_TASK_EXPIRED_TIME_LIMIT = 350;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
-constexpr int64_t STATE_DETECT_DELAYTIME = 3 * 1000;
+constexpr int64_t STATE_DETECT_DELAYTIME = 6 * 1000;
 constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
 constexpr int32_t TIMES_TO_WAIT_FOR_VSYNC_ONECE = 1;
 constexpr int32_t TIMES_TO_WAIT_FOR_VSYNC_TWICE = 2;
@@ -5151,7 +5151,7 @@ void Session::PostSpecificSessionLifeCycleTimeoutTask(const std::string& eventNa
         TLOGNI(WmsLogTag::DEFAULT, "%{public}s report msg: %{public}s", where, reportInfo.ToString().c_str());
         WindowInfoReporter::GetInstance().ReportSpecWindowLifeCycleChange(reportInfo);
     };
-    PostTask(task, eventName, THRESHOLD);
+    handler_->PostTask(task, "wms:" + eventName, THRESHOLD, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 void Session::DeletePersistentImageFit()

@@ -10050,6 +10050,12 @@ WMError SceneSession::UnlockCursor(const std::vector<int32_t>& parameters)
     NotifySessionInfoChange();
     return WMError::WM_OK;
 }
+
+void SceneSession::RegisterIsAppBoundSystemTrayCallback(
+    const std::function<bool(int32_t callingPid, uint32_t callingToken, const std::string &instanceKey)>& callback)
+{
+    isAppBoundSystemTrayCallback_ = callback;
+}
 /*
  * Window Event end
  */
