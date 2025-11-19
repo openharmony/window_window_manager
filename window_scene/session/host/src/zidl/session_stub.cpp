@@ -674,7 +674,12 @@ int SessionStub::HandleTitleAndDockHoverShowChange(MessageParcel& data, MessageP
 
 int SessionStub::HandleRestoreMainWindow(MessageParcel& data, MessageParcel& reply)
 {
-    OnRestoreMainWindow();
+    uint32_t errCode = static_cast<uint32_t>(OnRestoreMainWindow());
+    TLOGD(WmsLogTag::WMS_MAIN, "Handle restore main window readResult: %{public}u", errCode);
+    if (!reply.WriteUint32(errCode)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
