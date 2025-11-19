@@ -510,7 +510,7 @@ WMError WindowExtensionSessionImpl::UnregisterRectChangeInGlobalDisplayListener(
             return ret;
         }
         needNotifyHost = hostRectChangeInGlobalDisplayListenerList_.empty() &&
-        rectChangeInGlobalDisplayUIExtListenerIds.empty();
+        rectChangeInGlobalDisplayUIExtListenerIds_.empty();
     }
     if (needNotifyHost) {
         AAFwk::Want dataToSend;
@@ -519,8 +519,8 @@ WMError WindowExtensionSessionImpl::UnregisterRectChangeInGlobalDisplayListener(
             dataToSend);
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "No need to send message to host to unregister, size of "
-        "listener: %{public}zu, size of rectChangeInGlobalDisplayUIExtListenerIds: %{public}zu",
-        hostRectChangeInGlobalDisplayListenerList_.size(), rectChangeInGlobalDisplayUIExtListenerIds.size());
+        "listener: %{public}zu, size of rectChangeInGlobalDisplayUIExtListenerIds_: %{public}zu",
+        hostRectChangeInGlobalDisplayListenerList_.size(), rectChangeInGlobalDisplayUIExtListenerIds_.size());
     return ret;
 }
 
@@ -2090,7 +2090,7 @@ WMError WindowExtensionSessionImpl::HandleRegisterHostRectChangeInGlobalDisplayL
     if (ret != WMError::WM_OK) {
         return ret;
     }
-    rectChangeInGlobalDisplayUIExtListenerIds.emplace(persistentId);
+    rectChangeInGlobalDisplayUIExtListenerIds_.emplace(persistentId);
     return WMError::WM_OK;
 }
 
@@ -2099,18 +2099,18 @@ WMError WindowExtensionSessionImpl::HandleUnregisterHostRectChangeInGlobalDispla
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
     bool needNotifyHost = false;
-    rectChangeInGlobalDisplayUIExtListenerIds.erase(persistentId);
+    rectChangeInGlobalDisplayUIExtListenerIds_.erase(persistentId);
     {
         std::lock_guard<std::mutex> lockListener(hostRectChangeInGlobalDisplayListenerMutex_);
         needNotifyHost = hostRectChangeInGlobalDisplayListenerList_.empty() &&
-            rectChangeInGlobalDisplayUIExtListenerIds.empty();
+            rectChangeInGlobalDisplayUIExtListenerIds_.empty();
     }
     if (needNotifyHost) {
         return SendExtensionMessageToHost(code, data);
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "No need to send message to host to unregister, size of "
         "listener: %{public}zu, size of rectChangeUIExtListenerIds_: %{public}zu",
-        hostRectChangeInGlobalDisplayListenerList_.size(), rectChangeInGlobalDisplayUIExtListenerIds.size());
+        hostRectChangeInGlobalDisplayListenerList_.size(), rectChangeInGlobalDisplayUIExtListenerIds_.size());
     return WMError::WM_OK;
 }
 
@@ -2297,10 +2297,10 @@ WMError WindowExtensionSessionImpl::OnHostRectChangeInGlobalDisplay(AAFwk::Want&
         }
     }
     auto uiContent = GetUIContentSharedPtr();
-    if (!rectChangeInGlobalDisplayUIExtListenerIds.empty() && uiContent != nullptr) {
+    if (!rectChangeInGlobalDisplayUIExtListenerIds_.empty() && uiContent != nullptr) {
         uiContent->SendUIExtProprtyByPersistentId(
             static_cast<uint32_t>(Extension::Businesscode::NOTIFY_HOST_RECT_CHANGE_IN_GLOBAL_DISPLAY), data,
-            rectChangeInGlobalDisplayUIExtListenerIds, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+            rectChangeInGlobalDisplayUIExtListenerIds_, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
     }
     return WMError::WM_OK;
 }
