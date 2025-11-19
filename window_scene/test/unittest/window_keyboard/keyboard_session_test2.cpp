@@ -923,7 +923,7 @@ HWTEST_F(KeyboardSessionTest2, isNeedProcessKeyboardOccupiedAreaInfo, Function |
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     keyboardSession->SetSessionProperty(property);
-    EXPECT_FALSE(keyboardSEssion->isNeedProcessKeyboardOccupiedAreaInfo(params, lastParams));
+    EXPECT_FALSE(keyboardSession->isNeedProcessKeyboardOccupiedAreaInfo(params, lastParams));
 }
 } // namespace
 } // namespace Rosen
