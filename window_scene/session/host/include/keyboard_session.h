@@ -115,7 +115,7 @@ private:
     void CloseRSTransaction();
     bool stateChanged_ = false;
     bool isNeedProcessKeyboardOccupiedAreaInfo(
-        const KeyboardLayoutParams& params, const KeyboardLayoutParams& lastParams);
+        const KeyboardLayoutParams& lastParams, const KeyboardLayoutParams& params);
     void CalculateOccupiedAreaAfterUIRefresh() override;
     WSRect CalculateScaledRect(WSRect sessionRect, float scaleX, float scaleY);
     WMError HandleActionUpdateKeyboardTouchHotArea(const sptr<WindowSessionProperty>& property,
