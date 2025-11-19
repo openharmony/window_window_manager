@@ -291,7 +291,7 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
             session->SetWindowAnimationFlag(true);
         }
         // avoidHeight is set and keyboardLayourParams is not changed, notify avoidArea in case ui params don't flush
-        if (isNeedProcessKeyboardOccupiedAreaInfo(params, lastParams)) {
+        if (session->isNeedProcessKeyboardOccupiedAreaInfo(params, lastParams)) {
             TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard avoidHeight is set, id: %{public}d",
                 session->GetCallingSessionId());
             session->ProcessKeyboardOccupiedAreaInfo(session->GetCallingSessionId(), true, false);
