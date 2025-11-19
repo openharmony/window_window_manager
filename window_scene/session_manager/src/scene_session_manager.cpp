@@ -164,6 +164,7 @@ constexpr uint64_t START_UI_ABILITY_TIMEOUT = 5000;
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 constexpr int32_t NAV_FORCE_SPLIT_MODE = 6;
 const std::string FB_PANEL_NAME = "Fb_panel";
+constexpr std::size_t MAX_APP_BOUND_TRAY_MAP_SIZE = 50;
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
@@ -2903,6 +2904,7 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
     RegisterSessionExceptionFunc(sceneSession);
     RegisterVisibilityChangedDetectFunc(sceneSession);
     RegisterSaveSnapshotFunc(sceneSession);
+    RegisterIsAppBoundSystemTrayFunc(sceneSession);
     if (systemConfig_.IsPcOrPcMode()) {
         RegisterGetStartWindowConfigCallback(sceneSession);
     }
@@ -3551,6 +3553,22 @@ WSError SceneSessionManager::RegisterSaveSnapshotFunc(const sptr<SceneSession>& 
         this->PutSnapshotToCache(persistentId);
     });
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::RegisterIsAppBoundSystemTrayFunc(const sptr<SceneSession> &sceneSession)
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "session is nullptr");
+        return;
+    }
+    if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "id: %{public}d is not main window", sceneSession->GetPersistentId());
+        return;
+    }
+    sceneSession->RegisterIsAppBoundSystemTrayCallback(
+        [this](int32_t callingPid, uint32_t callingToken, const std::string &instanceKey) {
+            return IsAppBoundSystemTray(callingPid, callingToken, instanceKey);
+        });
 }
 
 void SceneSessionManager::ConfigSupportSnapshotAllSessionStatus()
@@ -18564,5 +18582,40 @@ void AppStateObserver::RegisterProcessDiedNotifyFunc(NotifyAppProcessDiedFunc&& 
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "register");
     procDiedCallback_ = std::move(func);
+}
+
+void SceneSessionManager::UpdateAppBoundSystemTrayStatus(const std::string &key, int32_t pid, bool enabled)
+{
+    if (appsWithBoundSystemTrayMap_.size() >= MAX_APP_BOUND_TRAY_MAP_SIZE) {
+        TLOGE(WmsLogTag::WMS_MAIN, "App bound tray map size exceeds %{public}zu.", MAX_APP_BOUND_TRAY_MAP_SIZE);
+        return;
+    }
+    auto &pidSet = appsWithBoundSystemTrayMap_[key];
+
+    if (enabled) {
+        if (pidSet.find(pid) == pidSet.end()) {
+            pidSet.insert(pid);
+        } else {
+            TLOGE(WmsLogTag::WMS_MAIN, "appsWithBoundSystemTrayMap_ has pid: %{public}d", pid);
+        }
+    } else {
+        if (pidSet.erase(pid) > 0) {
+            if (pidSet.empty()) {
+                appsWithBoundSystemTrayMap_.erase(key);
+            }
+        } else {
+            TLOGE(WmsLogTag::WMS_MAIN, "appsWithBoundSystemTrayMap_ does not have pid: %{public}d", pid);
+        }
+    }
+}
+
+bool SceneSessionManager::IsAppBoundSystemTray(int32_t callingPid, uint32_t callingToken, const std::string &instanceKey)
+{
+    std::string combinedKey = std::to_string(callingToken) + "-" + instanceKey;
+    auto it = appsWithBoundSystemTrayMap_.find(combinedKey);
+    if (it != appsWithBoundSystemTrayMap_.end()) {
+        return it->second.count(callingPid) > 0;
+    }
+    return false;
 }
 } // namespace OHOS::Rosen

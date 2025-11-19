@@ -504,6 +504,27 @@ HWTEST_F(MainSessionTest, OnRestoreMainWindow02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnRestoreMainWindow03
+ * @tc.desc: check func OnRestoreMainWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, OnRestoreMainWindow03, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnRestoreMainWindow03";
+    info.bundleName_ = "OnRestoreMainWindow03";
+    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<MainSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    sceneSession->property_->SetIsAppSupportPhoneInPc(true);
+    subSession->RegisterIsAppBoundSystemTrayCallback(
+        [](int32_t callingPid, uint32_t callingToken, const std::string &instanceKey) { return false; });
+    WSError result = sceneSession->OnRestoreMainWindow();
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_CALLING);
+}
+
+/**
  * @tc.name: OnSetWindowRectAutoSave
  * @tc.desc: OnSetWindowRectAutoSave
  * @tc.type: FUNC

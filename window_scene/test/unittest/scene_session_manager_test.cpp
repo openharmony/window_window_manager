@@ -2149,6 +2149,68 @@ HWTEST_F(SceneSessionManagerTest, NotifySessionTransferToTargetScreenEvent002, T
     ssm_->NotifySessionTransferToTargetScreenEvent(sceneSession->GetPersistentId(), 1, 1, 2);
     EXPECT_FALSE(g_logMsg.find("sceneSession is nullptr") != std::string::npos);
 }
+
+/**
+ *@tc.name: UpdateAppBoundSystemTrayStatus001
+ *@tc.desc: UpdateAppBoundSystemTrayStatusTest persistentId is invalid
+ *@tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, UpdateAppBoundSystemTrayStatus001, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    int32_t pid = 1000; // 初始 pid
+    uint32_t callingToken = 2000; // 初始 callingToken
+    std::string instanceKey = "app_instance_0";
+    // 插入 50 条记录，pid 和 callingToken 递增
+    for (int i = 0; i < 50; ++i) {
+        // 生成 key: callingToken + "-" + instanceKey
+        std::string key = std::to_string(callingToken) + "-" + instanceKey;
+        // 插入当前 pid 到对应的 unordered_set 中
+        ssm_->appsWithBoundSystemTrayMap_[key].insert(pid);
+        // pid 和 callingToken 自增
+        pid++;
+        callingToken++;
+    }
+
+    // pid=1049 callingToken=2049
+    ssm_->UpdateAppBoundSystemTrayStatus("2049-app_instance_0", 1049, true);
+    ASSERT_EQ(ssm_->appsWithBoundSystemTrayMap_.size() >= 50, true);
+    EXPECT_TRUE(g_logMsg.find("App bound tray map size exceeds") != std::string::npos);
+
+    ssm_->appsWithBoundSystemTrayMap_.erase("2049-app_instance_0");
+    ssm_->UpdateAppBoundSystemTrayStatus("2048-app_instance_0", 1048, true);
+    EXPECT_TRUE(g_logMsg.find("appsWithBoundSystemTrayMap_ has pid") != std::string::npos);
+
+    ssm_->UpdateAppBoundSystemTrayStatus("2049-app_instance_0", 1049, false);
+    EXPECT_TRUE(g_logMsg.find("appsWithBoundSystemTrayMap_ does not have pid") != std::string::npos);
+    ssm_->appsWithBoundSystemTrayMap_.clear();
+
+    ssm_->appsWithBoundSystemTrayMap_["2000-app_instance_0"].insert(1000);
+    ssm_->UpdateAppBoundSystemTrayStatus("2000-app_instance_0", 1000, false);
+    ssm_->appsWithBoundSystemTrayMap_.clear();
+
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ *@tc.name: IsAppBoundSystemTray001
+ *@tc.desc: IsAppBoundSystemTrayTest persistentId is invalid
+ *@tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, IsAppBoundSystemTray001, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    ssm_->UpdateAppBoundSystemTrayStatus("2000-app_instance_0", 1000, true);
+    ASSERT_EQ(ssm_->IsAppBoundSystemTray(1000, 2000, "app_instance_0"), true);
+
+    ASSERT_EQ(ssm_->IsAppBoundSystemTray(1001, 2001, "app_instance_0"), false);
+    ssm_->appsWithBoundSystemTrayMap_.clear();
+    LOG_SetCallback(nullptr);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
