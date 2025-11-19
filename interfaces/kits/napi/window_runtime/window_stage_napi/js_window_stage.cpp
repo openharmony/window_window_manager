@@ -765,33 +765,39 @@ napi_value JsWindowStage::OnSetDefaultDensityEnabled(napi_env env, napi_callback
     if (argc != 1) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
-        return CreateJsValue(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM));
+        return NapiThrowError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM),
+            "[window][setDefaultDensityEnabled]msg: Mandatory parameters are left unspecified");
     }
 
     auto weakScene = windowScene_.lock();
     if (weakScene == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WindowScene is null");
-        return CreateJsValue(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STAGE_ABNORMALLY));
+        return NapiThrowError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STAGE_ABNORMALLY),
+            "[window][setDefaultDensityEnabled]msg: WindowScene is nullptr");
     }
 
     auto window = weakScene->GetMainWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Window is null");
-        return CreateJsValue(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+        return NapiThrowError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+            "[window][setDefaultDensityEnabled]msg: MainWindow is nullptr");
     }
 
     bool enabled = false;
     if (!ConvertFromJsValue(env, argv[0], enabled)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to boolean");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
-        return CreateJsValue(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM));
+        return NapiThrowError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM),
+            "[window][setDefaultDensityEnabled]msg: Incorrect parameter types");
     }
 
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetDefaultDensityEnabled(enabled));
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u,%{public}s] enabled=%{public}u ret=%{public}u",
         window->GetWindowId(), window->GetWindowName().c_str(), enabled, ret);
-
-    return CreateJsValue(env, static_cast<int32_t>(ret));
+    if (ret != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, ret, "[window][setDefaultDensityEnabled]");
+    }
+    return NapiGetUndefined(env);
 }
 
 napi_value JsWindowStage::OnSetCustomDensity(napi_env env, napi_callback_info info)
@@ -801,20 +807,23 @@ napi_value JsWindowStage::OnSetCustomDensity(napi_env env, napi_callback_info in
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARG_COUNT_ONE || argc > ARG_COUNT_TWO) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setCustomDensity]msg: Mandatory parameters are left unspecified");
     }
 
     double density = UNDEFINED_DENSITY;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], density)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to double");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setCustomDensity]msg: Incorrect parameter types");
     }
 
     bool applyToSubWindow = false;
     if (GetType(env, argv[INDEX_ONE]) != napi_undefined && GetType(env, argv[INDEX_ONE]) != napi_null) {
         if (!ConvertFromJsValue(env, argv[INDEX_ONE], applyToSubWindow)) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to boolean");
-            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+                "[window][setCustomDensity]msg: Incorrect parameter types");
         }
     }
 
@@ -822,13 +831,13 @@ napi_value JsWindowStage::OnSetCustomDensity(napi_env env, napi_callback_info in
     if (windowScene == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowScene is null");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY,
-            "[window][setCustomDensity]msg: invalid window scene");
+            "[window][setCustomDensity]msg: Window scene is nullptr");
     }
     auto window = windowScene->GetMainWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Window is null");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][setCustomDensity]msg: invalid main window");
+            "[window][setCustomDensity]msg: MainWindow is nullptr");
     }
 
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetCustomDensity(density, applyToSubWindow));
@@ -836,7 +845,7 @@ napi_value JsWindowStage::OnSetCustomDensity(napi_env env, napi_callback_info in
         "applyToSubWindow=%{public}d, result=%{public}u",
         window->GetWindowId(), window->GetWindowName().c_str(), density, applyToSubWindow, ret);
     if (ret != WmErrorCode::WM_OK) {
-        return NapiThrowError(env, ret, "[window][setCustomDensity]msg: set custom density failed");
+        return NapiThrowError(env, ret, "[window][setCustomDensity]");
     }
     return NapiGetUndefined(env);
 }
@@ -928,15 +937,14 @@ napi_value JsWindowStage::OnRemoveStartingWindow(napi_env env, napi_callback_inf
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_STARTUP_PAGE, "%{public}s window is nullptr", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                "[window][removeStartingWindow]msg: Window is nullptr."));
+                "[window][removeStartingWindow]msg: Main window is nullptr."));
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->NotifyRemoveStartingWindow());
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret,
-                "[window][removeStartingWindow]msg: Notify remove starting window failed."));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "[window][removeStartingWindow]"));
         }
     };
     if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnRemoveStartingWindow") != napi_status::napi_ok) {
