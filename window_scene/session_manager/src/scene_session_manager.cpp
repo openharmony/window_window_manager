@@ -5713,7 +5713,8 @@ void SceneSessionManager::InitStartingWindowRdb(const std::string& rdbPath)
     if (mkdir(rdbPath.c_str(), S_IRWXU)) {
         TLOGW(WmsLogTag::WMS_PATTERN, "mkdir failed or already exists");
     }
-    startingWindowRdbMgr_ = std::make_unique<StartingWindowRdbManager>(config);
+    startingWindowRdbMgr_ = std::make_shared<StartingWindowRdbManager>(config,
+        systemConfig_.supportPreloadStartingWindow_ ? taskScheduler_->GetEventHandler() : nullptr);
     if (startingWindowRdbMgr_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "create rdb manager fail");
         return;
