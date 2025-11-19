@@ -346,21 +346,21 @@ HWTEST_F(WindowSceneSessionImplAnimationTest, GetWindowCornerRadius, TestSize.Le
     EXPECT_EQ(WMError::WM_OK, ret);
     EXPECT_EQ(0.0f, cornerRadius);
 
-    window->windowSystemConfig_.defaultCornerRadius_ = 1.0f; // 1.0f is valid default corner radius
+    window->windowSystemConfig_.defaultCornerRadius_ = 1.0f; // 1.0f is valid default window corner radius
     ret = window->GetWindowCornerRadius(cornerRadius);
     EXPECT_EQ(WMError::WM_OK, ret);
     EXPECT_EQ(window->windowSystemConfig_.defaultCornerRadius_, cornerRadius);
 
-    window->property_->SetWindowCornerRadius(1.0f); // 1.0f is valid window corner radius
+    window->property_->SetWindowCornerRadius(2.0f); // 2.0f is valid window corner radius
     ret = window->GetWindowCornerRadius(cornerRadius);
     EXPECT_EQ(WMError::WM_OK, ret);
-    EXPECT_EQ(1.0f, cornerRadius); // 1.0f is valid window corner radius
+    EXPECT_EQ(2.0f, cornerRadius); // 2.0f is valid window corner radius
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     ret = window->GetWindowCornerRadius(cornerRadius);
     EXPECT_EQ(WMError::WM_OK, ret);
-    EXPECT_EQ(1.0f, cornerRadius); // 1.0f is valid window corner radius
+    EXPECT_EQ(2.0f, cornerRadius); // 2.0f is valid window corner radius
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
@@ -368,16 +368,53 @@ HWTEST_F(WindowSceneSessionImplAnimationTest, GetWindowCornerRadius, TestSize.Le
     EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     ret = window->GetWindowCornerRadius(cornerRadius);
-    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(2.0f, cornerRadius); // 2.0f is valid window corner radius
+
+    ret = window->SetWindowCornerRadius(1.0f);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    ret = window->GetWindowCornerRadius(cornerRadius);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(1.0f, cornerRadius); //1.0f is valid window corner radius
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = window->GetWindowCornerRadius(cornerRadius);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_END);
+    ret = window->GetWindowCornerRadius(cornerRadius);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     ret = window->GetWindowCornerRadius(cornerRadius);
     EXPECT_EQ(WMError::WM_OK, ret);
-    EXPECT_EQ(1.0f, cornerRadius); // 1.0f is valid window corner radius
+    
+    ret = window->SetWindowCornerRadius(1.5f);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    ret = window->GetWindowCornerRadius(cornerRadius);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(1.5f, cornerRadius);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = window->GetWindowCornerRadius(cornerRadius);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_END);
+    ret = window->GetWindowCornerRadius(cornerRadius);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    ret = window->GetWindowCornerRadius(cornerRadius);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
 }
 
 /**
