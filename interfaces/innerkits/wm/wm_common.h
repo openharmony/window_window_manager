@@ -3377,16 +3377,20 @@ struct SupportRotationInfo : public Parcelable {
             return nullptr;
         }
         for(int i = 0; i < 4; i++) {
-            if(!parcel.ReadBool(supportRotationInfo->containerSupportRotation_[i])) {
+            bool isSupport = false;
+            if(!parcel.ReadBool(isSupport)) {
                 delete supportRotationInfo;
                 return nullptr;
             }
+            supportRotationInfo->containerSupportRotation_[i] = isSupport;
         }
         for(int i = 0; i < 4; i++) {
-            if(!parcel.ReadBool(supportRotationInfo->sceneSupportRotation_[i])) {
+            bool isSupport = false;
+            if(!parcel.ReadBool(isSupport)) {
                 delete supportRotationInfo;
                 return nullptr;
             }
+            supportRotationInfo->sceneSupportRotation_[i] = isSupport;
         }
         if(!parcel.ReadString(supportRotationInfo->supportRotationChangeReason_)) {
             delete supportRotationInfo;

@@ -4836,9 +4836,9 @@ void SceneSessionManager::SetStartPiPFailedListener(NotifyStartPiPFailedFunc&& f
     startPiPFailedFunc_ = std::move(func);
 }
 
-void SceneSessionManager::SetSupportRotationRegisteredListener(const NotifySupportRotationRegisteredFunc& func)
+void SceneSessionManager::SetSupportRotationRegisteredListener(NotifySupportRotationRegisteredFunc&& func)
 {
-    supportRotationRegisteredListener_ = func;
+    supportRotationRegisteredListener_ = std::move(func);
 }
 
 void SceneSessionManager::RegisterCreateSubSessionListener(int32_t persistentId,

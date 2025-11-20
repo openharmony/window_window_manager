@@ -561,7 +561,7 @@ void WindowManagerAgentProxy::NotifySupportRotationChange(const SupportRotationI
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_ROTATION, "WriteInterfaceToken failed");
         return;
     }
     if (!data.WriteParcelable(&supportRotationInfo)) {

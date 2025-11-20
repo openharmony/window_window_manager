@@ -689,7 +689,7 @@ public:
     /*
      * Window Rotation
      */
-    void SetSupportRotationRegisteredListener(const NotifySupportRotationRegisteredFunc& func);
+    void SetSupportRotationRegisteredListener(NotifySupportRotationRegisteredFunc&& func);
 
      /*
      * FloatingBall Window

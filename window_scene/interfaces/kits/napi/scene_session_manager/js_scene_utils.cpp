@@ -1294,7 +1294,7 @@ bool ConvertSupportRotationInfoFromJsValue(napi_env env, napi_value jsObject,
     napi_get_named_property(env, jsObject, "sceneSupportRotation", &jsSceneSupportRotation);
     napi_get_named_property(env, jsObject, "supportRotationChangeReason", &jsSupportRotationChangeReason);
     if (GetType(env, jsDisplayId) != napi_undefined) {
-        int32_t displayId;
+        uint32_t displayId;
         if (!ConvertFromJsValue(env, jsDisplayId, displayId)) {
             TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to displayId");
             return false;
@@ -1422,7 +1422,7 @@ bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::stri
         napi_get_element(env, array, i, &jsValue);
         if (!ConvertFromJsValue(env, jsValue, strItem)) {
             WLOGFW("Failed to ConvertFromJsValue, index: %{public}u", i);
-            continue;
+            return false;
         }
         vector.emplace_back(std::move(strItem));
     }
