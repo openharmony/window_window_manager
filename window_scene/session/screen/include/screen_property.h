@@ -371,7 +371,7 @@ private:
     uint32_t pointerActiveHeight_ { 0 };
 
     ScreenShape screenShape_ { ScreenShape::RECTANGLE };
-    SuperFoldStattus foldStatus_ { SuperFoldStatus::UNKNOWN };
+    SuperFoldStatus foldStatus_ { SuperFoldStatus::UNKNOWN };
 
     ScreenType type_ { ScreenType::REAL };
 
