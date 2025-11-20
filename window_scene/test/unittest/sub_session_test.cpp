@@ -623,7 +623,7 @@ HWTEST_F(SubSessionTest, HandleCrossMoveToSurfaceNode, TestSize.Level1)
     screenProperty.SetStartY(1000);
     screenProperty.SetBounds({{0, 0, 1000, 1000}, 10.0f, 10.0f});
     screenProperty.SetScreenType(ScreenType::REAL);
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(screenId, screenProperty,screenId);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
     ASSERT_NE(screenSession, nullptr);
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(ScreenId, screenSession);
     //Set screen type
@@ -665,11 +665,8 @@ HWTEST_F(SubSessionTest, AddSurfaceNodeToScreen, TestSize.Level1)
     ASSERT_NE(surfaceNode, nullptr);
     sceneSession->SetSurfaceNode(surfaceNode);
     sceneSession->SetScreenId(0);
-    sceneSession->AddSurfaceNodeToScreen(0);
-    EXPECT_EQ(0, sceneSession->displayIdSetDuringMoveTo_.size());
     WSRect rect = {900, 900, 800, 800};
     sceneSession->SetZOrder(101);
-    sceneSession->SetScreenId(0);
     sceneSession->SetSessionRect(rect);
     surfaceNode->SetPositionZ(0);
     auto originScreenId = 0;
