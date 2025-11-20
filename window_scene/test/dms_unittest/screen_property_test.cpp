@@ -1027,6 +1027,36 @@ HWTEST_F(ScreenPropertyTest, SetInputOffset, TestSize.Level1)
     EXPECT_EQ(property->GetInputOffsetX(), 1);
     EXPECT_EQ(property->GetInputOffsetY(), 2);
 }
+
+/**
+@tc.name : SetIsDestoryDisplay
+@tc.desc : SetIsDestoryDisplay
+@tc.type: FUNC
+*/
+HWTEST_F(ScreenPropertyTest, SetIsDestoryDisplay, TestSize.Level1) {
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetIsDestoryDisplay start";
+    ScreenProperty property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    property->SetIsDestoryDisplay(true);
+    EXPECT_TRUE(property->isDestoryDisplay_);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetIsDestoryDisplay end";
+}
+
+/**
+@tc.name : GetIsDestoryDisplay
+@tc.desc : GetIsDestoryDisplay
+@tc.type: FUNC
+*/
+HWTEST_F(ScreenPropertyTest, GetIsDestoryDisplay, TestSize.Level1) {
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetIsDestoryDisplay start";
+    ScreenProperty property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    property->SetIsDestoryDisplay(true);
+    EXPECT_EQ(property->isDestoryDisplay_, true);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetIsDestoryDisplay end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

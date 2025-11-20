@@ -86,7 +86,7 @@ public:
 
     nlohmann::ordered_json GetFoldCreaseRegionJson();
 
-    void HandleSuperFoldDisplayCallback(sptr<ScreenSession>& screenSession);
+    void HandleSuperFoldDisplayCallback(sptr<ScreenSession>& screenSession, SuperFolsStatusChangeEvents changeEvent);
 
     void AddMirrorVirtualScreenIds(const std::vector<ScreenId>& screenIds);
     void ClearMirrorVirtualScreenIds(const std::vector<ScreenId>& screenIds);
