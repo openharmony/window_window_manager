@@ -1584,14 +1584,14 @@ HWTEST_F(WindowSessionImplTest3, NotifyUIExtHostRectChangeInGlobalDisplayListene
     Rect rect;
     WindowSizeChangeReason reason = WindowSizeChangeReason::MOVE;
     window->NotifyUIExtHostRectChangeInGlobalDisplayListeners(rect, reason);
-    window->rectChangeInGlobalDisplayUIExtListenerIds.emplace(111);
-    ASSERT_FALSE(window->rectChangeInGlobalDisplayUIExtListenerIds.empty());
+    window->rectChangeInGlobalDisplayUIExtListenerIds_.emplace(111);
+    ASSERT_FALSE(window->rectChangeInGlobalDisplayUIExtListenerIds_.empty());
     window->NotifyUIExtHostRectChangeInGlobalDisplayListeners(rect, reason);
 
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
     window->NotifyUIExtHostRectChangeInGlobalDisplayListeners(rect, reason);
-    window->rectChangeInGlobalDisplayUIExtListenerIds.clear();
-    ASSERT_TRUE(window->rectChangeInGlobalDisplayUIExtListenerIds.empty());
+    window->rectChangeInGlobalDisplayUIExtListenerIds_.clear();
+    ASSERT_TRUE(window->rectChangeInGlobalDisplayUIExtListenerIds_.empty());
     window->NotifyUIExtHostRectChangeInGlobalDisplayListeners(rect, reason);
 }
 } // namespace
