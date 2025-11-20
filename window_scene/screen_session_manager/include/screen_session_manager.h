@@ -71,7 +71,7 @@ DECLARE_SYSTEM_ABILITY(ScreenSessionManager)
 WM_DECLARE_SINGLE_INSTANCE_BASE(ScreenSessionManager)
 
 public:
-    void SetPropertyChangedCallback(std::function<void(sptr<ScreenSession>& screenSession)> callback);
+    void SetPropertyChangedCallback(std::function<void(sptr<ScreenSession>& screenSession, SuperFoldStatusChangeEvents changeEvent)> callback);
     sptr<ScreenSession> GetScreenSession(ScreenId screenId) const;
     sptr<ScreenSession> GetDefaultScreenSession();
     std::vector<ScreenId> GetAllScreenIds();
@@ -1035,7 +1035,7 @@ private:
     std::atomic<bool> curResolutionEffectEnable_ = false;
     DMError SyncScreenPropertyChangedToServer(ScreenId screenId, const ScreenProperty& screenProperty) override;
     void SetConfigForInputmethod(ScreenId screenId, VirtualScreenOption option);
-    std::function<void(sptr<ScreenSession>& screenSession)> propertyChangedCallback_;
+    std::function<void(sptr<ScreenSession>& screenSession, SuperFoldStatusChangeEvents changeEvent)> propertyChangedCallback_;
     std::mutex callbackMutex_;
     bool isSupportCapture_ = false;
     std::atomic<FoldDisplayMode> foldDisplayModeAfterRotation_ = FoldDisplayMode::UNKNOWN;
