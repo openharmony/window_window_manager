@@ -424,6 +424,46 @@ WMError WindowAdapterLite::GetAccessibilityWindowInfo(std::vector<sptr<Accessibi
     return wmsProxy->GetAccessibilityWindowInfo(infos);
 }
 
+WMError WindowAdapterLite::SetGlobalDragResizeType(DragResizeType dragResizeType)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->SetGlobalDragResizeType(dragResizeType);
+}
+
+WMError WindowAdapterLite::GetGlobalDragResizeType(DragResizeType& dragResizeType)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetGlobalDragResizeType(dragResizeType);
+}
+
+WMError WindowAdapterLite::SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->SetAppDragResizeType(bundleName, dragResizeType);
+}
+
+WMError WindowAdapterLite::GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetAppDragResizeType(bundleName, dragResizeType);
+}
+
+WMError WindowAdapterLite::SetAppKeyFramePolicy(const std::string& bundleName, const KeyFramePolicy& keyFramePolicy)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->SetAppKeyFramePolicy(bundleName, keyFramePolicy);
+}
+
 WMError WindowAdapterLite::ListWindowInfo(const WindowInfoOption& windowInfoOption,
     std::vector<sptr<WindowInfo>>& infos)
 {

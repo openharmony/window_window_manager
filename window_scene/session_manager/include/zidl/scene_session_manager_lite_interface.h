@@ -70,6 +70,11 @@ public:
         TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT,
         TRANS_ID_GET_WINDOW_INFO,
         TRANS_ID_CHECK_WINDOW_ID,
+        TRANS_ID_SET_GLOBAL_DRAG_RESIZE_TYPE,
+        TRANS_ID_GET_GLOBAL_DRAG_RESIZE_TYPE,
+        TRANS_ID_SET_APP_DRAG_RESIZE_TYPE,
+        TRANS_ID_GET_APP_DRAG_RESIZE_TYPE,
+        TRANS_ID_SET_APP_KEY_FRAME_POLICY,
         TRANS_ID_LIST_WINDOW_INFO,
         TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID,
         TRANS_ID_UPDATE_SESSION_SCREEN_LOCK,
@@ -169,6 +174,14 @@ public:
     virtual WSError UnlockSession(int32_t sessionId) = 0;
     virtual WSError RaiseWindowToTop(int32_t persistentId) = 0;
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType) = 0;
+    virtual WMError SetGlobalDragResizeType(DragResizeType dragResizeType) { return WMError::WM_OK; }
+    virtual WMError GetGlobalDragResizeType(DragResizeType& dragResizeType) { return WMError::WM_OK; }
+    virtual WMError SetAppDragResizeType(const std::string& bundleName,
+        DragResizeType dragResizeType) { return WMError::WM_OK; }
+    virtual WMError GetAppDragResizeType(const std::string& bundleName,
+        DragResizeType& dragResizeType) { return WMError::WM_OK; }
+    virtual WMError SetAppKeyFramePolicy(const std::string& bundleName,
+        const KeyFramePolicy& keyFramePolicy) { return WMError::WM_OK; }
     virtual WMError ListWindowInfo(const WindowInfoOption& windowInfoOption,
         std::vector<sptr<WindowInfo>>& infos) = 0;
 

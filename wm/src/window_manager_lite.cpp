@@ -1297,6 +1297,51 @@ WMError WindowManagerLite::UnregisterWindowInfoChangeCallback(const std::unorder
     return ret;
 }
 
+WMError WindowManagerLite::SetGlobalDragResizeType(DragResizeType dragResizeType)
+{
+    WMError ret = WindowAdapterLite::GetInstance(userId_).SetGlobalDragResizeType(dragResizeType);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed");
+    }
+    return ret;
+}
+
+WMError WindowManagerLite::GetGlobalDragResizeType(DragResizeType& dragResizeType)
+{
+    WMError ret = WindowAdapterLite::GetInstance(userId_).GetGlobalDragResizeType(dragResizeType);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed");
+    }
+    return ret;
+}
+
+WMError WindowManagerLite::SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType)
+{
+    WMError ret = WindowAdapterLite::GetInstance(userId_).SetAppDragResizeType(bundleName, dragResizeType);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed");
+    }
+    return ret;
+}
+
+WMError WindowManagerLite::GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType)
+{
+    WMError ret = WindowAdapterLite::GetInstance(userId_).GetAppDragResizeType(bundleName, dragResizeType);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed");
+    }
+    return ret;
+}
+
+WMError WindowManagerLite::SetAppKeyFramePolicy(const std::string& bundleName, const KeyFramePolicy& keyFramePolicy)
+{
+    WMError ret = WindowAdapterLite::GetInstance(userId_).SetAppKeyFramePolicy(bundleName, keyFramePolicy);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed");
+    }
+    return ret;
+}
+
 WMError WindowManagerLite::ListWindowInfo(const WindowInfoOption& windowInfoOption,
     std::vector<sptr<WindowInfo>>& infos) const
 {
