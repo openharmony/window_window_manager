@@ -89,7 +89,7 @@ public:
     virtual void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground) = 0;
     virtual void NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
         const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList) = 0;
-    virtual void NotifySupportRotationChange(const SuppoortRotationInfo& supportRotationInfo) = 0;
+    virtual void NotifySupportRotationChange(const SupportRotationInfo& supportRotationInfo) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

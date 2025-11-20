@@ -303,9 +303,11 @@ void SessionManagerAgentController::NotifyWindowPropertyChange(uint32_t property
 void SessionManagerAgentController::NotifySupportRotationChange(const SupportRotationInfo& supportRotationInfo)
 {
     for (const auto& agent : smAgentContainer_.GetAgentsByType(
-        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY)) {
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_SUPPORT_ROTATION)) {
         if (agent != nullptr) {
             agent->NotifySupportRotationChange(supportRotationInfo);
+        } else {
+            TLOGE(WmsLogTag::WMS_ROTATION, "agent is nullptr");
         }
     }
 }

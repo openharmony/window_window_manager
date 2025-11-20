@@ -241,6 +241,29 @@ public:
     WindowLifeCycleInfo listenerLifeCycleInfo;
 };
 
+class TestIWindowSupportRotationListener : public IWindowSupportRotationListener {
+    public:
+    void OnSupportRotationChange(const SupportRotationInfo& supportRotationInfo)
+    {
+        listenerSupportRotationInfo.displayId_ = supportRotationInfo.displayId_;
+        listenerSupportRotationInfo.persistentId_ = supportRotationInfo.persistentId_;
+        listenerSupportRotationInfo.containerSupportRotation_ = supportRotationInfo.containerSupportRotation_;
+        listenerSupportRotationInfo.sceneSupportRotation_ = supportRotationInfo.sceneSupportRotation_;
+        listenerSupportRotationInfo.orientationChangeReason_ = supportRotationInfo.orientationChangeReason_;
+    }
+
+    TestIWindowSupportRotationListener()
+    {
+        listenerSupportRotationInfo.displayId_ = 0;
+        listenerSupportRotationInfo.persistentId_ = 0;
+        listenerSupportRotationInfo.containerSupportRotation_ = {false, false, false, false};
+        listenerSupportRotationInfo.sceneSupportRotation_ = {false, false, false, false};
+        listenerSupportRotationInfo.orientationChangeReason_ = "test";
+    }
+
+    SupportRotationInfo  listenerSupportRotationInfo;
+};
+
 class TestWMSListener : public IWMSConnectionChangedListener {
 public:
     void OnConnected(int32_t userId, int32_t screenId) override {}
@@ -2773,24 +2796,34 @@ HWTEST_F(WindowManagerTest, GetMainWindowSnapshot, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, RegisterWindowSupportRotationListener, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("RegisterWindowSupportRotationListener");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    sptr<IWindowSupportRotationListener> listener = nullptr;
-    WMError ret = window->RegisterWindowSupportRotationListener(listener);
-    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    auto instance_ = WindowManager::GetInstance(-1);
+    ASSERT_NE(nullptr, instance_);
+    auto oldWindowManagerAgent = instance_->pImpl_->windowSupportRotationListenerAgent_;
+    auto oldListeners = instance_->pImpl_->windowSupportRotationListeners_;
+    // register nullptr test
+    auto ret = WMError::WM_OK;
+    ret = instance_->RegisterWindowSupportRotationListener(nullptr);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 
-    listener = sptr<IWindowSupportRotationListener>::MakeSptr();
-    std::vector<sptr<IWindowSupportRotationListener>> holder;
-    window->windowRotationChangeListeners_[0] = holder;
-    ret = window->RegisterWindowSupportRotationListener(listener);
-    EXPECT_EQ(ret, WMError::WM_OK);
-    holder = window->windowRotationChangeListeners_[0];
-    auto existsListener = std::find(holder.begin(), holder.end(), listener);
-    ASSERT_NE(existsListener, holder.end());
+    sptr<TestIWindowSupportRotationListener> listener = sptr<TestIWindowSupportRotationListener>::MakeSptr();
+    instance_->RegisterWindowUpdateListener(listener);
+    EXPECT_EQ(1, instance_->pImpl_->windowSupportRotationListeners_.size());
 
-    ret = window->RegisterWindowSupportRotationListener(listener);
-    EXPECT_EQ(ret, WMError::WM_OK);
+    // to check that the same listner can not be registered twice
+    instance_->RegisterWindowUpdateListener(listener);
+    EXPECT_EQ(1, instance_->pImpl_->windowSupportRotationListeners_.size());
+
+    EXPECT_EQ(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
+    instance_->UnregisterWindowSupportRotationListener(listener);
+    instance_->pImpl_->windowSupportRotationListenerAgent_ = nullptr;
+    instance_->pImpl_->windowSupportRotationListeners_.clear();
+    ret = WindowManager::GetInstance().RegisterWindowSupportRotationListener(listener);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    instance_->pImpl_->windowSupportRotationListenerAgent_ = oldWindowManagerAgent;
+    instance_->pImpl_->windowSupportRotationListenerAgent_ = oldListeners;
 }
 
 /**
@@ -2800,24 +2833,45 @@ HWTEST_F(WindowManagerTest, RegisterWindowSupportRotationListener, Function | Sm
  */
 HWTEST_F(WindowManagerTest, UnregisterWindowSupportRotationListener, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("UnregisterWindowSupportRotationListener");
+    auto instance_ = WindowManager::GetInstance(-1);
+    ASSERT_NE(nullptr, instance_);
+    auto oldWindowManagerAgent = instance_->pImpl_->windowSupportRotationListenerAgent_;
+    auto oldListeners = instance_->pImpl_->windowSupportRotationListeners_;
+    instance_->pImpl_->windowSupportRotationListenerAgent_ = sptr<WindowManagerAgent>::MakeSptr();
+    instance_->pImpl_->windowSupportRotationListeners_.clear();
 
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    sptr<IWindowRotationChangeListener> listener = nullptr;
-    WMError ret = window->UnregisterWindowSupportRotationListener(listener);
-    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    // check nullpter
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, instance_->UnregisterWindowSupportRotationListener(nullptr));
 
-    listener = sptr<IWindowRotationChangeListener>::MakeSptr();
-    std::vector<sptr<IWindowRotationChangeListener>> holder;
-    window->windowRotationChangeListeners_[0] = holder;
-    window->RegisterWindowSupportRotationListener(listener);
-    ret = window->UnregisterWindowSupportRotationListener(listener);
-    EXPECT_EQ(ret, WMError::WM_OK);
+    sptr<TestIWindowSupportRotationListener> listener1 = sptr<TestIWindowSupportRotationListener>::MakeSptr();
+    sptr<TestIWindowSupportRotationListener> listener2 = sptr<TestIWindowSupportRotationListener>::MakeSptr();
+    EXPECT_EQ(WMError::WM_OK, instance_->UnregisterWindowSupportRotationListener(listener1));
 
-    holder = window->windowRotationChangeListeners_[0];
-    auto existsListener = std::find(holder.begin(), holder.end(), listener);
-    EXPECT_EQ(existsListener, holder.end());
+    ASSERT_NE(nullptr, windowAdapter);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
+
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_SUPPORT_ROTATION;
+    instance_->pImpl_->windowSupportRotationListeners_.clear();
+    EXPECT_EQ(0, instance_->pImpl_->windowSupportRotationListeners_.size());
+    auto ret = windowAdapter->RegisterWindowManagerAgent(type, nullptr);
+    EXPECT_EQ(WMError::WM_ERROR_SAMGR, ret);
+
+    instance_->RegisterWindowSupportRotationListener(listener1);
+    instance_->RegisterWindowSupportRotationListener(listener2);
+    EXPECT_EQ(2, instance_->pImpl_->windowSupportRotationListeners_.size());
+    EXPECT_EQ(WMError::WM_OK, instance_->UnregisterWindowSupportRotationListener(listener1));
+
+    instance_->UnregisterWindowSupportRotationListener(listener2);
+    EXPECT_EQ(0, instance_->pImpl_->windowSupportRotationListeners_.size());
+    EXPECT_EQ(nullptr, instance_->pImpl_->windowSupportRotationListenerAgent_);
+
+    instance_->pImpl_->windowSupportRotationListeners_.emplace_back(listener1);
+    EXPECT_EQ(WMError::WM_OK, instance_->UnregisterWindowSupportRotationListener(listener1));
+    EXPECT_EQ(0, instance_->pImpl_->windowSupportRotationListeners_.size());
+
+    instance_->pImpl_->windowSupportRotationListenerAgent_ = oldWindowManagerAgent;
+    instance_->pImpl_->windowSupportRotationListeners_ = oldListeners;
 }
 
 /**
@@ -2827,18 +2881,22 @@ HWTEST_F(WindowManagerTest, UnregisterWindowSupportRotationListener, Function | 
  */
 HWTEST_F(WindowManagerTest, NotifySupportRotationChange, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("NotifySupportRotationChange");
-    option->SetWindowType(WindowType::APP_WINDOW_BASE);
-    sptr<WindowSessionImpl> windowSessionImpl = sptr<WindowSessionImpl>::MakeSptr(option);
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    windowSessionImpl->property_->SetPersistentId(1);
-    windowSessionImpl->hostSession_ = session;
-    windowSessionImpl->state_ = WindowState::STATE_SHOWN;
-    SupportRotationInfo info = { 0, 1, { true, true, true, true }, { true, true, true, true }, "test" };
-    windowSessionImpl->NotifySupportRotationChange(info);
-    // 验证方法
+    WMError ret;
+    sptr<TestIWindowSupportRotationListener> listener = sptr<TestIWindowSupportRotationListener>::MakeSptr();
+    ret = WindowManager::GetInstance().RegisterWindowSupportRotationListener(listener);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    SupportRotationInfo supportRotationInfo;
+    supportRotationInfo.displayId_ = 0;
+    supportRotationInfo.persistentId_ = 0;
+    supportRotationInfo.containerSupportRotation_ = {false, false, false, false};
+    supportRotationInfo.sceneSupportRotation_ = {false, false, false, false};
+    supportRotationInfo.supportRotationChangeReason_ = "test";
+    WindowManager::GetInstance().NotifySupportRotationChange(supportRotationInfo);
+    EXPECT_EQ(supportRotationInfo.displayId_, listener->listenerSupportRotationInfo.displayId_);
+    EXPECT_EQ(supportRotationInfo.persistentId_, listener->listenerSupportRotationInfo.persistentId_);
+    EXPECT_EQ(supportRotationInfo.supportRotationChangeReason_,
+        listener->listenerSupportRotationInfo.supportRotationChangeReason_);
 }
 }
 } // namespace

@@ -555,7 +555,7 @@ void WindowManagerAgentProxy::NotifyWindowPropertyChange(uint32_t propertyDirtyF
     }
 }
 
-void WindowManagerAgentProxy::NotifySupportRotationChange(const SuppoortRotationInfo& supportRotationInfo)
+void WindowManagerAgentProxy::NotifySupportRotationChange(const SupportRotationInfo& supportRotationInfo)
 {
     MessageParcel data;
     MessageParcel reply;

@@ -1281,7 +1281,7 @@ bool ConvertInfoFromJsValue(napi_env env, napi_value jsObject, RotationChangeInf
 
 
 bool ConvertSupportRotationInfoFromJsValue(napi_env env, napi_value jsObject,
-    SuppoortRotationInfo& suppoortRotationInfo)
+    SupportRotationInfo& suppoortRotationInfo)
 {
     napi_value jsDisplayId = nullptr;
     napi_value jsPersistentId = nullptr;
@@ -1294,12 +1294,12 @@ bool ConvertSupportRotationInfoFromJsValue(napi_env env, napi_value jsObject,
     napi_get_named_property(env, jsObject, "sceneSupportRotation", &jsSceneSupportRotation);
     napi_get_named_property(env, jsObject, "supportRotationChangeReason", &jsSupportRotationChangeReason);
     if (GetType(env, jsDisplayId) != napi_undefined) {
-        uint64_t displayId;
+        int32_t displayId;
         if (!ConvertFromJsValue(env, jsDisplayId, displayId)) {
             TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to displayId");
             return false;
         }
-        suppoortRotationInfo.displayId_ = displayId;
+        suppoortRotationInfo.displayId_ = static_cast<uint64_t>(displayId);
     }
     if (GetType(env, jsPersistentId) != napi_undefined) {
         uint32_t persistentId;

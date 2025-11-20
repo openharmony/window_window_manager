@@ -3330,6 +3330,73 @@ struct OutlineParams : public Parcelable {
 };
 
 /**
+ * @brief support rotation of current application
+ */
+struct SupportRotationInfo : public Parcelable {
+    DisplayId displayId_ = DISPLAY_ID_INVALID;
+    int32_t persistentId_ = 0;
+    std::vector<bool> containerSupportRotation_ = {true, false, false, false};
+    std::vector<bool> sceneSupportRotation_ = {true, false, false, false};
+    std::string supportRotationChangeReason_ = "";
+
+    SupportRotationInfo() {}
+
+    bool Marshalling(Parcel& parcel) const
+    {
+        if(!parcel.WriteUint64(static_cast<uint64_t>(displayId_))) {
+            return false;
+        }
+        if(!parcel.WriteInt32(persistentId_)) {
+            return false;
+        }
+        for(int i = 0; i < 4; i++) {
+            if(!parcel.WriteBool(containerSupportRotation_[i])) {
+                return false;
+            }
+        }
+        for(int i = 0; i < 4; i++) {
+            if(!parcel.WriteBool(sceneSupportRotation_[i])) {
+                return false;
+            }
+        }
+        if(!parcel.WriteString(supportRotationChangeReason_)) {
+            return false;
+        }
+        return true;
+    }
+
+    static SupportRotationInfo* Unmarshalling(Parcel& parcel)
+    {
+        SupportRotationInfo* supportRotationInfo = new SupportRotationInfo();
+        if(!parcel.ReadUint64(supportRotationInfo->displayId_)) {
+            delete supportRotationInfo;
+            return nullptr;
+        }
+        if(!parcel.ReadInt32(supportRotationInfo->persistentId_)) {
+            delete supportRotationInfo;
+            return nullptr;
+        }
+        for(int i = 0; i < 4; i++) {
+            if(!parcel.ReadBool(supportRotationInfo->containerSupportRotation_[i])) {
+                delete supportRotationInfo;
+                return nullptr;
+            }
+        }
+        for(int i = 0; i < 4; i++) {
+            if(!parcel.ReadBool(supportRotationInfo->sceneSupportRotation_[i])) {
+                delete supportRotationInfo;
+                return nullptr;
+            }
+        }
+        if(!parcel.ReadString(supportRotationInfo->supportRotationChangeReason_)) {
+            delete supportRotationInfo;
+            return nullptr;
+        }
+        return supportRotationInfo;
+    }
+}
+
+/**
  * @enum WaterfallResidentState
  * @brief Represents the resident (persistent) state control of the waterfall layout.
  */

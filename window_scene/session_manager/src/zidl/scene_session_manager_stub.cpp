@@ -2676,6 +2676,7 @@ int SceneSessionManagerStub::HandleConvertToRelativeCoordinateExtended(MessagePa
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write errCode failed.");
         return ERR_TRANSACTION_FAILED;
     }
+    return ERR_NONE;
 }
 
 int SceneSessionManagerStub::HandleNotifySupportRotationRegistered(MessageParcel& data, MessageParcel& reply)
