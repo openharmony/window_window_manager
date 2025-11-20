@@ -3024,6 +3024,28 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRemoveSessionBlackList02, Function |
     int res = stub_->HandleRemoveSessionBlackList(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 }
+
+/**
+ * @tc.name: HandleSetSpecificWindowZIndex
+ * @tc.desc: HandleSetSpecificWindowZIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetSpecificWindowZIndex, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    int ret = stub_->HandleSetSpecificWindowZIndex(data, reply);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
+
+    data.WriteUint64(2106);
+    ret = stub_->HandleSetSpecificWindowZIndex(data, reply);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
+
+    data.WriteInt32(20);
+    ret = stub_->HandleSetSpecificWindowZIndex(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

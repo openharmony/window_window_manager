@@ -2524,7 +2524,7 @@ WSError SceneSessionManagerProxy::SetSpecificWindowZIndex(WindowType windowType,
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Write interface token failed.");
-        return WSError::WS_ERROR_INVALID_PARAM;
+        return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(windowType))) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Write sourcePersistentId failed");
@@ -2537,7 +2537,7 @@ WSError SceneSessionManagerProxy::SetSpecificWindowZIndex(WindowType windowType,
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "remote is null");
-        return WSError::WS_ERROR_IPC_FAILED;
+        return WSError::WS_ERROR_NULLPTR;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
         SceneSessionManagerMessage::TRANS_ID_SET_SPECIFIC_WINDOW_ZINDEX),
@@ -2548,9 +2548,9 @@ WSError SceneSessionManagerProxy::SetSpecificWindowZIndex(WindowType windowType,
     int32_t result = 0;
     if (!reply.ReadInt32(result)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Failed to read result");
-        return WMError::WM_ERROR_IPC_FAILED;
+        return WSError::WS_ERROR_IPC_FAILED;
     }
-    return static_cast<WMError>(result);
+    return static_cast<WSError>(result);
 }
 
 void SceneSessionManagerProxy::UpdateModalExtensionRect(const sptr<IRemoteObject>& token, Rect rect)

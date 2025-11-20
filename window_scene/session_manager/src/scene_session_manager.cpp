@@ -14160,9 +14160,9 @@ WSError SceneSessionManager::ShiftAppWindowFocus(int32_t sourcePersistentId, int
 /** @note @window.hierarchy */
 WSError SceneSessionManager::SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex)
 {
-    if (!(SessionPermission::IsSACalling())) {
+    if (!SessionPermission::IsSystemAppCall()) {
         TLOGE(WmsLogTag::WMS_FOCUS, "permission denied");
-        return WSError::WS_ERROR_INVALID_PERMISSION;
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     const char* const where = __func__;
     return taskScheduler_->PostSyncTask([this, windowType, zIndex, where] {
