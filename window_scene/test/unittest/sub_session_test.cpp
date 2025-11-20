@@ -735,6 +735,31 @@ HWTEST_F(SubSessionTest, RemoveSurfaceNodeFromScreen, TestSize.Level1)
     sceneSession->displayIdSetDuringMoveTo_.insert(888);
     sceneSession->RemoveSurfaceNodeFromScreen();
     EXPECT_EQ(0, sceneSession->cloneNodeCount_);
+
+    // Constructing screen rect information
+    auto screenId = 1001;
+    ScreenProperty screenProperty;
+    screenProperty.SetStartX(1000);
+    screenProperty.SetStartY(1000);
+    screenProperty.SetBounds({{0, 0, 1000, 1000}, 10.0f, 10.0f});
+    screenProperty.SetScreenType(ScreenType::REAL);
+    sptr<ScreenSession> screenSession =
+        sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(screenId, screenSession);
+    sceneSession->displayIdSetDuringMoveTo_.insert(screenId);
+    int32_t curCloneNodeCount = sceneSession->cloneNodeCount_;
+    sceneSession->SetFindScenePanelRsNodeByZOrderFunc([](uint64_t screenId, uint32_t targetZOrder) {
+        return nullptr;
+    });
+    sceneSession->RemoveSurfaceNodeFromScreen();
+    EXPECT_EQ(sceneSession->cloneNodeCount_, curCloneNodeCount);
+    // Register Lookup Node Function
+    sceneSession->SetFindScenePanelRsNodeByZOrderFunc([this](uint64_t screenId, uint32_t targetZOrder) {
+        return CreateRSSurfaceNode();
+    });
+    sceneSession->RemoveSurfaceNodeFromScreen();
+    EXPECT_EQ(sceneSession->cloneNodeCount_, curCloneNodeCount - 1);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
 }
 
 /**
