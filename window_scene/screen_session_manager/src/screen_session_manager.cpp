@@ -2485,12 +2485,12 @@ void ScreenSessionManager::CalculateSecondryXYPosition(sptr<ScreenSession> first
 void ScreenSessionManager::SetPhysicalXYPosition(sptr<ScreenSession> screenSession, int32_t x, int32_t y)
 {
     if(screenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS,"screenSession is nullptr");
+        TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
         return;
     }
     sptr<ScreenSession> physicalScreen = GetPhysicalScreenSession(screenSession->GetRSScreenId());
     if(physicalScreen == nullptr) {
-        TLOGE(WmsLogTag::DMS,"physicalScreen is nullptr");
+        TLOGE(WmsLogTag::DMS, "physicalScreen is nullptr");
         return;
     }
     physicalScreen->SetXYPosition(x,y);
@@ -2499,15 +2499,15 @@ void ScreenSessionManager::SetPhysicalXYPosition(sptr<ScreenSession> screenSessi
 void ScreenSessionManager::SetPhysicalStartPosition(sptr<ScreenSession> screenSession, uint32_t startX, uint32_t startY)
 {
     if(screenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS,"screenSession is nullptr");
+        TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
         return;
     }
     sptr<ScreenSession> physicalScreen = GetPhysicalScreenSession(screenSession->GetRSScreenId());
     if(physicalScreen == nullptr) {
-        TLOGE(WmsLogTag::DMS,"physicalScreen is nullptr");
+        TLOGE(WmsLogTag::DMS, "physicalScreen is nullptr");
         return;
     }
-    physicalScreen->SetStartPosition(x,y);
+    physicalScreen->SetStartPosition(startX, startY);
 }
 
 DMError ScreenSessionManager::CheckVirtualScreenPermission()
@@ -4957,17 +4957,10 @@ void ScreenSessionManager::CallRsSetScreenPowerStatusSync(ScreenId screenId, Scr
         }
     };
     screenPowerTaskScheduler_->PostVoidSyncTask(rsSetScreenPowerStatusTask, "rsInterface_.SetScreenPowerStatus task");
-#ifdef WM_SCREEN_ACTIVE_MODE_ENABLE
+#ifdef WM_MULTI_SCREEN_ENABLE
     if (g_isPcDevice && status == ScreenPowerStatus::POWER_STATUS_ON && IsDefaultMirrorMode(screenId)) {
-        sptr<ScreenSession> screenSession = GetScreenSessionByRsId(screenId);
-        if (screenSession == nullptr) {
-            TLOGE(WmsLogTag::DMS, "screenSession is nullptr!");
-            return;
-        }
-        auto activeId = screenSession->GetActiveId();
+        TLOGI(WmsLogTag::DMS, "set screen active mode, rsScreenId:%{public}" PRId64, screenId);
         RecoverScreenActiveMode(screenId);
-        TLOGI(WmsLogTag::DMS, "set screen active mode, rsid:%{public}" PRId64 ", activeId:%{public}u",
-            screenId, activeId);
     }
 #endif
 }
@@ -6934,8 +6927,8 @@ bool ScreenSessionManager::InitAbstractScreenModesInfo(sptr<ScreenSession>& scre
         info->height_ = static_cast<uint32_t>(rsScreenModeInfo.GetScreenHeight());
         info->refreshRate_ = rsScreenModeInfo.GetScreenRefreshRate();
         screenSession->modes_.push_back(info);
-        TLOGW(WmsLogTag::DMS, "fill screen idx:%{public}d w/h:%{public}d/%{public}d",
-            rsScreenModeInfo.GetScreenModeId(), info->width_, info->height_);
+        TLOGW(WmsLogTag::DMS, "fill screen idx:%{public}d w/h:%/%{public}u",
+            rsScreenModeInfo.GetScreenModeId(), info->width_, info->height_, info->refreshRate_);
     }
     TLOGW(WmsLogTag::DMS, "Call rsInterface_ GetScreenActiveMode");
     int32_t activeModeId = rsInterface_.GetScreenActiveMode(screenSession->rsId_).GetScreenModeId();
@@ -11195,7 +11188,6 @@ void ScreenSessionManager::SetMultiScreenRelativePositionInner(sptr<ScreenSessio
         if (firstPhysicalScreen && secondPhysicalScreen) {
             firstPhysicalScreen->SetStartPosition(mainScreenOptions.startX_, mainScreenOptions.startY_);
             secondPhysicalScreen->SetStartPosition(secondScreenOption.startX_, secondScreenOption.startY_);
-            CalculateXYPosition(firstPhysicalScreen, secondPhysicalScreen);
             const std::string errMsg = "success";
             ReportRelativePositionChangeEvent(mainScreenOptions, secondScreenOption, errMsg);     
         }
@@ -11225,6 +11217,7 @@ void ScreenSessionManager::SetRelativePositionForDisconnect(MultiScreenPositionO
         return;
     }
     defaultScreenSession->SetStartPosition(defaultScreenOptions.startX_, defaultScreenOptions.startY_);
+    SetPhysicalStartPosition(defaultScreenSession, defaultScreenOptions.startX_, defaultScreenOptions.startY_);
     const std::string errMsg = "default position";
     ReportRelativePositionChangeEvent(defaultScreenOptions, defaultScreenOptions, errMsg);
     CalculateXYPosition(defaultScreenSession);
@@ -11330,6 +11323,32 @@ void ScreenSessionManager::OperateModeChange(ScreenId mainScreenId, ScreenId sec
             }
         }
     }
+}
+
+bool ScreenSesssionManager::HasExtendVirtualScreen()
+{
+    TLOGI(WmsLogTag::DMS, "start");
+    bool hasExtendVirtualScreen = false ;
+    std::map<ScreenId, sptr<ScreenSession>> screenSessionMap;
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        screenSessionMap = screenSessionMap_;
+    }
+    for (const auto& sessionIt : screenSessionMap) {
+        sptr<ScreenSession> screenSession = sessionIt.second ;
+        if (screenSession = nullptr) {
+            TLOGE(WmsLogTag::DMS, "screenSession is nullptr, ScreenId: %{public}" PRIu64,
+                sessionIt.first);
+            continue;
+        }
+        if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL &&
+            screenSession->GetIsExtendVirtual()) {
+                hasExtendVirtualScreen = true;
+                TLOGI(WmsLogTag::DMS, "is true, screenId: %{public}" PRIu64, screenSession->GetScreenId());
+                break;
+            }
+    }
+    return hasExtendVirtualScreen;
 }
 
 void ScreenSessionManager::SwitchScrollParam(FoldDisplayMode displayMode)
@@ -12230,6 +12249,10 @@ void ScreenSessionManager::SetRSScreenPowerStatusExt(ScreenId screenId, ScreenPo
 void ScreenSessionManager::OnScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent)
 {
     TLOGI(WmsLogTag::DMS, "screenModeChangeEvent: %{public}d", static_cast<uint32_t>(screenModeChangeEvent));
+    if (HasExtendVirtualScreen()) {
+        TLOGE(WmsLogTag::DMS, "has extend virtual screen");
+        return;
+    }
     auto clientProxy = GetClientProxy();
     if (!clientProxy) {
         TLOGE(WmsLogTag::DMS, "clientProxy_ is null");
