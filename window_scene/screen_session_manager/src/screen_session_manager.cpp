@@ -1392,7 +1392,7 @@ void ScreenSessionManager::RecoverScreenActiveMode(ScreenId rsScreenId)
         TLOGE(WmsLogTag::DMS, "screenSession is nullptr, rsid: %{public}" PRIu64, rsScreenId);
         return;
     }
-    std::vector<sptr<SupportedScreenModes>> modes = screenSession->GetScreenMode();
+    std::vector<sptr<SupportedScreenModes>> modes = screenSession->GetScreenModes();
     if(modes.empty()) {
         TLOGE(WmsLogTag::DMS, "mode is empty");
         return;

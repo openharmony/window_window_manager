@@ -549,25 +549,25 @@ bool ScreenSettingHelper::GetScreenActiveMode(SupportedScreenModes& info, const 
     uint32_t width = 0;
     uint32_t height = 0;
     uint32_t refreshRate = 0;
-    if (!IsNumber(activeIdStr[DATA_INDEX_ZERO])) {
+    if (!IsNumber(modeStr[DATA_INDEX_ZERO])) {
         TLOGE(WmsLogTag::DMS, "not number");
         return false;
     } else {
         activeId = static_cast<uint32_t>(strtoll(modeStr[DATA_INDEX_ZERO].c_str(), nullptr, PARAM_NUM_TEN));
     }
-    if(!IsNumber(modeStr[DATA_INDEX_ONE])) {
+    if (!IsNumber(modeStr[DATA_INDEX_ONE])) {
         TLOGE(WmsLogTag::DMS, "not number");
         return false;
     } else {
         width = static_cast<uint32_t>(strtoll(modeStr[DATA_INDEX_ONE].c_str(), nullptr, PARAM_NUM_TEN));
     }
-    if(!IsNumber(modeStr[DATA_INDEX_TWO])) {
+    if (!IsNumber(modeStr[DATA_INDEX_TWO])) {
         TLOGE(WmsLogTag::DMS, "not number");
         return false;
     } else {
         height = static_cast<uint32_t>(strtoll(modeStr[DATA_INDEX_TWO].c_str(), nullptr, PARAM_NUM_TEN));
     }
-    if(!IsNumber(modeStr[DATA_INDEX_THERE])) {
+    if (!IsNumber(modeStr[DATA_INDEX_THERE])) {
         TLOGE(WmsLogTag::DMS, "not number");
         return false;
     } else {
@@ -577,7 +577,7 @@ bool ScreenSettingHelper::GetScreenActiveMode(SupportedScreenModes& info, const 
     info.width_ = width;
     info.height_ = height;
     info.refreshRate_ = refreshRate;
-    TLOGW(WmsLogTag::DMS, "activeId: %{public}d, width: %{public}d, height: %{public}d, refreshRate: %{public}d", 
+    TLOGW(WmsLogTag::DMS, "activeId: %{public}d, width: %{public}d, height: %{public}d, refreshRate: %{public}d",
         activeId, width, height, refreshRate);
     return true;
 }
