@@ -168,6 +168,14 @@ WMError WindowAdapterLite::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibi
     return wmsProxy->GetVisibilityWindowInfo(infos);
 }
 
+WMError WindowAdapterLite::UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
+    return wmsProxy->UpdateScreenLockStatusForApp(bundleName, isRelease);
+}
+
 bool WindowAdapterLite::InitSSMProxy()
 {
     std::lock_guard<std::mutex> lock(mutex_);

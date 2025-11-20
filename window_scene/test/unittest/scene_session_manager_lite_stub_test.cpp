@@ -1501,6 +1501,25 @@ HWTEST_F(SceneSessionManagerLiteStubTest, ProcessRemoteRequest_Hover, Function |
 }
 
 /**
+ * @tc.name: HandleUpdateSessionScreenLock
+ * @tc.desc: handle update session screen lock
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleUpdateSessionScreenLock, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    ASSERT_NE(sceneSessionManagerLiteStub_, nullptr);
+
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_UPDATE_SESSION_SCREEN_LOCK);
+    auto res = sceneSessionManagerLiteStub_->ProcessRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+}
+
+/**
  * @tc.name: HandleSendPointerEventForHover
  * @tc.desc: HandleSendPointerEventForHover
  * @tc.type: FUNC

@@ -67,6 +67,7 @@ private:
     int HandleCheckUIExtensionCreation(MessageParcel& data, MessageParcel& reply);
     int HandleListWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetVisibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateSessionScreenLock(MessageParcel& data, MessageParcel& reply);
     int HandleGetWindowModeType(MessageParcel& data, MessageParcel& reply);
     int HandleGetMainWinodowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateAnimationSpeedWithPid(MessageParcel& data, MessageParcel& reply);

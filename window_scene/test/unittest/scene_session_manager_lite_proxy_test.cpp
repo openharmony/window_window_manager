@@ -271,6 +271,47 @@ HWTEST_F(sceneSessionManagerLiteProxyTest, UpdateWindowModeByIdForUITest01, Test
 }
 
 /**
+ * @tc.name: UpdateScreenLockStatusForApp
+ * @tc.desc: update screen lock status
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerLiteProxyTest, UpdateScreenLockStatusForApp, TestSize.Level1)
+{
+    auto tempProxy = sptr<SceneSessionManagerLiteProxy>::MakeSptr(nullptr);
+    auto ret = tempProxy->UpdateScreenLockStatusForApp("", true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    auto proxy = sptr<SceneSessionManagerLiteProxy>::MakeSptr(remoteMocker);
+    ASSERT_NE(proxy, nullptr);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    EXPECT_EQ(proxy->UpdateScreenLockStatusForApp("", true), WMError::WM_OK);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ret = proxy->UpdateScreenLockStatusForApp("a", true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    MockMessageParcel::SetWriteStringErrorFlag(true);
+    ret = proxy->UpdateScreenLockStatusForApp("b", false);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteStringErrorFlag(false);
+
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    ret = proxy->UpdateScreenLockStatusForApp("c", false);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteBoolErrorFlag(false);
+
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ret = proxy->UpdateScreenLockStatusForApp("d", true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
  * @tc.name: SendPointerEventForHover
  * @tc.desc: normal function
  * @tc.type: FUNC
