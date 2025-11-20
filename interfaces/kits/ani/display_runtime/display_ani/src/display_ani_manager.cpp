@@ -564,8 +564,7 @@ void DisplayManagerAni::OnGetAllDisplayPhysicalResolution(ani_env* env, ani_obje
     }
 }
 
-void DisplayManagerAni::CreateVirtualScreen(ani_env* env,
-    ani_object virtualScreenConfig, ani_long screenId, ani_long nativeObj)
+void DisplayManagerAni::CreateVirtualScreen(ani_env* env, ani_object virtualScreenConfig, ani_long nativeObj)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
     if (env == nullptr) {
