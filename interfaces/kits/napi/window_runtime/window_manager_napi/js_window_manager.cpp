@@ -1941,30 +1941,25 @@ napi_value JsWindowManager::OnCreateUIEffectController(napi_env env, napi_callba
 /** @note @window.hierarchy */
 napi_value JsWindowManager::OnSetSpecificSystemWindowZIndex(napi_env env, napi_callback_info info)
 {
-    if (windowToken_ == nullptr) {
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-    }
-    WmErrorCode errCode = WmErrorCode::WM_OK;
-    size_t argc = FOUR_PARAMS_SIZE;
-    napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != 1 || argv[0] == nullptr) { // 1: params num
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "argc is invalid: %{public}zu", argc);
+    if (argc != 2) { // 2: params num
+        TLOGE(WmsLogTag::WMS_FOCUS, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     uint32_t windowTypeValue = 0;
     if (!ConvertFromJsValue(env, argv[0], windowTypeValue)) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "failed to convert paramter to winType");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "failed to convert paramter to windowType");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     WindowType windowType;
-    // if (winType >= static_cast<uint32_t>(ApiWindowType::TYPE_BASE) &&
-    //     winType < static_cast<uint32_t>(ApiWindowType::TYPE_END)) {
-        windowType = JS_TO_NATIVE_WINDOW_TYPE_MAP.at(static_cast<ApiWindowType>(winType));
-    // } else {
-    //     TLOGE(WmsLogTag::DEFAULT, "Invalid winType");
-    //     return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-    // }
+    if (windowTypeValue == static_cast<uint32_t>(ApiWindowType::TYPE_WALLET_SWIPE_CARD)) {
+        windowType = JS_TO_NATIVE_WINDOW_TYPE_MAP.at(static_cast<ApiWindowType>(windowTypeValue));
+    } else {
+        TLOGE(WmsLogTag::DEFAULT, "Invalid winType");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
     int32_t zIndex = 0;
     if (!ConvertFromJsValue(env, argv[1], zIndex)) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "failed to convert paramter to zIndex");
@@ -1972,19 +1967,20 @@ napi_value JsWindowManager::OnSetSpecificSystemWindowZIndex(napi_env env, napi_c
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = [windowType, env, task = napiAsyncTask] {
+    auto asyncTask = [windowType, zIndex, env, task = napiAsyncTask] {
         std::vector<int32_t> windowIds;
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().
             SetSpecificSystemWindowZIndex(windowType, zIndex));
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "SetSpecificSystemWindowZIndex failed"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "setSpecificSystemWindowZIndex failed"));
         }
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high, "SetSpecificSystemWindowZIndex") != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env,
-            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    napi_status status = napi_send_event(env, std::move(asyncTask), napi_eprio_high, "OnSetSpecificSystemWindowZIndex");
+    if (status != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+            "[window][setSpecificSystemWindowZIndex]msg:send event failed"));
     }
     return result;
 }
@@ -2066,7 +2062,7 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
         JsWindowManager::NotifyScreenshotEvent);
     BindNativeFunction(env, exportObj, "createUIEffectController", moduleName,
         JsWindowManager::CreateUIEffectController);
-    BindNativeFunction(env, exportObj, "SetSpecificSystemWindowZIndex", moduleName,
+    BindNativeFunction(env, exportObj, "setSpecificSystemWindowZIndex", moduleName,
         JsWindowManager::SetSpecificSystemWindowZIndex);
     return NapiGetUndefined(env);
 }

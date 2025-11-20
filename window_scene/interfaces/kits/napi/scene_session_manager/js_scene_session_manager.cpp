@@ -65,7 +65,7 @@ constexpr int ARG_INDEX_FOUR = 4;
 constexpr int32_t RESTYPE_RECLAIM = 100001;
 const std::string RES_PARAM_RECLAIM_TAG = "reclaimTag";
 const std::string CREATE_SYSTEM_SESSION_CB = "createSpecificSession";
-const std::string SET_SPECIFIC_SESSION_ZINDE_CB = "SetSpecificWindowZIndex";
+const std::string SET_SPECIFIC_SESSION_ZINDE_CB = "setSpecificWindowZIndex";
 const std::string CREATE_KEYBOARD_SESSION_CB = "createKeyboardSession";
 const std::string RECOVER_SCENE_SESSION_CB = "recoverSceneSession";
 const std::string STATUS_BAR_ENABLED_CHANGE_CB = "statusBarEnabledChange";
@@ -381,16 +381,18 @@ void JsSceneSessionManager::OnCreateSystemSession(const sptr<SceneSession>& scen
 void JsSceneSessionManager::OnSetSpecificWindowZIndex(WindowType windowType, int32_t zIndex)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "windowType: %{public}d, zIndex: %{public}d", windowType, zIndex);
-    auto task = [this, persistentId, jsCallBack = GetJSCallback(SET_SPECIFIC_SESSION_ZINDE_CB), env = env_, displayGroupId]() {
+    auto task = [this, windowType, zIndex, jsCallBack = GetJSCallback(SET_SPECIFIC_SESSION_ZINDE_CB), env = env_]() {
         if (jsCallBack == nullptr) {
             TLOGNE(WmsLogTag::WMS_FOCUS, "jsCallBack is nullptr");
             return;
         }
-        napi_value argv[] = { CreateJsValue(env, static_cast<int32_t>(windowType)),
+        uint32_t jsSessionType = static_cast<uint32_t>(GetApiType(windowType));
+        napi_value argv[] = { CreateJsValue(env, jsSessionType),
                               CreateJsValue(env, zIndex) };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
-    taskScheduler_->PostMainThreadTask(task, "OnSetSpecificWindowZIndex, WindowType:" + std::to_string(windowType));
+    taskScheduler_->PostMainThreadTask(task, "OnSetSpecificWindowZIndex, WindowType:" +
+        std::to_string(static_cast<uint32_t>(windowType))));
 }
 
 void JsSceneSessionManager::OnCreateKeyboardSession(const sptr<SceneSession>& keyboardSession,
