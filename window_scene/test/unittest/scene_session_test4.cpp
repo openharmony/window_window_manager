@@ -1113,7 +1113,7 @@ HWTEST_F(SceneSessionTest4, SetMovable01, TestSize.Level1)
     sceneSession->SetMovable(true);
     sceneSession->leashWinSurfaceNode_ = nullptr;
     SessionEvent event = SessionEvent::EVENT_START_MOVE;
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(1, WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     sceneSession->SetMovable(true);
     sceneSession->OnSessionEvent(event);
     sceneSession->moveDragController_->isStartDrag_ = true;
@@ -1233,7 +1233,7 @@ HWTEST_F(SceneSessionTest4, IsMovable02, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->SetSessionProperty(property);
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     ASSERT_EQ(WSError::WS_DO_NOTHING, sceneSession->UpdateFocus(false));
     ASSERT_EQ(false, sceneSession->IsMovable());
     ASSERT_EQ(WSError::WS_OK, sceneSession->UpdateFocus(true));
@@ -1251,7 +1251,7 @@ HWTEST_F(SceneSessionTest4, IsMovable03, TestSize.Level1)
     info.bundleName_ = "IsMovable03";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     ASSERT_EQ(WSError::WS_OK, sceneSession->UpdateFocus(true));
     ASSERT_EQ(false, sceneSession->IsMovable());
 }
@@ -1875,7 +1875,7 @@ HWTEST_F(SceneSessionTest4, SyncSessionEventTest002, TestSize.Level1)
     property->isSystemCalling_ = true;
     sceneSession->SetSessionProperty(property);
     sceneSession->isActive_ = false;
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, sceneSession->GetWindowType());
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
 
     SessionEvent event = SessionEvent::EVENT_END_MOVE;
     sceneSession->moveDragController_->isStartMove_ = true;
@@ -1899,7 +1899,7 @@ HWTEST_F(SceneSessionTest4, SyncSessionEventTest003, TestSize.Level1)
     property->isSystemCalling_ = true;
     sceneSession->SetSessionProperty(property);
     sceneSession->isActive_ = false;
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, sceneSession->GetWindowType());
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
 
     SessionEvent event = SessionEvent::EVENT_END_MOVE;
     sceneSession->moveDragController_->isStartMove_ = false;
@@ -1923,7 +1923,7 @@ HWTEST_F(SceneSessionTest4, SyncSessionEventTest004, TestSize.Level1)
     property->isSystemCalling_ = true;
     sceneSession->SetSessionProperty(property);
     sceneSession->isActive_ = false;
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, sceneSession->GetWindowType());
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
 
     SessionEvent event = SessionEvent::EVENT_START_MOVE;
     sceneSession->moveDragController_->isStartMove_ = false;
@@ -1947,7 +1947,7 @@ HWTEST_F(SceneSessionTest4, SyncSessionEventTest005, TestSize.Level1)
     property->isSystemCalling_ = true;
     sceneSession->SetSessionProperty(property);
     sceneSession->isActive_ = false;
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, sceneSession->GetWindowType());
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
 
     SessionEvent event = SessionEvent::EVENT_START_MOVE;
     sceneSession->moveDragController_->isStartMove_ = true;

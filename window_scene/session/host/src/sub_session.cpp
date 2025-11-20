@@ -36,18 +36,21 @@ SubSession::SubSession(const SessionInfo& info, const sptr<SpecificSessionCallba
     : SceneSession(info, specificCallback)
 {
     pcFoldScreenController_ = sptr<PcFoldScreenController>::MakeSptr(wptr(this), GetPersistentId());
-    moveDragController_ = sptr<MoveDragController>::MakeSptr(GetPersistentId(), GetWindowType());
-    if (specificCallback != nullptr &&
-        specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
-        moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback->onWindowInputPidChangeCallback_);
-    }
-    SetMoveDragCallback();
     TLOGD(WmsLogTag::WMS_LIFE, "Create");
 }
 
 SubSession::~SubSession()
 {
     TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
+}
+
+void SubSession::OnFirstStrongRef(const void*)
+{
+    moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(this));
+    if (specificCallback_ != nullptr && specificCallback_->onWindowInputPidChangeCallback_ != nullptr) {
+        moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback_->onWindowInputPidChangeCallback_);
+    }
+    SetMoveDragCallback();
 }
 
 WSError SubSession::Show(sptr<WindowSessionProperty> property)

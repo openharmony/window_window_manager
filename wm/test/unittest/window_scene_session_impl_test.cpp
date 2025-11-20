@@ -1088,7 +1088,7 @@ HWTEST_F(WindowSceneSessionImplTest, StartMoveWindow_02, TestSize.Level1)
     window->hostSession_ = sceneSession;
     ASSERT_EQ(window->StartMoveWindow(), WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
 
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(1, WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     ASSERT_EQ(window->StartMoveWindow(), WmErrorCode::WM_OK);
     sceneSession->moveDragController_->hasPointDown_ = true;
     sceneSession->moveDragController_->SetStartMoveFlag(true);
@@ -1122,7 +1122,7 @@ HWTEST_F(WindowSceneSessionImplTest, StartMoveWindowWithCoordinate_03, TestSize.
     window->hostSession_ = sceneSession;
     ASSERT_EQ(window->StartMoveWindowWithCoordinate(-1, 50), WmErrorCode::WM_ERROR_INVALID_PARAM);
 
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(1, WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     ASSERT_EQ(window->StartMoveWindowWithCoordinate(500, 500), WmErrorCode::WM_OK);
     sceneSession->moveDragController_->hasPointDown_ = true;
     sceneSession->moveDragController_->SetStartMoveFlag(true);
@@ -1155,7 +1155,7 @@ HWTEST_F(WindowSceneSessionImplTest, StopMoveWindow, TestSize.Level1)
     window->hostSession_ = sceneSession;
     ASSERT_EQ(window->StopMoveWindow(), WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
 
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(1, WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     ASSERT_EQ(window->StopMoveWindow(), WmErrorCode::WM_OK);
 }
 /**

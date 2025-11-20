@@ -502,7 +502,7 @@ HWTEST_F(SubSessionTest, UpdateSessionRectInner02, TestSize.Level1)
     sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     parentSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     parentSession->moveDragController_ =
-        sptr<MoveDragController>::MakeSptr(parentSession->GetPersistentId(), parentSession->GetWindowType());
+        sptr<MoveDragController>::MakeSptr(wptr(parentSession));
     parentSession->subSession_.emplace_back(subSession_);
     subSession_->SetParentSession(parentSession);
 
@@ -625,7 +625,7 @@ HWTEST_F(SubSessionTest, AddSurfaceNodeToScreen, TestSize.Level1)
     sptr<SubSession> sceneSession = sptr<SubSession>::MakeSptr(info, nullptr);
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sceneSession->moveDragController_ =
-        sptr<MoveDragController>::MakeSptr(sceneSession->GetPersistentId(), sceneSession->GetWindowType());
+        sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     sceneSession->AddSurfaceNodeToScreen(0);
     EXPECT_EQ(0, sceneSession->displayIdSetDuringMoveTo_.size());
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;

@@ -36,17 +36,20 @@ SystemSession::SystemSession(const SessionInfo& info, const sptr<SpecificSession
 {
     TLOGD(WmsLogTag::WMS_LIFE, "Create");
     pcFoldScreenController_ = sptr<PcFoldScreenController>::MakeSptr(wptr(this), GetPersistentId());
-    moveDragController_ = sptr<MoveDragController>::MakeSptr(GetPersistentId(), GetWindowType());
-    if (specificCallback != nullptr &&
-        specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
-        moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback_->onWindowInputPidChangeCallback_);
-    }
-    SetMoveDragCallback();
 }
 
 SystemSession::~SystemSession()
 {
     TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
+}
+
+void SystemSession::OnFirstStrongRef(const void*)
+{
+    moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(this));
+    if (specificCallback_ != nullptr && specificCallback_->onWindowInputPidChangeCallback_ != nullptr) {
+        moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback_->onWindowInputPidChangeCallback_);
+    }
+    SetMoveDragCallback();
 }
 
 void SystemSession::UpdateCameraWindowStatus(bool isShowing)
