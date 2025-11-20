@@ -33,6 +33,7 @@ class PointerEvent;
 } // namespace MMI
 
 namespace OHOS::Rosen {
+class SceneSession;
 
 using MoveDragCallback = std::function<void(const SizeChangeReason)>;
 
@@ -55,7 +56,7 @@ enum class MoveDirection : uint32_t {
 
 class MoveDragController : public ScreenManager::IScreenListener {
 public:
-    MoveDragController(int32_t persistentId, WindowType winType);
+    MoveDragController(wptr<SceneSession> sceneSession);
     ~MoveDragController() = default;
 
     /*
@@ -289,6 +290,7 @@ private:
      */
     std::pair<int32_t, int32_t> CalcUnifiedTranslate(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
+    wptr<SceneSession> sceneSession_ = nullptr;
     bool isStartMove_ = false;
     bool isStartDrag_ = false;
     bool isMovable_ = true;
@@ -308,8 +310,8 @@ private:
     WindowDecoration decoration_;
     MoveDragProperty moveDragProperty_;
     MoveDragCallback moveDragCallback_;
-    int32_t persistentId_;
-    WindowType winType_;
+    int32_t persistentId_ = INVALID_WINDOW_ID;
+    WindowType winType_ = WindowType::APP_WINDOW_BASE;
 
     enum class DragType : uint32_t {
         DRAG_UNDEFINED,

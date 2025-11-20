@@ -312,7 +312,7 @@ HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRectTask, TestSize.Level0)
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION,
               session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
 
-    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(session));
     session->moveDragController_->isStartDrag_ = true;
     session->moveDragController_->isStartMove_ = true;
     session->Session::UpdateSizeChangeReason(SizeChangeReason::MOVE);
@@ -437,7 +437,7 @@ HWTEST_F(SceneSessionLayoutTest, SetAspectRatio2, TestSize.Level0)
     ASSERT_EQ(result, WSError::WS_OK);
     ASSERT_EQ(sceneSession->GetAspectRatio(), ratio);
 
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(0, sceneSession->GetWindowType());
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_OK);
     ASSERT_EQ(sceneSession->GetAspectRatio(), ratio);
@@ -720,7 +720,7 @@ HWTEST_F(SceneSessionLayoutTest, IsNeedConvertToRelativeRect, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sceneSession->moveDragController_ =
-        sptr<MoveDragController>::MakeSptr(sceneSession->GetPersistentId(), sceneSession->GetWindowType());
+        sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     info.abilityName_ = "IsNeedConvertToRelativeRect_subSession";
     info.bundleName_ = "IsNeedConvertToRelativeRect_subSession";
     sptr<SceneSession> subSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
@@ -766,7 +766,7 @@ HWTEST_F(SceneSessionLayoutTest, IsDraggable, TestSize.Level1)
     EXPECT_EQ(sceneSession->IsDraggable(), false);
 
     sceneSession->moveDragController_ =
-        sptr<MoveDragController>::MakeSptr(sceneSession->GetPersistentId(), sceneSession->GetWindowType());
+        sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     EXPECT_EQ(sceneSession->IsDraggable(), true);
 }
 
@@ -782,7 +782,7 @@ HWTEST_F(SceneSessionLayoutTest, IsMovable, TestSize.Level1)
     info.bundleName_ = "IsMovable";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2025, WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     EXPECT_EQ(WSError::WS_OK, sceneSession->UpdateFocus(true));
     sceneSession->moveDragController_->isStartMove_ = false;
     sceneSession->moveDragController_->isStartDrag_ = false;
@@ -808,7 +808,7 @@ HWTEST_F(SceneSessionLayoutTest, IsAnyParentSessionDragMoving, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sceneSession->moveDragController_ =
-        sptr<MoveDragController>::MakeSptr(sceneSession->GetPersistentId(), sceneSession->GetWindowType());
+        sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     info.abilityName_ = "IsAnyParentSessionDragMoving_subSession";
     info.bundleName_ = "IsAnyParentSessionDragMoving_subSession";
     sptr<SceneSession> subSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
@@ -837,7 +837,7 @@ HWTEST_F(SceneSessionLayoutTest, IsAnyParentSessionDragZooming, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sceneSession->moveDragController_ =
-        sptr<MoveDragController>::MakeSptr(sceneSession->GetPersistentId(), sceneSession->GetWindowType());
+        sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     info.abilityName_ = "IsAnyParentSessionDragZooming_subSession";
     info.bundleName_ = "IsAnyParentSessionDragZooming_subSession";
     sptr<SceneSession> subSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
@@ -866,7 +866,7 @@ HWTEST_F(SceneSessionLayoutTest, HandleSubSessionSurfaceNode, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sceneSession->moveDragController_ =
-        sptr<MoveDragController>::MakeSptr(sceneSession->GetPersistentId(), sceneSession->GetWindowType());
+        sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     info.abilityName_ = "HandleSubSessionSurfaceNode_subSession";
     info.bundleName_ = "HandleSubSessionSurfaceNode_subSession";
     sptr<SubSession> subSceneSession = sptr<SubSession>::MakeSptr(info, nullptr);
@@ -959,7 +959,7 @@ HWTEST_F(SceneSessionLayoutTest, HandleMoveDragEnd, TestSize.Level1)
     sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->subSession_.push_back(subSession);
     sceneSession->moveDragController_ =
-        sptr<MoveDragController>::MakeSptr(sceneSession->GetPersistentId(), sceneSession->GetWindowType());
+        sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     subSession->state_ = SessionState::STATE_FOREGROUND;
     const uint64_t startDisplayId = 0;
     const uint64_t endDisplayId = 12;
@@ -1025,7 +1025,7 @@ HWTEST_F(SceneSessionLayoutTest, SetMoveAvailableArea01, TestSize.Level1)
     WSError res = sceneSession->SetMoveAvailableArea(-1);
     EXPECT_EQ(res, WSError::WS_ERROR_INVALID_DISPLAY);
 
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, sceneSession->GetWindowType());
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     int32_t screenId = 0;
     sceneSession->SetScreenId(screenId);
     res = sceneSession->SetMoveAvailableArea(0);
@@ -1089,13 +1089,13 @@ HWTEST_F(SceneSessionLayoutTest, SetMoveAvailableArea02, TestSize.Level1)
     
     systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
     sceneSession->SetSystemConfig(systemConfig);
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, sceneSession->GetWindowType());
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     WSError res = sceneSession->SetMoveAvailableArea(0);
     EXPECT_EQ(res, WSError::WS_OK);
 
     systemConfig.windowUIType_ = WindowUIType::PC_WINDOW;
     sceneSession->SetSystemConfig(systemConfig);
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, sceneSession->GetWindowType());
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     res = sceneSession->SetMoveAvailableArea(0);
     EXPECT_EQ(res, WSError::WS_OK);
 }

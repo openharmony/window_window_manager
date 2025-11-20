@@ -1093,7 +1093,7 @@ HWTEST_F(SceneSessionTest2, GetSessionTargetRectByDisplayId, TestSize.Level1)
     bool res = sceneSession->AddSubSession(sceneSession);
     EXPECT_EQ(true, res);
     EXPECT_EQ(sceneSession, (sceneSession->GetSubSession())[0]);
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(1024, WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     WSRect rectResult = sceneSession->GetSessionTargetRectByDisplayId(0);
     EXPECT_EQ(0, rectResult.posX_);
     EXPECT_EQ(0, rectResult.width_);
@@ -1201,7 +1201,7 @@ HWTEST_F(SceneSessionTest2, OnSessionEvent01, TestSize.Level1)
 
     sceneSession->leashWinSurfaceNode_ = nullptr;
     SessionEvent event = SessionEvent::EVENT_START_MOVE;
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(1, WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     sceneSession->OnSessionEvent(event);
 
     sceneSession->moveDragController_->isStartDrag_ = true;
@@ -1489,7 +1489,7 @@ HWTEST_F(SceneSessionTest2, OnMoveDragCallback02, TestSize.Level1)
     bool isPreImeEvent = true;
     sceneSession->SendKeyEventToUI(keyEvent, isPreImeEvent);
     sceneSession->IsDirtyWindow();
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(0, WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     sceneSession->NotifyUILostFocus();
 }
 
@@ -1762,7 +1762,7 @@ HWTEST_F(SceneSessionTest2, HandleMoveDragEvent, TestSize.Level1)
     SessionEvent event = { SessionEvent::EVENT_DRAG };
     EXPECT_EQ(WSError::WS_OK, session->OnSessionEvent(event));
  
-    auto moveDragController = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
+    auto moveDragController = sptr<MoveDragController>::MakeSptr(wptr(session));
     session->moveDragController_ = moveDragController;
     session->moveDragController_->isStartDrag_ = true;
     session->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
@@ -1808,7 +1808,7 @@ HWTEST_F(SceneSessionTest2, IsDragResizeScale, Function | SmallTest | Level2)
  
     session->property_ = oriProperty;
     reason = { SizeChangeReason::DRAG };
-    auto moveDragController = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
+    auto moveDragController = sptr<MoveDragController>::MakeSptr(wptr(session));
     session->moveDragController_ = moveDragController;
  
     session->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;

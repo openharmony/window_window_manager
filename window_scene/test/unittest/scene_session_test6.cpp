@@ -120,7 +120,7 @@ HWTEST_F(SceneSessionTest6, NotifyUpdateGravity01, TestSize.Level1)
     ASSERT_NE(nullptr, mainSession->notifySurfaceBoundsChangeFuncMap_[subSessionId]);
 
     sptr<MoveDragController> followController =
-        sptr<MoveDragController>::MakeSptr(subSessionId, subSession->GetWindowType());
+        sptr<MoveDragController>::MakeSptr(wptr(subSession));
     ASSERT_NE(nullptr, followController);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
@@ -1463,8 +1463,7 @@ HWTEST_F(SceneSessionTest6, TestSetContentAspectRatio, TestSize.Level1)
     EXPECT_EQ(result, WSError::WS_OK);
 
     // Case 4: aspect ratio is valid, moveDragController is not null
-    session->moveDragController_ =
-        sptr<MoveDragController>::MakeSptr(session->GetPersistentId(), session->GetWindowType());
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(session));
     result = session->SetContentAspectRatio(2.0f, true, true);
     EXPECT_EQ(result, WSError::WS_OK);
 }
@@ -1741,6 +1740,38 @@ HWTEST_F(SceneSessionTest6, GetMoveRectForWindowDrag, TestSize.Level0)
     session->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     WSRect rect4 = session->GetMoveRectForWindowDrag();
     EXPECT_EQ(rect4, session->GetGlobalOrWinRect());
+}
+
+/**
+ * @tc.name: TestIsCrossDisplayDragSupported
+ * @tc.desc: Verify IsCrossDisplayDragSupported with different window types.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, TestIsCrossDisplayDragSupported, TestSize.Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    // Case 1: ANCO windows are not supported
+    session->SetCollaboratorType(static_cast<int32_t>(CollaboratorType::RESERVE_TYPE));
+    EXPECT_FALSE(session->IsCrossDisplayDragSupported());
+    session->SetCollaboratorType(static_cast<int32_t>(CollaboratorType::DEFAULT_TYPE));
+
+    // Case 2: Normal system windows are not supported
+    session->GetSessionProperty()->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    EXPECT_FALSE(session->IsCrossDisplayDragSupported());
+
+    // Case 3: WINDOW_TYPE_FLOAT windows are supported
+    session->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    EXPECT_TRUE(session->IsCrossDisplayDragSupported());
+
+    // Case 4: WINDOW_TYPE_SCREENSHOT windows are supported
+    session->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_SCREENSHOT);
+    EXPECT_TRUE(session->IsCrossDisplayDragSupported());
+
+    // Case 5: Input Windows are supported
+    session->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    EXPECT_TRUE(session->IsCrossDisplayDragSupported());
 }
 } // namespace
 } // namespace Rosen
