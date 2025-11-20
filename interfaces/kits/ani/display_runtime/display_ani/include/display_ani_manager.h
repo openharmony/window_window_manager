@@ -51,8 +51,7 @@ public:
         sptr<DisplayAniListener> displayAniListener);
     static ani_boolean HasPrivateWindow(ani_env* env, ani_long displayId);
     static void GetAllDisplayPhysicalResolution(ani_env* env, ani_object arrayObj, ani_long nativeObj);
-    static void CreateVirtualScreen(ani_env* env,
-        ani_object virtualScreenConfig, ani_long screenId, ani_long nativeObj);
+    static void CreateVirtualScreen(ani_env* env, ani_object virtualScreenConfig, ani_long nativeObj);
     static void DestroyVirtualScreen(ani_env* env, ani_long screenId, ani_long nativeObj);
     static void SetVirtualScreenSurface(ani_env* env, ani_long screenId, ani_string surfaceId, ani_long nativeObj);
     static void MakeUnique(ani_env* env, ani_long screenId, ani_long nativeObj);
