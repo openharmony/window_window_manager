@@ -430,7 +430,6 @@ bool Session::GetSessionInfoCursorDragFlag()
     return sessionInfo_.cursorDragFlag_;
 }
 
-
 void Session::SetSessionInfoAdvancedFeatureFlag(uint32_t bitPosition, bool value)
 {
     if (bitPosition >= ADVANCED_FEATURE_BIT_MAX) {
