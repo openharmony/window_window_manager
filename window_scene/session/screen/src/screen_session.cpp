@@ -937,7 +937,7 @@ void ScreenSession::HandleKeyboardOffPropertyChange(ScreenProperty& screenProper
 }
 
 void ScreenSession::HandleSystemKeyboardOnPropertyChange(ScreenProperty& screenProperty,
-SuperFoldStatus currentStatus, bool isKeyboardOn, int32_t validHeight)
+    SuperFoldStatus currentStatus, bool isKeyboardOn, int32_t validHeight)
 {
     TLOGI(WmsLogTag::DMS, "Client HandleSystemKeyboardOnPropertyChange");
     if (!isKeyboardOn && currentStatus == SuperFoldStatus::HALF_FOLDED) {
@@ -955,7 +955,7 @@ SuperFoldStatus currentStatus, bool isKeyboardOn, int32_t validHeight)
 }
 
 void ScreenSession::HandleSystemKeyboardOffPropertyChange(ScreenProperty& screenProperty,
-SuperFoldStatus currentStatus, bool isKeyboardOn)
+    SuperFoldStatus currentStatus, bool isKeyboardOn)
 {
     TLOGI(WmsLogTag::DMS, "Client HandleSystemKeyboardOffPropertyChange");
     if (!isKeyboardOn && currentStatus == SuperFoldStatus::HALF_FOLDED) {
@@ -3172,10 +3172,10 @@ void ScreenSession::ModifyScreenPropertyWithLock(float rotation, RRect bounds)
 void ScreenSession::ProcPropertyChange(ScreenProperty& screenProperty, const ScreenProperty& eventPara)
 {
     TLOGI(WmsLogTag::DMS,
-    "ProcPropertyChange Before: local width_= %{public}f, height_= %{public}f, input width_= %{public}f, "
-    "height_= %{public}f",
-    screenProperty.GetBounds().rect_.width_, screenProperty.GetBounds().rect_.height_,
-    eventPara.GetBounds().rect_.width_, eventPara.GetBounds().rect_.height_);
+        "ProcPropertyChange Before: local width_= %{public}f, height_= %{public}f, input width_= %{public}f, "
+        "height_= %{public}f",
+        screenProperty.GetBounds().rect_.width_, screenProperty.GetBounds().rect_.height_,
+        eventPara.GetBounds().rect_.width_, eventPara.GetBounds().rect_.height_);
 
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         ProcPropertyChangedForSuperFold(screenProperty, eventPara);
