@@ -211,7 +211,7 @@ public:
     }
 
     FoldDisplayMode GetDisplayMode() const;
-    void SetDisplayMode(FoldDisplayMode mode)
+    void SetDisplayMode(FoldDisplayMode mode);
     RRect GetPhysicalTouchBounds() const;
 
     void SetPhysicalTouchBounds(Rotation rotationOffset);
