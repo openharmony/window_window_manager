@@ -4353,8 +4353,11 @@ bool WindowSceneSessionImpl::CheckCanMoveWindowTypeByDevice()
 
 bool WindowSceneSessionImpl::CheckIsPcAppInPadFullScreenOnMobileWindowMode()
 {
+    auto mode = property_->GetWindowMode();
     if (property_->GetIsPcAppInPad() &&
-        property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
+        (mode == WindowMode::WINDOW_MODE_FULLSCREEN ||
+         mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+         mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
         !IsFreeMultiWindowMode()) {
         return true;
     }
