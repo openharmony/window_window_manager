@@ -18,7 +18,7 @@ import { BusinessError } from '@ohos.base';
 
 export default namespace screen {
 
-loadLibrary('screenani_kit.z');
+loadLibraryWithPermissionCheck("screenani_kit.z", "@ohos.screen");
 
 const SCREEN_ARRAY_LENGTH = 15;
 const SCREEN_MODE_INFO = 15;
@@ -141,7 +141,7 @@ export interface Screen {
 
 class ScreenImpl implements Screen {
 
-    static { loadLibrary("screenani_kit.z"); }
+    static { loadLibraryWithPermissionCheck("screenani_kit.z", "@ohos.screen"); }
 
     constructor() {
         this.id = -1;

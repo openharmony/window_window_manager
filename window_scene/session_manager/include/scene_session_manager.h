@@ -815,6 +815,9 @@ public:
     void RegisterGetStartWindowConfigCallback(const sptr<SceneSession>& sceneSession);
     void RegisterUpdateKioskAppListCallback(UpdateKioskAppListFunc&& func);
     void RegisterKioskModeChangeCallback(KioskModeChangeFunc&& func);
+    bool IsAppBoundSystemTray(int32_t callingPid, uint32_t callingToken, const std::string &instanceKey);
+    void UpdateAppBoundSystemTrayStatus(const std::string &key, int32_t pid, bool enabled);
+    void RegisterIsAppBoundSystemTrayFunc(const sptr<SceneSession>& sceneSession);
 
     /*
      * Window Pattern
@@ -967,6 +970,7 @@ private:
     WMError CheckWindowIds(
         const std::vector<int32_t>& windowIds, const sptr<IRemoteObject>& callback);
     void RegisterWindowStateErrorCallbackToMMI();
+    std::unordered_map<std::string, std::unordered_set<int32_t>> appsWithBoundSystemTrayMap_;
 
     /*
      * Window Focus

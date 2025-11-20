@@ -392,6 +392,8 @@ private:
     static napi_value NotifySessionTransferToTargetScreenEvent(napi_env env, napi_callback_info info);
     napi_value OnNotifySessionTransferToTargetScreenEvent(napi_env env, napi_callback_info info);
     static napi_value UpdateRecentMainSessionInfos(napi_env env, napi_callback_info info);
+    static napi_value UpdateAppBoundSystemTrayStatus(napi_env env, napi_callback_info info);
+    napi_value OnUpdateAppBoundSystemTrayStatus(napi_env env, napi_callback_info info);
 
     napi_env env_;
     std::shared_mutex jsCbMapMutex_;

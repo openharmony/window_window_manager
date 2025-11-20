@@ -284,8 +284,22 @@ WSError MainSession::OnRestoreMainWindow()
     bool isAppSupportPhoneInPc = GetSessionProperty()->GetIsAppSupportPhoneInPc();
     int32_t callingPid = IPCSkeleton::GetCallingPid();
     uint32_t callingToken = IPCSkeleton::GetCallingTokenID();
-    TLOGI(WmsLogTag::WMS_MAIN, "isAppSupportPhoneInPc: %{public}d callingPid: %{public}d callingTokenId: %{public}u",
-        isAppSupportPhoneInPc, callingPid, callingToken);
+    std::string appInstanceKey = GetSessionProperty()->GetAppInstanceKey();
+    bool isAppBoundSystemTray = (SceneSession::isAppBoundSystemTrayCallback_ &&
+                                SceneSession::isAppBoundSystemTrayCallback_(callingPid, callingToken, appInstanceKey));
+    TLOGI(WmsLogTag::WMS_MAIN,
+        "isAppSupportPhoneInPc: %{public}d callingPid: %{public}d callingTokenId: %{public}u appInstanceKey: "
+        "%{public}s isAppBoundSystemTray: %{public}d",
+        isAppSupportPhoneInPc,
+        callingPid,
+        callingToken,
+        appInstanceKey.c_str(),
+        isAppBoundSystemTray);
+    // check if the application is bound to the system tray
+    if (isAppSupportPhoneInPc && !isAppBoundSystemTray) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "The application is not bound to the system tray.");
+        return WSError::WS_ERROR_INVALID_CALLING;
+    }
     PostTask([weakThis = wptr(this), isAppSupportPhoneInPc, callingPid, callingToken] {
         auto session = weakThis.promote();
         if (!session) {

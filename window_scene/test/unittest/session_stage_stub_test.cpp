@@ -117,6 +117,7 @@ HWTEST_F(SessionStageStubTest, HandleUpdateRect, TestSize.Level1)
     data.WriteBool(false);
     sptr<SceneAnimationConfig> animationConfigInfo = sptr<SceneAnimationConfig>::MakeSptr();
     data.WriteParcelable(animationConfigInfo);
+    data.WriteBool(false);
     data.WriteUint32(0);
     uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SIZE_CHANGE);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
@@ -142,10 +143,113 @@ HWTEST_F(SessionStageStubTest, HandleUpdateRect01, TestSize.Level1)
     data.WriteBool(false);
     sptr<SceneAnimationConfig> animationConfigInfo = nullptr;
     data.WriteParcelable(animationConfigInfo);
+    data.WriteBool(false);
     data.WriteUint32(0);
     uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SIZE_CHANGE);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
     ASSERT_EQ(-1, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleUpdateRect
+ * @tc.desc: test function : HandleUpdateRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateRect02, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteInt32(1);
+    data.WriteInt32(1);
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteBool(false);
+    sptr<SceneAnimationConfig> animationConfigInfo = sptr<SceneAnimationConfig>::MakeSptr();
+    data.WriteParcelable(animationConfigInfo);
+    data.WriteBool(true);
+    data.WriteUint32(0);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SIZE_CHANGE);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleUpdateRect
+ * @tc.desc: test function : HandleUpdateRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateRect03, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteInt32(1);
+    data.WriteInt32(1);
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteBool(false);
+    sptr<SceneAnimationConfig> animationConfigInfo = sptr<SceneAnimationConfig>::MakeSptr();
+    data.WriteParcelable(animationConfigInfo);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SIZE_CHANGE);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(-1, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleUpdateRect
+ * @tc.desc: test function : HandleUpdateRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateRect04, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteInt32(1);
+    data.WriteInt32(1);
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteBool(true);
+    sptr<SceneAnimationConfig> animationConfigInfo = sptr<SceneAnimationConfig>::MakeSptr();
+    data.WriteParcelable(animationConfigInfo);
+    data.WriteBool(false);
+    data.WriteUint32(0);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SIZE_CHANGE);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(-1, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleUpdateRect
+ * @tc.desc: test function : HandleUpdateRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateRect05, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteInt32(1);
+    data.WriteInt32(1);
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteBool(true);
+    sptr<SceneAnimationConfig> animationConfigInfo = sptr<SceneAnimationConfig>::MakeSptr();
+    data.WriteParcelable(animationConfigInfo);
+    data.WriteBool(true);
+    data.WriteUint32(0);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SIZE_CHANGE);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
 
 /**

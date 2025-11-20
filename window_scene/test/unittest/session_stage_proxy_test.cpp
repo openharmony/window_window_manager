@@ -131,6 +131,35 @@ HWTEST_F(SessionStageProxyTest, UpdateRect01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateRect02
+ * @tc.desc: test function : UpdateRect02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, UpdateRect02, TestSize.Level1)
+{
+    WSRect rect;
+    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    std::shared_ptr<RSTransaction> rsTransaction = std::make_shared<RSTransaction>();
+    SceneAnimationConfig config{ rsTransaction, ROTATE_ANIMATION_DURATION,
+    0, WindowAnimationCurve::LINEAR, {0.0f, 0.0f, 0.0f, 0.0f} };
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    MockMessageParcel::SetWriteInt32ErrorCount(2);
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    MockMessageParcel::SetWriteUint32ErrorCount(3);
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    MockMessageParcel::SetWriteBoolErrorCount(1);
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    MockMessageParcel::SetWriteParcelableErrorCount(1);
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    WSError res = sessionStage_->UpdateRect(rect, reason, config);
+    MockMessageParcel::ClearAllErrorFlag();
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+}
+
+/**
  * @tc.name: UpdateDensity
  * @tc.desc: test function : UpdateDensity
  * @tc.type: FUNC

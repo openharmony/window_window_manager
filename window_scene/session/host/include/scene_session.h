@@ -712,6 +712,10 @@ public:
     WMError NotifyDisableDelegatorChange() override;
     virtual void SetRecentSessionState(RecentSessionInfo& info, const SessionState& state) {}
     void RegisterGetStartWindowConfigFunc(GetStartWindowTypeFunc&& func);
+    void RegisterIsAppBoundSystemTrayCallback(
+        const std::function<bool(int32_t callingPid, uint32_t callingToken, const std::string &instanceKey)>& callback);
+    std::function<bool(int32_t callingPid, uint32_t callingToken, const std::string &instanceKey)>
+        isAppBoundSystemTrayCallback_;
 
     /*
      * Window Decor
@@ -921,6 +925,23 @@ public:
     */
     void NotifyWindowAttachStateListenerRegistered(bool registered) override;
     WMError NotifySnapshotUpdate() override;
+    bool GetIsPrivacyMode() const override { return isPrivacyMode_; };
+    void SetAppControlInfo(ControlAppType type, ControlInfo controlInfo) override
+    {
+        std::lock_guard lock(appUseControlMapMutex_);
+        appUseControlMap_[type] = controlInfo;
+    };
+    bool GetAppControlInfo(ControlAppType type, ControlInfo& controlInfo) const override
+    {
+        std::lock_guard lock(appUseControlMapMutex_);
+        auto it = appUseControlMap_.find(type);
+        if (it == appUseControlMap_.end()) {
+            controlInfo = { .isNeedControl = false, .isControlRecentOnly = false };
+            return false;
+        }
+        controlInfo = it->second;
+        return true;
+    };
 
     /**
      * Window Transition Animation For PC
@@ -1063,6 +1084,7 @@ protected:
     ClearCallbackMapFunc clearCallbackMapFunc_;
     UpdateAppUseControlFunc onUpdateAppUseControlFunc_;
     std::unordered_map<ControlAppType, ControlInfo> appUseControlMap_;
+    mutable std::mutex appUseControlMapMutex_;
     GetAllAppUseControlMapFunc onGetAllAppUseControlMapFunc_;
 
     /*

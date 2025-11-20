@@ -421,7 +421,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
         case DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_MIRROR_FOR_RECORD: {
             std::vector<ScreenId> mainScreenIds;
             if (!data.ReadUInt64Vector(&mainScreenIds)) {
-                TLOGE(WmsLogTag::DMS, "fail to receive mirror screen in stub.");
+                TLOGE(WmsLogTag::DMS, "fail to receive main screen in stub.");
                 break;
             }
             std::vector<ScreenId> mirrorScreenIds;

@@ -477,8 +477,6 @@ private:
     void UpdateDefaultStatusBarColor();
     bool userLimitsSet_ = false;
     bool forceLimits_ = false;
-    bool enableDefaultAnimation_ = true;
-    sptr<IAnimationTransitionController> animationTransitionController_;
     uint32_t setSameSystembarPropertyCnt_ = 0;
     std::atomic<uint32_t> getAvoidAreaCnt_ = 0;
     std::atomic<bool> enableImmersiveMode_ = false;
@@ -491,6 +489,14 @@ private:
         const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag) override;
     std::mutex systemBarPropertyForPageMapMutex_;
     std::unordered_map<WindowType, std::optional<SystemBarProperty>> systemBarPropertyForPageMap_;
+
+    /*
+     * Window Animation
+     */
+    bool enableDefaultAnimation_ = true;
+    static std::mutex transitionControllerMutex_;
+    std::vector<sptr<IAnimationTransitionController>> animationTransitionControllers_;
+    void CustomHideAnimation();
 
     /*
      * keyboard

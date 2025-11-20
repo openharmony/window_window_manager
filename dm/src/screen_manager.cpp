@@ -505,7 +505,7 @@ DMError ScreenManager::MakeMirrorForRecord(const std::vector<ScreenId>& mainScre
     std::vector<ScreenId>& mirrorScreenIds, ScreenId& screenGroupId)
 {
     std::string mainScreenIdsStr = "";
-    if (!StringUtil::VectorToString(mainScreenIds, mainScreenIdsStr)) {
+    if (StringUtil::VectorToString(mainScreenIds, mainScreenIdsStr)) {
         TLOGI(WmsLogTag::DMS, "Make mirror for screens: %{public}s", mainScreenIdsStr.c_str());
     }
     if (mirrorScreenIds.size() > MAX_SCREEN_SIZE) {

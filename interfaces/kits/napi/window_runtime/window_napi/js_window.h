@@ -106,6 +106,7 @@ public:
     static napi_value SetTouchableAreas(napi_env env, napi_callback_info info);
     static napi_value SetResizeByDragEnabled(napi_env env, napi_callback_info info);
     static napi_value SetRaiseByClickEnabled(napi_env env, napi_callback_info info);
+    static napi_value SetMainWindowRaiseByClickEnabled(napi_env env, napi_callback_info info);
     static napi_value HideNonSystemFloatingWindows(napi_env env, napi_callback_info info);
     static napi_value SetWindowTouchable(napi_env env, napi_callback_info info);
     static napi_value SetTransparent(napi_env env, napi_callback_info info);
@@ -361,6 +362,7 @@ private:
     napi_value OnSetTouchableAreas(napi_env env, napi_callback_info info);
     napi_value OnSetResizeByDragEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetRaiseByClickEnabled(napi_env env, napi_callback_info info);
+    napi_value OnSetMainWindowRaiseByClickEnabled(napi_env env, napi_callback_info info);
     napi_value OnHideNonSystemFloatingWindows(napi_env env, napi_callback_info info);
     napi_value OnSetWindowTouchable(napi_env env, napi_callback_info info);
     napi_value OnSetTransparent(napi_env env, napi_callback_info info);

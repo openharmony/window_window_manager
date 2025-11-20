@@ -337,6 +337,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::ApplyFeatureConfig);
     BindNativeFunction(env, exportObj, "notifySessionTransferToTargetScreenEvent", moduleName,
         JsSceneSessionManager::NotifySessionTransferToTargetScreenEvent);
+    BindNativeFunction(env, exportObj, "updateAppBoundSystemTrayStatus", moduleName,
+        JsSceneSessionManager::UpdateAppBoundSystemTrayStatus);
     BindNativeFunction(env, exportObj, "getPipDeviceCollaborationPolicy", moduleName,
         JsSceneSessionManager::GetPipDeviceCollaborationPolicy);
     return NapiGetUndefined(env);
@@ -5210,6 +5212,49 @@ napi_value JsSceneSessionManager::OnNotifySessionTransferToTargetScreenEvent(nap
         persistentId, resultCode, fromScreenId, toScreenId, transferReason);
     SceneSessionManager::GetInstance().NotifySessionTransferToTargetScreenEvent(
         persistentId, resultCode, static_cast<uint64_t>(fromScreenId), static_cast<uint64_t>(toScreenId));
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::UpdateAppBoundSystemTrayStatus(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnUpdateAppBoundSystemTrayStatus(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::OnUpdateAppBoundSystemTrayStatus(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_THREE;
+    napi_value argv[ARGC_THREE] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_THREE) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    std::string key;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], key)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Failed to convert key to %{public}s", key.c_str());
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t pid;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], pid)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Failed to convert pid to %{public}d", pid);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool enabled = false;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_TWO], enabled)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Failed to convert enabled to %{public}d", enabled);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().UpdateAppBoundSystemTrayStatus(key, pid, enabled);
     return NapiGetUndefined(env);
 }
 
