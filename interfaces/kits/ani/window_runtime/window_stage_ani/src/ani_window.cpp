@@ -2114,7 +2114,7 @@ ani_object AniWindow::SetWindowLimits(ani_env* env, ani_object inWindowLimits, a
 
     WindowLimits windowLimits;
     if (!AniWindowUtils::ParseWindowLimits(env, inWindowLimits, windowLimits)) {
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     
     if (windowLimits.maxWidth_ < 0 || windowLimits.maxHeight_ < 0 ||
