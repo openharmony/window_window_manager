@@ -1154,6 +1154,37 @@ HWTEST_F(SceneSessionTest3, SetUseControlState, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnSessionEvent2
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, OnSessionEvent2, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnSessionEvent2";
+    info.bundleName_ = "OnSessionEvent2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(1, WindowType::WINDOW_TYPE_FLOAT);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    sceneSession->property_ = property;
+    auto ret = sceneSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
+    usleep(SLEEP_TIME_US);
+    EXPECT_EQ(ret, WSError::WS_OK);
+
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    ret = sceneSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
+    usleep(SLEEP_TIME_US);
+    EXPECT_EQ(ret, WSError::WS_OK);
+
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    ret = sceneSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
+    usleep(SLEEP_TIME_US);
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
  * @tc.name: RegisterUpdateAppUseControlCallback
  * @tc.desc: RegisterUpdateAppUseControlCallback
  * @tc.type: FUNC

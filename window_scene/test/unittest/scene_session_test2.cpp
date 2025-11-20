@@ -1731,6 +1731,27 @@ HWTEST_F(SceneSessionTest2, IsFullScreenMovable, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsSplitMovable
+ * @tc.desc: IsSplitMovable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, IsSplitMovable, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsSplitMovable";
+    info.bundleName_ = "IsSplitMovable";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    auto result = sceneSession->IsSplitMovable();
+    ASSERT_EQ(false, result);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    sceneSession->property_ = property;
+    result = sceneSession->IsSplitMovable();
+    ASSERT_EQ(true, result);
+}
+
+/**
  * @tc.name: SetTitleAndDockHoverShowChangeCallback
  * @tc.desc: SetTitleAndDockHoverShowChangeCallback
  * @tc.type: FUNC

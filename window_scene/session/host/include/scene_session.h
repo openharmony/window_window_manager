@@ -1210,6 +1210,7 @@ private:
     void UpdateWinRectForSystemBar(WSRect& rect);
     bool IsMovableWindowType() const;
     bool IsFullScreenMovable() const;
+    bool IsSplitMovable() const;
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
     WMError HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
