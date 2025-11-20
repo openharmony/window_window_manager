@@ -1387,7 +1387,7 @@ void ScreenSessionManager::RecoverScreenActiveMode(ScreenId rsScreenId)
             rsScreenId,static_cast<uint32_t>(state));
         return;
     }
-    sptr<ScreenSession> screenSession = GetScreenSessionByRsId(screenId);
+    sptr<ScreenSession> screenSession = GetScreenSessionByRsId(rsScreenId);
     if (!screenSession) {
         TLOGE(WmsLogTag::DMS, "screenSession is nullptr, rsid: %{public}" PRIu64, rsScreenId);
         return;
@@ -1398,13 +1398,13 @@ void ScreenSessionManager::RecoverScreenActiveMode(ScreenId rsScreenId)
         return;
     }
     uint32_t activeId = -1;
-    std::map<std::string,SupportedScreenModes> resolutionMap = ScreenSettingHelper::GetResolutionMode();
+    std::map<std::string, SupportedScreenModes> resolutionMap = ScreenSettingHelper::GetResolutionMode();
     std::string serialNumber = screenSession->GetSerialNumber();
-    if(CheckResolutionMode(resolutionMap,serialNumber)) {
+    if(CheckResolutionMode(resolutionMap, serialNumber)) {
         auto info = resolutionMap[serialNumber];
         activeId = GetActiveIdxInMode(modes,info);
     } else {
-        activeId = modes.size() - 1;
+        activeId = static_cast<int32_t>(mode.size()) - 2;
     }
     TLOGI(WmsLogTag::DMS, "activeId: %{public}d", activeId);
     if(activeId == -1) {
@@ -1420,7 +1420,7 @@ void ScreenSessionManager::RecoverScreenActiveMode(ScreenId rsScreenId)
 int32_t ScreenSessionManager::GetActiveIdxInModes(const std::vector<sptr<SupportedScreenModes>>& modes,
                           const SupportedScreenModes& edidInfo)
 {
-    for(size_t i = 0; i < modes.size(); ++i)
+    for(size_t i = 0; i < modes.size() - 1; ++i)
     {
         const auto& mode = modes[i];
         if(mode == nullptr){
@@ -1439,23 +1439,6 @@ int32_t ScreenSessionManager::GetActiveIdxInModes(const std::vector<sptr<Support
            }
     }
     return -1;
-}
-bool ScreenSessionManager::CheckResolutionMode(std::map<std::string, MultiScreenInfo> resolutionMap,
-    const std::string& serialNumber)
-{
-    if (resolutionMap.empty()) {
-        TLOGE(WmsLogTag::DMS, "no restored screen, use default mode!");
-        return false;
-    }
-    if (serialNumber.size() == 0) {
-        TLOGE(WmsLogTag::DMS, "serialNumber empty!");
-        return false;
-    }
-    if (resolutionMap.find(serialNumber) == resolutionMap.end()) {
-        TLOGE(WmsLogTag::DMS, "screen not found, use default mode!");
-        return false;
-    }
-    return true;
 }
 
 bool ScreenSessionManager::CheckMultiScreenInfoMap(std::map<std::string, MultiScreenInfo> multiScreenInfoMap,
@@ -1476,6 +1459,23 @@ bool ScreenSessionManager::CheckMultiScreenInfoMap(std::map<std::string, MultiSc
     return true;
 }
 
+bool ScreenSessionManager::CheckResolutionMode(std::map<std::string, MultiScreenInfo> resolutionMap,
+    const std::string& serialNumber)
+{
+    if (resolutionMap.empty()) {
+        TLOGE(WmsLogTag::DMS, "no restored screen, use default mode!");
+        return false;
+    }
+    if (serialNumber.size() == 0) {
+        TLOGE(WmsLogTag::DMS, "serialNumber empty!");
+        return false;
+    }
+    if (resolutionMap.find(serialNumber) == resolutionMap.end()) {
+        TLOGE(WmsLogTag::DMS, "screen not found, use default mode!");
+        return false;
+    }
+    return true;
+}
 void ScreenSessionManager::ReportHandleScreenEvent(ScreenEvent screenEvent, ScreenCombination screenCombination)
 {
     MultiScreenMode multiScreenMode;

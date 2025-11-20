@@ -536,7 +536,7 @@ bool ScreenSettingHelper::GetScreenRelativePosition(MultiScreenInfo& info, const
     return true;
 }
 
-bool ScreenSettingHelper::GetScreenActiveMode(MultiScreenInfo& info, const std::string& inputString)
+bool ScreenSettingHelper::GetScreenActiveMode(SupportedScreenModes& info, const std::string& inputString)
 {
     std::vector<std::string> modeStr = {};
     bool split = SplitString(modeStr, inputString, ' ');
