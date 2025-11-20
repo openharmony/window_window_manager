@@ -375,7 +375,7 @@ WMError SceneSessionManagerLite::GetGlobalDragResizeType(DragResizeType& dragRes
 
 WMError SceneSessionManagerLite::SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "set app drag resize lite in: %{public}s %{public}d", 
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "set app drag resize lite in: %{public}s %{public}d",
         bundleName.c_str(), static_cast<int32_t>(dragResizeType));
     return SceneSessionManager::GetInstance().SetAppDragResizeType(bundleName, dragResizeType);
 }
@@ -389,7 +389,7 @@ WMError SceneSessionManagerLite::GetAppDragResizeType(const std::string& bundleN
 WMError SceneSessionManagerLite::SetAppKeyFramePolicy(const std::string& bundleName,
     const KeyFramePolicy& keyFramePolicy)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "set app key frame lite in: %{public}s %{public}d", 
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "set app key frame lite in: %{public}s %{public}d",
         bundleName.c_str(), keyFramePolicy.enabled());
     return SceneSessionManager::GetInstance().SetAppKeyFramePolicy(bundleName, keyFramePolicy);
 }
