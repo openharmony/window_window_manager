@@ -1652,19 +1652,12 @@ WMError WindowExtensionSessionImpl::UpdateHostSpecificSystemBarEnabled(const std
 
 bool WindowExtensionSessionImpl::GetImmersiveModeEnabledState() const
 {
-    return hostImmersiveModeEnabled_;
+    return immersiveModeEnabled_;
 }
 
 WMError WindowExtensionSessionImpl::SetImmersiveModeEnabledState(bool enable)
 {
-    AAFwk::WantParams want;
-    want.SetParam(Extension::ATOMICSERVICE_KEY_FUNCTION, AAFwk::String::Box("setImmersiveModeEnabledState"));
-    want.SetParam(Extension::ATOMICSERVICE_KEY_PARAM_ENABLE, AAFwk::Boolean::Box(enable));
-    if (TransferExtensionData(want) != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "send failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    return WMError::WM_OK;
+    return SetLayoutFullScreen(enable);
 }
 
 WMError WindowExtensionSessionImpl::ExtensionSetKeepScreenOn(bool keepScreenOn)
@@ -1962,7 +1955,6 @@ void WindowExtensionSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAF
     isFullScreenWaterfallMode_.store(static_cast<bool>(waterfallModeValue));
     isValidWaterfallMode_.store(true);
     hostGestureBackEnabled_ = static_cast<bool>(configParam.GetIntParam(Extension::GESTURE_BACK_ENABLED, 1));
-    hostImmersiveModeEnabled_ = static_cast<bool>(configParam.GetIntParam(Extension::IMMERSIVE_MODE_ENABLED, 0));
     auto isHostWindowDelayRaiseEnabled = configParam.GetIntParam(Extension::HOST_WINDOW_DELAY_RAISE_STATE_FIELD, 0);
     property_->SetWindowDelayRaiseEnabled(static_cast<bool>(isHostWindowDelayRaiseEnabled));
 
@@ -2219,21 +2211,6 @@ WMError WindowExtensionSessionImpl::OnGestureBackEnabledChange(AAFwk::Want&& dat
     return WMError::WM_OK;
 }
 
-WMError WindowExtensionSessionImpl::OnImmersiveModeEnabledChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
-{
-    auto enable = data.GetBoolParam(Extension::IMMERSIVE_MODE_ENABLED, false);
-    if (enable == hostImmersiveModeEnabled_) {
-        return WMError::WM_OK;
-    }
-    TLOGI(WmsLogTag::WMS_UIEXT, "immersiveModeEnabled:%{public}d", enable);
-    hostImmersiveModeEnabled_ = enable;
-    if (auto uiContent = GetUIContentSharedPtr()) {
-        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_HOST_IMMERSIVE_MODE_ENABLED),
-            data, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
-    }
-    return WMError::WM_OK;
-}
-
 WMError WindowExtensionSessionImpl::OnHostWindowDelayRaiseStateChange(AAFwk::Want&& data,
     std::optional<AAFwk::Want>& reply)
 {
@@ -2375,9 +2352,6 @@ void WindowExtensionSessionImpl::RegisterDataConsumer()
         this, std::placeholders::_1, std::placeholders::_2));
     RegisterConsumer(Extension::Businesscode::SYNC_HOST_GESTURE_BACK_ENABLED,
         std::bind(&WindowExtensionSessionImpl::OnGestureBackEnabledChange,
-        this, std::placeholders::_1, std::placeholders::_2));
-    RegisterConsumer(Extension::Businesscode::SYNC_HOST_IMMERSIVE_MODE_ENABLED,
-        std::bind(&WindowExtensionSessionImpl::OnImmersiveModeEnabledChange,
         this, std::placeholders::_1, std::placeholders::_2));
     RegisterConsumer(Extension::Businesscode::SYNC_COMPAT_INFO,
         std::bind(&WindowExtensionSessionImpl::OnHostWindowCompatInfoChange,

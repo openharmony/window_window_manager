@@ -8318,8 +8318,6 @@ void WindowSessionImpl::GetExtensionConfig(AAFwk::WantParams& want) const
     bool gestureBackEnable = true;
     GetGestureBackEnabled(gestureBackEnable);
     want.SetParam(Extension::GESTURE_BACK_ENABLED, AAFwk::Integer::Box(static_cast<int32_t>(gestureBackEnable)));
-    want.SetParam(Extension::IMMERSIVE_MODE_ENABLED,
-        AAFwk::Integer::Box(static_cast<int32_t>(GetImmersiveModeEnabledState())));
 }
 
 WMError WindowSessionImpl::OnExtensionMessage(uint32_t code, int32_t persistentId, const AAFwk::Want& data)

@@ -3271,13 +3271,11 @@ HWTEST_F(WindowExtensionSessionImplTest, SetImmersiveModeEnabledState, TestSize.
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
     window->property_->SetWindowName("SetImmersiveModeEnabledState");
-    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, window->SetImmersiveModeEnabledState(true));
 
     SessionInfo sessionInfo;
     sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
     window->hostSession_ = session;
     window->property_->SetPersistentId(1);
-    EXPECT_CALL(*session, TransferExtensionData).WillOnce(Return(ERR_NONE));
     EXPECT_EQ(WMError::WM_OK, window->SetImmersiveModeEnabledState(true));
 }
 
@@ -3291,9 +3289,21 @@ HWTEST_F(WindowExtensionSessionImplTest, GetImmersiveModeEnabledState, TestSize.
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
     window->property_->SetWindowName("GetImmersiveModeEnabledState");
-    window->hostImmersiveModeEnabled_ = false;
+    window->immersiveModeEnabled_ = false;
     EXPECT_EQ(false, window->GetImmersiveModeEnabledState());
-    window->hostImmersiveModeEnabled_ = true;
+}
+
+/**
+ * @tc.name: GetImmersiveModeEnabledState1
+ * @tc.desc: GetImmersiveModeEnabledState1 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, GetImmersiveModeEnabledState1, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowName("GetImmersiveModeEnabledState");
+    window->immersiveModeEnabled_ = true;
     EXPECT_EQ(true, window->GetImmersiveModeEnabledState());
 }
 

@@ -242,7 +242,6 @@ private:
     WMError OnCrossAxisStateChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnResyncExtensionConfig(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnGestureBackEnabledChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
-    WMError OnImmersiveModeEnabledChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnHostWindowDelayRaiseStateChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnHostWindowRectChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnScreenshot(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
@@ -273,7 +272,6 @@ private:
     uint64_t lastDisplayId_ { 0 };
     AAFwk::WantParams extensionConfig_ {};
     bool hostGestureBackEnabled_ { true };
-    bool hostImmersiveModeEnabled_ { false };
     bool immersiveModeEnabled_ { false };
     std::mutex hostWindowRectChangeListenerMutex_;
     std::mutex keyboardDidShowListenerMutex_;
