@@ -1404,17 +1404,17 @@ void ScreenSessionManager::RecoverScreenActiveMode(ScreenId rsScreenId)
         auto info = resolutionMap[serialNumber];
         activeId = GetActiveIdxInModes(modes,info);
     } else {
-        activeId = static_cast<int32_t>(mode.size()) - 2;
+        activeId = static_cast<int32_t>(modes.size()) - 2;
     }
     TLOGI(WmsLogTag::DMS, "activeId: %{public}d", activeId);
-    if(activeId == -1) {
+    if(activeId == static_cast<uint32_t>(-1)) {
         TLOGE(WmsLogTag::DMS, "no matching resolution, activeId: %{public}d", activeId);
         return;
     }
     DMError ret = SetScreenActiveMode(screenSession->GetScreenId(), activeId);
     if (ret != DMError::DM_OK) {
         TLOGE(WmsLogTag::DMS, "recover error, rsid:%{public}"  PRIu64", activeIdx:%{public}d",
-            screenId, activeIdx);
+            rsScreenId, activeId);
     }      
 }
 int32_t ScreenSessionManager::GetActiveIdxInModes(const std::vector<sptr<SupportedScreenModes>>& modes,
@@ -1433,7 +1433,7 @@ int32_t ScreenSessionManager::GetActiveIdxInModes(const std::vector<sptr<Support
            mode->height_ == edidInfo.height_ &&
            mode->refreshRate_ == edidInfo.refreshRate_) {
             TLOGW(WmsLogTag::DMS,
-                "remode, index:%{public}u, modeid: %{public}u, w:%{public}u, w:%{public}u, refreshRate:%{public}u"
+                "remode, index:%{public}d, modeid: %{public}u, w:%{public}u, h:%{public}u, refreshRate:%{public}u",
                 static_cast<int32_t>(i),mode->id_, mode->width_, mode->height_, mode->refreshRate_);
             return static_cast<int32_t>(i);
            }
@@ -6927,7 +6927,7 @@ bool ScreenSessionManager::InitAbstractScreenModesInfo(sptr<ScreenSession>& scre
         info->height_ = static_cast<uint32_t>(rsScreenModeInfo.GetScreenHeight());
         info->refreshRate_ = rsScreenModeInfo.GetScreenRefreshRate();
         screenSession->modes_.push_back(info);
-        TLOGW(WmsLogTag::DMS, "fill screen idx:%{public}d w/h:%/%{public}u",
+        TLOGW(WmsLogTag::DMS, "fill screen idx:%{public}d w/h:%{public}d/%{public}d/%{public}u",
             rsScreenModeInfo.GetScreenModeId(), info->width_, info->height_, info->refreshRate_);
     }
     TLOGW(WmsLogTag::DMS, "Call rsInterface_ GetScreenActiveMode");
@@ -11325,7 +11325,7 @@ void ScreenSessionManager::OperateModeChange(ScreenId mainScreenId, ScreenId sec
     }
 }
 
-bool ScreenSesssionManager::HasExtendVirtualScreen()
+bool ScreenSessionManager::HasExtendVirtualScreen()
 {
     TLOGI(WmsLogTag::DMS, "start");
     bool hasExtendVirtualScreen = false ;
@@ -11336,7 +11336,7 @@ bool ScreenSesssionManager::HasExtendVirtualScreen()
     }
     for (const auto& sessionIt : screenSessionMap) {
         sptr<ScreenSession> screenSession = sessionIt.second ;
-        if (screenSession = nullptr) {
+        if (screenSession == nullptr) {
             TLOGE(WmsLogTag::DMS, "screenSession is nullptr, ScreenId: %{public}" PRIu64,
                 sessionIt.first);
             continue;
