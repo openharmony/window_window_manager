@@ -1459,7 +1459,7 @@ bool ScreenSessionManager::CheckMultiScreenInfoMap(std::map<std::string, MultiSc
     return true;
 }
 
-bool ScreenSessionManager::CheckResolutionMode(std::map<std::string, MultiScreenInfo> resolutionMap,
+bool ScreenSessionManager::CheckResolutionMode(std::map<std::string, SupportedScreenModes> resolutionMap,
     const std::string& serialNumber)
 {
     if (resolutionMap.empty()) {
