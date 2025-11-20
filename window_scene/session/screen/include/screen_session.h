@@ -303,13 +303,13 @@ public:
     void Disconnect();
     void HandleKeyboardOnPropertyChange(ScreenProperty& screenProperty, int32_t height);
     void HandleKeyboardOffPropertyChange(ScreenProperty& screenProperty);
-    void HandleSystemKeyboardOnPropertyChange(ScreenProperty& screenProperty, SuperFoldStatus currentStatus, bool isKeyboardOn, int32_t validHeight);
-    void HandleSystemKeyboardOffPropertyChange(ScreenProperty& screenProperty, SuperFoldStatus currentStatus, bool isKeyboardOn);
+    void HandleSystemKeyboardOnPropertyChange(ScreenProperty& screenProperty,
+        SuperFoldStatus currentStatus, bool isKeyboardOn, int32_t validHeight);
+    void HandleSystemKeyboardOffPropertyChange(ScreenProperty& screenProperty,
+        SuperFoldStatus currentStatus, bool isKeyboardOn);
     void ProcPropertyChange(ScreenProperty& screenProperty, const ScreenProperty& eventPara);
     void ProcPropertyChangedForSuperFold(ScreenProperty& screenProperty, const ScreenProperty& eventPara);
-    void NotifyListenerPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason); //??????
-
-
+    void NotifyListenerPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason);
     void PropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason);
     void NotifyFoldPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
         FoldDisplayMode displayMode);
