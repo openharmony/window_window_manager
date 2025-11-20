@@ -406,7 +406,7 @@ std::map<std::string, MultiScreenInfo> ScreenSettingHelper::GetMultiScreenInfo(c
     return multiScreenInfoMap;
 }
 
-std::map<std::string, MultiScreenInfo> ScreenSettingHelper::GetResolutionMode(const std::string& key)
+std::map<std::string, SupportedScreenModes> ScreenSettingHelper::GetResolutionMode(const std::string& key)
 {
     std::map<std::string, SupportedScreenModes> resolutionMap = {};
     std::string value = "";
