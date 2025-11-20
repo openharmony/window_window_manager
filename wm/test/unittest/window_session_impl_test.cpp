@@ -1913,6 +1913,40 @@ HWTEST_F(WindowSessionImplTest, SetRaiseByClickEnabled01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetMainWindowRaiseByClickEnabled
+ * @tc.desc: SetMainWindowRaiseByClickEnabled test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, SetMainWindowRaiseByClickEnabled, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetMainWindowRaiseByClickEnabled");
+    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    WMError retCode = window->SetMainWindowRaiseByClickEnabled(true);
+    EXPECT_EQ(retCode, WMError::WM_ERROR_INVALID_CALLING);
+
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->state_ = WindowState::STATE_CREATED;
+    retCode = window->SetMainWindowRaiseByClickEnabled(true);
+    EXPECT_EQ(retCode, WMError::WM_DO_NOTHING);
+
+    window->state_ = WindowState::STATE_SHOWN;
+    window->property_->SetParentPersistentId(0);
+    retCode = window->SetMainWindowRaiseByClickEnabled(true);
+    EXPECT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
+
+    window->property_->SetParentPersistentId(1);
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->SetMainWindowRaiseByClickEnabled(false);
+    EXPECT_EQ(window->property_->GetRaiseEnabled(), false);
+}
+
+/**
  * @tc.name: HideNonSystemFloatingWindows01
  * @tc.desc: HideNonSystemFloatingWindows and check the retCode
  * @tc.type: FUNC
@@ -2459,6 +2493,10 @@ HWTEST_F(WindowSessionImplTest, OnExtensionMessage, TestSize.Level1)
     code = static_cast<uint32_t>(Extension::Businesscode::REGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER);
     EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
     code = static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER);
+    EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
+    code = static_cast<uint32_t>(Extension::Businesscode::REGISTER_HOST_RECT_CHANGE_IN_GLOBAL_DISPLAY_LISTENER);
+    EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
+    code = static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_HOST_RECT_CHANGE_IN_GLOBAL_DISPLAY_LISTENER);
     EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
 }
 

@@ -40,6 +40,9 @@ bool g_setReadStringVectorErrorFlag = false;
 bool g_setReadStringErrorFlag = false;
 std::vector<int32_t> g_int32Cache;
 int32_t g_WriteInt32ErrorCount = 0;
+int32_t g_WriteBoolErrorCount = 0;
+int32_t g_WriteParcelableErrorCount = 0;
+int32_t g_WriteUint32ErrorCount = 0;
 #ifdef ENABLE_MOCK_WRITE_STRING
 const static std::string ERROR_FLAG = "error";
 #endif
@@ -178,6 +181,21 @@ void MockMessageParcel::SetWriteInt32ErrorCount(int count)
 {
     g_WriteInt32ErrorCount = count;
 }
+
+void MockMessageParcel::SetWriteBoolErrorCount(int count)
+{
+    g_WriteBoolErrorCount = count;
+}
+
+void MockMessageParcel::SetWriteParcelableErrorCount(int count)
+{
+    g_WriteParcelableErrorCount = count;
+}
+
+void MockMessageParcel::SetWriteUint32ErrorCount(int count)
+{
+    g_WriteUint32ErrorCount = count;
+}
 }
 
 bool MessageParcel::WriteInterfaceToken(std::u16string name)
@@ -201,8 +219,11 @@ bool MessageParcel::WriteRemoteObject(const sptr<IRemoteObject> &object)
 bool Parcel::WriteParcelable(const Parcelable* object)
 {
     (void)object;
-    if (g_setWriteParcelableErrorFlag) {
+    if (g_setWriteParcelableErrorFlag && g_WriteParcelableErrorCount < 1) {
         return false;
+    }
+    if (g_WriteParcelableErrorCount > 0) {
+        g_WriteParcelableErrorCount--;
     }
     return true;
 }
@@ -210,7 +231,13 @@ bool Parcel::WriteParcelable(const Parcelable* object)
 bool Parcel::WriteBool(bool value)
 {
     (void)value;
-    return !g_setWriteBoolErrorFlag;
+    if (g_setWriteBoolErrorFlag && g_WriteBoolErrorCount < 1) {
+        return false;
+    }
+    if (g_WriteBoolErrorCount > 0) {
+        g_WriteBoolErrorCount--;
+    }
+    return true;
 }
 
 bool Parcel::WriteInt32(int32_t value)
@@ -238,8 +265,11 @@ bool Parcel::WriteInt64(int64_t value)
 bool Parcel::WriteUint32(uint32_t value)
 {
     (void)value;
-    if (g_setWriteUint32ErrorFlag) {
+    if (g_setWriteUint32ErrorFlag && g_WriteUint32ErrorCount < 1) {
         return false;
+    }
+    if (g_WriteUint32ErrorCount > 0) {
+        g_WriteUint32ErrorCount--;
     }
     return true;
 }

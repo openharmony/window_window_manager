@@ -1026,7 +1026,7 @@ WSError SessionProxy::OnRestoreMainWindow()
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -1041,7 +1041,12 @@ WSError SessionProxy::OnRestoreMainWindow()
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    return WSError::WS_OK;
+    uint32_t ret = 0;
+    if (!reply.ReadUint32(ret)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Read reply failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(ret);
 }
 
 /** @note @window.layout */

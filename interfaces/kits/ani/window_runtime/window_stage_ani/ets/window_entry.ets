@@ -9,7 +9,7 @@ import {
 } from '@ohos.window';
 
 function main() {
-    loadLibrary('windowstageani_kit.z')
+    loadLibrary('windowstageani_module.z')
     let ws = window.CreateWindowStage(0);
 
     let callback:AsyncCallbackVoid = (err) => {

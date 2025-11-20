@@ -2543,6 +2543,11 @@ struct KeyboardLayoutParams : public Parcelable {
         return LandscapeKeyboardRect_.IsUninitializedRect() && PortraitKeyboardRect_.IsUninitializedRect() &&
                LandscapePanelRect_.IsUninitializedRect() && PortraitPanelRect_.IsUninitializedRect();
     }
+    
+    bool isValidAvoidHeight() const
+    {
+        return landscapeAvoidHeight_ >= 0 && portraitAvoidHeight_ >= 0;
+    }
 
     static inline bool WriteParcel(Parcel& parcel, const Rect& rect)
     {

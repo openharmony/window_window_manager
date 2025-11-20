@@ -2923,6 +2923,14 @@ public:
     virtual WMError SetRaiseByClickEnabled(bool raiseEnabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Set the raise enabled flag of a main window.
+     *
+     * @param raiseEnabled true means the main window can be raised by click, otherwise means the opposite.
+     * @return Errorcode of window.
+     */
+    virtual WMError SetMainWindowRaiseByClickEnabled(bool raiseEnabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Raise one app sub window above another.
      *
      * @return WM_OK means raise success, others means raise failed.

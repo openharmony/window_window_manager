@@ -1260,7 +1260,8 @@ void SceneSession::NotifyUpdateAppUseControl(ControlAppType type, const ControlI
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return;
         }
-        session->appUseControlMap_[type] = controlInfo;
+        session->SetAppControlInfo(type, controlInfo);
+        session->UpdateAppLockSnapshot(type, controlInfo);
         if (session->onUpdateAppUseControlFunc_) {
             bool isAppUseControl = (controlInfo.isNeedControl && !controlInfo.isControlRecentOnly);
             bool isAppUseControlChanged = (session->isAppUseControl_ != isAppUseControl);
@@ -1290,11 +1291,12 @@ void SceneSession::UpdatePrivacyModeControlInfo()
     if ((property && property->GetPrivacyMode()) || HasChildSessionInPrivacyMode()) {
         isPrivacyMode = true;
     }
-    if (!isPrivacyMode && appUseControlMap_.find(ControlAppType::PRIVACY_WINDOW) == appUseControlMap_.end()) {
+    ControlInfo controlInfo;
+    if (!isPrivacyMode && !GetAppControlInfo(ControlAppType::PRIVACY_WINDOW, controlInfo)) {
         TLOGI(WmsLogTag::WMS_LIFE, "no need to update privacy mode control info");
         return;
     }
-    ControlInfo controlInfo = { .isNeedControl = isPrivacyMode, .isControlRecentOnly = true };
+    controlInfo = { .isNeedControl = isPrivacyMode, .isControlRecentOnly = true };
     NotifyUpdateAppUseControl(ControlAppType::PRIVACY_WINDOW, controlInfo);
 }
 
@@ -7722,7 +7724,7 @@ void SceneSession::SetTemporarilyShowWhenLocked(bool isTemporarilyShowWhenLocked
         isTemporarilyShowWhenLocked);
     if (systemConfig_.freeMultiWindowSupport_) {
         const bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
-        const bool isShow = !(isTemporarilyShowWhenLocked && (systemConfig_.IsFreeMultiWindowMode() && !isPcMode));
+        const bool isShow = !(isTemporarilyShowWhenLocked && !isPcMode);
         GetSessionProperty()->SetIsShowDecorInFreeMultiWindow(isShow);
         SetIsShowDecorInFreeMultiWindow(isShow);
     }
@@ -10047,6 +10049,12 @@ WMError SceneSession::UnlockCursor(const std::vector<int32_t>& parameters)
     SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_LOCK_CURSOR, false);
     NotifySessionInfoChange();
     return WMError::WM_OK;
+}
+
+void SceneSession::RegisterIsAppBoundSystemTrayCallback(
+    const std::function<bool(int32_t callingPid, uint32_t callingToken, const std::string &instanceKey)>& callback)
+{
+    isAppBoundSystemTrayCallback_ = callback;
 }
 /*
  * Window Event end
