@@ -87,13 +87,13 @@ void FoldScreenSensorManager::RegisterHallCallback()
 
 void FoldScreenSensorManager::UnRegisterPostureCallback()
 {
-    int32_t deactivateRet = DeactivateSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
-    int32_t unsubscribeRet = UnsubscribeSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
-    TLOGI(WmsLogTag::DMS, "deactivateRet: %{public}d, unsubscribeRet: %{public}d",
-        deactivateRet, unsubscribeRet);
-    if (deactivateRet == SENSOR_SUCCESS && unsubscribeRet == SENSOR_SUCCESS) {
+    int ret = OHOS::Rosen::FoldScreenSensorManager::GetInstance().UnSubscribeSensorCallback(
+        SENSOR_TYPE_ID_POSTURE);
+    if (ret == SENSOR_SUCCESS) {
         registerPosture_ = false;
         TLOGI(WmsLogTag::DMS, "success.");
+    } else {
+        TLOGE(WmsLogTag::DMS, "UnRegisterPostureCallback failed with ret: %d", ret);
     }
 }
 
@@ -112,11 +112,13 @@ void FoldScreenSensorManager::RegisterPostureCallback()
 
 void FoldScreenSensorManager::UnRegisterHallCallback()
 {
-    int32_t deactivateRet1 = DeactivateSensor(SENSOR_TYPE_ID_HALL_EXT, &hallUser);
-    int32_t unsubscribeRet1 = UnsubscribeSensor(SENSOR_TYPE_ID_HALL_EXT, &hallUser);
-    if (deactivateRet1 == SENSOR_SUCCESS && unsubscribeRet1 == SENSOR_SUCCESS) {
-        TLOGI(WmsLogTag::DMS, "UnRegisterHallCallback success.");
+    int ret = OHOS::Rosen::FoldScreenSensorManager::GetInstance().UnSubscribeSensorCallback(
+        SENSOR_TYPE_ID_HALL_EXT);
+    if (ret == SENSOR_SUCCESS) {
         registerHall_ = false;
+        TLOGI(WmsLogTag::DMS, "success.");
+    } else {
+        TLOGE(WmsLogTag::DMS, "UnRegisterHallCallback failed with ret: %d", ret);
     }
 }
 
@@ -185,36 +187,42 @@ int32_t FoldScreenSensorManager::SubscribeSensorCallback(int32_t sensorTypeId,
     }
 }
 
-void FoldScreenSensorManager::UnSubscribeSensorCallback()
+int32_t FoldScreenSensorManager::UnSubscribeSensorCallback(int32_t sensorTypeId)
 {
-    for (auto it = sensorCallbacks_.begin(); it != sensorCallbacks_.end();) {
-        int32_t sensorTypeId = it->first;
-        auto& callbackInfo = it->second;
+    auto userIt = users_.find(sensorTypeId);
+    if (userIt == users_.end()) {
+        TLOGI(WmsLogTag::DMS, "User data not found for sensor type %{public}d", sensorTypeId);
+        return SENSOR_FAILURE;
+    }
 
-        auto userIt = users_.find(sensorTypeId);
-        if (userIt == users_.end()) {
-            TLOGI(WmsLogTag::DMS, "User data not found for sensor type %{public}d", sensorTypeId);
-            ++it;
-            continue;
-        }
+    auto& user = userIt->second;
+    int32_t deactivateRet = DeactivateSensor(sensorTypeId, &user);
+    int32_t unsubscribeRet = UnsubscribeSensor(sensorTypeId, &user);
+    TLOGI(WmsLogTag::DMS,
+        "Unsubscribe sensor type: sensorTypeId=%{public}d, deactivateRet=%{public}d, unsubscribeRet=%{public}d",
+        sensorTypeId,
+        deactivateRet,
+        unsubscribeRet);
 
-        auto& user = userIt->second;
-
-        int32_t deactivateRet = DeactivateSensor(sensorTypeId, &user);
-        int32_t unsubscribeRet = UnsubscribeSensor(sensorTypeId, &user);
-
-        TLOGI(WmsLogTag::DMS,
-              "Unsubscribe sensor type: sensorTypeId=%{public}d, deactivateRet=%{public}d, unsubscribeRet=%{public}d",
-              sensorTypeId,
-              deactivateRet,
-              unsubscribeRet);
-
-        it = sensorCallbacks_.erase(it);
+    if (deactivateRet == SENSOR_SUCCESS && unsubscribeRet == SENSOR_SUCCESS) {
         users_.erase(userIt);
+        CleanupCallback(sensorTypeId);
+        TLOGI(WmsLogTag::DMS, "success.");
+        return SENSOR_SUCCESS;
+    } else {
+        TLOGI(WmsLogTag::DMS, "failed.");
+        return SENSOR_FAILURE;
+    }
+}
 
-        if (deactivateRet != SENSOR_SUCCESS || unsubscribeRet != SENSOR_SUCCESS) {
-            TLOGW(WmsLogTag::DMS, "Failed to unsubscribe sensor type %{public}d", sensorTypeId);
-        }
+void FoldScreenSensorManager::CleanupCallback(int32_t sensorTypeId)
+{
+    auto callbackIt = sensorCallbacks_.find(sensorTypeId);
+    if (callbackIt != sensorCallbacks_.end()) {
+        sensorCallbacks_.erase(callbackIt);
+        TLOGI(WmsLogTag::DMS, "Cleaned up callback for sensor type %{public}d", sensorTypeId);
+    } else {
+        TLOGI(WmsLogTag::DMS, "No callback to clean up for sensor type %{public}d", sensorTypeId);
     }
 }
 

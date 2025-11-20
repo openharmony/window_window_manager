@@ -25,7 +25,8 @@
 #include "fold_screen_controller/fold_screen_controller_config.h"
 #include "window_manager_hilog.h"
 #include "screen_session_manager.h"
- 
+#include "fold_screen_controller/fold_screen_sensor_manager.h"
+
 namespace OHOS {
  
 namespace Rosen {
@@ -69,12 +70,12 @@ void SuperFoldSensorManager::RegisterPostureCallback()
 
 void SuperFoldSensorManager::UnregisterPostureCallback()
 {
-    int32_t deactivateRet = DeactivateSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
-    int32_t unsubscribeRet = UnsubscribeSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
-    TLOGI(WmsLogTag::DMS, "deactivateRet: %{public}d, unsubscribeRet: %{public}d",
-        deactivateRet, unsubscribeRet);
-    if (deactivateRet == SENSOR_SUCCESS && unsubscribeRet == SENSOR_SUCCESS) {
-        TLOGI(WmsLogTag::DMS, "FoldScreenSensorManager.UnRegisterPostureCallback success.");
+    int ret = OHOS::Rosen::FoldScreenSensorManager::GetInstance().UnSubscribeSensorCallback(
+        SENSOR_TYPE_ID_POSTURE);
+    if (ret == SENSOR_SUCCESS) {
+        TLOGI(WmsLogTag::DMS, "success.");
+    } else {
+        TLOGE(WmsLogTag::DMS, "UnregisterPostureCallback failed with ret: %d", ret);
     }
 }
 
@@ -86,10 +87,12 @@ void SuperFoldSensorManager::RegisterHallCallback()
 
 void SuperFoldSensorManager::UnregisterHallCallback()
 {
-    int32_t deactivateRet = DeactivateSensor(SENSOR_TYPE_ID_HALL, &hallUser);
-    int32_t unsubscribeRet = UnsubscribeSensor(SENSOR_TYPE_ID_HALL, &hallUser);
-    if (deactivateRet == SENSOR_SUCCESS && unsubscribeRet == SENSOR_SUCCESS) {
-        TLOGI(WmsLogTag::DMS, "UnRegisterHallCallback success.");
+    int ret = OHOS::Rosen::FoldScreenSensorManager::GetInstance().UnSubscribeSensorCallback(
+        SENSOR_TYPE_ID_HALL_EXT);
+    if (ret == SENSOR_SUCCESS) {
+        TLOGI(WmsLogTag::DMS, "success.");
+    } else {
+        TLOGE(WmsLogTag::DMS, "UnRegisterHallCallback failed with ret: %d", ret);
     }
 }
 
@@ -109,16 +112,17 @@ void SuperFoldSensorManager::HandlePostureData(const SensorEvent * const event)
     }
     PostureData *postureData = reinterpret_cast<PostureData *>(event[SENSOR_EVENT_FIRST_DATA].data);
     curAngle_ = (*postureData).angle;
+    auto& user = FoldScreenSensorManager::GetInstance().users_[SENSOR_TYPE_ID_POSTURE];
     if (curAngle_ > UNFOLD_ANGLE && curInterval_ != POSTURE_INTERVAL_FOR_WIDE_ANGLE) {
-        int32_t setBatchRet = SetBatch(SENSOR_TYPE_ID_POSTURE, &postureUser,
+        int32_t setBatchRet = SetBatch(SENSOR_TYPE_ID_POSTURE, &user,
             POSTURE_INTERVAL_FOR_WIDE_ANGLE, POSTURE_INTERVAL_FOR_WIDE_ANGLE);
-        int32_t activateRet = ActivateSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
+        int32_t activateRet = ActivateSensor(SENSOR_TYPE_ID_POSTURE, &user);
         if (setBatchRet == 0 && activateRet == 0) {
             curInterval_ = POSTURE_INTERVAL_FOR_WIDE_ANGLE;
         }
     } else if (curAngle_ < UNFOLD_ANGLE && curInterval_ != POSTURE_INTERVAL) {
-        int32_t setBatchRet = SetBatch(SENSOR_TYPE_ID_POSTURE, &postureUser, POSTURE_INTERVAL, POSTURE_INTERVAL);
-        int32_t activateRet = ActivateSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
+        int32_t setBatchRet = SetBatch(SENSOR_TYPE_ID_POSTURE, &user, POSTURE_INTERVAL, POSTURE_INTERVAL);
+        int32_t activateRet = ActivateSensor(SENSOR_TYPE_ID_POSTURE, &user);
         if (setBatchRet == 0 && activateRet == 0) {
             curInterval_ = POSTURE_INTERVAL;
         }
