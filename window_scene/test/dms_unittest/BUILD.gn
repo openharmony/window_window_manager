@@ -773,6 +773,7 @@ if (window_manager_fold_ability) {
     external_deps += [
       "hisysevent:libhisysevent",
       "init:libbegetutil",
+      "sensor:sensor_interface_native",
     ]
 
     defines = []
@@ -857,6 +858,12 @@ if (window_manager_fold_ability) {
       "init:libbegetutil",
       "sensor:sensor_interface_native",
     ]
+    defines = []
+    if (defined(global_parts_info) &&
+        defined(global_parts_info.sensors_sensor)) {
+      external_deps += [ "sensor:sensor_interface_native" ]
+      defines += [ "SENSOR_ENABLE" ]
+    }
   }
 
   ohos_unittest("ws_secondary_display_sensor_fold_state_manager_test") {
