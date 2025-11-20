@@ -612,23 +612,23 @@ HWTEST_F(SubSessionTest, HandleCrossMoveToSurfaceNode, TestSize.Level1)
     sceneSession->SetSurfaceNode(surfaceNode);
     sceneSession->HandleCrossMoveToSurfaceNode(rect);
     ASSERT_NE(0, sceneSession->displayIdSetDuringMoveTo_.size());
-    SceneSession->SetZOrder(101);
+    sceneSession->SetZOrder(101);
     rect = { 900, 900, 800, 800};
     surfaceNode->SetPositionZ(0);
     //Constructing screen rect information
     auto screenId = 1001;
-    SceneSession->GetSessionProperty()->SetDisplayId(screenId);
+    sceneSession->GetSessionProperty()->SetDisplayId(screenId);
     ScreenProperty screenProperty;
     screenProperty.SetStartX(1000);
     screenProperty.SetStartY(1000);
     screenProperty.SetBounds({{0, 0, 1000, 1000}, 10.0f, 10.0f});
-    screenproperty.SetScreenType(ScreenType::REAL);
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(screenId, screenproperty,screenId);
+    screenProperty.SetScreenType(ScreenType::REAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(screenId, screenProperty,screenId);
     ASSERT_NE(screenSession, nullptr);
-    ScreenSessionManagerCline::GetInstance().screenSessionMap_.emplace(ScreenId, screenSession);
-    //Set Screen type
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(ScreenId, screenSession);
+    //Set screen type
     screenSession->GetScreenProperty().SetScreenType(ScreenType::REAL);
-    //test can nit find drag move mounted node
+    //test can not find drag move mounted node
     sceneSession->HandleCrossMoveToSurfaceNode(rect);
     EXPECT_EQ(surfaceNode->GetStagingProperties().GetPositionZ(), 0);
     //Register lookup node function
@@ -640,7 +640,7 @@ HWTEST_F(SubSessionTest, HandleCrossMoveToSurfaceNode, TestSize.Level1)
     sceneSession->displayIdSetDuringMoveTo_.clear();
     sceneSession->HandleCrossMoveToSurfaceNode(rect);
     EXPECT_EQ(sceneSession->cloneNodeCount_, curCloneNodeCount + 1);
-    ScreenSessionManagerCline::GetInstance().screenSessionMap_.clear();
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
 }
 
 /**
@@ -672,7 +672,7 @@ HWTEST_F(SubSessionTest, AddSurfaceNodeToScreen, TestSize.Level1)
     sceneSession->AddSurfaceNodeToScreen(0);
     EXPECT_EQ(0, sceneSession->displayIdSetDuringMoveTo_.size());
     WSRect rect = {900, 900, 800, 800};
-    SceneSession->SetZOrder(101);
+    sceneSession->SetZOrder(101);
     sceneSession->SetScreenId(0);
     sceneSession->SetSessionRect(rect);
     surfaceNode->SetPositionZ(0);
@@ -681,25 +681,26 @@ HWTEST_F(SubSessionTest, AddSurfaceNodeToScreen, TestSize.Level1)
     ScreenProperty originScreenProperty;
     originScreenProperty.SetStartX(0);
     originScreenProperty.SetStartY(0);
-    originScreenProperty.SetBounds({{0, 0, 100, 100}, 10.0f, 10.0f});
+    originScreenProperty.SetBounds({{0, 0, 1000, 1000}, 10.0f, 10.0f});
     originScreenProperty.SetScreenType(ScreenType::REAL);
     sptr<ScreenSession> originScreenSession =
         sptr<ScreenSession>::MakeSptr(originScreenId, originScreenProperty, originScreenId);
-    ScreenSessionManagerCline::GetInstance().screenSessionMap_.emplace(0, originScreenSession);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(0, originScreenSession);
     //Constructing target screen rect information
     auto screenId = 1001;
     ScreenProperty screenProperty;
     screenProperty.SetStartX(1000);
     screenProperty.SetStartY(1000);
     screenProperty.SetBounds({{0, 0, 1000, 1000}, 10.0f, 10.0f});
-    screenproperty.SetScreenType(ScreenType::REAL);
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(screenId, screenproperty,screenId);
-    ScreenSessionManagerCline::GetInstance().screenSessionMap_.emplace(ScreenId, screenSession);
+    screenProperty.SetScreenType(ScreenType::REAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(screenId, screenProperty,screenId);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(screenId, screenSession);
     //Set screen type
-    screenSession->GetScreenProperty().SteScreenType(ScreenType::REAL);
+    screenSession->GetScreenProperty().SetScreenType(ScreenType::REAL);
     //test can not find drag move mounted node
     sceneSession->AddSurfaceNodeToScreen(100);
     EXPECT_EQ(surfaceNode->GetStagingProperties().GetPositionZ(), 0);
+    // Register Lookup Node Function
     sceneSession->SetFindScenePanelRsNodeByZOrderFunc([this](uint64_t screenId, uint32_t targetZOrder) {
         return CreateRSSurfaceNode();
     });
@@ -708,7 +709,7 @@ HWTEST_F(SubSessionTest, AddSurfaceNodeToScreen, TestSize.Level1)
     sceneSession->displayIdSetDuringMoveTo_.clear();
     sceneSession->AddSurfaceNodeToScreen(100);
     EXPECT_EQ(sceneSession->cloneNodeCount_, curCloneNodeCount + 2);
-    ScreenSessionManagerCline::GetInstance().screenSessionMap_.clear();
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
 }
 
 /**
