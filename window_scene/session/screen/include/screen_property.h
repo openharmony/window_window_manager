@@ -282,9 +282,9 @@ public:
     uint32_t GetScreenRealDPI() { return screenRealDPI_; }
 
     void SetPointerActiveWidth(uint32_t pointerActiveWidth);
-    uint32_t GetPointerActiveWidth() const;
+    uint32_t GetPointerActiveWidth();
     void SetPointerActiveHeight(uint32_t pointerActiveHeight);
-    uint32_t GetPointerActiveHeight() const;
+    uint32_t GetPointerActiveHeight();
 
     // displayInfo
     void SetDisplayGroupId(DisplayGroupId displayGroupId) { displayGroupId_ = displayGroupId; }
