@@ -205,6 +205,8 @@ public:
     void SetMultiScreenFrameControl(void);
     bool IsPhysicalScreenAndInUse(sptr<ScreenSession> screenSession) const;
     bool HandleFoldScreenSessionCreate(ScreenId screenId);
+    void SetPhysicalXYPosition(sptr<ScreenSession> screenSession, int32_t x, int32_t y);
+    void SetPhysicalStartPosition(sptr<ScreenSession> screenSession, uint32_t startX, uint32_t startY);
     DMError CheckVirtualScreenPermission();
 
     void ChangeScreenGroup(sptr<ScreenSessionGroup> group, const std::vector<ScreenId>& screens,
@@ -614,7 +616,9 @@ private:
     void OnHgmRefreshRateChange(uint32_t refreshRate);
     void UpdateSessionByActiveModeChange(sptr<ScreenSession> screenSession,
         sptr<ScreenSession> phyScreenSession, int32_t activeIdx);
-    void RecoverScreenActiveMode(ScreenId screenId, int32_t activeIdx);
+    int32_t GetActiveIdxInModes(const std::vector<sptr<SupportedScreenModes>>& modes,
+                          const SupportedScreenModes& edidInfo);
+    void RecoverScreenActiveMode(ScreenId rsScreenId);
     void CheckAndNotifyRefreshRate(uint32_t refreshRate, sptr<ScreenSession> updateScreenSession);
     void CheckAndNotifyChangeMode(const RRect& bounds, sptr<ScreenSession> updateScreenSession);
     void ReportScreenModeChangeEvent(RSScreenModeInfo screenmode, uint32_t result);
@@ -628,6 +632,7 @@ private:
     void UpdateCoordinationRefreshRate(uint32_t refreshRate);
     void UpdateSuperFoldRefreshRate(sptr<ScreenSession> screenSession, uint32_t refreshRate);
     void GetInternalWidth();
+    bool HasExtendVirtualScreen();
     void InitExtendScreenProperty(ScreenId screenId, sptr<ScreenSession> session, ScreenProperty property);
     sptr<ScreenSession> CreatePhysicalMirrorSessionInner(ScreenId screenId, ScreenId defaultScreenId,
         ScreenProperty property);
@@ -644,6 +649,8 @@ private:
     void PhyMirrorConnectWakeupScreen();
     bool GetIsCurrentInUseById(ScreenId screenId);
     bool CheckMultiScreenInfoMap(std::map<std::string, MultiScreenInfo> multiScreenInfoMap,
+        const std::string& serialNumber);
+    bool CheckResolutionMode(std::map<std::string, SupportedScreenModes> resolutionMap,
         const std::string& serialNumber);
     void SetExtendedScreenFallbackPlanEvent(int32_t res);
     void SetInnerScreenFallbackPlan(sptr<ScreenSession> screenSession);
