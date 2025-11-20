@@ -684,7 +684,7 @@ void WindowManagerLite::NotifyAccessibilityWindowInfo(const std::vector<sptr<Acc
 
 WMError WindowManagerLite::UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease)
 {
-    WMError ret = WindowAdapterLite::GetInstance(userId_)->UpdateScreenLockStatusForApp(bundleName, isRelease);
+    WMError ret = WindowAdapterLite::GetInstance(userId_).UpdateScreenLockStatusForApp(bundleName, isRelease);
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "lite bundleName=%{public}s, isRelease=%{public}d, ret=%{public}d",
         bundleName.c_str(), isRelease, static_cast<int32_t>(ret));
     return ret;
