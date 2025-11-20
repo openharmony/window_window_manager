@@ -2527,16 +2527,16 @@ WSError SceneSessionManagerProxy::SetSpecificWindowZIndex(WindowType windowType,
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(windowType))) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "Write sourcePersistentId failed");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write windowType failed");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     if (!data.WriteInt32(zIndex)) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "Write targetPersistentId failed");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write zIndex failed");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "remote is null");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Remote is null");
         return WSError::WS_ERROR_NULLPTR;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
