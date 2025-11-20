@@ -543,7 +543,7 @@ namespace {
      */
     HWTEST_F(ScreenSettingHelperTest, GetScreenActiveMode001, Function | SmallTest | Level3)
     {
-        MultiScreenInfo info;
+        SupportedScreenModes info;
         string inputString = "1 11";
         auto ret = ScreenSettingHelper::GetScreenActiveMode(info, inputString);
         ASSERT_FALSE(ret);
@@ -556,7 +556,7 @@ namespace {
      */
     HWTEST_F(ScreenSettingHelperTest, GetScreenActiveMode002, Function | SmallTest | Level3)
     {
-        MultiScreenInfo info;
+        SupportedScreenModes info;
         string inputString = "E";
         auto ret = ScreenSettingHelper::GetScreenActiveMode(info, inputString);
         ASSERT_FALSE(ret);
@@ -569,7 +569,7 @@ namespace {
      */
     HWTEST_F(ScreenSettingHelperTest, GetScreenActiveMode003, Function | SmallTest | Level3)
     {
-        MultiScreenInfo info;
+        SupportedScreenModes info;
         string inputString = "1";
         auto ret = ScreenSettingHelper::GetScreenActiveMode(info, inputString);
         ASSERT_FALSE(ret);
