@@ -1402,7 +1402,7 @@ void ScreenSessionManager::RecoverScreenActiveMode(ScreenId rsScreenId)
     std::string serialNumber = screenSession->GetSerialNumber();
     if(CheckResolutionMode(resolutionMap, serialNumber)) {
         auto info = resolutionMap[serialNumber];
-        activeId = GetActiveIdxInMode(modes,info);
+        activeId = GetActiveIdxInModes(modes,info);
     } else {
         activeId = static_cast<int32_t>(mode.size()) - 2;
     }
@@ -1459,7 +1459,7 @@ bool ScreenSessionManager::CheckMultiScreenInfoMap(std::map<std::string, MultiSc
     return true;
 }
 
-bool ScreenSessionManager::CheckResolutionMode(std::map<std::string, MultiScreenInfo> resolutionMap,
+bool ScreenSessionManager::CheckResolutionMode(std::map<std::string, SupportedScreenModes> resolutionMap,
     const std::string& serialNumber)
 {
     if (resolutionMap.empty()) {
