@@ -650,7 +650,7 @@ private:
     bool GetIsCurrentInUseById(ScreenId screenId);
     bool CheckMultiScreenInfoMap(std::map<std::string, MultiScreenInfo> multiScreenInfoMap,
         const std::string& serialNumber);
-    bool CheckResolutionMode(std::map<std::string, SupportedScreenModes> resolutionMap,
+    bool CheckResolutionMode(std::map<std::string, SupportedScreenModes> multiScreenInfoMap,
         const std::string& serialNumber);
     void SetExtendedScreenFallbackPlanEvent(int32_t res);
     void SetInnerScreenFallbackPlan(sptr<ScreenSession> screenSession);
