@@ -3107,22 +3107,6 @@ WMError WindowSceneSessionImpl::GetSubWindowZLevel(int32_t& zLevel)
     return WMError::WM_OK;
 }
 
-/** @note @window.hierarchy */
-WMError WindowSceneSessionImpl::SetSpecificSystemWindowZIndex(WindowType windowType)
-{
-    TLOGI(WmsLogTag::WMS_HIERARCHY, "%{public}d", windowType);
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "session is invalid");
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    auto currentZLevel = property_->GetSubWindowZLevel();
-    if (currentZLevel == static_cast<int32_t>(zLevel)) {
-        return WMError::WM_OK;
-    }
-    property_->SetSubWindowZLevel(zLevel);
-    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_SUB_WINDOW_Z_LEVEL);
-}
-
 WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
     const Rect& rect, int32_t apiVersion)
 {

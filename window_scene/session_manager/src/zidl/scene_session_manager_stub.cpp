@@ -2680,8 +2680,8 @@ int SceneSessionManagerStub::HandleSetSpecificWindowZIndex(MessageParcel& data, 
     TLOGI(WmsLogTag::WMS_FOCUS, "in");
     uint32_t windowTypeValue = 0;
     if (!data.ReadUint32(windowTypeValue)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read windowType failed");
-        return WSError::WS_ERROR_IPC_FAILED;
+        TLOGE(WmsLogTag::WMS_FOCUS, "Read windowType failed");
+        return ERR_INVALID_DATA;
     }
     WindowType windowType = static_cast<WindowType>(windowTypeValue);
     int32_t zIndex = 0;

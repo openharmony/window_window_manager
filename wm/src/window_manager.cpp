@@ -2171,9 +2171,9 @@ WMError WindowManager::ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t t
 
 WMError WindowManager::SetSpecificSystemWindowZIndex(WindowType windowType, int32_t zIndex)
 {
-    WMError ret = WindowAdapter::GetInstance(userId_).SetSpecificWindowZIndex(windowType, zIndex);
+    WMError ret = WindowAdapter::GetInstance(userId_)->SetSpecificWindowZIndex(windowType, zIndex);
     if (ret != WMError::WM_OK) {
-        TLOGE("set specific system window zIndex failed");
+        TLOGE(WmsLogTag::WMS_FOCUS, "set specific system window zIndex failed");
     }
     return ret;
 }

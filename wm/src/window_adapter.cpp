@@ -1082,7 +1082,7 @@ WMError WindowAdapter::SetSpecificWindowZIndex(WindowType windowType, int32_t zI
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
     return static_cast<WMError>(
-        wmsProxy->SetSpecificSystemWindowZIndex(windowType, zIndex));
+        wmsProxy->SetSpecificWindowZIndex(windowType, zIndex));
 }
 
 void WindowAdapter::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,

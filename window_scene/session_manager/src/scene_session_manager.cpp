@@ -14160,11 +14160,19 @@ WSError SceneSessionManager::ShiftAppWindowFocus(int32_t sourcePersistentId, int
 /** @note @window.hierarchy */
 WSError SceneSessionManager::SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex)
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "windowType: %{public}d, zIndex: %{public}d", windowType, zIndex);
-    if (setSpecificWindowZIndexFunc_) {
-        setSpecificWindowZIndexFunc_(windowType, zIndex);
+    if (!(SessionPermission::IsSACalling())) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    return WSError::WS_OK;
+    const char* const where = __func__;
+    return taskScheduler_->PostSyncTask([this, windowType, zIndex, where] {
+        TLOGNI(WmsLogTag::WMS_FOCUS, "windowType: %{public}d, zIndex: %{public}d", windowType, zIndex);
+        if (setSpecificWindowZIndexFunc_) {
+            setSpecificWindowZIndexFunc_(windowType, zIndex);
+        }
+        return WSError::WS_OK;
+    }, __func__);
+
 }
 
 WSError SceneSessionManager::GetAppMainSceneSession(int32_t persistentId, sptr<SceneSession>& sceneSession)

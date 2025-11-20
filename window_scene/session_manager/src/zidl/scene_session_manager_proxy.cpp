@@ -2518,34 +2518,39 @@ WSError SceneSessionManagerProxy::ShiftAppWindowFocus(int32_t sourcePersistentId
 
 WSError SceneSessionManagerProxy::SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex)
 {
-    TLOGI("run SetSpecificSystemWindowZIndex");
+    TLOGI(WmsLogTag::WMS_FOCUS, "run SetSpecificSystemWindowZIndex");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE("Write interface token failed.");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write interface token failed.");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    if (!data.WriteUint32(windowType)) {
-        TLOGE("Write sourcePersistentId failed");
+    if (!data.WriteUint32(static_cast<uint32_t>(windowType))) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write sourcePersistentId failed");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     if (!data.WriteInt32(zIndex)) {
-        TLOGE("Write targetPersistentId failed");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write targetPersistentId failed");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE("remote is null");
+        TLOGE(WmsLogTag::WMS_FOCUS, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
         SceneSessionManagerMessage::TRANS_ID_SET_SPECIFIC_WINDOW_ZINDEX),
         data, reply, option) != ERR_NONE) {
-        TLOGE("SendRequest failed");
+        TLOGE(WmsLogTag::WMS_FOCUS, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    return static_cast<WSError>(reply.ReadInt32());
+    int32_t result = 0;
+    if (!reply.ReadInt32(result)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Failed to read result");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(result);
 }
 
 void SceneSessionManagerProxy::UpdateModalExtensionRect(const sptr<IRemoteObject>& token, Rect rect)
