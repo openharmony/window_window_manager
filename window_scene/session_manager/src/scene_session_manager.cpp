@@ -6944,7 +6944,7 @@ void SceneSessionManager::RegisterSessionSnapshotFunc(const sptr<SceneSession>& 
                 sceneSession->GetPersistentId());
             return;
         }
-        auto abilityInfo = sceneSession->GetSessionInfo().abilityInfo;
+        auto abilityInfo = sceneSession->GetSessionInfoAbilityInfo();
         if (abilityInfo == nullptr) {
             TLOGNW(WmsLogTag::WMS_SYSTEM, "NotifySessionSnapshotFunc, abilityInfo is nullptr");
             return;
@@ -17075,7 +17075,7 @@ WMError SceneSessionManager::SetImageForRecent(uint32_t imgResourceId, ImageFit 
         TLOGE(WmsLogTag::WMS_PATTERN, "sessionState is invalid");
         return WMError::WM_ERROR_NULLPTR;
     }
-    auto abilityInfo = sceneSession->GetSessionInfo().abilityInfo;
+    auto abilityInfo = sceneSession->GetSessionInfoAbilityInfo();
     if (abilityInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "abilityInfo is null");
         return WMError::WM_ERROR_NULLPTR;
