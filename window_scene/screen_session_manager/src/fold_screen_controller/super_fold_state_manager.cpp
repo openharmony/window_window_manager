@@ -249,7 +249,8 @@ SuperFoldStateManager::SuperFoldStateManager()
     InitSuperFoldStateManagerMap();
     InitSuperFoldCreaseRegionParams();
     ScreenSessionManager::GetInstance().SetPropertyChangedCallback(
-        std::bind(&SuperFoldStateManager::HandleSuperFoldDisplayCallback, this, std::placeholders::_1, std::placeholders::_2));
+        std::bind(&SuperFoldStateManager::HandleSuperFoldDisplayCallback, this,
+            std::placeholders::_1, std::placeholders::_2));
 }
 
 SuperFoldStateManager::~SuperFoldStateManager()
