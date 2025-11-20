@@ -55,6 +55,7 @@ enum class ListenerFunctionType : uint32_t {
     UI_EFFECT_ANIMATE_TO_CB,
     VIRTUAL_DENSITY_CHANGE_CB,
     SET_SPECIFIC_SESSION_ZINDE_CB,
+    NOTIFY_SUPPORT_ROTATION_REGISTERED_CB,
 };
 
 class JsSceneSessionManager final {

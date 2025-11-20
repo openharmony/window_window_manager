@@ -261,9 +261,13 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             break;
         }
         case WindowManagerAgentMsg::TRANS_ID_NOTIFY_WINDOW_SUPPORT_ROTATION_CHANGE: {
-            SupportRotationInfo supportRotationInfo;
-            supportRotationInfo.Unmarshalling(data);
-            NotifySupportRotationChange(supportRotationInfo);
+            sptr<SupportRotationInfo> supportRotationInfo = data.ReadParcelable<SupportRotationInfo>();
+            if (supportRotationInfo == nullptr) {
+                TLOGE(WmsLogTag::WMS_ROTATION, "fail to read supportRotationInfo.");
+                return ERR_INVALID_DATA;
+            }
+            NotifySupportRotationChange(*supportRotationInfo);
+            break;
         }
         default:
             WLOGFW("unknown transaction code %{public}d", code);

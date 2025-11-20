@@ -80,7 +80,7 @@ public:
     void NotifyWindowGlobalRectChange(
         const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
     void NotifyWMSWindowDestroyed(const WindowLifeCycleInfo& lifeCycleInfo, void* jsWindowNapiValue);
-    void NotifySupportRotationChange(const SupportRotationInfo& supportRotationInfo)
+    void NotifySupportRotationChange(const SupportRotationInfo& supportRotationInfo);
 
     static inline SingletonDelegator<WindowManager> delegator_;
 
@@ -126,6 +126,8 @@ public:
     sptr<WindowManagerAgent> windowSystemBarPropertyChangeAgent_;
     std::vector<sptr<IWindowSystemBarPropertyChangedListener>> windowSystemBarPropertyChangedListeners_;
     sptr<IWindowLifeCycleListener> windowLifeCycleListener_;
+    std::vector<sptr<IWindowSupportRotationListener>> windowSupportRotationListeners_;
+    sptr<WindowManagerAgent> windowSupportRotationListenerAgent_;
 };
 
 void WindowManager::Impl::NotifyWMSConnected(int32_t userId, int32_t screenId)
@@ -565,7 +567,7 @@ void WindowManager::Impl::NotifySupportRotationChange(const SupportRotationInfo&
 {
     std::vector<sptr<IWindowSupportRotationListener>> windowSupportRotationListener;
     {
-        std::shared_lock<std::shared_mutex> lock(listenerMutex_);
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
         windowSupportRotationListener = windowSupportRotationListeners_;
     }
     for (auto& listener : windowSupportRotationListener) {
@@ -2600,19 +2602,30 @@ WMError WindowManager::RegisterWindowSupportRotationListener(const sptr<IWindowS
         return WMError::WM_ERROR_NULLPTR;
     }
     {
-        std::lock_guard<std::mutex> lockListener(pImpl_->mutex_);
-        auto iter = std::find(pImpl_->windowSupportRotationListeners_.begin(),
-            pImpl_->windowSupportRotationListeners_.end(), listener);
-        if (iter != pImpl_->windowSupportRotationListeners_.end()) {
-            TLOGE(WmsLogTag::WMS_ROTATION, "Listener is already registered.");
-            return WMError::WM_OK;
+        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+        WMError ret = WMError::WM_OK;
+        if (pImpl_->windowSupportRotationListenerAgent_ == nullptr) {
+            pImpl_->windowSupportRotationListenerAgent_ = new WindowManagerAgent();
         }
-        pImpl_->windowSupportRotationListeners_.emplace_back(listener);
+        ret = WindowAdapter::GetInstance(userId_)->RegisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_SUPPORT_ROTATION,
+            pImpl_->windowSupportRotationListenerAgent_);
+        if (ret != WMError::WM_OK) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "RegisterWindowManagerAgent failed.");
+        } else {
+            auto iter = std::find(pImpl_->windowSupportRotationListeners_.begin(),
+                pImpl_->windowSupportRotationListeners_.end(), listener);
+            if (iter != pImpl_->windowSupportRotationListeners_.end()) {
+                TLOGE(WmsLogTag::WMS_ROTATION, "Listener is already registered.");
+                return WMError::WM_OK;
+            }
+            pImpl_->windowSupportRotationListeners_.emplace_back(listener);
+        }
     }
 
     WMError ret = WindowAdapter::GetInstance(userId_)->NotifySupportRotationRegistered();
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "get window visibility info failed");
+        TLOGE(WmsLogTag::WMS_ROTATION, "NotifySupportRotationRegistered failed");
     }
     return ret;
 }
@@ -2624,11 +2637,20 @@ WMError WindowManager::UnregisterWindowSupportRotationListener(const sptr<IWindo
         return WMError::WM_ERROR_NULLPTR;
     }
     {
-        std::lock_guard<std::mutex> lockListener(pImpl_->mutex_);
+        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
         pImpl_->windowSupportRotationListeners_.erase(std::remove_if(pImpl_->windowSupportRotationListeners_.begin(),
         pImpl_->windowSupportRotationListeners_.end(),
         [listener](sptr<IWindowSupportRotationListener>registeredListener) { return registeredListener == listener; }),
         pImpl_->windowSupportRotationListeners_.end());
+        WMError ret = WMError::WM_OK;
+        if (pImpl_->windowSupportRotationListeners_.empty() && pImpl_->windowSupportRotationListenerAgent_ != nullptr) {
+            ret = WindowAdapter::GetInstance(userId_)->UnregisterWindowManagerAgent(
+                WindowManagerAgentType::WINDOW_MANAGER_AGENT_SUPPORT_ROTATION,
+                pImpl_->windowSupportRotationListenerAgent_);
+            if (ret == WMError::WM_OK) {
+                pImpl_->windowSupportRotationListenerAgent_ = nullptr;
+            }
+        }
     }
     return WMError::WM_OK;
 }

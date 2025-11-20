@@ -2211,6 +2211,56 @@ HWTEST_F(SceneSessionManagerTest, IsAppBoundSystemTray001, TestSize.Level1)
     ssm_->appsWithBoundSystemTrayMap_.clear();
     LOG_SetCallback(nullptr);
 }
+
+/**
+ * @tc.name: SetSupportRotationRegisteredListener
+ * @tc.desc: SetSupportRotationRegisteredListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetSupportRotationRegisteredListener, TestSize.Level1)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    info.persistentId_ = 9527;
+    info.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
+
+    g_logMsg.clear();
+    NotifySupportRotationRegisteredFunc func = [](){};
+    ssm_->SetSupportRotationRegisteredListener(std::move(func));
+    EXPECT_TRUE(ssm_->supportRotationRegisteredListener_ != nullptr);
+}
+
+/**
+ * @tc.name: SetSupportRotationRegisteredListener
+ * @tc.desc: SetSupportRotationRegisteredListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, NotifySupportRotationRegistered, TestSize.Level1)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    info.persistentId_ = 9527;
+    info.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
+
+    g_logMsg.clear();
+    WMError ret = WMError::WM_OK;
+    ret = ssm_->NotifySupportRotationRegistered();
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    NotifySupportRotationRegisteredFunc func = [](){};
+    ssm_->SetSupportRotationRegisteredListener(std::move(func));
+    EXPECT_TRUE(ssm_->supportRotationRegisteredListener_ != nullptr);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

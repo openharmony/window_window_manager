@@ -614,7 +614,7 @@ void JsSceneSessionManager::OnStartPiPFailed(DisplayId displayId)
 void JsSceneSessionManager::OnSupportRotationRegistered()
 {
     TLOGD(WmsLogTag::WMS_ROTATION, "[NAPI]");
-    auto task = [jsCallBack = GetJSCallback(START_PIP_FAILED_CB), env = env_] {
+    auto task = [jsCallBack = GetJSCallback(NOTIFY_SUPPORT_ROTATION_REGISTERED_CB), env = env_] {
         if (jsCallBack == nullptr) {
             TLOGNE(WmsLogTag::WMS_PIP, "jsCallBack is nullptr");
             return;
@@ -5634,7 +5634,7 @@ napi_value JsSceneSessionManager::OnNotifySupportRotationChange(napi_env env, na
                                       "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SuppoortRotationInfo supportRotationInfo;
+    SupportRotationInfo supportRotationInfo;
     napi_value supportRotationInfoObj = argv[0];
     if (supportRotationInfoObj == nullptr) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Failed to get supportRotationInfoObj");
@@ -5644,6 +5644,9 @@ napi_value JsSceneSessionManager::OnNotifySupportRotationChange(napi_env env, na
         TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to supportRotationInfo");
         return NapiGetUndefined(env);
     }
+    TLOGI(WmsLogTag::WMS_ROTATION, "persistentId: %{public}d, container size: %{public}zu, scene size: %{public}zu",
+        supportRotationInfo.persistentId_, supportRotationInfo.containerSupportRotation_.size(),
+        supportRotationInfo.sceneSupportRotation_.size());
     SceneSessionManager::GetInstance().NotifySupportRotationChange(supportRotationInfo);
     return NapiGetUndefined(env);
 }
