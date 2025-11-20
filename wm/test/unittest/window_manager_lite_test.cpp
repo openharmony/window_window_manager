@@ -713,7 +713,7 @@ HWTEST_F(WindowManagerLiteTest, UpdateScreenLockStatusForApp, TestSize.Level1)
     ASSERT_NE(instance_, nullptr);
     std::string bundleName = "UpdateScreenLockStatusForApp";
     bool isRelease = true;
-    WMError expectRet = WindowAdapterLite::GetInstance(userId_)->UpdateScreenLockStatusForApp(bundleName, isRelease);
+    WMError expectRet = WindowAdapterLite::GetInstance(userId_).UpdateScreenLockStatusForApp(bundleName, isRelease);
     auto ret = instance_->UpdateScreenLockStatusForApp(bundleName, isRelease);
     EXPECT_EQ(ret, expectRet);
 }
