@@ -227,6 +227,11 @@ WMError SceneSessionManagerLite::GetVisibilityWindowInfo(std::vector<sptr<Window
     return SceneSessionManager::GetInstance().GetVisibilityWindowInfo(infos);
 }
 
+WMError SceneSessionManagerLite::UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease)
+{
+    return SceneSessionManager::GetInstance().UpdateScreenLockStatusForApp(bundleName, isRelease);
+}
+
 WSError SceneSessionManagerLite::UpdateWindowMode(int32_t persistentId, int32_t windowMode)
 {
     return SceneSessionManager::GetInstance().UpdateWindowMode(persistentId, windowMode);

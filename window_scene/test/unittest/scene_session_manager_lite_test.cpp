@@ -55,6 +55,20 @@ HWTEST_F(SceneSessionManagerLiteTest, GetInstance, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateScreenLockStatusForApp
+ * @tc.desc: test function : UpdateScreenLockStatusForApp
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteTest, UpdateScreenLockStatusForApp, TestSize.Level1)
+{
+    std::string bundleName = "aaa";
+    bool isRelease = false;
+    auto expectRet = SceneSessionManager::GetInstance().UpdateScreenLockStatusForApp(bundleName, isRelease);
+    auto ret = SceneSessionManagerLite::GetInstance().UpdateScreenLockStatusForApp(bundleName, isRelease);
+    EXPECT_EQ(ret, expectRet);
+}
+
+/**
  * @tc.name: SendPointerEventForHover
  * @tc.desc: test function : SendPointerEventForHover
  * @tc.type: FUNC

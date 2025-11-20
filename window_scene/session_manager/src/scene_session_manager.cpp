@@ -16896,6 +16896,7 @@ void SceneSessionManager::RefreshAppInfo(const std::string& bundleName)
 
 WMError SceneSessionManager::UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease)
 {
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "bundleName=%{public}s, isRelease=%{public}d", bundleName.c_str(), isRelease);
     if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;

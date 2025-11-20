@@ -704,6 +704,21 @@ HWTEST_F(WindowManagerLiteTest, ClearMainSessions003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateScreenLockStatusForApp
+ * @tc.desc: check UpdateScreenLockStatusForApp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, UpdateScreenLockStatusForApp, TestSize.Level1)
+{
+    ASSERT_NE(instance_, nullptr);
+    std::string bundleName = "UpdateScreenLockStatusForApp";
+    bool isRelease = true;
+    WMError expectRet = WindowAdapterLite::GetInstance(userId_).UpdateScreenLockStatusForApp(bundleName, isRelease);
+    auto ret = instance_->UpdateScreenLockStatusForApp(bundleName, isRelease);
+    EXPECT_EQ(ret, expectRet);
+}
+
+/**
  * @tc.name: GetWindowModeType
  * @tc.desc: GetWindowModeType
  * @tc.type: FUNC
