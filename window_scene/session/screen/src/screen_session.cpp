@@ -2563,6 +2563,8 @@ void ScreenSession::SetStartPosition(uint32_t startX, uint32_t startY)
 void ScreenSession::SetXYPosition(int32_t x, int32_t y)
 {
     property_.SetXYPosition(x, y);
+    TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64",rsId: %{public}" PRIu64",x = %{public}d y = %{public}d",
+        GetScreenId(), GetRSScreenId(), x, y);
 }
 
 void ScreenSession::ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName)
