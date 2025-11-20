@@ -17,9 +17,9 @@
 #include <want.h>
 
 #include "extension_window_impl.h"
+#include "extension/extension_business_info.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
-#include "extension/extension_business_info.h"
 
 namespace OHOS {
 namespace Rosen {
