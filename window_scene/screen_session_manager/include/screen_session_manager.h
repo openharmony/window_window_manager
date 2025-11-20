@@ -206,7 +206,7 @@ public:
     bool IsPhysicalScreenAndInUse(sptr<ScreenSession> screenSession) const;
     bool HandleFoldScreenSessionCreate(ScreenId screenId);
     void SetPhysicalXYPosition(sptr<ScreenSession> screenSession, int32_t x, int32_t y);
-    void SetPhysicalStartPosition(sptr<ScreenSession> screenSession,uint32_t startX, uint32_t startY);
+    void SetPhysicalStartPosition(sptr<ScreenSession> screenSession, uint32_t startX, uint32_t startY);
     DMError CheckVirtualScreenPermission();
 
     void ChangeScreenGroup(sptr<ScreenSessionGroup> group, const std::vector<ScreenId>& screens,
@@ -632,6 +632,7 @@ private:
     void UpdateCoordinationRefreshRate(uint32_t refreshRate);
     void UpdateSuperFoldRefreshRate(sptr<ScreenSession> screenSession, uint32_t refreshRate);
     void GetInternalWidth();
+    bool HasExtendVirtualScreen();
     void InitExtendScreenProperty(ScreenId screenId, sptr<ScreenSession> session, ScreenProperty property);
     sptr<ScreenSession> CreatePhysicalMirrorSessionInner(ScreenId screenId, ScreenId defaultScreenId,
         ScreenProperty property);
