@@ -633,7 +633,7 @@ void WindowAdapter::RecoverSpecificZIndexSetByApp()
     if (specificZIndexMap_.empty()) {
         return;
     }
-    for (const auto& elem : focusGroupMap_) {
+    for (const auto& elem : specificZIndexMap_) {
         SetSpecificWindowZIndex(elem.first, elem.second);
         TLOGI(WmsLogTag::WMS_FOCUS, "windowType: %{public}d, zIndex: %{public}d",
             elem.first, elem.second);
