@@ -2842,18 +2842,22 @@ napi_value JsWindow::OnSetDialogBackGestureEnabled(napi_env env, napi_callback_i
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) { // at least 1 params
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        TLOGE(WmsLogTag::WMS_DIALOG, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setDialogBackGestureEnabled]msg:Argc is invalid");
     }
 
     napi_value nativeVal = argv[0];
     if (nativeVal == nullptr) {
         TLOGE(WmsLogTag::WMS_DIALOG, "Failed to convert parameter to enable");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setDialogBackGestureEnabled]msg:Failed to convert parameter to enable");
     }
     bool isEnabled = false;
     napi_status retCode = napi_get_value_bool(env, nativeVal, &isEnabled);
     if (retCode != napi_ok) {
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setDialogBackGestureEnabled]msg:Failed to convert parameter to enable");
     }
 
     wptr<Window> weakToken(windowToken_);
@@ -2881,7 +2885,7 @@ napi_value JsWindow::OnSetDialogBackGestureEnabled(napi_env env, napi_callback_i
             if (*errCodePtr == WmErrorCode::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
-                task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "Set dialog window failed"));
+                task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "[window][setDialogBackGestureEnabled]"));
             }
         };
     napi_value result = nullptr;
@@ -5495,7 +5499,8 @@ napi_value JsWindow::OnSetWindowTouchable(napi_env env, napi_callback_info info)
         }
     }
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setWindowTouchable]msg:invalid params");
     }
 
     wptr<Window> weakToken(windowToken_);
