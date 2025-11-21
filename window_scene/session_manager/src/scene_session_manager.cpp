@@ -4821,6 +4821,11 @@ void SceneSessionManager::SetCreateSystemSessionListener(const NotifyCreateSyste
     createSystemSessionFunc_ = func;
 }
 
+void SceneSessionManager::SetSpecificWindowZIndexListener(const NotifySetSpecificWindowZIndexFunc& func)
+{
+    setSpecificWindowZIndexFunc_ = func;
+}
+
 void SceneSessionManager::SetCreateKeyboardSessionListener(const NotifyCreateKeyboardSessionFunc& func)
 {
     createKeyboardSessionFunc_ = func;
@@ -8099,7 +8104,8 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
         }
         if (preFocusedSessionFound && session->CheckFocusable() &&
             session->IsVisibleNotBackground() && IsParentSessionVisible(session)) {
-            if (session->GetWindowType() != WindowType::WINDOW_TYPE_DESKTOP || currentSessionDisplayId == displayId) {
+            if (!systemConfig_.IsPcWindow() || session->GetWindowType() != WindowType::WINDOW_TYPE_DESKTOP ||
+                currentSessionDisplayId == displayId) {
                 nextFocusableSession = session;
                 return true;
             }
@@ -14170,6 +14176,24 @@ WSError SceneSessionManager::ShiftAppWindowFocus(int32_t sourcePersistentId, int
     targetSession->NotifyClick(true, false);
     FocusChangeReason reason = FocusChangeReason::CLIENT_REQUEST;
     return RequestSessionFocus(targetPersistentId, false, reason);
+}
+
+/** @note @window.hierarchy */
+WSError SceneSessionManager::SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex)
+{
+    if (!SessionPermission::IsSystemAppCall()) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    const char* const where = __func__;
+    return taskScheduler_->PostSyncTask([this, windowType, zIndex, where] {
+        TLOGNI(WmsLogTag::WMS_FOCUS, "windowType: %{public}d, zIndex: %{public}d", windowType, zIndex);
+        if (setSpecificWindowZIndexFunc_) {
+            setSpecificWindowZIndexFunc_(windowType, zIndex);
+        }
+        return WSError::WS_OK;
+    }, __func__);
+
 }
 
 WSError SceneSessionManager::GetAppMainSceneSession(int32_t persistentId, sptr<SceneSession>& sceneSession)

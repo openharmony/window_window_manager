@@ -216,6 +216,10 @@ public:
     {
         return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
     }
+    virtual WSError SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex)
+    {
+        return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
