@@ -2153,7 +2153,7 @@ HWTEST_F(ScreenSessionManagerClientTest, HandleKeyboardOnPropertyChange02, TestS
     screenProperty.SetBounds(screenBounds);
     screenSession->SetScreenProperty(screenProperty);
     ASSERT_NE(screenSessionManagerClient_, nullptr);
-    screenSession->HandleKeyboardOnPropertyChange(screenSession, 300);
+    screenSession->HandleKeyboardOnPropertyChange(screenProperty, 300);
     EXPECT_EQ(screenSession->GetValidWidth(), 100);
     EXPECT_EQ(screenSession->GetValidHeight(), 300);
 }
