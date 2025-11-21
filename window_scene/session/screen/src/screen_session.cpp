@@ -874,7 +874,7 @@ void ScreenSession::PropertyChange(const ScreenProperty& newProperty, ScreenProp
     NotifyListenerPropertyChange(newProperty, reason);
 }
 
-void ScreenSession::NotifyFoldPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
+void ScreenSession::NotifyFoldPropertyChange(ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
     FoldDisplayMode displayMode)
 {
     TLOGI(WmsLogTag::DMS, "ScreenSession NotifyFoldPropertyChange");
@@ -3212,7 +3212,7 @@ void ScreenSession::ProcPropertyChange(ScreenProperty& screenProperty, const Scr
 
 void ScreenSession::UpdateScbScreenPropertyToServer(const ScreenProperty& screenProperty)
 {
-    std::lock_guardstd::mutex lock(propertyMutex_);
+    std::lock_guard<std::mutex> lock(propertyMutex_);
 
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         SuperFoldStatusChangeEvents changeEvent = screenProperty.GetSuperFoldStatusChangeEvent();
