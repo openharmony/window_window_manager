@@ -979,7 +979,7 @@ ani_object AniWindowManager::OnGetWindowsByCoordinate(ani_env* env, ani_object g
         sptr<Window> window = Window::GetWindowWithId(windowIds[i]);
         windows[i] = CreateAniWindowObject(env, window);
     }
-    return AniWindowUtils::CreateAniWindowsArray(env, windows);
+    return AniWindowUtils::CreateAniWindowArray(env, windows);
 }
 
 void AniWindowManager::OnToggleShownStateForAllAppWindows(ani_env* env)
