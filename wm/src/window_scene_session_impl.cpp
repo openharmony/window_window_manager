@@ -149,10 +149,10 @@ bool IsValueInRange(double value, double lowerBound, double upperBound)
 
 void RecalculatePxLimitsByVp(const WindowLimits& RefreshLimitsVp, WindowLimits& RefreshLimitsPx, float vpr)
 {
-    RefreshLimitsPx.maxWidth_ = static_cast<uint32_t>(std::round(RefreshLimitsVp.maxWidth_ * vpr));
-    RefreshLimitsPx.maxHeight_ = static_cast<uint32_t>(std::round(RefreshLimitsVp.maxHeight_ * vpr));
-    RefreshLimitsPx.minWidth_ = static_cast<uint32_t>(std::round(RefreshLimitsVp.minWidth_ * vpr));
-    RefreshLimitsPx.minHeight_ = static_cast<uint32_t>(std::round(RefreshLimitsVp.minHeight_ * vpr));
+    RefreshLimitsPx.maxWidth_ = static_cast<uint32_t>(RefreshLimitsVp.maxWidth_ * vpr);
+    RefreshLimitsPx.maxHeight_ = static_cast<uint32_t>(RefreshLimitsVp.maxHeight_ * vpr);
+    RefreshLimitsPx.minWidth_ = static_cast<uint32_t>(RefreshLimitsVp.minWidth_ * vpr);
+    RefreshLimitsPx.minHeight_ = static_cast<uint32_t>(RefreshLimitsVp.minHeight_ * vpr);
 }
 
 // Must ensure that vpr is non-zero
