@@ -311,7 +311,7 @@ public:
     void ProcPropertyChangedForSuperFold(ScreenProperty& screenProperty, const ScreenProperty& eventPara);
     void NotifyListenerPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason);
     void PropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason);
-    void NotifyFoldPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
+    void NotifyFoldPropertyChange(ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
         FoldDisplayMode displayMode);
     void UpdateSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents changeEvent);
     SuperFoldStatusChangeEvents GetSuperFoldStatusChangeEvent();
