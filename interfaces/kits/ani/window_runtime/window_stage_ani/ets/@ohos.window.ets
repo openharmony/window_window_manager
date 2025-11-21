@@ -2707,7 +2707,9 @@ export class WindowStageInternal implements WindowStage {
     public native setWindowModal(nativeObj: long, isModal: boolean): void;
     public native getMainWindowSync(nativeObj: long): Window;
     public native createSubWindowSync(nativeObj: long, name: String): Window;
-
+    public native setWindowRectAutoSave(nativeObj: long, enabled: boolean): void;
+    public native setWindowRectAutoSave(nativeObj: long, enabled: boolean, isSaveBySpecifiedFlag: boolean): void;
+    public native isWindowRectAutoSave(nativeObj: long): boolean;
     public native setImageForRecentSync(nativeObj: long, imageResource: long | image.PixelMap, value: int): void;
     public native removeImageForRecentSync(nativeObj: long): void;
     public native setCustomDensitySync(nativeObj: long, density: double, applyToSubWindow: boolean): void;
