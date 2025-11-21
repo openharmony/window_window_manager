@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
 import { AsyncCallback, BusinessError, Callback } from '@ohos.base';
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { UIContext } from '@ohos.arkui.UIContext';
@@ -33,6 +34,7 @@ export type KeyboardHeightChangeCallback = (data: int) => void;
 export type KeyboardDidShowOrHideCallback = (data: window.KeyboardInfo) => void;
 export type KeyboardWillShowOrHideCallback = (data: window.KeyboardInfo) => void;
 export type RotationChangeCallback<T, U> = (info: T) => U;
+export type WindowStageCloseCallback<T, V = void> = (data: T) => V;
 const DOMAIN = 0x4200;
 const TAG = '[ANI]';
 const WM_ERROR_INVALID_PARAM = 401;
@@ -2090,6 +2092,180 @@ export class KeyboardInfoInternal implements KeyboardInfo {
 }
 
 /**
+ * Rectangular area of the title buttons relative to the upper right corner of the window.
+ *
+ * @interface TitleButtonRect
+ * @syscap SystemCapability.Window.SessionManager
+ * @since 11
+ */
+/**
+ * Rectangular area of the title buttons relative to the upper right corner of the window.
+ *
+ * @interface TitleButtonRect
+ * @syscap SystemCapability.Window.SessionManager
+ * @atomicservice
+ * @since 12
+ */
+export interface TitleButtonRect {
+  /**
+   * The right of the Rect.
+   *
+   * @type { int }
+   * @syscap SystemCapability.Window.SessionManager
+   * @since 11
+   */
+  /**
+   * The right of the Rect.
+   *
+   * @type { int }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 12
+   */
+  right: int;
+  /**
+   * The top of the Rect.
+   *
+   * @type { int }
+   * @syscap SystemCapability.Window.SessionManager
+   * @since 11
+   */
+  /**
+   * The top of the Rect.
+   *
+   * @type { int }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 12
+   */
+  top: int;
+  /**
+   * The width of the Rect.
+   *
+   * @type { int }
+   * @syscap SystemCapability.Window.SessionManager
+   * @since 11
+   */
+  /**
+   * The width of the Rect.
+   *
+   * @type { int }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 12
+   */
+  width: int;
+  /**
+   * The height of the Rect.
+   *
+   * @type { int }
+   * @syscap SystemCapability.Window.SessionManager
+   * @since 11
+   */
+  /**
+   * The height of the Rect.
+   *
+   * @type { int }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 12
+   */
+  height: int;
+}
+
+export class TitleButtonRectInternal implements TitleButtonRect {
+  right: int;
+  top: int;
+  width: int;
+  height: int;
+}
+ 
+/**
+ * The decor button style of the window.
+ * 
+ * @interface DecorButtonStyle
+ * @syscap SystemCapability.Window.SessionManager
+ * @atomicservice
+ * @since 14
+ */
+export interface DecorButtonStyle {
+  /**
+   * color mode.
+   * 
+   * @type { ?colorMode }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 14
+   */
+  colorMode?: ConfigurationConstant.ColorMode;
+ 
+  /**
+   * button background size when hover.
+   * 
+   * @type { ?int }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 14
+   */
+  buttonBackgroundSize?: int;
+ 
+  /**
+   * button spacing.
+   * 
+   * @type { ?int }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 14
+   */
+  spacingBetweenButtons?: int;
+ 
+  /**
+   * close button right margin.
+   * 
+   * @type { ?int }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 14
+   */
+  closeButtonRightMargin?: int;
+ 
+  /**
+   * button icon size.
+   *
+   * @type { ?int }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 20
+   */
+  buttonIconSize?: int;
+ 
+  /**
+   * corner radius of button background when hover.
+   *
+   * @type { ?int }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 20
+   */
+  buttonBackgroundCornerRadius?: int;
+}
+ 
+export class DecorButtonStyleInternal implements DecorButtonStyle {
+  colorMode?: ConfigurationConstant.ColorMode;
+  buttonBackgroundSize?: int;
+  spacingBetweenButtons?: int;
+  closeButtonRightMargin?: int;
+  buttonIconSize?: int;
+  buttonBackgroundCornerRadius?: int;
+}
+ 
+export interface WindowTitleButtonVisibleParam {
+  isMaximizeButtonVisible: boolean;
+  isMinimizeButtonVisible: boolean;
+  isCloseButtonVisible: boolean;
+}
+
+/**
  * Options for subwindow creation
  * 
  * @interface SubWindowOptions
@@ -2676,6 +2852,50 @@ export class WindowStageInternal implements WindowStage {
         });
     }
 
+    public setWindowRectAutoSave(enabled: boolean): Promise<void> {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) => {
+            taskpool.execute((): void => {
+                this.setWindowRectAutoSave(this.nativeObj, enabled, false);
+            }).then((ret: NullishType) => {
+                resolve(undefined);
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
+    public setWindowRectAutoSave(enabled: boolean, isSaveBySpecifiedFlag: boolean): Promise<void> {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) => {
+            taskpool.execute((): void => {
+                this.setWindowRectAutoSave(this.nativeObj, enabled, isSaveBySpecifiedFlag);
+            }).then((ret: NullishType) => {
+                resolve(undefined);
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
+    public isWindowRectAutoSave(): Promise<boolean> {
+        return new Promise<boolean>((resolve: (value: boolean) => void, reject: (error: BusinessError) => void) => {
+            taskpool.execute((): boolean => {
+                return this.isWindowRectAutoSave(this.nativeObj);
+            }).then((ret: NullishType) => {
+                resolve(ret as boolean);
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
+    public onWindowStageClose(callback: WindowStageCloseCallback<void, boolean>): void {
+        this.onSync(this.nativeObj, 'windowStageClose', callback);
+    }
+
+    public offWindowStageClose(callback?: WindowStageCloseCallback<void, boolean>): void {
+        this.offSync(this.nativeObj, 'windowStageClose', callback);
+    }
+
     public getSubWindow(): Promise<Array<Window>> {
       return new Promise<Array<Window>>((resolve: (value: Array<Window>) => void,
         reject: (error: BusinessError) => void) => {
@@ -2843,6 +3063,11 @@ export interface WindowStage {
     removeStartingWindow(): Promise<void>;
     createSubWindow(name: string): Promise<Window>;
     createSubWindow(name: string, callback: AsyncCallback<Window>): void;
+    setWindowRectAutoSave(enabled: boolean): Promise<void>;
+    setWindowRectAutoSave(enabled: boolean, isSaveBySpecifiedFlag: boolean): Promise<void>;
+    isWindowRectAutoSave(): Promise<boolean>;
+    onWindowStageClose(callback: WindowStageCloseCallback<void, boolean>): void;
+    offWindowStageClose(callback?: WindowStageCloseCallback<void, boolean>): void;
     setSupportedWindowModes(supportedWindowModes: Array<bundleManager.SupportWindowMode>): Promise<void>;
     setSupportedWindowModes(
       supportedWindowModes: Array<bundleManager.SupportWindowMode>, grayOutMaximizeButton: boolean): Promise<void>;
@@ -2877,7 +3102,18 @@ export class WindowInternal implements Window {
     private native resize(nativeObj: long, width: int, height: int): void;
     private native moveWindowTo(nativeObj: long, x: int, y: int): void;
     private native getGlobalRect(nativeObj:long): Rect;
-
+    private native setDecorButtonStyle(nativeObj: long, decorStyle: DecorButtonStyle): void;
+    private native setWindowTitle(nativeObj:long, titleName: string): void;
+    private native setTitleButtonVisible(nativeObj: long, isMaximizeVisible: boolean,
+      isMinimizeVisible: boolean, isSplitVisible: boolean, isCloseVisible: boolean): void;
+    private native setWindowTitleButtonVisible(nativeObj: long, visibleParam: WindowTitleButtonVisibleParam): void;
+    private native setWindowTitleMoveEnabled(nativeObj: long, enabled: boolean): void;
+    private native getTitleButtonRect(nativeObj: long): TitleButtonRect;
+    private native getDecorButtonStyle(nativeObj: long): DecorButtonStyle;
+    private native setTitleAndDockHoverShown(nativeObj: long, isTitleHoverShown?: boolean,
+      isDockHoverShown?: boolean): void;
+    private native setHandwritingFlag(nativeObj: long, enable: boolean): void;
+    private native getWindowDecorVisible(nativeObj: long): boolean;
     private native getWindowDecorHeight(nativeObj:long): double;
     private native setWindowBackgroundColor(nativeObj: long, color: string): int;
     private native setImmersiveModeEnabledState(nativeObj: long, enable: boolean): int;
@@ -3128,6 +3364,101 @@ export class WindowInternal implements Window {
 
     public getGlobalRect(): Rect {
       return this.getGlobalRect(this.nativeObj);
+    }
+
+    public setDecorButtonStyle(decorStyle: DecorButtonStyle): void {
+      this.setDecorButtonStyle(this.nativeObj, decorStyle);
+    }
+
+    public setWindowTitleButtonVisible(isMaximizeButtonVisible: boolean, isMinimizeButtonVisible: boolean,
+                                   isCloseButtonVisible?: boolean): void {
+      let visibleParam: window.WindowTitleButtonVisibleParam = {
+        isMaximizeButtonVisible: isMaximizeButtonVisible,
+        isMinimizeButtonVisible: isMinimizeButtonVisible,
+        isCloseButtonVisible: true
+      };
+      if (isCloseButtonVisible != undefined) {
+        visibleParam.isCloseButtonVisible = isCloseButtonVisible;
+      }
+      this.setWindowTitleButtonVisible(this.nativeObj, visibleParam);
+    }
+
+    public setWindowTitle(titleName: string): Promise<void> {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+            taskpool.execute((): void => {
+                this.setWindowTitle(this.nativeObj, titleName);
+            }).then((ret: NullishType): void => {
+                resolve(undefined);
+            }).catch((err: NullishType): void => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
+    public setTitleButtonVisible(isMaximizeVisible: boolean,
+        isMinimizeVisible: boolean, isSplitVisible: boolean): void {
+        this.setTitleButtonVisible(this.nativeObj, isMaximizeVisible, isMinimizeVisible, isSplitVisible, true);
+    }
+
+    public setTitleButtonVisible(isMaximizeVisible: boolean,
+        isMinimizeVisible: boolean, isSplitVisible: boolean, isCloseVisible: boolean): void {
+        this.setTitleButtonVisible(this.nativeObj, isMaximizeVisible, isMinimizeVisible, isSplitVisible, isCloseVisible);
+    }
+
+    public setWindowTitleMoveEnabled(enabled: boolean): void {
+        this.setWindowTitleMoveEnabled(this.nativeObj, enabled);
+    }
+
+    public getTitleButtonRect(): TitleButtonRect {
+        return this.getTitleButtonRect(this.nativeObj);
+    }
+
+    public getDecorButtonStyle(): DecorButtonStyle {
+        return this.getDecorButtonStyle(this.nativeObj);
+    }
+
+    public setTitleAndDockHoverShown(isTitleHoverShown?: boolean, isDockHoverShown?: boolean): Promise<void> {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+            taskpool.execute((): void => {
+                this.setTitleAndDockHoverShown(this.nativeObj, isTitleHoverShown, isDockHoverShown);
+            }).then((ret: NullishType): void => {
+                resolve(undefined);
+            }).catch((err: NullishType): void => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
+    public setHandwritingFlag(enable: boolean): Promise<void> {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+            taskpool.execute((): void => {
+                this.setHandwritingFlag(this.nativeObj, enable);
+            }).then((ret: NullishType): void => {
+                resolve(undefined);
+            }).catch((err: NullishType): void => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
+    public getWindowDecorVisible(): boolean {
+        return this.getWindowDecorVisible(this.nativeObj);
+    }
+
+    public onWindowWillClose(callback: Callback<Promise<boolean>>): void {
+      this.onSync(this.nativeObj, 'windowWillClose', callback);
+    }
+
+    public offWindowWillClose(callback?: Callback<Promise<boolean>>): void {
+      this.offSync(this.nativeObj, 'windowWillClose', callback);
+    }
+
+    public onWindowTitleButtonRectChange(callback: Callback<TitleButtonRect>): void {
+      this.onSync(this.nativeObj, 'windowTitleButtonRectChange', callback);
+    }
+
+    public offWindowTitleButtonRectChange(callback?: Callback<TitleButtonRect>): void {
+      this.offSync(this.nativeObj, 'windowTitleButtonRectChange', callback);
     }
 
     public getWindowDecorHeight(): number {
@@ -4904,6 +5235,24 @@ export interface Window {
     resize(width: int, height: int, callback: AsyncCallback<void>): void;
     moveWindowTo(x: int, y: int, callback: AsyncCallback<void>): void;
     getGlobalRect(): Rect;
+    setDecorButtonStyle(decorStyle: DecorButtonStyle): void;
+    setWindowTitle(titleName: string): Promise<void>;
+    setWindowTitleButtonVisible(isMaximizeButtonVisible: boolean, isMinimizeButtonVisible: boolean,
+      isCloseButtonVisible?: boolean): void;
+    setTitleButtonVisible(isMaximizeVisible: boolean, isMinimizeVisible: boolean,
+      isSplitVisible: boolean): void;
+    setTitleButtonVisible(isMaximizeVisible: boolean, isMinimizeVisible: boolean,
+      isSplitVisible: boolean, isCloseVisible: boolean): void;
+    setWindowTitleMoveEnabled(enabled: boolean): void;
+    getTitleButtonRect(): TitleButtonRect;
+    getDecorButtonStyle(): DecorButtonStyle;
+    setTitleAndDockHoverShown(isTitleHoverShown?: boolean, isDockHoverShown?: boolean): Promise<void>;
+    setHandwritingFlag(enable: boolean): Promise<void>;
+    getWindowDecorVisible(): boolean;
+    onWindowWillClose(callback: Callback<Promise<boolean>>): void;
+    offWindowWillClose(callback?: Callback<Promise<boolean>>): void;
+    onWindowTitleButtonRectChange(callback: Callback<TitleButtonRect>): void;
+    offWindowTitleButtonRectChange(callback?: Callback<TitleButtonRect>): void;
     getWindowDecorHeight(): double;
     setWindowBackgroundColor(color: string | ColorMetrics): void;
     setBackgroundColor(color: string): Promise<void>;
@@ -5705,6 +6054,11 @@ function runMainWindowFullScreenAcrossDisplaysChangedCallback(cb: object, cbArg:
 function runScreenshotAppEvent(cb: object, cbArg: ScreenshotEventType): void {
   const func = cb as (cbArg: ScreenshotEventType) => void;
   func(cbArg as ScreenshotEventType);
+}
+
+function runWindowTitleButtonRectChangedCallback(cb: object, cbArg: object): void {
+  const func = cb as (cbArg: TitleButtonRect) => void;
+  func(cbArg as TitleButtonRect);
 }
 
 function runRectChangeInGlobalDisplayCallback(cb: object, rect: object, reason: int): void {
