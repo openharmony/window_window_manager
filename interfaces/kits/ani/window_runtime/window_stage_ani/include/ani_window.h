@@ -146,6 +146,7 @@ public:
 
     ani_ref GetParentWindow(ani_env* env);
     void SetParentWindow(ani_env* env, ani_int windowId);
+    void SetWindowTopmost(ani_env* env, ani_boolean isWindowTopmost);
     void Restore(ani_env* env);
     /*
      * Window Layout
