@@ -1041,29 +1041,33 @@ HWTEST_F(SessionStageProxyTest, ReadLittleStringVectorFromParcel, Function | Sma
 }
 
 /**
- * @tc.name: LinkKeyFrameCanvasNode
- * @tc.desc: test function : LinkKeyFrameCanvasNode
+ * @tc.name: LinkKeyFrameNode
+ * @tc.desc: test function : LinkKeyFrameNode
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, LinkKeyFrameCanvasNode, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, LinkKeyFrameNode, Function | SmallTest | Level1)
 {
     ASSERT_TRUE(sessionStage_ != nullptr);
-    auto rsCanvasNode = RSCanvasNode::Create();
-    ASSERT_NE(rsCanvasNode, nullptr);
-    WSError res = sessionStage_->LinkKeyFrameCanvasNode(rsCanvasNode);
+    auto rsKeyFrameNode = RSWindowKeyFrameNode::Create();
+    ASSERT_NE(rsKeyFrameNode, nullptr);
+    WSError res = sessionStage_->LinkKeyFrameNode(rsKeyFrameNode);
     ASSERT_EQ(WSError::WS_OK, res);
+
+    rsKeyFrameNode.reset();
+    res = sessionStage_->LinkKeyFrameNode(rsKeyFrameNode);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
 }
 
 /**
- * @tc.name: SetKeyFramePolicy
- * @tc.desc: test function : SetKeyFramePolicy
+ * @tc.name: SetStageKeyFramePolicy
+ * @tc.desc: test function : SetStageKeyFramePolicy
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, SetKeyFramePolicy, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, SetStageKeyFramePolicy, Function | SmallTest | Level1)
 {
     ASSERT_TRUE(sessionStage_ != nullptr);
     KeyFramePolicy keyFramePolicy;
-    WSError res = sessionStage_->SetKeyFramePolicy(keyFramePolicy);
+    WSError res = sessionStage_->SetStageKeyFramePolicy(keyFramePolicy);
     ASSERT_EQ(WSError::WS_OK, res);
 }
 

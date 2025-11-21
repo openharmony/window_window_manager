@@ -28,7 +28,7 @@
 #include "window_manager_agent.h"
 #include "ws_common.h"
 #include "zidl/window_manager_agent_interface.h"
-#include "ui/rs_canvas_node.h"
+#include "feature/window_keyframe/rs_window_keyframe_node.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1247,30 +1247,30 @@ HWTEST_F(SessionStageStubTest, HandleNotifyRotationChange, Function | SmallTest 
 }
 
 /**
- * @tc.name: HandleLinkKeyFrameCanvasNode
- * @tc.desc: test function : HandleLinkKeyFrameCanvasNode
+ * @tc.name: HandleLinkKeyFrameNode
+ * @tc.desc: test function : HandleLinkKeyFrameNode
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleLinkKeyFrameCanvasNode, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleLinkKeyFrameNode, Function | SmallTest | Level1)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
-    auto rsCanvasNode = RSCanvasNode::Create();
-    ASSERT_NE(rsCanvasNode, nullptr);
-    ASSERT_EQ(rsCanvasNode->Marshalling(data), true);
-    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_LINK_KEYFRAME_CANVAS_NODE);
+    auto rsKeyFrameNode = RSWindowKeyFrameNode::Create();
+    ASSERT_NE(rsKeyFrameNode, nullptr);
+    ASSERT_EQ(rsKeyFrameNode->WriteToParcel(data), true);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_LINK_KEYFRAME_NODE);
     EXPECT_TRUE(sessionStageStub_ != nullptr);
     EXPECT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
 
 /**
- * @tc.name: HandleSetKeyFramePolicy
- * @tc.desc: test function : HandleSetKeyFramePolicy
+ * @tc.name: HandleSetStageKeyFramePolicy
+ * @tc.desc: test function : HandleSetStageKeyFramePolicy
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleSetKeyFramePolicy, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleSetStageKeyFramePolicy, Function | SmallTest | Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1278,7 +1278,7 @@ HWTEST_F(SessionStageStubTest, HandleSetKeyFramePolicy, Function | SmallTest | L
     data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
     KeyFramePolicy keyFramePolicy;
     data.WriteParcelable(&keyFramePolicy);
-    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_KEYFRAME_POLICY);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_STAGE_KEYFRAME_POLICY);
     EXPECT_TRUE(sessionStageStub_ != nullptr);
     EXPECT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }

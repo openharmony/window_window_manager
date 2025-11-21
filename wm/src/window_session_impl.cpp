@@ -2205,15 +2205,15 @@ void WindowSessionImpl::RegisterKeyFrameCallback()
         return;
     }
     const char* const where = __func__;
-    uiContent->AddKeyFrameCanvasNodeCallback([where, weakThis = wptr(this)](
-        std::shared_ptr<RSCanvasNode>& rsCanvasNode, std::shared_ptr<RSTransaction>& rsTransaction) {
+    uiContent->AddKeyFrameNodeCallback([where, weakThis = wptr(this)](
+        std::shared_ptr<RSWindowKeyFrameNode>& rsKeyFrameNode, std::shared_ptr<RSTransaction>& rsTransaction) {
         auto window = weakThis.promote();
         if (!window) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s window is null", where);
             return;
         }
         if (auto session = window->GetHostSession()) {
-            session->UpdateKeyFrameCloneNode(rsCanvasNode, rsTransaction);
+            session->UpdateKeyFrameCloneNode(rsKeyFrameNode, rsTransaction);
         } else {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is nullptr", where);
         }
@@ -2232,7 +2232,7 @@ void WindowSessionImpl::RegisterKeyFrameCallback()
     });
 }
 
-WSError WindowSessionImpl::LinkKeyFrameCanvasNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode)
+WSError WindowSessionImpl::LinkKeyFrameNode(std::shared_ptr<RSWindowKeyFrameNode>& rsKeyFrameNode)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     auto uiContent = GetUIContentSharedPtr();
@@ -2241,12 +2241,12 @@ WSError WindowSessionImpl::LinkKeyFrameCanvasNode(std::shared_ptr<RSCanvasNode>&
         TLOGE(WmsLogTag::WMS_EVENT, "uiContent or session is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    RSAdapterUtil::SetRSUIContext(rsCanvasNode, GetRSUIContext(), true);
-    uiContent->LinkKeyFrameCanvasNode(rsCanvasNode);
+    RSAdapterUtil::SetRSUIContext(rsKeyFrameNode, GetRSUIContext(), true);
+    uiContent->LinkKeyFrameNode(rsKeyFrameNode);
     return WSError::WS_OK;
 }
 
-WSError WindowSessionImpl::SetKeyFramePolicy(KeyFramePolicy& keyFramePolicy)
+WSError WindowSessionImpl::SetStageKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     keyFramePolicy_ = keyFramePolicy;
