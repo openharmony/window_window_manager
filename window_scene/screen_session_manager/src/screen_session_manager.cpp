@@ -9108,7 +9108,7 @@ void ScreenSessionManager::OnFoldPropertyChange(ScreenId screenId, const ScreenP
     auto clientProxy = GetClientProxy();
     if (!clientProxy) {
 #ifdef FOLD_ABILITY_ENABLE
-        if (foldScreenController_ != nullptr && !FoldScreenStateInternel::IsSecondaryDiaplayFoldDevice()) {
+        if (foldScreenController_ != nullptr && !FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
             foldScreenController_->SetdisplayModeChangeStatus(false);
         }
 #endif
