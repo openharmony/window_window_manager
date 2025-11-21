@@ -631,14 +631,13 @@ void WindowAdapter::WindowManagerAndSessionRecover()
 void WindowAdapter::RecoverSpecificZIndexSetByApp()
 {
     if (specificZIndexMap_.empty()) {
-        return WMError::WM_OK;
+        return;
     }
     for (const auto& elem : focusGroupMap_) {
         SetSpecificWindowZIndex(elem.first, elem.second);
         TLOGI(WmsLogTag::WMS_FOCUS, "windowType: %{public}d, zIndex: %{public}d",
             elem.first, elem.second);
     }
-    return errCode;
 }
 
 WMError  WindowAdapter::RecoverWindowPropertyChangeFlag()
