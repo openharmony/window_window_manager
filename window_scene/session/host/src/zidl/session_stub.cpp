@@ -18,7 +18,7 @@
 #include "ability_start_setting.h"
 #include <ipc_types.h>
 #include <transaction/rs_transaction.h>
-#include <ui/rs_canvas_node.h>
+#include <feature/window_keyframe/rs_window_keyframe_node.h>
 #include <ui/rs_surface_node.h>
 #include "want.h"
 #include "pointer_event.h"
@@ -2148,9 +2148,9 @@ int SessionStub::HandleKeyFrameAnimateEnd(MessageParcel& data, MessageParcel& re
 int SessionStub::HandleUpdateKeyFrameCloneNode(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "In");
-    auto rsCanvasNode = RSCanvasNode::Unmarshalling(data);
-    if (rsCanvasNode == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "fail get rsCanvasNode");
+    auto rsKeyFrameNode = RSWindowKeyFrameNode::ReadFromParcel(data);
+    if (rsKeyFrameNode == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "fail get rsKeyFrameNode");
         return ERR_INVALID_DATA;
     }
     std::shared_ptr<RSTransaction> tranaction(data.ReadParcelable<RSTransaction>());
@@ -2158,7 +2158,7 @@ int SessionStub::HandleUpdateKeyFrameCloneNode(MessageParcel& data, MessageParce
         TLOGE(WmsLogTag::WMS_LAYOUT, "fail get tranaction");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = UpdateKeyFrameCloneNode(rsCanvasNode, tranaction);
+    WSError errCode = UpdateKeyFrameCloneNode(rsKeyFrameNode, tranaction);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "write errCode fail.");
         return ERR_INVALID_DATA;

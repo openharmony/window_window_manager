@@ -20,7 +20,7 @@
 #include "ws_common.h"
 #include "mock_message_parcel.h"
 #include "pointer_event.h"
-#include "ui/rs_canvas_node.h"
+#include "feature/window_keyframe/rs_window_keyframe_node.h"
 #include "transaction/rs_transaction.h"
 #include "window_manager_hilog.h"
 
@@ -1780,11 +1780,15 @@ HWTEST_F(SessionProxyTest, UpdateKeyFrameCloneNode, Function | SmallTest | Level
     ASSERT_NE(iRemoteObjectMocker, nullptr);
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
-    auto rsCanvasNode = RSCanvasNode::Create();
-    ASSERT_NE(rsCanvasNode, nullptr);
+    auto rsKeyFrameNode = RSWindowKeyFrameNode::Create();
+    ASSERT_NE(rsKeyFrameNode, nullptr);
     auto rsTransaction = std::make_shared<RSTransaction>();
     ASSERT_NE(rsTransaction, nullptr);
-    ASSERT_EQ(sProxy->UpdateKeyFrameCloneNode(rsCanvasNode, rsTransaction), WSError::WS_OK);
+    ASSERT_EQ(sProxy->UpdateKeyFrameCloneNode(rsKeyFrameNode, rsTransaction), WSError::WS_OK);
+
+    rsKeyFrameNode.reset();
+    rsTransaction.reset();
+    ASSERT_EQ(sProxy->UpdateKeyFrameCloneNode(rsKeyFrameNode, rsTransaction), WSError::WS_ERROR_IPC_FAILED);
 }
 
 /**

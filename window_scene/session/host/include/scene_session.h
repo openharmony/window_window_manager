@@ -20,7 +20,7 @@
 #include <animation/rs_animation_timing_protocol.h>
 #include <animation/rs_symbol_animation.h>
 #include <pipeline/rs_node_map.h>
-#include <ui/rs_canvas_node.h>
+#include <feature/window_keyframe/rs_window_keyframe_node.h>
 #include <chrono>
 
 #include "display_manager.h"
@@ -806,9 +806,8 @@ public:
     bool IsDragZooming() const override;
     bool IsCrossDisplayDragSupported() const;
     // KeyFrame
-    WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
+    WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSWindowKeyFrameNode>& rsKeyFrameNode,
         std::shared_ptr<RSTransaction>& rsTransaction) override;
-    void SetKeyFramePolicy(const KeyFramePolicy& keyFramePolicy);
     WSError SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) override;
     WSError KeyFrameAnimateEnd() override;
 
@@ -1394,9 +1393,11 @@ private:
     void OnKeyFrameNextVsync(uint64_t count);
     bool KeyFrameNotifyFilter(const WSRect& rect, SizeChangeReason reason);
     bool KeyFrameRectAlmostSame(const WSRect& rect1, const WSRect& rect2);
-    std::mutex keyFrameMutex_;
+    KeyFramePolicy GetKeyFramePolicy() const;
+    void UpdateKeyFramePolicy(bool running, bool stopping);
+    mutable std::mutex keyFrameMutex_;
     KeyFramePolicy keyFramePolicy_;
-    std::shared_ptr<RSCanvasNode> keyFrameCloneNode_ = nullptr;
+    std::shared_ptr<RSWindowKeyFrameNode> keyFrameCloneNode_ = nullptr;
     bool keyFrameAnimating_ = false;
     uint64_t lastKeyFrameStamp_ = 0;
     WSRect lastKeyFrameRect_;

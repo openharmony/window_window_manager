@@ -20,7 +20,7 @@
 #include <message_option.h>
 #include <transaction/rs_transaction.h>
 #include <ui/rs_surface_node.h>
-#include <ui/rs_canvas_node.h>
+#include <feature/window_keyframe/rs_window_keyframe_node.h>
 
 #include "parcel/accessibility_event_info_parcel.h"
 #include "process_options.h"
@@ -3206,7 +3206,7 @@ WSError SessionProxy::SetWindowTransitionAnimation(WindowTransitionType transiti
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
+WSError SessionProxy::UpdateKeyFrameCloneNode(std::shared_ptr<RSWindowKeyFrameNode>& rsKeyFrameNode,
     std::shared_ptr<RSTransaction>& rsTransaction)
 {
     MessageParcel data;
@@ -3221,8 +3221,8 @@ WSError SessionProxy::UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsC
         TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!rsCanvasNode || !rsCanvasNode->Marshalling(data)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "write rsCanvasNode failed");
+    if (!rsKeyFrameNode || !rsKeyFrameNode->WriteToParcel(data)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "write rsKeyFrameNode failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!rsTransaction || !data.WriteParcelable(rsTransaction.get())) {

@@ -31,7 +31,7 @@
 #include "want.h"
 #include "wm_common.h"
 #include "ws_common.h"
-#include "ui/rs_canvas_node.h"
+#include "feature/window_keyframe/rs_window_keyframe_node.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1409,9 +1409,9 @@ HWTEST_F(SessionStubTest, HandleUpdateKeyFrameCloneNode, Function | SmallTest | 
 {
     MessageParcel data;
     MessageParcel reply;
-    auto rsCanvasNode = RSCanvasNode::Create();
-    ASSERT_NE(rsCanvasNode, nullptr);
-    ASSERT_EQ(rsCanvasNode->Marshalling(data), true);
+    auto rsKeyFrameNode = RSWindowKeyFrameNode::Create();
+    ASSERT_NE(rsKeyFrameNode, nullptr);
+    ASSERT_EQ(rsKeyFrameNode->WriteToParcel(data), true);
     auto rsTransaction = std::make_shared<RSTransaction>();
     ASSERT_NE(rsTransaction, nullptr);
     ASSERT_EQ(data.WriteParcelable(rsTransaction.get()), true);
