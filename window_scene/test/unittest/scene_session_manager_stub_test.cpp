@@ -3040,11 +3040,11 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetSpecificWindowZIndex, Function | 
 
     data.WriteUint64(2106);
     ret = stub_->HandleSetSpecificWindowZIndex(data, reply);
-    EXPECT_EQ(ret, ERR_INVALID_DATA);
+    EXPECT_EQ(ret, ERR_NONE);
 
     data.WriteInt32(20);
     ret = stub_->HandleSetSpecificWindowZIndex(data, reply);
-    EXPECT_EQ(ret, ERR_NONE);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
 }
 } // namespace
 } // namespace Rosen

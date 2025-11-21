@@ -2312,10 +2312,10 @@ HWTEST_F(sceneSessionManagerProxyTest, SetSpecificWindowZIndex, TestSize.Level1)
     MockMessageParcel::SetWriteInt32ErrorFlag(false);
 
     ret = proxy->SetSpecificWindowZIndex(WindowType::WINDOW_TYPE_FLOAT, 20);
-    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+    EXPECT_EQ(WSError::WS_OK, ret);
 
     remoteMocker->SetRequestResult(ERR_INVALID_DATA);
-    ret = proxy->SetSpecificWindowZIndex(WindowType::WINDOW_TYPE_FLOAT, 20)
+    ret = proxy->SetSpecificWindowZIndex(WindowType::WINDOW_TYPE_FLOAT, 20);
     EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
 
     remoteMocker->SetRequestResult(ERR_NONE);
@@ -2325,7 +2325,7 @@ HWTEST_F(sceneSessionManagerProxyTest, SetSpecificWindowZIndex, TestSize.Level1)
     MockMessageParcel::SetReadInt32ErrorFlag(false);
 
     ret = proxy->SetSpecificWindowZIndex(WindowType::WINDOW_TYPE_FLOAT, 20);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WSError::WS_OK, ret);
 }
 } // namespace
 } // namespace Rosen

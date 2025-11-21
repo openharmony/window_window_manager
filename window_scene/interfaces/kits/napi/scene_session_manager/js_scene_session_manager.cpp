@@ -392,7 +392,7 @@ void JsSceneSessionManager::OnSetSpecificWindowZIndex(WindowType windowType, int
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnSetSpecificWindowZIndex, WindowType:" +
-        std::to_string(static_cast<uint32_t>(windowType))));
+        std::to_string(static_cast<uint32_t>(windowType)));
 }
 
 void JsSceneSessionManager::OnCreateKeyboardSession(const sptr<SceneSession>& keyboardSession,
@@ -617,7 +617,7 @@ void JsSceneSessionManager::ProcessCreateSystemSessionRegister()
 /** @note @window.hierarchy */
 void JsSceneSessionManager::RegisterSetSpecificWindowZIndexCallback()
 {
-    NotifyCreateSystemSessionFunc func = [this](WindowType windowType, int32_t zIndex) {
+    NotifySetSpecificWindowZIndexFunc func = [this](WindowType windowType, int32_t zIndex) {
         TLOGNI(WmsLogTag::WMS_FOCUS, "set specifc zIndex callback");
         this->OnSetSpecificWindowZIndex(windowType, zIndex);
     };

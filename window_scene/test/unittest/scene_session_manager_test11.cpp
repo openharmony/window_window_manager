@@ -1739,8 +1739,8 @@ HWTEST_F(SceneSessionManagerTest11, ConfigDockAutoHide, TestSize.Level0)
  */
 HWTEST_F(SceneSessionManagerTest11, SetSpecificWindowZIndexListener, TestSize.Level1)
 {
-    bool value = 0;
-    NotifyCreateSystemSessionFunc func = [this, value](WindowType windowType, int32_t zIndex) {
+    int value = 0;
+    NotifySetSpecificWindowZIndexFunc func = [&value](WindowType windowType, int32_t zIndex) {
         value = zIndex;
     };
     ssm_->SetSpecificWindowZIndexListener(func);
@@ -1760,11 +1760,11 @@ HWTEST_F(SceneSessionManagerTest11, SetSpecificWindowZIndex, TestSize.Level1)
     EXPECT_EQ(ret, WSError::WS_ERROR_NOT_SYSTEM_APP);
 
     MockAccesstokenKit::MockIsSystemApp(true);
-    bool value = 0;
-    NotifyCreateSystemSessionFunc func = [this, value](WindowType windowType, int32_t zIndex) {
+    int value = 0;
+    NotifySetSpecificWindowZIndexFunc func = [&value](WindowType windowType, int32_t zIndex) {
         value = zIndex;
     };
-    ssm_->setSpecificWindowZIndexFunc_ = func;
+    ssm_->SetSpecificWindowZIndexListener(func);
     ret = ssm_->SetSpecificWindowZIndex(WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD, 20);
     EXPECT_EQ(ret, WSError::WS_OK);
     EXPECT_EQ(value, 20);
