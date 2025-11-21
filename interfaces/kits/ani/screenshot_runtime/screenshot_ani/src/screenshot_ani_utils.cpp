@@ -53,6 +53,68 @@ ani_object ScreenshotAniUtils::CreateAniUndefined(ani_env* env)
     env->GetUndefined(&aniRef);
     return static_cast<ani_object>(aniRef);
 }
+
+ani_object ScreenshotAniUtils::CreateRectObject(ani_env* env)
+{
+    ani_class aniClass{};
+    ani_status status = env->FindClass("@ohos.screenshot.screenshot.RectImpl", &aniClass);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] class not found, status:%{public}d", static_cast<int32_t>(status));
+        return nullptr;
+    }
+    ani_method aniCtor;
+    auto ret = env->Class_FindMethod(aniClass, "<ctor>", ":", &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Class_FindMethod failed");
+        return nullptr;
+    }
+    ani_object rectObj;
+    status = env->Object_New(aniClass, aniCtor, &rectObj);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Object_New failed");
+        return nullptr;
+    }
+    return rectObj;
+}
+
+void ScreenshotAniUtils::ConvertRect(ani_env* env, Media::Rect rect, ani_object rectObj)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] rect area info: %{public}d, %{public}d, %{public}u, %{public}u",
+        rect.left, rect.width, rect.top, rect.height);
+    env->Object_SetFieldByName_Long(rectObj, "<property>left", rect.left);
+    env->Object_SetFieldByName_Long(rectObj, "<property>top", rect.top);
+    env->Object_SetFieldByName_Long(rectObj, "<property>width", rect.width);
+    env->Object_SetFieldByName_Long(rectObj, "<property>height", rect.height);
+}
+ 
+ani_object ScreenshotAniUtils::CreateScreenshotPickInfo(ani_env* env, std::unique_ptr<Param>& param)
+{
+    ani_class aniClass{};
+    ani_status status = env->FindClass("@ohos.screenshot.screenshot.PickInfoImpl", &aniClass);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] class not found, status:%{public}d", static_cast<int32_t>(status));
+        return nullptr;
+    }
+    ani_method aniCtor;
+    auto ret = env->Class_FindMethod(aniClass, "<ctor>", ":", &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Class_FindMethod failed");
+        return nullptr;
+    }
+    ani_object pickInfoObj;
+    status = env->Object_New(aniClass, aniCtor, &pickInfoObj);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Object_New failed");
+        return nullptr;
+    }
+    ani_object rectObj = ScreenshotAniUtils::CreateRectObject(env);
+    ScreenshotAniUtils::ConvertRect(env, param->imageRect, rectObj);
+    env->Object_SetFieldByName_Ref(pickInfoObj, "<property>pickRect", static_cast<ani_ref>(rectObj));
+ 
+    auto nativePixelMap = Media::PixelMapTaiheAni::CreateEtsPixelMap(env, param->image);
+    env->Object_SetFieldByName_Ref(pickInfoObj, "<property>pixelMap", static_cast<ani_ref>(nativePixelMap));
+    return pickInfoObj;
+}
  
 ani_status ScreenshotAniUtils::GetAniString(ani_env* env, const std::string& str, ani_string* result)
 {
