@@ -8814,14 +8814,14 @@ void ScreenSessionManager::SetExpandAndHorizontalLocked(bool isLocked)
         SuperFoldSensorManager::GetInstance().DriveStateMachineToExpand();
         // to connect
         extendScreenConnectStatus_.store(ExtendScreenConnectStatus::CONNECT);
-        OnExtendScreenConnectStatusChange(screenId, ExtendScreenConnectStatus::CONNECT);
+        OnExtendScreenConnectStatusChange(SCREEN_ID_DEFAULT, ExtendScreenConnectStatus::CONNECT);
 
     } else {
         TLOGI(WmsLogTag::DMS, "active statemachine");
         // drive state machine to actived
         SuperFoldSensorManager::GetInstance().SetStateMachineToActived();
         // to disconnect
-        OnExtendScreenConnectStatusChange(screenId, ExtendScreenConnectStatus::DISCONNECT);
+        OnExtendScreenConnectStatusChange(SCREEN_ID_DEFAULT, ExtendScreenConnectStatus::DISCONNECT);
         extendScreenConnectStatus_.store(ExtendScreenConnectStatus::DISCONNECT);
     }
 #endif
