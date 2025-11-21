@@ -7813,7 +7813,21 @@ void JsSceneSession::OnKeyboardStateChange(SessionState state, const KeyboardEff
             jsKeyboardCallingIdObj,
             jsKeyboardTargetDisplayId,
         };
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(env, &scope);
+        auto value = jsCallBack->GetNapiValue();
+        if (value == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s: jsCallBack->GetNapiValue() is null", where);
+            napi_close_handle_scope(env, scope);
+            return;
+        }
+        auto ret = napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv),
+            argv, nullptr);
+        napi_close_handle_scope(env, scope);
+        if (ret != napi_ok) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s: napi_call_function result is error", where);
+            return;
+        }
         TLOGNI(WmsLogTag::WMS_KEYBOARD, "%{public}s: id: %{public}d, state: %{public}d, callingSessionId: %{public}u",
             where, persistentId, state, callingSessionId);
     };
