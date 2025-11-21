@@ -2036,11 +2036,12 @@ HWTEST_F(ScreenSessionManagerClientTest, NotifyIsFullScreenInForceSplitMode, Tes
 */
 HWTEST_F(ScreenSessionManagerClientTest, HandleSystemKeyboardOffPropertyChange01, TestSize.Level1)
 {
-    sptr screenSession = sptr::MakeSptr();
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
     SuperFoldStatus currentState = SuperFoldStatus::HALF_FOLDED;
+    ScreenProperty screenProperty;
     bool isKeyboardOn = false;
     ASSERT_NE(screenSessionManagerClient_, nullptr);
-    screenSession->HandleSystemKeyboardOffPropertyChange(screenSession, currentState, isKeyboardOn);
+    screenSession->HandleSystemKeyboardOffPropertyChange(screenProperty, currentState, isKeyboardOn);
 }
 
 /**
@@ -2050,11 +2051,12 @@ HWTEST_F(ScreenSessionManagerClientTest, HandleSystemKeyboardOffPropertyChange01
 */
 HWTEST_F(ScreenSessionManagerClientTest, HandleSystemKeyboardOffPropertyChange02, TestSize.Level1)
 {
-    sptr screenSession = sptr::MakeSptr();
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
     SuperFoldStatus currentState = SuperFoldStatus::FOLDED;
+    ScreenProperty screenProperty;
     bool isKeyboardOn = true;
     ASSERT_NE(screenSessionManagerClient_, nullptr);
-    screenSession->HandleSystemKeyboardOffPropertyChange(screenSession, currentState, isKeyboardOn);
+    screenSession->HandleSystemKeyboardOffPropertyChange(screenProperty, currentState, isKeyboardOn);
 }
 
 /**
@@ -2064,7 +2066,7 @@ HWTEST_F(ScreenSessionManagerClientTest, HandleSystemKeyboardOffPropertyChange02
 */
 HWTEST_F(ScreenSessionManagerClientTest, HandleSystemKeyboardOnPropertyChange01, TestSize.Level1)
 {
-    sptr screenSession = sptr::MakeSptr();
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
     SuperFoldStatus currentState = SuperFoldStatus::HALF_FOLDED;
     bool isKeyboardOn = false;
     int32_t validHeight = 1620;
@@ -2077,7 +2079,7 @@ HWTEST_F(ScreenSessionManagerClientTest, HandleSystemKeyboardOnPropertyChange01,
     screenSession->SetScreenProperty(screenProperty);
 
     ASSERT_NE(screenSessionManagerClient_, nullptr);
-    screenSession->HandleSystemKeyboardOnPropertyChange(screenSession, currentState,
+    screenSession->HandleSystemKeyboardOnPropertyChange(screenProperty, currentState,
     isKeyboardOn, validHeight);
 
     EXPECT_EQ(screenSession->GetScreenProperty().GetIsFakeInUse(), false);
@@ -2092,7 +2094,7 @@ HWTEST_F(ScreenSessionManagerClientTest, HandleSystemKeyboardOnPropertyChange01,
 */
 HWTEST_F(ScreenSessionManagerClientTest, HandleSystemKeyboardOnPropertyChange02, TestSize.Level1)
 {
-    sptr screenSession = sptr::MakeSptr();
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
     SuperFoldStatus currentState = SuperFoldStatus::FOLDED;
     bool isKeyboardOn = false;
     int32_t validHeight = 1620;
@@ -2105,7 +2107,7 @@ HWTEST_F(ScreenSessionManagerClientTest, HandleSystemKeyboardOnPropertyChange02,
     screenSession->SetScreenProperty(screenProperty);
 
     ASSERT_NE(screenSessionManagerClient_, nullptr);
-    screenSession->HandleSystemKeyboardOnPropertyChange(screenSession, currentState,
+    screenSession->HandleSystemKeyboardOnPropertyChange(screenProperty, currentState,
     isKeyboardOn, validHeight);
 
     EXPECT_EQ(screenSession->GetScreenProperty().GetIsFakeInUse(), true);
@@ -2129,7 +2131,7 @@ HWTEST_F(ScreenSessionManagerClientTest, HandleKeyboardOnPropertyChange01, TestS
     screenProperty.SetBounds(screenBounds);
     screenSession->SetScreenProperty(screenProperty);
     ASSERT_NE(screenSessionManagerClient_, nullptr);
-    screenSession->HandleKeyboardOnPropertyChange(screenSession, 300);
+    screenSession->HandleKeyboardOnPropertyChange(screenProperty, 300);
     EXPECT_EQ(screenSession->GetScreenProperty().GetIsFakeInUse(), false);
     EXPECT_EQ(screenSession->GetValidWidth(), 100);
     EXPECT_EQ(screenSession->GetValidHeight(), 300);
@@ -2172,7 +2174,7 @@ HWTEST_F(ScreenSessionManagerClientTest, HandleKeyboardOffPropertyChange, TestSi
     screenSession->SetScreenProperty(screenProperty);
 
     ASSERT_NE(screenSessionManagerClient_, nullptr);
-    screenSession->HandleKeyboardOffPropertyChange(screenSession);
+    screenSession->HandleKeyboardOffPropertyChange(screenProperty);
 
     EXPECT_EQ(screenSession->GetValidWidth(), 100);
     EXPECT_EQ(screenSession->GetValidHeight(), 200);
