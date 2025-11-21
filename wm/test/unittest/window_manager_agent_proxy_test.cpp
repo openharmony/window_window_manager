@@ -1013,7 +1013,6 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifySupportRotationChange02, TestSize.Le
 
     // WriteInterfaceToken failed
     sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
-    auto windowManagerAgentProxy = sptr<WindowManagerAgentProxy>::MakeSptr(remoteMocker);
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     ASSERT_NE(windowManagerAgentProxy, nullptr);
@@ -1027,7 +1026,7 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifySupportRotationChange02, TestSize.Le
  * @tc.desc: test NotifySupportRotationChange03
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentProxyTest, NotifySupportRotationChange023, TestSize.Level1)
+HWTEST_F(WindowManagerAgentProxyTest, NotifySupportRotationChange03, TestSize.Level1)
 {
     g_logMsg.clear();
     SupportRotationInfo supportRotationInfo;
@@ -1039,7 +1038,6 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifySupportRotationChange023, TestSize.L
 
     // WriteParcelable failed
     sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
-    auto windowManagerAgentProxy = sptr<WindowManagerAgentProxy>::MakeSptr(remoteMocker);
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteParcelableErrorFlag(true);
     windowManagerAgentProxy->NotifySupportRotationChange(supportRotationInfo);
