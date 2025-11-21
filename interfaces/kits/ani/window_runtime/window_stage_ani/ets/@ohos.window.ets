@@ -4989,6 +4989,7 @@ export interface Window {
     setWaterMarkFlag(enable: boolean): Promise<void>;
     setWaterMarkFlag(enable: boolean, callback: AsyncCallback<void>): void;
     raiseMainWindowAboveTarget(windowId: int): Promise<void>;
+    setWindowTopmost(isWindowTopmost: boolean): Promise<void>;
     setMainWindowRaiseByClickEnabled(enable: boolean): Promise<void>;
     setWindowFocusable(isFocusable: boolean): Promise<void>;
     setWindowFocusable(isFocusable: boolean, callback: AsyncCallback<void>): void;
