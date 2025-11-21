@@ -730,7 +730,7 @@ void ScreenProperty::SetPointerActiveHeight(uint32_t pointerActiveHeight)
     pointerActiveHeight_ = pointerActiveHeight;
 }
 
-uint32_t ScreenProperty::GetPointerActiveHeight()
+uint32_t ScreenProperty::GetPointerActiveHeight() const
 {
     return pointerActiveHeight_;
 }
