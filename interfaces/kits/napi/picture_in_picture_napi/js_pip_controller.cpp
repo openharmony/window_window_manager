@@ -266,18 +266,18 @@ napi_value JsPipController::OnUpdateContentSize(napi_env env, napi_callback_info
     int32_t width = 0;
     std::string errMsg = "";
     if (!ConvertFromJsValue(env, argv[0], width) || width <= 0) {
-        errMsg = "[PiPWindow][updateContentSize]msg: Failed to convert parameter to int or width <= 0";
+        errMsg = "[PiPWindow][updateContentSize]msg: Failed to convert parameter to int or width <= 0.";
         TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
         return NapiThrowInvalidParam(env, errMsg);
     }
     int32_t height = 0;
     if (!ConvertFromJsValue(env, argv[1], height) || height <= 0) {
-        errMsg = "[PiPWindow][updateContentSize]msg: Failed to convert parameter to int or height <= 0";
+        errMsg = "[PiPWindow][updateContentSize]msg: Failed to convert parameter to int or height <= 0.";
         TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
         return NapiThrowInvalidParam(env, errMsg);
     }
     if (pipController_ == nullptr) {
-        errMsg = "[PiPWindow][updateContentSize]msg: Controller is nullptr";
+        errMsg = "[PiPWindow][updateContentSize]msg: Controller is nullptr.";
         TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
         return NapiThrowInvalidParam(env, errMsg);
     }
@@ -305,18 +305,18 @@ napi_value JsPipController::OnUpdatePiPControlStatus(napi_env env, napi_callback
     auto controlType = PiPControlType::VIDEO_PLAY_PAUSE;
     std::string errMsg;
     if (!ConvertFromJsValue(env, argv[0], controlType)) {
-        errMsg = "[PiPWindow][updatePiPControlStatus]msg: Failed to convert parameter to int or controlType < 0";
+        errMsg = "[PiPWindow][updatePiPControlStatus]msg: Failed to convert parameter to int or controlType < 0.";
         TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
         return NapiThrowInvalidParam(env, errMsg);
     }
     auto status = PiPControlStatus::PLAY;
     if (!ConvertFromJsValue(env, argv[1], status)) {
-        errMsg = "[PiPWindow][updatePiPControlStatus]msg: Failed to convert parameter to int";
+        errMsg = "[PiPWindow][updatePiPControlStatus]msg: Failed to convert parameter to int.";
         TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
         return NapiThrowInvalidParam(env, errMsg);
     }
     if (pipController_ == nullptr) {
-        errMsg = "[PiPWindow][updatePiPControlStatus]msg: Controller is nullptr";
+        errMsg = "[PiPWindow][updatePiPControlStatus]msg: Controller is nullptr.";
         TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
         return NapiThrowInvalidParam(env, errMsg);
     }
@@ -338,23 +338,24 @@ napi_value JsPipController::OnSetPiPControlEnabled(napi_env env, napi_callback_i
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != NUMBER_TWO) {
         TLOGE(WmsLogTag::WMS_PIP, "Invalid args count, need 2 args but received: %{public}zu", argc);
-        return NapiThrowInvalidParam(env, "[PiPWindow][setPiPControlEnabled]msg: Invalid args count, 2 args is needed.");
+        return NapiThrowInvalidParam(env,
+            "[PiPWindow][setPiPControlEnabled]msg: Invalid args count, 2 args is needed.");
     }
     auto controlType = PiPControlType::VIDEO_PLAY_PAUSE;
     std::string errMsg = "";
     if (!ConvertFromJsValue(env, argv[0], controlType)) {
-        errMsg = "[PiPWindow][setPiPControlEnabled]msg: Failed to convert parameter to int";
+        errMsg = "[PiPWindow][setPiPControlEnabled]msg: Failed to convert parameter to int.";
         TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
         return NapiThrowInvalidParam(env, errMsg);
     }
     bool enabled = true;
     if (!ConvertFromJsValue(env, argv[1], enabled)) {
-        errMsg = "[PiPWindow][setPiPControlEnabled]msg: Failed to convert parameter to bool";
+        errMsg = "[PiPWindow][setPiPControlEnabled]msg: Failed to convert parameter to bool.";
         TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
         return NapiThrowInvalidParam(env, errMsg);
     }
     if (pipController_ == nullptr) {
-        errMsg = "[PiPWindow][setPiPControlEnabled]msg: Controller is nullptr";
+        errMsg = "[PiPWindow][setPiPControlEnabled]msg: Controller is nullptr.";
         TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
         return NapiThrowInvalidParam(env, errMsg);
     }
@@ -450,7 +451,7 @@ napi_value JsPipController::OnRegisterCallback(napi_env env, napi_callback_info 
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < NUMBER_TWO) {
         TLOGE(WmsLogTag::WMS_PIP, "JsPipController Params not match: %{public}zu", argc);
-        return NapiThrowInvalidParam(env, "[PiPWindow][on]msg: Invalid args count, count < 2.");
+        return NapiThrowInvalidParam(env, "[PiPWindow][on]msg: Invalid args count, count >= 2 is needed.");
     }
     std::string cbType = "";
     if (!ConvertFromJsValue(env, argv[0], cbType)) {
@@ -642,7 +643,7 @@ napi_value JsPipController::OnUnregisterCallback(napi_env env, napi_callback_inf
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc == NUMBER_ZERO || argc > NUMBER_TWO) {
         TLOGE(WmsLogTag::WMS_PIP, "JsPipController Params not match: %{public}zu", argc);
-        return NapiThrowInvalidParam(env, "[PiPWindow][off]msg: Invalid args count, 0 arg or count > 2.");
+        return NapiThrowInvalidParam(env, "[PiPWindow][off]msg: Invalid args count, 0 < count <= 2 is needed.");
     }
     std::string cbType = "";
     if (!ConvertFromJsValue(env, argv[0], cbType)) {
