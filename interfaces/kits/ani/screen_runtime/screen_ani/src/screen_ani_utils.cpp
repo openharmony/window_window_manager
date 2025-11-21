@@ -26,9 +26,11 @@
 #include "screen_manager.h"
 #include "singleton_container.h"
 #include "window_manager_hilog.h"
+#include "surface_utils.h"
 
 namespace OHOS {
 namespace Rosen {
+
 ani_status ScreenAniUtils::GetStdString(ani_env *env, ani_string ani_str, std::string &result)
 {
     ani_size strSize;
@@ -66,12 +68,13 @@ ani_status ScreenAniUtils::ConvertScreen(ani_env *env, sptr<Screen> screen, ani_
     TLOGI(WmsLogTag::DMS, "[ANI] convert screen id %{public}u", static_cast<uint32_t>(info->GetScreenId()));
     env->Object_SetFieldByName_Long(obj, "<property>id", static_cast<ani_long>(info->GetScreenId()));
     env->Object_SetFieldByName_Long(obj, "<property>parent", static_cast<ani_long>(info->GetParentId()));
-    env->Object_SetFieldByName_Long(obj, "<property>activeModeIndex",
-        static_cast<ani_long>(info->GetModeId()));
-    env->Object_SetFieldByName_Ref(obj, "<property>orientation", ScreenAniUtils::CreateAniEnum(env,
-        "@ohos.screen.screen.Orientation", static_cast<ani_int>(info->GetOrientation())));
-    env->Object_SetFieldByName_Ref(obj, "<property>sourceMode", ScreenAniUtils::CreateAniEnum(env,
-        "@ohos.screen.screen.ScreenSourceMode", static_cast<ani_int>(info->GetSourceMode())));
+    env->Object_SetFieldByName_Long(obj, "<property>activeModeIndex", static_cast<ani_long>(info->GetModeId()));
+    env->Object_SetFieldByName_Ref(obj, "<property>orientation",
+        ScreenAniUtils::CreateAniEnum(env, "@ohos.screen.screen.Orientation",
+        static_cast<ani_int>(info->GetOrientation())));
+    env->Object_SetFieldByName_Ref(obj, "<property>sourceMode",
+        ScreenAniUtils::CreateAniEnum(env, "@ohos.screen.screen.ScreenSourceMode",
+        static_cast<ani_int>(info->GetSourceMode())));
     std::unique_ptr<ScreenAni> screenAni = std::make_unique<ScreenAni>(screen);
     if (ANI_OK != env->Object_SetFieldByName_Long(obj, "screenNativeObj",
         reinterpret_cast<ani_long>(screenAni.release()))) {
@@ -79,13 +82,13 @@ ani_status ScreenAniUtils::ConvertScreen(ani_env *env, sptr<Screen> screen, ani_
         return ANI_ERROR;
     }
     std::vector<sptr<SupportedScreenModes>> modes = info->GetModes();
-    ani_array_ref screenModeInfos = NewNativeArray(env, "@ohos.screen.screen.ScreenModeInfoImpl",
+    ani_array screenModeInfos = NewNativeArray(env, "@ohos.screen.screen.ScreenModeInfoImpl",
         static_cast<uint32_t>(modes.size()));
     ani_size index = 0;
     for (auto mode : modes) {
         ani_object screenModeInfo = NewNativeObject(env, "@ohos.screen.screen.ScreenModeInfoImpl");
         ConvertScreenMode(env, mode, screenModeInfo);
-        if (ANI_OK != env->Array_Set_Ref(screenModeInfos, index, screenModeInfo)) {
+        if (ANI_OK != env->Array_Set(screenModeInfos, index, screenModeInfo)) {
             TLOGE(WmsLogTag::DMS, "[ANI] Array_Set_Ref fail");
             return ANI_ERROR;
         }
@@ -93,22 +96,18 @@ ani_status ScreenAniUtils::ConvertScreen(ani_env *env, sptr<Screen> screen, ani_
     }
     auto ret = env->Object_SetFieldByName_Ref(obj, "<property>supportedModeInfo",
         static_cast<ani_ref>(screenModeInfos));
-    if (ANI_OK != ret) {
+    if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] get ScreenModeInfos fail, ret: %{public}d", ret);
         return ANI_ERROR;
     }
     return ANI_OK;
 }
 
-ani_array_ref ScreenAniUtils::NewNativeArray(ani_env* env, const std::string& objName, uint32_t size)
+ani_array ScreenAniUtils::NewNativeArray(ani_env* env, const std::string& objName, uint32_t size)
 {
-    ani_array_ref array = nullptr;
-    ani_class cls;
-    if (env->FindClass(objName.c_str(), &cls) != ANI_OK) {
-        TLOGE(WmsLogTag::DMS, "[ANI] class not found");
-        return array;
-    }
-    if (env->Array_New_Ref(cls, size, CreateAniUndefined(env), &array) != ANI_OK) {
+    ani_array array = nullptr;
+
+    if (env->Array_New(size, CreateAniUndefined(env), &array) != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] create array failed");
     }
     return array;
@@ -147,7 +146,7 @@ ani_status ScreenAniUtils::ConvertScreens(ani_env *env, std::vector<sptr<Screen>
     TLOGI(WmsLogTag::DMS, "[ANI] screens size %{public}u", static_cast<uint32_t>(screens.size()));
     for (uint32_t i = 0; i < screens.size(); i++) {
         ani_ref currentScreenAni;
-        if (ANI_OK != env->Object_CallMethodByName_Ref(screensAni, "$_get", "i:C{std.core.Object}",
+        if (ANI_OK != env->Object_CallMethodByName_Ref(screensAni, "$_get", "I:Lstd/core/Object;",
             &currentScreenAni, (ani_int)i)) {
             TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail", (ani_int)i);
             return ANI_ERROR;
@@ -196,12 +195,255 @@ ani_enum_item ScreenAniUtils::CreateAniEnum(ani_env* env, const char* enum_descr
     ani_enum enumType;
     ani_status ret = env->FindEnum(enum_descriptor, &enumType);
     if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DMS, "[ANI] Failed to find enum,%{public}s", enum_descriptor);
+        TLOGE(WmsLogTag::DMS, "[ANI] Failed to find enum, %{public}s", enum_descriptor);
         return nullptr;
     }
     ani_enum_item enumItem;
     env->Enum_GetEnumItemByIndex(enumType, index, &enumItem);
     return enumItem;
+}
+
+DmErrorCode ScreenAniUtils::GetVirtualScreenOption(ani_env* env, ani_object options, VirtualScreenOption& option)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
+    ani_ref nameRef = nullptr;
+    auto ret = env->Object_GetFieldByName_Ref(options, "<property>name", &nameRef);
+    if (ret != ANI_OK || nameRef == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Failed to get nameRef, ret:%{public}d", ret);
+        return DmErrorCode::DM_ERROR_INVALID_PARAM;
+    }
+    ret = GetStdString(env, static_cast<ani_string>(nameRef), option.name_);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get name, ret:%{public}d", ret);
+        return DmErrorCode::DM_ERROR_INVALID_PARAM;
+    }
+
+    ani_long widthAni = 0;
+    ret = env->Object_GetFieldByName_Long(options, "<property>width", &widthAni);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get width, ret:%{public}d", ret);
+        return DmErrorCode::DM_ERROR_INVALID_PARAM;
+    }
+    option.width_ = static_cast<uint32_t>(widthAni);
+    ani_long heightAni = 0;
+    ret = env->Object_GetFieldByName_Long(options, "<property>height", &heightAni);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get height, ret:%{public}d", ret);
+        return DmErrorCode::DM_ERROR_INVALID_PARAM;
+    }
+    option.height_ = static_cast<uint32_t>(heightAni);
+
+    ani_double densityAni = 0;
+    ret = env->Object_GetFieldByName_Double(options, "<property>density", &densityAni);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get density, ret:%{public}d", ret);
+        return DmErrorCode::DM_ERROR_INVALID_PARAM;
+    }
+    option.density_ = static_cast<float>(densityAni);
+
+    ani_ref surfaceIdRef = nullptr;
+    ret = env->Object_GetFieldByName_Ref(options, "<property>surfaceId", &surfaceIdRef);
+    if (ret != ANI_OK || surfaceIdRef == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Failed to get surfaceIdRef, ret:%{public}d", ret);
+        return DmErrorCode::DM_ERROR_INVALID_PARAM;
+    }
+
+    ret = GetSurfaceFromAni(env, static_cast<ani_string>(surfaceIdRef), option.surface_);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get surface, ret:%{public}d", ret);
+        return DmErrorCode::DM_ERROR_INVALID_PARAM;
+    }
+    return DmErrorCode::DM_OK;
+}
+
+ani_status ScreenAniUtils::GetSurfaceFromAni(ani_env* env, ani_string surfaceIdAniStr, sptr<Surface>& surface)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
+    std::string surfaceIdStr;
+    auto ret = GetStdString(env, surfaceIdAniStr, surfaceIdStr);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get surface, ret:%{public}d", ret);
+        return ret;
+    }
+    uint64_t surfaceId = 0;
+    std::istringstream inputStream(surfaceIdStr);
+    inputStream >> surfaceId;
+    surface = SurfaceUtils::GetInstance()->GetSurface(surfaceId);
+    if (surface == nullptr) {
+        TLOGI(WmsLogTag::DMS, "GetSurfaceFromAni failed, surfaceId:%{public}" PRIu64, surfaceId);
+    }
+    return ANI_OK;
+}
+
+ani_status ScreenAniUtils::GetMultiScreenPositionOptionsFromAni(ani_env* env, ani_object screenOptionsAni,
+    MultiScreenPositionOptions& mainScreenOptions)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
+    ani_long screenIdAni = 0;
+    auto ret = env->Object_GetFieldByName_Long(screenOptionsAni, "<property>id", &screenIdAni);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get screenId, ret:%{public}d", ret);
+        return ret;
+    }
+    mainScreenOptions.screenId_ = static_cast<ScreenId>(screenIdAni);
+
+    ani_long startXAni = 0;
+    ret = env->Object_GetFieldByName_Long(screenOptionsAni, "<property>startX", &startXAni);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get startX, ret:%{public}d", ret);
+        return ret;
+    }
+    mainScreenOptions.startX_ = static_cast<uint32_t>(startXAni);
+
+    ani_long startYAni = 0;
+    ret = env->Object_GetFieldByName_Long(screenOptionsAni, "<property>startY", &startYAni);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get startY, ret:%{public}d", ret);
+        return ret;
+    }
+    mainScreenOptions.startY_ = static_cast<uint32_t>(startYAni);
+    return ANI_OK;
+}
+
+ani_object ScreenAniUtils::CreateDisplayIdVectorAniObject(ani_env* env, std::vector<DisplayId>& displayIds)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
+    ani_object arrayObj = ScreenAniUtils::CreateAniArray(env, displayIds.size());
+    ani_boolean isUndefined = false;
+    env->Reference_IsUndefined(arrayObj, &isUndefined);
+    if (isUndefined) {
+        TLOGE(WmsLogTag::DMS, "Failed to create arrayObject");
+        return arrayObj;
+    }
+    ani_size index = 0;
+    for (const auto& displayId : displayIds) {
+        TLOGI(WmsLogTag::DMS, "displayId: %{public}" PRIu64, displayId);
+        ani_status ret = env->Object_CallMethodByName_Void(arrayObj, "$_set", "il:", index,
+            static_cast<ani_long>(displayId));
+        if (ret != ANI_OK) {
+            TLOGE(WmsLogTag::DMS, "Failed to set displayId item, index: %{public}zu, ret: %{public}d", index, ret);
+            continue;
+        }
+        index++;
+    }
+    return arrayObj;
+}
+
+ani_object ScreenAniUtils::CreateAniArray(ani_env* env, size_t size)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
+    ani_class arrayCls;
+    if (env->FindClass("escompat.Array", &arrayCls) != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to find class escompat.Array");
+        return CreateAniUndefined(env);
+    }
+    ani_method arrayCtor;
+    if (env->Class_FindMethod(arrayCls, "<ctor>", "i:", &arrayCtor) != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to find <ctor>");
+        return CreateAniUndefined(env);
+    }
+    ani_object arrayObj = nullptr;
+    if (env->Object_New(arrayCls, arrayCtor, &arrayObj, size) != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to create object Array");
+        return CreateAniUndefined(env);
+    }
+    return arrayObj;
+}
+
+ani_status ScreenAniUtils::GetRectFromAni(ani_env* env, ani_object mainScreenRegionAni, DMRect& mainScreenRegion)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
+    ani_long left = 0;
+    auto ret = env->Object_GetFieldByName_Long(mainScreenRegionAni, "<property>left", &left);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get left, ret:%{public}d", ret);
+        return ret;
+    }
+    mainScreenRegion.posX_ = static_cast<int32_t>(left);
+
+    ani_long top = 0;
+    ret = env->Object_GetFieldByName_Long(mainScreenRegionAni, "<property>top", &top);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get top, ret:%{public}d", ret);
+        return ret;
+    }
+    mainScreenRegion.posY_ = static_cast<int32_t>(top);
+
+    ani_long width = 0;
+    ret = env->Object_GetFieldByName_Long(mainScreenRegionAni, "<property>width", &width);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get width, ret:%{public}d", ret);
+        return ret;
+    }
+    mainScreenRegion.width_ = static_cast<uint32_t>(width);
+
+    ani_long height = 0;
+    ret = env->Object_GetFieldByName_Long(mainScreenRegionAni, "<property>height", &height);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get height, ret:%{public}d", ret);
+        return ret;
+    }
+    mainScreenRegion.height_ = static_cast<uint32_t>(height);
+    return ANI_OK;
+}
+
+ani_status ScreenAniUtils::GetScreenIdArrayFromAni(ani_env* env, ani_object mirrorScreen,
+    std::vector<ScreenId>& mirrorScreenIds)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
+    ani_int length = 0;
+    auto ret = env->Object_GetPropertyByName_Int(mirrorScreen, "length", &length);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get ani_array length failed, ret: %{public}u", ret);
+        return ret;
+    }
+    TLOGI(WmsLogTag::DMS, "[ANI] length %{public}d", (ani_int)length);
+    for (int32_t i = 0; i < length; i++) {
+        ani_ref screenIdRef;
+        ret = env->Object_CallMethodByName_Ref(mirrorScreen, "$_get", "I:Lstd/core/Object;",
+            &screenIdRef, (ani_int)i);
+        if (ret != ANI_OK) {
+            TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u failed, ret: %{public}u", (ani_int)i, ret);
+            return ret;
+        }
+        ani_long screenId;
+        ret = env->Object_CallMethodByName_Long(static_cast<ani_object>(screenIdRef), "toLong", ":l", &screenId);
+        if (ret !=ANI_OK) {
+            TLOGE(WmsLogTag::DMS, "[ANI] unbox screenId failed, ret: %{public}u", ret);
+            return ret;
+        }
+        mirrorScreenIds.emplace_back(static_cast<ScreenId>(screenId));
+    }
+    return ANI_OK;
+}
+
+ani_status ScreenAniUtils::GetExpandOptionFromAni(ani_env* env, ani_object optionAniObj, ExpandOption& expandOption)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
+    ani_long screenId = 0;
+    ani_status ret = env->Object_GetFieldByName_Long(optionAniObj, "<property>screenId", &screenId);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get screenId, ret:%{public}d", ret);
+        return ret;
+    }
+    expandOption.screenId_ = static_cast<ScreenId>(screenId);
+
+    ani_long startX = 0;
+    ret = env->Object_GetFieldByName_Long(optionAniObj, "<property>startX", &startX);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get startX, ret:%{public}d", ret);
+        return ret;
+    }
+    expandOption.startX_ = static_cast<uint32_t>(startX);
+
+    ani_long startY = 0;
+    ret = env->Object_GetFieldByName_Long(optionAniObj, "<property>startY", &startY);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get startY, ret:%{public}d", ret);
+        return ret;
+    }
+    expandOption.startY_ = static_cast<uint32_t>(startY);
+    return ANI_OK;
 }
 }
 }

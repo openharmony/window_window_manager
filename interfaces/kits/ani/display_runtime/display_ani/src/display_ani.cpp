@@ -57,7 +57,8 @@ void DisplayAni::GetCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutIn
     std::vector<DMRect> rects = cutoutInfo->GetBoundingRects();
     // bounding rects
     ani_ref boundingRects = nullptr;
-    ani_status status = env->Object_GetFieldByName_Ref(cutoutInfoObj, "<property>boundingRects", &boundingRects);
+    ani_status status = env->Object_GetFieldByName_Ref(cutoutInfoObj,
+        "<property>boundingRects", &boundingRects);
     if (ANI_OK != status) {
         TLOGE(WmsLogTag::DMS, "[ANI] get field bounding rects fail, ani_status = %{public}d", status);
     }
@@ -68,7 +69,7 @@ void DisplayAni::GetCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutIn
     for (int i = 0; i < std::min(int(length), static_cast<int>(rects.size())); i++) {
         ani_ref currentCutoutInfo;
         if (ANI_OK != env->Object_CallMethodByName_Ref(static_cast<ani_object>(boundingRects), "$_get",
-            "i:C{std.core.Object}", &currentCutoutInfo, (ani_int)i)) {
+            "I:Lstd/core/Object;", &currentCutoutInfo, (ani_int)i)) {
             TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail", (ani_int)i);
         }
         TLOGI(WmsLogTag::DMS, "current i: %{public}d", i);
@@ -76,9 +77,35 @@ void DisplayAni::GetCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutIn
     }
     // waterfall area
     ani_ref waterfallObj = nullptr;
-    env->Object_GetFieldByName_Ref(cutoutInfoObj, "<property>waterfallDisplayAreaRects", &waterfallObj);
+    env->Object_GetFieldByName_Ref(cutoutInfoObj, "<property>waterfallDisplayAreaRects",
+        &waterfallObj);
     auto waterfallDisplayAreaRects = cutoutInfo->GetWaterfallDisplayAreaRects();
     DisplayAniUtils::ConvertWaterArea(waterfallDisplayAreaRects, static_cast<ani_object>(waterfallObj), env);
+}
+
+ani_string DisplayAni::GetDisplayCapability(ani_env* env)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] Start");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
+        return nullptr;
+    }
+    auto display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
+    std::string capabilitInfo;
+    DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(display->GetDisplayCapability(capabilitInfo));
+    if (ret != DmErrorCode::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Display get capability failed.");
+        AniErrUtils::ThrowBusinessError(env, ret, "GetDisplayCapability failed.");
+        return nullptr;
+    }
+    TLOGI(WmsLogTag::DMS, "[ANI] GetDisplayCapability = %{public}s", capabilitInfo.c_str());
+    ani_string capabilitInfoAni;
+    ani_status status = DisplayAniUtils::GetAniString(env, capabilitInfo, &capabilitInfoAni);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] GetAniString failed, ani_status = %{public}d", status);
+        return nullptr;
+    }
+    return capabilitInfoAni;
 }
 
 void DisplayAni::GetAvailableArea(ani_env* env, ani_object obj, ani_object availableAreaObj)
@@ -202,7 +229,7 @@ void DisplayAni::OnRegisterCallback(ani_env* env, ani_object obj, ani_string typ
         TLOGE(WmsLogTag::DMS, "[ANI]create global ref fail");
         return;
     }
-    if (IsCallbackRegistered(env, typeString, callback)) {
+    if (IsCallbackRegistered(env, typeString, cbRef)) {
         env->GlobalReference_Delete(cbRef);
         TLOGI(WmsLogTag::DMS, "Callback has already been registered!");
         return;
@@ -432,11 +459,19 @@ ani_status DisplayAni::NspBindNativeFunctions(ani_env* env, ani_namespace nsp)
 {
     std::array funcs = {
         ani_native_function {"isFoldable", ":z", reinterpret_cast<void *>(DisplayManagerAni::IsFoldableAni)},
+        ani_native_function {"setFoldDisplayModeReasonNative", nullptr,
+            reinterpret_cast<void *>(DisplayManagerAni::SetFoldDisplayModeReasonAni)},
+        ani_native_function {"setFoldDisplayModeNative", nullptr,
+            reinterpret_cast<void *>(DisplayManagerAni::SetFoldDisplayModeAni)},
         ani_native_function {"getFoldDisplayModeNative", ":i",
             reinterpret_cast<void *>(DisplayManagerAni::GetFoldDisplayModeAni)},
+        ani_native_function {"setFoldStatusLockedNative", nullptr,
+            reinterpret_cast<void *>(DisplayManagerAni::SetFoldStatusLockedAni)},
         ani_native_function {"getFoldStatusNative", ":i", reinterpret_cast<void *>(DisplayManagerAni::GetFoldStatus)},
         ani_native_function {"getCurrentFoldCreaseRegionNative", "C{std.core.Object}l:",
             reinterpret_cast<void *>(DisplayManagerAni::GetCurrentFoldCreaseRegion)},
+        ani_native_function {"getPrimaryDisplaySyncNative", "C{std.core.Object}:",
+            reinterpret_cast<void *>(DisplayManagerAni::GetPrimaryDisplaySyncAni)},
         ani_native_function {"getDisplayByIdSyncNative", "C{std.core.Object}l:",
             reinterpret_cast<void *>(DisplayManagerAni::GetDisplayByIdSyncAni)},
         ani_native_function {"getDefaultDisplaySyncNative", "C{std.core.Object}:",
@@ -457,6 +492,18 @@ ani_status DisplayAni::NspBindNativeFunctions(ani_env* env, ani_namespace nsp)
             reinterpret_cast<void *>(DisplayManagerAni::ConvertGlobalToRelativeCoordinate)},
         ani_native_function {"convertRelativeToGlobalCoordinateNative", nullptr,
             reinterpret_cast<void *>(DisplayManagerAni::ConvertRelativeToGlobalCoordinate)},
+        ani_native_function {"createVirtualScreenNative", nullptr,
+            reinterpret_cast<void *>(DisplayManagerAni::CreateVirtualScreen)},
+        ani_native_function {"destroyVirtualScreenNative", nullptr,
+            reinterpret_cast<void *>(DisplayManagerAni::DestroyVirtualScreen)},
+        ani_native_function {"setVirtualScreenSurfaceNative", nullptr,
+            reinterpret_cast<void *>(DisplayManagerAni::SetVirtualScreenSurface)},
+        ani_native_function {"makeUniqueNative", nullptr,
+            reinterpret_cast<void *>(DisplayManagerAni::MakeUnique)},
+        ani_native_function {"addVirtualScreenBlocklistNative", nullptr,
+            reinterpret_cast<void *>(DisplayManagerAni::AddVirtualScreenBlocklist)},
+        ani_native_function {"removeVirtualScreenBlocklistNative", nullptr,
+            reinterpret_cast<void *>(DisplayManagerAni::RemoveVirtualScreenBlocklist)},
         ani_native_function {"isCaptured", nullptr, reinterpret_cast<void *>(DisplayManagerAni::IsCaptured)},
         ani_native_function {"finalizerDisplayNative", nullptr,
             reinterpret_cast<void *>(DisplayManagerAni::FinalizerDisplay)},
@@ -474,6 +521,8 @@ ani_status DisplayAni::ClassBindNativeFunctions(ani_env* env, ani_class displayC
     std::array methods = {
         ani_native_function {"getCutoutInfoInternal", "C{@ohos.display.display.CutoutInfo}:",
             reinterpret_cast<void *>(DisplayAni::GetCutoutInfo)},
+        ani_native_function {"getDisplayCapabilityInternal", nullptr,
+            reinterpret_cast<void *>(DisplayAni::GetDisplayCapability)},
         ani_native_function {"getAvailableAreaInternal", "C{@ohos.display.display.Rect}:",
             reinterpret_cast<void *>(DisplayAni::GetAvailableArea)},
         ani_native_function {"getLiveCreaseRegionInternal", nullptr,
@@ -484,14 +533,21 @@ ani_status DisplayAni::ClassBindNativeFunctions(ani_env* env, ani_class displayC
             reinterpret_cast<void *>(DisplayAni::RegisterCallback)},
         ani_native_function {"syncOff", nullptr,
             reinterpret_cast<void *>(DisplayAni::UnRegisterCallback)},
+    };
+    auto ret = env->Class_BindNativeMethods(displayCls, methods.data(), methods.size());
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] bind class methods fail %{public}u", ret);
+        return ANI_NOT_FOUND;
+    }
+    std::array staticMethods = {
         ani_native_function {"nativeTransferStatic", "C{std.interop.ESValue}C{std.core.Object}:z",
             reinterpret_cast<void *>(DisplayAni::TransferStatic)},
         ani_native_function {"nativeTransferDynamic", "l:C{std.interop.ESValue}",
             reinterpret_cast<void *>(DisplayAni::TransferDynamic)},
     };
-    auto ret = env->Class_BindNativeMethods(displayCls, methods.data(), methods.size());
+    ret = env->Class_BindStaticNativeMethods(displayCls, staticMethods.data(), staticMethods.size());
     if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DMS, "[ANI] bind class fail %{public}u", ret);
+        TLOGE(WmsLogTag::DMS, "[ANI] bind class static methods fail %{public}u", ret);
         return ANI_NOT_FOUND;
     }
     return ANI_OK;
