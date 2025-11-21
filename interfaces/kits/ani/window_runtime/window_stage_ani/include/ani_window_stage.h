@@ -74,6 +74,8 @@ public:
     static ani_object NativeTransferDynamic(ani_env* aniEnv, ani_class cls, ani_long nativeObj);
     static void LoadContent(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_string path, ani_object storage);
+    static void LoadContentByName(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_string path, ani_object storage);
     static void DisableWindowDecor(ani_env* env, ani_object obj, ani_long nativeObj);
     static void SetShowOnLockScreen(ani_env* env, ani_class cls, ani_long nativeObj, ani_boolean showOnLockScreen);
     static void RegisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
@@ -87,6 +89,9 @@ public:
     static void SetCustomDensity(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_double density, ani_boolean applyToSubWindow);
     static void SetDefaultDensityEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enabled);
+    static ani_object GetSubWindow(ani_env* env, ani_object obj, ani_long nativeObj);
+    static ani_object CreateSubWindowWithOptions(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_string name, ani_object options);
     static void RemoveStartingWindow(ani_env* env, ani_object obj, ani_long nativeObj);
     static void SetSupportedWindowModes(
         ani_env* env, ani_object obj, ani_long nativeObj, ani_object aniSupportedWindowModes);
@@ -98,7 +103,7 @@ public:
     ani_boolean WindowIsWindowSupportWideGamut(ani_env* env, ani_class cls, ani_object obj);
     ani_ref OnCreateSubWindow(ani_env *env, ani_string name);
 private:
-    void OnLoadContent(ani_env* env, ani_string path, ani_object storage);
+    void OnLoadContent(ani_env* env, ani_string path, ani_object storage, bool isLoadByName);
     void OnDisableWindowDecor(ani_env* env);
     void OnSetShowOnLockScreen(ani_env* env, ani_boolean showOnLockScreen);
     void OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
@@ -111,6 +116,8 @@ private:
     void OnSetSupportedWindowModes(ani_env* env, ani_object aniSupportedWindowModes);
     void OnSetSupportedWindowModesWithGrayOutMaximizeButton(
         ani_env* env, ani_object aniSupportedWindowModes, ani_boolean grayOutMaximizeButton);
+    ani_object OnGetSubWindow(ani_env* env);
+    ani_object OnCreateSubWindowWithOptions(ani_env* env, ani_string name, ani_object options);
     void OnRemoveStartingWindow(ani_env* env);
 
     static void ConvertImageFit(ImageFit& dst, const Ark_ImageFit& src);

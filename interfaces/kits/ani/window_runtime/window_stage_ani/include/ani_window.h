@@ -72,6 +72,8 @@ public:
     static ani_boolean IsFocused(ani_env* env, ani_object obj, ani_long nativeObj);
     static void LoadContent(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_string path, ani_object storage);
+    static void LoadContentByName(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_string path, ani_object storage);
     static void SetWindowSystemBarEnable(ani_env* env, ani_object obj, ani_long nativeObj, ani_object nameAry);
     static void SetWindowTouchable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isTouchable);
     static void SetDialogBackGestureEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enabled);
@@ -90,6 +92,8 @@ public:
     static void ShowWindow(ani_env* env, ani_object obj, ani_long nativeObj);
     static void ShowWindowWithOptions(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_object aniShowWindowOptions);
+    static void BindDialogTarget(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_object argv, ani_ref deathCallback);
     static void DestroyWindow(ani_env* env, ani_object obj, ani_long nativeObj);
     static ani_boolean IsWindowShowing(ani_env* env, ani_object obj, ani_long nativeObj);
     static ani_boolean IsWindowHighlighted(ani_env* env, ani_object obj, ani_long nativeObj);
@@ -136,8 +140,13 @@ public:
     static ani_object GetTransitionController(ani_env* env, ani_object obj, ani_long nativeObj);
     static void KeepKeyboardOnFocus(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean keepKeyboardFlag);
 
+    static ani_object CreateSubWindowWithOptions(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_string name, ani_object options);
+    static void Hide(ani_env* env, ani_object obj, ani_long nativeObj);
+
     ani_ref GetParentWindow(ani_env* env);
     void SetParentWindow(ani_env* env, ani_int windowId);
+    void Restore(ani_env* env);
     /*
      * Window Layout
      */
@@ -204,6 +213,8 @@ public:
     static ani_object GetWindowTransitionAnimation(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_enum_item transitionType);
 private:
+    ani_object OnCreateSubWindowWithOptions(ani_env* env, ani_string name, ani_object options);
+    void OnHide(ani_env* env);
     void OnSetWindowColorSpace(ani_env* env, ani_int colorSpace);
     void OnSetPreferredOrientation(ani_env* env, ani_int orientation);
     ani_int OnGetPreferredOrientation(ani_env* env);
@@ -224,7 +235,7 @@ private:
     void OnRequestFocus(ani_env* env, ani_boolean isFocused);
     void OnSetSubWindowModal(ani_env* env, ani_boolean isModal);
     void OnSetSubWindowModalType(ani_env* env, ani_boolean isModal, ani_int modalityType);
-    void OnLoadContent(ani_env* env, ani_string path, ani_object storage);
+    void OnLoadContent(ani_env* env, ani_string path, ani_object storage, bool isLoadByName);
     void OnSetWindowSystemBarEnable(ani_env* env, ani_object nameAry);
     void OnSetWindowTouchable(ani_env* env, ani_boolean isTouchable);
     void OnSetDialogBackGestureEnabled(ani_env* env, ani_boolean enabled);
@@ -237,6 +248,7 @@ private:
     void OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnShowWindow(ani_env* env);
     void OnShowWindowWithOptions(ani_env* env, ani_object aniShowWindowOptions);
+    void OnBindDialogTarget(ani_env* env, ani_object argv, ani_ref deathCallback);
     void OnDestroyWindow(ani_env* env);
     ani_boolean OnIsWindowShowing(ani_env* env);
     ani_boolean OnIsWindowHighlighted(ani_env* env);

@@ -61,6 +61,7 @@ public:
     static void RegisterWindowManagerCallback(ani_env* env, ani_long nativeObj, ani_string type, ani_ref callback);
     static void UnregisterWindowManagerCallback(ani_env* env, ani_long nativeObj, ani_string type, ani_ref callback);
     static void SetWindowLayoutMode(ani_env* env, ani_long nativeObj, ani_enum_item mode);
+    static void ToggleShownStateForAllAppWindows(ani_env* env, ani_long nativeObj);
 private:
     ani_ref OnGetLastWindow(ani_env* env, ani_object context);
     ani_ref OnFindWindow(ani_env* env, ani_string windowName);
@@ -82,6 +83,7 @@ private:
     void OnRegisterWindowManagerCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnUnregisterWindowManagerCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnSetWindowLayoutMode(ani_env* env, ani_enum_item mode);
+    void OnToggleShownStateForAllAppWindows(ani_env* env);
     ani_object OnGetAllWindowLayoutInfo(ani_env* env, ani_long displayId);
     ani_object OnGetSnapshot(ani_env* env, ani_double windowId);
     ani_object OnGetVisibleWindowInfo(ani_env* env);
