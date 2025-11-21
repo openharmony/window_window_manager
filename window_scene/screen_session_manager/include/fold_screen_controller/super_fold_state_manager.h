@@ -65,7 +65,7 @@ public:
 
     void HandleSuperFoldStatusChange(SuperFoldStatusChangeEvents events);
 
-    void HandleScreenConnectChange();
+    void DriveStateMachineToExpand();
 
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
 

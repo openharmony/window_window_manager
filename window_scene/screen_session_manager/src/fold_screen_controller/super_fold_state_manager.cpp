@@ -303,7 +303,7 @@ void SuperFoldStateManager::ReportNotifySuperFoldStatusChange(int32_t currentSta
     }
 }
 
-void SuperFoldStateManager::HandleScreenConnectChange()
+void SuperFoldStateManager::DriveStateMachineToExpand()
 {
     std::unique_lock<std::mutex> lock(superStatusMutex_);
     SuperFoldStatus curFoldState = curState_.load();
@@ -847,7 +847,7 @@ DMError SuperFoldStateManager::RefreshMirrorRegionInner(
 
 DMError SuperFoldStateManager::RefreshExternalRegion()
 {
-    if (!ScreenSessionManager::GetInstance().GetIsExtendScreenConnected()) {
+    if (!ScreenSessionManager::GetInstance().GetIsPhysicalExtendScreenConnected()) {
         TLOGW(WmsLogTag::DMS, "extend screen not connect");
         return DMError::DM_OK;
     }
