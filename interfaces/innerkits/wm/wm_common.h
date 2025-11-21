@@ -3398,7 +3398,7 @@ struct SupportRotationInfo : public Parcelable {
         }
         return supportRotationInfo;
     }
-}
+};
 
 /**
  * @enum WaterfallResidentState

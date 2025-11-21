@@ -861,8 +861,8 @@ public:
      */
     WMError AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
         const WindowAnimationOption& animationOption) override;
-    void NotifySupportRotationChange(const SuppoortRotationInfo& supportRotationInfo);
-    void NotifySupportRotationRegistered() override;
+    void NotifySupportRotationChange(const SupportRotationInfo& supportRotationInfo);
+    WMError NotifySupportRotationRegistered() override;
 
     std::vector<sptr<SceneSession>> GetSceneSessions(ScreenId screenId);
     WMError UpdateScreenLockState(int32_t persistentId);
