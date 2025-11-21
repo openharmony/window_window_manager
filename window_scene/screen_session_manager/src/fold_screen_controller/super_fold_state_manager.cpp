@@ -903,8 +903,6 @@ void SuperFoldStateManager::HandleHalfFoldToExtendDisplayNotify(sptr<ScreenSessi
 void SuperFoldStateManager::HandleKeyboardOnDisplayNotify(sptr<ScreenSession>& screenSession)
 {
     TLOGI(WmsLogTag::DMS, "SuperFoldStateManager HandleKeyboardOnDisplayNotify");
-    bool currFakeInUse = screenSession->GetScreenProperty().GetIsPreFakeInUse();
-    screenSession->SetIsPreFakeInUse(screenSession->GetScreenProperty().GetIsFakeInUse());
     screenSession->SetIsBScreenHalf(true);
     sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
     sptr<DisplayInfo> fakeDisplayInfo = fakeScreenSession->ConvertToDisplayInfo();
@@ -913,7 +911,8 @@ void SuperFoldStateManager::HandleKeyboardOnDisplayNotify(sptr<ScreenSession>& s
         return;
     }
     DisplayId fakeDisplayId = fakeDisplayInfo->GetDisplayId();
-    if (currFakeInUse) {
+    bool isDestory = screenSession->GetIsDestoryDisplay();
+    if (isDestory) {
         ScreenSessionManager::GetInstance().NotifyDisplayDestroy(fakeDisplayId);
     }
 }
