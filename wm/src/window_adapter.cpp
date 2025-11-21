@@ -587,6 +587,7 @@ void WindowAdapter::WindowManagerAndSessionRecover()
     ReregisterWindowManagerAgent();
     RecoverWindowPropertyChangeFlag();
     RecoverWatermarkImageForApp();
+    RecoverSpecificZIndexSetByApp();
 
     std::map<int32_t, SessionRecoverCallbackFunc> sessionRecoverCallbackFuncMap;
     {
@@ -625,6 +626,19 @@ void WindowAdapter::WindowManagerAndSessionRecover()
             TLOGE(WmsLogTag::WMS_ANIMATION, "Recover outline failed, ret: %{public}d.", ret);
         }
     }
+}
+
+void WindowAdapter::RecoverSpecificZIndexSetByApp()
+{
+    if (specificZIndexMap_.empty()) {
+        return WMError::WM_OK;
+    }
+    for (const auto& elem : focusGroupMap_) {
+        SetSpecificWindowZIndex(elem.first, elem.second);
+        TLOGI(WmsLogTag::WMS_FOCUS, "windowType: %{public}d, zIndex: %{public}d",
+            elem.first, elem.second);
+    }
+    return errCode;
 }
 
 WMError  WindowAdapter::RecoverWindowPropertyChangeFlag()
@@ -1081,6 +1095,7 @@ WMError WindowAdapter::SetSpecificWindowZIndex(WindowType windowType, int32_t zI
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
+    specificZIndexMap_[windowType] = zIndex;
     return static_cast<WMError>(
         wmsProxy->SetSpecificWindowZIndex(windowType, zIndex));
 }

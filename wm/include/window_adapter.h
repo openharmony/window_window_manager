@@ -266,10 +266,12 @@ private:
     void ReregisterWindowManagerAgent();
     void ReregisterWindowManagerFaultAgent();
     void WindowManagerAndSessionRecover();
+    void RecoverSpecificZIndexSetByApp();
     WMError RecoverWindowPropertyChangeFlag();
     uint32_t observedFlags_;
     uint32_t interestedFlags_;
     std::string appWatermarkName_;
+    std::unordered_map<WindowType, int32_t> specificZIndexMap_;
 
     sptr<IWindowManager> GetWindowManagerServiceProxy() const;
 
