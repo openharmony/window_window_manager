@@ -1681,11 +1681,19 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetGestureNavigationEnabled, TestSiz
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleConvertToRelativeCoordinateExtended, TestSize.Level1)
 {
-    MessageParcel data1;
+    MessageParcel data0;
     MessageParcel reply;
 
     Rect rect = {200, 100, 400, 600};
+    DisplayId newDisplayId = 0;
+    data0.WriteInt32(rect.posX_);
+    data0.WriteInt32(rect.posY_);
+    data0.WriteInt32(rect.width_);
+    data0.WriteInt32(rect.height_);
+    data0.WriteInt64(newDisplayId);
+    int res0 = stub_->HandleConvertToRelativeCoordinateExtended(data0, reply);
 
+    MessageParcel data1;
     data1.WriteInt32(rect.posX_);
     data1.WriteInt32(rect.posY_);
     data1.WriteInt32(rect.width_);
