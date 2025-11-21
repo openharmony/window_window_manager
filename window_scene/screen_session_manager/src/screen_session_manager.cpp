@@ -1397,7 +1397,7 @@ void ScreenSessionManager::RecoverScreenActiveMode(ScreenId rsScreenId)
         TLOGE(WmsLogTag::DMS, "mode is empty");
         return;
     }
-    uint32_t activeId = -1;
+    int32_t activeId = -1;
     std::map<std::string, SupportedScreenModes> resolutionMap = ScreenSettingHelper::GetResolutionMode();
     std::string serialNumber = screenSession->GetSerialNumber();
     if(CheckResolutionMode(resolutionMap, serialNumber)) {
@@ -1407,7 +1407,7 @@ void ScreenSessionManager::RecoverScreenActiveMode(ScreenId rsScreenId)
         activeId = static_cast<int32_t>(modes.size()) - 2;
     }
     TLOGI(WmsLogTag::DMS, "activeId: %{public}d", activeId);
-    if(activeId == static_cast<uint32_t>(-1)) {
+    if(activeId == -1) {
         TLOGE(WmsLogTag::DMS, "no matching resolution, activeId: %{public}d", activeId);
         return;
     }

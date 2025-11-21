@@ -54,7 +54,7 @@ public:
     static bool IsNumber(const std::string& str);
     static std::map<std::string, MultiScreenInfo> GetMultiScreenInfo(const std::string& key = SETTING_SCREEN_MODE_KEY);
     static std::map<std::string, SupportedScreenModes> GetResolutionMode(const std::string& key =
-        SETTING_SCREEN_MODE_KEY);
+        SETTING_SCREEN_RESOLUTION_MODE_KEY);
     static bool GetScreenMode(MultiScreenInfo& info, const std::string& inputString);
     static bool UpdateScreenMode(MultiScreenInfo& info, uint32_t mode, bool isExternal);
     static bool GetScreenActiveMode(SupportedScreenModes& info, const std::string& inputString);
