@@ -129,8 +129,7 @@ static void LogEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, con
 template <typename EventType>
 typename std::enable_if<
     std::is_same<EventType, MMI::KeyEvent>::value ||
-    std::is_same<EventType, MMI::PointerEvent>::value, bool>::type
-processSendEvent(std::mutex& mtx,
+    std::is_same<EventType, MMI::PointerEvent>::value, bool>::type processSendEvent(std::mutex& mtx,
     std::vector<IInputEventRecipientInfo>& recipientArray, const std::shared_ptr<EventType>& event)
 {
     if (event == nullptr) {
