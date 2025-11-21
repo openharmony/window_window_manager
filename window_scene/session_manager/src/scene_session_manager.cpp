@@ -8084,7 +8084,8 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
         }
         if (preFocusedSessionFound && session->CheckFocusable() &&
             session->IsVisibleNotBackground() && IsParentSessionVisible(session)) {
-            if (session->GetWindowType() != WindowType::WINDOW_TYPE_DESKTOP || currentSessionDisplayId == displayId) {
+            if (!systemConfig_.IsPcWindow() || session->GetWindowType() != WindowType::WINDOW_TYPE_DESKTOP ||
+                currentSessionDisplayId == displayId) {
                 nextFocusableSession = session;
                 return true;
             }
