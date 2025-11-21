@@ -165,6 +165,7 @@ public:
         TRANS_ID_MINIMIZE_ALL_WINDOW,
         TRANS_ID_GLOBAL_COORDINATE_TO_RELATIVE_COORDINATE,
         TRANS_ID_UPDATE_OUTLINE,
+        TRANS_ID_SET_SPECIFIC_WINDOW_ZINDEX,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -354,6 +355,10 @@ public:
      */
     WSError RaiseWindowToTop(int32_t persistentId) override { return WSError::WS_OK; }
     WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override
+    {
+        return WSError::WS_OK;
+    }
+    WSError SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex) override
     {
         return WSError::WS_OK;
     }

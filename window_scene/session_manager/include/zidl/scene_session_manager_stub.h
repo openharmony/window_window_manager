@@ -158,6 +158,7 @@ private:
     int HandleGetPiPSettingSwitchStatus(MessageParcel& data, MessageParcel& reply);
     int HandleMinimizeAllAppWindows(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateOutline(MessageParcel& data, MessageParcel& reply);
+    int HandleSetSpecificWindowZIndex(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H
