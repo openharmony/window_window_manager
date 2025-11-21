@@ -616,7 +616,7 @@ void JsSceneSessionManager::OnSupportRotationRegistered()
     TLOGD(WmsLogTag::WMS_ROTATION, "[NAPI]");
     auto task = [jsCallBack = GetJSCallback(NOTIFY_SUPPORT_ROTATION_REGISTERED_CB), env = env_] {
         if (jsCallBack == nullptr) {
-            TLOGNE(WmsLogTag::WMS_ROTRATION, "jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_ROTATION, "jsCallBack is nullptr");
             return;
         }
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, {}, nullptr);

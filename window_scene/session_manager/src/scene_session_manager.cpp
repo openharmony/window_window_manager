@@ -18663,6 +18663,6 @@ WMError SceneSessionManager::NotifySupportRotationRegistered()
     } else {
         TLOGE(WmsLogTag::WMS_ROTATION, "supportRotationRegisteredListener_ is null");
     }
-    return WMError:OK;
+    return WMError::WM_OK;
 }
 } // namespace OHOS::Rosen

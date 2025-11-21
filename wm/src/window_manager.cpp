@@ -2607,7 +2607,7 @@ WMError WindowManager::RegisterWindowSupportRotationListener(const sptr<IWindowS
         if (pImpl_->windowSupportRotationListenerAgent_ == nullptr) {
             pImpl_->windowSupportRotationListenerAgent_ = new WindowManagerAgent();
         }
-        ret = WindowAdapter::GetInstance(userId_)->RegisterWindowManagerAgent(
+        ret = WindowAdapter::GetInstance(userId_).RegisterWindowManagerAgent(
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_SUPPORT_ROTATION,
             pImpl_->windowSupportRotationListenerAgent_);
         if (ret != WMError::WM_OK) {
@@ -2623,7 +2623,7 @@ WMError WindowManager::RegisterWindowSupportRotationListener(const sptr<IWindowS
         }
     }
 
-    WMError ret = WindowAdapter::GetInstance(userId_)->NotifySupportRotationRegistered();
+    WMError ret = WindowAdapter::GetInstance(userId_).NotifySupportRotationRegistered();
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_ROTATION, "NotifySupportRotationRegistered failed");
     }
@@ -2644,7 +2644,7 @@ WMError WindowManager::UnregisterWindowSupportRotationListener(const sptr<IWindo
         pImpl_->windowSupportRotationListeners_.end());
         WMError ret = WMError::WM_OK;
         if (pImpl_->windowSupportRotationListeners_.empty() && pImpl_->windowSupportRotationListenerAgent_ != nullptr) {
-            ret = WindowAdapter::GetInstance(userId_)->UnregisterWindowManagerAgent(
+            ret = WindowAdapter::GetInstance(userId_).UnregisterWindowManagerAgent(
                 WindowManagerAgentType::WINDOW_MANAGER_AGENT_SUPPORT_ROTATION,
                 pImpl_->windowSupportRotationListenerAgent_);
             if (ret == WMError::WM_OK) {
