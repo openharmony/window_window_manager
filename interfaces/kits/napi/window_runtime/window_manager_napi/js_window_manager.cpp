@@ -1752,22 +1752,27 @@ napi_value JsWindowManager::OnShiftAppWindowPointerEvent(napi_env env, napi_call
     napi_value argv[ARGC_FOUR] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARGC_TWO) {
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        TLOGE(WmsLogTag::WMS_PC, "parameter number is illegal");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][shiftAppWindowPointerEvent]msg:parameter number is illegal");
     }
     int32_t sourceWindowId;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], sourceWindowId)) {
         TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to sourceWindowId");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][shiftAppWindowPointerEvent]msg:Failed to convert parameter to sourceWindowId");
     }
     int32_t targetWindowId;
     if (!ConvertFromJsValue(env, argv[INDEX_ONE], targetWindowId)) {
         TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to targetWindowId");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][shiftAppWindowPointerEvent]msg:Failed to convert parameter to targetWindowId");
     }
     if (sourceWindowId == static_cast<int32_t>(INVALID_WINDOW_ID) ||
         targetWindowId == static_cast<int32_t>(INVALID_WINDOW_ID)) {
         TLOGE(WmsLogTag::WMS_PC, "invalid sourceWindowId or targetWindowId");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][shiftAppWindowPointerEvent]msg:invalid sourceWindowId or targetWindowId");
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
@@ -1777,7 +1782,7 @@ napi_value JsWindowManager::OnShiftAppWindowPointerEvent(napi_env env, napi_call
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "shiftAppWindowPointerEvent failed"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "[window][shiftAppWindowPointerEvent]"));
         }
     };
     napi_status status = napi_send_event(env, std::move(asyncTask), napi_eprio_high, "OnShiftAppWindowPointerEvent");
@@ -1795,22 +1800,26 @@ napi_value JsWindowManager::OnShiftAppWindowTouchEvent(napi_env env, napi_callba
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARGC_THREE) {
         TLOGE(WmsLogTag::WMS_PC, "parameter number is illegal");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][shiftAppWindowTouchEvent]msg:parameter number is illegal");
     }
     int32_t sourceWindowId = static_cast<int32_t>(INVALID_WINDOW_ID);
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], sourceWindowId)) {
         TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to sourceWindowId");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][shiftAppWindowTouchEvent]msg:Failed to convert parameter to sourceWindowId");
     }
     int32_t targetWindowId = static_cast<int32_t>(INVALID_WINDOW_ID);
     if (!ConvertFromJsValue(env, argv[INDEX_ONE], targetWindowId)) {
         TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to targetWindowId");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][shiftAppWindowTouchEvent]msg:Failed to convert parameter to targetWindowId");
     }
     int32_t fingerId = static_cast<int32_t>(INVALID_FINGER_ID);
     if (!ConvertFromJsValue(env, argv[INDEX_TWO], fingerId)) {
         TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to fingerId");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][shiftAppWindowTouchEvent]msg:Failed to convert parameter to fingerId");
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
@@ -1819,8 +1828,8 @@ napi_value JsWindowManager::OnShiftAppWindowTouchEvent(napi_env env, napi_callba
             targetWindowId <= static_cast<int32_t>(INVALID_WINDOW_ID) ||
             (fingerId <= static_cast<int32_t>(INVALID_FINGER_ID))) {
             TLOGE(WmsLogTag::WMS_PC, "invalid sourceWindowId or targetWindowId or fingerId");
-            task->Reject(env, JsErrUtils::CreateJsError(env,
-                         WmErrorCode::WM_ERROR_ILLEGAL_PARAM, "shiftAppWindowTouchEvent failed"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM,
+                        "[window][shiftAppWindowTouchEvent]msg:invalid sourceWindowId or targetWindowId or fingerId"));
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().
@@ -1828,7 +1837,7 @@ napi_value JsWindowManager::OnShiftAppWindowTouchEvent(napi_env env, napi_callba
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "shiftAppWindowTouchEvent failed"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "[window][shiftAppWindowTouchEvent]"));
         }
     };
     napi_status status = napi_send_event(env, std::move(asyncTask), napi_eprio_high, "OnShiftAppWindowTouchEvent");
