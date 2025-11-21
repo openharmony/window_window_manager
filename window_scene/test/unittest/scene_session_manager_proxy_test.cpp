@@ -2352,7 +2352,6 @@ HWTEST_F(sceneSessionManagerProxyTest, NotifySupportRotationRegistered, TestSize
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
     
     // SendRequest failed
-    ASSERT_NE(proxy, nullptr);
     remoteMocker->SetRequestResult(ERR_INVALID_DATA);
     ret = proxy->NotifySupportRotationRegistered();
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);

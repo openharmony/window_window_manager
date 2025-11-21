@@ -62,6 +62,7 @@ constexpr uint32_t MAX_SIZE_PIP_CONTROL_GROUP = 8;
 constexpr uint32_t MAX_SIZE_PIP_CONTROL = 9;
 constexpr int32_t SPECIFIC_ZINDEX_INVALID = -1;
 constexpr double POS_ZERO = 0.001f;
+constexpr uint32_t SUPPORT_ROTATION_SIZE = 4;
 /*
  * PC Window Sidebar Blur
  */
@@ -3335,6 +3336,7 @@ struct OutlineParams : public Parcelable {
 struct SupportRotationInfo : public Parcelable {
     DisplayId displayId_ = DISPLAY_ID_INVALID;
     int32_t persistentId_ = 0;
+    // ture means support rotate to index*90 rotation
     std::vector<bool> containerSupportRotation_ = {true, false, false, false};
     std::vector<bool> sceneSupportRotation_ = {true, false, false, false};
     std::string supportRotationChangeReason_ = "";
@@ -3349,12 +3351,12 @@ struct SupportRotationInfo : public Parcelable {
         if(!parcel.WriteInt32(persistentId_)) {
             return false;
         }
-        for(int i = 0; i < 4; i++) {
+        for(int i = 0; i < SUPPORT_ROTATION_SIZE; i++) {
             if(!parcel.WriteBool(containerSupportRotation_[i])) {
                 return false;
             }
         }
-        for(int i = 0; i < 4; i++) {
+        for(int i = 0; i < SUPPORT_ROTATION_SIZE; i++) {
             if(!parcel.WriteBool(sceneSupportRotation_[i])) {
                 return false;
             }
@@ -3376,7 +3378,7 @@ struct SupportRotationInfo : public Parcelable {
             delete supportRotationInfo;
             return nullptr;
         }
-        for(int i = 0; i < 4; i++) {
+        for(int i = 0; i < SUPPORT_ROTATION_SIZE; i++) {
             bool isSupport = false;
             if(!parcel.ReadBool(isSupport)) {
                 delete supportRotationInfo;
@@ -3384,7 +3386,7 @@ struct SupportRotationInfo : public Parcelable {
             }
             supportRotationInfo->containerSupportRotation_[i] = isSupport;
         }
-        for(int i = 0; i < 4; i++) {
+        for(int i = 0; i < SUPPORT_ROTATION_SIZE; i++) {
             bool isSupport = false;
             if(!parcel.ReadBool(isSupport)) {
                 delete supportRotationInfo;
