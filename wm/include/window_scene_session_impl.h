@@ -19,6 +19,7 @@
 #include "window_session_impl.h"
 #include "window_manager.h"
 #include "screen_manager.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -205,6 +206,7 @@ public:
     WMError IsWindowRectAutoSave(bool& enabled) override;
     WMError MaximizeFloating() override;
     WMError MaximizeForCompatibleMode();
+    WMError SwitchCompatibleMode(CompatibleStyleMode styleMode);
     WMError RecoverForCompatibleMode();
     WMError Maximize() override;
     WMError Maximize(MaximizePresentation presentation) override;
