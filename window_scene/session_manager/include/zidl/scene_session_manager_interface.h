@@ -166,6 +166,7 @@ public:
         TRANS_ID_GLOBAL_COORDINATE_TO_RELATIVE_COORDINATE,
         TRANS_ID_UPDATE_OUTLINE,
         TRANS_ID_SET_SPECIFIC_WINDOW_ZINDEX,
+        TRANS_ID_SUPPORT_ROTATION_REGISTERED,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -474,6 +475,7 @@ public:
     {
         return WMError::WM_OK;
     }
+    WMError NotifySupportRotationRegistered() override { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

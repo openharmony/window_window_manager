@@ -610,6 +610,22 @@ public:
     virtual void OnPiPStateChanged(const std::string& bundleName, bool isForeground) = 0;
 };
 
+/*
+ * @class IWindowSupportRotationListener
+ *
+ * @brief IWindowSupportRotationListener is used to observe the window support rotation change.
+ */
+class IWindowSupportRotationListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window support rotation change
+     *
+     * @param supportRotationInfo information of support rotation
+     *
+     */
+    virtual void OnSupportRotationChange(const SupportRotationInfo& supportRotationInfo) = 0;
+};
+
 /**
  * @class WindowManager
  *
@@ -1373,6 +1389,27 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterWindowLifeCycleCallback(const sptr<IWindowLifeCycleListener>& listener);
+
+    /**
+     * @brief Register window support rotation change listener.
+     *
+     * @param listener IWindowSupportRotationListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    WMError RegisterWindowSupportRotationListener(const sptr<IWindowSupportRotationListener>& listener);
+
+    /**
+     * @brief Unregister window support rotation change listener.
+     *
+     * @param listener IWindowSupportRotationListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterWindowSupportRotationListener(const sptr<IWindowSupportRotationListener>& listener);
+
+    /*
+     * notify support rotation change to listener
+     */
+    void NotifySupportRotationChange(const SupportRotationInfo& supportRotationInfo);
 
     /**
      * @brief Register get js window callback.

@@ -280,6 +280,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleUpdateOutline(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SPECIFIC_WINDOW_ZINDEX):
             return HandleSetSpecificWindowZIndex(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SUPPORT_ROTATION_REGISTERED):
+            return HandleNotifySupportRotationRegistered(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -2674,6 +2676,12 @@ int SceneSessionManagerStub::HandleConvertToRelativeCoordinateExtended(MessagePa
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write errCode failed.");
         return ERR_TRANSACTION_FAILED;
     }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleNotifySupportRotationRegistered(MessageParcel& data, MessageParcel& reply)
+{
+    NotifySupportRotationRegistered();
     return ERR_NONE;
 }
 

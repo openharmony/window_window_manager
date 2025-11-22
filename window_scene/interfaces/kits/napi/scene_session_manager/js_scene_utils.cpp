@@ -1279,6 +1279,63 @@ bool ConvertInfoFromJsValue(napi_env env, napi_value jsObject, RotationChangeInf
     return true;
 }
 
+
+bool ConvertSupportRotationInfoFromJsValue(napi_env env, napi_value jsObject,
+    SupportRotationInfo& suppoortRotationInfo)
+{
+    napi_value jsDisplayId = nullptr;
+    napi_value jsPersistentId = nullptr;
+    napi_value jsContainerSupportRotation = nullptr;
+    napi_value jsSceneSupportRotation = nullptr;
+    napi_value jsSupportRotationChangeReason = nullptr;
+    napi_get_named_property(env, jsObject, "displayId", &jsDisplayId);
+    napi_get_named_property(env, jsObject, "persistentId", &jsPersistentId);
+    napi_get_named_property(env, jsObject, "containerSupportRotation", &jsContainerSupportRotation);
+    napi_get_named_property(env, jsObject, "sceneSupportRotation", &jsSceneSupportRotation);
+    napi_get_named_property(env, jsObject, "supportRotationChangeReason", &jsSupportRotationChangeReason);
+    if (GetType(env, jsDisplayId) != napi_undefined) {
+        uint32_t displayId;
+        if (!ConvertFromJsValue(env, jsDisplayId, displayId)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to displayId");
+            return false;
+        }
+        suppoortRotationInfo.displayId_ = static_cast<uint64_t>(displayId);
+    }
+    if (GetType(env, jsPersistentId) != napi_undefined) {
+        uint32_t persistentId;
+        if (!ConvertFromJsValue(env, jsPersistentId, persistentId)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to persistentId");
+            return false;
+        }
+        suppoortRotationInfo.persistentId_ = persistentId;
+    }
+    if (GetType(env, jsContainerSupportRotation) != napi_undefined) {
+        std::vector<bool> containerSupportRotation;
+        if (!ParseBoolArrayValueFromJsValue(env, jsContainerSupportRotation, containerSupportRotation)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to containerSupportRotation");
+            return false;
+        }
+        suppoortRotationInfo.containerSupportRotation_ = containerSupportRotation;
+    }
+    if (GetType(env, jsSceneSupportRotation) != napi_undefined) {
+        std::vector<bool> sceneSupportRotation;
+        if (!ParseBoolArrayValueFromJsValue(env, jsSceneSupportRotation, sceneSupportRotation)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to sceneSupportRotation");
+            return false;
+        }
+        suppoortRotationInfo.sceneSupportRotation_ = sceneSupportRotation;
+    }
+    if (GetType(env, jsSupportRotationChangeReason) != napi_undefined) {
+        std::string supportRotationChangeReason;
+        if (!ConvertFromJsValue(env, jsSupportRotationChangeReason, supportRotationChangeReason)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to supportRotationChangeReason");
+            return false;
+        }
+        suppoortRotationInfo.supportRotationChangeReason_ = supportRotationChangeReason;
+    }
+    return true;
+}
+
 bool ConvertDragResizeTypeFromJs(napi_env env, napi_value value, DragResizeType& dragResizeType)
 {
     uint32_t dragResizeTypeValue;
@@ -1366,6 +1423,37 @@ bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::stri
         if (!ConvertFromJsValue(env, jsValue, strItem)) {
             WLOGFW("Failed to ConvertFromJsValue, index: %{public}u", i);
             continue;
+        }
+        vector.emplace_back(std::move(strItem));
+    }
+    return true;
+}
+
+bool ParseBoolArrayValueFromJsValue(napi_env env, napi_value array, std::vector<bool>& vector)
+{
+    if (array == nullptr) {
+        WLOGFE("array is nullptr!");
+        return false;
+    }
+    bool isArray = false;
+    if (napi_is_array(env, array, &isArray) != napi_ok || isArray == false) {
+        WLOGFE("not array!");
+        return false;
+    }
+
+    uint32_t arrayLen = 0;
+    napi_get_array_length(env, array, &arrayLen);
+    if (arrayLen == 0) {
+        return true;
+    }
+    vector.reserve(arrayLen);
+    for (uint32_t i = 0; i < arrayLen; i++) {
+        bool strItem;
+        napi_value jsValue = nullptr;
+        napi_get_element(env, array, i, &jsValue);
+        if (!ConvertFromJsValue(env, jsValue, strItem)) {
+            WLOGFW("Failed to ConvertFromJsValue, index: %{public}u", i);
+            return false;
         }
         vector.emplace_back(std::move(strItem));
     }
