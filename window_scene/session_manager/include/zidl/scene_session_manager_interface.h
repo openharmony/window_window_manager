@@ -272,7 +272,7 @@ public:
         sptr<MoveDragProperty>& moveDragProperty) override {}
     void ProcessPointDown(uint32_t windowId, bool isPointDown) override {}
     void ProcessPointUp(uint32_t windowId) override {}
-    WMError MinimizeAllAppWindows(DisplayId displayId) override { return WMError::WM_OK; }
+    WMError MinimizeAllAppWindows(DisplayId displayId, int32_t excludeWindowId = 0) override { return WMError::WM_OK; }
     WMError ToggleShownStateForAllAppWindows() override { return WMError::WM_OK; }
     WMError SetWindowLayoutMode(WindowLayoutMode mode) override { return WMError::WM_OK; }
     WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,

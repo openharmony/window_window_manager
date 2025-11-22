@@ -838,10 +838,10 @@ WMError WindowManager::UnregisterSystemBarChangedListener(const sptr<ISystemBarC
     return ret;
 }
 
-WMError WindowManager::MinimizeAllAppWindows(DisplayId displayId)
+WMError WindowManager::MinimizeAllAppWindows(DisplayId displayId, int32_t excludeWindowId)
 {
-    WLOGFD("displayId %{public}" PRIu64"", displayId);
-    return WindowAdapter::GetInstance(userId_).MinimizeAllAppWindows(displayId);
+    WLOGFD("displayId %{public}" PRIu64", excludeWindowId %{public}d", displayId, excludeWindowId);
+    return WindowAdapter::GetInstance(userId_).MinimizeAllAppWindows(displayId, excludeWindowId);
 }
 
 WMError WindowManager::ToggleShownStateForAllAppWindows()

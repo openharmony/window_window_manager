@@ -3017,7 +3017,7 @@ WMError SceneSessionManagerProxy::GetWindowModeType(WindowModeType& windowModeTy
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerProxy::MinimizeAllAppWindows(DisplayId displayId)
+WMError SceneSessionManagerProxy::MinimizeAllAppWindows(DisplayId displayId, int32_t excludeWindowId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -3028,6 +3028,10 @@ WMError SceneSessionManagerProxy::MinimizeAllAppWindows(DisplayId displayId)
     }
     if (!data.WriteUint64(displayId)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write displayId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(excludeWindowId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write excludeWindowId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
