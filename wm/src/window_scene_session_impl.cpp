@@ -7297,6 +7297,18 @@ WMError WindowSceneSessionImpl::OnContainerModalEvent(const std::string& eventNa
     } else if (eventName == COMPATIBLE_RECOVER_WINDOW_EVENT) {
         RecoverForCompatibleMode();
         return WMError::WM_OK;
+    }  else if (eventName == NAME_LANDSCAPE_18_9_CLICK) {
+        SwitchCompatibleMode(CompatibleStyleMode::LANDSCAPE_18_9);
+        return WMError::WM_OK;
+    } else if (eventName == NAME_LANDSCAPE_1_1_CLICK) {
+        SwitchCompatibleMode(CompatibleStyleMode::LANDSCAPE_1_1);
+        return WMError::WM_OK;
+    } else if (eventName == NAME_LANDSCAPE_2_3_CLICK) {
+        SwitchCompatibleMode(CompatibleStyleMode::LANDSCAPE_2_3);
+        return WMError::WM_OK;
+    } else if (eventName == NAME_DEFAULT_LANDSCAPE_CLICK) {
+        SwitchCompatibleMode(CompatibleStyleMode::LANDSCAPE_DEFAULT);
+        return WMError::WM_OK;
     }
     return WMError::WM_DO_NOTHING;
 }
