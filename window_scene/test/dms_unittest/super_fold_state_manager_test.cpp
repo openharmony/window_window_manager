@@ -503,10 +503,10 @@ HWTEST_F(SuperFoldStateManagerTest, RefreshMirrorRegionInner_NormalCase, TestSiz
 HWTEST_F(SuperFoldStateManagerTest, RefreshExternalRegion_ShouldReturnOk_WhenNoExtendScreenConnected, TestSize.Level1)
 {
     ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
-    ssm_.SetIsExtendScreenConnected(false);
+    ssm_.SetIsPhysicalExtendScreenConnected(false);
     SuperFoldStateManager superFoldStateManager;
     DMError result = superFoldStateManager.RefreshExternalRegion();
-    ssm_.SetIsExtendScreenConnected(true);
+    ssm_.SetIsPhysicalExtendScreenConnected(true);
  
     sptr<ScreenSession> mainScreenSession = ssm_.GetOrCreateScreenSession(0);
     mainScreenSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);

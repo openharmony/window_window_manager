@@ -230,7 +230,7 @@ void SuperFoldSensorManager::NotifyHallChanged(uint16_t Hall)
 void SuperFoldSensorManager::HandleSuperSensorChange(SuperFoldStatusChangeEvents events)
 {
     // trigger events
-    if (ScreenSessionManager::GetInstance().GetIsExtendMode() ||
+    if (ScreenSessionManager::GetInstance().GetIsExtendModelocked() ||
         ScreenSessionManager::GetInstance().GetIsFoldStatusLocked() ||
         ScreenSessionManager::GetInstance().GetIsLandscapeLockStatus()) {
         return;
@@ -238,19 +238,19 @@ void SuperFoldSensorManager::HandleSuperSensorChange(SuperFoldStatusChangeEvents
     SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events);
 }
 
-void SuperFoldSensorManager::HandleScreenConnectChange()
+void SuperFoldSensorManager::DriveStateMachineToExpand()
 {
-    TLOGW(WmsLogTag::DMS, "Screen connect to stop statemachine.");
-    SuperFoldStateManager::GetInstance().HandleScreenConnectChange();
+    TLOGW(WmsLogTag::DMS, "to expand.");
+    SuperFoldStateManager::GetInstance().DriveStateMachineToExpand();
 }
 
-void SuperFoldSensorManager::HandleScreenDisconnectChange()
+void SuperFoldSensorManager::SetStateMachineToActived()
 {
     if (ScreenSessionManager::GetInstance().GetIsFoldStatusLocked()) {
         TLOGW(WmsLogTag::DMS, "Fold status is still locked.");
         return;
     }
-    if (ScreenSessionManager::GetInstance().GetIsExtendScreenConnected()) {
+    if (ScreenSessionManager::GetInstance().GetIsExtendModelocked()) {
         TLOGW(WmsLogTag::DMS, "Extend screen is still connected.");
         return;
     }
@@ -266,7 +266,7 @@ void SuperFoldSensorManager::HandleScreenDisconnectChange()
 void SuperFoldSensorManager::HandleFoldStatusLockedToExpand()
 {
     TLOGI(WmsLogTag::DMS, "Fold status locked to expand and stop statemachine.");
-    SuperFoldStateManager::GetInstance().HandleScreenConnectChange();
+    SuperFoldStateManager::GetInstance().DriveStateMachineToExpand();
 }
 
 void SuperFoldSensorManager::HandleFoldStatusUnlocked()
