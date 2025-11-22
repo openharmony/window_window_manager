@@ -2877,6 +2877,8 @@ HWTEST_F(WindowExtensionSessionImplTest, SetUIExtCustomDensity, TestSize.Level1)
     option->SetWindowName("UpdateExtensionDensity");
     sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetUIExtCustomDensity(0.0f));
+
+    window->handler_ = nullptr;
     EXPECT_EQ(WMError::WM_ERROR_SYSTEM_ABNORMALLY, window->SetUIExtCustomDensity(1.0f));
 
     auto runner = AppExecFwk::EventRunner::Create("WindowExtensionSessionImplTest");
