@@ -1384,6 +1384,13 @@ public:
     WMError RegisterWindowLifeCycleCallback(const sptr<IWindowLifeCycleListener>& listener);
 
     /**
+     * @brief Unregister window lifecycle status changed callback.
+     * @param listener IWindowLifeCycleListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterWindowLifeCycleCallback(const sptr<IWindowLifeCycleListener>& listener);
+
+    /**
      * @brief Register window support rotation change listener.
      *
      * @param listener IWindowSupportRotationListener.
@@ -1403,13 +1410,6 @@ public:
      * notify support rotation change to listener
      */
     void NotifySupportRotationChange(const SupportRotationInfo& supportRotationInfo);
-
-    /**
-     * @brief Unregister window lifecycle status changed callback.
-     * @param listener IWindowLifeCycleListener.
-     * @return WM_OK means unregister success, others means unregister failed.
-     */
-    WMError UnregisterWindowLifeCycleCallback(const sptr<IWindowLifeCycleListener>& listener);
 
     /**
      * @brief Register get js window callback.
