@@ -57,8 +57,8 @@ public:
 
     float GetCurAngle();
 
-    void HandleScreenConnectChange();
-    void HandleScreenDisconnectChange();
+    void DriveStateMachineToExpand();
+    void SetStateMachineToActived();
     void HandleFoldStatusLockedToExpand();
     void HandleFoldStatusUnlocked();
     void SetTaskScheduler(std::shared_ptr<TaskScheduler> scheduler);

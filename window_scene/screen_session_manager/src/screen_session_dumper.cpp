@@ -1116,9 +1116,9 @@ void ScreenSessionDumper::SetLandscapeLock(std::string input)
         }
         int32_t value = std::stoi(valueStr);
         if (value) {
-            ScreenSessionManager::GetInstance().HandleExtendScreenConnect(0);
+            ScreenSessionManager::GetInstance().SetExpandAndHorizontalLocked(true);
         } else {
-            ScreenSessionManager::GetInstance().HandleExtendScreenDisconnect(0);
+            ScreenSessionManager::GetInstance().SetExpandAndHorizontalLocked(false);
         }
         TLOGI(WmsLogTag::DMS, "landscape lock: %{public}d", value);
     }

@@ -1268,7 +1268,7 @@ void ScreenSessionManager::SetMultiScreenDefaultRelativePosition()
         ScreenProperty mainProperty = mainSession->GetScreenProperty();
         int32_t mainWidth = mainProperty.GetBounds().rect_.GetWidth();
         int32_t mainHeight = mainProperty.GetBounds().rect_.GetHeight();
-        if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && GetIsExtendScreenConnected() &&
+        if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && GetIsPhysicalExtendScreenConnected() &&
             mainHeight > mainWidth) {
             mainWidth = mainHeight;
         }
@@ -1321,9 +1321,9 @@ void ScreenSessionManager::LockLandExtendIfScreenInfoNull(sptr<ScreenSession>& s
         TLOGI(WmsLogTag::DMS, "not superFoldDisplayDevice");
         return;
    }
-   if (GetIsExtendScreenConnected()) {
-        SetIsExtendMode(true);
-        HandleExtendScreenConnect(GetDefaultScreenId());
+   if (GetIsPhysicalExtendScreenConnected()) {
+        SetIsExtendModelocked(true);
+        SetExpandAndHorizontalLocked(true);
    }
 #endif
 }
@@ -1793,7 +1793,9 @@ void ScreenSessionManager::HandleScreenDisconnectEvent(sptr<ScreenSession> scree
         }
     }
 #ifdef WM_MULTI_SCREEN_ENABLE
-    HandleExtendScreenDisconnect(screenId);
+    SetIsExtendModelocked(false);
+    SetIsPhysicalExtendScreenConnected(false);
+    SetExpandAndHorizontalLocked(false);
 #endif
     HandleMapWhenScreenDisconnect(screenId);
     if (g_isPcDevice) {
@@ -3469,7 +3471,7 @@ sptr<ScreenSession> ScreenSessionManager::CreatePhysicalMirrorSessionInner(Scree
     MultiScreenManager::GetInstance().MultiScreenReportDataToRss(SCREEN_EXTEND, MULTI_SCREEN_ENTER_STR);
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         TLOGI(WmsLogTag::DMS, "set ExtendConnect flag = true");
-        SetIsExtendScreenConnected(true);
+        SetIsPhysicalExtendScreenConnected(true);
         extendScreenConnectStatus_.store(ExtendScreenConnectStatus::CONNECT);
         OnExtendScreenConnectStatusChange(screenId, ExtendScreenConnectStatus::CONNECT);
     }
@@ -6209,6 +6211,11 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
         }
         RemoveScreenCastInfo(screenId);
         NotifyScreenDisconnected(screenId);
+        if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && screen->GetIsExtendVirtual()) {
+            SetIsExtendModelocked(false);
+            SetExpandAndHorizontalLocked(false);
+            TLOGW(WmsLogTag::DMS, "statemachine unlocked");
+        }
         if (auto clientProxy = GetClientProxy()) {
             clientProxy->OnVirtualScreenDisconnected(rsScreenId);
         }
@@ -8755,6 +8762,7 @@ bool ScreenSessionManager::GetIsLandscapeLockStatus()
 void ScreenSessionManager::SetIsLandscapeLockStatus(bool isLandscapeLockStatus)
 {
     isLandscapeLockStatus_ = isLandscapeLockStatus;
+    TLOGW(WmsLogTag::DMS, "statemachine landscape locked is: %{public}d", static_cast<int32_t>(isLandscapeLockStatus_));
 }
 
 void ScreenSessionManager::SetLandscapeLockStatus(bool isLocked)
@@ -8770,10 +8778,10 @@ void ScreenSessionManager::SetLandscapeLockStatus(bool isLocked)
     }
     if (isLocked) {
         SetIsLandscapeLockStatus(true);
-        SuperFoldSensorManager::GetInstance().HandleScreenConnectChange();
+        SuperFoldSensorManager::GetInstance().DriveStateMachineToExpand();
     } else {
         SetIsLandscapeLockStatus(false);
-        SuperFoldSensorManager::GetInstance().HandleScreenDisconnectChange();
+        SuperFoldSensorManager::GetInstance().SetStateMachineToActived();
     }
 #endif
 }
@@ -8788,52 +8796,51 @@ ExtendScreenConnectStatus ScreenSessionManager::GetExtendScreenConnectStatus()
 #endif
 }
 
-bool ScreenSessionManager::GetIsExtendScreenConnected()
+bool ScreenSessionManager::GetIsPhysicalExtendScreenConnected()
 {
     return isExtendScreenConnected_;
 }
 
-void ScreenSessionManager::SetIsExtendScreenConnected(bool isExtendScreenConnected)
+void ScreenSessionManager::SetIsPhysicalExtendScreenConnected(bool isExtendScreenConnected)
 {
     isExtendScreenConnected_ = isExtendScreenConnected;
 }
 
-void ScreenSessionManager::HandleExtendScreenConnect(ScreenId screenId)
+void ScreenSessionManager::SetExpandAndHorizontalLocked(bool isLocked)
 {
 #ifdef FOLD_ABILITY_ENABLE
     if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         TLOGI(WmsLogTag::DMS, "not super fold display device.");
         return;
     }
-    SuperFoldSensorManager::GetInstance().HandleScreenConnectChange();
-    extendScreenConnectStatus_.store(ExtendScreenConnectStatus::CONNECT);
-    OnExtendScreenConnectStatusChange(screenId, ExtendScreenConnectStatus::CONNECT);
-#endif
-}
+    if (isLocked) {
+        TLOGI(WmsLogTag::DMS, "drive statemachine to expand");
+        // drive state machine to expand
+        SuperFoldSensorManager::GetInstance().DriveStateMachineToExpand();
+        // to connect
+        extendScreenConnectStatus_.store(ExtendScreenConnectStatus::CONNECT);
+        OnExtendScreenConnectStatusChange(SCREEN_ID_DEFAULT, ExtendScreenConnectStatus::CONNECT);
 
-void ScreenSessionManager::HandleExtendScreenDisconnect(ScreenId screenId)
-{
-#ifdef FOLD_ABILITY_ENABLE
-    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        TLOGI(WmsLogTag::DMS, "not super fold display device.");
-        return;
+    } else {
+        TLOGI(WmsLogTag::DMS, "active statemachine");
+        // drive state machine to actived
+        SuperFoldSensorManager::GetInstance().SetStateMachineToActived();
+        // to disconnect
+        OnExtendScreenConnectStatusChange(SCREEN_ID_DEFAULT, ExtendScreenConnectStatus::DISCONNECT);
+        extendScreenConnectStatus_.store(ExtendScreenConnectStatus::DISCONNECT);
     }
-    SetIsExtendScreenConnected(false);
-    SetIsExtendMode(false);
-    SuperFoldSensorManager::GetInstance().HandleScreenDisconnectChange();
-    OnExtendScreenConnectStatusChange(screenId, ExtendScreenConnectStatus::DISCONNECT);
-    extendScreenConnectStatus_.store(ExtendScreenConnectStatus::DISCONNECT);
 #endif
 }
 
-bool ScreenSessionManager::GetIsExtendMode()
+bool ScreenSessionManager::GetIsExtendModelocked()
 {
     return isExtendMode_;
 }
  
-void ScreenSessionManager::SetIsExtendMode(bool isExtendMode)
+void ScreenSessionManager::SetIsExtendModelocked(bool isExtendMode)
 {
     isExtendMode_ = isExtendMode;
+    TLOGW(WmsLogTag::DMS, "statemachine extend modelocked is: %{puclic}d", isExtendMode);
 }
 
 bool ScreenSessionManager::GetIsFoldStatusLocked()
@@ -8844,6 +8851,7 @@ bool ScreenSessionManager::GetIsFoldStatusLocked()
 void ScreenSessionManager::SetIsFoldStatusLocked(bool isFoldStatusLocked)
 {
     isFoldStatusLocked_ = isFoldStatusLocked;
+    TLOGW(WmsLogTag::DMS, "statemachine foldstates locked is: %{puclic}d", isFoldStatusLocked);
 }
 
 void ScreenSessionManager::SetFoldStatusExpandAndLocked(bool isLocked)
@@ -11004,17 +11012,37 @@ DMError ScreenSessionManager::SetMultiScreenMode(ScreenId mainScreenId, ScreenId
     }
     SetMultiScreenModeInner(mainScreenId, secondaryScreenId, screenMode);
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        SetIsExtendMode(screenMode == MultiScreenMode::SCREEN_EXTEND);
+        SetIsExtendModelocked(screenMode == MultiScreenMode::SCREEN_EXTEND);
     }
     if (screenMode == MultiScreenMode::SCREEN_EXTEND) {
-        HandleExtendScreenConnect(mainScreenId);
+        SetExpandAndHorizontalLocked(true);
     }
     auto combination = screenMode == MultiScreenMode::SCREEN_MIRROR ?
         ScreenCombination::SCREEN_MIRROR : ScreenCombination::SCREEN_EXPAND;
     SetScreenCastInfo(secondaryScreenId, mainScreenId, combination);
+    UnlockStateMachineInExtendAndVirtualScreen(secondaryScreenId);
     NotifyScreenModeChange();
 #endif
     return DMError::DM_OK;
+}
+
+void ScreenSessionManager::UnlockStateMachineInExtendAndVirtualScreen(ScreenId screenId) 
+{
+    TLOGI(WmsLogTag::DMS, "Enter");
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        return;
+    }
+    sptr<ScreenSession> screenSession = GetScreenSessionByRsId(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenSession is nullptr!");
+        return;
+    }
+    if (screenSession->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR &&
+        screenSession->GetIsExtendVirtual()) {
+        SetIsExtendModelocked(false);
+        SetExpandAndHorizontalLocked(false);
+        TLOGI(WmsLogTag::DMS, "unlock");
+    }
 }
 
 void ScreenSessionManager::SetMultiScreenModeInner(ScreenId mainScreenId, ScreenId secondaryScreenId,

@@ -507,7 +507,6 @@ HWTEST_F(SuperFoldSensorManagerTest, HandleHallData08, TestSize.Level1)
     EXPECT_EQ(mgr.curHall_, VALID_HALL_STATUS);
 }
 
-
 /**
  * @tc.name: NotifyHallChanged
  * @tc.desc: test function : NotifyHallChanged
@@ -544,30 +543,6 @@ HWTEST_F(SuperFoldSensorManagerTest, HandleSuperSensorChange, Function | SmallTe
 }
 
 /**
- * @tc.name: HandleScreenConnectChange
- * @tc.desc: test function : HandleScreenConnectChange
- * @tc.type: FUNC
- */
-HWTEST_F(SuperFoldSensorManagerTest, HandleScreenConnectChange, Function | SmallTest | Level3)
-{
-    SuperFoldSensorManager mgr = SuperFoldSensorManager();
-    mgr.HandleScreenConnectChange();
-    ASSERT_EQ(mgr.curHall_, USHRT_MAX);
-}
-
-/**
- * @tc.name: HandleScreenDisconnectChange
- * @tc.desc: test function : HandleScreenDisconnectChange
- * @tc.type: FUNC
- */
-HWTEST_F(SuperFoldSensorManagerTest, HandleScreenDisconnectChange, Function | SmallTest | Level3)
-{
-    SuperFoldSensorManager mgr = SuperFoldSensorManager();
-    mgr.HandleScreenDisconnectChange();
-    ASSERT_EQ(mgr.curHall_, USHRT_MAX);
-}
-
-/**
  * @tc.name: GetCurAngle
  * @tc.desc: test function : GetCurAngle
  * @tc.type: FUNC
@@ -581,21 +556,82 @@ HWTEST_F(SuperFoldSensorManagerTest, GetCurAngle, Function | SmallTest | Level3)
 }
 
 /**
- * @tc.name: HandleFoldStatusLockedToExpand
- * @tc.desc: HandleFoldStatusLockedToExpand
+ * @tc.name: DriveStateMachineToExpand
+ * @tc.desc: test function : DriveStateMachineToExpand
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldSensorManagerTest, HandleFoldStatusLockedToExpand, TestSize.Level1)
+HWTEST_F(SuperFoldSensorManagerTest, DriveStateMachineToExpand, TestSize.Level1)
 {
-    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        GTEST_SKIP();
-    }
     SuperFoldSensorManager mgr = SuperFoldSensorManager();
-    mgr.HandleFoldStatusLockedToExpand();
-    EXPECT_NE(SuperFoldStateManager::GetInstance().curState_, SuperFoldStatus::UNKNOWN);
+    mgr.DriveStateMachineToExpand();
+    EXPECT_NE(SuperFoldStateManager::GetInstance().curState_, SuperFoldStatus::HALF_FOLDED);
+}
 
-    mgr.HandleFoldStatusLockedToExpand();
+/**
+ * @tc.name: HandleSuperSensorChange001
+ * @tc.desc: test function : HandleSuperSensorChange001
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldSensorManagerTest, HandleSuperSensorChange001, TestSize.Level1)
+{
+    SuperFoldSensorManager mgr = SuperFoldSensorManager();
+    SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_FOLDED;
+    mgr.HandleSuperSensorChange(events);
     EXPECT_NE(SuperFoldStateManager::GetInstance().curState_, SuperFoldStatus::UNKNOWN);
+    ssm_->SetIsExtendModelocked(true);
+    mgr.HandleSuperSensorChange(events);
+    EXPECT_NE(SuperFoldStateManager::GetInstance().curState_, SuperFoldStatus::UNKNOWN);
+    ssm_->SetIsExtendModelocked(false);
+}
+
+/**
+ * @tc.name: HandleSuperSensorChange002
+ * @tc.desc: test function : HandleSuperSensorChange002
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldSensorManagerTest, HandleSuperSensorChange002, TestSize.Level1)
+{
+    SuperFoldSensorManager mgr = SuperFoldSensorManager();
+    SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_FOLDED;
+    mgr.HandleSuperSensorChange(events);
+    EXPECT_NE(SuperFoldStateManager::GetInstance().curState_, SuperFoldStatus::UNKNOWN);
+    ssm_->SetIsFoldStatusLocked(true);
+    mgr.HandleSuperSensorChange(events);
+    EXPECT_NE(SuperFoldStateManager::GetInstance().curState_, SuperFoldStatus::UNKNOWN);
+    ssm_->SetIsFoldStatusLocked(false);
+}
+
+/**
+ * @tc.name: HandleSuperSensorChange003
+ * @tc.desc: test function : HandleSuperSensorChange003
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldSensorManagerTest, HandleSuperSensorChange003, TestSize.Level1)
+{
+    SuperFoldSensorManager mgr = SuperFoldSensorManager();
+    SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_FOLDED;
+    mgr.HandleSuperSensorChange(events);
+    EXPECT_NE(SuperFoldStateManager::GetInstance().curState_, SuperFoldStatus::UNKNOWN);
+    ssm_->SetIsLandscapeLockStatus(true);
+    mgr.HandleSuperSensorChange(events);
+    EXPECT_NE(SuperFoldStateManager::GetInstance().curState_, SuperFoldStatus::UNKNOWN);
+    ssm_->SetIsLandscapeLockStatus(false);
+}
+
+/**
+ * @tc.name: SetStateMachineToActived
+ * @tc.desc: test function : SetStateMachineToActived
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldSensorManagerTest, SetStateMachineToActived, TestSize.Level1)
+{
+    SuperFoldSensorManager mgr = SuperFoldSensorManager();
+    mgr.SetStateMachineToActived();
+    EXPECT_NE(SuperFoldStateManager::GetInstance().curState_, SuperFoldStatus::UNKNOWN);
+    ssm_->SetIsExtendModelocked(true);
+    mgr.SetStateMachineToActived();
+    EXPECT_NE(SuperFoldStateManager::GetInstance().curState_, SuperFoldStatus::UNKNOWN);
+    ssm_->SetIsExtendModelocked(false);
 }
 
 /**
