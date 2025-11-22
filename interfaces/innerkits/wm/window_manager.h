@@ -891,9 +891,10 @@ public:
      * @brief Minimize all app window.
      *
      * @param displayId Display id.
+     * @param excludeWindowId Exclude window id.
      * @return WM_OK means minimize success, others means minimize failed.
      */
-    WMError MinimizeAllAppWindows(DisplayId displayId);
+    WMError MinimizeAllAppWindows(DisplayId displayId, int32_t excludeWindowId = 0);
 
     /**
      * @brief Toggle all app windows to the foreground.

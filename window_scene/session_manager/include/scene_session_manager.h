@@ -767,7 +767,7 @@ public:
     WSError ClearAllSessions() override;
     WSError MoveSessionsToForeground(const std::vector<int32_t>& sessionIds, int32_t topSessionId) override;
     WSError MoveSessionsToBackground(const std::vector<int32_t>& sessionIds, std::vector<int32_t>& result) override;
-    WMError MinimizeAllAppWindows(DisplayId displayId) override;
+    WMError MinimizeAllAppWindows(DisplayId displayId, int32_t excludeWindowId = 0) override;
     int32_t StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abilitySessionInfo, sptr<SceneSession>& sceneSession);
     int32_t StartUIAbilityBySCB(sptr<SceneSession>& sceneSessions);
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);

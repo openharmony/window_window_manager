@@ -453,13 +453,13 @@ void WindowAdapter::ProcessPointUp(uint32_t windowId)
     wmsProxy->ProcessPointUp(windowId);
 }
 
-WMError WindowAdapter::MinimizeAllAppWindows(DisplayId displayId)
+WMError WindowAdapter::MinimizeAllAppWindows(DisplayId displayId, int32_t excludeWindowId)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
-    return wmsProxy->MinimizeAllAppWindows(displayId);
+    return wmsProxy->MinimizeAllAppWindows(displayId, excludeWindowId);
 }
 
 WMError WindowAdapter::ToggleShownStateForAllAppWindows()

@@ -1339,7 +1339,7 @@ HWTEST_F(WindowImplTest2, ShowHide, TestSize.Level1)
 
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_DESKTOP);
     ASSERT_EQ(WindowType::WINDOW_TYPE_DESKTOP, window->GetType());
-    EXPECT_CALL(m->Mock(), MinimizeAllAppWindows(_));
+    EXPECT_CALL(m->Mock(), MinimizeAllAppWindows(_, _));
     ASSERT_EQ(WMError::WM_OK, window->Show());
 
     EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).WillOnce(Return(WMError::WM_DO_NOTHING));
