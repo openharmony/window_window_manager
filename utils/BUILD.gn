@@ -177,6 +177,7 @@ ohos_shared_library("libwmutil_base") {
     "src/unreliable_window_info.cpp",
     "src/window_drawing_content_info.cpp",
     "src/window_manager_hilog.cpp",
+    "src/rate_limited_logger.cpp",
     "src/window_pid_visibility_info.cpp",
     "src/window_visibility_info.cpp",
     "src/wm_common.cpp",
