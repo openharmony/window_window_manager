@@ -1307,6 +1307,32 @@ bool ConvertThrowSlipModeFromJs(napi_env env, napi_value value, ThrowSlipMode& t
     return true;
 }
 
+bool ConvertRealTimeSwitchInfoFromJs(napi_env env, napi_value value, RealTimeSwitchInfo& switchInfo) {
+    napi_value realTimeSwitchInfo = nullptr;
+    napi_value jsIsNeedChange = nullptr;
+    napi_value jsShowTypes = nullptr;
+    napi_get_named_property(env, value, "realTimeSwitchInfo", &realTimeSwitchInfo);
+    if (!realTimeSwitchInfo) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to realTimeSwitchInfo");
+        return false;
+    }
+    napi_get_named_property(env, realTimeSwitchInfo, "isNeedChange", &jsIsNeedChange);
+    napi_get_named_property(env, realTimeSwitchInfo, "showTypes", &jsShowTypes);
+    bool isNeedChange = false;
+    if (realTimeSwitchInfo == nullptr || !ConvertFromJsValue(env, jsIsNeedChange, isNeedChange)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to isNeedChange");
+        return false;
+    }
+    switchInfo.isNeedChange_ = isNeedChange;
+    uint32_t showTypes = 0;
+    if (realTimeSwitchInfo == nullptr || !ConvertFromJsValue(env, jsShowTypes, showTypes)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to showTypes");
+        return false;
+    }
+    switchInfo.showTypes_ = showTypes;
+    return true;
+}
+
 bool ConvertCompatibleModePropertyFromJs(napi_env env, napi_value value, CompatibleModeProperty& compatibleModeProperty)
 {
     std::map<std::string, void (CompatibleModeProperty::*)(bool)> funcs = {
@@ -1336,6 +1362,11 @@ bool ConvertCompatibleModePropertyFromJs(napi_env env, napi_value value, Compati
             (compatibleModeProperty.*func)(ret);
             atLeastOneParam = true;
         }
+    }
+    RealTimeSwitchInfo realTimeSwitchInfo;
+    if (ConvertRealTimeSwitchInfoFromJs(env, value, realTimeSwitchInfo)) {
+        compatibleModeProperty.SetRealTimeSwitchInfo(realTimeSwitchInfo);
+        atLeastOneParam = true;
     }
     TLOGI(WmsLogTag::WMS_COMPAT, "property: %{public}s", compatibleModeProperty.ToString().c_str());
     return atLeastOneParam;
