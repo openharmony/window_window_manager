@@ -78,13 +78,10 @@ public:
         ani_string path, ani_object storage);
     static void DisableWindowDecor(ani_env* env, ani_object obj, ani_long nativeObj);
     static void SetShowOnLockScreen(ani_env* env, ani_class cls, ani_long nativeObj, ani_boolean showOnLockScreen);
-<<<<<<< HEAD
     static void SetWindowModal(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isModal);
-=======
     static void SetWindowRectAutoSave(ani_env* env, ani_class cls, ani_long nativeObj,
         ani_boolean enable, bool isSaveBySpecifiedFlag);
     static ani_boolean IsWindowRectAutoSave(ani_env* env, ani_class cls, ani_long nativeObj);
->>>>>>> cd2590f5ff (ani_window1)
     static void RegisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
         ani_ref callback);
     static void UnregisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
@@ -113,12 +110,9 @@ private:
     void OnLoadContent(ani_env* env, ani_string path, ani_object storage, bool isLoadByName);
     void OnDisableWindowDecor(ani_env* env);
     void OnSetShowOnLockScreen(ani_env* env, ani_boolean showOnLockScreen);
-<<<<<<< HEAD
     void OnSetWindowModal(ani_env* env, ani_boolean isModal);
-=======
     void OnSetWindowRectAutoSave(ani_env* env, ani_boolean enable, bool isSaveBySpecifiedFlag);
     ani_boolean OnIsWindowRectAutoSave(ani_env* env);
->>>>>>> cd2590f5ff (ani_window1)
     void OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
 
