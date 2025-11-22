@@ -1412,12 +1412,13 @@ void ScreenSessionManager::RecoverScreenActiveMode(ScreenId rsScreenId)
         TLOGE(WmsLogTag::DMS, "no matching resolution, activeId: %{public}d", activeId);
         return;
     }
-    DMError ret = SetScreenActiveMode(screenSession->GetScreenId(), activeId);
+    DMError ret = SetScreenActiveMode(screenSession->GetScreenId(), static_cast<uint32_t>(activeId));
     if (ret != DMError::DM_OK) {
         TLOGE(WmsLogTag::DMS, "recover error, rsid:%{public}"  PRIu64", activeIdx:%{public}d",
             rsScreenId, activeId);
     }      
 }
+
 int32_t ScreenSessionManager::GetActiveIdxInModes(const std::vector<sptr<SupportedScreenModes>>& modes,
                           const SupportedScreenModes& edidInfo)
 {
