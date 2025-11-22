@@ -70,8 +70,8 @@ constexpr uint32_t DISPLAY_A_WIDTH = 2472;
  *@brief the information for compatible mode App when switching window style in real time.
 */
 struct RealTimeSwitchInfo {
-bool isNeedChange_;
-uint32_t showTypes_;
+bool isNeedChange_{false};
+uint32_t showTypes_{0};
 };
 
 /**
