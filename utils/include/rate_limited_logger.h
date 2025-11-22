@@ -63,12 +63,12 @@ public:
 };
 
 
-#define TLOGLIMITI(timeWindowMs, maxCount, tag, fmt ...) \
-    do{ \
+#define TLOGLIMITI(timeWindowMs, maxCount, tag, fmt, ...) \
+    do { \
         
         if (RateLimitedLogger::getInstance().logFunction(__FUNCTION__, timeWindowMs, maxCount)) { \
-            TLOGI(tag, fmt, ##__VA_ARGS__) \
+            TLOGI(tag, fmt, ##__VA_ARGS__); \
         } \
-    } while(0)
+    } while (0)
 
 #endif // RATE_LIMITED_LOGGER_H
