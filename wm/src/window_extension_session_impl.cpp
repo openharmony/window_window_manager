@@ -1134,11 +1134,11 @@ WMError WindowExtensionSessionImpl::SetUIExtCustomDensity(const float density)
 {
     if (std::islessequal(density, 0.0f)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Invalid density_: %{public}f", density);
-        return WSError::WM_ERROR_INVALID_PARAM;
+        return WMError::WM_ERROR_INVALID_PARAM;
     }
     if (!handler_) {
         TLOGE(WmsLogTag::WMS_UIEXT, "handler_ is null");
-        return WSError::WMError::WM_ERROR_SYSTEM_ABNORMALLY;
+        return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
     }
     auto task = [weak = wptr(this), density]() {
         auto window = weak.promote();
@@ -1159,7 +1159,7 @@ WMError WindowExtensionSessionImpl::SetUIExtCustomDensity(const float density)
         window->UpdateSessionViewportConfig(config);
     };
     handler_->PostTask(task, "SetUIExtCustomDensity");
-    return WSError::WS_OK;
+    return WMError::WM_OK;
 }
 
 void WindowExtensionSessionImpl::UpdateExtensionDensity(SessionViewportConfig& config)
