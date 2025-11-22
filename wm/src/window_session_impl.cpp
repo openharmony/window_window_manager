@@ -5777,9 +5777,9 @@ void WindowSessionImpl::NotifyUIExtHostRectChangeInGlobalDisplayListeners(const 
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     CHECK_UI_CONTENT_RETURN_IF_NULL(uiContent);
     bool isUIExtensionWindow = WindowHelper::IsUIExtensionWindow(GetType());
-    if (!isUIExtensionWindow && !rectChangeInGlobalDisplayUIExtListenerIds.empty()) {
-        TLOGI(WmsLogTag::WMS_UIEXT, "rectChangeInGlobalDisplayUIExtListenerIds size: %{public}zu",
-            rectChangeInGlobalDisplayUIExtListenerIds.size());
+    if (!isUIExtensionWindow && !rectChangeInGlobalDisplayUIExtListenerIds_.empty()) {
+        TLOGI(WmsLogTag::WMS_UIEXT, "rectChangeInGlobalDisplayUIExtListenerIds_ size: %{public}zu",
+            rectChangeInGlobalDisplayUIExtListenerIds_.size());
         AAFwk::Want rectWant;
         rectWant.SetParam(Extension::RECT_X, rect.posX_);
         rectWant.SetParam(Extension::RECT_Y, rect.posY_);
@@ -5788,7 +5788,7 @@ void WindowSessionImpl::NotifyUIExtHostRectChangeInGlobalDisplayListeners(const 
         rectWant.SetParam(Extension::RECT_CHANGE_REASON, static_cast<int32_t>(reason));
         uiContent->SendUIExtProprtyByPersistentId(
             static_cast<uint32_t>(Extension::Businesscode::NOTIFY_HOST_RECT_CHANGE_IN_GLOBAL_DISPLAY), rectWant,
-            rectChangeInGlobalDisplayUIExtListenerIds, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+            rectChangeInGlobalDisplayUIExtListenerIds_, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
     }
 }
 
@@ -8402,7 +8402,7 @@ WMError WindowSessionImpl::HandleRegisterHostRectChangeInGlobalDisplayListener(u
     const AAFwk::Want& data)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
-    rectChangeInGlobalDisplayUIExtListenerIds.emplace(persistentId);
+    rectChangeInGlobalDisplayUIExtListenerIds_.emplace(persistentId);
     TLOGI(WmsLogTag::WMS_UIEXT, "persistentId: %{public}d register rect change in global display", persistentId);
     return WMError::WM_OK;
 }
@@ -8411,7 +8411,7 @@ WMError WindowSessionImpl::HandleUnregisterHostRectChangeInGlobalDisplayListener
     const AAFwk::Want& data)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
-    rectChangeInGlobalDisplayUIExtListenerIds.erase(persistentId);
+    rectChangeInGlobalDisplayUIExtListenerIds_.erase(persistentId);
     TLOGI(WmsLogTag::WMS_UIEXT, "persistentId: %{public}d unregister rect change in global display", persistentId);
     return WMError::WM_OK;
 }
