@@ -656,6 +656,17 @@ public:
         return WSError::WS_OK;
     }
 
+    /**
+     * @brief notify session when compatible mode change
+     *
+     * @param mode compatible mode.
+     * @return WSError::WS_OK means notify success, otherwise failed.
+     */
+    virtual WSError NotifyCompatibleModeChange(int32_t mode)
+    {
+        return WSError::WS_OK;
+    }
+
     virtual WSError RestartApp(const std::shared_ptr<AAFwk::Want>& want)
     {
         return WSError::WS_OK;

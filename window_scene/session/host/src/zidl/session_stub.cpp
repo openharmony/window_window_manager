@@ -331,6 +331,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetFrameRectForPartialZoomIn(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_IS_FULL_SCREEN_IN_FORCE_SPLIT):
             return HandleNotifyIsFullScreenInForceSplitMode(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_COMPATIBLE_MODE_CHANGE):
+            return HandleNotifyCompatibleModeChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RESTART_APP):
             return HandleRestartApp(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_COMMAND_EVENT):
@@ -524,6 +526,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         MissionInfo missionInfo = property->GetMissionInfo();
         reply.WriteParcelable(&missionInfo);
         reply.WriteBool(property->GetIsShowDecorInFreeMultiWindow());
+        reply.WriteString(property->GetCompatibleModePage());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -2523,6 +2526,21 @@ int SessionStub::HandleNotifyIsFullScreenInForceSplitMode(MessageParcel& data, M
         return ERR_INVALID_DATA;
     }
     WSError errCode = NotifyIsFullScreenInForceSplitMode(isFullScreen);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyCompatibleModeChange(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t mode = 0;
+    if (!data.ReadInt32(mode)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Read mode failed.");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = NotifyCompatibleModeChange(mode);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_COMPAT, "write errCode fail.");
         return ERR_INVALID_DATA;

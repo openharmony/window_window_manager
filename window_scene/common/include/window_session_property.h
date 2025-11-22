@@ -353,6 +353,10 @@ public:
     void SetIsFullScreenInForceSplitMode(bool isFullScreenInForceSplitMode);
     bool IsFullScreenInForceSplitMode() const;
     RealTimeSwitchInfo GetRealTimeSwitchInfo() const;
+    void SetCompatibleModePage(std::string compatibleModePage);
+    std::string GetCompatibleModePage() const;
+    void SetPageCompatibleMode(int32_t compatibleMode);
+    int32_t GetPageCompatibleMode() const;
 
     /*
      * Keyboard
@@ -543,7 +547,9 @@ private:
     bool isAppSupportPhoneInPc_ = false;
     bool isPcAppInLargeScreenDevice_ = false;
     mutable std::mutex compatibleModeMutex_;
-    bool isFullScreenInForceSplitMode_;
+    bool isFullScreenInForceSplitMode_ = false;
+    std::string compatibleModePage_ = "";
+    int32_t pageCompatibleMode_ = -1;
     uint8_t backgroundAlpha_ = 0xff; // default alpha is opaque.
     mutable std::mutex atomicServiceMutex_;
     bool isAtomicService_ = false;

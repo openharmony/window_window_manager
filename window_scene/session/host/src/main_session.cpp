@@ -626,6 +626,19 @@ bool MainSession::IsFullScreenInForceSplit()
     return isFullScreenInForceSplit_.load();
 }
 
+void MainSession::RegisterCompatibleModeChangeCallback(CompatibleModeChangeCallback&& callback)
+{
+    compatibleModeChangeCallback_ = callback;
+}
+
+WSError MainSession::NotifyCompatibleModeChange(int32_t mode)
+{
+    if (compatibleModeChangeCallback_) {
+        compatibleModeChangeCallback_(mode);
+    }
+    return WSError::WS_OK;
+}
+
 bool MainSession::RestoreAspectRatio(float ratio)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, ratio: %{public}f", GetPersistentId(), ratio);
