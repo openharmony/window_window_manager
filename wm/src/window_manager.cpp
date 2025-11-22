@@ -2641,7 +2641,7 @@ WMError WindowManager::UnregisterWindowSupportRotationListener(const sptr<IWindo
         pImpl_->windowSupportRotationListeners_.erase(std::remove_if(pImpl_->windowSupportRotationListeners_.begin(),
         pImpl_->windowSupportRotationListeners_.end(),
         [listener](sptr<IWindowSupportRotationListener>registeredListener) { return registeredListener == listener; }),
-        pImpl_->windowSupportRotationListeners_.end());
+            pImpl_->windowSupportRotationListeners_.end());
         WMError ret = WMError::WM_OK;
         if (pImpl_->windowSupportRotationListeners_.empty() && pImpl_->windowSupportRotationListenerAgent_ != nullptr) {
             ret = WindowAdapter::GetInstance(userId_).UnregisterWindowManagerAgent(
