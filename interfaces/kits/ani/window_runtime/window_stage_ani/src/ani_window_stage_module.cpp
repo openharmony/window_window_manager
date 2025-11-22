@@ -77,6 +77,8 @@ std::array g_methods = {
         reinterpret_cast<void *>(AniWindowStage::DisableWindowDecor)},
     ani_native_function {"setShowOnLockScreenSync",
         nullptr, reinterpret_cast<void *>(AniWindowStage::SetShowOnLockScreen)},
+    ani_native_function {"setWindowModal", "lz:",
+        reinterpret_cast<void *>(AniWindowStage::SetWindowModal)},
     ani_native_function {"getMainWindowSync", "J:L@ohos/window/window/Window;",
         reinterpret_cast<void *>(WindowGetMainWindow)},
     ani_native_function {"createSubWindowSync", "lC{std.core.String}:C{@ohos.window.window.Window}",
