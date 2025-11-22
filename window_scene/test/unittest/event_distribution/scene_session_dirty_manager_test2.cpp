@@ -811,7 +811,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, UpdateWindowFlagsForLockCursorInDrag, Te
     session->persistentId_ = 5;
     session->UpdateFocus(false);
     sptr<MoveDragController> moveDragController;
-    moveDragController = sptr<MoveDragController>::MakeSptr(session->GetPersistentId(), WindowType::WINDOW_TYPE_FLOAT);
+    moveDragController = sptr<MoveDragController>::MakeSptr(session);
     session->moveDragController_ = moveDragController;
     session->SetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_LOCK_CURSOR, true);
     session->SetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_CURSOR_FOLLOW_MOVEMENT, true);
