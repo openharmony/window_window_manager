@@ -567,7 +567,7 @@ void WindowManager::Impl::NotifySupportRotationChange(const SupportRotationInfo&
 {
     std::vector<sptr<IWindowSupportRotationListener>> windowSupportRotationListener;
     {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        std::shared_lock<std::shared_mutex> lock(listenerMutex_);
         windowSupportRotationListener = windowSupportRotationListeners_;
     }
     for (auto& listener : windowSupportRotationListener) {
@@ -2602,7 +2602,7 @@ WMError WindowManager::RegisterWindowSupportRotationListener(const sptr<IWindowS
         return WMError::WM_ERROR_NULLPTR;
     }
     {
-        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+        std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
         WMError ret = WMError::WM_OK;
         if (pImpl_->windowSupportRotationListenerAgent_ == nullptr) {
             pImpl_->windowSupportRotationListenerAgent_ = new WindowManagerAgent();
@@ -2637,7 +2637,7 @@ WMError WindowManager::UnregisterWindowSupportRotationListener(const sptr<IWindo
         return WMError::WM_ERROR_NULLPTR;
     }
     {
-        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+        std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
         pImpl_->windowSupportRotationListeners_.erase(std::remove_if(pImpl_->windowSupportRotationListeners_.begin(),
         pImpl_->windowSupportRotationListeners_.end(),
         [listener](sptr<IWindowSupportRotationListener>registeredListener) { return registeredListener == listener; }),
