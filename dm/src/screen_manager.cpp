@@ -465,15 +465,24 @@ DMError ScreenManager::MakeExpand(const std::vector<ExpandOption>& options, Scre
     return ret;
 }
 
-DMError ScreenManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds)
+DMError ScreenManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
+    const UniqueScreenRotationOptions& rotationOptions)
 {
     std::vector<DisplayId> displayIds;
-    return MakeUniqueScreen(screenIds, displayIds);
+    TLOGD(WmsLogTag::DMS, "Start passing parameters from DMS side, isRotationLocked: %{public}d, rotation: %{public}d",
+        rotationOptions.isRotationLocked_, rotationOptions.rotation_);
+    return MakeUniqueScreen(screenIds, displayIds, rotationOptions);
 }
 
-DMError ScreenManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds, std::vector<DisplayId>& displayIds)
+DMError ScreenManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds)
 {
-    TLOGD(WmsLogTag::DMS, "start Make UniqueScreen");
+    return MakeUniqueScreen(screenIds, UniqueScreenRotationOptions());
+}
+
+DMError ScreenManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds, std::vector<DisplayId>& displayIds,
+    const UniqueScreenRotationOptions& rotationOptions)
+{
+    TLOGD(WmsLogTag::DMS, "start make unique screen");
     if (screenIds.empty()) {
         TLOGE(WmsLogTag::DMS, "screenIds is null");
         return DMError::DM_ERROR_INVALID_PARAM;
@@ -482,8 +491,14 @@ DMError ScreenManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds, 
         TLOGW(WmsLogTag::DMS, "Make UniqueScreen failed. ScreenIds size bigger than %{public}u.", MAX_SCREEN_SIZE);
         return DMError::DM_ERROR_INVALID_PARAM;
     }
-    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MakeUniqueScreen(screenIds, displayIds);
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MakeUniqueScreen(screenIds, displayIds,
+        rotationOptions);
     return ret;
+}
+
+DMError ScreenManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds, std::vector<DisplayId>& displayIds)
+{
+    return MakeUniqueScreen(screenIds, displayIds, UniqueScreenRotationOptions());
 }
 
 DMError ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId, ScreenId& screenGroupId)

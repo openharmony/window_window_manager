@@ -734,7 +734,8 @@ HWTEST_F(DisplayManagerAdapterTest, MakeUniqueScreen, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds;
     std::vector<DisplayId> displayIds;
-    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().MakeUniqueScreen(screenIds, displayIds);
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().MakeUniqueScreen(screenIds, displayIds,
+        UniqueScreenRotationOptions());
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
     } else {

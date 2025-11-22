@@ -189,7 +189,7 @@ DMError MultiScreenManager::PhysicalScreenUniqueSwitch(const std::vector<ScreenI
 }
 
 DMError MultiScreenManager::VirtualScreenUniqueSwitch(sptr<ScreenSession> screenSession,
-    const std::vector<ScreenId>& screenIds)
+    const std::vector<ScreenId>& screenIds, const UniqueScreenRotationOptions& rotationOptions)
 {
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "screenSession is null");
@@ -232,7 +232,8 @@ DMError MultiScreenManager::VirtualScreenUniqueSwitch(sptr<ScreenSession> screen
                 }
         }
         // virtual screen create callback to notify scb
-        ScreenSessionManager::GetInstance().OnVirtualScreenChange(uniqueScreenId, ScreenEvent::CONNECTED);
+        ScreenSessionManager::GetInstance().OnVirtualScreenChange(uniqueScreenId, ScreenEvent::CONNECTED,
+            rotationOptions);
         BlockScreenConnect(uniqueScreen, uniqueScreenId);
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:VirtualScreenUniqueSwitch end");
@@ -279,8 +280,8 @@ static void AddUniqueScreenDisplayId(std::vector<DisplayId>& displayIds,
     }
 }
 
-DMError MultiScreenManager::UniqueSwitch(const std::vector<ScreenId>& screenIds,
-    std::vector<DisplayId>& displayIds)
+DMError MultiScreenManager::UniqueSwitch(const std::vector<ScreenId>& screenIds, std::vector<DisplayId>& displayIds,
+    const UniqueScreenRotationOptions& rotationOptions)
 {
     DMError switchStatus = DMError::DM_OK;
     std::vector<ScreenId> virtualScreenIds;
@@ -292,9 +293,11 @@ DMError MultiScreenManager::UniqueSwitch(const std::vector<ScreenId>& screenIds,
     TLOGW(WmsLogTag::DMS, "enter mirror to screen size: %{public}u",
         static_cast<uint32_t>(screenIds.size()));
     FilterPhysicalAndVirtualScreen(screenIds, physicalScreenIds, virtualScreenIds);
-
+    TLOGD(WmsLogTag::DMS,
+        "ScreenSessionManager processing with parameters, isRotationLocked: %{public}d, rotation: %{public}d",
+        rotationOptions.isRotationLocked_, rotationOptions.rotation_);
     if (!virtualScreenIds.empty()) {
-        switchStatus = ScreenSessionManager::GetInstance().VirtualScreenUniqueSwitch(virtualScreenIds);
+        switchStatus = ScreenSessionManager::GetInstance().VirtualScreenUniqueSwitch(virtualScreenIds, rotationOptions);
         TLOGW(WmsLogTag::DMS, "virtual screen switch to unique result: %{public}d", switchStatus);
         AddUniqueScreenDisplayId(displayIds, virtualScreenIds, switchStatus);
     }

@@ -439,6 +439,13 @@ void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screen
     }
     TLOGD(WmsLogTag::DMS, "[NAPI]OnScreenConnected");
     std::shared_ptr<NativeReference> callback_ = screenConnectionCallback_;
+    bool isRotationLocked = screenSession->GetUniqueRotationLock();
+    int32_t rotation = screenSession->GetUniqueRotation();
+    std::map<int32_t, int32_t> uniqueRotationOrientationMap = screenSession->GetUniqueRotationOrientationMap();
+    TLOGD(WmsLogTag::DMS, "JsScreenSessionManager converting to JS,"
+          "isUniqueRotationLocked: %{public}d, uniqueRotation: %{public}d,"
+          "uniqueRotationOrientationMap: %{public}s",
+          isRotationLocked, rotation, MapToString(uniqueRotationOrientationMap).c_str());
     auto asyncTask = [this, callback_, screenSession, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenSessionManager::OnScreenConnected");
         napi_value objValue = nullptr;

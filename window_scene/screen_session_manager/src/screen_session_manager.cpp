@@ -898,7 +898,8 @@ void ScreenSessionManager::RegisterRefreshRateChangeListener()
     // LCOV_EXCL_STOP
 }
 
-void ScreenSessionManager::OnVirtualScreenChange(ScreenId screenId, ScreenEvent screenEvent)
+void ScreenSessionManager::OnVirtualScreenChange(ScreenId screenId, ScreenEvent screenEvent,
+    const UniqueScreenRotationOptions& rotationOptions)
 {
     TLOGI(WmsLogTag::DMS, "Notify scb virtual screen change, ScreenId: %{public}" PRIu64 ", ScreenEvent: %{public}d",
         screenId, static_cast<int>(screenEvent));
@@ -921,7 +922,7 @@ void ScreenSessionManager::OnVirtualScreenChange(ScreenId screenId, ScreenEvent 
             screenSession->SetMainDisplayIdOfGroup(MAIN_SCREEN_ID_DEFAULT);
         }
         if (clientProxy) {
-            clientProxy->OnScreenConnectionChanged(GetSessionOption(screenSession, screenId),
+            clientProxy->OnScreenConnectionChanged(GetSessionOption(screenSession, screenId, rotationOptions),
                 ScreenEvent::CONNECTED);
         }
         return;
@@ -939,6 +940,11 @@ void ScreenSessionManager::OnVirtualScreenChange(ScreenId screenId, ScreenEvent 
             }
         }
     }
+}
+
+void ScreenSessionManager::OnVirtualScreenChange(ScreenId screenId, ScreenEvent screenEvent)
+{
+    return OnVirtualScreenChange(screenId, screenEvent, UniqueScreenRotationOptions());
 }
 
 // LCOV_EXCL_START
@@ -6565,7 +6571,8 @@ DMError ScreenSessionManager::SetVirtualScreenRefreshRate(ScreenId screenId, uin
     return DMError::DM_OK;
 }
 
-DMError ScreenSessionManager::VirtualScreenUniqueSwitch(const std::vector<ScreenId>& screenIds)
+DMError ScreenSessionManager::VirtualScreenUniqueSwitch(const std::vector<ScreenId>& screenIds,
+    const UniqueScreenRotationOptions& rotationOptions)
 {
 #ifdef WM_MULTI_SCREEN_ENABLE
     TLOGW(WmsLogTag::DMS, "enter");
@@ -6582,7 +6589,21 @@ DMError ScreenSessionManager::VirtualScreenUniqueSwitch(const std::vector<Screen
             smsScreenGroupMap_.erase(iter);
         }
     }
-    DMError uniqueSwitchRet = MultiScreenManager::GetInstance().VirtualScreenUniqueSwitch(defaultScreen, screenIds);
+    // Update the rotation-orientation mapping based on the device form factor
+    Rotation rotation = defaultScreen->GetScreenProperty().GetDeviceRotation();
+    int32_t orientation = GetDeviceOrientationAPI14(defaultScreen, rotation);
+    TLOGD(WmsLogTag::DMS, "default screenSession deviceRotation: %{public}d, orientationAPI14: %{public}d",
+        rotation, orientation);
+    UniqueScreenRotationOptions modifiedOptions = rotationOptions;
+    if (defaultScreen->UpdateRotationOrientationMap(modifiedOptions, static_cast<int32_t>(rotation),
+        orientation)) {
+        TLOGI(WmsLogTag::DMS, "update rotationOrientationMap success");
+    } else {
+        TLOGI(WmsLogTag::DMS, "update rotationOrientationMap failed");
+    }
+
+    DMError uniqueSwitchRet = MultiScreenManager::GetInstance().VirtualScreenUniqueSwitch(defaultScreen, screenIds,
+        modifiedOptions);
     TLOGW(WmsLogTag::DMS, "result: %{public}d", uniqueSwitchRet);
     return uniqueSwitchRet;
 #else
@@ -6590,10 +6611,23 @@ DMError ScreenSessionManager::VirtualScreenUniqueSwitch(const std::vector<Screen
 #endif
 }
 
+int32_t ScreenSessionManager::GetDeviceOrientationAPI14(sptr<ScreenSession> screenSession, Rotation rotation)
+{
+    ScreenProperty property = screenSession->GetScreenProperty();
+    RRect bounds = property.GetBounds();
+    int32_t rotationInt = static_cast<int32_t>(rotation);
+    screenSession->UpdateRotationOrientation(rotationInt, GetFoldDisplayMode(), bounds);
+    DisplayOrientation displayOrientation = property.GetDeviceOrientation();
+    return static_cast<int32_t>(displayOrientation);
+}
+
 DMError ScreenSessionManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
-    std::vector<DisplayId>& displayIds)
+    std::vector<DisplayId>& displayIds, const UniqueScreenRotationOptions& rotationOptions)
 {
 #ifdef WM_MULTI_SCREEN_ENABLE
+    TLOGD(WmsLogTag::DMS,
+          "rotationOptions passes through, isRotationLocked: %{public}d, rotation: %{public}d",
+          rotationOptions.isRotationLocked_, rotationOptions.rotation_);
     bool isCallingByThirdParty = Permission::CheckCallingPermission(ACCESS_VIRTUAL_SCREEN_PERMISSION);
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd() && !isCallingByThirdParty) {
         TLOGE(WmsLogTag::DMS, "Permission Denied! calling: %{public}s, pid: %{public}d",
@@ -6628,7 +6662,7 @@ DMError ScreenSessionManager::MakeUniqueScreen(const std::vector<ScreenId>& scre
             uniqueScreen->GetName() == "Cooperation-multi") {
             uniqueScreen->SetInnerName("CustomScbScreen");
         }
-        return MultiScreenManager::GetInstance().UniqueSwitch(allUniqueScreenIds, displayIds);
+        return MultiScreenManager::GetInstance().UniqueSwitch(allUniqueScreenIds, displayIds, rotationOptions);
     }
     return DoMakeUniqueScreenOld(allUniqueScreenIds, displayIds, isCallingByThirdParty);
 #else
@@ -11788,7 +11822,8 @@ SessionOption ScreenSessionManager::GetSessionOption(sptr<ScreenSession> screenS
     return option;
 }
 
-SessionOption ScreenSessionManager::GetSessionOption(sptr<ScreenSession> screenSession, ScreenId screenId)
+SessionOption ScreenSessionManager::GetSessionOption(sptr<ScreenSession> screenSession, ScreenId screenId,
+    const UniqueScreenRotationOptions& rotationOptions)
 {
     SessionOption option = {
         .rsId_ = screenSession->GetRSScreenId(),
@@ -11797,9 +11832,17 @@ SessionOption ScreenSessionManager::GetSessionOption(sptr<ScreenSession> screenS
         .innerName_ = screenSession->GetInnerName(),
         .screenId_ = screenId,
         .rotationCorrectionMap_ = screenSession->GetRotationCorrectionMap(),
-        .supportsFocus_ = screenSession->GetSupportsFocus()
+        .supportsFocus_ = screenSession->GetSupportsFocus(),
+        .isRotationLocked_ = rotationOptions.isRotationLocked_,
+        .rotation_ = rotationOptions.rotation_,
+        .rotationOrientationMap_ = rotationOptions.rotationOrientationMap_
     };
     return option;
+}
+
+SessionOption ScreenSessionManager::GetSessionOption(sptr<ScreenSession> screenSession, ScreenId screenId)
+{
+    return GetSessionOption(screenSession, screenId, UniqueScreenRotationOptions());
 }
 
 DMError ScreenSessionManager::SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable)

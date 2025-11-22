@@ -4888,6 +4888,66 @@ HWTEST_F(ScreenSessionTest, SetSupportsInput, TestSize.Level1)
 }
 
 /**
+ * @tc.name  : UpdateRotationOrientationMap01
+ * @tc.desc  : UpdateRotationOrientationMap01
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdateRotationOrientationMap01, TestSize.Level1)
+{
+    ScreenId screenId = 10000;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
+
+    UniqueScreenRotationOptions rotationOptions;
+    int32_t rotation = static_cast<int32_t>(Rotation::ROTATION_0);
+    int32_t orientation = static_cast<int32_t>(DisplayOrientation::LANDSCAPE);
+
+    bool result = session->UpdateRotationOrientationMap(rotationOptions, rotation, orientation);
+    std::map<int32_t, int32_t> rotationOrientationMap = {{0, 1}, {1, 2}, {2, 3}, {3, 0}};
+    EXPECT_EQ(result, true);
+    EXPECT_EQ(rotationOptions.rotationOrientationMap_, rotationOrientationMap);
+}
+
+/**
+ * @tc.name  : UpdateRotationOrientationMap02
+ * @tc.desc  : UpdateRotationOrientationMap02
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdateRotationOrientationMap02, TestSize.Level1)
+{
+    ScreenId screenId = 10000;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
+
+    UniqueScreenRotationOptions rotationOptions;
+    int32_t rotation = ROTATION_UNSET;
+    int32_t orientation = static_cast<int32_t>(DisplayOrientation::LANDSCAPE);
+
+    bool result = session->UpdateRotationOrientationMap(rotationOptions, rotation, orientation);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name  : UpdateRotationOrientationMap03
+ * @tc.desc  : UpdateRotationOrientationMap03
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdateRotationOrientationMap03, TestSize.Level1)
+{
+    ScreenId screenId = 10000;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
+    constexpr int32_t INVALID_ORIENTATION = 4;
+
+    UniqueScreenRotationOptions rotationOptions;
+    int32_t rotation = static_cast<int32_t>(Rotation::ROTATION_0);
+    int32_t orientation = INVALID_ORIENTATION;
+
+    bool result = session->UpdateRotationOrientationMap(rotationOptions, rotation, orientation);
+    EXPECT_EQ(result, false);
+}
+
+/**
  * @tc.name  : SetAndGetCurrentRotationCorrection
  * @tc.desc  : SetSupportsInput
  * @tc.type: FUNC

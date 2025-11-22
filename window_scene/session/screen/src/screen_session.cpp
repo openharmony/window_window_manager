@@ -3106,6 +3106,55 @@ void ScreenSession::SetSupportsInput(bool input)
     supportsInput_.store(input);
 }
 
+bool ScreenSession::GetUniqueRotationLock() const
+{
+    return isUniqueRotationLocked_;
+}
+
+void ScreenSession::SetUniqueRotationLock(bool isRotationLocked)
+{
+    isUniqueRotationLocked_ = isRotationLocked;
+}
+
+int32_t ScreenSession::GetUniqueRotation() const
+{
+    return uniqueRotation_;
+}
+
+void ScreenSession::SetUniqueRotation(int32_t rotation)
+{
+    uniqueRotation_ = rotation;
+}
+
+const std::map<int32_t, int32_t>& ScreenSession::GetUniqueRotationOrientationMap() const
+{
+    return uniqueRotationOrientationMap_;
+}
+
+bool ScreenSession::UpdateRotationOrientationMap(UniqueScreenRotationOptions& rotationOptions,
+    int32_t rotation, int32_t orientation)
+{
+    if (rotation < ROTATION_MIN || rotation > ROTATION_MAX) {
+        TLOGE(WmsLogTag::DMS, "Invalid input values, rotation: %{public}d must be in range [0, 3]", rotation);
+        return false;
+    }
+    if (orientation < ROTATION_MIN || orientation > ROTATION_MAX) {
+        TLOGE(WmsLogTag::DMS, "Invalid input values, orientation: %{public}d must be in range [0, 3]", orientation);
+        return false;
+    }
+    for (int i = ROTATION_MIN; i <= ROTATION_MAX; ++i) {
+        rotationOptions.rotationOrientationMap_[i] = (orientation + i - rotation + ROTATION_NUM) % ROTATION_NUM;
+    }
+    TLOGE(WmsLogTag::DMS, "rotationOrientationMap: %{public}s",
+        MapToString(rotationOptions.rotationOrientationMap_).c_str());
+    return true;
+}
+
+void ScreenSession::SetUniqueRotationOrientationMap(const std::map<int32_t, int32_t>& rotationOrientationMap)
+{
+    uniqueRotationOrientationMap_ = rotationOrientationMap;
+}
+
 void ScreenSession::SetVprScaleRatio(float vprScaleRatio)
 {
     vprScaleRatio_ = vprScaleRatio;
