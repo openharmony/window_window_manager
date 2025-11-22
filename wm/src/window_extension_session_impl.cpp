@@ -1069,6 +1069,10 @@ void WindowExtensionSessionImpl::UpdateSystemViewportConfig()
         if (!window) {
             return;
         }
+        if (window->isDensityCustomized_) {
+            TLOGNI(WmsLogTag::WMS_UIEXT, "UpdateSystemViewportConfig: Density is customized");
+            return;
+        }
         if (window->isDensityFollowHost_) {
             TLOGNW(WmsLogTag::WMS_UIEXT, "UpdateSystemViewportConfig: Density is follow host");
             return;
@@ -1106,9 +1110,10 @@ WSError WindowExtensionSessionImpl::UpdateSessionViewportConfig(const SessionVie
 
         TLOGNI(WmsLogTag::WMS_UIEXT, "UpdateSessionViewportConfig: Id:%{public}d, isDensityFollowHost_:%{public}d, "
             "displayId:%{public}" PRIu64", density:%{public}f, lastDensity:%{public}f, orientation:%{public}d, "
-            "lastOrientation:%{public}d",
+            "lastOrientation:%{public}d, isDensityCustomized:%{public}d",
             window->GetPersistentId(), viewportConfig.isDensityFollowHost_, viewportConfig.displayId_,
-            viewportConfig.density_, window->lastDensity_, viewportConfig.orientation_, window->lastOrientation_);
+            viewportConfig.density_, window->lastDensity_, viewportConfig.orientation_, window->lastOrientation_,
+            window->isDensityCustomized_);
 
         window->NotifyDisplayInfoChange(viewportConfig);
         window->property_->SetDisplayId(viewportConfig.displayId_);
@@ -1118,16 +1123,57 @@ WSError WindowExtensionSessionImpl::UpdateSessionViewportConfig(const SessionVie
             window->lastDensity_ = viewportConfig.density_;
             window->lastOrientation_ = viewportConfig.orientation_;
             window->lastDisplayId_ = viewportConfig.displayId_;
+            window->lastTransform_ = viewportConfig.transform_;
         }
     };
     handler_->PostTask(task, "UpdateSessionViewportConfig");
     return WSError::WS_OK;
 }
 
+WMError WindowExtensionSessionImpl::SetUIExtCustomDensity(const float density)
+{
+    if (std::islessequal(density, 0.0f)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Invalid density_: %{public}f", density);
+        return WSError::WM_ERROR_INVALID_PARAM;
+    }
+    if (!handler_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "handler_ is null");
+        return WSError::WMError::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
+    auto task = [weak = wptr(this), density]() {
+        auto window = weak.promote();
+        if (!window) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "window is null");
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_UIEXT, "Customize density:%{public}f", density);
+        window->customizedDensity_ = density; 
+        window->isDensityCustomized_ = true;
+
+        SessionViewportConfig config;
+        config.isDensityFollowHost_ = false;
+        config.density_ = density;
+        config.orientation_ = window->lastOrientation_;
+        config.displayId_ = window->lastDisplayId_;
+        config.transform_ = window->lastTransform_;
+        window->UpdateSessionViewportConfig(config);
+    };
+    handler_->PostTask(task, "SetUIExtCustomDensity");
+    return WSError::WS_OK;
+}
+
 void WindowExtensionSessionImpl::UpdateExtensionDensity(SessionViewportConfig& config)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "isFollowHost:%{public}d, densityValue:%{public}f", config.isDensityFollowHost_,
-        config.density_);
+    TLOGD(WmsLogTag::WMS_UIEXT, "isFollowHost:%{public}d, densityValue:%{public}f,isDensityCustomized_:%{public}d, "
+        "customizedDensity:%{public}f", config.isDensityFollowHost_, config.density_, isDensityCustomized_,
+        customizedDensity_);
+    if (isDensityCustomized_) {
+        if (config.isDensityFollowHost_) {
+            hostDensityValue_ = config.density_;
+        }
+        config.density_ = customizedDensity_;
+        return;
+    }
     isDensityFollowHost_ = config.isDensityFollowHost_;
     if (config.isDensityFollowHost_) {
         hostDensityValue_ = config.density_;
@@ -1372,6 +1418,9 @@ WSError WindowExtensionSessionImpl::NotifyDensityFollowHost(bool isFollowHost, f
 
 float WindowExtensionSessionImpl::GetVirtualPixelRatio(const sptr<DisplayInfo>& displayInfo)
 {
+    if (isDensityCustomized_) {
+        return customizedDensity_;
+    }
     if (isDensityFollowHost_ && hostDensityValue_ != std::nullopt) {
         return hostDensityValue_->load();
     }
