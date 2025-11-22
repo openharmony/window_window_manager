@@ -1407,26 +1407,28 @@ void ScreenSessionManager::RecoverScreenActiveMode(ScreenId rsScreenId)
         TLOGE(WmsLogTag::DMS, "mode is empty");
         return;
     }
-    uint32_t activeId = -1;
+    int32_t activeId = -1;
     std::map<std::string, SupportedScreenModes> resolutionMap = ScreenSettingHelper::GetResolutionMode();
     std::string serialNumber = screenSession->GetSerialNumber();
     if(CheckResolutionMode(resolutionMap, serialNumber)) {
         auto info = resolutionMap[serialNumber];
         activeId = GetActiveIdxInModes(modes,info);
     } else {
+        // interface not support parameter zero
         activeId = static_cast<int32_t>(modes.size()) - 2;
     }
     TLOGI(WmsLogTag::DMS, "activeId: %{public}d", activeId);
-    if(activeId == static_cast<uint32_t>(-1)) {
+    if(activeId < 0) {
         TLOGE(WmsLogTag::DMS, "no matching resolution, activeId: %{public}d", activeId);
         return;
     }
-    DMError ret = SetScreenActiveMode(screenSession->GetScreenId(), activeId);
+    DMError ret = SetScreenActiveMode(screenSession->GetScreenId(), static_cast<uint32_t>(activeId));
     if (ret != DMError::DM_OK) {
         TLOGE(WmsLogTag::DMS, "recover error, rsid:%{public}"  PRIu64", activeIdx:%{public}d",
             rsScreenId, activeId);
     }      
 }
+
 int32_t ScreenSessionManager::GetActiveIdxInModes(const std::vector<sptr<SupportedScreenModes>>& modes,
                           const SupportedScreenModes& edidInfo)
 {
