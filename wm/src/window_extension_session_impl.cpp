@@ -510,7 +510,7 @@ WMError WindowExtensionSessionImpl::UnregisterRectChangeInGlobalDisplayListener(
             return ret;
         }
         needNotifyHost = hostRectChangeInGlobalDisplayListenerList_.empty() &&
-        rectChangeInGlobalDisplayUIExtListenerIds_.empty();
+            rectChangeInGlobalDisplayUIExtListenerIds_.empty();
     }
     if (needNotifyHost) {
         AAFwk::Want dataToSend;
