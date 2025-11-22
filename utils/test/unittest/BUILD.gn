@@ -28,6 +28,7 @@ group("unittest") {
     ":utils_dms_reporter_test",
     ":utils_perform_reporter_test",
     ":utils_persistent_storage_test",
+    ":utils_rate_limited_logger_test",
     ":utils_point_test",
     ":utils_rs_adapter_test",
     ":utils_screen_group_info_test",
@@ -203,6 +204,16 @@ ohos_unittest("utils_persistent_storage_test") {
   module_out_path = module_out_path
 
   sources = [ "persistent_storage_test.cpp" ]
+
+  deps = [ ":utils_unittest_common" ]
+
+  external_deps = test_external_deps
+}
+
+ohos_unittest("utils_rate_limited_logger_test") {
+  module_out_path = module_out_path
+
+  sources = [ "rate_limited_logger_test.cpp" ]
 
   deps = [ ":utils_unittest_common" ]
 

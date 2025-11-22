@@ -60,15 +60,53 @@ public:
      * @return true if message was logged, false if rate limited
      */
     bool logFunction(const std::string& functionName, int timeWindowMs, int maxCount);
+
+    /**
+     * Enable or disable all logging
+     * @param enabled true to enable logging, false to disable
+     */
+    void setEnabled(bool enabled);
+
+    /**
+     * Clear all rate limiting records
+     */
+    void clear();
+
+    /**
+     * Get current log count for a function in the current time window
+     * @param functionName Name of the function
+     * @return Current log count
+     */
+    int getCurrentCount(const std::string& functionName);
 };
 
 
-#define TLOGLIMITI(timeWindowMs, maxCount, tag, fmt, ...) \
-    do { \
-        
+#define TLOGLIMITD(timeWindowMs, maxCount, tag, fmt, ...)                                         \
+    do {                                                                                          \
         if (RateLimitedLogger::getInstance().logFunction(__FUNCTION__, timeWindowMs, maxCount)) { \
-            TLOGI(tag, fmt, ##__VA_ARGS__); \
-        } \
+            TLOGD(tag, fmt, ##__VA_ARGS__);                                                       \
+        }                                                                                         \
+    } while (0)
+
+#define TLOGLIMITI(timeWindowMs, maxCount, tag, fmt, ...)                                         \
+    do {                                                                                          \
+        if (RateLimitedLogger::getInstance().logFunction(__FUNCTION__, timeWindowMs, maxCount)) { \
+            TLOGI(tag, fmt, ##__VA_ARGS__);                                                       \
+        }                                                                                         \
+    } while (0)
+
+#define TLOGLIMITW(timeWindowMs, maxCount, tag, fmt, ...)                                         \
+    do {                                                                                          \
+        if (RateLimitedLogger::getInstance().logFunction(__FUNCTION__, timeWindowMs, maxCount)) { \
+            TLOGW(tag, fmt, ##__VA_ARGS__);                                                       \
+        }                                                                                         \
+    } while (0)
+
+#define TLOGLIMITE(timeWindowMs, maxCount, tag, fmt, ...)                                         \
+    do {                                                                                          \
+        if (RateLimitedLogger::getInstance().logFunction(__FUNCTION__, timeWindowMs, maxCount)) { \
+            TLOGE(tag, fmt, ##__VA_ARGS__);                                                       \
+        }                                                                                         \
     } while (0)
 
 #endif // RATE_LIMITED_LOGGER_H
