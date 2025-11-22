@@ -665,9 +665,9 @@ HWTEST_F(WindowExtensionSessionImplTest, UnregisterRectChangeInGlobalDisplayList
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, window_->UnregisterRectChangeInGlobalDisplayListener(listener));
 
     listener = sptr<IRectChangeInGlobalDisplayListener>::MakeSptr();
-    window_->rectChangeInGlobalDisplayUIExtListenerIds.emplace(111);
+    window_->rectChangeInGlobalDisplayUIExtListenerIds_.emplace(111);
     EXPECT_EQ(WMError::WM_OK, window_->UnregisterRectChangeInGlobalDisplayListener(listener));
-    window_->rectChangeInGlobalDisplayUIExtListenerIds.clear();
+    window_->rectChangeInGlobalDisplayUIExtListenerIds_.clear();
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window_->UnregisterRectChangeInGlobalDisplayListener(listener));
     window_->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
     EXPECT_EQ(WMError::WM_OK, window_->UnregisterRectChangeInGlobalDisplayListener(listener));
@@ -2966,7 +2966,7 @@ HWTEST_F(WindowExtensionSessionImplTest, OnHostRectChangeInGlobalDisplay, TestSi
     window_->RegisterRectChangeInGlobalDisplayListener(listener);
 
     EXPECT_EQ(WMError::WM_OK, window_->OnHostRectChangeInGlobalDisplay(std::move(want), reply));
-    window_->rectChangeInGlobalDisplayUIExtListenerIds.emplace(111);
+    window_->rectChangeInGlobalDisplayUIExtListenerIds_.emplace(111);
     EXPECT_EQ(WMError::WM_OK, window_->OnHostRectChangeInGlobalDisplay(std::move(want), reply));
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     EXPECT_EQ(WMError::WM_OK, window_->OnHostRectChangeInGlobalDisplay(std::move(want), reply));
@@ -3066,7 +3066,7 @@ HWTEST_F(WindowExtensionSessionImplTest, OnExtensionMessage, TestSize.Level1)
     code = static_cast<uint32_t>(Extension::Businesscode::REGISTER_HOST_RECT_CHANGE_IN_GLOBAL_DISPLAY_LISTENER);
     EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
     code = static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_HOST_RECT_CHANGE_IN_GLOBAL_DISPLAY_LISTENER);
-    window->rectChangeInGlobalDisplayUIExtListenerIds.emplace(111);
+    window->rectChangeInGlobalDisplayUIExtListenerIds_.emplace(111);
     EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
 }
 
