@@ -3352,12 +3352,12 @@ struct SupportRotationInfo : public Parcelable {
             return false;
         }
         for (uint32_t i = 0; i < SUPPORT_ROTATION_SIZE; i++) {
-            if(!parcel.WriteBool(containerSupportRotation_[i])) {
+            if (!parcel.WriteBool(containerSupportRotation_[i])) {
                 return false;
             }
         }
         for (uint32_t i = 0; i < SUPPORT_ROTATION_SIZE; i++) {
-            if(!parcel.WriteBool(sceneSupportRotation_[i])) {
+            if (!parcel.WriteBool(sceneSupportRotation_[i])) {
                 return false;
             }
         }
@@ -3380,7 +3380,7 @@ struct SupportRotationInfo : public Parcelable {
         }
         for (uint32_t i = 0; i < SUPPORT_ROTATION_SIZE; i++) {
             bool isSupport = false;
-            if(!parcel.ReadBool(isSupport)) {
+            if (!parcel.ReadBool(isSupport)) {
                 delete supportRotationInfo;
                 return nullptr;
             }
@@ -3388,7 +3388,7 @@ struct SupportRotationInfo : public Parcelable {
         }
         for (uint32_t i = 0; i < SUPPORT_ROTATION_SIZE; i++) {
             bool isSupport = false;
-            if(!parcel.ReadBool(isSupport)) {
+            if (!parcel.ReadBool(isSupport)) {
                 delete supportRotationInfo;
                 return nullptr;
             }
