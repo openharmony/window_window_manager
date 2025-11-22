@@ -92,6 +92,8 @@ constexpr int64_t SET_UIEXTENSION_DESTROY_TIMEOUT_TIME_MS = 4000;
 const std::string SCB_BACK_VISIBILITY = "scb_back_visibility";
 const std::string SCB_COMPATIBLE_MAXIMIZE_VISIBILITY = "scb_compatible_maximize_visibility";
 const std::string SCB_COMPATIBLE_MAXIMIZE_BTN_RES = "scb_compatible_maximize_btn_res";
+const std::string SCB_COMPATIBLE_MENU_VISIBILITY = "scb_set_compatible_menu";
+const std::string SCB_GET_COMPATIBLE_PRIMARY_MODE = "scb_get_compatible_primary_mode";
 
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
 {
@@ -2024,6 +2026,11 @@ void WindowSessionImpl::HideTitleButton(bool& hideSplitButton, bool& hideMaximiz
     bool fullScreenStart = property_->IsFullScreenStart() &&
         (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
     uiContent->OnContainerModalEvent(SCB_COMPATIBLE_MAXIMIZE_BTN_RES, fullScreenStart ? "true" : "false");
+    RealTimeSwitchInfo switchInfo = property->GetRealTimeSwitchInfo();
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "LC-- isNeedChange: %{public}u, showTypes: %{public}u",
+        switchInfo.isNeedChange_, switchInfo.showTypes_);
+    uiContent->OnContainerModalEvent(SCB_COMPATIBLE_MENU_VISIBILITY, switchInfo.isNeedChange_ ? "true" : "false");
+    uiContent->OnContainerModalEvent(SCB_GET_COMPATIBLE_PRIMARY_MODE, std::to_string(switchInfo.showTypes_));
 }
 
 WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
