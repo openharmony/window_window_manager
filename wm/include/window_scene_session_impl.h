@@ -19,7 +19,6 @@
 #include "window_session_impl.h"
 #include "window_manager.h"
 #include "screen_manager.h"
-#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
