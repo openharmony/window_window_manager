@@ -1307,7 +1307,8 @@ bool ConvertThrowSlipModeFromJs(napi_env env, napi_value value, ThrowSlipMode& t
     return true;
 }
 
-bool ConvertRealTimeSwitchInfoFromJs(napi_env env, napi_value value, RealTimeSwitchInfo& switchInfo) {
+bool ConvertRealTimeSwitchInfoFromJs(napi_env env, napi_value value, RealTimeSwitchInfo& switchInfo)
+{
     napi_value realTimeSwitchInfo = nullptr;
     napi_value jsIsNeedChange = nullptr;
     napi_value jsShowTypes = nullptr;
