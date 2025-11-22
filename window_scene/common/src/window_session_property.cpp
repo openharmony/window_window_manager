@@ -2682,7 +2682,7 @@ bool CompatibleModeProperty::IsAdaptToSimulationScale() const
     return isAdaptToSimulationScale_;
 }
 
-void CompatibleModeProperty::SetRealTimeSwitchInfo(RealTimeSwitchInfo switchInfo)
+void CompatibleModeProperty::SetRealTimeSwitchInfo(const RealTimeSwitchInfo& switchInfo)
 {
     realTimeSwitchInfo_.isNeedChange_ = switchInfo.isNeedChange_;
     realTimeSwitchInfo_.showTypes_ = switchInfo.showTypes_;
