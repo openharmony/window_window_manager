@@ -111,6 +111,10 @@ constexpr int32_t TOUCH_SLOP_RATIO = 25;
 const std::string BACK_WINDOW_EVENT = "scb_back_window_event";
 const std::string COMPATIBLE_MAX_WINDOW_EVENT = "win_compatible_max_event";
 const std::string COMPATIBLE_RECOVER_WINDOW_EVENT = "win_compatible_recover_event";
+const std::string NAME_LANDSCAPE_2_3_CLICK = "win_change_to_2_3_landscape";
+const std::string NAME_LANDSCAPE_1_1_CLICK = "win_change_to_1_1_landscape";
+const std::string NAME_LANDSCAPE_18_9_CLICK = "win_change_to_18_9_landscape";
+const std::string NAME_DEFAULT_LANDSCAPE_CLICK = "win_change_to_default_landscape";
 const std::unordered_set<WindowType> INVALID_SYSTEM_WINDOW_TYPE = {
     WindowType::WINDOW_TYPE_NEGATIVE_SCREEN,
     WindowType::WINDOW_TYPE_THEME_EDITOR,
@@ -1445,9 +1449,11 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
             TLOGI(WmsLogTag::WMS_LAYOUT_PC, "winId: %{public}u, windowModeSupportType: %{public}u",
                 GetWindowId(), windowModeSupportType);
         }
-        if (property_->IsAdaptToDragScale()) {
-            windowModeSupportType = (WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN |
+        RealTimeSwitchInfo switchInfo = property_->GetRealTimeSwitchInfo();
+        if (switchInfo.showTypes_ != 0) {
+            uint32_t compatibleModeWindowNeed = (WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN |
                                      WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
+            windowModeSupportType |= compatibleModeWindowNeed;
         }
         property_->SetWindowModeSupportType(windowModeSupportType);
         TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}u, windowModeSupportType: %{public}u",
@@ -3776,6 +3782,26 @@ WMError WindowSceneSessionImpl::RecoverForCompatibleMode()
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     hostSession->OnSessionEvent(SessionEvent::EVENT_COMPATIBLE_TO_RECOVER);
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::SwitchCompatibleMode(CompatibleStyleMode styleMode)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "recover fail, not main");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+
+    SessionEventParam param;
+    param.compatibleStyleMode = static_cast<uint32_t>(styleMode);
+
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    hostSession->OnSessionEvent(SessionEvent::EVENT_SWITCH_COMPATIBLE_MODE, param);
     return WMError::WM_OK;
 }
 
