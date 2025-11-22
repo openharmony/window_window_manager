@@ -2858,10 +2858,11 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateExtensionDensity_DensityCustomize
     window->isDensityCustomized_ = true;
     window->customizedDensity_ = 2.0f;
 
+    SessionViewportConfig config;
     config.isDensityFollowHost_ = true;
     config.density_ = 3.0f;
     window->UpdateExtensionDensity(config);
-    EXPECT_NEAR(3.0f, window->hostDensityValue_, 0.00001f);
+    EXPECT_NEAR(3.0f, window->hostDensityValue_->load(), 0.00001f);
     EXPECT_NEAR(config.density_, window->customizedDensity_, 0.00001f);
 }
 
