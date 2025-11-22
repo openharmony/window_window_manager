@@ -2236,8 +2236,8 @@ HWTEST_F(SceneSessionManagerTest, SetSupportRotationRegisteredListener, TestSize
 }
 
 /**
- * @tc.name: SetSupportRotationRegisteredListener
- * @tc.desc: SetSupportRotationRegisteredListener
+ * @tc.name: NotifySupportRotationRegistered
+ * @tc.desc: NotifySupportRotationRegistered
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest, NotifySupportRotationRegistered, TestSize.Level1)
@@ -2256,10 +2256,6 @@ HWTEST_F(SceneSessionManagerTest, NotifySupportRotationRegistered, TestSize.Leve
     WMError ret = WMError::WM_OK;
     ret = ssm_->NotifySupportRotationRegistered();
     EXPECT_EQ(ret, WMError::WM_OK);
-
-    NotifySupportRotationRegisteredFunc func = [](){};
-    ssm_->SetSupportRotationRegisteredListener(std::move(func));
-    EXPECT_TRUE(ssm_->supportRotationRegisteredListener_ != nullptr);
 }
 } // namespace
 } // namespace Rosen

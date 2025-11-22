@@ -1422,7 +1422,7 @@ bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::stri
         napi_get_element(env, array, i, &jsValue);
         if (!ConvertFromJsValue(env, jsValue, strItem)) {
             WLOGFW("Failed to ConvertFromJsValue, index: %{public}u", i);
-            return false;
+            continue;
         }
         vector.emplace_back(std::move(strItem));
     }
@@ -1453,7 +1453,7 @@ bool ParseBoolArrayValueFromJsValue(napi_env env, napi_value array, std::vector<
         napi_get_element(env, array, i, &jsValue);
         if (!ConvertFromJsValue(env, jsValue, strItem)) {
             WLOGFW("Failed to ConvertFromJsValue, index: %{public}u", i);
-            continue;
+            return false;
         }
         vector.emplace_back(std::move(strItem));
     }
