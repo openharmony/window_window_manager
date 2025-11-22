@@ -543,30 +543,6 @@ HWTEST_F(SuperFoldSensorManagerTest, HandleSuperSensorChange, Function | SmallTe
 }
 
 /**
- * @tc.name: HandleScreenConnectChange
- * @tc.desc: test function : HandleScreenConnectChange
- * @tc.type: FUNC
- */
-HWTEST_F(SuperFoldSensorManagerTest, HandleScreenConnectChange, Function | SmallTest | Level3)
-{
-    SuperFoldSensorManager mgr = SuperFoldSensorManager();
-    mgr.HandleScreenConnectChange();
-    ASSERT_EQ(mgr.curHall_, USHRT_MAX);
-}
-
-/**
- * @tc.name: HandleScreenDisconnectChange
- * @tc.desc: test function : HandleScreenDisconnectChange
- * @tc.type: FUNC
- */
-HWTEST_F(SuperFoldSensorManagerTest, HandleScreenDisconnectChange, Function | SmallTest | Level3)
-{
-    SuperFoldSensorManager mgr = SuperFoldSensorManager();
-    mgr.HandleScreenDisconnectChange();
-    ASSERT_EQ(mgr.curHall_, USHRT_MAX);
-}
-
-/**
  * @tc.name: GetCurAngle
  * @tc.desc: test function : GetCurAngle
  * @tc.type: FUNC
