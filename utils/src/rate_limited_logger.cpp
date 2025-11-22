@@ -58,3 +58,19 @@ bool RateLimitedLogger::logFunction(const std::string& functionName, int timeWin
         return false;
     }
 }
+
+void RateLimitedLogger::clear() {
+    std::lock_guard<std::mutex> lock(mutex_);
+    functionRecords_.clear();
+}
+
+void RateLimitedLogger::setEnabled(bool enabled) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    enabled_ = enabled;
+}
+
+int RateLimitedLogger::getCurrentCount(const std::string& functionName) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto it = functionRecords_.find(functionName);
+    return (it != functionRecords_.end()) ? it->second.count : 0;
+}
