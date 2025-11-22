@@ -4836,6 +4836,11 @@ void SceneSessionManager::SetStartPiPFailedListener(NotifyStartPiPFailedFunc&& f
     startPiPFailedFunc_ = std::move(func);
 }
 
+void SceneSessionManager::SetSupportRotationRegisteredListener(NotifySupportRotationRegisteredFunc&& func)
+{
+    supportRotationRegisteredListener_ = std::move(func);
+}
+
 void SceneSessionManager::RegisterCreateSubSessionListener(int32_t persistentId,
     const NotifyCreateSubSessionFunc& func)
 {
@@ -11265,7 +11270,8 @@ WMError SceneSessionManager::UnregisterWindowManagerAgent(WindowManagerAgentType
 {
     if (type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_GESTURE_NAVIGATION_ENABLED ||
-        type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WATER_MARK_FLAG) {
+        type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WATER_MARK_FLAG ||
+        type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_SUPPORT_ROTATION) {
         if (!SessionPermission::IsSystemCalling()) {
             TLOGE(WmsLogTag::DEFAULT, "IsSystemCalling permission denied!");
             return WMError::WM_ERROR_NOT_SYSTEM_APP;
@@ -11932,6 +11938,11 @@ void SceneSessionManager::DealwithDrawingContentChange(const std::vector<std::pa
         TLOGD(WmsLogTag::DEFAULT, "Notify WindowDrawingContenInfo changed start");
         SessionManagerAgentController::GetInstance().UpdateWindowDrawingContentInfo(windowDrawingContenInfos);
     }
+}
+
+void SceneSessionManager::NotifySupportRotationChange(const SupportRotationInfo& supportRotationInfo)
+{
+    SessionManagerAgentController::GetInstance().NotifySupportRotationChange(supportRotationInfo);
 }
 
 WSError SceneSessionManager::NotifyAppUseControlList(
@@ -18644,5 +18655,15 @@ bool SceneSessionManager::IsAppBoundSystemTray(int32_t callingPid, uint32_t call
         return it->second.count(callingPid) > 0;
     }
     return false;
+}
+
+WMError SceneSessionManager::NotifySupportRotationRegistered()
+{
+    if (supportRotationRegisteredListener_) {
+        supportRotationRegisteredListener_();
+    } else {
+        TLOGE(WmsLogTag::WMS_ROTATION, "supportRotationRegisteredListener_ is null");
+    }
+    return WMError::WM_OK;
 }
 } // namespace OHOS::Rosen

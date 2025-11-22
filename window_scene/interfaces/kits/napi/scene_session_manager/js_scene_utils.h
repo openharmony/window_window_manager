@@ -291,6 +291,9 @@ bool ConvertRectFromJsValue(napi_env env, napi_value jsObject, Rect& displayRect
 bool ConvertInfoFromJsValue(napi_env env, napi_value jsObject, RotationChangeInfo& rotationChangeInfo);
 bool ConvertThrowSlipModeFromJs(napi_env env, napi_value value, ThrowSlipMode& throwSlipMode);
 bool convertAnimConfigFromJs(napi_env env, napi_value value, SceneAnimationConfig& config);
+bool ConvertSupportRotationInfoFromJsValue(napi_env env, napi_value jsObject,
+    SupportRotationInfo& suppoortRotationInfo);
+bool ParseBoolArrayValueFromJsValue(napi_env env, napi_value array, std::vector<bool>& vector);
 template<class T>
 bool ParseJsValue(napi_env env, napi_value jsObject, const std::string& name, T& data)
 {

@@ -217,6 +217,7 @@ public:
      */
     virtual WMError AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
         const WindowAnimationOption& animationOption);
+    WMError NotifySupportRotationRegistered();
     
     /*
      * Window Property

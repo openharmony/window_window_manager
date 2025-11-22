@@ -194,6 +194,7 @@ public:
         const std::unordered_set<std::string>& privacyWindowTags) override;
     WMError GetPiPSettingSwitchStatus(bool& switchStatus) override;
     WMError UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams) override;
+    WMError NotifySupportRotationRegistered() override;
 
 private:
     template<typename T>

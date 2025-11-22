@@ -3046,6 +3046,20 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetSpecificWindowZIndex, Function | 
     ret = stub_->HandleSetSpecificWindowZIndex(data, reply);
     EXPECT_EQ(ret, ERR_INVALID_DATA);
 }
+
+/**
+ * @tc.name: HandleNotifySupportRotationRegistered
+ * @tc.desc: HandleNotifySupportRotationRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleNotifySupportRotationRegistered, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    int res = stub_->HandleNotifySupportRotationRegistered(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

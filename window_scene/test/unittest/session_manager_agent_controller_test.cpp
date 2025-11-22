@@ -272,5 +272,30 @@ HWTEST_F(SessionManagerAgentControllerTest, NotifyWindowPropertyChange01, TestSi
               SessionManagerAgentController::GetInstance().UnregisterWindowManagerAgent(windowManagerAgent, type, pid));
 }
 
+/**
+ * @tc.name: NotifySupportRotationChange
+ * @tc.desc: NotifySupportRotationChange Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerAgentControllerTest, NotifySupportRotationChange, TestSize.Level1)
+{
+    int32_t pid = 65535;
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_SUPPORT_ROTATION;
+    SupportRotationInfo supportRotationInfo;
+    supportRotationInfo.displayId_ = 0;
+    supportRotationInfo.persistentId_ = 0;
+    supportRotationInfo.containerSupportRotation_ = {false, false, false, false};
+    supportRotationInfo.sceneSupportRotation_ = {false, false, false, false};
+    supportRotationInfo.supportRotationChangeReason_ = "test";
+
+
+    EXPECT_EQ(WMError::WM_OK,
+              SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(windowManagerAgent, type, pid));
+    SessionManagerAgentController::GetInstance().NotifySupportRotationChange(supportRotationInfo);
+    EXPECT_EQ(WMError::WM_OK,
+              SessionManagerAgentController::GetInstance().UnregisterWindowManagerAgent(windowManagerAgent, type, pid));
+}
+
 } // namespace Rosen
 } // namespace OHOS
