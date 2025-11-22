@@ -636,13 +636,13 @@ WMError WindowImpl::AniSetUIContent(const std::string& contentInfo, ani_env* env
 
 WMError WindowImpl::NapiSetUIContentByName(const std::string& contentName, napi_env env, napi_value storage,
     BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
-{ 
+{
     return SetUIContentInner(contentName, env, storage, WindowSetUIContentType::BY_NAME,
         BackupAndRestoreType::NONE, ability);
 }
 WMError WindowImpl::AniSetUIContentByName(const std::string& contentName, ani_env* env, ani_object storage,
     BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
-{ 
+{
     return SetUIContentInner(contentName, env, storage, WindowSetUIContentType::BY_NAME,
         BackupAndRestoreType::NONE, ability, 1);
 }
