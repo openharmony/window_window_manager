@@ -2026,9 +2026,7 @@ void WindowSessionImpl::HideTitleButton(bool& hideSplitButton, bool& hideMaximiz
     bool fullScreenStart = property_->IsFullScreenStart() &&
         (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
     uiContent->OnContainerModalEvent(SCB_COMPATIBLE_MAXIMIZE_BTN_RES, fullScreenStart ? "true" : "false");
-    RealTimeSwitchInfo switchInfo = property->GetRealTimeSwitchInfo();
-    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "LC-- isNeedChange: %{public}u, showTypes: %{public}u",
-        switchInfo.isNeedChange_, switchInfo.showTypes_);
+    RealTimeSwitchInfo switchInfo = property_->GetRealTimeSwitchInfo();
     uiContent->OnContainerModalEvent(SCB_COMPATIBLE_MENU_VISIBILITY, switchInfo.isNeedChange_ ? "true" : "false");
     uiContent->OnContainerModalEvent(SCB_GET_COMPATIBLE_PRIMARY_MODE, std::to_string(switchInfo.showTypes_));
 }
