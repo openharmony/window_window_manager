@@ -809,7 +809,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, UpdateWindowFlagsForLockCursorInDrag, Te
     SessionInfo info;
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     session->persistentId_ = 5;
-    session->UpdateFocus(false);
+    session->UpdateFocus(true);
     sptr<MoveDragController> moveDragController;
     moveDragController = sptr<MoveDragController>::MakeSptr(session);
     session->moveDragController_ = moveDragController;
