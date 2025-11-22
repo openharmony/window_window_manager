@@ -1404,6 +1404,7 @@ void ScreenSessionManager::RecoverScreenActiveMode(ScreenId rsScreenId)
         auto info = resolutionMap[serialNumber];
         activeId = GetActiveIdxInModes(modes,info);
     } else {
+        // interface not support parameter zero
         activeId = static_cast<int32_t>(modes.size()) - 2;
     }
     TLOGI(WmsLogTag::DMS, "activeId: %{public}d", activeId);
