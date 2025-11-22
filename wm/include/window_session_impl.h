@@ -1231,6 +1231,12 @@ private:
      * RS Client Multi Instance
      */
     std::shared_ptr<RSUIDirector> rsUIDirector_;
+
+    /*
+     * Compatible Mode
+     */
+    void RegisterNavigateCallbackForPageCompatibleModeIfNeed();
+    void HandleNavigateCallbackForPageCompatibleMode(const std::string& fromPage, const std::string& toPage);
 };
 } // namespace Rosen
 } // namespace OHOS
