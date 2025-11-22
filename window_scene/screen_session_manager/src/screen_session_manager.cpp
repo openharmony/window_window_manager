@@ -1408,7 +1408,7 @@ void ScreenSessionManager::RecoverScreenActiveMode(ScreenId rsScreenId)
         activeId = static_cast<int32_t>(modes.size()) - 2;
     }
     TLOGI(WmsLogTag::DMS, "activeId: %{public}d", activeId);
-    if(activeId == -1) {
+    if(activeId < 0) {
         TLOGE(WmsLogTag::DMS, "no matching resolution, activeId: %{public}d", activeId);
         return;
     }
