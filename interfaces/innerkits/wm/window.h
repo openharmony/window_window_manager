@@ -3575,9 +3575,9 @@ public:
 
     /**
      * @brief UIExtension window call to set custom density, once called this method to set custom density,
-     * UIExtension widnow will dinore FOLLOW_HOST_DPI and use specified density.
+     * UIExtension window will dinore FOLLOW_HOST_DPI and use specified density.
      *
-     * @param density the custom density of UIExtension widnow.
+     * @param density the custom density of UIExtension window.
      * @return WM_OK means set success, others means failed.
      */
     virtual WMError SetUIExtCustomDensity(const float density) { return WMError::WM_OK; }
