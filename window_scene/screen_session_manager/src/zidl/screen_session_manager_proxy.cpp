@@ -3007,7 +3007,7 @@ DMError ScreenSessionManagerProxy::GetLiveCreaseRegion(FoldCreaseRegion& region)
 }
 
 DMError ScreenSessionManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
-    std::vector<DisplayId>& displayIds)
+    std::vector<DisplayId>& displayIds, const UniqueScreenRotationOptions& rotationOptions)
 {
     TLOGI(WmsLogTag::DMS, "enter");
     sptr<IRemoteObject> remote = Remote();
@@ -3032,6 +3032,18 @@ DMError ScreenSessionManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>&
         TLOGE(WmsLogTag::DMS, "write screens failed");
         return DMError::DM_ERROR_NULLPTR;
     }
+    if (!data.WriteBool(rotationOptions.isRotationLocked_)) {
+        TLOGE(WmsLogTag::DMS, "write isRotationLocked failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    if (!data.WriteInt32(rotationOptions.rotation_)) {
+        TLOGE(WmsLogTag::DMS, "write rotation failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    TLOGD(WmsLogTag::DMS,
+          "IPC Proxy sending parameters, isRotationLocked: %{public}d, rotation: %{public}d",
+          rotationOptions.isRotationLocked_, rotationOptions.rotation_);
+
     if (remote->SendRequest(
         static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_MAKE_UNIQUE_SCREEN),
         data, reply, option) != ERR_NONE) {

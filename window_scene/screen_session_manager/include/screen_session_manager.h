@@ -152,7 +152,8 @@ public:
     virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint,
                                ScreenId& screenGroupId) override;
     virtual DMError StopExpand(const std::vector<ScreenId>& expandScreenIds) override;
-    DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds, std::vector<DisplayId>& displayIds) override;
+    DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds, std::vector<DisplayId>& displayIds,
+        const UniqueScreenRotationOptions& rotationOptions) override;
     virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) override;
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
@@ -413,8 +414,12 @@ public:
         std::vector<uint64_t> surfaceIdList = {}, std::vector<uint8_t> typeBlackList = {}) override;
     void SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag) override;
     // notify scb virtual screen change
+    void OnVirtualScreenChange(ScreenId screenId, ScreenEvent screenEvent,
+        const UniqueScreenRotationOptions& rotationOptions);
     void OnVirtualScreenChange(ScreenId screenId, ScreenEvent screenEvent);
-    DMError VirtualScreenUniqueSwitch(const std::vector<ScreenId>& screenIds);
+    DMError VirtualScreenUniqueSwitch(const std::vector<ScreenId>& screenIds,
+        const UniqueScreenRotationOptions& rotationOptions);
+    int32_t GetDeviceOrientationAPI14(sptr<ScreenSession> screenSession, Rotation rotation);
     void FixPowerStatus();
     void FoldScreenPowerInit();
     DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy) override;
@@ -490,6 +495,8 @@ public:
     void UnregisterSettingWireCastObserver(ScreenId screenId);
     void RegisterSettingWireCastObserver(sptr<ScreenSession>& screenSession);
     SessionOption GetSessionOption(sptr<ScreenSession> screenSession);
+    SessionOption GetSessionOption(sptr<ScreenSession> screenSession, ScreenId screenId,
+        const UniqueScreenRotationOptions& rotationOptions);
     SessionOption GetSessionOption(sptr<ScreenSession> screenSession, ScreenId screenId);
     virtual DMError SetSystemKeyboardStatus(bool isTpKeyboardOn = false) override;
 

@@ -416,6 +416,16 @@ public:
     void SetSupportsFocus(bool focus);
     bool GetSupportsInput() const;
     void SetSupportsInput(bool input);
+
+    bool GetUniqueRotationLock() const;
+    void SetUniqueRotationLock(bool isRotationLocked);
+    int32_t GetUniqueRotation() const;
+    void SetUniqueRotation(int32_t rotation);
+    const std::map<int32_t, int32_t>& GetUniqueRotationOrientationMap() const;
+    bool UpdateRotationOrientationMap(UniqueScreenRotationOptions& rotationOptions, int32_t rotation,
+                                            int32_t orientation);
+    void SetUniqueRotationOrientationMap(const std::map<int32_t, int32_t>& rotationOrientationMap);
+
     void SetVprScaleRatio(float vprScaleRatio);
     float GetVprScaleRatio() const;
 
@@ -483,6 +493,13 @@ private:
     std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap_;
     std::shared_mutex rotationCorrectionMutex_;
     std::atomic<Rotation> currentRotationCorrection_ { Rotation::ROTATION_0 };
+
+    /*
+     * Create Unique Screen Locked Rotation Parameters
+     */
+    bool isUniqueRotationLocked_;
+    int32_t uniqueRotation_;
+    std::map<int32_t, int32_t> uniqueRotationOrientationMap_;
 
     /*
      * RS Client Multi Instance

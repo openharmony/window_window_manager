@@ -2101,7 +2101,8 @@ HWTEST_F(ScreenSessionManagerTest, MakeUniqueScreen, TestSize.Level1)
     vector<ScreenId> screenIds;
     screenIds.clear();
     std::vector<DisplayId> displayIds;
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->MakeUniqueScreen(screenIds, displayIds));
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->MakeUniqueScreen(screenIds, displayIds,
+        UniqueScreenRotationOptions()));
 #endif
 }
 
