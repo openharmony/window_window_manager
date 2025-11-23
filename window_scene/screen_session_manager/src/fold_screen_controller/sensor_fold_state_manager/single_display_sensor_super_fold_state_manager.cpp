@@ -127,7 +127,7 @@ FoldStatus SingleDisplaySensorSuperFoldStateManager::GetNextFoldState(float angl
 
 void SingleDisplaySensorSuperFoldStateManager::RegisterApplicationStateObserver() {}
 
-void SingleDisplaySensorPocketFoldStateManager::HandleTentChange(int tentType,
+void SingleDisplaySensorSuperFoldStateManager::HandleTentChange(int tentType,
     sptr<FoldScreenPolicy> foldScreenPolicy, int32_t hall)
 {
     if (tentType == tentModeType_) {
@@ -170,7 +170,7 @@ void SingleDisplaySensorPocketFoldStateManager::HandleTentChange(int tentType,
     }
 }
 
-bool SingleDisplaySensorPocketFoldStateManager::TriggerTentExit(float angle, int hall)
+bool SingleDisplaySensorSuperFoldStateManager::TriggerTentExit(float angle, int hall)
 {
     if (hall == HALL_FOLDED_THRESHOLD) {
         ReportTentStatusChange(ReportTentModeStatus::ABNORMAL_EXIT_TENT_MODE_DUE_TO_HALL);
@@ -187,7 +187,7 @@ bool SingleDisplaySensorPocketFoldStateManager::TriggerTentExit(float angle, int
     return false;
 }
 
-void SingleDisplaySensorPocketFoldStateManager::TentModeHandleSensorChange(float angle, int hall,
+void SingleDisplaySensorSuperFoldStateManager::TentModeHandleSensorChange(float angle, int hall,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
     if (TriggerTentExit(angle, hall)) {
@@ -204,7 +204,7 @@ void SingleDisplaySensorPocketFoldStateManager::TentModeHandleSensorChange(float
     }
 }
 
-void SingleDisplaySensorPocketFoldStateManager::ReportTentStatusChange(ReportTentModeStatus tentStatus)
+void SingleDisplaySensorSuperFoldStateManager::ReportTentStatusChange(ReportTentModeStatus tentStatus)
 {
     int32_t status = static_cast<int32_t>(tentStatus);
     TLOGI(WmsLogTag::DMS, "report tentStatus: %{public}d", status);
@@ -218,7 +218,7 @@ void SingleDisplaySensorPocketFoldStateManager::ReportTentStatusChange(ReportTen
     }
 }
 
-void SingleDisplaySensorPocketFoldStateManager::SetDeviceStatusAndParam(uint32_t deviceStatus)
+void SingleDisplaySensorSuperFoldStateManager::SetDeviceStatusAndParam(uint32_t deviceStatus)
 {
     TLOGI(WmsLogTag::DMS, "Set device status to: %{public}u", deviceStatus);
     SetDeviceStatus(deviceStatus);
