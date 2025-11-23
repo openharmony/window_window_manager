@@ -40,8 +40,8 @@ private:
     void TentModeHandleSensorChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy);
     void ReportTentStatusChange(ReportTentModeStatus tentStatus);
     void SetDeviceStatusAndParam(uint32_t deviceStatus);
-    float currentAngle = -1.0F;
-    int currentHall = -1;
+    float currentAngle_ = -1.0F;
+    int currentHall_ = -1;
 };
 } // namespace Rosen
 } // namespace OHOS
