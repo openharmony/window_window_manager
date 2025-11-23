@@ -69,7 +69,7 @@ FoldCreaseRegion SingleDisplaySuperFoldPolicy::GetFoldCreaseRegion(bool isVertic
     return FoldCreaseRegion(SCREEN_ID_FULL, foldCreaseRect);
 }
 
-FoldCreaseRegion SingleDisplaySuperFoldPolicy::GetFoldCreaseRegionRect(bool isVertical) const
+std::vector<DMRect> SingleDisplaySuperFoldPolicy::GetFoldCreaseRegionRect(bool isVertical) const
 {
     std::vector<DMRect> foldCreaseRect = {};
     std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_FoldScreenRect,
