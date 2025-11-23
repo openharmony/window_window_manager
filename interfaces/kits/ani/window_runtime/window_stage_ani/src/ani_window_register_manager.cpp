@@ -63,6 +63,7 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     {ACROSS_DISPLAYS_CHANGE_CB, RegisterListenerType::ACROSS_DISPLAYS_CHANGE_CB},
     {SCREENSHOT_APP_EVENT_CB, RegisterListenerType::SCREENSHOT_APP_EVENT_CB},
     {FREE_WINDOW_MODE_CHANGE_CB, RegisterListenerType::FREE_WINDOW_MODE_CHANGE_CB},
+    {WINDOW_WILL_CLOSE_CB, RegisterListenerType::WINDOW_WILL_CLOSE_CB},
 };
 const std::map<std::string, RegisterListenerType> WINDOW_STAGE_LISTENER_MAP {
     // white register list for window stage
