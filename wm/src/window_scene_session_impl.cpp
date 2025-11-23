@@ -1460,7 +1460,7 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
             !WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FLOATING));
         auto mainWindow = FindMainWindowWithContext();
         bool isAnco = mainWindow != nullptr && mainWindow->IsAnco();
-        bool onlySupportFullScreen = (isWindowModeSupportFullscreen || isAnco) &&
+        bool onlySupportFullScreen = (isWindowModeSupportFullscreen || (isAnco && !windowSystemConfig_.IsPcWindow())) &&
             ((!windowSystemConfig_.IsPhoneWindow() && !windowSystemConfig_.IsPadWindow()) || IsFreeMultiWindowMode());
         bool compatibleDisableFullScreen = property_->IsFullScreenDisabled();
         if ((onlySupportFullScreen || property_->GetFullScreenStart()) && !compatibleDisableFullScreen) {
@@ -7744,6 +7744,59 @@ WMError WindowSceneSessionImpl::UnlockCursor(int32_t windowId)
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     return hostSession->SendCommonEvent(static_cast<int32_t>(CommonEventCommand::UNLOCK_CURSOR), parameters);
+}
+
+bool WindowSceneSessionImpl::IsHitHotAreas(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+	
+{
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (!IsPcOrPadFreeMultiWindowMode()) {
+        return false;
+    }
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::WMS_DECOR, "uiContent is null, windowId: %{public}u", GetWindowId());
+        return false;
+    }
+    Rect windowRect = property_->GetWindowRect();
+    MMI::PointerEvent::PointerItem pointerItem;
+    bool isValidPointItem = pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    
+    int32_t width = windowRect.width_;
+    int32_t height = windowRect.height_;
+    int32_t posX = windowRect.posX_;
+    int32_t posY = windowRect.posY_;
+    float vpr = WindowSessionImpl::GetVirtualPixelRatio();
+    float scaleX = compatScaleX_;
+    float scaleY = compatScaleY_;
+    float outsideArea = HOTZONE_TOUCH * vpr * scaleX;
+    float insideArea = WINDOW_FRAME_WIDTH * vpr * scaleX;
+ 
+    bool isHitTopHotArea = pointerItem.GetDisplayX() > posX - outsideArea * scaleX &&
+        pointerItem.GetDisplayX() < posX + (width + outsideArea) * scaleX &&
+        pointerItem.GetDisplayY() > posY - outsideArea * scaleY &&
+        pointerItem.GetDisplayY() < posY + (insideArea + outsideArea) * scaleY;
+ 
+    bool isHitLeftHotArea = pointerItem.GetDisplayX() > posX - outsideArea * scaleX &&
+        pointerItem.GetDisplayX() < posX + (insideArea + outsideArea) * scaleX &&
+        pointerItem.GetDisplayY() > posY - outsideArea * scaleY &&
+        pointerItem.GetDisplayY() < posY + (height + outsideArea) * scaleY;
+ 
+    bool isHitRightHotArea = pointerItem.GetDisplayX() > posX + (width - insideArea) * scaleX &&
+        pointerItem.GetDisplayX() < posX + (width + outsideArea) * scaleX &&
+        pointerItem.GetDisplayY() > posY - outsideArea * scaleY &&
+        pointerItem.GetDisplayY() < posY + (height + outsideArea) * scaleY;
+    
+    bool isHitBottomHotArea = pointerItem.GetDisplayX() > posX - outsideArea * scaleX &&
+        pointerItem.GetDisplayX() < posX + (width + outsideArea) * scaleX &&
+        pointerItem.GetDisplayY() > posY + (height - insideArea) * scaleY &&
+        pointerItem.GetDisplayY() < posY + (height + outsideArea) * scaleY;
+ 
+    bool isHitHotAreas = isHitTopHotArea || isHitLeftHotArea || isHitRightHotArea || isHitBottomHotArea;
+    if (isValidPointItem && isHitHotAreas) {
+        TLOGI(WmsLogTag::WMS_DECOR, "hitHotAreas success");
+        return true;
+    }
+    return false;
 }
 } // namespace Rosen
 } // namespace OHOS

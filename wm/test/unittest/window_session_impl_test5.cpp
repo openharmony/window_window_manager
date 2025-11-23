@@ -2259,6 +2259,30 @@ HWTEST_F(WindowSessionImplTest5, NotifyTitleChange02, TestSize.Level1)
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
 }
 
+/**
+ * @tc.name: NotifyTitleChange
+ * @tc.desc: NotifyTitleChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, NotifyTitleChange03, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyTitleChange");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetCollaboratorType(static_cast<int32_t>(CollaboratorType::RESERVE_TYPE));
+ 
+    SessionInfo sessionInfo = {"NotifyTitleBundle", "NotifyTitleModule", "NotifyTitleAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    bool isShow = false;
+    int32_t height = 0;
+    window->NotifyTitleChange(isShow, height);
+ 
+    sptr<IWindowTitleOrHotAreasListener> listener = sptr<IWindowTitleOrHotAreasListener>::MakeSptr();
+    window->RegisterWindowTitleOrHotAreasListener(listener);
+    window->NotifyTitleChange(isShow, height);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+}
  
 /**
  * @tc.name: IsHitTitleBar
@@ -2328,6 +2352,95 @@ HWTEST_F(WindowSessionImplTest5, RegisterWindowTitleChangeListener, TestSize.Lev
     sptr<IWindowTitleChangeListener> listener = nullptr;
     WMError ret = window->RegisterWindowTitleChangeListener(listener);
     EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: RegisterWindowTitleOrHotAreasListener
+ * @tc.desc: RegisterWindowTitleOrHotAreasListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, RegisterWindowTitleOrHotAreasListener, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("RegisterWindowTitleOrHotAreasListener");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    sptr<IWindowTitleOrHotAreasListener> listener = nullptr;
+    WMError ret = window->RegisterWindowTitleOrHotAreasListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+}
+ 
+/**
+ * @tc.name: GetListeners
+ * @tc.desc: GetListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, GetTitleOrHotAreasListeners, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetListeners");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(502);
+    window->windowTitleOrHotAreasListeners_[502] = std::vector<sptr<IWindowTitleOrHotAreasListener>>();
+ 
+    ASSERT_FALSE(window_->windowTitleOrHotAreasListeners_[window_->GetPersistentId()].empty());
+}
+ 
+/**
+ * @tc.name: IsHitHotAreas
+ * @tc.desc: IsHitHotAreas
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, IsHitHotAreas01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsHitHotAreas01");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    window->uiContent_ = nullptr;
+    bool isHitHotAreas = window->IsHitHotAreas(pointerEvent);
+    EXPECT_EQ(isHitHotAreas, false);
+ 
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->uiContent_->SetContainerModalTitleHeight(100);
+    MMI::PointerEvent::PointerItem pointerItem;
+    Rect rect = { 0, 0, 200, 200 };
+    window->property_->SetWindowRect(rect);
+    pointerItem.SetDisplayX(0);
+    pointerItem.SetDisplayY(0);
+    pointerEvent->AddPointerItem(pointerItem);
+    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    isHitHotAreas = window->IsHitHotAreas(pointerEvent);
+    EXPECT_EQ(isHitHotAreas, true);
+}
+ 
+/**
+ * @tc.name: IsHitHotAreas
+ * @tc.desc: IsHitHotAreas
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, IsHitHotAreas02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsHitHotAreas02");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    window->uiContent_ = nullptr;
+    bool isHitHotAreas = window->IsHitHotAreas(pointerEvent);
+    EXPECT_EQ(isHitHotAreas, false);
+ 
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->uiContent_->SetContainerModalTitleHeight(100);
+    MMI::PointerEvent::PointerItem pointerItem;
+    Rect rect = { 0, 0, 200, 200 };
+    window->property_->SetWindowRect(rect);
+    pointerItem.SetDisplayX(1000);
+    pointerItem.SetDisplayY(1000);
+    pointerEvent->AddPointerItem(pointerItem);
+    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    isHitHotAreas = window->IsHitHotAreas(pointerEvent);
+    EXPECT_EQ(isHitHotAreas, false);
 }
 } // namespace
 } // namespace Rosen
