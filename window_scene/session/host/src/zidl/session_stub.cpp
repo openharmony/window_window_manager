@@ -574,6 +574,11 @@ bool ReadEventParam(MessageParcel& data, SessionEvent event, SessionEventParam& 
             TLOGE(WmsLogTag::WMS_EVENT, "Failed to read waterfallResidentState");
             return false;
         }
+    } else if (event == SessionEvent::EVENT_SWITCH_COMPATIBLE_MODE) {
+        if (!data.ReadUint32(param.compatibleStyleMode)) {
+            TLOGE(WmsLogTag::WMS_EVENT, "Failed to read compatibleStyleMode");
+            return false;
+        }
     }
     return true;
 }
