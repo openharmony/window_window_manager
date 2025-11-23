@@ -926,7 +926,7 @@ void SceneSession::ApplySessionEventParam(SessionEvent event, const SessionEvent
             break;
         default:
             sessionEventParam_.waterfallResidentState = static_cast<uint32_t>(WaterfallResidentState::UNCHANGED);
-            sessionEventParam_.compatibleStyleMode = 0;
+            sessionEventParam_.compatibleStyleMode = static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_DEFAULT);
             break;
     }
 }
