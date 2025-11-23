@@ -60,7 +60,7 @@ SingleDisplaySuperFoldPolicy::SingleDisplaySuperFoldPolicy(std::recursive_mutex&
     : displayInfoMutex_(displayInfoMutex), screenPowerTaskScheduler_(screenPowerTaskScheduler)
 {
     TLOGI(WmsLogTag::DMS, "SingleDisplaySuperFoldPolicy created");
-    currentFoldCreaseRegion_ = new FoldCreaseRegion(SCREEN_ID_FULL, GetFoldCreaseRegionRect(true));
+    currentFoldCreaseRegion_ = sptr<FoldScreenController>::MakeSptr(SCREEN_ID_FULL, GetFoldCreaseRegionRect(true));
 }
 
 FoldCreaseRegion SingleDisplaySuperFoldPolicy::GetFoldCreaseRegion(bool isVertical) const
