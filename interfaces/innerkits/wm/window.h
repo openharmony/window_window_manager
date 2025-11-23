@@ -224,6 +224,16 @@ public:
 };
 
 /**
+ * @class IWindowTitleOrHotAreasListener
+ *
+ * @brief IWindowTitleOrHotAreasListener is used to observe the title appear or disappear.
+ */
+class IWindowTitleOrHotAreasListener : virtual public RefBase {
+public:
+    virtual void OnTitleOrHotAreasChange(std::vector<Rect>& hotAreas, bool visibility) {}
+};
+
+/**
  * @class IWindowChangeListener
  *
  * @brief IWindowChangeListener is used to observe the window size or window mode when window changed.
@@ -4861,6 +4871,21 @@ public:
     virtual bool IsHitTitleBar(std::shared_ptr<MMI::PointerEvent>& pointerEvent) const { return false; }
 
     /**
+     * @brief Calculate whether the pointerEvent hits the title bar.
+     *
+     * @param pointerEvent
+     * @return true means hit title bar success, false means not hit title bar.
+     */
+    virtual bool IsHitHotAreas(std::shared_ptr<MMI::PointerEvent>& pointerEvent) { return false; }
+ 
+    /**
+     * @brief Get anco window hot areas.
+     *
+     * @param rects Hot areas of anco window.
+     */
+    static std::vector<Rect> GetAncoWindowHotAreas();
+
+    /**
      * @brief Check if the current device is in free window mode.
      *
      * @return true means is in free window mode, false means not in free window mode.
@@ -4904,6 +4929,28 @@ public:
      * @return WMError::WM_OK on success, others means failed.
      */
     virtual WMError GetRotationLocked(bool& locked) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief register a listener to listen the window title bar and window hot areas.
+     *
+     * @param listener IWindowTitleOrHotAreasListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowTitleOrHotAreasListener(const sptr<IWindowTitleOrHotAreasListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+ 
+    /**
+     * @brief Unregister the IWindowTitleOrHotAreasListener.
+     *
+     * @param listener IWindowTitleOrHotAreasListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowTitleOrHotAreasListener(const sptr<IWindowTitleOrHotAreasListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }
