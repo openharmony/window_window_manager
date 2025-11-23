@@ -522,6 +522,50 @@ HWTEST_F(SingleDisplaySuperFoldPolicyTest, ChangeScreenDisplayMode03, TestSize.L
     policy->ChangeScreenDisplayMode(displayMode);
     EXPECT_NE(policy->lastCachedisplayMode_, displayMode);
 }
+
+/**
+ * @tc.name: ChangeOnTentMode
+ * @tc.desc: test function : ChangeOnTentMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SingleDisplaySuperFoldPolicyTest, ChangeOnTentMode, TestSize.Level1)
+{
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    auto policy = sptr<SingleDisplaySuperFoldPolicy>::MakeSptr(displayInfoMutex, screenPowerTaskScheduler);
+ 
+    FoldStatus currentState = FoldStatus::EXPAND;
+    policy->ChangeOnTentMode(currentState);
+    EXPECT_EQ(policy->lastCachedisplayMode_, FoldDisplayMode::MAIN);
+ 
+    currentState = FoldStatus::HALF_FOLD;
+    policy->ChangeOnTentMode(currentState);
+    EXPECT_EQ(policy->lastCachedisplayMode_, FoldDisplayMode::MAIN);
+ 
+    currentState = FoldStatus::FOLDED;
+    policy->ChangeOnTentMode(currentState);
+    EXPECT_EQ(policy->lastCachedisplayMode_, FoldDisplayMode::MAIN);
+ 
+    currentState = FoldStatus::UNKNOWN;
+    policy->ChangeOnTentMode(currentState);
+    EXPECT_EQ(policy->lastCachedisplayMode_, FoldDisplayMode::MAIN);
+}
+ 
+/**
+ * @tc.name: ChangeOffTentMode
+ * @tc.desc: test function : ChangeOffTentMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SingleDisplaySuperFoldPolicyTest, ChangeOffTentMode, TestSize.Level1)
+{
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    auto policy = sptr<SingleDisplaySuperFoldPolicy>::MakeSptr(displayInfoMutex, screenPowerTaskScheduler);
+ 
+    policy->ChangeOffTentMode();
+    FoldDisplayMode displayMode = policy->GetModeMatchStatus();
+    EXPECT_EQ(policy->lastCachedisplayMode_, displayMode);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
