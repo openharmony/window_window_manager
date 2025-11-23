@@ -50,7 +50,7 @@ SingleDisplaySensorSuperFoldStateManager::~SingleDisplaySensorSuperFoldStateMana
 void SingleDisplaySensorSuperFoldStateManager::HandleAngleChange(float angle, int hall,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
-    currentAngle = angle;
+    currentAngle__ = angle;
     if (IsTentMode()) {
         return TentModeHandleSensorChange(angle, hall, foldScreenPolicy);
     }
@@ -61,7 +61,7 @@ void SingleDisplaySensorSuperFoldStateManager::HandleAngleChange(float angle, in
 void SingleDisplaySensorSuperFoldStateManager::HandleHallChange(float angle, int hall,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
-    currentHall = hall;
+    currentHall_ = hall;
     if (IsTentMode()) {
         return TentModeHandleSensorChange(angle, hall, foldScreenPolicy);
     }
@@ -142,7 +142,7 @@ void SingleDisplaySensorSuperFoldStateManager::HandleTentChange(int tentType,
     }
     if (tentType != TENT_MODE_OFF) {
         ReportTentStatusChange(ReportTentModeStatus::NORMAL_ENTER_TENT_MODE);
-        HandleSensorChange(FoldStatus::FOLDED, currentAngle, foldScreenPolicy);
+        HandleSensorChange(FoldStatus::FOLDED, currentAngle_, foldScreenPolicy);
         foldScreenPolicy->ChangeOnTentMode(FoldStatus::FOLDED);
         if (tentType == TENT_MODE_ON) {
             SetDeviceStatusAndParam(static_cast<uint32_t>(DMDeviceStatus::STATUS_TENT));
@@ -150,20 +150,20 @@ void SingleDisplaySensorSuperFoldStateManager::HandleTentChange(int tentType,
         }
     } else {
         if (hall == HALL_FOLDED_THRESHOLD) {
-            currentAngle = ANGLE_MIN_VAL;
+            currentAngle_ = ANGLE_MIN_VAL;
         }
         FoldStatus nextState = FoldStatus::UNKNOWN;
         if (hall == -1) {
-            nextState = GetNextFoldState(currentAngle, currentHall);
+            nextState = GetNextFoldState(currentAngle_, currentHall_);
         } else {
-            nextState = GetNextFoldState(currentAngle, hall);
+            nextState = GetNextFoldState(currentAngle_, hall);
         }
         if (nextState == FoldStatus::FOLDED) {
             SetDeviceStatusAndParam(static_cast<uint32_t>(DMDeviceStatus::STATUS_FOLDED));
         } else {
             SetDeviceStatusAndParam(static_cast<uint32_t>(DMDeviceStatus::UNKNOWN));
         }
-        HandleSensorChange(nextState, currentAngle, foldScreenPolicy);
+        HandleSensorChange(nextState, currentAngle_, foldScreenPolicy);
         ReportTentStatusChange(ReportTentModeStatus::NORMAL_EXIT_TENT_MODE);
         foldScreenPolicy->ChangeOffTentMode();
         ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::TENT_STATUS_CANCEL);
