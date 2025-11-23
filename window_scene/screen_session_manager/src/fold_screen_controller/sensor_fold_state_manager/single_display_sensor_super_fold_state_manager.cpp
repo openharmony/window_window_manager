@@ -50,7 +50,7 @@ SingleDisplaySensorSuperFoldStateManager::~SingleDisplaySensorSuperFoldStateMana
 void SingleDisplaySensorSuperFoldStateManager::HandleAngleChange(float angle, int hall,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
-    currentAngle__ = angle;
+    currentAngle_ = angle;
     if (IsTentMode()) {
         return TentModeHandleSensorChange(angle, hall, foldScreenPolicy);
     }
