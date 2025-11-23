@@ -58,6 +58,7 @@
 #include "parameters.h"
 #include "floating_ball_manager.h"
 #include "sys_cap_util.h"
+#include "wm_common_inner.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityEventInfo;
@@ -166,6 +167,8 @@ std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
     WindowSessionImpl::windowTitleButtonRectChangeListeners_;
 std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> WindowSessionImpl::windowRectChangeListeners_;
 std::map<int32_t, std::vector<sptr<IWindowTitleChangeListener>>> WindowSessionImpl::windowTitleChangeListeners_;
+std::map<int32_t, std::vector<sptr<IWindowTitleOrHotAreasListener>>>
+    WindowSessionImpl::windowTitleOrHotAreasListeners_;
 std::map<int32_t, std::vector<sptr<IRectChangeInGlobalDisplayListener>>>
     WindowSessionImpl::rectChangeInGlobalDisplayListeners_;
 std::map<int32_t, std::vector<sptr<IExtensionSecureLimitChangeListener>>>
@@ -202,6 +205,7 @@ std::recursive_mutex WindowSessionImpl::windowTitleButtonRectChangeListenerMutex
 std::mutex WindowSessionImpl::displayMoveListenerMutex_;
 std::mutex WindowSessionImpl::windowRectChangeListenerMutex_;
 std::mutex WindowSessionImpl::windowTitleChangeListenerMutex_;
+std::mutex WindowSessionImpl::windowTitleOrHotAreasListenerMutex_;
 std::mutex WindowSessionImpl::rectChangeInGlobalDisplayListenerMutex_;
 std::mutex WindowSessionImpl::secureLimitChangeListenerMutex_;
 std::mutex WindowSessionImpl::subWindowCloseListenersMutex_;
@@ -791,9 +795,9 @@ WMError WindowSessionImpl::GetWindowScaleCoordinate(uint32_t windowId, CursorInf
     int32_t cursorX = cursorInfo.left - windowRect.posX_;
     int32_t cursorY = cursorInfo.top - windowRect.posY_;
     // 2: x scale computational formula
-    cursorInfo.left = round(windowRect.posX_ + scaleX * cursorX + (1 - scaleX) * windowRect.width_ / 2);
+    cursorInfo.left = round(windowRect.posX_ + scaleX * cursorX);
     // 2: y scale computational formula
-    cursorInfo.top = round(windowRect.posY_ + scaleY * cursorY + (1 - scaleY) * windowRect.height_ / 2);
+    cursorInfo.top = round(windowRect.posY_ + scaleY * cursorY);
     cursorInfo.width *= scaleX;
     cursorInfo.height *= scaleY;
     return WMError::WM_OK;
@@ -2489,8 +2493,9 @@ void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
     if (needNotify) {
         if (auto uiContent = GetUIContentSharedPtr()) {
             bool decorVisible = mode == WindowMode::WINDOW_MODE_FLOATING ||
-                mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
-                (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !property_->IsLayoutFullScreen());
+            mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
+            (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !property_->IsLayoutFullScreen() && !(IsAnco() &&
+            windowSystemConfig_.IsPcWindow()));
             if (windowSystemConfig_.freeMultiWindowSupport_) {
                 auto isSubWindow = WindowHelper::IsSubWindow(GetType());
                 decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
@@ -4307,6 +4312,33 @@ WMError WindowSessionImpl::UnregisterWindowTitleChangeListener(const sptr<IWindo
 }
 
 template<typename T>
+EnableIfSame<T, IWindowTitleOrHotAreasListener, std::vector<sptr<IWindowTitleOrHotAreasListener>>> WindowSessionImpl::GetListeners()
+{
+    std::vector<sptr<IWindowTitleOrHotAreasListener>> windowTitleOrHotAreasListeners;
+    std::lock_guard<std::mutex> lockListener(windowTitleOrHotAreasListenerMutex_);
+    for (auto& listener : windowTitleOrHotAreasListeners_[GetPersistentId()]) {
+        windowTitleOrHotAreasListeners.push_back(listener);
+    }
+    return windowTitleOrHotAreasListeners;
+}
+ 
+WMError WindowSessionImpl::RegisterWindowTitleOrHotAreasListener(const sptr<IWindowTitleOrHotAreasListener>& listener)
+{
+    std::lock_guard<std::mutex> lockListener(windowTitleChangeListenerMutex_);
+    WMError ret = RegisterListener(windowTitleOrHotAreasListeners_[GetPersistentId()], listener);
+    TLOGI(WmsLogTag::WMS_DECOR, "RegisterWindowTitleOrHotAreasListener");
+    return ret;
+}
+ 
+WMError WindowSessionImpl::UnregisterWindowTitleOrHotAreasListener(const sptr<IWindowTitleOrHotAreasListener>& listener)
+{
+    std::lock_guard<std::mutex> lockListener(windowTitleOrHotAreasListenerMutex_);
+    WMError ret = UnregisterListener(windowTitleOrHotAreasListeners_[GetPersistentId()], listener);
+    TLOGI(WmsLogTag::WMS_DECOR, "UnregisterWindowTitleOrHotAreasListener");
+    return ret;
+}
+
+template<typename T>
 EnableIfSame<T, ISwitchFreeMultiWindowListener,
     std::vector<sptr<ISwitchFreeMultiWindowListener>>> WindowSessionImpl::GetListeners()
 {
@@ -4776,6 +4808,10 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
     {
         std::lock_guard<std::mutex> lockListener(windowTitleChangeListenerMutex_);
         ClearUselessListeners(windowTitleChangeListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::mutex> lockListener(windowTitleOrHotAreasListenerMutex_);
+        ClearUselessListeners(windowTitleOrHotAreasListeners_, persistentId);
     }
     {
         std::lock_guard<std::mutex> lockListener(rectChangeInGlobalDisplayListenerMutex_);
@@ -5710,6 +5746,9 @@ WSError WindowSessionImpl::NotifyScreenshotAppEvent(ScreenshotEventType type)
 void WindowSessionImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reason)
 {
     HookWindowSizeByHookWindowInfo(rect);
+    if (reason != WindowSizeChangeReason::DRAG && reason != WindowSizeChangeReason::DRAG_MOVE) {
+        NotifyTitleChange(true, 0);
+    }
     {
         std::lock_guard<std::recursive_mutex> lockListener(windowChangeListenerMutex_);
         auto windowChangeListeners = GetListeners<IWindowChangeListener>();
@@ -5843,28 +5882,63 @@ void WindowSessionImpl::NotifyTitleChange(bool isShow, int32_t height)
     if (!IsAnco()) {
         return;
     }
-    auto windowTitleChangeListeners = GetListeners<IWindowTitleChangeListener>();
+    auto windowTitleOrHotAreasListeners = GetListeners<IWindowTitleOrHotAreasListener>();
+    property_->SetStatusBarHeightInImmersive(height);
+    std::vector<Rect> rectAreas = GetAncoWindowHotAreas();
+ 
+    for (auto& listener : windowTitleOrHotAreasListeners) {
+        if (listener != nullptr) {
+            TLOGI(WmsLogTag::WMS_IMMS, "NotifyTitleChange, the title bar is show? %{public}d", isShow);
+            listener->OnTitleOrHotAreasChange(rectAreas, isShow);
+        }
+    }
+}
+ 
+std::vector<Rect> WindowSessionImpl::GetAncoWindowHotAreas()
+{
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    std::vector<Rect> rectAreas;
     if (uiContent == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "uiContent is null, windowId: %{public}u", GetWindowId());
-        return;
+        return rectAreas;
     }
-    bool hideMaximizeBtn = IsPcOrPadFreeMultiWindowMode();
-    bool hideSplitBtn = hideMaximizeBtn;
-    uiContent->HideWindowTitleButton(hideSplitBtn, hideMaximizeBtn, false, false);
-    uiContent->EnableContainerModalGesture(false);
-    int32_t width = property_->GetWindowRect().width_;
+    float vpr = GetVirtualPixelRatio();
+    float outsideArea = HOTZONE_TOUCH * vpr;
+    float insideArea = WINDOW_FRAME_WIDTH * vpr;
+    float cornerArea = WINDOW_FRAME_CORNER_WIDTH * vpr;
+    int32_t width = static_cast<int32_t>(property_->GetWindowRect().width_);
+    int32_t height = static_cast<int32_t>(property_->GetWindowRect().height_);
     int32_t posX = property_->GetWindowRect().posX_;
     int32_t posY = property_->GetWindowRect().posY_;
     int32_t decorHeight = uiContent->GetContainerModalTitleHeight();
-    property_->SetStatusBarHeightInImmersive(height);
-    Rect rect = {posX, posY + height, width, decorHeight};
-    for (auto& listener : windowTitleChangeListeners) {
-        if (listener != nullptr) {
-            TLOGI(WmsLogTag::WMS_IMMS, "NotifyTitleChange, the title bar is show? %{public}d", isShow);
-            listener->OnTitleVisibilityChange(rect, isShow);
-        }
-    }
+    int32_t statusBarHeight = property_->GetStatusBarHeightInImmersive();
+ 
+    Rect titleRect = {posX, posY + statusBarHeight, width * compatScaleX_, decorHeight * compatScaleY_};
+    rectAreas.push_back(titleRect);
+    Rect rectTop = {posX - outsideArea * compatScaleX_, posY - outsideArea * compatScaleY_,
+        (width + outsideArea * 2) * compatScaleX_, (outsideArea + insideArea) * compatScaleY_};
+    rectAreas.push_back(rectTop);
+    Rect rectLeft = {posX - outsideArea * compatScaleX_, posY - outsideArea * compatScaleY_,
+        (outsideArea + insideArea) * compatScaleX_, (height + outsideArea * 2) * compatScaleY_};
+    rectAreas.push_back(rectLeft);
+    Rect rectRight = {posX + width * compatScaleX_ - insideArea, posY - outsideArea,
+        outsideArea + insideArea, height * compatScaleY_ + outsideArea * 2};
+    rectAreas.push_back(rectRight);
+    Rect rectBottom = {posX - outsideArea * compatScaleX_, posY + (height - insideArea) * compatScaleY_,
+        (width + outsideArea * 2) * compatScaleX_, (outsideArea + insideArea) * compatScaleY_};
+    rectAreas.push_back(rectBottom);
+    Rect rectLeftTop = {posX, posY, cornerArea * compatScaleX_, cornerArea * compatScaleY_};
+    rectAreas.push_back(rectLeftTop);
+    Rect rectRightTop = {posX + (width - cornerArea) * compatScaleX_, posY,
+        cornerArea * compatScaleX_, cornerArea * compatScaleY_};
+    rectAreas.push_back(rectRightTop);
+    Rect rectLeftBottom = {posX, posY + (height - cornerArea) * compatScaleY_,
+        cornerArea * compatScaleX_, cornerArea * compatScaleY_};
+    rectAreas.push_back(rectLeftBottom);
+    Rect rectRightBottom = {posX + (width - cornerArea) * compatScaleX_, posY + (height - cornerArea) * compatScaleY_,
+        cornerArea * compatScaleX_, cornerArea * compatScaleY_};
+    rectAreas.push_back(rectRightBottom);
+    return rectAreas;
 }
 
 WMError WindowSessionImpl::RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
