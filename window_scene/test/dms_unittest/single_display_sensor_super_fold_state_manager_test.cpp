@@ -226,7 +226,7 @@ HWTEST_F(SingleDisplaySensorSuperFoldStateManagerTest, HandleAngleChange02, Test
     sptr<FoldScreenPolicy> foldScreenPolicy = nullptr;
     manager.SetTentMode(1);
     manager.HandleAngleChange(angle, hall, foldScreenPolicy);
-    EXPECT_FLOAT_EQ(manager.currentAngle_, angle);
+    EXPECT_FLOAT_EQ(manager.currentAngle, angle);
 }
  
 /**
@@ -268,21 +268,21 @@ HWTEST_F(SingleDisplaySensorSuperFoldStateManagerTest, HandleTentChange, TestSiz
     EXPECT_EQ(mgr.tentModeType_, 1);
     mgr.SetTentMode(1);
     mgr.HandleTentChange(0, policy, hall);
-    EXPECT_FLOAT_EQ(mgr.currentAngle_, ANGLE_MIN_VAL);
+    EXPECT_FLOAT_EQ(mgr.currentAngle, ANGLE_MIN_VAL);
     hall = 1;
     mgr.SetTentMode(1);
     mgr.HandleAngleChange(90.0f, hall, nullptr);
     mgr.HandleTentChange(0, policy, hall);
-    EXPECT_FLOAT_EQ(mgr.currentAngle_, 90.0f);
+    EXPECT_FLOAT_EQ(mgr.currentAngle, 90.0f);
     hall = -1;
     mgr.SetTentMode(1);
     mgr.HandleTentChange(0, policy, hall);
-    EXPECT_FLOAT_EQ(mgr.currentAngle_, 90.0f);
+    EXPECT_FLOAT_EQ(mgr.currentAngle, 90.0f);
  
     mgr.SetTentMode(1);
     mgr.HandleAngleChange(160.0f, hall, nullptr);
     mgr.HandleTentChange(0, policy, hall);
-    EXPECT_FLOAT_EQ(mgr.currentAngle_, 160.0f);
+    EXPECT_FLOAT_EQ(mgr.currentAngle, 160.0f);
 }
  
 /**
