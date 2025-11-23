@@ -853,6 +853,11 @@ bool WriteEventParam(MessageParcel& data, SessionEvent event, const SessionEvent
             TLOGE(WmsLogTag::WMS_EVENT, "Failed to write waterfallResidentState");
             return false;
         }
+    } else if (event == SessionEvent::EVENT_SWITCH_COMPATIBLE_MODE) {
+        if (!data.WriteUint32(param.compatibleStyleMode)) {
+            TLOGE(WmsLogTag::WMS_EVENT, "Failed to write compatibleStyleMode");
+            return false;
+        }
     }
     return true;
 }
