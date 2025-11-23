@@ -620,22 +620,6 @@ enum class BrokerStates: uint32_t {
     BROKER_NOT_START = -1,
 };
 
-/**
- *
- *@enum CompatibleMode
- *@brief Controls the compatible aspect ratio modes for window display.
- */
-enum class CompatibleStyleMode : uint32_t {
-    // Default aspect ratio
-    LANDSCAPE_DEFAULT = 0,
-    // 18:9 aspect ratio
-    LANDSCAPE_18_9 = 1,
-    // 1:1 aspect ratio
-    LANDSCAPE_1_1 = 3,
-    // 2:3 aspect ratio
-    LANDSCAPE_2_3 = 4
-};
-
 inline bool GreatOrEqual(double left, double right)
 {
     constexpr double epsilon = -0.00001f;
