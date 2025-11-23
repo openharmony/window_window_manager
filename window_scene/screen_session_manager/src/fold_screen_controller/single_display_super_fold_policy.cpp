@@ -60,24 +60,26 @@ SingleDisplaySuperFoldPolicy::SingleDisplaySuperFoldPolicy(std::recursive_mutex&
     : displayInfoMutex_(displayInfoMutex), screenPowerTaskScheduler_(screenPowerTaskScheduler)
 {
     TLOGI(WmsLogTag::DMS, "SingleDisplaySuperFoldPolicy created");
-    ScreenId screenIdFull = 0;
-    std::vector<DMRect> rect = {{}};
-    currentFoldCreaseRegion_ = new FoldCreaseRegion(screenIdFull, rect);
+    currentFoldCreaseRegion_ = sptr<FoldCreaseRegion>::MakeSptr(SCREEN_ID_FULL, GetFoldCreaseRegionRect(true));
 }
 
 FoldCreaseRegion SingleDisplaySuperFoldPolicy::GetFoldCreaseRegion(bool isVertical) const
 {
+    std::vector<DMRect> foldCreaseRect = GetFoldCreaseRegionRect(isVertical);
+    return FoldCreaseRegion(SCREEN_ID_FULL, foldCreaseRect);
+}
+
+std::vector<DMRect> SingleDisplaySuperFoldPolicy::GetFoldCreaseRegionRect(bool isVertical) const
+{
+    std::vector<DMRect> foldCreaseRect = {};
     std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_FoldScreenRect,
         FOLD_CREASE_DELIMITER);
     if (foldRect.size() != FOLD_CREASE_RECT_SIZE) {
         TLOGE(WmsLogTag::DMS, "foldRect is invalid");
-        return FoldCreaseRegion(0, {});
+        return foldCreaseRect;
     }
- 
-    ScreenId screenIdFull = SCREEN_ID_FULL;
-    std::vector<DMRect> foldCreaseRect;
     GetFoldCreaseRect(isVertical, foldRect, foldCreaseRect);
-    return FoldCreaseRegion(screenIdFull, foldCreaseRect);
+    return foldCreaseRect;
 }
 
 void SingleDisplaySuperFoldPolicy::GetFoldCreaseRect(bool isVertical,
@@ -307,6 +309,28 @@ void SingleDisplaySuperFoldPolicy::ExitCoordination()
     ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
 }
 
+void SingleDisplaySuperFoldPolicy::ChangeOnTentMode(FoldStatus currentState)
+{
+    TLOGI(WmsLogTag::DMS, "Enter tent mode, current state:%{public}d, change display mode to MAIN", currentState);
+    if (currentState == FoldStatus::EXPAND || currentState == FoldStatus::HALF_FOLD) {
+        ChangeScreenDisplayMode(FoldDisplayMode::MAIN);
+    } else if (currentState == FoldStatus::FOLDED) {
+        ChangeScreenDisplayMode(FoldDisplayMode::MAIN);
+        PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync();
+    } else {
+        TLOGE(WmsLogTag::DMS, "current state:%{public}d invalid", currentState);
+    }
+}
+
+void SingleDisplaySuperFoldPolicy::ChangeOffTentMode()
+{
+    PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync();
+    FoldDisplayMode displayMode = GetModeMatchStatus();
+    TLOGW(WmsLogTag::DMS, "CurrentDisplayMode:%{public}d, CurrentFoldStatus:%{public}d",
+        currentDisplayMode_, currentFoldStatus_);
+    ChangeScreenDisplayMode(displayMode);
+}
+
 void SingleDisplaySuperFoldPolicy::NotifyRefreshRateEvent(bool isEventStatus)
 {
     EventInfo eventInfo = {
@@ -520,12 +544,17 @@ void SingleDisplaySuperFoldPolicy::ChangeScreenDisplayModeToMainWhenFoldScreenOf
     };
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOffMainOff, "screenOffMainOffTask");
     SendPropertyChangeResult(screenSession, SCREEN_ID_MAIN, ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING);
+    bool isTentMode = ScreenSessionManager::GetInstance().GetTentMode();
     auto taskScreenOnMainChangeScreenId = [=] {
         TLOGNI(WmsLogTag::DMS, "ChangeScreenDisplayModeToMain: IsFoldScreenOn is false, Change ScreenId to Main.");
         screenId_ = SCREEN_ID_MAIN;
 #ifdef TP_FEATURE_ENABLE
         RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE_POWER_CTRL, MAIN_TP_OFF.c_str());
 #endif
+        if (isTentMode) {
+            PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync(
+                PowerMgr::WakeupDeviceType::WAKEUP_DEVICE_TENT_MODE_CHANGE);
+        }
         SetdisplayModeChangeStatus(false);
     };
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnMainChangeScreenId, "taskScreenOnMainChangeScreenId");
