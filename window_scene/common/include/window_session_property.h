@@ -700,7 +700,7 @@ public:
     void SetIsAdaptToSimulationScale(bool isAdaptToSimulationScale);
     bool IsAdaptToSimulationScale() const;
 
-    void SetRealTimeSwitchInfo(RealTimeSwitchInfo switchInfo);
+    void SetRealTimeSwitchInfo(const RealTimeSwitchInfo& switchInfo);
     RealTimeSwitchInfo GetRealTimeSwitchInfo() const;
 
     bool Marshalling(Parcel& parcel) const override;
