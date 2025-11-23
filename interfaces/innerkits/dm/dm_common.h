@@ -65,16 +65,6 @@ constexpr uint32_t DISPLAY_B_HEIGHT = 1608;
 constexpr uint32_t DISPLAY_A_WIDTH = 2472;
 
 /**
- *
- *@struct RealTimeSwitchInfo.
- *@brief the information for compatible mode App when switching window style in real time.
-*/
-struct RealTimeSwitchInfo {
-bool isNeedChange_{false};
-uint32_t showTypes_{0};
-};
-
-/**
  * @struct HookInfo.
  *
  * @brief hook diaplayinfo deepending on the window size.
