@@ -72,6 +72,9 @@ private:
     void CloseCoordinationScreen();
     void NotifyRefreshRateEvent(bool isEventStatus);
     void UpdateDeviceStatus(FoldDisplayMode displayMode);
+    void ChangeOnTentMode(FoldStatus currentState) override;
+    void ChangeOffTentMode() override;
+    std::vector<DMRect> GetFoldCreaseRegionRect(bool isVertical) const;
     std::mutex coordinationMutex_;
     std::recursive_mutex& displayInfoMutex_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;

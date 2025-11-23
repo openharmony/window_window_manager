@@ -3954,7 +3954,8 @@ bool ScreenSessionManager::HandleFoldScreenSessionCreate(ScreenId screenId)
         if (screenId == SCREEN_ID_MAIN) {
             SetPostureAndHallSensorEnabled();
             if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()
-                || FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+                || FoldScreenStateInternel::IsDualDisplayFoldDevice()
+                || FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice) {
                 ScreenSensorConnector::SubscribeTentSensor();
             }
             isFoldScreenOuterScreenReady_ = true;
