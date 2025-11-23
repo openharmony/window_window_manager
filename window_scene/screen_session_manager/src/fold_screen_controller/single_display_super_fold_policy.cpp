@@ -309,7 +309,7 @@ void SingleDisplaySuperFoldPolicy::ExitCoordination()
     ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
 }
 
-void SingleDisplayPocketFoldPolicy::ChangeOnTentMode(FoldStatus currentState)
+void SingleDisplaySuperFoldPolicy::ChangeOnTentMode(FoldStatus currentState)
 {
     TLOGI(WmsLogTag::DMS, "Enter tent mode, current state:%{public}d, change display mode to MAIN", currentState);
     if (currentState == FoldStatus::EXPAND || currentState == FoldStatus::HALF_FOLD) {
@@ -322,7 +322,7 @@ void SingleDisplayPocketFoldPolicy::ChangeOnTentMode(FoldStatus currentState)
     }
 }
 
-void SingleDisplayPocketFoldPolicy::ChangeOffTentMode()
+void SingleDisplaySuperFoldPolicy::ChangeOffTentMode()
 {
     PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync();
     FoldDisplayMode displayMode = GetModeMatchStatus();
