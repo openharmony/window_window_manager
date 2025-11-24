@@ -275,8 +275,8 @@ void DropWindowStageByAni(ani_object aniObj)
     auto obj = g_localObjs.find(reinterpret_cast<ani_object>(aniObj));
     if (obj != g_localObjs.end()) {
         delete obj->second;
+        g_localObjs.erase(obj);
     }
-    g_localObjs.erase(obj);
 }
 
 AniWindowStage* GetWindowStageFromAni(void* aniObj)
