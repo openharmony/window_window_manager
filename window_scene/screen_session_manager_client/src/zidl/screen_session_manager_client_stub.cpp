@@ -85,6 +85,10 @@ void ScreenSessionManagerClientStub::InitScreenChangeMap()
         [this](MessageParcel& data, MessageParcel& reply) {
         return HandleOnSetSurfaceNodeIdsChanged(data, reply);
     };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_VIRTUAL_SCREEN_CONNECTED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnVirtualScreenConnected(data, reply);
+    };
     HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_VIRTUAL_SCREEN_DISCONNECTED] =
         [this](MessageParcel& data, MessageParcel& reply) {
         return HandleOnVirtualScreenDisconnected(data, reply);
@@ -435,6 +439,13 @@ int ScreenSessionManagerClientStub::HandleOnSetSurfaceNodeIdsChanged(MessageParc
     std::vector<uint64_t> surfaceNodeIds;
     data.ReadUInt64Vector(&surfaceNodeIds);
     OnSetSurfaceNodeIdsChanged(displayId, surfaceNodeIds);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnVirtualScreenConnected(MessageParcel& data, MessageParcel& reply)
+{
+    auto displayId = static_cast<DisplayId>(data.ReadUint64());
+    OnVirtualScreenConnected(displayId);
     return ERR_NONE;
 }
 

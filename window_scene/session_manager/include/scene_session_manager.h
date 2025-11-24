@@ -193,6 +193,7 @@ public:
         std::vector<uint64_t>& surfaceNodeIds, const std::vector<uint32_t>& needWindowTypeList = {},
         bool isNeedForceCheck = false) override;
     void OnSetSurfaceNodeIds(DisplayId displayId, const std::vector<uint64_t>& surfaceNodeIds) override;
+    void OnVirtualScreenConnected(DisplayId displayId) override;
     void OnVirtualScreenDisconnected(DisplayId displayId) override;
 
     /*
@@ -480,6 +481,7 @@ public:
     WMError UpdateSubSessionBlackList(const sptr<SceneSession>& sceneSession);
     WMError RemoveSessionFromBlackList(const sptr<SceneSession>& sceneSession);
     WMError SetSurfaceNodeIds(DisplayId displayId, const std::vector<uint64_t>& surfaceNodeIds);
+    WMError OnVirtualScreenConnected(DisplayId displayId);
     WMError OnVirtualScreenDisconnected(DisplayId displayId);
     WSError UpdateTitleInTargetPos(int32_t persistentId, bool isShow, int32_t height);
 

@@ -10856,6 +10856,20 @@ WMError SceneSessionManager::SetSurfaceNodeIds(DisplayId displayId, const std::v
     return taskScheduler_->PostSyncTask(task, __func__);
 }
 
+void DisplayChangeListener::OnVirtualScreenConnected(DisplayId displayId)
+{
+    SceneSessionManager::GetInstance().OnVirtualScreenConnected(displayId);
+}
+
+WMError SceneSessionManager::OnVirtualScreenConnected(DisplayId displayId)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "displayId: %{public}" PRIu64, displayId);
+    auto task = [this, displayId, where = __func__]() {
+        
+    };
+    return taskScheduler_->PostASyncTask(task, __func__); 
+}
+
 void DisplayChangeListener::OnVirtualScreenDisconnected(DisplayId displayId)
 {
     SceneSessionManager::GetInstance().OnVirtualScreenDisconnected(displayId);
