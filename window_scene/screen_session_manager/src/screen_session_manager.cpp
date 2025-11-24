@@ -5983,6 +5983,9 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
         screenSession->SetVirtualScreenFlag(option.virtualScreenFlag_);
         TLOGI(WmsLogTag::DMS, "virtualScreenFlag: %{public}d", option.virtualScreenFlag_);
         NotifyScreenConnected(screenSession->ConvertToScreenInfo());
+        if (clientProxy) {
+            clientProxy->OnVirtualScreenConnected(rsScreenId);
+        }
         TLOGW(WmsLogTag::DMS, "create success. ScreenId: %{public}" PRIu64", rsId: %{public}" PRIu64"",
             smsScreenId, rsId);
         if (displayManagerAgent == nullptr) {
