@@ -3392,7 +3392,7 @@ void ScreenSessionManagerProxy::SetScreenPrivacyState(bool hasPrivate)
     }
 }
 
-void ScreenSessionManagerProxy::SetPrivacyStateByDisplayId(DisplayId id, bool hasPrivate)
+void ScreenSessionManagerProxy::SetPrivacyStateByDisplayId(std::unordered_map<DisplayId, bool>& privacyBundleDisplayId)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -3407,13 +3407,19 @@ void ScreenSessionManagerProxy::SetPrivacyStateByDisplayId(DisplayId id, bool ha
         TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return;
     }
-    if (!data.WriteUint64(id)) {
-        TLOGE(WmsLogTag::DMS, "Write DisplayId failed");
+    if (!data.WriteUint32(privacyBundleDisplayId.size())) {
+        TLOGE(WmsLogTag::DMS, "Write privacyBundleDisplayId size failed");
         return;
     }
-    if (!data.WriteBool(hasPrivate)) {
-        TLOGE(WmsLogTag::DMS, "Write hasPrivate failed");
-        return;
+    for (auto iter : privacyBundleDisplayId) {
+        if (!data.WriteUint64(iter.first)) {
+            TLOGE(WmsLogTag::DMS, "Write DisplayId failed");
+            return;
+        }
+        if (!data.WriteBool(iter.second)) {
+            TLOGE(WmsLogTag::DMS, "Write hasPrivate failed");
+            return;
+        }
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREENID_PRIVACY_STATE),
         data, reply, option) != ERR_NONE) {

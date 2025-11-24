@@ -361,7 +361,8 @@ HWTEST_F(ScreenSessionManagerClientTest, SetPrivacyStateByDisplayId01, TestSize.
     
     DisplayId id = 0;
     bool hasPrivate = true;
-    screenSessionManagerClient_->SetPrivacyStateByDisplayId(id, hasPrivate);
+    std::unordered_map<DisplayId, bool> privacyBundleDisplayId = {{id, hasPrivate}};
+    screenSessionManagerClient_->SetPrivacyStateByDisplayId(privacyBundleDisplayId);
 
     bool result = false;
     screenSessionManagerClient_->screenSessionManager_->HasPrivateWindow(id, result);
@@ -382,7 +383,8 @@ HWTEST_F(ScreenSessionManagerClientTest, SetPrivacyStateByDisplayId02, TestSize.
     EXPECT_NE(screenSessionManagerClient_->screenSessionManager_, nullptr);
     DisplayId id = 0;
     bool hasPrivate = false;
-    screenSessionManagerClient_->SetPrivacyStateByDisplayId(id, hasPrivate);
+    std::unordered_map<DisplayId, bool> privacyBundleDisplayId = {{id, hasPrivate}};
+    screenSessionManagerClient_->SetPrivacyStateByDisplayId(privacyBundleDisplayId);
     bool result = true;
     screenSessionManagerClient_->screenSessionManager_->HasPrivateWindow(id, result);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -415,7 +417,8 @@ HWTEST_F(ScreenSessionManagerClientTest, SetScreenPrivacyWindowList, TestSize.Le
     });
     DisplayManager::GetInstance().RegisterPrivateWindowListChangeListener(listener_);
 
-    screenSessionManagerClient_->SetScreenPrivacyWindowList(id, privacyWindowList);
+    std::unordered_map<DisplayId, std::vector<std::string>> privacyBundleList = {{id, privacyWindowList}};
+    screenSessionManagerClient_->SetScreenPrivacyWindowList(privacyBundleList);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
@@ -1006,7 +1009,8 @@ HWTEST_F(ScreenSessionManagerClientTest, SetPrivacyStateByDisplayId, TestSize.Le
     DisplayId id = 0;
     bool hasPrivate = false;
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
-    screenSessionManagerClient_->SetPrivacyStateByDisplayId(id, hasPrivate);
+    std::unordered_map<DisplayId, bool> privacyBundleDisplayId = {{id, hasPrivate}};
+    screenSessionManagerClient_->SetPrivacyStateByDisplayId(privacyBundleDisplayId);
 }
 
 /**

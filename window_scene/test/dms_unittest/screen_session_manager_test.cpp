@@ -2211,9 +2211,11 @@ HWTEST_F(ScreenSessionManagerTest, SetPrivacyStateByDisplayId01, TestSize.Level1
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ssm_->screenSessionMap_[id] = screenSession;
     ASSERT_NE(nullptr, screenSession);
-    ssm_->SetPrivacyStateByDisplayId(id, hasPrivate);
-    bool result = screenSession->HasPrivateSessionForeground();
-    EXPECT_EQ(result, true);
+    std::unordered_map<DisplayId, bool> privacyBundleDisplayId = {{id, hasPrivate}};
+    ssm_->SetPrivacyStateByDisplayId(privacyBundleDisplayId);
+    bool curHasPrivate = false;
+    ssm_->HasPrivateWindow(id, curHasPrivate);
+    EXPECT_TRUE(curHasPrivate);
 }
 
 /**
@@ -2228,9 +2230,11 @@ HWTEST_F(ScreenSessionManagerTest, SetPrivacyStateByDisplayId02, TestSize.Level1
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ssm_->screenSessionMap_[id] = screenSession;
     ASSERT_NE(nullptr, screenSession);
-    ssm_->SetPrivacyStateByDisplayId(id, hasPrivate);
-    bool result = screenSession->HasPrivateSessionForeground();
-    EXPECT_EQ(result, false);
+    std::unordered_map<DisplayId, bool> privacyBundleDisplayId = {{id, hasPrivate}};
+    ssm_->SetPrivacyStateByDisplayId(privacyBundleDisplayId);
+    bool curHasPrivate = false;
+    ssm_->HasPrivateWindow(id, curHasPrivate);
+    EXPECT_FALSE(curHasPrivate);
 }
 
 /**
