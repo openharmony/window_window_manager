@@ -105,14 +105,14 @@ bool ScreenProperty::GetIsFakeInUse() const
     return isFakeInUse_;
 }
 
-void ScreenProperty::SetIsDestoryDisplay(bool isPreFakeInUse)
+void ScreenProperty::SetIsDestroyDisplay(bool isPreFakeInUse)
 {
-    isDestoryDisplay_ = isPreFakeInUse;
+    isDestroyDisplay_ = isPreFakeInUse;
 }
 
-bool ScreenProperty::GetIsDestoryDisplay() const
+bool ScreenProperty::GetIsDestroyDisplay() const
 {
-    return isDestoryDisplay_;
+    return isDestroyDisplay_;
 }
 
 void ScreenProperty::SetScaleX(float scaleX)
