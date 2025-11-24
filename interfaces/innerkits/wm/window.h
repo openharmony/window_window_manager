@@ -2559,6 +2559,21 @@ public:
     virtual void NotifySystemBarPropertyUpdate(WindowType type, const SystemBarProperty& property) {}
 
     /**
+     * @brief Convert orientation and rotation between window and display
+     *
+     * @param from The type of the value to be converted.
+     * @param to The target type of conversion.
+     * @param value The value to be converted.
+     * @param convertedValue The converted value.
+     * @return WM_OK means convert success, others means convert failed.
+     */
+    virtual WMError ConvertOrientationAndRotation(const RotationInfoType from, const RotationInfoType to,
+        const int32_t value, int32_t& convertedValue)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Get requested orientation.
      *
      * @return Orientation screen orientation.

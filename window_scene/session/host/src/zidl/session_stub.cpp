@@ -143,6 +143,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetAllAvoidAreas(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_TARGET_ORIENTATION_CONFIG_INFO):
             return HandleGetTargetOrientationConfigInfo(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONVERT_ORIENTATION_AND_ROTATION):
+            return HandleConvertOrientationAndRotation(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_ASPECT_RATIO):
             return HandleSetAspectRatio(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CONTENT_ASPECT_RATIO):
@@ -1367,6 +1369,26 @@ int SessionStub::HandleGetTargetOrientationConfigInfo(MessageParcel& data, Messa
         currentProperties[static_cast<WindowType>(type)] = property;
     }
     WSError errCode = GetTargetOrientationConfigInfo(targetOrientation, targetProperties, currentProperties);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleConvertOrientationAndRotation(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "in");
+    uint32_t from;
+    uint32_t to;
+    int32_t value;
+    int32_t convertedValue;
+    if (!data.ReadUint32(from) || !data.ReadUint32(to) || !data.ReadInt32(value)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read value failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = ConvertOrientationAndRotation(from, to, value, convertedValue);
+    if (!reply.WriteInt32(convertedValue)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Write failed");
+        return ERR_INVALID_DATA;
+    }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
