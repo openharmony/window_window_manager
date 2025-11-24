@@ -1919,8 +1919,8 @@ void DropWindowObjectByAni(ani_ref aniObj)
     auto obj = g_localObjs.find(reinterpret_cast<ani_ref>(aniObj));
     if (obj != g_localObjs.end()) {
         delete obj->second;
+        g_localObjs.erase(obj);
     }
-    g_localObjs.erase(obj);
 }
 
 AniWindow* GetWindowObjectFromAni(void* aniObj)
