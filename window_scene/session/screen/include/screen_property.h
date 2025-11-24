@@ -57,8 +57,8 @@ public:
     void SetIsFakeInUse(bool isFakeInUse);
     bool GetIsFakeInUse() const;
 
-    void SetIsDestoryDisplay(bool isPreFakeInUse);
-    bool GetIsDestoryDisplay() const;
+    void SetIsDestroyDisplay(bool isPreFakeInUse);
+    bool GetIsDestroyDisplay() const;
 
     void SetScaleX(float scaleX);
     float GetScaleX() const;
@@ -315,7 +315,7 @@ private:
     RRect phyBounds_;
     RRect fakeBounds_;
     bool isFakeInUse_ = false;  // is fakeBounds can be used
-    bool isDestoryDisplay_ = false;  // is fakeBounds can be used
+    bool isDestroyDisplay_ = false;  // is fakeBounds can be used
 
     float scaleX_ { 1.0f };
     float scaleY_ { 1.0f };
