@@ -712,6 +712,13 @@ napi_value JsWindow::GetPreferredOrientation(napi_env env, napi_callback_info in
     return (me != nullptr) ? me->OnGetPreferredOrientation(env, info) : nullptr;
 }
 
+napi_value JsWindow::ConvertOrientationAndRotation(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "ConvertOrientationAndRotation");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnConvertOrientationAndRotation(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetSnapshotSkip(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::DEFAULT, "SetSnapshotSkip");
@@ -4033,6 +4040,56 @@ napi_value JsWindow::OnGetPreferredOrientation(napi_env env, napi_callback_info 
     TLOGD(WmsLogTag::WMS_ROTATION, "end, window [%{public}u, %{public}s] orientation=%{public}u",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), static_cast<uint32_t>(apiOrientation));
     return CreateJsValue(env, static_cast<uint32_t>(apiOrientation));
+}
+
+napi_value JsWindow::OnConvertOrientationAndRotation(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != THREE_PARAMS_SIZE) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Argc is invalid: %{public}zu, expect three params", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "window is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    int32_t from;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], from)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to RotationInfoType of from");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    RotationInfoType fromRotationInfoType = static_cast<RotationInfoType>(from);
+    if (fromRotationInfoType < RotationInfoType::WINDOW_ORIENTATION ||
+        fromRotationInfoType > RotationInfoType::DISPLAY_ROTATION) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Invalid from RotationInfoType : %{public}d", from);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int32_t to;
+    if (!ConvertFromJsValue(env, argv[INDEX_ONE], to)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to RotationInfoType of to");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    RotationInfoType toRotationInfoType = static_cast<RotationInfoType>(to);
+    if (toRotationInfoType < RotationInfoType::WINDOW_ORIENTATION ||
+        toRotationInfoType > RotationInfoType::DISPLAY_ROTATION) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Invalid to RotationInfoType : %{public}d", to);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int32_t value;
+    if (!ConvertFromJsValue(env, argv[INDEX_TWO], value)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to RotationInfoValue");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int32_t convertedValue;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+        windowToken_->ConvertOrientationAndRotation(fromRotationInfoType, toRotationInfoType, value, convertedValue));
+    if (ret != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, ret);
+    }
+    TLOGD(WmsLogTag::WMS_ROTATION, "end, convertRotationValue : %{public}d", convertedValue);
+    return CreateJsValue(env, convertedValue);
 }
 
 napi_value JsWindow::OnIsSupportWideGamut(napi_env env, napi_callback_info info)
@@ -9597,6 +9654,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setForbidSplitMove", moduleName, JsWindow::SetForbidSplitMove);
     BindNativeFunction(env, object, "setPreferredOrientation", moduleName, JsWindow::SetPreferredOrientation);
     BindNativeFunction(env, object, "getPreferredOrientation", moduleName, JsWindow::GetPreferredOrientation);
+    BindNativeFunction(env, object, "convertOrientationAndRotation", moduleName, JsWindow::ConvertOrientationAndRotation);
     BindNativeFunction(env, object, "opacity", moduleName, JsWindow::Opacity);
     BindNativeFunction(env, object, "scale", moduleName, JsWindow::Scale);
     BindNativeFunction(env, object, "rotate", moduleName, JsWindow::Rotate);

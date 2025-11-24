@@ -904,6 +904,7 @@ protected:
     std::atomic_bool isExitSplitOnBackground_ = false;
     bool isVisible_ = false;
     int32_t currentRotation_ = 0;
+    int32_t sdkVersion_ = 0;
     std::string label_;
 
     NotifyChangeSessionVisibilityWithStatusBarFunc changeSessionVisibilityWithStatusBarFunc_;

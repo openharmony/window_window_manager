@@ -75,6 +75,8 @@ constexpr uint32_t INVALID_TARGET_API_VERSION = 0;
 constexpr uint32_t OPAQUE = 0xFF000000;
 constexpr int32_t WINDOW_CONNECT_TIMEOUT = 1000;
 constexpr int32_t WINDOW_LIFECYCLE_TIMEOUT = 100;
+constexpr int32_t MIN_ROTATION_VALUE = 0;
+constexpr int32_t MAX_ROTATION_VALUE = 3;
 
 /*
  * DFX
@@ -3147,6 +3149,35 @@ Orientation WindowSessionImpl::GetRequestedOrientation()
     }
     TLOGI(WmsLogTag::WMS_ROTATION, "userRequestedOrientation:%{public}u", property_->GetUserRequestedOrientation());
     return property_->GetUserRequestedOrientation();
+}
+
+WMError WindowSessionImpl::ConvertOrientationAndRotation(
+    const RotationInfoType from, const RotationInfoType to, const int32_t value, int32_t& convertedValue)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "windowSession is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (IsOrientationAndRotationInvalid(value)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "the value to be converted is invalid");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (from == to) {
+        convertedValue = value;
+        return WMError::WM_OK;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    WSError ret = hostSession->ConvertOrientationAndRotation(from, to, value, convertedValue);
+    return static_cast<WMError>(ret);
+}
+
+bool IsOrientationAndRotationInvalid(const int32_t value)
+{
+    if (value < MIN_ROTATION_VALUE || value > MAX_ROTATION_VALUE) {
+        return true;
+    }
+    return false;
 }
 
 Orientation WindowSessionImpl::ConvertUserOrientationToUserPageOrientation(Orientation Orientation) const
