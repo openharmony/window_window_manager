@@ -76,6 +76,7 @@ public:
     {
         TLOGW(WmsLogTag::WMS_RECOVER, "Client died, pid = %{public}d, isLite = %{public}d", pid_, isLite_);
         MockSessionManagerService::GetInstance().UnregisterSMSRecoverListenerInner(userId_, displayId_, pid_, isLite_);
+        MockSessionManagerService::GetInstance().ResetSpecificWindowZIndex(userId_, displayId_, pid_, isLite_);
     }
 
 private:
@@ -471,6 +472,22 @@ void MockSessionManagerService::UnregisterSMSRecoverListenerInner(int32_t client
         auto& mapMutex = isLite ? liteRecoverListenerMutex_ : recoverListenerMutex_;
         std::lock_guard<std::mutex> lock(mapMutex);
         smsRecoverListenerMap->erase(pid);
+    }
+}
+
+void MockSessionManagerService::ResetSpecificWindowZIndex(int32_t clientUserId, int32_t pid)
+{
+    TLOGI(WmsLogTag::WMS_FOCUS, "clientUserId: %{public}d, pid: %{public}d", clientUserId, pid);
+    sptr<IRemoteObject> remoteObject = GetSceneSessionManagerByUserId(clientUserId);
+    if (!remoteObject) {
+        TLOGI(WmsLogTag::WMS_FOCUS, "remoteObject is null");
+        return;
+    }
+    sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(remoteObject);
+    WMError ret = sceneSessionManagerProxy->ResetSpecificWindowZIndex(pid);
+    TLOGI(WmsLogTag::WMS_FOCUS, "ret:  %{public}d", ret);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "failed!");
     }
 }
 

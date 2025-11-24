@@ -14275,15 +14275,53 @@ WSError SceneSessionManager::SetSpecificWindowZIndex(WindowType windowType, int3
         TLOGE(WmsLogTag::WMS_FOCUS, "permission denied");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
+    const auto callingPid = IPCSkeleton::GetCallingRealPid();
     const char* const where = __func__;
-    return taskScheduler_->PostSyncTask([this, windowType, zIndex, where] {
+    return taskScheduler_->PostSyncTask([this, windowType, zIndex, callingPid, where] {
         TLOGNI(WmsLogTag::WMS_FOCUS, "windowType: %{public}d, zIndex: %{public}d", windowType, zIndex);
         if (setSpecificWindowZIndexFunc_) {
-            setSpecificWindowZIndexFunc_(windowType, zIndex);
+            setSpecificWindowZIndexFunc_(windowType, zIndex, SetSpecificZIndexReason::SET);
+            {
+                std::lock_guard<std::mutex> lock(specificZIndexByPidMapMutex_);
+                auto iter = specificZIndexByPidMap_.find(displayGroupId);
+                if (iter == specificZIndexByPidMap_.end()) {
+                    std::unordered_set<std::string> windowTypeList({ windowType });
+                    specificZIndexByPidMap_.emplace(callingPid, windowTypeList);
+                } else {
+                    iter->second.push_back(windowType);
+                }
+            }
+        } else {
+            TLOGNE(WmsLogTag::WMS_FOCUS, "setSpecificWindowZIndexFunc_ is nullptr");
         }
         return WSError::WS_OK;
     }, __func__);
+}
 
+/** @note @window.hierarchy */
+void SceneSessionManager::ResetSpecificWindowZIndex(int32_t pid)
+{
+    const char* const where = __func__;
+    return taskScheduler_->PostSyncTask([this, windowType, zIndex, where] {
+        TLOGNI(WmsLogTag::WMS_FOCUS, "windowType: %{public}d, zIndex: %{public}d", windowType, zIndex);
+        {
+            std::lock_guard<std::mutex> lock(specificZIndexByPidMapMutex_);
+            auto iter = specificZIndexByPidMap_.find(pid);
+            if (iter == specificZIndexByPidMap_.end()) {
+                TLOGE(WmsLogTag::WMS_FOCUS, "not found with pid: %{public}d", pid);
+                return;
+            }
+            std::vector<WindowType> windowTypeList = iter->second;
+            if (setSpecificWindowZIndexFunc_) {
+                for (auto windowType : windowTypeList) {
+                    setSpecificWindowZIndexFunc_(windowType, 0, SetSpecificZIndexReason::RESET);
+                }
+                specificZIndexByPidMap_.erase(pid)
+            } else {
+                TLOGNE(WmsLogTag::WMS_FOCUS, "resetSpecificWindowZIndexFunc_ is nullptr");
+            }
+        }
+    }, __func__);
 }
 
 WSError SceneSessionManager::GetAppMainSceneSession(int32_t persistentId, sptr<SceneSession>& sceneSession)

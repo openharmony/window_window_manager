@@ -634,7 +634,7 @@ void WindowAdapter::RecoverSpecificZIndexSetByApp()
         return;
     }
     for (const auto& elem : specificZIndexMap_) {
-        SetSpecificWindowZIndex(elem.first, elem.second);
+        SetSpecificWindowZIndex(elem.first, elem.second, false);
         TLOGI(WmsLogTag::WMS_FOCUS, "windowType: %{public}d, zIndex: %{public}d",
             elem.first, elem.second);
     }
@@ -1089,12 +1089,14 @@ WMError WindowAdapter::ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t t
         wmsProxy->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId));
 }
 
-WMError WindowAdapter::SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex)
+WMError WindowAdapter::SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex, bool updateMap)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
-    specificZIndexMap_[windowType] = zIndex;
+    if (updateMap) {
+        specificZIndexMap_[windowType] = zIndex;
+    }
     return static_cast<WMError>(
         wmsProxy->SetSpecificWindowZIndex(windowType, zIndex));
 }

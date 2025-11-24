@@ -2711,4 +2711,20 @@ int SceneSessionManagerStub::HandleSetSpecificWindowZIndex(MessageParcel& data, 
     }
     return ERR_NONE;
 }
+
+int SceneSessionManagerStub::HandleResetSpecificWindowZIndex(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGI(WmsLogTag::WMS_FOCUS, "in");
+    int32_t pid = 0;
+    if (!data.ReadInt32(pid)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "read pid failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError ret = ResetSpecificWindowZIndex(pid);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write errCode fail");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
 } // namespace OHOS::Rosen
