@@ -113,7 +113,6 @@ public:
     void RegisterScreenChangeListener(IScreenChangeListener* screenChangeListener);
     void UnregisterScreenChangeListener(IScreenChangeListener* screenChangeListener);
     void UpdateScbScreenPropertyToServer(const ScreenProperty& screenProperty);
-    std::vector<std::string> SplitBySemicolon(const std::string& str);
 
     sptr<DisplayInfo> ConvertToDisplayInfo();
     sptr<DisplayInfo> ConvertToRealDisplayInfo();
@@ -416,8 +415,8 @@ public:
     void UpdateMirrorHeight(uint32_t mirrorHeight);
     void SetCurrentValidHeight(int32_t currentValidHeight);
     int32_t GetCurrentValidHeight() const;
-    void SetIsDestoryDisplay(bool isPreFakeInUse);
-    bool GetIsDestoryDisplay() const;
+    void SetIsDestroyDisplay(bool isPreFakeInUse);
+    bool GetIsDestroyDisplay() const;
     void SetIsKeyboardOn(bool isKeyboardOn);
     bool GetIsKeyboardOn() const;
     void SetFloatRotation(float rotation);
