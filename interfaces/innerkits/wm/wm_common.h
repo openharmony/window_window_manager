@@ -195,8 +195,8 @@ enum class WindowType : uint32_t {
  * @brief the information for compatible mode App when switching window style in real time.
  */
 struct RealTimeSwitchInfo {
-    bool isNeedChange_;
-    uint32_t showTypes_;
+    bool isNeedChange_{false};
+    uint32_t showTypes_{0};
 };
 
 /**
