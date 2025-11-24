@@ -2272,6 +2272,37 @@ HWTEST_F(SessionStubTest, TestHandleSessionEventWithValidInputs, TestSize.Level1
         EXPECT_EQ(errCode, static_cast<uint32_t>(WSError::WS_OK));
     }
 }
+/**
+ * @tc.name: TestHandleSessionEventWithValidInputs
+ * @tc.desc: Verify that HandleSessionEvent correctly processes valid input data and writes proper response.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, TestHandleSessionEventWithValidInputs02, TestSize.Level1)
+{
+    sptr<SessionStubMocker> session = sptr<SessionStubMocker>::MakeSptr();
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SESSION_EVENT);
+    MessageOption option;
+ 
+    // Case 1: EVENT_MAXIMIZE with valid 'compatibleStyleMode' → should succeed and return WS_OK
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        uint32_t eventId = static_cast<uint32_t>(SessionEvent::EVENT_SWITCH_COMPATIBLE_MODE);
+        uint32_t compatibleStyleMode = 0;
+        data.WriteUint32(eventId);
+        data.WriteUint32(compatibleStyleMode);
+ 
+        EXPECT_CALL(*session, OnSessionEvent(_, _))
+            .Times(1)
+            .WillOnce(testing::Return(WSError::WS_OK));
+ 
+        int ret = session->ProcessRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(ret, ERR_NONE);
+ 
+        uint32_t errCode = reply.ReadUint32();
+        EXPECT_EQ(errCode, static_cast<uint32_t>(WSError::WS_OK));
+    }
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

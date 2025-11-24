@@ -610,6 +610,7 @@ enum class SessionEvent : uint32_t {
     EVENT_COMPATIBLE_TO_MAXIMIZE,
     EVENT_COMPATIBLE_TO_RECOVER,
     EVENT_MAXIMIZE_FULLSCREEN,
+    EVENT_SWITCH_COMPATIBLE_MODE = 200,
     EVENT_END
 };
 
@@ -1077,6 +1078,7 @@ struct SessionEventParam {
     uint32_t dragResizeType = 0;
     uint32_t gravity = 0;
     uint32_t waterfallResidentState = 0;
+    uint32_t compatibleStyleMode = 0;
 };
 
 struct BackgroundParams {

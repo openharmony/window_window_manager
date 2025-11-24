@@ -352,6 +352,7 @@ public:
     bool IsAdaptToSimulationScale() const;
     void SetIsFullScreenInForceSplitMode(bool isFullScreenInForceSplitMode);
     bool IsFullScreenInForceSplitMode() const;
+    RealTimeSwitchInfo GetRealTimeSwitchInfo() const;
 
     /*
      * Keyboard
@@ -699,6 +700,9 @@ public:
     void SetIsAdaptToSimulationScale(bool isAdaptToSimulationScale);
     bool IsAdaptToSimulationScale() const;
 
+    void SetRealTimeSwitchInfo(const RealTimeSwitchInfo& switchInfo);
+    RealTimeSwitchInfo GetRealTimeSwitchInfo() const;
+
     bool Marshalling(Parcel& parcel) const override;
     static CompatibleModeProperty* Unmarshalling(Parcel& parcel);
 
@@ -721,6 +725,8 @@ public:
         ss << "isSupportRotateFullScreen_:" << isSupportRotateFullScreen_ << " ";
         ss << "isAdaptToSubWindow_:" << isAdaptToSubWindow_ << " ";
         ss << "isAdaptToSimulationScale_:" << isAdaptToSimulationScale_ << " ";
+        ss << "realTimeSwitchInfo_.isNeedChange_:" << realTimeSwitchInfo_.isNeedChange_ << " ";
+        ss << "realTimeSwitchInfo_.showTypes_:" << realTimeSwitchInfo_.showTypes_ << " ";
         return ss.str();
     }
 
@@ -740,6 +746,7 @@ private:
     bool isSupportRotateFullScreen_ { false };
     bool isAdaptToSubWindow_ { false };
     bool isAdaptToSimulationScale_ { false };
+    RealTimeSwitchInfo realTimeSwitchInfo_;
 };
 
 struct FreeMultiWindowConfig : public Parcelable {
