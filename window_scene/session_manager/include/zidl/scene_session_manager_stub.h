@@ -159,6 +159,7 @@ private:
     int HandleMinimizeAllAppWindows(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateOutline(MessageParcel& data, MessageParcel& reply);
     int HandleSetSpecificWindowZIndex(MessageParcel& data, MessageParcel& reply);
+    int HandleResetSpecificWindowZIndex(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySupportRotationRegistered(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen

@@ -172,7 +172,8 @@ using FindScenePanelRsNodeByZOrderFunc = std::function<std::shared_ptr<Rosen::RS
 using NotifyAppProcessDiedFunc = std::function<void(const AppExecFwk::ProcessData& processData)>;
 using ConvertSystemConfigFunc = std::function<void(const std::string& configItem)>;
 using NotifyVirtualPixelChangeFunc = std::function<void(float density, DisplayId displayId)>;
-using NotifySetSpecificWindowZIndexFunc = std::function<void(WindowType windowType, int32_t zIndex)>;
+using NotifySetSpecificWindowZIndexFunc = std::function<void(WindowType windowType, int32_t zIndex,
+    SetSpecificZIndexReason reason)>;
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
     void OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInfo>& debugInfos) override;
@@ -341,6 +342,7 @@ public:
      * Window Hierarchy
      */
     WSError SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex) override;
+    WSError ResetSpecificWindowZIndex(int32_t pid) override;
     void SetSpecificWindowZIndexListener(const NotifySetSpecificWindowZIndexFunc& func);
 
     WSError UpdateWindowMode(int32_t persistentId, int32_t windowMode);
@@ -1340,6 +1342,8 @@ private:
      * Window Hierarchy
      */
     NotifySetSpecificWindowZIndexFunc setSpecificWindowZIndexFunc_;
+    std::unordered_map<int32_t, std::vector<WindowType>> specificZIndexByPidMap_;
+    std::mutex specificZIndexByPidMapMutex_;
 
     /*
      * DFX
