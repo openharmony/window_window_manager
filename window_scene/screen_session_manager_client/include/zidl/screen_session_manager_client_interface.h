@@ -91,7 +91,6 @@ public:
         std::vector<uint64_t>& surfaceNodeIds, const std::vector<uint32_t>& needWindowTypeList = {},
         bool isNeedForceCheck = false) = 0;
     virtual void OnSetSurfaceNodeIdsChanged(DisplayId displayId, const std::vector<uint64_t>& surfaceNodeIds) = 0;
-    virtual void OnVirtualScreenConnected(DisplayId displayId) = 0;
     virtual void OnVirtualScreenDisconnected(DisplayId displayId) = 0;
     virtual void OnUpdateFoldDisplayMode(FoldDisplayMode displayMode) = 0;
     virtual void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) = 0;
