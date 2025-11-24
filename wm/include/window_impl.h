@@ -597,7 +597,7 @@ private:
     /*
      * Window animation
      */
-    static std::mutex transitionControllerMutex_;
+    std::mutex transitionControllerMutex_;
     std::vector<sptr<IAnimationTransitionController>> animationTransitionControllers_;
 
     /*

@@ -495,7 +495,7 @@ private:
      * Window Animation
      */
     bool enableDefaultAnimation_ = true;
-    static std::mutex transitionControllerMutex_;
+    std::mutex transitionControllerMutex_;
     std::vector<sptr<IAnimationTransitionController>> animationTransitionControllers_;
     void CustomHideAnimation();
 
