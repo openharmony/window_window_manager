@@ -35,6 +35,7 @@ export type KeyboardDidShowOrHideCallback = (data: window.KeyboardInfo) => void;
 export type KeyboardWillShowOrHideCallback = (data: window.KeyboardInfo) => void;
 export type RotationChangeCallback<T, U> = (info: T) => U;
 export type WindowStageCloseCallback<T, V = void> = (data: T) => V;
+export type WindowWillCloseCallback<T, V = void> = (data: T) => V;
 const DOMAIN = 0x4200;
 const TAG = '[ANI]';
 const WM_ERROR_INVALID_PARAM = 401;
@@ -3447,11 +3448,11 @@ export class WindowInternal implements Window {
         return this.getWindowDecorVisible(this.nativeObj);
     }
 
-    public onWindowWillClose(callback: Callback<Promise<boolean>>): void {
+    public onWindowWillClose(callback: WindowWillCloseCallback<void, Promise<boolean>>): void {
       this.onSync(this.nativeObj, 'windowWillClose', callback);
     }
 
-    public offWindowWillClose(callback?: Callback<Promise<boolean>>): void {
+    public offWindowWillClose(callback?: WindowWillCloseCallback<void, Promise<boolean>>): void {
       this.offSync(this.nativeObj, 'windowWillClose', callback);
     }
 
@@ -5251,8 +5252,8 @@ export interface Window {
     setTitleAndDockHoverShown(isTitleHoverShown?: boolean, isDockHoverShown?: boolean): Promise<void>;
     setHandwritingFlag(enable: boolean): Promise<void>;
     getWindowDecorVisible(): boolean;
-    onWindowWillClose(callback: Callback<Promise<boolean>>): void;
-    offWindowWillClose(callback?: Callback<Promise<boolean>>): void;
+    onWindowWillClose(callback: WindowWillCloseCallback<void, Promise<boolean>>): void;
+    offWindowWillClose(callback?: WindowWillCloseCallback<void, Promise<boolean>>): void;
     onWindowTitleButtonRectChange(callback: Callback<TitleButtonRect>): void;
     offWindowTitleButtonRectChange(callback?: Callback<TitleButtonRect>): void;
     getWindowDecorHeight(): double;
