@@ -1575,13 +1575,13 @@ DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation,
         TLOGD(WmsLogTag::DMS, "foldDisplay is verticalScreen when width is greater than height");
         isVerticalScreen = property_.GetPhyWidth() > property_.GetPhyHeight();
     }
-        if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() || 
-            FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice()){
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() || 
+        FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice()) {
         isVerticalScreen = true;
     }
     if (foldDisplayMode == FoldDisplayMode::GLOBAL_FULL || 
         (foldDisplayMode == FoldDisplayMode::FULL &&
-        FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice())) {
+        Foldernel::IsSingleDisplaySuperFoldDevice())) {
         uint32_t temp = (static_cast<uint32_t>(rotation) + SECONDARY_ROTATION_270) % SECONDARY_ROTATION_MOD;
         rotation = static_cast<Rotation>(temp);
         isVerticalScreen = true;
