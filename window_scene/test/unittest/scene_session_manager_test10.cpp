@@ -1238,11 +1238,11 @@ HWTEST_F(SceneSessionManagerTest10, NotifyAppUseControlListInner02, TestSize.Lev
 }
 
 /**
- * @tc.name: NotifyAppUseControlListInner
+ * @tc.name: NotifyAppUseControlListInner03
  * @tc.desc: NotifyAppUseControlListInner
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, NotifyAppUseControlListInner, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest10, NotifyAppUseControlListInner03 , TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     int32_t controlListSize = -1;
