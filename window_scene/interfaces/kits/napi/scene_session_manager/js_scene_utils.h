@@ -278,6 +278,7 @@ napi_value ConvertWindowAnimationPropertyToJsValue(napi_env env,
     const WindowAnimationProperty& animationProperty);
 napi_value ConvertKeyboardEffectOptionToJsValue(napi_env env, const KeyboardEffectOption& effectOption);
 napi_value CreateWaterfallResidentState(napi_env env);
+napi_value CreateCompatibleStyleMode(napi_env env);
 bool NapiIsCallable(napi_env env, napi_value value);
 bool ConvertRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect);
 bool ConvertSessionRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect);
