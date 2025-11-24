@@ -1029,18 +1029,18 @@ HWTEST_F(ScreenPropertyTest, SetInputOffset, TestSize.Level1)
 }
 
 /**
-@tc.name : SetIsDestoryDisplay
-@tc.desc : SetIsDestoryDisplay
+@tc.name : SetIsDestroyDisplay
+@tc.desc : SetIsDestroyDisplay
 @tc.type: FUNC
 */
-HWTEST_F(ScreenPropertyTest, SetIsDestoryDisplay, TestSize.Level1) {
-    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetIsDestoryDisplay start";
+HWTEST_F(ScreenPropertyTest, SetIsDestroyDisplay, TestSize.Level1) {
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetIsDestroyDisplay start";
     ScreenProperty property = new(std::nothrow) ScreenProperty();
     ASSERT_NE(property, nullptr);
-    property->SetIsDestoryDisplay(true);
-    EXPECT_TRUE(property->isDestoryDisplay_);
+    property->SetIsDestroyDisplay(true);
+    EXPECT_TRUE(property->isDestroyDisplay_);
     delete property;
-    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetIsDestoryDisplay end";
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetIsDestroyDisplay end";
 }
 
 /**
