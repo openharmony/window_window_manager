@@ -11989,18 +11989,9 @@ void SceneSessionManager::NotifyAppUseControlListInner(
         if (appUseControlInfo.persistentId_ > INVALID_WINDOW_ID) {
             // control by peristentId
             TLOGI(WmsLogTag::WMS_MAIN, "control by id:%{public}d", appUseControlInfo.persistentId_);
-            auto iter = sceneSessionMap_.find(appUseControlInfo.persistentId_);
-            if (iter == sceneSessionMap_.end() || iter->second == nullptr) {
-                TLOGW(WmsLogTag::WMS_MAIN, "session not found, id:%{public}d", appUseControlInfo.persistentId_);
-                continue;
+            if (!IsNeedSkipForAppUseControl(appUseControlInfo)) {
+                mainSessions.push_back(iter->second);
             }
-            if (iter->second->GetSessionInfo().bundleName_ != appUseControlInfo.bundleName_ ||
-                iter->second->GetSessionInfo().appIndex_ != appUseControlInfo.appIndex_ ||
-                !SessionHelper::IsMainWindow(iter->second->GetWindowType())) {
-                TLOGW(WmsLogTag::WMS_MAIN, "invalid session, id:%{public}d", appUseControlInfo.persistentId_);
-                continue;
-            }
-            mainSessions.push_back(iter->second);
         } else {
             // control by bundleName and appIndex
             RefreshAllAppUseControlMap(appUseControlInfo, type);
@@ -12022,6 +12013,23 @@ void SceneSessionManager::NotifyAppUseControlListInner(
     if (notifyAppUseControlListFunc_ != nullptr && controlByBundleList.size() > 0) {
         notifyAppUseControlListFunc_(type, userId, controlByBundleList);
     }
+}
+
+bool SceneSessionManager::IsNeedSkipForAppUseControl(const AppUseControlInfo& appUseControlInfo)
+{
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    auto iter = sceneSessionMap_.find(appUseControlInfo.persistentId_);
+    if (iter == sceneSessionMap_.end() || iter->second == nullptr) {
+        TLOGW(WmsLogTag::WMS_MAIN, "session not found, id:%{public}d", appUseControlInfo.persistentId_);
+        return true;
+    }
+    if (iter->second->GetSessionInfo().bundleName_ != appUseControlInfo.bundleName_ ||
+        iter->second->GetSessionInfo().appIndex_ != appUseControlInfo.appIndex_ ||
+        !SessionHelper::IsMainWindow(iter->second->GetWindowType())) {
+        TLOGW(WmsLogTag::WMS_MAIN, "invalid session, id:%{public}d", appUseControlInfo.persistentId_);
+        return true;
+    }
+    return false;
 }
 
 void SceneSessionManager::RefreshAllAppUseControlMap(const AppUseControlInfo& appUseControlInfo, ControlAppType type)
