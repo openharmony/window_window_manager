@@ -975,7 +975,7 @@ void ScreenSession::ProcPropertyChangedForSuperFold(ScreenProperty& screenProper
 
     // back server for post processs of screen change
     screenProperty.SetSuperFoldStatusChangeEvent(changeEvent);
-    screenProperty.SetIsDestoryDisplay(eventPara.GetIsFakeInUse());
+    screenProperty.SetIsDestroyDisplay(eventPara.GetIsFakeInUse());
 
     switch (changeEvent) {
         case SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED: {
@@ -3137,14 +3137,14 @@ int32_t ScreenSession::GetCurrentValidHeight() const
     return property_.GetCurrentValidHeight();
 }
  
-void ScreenSession::SetIsDestoryDisplay(bool isPreFakeInUse)
+void ScreenSession::SetIsDestroyDisplay(bool isPreFakeInUse)
 {
-    property_.SetIsDestoryDisplay(isPreFakeInUse);
+    property_.SetIsDestroyDisplay(isPreFakeInUse);
 }
  
-bool ScreenSession::GetIsDestoryDisplay() const
+bool ScreenSession::GetIsDestroyDisplay() const
 {
-    return property_.GetIsDestoryDisplay();
+    return property_.GetIsDestroyDisplay();
 }
  
 void ScreenSession::SetIsKeyboardOn(bool isKeyboardOn)
@@ -3217,7 +3217,7 @@ void ScreenSession::UpdateScbScreenPropertyToServer(const ScreenProperty& screen
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         SuperFoldStatusChangeEvents changeEvent = screenProperty.GetSuperFoldStatusChangeEvent();
         property_.SetIsFakeInUse(screenProperty.GetIsFakeInUse());
-        property_.SetIsDestoryDisplay(screenProperty.GetIsDestoryDisplay());
+        property_.SetIsDestroyDisplay(screenProperty.GetIsDestroyDisplay());
         if (changeEvent == SuperFoldStatusChangeEvents::KEYBOARD_ON ||
             changeEvent == SuperFoldStatusChangeEvents::KEYBOARD_OFF) {
             property_.SetValidHeight(screenProperty.GetBounds().rect_.GetHeight());
