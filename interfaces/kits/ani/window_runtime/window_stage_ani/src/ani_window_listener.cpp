@@ -580,6 +580,21 @@ void AniWindowListener::OnWindowHighlightChange(bool isHighlight)
 
 void AniWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect)
 {
+    auto task = [self = weakRef_, titleButtonRect, eng = env_] () {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || eng == nullptr || thisListener->aniCallback_ == nullptr) {
+            TLOGE(WmsLogTag::WMS_DECOR, "[ANI]this listener, eng or callback is nullptr");
+            return;
+        }
+        AniWindowUtils::CallAniFunctionVoid(eng, "@ohos.window.window", "runWindowTitleButtonRectChangedCallback",
+            nullptr, thisListener->aniCallback_, AniWindowUtils::CreateAniTitleButtonRect(eng, titleButtonRect));
+    };
+    if (!eventHandler_) {
+        TLOGE(WmsLogTag::WMS_DECOR, "get main event handler failed!");
+        return;
+    }
+    eventHandler_->PostTask(task, "wms:AniWindowListener::WindowTitleButtonRectChangedCallback", 0,
+        AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 void AniWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
@@ -650,6 +665,18 @@ void AniWindowListener::OnSubWindowClose(bool& terminateCloseProcess)
 
 void AniWindowListener::OnMainWindowClose(bool& terminateCloseProcess)
 {
+    TLOGI(WmsLogTag::WMS_PC, "[ANI]");
+    auto thisListener = weakRef_.promote();
+    if (thisListener == nullptr || env_ == nullptr || thisListener->aniCallback_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "[ANI]this listener, env_ or callback is nullptr");
+        return;
+    }
+    ani_ref preClose;
+    AniWindowUtils::CallAniFunctionRef(env_, preClose, thisListener->aniCallback_, 0);
+    auto aniRet = AniWindowUtils::GetBooleanObject(env_, static_cast<ani_object>(preClose), terminateCloseProcess);
+    if (aniRet != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_PC, "[ANI]Get terminateCloseProcess failed, ret: %{public}u", aniRet);
+    }
 }
 
 void AniWindowListener::AfterLifecycleForeground()
