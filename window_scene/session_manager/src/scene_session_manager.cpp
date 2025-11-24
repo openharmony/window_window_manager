@@ -10883,7 +10883,9 @@ WMError SceneSessionManager::AddSessionBlackList(
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    auto task = [this, &bundleNames, &privacyWindowTags]() {
+    auto task = [this, &bundleNames, &privacyWindowTags, where = __func__]() {
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, bundleSize: %{public}zu, privacySize: %{public}zu",
+            where, bundleNames.size(), privacyWindowTags.size());
         for (const auto& bundleName : bundleNames) {
             bundleRSBlackListConfigMap_.insert({ bundleName, {} });
             bundleRSBlackListConfigMap_[bundleName].insert(privacyWindowTags.begin(), privacyWindowTags.end());
@@ -10921,7 +10923,9 @@ WMError SceneSessionManager::RemoveSessionBlackList(
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    auto task = [this, &bundleNames, &privacyWindowTags]() {
+    auto task = [this, &bundleNames, &privacyWindowTags, where = __func__]() {
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, bundleSize: %{public}zu, privacySize: %{public}zu",
+            where, bundleNames.size(), privacyWindowTags.size());
         for (const auto& bundleName : bundleNames) {
             bundleRSBlackListConfigMap_.insert({ bundleName, {} });
             for(const auto& privacyWindowTag : privacyWindowTags) {
