@@ -415,6 +415,60 @@ bool AniWindowUtils::GetIntObject(ani_env* env, const char* propertyName,
     return true;
 }
 
+bool AniWindowUtils::GetPropertyUIntObject(ani_env* env, const char* propertyName,
+    ani_object object, uint32_t& result)
+{
+    ani_ref uint_ref;
+    ani_status ret = env->Object_GetPropertyByName_Ref(object, propertyName, &uint_ref);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed, ret : %{public}u",
+            propertyName, static_cast<int32_t>(ret));
+        return false;
+    }
+    ani_boolean isUndefined;
+    if (ANI_OK != env->Reference_IsUndefined(uint_ref, &isUndefined)) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Reference_IsUndefined %{public}s Failed", propertyName);
+        return false;
+    }
+
+    if (isUndefined) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] %{public}s is Undefined Now", propertyName);
+        return false;
+    }
+
+    ani_int int_value;
+    if (ANI_OK != env->Object_CallMethodByName_Int(static_cast<ani_object>(uint_ref),
+        "intValue", nullptr, &int_value)) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
+        return false;
+    }
+    result = static_cast<uint32_t>(int_value);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] %{public}s is: %{public}u", propertyName, result);
+    return true;
+}
+
+ani_status AniWindowUtils::GetBooleanObject(ani_env* env, ani_object boolean_object, bool& result)
+{
+    ani_boolean isUndefined;
+    ani_status isUndefinedRet = env->Reference_IsUndefined(boolean_object, &isUndefined);
+    if (ANI_OK != isUndefinedRet) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Check boolean_object isUndefined fail");
+        return isUndefinedRet;
+    }
+    if (isUndefined) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] CallMeWithOptionalBoolean is undefined");
+        return ANI_OK;
+    }
+    ani_boolean bool_value;
+    ani_status ret = env->Object_CallMethodByName_Boolean(boolean_object, "toBoolean", ":z", &bool_value);
+    if (ANI_OK != ret) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_CallMethodByName_Boolean Failed!");
+        return ret;
+    }
+    result = static_cast<bool>(bool_value);
+    return ret;
+}
+
 ani_status AniWindowUtils::GetDoubleObject(ani_env* env, ani_object double_object, double& result)
 {
     ani_boolean isUndefined;
@@ -881,6 +935,150 @@ ani_object AniWindowUtils::CreateAniAvoidArea(ani_env* env, const AvoidArea& avo
     CallAniMethodVoid(env, aniAvoidArea, aniClass, "<set>bottomRect", nullptr,
         CreateAniRect(env, avoidArea.bottomRect_));
     return aniAvoidArea;
+}
+
+ani_object AniWindowUtils::CreateAniTitleButtonRect(ani_env* env, const TitleButtonRect& rect)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    ani_class aniClass;
+    ani_status ret = env->FindClass("@ohos.window.window.TitleButtonRectInternal", &aniClass);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_method aniCtor;
+    ret = env->Class_FindMethod(aniClass, "<ctor>", nullptr, &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object aniRect;
+    ret = env->Object_New(aniClass, aniCtor, &aniRect);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    CallAniMethodVoid(env, aniRect, aniClass, "<set>right", nullptr, ani_int(rect.posX_));
+    CallAniMethodVoid(env, aniRect, aniClass, "<set>top", nullptr, ani_int(rect.posY_));
+    CallAniMethodVoid(env, aniRect, aniClass, "<set>width", nullptr, ani_int(rect.width_));
+    CallAniMethodVoid(env, aniRect, aniClass, "<set>height", nullptr, ani_int(rect.height_));
+    return aniRect;
+}
+ 
+ani_object AniWindowUtils::CreateAniDecorButtonStyle(ani_env* env, const DecorButtonStyle& style)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    ani_class aniClass;
+    ani_status ret = env->FindClass("@ohos.window.window.DecorButtonStyleInternal", &aniClass);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_method aniCtor;
+    ret = env->Class_FindMethod(aniClass, "<ctor>", nullptr, &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object aniStyle;
+    ret = env->Object_New(aniClass, aniCtor, &aniStyle);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_enum aniColorModeType;
+    ret = env->FindEnum("@ohos.app.ability.ConfigurationConstant.ConfigurationConstant.ColorMode", &aniColorModeType);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] failed to FindEnum");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    std::string itemName = "COLOR_MODE_NOT_SET";
+    if (style.colorMode == LIGHT_COLOR_MODE) {
+        itemName = "COLOR_MODE_DARK";
+    } else if (style.colorMode == DARK_COLOR_MODE) {
+        itemName = "COLOR_MODE_LIGHT";
+    }
+    ani_enum_item aniColorMode;
+    ret = env->Enum_GetEnumItemByName(aniColorModeType, itemName.c_str(), &aniColorMode);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Enum_GetEnumItemByName failed");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    CallAniMethodVoid(env, aniStyle, aniClass, "<set>colorMode", nullptr, aniColorMode);
+    SetOptionalFieldInt(env, aniStyle, aniClass, "<set>buttonBackgroundSize", ani_int(style.buttonBackgroundSize));
+    SetOptionalFieldInt(env, aniStyle, aniClass, "<set>spacingBetweenButtons", ani_int(style.spacingBetweenButtons));
+    SetOptionalFieldInt(env, aniStyle, aniClass, "<set>closeButtonRightMargin", ani_int(style.closeButtonRightMargin));
+    SetOptionalFieldInt(env, aniStyle, aniClass, "<set>buttonIconSize", ani_int(style.buttonIconSize));
+    SetOptionalFieldInt(env, aniStyle, aniClass, "<set>buttonBackgroundCornerRadius",
+        ani_int(style.buttonBackgroundCornerRadius));
+    return aniStyle;
+}
+ 
+ani_status AniWindowUtils::SetOptionalFieldInt(ani_env* env, ani_object obj,
+    ani_class cls, const char* method, ani_int aniInt)
+{
+    ani_class aniIntClass {};
+    ani_status ret = env->FindClass("std.core.Int", &aniIntClass);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_DECOR, "[ANI] class not found");
+        return ret;
+    }
+    ani_method aniCtor {};
+    ret = env->Class_FindMethod(aniIntClass, "<ctor>", "i:", &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_DECOR, "[ANI] ctor not found");
+        return ret;
+    }
+    ani_object intObj {};
+    if (env->Object_New(aniIntClass, aniCtor, &intObj, aniInt) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_DECOR, "[ANI] fail to new obj: %{public}s", method);
+        return ret;
+    }
+    return CallAniMethodVoid(env, obj, cls, method, nullptr, intObj);
+}
+ 
+bool AniWindowUtils::SetDecorButtonStyleFromAni(ani_env* env, DecorButtonStyle& decorButtonStyle,
+                                                const ani_object& decorStyle)
+{
+    bool hasParam = false;
+    hasParam |= GetColorMode(env, decorStyle, decorButtonStyle.colorMode);
+    hasParam |= GetPropertyUIntObject(env, "buttonBackgroundSize", decorStyle, decorButtonStyle.buttonBackgroundSize);
+    hasParam |= GetPropertyUIntObject(env, "spacingBetweenButtons",
+        decorStyle, decorButtonStyle.spacingBetweenButtons);
+    hasParam |= GetPropertyUIntObject(env, "closeButtonRightMargin",
+        decorStyle, decorButtonStyle.closeButtonRightMargin);
+    hasParam |= GetPropertyUIntObject(env, "buttonIconSize", decorStyle, decorButtonStyle.buttonIconSize);
+    hasParam |= GetPropertyUIntObject(env, "buttonBackgroundCornerRadius",
+        decorStyle, decorButtonStyle.buttonBackgroundCornerRadius);
+    return hasParam;
+}
+ 
+bool AniWindowUtils::GetColorMode(ani_env* env, const ani_object& decorStyle, int32_t& colorMode)
+{
+    ani_ref colorModeRef;
+    ani_status ret = env->Object_GetPropertyByName_Ref(decorStyle, "colorMode", &colorModeRef);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref colorMode Failed, ret : %{public}u",
+            static_cast<int32_t>(ret));
+        return false;
+    }
+    ani_boolean isUndefined;
+    if (ANI_OK != env->Reference_IsUndefined(colorModeRef, &isUndefined)) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Reference_IsUndefined colorMode Failed");
+        return false;
+    }
+    if (isUndefined) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] colorMode is Undefined Now");
+        return false;
+    }
+ 
+    ani_int colorModeValue;
+    if (ANI_OK != env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(colorModeRef), &colorModeValue)) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref colorMode Failed");
+        return false;
+    }
+    colorMode = static_cast<int32_t>(colorModeValue);
+    return true;
 }
 
 ani_object AniWindowUtils::CreateAniWindowsArray(ani_env* env, std::vector<ani_ref>& windows)

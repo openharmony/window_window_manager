@@ -90,6 +90,8 @@ public:
         ani_object object, Rect& result);
     static bool GetIntObject(ani_env* env, const char* propertyName, ani_object object, int32_t& result);
     static ani_status GetDoubleObject(ani_env* env, ani_object double_object, double& result);
+    static ani_status GetBooleanObject(ani_env* env, ani_object boolean_object, bool& result);
+    static bool GetPropertyUIntObject(ani_env* env, const char* propertyName, ani_object object, uint32_t& result);
     static ani_status GetIntVector(ani_env* env, ani_object ary, std::vector<int32_t>& result);
     static ani_status GetPropertyLongObject(ani_env* env, const char* propertyName, ani_object object, int64_t& result);
     static ani_status GetEnumValue(ani_env* env, ani_enum_item enumPara, uint32_t& result);
@@ -108,6 +110,13 @@ public:
     static ani_object CreateAniWindowArray(ani_env* env, std::vector<ani_ref>& windows);
     static ani_object CreateAniSize(ani_env* env, int32_t width, int32_t height);
     static ani_object CreateAniRect(ani_env* env, const Rect& rect);
+    static ani_object CreateAniTitleButtonRect(ani_env* env, const TitleButtonRect& rect);
+    static ani_object CreateAniDecorButtonStyle(ani_env* env, const DecorButtonStyle& style);
+    static ani_status SetOptionalFieldInt(ani_env* env, ani_object obj, ani_class cls,
+        const char* method, ani_int aniInt);
+    static bool SetDecorButtonStyleFromAni(ani_env* env, DecorButtonStyle& decorButtonStyle,
+        const ani_object& decorStyle);
+    static bool GetColorMode(ani_env* env, const ani_object& decorStyle, int32_t& colorMode);
     static ani_object CreateAniWindowLimits(ani_env* env, const WindowLimits& windowLimits);
     static ani_object CreateAniAvoidArea(ani_env* env, const AvoidArea& avoidArea,
         AvoidAreaType type, bool useActualVisibility = false);
