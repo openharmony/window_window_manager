@@ -7458,6 +7458,66 @@ HWTEST_F(ScreenSessionManagerTest, UpdateCoordinationRefreshRate, TestSize.Level
 }
 
 /**
+@tc.name: SyncScreenPropertyChangedToServer
+@tc.desc: test function : SyncScreenPropertyChangedToServer
+@tc.type: FUNC
+*/
+HWTEST_F(ScreenSessionManagerTest, SyncScreenPropertyChangedToServer, TestSize.Level1)
+{
+    ScreenId screenId = 1;
+    ScreenProperty screenProperty;
+    sptr screenSession = nullptr;
+    ssm_->screenSessionMap_.erase(screenId);
+    ssm_->screenSessionMap_.insert(std::make_pair(screenId, screenSession));
+    DMError ret = ssm_->SyncScreenPropertyChangedToServer(screenId, screenProperty);
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+    screenSession = new ScreenSession(screenId, screenProperty, 0);
+    ssm_->screenSessionMap_.erase(screenId);
+    ssm_->screenSessionMap_.insert(std::make_pair(screenId, screenSession));
+    std::function<void(sptr screenSession, SuperFoldStatusChangeEvents changeEvent)> func =
+        [](sptr screenSession, SuperFoldStatusChangeEvents changeEvent) { return; };
+    ssm_->SetPropertyChangedCallback(func);
+    ret = ssm_->SyncScreenPropertyChangedToServer(screenId, screenProperty);
+    EXPECT_EQ(DMError::DM_OK, ret);
+}
+/**
+@tc.name: SetPropertyChangedCallback
+@tc.desc: test function : SetPropertyChangedCallback
+@tc.type: FUNC
+*/
+HWTEST_F(ScreenSessionManagerTest, SetPropertyChangedCallback, TestSize.Level1)
+{
+    std::function<void(sptr screenSession, SuperFoldStatusChangeEvents changeEvent)> func = nullptr;
+    ssm_->SetPropertyChangedCallback(func);
+    EXPECT_EQ(ssm_->propertyChangedCallback_, nullptr);
+    std::function<void(sptr screenSession, SuperFoldStatusChangeEvents changeEvent)> func1 =
+        [](sptr screenSession, SuperFoldStatusChangeEvents changeEvent) { return; };
+    ssm_->SetPropertyChangedCallback(func1);
+    EXPECT_NE(ssm_->propertyChangedCallback_, nullptr);
+}
+/**
+@tc.name: OnFoldPropertyChange
+@tc.desc: test function : OnFoldPropertyChange
+@tc.type: FUNC
+*/
+HWTEST_F(ScreenSessionManagerTest, OnFoldPropertyChange, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ScreenId screenId = 1;
+    ScreenProperty screenProperty;
+    ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::UNDEFINED;
+    FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
+    ssm_->clientProxy_ = nullptr;
+    ssm_->OnFoldPropertyChange(screenId, screenProperty, reason, displayMode);
+    EXPECT_TRUE(g_logMsg.find("clientProxy_ is null") != std::string::npos);
+    g_logMsg.clear();
+
+    ssm_->clientProxy_ = sptr::MakeSptr();
+    ssm_->OnFoldPropertyChange(screenId, screenProperty, reason, displayMode);
+}
+
+/**
  * @tc.name: SetConfigForInputmethod
  * @tc.desc: SetConfigForInputmethod
  * @tc.type: FUNC

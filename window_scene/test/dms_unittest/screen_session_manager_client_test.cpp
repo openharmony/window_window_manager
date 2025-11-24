@@ -2336,5 +2336,137 @@ HWTEST_F(ScreenSessionManagerClientTest, GetSupportsFocus, TestSize.Level1)
     focus = client->GetSupportsFocus(displayId);
     EXPECT_EQ(focus, true);
 }
+
+/**
+@tc.name: ProcPropertyChangedForSuperFold
+@tc.desc: ProcPropertyChangedForSuperFold test
+@tc.type: FUNC
+*/
+HWTEST_F(ScreenSessionManagerClientTest, ProcPropertyChangedForSuperFold, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    ScreenSession session;
+    ScreenProperty screenProperty;
+    ScreenProperty eventPara;
+
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        GTEST_SKIP();
+    }
+
+    struct TestCase {
+        SuperFoldStatusChangeEvents eventType;
+        std::string expectedLog;
+        bool isInfoLog;
+    };
+
+    std::vector testCases = {
+        { SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED, "handle extend change to half fold", true },
+        { SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED, "handle half fold change to expanded", true },
+        { SuperFoldStatusChangeEvents::KEYBOARD_ON, "handle keyboard on", true },
+        { SuperFoldStatusChangeEvents::KEYBOARD_OFF, "handle keyboard off", true },
+        { SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_ON, "handle system keyboard on", true },
+        { SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_OFF, "handle system keyboard off", true },
+        { static_cast(999), "nothing to handle changeEvent=", false },
+    };
+
+    eventPara.SetCurrentValidHeight(1080);
+    eventPara.SetIsKeyboardOn(true);
+    eventPara.SetFoldStatus(SuperFoldStatus::FOLDED);
+
+    for (const auto& tc : testCases) {
+        logMsg.clear();
+        eventPara.SetSuperFoldStatusChangeEvent(tc.eventType);
+        session.ProcPropertyChangedForSuperFold(screenProperty, eventPara);
+
+        if (tc.isInfoLog) {
+            EXPECT_NE(logMsg.find(tc.expectedLog), std::string::npos)
+                << "Expected log not found for event: " << static_cast<uint32_t>(tc.eventType);
+            EXPECT_EQ(logMsg.find("failed"), std::string::npos)
+                << "Unexpected error log found for info event: " << static_cast<uint32_t>(tc.eventType);
+        } else {
+            EXPECT_NE(logMsg.find(tc.expectedLog), std::string::npos)
+                << "Expected error log not found for default case";
+            EXPECT_NE(logMsg.find("nothing to handle"), std::string::npos) << "Default case log mismatch";
+        }
+    }
+
+    logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+@tc.name: UpdateScbScreenPropertyToServer
+@tc.desc: UpdateScbScreenPropertyToServer test
+@tc.type: FUNC
+*/
+HWTEST_F(ScreenSessionManagerClientTest, UpdateScbScreenPropertyToServer, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    ScreenSession session;
+    ScreenProperty screenProperty;
+
+    RRect screenBounds;
+    screenBounds.rect_.width_ = 1080;
+    screenBounds.rect_.height_ = 1920;
+    screenProperty.SetBounds(screenBounds);
+
+    screenProperty.SetRotation(90);
+    screenProperty.SetPhyWidth(1080.0f);
+    screenProperty.SetPhyHeight(2400.0f);
+
+    RRect phyBounds;
+    phyBounds.rect_.width_ = 1080;
+    phyBounds.rect_.height_ = 2400;
+    screenProperty.SetPhyBounds(phyBounds);
+
+    RRect touchBounds;
+    touchBounds.rect_.width_ = 1080;
+    touchBounds.rect_.height_ = 1920;
+    screenProperty.SetPhysicalTouchBoundsDirectly(touchBounds);
+
+    screenProperty.SetInputOffset(10.0f, 20.0f);
+
+    bool isSuperFold = FoldScreenStateInternel::IsSuperFoldDisplayDevice();
+    bool isSecondaryFold = FoldScreenStateInternel::IsSecondaryDisplayFoldDevice();
+    bool isDualFold = FoldScreenStateInternel::IsDualDisplayFoldDevice();
+
+    if (isSuperFold) {
+        screenProperty.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::KEYBOARD_ON);
+    }
+
+    if (!isSuperFold && !isSecondaryFold && !isDualFold) {
+        GTEST_SKIP() << "Current device is not a foldable display, skip testing fold-related logs.";
+    }
+
+    session.UpdateScbScreenPropertyToServer(screenProperty);
+
+    const std::string commonLog = "ProcPropertyChange After: width_= ";
+    const std::string keyboardLog = "handle keyboard on and keyboard succ";
+    const std::string sysKeyboardLog = "handle system keyboard on and system keyboard succ";
+
+    EXPECT_TRUE(logMsg.find(commonLog) != std::string::npos)
+        << "Expected common log not found: " << commonLog << ". Full log: " << logMsg;
+
+    if (isSuperFold) {
+        EXPECT_TRUE(logMsg.find(keyboardLog) != std::string::npos)
+            << "Expected keyboard log not found when device is super-fold. Full log: " << logMsg;
+        EXPECT_FALSE(logMsg.find(sysKeyboardLog) != std::string::npos)
+            << "Unexpected system keyboard log found when only KEYBOARD_ON was set. Full log: " << logMsg;
+    } else {
+        EXPECT_TRUE(logMsg.find(keyboardLog) == std::string::npos)
+            << "Unexpected keyboard log found on non-super-fold device. Full log: " << logMsg;
+        EXPECT_TRUE(logMsg.find(sysKeyboardLog) == std::string::npos)
+            << "Unexpected system keyboard log found on non-super-fold device. Full log: " << logMsg;
+    }
+
+    EXPECT_TRUE(logMsg.find("failed") == std::string::npos) << "Unexpected error log detected: " << logMsg;
+
+    logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
 } // namespace Rosen
 } // namespace OHOS

@@ -599,6 +599,43 @@ HWTEST_F(SuperFoldStateManagerTest, GetFoldCreaseRect02, TestSize.Level1)
     EXPECT_TRUE(g_errLog.find("the current FoldCreaseRect is horizontal") != std::string::npos);
     LOG_SetCallback(nullptr);
 }
+
+/**
+@tc.name : HandleKeyboardOnDisplayNotify01
+@tc.desc : HandleKeyboardOnDisplayNotify01 test.
+@tc.type: FUNC
+*/
+HWTEST_F(SuperFoldStateManagerTest, HandleKeyboardOnDisplayNotify01, TestSize.Level1)
+{
+    sptr screenSession = ssm_.GetOrCreateScreenSession(0);
+    screenSession->SetIsFakeInUse(true);
+    sptr fakeScreenSession = sptr::MakeSptr();
+    screenSession->SetFakeScreenSession(fakeScreenSession);
+    screenSession->SetIsDestroyDisplay(false);
+    SuperFoldStateManager& manager = SuperFoldStateManager::GetInstance();
+    manager.HandleKeyboardOnDisplayNotify(screenSession);
+
+    EXPECT_TRUE(screenSession->GetIsBScreenHalf());
+    EXPECT_GT(screenSession->GetValidHeight(), 0);
+    EXPECT_GT(screenSession->GetValidWidth(), 0);
+}
+
+/**
+@tc.name : HandleKeyboardOnDisplayNotify02
+@tc.desc : HandleKeyboardOnDisplayNotify02 test.
+@tc.type: FUNC
+*/
+HWTEST_F(SuperFoldStateManagerTest, HandleKeyboardOnDisplayNotify02, TestSize.Level1)
+{
+    sptr screenSession = ssm_.GetOrCreateScreenSession(0);
+    screenSession->SetIsFakeInUse(true);
+    sptr fakeScreenSession = sptr::MakeSptr();
+    screenSession->SetFakeScreenSession(fakeScreenSession);
+    screenSession->SetIsDestroyDisplay(true);
+    SuperFoldStateManager& manager = SuperFoldStateManager::GetInstance();
+    manager.HandleKeyboardOnDisplayNotify(screenSession);
+    EXPECT_TRUE(screenSession->GetIsBScreenHalf());
+}
 }
 }
 }
