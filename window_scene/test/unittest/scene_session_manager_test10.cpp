@@ -1323,6 +1323,78 @@ HWTEST_F(SceneSessionManagerTest10, NotifyAppUseControlListInner04, TestSize.Lev
 }
 
 /**
+ * @tc.name: IsNeedSkipForAppUseControl01
+ * @tc.desc: IsNeedSkipForAppUseControl
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, IsNeedSkipForAppUseControl01, TestSize.Level1)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.persistentId_ = 100;
+    sessionInfo.bundleName_ = "bundleName";
+    sessionInfo.appIndex_ = 0;
+    sessionInfo.windowType_ = 1000;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ssm_->sceneSessionMap_.emplace(100, sceneSession);
+
+    AppUseControlInfo controlById;
+    controlById.persistentId_ = 100;
+    controlById.bundleName_ = "bundleName";
+    controlById.appIndex_ = 0;
+
+    bool result = ssm_->IsNeedSkipForAppUseControl(controlById);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: IsNeedSkipForAppUseControl02
+ * @tc.desc: IsNeedSkipForAppUseControl
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, IsNeedSkipForAppUseControl02, TestSize.Level1)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.persistentId_ = 100;
+    sessionInfo.bundleName_ = "bundleName";
+    sessionInfo.appIndex_ = 0;
+    sessionInfo.windowType_ = 1000;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ssm_->sceneSessionMap_.emplace(100, sceneSession);
+
+    AppUseControlInfo controlById2;
+    controlById2.persistentId_ = 100;
+    controlById2.bundleName_ = "errorBundleName";
+    controlById2.appIndex_ = 0;
+
+    bool result = ssm_->IsNeedSkipForAppUseControl(controlById);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: IsNeedSkipForAppUseControl02
+ * @tc.desc: IsNeedSkipForAppUseControl
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, IsNeedSkipForAppUseControl02, TestSize.Level1)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.persistentId_ = 100;
+    sessionInfo.bundleName_ = "bundleName";
+    sessionInfo.appIndex_ = 0;
+    sessionInfo.windowType_ = 1000;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ssm_->sceneSessionMap_.emplace(100, sceneSession);
+
+    AppUseControlInfo controlById3;
+    controlById3.persistentId_ = 100;
+    controlById3.bundleName_ = "bundleName";
+    controlById3.appIndex_ = 100;
+
+    bool result = ssm_->IsNeedSkipForAppUseControl(controlById);
+    EXPECT_EQ(result, true);
+}
+
+/**
  * @tc.name: MinimizeMainSession
  * @tc.desc: test MinimizeMainSession
  * @tc.type: FUNC
