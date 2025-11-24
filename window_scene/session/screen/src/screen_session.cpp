@@ -917,13 +917,18 @@ void ScreenSession::HandleKeyboardOnPropertyChange(ScreenProperty& screenPropert
     auto screenBounds = screenProperty.GetBounds();
     screenProperty.SetIsFakeInUse(false);
     if (screenBounds.rect_.GetWidth() < screenBounds.rect_.GetHeight()) {
-    screenProperty.SetValidHeight(height);
-    screenProperty.SetValidWidth(screenBounds.rect_.GetWidth());
+        screenProperty.SetValidHeight(height);
+        screenProperty.SetValidWidth(screenBounds.rect_.GetWidth());
     } else {
-    screenProperty.SetValidHeight(height);
-    screenProperty.SetValidWidth(screenBounds.rect_.GetHeight());
+        screenProperty.SetValidHeight(height);
+        screenProperty.SetValidWidth(screenBounds.rect_.GetHeight());
     }
     screenProperty.SetScreenAreaHeight(DISPLAY_B_HEIGHT);
+    TLOG(WmsLogTag::DMS,
+         "Client:validHeight=%{public}u validWidth=%{public}u AreaHeight=%{public}u ",
+         screenProperty.GetValidHeight(),
+         screenProperty.GetValidWidth(),
+         screenProperty.GetScreenAreaHeight());
 }
 
 void ScreenSession::HandleKeyboardOffPropertyChange(ScreenProperty& screenProperty)
@@ -3225,15 +3230,15 @@ void ScreenSession::UpdateScbScreenPropertyToServer(const ScreenProperty& screen
             property_.SetScreenAreaHeight(screenProperty.GetScreenAreaHeight());
             TLOGI(WmsLogTag::DMS, "handle keyboard on and keyboard succ");
         } else if (changeEvent == SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_ON ||
-                changeEvent == SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_OFF) {
+                   changeEvent == SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_OFF) {
             property_.SetPointerActiveWidth(screenProperty.GetPointerActiveWidth());
             property_.SetPointerActiveHeight(screenProperty.GetPointerActiveHeight());
             TLOGI(WmsLogTag::DMS, "handle system keyboard on and system keyboard succ");
         }
         TLOGI(WmsLogTag::DMS,
-            "ProcPropertyChange After: width_= %{public}f, height_= %{public}f",
-            screenProperty.GetBounds().rect_.width_,
-            screenProperty.GetBounds().rect_.height_);
+              "ProcPropertyChange After: width_= %{public}f, height_= %{public}f",
+              screenProperty.GetBounds().rect_.width_,
+              screenProperty.GetBounds().rect_.height_);
         return;
     }
 
@@ -3260,8 +3265,9 @@ void ScreenSession::UpdateScbScreenPropertyToServer(const ScreenProperty& screen
     }
 
     TLOGI(WmsLogTag::DMS,
-        "ProcPropertyChange After: width_= %{public}f, height_= %{public}f",
-        property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
+          "ProcPropertyChange After: width_= %{public}f, height_= %{public}f",
+          property_.GetBounds().rect_.width_,
+          property_.GetBounds().rect_.height_);
 }
 
 bool ScreenSession::GetSupportsFocus() const
