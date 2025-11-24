@@ -1236,11 +1236,11 @@ HWTEST_F(SceneSessionTest3, RegisterUpdateAppUseControlCallback, Function | Smal
 }
 
 /**
- * @tc.name: NotifyUpdateAppUseControl
+ * @tc.name: NotifyUpdateAppUseControl01
  * @tc.desc: NotifyUpdateAppUseControl
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, NotifyUpdateAppUseControl, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionTest3, NotifyUpdateAppUseControl01, Function | SmallTest | Level3)
 {
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
@@ -1275,6 +1275,46 @@ HWTEST_F(SceneSessionTest3, NotifyUpdateAppUseControl, Function | SmallTest | Le
         .isControlRecentOnly = false
     };
     sceneSession->NotifyUpdateAppUseControl(type, controlInfoThd);
+    EXPECT_TRUE(logMsg.find("isAppUseControl:") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: NotifyUpdateAppUseControl02
+ * @tc.desc: NotifyUpdateAppUseControl
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, NotifyUpdateAppUseControl02, Function | SmallTest | Level3)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    SessionInfo info;
+    info.abilityName_ = "NotifyUpdateAppUseControl";
+    info.bundleName_ = "NotifyUpdateAppUseControl";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto callback = [](ControlAppType type, bool isNeedControl, bool isControlRecentOnly) {
+        std::cout << "isNeedControl:" << isNeedControl << ";isControlRecentOnly:" << isControlRecentOnly << std::endl;
+    };
+    sceneSession->onUpdateAppUseControlFunc_ = std::move(callback);
+    sceneSession->sessionStage_ = nullptr;
+    ControlAppType type = ControlAppType::APP_LOCK;
+    sceneSession->NotifyUpdateAppUseControl(type, controlInfo);
+    sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    sceneSession->NotifyUpdateAppUseControl(type, controlInfo);
+
+    ControlInfo controlInfo1 = {
+        .isNeedControl = false,
+        .isControlRecentOnly = true
+    };
+    sceneSession->NotifyUpdateAppUseControl(type, controlInfo1);
+
+    sceneSession->Session::SetSessionState(SessionState::STATE_BACKGROUND);
+    sceneSession->NotifyUpdateAppUseControl(type, controlInfo1);
+    ControlInfo controlInfo2 = {
+        .isNeedControl = true,
+        .isControlRecentOnly = true
+    };
+    sceneSession->NotifyUpdateAppUseControl(type, controlInfo2);
     EXPECT_TRUE(logMsg.find("isAppUseControl:") != std::string::npos);
     LOG_SetCallback(nullptr);
 }
