@@ -1694,6 +1694,9 @@ void JsSceneSessionManager::ProcessRegisterCallback(ListenerFunctionType listene
         case ListenerFunctionType::SET_SPECIFIC_SESSION_ZINDE_CB:
             RegisterSetSpecificWindowZIndexCallback();
             break;
+        case ListenerFunctionType::NOTIFY_SUPPORT_ROTATION_REGISTERED_CB:
+            ProcessSupportRotationRegister();
+            break;
         default:
             break;
     }
