@@ -1275,5 +1275,15 @@ enum class SessionRecoverState : uint32_t {
     SESSION_FINISH_RECONNECT,
     SESSION_RECOVER_STATE_END,
 };
+
+enum class CrossPlaneState : uint32_t {
+    UNDEFINED = 0,
+    CROSS_DEFAULT_PLANE,
+    CROSS_DEFAULT_CREASE_PLANE,
+    CROSS_CREASE_PLANE,
+    CROSS_VIRTUAL_CREASE_PLANE,
+    CROSS_VIRTUAL_PLANE,
+    CROSS_ALL_PLANE,
+};
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H

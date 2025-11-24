@@ -1032,29 +1032,6 @@ HWTEST_F(ScreenSessionTest, SetScreenColorSpace, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetPrivateSessionForeground
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionTest, SetPrivateSessionForeground, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "SetPrivateSessionForeground start";
-    ScreenSessionConfig config = {
-        .screenId = 100,
-        .rsId = 101,
-        .name = "OpenHarmony",
-    };
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
-        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
-    EXPECT_NE(nullptr, screenSession);
-    bool hasPrivate = true;
-    screenSession->SetPrivateSessionForeground(hasPrivate);
-    auto res = screenSession->HasPrivateSessionForeground();
-    ASSERT_EQ(res, hasPrivate);
-    GTEST_LOG_(INFO) << "SetPrivateSessionForeground end";
-}
-
-/**
  * @tc.name: GetScreenCombination
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -2111,20 +2088,6 @@ HWTEST_F(ScreenSessionTest, screen_session_test007, TestSize.Level1)
     LOG_SetCallback(nullptr);
     g_errLog.clear();
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test007 end";
-}
-
-/**
- * @tc.name: screen_session_test008
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionTest, screen_session_test008, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test008 start";
-    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
-    bool res = session->HasPrivateSessionForeground();
-    ASSERT_EQ(res, false);
-    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test008 end";
 }
 
 /**

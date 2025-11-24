@@ -634,25 +634,30 @@ void ScreenSessionManagerClient::SetScreenPrivacyState(bool hasPrivate)
     TLOGD(WmsLogTag::DMS, "End calling the SetScreenPrivacyState() of screenSessionManager_");
 }
 
-void ScreenSessionManagerClient::SetPrivacyStateByDisplayId(DisplayId id, bool hasPrivate)
+void ScreenSessionManagerClient::SetPrivacyStateByDisplayId(std::unordered_map<DisplayId, bool>& privacyBundleDisplayId)
 {
     if (!screenSessionManager_) {
         TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return;
     }
-    TLOGD(WmsLogTag::DMS, "Begin calling the SetPrivacyStateByDisplayId, hasPrivate: %{public}d", hasPrivate);
-    screenSessionManager_->SetPrivacyStateByDisplayId(id, hasPrivate);
+    for (auto iter : privacyBundleDisplayId) {
+        TLOGD(WmsLogTag::DMS, "displayId: %{public}" PRIu64" hasPrivate: %{public}d", iter.first, iter.second);
+    }
+    screenSessionManager_->SetPrivacyStateByDisplayId(privacyBundleDisplayId);
     TLOGD(WmsLogTag::DMS, "End calling the SetPrivacyStateByDisplayId");
 }
 
-void ScreenSessionManagerClient::SetScreenPrivacyWindowList(DisplayId id, std::vector<std::string> privacyWindowList)
+void ScreenSessionManagerClient::SetScreenPrivacyWindowList(
+    std::unordered_map<DisplayId, std::vector<std::string>>& privacyBundleList)
 {
     if (!screenSessionManager_) {
         TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return;
     }
-    TLOGD(WmsLogTag::DMS, "Begin calling the SetScreenPrivacyWindowList(), id: %{public}" PRIu64, id);
-    screenSessionManager_->SetScreenPrivacyWindowList(id, privacyWindowList);
+    for (const auto& iter : privacyBundleList) {
+        TLOGD(WmsLogTag::DMS, "Begin calling the SetScreenPrivacyWindowList(), id: %{public}" PRIu64, iter.first);
+        screenSessionManager_->SetScreenPrivacyWindowList(iter.first, iter.second);
+    }
     TLOGD(WmsLogTag::DMS, "End calling the SetScreenPrivacyWindowList()");
 }
 
