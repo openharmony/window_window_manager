@@ -387,11 +387,23 @@ HWTEST_F(FoldScreenSensorManagerTest, HandleHallDataWhenAngleMinusOne, TestSize.
     };
     mgr.HandleHallData(&hallEvent);
     EXPECT_EQ(mgr.globalAngle, ANGLE_MIN_VAL);
+}
 
-    mgr.globalAngle = -2.0F;
-    mgr.globalHall = 0;
-    mgr.HandleHallData(&hallEvent);
-    EXPECT_EQ(mgr.globalAngle, -2.0F);
+/**
+ * @tc.name: HandleAbnormalAngleTest
+ * @tc.desc: test function : HandleAbnormalAngle
+ * @tc.type: FUNC
+ */
+HWTEST_F(FoldScreenSensorManagerTest, HandleAbnormalAngleTest, TestSize.Level1)
+{
+    FoldScreenSensorManager mgr = FoldScreenSensorManager();
+    mgr.SetSensorFoldStateManager(new SensorFoldStateManager());
+    mgr.SetGlobalAngle(-1.0F);
+    mgr.SetGlobalHall(1);
+    EXPECT_TRUE(mgr.HandleAbnormalAngle());
+
+    mgr.SetGlobalAngle(-2.0F);
+    EXPECT_FALSE(mgr.HandleAbnormalAngle());
 }
 
 /**
