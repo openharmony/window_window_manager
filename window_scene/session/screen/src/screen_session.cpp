@@ -1581,7 +1581,7 @@ DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation,
     }
     if (foldDisplayMode == FoldDisplayMode::GLOBAL_FULL || 
         (foldDisplayMode == FoldDisplayMode::FULL &&
-        Foldernel::IsSingleDisplaySuperFoldDevice())) {
+         Foldernel::IsSingleDisplaySuperFoldDevice())) {
         uint32_t temp = (static_cast<uint32_t>(rotation) + SECONDARY_ROTATION_270) % SECONDARY_ROTATION_MOD;
         rotation = static_cast<Rotation>(temp);
         isVerticalScreen = true;
