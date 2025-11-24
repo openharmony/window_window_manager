@@ -96,6 +96,18 @@ HWTEST_F(WindowSessionPropertyTest, SetSessionInfo, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetRealTimeSwitchInfo
+ * @tc.desc: GetRealTimeSwitchInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetRealTimeSwitchInfo, TestSize.Level1)
+{
+    WindowSessionProperty *propertyWindow = new WindowSessionProperty();
+    ASSERT_EQ(propertyWindow->GetRealTimeSwitchInfo().isNeedChange_, false);
+    ASSERT_EQ(propertyWindow->GetRealTimeSwitchInfo().showTypes_, 0);
+}
+
+/**
  * @tc.name: SetPrivacyMode
  * @tc.desc: SetPrivacyMode as true and false
  * @tc.type: FUNC

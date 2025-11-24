@@ -921,8 +921,12 @@ void SceneSession::ApplySessionEventParam(SessionEvent event, const SessionEvent
         case SessionEvent::EVENT_MAXIMIZE:
             sessionEventParam_.waterfallResidentState = param.waterfallResidentState;
             break;
+        case SessionEvent::EVENT_SWITCH_COMPATIBLE_MODE:
+            sessionEventParam_.compatibleStyleMode = param.compatibleStyleMode;
+            break;
         default:
             sessionEventParam_.waterfallResidentState = static_cast<uint32_t>(WaterfallResidentState::UNCHANGED);
+            sessionEventParam_.compatibleStyleMode = static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_DEFAULT);
             break;
     }
 }

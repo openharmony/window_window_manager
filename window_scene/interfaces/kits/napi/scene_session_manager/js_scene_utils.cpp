@@ -1364,6 +1364,33 @@ bool ConvertThrowSlipModeFromJs(napi_env env, napi_value value, ThrowSlipMode& t
     return true;
 }
 
+bool ConvertRealTimeSwitchInfoFromJs(napi_env env, napi_value value, RealTimeSwitchInfo& switchInfo)
+{
+    napi_value realTimeSwitchInfo = nullptr;
+    napi_value jsIsNeedChange = nullptr;
+    napi_value jsShowTypes = nullptr;
+    napi_get_named_property(env, value, "realTimeSwitchInfo", &realTimeSwitchInfo);
+    if (!realTimeSwitchInfo) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to realTimeSwitchInfo");
+        return false;
+    }
+    napi_get_named_property(env, realTimeSwitchInfo, "isNeedChange", &jsIsNeedChange);
+    napi_get_named_property(env, realTimeSwitchInfo, "showTypes", &jsShowTypes);
+    bool isNeedChange = false;
+    if (realTimeSwitchInfo == nullptr || !ConvertFromJsValue(env, jsIsNeedChange, isNeedChange)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to isNeedChange");
+        return false;
+    }
+    switchInfo.isNeedChange_ = isNeedChange;
+    uint32_t showTypes = 0;
+    if (realTimeSwitchInfo == nullptr || !ConvertFromJsValue(env, jsShowTypes, showTypes)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to showTypes");
+        return false;
+    }
+    switchInfo.showTypes_ = showTypes;
+    return true;
+}
+
 bool ConvertCompatibleModePropertyFromJs(napi_env env, napi_value value, CompatibleModeProperty& compatibleModeProperty)
 {
     std::map<std::string, void (CompatibleModeProperty::*)(bool)> funcs = {
@@ -1393,6 +1420,11 @@ bool ConvertCompatibleModePropertyFromJs(napi_env env, napi_value value, Compati
             (compatibleModeProperty.*func)(ret);
             atLeastOneParam = true;
         }
+    }
+    RealTimeSwitchInfo realTimeSwitchInfo;
+    if (ConvertRealTimeSwitchInfoFromJs(env, value, realTimeSwitchInfo)) {
+        compatibleModeProperty.SetRealTimeSwitchInfo(realTimeSwitchInfo);
+        atLeastOneParam = true;
     }
     TLOGI(WmsLogTag::WMS_COMPAT, "property: %{public}s", compatibleModeProperty.ToString().c_str());
     return atLeastOneParam;
@@ -2152,6 +2184,7 @@ napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& para
     napi_set_named_property(env, objValue, "dragResizeType", CreateJsValue(env, param.dragResizeType));
     napi_set_named_property(env, objValue, "gravity", CreateJsValue(env, param.gravity));
     napi_set_named_property(env, objValue, "waterfallResidentState", CreateJsValue(env, param.waterfallResidentState));
+    napi_set_named_property(env, objValue, "compatibleStyleMode", CreateJsValue(env, param.compatibleStyleMode));
     return objValue;
 }
 
@@ -2726,6 +2759,29 @@ napi_value CreateWaterfallResidentState(napi_env env)
     return objValue;
 }
 
+napi_value CreateCompatibleStyleMode(napi_env env)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "env is nullptr");
+        return nullptr;
+    }
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to create object");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "LANDSCAPE_DEFAULT",
+        CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_DEFAULT)));
+    napi_set_named_property(env, objValue, "LANDSCAPE_18_9",
+        CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_18_9)));
+    napi_set_named_property(env, objValue, "LANDSCAPE_1_1",
+        CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_1_1)));
+    napi_set_named_property(env, objValue, "LANDSCAPE_2_3",
+        CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_2_3)));
+    return objValue;
+}
+ 
 MainThreadScheduler::MainThreadScheduler(napi_env env)
     : env_(env)
 {
