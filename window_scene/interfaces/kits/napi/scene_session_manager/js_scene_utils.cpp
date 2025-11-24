@@ -2671,6 +2671,29 @@ napi_value CreateWaterfallResidentState(napi_env env)
     return objValue;
 }
 
+napi_value CreateCompatibleStyleMode(napi_env env)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "env is nullptr");
+        return nullptr;
+    }
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to create object");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "LANDSCAPE_DEFAULT",
+        CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_DEFAULT)));
+    napi_set_named_property(env, objValue, "LANDSCAPE_18_9",
+        CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_18_9)));
+    napi_set_named_property(env, objValue, "LANDSCAPE_1_1",
+        CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_1_1)));
+    napi_set_named_property(env, objValue, "LANDSCAPE_2_3",
+        CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_2_3)));
+    return objValue;
+}
+ 
 MainThreadScheduler::MainThreadScheduler(napi_env env)
     : env_(env)
 {
