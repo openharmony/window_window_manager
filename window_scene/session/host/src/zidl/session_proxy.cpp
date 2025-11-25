@@ -1606,7 +1606,7 @@ WSError SessionProxy::GetTargetOrientationConfigInfo(Orientation targetOrientati
     return static_cast<WSError>(ret);
 }
 
- WSError ConvertOrientationAndRotation(const RotationInfoType from, const RotationInfoType to,
+ WSError SessionProxy::ConvertOrientationAndRotation(const RotationInfoType from, const RotationInfoType to,
         const int32_t value, int32_t& convertedValue)
 {
     MessageParcel data;
@@ -1640,7 +1640,7 @@ WSError SessionProxy::GetTargetOrientationConfigInfo(Orientation targetOrientati
     }
     if (!reply.ReadInt32(convertedValue)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "read failed");
-        return WMError::WM_ERROR_IPC_FAILED;
+        return WSError::WS_ERROR_IPC_FAILED;
     }
     uint32_t ret = reply.ReadUint32();
     return static_cast<WSError>(ret);
