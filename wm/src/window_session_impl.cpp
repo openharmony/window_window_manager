@@ -59,6 +59,7 @@
 #include "floating_ball_manager.h"
 #include "sys_cap_util.h"
 #include "wm_common_inner.h"
+#include "window_input_redistribute_impl.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityEventInfo;
@@ -7070,6 +7071,8 @@ void WindowSessionImpl::DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyE
         TLOGI(WmsLogTag::WMS_EVENT, "id: %{public}d, consumed: %{public}d,"
             "escTrigger: %{public}d, escDown: %{public}d",
             keyEvent->GetId(), isConsumed, escKeyEventTriggered_, escKeyHasDown_);
+        isConsumed = isConsumed ? isConsumed : WindowInputRedistributeImpl::GetInstance().SendEvent(
+            InputRedistributeTiming::REDISTRIBUTE_AFTER_SEND_TO_COMPONENT, keyEvent);
         HandleEscKeyEvent(keyEvent, isConsumed);
         NotifyConsumeResultToFloatWindow(keyEvent, isConsumed);
         if (!isConsumed) {
