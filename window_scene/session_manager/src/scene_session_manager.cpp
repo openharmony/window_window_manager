@@ -14325,7 +14325,7 @@ WSError SceneSessionManager::ResetSpecificWindowZIndex(int32_t pid)
                 }
             }
         } else {
-            TLOGNE(WmsLogTag::WMS_FOCUS, "resetSpecificWindowZIndexFunc_ is nullptr");
+            TLOGNE(WmsLogTag::WMS_FOCUS, "setSpecificWindowZIndexFunc_ is nullptr");
         }
         return WSError::WS_OK;
     }, __func__);
