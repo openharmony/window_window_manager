@@ -407,6 +407,30 @@ uint32_t Session::GetSessionInfoExpandInputFlag() const
     return sessionInfo_.expandInputFlag_;
 }
 
+void Session::SetSessionInfoCursorDragCount(int32_t count)
+{
+    std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+    sessionInfo_.cursorDragCount_ = count;
+}
+
+int32_t Session::GetSessionInfoCursorDragCount()
+{
+    std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+    return sessionInfo_.cursorDragCount_;
+}
+
+void Session::SetSessionInfoCursorDragFlag(bool value)
+{
+    std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+    sessionInfo_.cursorDragFlag_ = value;
+}
+
+bool Session::GetSessionInfoCursorDragFlag()
+{
+    std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+    return sessionInfo_.cursorDragFlag_;
+}
+
 void Session::SetSessionInfoAdvancedFeatureFlag(uint32_t bitPosition, bool value)
 {
     if (bitPosition >= ADVANCED_FEATURE_BIT_MAX) {
