@@ -164,7 +164,7 @@ bool ScreenStateMachine::DoSetScreenPowerForAll(ScreenPowerEvent event, const Sc
         TLOGI(WmsLogTag::DMS, "[ScreenPower FSM] invalid params");
         return false;
     }
-    return ScreenSessionManager::GetInstance().DoSetScreenPowerForAll(params->first, params->second);
+    return ScreenSessionManager::GetInstance().SetScreenPowerForAll(params->first, params->second);
 }
 
 bool ScreenStateMachine::DoAodExitAndSetPowerOn(ScreenPowerEvent event, const ScreenPowerInfoType& type)
