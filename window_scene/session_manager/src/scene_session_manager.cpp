@@ -14275,6 +14275,10 @@ WSError SceneSessionManager::SetSpecificWindowZIndex(WindowType windowType, int3
         TLOGE(WmsLogTag::WMS_FOCUS, "permission denied");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
+    if (!WindowHelper::IsSupportSetZIndexWindow(windowType)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "windowType not support %{public}d", windowType);
+        return WSError::WS_ERROR_INVALID_CALLING;
+    }
     const auto callingPid = IPCSkeleton::GetCallingRealPid();
     const char* const where = __func__;
     return taskScheduler_->PostSyncTask([this, windowType, zIndex, callingPid, where] {

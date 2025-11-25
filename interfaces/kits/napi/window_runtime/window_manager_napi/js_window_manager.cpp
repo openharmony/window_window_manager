@@ -1954,7 +1954,6 @@ napi_value JsWindowManager::OnCreateUIEffectController(napi_env env, napi_callba
     return result;
 }
 
-
 /** @note @window.hierarchy */
 napi_value JsWindowManager::OnSetSpecificSystemWindowZIndex(napi_env env, napi_callback_info info)
 {
@@ -1962,7 +1961,7 @@ napi_value JsWindowManager::OnSetSpecificSystemWindowZIndex(napi_env env, napi_c
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != 2) { // 2: params num
-        TLOGE(WmsLogTag::WMS_FOCUS, "Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_FOCUS, "argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     uint32_t windowTypeValue = 0;
@@ -1971,12 +1970,16 @@ napi_value JsWindowManager::OnSetSpecificSystemWindowZIndex(napi_env env, napi_c
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     WindowType windowType;
-    ApiWindowType apiWindowTypeValue = static_cast<ApiWindowType>(windowTypeValue);
-    if (apiWindowTypeValue == ApiWindowType::TYPE_WALLET_SWIPE_CARD) {
-        windowType = JS_TO_NATIVE_WINDOW_TYPE_MAP.at();
+    if (windowTypeValue >= static_cast<uint32_t>(ApiWindowType::TYPE_BASE) &&
+        windowTypeValue < static_cast<uint32_t>(ApiWindowType::TYPE_END)) {
+        windowType = JS_TO_NATIVE_WINDOW_TYPE_MAP.at(static_cast<ApiWindowType>(windowTypeValue));
     } else {
-        TLOGE(WmsLogTag::DEFAULT, "Invalid winType");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "invalid windowType");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (!WindowHelper::IsSupportSetZIndexWindow(windowType)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "windowType not support %{public}d", windowType);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     int32_t zIndex = 0;
     if (!ConvertFromJsValue(env, argv[1], zIndex)) {
