@@ -715,8 +715,8 @@ void SuperFoldStateManager::HandleKeyboardOnDisplayNotifyInServer(sptr<ScreenSes
         return;
     }
     DisplayId fakeDisplayId = fakeDisplayInfo->GetDisplayId();
-    bool isDestory = screenSession->GetIsDestoryDisplay();
-    if (isDestory) {
+    bool isDestroy = screenSession->GetIsDestroyDisplay();
+    if (isDestroy) {
         ScreenSessionManager::GetInstance().NotifyDisplayDestroy(fakeDisplayId);
     }
     screenSession->PropertyChange(screenSession->GetScreenProperty(),
@@ -911,8 +911,8 @@ void SuperFoldStateManager::HandleKeyboardOnDisplayNotify(sptr<ScreenSession>& s
         return;
     }
     DisplayId fakeDisplayId = fakeDisplayInfo->GetDisplayId();
-    bool isDestory = screenSession->GetIsDestoryDisplay();
-    if (isDestory) {
+    bool isDestroy = screenSession->GetIsDestroyDisplay();
+    if (isDestroy) {
         ScreenSessionManager::GetInstance().NotifyDisplayDestroy(fakeDisplayId);
     }
 }
