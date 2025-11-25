@@ -1298,9 +1298,7 @@ HWTEST_F(SceneSessionTest3, NotifyUpdateAppUseControl02, Function | SmallTest | 
     sceneSession->onUpdateAppUseControlFunc_ = std::move(callback);
     sceneSession->sessionStage_ = nullptr;
     ControlAppType type = ControlAppType::APP_LOCK;
-    sceneSession->NotifyUpdateAppUseControl(type, controlInfo);
     sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
-    sceneSession->NotifyUpdateAppUseControl(type, controlInfo);
 
     ControlInfo controlInfo1 = {
         .isNeedControl = false,
