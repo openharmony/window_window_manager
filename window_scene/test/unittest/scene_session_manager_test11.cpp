@@ -1745,7 +1745,7 @@ HWTEST_F(SceneSessionManagerTest11, SetSpecificWindowZIndexListener, TestSize.Le
         value = zIndex;
     };
     ssm_->SetSpecificWindowZIndexListener(func);
-    ssm_->setSpecificWindowZIndexFunc_(WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD, 20);
+    ssm_->setSpecificWindowZIndexFunc_(WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD, 20, SetSpecificZIndexReason::SET);
     EXPECT_EQ(value, 20);
     ssm_->SetSpecificWindowZIndexListener(nullptr);
 }

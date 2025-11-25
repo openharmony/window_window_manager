@@ -76,7 +76,9 @@ public:
     {
         TLOGW(WmsLogTag::WMS_RECOVER, "Client died, pid = %{public}d, isLite = %{public}d", pid_, isLite_);
         MockSessionManagerService::GetInstance().UnregisterSMSRecoverListenerInner(userId_, displayId_, pid_, isLite_);
-        MockSessionManagerService::GetInstance().ResetSpecificWindowZIndex(userId_, displayId_, pid_, isLite_);
+        if (!isLite_) {
+            MockSessionManagerService::GetInstance().ResetSpecificWindowZIndex(userId_, pid_);
+        }
     }
 
 private:
@@ -488,10 +490,9 @@ void MockSessionManagerService::ResetSpecificWindowZIndex(int32_t clientUserId, 
         TLOGE(WmsLogTag::WMS_FOCUS, "sessionManagerServiceProxy is nullptr");
         return;
     }
-    WMError ret = sceneSessionManagerProxy->ResetSpecificWindowZIndex(pid);
-    TLOGI(WmsLogTag::WMS_FOCUS, "ret: %{public}d", ret);
-    if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "failed, result: %{public}d", ret);
+    WSError ret = sceneSessionManagerProxy->ResetSpecificWindowZIndex(pid);
+    if (ret != WSError::WS_OK) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "reset failed, result: %{public}d", ret);
     }
 }
 
