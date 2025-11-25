@@ -1035,7 +1035,7 @@ HWTEST_F(ScreenPropertyTest, SetInputOffset, TestSize.Level1)
 */
 HWTEST_F(ScreenPropertyTest, SetIsDestroyDisplay, TestSize.Level1) {
     GTEST_LOG_(INFO) << "ScreenPropertyTest: SetIsDestroyDisplay start";
-    ScreenProperty property = new(std::nothrow) ScreenProperty();
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
     ASSERT_NE(property, nullptr);
     property->SetIsDestroyDisplay(true);
     EXPECT_TRUE(property->isDestroyDisplay_);
@@ -1074,7 +1074,7 @@ HWTEST_F(ScreenPropertyTest, GetIsDestroyDisplay, TestSize.Level1)
 
 HWTEST_F(ScreenPropertyTest, SetPhysicalTouchBoundsDirectly, TestSize.Level1)
 {
-    std::shared_ptr property = std::make_shared();
+    std::shared_ptr<ScreenProperty> property = std::make_shared<ScreenProperty>();
 
     RRect zeroBounds;
     zeroBounds.rect_.width_ = 0;
