@@ -1344,6 +1344,11 @@ bool ScreenSessionManager::RecoverRestoredMultiScreenMode(sptr<ScreenSession> sc
     std::map<std::string, MultiScreenInfo> multiScreenInfoMap = ScreenSettingHelper::GetMultiScreenInfo();
     std::string serialNumber = screenSession->GetSerialNumber();
     if (!CheckMultiScreenInfoMap(multiScreenInfoMap, serialNumber)) {
+        if (IsDefaultMirrorMode(screenSession->GetRSScreenId())) {
+                TLOGI(WmsLogTag::DMS, "new user recover recommended resolution rsid: %{public}" PRIu64,
+                    screenSession->GetRSScreenId());
+                RecoverScreenActiveMode(screenSession->GetRSScreenId());
+        }
         LockLandExtendIfScreenInfoNull(screenSession);
         return false;
     }
@@ -2625,12 +2630,12 @@ void ScreenSessionManager::CheckAndNotifyChangeMode(const RRect& bounds, sptr<Sc
     if (isSizeChanged) {
         property.SetPropertyChangeReason("active mode change");
         updateScreenSession->PropertyChange(property, ScreenPropertyChangeReason::CHANGE_MODE);
-        NotifyScreenChanged(updateScreenSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
         NotifyDisplayChanged(updateScreenSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
         TLOGI(WmsLogTag::DMS, "notify end");
     } else {
         TLOGI(WmsLogTag::DMS, "no notify");
     }
+    NotifyScreenChanged(updateScreenSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
     NotifyScreenModeChange();
 }
 
