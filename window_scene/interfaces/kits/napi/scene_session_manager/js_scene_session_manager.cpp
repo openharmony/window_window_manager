@@ -322,8 +322,6 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::SetSupportFunctionType);
     BindNativeFunction(env, exportObj, "supportCreateFloatWindow", moduleName,
         JsSceneSessionManager::SupportCreateFloatWindow);
-    BindNativeFunction(env, exportObj, "getApplicationInfo", moduleName,
-        JsSceneSessionManager::GetApplicationInfo);
     BindNativeFunction(env, exportObj, "updateRecentMainSessionList", moduleName,
         JsSceneSessionManager::UpdateRecentMainSessionInfos);
     BindNativeFunction(env, exportObj, "supportSnapshotAllSessionStatus", moduleName,
@@ -1731,6 +1729,18 @@ static napi_value CreateWindowModes(napi_env env,
     return arrayValue;
 }
 
+static napi_value CreateApplicationInfo(napi_env env, const AppExecFwk::AbilityInfo& abilityInfo)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "CreateObject failed");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "startMode", CreateJsValue(env, abilityInfo.applicationInfo.startMode));
+    return objValue;
+}
+
 static napi_value CreateWindowSize(napi_env env, const AppExecFwk::AbilityInfo& abilityInfo)
 {
     napi_value objValue = nullptr;
@@ -1776,6 +1786,7 @@ static napi_value CreateAbilityItemInfo(napi_env env, const AppExecFwk::AbilityI
         CreateJsValue(env, abilityInfo.preferMultiWindowOrientation));
     napi_set_named_property(env, objValue, "isForceRotate",
         CreateJsValue(env, abilityInfo.applicationInfo.isForceRotate));
+    napi_set_named_property(env, objValue, "applicationInfo", CreateApplicationInfo(env, abilityInfo));
     return objValue;
 }
 
@@ -5364,54 +5375,6 @@ napi_value JsSceneSessionManager::OnSetSupportFunctionType(napi_env env, napi_ca
     funcType = static_cast<SupportFunctionType>(funcTypeRawValue);
     SceneSessionManager::GetInstance().ConfigSupportFunctionType(funcType);
     return NapiGetUndefined(env);
-}
-
-static napi_value CreateSCBApplicationInfo(napi_env env, const SCBApplicationInfo& scbApplicationInfo)
-{
-    napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "CreateObject failed");
-        return NapiGetUndefined(env);
-    }
-    napi_set_named_property(env, objValue, "startMode", CreateJsValue(env, scbApplicationInfo.startMode_));
-    return objValue;
-}
-
-napi_value JsSceneSessionManager::GetApplicationInfo(napi_env env, napi_callback_info info)
-{
-    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
-    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
-    return (me != nullptr) ? me->OnGetApplicationInfo(env, info) : nullptr;
-}
-
-napi_value JsSceneSessionManager::OnGetApplicationInfo(napi_env env, napi_callback_info info)
-{
-    size_t argc = DEFAULT_ARG_COUNT;
-    napi_value argv[DEFAULT_ARG_COUNT] = { nullptr };
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != ARGC_ONE) {
-        TLOGE(WmsLogTag::DEFAULT, "Argc is invalid: %{public}zu", argc);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    std::string bundleName;
-    if (!ConvertFromJsValue(env, argv[0], bundleName)) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to bundleName");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    SCBApplicationInfo scbApplicationInfo;
-    WSErrorCode ret = WS_JS_TO_ERROR_CODE_MAP.at(SceneSessionManager::GetInstance().GetApplicationInfo(
-        bundleName, scbApplicationInfo));
-    if (ret != WSErrorCode::WS_OK) {
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
-            "System is abnormal"));
-        return NapiGetUndefined(env);
-    }
-    return CreateSCBApplicationInfo(env, scbApplicationInfo);
 }
 
 napi_value JsSceneSessionManager::UpdateRecentMainSessionInfos(napi_env env, napi_callback_info info)

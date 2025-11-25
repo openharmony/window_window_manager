@@ -10310,6 +10310,7 @@ WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(const std::vector<App
                 scbAbilityInfo.abilityInfo_ = abilityInfo;
                 scbAbilityInfo.abilityInfo_.windowModes = ExtractSupportWindowModeFromMetaData(
                     std::make_shared<OHOS::AppExecFwk::AbilityInfo>(abilityInfo));
+                scbAbilityInfo.abilityInfo_.applicationInfo = bundleInfo.applicationInfo;
                 scbAbilityInfo.sdkVersion_ = sdkVersion;
                 scbAbilityInfo.isAbilityHook_ = isModuleAbilityHook;
                 GetOrientationFromResourceManager(scbAbilityInfo.abilityInfo_);
@@ -16930,7 +16931,9 @@ std::string SceneSessionManager::GetLastInstanceKey(const std::string& bundleNam
 
 void SceneSessionManager::RefreshAppInfo(const std::string& bundleName)
 {
-    MultiInstanceManager::GetInstance().RefreshAppInfo(bundleName);
+    if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_)) {
+        MultiInstanceManager::GetInstance().RefreshAppInfo(bundleName);
+    }
     AbilityInfoManager::GetInstance().RemoveAppInfo(bundleName);
 }
 
@@ -18055,14 +18058,6 @@ WSError SceneSessionManager::UseImplicitAnimation(int32_t hostWindowId, bool use
     };
 
     return taskScheduler_->PostSyncTask(task, "UseImplicitAnimation");
-}
-
-WSError SceneSessionManager::GetApplicationInfo(const std::string& bundleName, SCBApplicationInfo& scbApplicationInfo)
-{
-    AppExecFwk::ApplicationInfo applicationInfo;
-    applicationInfo = MultiInstanceManager::GetInstance().GetApplicationInfo(bundleName);
-    scbApplicationInfo.startMode_ = applicationInfo.startMode;
-    return WSError::WS_OK;
 }
 
 WSError SceneSessionManager::GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList)
