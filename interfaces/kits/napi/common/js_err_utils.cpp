@@ -368,7 +368,7 @@ napi_value JsErrUtils::CreateJsError(napi_env env, const WmErrorCode& errorCode,
 {
     napi_value result = nullptr;
     napi_create_error(env, CreateJsValue(env, static_cast<int32_t>(errorCode)),
-        CreateJsValue(env, msg == "" ? GetErrorMsg(errorCode) : GetPreErrorMsg(errorCode) + msg), &result);
+        CreateJsValue(env, msg == "" ? GetErrorMsg(errorCode) : (GetPreErrorMsg(errorCode) + msg)), &result);
     return result;
 }
 
@@ -384,7 +384,7 @@ napi_value JsErrUtils::CreateJsError(napi_env env, const DmErrorCode& errorCode,
 {
     napi_value result = nullptr;
     napi_create_error(env, CreateJsValue(env, static_cast<int32_t>(errorCode)),
-        CreateJsValue(env, msg == "" ? GetErrorMsg(errorCode) : GetPreErrorMsg(errorCode) + msg), &result);
+        CreateJsValue(env, msg == "" ? GetErrorMsg(errorCode) : (GetPreErrorMsg(errorCode) + msg)), &result);
     return result;
 }
 } // namespace OHOS::Rosen
