@@ -2844,20 +2844,18 @@ napi_value JsWindow::OnSetDialogBackGestureEnabled(napi_env env, napi_callback_i
     if (argc < 1) { // at least 1 params
         TLOGE(WmsLogTag::WMS_DIALOG, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "[window][setDialogBackGestureEnabled]msg:Argc is invalid");
+            "[window][setDialogBackGestureEnabled]msg: Mandatory parameters are left unspecified");
     }
 
     napi_value nativeVal = argv[0];
     if (nativeVal == nullptr) {
         TLOGE(WmsLogTag::WMS_DIALOG, "Failed to convert parameter to enable");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "[window][setDialogBackGestureEnabled]msg:Failed to convert parameter to enable");
     }
     bool isEnabled = false;
     napi_status retCode = napi_get_value_bool(env, nativeVal, &isEnabled);
     if (retCode != napi_ok) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "[window][setDialogBackGestureEnabled]msg:Failed to convert parameter to enable");
+            "[window][setDialogBackGestureEnabled]msg: Incorrect parameter types");
     }
 
     wptr<Window> weakToken(windowToken_);
@@ -2879,7 +2877,7 @@ napi_value JsWindow::OnSetDialogBackGestureEnabled(napi_env env, napi_callback_i
         [weakToken, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (errCodePtr == nullptr) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                    "[window][setDialogBackGestureEnabled]msg:System abnormal"));
+                    "[window][setDialogBackGestureEnabled]msg: System abnormal"));
                 return;
             }
             if (*errCodePtr == WmErrorCode::WM_OK) {
@@ -5486,6 +5484,8 @@ napi_value JsWindow::OnSetWindowTouchable(napi_env env, napi_callback_info info)
     if (argc < 1) { // 1: params num
         WLOGFE("Argc is invalid: %{public}zu", argc);
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setWindowTouchable]msg: Mandatory parameters are left unspecified");
     }
     bool touchable = true;
     if (errCode == WmErrorCode::WM_OK) {
@@ -5500,7 +5500,7 @@ napi_value JsWindow::OnSetWindowTouchable(napi_env env, napi_callback_info info)
     }
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "[window][setWindowTouchable]msg:invalid params");
+            "[window][setWindowTouchable]msg: Incorrect parameter types");
     }
 
     wptr<Window> weakToken(windowToken_);
@@ -5512,21 +5512,22 @@ napi_value JsWindow::OnSetWindowTouchable(napi_env env, napi_callback_info info)
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
             task->Reject(env,
-                JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Invalidate params."));
+                JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                    "[window][setWindowTouchable]msg: The window is nullptr"));
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetTouchable(touchable));
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Window set touchable failed"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "[window][setWindowTouchable]"));
         }
         WLOGI("Window [%{public}u, %{public}s] set touchable end",
             weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowTouchable") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][setWindowTouchable]msg:failed to send event"));
+            "[window][setWindowTouchable]msg: Failed to send event"));
     }
     return result;
 }
