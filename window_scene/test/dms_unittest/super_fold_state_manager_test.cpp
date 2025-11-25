@@ -601,6 +601,46 @@ HWTEST_F(SuperFoldStateManagerTest, GetFoldCreaseRect02, TestSize.Level1)
 }
 
 /**
+@tc.name : HandleSuperFoldDisplayCallback
+@tc.desc : HandleSuperFoldDisplayCallback test.
+@tc.type: FUNC
+*/
+HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldDisplayCallback, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    SuperFoldStateManager& manager = SuperFoldStateManager::GetInstance();
+    sptr screenSession = ssm_.GetOrCreateScreenSession(0);
+    ScreenProperty screenProperty;
+    screenProperty.bounds_.rect_ = { 0, 0, 100, 100 };
+    screenSession->SetScreenProperty(screenProperty);
+    ssm_.InitFakeScreenSession(screenSession);
+
+    screenSession->UpdateSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::UNDEFINED);
+    manager.HandleSuperFoldDisplayCallback(screenSession, SuperFoldStatusChangeEvents::UNDEFINED);
+    EXPECT_TRUE(g_errLog.find("nothing to handle") != std::string::npos);
+    g_errLog.clear();
+
+    screenSession->UpdateSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED);
+    manager.HandleSuperFoldDisplayCallback(screenSession, SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED);
+
+    screenSession->UpdateSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
+    manager.HandleSuperFoldDisplayCallback(screenSession, SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
+
+    screenSession->UpdateSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::KEYBOARD_ON);
+    manager.HandleSuperFoldDisplayCallback(screenSession, SuperFoldStatusChangeEvents::KEYBOARD_ON);
+
+    screenSession->UpdateSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::KEYBOARD_OFF);
+    manager.HandleSuperFoldDisplayCallback(screenSession, SuperFoldStatusChangeEvents::KEYBOARD_OFF);
+
+    screenSession->UpdateSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_ON);
+    manager.HandleSuperFoldDisplayCallback(screenSession, SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_ON);
+
+    screenSession->UpdateSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_OFF);
+    manager.HandleSuperFoldDisplayCallback(screenSession, SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_OFF);
+}
+
+/**
 @tc.name : HandleKeyboardOnDisplayNotify01
 @tc.desc : HandleKeyboardOnDisplayNotify01 test.
 @tc.type: FUNC
