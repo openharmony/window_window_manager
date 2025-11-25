@@ -2329,6 +2329,50 @@ HWTEST_F(sceneSessionManagerProxyTest, SetSpecificWindowZIndex, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ResetSpecificWindowZIndex
+ * @tc.desc: ResetSpecificWindowZIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, ResetSpecificWindowZIndex, TestSize.Level1)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    sptr<MockIRemoteObject> remoteMocker = nullptr;
+    auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
+    auto ret = proxy->ResetSpecificWindowZIndex(10);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+    ASSERT_NE(proxy, nullptr);
+
+    remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ret = proxy->ResetSpecificWindowZIndex(10);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    ret = proxy->ResetSpecificWindowZIndex(10);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+
+    ret = proxy->ResetSpecificWindowZIndex(10);
+    EXPECT_EQ(WSError::WS_OK, ret);
+
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ret = proxy->ResetSpecificWindowZIndex(10);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+
+    remoteMocker->SetRequestResult(ERR_NONE);
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    ret = proxy->ResetSpecificWindowZIndex(10);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+
+    ret = proxy->ResetSpecificWindowZIndex(10);
+    EXPECT_EQ(WSError::WS_OK, ret);
+}
+
+/**
  * @tc.name: NotifySupportRotationRegistered
  * @tc.desc: NotifySupportRotationRegistered
  * @tc.type: FUNC

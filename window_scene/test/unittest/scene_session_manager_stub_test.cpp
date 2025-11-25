@@ -3056,6 +3056,24 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetSpecificWindowZIndex, Function | 
 }
 
 /**
+ * @tc.name: HandleResetSpecificWindowZIndex
+ * @tc.desc: HandleResetSpecificWindowZIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleResetSpecificWindowZIndex, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    int ret = stub_->HandleResetSpecificWindowZIndex(data, reply);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
+
+    data.WriteInt32(20);
+    ret = stub_->HandleSetSpecificWindowZIndex(data, reply);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
+}
+
+/**
  * @tc.name: HandleNotifySupportRotationRegistered
  * @tc.desc: HandleNotifySupportRotationRegistered
  * @tc.type: FUNC
