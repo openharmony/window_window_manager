@@ -3062,6 +3062,50 @@ HWTEST_F(ScreenSessionManagerTest, HandleDefaultMultiScreenModeTest3, TestSize.L
     }
     g_errLog.clear();
 }
+
+/**
+ * @tc.name: SetScreenPowerForAll
+ * @tc.desc: SetScreenPowerForAll test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForAll01, TestSize.Level1)
+{   
+    g_errLog.clear();
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    EXPECT_NE(displayManagerAgent, nullptr);
+
+    DisplayManagerAgentType type = DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER;
+    EXPECT_EQ(DMError::DM_OK, ssm_->RegisterDisplayManagerAgent(displayManagerAgent, type));
+
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
+    }
+    ScreenTransitionState temp = ScreenStateMachine::GetInstance().GetTransitionState();
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::WAIT_SCREEN_ADVANCE_ON_READY);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_POWER_KEY;
+    ScreenPowerState state = ScreenPowerState::POWER_ON;
+    ASSERT_EQ(true, ssm_->SetScreenPowerForAll(state, reason));
+
+    reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS;
+    ASSERT_EQ(true, ssm_->SetScreenPowerForAll(state, reason));
+
+    reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON;
+    ASSERT_EQ(true, ssm_->SetScreenPowerForAll(state, reason));
+
+    state = ScreenPowerState::POWER_OFF;
+    ASSERT_EQ(true, ssm_->SetScreenPowerForAll(state, reason));
+
+    reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
+    ASSERT_EQ(true, ssm_->SetScreenPowerForAll(state, reason));
+
+    EXPECT_EQ(DMError::DM_OK, ssm_->DestroyVirtualScreen(screenId));
+    EXPECT_EQ(DMError::DM_OK, ssm_->UnregisterDisplayManagerAgent(displayManagerAgent, type));
+    g_errLog.clear();
+    ScreenStateMachine::GetInstance().SetTransitionState(temp);
+}
 }
 }
 }
