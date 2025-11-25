@@ -1376,7 +1376,7 @@ napi_value JsWindowManager::OnSetStartWindowBackgroundColor(napi_env env, napi_c
     if (moduleName.length() > maxNameLength) {
         TLOGE(WmsLogTag::WMS_PATTERN, "moduleName length out of range");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM,
-            "[window][setStartWindowBackgroundColor]msg: ModuleName length out of range");
+            "[window][setStartWindowBackgroundColor]msg: Parameter moduleName exceeds the allowed length");
     }
     std::string abilityName;
     if (!ConvertFromJsValue(env, argv[INDEX_ONE], abilityName)) {
@@ -1387,7 +1387,7 @@ napi_value JsWindowManager::OnSetStartWindowBackgroundColor(napi_env env, napi_c
     if (abilityName.length() > maxNameLength) {
         TLOGE(WmsLogTag::WMS_PATTERN, "abilityName length out of range");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM,
-            "[window][setStartWindowBackgroundColor]msg: AbilityName length out of range");
+            "[window][setStartWindowBackgroundColor]msg: Parameter abilityName exceeds the allowed length");
     }
     uint32_t color = 0;
     if (!ParseColorMetrics(env, argv[ARGC_TWO], color)) {
@@ -1411,7 +1411,7 @@ napi_value JsWindowManager::OnSetStartWindowBackgroundColor(napi_env env, napi_c
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetStartWindowBackgroundColor") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,
-                "[window][setStartWindowBackgroundColor]msg: Send event failed"));
+                "[window][setStartWindowBackgroundColor]msg: Internal task error"));
     }
     return result;
 }
@@ -1454,7 +1454,7 @@ napi_value JsWindowManager::OnGetAllWindowLayoutInfo(napi_env env, napi_callback
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnGetAllWindowLayoutInfo") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
-            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY),
                 "[window][getAllWindowLayoutInfo]Send event failed"));
     }
     return result;
@@ -1615,7 +1615,8 @@ napi_value JsWindowManager::OnGetGlobalWindowMode(napi_env env, napi_callback_in
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnGetGlobalWindowMode") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "send event failed, displayId: %{public}" PRIu64, displayId);
         napiAsyncTask->Reject(env,
-            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY), "Send event failed"));
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY),
+                "[window][getGlobalWindowMode]msg: Internal task error"));
     }
     return result;
 }
@@ -1679,7 +1680,7 @@ napi_value JsWindowManager::OnGetVisibleWindowInfo(napi_env env, napi_callback_i
     if (apiVersion < API_VERSION_18 && !Permission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!, api%{public}u", apiVersion);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP,
-            "[window][getVisibleWindowInfo]msg: Not system app");
+            "[window][getVisibleWindowInfo]");
     } else if (apiVersion >= API_VERSION_18 &&
                !CheckCallingPermission(PermissionConstants::PERMISSION_VISIBLE_WINDOW_INFO)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!, api%{public}u", apiVersion);
@@ -1702,13 +1703,13 @@ napi_value JsWindowManager::OnGetVisibleWindowInfo(napi_env env, napi_callback_i
         } else {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "OnGetVisibleWindowInfo failed");
             task->Reject(env, JsErrUtils::CreateJsError(env, ret,
-                "[window][getVisibleWindowInfo]msg: GetVisibilityWindowInfo failed"));
+                "[window][getVisibleWindowInfo]"));
         }
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnGetVisibleWindowInfo") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
-            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                "[window][getVisibleWindowInfo]msg: Failed to send event"));
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,
+                "[window][getVisibleWindowInfo]msg: Internal task error"));
     }
     return result;
 }
@@ -1726,13 +1727,13 @@ napi_value JsWindowManager::OnGetWindowsByCoordinate(napi_env env, napi_callback
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], displayId)) {
         TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to displayId");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "[window][getWindowsByCoordinate]msg: Incorrect parameter types");
+            "[window][getWindowsByCoordinate]msg: DisplayId has incorrect parameter types");
     }
     if (displayId < 0 ||
         SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
         TLOGE(WmsLogTag::WMS_PC, "invalid displayId");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "[window][getWindowsByCoordinate]msg: Parameter verification failed");
+            "[window][getWindowsByCoordinate]msg: Parameter displayId verification failed");
     }
     int32_t windowNumber = 0;
     if (argc > ARGC_ONE && !ConvertFromJsValue(env, argv[ARGC_ONE], windowNumber)) {
@@ -1764,8 +1765,8 @@ napi_value JsWindowManager::OnGetWindowsByCoordinate(napi_env env, napi_callback
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnGetWindowsByCoordinate") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
-            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
-                "[window][getWindowsByCoordinate]msg: Send event failed"));
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY),
+                "[window][getWindowsByCoordinate]msg: Internal task error"));
     }
     return result;
 }
