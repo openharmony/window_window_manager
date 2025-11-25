@@ -144,12 +144,22 @@ HWTEST_F(ScreenStateMachineTest, HandlePowerStateChangeTestInvalidTransition, Te
     EXPECT_FALSE(fsm_->HandlePowerStateChange(ScreenPowerEvent::SCREEN_POWER_EVENT_MAX, type));
 }
 
+/**
+ * @tc.name: DoSetScreenPowerForAll_ShouldReturnFalse_WhenTypeIsInvalid
+ * @tc.number: DoSetScreenPowerForAllTest_001
+ * @tc.desc: 测试当type参数有效时，DoSetScreenPowerForAll 函数应返回 true
+ */
 HWTEST_F(ScreenStateMachineTest, DoSetScreenPowerForAll_ShouldReturnFalse_WhenTypeIsInvalid, TestSize.Level0)
 {   ScreenPowerEvent event = ScreenPowerEvent::POWER_OFF;
     ScreenPowerInfoType type;
     EXPECT_FALSE(fsm_->DoSetScreenPowerForAll(event, type));
 }
 
+/**
+ * @tc.name: DoSetScreenPowerForAll_ShouldReturnFalse_WhenTypeIsValid
+ * @tc.number: DoSetScreenPowerForAllTest_001
+ * @tc.desc: 测试当type参数有效时，DoSetScreenPowerForAll 函数应返回 true
+ */
 HWTEST_F(ScreenStateMachineTest, DoSetScreenPowerForAll_ShouldReturnFalse_WhenTypeIsValid, TestSize.Level0)
 {   ScreenPowerEvent event = ScreenPowerEvent::POWER_ON;
     ScreenPowerInfoType type = std::make_pair(ScreenPowerState::INVALID_STATE, PowerStateChangeReason::POWER_BUTTON);
