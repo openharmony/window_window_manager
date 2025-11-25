@@ -647,9 +647,9 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldDisplayCallback, TestSize.Lev
 */
 HWTEST_F(SuperFoldStateManagerTest, HandleKeyboardOnDisplayNotify01, TestSize.Level1)
 {
-    sptr screenSession = ssm_.GetOrCreateScreenSession(0);
+    sptr<ScreenSession> screenSession = ssm_.GetOrCreateScreenSession(0);
     screenSession->SetIsFakeInUse(true);
-    sptr fakeScreenSession = sptr::MakeSptr();
+    sptr<ScreenSession> fakeScreenSession = sptr<ScreenSession>::MakeSptr();
     screenSession->SetFakeScreenSession(fakeScreenSession);
     screenSession->SetIsDestroyDisplay(false);
     SuperFoldStateManager& manager = SuperFoldStateManager::GetInstance();
@@ -667,9 +667,9 @@ HWTEST_F(SuperFoldStateManagerTest, HandleKeyboardOnDisplayNotify01, TestSize.Le
 */
 HWTEST_F(SuperFoldStateManagerTest, HandleKeyboardOnDisplayNotify02, TestSize.Level1)
 {
-    sptr screenSession = ssm_.GetOrCreateScreenSession(0);
+    sptr<ScreenSession> screenSession= ssm_.GetOrCreateScreenSession(0);
     screenSession->SetIsFakeInUse(true);
-    sptr fakeScreenSession = sptr::MakeSptr();
+    sptr<ScreenSession> fakeScreenSession = sptr<ScreenSession>::MakeSptr();
     screenSession->SetFakeScreenSession(fakeScreenSession);
     screenSession->SetIsDestroyDisplay(true);
     SuperFoldStateManager& manager = SuperFoldStateManager::GetInstance();
