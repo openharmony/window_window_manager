@@ -1235,7 +1235,8 @@ export class WindowInternal implements Window {
     private native isWindowSupportWideGamut(nativeObj: long): boolean;
     private native setWindowLayoutFullScreen(nativeObj: long, isLayoutFullScreen: boolean): int;
     private native setWindowSystemBarProperties(nativeObj: long, systemBarProperties: SystemBarProperties): int;
-    private native setSpecificSystemBarEnabled(nativeObj: long, name: String, enable: boolean, enableAnimation: boolean): int;
+    private native setSpecificSystemBarEnabled(
+      nativeObj: long, name: String, enable: boolean, enableAnimation?: boolean): int;
 
     private native setWindowColorSpaceSync(nativeObj: long, colorSpace: int): void;
     private native setPreferredOrientationSync(nativeObj: long, orientation: int): void;
@@ -1448,11 +1449,7 @@ export class WindowInternal implements Window {
     public setSpecificSystemBarEnabled(name: String, enable: boolean, enableAnimation?: boolean): Promise<void> {
         return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
             taskpool.execute((): void => {
-                if (enableAnimation == undefined) {
-                    this.setSpecificSystemBarEnabled(this.nativeObj, name, enable, false);
-                } else {
-                    this.setSpecificSystemBarEnabled(this.nativeObj, name, enable, enableAnimation);
-                }
+              this.setSpecificSystemBarEnabled(this.nativeObj, name, enable, enableAnimation);
             }).then((ret: NullishType) :void => {
                 resolve(undefined);
             }).catch((err: NullishType) :void => {
