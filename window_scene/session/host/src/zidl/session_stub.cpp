@@ -1384,7 +1384,19 @@ int SessionStub::HandleConvertOrientationAndRotation(MessageParcel& data, Messag
         TLOGE(WmsLogTag::WMS_ROTATION, "read value failed");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = ConvertOrientationAndRotation(from, to, value, convertedValue);
+    RotationInfoType fromRotationInfoType = static_cast<RotationInfoType>(from);
+    if (fromRotationInfoType < RotationInfoType::WINDOW_ORIENTATION ||
+        fromRotationInfoType > RotationInfoType::DISPLAY_ROTATION) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Invalid fromRotationInfoType: %{public}u", fromRotationInfoType);
+        return ERR_INVALID_DATA;
+    }
+    RotationInfoType toRotationInfoType = static_cast<RotationInfoType>(to);
+    if (toRotationInfoType < RotationInfoType::WINDOW_ORIENTATION ||
+        toRotationInfoType > RotationInfoType::DISPLAY_ROTATION) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Invalid toRotationInfoType: %{public}u", toRotationInfoType);
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = ConvertOrientationAndRotation(fromRotationInfoType, toRotationInfoType, value, convertedValue);
     if (!reply.WriteInt32(convertedValue)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Write failed");
         return ERR_INVALID_DATA;

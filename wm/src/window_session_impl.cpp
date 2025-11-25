@@ -3158,7 +3158,7 @@ WMError WindowSessionImpl::ConvertOrientationAndRotation(
         TLOGE(WmsLogTag::WMS_ROTATION, "windowSession is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (IsOrientationAndRotationInvalid(value)) {
+    if (value < MIN_ROTATION_VALUE || value > MAX_ROTATION_VALUE) {
         TLOGE(WmsLogTag::WMS_ROTATION, "the value to be converted is invalid");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
@@ -3170,14 +3170,6 @@ WMError WindowSessionImpl::ConvertOrientationAndRotation(
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     WSError ret = hostSession->ConvertOrientationAndRotation(from, to, value, convertedValue);
     return static_cast<WMError>(ret);
-}
-
-bool IsOrientationAndRotationInvalid(const int32_t value)
-{
-    if (value < MIN_ROTATION_VALUE || value > MAX_ROTATION_VALUE) {
-        return true;
-    }
-    return false;
 }
 
 Orientation WindowSessionImpl::ConvertUserOrientationToUserPageOrientation(Orientation Orientation) const

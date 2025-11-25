@@ -625,7 +625,7 @@ public:
     WSError ConvertDisplayOrientationToWindowOrientation(const int32_t value, int32_t& convertedValue);
     WSError ConvertWindowOrientationToDisplayOrientation(const int32_t value, int32_t& convertedValue);
     WSError ConvertDisplayRotationToDisplayOrientation(int32_t rotation, int32_t& orientation);
-    WSError onvertDisplayOrientationToDisplayRotation(int32_t orientation, int32_t& rotation);
+    WSError ConvertDisplayOrientationToDisplayRotation(int32_t orientation, int32_t& rotation);
     WSError ConvertDisplayRotationToWindowOrientation(int32_t value, int32_t& convertedValue);
     WSError ConvertWindowOrientationToDisplayRotation(int32_t value, int32_t& convertedValue);
     WSError SetSdkVersion(int32_t sdkVersion);

@@ -581,6 +581,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "notifyPageRotationIsIgnored", moduleName,
         JsSceneSession::NotifyPageRotationIsIgnored);
     BindNativeFunction(env, objValue, "setCurrentRotation", moduleName, JsSceneSession::SetCurrentRotation);
+    BindNativeFunction(env, objValue, "setSdkVersion", moduleName, JsSceneSession::SetSdkVersion);
     BindNativeFunction(env, objValue, "setSidebarBlurMaximize", moduleName, JsSceneSession::SetSidebarBlurMaximize);
     BindNativeFunction(env, objValue, "toggleCompatibleMode", moduleName, JsSceneSession::ToggleCompatibleMode);
     BindNativeFunction(env, objValue, "requestSpecificSessionClose", moduleName,
@@ -2929,6 +2930,13 @@ napi_value JsSceneSession::SetCurrentRotation(napi_env env, napi_callback_info i
     TLOGD(WmsLogTag::WMS_ROTATION, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetCurrentRotation(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetSdkVersion(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetSdkVersion(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetSidebarBlurMaximize(napi_env env, napi_callback_info info)
@@ -8446,6 +8454,40 @@ napi_value JsSceneSession::OnSetCurrentRotation(napi_env env, napi_callback_info
     }
     if (session->SetCurrentRotation(currentRotation) != WSError::WS_OK) {
         TLOGE(WmsLogTag::WMS_ROTATION, "set currentRotation failed, id: %{public}d", persistentId_);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
+                                      "Set failed"));
+        return NapiGetUndefined(env);
+    }
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetSdkVersion(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t sdkVersion = 0;
+    if (!ConvertFromJsValue(env, argv[0], sdkVersion)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to sdkVersion");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "session is nullptr, id: %{public}d", persistentId_);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
+                                      "Session is nullptr"));
+        return NapiGetUndefined(env);
+    }
+    if (session->SetSdkVersion(sdkVersion) != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "set sdkVersion failed, id: %{public}d", persistentId_);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
                                       "Set failed"));
         return NapiGetUndefined(env);

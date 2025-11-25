@@ -1311,6 +1311,125 @@ HWTEST_F(SessionStubTest, HandleGetTargetOrientationConfigInfo, Function | Small
 }
 
 /**
+ * @tc.name: HandleConvertOrientationAndRotationWithInvalidFrom
+ * @tc.desc: Verify HandleConvertOrientationAndRotation with invalid from
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleConvertOrientationAndRotationWithInvalidFrom, TestSize.Level1)
+{
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONVERT_ORIENTATION_AND_ROTATION);
+    MessageParcel reply;
+    MessageOption option;
+    MessageParcel data;
+    // missing FromRotationInfoType from
+    EXPECT_EQ(ERR_INVALID_DATA, session_->ProcessRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleConvertOrientationAndRotationWithInvalidTo
+ * @tc.desc: Verify  HandleConvertOrientationAndRotation with invalid to
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleConvertOrientationAndRotationWithInvalidTo, TestSize.Level1)
+{
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONVERT_ORIENTATION_AND_ROTATION);
+    MessageParcel reply;
+    MessageOption option;
+    MessageParcel data;
+    // missing FromRotationInfoType to
+    data.WriteUint32(0);
+    EXPECT_EQ(ERR_INVALID_DATA, session_->ProcessRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name:  HandleConvertOrientationAndRotationWithInvalidConvertValue
+ * @tc.desc: Verify  HandleConvertOrientationAndRotation with invalid convert value
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest,  HandleConvertOrientationAndRotationWithInvalidConvertValue, TestSize.Level1)
+{
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONVERT_ORIENTATION_AND_ROTATION);
+    MessageParcel reply;
+    MessageOption option;
+    MessageParcel data;
+    // missing convert value
+    data.WriteUint32(0);
+    data.WriteUint32(0);
+    EXPECT_EQ(ERR_INVALID_DATA, session_->ProcessRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name:  HandleConvertOrientationAndRotationWithInvalidRotationInfoType
+ * @tc.desc: Verify that ProcessRemoteRequest rejects invalid RotationInfoType values
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleConvertOrientationAndRotationWithInvalidRotationInfoType, TestSize.Level1)
+{
+    constexpr uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONVERT_ORIENTATION_AND_ROTATION);
+    MessageOption option;
+
+    // Case 1: from < RotationInfoType::WINDOW_ORIENTATION
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        data.WriteUint32(static_cast<uint32_t>(RotationInfoType::WINDOW_ORIENTATION) - 1);
+        data.WriteUint32(0);
+        data.WriteInt32(0);
+        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+
+    // Case 2: from > RotationInfoType::DISPLAY_ROTATION
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        data.WriteUint32(static_cast<uint32_t>(RotationInfoType::DISPLAY_ROTATION) + 1);
+        data.WriteUint32(0);
+        data.WriteInt32(0);
+        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+
+    // Case 3: to < RotationInfoType::WINDOW_ORIENTATION
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        data.WriteUint32(0);
+        data.WriteUint32(static_cast<uint32_t>(RotationInfoType::WINDOW_ORIENTATION) - 1);
+        data.WriteInt32(0);
+        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+
+    // Case 4: to > RotationInfoType::DISPLAY_ROTATION
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        data.WriteUint32(0);
+        data.WriteUint32(static_cast<uint32_t>(RotationInfoType::DISPLAY_ROTATION) + 1);
+        data.WriteInt32(0);
+        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+}
+
+/**
+ * @tc.name: HandleConvertOrientationAndRotationSuccess
+ * @tc.desc: Verify that ProcessRemoteRequest accepts Success
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleConvertOrientationAndRotationSuccess, TestSize.Level1)
+{
+    constexpr uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONVERT_ORIENTATION_AND_ROTATION);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteInt32(1);
+
+    EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_NONE);
+}
+
+/**
  * @tc.name: GetIsHighlighted
  * @tc.desc: sessionStub GetIsHighlighted
  * @tc.type: FUNC
