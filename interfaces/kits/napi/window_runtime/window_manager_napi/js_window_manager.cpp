@@ -1754,25 +1754,25 @@ napi_value JsWindowManager::OnShiftAppWindowPointerEvent(napi_env env, napi_call
     if (argc != ARGC_TWO) {
         TLOGE(WmsLogTag::WMS_PC, "parameter number is illegal");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "[window][shiftAppWindowPointerEvent]msg:parameter number is illegal");
+            "[window][shiftAppWindowPointerEvent]msg: Parameter number is illegal");
     }
     int32_t sourceWindowId;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], sourceWindowId)) {
         TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to sourceWindowId");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "[window][shiftAppWindowPointerEvent]msg:Failed to convert parameter to sourceWindowId");
+            "[window][shiftAppWindowPointerEvent]msg: Failed to convert parameter to sourceWindowId");
     }
     int32_t targetWindowId;
     if (!ConvertFromJsValue(env, argv[INDEX_ONE], targetWindowId)) {
         TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to targetWindowId");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "[window][shiftAppWindowPointerEvent]msg:Failed to convert parameter to targetWindowId");
+            "[window][shiftAppWindowPointerEvent]msg: Failed to convert parameter to targetWindowId");
     }
     if (sourceWindowId == static_cast<int32_t>(INVALID_WINDOW_ID) ||
         targetWindowId == static_cast<int32_t>(INVALID_WINDOW_ID)) {
         TLOGE(WmsLogTag::WMS_PC, "invalid sourceWindowId or targetWindowId");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "[window][shiftAppWindowPointerEvent]msg:invalid sourceWindowId or targetWindowId");
+            "[window][shiftAppWindowPointerEvent]msg: Invalid sourceWindowId or targetWindowId");
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
@@ -1788,7 +1788,7 @@ napi_value JsWindowManager::OnShiftAppWindowPointerEvent(napi_env env, napi_call
     napi_status status = napi_send_event(env, std::move(asyncTask), napi_eprio_high, "OnShiftAppWindowPointerEvent");
     if (status != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
-            "[window][shiftAppWindowPointerEvent]msg:send event failed"));
+            "[window][shiftAppWindowPointerEvent]msg: Send event failed"));
     }
     return result;
 }
@@ -1801,25 +1801,25 @@ napi_value JsWindowManager::OnShiftAppWindowTouchEvent(napi_env env, napi_callba
     if (argc != ARGC_THREE) {
         TLOGE(WmsLogTag::WMS_PC, "parameter number is illegal");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "[window][shiftAppWindowTouchEvent]msg:parameter number is illegal");
+            "[window][shiftAppWindowTouchEvent]msg: Parameter number is illegal");
     }
     int32_t sourceWindowId = static_cast<int32_t>(INVALID_WINDOW_ID);
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], sourceWindowId)) {
         TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to sourceWindowId");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "[window][shiftAppWindowTouchEvent]msg:Failed to convert parameter to sourceWindowId");
+            "[window][shiftAppWindowTouchEvent]msg: Failed to convert parameter to sourceWindowId");
     }
     int32_t targetWindowId = static_cast<int32_t>(INVALID_WINDOW_ID);
     if (!ConvertFromJsValue(env, argv[INDEX_ONE], targetWindowId)) {
         TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to targetWindowId");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "[window][shiftAppWindowTouchEvent]msg:Failed to convert parameter to targetWindowId");
+            "[window][shiftAppWindowTouchEvent]msg: Failed to convert parameter to targetWindowId");
     }
     int32_t fingerId = static_cast<int32_t>(INVALID_FINGER_ID);
     if (!ConvertFromJsValue(env, argv[INDEX_TWO], fingerId)) {
         TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to fingerId");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "[window][shiftAppWindowTouchEvent]msg:Failed to convert parameter to fingerId");
+            "[window][shiftAppWindowTouchEvent]msg: Failed to convert parameter to fingerId");
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
@@ -1827,9 +1827,9 @@ napi_value JsWindowManager::OnShiftAppWindowTouchEvent(napi_env env, napi_callba
         if (sourceWindowId <= static_cast<int32_t>(INVALID_WINDOW_ID) ||
             targetWindowId <= static_cast<int32_t>(INVALID_WINDOW_ID) ||
             (fingerId <= static_cast<int32_t>(INVALID_FINGER_ID))) {
-            TLOGE(WmsLogTag::WMS_PC, "invalid sourceWindowId or targetWindowId or fingerId");
+            TLOGE(WmsLogTag::WMS_PC, "Invalid sourceWindowId or targetWindowId or fingerId");
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM,
-                        "[window][shiftAppWindowTouchEvent]msg:invalid sourceWindowId or targetWindowId or fingerId"));
+                        "[window][shiftAppWindowTouchEvent]msg: Invalid sourceWindowId or targetWindowId or fingerId"));
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().
@@ -1842,8 +1842,8 @@ napi_value JsWindowManager::OnShiftAppWindowTouchEvent(napi_env env, napi_callba
     };
     napi_status status = napi_send_event(env, std::move(asyncTask), napi_eprio_high, "OnShiftAppWindowTouchEvent");
     if (status != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env,
-            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY), "send event failed"));
+        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,
+            "[window][shiftAppWindowTouchEvent]msg: Send event failed"));
     }
     return result;
 }
