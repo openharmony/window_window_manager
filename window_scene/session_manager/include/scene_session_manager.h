@@ -1342,7 +1342,7 @@ private:
      * Window Hierarchy
      */
     NotifySetSpecificWindowZIndexFunc setSpecificWindowZIndexFunc_;
-    std::unordered_map<int32_t, std::vector<WindowType>> specificZIndexByPidMap_;
+    std::unordered_map<WindowType, int32_t> specificZIndexByPidMap_;
     std::mutex specificZIndexByPidMapMutex_;
 
     /*

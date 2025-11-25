@@ -14283,13 +14283,7 @@ WSError SceneSessionManager::SetSpecificWindowZIndex(WindowType windowType, int3
             setSpecificWindowZIndexFunc_(windowType, zIndex, SetSpecificZIndexReason::SET);
             {
                 std::lock_guard<std::mutex> lock(specificZIndexByPidMapMutex_);
-                auto iter = specificZIndexByPidMap_.find(displayGroupId);
-                if (iter == specificZIndexByPidMap_.end()) {
-                    std::unordered_set<std::string> windowTypeList({ windowType });
-                    specificZIndexByPidMap_.emplace(callingPid, windowTypeList);
-                } else {
-                    iter->second.push_back(windowType);
-                }
+                specificZIndexByPidMap_[windowType] = callingPid;
             }
         } else {
             TLOGNE(WmsLogTag::WMS_FOCUS, "setSpecificWindowZIndexFunc_ is nullptr");
@@ -14299,28 +14293,37 @@ WSError SceneSessionManager::SetSpecificWindowZIndex(WindowType windowType, int3
 }
 
 /** @note @window.hierarchy */
-void SceneSessionManager::ResetSpecificWindowZIndex(int32_t pid)
+WSError SceneSessionManager::ResetSpecificWindowZIndex(int32_t pid)
 {
     const char* const where = __func__;
-    return taskScheduler_->PostSyncTask([this, windowType, zIndex, where] {
+    return taskScheduler_->PostSyncTask([this, pid, where] {
         TLOGNI(WmsLogTag::WMS_FOCUS, "windowType: %{public}d, zIndex: %{public}d", windowType, zIndex);
+        std::vector<WindowType> windowTypeList;
         {
             std::lock_guard<std::mutex> lock(specificZIndexByPidMapMutex_);
-            auto iter = specificZIndexByPidMap_.find(pid);
-            if (iter == specificZIndexByPidMap_.end()) {
-                TLOGE(WmsLogTag::WMS_FOCUS, "not found with pid: %{public}d", pid);
-                return;
-            }
-            std::vector<WindowType> windowTypeList = iter->second;
-            if (setSpecificWindowZIndexFunc_) {
-                for (auto windowType : windowTypeList) {
-                    setSpecificWindowZIndexFunc_(windowType, 0, SetSpecificZIndexReason::RESET);
+            for (const auto& item : specificZIndexByPidMap_) {
+                if (item.second == pid) {
+                    windowTypeList.push_back(item.first);
                 }
-                specificZIndexByPidMap_.erase(pid)
-            } else {
-                TLOGNE(WmsLogTag::WMS_FOCUS, "resetSpecificWindowZIndexFunc_ is nullptr");
             }
         }
+        if (windowTypeList.size() == 0) {
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        if (setSpecificWindowZIndexFunc_) {
+            for (const auto& windowType : windowTypeList) {
+                setSpecificWindowZIndexFunc_(windowType, 0, SetSpecificZIndexReason::RESET);
+            }
+            {
+                std::lock_guard<std::mutex> lock(specificZIndexByPidMapMutex_);
+                for (const auto& windowType : windowTypeList) {
+                    specificZIndexByPidMap_.erase(windowType);
+                }
+            }
+        } else {
+            TLOGNE(WmsLogTag::WMS_FOCUS, "resetSpecificWindowZIndexFunc_ is nullptr");
+        }
+        return WSError::WS_OK;
     }, __func__);
 }
 

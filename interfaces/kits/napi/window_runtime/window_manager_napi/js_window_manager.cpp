@@ -1971,11 +1971,12 @@ napi_value JsWindowManager::OnSetSpecificSystemWindowZIndex(napi_env env, napi_c
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     WindowType windowType;
-    if (windowTypeValue == static_cast<uint32_t>(ApiWindowType::TYPE_WALLET_SWIPE_CARD)) {
-        windowType = JS_TO_NATIVE_WINDOW_TYPE_MAP.at(static_cast<ApiWindowType>(windowTypeValue));
+    ApiWindowType apiWindowTypeValue = static_cast<ApiWindowType>(windowTypeValue);
+    if (apiWindowTypeValue == ApiWindowType::TYPE_WALLET_SWIPE_CARD) {
+        windowType = JS_TO_NATIVE_WINDOW_TYPE_MAP.at();
     } else {
         TLOGE(WmsLogTag::DEFAULT, "Invalid winType");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
     }
     int32_t zIndex = 0;
     if (!ConvertFromJsValue(env, argv[1], zIndex)) {
@@ -1985,7 +1986,6 @@ napi_value JsWindowManager::OnSetSpecificSystemWindowZIndex(napi_env env, napi_c
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask = [windowType, zIndex, env, task = napiAsyncTask] {
-        std::vector<int32_t> windowIds;
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().
             SetSpecificSystemWindowZIndex(windowType, zIndex));
         if (ret == WmErrorCode::WM_OK) {

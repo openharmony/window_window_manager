@@ -1094,11 +1094,13 @@ WMError WindowAdapter::SetSpecificWindowZIndex(WindowType windowType, int32_t zI
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
-    if (updateMap) {
+    WMError ret = static_cast<WMError>(wmsProxy->SetSpecificWindowZIndex(windowType, zIndex));
+    if (updateMap && ret == WMError::WM_OK) {
         specificZIndexMap_[windowType] = zIndex;
     }
-    return static_cast<WMError>(
-        wmsProxy->SetSpecificWindowZIndex(windowType, zIndex));
+    TLOGI(WmsLogTag::WMS_FOCUS, "windowType: %{public}d, zIndex: %{public}d",
+        windowType, zIndex);
+    return ret;
 }
 
 void WindowAdapter::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
