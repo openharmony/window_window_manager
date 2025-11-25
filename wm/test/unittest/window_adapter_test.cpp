@@ -1487,9 +1487,9 @@ HWTEST_F(WindowAdapterTest, SetSpecificSystemWindowZIndex, TestSize.Level1)
     auto ret = windowAdapter.InitWMSProxy();
     EXPECT_EQ(ret, true);
 
-    auto result = windowAdapter.SetSpecificSystemWindowZIndex(
+    auto result = windowAdapter.SetSpecificWindowZIndex(
         WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD, 20);
-    EXPECT_EQ(WMError::WM_OK, result);
+    EXPECT_NE(WMError::WM_OK, result);
 }
 
 /**

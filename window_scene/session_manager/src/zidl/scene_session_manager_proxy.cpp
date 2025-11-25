@@ -2568,7 +2568,7 @@ WSError SceneSessionManagerProxy::ResetSpecificWindowZIndex(int32_t pid)
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "remote is null");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
@@ -2580,7 +2580,7 @@ WSError SceneSessionManagerProxy::ResetSpecificWindowZIndex(int32_t pid)
     int32_t result = 0;
     if (!reply.ReadInt32(result)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Failed to read result");
-        return WSError::WS_ERROR_IPC_FAILED
+        return WSError::WS_ERROR_IPC_FAILED;
     }
     return static_cast<WSError>(result);
 }

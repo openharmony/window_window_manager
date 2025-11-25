@@ -65,7 +65,7 @@ constexpr int ARG_INDEX_FOUR = 4;
 constexpr int32_t RESTYPE_RECLAIM = 100001;
 const std::string RES_PARAM_RECLAIM_TAG = "reclaimTag";
 const std::string CREATE_SYSTEM_SESSION_CB = "createSpecificSession";
-const std::string SET_SPECIFIC_SESSION_ZINDE_CB = "setSpecificWindowZIndex";
+const std::string SET_SPECIFIC_SESSION_ZINDEX_CB = "setSpecificWindowZIndex";
 const std::string CREATE_KEYBOARD_SESSION_CB = "createKeyboardSession";
 const std::string RECOVER_SCENE_SESSION_CB = "recoverSceneSession";
 const std::string STATUS_BAR_ENABLED_CHANGE_CB = "statusBarEnabledChange";
@@ -117,7 +117,7 @@ const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {UI_EFFECT_SET_PARAMS_CB,       ListenerFunctionType::UI_EFFECT_SET_PARAMS_CB},
     {UI_EFFECT_ANIMATE_TO_CB,      ListenerFunctionType::UI_EFFECT_ANIMATE_TO_CB},
     {VIRTUAL_DENSITY_CHANGE_CB,   ListenerFunctionType::VIRTUAL_DENSITY_CHANGE_CB},
-    {SET_SPECIFIC_SESSION_ZINDE_CB,     ListenerFunctionType::SET_SPECIFIC_SESSION_ZINDE_CB},
+    {SET_SPECIFIC_SESSION_ZINDEX_CB,     ListenerFunctionType::SET_SPECIFIC_SESSION_ZINDEX_CB},
 };
 } // namespace
 
@@ -388,7 +388,7 @@ void JsSceneSessionManager::OnSetSpecificWindowZIndex(WindowType windowType, int
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "windowType: %{public}d, zIndex: %{public}d, reason: %{public}d",
         windowType, zIndex, reason);
-    auto task = [this, windowType, zIndex, reason, jsCallBack = GetJSCallback(SET_SPECIFIC_SESSION_ZINDE_CB),
+    auto task = [this, windowType, zIndex, reason, jsCallBack = GetJSCallback(SET_SPECIFIC_SESSION_ZINDEX_CB),
         env = env_]() {
         if (jsCallBack == nullptr) {
             TLOGNE(WmsLogTag::WMS_FOCUS, "jsCallBack is nullptr");
@@ -396,7 +396,7 @@ void JsSceneSessionManager::OnSetSpecificWindowZIndex(WindowType windowType, int
         }
         uint32_t jsSessionType = static_cast<uint32_t>(GetApiType(windowType));
         napi_value argv[] = { CreateJsValue(env, jsSessionType),
-                              CreateJsValue(env, zIndex)
+                              CreateJsValue(env, zIndex),
                               CreateJsValue(env, reason) };
         napi_status ret = napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(),
             ArraySize(argv), argv, nullptr);
@@ -1700,7 +1700,7 @@ void JsSceneSessionManager::ProcessRegisterCallback(ListenerFunctionType listene
         case ListenerFunctionType::VIRTUAL_DENSITY_CHANGE_CB:
             RegisterVirtualPixelRatioChangeCallback();
             break;
-        case ListenerFunctionType::SET_SPECIFIC_SESSION_ZINDE_CB:
+        case ListenerFunctionType::SET_SPECIFIC_SESSION_ZINDEX_CB:
             RegisterSetSpecificWindowZIndexCallback();
             break;
         case ListenerFunctionType::NOTIFY_SUPPORT_ROTATION_REGISTERED_CB:
