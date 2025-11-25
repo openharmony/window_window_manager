@@ -124,6 +124,10 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) c
     if (WindowInputIntercept::GetInstance().IsInputIntercept(keyEvent)) {
         return;
     }
+    if (WindowInputRedistributeImpl::GetInstance().SendEvent(
+        InputRedistributeTiming::REDISTRIBUTE_BEFORE_SEND_TO_COMPONENT, keyEvent)) {
+        return;
+    }
     HandleInputEvent(keyEvent);
 }
 
