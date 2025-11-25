@@ -158,6 +158,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "WindowAnimationCurve", WindowAnimationCurveInit(env));
     napi_set_named_property(env, exportObj, "SupportFunctionType", CreateSupportType(env));
     napi_set_named_property(env, exportObj, "WaterfallResidentState", CreateWaterfallResidentState(env));
+    napi_set_named_property(env, exportObj, "CompatibleStyleMode", CreateCompatibleStyleMode(env));
 
     const char* moduleName = "JsSceneSessionManager";
     BindNativeFunction(env, exportObj, "setBehindWindowFilterEnabled",
@@ -1693,6 +1694,9 @@ void JsSceneSessionManager::ProcessRegisterCallback(ListenerFunctionType listene
             break;
         case ListenerFunctionType::SET_SPECIFIC_SESSION_ZINDE_CB:
             RegisterSetSpecificWindowZIndexCallback();
+            break;
+        case ListenerFunctionType::NOTIFY_SUPPORT_ROTATION_REGISTERED_CB:
+            ProcessSupportRotationRegister();
             break;
         default:
             break;

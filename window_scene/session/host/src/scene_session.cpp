@@ -921,8 +921,12 @@ void SceneSession::ApplySessionEventParam(SessionEvent event, const SessionEvent
         case SessionEvent::EVENT_MAXIMIZE:
             sessionEventParam_.waterfallResidentState = param.waterfallResidentState;
             break;
+        case SessionEvent::EVENT_SWITCH_COMPATIBLE_MODE:
+            sessionEventParam_.compatibleStyleMode = param.compatibleStyleMode;
+            break;
         default:
             sessionEventParam_.waterfallResidentState = static_cast<uint32_t>(WaterfallResidentState::UNCHANGED);
+            sessionEventParam_.compatibleStyleMode = static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_DEFAULT);
             break;
     }
 }
@@ -1255,6 +1259,7 @@ void SceneSession::RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&&
             TLOGNI(WmsLogTag::WMS_LIFE,
                 "notify appUseControl when register, key: %{public}s, control: %{public}d, controlRecent: %{public}d",
                 key.c_str(), info.isNeedControl, info.isControlRecentOnly);
+            session->SetAppControlInfo(type, info);
             session->onUpdateAppUseControlFunc_(type, info.isNeedControl, info.isControlRecentOnly);
             if (info.isNeedControl && !info.isControlRecentOnly) {
                 appUseControlResult = true;

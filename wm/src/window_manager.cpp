@@ -2775,7 +2775,7 @@ void WindowManager::NotifyWMSWindowDestroyed(const WindowLifeCycleInfo& lifeCycl
 WMError WindowManager::AddSessionBlackList(
     const std::unordered_set<std::string>& bundleNames, const std::unordered_set<std::string>& privacyWindowTags)
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "in");
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
     auto ret = WindowAdapter::GetInstance(userId_).AddSessionBlackList(bundleNames, privacyWindowTags);
     return ret;
 }
@@ -2783,7 +2783,7 @@ WMError WindowManager::AddSessionBlackList(
 WMError WindowManager::RemoveSessionBlackList(
     const std::unordered_set<std::string>& bundleNames, const std::unordered_set<std::string>& privacyWindowTags)
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "in");
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
     auto ret = WindowAdapter::GetInstance(userId_).RemoveSessionBlackList(bundleNames, privacyWindowTags);
     return ret;
 }
