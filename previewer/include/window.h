@@ -231,6 +231,11 @@ public:
         { return WMError::WM_OK; }
     virtual void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
         SystemBarProperty& property) {}
+    virtual WMError UpdateSystemBarPropertyForPage(WindowType type,
+        const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag)
+    {
+        return WMError::WM_OK;
+    }
     virtual WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) = 0;
     virtual WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) = 0;
     virtual WMError SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,

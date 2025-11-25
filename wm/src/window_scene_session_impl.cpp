@@ -913,7 +913,8 @@ void WindowSceneSessionImpl::UpdateDefaultStatusBarColor()
     statusBarProp.settingFlag_ = static_cast<SystemBarSettingFlag>(
         static_cast<uint32_t>(statusBarProp.settingFlag_) |
         static_cast<uint32_t>(SystemBarSettingFlag::FOLLOW_SETTING));
-    SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProp);
+    SystemBarPropertyFlag systemBarPropertyFlag = { false, false, true, false };
+    UpdateSystemBarPropertyForPage(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProp, systemBarPropertyFlag);
 }
 
 void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSession)
@@ -3114,28 +3115,53 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
         auto property = GetSystemBarPropertyByType(systemBarType);
         property.enable_ = systemBarPropertyFlag.enableFlag ?
             systemBarProperties.at(systemBarType).enable_ : property.enable_;
+        property.settingFlag_ |= systemBarPropertyFlag.enableFlag ?
+            SystemBarSettingFlag::ENABLE_SETTING : SystemBarSettingFlag::DEFAULT_SETTING;
         property.backgroundColor_ = systemBarPropertyFlag.backgroundColorFlag ?
             systemBarProperties.at(systemBarType).backgroundColor_ : property.backgroundColor_;
         property.contentColor_ = systemBarPropertyFlag.contentColorFlag ?
             systemBarProperties.at(systemBarType).contentColor_ : property.contentColor_;
+        property.settingFlag_ |=
+            (systemBarPropertyFlag.backgroundColorFlag || systemBarPropertyFlag.contentColorFlag) ?
+            SystemBarSettingFlag::COLOR_SETTING : SystemBarSettingFlag::DEFAULT_SETTING;
         property.enableAnimation_ = systemBarPropertyFlag.enableAnimationFlag ?
             systemBarProperties.at(systemBarType).enableAnimation_ : property.enableAnimation_;
 
-        if (systemBarPropertyFlag.enableFlag) {
-            property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
-        }
-        if (systemBarPropertyFlag.backgroundColorFlag || systemBarPropertyFlag.contentColorFlag) {
-            property.settingFlag_ |= SystemBarSettingFlag::COLOR_SETTING;
-        }
-        if (systemBarPropertyFlag.enableFlag || systemBarPropertyFlag.backgroundColorFlag ||
-            systemBarPropertyFlag.contentColorFlag || systemBarPropertyFlag.enableAnimationFlag) {
-            auto err = SetSystemBarProperty(systemBarType, property);
-            if (err != WMError::WM_OK) {
-                return err;
-            }
+        auto ret = UpdateSystemBarPropertyForPage(systemBarType, property, systemBarPropertyFlag);
+        if (ret != WMError::WM_OK) {
+            TLOGE(WmsLogTag::WMS_IMMS, "set failed");
+            return ret;
         }
     }
     return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::UpdateSystemBarPropertyForPage(WindowType type,
+    const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag)
+{
+    bool isUsedPageEnabled = false;
+    {
+        std::lock_guard<std::mutex> lock(systemBarPropertyForPageMapMutex_);
+        auto iter = systemBarPropertyForPageMap_.find(type);
+        if (iter != systemBarPropertyForPageMap_.end() && iter->second.has_value()) {
+            auto& prop = *iter->second;
+            prop.enable_ =  systemBarPropertyFlag.enableFlag ? systemBarProperty.enable_ : prop.enable_;
+            prop.backgroundColor_ =  systemBarPropertyFlag.backgroundColorFlag ?
+                systemBarProperty.backgroundColor_ : prop.backgroundColor_;
+            prop.contentColor_ =  systemBarPropertyFlag.contentColorFlag ?
+                systemBarProperty.contentColor_ : prop.contentColor_;
+            prop.enableAnimation_ =  systemBarPropertyFlag.enableAnimationFlag ?
+                systemBarProperty.enableAnimation_ : prop.enableAnimation_;
+            prop.settingFlag_ |=  systemBarProperty.settingFlag_;
+            isUsedPageEnabled = true;
+        }
+    }
+    auto ret = SetSystemBarProperty(type,
+        isUsedPageEnabled ? systemBarPropertyForPageMap_[type].value() : systemBarProperty);
+    if (ret == WMError::WM_OK) {
+        property_->SetSystemBarProperty(type, systemBarProperty);
+    }
+    return ret;
 }
 
 WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
@@ -3180,6 +3206,10 @@ WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(WindowType type, std
         return WMError::WM_DO_NOTHING;
     }
     if (property == std::nullopt) {
+        {
+            std::lock_guard<std::mutex> lock(systemBarPropertyForPageMapMutex_);
+            systemBarPropertyForPageMap_[type] = std::nullopt;
+        }
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u property is nullptr use main window prop", GetWindowId());
         return NotifySpecificWindowSessionProperty(type, GetSystemBarPropertyByType(type));
     }
@@ -3188,6 +3218,10 @@ WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(WindowType type, std
         GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type),
         property->enable_, property->backgroundColor_,
         property->contentColor_, property->enableAnimation_, property->settingFlag_);
+    {
+        std::lock_guard<std::mutex> lock(systemBarPropertyForPageMapMutex_);
+        systemBarPropertyForPageMap_[type] = property;
+    }
     auto lastProperty = GetSystemBarPropertyByType(type);
     property_->SetSystemBarProperty(type, property.value());
     auto ret = NotifySpecificWindowSessionProperty(type, property.value());

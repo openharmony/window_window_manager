@@ -988,6 +988,12 @@ WMError WindowImpl::UpdateSystemBarProperties(
     return WMError::WM_OK;
 }
 
+WMError WindowImpl::UpdateSystemBarPropertyForPage(WindowType type,
+    const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag)
+{
+    return SetSystemBarProperty(type, systemBarProperty);
+}
+
 WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
 {
     WLOGI("Window %{public}u type %{public}u enable:%{public}u, bgColor:%{public}x, Color:%{public}x ",

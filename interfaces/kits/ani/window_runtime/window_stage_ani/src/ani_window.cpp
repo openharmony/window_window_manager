@@ -831,40 +831,30 @@ void AniWindow::SetSystemBarProperties(ani_env* env, ani_object aniSystemBarProp
 }
 
 ani_object AniWindow::SetSpecificSystemBarEnabled(ani_env* env, ani_string name, ani_boolean enable,
-    ani_boolean enableAnimation)
+    ani_object enableAnimation)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] SetSystemBarEnable");
-    std::map<WindowType, SystemBarProperty> aniSystemBarProperties;
-    if (!AniWindowUtils::SetSpecificSystemBarEnabled(env, aniSystemBarProperties, name, enable, enableAnimation)) {
+    TLOGI(WmsLogTag::WMS_IMMS, "[ANI]");
+    WindowType type = WindowType::WINDOW_TYPE_STATUS_BAR;
+    SystemBarProperty property;
+    SystemBarPropertyFlag propertyFlag;
+    if (!AniWindowUtils::GetSpecificBarStatus(env, name, enable, enableAnimation, type, property, propertyFlag)) {
         TLOGE(WmsLogTag::WMS_IMMS, "[ANI] invalid param or argc");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    std::map<WindowType, SystemBarProperty> systemBarProperties;
-    std::string barName;
-    ani_status ret = AniWindowUtils::GetStdString(env, name, barName);
-    if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_IMMS, "[ANI] invalid param of name");
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "[ANI] windowToken_ is nullptr");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-
-    AniWindowUtils::GetSpecificBarStatus(windowToken_, barName, systemBarProperties, systemBarProperties);
-    WmErrorCode err = (windowToken_ == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : WmErrorCode::WM_OK;
-    if (barName.compare("status") == 0) {
-        err = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetSpecificBarProperty(
-            WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperties.at(WindowType::WINDOW_TYPE_STATUS_BAR)));
-    } else if (barName.compare("navigation") == 0) {
-        err = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetSpecificBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR,
-            systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_BAR)));
-    } else if (barName.compare("navigationIndicator") == 0) {
-        err = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetSpecificBarProperty(
-            WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR,
-            systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR)));
-    }
-
+    auto systemBarProperty = windowToken_->GetSystemBarPropertyByType(type);
+    systemBarProperty.enable_ = propertyFlag.enableFlag ? property.enable_ : systemBarProperty.enable_;
+    systemBarProperty.enableAnimation_ =
+        propertyFlag.enableAnimationFlag ? property.enableAnimation_ : systemBarProperty.enableAnimation_;
+    systemBarProperty.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
+    auto err = WM_JS_TO_ERROR_CODE_MAP.at(
+        windowToken_->UpdateSystemBarPropertyForPage(type, systemBarProperty, propertyFlag));
     if (err == WmErrorCode::WM_OK) {
         return AniWindowUtils::CreateAniUndefined(env);
     }
-
     TLOGE(WmsLogTag::WMS_IMMS, "SetSpecificSystemBarEnabled failed, ret = %{public}d", err);
     return AniWindowUtils::AniThrowError(env, err);
 }
@@ -1033,7 +1023,7 @@ static ani_int WindowSetSystemBarProperties(ani_env* env, ani_object obj,
 }
 
 static ani_int WindowSetSpecificSystemBarEnabled(ani_env* env, ani_object obj, ani_long nativeObj,
-    ani_string name, ani_boolean enable, ani_boolean enableAnimation)
+    ani_string name, ani_boolean enable, ani_object enableAnimation)
 {
     using namespace OHOS::Rosen;
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
@@ -1150,7 +1140,7 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(WindowSetWindowLayoutFullScreen)},
         ani_native_function {"setWindowSystemBarProperties", "JL@ohos/window/window/SystemBarProperties;:I",
             reinterpret_cast<void *>(WindowSetSystemBarProperties)},
-        ani_native_function {"setSpecificSystemBarEnabled", "JLstd/core/String;ZZ:I",
+        ani_native_function {"setSpecificSystemBarEnabled", "lC{std.core.String}zC{std.core.Boolean}:i",
             reinterpret_cast<void *>(WindowSetSpecificSystemBarEnabled)},
         ani_native_function {"setWindowColorSpaceSync", "JI:V",
             reinterpret_cast<void *>(AniWindow::SetWindowColorSpace)},
