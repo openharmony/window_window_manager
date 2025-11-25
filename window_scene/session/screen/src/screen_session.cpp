@@ -924,7 +924,7 @@ void ScreenSession::HandleKeyboardOnPropertyChange(ScreenProperty& screenPropert
         screenProperty.SetValidWidth(screenBounds.rect_.GetHeight());
     }
     screenProperty.SetScreenAreaHeight(DISPLAY_B_HEIGHT);
-    TLOG(WmsLogTag::DMS,
+    TLOGI(WmsLogTag::DMS,
          "Client:validHeight=%{public}u validWidth=%{public}u AreaHeight=%{public}u ",
          screenProperty.GetValidHeight(),
          screenProperty.GetValidWidth(),
