@@ -228,16 +228,6 @@ HWTEST_F(MockSessionManagerServiceTest, GetProcessSurfaceNodeIdByPersistentId, T
         pid, persistentIds, surfaceNodeIds);
     ASSERT_EQ(0, surfaceNodeIds.size());
 }
-
-/**
- * @tc.name: ResetSpecificWindowZIndex
- * @tc.desc: ResetSpecificWindowZIndex
- * @tc.type: FUNC
- */
-HWTEST_F(MockSessionManagerServiceTest, ResetSpecificWindowZIndex, TestSize.Level1)
-{
-    MockSessionManagerService::GetInstance().ResetSpecificWindowZIndex(-1, 123);
-}
 }
 }
 }
