@@ -8028,11 +8028,11 @@ void ScreenSessionManager::SetScreenPrivacyWindowList(DisplayId id, std::vector<
         return;
     }
     TLOGW(WmsLogTag::DMS, "enter");
-    std::vector<DisplayId> displayIds = GetAllDisplayIds();
-    auto iter = std::find(displayIds.begin(), displayIds.end(), id);
-    if (iter == displayIds.end()) {
+    std::vector<ScreenId> screenIds = GetAllScreenIds();
+    auto iter = std::find(screenIds.begin(), screenIds.end(), id);
+    if (iter == screenIds.end()) {
         TLOGE(WmsLogTag::DMS, "invalid displayId");
-        return DMError::DM_ERROR_INVALID_PARAM;
+        return;
     }
     auto screenSession = GetScreenSession(id);
     if (screenSession == nullptr) {
@@ -8054,9 +8054,9 @@ DMError ScreenSessionManager::HasPrivateWindow(DisplayId id, bool& hasPrivateWin
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
-    std::vector<ScreenId> screenIds = GetAllScreenIds();
-    auto iter = std::find(screenIds.begin(), screenIds.end(), id);
-    if (iter == screenIds.end()) {
+    std::vector<DisplayId> displayIds = GetAllDisplayIds();
+    auto iter = std::find(displayIds.begin(), displayIds.end(), id);
+    if (iter == displayIds.end()) {
         TLOGE(WmsLogTag::DMS, "invalid displayId");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
