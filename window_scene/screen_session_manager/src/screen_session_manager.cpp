@@ -2625,12 +2625,12 @@ void ScreenSessionManager::CheckAndNotifyChangeMode(const RRect& bounds, sptr<Sc
     if (isSizeChanged) {
         property.SetPropertyChangeReason("active mode change");
         updateScreenSession->PropertyChange(property, ScreenPropertyChangeReason::CHANGE_MODE);
-        NotifyScreenChanged(updateScreenSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
         NotifyDisplayChanged(updateScreenSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
         TLOGI(WmsLogTag::DMS, "notify end");
     } else {
         TLOGI(WmsLogTag::DMS, "no notify");
     }
+    NotifyScreenChanged(updateScreenSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
     NotifyScreenModeChange();
 }
 
