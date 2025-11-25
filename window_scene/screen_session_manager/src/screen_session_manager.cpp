@@ -1344,6 +1344,11 @@ bool ScreenSessionManager::RecoverRestoredMultiScreenMode(sptr<ScreenSession> sc
     std::map<std::string, MultiScreenInfo> multiScreenInfoMap = ScreenSettingHelper::GetMultiScreenInfo();
     std::string serialNumber = screenSession->GetSerialNumber();
     if (!CheckMultiScreenInfoMap(multiScreenInfoMap, serialNumber)) {
+        if (IsDefaultMirrorMode(screenSession->GetRSScreenId())) {
+                TLOGI(WmsLogTag::DMS, "new user recover recommended resolution rsid: %{public}" PRIu64,
+                    screenSession->GetRSScreenId());
+                RecoverScreenActiveMode(screenSession->GetRSScreenId());
+        }
         LockLandExtendIfScreenInfoNull(screenSession);
         return false;
     }
