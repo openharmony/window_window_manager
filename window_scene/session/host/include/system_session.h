@@ -24,7 +24,7 @@ public:
     SystemSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
     ~SystemSession();
 
-    void OnFirstStrongRef(const void*) override;
+    void OnFirstStrongRef(const void* objectId) override;
 
     WSError Show(sptr<WindowSessionProperty> property) override;
     WSError Hide() override;
