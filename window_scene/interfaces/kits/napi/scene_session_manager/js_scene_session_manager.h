@@ -404,7 +404,6 @@ private:
      */
     void RegisterSetSpecificWindowZIndexCallback();
     void OnSetSpecificWindowZIndex(WindowType windowType, int32_t zIndex, SetSpecificZIndexReason reason);
-    
 
     napi_env env_;
     std::shared_mutex jsCbMapMutex_;
