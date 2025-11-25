@@ -303,6 +303,8 @@ void SingleDisplaySuperFoldPolicy::ExitCoordination()
     ScreenSessionManager::GetInstance().SetCoordinationFlag(false);
     NotifyRefreshRateEvent(false);
     FoldDisplayMode displayMode = GetModeMatchStatus();
+    currentDisplayMode_ = displayMode;
+    lastDisplayMode_ = displayMode;
     TLOGI(WmsLogTag::DMS, "Exit coordination, current display mode:%{public}d", displayMode);
     ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
 }
