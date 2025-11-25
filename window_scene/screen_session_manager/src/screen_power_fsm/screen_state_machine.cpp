@@ -310,7 +310,7 @@ void ScreenStateMachine::InitStateMachineTbl()
     stateMachine_[{ScreenTransitionState::WAIT_SCREEN_ADVANCE_ON_READY, 
         ScreenPowerEvent::SET_SCREEN_POWER_FOR_ALL_POWER_ON}] = {
         ScreenTransitionState::SCREEN_ON, &ScreenStateMachine::DoSetScreenPowerForAll};
-    stateMachine_[{ScreenTransitionState::WAIT_SCREEN_ADVANCE_ON_READY, 
+    stateMachine_[{ScreenTransitionState::WAIT_SCREEN_ADVANCE_ON_READY,
         ScreenPowerEvent::SET_SCREEN_POWER_FOR_ALL_POWER_OFF}] = {
         ScreenTransitionState::SCREEN_OFF, &ScreenStateMachine::DoSetScreenPowerForAll};
 }
