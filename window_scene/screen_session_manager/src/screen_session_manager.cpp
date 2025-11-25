@@ -8028,11 +8028,11 @@ void ScreenSessionManager::SetScreenPrivacyWindowList(DisplayId id, std::vector<
         return;
     }
     TLOGW(WmsLogTag::DMS, "enter");
-    std::vector<ScreenId> screenIds = GetAllScreenIds();
-    auto iter = std::find(screenIds.begin(), screenIds.end(), id);
-    if (iter == screenIds.end()) {
+    std::vector<DisplayId> displayIds = GetAllDisplayIds();
+    auto iter = std::find(displayIds.begin(), displayIds.end(), id);
+    if (iter == displayIds.end()) {
         TLOGE(WmsLogTag::DMS, "invalid displayId");
-        return;
+        return DMError::DM_ERROR_INVALID_PARAM;
     }
     auto screenSession = GetScreenSession(id);
     if (screenSession == nullptr) {

@@ -640,7 +640,7 @@ void ScreenSessionManagerClient::SetPrivacyStateByDisplayId(std::unordered_map<D
         TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return;
     }
-    for (auto iter : privacyBundleDisplayId) {
+    for (const auto iter : privacyBundleDisplayId) {
         TLOGD(WmsLogTag::DMS, "displayId: %{public}" PRIu64" hasPrivate: %{public}d", iter.first, iter.second);
     }
     screenSessionManager_->SetPrivacyStateByDisplayId(privacyBundleDisplayId);

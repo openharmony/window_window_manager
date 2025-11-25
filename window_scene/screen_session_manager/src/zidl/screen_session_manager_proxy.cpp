@@ -3411,7 +3411,7 @@ void ScreenSessionManagerProxy::SetPrivacyStateByDisplayId(std::unordered_map<Di
         TLOGE(WmsLogTag::DMS, "Write privacyBundleDisplayId size failed");
         return;
     }
-    for (auto iter : privacyBundleDisplayId) {
+    for (const auto iter : privacyBundleDisplayId) {
         if (!data.WriteUint64(iter.first)) {
             TLOGE(WmsLogTag::DMS, "Write DisplayId failed");
             return;
