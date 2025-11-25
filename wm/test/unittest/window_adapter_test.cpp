@@ -1475,6 +1475,38 @@ HWTEST_F(WindowAdapterTest, UnregisterWMSConnectionChangedListener, TestSize.Lev
     ASSERT_NE(nullptr, instance);
     instance->UnregisterWMSConnectionChangedListener();
 }
+
+/**
+ * @tc.name: SetSpecificSystemWindowZIndex
+ * @tc.desc: SetSpecificSystemWindowZIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, SetSpecificSystemWindowZIndex, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    auto ret = windowAdapter.InitWMSProxy();
+    EXPECT_EQ(ret, true);
+
+    auto result = windowAdapter.SetSpecificSystemWindowZIndex(
+        WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD, 20);
+    EXPECT_EQ(WMError::WM_OK, result);
+}
+
+/**
+ * @tc.name: RecoverSpecificZIndexSetByApp
+ * @tc.desc: RecoverSpecificZIndexSetByApp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, RecoverSpecificZIndexSetByApp, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    sptr<WindowAdapter> instance = &WindowAdapter::GetInstance(-1);
+    ASSERT_NE(nullptr, instance);
+    instance->RecoverSpecificZIndexSetByApp();
+
+    instance->specificZIndexMap_[WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD] = 20;
+    instance->RecoverSpecificZIndexSetByApp();
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

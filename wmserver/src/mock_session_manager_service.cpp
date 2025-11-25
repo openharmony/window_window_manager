@@ -480,14 +480,18 @@ void MockSessionManagerService::ResetSpecificWindowZIndex(int32_t clientUserId, 
     TLOGI(WmsLogTag::WMS_FOCUS, "clientUserId: %{public}d, pid: %{public}d", clientUserId, pid);
     sptr<IRemoteObject> remoteObject = GetSceneSessionManagerByUserId(clientUserId);
     if (!remoteObject) {
-        TLOGI(WmsLogTag::WMS_FOCUS, "remoteObject is null");
+        TLOGE(WmsLogTag::WMS_FOCUS, "remoteObject is null");
         return;
     }
     sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(remoteObject);
+    if (sceneSessionManagerProxy == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "sessionManagerServiceProxy is nullptr");
+        return;
+    }
     WMError ret = sceneSessionManagerProxy->ResetSpecificWindowZIndex(pid);
-    TLOGI(WmsLogTag::WMS_FOCUS, "ret:  %{public}d", ret);
+    TLOGI(WmsLogTag::WMS_FOCUS, "ret: %{public}d", ret);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "failed!");
+        TLOGE(WmsLogTag::WMS_FOCUS, "failed, result: %{public}d", ret);
     }
 }
 

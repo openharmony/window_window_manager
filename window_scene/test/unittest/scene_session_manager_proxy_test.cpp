@@ -2303,12 +2303,12 @@ HWTEST_F(sceneSessionManagerProxyTest, SetSpecificWindowZIndex, TestSize.Level1)
 
     MockMessageParcel::SetWriteUint32ErrorFlag(true);
     ret = proxy->SetSpecificWindowZIndex(WindowType::WINDOW_TYPE_FLOAT, 20);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
     MockMessageParcel::SetWriteUint32ErrorFlag(false);
 
     MockMessageParcel::SetWriteInt32ErrorFlag(true);
     ret = proxy->SetSpecificWindowZIndex(WindowType::WINDOW_TYPE_FLOAT, 20);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
     MockMessageParcel::SetWriteInt32ErrorFlag(false);
 
     ret = proxy->SetSpecificWindowZIndex(WindowType::WINDOW_TYPE_FLOAT, 20);
