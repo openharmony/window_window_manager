@@ -14301,8 +14301,7 @@ WSError SceneSessionManager::ResetSpecificWindowZIndex(int32_t pid)
 {
     const char* const where = __func__;
     return taskScheduler_->PostSyncTask([this, pid, where] {
-        TLOGNI(WmsLogTag::WMS_FOCUS, "
-            id: %{public}d", pid);
+        TLOGNI(WmsLogTag::WMS_FOCUS, "id: %{public}d", pid);
         std::vector<WindowType> windowTypeList;
         {
             std::lock_guard<std::mutex> lock(specificZIndexByPidMapMutex_);
