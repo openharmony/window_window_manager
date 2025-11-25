@@ -1357,7 +1357,7 @@ HWTEST_F(SceneSessionManagerTest10, GetSessionForAppUseControl02, TestSize.Level
     sessionInfo.persistentId_ = 100;
     sessionInfo.bundleName_ = "bundleName";
     sessionInfo.appIndex_ = 0;
-    sessionInfo.windowType_ = 1000; 
+    sessionInfo.windowType_ = 1000;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ssm_->sceneSessionMap_.emplace(100, sceneSession);
 
