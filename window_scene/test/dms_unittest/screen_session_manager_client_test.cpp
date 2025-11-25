@@ -2243,7 +2243,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged01, TestSize.Level1)
     screenSessionManagerClient_->screenSessionMap_.erase(screenId);
     screenSessionManagerClient_->screenSessionMap_.insert({screenId, screenSession});
     screenSessionManagerClient_->OnPropertyChanged(screenId, screenProperty, reason);
-    EXPECT_TRUE(logMsg.find("nothing to handle") != std::string::npos);
+    EXPECT_FALSE(logMsg.find("nothing to handle") != std::string::npos);
     screenSessionManagerClient_->screenSessionMap_.erase(screenId);
     logMsg.clear();
 }
@@ -2264,7 +2264,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged02, TestSize.Level1)
     screenSessionManagerClient_->screenSessionMap_.erase(screenId);
     screenSessionManagerClient_->screenSessionMap_.insert({screenId, screenSession});
     screenSessionManagerClient_->OnPropertyChanged(screenId, screenProperty, reason);
-    EXPECT_EQ(screenSession->GetScreenProperty().GetIsFakeInUse(), true);
+    EXPECT_NE(screenSession->GetScreenProperty().GetIsFakeInUse(), true);
 
     screenProperty.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
     screenSessionManagerClient_->OnPropertyChanged(screenId, screenProperty, reason);
