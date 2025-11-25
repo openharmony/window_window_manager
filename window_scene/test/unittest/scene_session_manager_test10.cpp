@@ -1366,16 +1366,16 @@ HWTEST_F(SceneSessionManagerTest10, GetSessionForAppUseControl02, TestSize.Level
     controlById2.bundleName_ = "errorBundleName";
     controlById2.appIndex_ = 0;
 
-    bool result = ssm_->GetSessionForAppUseControl(controlById);
+    bool result = ssm_->GetSessionForAppUseControl(controlById2);
     EXPECT_EQ(result, nullptr);
 }
 
 /**
- * @tc.name: GetSessionForAppUseControl02
+ * @tc.name: GetSessionForAppUseControl03
  * @tc.desc: GetSessionForAppUseControl
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, GetSessionForAppUseControl02, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest10, GetSessionForAppUseControl03, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     sessionInfo.persistentId_ = 100;
@@ -1390,7 +1390,7 @@ HWTEST_F(SceneSessionManagerTest10, GetSessionForAppUseControl02, TestSize.Level
     controlById3.bundleName_ = "bundleName";
     controlById3.appIndex_ = 100;
 
-    bool result = ssm_->GetSessionForAppUseControl(controlById);
+    bool result = ssm_->GetSessionForAppUseControl(controlById3);
     EXPECT_EQ(result, nullptr);
 }
 
