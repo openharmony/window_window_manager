@@ -3791,7 +3791,7 @@ WMError WindowSceneSessionImpl::SwitchCompatibleMode(CompatibleStyleMode styleMo
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (!WindowHelper::IsMainWindow(GetType())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "recover fail, not main");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "switch compatible style fail, not main");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
