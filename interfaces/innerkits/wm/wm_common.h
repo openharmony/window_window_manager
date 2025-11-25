@@ -189,6 +189,16 @@ enum class WindowType : uint32_t {
 
     WINDOW_TYPE_UI_EXTENSION = 3000
 };
+ 
+/**
+ * @struct RealTimeSwitchInfo.
+ *
+ * @brief the information for compatible mode App when switching window style in real time.
+ */
+struct RealTimeSwitchInfo {
+    bool isNeedChange_{false};
+    uint32_t showTypes_{0};
+};
 
 /**
  * @struct HookInfo.
@@ -3418,6 +3428,21 @@ enum class WaterfallResidentState : uint32_t {
 
     /** Disable the resident state but keep the current waterfall layout state unchanged. */
     CANCEL = 3,
+};
+
+/**
+ * @enum CompatibleMode
+ * @brief Controls the compatible aspect ratio modes for window display.
+ */
+enum class CompatibleStyleMode : uint32_t {
+    // Default aspect ratio
+    LANDSCAPE_DEFAULT = 0,
+    // 18:9 aspect ratio
+    LANDSCAPE_18_9 = 1,
+    // 1:1 aspect ratio
+    LANDSCAPE_1_1 = 3,
+    // 2:3 aspect ratio
+    LANDSCAPE_2_3 = 4
 };
 }
 }

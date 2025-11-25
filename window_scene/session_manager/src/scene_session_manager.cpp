@@ -6955,7 +6955,7 @@ void SceneSessionManager::RegisterSessionSnapshotFunc(const sptr<SceneSession>& 
                 sceneSession->GetPersistentId());
             return;
         }
-        auto abilityInfo = sceneSession->GetSessionInfo().abilityInfo;
+        auto abilityInfo = sceneSession->GetSessionInfoAbilityInfo();
         if (abilityInfo == nullptr) {
             TLOGNW(WmsLogTag::WMS_SYSTEM, "NotifySessionSnapshotFunc, abilityInfo is nullptr");
             return;
@@ -10883,7 +10883,9 @@ WMError SceneSessionManager::AddSessionBlackList(
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    auto task = [this, &bundleNames, &privacyWindowTags]() {
+    auto task = [this, &bundleNames, &privacyWindowTags, where = __func__]() {
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, bundleSize: %{public}zu, privacySize: %{public}zu",
+            where, bundleNames.size(), privacyWindowTags.size());
         for (const auto& bundleName : bundleNames) {
             bundleRSBlackListConfigMap_.insert({ bundleName, {} });
             bundleRSBlackListConfigMap_[bundleName].insert(privacyWindowTags.begin(), privacyWindowTags.end());
@@ -10921,7 +10923,9 @@ WMError SceneSessionManager::RemoveSessionBlackList(
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    auto task = [this, &bundleNames, &privacyWindowTags]() {
+    auto task = [this, &bundleNames, &privacyWindowTags, where = __func__]() {
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, bundleSize: %{public}zu, privacySize: %{public}zu",
+            where, bundleNames.size(), privacyWindowTags.size());
         for (const auto& bundleName : bundleNames) {
             bundleRSBlackListConfigMap_.insert({ bundleName, {} });
             for(const auto& privacyWindowTag : privacyWindowTags) {
@@ -17112,7 +17116,7 @@ WMError SceneSessionManager::SetImageForRecent(uint32_t imgResourceId, ImageFit 
         TLOGE(WmsLogTag::WMS_PATTERN, "sessionState is invalid");
         return WMError::WM_ERROR_NULLPTR;
     }
-    auto abilityInfo = sceneSession->GetSessionInfo().abilityInfo;
+    auto abilityInfo = sceneSession->GetSessionInfoAbilityInfo();
     if (abilityInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "abilityInfo is null");
         return WMError::WM_ERROR_NULLPTR;
