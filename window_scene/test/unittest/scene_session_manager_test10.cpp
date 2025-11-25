@@ -1323,11 +1323,11 @@ HWTEST_F(SceneSessionManagerTest10, NotifyAppUseControlListInner04, TestSize.Lev
 }
 
 /**
- * @tc.name: IsNeedSkipForAppUseControl01
- * @tc.desc: IsNeedSkipForAppUseControl
+ * @tc.name: GetSessionForAppUseControl01
+ * @tc.desc: GetSessionForAppUseControl
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, IsNeedSkipForAppUseControl01, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest10, GetSessionForAppUseControl01, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     sessionInfo.persistentId_ = 100;
@@ -1342,16 +1342,16 @@ HWTEST_F(SceneSessionManagerTest10, IsNeedSkipForAppUseControl01, TestSize.Level
     controlById.bundleName_ = "bundleName";
     controlById.appIndex_ = 0;
 
-    bool result = ssm_->IsNeedSkipForAppUseControl(controlById);
-    EXPECT_EQ(result, true);
+    bool result = ssm_->GetSessionForAppUseControl(controlById);
+    EXPECT_EQ(result, nullptr);
 }
 
 /**
- * @tc.name: IsNeedSkipForAppUseControl02
- * @tc.desc: IsNeedSkipForAppUseControl
+ * @tc.name: GetSessionForAppUseControl02
+ * @tc.desc: GetSessionForAppUseControl
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, IsNeedSkipForAppUseControl02, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest10, GetSessionForAppUseControl02, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     sessionInfo.persistentId_ = 100;
@@ -1366,16 +1366,16 @@ HWTEST_F(SceneSessionManagerTest10, IsNeedSkipForAppUseControl02, TestSize.Level
     controlById2.bundleName_ = "errorBundleName";
     controlById2.appIndex_ = 0;
 
-    bool result = ssm_->IsNeedSkipForAppUseControl(controlById);
-    EXPECT_EQ(result, true);
+    bool result = ssm_->GetSessionForAppUseControl(controlById);
+    EXPECT_EQ(result, nullptr);
 }
 
 /**
- * @tc.name: IsNeedSkipForAppUseControl02
- * @tc.desc: IsNeedSkipForAppUseControl
+ * @tc.name: GetSessionForAppUseControl02
+ * @tc.desc: GetSessionForAppUseControl
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, IsNeedSkipForAppUseControl02, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest10, GetSessionForAppUseControl02, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     sessionInfo.persistentId_ = 100;
@@ -1390,8 +1390,8 @@ HWTEST_F(SceneSessionManagerTest10, IsNeedSkipForAppUseControl02, TestSize.Level
     controlById3.bundleName_ = "bundleName";
     controlById3.appIndex_ = 100;
 
-    bool result = ssm_->IsNeedSkipForAppUseControl(controlById);
-    EXPECT_EQ(result, true);
+    bool result = ssm_->GetSessionForAppUseControl(controlById);
+    EXPECT_EQ(result, nullptr);
 }
 
 /**
