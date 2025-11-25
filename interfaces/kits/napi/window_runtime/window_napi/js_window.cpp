@@ -4557,7 +4557,7 @@ napi_value JsWindow::OnSetSubWindowZLevel(napi_env env, napi_callback_info info)
     if (errCode == WmErrorCode::WM_OK && !ConvertFromJsValue(env, argv[0], zLevel)) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "failed to convert paramter to zLevel");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-              "[window][setSubWindowZLevel]msg: failed to convert paramter to zLevel");
+            "[window][setSubWindowZLevel]msg: failed to convert paramter to zLevel");
     }
     napi_value lastParam = nullptr;
     napi_value result = nullptr;
@@ -4644,7 +4644,7 @@ napi_value JsWindow::OnSetWindowDelayRaiseOnDrag(napi_env env, napi_callback_inf
     if (result != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_FOCUS, "failed");
         return NapiThrowError(env, WM_JS_TO_ERROR_CODE_MAP.at(result),
-            "[window][setWindowDelayRaiseOnDrag]"));
+            "[window][setWindowDelayRaiseOnDrag]");
     }
     return NapiGetUndefined(env);
 }
@@ -7675,7 +7675,7 @@ napi_value JsWindow::OnSetSubWindowModal(napi_env env, napi_callback_info info)
     if (argc < 1 || argc > 2) { // 1: the minimum param num  2: the maximum param num
         TLOGE(WmsLogTag::WMS_SUB, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "[window][setSubWindowModal]msg: Argc is invalid"));
+            "[window][setSubWindowModal]msg: Argc is invalid");
     }
     bool isModal = false;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], isModal)) {
@@ -9202,7 +9202,7 @@ napi_value JsWindow::OnIsWindowHighlighted(napi_env env, napi_callback_info info
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->IsWindowHighlighted(isHighlighted));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_FOCUS, "get window highlight failed, ret: %{public}d", ret);
-        return NapiThrowError(env, ret,"[window][isWindowHighlighted]");
+        return NapiThrowError(env, ret, "[window][isWindowHighlighted]");
     }
     TLOGI(WmsLogTag::WMS_FOCUS, "get window highlight end, isHighlighted: %{public}u", isHighlighted);
     return CreateJsValue(env, isHighlighted);
