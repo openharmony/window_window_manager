@@ -1342,7 +1342,7 @@ HWTEST_F(SceneSessionManagerTest10, GetSessionForAppUseControl01, TestSize.Level
     controlById.bundleName_ = "bundleName";
     controlById.appIndex_ = 0;
 
-    bool result = ssm_->GetSessionForAppUseControl(controlById);
+    auto result = ssm_->GetSessionForAppUseControl(controlById);
     EXPECT_EQ(result, nullptr);
 }
 
@@ -1357,7 +1357,7 @@ HWTEST_F(SceneSessionManagerTest10, GetSessionForAppUseControl02, TestSize.Level
     sessionInfo.persistentId_ = 100;
     sessionInfo.bundleName_ = "bundleName";
     sessionInfo.appIndex_ = 0;
-    sessionInfo.windowType_ = 1000;
+    sessionInfo.windowType_ = 1000; 
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ssm_->sceneSessionMap_.emplace(100, sceneSession);
 
@@ -1366,7 +1366,7 @@ HWTEST_F(SceneSessionManagerTest10, GetSessionForAppUseControl02, TestSize.Level
     controlById2.bundleName_ = "errorBundleName";
     controlById2.appIndex_ = 0;
 
-    bool result = ssm_->GetSessionForAppUseControl(controlById2);
+    auto result = ssm_->GetSessionForAppUseControl(controlById2);
     EXPECT_EQ(result, nullptr);
 }
 
@@ -1390,7 +1390,7 @@ HWTEST_F(SceneSessionManagerTest10, GetSessionForAppUseControl03, TestSize.Level
     controlById3.bundleName_ = "bundleName";
     controlById3.appIndex_ = 100;
 
-    bool result = ssm_->GetSessionForAppUseControl(controlById3);
+    auto result = ssm_->GetSessionForAppUseControl(controlById3);
     EXPECT_EQ(result, nullptr);
 }
 
