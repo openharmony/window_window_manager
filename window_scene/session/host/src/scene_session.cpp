@@ -2281,8 +2281,9 @@ SessionInfo SceneSession::GetSessionInfoByWant(const std::shared_ptr<AAFwk::Want
     const sptr<SceneSession>& session)
 {
     SessionInfo info;
-    if (session->sessionInfo_.moduleName_ == want->GetElement().GetModuleName() &&
-        session->sessionInfo_.abilityName_ == want->GetElement().GetAbilityName()) {
+    if ((session->sessionInfo_.moduleName_ == want->GetElement().GetModuleName() &&
+        session->sessionInfo_.abilityName_ == want->GetElement().GetAbilityName()) ||
+        session->sessionInfo_.isAtomicService_) {
         session->sessionInfo_.want = want;
         session->sessionInfo_.isRestartApp_ = true;
         session->sessionInfo_.restartCallerPersistentId_ = INVALID_SESSION_ID;
@@ -5765,8 +5766,7 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
                 abilitySessionInfo->supportWindowModes.end());
         }
     }
-    if (info.isAtomicService_ && info.want != nullptr &&
-        (info.want->GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) == AAFwk::Want::FLAG_INSTALL_ON_DEMAND) {
+    if (info.isAtomicService_) {
         SetAtomicServiceInfo(info);
     }
     if (info.want != nullptr) {
