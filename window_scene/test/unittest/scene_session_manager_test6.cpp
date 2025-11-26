@@ -852,7 +852,7 @@ HWTEST_F(SceneSessionManagerTest6, GetSceneSessionPrivacyModeBundles, TestSize.L
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
     DisplayId displayId = 0;
-    std::unordered_set<std::string> privacyBundles;
+    std::unordered_map<DisplayId, std::unordered_set<std::string>> privacyBundles;
     ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundles);
     SessionInfo sessionInfoFirst;
     sessionInfoFirst.bundleName_ = "";
@@ -884,7 +884,7 @@ HWTEST_F(SceneSessionManagerTest6, GetSceneSessionPrivacyModeBundles, TestSize.L
 HWTEST_F(SceneSessionManagerTest6, GetSceneSessionPrivacyModeBundles01, TestSize.Level1)
 {
     DisplayId displayId = 0;
-    std::unordered_set<std::string> privacyBundles;
+    std::unordered_map<DisplayId, std::unordered_set<std::string>> privacyBundles;
     ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundles);
     SessionInfo sessionInfoFirst;
     sessionInfoFirst.bundleName_ = "privacy.test.first";
@@ -922,7 +922,7 @@ HWTEST_F(SceneSessionManagerTest6, GetSceneSessionPrivacyModeBundles01, TestSize
 HWTEST_F(SceneSessionManagerTest6, GetSceneSessionPrivacyModeBundles02, TestSize.Level1)
 {
     DisplayId displayId = 0;
-    std::unordered_set<std::string> privacyBundles;
+    std::unordered_map<DisplayId, std::unordered_set<std::string>> privacyBundles;
     ASSERT_NE(nullptr, ssm_);
     ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundles);
     SessionInfo sessionInfoFirst;
