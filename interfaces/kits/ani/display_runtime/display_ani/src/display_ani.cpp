@@ -432,7 +432,7 @@ ani_status DisplayAni::NspBindNativeFunctions(ani_env* env, ani_namespace nsp)
             reinterpret_cast<void *>(DisplayManagerAni::GetPrimaryDisplaySyncAni)},
         ani_native_function {"getDisplayByIdSyncNative", "C{std.core.Object}l:",
             reinterpret_cast<void *>(DisplayManagerAni::GetDisplayByIdSyncAni)},
-        ani_native_function {"getDefaultDisplaySyncNative", "C{std.core.Object}:",
+        ani_native_function {"getDefaultDisplaySyncNative", ":C{@ohos.display.display.DisplayImpl}",
             reinterpret_cast<void *>(DisplayManagerAni::GetDefaultDisplaySyncAni)},
         ani_native_function {"getAllDisplaysSyncNative", "C{escompat.Array}:",
             reinterpret_cast<void *>(DisplayManagerAni::GetAllDisplaysAni)},

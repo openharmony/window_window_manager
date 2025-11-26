@@ -253,7 +253,7 @@ export interface Display {
 
     hdrFormats: Array<hdrCapability.HDRFormat>;
 
-    sourceMode?:DisplaySourceMode;
+    sourceMode?: DisplaySourceMode;
 
     x?: long;
 
@@ -282,6 +282,33 @@ export class DisplayImpl implements Display {
     static { loadLibrary("displayani_kit.z"); }
 
     constructor() {
+        this.colorSpaces = new Array<colorSpaceManager.ColorSpace>();
+        this.hdrFormats = new Array<hdrCapability.HDRFormat>();
+        this.supportedRefreshRates = new Array<int>();
+    }
+
+    constructor(id: long, name: string, alive: boolean, state: int, refreshRate: int, rotation: int,
+        width: long, height: long, availableHeight: long, availableWidth: long, densityDPI: double,
+        orientation: int, densityPixels: double, scaledDensity: double, xDPI: double, yDPI: double,
+        screenShape: int, sourceMode: int) {
+        this.id = id;
+        this.name = name;
+        this.alive = alive;
+        this.state = state as DisplayState;
+        this.refreshRate = refreshRate;
+        this.rotation = rotation;
+        this.width = width;
+        this.height = height;
+        this.availableHeight = availableHeight;
+        this.availableWidth = availableWidth;
+        this.densityDPI = densityDPI;
+        this.orientation = orientation as Orientation;
+        this.densityPixels = densityPixels;
+        this.scaledDensity = scaledDensity;
+        this.xDPI = xDPI;
+        this.yDPI = yDPI;
+        this.screenShape = screenShape as ScreenShape;
+        this.sourceMode = sourceMode as DisplaySourceMode;
         this.colorSpaces = new Array<colorSpaceManager.ColorSpace>();
         this.hdrFormats = new Array<hdrCapability.HDRFormat>();
         this.supportedRefreshRates = new Array<int>();
@@ -523,12 +550,11 @@ export function getDisplayByIdSync(displayId: long): Display {
 export native function getDisplayByIdSyncNative(obj: object, displayId: long): void;
 
 export function getDefaultDisplaySync(): Display {
-    let display = new DisplayImpl();
-    getDefaultDisplaySyncNative(display as object);
+    let display = getDefaultDisplaySyncNative();
     return display;
 }
 
-export native function getDefaultDisplaySyncNative(obj: object): void;
+export native function getDefaultDisplaySyncNative(): DisplayImpl;
 
 export native function getAllDisplaysSyncNative(displayArray: Array<Display>): void;
 
