@@ -4014,32 +4014,18 @@ DMError ScreenSessionManager::GetBrightnessInfo(DisplayId displayId, ScreenBrigh
 {
     TLOGI(WmsLogTag::DMS, "start");
     ScreenId screenId = 0;
-    const uint64_t HPR_SPECAIL_DISPLAY_ID = 999;
     sptr<ScreenSession> screenSession = GetScreenSession(displayId);
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "GetScreenSession failed");
         return DMError::DM_ERROR_ILLEGAL_PARAM;
     }
-    if (screenSession->rsId_ != SCREEN_ID_INVALID) {
-        displayId = screenSession->rsId_;
-    }
-    if (static_cast<uint64_t>(displayId) != HPR_SPECAIL_DISPLAY_ID) {
-        screenId = displayId;
-        TLOGD(WmsLogTag::DMS, "brightness screenId=%{public}d", static_cast<int32_t>(screenId));
-    }
     BrightnessInfo rsBrightnessInfo;
-    ScreenId rsScreenId;
-    if (!screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId) ||
-        rsScreenId == INVALID_SCREEN_ID) {
-        TLOGE(WmsLogTag::DMS, "No corresponding rsId");
-        return DMError::DM_ERROR_ILLEGAL_PARAM;
-    }
-    auto status = rsInterface_.GetBrightnessInfo(rsScreenId, rsBrightnessInfo);
+    auto status = rsInterface_.GetBrightnessInfo(screenSession->rsId_, rsBrightnessInfo);
     if (static_cast<StatusCode>(status) != StatusCode::SUCCESS) {
         TLOGE(WmsLogTag::DMS, "get screen brightness info failed! status code:%{public}d", status);
         return DMError::DM_ERROR_ILLEGAL_PARAM;
     }
-    TLOGE(WmsLogTag::DMS, "RS brightnessInfo currentHeadroom:%{public}f maxHeadroom:%{public}f sdrNits:%{public}f",
+    TLOGI(WmsLogTag::DMS, "RS brightnessInfo currentHeadroom:%{public}f maxHeadroom:%{public}f sdrNits:%{public}f",
           rsBrightnessInfo.currentHeadroom, rsBrightnessInfo.maxHeadroom, rsBrightnessInfo.sdrNits);
     brightnessInfo.currentHeadroom = rsBrightnessInfo.currentHeadroom;
     brightnessInfo.maxHeadroom = rsBrightnessInfo.maxHeadroom;
