@@ -721,11 +721,6 @@ ScreenPowerState ScreenManager::GetScreenPower()
     return SingletonContainer::Get<ScreenManagerAdapter>().GetScreenPower();
 }
 
-void ScreenManager::SyncScreenPowerState(ScreenPowerState state)
-{
-    SingletonContainer::Get<ScreenManagerAdapter>().SyncScreenPowerState(state);
-}
-
 DMError ScreenManager::SetScreenRotationLocked(bool isLocked)
 {
     return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenRotationLocked(isLocked);
