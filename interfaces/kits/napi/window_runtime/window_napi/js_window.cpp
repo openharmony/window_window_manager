@@ -7685,7 +7685,7 @@ napi_value JsWindow::OnSetWindowTitleMoveEnabled(napi_env env, napi_callback_inf
     bool enable = true;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], enable)) {
         TLOGE(WmsLogTag::WMS_DECOR, "Failed to convert parameter to enable");
-        return NapiThrowError(env,WmErrorCode::WM_ERROR_INVALID_PARAM,
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setWindowTitleMoveEnabled]msg: Failed to convert parameter to enable.");
     }
     if (windowToken_ == nullptr) {
