@@ -32,6 +32,14 @@ namespace Rosen {
 
 class DisplayAniUtils {
 public:
+static ani_status InitAniCreator(ani_env* env,
+        const std::string& aniClassDescriptor, const std::string& aniCtorSignature);
+static ani_object InitAniObjectByCreator(ani_env* env,
+        const std::string& aniClassDescriptor, const std::string aniCtorSignature, ...);
+static ani_object CreateDisplayAniObject(ani_env* env, sptr<DisplayInfo> info);
+
+static void InitDisplayProperties(ani_env* env, ani_object obj, sptr<DisplayInfo> info);
+
 static void ConvertRect(DMRect rect, ani_object rectObj, ani_env* env);
 
 static void ConvertWaterArea(WaterfallDisplayAreaRects waterfallDisplayAreaRects,

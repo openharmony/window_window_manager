@@ -32,6 +32,12 @@ namespace OHOS {
 namespace Rosen {
 using namespace arkts::ani_signature;
 
+namespace {
+    std::mutex g_aniCreatorsMutex;
+    std::unordered_map<std::string,
+        std::pair<ani_class, std::unordered_map<std::string, ani_method>>> globalAniCreators;
+}
+
 static thread_local std::map<DisplayId, std::shared_ptr<DisplayAni>> g_AniDisplayMap;
 std::recursive_mutex g_mutex;
 
@@ -149,6 +155,140 @@ ani_enum_item DisplayAniUtils::CreateAniEnum(ani_env* env, const char* enum_desc
 std::string propName(const std::string_view& name)
 {
     return Builder::BuildPropertyName(name);
+}
+
+ani_object DisplayAniUtils::CreateDisplayAniObject(ani_env* env, sptr<DisplayInfo> info)
+{
+    ani_string aniDisplayName;
+    GetAniString(env, info->GetName(), &aniDisplayName);
+    DisplayState displayState;
+    if (NATIVE_TO_JS_DISPLAY_STATE_MAP.count(info->GetDisplayState()) != 0) {
+        displayState = info->GetDisplayState();
+    } else {
+        displayState = static_cast<DisplayState>(0);
+    }
+    ani_object displayAniObject = InitAniObjectByCreator(env, "@ohos.display.display.DisplayImpl",
+        "lC{std.core.String}ziiilllldiddddii:",
+        ani_long(info->GetDisplayId()), aniDisplayName, ani_boolean(info->GetAliveStatus()),
+        ani_int(info->GetDisplayState()), ani_int(info->GetRefreshRate()), ani_int(info->GetRotation()),
+        ani_long(info->GetWidth()), ani_long(info->GetHeight()),
+        ani_long(info->GetAvailableWidth()), ani_long(info->GetAvailableHeight()),
+        ani_double(info->GetVirtualPixelRatio() * DOT_PER_INCH), ani_int(info->GetDisplayOrientation()),
+        ani_double(info->GetVirtualPixelRatio()), ani_double(info->GetVirtualPixelRatio()),
+        ani_double(info->GetXDpi()), ani_double(info->GetYDpi()), ani_int(info->GetScreenShape()),
+        ani_int(info->GetDisplaySourceMode()));
+    InitDisplayProperties(env, displayAniObject, info);
+    return displayAniObject;
+}
+
+ani_object DisplayAniUtils::InitAniObjectByCreator(ani_env* env,
+    const std::string& aniClassDescriptor, const std::string aniCtorSignature, ...)
+{
+    std::lock_guard<std::mutex> lock(g_aniCreatorsMutex);
+    ani_status status = InitAniCreator(env, aniClassDescriptor, aniCtorSignature);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "InitAniCreator failed, ret %{public}d", status);
+        return DisplayAniUtils::CreateAniUndefined(env);
+    }
+    va_list args;
+    va_start(args, aniCtorSignature);
+    auto& creatorEntry = globalAniCreators[aniClassDescriptor];
+    ani_object aniObject;
+    status = env->Object_New_V(
+        creatorEntry.first,
+        creatorEntry.second[aniCtorSignature],
+        &aniObject,
+        args);
+    va_end(args);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "Object_New_V failed, ret %{public}d", status);
+        return DisplayAniUtils::CreateAniUndefined(env);
+    }
+    return aniObject;
+}
+
+ani_status DisplayAniUtils::InitAniCreator(ani_env* env,
+    const std::string& aniClassDescriptor, const std::string& aniCtorSignature)
+{
+    ani_status status = ANI_OK;
+    auto aniClassIter = globalAniCreators.find(aniClassDescriptor);
+    if (aniClassIter != globalAniCreators.end()) {
+        auto& aniCtorSignatureMap = aniClassIter->second.second;
+        if (aniCtorSignatureMap.find(aniCtorSignature) != aniCtorSignatureMap.end()) {
+            TLOGD(WmsLogTag::DEFAULT, "class %{public}s and its ctor already exist", aniClassDescriptor.c_str());
+            return status;
+        }
+    }
+    bool isNewClassEntry = false;
+    ani_class aniClass = nullptr;
+    if (aniClassIter == globalAniCreators.end()) {
+        status = env->FindClass(aniClassDescriptor.c_str(), &aniClass);
+        if (status != ANI_OK) {
+            TLOGE(WmsLogTag::DEFAULT, "class %{public}s not found, ret %{public}d", aniClassDescriptor.c_str(), status);
+            return status;
+        }
+        auto [iter, inserted] = globalAniCreators.emplace(
+            aniClassDescriptor, std::make_pair(aniClass, std::unordered_map<std::string, ani_method>()));
+        if (!inserted) {
+            TLOGE(WmsLogTag::DEFAULT, "emplace class %{public}s failed", aniClassDescriptor.c_str());
+            return ANI_ERROR;
+        }
+        aniClassIter = iter;
+        isNewClassEntry = true;
+        auto& newClassEntry = aniClassIter->second;
+        status = env->GlobalReference_Create(static_cast<ani_ref>(newClassEntry.first),
+            reinterpret_cast<ani_ref*>(&(newClassEntry.first)));
+        if (status != ANI_OK) {
+            TLOGE(WmsLogTag::DEFAULT, "GlobalReference_Create failed ret %{public}d", status);
+            globalAniCreators.erase(aniClassIter);
+            return status;
+        }
+    }
+    aniClass = aniClassIter->second.first;
+    ani_method aniCtorMethod;
+    status = env->Class_FindMethod(aniClass, "<ctor>", aniCtorSignature.c_str(), &aniCtorMethod);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "find %{public}s ctor failed ret %{public}d", aniClassDescriptor.c_str(), status);
+        if (isNewClassEntry) {
+            env->GlobalReference_Delete(static_cast<ani_ref>(aniClass));
+            globalAniCreators.erase(aniClassIter);
+        }
+        return status;
+    }
+    aniClassIter->second.second.emplace(aniCtorSignature, aniCtorMethod);
+    return status;
+}
+
+void DisplayAniUtils::InitDisplayProperties(ani_env* env, ani_object obj, sptr<DisplayInfo> info)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] begin");
+    if (info->GetDisplaySourceMode() == DisplaySourceMode::MAIN ||
+        info->GetDisplaySourceMode() == DisplaySourceMode::EXTEND) {
+        env->Object_SetFieldByName_Long(obj, "<property>x", info->GetX());
+        env->Object_SetFieldByName_Long(obj, "<property>y", info->GetY());
+    } else {
+        env->Object_SetFieldByName_Ref(obj, "<property>x", DisplayAniUtils::CreateAniUndefined(env));
+        env->Object_SetFieldByName_Ref(obj, "<property>y", DisplayAniUtils::CreateAniUndefined(env));
+    }
+    auto colorSpaces = info->GetColorSpaces();
+    auto hdrFormats = info->GetHdrFormats();
+    auto supportedRefreshRates = info->GetSupportedRefreshRate();
+    if (colorSpaces.size() != 0) {
+        ani_array colorSpacesAni;
+        CreateAniArrayInt(env, colorSpaces.size(), &colorSpacesAni, colorSpaces);
+        env->Object_SetFieldByName_Ref(obj, "<property>colorSpaces", static_cast<ani_ref>(colorSpacesAni));
+    }
+    if (hdrFormats.size() != 0) {
+        ani_array hdrFormatsAni;
+        CreateAniArrayInt(env, hdrFormats.size(), &hdrFormatsAni, hdrFormats);
+        env->Object_SetFieldByName_Ref(obj, "<property>hdrFormats", static_cast<ani_ref>(hdrFormatsAni));
+    }
+    if (supportedRefreshRates.size() != 0) {
+        ani_array supportedRefreshRatesAni;
+        CreateAniArrayInt(env, hdrFormats.size(), &supportedRefreshRatesAni, supportedRefreshRates);
+        env->Object_SetFieldByName_Ref(obj, "<property>supportedRefreshRates",
+            static_cast<ani_ref>(supportedRefreshRatesAni));
+    }
 }
 
 ani_status DisplayAniUtils::CvtDisplay(sptr<Display> display, ani_env* env, ani_object obj)

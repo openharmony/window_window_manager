@@ -270,17 +270,24 @@ void DisplayManagerAni::GetDisplayByIdSyncAni(ani_env* env, ani_object obj, ani_
     DisplayAni::CreateDisplayAni(display, static_cast<ani_object>(obj), env);
 }
 
-void DisplayManagerAni::GetDefaultDisplaySyncAni(ani_env* env, ani_object obj)
+ani_object DisplayManagerAni::GetDefaultDisplaySyncAni(ani_env* env)
 {
     sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplaySync(true);
     if (display == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI] Display null");
-        return;
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_SYSTEM_INNORMAL, "");
+        return DisplayAniUtils::CreateAniUndefined(env);
     }
-    TLOGI(WmsLogTag::DMS, "[ANI] GetDefaultDisplaySyncAni");
-    DisplayAniUtils::CvtDisplay(display, env, obj);
-    DisplayAni::CreateDisplayAni(display, static_cast<ani_object>(obj), env);
-    return;
+    sptr<DisplayInfo> info = display->GetDisplayInfoWithCache();
+    if (info == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Failed to GetDisplayInfo");
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_SYSTEM_INNORMAL, "");
+        return DisplayAniUtils::CreateAniUndefined(env);
+    }
+    TLOGI(WmsLogTag::DMS, "[ANI] create display ani obj");
+    ani_object displayAniObject = DisplayAniUtils::CreateDisplayAniObject(env, info);
+    DisplayAni::CreateDisplayAni(display, static_cast<ani_object>(displayAniObject), env);
+    return displayAniObject;
 }
 
 void DisplayManagerAni::RegisterCallback(ani_env* env, ani_string type,
