@@ -94,10 +94,6 @@ struct SCBAbilityInfo {
     bool isForceRotate_;
 };
 
-struct SCBApplicationInfo {
-    AppExecFwk::StartMode startMode_;
-};
-
 struct SessionIdentityInfo {
     std::string bundleName_;
     std::string moduleName_;
@@ -807,7 +803,6 @@ public:
     void NotifySessionTransferToTargetScreenEvent(const int32_t persistentId,
         const uint32_t resultCode, const uint64_t fromScreenid, const uint64_t toScreenId,
         LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
-    WSError GetApplicationInfo(const std::string& bundleName, SCBApplicationInfo& scbApplicationInfo);
     WSError GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList);
     void UpdateRecentMainSessionInfos(const std::vector<int32_t>& recentMainSessionIdList);
     sptr<SceneSession> GetMainSessionByPersistentId(int32_t persistentId) const;
