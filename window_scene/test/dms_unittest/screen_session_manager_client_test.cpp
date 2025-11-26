@@ -2122,7 +2122,7 @@ HWTEST_F(ScreenSessionManagerClientTest, HandleSystemKeyboardOnPropertyChange02,
 */
 HWTEST_F(ScreenSessionManagerClientTest, HandleKeyboardOnPropertyChange01, TestSize.Level1)
 {
-    sptr screenSession = sptr::MakeSptr();
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
     ScreenProperty screenProperty;
     screenProperty.SetIsFakeInUse(true);
     RRect screenBounds;
@@ -2145,7 +2145,7 @@ HWTEST_F(ScreenSessionManagerClientTest, HandleKeyboardOnPropertyChange01, TestS
 */
 HWTEST_F(ScreenSessionManagerClientTest, HandleKeyboardOnPropertyChange02, TestSize.Level1)
 {
-    sptr screenSession = sptr::MakeSptr();
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
     ScreenProperty screenProperty;
     RRect screenBounds;
     screenBounds.rect_.width_ = 100;
@@ -2165,7 +2165,7 @@ HWTEST_F(ScreenSessionManagerClientTest, HandleKeyboardOnPropertyChange02, TestS
 */
 HWTEST_F(ScreenSessionManagerClientTest, HandleKeyboardOffPropertyChange, TestSize.Level1)
 {
-    sptr screenSession = sptr::MakeSptr();
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
     ScreenProperty screenProperty;
     RRect screenBounds;
     screenBounds.rect_.width_ = 100;
@@ -2197,9 +2197,9 @@ HWTEST_F(ScreenSessionManagerClientTest, OnScreenPropertyChanged, TestSize.Level
     bounds.rect_.width_ = 1344;
     bounds.rect_.height_ = 2772;
     float rotation = 0.0;
-    sptr screenSession1 = sptr::MakeSptr(50, ScreenProperty(), 0);
+    sptr<ScreenSession> screenSession1 = sptr<ScreenSession>::MakeSptr(50, ScreenProperty(), 0));
     screenSessionManagerClient_->screenSessionMap_[50] = screenSession1;
-    sptr screenSession2 = nullptr;
+    sptr<ScreenSession> screenSession2 = nullptr;
     screenSessionManagerClient_->screenSessionMap_[51] = screenSession2;
 
     screenSessionManagerClient_->OnScreenPropertyChanged(51, rotation, bounds);
@@ -2231,7 +2231,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged01, TestSize.Level1)
 
     ScreenId screenId = 1234;
     ScreenProperty screenProperty;
-    sptr screenSession = nullptr;
+    sptr<ScreenSession> screenSession = nullptr;
     ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::UNDEFINED;
     screenSessionManagerClient_->screenSessionMap_.insert({screenId, screenSession});
     screenSessionManagerClient_->OnPropertyChanged(screenId, screenProperty, reason);
@@ -2257,7 +2257,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged02, TestSize.Level1)
 {
     ScreenId screenId = 1234;
     ScreenProperty screenProperty;
-    sptr screenSession = nullptr;
+    sptr<ScreenSession> screenSession = nullptr;
     ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::UNDEFINED;
     screenProperty.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED);
     screenSession = sptr::MakeSptr(screenId, screenProperty, 0);
