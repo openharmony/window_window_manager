@@ -2537,7 +2537,7 @@ WSError SceneSessionManagerProxy::SetSpecificWindowZIndex(WindowType windowType,
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Remote is null");
-        return WSError::WS_ERROR_NULLPTR;
+        return WSError::WS_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
         SceneSessionManagerMessage::TRANS_ID_SET_SPECIFIC_WINDOW_ZINDEX),

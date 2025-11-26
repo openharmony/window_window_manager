@@ -3056,14 +3056,21 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetSpecificWindowZIndex, Function | 
 }
 
 /**
- * @tc.name: HandleResetSpecificWindowZIndex
- * @tc.desc: HandleResetSpecificWindowZIndex
+ * @tc.name: ResetSpecificWindowZIndex
+ * @tc.desc: ResetSpecificWindowZIndex
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleResetSpecificWindowZIndex, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, ResetSpecificWindowZIndex, Function | SmallTest | Level2)
 {
     MessageParcel data;
     MessageParcel reply;
+    MessageOption option;
+
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_RESET_SPECIFIC_WINDOW_ZINDEX);
+
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 
     int ret = stub_->HandleResetSpecificWindowZIndex(data, reply);
     EXPECT_EQ(ret, ERR_INVALID_DATA);

@@ -2290,7 +2290,7 @@ HWTEST_F(sceneSessionManagerProxyTest, SetSpecificWindowZIndex, TestSize.Level1)
     sptr<MockIRemoteObject> remoteMocker = nullptr;
     auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
     auto ret = proxy->SetSpecificWindowZIndex(WindowType::WINDOW_TYPE_FLOAT, 20);
-    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
     ASSERT_NE(proxy, nullptr);
 
     remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
@@ -2339,7 +2339,7 @@ HWTEST_F(sceneSessionManagerProxyTest, ResetSpecificWindowZIndex, TestSize.Level
     sptr<MockIRemoteObject> remoteMocker = nullptr;
     auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
     auto ret = proxy->ResetSpecificWindowZIndex(10);
-    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
     ASSERT_NE(proxy, nullptr);
 
     remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
