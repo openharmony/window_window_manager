@@ -1062,9 +1062,14 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SET_SCREENID_PRIVACY_STATE: {
-            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
-            auto hasPrivate = data.ReadBool();
-            SetPrivacyStateByDisplayId(displayId, hasPrivate);
+            std::unordered_map<DisplayId, bool> privacyBundleDisplayId;
+            uint32_t mapSize = data.ReadUint32();
+            for (uint32_t i = 0; i < mapSize; i++) {
+                DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+                auto hasPrivate = data.ReadBool();
+                privacyBundleDisplayId[displayId] = hasPrivate;
+            }
+            SetPrivacyStateByDisplayId(privacyBundleDisplayId);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_LIST: {

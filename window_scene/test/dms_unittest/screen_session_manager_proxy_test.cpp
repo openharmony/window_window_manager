@@ -77,7 +77,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetPrivacyStateByDisplayId, TestSize.Lev
     LOG_SetCallback(MyLogCallback);
     std::function<void()> func = [&]()
     {
-        screenSessionManagerProxy->SetPrivacyStateByDisplayId(id, hasPrivate);
+        std::unordered_map<DisplayId, bool> privacyBundleDisplayId = {{id, hasPrivate}};
+        screenSessionManagerProxy->SetPrivacyStateByDisplayId(privacyBundleDisplayId);
     };
     func();
     EXPECT_TRUE(g_logMsg.find("failed") == std::string::npos &&

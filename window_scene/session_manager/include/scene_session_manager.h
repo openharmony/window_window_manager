@@ -457,7 +457,8 @@ public:
     void ClearAllCollaboratorSessions();
 
     WMError CheckWindowId(int32_t windowId, int32_t& pid) override;
-    void GetSceneSessionPrivacyModeBundles(DisplayId displayId, std::unordered_set<std::string>& privacyBundles);
+    void GetSceneSessionPrivacyModeBundles(DisplayId displayId,
+        std::unordered_map<DisplayId, std::unordered_set<std::string>>& privacyBundles);
     BrokerStates CheckIfReuseSession(SessionInfo& sessionInfo);
     bool CheckCollaboratorType(int32_t type);
     sptr<SceneSession> FindSessionByAffinity(const std::string& affinity);
@@ -465,6 +466,7 @@ public:
     void PreloadInLakeApp(const std::string& bundleName);
     WSError UpdateMaximizeMode(int32_t persistentId, bool isMaximize);
     WSError UpdateSessionDisplayId(int32_t persistentId, uint64_t screenId);
+    void RegisterClientDisplayIdChangeNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
     WSError NotifyStackEmpty(int32_t persistentId);
     void NotifySessionUpdate(const SessionInfo& sessionInfo, ActionType type,
         ScreenId fromScreenId = SCREEN_ID_INVALID);
@@ -642,6 +644,8 @@ public:
         const std::unordered_set<std::string>& privacyWindowTags) override;
     WMError RemoveSessionBlackList(const std::unordered_set<std::string>& bundleNames,
         const std::unordered_set<std::string>& privacyWindowTags) override;
+    void UpdateSessionPrivacyForSuperFold(const sptr<SceneSession>& sceneSession, DisplayId displayId,
+        std::unordered_map<DisplayId, std::unordered_set<std::string>>& privacyBundles);
 
     /*
      * Multi Window

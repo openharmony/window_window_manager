@@ -2066,15 +2066,6 @@ DMError ScreenSession::SetScreenColorSpace(GraphicCM_ColorSpaceType colorSpace)
     return DMError::DM_OK;
 }
 
-bool ScreenSession::HasPrivateSessionForeground() const
-{
-    return hasPrivateWindowForeground_;
-}
-
-void ScreenSession::SetPrivateSessionForeground(bool hasPrivate)
-{
-    hasPrivateWindowForeground_ = hasPrivate;
-}
 void ScreenSession::SetDisplayNodeSecurity()
 {
     std::unique_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);

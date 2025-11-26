@@ -1448,6 +1448,8 @@ private:
         const std::pair<RSAnimationTimingProtocol, RSAnimationTimingCurve>& animationParam,
         const WSRect& rect, const std::function<void()>& finishCallback = nullptr, bool isGlobal = false);
     virtual void UpdateCrossAxisOfLayout(const WSRect& rect);
+    CrossPlaneState UpdateCrossPlaneState(const WSRect& rect);
+    void UpdatePrivateStateOfLayout(const WSRect& rect);
     NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
     WSRect requestRectWhenFollowParent_;
     MoveConfiguration requestMoveConfiguration_;

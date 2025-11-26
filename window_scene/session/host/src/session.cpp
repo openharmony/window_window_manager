@@ -1176,6 +1176,11 @@ bool Session::IsDraggingReason(SizeChangeReason reason) const
            reason == SizeChangeReason::DRAG_START;
 }
 
+void Session::SetClientDisplayIdChangeListener(const NotifyClientDisplayIdChangeFunc& func)
+{
+    clientDisplayIdChangeFunc_ = func;
+}
+
 WSError Session::UpdateClientDisplayId(DisplayId displayId)
 {
     if (sessionStage_ == nullptr) {
