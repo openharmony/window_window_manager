@@ -195,14 +195,22 @@ napi_value JsWindowStage::SetWindowRectAutoSave(napi_env env, napi_callback_info
 {
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[NAPI]");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
-    return (me != nullptr) ? me->OnSetWindowRectAutoSave(env, info) : nullptr;
+    if (me != nullptr) {
+        return me->OnSetWindowRectAutoSave(env, info);
+    }
+    return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+        "[window][setWindowRectAutoSave]msg: Window is nullptr.");
 }
 
 napi_value JsWindowStage::IsWindowRectAutoSave(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[NAPI]");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
-    return (me != nullptr) ? me->OnIsWindowRectAutoSave(env, info) : nullptr;
+    if (me != nullptr) {
+        return me->OnIsWindowRectAutoSave(env, info);
+    }
+    return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+        "[window][isWindowRectAutoSave]msg: Window is nullptr.");
 }
 
 napi_value JsWindowStage::SetSupportedWindowModes(napi_env env, napi_callback_info info)
@@ -952,19 +960,21 @@ napi_value JsWindowStage::OnSetWindowRectAutoSave(napi_env env, napi_callback_in
     if (windowScene == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "WindowScene is null");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][setWindowRectAutoSave]msg: windowScene is null");
+            "[window][setWindowRectAutoSave]msg: WindowScene is null.");
     }
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARG_COUNT_TWO) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setWindowRectAutoSave]msg: Incorrect number of parameters. Expected 2.");
     }
     bool enabled = false;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], enabled)) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to enabled");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setWindowRectAutoSave]msg: Failed to convert parameter to enabled.");
     }
     bool isSaveBySpecifiedFlag = false;
     ConvertFromJsValue(env, argv[INDEX_ONE], isSaveBySpecifiedFlag);
@@ -977,13 +987,15 @@ napi_value JsWindowStage::OnSetWindowRectAutoSave(napi_env env, napi_callback_in
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s window is nullptr", where);
             WmErrorCode wmErroeCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
-            task->Reject(env, JsErrUtils::CreateJsError(env, wmErroeCode, "window is nullptr."));
+            task->Reject(env, JsErrUtils::CreateJsError(env, wmErroeCode,
+                "[window][setWindowRectAutoSave]msg: Window is nullptr."));
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowRectAutoSave(enabled, isSaveBySpecifiedFlag));
         if (ret != WmErrorCode::WM_OK) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s enable recover position failed!", where);
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "window recover position failed."));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret,
+                "[window][setWindowRectAutoSave]msg: Window recover position failed."));
         } else {
             task->Resolve(env, NapiGetUndefined(env));
             TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id %{public}d isSaveBySpecifiedFlag: %{public}d "
@@ -993,7 +1005,7 @@ napi_value JsWindowStage::OnSetWindowRectAutoSave(napi_env env, napi_callback_in
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowRectAutoSave") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
-            "[window][setWindowRectAutoSave]msg: send event failed"));
+            "[window][setWindowRectAutoSave]msg: Send event failed."));
     }
     return result;
 }
@@ -1190,7 +1202,7 @@ napi_value JsWindowStage::OnIsWindowRectAutoSave(napi_env env, napi_callback_inf
     if (windowScene == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "WindowScene is null");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][isWindowRectAutoSave]msg: WindowScene is null"));
+            "[window][isWindowRectAutoSave]msg: WindowScene is null."));
         return NapiGetUndefined(env);
     }
 
@@ -1203,7 +1215,8 @@ napi_value JsWindowStage::OnIsWindowRectAutoSave(napi_env env, napi_callback_inf
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s Window is nullptr", where);
             task->Reject(env,
-                JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Window is nullptr."));
+                JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][isWindowRectAutoSave]msg: Window is nullptr."));
             return;
         }
         bool enabled = false;
@@ -1211,7 +1224,7 @@ napi_value JsWindowStage::OnIsWindowRectAutoSave(napi_env env, napi_callback_inf
         if (ret != WmErrorCode::WM_OK) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s get the auto-save state of the window rect failed!", where);
             task->Reject(env, JsErrUtils::CreateJsError(env,
-                ret, "Window recover position failed."));
+                ret, "[window][isWindowRectAutoSave]msg: Window recover position failed."));
         } else {
             napi_value jsEnabled = CreateJsValue(env, enabled);
             task->Resolve(env, jsEnabled);
@@ -1220,7 +1233,7 @@ napi_value JsWindowStage::OnIsWindowRectAutoSave(napi_env env, napi_callback_inf
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnIsWindowRectAutoSave") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
-            "[window][isWindowRectAutoSave]msg: send event failed"));
+            "[window][isWindowRectAutoSave]msg: Send event failed."));
     }
     return result;
 }
