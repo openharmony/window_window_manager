@@ -51,12 +51,10 @@ bool RateLimitedLogger::logFunction(const std::string& functionName, int timeWin
     // Check if within limit
     if (record.count < maxCount) {
         record.count++;
-        record.lastLogTime = now;
         return true;
-    } else {
-        // Exceeded limit, don't log
-        return false;
     }
+    // Exceeded limit, don't log
+    return false;
 }
 
 void RateLimitedLogger::clear() {
