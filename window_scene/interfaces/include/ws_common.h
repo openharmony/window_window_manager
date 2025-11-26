@@ -722,6 +722,18 @@ struct WSRectT {
     }
 
     /**
+     * @brief Create a new rectangle offset by (dx, dy).
+     *
+     * @param dx The offset in the x direction.
+     * @param dy The offset in the y direction.
+     * @return A new WSRectT<T> instance with updated position.
+     */
+    WSRectT<T> WithOffset(T dx, T dy) const
+    {
+        return { posX_ + dx, posY_ + dy, width_, height_ };
+    }
+
+    /**
      * @brief Compute the intersection area with another rectangle.
      *
      * @tparam F The result type for intersection area calculation.

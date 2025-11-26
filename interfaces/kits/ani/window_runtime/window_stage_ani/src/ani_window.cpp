@@ -3224,8 +3224,8 @@ ani_ref FindAniWindowObject(const std::string& windowName)
 
 ani_object AniWindow::SetDragKeyFramePolicy(ani_env* env, ani_object aniKeyFramePolicy)
 {
-    if (windowToken_ == nullptr || env == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] windowToken_ or env is nullptr");
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] windowToken is nullptr");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     KeyFramePolicy keyFramePolicy;
@@ -5401,8 +5401,8 @@ static ani_object WindowSetDragKeyFramePolicy(ani_env* env, ani_object obj, ani_
     using namespace OHOS::Rosen;
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-    if (aniWindow == nullptr || env == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] aniWindow or env is nullptr");
+    if (aniWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] aniWindow is nullptr");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     return aniWindow->SetDragKeyFramePolicy(env, aniKeyFramePolicy);
