@@ -99,7 +99,6 @@ std::map<uint32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> WindowImpl::o
 std::map<uint32_t, sptr<IDialogDeathRecipientListener>> WindowImpl::dialogDeathRecipientListener_;
 std::recursive_mutex WindowImpl::globalMutex_;
 std::shared_mutex WindowImpl::windowMapMutex_;
-std::mutex WindowImpl::transitionControllerMutex_;
 
 int g_constructorCnt = 0;
 int g_deConstructorCnt = 0;
@@ -624,6 +623,27 @@ WMError WindowImpl::NapiSetUIContent(const std::string& contentInfo, napi_env en
     return SetUIContentInner(contentInfo, env, storage,
         type == BackupAndRestoreType::NONE ? WindowSetUIContentType::DEFAULT : WindowSetUIContentType::RESTORE,
         type, ability);
+}
+
+WMError WindowImpl::AniSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
+    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
+{
+    return SetUIContentInner(contentInfo, env, storage,
+        type == BackupAndRestoreType::NONE ? WindowSetUIContentType::DEFAULT : WindowSetUIContentType::RESTORE,
+        type, ability, 1);
+}
+
+WMError WindowImpl::NapiSetUIContentByName(const std::string& contentName, napi_env env, napi_value storage,
+    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
+{
+    return SetUIContentInner(contentName, env, storage, WindowSetUIContentType::BY_NAME,
+        BackupAndRestoreType::NONE, ability);
+}
+WMError WindowImpl::AniSetUIContentByName(const std::string& contentName, ani_env* env, ani_object storage,
+    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
+{
+    return SetUIContentInner(contentName, env, storage, WindowSetUIContentType::BY_NAME,
+        BackupAndRestoreType::NONE, ability, 1);
 }
 
 WMError WindowImpl::SetUIContentByName(

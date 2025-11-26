@@ -2461,6 +2461,17 @@ bool WindowSessionProperty::IsAdaptToSimulationScale() const
     return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToSimulationScale();
 }
 
+RealTimeSwitchInfo WindowSessionProperty::GetRealTimeSwitchInfo() const
+{
+    if (!compatibleModeProperty_) {
+        RealTimeSwitchInfo switchInfo;
+        switchInfo.isNeedChange_ = false;
+        switchInfo.showTypes_ = 0;
+        return switchInfo;
+    }
+    return compatibleModeProperty_->GetRealTimeSwitchInfo();
+}
+
 void WindowSessionProperty::SetIsFullScreenInForceSplitMode(bool isFullScreenInForceSplitMode)
 {
     isFullScreenInForceSplitMode_ = isFullScreenInForceSplitMode;
@@ -2671,6 +2682,17 @@ bool CompatibleModeProperty::IsAdaptToSimulationScale() const
     return isAdaptToSimulationScale_;
 }
 
+void CompatibleModeProperty::SetRealTimeSwitchInfo(const RealTimeSwitchInfo& switchInfo)
+{
+    realTimeSwitchInfo_.isNeedChange_ = switchInfo.isNeedChange_;
+    realTimeSwitchInfo_.showTypes_ = switchInfo.showTypes_;
+}
+
+RealTimeSwitchInfo CompatibleModeProperty::GetRealTimeSwitchInfo() const
+{
+    return realTimeSwitchInfo_;
+}
+
 bool CompatibleModeProperty::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteBool(isAdaptToImmersive_) &&
@@ -2687,7 +2709,9 @@ bool CompatibleModeProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isFullScreenStart_) &&
         parcel.WriteBool(isSupportRotateFullScreen_) &&
         parcel.WriteBool(isAdaptToSubWindow_) &&
-        parcel.WriteBool(isAdaptToSimulationScale_);
+        parcel.WriteBool(isAdaptToSimulationScale_) &&
+        parcel.WriteBool(realTimeSwitchInfo_.isNeedChange_) &&
+        parcel.WriteUint32(realTimeSwitchInfo_.showTypes_);
 }
 
 CompatibleModeProperty* CompatibleModeProperty::Unmarshalling(Parcel& parcel)
@@ -2711,6 +2735,8 @@ CompatibleModeProperty* CompatibleModeProperty::Unmarshalling(Parcel& parcel)
     property->isSupportRotateFullScreen_ = parcel.ReadBool();
     property->isAdaptToSubWindow_ = parcel.ReadBool();
     property->isAdaptToSimulationScale_ = parcel.ReadBool();
+    property->realTimeSwitchInfo_.isNeedChange_ = parcel.ReadBool();
+    property->realTimeSwitchInfo_.showTypes_ = parcel.ReadUint32();
     return property;
 }
 

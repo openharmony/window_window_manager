@@ -508,24 +508,29 @@ HWTEST_F(WindowPatternSnapshotTest, Snapshot01, TestSize.Level1)
  */
 HWTEST_F(WindowPatternSnapshotTest, Snapshot02, TestSize.Level1)
 {
-    ASSERT_NE(session_, nullptr);
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     int32_t persistentId = 1424;
     std::string bundleName = "testBundleName";
-    session_->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
-    ASSERT_NE(session_->scenePersistence_, nullptr);
+    sceneSession->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
+    ASSERT_NE(sceneSession->scenePersistence_, nullptr);
     struct RSSurfaceNodeConfig config;
-    session_->surfaceNode_ = RSSurfaceNode::Create(config);
-    ASSERT_NE(session_->surfaceNode_, nullptr);
-    ASSERT_EQ(nullptr, session_->Snapshot(false, 0.0f));
+    sceneSession->surfaceNode_ = RSSurfaceNode::Create(config);
+    ASSERT_NE(sceneSession->surfaceNode_, nullptr);
+    ASSERT_EQ(nullptr, sceneSession->Snapshot(false, 0.0f));
 
-    session_->bufferAvailable_ = true;
-    ASSERT_EQ(nullptr, session_->Snapshot(false, 0.0f));
+    sceneSession->bufferAvailable_ = true;
+    ASSERT_EQ(nullptr, sceneSession->Snapshot(false, 0.0f));
 
-    session_->surfaceNode_->bufferAvailable_ = true;
-    ASSERT_EQ(nullptr, session_->Snapshot(false, 0.0f));
+    sceneSession->surfaceNode_->bufferAvailable_ = true;
+    sceneSession->isPrivacyMode_ = false;
+    ASSERT_EQ(nullptr, sceneSession->Snapshot(false, 0.0f));
 
-    session_->surfaceNode_ = nullptr;
-    ASSERT_EQ(nullptr, session_->Snapshot(false, 0.0f));
+    sceneSession->isPrivacyMode_ = true;
+    ASSERT_EQ(nullptr, sceneSession->Snapshot(false, 0.0f));
+
+    sceneSession->surfaceNode_ = nullptr;
+    ASSERT_EQ(nullptr, sceneSession->Snapshot(false, 0.0f));
 }
 
 /**
