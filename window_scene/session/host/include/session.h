@@ -341,6 +341,10 @@ public:
     void SetSessionInfoWindowInputType(uint32_t windowInputType);
     void SetSessionInfoExpandInputFlag(uint32_t expandInputFlag);
     uint32_t GetSessionInfoExpandInputFlag() const;
+    void SetSessionInfoCursorDragCount(int32_t count);
+    int32_t GetSessionInfoCursorDragCount();
+    void SetSessionInfoCursorDragFlag(bool value);
+    bool GetSessionInfoCursorDragFlag();
     void SetSessionInfoAdvancedFeatureFlag(uint32_t bitPosition, bool value);
     bool GetSessionInfoAdvancedFeatureFlag(uint32_t bitPosition);
     void SetSessionInfoWindowMode(int32_t windowMode);

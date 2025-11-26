@@ -59,6 +59,7 @@
 #include "floating_ball_manager.h"
 #include "sys_cap_util.h"
 #include "wm_common_inner.h"
+#include "window_input_redistribute_impl.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityEventInfo;
@@ -93,6 +94,8 @@ constexpr int64_t SET_UIEXTENSION_DESTROY_TIMEOUT_TIME_MS = 4000;
 const std::string SCB_BACK_VISIBILITY = "scb_back_visibility";
 const std::string SCB_COMPATIBLE_MAXIMIZE_VISIBILITY = "scb_compatible_maximize_visibility";
 const std::string SCB_COMPATIBLE_MAXIMIZE_BTN_RES = "scb_compatible_maximize_btn_res";
+const std::string SCB_COMPATIBLE_MENU_VISIBILITY = "scb_set_compatible_menu";
+const std::string SCB_GET_COMPATIBLE_PRIMARY_MODE = "scb_get_compatible_primary_mode";
 
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
 {
@@ -2028,14 +2031,22 @@ void WindowSessionImpl::HideTitleButton(bool& hideSplitButton, bool& hideMaximiz
     bool fullScreenStart = property_->IsFullScreenStart() &&
         (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
     uiContent->OnContainerModalEvent(SCB_COMPATIBLE_MAXIMIZE_BTN_RES, fullScreenStart ? "true" : "false");
+    RealTimeSwitchInfo switchInfo = property_->GetRealTimeSwitchInfo();
+    uiContent->OnContainerModalEvent(SCB_COMPATIBLE_MENU_VISIBILITY, switchInfo.isNeedChange_ ? "true" : "false");
+    uiContent->OnContainerModalEvent(SCB_GET_COMPATIBLE_PRIMARY_MODE, std::to_string(switchInfo.showTypes_));
 }
 
 WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
     BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
-    return SetUIContentInner(contentInfo, env, storage,
-        type == BackupAndRestoreType::NONE ? WindowSetUIContentType::DEFAULT : WindowSetUIContentType::RESTORE,
-        type, ability, 1u);
+    WindowSetUIContentType setUIContentType;
+    if (!navDestinationInfo_.empty()) {
+        setUIContentType = WindowSetUIContentType::BY_SHARED;
+    } else {
+        setUIContentType =
+            type == BackupAndRestoreType::NONE ? WindowSetUIContentType::DEFAULT : WindowSetUIContentType::RESTORE;
+    }
+    return SetUIContentInner(contentInfo, env, storage, setUIContentType, type, ability, 1u);
 }
 
 WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
@@ -2049,6 +2060,32 @@ WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi
             type == BackupAndRestoreType::NONE ? WindowSetUIContentType::DEFAULT : WindowSetUIContentType::RESTORE;
     }
     return SetUIContentInner(contentInfo, env, storage, setUIContentType, type, ability);
+}
+
+WMError WindowSessionImpl::AniSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
+    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
+{
+    WindowSetUIContentType setUIContentType;
+    if (!navDestinationInfo_.empty()) {
+        setUIContentType = WindowSetUIContentType::BY_SHARED;
+    } else {
+        setUIContentType =
+            type == BackupAndRestoreType::NONE ? WindowSetUIContentType::DEFAULT : WindowSetUIContentType::RESTORE;
+    }
+    return SetUIContentInner(contentInfo, env, storage, setUIContentType, type, ability, 1u);
+}
+
+WMError WindowSessionImpl::NapiSetUIContentByName(const std::string& contentName, napi_env env, napi_value storage,
+    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
+{
+    return SetUIContentInner(contentName, env, storage, WindowSetUIContentType::BY_NAME,
+        BackupAndRestoreType::NONE, ability);
+}
+WMError WindowSessionImpl::AniSetUIContentByName(const std::string& contentName, ani_env* env, ani_object storage,
+    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
+{
+    return SetUIContentInner(contentName, env, storage, WindowSetUIContentType::BY_NAME,
+        BackupAndRestoreType::NONE, ability, 1);
 }
 
 WMError WindowSessionImpl::SetUIContentByName(
@@ -7034,6 +7071,8 @@ void WindowSessionImpl::DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyE
         TLOGI(WmsLogTag::WMS_EVENT, "id: %{public}d, consumed: %{public}d,"
             "escTrigger: %{public}d, escDown: %{public}d",
             keyEvent->GetId(), isConsumed, escKeyEventTriggered_, escKeyHasDown_);
+        isConsumed = isConsumed ? isConsumed : WindowInputRedistributeImpl::GetInstance().SendEvent(
+            InputRedistributeTiming::REDISTRIBUTE_AFTER_SEND_TO_COMPONENT, keyEvent);
         HandleEscKeyEvent(keyEvent, isConsumed);
         NotifyConsumeResultToFloatWindow(keyEvent, isConsumed);
         if (!isConsumed) {
