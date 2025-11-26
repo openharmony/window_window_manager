@@ -1754,7 +1754,7 @@ HWTEST_F(SceneSessionManagerTest9, SetParentWindowInner, TestSize.Level1)
  * @tc.desc: test function : ResetSpecificWindowZIndex
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest11, ResetSpecificWindowZIndex, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest9, ResetSpecificWindowZIndex, TestSize.Level1)
 {
     WSError ret = ssm_->ResetSpecificWindowZIndex(123);
     EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
