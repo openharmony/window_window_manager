@@ -67,6 +67,7 @@ public:
     bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason);
     ScreenPowerState GetScreenPower(ScreenId dmsScreenId);
     ScreenPowerState GetScreenPower();
+    void SyncScreenPowerState(ScreenPowerState state);
     bool SetDisplayState(DisplayState state);
     DisplayState GetDisplayState(DisplayId displayId);
     bool TryToCancelScreenOff();
@@ -163,7 +164,6 @@ private:
     ErrCode SetSpecifiedScreenPower(uint64_t screenId, uint32_t screenPowerState, uint32_t reason, bool& isSucc);
     ErrCode SetScreenPowerForAll(uint32_t screenPowerState, uint32_t reason, bool& isSucc);
     ErrCode GetScreenPower(uint64_t dmsScreenId, uint32_t& screenPowerState);
-    void SyncScreenPowerState(ScreenPowerState state);
     ErrCode SetDisplayState(uint32_t displayState, bool& isSucc);
     ErrCode GetDisplayState(uint64_t displayId, uint32_t& displayState);
     ErrCode TryToCancelScreenOff(bool& isSucc);
