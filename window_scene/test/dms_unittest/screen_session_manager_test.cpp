@@ -7466,7 +7466,7 @@ HWTEST_F(ScreenSessionManagerTest, SyncScreenPropertyChangedToServer, TestSize.L
 {
     ScreenId screenId = 1;
     ScreenProperty screenProperty;
-    sptr screenSession = nullptr;
+    sptr<ScreenSession> screenSession = nullptr;
     ssm_->screenSessionMap_.erase(screenId);
     ssm_->screenSessionMap_.insert(std::make_pair(screenId, screenSession));
     DMError ret = ssm_->SyncScreenPropertyChangedToServer(screenId, screenProperty);
@@ -7474,8 +7474,8 @@ HWTEST_F(ScreenSessionManagerTest, SyncScreenPropertyChangedToServer, TestSize.L
     screenSession = new ScreenSession(screenId, screenProperty, 0);
     ssm_->screenSessionMap_.erase(screenId);
     ssm_->screenSessionMap_.insert(std::make_pair(screenId, screenSession));
-    std::function<void(sptr screenSession, SuperFoldStatusChangeEvents changeEvent)> func =
-        [](sptr screenSession, SuperFoldStatusChangeEvents changeEvent) { return; };
+    std::function<void(sptr<ScreenSession> screenSession, SuperFoldStatusChangeEvents changeEvent)> func =
+        [](sptr<ScreenSession> screenSession, SuperFoldStatusChangeEvents changeEvent) { return; };
     ssm_->SetPropertyChangedCallback(func);
     ret = ssm_->SyncScreenPropertyChangedToServer(screenId, screenProperty);
     EXPECT_EQ(DMError::DM_OK, ret);
@@ -7487,11 +7487,11 @@ HWTEST_F(ScreenSessionManagerTest, SyncScreenPropertyChangedToServer, TestSize.L
 */
 HWTEST_F(ScreenSessionManagerTest, SetPropertyChangedCallback, TestSize.Level1)
 {
-    std::function<void(sptr screenSession, SuperFoldStatusChangeEvents changeEvent)> func = nullptr;
+    std::function<void(sptr<ScreenSession> screenSession, SuperFoldStatusChangeEvents changeEvent)> func = nullptr;
     ssm_->SetPropertyChangedCallback(func);
     EXPECT_EQ(ssm_->propertyChangedCallback_, nullptr);
-    std::function<void(sptr screenSession, SuperFoldStatusChangeEvents changeEvent)> func1 =
-        [](sptr screenSession, SuperFoldStatusChangeEvents changeEvent) { return; };
+    std::function<void(sptr<ScreenSession> screenSession, SuperFoldStatusChangeEvents changeEvent)> func1 =
+        [](sptr<ScreenSession> screenSession, SuperFoldStatusChangeEvents changeEvent) { return; };
     ssm_->SetPropertyChangedCallback(func1);
     EXPECT_NE(ssm_->propertyChangedCallback_, nullptr);
 }
@@ -7513,7 +7513,7 @@ HWTEST_F(ScreenSessionManagerTest, OnFoldPropertyChange, TestSize.Level1)
     EXPECT_TRUE(g_logMsg.find("clientProxy_ is null") != std::string::npos);
     g_logMsg.clear();
 
-    ssm_->clientProxy_ = sptr::MakeSptr();
+    ssm_->clientProxy_ = sptr<ScreenSessionManagerClientTest>::MakeSptr();
     ssm_->OnFoldPropertyChange(screenId, screenProperty, reason, displayMode);
 }
 
