@@ -228,6 +228,10 @@ constexpr float POSITION_Z_LOW = 1.0f;
 const uint32_t FOLD_SCREEN_STATE_MACHINE_REF_COUNT = 1;
 const uint32_t SCREEN_STATE_MACHINE_REF_COUNT = 0;
 
+const uint32_t FREEZE_SCREEN_MAX_COUNT = 150;
+const uint32_t FREEZE_SCREEN_RETRY_DELAY_MS = 2000;
+const uint32_t UNFREEZE_SCREEN_DELAY_MS = 2000;
+
 // based on the bundle_util
 // LCOV_EXCL_START
 inline int32_t GetUserIdByCallingUid()
@@ -3023,39 +3027,32 @@ DMError ScreenSessionManager::SetResolution(ScreenId screenId, uint32_t width, u
         TLOGE(WmsLogTag::DMS, "Get ScreenSession failed");
         return DMError::DM_ERROR_NULLPTR;
     }
-    screenSession->FreezeScreen(true);
     if (rsInterface_.SetRogScreenResolution(screenId, width, height) != 0) {
         TLOGE(WmsLogTag::DMS, "Failed to SetRogScreenResolution");
         screenSession->FreezeScreen(false);
+        rsInterface_.ForceRefreshOneFrameWithNextVSync();
         return DMError::DM_ERROR_IPC_FAILED;
     }
     screenSession->SetDensityInCurResolution(virtualPixelRatio);
     screenSession->SetDefaultDensity(virtualPixelRatio);
     uint32_t defaultResolutionDpi = virtualPixelRatio * BASELINE_DENSITY;
     (void)ScreenSettingHelper::SetSettingDefaultDpi(defaultResolutionDpi, SET_SETTING_DPI_KEY);
-
-    float defaultVirtualPixelRatio = static_cast<float>(defaultDpi) / BASELINE_DENSITY;
-    float vprScaleRatio = virtualPixelRatio / defaultVirtualPixelRatio;
+    float vprScaleRatio = virtualPixelRatio / densityDpi_;
     screenSession->SetVprScaleRatio(vprScaleRatio);
-    ret = SetVirtualPixelRatio(screenId, defaultVirtualPixelRatio);
-    if (ret != DMError::DM_OK) {
-        TLOGE(WmsLogTag::DMS, "Failed to setVirtualPixelRatio when settingResolution");
-        screenSession->SetDensityInCurResolution(screenSession->GetScreenProperty().GetVirtualPixelRatio());
-        screenSession->SetDefaultDensity(screenSession->GetScreenProperty().GetVirtualPixelRatio());
-        (void)ScreenSettingHelper::SetSettingDefaultDpi(defaultDpi, SET_SETTING_DPI_KEY);
-        screenSession->SetVprScaleRatio(1.0f);
-        screenSession->FreezeScreen(false);
-        return ret;
-    }
+    screenSession->SetVirtualPixelRatio(virtualPixelRatio);
+
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetResolution(%" PRIu64", %u, %u, %f)",
         screenId, width, height, virtualPixelRatio);
     screenSession->UpdatePropertyByResolution(width, height);
-    screenSession->PropertyChange(screenSession->GetScreenProperty(),
-        ScreenPropertyChangeReason::CHANGE_MODE);
-    NotifyDisplayStateChange(screenId, screenSession->ConvertToDisplayInfo(),
-        {}, DisplayStateChangeType::RESOLUTION_CHANGE);
+    std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
+    auto displayInfo = screenSession->ConvertToDisplayInfo();
+    NotifyDisplayStateChange(screenId, displayInfo, emptyMap, DisplayStateChangeType::RESOLUTION_CHANGE);
+    screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
-    NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
+    NotifyDisplayChanged(displayInfo, DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
+
+    WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), BootFinishedUnfreezeCallback, this);
+    AddScreenUnfreezeTask(screenSession, 0);
     return DMError::DM_OK;
 }
 
@@ -13222,6 +13219,52 @@ void ScreenSessionManager::SetConfigForInputmethod(ScreenId screenId, VirtualScr
     } else {
         screenSession->SetSupportsInput(false);
     }
+}
+
+void ScreenSessionManager::BootFinishedUnfreezeCallback(const char *key, const char *value, void *context)
+{
+    if (strcmp(key, BOOTEVENT_BOOT_COMPLETED.c_str()) == 0 && strcmp(value, "true") == 0) {
+        TLOGI(WmsLogTag::DMS, "boot finished to unfreeze");
+        auto &that = *reinterpret_cast<ScreenSessionManager *>(context);
+        auto screenSession = that.GetDefaultScreenSession();
+        if (screenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
+            return;
+        }
+        screenSession->FreezeScreen(false);
+        that.rsInterface_.ForceRefreshOneFrameWithNextVSync();
+    }
+}
+
+void ScreenSessionManager::AddScreenUnfreezeTask(const sptr<ScreenSession>& screenSession, uint32_t freezeCount)
+{
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
+        return;
+    }
+    // maximum boot time can reach 5 minutes, 300s = 150 * 2s
+    if (freezeCount >= FREEZE_SCREEN_MAX_COUNT) {
+        TLOGE(WmsLogTag::DMS, "boot error and freeze screen over 5 minutes");
+        screenSession->FreezeScreen(false);
+        rsInterface_.ForceRefreshOneFrameWithNextVSync();
+        return;
+    }
+    if (system::GetBoolParameter(BOOTEVENT_BOOT_COMPLETED, false)) {
+        auto unfreezeTask = [this, screenSession]() {
+            screenSession->FreezeScreen(false);
+            rsInterface_.ForceRefreshOneFrameWithNextVSync();
+        };
+        // delay 2000ms to wait app layout and send to display completed
+        taskScheduler_->PostAsyncTask(unfreezeTask, "unfreezeTask", UNFREEZE_SCREEN_DELAY_MS);
+        return;
+    }
+    freezeCount++;
+    screenSession->FreezeScreen(true);
+    auto task = [this, screenSession, freezeCount]() {
+        AddScreenUnfreezeTask(screenSession, freezeCount);
+    };
+    // delay 2000ms to freeze again if not boot completed, avoid rs unfreeze after 3000ms
+    taskScheduler_->PostAsyncTask(task, "AddScreenUnfreezeTask", FREEZE_SCREEN_RETRY_DELAY_MS);
 }
 
 DMError ScreenSessionManager::CheckSetResolutionIsValid(ScreenId screenId, uint32_t width, uint32_t height,

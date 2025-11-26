@@ -2038,6 +2038,58 @@ HWTEST_F(ScreenSessionManagerTest, DoAodExitAndSetPowerTest, TestSize.level1)
 }
 
 /**
+ * @tc.name: AddScreenUnfreezeTask
+ * @tc.desc: AddScreenUnfreezeTask test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, AddScreenUnfreezeTask, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenSession> screenSession = nullptr;
+    g_errLog.clear();
+    ssm_->AddScreenUnfreezeTask(screenSession, 0);
+    EXPECT_TRUE(g_errLog.find("screenSession is nullptr") != std::string::npos);
+    g_errLog.clear();
+    ScreenId scrrenId = 111;
+    screenSession = sptr<ScreenSession>::MakeSptr(scrrenId, ScreenProperty(), 0);
+    ssm_->AddScreenUnfreezeTask(screenSession, 1000);
+    EXPECT_TRUE(g_errLog.find("boot error and freeze screen over 5 minutes") != std::string::npos);
+    g_errLog.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: CheckSetResolutionIsValid
+ * @tc.desc: CheckSetResolutionIsValid test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CheckSetResolutionIsValid, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenId screenId = -1;
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->CheckSetResolutionIsValid(screenId, 100, 100, 0.5));
+    screenId = 111;
+    sptr<ScreenSession> screenSession = nullptr;
+    ssm_->screenSessionMap_.erase(screenId);
+    ssm_->screenSessionMap_.insert(std::make_pair(screenId, screenSession));
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->CheckSetResolutionIsValid(screenId, 100, 100, 0.5));
+    screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
+    ssm_->screenSessionMap_.erase(screenId);
+    ssm_->screenSessionMap_.insert(std::make_pair(screenId, screenSession));
+    sptr<SupportedScreenModes> mode = nullptr;
+    screenSession->modes_ = {mode};
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->CheckSetResolutionIsValid(screenId, 100, 100, 0.5));
+    mode = new SupportedScreenModes();
+    mode->width_ = 1;
+    mode->height_ = 1;
+    screenSession->modes_ = {mode};
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->CheckSetResolutionIsValid(screenId, 100, 100, 0.5));
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->CheckSetResolutionIsValid(screenId, 0, 0, 10.5));
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->CheckSetResolutionIsValid(screenId, 1, 1, 10.5));
+}
+
+/**
  * @tc.name: UpdateDuringCallState
  * @tc.desc: UpdateDuringCallState
  * @tc.type: FUNC
