@@ -622,14 +622,14 @@ napi_value JsWindowStage::OnSetWindowModal(napi_env env, napi_callback_info info
     if (windowScene == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "WindowScene is null");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY,
-            "[window][setWindowModal]msg: invalid window scene"));
+            "[window][setWindowModal]msg: Invalid window scene"));
         return NapiGetUndefined(env);
     }
     auto window = windowScene->GetMainWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "window is nullptr");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY,
-            "[window][setWindowModal]msg: invalid main window"));
+            "[window][setWindowModal]msg: Invalid main window"));
         return NapiGetUndefined(env);
     }
     if (window->IsPadAndNotFreeMultiWindowCompatibleMode()) {
@@ -639,7 +639,7 @@ napi_value JsWindowStage::OnSetWindowModal(napi_env env, napi_callback_info info
     if (!window->IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_MAIN, "device not support");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT,
-            "[window][setWindowModal]msg: device not support"));
+            "[window][setWindowModal]msg: Device not support"));
         return NapiGetUndefined(env);
     }
     size_t argc = FOUR_PARAMS_SIZE;
