@@ -39,7 +39,7 @@ public:
     static void GetAllDisplaysAni(ani_env* env, ani_object arrayObj);
     static void GetPrimaryDisplaySyncAni(ani_env* env, ani_object obj);
     static void GetDisplayByIdSyncAni(ani_env* env, ani_object obj, ani_long displayId);
-    static void GetDefaultDisplaySyncAni(ani_env* env, ani_object obj);
+    static ani_object GetDefaultDisplaySyncAni(ani_env* env);
 
     static void RegisterCallback(ani_env* env, ani_string type,
         ani_ref callback, ani_long nativeObj);
