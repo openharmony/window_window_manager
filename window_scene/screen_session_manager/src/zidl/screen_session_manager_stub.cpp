@@ -1463,6 +1463,15 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             }
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SYNC_SCREEN_POWER_STATE: {
+            ScreenPowerState state = ScreenPowerState::INVALID_STATE;
+            if (!data.ReadUint32(state)) {
+                TLOGE(WmsLogTag::DMS, "Read power state failed");
+                return ERR_INVALID_DATA;
+            }
+            SyncScreenPowerState(state);
+            break;
+        }
         default:
             TLOGW(WmsLogTag::DMS, "unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

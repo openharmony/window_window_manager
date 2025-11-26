@@ -200,6 +200,7 @@ public:
     virtual DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
         uint32_t& actualRefreshRate);
     virtual ScreenPowerState GetScreenPower();
+    virtual void SyncScreenPowerState(ScreenPowerState state);
     virtual void SetFoldStatusExpandAndLocked(bool locked);
     virtual DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable);
     virtual DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable);
