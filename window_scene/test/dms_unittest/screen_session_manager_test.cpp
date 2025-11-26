@@ -3264,6 +3264,7 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenProperty03, TestSize.Level1)
     ScreenId screenId = 1050;
     ssm_->GetScreenProperty(screenId);
     EXPECT_TRUE(logMsg.find("Permission Denied") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
