@@ -1572,7 +1572,7 @@ HWTEST_F(SceneSessionManagerTest2, LoadFreeMultiWindowConfigTest, TestSize.Level
 
 /**
  * @tc.name: Init
- * @tc.desc: SceneSesionManager init
+ * @tc.desc: SceneSessionManager init
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest2, Init, TestSize.Level1)
@@ -1582,6 +1582,26 @@ HWTEST_F(SceneSessionManagerTest2, Init, TestSize.Level1)
     ssm_->Init();
     ssm_->RegisterAppListener();
     EXPECT_FALSE(g_logMsg.find("appMgrClient is nullptr.") != std::string::npos);
+    
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ssm_->Init();
+    EXPECT_TRUE(g_logMsg.find("SSM init success.") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ *@tc.name: HandleUserSwitching
+ *@tc.desc: SceneSesionManager HandleUserSwitching
+ *@tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest2, HandleUserSwitching, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ssm_->HandleUserSwitching(true);
+    EXPECT_TRUE(g_logMsg.find("taskScheduler is nullptr") != std::string::npos);
     LOG_SetCallback(nullptr);
 }
 
