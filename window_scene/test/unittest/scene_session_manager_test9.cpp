@@ -1748,6 +1748,22 @@ HWTEST_F(SceneSessionManagerTest9, SetParentWindowInner, TestSize.Level1)
     subSession->SetExclusivelyHighlighted(false);
     ssm_->SetParentWindowInner(subSession, oldParentSession, newParentSession);
 }
+
+/**
+ * @tc.name: ResetSpecificWindowZIndex
+ * @tc.desc: test function : ResetSpecificWindowZIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, ResetSpecificWindowZIndex, TestSize.Level1)
+{
+    WSError ret = ssm_->ResetSpecificWindowZIndex(123);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+
+    ssm_->specificZIndexByPidMap_[WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD] = 123;
+    ret = ssm_->ResetSpecificWindowZIndex(123);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    ssm_->specificZIndexByPidMap_.clear();
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
