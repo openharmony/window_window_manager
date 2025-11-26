@@ -578,6 +578,16 @@ ScreenPowerState ScreenManagerAdapter::GetScreenPower()
     return ScreenPowerState::INVALID_STATE;
 }
 
+void ScreenManagerAdapter::SyncScreenPowerState(ScreenPowerState state)
+{
+    INIT_PROXY_CHECK_RETURN();
+
+    if (screenSessionManagerServiceProxy_ == nullptr) {
+        return;
+    }
+    screenSessionManagerServiceProxy_->SyncScreenPowerState(state);
+}
+
 DMError ScreenManagerAdapter::SetOrientation(ScreenId screenId, Orientation orientation, bool isFromNapi)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);

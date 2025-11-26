@@ -352,6 +352,12 @@ public:
     ScreenPowerState GetScreenPower();
 
     /**
+     * @brief Sync screen power state, only for PMS.
+     *
+     */
+    void SyncScreenPowerState(ScreenPowerState state);
+
+    /**
      * @brief Set screen rotation lock status.
      *
      * @param isLocked True means forbid to rotate screen, false means the opposite.

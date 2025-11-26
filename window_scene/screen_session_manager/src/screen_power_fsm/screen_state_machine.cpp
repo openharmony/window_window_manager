@@ -192,6 +192,22 @@ bool ScreenStateMachine::DoAodExitAndSetPowerAllOff(ScreenPowerEvent event, cons
     return true;
 }
 
+bool ScreenStateMachine::ActionScreenPowerOff(ScreenPowerEvent event, const ScreenPowerInfoType& type)
+{
+    bool ret = DoSetScreenPower(event, type);
+    if (!ret) {
+        return false;
+    }
+    ScreenPowerState state = ScreenSessionManager::GetInstance().GetScreenPower();
+    if (state != ScreenPowerState::POWER_OFF) {
+        ScreenTransitionState currState = ScreenStateMachine::GetInstance().GetTransitionState();
+        ScreenStateMachine::GetInstance().ToTransition(currState, true);
+        TLOGI(WmsLogTag::DMS, "[ScreenPower FSM] main screen is on, stay current state: %{public}d event: %{public}u",
+            currState, event);
+    }
+    return true;
+}
+
 Transition& ScreenStateMachine::GetTransition(ScreenTransitionState state, ScreenPowerEvent event)
 {
     static Transition errorTransition;
@@ -228,6 +244,8 @@ void ScreenStateMachine::InitStateMachineTbl()
         ScreenTransitionState::WAIT_SCREEN_ON_READY, &ScreenStateMachine::DoSetDisplayState};
     stateMachine_[{ScreenTransitionState::WAIT_SCREEN_ON_READY, ScreenPowerEvent::POWER_ON}] = {
         ScreenTransitionState::SCREEN_ON, &ScreenStateMachine::DoSetScreenPower};
+    stateMachine_[{ScreenTransitionState::WAIT_SCREEN_ON_READY, ScreenPowerEvent::SYNC_POWER_ON}] = {
+        ScreenTransitionState::SCREEN_ON, &ScreenStateMachine::DoRecordTransNormal};
 
     stateMachine_[{ScreenTransitionState::SCREEN_ON, ScreenPowerEvent::WAKEUP_BEGIN}] = {
         ScreenTransitionState::WAIT_SCREEN_ON_READY, &ScreenStateMachine::DoWakeUpBegin};
@@ -240,7 +258,7 @@ void ScreenStateMachine::InitStateMachineTbl()
     stateMachine_[{ScreenTransitionState::SCREEN_ON, ScreenPowerEvent::SET_DISPLAY_STATE_DOZE_SUSPEND}] = {
         ScreenTransitionState::WAIT_LOCK_SCREEN_IND, &ScreenStateMachine::DoSetDisplayState};
     stateMachine_[{ScreenTransitionState::SCREEN_ON, ScreenPowerEvent::POWER_OFF_DIRECTLY}] = {
-        ScreenTransitionState::SCREEN_OFF, &ScreenStateMachine::DoSetScreenPower};
+        ScreenTransitionState::SCREEN_OFF, &ScreenStateMachine::ActionScreenPowerOff};
     stateMachine_[{ScreenTransitionState::SCREEN_ON, ScreenPowerEvent::POWER_ON_DIRECTLY}] = {
         ScreenTransitionState::SCREEN_ON, &ScreenStateMachine::DoSetScreenPower};
     
