@@ -1040,10 +1040,18 @@ ScreenId ScreenSessionManager::GenerateSmsScreenId(ScreenId rsScreenId)
 
 void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason)
 {
-    if (reason == ScreenChangeReason::HWCDEAD) {
-        NotifyAbnormalScreenConnectChange(screenId);
-        TLOGW(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " ScreenChangeReason: %{public}d",
-            screenId, static_cast<int>(reason));
+    if (reason == ScreenChangeReason::HWCDEAD && screenEvent == ScreenEvent::DISCONNECTED) {
+        TLOGW(WmsLogTag::DMS, "composer dead, ignore");
+        return;
+    }
+    if (reason == ScreenChangeReason::HWCDEAD && GetScreenSession(GenerateSmsScreenId(screenId))) {
+        TLOGW(WmsLogTag::DMS, "composer restart and screensession connected");
+        // composer restart, notify powermgr poweron pc outer screen
+        if (screenId != SCREEN_ID_DEFAULT && g_isPcDevice) {
+            NotifyAbnormalScreenConnectChange(screenId);
+            TLOGW(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " ScreenChangeReason: %{public}d",
+                screenId, static_cast<int>(reason));
+        }
         return;
     }
     OnScreenChangeDefault(screenId, screenEvent, reason);
