@@ -3066,9 +3066,9 @@ HWTEST_F(SceneSessionManagerStubTest, ResetSpecificWindowZIndex, Function | Smal
     MessageParcel reply;
     MessageOption option;
 
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
     uint32_t code = static_cast<uint32_t>(
         ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_RESET_SPECIFIC_WINDOW_ZINDEX);
-
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
