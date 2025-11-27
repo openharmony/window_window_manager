@@ -599,6 +599,83 @@ HWTEST_F(SuperFoldStateManagerTest, GetFoldCreaseRect02, TestSize.Level1)
     EXPECT_TRUE(g_errLog.find("the current FoldCreaseRect is horizontal") != std::string::npos);
     LOG_SetCallback(nullptr);
 }
+
+/**
+@tc.name : HandleSuperFoldDisplayCallback
+@tc.desc : HandleSuperFoldDisplayCallback test.
+@tc.type: FUNC
+*/
+HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldDisplayCallback, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    SuperFoldStateManager& manager = SuperFoldStateManager::GetInstance();
+    sptr screenSession = ssm_.GetOrCreateScreenSession(0);
+    ScreenProperty screenProperty;
+    screenProperty.bounds_.rect_ = { 0, 0, 100, 100 };
+    screenSession->SetScreenProperty(screenProperty);
+    ssm_.InitFakeScreenSession(screenSession);
+
+    screenSession->UpdateSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::UNDEFINED);
+    manager.HandleSuperFoldDisplayCallback(screenSession, SuperFoldStatusChangeEvents::UNDEFINED);
+    EXPECT_TRUE(g_errLog.find("nothing to handle") != std::string::npos);
+    g_errLog.clear();
+
+    screenSession->UpdateSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED);
+    manager.HandleSuperFoldDisplayCallback(screenSession, SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED);
+
+    screenSession->UpdateSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
+    manager.HandleSuperFoldDisplayCallback(screenSession, SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
+
+    screenSession->UpdateSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::KEYBOARD_ON);
+    manager.HandleSuperFoldDisplayCallback(screenSession, SuperFoldStatusChangeEvents::KEYBOARD_ON);
+
+    screenSession->UpdateSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::KEYBOARD_OFF);
+    manager.HandleSuperFoldDisplayCallback(screenSession, SuperFoldStatusChangeEvents::KEYBOARD_OFF);
+
+    screenSession->UpdateSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_ON);
+    manager.HandleSuperFoldDisplayCallback(screenSession, SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_ON);
+
+    screenSession->UpdateSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_OFF);
+    manager.HandleSuperFoldDisplayCallback(screenSession, SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_OFF);
+}
+
+/**
+@tc.name : HandleKeyboardOnDisplayNotify01
+@tc.desc : HandleKeyboardOnDisplayNotify01 test.
+@tc.type: FUNC
+*/
+HWTEST_F(SuperFoldStateManagerTest, HandleKeyboardOnDisplayNotify01, TestSize.Level1)
+{
+    sptr<ScreenSession> screenSession = ssm_.GetOrCreateScreenSession(0);
+    screenSession->SetIsFakeInUse(true);
+    sptr<ScreenSession> fakeScreenSession = sptr<ScreenSession>::MakeSptr();
+    screenSession->SetFakeScreenSession(fakeScreenSession);
+    screenSession->SetIsDestroyDisplay(false);
+    SuperFoldStateManager& manager = SuperFoldStateManager::GetInstance();
+    manager.HandleKeyboardOnDisplayNotify(screenSession);
+
+    EXPECT_TRUE(screenSession->GetIsBScreenHalf());
+    EXPECT_GT(screenSession->GetValidHeight(), 0);
+    EXPECT_GT(screenSession->GetValidWidth(), 0);
+}
+
+/**
+@tc.name : HandleKeyboardOnDisplayNotify02
+@tc.desc : HandleKeyboardOnDisplayNotify02 test.
+@tc.type: FUNC
+*/
+HWTEST_F(SuperFoldStateManagerTest, HandleKeyboardOnDisplayNotify02, TestSize.Level1)
+{
+    sptr<ScreenSession> screenSession= ssm_.GetOrCreateScreenSession(0);
+    screenSession->SetIsFakeInUse(true);
+    sptr<ScreenSession> fakeScreenSession = sptr<ScreenSession>::MakeSptr();
+    screenSession->SetFakeScreenSession(fakeScreenSession);
+    screenSession->SetIsDestroyDisplay(true);
+    SuperFoldStateManager& manager = SuperFoldStateManager::GetInstance();
+    manager.HandleKeyboardOnDisplayNotify(screenSession);
+    EXPECT_TRUE(screenSession->GetIsBScreenHalf());
+}
 }
 }
 }

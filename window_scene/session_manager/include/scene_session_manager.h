@@ -94,10 +94,6 @@ struct SCBAbilityInfo {
     bool isForceRotate_;
 };
 
-struct SCBApplicationInfo {
-    AppExecFwk::StartMode startMode_;
-};
-
 struct SessionIdentityInfo {
     std::string bundleName_;
     std::string moduleName_;
@@ -461,7 +457,8 @@ public:
     void ClearAllCollaboratorSessions();
 
     WMError CheckWindowId(int32_t windowId, int32_t& pid) override;
-    void GetSceneSessionPrivacyModeBundles(DisplayId displayId, std::unordered_set<std::string>& privacyBundles);
+    void GetSceneSessionPrivacyModeBundles(DisplayId displayId,
+        std::unordered_map<DisplayId, std::unordered_set<std::string>>& privacyBundles);
     BrokerStates CheckIfReuseSession(SessionInfo& sessionInfo);
     bool CheckCollaboratorType(int32_t type);
     sptr<SceneSession> FindSessionByAffinity(const std::string& affinity);
@@ -469,6 +466,7 @@ public:
     void PreloadInLakeApp(const std::string& bundleName);
     WSError UpdateMaximizeMode(int32_t persistentId, bool isMaximize);
     WSError UpdateSessionDisplayId(int32_t persistentId, uint64_t screenId);
+    void RegisterClientDisplayIdChangeNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
     WSError NotifyStackEmpty(int32_t persistentId);
     void NotifySessionUpdate(const SessionInfo& sessionInfo, ActionType type,
         ScreenId fromScreenId = SCREEN_ID_INVALID);
@@ -646,6 +644,8 @@ public:
         const std::unordered_set<std::string>& privacyWindowTags) override;
     WMError RemoveSessionBlackList(const std::unordered_set<std::string>& bundleNames,
         const std::unordered_set<std::string>& privacyWindowTags) override;
+    void UpdateSessionPrivacyForSuperFold(const sptr<SceneSession>& sceneSession, DisplayId displayId,
+        std::unordered_map<DisplayId, std::unordered_set<std::string>>& privacyBundles);
 
     /*
      * Multi Window
@@ -774,7 +774,7 @@ public:
     WSError ClearAllSessions() override;
     WSError MoveSessionsToForeground(const std::vector<int32_t>& sessionIds, int32_t topSessionId) override;
     WSError MoveSessionsToBackground(const std::vector<int32_t>& sessionIds, std::vector<int32_t>& result) override;
-    WMError MinimizeAllAppWindows(DisplayId displayId) override;
+    WMError MinimizeAllAppWindows(DisplayId displayId, int32_t excludeWindowId = 0) override;
     int32_t StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abilitySessionInfo, sptr<SceneSession>& sceneSession);
     int32_t StartUIAbilityBySCB(sptr<SceneSession>& sceneSessions);
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
@@ -807,7 +807,6 @@ public:
     void NotifySessionTransferToTargetScreenEvent(const int32_t persistentId,
         const uint32_t resultCode, const uint64_t fromScreenid, const uint64_t toScreenId,
         LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
-    WSError GetApplicationInfo(const std::string& bundleName, SCBApplicationInfo& scbApplicationInfo);
     WSError GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList);
     void UpdateRecentMainSessionInfos(const std::vector<int32_t>& recentMainSessionIdList);
     sptr<SceneSession> GetMainSessionByPersistentId(int32_t persistentId) const;

@@ -1616,6 +1616,9 @@ WSError SceneSession::NotifyClientToUpdateRectTask(const std::string& updateReas
     if (reason != SizeChangeReason::DRAG_MOVE) {
         UpdateCrossAxisOfLayout(winRect);
     }
+    if (reason != SizeChangeReason::DRAG_MOVE && reason != SizeChangeReason::DRAG) {
+        UpdatePrivateStateOfLayout(winRect);
+    }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "SceneSession::NotifyClientToUpdateRect%d [%d, %d, %u, %u] reason:%u",
         GetPersistentId(), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_, reason);
@@ -2076,6 +2079,52 @@ void SceneSession::HandleCrossMoveTo(WSRect& globalRect)
     SetSurfaceBounds(globalRect, true, true);
 }
 
+CrossPlaneState SceneSession::UpdateCrossPlaneState(const WSRect &rect)
+{
+    if (!PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId()) ||
+        PcFoldScreenManager::GetInstance().HasSystemKeyboard()) {
+        return CrossPlaneState::CROSS_DEFAULT_PLANE;
+    }
+    const auto &[defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
+        PcFoldScreenManager::GetInstance().GetDisplayRects();
+    if (rect.IsOverlap(defaultDisplayRect) && rect.IsOverlap(foldCreaseRect) && rect.IsOverlap(virtualDisplayRect)) {
+        return CrossPlaneState::CROSS_ALL_PLANE;
+    }
+    if (rect.IsOverlap(defaultDisplayRect) && rect.IsOverlap(foldCreaseRect)) {
+        return CrossPlaneState::CROSS_DEFAULT_CREASE_PLANE;
+    }
+    if (rect.IsOverlap(foldCreaseRect) && rect.IsOverlap(virtualDisplayRect)) {
+        return CrossPlaneState::CROSS_VIRTUAL_CREASE_PLANE;
+    }
+    if (rect.IsOverlap(defaultDisplayRect)) {
+        return CrossPlaneState::CROSS_DEFAULT_PLANE;
+    }
+    if (rect.IsOverlap(virtualDisplayRect)) {
+        return CrossPlaneState::CROSS_VIRTUAL_PLANE;
+    }
+    if (rect.IsOverlap(foldCreaseRect)) {
+        return CrossPlaneState::CROSS_CREASE_PLANE;
+    }
+    return CrossPlaneState::CROSS_DEFAULT_PLANE;
+}
+
+void SceneSession::UpdatePrivateStateOfLayout(const WSRect &rect)
+{
+    bool notifyPrivacy = false;
+    CrossPlaneState crossPlaneState = UpdateCrossPlaneState(rect);
+    notifyPrivacy = crossPlaneState_ != static_cast<uint32_t>(crossPlaneState);
+    crossPlaneState_ = static_cast<uint32_t>(crossPlaneState);
+
+    TLOGD(WmsLogTag::WMS_LAYOUT, "notifyPrivacy: %{public}u, winId: %{public}d, rect: %{public}s"
+        ", crossPlaneState: %{public}u", notifyPrivacy, GetPersistentId(), rect.ToString().c_str(), crossPlaneState);
+    
+    if (notifyPrivacy && updatePrivateStateAndNotifyFunc_) {
+        updatePrivateStateAndNotifyFunc_(GetPersistentId());
+    } else if (updatePrivateStateAndNotifyFunc_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "updatePrivateStateAndNotifyFunc_ is null, id: %{public}d", GetPersistentId() );
+    }
+}
+
 void SceneSession::UpdateCrossAxisOfLayout(const WSRect& rect)
 {
     const int FOLD_CREASE_TYPE = 2;
@@ -2281,8 +2330,9 @@ SessionInfo SceneSession::GetSessionInfoByWant(const std::shared_ptr<AAFwk::Want
     const sptr<SceneSession>& session)
 {
     SessionInfo info;
-    if (session->sessionInfo_.moduleName_ == want->GetElement().GetModuleName() &&
-        session->sessionInfo_.abilityName_ == want->GetElement().GetAbilityName()) {
+    if ((session->sessionInfo_.moduleName_ == want->GetElement().GetModuleName() &&
+        session->sessionInfo_.abilityName_ == want->GetElement().GetAbilityName()) ||
+        session->sessionInfo_.isAtomicService_) {
         session->sessionInfo_.want = want;
         session->sessionInfo_.isRestartApp_ = true;
         session->sessionInfo_.restartCallerPersistentId_ = INVALID_SESSION_ID;
@@ -5765,8 +5815,7 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
                 abilitySessionInfo->supportWindowModes.end());
         }
     }
-    if (info.isAtomicService_ && info.want != nullptr &&
-        (info.want->GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) == AAFwk::Want::FLAG_INSTALL_ON_DEMAND) {
+    if (info.isAtomicService_) {
         SetAtomicServiceInfo(info);
     }
     if (info.want != nullptr) {

@@ -290,8 +290,7 @@ void FoldScreenSensorManager::HandleHallData(const SensorEvent* const event)
 
 bool FoldScreenSensorManager::HandleAbnormalAngle()
 {
-    if (FoldScreenStateInternel::FloatEqualAbs(globalAngle, DUAL_INVALID_ANGLE_VALUE)
-        && globalHall == 0 && !registerPosture_) {
+    if (FoldScreenStateInternel::FloatEqualAbs(globalAngle, DUAL_INVALID_ANGLE_VALUE)) {
         globalAngle = ANGLE_MIN_VAL;
         TLOGI(WmsLogTag::DMS, "hall value is: %{public}u, let angle value is: %{public}f, continue",
             globalHall, globalAngle);
