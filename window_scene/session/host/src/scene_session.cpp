@@ -9139,33 +9139,27 @@ WSError SceneSession::ConvertOrientationAndRotation(const RotationInfoType from,
         convertedValue = value;
         return WSError::WS_OK;
     }
-    if (from == RotationInfoType::DISPLAY_ORIENTATION && to == RotationInfoType::WINDOW_ORIENTATION)
-    {
+    if (from == RotationInfoType::DISPLAY_ORIENTATION && to == RotationInfoType::WINDOW_ORIENTATION) {
         ret = ConvertDisplayOrientationToWindowOrientation(value, convertedValue);
         return ret;
     }
-    if (from == RotationInfoType::WINDOW_ORIENTATION && to == RotationInfoType::DISPLAY_ORIENTATION)
-    {
-        ret = ConvertWindowOrientationToDisplayOrientation(value,convertedValue);
+    if (from == RotationInfoType::WINDOW_ORIENTATION && to == RotationInfoType::DISPLAY_ORIENTATION) {
+        ret = ConvertWindowOrientationToDisplayOrientation(value, convertedValue);
         return ret;
     }
-    if (from == RotationInfoType::DISPLAY_ROTATION && to == RotationInfoType::DISPLAY_ORIENTATION)
-    {
+    if (from == RotationInfoType::DISPLAY_ROTATION && to == RotationInfoType::DISPLAY_ORIENTATION) {
         ret = ConvertDisplayRotationToDisplayOrientation(value, convertedValue);
         return ret;
     }
-    if (from == RotationInfoType::DISPLAY_ORIENTATION && to == RotationInfoType::DISPLAY_ROTATION)
-    {
+    if (from == RotationInfoType::DISPLAY_ORIENTATION && to == RotationInfoType::DISPLAY_ROTATION) {
         ret = ConvertDisplayOrientationToDisplayRotation(value, convertedValue);
         return ret;
     }
-    if (from == RotationInfoType::DISPLAY_ROTATION && to == RotationInfoType::WINDOW_ORIENTATION)
-    {
+    if (from == RotationInfoType::DISPLAY_ROTATION && to == RotationInfoType::WINDOW_ORIENTATION) {
         ret = ConvertDisplayRotationToWindowOrientation(value, convertedValue);
         return ret;
     }
-    if (from == RotationInfoType::WINDOW_ORIENTATION && to == RotationInfoType::DISPLAY_ROTATION)
-    {
+    if (from == RotationInfoType::WINDOW_ORIENTATION && to == RotationInfoType::DISPLAY_ROTATION) {
         ret = ConvertWindowOrientationToDisplayRotation(value, convertedValue);
         return ret;
     }

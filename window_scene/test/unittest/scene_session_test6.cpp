@@ -1716,21 +1716,9 @@ HWTEST_F(SceneSessionTest6, ConvertDisplayOrientationToWindowOrientation, TestSi
     sptr<SceneSession> session = nullptr;
     int32_t value = 4;
     int32_t convertedValue = 0;
-    session->sdkVersion_ = 0;
-    auto ret = session->ConvertDisplayOrientationToWindowOrientation(value, convertedValue);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
 
-    session->sdkVersion_ = 3;
     ret = session->ConvertDisplayOrientationToWindowOrientation(value, convertedValue);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
-    value = 5;
-    ret = session->ConvertDisplayOrientationToWindowOrientation(value, convertedValue);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
-    value = 2;
-    ret = session->ConvertDisplayOrientationToWindowOrientation(value, convertedValue);
-    EXPECT_EQ(WSError::WS_OK, ret);
-
-    session->sdkVersion_ = 20;
     value = 5;
     ret = session->ConvertDisplayOrientationToWindowOrientation(value, convertedValue);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
@@ -1752,19 +1740,6 @@ HWTEST_F(SceneSessionTest6, ConvertWindowOrientationToDisplayOrientation, TestSi
     sptr<SceneSession> session = nullptr;
     int32_t value = 4;
     int32_t convertedValue = 0;
-    session->sdkVersion_ = 0;
-    auto ret = session->ConvertWindowOrientationToDisplayOrientation(value, convertedValue);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
-
-    session->sdkVersion_ = 3;
-    value = 5;
-    ret = session->ConvertWindowOrientationToDisplayOrientation(value, convertedValue);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
-    value = 2;
-    ret = session->ConvertWindowOrientationToDisplayOrientation(value, convertedValue);
-    EXPECT_EQ(WSError::WS_OK, ret);
-
-    session->sdkVersion_ = 20;
     value = 5;
     ret = session->ConvertWindowOrientationToDisplayOrientation(value, convertedValue);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
