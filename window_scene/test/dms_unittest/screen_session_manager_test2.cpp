@@ -3106,6 +3106,40 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForAll01, TestSize.Level1)
     g_errLog.clear();
     ScreenStateMachine::GetInstance().SetTransitionState(temp);
 }
+
+/**
+ * @tc.name: WakeupBegin
+ * @tc.desc: WakeupBegin test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, WakeUpBegin01, TestSize.Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    EXPECT_NE(displayManagerAgent, nullptr);
+
+    DisplayManagerAgentType type = DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER;
+    EXPECT_EQ(DMError::DM_OK, ssm_->RegisterDisplayManagerAgent(displayManagerAgent, type));
+
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
+    }
+
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_ON);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS;
+    ASSERT_EQ(true, ssm_->WakeUpBegin(reason));
+
+    reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
+    ASSERT_EQ(true, ssm_->WakeUpBegin(reason));
+
+    reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
+    ASSERT_EQ(true, ssm_->WakeUpBegin(reason));
+
+    EXPECT_EQ(DMError::DM_OK, ssm_->DestroyVirtualScreen(screenId));
+    EXPECT_EQ(DMError::DM_OK, ssm_->UnregisterDisplayManagerAgent(displayManagerAgent, type));
+}
 }
 }
 }
