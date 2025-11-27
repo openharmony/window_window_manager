@@ -6117,7 +6117,7 @@ void SceneSessionManager::ClearStartWindowColorFollowApp(const std::string& bund
 
 void SceneSessionManager::OnBundleUpdated(const std::string& bundleName, int userId)
 {
-    taskScheduler_->PostAsyncTask([this, bundleName, where]() {
+    taskScheduler_->PostAsyncTask([this, bundleName]() {
         ClearStartWindowColorFollowApp(bundleName);
     }, __func__);
     ffrtQueueHelper_->SubmitTask([this, bundleName, where = __func__] {
