@@ -31,6 +31,7 @@ const static int32_t MAX_BUFF_SIZE = 100;
 const static float INVALID_DEFAULT_DENSITY = 1.0f;
 const static uint32_t PIXMAP_VECTOR_SIZE = 2;
 constexpr uint32_t  MAX_CREASE_REGION_SIZE = 20;
+constexpr uint32_t MAP_SIZE_MAX_NUM = 100;
 }
 
 int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
@@ -1063,7 +1064,11 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
         }
         case DisplayManagerMessage::TRANS_ID_SET_SCREENID_PRIVACY_STATE: {
             std::unordered_map<DisplayId, bool> privacyBundleDisplayId;
-            uint32_t mapSize = data.ReadUint32();
+            uint32_t mapSize = 0;
+            if (!data.ReadUint32(mapSize) || mapSize > MAP_SIZE_MAX_NUM) {
+                TLOGE(WmsLogTag::DMS, "Failed to read mapSize");
+                return ERR_INVALID_DATA;
+            }
             for (uint32_t i = 0; i < mapSize; i++) {
                 DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
                 auto hasPrivate = data.ReadBool();
