@@ -112,6 +112,7 @@ public:
     void SetDisplayNodeScreenId(ScreenId screenId);
     void RegisterScreenChangeListener(IScreenChangeListener* screenChangeListener);
     void UnregisterScreenChangeListener(IScreenChangeListener* screenChangeListener);
+    void UpdateScbScreenPropertyToServer(const ScreenProperty& screenProperty);
 
     sptr<DisplayInfo> ConvertToDisplayInfo();
     sptr<DisplayInfo> ConvertToRealDisplayInfo();
@@ -297,9 +298,17 @@ public:
 
     void Connect();
     void Disconnect();
+    void HandleKeyboardOnPropertyChange(ScreenProperty& screenProperty, int32_t height);
+    void HandleKeyboardOffPropertyChange(ScreenProperty& screenProperty);
+    void HandleSystemKeyboardOnPropertyChange(ScreenProperty& screenProperty,
+        SuperFoldStatus currentStatus, bool isKeyboardOn, int32_t validHeight);
+    void HandleSystemKeyboardOffPropertyChange(ScreenProperty& screenProperty,
+        SuperFoldStatus currentStatus, bool isKeyboardOn);
+    void ProcPropertyChange(ScreenProperty& screenProperty, const ScreenProperty& eventPara);
+    void ProcPropertyChangedForSuperFold(ScreenProperty& screenProperty, const ScreenProperty& eventPara);
+    void NotifyListenerPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason);
     void PropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason);
-    void NotifyClientPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason);
-    void NotifyFoldPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
+    void NotifyFoldPropertyChange(ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
         FoldDisplayMode displayMode);
     void UpdateSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents changeEvent);
     SuperFoldStatusChangeEvents GetSuperFoldStatusChangeEvent();
@@ -404,8 +413,8 @@ public:
     void UpdateMirrorHeight(uint32_t mirrorHeight);
     void SetCurrentValidHeight(int32_t currentValidHeight);
     int32_t GetCurrentValidHeight() const;
-    void SetIsPreFakeInUse(bool isPreFakeInUse);
-    bool GetIsPreFakeInUse() const;
+    void SetIsDestroyDisplay(bool isPreFakeInUse);
+    bool GetIsDestroyDisplay() const;
     void SetIsKeyboardOn(bool isKeyboardOn);
     bool GetIsKeyboardOn() const;
     void SetFloatRotation(float rotation);

@@ -2034,6 +2034,261 @@ HWTEST_F(ScreenSessionManagerClientTest, NotifyIsFullScreenInForceSplitMode, Tes
 }
 
 /**
+@tc.name: HandleSystemKeyboardOffPropertyChange01
+@tc.desc: HandleSystemKeyboardOffPropertyChange01 Test
+@tc.type: FUNC
+*/
+HWTEST_F(ScreenSessionManagerClientTest, HandleSystemKeyboardOffPropertyChange01, TestSize.Level1)
+{
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
+    SuperFoldStatus currentState = SuperFoldStatus::HALF_FOLDED;
+    ScreenProperty screenProperty;
+    bool isKeyboardOn = false;
+    ASSERT_NE(screenSessionManagerClient_, nullptr);
+    screenSession->HandleSystemKeyboardOffPropertyChange(screenProperty, currentState, isKeyboardOn);
+}
+
+/**
+@tc.name: HandleSystemKeyboardOffPropertyChange02
+@tc.desc: HandleSystemKeyboardOffPropertyChange02 Test
+@tc.type: FUNC
+*/
+HWTEST_F(ScreenSessionManagerClientTest, HandleSystemKeyboardOffPropertyChange02, TestSize.Level1)
+{
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
+    SuperFoldStatus currentState = SuperFoldStatus::FOLDED;
+    ScreenProperty screenProperty;
+    bool isKeyboardOn = true;
+    ASSERT_NE(screenSessionManagerClient_, nullptr);
+    screenSession->HandleSystemKeyboardOffPropertyChange(screenProperty, currentState, isKeyboardOn);
+}
+
+/**
+@tc.name: HandleSystemKeyboardOnPropertyChange01
+@tc.desc: HandleSystemKeyboardOnPropertyChange01 Test
+@tc.type: FUNC
+*/
+HWTEST_F(ScreenSessionManagerClientTest, HandleSystemKeyboardOnPropertyChange01, TestSize.Level1)
+{
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
+    SuperFoldStatus currentState = SuperFoldStatus::HALF_FOLDED;
+    bool isKeyboardOn = false;
+    int32_t validHeight = 1620;
+    ScreenProperty screenProperty;
+    screenProperty.SetIsFakeInUse(true);
+    RRect screenBounds;
+    screenBounds.rect_.width_ = 1080;
+    screenBounds.rect_.height_ = 1920;
+    screenProperty.SetBounds(screenBounds);
+    screenSession->SetScreenProperty(screenProperty);
+
+    ASSERT_NE(screenSessionManagerClient_, nullptr);
+    screenSession->HandleSystemKeyboardOnPropertyChange(screenProperty, currentState,
+    isKeyboardOn, validHeight);
+
+    EXPECT_EQ(screenSession->GetScreenProperty().GetIsFakeInUse(), false);
+    EXPECT_EQ(screenSession->GetPointerActiveWidth(), 1080);
+    EXPECT_EQ(screenSession->GetPointerActiveHeight(), 1620);
+}
+
+/**
+@tc.name: HandleSystemKeyboardOnPropertyChange02
+@tc.desc: HandleSystemKeyboardOnPropertyChange02 Test
+@tc.type: FUNC
+*/
+HWTEST_F(ScreenSessionManagerClientTest, HandleSystemKeyboardOnPropertyChange02, TestSize.Level1)
+{
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
+    SuperFoldStatus currentState = SuperFoldStatus::FOLDED;
+    bool isKeyboardOn = false;
+    int32_t validHeight = 1620;
+    ScreenProperty screenProperty;
+    screenProperty.SetIsFakeInUse(true);
+    RRect screenBounds;
+    screenBounds.rect_.width_ = 1920;
+    screenBounds.rect_.height_ = 1080;
+    screenProperty.SetBounds(screenBounds);
+    screenSession->SetScreenProperty(screenProperty);
+
+    ASSERT_NE(screenSessionManagerClient_, nullptr);
+    screenSession->HandleSystemKeyboardOnPropertyChange(screenProperty, currentState,
+    isKeyboardOn, validHeight);
+
+    EXPECT_EQ(screenSession->GetScreenProperty().GetIsFakeInUse(), true);
+    EXPECT_EQ(screenSession->GetPointerActiveWidth(), 1080);
+    EXPECT_EQ(screenSession->GetPointerActiveHeight(), 1620);
+}
+
+/**
+@tc.name: HandleKeyboardOnPropertyChange01
+@tc.desc: HandleKeyboardOnPropertyChange01 Test
+@tc.type: FUNC
+*/
+HWTEST_F(ScreenSessionManagerClientTest, HandleKeyboardOnPropertyChange01, TestSize.Level1)
+{
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
+    ScreenProperty screenProperty;
+    screenProperty.SetIsFakeInUse(true);
+    RRect screenBounds;
+    screenBounds.rect_.width_ = 100;
+    screenBounds.rect_.height_ = 200;
+    screenProperty.SetBounds(screenBounds);
+    screenSession->SetScreenProperty(screenProperty);
+    ASSERT_NE(screenSessionManagerClient_, nullptr);
+    screenSession->HandleKeyboardOnPropertyChange(screenProperty, 300);
+    EXPECT_EQ(screenSession->GetScreenProperty().GetIsFakeInUse(), false);
+    EXPECT_EQ(screenSession->GetValidWidth(), 100);
+    EXPECT_EQ(screenSession->GetValidHeight(), 300);
+    EXPECT_EQ(screenSession->GetScreenAreaHeight(), 1608);
+}
+
+/**
+@tc.name: HandleKeyboardOnPropertyChange02
+@tc.desc: HandleKeyboardOnPropertyChange02 Test
+@tc.type: FUNC
+*/
+HWTEST_F(ScreenSessionManagerClientTest, HandleKeyboardOnPropertyChange02, TestSize.Level1)
+{
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
+    ScreenProperty screenProperty;
+    RRect screenBounds;
+    screenBounds.rect_.width_ = 100;
+    screenBounds.rect_.height_ = 200;
+    screenProperty.SetBounds(screenBounds);
+    screenSession->SetScreenProperty(screenProperty);
+    ASSERT_NE(screenSessionManagerClient_, nullptr);
+    screenSession->HandleKeyboardOnPropertyChange(screenProperty, 300);
+    EXPECT_EQ(screenSession->GetValidWidth(), 100);
+    EXPECT_EQ(screenSession->GetValidHeight(), 300);
+}
+
+/**
+@tc.name: HandleKeyboardOffPropertyChange
+@tc.desc: HandleKeyboardOffPropertyChange Test
+@tc.type: FUNC
+*/
+HWTEST_F(ScreenSessionManagerClientTest, HandleKeyboardOffPropertyChange, TestSize.Level1)
+{
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
+    ScreenProperty screenProperty;
+    RRect screenBounds;
+    screenBounds.rect_.width_ = 100;
+    screenBounds.rect_.height_ = 200;
+    screenProperty.SetBounds(screenBounds);
+    screenSession->SetScreenProperty(screenProperty);
+
+    ASSERT_NE(screenSessionManagerClient_, nullptr);
+    screenSession->HandleKeyboardOffPropertyChange(screenProperty);
+
+    EXPECT_EQ(screenSession->GetValidWidth(), 100);
+    EXPECT_EQ(screenSession->GetValidHeight(), 200);
+    EXPECT_EQ(screenSession->GetScreenProperty().GetIsFakeInUse(), true);
+    EXPECT_EQ(screenSession->GetScreenAreaHeight(), 3296);
+}
+
+/**
+@tc.name: OnScreenPropertyChanged
+@tc.desc: OnScreenPropertyChanged test
+@tc.type: FUNC
+*/
+HWTEST_F(ScreenSessionManagerClientTest, OnScreenPropertyChanged, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(screenSessionManagerClient_, nullptr);
+
+    RRect bounds;
+    bounds.rect_.width_ = 1344;
+    bounds.rect_.height_ = 2772;
+    float rotation = 0.0;
+    sptr<ScreenSession> screenSession1 = sptr<ScreenSession>::MakeSptr(50, ScreenProperty(), 0));
+    screenSessionManagerClient_->screenSessionMap_[50] = screenSession1;
+    sptr<ScreenSession> screenSession2 = nullptr;
+    screenSessionManagerClient_->screenSessionMap_[51] = screenSession2;
+
+    screenSessionManagerClient_->OnScreenPropertyChanged(51, rotation, bounds);
+    EXPECT_TRUE(logMsg.find("screenSession is null") != std::string::npos);
+    logMsg.clear();
+
+    screenSessionManagerClient_->screenSessionManager_ = nullptr;
+    EXPECT_EQ(screenSessionManagerClient_->screenSessionManager_, nullptr);
+    screenSessionManagerClient_->OnScreenPropertyChanged(50, rotation, bounds);
+    EXPECT_TRUE(logMsg.find("screenSessionManager_ is null") != std::string::npos);
+    logMsg.clear();
+
+    screenSessionManagerClient_->ConnectToServer();
+    EXPECT_NE(screenSessionManagerClient_->screenSessionManager_, nullptr);
+    screenSessionManagerClient_->screenSessionManager_ = sptr::MakeSptr();
+    screenSessionManagerClient_->OnScreenPropertyChanged(50, rotation, bounds);
+}
+
+/**
+@tc.name: OnPropertyChanged01
+@tc.desc: OnPropertyChanged01 test
+@tc.type: FUNC
+*/
+HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged01, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+
+    ScreenId screenId = 1234;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> screenSession = nullptr;
+    ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::UNDEFINED;
+    screenSessionManagerClient_->screenSessionMap_.insert({screenId, screenSession});
+    screenSessionManagerClient_->OnPropertyChanged(screenId, screenProperty, reason);
+    EXPECT_TRUE(logMsg.find("screenSession is null") != std::string::npos);
+    logMsg.clear();
+
+    screenProperty.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::UNDEFINED);
+    screenSession = sptr::MakeSptr(screenId, screenProperty, 0);
+    screenSessionManagerClient_->screenSessionMap_.erase(screenId);
+    screenSessionManagerClient_->screenSessionMap_.insert({screenId, screenSession});
+    screenSessionManagerClient_->OnPropertyChanged(screenId, screenProperty, reason);
+    EXPECT_FALSE(logMsg.find("nothing to handle") != std::string::npos);
+    screenSessionManagerClient_->screenSessionMap_.erase(screenId);
+    logMsg.clear();
+}
+
+/**
+@tc.name: OnPropertyChanged02
+@tc.desc: OnPropertyChanged02 test
+@tc.type: FUNC
+*/
+HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged02, TestSize.Level1)
+{
+    ScreenId screenId = 1234;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> screenSession = nullptr;
+    ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::UNDEFINED;
+    screenProperty.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED);
+    screenSession = sptr::MakeSptr(screenId, screenProperty, 0);
+    screenSessionManagerClient_->screenSessionMap_.erase(screenId);
+    screenSessionManagerClient_->screenSessionMap_.insert({screenId, screenSession});
+    screenSessionManagerClient_->OnPropertyChanged(screenId, screenProperty, reason);
+    EXPECT_NE(screenSession->GetScreenProperty().GetIsFakeInUse(), true);
+
+    screenProperty.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
+    screenSessionManagerClient_->OnPropertyChanged(screenId, screenProperty, reason);
+    EXPECT_EQ(screenSession->GetScreenProperty().GetIsFakeInUse(), false);
+
+    screenProperty.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::KEYBOARD_ON);
+    screenSessionManagerClient_->OnPropertyChanged(screenId, screenProperty, reason);
+
+    screenProperty.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::KEYBOARD_OFF);
+    screenSessionManagerClient_->OnPropertyChanged(screenId, screenProperty, reason);
+
+    screenProperty.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_ON);
+    screenSessionManagerClient_->OnPropertyChanged(screenId, screenProperty, reason);
+
+    screenProperty.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_OFF);
+    screenSessionManagerClient_->OnPropertyChanged(screenId, screenProperty, reason);
+    screenSessionManagerClient_->screenSessionMap_.erase(screenId);
+}
+
+/**
  * @tc.name: SetInternalClipToBounds
  * @tc.desc: SetInternalClipToBounds test
  * @tc.type: FUNC
@@ -2084,6 +2339,65 @@ HWTEST_F(ScreenSessionManagerClientTest, GetSupportsFocus, TestSize.Level1)
     displayId = 10000;
     focus = client->GetSupportsFocus(displayId);
     EXPECT_EQ(focus, true);
+}
+
+/**
+@tc.name: ProcPropertyChangedForSuperFold
+@tc.desc: ProcPropertyChangedForSuperFold test
+@tc.type: FUNC
+*/
+HWTEST_F(ScreenSessionManagerClientTest, ProcPropertyChangedForSuperFold, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    ScreenSession session;
+    ScreenProperty screenProperty;
+    ScreenProperty eventPara;
+
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        GTEST_SKIP();
+    }
+
+    struct TestCase {
+        SuperFoldStatusChangeEvents eventType;
+        std::string expectedLog;
+        bool isInfoLog;
+    };
+
+    std::vector testCases = {
+        { SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED, "handle extend change to half fold", true },
+        { SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED, "handle half fold change to expanded", true },
+        { SuperFoldStatusChangeEvents::KEYBOARD_ON, "handle keyboard on", true },
+        { SuperFoldStatusChangeEvents::KEYBOARD_OFF, "handle keyboard off", true },
+        { SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_ON, "handle system keyboard on", true },
+        { SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_OFF, "handle system keyboard off", true },
+        { static_cast(999), "nothing to handle changeEvent=", false },
+    };
+
+    eventPara.SetCurrentValidHeight(1080);
+    eventPara.SetIsKeyboardOn(true);
+    eventPara.SetFoldStatus(SuperFoldStatus::FOLDED);
+
+    for (const auto& tc : testCases) {
+        logMsg.clear();
+        eventPara.SetSuperFoldStatusChangeEvent(tc.eventType);
+        session.ProcPropertyChangedForSuperFold(screenProperty, eventPara);
+
+        if (tc.isInfoLog) {
+            EXPECT_NE(logMsg.find(tc.expectedLog), std::string::npos)
+                << "Expected log not found for event: " << static_cast<uint32_t>(tc.eventType);
+            EXPECT_EQ(logMsg.find("failed"), std::string::npos)
+                << "Unexpected error log found for info event: " << static_cast<uint32_t>(tc.eventType);
+        } else {
+            EXPECT_NE(logMsg.find(tc.expectedLog), std::string::npos)
+                << "Expected error log not found for default case";
+            EXPECT_NE(logMsg.find("nothing to handle"), std::string::npos) << "Default case log mismatch";
+        }
+    }
+
+    logMsg.clear();
+    LOG_SetCallback(nullptr);
 }
 } // namespace Rosen
 } // namespace OHOS
