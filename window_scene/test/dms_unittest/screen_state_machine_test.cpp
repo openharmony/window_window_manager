@@ -165,7 +165,10 @@ HWTEST_F(ScreenStateMachineTest, ActionScreenPowerOff_ShouldReturnFalse_WhenType
 
 HWTEST_F(ScreenStateMachineTest, ActionScreenPowerOff_ShouldReturnTrue_WhenTypeIsValid, TestSize.Level0)
 {   
-    ScreenSessionManager::GetInstance().SetScreenPowerForAll();
+    DisplayId id = 0;
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
+    ScreenSessionManager::GetInstance().screenSessionMap_[id] = screenSession;
+    ScreenSessionManager::GetInstance().SetScreenPowerForAll(ScreenPowerState::POWER_ON, PowerStateChangeReason::POWER_BUTTON);
     ScreenPowerEvent event = ScreenPowerEvent::POWER_OFF;
     ScreenPowerInfoType type = std::make_pair(ScreenPowerState::INVALID_STATE, PowerStateChangeReason::POWER_BUTTON);
     EXPECT_TRUE(fsm_->ActionScreenPowerOff(event, type));
