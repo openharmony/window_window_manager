@@ -1003,7 +1003,8 @@ napi_value JsWindowStage::OnSetSupportedWindowModes(napi_env env, napi_callback_
     auto windowScene = windowScene_.lock();
     if (windowScene == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "WindowScene is null");
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setSupportedWindowModes]msg: The window is not created or destoryed."));
         return NapiGetUndefined(env);
     }
 
@@ -1012,27 +1013,31 @@ napi_value JsWindowStage::OnSetSupportedWindowModes(napi_env env, napi_callback_
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (!(argc == ARG_COUNT_ONE || argc == ARG_COUNT_TWO)) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Argc is invalid: %{public}zu", argc);
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setSupportedWindowModes]msg: The number of parameters is invalid"));
         return NapiGetUndefined(env);
     }
 
     if (GetType(env, argv[INDEX_ZERO]) != napi_object) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "GetType error");
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setSupportedWindowModes]msg: Failed to covert object"));
         return NapiGetUndefined(env);
     }
 
     std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes;
     if (!ConvertNativeValueToVector(env, argv[INDEX_ZERO], supportedWindowModes)) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "ConvertNativeValueToVector failed");
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setSupportedWindowModes]msg: Failed to convert supportedWindowModes parameter"));
         return NapiGetUndefined(env);
     }
 
     bool grayOutMaximizeButton = false;
     if (argc == ARG_COUNT_TWO && !ConvertFromJsValue(env, argv[INDEX_ONE], grayOutMaximizeButton)) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert grayOutMaximizeButton parameter");
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM));
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM,
+            "[window][setSupportedWindowModes]msg: Failed to convert grayOutMaximizeButton parameter"));
         return NapiGetUndefined(env);
     }
 
@@ -1046,7 +1051,7 @@ napi_value JsWindowStage::OnSetSupportedWindowModes(napi_env env, napi_callback_
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s window is nullptr", where);
             WmErrorCode wmErroeCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
-            task->Reject(env, JsErrUtils::CreateJsError(env, wmErroeCode, "window is nullptr."));
+            task->Reject(env, JsErrUtils::CreateJsError(env, wmErroeCode, "The window is not created or destoryed."));
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSupportedWindowModes(supportedWindowModes,
@@ -1055,7 +1060,7 @@ napi_value JsWindowStage::OnSetSupportedWindowModes(napi_env env, napi_callback_
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "window [%{public}u, %{public}s] "
                 "set window support modes failed!", window->GetWindowId(),
                 window->GetWindowName().c_str());
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "set window support modes failed."));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "[window][setSupportedWindowModes]"));
         } else {
             TLOGNI(WmsLogTag::WMS_LAYOUT_PC, "window [%{public}u, %{public}s] "
                 "set window support modes succeed.", window->GetWindowId(),
@@ -1065,8 +1070,8 @@ napi_value JsWindowStage::OnSetSupportedWindowModes(napi_env env, napi_callback_
     };
     napi_status status = napi_send_event(env, std::move(asyncTask), napi_eprio_high, "OnSetSupportedWindowModes");
     if (status != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env,
-            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+        napiAsyncTask->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+            "[window][setSupportedWindowModes]msg: Internal task error"));
     }
     return result;
 }
