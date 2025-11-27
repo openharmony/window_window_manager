@@ -7794,14 +7794,15 @@ WMError WindowSceneSessionImpl::SetReceiveDragEventEnabled(bool enabled)
     parameters.emplace_back(static_cast<int32_t>(enabled));
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    auto result = hostSession->SendCommonEvent(static_cast<int32_t>(CommonEventCommand::SET_RECEIVE_DRAG_EVENT), parameters);
+    auto result = hostSession->SendCommonEvent(static_cast<int32_t>(CommonEventCommand::SET_RECEIVE_DRAG_EVENT),
+        parameters);
     if (result == WMError::WM_OK) {
         isReceiveDragEventEnable_ = enabled;
     }
     return result;
 }
 
-bool IsReceiveDragEventEnabled()
+bool WindowSceneSessionImpl::IsReceiveDragEventEnabled()
 {
     return isReceiveDragEventEnable_;
 }
