@@ -834,18 +834,14 @@ napi_value JsWindowManager::OnFindWindowSync(napi_env env, napi_callback_info in
     }
 }
 
-napi_value JsWindowManager::OnMinimizeAll(napi_env env, napi_callback_info info)
+WmErrorCode JsWindowManager::MinimizeAllParamParse(
+    napi_env env, size_t argc, napi_value* argv, int64_t& displayId, int32_t& excludeWindowId)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]");
     WmErrorCode errCode = WmErrorCode::WM_OK;
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
         TLOGE(WmsLogTag::WMS_LIFE, "Argc is invalid: %{public}zu", argc);
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
-    int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
     if (errCode == WmErrorCode::WM_OK && !ConvertFromJsValue(env, argv[0], displayId)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to displayId");
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
@@ -854,23 +850,44 @@ napi_value JsWindowManager::OnMinimizeAll(napi_env env, napi_callback_info info)
         SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
+    if (argc > 1 && argv[1] != nullptr && GetType(env, argv[1]) == napi_number &&
+        errCode == WmErrorCode::WM_OK && !ConvertFromJsValue(env, argv[1], excludeWindowId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to excludeWindowId");
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+    }
+    if (excludeWindowId < 0) {
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+    }
+    return errCode;
+}
+
+napi_value JsWindowManager::OnMinimizeAll(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
+    int32_t excludeWindowId = static_cast<int32_t>(INVALID_WINDOW_ID);
+    WmErrorCode errCode = MinimizeAllParamParse(env, argc, argv, displayId, excludeWindowId);
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
         TLOGE(WmsLogTag::WMS_LIFE, "JsWindowManager::OnMinimizeAll failed, Invalidate params.");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
 
-    TLOGI(WmsLogTag::WMS_LIFE, "Display id=%{public}" PRIu64 ", err=%{public}d", static_cast<uint64_t>(displayId),
-        errCode);
+    TLOGI(WmsLogTag::WMS_LIFE, "Display id=%{public}" PRIu64 ", excludeWindowId=%{public}d, err=%{public}d",
+        static_cast<uint64_t>(displayId), static_cast<int32_t>(excludeWindowId), errCode);
     napi_value lastParam = (argc <= 1) ? nullptr :
         ((argv[1] != nullptr && GetType(env, argv[1]) == napi_function) ? argv[1] : nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [displayId, env, task = napiAsyncTask] {
+    auto asyncTask = [displayId, excludeWindowId, env, task = napiAsyncTask] {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "WM:MinimizeAll: (%" PRIu64")",
             static_cast<uint64_t>(displayId));
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
-            SingletonContainer::Get<WindowManager>().MinimizeAllAppWindows(static_cast<uint64_t>(displayId)));
+            SingletonContainer::Get<WindowManager>().MinimizeAllAppWindows(
+                static_cast<uint64_t>(displayId), static_cast<int32_t>(excludeWindowId)));
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
             TLOGNI(WmsLogTag::WMS_LIFE, "OnMinimizeAll success");

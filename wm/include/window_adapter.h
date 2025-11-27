@@ -60,7 +60,7 @@ public:
         sptr<MoveDragProperty>& moveDragProperty);
     virtual void ProcessPointDown(uint32_t windowId, bool isPointDown = true);
     virtual void ProcessPointUp(uint32_t windowId);
-    virtual WMError MinimizeAllAppWindows(DisplayId displayId);
+    virtual WMError MinimizeAllAppWindows(DisplayId displayId, int32_t excludeWindowId = 0);
     virtual WMError ToggleShownStateForAllAppWindows();
     virtual WMError SetWindowLayoutMode(WindowLayoutMode mode);
     virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action);

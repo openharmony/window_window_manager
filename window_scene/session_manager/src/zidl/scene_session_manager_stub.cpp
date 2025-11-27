@@ -2413,7 +2413,12 @@ int SceneSessionManagerStub::HandleMinimizeAllAppWindows(MessageParcel& data, Me
         TLOGE(WmsLogTag::WMS_LIFE, "Read displayId failed.");
         return ERR_INVALID_DATA;
     }
-    WMError errCode = MinimizeAllAppWindows(displayId);
+    int32_t excludeWindowId = 0;
+    if (!data.ReadInt32(excludeWindowId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read excludeWindowId failed.");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = MinimizeAllAppWindows(displayId, excludeWindowId);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write errCode failed.");
         return ERR_INVALID_DATA;
