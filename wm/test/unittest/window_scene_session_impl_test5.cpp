@@ -1480,8 +1480,8 @@ HWTEST_F(WindowSceneSessionImplTest5, SetParentWindow03, TestSize.Level1)
     EXPECT_CALL(mocker.Mock(), SetParentWindow(_, _)).WillOnce(Return(mockerResult));
     EXPECT_EQ(subWindow->SetParentWindow(newParentWindowId), mockerResult);
     subWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
-    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    subWindow->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    subWindow->windowSystemConfig_.freeMultiWindowSupport_ = true;
     EXPECT_EQ(subWindow->SetParentWindow(newParentWindowId), WMError::WM_OK);
     EXPECT_EQ(WMError::WM_OK, subWindow->Destroy(true));
 }
