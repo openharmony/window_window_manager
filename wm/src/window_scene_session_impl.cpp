@@ -7783,6 +7783,29 @@ WMError WindowSceneSessionImpl::UnlockCursor(int32_t windowId)
     return hostSession->SendCommonEvent(static_cast<int32_t>(CommonEventCommand::UNLOCK_CURSOR), parameters);
 }
 
+WMError WindowSceneSessionImpl::SetReceiveDragEventEnabled(bool enabled)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_EVENT, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    std::vector<int32_t> parameters;
+    parameters.emplace_back(SET_RECEIVE_DRAG_EVENT_LENGTH);
+    parameters.emplace_back(static_cast<int32_t>(enabled));
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    auto result = hostSession->SendCommonEvent(static_cast<int32_t>(CommonEventCommand::SET_RECEIVE_DRAG_EVENT), parameters);
+    if (result == WMError::WM_OK) {
+        isReceiveDragEventEnable_ = enabled;
+    }
+    return result;
+}
+
+bool IsReceiveDragEventEnabled()
+{
+    return isReceiveDragEventEnable_;
+}
+
 bool WindowSceneSessionImpl::IsHitHotAreas(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 	
 {
