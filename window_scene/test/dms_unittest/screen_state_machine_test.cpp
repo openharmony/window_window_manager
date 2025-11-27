@@ -156,6 +156,11 @@ HWTEST_F(ScreenStateMachineTest, DoSetScreenPowerForAll_ShouldReturnFalse_WhenTy
     EXPECT_FALSE(fsm_->DoSetScreenPowerForAll(event, type));
 }
 
+/**
+ * @tc.name: ActionScreenPowerOff invalidType
+ * @tc.desc: ActionScreenPowerOff func
+ * @tc.type: FUNC
+ */
 HWTEST_F(ScreenStateMachineTest, ActionScreenPowerOff_ShouldReturnFalse_WhenTypeIsInvalid, TestSize.Level0)
 {   
     ScreenPowerEvent event = ScreenPowerEvent::POWER_OFF;
@@ -163,6 +168,11 @@ HWTEST_F(ScreenStateMachineTest, ActionScreenPowerOff_ShouldReturnFalse_WhenType
     EXPECT_FALSE(fsm_->ActionScreenPowerOff(event, type));
 }
 
+/**
+ * @tc.name: ActionScreenPowerOff validType&&powerOn
+ * @tc.desc: ActionScreenPowerOff func
+ * @tc.type: FUNC
+ */
 HWTEST_F(ScreenStateMachineTest, ActionScreenPowerOff_ShouldReturnTrue_WhenTypeIsValid, TestSize.Level0)
 {   
     DisplayId id = 0;
@@ -170,7 +180,23 @@ HWTEST_F(ScreenStateMachineTest, ActionScreenPowerOff_ShouldReturnTrue_WhenTypeI
     ScreenSessionManager::GetInstance().screenSessionMap_[id] = screenSession;
     ScreenSessionManager::GetInstance().SetScreenPowerForAll(ScreenPowerState::POWER_ON, PowerStateChangeReason::POWER_BUTTON);
     ScreenPowerEvent event = ScreenPowerEvent::POWER_OFF;
-    ScreenPowerInfoType type = std::make_pair(ScreenPowerState::INVALID_STATE, PowerStateChangeReason::POWER_BUTTON);
+    ScreenPowerInfoType type = std::make_pair(id, ScreenPowerStatus::POWER_STATUS_ON);
+    EXPECT_TRUE(fsm_->ActionScreenPowerOff(event, type));
+}
+
+/**
+ * @tc.name: ActionScreenPowerOff validType&&powerOff
+ * @tc.desc: ActionScreenPowerOff func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenStateMachineTest, ActionScreenPowerOff_ShouldReturnTrue_WhenTypeIsValid, TestSize.Level0)
+{   
+    DisplayId id = 0;
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
+    ScreenSessionManager::GetInstance().screenSessionMap_[id] = screenSession;
+    ScreenSessionManager::GetInstance().SetScreenPowerForAll(ScreenPowerState::POWER_OFF, PowerStateChangeReason::POWER_BUTTON);
+    ScreenPowerEvent event = ScreenPowerEvent::POWER_OFF;
+    ScreenPowerInfoType type = std::make_pair(id, ScreenPowerStatus::POWER_STATUS_ON);
     EXPECT_TRUE(fsm_->ActionScreenPowerOff(event, type));
 }
 
