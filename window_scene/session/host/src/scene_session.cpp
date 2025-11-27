@@ -97,8 +97,6 @@ const int32_t ROTATE_POLICY_SCREEN = 1;
 const int32_t SCREEN_LOCK_Z_ORDER = 2000;
 constexpr int32_t MIN_ROTATION_VALUE = 0;
 constexpr int32_t MAX_ROTATION_VALUE = 3;
-constexpr int32_t MIN_SDK_VERSION = 1;
-constexpr int32_t SDK_VERSION_12 = 12;
 const std::string OPTIONAL_SHOW = "OPTIONAL_SHOW"; // startWindowType can be changed by startAbility option.
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
