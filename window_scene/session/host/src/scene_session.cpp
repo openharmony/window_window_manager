@@ -23,6 +23,7 @@
 #include "configuration.h"
 #include <hitrace_meter.h>
 #include "hitrace/hitracechain.h"
+#include "hisysevent.h"
 #include <type_traits>
 #ifdef IMF_ENABLE
 #include <input_method_controller.h>
@@ -92,6 +93,8 @@ constexpr int32_t MULTI_WINDOW_TITLE_BAR_DEFAULT_HEIGHT_VP = 32;
 constexpr int32_t MAX_FLOAT_TITLE_BAR_HEIGHT_VP = 40;
 constexpr uint32_t ROTATION_DEGREE = 90;
 constexpr int32_t HALF_VALUE = 2;
+constexpr char SCENE_BOARD_UE_DOMAIN[] = "SCENE_BOARD_UE";
+constexpr char DRAG_RESIZE_WINDOW[] = "PC_DRAG_RESIZE_WINDOW";
 const int32_t ROTATE_POLICY_WINDOW = 0;
 const int32_t ROTATE_POLICY_SCREEN = 1;
 const int32_t SCREEN_LOCK_Z_ORDER = 2000;
@@ -3531,6 +3534,9 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
             moveDragController_->ConsumeDragEvent(pointerEvent, GetGlobalOrWinRect(), property, systemConfig_)) {
             auto surfaceNode = GetSurfaceNode();
             moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
+            if (isPointDown) {
+                ReportDragEndDirection(GetSessionInfo().bundleName_, moveDragController_->GetAreaType());
+            }
             PresentFocusIfNeed(pointerEvent->GetPointerAction());
             pointerEvent->MarkProcessed();
             return WSError::WS_OK;
@@ -3548,6 +3554,14 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
         }
     }
     return Session::TransferPointerEvent(pointerEvent, needNotifyClient, isExecuteDelayRaise);
+}
+
+void SceneSession::ReportDragEndDirection(const std::string& bundleName, AreaType dragType)
+{
+    HiSysEventWrite(SCENE_BOARD_UE_DOMAIN, DRAG_RESIZE_WINDOW,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "BUNDLENAME", bundleName,
+        "DRAGDIRECTION", static_cast<int32_t>(dragType));
 }
 
 void SceneSession::NotifyUpdateGravity()
