@@ -706,6 +706,7 @@ protected:
     std::unordered_set<int32_t> rectChangeInGlobalDisplayUIExtListenerIds_;
     std::unordered_map<int32_t, sptr<IKeyboardDidShowListener>> keyboardDidShowUIExtListeners_;
     std::unordered_map<int32_t, sptr<IKeyboardDidHideListener>> keyboardDidHideUIExtListeners_;
+    bool isHideFollowUIExt_ = false;
     void WriteKeyboardInfoToWant(AAFwk::Want& want, const KeyboardPanelInfo& keyboardPanelInfo) const;
     void ReadKeyboardInfoFromWant(const AAFwk::Want& want, KeyboardPanelInfo& keyboardPanelInfo) const;
     static std::set<sptr<WindowSessionImpl>>& GetWindowExtensionSessionSet();
@@ -714,6 +715,7 @@ protected:
      * Sub Window
      */
     void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState newState);
+    void UpdateSubWindowStateWithOptions(const StateChangeOption& option);
     void DestroySubWindow();
     bool IsSubWindowMaximizeSupported() const override;
     void UpdateSubWindowInfo(uint32_t subWindowLevel, const std::shared_ptr<AbilityRuntime::Context>& context);

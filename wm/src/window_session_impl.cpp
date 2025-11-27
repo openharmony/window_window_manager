@@ -301,6 +301,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option,
     property_->SetWindowType(optionWindowType);
     InitPropertyFromOption(option);
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
+    isHideFollowUIExt_ = option->IsHideFollowUIExt();
 
     RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true, rsUIContext);
     if (WindowHelper::IsSubWindow(GetType())) {
@@ -910,6 +911,47 @@ void WindowSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersistentId
     }
 }
 
+void WindowSessionImpl::UpdateSubWindowStateWithOptions(const StateChangeOption& option)
+{
+    std::vector<sptr<WindowSessionImpl>> subWindows;
+    GetSubWindows(option.parentPersistentId_, subWindows);
+    if (subWindows.empty()) {
+        TLOGD(WmsLogTag::WMS_SUB, "parent window: %{public}d, its subWindowMap is empty", option.parentPersistentId_);
+        return;
+    }
+    if (option.newState_ == WindowState::STATE_HIDDEN) {
+        for (auto subwindow : subWindows) {
+            if (subwindow == nullptr || subwindow->GetWindowState() != WindowState::STATE_SHOWN) {
+                continue;
+            }
+            if (subwindow->isHideFollowUIExt_) {
+                TLOGI(WmsLogTag::WMS_SUB, "subwindow hide follow uec, id: %{public}d", subwindow->GetPersistentId());
+                subwindow->Hide(option.reason_, option.withAnimation_, option.isFromInnerkits_, option.waitDetach_);
+            } else {
+                subwindow->state_ = WindowState::STATE_HIDDEN;
+                subwindow->NotifyAfterBackground();
+                TLOGD(WmsLogTag::WMS_SUB, "Notify subWindow background, id:%{public}d", subwindow->GetPersistentId());
+                UpdateSubWindowStateAndNotify(subwindow->GetPersistentId(), option.newState_);
+            }
+        }
+    } else if (option.newState_ == WindowState::STATE_SHOWN) {
+        for (auto subwindow : subWindows) {
+            if (subwindow == nullptr || subwindow->GetWindowState() != WindowState::STATE_HIDDEN) {
+                continue;
+            }
+            if (subwindow->isHideFollowUIExt_) {
+                TLOGI(WmsLogTag::WMS_SUB, "subwindow show follow uec, id: %{public}d", subwindow->GetPersistentId());
+                subwindow->Show(option.reason_, option.withAnimation_, option.withFocus_, option.waitAttach_);
+            } else if (subwindow->GetRequestWindowState() == WindowState::STATE_SHOWN) {
+                subwindow->state_ = WindowState::STATE_SHOWN;
+                subwindow->NotifyAfterForeground();
+                TLOGD(WmsLogTag::WMS_SUB, "Notify subWindow foreground, id:%{public}d", subwindow->GetPersistentId());
+                UpdateSubWindowStateAndNotify(subwindow->GetPersistentId(), option.newState_);
+            }
+        }
+    }
+}
+
 WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
 {
     return Show(reason, withAnimation, withFocus, false);
@@ -936,7 +978,9 @@ WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation, bool withFo
     // delete after replace WSError with WMError
     WMError res = static_cast<WMError>(ret);
     if (res == WMError::WM_OK) {
-        UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_SHOWN);
+        StateChangeOption option(GetPersistentId(), WindowState::STATE_SHOWN, reason, withAnimation, withFocus,
+            waitAttach, false, false);
+        UpdateSubWindowStateWithOptions(option);
         state_ = WindowState::STATE_SHOWN;
         requestState_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground();

@@ -108,7 +108,7 @@ namespace uiExtensionHost {
     public native onSync(nativeObj: long, type: string, callback: object): void;
     public native offSync(nativeObj: long, type: string, callback?: object): void;
     public native createSubWindowWithOptions(nativeObj: long, name: string,
-      subWindowOptions: window.SubWindowOptions): window.Window;
+      subWindowOptions: window.SubWindowOptions, isHideFollowUIExt?: boolean): window.Window;
     public native hideNonSecureWindows(nativeObj: long, shouldHide: boolean): int;
 
     get properties(): UIExtensionHostWindowProxyProperties {
@@ -202,10 +202,11 @@ namespace uiExtensionHost {
       });
     }
 
-    public createSubWindowWithOptions(name: string, subWindowOptions: window.SubWindowOptions): Promise<window.Window> {
+    public createSubWindowWithOptions(name: string, subWindowOptions: window.SubWindowOptions,
+      isHideFollowUIExt?: boolean): Promise<window.Window> {
       return new Promise<window.Window>((resolve: (value: window.Window) => void, reject: (error: BusinessError) => void) => {
         taskpool.execute((): window.Window => {
-          return this.createSubWindowWithOptions(this.nativeObj, name, subWindowOptions);
+          return this.createSubWindowWithOptions(this.nativeObj, name, subWindowOptions, isHideFollowUIExt);
         }).then((ret: NullishType) => {
             resolve(ret as window.Window);
         }).catch((err: NullishType) => {
@@ -228,7 +229,8 @@ namespace uiExtensionHost {
     setWaterMarkFlag(enable: boolean): Promise<void>;
     hidePrivacyContentForHost(shouldHide: boolean): Promise<void>;
     hideNonSecureWindows(shouldHide: boolean): Promise<void>;
-    createSubWindowWithOptions(name: string, subWindowOptions: window.SubWindowOptions): Promise<window.Window>;
+    createSubWindowWithOptions(name: string, subWindowOptions: window.SubWindowOptions,
+      isHideFollowUIExt?: boolean): Promise<window.Window>;
     on<T>(type: string, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;
     onAvoidAreaChange<T>(callback: Callback<T>): void;
