@@ -113,6 +113,7 @@ const int32_t SCREEN_OFF_MIN_DELAY_TIME = 300;
 const int32_t SCREEN_WAIT_PICTURE_FRAME_TIME = 1500;
 const std::string STATUS_FOLD_HALF = "-z";
 const std::string STATUS_EXPAND = "-y";
+const std::string STATUS_EXPAND_WITH_SECOND_EXPAND = "-yy";
 const std::string STATUS_FOLD = "-p";
 const std::string SETTING_LOCKED_KEY = "settings.general.accelerometer_rotation_status";
 const ScreenId SCREEN_ID_DEFAULT = 0;
@@ -7971,13 +7972,6 @@ void ScreenSessionManager::NotifyScreenGroupChanged(
 
 void ScreenSessionManager::NotifyPrivateSessionStateChanged(bool hasPrivate)
 {
-    if (hasPrivate == screenPrivacyStates) {
-        TLOGD(WmsLogTag::DMS, "screen session state is not changed, return");
-        return;
-    }
-    TLOGI(WmsLogTag::DMS, "status : %{public}u", hasPrivate);
-    screenPrivacyStates = hasPrivate;
-
     ScreenSessionManagerAdapter::GetInstance().NotifyPrivateWindowStateChanged(hasPrivate);
 }
 
@@ -7991,35 +7985,71 @@ void ScreenSessionManager::SetScreenPrivacyState(bool hasPrivate)
     TLOGI(WmsLogTag::DMS, "enter, hasPrivate: %{public}d", hasPrivate);
     ScreenId id = GetDefaultScreenId();
     auto screenSession = GetScreenSession(id);
-    if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "can not get default screen now");
-        return;
-    }
-    screenSession->SetPrivateSessionForeground(hasPrivate);
+    hasPrivateWindowForeground_.clear();
+    hasPrivateWindowForeground_[id] = hasPrivate;
     NotifyPrivateSessionStateChanged(hasPrivate);
 }
 
-void ScreenSessionManager::SetPrivacyStateByDisplayId(DisplayId id, bool hasPrivate)
+void ScreenSessionManager::SetPrivacyStateByDisplayId(std::unordered_map<DisplayId, bool>& privacyBundleDisplayId)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "Permission Denied! calling: %{public}s, pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return;
     }
-    TLOGI(WmsLogTag::DMS, "enter, hasPrivate: %{public}d", hasPrivate);
-    std::vector<ScreenId> screenIds = GetAllScreenIds();
-    auto iter = std::find(screenIds.begin(), screenIds.end(), id);
-    if (iter == screenIds.end()) {
-        TLOGE(WmsLogTag::DMS, "invalid displayId");
-        return;
+    for (const auto& [displayId, hasPrivate] : privacyBundleDisplayId) {
+        TLOGD(WmsLogTag::DMS, "displayId: %{public}" PRIu64 ", hasPrivate: %{public}d", displayId, hasPrivate);
     }
-    auto screenSession = GetScreenSession(id);
-    if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "can not get id: %{public}" PRIu64" screen now", id);
-        return;
+    const std::vector<DisplayId> displayIds = GetAllDisplayIds();
+    // all display use or to calculate private state
+    if (CheckNeedNotify(displayIds, privacyBundleDisplayId)) {
+        bool allDisplayHasPrivate = false;
+        {
+            std::lock_guard<std::mutex> lock(hasPrivateWindowForegroundMutex_);
+            allDisplayHasPrivate = std::any_of(hasPrivateWindowForeground_.begin(), hasPrivateWindowForeground_.end(),
+                [](const auto& pair) { return pair.second; });
+        }
+        NotifyPrivateSessionStateChanged(allDisplayHasPrivate);
     }
-    screenSession->SetPrivateSessionForeground(hasPrivate);
-    NotifyPrivateSessionStateChanged(hasPrivate);
+}
+
+bool ScreenSessionManager::CheckNeedNotify(const std::vector<DisplayId>& displayIds,
+        std::unordered_map<DisplayId, bool>& privacyBundleDisplayId)
+{
+    bool isNeedNotify = false;
+    std::lock_guard<std::mutex> lock(hasPrivateWindowForegroundMutex_);
+    if (privacyBundleDisplayId.empty()) {
+        return isNeedNotify;
+    }
+    // determine whether the hasPrivate value corresponding to displayId in hasPrivateWindowForeground_
+    // matches the status in privacyBundleDisplayId
+    for (auto it = privacyBundleDisplayId.begin(); it != privacyBundleDisplayId.end();) {
+        DisplayId displayId = it->first;
+        bool hasPrivate = it->second;
+        if (std::find(displayIds.begin(), displayIds.end(), displayId) == displayIds.end()) {
+            TLOGW(WmsLogTag::DMS, "invalid displayId");
+            it = privacyBundleDisplayId.erase(it);
+            continue;
+        }
+        auto iter = hasPrivateWindowForeground_.find(displayId);
+        if (iter != hasPrivateWindowForeground_.end() && iter->second != hasPrivate) {
+            isNeedNotify = true;
+            iter->second = hasPrivate;
+        } else if (iter == hasPrivateWindowForeground_.end()) {
+            isNeedNotify = true;
+            hasPrivateWindowForeground_[displayId] = hasPrivate;
+        }
+        ++it;
+    }
+    // clear hasPrivateWindowForeground_ not include id that not in privacyBundleDisplayId
+    for (auto iter = hasPrivateWindowForeground_.begin(); iter != hasPrivateWindowForeground_.end();) {
+        if (privacyBundleDisplayId.find(iter->first) == privacyBundleDisplayId.end()) {
+            iter = hasPrivateWindowForeground_.erase(iter);
+        } else {
+            ++iter;
+        }
+    }
+    return isNeedNotify;
 }
 
 void ScreenSessionManager::SetScreenPrivacyWindowList(DisplayId id, std::vector<std::string> privacyWindowList)
@@ -8056,25 +8086,21 @@ DMError ScreenSessionManager::HasPrivateWindow(DisplayId id, bool& hasPrivateWin
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
-    if (id == DISPLAY_ID_FAKE) {
-        auto displayInfo = GetDefaultDisplayInfo();
-        if (displayInfo) {
-            id = displayInfo->GetDisplayId();
-            TLOGI(WmsLogTag::DMS, "change displayId: %{public}" PRIu64" to displayId: %{public}" PRIu64,
-                DISPLAY_ID_FAKE, id);
-        }
-    }
-    std::vector<ScreenId> screenIds = GetAllScreenIds();
-    auto iter = std::find(screenIds.begin(), screenIds.end(), id);
-    if (iter == screenIds.end()) {
+    std::vector<DisplayId> displayIds = GetAllDisplayIds();
+    auto iter = std::find(displayIds.begin(), displayIds.end(), id);
+    if (iter == displayIds.end()) {
         TLOGE(WmsLogTag::DMS, "invalid displayId");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
-    auto screenSession = GetScreenSession(id);
-    if (screenSession == nullptr) {
-        return DMError::DM_ERROR_NULLPTR;
+    {
+        std::lock_guard<std::mutex> lock(hasPrivateWindowForegroundMutex_);
+        auto iter = hasPrivateWindowForeground_.find(id);
+        if (iter != hasPrivateWindowForeground_.end()) {
+            hasPrivateWindow = iter->second;
+        } else {
+            hasPrivateWindow = false;
+        }
     }
-    hasPrivateWindow = screenSession->HasPrivateSessionForeground();
     TLOGI(WmsLogTag::DMS, "id: %{public}" PRIu64" has private window: %{public}u",
         id, static_cast<uint32_t>(hasPrivateWindow));
     return DMError::DM_OK;
@@ -9279,6 +9305,11 @@ void ScreenSessionManager::OnFoldPropertyChange(ScreenId screenId, const ScreenP
     TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " reason: %{public}d", screenId, static_cast<int>(reason));
     auto clientProxy = GetClientProxy();
     if (!clientProxy) {
+#ifdef FOLD_ABILITY_ENABLE
+        if (foldScreenController_ != nullptr && !FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+            foldScreenController_->SetdisplayModeChangeStatus(false);
+        }
+#endif
         TLOGE(WmsLogTag::DMS, "clientProxy_ is null");
         return;
     }
@@ -9300,7 +9331,7 @@ void ScreenSessionManager::OnFoldPropertyChange(ScreenId screenId, const ScreenP
         TLOGE(WmsLogTag::DMS, "Cannot get ScreenSession, screenId: %{public}" PRIu64 "", screenId);
         return;
     }
-    screenSession->SetScreenProperty(midProperty);
+    screenSession->UpdateScbScreenPropertyToServer(midProperty);
 }
 
 void ScreenSessionManager::OnPowerStatusChange(DisplayPowerEvent event, EventStatus status,
@@ -10302,6 +10333,9 @@ int ScreenSessionManager::NotifyFoldStatusChanged(const std::string& statusParam
     } else if (statusParam == STATUS_FOLD) {
         foldStatus = FoldStatus::FOLDED;
         displayMode = FoldDisplayMode::MAIN;
+    } else if (statusParam == STATUS_EXPAND_WITH_SECOND_EXPAND) {
+        foldStatus = FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND;
+        displayMode = FoldDisplayMode::GLOBAL_FULL;
     } else {
         TLOGW(WmsLogTag::DMS, "status not support");
         return -1;
@@ -13137,11 +13171,12 @@ DMError ScreenSessionManager::SyncScreenPropertyChangedToServer(ScreenId screenI
         TLOGE(WmsLogTag::DMS, "cannot get screenInfo: %{public}" PRIu64, screenId);
         return DMError::DM_ERROR_NULLPTR;
     }
-    serverScreenSession->SetScreenProperty(screenProperty);
+    serverScreenSession->UpdateScbScreenPropertyToServer(screenProperty);
     std::lock_guard<std::mutex> lock(callbackMutex_);
     if (propertyChangedCallback_) {
         TLOGI(WmsLogTag::DMS, "screensessionmanager callback propertychanged");
-        propertyChangedCallback_(serverScreenSession);
+        // only super fold device enter, so the second parameter is super fold change event
+        propertyChangedCallback_(serverScreenSession, screenProperty.GetSuperFoldStatusChangeEvent());
     }
     if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
         FoldScreenStateInternel::IsSingleDisplayFoldDevice()) {
@@ -13150,7 +13185,8 @@ DMError ScreenSessionManager::SyncScreenPropertyChangedToServer(ScreenId screenI
     return DMError::DM_OK;
 }
 
-void ScreenSessionManager::SetPropertyChangedCallback(std::function<void(sptr<ScreenSession>& screenSession)> callback)
+void ScreenSessionManager::SetPropertyChangedCallback(
+    std::function<void(sptr<ScreenSession>& screenSession, SuperFoldStatusChangeEvents changeEvent)> callback)
 {
     TLOGI(WmsLogTag::DMS, "set callback is valid: %{public}s",callback ? "true" : "false");
     std::lock_guard<std::mutex> lock(callbackMutex_);

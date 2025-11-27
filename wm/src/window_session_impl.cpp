@@ -2012,6 +2012,9 @@ void WindowSessionImpl::HideTitleButton(bool& hideSplitButton, bool& hideMaximiz
     if (uiContent == nullptr || !IsDecorEnable()) {
         return;
     }
+    RealTimeSwitchInfo switchInfo = property_->GetRealTimeSwitchInfo();
+    uiContent->OnContainerModalEvent(SCB_COMPATIBLE_MENU_VISIBILITY, switchInfo.isNeedChange_ ? "true" : "false");
+    uiContent->OnContainerModalEvent(SCB_GET_COMPATIBLE_PRIMARY_MODE, std::to_string(switchInfo.showTypes_));
     hideMaximizeButton = hideMaximizeButton || property_->IsFullScreenDisabled();
     bool isLayoutFullScreen = property_->IsLayoutFullScreen();
     bool hideSplitBtn = hideSplitButton || property_->IsSplitDisabled();
@@ -2031,9 +2034,6 @@ void WindowSessionImpl::HideTitleButton(bool& hideSplitButton, bool& hideMaximiz
     bool fullScreenStart = property_->IsFullScreenStart() &&
         (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
     uiContent->OnContainerModalEvent(SCB_COMPATIBLE_MAXIMIZE_BTN_RES, fullScreenStart ? "true" : "false");
-    RealTimeSwitchInfo switchInfo = property_->GetRealTimeSwitchInfo();
-    uiContent->OnContainerModalEvent(SCB_COMPATIBLE_MENU_VISIBILITY, switchInfo.isNeedChange_ ? "true" : "false");
-    uiContent->OnContainerModalEvent(SCB_GET_COMPATIBLE_PRIMARY_MODE, std::to_string(switchInfo.showTypes_));
 }
 
 WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
@@ -2503,7 +2503,6 @@ void WindowSessionImpl::UpdateDecorEnableToAce(bool isDecorEnable)
             auto isSubWindow = WindowHelper::IsSubWindow(GetType());
             decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
                 (property_->GetIsPcAppInPad() && isSubWindow)) &&
-                !(mode == WindowMode::WINDOW_MODE_FULLSCREEN && property_->GetCompatibleModeProperty()) &&
                 property_->GetIsShowDecorInFreeMultiWindow();
         }
         if (mode == WindowMode::WINDOW_MODE_FULLSCREEN && property_->IsDecorFullscreenDisabled()) {
@@ -2537,7 +2536,6 @@ void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
                 auto isSubWindow = WindowHelper::IsSubWindow(GetType());
                 decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
                     (property_->GetIsPcAppInPad() && isSubWindow)) &&
-                    !(mode == WindowMode::WINDOW_MODE_FULLSCREEN && property_->GetCompatibleModeProperty()) &&
                     property_->GetIsShowDecorInFreeMultiWindow();
             }
             if (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN && property_->IsDecorFullscreenDisabled()) {

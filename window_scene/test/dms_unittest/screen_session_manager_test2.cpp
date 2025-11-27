@@ -3139,6 +3139,31 @@ HWTEST_F(ScreenSessionManagerTest, WakeUpBegin01, TestSize.Level1)
 
     EXPECT_EQ(DMError::DM_OK, ssm_->DestroyVirtualScreen(screenId));
     EXPECT_EQ(DMError::DM_OK, ssm_->UnregisterDisplayManagerAgent(displayManagerAgent, type));
+
+/*
+ * @tc.name: CheckNeedNotifyTest
+ * @tc.desc: Test CheckNeedNotifyTest check notify
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CheckNeedNotifyTest, TestSize.Level1)
+{
+    std::vector<DisplayId> displayIds = {1, 2, 3};
+    std::unordered_map<DisplayId, bool> privacyBundleDisplayId;
+    
+    bool result = ssm_->CheckNeedNotify(dispalyIds, privacyBundleDisplayId);
+    EXPECT_FALSE(result);
+
+    privacyBundleDisplayId = {{4, true}, {5, false}};
+    result = ssm_->CheckNeedNotify(dispalyIds, privacyBundleDisplayId);
+    EXPECT_FALSE(result);
+
+    privacyBundleDisplayId = {{1, true}, {2, false}};
+    result = ssm_->CheckNeedNotify(dispalyIds, privacyBundleDisplayId);
+    EXPECT_TRUE(result);
+
+    privacyBundleDisplayId = {{1, true}, {2, true}};
+    result = ssm_->CheckNeedNotify(dispalyIds, privacyBundleDisplayId);
+    EXPECT_TRUE(result);
 }
 }
 }

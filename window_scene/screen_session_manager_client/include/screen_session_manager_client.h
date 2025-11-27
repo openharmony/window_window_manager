@@ -66,8 +66,8 @@ public:
     uint32_t GetCurvedCompressionArea();
     ScreenProperty GetPhyScreenProperty(ScreenId screenId);
     void SetScreenPrivacyState(bool hasPrivate);
-    void SetPrivacyStateByDisplayId(DisplayId id, bool hasPrivate);
-    void SetScreenPrivacyWindowList(DisplayId id, std::vector<std::string> privacyWindowList);
+    void SetPrivacyStateByDisplayId(std::unordered_map<DisplayId, bool>& privacyBundleDisplayId);
+    void SetScreenPrivacyWindowList(std::unordered_map<DisplayId, std::vector<std::string>>& privacyBundleList);
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info);
     void OnDisplayStateChanged(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) override;
@@ -184,12 +184,6 @@ private:
     sptr<ScreenSession> CreateTempScreenSession(
         ScreenId screenId, ScreenId rsId, const std::shared_ptr<RSDisplayNode>& displayNode);
 
-    void HandleKeyboardOnPropertyChange(sptr<ScreenSession>& screenSession, int32_t height);
-    void HandleKeyboardOffPropertyChange(sptr<ScreenSession>& screenSession);
-    void HandleSystemKeyboardOnPropertyChange(sptr<ScreenSession>& screenSession, SuperFoldStatus currentStatus,
-        bool isKeyboardOn, int32_t validHeight);
-    void HandleSystemKeyboardOffPropertyChange(sptr<ScreenSession>& screenSession, SuperFoldStatus currentStatus,
-        bool isKeyboardOn);
     void UpdateWidthAndHeight(const sptr<ScreenSession>& screenSession, const RRect* bounds, ScreenId screenId);
 
     mutable std::mutex screenSessionMapMutex_;

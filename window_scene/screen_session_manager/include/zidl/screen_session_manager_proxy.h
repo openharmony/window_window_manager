@@ -198,7 +198,7 @@ public:
     ScreenProperty GetPhyScreenProperty(ScreenId screenId) override;
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override;
     void SetScreenPrivacyState(bool hasPrivate) override;
-    void SetPrivacyStateByDisplayId(DisplayId id, bool hasPrivate) override;
+    void SetPrivacyStateByDisplayId(std::unordered_map<DisplayId, bool>& privacyBundleDisplayId) override;
     void SetScreenPrivacyWindowList(DisplayId id, std::vector<std::string> privacyWindowList) override;
     virtual DMError GetAvailableArea(DisplayId displayId, DMRect& area) override;
     virtual DMError GetExpandAvailableArea(DisplayId displayId, DMRect& area) override;

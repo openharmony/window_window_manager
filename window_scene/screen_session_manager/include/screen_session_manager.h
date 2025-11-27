@@ -71,7 +71,8 @@ DECLARE_SYSTEM_ABILITY(ScreenSessionManager)
 WM_DECLARE_SINGLE_INSTANCE_BASE(ScreenSessionManager)
 
 public:
-    void SetPropertyChangedCallback(std::function<void(sptr<ScreenSession>& screenSession)> callback);
+    void SetPropertyChangedCallback(std::function<void(sptr<ScreenSession>& screenSession,
+        SuperFoldStatusChangeEvents changeEvent)> callback);
     sptr<ScreenSession> GetScreenSession(ScreenId screenId) const;
     sptr<ScreenSession> GetDefaultScreenSession();
     std::vector<ScreenId> GetAllScreenIds();
@@ -380,7 +381,9 @@ public:
     uint32_t GetCurvedCompressionArea() override;
     ScreenProperty GetPhyScreenProperty(ScreenId screenId) override;
     void SetScreenPrivacyState(bool hasPrivate) override;
-    void SetPrivacyStateByDisplayId(DisplayId id, bool hasPrivate) override;
+    void SetPrivacyStateByDisplayId(std::unordered_map<DisplayId, bool>& privacyBundleDisplayId) override;
+    bool CheckNeedNotify(const std::vector<DisplayId>& displayIds,
+        std::unordered_map<DisplayId, bool>& privacyBundleDisplayId);
     void SetScreenPrivacyWindowList(DisplayId id, std::vector<std::string> privacyWindowList) override;
     void UpdateAvailableArea(ScreenId screenId, DMRect area) override;
     void UpdateSuperFoldAvailableArea(ScreenId screenId, DMRect bArea, DMRect cArea) override;
@@ -591,6 +594,7 @@ protected:
     sptr<ScreenSession> GetPhysicalScreenSessionInner(ScreenId screenId, ScreenProperty property);
     virtual void NotifyCaptureStatusChangedGlobal();
     std::mutex screenChangeMutex_;
+    std::mutex hasPrivateWindowForegroundMutex_;
     sptr<ScreenSession> GetOrCreateScreenSession(ScreenId screenId);
     void AdaptSuperHorizonalBoot(sptr<ScreenSession> screenSession, ScreenId screenId);
     sptr<ScreenSession> GetOrCreatePhysicalScreenSession(ScreenId screenId);
@@ -769,6 +773,7 @@ private:
     std::shared_mutex rotationCorrectionExemptionMutex_;
     std::vector<std::string> rotationCorrectionExemptionList_;
     bool needReinstallExemptionList_ = true;
+    std::unordered_map<DisplayId, bool> hasPrivateWindowForeground_;
 
     class ScreenIdManager {
     friend class ScreenSessionGroup;
@@ -1051,7 +1056,8 @@ private:
     std::atomic<bool> curResolutionEffectEnable_ = false;
     DMError SyncScreenPropertyChangedToServer(ScreenId screenId, const ScreenProperty& screenProperty) override;
     void SetConfigForInputmethod(ScreenId screenId, VirtualScreenOption option);
-    std::function<void(sptr<ScreenSession>& screenSession)> propertyChangedCallback_;
+    std::function<void(sptr<ScreenSession>& screenSession,
+        SuperFoldStatusChangeEvents changeEvent)> propertyChangedCallback_;
     std::mutex callbackMutex_;
     bool isSupportCapture_ = false;
     std::atomic<FoldDisplayMode> foldDisplayModeAfterRotation_ = FoldDisplayMode::UNKNOWN;

@@ -102,6 +102,8 @@ private:
     static void RegisterCallBackFunc(napi_env env, sptr<GetSnapshotCallback>& getSnapshotCallback,
         const std::shared_ptr<AbilityRuntime::NapiAsyncTask>& task,
         const std::shared_ptr<AbilityRuntime::NapiAsyncTask>& napiAsyncCallBackTask);
+    static WmErrorCode MinimizeAllParamParse(
+        napi_env env, size_t argc, napi_value* argv, int64_t& displayId, int32_t& excludeWindowId);
 };
 }  // namespace Rosen
 }  // namespace OHOS
