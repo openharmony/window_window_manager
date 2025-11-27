@@ -260,7 +260,6 @@ private:
     static napi_value NotifyRotationProperty(napi_env env, napi_callback_info info);
     static napi_value NotifyPageRotationIsIgnored(napi_env env, napi_callback_info info);
     static napi_value SetCurrentRotation(napi_env env, napi_callback_info info);
-    static napi_value SetSdkVersion(napi_env env, napi_callback_info info);
     static napi_value SetSidebarBlurMaximize(napi_env env, napi_callback_info info);
     static napi_value RequestSpecificSessionClose(napi_env env, napi_callback_info info);
     static napi_value SendFbActionEvent(napi_env env, napi_callback_info info);
@@ -362,7 +361,6 @@ private:
     napi_value OnNotifyPageRotationIsIgnored(napi_env env, napi_callback_info info);
     napi_value OnNotifyRotationChange(napi_env env, napi_callback_info info);
     napi_value OnSetCurrentRotation(napi_env env, napi_callback_info info);
-    napi_value OnSetSdkVersion(napi_env env, napi_callback_info info);
     napi_value OnSetSidebarBlurMaximize(napi_env env, napi_callback_info info);
     static napi_value GetJsPanelSessionObj(napi_env env, const sptr<SceneSession>& session);
     napi_value OnRequestSpecificSessionClose(napi_env env, napi_callback_info info);

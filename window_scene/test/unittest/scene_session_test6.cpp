@@ -1644,27 +1644,6 @@ HWTEST_F(SceneSessionTest6, NotifyPageRotationIsIgnored, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetSdkVersion
- * @tc.desc: SetSdkVersion function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest6, SetSdkVersion, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetSdkVersion";
-    info.bundleName_ = "SetSdkVersion";
-    sptr<SceneSession> session = nullptr;
-    int32_t sdkVersion = 18;
-    auto ret = session->SetSdkVersion(sdkVersion);
-    EXPECT_EQ(WSError::WS_ERROR_DESTROYED_OBJECT, ret);
-
-    session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, session);
-    ret = session->SetSdkVersion(sdkVersion);
-    EXPECT_EQ(WSError::WS_OK, ret);
-}
-
-/**
  * @tc.name: ConvertOrientationAndRotation
  * @tc.desc: ConvertOrientationAndRotation function
  * @tc.type: FUNC

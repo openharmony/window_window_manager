@@ -9654,7 +9654,8 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setForbidSplitMove", moduleName, JsWindow::SetForbidSplitMove);
     BindNativeFunction(env, object, "setPreferredOrientation", moduleName, JsWindow::SetPreferredOrientation);
     BindNativeFunction(env, object, "getPreferredOrientation", moduleName, JsWindow::GetPreferredOrientation);
-    BindNativeFunction(env, object, "convertOrientationAndRotation", moduleName, JsWindow::ConvertOrientationAndRotation);
+    BindNativeFunction(env, object, "convertOrientationAndRotation",
+        moduleName, JsWindow::ConvertOrientationAndRotation);
     BindNativeFunction(env, object, "opacity", moduleName, JsWindow::Opacity);
     BindNativeFunction(env, object, "scale", moduleName, JsWindow::Scale);
     BindNativeFunction(env, object, "rotate", moduleName, JsWindow::Rotate);

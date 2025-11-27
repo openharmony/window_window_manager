@@ -3158,6 +3158,9 @@ WMError WindowSessionImpl::ConvertOrientationAndRotation(
         TLOGE(WmsLogTag::WMS_ROTATION, "windowSession is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    if (!windowSystemConfig_.IsPadWindow() && !windowSystemConfig_.IsPhoneWindow()) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     if (value < MIN_ROTATION_VALUE || value > MAX_ROTATION_VALUE) {
         TLOGE(WmsLogTag::WMS_ROTATION, "the value to be converted is invalid");
         return WMError::WM_ERROR_INVALID_PARAM;
