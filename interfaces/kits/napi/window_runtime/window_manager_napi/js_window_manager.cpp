@@ -850,13 +850,14 @@ WmErrorCode JsWindowManager::MinimizeAllParamParse(
         SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
-    if (argc > 1 && argv[1] != nullptr && GetType(env, argv[1]) == napi_number &&
-        errCode == WmErrorCode::WM_OK && !ConvertFromJsValue(env, argv[1], excludeWindowId)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to excludeWindowId");
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-    }
-    if (excludeWindowId < 0) {
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+    if (argc > 1 && argv[1] != nullptr && GetType(env, argv[1]) == napi_number && errCode == WmErrorCode::WM_OK) {
+        if (!ConvertFromJsValue(env, argv[1], excludeWindowId)) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to excludeWindowId");
+            return WmErrorCode::WM_ERROR_INVALID_PARAM;
+        }
+        if (excludeWindowId <= 0) {
+            return WmErrorCode::WM_ERROR_INVALID_PARAM;
+        }
     }
     return errCode;
 }

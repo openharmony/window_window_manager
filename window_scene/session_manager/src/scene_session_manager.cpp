@@ -17541,6 +17541,16 @@ WMError SceneSessionManager::MinimizeAllAppWindows(DisplayId displayId, int32_t 
         TLOGE(WmsLogTag::WMS_LIFE, "Device not support!");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    {
+        if (excludeWindowId > 0) {
+            std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+            auto iter = sceneSessionMap_.find(excludeWindowId);
+            if (iter == sceneSessionMap_.end()) {
+                TLOGW(WmsLogTag::WMS_LIFE, "excludeWindowId: %{public}d not exist", excludeWindowId);
+                return WMError::WM_ERROR_INVALID_OPERATION;
+            }
+        }
+    }
 
     const char* const where = __func__;
     taskScheduler_->PostAsyncTask([this, displayId, excludeWindowId, where] {
