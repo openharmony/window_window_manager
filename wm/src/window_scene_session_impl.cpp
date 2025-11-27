@@ -114,7 +114,7 @@ const std::string COMPATIBLE_RECOVER_WINDOW_EVENT = "win_compatible_recover_even
 const std::string NAME_LANDSCAPE_2_3_CLICK = "win_change_to_2_3_landscape";
 const std::string NAME_LANDSCAPE_1_1_CLICK = "win_change_to_1_1_landscape";
 const std::string NAME_LANDSCAPE_18_9_CLICK = "win_change_to_18_9_landscape";
-const std::string NAME_LANDSCAPE_18_9_CLICK = "win_change_to_18_9_landscape";
+const std::string NAME_LANDSCAPE_SPLIT_CLICK = "win_change_to_split_landscape";
 const std::string NAME_DEFAULT_LANDSCAPE_CLICK = "win_change_to_default_landscape";
 const std::unordered_set<WindowType> INVALID_SYSTEM_WINDOW_TYPE = {
     WindowType::WINDOW_TYPE_NEGATIVE_SCREEN,
@@ -7309,6 +7309,9 @@ WMError WindowSceneSessionImpl::OnContainerModalEvent(const std::string& eventNa
         return WMError::WM_OK;
     } else if (eventName == NAME_DEFAULT_LANDSCAPE_CLICK) {
         SwitchCompatibleMode(CompatibleStyleMode::LANDSCAPE_DEFAULT);
+        return WMError::WM_OK;
+    } else if (eventName == NAME_LANDSCAPE_SPLIT_CLICK) {
+        SwitchCompatibleMode(CompatibleStyleMode::LANDSCAPE_SPLIT);
         return WMError::WM_OK;
     }
     return WMError::WM_DO_NOTHING;
