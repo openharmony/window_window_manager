@@ -9233,28 +9233,28 @@ WSError SceneSession::ConvertDisplayOrientationToDisplayRotation(int32_t orienta
 
 WSError SceneSession::ConvertDisplayRotationToWindowOrientation(int32_t value, int32_t& convertedValue)
 {
-    // 先把displayRotation转化为displayorientation
+    // convert displayRotation to displayorientation
     int32_t displayOrientation;
     WSError ret = ConvertDisplayRotationToDisplayOrientation(value, displayOrientation);
     if (ret != WSError::WS_OK) {
         TLOGNE(WmsLogTag::WMS_ROTATION, "failed to convert Rotation to Orientation");
         return ret;
     }
-    //再将displayorientation转化为windowOrientation
+    // convert displayorientation to windowOrientation
     ret = ConvertDisplayOrientationToWindowOrientation(displayOrientation, convertedValue);
     return ret;
 }
 
 WSError SceneSession::ConvertWindowOrientationToDisplayRotation(int32_t value, int32_t& convertedValue)
 {
-    // 先把windowOrientation转化为displayorientation
+    // convert windowOrientation to displayorientation
     int32_t displayOrientation;
     WSError ret = ConvertWindowOrientationToDisplayOrientation(value, displayOrientation);
     if (ret != WSError::WS_OK) {
         TLOGNE(WmsLogTag::WMS_ROTATION, "failed to convert Rotation to Orientation");
         return ret;
     }
-    //再将displayorientation转化为displayRotation
+    // convert displayorientation to displayRotation
     ret = ConvertDisplayOrientationToDisplayRotation(displayOrientation, convertedValue);
     return ret;
 }
