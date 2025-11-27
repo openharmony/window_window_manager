@@ -184,12 +184,6 @@ private:
     sptr<ScreenSession> CreateTempScreenSession(
         ScreenId screenId, ScreenId rsId, const std::shared_ptr<RSDisplayNode>& displayNode);
 
-    void HandleKeyboardOnPropertyChange(sptr<ScreenSession>& screenSession, int32_t height);
-    void HandleKeyboardOffPropertyChange(sptr<ScreenSession>& screenSession);
-    void HandleSystemKeyboardOnPropertyChange(sptr<ScreenSession>& screenSession, SuperFoldStatus currentStatus,
-        bool isKeyboardOn, int32_t validHeight);
-    void HandleSystemKeyboardOffPropertyChange(sptr<ScreenSession>& screenSession, SuperFoldStatus currentStatus,
-        bool isKeyboardOn);
     void UpdateWidthAndHeight(const sptr<ScreenSession>& screenSession, const RRect* bounds, ScreenId screenId);
 
     mutable std::mutex screenSessionMapMutex_;
