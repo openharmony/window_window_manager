@@ -2721,10 +2721,10 @@ void ScreenSessionManager::UpdateSessionByActiveModeChange(sptr<ScreenSession> s
         screenSession->SetStartPosition(startXcopy, startYcopy);
         screenSession->SetXYPosition(retxCopy, retyCopy);
         screenSession->SetScreenOffScreenRendering();
-        HandleResolutionEffectChange();
         if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
             SuperFoldStateManager::GetInstance().RefreshExternalRegion();
         }
+        HandleResolutionEffectChange();
     }
     TLOGI(WmsLogTag::DMS, "end");
 }
@@ -3231,7 +3231,15 @@ void ScreenSessionManager::SetInternalScreenResolutionEffect(const sptr<ScreenSe
     // Setting the display area of the internal screen
     auto oldProperty = internalSession->GetScreenProperty();
     internalSession->UpdatePropertyByResolution(targetRect);
-    internalSession->PropertyChange(internalSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
+    auto newProperty = internalSession->GetScreenProperty();
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        newProperty.SetFoldStatus(GetSuperFoldStatus());
+        newProperty.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::RESOLUITION_EFFECT_CHANGE);
+        internalSession->NotifyFoldPropertyChange(newProperty, ScreenPropertyChangeReason::CHANGE_MODE,
+            FoldDisplayMode::UNKNOWN);
+    } else {
+        internalSession->PropertyChange(internalSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
+    }
     if (oldProperty.GetScreenAreaWidth() != targetRect.width_ ||
         oldProperty.GetScreenAreaHeight() != targetRect.height_) {
         NotifyScreenChanged(internalSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
@@ -3284,11 +3292,19 @@ bool ScreenSessionManager::HandleCastVirtualScreenMirrorRegion()
         TLOGE(WmsLogTag::DMS, "ScreenSession Null");
         return false;
     }
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
+        (internalSession->GetRotation() == Rotation::ROTATION_0 ||
+        internalSession->GetRotation() == Rotation::ROTATION_180)) {
+        TLOGI(WmsLogTag::DMS, "SuperFoldDisplayDevice Vertical");
+        return false;
+    }
     //all zero, means full screen mirror.
     DMRect mirrorRegion = DMRect::NONE();
     if (curResolutionEffectEnable_.load()) {
-        auto bounds = internalSession->GetScreenProperty().GetBounds();
-        mirrorRegion = DMRect{bounds.rect_.left_, bounds.rect_.top_, bounds.rect_.width_, bounds.rect_.height_};
+        auto property = internalSession->GetScreenProperty();
+        auto bounds = property.GetBounds();
+        mirrorRegion = DMRect{bounds.rect_.left_, bounds.rect_.top_,
+            property.GetScreenAreaWidth(), property.GetScreenAreaHeight()};
     }
     virtualSession->SetMirrorScreenRegion(virtualSession->GetScreenId(), mirrorRegion);
     virtualSession->EnableMirrorScreenRegion();
