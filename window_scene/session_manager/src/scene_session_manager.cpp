@@ -6117,8 +6117,10 @@ void SceneSessionManager::ClearStartWindowColorFollowApp(const std::string& bund
 
 void SceneSessionManager::OnBundleUpdated(const std::string& bundleName, int userId)
 {
-    taskScheduler_->PostAsyncTask([this, bundleName, where = __func__]() {
+    taskScheduler_->PostAsyncTask([this, bundleName, where]() {
         ClearStartWindowColorFollowApp(bundleName);
+    }, __func__);
+    ffrtQueueHelper_->SubmitTask([this, bundleName, where = __func__] {
         if (startingWindowRdbMgr_ == nullptr || bundleMgr_ == nullptr) {
             TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s: rdb or bms is nullptr", where);
             return;
@@ -6138,7 +6140,7 @@ void SceneSessionManager::OnBundleUpdated(const std::string& bundleName, int use
             auto batchInsertRes = startingWindowRdbMgr_->BatchInsert(outInsertNum, inputValues);
             TLOGNI(WmsLogTag::WMS_PATTERN, "res:%{public}d, insert num:%{public}" PRId64, batchInsertRes, outInsertNum);
         }
-    }, __func__);
+    });
     taskScheduler_->PostAsyncTask([this, bundleName]() {
         std::unique_lock<std::shared_mutex> lock(startingWindowMapMutex_);
         if (auto iter = startingWindowMap_.find(bundleName); iter != startingWindowMap_.end()) {
