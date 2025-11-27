@@ -3069,7 +3069,7 @@ HWTEST_F(ScreenSessionManagerTest, HandleDefaultMultiScreenModeTest3, TestSize.L
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForAll01, TestSize.Level1)
-{   
+{
     g_errLog.clear();
     sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
     EXPECT_NE(displayManagerAgent, nullptr);
