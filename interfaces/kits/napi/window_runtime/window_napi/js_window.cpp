@@ -2114,7 +2114,7 @@ napi_value JsWindow::OnGetGlobalScaledRect(napi_env env, napi_callback_info info
     if (globalScaledRectObj == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "globalScaledRectObj is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][getGlobalScaledRect]msg: GlobalScaledRectObj is nullptr");
+            "[window][getGlobalRect]msg: Failed to convert result into JS value object");
     }
     return globalScaledRectObj;
 }
@@ -2877,7 +2877,7 @@ napi_value JsWindow::OnSetDialogBackGestureEnabled(napi_env env, napi_callback_i
         [weakToken, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (errCodePtr == nullptr) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                    "[window][setDialogBackGestureEnabled]msg: System abnormal"));
+                    "[window][setDialogBackGestureEnabled]"));
                 return;
             }
             if (*errCodePtr == WmErrorCode::WM_OK) {
@@ -5513,7 +5513,7 @@ napi_value JsWindow::OnSetWindowTouchable(napi_env env, napi_callback_info info)
         if (weakWindow == nullptr) {
             task->Reject(env,
                 JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                    "[window][setWindowTouchable]msg: The window is nullptr"));
+                    "[window][setWindowTouchable]msg: The window is not created or destroyed"));
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetTouchable(touchable));
@@ -5527,7 +5527,7 @@ napi_value JsWindow::OnSetWindowTouchable(napi_env env, napi_callback_info info)
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowTouchable") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][setWindowTouchable]msg: Failed to send event"));
+            "[window][setWindowTouchable]msg: Internal task error"));
     }
     return result;
 }
