@@ -462,6 +462,16 @@ void WindowOption::SetStartModalExtensionTimeStamp(int64_t timeStamp)
 {
     startModalExtensionTimeStamp_ = timeStamp;
 }
+
+void WindowOption::SetIsHideFollowUIExt(bool isHideFollowUIExt)
+{
+    isHideFollowUIExt_ = isHideFollowUIExt;
+}
+
+bool WindowOption::IsHideFollowUIExt() const
+{
+    return isHideFollowUIExt_;
+}
 } // namespace Rosen
 } // namespace OHOS
 

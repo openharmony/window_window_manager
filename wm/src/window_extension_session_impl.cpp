@@ -1332,7 +1332,9 @@ WMError WindowExtensionSessionImpl::Hide(uint32_t reason, bool withAnimation, bo
     WSError ret = hostSession->Background();
     WMError res = static_cast<WMError>(ret);
     if (res == WMError::WM_OK) {
-        UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_HIDDEN);
+        StateChangeOption option(GetPersistentId(), WindowState::STATE_HIDDEN, reason, withAnimation, false, false,
+            isFromInnerkits, waitDetach);
+        UpdateSubWindowStateWithOptions(option);
         state_ = WindowState::STATE_HIDDEN;
         requestState_ = WindowState::STATE_HIDDEN;
         NotifyAfterBackground();

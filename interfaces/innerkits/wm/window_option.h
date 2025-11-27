@@ -647,6 +647,21 @@ public:
      */
     int64_t GetStartModalExtensionTimeStamp() const;
 
+    /**
+     * @brief Set whether the subwindow will be hidden when uiextension is hidden.
+     *
+     * @param isHideFollowUIExt True means the subwindow will be hidden when uiextension is hidden,
+     *     false means it will remain visible.
+     */
+    void SetIsHideFollowUIExt(bool isHideFollowUIExt);
+
+    /**
+     * @brief Get whether the subwindow will be hidden when uiextension is hidden.
+     *
+     * @return The subwindow will be hidden if true or not be hidden if false.
+     */
+    bool IsHideFollowUIExt() const;
+
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
@@ -697,6 +712,7 @@ private:
     bool isDensityFollowHost_ = false;
     bool isConstrainedModal_ = false;
     int64_t startModalExtensionTimeStamp_ = -1;
+    bool isHideFollowUIExt_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS
