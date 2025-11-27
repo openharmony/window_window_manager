@@ -476,8 +476,20 @@ void SceneSessionManager::Init()
     PcFoldScreenManager::GetInstance().RegisterFoldScreenStatusChangeCallback(0, foldChangeCallback_);
     RegisterAppStateObserver();
 
-    InitSnapshotCache();
+    InitWindowPattern();
     WSSnapshotHelper::GetInstance()->SetWindowScreenStatus(DisplayManager::GetInstance().GetFoldStatus());
+}
+
+void SceneSessionManager::InitWindowPattern()
+{
+    InitSnapshotCache();
+    InitStartingWindow();
+}
+
+void SceneSessionManager::InitStartingWindow()
+{
+    syncLoadStartingWindow_ = system::GetBoolParameter("const.window.sync_startingWindow", false);
+    TLOGI(WmsLogTag::WMS_PATTERN, "Sync Load StartingWindow: %{public}d", syncLoadStartingWindow_);
 }
 
 void SceneSessionManager::RegisterSessionRecoverStateChangeListener()
@@ -6027,6 +6039,10 @@ void SceneSessionManager::PreLoadStartingWindow(sptr<SceneSession> sceneSession)
 {
     if (!systemConfig_.supportPreloadStartingWindow_) {
         TLOGD(WmsLogTag::WMS_PATTERN, "not supported");
+        return;
+    }
+    if (IsSyncLoadStartWindow()) {
+        TLOGD(WmsLogTag::WMS_PATTERN, "sync load starting window");
         return;
     }
     const char* const where = __func__;
