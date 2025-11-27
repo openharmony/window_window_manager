@@ -126,6 +126,7 @@ private:
     static bool DoSuspendBegin(ScreenPowerEvent event, const ScreenPowerInfoType& type);
     static bool DoWaitAodRequest(ScreenPowerEvent event, const ScreenPowerInfoType& type);
     static bool DoSetScreenPowerForAll(ScreenPowerEvent event, const ScreenPowerInfoType& type);
+    static bool ActionScreenPowerOff(ScreenPowerEvent event, const ScreenPowerInfoType& type);
 
     ScreenStateTimer timer_;
     std::mutex mtx;
