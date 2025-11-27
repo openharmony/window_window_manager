@@ -1754,7 +1754,7 @@ napi_value JsWindowManager::OnShiftAppWindowPointerEvent(napi_env env, napi_call
     if (argc != ARGC_TWO) {
         TLOGE(WmsLogTag::WMS_PC, "parameter number is illegal");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "[window][shiftAppWindowPointerEvent]msg: Parameter number is illegal");
+            "[window][shiftAppWindowPointerEvent]msg: Mandatory parameters are left unspecified");
     }
     int32_t sourceWindowId;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], sourceWindowId)) {
@@ -1787,8 +1787,8 @@ napi_value JsWindowManager::OnShiftAppWindowPointerEvent(napi_env env, napi_call
     };
     napi_status status = napi_send_event(env, std::move(asyncTask), napi_eprio_high, "OnShiftAppWindowPointerEvent");
     if (status != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
-            "[window][shiftAppWindowPointerEvent]msg: Send event failed"));
+        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][shiftAppWindowPointerEvent]msg: Internal task error"));
     }
     return result;
 }
@@ -1801,7 +1801,7 @@ napi_value JsWindowManager::OnShiftAppWindowTouchEvent(napi_env env, napi_callba
     if (argc != ARGC_THREE) {
         TLOGE(WmsLogTag::WMS_PC, "parameter number is illegal");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "[window][shiftAppWindowTouchEvent]msg: Parameter number is illegal");
+            "[window][shiftAppWindowTouchEvent]msg: Mandatory parameters are left unspecified");
     }
     int32_t sourceWindowId = static_cast<int32_t>(INVALID_WINDOW_ID);
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], sourceWindowId)) {
@@ -1843,7 +1843,7 @@ napi_value JsWindowManager::OnShiftAppWindowTouchEvent(napi_env env, napi_callba
     napi_status status = napi_send_event(env, std::move(asyncTask), napi_eprio_high, "OnShiftAppWindowTouchEvent");
     if (status != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,
-            "[window][shiftAppWindowTouchEvent]msg: Send event failed"));
+            "[window][shiftAppWindowTouchEvent]msg: Internal task error"));
     }
     return result;
 }
