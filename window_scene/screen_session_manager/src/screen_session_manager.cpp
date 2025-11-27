@@ -2172,7 +2172,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDefaultDisplayInfo(int32_t userId)
     } else {
         screenId = GetUserDisplayId(userId);
     }
-    TLOGI(WmsLogTag::DMS, "get screenId %{public}" PRIu64" with userId %{public}u", screenId, userId);
+    TLOGD(WmsLogTag::DMS, "get screenId %{public}" PRIu64" with userId %{public}u", screenId, userId);
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
     std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
     if (screenSession) {
@@ -2624,13 +2624,13 @@ void ScreenSessionManager::CheckAndNotifyChangeMode(const RRect& bounds, sptr<Sc
         return;
     }
     ScreenProperty property = updateScreenSession->GetScreenProperty();
+    property.SetPropertyChangeReason("active mode change");
+    updateScreenSession->PropertyChange(property, ScreenPropertyChangeReason::CHANGE_MODE);
     RRect updateBounds = property.GetBounds();
     bool isSizeChanged =
         std::fabs(bounds.rect_.width_ - updateBounds.rect_.width_) >= FLT_EPSILON ||
         std::fabs(bounds.rect_.height_ - updateBounds.rect_.height_) >= FLT_EPSILON;
     if (isSizeChanged) {
-        property.SetPropertyChangeReason("active mode change");
-        updateScreenSession->PropertyChange(property, ScreenPropertyChangeReason::CHANGE_MODE);
         NotifyDisplayChanged(updateScreenSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
         TLOGI(WmsLogTag::DMS, "notify end");
     } else {
