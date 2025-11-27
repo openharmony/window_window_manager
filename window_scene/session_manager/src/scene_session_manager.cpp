@@ -24,14 +24,15 @@
 #include <bundlemgr/launcher_service.h>
 #include <common/rs_common_def.h>
 #include <hisysevent.h>
-#include <parameters.h>
 #include <hitrace_meter.h>
+#include <parameters.h>
+#include <ui/rs_node.h>
 #include "hitrace/hitracechain.h"
 #include "parameter.h"
+#include "publish/scb_dump_subscriber.h"
 #include "resource_manager.h"
 #include "session/host/include/pc_fold_screen_manager.h"
-#include "publish/scb_dump_subscriber.h"
-#include <ui/rs_node.h>
+#include "wm_common.h"
 
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
 #include <display_power_mgr_client.h>
