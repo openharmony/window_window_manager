@@ -114,6 +114,7 @@ const std::string COMPATIBLE_RECOVER_WINDOW_EVENT = "win_compatible_recover_even
 const std::string NAME_LANDSCAPE_2_3_CLICK = "win_change_to_2_3_landscape";
 const std::string NAME_LANDSCAPE_1_1_CLICK = "win_change_to_1_1_landscape";
 const std::string NAME_LANDSCAPE_18_9_CLICK = "win_change_to_18_9_landscape";
+const std::string NAME_LANDSCAPE_18_9_CLICK = "win_change_to_18_9_landscape";
 const std::string NAME_DEFAULT_LANDSCAPE_CLICK = "win_change_to_default_landscape";
 const std::unordered_set<WindowType> INVALID_SYSTEM_WINDOW_TYPE = {
     WindowType::WINDOW_TYPE_NEGATIVE_SCREEN,
