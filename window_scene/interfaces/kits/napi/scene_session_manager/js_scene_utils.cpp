@@ -2779,6 +2779,8 @@ napi_value CreateCompatibleStyleMode(napi_env env)
         CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_1_1)));
     napi_set_named_property(env, objValue, "LANDSCAPE_2_3",
         CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_2_3)));
+    napi_set_named_property(env, objValue, "LANDSCAPE_SPLIT",
+        CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_SPLIT)));
     return objValue;
 }
  

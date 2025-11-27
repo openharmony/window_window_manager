@@ -3442,7 +3442,9 @@ enum class CompatibleStyleMode : uint32_t {
     // 1:1 aspect ratio
     LANDSCAPE_1_1 = 3,
     // 2:3 aspect ratio
-    LANDSCAPE_2_3 = 4
+    LANDSCAPE_2_3 = 4,
+    // split aspect ratio
+    LANDSCAPE_SPLIT = 5,
 };
 }
 }
