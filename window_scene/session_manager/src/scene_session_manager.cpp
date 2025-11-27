@@ -17623,7 +17623,7 @@ void SceneSessionManager::GetStatusBarAvoidHeight(DisplayId displayId, WSRect& b
     barArea.height_ = it->second;
 }
 
-WMError SceneSessionManager::MinimizeAllAppWindows(DisplayId displayId)
+WMError SceneSessionManager::MinimizeAllAppWindows(DisplayId displayId, int32_t excludeWindowId)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no right.");
@@ -17635,7 +17635,7 @@ WMError SceneSessionManager::MinimizeAllAppWindows(DisplayId displayId)
     }
 
     const char* const where = __func__;
-    taskScheduler_->PostAsyncTask([this, displayId, where] {
+    taskScheduler_->PostAsyncTask([this, displayId, excludeWindowId, where] {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& iter : sceneSessionMap_) {
             auto& session = iter.second;
@@ -17644,7 +17644,8 @@ WMError SceneSessionManager::MinimizeAllAppWindows(DisplayId displayId)
                     iter.first);
                 continue;
             }
-            if (displayId == session->GetScreenId() && WindowHelper::IsMainWindow(session->GetWindowType())) {
+            if (displayId == session->GetScreenId() && WindowHelper::IsMainWindow(session->GetWindowType()) && 
+                iter.first != excludeWindowId) {
                 session->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
                 TLOGI(WmsLogTag::WMS_LIFE, "%{public}s Id: %{public}d has minimized window.", where,
                     session->GetPersistentId());
