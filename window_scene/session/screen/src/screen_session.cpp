@@ -790,7 +790,7 @@ void ScreenSession::UpdatePropertyByResolution(const DMRect& rect)
 void ScreenSession::HandleResolutionEffectPropertyChange(ScreenProperty& screenProperty,
     const ScreenProperty& eventPara)
 {
-    if(screenProperty.GetRsId() != 0) {
+    if (screenProperty.GetRsId() != 0) {
         TLOGI(WmsLogTag::DMS, "no need handle");
         return;
     }
@@ -802,10 +802,10 @@ void ScreenSession::HandleResolutionEffectPropertyChange(ScreenProperty& screenP
     screenProperty.SetMirrorWidth(eventPara.GetMirrorWidth());
     screenProperty.SetMirrorHeight(eventPara.GetMirrorHeight());
     if (!IsVertical(rotation)) {
-        std::swap(screenBounds.rect_.width_,screenBounds.rect_.height_);
+        std::swap(screenBounds.rect_.width_, screenBounds.rect_.height_);
     }
     TLOGI(WmsLogTag::DMS, "bounds after change: %{public}f, %{public}f",
-        screenBounds.rect_.width_,screenBounds.rect_.height_);
+        screenBounds.rect_.width_, screenBounds.rect_.height_);
     screenProperty.SetBounds(screenBounds);
     screenProperty.SetValidHeight(screenBounds.rect_.height_);
     screenProperty.SetValidWidth(screenBounds.rect_.width_);
@@ -3243,7 +3243,8 @@ void ScreenSession::ProcPropertyChange(ScreenProperty& screenProperty, const Scr
         screenProperty.GetBounds().rect_.width_, screenProperty.GetBounds().rect_.height_);
 }
 
-void ScreenSession::UpdateScbScreenPropertyForSuperFlod(const ScreenProperty& screenProperty) {
+void ScreenSession::UpdateScbScreenPropertyForSuperFlod(const ScreenProperty& screenProperty)
+{
     SuperFoldStatusChangeEvents changeEvent = screenProperty.GetSuperFoldStatusChangeEvent();
     property_.SetIsFakeInUse(screenProperty.GetIsFakeInUse());
     property_.SetIsDestroyDisplay(screenProperty.GetIsDestroyDisplay());

@@ -38,7 +38,7 @@ bool SuperFoldPolicy::IsNeedSetSnapshotRect(DisplayId displayId)
         return false;
     }
     auto rotation = screenSession->GetRotation();
-    return ((displayId == DEFAULT_DISPLAY_ID) || (displayId == DISPLAY_ID_FAKE)) && 
+    return ((displayId == DEFAULT_DISPLAY_ID) || (displayId == DISPLAY_ID_FAKE)) &&
         (rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180);
 }
 
