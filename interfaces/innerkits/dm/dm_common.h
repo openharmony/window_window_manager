@@ -431,25 +431,11 @@ const std::map<DisplayOrientation, WindowOrientation> DISPLAY_TO_WINDOW_MAP{
     { DisplayOrientation::LANDSCAPE_INVERTED, WindowOrientation::LANDSCAPE },
 };
 
-const std::map<DisplayOrientation, WindowOrientation> DISPLAY_TO_WINDOW_BEFORE_SDK_VERSION_12_MAP{
-    { DisplayOrientation::PORTRAIT, WindowOrientation::PORTRAIT },
-    { DisplayOrientation::LANDSCAPE, WindowOrientation::LANDSCAPE },
-    { DisplayOrientation::PORTRAIT_INVERTED, WindowOrientation::PORTRAIT_INVERTED },
-    { DisplayOrientation::LANDSCAPE_INVERTED, WindowOrientation::LANDSCAPE_INVERTED },
-};
-
 const std::map<WindowOrientation, DisplayOrientation> WINDOW_TO_DISPLAY_MAP{
     { WindowOrientation::PORTRAIT, DisplayOrientation::PORTRAIT },
     { WindowOrientation::LANDSCAPE, DisplayOrientation::LANDSCAPE_INVERTED },
     { WindowOrientation::PORTRAIT_INVERTED, DisplayOrientation::PORTRAIT_INVERTED },
     { WindowOrientation::LANDSCAPE_INVERTED, DisplayOrientation::LANDSCAPE },
-};
-
-const std::map<WindowOrientation, DisplayOrientation> WINDOW_TO_DISPLAY_BEFORE_SDK_VERSION_12_MAP{
-    { WindowOrientation::PORTRAIT, DisplayOrientation::PORTRAIT },
-    { WindowOrientation::LANDSCAPE, DisplayOrientation::LANDSCAPE },
-    { WindowOrientation::PORTRAIT_INVERTED, DisplayOrientation::PORTRAIT_INVERTED },
-    { WindowOrientation::LANDSCAPE_INVERTED, DisplayOrientation::LANDSCAPE_INVERTED },
 };
 
 /**

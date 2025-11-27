@@ -9166,7 +9166,7 @@ WSError SceneSession::ConvertOrientationAndRotation(const RotationInfoType from,
     }
     if (from == RotationInfoType::WINDOW_ORIENTATION && to == RotationInfoType::DISPLAY_ROTATION)
     {
-        ret = ConvertDisplayRotationToWindowOrientation(value, convertedValue);
+        ret = ConvertWindowOrientationToDisplayRotation(value, convertedValue);
         return ret;
     }
     return ret;
@@ -9175,49 +9175,26 @@ WSError SceneSession::ConvertOrientationAndRotation(const RotationInfoType from,
 WSError SceneSession::ConvertDisplayOrientationToWindowOrientation(const int32_t value, int32_t& convertedValue)
 {
     DisplayOrientation displayOrientation = static_cast<DisplayOrientation>(value);
-    int32_t sdkVersion = sdkVersion_;
-    if (displayOrientation == DisplayOrientation::UNKNOWN || sdkVersion < MIN_SDK_VERSION) {
+    if (displayOrientation == DisplayOrientation::UNKNOWN) {
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    if (sdkVersion >= SDK_VERSION_12) {
-        auto it = DISPLAY_TO_WINDOW_MAP.find(displayOrientation);
-        if (it != DISPLAY_TO_WINDOW_MAP.end()) {
-            convertedValue = static_cast<int32_t>(it->second);
-            return WSError::WS_OK;
-        }
-        return WSError::WS_ERROR_INVALID_PARAM;
-    } else {
-        auto it = DISPLAY_TO_WINDOW_BEFORE_SDK_VERSION_12_MAP.find(displayOrientation);
-        if (it != DISPLAY_TO_WINDOW_BEFORE_SDK_VERSION_12_MAP.end()) {
-            convertedValue = static_cast<int32_t>(it->second);
-            return WSError::WS_OK;
-        }
-        return WSError::WS_ERROR_INVALID_PARAM;
+    auto it = DISPLAY_TO_WINDOW_MAP.find(displayOrientation);
+    if (it != DISPLAY_TO_WINDOW_MAP.end()) {
+        convertedValue = static_cast<int32_t>(it->second);
+        return WSError::WS_OK;
     }
+    return WSError::WS_ERROR_INVALID_PARAM;
 }
 
 WSError SceneSession::ConvertWindowOrientationToDisplayOrientation(const int32_t value, int32_t& convertedValue)
 {
     WindowOrientation windowOrientation = static_cast<WindowOrientation>(value);
-    int32_t sdkVersion = sdkVersion_;
-    if (sdkVersion < MIN_SDK_VERSION) {
-        return WSError::WS_ERROR_INVALID_PARAM;
+    auto it = WINDOW_TO_DISPLAY_MAP.find(windowOrientation);
+    if (it != WINDOW_TO_DISPLAY_MAP.end()) {
+        convertedValue = static_cast<int32_t>(it->second);
+        return WSError::WS_OK;
     }
-    if (sdkVersion >= SDK_VERSION_12) {
-        auto it = WINDOW_TO_DISPLAY_MAP.find(windowOrientation);
-        if (it != WINDOW_TO_DISPLAY_MAP.end()) {
-            convertedValue = static_cast<int32_t>(it->second);
-            return WSError::WS_OK;
-        }
-        return WSError::WS_ERROR_INVALID_PARAM;
-    } else {
-        auto it = WINDOW_TO_DISPLAY_BEFORE_SDK_VERSION_12_MAP.find(windowOrientation);
-        if (it != WINDOW_TO_DISPLAY_BEFORE_SDK_VERSION_12_MAP.end()) {
-            convertedValue = static_cast<int32_t>(it->second);
-            return WSError::WS_OK;
-        }
-        return WSError::WS_ERROR_INVALID_PARAM;
-    }
+    return WSError::WS_ERROR_INVALID_PARAM;
 }
 
 WSError SceneSession::ConvertDisplayRotationToDisplayOrientation(int32_t rotation, int32_t& orientation)
@@ -9228,10 +9205,9 @@ WSError SceneSession::ConvertDisplayRotationToDisplayOrientation(int32_t rotatio
         TLOGW(WmsLogTag::WMS_ROTATION, "Screen session is null");
         return WSError::WS_ERROR_INVALID_DISPLAY;
     }
-    WSRect currentWsrect = GetSessionRect();
     FoldDisplayMode foldDisplayMode = ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
     Rotation targetRotation = static_cast<Rotation>(rotation);
-    RRect bounds = RRect({ 0, 0, currentWsrect.width_, currentWsrect.height_ }, 0.0f, 0.0f);
+    RRect bounds = screenSession->CalcBoundsByRotation(rotation);
     DisplayOrientation displayOrientation =
         screenSession->CalcDeviceOrientationWithBounds(targetRotation, foldDisplayMode, bounds);
     orientation = static_cast<int32_t>(displayOrientation);
@@ -9249,10 +9225,9 @@ WSError SceneSession::ConvertDisplayOrientationToDisplayRotation(int32_t orienta
         TLOGW(WmsLogTag::WMS_ROTATION, "Screen session is null");
         return WSError::WS_ERROR_INVALID_DISPLAY;
     }
-    WSRect currentWsrect = GetSessionRect();
     FoldDisplayMode foldDisplayMode = ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
     DisplayOrientation displayOrientation = static_cast<DisplayOrientation>(orientation);
-    RRect bounds = RRect({ 0, 0, currentWsrect.width_, currentWsrect.height_ }, 0.0f, 0.0f);
+    RRect bounds = screenSession->CalcBoundsInRotationZero();
     Rotation targetRotation =
         screenSession->CalcRotationByDeviceOrientation(displayOrientation, foldDisplayMode, bounds);
     rotation = static_cast<int32_t>(targetRotation);
@@ -9690,20 +9665,6 @@ WSError SceneSession::SetCurrentRotation(int32_t currentRotation)
         session->sessionStage_->SetCurrentRotation(currentRotation);
         }, __func__);
     return WSError::WS_OK;
-}
-
-WSError SceneSession::SetSdkVersion(int32_t sdkVersion)
-{
-    TLOGI(WmsLogTag::WMS_ROTATION, "sdkVersion: %{public}d", sdkVersion);
-    return PostSyncTask([weakThis = wptr(this), sdkVersion, where = __func__] {
-        auto session = weakThis.promote();
-        if (!session) {
-            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s session is null", where);
-            return  WSError::WS_ERROR_DESTROYED_OBJECT;
-        }
-        session->sdkVersion_ = sdkVersion;
-        return WSError::WS_OK;
-    }, __func__);
 }
 
 WMError SceneSession::UpdateScreenshotAppEventRegistered(int32_t persistentId, bool isRegister)

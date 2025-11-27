@@ -628,7 +628,6 @@ public:
     WSError ConvertDisplayOrientationToDisplayRotation(int32_t orientation, int32_t& rotation);
     WSError ConvertDisplayRotationToWindowOrientation(int32_t value, int32_t& convertedValue);
     WSError ConvertWindowOrientationToDisplayRotation(int32_t value, int32_t& convertedValue);
-    WSError SetSdkVersion(int32_t sdkVersion);
     void RegisterUpdateRotationChangeListener(NotifyRotationChangeFunc&& callback);
     WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) override;
     RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo,
