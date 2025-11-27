@@ -1455,7 +1455,7 @@ napi_value JsWindowManager::OnGetAllWindowLayoutInfo(napi_env env, napi_callback
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnGetAllWindowLayoutInfo") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY),
-                "[window][getAllWindowLayoutInfo]Send event failed"));
+                "[window][getAllWindowLayoutInfo]msg: Internal task error"));
     }
     return result;
 }
