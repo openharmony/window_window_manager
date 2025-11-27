@@ -857,7 +857,7 @@ void SceneSessionDirtyManager::UpdateWindowFlagsForReceiveDragEventEnabled(const
         return;
     }
     if (sceneSession->GetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_RECEIVE_DRAG_EVENT)) {
-        windowInfo.flags |= MMI_FLAG_BIT_LOCK_RECEIVE_DRAG_EVENT;
+        windowInfo.flags |= MMI::WindowInputPolicy::FLAG_DRAG_DISABLED;
     }
 }
 

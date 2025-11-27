@@ -608,7 +608,7 @@ private:
     /*
      * Window Event
      */
-    bool IsReceiveDragEventEnable_ = true;
+    bool isReceiveDragEventEnable_ = true;
 
     /*
      * Window Decor

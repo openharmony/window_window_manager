@@ -4856,7 +4856,7 @@ public:
      *
      * @return - The value true means the window can receive drag event, and false means the opposite.
      */
-    virtual WMError IsReceiveDragEventEnabled()
+    virtual bool IsReceiveDragEventEnabled()
     {
         return true;
     }

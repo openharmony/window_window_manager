@@ -10072,12 +10072,12 @@ WMError SceneSession::UnlockCursor(const std::vector<int32_t>& parameters)
 
 WMError SceneSession::SetReceiveDragEventEnabled(const std::vector<int32_t>& parameters)
 {
-    if (!CheckParameters(parameters, LOCK_CURSOR_LENGTH)) {
+    if (!CheckParameters(parameters, SET_RECEIVE_DRAG_EVENT_LENGTH)) {
         TLOGE(WmsLogTag::WMS_EVENT, "The param is illegal");
         return WMError::WM_ERROR_ILLEGAL_PARAM;
     }
     bool enalbed = static_cast<bool>(parameters[1]);
-    SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_RECEIVE_DRAG_EVENT, enalbed);
+    SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_RECEIVE_DRAG_EVENT, !enalbed);
     NotifySessionInfoChange();
     return WMError::WM_OK;
 }
