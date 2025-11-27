@@ -4559,27 +4559,24 @@ napi_value JsWindow::OnSetSubWindowZLevel(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setSubWindowZLevel]msg: Failed to convert paramter to zLevel");
     }
-    napi_value lastParam = nullptr;
-    napi_value result = nullptr;
+    napi_value lastParam = nullptr, result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask = [windowToken = wptr<Window>(windowToken_), zLevel, env,
         task = napiAsyncTask, where = __func__] {
         auto window = windowToken.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_HIERARCHY, "%{public}s window is nullptr", where);
-            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                "[window][setSubWindowZLevel]msg: Window is nullptr"));
+            task->Reject(env, JsErrUtils::CreateJsError(env,
+                WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "[window][setSubWindowZLevel]msg: Window is nullptr"));
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSubWindowZLevel(zLevel));
-        if (ret == WmErrorCode::WM_OK) {
-            task->Resolve(env, NapiGetUndefined(env));
-        } else {
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret,
-                "[window][setSubWindowZLevel]msg: Set sub window zLevel failed"));
-        }
+        task->(ret == WmErrorCode::WM_OK ?
+            Resolve(env, NapiGetUndefined(env)) :
+            Reject(env, JsErrUtils::CreateJsError(env, ret,
+            "[window][setSubWindowZLevel]msg: Set sub window zLevel failed")));
         TLOGNI(WmsLogTag::WMS_HIERARCHY, "window [%{public}u, %{public}s], zLevel = %{public}d, ret = %{public}d",
-            window->GetWindowId(), window->GetWindowName().c_str(), zLevel, ret);
+           window->GetWindowId(), window->GetWindowName().c_str(), zLevel, ret);
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetSubWindowZLevel") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
