@@ -3422,7 +3422,7 @@ napi_value JsWindow::OnSetWindowSystemBarEnable(napi_env env, napi_callback_info
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowSystemBarEnable") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][setWindowSystemBarEnable]msg: Send event failed"));
+            "[window][setWindowSystemBarEnable]msg: Internal task error"));
     }
     return result;
 }
@@ -4284,14 +4284,14 @@ napi_value JsWindow::OnSetWindowBrightness(napi_env env, napi_callback_info info
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) { // 1: params num
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setWindowBrightness]msg: Mandatory parameters are left unspecified");
     }
     double brightness = UNDEFINED_BRIGHTNESS;
     napi_value nativeVal = argv[0];
     if (nativeVal == nullptr) {
-        WLOGFE("Failed to convert parameter to brightness");
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to brightness");
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     } else {
         CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
@@ -5738,13 +5738,13 @@ napi_value JsWindow::OnSetWindowColorSpace(napi_env env, napi_callback_info info
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) { // 1: params num
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setWindowColorSpace]msg: Mandatory parameters are left unspecified");
     }
     napi_value nativeType = argv[0];
     if (nativeType == nullptr) {
-        WLOGFE("Failed to convert parameter to ColorSpace");
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to ColorSpace");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setWindowColorSpace]msg: Incorrect parameter types");
     }
@@ -5753,7 +5753,7 @@ napi_value JsWindow::OnSetWindowColorSpace(napi_env env, napi_callback_info info
         napi_get_value_uint32(env, nativeType, &resultValue));
     colorSpace = static_cast<ColorSpace>(resultValue);
     if (colorSpace > ColorSpace::COLOR_SPACE_WIDE_GAMUT || colorSpace < ColorSpace::COLOR_SPACE_DEFAULT) {
-        WLOGFE("ColorSpace %{public}u invalid!", static_cast<uint32_t>(colorSpace));
+        TLOGE(WmsLogTag::WMS_IMMS, "ColorSpace %{public}u invalid!", static_cast<uint32_t>(colorSpace));
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setWindowColorSpace]msg: Parameter verification failed");
     }
@@ -5766,7 +5766,7 @@ napi_value JsWindow::OnSetWindowColorSpace(napi_env env, napi_callback_info info
     auto asyncTask = [weakToken = wptr<Window>(windowToken_), colorSpace, where, env, task = napiAsyncTask] {
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
-            WLOGFE("window is nullptr");
+            TLOGE(WmsLogTag::WMS_IMMS, "window is nullptr");
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                 "[window][setWindowColorSpace]msg: The window is not created or destroyed"));
             return;
