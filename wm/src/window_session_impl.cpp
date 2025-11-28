@@ -2772,7 +2772,7 @@ WSError WindowSessionImpl::NotifyHighlightChange(const sptr<HighlightNotifyInfo>
     }
     updateHighlightTimeStamp_.store(highlightNotifyInfo->timeStamp_);
     for (auto unHighlightWindowId : highlightNotifyInfo->notHighlightIds_) {
-        if (!isHighlight && unHighlightWindowId == GetWindowId()) {
+        if (!isHighlight && static_cast<uint32_t>(unHighlightWindowId) == GetWindowId()) {
             NotifyHighlightChange(isHighlight);
             continue;
         }
