@@ -1685,7 +1685,7 @@ napi_value JsWindowManager::OnGetVisibleWindowInfo(napi_env env, napi_callback_i
                !CheckCallingPermission(PermissionConstants::PERMISSION_VISIBLE_WINDOW_INFO)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!, api%{public}u", apiVersion);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_NO_PERMISSION,
-            "[window][getVisibleWindowInfo]msg: Need permission VISIBLE_WINDOW_INFO");
+            "[window][getVisibleWindowInfo]msg: Need ohos.permission.VISIBLE_WINDOW_INFO permission");
     }
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
