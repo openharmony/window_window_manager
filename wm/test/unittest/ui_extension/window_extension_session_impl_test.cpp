@@ -304,13 +304,13 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationForSpecified02, Test
 {
     window_->uiContent_ = nullptr;
     std::shared_ptr<AppExecFwk::Configuration> configuration;
-    std::shared_ptr<Global:Resource::ResourceManager> resourceManager;
-    window->UpdateConfigurationForSpecified(configuration, resourceManager);
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager;
+    window_->UpdateConfigurationForSpecified(configuration, resourceManager);
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, window_->uiContent_);
-    window->UpdateConfigurationForSpecified(configuration, resourceManager);
+    window_->UpdateConfigurationForSpecified(configuration, resourceManager);
     configuration = std::make_shared<AppExecFwk::Configuration>();
-    window->UpdateConfigurationForSpecified(configuration, resourceManager);
+    window_->UpdateConfigurationForSpecified(configuration, resourceManager);
 }
 
 /**
