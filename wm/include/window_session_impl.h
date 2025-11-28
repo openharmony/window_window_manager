@@ -543,7 +543,6 @@ public:
     void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
         SystemBarProperty& property) override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
-    // tanhong
     virtual UpdateDefaultStatusBarColor();
 
     /*
