@@ -3170,7 +3170,7 @@ WMError WindowSessionImpl::ConvertOrientationAndRotation(
         return WMError::WM_OK;
     }
     auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     WSError ret = hostSession->ConvertOrientationAndRotation(from, to, value, convertedValue);
     TLOGI(WmsLogTag::WMS_ROTATION, "convertedValue:%{public}d", convertedValue);
     return static_cast<WMError>(ret);

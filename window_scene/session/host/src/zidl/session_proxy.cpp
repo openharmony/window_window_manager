@@ -1642,7 +1642,11 @@ WSError SessionProxy::GetTargetOrientationConfigInfo(Orientation targetOrientati
         TLOGE(WmsLogTag::WMS_ROTATION, "read failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    uint32_t ret = reply.ReadUint32();
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read ret failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     return static_cast<WSError>(ret);
 }
 
