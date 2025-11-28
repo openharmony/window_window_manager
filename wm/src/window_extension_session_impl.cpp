@@ -1147,7 +1147,7 @@ WMError WindowExtensionSessionImpl::SetUIExtCustomDensity(const float density)
             return;
         }
         TLOGNI(WmsLogTag::WMS_UIEXT, "Customize density:%{public}f", density);
-        window->customizedDensity_ = density; 
+        window->customizedDensity_ = density;
         window->isDensityCustomized_ = true;
 
         SessionViewportConfig config;
