@@ -1762,6 +1762,17 @@ HWTEST_F(SceneSessionManagerTest9, ResetSpecificWindowZIndex, TestSize.Level1)
     ssm_->specificZIndexByPidMap_[WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD] = 123;
     ret = ssm_->ResetSpecificWindowZIndex(123);
     EXPECT_EQ(ret, WSError::WS_OK);
+
+    SetSpecificZIndexReason reason = 0;
+    NotifySetSpecificWindowZIndexFunc func = [&reason](WindowType windowType, int32_t zIndex,
+        SetSpecificZIndexReason reason) {
+        reason = reason;
+    };
+    ssm_->SetSpecificWindowZIndexListener(func);
+    ret = ssm_->ResetSpecificWindowZIndex(123);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(reason, SetSpecificZIndexReason::RESET);
+    ssm_->SetSpecificWindowZIndexListener(nullptr);
     ssm_->specificZIndexByPidMap_.clear();
 }
 } // namespace
