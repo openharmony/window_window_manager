@@ -911,7 +911,7 @@ WMError WindowSceneSessionImpl::SetParentWindow(int32_t newParentWindowId)
         TLOGE(WmsLogTag::WMS_SUB, "This is PcAppInPad, not Supported");
         return WMError::WM_OK;
     }
-    if (!IsPcWindow()) {
+    if (!IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d device not support", subWindowId);
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -959,10 +959,6 @@ WMError WindowSceneSessionImpl::GetParentWindow(sptr<Window>& parentWindow)
     if (property_->GetPcAppInpadCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_SUB, "This is PcAppInPad, not Supported");
         return WMError::WM_OK;
-    }
-    if (!IsPcWindow()) {
-        TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d device not support", GetPersistentId());
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
