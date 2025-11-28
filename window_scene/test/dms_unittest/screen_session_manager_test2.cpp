@@ -1163,7 +1163,6 @@ HWTEST_F(ScreenSessionManagerTest, CalculateRotatedDisplay1, Function | SmallTes
     displayArea = {20, 10, 30, 40};
     ssm_->CalculateRotatedDisplay(rotation, screenRegion, displayRegion, displayArea);
     EXPECT_TRUE(g_errLog.find("failed") == std::string::npos);
-    g_logMsg.clear();
     LOG_SetCallback(nullptr);
     expectedRect = {50, 150, 30, 40};
     EXPECT_EQ(displayArea, expectedRect);
@@ -1200,7 +1199,6 @@ HWTEST_F(ScreenSessionManagerTest, CalculateRotatedDisplay2, Function | SmallTes
     ssm_->CalculateRotatedDisplay(rotation, screenRegion, displayRegion, displayArea);
     DMRect expectedRect = {0, 0, 200, 100};
     EXPECT_TRUE(g_errLog.find("failed") == std::string::npos);
-    g_logMsg.clear();
 
     rotation = Rotation::ROTATION_180;
     displayRegion = {0, 0, 200, 100};
@@ -1216,7 +1214,6 @@ HWTEST_F(ScreenSessionManagerTest, CalculateRotatedDisplay2, Function | SmallTes
     displayArea = {20, 10, 30, 40};
     ssm_->CalculateRotatedDisplay(rotation, screenRegion, displayRegion, displayArea);
     EXPECT_TRUE(g_errLog.find("failed") == std::string::npos);
-    g_logMsg.clear();
     LOG_SetCallback(nullptr);
 
     expectedRect = {50, 150, 30, 40};
