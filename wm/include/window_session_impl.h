@@ -159,6 +159,7 @@ public:
      */
     bool IsPcWindow() const override;
     bool IsPadWindow() const override;
+    bool IsPhonePadOrPcWindow() const override;
     bool IsPcOrFreeMultiWindowCapabilityEnabled() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
     bool IsPadAndNotFreeMultiWindowCompatibleMode() const override;
@@ -174,7 +175,7 @@ public:
     WMError SetSubWindowModal(bool isModal, ModalityType modalityType = ModalityType::WINDOW_MODALITY) override;
     WMError SetWindowModal(bool isModal) override;
     void SetTargetAPIVersion(uint32_t targetAPIVersion);
-    uint32_t GetTargetAPIVersion() const;
+    uint32_t GetTargetAPIVersion() const override;
     void NotifyClientWindowSize();
     bool IsFullScreenPcAppInPadMode() const;
     sptr<WindowSessionProperty> GetPropertyByContext() const;
