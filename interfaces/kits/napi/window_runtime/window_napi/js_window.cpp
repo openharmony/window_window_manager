@@ -6706,7 +6706,7 @@ napi_value JsWindow::OnSetWindowShadowRadius(napi_env env, napi_callback_info in
     if (argc != ARG_COUNT_ONE) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "[window][setWindowShadowRadius]msg: Exactly one parameter is required.");    
+            "[window][setWindowShadowRadius]msg: Exactly one parameter is required.");
     }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WindowToken is nullptr.");
