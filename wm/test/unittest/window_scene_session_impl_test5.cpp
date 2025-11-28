@@ -1270,8 +1270,10 @@ HWTEST_F(WindowSceneSessionImplTest5, GetParentWindow01, TestSize.Level1)
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     sptr<Window> parentWindow = nullptr;
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->property_->SetPcAppInpadCompatibleMode(true);
     auto res = window->GetParentWindow(parentWindow);
-    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    EXPECT_EQ(res, WMError::WM_OK);	
+    window->property_->SetPcAppInpadCompatibleMode(false);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     res = window->GetParentWindow(parentWindow);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
@@ -1480,6 +1482,7 @@ HWTEST_F(WindowSceneSessionImplTest5, SetParentWindow03, TestSize.Level1)
     EXPECT_CALL(mocker.Mock(), SetParentWindow(_, _)).WillOnce(Return(mockerResult));
     EXPECT_EQ(subWindow->SetParentWindow(newParentWindowId), mockerResult);
     subWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    subWindow->property_->SetPcAppInpadCompatibleMode(true);
     subWindow->windowSystemConfig_.freeMultiWindowEnable_ = true;
     subWindow->windowSystemConfig_.freeMultiWindowSupport_ = true;
     EXPECT_EQ(subWindow->SetParentWindow(newParentWindowId), WMError::WM_OK);
