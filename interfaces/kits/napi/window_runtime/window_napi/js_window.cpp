@@ -4034,7 +4034,7 @@ napi_value JsWindow::OnSetPreferredOrientation(napi_env env, napi_callback_info 
             static_cast<uint32_t>(requestedOrientation));
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetPreferredOrientation") != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, 
+        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][setPreferredOrientation]msg: Send event failed."));
     }
     return result;
@@ -4047,7 +4047,7 @@ napi_value JsWindow::OnGetPreferredOrientation(napi_env env, napi_callback_info 
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc >= 1) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Argc is invalid: %{public}zu, expect zero params", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, 
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][getPreferredOrientation]msg: Unexpected parameters.");
     }
     if (windowToken_ == nullptr) {
@@ -6534,7 +6534,7 @@ napi_value JsWindow::OnSetWindowCornerRadius(napi_env env, napi_callback_info in
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARG_COUNT_ONE) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, 
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setWindowCornerRadius]msg: Exactly one parameter is required.");
     }
     double radius = 0.0;
@@ -6589,7 +6589,7 @@ napi_value JsWindow::OnGetWindowCornerRadius(napi_env env, napi_callback_info in
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc > ARG_COUNT_ZERO) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, 
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][getWindowCornerRadius]msg: Unexpected parameters.");
     }
     if (windowToken_ == nullptr) {
@@ -7906,13 +7906,13 @@ napi_value JsWindow::OnGetWindowTransitionAnimation(napi_env env, napi_callback_
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARG_COUNT_ONE) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, 
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][getWindowTransitionAnimation]msg: Exactly one parameter is required.");
     }
     WindowTransitionType type = WindowTransitionType::DESTROY;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], type) || type >= WindowTransitionType::END) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to type");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, 
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][getWindowTransitionAnimation]msg: Failed to convert parameter to type.");
     }
     napi_value result = ConvertTransitionAnimationToJsValue(env, windowToken_->GetWindowTransitionAnimation(type));
