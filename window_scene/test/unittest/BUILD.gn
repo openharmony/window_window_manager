@@ -1717,7 +1717,5 @@ ohos_unittest("ws_compatible_mode_session_stub_test") {
   deps = [ ":ws_unittest_common" ]
 
   external_deps = test_external_deps
-
-  public_external_deps = [ "accessibility:accessibility_interface" ]
 }
 ## Build ws_unittest_common.a }}}
