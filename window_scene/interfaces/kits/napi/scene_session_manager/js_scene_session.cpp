@@ -4780,29 +4780,11 @@ sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info, bool needA
             TLOGE(WmsLogTag::WMS_LIFE, "BrokerStates not started");
             return nullptr;
         }
-        if (info.reuse || info.isAtomicService_ || !info.specifiedFlag_.empty()) {
-            TLOGI(WmsLogTag::WMS_LIFE, "session need to be reusesd.");
-            if (SceneSessionManager::GetInstance().CheckCollaboratorType(info.collaboratorType_)) {
-                sceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(info.sessionAffinity);
-            } else {
-                SessionIdentityInfo identityInfo = { info.bundleName_, info.moduleName_, info.abilityName_,
-                    info.appIndex_, info.appInstanceKey_, info.windowType_, info.isAtomicService_,
-                    info.specifiedFlag_ };
-                sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByIdentityInfo(identityInfo);
-            }
+        if (result == BrokerStates::BROKER_STARTED && info.collaboratorType_ == CollaboratorType::REDIRECT_TYPE) {
+            TLOGW(WmsLogTag::WMS_LIFE, "redirect and not create session.");
+            return nullptr;
         }
-        if (sceneSession == nullptr) {
-            TLOGI(WmsLogTag::WMS_LIFE, "SceneSession not exist, request a new one.");
-            sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
-            if (sceneSession == nullptr) {
-                TLOGE(WmsLogTag::WMS_LIFE, "RequestSceneSession return nullptr");
-                return nullptr;
-            }
-        } else {
-            sceneSession->SetSessionInfo(info);
-        }
-        info.persistentId_ = sceneSession->GetPersistentId();
-        sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
+        ReuseSession(sceneSession, info);
     } else {
         sceneSession = SceneSessionManager::GetInstance().GetSceneSession(info.persistentId_);
         if (sceneSession == nullptr) {
@@ -4820,6 +4802,33 @@ sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info, bool needA
     }
     AddRequestTaskInfo(sceneSession, info.requestId, needAddRequestInfo);
     return sceneSession;
+}
+
+void JsSceneSession::ReuseSession(sptr<SceneSession>& sceneSession, SessionInfo& info)
+{
+    if (info.reuse || info.isAtomicService_ || !info.specifiedFlag_.empty()) {
+        TLOGI(WmsLogTag::WMS_LIFE, "session need to be reusesd.");
+        if (SceneSessionManager::GetInstance().CheckCollaboratorType(info.collaboratorType_)) {
+            sceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(info.sessionAffinity);
+        } else {
+            SessionIdentityInfo identityInfo = { info.bundleName_, info.moduleName_, info.abilityName_,
+                info.appIndex_, info.appInstanceKey_, info.windowType_, info.isAtomicService_,
+                info.specifiedFlag_ };
+            sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByIdentityInfo(identityInfo);
+        }
+    }
+    if (sceneSession == nullptr) {
+        TLOGI(WmsLogTag::WMS_LIFE, "SceneSession not exist, request a new one.");
+        sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
+        if (sceneSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "RequestSceneSession return nullptr");
+            return;
+        }
+    } else {
+        sceneSession->SetSessionInfo(info);
+    }
+    info.persistentId_ = sceneSession->GetPersistentId();
+    sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
 }
 
 void JsSceneSession::PendingSessionActivation(SessionInfo& info)

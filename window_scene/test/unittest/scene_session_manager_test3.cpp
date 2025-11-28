@@ -1104,6 +1104,8 @@ HWTEST_F(SceneSessionManagerTest3, CheckCollaboratorType, TestSize.Level1)
     EXPECT_TRUE(ssm_->CheckCollaboratorType(type));
     type = CollaboratorType::OTHERS_TYPE;
     EXPECT_TRUE(ssm_->CheckCollaboratorType(type));
+    type = CollaboratorType::REDIRECT_TYPE;
+    EXPECT_TRUE(ssm_->CheckCollaboratorType(type));
     type = CollaboratorType::DEFAULT_TYPE;
     ASSERT_FALSE(ssm_->CheckCollaboratorType(type));
 }

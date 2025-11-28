@@ -13397,7 +13397,8 @@ void SceneSessionManager::ClearAllCollaboratorSessions()
 
 bool SceneSessionManager::CheckCollaboratorType(int32_t type)
 {
-    if (type != CollaboratorType::RESERVE_TYPE && type != CollaboratorType::OTHERS_TYPE) {
+    if (type != CollaboratorType::RESERVE_TYPE && type != CollaboratorType::OTHERS_TYPE &&
+        type != CollaboratorType::REDIRECT_TYPE) {
         TLOGD(WmsLogTag::WMS_MAIN, "type is invalid");
         return false;
     }
@@ -13418,6 +13419,8 @@ BrokerStates SceneSessionManager::CheckIfReuseSession(SessionInfo& sessionInfo)
         collaboratorType = CollaboratorType::RESERVE_TYPE;
     } else if (abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE)) {
         collaboratorType = CollaboratorType::OTHERS_TYPE;
+    } else if (abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::REDIRECT_TYPE)) {
+        collaboratorType = CollaboratorType::REDIRECT_TYPE;
     }
     if (!CheckCollaboratorType(collaboratorType)) {
         TLOGW(WmsLogTag::DEFAULT, "checked not collaborator!");
