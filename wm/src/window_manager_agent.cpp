@@ -22,7 +22,7 @@ namespace OHOS {
 namespace Rosen {
 void WindowManagerAgent::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused)
 {
-    SingletonContainer::Get<WindowManager>().UpdateFocusChangeInfo(focusChangeInfo, focused);
+    WindowManager::GetInstance().UpdateFocusChangeInfo(focusChangeInfo, focused);
 }
 
 void WindowManagerAgent::UpdateWindowModeTypeInfo(WindowModeType type)
