@@ -4049,44 +4049,52 @@ napi_value JsWindow::OnConvertOrientationAndRotation(napi_env env, napi_callback
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != THREE_PARAMS_SIZE) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Argc is invalid: %{public}zu, expect three params", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][convertOrientationAndRotation]msg: invalid argc");
     }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_ROTATION, "window is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][convertOrientationAndRotation]msg: invalid window");
     }
-    int32_t from;
+    int32_t from = 0;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], from)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to RotationInfoType of from");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][convertOrientationAndRotation]msg: Failed to convert parameter to RotationInfoType of from");
     }
     RotationInfoType fromRotationInfoType = static_cast<RotationInfoType>(from);
     if (fromRotationInfoType < RotationInfoType::WINDOW_ORIENTATION ||
         fromRotationInfoType > RotationInfoType::DISPLAY_ROTATION) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Invalid from RotationInfoType : %{public}d", from);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][convertOrientationAndRotation]msg: Invalid from RotationInfoType");
     }
-    int32_t to;
+    int32_t to = 0;
     if (!ConvertFromJsValue(env, argv[INDEX_ONE], to)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to RotationInfoType of to");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][convertOrientationAndRotation]msg: Failed to convert parameter to RotationInfoType of to");
     }
     RotationInfoType toRotationInfoType = static_cast<RotationInfoType>(to);
     if (toRotationInfoType < RotationInfoType::WINDOW_ORIENTATION ||
         toRotationInfoType > RotationInfoType::DISPLAY_ROTATION) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Invalid to RotationInfoType : %{public}d", to);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][convertOrientationAndRotation]msg: Invalid to RotationInfoType");
     }
-    int32_t value;
+    int32_t value = 0;
     if (!ConvertFromJsValue(env, argv[INDEX_TWO], value)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to RotationInfoValue");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][convertOrientationAndRotation]msg: Failed to convert parameter to RotationInfoValue");
     }
-    int32_t convertedValue;
+    int32_t convertedValue = 0;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
         windowToken_->ConvertOrientationAndRotation(fromRotationInfoType, toRotationInfoType, value, convertedValue));
     if (ret != WmErrorCode::WM_OK) {
-        return NapiThrowError(env, ret);
+        return NapiThrowError(env, ret,
+            "[window][convertOrientationAndRotation]msg: Failed to convert Orientation adn Rotation");
     }
     TLOGD(WmsLogTag::WMS_ROTATION, "end, convertRotationValue : %{public}d", convertedValue);
     return CreateJsValue(env, convertedValue);

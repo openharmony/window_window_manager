@@ -624,10 +624,10 @@ public:
         const int32_t value, int32_t& convertedValue) override;
     WSError ConvertDisplayOrientationToWindowOrientation(const int32_t value, int32_t& convertedValue);
     WSError ConvertWindowOrientationToDisplayOrientation(const int32_t value, int32_t& convertedValue);
-    WSError ConvertDisplayRotationToDisplayOrientation(int32_t rotation, int32_t& orientation);
-    WSError ConvertDisplayOrientationToDisplayRotation(int32_t orientation, int32_t& rotation);
-    WSError ConvertDisplayRotationToWindowOrientation(int32_t value, int32_t& convertedValue);
-    WSError ConvertWindowOrientationToDisplayRotation(int32_t value, int32_t& convertedValue);
+    WSError ConvertDisplayRotationToDisplayOrientation(const int32_t rotation, int32_t& orientation);
+    WSError ConvertDisplayOrientationToDisplayRotation(const int32_t orientation, int32_t& rotation);
+    WSError ConvertDisplayRotationToWindowOrientation(const int32_t value, int32_t& convertedValue);
+    WSError ConvertWindowOrientationToDisplayRotation(const int32_t value, int32_t& convertedValue);
     void RegisterUpdateRotationChangeListener(NotifyRotationChangeFunc&& callback);
     WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) override;
     RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo,
