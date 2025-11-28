@@ -65,7 +65,7 @@ constexpr int ARG_INDEX_FOUR = 4;
 constexpr int32_t RESTYPE_RECLAIM = 100001;
 const std::string RES_PARAM_RECLAIM_TAG = "reclaimTag";
 const std::string CREATE_SYSTEM_SESSION_CB = "createSpecificSession";
-const std::string SET_SPECIFIC_SESSION_ZINDE_CB = "setSpecificWindowZIndex";
+const std::string SET_SPECIFIC_SESSION_ZINDEX_CB = "setSpecificWindowZIndex";
 const std::string CREATE_KEYBOARD_SESSION_CB = "createKeyboardSession";
 const std::string RECOVER_SCENE_SESSION_CB = "recoverSceneSession";
 const std::string STATUS_BAR_ENABLED_CHANGE_CB = "statusBarEnabledChange";
@@ -117,7 +117,7 @@ const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {UI_EFFECT_SET_PARAMS_CB,       ListenerFunctionType::UI_EFFECT_SET_PARAMS_CB},
     {UI_EFFECT_ANIMATE_TO_CB,      ListenerFunctionType::UI_EFFECT_ANIMATE_TO_CB},
     {VIRTUAL_DENSITY_CHANGE_CB,   ListenerFunctionType::VIRTUAL_DENSITY_CHANGE_CB},
-    {SET_SPECIFIC_SESSION_ZINDE_CB,     ListenerFunctionType::SET_SPECIFIC_SESSION_ZINDE_CB},
+    {SET_SPECIFIC_SESSION_ZINDEX_CB,     ListenerFunctionType::SET_SPECIFIC_SESSION_ZINDEX_CB},
 };
 } // namespace
 
@@ -383,18 +383,27 @@ void JsSceneSessionManager::OnCreateSystemSession(const sptr<SceneSession>& scen
     taskScheduler_->PostMainThreadTask(task, "OnCreateSystemSession");
 }
 
-void JsSceneSessionManager::OnSetSpecificWindowZIndex(WindowType windowType, int32_t zIndex)
+void JsSceneSessionManager::OnSetSpecificWindowZIndex(WindowType windowType, int32_t zIndex,
+    SetSpecificZIndexReason reason)
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "windowType: %{public}d, zIndex: %{public}d", windowType, zIndex);
-    auto task = [this, windowType, zIndex, jsCallBack = GetJSCallback(SET_SPECIFIC_SESSION_ZINDE_CB), env = env_]() {
+    TLOGI(WmsLogTag::WMS_FOCUS, "windowType: %{public}d, zIndex: %{public}d, reason: %{public}d",
+        windowType, zIndex, reason);
+    auto task = [this, windowType, zIndex, reason, jsCallBack = GetJSCallback(SET_SPECIFIC_SESSION_ZINDEX_CB),
+        env = env_]() {
         if (jsCallBack == nullptr) {
             TLOGNE(WmsLogTag::WMS_FOCUS, "jsCallBack is nullptr");
             return;
         }
         uint32_t jsSessionType = static_cast<uint32_t>(GetApiType(windowType));
         napi_value argv[] = { CreateJsValue(env, jsSessionType),
-                              CreateJsValue(env, zIndex) };
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+                              CreateJsValue(env, zIndex),
+                              CreateJsValue(env, reason) };
+        napi_status ret = napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(),
+            ArraySize(argv), argv, nullptr);
+        if (ret != napi_ok) {
+            TLOGNE(WmsLogTag::WMS_FOCUS, "OnSetSpecificWindowZIndex:napi call exception ret: %{public}d", ret);
+            return;
+        }
     };
     taskScheduler_->PostMainThreadTask(task, "OnSetSpecificWindowZIndex, WindowType:" +
         std::to_string(static_cast<uint32_t>(windowType)));
@@ -635,9 +644,10 @@ void JsSceneSessionManager::ProcessCreateSystemSessionRegister()
 /** @note @window.hierarchy */
 void JsSceneSessionManager::RegisterSetSpecificWindowZIndexCallback()
 {
-    NotifySetSpecificWindowZIndexFunc func = [this](WindowType windowType, int32_t zIndex) {
+    NotifySetSpecificWindowZIndexFunc func = [this](WindowType windowType, int32_t zIndex,
+        SetSpecificZIndexReason reason) {
         TLOGNI(WmsLogTag::WMS_FOCUS, "set specifc zIndex callback");
-        this->OnSetSpecificWindowZIndex(windowType, zIndex);
+        this->OnSetSpecificWindowZIndex(windowType, zIndex, reason);
     };
     SceneSessionManager::GetInstance().SetSpecificWindowZIndexListener(func);
 }
@@ -1690,7 +1700,7 @@ void JsSceneSessionManager::ProcessRegisterCallback(ListenerFunctionType listene
         case ListenerFunctionType::VIRTUAL_DENSITY_CHANGE_CB:
             RegisterVirtualPixelRatioChangeCallback();
             break;
-        case ListenerFunctionType::SET_SPECIFIC_SESSION_ZINDE_CB:
+        case ListenerFunctionType::SET_SPECIFIC_SESSION_ZINDEX_CB:
             RegisterSetSpecificWindowZIndexCallback();
             break;
         case ListenerFunctionType::NOTIFY_SUPPORT_ROTATION_REGISTERED_CB:

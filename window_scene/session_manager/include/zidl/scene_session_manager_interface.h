@@ -167,6 +167,7 @@ public:
         TRANS_ID_UPDATE_OUTLINE,
         TRANS_ID_SET_SPECIFIC_WINDOW_ZINDEX,
         TRANS_ID_SUPPORT_ROTATION_REGISTERED,
+        TRANS_ID_RESET_SPECIFIC_WINDOW_ZINDEX,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -359,10 +360,8 @@ public:
     {
         return WSError::WS_OK;
     }
-    WSError SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex) override
-    {
-        return WSError::WS_OK;
-    }
+    WSError SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex) override { return WSError::WS_OK; }
+    WSError ResetSpecificWindowZIndex(int32_t pid) override { return WSError::WS_OK; }
     void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, const sptr<IRemoteObject>& token,
         uint64_t surfaceNodeId, int64_t startModalExtensionTimeStamp, bool isConstrainedModal) override {}
     void RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,

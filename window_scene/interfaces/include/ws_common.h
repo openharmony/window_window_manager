@@ -1280,6 +1280,14 @@ enum class SessionRecoverState : uint32_t {
     SESSION_RECOVER_STATE_END,
 };
 
+/**
+ * @brief Set specific window zIndex reason
+ */
+enum class SetSpecificZIndexReason : uint32_t {
+    SET = 0,
+    RESET = 1,
+};
+
 enum class CrossPlaneState : uint32_t {
     UNDEFINED = 0,
     CROSS_DEFAULT_PLANE,

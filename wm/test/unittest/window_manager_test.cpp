@@ -2790,6 +2790,18 @@ HWTEST_F(WindowManagerTest, GetMainWindowSnapshot, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetSpecificSystemWindowZIndex
+ * @tc.desc: SetSpecificSystemWindowZIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, SetSpecificSystemWindowZIndex, TestSize.Level1)
+{
+    WMError ret = WindowManager::GetInstance().SetSpecificSystemWindowZIndex(
+        WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD, 20);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
  * @tc.name: RegisterWindowSupportRotationListener
  * @tc.desc: RegisterWindowSupportRotationListener
  * @tc.type: FUNC

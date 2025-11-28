@@ -54,7 +54,7 @@ enum class ListenerFunctionType : uint32_t {
     UI_EFFECT_SET_PARAMS_CB,
     UI_EFFECT_ANIMATE_TO_CB,
     VIRTUAL_DENSITY_CHANGE_CB,
-    SET_SPECIFIC_SESSION_ZINDE_CB,
+    SET_SPECIFIC_SESSION_ZINDEX_CB,
     NOTIFY_SUPPORT_ROTATION_REGISTERED_CB,
 };
 
@@ -403,7 +403,7 @@ private:
      * Window Hierarchy
      */
     void RegisterSetSpecificWindowZIndexCallback();
-    void OnSetSpecificWindowZIndex(WindowType windowType, int32_t zIndex);
+    void OnSetSpecificWindowZIndex(WindowType windowType, int32_t zIndex, SetSpecificZIndexReason reason);
 
     napi_env env_;
     std::shared_mutex jsCbMapMutex_;
