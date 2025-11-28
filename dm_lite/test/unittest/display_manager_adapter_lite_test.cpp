@@ -22,6 +22,14 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        g_logMsg += msg;
+    }
+}
 class DisplayManagerAdapterLiteTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -203,6 +211,64 @@ HWTEST_F(DisplayManagerAdapterLiteTest, GetScreenPowerPiling, TestSize.Level1)
     auto ret = SingletonContainer::Get<ScreenManagerAdapterLite>().GetScreenPower(screenId);
     EXPECT_NE(ret, ScreenPowerState::INVALID_STATE);
 #undef SCREENLESS_ENABLE
+}
+
+/**
+ * @tc.name: SyncScreenPowerState_ScreenLess
+ * @tc.desc: test SyncScreenPowerState_ScreenLess
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, SyncScreenPowerState_NotScreenLess, TestSize.Level1)
+{
+    #pragma push_macro("SCREENLESS_ENABLE")
+    #undef SCREENLESS_ENABLE
+    #define SCREENLESS_ENABLE
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    SingletonContainer::Get<ScreenManagerAdapterLite>().SyncScreenPowerState(
+        ScreenPowerState::POWER_ON);
+    EXPECT_TRUE(g_logMsg.find("screenless device") != std::string::npos)
+    LOG_SetCallback(nullptr);
+    #pragma pop_macro("SCREENLESS_ENABLE")
+}
+
+/**
+ * @tc.name: SyncScreenPowerState_NullProxyObject
+ * @tc.desc: test SyncScreenPowerState_NullProxyObject
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, SyncScreenPowerState_NullProxyObject, TestSize.Level1)
+{
+    #pragma push_macro("SCREENLESS_ENABLE")
+    #undef SCREENLESS_ENABLE
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    auto proxyBak = SingletonContainer::Get<ScreenManagerAdapterLite>().displayManagerServiceProxy_;
+    SingletonContainer::Get<ScreenManagerAdapterLite>().displayManagerServiceProxy_ = nullptr;
+    SingletonContainer::Get<ScreenManagerAdapterLite>().SyncScreenPowerState(
+        ScreenPowerState::POWER_ON);
+    EXPECT_TRUE(g_logMsg.find("null proxy object") != std::string::npos)
+    SingletonContainer::Get<ScreenManagerAdapterLite>().displayManagerServiceProxy_ = proxyBak;
+    LOG_SetCallback(nullptr);
+    #pragma pop_macro("SCREENLESS_ENABLE")
+}
+
+/**
+ * @tc.name: SyncScreenPowerState_Success
+ * @tc.desc: test SyncScreenPowerState_Success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, SyncScreenPowerState_Success, TestSize.Level1)
+{
+    #pragma push_macro("SCREENLESS_ENABLE")
+    #undef SCREENLESS_ENABLE
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    SingletonContainer::Get<ScreenManagerAdapterLite>().SyncScreenPowerState(
+        ScreenPowerState::POWER_ON);
+    EXPECT_TRUE(g_logMsg.find("sync power state success") != std::string::npos)
+    LOG_SetCallback(nullptr);
+    #pragma pop_macro("SCREENLESS_ENABLE")
 }
 
 /**
