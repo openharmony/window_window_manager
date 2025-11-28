@@ -4372,12 +4372,14 @@ napi_value JsWindow::OnSetWindowFocusable(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) { // 1: maximum params num
         TLOGE(WmsLogTag::WMS_FOCUS, "Argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setWindowFocusable]msg: Argc is invalid");
     }
     bool focusable = true;
     if (!ConvertFromJsValue(env, argv[0], focusable)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Failed to convert parameter to focusable");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setWindowFocusable]msg: Failed to convert parameter to focusable");
     }
 
     napi_value lastParam = (argc <= 1) ? nullptr :
@@ -4474,7 +4476,8 @@ napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "windowToken is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setWindowTopmost]msg: WindowToken is nullptr");
     }
     if (windowToken_->IsPadAndNotFreeMultiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "This is PcAppInPad, not support");
@@ -4482,11 +4485,13 @@ napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
     }
     if (!windowToken_->IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "device not support");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT,
+            "[window][setWindowTopmost]msg: Device not support");
     }
     if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "not allowed since window is not main window");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
+            "[window][setWindowTopmost]msg: Not allowed since window is not main window");
     }
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
@@ -4495,7 +4500,8 @@ napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
     if (argc != 1 || !ConvertFromJsValue(env, argv[INDEX_ZERO], isMainWindowTopmost)) {
         TLOGE(WmsLogTag::WMS_HIERARCHY,
             "Argc is invalid: %{public}zu. Failed to convert parameter to topmost", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setWindowTopmost]msg: Argc is invalid");
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
@@ -4530,11 +4536,13 @@ napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
 napi_value JsWindow::OnSetSubWindowZLevel(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setSubWindowZLevel]msg: WindowToken is nullptr");
     }
     if (!WindowHelper::IsSubWindow(windowToken_->GetType())) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "not allowed since window is not sub window");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
+            "[window][setSubWindowZLevel]msg: Not allowed since window is not sub window");
     }
     WmErrorCode errCode = WmErrorCode::WM_OK;
     size_t argc = FOUR_PARAMS_SIZE;
@@ -4542,12 +4550,14 @@ napi_value JsWindow::OnSetSubWindowZLevel(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != 1 || argv[0] == nullptr) { // 1: params num
         TLOGE(WmsLogTag::WMS_HIERARCHY, "argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setSubWindowZLevel]msg: Argc is invalid");
     }
     int32_t zLevel = 0;
     if (errCode == WmErrorCode::WM_OK && !ConvertFromJsValue(env, argv[0], zLevel)) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "failed to convert paramter to zLevel");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setSubWindowZLevel]msg: Failed to convert paramter to zLevel");
     }
     napi_value lastParam = nullptr;
     napi_value result = nullptr;
@@ -4562,19 +4572,15 @@ napi_value JsWindow::OnSetSubWindowZLevel(napi_env env, napi_callback_info info)
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSubWindowZLevel(zLevel));
-        if (ret == WmErrorCode::WM_OK) {
-            task->Resolve(env, NapiGetUndefined(env));
-        } else {
+        ret == WmErrorCode::WM_OK ? task->Resolve(env, NapiGetUndefined(env)) :
             task->Reject(env, JsErrUtils::CreateJsError(env, ret,
                 "[window][setSubWindowZLevel]msg: Set sub window zLevel failed"));
-        }
         TLOGNI(WmsLogTag::WMS_HIERARCHY, "window [%{public}u, %{public}s], zLevel = %{public}d, ret = %{public}d",
             window->GetWindowId(), window->GetWindowName().c_str(), zLevel, ret);
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetSubWindowZLevel") != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env,
-            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                "[window][setSubWindowZLevel]msg: Failed to send event"));
+        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setSubWindowZLevel]msg: Failed to send event"));
     }
     return result;
 }
@@ -4612,7 +4618,8 @@ napi_value JsWindow::OnSetWindowDelayRaiseOnDrag(napi_env env, napi_callback_inf
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "windowToken is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setWindowDelayRaiseOnDrag]msg: WindowToken is nullptr");
     }
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
@@ -4620,17 +4627,20 @@ napi_value JsWindow::OnSetWindowDelayRaiseOnDrag(napi_env env, napi_callback_inf
     if (argc != 1 || argv[0] == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS,
             "Argc is invalid: %{public}zu. Failed to convert parameter to delay raise", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setWindowDelayRaiseOnDrag]msg: Argc is invalid");
     }
     bool isDelayRaise = false;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], isDelayRaise)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Failed to convert parameter from jsValue");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setWindowDelayRaiseOnDrag]msg: Failed to convert parameter from jsValue");
     }
     auto result = windowToken_->SetWindowDelayRaiseEnabled(isDelayRaise);
     if (result != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_FOCUS, "failed");
-        return NapiThrowError(env, WM_JS_TO_ERROR_CODE_MAP.at(result));
+        return NapiThrowError(env, WM_JS_TO_ERROR_CODE_MAP.at(result),
+            "[window][setWindowDelayRaiseOnDrag]");
     }
     return NapiGetUndefined(env);
 }
@@ -7660,19 +7670,22 @@ napi_value JsWindow::OnSetSubWindowModal(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1 || argc > 2) { // 1: the minimum param num  2: the maximum param num
         TLOGE(WmsLogTag::WMS_SUB, "Argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setSubWindowModal]msg: Argc is invalid");
     }
     bool isModal = false;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], isModal)) {
         TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to isModal");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setSubWindowModal]msg: Failed to convert parameter to isModal");
     }
     ModalityType modalityType = ModalityType::WINDOW_MODALITY;
     ApiModalityType apiModalityType;
     if (argc == 2 && ConvertFromJsValue(env, argv[INDEX_ONE], apiModalityType)) { // 2: the param num
         if (!isModal) {
             TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow not support modalityType");
-            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+                "[window][setSubWindowModal]msg: Normal subwindow not support modalityType");
         }
         using T = std::underlying_type_t<ApiModalityType>;
         T type = static_cast<T>(apiModalityType);
@@ -7682,7 +7695,7 @@ napi_value JsWindow::OnSetSubWindowModal(napi_env env, napi_callback_info info)
         } else {
             TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to modalityType");
             return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-                "[window][setPrivacyMode]msg: convert parameter to modality type failed");
+                "[window][setPrivacyMode]msg: Convert parameter to modality type failed");
         }
     }
     napi_value result = nullptr;
@@ -8508,7 +8521,8 @@ napi_value JsWindow::OnIsFocused(napi_env env, napi_callback_info info)
     auto window = windowToken_;
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "window is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][isFocused]msg: Window is nullptr");
     }
 
     bool isFocused = window->IsFocused();
@@ -9134,12 +9148,14 @@ napi_value JsWindow::OnSetExclusivelyHighlighted(napi_env env, napi_callback_inf
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARG_COUNT_ONE) {
         TLOGE(WmsLogTag::WMS_FOCUS, "argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setExclusivelyHighlighted]msg: Argc is invalid");
     }
     bool exclusivelyHighlighted = true;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], exclusivelyHighlighted)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Failed to convert parameter to exclusivelyHighlighted");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setExclusivelyHighlighted]msg: Failed to convert parameter to exclusivelyHighlighted");
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
@@ -9175,13 +9191,14 @@ napi_value JsWindow::OnIsWindowHighlighted(napi_env env, napi_callback_info info
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "windowToken is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][isWindowHighlighted]msg: WindowToken is nullptr");
     }
     bool isHighlighted = false;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->IsWindowHighlighted(isHighlighted));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_FOCUS, "get window highlight failed, ret: %{public}d", ret);
-        return NapiThrowError(env, ret);
+        return NapiThrowError(env, ret, "[window][isWindowHighlighted]");
     }
     TLOGI(WmsLogTag::WMS_FOCUS, "get window highlight end, isHighlighted: %{public}u", isHighlighted);
     return CreateJsValue(env, isHighlighted);
