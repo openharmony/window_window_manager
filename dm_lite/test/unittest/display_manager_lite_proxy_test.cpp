@@ -514,7 +514,7 @@ HWTEST_F(DisplayManagerLiteProxyTest, SyncScreenPowerState, TestSize.Level1)
     sptr<DisplayManagerLiteProxy> displayManagerLiteProxy = new DisplayManagerLiteProxy(impl);
 
     displayManagerLiteProxy->SyncScreenPowerState(ScreenPowerState::POWER_ON);
-    EXPECT_TRUE(g_logMsg.find("Sync power state success") != std::string::npos)
+    EXPECT_TRUE(g_logMsg.find("Sync power state success") != std::string::npos);
     LOG_SetCallback(nullptr);
 }
 }
