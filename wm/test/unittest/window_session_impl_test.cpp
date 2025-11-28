@@ -2557,7 +2557,7 @@ HWTEST_F(WindowSessionImplTest, UpdateDefaultStatusBarColor, TestSize.Level1)
     property.settingFlag_ = SystemBarSettingFlag::COLOR_SETTING;
     window->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_STATUS_BAR] = property;
     window->UpdateDefaultStatusBarColor();
-    EXPECT_EQ(window->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_STATUS_BAR], property);
+    EXPECT_EQ(window->GetSystemBarPropertyByType[WindowType::WINDOW_TYPE_STATUS_BAR], property);
 
     property.settingFlag_ = SystemBarSettingFlag::DEFAULT_SETTING;
     window->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_STATUS_BAR] = property;
@@ -2576,20 +2576,20 @@ HWTEST_F(WindowSessionImplTest, UpdateDefaultStatusBarColor, TestSize.Level1)
 
     std::string key = AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE;
     std::string value = AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT;
-    context->applicationContext_->contextImpl_->config_->configParameter[key]_ = value;
+    context->applicationContext_->contextImpl_->config_->configParameter_[key] = value;
     window->UpdateDefaultStatusBarColor();
 
     value = AppExecFwk::ConfigurationInner::COLOR_MODE_DARK;
-    context->applicationContext_->contextImpl_->config_->configParameter[key]_ = value;
+    context->applicationContext_->contextImpl_->config_->configParameter_[key] = value;
     window->UpdateDefaultStatusBarColor();
 
     key = AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP;
     value = AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT;
-    context->applicationContext_->contextImpl_->config_->configParameter[key]_ = value;
+    context->applicationContext_->contextImpl_->config_->configParameter_[key] = value;
     window->UpdateDefaultStatusBarColor();
 
     value = AppExecFwk::ConfigurationInner::COLOR_MODE_DARK;
-    context->applicationContext_->contextImpl_->config_->configParameter[key]_ = value;
+    context->applicationContext_->contextImpl_->config_->configParameter_[key] = value;
     window->UpdateDefaultStatusBarColor();
 
     window->specifiedAbilityColorMode_ = "light";
