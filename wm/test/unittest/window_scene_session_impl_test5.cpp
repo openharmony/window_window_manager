@@ -1272,7 +1272,7 @@ HWTEST_F(WindowSceneSessionImplTest5, GetParentWindow01, TestSize.Level1)
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     window->property_->SetPcAppInpadCompatibleMode(true);
     auto res = window->GetParentWindow(parentWindow);
-    EXPECT_EQ(res, WMError::WM_OK);	
+    EXPECT_EQ(res, WMError::WM_OK);
     window->property_->SetPcAppInpadCompatibleMode(false);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     res = window->GetParentWindow(parentWindow);
