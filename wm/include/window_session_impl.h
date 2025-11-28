@@ -543,6 +543,8 @@ public:
     void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
         SystemBarProperty& property) override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
+    // tanhong
+    virtual UpdateDefaultStatusBarColor();
 
     /*
      * Window Property
@@ -846,6 +848,7 @@ protected:
     std::map<AvoidAreaType, AvoidArea> lastAvoidAreaMap_;
     uint32_t GetStatusBarHeight() const override;
     WindowType rootHostWindowType_ = WindowType::APP_MAIN_WINDOW_BASE;
+    std::string specifiedAbilityColorMode_;
 
     /*
      * PC Fold Screen
