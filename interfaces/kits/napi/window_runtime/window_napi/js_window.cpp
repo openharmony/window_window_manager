@@ -4571,10 +4571,10 @@ napi_value JsWindow::OnSetSubWindowZLevel(napi_env env, napi_callback_info info)
                 WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "[window][setSubWindowZLevel]msg: Window is nullptr"));
             return;
         }
-        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken.promote()->SetSubWindowZLevel(zLevel));
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSubWindowZLevel(zLevel));
         ret == WmErrorCode::WM_OK ? task->Resolve(env, NapiGetUndefined(env)) :
             task->Reject(env, JsErrUtils::CreateJsError(env, ret,
-               "[window][setSubWindowZLevel]msg: Set sub window zLevel failed"));
+                "[window][setSubWindowZLevel]msg: Set sub window zLevel failed"));
         TLOGNI(WmsLogTag::WMS_HIERARCHY, "window [%{public}u, %{public}s], zLevel = %{public}d, ret = %{public}d",
             window->GetWindowId(), window->GetWindowName().c_str(), zLevel, ret);
     };
