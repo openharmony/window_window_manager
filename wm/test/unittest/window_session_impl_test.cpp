@@ -2575,20 +2575,20 @@ HWTEST_F(WindowSessionImplTest, UpdateDefaultStatusBarColor, TestSize.Level1)
     window->UpdateDefaultStatusBarColor();
 
     std::string key = AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE;
-    std::string value = AppExecFwk::GlobalConfigurationInner::COLOR_MODE_LIGHT;
+    std::string value = AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT;
     context->applicationContext_->contextImpl_->config_->configParameter[key]_ = value;
     window->UpdateDefaultStatusBarColor();
 
-    value = AppExecFwk::GlobalConfigurationInner::COLOR_MODE_DARK;
+    value = AppExecFwk::ConfigurationInner::COLOR_MODE_DARK;
     context->applicationContext_->contextImpl_->config_->configParameter[key]_ = value;
     window->UpdateDefaultStatusBarColor();
 
     key = AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP;
-    value = AppExecFwk::GlobalConfigurationInner::COLOR_MODE_LIGHT;
+    value = AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT;
     context->applicationContext_->contextImpl_->config_->configParameter[key]_ = value;
     window->UpdateDefaultStatusBarColor();
 
-    value = AppExecFwk::GlobalConfigurationInner::COLOR_MODE_DARK;
+    value = AppExecFwk::ConfigurationInner::COLOR_MODE_DARK;
     context->applicationContext_->contextImpl_->config_->configParameter[key]_ = value;
     window->UpdateDefaultStatusBarColor();
 
