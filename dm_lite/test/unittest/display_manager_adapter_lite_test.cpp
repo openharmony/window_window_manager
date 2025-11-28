@@ -241,6 +241,7 @@ HWTEST_F(DisplayManagerAdapterLiteTest, SyncScreenPowerState_NullProxyObject, Te
 {
     #pragma push_macro("SCREENLESS_ENABLE")
     #undef SCREENLESS_ENABLE
+
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     auto proxyBak = SingletonContainer::Get<ScreenManagerAdapterLite>().displayManagerServiceProxy_;
