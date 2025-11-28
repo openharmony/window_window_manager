@@ -543,7 +543,7 @@ public:
     void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
         SystemBarProperty& property) override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
-    virtual UpdateDefaultStatusBarColor();
+    virtual void UpdateDefaultStatusBarColor();
 
     /*
      * Window Property
