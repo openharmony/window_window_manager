@@ -2551,7 +2551,8 @@ HWTEST_F(WindowSessionImplTest, UpdateDefaultStatusBarColor, TestSize.Level1)
     window->property_->SetPersistentId(1);
     window->state_ = WindowState::STATE_SHOWN;
     window->UpdateDefaultStatusBarColor();
-    window->property_->isAtomicService_ = false;
+    window->property_->isAtomicService_ = true;
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     SystemBarProperty property = SystemBarProperty();
     property.settingFlag_ = SystemBarSettingFlag::COLOR_SETTING;
     window->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_STATUS_BAR] = property;
@@ -2573,21 +2574,21 @@ HWTEST_F(WindowSessionImplTest, UpdateDefaultStatusBarColor, TestSize.Level1)
     window->UpdateDefaultStatusBarColor();
 
     std::string key = AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE;
-    std::string value = AAFwk::GlobalConfigurationInner::COLOR_MODE_LIGHT;
-    context->applicationContext_->contextImpl_->config_->configParameter[key] = value;
+    std::string value = AppExecFwk::GlobalConfigurationInner::COLOR_MODE_LIGHT;
+    context->applicationContext_->contextImpl_->config_->configParameter[key]_ = value;
     window->UpdateDefaultStatusBarColor();
 
-    value = AAFwk::GlobalConfigurationInner::COLOR_MODE_DARK;
-    context->applicationContext_->contextImpl_->config_->configParameter[key] = value;
+    value = AppExecFwk::GlobalConfigurationInner::COLOR_MODE_DARK;
+    context->applicationContext_->contextImpl_->config_->configParameter[key]_ = value;
     window->UpdateDefaultStatusBarColor();
 
     key = AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP;
-    value = AAFwk::GlobalConfigurationInner::COLOR_MODE_LIGHT;
-    context->applicationContext_->contextImpl_->config_->configParameter[key] = value;
+    value = AppExecFwk::GlobalConfigurationInner::COLOR_MODE_LIGHT;
+    context->applicationContext_->contextImpl_->config_->configParameter[key]_ = value;
     window->UpdateDefaultStatusBarColor();
 
-    value = AAFwk::GlobalConfigurationInner::COLOR_MODE_DARK;
-    context->applicationContext_->contextImpl_->config_->configParameter[key] = value;
+    value = AppExecFwk::GlobalConfigurationInner::COLOR_MODE_DARK;
+    context->applicationContext_->contextImpl_->config_->configParameter[key]_ = value;
     window->UpdateDefaultStatusBarColor();
 
     window->specifiedAbilityColorMode_ = "light";
