@@ -4019,16 +4019,16 @@ WSError SessionProxy::NotifyIsFullScreenInForceSplitMode(bool isFullScreen)
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::NotifyCompatibleModeChange(int32_t mode)
+WSError SessionProxy::NotifyCompatibleModeChange(CompatibleStyleMode mode)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_COMPAT, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt32(mode)) {
+    if (!data.WriteInt32(static_cast<int32_t>(mode))) {
         TLOGE(WmsLogTag::WMS_COMPAT, "write mode failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }

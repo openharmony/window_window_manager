@@ -2540,7 +2540,7 @@ int SessionStub::HandleNotifyCompatibleModeChange(MessageParcel& data, MessagePa
         TLOGE(WmsLogTag::WMS_COMPAT, "Read mode failed.");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = NotifyCompatibleModeChange(mode);
+    WSError errCode = NotifyCompatibleModeChange(static_cast<CompatibleStyleMode>(mode));
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_COMPAT, "write errCode fail.");
         return ERR_INVALID_DATA;

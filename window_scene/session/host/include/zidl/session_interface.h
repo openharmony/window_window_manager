@@ -662,7 +662,7 @@ public:
      * @param mode compatible mode.
      * @return WSError::WS_OK means notify success, otherwise failed.
      */
-    virtual WSError NotifyCompatibleModeChange(int32_t mode)
+    virtual WSError NotifyCompatibleModeChange(CompatibleStyleMode mode)
     {
         return WSError::WS_OK;
     }

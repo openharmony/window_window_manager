@@ -2776,6 +2776,8 @@ napi_value CreateCompatibleStyleMode(napi_env env)
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to create object");
         return NapiGetUndefined(env);
     }
+    napi_set_named_property(env, objValue, "INVALID_VALUE",
+        CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::INVALID_VALUE)));
     napi_set_named_property(env, objValue, "LANDSCAPE_DEFAULT",
         CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_DEFAULT)));
     napi_set_named_property(env, objValue, "LANDSCAPE_18_9",

@@ -69,7 +69,7 @@ HWTEST_F(CompatibleModeSessionProxyTest, NotifyCompatibleModeChangeWithWriteToke
     GTEST_LOG_(INFO) << "NotifyCompatibleModeChangeWithWriteTokenFail test start";
     auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
     auto sessionProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
-    int32_t mode = 1;
+    CompatibleStyleMode mode = CompatibleStyleMode::LANDSCAPE_DEFAULT;
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     auto ret = sessionProxy->NotifyCompatibleModeChange(mode);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
@@ -87,7 +87,7 @@ HWTEST_F(CompatibleModeSessionProxyTest, NotifyCompatibleModeChangeWithWriteMode
     GTEST_LOG_(INFO) << "NotifyCompatibleModeChangeWithWriteModeFail test start";
     auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
     auto sessionProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
-    int32_t mode = 1;
+    CompatibleStyleMode mode = CompatibleStyleMode::LANDSCAPE_18_9;
     MockMessageParcel::SetWriteInt32ErrorFlag(true);
     auto ret = sessionProxy->NotifyCompatibleModeChange(mode);
     MockMessageParcel::SetWriteInt32ErrorFlag(false);
@@ -104,8 +104,8 @@ HWTEST_F(CompatibleModeSessionProxyTest, NotifyCompatibleModeChangeWithNullRemot
 {
     GTEST_LOG_(INFO) << "NotifyCompatibleModeChangeWithNullRemote test start";
     sptr<SessionProxy> nullProxy = sptr<SessionProxy>::MakeSptr(nullptr);
-    int32_t mode = 1;
-    auto ret = sessionProxy->NotifyCompatibleModeChange(mode);
+    CompatibleStyleMode mode = CompatibleStyleMode::LANDSCAPE_18_9;
+    auto ret = nullProxy->NotifyCompatibleModeChange(mode);
     EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
     GTEST_LOG_(INFO) << "NotifyCompatibleModeChangeWithNullRemote test end";
 }
@@ -118,7 +118,7 @@ HWTEST_F(CompatibleModeSessionProxyTest, NotifyCompatibleModeChangeWithNullRemot
 HWTEST_F(CompatibleModeSessionProxyTest, NotifyCompatibleModeChangeWithFailSendRequest, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "NotifyCompatibleModeChangeWithFailSendRequest test start";
-    int32_t mode = 1;
+    CompatibleStyleMode mode = CompatibleStyleMode::LANDSCAPE_18_9;
     auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
     mockRemote->sendRequestResult_ = ERR_TRANSACTION_FAILED;
     sptr<SessionProxy> failProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
@@ -137,7 +137,7 @@ HWTEST_F(CompatibleModeSessionProxyTest, NotifyCompatibleModeChangeWithFailReadR
     GTEST_LOG_(INFO) << "NotifyCompatibleModeChangeWithFailReadRet test start";
     auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
     auto sessionProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
-    int32_t mode = 1;
+    CompatibleStyleMode mode = CompatibleStyleMode::LANDSCAPE_18_9;
     MockMessageParcel::SetReadInt32ErrorFlag(true);
     auto ret = sessionProxy->NotifyCompatibleModeChange(mode);
     MockMessageParcel::SetReadInt32ErrorFlag(false);
@@ -155,7 +155,7 @@ HWTEST_F(CompatibleModeSessionProxyTest, NotifyCompatibleModeChangeWithReturnOK,
     GTEST_LOG_(INFO) << "NotifyCompatibleModeChangeWithReturnOK test start";
     auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
     auto sessionProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
-    int32_t mode = 1;
+    CompatibleStyleMode mode = CompatibleStyleMode::LANDSCAPE_18_9;
     auto ret = sessionProxy->NotifyCompatibleModeChange(mode);
     EXPECT_EQ(WSError::WS_OK, ret);
     GTEST_LOG_(INFO) << "NotifyCompatibleModeChangeWithReturnOK test end";
