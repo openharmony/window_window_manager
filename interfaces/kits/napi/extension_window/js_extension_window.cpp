@@ -914,8 +914,8 @@ napi_value JsExtensionWindow::OnLoadContent(napi_env env, napi_callback_info inf
         env, task = napiAsyncTask]() {
         if (extWindow == nullptr) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "Window is nullptr");
-            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
-                "[window][loadContent]msg: The window is not created or destroyed");
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][loadContent]msg: The window is not created or destroyed"));
             return;
         }
         LoadContentTask(contentStorage, contextUrl, extWindow, env, *task, parentToken, isLoadedByName);
@@ -1643,7 +1643,6 @@ napi_value JsExtensionWindow::OnSetWindowSystemBarEnable(napi_env env, napi_call
     std::unordered_map<WindowType, SystemBarProperty> systemBarProperties;
     std::unordered_map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
     if (argc < ARG_COUNT_ONE) {
-        TLOGE(WmsLogTag::WMS_IMMS, "invalid argc");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setWindowSystemBarEnable]msg: Mandatory parameters are left unspecified");
     }
@@ -1854,7 +1853,7 @@ napi_value JsExtensionWindow::OnGetGlobalScaledRect(napi_env env, napi_callback_
     if (windowImpl == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "extensionWindow is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-           "[window][getGlobalRect]msg: The window is not created or destroyed");
+            "[window][getGlobalRect]msg: The window is not created or destroyed");
     }
     Rect globalScaledRect;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowImpl->GetGlobalScaledRect(globalScaledRect));
