@@ -44,10 +44,33 @@ declare namespace window {
     heightVp: number;
   }
 
+  interface Rect {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+  }
+
+  interface AvoidArea {
+    visible: boolean;
+    leftRect: Rect;
+    topRect: Rect;
+    rightRect: Rect;
+    bottomRect: Rect;
+  }
+
+  interface AvoidAreaOptions {
+    type: number;
+    area: AvoidArea;
+  }
+
   interface Window {
     getWindowProperties(): { windowRect: Size };
+    getWindowAvoidArea(type: number): AvoidArea;
     on(type: 'windowSizeChange', callback: Callback<Size>): void;
     off(type: 'windowSizeChange', callback?: Callback<Size>): void;
+    on(type: 'avoidAreaChange', callback: Callback<AvoidAreaOptions>): void;
+    off(type: 'avoidAreaChange', callback?: Callback<AvoidAreaOptions>): void;
   }
 }
 
