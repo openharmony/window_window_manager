@@ -94,8 +94,8 @@ HWTEST_F(CompatibleModeWindowSessionImplTest, RegisterNavigateCallbackForPageCom
  * @tc.desc: RegisterNavigateCallbackForPageCompatibleModeIfNeedWithEmptyCompatibleModePage
  * @tc.type: FUNC
  */
-HWTEST_F(CompatibleModeWindowSessionImplTest, RegisterNavigateCallbackForPageCompatibleModeIfNeedWithEmptyCompatibleModePage,
-    TestSize.Level1)
+HWTEST_F(CompatibleModeWindowSessionImplTest,
+    RegisterNavigateCallbackForPageCompatibleModeIfNeedWithEmptyCompatibleModePage, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RegisterNavigateCallbackForPageCompatibleModeIfNeedWithEmptyCompatibleModePage test start";
     g_errLog.clear();
