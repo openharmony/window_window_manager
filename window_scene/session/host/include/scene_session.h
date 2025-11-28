@@ -313,6 +313,7 @@ public:
         bool needNotifyClient = true, bool isExecuteDelayRaise = false) override;
     WSError TransferPointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool needNotifyClient = true, bool isExecuteDelayRaise = false);
+    void ReportDragEndDirection(const std::string& bundleName, AreaType dragType);
     WSError RequestSessionBack(bool needMoveToBackground) override;
     WSError SetAspectRatio(float ratio) override;
     WSError SetContentAspectRatio(float ratio, bool isPersistent, bool needUpdateRect) override;
