@@ -9235,7 +9235,7 @@ WSError SceneSession::ConvertDisplayRotationToWindowOrientation(const int32_t va
     int32_t displayOrientation;
     WSError ret = ConvertDisplayRotationToDisplayOrientation(value, displayOrientation);
     if (ret != WSError::WS_OK) {
-        TLOGNE(WmsLogTag::WMS_ROTATION, "failed to convert Rotation to Orientation");
+        TLOGNE(WmsLogTag::WMS_ROTATION, "failed to convert DisplayRotation to DisplayOrientation");
         return ret;
     }
     // convert displayorientation to windowOrientation
@@ -9249,7 +9249,7 @@ WSError SceneSession::ConvertWindowOrientationToDisplayRotation(const int32_t va
     int32_t displayOrientation;
     WSError ret = ConvertWindowOrientationToDisplayOrientation(value, displayOrientation);
     if (ret != WSError::WS_OK) {
-        TLOGNE(WmsLogTag::WMS_ROTATION, "failed to convert Rotation to Orientation");
+        TLOGNE(WmsLogTag::WMS_ROTATION, "failed to convert WindowOrientation to DisplayOrientation");
         return ret;
     }
     // convert displayorientation to displayRotation

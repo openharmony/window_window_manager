@@ -1401,7 +1401,10 @@ int SessionStub::HandleConvertOrientationAndRotation(MessageParcel& data, Messag
         TLOGE(WmsLogTag::WMS_ROTATION, "Write failed");
         return ERR_INVALID_DATA;
     }
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
