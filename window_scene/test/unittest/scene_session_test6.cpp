@@ -1655,6 +1655,11 @@ HWTEST_F(SceneSessionTest6, ConvertOrientationAndRotation, TestSize.Level1)
     info.bundleName_ = "ConvertOrientationAndRotation";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, session);
+    sceneSession->GetSessionProperty()->SetDisplayId(1001);
+    ScreenSessionConfig config;
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(1001, screenSession);
 
     RotationInfoType from = RotationInfoType::DISPLAY_ORIENTATION;
     RotationInfoType to = RotationInfoType::DISPLAY_ORIENTATION;
