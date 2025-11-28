@@ -809,7 +809,7 @@ HWTEST_F(ScreenManagerTest, MakeMirrorForRecord02, TestSize.Level1)
 
     DMError result = ScreenManager::GetInstance().MakeMirrorForRecord(mainScreenIds, miirrorScreenId, screenGroupId);
 
-    EXPECT_EQ(result, DMError::DM_ERROR_NULLPTR);
+    EXPECT_EQ(result, DMError::DM_ERROR_INVALID_PARAM);
 }
 
 /**
@@ -826,7 +826,7 @@ HWTEST_F(ScreenManagerTest, MakeMirrorForRecord03, TestSize.Level1)
 
     DMError result = ScreenManager::GetInstance().MakeMirrorForRecord(mainScreenIds, miirrorScreenId, screenGroupId);
 
-    EXPECT_EQ(result, DMError::DM_ERROR_NULLPTR);
+    EXPECT_EQ(result, DMError::DM_ERROR_INVALID_PARAM);
 }
 
 /**

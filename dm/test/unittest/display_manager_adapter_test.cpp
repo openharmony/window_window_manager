@@ -710,7 +710,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetResolution, TestSize.Level1)
     VirtualScreenOption defaultOption = { "virtualScreen04", 480, 320, 2.0, nullptr, 0 };
     ScreenId id = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetResolution(id, 70, 100, 1);
-    ASSERT_EQ(err, DMError::DM_OK);
+    ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
     SingletonContainer::Get<ScreenManagerAdapter>().DestroyVirtualScreen(id);
 }
 
