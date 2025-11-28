@@ -150,6 +150,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     state_ = WindowState::STATE_CREATED;
     isUIExtensionAbilityProcess_ = true;
     property_->SetIsUIExtensionAbilityProcess(true);
+    UpdateDefaultStatusBarColor();
     TLOGI(WmsLogTag::WMS_LIFE, "Created name:%{public}s %{public}d",
         property_->GetWindowName().c_str(), GetPersistentId());
     AddSetUIContentTimeoutCheck();
@@ -192,6 +193,7 @@ void WindowExtensionSessionImpl::UpdateConfiguration(const std::shared_ptr<AppEx
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, ext win=%{public}u, display=%{public}" PRIu64,
             GetWindowId(), GetDisplayId());
     }
+    UpdateDefaultStatusBarColor();
 }
 
 void WindowExtensionSessionImpl::UpdateConfigurationForSpecified(
@@ -205,6 +207,12 @@ void WindowExtensionSessionImpl::UpdateConfigurationForSpecified(
     } else {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, ext win=%{public}u, display=%{public}" PRIu64,
             GetWindowId(), GetDisplayId());
+    }
+    if (configuration != nullptr) {
+        TLOGI(WmsLogTag::WMS_IMMS, "extension win=%{public}u, colorMode=%{public}s, display=%{public}" PRIu64,
+            GetWindowId(), specifiedAbilityColorMode_.c_str(), GetDisplayId());
+        specifiedAbilityColorMode_ = configuration->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+        UpdateDefaultStatusBarColor();
     }
 }
 

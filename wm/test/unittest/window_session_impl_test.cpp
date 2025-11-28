@@ -21,6 +21,7 @@
 
 #include "ability_context_impl.h"
 #include "accessibility_event_info.h"
+#include "application_context.h"
 #include "color_parser.h"
 #include "extension/extension_business_info.h"
 #include "mock_session.h"
@@ -2535,6 +2536,62 @@ HWTEST_F(WindowSessionImplTest, OnExtensionMessage_KeyboardListener, TestSize.Le
     EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
     ASSERT_TRUE(window->keyboardDidHideUIExtListeners_.empty());
     EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
+}
+
+/**
+ * @tc.name: UpdateDefaultStatusBarColor
+ * @tc.desc: UpdateDefaultStatusBarColor Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, UpdateDefaultStatusBarColor, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_SHOWN;
+    window->UpdateDefaultStatusBarColor();
+    window->property_->isAtomicService_ = false;
+    SystemBarProperty property = SystemBarProperty();
+    property.settingFlag_ = SystemBarSettingFlag::COLOR_SETTING;
+    window->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_STATUS_BAR] = property;
+    window->UpdateDefaultStatusBarColor();
+    EXPECT_EQ(window->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_STATUS_BAR], property);
+
+    property.settingFlag_ = SystemBarSettingFlag::DEFAULT_SETTING;
+    window->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_STATUS_BAR] = property;
+    window->UpdateDefaultStatusBarColor();
+    EXPECT_EQ(window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR), property);
+
+    std::shared_ptr<AbilityRuntime::Context> context = std::make_shared<AbilityRuntime::Context>();
+    ASSERT_EQ(WMError::WM_OK, window->Create(context, nullptr));
+    window->UpdateDefaultStatusBarColor();
+
+    context->applicationContext_->contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
+    context->applicationContext_->contextImpl_->config_ = std::make_shared<AppExecFwk::Configuration>();
+    ASSERT_EQ(WMError::WM_OK, window->Create(context, nullptr));
+    window->UpdateDefaultStatusBarColor();
+
+    std::string key = AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE;
+    std::string value = AAFwk::GlobalConfigurationInner::COLOR_MODE_LIGHT;
+    context->applicationContext_->contextImpl_->config_->configParameter[key] = value;
+    window->UpdateDefaultStatusBarColor();
+
+    value = AAFwk::GlobalConfigurationInner::COLOR_MODE_DARK;
+    context->applicationContext_->contextImpl_->config_->configParameter[key] = value;
+    window->UpdateDefaultStatusBarColor();
+
+    key = AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP;
+    value = AAFwk::GlobalConfigurationInner::COLOR_MODE_LIGHT;
+    context->applicationContext_->contextImpl_->config_->configParameter[key] = value;
+    window->UpdateDefaultStatusBarColor();
+
+    value = AAFwk::GlobalConfigurationInner::COLOR_MODE_DARK;
+    context->applicationContext_->contextImpl_->config_->configParameter[key] = value;
+    window->UpdateDefaultStatusBarColor();
+
+    window->specifiedAbilityColorMode_ = "light";
+    window->UpdateDefaultStatusBarColor();
 }
 
 /**
