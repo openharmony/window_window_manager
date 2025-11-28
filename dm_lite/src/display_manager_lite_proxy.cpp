@@ -757,6 +757,7 @@ void DisplayManagerLiteProxy::SyncScreenPowerState(ScreenPowerState state)
         data, reply, option) != ERR_NONE) {
         TLOGW(WmsLogTag::DMS, "SendRequest failed");
     }
+    TLOGI(WmsLogTag::DMS, "Sync power state success");
 #endif
 }
 
