@@ -130,6 +130,7 @@ private:
     int HandleAddSkipSelfWhenShowOnVirtualScreenList(MessageParcel& data, MessageParcel& reply);
     int HandleRemoveSkipSelfWhenShowOnVirtualScreenList(MessageParcel& data, MessageParcel& reply);
     int HandleSetScreenPrivacyWindowTagSwitch(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyBrightnessModeChange(MessageParcel& data, MessageParcel& reply);
     int HandleIsPcWindow(MessageParcel& data, MessageParcel& reply);
     int HandleIsFreeMultiWindow(MessageParcel& data, MessageParcel& reply);
     int HandleIsPcOrPadFreeMultiWindowMode(MessageParcel& data, MessageParcel& reply);

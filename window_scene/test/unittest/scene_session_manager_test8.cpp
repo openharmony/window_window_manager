@@ -1785,6 +1785,83 @@ HWTEST_F(SceneSessionManagerTest8, AddSkipSurfaceNodeWhenAttach01, TestSize.Leve
 }
 
 /**
+ * @tc.name: NotifyBrightnessModeChange01
+ * @tc.desc: test function : NotifyBrightnessModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, NotifyBrightnessModeChange01, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+
+    ssm_->SetDisplayBrightness(UNDEFINED_BRIGHTNESS);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ssm_->NotifyBrightnessModeChange(""));
+}
+
+/**
+ * @tc.name: NotifyBrightnessModeChange02
+ * @tc.desc: test function : NotifyBrightnessModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, NotifyBrightnessModeChange02, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+
+    ssm_->SetDisplayBrightness(1);
+    ssm_->brightnessSessionId_ = 1;
+
+    ssm_->sceneSessionMap_.insert({1, nullptr});
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ssm_->NotifyBrightnessModeChange(""));
+
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: NotifyBrightnessModeChange03
+ * @tc.desc: test function : NotifyBrightnessModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, NotifyBrightnessModeChange03, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+
+    ssm_->SetDisplayBrightness(1);
+    ssm_->brightnessSessionId_ = 1;
+    SessionInfo sessionInfo1;
+    sessionInfo1.bundleName_ = "test";
+    sessionInfo1.persistentId_ = 1;
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    sceneSession1->state_ = SessionState::STATE_FOREGROUND;
+
+    ssm_->sceneSessionMap_.insert({1, sceneSession1});
+    EXPECT_EQ(WMError::WM_OK, ssm_->NotifyBrightnessModeChange(""));
+
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: NotifyBrightnessModeChange04
+ * @tc.desc: test function : NotifyBrightnessModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, NotifyBrightnessModeChange04, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+
+    ssm_->SetDisplayBrightness(1);
+    ssm_->brightnessSessionId_ = 1;
+    SessionInfo sessionInfo1;
+    sessionInfo1.bundleName_ = "test";
+    sessionInfo1.persistentId_ = 1;
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    sceneSession1->state_ = SessionState::STATE_DISCONNECT;
+
+    ssm_->sceneSessionMap_.insert({1, sceneSession1});
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ssm_->NotifyBrightnessModeChange(""));
+
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
  * @tc.name: RemoveSessionFromBlackListInfoSet
  * @tc.desc: test function : RemoveSessionFromBlackListInfoSet
  * @tc.type: FUNC
