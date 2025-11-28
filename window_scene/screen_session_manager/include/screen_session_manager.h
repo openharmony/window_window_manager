@@ -349,6 +349,7 @@ public:
     void NotifyScreenMagneticStateChanged(bool isMagneticState);
     void OnTentModeChanged(int tentType, int32_t hall = -1);
     void RegisterSettingDpiObserver();
+    void RegisterSettingBrightnessObserver();
     void RegisterSettingRotationObserver();
     void NotifyBrightnessInfoChanged(ScreenId screenId, const BrightnessInfo& info);
 
@@ -1053,6 +1054,7 @@ private:
     void CalculateTargetResolution(const sptr<ScreenSession>& internalSession,
         const sptr<ScreenSession>& externalSession, const bool& effectFlag,
         uint32_t& targetWidth, uint32_t& targetHeight);
+    void NotifyBrightnessModeChange();
     std::atomic<bool> curResolutionEffectEnable_ = false;
     DMError SyncScreenPropertyChangedToServer(ScreenId screenId, const ScreenProperty& screenProperty) override;
     void SetConfigForInputmethod(ScreenId screenId, VirtualScreenOption option);
@@ -1061,6 +1063,7 @@ private:
     std::mutex callbackMutex_;
     bool isSupportCapture_ = false;
     std::atomic<FoldDisplayMode> foldDisplayModeAfterRotation_ = FoldDisplayMode::UNKNOWN;
+    std::string brightnessMode_ = "";
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {
