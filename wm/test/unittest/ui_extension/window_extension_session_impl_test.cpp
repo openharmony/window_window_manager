@@ -1515,6 +1515,19 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateSystemViewportConfig3, TestSize.L
 }
 
 /**
+ * @tc.name: UpdateSystemViewportConfig_DensityCustomized
+ * @tc.desc: Density customized
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateSystemViewportConfig_DensityCustomized, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->isDensityCustomized_ = true;
+    window_->UpdateSystemViewportConfig();
+    usleep(WAIT_SYNC_IN_NS);
+}
+
+/**
  * @tc.name: NotifyDisplayInfoChange1
  * @tc.desc: Normal test
  * @tc.type: FUNC
@@ -2044,6 +2057,21 @@ HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio_compat, TestSize.L
     window->property_->SetCompatibleModeProperty(compatibleModeProperty);
     auto value = window->GetVirtualPixelRatio(nullptr);
     EXPECT_NEAR(value, COMPACT_SIMULATION_SCALE_DPI, 0.00001f);
+}
+
+/**
+ * @tc.name: GetVirtualPixelRatio_DensityCustomized
+ * @tc.desc: GetVirtualPixelRatio_DensityCustomized test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio_DensityCustomized, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetVirtualPixelRatio_DensityCustomized");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    window->isDensityCustomized_ = true;
+    window->customizedDensity_ = 2.0f;
+    EXPECT_NEAR(window->GetVirtualPixelRatio(nullptr), window->customizedDensity_, 0.00001f);
 }
 
 /**
@@ -2795,6 +2823,68 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateExtensionDensity, TestSize.Level1
     window->UpdateExtensionDensity(config);
     EXPECT_FALSE(window->isDensityFollowHost_);
     EXPECT_NEAR(config.density_, COMPACT_SIMULATION_SCALE_DPI, 0.00001f);
+}
+
+/**
+ * @tc.name: UpdateExtensionDensity
+ * @tc.desc: UpdateExtensionDensity_DensityCustomized Density customized test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateExtensionDensity_DensityCustomized, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateExtensionDensity");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    window->isDensityCustomized_ = true;
+    window->customizedDensity_ = 2.0f;
+
+    SessionViewportConfig config;
+    config.isDensityFollowHost_ = false;
+    config.density_ = 3.0f;
+    window->UpdateExtensionDensity(config);
+    EXPECT_NEAR(config.density_, window->customizedDensity_, 0.00001f);
+}
+
+/**
+ * @tc.name: UpdateExtensionDensity
+ * @tc.desc: UpdateExtensionDensity_DensityCustomized1 Density customized test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateExtensionDensity_DensityCustomized1, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateExtensionDensity");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    window->isDensityCustomized_ = true;
+    window->customizedDensity_ = 2.0f;
+
+    SessionViewportConfig config;
+    config.isDensityFollowHost_ = true;
+    config.density_ = 3.0f;
+    window->UpdateExtensionDensity(config);
+    EXPECT_NEAR(3.0f, window->hostDensityValue_->load(), 0.00001f);
+    EXPECT_NEAR(config.density_, window->customizedDensity_, 0.00001f);
+}
+
+/**
+ * @tc.name: SetUIExtCustomDensity
+ * @tc.desc: SetUIExtCustomDensity Density customized test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, SetUIExtCustomDensity, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateExtensionDensity");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetUIExtCustomDensity(0.0f));
+
+    window->handler_ = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_SYSTEM_ABNORMALLY, window->SetUIExtCustomDensity(1.0f));
+
+    auto runner = AppExecFwk::EventRunner::Create("WindowExtensionSessionImplTest");
+    window->handler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    EXPECT_EQ(WMError::WM_OK, window->SetUIExtCustomDensity(1.0f));
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
