@@ -7450,7 +7450,6 @@ void WindowSessionImpl::UpdateDefaultStatusBarColor()
         }
     }
     TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u, contentColor %{public}x", GetPersistentId(), contentColor);
-    // AtomicServiceSetStatusBarColorInner(contentColor);
 }
 
 void WindowSessionImpl::NotifyOccupiedAreaChangeInfoInner(sptr<OccupiedAreaChangeInfo> info)
