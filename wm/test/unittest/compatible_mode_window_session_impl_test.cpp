@@ -75,7 +75,8 @@ namespace {
  * @tc.desc: RegisterNavigateCallbackForPageCompatibleModeIfNeedWithNullUiContent
  * @tc.type: FUNC
  */
-HWTEST_F(CompatibleModeWindowSessionImplTest, RegisterNavigateCallbackForPageCompatibleModeIfNeedWithNullUiContent, TestSize.Level1)
+HWTEST_F(CompatibleModeWindowSessionImplTest, RegisterNavigateCallbackForPageCompatibleModeIfNeedWithNullUiContent,
+    TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RegisterNavigateCallbackForPageCompatibleModeIfNeedWithNullUiContent test start";
     g_errLog.clear();
@@ -93,7 +94,8 @@ HWTEST_F(CompatibleModeWindowSessionImplTest, RegisterNavigateCallbackForPageCom
  * @tc.desc: RegisterNavigateCallbackForPageCompatibleModeIfNeedWithEmptyCompatibleModePage
  * @tc.type: FUNC
  */
-HWTEST_F(CompatibleModeWindowSessionImplTest, RegisterNavigateCallbackForPageCompatibleModeIfNeedWithEmptyCompatibleModePage, TestSize.Level1)
+HWTEST_F(CompatibleModeWindowSessionImplTest, RegisterNavigateCallbackForPageCompatibleModeIfNeedWithEmptyCompatibleModePage,
+    TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RegisterNavigateCallbackForPageCompatibleModeIfNeedWithEmptyCompatibleModePage test start";
     g_errLog.clear();
@@ -112,7 +114,8 @@ HWTEST_F(CompatibleModeWindowSessionImplTest, RegisterNavigateCallbackForPageCom
  * @tc.desc: RegisterNavigateCallbackForPageCompatibleModeIfNeedWithSuccess
  * @tc.type: FUNC
  */
-HWTEST_F(CompatibleModeWindowSessionImplTest, RegisterNavigateCallbackForPageCompatibleModeIfNeedWithSuccess, TestSize.Level1)
+HWTEST_F(CompatibleModeWindowSessionImplTest, RegisterNavigateCallbackForPageCompatibleModeIfNeedWithSuccess,
+    TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RegisterNavigateCallbackForPageCompatibleModeIfNeedWithSuccess test start";
     g_errLog.clear();
@@ -132,7 +135,8 @@ HWTEST_F(CompatibleModeWindowSessionImplTest, RegisterNavigateCallbackForPageCom
  * @tc.desc: HandleNavigateCallbackForPageCompatibleModeWithSameTargetPage
  * @tc.type: FUNC
  */
-HWTEST_F(CompatibleModeWindowSessionImplTest, HandleNavigateCallbackForPageCompatibleModeWithSameTargetPage, TestSize.Level1)
+HWTEST_F(CompatibleModeWindowSessionImplTest, HandleNavigateCallbackForPageCompatibleModeWithSameTargetPage,
+    TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "HandleNavigateCallbackForPageCompatibleModeWithSameTargetPage test start";
     SessionInfo sessionInfo = { "TestBundle", "TestModule", "TestAbility" };
@@ -144,7 +148,7 @@ HWTEST_F(CompatibleModeWindowSessionImplTest, HandleNavigateCallbackForPageCompa
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     window->property_->SetCompatibleModePage(targetPage);
     window->HandleNavigateCallbackForPageCompatibleMode(targetPage, targetPage);
-    EXPECT_EQ(window->property_->GetPageCompatibleMode(), -1);
+    EXPECT_EQ(window->property_->GetPageCompatibleMode(), CompatibleStyleMode::INVALID_VALUE);
     GTEST_LOG_(INFO) << "HandleNavigateCallbackForPageCompatibleModeWithSameTargetPage test end";
 }
 
@@ -153,7 +157,8 @@ HWTEST_F(CompatibleModeWindowSessionImplTest, HandleNavigateCallbackForPageCompa
  * @tc.desc: HandleNavigateCallbackForPageCompatibleModeWithSameEmptyPage
  * @tc.type: FUNC
  */
-HWTEST_F(CompatibleModeWindowSessionImplTest, HandleNavigateCallbackForPageCompatibleModeWithSameEmptyPage, TestSize.Level1)
+HWTEST_F(CompatibleModeWindowSessionImplTest, HandleNavigateCallbackForPageCompatibleModeWithSameEmptyPage,
+    TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "HandleNavigateCallbackForPageCompatibleModeWithSameEmptyPage test start";
     SessionInfo sessionInfo = { "TestBundle", "TestModule", "TestAbility" };
@@ -165,7 +170,7 @@ HWTEST_F(CompatibleModeWindowSessionImplTest, HandleNavigateCallbackForPageCompa
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     window->property_->SetCompatibleModePage(targetPage);
     window->HandleNavigateCallbackForPageCompatibleMode("", "");
-    EXPECT_EQ(window->property_->GetPageCompatibleMode(), -1);
+    EXPECT_EQ(window->property_->GetPageCompatibleMode(), CompatibleStyleMode::INVALID_VALUE);
     GTEST_LOG_(INFO) << "HandleNavigateCallbackForPageCompatibleModeWithSameEmptyPage test end";
 }
 
@@ -174,7 +179,8 @@ HWTEST_F(CompatibleModeWindowSessionImplTest, HandleNavigateCallbackForPageCompa
  * @tc.desc: HandleNavigateCallbackForPageCompatibleModeWithTargetFromPage
  * @tc.type: FUNC
  */
-HWTEST_F(CompatibleModeWindowSessionImplTest, HandleNavigateCallbackForPageCompatibleModeWithTargetFromPage, TestSize.Level1)
+HWTEST_F(CompatibleModeWindowSessionImplTest, HandleNavigateCallbackForPageCompatibleModeWithTargetFromPage,
+    TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "HandleNavigateCallbackForPageCompatibleModeWithTargetFromPage test start";
     SessionInfo sessionInfo = { "TestBundle", "TestModule", "TestAbility" };
@@ -186,7 +192,7 @@ HWTEST_F(CompatibleModeWindowSessionImplTest, HandleNavigateCallbackForPageCompa
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     window->property_->SetCompatibleModePage(targetPage);
     window->HandleNavigateCallbackForPageCompatibleMode(targetPage, "");
-    EXPECT_EQ(window->property_->GetPageCompatibleMode(), -1);
+    EXPECT_EQ(window->property_->GetPageCompatibleMode(), CompatibleStyleMode::INVALID_VALUE);
     GTEST_LOG_(INFO) << "HandleNavigateCallbackForPageCompatibleModeWithTargetFromPage test end";
 }
 
@@ -195,7 +201,8 @@ HWTEST_F(CompatibleModeWindowSessionImplTest, HandleNavigateCallbackForPageCompa
  * @tc.desc: HandleNavigateCallbackForPageCompatibleModeWithTargetToPage
  * @tc.type: FUNC
  */
-HWTEST_F(CompatibleModeWindowSessionImplTest, HandleNavigateCallbackForPageCompatibleModeWithTargetToPage, TestSize.Level1)
+HWTEST_F(CompatibleModeWindowSessionImplTest, HandleNavigateCallbackForPageCompatibleModeWithTargetToPage,
+    TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "HandleNavigateCallbackForPageCompatibleModeWithTargetToPage test start";
     SessionInfo sessionInfo = { "TestBundle", "TestModule", "TestAbility" };
@@ -207,7 +214,7 @@ HWTEST_F(CompatibleModeWindowSessionImplTest, HandleNavigateCallbackForPageCompa
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     window->property_->SetCompatibleModePage(targetPage);
     window->HandleNavigateCallbackForPageCompatibleMode("", targetPage);
-    EXPECT_EQ(window->property_->GetPageCompatibleMode(), 1);
+    EXPECT_EQ(window->property_->GetPageCompatibleMode(), CompatibleStyleMode::LANDSCAPE_18_9);
     GTEST_LOG_(INFO) << "HandleNavigateCallbackForPageCompatibleModeWithTargetToPage test end";
 }
 
@@ -216,7 +223,8 @@ HWTEST_F(CompatibleModeWindowSessionImplTest, HandleNavigateCallbackForPageCompa
  * @tc.desc: HandleNavigateCallbackForPageCompatibleModeWithNullSession
  * @tc.type: FUNC
  */
-HWTEST_F(CompatibleModeWindowSessionImplTest, HandleNavigateCallbackForPageCompatibleModeWithNullSession, TestSize.Level1)
+HWTEST_F(CompatibleModeWindowSessionImplTest, HandleNavigateCallbackForPageCompatibleModeWithNullSession,
+    TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "HandleNavigateCallbackForPageCompatibleModeWithNullSession test start";
     g_errLog.clear();

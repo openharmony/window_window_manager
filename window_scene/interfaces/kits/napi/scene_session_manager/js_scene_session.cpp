@@ -8747,7 +8747,7 @@ void JsSceneSession::ProcessCompatibleModeChangeRegister()
         TLOGE(WmsLogTag::WMS_COMPAT, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    session->RegisterCompatibleModeChangeCallback([weakThis = wptr(this)](int32_t mode) {
+    session->RegisterCompatibleModeChangeCallback([weakThis = wptr(this)](CompatibleStyleMode mode) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_COMPAT, "jsSceneSession is null");
@@ -8757,7 +8757,7 @@ void JsSceneSession::ProcessCompatibleModeChangeRegister()
     });
 }
 
-void JsSceneSession::OnCompatibleModeChange(int32_t mode)
+void JsSceneSession::OnCompatibleModeChange(CompatibleStyleMode mode)
 {
     TLOGI(WmsLogTag::WMS_COMPAT, "compatible mode change to: %{public}d", mode);
     taskScheduler_->PostMainThreadTask([weakThis = wptr(this), persistentId = persistentId_, mode, env = env_] {

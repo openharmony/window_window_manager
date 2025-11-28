@@ -1473,7 +1473,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isMobileAppInPadLayoutFullScreen_) &&
         parcel.WriteBool(isFullScreenInForceSplitMode_) &&
         parcel.WriteString(compatibleModePage_) &&
-        parcel.WriteInt32(pageCompatibleMode_) &&
+        parcel.WriteInt32(static_cast<int32_t>(pageCompatibleMode_)) &&
         parcel.WriteFloat(aspectRatio_) &&
         parcel.WriteBool(isRotationLock_);
 }
@@ -1596,7 +1596,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetMobileAppInPadLayoutFullScreen(parcel.ReadBool());
     property->SetIsFullScreenInForceSplitMode(parcel.ReadBool());
     property->SetCompatibleModePage(parcel.ReadString());
-    property->SetPageCompatibleMode(parcel.ReadInt32());
+    property->SetPageCompatibleMode(static_cast<CompatibleStyleMode>(parcel.ReadInt32()));
     property->SetAspectRatio(parcel.ReadFloat());
     property->SetRotationLocked(parcel.ReadBool());
     return property;
@@ -2487,7 +2487,7 @@ bool WindowSessionProperty::IsFullScreenInForceSplitMode() const
     return isFullScreenInForceSplitMode_;
 }
 
-void WindowSessionProperty::SetCompatibleModePage(std::string compatibleModePage)
+void WindowSessionProperty::SetCompatibleModePage(const std::string& compatibleModePage)
 {
     compatibleModePage_ = compatibleModePage;
 }
@@ -2497,12 +2497,12 @@ std::string WindowSessionProperty::GetCompatibleModePage() const
     return compatibleModePage_;
 }
 
-void WindowSessionProperty::SetPageCompatibleMode(int32_t compatibleMode)
+void WindowSessionProperty::SetPageCompatibleMode(CompatibleStyleMode compatibleMode)
 {
     pageCompatibleMode_ = compatibleMode;
 }
 
-int32_t WindowSessionProperty::GetPageCompatibleMode() const
+CompatibleStyleMode WindowSessionProperty::GetPageCompatibleMode() const
 {
     return pageCompatibleMode_;
 }

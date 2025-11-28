@@ -77,8 +77,6 @@ constexpr uint32_t INVALID_TARGET_API_VERSION = 0;
 constexpr uint32_t OPAQUE = 0xFF000000;
 constexpr int32_t WINDOW_CONNECT_TIMEOUT = 1000;
 constexpr int32_t WINDOW_LIFECYCLE_TIMEOUT = 100;
-constexpr int32_t COMPATIBLE_MODE_INVALID_VALUE = -1;
-constexpr int32_t COMPATIBLE_MODE_LANDSCAPE_18_9 = 1;
 
 /*
  * DFX
@@ -8927,13 +8925,13 @@ void WindowSessionImpl::RegisterNavigateCallbackForPageCompatibleModeIfNeed()
         return;
     }
     uiContent_->RegisterNavigateChangeCallback(
-        [weakThis = wptr(this), where = __func__](NavigateChangeInfo fromPage, NavigateChangeInfo toPage) {
+        [weakThis = wptr(this), where = __func__](const std::string& fromPage, const std::string& toPage) {
         auto window = weakThis.promote();
         if (!window) {
             TLOGNE(WmsLogTag::WMS_COMPAT, "%{public}s window is null", where);
             return;
         }
-        window->HandleNavigateCallbackForPageCompatibleMode(fromPage.name, toPage.name);
+        window->HandleNavigateCallbackForPageCompatibleMode(fromPage, toPage);
     });
 }
 
@@ -8950,7 +8948,7 @@ void WindowSessionImpl::HandleNavigateCallbackForPageCompatibleMode(
         TLOGNE(WmsLogTag::WMS_COMPAT, "hostSession is null");
         return;
     }
-    auto mode = toPage == compatibleModePage ? COMPATIBLE_MODE_LANDSCAPE_18_9 : COMPATIBLE_MODE_INVALID_VALUE;
+    auto mode = toPage == compatibleModePage ? CompatibleStyleMode::LANDSCAPE_18_9 : CompatibleStyleMode::INVALID_VALUE;
     property_->SetPageCompatibleMode(mode);
     hostSession->NotifyCompatibleModeChange(mode);
 }

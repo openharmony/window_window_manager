@@ -631,7 +631,7 @@ void MainSession::RegisterCompatibleModeChangeCallback(CompatibleModeChangeCallb
     compatibleModeChangeCallback_ = callback;
 }
 
-WSError MainSession::NotifyCompatibleModeChange(int32_t mode)
+WSError MainSession::NotifyCompatibleModeChange(CompatibleStyleMode mode)
 {
     if (compatibleModeChangeCallback_) {
         compatibleModeChangeCallback_(mode);

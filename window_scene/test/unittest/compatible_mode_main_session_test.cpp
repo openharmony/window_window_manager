@@ -71,7 +71,7 @@ HWTEST_F(CompatibleModeMainSessionTest, RegisterCompatibleModeChangeCallback, Te
     info.moduleName_ = "testModuleName";
     info.bundleName_ = "testBundleName";
     sptr<MainSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
-    session->RegisterCompatibleModeChangeCallback([](int32_t mode) {
+    session->RegisterCompatibleModeChangeCallback([](CompatibleStyleMode mode) {
         GTEST_LOG_(INFO) << "RegisterCompatibleModeChangeCallback callback";
     });
     ASSERT_NE(session->compatibleModeChangeCallback_, nullptr);
@@ -91,7 +91,7 @@ HWTEST_F(CompatibleModeMainSessionTest, NotifyCompatibleModeChangeWithNullCallba
     info.moduleName_ = "testModuleName";
     info.bundleName_ = "testBundleName";
     sptr<MainSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
-    auto ret = session->NotifyCompatibleModeChange(0);
+    auto ret = session->NotifyCompatibleModeChange(CompatibleStyleMode::LANDSCAPE_DEFAULT);
     ASSERT_EQ(ret, WSError::WS_OK);
     GTEST_LOG_(INFO) << "NotifyCompatibleModeChangeWithNullCallback test end";
 }
@@ -109,10 +109,10 @@ HWTEST_F(CompatibleModeMainSessionTest, NotifyCompatibleModeChangeWithNotNullCal
     info.moduleName_ = "testModuleName";
     info.bundleName_ = "testBundleName";
     sptr<MainSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
-    session->RegisterCompatibleModeChangeCallback([](int32_t mode) {
+    session->RegisterCompatibleModeChangeCallback([](CompatibleStyleMode mode) {
         GTEST_LOG_(INFO) << "NotifyCompatibleModeChangeWithNotNullCallback callback";
     });
-    auto ret = session->NotifyCompatibleModeChange(0);
+    auto ret = session->NotifyCompatibleModeChange(CompatibleStyleMode::LANDSCAPE_DEFAULT);
     ASSERT_EQ(ret, WSError::WS_OK);
     GTEST_LOG_(INFO) << "NotifyCompatibleModeChangeWithNotNullCallback test end";
 }

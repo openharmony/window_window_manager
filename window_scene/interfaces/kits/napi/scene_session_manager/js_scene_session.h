@@ -566,7 +566,7 @@ private:
      * Compatible Mode
      */
     void ProcessCompatibleModeChangeRegister();
-    void OnCompatibleModeChange(int32_t mode);
+    void OnCompatibleModeChange(CompatibleStyleMode mode);
 
     bool HandleCloseKeyboardSyncTransactionWSRectParams(napi_env env,
         napi_value argv[], int index, WSRect& rect);

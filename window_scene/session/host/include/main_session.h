@@ -83,7 +83,7 @@ public:
     void RegisterForceSplitFullScreenChangeCallback(ForceSplitFullScreenChangeCallback&& callback) override;
     bool IsFullScreenInForceSplit() override;
     void RegisterCompatibleModeChangeCallback(CompatibleModeChangeCallback&& callback) override;
-    WSError NotifyCompatibleModeChange(int32_t mode) override;
+    WSError NotifyCompatibleModeChange(CompatibleStyleMode mode) override;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
