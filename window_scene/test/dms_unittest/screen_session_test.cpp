@@ -2301,12 +2301,12 @@ HWTEST_F(ScreenSessionTest, CalcBoundsInRotationZero, TestSize.Level1)
     property.UpdateDeviceRotation(Rotation::ROTATION_0);
     session->SetScreenProperty(property);
     auto res = session->CalcBoundsInRotationZero();
-    EXPECT_EQ(res.rect_.width, 1344);
+    EXPECT_EQ(res.rect_.width_, 1344);
 
     property.UpdateDeviceRotation(Rotation::ROTATION_90);
     session->SetScreenProperty(property);
     res = session->CalcBoundsInRotationZero();
-    EXPECT_EQ(res.rect_.width, 2772);
+    EXPECT_EQ(res.rect_.width_, 2772);
 }
 
 /**
@@ -2326,19 +2326,19 @@ HWTEST_F(ScreenSessionTest, CalcBoundsByRotation, TestSize.Level1)
     session->SetScreenProperty(property);
     Rotation rotation = Rotation::ROTATION_0;
     auto res = session->CalcBoundsByRotation(rotation);
-    EXPECT_EQ(res.rect_.width, 1344);
+    EXPECT_EQ(res.rect_.width_, 1344);
     rotation = Rotation::ROTATION_90;
     res = session->CalcBoundsByRotation(rotation);
-    EXPECT_EQ(res.rect_.width, 2772);
+    EXPECT_EQ(res.rect_.width_, 2772);
 
     property.UpdateDeviceRotation(Rotation::ROTATION_90);
     session->SetScreenProperty(property);
-    Rotation rotation = Rotation::ROTATION_0;
+    rotation = Rotation::ROTATION_0;
     res = session->CalcBoundsByRotation(rotation);
-    EXPECT_EQ(res.rect_.width, 2772);
+    EXPECT_EQ(res.rect_.width_, 2772);
     rotation = Rotation::ROTATION_90;
     res = session->CalcBoundsByRotation(rotation);
-    EXPECT_EQ(res.rect_.width, 1344);
+    EXPECT_EQ(res.rect_.width_, 1344);
 }
 
 /**

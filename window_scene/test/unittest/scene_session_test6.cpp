@@ -1667,6 +1667,7 @@ HWTEST_F(SceneSessionTest6, ConvertOrientationAndRotation, TestSize.Level1)
     ret = session->ConvertOrientationAndRotation(from, to, value, convertedValue);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
 
+    value = 2;
     from = RotationInfoType::DISPLAY_ROTATION;
     to = RotationInfoType::DISPLAY_ROTATION;
     ret = session->ConvertOrientationAndRotation(from, to, value, convertedValue);
@@ -1717,7 +1718,7 @@ HWTEST_F(SceneSessionTest6, ConvertDisplayOrientationToWindowOrientation, TestSi
     int32_t value = 4;
     int32_t convertedValue = 0;
 
-    ret = session->ConvertDisplayOrientationToWindowOrientation(value, convertedValue);
+    auto ret = session->ConvertDisplayOrientationToWindowOrientation(value, convertedValue);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
     value = 5;
     ret = session->ConvertDisplayOrientationToWindowOrientation(value, convertedValue);
@@ -1741,7 +1742,7 @@ HWTEST_F(SceneSessionTest6, ConvertWindowOrientationToDisplayOrientation, TestSi
     int32_t value = 4;
     int32_t convertedValue = 0;
     value = 5;
-    ret = session->ConvertWindowOrientationToDisplayOrientation(value, convertedValue);
+    auto ret = session->ConvertWindowOrientationToDisplayOrientation(value, convertedValue);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
     value = 2;
     ret = session->ConvertWindowOrientationToDisplayOrientation(value, convertedValue);
