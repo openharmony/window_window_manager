@@ -1763,15 +1763,15 @@ HWTEST_F(SceneSessionManagerTest9, ResetSpecificWindowZIndex, TestSize.Level1)
     ret = ssm_->ResetSpecificWindowZIndex(123);
     EXPECT_EQ(ret, WSError::WS_OK);
 
-    SetSpecificZIndexReason reason = 0;
-    NotifySetSpecificWindowZIndexFunc func = [&reason](WindowType windowType, int32_t zIndex,
+    SetSpecificZIndexReason setReason = SetSpecificZIndexReason::SET;
+    NotifySetSpecificWindowZIndexFunc func = [&setReason](WindowType windowType, int32_t zIndex,
         SetSpecificZIndexReason reason) {
-        reason = reason;
+        setReason = reason;
     };
     ssm_->SetSpecificWindowZIndexListener(func);
     ret = ssm_->ResetSpecificWindowZIndex(123);
     EXPECT_EQ(ret, WSError::WS_OK);
-    EXPECT_EQ(reason, SetSpecificZIndexReason::RESET);
+    EXPECT_EQ(setReason, SetSpecificZIndexReason::RESET);
     ssm_->SetSpecificWindowZIndexListener(nullptr);
     ssm_->specificZIndexByPidMap_.clear();
 }
