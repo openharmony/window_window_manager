@@ -15,6 +15,7 @@
 
 #include "js_extension_window.h"
 
+#include "js_err_utils.h"
 #include "js_extension_window_utils.h"
 #include "js_runtime_utils.h"
 #include "js_window_utils.h"
@@ -941,16 +942,15 @@ napi_value JsExtensionWindow::OnGetWindowAvoidArea(napi_env env, napi_callback_i
     AvoidAreaType avoidAreaType = AvoidAreaType::TYPE_SYSTEM;
     napi_value nativeMode = argv[0];
     if (nativeMode == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "invalid param");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][getWindowAvoidArea]msg: Incorrect parameter types");
+    }
     uint32_t resultValue = 0;
     napi_get_value_uint32(env, nativeMode, &resultValue);
     avoidAreaType = static_cast<AvoidAreaType>(resultValue);
     errCode = avoidAreaType >= AvoidAreaType::TYPE_END ?
         WmErrorCode::WM_ERROR_INVALID_PARAM : WmErrorCode::WM_OK;
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "invalid param");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][getWindowAvoidArea]msg: Parameter verification failed");
     }
@@ -1867,7 +1867,7 @@ napi_value JsExtensionWindow::OnGetGlobalScaledRect(napi_env env, napi_callback_
     if (globalScaledRectObj == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "globalScaledRectObj is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][getGlobalRect]msg: GlobalScaledRectObj is nullptr");
+            "[window][getGlobalRect]msg: Failed to convert result into JS value object");
     }
     return globalScaledRectObj;
 }

@@ -1827,18 +1827,15 @@ napi_value JsWindowManager::OnShiftAppWindowTouchEvent(napi_env env, napi_callba
         if (sourceWindowId <= static_cast<int32_t>(INVALID_WINDOW_ID) ||
             targetWindowId <= static_cast<int32_t>(INVALID_WINDOW_ID) ||
             (fingerId <= static_cast<int32_t>(INVALID_FINGER_ID))) {
-            TLOGE(WmsLogTag::WMS_PC, "Invalid sourceWindowId or targetWindowId or fingerId");
+            TLOGE(WmsLogTag::WMS_PC, "invalid sourceWindowId or targetWindowId or fingerId");
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM,
                         "[window][shiftAppWindowTouchEvent]msg: Invalid sourceWindowId or targetWindowId or fingerId"));
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().
             ShiftAppWindowPointerEvent(sourceWindowId, targetWindowId, fingerId));
-        if (ret == WmErrorCode::WM_OK) {
-            task->Resolve(env, NapiGetUndefined(env));
-        } else {
+        ret == WmErrorCode::WM_OK ? task->Resolve(env, NapiGetUndefined(env)) :
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "[window][shiftAppWindowTouchEvent]"));
-        }
     };
     napi_status status = napi_send_event(env, std::move(asyncTask), napi_eprio_high, "OnShiftAppWindowTouchEvent");
     if (status != napi_status::napi_ok) {

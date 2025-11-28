@@ -2114,7 +2114,7 @@ napi_value JsWindow::OnGetGlobalScaledRect(napi_env env, napi_callback_info info
     if (globalScaledRectObj == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "globalScaledRectObj is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][getGlobalRect]msg: Failed to convert result into JS value object");
+            "[window][getGlobalScaledRect]msg: GlobalScaledRectObj is nullptr");
     }
     return globalScaledRectObj;
 }
@@ -2842,7 +2842,6 @@ napi_value JsWindow::OnSetDialogBackGestureEnabled(napi_env env, napi_callback_i
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) { // at least 1 params
-        TLOGE(WmsLogTag::WMS_DIALOG, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setDialogBackGestureEnabled]msg: Mandatory parameters are left unspecified");
     }
@@ -2880,11 +2879,8 @@ napi_value JsWindow::OnSetDialogBackGestureEnabled(napi_env env, napi_callback_i
                     "[window][setDialogBackGestureEnabled]"));
                 return;
             }
-            if (*errCodePtr == WmErrorCode::WM_OK) {
-                task.Resolve(env, NapiGetUndefined(env));
-            } else {
+            *errCodePtr == WmErrorCode::WM_OK ? task.Resolve(env, NapiGetUndefined(env)) :
                 task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "[window][setDialogBackGestureEnabled]"));
-            }
         };
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnSetTopmost",
@@ -5483,20 +5479,17 @@ napi_value JsWindow::OnSetWindowTouchable(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) { // 1: params num
         WLOGFE("Argc is invalid: %{public}zu", argc);
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setWindowTouchable]msg: Mandatory parameters are left unspecified");
     }
     bool touchable = true;
-    if (errCode == WmErrorCode::WM_OK) {
-        napi_value nativeVal = argv[0];
-        if (nativeVal == nullptr) {
-            WLOGFE("Failed to convert parameter to touchable");
-            errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-        } else {
-            CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
-                napi_get_value_bool(env, nativeVal, &touchable));
-        }
+    napi_value nativeVal = argv[0];
+    if (nativeVal == nullptr) {
+        WLOGFE("Failed to convert parameter to touchable");
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+    } else {
+        CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            napi_get_value_bool(env, nativeVal, &touchable));
     }
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
@@ -5517,11 +5510,8 @@ napi_value JsWindow::OnSetWindowTouchable(napi_env env, napi_callback_info info)
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetTouchable(touchable));
-        if (ret == WmErrorCode::WM_OK) {
-            task->Resolve(env, NapiGetUndefined(env));
-        } else {
+        ret == WmErrorCode::WM_OK ? task->Resolve(env, NapiGetUndefined(env)) :
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "[window][setWindowTouchable]"));
-        }
         WLOGI("Window [%{public}u, %{public}s] set touchable end",
             weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
     };
