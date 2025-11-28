@@ -856,7 +856,7 @@ public:
     void ConfigSupportCacheLockedSessionSnapshot();
     void ConfigSupportPreloadStartingWindow();
     void PreLoadStartingWindow(sptr<SceneSession> sceneSession);
-    bool IsSyncLoadStartWindow() { return syncLoadStartingWindow_; };
+    bool IsSyncLoadStartingWindow() { return syncLoadStartingWindow_; };
 
     /*
      * Window Animation
