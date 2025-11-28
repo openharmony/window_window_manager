@@ -1960,11 +1960,6 @@ napi_value JsWindowManager::OnSetSpecificSystemWindowZIndex(napi_env env, napi_c
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != 2) { // 2: params num
-        TLOGE(WmsLogTag::WMS_FOCUS, "argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "[window][setSpecificSystemWindowZIndex]msg:invalid args count, 2 args is needed");
-    }
     uint32_t windowTypeValue = 0;
     if (!ConvertFromJsValue(env, argv[0], windowTypeValue)) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "failed to convert paramter to windowType");
