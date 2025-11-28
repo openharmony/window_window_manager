@@ -4720,7 +4720,7 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
     TLOGI(WmsLogTag::DMS, "[UL_POWER]state: %{public}u, reason: %{public}u",
         static_cast<uint32_t>(state), static_cast<uint32_t>(reason));
     ScreenTransitionState screenTransitionState = ScreenStateMachine::GetInstance().GetTransitionState();
-    if (screenTransitionState == ScreenTransitionState::WAIT_SCREEN_ADVANCE_ON_READY){
+    if (screenTransitionState == ScreenTransitionState::WAIT_SCREEN_ADVANCED_ON_READY){
         ScreenPowerInfoType type = std::make_pair(state,reason);
         if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS ||
         reason == PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON){

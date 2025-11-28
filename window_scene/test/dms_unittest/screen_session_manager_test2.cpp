@@ -3084,7 +3084,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForAll01, TestSize.Level1)
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
     }
     ScreenTransitionState temp = ScreenStateMachine::GetInstance().GetTransitionState();
-    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::WAIT_SCREEN_ADVANCE_ON_READY);
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::WAIT_SCREEN_ADVANCED_ON_READY);
     PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_POWER_KEY;
     ScreenPowerState state = ScreenPowerState::POWER_ON;
     ASSERT_EQ(true, ssm_->SetScreenPowerForAll(state, reason));
