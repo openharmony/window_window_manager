@@ -2559,6 +2559,37 @@ HWTEST_F(SceneSessionManagerTest6, CheckIfReuseSession05, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckIfReuseSession06
+ * @tc.desc: Test if CollaboratorType is RESERVE_TYPE and collaboratorMap_ not exist
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, CheckIfReuseSession06, TestSize.Level1)
+{
+    EXPECT_NE(ssm_, nullptr);
+    ssm_->bundleMgr_ = ssm_->GetBundleManager();
+    ssm_->currentUserId_ = 123;
+
+    SessionInfo sessionInfo;
+    sessionInfo.moduleName_ = "SceneSessionManager";
+    sessionInfo.bundleName_ = "SceneSessionManagerTest6";
+    sessionInfo.abilityName_ = "CheckIfReuseSession06";
+    sessionInfo.want = std::make_shared<AAFwk::Want>();
+
+    SceneSessionManager::SessionInfoList list = { .uid_ = 123,
+                                                  .bundleName_ = "SceneSessionManagerTest6",
+                                                  .abilityName_ = "CheckIfReuseSession06",
+                                                  .moduleName_ = "SceneSessionManager" };
+
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    EXPECT_NE(abilityInfo, nullptr);
+    abilityInfo->applicationInfo.codePath = std::to_string(CollaboratorType::REDIRECT_TYPE);
+    ssm_->abilityInfoMap_[list] = abilityInfo;
+    auto ret2 = ssm_->CheckIfReuseSession(sessionInfo);
+    EXPECT_EQ(ret2, BrokerStates::BROKER_UNKOWN);
+    ssm_->abilityInfoMap_.erase(list);
+}
+
+/**
  * @tc.name: UpdateAvoidArea
  * @tc.desc: UpdateAvoidArea
  * @tc.type: FUNC
