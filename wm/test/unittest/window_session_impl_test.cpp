@@ -2564,7 +2564,8 @@ HWTEST_F(WindowSessionImplTest, UpdateDefaultStatusBarColor, TestSize.Level1)
     window->UpdateDefaultStatusBarColor();
     EXPECT_EQ(window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR), property);
 
-    std::shared_ptr<AbilityRuntime::Context> context = std::make_shared<AbilityRuntime::Context>();
+    std::shared_ptr<AbilityRuntime::Context> context = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    context->applicationContext_ = std::make_shared<AbilityRuntime::ApplicationContext>();
     ASSERT_EQ(WMError::WM_OK, window->Create(context, nullptr));
     window->UpdateDefaultStatusBarColor();
 
