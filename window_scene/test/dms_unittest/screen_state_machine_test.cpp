@@ -178,7 +178,8 @@ HWTEST_F(ScreenStateMachineTest, ActionScreenPowerOff_ShouldReturnTrue_WhenTypeI
     DisplayId id = 0;
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
     ScreenSessionManager::GetInstance().screenSessionMap_[id] = screenSession;
-    ScreenSessionManager::GetInstance().SetScreenPowerForAll(ScreenPowerState::POWER_ON, PowerStateChangeReason::POWER_BUTTON);
+    ScreenSessionManager::GetInstance().SetScreenPowerForAll(
+        ScreenPowerState::POWER_ON, PowerStateChangeReason::POWER_BUTTON);
     ScreenPowerEvent event = ScreenPowerEvent::POWER_OFF;
     ScreenPowerInfoType type = std::make_pair(id, ScreenPowerStatus::POWER_STATUS_ON);
     EXPECT_TRUE(fsm_->ActionScreenPowerOff(event, type));
@@ -194,7 +195,8 @@ HWTEST_F(ScreenStateMachineTest, ActionScreenPowerOff_ShouldReturnTrue_WhenTypeI
     DisplayId id = 0;
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
     ScreenSessionManager::GetInstance().screenSessionMap_[id] = screenSession;
-    ScreenSessionManager::GetInstance().SetScreenPowerForAll(ScreenPowerState::POWER_OFF, PowerStateChangeReason::POWER_BUTTON);
+    ScreenSessionManager::GetInstance().SetScreenPowerForAll(
+        ScreenPowerState::POWER_OFF, PowerStateChangeReason::POWER_BUTTON);
     ScreenPowerEvent event = ScreenPowerEvent::POWER_OFF;
     ScreenPowerInfoType type = std::make_pair(id, ScreenPowerStatus::POWER_STATUS_OFF);
     EXPECT_TRUE(fsm_->ActionScreenPowerOff(event, type));
