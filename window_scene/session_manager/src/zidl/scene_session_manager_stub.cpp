@@ -282,6 +282,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleSetSpecificWindowZIndex(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SUPPORT_ROTATION_REGISTERED):
             return HandleNotifySupportRotationRegistered(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RESET_SPECIFIC_WINDOW_ZINDEX):
+            return HandleResetSpecificWindowZIndex(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -2705,6 +2707,22 @@ int SceneSessionManagerStub::HandleSetSpecificWindowZIndex(MessageParcel& data, 
         return ERR_INVALID_DATA;
     }
     WSError ret = SetSpecificWindowZIndex(windowType, zIndex);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write errCode fail");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleResetSpecificWindowZIndex(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGI(WmsLogTag::WMS_FOCUS, "in");
+    int32_t pid = 0;
+    if (!data.ReadInt32(pid)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Read pid fail");
+        return ERR_INVALID_DATA;
+    }
+    WSError ret = ResetSpecificWindowZIndex(pid);
     if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Write errCode fail");
         return ERR_INVALID_DATA;

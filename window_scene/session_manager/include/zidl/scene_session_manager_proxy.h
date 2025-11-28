@@ -124,6 +124,7 @@ public:
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
     WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override;
     WSError SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex) override;
+    WSError ResetSpecificWindowZIndex(int32_t pid) override;
     void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
         const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, int64_t startModalExtensionTimeStamp,
         bool isConstrainedModal = false) override;
