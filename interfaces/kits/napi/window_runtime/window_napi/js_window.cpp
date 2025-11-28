@@ -3585,7 +3585,7 @@ napi_value JsWindow::OnGetWindowSystemBarPropertiesSync(napi_env env, napi_callb
     if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
         TLOGE(WmsLogTag::WMS_IMMS, "only main window is allowed");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
-            "[window][getWindowSystemBarProperties]msg: Invalid window type. Only mainWindow are supported");
+            "[window][getWindowSystemBarProperties]msg: Invalid window type. Only main windows are supported");
     }
     auto objValue = CreateJsSystemBarPropertiesObject(env, windowToken_);
     if (objValue == nullptr) {
@@ -3652,7 +3652,7 @@ napi_value JsWindow::OnGetStatusBarPropertySync(napi_env env, napi_callback_info
     if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
         TLOGE(WmsLogTag::WMS_IMMS, "only main window is allowed");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
-            "[window][getStatusBarProperty]msg: Invalid window type. Only mainWindow are supported");
+            "[window][getStatusBarProperty]msg: Invalid window type. Only main windows are supported");
     }
     auto objValue = GetStatusBarPropertyObject(env, windowToken_);
     if (objValue == nullptr) {
@@ -4218,8 +4218,7 @@ napi_value JsWindow::OnSetWindowBackgroundColorSync(napi_env env, napi_callback_
     if (ret == WmErrorCode::WM_OK) {
         return NapiGetUndefined(env);
     } else {
-        return NapiThrowError(env, ret,
-            "[window][setWindowBackgroundColor]msg: The window is destroyed or parse color failed");
+        return NapiThrowError(env, ret, "[window][setWindowBackgroundColor]");
     }
 }
 
@@ -4927,7 +4926,7 @@ napi_value JsWindow::OnSetWindowPrivacyMode(napi_env env, napi_callback_info inf
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetPrivacyMode(isPrivacyMode));
         if (ret == WmErrorCode::WM_ERROR_NO_PERMISSION) {
             task->Reject(env, JsErrUtils::CreateJsError(env, ret,
-                "[window][setWindowPrivacyMode]msg: Need PRIVACY_WINDOW permission"));
+                "[window][setWindowPrivacyMode]msg: Need ohos.permission.PRIVACY_WINDOW permission"));
             WLOGI("%{public}s failed, window [%{public}u, %{public}s] mode=%{public}u",
                 where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), isPrivacyMode);
             return;
@@ -6038,7 +6037,7 @@ napi_value JsWindow::OnSnapshotIgnorePrivacy(napi_env env, napi_callback_info in
                 return;
             } else if (ret != WmErrorCode::WM_OK) {
                 task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                    "[window][snapshotIgnorePrivacy]msg: The window is destroyed or get pixelMap failed"));
+                    "[window][snapshotIgnorePrivacy]msg: Create pixelMap failed"));
                 TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "get pixelmap failed, code:%{public}d", ret);
                 return;
             }
@@ -8294,7 +8293,7 @@ napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
             !WindowHelper::IsAppFloatingWindow(window->GetType())) {
             WmErrorCode wmErrorCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
             task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "[window][setWindowMask]msg: "
-                "Invalid window type. Only subWindow and appFloatingWindow are supported"));
+                "Invalid window type. Only sub windows and float windows are supported"));
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowMask(windowMask));
@@ -8432,8 +8431,8 @@ napi_value JsWindow::OnSetImmersiveModeEnabledState(napi_env env, napi_callback_
     if (!WindowHelper::IsMainWindow(windowToken_->GetType()) &&
         !WindowHelper::IsSubWindow(windowToken_->GetType())) {
         TLOGE(WmsLogTag::WMS_IMMS, "not allowed since invalid window type");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
-            "[window][setImmersiveModeEnabledState]msg: Not mainWindow or subWindow");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING, "[window][setImmersiveModeEnabledState]"
+            "msg: Invalid window type. Only main windows and sub windows are supported");
     }
     WmErrorCode ret = WmErrorCode::WM_OK;
     napi_value nativeVal = argv[0];
@@ -8455,10 +8454,13 @@ napi_value JsWindow::OnSetImmersiveModeEnabledState(napi_env env, napi_callback_
             "[window][setImmersiveModeEnabledState]msg: Incorrect parameter types");
     }
     ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetImmersiveModeEnabledState(enable));
-    if (ret != WmErrorCode::WM_OK) {
+    if (ret == WmErrorCode::WM_ERROR_STATE_ABNORMALLY) {
         TLOGE(WmsLogTag::WMS_IMMS, "set failed, ret %{public}d", ret);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,
-            "[window][setImmersiveModeEnabledState]msg: Internal IPC error or the window is destroyed");
+        return NapiThrowError(env, ret,
+            "[window][setImmersiveModeEnabledState]msg: The window is not created or destroyed");
+    } else if (ret == WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY) {
+        TLOGE(WmsLogTag::WMS_IMMS, "set failed, ret %{public}d", ret);
+        return NapiThrowError(env, ret, "[window][setImmersiveModeEnabledState]msg: Internal IPC error");
     }
     TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u set end", windowToken_->GetWindowId());
     return NapiGetUndefined(env);
@@ -8475,7 +8477,7 @@ napi_value JsWindow::OnGetImmersiveModeEnabledState(napi_env env, napi_callback_
         !WindowHelper::IsSubWindow(windowToken_->GetType())) {
         TLOGE(WmsLogTag::WMS_IMMS, "not allowed since invalid window type");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING, "[window][getImmersiveModeEnabledState]msg: "
-            "Invalid window type. Only mainWindow and subWindow are supported");
+            "Invalid window type. Only main windows and sub windows are supported");
     }
 
     bool isEnabled = windowToken_->GetImmersiveModeEnabledState();
@@ -8815,7 +8817,7 @@ napi_value JsWindow::OnGetGestureBackEnabled(napi_env env, napi_callback_info in
     if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
         TLOGE(WmsLogTag::WMS_IMMS, "get failed since invalid window type");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
-            "[window][isGestureBackEnabled]msg: Invalid window type. Only mainWindow are supported.");
+            "[window][isGestureBackEnabled]msg: Invalid window type. Only main windows are supported.");
     }
     bool enable = true;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetGestureBackEnabled(enable));
@@ -9152,7 +9154,7 @@ napi_value JsWindow::OnIsSystemAvoidAreaEnabled(napi_env env, napi_callback_info
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
         TLOGE(WmsLogTag::WMS_IMMS, "only system window is valid");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
-            "[window][isSystemAvoidAreaEnabled]msg: Invalid window type. Only systemWindow are supported");
+            "[window][isSystemAvoidAreaEnabled]msg: Invalid window type.");
     }
     uint32_t avoidAreaOption = 0;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetAvoidAreaOption(avoidAreaOption));

@@ -772,14 +772,14 @@ napi_value JsWindowStage::OnSetDefaultDensityEnabled(napi_env env, napi_callback
     if (weakScene == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WindowScene is null");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY,
-            "[window][setDefaultDensityEnabled]msg: The window is not created or destroyed");
+            "[window][setDefaultDensityEnabled]msg: The window stage is not created or destroyed");
     }
 
     auto window = weakScene->GetMainWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Window is null");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][setDefaultDensityEnabled]msg: MainWindow is not created or destroyed");
+            "[window][setDefaultDensityEnabled]msg: The main window is not created or destroyed");
     }
 
     bool enabled = false;
@@ -829,13 +829,13 @@ napi_value JsWindowStage::OnSetCustomDensity(napi_env env, napi_callback_info in
     if (windowScene == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowScene is null");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY,
-            "[window][setCustomDensity]msg: The window is not created or destroyed");
+            "[window][setCustomDensity]msg: The window stage is not created or destroyed");
     }
     auto window = windowScene->GetMainWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Window is null");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][setCustomDensity]msg: MainWindow is not created or destroyed");
+            "[window][setCustomDensity]msg: The main window is not created or destroyed");
     }
 
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetCustomDensity(density, applyToSubWindow));
@@ -917,7 +917,7 @@ napi_value JsWindowStage::OnRemoveStartingWindow(napi_env env, napi_callback_inf
     if (windowScene == nullptr) {
         TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "windowScene is null");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][removeStartingWindow]msg: The window is not created or destroyed"));
+            "[window][removeStartingWindow]msg: The window stage is not created or destroyed"));
         return NapiGetUndefined(env);
     }
 
@@ -935,7 +935,7 @@ napi_value JsWindowStage::OnRemoveStartingWindow(napi_env env, napi_callback_inf
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_STARTUP_PAGE, "%{public}s window is nullptr", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                "[window][removeStartingWindow]msg: MainWindow is not created or destroyed"));
+                "[window][removeStartingWindow]msg: The main window is not created or destroyed"));
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->NotifyRemoveStartingWindow());
