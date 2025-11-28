@@ -1606,8 +1606,8 @@ WSError SessionProxy::GetTargetOrientationConfigInfo(Orientation targetOrientati
     return static_cast<WSError>(ret);
 }
 
- WSError SessionProxy::ConvertOrientationAndRotation(const RotationInfoType from, const RotationInfoType to,
-        const int32_t value, int32_t& convertedValue)
+WSError SessionProxy::ConvertOrientationAndRotation(const RotationInfoType from, const RotationInfoType to,
+    const int32_t value, int32_t& convertedValue)
 {
     MessageParcel data;
     MessageParcel reply;
