@@ -1115,7 +1115,8 @@ napi_value JsWindowManager::OnGetLastWindow(napi_env env, napi_callback_info inf
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
         WLOGFE("Argc is invalid: %{public}zu", argc);
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][getLastWindow]msg: Argc is invalid"));
         return NapiGetUndefined(env);
     } else {
         nativeContext = argv[0];
@@ -1123,7 +1124,8 @@ napi_value JsWindowManager::OnGetLastWindow(napi_env env, napi_callback_info inf
         GetNativeContext(env, nativeContext, contextPtr, errCode);
     }
     if (errCode != WMError::WM_OK) {
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][getLastWindow]"));
         return NapiGetUndefined(env);
     }
 
@@ -1357,7 +1359,8 @@ napi_value JsWindowManager::OnShiftAppWindowFocus(napi_env env, napi_callback_in
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     if (errCode == WMError::WM_ERROR_INVALID_PARAM) {
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][shiftAppWindowFocus]"));
         return NapiGetUndefined(env);
     }
     // only return promiss<void>

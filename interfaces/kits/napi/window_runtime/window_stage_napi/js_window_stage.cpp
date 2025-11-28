@@ -622,14 +622,14 @@ napi_value JsWindowStage::OnSetWindowModal(napi_env env, napi_callback_info info
     if (windowScene == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "WindowScene is null");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY,
-            "[window][setWindowModal]msg: invalid window scene"));
+            "[window][setWindowModal]msg: Invalid window scene"));
         return NapiGetUndefined(env);
     }
     auto window = windowScene->GetMainWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "window is nullptr");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY,
-            "[window][setWindowModal]msg: invalid main window"));
+            "[window][setWindowModal]msg: Invalid main window"));
         return NapiGetUndefined(env);
     }
     if (window->IsPadAndNotFreeMultiWindowCompatibleMode()) {
@@ -638,7 +638,8 @@ napi_value JsWindowStage::OnSetWindowModal(napi_env env, napi_callback_info info
     }
     if (!window->IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_MAIN, "device not support");
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT));
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT,
+            "[window][setWindowModal]msg: Device not support"));
         return NapiGetUndefined(env);
     }
     size_t argc = FOUR_PARAMS_SIZE;
@@ -646,13 +647,15 @@ napi_value JsWindowStage::OnSetWindowModal(napi_env env, napi_callback_info info
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != 1) {
         TLOGE(WmsLogTag::WMS_MAIN, "Argc is invalid: %{public}zu", argc);
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setWindowModal]msg: Argc is invalid"));
         return NapiGetUndefined(env);
     }
     bool isModal = false;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], isModal)) {
         TLOGE(WmsLogTag::WMS_MAIN, "Failed to convert parameter to bool");
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setWindowModal]msg: Failed to convert parameter to bool"));
         return NapiGetUndefined(env);
     }
     napi_value result = nullptr;
