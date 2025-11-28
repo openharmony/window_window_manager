@@ -6041,7 +6041,7 @@ void SceneSessionManager::PreLoadStartingWindow(sptr<SceneSession> sceneSession)
         TLOGD(WmsLogTag::WMS_PATTERN, "not supported");
         return;
     }
-    if (IsSyncLoadStartWindow()) {
+    if (IsSyncLoadStartingWindow()) {
         TLOGD(WmsLogTag::WMS_PATTERN, "sync load starting window");
         return;
     }
