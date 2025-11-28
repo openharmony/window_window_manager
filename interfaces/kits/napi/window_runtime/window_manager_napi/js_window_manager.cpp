@@ -1994,7 +1994,8 @@ napi_value JsWindowManager::OnSetSpecificSystemWindowZIndex(napi_env env, napi_c
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "[window][setSpecificSystemWindowZIndex]msg:set failed"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret,
+                "[window][setSpecificSystemWindowZIndex]msg:set failed"));
         }
     };
     napi_status status = napi_send_event(env, std::move(asyncTask), napi_eprio_high, "OnSetSpecificSystemWindowZIndex");
