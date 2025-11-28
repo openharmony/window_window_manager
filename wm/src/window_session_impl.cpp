@@ -356,6 +356,13 @@ bool WindowSessionImpl::IsPadWindow() const
     return windowSystemConfig_.IsPadWindow();
 }
 
+bool WindowSessionImpl::IsPhonePadOrPcWindow() const
+{
+    return windowSystemConfig_.IsPhoneWindow() ||
+        windowSystemConfig_.IsPadWindow() ||
+        windowSystemConfig_.IsPcWindow();
+}
+
 bool WindowSessionImpl::IsPcOrFreeMultiWindowCapabilityEnabled() const
 {
     return WindowSessionImpl::IsPcOrPadFreeMultiWindowMode() ||
