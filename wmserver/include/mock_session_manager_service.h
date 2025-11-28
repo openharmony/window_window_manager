@@ -43,6 +43,7 @@ public:
     void RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds, int32_t userId);
     void SetScreenPrivacyWindowTagSwitch(
         uint64_t screenId, const std::vector<std::string>& privacyWindowTags, bool enable);
+    void NotifyBrightnessModeChange(const std::string& brightnessMode);
 
     /*
      * Multi User
