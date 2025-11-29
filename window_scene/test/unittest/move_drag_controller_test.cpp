@@ -40,7 +40,7 @@ public:
     void SetUp() override;
     void TearDown() override;
     sptr<MoveDragController> moveDragController;
-    sptr<Session> session_;
+    sptr<SceneSession> session_;
 };
 
 void MoveDragControllerTest::SetUpTestCase() {}
