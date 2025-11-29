@@ -55,7 +55,7 @@ void MoveDragControllerTest::SetUp()
     info.abilityName_ = "testSession1";
     info.moduleName_ = "testSession2";
     info.bundleName_ = "testSession3";
-    session_ = sptr<SceneSession>::MakeSptr(info);
+    session_ = sptr<SceneSession>::MakeSptr(info, nullptr);
     moveDragController = sptr<MoveDragController>::MakeSptr(wptr(session_));
 }
 
