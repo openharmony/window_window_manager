@@ -3056,16 +3056,27 @@ void Session::SetHasSnapshot(SnapshotStatus key, DisplayOrientation rotate)
     }
     if (freeMultiWindow_.load()) {
         scenePersistence_->SetHasSnapshotFreeMultiWindow(true);
-        ScenePersistentStorage::Insert(GetSnapshotPersistentKey(), static_cast<int32_t>(GetWindowMode()),
+        ScenePersistentStorage::Insert(GetSnapshotPersistentKey(), EncodeSnapShotRecoverValue(),
             ScenePersistentStorageType::MAXIMIZE_STATE);
     } else {
         scenePersistence_->SetHasSnapshot(true, key);
         ScenePersistentStorage::Insert(GetSnapshotPersistentKey(key),
-            static_cast<int32_t>(rotate), ScenePersistentStorageType::MAXIMIZE_STATE);
+            EncodeSnapShotRecoverValue(), ScenePersistentStorageType::MAXIMIZE_STATE);
     }
 }
 
+int32_t Session::EncodeSnapShotRecoverValue()
+{
+    int32_t snapShotRecoverValue = 0;
+    snapShotRecoverValue += static_cast<int32_t>(rotate_);
+    snapShotRecoverValue += static_cast<int32_t>(IsExitSplitOnBackgroundRecover()) * 10;
+    return snapShotRecoverValue;
+}
 
+int32_t Session::DecodeSnapShotRecoverValue(int32_t snapShotRecoverValue, SnapShotRecoverType snapShotRecoverType)
+{
+    return (value / static_cast<int32_t>(std::pow(10, static_cast<int32_t>(snapShotRecoverType)))) % 10;
+}
 
 bool Session::IsExitSplitOnBackgroundRecover()
 {
@@ -3152,9 +3163,10 @@ bool Session::HasSnapshotFreeMultiWindow()
     if (hasSnapshotFreeMultiWindow && scenePersistence_) {
         freeMultiWindow_.store(true);
         scenePersistence_->SetHasSnapshotFreeMultiWindow(true);
-        int32_t windowMode = 0;
+        int32_t snapShotRecoverValue = 0;
         ScenePersistentStorage::Get("Snapshot_" + sessionInfo_.bundleName_ +
-            "_" + std::to_string(persistentId_), windowMode, ScenePersistentStorageType::MAXIMIZE_STATE);
+            "_" + std::to_string(persistentId_), snapShotRecoverValue, ScenePersistentStorageType::MAXIMIZE_STATE);
+        int32_t windowMode = DecodeSnapShotRecoverValue(snapShotRecoverValue, SnapShotRecoverType::IsExitSplitOnBackgroundRecover);
         if (static_cast<WindowMode>(windowMode) == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
             static_cast<WindowMode>(windowMode) == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
             SetExitSplitOnBackground(true);
