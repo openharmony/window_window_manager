@@ -127,6 +127,8 @@ public:
                                       ani_double ratio, ani_boolean isPersistent, ani_boolean needUpdateRect);
     static ani_object CreateAniWindow(ani_env* env, OHOS::sptr<OHOS::Rosen::Window>& window);
     static ani_int GetWindowStatus(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void Minimize(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void HideWindowFunction(ani_env* env, WmErrorCode errCode);
     static void Maximize(ani_env* env, ani_object obj, ani_long nativeObj,
                          ani_object aniPresentation, ani_object aniAcrossDisplay);
     static void StartMoving(ani_env* env, ani_object obj, ani_long nativeObj);
@@ -319,6 +321,7 @@ private:
     void OnSetContentAspectRatio(
         ani_env* env, ani_double ratio, ani_boolean isPersistent, ani_boolean needUpdateRect);
     ani_int OnGetWindowStatus(ani_env* env);
+    void OnMinimize(ani_env* env);
     void OnMaximize(ani_env* env, ani_object aniPresentation, ani_object aniAcrossDisplay);
     void OnStartMoving(ani_env* env);
     void OnStartMoveWindowWithCoordinate(ani_env* env, ani_int offsetX, ani_int offsetY);

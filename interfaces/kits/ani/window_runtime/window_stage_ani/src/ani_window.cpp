@@ -4139,6 +4139,66 @@ ani_int AniWindow::OnGetWindowStatus(ani_env* env)
     return static_cast<ani_int>(windowStatus);
 }
 
+void AniWindow::Minimize(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[ANI] start");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] windowToken is null");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    aniWindow->OnMinimize(env);
+}
+
+void AniWindow::OnMinimize(ani_env* env)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] window is null");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+
+    if (WindowHelper::IsFloatOrSubWindow(windowToken_->GetType())) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI] subWindow or float window use hide");
+        HideWindowFunction(env, WmErrorCode::WM_OK);
+        return;
+    }
+
+    WMError ret = windowToken_->Minimize();
+    TLOGNI(WmsLogTag::WMS_PC, "[ANI] Window [%{public}u, %{public}s] minimize end, ret=%{public}d",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), ret);
+    if (ret != WMError::WM_OK) {
+        WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+        AniWindowUtils::AniThrowError(env, wmErrorCode);
+    }
+}
+
+void AniWindow::HideWindowFunction(ani_env* env, WmErrorCode errCode)
+{
+    if (errCode != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, errCode);
+        return;
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] window is null");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    if (WindowHelper::IsMainWindow(windowToken_->GetType())) {
+        TLOGW(WmsLogTag::WMS_LIFE, "[ANI] window type %{public}u is not supported, [%{public}u, %{public}s]",
+            static_cast<uint32_t>(windowToken_->GetType()),
+            windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->Hide(0, false, false));
+    TLOGI(WmsLogTag::WMS_LIFE, "[ANI] end, window [%{public}u] ret=%{public}d",
+        windowToken_->GetWindowId(), ret);
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret);
+    }
+}
+
 void AniWindow::Maximize(
     ani_env* env, ani_object obj, ani_long nativeObj, ani_object aniPresentation, ani_object aniAcrossDisplay)
 {
@@ -6079,6 +6139,8 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(WindowResetAspectRatio)},
         ani_native_function {"getWindowStatus", "l:i",
             reinterpret_cast<void *>(AniWindow::GetWindowStatus)},
+        ani_native_function {"minimize", "l:",
+            reinterpret_cast<void *>(AniWindow::Minimize)},
         ani_native_function {"maximize", "JL@ohos/window/window/MaximizePresentation;Lstd/core/Boolean;:V",
             reinterpret_cast<void *>(AniWindow::Maximize)},
         ani_native_function {"startMoving", "l:",
