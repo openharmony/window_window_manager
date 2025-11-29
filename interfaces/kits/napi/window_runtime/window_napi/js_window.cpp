@@ -5753,6 +5753,9 @@ napi_value JsWindow::OnSetWindowColorSpace(napi_env env, napi_callback_info info
     colorSpace = static_cast<ColorSpace>(resultValue);
     if (colorSpace > ColorSpace::COLOR_SPACE_WIDE_GAMUT || colorSpace < ColorSpace::COLOR_SPACE_DEFAULT) {
         TLOGE(WmsLogTag::WMS_IMMS, "ColorSpace %{public}u invalid!", static_cast<uint32_t>(colorSpace));
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+    }
+    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setWindowColorSpace]msg: Parameter verification failed");
     }
