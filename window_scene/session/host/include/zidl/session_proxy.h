@@ -226,6 +226,7 @@ public:
      * Compatible Mode
      */
     WSError NotifyIsFullScreenInForceSplitMode(bool isFullScreen) override;
+    WSError NotifyCompatibleModeChange(CompatibleStyleMode mode) override;
 
     /**
      * Restart app
