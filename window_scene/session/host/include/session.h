@@ -412,6 +412,7 @@ public:
     virtual void SetExitSplitOnBackground(bool isExitSplitOnBackground);
     virtual bool IsExitSplitOnBackground() const;
     virtual bool NeedStartingWindowExitAnimation() const { return true; }
+    bool IsExitSplitOnBackgroundRecover();
 
     void SetChangeSessionVisibilityWithStatusBarEventListener(
         NotifyChangeSessionVisibilityWithStatusBarFunc&& func);

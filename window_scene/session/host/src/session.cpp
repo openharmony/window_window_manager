@@ -3065,6 +3065,16 @@ void Session::SetHasSnapshot(SnapshotStatus key, DisplayOrientation rotate)
     }
 }
 
+
+
+bool Session::IsExitSplitOnBackgroundRecover()
+{
+    return GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+           GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
+           IsExitSplitOnBackground();
+            
+}
+
 void Session::ResetLockedCacheSnapshot()
 {
     if (!SupportCacheLockedSessionSnapshot()) {
