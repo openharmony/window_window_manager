@@ -71,6 +71,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowS
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 constexpr int32_t NAV_FORCE_SPLIT_MODE = 6;
 constexpr int32_t API_VERSION_18 = 18;
+constexpr int32_t API_VERSION_23 = 23;
 constexpr uint32_t API_VERSION_MOD = 1000;
 constexpr int32_t  WINDOW_ROTATION_CHANGE = 50;
 constexpr uint32_t INVALID_TARGET_API_VERSION = 0;
@@ -2297,14 +2298,27 @@ WSError WindowSessionImpl::SetStageKeyFramePolicy(const KeyFramePolicy& keyFrame
 
 WMError WindowSessionImpl::SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "in");
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "only main window is valid");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (!windowSystemConfig_.IsPcWindow()) {
+        // isolate on api 23
+        if (GetTargetAPIVersion() >= API_VERSION_23 && IsPhonePadOrPcWindow()) {
+            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ignore phone or pad window type");
+            return WMError::WM_OK;
+        } else {
+            return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+        }
+    }
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     WSError errorCode = hostSession->SetDragKeyFramePolicy(keyFramePolicy);
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id: %{public}d, keyFramePolicy: %{public}s, errorCode: %{public}d",
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "Id: %{public}d, keyFramePolicy: %{public}s, errorCode: %{public}d",
         GetPersistentId(), keyFramePolicy.ToString().c_str(), static_cast<int32_t>(errorCode));
     return static_cast<WMError>(errorCode);
 }
