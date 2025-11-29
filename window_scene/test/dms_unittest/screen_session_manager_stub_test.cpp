@@ -3437,7 +3437,7 @@ HWTEST_F(ScreenSessionManagerStubTest, SyncScreenPowerState, TestSize.Level3)
         MessageOption option;
         uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SYNC_SCREEN_POWER_STATE);
         int res = stub_->OnRemoteRequest(code, data, reply, option);
-        EXPECT_EQ(res, 1);
+        EXPECT_EQ(res, ERR_TRANSACTION_FAILED);
     }
     {
         MessageParcel data;

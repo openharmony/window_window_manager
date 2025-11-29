@@ -756,6 +756,7 @@ void DisplayManagerLiteProxy::SyncScreenPowerState(ScreenPowerState state)
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SYNC_SCREEN_POWER_STATE),
         data, reply, option) != ERR_NONE) {
         TLOGW(WmsLogTag::DMS, "SendRequest failed");
+        return;
     }
     TLOGI(WmsLogTag::DMS, "Sync power state success");
 #endif
