@@ -162,7 +162,7 @@ HWTEST_F(ScreenStateMachineTest, DoSetScreenPowerForAll_ShouldReturnFalse_WhenTy
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenStateMachineTest, ActionScreenPowerOff_ShouldReturnFalse_WhenTypeIsInvalid, TestSize.Level0)
-{   
+{
     ScreenPowerEvent event = ScreenPowerEvent::POWER_OFF;
     ScreenPowerInfoType type;
     EXPECT_FALSE(fsm_->ActionScreenPowerOff(event, type));
