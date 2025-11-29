@@ -1847,9 +1847,49 @@ HWTEST_F(WindowSessionImplTest2, SetDragKeyFramePolicy, TestSize.Level1)
     sptr<SessionMocker> hostSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = hostSession;
     KeyFramePolicy keyFramePolicy;
-    ASSERT_EQ(window->SetDragKeyFramePolicy(keyFramePolicy), WMError::WM_OK);
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_SHOWN;
+    ASSERT_FALSE(window->IsWindowSessionInvalid());
+    // subWindow
+    window->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    EXPECT_EQ(window->SetDragKeyFramePolicy(keyFramePolicy), WMError::WM_ERROR_INVALID_CALLING);
+    // mainWindow
+    window->property_->type_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+
+    // api 20
+    window->SetTargetAPIVersion(20);
+    // phone
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    EXPECT_EQ(window->SetDragKeyFramePolicy(keyFramePolicy), WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    // pad
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    EXPECT_EQ(window->SetDragKeyFramePolicy(keyFramePolicy), WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    // other
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
+    EXPECT_EQ(window->SetDragKeyFramePolicy(keyFramePolicy), WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    // api23
+    window->SetTargetAPIVersion(23);
+    // phone
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    EXPECT_EQ(window->SetDragKeyFramePolicy(keyFramePolicy), WMError::WM_OK);
+    // pad
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    EXPECT_EQ(window->SetDragKeyFramePolicy(keyFramePolicy), WMError::WM_OK);
+    // other
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
+    EXPECT_EQ(window->SetDragKeyFramePolicy(keyFramePolicy), WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    // pc
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    // pass
+    EXPECT_EQ(window->SetDragKeyFramePolicy(keyFramePolicy), WMError::WM_OK);
+    // invalid id
+    window->property_->SetPersistentId(0);
+    EXPECT_EQ(window->SetDragKeyFramePolicy(keyFramePolicy), WMError::WM_ERROR_INVALID_WINDOW);
+    // invalid session
+    window->property_->SetPersistentId(1);
     window->hostSession_ = nullptr;
-    ASSERT_EQ(window->SetDragKeyFramePolicy(keyFramePolicy), WMError::WM_ERROR_NULLPTR);
+    EXPECT_EQ(window->SetDragKeyFramePolicy(keyFramePolicy), WMError::WM_ERROR_INVALID_WINDOW);
 }
 
 /**

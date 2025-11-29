@@ -3232,14 +3232,6 @@ ani_object AniWindow::SetDragKeyFramePolicy(ani_env* env, ani_object aniKeyFrame
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed to convert parameter to keyFramePolicy");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
     }
-    if (!windowToken_->IsPcWindow()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] device not support");
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
-    }
-    if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] only main window is valid");
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
-    }
 
     const WMError ret = windowToken_->SetDragKeyFramePolicy(keyFramePolicy);
     const WmErrorCode errorCode = AniWindowUtils::ToErrorCode(ret);
