@@ -170,6 +170,7 @@ enum class SessionInterfaceCode {
 
     // Compatible Mode
     TRANS_ID_NOTIFY_IS_FULL_SCREEN_IN_FORCE_SPLIT,
+    TRANS_ID_NOTIFY_COMPATIBLE_MODE_CHANGE,
 };
 } // namespace Rosen
 } // namespace OHOS

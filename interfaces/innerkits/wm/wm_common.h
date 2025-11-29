@@ -3435,6 +3435,7 @@ enum class WaterfallResidentState : uint32_t {
  * @brief Controls the compatible aspect ratio modes for window display.
  */
 enum class CompatibleStyleMode : uint32_t {
+    INVALID_VALUE = -1,
     // Default aspect ratio
     LANDSCAPE_DEFAULT = 0,
     // 18:9 aspect ratio

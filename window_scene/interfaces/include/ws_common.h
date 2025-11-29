@@ -508,6 +508,11 @@ struct SessionInfo {
      */
     int32_t currentRotation_ = 0;
 
+    /*
+     * Compatible Mode
+     */
+    std::string compatibleModePage = "";
+
     AAFwk::Want GetWantSafely() const
     {
         std::lock_guard<std::mutex> lock(*wantMutex_);

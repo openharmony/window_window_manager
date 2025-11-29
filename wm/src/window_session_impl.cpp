@@ -2214,6 +2214,7 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, void* e
             uiContent_->SetContainerModalTitleVisible(false, true);
             uiContent_->EnableContainerModalCustomGesture(true);
         }
+        RegisterNavigateCallbackForPageCompatibleModeIfNeed();
         TLOGI(WmsLogTag::DEFAULT, "[%{public}d, %{public}d]",
             uiContent_->IsUIExtensionSubWindow(), uiContent_->IsUIExtensionAbilityProcess());
     }
@@ -8914,6 +8915,42 @@ void WindowSessionImpl::NotifyFreeWindowModeChange(bool isInFreeWindowMode)
             listener->OnFreeWindowModeChange(isInFreeWindowMode);
         }
     }
+}
+
+void WindowSessionImpl::RegisterNavigateCallbackForPageCompatibleModeIfNeed()
+{
+    const std::string compatibleModePage = property_->GetCompatibleModePage();
+    if (!uiContent_ || compatibleModePage.empty()) {
+        TLOGI(WmsLogTag::WMS_COMPAT, "content is nullptr or page is empty");
+        return;
+    }
+    uiContent_->RegisterNavigateChangeCallback(
+        [weakThis = wptr(this), where = __func__](const std::string& fromPage, const std::string& toPage) {
+        auto window = weakThis.promote();
+        if (!window) {
+            TLOGNE(WmsLogTag::WMS_COMPAT, "%{public}s window is null", where);
+            return;
+        }
+        window->HandleNavigateCallbackForPageCompatibleMode(fromPage, toPage);
+    });
+}
+
+void WindowSessionImpl::HandleNavigateCallbackForPageCompatibleMode(
+    const std::string& fromPage, const std::string& toPage)
+{
+    const std::string compatibleModePage = property_->GetCompatibleModePage();
+    if ((fromPage == compatibleModePage && toPage == compatibleModePage) ||
+        (fromPage != compatibleModePage && toPage != compatibleModePage)) {
+        return;
+    }
+    auto hostSession = GetHostSession();
+    if (!hostSession) {
+        TLOGNE(WmsLogTag::WMS_COMPAT, "hostSession is null");
+        return;
+    }
+    auto mode = toPage == compatibleModePage ? CompatibleStyleMode::LANDSCAPE_18_9 : CompatibleStyleMode::INVALID_VALUE;
+    property_->SetPageCompatibleMode(mode);
+    hostSession->NotifyCompatibleModeChange(mode);
 }
 } // namespace Rosen
 } // namespace OHOS
