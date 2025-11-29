@@ -3344,10 +3344,12 @@ bool WindowSceneSessionImpl::IsLayoutFullScreen() const
     }
     WindowType winType = property_->GetWindowType();
     if (WindowHelper::IsMainWindow(winType)) {
-        return (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN && isIgnoreSafeArea_);
+        return (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
+            (IsPcOrPadFreeMultiWindowMode() ? enableImmersiveMode_.load() : isIgnoreSafeArea_));
     }
     if (WindowHelper::IsSubWindow(winType)) {
-        return (isIgnoreSafeAreaNeedNotify_ && isIgnoreSafeArea_);
+        return IsPcOrPadFreeMultiWindowMode() ? enableImmersiveMode_.load() :
+            (isIgnoreSafeAreaNeedNotify_ && isIgnoreSafeArea_);
     }
     return false;
 }
@@ -3893,7 +3895,6 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation, Wate
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
     hostSession->OnTitleAndDockHoverShowChange(titleHoverShowEnabled_, dockHoverShowEnabled_);
-    SetLayoutFullScreenByApiVersion(enableImmersiveMode_);
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "present: %{public}d, enableImmersiveMode_:%{public}d!",
         presentation, enableImmersiveMode_.load());
     SessionEventParam param;
