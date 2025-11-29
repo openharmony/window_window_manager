@@ -49,13 +49,13 @@ group("unittest") {
       ":ws_screen_session_manager_proxy_test",
       ":ws_screen_session_manager_client_test",
       ":ws_screen_session_manager_test",
-      ":ws_screen_session_manager_test2",
-      ":ws_screen_session_manager_test3",
-      ":ws_screen_session_manager_test4",
-      ":ws_screen_session_manager_test5",
-      ":ws_screen_session_manager_test6",
-      ":ws_screen_session_manager_test7",
-      ":ws_screen_session_manager_test8",
+      ":ws_screen_session_manager_test_two",
+      ":ws_screen_session_manager_test_three",
+      ":ws_screen_session_manager_test_four",
+      ":ws_screen_session_manager_test_five",
+      ":ws_screen_session_manager_test_six",
+      ":ws_screen_session_manager_test_seven",
+      ":ws_screen_session_manager_test_eight",
     ]
   }
 
@@ -606,12 +606,12 @@ ohos_unittest("ws_screen_session_manager_test") {
   }
 }
 
-ohos_unittest("ws_screen_session_manager_test2") {
+ohos_unittest("ws_screen_session_manager_test_two") {
   module_out_path = module_out_path
 
   sources = [ 
     "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
-    "screen_session_manager_test2.cpp" 
+    "screen_session_manager_test_two.cpp" 
   ]
 
 
@@ -624,7 +624,7 @@ ohos_unittest("ws_screen_session_manager_test2") {
   ]
 }
 
-ohos_unittest("ws_screen_session_manager_test3") {
+ohos_unittest("ws_screen_session_manager_test_three") {
   module_out_path = module_out_path
 
   sanitize = {
@@ -635,7 +635,7 @@ ohos_unittest("ws_screen_session_manager_test3") {
 
   sources = [
     "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
-    "screen_session_manager_test3.cpp"
+    "screen_session_manager_test_three.cpp"
   ]
 
   include_dirs = [ "../mock" ]
@@ -690,7 +690,7 @@ ohos_unittest("ws_screen_session_manager_test3") {
   }
 }
 
-ohos_unittest("ws_screen_session_manager_test4") {
+ohos_unittest("ws_screen_session_manager_test_four") {
   module_out_path = module_out_path
 
   sanitize = {
@@ -701,7 +701,7 @@ ohos_unittest("ws_screen_session_manager_test4") {
 
   sources = [
     "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
-    "screen_session_manager_test4.cpp"
+    "screen_session_manager_test_four.cpp"
   ]
 
   include_dirs = [ "../mock" ]
@@ -756,7 +756,7 @@ ohos_unittest("ws_screen_session_manager_test4") {
   }
 }
 
-ohos_unittest("ws_screen_session_manager_test5") {
+ohos_unittest("ws_screen_session_manager_test_five") {
   module_out_path = module_out_path
 
   sanitize = {
@@ -767,7 +767,7 @@ ohos_unittest("ws_screen_session_manager_test5") {
 
   sources = [
     "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
-    "screen_session_manager_test5.cpp"
+    "screen_session_manager_test_five.cpp"
   ]
 
   include_dirs = [ "../mock" ]
@@ -822,7 +822,7 @@ ohos_unittest("ws_screen_session_manager_test5") {
   }
 }
 
-ohos_unittest("ws_screen_session_manager_test6") {
+ohos_unittest("ws_screen_session_manager_test_six") {
   module_out_path = module_out_path
 
   sanitize = {
@@ -833,7 +833,7 @@ ohos_unittest("ws_screen_session_manager_test6") {
 
   sources = [
     "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
-    "screen_session_manager_test6.cpp"
+    "screen_session_manager_test_six.cpp"
   ]
 
   include_dirs = [ "../mock" ]
@@ -888,7 +888,7 @@ ohos_unittest("ws_screen_session_manager_test6") {
   }
 }
 
-ohos_unittest("ws_screen_session_manager_test7") {
+ohos_unittest("ws_screen_session_manager_test_seven") {
   module_out_path = module_out_path
 
   sanitize = {
@@ -899,7 +899,7 @@ ohos_unittest("ws_screen_session_manager_test7") {
 
   sources = [
     "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
-    "screen_session_manager_test7.cpp"
+    "screen_session_manager_test_seven.cpp"
   ]
 
   include_dirs = [ "../mock" ]
@@ -954,7 +954,7 @@ ohos_unittest("ws_screen_session_manager_test7") {
   }
 }
 
-ohos_unittest("ws_screen_session_manager_test8") {
+ohos_unittest("ws_screen_session_manager_test_eight") {
   module_out_path = module_out_path
 
   sanitize = {
@@ -965,7 +965,7 @@ ohos_unittest("ws_screen_session_manager_test8") {
 
   sources = [
     "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
-    "screen_session_manager_test8.cpp"
+    "screen_session_manager_test_eight.cpp"
   ]
 
   include_dirs = [ "../mock" ]

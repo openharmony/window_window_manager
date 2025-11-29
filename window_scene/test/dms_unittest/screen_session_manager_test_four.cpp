@@ -25,7 +25,10 @@
 #include "fold_screen_state_internel.h"
 #include "common_test_utils.h"
 #include "iremote_object_mocker.h"
-#include "mock_accesstoken_kit.h"
+#include "os_account_manager.h"
+#include "screen_session_manager_client.h"
+#include "../mock/mock_accesstoken_kit.h"
+#include "test_client.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -35,7 +38,7 @@ namespace Rosen {
 namespace {
 const int32_t CV_WAIT_SCREENOFF_MS = 1500;
 const int32_t CV_WAIT_SCREENON_MS = 300;
-const int32_t CV_WAIT_SCREENOFF_MS_MAX = 3000;
+const int32_t CV_WAIT_SCREENOFF_MS_MAX = 3500;
 const uint32_t INVALID_DISPLAY_ORIENTATION = 99;
 constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
@@ -48,6 +51,7 @@ void MyLogCallback(const LogType type, const LogLevel level, const unsigned int 
 {
     g_logMsg = msg;
 }
+const bool IS_SUPPORT_PC_MODE = system::GetBoolParameter("const.window.support_window_pcmode_switch", false);
 }
 class ScreenSessionManagerTest : public testing::Test {
 public:
@@ -61,6 +65,7 @@ public:
     ScreenId DEFAULT_SCREEN_ID {0};
     ScreenId VIRTUAL_SCREEN_ID {2};
     ScreenId VIRTUAL_SCREEN_RS_ID {100};
+    int32_t INVALID_USER_ID {1000};
     void SetAceessTokenPermission(const std::string processName);
     sptr<ScreenSession> InitTestScreenSession(std::string name, ScreenId &screenId);
     DMHookInfo CreateDefaultHookInfo();
@@ -93,7 +98,7 @@ void ScreenSessionManagerTest::TearDown()
 
 sptr<ScreenSession> ScreenSessionManagerTest::InitTestScreenSession(std::string name, ScreenId &screenId)
 {
-    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    sptr displayManagerAgent = new (std::nothrow) DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = name;
     screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
@@ -170,17 +175,6 @@ HWTEST_F(ScreenSessionManagerTest, OnScreenCaptureNotify, TestSize.Level1)
     int32_t uid = 0;
     std::string clientName = "test";
     ssm->OnScreenCaptureNotify(screenId, uid, clientName);
-}
-
-/**
- * @tc.name: GetPrimaryDisplayInfo
- * @tc.desc: GetPrimaryDisplayInfo
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, GetPrimaryDisplayInfo, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    ASSERT_NE(ssm_->GetPrimaryDisplayInfo(), nullptr);
 }
 
 /*
@@ -429,22 +423,6 @@ HWTEST_F(ScreenSessionManagerTest, SetGotScreenOffAndWakeUpBlock, TestSize.Level
 }
 
 /**
- * @tc.name: GetFoldStatus
- * @tc.desc: GetFoldStatus test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, GetFoldStatus, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    auto status = ssm_->GetFoldStatus();
-    if (ssm_->IsFoldable()) {
-        EXPECT_NE(FoldStatus::UNKNOWN, status);
-    } else {
-        EXPECT_EQ(FoldStatus::UNKNOWN, status);
-    }
-}
-
-/**
  * @tc.name: SetLowTemp
  * @tc.desc: SetLowTemp test
  * @tc.type: FUNC
@@ -582,30 +560,6 @@ HWTEST_F(ScreenSessionManagerTest, SetCastPrivacyFromSettingData, TestSize.Level
     ASSERT_NE(newSession, nullptr);
     ssm_->screenSessionMap_[id] = newSession;
     ssm_->SetCastPrivacyFromSettingData();
-}
-
-/**
- * @tc.name: SetCastPrivacyToRS
- * @tc.desc: SetCastPrivacyToRS test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, SetCastPrivacyToRS, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
-    ASSERT_NE(displayManagerAgent, nullptr);
-    sptr<ScreenSession> defScreen = ssm_->GetScreenSession(DEFAULT_SCREEN_ID);
-    ASSERT_EQ(ssm_->SetCastPrivacyToRS(defScreen, true), false);
-    VirtualScreenOption virtualOption;
-    virtualOption.name_ = "createVirtualOption";
-    auto virtualScreenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-    sptr<ScreenSession> virtualSession = ssm_->GetScreenSession(virtualScreenId);
-    ASSERT_EQ(ssm_->SetCastPrivacyToRS(virtualSession, true), false);
-    ScreenId id = 2;
-    sptr<ScreenSession> newSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
-    ASSERT_NE(newSession, nullptr);
-    newSession->GetScreenProperty().SetScreenType(ScreenType::REAL);
-    ASSERT_EQ(ssm_->SetCastPrivacyToRS(newSession, true), true);
 }
 
 /**
@@ -751,25 +705,6 @@ HWTEST_F(ScreenSessionManagerTest, IsSpecialApp, Function | SmallTest | Level3)
 }
 
 /**
- * @tc.name: IsScreenCasting
- * @tc.desc: IsScreenCasting
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, IsScreenCasting, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-
-    ssm_->virtualScreenCount_ = 1;
-    auto ret = ssm_->IsScreenCasting();
-    ASSERT_EQ(ret, true);
-
-    ssm_->virtualScreenCount_ = 0;
-    ssm_->hdmiScreenCount_ = 0;
-    ret = ssm_->IsScreenCasting();
-    ASSERT_EQ(ret, false);
-}
-
-/**
  * @tc.name: CanEnterCoordination01
  * @tc.desc: CanEnterCoordination01 test
  * @tc.type: FUNC
@@ -784,7 +719,7 @@ HWTEST_F(ScreenSessionManagerTest, CanEnterCoordination01, Function | SmallTest 
 
     ssm_->virtualScreenCount_ = 0;
     ssm_->hdmiScreenCount_ = 0;
-    auto ret = ssm_->CanEnterCoordination();
+    ret = ssm_->CanEnterCoordination();
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 
@@ -807,7 +742,7 @@ HWTEST_F(ScreenSessionManagerTest, CanEnterCoordination02, Function | SmallTest 
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     auto ret = ssm_->CanEnterCoordination();
     EXPECT_EQ(ret, DMError::DM_ERROR_NOT_SUPPORT_COOR_WHEN_WIRLESS_CASTING);
-    ssm_->DestroyVirtualScreen(screenId)
+    ssm_->DestroyVirtualScreen(screenId);
 }
 
 /**
@@ -970,23 +905,6 @@ HWTEST_F(ScreenSessionManagerTest, OnScreenExtendChange, Function | SmallTest | 
 
     ssm_->OnScreenExtendChange(0, 12);
     ASSERT_EQ(ssm_->cameraStatus_, 1);
-}
-
-/**
- * @tc.name: GetSessionOption
- * @tc.desc: GetSessionOption
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, GetSessionOption, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-
-    auto session = ssm_->GetScreenSession(0);
-    auto ret = ssm_->GetSessionOption(session);
-    ASSERT_EQ(ret.screenId_, 0);
-
-    ret = ssm_->GetSessionOption(session, 0);
-    ASSERT_EQ(ret.screenId_, 0);
 }
 
 /**

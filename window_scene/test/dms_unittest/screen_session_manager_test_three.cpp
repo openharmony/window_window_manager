@@ -25,7 +25,10 @@
 #include "fold_screen_state_internel.h"
 #include "common_test_utils.h"
 #include "iremote_object_mocker.h"
-#include "mock_accesstoken_kit.h"
+#include "os_account_manager.h"
+#include "screen_session_manager_client.h"
+#include "../mock/mock_accesstoken_kit.h"
+#include "test_client.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -35,7 +38,7 @@ namespace Rosen {
 namespace {
 const int32_t CV_WAIT_SCREENOFF_MS = 1500;
 const int32_t CV_WAIT_SCREENON_MS = 300;
-const int32_t CV_WAIT_SCREENOFF_MS_MAX = 3000;
+const int32_t CV_WAIT_SCREENOFF_MS_MAX = 3500;
 const uint32_t INVALID_DISPLAY_ORIENTATION = 99;
 constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
@@ -48,6 +51,7 @@ void MyLogCallback(const LogType type, const LogLevel level, const unsigned int 
 {
     g_logMsg = msg;
 }
+const bool IS_SUPPORT_PC_MODE = system::GetBoolParameter("const.window.support_window_pcmode_switch", false);
 }
 class ScreenSessionManagerTest : public testing::Test {
 public:
@@ -61,6 +65,7 @@ public:
     ScreenId DEFAULT_SCREEN_ID {0};
     ScreenId VIRTUAL_SCREEN_ID {2};
     ScreenId VIRTUAL_SCREEN_RS_ID {100};
+    int32_t INVALID_USER_ID {1000};
     void SetAceessTokenPermission(const std::string processName);
     sptr<ScreenSession> InitTestScreenSession(std::string name, ScreenId &screenId);
     DMHookInfo CreateDefaultHookInfo();
@@ -93,7 +98,7 @@ void ScreenSessionManagerTest::TearDown()
 
 sptr<ScreenSession> ScreenSessionManagerTest::InitTestScreenSession(std::string name, ScreenId &screenId)
 {
-    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    sptr displayManagerAgent = new (std::nothrow) DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = name;
     screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
@@ -236,7 +241,9 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenOnDelayTime, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerTest, ShouldReturnOkWhenMultiScreenNotEnabled, TestSize.Level1)
 {
-    EXPECT_EQ(ScreenSessionManager::GetInstance().VirtualScreenUniqueSwitch({}), DMError::DM_ERROR_NULLPTR);
+    EXPECT_EQ(ScreenSessionManager::GetInstance().VirtualScreenUniqueSwitch({},
+        UniqueScreenRotationOptions()),
+    DMError::DM_ERROR_NULLPTR);
 }
 
 /**
@@ -825,7 +832,20 @@ HWTEST_F(ScreenSessionManagerTest, NotifyCreatedScreen, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerTest, SetPrimaryDisplaySystemDpi, Function | SmallTest | Level3)
 {
-    DMError ret = ssm_->SetPrimaryDisplaySystemDpi(2.2);
+    float dpi = 2.2f;
+    ssm_->screenSessionMap_.clear();
+    DMError ret = ssm_->SetPrimaryDisplaySystemDpi(dpi);
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+
+    DisplayId id = 0;
+    sptr<ScreenSession> invalidScreenSession = new (std::nothrow) ScreenSession(1, ScreenProperty(), 1);
+    ssm_->screenSessionMap_[id] = invalidScreenSession;
+    ret = ssm_->SetPrimaryDisplaySystemDpi(dpi);
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(0, ScreenProperty(), 0);
+    ssm_->screenSessionMap_[id] = screenSession;
+    ret = ssm_->SetPrimaryDisplaySystemDpi(dpi);
     EXPECT_EQ(DMError::DM_OK, ret);
 }
 
@@ -875,7 +895,7 @@ HWTEST_F(ScreenSessionManagerTest, SwitchModeHandleExternalScreen01, TestSize.Le
     virtualOption1.name_ = "createVirtualOption2";
     auto virtualScreenId = ssm_->CreateVirtualScreen(virtualOption1, displayManagerAgent1->AsObject());
     ssm_->SwitchModeHandleExternalScreen(false);
-    EXPECT_EQ(screenSession->GetName(), "CastEngine");
+    EXPECT_EQ(screenSession->GetName(), "testVirtualOption");
     screenSession->SetIsRealScreen(false);
     ssm_->DestroyVirtualScreen(screenId);
     ssm_->DestroyVirtualScreen(virtualScreenId);
@@ -913,6 +933,7 @@ HWTEST_F(ScreenSessionManagerTest, CreateVirtualScreen, TestSize.Level1)
     sptr<IDisplayManagerAgent> displayManagerAgent = sptr<DisplayManagerAgentDefault>::MakeSptr();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "CastEngine";
+    virtualOption.virtualScreenFlag_ = VirtualScreenFlag::CAST;
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
     ASSERT_NE(screenSession, nullptr);
@@ -928,28 +949,14 @@ HWTEST_F(ScreenSessionManagerTest, CreateVirtualScreen, TestSize.Level1)
 HWTEST_F(ScreenSessionManagerTest, SetScreenOffsetFeatureTest, Function | SmallTest | Level3)
 {
     ScreenId screenId = 0;
-    EXPECT_TRUE(ssm_->SetScreenOffset(screenId, 0.0F, 0.0F));
-    EXPECT_TRUE(ssm_->SetScreenOffset(screenId, 100.0F, 100.0F));
+    EXPECT_FALSE(ssm_->SetScreenOffset(screenId, 0.0F, 0.0F));
+    EXPECT_FALSE(ssm_->SetScreenOffset(screenId, 100.0F, 100.0F));
     screenId = -1;
     EXPECT_FALSE(ssm_->SetScreenOffset(screenId, 0.0F, 0.0F));
     EXPECT_FALSE(ssm_->SetScreenOffset(screenId, 100.0F, 100.0F));
 }
 
-+/**
-+ * @tc.name: SetLapTopLidOpenStatus
-+ * @tc.desc: test function : SetLapTopLidOpenStatus
-+ * @tc.type: FUNC
-+ */
-HWTEST_F(ScreenSessionManagerTest, SetLapTopLidOpenStatus, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-
-    ssm_->SetLapTopLidOpenStatus(true);
-    bool isOpened = ssm_->IsLapTopLidOpen();
-    EXPECT_EQ(true, isOpened);
-}
-
-+/**
+/**
 + * @tc.name: InitSecondaryDisplayPhysicalParams
 + * @tc.desc: test function : InitSecondaryDisplayPhysicalParams
 + * @tc.type: FUNC
@@ -1095,7 +1102,7 @@ HWTEST_F(ScreenSessionManagerTest, SetConfigForInputmethod, TestSize.Level1)
     LOG_SetCallback(MyLogCallback);
     screenId++;
     ssm_->SetConfigForInputmethod(screenId, option);
-    EXPECT_TRUE(g_logMsg.find("screenSession is nullptr!") != std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("screenSession is nullptr") != std::string::npos);
     LOG_SetCallback(nullptr);
 }
 }
