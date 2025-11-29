@@ -1586,7 +1586,35 @@ Rotation ScreenSession::CalcRotation(Orientation orientation, FoldDisplayMode fo
     DisplayOrientation displayOrientation = CalcOrientationToDisplayOrientation(orientation);
     return CalcRotationByDeviceOrientation(displayOrientation, foldDisplayMode, bounds);
 }
- 
+
+RRect ScreenSession::CalcBoundsInRotationZero()
+{
+    Rotation deviceRotation = property_.GetDeviceRotation();
+    RRect bounds = property_.GetBounds();
+    if (!IsVertical(deviceRotation)) {
+        uint32_t width = bounds.rect_.GetWidth();
+        bounds.rect_.width_ = bounds.rect_.GetHeight();
+        bounds.rect_.height_ = width;
+    }
+    return bounds;
+}
+
+RRect ScreenSession::CalcBoundsByRotation(Rotation rotation)
+{
+    Rotation deviceRotation = property_.GetDeviceRotation();
+    RRect bounds = property_.GetBounds();
+    if (!IsVertical(deviceRotation) && !IsVertical(rotation)) {
+        return bounds;
+    }
+    if (IsVertical(deviceRotation) && IsVertical(rotation)) {
+        return bounds;
+    }
+    uint32_t width = bounds.rect_.GetWidth();
+    bounds.rect_.width_ = bounds.rect_.GetHeight();
+    bounds.rect_.height_ = width;
+    return bounds;
+}
+
 bool ScreenSession::IsVertical(Rotation rotation) const
 {
     return rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180;
