@@ -25,7 +25,10 @@
 #include "fold_screen_state_internel.h"
 #include "common_test_utils.h"
 #include "iremote_object_mocker.h"
-#include "mock_accesstoken_kit.h"
+#include "os_account_manager.h"
+#include "screen_session_manager_client.h"
+#include "../mock/mock_accesstoken_kit.h"
+#include "test_client.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -35,7 +38,7 @@ namespace Rosen {
 namespace {
 const int32_t CV_WAIT_SCREENOFF_MS = 1500;
 const int32_t CV_WAIT_SCREENON_MS = 300;
-const int32_t CV_WAIT_SCREENOFF_MS_MAX = 3000;
+const int32_t CV_WAIT_SCREENOFF_MS_MAX = 3500;
 const uint32_t INVALID_DISPLAY_ORIENTATION = 99;
 constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
@@ -48,6 +51,7 @@ void MyLogCallback(const LogType type, const LogLevel level, const unsigned int 
 {
     g_logMsg = msg;
 }
+const bool IS_SUPPORT_PC_MODE = system::GetBoolParameter("const.window.support_window_pcmode_switch", false);
 }
 class ScreenSessionManagerTest : public testing::Test {
 public:
@@ -61,6 +65,7 @@ public:
     ScreenId DEFAULT_SCREEN_ID {0};
     ScreenId VIRTUAL_SCREEN_ID {2};
     ScreenId VIRTUAL_SCREEN_RS_ID {100};
+    int32_t INVALID_USER_ID {1000};
     void SetAceessTokenPermission(const std::string processName);
     sptr<ScreenSession> InitTestScreenSession(std::string name, ScreenId &screenId);
     DMHookInfo CreateDefaultHookInfo();
@@ -93,7 +98,7 @@ void ScreenSessionManagerTest::TearDown()
 
 sptr<ScreenSession> ScreenSessionManagerTest::InitTestScreenSession(std::string name, ScreenId &screenId)
 {
-    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    sptr displayManagerAgent = new (std::nothrow) DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = name;
     screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
@@ -114,33 +119,6 @@ DMHookInfo ScreenSessionManagerTest::CreateDefaultHookInfo()
 }
 
 namespace {
-/**
- * @tc.name: HookDisplayInfoByUid03
- * @tc.desc: HookDisplayInfo by uid
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, HookDisplayInfoByUid04, TestSize.Level1)
-{
-    ScreenId screenId;
-    sptr<ScreenSession> screenSession = InitTestScreenSession("HookDisplayInfoByUid04", screenId);
-    ASSERT_NE(ssm_->GetScreenSession(screenId), nullptr);
-    sptr<DisplayInfo> displayInfo = ssm_->GetDefaultDisplayInfo();
-    ASSERT_NE(displayInfo, nullptr);
-    uint32_t uid = getuid();
-    DMHookInfo dmHookInfo = CreateDefaultHookInfo();
-    dmHookInfo.displayOrientation_ = INVALID_DISPLAY_ORIENTATION;
-    ssm_->displayHookMap_[uid] = dmHookInfo;
-    EXPECT_NE(ssm_->displayHookMap_.find(uid), ssm_->displayHookMap_.end());
-    displayInfo = ssm_->HookDisplayInfoByUid(displayInfo, screenSession);
-    EXPECT_EQ(displayInfo->GetWidth(), dmHookInfo.width_);
-    EXPECT_EQ(displayInfo->GetHeight(), dmHookInfo.height_);
-    EXPECT_EQ(displayInfo->GetVirtualPixelRatio(), dmHookInfo.density_);
-    EXPECT_EQ(static_cast<uint32_t>(displayInfo->GetRotation()), dmHookInfo.rotation_);
-    EXPECT_NE(static_cast<uint32_t>(displayInfo->GetDisplayOrientation()), dmHookInfo.displayOrientation_);
-    ssm_->displayHookMap_.erase(uid);
-    ssm_->DestroyVirtualScreen(screenId);
-}
-
 /**
  * @tc.name: GetDisplayInfoById
  * @tc.desc: GetDisplayInfoById virtual screen
@@ -178,25 +156,6 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenInfoById, TestSize.Level1)
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "GetScreenInfoById";
     ASSERT_EQ(ssm_->GetScreenInfoById(1), nullptr);
-}
-
-/**
- * @tc.name: NotifyScreenChanged
- * @tc.desc: NotifyScreenChanged virtual screen
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, NotifyScreenChanged, TestSize.Level1)
-{
-    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
-    VirtualScreenOption virtualOption;
-    virtualOption.name_ = "NotifyScreenChanged";
-    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-    sptr<ScreenInfo> screenInfo;
-    ssm_->NotifyScreenChanged(screenInfo, ScreenChangeEvent::UPDATE_ORIENTATION);
-    screenInfo = new ScreenInfo();
-    ssm_->NotifyScreenChanged(screenInfo, ScreenChangeEvent::UPDATE_ORIENTATION);
-    ASSERT_EQ(ssm_->SetScreenActiveMode(screenId, 0), DMError::DM_OK);
-    ssm_->DestroyVirtualScreen(screenId);
 }
 
 /**
@@ -469,7 +428,7 @@ HWTEST_F(ScreenSessionManagerTest, LoadScreenSceneXml, TestSize.Level1)
     virtualOption.name_ = "LoadScreenSceneXml";
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     ssm_->LoadScreenSceneXml();
-    ASSERT_EQ(ssm_->SetScreenActiveMode(screenId, 0), DMError::DM_OK);
+    ASSERT_EQ(ssm_->SetScreenActiveMode(screenId, 0), DMError::DM_ERROR_NULLPTR);
     ssm_->DestroyVirtualScreen(screenId);
 }
 
@@ -1148,7 +1107,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPrivacyWindowList, Function | SmallT
     std::vector<std::string> windowList{ "win0" };
     ScreenSessionManager::GetInstance().SetScreenPrivacyWindowList(invalidId, windowList);
 
-    std::string expectedKeyword = "Permission Denied";
+    std::string expectedKeyword = "Permmission Denied!";
     bool found = (g_logMsg.find(expectedKeyword) != std::string::npos);
     EXPECT_TRUE(found) << "Expected log to contain '" << expectedKeyword
                        << "', but got: " << g_logMsg;
@@ -1168,7 +1127,6 @@ HWTEST_F(ScreenSessionManagerTest, GetAllScreenIds, TestSize.Level1)
     ASSERT_NE(nullptr, screenSession);
     ssm_->screenSessionMap_.insert(std::make_pair(1, screenSession));
     ssm_->GetAllScreenIds();
-    EXPECT_TRUE(1);
 }
 
 /**

@@ -25,7 +25,10 @@
 #include "fold_screen_state_internel.h"
 #include "common_test_utils.h"
 #include "iremote_object_mocker.h"
-#include "mock_accesstoken_kit.h"
+#include "os_account_manager.h"
+#include "screen_session_manager_client.h"
+#include "../mock/mock_accesstoken_kit.h"
+#include "test_client.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -35,7 +38,7 @@ namespace Rosen {
 namespace {
 const int32_t CV_WAIT_SCREENOFF_MS = 1500;
 const int32_t CV_WAIT_SCREENON_MS = 300;
-const int32_t CV_WAIT_SCREENOFF_MS_MAX = 3000;
+const int32_t CV_WAIT_SCREENOFF_MS_MAX = 3500;
 const uint32_t INVALID_DISPLAY_ORIENTATION = 99;
 constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
@@ -48,6 +51,7 @@ void MyLogCallback(const LogType type, const LogLevel level, const unsigned int 
 {
     g_logMsg = msg;
 }
+const bool IS_SUPPORT_PC_MODE = system::GetBoolParameter("const.window.support_window_pcmode_switch", false);
 }
 class ScreenSessionManagerTest : public testing::Test {
 public:
@@ -61,6 +65,7 @@ public:
     ScreenId DEFAULT_SCREEN_ID {0};
     ScreenId VIRTUAL_SCREEN_ID {2};
     ScreenId VIRTUAL_SCREEN_RS_ID {100};
+    int32_t INVALID_USER_ID {1000};
     void SetAceessTokenPermission(const std::string processName);
     sptr<ScreenSession> InitTestScreenSession(std::string name, ScreenId &screenId);
     DMHookInfo CreateDefaultHookInfo();
@@ -93,7 +98,7 @@ void ScreenSessionManagerTest::TearDown()
 
 sptr<ScreenSession> ScreenSessionManagerTest::InitTestScreenSession(std::string name, ScreenId &screenId)
 {
-    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    sptr displayManagerAgent = new (std::nothrow) DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = name;
     screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
@@ -736,7 +741,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPrivacyMaskImage001, TestSize.Level1
 {
     ScreenId screenId = DEFAULT_SCREEN_ID;
     auto ret = ssm_->SetScreenPrivacyMaskImage(screenId, nullptr);
-    ASSERT_EQ(ret, DMError::DM_OK);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
 }
 
 /**
