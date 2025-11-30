@@ -188,6 +188,10 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WMError GetRootUIContentRemoteObj(DisplayId displayId, sptr<IRemoteObject>& uiContentRemoteObj)
+    {
+        return WMError::WM_DO_NOTHING;
+    }
     virtual WMError GetWindowAnimationTargets(std::vector<uint32_t> missionIds,
         std::vector<sptr<RSWindowAnimationTarget>>& targets) = 0;
     virtual void SetMaximizeMode(MaximizeMode maximizeMode) = 0;

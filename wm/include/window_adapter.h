@@ -110,6 +110,7 @@ public:
     virtual WMError DumpSessionAll(std::vector<std::string>& infos);
     virtual WMError DumpSessionWithId(int32_t persistentId, std::vector<std::string>& infos);
     virtual WMError GetUIContentRemoteObj(int32_t persistentId, sptr<IRemoteObject>& uiContentRemoteObj);
+    virtual WMError GetRootUIContentRemoteObj(DisplayId displayId, sptr<IRemoteObject>& uiContentRemoteObj);
     virtual WMError GetWindowAnimationTargets(std::vector<uint32_t> missionIds,
         std::vector<sptr<RSWindowAnimationTarget>>& targets);
     virtual void SetMaximizeMode(MaximizeMode maximizeMode);

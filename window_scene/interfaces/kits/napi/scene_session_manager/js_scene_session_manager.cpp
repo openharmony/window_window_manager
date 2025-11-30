@@ -2063,6 +2063,12 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
             SceneSessionManager::GetInstance().InitPersistentStorage();
             SceneSessionManager::GetInstance().UpdateAllStartingWindowRdb();
         });
+    rootSceneSession->SetGetUIContentFunc([rootScene = rootScene_](DisplayId displayId) -> Ace::UIContent* {
+        const auto& uiContent = rootScene->GetUIContentByDisplayId(displayId).first;
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "isNullUiContent=%{public}d, displayId: %{public}" PRIu64,
+            uiContent == nullptr, displayId);
+        return uiContent;
+    });
     RegisterRootSceneCallbacksOnSSManager();
     RegisterSSManagerCallbacksOnRootScene();
     napi_value jsRootSceneSessionObj = JsRootSceneSession::Create(env, rootSceneSession);
