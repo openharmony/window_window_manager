@@ -2797,7 +2797,6 @@ void CompatibleModeProperty::CopyFrom(const sptr<CompatibleModeProperty>& proper
     disableFullScreen_ = property->disableFullScreen_;
     disableWindowLimit_ = property->disableWindowLimit_;
     isAdaptToSimulationScale_= property->isAdaptToSimulationScale_;
-    isAdaptToGestureBack_ = property->isAdaptToGestureBack_;
 }
 
 bool WindowSessionProperty::MarshallingWindowAnchorInfo(Parcel& parcel) const
