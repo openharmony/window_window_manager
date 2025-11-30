@@ -2466,6 +2466,11 @@ bool WindowSessionProperty::IsAdaptToSimulationScale() const
     return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToSimulationScale();
 }
 
+bool WindowSessionProperty::IsAdaptToGestureBack() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToGestureBack();
+}
+
 RealTimeSwitchInfo WindowSessionProperty::GetRealTimeSwitchInfo() const
 {
     if (!compatibleModeProperty_) {
@@ -2707,6 +2712,17 @@ bool CompatibleModeProperty::IsAdaptToSimulationScale() const
     return isAdaptToSimulationScale_;
 }
 
+void CompatibleModeProperty::SetIsAdaptToGestureBack(bool enable)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "enable=%{public}d", enable);
+    isAdaptToGestureBack_ = enable;
+}
+
+bool CompatibleModeProperty::IsAdaptToGestureBack() const
+{
+    return isAdaptToGestureBack_;
+}
+
 void CompatibleModeProperty::SetRealTimeSwitchInfo(const RealTimeSwitchInfo& switchInfo)
 {
     realTimeSwitchInfo_.isNeedChange_ = switchInfo.isNeedChange_;
@@ -2735,6 +2751,7 @@ bool CompatibleModeProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isSupportRotateFullScreen_) &&
         parcel.WriteBool(isAdaptToSubWindow_) &&
         parcel.WriteBool(isAdaptToSimulationScale_) &&
+        parcel.WriteBool(isAdaptToGestureBack_) &&
         parcel.WriteBool(realTimeSwitchInfo_.isNeedChange_) &&
         parcel.WriteUint32(realTimeSwitchInfo_.showTypes_);
 }
@@ -2760,6 +2777,7 @@ CompatibleModeProperty* CompatibleModeProperty::Unmarshalling(Parcel& parcel)
     property->isSupportRotateFullScreen_ = parcel.ReadBool();
     property->isAdaptToSubWindow_ = parcel.ReadBool();
     property->isAdaptToSimulationScale_ = parcel.ReadBool();
+    property->isAdaptToGestureBack_ = parcel.ReadBool();
     property->realTimeSwitchInfo_.isNeedChange_ = parcel.ReadBool();
     property->realTimeSwitchInfo_.showTypes_ = parcel.ReadUint32();
     return property;
@@ -2778,7 +2796,8 @@ void CompatibleModeProperty::CopyFrom(const sptr<CompatibleModeProperty>& proper
     disableResizeWithDpi_ = property->disableResizeWithDpi_;
     disableFullScreen_ = property->disableFullScreen_;
     disableWindowLimit_ = property->disableWindowLimit_;
-    isAdaptToSimulationScale_= property->isAdaptToSimulationScale_;
+    isAdaptToSimulationScale_ = property->isAdaptToSimulationScale_;
+    isAdaptToGestureBack_ = property->isAdaptToGestureBack_;
 }
 
 bool WindowSessionProperty::MarshallingWindowAnchorInfo(Parcel& parcel) const

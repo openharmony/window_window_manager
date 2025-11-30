@@ -350,6 +350,7 @@ public:
     bool IsSupportRotateFullScreen() const;
     bool IsAdaptToSubWindow() const;
     bool IsAdaptToSimulationScale() const;
+    bool IsAdaptToGestureBack() const;
     void SetIsFullScreenInForceSplitMode(bool isFullScreenInForceSplitMode);
     bool IsFullScreenInForceSplitMode() const;
     RealTimeSwitchInfo GetRealTimeSwitchInfo() const;
@@ -706,6 +707,9 @@ public:
     void SetIsAdaptToSimulationScale(bool isAdaptToSimulationScale);
     bool IsAdaptToSimulationScale() const;
 
+    void SetIsAdaptToGestureBack(bool enable);
+    bool IsAdaptToGestureBack() const;
+
     void SetRealTimeSwitchInfo(const RealTimeSwitchInfo& switchInfo);
     RealTimeSwitchInfo GetRealTimeSwitchInfo() const;
 
@@ -731,6 +735,7 @@ public:
         ss << "isSupportRotateFullScreen_:" << isSupportRotateFullScreen_ << " ";
         ss << "isAdaptToSubWindow_:" << isAdaptToSubWindow_ << " ";
         ss << "isAdaptToSimulationScale_:" << isAdaptToSimulationScale_ << " ";
+        ss << "isAdaptToGestureBack_:" << isAdaptToGestureBack_ << " ";
         ss << "realTimeSwitchInfo_.isNeedChange_:" << realTimeSwitchInfo_.isNeedChange_ << " ";
         ss << "realTimeSwitchInfo_.showTypes_:" << realTimeSwitchInfo_.showTypes_ << " ";
         return ss.str();
@@ -752,6 +757,7 @@ private:
     bool isSupportRotateFullScreen_ { false };
     bool isAdaptToSubWindow_ { false };
     bool isAdaptToSimulationScale_ { false };
+    bool isAdaptToGestureBack_ { false };
     RealTimeSwitchInfo realTimeSwitchInfo_;
 };
 

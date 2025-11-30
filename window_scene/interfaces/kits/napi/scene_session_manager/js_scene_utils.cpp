@@ -1412,6 +1412,7 @@ bool ConvertCompatibleModePropertyFromJs(napi_env env, napi_value value, Compati
         {"isSupportRotateFullScreen", &CompatibleModeProperty::SetIsSupportRotateFullScreen},
         {"isAdaptToSubWindow", &CompatibleModeProperty::SetIsAdaptToSubWindow},
         {"isAdaptToSimulationScale", &CompatibleModeProperty::SetIsAdaptToSimulationScale},
+        {"isAdaptToGestureBack", &CompatibleModeProperty::SetIsAdaptToGestureBack},
     };
     bool atLeastOneParam = false;
     std::map<std::string, void (CompatibleModeProperty::*)(bool)>::iterator iter;
