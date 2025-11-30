@@ -2796,7 +2796,7 @@ void CompatibleModeProperty::CopyFrom(const sptr<CompatibleModeProperty>& proper
     disableResizeWithDpi_ = property->disableResizeWithDpi_;
     disableFullScreen_ = property->disableFullScreen_;
     disableWindowLimit_ = property->disableWindowLimit_;
-    isAdaptToSimulationScale_ = property->isAdaptToSimulationScale_;
+    isAdaptToSimulationScale_= property->isAdaptToSimulationScale_;
     isAdaptToGestureBack_ = property->isAdaptToGestureBack_;
 }
 
