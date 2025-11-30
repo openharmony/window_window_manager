@@ -982,6 +982,14 @@ WMError WindowAdapter::GetUIContentRemoteObj(int32_t persistentId, sptr<IRemoteO
     return static_cast<WMError>(wmsProxy->GetUIContentRemoteObj(persistentId, uiContentRemoteObj));
 }
 
+WMError WindowAdapter::GetRootUIContentRemoteObj(DisplayId displayId, sptr<IRemoteObject>& uiContentRemoteObj)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetRootUIContentRemoteObj(displayId, uiContentRemoteObj);
+}
+
 WMError WindowAdapter::GetWindowAnimationTargets(std::vector<uint32_t> missionIds,
     std::vector<sptr<RSWindowAnimationTarget>>& targets)
 {

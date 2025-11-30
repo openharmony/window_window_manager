@@ -10611,6 +10611,27 @@ WSError SceneSessionManager::GetUIContentRemoteObj(int32_t persistentId, sptr<IR
     return sceneSession->GetUIContentRemoteObj(uiContentRemoteObj);
 }
 
+WMError SceneSessionManager::GetRootUIContentRemoteObj(DisplayId displayId, sptr<IRemoteObject>& uiContentRemoteObj)
+{
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied, displayId: %{public}" PRIu64, displayId);
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    if (rootSceneSession_ == nullptr) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "root scene is null, displayId: %{public}" PRIu64, displayId);
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto uiContent = rootSceneSession_->GetUIContent(displayId);
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "uiContent is nullptr, displayId: %{public}" PRIu64, displayId);
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    uiContentRemoteObj = uiContent->GetRemoteObj();
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "isNullUiContentObj=%{public}d, displayId: %{public}" PRIu64,
+        uiContentRemoteObj == nullptr, displayId);
+    return WMError::WM_OK;
+}
+
 #ifdef WINDOW_MANAGER_FEATURE_SUPPORT_DMSFWK
 int SceneSessionManager::GetRemoteSessionSnapshotInfo(const std::string& deviceId, int32_t sessionId,
                                                       AAFwk::MissionSnapshot& sessionSnapshot)
