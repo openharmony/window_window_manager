@@ -7203,6 +7203,10 @@ bool WindowSceneSessionImpl::GetIsUIExtAnySubWindow() const
 WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)
 {
     if (windowSystemConfig_.IsPcWindow()) {
+        if (property_->IsAdaptToGestureBack()) {
+            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "phone app in pc compatible mode, enable=%{public}d", enable);
+            return WMError::WM_OK;
+        }
         TLOGI(WmsLogTag::WMS_IMMS, "device is not support");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -7222,6 +7226,11 @@ WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)
 WMError WindowSceneSessionImpl::GetGestureBackEnabled(bool& enable) const
 {
     if (windowSystemConfig_.IsPcWindow()) {
+        enable = false;
+        if (property_->IsAdaptToGestureBack()) {
+            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "phone app in pc compatible mode, enable=%{public}d", enable);
+            return WMError::WM_OK;
+        }
         TLOGI(WmsLogTag::WMS_IMMS, "device not support");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
