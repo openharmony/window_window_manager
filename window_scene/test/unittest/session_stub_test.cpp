@@ -878,6 +878,20 @@ HWTEST_F(SessionStubTest, HandleRequestFocus, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleNotifyWindowStatusDidChangeAfterShowWindow
+ * @tc.desc: sessionStub HandleNotifyWindowStatusDidChangeAfterShowWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleNotifyWindowStatusDidChangeAfterShowWindow, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleNotifyWindowStatusDidChangeAfterShowWindow(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleSyncSessionEvent1
  * @tc.desc: sessionStub HandleSyncSessionEvent
  * @tc.type: FUNC

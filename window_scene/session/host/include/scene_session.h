@@ -839,6 +839,7 @@ public:
     void RegisterAppHookWindowInfoFunc(GetHookWindowInfoFunc&& func);
     WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
     void SetFindScenePanelRsNodeByZOrderFunc(FindScenePanelRsNodeByZOrderFunc&& func);
+    void NotifyWindowStatusDidChangeAfterShowWindow() override;
 
     /*
      * Gesture Back
@@ -1337,6 +1338,9 @@ private:
     virtual void RemoveSurfaceNodeFromScreen() {}
     void SetParentRect();
     WSRect GetGlobalOrWinRect();
+    void NotifyWindowStatusDidChangeIfNeedWhenSessionEvent(SessionEvent event);
+    bool ShouldNotifyWindowStatusChange(SessionEvent event) const;
+    void ExecuteWindowStatusChangeNotification(const char* where);
 
     /*
      * Window Decor
