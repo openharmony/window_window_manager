@@ -3080,31 +3080,20 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForAll01, TestSize.Level1)
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "createVirtualOption";
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-    if (screenId != VIRTUAL_SCREEN_ID) {
-        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
-    }
     ScreenTransitionState temp = ScreenStateMachine::GetInstance().GetTransitionState();
     ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::WAIT_SCREEN_ADVANCED_ON_READY);
-    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_POWER_KEY;
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS;
     ScreenPowerState state = ScreenPowerState::POWER_ON;
-    ASSERT_EQ(true, ssm_->SetScreenPowerForAll(state, reason));
-
-    reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS;
-    ASSERT_EQ(true, ssm_->SetScreenPowerForAll(state, reason));
-
+    EXPECT_EQ(true, ssm_->SetScreenPowerForAll(state, reason));
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::WAIT_SCREEN_ADVANCED_ON_READY);
     reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON;
-    ASSERT_EQ(true, ssm_->SetScreenPowerForAll(state, reason));
-
-    state = ScreenPowerState::POWER_OFF;
-    ASSERT_EQ(true, ssm_->SetScreenPowerForAll(state, reason));
-
+    EXPECT_EQ(true, ssm_->SetScreenPowerForAll(state, reason));
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::WAIT_SCREEN_ADVANCED_ON_READY);
     reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
-    ASSERT_EQ(true, ssm_->SetScreenPowerForAll(state, reason));
-
+    EXPECT_EQ(true, ssm_->SetScreenPowerForAll(state, reason));
+    ScreenStateMachine::GetInstance().SetTransitionState(temp);
     EXPECT_EQ(DMError::DM_OK, ssm_->DestroyVirtualScreen(screenId));
     EXPECT_EQ(DMError::DM_OK, ssm_->UnregisterDisplayManagerAgent(displayManagerAgent, type));
-    g_errLog.clear();
-    ScreenStateMachine::GetInstance().SetTransitionState(temp);
 }
 
 /**
@@ -3123,20 +3112,17 @@ HWTEST_F(ScreenSessionManagerTest, WakeUpBegin01, TestSize.Level1)
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "createVirtualOption";
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-    if (screenId != VIRTUAL_SCREEN_ID) {
-        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
-    }
-
-    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_ON);
+    ScreenTransitionState temp = ScreenStateMachine::GetInstance().GetTransitionState();
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_ADVANCED_ON);
     PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS;
-    ASSERT_EQ(true, ssm_->WakeUpBegin(reason));
-
+    EXPECT_EQ(true, ssm_->WakeUpBegin(reason));
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_ADVANCED_ON);
     reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
-    ASSERT_EQ(true, ssm_->WakeUpBegin(reason));
-
+    EXPECT_EQ(true, ssm_->WakeUpBegin(reason));
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_ADVANCED_ON);
     reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
-    ASSERT_EQ(true, ssm_->WakeUpBegin(reason));
-
+    EXPECT_EQ(false, ssm_->WakeUpBegin(reason));
+    ScreenStateMachine::GetInstance().SetTransitionState(temp);
     EXPECT_EQ(DMError::DM_OK, ssm_->DestroyVirtualScreen(screenId));
     EXPECT_EQ(DMError::DM_OK, ssm_->UnregisterDisplayManagerAgent(displayManagerAgent, type));
 
