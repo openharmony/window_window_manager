@@ -2194,6 +2194,37 @@ HWTEST_F(SessionProxyTest, GetAppHookWindowInfoFromServer, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetAppHookWindowInfoFromServer
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, NotifyWindowStatusDidChangeAfterShowWindow, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: NotifyWindowStatusDidChangeAfterShowWindow start";
+    logMsg.clear();
+    LOG_SetCallBack(MyLogCallback);
+
+    auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
+
+    auto sProxy = sptr<MockIRemoteObject>::MakeSptr(nullptr);
+    sProxy->NotifyWindowStatusDidChangeAfterShowWindow();
+    EXPECT_TRUE(logMsg.find("remote is null") != std::string::npos);
+
+    sProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    sProxy->NotifyWindowStatusDidChangeAfterShowWindow();
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    mockRemote->SetRequestResult(ERR_INVALID_DATA);
+    sProxy->NotifyWindowStatusDidChangeAfterShowWindow();
+    EXPECT_TRUE(logMsg.find("SendRequest failed") != std::string::npos);
+
+    GTEST_LOG_(INFO) << "SessionProxyTest: NotifyWindowStatusDidChangeAfterShowWindow end";
+}
+
+/**
  * @tc.name: TestSetContentAspectRatio
  * @tc.desc: Test SetContentAspectRatio behavior in various IPC scenarios
  * @tc.type: FUNC

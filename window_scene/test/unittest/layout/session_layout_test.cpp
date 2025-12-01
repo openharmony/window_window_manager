@@ -276,6 +276,28 @@ HWTEST_F(SessionLayoutTest, UpdateWindowModeSupportType01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyWindowStatusDidChangeIfNeedWhenUpdateRect
+ * @tc.desc: NotifyWindowStatusDidChangeIfNeedWhenUpdateRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionLayoutTest, NotifyWindowStatusDidChangeIfNeedWhenUpdateRect, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    EXPECT_CALL(*mockSessionStage, NotifyLayoutFinishAfterWindowModeChange(_)).Times(0);
+    session_->NotifyWindowStatusDidChangeIfNeedWhenUpdateRect(SizeChangeReason::MAXIMIZE);
+
+    session_->sessionStage_ = mockSessionStage;
+    EXPECT_CALL(*mockSessionStage, NotifyLayoutFinishAfterWindowModeChange(_)).Times(1);
+
+    session_->NotifyWindowStatusDidChangeIfNeedWhenUpdateRect(SizeChangeReason::MAXIMIZE);
+    EXPECT_CALL(*mockSessionStage, NotifyLayoutFinishAfterWindowModeChange(_)).Times(1);
+
+    session_->NotifyWindowStatusDidChangeIfNeedWhenUpdateRect(SizeChangeReason::MAXIMIZE_IN_IMPLICT);
+}
+
+/**
  * @tc.name: SetHasRequestedVsyncFunc
  * @tc.desc: SetHasRequestedVsyncFunc
  * @tc.type: FUNC

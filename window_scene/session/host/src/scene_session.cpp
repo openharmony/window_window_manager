@@ -931,6 +931,53 @@ void SceneSession::ApplySessionEventParam(SessionEvent event, const SessionEvent
     }
 }
 
+void SceneSession::NotifyWindowStatusDidChangeIfNeedWhenSessionEvent(SessionEvent event)
+{
+    if (!ShouldNotifyWindowStatusChange(event)) {
+        return;
+    }
+    constexpr uint32_t timesToWaitForVsyncs = 2;
+    RunAfterNVsyncs(timesToWaitForVsyncs, [weakSession = wptr(this), where = __func__](int64_t, int64_t) {
+        auto session = weakSession.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", where);
+            return;
+        }
+
+        session->ExecuteWindowStatusChangeNotification(where);
+    });
+}
+
+bool SceneSession::ShouldNotifyWindowStatusChange(SessionEvent event) const
+{
+    const auto currentMode = GetWindowMode();
+    bool isDockAutoHide = onGetIsDockAutoHideFunc_ ? onGetIsDockAutoHideFunc_() : false;
+
+    return (event == SessionEvent::EVENT_MAXIMIZE &&
+            currentMode == WindowMode::WINDOW_MODE_FULLSCREEN &&
+            isDockAutoHide);
+}
+
+void SceneSession::ExecuteWindowStatusChangeNotification(const char* where)
+{
+    PostTask([weakSession = wptr(this), where] {
+        auto session = weakSession.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", where);
+            return;
+        }
+
+        if (!session->sessionStage_) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: sessionStage is null", where);
+            return;
+        }
+
+        session->sessionStage_->NotifyLayoutFinishAfterWindowModeChange(session->GetWindowMode());
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: Notify completed, windowId: %{public}d",
+            where, session->GetPersistentId());
+    }, __func__);
+}
+
 WSError SceneSession::OnSessionEvent(SessionEvent event, const SessionEventParam& param)
 {
     PostTask([weakThis = wptr(this), event, param, where = __func__] {
@@ -940,6 +987,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event, const SessionEventParam
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s event: %{public}d", where, static_cast<int32_t>(event));
+        session->NotifyWindowStatusDidChangeIfNeedWhenSessionEvent(event);
         session->UpdateWaterfallMode(event);
         auto property = session->GetSessionProperty();
         bool proportionalScale = property->IsAdaptToProportionalScale();
@@ -8021,6 +8069,27 @@ WMError SceneSession::GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowI
         }
         hookWindowInfo = session->getHookWindowInfoFunc_(session->GetSessionInfo().bundleName_);
         return WMError::WM_OK;
+    }, __func__);
+}
+
+void SceneSession::NotifyWindowStatusDidChangeAfterShowWindow()
+{
+    PostTask([weakSession = wptr(this), where = __func__] {
+        auto session = weakSession.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", where);
+            return;
+        }
+        constexpr uint32_t timesToWaitForVsyncs = 2;
+        session->RunAfterNVsyncs(timesToWaitForVsyncs, [weakSession, where](int64_t, int64_t) {
+            auto session = weakSession.promote();
+            if (!session) {
+                TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", where);
+                return;
+            }
+
+            session->ExecuteWindowStatusChangeNotification(where);
+            });
     }, __func__);
 }
 
