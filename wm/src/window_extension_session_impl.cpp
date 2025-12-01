@@ -1685,10 +1685,10 @@ WMError WindowExtensionSessionImpl::ExtensionSetBrightness(float brightness)
     return WMError::WM_OK;
 }
 
-WMError WindowExtensionSessionImpl::AtomicServiceSetStatusBarColor(uint32_t color)
+WMError WindowExtensionSessionImpl::SetStatusBarColorForExtension(uint32_t color)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "id=%{public}d", GetPersistentId());
-    WMError ret = AtomicServiceSetStatusBarColorInner(color);
+    WMError ret = SetStatusBarColorForExtensionInner(color);
     if (ret == WMError::WM_OK) {
         SystemBarProperty statusBarProp = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
         statusBarProp.settingFlag_ |= SystemBarSettingFlag::COLOR_SETTING;
@@ -1697,7 +1697,7 @@ WMError WindowExtensionSessionImpl::AtomicServiceSetStatusBarColor(uint32_t colo
     return ret;
 }
 
-WMError WindowExtensionSessionImpl::AtomicServiceSetStatusBarColorInner(uint32_t color)
+WMError WindowExtensionSessionImpl::SetStatusBarColorForExtensionInner(uint32_t color)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "id=%{public}d", GetPersistentId());
     AAFwk::WantParams want;
