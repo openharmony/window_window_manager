@@ -717,6 +717,8 @@ ani_long DisplayManagerAni::OnCreateVirtualScreen(ani_env* env, ani_object virtu
         DmErrorCode ret = DmErrorCode::DM_ERROR_INVALID_SCREEN;
         if (screenId == ERROR_ID_NOT_SYSTEM_APP) {
             ret = DmErrorCode::DM_ERROR_NO_PERMISSION;
+        } else if (screenId == ERROR_ID_NO_PERMISSION) {
+            ret =  DmErrorCode::DM_ERROR_NO_PERMISSION;
         }
         AniErrUtils::ThrowBusinessError(env, ret, "Get screen by id failed.");
         return static_cast<ani_long>(screenId);
