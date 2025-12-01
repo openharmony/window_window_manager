@@ -42,6 +42,12 @@ struct FoldCreaseRegionItem {
         : orientation_(orientation), foldDisplayMode_(foldDisplayMode), region_(region) {}
 };
 
+static const std::map<FoldDisplayMode, DMDeviceStatus> DISPLAYMODE_DEVICESTATUS_MAPPING = {
+    {FoldDisplayMode::MAIN, DMDeviceStatus::STATUS_FOLDED},
+    {FoldDisplayMode::FULL, DMDeviceStatus::STATUS_EXPAND},
+    {FoldDisplayMode::GLOBAL_FULL, DMDeviceStatus::STATUS_GLOBAL_FULL}
+};
+
 class FoldScreenPolicy : public RefBase {
 public:
     FoldScreenPolicy();

@@ -1304,6 +1304,26 @@ HWTEST_F(WindowAdapterTest, AddSessionBlackList01, Function | SmallTest | Level2
 }
 
 /**
+ * @tc.name: NotifySupportRotationRegistered
+ * @tc.desc: WindowAdapter/NotifySupportRotationRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, NotifySupportRotationRegistered, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
+    sptr<IWindowManagerAgent> windowManagerAgent;
+    auto err = windowAdapter.NotifySupportRotationRegistered();
+    EXPECT_EQ(WMError::WM_ERROR_SAMGR, err);
+    auto ret = windowAdapter.InitWMSProxy();
+    EXPECT_EQ(ret, true);
+
+    err = windowAdapter.NotifySupportRotationRegistered();
+    EXPECT_EQ(err, WMError::WM_ERROR_SAMGR);
+}
+
+/**
  * @tc.name: RemoveSessionBlackList01
  * @tc.desc: WindowAdapter/RemoveSessionBlackList
  * @tc.type: FUNC
@@ -1454,6 +1474,38 @@ HWTEST_F(WindowAdapterTest, UnregisterWMSConnectionChangedListener, TestSize.Lev
     sptr<WindowAdapter> instance = &WindowAdapter::GetInstance(101);
     ASSERT_NE(nullptr, instance);
     instance->UnregisterWMSConnectionChangedListener();
+}
+
+/**
+ * @tc.name: SetSpecificSystemWindowZIndex
+ * @tc.desc: SetSpecificSystemWindowZIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, SetSpecificSystemWindowZIndex, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    auto ret = windowAdapter.InitWMSProxy();
+    EXPECT_EQ(ret, true);
+
+    auto result = windowAdapter.SetSpecificWindowZIndex(
+        WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD, 20);
+    EXPECT_NE(WMError::WM_OK, result);
+}
+
+/**
+ * @tc.name: RecoverSpecificZIndexSetByApp
+ * @tc.desc: RecoverSpecificZIndexSetByApp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, RecoverSpecificZIndexSetByApp, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    sptr<WindowAdapter> instance = &WindowAdapter::GetInstance(-1);
+    ASSERT_NE(nullptr, instance);
+    instance->RecoverSpecificZIndexSetByApp();
+
+    instance->specificZIndexMap_[WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD] = 20;
+    instance->RecoverSpecificZIndexSetByApp();
 }
 } // namespace
 } // namespace Rosen

@@ -227,6 +227,11 @@ WMError SceneSessionManagerLite::GetVisibilityWindowInfo(std::vector<sptr<Window
     return SceneSessionManager::GetInstance().GetVisibilityWindowInfo(infos);
 }
 
+WMError SceneSessionManagerLite::UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease)
+{
+    return SceneSessionManager::GetInstance().UpdateScreenLockStatusForApp(bundleName, isRelease);
+}
+
 WSError SceneSessionManagerLite::UpdateWindowMode(int32_t persistentId, int32_t windowMode)
 {
     return SceneSessionManager::GetInstance().UpdateWindowMode(persistentId, windowMode);
@@ -358,6 +363,40 @@ WMError SceneSessionManagerLite::RegisterSessionLifecycleListenerByBundles(
 WMError SceneSessionManagerLite::UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener)
 {
     return SceneSessionManager::GetInstance().UnregisterSessionLifecycleListener(listener);
+}
+
+WMError SceneSessionManagerLite::SetGlobalDragResizeType(DragResizeType dragResizeType)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "set global drag resize lite in: %{public}d",
+        static_cast<int32_t>(dragResizeType));
+    return SceneSessionManager::GetInstance().SetGlobalDragResizeType(dragResizeType);
+}
+
+WMError SceneSessionManagerLite::GetGlobalDragResizeType(DragResizeType& dragResizeType)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "get global drag resize lite in");
+    return SceneSessionManager::GetInstance().GetGlobalDragResizeType(dragResizeType);
+}
+
+WMError SceneSessionManagerLite::SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "set app drag resize lite in: %{public}s %{public}d",
+        bundleName.c_str(), static_cast<int32_t>(dragResizeType));
+    return SceneSessionManager::GetInstance().SetAppDragResizeType(bundleName, dragResizeType);
+}
+
+WMError SceneSessionManagerLite::GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "get app drag resize lite in: %{public}s", bundleName.c_str());
+    return SceneSessionManager::GetInstance().GetAppDragResizeType(bundleName, dragResizeType);
+}
+
+WMError SceneSessionManagerLite::SetAppKeyFramePolicy(const std::string& bundleName,
+    const KeyFramePolicy& keyFramePolicy)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "set app key frame lite in: %{public}s %{public}d",
+        bundleName.c_str(), keyFramePolicy.enabled());
+    return SceneSessionManager::GetInstance().SetAppKeyFramePolicy(bundleName, keyFramePolicy);
 }
 
 WMError SceneSessionManagerLite::ListWindowInfo(const WindowInfoOption& windowInfoOption,

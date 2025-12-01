@@ -54,6 +54,8 @@ enum class ListenerFunctionType : uint32_t {
     UI_EFFECT_SET_PARAMS_CB,
     UI_EFFECT_ANIMATE_TO_CB,
     VIRTUAL_DENSITY_CHANGE_CB,
+    SET_SPECIFIC_SESSION_ZINDEX_CB,
+    NOTIFY_SUPPORT_ROTATION_REGISTERED_CB,
 };
 
 class JsSceneSessionManager final {
@@ -135,6 +137,7 @@ public:
     static napi_value SetUIEffectControllerAliveInUI(napi_env env, napi_callback_info info);
     static napi_value SupportCreateFloatWindow(napi_env env, napi_callback_info info);
     static napi_value ApplyFeatureConfig(napi_env env, napi_callback_info info);
+    static napi_value NotifySupportRotationChange(napi_env env, napi_callback_info info);
 
     /*
      * PC Window
@@ -262,6 +265,7 @@ private:
     napi_value OnSetSupportFunctionType(napi_env env, napi_callback_info info);
     napi_value OnUpdateRecentMainSessionInfos(napi_env env, napi_callback_info info);
     napi_value OnApplyFeatureConfig(napi_env env, napi_callback_info info);
+    napi_value OnNotifySupportRotationChange(napi_env env, napi_callback_info info);
     
     /*
      * PC Window
@@ -395,6 +399,12 @@ private:
     static napi_value UpdateAppBoundSystemTrayStatus(napi_env env, napi_callback_info info);
     napi_value OnUpdateAppBoundSystemTrayStatus(napi_env env, napi_callback_info info);
 
+    /*
+     * Window Hierarchy
+     */
+    void RegisterSetSpecificWindowZIndexCallback();
+    void OnSetSpecificWindowZIndex(WindowType windowType, int32_t zIndex, SetSpecificZIndexReason reason);
+
     napi_env env_;
     std::shared_mutex jsCbMapMutex_;
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
@@ -408,6 +418,8 @@ private:
     std::unordered_map<int32_t, RotationChangeResult> GetRotationChangeResult(
         const std::vector<sptr<SceneSession>>& activeSceneSessionMapCopy,
         const RotationChangeInfo& rotationChangeInfo, bool isRestrictNotify = false);
+    void ProcessSupportRotationRegister();
+    void OnSupportRotationRegistered();
 
     /*
      * Window Pattern

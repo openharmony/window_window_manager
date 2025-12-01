@@ -65,7 +65,7 @@ public:
 
     void HandleSuperFoldStatusChange(SuperFoldStatusChangeEvents events);
 
-    void HandleScreenConnectChange();
+    void DriveStateMachineToExpand();
 
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
 
@@ -86,7 +86,7 @@ public:
 
     nlohmann::ordered_json GetFoldCreaseRegionJson();
 
-    void HandleSuperFoldDisplayCallback(sptr<ScreenSession>& screenSession);
+    void HandleSuperFoldDisplayCallback(sptr<ScreenSession>& screenSession, SuperFoldStatusChangeEvents changeEvent);
 
     void AddMirrorVirtualScreenIds(const std::vector<ScreenId>& screenIds);
     void ClearMirrorVirtualScreenIds(const std::vector<ScreenId>& screenIds);

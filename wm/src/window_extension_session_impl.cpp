@@ -510,7 +510,7 @@ WMError WindowExtensionSessionImpl::UnregisterRectChangeInGlobalDisplayListener(
             return ret;
         }
         needNotifyHost = hostRectChangeInGlobalDisplayListenerList_.empty() &&
-        rectChangeInGlobalDisplayUIExtListenerIds.empty();
+            rectChangeInGlobalDisplayUIExtListenerIds_.empty();
     }
     if (needNotifyHost) {
         AAFwk::Want dataToSend;
@@ -519,8 +519,8 @@ WMError WindowExtensionSessionImpl::UnregisterRectChangeInGlobalDisplayListener(
             dataToSend);
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "No need to send message to host to unregister, size of "
-        "listener: %{public}zu, size of rectChangeInGlobalDisplayUIExtListenerIds: %{public}zu",
-        hostRectChangeInGlobalDisplayListenerList_.size(), rectChangeInGlobalDisplayUIExtListenerIds.size());
+        "listener: %{public}zu, size of rectChangeInGlobalDisplayUIExtListenerIds_: %{public}zu",
+        hostRectChangeInGlobalDisplayListenerList_.size(), rectChangeInGlobalDisplayUIExtListenerIds_.size());
     return ret;
 }
 
@@ -1069,6 +1069,10 @@ void WindowExtensionSessionImpl::UpdateSystemViewportConfig()
         if (!window) {
             return;
         }
+        if (window->isDensityCustomized_) {
+            TLOGNI(WmsLogTag::WMS_UIEXT, "UpdateSystemViewportConfig: Density is customized");
+            return;
+        }
         if (window->isDensityFollowHost_) {
             TLOGNW(WmsLogTag::WMS_UIEXT, "UpdateSystemViewportConfig: Density is follow host");
             return;
@@ -1106,9 +1110,10 @@ WSError WindowExtensionSessionImpl::UpdateSessionViewportConfig(const SessionVie
 
         TLOGNI(WmsLogTag::WMS_UIEXT, "UpdateSessionViewportConfig: Id:%{public}d, isDensityFollowHost_:%{public}d, "
             "displayId:%{public}" PRIu64", density:%{public}f, lastDensity:%{public}f, orientation:%{public}d, "
-            "lastOrientation:%{public}d",
+            "lastOrientation:%{public}d, isDensityCustomized:%{public}d",
             window->GetPersistentId(), viewportConfig.isDensityFollowHost_, viewportConfig.displayId_,
-            viewportConfig.density_, window->lastDensity_, viewportConfig.orientation_, window->lastOrientation_);
+            viewportConfig.density_, window->lastDensity_, viewportConfig.orientation_, window->lastOrientation_,
+            window->isDensityCustomized_);
 
         window->NotifyDisplayInfoChange(viewportConfig);
         window->property_->SetDisplayId(viewportConfig.displayId_);
@@ -1118,16 +1123,57 @@ WSError WindowExtensionSessionImpl::UpdateSessionViewportConfig(const SessionVie
             window->lastDensity_ = viewportConfig.density_;
             window->lastOrientation_ = viewportConfig.orientation_;
             window->lastDisplayId_ = viewportConfig.displayId_;
+            window->lastTransform_ = viewportConfig.transform_;
         }
     };
     handler_->PostTask(task, "UpdateSessionViewportConfig");
     return WSError::WS_OK;
 }
 
+WMError WindowExtensionSessionImpl::SetUIExtCustomDensity(const float density)
+{
+    if (std::islessequal(density, 0.0f)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Invalid density_: %{public}f", density);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (!handler_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "handler_ is null");
+        return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
+    auto task = [weak = wptr(this), density]() {
+        auto window = weak.promote();
+        if (!window) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "window is null");
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_UIEXT, "Customize density:%{public}f", density);
+        window->customizedDensity_ = density;
+        window->isDensityCustomized_ = true;
+
+        SessionViewportConfig config;
+        config.isDensityFollowHost_ = false;
+        config.density_ = density;
+        config.orientation_ = window->lastOrientation_;
+        config.displayId_ = window->lastDisplayId_;
+        config.transform_ = window->lastTransform_;
+        window->UpdateSessionViewportConfig(config);
+    };
+    handler_->PostTask(task, "SetUIExtCustomDensity");
+    return WMError::WM_OK;
+}
+
 void WindowExtensionSessionImpl::UpdateExtensionDensity(SessionViewportConfig& config)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "isFollowHost:%{public}d, densityValue:%{public}f", config.isDensityFollowHost_,
-        config.density_);
+    TLOGD(WmsLogTag::WMS_UIEXT, "isFollowHost:%{public}d, densityValue:%{public}f,isDensityCustomized_:%{public}d, "
+        "customizedDensity:%{public}f", config.isDensityFollowHost_, config.density_, isDensityCustomized_,
+        customizedDensity_);
+    if (isDensityCustomized_) {
+        if (config.isDensityFollowHost_) {
+            hostDensityValue_ = config.density_;
+        }
+        config.density_ = customizedDensity_;
+        return;
+    }
     isDensityFollowHost_ = config.isDensityFollowHost_;
     if (config.isDensityFollowHost_) {
         hostDensityValue_ = config.density_;
@@ -1372,6 +1418,9 @@ WSError WindowExtensionSessionImpl::NotifyDensityFollowHost(bool isFollowHost, f
 
 float WindowExtensionSessionImpl::GetVirtualPixelRatio(const sptr<DisplayInfo>& displayInfo)
 {
+    if (isDensityCustomized_) {
+        return customizedDensity_;
+    }
     if (isDensityFollowHost_ && hostDensityValue_ != std::nullopt) {
         return hostDensityValue_->load();
     }
@@ -1652,19 +1701,12 @@ WMError WindowExtensionSessionImpl::UpdateHostSpecificSystemBarEnabled(const std
 
 bool WindowExtensionSessionImpl::GetImmersiveModeEnabledState() const
 {
-    return hostImmersiveModeEnabled_;
+    return immersiveModeEnabled_;
 }
 
 WMError WindowExtensionSessionImpl::SetImmersiveModeEnabledState(bool enable)
 {
-    AAFwk::WantParams want;
-    want.SetParam(Extension::ATOMICSERVICE_KEY_FUNCTION, AAFwk::String::Box("setImmersiveModeEnabledState"));
-    want.SetParam(Extension::ATOMICSERVICE_KEY_PARAM_ENABLE, AAFwk::Boolean::Box(enable));
-    if (TransferExtensionData(want) != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "send failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    return WMError::WM_OK;
+    return SetLayoutFullScreen(enable);
 }
 
 WMError WindowExtensionSessionImpl::ExtensionSetKeepScreenOn(bool keepScreenOn)
@@ -1962,7 +2004,6 @@ void WindowExtensionSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAF
     isFullScreenWaterfallMode_.store(static_cast<bool>(waterfallModeValue));
     isValidWaterfallMode_.store(true);
     hostGestureBackEnabled_ = static_cast<bool>(configParam.GetIntParam(Extension::GESTURE_BACK_ENABLED, 1));
-    hostImmersiveModeEnabled_ = static_cast<bool>(configParam.GetIntParam(Extension::IMMERSIVE_MODE_ENABLED, 0));
     auto isHostWindowDelayRaiseEnabled = configParam.GetIntParam(Extension::HOST_WINDOW_DELAY_RAISE_STATE_FIELD, 0);
     property_->SetWindowDelayRaiseEnabled(static_cast<bool>(isHostWindowDelayRaiseEnabled));
 
@@ -2090,7 +2131,7 @@ WMError WindowExtensionSessionImpl::HandleRegisterHostRectChangeInGlobalDisplayL
     if (ret != WMError::WM_OK) {
         return ret;
     }
-    rectChangeInGlobalDisplayUIExtListenerIds.emplace(persistentId);
+    rectChangeInGlobalDisplayUIExtListenerIds_.emplace(persistentId);
     return WMError::WM_OK;
 }
 
@@ -2099,18 +2140,18 @@ WMError WindowExtensionSessionImpl::HandleUnregisterHostRectChangeInGlobalDispla
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
     bool needNotifyHost = false;
-    rectChangeInGlobalDisplayUIExtListenerIds.erase(persistentId);
+    rectChangeInGlobalDisplayUIExtListenerIds_.erase(persistentId);
     {
         std::lock_guard<std::mutex> lockListener(hostRectChangeInGlobalDisplayListenerMutex_);
         needNotifyHost = hostRectChangeInGlobalDisplayListenerList_.empty() &&
-            rectChangeInGlobalDisplayUIExtListenerIds.empty();
+            rectChangeInGlobalDisplayUIExtListenerIds_.empty();
     }
     if (needNotifyHost) {
         return SendExtensionMessageToHost(code, data);
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "No need to send message to host to unregister, size of "
         "listener: %{public}zu, size of rectChangeUIExtListenerIds_: %{public}zu",
-        hostRectChangeInGlobalDisplayListenerList_.size(), rectChangeInGlobalDisplayUIExtListenerIds.size());
+        hostRectChangeInGlobalDisplayListenerList_.size(), rectChangeInGlobalDisplayUIExtListenerIds_.size());
     return WMError::WM_OK;
 }
 
@@ -2219,21 +2260,6 @@ WMError WindowExtensionSessionImpl::OnGestureBackEnabledChange(AAFwk::Want&& dat
     return WMError::WM_OK;
 }
 
-WMError WindowExtensionSessionImpl::OnImmersiveModeEnabledChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
-{
-    auto enable = data.GetBoolParam(Extension::IMMERSIVE_MODE_ENABLED, false);
-    if (enable == hostImmersiveModeEnabled_) {
-        return WMError::WM_OK;
-    }
-    TLOGI(WmsLogTag::WMS_UIEXT, "immersiveModeEnabled:%{public}d", enable);
-    hostImmersiveModeEnabled_ = enable;
-    if (auto uiContent = GetUIContentSharedPtr()) {
-        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_HOST_IMMERSIVE_MODE_ENABLED),
-            data, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
-    }
-    return WMError::WM_OK;
-}
-
 WMError WindowExtensionSessionImpl::OnHostWindowDelayRaiseStateChange(AAFwk::Want&& data,
     std::optional<AAFwk::Want>& reply)
 {
@@ -2297,10 +2323,10 @@ WMError WindowExtensionSessionImpl::OnHostRectChangeInGlobalDisplay(AAFwk::Want&
         }
     }
     auto uiContent = GetUIContentSharedPtr();
-    if (!rectChangeInGlobalDisplayUIExtListenerIds.empty() && uiContent != nullptr) {
+    if (!rectChangeInGlobalDisplayUIExtListenerIds_.empty() && uiContent != nullptr) {
         uiContent->SendUIExtProprtyByPersistentId(
             static_cast<uint32_t>(Extension::Businesscode::NOTIFY_HOST_RECT_CHANGE_IN_GLOBAL_DISPLAY), data,
-            rectChangeInGlobalDisplayUIExtListenerIds, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+            rectChangeInGlobalDisplayUIExtListenerIds_, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
     }
     return WMError::WM_OK;
 }
@@ -2375,9 +2401,6 @@ void WindowExtensionSessionImpl::RegisterDataConsumer()
         this, std::placeholders::_1, std::placeholders::_2));
     RegisterConsumer(Extension::Businesscode::SYNC_HOST_GESTURE_BACK_ENABLED,
         std::bind(&WindowExtensionSessionImpl::OnGestureBackEnabledChange,
-        this, std::placeholders::_1, std::placeholders::_2));
-    RegisterConsumer(Extension::Businesscode::SYNC_HOST_IMMERSIVE_MODE_ENABLED,
-        std::bind(&WindowExtensionSessionImpl::OnImmersiveModeEnabledChange,
         this, std::placeholders::_1, std::placeholders::_2));
     RegisterConsumer(Extension::Businesscode::SYNC_COMPAT_INFO,
         std::bind(&WindowExtensionSessionImpl::OnHostWindowCompatInfoChange,

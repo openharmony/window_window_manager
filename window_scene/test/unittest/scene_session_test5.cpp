@@ -328,7 +328,7 @@ HWTEST_F(SceneSessionTest5, TransferPointerEventInnerTest001, TestSize.Level1)
     session->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     session->property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
     session->ClearDialogVector();
-    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(session));
     SystemSessionConfig systemConfig;
     systemConfig.isSystemDecorEnable_ = false;
     systemConfig.decorWindowModeSupportType_ = 2;
@@ -629,7 +629,7 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback, TestSize.Level1)
     session->moveDragController_ = nullptr;
     SizeChangeReason reason = { SizeChangeReason::DRAG };
     session->OnMoveDragCallback(reason);
-    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(session));
     session->OnMoveDragCallback(reason);
 
     reason = SizeChangeReason::DRAG_END;
@@ -642,7 +642,7 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback, TestSize.Level1)
     session->OnMoveDragCallback(reason);
     EXPECT_EQ(WSError::WS_OK, session->UpdateSizeChangeReason(reason));
 
-    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(session));
     EXPECT_NE(session->moveDragController_, nullptr);
 }
 
@@ -660,7 +660,7 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback02, Function | SmallTest | Level2)
     info.isSystem_ = false;
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(nullptr, session);
-    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(session));
     EXPECT_NE(nullptr, session->moveDragController_);
     SizeChangeReason reason = { SizeChangeReason::DRAG };
     session->OnMoveDragCallback(reason);
@@ -684,7 +684,7 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback03, TestSize.Level1)
     info.isSystem_ = false;
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(nullptr, session);
-    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(session));
     EXPECT_NE(nullptr, session->moveDragController_);
     SizeChangeReason reason = { SizeChangeReason::DRAG };
     WSRect windowRect = { 1, 10, 3, 4 };
@@ -740,7 +740,7 @@ HWTEST_F(SceneSessionTest5, DragResizeWhenEndFilter, Function | SmallTest | Leve
     EXPECT_NE(nullptr, session);
     auto oriProperty = session->GetSessionProperty();
     EXPECT_NE(nullptr, oriProperty);
-    auto moveDragController = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
+    auto moveDragController = sptr<MoveDragController>::MakeSptr(wptr(session));
     EXPECT_NE(nullptr, moveDragController);
     SizeChangeReason reason = { SizeChangeReason::DRAG };
     // null
@@ -792,7 +792,7 @@ HWTEST_F(SceneSessionTest5, HandleSessionDragEvent, TestSize.Level1)
  
     auto oriProperty = session->GetSessionProperty();
     session->property_ = oriProperty;
-    auto moveDragController = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
+    auto moveDragController = sptr<MoveDragController>::MakeSptr(wptr(session));
     session->moveDragController_ = moveDragController;
     SessionEvent event = { SessionEvent::EVENT_DRAG };
  
@@ -875,21 +875,21 @@ HWTEST_F(SceneSessionTest5, UpdateKeyFrameCloneNode, Function | SmallTest | Leve
     EXPECT_NE(session, nullptr);
     auto sessionStage = sptr<SessionStageMocker>::MakeSptr();
     EXPECT_NE(nullptr, sessionStage);
-    auto rsCanvasNode = RSCanvasNode::Create();
-    EXPECT_NE(nullptr, rsCanvasNode);
-    std::shared_ptr<RSCanvasNode> rsCanvasNodeNull = nullptr;
+    auto rsKeyFrameNode = RSWindowKeyFrameNode::Create();
+    EXPECT_NE(nullptr, rsKeyFrameNode);
+    std::shared_ptr<RSWindowKeyFrameNode> rsKeyFrameNodeNull = nullptr;
     auto rsTransaction = std::make_shared<RSTransaction>();
     EXPECT_NE(nullptr, rsTransaction);
     std::shared_ptr<RSTransaction> rsTransactionNull = nullptr;
 
-    session->keyFrameCloneNode_ = rsCanvasNode;
-    EXPECT_EQ(session->UpdateKeyFrameCloneNode(rsCanvasNode, rsTransaction), WSError::WS_OK);
+    session->keyFrameCloneNode_ = rsKeyFrameNode;
+    EXPECT_EQ(session->UpdateKeyFrameCloneNode(rsKeyFrameNode, rsTransaction), WSError::WS_OK);
     session->keyFrameCloneNode_ = nullptr;
-    EXPECT_EQ(session->UpdateKeyFrameCloneNode(rsCanvasNodeNull, rsTransaction), WSError::WS_ERROR_NULLPTR);
-    EXPECT_EQ(session->UpdateKeyFrameCloneNode(rsCanvasNode, rsTransaction), WSError::WS_ERROR_NULLPTR);
+    EXPECT_EQ(session->UpdateKeyFrameCloneNode(rsKeyFrameNodeNull, rsTransaction), WSError::WS_ERROR_NULLPTR);
+    EXPECT_EQ(session->UpdateKeyFrameCloneNode(rsKeyFrameNode, rsTransaction), WSError::WS_ERROR_NULLPTR);
     session->sessionStage_ = sessionStage;
-    EXPECT_EQ(session->UpdateKeyFrameCloneNode(rsCanvasNode, rsTransactionNull), WSError::WS_OK);
-    EXPECT_EQ(session->UpdateKeyFrameCloneNode(rsCanvasNode, rsTransaction), WSError::WS_OK);
+    EXPECT_EQ(session->UpdateKeyFrameCloneNode(rsKeyFrameNode, rsTransactionNull), WSError::WS_OK);
+    EXPECT_EQ(session->UpdateKeyFrameCloneNode(rsKeyFrameNode, rsTransaction), WSError::WS_OK);
 }
 
 /**
@@ -904,12 +904,12 @@ HWTEST_F(SceneSessionTest5, UpdateKeyFrameState, Function | SmallTest | Level2)
     info.bundleName_ = "keyframe";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
-    auto moveDragController = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
+    auto moveDragController = sptr<MoveDragController>::MakeSptr(wptr(session));
     EXPECT_NE(nullptr, moveDragController);
     auto sessionStage = sptr<SessionStageMocker>::MakeSptr();
     EXPECT_NE(nullptr, sessionStage);
-    auto rsCanvasNode = RSCanvasNode::Create();
-    EXPECT_NE(nullptr, rsCanvasNode);
+    auto rsKeyFrameNode = RSWindowKeyFrameNode::Create();
+    EXPECT_NE(nullptr, rsKeyFrameNode);
     auto rsTransaction = std::make_shared<RSTransaction>();
     EXPECT_NE(nullptr, rsTransaction);
 
@@ -929,7 +929,7 @@ HWTEST_F(SceneSessionTest5, UpdateKeyFrameState, Function | SmallTest | Level2)
     EXPECT_EQ(session->keyFramePolicy_.running_, false);
     session->moveDragController_->isStartDrag_ = true;
     session->UpdateKeyFrameState(reason, rect);
-    session->SetKeyFramePolicy(keyFramePolicy);
+    session->SetDragKeyFramePolicy(keyFramePolicy);
     session->UpdateKeyFrameState(reason, rect);
     EXPECT_EQ(session->keyFramePolicy_.running_, true);
     session->SetAppDragResizeType(DragResizeType::RESIZE_WHEN_DRAG_END);
@@ -938,7 +938,7 @@ HWTEST_F(SceneSessionTest5, UpdateKeyFrameState, Function | SmallTest | Level2)
     session->SetAppDragResizeType(DragResizeType::RESIZE_TYPE_UNDEFINED);
     session->UpdateKeyFrameState(reason, rect);
     EXPECT_EQ(session->keyFramePolicy_.running_, true);
-    session->keyFrameCloneNode_ = rsCanvasNode;
+    session->keyFrameCloneNode_ = rsKeyFrameNode;
     reason = SizeChangeReason::DRAG;
     session->UpdateKeyFrameState(reason, rect);
     EXPECT_EQ(session->lastKeyFrameDragRect_, rect);
@@ -1883,7 +1883,7 @@ HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceNode, TestSize.Level1)
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
 
-    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(session));
     EXPECT_NE(session->moveDragController_, nullptr);
 
     session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_START);
@@ -1903,7 +1903,7 @@ HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceBounds, TestSize.Level1)
     info.abilityName_ = "HandleMoveDragSurfaceBounds";
     info.bundleName_ = "HandleMoveDragSurfaceBounds";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(1000, session->GetWindowType());
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(session));
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
 
     WSRect preRect = { 0, 0, 50, 50 };
@@ -1939,7 +1939,7 @@ HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceBounds02, TestSize.Level1)
     info.abilityName_ = "HandleMoveDragSurfaceBounds02";
     info.bundleName_ = "HandleMoveDragSurfaceBounds02";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(1000, session->GetWindowType());
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(session));
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     WSRect preRect = { 0, 0, 50, 50 };
     WSRect rect = { 0, 0, 100, 100 };
@@ -1976,7 +1976,7 @@ HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceBounds03, TestSize.Level1)
     info.bundleName_ = "HandleMoveDragSurfaceBounds03";
     sptr<MainSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
     session->SetScreenId(0);
-    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(1000, session->GetWindowType());
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(session));
     session->moveDragController_->moveDragProperty_.pointerType_ = MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
     session->moveDragController_->SetStartDragFlag(true);
     ASSERT_NE(session->pcFoldScreenController_, nullptr);
@@ -2575,7 +2575,7 @@ HWTEST_F(SceneSessionTest5, StartMovingWithCoordinate_02, TestSize.Level1)
 {
     const SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, sceneSession->GetWindowType());
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     sceneSession->moveDragController_->isStartMove_ = true;
     WSError result = sceneSession->StartMovingWithCoordinate(100, 50, 300, 500, 0);
     EXPECT_EQ(result, WSError::WS_ERROR_REPEAT_OPERATION);
@@ -2590,7 +2590,7 @@ HWTEST_F(SceneSessionTest5, StartMovingWithCoordinate_03, TestSize.Level1)
 {
     const SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, sceneSession->GetWindowType());
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     sceneSession->moveDragController_->isStartMove_ = false;
     WSError result = sceneSession->StartMovingWithCoordinate(100, 50, 300, 500, 0);
     EXPECT_EQ(result, WSError::WS_OK);
@@ -2605,7 +2605,7 @@ HWTEST_F(SceneSessionTest5, StartMovingWithCoordinate_04, TestSize.Level1)
 {
     const SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, sceneSession->GetWindowType());
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     sceneSession->moveDragController_->isStartMove_ = false;
     WSError result = sceneSession->StartMovingWithCoordinate(100, 50, 300, 500, 999);
     EXPECT_EQ(result, WSError::WS_OK);

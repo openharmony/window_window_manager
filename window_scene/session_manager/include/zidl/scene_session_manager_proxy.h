@@ -123,6 +123,8 @@ public:
     WMError RecoverWatermarkImageForApp(const std::string& watermarkName) override;
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
     WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override;
+    WSError SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex) override;
+    WSError ResetSpecificWindowZIndex(int32_t pid) override;
     void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
         const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, int64_t startModalExtensionTimeStamp,
         bool isConstrainedModal = false) override;
@@ -138,7 +140,7 @@ public:
     WSError GetFreeMultiWindowEnableState(bool& enable) override;
     WMError GetCallingWindowWindowStatus(uint32_t callingWindowId, WindowStatus& windowStatus) override;
     WMError GetCallingWindowRect(uint32_t callingWindowId, Rect& rect) override;
-    WMError MinimizeAllAppWindows(DisplayId displayId) override;
+    WMError MinimizeAllAppWindows(DisplayId displayId, int32_t excludeWindowId = 0) override;
     WMError ToggleShownStateForAllAppWindows() override;
     WMError GetWindowModeType(WindowModeType& windowModeType) override;
     WMError GetWindowStyleType(WindowStyleType& windowStyleType) override;
@@ -155,6 +157,7 @@ public:
     WMError RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
     WMError SetScreenPrivacyWindowTagSwitch(
         uint64_t screenId, const std::vector<std::string>& privacyWindowTags, bool enable) override;
+    WMError NotifyBrightnessModeChange(const std::string& brightnessMode) override;
     WMError IsPcWindow(bool& isPcWindow) override;
     WMError IsFreeMultiWindow(bool& isPcWindow) override;
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
@@ -193,6 +196,7 @@ public:
         const std::unordered_set<std::string>& privacyWindowTags) override;
     WMError GetPiPSettingSwitchStatus(bool& switchStatus) override;
     WMError UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams) override;
+    WMError NotifySupportRotationRegistered() override;
 
 private:
     template<typename T>

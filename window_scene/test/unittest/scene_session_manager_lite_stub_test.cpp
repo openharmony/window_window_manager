@@ -44,6 +44,29 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WSError::WS_OK;
     }
+    WMError SetGlobalDragResizeType(DragResizeType dragResizeType) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError GetGlobalDragResizeType(DragResizeType& dragResizeType) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError SetAppDragResizeType(const std::string& bundleName,
+        DragResizeType dragResizeType) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError GetAppDragResizeType(const std::string& bundleName,
+        DragResizeType& dragResizeType) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError SetAppKeyFramePolicy(const std::string& bundleName,
+        const KeyFramePolicy& keyFramePolicy) override
+    {
+        return WMError::WM_OK;
+    }
     WSError PendingSessionToForeground(const sptr<IRemoteObject>& token, int32_t windowMode) override
     {
         return WSError::WS_OK;
@@ -399,6 +422,92 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleIsValidSessionIds, TestSize.Leve
     MessageParcel reply;
     auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleIsValidSessionIds(data, reply);
     EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleSetGlobalDragResizeType
+ * @tc.desc: test HandleSetGlobalDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetGlobalDragResizeType, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleSetGlobalDragResizeType(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    data.WriteUint32(static_cast<uint32_t>(dragResizeType));
+    res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleSetGlobalDragResizeType(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleGetGlobalDragResizeType
+ * @tc.desc: test HandleGetGlobalDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetGlobalDragResizeType, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetGlobalDragResizeType(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleSetAppDragResizeType
+ * @tc.desc: test HandleSetAppDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetAppDragResizeType, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleSetAppDragResizeType(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    const std::string bundleName = "test";
+    data.WriteString(bundleName);
+    data.WriteUint32(static_cast<uint32_t>(dragResizeType));
+    res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleSetAppDragResizeType(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleGetAppDragResizeType
+ * @tc.desc: test HandleGetAppDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetAppDragResizeType, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    const std::string bundleName = "test";
+    data.WriteString(bundleName);
+    int res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetAppDragResizeType(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleSetAppKeyFramePolicy
+ * @tc.desc: test HandleSetAppKeyFramePolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetAppKeyFramePolicy, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleSetAppKeyFramePolicy(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+    
+    const std::string bundleName = "test";
+    KeyFramePolicy keyFramePolicy;
+    data.WriteString(bundleName);
+    data.WriteParcelable(&keyFramePolicy);
+    res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleSetAppKeyFramePolicy(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
 }
 
 /**
@@ -1498,6 +1607,25 @@ HWTEST_F(SceneSessionManagerLiteStubTest, ProcessRemoteRequest_Hover, Function |
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::ProcessRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ERR_INVALID_DATA, res);
+}
+
+/**
+ * @tc.name: HandleUpdateSessionScreenLock
+ * @tc.desc: handle update session screen lock
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleUpdateSessionScreenLock, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    ASSERT_NE(sceneSessionManagerLiteStub_, nullptr);
+
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_UPDATE_SESSION_SCREEN_LOCK);
+    auto res = sceneSessionManagerLiteStub_->ProcessRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**

@@ -3423,6 +3423,33 @@ HWTEST_F(ScreenSessionManagerStubTest, NotifyIsFullScreenInForceSplitMode, TestS
         EXPECT_EQ(res, ERR_NONE);
     }
 }
+
+/**
+ * @tc.name: SyncScreenPowerState
+ * @tc.desc: normal function, TRANS_ID_SYNC_SCREEN_POWER_STATE test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, SyncScreenPowerState, TestSize.Level3)
+{
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        MessageOption option;
+        uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SYNC_SCREEN_POWER_STATE);
+        int res = stub_->OnRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(res, ERR_TRANSACTION_FAILED);
+    }
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        MessageOption option;
+        uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SYNC_SCREEN_POWER_STATE);
+        data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+        data.WriteUint32(0);
+        int res = stub_->OnRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(res, ERR_NONE);
+    }
+}
 }
 }
 }

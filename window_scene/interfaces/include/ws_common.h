@@ -171,6 +171,7 @@ enum CollaboratorType : int32_t {
     DEFAULT_TYPE = 0,
     RESERVE_TYPE,
     OTHERS_TYPE,
+    REDIRECT_TYPE,
 };
 
 enum AncoSceneState: int32_t {
@@ -441,6 +442,8 @@ struct SessionInfo {
     uint32_t windowInputType_ = 0;
     uint32_t expandInputFlag_ = 0;
     std::bitset<ADVANCED_FEATURE_BIT_MAX> advancedFeatureFlag_ = 0;
+    bool cursorDragFlag_ = false;
+    int32_t cursorDragCount_ = 0;
     std::string continueSessionId_ = "";
     bool isCalledRightlyByCallerId_ = false;
     bool fullScreenStart_ = false;
@@ -504,6 +507,11 @@ struct SessionInfo {
      * Window Rotation
      */
     int32_t currentRotation_ = 0;
+
+    /*
+     * Compatible Mode
+     */
+    std::string compatibleModePage = "";
 
     AAFwk::Want GetWantSafely() const
     {
@@ -610,6 +618,7 @@ enum class SessionEvent : uint32_t {
     EVENT_COMPATIBLE_TO_MAXIMIZE,
     EVENT_COMPATIBLE_TO_RECOVER,
     EVENT_MAXIMIZE_FULLSCREEN,
+    EVENT_SWITCH_COMPATIBLE_MODE = 200,
     EVENT_END
 };
 
@@ -1077,6 +1086,7 @@ struct SessionEventParam {
     uint32_t dragResizeType = 0;
     uint32_t gravity = 0;
     uint32_t waterfallResidentState = 0;
+    uint32_t compatibleStyleMode = 0;
 };
 
 struct BackgroundParams {
@@ -1274,6 +1284,24 @@ enum class SessionRecoverState : uint32_t {
     SESSION_DOING_RECONNECT,
     SESSION_FINISH_RECONNECT,
     SESSION_RECOVER_STATE_END,
+};
+
+/**
+ * @brief Set specific window zIndex reason
+ */
+enum class SetSpecificZIndexReason : uint32_t {
+    SET = 0,
+    RESET = 1,
+};
+
+enum class CrossPlaneState : uint32_t {
+    UNDEFINED = 0,
+    CROSS_DEFAULT_PLANE,
+    CROSS_DEFAULT_CREASE_PLANE,
+    CROSS_CREASE_PLANE,
+    CROSS_VIRTUAL_CREASE_PLANE,
+    CROSS_VIRTUAL_PLANE,
+    CROSS_ALL_PLANE,
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H

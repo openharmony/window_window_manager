@@ -179,7 +179,8 @@ public:
     void SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition) override;
 
     // unique screen
-    DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds, std::vector<DisplayId>& displayIds) override;
+    DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds, std::vector<DisplayId>& displayIds,
+        const UniqueScreenRotationOptions& rotationOptions) override;
 
     void SetClient(const sptr<IScreenSessionManagerClient>& client) override;
     ScreenProperty GetScreenProperty(ScreenId screenId) override;
@@ -197,7 +198,7 @@ public:
     ScreenProperty GetPhyScreenProperty(ScreenId screenId) override;
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override;
     void SetScreenPrivacyState(bool hasPrivate) override;
-    void SetPrivacyStateByDisplayId(DisplayId id, bool hasPrivate) override;
+    void SetPrivacyStateByDisplayId(std::unordered_map<DisplayId, bool>& privacyBundleDisplayId) override;
     void SetScreenPrivacyWindowList(DisplayId id, std::vector<std::string> privacyWindowList) override;
     virtual DMError GetAvailableArea(DisplayId displayId, DMRect& area) override;
     virtual DMError GetExpandAvailableArea(DisplayId displayId, DMRect& area) override;

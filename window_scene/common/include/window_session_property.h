@@ -352,6 +352,11 @@ public:
     bool IsAdaptToSimulationScale() const;
     void SetIsFullScreenInForceSplitMode(bool isFullScreenInForceSplitMode);
     bool IsFullScreenInForceSplitMode() const;
+    RealTimeSwitchInfo GetRealTimeSwitchInfo() const;
+    void SetCompatibleModePage(const std::string& compatibleModePage);
+    std::string GetCompatibleModePage() const;
+    void SetPageCompatibleMode(CompatibleStyleMode compatibleMode);
+    CompatibleStyleMode GetPageCompatibleMode() const;
 
     /*
      * Keyboard
@@ -542,7 +547,9 @@ private:
     bool isAppSupportPhoneInPc_ = false;
     bool isPcAppInLargeScreenDevice_ = false;
     mutable std::mutex compatibleModeMutex_;
-    bool isFullScreenInForceSplitMode_;
+    bool isFullScreenInForceSplitMode_ = false;
+    std::string compatibleModePage_ = "";
+    CompatibleStyleMode pageCompatibleMode_ = CompatibleStyleMode::INVALID_VALUE;
     uint8_t backgroundAlpha_ = 0xff; // default alpha is opaque.
     mutable std::mutex atomicServiceMutex_;
     bool isAtomicService_ = false;
@@ -699,6 +706,9 @@ public:
     void SetIsAdaptToSimulationScale(bool isAdaptToSimulationScale);
     bool IsAdaptToSimulationScale() const;
 
+    void SetRealTimeSwitchInfo(const RealTimeSwitchInfo& switchInfo);
+    RealTimeSwitchInfo GetRealTimeSwitchInfo() const;
+
     bool Marshalling(Parcel& parcel) const override;
     static CompatibleModeProperty* Unmarshalling(Parcel& parcel);
 
@@ -721,6 +731,8 @@ public:
         ss << "isSupportRotateFullScreen_:" << isSupportRotateFullScreen_ << " ";
         ss << "isAdaptToSubWindow_:" << isAdaptToSubWindow_ << " ";
         ss << "isAdaptToSimulationScale_:" << isAdaptToSimulationScale_ << " ";
+        ss << "realTimeSwitchInfo_.isNeedChange_:" << realTimeSwitchInfo_.isNeedChange_ << " ";
+        ss << "realTimeSwitchInfo_.showTypes_:" << realTimeSwitchInfo_.showTypes_ << " ";
         return ss.str();
     }
 
@@ -740,6 +752,7 @@ private:
     bool isSupportRotateFullScreen_ { false };
     bool isAdaptToSubWindow_ { false };
     bool isAdaptToSimulationScale_ { false };
+    RealTimeSwitchInfo realTimeSwitchInfo_;
 };
 
 struct FreeMultiWindowConfig : public Parcelable {

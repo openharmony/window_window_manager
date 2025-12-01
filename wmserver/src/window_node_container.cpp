@@ -1942,7 +1942,7 @@ void WindowNodeContainer::ExitSplitMode(DisplayId displayId)
     windowPair->ExitSplitMode();
 }
 
-void WindowNodeContainer::MinimizeAllAppWindows(DisplayId displayId)
+void WindowNodeContainer::MinimizeAllAppWindows(DisplayId displayId, int32_t excludeWindowId)
 {
     WMError ret = MinimizeAppNodeExceptOptions(MinimizeReason::MINIMIZE_ALL);
     SwitchLayoutPolicy(WindowLayoutMode::CASCADE, displayId);

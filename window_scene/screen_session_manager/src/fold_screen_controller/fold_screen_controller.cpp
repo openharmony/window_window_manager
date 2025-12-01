@@ -17,10 +17,12 @@
 #include "fold_screen_controller/single_display_fold_policy.h"
 #include "fold_screen_controller/secondary_display_fold_policy.h"
 #include "fold_screen_controller/single_display_pocket_fold_policy.h"
+#include "fold_screen_controller/single_display_super_fold_policy.h"
 #include "fold_screen_controller/dual_display_fold_policy.h"
 #include "fold_screen_controller/fold_screen_sensor_manager.h"
 #include "fold_screen_controller/sensor_fold_state_manager/single_display_sensor_fold_state_manager.h"
 #include "fold_screen_controller/sensor_fold_state_manager/single_display_sensor_pocket_fold_state_manager.h"
+#include "fold_screen_controller/sensor_fold_state_manager/single_display_sensor_super_fold_state_manager.h"
 #include "fold_screen_controller/sensor_fold_state_manager/dual_display_sensor_fold_state_manager.h"
 #include "fold_screen_controller/sensor_fold_state_manager/secondary_display_sensor_fold_state_manager.h"
 #include "fold_screen_controller/secondary_fold_sensor_manager.h"
@@ -49,6 +51,10 @@ FoldScreenController::FoldScreenController(std::recursive_mutex& displayInfoMute
         foldScreenPolicy_ = GetFoldScreenPolicy(DisplayDeviceType::SECONDARY_DISPLAY_DEVICE);
         sensorFoldStateManager_ = new SecondaryDisplaySensorFoldStateManager();
         TLOGI(WmsLogTag::DMS, "fold polocy: SECONDARY_DISPLAY_DEVICE");
+    } else if (FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice()) {
+        foldScreenPolicy_ = GetFoldScreenPolicy(DisplayDeviceType::SINGLE_DISPLAY_SUPER_DEVICE);
+        sensorFoldStateManager_ = new SingleDisplaySensorSuperFoldStateManager();
+        TLOGI(WmsLogTag::DMS, "fold polocy: SINGLE_DISPLAY_SUPER_DEVICE");
     }
 
     if (foldScreenPolicy_ == nullptr) {
@@ -124,6 +130,10 @@ sptr<FoldScreenPolicy> FoldScreenController::GetFoldScreenPolicy(DisplayDeviceTy
             tempPolicy = new SecondaryDisplayFoldPolicy(displayInfoMutex_, screenPowerTaskScheduler_);
             break;
         }
+        case DisplayDeviceType::SINGLE_DISPLAY_SUPER_DEVICE:{
+            tempPolicy = new SingleDisplaySuperFoldPolicy(displayInfoMutex_, screenPowerTaskScheduler_);
+            break;
+        }
         default: {
             TLOGE(WmsLogTag::DMS, "DisplayDeviceType is invalid");
             break;
@@ -157,7 +167,8 @@ void FoldScreenController::RecoverDisplayMode()
     if (!FoldScreenStateInternel::IsSingleDisplayFoldDevice() &&
         !FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
         !FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() &&
-        !FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+        !FoldScreenStateInternel::IsDualDisplayFoldDevice() &&
+        !FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice()) {
         TLOGI(WmsLogTag::DMS, "current fold device do not need recover, skip");
         return;
     }

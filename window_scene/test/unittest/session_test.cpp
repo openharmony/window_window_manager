@@ -502,7 +502,7 @@ HWTEST_F(WindowSessionTest, OnSessionEvent02, TestSize.Level1)
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(1, WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
     WSRect targetRect = { 100, 100, 1000, 1000 };
@@ -523,7 +523,7 @@ HWTEST_F(WindowSessionTest, ConsumeMoveEvent02, TestSize.Level1)
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(1, WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
     WSRect originalRect = { 100, 100, 1000, 1000 };
@@ -577,7 +577,7 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent01, TestSize.Level1)
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(1, WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
     WSRect originalRect = { 100, 100, 1000, 1000 };
@@ -619,7 +619,7 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent02, TestSize.Level1)
     info.abilityName_ = "testSession1";
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(1, WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
     WSRect originalRect = { 100, 100, 1000, 1000 };
@@ -683,7 +683,7 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent03, TestSize.Level1)
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(1, WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
     WSRect originalRect = { 100, 100, 1000, 1000 };
@@ -744,7 +744,7 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent04, TestSize.Level1)
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(1, WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
     WSRect originalRect = { 100, 100, 1000, 1000 };

@@ -104,6 +104,45 @@ namespace {
     }
 
     /**
+     * @tc.name: RegisterSettingBrightnessObserver
+     * @tc.desc: RegisterSettingBrightnessObserver
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, RegisterSettingBrightnessObserver, TestSize.Level1)
+    {
+        auto func = [] (const std::string&) {
+            TLOGI(WmsLogTag::DMS, "UT test");
+        };
+        ScreenSettingHelper::RegisterSettingBrightnessObserver(func);
+        ScreenSettingHelper::brightnessObserver_  = nullptr;
+        EXPECT_EQ(ScreenSettingHelper::brightnessObserver_, nullptr);
+    }
+
+    /**
+     * @tc.name: UnregisterSettingBrightnessObserver01
+     * @tc.desc: UnregisterSettingBrightnessObserver01
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, UnregisterSettingBrightnessObserver01, TestSize.Level1)
+    {
+        ScreenSettingHelper::brightnessObserver_  = new SettingObserver;
+        ScreenSettingHelper::UnregisterSettingBrightnessObserver();
+        EXPECT_EQ(ScreenSettingHelper::brightnessObserver_, nullptr);
+    }
+
+    /**
+     * @tc.name: UnregisterSettingBrightnessObserver02
+     * @tc.desc: UnregisterSettingBrightnessObserver02
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, UnregisterSettingBrightnessObserver02, TestSize.Level1)
+    {
+        ScreenSettingHelper::brightnessObserver_  = nullptr;
+        ScreenSettingHelper::UnregisterSettingBrightnessObserver();
+        ASSERT_EQ(ScreenSettingHelper::brightnessObserver_, nullptr);
+    }
+
+    /**
      * @tc.name: GetSettingDpi01
      * @tc.desc: GetSettingDpi01
      * @tc.type: FUNC
@@ -543,7 +582,7 @@ namespace {
      */
     HWTEST_F(ScreenSettingHelperTest, GetScreenActiveMode001, Function | SmallTest | Level3)
     {
-        MultiScreenInfo info;
+        SupportedScreenModes info;
         string inputString = "1 11";
         auto ret = ScreenSettingHelper::GetScreenActiveMode(info, inputString);
         ASSERT_FALSE(ret);
@@ -556,7 +595,7 @@ namespace {
      */
     HWTEST_F(ScreenSettingHelperTest, GetScreenActiveMode002, Function | SmallTest | Level3)
     {
-        MultiScreenInfo info;
+        SupportedScreenModes info;
         string inputString = "E";
         auto ret = ScreenSettingHelper::GetScreenActiveMode(info, inputString);
         ASSERT_FALSE(ret);
@@ -569,7 +608,7 @@ namespace {
      */
     HWTEST_F(ScreenSettingHelperTest, GetScreenActiveMode003, Function | SmallTest | Level3)
     {
-        MultiScreenInfo info;
+        SupportedScreenModes info;
         string inputString = "1";
         auto ret = ScreenSettingHelper::GetScreenActiveMode(info, inputString);
         ASSERT_FALSE(ret);

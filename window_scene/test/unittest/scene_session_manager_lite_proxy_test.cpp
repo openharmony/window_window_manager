@@ -178,6 +178,232 @@ HWTEST_F(sceneSessionManagerLiteProxyTest, UpdateAnimationSpeedWithPid, TestSize
 }
 
 /**
+ * @tc.name: SetGlobalDragResizeType
+ * @tc.desc: SetGlobalDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerLiteProxyTest, SetGlobalDragResizeType, TestSize.Level1)
+{
+    DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    // remote nullptr
+    sptr<SceneSessionManagerLiteProxy> nullptrProxy =
+        sptr<SceneSessionManagerLiteProxy>::MakeSptr(nullptr);
+    auto errCode = nullptrProxy->SetGlobalDragResizeType(dragResizeType);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+
+    sptr<MockIRemoteObject> iRemoteObjectMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SceneSessionManagerLiteProxy> sceneSessionManagerLiteProxy =
+        sptr<SceneSessionManagerLiteProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_TRUE(sceneSessionManagerLiteProxy != nullptr);
+    // write token failed
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    errCode = sceneSessionManagerLiteProxy->SetGlobalDragResizeType(dragResizeType);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    // write value failed
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    errCode = sceneSessionManagerLiteProxy->SetGlobalDragResizeType(dragResizeType);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    // send failed
+    MockMessageParcel::ClearAllErrorFlag();
+    iRemoteObjectMocker->SetRequestResult(1);
+    errCode = sceneSessionManagerLiteProxy->SetGlobalDragResizeType(dragResizeType);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    iRemoteObjectMocker->SetRequestResult(0);
+    // read failed
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetReadInt32ErrorFlag(1);
+    errCode = sceneSessionManagerLiteProxy->SetGlobalDragResizeType(dragResizeType);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    // pass
+    MockMessageParcel::ClearAllErrorFlag();
+    errCode = sceneSessionManagerLiteProxy->SetGlobalDragResizeType(dragResizeType);
+    EXPECT_EQ(errCode, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetGlobalDragResizeType
+ * @tc.desc: GetGlobalDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerLiteProxyTest, GetGlobalDragResizeType, TestSize.Level1)
+{
+    DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    // remote nullptr
+    sptr<SceneSessionManagerLiteProxy> nullptrProxy =
+        sptr<SceneSessionManagerLiteProxy>::MakeSptr(nullptr);
+    auto errCode = nullptrProxy->GetGlobalDragResizeType(dragResizeType);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+
+    sptr<MockIRemoteObject> iRemoteObjectMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SceneSessionManagerLiteProxy> sceneSessionManagerLiteProxy =
+        sptr<SceneSessionManagerLiteProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_TRUE(sceneSessionManagerLiteProxy != nullptr);
+    // write token failed
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    errCode = sceneSessionManagerLiteProxy->GetGlobalDragResizeType(dragResizeType);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    // send failed
+    MockMessageParcel::ClearAllErrorFlag();
+    iRemoteObjectMocker->SetRequestResult(1);
+    errCode = sceneSessionManagerLiteProxy->GetGlobalDragResizeType(dragResizeType);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    iRemoteObjectMocker->SetRequestResult(0);
+    // read failed
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetReadInt32ErrorFlag(1);
+    errCode = sceneSessionManagerLiteProxy->GetGlobalDragResizeType(dragResizeType);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: SetAppDragResizeType
+ * @tc.desc: SetAppDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerLiteProxyTest, SetAppDragResizeType, TestSize.Level1)
+{
+    DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    const std::string bundleName = "test";
+    // remote nullptr
+    sptr<SceneSessionManagerLiteProxy> nullptrProxy =
+        sptr<SceneSessionManagerLiteProxy>::MakeSptr(nullptr);
+    auto errCode = nullptrProxy->SetAppDragResizeType(bundleName, dragResizeType);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+
+    sptr<MockIRemoteObject> iRemoteObjectMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SceneSessionManagerLiteProxy> sceneSessionManagerLiteProxy =
+        sptr<SceneSessionManagerLiteProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_TRUE(sceneSessionManagerLiteProxy != nullptr);
+    // write token failed
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    errCode = sceneSessionManagerLiteProxy->SetAppDragResizeType(bundleName, dragResizeType);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    // write value failed
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteStringErrorFlag(true);
+    errCode = sceneSessionManagerLiteProxy->SetAppDragResizeType(bundleName, dragResizeType);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    errCode = sceneSessionManagerLiteProxy->SetAppDragResizeType(bundleName, dragResizeType);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    // send failed
+    MockMessageParcel::ClearAllErrorFlag();
+    iRemoteObjectMocker->SetRequestResult(1);
+    errCode = sceneSessionManagerLiteProxy->SetAppDragResizeType(bundleName, dragResizeType);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    iRemoteObjectMocker->SetRequestResult(0);
+    // read failed
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetReadInt32ErrorFlag(1);
+    errCode = sceneSessionManagerLiteProxy->SetAppDragResizeType(bundleName, dragResizeType);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    // pass
+    MockMessageParcel::ClearAllErrorFlag();
+    errCode = sceneSessionManagerLiteProxy->SetAppDragResizeType(bundleName, dragResizeType);
+    EXPECT_EQ(errCode, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetAppDragResizeType
+ * @tc.desc: GetAppDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerLiteProxyTest, GetAppDragResizeType, TestSize.Level1)
+{
+    DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    const std::string bundleName = "test";
+    // remote nullptr
+    sptr<SceneSessionManagerLiteProxy> nullptrProxy =
+        sptr<SceneSessionManagerLiteProxy>::MakeSptr(nullptr);
+    auto errCode = nullptrProxy->GetAppDragResizeType(bundleName, dragResizeType);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+
+    sptr<MockIRemoteObject> iRemoteObjectMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SceneSessionManagerLiteProxy> sceneSessionManagerLiteProxy =
+        sptr<SceneSessionManagerLiteProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_TRUE(sceneSessionManagerLiteProxy != nullptr);
+    // write token failed
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    errCode = sceneSessionManagerLiteProxy->GetAppDragResizeType(bundleName, dragResizeType);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    // write failed
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteStringErrorFlag(true);
+    errCode = sceneSessionManagerLiteProxy->GetAppDragResizeType(bundleName, dragResizeType);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    // send failed
+    MockMessageParcel::ClearAllErrorFlag();
+    iRemoteObjectMocker->SetRequestResult(1);
+    errCode = sceneSessionManagerLiteProxy->GetAppDragResizeType(bundleName, dragResizeType);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    iRemoteObjectMocker->SetRequestResult(0);
+    // read failed
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetReadInt32ErrorFlag(1);
+    errCode = sceneSessionManagerLiteProxy->GetAppDragResizeType(bundleName, dragResizeType);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: SetAppKeyFramePolicy
+ * @tc.desc: SetAppKeyFramePolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerLiteProxyTest, SetAppKeyFramePolicy, TestSize.Level1)
+{
+    const std::string bundleName = "test";
+    KeyFramePolicy keyFramePolicy;
+    keyFramePolicy.dragResizeType_ = DragResizeType::RESIZE_EACH_FRAME;
+    // remote nullptr
+    sptr<SceneSessionManagerLiteProxy> nullptrProxy =
+        sptr<SceneSessionManagerLiteProxy>::MakeSptr(nullptr);
+    auto errCode = nullptrProxy->SetAppKeyFramePolicy(bundleName, keyFramePolicy);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+
+    sptr<MockIRemoteObject> iRemoteObjectMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SceneSessionManagerLiteProxy> sceneSessionManagerLiteProxy =
+        sptr<SceneSessionManagerLiteProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_TRUE(sceneSessionManagerLiteProxy != nullptr);
+    // write token failed
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    errCode = sceneSessionManagerLiteProxy->SetAppKeyFramePolicy(bundleName, keyFramePolicy);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    // write value failed
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteStringErrorFlag(true);
+    errCode = sceneSessionManagerLiteProxy->SetAppKeyFramePolicy(bundleName, keyFramePolicy);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    errCode = sceneSessionManagerLiteProxy->SetAppKeyFramePolicy(bundleName, keyFramePolicy);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    // send failed
+    MockMessageParcel::ClearAllErrorFlag();
+    iRemoteObjectMocker->SetRequestResult(1);
+    errCode = sceneSessionManagerLiteProxy->SetAppKeyFramePolicy(bundleName, keyFramePolicy);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    iRemoteObjectMocker->SetRequestResult(0);
+    // read failed
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetReadInt32ErrorFlag(1);
+    errCode = sceneSessionManagerLiteProxy->SetAppKeyFramePolicy(bundleName, keyFramePolicy);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    // pass
+    MockMessageParcel::ClearAllErrorFlag();
+    errCode = sceneSessionManagerLiteProxy->SetAppKeyFramePolicy(bundleName, keyFramePolicy);
+    EXPECT_EQ(errCode, WMError::WM_OK);
+}
+
+/**
  * @tc.name: PendingSessionToBackgroundByPersistentId
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -267,6 +493,47 @@ HWTEST_F(sceneSessionManagerLiteProxyTest, UpdateWindowModeByIdForUITest01, Test
     errCode = sceneSessionManagerLiteProxy->UpdateWindowModeByIdForUITest(windowId, updateMode);
     MockMessageParcel::SetReadInt32ErrorFlag(false);
     EXPECT_EQ(errCode, WMError::WM_OK);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: UpdateScreenLockStatusForApp
+ * @tc.desc: update screen lock status
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerLiteProxyTest, UpdateScreenLockStatusForApp, TestSize.Level1)
+{
+    auto tempProxy = sptr<SceneSessionManagerLiteProxy>::MakeSptr(nullptr);
+    auto ret = tempProxy->UpdateScreenLockStatusForApp("", true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    auto proxy = sptr<SceneSessionManagerLiteProxy>::MakeSptr(remoteMocker);
+    ASSERT_NE(proxy, nullptr);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    EXPECT_EQ(proxy->UpdateScreenLockStatusForApp("", true), WMError::WM_OK);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ret = proxy->UpdateScreenLockStatusForApp("a", true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    MockMessageParcel::SetWriteStringErrorFlag(true);
+    ret = proxy->UpdateScreenLockStatusForApp("b", false);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteStringErrorFlag(false);
+
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    ret = proxy->UpdateScreenLockStatusForApp("c", false);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteBoolErrorFlag(false);
+
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ret = proxy->UpdateScreenLockStatusForApp("d", true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
     MockMessageParcel::ClearAllErrorFlag();
 }
 

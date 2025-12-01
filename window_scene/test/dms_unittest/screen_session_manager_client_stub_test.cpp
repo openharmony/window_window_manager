@@ -526,6 +526,19 @@ HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnScreenConnectionChanged, Te
     data.WriteUint64(1);
     data.WriteUint32(1);
     data.WriteUint32(2);
+    data.WriteBool(true);
+    data.WriteInt32(1);
+    uint64_t mapSize = 4;
+    data.WriteUint64(mapSize);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteInt32(1);
+    data.WriteInt32(1);
+    data.WriteInt32(2);
+    data.WriteInt32(2);
+    data.WriteInt32(3);
+    data.WriteInt32(3);
+
     int ret = screenSessionManagerClientStub_->HandleOnScreenConnectionChanged(data, reply);
     EXPECT_EQ(ret, 0);
 }

@@ -48,6 +48,7 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent);
     virtual WMError CheckWindowId(int32_t windowId, int32_t& pid);
     virtual WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos);
+    virtual WMError UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease);
     virtual void ClearWindowAdapter();
     virtual WMError GetWindowModeType(WindowModeType& windowModeType);
     virtual WMError RaiseWindowToTop(int32_t persistentId);
@@ -66,6 +67,11 @@ public:
     virtual WMError CloseTargetPiPWindow(const std::string& bundleName);
     virtual WMError GetCurrentPiPWindowInfo(std::string& bundleName);
     virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos);
+    virtual WMError SetGlobalDragResizeType(DragResizeType dragResizeType);
+    virtual WMError GetGlobalDragResizeType(DragResizeType& dragResizeType);
+    virtual WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType);
+    virtual WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType);
+    virtual WMError SetAppKeyFramePolicy(const std::string& bundleName, const KeyFramePolicy& keyFramePolicy);
     virtual WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos);
     virtual WMError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     virtual WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,

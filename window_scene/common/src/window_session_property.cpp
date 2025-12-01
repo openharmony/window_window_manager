@@ -1472,6 +1472,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isShowDecorInFreeMultiWindow_) &&
         parcel.WriteBool(isMobileAppInPadLayoutFullScreen_) &&
         parcel.WriteBool(isFullScreenInForceSplitMode_) &&
+        parcel.WriteString(compatibleModePage_) &&
+        parcel.WriteInt32(static_cast<int32_t>(pageCompatibleMode_)) &&
         parcel.WriteFloat(aspectRatio_) &&
         parcel.WriteBool(isRotationLock_);
 }
@@ -1593,6 +1595,8 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsShowDecorInFreeMultiWindow(parcel.ReadBool());
     property->SetMobileAppInPadLayoutFullScreen(parcel.ReadBool());
     property->SetIsFullScreenInForceSplitMode(parcel.ReadBool());
+    property->SetCompatibleModePage(parcel.ReadString());
+    property->SetPageCompatibleMode(static_cast<CompatibleStyleMode>(parcel.ReadInt32()));
     property->SetAspectRatio(parcel.ReadFloat());
     property->SetRotationLocked(parcel.ReadBool());
     return property;
@@ -1713,6 +1717,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     aspectRatio_ = property->aspectRatio_;
     isRotationLock_ = property->isRotationLock_;
     statusBarHeightInImmersive_ = property->statusBarHeightInImmersive_;
+    pageCompatibleMode_ = property->pageCompatibleMode_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -2461,6 +2466,17 @@ bool WindowSessionProperty::IsAdaptToSimulationScale() const
     return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToSimulationScale();
 }
 
+RealTimeSwitchInfo WindowSessionProperty::GetRealTimeSwitchInfo() const
+{
+    if (!compatibleModeProperty_) {
+        RealTimeSwitchInfo switchInfo;
+        switchInfo.isNeedChange_ = false;
+        switchInfo.showTypes_ = 0;
+        return switchInfo;
+    }
+    return compatibleModeProperty_->GetRealTimeSwitchInfo();
+}
+
 void WindowSessionProperty::SetIsFullScreenInForceSplitMode(bool isFullScreenInForceSplitMode)
 {
     isFullScreenInForceSplitMode_ = isFullScreenInForceSplitMode;
@@ -2469,6 +2485,26 @@ void WindowSessionProperty::SetIsFullScreenInForceSplitMode(bool isFullScreenInF
 bool WindowSessionProperty::IsFullScreenInForceSplitMode() const
 {
     return isFullScreenInForceSplitMode_;
+}
+
+void WindowSessionProperty::SetCompatibleModePage(const std::string& compatibleModePage)
+{
+    compatibleModePage_ = compatibleModePage;
+}
+
+std::string WindowSessionProperty::GetCompatibleModePage() const
+{
+    return compatibleModePage_;
+}
+
+void WindowSessionProperty::SetPageCompatibleMode(CompatibleStyleMode compatibleMode)
+{
+    pageCompatibleMode_ = compatibleMode;
+}
+
+CompatibleStyleMode WindowSessionProperty::GetPageCompatibleMode() const
+{
+    return pageCompatibleMode_;
 }
 
 void WindowSessionProperty::SetPcAppInpadCompatibleMode(bool enabled)
@@ -2671,6 +2707,17 @@ bool CompatibleModeProperty::IsAdaptToSimulationScale() const
     return isAdaptToSimulationScale_;
 }
 
+void CompatibleModeProperty::SetRealTimeSwitchInfo(const RealTimeSwitchInfo& switchInfo)
+{
+    realTimeSwitchInfo_.isNeedChange_ = switchInfo.isNeedChange_;
+    realTimeSwitchInfo_.showTypes_ = switchInfo.showTypes_;
+}
+
+RealTimeSwitchInfo CompatibleModeProperty::GetRealTimeSwitchInfo() const
+{
+    return realTimeSwitchInfo_;
+}
+
 bool CompatibleModeProperty::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteBool(isAdaptToImmersive_) &&
@@ -2687,7 +2734,9 @@ bool CompatibleModeProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isFullScreenStart_) &&
         parcel.WriteBool(isSupportRotateFullScreen_) &&
         parcel.WriteBool(isAdaptToSubWindow_) &&
-        parcel.WriteBool(isAdaptToSimulationScale_);
+        parcel.WriteBool(isAdaptToSimulationScale_) &&
+        parcel.WriteBool(realTimeSwitchInfo_.isNeedChange_) &&
+        parcel.WriteUint32(realTimeSwitchInfo_.showTypes_);
 }
 
 CompatibleModeProperty* CompatibleModeProperty::Unmarshalling(Parcel& parcel)
@@ -2711,6 +2760,8 @@ CompatibleModeProperty* CompatibleModeProperty::Unmarshalling(Parcel& parcel)
     property->isSupportRotateFullScreen_ = parcel.ReadBool();
     property->isAdaptToSubWindow_ = parcel.ReadBool();
     property->isAdaptToSimulationScale_ = parcel.ReadBool();
+    property->realTimeSwitchInfo_.isNeedChange_ = parcel.ReadBool();
+    property->realTimeSwitchInfo_.showTypes_ = parcel.ReadUint32();
     return property;
 }
 

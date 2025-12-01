@@ -665,9 +665,9 @@ HWTEST_F(WindowExtensionSessionImplTest, UnregisterRectChangeInGlobalDisplayList
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, window_->UnregisterRectChangeInGlobalDisplayListener(listener));
 
     listener = sptr<IRectChangeInGlobalDisplayListener>::MakeSptr();
-    window_->rectChangeInGlobalDisplayUIExtListenerIds.emplace(111);
+    window_->rectChangeInGlobalDisplayUIExtListenerIds_.emplace(111);
     EXPECT_EQ(WMError::WM_OK, window_->UnregisterRectChangeInGlobalDisplayListener(listener));
-    window_->rectChangeInGlobalDisplayUIExtListenerIds.clear();
+    window_->rectChangeInGlobalDisplayUIExtListenerIds_.clear();
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window_->UnregisterRectChangeInGlobalDisplayListener(listener));
     window_->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
     EXPECT_EQ(WMError::WM_OK, window_->UnregisterRectChangeInGlobalDisplayListener(listener));
@@ -1515,6 +1515,19 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateSystemViewportConfig3, TestSize.L
 }
 
 /**
+ * @tc.name: UpdateSystemViewportConfig_DensityCustomized
+ * @tc.desc: Density customized
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateSystemViewportConfig_DensityCustomized, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->isDensityCustomized_ = true;
+    window_->UpdateSystemViewportConfig();
+    usleep(WAIT_SYNC_IN_NS);
+}
+
+/**
  * @tc.name: NotifyDisplayInfoChange1
  * @tc.desc: Normal test
  * @tc.type: FUNC
@@ -2044,6 +2057,21 @@ HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio_compat, TestSize.L
     window->property_->SetCompatibleModeProperty(compatibleModeProperty);
     auto value = window->GetVirtualPixelRatio(nullptr);
     EXPECT_NEAR(value, COMPACT_SIMULATION_SCALE_DPI, 0.00001f);
+}
+
+/**
+ * @tc.name: GetVirtualPixelRatio_DensityCustomized
+ * @tc.desc: GetVirtualPixelRatio_DensityCustomized test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio_DensityCustomized, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetVirtualPixelRatio_DensityCustomized");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    window->isDensityCustomized_ = true;
+    window->customizedDensity_ = 2.0f;
+    EXPECT_NEAR(window->GetVirtualPixelRatio(nullptr), window->customizedDensity_, 0.00001f);
 }
 
 /**
@@ -2798,6 +2826,68 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateExtensionDensity, TestSize.Level1
 }
 
 /**
+ * @tc.name: UpdateExtensionDensity
+ * @tc.desc: UpdateExtensionDensity_DensityCustomized Density customized test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateExtensionDensity_DensityCustomized, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateExtensionDensity");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    window->isDensityCustomized_ = true;
+    window->customizedDensity_ = 2.0f;
+
+    SessionViewportConfig config;
+    config.isDensityFollowHost_ = false;
+    config.density_ = 3.0f;
+    window->UpdateExtensionDensity(config);
+    EXPECT_NEAR(config.density_, window->customizedDensity_, 0.00001f);
+}
+
+/**
+ * @tc.name: UpdateExtensionDensity
+ * @tc.desc: UpdateExtensionDensity_DensityCustomized1 Density customized test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateExtensionDensity_DensityCustomized1, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateExtensionDensity");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    window->isDensityCustomized_ = true;
+    window->customizedDensity_ = 2.0f;
+
+    SessionViewportConfig config;
+    config.isDensityFollowHost_ = true;
+    config.density_ = 3.0f;
+    window->UpdateExtensionDensity(config);
+    EXPECT_NEAR(3.0f, window->hostDensityValue_->load(), 0.00001f);
+    EXPECT_NEAR(config.density_, window->customizedDensity_, 0.00001f);
+}
+
+/**
+ * @tc.name: SetUIExtCustomDensity
+ * @tc.desc: SetUIExtCustomDensity Density customized test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, SetUIExtCustomDensity, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateExtensionDensity");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetUIExtCustomDensity(0.0f));
+
+    window->handler_ = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_SYSTEM_ABNORMALLY, window->SetUIExtCustomDensity(1.0f));
+
+    auto runner = AppExecFwk::EventRunner::Create("WindowExtensionSessionImplTest");
+    window->handler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    EXPECT_EQ(WMError::WM_OK, window->SetUIExtCustomDensity(1.0f));
+    usleep(WAIT_SYNC_IN_NS);
+}
+
+/**
  * @tc.name: GetDefaultDensity
  * @tc.desc: GetDefaultDensity Test
  * @tc.type: FUNC
@@ -2966,7 +3056,7 @@ HWTEST_F(WindowExtensionSessionImplTest, OnHostRectChangeInGlobalDisplay, TestSi
     window_->RegisterRectChangeInGlobalDisplayListener(listener);
 
     EXPECT_EQ(WMError::WM_OK, window_->OnHostRectChangeInGlobalDisplay(std::move(want), reply));
-    window_->rectChangeInGlobalDisplayUIExtListenerIds.emplace(111);
+    window_->rectChangeInGlobalDisplayUIExtListenerIds_.emplace(111);
     EXPECT_EQ(WMError::WM_OK, window_->OnHostRectChangeInGlobalDisplay(std::move(want), reply));
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     EXPECT_EQ(WMError::WM_OK, window_->OnHostRectChangeInGlobalDisplay(std::move(want), reply));
@@ -3066,7 +3156,7 @@ HWTEST_F(WindowExtensionSessionImplTest, OnExtensionMessage, TestSize.Level1)
     code = static_cast<uint32_t>(Extension::Businesscode::REGISTER_HOST_RECT_CHANGE_IN_GLOBAL_DISPLAY_LISTENER);
     EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
     code = static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_HOST_RECT_CHANGE_IN_GLOBAL_DISPLAY_LISTENER);
-    window->rectChangeInGlobalDisplayUIExtListenerIds.emplace(111);
+    window->rectChangeInGlobalDisplayUIExtListenerIds_.emplace(111);
     EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
 }
 
@@ -3271,13 +3361,11 @@ HWTEST_F(WindowExtensionSessionImplTest, SetImmersiveModeEnabledState, TestSize.
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
     window->property_->SetWindowName("SetImmersiveModeEnabledState");
-    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, window->SetImmersiveModeEnabledState(true));
 
     SessionInfo sessionInfo;
     sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
     window->hostSession_ = session;
     window->property_->SetPersistentId(1);
-    EXPECT_CALL(*session, TransferExtensionData).WillOnce(Return(ERR_NONE));
     EXPECT_EQ(WMError::WM_OK, window->SetImmersiveModeEnabledState(true));
 }
 
@@ -3291,9 +3379,21 @@ HWTEST_F(WindowExtensionSessionImplTest, GetImmersiveModeEnabledState, TestSize.
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
     window->property_->SetWindowName("GetImmersiveModeEnabledState");
-    window->hostImmersiveModeEnabled_ = false;
+    window->immersiveModeEnabled_ = false;
     EXPECT_EQ(false, window->GetImmersiveModeEnabledState());
-    window->hostImmersiveModeEnabled_ = true;
+}
+
+/**
+ * @tc.name: GetImmersiveModeEnabledState1
+ * @tc.desc: GetImmersiveModeEnabledState1 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, GetImmersiveModeEnabledState1, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowName("GetImmersiveModeEnabledState");
+    window->immersiveModeEnabled_ = true;
     EXPECT_EQ(true, window->GetImmersiveModeEnabledState());
 }
 

@@ -1032,29 +1032,6 @@ HWTEST_F(ScreenSessionTest, SetScreenColorSpace, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetPrivateSessionForeground
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionTest, SetPrivateSessionForeground, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "SetPrivateSessionForeground start";
-    ScreenSessionConfig config = {
-        .screenId = 100,
-        .rsId = 101,
-        .name = "OpenHarmony",
-    };
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
-        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
-    EXPECT_NE(nullptr, screenSession);
-    bool hasPrivate = true;
-    screenSession->SetPrivateSessionForeground(hasPrivate);
-    auto res = screenSession->HasPrivateSessionForeground();
-    ASSERT_EQ(res, hasPrivate);
-    GTEST_LOG_(INFO) << "SetPrivateSessionForeground end";
-}
-
-/**
  * @tc.name: GetScreenCombination
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -2114,20 +2091,6 @@ HWTEST_F(ScreenSessionTest, screen_session_test007, TestSize.Level1)
 }
 
 /**
- * @tc.name: screen_session_test008
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionTest, screen_session_test008, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test008 start";
-    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
-    bool res = session->HasPrivateSessionForeground();
-    ASSERT_EQ(res, false);
-    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test008 end";
-}
-
-/**
  * @tc.name: screen_session_test009
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -2283,6 +2246,62 @@ HWTEST_F(ScreenSessionTest, CalcRotation, TestSize.Level1)
     session->SetScreenProperty(property);
     res = session->CalcRotation(orientation, foldDisplayMode);
     EXPECT_EQ(Rotation::ROTATION_0, res);
+}
+
+/**
+ * @tc.name: CalcBoundsInRotationZero
+ * @tc.desc: normal CalcBoundsInRotationZero
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CalcBoundsInRotationZero, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ScreenProperty property;
+    RRect bounds;
+    bounds.rect_.width_ = 1344;
+    bounds.rect_.height_ = 2772;
+    property.SetBounds(bounds);
+    property.UpdateDeviceRotation(Rotation::ROTATION_0);
+    session->SetScreenProperty(property);
+    auto res = session->CalcBoundsInRotationZero();
+    EXPECT_EQ(res.rect_.width_, 1344);
+
+    property.UpdateDeviceRotation(Rotation::ROTATION_90);
+    session->SetScreenProperty(property);
+    res = session->CalcBoundsInRotationZero();
+    EXPECT_EQ(res.rect_.width_, 2772);
+}
+
+/**
+ * @tc.name: CalcBoundsByRotation
+ * @tc.desc: normal CalcBoundsByRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CalcBoundsByRotation, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ScreenProperty property;
+    RRect bounds;
+    bounds.rect_.width_ = 1344;
+    bounds.rect_.height_ = 2772;
+    property.SetBounds(bounds);
+    property.UpdateDeviceRotation(Rotation::ROTATION_0);
+    session->SetScreenProperty(property);
+    Rotation rotation = Rotation::ROTATION_0;
+    auto res = session->CalcBoundsByRotation(rotation);
+    EXPECT_EQ(res.rect_.width_, 1344);
+    rotation = Rotation::ROTATION_90;
+    res = session->CalcBoundsByRotation(rotation);
+    EXPECT_EQ(res.rect_.width_, 2772);
+
+    property.UpdateDeviceRotation(Rotation::ROTATION_90);
+    session->SetScreenProperty(property);
+    rotation = Rotation::ROTATION_0;
+    res = session->CalcBoundsByRotation(rotation);
+    EXPECT_EQ(res.rect_.width_, 2772);
+    rotation = Rotation::ROTATION_90;
+    res = session->CalcBoundsByRotation(rotation);
+    EXPECT_EQ(res.rect_.width_, 1344);
 }
 
 /**
@@ -4885,6 +4904,66 @@ HWTEST_F(ScreenSessionTest, SetSupportsInput, TestSize.Level1)
     session->SetSupportsInput(true);
     supportInput = session->GetSupportsInput();
     EXPECT_EQ(supportInput, true);
+}
+
+/**
+ * @tc.name  : UpdateRotationOrientationMap01
+ * @tc.desc  : UpdateRotationOrientationMap01
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdateRotationOrientationMap01, TestSize.Level1)
+{
+    ScreenId screenId = 10000;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
+
+    UniqueScreenRotationOptions rotationOptions;
+    int32_t rotation = static_cast<int32_t>(Rotation::ROTATION_0);
+    int32_t orientation = static_cast<int32_t>(DisplayOrientation::LANDSCAPE);
+
+    bool result = session->UpdateRotationOrientationMap(rotationOptions, rotation, orientation);
+    std::map<int32_t, int32_t> rotationOrientationMap = {{0, 1}, {1, 2}, {2, 3}, {3, 0}};
+    EXPECT_EQ(result, true);
+    EXPECT_EQ(rotationOptions.rotationOrientationMap_, rotationOrientationMap);
+}
+
+/**
+ * @tc.name  : UpdateRotationOrientationMap02
+ * @tc.desc  : UpdateRotationOrientationMap02
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdateRotationOrientationMap02, TestSize.Level1)
+{
+    ScreenId screenId = 10000;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
+
+    UniqueScreenRotationOptions rotationOptions;
+    int32_t rotation = ROTATION_UNSET;
+    int32_t orientation = static_cast<int32_t>(DisplayOrientation::LANDSCAPE);
+
+    bool result = session->UpdateRotationOrientationMap(rotationOptions, rotation, orientation);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name  : UpdateRotationOrientationMap03
+ * @tc.desc  : UpdateRotationOrientationMap03
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdateRotationOrientationMap03, TestSize.Level1)
+{
+    ScreenId screenId = 10000;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
+    constexpr int32_t INVALID_ORIENTATION = 4;
+
+    UniqueScreenRotationOptions rotationOptions;
+    int32_t rotation = static_cast<int32_t>(Rotation::ROTATION_0);
+    int32_t orientation = INVALID_ORIENTATION;
+
+    bool result = session->UpdateRotationOrientationMap(rotationOptions, rotation, orientation);
+    EXPECT_EQ(result, false);
 }
 
 /**

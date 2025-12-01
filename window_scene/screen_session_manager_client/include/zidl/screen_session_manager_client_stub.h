@@ -51,6 +51,10 @@ private:
     int HandleOnUpdateFoldDisplayMode(MessageParcel& data, MessageParcel& reply);
     int HandleSetVirtualPixelRatioSystem(MessageParcel& data, MessageParcel& reply);
     int HandleSwitchUserCallback(MessageParcel& data, MessageParcel& reply);
+    int ReadRotationCorrectionMap(MessageParcel& data,
+        std::unordered_map<FoldDisplayMode, int32_t>& rotationCorrectionMap);
+    int ReadRotationOptions(MessageParcel& data, UniqueScreenRotationOptions& rotationOptions);
+    int ReadRotationOrientationMap(MessageParcel& data, std::map<int32_t, int32_t>& rotationOrientationMap);
     int HandleOnFoldStatusChangedReportUE(MessageParcel& data, MessageParcel& reply);
     int HandleOnScreenExtendChanged(MessageParcel& data, MessageParcel& reply);
     int HandleOnHoverStatusChanged(MessageParcel& data, MessageParcel& reply);

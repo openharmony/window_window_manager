@@ -759,6 +759,40 @@ HWTEST_F(ScreenSessionManagerTest, ScreenPower, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SyncScreenPowerState_StateON
+ * @tc.desc: SyncScreenPowerState State is ON
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SyncScreenPowerState_StateON, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr) << "ScreenSessionManager instance is null";
+
+    ssm_->SyncScreenPowerState(ScreenPowerState::POWER_ON);
+
+    EXPECT_TRUE(g_logMsg.find("force sync power state") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: SyncScreenPowerState_StateOFF
+ * @tc.desc: SyncScreenPowerState State is OFF
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SyncScreenPowerState_StateOFF, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr) << "ScreenSessionManager instance is null";
+
+    ssm_->SyncScreenPowerState(ScreenPowerState::POWER_OFF);
+
+    EXPECT_TRUE(g_logMsg.find("force sync power state") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
  * @tc.name: GetScreenPower
  * @tc.desc: GetScreenPower screen power
  * @tc.type: FUNC
@@ -2101,7 +2135,8 @@ HWTEST_F(ScreenSessionManagerTest, MakeUniqueScreen, TestSize.Level1)
     vector<ScreenId> screenIds;
     screenIds.clear();
     std::vector<DisplayId> displayIds;
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->MakeUniqueScreen(screenIds, displayIds));
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->MakeUniqueScreen(screenIds, displayIds,
+        UniqueScreenRotationOptions()));
 #endif
 }
 
@@ -2210,9 +2245,11 @@ HWTEST_F(ScreenSessionManagerTest, SetPrivacyStateByDisplayId01, TestSize.Level1
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ssm_->screenSessionMap_[id] = screenSession;
     ASSERT_NE(nullptr, screenSession);
-    ssm_->SetPrivacyStateByDisplayId(id, hasPrivate);
-    bool result = screenSession->HasPrivateSessionForeground();
-    EXPECT_EQ(result, true);
+    std::unordered_map<DisplayId, bool> privacyBundleDisplayId = {{id, hasPrivate}};
+    ssm_->SetPrivacyStateByDisplayId(privacyBundleDisplayId);
+    bool curHasPrivate = false;
+    ssm_->HasPrivateWindow(id, curHasPrivate);
+    EXPECT_TRUE(curHasPrivate);
 }
 
 /**
@@ -2227,9 +2264,11 @@ HWTEST_F(ScreenSessionManagerTest, SetPrivacyStateByDisplayId02, TestSize.Level1
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ssm_->screenSessionMap_[id] = screenSession;
     ASSERT_NE(nullptr, screenSession);
-    ssm_->SetPrivacyStateByDisplayId(id, hasPrivate);
-    bool result = screenSession->HasPrivateSessionForeground();
-    EXPECT_EQ(result, false);
+    std::unordered_map<DisplayId, bool> privacyBundleDisplayId = {{id, hasPrivate}};
+    ssm_->SetPrivacyStateByDisplayId(privacyBundleDisplayId);
+    bool curHasPrivate = false;
+    ssm_->HasPrivateWindow(id, curHasPrivate);
+    EXPECT_FALSE(curHasPrivate);
 }
 
 /**
@@ -3263,6 +3302,7 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenProperty03, TestSize.Level1)
     ScreenId screenId = 1050;
     ssm_->GetScreenProperty(screenId);
     EXPECT_TRUE(logMsg.find("Permission Denied") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -7455,6 +7495,66 @@ HWTEST_F(ScreenSessionManagerTest, UpdateCoordinationRefreshRate, TestSize.Level
     ssm_->SetCoordinationFlag(true);
     ssm_->UpdateCoordinationRefreshRate(refreshRate);
     EXPECT_TRUE(ssm_->GetScreenSession(0));
+}
+
+/**
+@tc.name: SyncScreenPropertyChangedToServer
+@tc.desc: test function : SyncScreenPropertyChangedToServer
+@tc.type: FUNC
+*/
+HWTEST_F(ScreenSessionManagerTest, SyncScreenPropertyChangedToServer, TestSize.Level1)
+{
+    ScreenId screenId = 1;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> screenSession = nullptr;
+    ssm_->screenSessionMap_.erase(screenId);
+    ssm_->screenSessionMap_.insert(std::make_pair(screenId, screenSession));
+    DMError ret = ssm_->SyncScreenPropertyChangedToServer(screenId, screenProperty);
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+    screenSession = new ScreenSession(screenId, screenProperty, 0);
+    ssm_->screenSessionMap_.erase(screenId);
+    ssm_->screenSessionMap_.insert(std::make_pair(screenId, screenSession));
+    std::function<void(sptr<ScreenSession> screenSession, SuperFoldStatusChangeEvents changeEvent)> func =
+        [](sptr<ScreenSession> screenSession, SuperFoldStatusChangeEvents changeEvent) { return; };
+    ssm_->SetPropertyChangedCallback(func);
+    ret = ssm_->SyncScreenPropertyChangedToServer(screenId, screenProperty);
+    EXPECT_EQ(DMError::DM_OK, ret);
+}
+/**
+@tc.name: SetPropertyChangedCallback
+@tc.desc: test function : SetPropertyChangedCallback
+@tc.type: FUNC
+*/
+HWTEST_F(ScreenSessionManagerTest, SetPropertyChangedCallback, TestSize.Level1)
+{
+    std::function<void(sptr<ScreenSession> screenSession, SuperFoldStatusChangeEvents changeEvent)> func = nullptr;
+    ssm_->SetPropertyChangedCallback(func);
+    EXPECT_EQ(ssm_->propertyChangedCallback_, nullptr);
+    std::function<void(sptr<ScreenSession> screenSession, SuperFoldStatusChangeEvents changeEvent)> func1 =
+        [](sptr<ScreenSession> screenSession, SuperFoldStatusChangeEvents changeEvent) { return; };
+    ssm_->SetPropertyChangedCallback(func1);
+    EXPECT_NE(ssm_->propertyChangedCallback_, nullptr);
+}
+/**
+@tc.name: OnFoldPropertyChange
+@tc.desc: test function : OnFoldPropertyChange
+@tc.type: FUNC
+*/
+HWTEST_F(ScreenSessionManagerTest, OnFoldPropertyChange, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ScreenId screenId = 1;
+    ScreenProperty screenProperty;
+    ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::UNDEFINED;
+    FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
+    ssm_->clientProxy_ = nullptr;
+    ssm_->OnFoldPropertyChange(screenId, screenProperty, reason, displayMode);
+    EXPECT_TRUE(g_logMsg.find("clientProxy_ is null") != std::string::npos);
+    g_logMsg.clear();
+
+    ssm_->clientProxy_ = sptr<ScreenSessionManagerClientTest>::MakeSptr();
+    ssm_->OnFoldPropertyChange(screenId, screenProperty, reason, displayMode);
 }
 
 /**

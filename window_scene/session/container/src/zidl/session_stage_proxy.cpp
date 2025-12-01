@@ -1762,7 +1762,7 @@ WSError SessionStageProxy::SendExtensionData(MessageParcel& data, MessageParcel&
     return WSError::WS_OK;
 }
 
-WSError SessionStageProxy::LinkKeyFrameCanvasNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode)
+WSError SessionStageProxy::LinkKeyFrameNode(std::shared_ptr<RSWindowKeyFrameNode>& rsKeyFrameNode)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1771,8 +1771,8 @@ WSError SessionStageProxy::LinkKeyFrameCanvasNode(std::shared_ptr<RSCanvasNode>&
         TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!rsCanvasNode || !rsCanvasNode->Marshalling(data)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Write rsCanvasNode failed");
+    if (!rsKeyFrameNode || !rsKeyFrameNode->WriteToParcel(data)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write rsKeyFrameNode failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
@@ -1780,7 +1780,7 @@ WSError SessionStageProxy::LinkKeyFrameCanvasNode(std::shared_ptr<RSCanvasNode>&
         TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_LINK_KEYFRAME_CANVAS_NODE),
+    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_LINK_KEYFRAME_NODE),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -1788,7 +1788,7 @@ WSError SessionStageProxy::LinkKeyFrameCanvasNode(std::shared_ptr<RSCanvasNode>&
     return WSError::WS_OK;
 }
 
-WSError SessionStageProxy::SetKeyFramePolicy(KeyFramePolicy& keyFramePolicy)
+WSError SessionStageProxy::SetStageKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1806,7 +1806,7 @@ WSError SessionStageProxy::SetKeyFramePolicy(KeyFramePolicy& keyFramePolicy)
         TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_KEYFRAME_POLICY),
+    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_STAGE_KEYFRAME_POLICY),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;

@@ -52,10 +52,12 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "MoveDragController"};
 }
 
-MoveDragController::MoveDragController(int32_t persistentId, WindowType winType)
+MoveDragController::MoveDragController(wptr<SceneSession> sceneSession) : sceneSession_(sceneSession)
 {
-    persistentId_ = persistentId;
-    winType_ = winType;
+    if (auto session = sceneSession.promote()) {
+        persistentId_ = session->GetPersistentId();
+        winType_ = session->GetWindowType();
+    }
 }
 
 void MoveDragController::OnConnect(ScreenId id)
@@ -508,8 +510,12 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
 
 bool MoveDragController::IsSupportWindowDragCrossDisplay()
 {
-    return !WindowHelper::IsSystemWindow(winType_) || winType_ == WindowType::WINDOW_TYPE_FLOAT ||
-            winType_ == WindowType::WINDOW_TYPE_SCREENSHOT || WindowHelper::IsInputWindow(winType_);
+    auto session = sceneSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to get session");
+        return false;
+    }
+    return session->IsCrossDisplayDragSupported();
 }
 
 /** @note @window.drag */

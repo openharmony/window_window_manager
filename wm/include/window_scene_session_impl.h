@@ -194,6 +194,7 @@ public:
     WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask) override;
     WMError SetFollowParentMultiScreenPolicy(bool enabled) override;
     WMError UseImplicitAnimation(bool useImplicit) override;
+    bool IsHitHotAreas(std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
 
     /*
      * PC Window Layout
@@ -205,6 +206,7 @@ public:
     WMError IsWindowRectAutoSave(bool& enabled) override;
     WMError MaximizeFloating() override;
     WMError MaximizeForCompatibleMode();
+    WMError SwitchCompatibleMode(CompatibleStyleMode styleMode);
     WMError RecoverForCompatibleMode();
     WMError Maximize() override;
     WMError Maximize(MaximizePresentation presentation) override;
@@ -259,6 +261,7 @@ public:
     WSError SetFullScreenWaterfallMode(bool isWaterfallMode) override;
     WSError SetSupportEnterWaterfallMode(bool isSupportEnter) override;
     WMError OnContainerModalEvent(const std::string& eventName, const std::string& value) override;
+    void ReportHoverMaximizeMenu(const std::string& bundleName, const std::string& hoverType);
 
     /*
      * Window Property
@@ -494,7 +497,7 @@ private:
      * Window Animation
      */
     bool enableDefaultAnimation_ = true;
-    static std::mutex transitionControllerMutex_;
+    std::mutex transitionControllerMutex_;
     std::vector<sptr<IAnimationTransitionController>> animationTransitionControllers_;
     void CustomHideAnimation();
 

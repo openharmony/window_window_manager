@@ -77,8 +77,14 @@ public:
     WMError CheckWindowId(int32_t windowId, int32_t& pid) override;
     WMError CheckUIExtensionCreation(int32_t windowId, uint32_t tokenId, const AppExecFwk::ElementName& element,
         AppExecFwk::ExtensionAbilityType extensionAbilityType, int32_t& pid) override;
+    WMError SetGlobalDragResizeType(DragResizeType dragResizeType) override;
+    WMError GetGlobalDragResizeType(DragResizeType& dragResizeType) override;
+    WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType) override;
+    WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType) override;
+    WMError SetAppKeyFramePolicy(const std::string& bundleName, const KeyFramePolicy& keyFramePolicy) override;
     WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) override;
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
+    WMError UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease) override;
     WMError GetWindowModeType(WindowModeType& windowModeType) override;
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo) override;
     WMError UpdateAnimationSpeedWithPid(pid_t pid, float speed) override;

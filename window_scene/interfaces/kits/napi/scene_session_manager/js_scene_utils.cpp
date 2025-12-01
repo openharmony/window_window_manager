@@ -675,6 +675,9 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
     if (!ConvertFromJsValueProperty(env, jsObject, "windowMode", sessionInfo.windowMode)) {
         return false;
     }
+    if (!ConvertFromJsValueProperty(env, jsObject, "compatibleModePage", sessionInfo.compatibleModePage)) {
+        return false;
+    }
     return true;
 }
 
@@ -1279,6 +1282,63 @@ bool ConvertInfoFromJsValue(napi_env env, napi_value jsObject, RotationChangeInf
     return true;
 }
 
+
+bool ConvertSupportRotationInfoFromJsValue(napi_env env, napi_value jsObject,
+    SupportRotationInfo& suppoortRotationInfo)
+{
+    napi_value jsDisplayId = nullptr;
+    napi_value jsPersistentId = nullptr;
+    napi_value jsContainerSupportRotation = nullptr;
+    napi_value jsSceneSupportRotation = nullptr;
+    napi_value jsSupportRotationChangeReason = nullptr;
+    napi_get_named_property(env, jsObject, "displayId", &jsDisplayId);
+    napi_get_named_property(env, jsObject, "persistentId", &jsPersistentId);
+    napi_get_named_property(env, jsObject, "containerSupportRotation", &jsContainerSupportRotation);
+    napi_get_named_property(env, jsObject, "sceneSupportRotation", &jsSceneSupportRotation);
+    napi_get_named_property(env, jsObject, "supportRotationChangeReason", &jsSupportRotationChangeReason);
+    if (GetType(env, jsDisplayId) != napi_undefined) {
+        uint32_t displayId;
+        if (!ConvertFromJsValue(env, jsDisplayId, displayId)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to displayId");
+            return false;
+        }
+        suppoortRotationInfo.displayId_ = static_cast<uint64_t>(displayId);
+    }
+    if (GetType(env, jsPersistentId) != napi_undefined) {
+        uint32_t persistentId;
+        if (!ConvertFromJsValue(env, jsPersistentId, persistentId)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to persistentId");
+            return false;
+        }
+        suppoortRotationInfo.persistentId_ = persistentId;
+    }
+    if (GetType(env, jsContainerSupportRotation) != napi_undefined) {
+        std::vector<bool> containerSupportRotation;
+        if (!ParseBoolArrayValueFromJsValue(env, jsContainerSupportRotation, containerSupportRotation)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to containerSupportRotation");
+            return false;
+        }
+        suppoortRotationInfo.containerSupportRotation_ = containerSupportRotation;
+    }
+    if (GetType(env, jsSceneSupportRotation) != napi_undefined) {
+        std::vector<bool> sceneSupportRotation;
+        if (!ParseBoolArrayValueFromJsValue(env, jsSceneSupportRotation, sceneSupportRotation)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to sceneSupportRotation");
+            return false;
+        }
+        suppoortRotationInfo.sceneSupportRotation_ = sceneSupportRotation;
+    }
+    if (GetType(env, jsSupportRotationChangeReason) != napi_undefined) {
+        std::string supportRotationChangeReason;
+        if (!ConvertFromJsValue(env, jsSupportRotationChangeReason, supportRotationChangeReason)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to supportRotationChangeReason");
+            return false;
+        }
+        suppoortRotationInfo.supportRotationChangeReason_ = supportRotationChangeReason;
+    }
+    return true;
+}
+
 bool ConvertDragResizeTypeFromJs(napi_env env, napi_value value, DragResizeType& dragResizeType)
 {
     uint32_t dragResizeTypeValue;
@@ -1304,6 +1364,33 @@ bool ConvertThrowSlipModeFromJs(napi_env env, napi_value value, ThrowSlipMode& t
         return false;
     }
     throwSlipMode = it->second;
+    return true;
+}
+
+bool ConvertRealTimeSwitchInfoFromJs(napi_env env, napi_value value, RealTimeSwitchInfo& switchInfo)
+{
+    napi_value realTimeSwitchInfo = nullptr;
+    napi_value jsIsNeedChange = nullptr;
+    napi_value jsShowTypes = nullptr;
+    napi_get_named_property(env, value, "realTimeSwitchInfo", &realTimeSwitchInfo);
+    if (!realTimeSwitchInfo) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to realTimeSwitchInfo");
+        return false;
+    }
+    napi_get_named_property(env, realTimeSwitchInfo, "isNeedChange", &jsIsNeedChange);
+    napi_get_named_property(env, realTimeSwitchInfo, "showTypes", &jsShowTypes);
+    bool isNeedChange = false;
+    if (realTimeSwitchInfo == nullptr || !ConvertFromJsValue(env, jsIsNeedChange, isNeedChange)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to isNeedChange");
+        return false;
+    }
+    switchInfo.isNeedChange_ = isNeedChange;
+    uint32_t showTypes = 0;
+    if (realTimeSwitchInfo == nullptr || !ConvertFromJsValue(env, jsShowTypes, showTypes)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to showTypes");
+        return false;
+    }
+    switchInfo.showTypes_ = showTypes;
     return true;
 }
 
@@ -1337,6 +1424,11 @@ bool ConvertCompatibleModePropertyFromJs(napi_env env, napi_value value, Compati
             atLeastOneParam = true;
         }
     }
+    RealTimeSwitchInfo realTimeSwitchInfo;
+    if (ConvertRealTimeSwitchInfoFromJs(env, value, realTimeSwitchInfo)) {
+        compatibleModeProperty.SetRealTimeSwitchInfo(realTimeSwitchInfo);
+        atLeastOneParam = true;
+    }
     TLOGI(WmsLogTag::WMS_COMPAT, "property: %{public}s", compatibleModeProperty.ToString().c_str());
     return atLeastOneParam;
 }
@@ -1366,6 +1458,37 @@ bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::stri
         if (!ConvertFromJsValue(env, jsValue, strItem)) {
             WLOGFW("Failed to ConvertFromJsValue, index: %{public}u", i);
             continue;
+        }
+        vector.emplace_back(std::move(strItem));
+    }
+    return true;
+}
+
+bool ParseBoolArrayValueFromJsValue(napi_env env, napi_value array, std::vector<bool>& vector)
+{
+    if (array == nullptr) {
+        WLOGFE("array is nullptr!");
+        return false;
+    }
+    bool isArray = false;
+    if (napi_is_array(env, array, &isArray) != napi_ok || isArray == false) {
+        WLOGFE("not array!");
+        return false;
+    }
+
+    uint32_t arrayLen = 0;
+    napi_get_array_length(env, array, &arrayLen);
+    if (arrayLen == 0) {
+        return true;
+    }
+    vector.reserve(arrayLen);
+    for (uint32_t i = 0; i < arrayLen; i++) {
+        bool strItem;
+        napi_value jsValue = nullptr;
+        napi_get_element(env, array, i, &jsValue);
+        if (!ConvertFromJsValue(env, jsValue, strItem)) {
+            WLOGFW("Failed to ConvertFromJsValue, index: %{public}u", i);
+            return false;
         }
         vector.emplace_back(std::move(strItem));
     }
@@ -1577,6 +1700,8 @@ napi_value CreateJsSessionRecoverInfo(
     napi_set_named_property(env, objValue, "currentRotation", CreateJsValue(env, sessionInfo.currentRotation_));
     napi_set_named_property(env, objValue, "supportWindowModes",
         CreateSupportWindowModes(env, sessionInfo.supportedWindowModes));
+    napi_set_named_property(env, objValue,
+        "pageCompatibleMode", CreateJsValue(env, property->GetPageCompatibleMode()));
 
     napi_value jsTransitionAnimationMapValue = nullptr;
     napi_create_object(env, &jsTransitionAnimationMapValue);
@@ -2064,6 +2189,7 @@ napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& para
     napi_set_named_property(env, objValue, "dragResizeType", CreateJsValue(env, param.dragResizeType));
     napi_set_named_property(env, objValue, "gravity", CreateJsValue(env, param.gravity));
     napi_set_named_property(env, objValue, "waterfallResidentState", CreateJsValue(env, param.waterfallResidentState));
+    napi_set_named_property(env, objValue, "compatibleStyleMode", CreateJsValue(env, param.compatibleStyleMode));
     return objValue;
 }
 
@@ -2638,6 +2764,33 @@ napi_value CreateWaterfallResidentState(napi_env env)
     return objValue;
 }
 
+napi_value CreateCompatibleStyleMode(napi_env env)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "env is nullptr");
+        return nullptr;
+    }
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to create object");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "INVALID_VALUE",
+        CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::INVALID_VALUE)));
+    napi_set_named_property(env, objValue, "LANDSCAPE_DEFAULT",
+        CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_DEFAULT)));
+    napi_set_named_property(env, objValue, "LANDSCAPE_18_9",
+        CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_18_9)));
+    napi_set_named_property(env, objValue, "LANDSCAPE_1_1",
+        CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_1_1)));
+    napi_set_named_property(env, objValue, "LANDSCAPE_2_3",
+        CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_2_3)));
+    napi_set_named_property(env, objValue, "LANDSCAPE_SPLIT",
+        CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_SPLIT)));
+    return objValue;
+}
+ 
 MainThreadScheduler::MainThreadScheduler(napi_env env)
     : env_(env)
 {

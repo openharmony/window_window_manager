@@ -170,7 +170,7 @@ HWTEST_F(SceneSessionManagerTest, GerPrivacyBundleListTwoWindow, TestSize.Level1
     sceneSessionSecond->GetSessionProperty()->isPrivacyMode_ = true;
     sceneSessionSecond->state_ = SessionState::STATE_FOREGROUND;
 
-    std::unordered_set<std::string> privacyBundleList;
+    std::unordered_map<DisplayId, std::unordered_set<std::string>> privacyBundleList;
     ssm_->GetSceneSessionPrivacyModeBundles(0, privacyBundleList);
     EXPECT_EQ(privacyBundleList.size(), 2);
 
@@ -2210,6 +2210,52 @@ HWTEST_F(SceneSessionManagerTest, IsAppBoundSystemTray001, TestSize.Level1)
     ASSERT_EQ(ssm_->IsAppBoundSystemTray(1001, 2001, "app_instance_0"), false);
     ssm_->appsWithBoundSystemTrayMap_.clear();
     LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: SetSupportRotationRegisteredListener
+ * @tc.desc: SetSupportRotationRegisteredListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetSupportRotationRegisteredListener, TestSize.Level1)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    info.persistentId_ = 9527;
+    info.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
+
+    g_logMsg.clear();
+    NotifySupportRotationRegisteredFunc func = [](){};
+    ssm_->SetSupportRotationRegisteredListener(std::move(func));
+    EXPECT_TRUE(ssm_->supportRotationRegisteredListener_ != nullptr);
+}
+
+/**
+ * @tc.name: NotifySupportRotationRegistered
+ * @tc.desc: NotifySupportRotationRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, NotifySupportRotationRegistered, TestSize.Level1)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    info.persistentId_ = 9527;
+    info.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
+
+    g_logMsg.clear();
+    WMError ret = WMError::WM_OK;
+    ret = ssm_->NotifySupportRotationRegistered();
+    EXPECT_EQ(ret, WMError::WM_OK);
 }
 } // namespace
 } // namespace Rosen

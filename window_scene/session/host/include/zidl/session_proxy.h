@@ -72,6 +72,8 @@ public:
     WSError GetTargetOrientationConfigInfo(Orientation targetOrientation,
         const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& targetProperties,
         const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& currentProperties) override;
+    WSError ConvertOrientationAndRotation(const RotationInfoType from, const RotationInfoType to,
+        const int32_t value, int32_t& convertedValue) override;
     WSError RequestSessionBack(bool needMoveToBackground) override;
     WSError MarkProcessed(int32_t eventId) override;
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
@@ -194,7 +196,7 @@ public:
     WSError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
     WSError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo) override;
     WSError KeyFrameAnimateEnd() override;
-    WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
+    WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSWindowKeyFrameNode>& rsKeyFrameNode,
         std::shared_ptr<RSTransaction>& rsTransaction) override;
     WSError SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) override;
     WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
@@ -226,6 +228,7 @@ public:
      * Compatible Mode
      */
     WSError NotifyIsFullScreenInForceSplitMode(bool isFullScreen) override;
+    WSError NotifyCompatibleModeChange(CompatibleStyleMode mode) override;
 
     /**
      * Restart app

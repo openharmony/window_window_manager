@@ -60,7 +60,7 @@ public:
         sptr<MoveDragProperty>& moveDragProperty);
     virtual void ProcessPointDown(uint32_t windowId, bool isPointDown = true);
     virtual void ProcessPointUp(uint32_t windowId);
-    virtual WMError MinimizeAllAppWindows(DisplayId displayId);
+    virtual WMError MinimizeAllAppWindows(DisplayId displayId, int32_t excludeWindowId = 0);
     virtual WMError ToggleShownStateForAllAppWindows();
     virtual WMError SetWindowLayoutMode(WindowLayoutMode mode);
     virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action);
@@ -122,6 +122,7 @@ public:
     virtual WMError UpdateSessionOcclusionStateListener(int32_t persistentId, bool haveListener);
     virtual WMError RaiseWindowToTop(int32_t persistentId);
     virtual WMError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId);
+    virtual WMError SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex, bool updateMap = true);
     virtual void CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
@@ -216,6 +217,7 @@ public:
      */
     virtual WMError AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
         const WindowAnimationOption& animationOption);
+    WMError NotifySupportRotationRegistered();
     
     /*
      * Window Property
@@ -265,10 +267,12 @@ private:
     void ReregisterWindowManagerAgent();
     void ReregisterWindowManagerFaultAgent();
     void WindowManagerAndSessionRecover();
+    void RecoverSpecificZIndexSetByApp();
     WMError RecoverWindowPropertyChangeFlag();
     uint32_t observedFlags_;
     uint32_t interestedFlags_;
     std::string appWatermarkName_;
+    std::unordered_map<WindowType, int32_t> specificZIndexMap_;
 
     sptr<IWindowManager> GetWindowManagerServiceProxy() const;
 
