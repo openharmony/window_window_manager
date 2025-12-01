@@ -413,6 +413,8 @@ public:
     virtual bool IsExitSplitOnBackground() const;
     virtual bool NeedStartingWindowExitAnimation() const { return true; }
     bool IsExitSplitOnBackgroundRecover();
+    int32_t EncodeSnapShotRecoverValue();
+    int32_t DecodeSnapShotRecoverValue(int32_t snapShotRecoverValue, SnapShotRecoverType snapShotRecoverType);
 
     void SetChangeSessionVisibilityWithStatusBarEventListener(
         NotifyChangeSessionVisibilityWithStatusBarFunc&& func);
@@ -538,6 +540,7 @@ public:
     WSError HandlePointerEventForFocus(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool isExecuteDelayRaise = false);
     bool HasParentSessionWithToken(const sptr<IRemoteObject>& token);
+    unordered_map<std::string, int32_t> snapShotRecoverValueMap_
 
     /*
      * Multi Window
