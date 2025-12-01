@@ -3556,6 +3556,24 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateRotateDuration, TestSize.Level2)
     EXPECT_EQ(duration, transactionDuration);
     EXPECT_EQ(reason, WindowSizeChangeReason::ROTATION);
 }
+
+/**
+ * @tc.name: AtomicServiceSetStatusBarColor
+ * @tc.desc: AtomicServiceSetStatusBarColor test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, AtomicServiceSetStatusBarColor, TestSize.Level1)
+{
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, window_->AtomicServiceSetStatusBarColor(255));
+
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window_->hostSession_ = session;
+    window_->property_->SetPersistentId(1);
+    EXPECT_CALL(*session, TransferExtensionData).WillOnce(Return(ERR_NONE));
+    EXPECT_EQ(WMError::WM_OK, window_->AtomicServiceSetStatusBarColor(255));
+}
 }
 } // namespace Rosen
 } // namespace OHOS

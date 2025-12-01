@@ -4951,6 +4951,14 @@ public:
     {
         return WMError::WM_OK;
     }
+
+    /**
+     * @brief Embeddable atomicService set status bar color.
+     *
+     * @param color Color numeric to set.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError AtomicServiceSetStatusBarColor(uint32_t color) { return WMError::WM_OK; }
 };
 }
 }

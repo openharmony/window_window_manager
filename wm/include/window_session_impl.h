@@ -708,6 +708,7 @@ protected:
     std::unordered_map<int32_t, sptr<IKeyboardDidHideListener>> keyboardDidHideUIExtListeners_;
     void WriteKeyboardInfoToWant(AAFwk::Want& want, const KeyboardPanelInfo& keyboardPanelInfo) const;
     void ReadKeyboardInfoFromWant(const AAFwk::Want& want, KeyboardPanelInfo& keyboardPanelInfo) const;
+    virtual WMError AtomicServiceSetStatusBarColorInner(uint32_t color) { return WMError::WM_OK; }
     static std::set<sptr<WindowSessionImpl>>& GetWindowExtensionSessionSet();
 
     /*
