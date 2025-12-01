@@ -3059,7 +3059,7 @@ void Session::SetHasSnapshot(SnapshotStatus key, DisplayOrientation rotate)
         ScenePersistentStorage::Insert(GetSnapshotPersistentKey(), EncodeSnapShotRecoverValue(),
             ScenePersistentStorageType::MAXIMIZE_STATE);
     } else {
-        scenePersistence_->SetHasSnapshot(true, key);  
+        scenePersistence_->SetHasSnapshot(true, key);
         ScenePersistentStorage::Insert(GetSnapshotPersistentKey(key),
             EncodeSnapShotRecoverValue(), ScenePersistentStorageType::MAXIMIZE_STATE);
     }
@@ -3166,12 +3166,9 @@ bool Session::HasSnapshotFreeMultiWindow()
         int32_t snapShotRecoverValue = 0;
         ScenePersistentStorage::Get("Snapshot_" + sessionInfo_.bundleName_ +
             "_" + std::to_string(persistentId_), snapShotRecoverValue, ScenePersistentStorageType::MAXIMIZE_STATE);
-        WindowMode windowMode = static_cast<WindowMode>(DecodeSnapShotRecoverValue(
+        bool isExitSplitOnBackgroundRecover = static_cast<bool>(DecodeSnapShotRecoverValue(
             snapShotRecoverValue, SnapShotRecoverType::EXIT_SPLIT_ON_BACKGROUND));
-        if (windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-            windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-            SetExitSplitOnBackground(true);
-        }
+        SetExitSplitOnBackground(isExitSplitOnBackgroundRecover);
     }
     return hasSnapshotFreeMultiWindow;
 }
