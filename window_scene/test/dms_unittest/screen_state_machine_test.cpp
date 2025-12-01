@@ -144,16 +144,28 @@ HWTEST_F(ScreenStateMachineTest, HandlePowerStateChangeTestInvalidTransition, Te
     EXPECT_FALSE(fsm_->HandlePowerStateChange(ScreenPowerEvent::SCREEN_POWER_EVENT_MAX, type));
 }
 
+/**
+ * @tc.name: DoSetScreenPowerForAll_ShouldReturnFalse_WhenTypeIsInvalid
+ * @tc.number: DoSetScreenPowerForAllTest_001
+ * @tc.desc: 测试当type参数有效时，DoSetScreenPowerForAll 函数应返回 true
+ */
 HWTEST_F(ScreenStateMachineTest, DoSetScreenPowerForAll_ShouldReturnFalse_WhenTypeIsInvalid, TestSize.Level0)
 {   ScreenPowerEvent event = ScreenPowerEvent::POWER_OFF;
-    ScreenPowerInfoType type;
-    EXPECT_FALSE(fsm_->DoSetScreenPowerForAll(event, type));
+    ScreenPowerInfoType invalidType;
+    EXPECT_FALSE(fsm_->DoSetScreenPowerForAll(event, invalidType));
 }
 
-HWTEST_F(ScreenStateMachineTest, DoSetScreenPowerForAll_ShouldReturnFalse_WhenTypeIsValid, TestSize.Level0)
+/**
+ * @tc.name: DoSetScreenPowerForAll_ShouldReturnFalse_WhenTypeIsValidAndDoSetScreenPowerForAllReturnFalse
+ * @tc.number: DoSetScreenPowerForAllTest_003
+ * @tc.desc: 测试当type参数有效时，DoSetScreenPowerForAll 函数应返回 false
+ */
+HWTEST_F(ScreenStateMachineTest,
+DoSetScreenPowerForAll_ShouldReturnFalse_WhenTypeIsValidAndDoSetScreenPowerForAllReturnFalse, TestSize.Level0)
 {   ScreenPowerEvent event = ScreenPowerEvent::POWER_ON;
-    ScreenPowerInfoType type = std::make_pair(ScreenPowerState::INVALID_STATE, PowerStateChangeReason::POWER_BUTTON);
-    EXPECT_FALSE(fsm_->DoSetScreenPowerForAll(event, type));
+    ScreenPowerInfoType validType = std::make_pair(ScreenPowerState::INVALID_STATE,
+    PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF);
+    EXPECT_FALSE(fsm_->DoSetScreenPowerForAll(event, validType));
 }
 }
 } // namespace Rosen
