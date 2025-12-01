@@ -3117,7 +3117,7 @@ export class WindowInternal implements Window {
       isDockHoverShown?: boolean): void;
     private native setHandwritingFlag(nativeObj: long, enable: boolean): void;
     private native getWindowDecorVisible(nativeObj: long): boolean;
-    private native getWindowDecorHeight(nativeObj:long): double;
+    private native getWindowDecorHeight(nativeObj:long): int;
     private native setWindowBackgroundColor(nativeObj: long, color: string): int;
     private native setImmersiveModeEnabledState(nativeObj: long, enable: boolean): int;
     private native setWindowDecorVisible(nativeObj: long, isVisible: boolean): int;
