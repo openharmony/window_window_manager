@@ -4931,6 +4931,10 @@ export class WindowInternal implements Window {
       });
     }
 
+    public maximize(presentation?: MaximizePresentation): Promise<void> {
+      return this.maximize(presentation, undefined);
+    }
+
     public maximize(presentation?: MaximizePresentation, acrossDisplay?: boolean): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute(() => {
@@ -5465,6 +5469,7 @@ export interface Window {
     getWindowStatus(): WindowStatusType;
     minimize(callback: AsyncCallback<void>): void;
     minimize(): Promise<void>;
+    maximize(presentation?: MaximizePresentation): Promise<void>;
     maximize(presentation?: MaximizePresentation, acrossDisplay?: boolean): Promise<void>;
     startMoving(): Promise<void>;
     startMoving(offsetX: int, offsetY: int): Promise<void>;
