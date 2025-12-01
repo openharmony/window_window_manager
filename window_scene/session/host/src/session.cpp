@@ -3059,7 +3059,7 @@ void Session::SetHasSnapshot(SnapshotStatus key, DisplayOrientation rotate)
         ScenePersistentStorage::Insert(GetSnapshotPersistentKey(), EncodeSnapShotRecoverValue(),
             ScenePersistentStorageType::MAXIMIZE_STATE);
     } else {
-        scenePersistence_->SetHasSnapshot(true, key);
+        scenePersistence_->SetHasSnapshot(true, key);  
         ScenePersistentStorage::Insert(GetSnapshotPersistentKey(key),
             EncodeSnapShotRecoverValue(), ScenePersistentStorageType::MAXIMIZE_STATE);
     }
@@ -3083,7 +3083,6 @@ bool Session::IsExitSplitOnBackgroundRecover()
     return GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
            GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
            IsExitSplitOnBackground();
-            
 }
 
 void Session::ResetLockedCacheSnapshot()
@@ -3147,11 +3146,12 @@ bool Session::HasSnapshot(SnapshotStatus key)
         "_" + std::to_string(persistentId_) + "_" + std::to_string(key), ScenePersistentStorageType::MAXIMIZE_STATE);
     if (hasSnapshot && scenePersistence_) {
         scenePersistence_->SetHasSnapshot(true, key);
-        int32_t rotate = 0;
+        int32_t snapShotRecoverValue = 0;
         ScenePersistentStorage::Get("Snapshot_" + sessionInfo_.bundleName_ +
             "_" + std::to_string(persistentId_) + "_" + std::to_string(key),
-            rotate, ScenePersistentStorageType::MAXIMIZE_STATE);
-        scenePersistence_->rotate_[key] = static_cast<DisplayOrientation>(rotate);
+            snapShotRecoverValue, ScenePersistentStorageType::MAXIMIZE_STATE);
+        scenePersistence_->rotate_[key] = static_cast<DisplayOrientation>(DecodeSnapShotRecoverValue(
+            snapShotRecoverValue, SnapShotRecoverType::ROTATE));
     }
     return hasSnapshot;
 }
@@ -3166,9 +3166,10 @@ bool Session::HasSnapshotFreeMultiWindow()
         int32_t snapShotRecoverValue = 0;
         ScenePersistentStorage::Get("Snapshot_" + sessionInfo_.bundleName_ +
             "_" + std::to_string(persistentId_), snapShotRecoverValue, ScenePersistentStorageType::MAXIMIZE_STATE);
-        int32_t windowMode = DecodeSnapShotRecoverValue(snapShotRecoverValue, SnapShotRecoverType::IsExitSplitOnBackgroundRecover);
-        if (static_cast<WindowMode>(windowMode) == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-            static_cast<WindowMode>(windowMode) == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        WindowMode windowMode = static_cast<WindowMode>(DecodeSnapShotRecoverValue(
+            snapShotRecoverValue, SnapShotRecoverType::EXIT_SPLIT_ON_BACKGROUND));
+        if (windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
             SetExitSplitOnBackground(true);
         }
     }
