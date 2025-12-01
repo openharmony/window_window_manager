@@ -205,6 +205,8 @@ public:
     WMError HandleUnregisterHostRectChangeInGlobalDisplayListener(uint32_t code, int32_t persistentId,
         const AAFwk::Want& data) override;
     uint32_t GetHostStatusBarContentColor() const override;
+    WMError AtomicServiceSetStatusBarColor(uint32_t color) override;
+    WMError AtomicServiceSetStatusBarColorInner(uint32_t color) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
