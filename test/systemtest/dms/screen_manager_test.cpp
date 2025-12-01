@@ -526,22 +526,27 @@ HWTEST_F(ScreenManagerTest, ScreenManager06, TestSize.Level1)
 }
 
 /**
- * @tc.name: ScreenManager07
- * @tc.desc: Get and set screenMode
- * @tc.type: FUNC
- */
+@tc.name: ScreenManager07
+@tc.desc: Get and set screenMode
+@tc.type: FUNC
+*/
 HWTEST_F(ScreenManagerTest, ScreenManager07, TestSize.Level1)
 {
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        GTEST_SKIP();
+    GTEST_SKIP();
     }
-    sptr<Screen> screen = ScreenManager::GetInstance().GetScreenById(defaultScreenId_);
+    sptr screen = ScreenManager::GetInstance().GetScreenById(defaultScreenId_);
     ASSERT_TRUE(screen);
-
+    auto modes = screen->GetSupportedModes();
     auto defaultModeId = screen->GetModeId();
-    ASSERT_EQ(DMError::DM_OK, screen->SetScreenActiveMode(defaultModeId));
+    ASSERT_GT(modes.size(), 0);
+    for (uint32_t modeIdx = 0; modeIdx < modes.size(); modeIdx++) {
+    ASSERT_EQ(DMError::DM_OK, screen->SetScreenActiveMode(modeIdx));
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(defaultModeId, screen->GetModeId());
+    ASSERT_EQ(modeIdx, screen->GetModeId());
+    sleep(TEST_SLEEP_S);
+    }
+    ASSERT_EQ(DMError::DM_OK, screen->SetScreenActiveMode(defaultModeId));
 }
 
 /**
