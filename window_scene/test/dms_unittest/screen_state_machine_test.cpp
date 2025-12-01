@@ -191,7 +191,7 @@ HWTEST_F(ScreenStateMachineTest, ActionScreenPowerOff_ShouldReturnTrue_WhenTypeI
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenStateMachineTest, ActionScreenPowerOff_ShouldReturnTrue_WhenTypeIsValidScreenOff, TestSize.Level0)
-{   
+{
     DisplayId id = 0;
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
     ScreenSessionManager::GetInstance().screenSessionMap_[id] = screenSession;
