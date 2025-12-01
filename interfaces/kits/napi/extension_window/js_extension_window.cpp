@@ -1857,11 +1857,11 @@ napi_value JsExtensionWindow::OnSetStatusBarColor(napi_env env, napi_callback_in
                 "[window][setStatusBarColor]msg: invalid window"));
             return;
         }
-        auto errCode = window->AtomicServiceSetStatusBarColor(contentColor);
+        auto errCode = window->SetStatusBarColorForExtension(contentColor);
         if (errCode == WMError::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
-            TLOGNE(WmsLogTag::WMS_IMMS, "AtomicService SetStatusBarColor error: %{public}d", errCode);
+            TLOGNE(WmsLogTag::WMS_IMMS, "SetStatusBarColor error: %{public}d", errCode);
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(errCode)),
                 "[window][setStatusBarColor]msg: update status bar color failed"));
         }
