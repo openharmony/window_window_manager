@@ -1214,6 +1214,10 @@ private:
     Task addSnapshotCallback_ = []() {};
     std::mutex saveSnapshotCallbackMutex_;
     std::mutex addSnapshotCallbackMutex_;
+    enum SnapShotRecoverType : uint32_t {
+        ROTATE = 0,
+        EXIT_SPLIT_ON_BACKGROUND,
+    };
 
     /*
      * Window Pattern
