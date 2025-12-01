@@ -228,6 +228,8 @@ void ScreenStateMachine::InitStateMachineTbl()
         ScreenTransitionState::WAIT_SCREEN_ON_READY, &ScreenStateMachine::DoSetDisplayState};
     stateMachine_[{ScreenTransitionState::WAIT_SCREEN_ON_READY, ScreenPowerEvent::POWER_ON}] = {
         ScreenTransitionState::SCREEN_ON, &ScreenStateMachine::DoSetScreenPower};
+    stateMachine_[{ScreenTransitionState::WAIT_SCREEN_ON_READY, ScreenPowerEvent::SYNC_POWER_ON}] = {
+        ScreenTransitionState::SCREEN_ON, &ScreenStateMachine::DoRecordTransNormal};
 
     stateMachine_[{ScreenTransitionState::SCREEN_ON, ScreenPowerEvent::WAKEUP_BEGIN}] = {
         ScreenTransitionState::WAIT_SCREEN_ON_READY, &ScreenStateMachine::DoWakeUpBegin};

@@ -68,6 +68,7 @@ enum class ScreenPowerEvent {
     WAKEUP_BEGIN,
     SUSPEND_BEGIN,
     SCREEN_POWER_EVENT_MAX,
+    SYNC_POWER_ON, //Special scenario, PMS force synchronization ON state
 };
 
 enum class AodStatus {

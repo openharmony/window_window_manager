@@ -5388,6 +5388,20 @@ ScreenPowerState ScreenSessionManager::GetScreenPower()
     return state;
 }
 
+void ScreenSessionManager::SyncScreenPowerState(ScreenPowerState state)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied! calling: %{public}s, pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return;
+    }
+    if (state == ScreenPowerState::POWER_ON) {
+        ScreenStateMachine::GetInstance().HandlePowerStateChange(
+            ScreenPowerEvent::SYNC_POWER_ON, PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN);
+    }
+    TLOGI(WmsLogTag::DMS, "force sync power state: %{public}d", static_cast<int>(state));
+}
+
 DMError ScreenSessionManager::IsScreenRotationLocked(bool& isLocked)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
