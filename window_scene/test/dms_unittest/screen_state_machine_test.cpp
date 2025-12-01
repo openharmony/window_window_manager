@@ -174,7 +174,7 @@ HWTEST_F(ScreenStateMachineTest, ActionScreenPowerOff_ShouldReturnFalse_WhenType
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenStateMachineTest, ActionScreenPowerOff_ShouldReturnTrue_WhenTypeIsValidScreenOn, TestSize.Level0)
-{   
+{
     DisplayId id = 0;
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
     ScreenSessionManager::GetInstance().screenSessionMap_[id] = screenSession;
@@ -201,7 +201,6 @@ HWTEST_F(ScreenStateMachineTest, ActionScreenPowerOff_ShouldReturnTrue_WhenTypeI
     ScreenPowerInfoType type = std::make_pair(id, ScreenPowerStatus::POWER_STATUS_OFF);
     EXPECT_TRUE(fsm_->ActionScreenPowerOff(event, type));
 }
-
 }
 } // namespace Rosen
 } // namespace OHOS
