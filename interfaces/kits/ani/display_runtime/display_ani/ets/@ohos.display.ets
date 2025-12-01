@@ -288,7 +288,7 @@ export class DisplayImpl implements Display {
     }
 
     constructor(id: long, name: string, alive: boolean, state: int, refreshRate: int, rotation: int,
-        width: long, height: long, availableHeight: long, availableWidth: long, densityDPI: double,
+        width: long, height: long, availableWidth: long, availableHeight: long, densityDPI: double,
         orientation: int, densityPixels: double, scaledDensity: double, xDPI: double, yDPI: double,
         screenShape: int, sourceMode: int) {
         this.id = id;
