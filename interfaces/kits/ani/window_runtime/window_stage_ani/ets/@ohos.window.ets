@@ -3121,7 +3121,7 @@ export class WindowInternal implements Window {
     private native setWindowBackgroundColor(nativeObj: long, color: string): int;
     private native setImmersiveModeEnabledState(nativeObj: long, enable: boolean): int;
     private native setWindowDecorVisible(nativeObj: long, isVisible: boolean): int;
-    private native setWindowDecorHeight(nativeObj: long, height: double): int;
+    private native setWindowDecorHeight(nativeObj: long, height: int): int;
     private native getWindowProperties(nativeObj: long): WindowProperties;
     private native getProperties(nativeObj: long): WindowProperties;
     private native isWindowSupportWideGamut(nativeObj: long): boolean;
@@ -3464,7 +3464,7 @@ export class WindowInternal implements Window {
       this.offSync(this.nativeObj, 'windowTitleButtonRectChange', callback);
     }
 
-    public getWindowDecorHeight(): number {
+    public getWindowDecorHeight(): int {
        let ret = this.getWindowDecorHeight(this.nativeObj);
        return ret;
     }
@@ -3521,7 +3521,7 @@ export class WindowInternal implements Window {
         this.setWindowDecorVisible(this.nativeObj, isVisible);
     }
 
-    public setWindowDecorHeight(height: number): void {
+    public setWindowDecorHeight(height: int): void {
         this.setWindowDecorHeight(this.nativeObj, height);
     }
 
@@ -5256,13 +5256,13 @@ export interface Window {
     offWindowWillClose(callback?: WindowWillCloseCallback<void, Promise<boolean>>): void;
     onWindowTitleButtonRectChange(callback: Callback<TitleButtonRect>): void;
     offWindowTitleButtonRectChange(callback?: Callback<TitleButtonRect>): void;
-    getWindowDecorHeight(): double;
+    getWindowDecorHeight(): int;
     setWindowBackgroundColor(color: string | ColorMetrics): void;
     setBackgroundColor(color: string): Promise<void>;
     setBackgroundColor(color: string, callback: AsyncCallback<void>): void;
     setImmersiveModeEnabledState(enable: boolean): void;
     setWindowDecorVisible(isVisible: boolean): void;
-    setWindowDecorHeight(height: number): void;
+    setWindowDecorHeight(height: int): void;
     getWindowProperties(): WindowProperties;
     getProperties(): Promise<WindowProperties>;
     getProperties(callback: AsyncCallback<WindowProperties>): void;
