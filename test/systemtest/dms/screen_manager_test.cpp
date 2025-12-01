@@ -526,14 +526,14 @@ HWTEST_F(ScreenManagerTest, ScreenManager06, TestSize.Level1)
 }
 
 /**
-@tc.name: ScreenManager07
-@tc.desc: Get and set screenMode
-@tc.type: FUNC
-*/
+ * @tc.name: ScreenManager07
+ * @tc.desc: Get and set screenMode
+ * @tc.type: FUNC
+ */
 HWTEST_F(ScreenManagerTest, ScreenManager07, TestSize.Level1)
 {
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-    GTEST_SKIP();
+        GTEST_SKIP();
     }
     sptr screen = ScreenManager::GetInstance().GetScreenById(defaultScreenId_);
     ASSERT_TRUE(screen);
