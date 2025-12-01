@@ -1772,7 +1772,7 @@ HWTEST_F(ScreenSessionTest, UpdatePropertyByActiveMode, TestSize.Level1)
     auto screenBounds = originalProperty.GetBounds();
     session->UpdatePropertyByActiveMode();
     ScreenProperty updatedProperty = session->GetScreenProperty();
-    auto screenBounds1 = updateProperty.GetBounds();
+    auto screenBounds1 = updatedProperty.GetBounds();
     ASSERT_EQ(screenBounds, screenBounds1);
     GTEST_LOG_(INFO) << "ScreenSessionTest: UpdatePropertyByActiveMode end";
 }
