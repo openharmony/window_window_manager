@@ -6599,7 +6599,7 @@ napi_value JsWindow::OnGetWindowCornerRadius(napi_env env, napi_callback_info in
     }
     if (!WindowHelper::IsFloatOrSubWindow(windowToken_->GetType())) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not sub window or float window.");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
             "[window][getWindowCornerRadius]msg: This is not sub window or float window.");
     }
 
