@@ -171,7 +171,7 @@ HWTEST_F(ScreenSceneConfigTest, ReadIntNumbersConfigInfo, TestSize.Level1)
     if (rootPtr == nullptr || rootPtr->name == nullptr ||
         xmlStrcmp(rootPtr->name, reinterpret_cast<const xmlChar*>("Configs"))) {
         xmlFreeDoc(docPtr);
-        return;
+        GTEST_SKIP();
     }
     uint32_t readCount = 0;
     for (xmlNodePtr curNodePtr = rootPtr->xmlChildrenNode; curNodePtr != nullptr; curNodePtr = curNodePtr->next) {
@@ -267,7 +267,7 @@ HWTEST_F(ScreenSceneConfigTest, ReadEnableConfigInfo, TestSize.Level1)
     if (rootPtr == nullptr || rootPtr->name == nullptr ||
         xmlStrcmp(rootPtr->name, reinterpret_cast<const xmlChar*>("Configs"))) {
         xmlFreeDoc(docPtr);
-        return;
+        GTEST_SKIP();
     }
     uint32_t readCount = 0;
     for (xmlNodePtr curNodePtr = rootPtr->xmlChildrenNode; curNodePtr != nullptr; curNodePtr = curNodePtr->next) {
@@ -314,7 +314,7 @@ HWTEST_F(ScreenSceneConfigTest, ReadStringConfigInfo, TestSize.Level1)
     if (rootPtr == nullptr || rootPtr->name == nullptr ||
         xmlStrcmp(rootPtr->name, reinterpret_cast<const xmlChar*>("Configs"))) {
         xmlFreeDoc(docPtr);
-        return;
+        GTEST_SKIP();
     }
     uint32_t readCount = 0;
     for (xmlNodePtr curNodePtr = rootPtr->xmlChildrenNode; curNodePtr != nullptr; curNodePtr = curNodePtr->next) {

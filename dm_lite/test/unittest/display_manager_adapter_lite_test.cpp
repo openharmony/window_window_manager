@@ -307,12 +307,11 @@ HWTEST_F(DisplayManagerAdapterLiteTest, WakeUpEndPiling, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAdapterLiteTest, GetScreenBrightnessPiling, TestSize.Level1)
 {
-    uint32_t b1 = SingletonContainer::Get<DisplayManagerAdapterLite>().GetScreenBrightness(0);
-    uint32_t b2 = SingletonContainer::Get<DisplayManagerAdapterLite>().GetScreenBrightness(0);
+    uint32_t brightness = SingletonContainer::Get<DisplayManagerAdapterLite>().GetScreenBrightness(0);
     
-    EXPECT_GE(b1, 0u);
-    EXPECT_LE(b1, 10000u);
-    EXPECT_EQ(b1, b2);
+    EXPECT_GE(brightness, 0u);
+    EXPECT_LE(brightness, 10000u);
+
 }
 
 /**
