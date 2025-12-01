@@ -562,6 +562,7 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot, LifeCycleChangeR
         if (ret != WSError::WS_OK) {
             return ret;
         }
+        session->SetSnapshotPrivacyMode(session->GetIsPrivacyMode());
         if (WindowHelper::IsMainWindow(session->GetWindowType()) && isSaveSnapshot && needSaveSnapshot) {
             session->SetFreeMultiWindow();
             session->SaveSnapshot(true, true, nullptr, false, reason);
@@ -699,6 +700,7 @@ WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
             session->SetSessionState(SessionState::STATE_DISCONNECT);
             return WSError::WS_OK;
         }
+        session->SetSnapshotPrivacyMode(session->GetIsPrivacyMode());
         auto state = session->GetSessionState();
         if ((session->needSnapshot_ || (state == SessionState::STATE_ACTIVE && isMainWindow)) &&
             isSaveSnapshot && needSaveSnapshot) {
