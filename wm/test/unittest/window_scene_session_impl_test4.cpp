@@ -1892,6 +1892,52 @@ HWTEST_F(WindowSceneSessionImplTest4, OnContainerModalEvent, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnContainerModalEvent
+ * @tc.desc: test OnContainerModalEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, OnContainerModalEvent02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("OnContainerModalEvent02");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    EXPECT_NE(nullptr, session);
+    window->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_OK, window->OnContainerModalEvent("win_change_to_2_3_landscape", ""));
+    ASSERT_EQ(WMError::WM_OK, window->OnContainerModalEvent("win_change_to_1_1_landscape", ""));
+    ASSERT_EQ(WMError::WM_OK, window->OnContainerModalEvent("win_change_to_18_9_landscape", ""));
+    ASSERT_EQ(WMError::WM_OK, window->OnContainerModalEvent("win_change_to_default_landscape", ""));
+    ASSERT_EQ(WMError::WM_OK, window->OnContainerModalEvent("win_change_to_split_landscape", ""));
+    ASSERT_EQ(WMError::WM_DO_NOTHING, window->OnContainerModalEvent("win_change_to_split_landscape_error", ""));
+    ASSERT_EQ(WMError::WM_OK, window->OnContainerModalEvent("win_hover_event", ""));
+}
+
+/**
+ * @tc.name: HideTitleButton
+ * @tc.desc: test HideTitleButton
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, HideTitleButton, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("HideTitleButton");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    EXPECT_NE(nullptr, session);
+    window->hostSession_ = session;
+    bool hideSplitButton = true;
+    bool hideMaximizeButton = true;
+    bool hideMinimizeButton = true;
+    bool hideCloseButton = true;
+    window->HideTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
+}
+
+/**
  * @tc.name: UpdateConfigurationSyncForAll
  * @tc.desc: UpdateConfigurationSyncForAll
  * @tc.type: FUNC

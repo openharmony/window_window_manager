@@ -60,6 +60,7 @@ public:
     static napi_value CreateUIEffectController(napi_env env, napi_callback_info info);
     static napi_value GetAllMainWindowInfo(napi_env env, napi_callback_info info);
     static napi_value GetMainWindowSnapshot(napi_env env, napi_callback_info info);
+    static napi_value SetSpecificSystemWindowZIndex(napi_env env, napi_callback_info info);
 
 private:
     static napi_value OnCreate(napi_env env, napi_callback_info info);
@@ -90,6 +91,7 @@ private:
     static napi_value OnShiftAppWindowTouchEvent(napi_env env, napi_callback_info info);
     static napi_value OnNotifyScreenshotEvent(napi_env env, napi_callback_info info);
     static napi_value OnCreateUIEffectController(napi_env env, napi_callback_info info);
+    static napi_value OnSetSpecificSystemWindowZIndex(napi_env env, napi_callback_info info);
     static bool ParseRequiredConfigOption(
         napi_env env, napi_value jsObject, WindowOption& option);
     static bool ParseConfigOption(
@@ -100,6 +102,8 @@ private:
     static void RegisterCallBackFunc(napi_env env, sptr<GetSnapshotCallback>& getSnapshotCallback,
         const std::shared_ptr<AbilityRuntime::NapiAsyncTask>& task,
         const std::shared_ptr<AbilityRuntime::NapiAsyncTask>& napiAsyncCallBackTask);
+    static WmErrorCode MinimizeAllParamParse(
+        napi_env env, size_t argc, napi_value* argv, int64_t& displayId, int32_t& excludeWindowId);
 };
 }  // namespace Rosen
 }  // namespace OHOS

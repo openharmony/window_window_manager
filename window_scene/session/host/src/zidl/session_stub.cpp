@@ -18,7 +18,7 @@
 #include "ability_start_setting.h"
 #include <ipc_types.h>
 #include <transaction/rs_transaction.h>
-#include <ui/rs_canvas_node.h>
+#include <feature/window_keyframe/rs_window_keyframe_node.h>
 #include <ui/rs_surface_node.h>
 #include "want.h"
 #include "pointer_event.h"
@@ -143,6 +143,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetAllAvoidAreas(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_TARGET_ORIENTATION_CONFIG_INFO):
             return HandleGetTargetOrientationConfigInfo(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONVERT_ORIENTATION_AND_ROTATION):
+            return HandleConvertOrientationAndRotation(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_ASPECT_RATIO):
             return HandleSetAspectRatio(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CONTENT_ASPECT_RATIO):
@@ -331,6 +333,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetFrameRectForPartialZoomIn(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_IS_FULL_SCREEN_IN_FORCE_SPLIT):
             return HandleNotifyIsFullScreenInForceSplitMode(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_COMPATIBLE_MODE_CHANGE):
+            return HandleNotifyCompatibleModeChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RESTART_APP):
             return HandleRestartApp(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_COMMAND_EVENT):
@@ -524,6 +528,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         MissionInfo missionInfo = property->GetMissionInfo();
         reply.WriteParcelable(&missionInfo);
         reply.WriteBool(property->GetIsShowDecorInFreeMultiWindow());
+        reply.WriteString(property->GetCompatibleModePage());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -572,6 +577,11 @@ bool ReadEventParam(MessageParcel& data, SessionEvent event, SessionEventParam& 
     if (event == SessionEvent::EVENT_MAXIMIZE) {
         if (!data.ReadUint32(param.waterfallResidentState)) {
             TLOGE(WmsLogTag::WMS_EVENT, "Failed to read waterfallResidentState");
+            return false;
+        }
+    } else if (event == SessionEvent::EVENT_SWITCH_COMPATIBLE_MODE) {
+        if (!data.ReadUint32(param.compatibleStyleMode)) {
+            TLOGE(WmsLogTag::WMS_EVENT, "Failed to read compatibleStyleMode");
             return false;
         }
     }
@@ -1371,6 +1381,41 @@ int SessionStub::HandleGetTargetOrientationConfigInfo(MessageParcel& data, Messa
     return ERR_NONE;
 }
 
+int SessionStub::HandleConvertOrientationAndRotation(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "in");
+    uint32_t from;
+    uint32_t to;
+    int32_t value;
+    int32_t convertedValue;
+    if (!data.ReadUint32(from) || !data.ReadUint32(to) || !data.ReadInt32(value)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read value failed");
+        return ERR_INVALID_DATA;
+    }
+    RotationInfoType fromRotationInfoType = static_cast<RotationInfoType>(from);
+    if (fromRotationInfoType < RotationInfoType::WINDOW_ORIENTATION ||
+        fromRotationInfoType > RotationInfoType::DISPLAY_ROTATION) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Invalid fromRotationInfoType: %{public}u", fromRotationInfoType);
+        return ERR_INVALID_DATA;
+    }
+    RotationInfoType toRotationInfoType = static_cast<RotationInfoType>(to);
+    if (toRotationInfoType < RotationInfoType::WINDOW_ORIENTATION ||
+        toRotationInfoType > RotationInfoType::DISPLAY_ROTATION) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Invalid toRotationInfoType: %{public}u", toRotationInfoType);
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = ConvertOrientationAndRotation(fromRotationInfoType, toRotationInfoType, value, convertedValue);
+    if (!reply.WriteInt32(convertedValue)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Write failed");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 /** @note @window.layout */
 int SessionStub::HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply)
 {
@@ -2148,9 +2193,9 @@ int SessionStub::HandleKeyFrameAnimateEnd(MessageParcel& data, MessageParcel& re
 int SessionStub::HandleUpdateKeyFrameCloneNode(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "In");
-    auto rsCanvasNode = RSCanvasNode::Unmarshalling(data);
-    if (rsCanvasNode == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "fail get rsCanvasNode");
+    auto rsKeyFrameNode = RSWindowKeyFrameNode::ReadFromParcel(data);
+    if (rsKeyFrameNode == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "fail get rsKeyFrameNode");
         return ERR_INVALID_DATA;
     }
     std::shared_ptr<RSTransaction> tranaction(data.ReadParcelable<RSTransaction>());
@@ -2158,7 +2203,7 @@ int SessionStub::HandleUpdateKeyFrameCloneNode(MessageParcel& data, MessageParce
         TLOGE(WmsLogTag::WMS_LAYOUT, "fail get tranaction");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = UpdateKeyFrameCloneNode(rsCanvasNode, tranaction);
+    WSError errCode = UpdateKeyFrameCloneNode(rsKeyFrameNode, tranaction);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "write errCode fail.");
         return ERR_INVALID_DATA;
@@ -2518,6 +2563,21 @@ int SessionStub::HandleNotifyIsFullScreenInForceSplitMode(MessageParcel& data, M
         return ERR_INVALID_DATA;
     }
     WSError errCode = NotifyIsFullScreenInForceSplitMode(isFullScreen);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyCompatibleModeChange(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t mode = 0;
+    if (!data.ReadInt32(mode)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Read mode failed.");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = NotifyCompatibleModeChange(static_cast<CompatibleStyleMode>(mode));
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_COMPAT, "write errCode fail.");
         return ERR_INVALID_DATA;

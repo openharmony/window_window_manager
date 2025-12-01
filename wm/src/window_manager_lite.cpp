@@ -682,6 +682,14 @@ void WindowManagerLite::NotifyAccessibilityWindowInfo(const std::vector<sptr<Acc
     pImpl_->NotifyAccessibilityWindowInfo(infos, type);
 }
 
+WMError WindowManagerLite::UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease)
+{
+    WMError ret = WindowAdapterLite::GetInstance(userId_).UpdateScreenLockStatusForApp(bundleName, isRelease);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "lite bundleName=%{public}s, isRelease=%{public}d, ret=%{public}d",
+        bundleName.c_str(), isRelease, static_cast<int32_t>(ret));
+    return ret;
+}
+
 WMError WindowManagerLite::GetWindowModeType(WindowModeType& windowModeType) const
 {
     WMError ret = WindowAdapterLite::GetInstance(userId_).GetWindowModeType(windowModeType);
@@ -1286,6 +1294,51 @@ WMError WindowManagerLite::UnregisterWindowInfoChangeCallback(const std::unorder
         }
     }
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s", observedInfoForLog.str().c_str());
+    return ret;
+}
+
+WMError WindowManagerLite::SetGlobalDragResizeType(DragResizeType dragResizeType)
+{
+    WMError ret = WindowAdapterLite::GetInstance(userId_).SetGlobalDragResizeType(dragResizeType);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed");
+    }
+    return ret;
+}
+
+WMError WindowManagerLite::GetGlobalDragResizeType(DragResizeType& dragResizeType)
+{
+    WMError ret = WindowAdapterLite::GetInstance(userId_).GetGlobalDragResizeType(dragResizeType);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed");
+    }
+    return ret;
+}
+
+WMError WindowManagerLite::SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType)
+{
+    WMError ret = WindowAdapterLite::GetInstance(userId_).SetAppDragResizeType(bundleName, dragResizeType);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed");
+    }
+    return ret;
+}
+
+WMError WindowManagerLite::GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType)
+{
+    WMError ret = WindowAdapterLite::GetInstance(userId_).GetAppDragResizeType(bundleName, dragResizeType);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed");
+    }
+    return ret;
+}
+
+WMError WindowManagerLite::SetAppKeyFramePolicy(const std::string& bundleName, const KeyFramePolicy& keyFramePolicy)
+{
+    WMError ret = WindowAdapterLite::GetInstance(userId_).SetAppKeyFramePolicy(bundleName, keyFramePolicy);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed");
+    }
     return ret;
 }
 

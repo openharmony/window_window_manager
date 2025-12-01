@@ -453,13 +453,13 @@ void WindowAdapter::ProcessPointUp(uint32_t windowId)
     wmsProxy->ProcessPointUp(windowId);
 }
 
-WMError WindowAdapter::MinimizeAllAppWindows(DisplayId displayId)
+WMError WindowAdapter::MinimizeAllAppWindows(DisplayId displayId, int32_t excludeWindowId)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
-    return wmsProxy->MinimizeAllAppWindows(displayId);
+    return wmsProxy->MinimizeAllAppWindows(displayId, excludeWindowId);
 }
 
 WMError WindowAdapter::ToggleShownStateForAllAppWindows()
@@ -587,6 +587,7 @@ void WindowAdapter::WindowManagerAndSessionRecover()
     ReregisterWindowManagerAgent();
     RecoverWindowPropertyChangeFlag();
     RecoverWatermarkImageForApp();
+    RecoverSpecificZIndexSetByApp();
 
     std::map<int32_t, SessionRecoverCallbackFunc> sessionRecoverCallbackFuncMap;
     {
@@ -624,6 +625,18 @@ void WindowAdapter::WindowManagerAndSessionRecover()
         if (ret != WMError::WM_OK) {
             TLOGE(WmsLogTag::WMS_ANIMATION, "Recover outline failed, ret: %{public}d.", ret);
         }
+    }
+}
+
+void WindowAdapter::RecoverSpecificZIndexSetByApp()
+{
+    if (specificZIndexMap_.empty()) {
+        return;
+    }
+    for (const auto& elem : specificZIndexMap_) {
+        SetSpecificWindowZIndex(elem.first, elem.second, false);
+        TLOGI(WmsLogTag::WMS_FOCUS, "windowType: %{public}d, zIndex: %{public}d",
+            elem.first, elem.second);
     }
 }
 
@@ -1074,6 +1087,20 @@ WMError WindowAdapter::ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t t
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
     return static_cast<WMError>(
         wmsProxy->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId));
+}
+
+WMError WindowAdapter::SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex, bool updateMap)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
+    WMError ret = static_cast<WMError>(wmsProxy->SetSpecificWindowZIndex(windowType, zIndex));
+    if (updateMap && ret == WMError::WM_OK) {
+        specificZIndexMap_[windowType] = zIndex;
+    }
+    TLOGI(WmsLogTag::WMS_FOCUS, "windowType: %{public}d, zIndex: %{public}d",
+        windowType, zIndex);
+    return ret;
 }
 
 void WindowAdapter::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
@@ -1541,6 +1568,14 @@ WMError WindowAdapter::AddSessionBlackList(
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->AddSessionBlackList(bundleNames, privacyWindowTags);
+}
+
+WMError WindowAdapter::NotifySupportRotationRegistered()
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->NotifySupportRotationRegistered();
 }
 
 WMError WindowAdapter::RemoveSessionBlackList(

@@ -72,8 +72,10 @@ group("unittest") {
       ":ws_sensor_fold_state_manager_test",
       ":ws_single_display_fold_policy_test",
       ":ws_single_display_pocket_fold_policy_test",
+      ":ws_single_display_super_fold_policy_test",
       ":ws_single_display_sensor_fold_state_manager_test",
       ":ws_single_display_sensor_pocket_fold_state_manager_test",
+      ":ws_single_display_sensor_super_fold_state_manager_test",
       ":ws_super_fold_sensor_manager_test",
       ":ws_super_fold_state_manager_test",
     ]
@@ -716,6 +718,17 @@ if (window_manager_fold_ability) {
     ]
   }
 
+  ohos_unittest("ws_single_display_super_fold_policy_test") {
+    module_out_path = module_out_path
+
+    sources = [ "single_display_super_fold_policy_test.cpp" ]
+
+    deps = [ ":ws_unittest_common" ]
+
+    external_deps = test_external_deps
+    external_deps += [ "init:libbegetutil" ]
+  }
+
   ohos_unittest("ws_sensor_fold_state_manager_test") {
     module_out_path = module_out_path
 
@@ -773,6 +786,7 @@ if (window_manager_fold_ability) {
     external_deps += [
       "hisysevent:libhisysevent",
       "init:libbegetutil",
+      "sensor:sensor_interface_native",
     ]
 
     defines = []
@@ -831,6 +845,20 @@ if (window_manager_fold_ability) {
     external_deps += [ "init:libbegetutil" ]
   }
 
+  ohos_unittest("ws_single_display_sensor_super_fold_state_manager_test") {
+    module_out_path = module_out_path
+
+    sources = [ "single_display_sensor_super_fold_state_manager_test.cpp" ]
+
+    deps = [
+      ":ws_unittest_common",
+      "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+    ]
+
+    external_deps = test_external_deps
+    external_deps += [ "init:libbegetutil" ]
+  }
+
   ohos_unittest("ws_super_fold_state_manager_test") {
     module_out_path = module_out_path
 
@@ -857,6 +885,12 @@ if (window_manager_fold_ability) {
       "init:libbegetutil",
       "sensor:sensor_interface_native",
     ]
+    defines = []
+    if (defined(global_parts_info) &&
+        defined(global_parts_info.sensors_sensor)) {
+      external_deps += [ "sensor:sensor_interface_native" ]
+      defines += [ "SENSOR_ENABLE" ]
+    }
   }
 
   ohos_unittest("ws_secondary_display_sensor_fold_state_manager_test") {

@@ -38,12 +38,17 @@ constexpr ScreenId SCREEN_ID_FAKE = 999;
 constexpr DisplayId DISPLAY_ID_FAKE = 999;
 constexpr ScreenId ERROR_ID_NO_PERMISSION = -201ULL;
 constexpr ScreenId ERROR_ID_NOT_SYSTEM_APP = -202ULL;
+constexpr bool IS_ROTATION_LOCKED_DEFAULT = false;
 constexpr int DOT_PER_INCH = 160;
 const static std::string DEFAULT_SCREEN_NAME = "buildIn";
 constexpr int DOT_PER_INCH_MAXIMUM_VALUE = 1000;
 constexpr int DOT_PER_INCH_MINIMUM_VALUE = 80;
 constexpr int32_t CONCURRENT_USER_ID_DEFAULT = -1;
 constexpr int32_t USER_ID_DEFAULT = 0;
+constexpr int32_t ROTATION_UNSET = -1;
+constexpr int32_t ROTATION_MIN = 0;
+constexpr int32_t ROTATION_MAX = 3;
+constexpr int32_t ROTATION_NUM = 4;
 constexpr uint32_t BASELINE_DENSITY = 160;
 constexpr uint32_t HALF_SCREEN_PARAM = 2;
 const std::string DM_ERROR_MSG_NOT_SUPPORT_COOR_WHEN_WIRED_CASTING =
@@ -395,6 +400,25 @@ enum class Orientation : uint32_t {
 };
 
 /**
+ * @brief Rotation info type
+ */
+enum class RotationInfoType : uint32_t {
+    WINDOW_ORIENTATION = 0,
+    DISPLAY_ORIENTATION = 1,
+    DISPLAY_ROTATION = 2,
+};
+
+/**
+ * @brief Window Orientaion
+ */
+enum class WindowOrientation : uint32_t {
+    PORTRAIT = 0,
+    LANDSCAPE_INVERTED,
+    PORTRAIT_INVERTED,
+    LANDSCAPE,
+};
+
+/**
  * @brief Enumerates display orientations.
  */
 enum class DisplayOrientation : uint32_t {
@@ -403,6 +427,20 @@ enum class DisplayOrientation : uint32_t {
     PORTRAIT_INVERTED,
     LANDSCAPE_INVERTED,
     UNKNOWN,
+};
+
+const std::map<DisplayOrientation, WindowOrientation> DISPLAY_TO_WINDOW_MAP{
+    { DisplayOrientation::PORTRAIT, WindowOrientation::PORTRAIT },
+    { DisplayOrientation::LANDSCAPE, WindowOrientation::LANDSCAPE_INVERTED },
+    { DisplayOrientation::PORTRAIT_INVERTED, WindowOrientation::PORTRAIT_INVERTED },
+    { DisplayOrientation::LANDSCAPE_INVERTED, WindowOrientation::LANDSCAPE },
+};
+
+const std::map<WindowOrientation, DisplayOrientation> WINDOW_TO_DISPLAY_MAP{
+    { WindowOrientation::PORTRAIT, DisplayOrientation::PORTRAIT },
+    { WindowOrientation::LANDSCAPE, DisplayOrientation::LANDSCAPE_INVERTED },
+    { WindowOrientation::PORTRAIT_INVERTED, DisplayOrientation::PORTRAIT_INVERTED },
+    { WindowOrientation::LANDSCAPE_INVERTED, DisplayOrientation::LANDSCAPE },
 };
 
 /**
@@ -637,6 +675,27 @@ struct MultiScreenPositionOptions {
     uint32_t startY_;
 };
 
+struct UniqueScreenRotationOptions {
+    bool isRotationLocked_ = IS_ROTATION_LOCKED_DEFAULT;
+    int32_t rotation_ = ROTATION_UNSET;
+    std::map<int32_t, int32_t> rotationOrientationMap_ = {};
+};
+
+/**
+ * Used to print map
+ */
+inline std::string MapToString(const std::map<int32_t, int32_t>& map)
+{
+    std::ostringstream oss;
+    oss << "{";
+    for (auto it = map.begin(); it != map.end(); ++it) {
+        if (it != map.begin()) oss << ",";
+        oss << it->first << ":" << it->second;
+    }
+    oss << "}";
+    return oss.str();
+}
+
 /**
  * @brief fold display physical resolution
  */
@@ -736,6 +795,9 @@ struct SessionOption {
     ScreenId screenId_;
     std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap_;
     bool supportsFocus_ {true};
+    bool isRotationLocked_;
+    int32_t rotation_;
+    std::map<int32_t, int32_t> rotationOrientationMap_;
 };
 
 /**
@@ -746,7 +808,8 @@ enum class DMDeviceStatus: uint32_t {
     STATUS_FOLDED,
     STATUS_TENT_HOVER,
     STATUS_TENT,
-    STATUS_GLOBAL_FULL
+    STATUS_GLOBAL_FULL,
+    STATUS_EXPAND
 };
 
 /**

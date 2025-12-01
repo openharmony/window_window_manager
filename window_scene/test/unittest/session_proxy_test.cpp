@@ -20,7 +20,7 @@
 #include "ws_common.h"
 #include "mock_message_parcel.h"
 #include "pointer_event.h"
-#include "ui/rs_canvas_node.h"
+#include "feature/window_keyframe/rs_window_keyframe_node.h"
 #include "transaction/rs_transaction.h"
 #include "window_manager_hilog.h"
 
@@ -81,6 +81,47 @@ HWTEST_F(SessionProxyTest, TestOnSessionEvent, TestSize.Level1)
     sptr<SessionProxy> okProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
     EXPECT_EQ(WSError::WS_OK, okProxy->OnSessionEvent(event, param));
 
+    // Case 6: Success when event is not EVENT_MAXIMIZE
+    event = SessionEvent::EVENT_MINIMIZE;
+    EXPECT_EQ(WSError::WS_OK, okProxy->OnSessionEvent(event, param));
+}
+
+/**
+ * @tc.name: TestOnSessionEvent
+ * @tc.desc: Verify OnSessionEvent handles various IPC conditions correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, TestOnSessionEvent02, TestSize.Level1)
+{
+    auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
+    auto sessionProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    SessionEvent event = SessionEvent::EVENT_SWITCH_COMPATIBLE_MODE;
+    SessionEventParam param { .compatibleStyleMode = 0 };
+ 
+    // Case 1: Failed to write interface token
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->OnSessionEvent(event, param));
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+ 
+    // Case 2: Failed to write eventId or compatibleStyleMode
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->OnSessionEvent(event, param));
+    MockMessageParcel::SetWriteUint32ErrorFlag(false);
+ 
+    // Case 3: remote is nullptr
+    sptr<SessionProxy> nullProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, nullProxy->OnSessionEvent(event, param));
+ 
+    // Case 4: Failed to send request
+    mockRemote->sendRequestResult_ = ERR_TRANSACTION_FAILED;
+    sptr<SessionProxy> failProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, failProxy->OnSessionEvent(event, param));
+ 
+    // Case 5: Success when event is EVENT_MAXIMIZE
+    mockRemote->sendRequestResult_ = ERR_NONE;
+    sptr<SessionProxy> okProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WSError::WS_OK, okProxy->OnSessionEvent(event, param));
+ 
     // Case 6: Success when event is not EVENT_MAXIMIZE
     event = SessionEvent::EVENT_MINIMIZE;
     EXPECT_EQ(WSError::WS_OK, okProxy->OnSessionEvent(event, param));
@@ -1756,6 +1797,56 @@ HWTEST_F(SessionProxyTest, GetTargetOrientationConfigInfo, Function | SmallTest 
 }
 
 /**
+ * @tc.name: ConvertOrientationAndRotation
+ * @tc.desc: Test ConvertOrientationAndRotation behavior in various IPC scenarios
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, ConvertOrientationAndRotation, Function | SmallTest | Level1)
+{
+    auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
+    auto sessionProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    RotationInfoType from = RotationInfoType::DISPLAY_ORIENTATION;
+    RotationInfoType to = RotationInfoType::DISPLAY_ORIENTATION;
+    int32_t value = 0;
+    int32_t convertedValue = 0;
+
+    // Case 1: Failed to write interface token
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED,
+        sessionProxy->ConvertOrientationAndRotation(from, to, value, convertedValue));
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    // Case 2: Failed to write RotationInfoType
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED,
+        sessionProxy->ConvertOrientationAndRotation(from, to, value, convertedValue));
+    MockMessageParcel::SetWriteUint32ErrorFlag(false);
+
+    // Case 3: Failed to write convert value
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED,
+        sessionProxy->ConvertOrientationAndRotation(from, to, value, convertedValue));
+    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+
+    // Case 4: remote is nullptr
+    sptr<SessionProxy> nullProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED,
+        nullProxy->ConvertOrientationAndRotation(from, to, value, convertedValue));
+
+    // Case 5: Failed to send request
+    mockRemote->sendRequestResult_ = ERR_TRANSACTION_FAILED;
+    sptr<SessionProxy> failProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED,
+        failProxy->ConvertOrientationAndRotation(from, to, value, convertedValue));
+
+    // Case 6: Success
+    mockRemote->sendRequestResult_ = ERR_NONE;
+    sptr<SessionProxy> okProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WSError::WS_OK,
+        okProxy->ConvertOrientationAndRotation(from, to, value, convertedValue));
+}
+
+/**
  * @tc.name: KeyFrameAnimateEnd
  * @tc.desc: KeyFrameAnimateEnd test
  * @tc.type: FUNC
@@ -1780,11 +1871,15 @@ HWTEST_F(SessionProxyTest, UpdateKeyFrameCloneNode, Function | SmallTest | Level
     ASSERT_NE(iRemoteObjectMocker, nullptr);
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
-    auto rsCanvasNode = RSCanvasNode::Create();
-    ASSERT_NE(rsCanvasNode, nullptr);
+    auto rsKeyFrameNode = RSWindowKeyFrameNode::Create();
+    ASSERT_NE(rsKeyFrameNode, nullptr);
     auto rsTransaction = std::make_shared<RSTransaction>();
     ASSERT_NE(rsTransaction, nullptr);
-    ASSERT_EQ(sProxy->UpdateKeyFrameCloneNode(rsCanvasNode, rsTransaction), WSError::WS_OK);
+    ASSERT_EQ(sProxy->UpdateKeyFrameCloneNode(rsKeyFrameNode, rsTransaction), WSError::WS_OK);
+
+    rsKeyFrameNode.reset();
+    rsTransaction.reset();
+    ASSERT_EQ(sProxy->UpdateKeyFrameCloneNode(rsKeyFrameNode, rsTransaction), WSError::WS_ERROR_IPC_FAILED);
 }
 
 /**

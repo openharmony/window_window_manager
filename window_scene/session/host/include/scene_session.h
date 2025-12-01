@@ -20,7 +20,7 @@
 #include <animation/rs_animation_timing_protocol.h>
 #include <animation/rs_symbol_animation.h>
 #include <pipeline/rs_node_map.h>
-#include <ui/rs_canvas_node.h>
+#include <feature/window_keyframe/rs_window_keyframe_node.h>
 #include <chrono>
 
 #include "display_manager.h"
@@ -156,6 +156,7 @@ using GetFbPanelWindowIdFunc =  std::function<WMError(uint32_t& windowId)>;
 using FindScenePanelRsNodeByZOrderFunc = std::function<std::shared_ptr<Rosen::RSNode>(DisplayId displayId,
     uint32_t targetZOrder)>;
 using ForceSplitFullScreenChangeCallback = std::function<void(uint32_t uid, bool isFullScreen)>;
+using CompatibleModeChangeCallback = std::function<void(CompatibleStyleMode mode)>;
 using NotifyRotationLockChangeFunc = std::function<void(bool locked)>;
 using NotifySnapshotSkipChangeFunc = std::function<void(bool isSkip)>;
 
@@ -313,6 +314,7 @@ public:
         bool needNotifyClient = true, bool isExecuteDelayRaise = false) override;
     WSError TransferPointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool needNotifyClient = true, bool isExecuteDelayRaise = false);
+    void ReportDragEndDirection(const std::string& bundleName, AreaType dragType);
     WSError RequestSessionBack(bool needMoveToBackground) override;
     WSError SetAspectRatio(float ratio) override;
     WSError SetContentAspectRatio(float ratio, bool isPersistent, bool needUpdateRect) override;
@@ -428,6 +430,7 @@ public:
     bool IsInCompatScaleMode();
     virtual void RegisterForceSplitFullScreenChangeCallback(ForceSplitFullScreenChangeCallback&& callback) {}
     virtual bool IsFullScreenInForceSplit() { return false; }
+    virtual void RegisterCompatibleModeChangeCallback(CompatibleModeChangeCallback&& callback) {}
 
     /*
      * PC Window
@@ -620,6 +623,14 @@ public:
     WSError NotifyRotationProperty(uint32_t rotation, uint32_t width, uint32_t height);
     WSError NotifyPageRotationIsIgnored();
     WSError ConvertRotationToOrientation(uint32_t rotation, uint32_t width, uint32_t height, uint32_t& orientation);
+    WSError ConvertOrientationAndRotation(const RotationInfoType from, const RotationInfoType to,
+        const int32_t value, int32_t& convertedValue) override;
+    WSError ConvertDisplayOrientationToWindowOrientation(const int32_t value, int32_t& convertedValue);
+    WSError ConvertWindowOrientationToDisplayOrientation(const int32_t value, int32_t& convertedValue);
+    WSError ConvertDisplayRotationToDisplayOrientation(const int32_t rotation, int32_t& orientation);
+    WSError ConvertDisplayOrientationToDisplayRotation(const int32_t orientation, int32_t& rotation);
+    WSError ConvertDisplayRotationToWindowOrientation(const int32_t value, int32_t& convertedValue);
+    WSError ConvertWindowOrientationToDisplayRotation(const int32_t value, int32_t& convertedValue);
     void RegisterUpdateRotationChangeListener(NotifyRotationChangeFunc&& callback);
     WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) override;
     RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo,
@@ -804,10 +815,10 @@ public:
     WSError SetMoveAvailableArea(DisplayId displayId);
     bool IsDragMoving() const override;
     bool IsDragZooming() const override;
+    bool IsCrossDisplayDragSupported() const;
     // KeyFrame
-    WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
+    WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSWindowKeyFrameNode>& rsKeyFrameNode,
         std::shared_ptr<RSTransaction>& rsTransaction) override;
-    void SetKeyFramePolicy(const KeyFramePolicy& keyFramePolicy);
     WSError SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) override;
     WSError KeyFrameAnimateEnd() override;
 
@@ -1209,6 +1220,7 @@ private:
     void UpdateWinRectForSystemBar(WSRect& rect);
     bool IsMovableWindowType() const;
     bool IsFullScreenMovable() const;
+    bool IsSplitMovable() const;
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
     WMError HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
@@ -1392,9 +1404,11 @@ private:
     void OnKeyFrameNextVsync(uint64_t count);
     bool KeyFrameNotifyFilter(const WSRect& rect, SizeChangeReason reason);
     bool KeyFrameRectAlmostSame(const WSRect& rect1, const WSRect& rect2);
-    std::mutex keyFrameMutex_;
+    KeyFramePolicy GetKeyFramePolicy() const;
+    void UpdateKeyFramePolicy(bool running, bool stopping);
+    mutable std::mutex keyFrameMutex_;
     KeyFramePolicy keyFramePolicy_;
-    std::shared_ptr<RSCanvasNode> keyFrameCloneNode_ = nullptr;
+    std::shared_ptr<RSWindowKeyFrameNode> keyFrameCloneNode_ = nullptr;
     bool keyFrameAnimating_ = false;
     uint64_t lastKeyFrameStamp_ = 0;
     WSRect lastKeyFrameRect_;
@@ -1445,6 +1459,8 @@ private:
         const std::pair<RSAnimationTimingProtocol, RSAnimationTimingCurve>& animationParam,
         const WSRect& rect, const std::function<void()>& finishCallback = nullptr, bool isGlobal = false);
     virtual void UpdateCrossAxisOfLayout(const WSRect& rect);
+    CrossPlaneState UpdateCrossPlaneState(const WSRect& rect);
+    void UpdatePrivateStateOfLayout(const WSRect& rect);
     NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
     WSRect requestRectWhenFollowParent_;
     MoveConfiguration requestMoveConfiguration_;

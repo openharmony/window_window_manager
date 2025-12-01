@@ -31,6 +31,7 @@ enum class DisplayDeviceType :uint32_t {
     DOUBLE_DISPLAY_DEVICE,
     SINGLE_DISPLAY_POCKET_DEVICE,
     SECONDARY_DISPLAY_DEVICE,
+    SINGLE_DISPLAY_SUPER_DEVICE,
 };
 
 class FoldScreenController : public RefBase {

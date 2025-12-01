@@ -120,6 +120,7 @@ const std::string RESTART_APP_CB = "restartApp";
 const std::string CALLING_SESSION_ID_CHANGE_CB = "callingWindowIdChange";
 const std::string ROTATION_LOCK_CHANGE_CB = "rotationLockChange";
 const std::string SNAPSHOT_SKIP_CHANGE_CB = "snapshotSkipChange";
+const std::string COMPATIBLE_MODE_CHANGE_CB = "compatibleModeChange";
 
 constexpr int ARG_COUNT_1 = 1;
 constexpr int ARG_COUNT_2 = 2;
@@ -232,6 +233,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {CALLING_SESSION_ID_CHANGE_CB,          ListenerFuncType::CALLING_SESSION_ID_CHANGE_CB},
     {ROTATION_LOCK_CHANGE_CB,               ListenerFuncType::ROTATION_LOCK_CHANGE_CB},
     {SNAPSHOT_SKIP_CHANGE_CB,               ListenerFuncType::SNAPSHOT_SKIP_CHANGE_CB},
+    {COMPATIBLE_MODE_CHANGE_CB,             ListenerFuncType::COMPATIBLE_MODE_CHANGE_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -3324,6 +3326,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
         case static_cast<uint32_t>(ListenerFuncType::SNAPSHOT_SKIP_CHANGE_CB):
             ProcessSnapshotSkipChangeRegister();
             break;
+        case static_cast<uint32_t>(ListenerFuncType::COMPATIBLE_MODE_CHANGE_CB):
+            ProcessCompatibleModeChangeRegister();
+            break;
         default:
             break;
     }
@@ -4780,29 +4785,11 @@ sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info, bool needA
             TLOGE(WmsLogTag::WMS_LIFE, "BrokerStates not started");
             return nullptr;
         }
-        if (info.reuse || info.isAtomicService_ || !info.specifiedFlag_.empty()) {
-            TLOGI(WmsLogTag::WMS_LIFE, "session need to be reusesd.");
-            if (SceneSessionManager::GetInstance().CheckCollaboratorType(info.collaboratorType_)) {
-                sceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(info.sessionAffinity);
-            } else {
-                SessionIdentityInfo identityInfo = { info.bundleName_, info.moduleName_, info.abilityName_,
-                    info.appIndex_, info.appInstanceKey_, info.windowType_, info.isAtomicService_,
-                    info.specifiedFlag_ };
-                sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByIdentityInfo(identityInfo);
-            }
+        if (result == BrokerStates::BROKER_STARTED && info.collaboratorType_ == CollaboratorType::REDIRECT_TYPE) {
+            TLOGW(WmsLogTag::WMS_LIFE, "redirect and not create session.");
+            return nullptr;
         }
-        if (sceneSession == nullptr) {
-            TLOGI(WmsLogTag::WMS_LIFE, "SceneSession not exist, request a new one.");
-            sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
-            if (sceneSession == nullptr) {
-                TLOGE(WmsLogTag::WMS_LIFE, "RequestSceneSession return nullptr");
-                return nullptr;
-            }
-        } else {
-            sceneSession->SetSessionInfo(info);
-        }
-        info.persistentId_ = sceneSession->GetPersistentId();
-        sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
+        ReuseSession(sceneSession, info);
     } else {
         sceneSession = SceneSessionManager::GetInstance().GetSceneSession(info.persistentId_);
         if (sceneSession == nullptr) {
@@ -4820,6 +4807,33 @@ sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info, bool needA
     }
     AddRequestTaskInfo(sceneSession, info.requestId, needAddRequestInfo);
     return sceneSession;
+}
+
+void JsSceneSession::ReuseSession(sptr<SceneSession>& sceneSession, SessionInfo& info)
+{
+    if (info.reuse || info.isAtomicService_ || !info.specifiedFlag_.empty()) {
+        TLOGI(WmsLogTag::WMS_LIFE, "session need to be reusesd.");
+        if (SceneSessionManager::GetInstance().CheckCollaboratorType(info.collaboratorType_)) {
+            sceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(info.sessionAffinity);
+        } else {
+            SessionIdentityInfo identityInfo = { info.bundleName_, info.moduleName_, info.abilityName_,
+                info.appIndex_, info.appInstanceKey_, info.windowType_, info.isAtomicService_,
+                info.specifiedFlag_ };
+            sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByIdentityInfo(identityInfo);
+        }
+    }
+    if (sceneSession == nullptr) {
+        TLOGI(WmsLogTag::WMS_LIFE, "SceneSession not exist, request a new one.");
+        sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
+        if (sceneSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "RequestSceneSession return nullptr");
+            return;
+        }
+    } else {
+        sceneSession->SetSessionInfo(info);
+    }
+    info.persistentId_ = sceneSession->GetPersistentId();
+    sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
 }
 
 void JsSceneSession::PendingSessionActivation(SessionInfo& info)
@@ -7813,7 +7827,21 @@ void JsSceneSession::OnKeyboardStateChange(SessionState state, const KeyboardEff
             jsKeyboardCallingIdObj,
             jsKeyboardTargetDisplayId,
         };
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(env, &scope);
+        auto value = jsCallBack->GetNapiValue();
+        if (value == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s: jsCallBack->GetNapiValue() is null", where);
+            napi_close_handle_scope(env, scope);
+            return;
+        }
+        auto ret = napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv),
+            argv, nullptr);
+        napi_close_handle_scope(env, scope);
+        if (ret != napi_ok) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s: napi_call_function result is error", where);
+            return;
+        }
         TLOGNI(WmsLogTag::WMS_KEYBOARD, "%{public}s: id: %{public}d, state: %{public}d, callingSessionId: %{public}u",
             where, persistentId, state, callingSessionId);
     };
@@ -8719,5 +8747,41 @@ void JsSceneSession::OnRotationLockChange(bool locked)
         napi_value argv[] = { rotationLockChangeObj };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     }, info);
+}
+
+void JsSceneSession::ProcessCompatibleModeChangeRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    session->RegisterCompatibleModeChangeCallback([weakThis = wptr(this)](CompatibleStyleMode mode) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_COMPAT, "jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->OnCompatibleModeChange(mode);
+    });
+}
+
+void JsSceneSession::OnCompatibleModeChange(CompatibleStyleMode mode)
+{
+    TLOGI(WmsLogTag::WMS_COMPAT, "compatible mode change to: %{public}d", mode);
+    taskScheduler_->PostMainThreadTask([weakThis = wptr(this), persistentId = persistentId_, mode, env = env_] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_COMPAT, "jsSceneSession id:%{public}d has been destroyed", persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(COMPATIBLE_MODE_CHANGE_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_COMPAT, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value argv[] = { CreateJsValue(env, mode) };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    }, __func__);
 }
 } // namespace OHOS::Rosen

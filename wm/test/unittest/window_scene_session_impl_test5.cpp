@@ -717,6 +717,7 @@ HWTEST_F(WindowSceneSessionImplTest5, SwitchFreeMultiWindow02, TestSize.Level1)
     EXPECT_EQ(false, subWindow->IsPcOrPadFreeMultiWindowMode());
     EXPECT_EQ(WSError::WS_ERROR_NULLPTR, mainWindow->SwitchFreeMultiWindow(true));
     EXPECT_EQ(true, mainWindow->IsPcOrPadFreeMultiWindowMode());
+    floatWindow->windowSystemConfig_.freeMultiWindowEnable_ = false;
     EXPECT_EQ(WSError::WS_OK, floatWindow->SwitchFreeMultiWindow(true));
     EXPECT_EQ(true, floatWindow->IsPcOrPadFreeMultiWindowMode());
     EXPECT_EQ(WSError::WS_OK, subWindow->SwitchFreeMultiWindow(true));
@@ -1284,9 +1285,6 @@ HWTEST_F(WindowSceneSessionImplTest5, GetParentWindow01, TestSize.Level1)
     window->property_->SetPersistentId(1);
     window->property_->SetParentPersistentId(2);
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    res = window->GetParentWindow(parentWindow);
-    EXPECT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     res = window->GetParentWindow(parentWindow);
@@ -1364,6 +1362,8 @@ HWTEST_F(WindowSceneSessionImplTest5, SetParentWindow01, TestSize.Level1)
     window->property_->SetParentPersistentId(2);
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = false;
     res = window->SetParentWindow(newParentWindowId);
     EXPECT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 
@@ -1484,6 +1484,8 @@ HWTEST_F(WindowSceneSessionImplTest5, SetParentWindow03, TestSize.Level1)
     EXPECT_EQ(subWindow->SetParentWindow(newParentWindowId), mockerResult);
     subWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     subWindow->property_->SetPcAppInpadCompatibleMode(true);
+    subWindow->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    subWindow->windowSystemConfig_.freeMultiWindowSupport_ = true;
     EXPECT_EQ(subWindow->SetParentWindow(newParentWindowId), WMError::WM_OK);
     EXPECT_EQ(WMError::WM_OK, subWindow->Destroy(true));
 }
@@ -2283,6 +2285,22 @@ HWTEST_F(WindowSceneSessionImplTest5, GetConfigurationFromAbilityInfo, TestSize.
     auto expceted = WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN |
                     WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
     EXPECT_EQ(supportType & expceted, expceted);
+
+    compatibleModeProperty->SetIsAdaptToDragScale(false);
+    RealTimeSwitchInfo SwitchInfo;
+    SwitchInfo.isNeedChange_ = true;
+    SwitchInfo.showTypes_ = 1;
+    window->property_->compatibleModeProperty_->SetRealTimeSwitchInfo(SwitchInfo);
+    window->GetConfigurationFromAbilityInfo();
+    supportType = window->property_->GetWindowModeSupportType();
+    expected = WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN |
+                    WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING |
+                    WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+                    WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY;
+    EXPECT_EQ(supportType, expected);
+    SwitchInfo.showTypes_ = 0;
+    window->property_->compatibleModeProperty_->SetRealTimeSwitchInfo(SwitchInfo);
+    window->GetConfigurationFromAbilityInfo();
 }
 
 /**

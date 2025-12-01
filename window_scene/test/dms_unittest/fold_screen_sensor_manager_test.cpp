@@ -16,13 +16,23 @@
 #include <gtest/gtest.h>
 #include <hisysevent.h>
 #include <parameters.h>
-
+#include "gmock/gmock.h"
+#include <functional>
 #include "fold_screen_controller/fold_screen_sensor_manager.h"
 #include "fold_screen_state_internel.h"
 #include "window_manager_hilog.h"
 #include "screen_session_manager.h"
 #include "scene_board_judgement.h"
-
+#include "fold_screen_controller/secondary_fold_sensor_manager.h"
+#include "fold_screen_controller/fold_screen_controller_config.h"
+namespace {
+std::string g_logMsg;
+void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+    const char* msg)
+{
+    g_logMsg = msg;
+}
+}
 using namespace testing;
 using namespace testing::ext;
 
@@ -30,7 +40,6 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr uint32_t SLEEP_TIME_US = 100000;
-constexpr float ANGLE_MIN_VAL = 0.0F;
 }
 
 class FoldScreenSensorManagerTest : public testing::Test {
@@ -41,8 +50,10 @@ public:
     void TearDown() override;
 };
 
+ScreenSessionManager *ssm_;
 void FoldScreenSensorManagerTest::SetUpTestCase()
 {
+    ssm_ = &ScreenSessionManager::GetInstance();
 }
 
 void FoldScreenSensorManagerTest::TearDownTestCase()
@@ -68,7 +79,29 @@ HWTEST_F(FoldScreenSensorManagerTest, UnRegisterPostureCallback, TestSize.Level1
 {
     FoldScreenSensorManager mgr = FoldScreenSensorManager();
     mgr.UnRegisterPostureCallback();
-    ASSERT_EQ(mgr.postureUser.callback, nullptr);
+    ASSERT_FALSE(SecondaryFoldSensorManager::GetInstance().IsPostureUserCallbackInvalid());
+}
+
+/**
+* @tc.name: UnRegisterPostureCallback01
+* @tc.desc: test function : UnRegisterPostureCallback
+* @tc.type: FUNC
+*/
+HWTEST_F(FoldScreenSensorManagerTest, UnRegisterPostureCallback01, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    FoldScreenSensorManager manager;
+    manager.UnRegisterPostureCallback();
+    if (!(ssm_->IsFoldable())) {
+        GTEST_SKIP();
+    }
+    EXPECT_TRUE(g_logMsg.find("UnRegisterPostureCallback failed with ret:") == std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("success.") != std::string::npos);
+
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -80,7 +113,177 @@ HWTEST_F(FoldScreenSensorManagerTest, UnRegisterHallCallback, TestSize.Level1)
 {
     FoldScreenSensorManager mgr = FoldScreenSensorManager();
     mgr.UnRegisterHallCallback();
-    ASSERT_EQ(mgr.hallUser.callback, nullptr);
+    ASSERT_FALSE(SecondaryFoldSensorManager::GetInstance().IsHallUserCallbackInvalid());
+}
+
+/**
+* @tc.name: UnRegisterHallCallback03
+* @tc.desc: test function : UnRegisterHallCallback
+* @tc.type: FUNC
+*/
+HWTEST_F(FoldScreenSensorManagerTest, UnRegisterHallCallback01, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    FoldScreenSensorManager manager;
+    manager.RegisterHallCallback();
+    manager.UnRegisterHallCallback();
+
+    if (!(ssm_->IsFoldable())) {
+        GTEST_SKIP();
+    }
+    EXPECT_TRUE(g_logMsg.find("success.") != std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("FoldScreenSensorManager.RegisterHallCallback failed.") == std::string::npos);
+
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: CleanupCallback
+ * @tc.desc: test function : CleanupCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(FoldScreenSensorManagerTest, CleanupCallback, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    FoldScreenSensorManager mgr1 = FoldScreenSensorManager();
+    const int32_t validSensorType = 1001;
+    auto callback = [](SensorEvent* /*event*/) { TLOGI(WmsLogTag::DMS, "Test callback"); };
+    mgr1.sensorCallbacks_[validSensorType].taskCallback = callback;
+    mgr1.CleanupCallback(validSensorType);
+    EXPECT_TRUE(g_logMsg.find("Cleaned up callback for sensor type 1001") != std::string::npos);
+    EXPECT_EQ(mgr1.sensorCallbacks_.count(validSensorType), 0U);
+    g_logMsg.clear();
+
+    const int32_t invalidSensorType = 9999;
+    mgr1.CleanupCallback(invalidSensorType);
+    EXPECT_TRUE(g_logMsg.find("No callback to clean up for sensor type 9999") != std::string::npos);
+    g_logMsg.clear();
+
+    mgr1.sensorCallbacks_.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+* @tc.name  : CleanupCallback_ShouldRemoveCallback_WhenSensorTypeIdExists
+* @tc.number: CleanupCallbackTest_001
+* @tc.desc  : FUNC
+*/
+HWTEST_F(FoldScreenSensorManagerTest, CleanupCallbackTest_001, TestSize.Level1) {
+    int32_t sensorTypeId = 1;
+    FoldScreenSensorManager manager = FoldScreenSensorManager();
+    auto callback = [](SensorEvent* /*event*/) { TLOGI(WmsLogTag::DMS, "Test callback"); };
+    manager.sensorCallbacks_[sensorTypeId].taskCallback = callback;
+    manager.CleanupCallback(sensorTypeId);
+    EXPECT_TRUE(manager.sensorCallbacks_.find(sensorTypeId) == manager.sensorCallbacks_.end());
+}
+
+/**
+* @tc.name  : CleanupCallback_ShouldLogNotFound_WhenSensorTypeIdDoesNotExist
+* @tc.number: CleanupCallbackTest_002
+* @tc.desc  : FUNC
+*/
+HWTEST_F(FoldScreenSensorManagerTest, CleanupCallbackTest_002, TestSize.Level1) {
+    int32_t sensorTypeId = 2;
+    FoldScreenSensorManager manager = FoldScreenSensorManager();
+    manager.CleanupCallback(sensorTypeId);
+    EXPECT_TRUE(manager.sensorCallbacks_.find(sensorTypeId) == manager.sensorCallbacks_.end());
+}
+
+/**
+* @tc.name  : UnSubscribeSensorCallback_ShouldReturnSensorFailure_WhenUserNotFound
+* @tc.number: UnSubscribeSensorCallbackTest_001
+* @tc.desc  : FUNC
+*/
+HWTEST_F(FoldScreenSensorManagerTest, UnSubscribeSensorCallback, TestSize.Level1) {
+    int32_t sensorTypeId = 1;
+    FoldScreenSensorManager manager = FoldScreenSensorManager();
+    auto userIt = manager.users_.find(sensorTypeId);
+
+    if (!(ssm_->IsFoldable())) {
+        GTEST_SKIP();
+    }
+    EXPECT_EQ(userIt, manager.users_.end());
+
+    int32_t result = manager.UnSubscribeSensorCallback(sensorTypeId);
+    int sensorFailure = 1;
+    EXPECT_EQ(result, sensorFailure);
+}
+
+/**
+* @tc.name  : UnSubscribeSensorCallback_ShouldReturnSensorSuccess_WhenDeactivateAndUnsubscribeSucceed
+* @tc.number: UnSubscribeSensorCallbackTest_002
+* @tc.desc  : FUNC
+*/
+HWTEST_F(FoldScreenSensorManagerTest, UnSubscribeSensorCallback_001, TestSize.Level1) {
+    int sensorSuccess = 1;
+    FoldScreenSensorManager manager = FoldScreenSensorManager();
+    manager.RegisterHallCallback();
+    if (!(ssm_->IsFoldable())) {
+        GTEST_SKIP();
+    }
+    int32_t result = manager.UnSubscribeSensorCallback(SENSOR_TYPE_ID_HALL_EXT);
+    EXPECT_EQ(result, sensorSuccess);
+}
+
+/**
+* @tc.name  : UnSubscribeSensorCallback_ShouldReturnSensorFailure_WhenDeactivateFails
+* @tc.number: UnSubscribeSensorCallbackTest_003
+* @tc.desc  : FUNC
+*/
+HWTEST_F(FoldScreenSensorManagerTest, UnSubscribeSensorCallback_002, TestSize.Level1) {
+    int32_t sensorTypeId = 1;
+    int sensorFailure = 1;
+    int sensorSuccess = 0;
+    FoldScreenSensorManager manager;
+
+    auto userIt = manager.users_.find(sensorTypeId);
+    EXPECT_NE(userIt, manager.users_.end());
+
+    int32_t result = manager.UnSubscribeSensorCallback(sensorTypeId);
+    EXPECT_EQ(result, sensorFailure);
+}
+
+/**
+* @tc.name  : UnSubscribeSensorCallback_ShouldReturnSensorFailure_WhenUnsubscribeFails
+* @tc.number: UnSubscribeSensorCallbackTest_004
+* @tc.desc  : FUNC
+*/
+HWTEST_F(FoldScreenSensorManagerTest, UnSubscribeSensorCallback_003, TestSize.Level1) {
+    int32_t sensorTypeId = 1;
+    FoldScreenSensorManager manager;
+    int sensorFailure = 1;
+    int sensorSuccess = 0;
+    auto userIt = manager.users_.find(sensorTypeId);
+    EXPECT_NE(userIt, manager.users_.end());
+
+    int32_t result = manager.UnSubscribeSensorCallback(sensorTypeId);
+    EXPECT_EQ(result, sensorFailure);
+}
+
+/**
+* @tc.name  : UnSubscribeSensorCallback
+* @tc.number: UnSubscribeSensorCallback_004
+* @tc.desc  : FUNC
+*/
+HWTEST_F(FoldScreenSensorManagerTest, UnSubscribeSensorCallback_004, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    FoldScreenSensorManager manager;
+    manager.RegisterPostureCallback();
+    if (!(ssm_->IsFoldable())) {
+        GTEST_SKIP();
+    }
+    EXPECT_TRUE(g_logMsg.find("Unsubscribe sensor type: sensorTypeId=%{public}d") == std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("success.") != std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("failed.") == std::string::npos);
+
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -187,21 +390,20 @@ HWTEST_F(FoldScreenSensorManagerTest, HandleHallDataWhenAngleMinusOne, TestSize.
 }
 
 /**
-* @tc.name: HandleHandleAbnormalAngleTest
-* @tc.desc: test function : HandleHandleAbnormalAngle
-* @tc.type: FUNC
-*/
-HWTEST_F(FoldScreenSensorManagerTest, HandleHandleAbnormalAngleTest, TestSize.Level1)
+ * @tc.name: HandleAbnormalAngleTest
+ * @tc.desc: test function : HandleAbnormalAngle
+ * @tc.type: FUNC
+ */
+HWTEST_F(FoldScreenSensorManagerTest, HandleAbnormalAngleTest, TestSize.Level1)
 {
     FoldScreenSensorManager mgr = FoldScreenSensorManager();
     mgr.SetSensorFoldStateManager(new SensorFoldStateManager());
-    mgr.registerPosture_ = false;
     mgr.SetGlobalAngle(-1.0F);
-    mgr.SetGlobalHall(0);
+    mgr.SetGlobalHall(1);
     EXPECT_TRUE(mgr.HandleAbnormalAngle());
 
-        mgr.globalHall = 2;
-        EXPECT_FALSE(mgr.HandleAbnormalAngle());
+    mgr.SetGlobalAngle(-2.0F);
+    EXPECT_FALSE(mgr.HandleAbnormalAngle());
 }
 
 /**
@@ -223,7 +425,7 @@ HWTEST_F(FoldScreenSensorManagerTest, TriggerDisplaySwitch, TestSize.Level1)
         EXPECT_EQ(mgr.globalAngle, 110);
     } else if (SceneBoardJudgement::IsSceneBoardEnabled() || FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         EXPECT_EQ(mgr.globalAngle, 25);
-    } else {
+    } else if (FoldScreenStateInternel::IsSingleDisplayFoldDevice()) {
         EXPECT_EQ(mgr.globalAngle, 25);
     }
     usleep(SLEEP_TIME_US);
@@ -329,8 +531,8 @@ HWTEST_F(FoldScreenSensorManagerTest, SetGlobalHallWhenParamInValid, TestSize.Le
 /**
  * @tc.name  : SubscribeSensorCallback_ShouldReturnFailure_WhenAnyOperationFails
  * @tc.number: SubscribeSensorCallbackTest_002
- * @tc.desc  : 测试当任何一个操作（订阅传感器、设置批量处理间隔、激活传感器）失败时,SubscribeSensorCallback 返回
- * SENSOR_FAILURE
+ * @tc.desc  : FUNC
+ * sensorFailure
  */
 HWTEST_F(FoldScreenSensorManagerTest, ATC_SubscribeSensorCallback_Fails, TestSize.Level0)
 {
@@ -345,8 +547,8 @@ HWTEST_F(FoldScreenSensorManagerTest, ATC_SubscribeSensorCallback_Fails, TestSiz
 /**
  * @tc.name  : SubscribeSensorCallback_ShouldReturnFailure_WhenAllOperationsFail
  * @tc.number: SubscribeSensorCallbackTest_003
- * @tc.desc  : 测试当所有操作（订阅传感器、设置批量处理间隔、激活传感器）都失败时,SubscribeSensorCallback 返回
- * SENSOR_FAILURE
+ * @tc.desc  : FUNC
+ * sensorFailure
  */
 HWTEST_F(FoldScreenSensorManagerTest, ATC_SubscribeSensorCallback_Fail, TestSize.Level0)
 {

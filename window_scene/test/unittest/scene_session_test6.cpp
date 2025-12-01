@@ -120,7 +120,7 @@ HWTEST_F(SceneSessionTest6, NotifyUpdateGravity01, TestSize.Level1)
     ASSERT_NE(nullptr, mainSession->notifySurfaceBoundsChangeFuncMap_[subSessionId]);
 
     sptr<MoveDragController> followController =
-        sptr<MoveDragController>::MakeSptr(subSessionId, subSession->GetWindowType());
+        sptr<MoveDragController>::MakeSptr(wptr(subSession));
     ASSERT_NE(nullptr, followController);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
@@ -1463,8 +1463,7 @@ HWTEST_F(SceneSessionTest6, TestSetContentAspectRatio, TestSize.Level1)
     EXPECT_EQ(result, WSError::WS_OK);
 
     // Case 4: aspect ratio is valid, moveDragController is not null
-    session->moveDragController_ =
-        sptr<MoveDragController>::MakeSptr(session->GetPersistentId(), session->GetWindowType());
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(session));
     result = session->SetContentAspectRatio(2.0f, true, true);
     EXPECT_EQ(result, WSError::WS_OK);
 }
@@ -1644,6 +1643,237 @@ HWTEST_F(SceneSessionTest6, NotifyPageRotationIsIgnored, TestSize.Level1)
     EXPECT_EQ(WSError::WS_OK, ret);
 }
 
+/**
+ * @tc.name: ConvertOrientationAndRotation
+ * @tc.desc: ConvertOrientationAndRotation function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, ConvertOrientationAndRotation, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "ConvertOrientationAndRotation";
+    info.bundleName_ = "ConvertOrientationAndRotation";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, session);
+    session->GetSessionProperty()->SetDisplayId(1001);
+    ScreenSessionConfig config;
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(1001, screenSession);
+
+    RotationInfoType from = RotationInfoType::DISPLAY_ORIENTATION;
+    RotationInfoType to = RotationInfoType::DISPLAY_ORIENTATION;
+    int32_t value = -1;
+    int32_t convertedValue = 0;
+    auto ret = session->ConvertOrientationAndRotation(from, to, value, convertedValue);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
+
+    value = 4;
+    ret = session->ConvertOrientationAndRotation(from, to, value, convertedValue);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
+
+    value = 2;
+    from = RotationInfoType::DISPLAY_ROTATION;
+    to = RotationInfoType::DISPLAY_ROTATION;
+    ret = session->ConvertOrientationAndRotation(from, to, value, convertedValue);
+    EXPECT_EQ(WSError::WS_OK, ret);
+
+    from = RotationInfoType::DISPLAY_ROTATION;
+    to = RotationInfoType::WINDOW_ORIENTATION;
+    ret = session->ConvertOrientationAndRotation(from, to, value, convertedValue);
+    EXPECT_EQ(WSError::WS_OK, ret);
+
+    from = RotationInfoType::DISPLAY_ROTATION;
+    to = RotationInfoType::DISPLAY_ORIENTATION;
+    ret = session->ConvertOrientationAndRotation(from, to, value, convertedValue);
+    EXPECT_EQ(WSError::WS_OK, ret);
+
+    from = RotationInfoType::DISPLAY_ORIENTATION;
+    to = RotationInfoType::WINDOW_ORIENTATION;
+    ret = session->ConvertOrientationAndRotation(from, to, value, convertedValue);
+    EXPECT_EQ(WSError::WS_OK, ret);
+
+    from = RotationInfoType::DISPLAY_ORIENTATION;
+    to = RotationInfoType::DISPLAY_ROTATION;
+    ret = session->ConvertOrientationAndRotation(from, to, value, convertedValue);
+    EXPECT_EQ(WSError::WS_OK, ret);
+
+    from = RotationInfoType::WINDOW_ORIENTATION;
+    to = RotationInfoType::DISPLAY_ORIENTATION;
+    ret = session->ConvertOrientationAndRotation(from, to, value, convertedValue);
+    EXPECT_EQ(WSError::WS_OK, ret);
+
+    from = RotationInfoType::WINDOW_ORIENTATION;
+    to = RotationInfoType::DISPLAY_ROTATION;
+    ret = session->ConvertOrientationAndRotation(from, to, value, convertedValue);
+    EXPECT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: ConvertDisplayOrientationToWindowOrientation
+ * @tc.desc: ConvertDisplayOrientationToWindowOrientation function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, ConvertDisplayOrientationToWindowOrientation, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "ConvertDisplayOrientationToWindowOrientation";
+    info.bundleName_ = "ConvertDisplayOrientationToWindowOrientation";
+    sptr<SceneSession> session = nullptr;
+    int32_t value = 4;
+    int32_t convertedValue = 0;
+
+    auto ret = session->ConvertDisplayOrientationToWindowOrientation(value, convertedValue);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
+    value = 5;
+    ret = session->ConvertDisplayOrientationToWindowOrientation(value, convertedValue);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
+    value = 2;
+    ret = session->ConvertDisplayOrientationToWindowOrientation(value, convertedValue);
+    EXPECT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: ConvertWindowOrientationToDisplayOrientation
+ * @tc.desc: ConvertWindowOrientationToDisplayOrientation function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, ConvertWindowOrientationToDisplayOrientation, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "ConvertWindowOrientationToDisplayOrientation";
+    info.bundleName_ = "ConvertWindowOrientationToDisplayOrientation";
+    sptr<SceneSession> session = nullptr;
+    int32_t value = 4;
+    int32_t convertedValue = 0;
+    value = 5;
+    auto ret = session->ConvertWindowOrientationToDisplayOrientation(value, convertedValue);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
+    value = 2;
+    ret = session->ConvertWindowOrientationToDisplayOrientation(value, convertedValue);
+    EXPECT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: ConvertDisplayRotationToDisplayOrientation
+ * @tc.desc: ConvertDisplayRotationToDisplayOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, ConvertDisplayRotationToDisplayOrientation, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ConvertDisplayRotationToDisplayOrientation";
+    info.bundleName_ = "ConvertDisplayRotationToDisplayOrientation";
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->GetSessionProperty()->SetDisplayId(1001);
+    ScreenSessionConfig config;
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(1001, screenSession);
+
+    int32_t value = 2;
+    int32_t convertedValue = 0;
+    WSError result = sceneSession->ConvertDisplayRotationToDisplayOrientation(value, convertedValue);
+    EXPECT_EQ(result, WSError::WS_OK);
+    
+    sceneSession->GetSessionProperty()->SetDisplayId(1024);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(1024, nullptr);
+    WSError result1 = sceneSession->ConvertDisplayRotationToDisplayOrientation(value, convertedValue);
+    EXPECT_EQ(result1, WSError::WS_ERROR_INVALID_DISPLAY);
+}
+
+/**
+ * @tc.name: ConvertDisplayOrientationToDisplayRotation
+ * @tc.desc: ConvertDisplayOrientationToDisplayRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, ConvertDisplayOrientationToDisplayRotation, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ConvertDisplayOrientationToDisplayRotation";
+    info.bundleName_ = "ConvertDisplayOrientationToDisplayRotation";
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->GetSessionProperty()->SetDisplayId(1001);
+    ScreenSessionConfig config;
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(1001, screenSession);
+
+    int32_t value = 2;
+    int32_t convertedValue = 0;
+    WSError result = sceneSession->ConvertDisplayOrientationToDisplayRotation(value, convertedValue);
+    EXPECT_EQ(result, WSError::WS_OK);
+    
+    sceneSession->GetSessionProperty()->SetDisplayId(1024);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(1024, nullptr);
+    WSError result1 = sceneSession->ConvertDisplayOrientationToDisplayRotation(value, convertedValue);
+    EXPECT_EQ(result1, WSError::WS_ERROR_INVALID_DISPLAY);
+}
+
+/**
+ * @tc.name: ConvertDisplayRotationToWindowOrientation
+ * @tc.desc: ConvertDisplayRotationToWindowOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, ConvertDisplayRotationToWindowOrientation, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ConvertDisplayRotationToWindowOrientation";
+    info.bundleName_ = "ConvertDisplayRotationToWindowOrientation";
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->GetSessionProperty()->SetDisplayId(1001);
+    ScreenSessionConfig config;
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(1001, screenSession);
+
+    int32_t value = 2;
+    int32_t convertedValue = 0;
+    WSError result = sceneSession->ConvertDisplayRotationToWindowOrientation(value, convertedValue);
+    EXPECT_EQ(result, WSError::WS_OK);
+    
+    sceneSession->GetSessionProperty()->SetDisplayId(1024);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(1024, nullptr);
+    WSError result1 = sceneSession->ConvertDisplayRotationToWindowOrientation(value, convertedValue);
+    EXPECT_EQ(result1, WSError::WS_ERROR_INVALID_DISPLAY);
+}
+
+/**
+ * @tc.name: ConvertWindowOrientationToDisplayRotation
+ * @tc.desc: ConvertWindowOrientationToDisplayRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, ConvertWindowOrientationToDisplayRotation, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ConvertWindowOrientationToDisplayRotation";
+    info.bundleName_ = "ConvertWindowOrientationToDisplayRotation";
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->GetSessionProperty()->SetDisplayId(1001);
+    ScreenSessionConfig config;
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(1001, screenSession);
+
+    int32_t value = 2;
+    int32_t convertedValue = 0;
+    WSError result = sceneSession->ConvertWindowOrientationToDisplayRotation(value, convertedValue);
+    EXPECT_EQ(result, WSError::WS_OK);
+    
+    sceneSession->GetSessionProperty()->SetDisplayId(1024);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(1024, nullptr);
+    WSError result1 = sceneSession->ConvertWindowOrientationToDisplayRotation(value, convertedValue);
+    EXPECT_EQ(result1, WSError::WS_ERROR_INVALID_DISPLAY);
+}
+
 /*
  * @tc.name: RegisterSnapshotSkipChangeCallback
  * @tc.desc: RegisterSnapshotSkipChangeCallback
@@ -1741,6 +1971,38 @@ HWTEST_F(SceneSessionTest6, GetMoveRectForWindowDrag, TestSize.Level0)
     session->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     WSRect rect4 = session->GetMoveRectForWindowDrag();
     EXPECT_EQ(rect4, session->GetGlobalOrWinRect());
+}
+
+/**
+ * @tc.name: TestIsCrossDisplayDragSupported
+ * @tc.desc: Verify IsCrossDisplayDragSupported with different window types.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, TestIsCrossDisplayDragSupported, TestSize.Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    // Case 1: ANCO windows are not supported
+    session->SetCollaboratorType(static_cast<int32_t>(CollaboratorType::RESERVE_TYPE));
+    EXPECT_FALSE(session->IsCrossDisplayDragSupported());
+    session->SetCollaboratorType(static_cast<int32_t>(CollaboratorType::DEFAULT_TYPE));
+
+    // Case 2: Normal system windows are not supported
+    session->GetSessionProperty()->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    EXPECT_FALSE(session->IsCrossDisplayDragSupported());
+
+    // Case 3: WINDOW_TYPE_FLOAT windows are supported
+    session->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    EXPECT_TRUE(session->IsCrossDisplayDragSupported());
+
+    // Case 4: WINDOW_TYPE_SCREENSHOT windows are supported
+    session->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_SCREENSHOT);
+    EXPECT_TRUE(session->IsCrossDisplayDragSupported());
+
+    // Case 5: Input Windows are supported
+    session->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    EXPECT_TRUE(session->IsCrossDisplayDragSupported());
 }
 } // namespace
 } // namespace Rosen

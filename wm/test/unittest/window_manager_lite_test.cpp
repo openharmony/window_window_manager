@@ -704,6 +704,21 @@ HWTEST_F(WindowManagerLiteTest, ClearMainSessions003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateScreenLockStatusForApp
+ * @tc.desc: check UpdateScreenLockStatusForApp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, UpdateScreenLockStatusForApp, TestSize.Level1)
+{
+    ASSERT_NE(instance_, nullptr);
+    std::string bundleName = "UpdateScreenLockStatusForApp";
+    bool isRelease = true;
+    WMError expectRet = WindowAdapterLite::GetInstance(userId_).UpdateScreenLockStatusForApp(bundleName, isRelease);
+    auto ret = instance_->UpdateScreenLockStatusForApp(bundleName, isRelease);
+    EXPECT_EQ(ret, expectRet);
+}
+
+/**
  * @tc.name: GetWindowModeType
  * @tc.desc: GetWindowModeType
  * @tc.type: FUNC
@@ -1412,6 +1427,113 @@ HWTEST_F(WindowManagerLiteTest, UnregisterVisibilityStateChangedListener01, Func
 
     instance_->pImpl_->windowVisibilityStateListenerAgent_ = oldWindowManagerAgent;
     instance_->pImpl_->windowVisibilityStateListeners_ = oldListeners;
+}
+
+/**
+ * @tc.name: SetGlobalDragResizeType
+ * @tc.desc: check SetGlobalDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, SetGlobalDragResizeType, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, instance_);
+    DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    auto ret = instance_->SetGlobalDragResizeType(dragResizeType);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: GetGlobalDragResizeType
+ * @tc.desc: check GetGlobalDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, GetGlobalDragResizeType, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, instance_);
+    DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    auto ret = instance_->GetGlobalDragResizeType(dragResizeType);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: SetAppDragResizeType
+ * @tc.desc: check SetAppDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, SetAppDragResizeType, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, instance_);
+    DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    const std::string bundleName = "test";
+    auto ret = instance_->SetAppDragResizeType(bundleName, dragResizeType);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: GetAppDragResizeType
+ * @tc.desc: check GetAppDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, GetAppDragResizeType, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, instance_);
+    DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    const std::string bundleName = "test";
+    auto ret = instance_->GetAppDragResizeType(bundleName, dragResizeType);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: EffectiveDragResizeType
+ * @tc.desc: test EffectiveDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, EffectiveDragResizeType, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, instance_);
+    DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    const std::string bundleName = "test";
+
+    DragResizeType globalDragResizeType = DragResizeType::RESIZE_WHEN_DRAG_END;
+    DragResizeType appDragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    instance_->SetGlobalDragResizeType(globalDragResizeType);
+    instance_->SetAppDragResizeType(bundleName, appDragResizeType);
+    instance_->GetAppDragResizeType(bundleName, dragResizeType);
+    ASSERT_EQ(dragResizeType, globalDragResizeType);
+    instance_->SetGlobalDragResizeType(DragResizeType::RESIZE_TYPE_UNDEFINED);
+    instance_->GetAppDragResizeType(bundleName, dragResizeType);
+    ASSERT_EQ(dragResizeType, appDragResizeType);
+}
+
+/**
+ * @tc.name: SetAppKeyFramePolicy01
+ * @tc.desc: check SetAppKeyFramePolicy enable
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, SetAppKeyFramePolicy01, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, instance_);
+    const std::string bundleName = "test";
+    KeyFramePolicy keyFramePolicy;
+    keyFramePolicy.dragResizeType_ = DragResizeType::RESIZE_KEY_FRAME;
+    keyFramePolicy.animationDelay_ = 200;
+    auto ret = instance_->SetAppKeyFramePolicy(bundleName, keyFramePolicy);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: SetAppKeyFramePolicy02
+ * @tc.desc: check SetAppKeyFramePolicy disable
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, SetAppKeyFramePolicy02, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, instance_);
+    const std::string bundleName = "test";
+    KeyFramePolicy keyFramePolicy;
+    keyFramePolicy.dragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    auto ret = instance_->SetAppKeyFramePolicy(bundleName, keyFramePolicy);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**

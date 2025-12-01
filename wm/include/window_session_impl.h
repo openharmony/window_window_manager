@@ -23,7 +23,7 @@
 #include <event_handler.h>
 #include <i_input_event_consumer.h>
 #include <ui_content.h>
-#include <ui/rs_canvas_node.h>
+#include <feature/window_keyframe/rs_window_keyframe_node.h>
 #include <ui/rs_surface_node.h>
 #include <ui/rs_ui_director.h>
 #include "display_manager.h"
@@ -110,6 +110,12 @@ public:
         BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
         BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
+    WMError AniSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
+        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
+    WMError NapiSetUIContentByName(const std::string& contentName, napi_env env, napi_value storage,
+        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
+    WMError AniSetUIContentByName(const std::string& contentName, ani_env* env, ani_object storage,
+        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     WMError SetUIContentByName(const std::string& contentInfo, napi_env env, napi_value storage,
         AppExecFwk::Ability* ability) override;
     WMError SetUIContentByAbc(const std::string& abcPath, napi_env env, napi_value storage,
@@ -172,6 +178,7 @@ public:
     void NotifyClientWindowSize();
     bool IsFullScreenPcAppInPadMode() const;
     sptr<WindowSessionProperty> GetPropertyByContext() const;
+    std::vector<Rect> GetAncoWindowHotAreas();
 
     /*
      * Compatible Mode
@@ -459,6 +466,8 @@ public:
     WMError UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
     WMError RegisterWindowTitleChangeListener(const sptr<IWindowTitleChangeListener>& listener) override;
     WMError UnregisterWindowTitleChangeListener(const sptr<IWindowTitleChangeListener>& listener) override;
+    WMError RegisterWindowTitleOrHotAreasListener(const sptr<IWindowTitleOrHotAreasListener>& listener) override;
+    WMError UnregisterWindowTitleOrHotAreasListener(const sptr<IWindowTitleOrHotAreasListener>& listener) override;
     WMError RegisterRectChangeInGlobalDisplayListener(
         const sptr<IRectChangeInGlobalDisplayListener>& listener) override;
     WMError UnregisterRectChangeInGlobalDisplayListener(
@@ -494,8 +503,8 @@ public:
     float GetVirtualPixelRatio() override;
     CrossAxisState GetCrossAxisState() override;
     void RegisterKeyFrameCallback();
-    WSError LinkKeyFrameCanvasNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode) override;
-    WSError SetKeyFramePolicy(KeyFramePolicy& keyFramePolicy) override;
+    WSError LinkKeyFrameNode(std::shared_ptr<RSWindowKeyFrameNode>& rsKeyFrameNode) override;
+    WSError SetStageKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) override;
     WMError SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) override;
     WMError RegisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener) override;
     WMError UnregisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener) override;
@@ -593,6 +602,8 @@ public:
     WMError SetFollowScreenChange(bool isFollowScreenChange) override;
     void BeginRSTransaction(const std::shared_ptr<RSTransaction>& rsTransaction) const;
     WSError NotifyPageRotationIsIgnored() override;
+    WMError ConvertOrientationAndRotation(const RotationInfoType from, const RotationInfoType to,
+        const int32_t value, int32_t& convertedValue) override;
 
     /*
      * UIExtension
@@ -694,7 +705,7 @@ protected:
     std::unordered_set<int32_t> rectChangeUIExtListenerIds_;
     std::unordered_set<int32_t> keyboardDidShowUIExtListenerIds_;
     std::unordered_set<int32_t> keyboardDidHideUIExtListenerIds_;
-    std::unordered_set<int32_t> rectChangeInGlobalDisplayUIExtListenerIds;
+    std::unordered_set<int32_t> rectChangeInGlobalDisplayUIExtListenerIds_;
     std::unordered_map<int32_t, sptr<IKeyboardDidShowListener>> keyboardDidShowUIExtListeners_;
     std::unordered_map<int32_t, sptr<IKeyboardDidHideListener>> keyboardDidHideUIExtListeners_;
     void WriteKeyboardInfoToWant(AAFwk::Want& want, const KeyboardPanelInfo& keyboardPanelInfo) const;
@@ -949,6 +960,8 @@ private:
     template<typename T>
     EnableIfSame<T, IWindowTitleChangeListener, std::vector<sptr<IWindowTitleChangeListener>>> GetListeners();
     template<typename T>
+    EnableIfSame<T, IWindowTitleOrHotAreasListener, std::vector<sptr<IWindowTitleOrHotAreasListener>>> GetListeners();
+    template<typename T>
     EnableIfSame<T, IRectChangeInGlobalDisplayListener, std::vector<sptr<IRectChangeInGlobalDisplayListener>>>
         GetListeners();
     template<typename T>
@@ -1066,6 +1079,7 @@ private:
     static std::mutex displayMoveListenerMutex_;
     static std::mutex windowRectChangeListenerMutex_;
     static std::mutex windowTitleChangeListenerMutex_;
+    static std::mutex windowTitleOrHotAreasListenerMutex_;
     static std::mutex rectChangeInGlobalDisplayListenerMutex_;
     static std::mutex secureLimitChangeListenerMutex_;
     static std::mutex switchFreeMultiWindowListenerMutex_;
@@ -1111,6 +1125,7 @@ private:
     static std::map<int32_t, std::vector<sptr<IWindowStatusDidChangeListener>>> windowStatusDidChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> windowRectChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowTitleChangeListener>>> windowTitleChangeListeners_;
+    static std::map<int32_t, std::vector<sptr<IWindowTitleOrHotAreasListener>>> windowTitleOrHotAreasListeners_;
     static std::map<int32_t, std::vector<sptr<IRectChangeInGlobalDisplayListener>>> rectChangeInGlobalDisplayListeners_;
     static std::map<int32_t, std::vector<sptr<IExtensionSecureLimitChangeListener>>> secureLimitChangeListeners_;
     static std::map<int32_t, std::vector<sptr<ISwitchFreeMultiWindowListener>>> switchFreeMultiWindowListeners_;
@@ -1218,6 +1233,12 @@ private:
      * RS Client Multi Instance
      */
     std::shared_ptr<RSUIDirector> rsUIDirector_;
+
+    /*
+     * Compatible Mode
+     */
+    void RegisterNavigateCallbackForPageCompatibleModeIfNeed();
+    void HandleNavigateCallbackForPageCompatibleMode(const std::string& fromPage, const std::string& toPage);
 };
 } // namespace Rosen
 } // namespace OHOS

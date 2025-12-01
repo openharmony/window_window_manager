@@ -39,23 +39,6 @@ MainSession::MainSession(const SessionInfo& info, const sptr<SpecificSessionCall
         scenePersistence_->RenameSnapshotFromOldPersistentId(info.persistentId_);
     }
     pcFoldScreenController_ = sptr<PcFoldScreenController>::MakeSptr(wptr(this), GetPersistentId());
-    moveDragController_ = sptr<MoveDragController>::MakeSptr(GetPersistentId(), GetWindowType());
-    if (specificCallback != nullptr &&
-        specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
-        moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback->onWindowInputPidChangeCallback_);
-    }
-    SetMoveDragCallback();
-    std::string key = GetRatioPreferenceKey();
-    if (!key.empty()) {
-        if (ScenePersistentStorage::HasKey(key, ScenePersistentStorageType::ASPECT_RATIO)) {
-            float aspectRatio = 0.f;
-            ScenePersistentStorage::Get(key, aspectRatio, ScenePersistentStorageType::ASPECT_RATIO);
-            TLOGI(WmsLogTag::WMS_LAYOUT, "init aspectRatio, bundleName:%{public}s, key:%{public}s, value:%{public}f",
-                info.bundleName_.c_str(), key.c_str(), aspectRatio);
-            Session::SetAspectRatio(aspectRatio);
-            moveDragController_->SetAspectRatio(aspectRatio);
-        }
-    }
     auto isPersistentImageFit = ScenePersistentStorage::HasKey(
         "SetImageForRecent_" + std::to_string(GetPersistentId()), ScenePersistentStorageType::MAXIMIZE_STATE);
     if (isPersistentImageFit) {
@@ -68,6 +51,31 @@ MainSession::MainSession(const SessionInfo& info, const sptr<SpecificSessionCall
 MainSession::~MainSession()
 {
     WLOGD("~MainSession, id: %{public}d", GetPersistentId());
+}
+
+void MainSession::OnFirstStrongRef(const void* objectId)
+{
+    // OnFirstStrongRef is overridden in the parent class IPCObjectStub,
+    // so its parent implementation must be invoked here to avoid IPC communication issues.
+    SceneSession::OnFirstStrongRef(objectId);
+    
+    moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(this));
+    if (specificCallback_ != nullptr && specificCallback_->onWindowInputPidChangeCallback_ != nullptr) {
+        moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback_->onWindowInputPidChangeCallback_);
+    }
+    SetMoveDragCallback();
+    std::string key = GetRatioPreferenceKey();
+    if (!key.empty()) {
+        if (ScenePersistentStorage::HasKey(key, ScenePersistentStorageType::ASPECT_RATIO)) {
+            float aspectRatio = 0.f;
+            ScenePersistentStorage::Get(key, aspectRatio, ScenePersistentStorageType::ASPECT_RATIO);
+            TLOGI(WmsLogTag::WMS_LAYOUT,
+                  "init aspectRatio, bundleName:%{public}s, key:%{public}s, value:%{public}f",
+                  sessionInfo_.bundleName_.c_str(), key.c_str(), aspectRatio);
+            Session::SetAspectRatio(aspectRatio);
+            moveDragController_->SetAspectRatio(aspectRatio);
+        }
+    }
 }
 
 WSError MainSession::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
@@ -616,6 +624,19 @@ WSError MainSession::NotifyIsFullScreenInForceSplitMode(bool isFullScreen)
 bool MainSession::IsFullScreenInForceSplit()
 {
     return isFullScreenInForceSplit_.load();
+}
+
+void MainSession::RegisterCompatibleModeChangeCallback(CompatibleModeChangeCallback&& callback)
+{
+    compatibleModeChangeCallback_ = callback;
+}
+
+WSError MainSession::NotifyCompatibleModeChange(CompatibleStyleMode mode)
+{
+    if (compatibleModeChangeCallback_) {
+        compatibleModeChangeCallback_(mode);
+    }
+    return WSError::WS_OK;
 }
 
 bool MainSession::RestoreAspectRatio(float ratio)

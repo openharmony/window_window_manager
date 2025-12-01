@@ -84,7 +84,7 @@ void WindowPatternStartingWindowTest::InitTestStartingWindowRdb()
     WmsRdbConfig config;
     config.dbName = TEST_RDB_NAME;
     config.dbPath = TEST_RDB_PATH;
-    ssm_->startingWindowRdbMgr_ = std::make_unique<StartingWindowRdbManager>(config);
+    ssm_->startingWindowRdbMgr_ = std::make_shared<StartingWindowRdbManager>(config);
 }
 
 void WindowPatternStartingWindowTest::CreateSession(SessionInfo sessionInfo, int32_t persistentId)

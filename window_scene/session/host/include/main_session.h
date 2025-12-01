@@ -24,6 +24,8 @@ public:
     MainSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
     ~MainSession();
 
+    void OnFirstStrongRef(const void* objectId) override;
+
     WSError Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property = nullptr,
         sptr<IRemoteObject> token = nullptr, int32_t pid = -1, int32_t uid = -1) override;
@@ -80,6 +82,8 @@ public:
     WSError NotifyIsFullScreenInForceSplitMode(bool isFullScreen) override;
     void RegisterForceSplitFullScreenChangeCallback(ForceSplitFullScreenChangeCallback&& callback) override;
     bool IsFullScreenInForceSplit() override;
+    void RegisterCompatibleModeChangeCallback(CompatibleModeChangeCallback&& callback) override;
+    WSError NotifyCompatibleModeChange(CompatibleStyleMode mode) override;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
@@ -110,6 +114,7 @@ private:
      */
     ForceSplitFullScreenChangeCallback forceSplitFullScreenChangeCallback_;
     std::atomic_bool isFullScreenInForceSplit_ { false };
+    CompatibleModeChangeCallback compatibleModeChangeCallback_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MAIN_SESSION_H

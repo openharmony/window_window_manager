@@ -67,6 +67,7 @@ public:
     bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason);
     ScreenPowerState GetScreenPower(ScreenId dmsScreenId);
     ScreenPowerState GetScreenPower();
+    void SyncScreenPowerState(ScreenPowerState state);
     bool SetDisplayState(DisplayState state);
     DisplayState GetDisplayState(DisplayId displayId);
     bool TryToCancelScreenOff();

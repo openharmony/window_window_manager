@@ -62,6 +62,7 @@ constexpr uint32_t MAX_SIZE_PIP_CONTROL_GROUP = 8;
 constexpr uint32_t MAX_SIZE_PIP_CONTROL = 9;
 constexpr int32_t SPECIFIC_ZINDEX_INVALID = -1;
 constexpr double POS_ZERO = 0.001f;
+constexpr uint32_t SUPPORT_ROTATION_SIZE = 4;
 /*
  * PC Window Sidebar Blur
  */
@@ -187,6 +188,16 @@ enum class WindowType : uint32_t {
     SYSTEM_WINDOW_END = SYSTEM_SUB_WINDOW_END,
 
     WINDOW_TYPE_UI_EXTENSION = 3000
+};
+ 
+/**
+ * @struct RealTimeSwitchInfo.
+ *
+ * @brief the information for compatible mode App when switching window style in real time.
+ */
+struct RealTimeSwitchInfo {
+    bool isNeedChange_{false};
+    uint32_t showTypes_{0};
 };
 
 /**
@@ -3330,6 +3341,78 @@ struct OutlineParams : public Parcelable {
 };
 
 /**
+ * @brief support rotation of current application
+ */
+struct SupportRotationInfo : public Parcelable {
+    DisplayId displayId_ = DISPLAY_ID_INVALID;
+    int32_t persistentId_ = 0;
+    // ture means support rotate to index*90 rotation
+    std::vector<bool> containerSupportRotation_ = {true, false, false, false};
+    std::vector<bool> sceneSupportRotation_ = {true, false, false, false};
+    std::string supportRotationChangeReason_ = "";
+
+    SupportRotationInfo() {}
+
+    bool Marshalling(Parcel& parcel) const
+    {
+        if (!parcel.WriteUint64(static_cast<uint64_t>(displayId_))) {
+            return false;
+        }
+        if (!parcel.WriteInt32(persistentId_)) {
+            return false;
+        }
+        for (uint32_t i = 0; i < SUPPORT_ROTATION_SIZE; i++) {
+            if (!parcel.WriteBool(containerSupportRotation_[i])) {
+                return false;
+            }
+        }
+        for (uint32_t i = 0; i < SUPPORT_ROTATION_SIZE; i++) {
+            if (!parcel.WriteBool(sceneSupportRotation_[i])) {
+                return false;
+            }
+        }
+        if (!parcel.WriteString(supportRotationChangeReason_)) {
+            return false;
+        }
+        return true;
+    }
+
+    static SupportRotationInfo* Unmarshalling(Parcel& parcel)
+    {
+        SupportRotationInfo* supportRotationInfo = new SupportRotationInfo();
+        if (!parcel.ReadUint64(supportRotationInfo->displayId_)) {
+            delete supportRotationInfo;
+            return nullptr;
+        }
+        if (!parcel.ReadInt32(supportRotationInfo->persistentId_)) {
+            delete supportRotationInfo;
+            return nullptr;
+        }
+        for (uint32_t i = 0; i < SUPPORT_ROTATION_SIZE; i++) {
+            bool isSupport = false;
+            if (!parcel.ReadBool(isSupport)) {
+                delete supportRotationInfo;
+                return nullptr;
+            }
+            supportRotationInfo->containerSupportRotation_[i] = isSupport;
+        }
+        for (uint32_t i = 0; i < SUPPORT_ROTATION_SIZE; i++) {
+            bool isSupport = false;
+            if (!parcel.ReadBool(isSupport)) {
+                delete supportRotationInfo;
+                return nullptr;
+            }
+            supportRotationInfo->sceneSupportRotation_[i] = isSupport;
+        }
+        if (!parcel.ReadString(supportRotationInfo->supportRotationChangeReason_)) {
+            delete supportRotationInfo;
+            return nullptr;
+        }
+        return supportRotationInfo;
+    }
+};
+
+/**
  * @enum WaterfallResidentState
  * @brief Represents the resident (persistent) state control of the waterfall layout.
  */
@@ -3345,6 +3428,24 @@ enum class WaterfallResidentState : uint32_t {
 
     /** Disable the resident state but keep the current waterfall layout state unchanged. */
     CANCEL = 3,
+};
+
+/**
+ * @enum CompatibleMode
+ * @brief Controls the compatible aspect ratio modes for window display.
+ */
+enum class CompatibleStyleMode : uint32_t {
+    INVALID_VALUE = -1,
+    // Default aspect ratio
+    LANDSCAPE_DEFAULT = 0,
+    // 18:9 aspect ratio
+    LANDSCAPE_18_9 = 1,
+    // 1:1 aspect ratio
+    LANDSCAPE_1_1 = 3,
+    // 2:3 aspect ratio
+    LANDSCAPE_2_3 = 4,
+    // split aspect ratio
+    LANDSCAPE_SPLIT = 5,
 };
 }
 }

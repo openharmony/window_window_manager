@@ -112,6 +112,7 @@ public:
     void SetDisplayNodeScreenId(ScreenId screenId);
     void RegisterScreenChangeListener(IScreenChangeListener* screenChangeListener);
     void UnregisterScreenChangeListener(IScreenChangeListener* screenChangeListener);
+    void UpdateScbScreenPropertyToServer(const ScreenProperty& screenProperty);
 
     sptr<DisplayInfo> ConvertToDisplayInfo();
     sptr<DisplayInfo> ConvertToRealDisplayInfo();
@@ -168,6 +169,8 @@ public:
     DisplayOrientation CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode);
     DisplayOrientation CalcDeviceOrientationWithBounds(Rotation rotation,
         FoldDisplayMode foldDisplayMode, const RRect& bounds);
+    RRect CalcBoundsInRotationZero();
+    RRect CalcBoundsByRotation(Rotation rotation);
     void FillScreenInfo(sptr<ScreenInfo> info) const;
     void SetDisplayNodeSecurity();
     void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint, bool isExtend = false,
@@ -194,8 +197,6 @@ public:
     void HandleCameraBackSelfieChange(bool isCameraBackSelfie);
     float ConvertRotationToFloat(Rotation sensorRotation);
 
-    bool HasPrivateSessionForeground() const;
-    void SetPrivateSessionForeground(bool hasPrivate);
     void SetDisplayBoundary(const RectF& rect, const uint32_t& offsetY);
     void SetExtendProperty(RRect bounds, bool isCurrentOffScreenRendering);
     void SetScreenRotationLocked(bool isLocked);
@@ -299,9 +300,17 @@ public:
 
     void Connect();
     void Disconnect();
+    void HandleKeyboardOnPropertyChange(ScreenProperty& screenProperty, int32_t height);
+    void HandleKeyboardOffPropertyChange(ScreenProperty& screenProperty);
+    void HandleSystemKeyboardOnPropertyChange(ScreenProperty& screenProperty,
+        SuperFoldStatus currentStatus, bool isKeyboardOn, int32_t validHeight);
+    void HandleSystemKeyboardOffPropertyChange(ScreenProperty& screenProperty,
+        SuperFoldStatus currentStatus, bool isKeyboardOn);
+    void ProcPropertyChange(ScreenProperty& screenProperty, const ScreenProperty& eventPara);
+    void ProcPropertyChangedForSuperFold(ScreenProperty& screenProperty, const ScreenProperty& eventPara);
+    void NotifyListenerPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason);
     void PropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason);
-    void NotifyClientPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason);
-    void NotifyFoldPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
+    void NotifyFoldPropertyChange(ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
         FoldDisplayMode displayMode);
     void UpdateSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents changeEvent);
     SuperFoldStatusChangeEvents GetSuperFoldStatusChangeEvent();
@@ -406,8 +415,8 @@ public:
     void UpdateMirrorHeight(uint32_t mirrorHeight);
     void SetCurrentValidHeight(int32_t currentValidHeight);
     int32_t GetCurrentValidHeight() const;
-    void SetIsPreFakeInUse(bool isPreFakeInUse);
-    bool GetIsPreFakeInUse() const;
+    void SetIsDestroyDisplay(bool isPreFakeInUse);
+    bool GetIsDestroyDisplay() const;
     void SetIsKeyboardOn(bool isKeyboardOn);
     bool GetIsKeyboardOn() const;
     void SetFloatRotation(float rotation);
@@ -416,6 +425,16 @@ public:
     void SetSupportsFocus(bool focus);
     bool GetSupportsInput() const;
     void SetSupportsInput(bool input);
+
+    bool GetUniqueRotationLock() const;
+    void SetUniqueRotationLock(bool isRotationLocked);
+    int32_t GetUniqueRotation() const;
+    void SetUniqueRotation(int32_t rotation);
+    const std::map<int32_t, int32_t>& GetUniqueRotationOrientationMap() const;
+    bool UpdateRotationOrientationMap(UniqueScreenRotationOptions& rotationOptions, int32_t rotation,
+                                            int32_t orientation);
+    void SetUniqueRotationOrientationMap(const std::map<int32_t, int32_t>& rotationOrientationMap);
+
     void SetVprScaleRatio(float vprScaleRatio);
     float GetVprScaleRatio() const;
 
@@ -434,7 +453,6 @@ private:
     mutable std::mutex combinationMutex_; // above guarded by clientProxyMutex_
     VirtualScreenFlag screenFlag_ { VirtualScreenFlag::DEFAULT };
     VirtualScreenType screenType_ { VirtualScreenType::UNKNOWN };
-    bool hasPrivateWindowForeground_ = false;
     bool isFakeInUse_ = false;  // is fakeScreenSession can be used
     bool isBScreenHalf_ = false;
     bool isPhysicalMirrorSwitch_ = false;
@@ -479,9 +497,17 @@ private:
 
     void RemoveRotationCorrection(Rotation& rotation, FoldDisplayMode foldDisplayMode);
     void AddRotationCorrection(Rotation& rotation, FoldDisplayMode displayMode);
+    Rotation GetTargetRotationWithBounds(Rotation rotation, const RRect& bounds, uint32_t rotationOffset);
     std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap_;
     std::shared_mutex rotationCorrectionMutex_;
     std::atomic<Rotation> currentRotationCorrection_ { Rotation::ROTATION_0 };
+
+    /*
+     * Create Unique Screen Locked Rotation Parameters
+     */
+    bool isUniqueRotationLocked_;
+    int32_t uniqueRotation_;
+    std::map<int32_t, int32_t> uniqueRotationOrientationMap_;
 
     /*
      * RS Client Multi Instance

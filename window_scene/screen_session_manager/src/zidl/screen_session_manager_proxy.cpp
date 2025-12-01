@@ -3007,7 +3007,7 @@ DMError ScreenSessionManagerProxy::GetLiveCreaseRegion(FoldCreaseRegion& region)
 }
 
 DMError ScreenSessionManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
-    std::vector<DisplayId>& displayIds)
+    std::vector<DisplayId>& displayIds, const UniqueScreenRotationOptions& rotationOptions)
 {
     TLOGI(WmsLogTag::DMS, "enter");
     sptr<IRemoteObject> remote = Remote();
@@ -3032,6 +3032,18 @@ DMError ScreenSessionManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>&
         TLOGE(WmsLogTag::DMS, "write screens failed");
         return DMError::DM_ERROR_NULLPTR;
     }
+    if (!data.WriteBool(rotationOptions.isRotationLocked_)) {
+        TLOGE(WmsLogTag::DMS, "write isRotationLocked failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    if (!data.WriteInt32(rotationOptions.rotation_)) {
+        TLOGE(WmsLogTag::DMS, "write rotation failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    TLOGD(WmsLogTag::DMS,
+          "IPC Proxy sending parameters, isRotationLocked: %{public}d, rotation: %{public}d",
+          rotationOptions.isRotationLocked_, rotationOptions.rotation_);
+
     if (remote->SendRequest(
         static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_MAKE_UNIQUE_SCREEN),
         data, reply, option) != ERR_NONE) {
@@ -3380,7 +3392,7 @@ void ScreenSessionManagerProxy::SetScreenPrivacyState(bool hasPrivate)
     }
 }
 
-void ScreenSessionManagerProxy::SetPrivacyStateByDisplayId(DisplayId id, bool hasPrivate)
+void ScreenSessionManagerProxy::SetPrivacyStateByDisplayId(std::unordered_map<DisplayId, bool>& privacyBundleDisplayId)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -3395,13 +3407,19 @@ void ScreenSessionManagerProxy::SetPrivacyStateByDisplayId(DisplayId id, bool ha
         TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return;
     }
-    if (!data.WriteUint64(id)) {
-        TLOGE(WmsLogTag::DMS, "Write DisplayId failed");
+    if (!data.WriteUint32(privacyBundleDisplayId.size())) {
+        TLOGE(WmsLogTag::DMS, "Write privacyBundleDisplayId size failed");
         return;
     }
-    if (!data.WriteBool(hasPrivate)) {
-        TLOGE(WmsLogTag::DMS, "Write hasPrivate failed");
-        return;
+    for (const auto& iter : privacyBundleDisplayId) {
+        if (!data.WriteUint64(iter.first)) {
+            TLOGE(WmsLogTag::DMS, "Write DisplayId failed");
+            return;
+        }
+        if (!data.WriteBool(iter.second)) {
+            TLOGE(WmsLogTag::DMS, "Write hasPrivate failed");
+            return;
+        }
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREENID_PRIVACY_STATE),
         data, reply, option) != ERR_NONE) {

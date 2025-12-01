@@ -56,7 +56,7 @@ void MoveDragControllerTest::SetUp()
     info.moduleName_ = "testSession2";
     info.bundleName_ = "testSession3";
     session_ = sptr<Session>::MakeSptr(info);
-    moveDragController = sptr<MoveDragController>::MakeSptr(session_->GetPersistentId(), session_->GetWindowType());
+    moveDragController = sptr<MoveDragController>::MakeSptr(wptr(session_));
 }
 
 void MoveDragControllerTest::TearDown()
@@ -1845,7 +1845,7 @@ HWTEST_F(MoveDragControllerTest, UpdateSubWindowGravityWhenFollow01, TestSize.Le
     sptr<Session> followSession = sptr<Session>::MakeSptr(info);
 
     sptr<MoveDragController> followController =
-        sptr<MoveDragController>::MakeSptr(session_->GetPersistentId(), session_->GetWindowType());
+        sptr<MoveDragController>::MakeSptr(wptr(session_));
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
 
@@ -1894,14 +1894,14 @@ HWTEST_F(MoveDragControllerTest, TestCalcDragTargetRect, TestSize.Level1)
 
     // Case 2: Cross-display disabled & displayId mismatch → no update
     moveDragController->moveDragProperty_.targetRect_ = WSRect::EMPTY_RECT;
-    moveDragController->winType_ = WindowType::SYSTEM_WINDOW_BASE;
+    session_->GetSessionProperty()->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
     moveDragController->moveDragStartDisplayId_ = 1;
     moveDragController->CalcDragTargetRect(pointerEvent, reason);
     EXPECT_EQ(moveDragController->moveDragProperty_.targetRect_, WSRect::EMPTY_RECT);
 
     // Case 3: Cross-display enabled but aspect ratio is 0
     moveDragController->moveDragProperty_.targetRect_ = WSRect::EMPTY_RECT;
-    moveDragController->winType_ = WindowType::WINDOW_TYPE_FLOAT;
+    session_->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     moveDragController->aspectRatio_ = 0.0f;
     moveDragController->CalcDragTargetRect(pointerEvent, reason);
     EXPECT_NE(moveDragController->moveDragProperty_.targetRect_, WSRect::EMPTY_RECT);
@@ -1957,6 +1957,37 @@ HWTEST_F(MoveDragControllerTest, TestRestoreToPreDragGravity, TestSize.Level1)
     EXPECT_TRUE(res);
     EXPECT_EQ(gravity, Gravity::BOTTOM_RIGHT);
     EXPECT_EQ(moveDragController->preDragGravity_, std::nullopt);
+}
+
+/**
+ * @tc.name: TestMoveDragControllerCtor
+ * @tc.desc: Verify MoveDragController constructor initializes members correctly
+ */
+HWTEST_F(MoveDragControllerTest, TestMoveDragControllerCtor, TestSize.Level0)
+{
+    // Case 1: sceneSession is not null
+    ASSERT_EQ(moveDragController->persistentId_, session_->GetPersistentId());
+    ASSERT_EQ(moveDragController->winType_, session_->GetWindowType());
+
+    // Case 2: sceneSession is null
+    sptr<MoveDragController> moveDragControllerNull = sptr<MoveDragController>::MakeSptr(wptr<SceneSession>(nullptr));
+    ASSERT_EQ(moveDragControllerNull->persistentId_, INVALID_WINDOW_ID);
+}
+
+/**
+ * @tc.name: TestIsSupportWindowDragCrossDisplay
+ * @tc.desc: Verify IsSupportWindowDragCrossDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, TestIsSupportWindowDragCrossDisplay, TestSize.Level1)
+{
+    // Case 1: sceneSession_ is not null and window type is APP_MAIN_WINDOW_BASE
+    session_->GetSessionProperty()->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    ASSERT_TRUE(moveDragController->IsSupportWindowDragCrossDisplay());
+
+    // Case 2: sceneSession_ is null
+    moveDragController->sceneSession_ = nullptr;
+    ASSERT_FALSE(moveDragController->IsSupportWindowDragCrossDisplay());
 }
 } // namespace
 } // namespace Rosen

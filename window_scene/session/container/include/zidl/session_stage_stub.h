@@ -19,7 +19,7 @@
 #include <map>
 
 #include <iremote_stub.h>
-#include <ui/rs_canvas_node.h>
+#include <feature/window_keyframe/rs_window_keyframe_node.h>
 
 #include "session/container/include/zidl/session_stage_interface.h"
 
@@ -85,8 +85,8 @@ private:
     int HandleNotifySessionFullScreen(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& reply);
     int HandleExtensionHostData(MessageParcel& data, MessageParcel& reply, MessageOption& option);
-    int HandleLinkKeyFrameCanvasNode(MessageParcel& data, MessageParcel& reply);
-    int HandleSetKeyFramePolicy(MessageParcel& data, MessageParcel& reply);
+    int HandleLinkKeyFrameNode(MessageParcel& data, MessageParcel& reply);
+    int HandleSetStageKeyFramePolicy(MessageParcel& data, MessageParcel& reply);
     int HandleSetDragActivated(MessageParcel& data, MessageParcel& reply);
     int HandleSetSplitButtonVisible(MessageParcel& data, MessageParcel& reply);
     int HandleSetEnableDragBySystem(MessageParcel& data, MessageParcel& reply);

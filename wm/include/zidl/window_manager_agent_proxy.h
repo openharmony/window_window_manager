@@ -47,6 +47,7 @@ public:
     void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground) override;
     void NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
         const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList) override;
+    void NotifySupportRotationChange(const SupportRotationInfo& supportRotationInfo) override;
 
 private:
     static inline BrokerDelegator<WindowManagerAgentProxy> delegator_;

@@ -21,6 +21,7 @@
 #include "session_manager/include/scene_session_dirty_manager.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "scene_input_manager.h"
+#include "session/host/include/move_drag_controller.h"
 #include "session/host/include/scene_session.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "transaction/rs_uiextension_data.h"
@@ -796,6 +797,55 @@ HWTEST_F(SceneSessionDirtyManagerTest2, UpdateWindowFlagsForLockCursor, TestSize
     session->SetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_CURSOR_FOLLOW_MOVEMENT, true);
     manager_->UpdateWindowFlagsForLockCursor(session, windowInfo);
     EXPECT_EQ(windowInfo.flags, MMI_FLAG_BIT_LOCK_CURSOR_FOLLOW_MOVEMENT);
+}
+
+/**
+ * @tc.name: UpdateWindowFlagsForLockCursorInDrag
+ * @tc.desc: UpdateWindowFlagsForLockCursorInDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest2, UpdateWindowFlagsForLockCursorInDrag, TestSize.Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->persistentId_ = 5;
+    session->UpdateFocus(true);
+    sptr<MoveDragController> moveDragController;
+    moveDragController = sptr<MoveDragController>::MakeSptr(session);
+    session->moveDragController_ = moveDragController;
+    session->SetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_LOCK_CURSOR, true);
+    session->SetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_CURSOR_FOLLOW_MOVEMENT, true);
+    moveDragController->SetStartMoveFlag(false);
+    EXPECT_FALSE(moveDragController->GetStartMoveFlag());
+    EXPECT_FALSE(session->IsDragMoving());
+    moveDragController->SetStartDragFlag(false);
+    EXPECT_FALSE(moveDragController->GetStartDragFlag());
+    EXPECT_FALSE(session->IsDragZooming());
+
+    MMI::WindowInfo windowInfo;
+    windowInfo.flags = 0;
+    session->SetSessionInfoCursorDragFlag(true);
+    manager_->UpdateWindowFlagsForLockCursor(session, windowInfo);
+    manager_->UpdateWindowFlagsForLockCursor(session, windowInfo);
+    EXPECT_EQ(windowInfo.flags, 0);
+
+    windowInfo.flags = 0;
+    moveDragController->hasPointDown_ = true;
+    moveDragController->SetStartMoveFlag(true);
+    EXPECT_TRUE(moveDragController->GetStartMoveFlag());
+    EXPECT_TRUE(session->IsDragMoving());
+    manager_->UpdateWindowFlagsForLockCursor(session, windowInfo);
+    EXPECT_EQ(windowInfo.flags, 0);
+
+    windowInfo.flags = 0;
+    moveDragController->SetStartMoveFlag(false);
+    EXPECT_FALSE(moveDragController->GetStartMoveFlag());
+    EXPECT_FALSE(session->IsDragMoving());
+    moveDragController->SetStartDragFlag(true);
+    EXPECT_TRUE(moveDragController->GetStartDragFlag());
+    EXPECT_TRUE(session->IsDragZooming());
+    manager_->UpdateWindowFlagsForLockCursor(session, windowInfo);
+    EXPECT_EQ(windowInfo.flags, 0);
 }
 } // namespace
 } // namespace Rosen

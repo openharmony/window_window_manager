@@ -139,6 +139,7 @@ public:
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits, bool waitDetach) override;
     WSError NotifyDensityFollowHost(bool isFollowHost, float densityValue) override;
+    WMError SetUIExtCustomDensity(const float density) override;
     float GetVirtualPixelRatio(const sptr<DisplayInfo>& displayInfo) override;
     float GetDefaultDensity(const sptr<DisplayInfo>& displayInfo);
     WMError HideNonSecureWindows(bool shouldHide) override;
@@ -242,7 +243,6 @@ private:
     WMError OnCrossAxisStateChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnResyncExtensionConfig(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnGestureBackEnabledChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
-    WMError OnImmersiveModeEnabledChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnHostWindowDelayRaiseStateChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnHostWindowRectChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnScreenshot(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
@@ -268,12 +268,14 @@ private:
     ExtensionWindowFlags extensionWindowFlags_ { 0 };
     bool modalUIExtensionMayBeCovered_ { false };
     bool modalUIExtensionSelfLoadContent_ { false };
+    bool isDensityCustomized_ { false };
+    float customizedDensity_ { 0.0f };
     float lastDensity_ { 0.0f };
     int32_t lastOrientation_ { 0 };
     uint64_t lastDisplayId_ { 0 };
+    uint32_t lastTransform_ { 0 };
     AAFwk::WantParams extensionConfig_ {};
     bool hostGestureBackEnabled_ { true };
-    bool hostImmersiveModeEnabled_ { false };
     bool immersiveModeEnabled_ { false };
     std::mutex hostWindowRectChangeListenerMutex_;
     std::mutex keyboardDidShowListenerMutex_;

@@ -24,6 +24,8 @@ public:
     SystemSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
     ~SystemSession();
 
+    void OnFirstStrongRef(const void* objectId) override;
+
     WSError Show(sptr<WindowSessionProperty> property) override;
     WSError Hide() override;
     WSError Disconnect(bool isFromClient = false, const std::string& identityToken = "") override;

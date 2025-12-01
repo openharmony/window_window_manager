@@ -113,6 +113,7 @@ public:
     static napi_value ChangeCallingWindowId(napi_env env, napi_callback_info info);
     static napi_value SetPreferredOrientation(napi_env env, napi_callback_info info);
     static napi_value GetPreferredOrientation(napi_env env, napi_callback_info info);
+    static napi_value ConvertOrientationAndRotation(napi_env env, napi_callback_info info);
     static napi_value SetSnapshotSkip(napi_env env, napi_callback_info info);
     static napi_value RaiseToAppTop(napi_env env, napi_callback_info info);
     static napi_value SetAspectRatio(napi_env env, napi_callback_info info);
@@ -311,6 +312,7 @@ private:
     napi_value OnIsWindowShowingSync(napi_env env, napi_callback_info info);
     napi_value OnSetPreferredOrientation(napi_env env, napi_callback_info info);
     napi_value OnGetPreferredOrientation(napi_env env, napi_callback_info info);
+    napi_value OnConvertOrientationAndRotation(napi_env env, napi_callback_info info);
     napi_value OnRaiseToAppTop(napi_env env, napi_callback_info info);
     napi_value OnSetAspectRatio(napi_env env, napi_callback_info info);
     napi_value OnSetContentAspectRatio(napi_env env, napi_callback_info info);

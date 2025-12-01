@@ -111,6 +111,17 @@ constexpr int32_t TOUCH_SLOP_RATIO = 25;
 const std::string BACK_WINDOW_EVENT = "scb_back_window_event";
 const std::string COMPATIBLE_MAX_WINDOW_EVENT = "win_compatible_max_event";
 const std::string COMPATIBLE_RECOVER_WINDOW_EVENT = "win_compatible_recover_event";
+const std::string NAME_LANDSCAPE_2_3_CLICK = "win_change_to_2_3_landscape";
+const std::string NAME_LANDSCAPE_1_1_CLICK = "win_change_to_1_1_landscape";
+const std::string NAME_LANDSCAPE_18_9_CLICK = "win_change_to_18_9_landscape";
+const std::string NAME_LANDSCAPE_SPLIT_CLICK = "win_change_to_split_landscape";
+const std::string NAME_DEFAULT_LANDSCAPE_CLICK = "win_change_to_default_landscape";
+const std::string EVENT_NAME_HOVER = "win_hover_event";
+const std::string MOUSE_HOVER = "mouseHover";
+const std::string TOUCH_HOVER = "touchHover";
+const std::string EXIT_HOVER = "exitHover";
+constexpr char SCENE_BOARD_UE_DOMAIN[] = "SCENE_BOARD_UE";
+constexpr char HOVER_MAXIMIZE_MENU[] = "PC_HOVER_MAXIMIZE_MENU";
 const std::unordered_set<WindowType> INVALID_SYSTEM_WINDOW_TYPE = {
     WindowType::WINDOW_TYPE_NEGATIVE_SCREEN,
     WindowType::WINDOW_TYPE_THEME_EDITOR,
@@ -149,10 +160,10 @@ bool IsValueInRange(double value, double lowerBound, double upperBound)
 
 void RecalculatePxLimitsByVp(const WindowLimits& RefreshLimitsVp, WindowLimits& RefreshLimitsPx, float vpr)
 {
-    RefreshLimitsPx.maxWidth_ = static_cast<uint32_t>(std::round(RefreshLimitsVp.maxWidth_ * vpr));
-    RefreshLimitsPx.maxHeight_ = static_cast<uint32_t>(std::round(RefreshLimitsVp.maxHeight_ * vpr));
-    RefreshLimitsPx.minWidth_ = static_cast<uint32_t>(std::round(RefreshLimitsVp.minWidth_ * vpr));
-    RefreshLimitsPx.minHeight_ = static_cast<uint32_t>(std::round(RefreshLimitsVp.minHeight_ * vpr));
+    RefreshLimitsPx.maxWidth_ = static_cast<uint32_t>(RefreshLimitsVp.maxWidth_ * vpr);
+    RefreshLimitsPx.maxHeight_ = static_cast<uint32_t>(RefreshLimitsVp.maxHeight_ * vpr);
+    RefreshLimitsPx.minWidth_ = static_cast<uint32_t>(RefreshLimitsVp.minWidth_ * vpr);
+    RefreshLimitsPx.minHeight_ = static_cast<uint32_t>(RefreshLimitsVp.minHeight_ * vpr);
 }
 
 // Must ensure that vpr is non-zero
@@ -202,7 +213,6 @@ void UpdateLimitIfInRange(uint32_t& currentLimit, uint32_t newLimit, uint32_t mi
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
 using WindowSessionImplMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
 std::mutex WindowSceneSessionImpl::windowAttachStateChangeListenerMutex_;
-std::mutex WindowSceneSessionImpl::transitionControllerMutex_;
 
 WindowSceneSessionImpl::WindowSceneSessionImpl(const sptr<WindowOption>& option,
     const std::shared_ptr<RSUIContext>& rsUIContext) : WindowSessionImpl(option, rsUIContext)
@@ -901,7 +911,7 @@ WMError WindowSceneSessionImpl::SetParentWindow(int32_t newParentWindowId)
         TLOGE(WmsLogTag::WMS_SUB, "This is PcAppInPad, not Supported");
         return WMError::WM_OK;
     }
-    if (!IsPcWindow()) {
+    if (!IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d device not support", subWindowId);
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -949,10 +959,6 @@ WMError WindowSceneSessionImpl::GetParentWindow(sptr<Window>& parentWindow)
     if (property_->GetPcAppInpadCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_SUB, "This is PcAppInPad, not Supported");
         return WMError::WM_OK;
-    }
-    if (!IsPcWindow()) {
-        TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d device not support", GetPersistentId());
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1445,9 +1451,11 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
             TLOGI(WmsLogTag::WMS_LAYOUT_PC, "winId: %{public}u, windowModeSupportType: %{public}u",
                 GetWindowId(), windowModeSupportType);
         }
-        if (property_->IsAdaptToDragScale()) {
-            windowModeSupportType = (WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN |
+        RealTimeSwitchInfo switchInfo = property_->GetRealTimeSwitchInfo();
+        if (switchInfo.showTypes_ != 0) {
+            uint32_t compatibleModeWindowNeed = (WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN |
                                      WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
+            windowModeSupportType |= compatibleModeWindowNeed;
         }
         property_->SetWindowModeSupportType(windowModeSupportType);
         TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}u, windowModeSupportType: %{public}u",
@@ -1460,7 +1468,7 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
             !WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FLOATING));
         auto mainWindow = FindMainWindowWithContext();
         bool isAnco = mainWindow != nullptr && mainWindow->IsAnco();
-        bool onlySupportFullScreen = (isWindowModeSupportFullscreen || isAnco) &&
+        bool onlySupportFullScreen = (isWindowModeSupportFullscreen || (isAnco && !windowSystemConfig_.IsPcWindow())) &&
             ((!windowSystemConfig_.IsPhoneWindow() && !windowSystemConfig_.IsPadWindow()) || IsFreeMultiWindowMode());
         bool compatibleDisableFullScreen = property_->IsFullScreenDisabled();
         if ((onlySupportFullScreen || property_->GetFullScreenStart()) && !compatibleDisableFullScreen) {
@@ -3336,10 +3344,12 @@ bool WindowSceneSessionImpl::IsLayoutFullScreen() const
     }
     WindowType winType = property_->GetWindowType();
     if (WindowHelper::IsMainWindow(winType)) {
-        return (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN && isIgnoreSafeArea_);
+        return (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
+            (IsPcOrPadFreeMultiWindowMode() ? enableImmersiveMode_.load() : isIgnoreSafeArea_));
     }
     if (WindowHelper::IsSubWindow(winType)) {
-        return (isIgnoreSafeAreaNeedNotify_ && isIgnoreSafeArea_);
+        return IsPcOrPadFreeMultiWindowMode() ? enableImmersiveMode_.load() :
+            (isIgnoreSafeAreaNeedNotify_ && isIgnoreSafeArea_);
     }
     return false;
 }
@@ -3779,6 +3789,26 @@ WMError WindowSceneSessionImpl::RecoverForCompatibleMode()
     return WMError::WM_OK;
 }
 
+WMError WindowSceneSessionImpl::SwitchCompatibleMode(CompatibleStyleMode styleMode)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "switch compatible style fail, not main");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+
+    SessionEventParam param;
+    param.compatibleStyleMode = static_cast<uint32_t>(styleMode);
+
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    hostSession->OnSessionEvent(SessionEvent::EVENT_SWITCH_COMPATIBLE_MODE, param);
+    return WMError::WM_OK;
+}
+
 WMError WindowSceneSessionImpl::Maximize()
 {
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d", GetPersistentId());
@@ -3865,7 +3895,6 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation, Wate
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
     hostSession->OnTitleAndDockHoverShowChange(titleHoverShowEnabled_, dockHoverShowEnabled_);
-    SetLayoutFullScreenByApiVersion(enableImmersiveMode_);
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "present: %{public}d, enableImmersiveMode_:%{public}d!",
         presentation, enableImmersiveMode_.load());
     SessionEventParam param;
@@ -4353,8 +4382,11 @@ bool WindowSceneSessionImpl::CheckCanMoveWindowTypeByDevice()
 
 bool WindowSceneSessionImpl::CheckIsPcAppInPadFullScreenOnMobileWindowMode()
 {
+    auto mode = property_->GetWindowMode();
     if (property_->GetIsPcAppInPad() &&
-        property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
+        (mode == WindowMode::WINDOW_MODE_FULLSCREEN ||
+         mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+         mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
         !IsFreeMultiWindowMode()) {
         return true;
     }
@@ -5171,8 +5203,9 @@ WMError WindowSceneSessionImpl::GetWindowCornerRadius(float& cornerRadius)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!IsPcOrFreeMultiWindowCapabilityEnabled()) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not PC or Pad, not supported.");
+    if (!windowSystemConfig_.IsPcWindow() && !windowSystemConfig_.IsPadWindow() &&
+            !windowSystemConfig_.IsPhoneWindow()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not PC, pad or phone, not supported.");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (!WindowHelper::IsFloatOrSubWindow(GetType())) {
@@ -5184,7 +5217,7 @@ WMError WindowSceneSessionImpl::GetWindowCornerRadius(float& cornerRadius)
     if (MathHelper::LessNotEqual(cornerRadius, 0.0f)) {
         // Invalid corner radius means app has not set corner radius of the window, return the default corner radius
         TLOGI(WmsLogTag::WMS_ANIMATION, "System config radius: %{public}f, property radius: %{public}f, id: %{public}d",
-              windowSystemConfig_.defaultCornerRadius_, cornerRadius, GetPersistentId());
+            windowSystemConfig_.defaultCornerRadius_, cornerRadius, GetPersistentId());
         cornerRadius = MathHelper::LessNotEqual(windowSystemConfig_.defaultCornerRadius_, 0.0f) ?
             0.0f : windowSystemConfig_.defaultCornerRadius_;
     }
@@ -6926,12 +6959,6 @@ WMError WindowSceneSessionImpl::SetImmersiveModeEnabledState(bool enable)
 
     enableImmersiveMode_ = enable;
     hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
-    AAFwk::Want want;
-    want.SetParam(Extension::IMMERSIVE_MODE_ENABLED, enable);
-    if (auto uiContent = GetUIContentSharedPtr()) {
-        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_HOST_IMMERSIVE_MODE_ENABLED),
-            want, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
-    }
     WindowMode mode = GetWindowMode();
     if (!windowSystemConfig_.IsPcWindow() || mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
         return SetLayoutFullScreen(enableImmersiveMode_);
@@ -7274,8 +7301,35 @@ WMError WindowSceneSessionImpl::OnContainerModalEvent(const std::string& eventNa
     } else if (eventName == COMPATIBLE_RECOVER_WINDOW_EVENT) {
         RecoverForCompatibleMode();
         return WMError::WM_OK;
+    }  else if (eventName == NAME_LANDSCAPE_18_9_CLICK) {
+        SwitchCompatibleMode(CompatibleStyleMode::LANDSCAPE_18_9);
+        return WMError::WM_OK;
+    } else if (eventName == NAME_LANDSCAPE_1_1_CLICK) {
+        SwitchCompatibleMode(CompatibleStyleMode::LANDSCAPE_1_1);
+        return WMError::WM_OK;
+    } else if (eventName == NAME_LANDSCAPE_2_3_CLICK) {
+        SwitchCompatibleMode(CompatibleStyleMode::LANDSCAPE_2_3);
+        return WMError::WM_OK;
+    } else if (eventName == NAME_DEFAULT_LANDSCAPE_CLICK) {
+        SwitchCompatibleMode(CompatibleStyleMode::LANDSCAPE_DEFAULT);
+        return WMError::WM_OK;
+    } else if (eventName == NAME_LANDSCAPE_SPLIT_CLICK) {
+        SwitchCompatibleMode(CompatibleStyleMode::LANDSCAPE_SPLIT);
+        return WMError::WM_OK;
+    } else if (eventName == EVENT_NAME_HOVER) {
+        std::string bundleName = property_->GetSessionInfo().bundleName_;
+        ReportHoverMaximizeMenu(bundleName, value);
+        return WMError::WM_OK;
     }
     return WMError::WM_DO_NOTHING;
+}
+
+void WindowSceneSessionImpl::ReportHoverMaximizeMenu(const std::string& bundleName, const std::string& hoverType)
+{
+    HiSysEventWrite(SCENE_BOARD_UE_DOMAIN, HOVER_MAXIMIZE_MENU,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "BUNDLENAME", bundleName,
+        "HOVERTYPE", hoverType);
 }
 
 bool WindowSceneSessionImpl::IsSystemDensityChanged(const sptr<DisplayInfo>& displayInfo)
@@ -7746,6 +7800,59 @@ WMError WindowSceneSessionImpl::UnlockCursor(int32_t windowId)
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     return hostSession->SendCommonEvent(static_cast<int32_t>(CommonEventCommand::UNLOCK_CURSOR), parameters);
+}
+
+bool WindowSceneSessionImpl::IsHitHotAreas(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+	
+{
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (!IsPcOrPadFreeMultiWindowMode()) {
+        return false;
+    }
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::WMS_DECOR, "uiContent is null, windowId: %{public}u", GetWindowId());
+        return false;
+    }
+    Rect windowRect = property_->GetWindowRect();
+    MMI::PointerEvent::PointerItem pointerItem;
+    bool isValidPointItem = pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    
+    int32_t width = windowRect.width_;
+    int32_t height = windowRect.height_;
+    int32_t posX = windowRect.posX_;
+    int32_t posY = windowRect.posY_;
+    float vpr = WindowSessionImpl::GetVirtualPixelRatio();
+    float scaleX = compatScaleX_;
+    float scaleY = compatScaleY_;
+    float outsideArea = HOTZONE_TOUCH * vpr * scaleX;
+    float insideArea = WINDOW_FRAME_WIDTH * vpr * scaleX;
+ 
+    bool isHitTopHotArea = pointerItem.GetDisplayX() > posX - outsideArea * scaleX &&
+        pointerItem.GetDisplayX() < posX + (width + outsideArea) * scaleX &&
+        pointerItem.GetDisplayY() > posY - outsideArea * scaleY &&
+        pointerItem.GetDisplayY() < posY + (insideArea + outsideArea) * scaleY;
+ 
+    bool isHitLeftHotArea = pointerItem.GetDisplayX() > posX - outsideArea * scaleX &&
+        pointerItem.GetDisplayX() < posX + (insideArea + outsideArea) * scaleX &&
+        pointerItem.GetDisplayY() > posY - outsideArea * scaleY &&
+        pointerItem.GetDisplayY() < posY + (height + outsideArea) * scaleY;
+ 
+    bool isHitRightHotArea = pointerItem.GetDisplayX() > posX + (width - insideArea) * scaleX &&
+        pointerItem.GetDisplayX() < posX + (width + outsideArea) * scaleX &&
+        pointerItem.GetDisplayY() > posY - outsideArea * scaleY &&
+        pointerItem.GetDisplayY() < posY + (height + outsideArea) * scaleY;
+    
+    bool isHitBottomHotArea = pointerItem.GetDisplayX() > posX - outsideArea * scaleX &&
+        pointerItem.GetDisplayX() < posX + (width + outsideArea) * scaleX &&
+        pointerItem.GetDisplayY() > posY + (height - insideArea) * scaleY &&
+        pointerItem.GetDisplayY() < posY + (height + outsideArea) * scaleY;
+ 
+    bool isHitHotAreas = isHitTopHotArea || isHitLeftHotArea || isHitRightHotArea || isHitBottomHotArea;
+    if (isValidPointItem && isHitHotAreas) {
+        TLOGI(WmsLogTag::WMS_DECOR, "hitHotAreas success");
+        return true;
+    }
+    return false;
 }
 } // namespace Rosen
 } // namespace OHOS

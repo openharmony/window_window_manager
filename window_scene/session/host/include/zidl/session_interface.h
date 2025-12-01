@@ -29,7 +29,7 @@ class AccessibilityEventInfo;
 }
 namespace OHOS::Rosen {
 class RSSurfaceNode;
-class RSCanvasNode;
+class RSWindowKeyFrameNode;
 class RSTransaction;
 enum class ImageFit;
 
@@ -170,6 +170,8 @@ public:
     virtual WSError GetTargetOrientationConfigInfo(Orientation targetOrientation,
         const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& targetProperties,
         const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& currentProperties) { return WSError::WS_OK; }
+    virtual WSError ConvertOrientationAndRotation(const RotationInfoType from, const RotationInfoType to,
+        const int32_t value, int32_t& convertedValue) { return WSError::WS_OK; }
     virtual WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) { return WSError::WS_OK; }
     virtual WSError RequestSessionBack(bool needMoveToBackground) { return WSError::WS_OK; }
     virtual WSError MarkProcessed(int32_t eventId) { return WSError::WS_OK; }
@@ -278,7 +280,7 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError KeyFrameAnimateEnd() { return WSError::WS_OK; }
-    virtual WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
+    virtual WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSWindowKeyFrameNode>& rsKeyFrameNode,
         std::shared_ptr<RSTransaction>& rsTransaction) { return WSError::WS_OK; }
     virtual WSError SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) { return WSError::WS_OK; }
 
@@ -652,6 +654,17 @@ public:
      * @return WSError::WS_OK means set success, otherwise failed.
      */
     virtual WSError NotifyIsFullScreenInForceSplitMode(bool isFullScreen)
+    {
+        return WSError::WS_OK;
+    }
+
+    /**
+     * @brief notify session when compatible mode change
+     *
+     * @param mode compatible mode.
+     * @return WSError::WS_OK means notify success, otherwise failed.
+     */
+    virtual WSError NotifyCompatibleModeChange(CompatibleStyleMode mode)
     {
         return WSError::WS_OK;
     }

@@ -25,6 +25,12 @@
 #include "fold_screen_controller/fold_screen_policy.h"
 
 namespace OHOS::Rosen {
+enum class ReportTentModeStatus : int32_t {
+    NORMAL_EXIT_TENT_MODE = 0,
+    NORMAL_ENTER_TENT_MODE = 1,
+    ABNORMAL_EXIT_TENT_MODE_DUE_TO_ANGLE = 2,
+    ABNORMAL_EXIT_TENT_MODE_DUE_TO_HALL = 3,
+};
 class SensorFoldStateManager : public RefBase {
 public:
     SensorFoldStateManager();

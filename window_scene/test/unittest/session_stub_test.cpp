@@ -31,7 +31,7 @@
 #include "want.h"
 #include "wm_common.h"
 #include "ws_common.h"
-#include "ui/rs_canvas_node.h"
+#include "feature/window_keyframe/rs_window_keyframe_node.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1311,6 +1311,125 @@ HWTEST_F(SessionStubTest, HandleGetTargetOrientationConfigInfo, Function | Small
 }
 
 /**
+ * @tc.name: HandleConvertOrientationAndRotationWithInvalidFrom
+ * @tc.desc: Verify HandleConvertOrientationAndRotation with invalid from
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleConvertOrientationAndRotationWithInvalidFrom, TestSize.Level1)
+{
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONVERT_ORIENTATION_AND_ROTATION);
+    MessageParcel reply;
+    MessageOption option;
+    MessageParcel data;
+    // missing FromRotationInfoType from
+    EXPECT_EQ(ERR_INVALID_DATA, session_->ProcessRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleConvertOrientationAndRotationWithInvalidTo
+ * @tc.desc: Verify  HandleConvertOrientationAndRotation with invalid to
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleConvertOrientationAndRotationWithInvalidTo, TestSize.Level1)
+{
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONVERT_ORIENTATION_AND_ROTATION);
+    MessageParcel reply;
+    MessageOption option;
+    MessageParcel data;
+    // missing FromRotationInfoType to
+    data.WriteUint32(0);
+    EXPECT_EQ(ERR_INVALID_DATA, session_->ProcessRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name:  HandleConvertOrientationAndRotationWithInvalidConvertValue
+ * @tc.desc: Verify  HandleConvertOrientationAndRotation with invalid convert value
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest,  HandleConvertOrientationAndRotationWithInvalidConvertValue, TestSize.Level1)
+{
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONVERT_ORIENTATION_AND_ROTATION);
+    MessageParcel reply;
+    MessageOption option;
+    MessageParcel data;
+    // missing convert value
+    data.WriteUint32(0);
+    data.WriteUint32(0);
+    EXPECT_EQ(ERR_INVALID_DATA, session_->ProcessRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name:  HandleConvertOrientationAndRotationWithInvalidRotationInfoType
+ * @tc.desc: Verify that ProcessRemoteRequest rejects invalid RotationInfoType values
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleConvertOrientationAndRotationWithInvalidRotationInfoType, TestSize.Level1)
+{
+    constexpr uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONVERT_ORIENTATION_AND_ROTATION);
+    MessageOption option;
+
+    // Case 1: from < RotationInfoType::WINDOW_ORIENTATION
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        data.WriteUint32(static_cast<uint32_t>(RotationInfoType::WINDOW_ORIENTATION) - 1);
+        data.WriteUint32(0);
+        data.WriteInt32(0);
+        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+
+    // Case 2: from > RotationInfoType::DISPLAY_ROTATION
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        data.WriteUint32(static_cast<uint32_t>(RotationInfoType::DISPLAY_ROTATION) + 1);
+        data.WriteUint32(0);
+        data.WriteInt32(0);
+        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+
+    // Case 3: to < RotationInfoType::WINDOW_ORIENTATION
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        data.WriteUint32(0);
+        data.WriteUint32(static_cast<uint32_t>(RotationInfoType::WINDOW_ORIENTATION) - 1);
+        data.WriteInt32(0);
+        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+
+    // Case 4: to > RotationInfoType::DISPLAY_ROTATION
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        data.WriteUint32(0);
+        data.WriteUint32(static_cast<uint32_t>(RotationInfoType::DISPLAY_ROTATION) + 1);
+        data.WriteInt32(0);
+        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+}
+
+/**
+ * @tc.name: HandleConvertOrientationAndRotationSuccess
+ * @tc.desc: Verify that ProcessRemoteRequest accepts Success
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleConvertOrientationAndRotationSuccess, TestSize.Level1)
+{
+    constexpr uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONVERT_ORIENTATION_AND_ROTATION);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteInt32(1);
+
+    EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_NONE);
+}
+
+/**
  * @tc.name: GetIsHighlighted
  * @tc.desc: sessionStub GetIsHighlighted
  * @tc.type: FUNC
@@ -1409,9 +1528,9 @@ HWTEST_F(SessionStubTest, HandleUpdateKeyFrameCloneNode, Function | SmallTest | 
 {
     MessageParcel data;
     MessageParcel reply;
-    auto rsCanvasNode = RSCanvasNode::Create();
-    ASSERT_NE(rsCanvasNode, nullptr);
-    ASSERT_EQ(rsCanvasNode->Marshalling(data), true);
+    auto rsKeyFrameNode = RSWindowKeyFrameNode::Create();
+    ASSERT_NE(rsKeyFrameNode, nullptr);
+    ASSERT_EQ(rsKeyFrameNode->WriteToParcel(data), true);
     auto rsTransaction = std::make_shared<RSTransaction>();
     ASSERT_NE(rsTransaction, nullptr);
     ASSERT_EQ(data.WriteParcelable(rsTransaction.get()), true);
@@ -2268,6 +2387,37 @@ HWTEST_F(SessionStubTest, TestHandleSessionEventWithValidInputs, TestSize.Level1
         int ret = session->ProcessRemoteRequest(code, data, reply, option);
         EXPECT_EQ(ret, ERR_NONE);
 
+        uint32_t errCode = reply.ReadUint32();
+        EXPECT_EQ(errCode, static_cast<uint32_t>(WSError::WS_OK));
+    }
+}
+/**
+ * @tc.name: TestHandleSessionEventWithValidInputs
+ * @tc.desc: Verify that HandleSessionEvent correctly processes valid input data and writes proper response.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, TestHandleSessionEventWithValidInputs02, TestSize.Level1)
+{
+    sptr<SessionStubMocker> session = sptr<SessionStubMocker>::MakeSptr();
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SESSION_EVENT);
+    MessageOption option;
+ 
+    // Case 1: EVENT_MAXIMIZE with valid 'compatibleStyleMode' → should succeed and return WS_OK
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        uint32_t eventId = static_cast<uint32_t>(SessionEvent::EVENT_SWITCH_COMPATIBLE_MODE);
+        uint32_t compatibleStyleMode = 0;
+        data.WriteUint32(eventId);
+        data.WriteUint32(compatibleStyleMode);
+ 
+        EXPECT_CALL(*session, OnSessionEvent(_, _))
+            .Times(1)
+            .WillOnce(testing::Return(WSError::WS_OK));
+ 
+        int ret = session->ProcessRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(ret, ERR_NONE);
+ 
         uint32_t errCode = reply.ReadUint32();
         EXPECT_EQ(errCode, static_cast<uint32_t>(WSError::WS_OK));
     }

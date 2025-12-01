@@ -610,6 +610,22 @@ public:
     virtual void OnPiPStateChanged(const std::string& bundleName, bool isForeground) = 0;
 };
 
+/*
+ * @class IWindowSupportRotationListener
+ *
+ * @brief IWindowSupportRotationListener is used to observe the window support rotation change.
+ */
+class IWindowSupportRotationListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window support rotation change
+     *
+     * @param supportRotationInfo information of support rotation
+     *
+     */
+    virtual void OnSupportRotationChange(const SupportRotationInfo& supportRotationInfo) = 0;
+};
+
 /**
  * @class WindowManager
  *
@@ -891,9 +907,10 @@ public:
      * @brief Minimize all app window.
      *
      * @param displayId Display id.
+     * @param excludeWindowId Exclude window id.
      * @return WM_OK means minimize success, others means minimize failed.
      */
-    WMError MinimizeAllAppWindows(DisplayId displayId);
+    WMError MinimizeAllAppWindows(DisplayId displayId, int32_t excludeWindowId = 0);
 
     /**
      * @brief Toggle all app windows to the foreground.
@@ -1077,6 +1094,15 @@ public:
     WMError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId);
 
     /**
+     * @brief Set zIndex of the specific system window with window type.
+     *
+     * @param windowType Window type of the specific system window
+     * @param zIndex  The value of ZIndex
+     * @return WM_OK means set zIndex success, others means failed.
+     */
+    WMError SetSpecificSystemWindowZIndex(WindowType windowType, int32_t zIndex);
+
+    /**
      * @brief Set start window background color.
      *
      * @param moduleName Module name that needs to be set
@@ -1216,7 +1242,7 @@ public:
      * this priority is highest.
      *
      * @param dragResizeType global drag resize type to set
-     * @return WM_OK means get success, others means failed.
+     * @return WM_OK means set success, others means failed.
      */
     WMError SetGlobalDragResizeType(DragResizeType dragResizeType);
 
@@ -1235,7 +1261,7 @@ public:
      *
      * @param bundleName bundleName of specific app
      * @param dragResizeType drag resize type to set
-     * @return WM_OK means get success, others means failed.
+     * @return WM_OK means set success, others means failed.
      */
     WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType);
 
@@ -1261,7 +1287,7 @@ public:
      *
      * @param bundleName bundleName of specific app
      * @param keyFramePolicy param of key frame
-     * @return WM_OK means get success, others means failed.
+     * @return WM_OK means set success, others means failed.
      */
     WMError SetAppKeyFramePolicy(const std::string& bundleName, const KeyFramePolicy& keyFramePolicy);
 
@@ -1364,6 +1390,27 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterWindowLifeCycleCallback(const sptr<IWindowLifeCycleListener>& listener);
+
+    /**
+     * @brief Register window support rotation change listener.
+     *
+     * @param listener IWindowSupportRotationListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    WMError RegisterWindowSupportRotationListener(const sptr<IWindowSupportRotationListener>& listener);
+
+    /**
+     * @brief Unregister window support rotation change listener.
+     *
+     * @param listener IWindowSupportRotationListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterWindowSupportRotationListener(const sptr<IWindowSupportRotationListener>& listener);
+
+    /*
+     * notify support rotation change to listener
+     */
+    void NotifySupportRotationChange(const SupportRotationInfo& supportRotationInfo);
 
     /**
      * @brief Register get js window callback.

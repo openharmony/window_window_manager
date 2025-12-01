@@ -1681,11 +1681,19 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetGestureNavigationEnabled, TestSiz
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleConvertToRelativeCoordinateExtended, TestSize.Level1)
 {
-    MessageParcel data1;
+    MessageParcel data0;
     MessageParcel reply;
 
     Rect rect = {200, 100, 400, 600};
+    DisplayId newDisplayId = 0;
+    data0.WriteInt32(rect.posX_);
+    data0.WriteInt32(rect.posY_);
+    data0.WriteInt32(rect.width_);
+    data0.WriteInt32(rect.height_);
+    data0.WriteInt64(newDisplayId);
+    int res0 = stub_->HandleConvertToRelativeCoordinateExtended(data0, reply);
 
+    MessageParcel data1;
     data1.WriteInt32(rect.posX_);
     data1.WriteInt32(rect.posY_);
     data1.WriteInt32(rect.width_);
@@ -2902,6 +2910,23 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetScreenPrivacyWindowTagSwitch02, F
 }
 
 /**
+ * @tc.name: HandleNotifyBrightnessModeChange
+ * @tc.desc: test HandleNotifyBrightnessModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleNotifyBrightnessModeChange, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    std::string brightnessMode = "test";
+    data.WriteString(brightnessMode);
+
+    int res = stub_->HandleNotifyBrightnessModeChange(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleAddSessionBlackList01
  * @tc.desc: test HandleAddSessionBlackList
  * @tc.type: FUNC
@@ -3023,6 +3048,67 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRemoveSessionBlackList02, Function |
 
     int res = stub_->HandleRemoveSessionBlackList(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleSetSpecificWindowZIndex
+ * @tc.desc: HandleSetSpecificWindowZIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetSpecificWindowZIndex, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    int ret = stub_->HandleSetSpecificWindowZIndex(data, reply);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
+
+    data.WriteUint64(2106);
+    ret = stub_->HandleSetSpecificWindowZIndex(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+
+    data.WriteInt32(20);
+    ret = stub_->HandleSetSpecificWindowZIndex(data, reply);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: ResetSpecificWindowZIndex
+ * @tc.desc: ResetSpecificWindowZIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, ResetSpecificWindowZIndex, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_RESET_SPECIFIC_WINDOW_ZINDEX);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    int ret = stub_->HandleResetSpecificWindowZIndex(data, reply);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
+
+    data.WriteInt32(20);
+    ret = stub_->HandleSetSpecificWindowZIndex(data, reply);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleNotifySupportRotationRegistered
+ * @tc.desc: HandleNotifySupportRotationRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleNotifySupportRotationRegistered, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    int res = stub_->HandleNotifySupportRotationRegistered(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
 }
 } // namespace
 } // namespace Rosen

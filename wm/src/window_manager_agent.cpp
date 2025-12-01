@@ -94,5 +94,10 @@ void WindowManagerAgent::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
 {
     WindowManager::GetInstance().NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
 }
+
+void WindowManagerAgent::NotifySupportRotationChange(const SupportRotationInfo& supportRotationInfo)
+{
+    SingletonContainer::Get<WindowManager>().NotifySupportRotationChange(supportRotationInfo);
+}
 } // namespace Rosen
 } // namespace OHOS
