@@ -540,7 +540,6 @@ public:
     WSError HandlePointerEventForFocus(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool isExecuteDelayRaise = false);
     bool HasParentSessionWithToken(const sptr<IRemoteObject>& token);
-    unordered_map<std::string, int32_t> snapShotRecoverValueMap_
 
     /*
      * Multi Window
