@@ -3075,7 +3075,7 @@ int32_t Session::EncodeSnapShotRecoverValue()
 
 int32_t Session::DecodeSnapShotRecoverValue(int32_t snapShotRecoverValue, SnapShotRecoverType snapShotRecoverType)
 {
-    return (value / static_cast<int32_t>(std::pow(10, static_cast<int32_t>(snapShotRecoverType)))) % 10;
+    return (snapShotRecoverValue / static_cast<int32_t>(std::pow(10, static_cast<int32_t>(snapShotRecoverType)))) % 10;
 }
 
 bool Session::IsExitSplitOnBackgroundRecover()
