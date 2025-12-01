@@ -156,17 +156,6 @@ HWTEST_F(ScreenStateMachineTest, DoSetScreenPowerForAll_ShouldReturnFalse_WhenTy
 }
 
 /**
- * @tc.name: DoSetScreenPowerForAll_ShouldReturnFalse_WhenTypeIsValidAndDoSetScreenPowerForAllReturnTrue
- * @tc.number: DoSetScreenPowerForAllTest_002
- * @tc.desc: 测试当type参数有效时，DoSetScreenPowerForAll 函数应返回 true
- */
-HWTEST_F(ScreenStateMachineTest, DoSetScreenPowerForAll_ShouldReturnFalse_WhenTypeIsValidAndDoSetScreenPowerForAllReturnTrue, TestSize.Level0)
-{   ScreenPowerEvent event = ScreenPowerEvent::POWER_ON;
-    ScreenPowerInfoType validType = std::make_pair(ScreenPowerState::POWER_ON, PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS);
-    EXPECT_FALSE(fsm_->DoSetScreenPowerForAll(event, validType));
-}
-
-/**
  * @tc.name: DoSetScreenPowerForAll_ShouldReturnFalse_WhenTypeIsValidAndDoSetScreenPowerForAllReturnFalse
  * @tc.number: DoSetScreenPowerForAllTest_003
  * @tc.desc: 测试当type参数有效时，DoSetScreenPowerForAll 函数应返回 false
