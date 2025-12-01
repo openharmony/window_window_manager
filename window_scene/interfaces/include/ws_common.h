@@ -1229,6 +1229,11 @@ enum class SnapshotNodeType : uint32_t {
     APP_NODE,
 };
 
+enum class SnapShotRecoverType : uint32_t {
+    ROTATE = 0,
+    EXIT_SPLIT_ON_BACKGROUND,
+};
+
 enum class LifeCycleChangeReason {
     DEFAULT = 0,
 
