@@ -5550,7 +5550,7 @@ native function setStartWindowBackgroundColorSync(nativeObj: long, moduleName: s
   color: long): void;
 native function notifyScreenshotEventSync(nativeObj: long, eventType: ScreenshotEventType): void;
 native function toggleShownStateForAllAppWindowsSync(nativeObj: long): void;
-native function SetSpecificSystemWindowZIndexSync(nativeObj: long, windowType: WindowType, zIndex: int): void;
+native function setSpecificSystemWindowZIndexSync(nativeObj: long, windowType: WindowType, zIndex: int): void;
 
 export function toggleShownStateForAllAppWindows(callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {

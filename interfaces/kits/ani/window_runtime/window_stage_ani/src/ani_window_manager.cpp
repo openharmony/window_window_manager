@@ -100,7 +100,7 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace wi
         ani_native_function {"toggleShownStateForAllAppWindowsSync", "l:",
             reinterpret_cast<void *>(AniWindowManager::ToggleShownStateForAllAppWindows)},
         ani_native_function {"setSpecificSystemWindowZIndexSync", "JL@ohos/window/window/WindowType;I:V",
-            reinterpret_cast<void *>(AniWindowManager::setSpecificSystemWindowZIndex)},
+            reinterpret_cast<void *>(AniWindowManager::SetSpecificSystemWindowZIndex)},
     };
     for (auto method : functions) {
         if ((ret = env->Namespace_BindNativeFunctions(ns, &method, 1u)) != ANI_OK) {
@@ -1006,26 +1006,27 @@ void AniWindowManager::ToggleShownStateForAllAppWindows(ani_env* env, ani_long n
 }
 
 void AniWindowManager::SetSpecificSystemWindowZIndex(ani_env* env, ani_long nativeObj,
-    ani_enum_item windowType, ani_int zIndex)
+    ani_enum_item apiWindowType, ani_int zIndex)
 {
     AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
     if (aniWindowManager != nullptr) {
-        aniWindowManager->OnSetSpecificSystemWindowZIndex(env, windowType, zIndex);
+        aniWindowManager->OnSetSpecificSystemWindowZIndex(env, apiWindowType, zIndex);
     } else {
         TLOGE(WmsLogTag::WMS_FOCUS, "[ANI] aniWindowManager is nullptr");
     }
 }
 
-void AniWindowManager::OnSetSpecificSystemWindowZIndex(ani_env* env, ani_enum_item windowType, ani_int zIndex)
+void AniWindowManager::OnSetSpecificSystemWindowZIndex(ani_env* env, ani_enum_item apiWindowType, ani_int zIndex)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "[ANI] windowType: %{public}d zIndex: %{public}d",
         static_cast<uint32_t>(windowType), static_cast<int32_t>(zIndex));
     ani_int enumValue;
-    env->EnumItem_GetValue_Int(value, &enumValue);
-    WindowType windowTypeValue = static_cast<uint32_t>(enumValue);
-    if (windowTypeValue >= static_cast<uint32_t>(ApiWindowType::TYPE_BASE) &&
-        windowTypeValue < static_cast<uint32_t>(ApiWindowType::TYPE_END)) {
-        windowType = JS_TO_NATIVE_WINDOW_TYPE_MAP.at(static_cast<ApiWindowType>(windowTypeValue));
+    env->EnumItem_GetValue_Int(apiWindowType, &enumValue);
+    uint32_t apiWindowTypeValue = static_cast<uint32_t>(enumValue);
+    WindowType windowType;
+    if (apiWindowTypeValue >= static_cast<uint32_t>(ApiWindowType::TYPE_BASE) &&
+        apiWindowTypeValue < static_cast<uint32_t>(ApiWindowType::TYPE_END)) {
+        windowType = JS_TO_NATIVE_WINDOW_TYPE_MAP.at(static_cast<ApiWindowType>(apiWindowTypeValue));
     } else {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] invalid windowType");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
