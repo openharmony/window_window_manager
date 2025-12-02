@@ -4160,6 +4160,10 @@ void AniWindow::OnMinimize(ani_env* env)
     }
 
     if (WindowHelper::IsFloatOrSubWindow(windowToken_->GetType())) {
+        if (!windowToken_->IsSceneBoardEnabled()) {
+            AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+            return;
+        }
         TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI] subWindow or float window use hide");
         HideWindowFunction(env, WmErrorCode::WM_OK);
         return;
@@ -4191,7 +4195,7 @@ void AniWindow::HideWindowFunction(ani_env* env, WmErrorCode errCode)
             windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
         return;
     }
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->Hide(0, false, false));
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->Hide(0, false, false, true));
     TLOGI(WmsLogTag::WMS_LIFE, "[ANI] end, window [%{public}u] ret=%{public}d",
         windowToken_->GetWindowId(), ret);
     if (ret != WmErrorCode::WM_OK) {
@@ -5086,12 +5090,12 @@ void AniWindow::OnHide(ani_env* env)
         return;
     }
     auto winType = window->GetType();
-    if (!WindowHelper::IsMainWindow(winType)) {
+    if (WindowHelper::IsMainWindow(winType)) {
         TLOGW(WmsLogTag::WMS_LIFE, "window Type %{public}u is not supported, [%{public}u, %{public}s]",
                 static_cast<uint32_t>(window->GetType()), window->GetWindowId(), window->GetWindowName().c_str());
         return;
     }
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->Hide(0, false, false));
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->Hide(0, false, false, true));
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret, "Window hide failed");
     }
