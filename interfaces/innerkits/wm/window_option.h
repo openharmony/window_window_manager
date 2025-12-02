@@ -648,19 +648,18 @@ public:
     int64_t GetStartModalExtensionTimeStamp() const;
 
     /**
-     * @brief Set whether the subwindow will be hidden when uiextension is hidden.
+     * @brief Set whether the lifecycle of the subwindow follows creator of subwindow.
      *
-     * @param isHideFollowUIExt True means the subwindow will be hidden when uiextension is hidden,
-     *     false means it will remain visible.
+     * @param isFollowCreatorLifecycle True means the lifecycle of the subwindow follows creator of subwindow.
      */
-    void SetIsHideFollowUIExt(bool isHideFollowUIExt);
+    void SetIsFollowCreatorLifecycle(bool isFollowCreatorLifecycle);
 
     /**
-     * @brief Get whether the subwindow will be hidden when uiextension is hidden.
+     * @brief Get whether the lifecycle of the subwindow follows creator of subwindow.
      *
-     * @return The subwindow will be hidden if true or not be hidden if false.
+     * @return The lifecycle of the subwindow follows creator of subwindow if true or not if false.
      */
-    bool IsHideFollowUIExt() const;
+    bool IsFollowCreatorLifecycle() const;
 
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
@@ -712,7 +711,7 @@ private:
     bool isDensityFollowHost_ = false;
     bool isConstrainedModal_ = false;
     int64_t startModalExtensionTimeStamp_ = -1;
-    bool isHideFollowUIExt_ = false;
+    bool isFollowCreatorLifecycle_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS

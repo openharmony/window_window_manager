@@ -1616,19 +1616,25 @@ HWTEST_F(WindowSessionImplTest3, UpdateSubWindowStateWithOptions, Function | Sma
     sptr<WindowSessionImpl> subwindow3 = GetTestWindowImpl("SubWindow3");
     ASSERT_NE(subwindow3, nullptr);
     subwindow3->state_ = WindowState::STATE_HIDDEN;
+    sptr<WindowSessionImpl> subwindow4 = GetTestWindowImpl("SubWindow4");
+    ASSERT_NE(subwindow4, nullptr);
+    subwindow3->state_ = WindowState::STATE_INITIAL;
     window_->subWindowSessionMap_[window_->GetPersistentId()].push_back(subwindow1);
     window_->subWindowSessionMap_[window_->GetPersistentId()].push_back(subwindow2);
     window_->subWindowSessionMap_[window_->GetPersistentId()].push_back(subwindow3);
+    window_->subWindowSessionMap_[window_->GetPersistentId()].push_back(subwindow4);
+    // Hide branch
     window_->UpdateSubWindowStateWithOptions(option);
-    subwindow2->isHideFollowUIExt_ = true;
+    subwindow2->isFollowCreatorLifecycle_ = true;
     window_->UpdateSubWindowStateWithOptions(option);
     ASSERT_EQ(subwindow2->state_, WindowState::STATE_HIDDEN);
 
+    // Show branch
     option.newState_ = WindowState::STATE_SHOWN;
     window_->UpdateSubWindowStateWithOptions(option);
     subwindow3->requestState_ = WindowState::STATE_SHOWN;
     window_->UpdateSubWindowStateWithOptions(option);
-    subwindow3->isHideFollowUIExt_ = true;
+    subwindow3->isFollowCreatorLifecycle_ = true;
     window_->UpdateSubWindowStateWithOptions(option);
     ASSERT_EQ(subwindow3->state_, WindowState::STATE_SHOWN);
 }

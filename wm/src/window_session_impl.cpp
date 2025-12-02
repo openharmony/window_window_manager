@@ -301,7 +301,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option,
     property_->SetWindowType(optionWindowType);
     InitPropertyFromOption(option);
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
-    isHideFollowUIExt_ = option->IsHideFollowUIExt();
+    isFollowCreatorLifecycle_ = option->IsFollowCreatorLifecycle();
 
     RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true, rsUIContext);
     if (WindowHelper::IsSubWindow(GetType())) {
@@ -924,9 +924,10 @@ void WindowSessionImpl::UpdateSubWindowStateWithOptions(const StateChangeOption&
             if (subwindow == nullptr || subwindow->GetWindowState() != WindowState::STATE_SHOWN) {
                 continue;
             }
-            if (subwindow->isHideFollowUIExt_) {
+            if (subwindow->isFollowCreatorLifecycle_) {
                 TLOGI(WmsLogTag::WMS_SUB, "subwindow hide follow uec, id: %{public}d", subwindow->GetPersistentId());
                 subwindow->Hide(option.reason_, option.withAnimation_, option.isFromInnerkits_, option.waitDetach_);
+                subwindow->isHiddenFollowingUIExtension_ = true;
             } else {
                 subwindow->state_ = WindowState::STATE_HIDDEN;
                 subwindow->NotifyAfterBackground();
@@ -939,9 +940,10 @@ void WindowSessionImpl::UpdateSubWindowStateWithOptions(const StateChangeOption&
             if (subwindow == nullptr || subwindow->GetWindowState() != WindowState::STATE_HIDDEN) {
                 continue;
             }
-            if (subwindow->isHideFollowUIExt_) {
+            if (subwindow->isFollowCreatorLifecycle_ && subwindow->isHiddenFollowingUIExtension_) {
                 TLOGI(WmsLogTag::WMS_SUB, "subwindow show follow uec, id: %{public}d", subwindow->GetPersistentId());
                 subwindow->Show(option.reason_, option.withAnimation_, option.withFocus_, option.waitAttach_);
+                subwindow->isHiddenFollowingUIExtension_ = false;
             } else if (subwindow->GetRequestWindowState() == WindowState::STATE_SHOWN) {
                 subwindow->state_ = WindowState::STATE_SHOWN;
                 subwindow->NotifyAfterForeground();
