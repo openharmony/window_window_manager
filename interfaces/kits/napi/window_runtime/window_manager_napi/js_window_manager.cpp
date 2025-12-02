@@ -1023,14 +1023,14 @@ static napi_value GetTopWindowTask(void* contextPtr, napi_env env, napi_value ca
             }
             lists->window = Window::GetTopWindowWithId(lists->ability->GetWindow()->GetWindowId());
         } else {
-            auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);	
+            auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
             if (contextPtr == nullptr || context == nullptr) {
                 lists->errorCode = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
                     static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
                 lists->errMsg = "[window][getLatsWindow]msg: Stage mode without context";
                 return;
             }
-            lists->window = Window::GetTopWindowWithContext(context->lock();
+            lists->window = Window::GetTopWindowWithContext(context->lock());
         }
     };
     NapiAsyncTask::CompleteCallback complete = [lists, newApi](napi_env env, NapiAsyncTask& task, int32_t status) {
