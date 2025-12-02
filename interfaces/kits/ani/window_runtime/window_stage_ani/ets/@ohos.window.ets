@@ -5550,6 +5550,7 @@ native function setStartWindowBackgroundColorSync(nativeObj: long, moduleName: s
   color: long): void;
 native function notifyScreenshotEventSync(nativeObj: long, eventType: ScreenshotEventType): void;
 native function toggleShownStateForAllAppWindowsSync(nativeObj: long): void;
+native function SetSpecificSystemWindowZIndexSync(nativeObj: long, windowType: WindowType, zIndex: int): void;
 
 export function toggleShownStateForAllAppWindows(callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
@@ -5847,6 +5848,18 @@ export function shiftAppWindowPointerEvent(sourceWindowId: int, targetWindowId: 
     }).catch((err: NullishType) => {
       reject(err as BusinessError);
     });
+  });
+}
+
+export function setSpecificSystemWindowZIndex(windowType: WindowType, zIndex: int): Promise<void> {
+  return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+      taskpool.execute((): void => {
+          return setSpecificSystemWindowZIndexSync(nativeObj, windowType, zIndex);
+      }).then((ret: NullishType) => {
+          resolve(undefined);
+      }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+      });
   });
 }
 
