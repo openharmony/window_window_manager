@@ -29,6 +29,7 @@
 #include <input_method_controller.h>
 #endif
 
+#include "configuration.h"
 #include "display_info.h"
 #include "input_transfer_station.h"
 #include "perform_reporter.h"
