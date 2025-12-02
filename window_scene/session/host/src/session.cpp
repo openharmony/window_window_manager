@@ -3061,15 +3061,17 @@ void Session::SetHasSnapshot(SnapshotStatus key, DisplayOrientation rotate)
     } else {
         scenePersistence_->SetHasSnapshot(true, key);
         ScenePersistentStorage::Insert(GetSnapshotPersistentKey(key),
-            EncodeSnapShotRecoverValue(), ScenePersistentStorageType::MAXIMIZE_STATE);
+            EncodeSnapShotRecoverValue(rotate), ScenePersistentStorageType::MAXIMIZE_STATE);
     }
 }
 
-int32_t Session::EncodeSnapShotRecoverValue()
+int32_t Session::EncodeSnapShotRecoverValue(DisplayOrientation rotate)
 {
     int32_t snapShotRecoverValue = 0;
-    snapShotRecoverValue += static_cast<int32_t>(rotate_);
-    snapShotRecoverValue += static_cast<int32_t>(IsExitSplitOnBackgroundRecover()) * 10;
+    snapShotRecoverValue += static_cast<int32_t>(rotate) *
+        std::pow(10, static_cast<int32_t>(SnapShotRecoverType::ROTATE));
+    snapShotRecoverValue += static_cast<int32_t>(IsExitSplitOnBackgroundRecover()) *
+        std::pow(10, static_cast<int32_t>(SnapShotRecoverType::EXIT_SPLIT_ON_BACKGROUND));;
     return snapShotRecoverValue;
 }
 
