@@ -2757,28 +2757,33 @@ KeyFramePolicy SceneSessionManager::GetAppKeyFramePolicy(const std::string& bund
 
 sptr<SceneSession> SceneSessionManager::GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo)
 {
-    if (sessionInfo.persistentId_ != 0 && !sessionInfo.isPersistentRecover_) {
+    if (sessionInfo.isPersistentRecover_) {
+        TLOGI(WmsLogTag::WMS_LIFE, "session id: %{public}d is persistent recover.", sessionInfo.persistentId_);
+        return nullptr;
+    }
+
+    if (sessionInfo.persistentId_ != INVALID_SESSION_ID) {
         if (auto session = GetSceneSession(sessionInfo.persistentId_)) {
             TLOGI(WmsLogTag::WMS_LIFE, "get exist session persistentId: %{public}d", sessionInfo.persistentId_);
             return session;
         }
+    }
 
-        if (WindowHelper::IsMainWindow(static_cast<WindowType>(sessionInfo.windowType_))) {
-            TLOGD(WmsLogTag::WMS_LIFE, "mainWindow bundleName: %{public}s, moduleName: %{public}s, "
-                "abilityName: %{public}s, appIndex: %{public}d",
-                sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
-                sessionInfo.abilityName_.c_str(), sessionInfo.appIndex_);
-            SessionIdentityInfo identityInfo = { sessionInfo.bundleName_, sessionInfo.moduleName_,
-                sessionInfo.abilityName_, sessionInfo.appIndex_, sessionInfo.appInstanceKey_, sessionInfo.windowType_,
-                sessionInfo.isAtomicService_ };
-            auto sceneSession = GetSceneSessionByIdentityInfo(identityInfo);
-            bool isSingleStart = sceneSession && sceneSession->GetAbilityInfo() &&
-                sceneSession->GetAbilityInfo()->launchMode == AppExecFwk::LaunchMode::SINGLETON;
-            if (isSingleStart) {
-                TLOGD(WmsLogTag::WMS_LIFE, "get exist singleton session persistentId: %{public}d",
-                    sessionInfo.persistentId_);
-                return sceneSession;
-            }
+    if (WindowHelper::IsMainWindow(static_cast<WindowType>(sessionInfo.windowType_))) {
+        TLOGI(WmsLogTag::WMS_LIFE, "mainWindow bundleName: %{public}s, moduleName: %{public}s, "
+            "abilityName: %{public}s, appIndex: %{public}d, appInstanceKey:%{public}s, isAtomicService:%{public}d",
+            sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str(),
+            sessionInfo.appIndex_, sessionInfo.appInstanceKey_.c_str(), sessionInfo.isAtomicService_);
+        SessionIdentityInfo identityInfo = { sessionInfo.bundleName_, sessionInfo.moduleName_,
+            sessionInfo.abilityName_, sessionInfo.appIndex_, sessionInfo.appInstanceKey_, sessionInfo.windowType_,
+            sessionInfo.isAtomicService_ };
+        auto sceneSession = GetSceneSessionByIdentityInfo(identityInfo);
+        bool isSingleStart = sceneSession && sceneSession->GetAbilityInfo() &&
+            sceneSession->GetAbilityInfo()->launchMode == AppExecFwk::LaunchMode::SINGLETON;
+        if (isSingleStart) {
+            TLOGI(WmsLogTag::WMS_LIFE, "get exist singleton session persistentId: %{public}d",
+                sessionInfo.persistentId_);
+            return sceneSession;
         }
     }
     return nullptr;
