@@ -130,6 +130,8 @@ MouseEventFilterFunc convert2MouseEventFilterFunc(OH_NativeWindowManager_MouseEv
         OH_Input_SetMouseEventActionTime(mouseEvent, event.GetActionTime());
         OH_Input_SetMouseEventWindowId(mouseEvent, event.GetTargetWindowId());
         OH_Input_SetMouseEventDisplayId(mouseEvent, event.GetTargetDisplayId());
+        OH_Input_SetMouseEventGlobalX(mouseEvent, item.GetGlobalX());
+        OH_Input_SetMouseEventGlobalY(mouseEvent, item.GetGlobalY());
         bool res = filter(mouseEvent);
         OH_Input_DestroyMouseEvent(&mouseEvent);
         return res;
@@ -183,11 +185,13 @@ TouchEventFilterFunc convert2TouchEventFilterFunc(OH_NativeWindowManager_TouchEv
         }
         OH_Input_SetTouchEventAction(touchEvent, actionIter->second);
         OH_Input_SetTouchEventFingerId(touchEvent, event.GetPointerId());
-        OH_Input_SetTouchEventDisplayX(touchEvent, item.GetDisplayX());
+        OH_Input_SetTouchEventDisplayX(touchEvent, item.);
         OH_Input_SetTouchEventDisplayY(touchEvent, item.GetDisplayY());
         OH_Input_SetTouchEventActionTime(touchEvent, event.GetActionTime());
         OH_Input_SetTouchEventWindowId(touchEvent, event.GetTargetWindowId());
         OH_Input_SetTouchEventDisplayId(touchEvent, event.GetTargetDisplayId());
+        OH_Input_SetTouchEventGlobalX(touchEvent, item.GetGlobalX());
+        OH_Input_SetTouchEventGlobalX(touchEvent, item.GetGlobalY());
         bool res = filter(touchEvent);
         OH_Input_DestroyTouchEvent(&touchEvent);
         return res;
