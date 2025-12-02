@@ -981,50 +981,17 @@ WMError WindowSceneSessionImpl::GetParentWindow(sptr<Window>& parentWindow)
 
 void WindowSceneSessionImpl::UpdateDefaultStatusBarColor()
 {
-    SystemBarProperty statusBarProp = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    if (static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(statusBarProp.settingFlag_) &
-        static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING)) == SystemBarSettingFlag::COLOR_SETTING) {
-        TLOGD(WmsLogTag::WMS_IMMS, "user has set color");
-        return;
-    }
     if (!WindowHelper::IsMainWindow(GetType())) {
-        TLOGD(WmsLogTag::WMS_IMMS, "not main window");
+        TLOGD(WmsLogTag::WMS_IMMS, "win %{public}u not main window", GetPersistentId());
         return;
     }
-    uint32_t contentColor;
-    constexpr uint32_t BLACK = 0xFF000000;
-    constexpr uint32_t WHITE = 0xFFFFFFFF;
-    bool isColorModeSetByApp = !specifiedColorMode_.empty();
-    std::string colorMode = specifiedColorMode_;
-    if (isColorModeSetByApp) {
-        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type %{public}u colorMode %{public}s",
-            GetPersistentId(), GetType(), colorMode.c_str());
-        contentColor = colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT ? BLACK : WHITE;
-    } else {
-        auto appContext = AbilityRuntime::Context::GetApplicationContext();
-        if (appContext == nullptr) {
-            TLOGE(WmsLogTag::WMS_IMMS, "app context is nullptr");
-            return;
-        }
-        std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
-        if (config == nullptr) {
-            TLOGE(WmsLogTag::WMS_IMMS, "config is null, winId: %{public}d", GetPersistentId());
-            return;
-        }
-        colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-        isColorModeSetByApp = !config->GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP).empty();
-        if (isColorModeSetByApp) {
-            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "win=%{public}u, appColor=%{public}s", GetWindowId(), colorMode.c_str());
-            contentColor = colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT ? BLACK : WHITE;
-        } else {
-            bool hasDarkRes = false;
-            appContext->AppHasDarkRes(hasDarkRes);
-            TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type %{public}u hasDarkRes %{public}u colorMode %{public}s",
-                GetPersistentId(), GetType(), hasDarkRes, colorMode.c_str());
-            contentColor = colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT ? BLACK :
-                (hasDarkRes ? WHITE : BLACK);
-        }
+    uint32_t contentColor = 0;
+    auto ret = UpdateStatusBarColorByColorMode(contentColor);
+    if (ret != WMError::WM_OK) {
+        TLOGD(WmsLogTag::WMS_IMMS, "win %{public}u no need update", GetPersistentId());
+        return;
     }
+    SystemBarProperty statusBarProp = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     statusBarProp.contentColor_ = contentColor;
     statusBarProp.settingFlag_ = static_cast<SystemBarSettingFlag>(
         static_cast<uint32_t>(statusBarProp.settingFlag_) |
