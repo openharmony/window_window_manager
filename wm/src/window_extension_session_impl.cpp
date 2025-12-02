@@ -210,8 +210,8 @@ void WindowExtensionSessionImpl::UpdateConfigurationForSpecified(
     }
     if (configuration != nullptr) {
         TLOGI(WmsLogTag::WMS_IMMS, "extension win=%{public}u, colorMode=%{public}s, display=%{public}" PRIu64,
-            GetWindowId(), specifiedAbilityColorMode_.c_str(), GetDisplayId());
-        specifiedAbilityColorMode_ = configuration->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+            GetWindowId(), specifiedColorMode_.c_str(), GetDisplayId());
+        specifiedColorMode_ = configuration->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
         UpdateDefaultStatusBarColor();
     }
 }

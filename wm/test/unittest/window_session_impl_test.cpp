@@ -156,7 +156,7 @@ HWTEST_F(WindowSessionImplTest, UpdateDefaultStatusBarColor, TestSize.Level1)
     context->applicationContext_->contextImpl_->config_->configParameter_[key] = value;
     EXPECT_EQ(window->UpdateStatusBarColorByColorMode(contentColor), WMError::WM_ERROR_NULLPTR);
 
-    window->specifiedAbilityColorMode_ = "light";
+    window->specifiedColorMode_ = "light";
     EXPECT_EQ(window->UpdateStatusBarColorByColorMode(contentColor), WMError::WM_ERROR_NULLPTR);
 }
 

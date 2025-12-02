@@ -7411,7 +7411,6 @@ WMError WindowSessionImpl::UpdateStatusBarColorByColorMode(uint32_t& contentColo
         TLOGD(WmsLogTag::WMS_IMMS, "user has set color");
         return WMError::WM_DO_NOTHING;
     }
-    uint32_t contentColor;
     constexpr uint32_t BLACK = 0xFF000000;
     constexpr uint32_t WHITE = 0xFFFFFFFF;
     bool isColorModeSetByApp = !specifiedColorMode_.empty();
