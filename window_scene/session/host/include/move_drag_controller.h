@@ -149,7 +149,7 @@ public:
         DisplayId displayId = DISPLAY_ID_INVALID;
         WSRect winRect = { 0, 0, 0, 0 };
     };
-    void HandleStartMovingWithCoordinate(const MoveCoordinateProperty& property);
+    void HandleStartMovingWithCoordinate(const MoveCoordinateProperty& property, bool isMovable = true);
     void SetSpecifyMoveStartDisplay(DisplayId displayId);
     void ClearSpecifyMoveStartDisplay();
     WSRect GetTargetDisplayRectRelatedToStartDisplay(WSRect rect, DisplayId displayId) const;
