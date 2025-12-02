@@ -2136,6 +2136,21 @@ WMError SceneSessionManager::SetScreenPrivacyWindowTagSwitch(
     return taskScheduler_->PostSyncTask(task, __func__);
 }
 
+WMError SceneSessionManager::NotifyBrightnessModeChange(const std::string& brightnessMode)
+{
+    if (GetDisplayBrightness() == UNDEFINED_BRIGHTNESS) {
+        return WMError::WM_DO_NOTHING;
+    }
+    auto brightnessSession = GetSceneSession(brightnessSessionId_);
+    if (brightnessSession != nullptr && brightnessSession->IsSessionForeground()) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Restore brightness, wid: %{public}d", brightnessSession->GetWindowId());
+        PostBrightnessTask(UNDEFINED_BRIGHTNESS);
+        brightnessSession->SetBrightness(UNDEFINED_BRIGHTNESS);
+        return WMError::WM_OK;
+    }
+    return WMError::WM_DO_NOTHING;
+}
+
 void SceneSessionManager::SetSkipEventOnCastPlusInner(int32_t windowId, bool isSkip)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Wid: %{public}d, isSkip: %{public}d", windowId, isSkip);

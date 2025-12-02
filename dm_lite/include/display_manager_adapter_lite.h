@@ -95,6 +95,7 @@ public:
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason);
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId);
     virtual ScreenPowerState GetScreenPower();
+    virtual void SyncScreenPowerState(ScreenPowerState state);
     virtual sptr<ScreenInfo> GetScreenInfo(ScreenId screenId);
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos);
     virtual bool SynchronizePowerStatus(ScreenPowerState state);

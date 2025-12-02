@@ -36,6 +36,9 @@ public:
     static void UnregisterSettingDpiObserver();
     static bool GetSettingDpi(uint32_t& dpi, const std::string& key = SETTING_DPI_KEY);
     static bool SetSettingDefaultDpi(uint32_t& dpi, const std::string& key);
+    static void RegisterSettingBrightnessObserver(SettingObserver::UpdateFunc func);
+    static void UnregisterSettingBrightnessObserver();
+    static bool GetSettingBrightnessMode(std::string& brightnessMode, const std::string& key = SETTING_BRIGHTNESS_KEY);
     static bool GetSettingValue(uint32_t& value, const std::string& key);
     static bool SetSettingValue(const std::string& key, uint32_t value);
     static bool GetSettingValue(const std::string& key, std::string& value);
@@ -107,6 +110,7 @@ public:
     }
 private:
     static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};
+    static const constexpr char* SETTING_BRIGHTNESS_KEY {"settings.display.brightness_override_mode_change"};
     static const constexpr char* SETTING_CAST_KEY {"huaweicast.data.privacy_projection_state"};
     static const constexpr char* SETTING_ROTATION_KEY {"screen_rotation_value"};
     static const constexpr char* SETTING_ROTATION_SCREEN_ID_KEY {"screen_rotation_screen_id_value"};
@@ -118,6 +122,7 @@ private:
     static const constexpr char* SETTING_SCREEN_RESOLUTION_MODE_KEY {"user_set_resolution_mode"};
     static const constexpr uint32_t BASE_TEN = 10;
     static sptr<SettingObserver> dpiObserver_;
+    static sptr<SettingObserver> brightnessObserver_;
     static sptr<SettingObserver> castObserver_;
     static sptr<SettingObserver> rotationObserver_;
     static sptr<SettingObserver> wireCastObserver_;

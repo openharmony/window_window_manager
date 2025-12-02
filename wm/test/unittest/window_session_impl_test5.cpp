@@ -888,6 +888,45 @@ HWTEST_F(WindowSessionImplTest5, NotifyPageRotationIsIgnored, Function | SmallTe
 }
 
 /**
+ * @tc.name: ConvertOrientationAndRotation()
+ * @tc.desc: ConvertOrientationAndRotation()
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, ConvertOrientationAndRotation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: ConvertOrientationAndRotation start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetDisplayId(0);
+    option->SetWindowName("ConvertOrientationAndRotation");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(INVALID_SESSION_ID);
+    RotationInfoType from = RotationInfoType::DISPLAY_ORIENTATION;
+    RotationInfoType to = RotationInfoType::DISPLAY_ORIENTATION;
+    int32_t value = -1;
+    int32_t convertedValue = 0;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
+        window->ConvertOrientationAndRotation(from, to, value, convertedValue));
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_CREATED;
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT,
+        window->ConvertOrientationAndRotation(from, to, value, convertedValue));
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    value = -1;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
+        window->ConvertOrientationAndRotation(from, to, value, convertedValue));
+    value = 8;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->ConvertOrientationAndRotation(from, to, value, convertedValue));
+    value = 0;
+    ASSERT_EQ(WMError::WM_OK, window->ConvertOrientationAndRotation(from, to, value, convertedValue));
+    to = RotationInfoType::DISPLAY_ROTATION;
+    ASSERT_EQ(WMError::WM_OK, window->ConvertOrientationAndRotation(from, to, value, convertedValue));
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: ConvertOrientationAndRotation end";
+}
+
+/**
  * @tc.name: BeginRSTransaction()
  * @tc.desc: BeginRSTransaction()
  * @tc.type: FUNC

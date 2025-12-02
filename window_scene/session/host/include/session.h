@@ -298,6 +298,10 @@ public:
     bool GetNeedUseBlurSnapshot() const;
     void UpdateAppLockSnapshot(ControlAppType type, ControlInfo controlInfo);
     virtual bool GetIsPrivacyMode() const { return false; };
+    void SetSnapshotPrivacyMode(bool privacyMode) { snapshotPrivacyMode_.store(privacyMode); };
+    bool GetSnapshotPrivacyMode() const;
+    std::atomic<bool> snapshotPrivacyMode_ { false };
+
     virtual void SetAppControlInfo(ControlAppType type, ControlInfo controlInfo) {};
     virtual bool GetAppControlInfo(ControlAppType type, ControlInfo& controlInfo) const
     {

@@ -879,6 +879,31 @@ void MockSessionManagerService::SetScreenPrivacyWindowTagSwitch(
     }
 }
 
+void MockSessionManagerService::NotifyBrightnessModeChange(const std::string& brightnessMode)
+{
+    auto sessionManagerService = GetSessionManagerServiceInner(defaultWMSUserId_);
+    if (sessionManagerService == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerService is nullptr");
+        return;
+    }
+    if (!defaultSceneSessionManager_) {
+        GetSceneSessionManager();
+        if (!defaultSceneSessionManager_) {
+            TLOGW(WmsLogTag::WMS_ATTRIBUTE, "get scene session manager proxy failed, nullptr");
+            return;
+        }
+    }
+    sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(defaultSceneSessionManager_);
+    if (sceneSessionManagerProxy == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerServiceProxy is nullptr");
+        return;
+    }
+    WMError ret = sceneSessionManagerProxy->NotifyBrightnessModeChange(brightnessMode);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Notify brightnessmode change failed!");
+    }
+}
+
 sptr<IRemoteObject> MockSessionManagerService::GetSceneSessionManagerByUserId(int32_t userId)
 {
     auto sessionManagerService = GetSessionManagerServiceInner(userId);

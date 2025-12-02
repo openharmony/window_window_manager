@@ -77,6 +77,8 @@ constexpr uint32_t INVALID_TARGET_API_VERSION = 0;
 constexpr uint32_t OPAQUE = 0xFF000000;
 constexpr int32_t WINDOW_CONNECT_TIMEOUT = 1000;
 constexpr int32_t WINDOW_LIFECYCLE_TIMEOUT = 100;
+constexpr int32_t MIN_ROTATION_VALUE = 0;
+constexpr int32_t MAX_ROTATION_VALUE = 3;
 
 /*
  * DFX
@@ -2214,6 +2216,7 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, void* e
             uiContent_->SetContainerModalTitleVisible(false, true);
             uiContent_->EnableContainerModalCustomGesture(true);
         }
+        RegisterNavigateCallbackForPageCompatibleModeIfNeed();
         TLOGI(WmsLogTag::DEFAULT, "[%{public}d, %{public}d]",
             uiContent_->IsUIExtensionSubWindow(), uiContent_->IsUIExtensionAbilityProcess());
     }
@@ -3187,6 +3190,31 @@ Orientation WindowSessionImpl::GetRequestedOrientation()
     }
     TLOGI(WmsLogTag::WMS_ROTATION, "userRequestedOrientation:%{public}u", property_->GetUserRequestedOrientation());
     return property_->GetUserRequestedOrientation();
+}
+
+WMError WindowSessionImpl::ConvertOrientationAndRotation(
+    const RotationInfoType from, const RotationInfoType to, const int32_t value, int32_t& convertedValue)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "windowSession is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!windowSystemConfig_.IsPadWindow() && !windowSystemConfig_.IsPhoneWindow()) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (value < MIN_ROTATION_VALUE || value > MAX_ROTATION_VALUE) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "the value to be converted is invalid");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (from == to) {
+        convertedValue = value;
+        return WMError::WM_OK;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    WSError ret = hostSession->ConvertOrientationAndRotation(from, to, value, convertedValue);
+    TLOGI(WmsLogTag::WMS_ROTATION, "convertedValue:%{public}d", convertedValue);
+    return static_cast<WMError>(ret);
 }
 
 Orientation WindowSessionImpl::ConvertUserOrientationToUserPageOrientation(Orientation Orientation) const
@@ -8914,6 +8942,42 @@ void WindowSessionImpl::NotifyFreeWindowModeChange(bool isInFreeWindowMode)
             listener->OnFreeWindowModeChange(isInFreeWindowMode);
         }
     }
+}
+
+void WindowSessionImpl::RegisterNavigateCallbackForPageCompatibleModeIfNeed()
+{
+    const std::string compatibleModePage = property_->GetCompatibleModePage();
+    if (!uiContent_ || compatibleModePage.empty()) {
+        TLOGI(WmsLogTag::WMS_COMPAT, "content is nullptr or page is empty");
+        return;
+    }
+    uiContent_->RegisterNavigateChangeCallback(
+        [weakThis = wptr(this), where = __func__](const std::string& fromPage, const std::string& toPage) {
+        auto window = weakThis.promote();
+        if (!window) {
+            TLOGNE(WmsLogTag::WMS_COMPAT, "%{public}s window is null", where);
+            return;
+        }
+        window->HandleNavigateCallbackForPageCompatibleMode(fromPage, toPage);
+    });
+}
+
+void WindowSessionImpl::HandleNavigateCallbackForPageCompatibleMode(
+    const std::string& fromPage, const std::string& toPage)
+{
+    const std::string compatibleModePage = property_->GetCompatibleModePage();
+    if ((fromPage == compatibleModePage && toPage == compatibleModePage) ||
+        (fromPage != compatibleModePage && toPage != compatibleModePage)) {
+        return;
+    }
+    auto hostSession = GetHostSession();
+    if (!hostSession) {
+        TLOGNE(WmsLogTag::WMS_COMPAT, "hostSession is null");
+        return;
+    }
+    auto mode = toPage == compatibleModePage ? CompatibleStyleMode::LANDSCAPE_18_9 : CompatibleStyleMode::INVALID_VALUE;
+    property_->SetPageCompatibleMode(mode);
+    hostSession->NotifyCompatibleModeChange(mode);
 }
 } // namespace Rosen
 } // namespace OHOS

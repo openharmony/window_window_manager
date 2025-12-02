@@ -156,6 +156,7 @@ using GetFbPanelWindowIdFunc =  std::function<WMError(uint32_t& windowId)>;
 using FindScenePanelRsNodeByZOrderFunc = std::function<std::shared_ptr<Rosen::RSNode>(DisplayId displayId,
     uint32_t targetZOrder)>;
 using ForceSplitFullScreenChangeCallback = std::function<void(uint32_t uid, bool isFullScreen)>;
+using CompatibleModeChangeCallback = std::function<void(CompatibleStyleMode mode)>;
 using NotifyRotationLockChangeFunc = std::function<void(bool locked)>;
 using NotifySnapshotSkipChangeFunc = std::function<void(bool isSkip)>;
 
@@ -429,6 +430,7 @@ public:
     bool IsInCompatScaleMode();
     virtual void RegisterForceSplitFullScreenChangeCallback(ForceSplitFullScreenChangeCallback&& callback) {}
     virtual bool IsFullScreenInForceSplit() { return false; }
+    virtual void RegisterCompatibleModeChangeCallback(CompatibleModeChangeCallback&& callback) {}
 
     /*
      * PC Window
@@ -621,6 +623,14 @@ public:
     WSError NotifyRotationProperty(uint32_t rotation, uint32_t width, uint32_t height);
     WSError NotifyPageRotationIsIgnored();
     WSError ConvertRotationToOrientation(uint32_t rotation, uint32_t width, uint32_t height, uint32_t& orientation);
+    WSError ConvertOrientationAndRotation(const RotationInfoType from, const RotationInfoType to,
+        const int32_t value, int32_t& convertedValue) override;
+    WSError ConvertDisplayOrientationToWindowOrientation(const int32_t value, int32_t& convertedValue);
+    WSError ConvertWindowOrientationToDisplayOrientation(const int32_t value, int32_t& convertedValue);
+    WSError ConvertDisplayRotationToDisplayOrientation(const int32_t rotation, int32_t& orientation);
+    WSError ConvertDisplayOrientationToDisplayRotation(const int32_t orientation, int32_t& rotation);
+    WSError ConvertDisplayRotationToWindowOrientation(const int32_t value, int32_t& convertedValue);
+    WSError ConvertWindowOrientationToDisplayRotation(const int32_t value, int32_t& convertedValue);
     void RegisterUpdateRotationChangeListener(NotifyRotationChangeFunc&& callback);
     WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) override;
     RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo,

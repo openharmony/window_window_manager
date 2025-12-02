@@ -19,6 +19,7 @@
 #include <hitrace_meter.h>
 #include <map>
 #include <set>
+#include <js_err_utils.h>
 
 #include "cutout_info.h"
 #include "display.h"
@@ -447,14 +448,14 @@ napi_value JsDisplay::OnGetCutoutInfo(napi_env env, napi_callback_info info)
             task->Resolve(env, CreateJsCutoutInfoObject(env, cutoutInfo));
             TLOGND(WmsLogTag::DMS, "JsDisplay::OnGetCutoutInfo success");
         } else {
-            task->Reject(env, CreateJsError(env,
-                static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "JsDisplay::OnGetCutoutInfo failed."));
+            task->Reject(env, JsErrUtils::CreateJsError(env,
+                DmErrorCode::DM_ERROR_INVALID_SCREEN, "[display][getCutoutInfo]"));
         }
         delete task;
     };
     if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnGetCutoutInfo") != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env, CreateJsError(env,
-                static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "Send event failed!"));
+        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env,
+            DmErrorCode::DM_ERROR_INVALID_SCREEN, "[display][getCutoutInfo]msg: Internal task error."));
     } else {
         napiAsyncTask.release();
     }
@@ -500,14 +501,13 @@ napi_value JsDisplay::OnGetAvailableArea(napi_env env, napi_callback_info info)
             task->Resolve(env, CreateJsRectObject(env, area));
             TLOGNI(WmsLogTag::DMS, "JsDisplay::OnGetAvailableArea success");
         } else {
-            task->Reject(env, CreateJsError(env, static_cast<int32_t>(ret),
-                "JsDisplay::OnGetAvailableArea failed."));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "[display][getAvailableArea]"));
         }
         delete task;
     };
     if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnGetAvailableArea") != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env, CreateJsError(env,
-                static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "Send event failed!"));
+        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env,
+            DmErrorCode::DM_ERROR_INVALID_SCREEN, "[display][getAvailableArea]msg: Internal task error."));
     } else {
         napiAsyncTask.release();
     }
@@ -580,7 +580,7 @@ napi_value JsDisplay::OnGetLiveCreaseRegion(napi_env env, napi_callback_info inf
     }
     DmErrorCode ret = errorCodeMapping->second;
     if (ret != DmErrorCode::DM_OK) {
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(ret)));
+        napi_throw(env, JsErrUtils::CreateJsError(env, ret, "[display][getLiveCreaseRegion]"));
         return NapiGetUndefined(env);
     }
     return CreateJsFoldCreaseRegionObject(env, region);

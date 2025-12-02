@@ -98,6 +98,8 @@ constexpr char DRAG_RESIZE_WINDOW[] = "PC_DRAG_RESIZE_WINDOW";
 const int32_t ROTATE_POLICY_WINDOW = 0;
 const int32_t ROTATE_POLICY_SCREEN = 1;
 const int32_t SCREEN_LOCK_Z_ORDER = 2000;
+constexpr int32_t MIN_ROTATION_VALUE = 0;
+constexpr int32_t MAX_ROTATION_VALUE = 3;
 const std::string OPTIONAL_SHOW = "OPTIONAL_SHOW"; // startWindowType can be changed by startAbility option.
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
@@ -172,6 +174,7 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
             property->SetAppInstanceKey(session->GetAppInstanceKey());
             property->SetUseControlState(session->isAppUseControl_);
             property->SetAncoRealBundleName(session->IsAnco() ? session->GetSessionInfo().bundleName_ : "");
+            property->SetCompatibleModePage(session->GetSessionInfo().compatibleModePage);
             if (session->GetSessionInfo().processOptions != nullptr) {
                 MissionInfo missionInfo;
                 missionInfo.startupInvisibility_ = session->GetSessionInfo().processOptions->startupVisibility ==
@@ -559,6 +562,7 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot, LifeCycleChangeR
         if (ret != WSError::WS_OK) {
             return ret;
         }
+        session->SetSnapshotPrivacyMode(session->GetIsPrivacyMode());
         if (WindowHelper::IsMainWindow(session->GetWindowType()) && isSaveSnapshot && needSaveSnapshot) {
             session->SetFreeMultiWindow();
             session->SaveSnapshot(true, true, nullptr, false, reason);
@@ -696,6 +700,7 @@ WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
             session->SetSessionState(SessionState::STATE_DISCONNECT);
             return WSError::WS_OK;
         }
+        session->SetSnapshotPrivacyMode(session->GetIsPrivacyMode());
         auto state = session->GetSessionState();
         if ((session->needSnapshot_ || (state == SessionState::STATE_ACTIVE && isMainWindow)) &&
             isSaveSnapshot && needSaveSnapshot) {
@@ -9193,6 +9198,138 @@ WSError SceneSession::GetTargetOrientationConfigInfo(Orientation targetOrientati
             return WSError::WS_OK;
         }, __func__);
     return WSError::WS_OK;
+}
+
+WSError SceneSession::ConvertOrientationAndRotation(const RotationInfoType from, const RotationInfoType to,
+        const int32_t value, int32_t& convertedValue)
+{
+    WSError ret = WSError::WS_ERROR_INVALID_PARAM;
+    if (value < MIN_ROTATION_VALUE || value > MAX_ROTATION_VALUE) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "the value to be converted is invalid");
+        return ret;
+    }
+    if (from == to) {
+        convertedValue = value;
+        return WSError::WS_OK;
+    }
+    if (from == RotationInfoType::DISPLAY_ORIENTATION && to == RotationInfoType::WINDOW_ORIENTATION) {
+        ret = ConvertDisplayOrientationToWindowOrientation(value, convertedValue);
+        return ret;
+    }
+    if (from == RotationInfoType::WINDOW_ORIENTATION && to == RotationInfoType::DISPLAY_ORIENTATION) {
+        ret = ConvertWindowOrientationToDisplayOrientation(value, convertedValue);
+        return ret;
+    }
+    if (from == RotationInfoType::DISPLAY_ROTATION && to == RotationInfoType::DISPLAY_ORIENTATION) {
+        ret = ConvertDisplayRotationToDisplayOrientation(value, convertedValue);
+        return ret;
+    }
+    if (from == RotationInfoType::DISPLAY_ORIENTATION && to == RotationInfoType::DISPLAY_ROTATION) {
+        ret = ConvertDisplayOrientationToDisplayRotation(value, convertedValue);
+        return ret;
+    }
+    if (from == RotationInfoType::DISPLAY_ROTATION && to == RotationInfoType::WINDOW_ORIENTATION) {
+        ret = ConvertDisplayRotationToWindowOrientation(value, convertedValue);
+        return ret;
+    }
+    if (from == RotationInfoType::WINDOW_ORIENTATION && to == RotationInfoType::DISPLAY_ROTATION) {
+        ret = ConvertWindowOrientationToDisplayRotation(value, convertedValue);
+        return ret;
+    }
+    return ret;
+}
+
+WSError SceneSession::ConvertDisplayOrientationToWindowOrientation(const int32_t value, int32_t& convertedValue)
+{
+    DisplayOrientation displayOrientation = static_cast<DisplayOrientation>(value);
+    if (displayOrientation == DisplayOrientation::UNKNOWN) {
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    auto it = DISPLAY_TO_WINDOW_MAP.find(displayOrientation);
+    if (it != DISPLAY_TO_WINDOW_MAP.end()) {
+        convertedValue = static_cast<int32_t>(it->second);
+        return WSError::WS_OK;
+    }
+    return WSError::WS_ERROR_INVALID_PARAM;
+}
+
+WSError SceneSession::ConvertWindowOrientationToDisplayOrientation(const int32_t value, int32_t& convertedValue)
+{
+    WindowOrientation windowOrientation = static_cast<WindowOrientation>(value);
+    auto it = WINDOW_TO_DISPLAY_MAP.find(windowOrientation);
+    if (it != WINDOW_TO_DISPLAY_MAP.end()) {
+        convertedValue = static_cast<int32_t>(it->second);
+        return WSError::WS_OK;
+    }
+    return WSError::WS_ERROR_INVALID_PARAM;
+}
+
+WSError SceneSession::ConvertDisplayRotationToDisplayOrientation(const int32_t rotation, int32_t& orientation)
+{
+    sptr<ScreenSession> screenSession =
+        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(GetSessionProperty()->GetDisplayId());
+    if (screenSession == nullptr) {
+        TLOGW(WmsLogTag::WMS_ROTATION, "Screen session is null");
+        return WSError::WS_ERROR_INVALID_DISPLAY;
+    }
+    FoldDisplayMode foldDisplayMode = ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
+    Rotation targetRotation = static_cast<Rotation>(rotation);
+    RRect bounds = screenSession->CalcBoundsByRotation(targetRotation);
+    DisplayOrientation displayOrientation =
+        screenSession->CalcDeviceOrientationWithBounds(targetRotation, foldDisplayMode, bounds);
+    orientation = static_cast<int32_t>(displayOrientation);
+    TLOGI(WmsLogTag::WMS_ROTATION,
+        "rotation: %{public}d, width: %{public}f, height: %{public}f, orientation: %{public}d",
+        rotation, bounds.rect_.width_, bounds.rect_.height_, orientation);
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::ConvertDisplayOrientationToDisplayRotation(const int32_t orientation, int32_t& rotation)
+{
+    sptr<ScreenSession> screenSession =
+        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(GetSessionProperty()->GetDisplayId());
+    if (screenSession == nullptr) {
+        TLOGW(WmsLogTag::WMS_ROTATION, "Screen session is null");
+        return WSError::WS_ERROR_INVALID_DISPLAY;
+    }
+    FoldDisplayMode foldDisplayMode = ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
+    DisplayOrientation displayOrientation = static_cast<DisplayOrientation>(orientation);
+    RRect bounds = screenSession->CalcBoundsInRotationZero();
+    Rotation targetRotation =
+        screenSession->CalcRotationByDeviceOrientation(displayOrientation, foldDisplayMode, bounds);
+    rotation = static_cast<int32_t>(targetRotation);
+    TLOGI(WmsLogTag::WMS_ROTATION,
+        "rotation: %{public}d, width: %{public}f, height: %{public}f, orientation: %{public}d",
+        rotation, bounds.rect_.width_, bounds.rect_.height_, orientation);
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::ConvertDisplayRotationToWindowOrientation(const int32_t value, int32_t& convertedValue)
+{
+    // convert displayRotation to displayorientation
+    int32_t displayOrientation;
+    WSError ret = ConvertDisplayRotationToDisplayOrientation(value, displayOrientation);
+    if (ret != WSError::WS_OK) {
+        TLOGNE(WmsLogTag::WMS_ROTATION, "failed to convert DisplayRotation to DisplayOrientation");
+        return ret;
+    }
+    // convert displayorientation to windowOrientation
+    ret = ConvertDisplayOrientationToWindowOrientation(displayOrientation, convertedValue);
+    return ret;
+}
+
+WSError SceneSession::ConvertWindowOrientationToDisplayRotation(const int32_t value, int32_t& convertedValue)
+{
+    // convert windowOrientation to displayorientation
+    int32_t displayOrientation;
+    WSError ret = ConvertWindowOrientationToDisplayOrientation(value, displayOrientation);
+    if (ret != WSError::WS_OK) {
+        TLOGNE(WmsLogTag::WMS_ROTATION, "failed to convert WindowOrientation to DisplayOrientation");
+        return ret;
+    }
+    // convert displayorientation to displayRotation
+    ret = ConvertDisplayOrientationToDisplayRotation(displayOrientation, convertedValue);
+    return ret;
 }
 
 WSError SceneSession::NotifyRotationProperty(uint32_t rotation, uint32_t width, uint32_t height)

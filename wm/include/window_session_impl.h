@@ -602,6 +602,8 @@ public:
     WMError SetFollowScreenChange(bool isFollowScreenChange) override;
     void BeginRSTransaction(const std::shared_ptr<RSTransaction>& rsTransaction) const;
     WSError NotifyPageRotationIsIgnored() override;
+    WMError ConvertOrientationAndRotation(const RotationInfoType from, const RotationInfoType to,
+        const int32_t value, int32_t& convertedValue) override;
 
     /*
      * UIExtension
@@ -1231,6 +1233,12 @@ private:
      * RS Client Multi Instance
      */
     std::shared_ptr<RSUIDirector> rsUIDirector_;
+
+    /*
+     * Compatible Mode
+     */
+    void RegisterNavigateCallbackForPageCompatibleModeIfNeed();
+    void HandleNavigateCallbackForPageCompatibleMode(const std::string& fromPage, const std::string& toPage);
 };
 } // namespace Rosen
 } // namespace OHOS
