@@ -19,6 +19,7 @@
 #include <float_wrapper.h>
 #include <hitrace_meter.h>
 #include <int_wrapper.h>
+#include <long_wrapper.h>
 #include <ipc_types.h>
 #include <parameters.h>
 #include <string_wrapper.h>
@@ -1726,6 +1727,31 @@ WMError WindowExtensionSessionImpl::ExtensionSetBrightness(float brightness)
     AAFwk::WantParams want;
     want.SetParam(Extension::ATOMICSERVICE_KEY_FUNCTION, AAFwk::String::Box("setWindowBrightness"));
     want.SetParam(Extension::ATOMICSERVICE_KEY_PARAM_BRIGHTNESS, AAFwk::Float::Box(brightness));
+    if (TransferExtensionData(want) != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "send failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowExtensionSessionImpl::SetStatusBarColorForExtension(uint32_t color)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "id=%{public}d", GetPersistentId());
+    WMError ret = SetStatusBarColorForExtensionInner(color);
+    if (ret == WMError::WM_OK) {
+        SystemBarProperty statusBarProp = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+        statusBarProp.settingFlag_ |= SystemBarSettingFlag::COLOR_SETTING;
+        property_->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProp);
+    }
+    return ret;
+}
+
+WMError WindowExtensionSessionImpl::SetStatusBarColorForExtensionInner(uint32_t color)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "id=%{public}d", GetPersistentId());
+    AAFwk::WantParams want;
+    want.SetParam(Extension::ATOMICSERVICE_KEY_FUNCTION, AAFwk::String::Box("setStatusBarColor"));
+    want.SetParam(Extension::ATOMICSERVICE_KEY_PARAM_COLOR_NUMERIC, AAFwk::Long::Box(color));
     if (TransferExtensionData(want) != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "send failed");
         return WMError::WM_ERROR_IPC_FAILED;
