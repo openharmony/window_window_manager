@@ -185,6 +185,11 @@ public:
     WMError UseImplicitAnimation(bool useImplicit) override;
 
     /*
+     * Window Immersive
+     */
+    void UpdateDefaultStatusBarColor();
+
+    /*
      * Window Property
      */
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
@@ -285,6 +290,11 @@ private:
     std::vector<sptr<IRectChangeInGlobalDisplayListener>> hostRectChangeInGlobalDisplayListenerList_;
     uint32_t hostStatusBarContentColor_ { 0 };
     int64_t startModalExtensionTimeStamp_ = -1;
+
+    /*
+     * Window Immersive
+     */
+    std::string specifiedAbilityColorMode_;
 
     /*
      * PC Fold Screen

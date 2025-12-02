@@ -476,7 +476,7 @@ private:
     /*
      * Window Immersive
      */
-    void UpdateDefaultStatusBarColor() override;
+    void UpdateDefaultStatusBarColor();
     bool userLimitsSet_ = false;
     bool forceLimits_ = false;
     uint32_t setSameSystembarPropertyCnt_ = 0;
