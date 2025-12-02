@@ -413,7 +413,7 @@ public:
     virtual bool IsExitSplitOnBackground() const;
     virtual bool NeedStartingWindowExitAnimation() const { return true; }
     bool IsExitSplitOnBackgroundRecover();
-    int32_t EncodeSnapShotRecoverValue();
+    int32_t EncodeSnapShotRecoverValue(DisplayOrientation rotate);
     int32_t DecodeSnapShotRecoverValue(int32_t snapShotRecoverValue, SnapShotRecoverType snapShotRecoverType);
 
     void SetChangeSessionVisibilityWithStatusBarEventListener(
