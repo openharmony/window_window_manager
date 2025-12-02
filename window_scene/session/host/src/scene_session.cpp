@@ -2697,10 +2697,6 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea, bool i
     auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
     bool isAvailableScreen = !screenSession || (screenSession->GetName() != "HiCar");
     if (isWindowFloatingOrSplit && isAvailableWindowType && isAvailableDevice && isAvailableScreen) {
-        // mini floating scene no need avoid
-        if (LessOrEqual(Session::GetFloatingScale(), MINI_FLOAT_SCALE) && !ignoreVisibility) {
-            return;
-        }
         float vpr = 3.5f; // 3.5f: default pixel ratio
         auto display = DisplayManager::GetInstance().GetDefaultDisplay();
         if (display == nullptr) {
