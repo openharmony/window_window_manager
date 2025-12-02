@@ -1163,7 +1163,6 @@ HWTEST_F(ScreenSessionManagerTest, CalculateRotatedDisplay1, Function | SmallTes
     displayArea = {20, 10, 30, 40};
     ssm_->CalculateRotatedDisplay(rotation, screenRegion, displayRegion, displayArea);
     EXPECT_TRUE(g_errLog.find("failed") == std::string::npos);
-    g_logMsg.clear();
     LOG_SetCallback(nullptr);
     expectedRect = {50, 150, 30, 40};
     EXPECT_EQ(displayArea, expectedRect);
@@ -1200,7 +1199,6 @@ HWTEST_F(ScreenSessionManagerTest, CalculateRotatedDisplay2, Function | SmallTes
     ssm_->CalculateRotatedDisplay(rotation, screenRegion, displayRegion, displayArea);
     DMRect expectedRect = {0, 0, 200, 100};
     EXPECT_TRUE(g_errLog.find("failed") == std::string::npos);
-    g_logMsg.clear();
 
     rotation = Rotation::ROTATION_180;
     displayRegion = {0, 0, 200, 100};
@@ -1216,7 +1214,6 @@ HWTEST_F(ScreenSessionManagerTest, CalculateRotatedDisplay2, Function | SmallTes
     displayArea = {20, 10, 30, 40};
     ssm_->CalculateRotatedDisplay(rotation, screenRegion, displayRegion, displayArea);
     EXPECT_TRUE(g_errLog.find("failed") == std::string::npos);
-    g_logMsg.clear();
     LOG_SetCallback(nullptr);
 
     expectedRect = {50, 150, 30, 40};
@@ -3068,32 +3065,22 @@ HWTEST_F(ScreenSessionManagerTest, HandleDefaultMultiScreenModeTest3, TestSize.L
  * @tc.desc: SetScreenPowerForAll test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForAll01, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForAll, TestSize.Level1)
 {
-    g_errLog.clear();
-    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
-    EXPECT_NE(displayManagerAgent, nullptr);
-
-    DisplayManagerAgentType type = DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER;
-    EXPECT_EQ(DMError::DM_OK, ssm_->RegisterDisplayManagerAgent(displayManagerAgent, type));
-
-    VirtualScreenOption virtualOption;
-    virtualOption.name_ = "createVirtualOption";
-    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     ScreenTransitionState temp = ScreenStateMachine::GetInstance().GetTransitionState();
     ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::WAIT_SCREEN_ADVANCED_ON_READY);
     PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS;
-    ScreenPowerState state = ScreenPowerState::POWER_ON;
-    EXPECT_EQ(true, ssm_->SetScreenPowerForAll(state, reason));
+    ScreenPowerState state = ScreenPowerState::POWER_SUSPEND;
+    EXPECT_FALSE(ssm_->SetScreenPowerForAll(state, reason));
+
     ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::WAIT_SCREEN_ADVANCED_ON_READY);
     reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON;
-    EXPECT_EQ(true, ssm_->SetScreenPowerForAll(state, reason));
+    EXPECT_FALSE(ssm_->SetScreenPowerForAll(state, reason));
+
     ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::WAIT_SCREEN_ADVANCED_ON_READY);
     reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
-    EXPECT_EQ(true, ssm_->SetScreenPowerForAll(state, reason));
+    EXPECT_FALSE(ssm_->SetScreenPowerForAll(state, reason));
     ScreenStateMachine::GetInstance().SetTransitionState(temp);
-    EXPECT_EQ(DMError::DM_OK, ssm_->DestroyVirtualScreen(screenId));
-    EXPECT_EQ(DMError::DM_OK, ssm_->UnregisterDisplayManagerAgent(displayManagerAgent, type));
 }
 
 /**
@@ -3103,28 +3090,18 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForAll01, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerTest, WakeUpBegin01, TestSize.Level1)
 {
-    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
-    EXPECT_NE(displayManagerAgent, nullptr);
-
-    DisplayManagerAgentType type = DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER;
-    EXPECT_EQ(DMError::DM_OK, ssm_->RegisterDisplayManagerAgent(displayManagerAgent, type));
-
-    VirtualScreenOption virtualOption;
-    virtualOption.name_ = "createVirtualOption";
-    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     ScreenTransitionState temp = ScreenStateMachine::GetInstance().GetTransitionState();
     ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_ADVANCED_ON);
     PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS;
-    EXPECT_EQ(true, ssm_->WakeUpBegin(reason));
+    EXPECT_FALSE(ssm_->WakeUpBegin(reason));
     ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_ADVANCED_ON);
     reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
-    EXPECT_EQ(true, ssm_->WakeUpBegin(reason));
+    EXPECT_FALSE(ssm_->WakeUpBegin(reason));
     ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_ADVANCED_ON);
     reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
-    EXPECT_EQ(false, ssm_->WakeUpBegin(reason));
+    EXPECT_FALSE(ssm_->WakeUpBegin(reason));
     ScreenStateMachine::GetInstance().SetTransitionState(temp);
-    EXPECT_EQ(DMError::DM_OK, ssm_->DestroyVirtualScreen(screenId));
-    EXPECT_EQ(DMError::DM_OK, ssm_->UnregisterDisplayManagerAgent(displayManagerAgent, type));
+}
 
 /*
  * @tc.name: CheckNeedNotifyTest

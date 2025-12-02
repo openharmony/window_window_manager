@@ -496,7 +496,7 @@ HWTEST_F(DisplayManagerLiteProxyTest, SetResolution, TestSize.Level1)
     uint32_t height = 2400;
     float vpr = 2.8;
     auto ret = displayManagerLiteProxy->SetResolution(id, width, height, vpr);
-    ASSERT_NE(ret, DMError::DM_OK);
+    EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
 }
 
 /**
