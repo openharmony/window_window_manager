@@ -3026,7 +3026,7 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
             saveSnapshotCallback = session->saveSnapshotCallback_;
         }
         session->scenePersistence_->SaveSnapshot(pixelMap, saveSnapshotCallback, key, rotate,
-            session->freeMultiWindow_.load());
+            session->responseForScreenForm_.load());
     };
     if (!useFfrt) {
         task();
@@ -3054,7 +3054,7 @@ void Session::SetHasSnapshot(SnapshotStatus key, DisplayOrientation rotate)
         TLOGNE(WmsLogTag::WMS_PATTERN, "scenePersistence is null");
         return;
     }
-    if (freeMultiWindow_.load()) {
+    if (responseForScreenForm_.load()) {
         scenePersistence_->SetHasSnapshotFreeMultiWindow(true);
         ScenePersistentStorage::Insert(GetSnapshotPersistentKey(), EncodeSnapShotRecoverValue(),
             ScenePersistentStorageType::MAXIMIZE_STATE);
@@ -3106,9 +3106,9 @@ void Session::SetFreeMultiWindow()
         return;
     }
     if (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        freeMultiWindow_.store(false);
+        responseForScreenForm_.store(false);
     } else {
-        freeMultiWindow_.store(true);
+        responseForScreenForm_.store(true);
     }
 }
 
@@ -3161,7 +3161,7 @@ bool Session::HasSnapshotFreeMultiWindow()
     auto hasSnapshotFreeMultiWindow = ScenePersistentStorage::HasKey("Snapshot_" + sessionInfo_.bundleName_ +
         "_"  + std::to_string(persistentId_), ScenePersistentStorageType::MAXIMIZE_STATE);
     if (hasSnapshotFreeMultiWindow && scenePersistence_) {
-        freeMultiWindow_.store(true);
+        responseForScreenForm_.store(true);
         scenePersistence_->SetHasSnapshotFreeMultiWindow(true);
         int32_t snapShotRecoverValue = 0;
         ScenePersistentStorage::Get("Snapshot_" + sessionInfo_.bundleName_ +
@@ -4952,8 +4952,8 @@ std::shared_ptr<Media::PixelMap> Session::GetSnapshotPixelMap(const float oriSca
         return nullptr;
     }
     auto key = GetScreenSnapshotStatus();
-    return scenePersistence_->IsSavingSnapshot(key, freeMultiWindow_.load()) ? GetSnapshot() :
-        scenePersistence_->GetLocalSnapshotPixelMap(oriScale, newScale, key, freeMultiWindow_.load());
+    return scenePersistence_->IsSavingSnapshot(key, responseForScreenForm_.load()) ? GetSnapshot() :
+        scenePersistence_->GetLocalSnapshotPixelMap(oriScale, newScale, key, responseForScreenForm_.load());
 }
 
 bool Session::IsVisibleForeground() const

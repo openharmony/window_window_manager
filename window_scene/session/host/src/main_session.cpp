@@ -236,6 +236,7 @@ void MainSession::SetExitSplitOnBackground(bool isExitSplitOnBackground)
 {
     TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "id:%{public}d, isExitSplitOnBackground:%{public}d", persistentId_,
         isExitSplitOnBackground);
+    responseForScreenForm_.store(true);
     isExitSplitOnBackground_ = isExitSplitOnBackground;
 }
 
