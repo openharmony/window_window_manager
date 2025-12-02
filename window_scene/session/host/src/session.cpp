@@ -3048,7 +3048,7 @@ std::string Session::GetSnapshotPersistentKey(SnapshotStatus key)
     return "Snapshot_" + sessionInfo_.bundleName_ + "_"+ std::to_string(persistentId_) + "_" + std::to_string(key);
 }
 
-void Session::SetHasSnapshot(SnapshotStatus key, DisplayOrientation rotate)
+void Session:: (SnapshotStatus key, DisplayOrientation rotate)
 {
     if (!scenePersistence_) {
         TLOGNE(WmsLogTag::WMS_PATTERN, "scenePersistence is null");
@@ -3065,7 +3065,7 @@ void Session::SetHasSnapshot(SnapshotStatus key, DisplayOrientation rotate)
     }
 }
 
-int32_t Session::EncodeSnapShotRecoverValue(DisplayOrientation rotate)
+int32_t Session::EncodeSnapShotRecoverValue(int32_t rotate)
 {
     int32_t snapShotRecoverValue = 0;
     snapShotRecoverValue += static_cast<int32_t>(rotate) *
