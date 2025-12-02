@@ -552,7 +552,29 @@ HWTEST_F(WindowPatternStartingWindowTest, PreLoadStartingWindow, TestSize.Level1
     ssm_->PreLoadStartingWindow(sceneSession);
     sceneSession->state_ = SessionState::STATE_DISCONNECT;
     ssm_->PreLoadStartingWindow(sceneSession);
+
+    StartingWindowInfo startingWindowInfo;
+    startingWindowInfo.configFileEnabled_ = false;
+    startingWindowInfo.iconPathEarlyVersion_ = "resource:///12345678.png";
+    std::string keyForCached = info.moduleName_ + info.abilityName_ + std::to_string(true);
+    ssm_->startingWindowMap_[info.bundleName_][keyForCached] = startingWindowInfo;
+    ssm_->PreLoadStartingWindow(sceneSession);
     ASSERT_NE(nullptr, sceneSession);
+}
+
+/**
+ * @tc.name: GetCropInfoByDisplaySize
+ * @tc.desc: GetCropInfoByDisplaySize
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternStartingWindowTest, GetCropInfoByDisplaySize, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    Media::ImageInfo imageInfo;
+    imageInfo.size.width = imageInfo.size.height = 3200;
+    Media::DecodeOptions decodeOpts;
+    ssm_->GetCropInfoByDisplaySize(imageInfo, decodeOpts);
+    EXPECT_EQ(decodeOpts.CropRect.top, 0);
 }
 
 /**
