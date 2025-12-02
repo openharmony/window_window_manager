@@ -3154,6 +3154,9 @@ bool Session::HasSnapshot(SnapshotStatus key)
             snapShotRecoverValue, ScenePersistentStorageType::MAXIMIZE_STATE);
         scenePersistence_->rotate_[key] = static_cast<DisplayOrientation>(DecodeSnapShotRecoverValue(
             snapShotRecoverValue, SnapShotRecoverType::ROTATE));
+        bool isExitSplitOnBackgroundRecover = static_cast<bool>(DecodeSnapShotRecoverValue(
+            snapShotRecoverValue, SnapShotRecoverType::EXIT_SPLIT_ON_BACKGROUND));
+        SetExitSplitOnBackground(isExitSplitOnBackgroundRecover);
     }
     return hasSnapshot;
 }
