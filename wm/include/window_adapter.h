@@ -75,9 +75,9 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent);
     virtual WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
-    WMError RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
+    virtual WMError RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
-    WMError UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
+    virtual WMError UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
     virtual WMError CheckWindowId(int32_t windowId, int32_t& pid);
 
@@ -244,6 +244,8 @@ public:
     void UnregisterOutlineRecoverCallbackFunc();
     virtual WMError UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams);
 
+    sptr<IWindowManager> GetWindowManagerServiceProxy() const;
+
 private:
     friend class sptr<WindowAdapter>;
     ~WindowAdapter() override;
@@ -265,7 +267,7 @@ private:
      * Window Recover
      */
     void ReregisterWindowManagerAgent();
-    void ReregisterWindowManagerFaultAgent();
+    void ReregisterWindowManagerFaultAgent(const sptr<IWindowManager>& proxy);
     void WindowManagerAndSessionRecover();
     void RecoverSpecificZIndexSetByApp();
     WMError RecoverWindowPropertyChangeFlag();
@@ -274,25 +276,26 @@ private:
     std::string appWatermarkName_;
     std::unordered_map<WindowType, int32_t> specificZIndexMap_;
 
-    sptr<IWindowManager> GetWindowManagerServiceProxy() const;
-
     mutable std::mutex mutex_;
     sptr<IWindowManager> windowManagerServiceProxy_ = nullptr;
     sptr<WMSDeathRecipient> wmsDeath_ = nullptr;
     bool isProxyValid_ = false;
     bool isRegisteredUserSwitchListener_ = false;
-    std::map<WindowManagerAgentType, std::set<sptr<IWindowManagerAgent>>> windowManagerAgentMap_;
+    bool recoverInitialized_ = false;
     std::map<int32_t, SessionRecoverCallbackFunc> sessionRecoverCallbackFuncMap_;
+    // above guarded by mutex_
+
     std::mutex effectMutex_;
     std::map<int32_t, UIEffectRecoverCallbackFunc> uiEffectRecoverCallbackFuncMap_;
-    bool recoverInitialized_ = false;
 
+    // Note: Currently, sptr does not support unordered_map<T, unordered_set<sptr<T>>>.
+    std::map<WindowManagerAgentType, std::set<sptr<IWindowManagerAgent>>> windowManagerAgentMap_;
     std::map<WindowManagerAgentType, std::set<sptr<IWindowManagerAgent>>> windowManagerAgentFaultMap_;
-    std::mutex windowManagerAgentFaultMapMutex_;
+    std::mutex wmAgentMapMutex_;
+    // Agent map both locked by wmAgentMapMutex_
 
     std::mutex outlineMutex_;
     OutlineRecoverCallbackFunc outlineRecoverCallbackFunc_;
-    // above guarded by mutex_
 };
 } // namespace Rosen
 } // namespace OHOS
