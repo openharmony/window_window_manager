@@ -121,7 +121,6 @@ HWTEST_F(WindowSessionImplTest, UpdateDefaultStatusBarColor, TestSize.Level1)
     SystemBarProperty property = SystemBarProperty();
     property.settingFlag_ = SystemBarSettingFlag::COLOR_SETTING;
     window->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_STATUS_BAR] = property;
-    window->UpdateDefaultStatusBarColor();
     uint32_t contentColor = 0;
     EXPECT_EQ(window->UpdateStatusBarColorByColorMode(contentColor), WMError::WM_DO_NOTHING);
 
