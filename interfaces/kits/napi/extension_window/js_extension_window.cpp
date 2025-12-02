@@ -1326,13 +1326,13 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_NOT_SYSTEM_APP)));
         return NapiGetUndefined(env);
     }
-    bool isHideFollowUIExt = false;
-    if (argc >= ARG_COUNT_THREE && !ConvertFromJsValue(env, argv[INDEX_TWO], isHideFollowUIExt)) {
-        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert isHideFollowUIExt parameter to bool");
+    bool isFollowCreatorLifecycle = false;
+    if (argc >= ARG_COUNT_THREE && !ConvertFromJsValue(env, argv[INDEX_TWO], isFollowCreatorLifecycle)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert isFollowCreatorLifecycle parameter to bool");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
-    option->SetIsHideFollowUIExt(isHideFollowUIExt);
+    option->SetIsFollowCreatorLifecycle(isFollowCreatorLifecycle);
     option->SetParentId(hostWindowId_);
     const char* const where = __func__;
     napi_value lastParam = (argv[2] != nullptr && GetType(env, argv[2]) == napi_function) ? argv[2] : nullptr;

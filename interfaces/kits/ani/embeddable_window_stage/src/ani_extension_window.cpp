@@ -228,7 +228,7 @@ WmErrorCode AniExtensionWindow::OnHideNonSecureWindows(ani_env* env, ani_boolean
 }
 
 ani_object AniExtensionWindow::OnCreateSubWindowWithOptions(ani_env* env, ani_string name, ani_object subWindowOptions,
-    ani_object isHideFollowUIExt)
+    ani_boolean isFollowCreatorLifecycle)
 {
     if (!IsExtensionWindowValid()) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]extension window is invalid");
@@ -254,14 +254,12 @@ ani_object AniExtensionWindow::OnCreateSubWindowWithOptions(ani_env* env, ani_st
         TLOGE(WmsLogTag::WMS_SUB, "Modal subwindow has topmost, but no system permission");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }
-    bool isHideFollowUIExtBool = false;
-    AniWindowUtils::GetPropertyBoolObject(env, "isHideFollowUIExt", isHideFollowUIExt, isHideFollowUIExtBool);
-    option->SetIsHideFollowUIExt(isHideFollowUIExtBool);
     option->SetParentId(hostWindowId_);
     option->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     option->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
     option->SetOnlySupportSceneBoard(true);
     option->SetIsUIExtFirstSubWindow(true);
+    option->SetIsFollowCreatorLifecycle(static_cast<bool>(isFollowCreatorLifecycle));
     auto window = Window::Create(windowName, option, extensionWindow_->GetWindow()->GetContext());
     if (window == nullptr) {
         TLOGI(WmsLogTag::WMS_UIEXT, "create sub window failed");
@@ -489,7 +487,7 @@ static ani_int ExtWindowHideNonSecureWindows(ani_env* env, ani_object obj, ani_l
 }
 
 static ani_object ExtWindowCreateSubWindowWithOptions(ani_env* env, ani_object obj, ani_long nativeObj,
-    ani_string name, ani_object subWindowOptions, ani_object isHideFollowUIExt)
+    ani_string name, ani_object subWindowOptions, ani_boolean isFollowCreatorLifecycle)
 {
     AniExtensionWindow* aniExtWinPtr = reinterpret_cast<AniExtensionWindow*>(nativeObj);
     if (aniExtWinPtr == nullptr) {
@@ -497,7 +495,7 @@ static ani_object ExtWindowCreateSubWindowWithOptions(ani_env* env, ani_object o
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return AniWindowUtils::CreateAniUndefined(env);
     }
-    return aniExtWinPtr->OnCreateSubWindowWithOptions(env, name, subWindowOptions, isHideFollowUIExt);
+    return aniExtWinPtr->OnCreateSubWindowWithOptions(env, name, subWindowOptions, isFollowCreatorLifecycle);
 }
 
 static void ExtWindowOccupyEvents(ani_env* env, ani_object obj, ani_long nativeObj, ani_int eventFlags)
@@ -568,7 +566,7 @@ std::array extensionWindowNativeMethods = {
         reinterpret_cast<void *>(ExtWindowSetWaterMarkFlag)},
     ani_native_function {"hideNonSecureWindows", "JZ:I", reinterpret_cast<void *>(ExtWindowHideNonSecureWindows)},
     ani_native_function {"createSubWindowWithOptions",
-        "JLstd/core/String;L@ohos/window/window/SubWindowOptions;Lstd/core/Boolean;:L@ohos/window/window/Window;",
+        "JLstd/core/String;L@ohos/window/window/SubWindowOptions;Z:L@ohos/window/window/Window;",
         reinterpret_cast<void *>(ExtWindowCreateSubWindowWithOptions)},
     ani_native_function {"occupyEvents", "JI:V", reinterpret_cast<void *>(ExtWindowOccupyEvents)},
     ani_native_function {"onSync", "JLstd/core/String;Lstd/core/Object;:V",
@@ -589,7 +587,7 @@ std::array extensionWindowHostNativeMethods = {
         reinterpret_cast<void *>(ExtWindowHidePrivacyContentForHost)},
     ani_native_function {"hideNonSecureWindows", "JZ:I", reinterpret_cast<void *>(ExtWindowHideNonSecureWindows)},
     ani_native_function {"createSubWindowWithOptions",
-        "JLstd/core/String;L@ohos/window/window/SubWindowOptions;Lstd/core/Boolean;:L@ohos/window/window/Window;",
+        "JLstd/core/String;L@ohos/window/window/SubWindowOptions;Z:L@ohos/window/window/Window;",
         reinterpret_cast<void *>(ExtWindowCreateSubWindowWithOptions)},
     ani_native_function {"onSync", "JLstd/core/String;Lstd/core/Object;:V",
         reinterpret_cast<void *>(RegisterExtWindowCallback)},

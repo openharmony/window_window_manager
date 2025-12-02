@@ -463,14 +463,14 @@ void WindowOption::SetStartModalExtensionTimeStamp(int64_t timeStamp)
     startModalExtensionTimeStamp_ = timeStamp;
 }
 
-void WindowOption::SetIsHideFollowUIExt(bool isHideFollowUIExt)
+void WindowOption::SetIsFollowCreatorLifecycle(bool isFollowCreatorLifecycle)
 {
-    isHideFollowUIExt_ = isHideFollowUIExt;
+    isFollowCreatorLifecycle_ = isFollowCreatorLifecycle;
 }
 
-bool WindowOption::IsHideFollowUIExt() const
+bool WindowOption::IsFollowCreatorLifecycle() const
 {
-    return isHideFollowUIExt_;
+    return isFollowCreatorLifecycle_;
 }
 } // namespace Rosen
 } // namespace OHOS
