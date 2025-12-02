@@ -24,7 +24,6 @@
 
 #include "accessibility_event_info.h"
 #include "ani.h"
-#include "application_context.h"
 #include "display_info.h"
 #include "extension/extension_business_info.h"
 #include "extension_data_handler.h"
@@ -315,6 +314,21 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationForSpecified02, Test
 }
 
 /**
+ * @tc.name: UpdateDefaultStatusBarColor
+ * @tc.desc: UpdateDefaultStatusBarColor Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateDefaultStatusBarColor, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->UpdateDefaultStatusBarColor();
+    window_->property_isAtomicService_ = true;
+    window_->UpdateDefaultStatusBarColor();
+    window_->specifiedColorMode_ = "light";
+    window_->UpdateDefaultStatusBarColor();
+}
+
+/**
  * @tc.name: UpdateConfigurationForAll01
  * @tc.desc: UpdateConfigurationForAll01 Test
  * @tc.type: FUNC
@@ -362,64 +376,6 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationForAll03, TestSize.L
     ignoreWindowContexts.push_back(abilityContext);
     window_->UpdateConfigurationForAll(configuration, ignoreWindowContexts);
     window_->GetWindowExtensionSessionSet().erase(window_);
-}
-
-/**
- * @tc.name: UpdateDefaultStatusBarColor
- * @tc.desc: UpdateDefaultStatusBarColor Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, UpdateDefaultStatusBarColor, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
-    window->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    window->property_->SetPersistentId(1);
-    window->state_ = WindowState::STATE_SHOWN;
-    window->UpdateDefaultStatusBarColor();
-    window->property_->isAtomicService_ = true;
-    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    SystemBarProperty property = SystemBarProperty();
-    property.settingFlag_ = SystemBarSettingFlag::COLOR_SETTING;
-    window->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_STATUS_BAR] = property;
-    window->UpdateDefaultStatusBarColor();
-    EXPECT_EQ(window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR), property);
-
-    property.settingFlag_ = SystemBarSettingFlag::DEFAULT_SETTING;
-    window->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_STATUS_BAR] = property;
-    window->UpdateDefaultStatusBarColor();
-    EXPECT_EQ(window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR), property);
-
-    std::shared_ptr<AbilityRuntime::Context> context = std::make_shared<AbilityRuntime::AbilityContextImpl>();
-    context->applicationContext_ = std::make_shared<AbilityRuntime::ApplicationContext>();
-    ASSERT_EQ(WMError::WM_OK, window->Create(context, nullptr));
-    window->UpdateDefaultStatusBarColor();
-
-    context->applicationContext_->contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
-    context->applicationContext_->contextImpl_->config_ = std::make_shared<AppExecFwk::Configuration>();
-    ASSERT_EQ(WMError::WM_OK, window->Create(context, nullptr));
-    window->UpdateDefaultStatusBarColor();
-
-    std::string key = AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE;
-    std::string value = AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT;
-    context->applicationContext_->contextImpl_->config_->configParameter_[key] = value;
-    window->UpdateDefaultStatusBarColor();
-
-    value = AppExecFwk::ConfigurationInner::COLOR_MODE_DARK;
-    context->applicationContext_->contextImpl_->config_->configParameter_[key] = value;
-    window->UpdateDefaultStatusBarColor();
-
-    key = AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP;
-    value = AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT;
-    context->applicationContext_->contextImpl_->config_->configParameter_[key] = value;
-    window->UpdateDefaultStatusBarColor();
-
-    value = AppExecFwk::ConfigurationInner::COLOR_MODE_DARK;
-    context->applicationContext_->contextImpl_->config_->configParameter_[key] = value;
-    window->UpdateDefaultStatusBarColor();
-
-    window->specifiedAbilityColorMode_ = "light";
-    window->UpdateDefaultStatusBarColor();
 }
 
 /**

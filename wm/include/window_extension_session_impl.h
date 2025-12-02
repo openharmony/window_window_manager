@@ -187,7 +187,7 @@ public:
     /*
      * Window Immersive
      */
-    void UpdateDefaultStatusBarColor();
+    void UpdateDefaultStatusBarColor() override;
 
     /*
      * Window Property
@@ -290,11 +290,6 @@ private:
     std::vector<sptr<IRectChangeInGlobalDisplayListener>> hostRectChangeInGlobalDisplayListenerList_;
     uint32_t hostStatusBarContentColor_ { 0 };
     int64_t startModalExtensionTimeStamp_ = -1;
-
-    /*
-     * Window Immersive
-     */
-    std::string specifiedAbilityColorMode_;
 
     /*
      * PC Fold Screen

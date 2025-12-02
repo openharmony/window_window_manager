@@ -543,6 +543,8 @@ public:
     void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
         SystemBarProperty& property) override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
+    virtual void UpdateDefaultStatusBarColor() { return; }
+    WMError UpdateStatusBarColorByColorMode(uint32_t& contentColor);
 
     /*
      * Window Property
@@ -869,6 +871,7 @@ protected:
      */
     std::string colorMode_;
     bool hasDarkRes_;
+    std::string specifiedColorMode_;
     WindowVisibilityState lastVisibilityState_ = WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION;
     std::unordered_set<std::string> containerColorList_;
     float lastSystemDensity_ = UNDEFINED_DENSITY;
