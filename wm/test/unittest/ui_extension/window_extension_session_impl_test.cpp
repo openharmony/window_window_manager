@@ -322,7 +322,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateDefaultStatusBarColor, TestSize.L
 {
     ASSERT_NE(nullptr, window_);
     window_->UpdateDefaultStatusBarColor();
-    window_->property_isAtomicService_ = true;
+    window_->property_->isAtomicService_ = true;
     window_->UpdateDefaultStatusBarColor();
     window_->specifiedColorMode_ = "light";
     window_->UpdateDefaultStatusBarColor();
