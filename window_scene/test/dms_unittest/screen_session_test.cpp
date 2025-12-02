@@ -2249,6 +2249,62 @@ HWTEST_F(ScreenSessionTest, CalcRotation, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalcBoundsInRotationZero
+ * @tc.desc: normal CalcBoundsInRotationZero
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CalcBoundsInRotationZero, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ScreenProperty property;
+    RRect bounds;
+    bounds.rect_.width_ = 1344;
+    bounds.rect_.height_ = 2772;
+    property.SetBounds(bounds);
+    property.UpdateDeviceRotation(Rotation::ROTATION_0);
+    session->SetScreenProperty(property);
+    auto res = session->CalcBoundsInRotationZero();
+    EXPECT_EQ(res.rect_.width_, 1344);
+
+    property.UpdateDeviceRotation(Rotation::ROTATION_90);
+    session->SetScreenProperty(property);
+    res = session->CalcBoundsInRotationZero();
+    EXPECT_EQ(res.rect_.width_, 2772);
+}
+
+/**
+ * @tc.name: CalcBoundsByRotation
+ * @tc.desc: normal CalcBoundsByRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CalcBoundsByRotation, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ScreenProperty property;
+    RRect bounds;
+    bounds.rect_.width_ = 1344;
+    bounds.rect_.height_ = 2772;
+    property.SetBounds(bounds);
+    property.UpdateDeviceRotation(Rotation::ROTATION_0);
+    session->SetScreenProperty(property);
+    Rotation rotation = Rotation::ROTATION_0;
+    auto res = session->CalcBoundsByRotation(rotation);
+    EXPECT_EQ(res.rect_.width_, 1344);
+    rotation = Rotation::ROTATION_90;
+    res = session->CalcBoundsByRotation(rotation);
+    EXPECT_EQ(res.rect_.width_, 2772);
+
+    property.UpdateDeviceRotation(Rotation::ROTATION_90);
+    session->SetScreenProperty(property);
+    rotation = Rotation::ROTATION_0;
+    res = session->CalcBoundsByRotation(rotation);
+    EXPECT_EQ(res.rect_.width_, 2772);
+    rotation = Rotation::ROTATION_90;
+    res = session->CalcBoundsByRotation(rotation);
+    EXPECT_EQ(res.rect_.width_, 1344);
+}
+
+/**
  * @tc.name: IsVertical
  * @tc.desc: IsVertical
  * @tc.type: FUNC

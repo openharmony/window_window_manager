@@ -3061,6 +3061,49 @@ HWTEST_F(ScreenSessionManagerTest, HandleDefaultMultiScreenModeTest3, TestSize.L
 }
 
 /**
+ * @tc.name: SetScreenPowerForAll
+ * @tc.desc: SetScreenPowerForAll test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForAll, TestSize.Level1)
+{
+    ScreenTransitionState temp = ScreenStateMachine::GetInstance().GetTransitionState();
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::WAIT_SCREEN_ADVANCED_ON_READY);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS;
+    ScreenPowerState state = ScreenPowerState::POWER_SUSPEND;
+    EXPECT_FALSE(ssm_->SetScreenPowerForAll(state, reason));
+
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::WAIT_SCREEN_ADVANCED_ON_READY);
+    reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON;
+    EXPECT_FALSE(ssm_->SetScreenPowerForAll(state, reason));
+
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::WAIT_SCREEN_ADVANCED_ON_READY);
+    reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
+    EXPECT_FALSE(ssm_->SetScreenPowerForAll(state, reason));
+    ScreenStateMachine::GetInstance().SetTransitionState(temp);
+}
+
+/**
+ * @tc.name: WakeupBegin
+ * @tc.desc: WakeupBegin test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, WakeUpBegin01, TestSize.Level1)
+{
+    ScreenTransitionState temp = ScreenStateMachine::GetInstance().GetTransitionState();
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_ADVANCED_ON);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS;
+    EXPECT_FALSE(ssm_->WakeUpBegin(reason));
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_ADVANCED_ON);
+    reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
+    EXPECT_FALSE(ssm_->WakeUpBegin(reason));
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_ADVANCED_ON);
+    reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
+    EXPECT_FALSE(ssm_->WakeUpBegin(reason));
+    ScreenStateMachine::GetInstance().SetTransitionState(temp);
+}
+
+/*
  * @tc.name: CheckNeedNotifyTest
  * @tc.desc: Test CheckNeedNotifyTest check notify
  * @tc.type: FUNC

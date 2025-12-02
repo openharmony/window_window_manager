@@ -764,6 +764,40 @@ HWTEST_F(ScreenSessionManagerTest, ScreenPower, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SyncScreenPowerState_StateON
+ * @tc.desc: SyncScreenPowerState State is ON
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SyncScreenPowerState_StateON, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr) << "ScreenSessionManager instance is null";
+
+    ssm_->SyncScreenPowerState(ScreenPowerState::POWER_ON);
+
+    EXPECT_TRUE(g_logMsg.find("force sync power state") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: SyncScreenPowerState_StateOFF
+ * @tc.desc: SyncScreenPowerState State is OFF
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SyncScreenPowerState_StateOFF, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr) << "ScreenSessionManager instance is null";
+
+    ssm_->SyncScreenPowerState(ScreenPowerState::POWER_OFF);
+
+    EXPECT_TRUE(g_logMsg.find("force sync power state") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
  * @tc.name: GetScreenPower
  * @tc.desc: GetScreenPower screen power
  * @tc.type: FUNC
