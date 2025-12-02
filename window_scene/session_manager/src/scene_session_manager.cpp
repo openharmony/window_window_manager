@@ -6077,7 +6077,7 @@ void SceneSessionManager::PreLoadStartingWindow(sptr<SceneSession> sceneSession)
                 where, sceneSession->GetPersistentId());
             return;
         }
-        auto pixelMap = GetPixelMap(resId, sessionInfo.abilityInfo);
+        auto pixelMap = GetPixelMap(resId, sessionInfo.abilityInfo, true);
         if (pixelMap == nullptr) {
             TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s pixelMap is nullptr", where);
             return;
@@ -17353,7 +17353,7 @@ bool SceneSessionManager::GetPersistentImageFit(int32_t persistentId, int32_t& i
 }
 
 std::shared_ptr<Media::PixelMap> SceneSessionManager::GetPixelMap(uint32_t resourceId,
-    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo)
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo, bool needCrop)
 {
     auto resourceMgr = GetResourceManager(*abilityInfo.get());
     if (resourceMgr == nullptr) {
@@ -17385,12 +17385,40 @@ std::shared_ptr<Media::PixelMap> SceneSessionManager::GetPixelMap(uint32_t resou
     }
 
     Media::DecodeOptions decodeOpts;
+    if (needCrop) {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetCropInfoByDisplaySize");
+        Media::ImageInfo imageInfo;
+        imageSource->GetImageInfo(imageInfo);
+        GetCropInfoByDisplaySize(imageInfo, decodeOpts);
+    }
     auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
     if (errorCode != 0) {
         TLOGE(WmsLogTag::WMS_PATTERN, "failed id %{private}d err %{public}d", resourceId, errorCode);
         return nullptr;
     }
     return std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
+}
+
+void SceneSessionManager::GetCropInfoByDisplaySize(const Media::ImageInfo& imageinfo, Media::DecodeOptions& decodeOpts)
+{
+    int32_t displayWidth = 0;
+    int32_t displayHeight = 0;
+    ScreenId defaultScreenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
+    if (!GetDisplaySizeById(defaultScreenId, displayWidth, displayHeight)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "get display size failed");
+        return;
+    }
+    int32_t cropSize = std::max(displayWidth, displayHeight);
+    if (imageinfo.size.width > cropSize || imageinfo.size.height > cropSize) {
+        decodeOpts.CropRect = {
+            .left = std::max(0, (imageinfo.size.width - cropSize) / 2),
+            .top = std::max(0, (imageinfo.size.height - cropSize) / 2),
+            .width = std::min(imageinfo.size.width, cropSize),
+            .height = std::min(imageinfo.size.height, cropSize),
+        };
+        TLOGI(WmsLogTag::WMS_PATTERN, "crop: %{public}d, %{public}d, %{public}d, %{public}d",
+            decodeOpts.CropRect.left, decodeOpts.CropRect.top, decodeOpts.CropRect.width, decodeOpts.CropRect.height);
+    }
 }
 
 void SceneSessionManager::SetIsWindowRectAutoSave(const std::string& key, bool enabled,
