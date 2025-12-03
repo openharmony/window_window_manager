@@ -62,6 +62,7 @@ constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
 constexpr int32_t TIMES_TO_WAIT_FOR_VSYNC_ONECE = 1;
 constexpr int32_t TIMES_TO_WAIT_FOR_VSYNC_TWICE = 2;
 const uint64_t PRELAUNCH_DONE_TIME = system::GetIntParameter("window.prelaunchDoneTime", 6000);
+constexpr int32_t SNAP_SHOT_RECOVER_KEY = 10;
 
 const std::map<SessionState, bool> ATTACH_MAP = {
     { SessionState::STATE_DISCONNECT, false },
@@ -3069,15 +3070,16 @@ int32_t Session::EncodeSnapShotRecoverValue(DisplayOrientation rotate)
 {
     int32_t snapShotRecoverValue = 0;
     snapShotRecoverValue += static_cast<int32_t>(rotate) *
-        std::pow(10, static_cast<int32_t>(SnapShotRecoverType::ROTATE));
+        std::pow(SNAP_SHOT_RECOVER_KEY, static_cast<int32_t>(SnapShotRecoverType::ROTATE));
     snapShotRecoverValue += static_cast<int32_t>(IsExitSplitOnBackgroundRecover()) *
-        std::pow(10, static_cast<int32_t>(SnapShotRecoverType::EXIT_SPLIT_ON_BACKGROUND));;
+        std::pow(SNAP_SHOT_RECOVER_KEY, static_cast<int32_t>(SnapShotRecoverType::EXIT_SPLIT_ON_BACKGROUND));
     return snapShotRecoverValue;
 }
 
 int32_t Session::DecodeSnapShotRecoverValue(int32_t snapShotRecoverValue, SnapShotRecoverType snapShotRecoverType)
 {
-    return (snapShotRecoverValue / static_cast<int32_t>(std::pow(10, static_cast<int32_t>(snapShotRecoverType)))) % 10;
+    return (snapShotRecoverValue / static_cast<int32_t>(std::pow(SNAP_SHOT_RECOVER_KEY,
+        static_cast<int32_t>(snapShotRecoverType)))) % SNAP_SHOT_RECOVER_KEY;
 }
 
 bool Session::IsExitSplitOnBackgroundRecover()
