@@ -185,7 +185,7 @@ TouchEventFilterFunc convert2TouchEventFilterFunc(OH_NativeWindowManager_TouchEv
         }
         OH_Input_SetTouchEventAction(touchEvent, actionIter->second);
         OH_Input_SetTouchEventFingerId(touchEvent, event.GetPointerId());
-        OH_Input_SetTouchEventDisplayX(touchEvent, item.);
+        OH_Input_SetTouchEventDisplayX(touchEvent, item.GetDisplayX());
         OH_Input_SetTouchEventDisplayY(touchEvent, item.GetDisplayY());
         OH_Input_SetTouchEventActionTime(touchEvent, event.GetActionTime());
         OH_Input_SetTouchEventWindowId(touchEvent, event.GetTargetWindowId());
