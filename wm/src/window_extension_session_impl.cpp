@@ -30,6 +30,7 @@
 #include <input_method_controller.h>
 #endif
 
+#include "configuration.h"
 #include "display_info.h"
 #include "input_transfer_station.h"
 #include "perform_reporter.h"
@@ -151,6 +152,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     state_ = WindowState::STATE_CREATED;
     isUIExtensionAbilityProcess_ = true;
     property_->SetIsUIExtensionAbilityProcess(true);
+    UpdateDefaultStatusBarColor();
     TLOGI(WmsLogTag::WMS_LIFE, "Created name:%{public}s %{public}d",
         property_->GetWindowName().c_str(), GetPersistentId());
     AddSetUIContentTimeoutCheck();
@@ -193,6 +195,7 @@ void WindowExtensionSessionImpl::UpdateConfiguration(const std::shared_ptr<AppEx
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, ext win=%{public}u, display=%{public}" PRIu64,
             GetWindowId(), GetDisplayId());
     }
+    UpdateDefaultStatusBarColor();
 }
 
 void WindowExtensionSessionImpl::UpdateConfigurationForSpecified(
@@ -206,6 +209,12 @@ void WindowExtensionSessionImpl::UpdateConfigurationForSpecified(
     } else {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, ext win=%{public}u, display=%{public}" PRIu64,
             GetWindowId(), GetDisplayId());
+    }
+    if (configuration != nullptr) {
+        TLOGI(WmsLogTag::WMS_IMMS, "extension win=%{public}u, colorMode=%{public}s, display=%{public}" PRIu64,
+            GetWindowId(), specifiedColorMode_.c_str(), GetDisplayId());
+        specifiedColorMode_ = configuration->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+        UpdateDefaultStatusBarColor();
     }
 }
 
@@ -262,6 +271,22 @@ void WindowExtensionSessionImpl::UpdateConfigurationSyncForAll(
             window->GetWindowId(), window->GetDisplayId());
         window->UpdateConfigurationSync(configuration);
     }
+}
+
+void WindowExtensionSessionImpl::UpdateDefaultStatusBarColor()
+{
+    if (!property_->GetIsAtomicService()) {
+        TLOGD(WmsLogTag::WMS_IMMS, "win %{public}u no support", GetPersistentId());
+        return;
+    }
+    uint32_t contentColor = 0;
+    auto ret = UpdateStatusBarColorByColorMode(contentColor);
+    if (ret != WMError::WM_OK) {
+        TLOGD(WmsLogTag::WMS_IMMS, "win %{public}u no need update", GetPersistentId());
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u, contentColor %{public}x", GetPersistentId(), contentColor);
+    SetStatusBarColorForExtensionInner(contentColor);
 }
 
 WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClearListener, uint32_t reason)
