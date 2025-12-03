@@ -613,6 +613,31 @@ HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged, TestSize.Level1)
  * @tc.desc: OnFoldPropertyChanged test
  * @tc.type: FUNC
  */
+HWTEST_F(ScreenSessionManagerClientTest, OnFoldPropertyChange_InitRotation, TestSize.Level1)
+{
+    ScreenId screenId = 0;
+    ScreenProperty property;
+    ScreenProperty midProperty;
+    ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::UNDEFINED;
+    FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
+    sptr<ScreenSession> screenSession = nullptr;
+    screenSession = new ScreenSession(0, ScreenProperty(), 0);
+    screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    screenSessionManagerClient_->OnFoldPropertyChange(screenId, property, reason, displayMode, midProperty);
+    EXPECT_TRUE(logMsg.find("init rotation=") != std::string::npos);
+    logMsg.clear();
+    LOG_SetCallback(nullptr);
+    screenSessionManagerClient_->screenSessionMap_.clear();
+}
+
+/**
+ * @tc.name: OnFoldPropertyChanged
+ * @tc.desc: OnFoldPropertyChanged test
+ * @tc.type: FUNC
+ */
 HWTEST_F(ScreenSessionManagerClientTest, OnFoldPropertyChanged, TestSize.Level1)
 {
     ScreenId screenId = 0;
