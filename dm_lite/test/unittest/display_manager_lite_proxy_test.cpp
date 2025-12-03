@@ -440,9 +440,11 @@ HWTEST_F(DisplayManagerLiteProxyTest, GetAllDisplayIds, Function | SmallTest | L
     adapter.InitDMSProxy();
     auto ids1 = adapter.GetAllDisplayIds(100);
     auto ids2 = adapter.GetAllDisplayIds(-1);
+    auto ids3 = adapter.GetAllDisplayIds(12345);
 
     EXPECT_FALSE(ids1.empty());
     EXPECT_EQ(ids1, ids2);
+    EXPECT_TRUE(ids3.empty());
 }
 
 /**
@@ -496,7 +498,7 @@ HWTEST_F(DisplayManagerLiteProxyTest, SetResolution, TestSize.Level1)
     uint32_t height = 2400;
     float vpr = 2.8;
     auto ret = displayManagerLiteProxy->SetResolution(id, width, height, vpr);
-    ASSERT_NE(ret, DMError::DM_OK);
+    EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
 }
 
 /**
