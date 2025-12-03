@@ -440,9 +440,11 @@ HWTEST_F(DisplayManagerLiteProxyTest, GetAllDisplayIds, Function | SmallTest | L
     adapter.InitDMSProxy();
     auto ids1 = adapter.GetAllDisplayIds(100);
     auto ids2 = adapter.GetAllDisplayIds(-1);
+    auto ids3 = adapter.GetAllDisplayIds(12345);
 
     EXPECT_FALSE(ids1.empty());
     EXPECT_EQ(ids1, ids2);
+    EXPECT_TRUE(ids3.empty());
 }
 
 /**
