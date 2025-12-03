@@ -27,6 +27,15 @@
 using namespace testing;
 using namespace testing::ext;
 
+namespace {
+    std::string  g_logMsg;
+    void MyLogCallback(const LogType, const LogLevel, const unsigned int domain, const char* tag,
+        const char* msg)
+        {
+            g_logMsg = msg;
+        }
+}
+
 namespace OHOS {
 namespace Rosen {
 using Mocker = SingletonMocker<ScreenManagerAdapter, MockScreenManagerAdapter>;
@@ -160,11 +169,12 @@ HWTEST_F(ScreenManagerTest, MakeExpand_001, TestSize.Level1)
  */
 HWTEST_F(ScreenManagerTest, MakeExpand_002, TestSize.Level1)
 {
-    ScreenId invalidId = SCREEN_ID_INVALID;
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     std::vector<ExpandOption> options = {};
     ScreenId expansionId = SCREEN_ID_INVALID;
     ScreenManager::GetInstance().MakeExpand(options, expansionId);
-    ASSERT_EQ(expansionId, invalidId);
+    ASSERT_TRUE(g_logMsg.find("make expand failed") != std::string::npos);
 }
 
 /**
