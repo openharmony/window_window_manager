@@ -145,14 +145,14 @@ HWTEST_F(SceneSessionManagerTest5, OnBundleUpdated, TestSize.Level1)
     StartingWindowInfo startingWindowInfo;
     std::map<std::string, StartingWindowInfo> startingWindowInfoMap{ { key, startingWindowInfo } };
     ssm_->startingWindowMap_.insert({ sessionInfo.bundleName_, startingWindowInfoMap });
-    ASSERT_NE(ssm_->startingWindowMap_.size(), 0);
+    EXPECT_NE(ssm_->startingWindowMap_.size(), 0);
 
     /**
      * @tc.steps: step2. On bundle updated and check map.
      */
     ssm_->OnBundleUpdated(sessionInfo.bundleName_, 0);
     usleep(WAIT_SYNC_IN_NS);
-    ASSERT_EQ(ssm_->startingWindowMap_.size(), 0);
+    EXPECT_EQ(ssm_->startingWindowMap_.size(), 0);
 }
 
 /**
@@ -175,7 +175,7 @@ HWTEST_F(SceneSessionManagerTest5, OnConfigurationUpdated, TestSize.Level1)
     StartingWindowInfo startingWindowInfo;
     std::map<std::string, StartingWindowInfo> startingWindowInfoMap{ { key, startingWindowInfo } };
     ssm_->startingWindowMap_.insert({ sessionInfo.bundleName_, startingWindowInfoMap });
-    ASSERT_NE(ssm_->startingWindowMap_.size(), 0);
+    EXPECT_NE(ssm_->startingWindowMap_.size(), 0);
 
     /**
      * @tc.steps: step2. On configuration updated and check map.
@@ -183,7 +183,7 @@ HWTEST_F(SceneSessionManagerTest5, OnConfigurationUpdated, TestSize.Level1)
     auto configuration = std::make_shared<AppExecFwk::Configuration>();
     ssm_->OnConfigurationUpdated(configuration);
     usleep(WAIT_SYNC_IN_NS);
-    ASSERT_EQ(ssm_->startingWindowMap_.size(), 0);
+    EXPECT_EQ(ssm_->startingWindowMap_.size(), 0);
 }
 
 /**
@@ -197,7 +197,7 @@ HWTEST_F(SceneSessionManagerTest5, PrepareTerminate, TestSize.Level1)
     bool isPrepareTerminate = true;
     SceneSessionManager* sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
     ASSERT_NE(sceneSessionManager, nullptr);
-    ASSERT_EQ(WSError::WS_OK, sceneSessionManager->PrepareTerminate(persistentId, isPrepareTerminate));
+    EXPECT_EQ(WSError::WS_OK, sceneSessionManager->PrepareTerminate(persistentId, isPrepareTerminate));
 }
 
 /**
@@ -385,9 +385,9 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionFocus, TestSize.Level0)
 {
     FocusChangeReason reason = FocusChangeReason::DEFAULT;
     WSError ret = ssm_->RequestSessionFocus(0, true, reason);
-    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
     ret = ssm_->RequestSessionFocus(100, true, reason);
-    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
 
     SessionInfo info;
     info.abilityName_ = "test1";
@@ -411,8 +411,8 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionFocus, TestSize.Level0)
     focusGroup->SetFocusedSessionId(2);
     ssm_->sceneSessionMap_.insert({ sceneSession1->GetPersistentId(), sceneSession1 });
     ret = ssm_->RequestSessionFocus(1, true, reason);
-    ASSERT_EQ(ret, WSError::WS_OK);
-    ASSERT_EQ(focusGroup->GetFocusedSessionId(), 1);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(focusGroup->GetFocusedSessionId(), 1);
     ssm_->sceneSessionMap_.clear();
 }
 

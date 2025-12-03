@@ -1275,7 +1275,7 @@ int SceneSessionManagerStub::HandleGetTopWindowId(MessageParcel& data, MessagePa
         TLOGE(WmsLogTag::WMS_HIERARCHY, "read mainWinId failed");
         return ERR_INVALID_DATA;
     }
-    uint32_t topWinId;
+    uint32_t topWinId = 0;
     WMError ret = GetTopWindowId(mainWinId, topWinId);
     reply.WriteUint32(topWinId);
     reply.WriteUint32(static_cast<uint32_t>(ret));

@@ -4975,6 +4975,14 @@ public:
     {
         return WMError::WM_OK;
     }
+
+    /**
+     * @brief Set status bar color for uiExtension.
+     *
+     * @param color Color numeric to set.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetStatusBarColorForExtension(uint32_t color) { return WMError::WM_OK; }
 };
 }
 }
