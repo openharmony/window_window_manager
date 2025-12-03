@@ -55,6 +55,7 @@
 #include "distributed_client.h"
 #endif
 #include "dms_reporter.h"
+#include "ffrt_serial_queue_helper.h"
 #include "hidump_controller.h"
 #include "image_source.h"
 #include "perform_reporter.h"
@@ -6120,7 +6121,7 @@ void SceneSessionManager::OnBundleUpdated(const std::string& bundleName, int use
     taskScheduler_->PostAsyncTask([this, bundleName]() {
         ClearStartWindowColorFollowApp(bundleName);
     }, __func__);
-    ffrtQueueHelper_->SubmitTask([this, bundleName, where = __func__] {
+    auto task = [this, bundleName, where = __func__] {
         if (startingWindowRdbMgr_ == nullptr || bundleMgr_ == nullptr) {
             TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s: rdb or bms is nullptr", where);
             return;
@@ -6140,7 +6141,9 @@ void SceneSessionManager::OnBundleUpdated(const std::string& bundleName, int use
             auto batchInsertRes = startingWindowRdbMgr_->BatchInsert(outInsertNum, inputValues);
             TLOGNI(WmsLogTag::WMS_PATTERN, "res:%{public}d, insert num:%{public}" PRId64, batchInsertRes, outInsertNum);
         }
-    });
+    };
+    static FfrtSerialQueueHelper ffrtSerialHelper;
+    ffrtSerialHelper.SubmitTask(task);
     taskScheduler_->PostAsyncTask([this, bundleName]() {
         std::unique_lock<std::shared_mutex> lock(startingWindowMapMutex_);
         if (auto iter = startingWindowMap_.find(bundleName); iter != startingWindowMap_.end()) {
