@@ -2507,6 +2507,7 @@ void ScreenSession::SetFrameGravity(Gravity gravity)
 bool ScreenSession::UpdateAvailableArea(DMRect area)
 {
     std::unique_lock<std::shared_mutex> lock(availableAreaMutex_);
+    auto areainss = property_.GetAvailableArea();
     if (property_.GetAvailableArea() == area && !GetIsAvailableAreaNeedNotify()) {
         return false;
     }
