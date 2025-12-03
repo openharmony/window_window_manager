@@ -15,8 +15,12 @@ import("//build/templates/abc/ohos_abc.gni")
 
 name_mapping = [
   {
-      js_file = "$target_out_dir/engine/WindowSizeEnv.js"
-      abc_name = "windowsizeenv"
+    js_file = "$target_out_dir/engine/WindowSizeEnv.js"
+    abc_name = "windowsizeenv"
+  },
+  {
+    js_file = "$target_out_dir/engine/WindowAvoidAreaEnv.js"
+    abc_name = "windowavoidareaenv"
   }
 ]
 
