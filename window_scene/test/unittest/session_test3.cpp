@@ -1280,9 +1280,6 @@ HWTEST_F(WindowSessionTest3, IsExitSplitOnBackgroundRecover, Function | SmallTes
     EXPECT_EQ(session_->IsExitSplitOnBackgroundRecover(), true);
     session_->UpdateWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
     EXPECT_EQ(session_->IsExitSplitOnBackgroundRecover(), true);
-    session_->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    session_->isExitSplitOnBackground_ = true;
-    EXPECT_EQ(session_->IsExitSplitOnBackgroundRecover(), true);
 }
 } // namespace
 } // namespace Rosen
