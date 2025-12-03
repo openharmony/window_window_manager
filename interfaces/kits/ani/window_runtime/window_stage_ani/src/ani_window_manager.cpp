@@ -1018,8 +1018,6 @@ void AniWindowManager::SetSpecificSystemWindowZIndex(ani_env* env, ani_long nati
 
 void AniWindowManager::OnSetSpecificSystemWindowZIndex(ani_env* env, ani_enum_item apiWindowType, ani_int zIndex)
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "[ANI] windowType: %{public}d zIndex: %{public}d",
-        static_cast<uint32_t>(windowType), static_cast<int32_t>(zIndex));
     ani_int enumValue;
     env->EnumItem_GetValue_Int(apiWindowType, &enumValue);
     uint32_t apiWindowTypeValue = static_cast<uint32_t>(enumValue);
