@@ -60,6 +60,7 @@ constexpr size_t ARG_COUNT_TWO = 2;
 constexpr double MIN_GRAY_SCALE = 0.0;
 constexpr double MAX_GRAY_SCALE = 1.0;
 constexpr uint32_t DEFAULT_WINDOW_MAX_WIDTH = 3840;
+constexpr int32_t API_VERSION_23 = 23;
 }
 
 static thread_local std::map<std::string, std::shared_ptr<NativeReference>> g_jsWindowMap;
@@ -2180,12 +2181,13 @@ napi_value JsWindow::OnGetGlobalScaledRect(napi_env env, napi_callback_info info
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][getGlobalScaledRect]msg: Window is nullptr");
     }
     Rect globalScaledRect;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetGlobalScaledRect(globalScaledRect));
     if (ret != WmErrorCode::WM_OK) {
-        return NapiThrowError(env, ret);
+        return NapiThrowError(env, ret, "[window][getGlobalScaledRect]");
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "Window [%{public}u, %{public}s] end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
@@ -2193,7 +2195,7 @@ napi_value JsWindow::OnGetGlobalScaledRect(napi_env env, napi_callback_info info
     if (globalScaledRectObj == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "globalScaledRectObj is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][getGlobalScaledRect]msg: GlobalScaledRectObj is nullptr");
+            "[window][getGlobalScaledRect]msg: Failed to convert result into JS value object.");
     }
     return globalScaledRectObj;
 }
@@ -2348,7 +2350,7 @@ static void SetResizeWindowAsyncTask(NapiAsyncTask::ExecuteCallback& execute, Na
         if (*errCodePtr == WmErrorCode::WM_OK) {
             task.Resolve(env, NapiGetUndefined(env));
         } else {
-            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "JsWindow::OnResizeWindowAsync failed"));
+            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "[window][resizeWindowAsync]"));
         }
     };
 }
@@ -2360,27 +2362,32 @@ napi_value JsWindow::OnResizeWindowAsync(napi_env env, napi_callback_info info)
     size_t argc = 4; // 4: number of arg
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    std::string errorMsg;
     if (argc < 2) { // 2: minimum param num
         TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+        errorMsg = "The number of parameters is invalid";
     }
     int32_t width = 0;
     if (errCode == WmErrorCode::WM_OK && !ConvertFromJsValue(env, argv[0], width)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to width");
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+        errorMsg = "Failed to convert parameter to width";
     }
     int32_t height = 0;
     if (errCode == WmErrorCode::WM_OK && !ConvertFromJsValue(env, argv[1], height)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to height");
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+        errorMsg = "Failed to convert parameter to height";
     }
     if (width <= 0 || height <= 0) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "width or height should greater than 0!");
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+        errorMsg = "width or height should greater than 0!";
     }
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "[window][resizeWindowAsync]msg: Invalid param");
+            "[window][resizeWindowAsync]msg: " + errorMsg);
     }
 
     wptr<Window> weakToken(windowToken_);
@@ -5296,12 +5303,12 @@ napi_value JsWindow::OnSetMainWindowRaiseByClickEnabled(napi_env env, napi_callb
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARG_COUNT_ONE) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "Argc is invalid: %{public}zu", argc);
-        errCode = WMError::WM_DO_NOTHING;
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     bool raiseEnabled = true;
     if (!ConvertFromJsValue(env, argv[0], raiseEnabled)) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "Failed to convert parameter to raiseEnabled");
-        errCode = WMError::WM_DO_NOTHING;
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     if (!Permission::IsSystemCallingOrStartByHdcd(true)) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "permission denied, require system application");
@@ -6743,7 +6750,7 @@ napi_value JsWindow::OnGetWindowCornerRadius(napi_env env, napi_callback_info in
     }
     if (!WindowHelper::IsFloatOrSubWindow(windowToken_->GetType())) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not sub window or float window.");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
             "[window][getWindowCornerRadius]msg: This is not sub window or float window.");
     }
 
@@ -7654,7 +7661,9 @@ napi_value JsWindow::OnSetWindowLimits(napi_env env, napi_callback_info info)
             return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                 "[window][setWindowLimits]msg: Window is nullptr");
         }
-        if (!windowToken_->IsPcOrFreeMultiWindowCapabilityEnabled()) {
+        if ((windowToken_->GetTargetAPIVersion() >= API_VERSION_23 && !windowToken_->IsPhonePadOrPcWindow()) ||
+            (windowToken_->GetTargetAPIVersion() < API_VERSION_23 &&
+            !windowToken_->IsPcOrFreeMultiWindowCapabilityEnabled())) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "device not support");
             return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT,
                 "[window][setWindowLimits]msg: Device not support");

@@ -325,6 +325,8 @@ void ScreenManagerAni::CreateVirtualScreen(ani_env* env, ani_object options, ani
         ret = DmErrorCode::DM_ERROR_INVALID_SCREEN;
         if (screenId == ERROR_ID_NOT_SYSTEM_APP) {
             ret = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
+        } else if (screenId == ERROR_ID_NO_PERMISSION) {
+            ret =  DmErrorCode::DM_ERROR_NO_PERMISSION;
         }
         TLOGE(WmsLogTag::DMS, "[ANI] Get virtual screen failed");
         AniErrUtils::ThrowBusinessError(env, ret, "Get virtual screen failed");

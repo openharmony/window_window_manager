@@ -663,6 +663,10 @@ void Session::NotifyAddSnapshot(bool useFfrt, bool needPersist, bool needSaveSna
 
 void Session::NotifyRemoveSnapshot()
 {
+    if (GetAppLockControl()) {
+        TLOGI(WmsLogTag::WMS_PATTERN, "not allowed");
+        return;
+    }
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
     for (auto& listener : lifecycleListeners) {
         if (auto listenerPtr = listener.lock()) {
@@ -2863,12 +2867,13 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
 bool Session::GetNeedUseBlurSnapshot() const
 {
     bool isPrivacyMode = GetIsPrivacyMode();
+    bool snapshotPrivacyMode = GetSnapshotPrivacyMode();
     ControlInfo controlInfo;
     bool isAppControl = GetAppControlInfo(ControlAppType::APP_LOCK, controlInfo);
-    bool needUseBlurSnapshot = isPrivacyMode || (isAppControl && controlInfo.isNeedControl);
+    bool needUseBlurSnapshot = isPrivacyMode || snapshotPrivacyMode || (isAppControl && controlInfo.isNeedControl);
     if (needUseBlurSnapshot) {
-        TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d, isPrivacyMode: %{public}d, isAppLock: %{public}d",
-            persistentId_, isPrivacyMode, controlInfo.isNeedControl);
+        TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d, isPrivacyMode: %{public}d, snapshotPrivacyMode: %{public}d, "
+            "isAppLock: %{public}d", persistentId_, isPrivacyMode, snapshotPrivacyMode, controlInfo.isNeedControl);
     }
     return needUseBlurSnapshot;
 }
@@ -2900,20 +2905,30 @@ void Session::UpdateAppLockSnapshot(ControlAppType type, ControlInfo controlInfo
     }
     TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d, isAppLock: %{public}d", persistentId_, controlInfo.isNeedControl);
     isAppLockControl_.store(controlInfo.isNeedControl);
-    if (controlInfo.isNeedControl == isSnapshotBlur_.load()) {
-        return;
-    }
-    if (IsPersistentImageFit()) {
-        return;
-    }
-    if (GetSessionState() != SessionState::STATE_BACKGROUND) {
-        if (!controlInfo.isNeedControl) {
-            NotifyRemoveSnapshot();
+    if (controlInfo.isNeedControl) {
+        if (IsPersistentImageFit()) {
+            NotifyAddSnapshot(false, false, false);
+            return;
         }
+        NotifyAddSnapshot(true, false, false);
+        SaveSnapshot(true, true, nullptr, true);
         return;
     }
-    NotifyAddSnapshot(true, false, false);
-    SaveSnapshot(true, true, nullptr, true);
+    if (IsSessionForeground()) {
+        NotifyRemoveSnapshot();
+        return;
+    }
+    if (!GetIsPrivacyMode() && !GetSnapshotPrivacyMode()) {
+        SaveSnapshot(true, true, nullptr, true);
+    }
+}
+
+bool Session::GetSnapshotPrivacyMode() const
+{
+    if (IsSessionForeground()) {
+        return false;
+    }
+    return snapshotPrivacyMode_.load();
 }
 
 uint32_t Session::GetBackgroundColor() const
@@ -3051,7 +3066,7 @@ std::string Session::GetSnapshotPersistentKey(SnapshotStatus key)
 void Session::SetHasSnapshot(SnapshotStatus key, DisplayOrientation rotate)
 {
     if (!scenePersistence_) {
-        TLOGNE(WmsLogTag::WMS_PATTERN, "scenePersistence is null");
+        TLOGE(WmsLogTag::WMS_PATTERN, "scenePersistence is null");
         return;
     }
     if (freeMultiWindow_.load()) {

@@ -19,6 +19,7 @@
 #include <float_wrapper.h>
 #include <hitrace_meter.h>
 #include <int_wrapper.h>
+#include <long_wrapper.h>
 #include <ipc_types.h>
 #include <parameters.h>
 #include <string_wrapper.h>
@@ -29,6 +30,7 @@
 #include <input_method_controller.h>
 #endif
 
+#include "configuration.h"
 #include "display_info.h"
 #include "input_transfer_station.h"
 #include "perform_reporter.h"
@@ -150,6 +152,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     state_ = WindowState::STATE_CREATED;
     isUIExtensionAbilityProcess_ = true;
     property_->SetIsUIExtensionAbilityProcess(true);
+    UpdateDefaultStatusBarColor();
     TLOGI(WmsLogTag::WMS_LIFE, "Created name:%{public}s %{public}d",
         property_->GetWindowName().c_str(), GetPersistentId());
     AddSetUIContentTimeoutCheck();
@@ -192,6 +195,7 @@ void WindowExtensionSessionImpl::UpdateConfiguration(const std::shared_ptr<AppEx
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, ext win=%{public}u, display=%{public}" PRIu64,
             GetWindowId(), GetDisplayId());
     }
+    UpdateDefaultStatusBarColor();
 }
 
 void WindowExtensionSessionImpl::UpdateConfigurationForSpecified(
@@ -205,6 +209,12 @@ void WindowExtensionSessionImpl::UpdateConfigurationForSpecified(
     } else {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, ext win=%{public}u, display=%{public}" PRIu64,
             GetWindowId(), GetDisplayId());
+    }
+    if (configuration != nullptr) {
+        TLOGI(WmsLogTag::WMS_IMMS, "extension win=%{public}u, colorMode=%{public}s, display=%{public}" PRIu64,
+            GetWindowId(), specifiedColorMode_.c_str(), GetDisplayId());
+        specifiedColorMode_ = configuration->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+        UpdateDefaultStatusBarColor();
     }
 }
 
@@ -261,6 +271,22 @@ void WindowExtensionSessionImpl::UpdateConfigurationSyncForAll(
             window->GetWindowId(), window->GetDisplayId());
         window->UpdateConfigurationSync(configuration);
     }
+}
+
+void WindowExtensionSessionImpl::UpdateDefaultStatusBarColor()
+{
+    if (!property_->GetIsAtomicService()) {
+        TLOGD(WmsLogTag::WMS_IMMS, "win %{public}u no support", GetPersistentId());
+        return;
+    }
+    uint32_t contentColor = 0;
+    auto ret = UpdateStatusBarColorByColorMode(contentColor);
+    if (ret != WMError::WM_OK) {
+        TLOGD(WmsLogTag::WMS_IMMS, "win %{public}u no need update", GetPersistentId());
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u, contentColor %{public}x", GetPersistentId(), contentColor);
+    SetStatusBarColorForExtensionInner(contentColor);
 }
 
 WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClearListener, uint32_t reason)
@@ -1726,6 +1752,31 @@ WMError WindowExtensionSessionImpl::ExtensionSetBrightness(float brightness)
     AAFwk::WantParams want;
     want.SetParam(Extension::ATOMICSERVICE_KEY_FUNCTION, AAFwk::String::Box("setWindowBrightness"));
     want.SetParam(Extension::ATOMICSERVICE_KEY_PARAM_BRIGHTNESS, AAFwk::Float::Box(brightness));
+    if (TransferExtensionData(want) != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "send failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowExtensionSessionImpl::SetStatusBarColorForExtension(uint32_t color)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "id=%{public}d", GetPersistentId());
+    WMError ret = SetStatusBarColorForExtensionInner(color);
+    if (ret == WMError::WM_OK) {
+        SystemBarProperty statusBarProp = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+        statusBarProp.settingFlag_ |= SystemBarSettingFlag::COLOR_SETTING;
+        property_->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProp);
+    }
+    return ret;
+}
+
+WMError WindowExtensionSessionImpl::SetStatusBarColorForExtensionInner(uint32_t color)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "id=%{public}d", GetPersistentId());
+    AAFwk::WantParams want;
+    want.SetParam(Extension::ATOMICSERVICE_KEY_FUNCTION, AAFwk::String::Box("setStatusBarColor"));
+    want.SetParam(Extension::ATOMICSERVICE_KEY_PARAM_COLOR_NUMERIC, AAFwk::Long::Box(color));
     if (TransferExtensionData(want) != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "send failed");
         return WMError::WM_ERROR_IPC_FAILED;

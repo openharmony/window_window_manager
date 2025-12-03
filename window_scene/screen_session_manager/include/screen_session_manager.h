@@ -123,6 +123,7 @@ public:
     bool SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) override;
     void ForceSkipScreenOffAnimation();
     ScreenPowerState GetScreenPower() override;
+    void SyncScreenPowerState(ScreenPowerState state) override;
 
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
     bool NotifyDisplayStateChanged(DisplayId id, DisplayState state);
@@ -627,8 +628,7 @@ private:
     void RegisterBrightnessInfoChangeListener();
     void UnregisterBrightnessInfoChangeListener();
     void OnHgmRefreshRateChange(uint32_t refreshRate);
-    void UpdateSessionByActiveModeChange(sptr<ScreenSession> screenSession,
-        sptr<ScreenSession> phyScreenSession, int32_t activeIdx);
+    void UpdateSessionByActiveModeChange(sptr<ScreenSession> screenSession, int32_t activeIdx);
     int32_t GetActiveIdxInModes(const std::vector<sptr<SupportedScreenModes>>& modes,
                           const SupportedScreenModes& edidInfo);
     void RecoverScreenActiveMode(ScreenId rsScreenId);

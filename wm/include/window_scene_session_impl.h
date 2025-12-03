@@ -477,7 +477,7 @@ private:
     /*
      * Window Immersive
      */
-    void UpdateDefaultStatusBarColor();
+    void UpdateDefaultStatusBarColor() override;
     bool userLimitsSet_ = false;
     bool forceLimits_ = false;
     uint32_t setSameSystembarPropertyCnt_ = 0;
@@ -525,7 +525,6 @@ private:
     float GetMainWindowCustomDensity();
     float customDensity_ = UNDEFINED_DENSITY;
     bool isEnableDefaultDensityWhenCreate_ = false;
-    std::string specifiedColorMode_;
     WMError SetPcAppInpadSpecificSystemBarInvisible();
     WMError SetPcAppInpadOrientationLandscape();
 

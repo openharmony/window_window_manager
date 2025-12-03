@@ -562,6 +562,7 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot, LifeCycleChangeR
         if (ret != WSError::WS_OK) {
             return ret;
         }
+        session->SetSnapshotPrivacyMode(session->GetIsPrivacyMode());
         if (WindowHelper::IsMainWindow(session->GetWindowType()) && isSaveSnapshot && needSaveSnapshot) {
             session->SetFreeMultiWindow();
             session->SaveSnapshot(true, true, nullptr, false, reason);
@@ -699,6 +700,7 @@ WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
             session->SetSessionState(SessionState::STATE_DISCONNECT);
             return WSError::WS_OK;
         }
+        session->SetSnapshotPrivacyMode(session->GetIsPrivacyMode());
         auto state = session->GetSessionState();
         if ((session->needSnapshot_ || (state == SessionState::STATE_ACTIVE && isMainWindow)) &&
             isSaveSnapshot && needSaveSnapshot) {
@@ -1110,7 +1112,7 @@ WSError SceneSession::StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY
         session->moveDragController_->InitMoveDragProperty();
         MoveDragController::MoveCoordinateProperty property = { offsetX, offsetY, pointerPosX,
             pointerY, displayId, winRect };
-        session->moveDragController_->HandleStartMovingWithCoordinate(property);
+        session->moveDragController_->HandleStartMovingWithCoordinate(property, session->IsMovable());
         session->moveDragController_->SetSpecifyMoveStartDisplay(displayId);
         session->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
         return WSError::WS_OK;

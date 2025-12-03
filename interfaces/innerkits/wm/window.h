@@ -3010,6 +3010,20 @@ public:
     virtual bool IsPcOrFreeMultiWindowCapabilityEnabled() const { return false; }
 
     /**
+     * @brief Is phone, pad, pc window or not.
+     *
+     * @return True means phone, pad or pc window, false means the opposite.
+     */
+    virtual bool IsPhonePadOrPcWindow() const { return false; }
+    
+    /**
+     * @brief Get target api version.
+     *
+     * @return API version.
+     */
+    virtual uint32_t GetTargetAPIVersion() const { return API_VERSION_INVALID; }
+
+    /**
      * @brief Is pc window or pad free multi-window.
      *
      * @return True means pc window or pad free multi-window, false means the opposite.
@@ -4975,6 +4989,14 @@ public:
     {
         return WMError::WM_OK;
     }
+
+    /**
+     * @brief Set status bar color for uiExtension.
+     *
+     * @param color Color numeric to set.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetStatusBarColorForExtension(uint32_t color) { return WMError::WM_OK; }
 };
 }
 }

@@ -185,6 +185,7 @@ napi_value JsExtensionWindow::CreateJsExtensionWindowObject(napi_env env, sptr<R
     BindNativeFunction(env, objValue, "getWindowDensityInfo", moduleName, JsExtensionWindow::GetWindowDensityInfo);
     BindNativeFunction(env, objValue, "getWindowSystemBarProperties", moduleName,
         JsExtensionWindow::GetWindowSystemBarProperties);
+    BindNativeFunction(env, objValue, "setStatusBarColor", moduleName, JsExtensionWindow::SetStatusBarColor);
 
     RegisterUnsupportFuncs(env, objValue, moduleName);
 
@@ -219,7 +220,6 @@ void JsExtensionWindow::RegisterUnsupportFuncs(napi_env env, napi_value objValue
     BindNativeFunction(env, objValue, "setFollowParentMultiScreenPolicy", moduleName,
         JsExtensionWindow::EmptyAsyncCall);
     BindNativeFunction(env, objValue, "setWindowSystemBarProperties", moduleName, JsExtensionWindow::EmptyAsyncCall);
-    BindNativeFunction(env, objValue, "setStatusBarColor", moduleName, JsExtensionWindow::EmptyAsyncCall);
 
     BindNativeFunction(env, objValue, "setWindowBackgroundColor", moduleName, JsExtensionWindow::EmptySyncCall);
     BindNativeFunction(env, objValue, "setWindowDecorVisible", moduleName, JsExtensionWindow::EmptySyncCall);
@@ -505,6 +505,12 @@ napi_value JsExtensionWindow::GetWindowStatus(napi_env env, napi_callback_info i
 {
     WindowStatus windowStatus = WindowStatus::WINDOW_STATUS_UNDEFINED;
     return CreateJsValue(env, static_cast<uint32_t>(windowStatus));
+}
+
+napi_value JsExtensionWindow::SetStatusBarColor(napi_env env, napi_callback_info info)
+{
+    JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
+    return (me != nullptr) ? me->OnSetStatusBarColor(env, info) : nullptr;
 }
 
 napi_value JsExtensionWindow::EmptyAsyncCall(napi_env env, napi_callback_info info)
@@ -1886,6 +1892,51 @@ napi_value JsExtensionWindow::OnGetStatusBarPropertySync(napi_env env, napi_call
             "[window][getStatusBarProperty]msg: Internal task error");
     }
     return objValue;
+}
+
+napi_value JsExtensionWindow::OnSetStatusBarColor(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARG_COUNT_ONE || argv[INDEX_ZERO] == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "no enough arguments");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    uint32_t contentColor = 0;
+    if (!ParseColorMetrics(env, argv[INDEX_ZERO], contentColor)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "parse color failed");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    napi_value result = nullptr;
+    napi_value lastParam = (argc <= ARG_COUNT_ONE) ? nullptr :
+        (GetType(env, argv[INDEX_ONE]) == napi_function ? argv[INDEX_ONE] : nullptr);
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    TLOGI(WmsLogTag::WMS_IMMS, "target color: %{public}u", contentColor);
+    auto asyncTask = [weakToken = wptr<Window>(extensionWindow_->GetWindow()), env, contentColor,
+        task = napiAsyncTask] {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "window is null");
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                "[window][setStatusBarColor]msg: invalid window"));
+            return;
+        }
+        auto errCode = window->SetStatusBarColorForExtension(contentColor);
+        if (errCode == WMError::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            TLOGNE(WmsLogTag::WMS_IMMS, "SetStatusBarColor error: %{public}d", errCode);
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(errCode)),
+                "[window][setStatusBarColor]msg: update status bar color failed"));
+        }
+    };
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetStatusBarColor") != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
+        napiAsyncTask->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY),
+            "[window][setStatusBarColor]msg: send event failed"));
+    }
+    return result;
 }
 
 napi_value JsExtensionWindow::OnUnsupportAsyncCall(napi_env env, napi_callback_info info)
