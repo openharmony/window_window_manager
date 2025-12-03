@@ -305,15 +305,8 @@ bool ScreenSessionManagerClient::OnFoldPropertyChange(ScreenId screenId, const S
 
     Rotation rotation = Rotation::ROTATION_0;
     screenSession->AddRotationCorrection(rotation, displayMode);
-    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
-        if (displayMode == FoldDisplayMode::MAIN) {
-            screenProperty.SetRotationAndScreenRotationOnly(rotation);
-            TLOGI(WmsLogTag::DMS, "init rotation= %{public}u", rotation);
-        }
-    } else {
-        screenProperty.SetRotationAndScreenRotationOnly(rotation);
-        TLOGI(WmsLogTag::DMS, "init rotation= %{public}u", rotation);
-    }
+    screenProperty.SetRotationAndScreenRotationOnly(rotation);
+    TLOGI(WmsLogTag::DMS, "init rotation= %{public}u", rotation);
 
     screenSession->PropertyChange(screenProperty, reason);
     return true;
