@@ -6122,6 +6122,7 @@ void SceneSessionManager::OnBundleUpdated(const std::string& bundleName, int use
         ClearStartWindowColorFollowApp(bundleName);
     }, __func__);
     auto task = [this, bundleName, where = __func__] {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:OnBundleUpdated [%s]", bundleName.c_str());
         if (startingWindowRdbMgr_ == nullptr || bundleMgr_ == nullptr) {
             TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s: rdb or bms is nullptr", where);
             return;
