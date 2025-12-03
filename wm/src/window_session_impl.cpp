@@ -17,6 +17,8 @@
 
 #include <cstdlib>
 
+#include <ability_manager_client.h>
+#include <app_mgr_client.h>
 #include <common/rs_common_def.h>
 #include <filesystem>
 #include <float_wrapper.h>
@@ -28,8 +30,10 @@
 #ifdef IMF_ENABLE
 #include <input_method_controller.h>
 #endif // IMF_ENABLE
+#include <singleton.h>
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
+#include <ui_extension_utils.h>
 
 #include "application_context.h"
 #include "color_parser.h"
@@ -5332,13 +5336,20 @@ void WindowSessionImpl::NotifyAfterDidBackground(uint32_t reason)
     }, where, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
-static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool keepKeyboardFlag)
+static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool keepKeyboardFlag, int32_t windowId)
 {
     if (!isNeedKeyboard && !keepKeyboardFlag) {
 #ifdef IMF_ENABLE
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify InputMethod framework close keyboard start.");
-        if (MiscServices::InputMethodController::GetInstance()) {
-            MiscServices::InputMethodController::GetInstance()->RequestHideInput();
+        auto callingUid = IPCSkeleton::GetCallingUid();
+        bool isBrokerCall = callingUid == BROKER_UID;
+        auto pid = IPCSkeleton::GetCallingRealPid();
+        AppExecFwk::RunningProcessInfo info;
+        DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->GetRunningProcessInfoByPid(pid, info);
+        bool isUIEProc = AAFwk::UIExtensionUtils::IsUIExtension(info.extensionType_);
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify InputMethod framework close keyboard start. id: %{public}d, "
+              "isBrokerCall: %{public}d, isUIEProc: %{public}d", windowId, isBrokerCall, isUIEProc);
+        if (MiscServices::InputMethodController::GetInstance() && !isBrokerCall && !isUIEProc) {
+            MiscServices::InputMethodController::GetInstance()->RequestHideInput(static_cast<uint32_t>(windowId));
             TLOGD(WmsLogTag::WMS_KEYBOARD, "Notify InputMethod framework close keyboard end.");
         }
 #endif
@@ -5364,9 +5375,10 @@ void WindowSessionImpl::NotifyUIContentFocusStatus()
         }
         // whether keep the keyboard created by other windows, support system window and app subwindow.
         bool keepKeyboardFlag = window->property_->GetKeepKeyboardFlag();
+        int32_t windowId = window->GetPersistentId();
         TLOGNI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, isNeedKeyboard: %{public}d, keepKeyboardFlag: %{public}d",
-            window->GetPersistentId(), isNeedKeyboard, keepKeyboardFlag);
-        RequestInputMethodCloseKeyboard(isNeedKeyboard, keepKeyboardFlag);
+            windowId, isNeedKeyboard, keepKeyboardFlag);
+        RequestInputMethodCloseKeyboard(isNeedKeyboard, keepKeyboardFlag, windowId);
     };
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->SetOnWindowFocused(task);

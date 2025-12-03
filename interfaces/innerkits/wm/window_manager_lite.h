@@ -61,6 +61,22 @@ public:
     WMError UnregisterFocusChangedListener(const sptr<IFocusChangedListener>& listener);
 
     /**
+     * @brief Register all display group info changed listener.
+     * 
+     * @param listener IAllGroupInfoChangedListener.
+     * @return WM_OK means register success, others mean register failure.
+     */
+    WMError RegisterAllGroupInfoChangedListener(const sptr<IAllGroupInfoChangedListener>& listener);
+
+    /**
+     * @brief Unregister all display group info changed listener.
+     * 
+     * @param listener IAllGroupInfoChangedListener.
+     * @return WM_OK means unregister success, others mean unregister failure.
+     */
+    WMError UnregisterAllGroupInfoChangedListener(const sptr<IAllGroupInfoChangedListener>& listener);
+
+    /**
      * @brief Register visibility changed listener.
      *
      * @param listener IVisibilityChangedListener.
@@ -100,6 +116,16 @@ public:
      * @return FocusChangeInfo object about focus window.
      */
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID);
+
+    /**
+     * @brief Get all group infomation.
+     *
+     * @param displayId2GroupIdMap display id to display group id map.
+     * @param allFocusInfoList focus infomation in every display group.
+     * @return void.
+     */
+    void GetAllGroupInfo(std::unordered_map<DisplayId, DisplayGroupId>& displayId2GroupIdMap,
+                         std::vector<sptr<FocusChangeInfo>>& allFocusInfoList);
 
     /**
      * @brief Register drawingcontent changed listener.
@@ -478,6 +504,7 @@ private:
     void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
         DisplayId displayId, bool focused) const;
     void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) const;
+    void UpdateDisplayGroupInfo(DisplayGroupId displayGroupId, DisplayId displayId, bool isAdd) const;
     void UpdateWindowVisibilityInfo(
         const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos) const;
     void UpdateWindowDrawingContentInfo(
