@@ -186,6 +186,11 @@ public:
     WMError UseImplicitAnimation(bool useImplicit) override;
 
     /*
+     * Window Immersive
+     */
+    void UpdateDefaultStatusBarColor() override;
+
+    /*
      * Window Property
      */
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
