@@ -571,10 +571,39 @@ HWTEST_F(WindowPatternStartingWindowTest, GetCropInfoByDisplaySize, TestSize.Lev
 {
     ASSERT_NE(ssm_, nullptr);
     Media::ImageInfo imageInfo;
-    imageInfo.size.width = imageInfo.size.height = 3200;
+    imageInfo.size.width = 2200;
+    imageInfo.size.height = 3200;
     Media::DecodeOptions decodeOpts;
     ssm_->GetCropInfoByDisplaySize(imageInfo, decodeOpts);
     EXPECT_EQ(decodeOpts.CropRect.top, 0);
+
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+    ASSERT_NE(displayInfo, nullptr);
+    ScreenId defaultScreenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
+    displayInfo->SetDisplayId(defaultScreenId);
+    displayInfo->SetWidth(5000);
+    displayInfo->SetHeight(5000);
+    ssm_->UpdateDisplayRegion(displayInfo);
+    ssm_->GetCropInfoByDisplaySize(imageInfo, decodeOpts);
+    EXPECT_EQ(decodeOpts.CropRect.top, 0);
+
+    displayInfo->SetWidth(3000);
+    displayInfo->SetHeight(3000);
+    ssm_->UpdateDisplayRegion(displayInfo);
+    ssm_->GetCropInfoByDisplaySize(imageInfo, decodeOpts);
+    EXPECT_EQ(decodeOpts.CropRect.top, 100);
+
+    imageInfo.size.width = 3200;
+    imageInfo.size.height = 2200;
+    ssm_->UpdateDisplayRegion(displayInfo);
+    ssm_->GetCropInfoByDisplaySize(imageInfo, decodeOpts);
+    EXPECT_EQ(decodeOpts.CropRect.left, 100);
+
+    displayInfo->SetWidth(2000);
+    displayInfo->SetHeight(2000);
+    ssm_->UpdateDisplayRegion(displayInfo);
+    ssm_->GetCropInfoByDisplaySize(imageInfo, decodeOpts);
+    EXPECT_EQ(decodeOpts.CropRect.left, 600);
 }
 
 /**

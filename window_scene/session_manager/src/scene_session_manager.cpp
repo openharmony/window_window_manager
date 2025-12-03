@@ -17404,7 +17404,7 @@ std::shared_ptr<Media::PixelMap> SceneSessionManager::GetPixelMap(uint32_t resou
     return std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
 }
 
-void SceneSessionManager::GetCropInfoByDisplaySize(const Media::ImageInfo& imageinfo, Media::DecodeOptions& decodeOpts)
+void SceneSessionManager::GetCropInfoByDisplaySize(const Media::ImageInfo& imageInfo, Media::DecodeOptions& decodeOpts)
 {
     int32_t displayWidth = 0;
     int32_t displayHeight = 0;
@@ -17414,13 +17414,14 @@ void SceneSessionManager::GetCropInfoByDisplaySize(const Media::ImageInfo& image
         return;
     }
     int32_t cropSize = std::max(displayWidth, displayHeight);
-    if (imageinfo.size.width > cropSize || imageinfo.size.height > cropSize) {
+    if (imageInfo.size.width > cropSize || imageInfo.size.height > cropSize) {
         decodeOpts.CropRect = {
-            .left = std::max(0, (imageinfo.size.width - cropSize) / 2),
-            .top = std::max(0, (imageinfo.size.height - cropSize) / 2),
-            .width = std::min(imageinfo.size.width, cropSize),
-            .height = std::min(imageinfo.size.height, cropSize),
+            .left = std::max(0, (imageInfo.size.width - cropSize) / 2),
+            .top = std::max(0, (imageInfo.size.height - cropSize) / 2),
+            .width = std::min(imageInfo.size.width, cropSize),
+            .height = std::min(imageInfo.size.height, cropSize),
         };
+        decodeOpts.cropAndScaleStrategy = Media::CropAndScaleStrategy::CROP_FIRST;
         TLOGI(WmsLogTag::WMS_PATTERN, "crop: %{public}d, %{public}d, %{public}d, %{public}d",
             decodeOpts.CropRect.left, decodeOpts.CropRect.top, decodeOpts.CropRect.width, decodeOpts.CropRect.height);
     }
