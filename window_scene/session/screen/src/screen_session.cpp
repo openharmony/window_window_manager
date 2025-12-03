@@ -3279,6 +3279,8 @@ void ScreenSession::UpdateScbScreenPropertyToServer(const ScreenProperty& screen
     }
 
     property_.SetRotation(screenProperty.GetRotation());
+    property_.UpdateScreenRotation(screenProperty.GetScreenRotation());
+    property_.UpdateDeviceRotation(screenProperty.GetDeviceRotation());
     property_.SetBounds(screenProperty.GetBounds());
     property_.SetDpiPhyBounds(screenProperty.GetPhyWidth(), screenProperty.GetPhyHeight());
     property_.SetPhyBounds(screenProperty.GetPhyBounds());

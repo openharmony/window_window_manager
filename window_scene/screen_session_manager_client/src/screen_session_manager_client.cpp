@@ -302,6 +302,19 @@ bool ScreenSessionManagerClient::OnFoldPropertyChange(ScreenId screenId, const S
         screenProperty.SetValidHeight(screenProperty.GetBounds().rect_.GetHeight());
         screenProperty.SetValidWidth(screenProperty.GetBounds().rect_.GetWidth());
     }
+
+    Rotation rotation = Rotation::ROTATION_0;
+    screenSession->AddRotationCorrection(rotation, property.GetDisplayMode());
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+         if (property.GetDisplayMode() == FoldDisplayMode::MAIN) {
+            screenProperty.SetRotationAndScreenRotationOnly(rotation);
+            TLOGI(WmsLogTag::DMS, "ProcPropertyChange : init rotation= %{public}u", rotation);
+        }
+    } else {
+        screenProperty.SetRotationAndScreenRotationOnly(rotation);
+        TLOGI(WmsLogTag::DMS, "ProcPropertyChange : init rotation= %{public}u", rotation);
+    }
+
     screenSession->PropertyChange(screenProperty, reason);
     return true;
 }
