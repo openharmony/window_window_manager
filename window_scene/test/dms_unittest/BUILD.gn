@@ -56,6 +56,7 @@ group("unittest") {
       ":ws_screen_session_manager_test_six",
       ":ws_screen_session_manager_test_seven",
       ":ws_screen_session_manager_test_eight",
+
     ]
   }
 
