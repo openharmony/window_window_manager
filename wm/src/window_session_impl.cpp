@@ -9004,13 +9004,14 @@ void WindowSessionImpl::RegisterNavigateCallbackForPageCompatibleModeIfNeed()
         return;
     }
     uiContent_->RegisterNavigateChangeCallback(
-        [weakThis = wptr(this), where = __func__](const std::string& fromPage, const std::string& toPage) {
+        [weakThis = wptr(this), where = __func__](const OHOS::Ace::NavigateChangeInfo& fromPage,
+            const OHOS::Ace::NavigateChangeInfo& toPage) {
         auto window = weakThis.promote();
         if (!window) {
             TLOGNE(WmsLogTag::WMS_COMPAT, "%{public}s window is null", where);
             return;
         }
-        window->HandleNavigateCallbackForPageCompatibleMode(fromPage, toPage);
+        window->HandleNavigateCallbackForPageCompatibleMode(fromPage.name, toPage.name);
     });
 }
 
