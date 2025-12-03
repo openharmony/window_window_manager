@@ -543,8 +543,6 @@ public:
     void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
         SystemBarProperty& property) override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
-    virtual void UpdateDefaultStatusBarColor() { return; }
-    WMError UpdateStatusBarColorByColorMode(uint32_t& contentColor);
 
     /*
      * Window Property
@@ -845,6 +843,8 @@ protected:
     /*
      * Window Immersive
      */
+    virtual void UpdateDefaultStatusBarColor() { return; }
+    WMError UpdateStatusBarColorByColorMode(uint32_t& contentColor);
     std::map<AvoidAreaType, AvoidArea> lastAvoidAreaMap_;
     uint32_t GetStatusBarHeight() const override;
     WindowType rootHostWindowType_ = WindowType::APP_MAIN_WINDOW_BASE;
