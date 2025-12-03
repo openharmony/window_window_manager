@@ -437,6 +437,7 @@ public:
 
     void SetVprScaleRatio(float vprScaleRatio);
     float GetVprScaleRatio() const;
+    void AddRotationCorrection(Rotation& rotation, FoldDisplayMode displayMode);
 
 private:
     bool IsVertical(Rotation rotation) const;
@@ -496,7 +497,6 @@ private:
     float vprScaleRatio_ { 1.0f };
 
     void RemoveRotationCorrection(Rotation& rotation, FoldDisplayMode foldDisplayMode);
-    void AddRotationCorrection(Rotation& rotation, FoldDisplayMode displayMode);
     Rotation GetTargetRotationWithBounds(Rotation rotation, const RRect& bounds, uint32_t rotationOffset);
     std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap_;
     std::shared_mutex rotationCorrectionMutex_;
