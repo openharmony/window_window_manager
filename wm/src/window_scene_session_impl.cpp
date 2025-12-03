@@ -148,6 +148,7 @@ constexpr float INVALID_DEFAULT_DENSITY = 1.0f;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 40;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 constexpr int32_t API_VERSION_18 = 18;
+constexpr int32_t API_VERSION_23 = 23;
 constexpr uint32_t SNAPSHOT_TIMEOUT = 2000; // MS
 constexpr uint32_t REASON_MAXIMIZE_MODE_CHANGE = 1;
 const std::string COOPERATION_DISPLAY_NAME = "Cooperation";
@@ -6605,7 +6606,8 @@ WMError WindowSceneSessionImpl::SetFollowParentMultiScreenPolicy(bool enabled)
         TLOGE(WmsLogTag::WMS_SUB, "This is PcAppInpad, not Suppored");
         return WMError::WM_OK;
     }
-    if (!IsPcOrPadFreeMultiWindowMode()) {
+    if ((GetTargetAPIVersion() >= API_VERSION_23 && !IsPhonePadOrPcWindow()) ||
+        (GetTargetAPIVersion() < API_VERSION_23 && !IsPcOrPadFreeMultiWindowMode())) {
         TLOGE(WmsLogTag::WMS_SUB, "device not support");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }

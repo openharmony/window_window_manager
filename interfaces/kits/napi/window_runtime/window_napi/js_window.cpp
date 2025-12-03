@@ -60,6 +60,7 @@ constexpr size_t ARG_COUNT_TWO = 2;
 constexpr double MIN_GRAY_SCALE = 0.0;
 constexpr double MAX_GRAY_SCALE = 1.0;
 constexpr uint32_t DEFAULT_WINDOW_MAX_WIDTH = 3840;
+constexpr int32_t API_VERSION_23 = 23;
 }
 
 static thread_local std::map<std::string, std::shared_ptr<NativeReference>> g_jsWindowMap;
@@ -7660,7 +7661,9 @@ napi_value JsWindow::OnSetWindowLimits(napi_env env, napi_callback_info info)
             return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                 "[window][setWindowLimits]msg: Window is nullptr");
         }
-        if (!windowToken_->IsPcOrFreeMultiWindowCapabilityEnabled()) {
+        if ((windowToken_->GetTargetAPIVersion() >= API_VERSION_23 && !windowToken_->IsPhonePadOrPcWindow()) ||
+            (windowToken_->GetTargetAPIVersion() < API_VERSION_23 &&
+            !windowToken_->IsPcOrFreeMultiWindowCapabilityEnabled())) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "device not support");
             return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT,
                 "[window][setWindowLimits]msg: Device not support");

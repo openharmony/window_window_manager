@@ -54,6 +54,7 @@ namespace {
 static std::map<ani_ref, AniWindow*> g_localObjs;
 constexpr double MIN_GRAY_SCALE = 0.0;
 constexpr double MAX_GRAY_SCALE = 1.0;
+constexpr int32_t API_VERSION_23 = 23;
 } // namespace
 static std::mutex g_aniWindowMap_mutex;
 static std::map<std::string, ani_ref> g_aniWindowMap;
@@ -3963,7 +3964,9 @@ ani_object AniWindow::SetWindowLimits(ani_env* env, ani_object inWindowLimits, a
 
     bool isForcible = false;
     if (!AniWindowUtils::CheckParaIsUndefined(env, forcible)) {
-        if (!windowToken_->IsPcOrFreeMultiWindowCapabilityEnabled()) {
+        if ((windowToken_->GetTargetAPIVersion() >= API_VERSION_23 && !windowToken_->IsPhonePadOrPcWindow()) ||
+            (windowToken_->GetTargetAPIVersion() < API_VERSION_23 &&
+            !windowToken_->IsPcOrFreeMultiWindowCapabilityEnabled())) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] device not support");
             return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
         }
