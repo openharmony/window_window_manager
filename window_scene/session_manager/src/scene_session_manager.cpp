@@ -24,14 +24,15 @@
 #include <bundlemgr/launcher_service.h>
 #include <common/rs_common_def.h>
 #include <hisysevent.h>
-#include <parameters.h>
 #include <hitrace_meter.h>
+#include <parameters.h>
+#include <ui/rs_node.h>
 #include "hitrace/hitracechain.h"
 #include "parameter.h"
+#include "publish/scb_dump_subscriber.h"
 #include "resource_manager.h"
 #include "session/host/include/pc_fold_screen_manager.h"
-#include "publish/scb_dump_subscriber.h"
-#include <ui/rs_node.h>
+#include "wm_common.h"
 
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
 #include <display_power_mgr_client.h>
@@ -2756,28 +2757,33 @@ KeyFramePolicy SceneSessionManager::GetAppKeyFramePolicy(const std::string& bund
 
 sptr<SceneSession> SceneSessionManager::GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo)
 {
-    if (sessionInfo.persistentId_ != 0 && !sessionInfo.isPersistentRecover_) {
+    if (sessionInfo.isPersistentRecover_) {
+        TLOGI(WmsLogTag::WMS_LIFE, "session id: %{public}d is persistent recover.", sessionInfo.persistentId_);
+        return nullptr;
+    }
+
+    if (sessionInfo.persistentId_ != INVALID_SESSION_ID) {
         if (auto session = GetSceneSession(sessionInfo.persistentId_)) {
             TLOGI(WmsLogTag::WMS_LIFE, "get exist session persistentId: %{public}d", sessionInfo.persistentId_);
             return session;
         }
+    }
 
-        if (WindowHelper::IsMainWindow(static_cast<WindowType>(sessionInfo.windowType_))) {
-            TLOGD(WmsLogTag::WMS_LIFE, "mainWindow bundleName: %{public}s, moduleName: %{public}s, "
-                "abilityName: %{public}s, appIndex: %{public}d",
-                sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
-                sessionInfo.abilityName_.c_str(), sessionInfo.appIndex_);
-            SessionIdentityInfo identityInfo = { sessionInfo.bundleName_, sessionInfo.moduleName_,
-                sessionInfo.abilityName_, sessionInfo.appIndex_, sessionInfo.appInstanceKey_, sessionInfo.windowType_,
-                sessionInfo.isAtomicService_ };
-            auto sceneSession = GetSceneSessionByIdentityInfo(identityInfo);
-            bool isSingleStart = sceneSession && sceneSession->GetAbilityInfo() &&
-                sceneSession->GetAbilityInfo()->launchMode == AppExecFwk::LaunchMode::SINGLETON;
-            if (isSingleStart) {
-                TLOGD(WmsLogTag::WMS_LIFE, "get exist singleton session persistentId: %{public}d",
-                    sessionInfo.persistentId_);
-                return sceneSession;
-            }
+    if (WindowHelper::IsMainWindow(static_cast<WindowType>(sessionInfo.windowType_))) {
+        TLOGI(WmsLogTag::WMS_LIFE, "mainWindow bundleName: %{public}s, moduleName: %{public}s, "
+            "abilityName: %{public}s, appIndex: %{public}d, appInstanceKey:%{public}s, isAtomicService:%{public}d",
+            sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str(),
+            sessionInfo.appIndex_, sessionInfo.appInstanceKey_.c_str(), sessionInfo.isAtomicService_);
+        SessionIdentityInfo identityInfo = { sessionInfo.bundleName_, sessionInfo.moduleName_,
+            sessionInfo.abilityName_, sessionInfo.appIndex_, sessionInfo.appInstanceKey_, sessionInfo.windowType_,
+            sessionInfo.isAtomicService_ };
+        auto sceneSession = GetSceneSessionByIdentityInfo(identityInfo);
+        bool isSingleStart = sceneSession && sceneSession->GetAbilityInfo() &&
+            sceneSession->GetAbilityInfo()->launchMode == AppExecFwk::LaunchMode::SINGLETON;
+        if (isSingleStart) {
+            TLOGI(WmsLogTag::WMS_LIFE, "get exist singleton session persistentId: %{public}d",
+                sessionInfo.persistentId_);
+            return sceneSession;
         }
     }
     return nullptr;
@@ -6076,7 +6082,7 @@ void SceneSessionManager::PreLoadStartingWindow(sptr<SceneSession> sceneSession)
                 where, sceneSession->GetPersistentId());
             return;
         }
-        auto pixelMap = GetPixelMap(resId, sessionInfo.abilityInfo);
+        auto pixelMap = GetPixelMap(resId, sessionInfo.abilityInfo, true);
         if (pixelMap == nullptr) {
             TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s pixelMap is nullptr", where);
             return;
@@ -17373,7 +17379,7 @@ bool SceneSessionManager::GetPersistentImageFit(int32_t persistentId, int32_t& i
 }
 
 std::shared_ptr<Media::PixelMap> SceneSessionManager::GetPixelMap(uint32_t resourceId,
-    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo)
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo, bool needCrop)
 {
     auto resourceMgr = GetResourceManager(*abilityInfo.get());
     if (resourceMgr == nullptr) {
@@ -17405,12 +17411,40 @@ std::shared_ptr<Media::PixelMap> SceneSessionManager::GetPixelMap(uint32_t resou
     }
 
     Media::DecodeOptions decodeOpts;
+    if (needCrop) {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetCropInfoByDisplaySize");
+        Media::ImageInfo imageInfo;
+        imageSource->GetImageInfo(imageInfo);
+        GetCropInfoByDisplaySize(imageInfo, decodeOpts);
+    }
     auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
     if (errorCode != 0) {
         TLOGE(WmsLogTag::WMS_PATTERN, "failed id %{private}d err %{public}d", resourceId, errorCode);
         return nullptr;
     }
     return std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
+}
+
+void SceneSessionManager::GetCropInfoByDisplaySize(const Media::ImageInfo& imageinfo, Media::DecodeOptions& decodeOpts)
+{
+    int32_t displayWidth = 0;
+    int32_t displayHeight = 0;
+    ScreenId defaultScreenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
+    if (!GetDisplaySizeById(defaultScreenId, displayWidth, displayHeight)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "get display size failed");
+        return;
+    }
+    int32_t cropSize = std::max(displayWidth, displayHeight);
+    if (imageinfo.size.width > cropSize || imageinfo.size.height > cropSize) {
+        decodeOpts.CropRect = {
+            .left = std::max(0, (imageinfo.size.width - cropSize) / 2),
+            .top = std::max(0, (imageinfo.size.height - cropSize) / 2),
+            .width = std::min(imageinfo.size.width, cropSize),
+            .height = std::min(imageinfo.size.height, cropSize),
+        };
+        TLOGI(WmsLogTag::WMS_PATTERN, "crop: %{public}d, %{public}d, %{public}d, %{public}d",
+            decodeOpts.CropRect.left, decodeOpts.CropRect.top, decodeOpts.CropRect.width, decodeOpts.CropRect.height);
+    }
 }
 
 void SceneSessionManager::SetIsWindowRectAutoSave(const std::string& key, bool enabled,

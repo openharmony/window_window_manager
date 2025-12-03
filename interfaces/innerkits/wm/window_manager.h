@@ -626,6 +626,8 @@ public:
     virtual void OnSupportRotationChange(const SupportRotationInfo& supportRotationInfo) = 0;
 };
 
+class WindowManagerAgent;
+
 /**
  * @class WindowManager
  *
@@ -663,11 +665,9 @@ public:
      * @brief Register focus changed listener.
      *
      * @param listener IFocusChangedListener.
-     * @param recoverableOnFault Indicates whether to forcibly register a listener.
      * @return WM_OK means register success, others means register failed.
      */
-    WMError RegisterFocusChangedListener(const sptr<IFocusChangedListener>& listener,
-        bool recoverableOnFault = false);
+    WMError RegisterFocusChangedListener(const sptr<IFocusChangedListener>& listener);
 
     /**
      * @brief Unregister focus changed listener.
@@ -1524,6 +1524,10 @@ private:
     WMError UnregisterMidSceneChangedListener(const sptr<IWindowInfoChangedListener>& listener);
     void SetIsModuleHookOffToSet(const std::string& moduleName);
     bool GetIsModuleHookOffFromSet(const std::string& moduleName);
+
+    // For fault agent re-register.
+    void ActiveFaultAgentReregister(const WindowManagerAgentType type,
+        const sptr<WindowManagerAgent>& agent, WMError& ret);
 };
 } // namespace Rosen
 } // namespace OHOS

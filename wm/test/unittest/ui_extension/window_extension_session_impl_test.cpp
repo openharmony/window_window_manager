@@ -296,6 +296,39 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateConfiguration02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateConfigurationForSpecified02
+ * @tc.desc: UpdateConfigurationForSpecified02 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationForSpecified02, TestSize.Level1)
+{
+    window_->uiContent_ = nullptr;
+    std::shared_ptr<AppExecFwk::Configuration> configuration;
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager;
+    window_->UpdateConfigurationForSpecified(configuration, resourceManager);
+    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_NE(nullptr, window_->uiContent_);
+    window_->UpdateConfigurationForSpecified(configuration, resourceManager);
+    configuration = std::make_shared<AppExecFwk::Configuration>();
+    window_->UpdateConfigurationForSpecified(configuration, resourceManager);
+}
+
+/**
+ * @tc.name: UpdateDefaultStatusBarColor
+ * @tc.desc: UpdateDefaultStatusBarColor Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateDefaultStatusBarColor, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->UpdateDefaultStatusBarColor();
+    window_->property_->isAtomicService_ = true;
+    window_->UpdateDefaultStatusBarColor();
+    window_->specifiedColorMode_ = "light";
+    window_->UpdateDefaultStatusBarColor();
+}
+
+/**
  * @tc.name: UpdateConfigurationForAll01
  * @tc.desc: UpdateConfigurationForAll01 Test
  * @tc.type: FUNC
@@ -3645,6 +3678,24 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateRotateDuration, TestSize.Level2)
     window_->UpdateRotateDuration(reason, duration, rsTransaction);
     EXPECT_EQ(duration, transactionDuration);
     EXPECT_EQ(reason, WindowSizeChangeReason::ROTATION);
+}
+
+/**
+ * @tc.name: SetStatusBarColorForExtension
+ * @tc.desc: SetStatusBarColorForExtension test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, SetStatusBarColorForExtension, TestSize.Level1)
+{
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, window_->SetStatusBarColorForExtension(255));
+
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window_->hostSession_ = session;
+    window_->property_->SetPersistentId(1);
+    EXPECT_CALL(*session, TransferExtensionData).WillOnce(Return(ERR_NONE));
+    EXPECT_EQ(WMError::WM_OK, window_->SetStatusBarColorForExtension(255));
 }
 }
 } // namespace Rosen

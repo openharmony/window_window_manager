@@ -847,11 +847,12 @@ public:
     void RemoveSnapshotFromCache(int32_t persistentId);
     void UpdateAllStartingWindowRdb();
     void GetStartupPage(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
+    bool CheckAndGetPreLoadResourceId(const StartingWindowInfo& startingWindowInfo, uint32_t& resId);
     std::shared_ptr<Media::PixelMap> GetPreLoadStartingWindow(const SessionInfo& sessionInfo);
     void RemovePreLoadStartingWindowFromMap(const SessionInfo& sessionInfo);
     WSError RegisterSaveSnapshotFunc(const sptr<SceneSession>& sceneSession);
     std::shared_ptr<Media::PixelMap> GetPixelMap(uint32_t resourceId,
-        std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
+        std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo, bool needCrop = false);
     bool GetPersistentImageFit(int32_t persistentId, int32_t& imageFit);
     WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
         uint32_t color, int32_t uid) override;
@@ -1801,7 +1802,6 @@ private:
         std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>>& outValues);
     void CacheStartingWindowInfo(const std::string& bundleName, const std::string& moduleName,
         const std::string& abilityName, const StartingWindowInfo& startingWindowInfo, bool isDark);
-    bool CheckAndGetPreLoadResourceId(const StartingWindowInfo& startingWindowInfo, uint32_t& resId);
     std::shared_ptr<StartingWindowRdbManager> startingWindowRdbMgr_;
     std::unique_ptr<LruCache> snapshotLruCache_;
     std::size_t snapshotCapacity_ = 0;
@@ -1813,6 +1813,7 @@ private:
     WMError SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, ImageFit imageFit,
         int32_t persistentId) override;
     WMError RemoveImageForRecent(int32_t persistentId) override;
+    void GetCropInfoByDisplaySize(const Media::ImageInfo& imageinfo, Media::DecodeOptions& decodeOpts);
 
     RecoverState recoverState_ = RecoverState::RECOVER_END;
     OutlineParams recoverOutlineParams_;

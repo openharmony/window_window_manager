@@ -54,6 +54,7 @@ namespace {
 static std::map<ani_ref, AniWindow*> g_localObjs;
 constexpr double MIN_GRAY_SCALE = 0.0;
 constexpr double MAX_GRAY_SCALE = 1.0;
+constexpr int32_t API_VERSION_23 = 23;
 } // namespace
 static std::mutex g_aniWindowMap_mutex;
 static std::map<std::string, ani_ref> g_aniWindowMap;
@@ -3963,7 +3964,9 @@ ani_object AniWindow::SetWindowLimits(ani_env* env, ani_object inWindowLimits, a
 
     bool isForcible = false;
     if (!AniWindowUtils::CheckParaIsUndefined(env, forcible)) {
-        if (!windowToken_->IsPcOrFreeMultiWindowCapabilityEnabled()) {
+        if ((windowToken_->GetTargetAPIVersion() >= API_VERSION_23 && !windowToken_->IsPhonePadOrPcWindow()) ||
+            (windowToken_->GetTargetAPIVersion() < API_VERSION_23 &&
+            !windowToken_->IsPcOrFreeMultiWindowCapabilityEnabled())) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] device not support");
             return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
         }
@@ -4137,6 +4140,70 @@ ani_int AniWindow::OnGetWindowStatus(ani_env* env)
     TLOGI(WmsLogTag::WMS_PC, "[ANI] window [%{public}u, %{public}s] end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
     return static_cast<ani_int>(windowStatus);
+}
+
+void AniWindow::Minimize(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[ANI] start");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] windowToken is null");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    aniWindow->OnMinimize(env);
+}
+
+void AniWindow::OnMinimize(ani_env* env)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] window is null");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+
+    if (WindowHelper::IsFloatOrSubWindow(windowToken_->GetType())) {
+        if (!windowToken_->IsSceneBoardEnabled()) {
+            AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+            return;
+        }
+        TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI] subWindow or float window use hide");
+        HideWindowFunction(env, WmErrorCode::WM_OK);
+        return;
+    }
+
+    WMError ret = windowToken_->Minimize();
+    TLOGNI(WmsLogTag::WMS_PC, "[ANI] Window [%{public}u, %{public}s] minimize end, ret=%{public}d",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), ret);
+    if (ret != WMError::WM_OK) {
+        WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+        AniWindowUtils::AniThrowError(env, wmErrorCode);
+    }
+}
+
+void AniWindow::HideWindowFunction(ani_env* env, WmErrorCode errCode)
+{
+    if (errCode != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, errCode);
+        return;
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] window is null");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    if (WindowHelper::IsMainWindow(windowToken_->GetType())) {
+        TLOGW(WmsLogTag::WMS_LIFE, "[ANI] window type %{public}u is not supported, [%{public}u, %{public}s]",
+            static_cast<uint32_t>(windowToken_->GetType()),
+            windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->Hide(0, false, false, true));
+    TLOGI(WmsLogTag::WMS_LIFE, "[ANI] end, window [%{public}u] ret=%{public}d",
+        windowToken_->GetWindowId(), ret);
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret);
+    }
 }
 
 void AniWindow::Maximize(
@@ -5026,12 +5093,12 @@ void AniWindow::OnHide(ani_env* env)
         return;
     }
     auto winType = window->GetType();
-    if (!WindowHelper::IsMainWindow(winType)) {
+    if (WindowHelper::IsMainWindow(winType)) {
         TLOGW(WmsLogTag::WMS_LIFE, "window Type %{public}u is not supported, [%{public}u, %{public}s]",
                 static_cast<uint32_t>(window->GetType()), window->GetWindowId(), window->GetWindowName().c_str());
         return;
     }
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->Hide(0, false, false));
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->Hide(0, false, false, true));
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret, "Window hide failed");
     }
@@ -6079,6 +6146,8 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(WindowResetAspectRatio)},
         ani_native_function {"getWindowStatus", "l:i",
             reinterpret_cast<void *>(AniWindow::GetWindowStatus)},
+        ani_native_function {"minimize", "l:",
+            reinterpret_cast<void *>(AniWindow::Minimize)},
         ani_native_function {"maximize", "JL@ohos/window/window/MaximizePresentation;Lstd/core/Boolean;:V",
             reinterpret_cast<void *>(AniWindow::Maximize)},
         ani_native_function {"startMoving", "l:",
