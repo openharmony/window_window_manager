@@ -162,6 +162,8 @@ MaximizeMode GetMaximizeMode() override
     return MaximizeMode::MODE_FULL_FILL;
 }
 void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) override {}
+void GetAllGroupInfo(std::unordered_map<DisplayId, DisplayGroupId>& displayId2GroupIdMap,
+                     std::vector<sptr<FocusChangeInfo>>& allFocusInfoList) override {}
 };
 }
 }

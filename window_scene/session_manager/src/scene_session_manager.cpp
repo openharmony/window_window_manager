@@ -6823,6 +6823,50 @@ void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo, Display
     }, __func__);
 }
 
+void SceneSessionManager::GetAllGroupInfo(std::unordered_map<DisplayId, DisplayGroupId>& displayId2GroupIdMap,
+                                          std::vector<sptr<FocusChangeInfo>>& allFocusInfoList)
+{
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "non-SA calling, permission denied!");
+        return;
+    }
+    taskScheduler_->PostSyncTask([this, &displayId2GroupIdMap, &allFocusInfoList, where = __func__] {
+        std::unordered_map<DisplayId, DisplayGroupId> groupInfoMap = windowFocusController_->GetDisplayId2GroupIdMap();
+        if (groupInfoMap.empty()) {
+            TLOGNE(WmsLogTag::WMS_FOCUS, "displayId2GroupIdMap is empty");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        displayId2GroupIdMap = groupInfoMap;
+        std::unordered_map<DisplayGroupId, sptr<FocusGroup>> allFocusGroupMap;
+        windowFocusController_->GetAllFocusGroup(allFocusGroupMap);
+        for (const auto& elem : allFocusGroupMap) {
+            auto curFocusGroup = elem.second;
+            if (curFocusGroup == nullptr) {
+                TLOGNE(WmsLogTag::WMS_FOCUS, "%{public}s focus group is null", where);
+                continue;
+            }
+            auto focusedSession = GetSceneSession(curFocusGroup->GetFocusedSessionId());
+            if (focusedSession == nullptr) {
+                TLOGNE(WmsLogTag::WMS_FOCUS, "%{public}s focused session is null, id: %{public}d", where,
+                    curFocusGroup->GetFocusedSessionId());
+                continue;
+            }
+            auto focusInfo = sptr<FocusChangeInfo>::MakeSptr(
+                focusedSession->GetWindowId(), curFocusGroup->GetDisplayGroupId() == DEFAULT_DISPLAY_ID
+                ? DEFAULT_DISPLAY_ID : focusedSession->GetDisplayId(), focusedSession->GetDisplayId(),
+                curFocusGroup->GetDisplayGroupId(), focusedSession->GetCallingPid(), focusedSession->GetCallingUid(),
+                focusedSession->GetWindowType(), focusedSession->GetAbilityToken());
+            allFocusInfoList.emplace_back(focusInfo);
+        }
+        if (allFocusInfoList.empty()) {
+            TLOGNE(WmsLogTag::WMS_FOCUS, "allFocusInfoList is empty");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        TLOGNI(WmsLogTag::WMS_FOCUS, "%{public}s success", where);
+        return WSError::WS_OK;
+    }, __func__);
+}
+
 WSError SceneSessionManager::AddFocusGroup(DisplayGroupId displayGroupId, DisplayId displayId)
 {
     return windowFocusController_->AddFocusGroup(displayGroupId, displayId);
@@ -8638,6 +8682,8 @@ void SceneSessionManager::NotifyFocusStatus(const sptr<SceneSession>& sceneSessi
     sptr<FocusChangeInfo> focusChangeInfo = sptr<FocusChangeInfo>::MakeSptr(
         sceneSession->GetWindowId(),
         focusGroupId,
+        sceneSession->GetDisplayId(),
+        focusGroup->GetDisplayGroupId(),
         sceneSession->GetCallingPid(),
         sceneSession->GetCallingUid(),
         sceneSession->GetWindowType(),
@@ -9502,7 +9548,7 @@ void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneS
 
 WSError SceneSessionManager::ProcessModalTopmostRequestFocusImmediately(const sptr<SceneSession>& sceneSession)
 {
-    // focus must on modal topmost subwindow when APP_MAIN_WINDOW or sub winodw request focus
+    // focus must on modal topmost subwindow when APP_MAIN_WINDOW or sub window request focus
     sptr<SceneSession> mainSession = nullptr;
     if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         mainSession = sceneSession;
@@ -9581,7 +9627,7 @@ WSError SceneSessionManager::ProcessSubWindowRequestFocusImmediately(const sptr<
 
 WSError SceneSessionManager::ProcessDialogRequestFocusImmediately(const sptr<SceneSession>& sceneSession)
 {
-    // focus must on dialog when APP_MAIN_WINDOW or sub winodw request focus
+    // focus must on dialog when APP_MAIN_WINDOW or sub window request focus
     sptr<SceneSession> mainSession = nullptr;
     if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         mainSession = sceneSession;
@@ -11326,6 +11372,7 @@ WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType t
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_VISIBLE_WINDOW_NUM ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS ||
+        type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_DISPLAYGROUP_INFO ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_PID_VISIBILITY ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY) {
@@ -11362,6 +11409,7 @@ WMError SceneSessionManager::UnregisterWindowManagerAgent(WindowManagerAgentType
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_VISIBLE_WINDOW_NUM ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS ||
+        type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_DISPLAYGROUP_INFO ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY) {
         if (!SessionPermission::IsSACalling()) {
