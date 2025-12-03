@@ -3315,9 +3315,8 @@ WMError WindowSceneSessionImpl::SetTitleAndDockHoverShown(
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "winId:%{public}u %{public}s isTitleHoverShown:%{public}d, "
-        "isDockHoverShown:%{public}d, isFreeMultiWinMode:%{public}d", GetWindowId(), GetWindowName().c_str(),
-        isTitleHoverShown, isDockHoverShown, IsFreeMultiWindowMode());
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "winId:%{public}u %{public}s isTitleHoverShown:%{public}d, "	
+        "isDockHoverShown:%{public}d", GetWindowId(), GetWindowName().c_str(), isTitleHoverShown, isDockHoverShown);
     if (!WindowHelper::IsMainWindow(GetType())) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "window is not main window");
         return WMError::WM_ERROR_INVALID_CALLING;
@@ -3326,7 +3325,7 @@ WMError WindowSceneSessionImpl::SetTitleAndDockHoverShown(
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "This is PcAppInPad, not supported");
         return WMError::WM_OK;
     }
-    if (!IsFreeMultiWindowMode()) {
+    if (!IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
