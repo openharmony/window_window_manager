@@ -514,7 +514,7 @@ HWTEST_F(ScreenSessionManagerTest, UpdateSessionByActiveModeChange001, TestSize.
     MockAccesstokenKit::MockIsSystemApp(true);
     MockSessionPermission::MockIsStarByHdcd(true);
     sptr<ScreenSession> screenSession = nullptr;
-    ssm_->UpdateSessionByActiveModeChange(screenSession, screenSession, 0);
+    ssm_->UpdateSessionByActiveModeChange(screenSession, 0);
     EXPECT_FALSE(g_errLog.find("screenSession is nullptr") != std::string::npos);
     g_errLog.clear();
 }
@@ -531,7 +531,7 @@ HWTEST_F(ScreenSessionManagerTest, UpdateSessionByActiveModeChange002, TestSize.
     MockAccesstokenKit::MockIsSystemApp(true);
     MockSessionPermission::MockIsStarByHdcd(true);
     sptr<ScreenSession> screenSession = ssm_->GetOrCreateScreenSession(1050);
-    ssm_->UpdateSessionByActiveModeChange(screenSession, screenSession, 0);
+    ssm_->UpdateSessionByActiveModeChange(screenSession, 0);
     EXPECT_TRUE(g_errLog.find("end") != std::string::npos);
     g_errLog.clear();
 }
