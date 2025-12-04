@@ -26,7 +26,7 @@ namespace OHOS::Rosen {
 class FfrtSerialQueueHelper {
 public:
     static FfrtSerialQueueHelper& GetInstance();
-    void SubmitTask(std::function<void()>& task);
+    void SubmitTask(std::function<void()>&& task);
 
 private:
     FfrtSerialQueueHelper();
