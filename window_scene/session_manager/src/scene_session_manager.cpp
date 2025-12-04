@@ -28,7 +28,7 @@
 #include <parameters.h>
 #include <ui/rs_node.h>
 #include "hitrace/hitracechain.h"
-#include "ffrt_inner.h"
+#include "ffrt_serial_queue_helper.h"
 #include "parameter.h"
 #include "publish/scb_dump_subscriber.h"
 #include "resource_manager.h"
@@ -6165,10 +6165,7 @@ void SceneSessionManager::OnBundleUpdated(const std::string& bundleName, int use
             TLOGNI(WmsLogTag::WMS_PATTERN, "res:%{public}d, insert num:%{public}" PRId64, batchInsertRes, outInsertNum);
         }
     };
-    static ffrt::queue ffrtSerialHelper(
-        ffrt::queue_serial, "OnBundleUpdatedQueue",
-        ffrt::queue_attr().qos(ffrt_qos_user_interactive));
-    ffrtSerialHelper.submit(task);
+    FfrtSerialQueueHelper::GetInstance().SubmitTask(task);
     taskScheduler_->PostAsyncTask([this, bundleName]() {
         std::unique_lock<std::shared_mutex> lock(startingWindowMapMutex_);
         if (auto iter = startingWindowMap_.find(bundleName); iter != startingWindowMap_.end()) {
