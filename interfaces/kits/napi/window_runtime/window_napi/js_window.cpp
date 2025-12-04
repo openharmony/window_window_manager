@@ -1358,6 +1358,20 @@ napi_value JsWindow::SetFollowParentWindowLayoutEnabled(napi_env env, napi_callb
     return (me != nullptr) ? me->OnSetFollowParentWindowLayoutEnabled(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetReceiveDragEventEnabled(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetReceiveDragEventEnabled(env, info) : nullptr;
+}
+
+napi_value JsWindow::IsReceiveDragEventEnabled(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnIsReceiveDragEventEnabled(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetWindowShadowEnabled(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
@@ -9636,6 +9650,62 @@ napi_value JsWindow::OnSetFollowParentWindowLayoutEnabled(napi_env env, napi_cal
     return result;
 }
 
+napi_value JsWindow::OnSetReceiveDragEventEnabled(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != INDEX_ONE) {
+        TLOGE(WmsLogTag::WMS_EVENT, "argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool enabled = true;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], enabled)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to convert parameter to enable");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    const char* const where = __func__;
+    auto execute = [weakToken = wptr<Window>(windowToken_), errCodePtr, enabled, where] {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s window is null", where);
+            *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            return;
+        }
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetReceiveDragEventEnabled(enabled));
+        TLOGNI(WmsLogTag::WMS_EVENT, "%{public}s winId: %{public}u, set enable: %{public}u",
+            where, window->GetWindowId(), enabled);
+    };
+    auto complete = [errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (*errCodePtr == WmErrorCode::WM_OK) {
+            task.Resolve(env, NapiGetUndefined(env));
+        } else {
+            TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s set failed, result: %{public}d", where, *errCodePtr);
+            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr,
+                "[window][setReceiveDragEventEnabled]msg: set window receive drag failed"));
+        }
+    };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnSetReceiveDragEventEnabled",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
+napi_value JsWindow::OnIsReceiveDragEventEnabled(napi_env env, napi_callback_info info)
+{
+    if (windowToken_ == nullptr){
+        TLOGE(WmsLogTag::WMS_EVENT, "IsReceiveDragEventEnabled");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, 
+            "[window][isReceiveDragEventEnabled]msg: IsReceiveDragEventEnabled");
+    }
+
+    bool isReceiveDragEventEnabled = windowToken_->IsReceiveDragEventEnabled();
+    TLOGD(WmsLogTag::WMS_EVENT, "Id=%{public}u, state=%{public}u", windowToken_->GetWindowId(),
+        isReceiveDragEventEnabled);
+    return CreateJsValue(env, isReceiveDragEventEnabled);
+}
+
 napi_value JsWindow::OnSetWindowShadowEnabled(napi_env env, napi_callback_info info)
 {
     size_t argc = FOUR_PARAMS_SIZE;
@@ -9949,6 +10019,8 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
         JsWindow::SetRelativePositionToParentWindowEnabled);
     BindNativeFunction(env, object, "setFollowParentWindowLayoutEnabled", moduleName,
         JsWindow::SetFollowParentWindowLayoutEnabled);
+    BindNativeFunction(env, object, "setReceiveDragEventEnabled", moduleName, JsWindow::SetReceiveDragEventEnabled);
+    BindNativeFunction(env, object, "isReceiveDragEventEnabled", moduleName, JsWindow::IsReceiveDragEventEnabled);
     BindNativeFunction(env, object, "setWindowShadowEnabled", moduleName, JsWindow::SetWindowShadowEnabled);
     BindNativeFunction(env, object, "isImmersiveLayout", moduleName, JsWindow::IsImmersiveLayout);
     BindNativeFunction(env, object, "isInFreeWindowMode", moduleName, JsWindow::IsInFreeWindowMode);

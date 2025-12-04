@@ -354,6 +354,8 @@ public:
      */
     WMError LockCursor(int32_t windowId, bool isCursorFollowMovement) override;
     WMError UnlockCursor(int32_t windowId) override;
+    WMError SetReceiveDragEventEnabled(bool enabled) override;
+    bool IsReceiveDragEventEnabled() override;
 
 protected:
     WMError CreateAndConnectSpecificSession();
@@ -602,6 +604,11 @@ private:
      * Window Transition Animation For PC
      */
     std::mutex transitionAnimationConfigMutex_;
+
+    /*
+     * Window Event
+     */
+    bool isReceiveDragEventEnable_ = true;
 
     /*
      * Window Decor
