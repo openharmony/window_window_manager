@@ -874,6 +874,21 @@ HWTEST_F(WindowManagerTest, GetUIContentRemoteObj, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetRootUIContentRemoteObj
+ * @tc.desc: test GetRootUIContentRemoteObj rpc is ok
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetRootUIContentRemoteObj, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, instance_);
+    DisplayId displayId = 0;
+    sptr<IRemoteObject> uiContentRemoteObj = nullptr;
+    auto expectRet = WindowAdapter::GetInstance(userId_).GetRootUIContentRemoteObj(displayId, uiContentRemoteObj);
+    auto ret = instance_->GetRootUIContentRemoteObj(displayId, uiContentRemoteObj);
+    EXPECT_EQ(ret, expectRet);
+}
+
+/**
  * @tc.name: GetFocusWindowInfo
  * @tc.desc: window GetFocusWindowInfo
  * @tc.type: FUNC
