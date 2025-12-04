@@ -3010,6 +3010,20 @@ public:
     virtual bool IsPcOrFreeMultiWindowCapabilityEnabled() const { return false; }
 
     /**
+     * @brief Is phone, pad, pc window or not.
+     *
+     * @return True means phone, pad or pc window, false means the opposite.
+     */
+    virtual bool IsPhonePadOrPcWindow() const { return false; }
+    
+    /**
+     * @brief Get target api version.
+     *
+     * @return API version.
+     */
+    virtual uint32_t GetTargetAPIVersion() const { return API_VERSION_INVALID; }
+
+    /**
      * @brief Is pc window or pad free multi-window.
      *
      * @return True means pc window or pad free multi-window, false means the opposite.
@@ -4860,6 +4874,29 @@ public:
     virtual WMError UnregisterWindowTitleChangeListener(const sptr<IWindowTitleChangeListener>& listener)
     {
         return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Set whether the window receive drag event.
+     *
+     * @param enalbed - whether the window receive drag event.
+     *        True: - means default state, the window can receive drag event.
+     *        False: - means the window can't receive drag event.
+     * @return Returns the status code of the execution.
+     */
+    virtual WMError SetReceiveDragEventEnabled(bool enabled)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief  whether the window receive drag event.
+     *
+     * @return - The value true means the window can receive drag event, and false means the opposite.
+     */
+    virtual bool IsReceiveDragEventEnabled()
+    {
+        return true;
     }
 
     /**

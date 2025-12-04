@@ -94,6 +94,8 @@ private:
     void UpdatePointerAreas(sptr<SceneSession> sceneSession, std::vector<int32_t>& pointerChangeAreas) const;
     void UpdateWindowFlags(DisplayId displayId, const sptr<SceneSession>& sceneSession,
         MMI::WindowInfo& windowInfo) const;
+    void UpdateWindowFlagsForReceiveDragEventEnabled(const sptr<SceneSession>& sceneSession,
+        MMI::WindowInfo& windowInfo) const;
     void UpdateWindowFlagsForLockCursor(const sptr<SceneSession>& sceneSession, MMI::WindowInfo& windowInfo) const;
     void AddModalExtensionWindowInfo(std::vector<MMI::WindowInfo>& windowInfoList, MMI::WindowInfo windowInfo,
         const sptr<SceneSession>& sceneSession, const ExtensionWindowEventInfo& extensionInfo);

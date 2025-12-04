@@ -296,6 +296,39 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateConfiguration02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateConfigurationForSpecified02
+ * @tc.desc: UpdateConfigurationForSpecified02 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationForSpecified02, TestSize.Level1)
+{
+    window_->uiContent_ = nullptr;
+    std::shared_ptr<AppExecFwk::Configuration> configuration;
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager;
+    window_->UpdateConfigurationForSpecified(configuration, resourceManager);
+    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_NE(nullptr, window_->uiContent_);
+    window_->UpdateConfigurationForSpecified(configuration, resourceManager);
+    configuration = std::make_shared<AppExecFwk::Configuration>();
+    window_->UpdateConfigurationForSpecified(configuration, resourceManager);
+}
+
+/**
+ * @tc.name: UpdateDefaultStatusBarColor
+ * @tc.desc: UpdateDefaultStatusBarColor Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateDefaultStatusBarColor, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->UpdateDefaultStatusBarColor();
+    window_->property_->isAtomicService_ = true;
+    window_->UpdateDefaultStatusBarColor();
+    window_->specifiedColorMode_ = "light";
+    window_->UpdateDefaultStatusBarColor();
+}
+
+/**
  * @tc.name: UpdateConfigurationForAll01
  * @tc.desc: UpdateConfigurationForAll01 Test
  * @tc.type: FUNC

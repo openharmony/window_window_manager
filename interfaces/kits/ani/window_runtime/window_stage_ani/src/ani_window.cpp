@@ -54,6 +54,7 @@ namespace {
 static std::map<ani_ref, AniWindow*> g_localObjs;
 constexpr double MIN_GRAY_SCALE = 0.0;
 constexpr double MAX_GRAY_SCALE = 1.0;
+constexpr int32_t API_VERSION_23 = 23;
 } // namespace
 static std::mutex g_aniWindowMap_mutex;
 static std::map<std::string, ani_ref> g_aniWindowMap;
@@ -1298,6 +1299,59 @@ void AniWindow::OnSetTopmost(ani_env* env, ani_boolean isTopmost)
         AniWindowUtils::AniThrowError(env, ret, "SetTopmost failed.");
     }
 }
+
+void AniWindow::SetReceiveDragEventEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enabled)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow != nullptr) {
+        aniWindow->OnSetReceiveDragEventEnabled(env, enabled);
+    } else {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI] aniWindow is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+}
+
+void AniWindow::OnSetReceiveDragEventEnabled(ani_env* env, ani_boolean enabled)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "[ANI]");
+    auto window = GetWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI] window is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetReceiveDragEventEnabled(enabled));
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret, "SetReceiveDragEventEnabled failed.");
+    }
+}
+
+ani_boolean AniWindow::IsReceiveDragEventEnabled(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI] aniWindow is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return static_cast<ani_boolean>(true);
+    }
+    return static_cast<ani_boolean>(aniWindow->OnIsReceiveDragEventEnabled(env));
+}
+
+bool AniWindow::OnIsReceiveDragEventEnabled(ani_env* env)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "[ANI]");
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI] window is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return true;
+    }
+
+    return windowToken_->IsReceiveDragEventEnabled();
+}
+
 void AniWindow::RaiseMainWindowAboveTarget(ani_env* env, ani_object obj, ani_long nativeObj, ani_int windowId)
 {
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
@@ -3963,7 +4017,9 @@ ani_object AniWindow::SetWindowLimits(ani_env* env, ani_object inWindowLimits, a
 
     bool isForcible = false;
     if (!AniWindowUtils::CheckParaIsUndefined(env, forcible)) {
-        if (!windowToken_->IsPcOrFreeMultiWindowCapabilityEnabled()) {
+        if ((windowToken_->GetTargetAPIVersion() >= API_VERSION_23 && !windowToken_->IsPhonePadOrPcWindow()) ||
+            (windowToken_->GetTargetAPIVersion() < API_VERSION_23 &&
+            !windowToken_->IsPcOrFreeMultiWindowCapabilityEnabled())) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] device not support");
             return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
         }
@@ -6042,6 +6098,10 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::RaiseToAppTop)},
         ani_native_function {"setTopmostSync", "lz:",
             reinterpret_cast<void *>(AniWindow::SetTopmost)},
+        ani_native_function {"setReceiveDragEventEnabled", "lz:",
+            reinterpret_cast<void *>(AniWindow::SetReceiveDragEventEnabled)},
+        ani_native_function {"isReceiveDragEventEnabled", "J:Z",
+            reinterpret_cast<void *>(AniWindow::IsReceiveDragEventEnabled)},
         ani_native_function {"requestFocusSync", "lz:",
             reinterpret_cast<void *>(AniWindow::RequestFocus)},
         ani_native_function {"setSubWindowModal", "lz:",
