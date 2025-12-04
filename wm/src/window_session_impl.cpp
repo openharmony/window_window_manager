@@ -1960,6 +1960,13 @@ int32_t WindowSessionImpl::GetFloatingWindowParentId()
             return winPair.second.second->GetProperty()->GetPersistentId();
         }
     }
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(GetContext());
+    if (abilityContext != nullptr) {
+        int32_t parentId = INVALID_SESSION_ID;
+        abilityContext->GetMissionId(parentId);
+        TLOGI(WmsLogTag::WMS_LIFE, "parentId: %{public}d", parentId);
+        return parentId;
+    }
     return INVALID_SESSION_ID;
 }
 
