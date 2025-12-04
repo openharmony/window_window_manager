@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "rate_limited_logger.h"
 
+#include <chrono>
 #include <gtest/gtest.h>
 #include <thread>
-#include <chrono>
-#include "rate_limited_logger.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -45,7 +45,11 @@ void RateLimitedLoggerTest::SetUpTestCase() {}
 void RateLimitedLoggerTest::TearDownTestCase() {}
 
 namespace {
-// Test Case 1: Should handle very large time windows correctly
+/**
+ * @tc.name: ShouldHandleLargeTimeWindow
+ * @tc.desc: Should handle very large time windows correctly
+ * @tc.type: FUNC
+ */
 HWTEST_F(RateLimitedLoggerTest, ShouldHandleLargeTimeWindow, TestSize.Level1)
 {
     // Given - Very large time window (1 hour)
@@ -66,7 +70,11 @@ HWTEST_F(RateLimitedLoggerTest, ShouldHandleLargeTimeWindow, TestSize.Level1)
     EXPECT_FALSE(result4);
 }
 
-// Test Case 2: Should handle very small time windows correctly
+/**
+ * @tc.name: ShouldHandleLargeTimeWindow
+ * @tc.desc: Should handle very small time windows correctly
+ * @tc.type: FUNC
+ */
 HWTEST_F(RateLimitedLoggerTest, ShouldHandleSmallTimeWindow, TestSize.Level1)
 {
     // Given - Very small time window (1ms)
@@ -94,7 +102,11 @@ HWTEST_F(RateLimitedLoggerTest, ShouldHandleSmallTimeWindow, TestSize.Level1)
     EXPECT_TRUE(result3);
 }
 
-// Test Case 3: Should handle maximum integer values for maxCount
+/**
+ * @tc.name: ShouldHandleLargeMaxCount
+ * @tc.desc: Should handle maximum integer values for maxCount
+ * @tc.type: FUNC
+ */
 HWTEST_F(RateLimitedLoggerTest, ShouldHandleLargeMaxCount, TestSize.Level1)
 {
     // Given - Very large maxCount
@@ -110,7 +122,11 @@ HWTEST_F(RateLimitedLoggerTest, ShouldHandleLargeMaxCount, TestSize.Level1)
     EXPECT_EQ(RateLimitedLogger::getInstance().getCurrentCount(functionName), 1);
 }
 
-// Test Case 4: Should handle function names with special characters
+/**
+ * @tc.name: ShouldHandleSpecialCharactersInFunctionName
+ * @tc.desc: Should handle function names with special characters
+ * @tc.type: FUNC
+ */
 HWTEST_F(RateLimitedLoggerTest, ShouldHandleSpecialCharactersInFunctionName, TestSize.Level1)
 {
     // Given - Function names with special characters
@@ -139,7 +155,11 @@ HWTEST_F(RateLimitedLoggerTest, ShouldHandleSpecialCharactersInFunctionName, Tes
     EXPECT_EQ(RateLimitedLogger::getInstance().getCurrentCount(functionName4), 1);
 }
 
-// Test Case 5: Should handle empty function name
+/**
+ * @tc.name: ShouldHandleEmptyFunctionName
+ * @tc.desc: Should handle empty function name
+ * @tc.type: FUNC
+ */
 HWTEST_F(RateLimitedLoggerTest, ShouldHandleEmptyFunctionName, TestSize.Level1)
 {
     // Given - Empty function name
@@ -159,7 +179,11 @@ HWTEST_F(RateLimitedLoggerTest, ShouldHandleEmptyFunctionName, TestSize.Level1)
     EXPECT_EQ(RateLimitedLogger::getInstance().getCurrentCount(functionName), 2);
 }
 
-// Test Case 6: Should maintain separate counts for same function with different parameters
+/**
+ * @tc.name: SameFunctionWithDifferentParametersShouldHaveSeparateCounts
+ * @tc.desc: Should maintain separate counts for same function with different parameters
+ * @tc.type: FUNC
+ */
 HWTEST_F(RateLimitedLoggerTest, SameFunctionWithDifferentParametersShouldHaveSeparateCounts, TestSize.Level1)
 {
     // Given - Same function name but different time windows and max counts
@@ -178,7 +202,11 @@ HWTEST_F(RateLimitedLoggerTest, SameFunctionWithDifferentParametersShouldHaveSep
     EXPECT_FALSE(result3); // Still limited by original parameters (1000ms, 2 max)
 }
 
-// Test Case 7: Should handle rapid consecutive calls correctly
+/**
+ * @tc.name: ShouldHandleRapidConsecutiveCalls
+ * @tc.desc: Should handle rapid consecutive calls correctly
+ * @tc.type: FUNC
+ */
 HWTEST_F(RateLimitedLoggerTest, ShouldHandleRapidConsecutiveCalls, TestSize.Level1)
 {
     // Given - Short time window and low max count
@@ -201,7 +229,11 @@ HWTEST_F(RateLimitedLoggerTest, ShouldHandleRapidConsecutiveCalls, TestSize.Leve
     EXPECT_EQ(RateLimitedLogger::getInstance().getCurrentCount(functionName), 3);
 }
 
-// Test Case 8: Should reset correctly after clear() is called
+/**
+ * @tc.name: ShouldResetAfterClear
+ * @tc.desc: Should reset correctly after clear() is called
+ * @tc.type: FUNC
+ */
 HWTEST_F(RateLimitedLoggerTest, ShouldResetAfterClear, TestSize.Level1)
 {
     // Given - Function that has reached its limit
@@ -228,7 +260,11 @@ HWTEST_F(RateLimitedLoggerTest, ShouldResetAfterClear, TestSize.Level1)
     EXPECT_EQ(RateLimitedLogger::getInstance().getCurrentCount(functionName), 1);
 }
 
-// Test Case 9: Should handle multiple functions with rapid calls
+/**
+ * @tc.name: ShouldHandleMultipleFunctionsWithRapidCalls
+ * @tc.desc: Should handle multiple functions with rapid calls
+ * @tc.type: FUNC
+ */
 HWTEST_F(RateLimitedLoggerTest, ShouldHandleMultipleFunctionsWithRapidCalls, TestSize.Level1)
 {
     // Given - Multiple functions with different limits
@@ -253,7 +289,11 @@ HWTEST_F(RateLimitedLoggerTest, ShouldHandleMultipleFunctionsWithRapidCalls, Tes
     EXPECT_EQ(std::count(results3.begin(), results3.end(), true), 1);
 }
 
-// Test Case 10: Should handle very long function names
+/**
+ * @tc.name: ShouldHandleLongFunctionNames
+ * @tc.desc: Should handle very long function names
+ * @tc.type: FUNC
+ */
 HWTEST_F(RateLimitedLoggerTest, ShouldHandleLongFunctionNames, TestSize.Level1)
 {
     // Given - Very long function name
@@ -271,6 +311,30 @@ HWTEST_F(RateLimitedLoggerTest, ShouldHandleLongFunctionNames, TestSize.Level1)
     EXPECT_TRUE(result2);
     EXPECT_FALSE(result3);
     EXPECT_EQ(RateLimitedLogger::getInstance().getCurrentCount(longFunctionName), 2);
+}
+
+/**
+ * @tc.name: DisableRetrunTrue
+ * @tc.desc: disable return true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RateLimitedLoggerTest, DisableRetrunTrue, TestSize.Level1)
+{
+    // Given - Turn off the log rate limiting switch
+    std::string longFunctionName = "testFunction";
+    int timeWindowMs = 1000;
+    int maxCount = 1;
+    RateLimitedLogger::getInstance().setEnabled(false);
+    
+    // When - Print multiple logs in a short period of time
+    bool result1 = RateLimitedLogger::getInstance().logFunction(longFunctionName, timeWindowMs, maxCount);
+    bool result2 = RateLimitedLogger::getInstance().logFunction(longFunctionName, timeWindowMs, maxCount);
+    bool result3 = RateLimitedLogger::getInstance().logFunction(longFunctionName, timeWindowMs, maxCount);
+    
+    // Then - The log should be printed normally
+    EXPECT_TRUE(result1);
+    EXPECT_TRUE(result2);
+    EXPECT_TRUE(result3);
 }
 } // namespace
 } // Rosen

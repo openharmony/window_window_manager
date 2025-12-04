@@ -12,37 +12,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <iomanip>
 #include <iostream>
 #include <sstream>
-#include <iomanip>
 #include <thread>
 #include "rate_limited_logger.h"
 
-// Static member initialization
-RateLimitedLogger* RateLimitedLogger::instance_ = nullptr;
-std::mutex RateLimitedLogger::instanceMutex_;
-
 RateLimitedLogger& RateLimitedLogger::getInstance() {
-    std::lock_guard<std::mutex> lock(instanceMutex_);
-    if (!instance_) {
-        instance_ = new RateLimitedLogger();
-    }
-    return *instance_;
+    static RateLimitedLogger instance_;
+    return instance_;
 }
 
 bool RateLimitedLogger::logFunction(const std::string& functionName, int timeWindowMs, int maxCount) {
+    // 
     if (!enabled_) {
-        return false;
+        return true;
     }
 
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(functionRecordsMutex_);
     auto now = std::chrono::steady_clock::now();
 
     // Find or create function record
     auto& record = functionRecords_[functionName];
     
     // If new record or time window expired, reset count
-    if (record.count == 0 || 
+    if (record.count == 0 ||
         std::chrono::duration_cast<std::chrono::milliseconds>(now - record.startTime).count() >= timeWindowMs) {
         record.count = 0;
         record.startTime = now;
@@ -58,17 +52,16 @@ bool RateLimitedLogger::logFunction(const std::string& functionName, int timeWin
 }
 
 void RateLimitedLogger::clear() {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(functionRecordsMutex_);
     functionRecords_.clear();
 }
 
 void RateLimitedLogger::setEnabled(bool enabled) {
-    std::lock_guard<std::mutex> lock(mutex_);
     enabled_ = enabled;
 }
 
 int RateLimitedLogger::getCurrentCount(const std::string& functionName) {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(functionRecordsMutex_);
     auto it = functionRecords_.find(functionName);
     return (it != functionRecords_.end()) ? it->second.count : 0;
 }
