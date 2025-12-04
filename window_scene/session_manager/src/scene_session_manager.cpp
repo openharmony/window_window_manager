@@ -6145,7 +6145,7 @@ void SceneSessionManager::OnBundleUpdated(const std::string& bundleName, int use
     static ffrt::queue ffrtSerialHelper(
         ffrt::queue_serial, "OnBundleUpdatedQueue",
         ffrt::queue_attr().qos(ffrt_qos_user_interactive));
-    ffrtSerialHelper.SubmitTask(task);
+    ffrtSerialHelper.submit(task);
     taskScheduler_->PostAsyncTask([this, bundleName]() {
         std::unique_lock<std::shared_mutex> lock(startingWindowMapMutex_);
         if (auto iter = startingWindowMap_.find(bundleName); iter != startingWindowMap_.end()) {
