@@ -2065,7 +2065,7 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
         });
     rootSceneSession->SetGetUIContentFunc([rootScene = rootScene_](DisplayId displayId) -> Ace::UIContent* {
         const auto& uiContent = rootScene->GetUIContentByDisplayId(displayId).first;
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "isNullUiContent=%{public}d, displayId: %{public}" PRIu64,
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "isNullUiContent=%{public}d, displayId: %{public}" PRIu64,
             uiContent == nullptr, displayId);
         return uiContent;
     });
