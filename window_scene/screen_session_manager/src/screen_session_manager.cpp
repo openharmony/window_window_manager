@@ -11597,7 +11597,7 @@ bool ScreenSessionManager::GetCoordinationFlag(void)
     return isCoordinationFlag_;
 }
 
-void NotifyRSCoordination(bool isEnterCoordination)
+void NotifyRSCoordination(bool isEnterCoordination) const
 {
     TLOGI(WmsLogTag::DMS, "isEnterCoordination:%{public}d", isEnterCoordination);
     auto ret = rsInterface_.SetDualScreenState(SCREEN_ID_FULL, isEnterCoordination ?
