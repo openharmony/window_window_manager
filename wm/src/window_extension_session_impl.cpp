@@ -847,12 +847,6 @@ WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentI
     return SetUIContentInner(contentInfo, env, storage, token, ability, false, EnvironmentType::NAPI);
 }
 
-WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
-    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
-{
-    return SetUIContentInner(contentInfo, env, storage, token, ability, false, EnvironmentType::ANI);
-}
-
 WMError WindowExtensionSessionImpl::AniSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
     BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
