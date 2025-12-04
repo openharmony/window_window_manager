@@ -1159,6 +1159,65 @@ HWTEST_F(WindowSessionTest4, GetWindowMetaInfoForWindowInfo01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetWindowMetaInfoForWindowInfo02
+ * @tc.desc: GetWindowMetaInfoForWindowInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, GetWindowMetaInfoForWindowInfo02, TestSize.Level1)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.isSystem_ = false;
+    sessionInfo.bundleName_ = "bundleName";
+    sessionInfo.abilityName_ = "abilityName";
+    sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    WindowMetaInfo windowMetaInfo = sceneSession->GetWindowMetaInfoForWindowInfo();
+    ASSERT_EQ(windowMetaInfo.isTouchable, true);
+    auto screenId = 0;
+    ScreenSessionConfig config;
+    sptr<ScreenSession> screenSession =
+        sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ASSERT_NE(screenSession, nullptr);
+    sptr<DisplayInfo> displayInfo = new(std::nothrow) DisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
+    displayInfo->SetScreenId(screenId);
+    displayInfo->SetDisplayId(screenId);
+    sceneSession->GetSessionProperty()->SetDisplayId(screenId);
+    screenSession->SetTouchEnabledFromJs(false);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
+    windowMetaInfo = sceneSession->GetWindowMetaInfoForWindowInfo();
+    ASSERT_EQ(windowMetaInfo.isTouchable, false);
+    screenSession->SetTouchEnabledFromJs(true);
+    sceneSession->SetSystemTouchable(false);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
+    windowMetaInfo = sceneSession->GetWindowMetaInfoForWindowInfo();
+    ASSERT_EQ(windowMetaInfo.isTouchable, false);
+    screenSession->SetTouchEnabledFromJs(true);
+    sceneSession->SetSystemTouchable(true);
+    sceneSession->SetForegroundInteractiveStatus(false);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
+    windowMetaInfo = sceneSession->GetWindowMetaInfoForWindowInfo();
+    ASSERT_EQ(windowMetaInfo.isTouchable, false);
+    screenSession->SetTouchEnabledFromJs(true);
+    sceneSession->SetSystemTouchable(true);
+    sceneSession->SetForegroundInteractiveStatus(true);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
+    windowMetaInfo = sceneSession->GetWindowMetaInfoForWindowInfo();
+    ASSERT_EQ(windowMetaInfo.isTouchable, true);
+    screenSession->SetTouchEnabledFromJs(false);
+    sceneSession->SetSystemTouchable(false);
+    sceneSession->SetForegroundInteractiveStatus(false);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
+    windowMetaInfo = sceneSession->GetWindowMetaInfoForWindowInfo();
+    ASSERT_EQ(windowMetaInfo.isTouchable, false);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
+}
+
+/**
  * @tc.name: GetWantSafely01
  * @tc.desc: GetWantSafely Test
  * @tc.type: FUNC
