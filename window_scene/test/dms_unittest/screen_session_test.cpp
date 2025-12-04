@@ -4972,11 +4972,6 @@ HWTEST_F(ScreenSessionTest, HandleResolutionEffectPropertyChange2, TestSize.Leve
     session->HandleResolutionEffectPropertyChange(property1, property2);
     EXPECT_EQ(property1.GetBounds().rect_.width_, 1);
     EXPECT_EQ(property1.GetBounds().rect_.height_, 2);
-
-    property1.SetScreenRotation(Rotation::ROTATION_90);
-    session->HandleResolutionEffectPropertyChange(property1, property2);
-    EXPECT_EQ(property1.GetBounds().rect_.width_, 2);
-    EXPECT_EQ(property1.GetBounds().rect_.height_, 1);
 }
 
 

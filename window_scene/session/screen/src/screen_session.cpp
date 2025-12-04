@@ -795,15 +795,11 @@ void ScreenSession::HandleResolutionEffectPropertyChange(ScreenProperty& screenP
         return;
     }
     auto screenBounds = eventPara.GetBounds();
-    auto rotation = screenProperty.GetScreenRotation();
     screenProperty.SetInputOffset(eventPara.GetInputOffsetX(), eventPara.GetInputOffsetY());
     screenProperty.SetScreenAreaHeight(eventPara.GetScreenAreaHeight());
     screenProperty.SetScreenAreaWidth(eventPara.GetScreenAreaWidth());
     screenProperty.SetMirrorWidth(eventPara.GetMirrorWidth());
     screenProperty.SetMirrorHeight(eventPara.GetMirrorHeight());
-    if (!IsVertical(rotation)) {
-        std::swap(screenBounds.rect_.width_, screenBounds.rect_.height_);
-    }
     TLOGI(WmsLogTag::DMS, "bounds after change: %{public}f, %{public}f",
         screenBounds.rect_.width_, screenBounds.rect_.height_);
     screenProperty.SetBounds(screenBounds);
@@ -999,6 +995,7 @@ void ScreenSession::ProcPropertyChangedForSuperFold(ScreenProperty& screenProper
     // back server for post processs of screen change
     screenProperty.SetSuperFoldStatusChangeEvent(changeEvent);
     screenProperty.SetIsDestroyDisplay(eventPara.GetIsFakeInUse());
+    screenProperty.SetPropertyChangeReason(eventPara.GetPropertyChangeReason());
 
     switch (changeEvent) {
         case SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED: {
@@ -3259,7 +3256,7 @@ void ScreenSession::UpdateScbScreenPropertyForSuperFlod(const ScreenProperty& sc
         property_.SetPointerActiveWidth(screenProperty.GetPointerActiveWidth());
         property_.SetPointerActiveHeight(screenProperty.GetPointerActiveHeight());
         TLOGI(WmsLogTag::DMS, "handle system keyboard on and system keyboard succ");
-    } else if (changeEvent == SuperFoldStatusChangeEvents::RESOLUITION_EFFECT_CHANGE) {
+    } else {
         auto screenBounds = screenProperty.GetBounds();
         property_.SetBounds(screenBounds);
         property_.SetValidHeight(screenProperty.GetValidHeight());
