@@ -2685,8 +2685,8 @@ HWTEST_F(WindowSceneSessionImplTest, SetGestureBackEnabled, TestSize.Level1)
     window->property_->SetWindowName("SetGestureBackEnabled");
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetGestureBackEnabled(false));
-    window->property->compatibleModeProperty_ = sptr<CompatibleModeProperty>::MakeSptr();
-    window->property->compatibleModeProperty_->SetIsAdaptToCompatibleDevice(true);
+    window->property_->compatibleModeProperty_ = sptr<CompatibleModeProperty>::MakeSptr();
+    window->property_->compatibleModeProperty_->SetIsAdaptToCompatibleDevice(true);
     EXPECT_EQ(window->SetGestureBackEnabled(false), WMError::WM_OK);
     bool enabled = false;
     EXPECT_EQ(window->GetGestureBackEnabled(enabled), WMError::WM_OK);
