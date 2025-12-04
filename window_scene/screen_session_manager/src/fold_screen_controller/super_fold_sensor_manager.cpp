@@ -206,7 +206,7 @@ void SuperFoldSensorManager::NotifyHallChanged(uint16_t Hall)
 {
     SuperFoldStatusChangeEvents events;
     if (Hall == HALL_REMOVE_KEYBOARD_THRESHOLD) {
-        TLOGI(WmsLogTag::DMS, "NotifyHallChanged: Keyboard off!");
+        TLOGD(WmsLogTag::DMS, "NotifyHallChanged: Keyboard off!");
         events = SuperFoldStatusChangeEvents::KEYBOARD_OFF;
     } else if (Hall == HALL_HAVE_KEYBOARD_THRESHOLD) {
         if (SuperFoldStateManager::GetInstance().GetCurrentStatus() == SuperFoldStatus::EXPANDED) {

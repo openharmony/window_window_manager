@@ -60,7 +60,7 @@ public:
         sptr<MoveDragProperty>& moveDragProperty);
     virtual void ProcessPointDown(uint32_t windowId, bool isPointDown = true);
     virtual void ProcessPointUp(uint32_t windowId);
-    virtual WMError MinimizeAllAppWindows(DisplayId displayId);
+    virtual WMError MinimizeAllAppWindows(DisplayId displayId, int32_t excludeWindowId = 0);
     virtual WMError ToggleShownStateForAllAppWindows();
     virtual WMError SetWindowLayoutMode(WindowLayoutMode mode);
     virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action);
@@ -75,9 +75,9 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent);
     virtual WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
-    WMError RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
+    virtual WMError RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
-    WMError UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
+    virtual WMError UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
     virtual WMError CheckWindowId(int32_t windowId, int32_t& pid);
 
@@ -122,7 +122,7 @@ public:
     virtual WMError UpdateSessionOcclusionStateListener(int32_t persistentId, bool haveListener);
     virtual WMError RaiseWindowToTop(int32_t persistentId);
     virtual WMError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId);
-    virtual WMError SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex);
+    virtual WMError SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex, bool updateMap = true);
     virtual void CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
@@ -244,6 +244,8 @@ public:
     void UnregisterOutlineRecoverCallbackFunc();
     virtual WMError UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams);
 
+    sptr<IWindowManager> GetWindowManagerServiceProxy() const;
+
 private:
     friend class sptr<WindowAdapter>;
     ~WindowAdapter() override;
@@ -265,7 +267,7 @@ private:
      * Window Recover
      */
     void ReregisterWindowManagerAgent();
-    void ReregisterWindowManagerFaultAgent();
+    void ReregisterWindowManagerFaultAgent(const sptr<IWindowManager>& proxy);
     void WindowManagerAndSessionRecover();
     void RecoverSpecificZIndexSetByApp();
     WMError RecoverWindowPropertyChangeFlag();
@@ -274,25 +276,26 @@ private:
     std::string appWatermarkName_;
     std::unordered_map<WindowType, int32_t> specificZIndexMap_;
 
-    sptr<IWindowManager> GetWindowManagerServiceProxy() const;
-
     mutable std::mutex mutex_;
     sptr<IWindowManager> windowManagerServiceProxy_ = nullptr;
     sptr<WMSDeathRecipient> wmsDeath_ = nullptr;
     bool isProxyValid_ = false;
     bool isRegisteredUserSwitchListener_ = false;
-    std::map<WindowManagerAgentType, std::set<sptr<IWindowManagerAgent>>> windowManagerAgentMap_;
+    bool recoverInitialized_ = false;
     std::map<int32_t, SessionRecoverCallbackFunc> sessionRecoverCallbackFuncMap_;
+    // above guarded by mutex_
+
     std::mutex effectMutex_;
     std::map<int32_t, UIEffectRecoverCallbackFunc> uiEffectRecoverCallbackFuncMap_;
-    bool recoverInitialized_ = false;
 
+    // Note: Currently, sptr does not support unordered_map<T, unordered_set<sptr<T>>>.
+    std::map<WindowManagerAgentType, std::set<sptr<IWindowManagerAgent>>> windowManagerAgentMap_;
     std::map<WindowManagerAgentType, std::set<sptr<IWindowManagerAgent>>> windowManagerAgentFaultMap_;
-    std::mutex windowManagerAgentFaultMapMutex_;
+    std::mutex wmAgentMapMutex_;
+    // Agent map both locked by wmAgentMapMutex_
 
     std::mutex outlineMutex_;
     OutlineRecoverCallbackFunc outlineRecoverCallbackFunc_;
-    // above guarded by mutex_
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -31,6 +31,7 @@
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
 
+#include "application_context.h"
 #include "color_parser.h"
 #include "common/include/fold_screen_state_internel.h"
 #include "common/include/fold_screen_common.h"
@@ -77,6 +78,8 @@ constexpr uint32_t INVALID_TARGET_API_VERSION = 0;
 constexpr uint32_t OPAQUE = 0xFF000000;
 constexpr int32_t WINDOW_CONNECT_TIMEOUT = 1000;
 constexpr int32_t WINDOW_LIFECYCLE_TIMEOUT = 100;
+constexpr int32_t MIN_ROTATION_VALUE = 0;
+constexpr int32_t MAX_ROTATION_VALUE = 3;
 
 /*
  * DFX
@@ -354,6 +357,13 @@ bool WindowSessionImpl::IsPcWindow() const
 bool WindowSessionImpl::IsPadWindow() const
 {
     return windowSystemConfig_.IsPadWindow();
+}
+
+bool WindowSessionImpl::IsPhonePadOrPcWindow() const
+{
+    return windowSystemConfig_.IsPhoneWindow() ||
+        windowSystemConfig_.IsPadWindow() ||
+        windowSystemConfig_.IsPcWindow();
 }
 
 bool WindowSessionImpl::IsPcOrFreeMultiWindowCapabilityEnabled() const
@@ -1950,6 +1960,13 @@ int32_t WindowSessionImpl::GetFloatingWindowParentId()
             return winPair.second.second->GetProperty()->GetPersistentId();
         }
     }
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(GetContext());
+    if (abilityContext != nullptr) {
+        int32_t parentId = INVALID_SESSION_ID;
+        abilityContext->GetMissionId(parentId);
+        TLOGI(WmsLogTag::WMS_LIFE, "parentId: %{public}d", parentId);
+        return parentId;
+    }
     return INVALID_SESSION_ID;
 }
 
@@ -2012,6 +2029,9 @@ void WindowSessionImpl::HideTitleButton(bool& hideSplitButton, bool& hideMaximiz
     if (uiContent == nullptr || !IsDecorEnable()) {
         return;
     }
+    RealTimeSwitchInfo switchInfo = property_->GetRealTimeSwitchInfo();
+    uiContent->OnContainerModalEvent(SCB_COMPATIBLE_MENU_VISIBILITY, switchInfo.isNeedChange_ ? "true" : "false");
+    uiContent->OnContainerModalEvent(SCB_GET_COMPATIBLE_PRIMARY_MODE, std::to_string(switchInfo.showTypes_));
     hideMaximizeButton = hideMaximizeButton || property_->IsFullScreenDisabled();
     bool isLayoutFullScreen = property_->IsLayoutFullScreen();
     bool hideSplitBtn = hideSplitButton || property_->IsSplitDisabled();
@@ -2031,9 +2051,6 @@ void WindowSessionImpl::HideTitleButton(bool& hideSplitButton, bool& hideMaximiz
     bool fullScreenStart = property_->IsFullScreenStart() &&
         (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
     uiContent->OnContainerModalEvent(SCB_COMPATIBLE_MAXIMIZE_BTN_RES, fullScreenStart ? "true" : "false");
-    RealTimeSwitchInfo switchInfo = property_->GetRealTimeSwitchInfo();
-    uiContent->OnContainerModalEvent(SCB_COMPATIBLE_MENU_VISIBILITY, switchInfo.isNeedChange_ ? "true" : "false");
-    uiContent->OnContainerModalEvent(SCB_GET_COMPATIBLE_PRIMARY_MODE, std::to_string(switchInfo.showTypes_));
 }
 
 WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
@@ -2214,6 +2231,7 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, void* e
             uiContent_->SetContainerModalTitleVisible(false, true);
             uiContent_->EnableContainerModalCustomGesture(true);
         }
+        RegisterNavigateCallbackForPageCompatibleModeIfNeed();
         TLOGI(WmsLogTag::DEFAULT, "[%{public}d, %{public}d]",
             uiContent_->IsUIExtensionSubWindow(), uiContent_->IsUIExtensionAbilityProcess());
     }
@@ -2503,7 +2521,6 @@ void WindowSessionImpl::UpdateDecorEnableToAce(bool isDecorEnable)
             auto isSubWindow = WindowHelper::IsSubWindow(GetType());
             decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
                 (property_->GetIsPcAppInPad() && isSubWindow)) &&
-                !(mode == WindowMode::WINDOW_MODE_FULLSCREEN && property_->GetCompatibleModeProperty()) &&
                 property_->GetIsShowDecorInFreeMultiWindow();
         }
         if (mode == WindowMode::WINDOW_MODE_FULLSCREEN && property_->IsDecorFullscreenDisabled()) {
@@ -2537,7 +2554,6 @@ void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
                 auto isSubWindow = WindowHelper::IsSubWindow(GetType());
                 decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
                     (property_->GetIsPcAppInPad() && isSubWindow)) &&
-                    !(mode == WindowMode::WINDOW_MODE_FULLSCREEN && property_->GetCompatibleModeProperty()) &&
                     property_->GetIsShowDecorInFreeMultiWindow();
             }
             if (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN && property_->IsDecorFullscreenDisabled()) {
@@ -2774,7 +2790,7 @@ WSError WindowSessionImpl::NotifyHighlightChange(const sptr<HighlightNotifyInfo>
     }
     updateHighlightTimeStamp_.store(highlightNotifyInfo->timeStamp_);
     for (auto unHighlightWindowId : highlightNotifyInfo->notHighlightIds_) {
-        if (!isHighlight && unHighlightWindowId == GetWindowId()) {
+        if (!isHighlight && static_cast<uint32_t>(unHighlightWindowId) == GetWindowId()) {
             NotifyHighlightChange(isHighlight);
             continue;
         }
@@ -3189,6 +3205,31 @@ Orientation WindowSessionImpl::GetRequestedOrientation()
     }
     TLOGI(WmsLogTag::WMS_ROTATION, "userRequestedOrientation:%{public}u", property_->GetUserRequestedOrientation());
     return property_->GetUserRequestedOrientation();
+}
+
+WMError WindowSessionImpl::ConvertOrientationAndRotation(
+    const RotationInfoType from, const RotationInfoType to, const int32_t value, int32_t& convertedValue)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "windowSession is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!windowSystemConfig_.IsPadWindow() && !windowSystemConfig_.IsPhoneWindow()) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (value < MIN_ROTATION_VALUE || value > MAX_ROTATION_VALUE) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "the value to be converted is invalid");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (from == to) {
+        convertedValue = value;
+        return WMError::WM_OK;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    WSError ret = hostSession->ConvertOrientationAndRotation(from, to, value, convertedValue);
+    TLOGI(WmsLogTag::WMS_ROTATION, "convertedValue:%{public}d", convertedValue);
+    return static_cast<WMError>(ret);
 }
 
 Orientation WindowSessionImpl::ConvertUserOrientationToUserPageOrientation(Orientation Orientation) const
@@ -7404,6 +7445,50 @@ WMError WindowSessionImpl::SetSpecificBarProperty(WindowType type, const SystemB
     return WMError::WM_OK;
 }
 
+WMError WindowSessionImpl::UpdateStatusBarColorByColorMode(uint32_t& contentColor)
+{
+    SystemBarProperty statusBarProp = property_->GetSystemBarProperty().at(WindowType::WINDOW_TYPE_STATUS_BAR);
+    if (static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(statusBarProp.settingFlag_) &
+        static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING)) == SystemBarSettingFlag::COLOR_SETTING) {
+        TLOGD(WmsLogTag::WMS_IMMS, "user has set color");
+        return WMError::WM_DO_NOTHING;
+    }
+    constexpr uint32_t BLACK = 0xFF000000;
+    constexpr uint32_t WHITE = 0xFFFFFFFF;
+    bool isColorModeSetByApp = !specifiedColorMode_.empty();
+    std::string colorMode = specifiedColorMode_;
+    if (isColorModeSetByApp) {
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type %{public}u colorMode %{public}s",
+            GetPersistentId(), GetType(), colorMode.c_str());
+        contentColor = colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT ? BLACK : WHITE;
+    } else {
+        auto appContext = AbilityRuntime::Context::GetApplicationContext();
+        if (appContext == nullptr) {
+            TLOGE(WmsLogTag::WMS_IMMS, "app context is nullptr");
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
+        if (config == nullptr) {
+            TLOGE(WmsLogTag::WMS_IMMS, "config is null, winId: %{public}d", GetPersistentId());
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+        isColorModeSetByApp = !config->GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP).empty();
+        if (isColorModeSetByApp) {
+            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "win=%{public}u, appColor=%{public}s", GetWindowId(), colorMode.c_str());
+            contentColor = colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT ? BLACK : WHITE;
+        } else {
+            bool hasDarkRes = false;
+            appContext->AppHasDarkRes(hasDarkRes);
+            TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type %{public}u hasDarkRes %{public}u colorMode %{public}s",
+                GetPersistentId(), GetType(), hasDarkRes, colorMode.c_str());
+            contentColor = colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT ? BLACK :
+                (hasDarkRes ? WHITE : BLACK);
+        }
+    }
+    return WMError::WM_OK;
+}
+
 void WindowSessionImpl::NotifyOccupiedAreaChangeInfoInner(sptr<OccupiedAreaChangeInfo> info)
 {
     std::lock_guard<std::recursive_mutex> lockListener(occupiedAreaChangeListenerMutex_);
@@ -8916,6 +9001,43 @@ void WindowSessionImpl::NotifyFreeWindowModeChange(bool isInFreeWindowMode)
             listener->OnFreeWindowModeChange(isInFreeWindowMode);
         }
     }
+}
+
+void WindowSessionImpl::RegisterNavigateCallbackForPageCompatibleModeIfNeed()
+{
+    const std::string compatibleModePage = property_->GetCompatibleModePage();
+    if (!uiContent_ || compatibleModePage.empty()) {
+        TLOGI(WmsLogTag::WMS_COMPAT, "content is nullptr or page is empty");
+        return;
+    }
+    uiContent_->RegisterNavigateChangeCallback(
+        [weakThis = wptr(this), where = __func__](const OHOS::Ace::NavigateChangeInfo& fromPage,
+            const OHOS::Ace::NavigateChangeInfo& toPage) {
+        auto window = weakThis.promote();
+        if (!window) {
+            TLOGNE(WmsLogTag::WMS_COMPAT, "%{public}s window is null", where);
+            return;
+        }
+        window->HandleNavigateCallbackForPageCompatibleMode(fromPage.name, toPage.name);
+    });
+}
+
+void WindowSessionImpl::HandleNavigateCallbackForPageCompatibleMode(
+    const std::string& fromPage, const std::string& toPage)
+{
+    const std::string compatibleModePage = property_->GetCompatibleModePage();
+    if ((fromPage == compatibleModePage && toPage == compatibleModePage) ||
+        (fromPage != compatibleModePage && toPage != compatibleModePage)) {
+        return;
+    }
+    auto hostSession = GetHostSession();
+    if (!hostSession) {
+        TLOGNE(WmsLogTag::WMS_COMPAT, "hostSession is null");
+        return;
+    }
+    auto mode = toPage == compatibleModePage ? CompatibleStyleMode::LANDSCAPE_18_9 : CompatibleStyleMode::INVALID_VALUE;
+    property_->SetPageCompatibleMode(mode);
+    hostSession->NotifyCompatibleModeChange(mode);
 }
 } // namespace Rosen
 } // namespace OHOS

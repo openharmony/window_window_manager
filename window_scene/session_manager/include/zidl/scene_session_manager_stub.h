@@ -130,6 +130,7 @@ private:
     int HandleAddSkipSelfWhenShowOnVirtualScreenList(MessageParcel& data, MessageParcel& reply);
     int HandleRemoveSkipSelfWhenShowOnVirtualScreenList(MessageParcel& data, MessageParcel& reply);
     int HandleSetScreenPrivacyWindowTagSwitch(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyBrightnessModeChange(MessageParcel& data, MessageParcel& reply);
     int HandleIsPcWindow(MessageParcel& data, MessageParcel& reply);
     int HandleIsFreeMultiWindow(MessageParcel& data, MessageParcel& reply);
     int HandleIsPcOrPadFreeMultiWindowMode(MessageParcel& data, MessageParcel& reply);
@@ -159,6 +160,7 @@ private:
     int HandleMinimizeAllAppWindows(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateOutline(MessageParcel& data, MessageParcel& reply);
     int HandleSetSpecificWindowZIndex(MessageParcel& data, MessageParcel& reply);
+    int HandleResetSpecificWindowZIndex(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySupportRotationRegistered(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen

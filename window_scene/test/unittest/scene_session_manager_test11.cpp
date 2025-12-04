@@ -1740,12 +1740,14 @@ HWTEST_F(SceneSessionManagerTest11, ConfigDockAutoHide, TestSize.Level0)
 HWTEST_F(SceneSessionManagerTest11, SetSpecificWindowZIndexListener, TestSize.Level1)
 {
     int value = 0;
-    NotifySetSpecificWindowZIndexFunc func = [&value](WindowType windowType, int32_t zIndex) {
+    NotifySetSpecificWindowZIndexFunc func = [&value](WindowType windowType, int32_t zIndex,
+        SetSpecificZIndexReason reason) {
         value = zIndex;
     };
     ssm_->SetSpecificWindowZIndexListener(func);
-    ssm_->setSpecificWindowZIndexFunc_(WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD, 20);
+    ssm_->setSpecificWindowZIndexFunc_(WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD, 20, SetSpecificZIndexReason::SET);
     EXPECT_EQ(value, 20);
+    ssm_->SetSpecificWindowZIndexListener(nullptr);
 }
 
 /**
@@ -1761,13 +1763,15 @@ HWTEST_F(SceneSessionManagerTest11, SetSpecificWindowZIndex, TestSize.Level1)
 
     MockAccesstokenKit::MockIsSystemApp(true);
     int value = 0;
-    NotifySetSpecificWindowZIndexFunc func = [&value](WindowType windowType, int32_t zIndex) {
+    NotifySetSpecificWindowZIndexFunc func = [&value](WindowType windowType, int32_t zIndex,
+        SetSpecificZIndexReason reason) {
         value = zIndex;
     };
     ssm_->SetSpecificWindowZIndexListener(func);
     ret = ssm_->SetSpecificWindowZIndex(WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD, 20);
     EXPECT_EQ(ret, WSError::WS_OK);
     EXPECT_EQ(value, 20);
+    ssm_->SetSpecificWindowZIndexListener(nullptr);
 }
 } // namespace
 } // namespace Rosen

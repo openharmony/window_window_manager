@@ -1474,7 +1474,7 @@ void MoveDragController::ClearSpecifyMoveStartDisplay()
     isSpecifyMoveStart_ = false;
 }
 
-void MoveDragController::HandleStartMovingWithCoordinate(const MoveCoordinateProperty& property)
+void MoveDragController::HandleStartMovingWithCoordinate(const MoveCoordinateProperty& property, bool isMovable)
 {
     moveTempProperty_.lastDownPointerPosX_ = property.pointerPosX;
     moveTempProperty_.lastDownPointerPosY_ = property.pointerPosY;
@@ -1488,7 +1488,9 @@ void MoveDragController::HandleStartMovingWithCoordinate(const MoveCoordinatePro
         property.displayId, targetRect.ToString().c_str());
     moveDragProperty_.targetRect_ = targetRect;
     moveDragEndDisplayId_ = property.displayId;
-    ProcessSessionRectChange(SizeChangeReason::DRAG_MOVE);
+    if (isMovable) {
+        ProcessSessionRectChange(SizeChangeReason::DRAG_MOVE);
+    }
 }
 
 /** @note @window.drag */

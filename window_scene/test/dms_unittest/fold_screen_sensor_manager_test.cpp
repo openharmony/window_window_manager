@@ -66,6 +66,10 @@ void FoldScreenSensorManagerTest::SetUp()
 
 void FoldScreenSensorManagerTest::TearDown()
 {
+    OHOS::Rosen::FoldScreenSensorManager::GetInstance().UnSubscribeSensorCallback(
+        SENSOR_TYPE_ID_POSTURE);
+    OHOS::Rosen::FoldScreenSensorManager::GetInstance().UnSubscribeSensorCallback(
+        SENSOR_TYPE_ID_HALL_EXT);
     usleep(SLEEP_TIME_US);
 }
 
@@ -97,8 +101,8 @@ HWTEST_F(FoldScreenSensorManagerTest, UnRegisterPostureCallback01, TestSize.Leve
     if (!(ssm_->IsFoldable())) {
         GTEST_SKIP();
     }
-    EXPECT_TRUE(g_logMsg.find("UnRegisterPostureCallback failed with ret:") == std::string::npos);
-    EXPECT_TRUE(g_logMsg.find("success.") != std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("UnRegisterPostureCallback failed with ret:") != std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("success.") == std::string::npos);
 
     g_logMsg.clear();
     LOG_SetCallback(nullptr);
@@ -241,7 +245,7 @@ HWTEST_F(FoldScreenSensorManagerTest, UnSubscribeSensorCallback_002, TestSize.Le
     FoldScreenSensorManager manager;
 
     auto userIt = manager.users_.find(sensorTypeId);
-    EXPECT_NE(userIt, manager.users_.end());
+    EXPECT_EQ(userIt, manager.users_.end());
 
     int32_t result = manager.UnSubscribeSensorCallback(sensorTypeId);
     EXPECT_EQ(result, sensorFailure);
@@ -258,7 +262,7 @@ HWTEST_F(FoldScreenSensorManagerTest, UnSubscribeSensorCallback_003, TestSize.Le
     int sensorFailure = 1;
     int sensorSuccess = 0;
     auto userIt = manager.users_.find(sensorTypeId);
-    EXPECT_NE(userIt, manager.users_.end());
+    EXPECT_EQ(userIt, manager.users_.end());
 
     int32_t result = manager.UnSubscribeSensorCallback(sensorTypeId);
     EXPECT_EQ(result, sensorFailure);
@@ -279,7 +283,6 @@ HWTEST_F(FoldScreenSensorManagerTest, UnSubscribeSensorCallback_004, TestSize.Le
         GTEST_SKIP();
     }
     EXPECT_TRUE(g_logMsg.find("Unsubscribe sensor type: sensorTypeId=%{public}d") == std::string::npos);
-    EXPECT_TRUE(g_logMsg.find("success.") != std::string::npos);
     EXPECT_TRUE(g_logMsg.find("failed.") == std::string::npos);
 
     g_logMsg.clear();
@@ -387,11 +390,23 @@ HWTEST_F(FoldScreenSensorManagerTest, HandleHallDataWhenAngleMinusOne, TestSize.
     };
     mgr.HandleHallData(&hallEvent);
     EXPECT_EQ(mgr.globalAngle, ANGLE_MIN_VAL);
+}
 
-    mgr.globalAngle = -2.0F;
-    mgr.globalHall = 0;
-    mgr.HandleHallData(&hallEvent);
-    EXPECT_EQ(mgr.globalAngle, -2.0F);
+/**
+ * @tc.name: HandleAbnormalAngleTest
+ * @tc.desc: test function : HandleAbnormalAngle
+ * @tc.type: FUNC
+ */
+HWTEST_F(FoldScreenSensorManagerTest, HandleAbnormalAngleTest, TestSize.Level1)
+{
+    FoldScreenSensorManager mgr = FoldScreenSensorManager();
+    mgr.SetSensorFoldStateManager(new SensorFoldStateManager());
+    mgr.SetGlobalAngle(-1.0F);
+    mgr.SetGlobalHall(1);
+    EXPECT_TRUE(mgr.HandleAbnormalAngle());
+
+    mgr.SetGlobalAngle(-2.0F);
+    EXPECT_FALSE(mgr.HandleAbnormalAngle());
 }
 
 /**

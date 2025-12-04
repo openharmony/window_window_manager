@@ -400,6 +400,25 @@ enum class Orientation : uint32_t {
 };
 
 /**
+ * @brief Rotation info type
+ */
+enum class RotationInfoType : uint32_t {
+    WINDOW_ORIENTATION = 0,
+    DISPLAY_ORIENTATION = 1,
+    DISPLAY_ROTATION = 2,
+};
+
+/**
+ * @brief Window Orientaion
+ */
+enum class WindowOrientation : uint32_t {
+    PORTRAIT = 0,
+    LANDSCAPE_INVERTED,
+    PORTRAIT_INVERTED,
+    LANDSCAPE,
+};
+
+/**
  * @brief Enumerates display orientations.
  */
 enum class DisplayOrientation : uint32_t {
@@ -408,6 +427,20 @@ enum class DisplayOrientation : uint32_t {
     PORTRAIT_INVERTED,
     LANDSCAPE_INVERTED,
     UNKNOWN,
+};
+
+const std::map<DisplayOrientation, WindowOrientation> DISPLAY_TO_WINDOW_MAP{
+    { DisplayOrientation::PORTRAIT, WindowOrientation::PORTRAIT },
+    { DisplayOrientation::LANDSCAPE, WindowOrientation::LANDSCAPE_INVERTED },
+    { DisplayOrientation::PORTRAIT_INVERTED, WindowOrientation::PORTRAIT_INVERTED },
+    { DisplayOrientation::LANDSCAPE_INVERTED, WindowOrientation::LANDSCAPE },
+};
+
+const std::map<WindowOrientation, DisplayOrientation> WINDOW_TO_DISPLAY_MAP{
+    { WindowOrientation::PORTRAIT, DisplayOrientation::PORTRAIT },
+    { WindowOrientation::LANDSCAPE, DisplayOrientation::LANDSCAPE_INVERTED },
+    { WindowOrientation::PORTRAIT_INVERTED, DisplayOrientation::PORTRAIT_INVERTED },
+    { WindowOrientation::LANDSCAPE_INVERTED, DisplayOrientation::LANDSCAPE },
 };
 
 /**

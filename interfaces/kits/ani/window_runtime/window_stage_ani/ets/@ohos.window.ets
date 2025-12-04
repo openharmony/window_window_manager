@@ -3190,6 +3190,8 @@ export class WindowInternal implements Window {
     private native raiseAboveTargetSync(nativeObj: long, windowId: int): void;
     private native raiseToAppTopSync(nativeObj: long): void;
     private native setTopmostSync(nativeObj: long, isTopmost: boolean): void;
+    private native setReceiveDragEventEnabled(nativeObj: long, enabled: boolean): void;
+    private native isReceiveDragEventEnabled(nativeObj: long): boolean;
     private native requestFocusSync(nativeObj: long, isFocused: boolean): void;
     private native setSubWindowModal(nativeObj: long, isModal: boolean): void;
     private native setSubWindowModalType(nativeObj: long, isModal: boolean, modalityType: int): void;
@@ -3220,6 +3222,7 @@ export class WindowInternal implements Window {
     private native setAspectRatio(nativeObj: long, ratio: double): void;
     private native resetAspectRatio(nativeObj: long): void;
     private native getWindowStatus(nativeObj: long): int;
+    private native minimize(nativeObj: long): void;
     private native maximize(nativeObj: long, presentation?: MaximizePresentation, acrossDisplay?: boolean): void;
     private native startMoving(nativeObj: long): void;
     private native startMoveWindowWithCoordinate(nativeObj: long, offsetX: int, offsetY: int): void;
@@ -4375,6 +4378,22 @@ export class WindowInternal implements Window {
       });
     }
 
+    public setReceiveDragEventEnabled(enabled: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setReceiveDragEventEnabled(this.nativeObj, enabled);
+        }).then((ret: NullishType): void => {
+          resolve(undefined);
+        }).catch((err: NullishType): void => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public isReceiveDragEventEnabled(): boolean{
+      return this.isReceiveDragEventEnabled(this.nativeObj);
+    }
+
     public requestFocus(isFocused: boolean): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
@@ -4908,6 +4927,32 @@ export class WindowInternal implements Window {
       return this.getWindowStatus(this.nativeObj) as WindowStatusType;
     }
 
+    public minimize(): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
+        taskpool.execute((): void => {
+          this.minimize(this.nativeObj);
+        }).then((ret: Any): void => {
+            resolve(undefined);
+        }).catch((err: Any): void => {
+            reject(err as BusinessError);
+        });
+      });
+    }
+
+    public minimize(callback: AsyncCallback<void>): void {
+      taskpool.execute((): void => {
+          this.minimize(this.nativeObj);
+      }).then((ret: Any) => {
+          callback(new BusinessError(), undefined);
+      }).catch((err: Any) => {
+          callback(err as BusinessError, undefined);
+      });
+    }
+
+    public maximize(presentation?: MaximizePresentation): Promise<void> {
+      return this.maximize(presentation, undefined);
+    }
+
     public maximize(presentation?: MaximizePresentation, acrossDisplay?: boolean): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute(() => {
@@ -5353,6 +5398,8 @@ export interface Window {
     raiseToAppTop(callback: AsyncCallback<void>): void;
     raiseToAppTop(): Promise<void>;
     setTopmost(isTopmost: boolean): Promise<void>;
+    setReceiveDragEventEnabled(enabled: boolean): Promise<void>;
+    isReceiveDragEventEnabled(): boolean;
     requestFocus(isFocused: boolean): Promise<void>;
     setSubWindowModal(isModal: boolean): Promise<void>;
     setSubWindowModal(isModal: boolean, modalityType: ModalityType): Promise<void>;
@@ -5440,6 +5487,9 @@ export interface Window {
     resetAspectRatio(callback: AsyncCallback<void>): void;
     resetAspectRatio(): Promise<void>;
     getWindowStatus(): WindowStatusType;
+    minimize(callback: AsyncCallback<void>): void;
+    minimize(): Promise<void>;
+    maximize(presentation?: MaximizePresentation): Promise<void>;
     maximize(presentation?: MaximizePresentation, acrossDisplay?: boolean): Promise<void>;
     startMoving(): Promise<void>;
     startMoving(offsetX: int, offsetY: int): Promise<void>;
@@ -5503,7 +5553,7 @@ native function onSync(nativeObj: long, type: string, callback: object): void;
 native function offSync(nativeObj: long, type: string, callback?: object): void;
 native function createWindowSync(nativeObj: long, config: Configuration): Window;
 native function getAllWindowLayoutInfo(nativeObj: long, displayId: long): Array<WindowLayoutInfo>;
-native function getSnapshot(nativeObj: long, windowId: number): image.PixelMap;
+native function getSnapshot(nativeObj: long, windowId: int): image.PixelMap;
 native function getVisibleWindowInfo(nativeObj: long): Array<WindowInfoInternal>;
 native function setGestureNavigationEnabled(nativeObj: long, enabled: boolean): void;
 native function setWaterMarkImage(nativeObj: long, pixelMap: image.PixelMap, enabled: boolean): void;
@@ -5520,6 +5570,7 @@ native function setStartWindowBackgroundColorSync(nativeObj: long, moduleName: s
   color: long): void;
 native function notifyScreenshotEventSync(nativeObj: long, eventType: ScreenshotEventType): void;
 native function toggleShownStateForAllAppWindowsSync(nativeObj: long): void;
+native function setSpecificSystemWindowZIndexSync(nativeObj: long, windowType: WindowType, zIndex: int): void;
 
 export function toggleShownStateForAllAppWindows(callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
@@ -5685,7 +5736,7 @@ export function getAllWindowLayoutInfo(displayId: long): Promise<Array<WindowLay
   });
 }
 
-export function getSnapshot(windowId: number): Promise<image.PixelMap> {
+export function getSnapshot(windowId: int): Promise<image.PixelMap> {
   return new Promise<image.PixelMap>((
     resolve: (value: image.PixelMap) => void, reject: (error: BusinessError) => void): void => {
       taskpool.execute(() => {
@@ -5817,6 +5868,18 @@ export function shiftAppWindowPointerEvent(sourceWindowId: int, targetWindowId: 
     }).catch((err: NullishType) => {
       reject(err as BusinessError);
     });
+  });
+}
+
+export function setSpecificSystemWindowZIndex(windowType: WindowType, zIndex: int): Promise<void> {
+  return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+      taskpool.execute((): void => {
+          return setSpecificSystemWindowZIndexSync(nativeObj, windowType, zIndex);
+      }).then((ret: NullishType) => {
+          resolve(undefined);
+      }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+      });
   });
 }
 

@@ -486,6 +486,40 @@ HWTEST_F(WindowSessionImplTest4, IsPcWindow, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsPhonePadOrPcWindow
+ * @tc.desc: IsPhonePadOrPcWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, IsPhonePadOrPcWindow, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPhonePadOrPcWindow start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsPhonePadOrPcWindow");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    // Case 1: Test phone window
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    EXPECT_EQ(true, window->IsPhonePadOrPcWindow());
+
+    // Case 2: Test pad window
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    EXPECT_EQ(true, window->IsPhonePadOrPcWindow());
+
+    // Case 3: Test pc window
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    EXPECT_EQ(true, window->IsPhonePadOrPcWindow());
+
+    // Case 4: Test invalid window
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
+    EXPECT_EQ(false, window->IsPhonePadOrPcWindow());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPhonePadOrPcWindow end";
+}
+
+/**
  * @tc.name: IsPadAndNotFreeMultiWindowCompatibleMode
  * @tc.desc: IsPadAndNotFreeMultiWindowCompatibleMode
  * @tc.type: FUNC

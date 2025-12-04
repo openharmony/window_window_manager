@@ -48,6 +48,7 @@ const std::string ARG_DUMP_FOLD_STATUS = "-f";
 constexpr int MOTION_SENSOR_PARAM_SIZE = 2;
 const std::string STATUS_FOLD_HALF = "-z";
 const std::string STATUS_EXPAND = "-y";
+const std::string STATUS_EXPAND_WITH_SECOND_EXPAND = "-yy";
 const std::string STATUS_FOLD = "-p";
 const std::string ARG_SET_ROTATION_SENSOR = "-motion"; // rotation event inject
 const std::string ARG_SET_ROTATION_LOCK = "-rotationlock";
@@ -229,7 +230,8 @@ bool ScreenSessionDumper::IsDeveloperModeCommand()
         if (SetFoldDisplayMode() != 0) {
             ShowIllegalArgsInfo();
         }
-    } else if (params_[0] == STATUS_FOLD_HALF || params_[0] == STATUS_EXPAND || params_[0] == STATUS_FOLD) {
+    } else if (params_[0] == STATUS_FOLD_HALF || params_[0] == STATUS_EXPAND || params_[0] == STATUS_FOLD ||
+        params_[0] == STATUS_EXPAND_WITH_SECOND_EXPAND) {
         ShowNotifyFoldStatusChangedInfo();
     } else if (params_[0].find(ARG_SET_ROTATION_SENSOR) != std::string::npos) {
         SetMotionSensorValue(params_[0]);
@@ -311,6 +313,8 @@ void ScreenSessionDumper::ShowHelpInfo()
         .append("|switch to fold half status\n")
         .append(" -y                             ")
         .append("|switch to expand status\n")
+        .append(" -yy                            ")
+        .append("|switch to both first and second axes expand status\n")
         .append(" -p                             ")
         .append("|switch to fold status\n")
         .append(" -f                             ")

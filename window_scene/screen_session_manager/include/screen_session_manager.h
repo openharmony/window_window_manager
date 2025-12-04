@@ -71,7 +71,8 @@ DECLARE_SYSTEM_ABILITY(ScreenSessionManager)
 WM_DECLARE_SINGLE_INSTANCE_BASE(ScreenSessionManager)
 
 public:
-    void SetPropertyChangedCallback(std::function<void(sptr<ScreenSession>& screenSession)> callback);
+    void SetPropertyChangedCallback(std::function<void(sptr<ScreenSession>& screenSession,
+        SuperFoldStatusChangeEvents changeEvent)> callback);
     sptr<ScreenSession> GetScreenSession(ScreenId screenId) const;
     sptr<ScreenSession> GetDefaultScreenSession();
     std::vector<ScreenId> GetAllScreenIds();
@@ -122,6 +123,7 @@ public:
     bool SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) override;
     void ForceSkipScreenOffAnimation();
     ScreenPowerState GetScreenPower() override;
+    void SyncScreenPowerState(ScreenPowerState state) override;
 
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
     bool NotifyDisplayStateChanged(DisplayId id, DisplayState state);
@@ -348,6 +350,7 @@ public:
     void NotifyScreenMagneticStateChanged(bool isMagneticState);
     void OnTentModeChanged(int tentType, int32_t hall = -1);
     void RegisterSettingDpiObserver();
+    void RegisterSettingBrightnessObserver();
     void RegisterSettingRotationObserver();
     void NotifyBrightnessInfoChanged(ScreenId screenId, const BrightnessInfo& info);
 
@@ -380,7 +383,9 @@ public:
     uint32_t GetCurvedCompressionArea() override;
     ScreenProperty GetPhyScreenProperty(ScreenId screenId) override;
     void SetScreenPrivacyState(bool hasPrivate) override;
-    void SetPrivacyStateByDisplayId(DisplayId id, bool hasPrivate) override;
+    void SetPrivacyStateByDisplayId(std::unordered_map<DisplayId, bool>& privacyBundleDisplayId) override;
+    bool CheckNeedNotify(const std::vector<DisplayId>& displayIds,
+        std::unordered_map<DisplayId, bool>& privacyBundleDisplayId);
     void SetScreenPrivacyWindowList(DisplayId id, std::vector<std::string> privacyWindowList) override;
     void UpdateAvailableArea(ScreenId screenId, DMRect area) override;
     void UpdateSuperFoldAvailableArea(ScreenId screenId, DMRect bArea, DMRect cArea) override;
@@ -585,12 +590,14 @@ protected:
     mutable std::recursive_mutex phyScreenPropMapMutex_;
     mutable std::recursive_mutex screenSessionMapMutex_;
     ScreenId GetPhyScreenId(ScreenId screenId);
+    ScreenId GenerateSmsScreenId(ScreenId rsScreenId);
     EventTracker screenEventTracker_;
     sptr<ScreenSession> GetInternalScreenSession();
     sptr<ScreenSession> GetScreenSessionInner(ScreenId screenId, ScreenProperty property);
     sptr<ScreenSession> GetPhysicalScreenSessionInner(ScreenId screenId, ScreenProperty property);
     virtual void NotifyCaptureStatusChangedGlobal();
     std::mutex screenChangeMutex_;
+    std::mutex hasPrivateWindowForegroundMutex_;
     sptr<ScreenSession> GetOrCreateScreenSession(ScreenId screenId);
     void AdaptSuperHorizonalBoot(sptr<ScreenSession> screenSession, ScreenId screenId);
     sptr<ScreenSession> GetOrCreatePhysicalScreenSession(ScreenId screenId);
@@ -622,8 +629,7 @@ private:
     void RegisterBrightnessInfoChangeListener();
     void UnregisterBrightnessInfoChangeListener();
     void OnHgmRefreshRateChange(uint32_t refreshRate);
-    void UpdateSessionByActiveModeChange(sptr<ScreenSession> screenSession,
-        sptr<ScreenSession> phyScreenSession, int32_t activeIdx);
+    void UpdateSessionByActiveModeChange(sptr<ScreenSession> screenSession, int32_t activeIdx);
     int32_t GetActiveIdxInModes(const std::vector<sptr<SupportedScreenModes>>& modes,
                           const SupportedScreenModes& edidInfo);
     void RecoverScreenActiveMode(ScreenId rsScreenId);
@@ -756,7 +762,6 @@ private:
      */
     bool ActiveUser(int32_t newUserId, int32_t& oldUserId, int32_t newScbPid);
     DisplayId GetUserDisplayId(int32_t targetUserId) const;
-    ScreenId GenerateSmsScreenId(ScreenId rsScreenId);
 
     void HandleSuperFoldDisplayInfoWhenKeyboardOn(const sptr<ScreenSession>& screenSession,
         sptr<DisplayInfo>& displayInfo);
@@ -769,6 +774,7 @@ private:
     std::shared_mutex rotationCorrectionExemptionMutex_;
     std::vector<std::string> rotationCorrectionExemptionList_;
     bool needReinstallExemptionList_ = true;
+    std::unordered_map<DisplayId, bool> hasPrivateWindowForeground_;
 
     class ScreenIdManager {
     friend class ScreenSessionGroup;
@@ -1048,13 +1054,16 @@ private:
     void CalculateTargetResolution(const sptr<ScreenSession>& internalSession,
         const sptr<ScreenSession>& externalSession, const bool& effectFlag,
         uint32_t& targetWidth, uint32_t& targetHeight);
+    void NotifyBrightnessModeChange();
     std::atomic<bool> curResolutionEffectEnable_ = false;
     DMError SyncScreenPropertyChangedToServer(ScreenId screenId, const ScreenProperty& screenProperty) override;
     void SetConfigForInputmethod(ScreenId screenId, VirtualScreenOption option);
-    std::function<void(sptr<ScreenSession>& screenSession)> propertyChangedCallback_;
+    std::function<void(sptr<ScreenSession>& screenSession,
+        SuperFoldStatusChangeEvents changeEvent)> propertyChangedCallback_;
     std::mutex callbackMutex_;
     bool isSupportCapture_ = false;
     std::atomic<FoldDisplayMode> foldDisplayModeAfterRotation_ = FoldDisplayMode::UNKNOWN;
+    std::string brightnessMode_ = "";
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {

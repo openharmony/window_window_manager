@@ -44,7 +44,7 @@ public:
         sptr<MoveDragProperty>& moveDragProperty) override;
     void ProcessPointDown(uint32_t windowId, bool isPointDown) override;
     void ProcessPointUp(uint32_t windowId) override;
-    WMError MinimizeAllAppWindows(DisplayId displayId) override;
+    WMError MinimizeAllAppWindows(DisplayId displayId, int32_t excludeWindowId = 0) override;
     WMError ToggleShownStateForAllAppWindows() override;
     WMError SetWindowLayoutMode(WindowLayoutMode mode) override;
     WMError NotifyScreenshotEvent(ScreenshotEventType type) override;

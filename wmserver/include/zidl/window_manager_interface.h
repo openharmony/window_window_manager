@@ -116,7 +116,7 @@ public:
         sptr<MoveDragProperty>& moveDragProperty) = 0;
     virtual void ProcessPointDown(uint32_t windowId, bool isPointDown) = 0;
     virtual void ProcessPointUp(uint32_t windowId) = 0;
-    virtual WMError MinimizeAllAppWindows(DisplayId displayId) = 0;
+    virtual WMError MinimizeAllAppWindows(DisplayId displayId, int32_t excludeWindowId = 0) = 0;
     virtual WMError ToggleShownStateForAllAppWindows() = 0;
     virtual WMError SetWindowLayoutMode(WindowLayoutMode mode) = 0;
     virtual WMError NotifyScreenshotEvent(ScreenshotEventType type) = 0;
@@ -217,6 +217,10 @@ public:
         return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
     }
     virtual WSError SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex)
+    {
+        return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual WSError ResetSpecificWindowZIndex(int32_t pid)
     {
         return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
     }

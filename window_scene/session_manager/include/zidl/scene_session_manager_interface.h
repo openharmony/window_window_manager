@@ -167,6 +167,8 @@ public:
         TRANS_ID_UPDATE_OUTLINE,
         TRANS_ID_SET_SPECIFIC_WINDOW_ZINDEX,
         TRANS_ID_SUPPORT_ROTATION_REGISTERED,
+        TRANS_ID_RESET_SPECIFIC_WINDOW_ZINDEX,
+        TRANS_ID_NOTIFY_BRIGHTNESS_MODE_CHANGE,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -273,7 +275,7 @@ public:
         sptr<MoveDragProperty>& moveDragProperty) override {}
     void ProcessPointDown(uint32_t windowId, bool isPointDown) override {}
     void ProcessPointUp(uint32_t windowId) override {}
-    WMError MinimizeAllAppWindows(DisplayId displayId) override { return WMError::WM_OK; }
+    WMError MinimizeAllAppWindows(DisplayId displayId, int32_t excludeWindowId = 0) override { return WMError::WM_OK; }
     WMError ToggleShownStateForAllAppWindows() override { return WMError::WM_OK; }
     WMError SetWindowLayoutMode(WindowLayoutMode mode) override { return WMError::WM_OK; }
     WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
@@ -359,10 +361,8 @@ public:
     {
         return WSError::WS_OK;
     }
-    WSError SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex) override
-    {
-        return WSError::WS_OK;
-    }
+    WSError SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex) override { return WSError::WS_OK; }
+    WSError ResetSpecificWindowZIndex(int32_t pid) override { return WSError::WS_OK; }
     void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, const sptr<IRemoteObject>& token,
         uint64_t surfaceNodeId, int64_t startModalExtensionTimeStamp, bool isConstrainedModal) override {}
     void RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
@@ -426,6 +426,8 @@ public:
 
     virtual WMError SetScreenPrivacyWindowTagSwitch(
         uint64_t screenId, const std::vector<std::string>& privacyWindowTags, bool enable) { return WMError::WM_OK; }
+
+    virtual WMError NotifyBrightnessModeChange(const std::string& brightnessMode) { return WMError::WM_OK; }
 
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override { return WMError::WM_OK; }
 

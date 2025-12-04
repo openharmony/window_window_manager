@@ -159,6 +159,7 @@ public:
      */
     bool IsPcWindow() const override;
     bool IsPadWindow() const override;
+    bool IsPhonePadOrPcWindow() const override;
     bool IsPcOrFreeMultiWindowCapabilityEnabled() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
     bool IsPadAndNotFreeMultiWindowCompatibleMode() const override;
@@ -174,7 +175,7 @@ public:
     WMError SetSubWindowModal(bool isModal, ModalityType modalityType = ModalityType::WINDOW_MODALITY) override;
     WMError SetWindowModal(bool isModal) override;
     void SetTargetAPIVersion(uint32_t targetAPIVersion);
-    uint32_t GetTargetAPIVersion() const;
+    uint32_t GetTargetAPIVersion() const override;
     void NotifyClientWindowSize();
     bool IsFullScreenPcAppInPadMode() const;
     sptr<WindowSessionProperty> GetPropertyByContext() const;
@@ -602,6 +603,8 @@ public:
     WMError SetFollowScreenChange(bool isFollowScreenChange) override;
     void BeginRSTransaction(const std::shared_ptr<RSTransaction>& rsTransaction) const;
     WSError NotifyPageRotationIsIgnored() override;
+    WMError ConvertOrientationAndRotation(const RotationInfoType from, const RotationInfoType to,
+        const int32_t value, int32_t& convertedValue) override;
 
     /*
      * UIExtension
@@ -843,6 +846,8 @@ protected:
     /*
      * Window Immersive
      */
+    virtual void UpdateDefaultStatusBarColor() { return; }
+    WMError UpdateStatusBarColorByColorMode(uint32_t& contentColor);
     std::map<AvoidAreaType, AvoidArea> lastAvoidAreaMap_;
     uint32_t GetStatusBarHeight() const override;
     WindowType rootHostWindowType_ = WindowType::APP_MAIN_WINDOW_BASE;
@@ -869,6 +874,7 @@ protected:
      */
     std::string colorMode_;
     bool hasDarkRes_;
+    std::string specifiedColorMode_;
     WindowVisibilityState lastVisibilityState_ = WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION;
     std::unordered_set<std::string> containerColorList_;
     float lastSystemDensity_ = UNDEFINED_DENSITY;
@@ -1231,6 +1237,12 @@ private:
      * RS Client Multi Instance
      */
     std::shared_ptr<RSUIDirector> rsUIDirector_;
+
+    /*
+     * Compatible Mode
+     */
+    void RegisterNavigateCallbackForPageCompatibleModeIfNeed();
+    void HandleNavigateCallbackForPageCompatibleMode(const std::string& fromPage, const std::string& toPage);
 };
 } // namespace Rosen
 } // namespace OHOS

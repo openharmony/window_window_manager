@@ -114,7 +114,14 @@ const std::string COMPATIBLE_RECOVER_WINDOW_EVENT = "win_compatible_recover_even
 const std::string NAME_LANDSCAPE_2_3_CLICK = "win_change_to_2_3_landscape";
 const std::string NAME_LANDSCAPE_1_1_CLICK = "win_change_to_1_1_landscape";
 const std::string NAME_LANDSCAPE_18_9_CLICK = "win_change_to_18_9_landscape";
+const std::string NAME_LANDSCAPE_SPLIT_CLICK = "win_change_to_split_landscape";
 const std::string NAME_DEFAULT_LANDSCAPE_CLICK = "win_change_to_default_landscape";
+const std::string EVENT_NAME_HOVER = "win_hover_event";
+const std::string MOUSE_HOVER = "mouseHover";
+const std::string TOUCH_HOVER = "touchHover";
+const std::string EXIT_HOVER = "exitHover";
+constexpr char SCENE_BOARD_UE_DOMAIN[] = "SCENE_BOARD_UE";
+constexpr char HOVER_MAXIMIZE_MENU[] = "PC_HOVER_MAXIMIZE_MENU";
 const std::unordered_set<WindowType> INVALID_SYSTEM_WINDOW_TYPE = {
     WindowType::WINDOW_TYPE_NEGATIVE_SCREEN,
     WindowType::WINDOW_TYPE_THEME_EDITOR,
@@ -141,6 +148,7 @@ constexpr float INVALID_DEFAULT_DENSITY = 1.0f;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 40;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 constexpr int32_t API_VERSION_18 = 18;
+constexpr int32_t API_VERSION_23 = 23;
 constexpr uint32_t SNAPSHOT_TIMEOUT = 2000; // MS
 constexpr uint32_t REASON_MAXIMIZE_MODE_CHANGE = 1;
 const std::string COOPERATION_DISPLAY_NAME = "Cooperation";
@@ -904,7 +912,7 @@ WMError WindowSceneSessionImpl::SetParentWindow(int32_t newParentWindowId)
         TLOGE(WmsLogTag::WMS_SUB, "This is PcAppInPad, not Supported");
         return WMError::WM_OK;
     }
-    if (!IsPcWindow()) {
+    if (!IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d device not support", subWindowId);
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -953,10 +961,6 @@ WMError WindowSceneSessionImpl::GetParentWindow(sptr<Window>& parentWindow)
         TLOGE(WmsLogTag::WMS_SUB, "This is PcAppInPad, not Supported");
         return WMError::WM_OK;
     }
-    if (!IsPcWindow()) {
-        TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d device not support", GetPersistentId());
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -980,50 +984,17 @@ WMError WindowSceneSessionImpl::GetParentWindow(sptr<Window>& parentWindow)
 
 void WindowSceneSessionImpl::UpdateDefaultStatusBarColor()
 {
-    SystemBarProperty statusBarProp = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    if (static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(statusBarProp.settingFlag_) &
-        static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING)) == SystemBarSettingFlag::COLOR_SETTING) {
-        TLOGD(WmsLogTag::WMS_IMMS, "user has set color");
-        return;
-    }
     if (!WindowHelper::IsMainWindow(GetType())) {
-        TLOGD(WmsLogTag::WMS_IMMS, "not main window");
+        TLOGD(WmsLogTag::WMS_IMMS, "win %{public}u not main window", GetPersistentId());
         return;
     }
-    uint32_t contentColor;
-    constexpr uint32_t BLACK = 0xFF000000;
-    constexpr uint32_t WHITE = 0xFFFFFFFF;
-    bool isColorModeSetByApp = !specifiedColorMode_.empty();
-    std::string colorMode = specifiedColorMode_;
-    if (isColorModeSetByApp) {
-        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type %{public}u colorMode %{public}s",
-            GetPersistentId(), GetType(), colorMode.c_str());
-        contentColor = colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT ? BLACK : WHITE;
-    } else {
-        auto appContext = AbilityRuntime::Context::GetApplicationContext();
-        if (appContext == nullptr) {
-            TLOGE(WmsLogTag::WMS_IMMS, "app context is nullptr");
-            return;
-        }
-        std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
-        if (config == nullptr) {
-            TLOGE(WmsLogTag::WMS_IMMS, "config is null, winId: %{public}d", GetPersistentId());
-            return;
-        }
-        colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-        isColorModeSetByApp = !config->GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP).empty();
-        if (isColorModeSetByApp) {
-            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "win=%{public}u, appColor=%{public}s", GetWindowId(), colorMode.c_str());
-            contentColor = colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT ? BLACK : WHITE;
-        } else {
-            bool hasDarkRes = false;
-            appContext->AppHasDarkRes(hasDarkRes);
-            TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type %{public}u hasDarkRes %{public}u colorMode %{public}s",
-                GetPersistentId(), GetType(), hasDarkRes, colorMode.c_str());
-            contentColor = colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT ? BLACK :
-                (hasDarkRes ? WHITE : BLACK);
-        }
+    uint32_t contentColor = 0;
+    auto ret = UpdateStatusBarColorByColorMode(contentColor);
+    if (ret != WMError::WM_OK) {
+        TLOGD(WmsLogTag::WMS_IMMS, "win %{public}u no need update", GetPersistentId());
+        return;
     }
+    SystemBarProperty statusBarProp = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     statusBarProp.contentColor_ = contentColor;
     statusBarProp.settingFlag_ = static_cast<SystemBarSettingFlag>(
         static_cast<uint32_t>(statusBarProp.settingFlag_) |
@@ -3341,10 +3312,12 @@ bool WindowSceneSessionImpl::IsLayoutFullScreen() const
     }
     WindowType winType = property_->GetWindowType();
     if (WindowHelper::IsMainWindow(winType)) {
-        return (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN && isIgnoreSafeArea_);
+        return (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
+            (IsPcOrPadFreeMultiWindowMode() ? enableImmersiveMode_.load() : isIgnoreSafeArea_));
     }
     if (WindowHelper::IsSubWindow(winType)) {
-        return (isIgnoreSafeAreaNeedNotify_ && isIgnoreSafeArea_);
+        return IsPcOrPadFreeMultiWindowMode() ? enableImmersiveMode_.load() :
+            (isIgnoreSafeAreaNeedNotify_ && isIgnoreSafeArea_);
     }
     return false;
 }
@@ -3791,7 +3764,7 @@ WMError WindowSceneSessionImpl::SwitchCompatibleMode(CompatibleStyleMode styleMo
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (!WindowHelper::IsMainWindow(GetType())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "recover fail, not main");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "switch compatible style fail, not main");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
@@ -3890,7 +3863,6 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation, Wate
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
     hostSession->OnTitleAndDockHoverShowChange(titleHoverShowEnabled_, dockHoverShowEnabled_);
-    SetLayoutFullScreenByApiVersion(enableImmersiveMode_);
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "present: %{public}d, enableImmersiveMode_:%{public}d!",
         presentation, enableImmersiveMode_.load());
     SessionEventParam param;
@@ -6634,7 +6606,8 @@ WMError WindowSceneSessionImpl::SetFollowParentMultiScreenPolicy(bool enabled)
         TLOGE(WmsLogTag::WMS_SUB, "This is PcAppInpad, not Suppored");
         return WMError::WM_OK;
     }
-    if (!IsPcOrPadFreeMultiWindowMode()) {
+    if ((GetTargetAPIVersion() >= API_VERSION_23 && !IsPhonePadOrPcWindow()) ||
+        (GetTargetAPIVersion() < API_VERSION_23 && !IsPcOrPadFreeMultiWindowMode())) {
         TLOGE(WmsLogTag::WMS_SUB, "device not support");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -7309,8 +7282,23 @@ WMError WindowSceneSessionImpl::OnContainerModalEvent(const std::string& eventNa
     } else if (eventName == NAME_DEFAULT_LANDSCAPE_CLICK) {
         SwitchCompatibleMode(CompatibleStyleMode::LANDSCAPE_DEFAULT);
         return WMError::WM_OK;
+    } else if (eventName == NAME_LANDSCAPE_SPLIT_CLICK) {
+        SwitchCompatibleMode(CompatibleStyleMode::LANDSCAPE_SPLIT);
+        return WMError::WM_OK;
+    } else if (eventName == EVENT_NAME_HOVER) {
+        std::string bundleName = property_->GetSessionInfo().bundleName_;
+        ReportHoverMaximizeMenu(bundleName, value);
+        return WMError::WM_OK;
     }
     return WMError::WM_DO_NOTHING;
+}
+
+void WindowSceneSessionImpl::ReportHoverMaximizeMenu(const std::string& bundleName, const std::string& hoverType)
+{
+    HiSysEventWrite(SCENE_BOARD_UE_DOMAIN, HOVER_MAXIMIZE_MENU,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "BUNDLENAME", bundleName,
+        "HOVERTYPE", hoverType);
 }
 
 bool WindowSceneSessionImpl::IsSystemDensityChanged(const sptr<DisplayInfo>& displayInfo)
@@ -7781,6 +7769,30 @@ WMError WindowSceneSessionImpl::UnlockCursor(int32_t windowId)
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     return hostSession->SendCommonEvent(static_cast<int32_t>(CommonEventCommand::UNLOCK_CURSOR), parameters);
+}
+
+WMError WindowSceneSessionImpl::SetReceiveDragEventEnabled(bool enabled)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_EVENT, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    std::vector<int32_t> parameters;
+    parameters.emplace_back(SET_RECEIVE_DRAG_EVENT_LENGTH);
+    parameters.emplace_back(static_cast<int32_t>(enabled));
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    auto result = hostSession->SendCommonEvent(static_cast<int32_t>(CommonEventCommand::SET_RECEIVE_DRAG_EVENT),
+        parameters);
+    if (result == WMError::WM_OK) {
+        isReceiveDragEventEnable_ = enabled;
+    }
+    return result;
+}
+
+bool WindowSceneSessionImpl::IsReceiveDragEventEnabled()
+{
+    return isReceiveDragEventEnable_;
 }
 
 bool WindowSceneSessionImpl::IsHitHotAreas(std::shared_ptr<MMI::PointerEvent>& pointerEvent)

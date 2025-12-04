@@ -62,6 +62,7 @@ constexpr uint32_t ICON_MAX_SIZE = 128 * 1024 * 1024;
 constexpr uint32_t ADVANCED_FEATURE_BIT_MAX = 32;
 constexpr uint32_t ADVANCED_FEATURE_BIT_LOCK_CURSOR = 0x00;
 constexpr uint32_t ADVANCED_FEATURE_BIT_CURSOR_FOLLOW_MOVEMENT = 0x01;
+constexpr uint32_t ADVANCED_FEATURE_BIT_RECEIVE_DRAG_EVENT = 0x03;
 
 enum class WSError : int32_t {
     WS_OK = 0,
@@ -171,6 +172,7 @@ enum CollaboratorType : int32_t {
     DEFAULT_TYPE = 0,
     RESERVE_TYPE,
     OTHERS_TYPE,
+    REDIRECT_TYPE,
 };
 
 enum AncoSceneState: int32_t {
@@ -506,6 +508,11 @@ struct SessionInfo {
      * Window Rotation
      */
     int32_t currentRotation_ = 0;
+
+    /*
+     * Compatible Mode
+     */
+    std::string compatibleModePage = "";
 
     AAFwk::Want GetWantSafely() const
     {
@@ -1278,6 +1285,24 @@ enum class SessionRecoverState : uint32_t {
     SESSION_DOING_RECONNECT,
     SESSION_FINISH_RECONNECT,
     SESSION_RECOVER_STATE_END,
+};
+
+/**
+ * @brief Set specific window zIndex reason
+ */
+enum class SetSpecificZIndexReason : uint32_t {
+    SET = 0,
+    RESET = 1,
+};
+
+enum class CrossPlaneState : uint32_t {
+    UNDEFINED = 0,
+    CROSS_DEFAULT_PLANE,
+    CROSS_DEFAULT_CREASE_PLANE,
+    CROSS_CREASE_PLANE,
+    CROSS_VIRTUAL_CREASE_PLANE,
+    CROSS_VIRTUAL_PLANE,
+    CROSS_ALL_PLANE,
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H

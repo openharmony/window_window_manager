@@ -159,13 +159,13 @@ HWTEST_F(SceneSessionManagerTest3, ConfigAppWindowCornerRadius, TestSize.Level1)
     std::string str = "defaultCornerRadiusM";
     item01.SetValue(str);
     bool result01 = ssm_->ConfigAppWindowCornerRadius(item01, out);
-    ASSERT_EQ(result01, true);
+    EXPECT_EQ(result01, true);
 
     WindowSceneConfig::ConfigItem item02;
     item02.SetValue(new string("defaultCornerRadiusS"));
     bool result02 = ssm_->ConfigAppWindowCornerRadius(item02, out);
-    ASSERT_EQ(result02, false);
-    ASSERT_EQ(out, 12.0f);
+    EXPECT_EQ(result02, false);
+    EXPECT_EQ(out, 12.0f);
 }
 
 /**
@@ -222,10 +222,10 @@ HWTEST_F(SceneSessionManagerTest3, ConfigStatusBar, TestSize.Level1)
     item01.SetValue(
         { { "showHide", showHide }, { "contentColor", contentColor }, { "backgroundColor", backgroundColor } });
     bool result01 = ssm_->ConfigStatusBar(item01, out);
-    ASSERT_EQ(result01, true);
-    ASSERT_EQ(out.showHide_, true);
-    ASSERT_EQ(out.contentColor_, "#12345678");
-    ASSERT_EQ(out.backgroundColor_, "#12345678");
+    EXPECT_EQ(result01, true);
+    EXPECT_EQ(out.showHide_, true);
+    EXPECT_EQ(out.contentColor_, "#12345678");
+    EXPECT_EQ(out.backgroundColor_, "#12345678");
 }
 
 /**
@@ -260,15 +260,15 @@ HWTEST_F(SceneSessionManagerTest3, ConfigWindowImmersive, TestSize.Level1)
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.desktopStatusBarConfig_.showHide_, true);
-    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.desktopStatusBarConfig_.backgroundColor_, "#12341234");
-    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.desktopStatusBarConfig_.contentColor_, "#12341234");
-    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.upDownStatusBarConfig_.showHide_, true);
-    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.upDownStatusBarConfig_.backgroundColor_, "#12341234");
-    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.upDownStatusBarConfig_.contentColor_, "#12341234");
-    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.leftRightStatusBarConfig_.showHide_, true);
-    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.leftRightStatusBarConfig_.backgroundColor_, "#12341234");
-    ASSERT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.leftRightStatusBarConfig_.contentColor_, "#12341234");
+    EXPECT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.desktopStatusBarConfig_.showHide_, true);
+    EXPECT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.desktopStatusBarConfig_.backgroundColor_, "#12341234");
+    EXPECT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.desktopStatusBarConfig_.contentColor_, "#12341234");
+    EXPECT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.upDownStatusBarConfig_.showHide_, true);
+    EXPECT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.upDownStatusBarConfig_.backgroundColor_, "#12341234");
+    EXPECT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.upDownStatusBarConfig_.contentColor_, "#12341234");
+    EXPECT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.leftRightStatusBarConfig_.showHide_, true);
+    EXPECT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.leftRightStatusBarConfig_.backgroundColor_, "#12341234");
+    EXPECT_EQ(ssm_->appWindowSceneConfig_.windowImmersive_.leftRightStatusBarConfig_.contentColor_, "#12341234");
 }
 
 /**
@@ -326,7 +326,7 @@ HWTEST_F(SceneSessionManagerTest3, RecoverAndReconnectSceneSession, TestSize.Lev
 {
     sptr<ISession> session;
     auto result = ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, session, nullptr, nullptr);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+    EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
@@ -334,7 +334,7 @@ HWTEST_F(SceneSessionManagerTest3, RecoverAndReconnectSceneSession, TestSize.Lev
     ssm_->SetAlivePersistentIds(recoveredPersistentIds);
     property->SetPersistentId(1);
     result = ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, session, property, nullptr);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+    EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 
 /**
@@ -379,25 +379,25 @@ HWTEST_F(SceneSessionManagerTest3, CreateCurve, TestSize.Level1)
 {
     WindowSceneConfig::ConfigItem curveConfig;
     std::string result01 = std::get<std::string>(ssm_->CreateCurve(curveConfig));
-    ASSERT_EQ(result01, "easeOut");
+    EXPECT_EQ(result01, "easeOut");
 
     std::string value02 = "userName";
     curveConfig.SetValue(value02);
     curveConfig.SetValue({ { "name", curveConfig } });
     std::string result02 = std::get<std::string>(ssm_->CreateCurve(curveConfig));
-    ASSERT_EQ(result02, "easeOut");
+    EXPECT_EQ(result02, "easeOut");
 
     std::string value03 = "interactiveSpring";
     curveConfig.SetValue(value03);
     curveConfig.SetValue({ { "name", curveConfig } });
     std::string result03 = std::get<std::string>(ssm_->CreateCurve(curveConfig));
-    ASSERT_EQ(result03, "easeOut");
+    EXPECT_EQ(result03, "easeOut");
 
     std::string value04 = "cubic";
     curveConfig.SetValue(value04);
     curveConfig.SetValue({ { "name", curveConfig } });
     std::string result04 = std::get<std::string>(ssm_->CreateCurve(curveConfig));
-    ASSERT_EQ(result04, "easeOut");
+    EXPECT_EQ(result04, "easeOut");
 }
 
 /**
@@ -537,22 +537,22 @@ HWTEST_F(SceneSessionManagerTest3, GetWindowLimits, TestSize.Level1)
     ssm_->systemConfig_.freeMultiWindowEnable_ = false;
     ssm_->systemConfig_.freeMultiWindowSupport_ = false;
     auto ret = ssm_->GetWindowLimits(windowId, windowlimits);
-    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    EXPECT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 
     ssm_->systemConfig_.freeMultiWindowEnable_ = true;
     ssm_->systemConfig_.freeMultiWindowSupport_ = true;
     ret = ssm_->GetWindowLimits(windowId, windowlimits);
-    ASSERT_EQ(ret, WMError::WM_OK);
+    EXPECT_EQ(ret, WMError::WM_OK);
 
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ret = ssm_->GetWindowLimits(windowId, windowlimits);
     ssm_->sceneSessionMap_.erase(windowId);
     ssm_->systemConfig_.windowUIType_ = defaultUIType;
-    ASSERT_EQ(ret, WMError::WM_OK);
-    ASSERT_EQ(windowlimits.maxHeight_, 1000);
-    ASSERT_EQ(windowlimits.minHeight_, 500);
-    ASSERT_EQ(windowlimits.maxWidth_, 1000);
-    ASSERT_EQ(windowlimits.minWidth_, 500);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    EXPECT_EQ(windowlimits.maxHeight_, 1000);
+    EXPECT_EQ(windowlimits.minHeight_, 500);
+    EXPECT_EQ(windowlimits.maxWidth_, 1000);
+    EXPECT_EQ(windowlimits.minWidth_, 500);
 }
 
 /**
@@ -626,7 +626,7 @@ HWTEST_F(SceneSessionManagerTest3, CheckAppIsInDisplay, TestSize.Level1)
     ssm_->StartUIAbilityBySCB(abilitySessionInfo, sceneSession);
     ssm_->DestroySubSession(sceneSession);
     ssm_->EraseSceneSessionMapById(2);
-    ASSERT_EQ(ret, 1);
+    EXPECT_EQ(ret, 1);
 }
 
 /**
@@ -682,8 +682,8 @@ HWTEST_F(SceneSessionManagerTest3, SetAbilitySessionInfo, TestSize.Level1)
     ASSERT_NE(nullptr, sceneSession);
     sptr<OHOS::AAFwk::SessionInfo> ret = ssm_->SetAbilitySessionInfo(sceneSession);
     OHOS::AppExecFwk::ElementName retElementName = ret->want.GetElement();
-    ASSERT_EQ(retElementName.GetAbilityName(), info.abilityName_);
-    ASSERT_EQ(retElementName.GetBundleName(), info.bundleName_);
+    EXPECT_EQ(retElementName.GetAbilityName(), info.abilityName_);
+    EXPECT_EQ(retElementName.GetBundleName(), info.bundleName_);
 }
 
 /**
@@ -855,7 +855,7 @@ HWTEST_F(SceneSessionManagerTest3, DestroyDialogWithMainWindow, TestSize.Level1)
     sptr<SceneSession> sceneSession;
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    ASSERT_EQ(WSError::WS_OK, ssm_->DestroyDialogWithMainWindow(sceneSession));
+    EXPECT_EQ(WSError::WS_OK, ssm_->DestroyDialogWithMainWindow(sceneSession));
 }
 
 /**
@@ -943,7 +943,7 @@ HWTEST_F(SceneSessionManagerTest3, OnOutsideDownEvent, TestSize.Level1)
 HWTEST_F(SceneSessionManagerTest3, IsSameDisplayGroupId01, TestSize.Level1)
 {
     bool result = ssm_->IsSameDisplayGroupId(nullptr, 0);
-    ASSERT_EQ(result, false);
+    EXPECT_EQ(result, false);
 }
 
 /**
@@ -961,7 +961,7 @@ HWTEST_F(SceneSessionManagerTest3, IsSameDisplayGroupId02, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->SetSessionProperty(property);
     bool result = ssm_->IsSameDisplayGroupId(sceneSession, 0);
-    ASSERT_EQ(result, true);
+    EXPECT_EQ(result, true);
 }
 
 /**
@@ -983,7 +983,7 @@ HWTEST_F(SceneSessionManagerTest3, GetWindowSceneConfig, TestSize.Level1)
 HWTEST_F(SceneSessionManagerTest3, ProcessBackEvent, TestSize.Level1)
 {
     WSError result = ssm_->ProcessBackEvent();
-    ASSERT_EQ(result, WSError::WS_OK);
+    EXPECT_EQ(result, WSError::WS_OK);
 }
 
 /**
@@ -1104,6 +1104,8 @@ HWTEST_F(SceneSessionManagerTest3, CheckCollaboratorType, TestSize.Level1)
     EXPECT_TRUE(ssm_->CheckCollaboratorType(type));
     type = CollaboratorType::OTHERS_TYPE;
     EXPECT_TRUE(ssm_->CheckCollaboratorType(type));
+    type = CollaboratorType::REDIRECT_TYPE;
+    EXPECT_TRUE(ssm_->CheckCollaboratorType(type));
     type = CollaboratorType::DEFAULT_TYPE;
     ASSERT_FALSE(ssm_->CheckCollaboratorType(type));
 }
@@ -1171,11 +1173,11 @@ HWTEST_F(SceneSessionManagerTest3, NotifyStartAbility, TestSize.Level1)
     ssm_->collaboratorMap_.insert(std::make_pair(1, collaborator));
     int32_t collaboratorType = 1;
     auto ret1 = ssm_->NotifyStartAbility(collaboratorType, sessionInfo);
-    ASSERT_EQ(ret1, BrokerStates::BROKER_UNKOWN);
+    EXPECT_EQ(ret1, BrokerStates::BROKER_UNKOWN);
 
     sessionInfo.want = std::make_shared<AAFwk::Want>();
     auto ret2 = ssm_->NotifyStartAbility(collaboratorType, sessionInfo);
-    ASSERT_EQ(ret2, BrokerStates::BROKER_UNKOWN);
+    EXPECT_EQ(ret2, BrokerStates::BROKER_UNKOWN);
     ssm_->collaboratorMap_.clear();
 }
 
@@ -1274,7 +1276,7 @@ HWTEST_F(SceneSessionManagerTest3, HandleHideNonSystemFloatingWindows, TestSize.
     ssm_->UpdateForceHideState(sceneSession, property, true);
     ssm_->UpdateForceHideState(sceneSession, property, false);
     uint32_t result = property->GetWindowModeSupportType();
-    ASSERT_EQ(result, WindowModeSupport::WINDOW_MODE_SUPPORT_ALL);
+    EXPECT_EQ(result, WindowModeSupport::WINDOW_MODE_SUPPORT_ALL);
 }
 
 /**
@@ -1361,7 +1363,7 @@ HWTEST_F(SceneSessionManagerTest3, SetDisplayBrightness, TestSize.Level1)
     float brightness = 2.0f;
     ssm_->SetDisplayBrightness(brightness);
     float result02 = ssm_->GetDisplayBrightness();
-    ASSERT_EQ(result02, 2.0f);
+    EXPECT_EQ(result02, 2.0f);
 }
 
 /**
@@ -1381,7 +1383,7 @@ HWTEST_F(SceneSessionManagerTest3, SetGestureNavigationEnabled02, TestSize.Level
     ProcessStatusBarEnabledChangeFunc funcStatus_ = ProcessStatusBarEnabledChangeFuncTest;
     ssm_->SetStatusBarEnabledChangeListener(funcStatus_);
     WMError result03 = ssm_->SetGestureNavigationEnabled(enable);
-    ASSERT_EQ(result03, WMError::WM_OK);
+    EXPECT_EQ(result03, WMError::WM_OK);
 }
 
 /**
@@ -1444,7 +1446,7 @@ HWTEST_F(SceneSessionManagerTest3, RequestFocusStatusBySA, TestSize.Level1)
     bool byForeground = true;
     FocusChangeReason reason = FocusChangeReason::CLICK;
     auto result = ssm_->SceneSessionManager::RequestFocusStatusBySA(persistentId, isFocused, byForeground, reason);
-    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
 }
 
 /**
@@ -1465,7 +1467,7 @@ HWTEST_F(SceneSessionManagerTest3, NotifyRequestFocusStatusNotifyManager, TestSi
     sceneSession->NotifyRequestFocusStatusNotifyManager(true, true, reasonInput);
     FocusChangeReason reasonResult = ssm_->GetFocusChangeReason();
 
-    ASSERT_EQ(reasonInput, reasonResult);
+    EXPECT_EQ(reasonInput, reasonResult);
 }
 
 /**
@@ -1605,7 +1607,7 @@ HWTEST_F(SceneSessionManagerTest3, UpdatePrivateStateAndNotify, TestSize.Level1)
     ssm_->RegisterSessionStateChangeNotifyManagerFunc(sceneSession);
     ssm_->UpdatePrivateStateAndNotify(persistentId);
     auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
-    std::unordered_set<string> privacyBundleList;
+    std::unordered_map<DisplayId, std::unordered_set<std::string>> privacyBundleList;
     ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundleList);
     EXPECT_EQ(privacyBundleList.size(), 0);
 }
@@ -1624,7 +1626,7 @@ HWTEST_F(SceneSessionManagerTest3, UpdatePrivateStateAndNotifyForAllScreens, Tes
 
     ssm_->UpdatePrivateStateAndNotifyForAllScreens();
     auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
-    std::unordered_set<std::string> privacyBundleList;
+    std::unordered_map<DisplayId, std::unordered_set<std::string>> privacyBundleList;
     ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundleList);
     EXPECT_EQ(privacyBundleList.size(), 0);
 }
@@ -1647,7 +1649,7 @@ HWTEST_F(SceneSessionManagerTest3, GerPrivacyBundleListOneWindow, TestSize.Level
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
 
-    std::unordered_set<std::string> privacyBundleList;
+    std::unordered_map<DisplayId, std::unordered_set<std::string>> privacyBundleList;
     sceneSession->GetSessionProperty()->isPrivacyMode_ = false;
     privacyBundleList.clear();
     ssm_->GetSceneSessionPrivacyModeBundles(0, privacyBundleList);
@@ -1755,17 +1757,17 @@ HWTEST_F(SceneSessionManagerTest3, ConfigAppWindowShadow02, TestSize.Level1)
     WindowShadowConfig outShadow;
     std::vector<float> floatTest = {};
     bool result = ssm_->ConfigAppWindowShadow(shadowConfig, outShadow);
-    ASSERT_EQ(result, true);
+    EXPECT_EQ(result, true);
 
     item.SetValue(floatTest);
     shadowConfig.SetValue({ { "radius", item } });
     result = ssm_->ConfigAppWindowShadow(shadowConfig, outShadow);
-    ASSERT_EQ(result, false);
+    EXPECT_EQ(result, false);
 
     item.SetValue(new std::string(""));
     shadowConfig.SetValue({ { "", item } });
     result = ssm_->ConfigAppWindowShadow(shadowConfig, outShadow);
-    ASSERT_EQ(result, true);
+    EXPECT_EQ(result, true);
 }
 
 /**

@@ -384,6 +384,11 @@ public:
     virtual void NotifyPreferredOrientationChange(Orientation orientation) = 0;
     virtual void SetUserRequestedOrientation(Orientation orientation) = 0;
     virtual Orientation GetRequestedOrientation() = 0;
+    virtual WMError ConvertOrientationAndRotation(const RotationInfoType from, const RotationInfoType to,
+        const int32_t value, int32_t& convertedValue)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual void SetRequestWindowModeSupportType(uint32_t windowModeSupportType) = 0;
     virtual uint32_t GetRequestWindowModeSupportType() const = 0;
     virtual WMError SetTouchHotAreas(const std::vector<Rect>& rects) = 0;
@@ -485,6 +490,8 @@ public:
     virtual bool IsPcWindow() const { return false; }
     virtual bool IsPadWindow() const { return false; }
     virtual bool IsPcOrFreeMultiWindowCapabilityEnabled() const { return false; }
+    virtual bool IsPhonePadOrPcWindow() const { return false; }
+    virtual uint32_t GetTargetAPIVersion() const { return API_VERSION_INVALID; }
     virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
     virtual bool IsPadAndNotFreeMultiWindowCompatibleMode() const { return false; }
     virtual bool IsSceneBoardEnabled() const { return false; }
@@ -902,6 +909,29 @@ public:
      * @return WMError::WM_OK on success, others means failed.
      */
     virtual WMError GetRotationLocked(bool& locked) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+        /**
+     * @brief Set whether the window receive drag event.
+     *
+     * @param enalbed - whether the window receive drag event.
+     *        True: - means default state, the window can receive drag event.
+     *        False: - means the window can't receive drag event.
+     * @return Returns the status code of the execution.
+     */
+    virtual WMError SetReceiveDragEventEnabled(bool enabled)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief  whether the window receive drag event.
+     *
+     * @return - The value true means the window can receive drag event, and false means the opposite.
+     */
+    virtual bool IsReceiveDragEventEnabled()
+    {
+        return true;
+    }
 };
 }
 }

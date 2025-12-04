@@ -1797,6 +1797,56 @@ HWTEST_F(SessionProxyTest, GetTargetOrientationConfigInfo, Function | SmallTest 
 }
 
 /**
+ * @tc.name: ConvertOrientationAndRotation
+ * @tc.desc: Test ConvertOrientationAndRotation behavior in various IPC scenarios
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, ConvertOrientationAndRotation, Function | SmallTest | Level1)
+{
+    auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
+    auto sessionProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    RotationInfoType from = RotationInfoType::DISPLAY_ORIENTATION;
+    RotationInfoType to = RotationInfoType::DISPLAY_ORIENTATION;
+    int32_t value = 0;
+    int32_t convertedValue = 0;
+
+    // Case 1: Failed to write interface token
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED,
+        sessionProxy->ConvertOrientationAndRotation(from, to, value, convertedValue));
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    // Case 2: Failed to write RotationInfoType
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED,
+        sessionProxy->ConvertOrientationAndRotation(from, to, value, convertedValue));
+    MockMessageParcel::SetWriteUint32ErrorFlag(false);
+
+    // Case 3: Failed to write convert value
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED,
+        sessionProxy->ConvertOrientationAndRotation(from, to, value, convertedValue));
+    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+
+    // Case 4: remote is nullptr
+    sptr<SessionProxy> nullProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED,
+        nullProxy->ConvertOrientationAndRotation(from, to, value, convertedValue));
+
+    // Case 5: Failed to send request
+    mockRemote->sendRequestResult_ = ERR_TRANSACTION_FAILED;
+    sptr<SessionProxy> failProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED,
+        failProxy->ConvertOrientationAndRotation(from, to, value, convertedValue));
+
+    // Case 6: Success
+    mockRemote->sendRequestResult_ = ERR_NONE;
+    sptr<SessionProxy> okProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WSError::WS_OK,
+        okProxy->ConvertOrientationAndRotation(from, to, value, convertedValue));
+}
+
+/**
  * @tc.name: KeyFrameAnimateEnd
  * @tc.desc: KeyFrameAnimateEnd test
  * @tc.type: FUNC

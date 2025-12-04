@@ -76,6 +76,9 @@ public:
     {
         TLOGW(WmsLogTag::WMS_RECOVER, "Client died, pid = %{public}d, isLite = %{public}d", pid_, isLite_);
         MockSessionManagerService::GetInstance().UnregisterSMSRecoverListenerInner(userId_, displayId_, pid_, isLite_);
+        if (!isLite_) {
+            MockSessionManagerService::GetInstance().ResetSpecificWindowZIndex(userId_, pid_);
+        }
     }
 
 private:
@@ -474,6 +477,25 @@ void MockSessionManagerService::UnregisterSMSRecoverListenerInner(int32_t client
     }
 }
 
+void MockSessionManagerService::ResetSpecificWindowZIndex(int32_t clientUserId, int32_t pid)
+{
+    TLOGI(WmsLogTag::WMS_FOCUS, "clientUserId: %{public}d, pid: %{public}d", clientUserId, pid);
+    sptr<IRemoteObject> remoteObject = GetSceneSessionManagerByUserId(clientUserId);
+    if (!remoteObject) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "remoteObject is null");
+        return;
+    }
+    sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(remoteObject);
+    if (sceneSessionManagerProxy == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "sessionManagerServiceProxy is nullptr");
+        return;
+    }
+    WSError ret = sceneSessionManagerProxy->ResetSpecificWindowZIndex(pid);
+    if (ret != WSError::WS_OK) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "reset failed, result: %{public}d", ret);
+    }
+}
+
 ErrCode MockSessionManagerService::NotifySceneBoardAvailable()
 {
     if (!SessionPermission::IsSystemCalling()) {
@@ -854,6 +876,31 @@ void MockSessionManagerService::SetScreenPrivacyWindowTagSwitch(
     WMError ret = sceneSessionManagerProxy->SetScreenPrivacyWindowTagSwitch(screenId, privacyWindowTags, enable);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remove virtual screen black list failed!");
+    }
+}
+
+void MockSessionManagerService::NotifyBrightnessModeChange(const std::string& brightnessMode)
+{
+    auto sessionManagerService = GetSessionManagerServiceInner(defaultWMSUserId_);
+    if (sessionManagerService == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerService is nullptr");
+        return;
+    }
+    if (!defaultSceneSessionManager_) {
+        GetSceneSessionManager();
+        if (!defaultSceneSessionManager_) {
+            TLOGW(WmsLogTag::WMS_ATTRIBUTE, "get scene session manager proxy failed, nullptr");
+            return;
+        }
+    }
+    sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(defaultSceneSessionManager_);
+    if (sceneSessionManagerProxy == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerServiceProxy is nullptr");
+        return;
+    }
+    WMError ret = sceneSessionManagerProxy->NotifyBrightnessModeChange(brightnessMode);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Notify brightnessmode change failed!");
     }
 }
 

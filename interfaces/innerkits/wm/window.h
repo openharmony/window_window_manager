@@ -2569,6 +2569,21 @@ public:
     virtual void NotifySystemBarPropertyUpdate(WindowType type, const SystemBarProperty& property) {}
 
     /**
+     * @brief Convert orientation and rotation between window and display
+     *
+     * @param from The type of the value to be converted.
+     * @param to The target type of conversion.
+     * @param value The value to be converted.
+     * @param convertedValue The converted value.
+     * @return WM_OK means convert success, others means convert failed.
+     */
+    virtual WMError ConvertOrientationAndRotation(const RotationInfoType from, const RotationInfoType to,
+        const int32_t value, int32_t& convertedValue)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Get requested orientation.
      *
      * @return Orientation screen orientation.
@@ -2993,6 +3008,20 @@ public:
      * @return True means pc window or free multi window capility enabled, false means the opposite.
      */
     virtual bool IsPcOrFreeMultiWindowCapabilityEnabled() const { return false; }
+
+    /**
+     * @brief Is phone, pad, pc window or not.
+     *
+     * @return True means phone, pad or pc window, false means the opposite.
+     */
+    virtual bool IsPhonePadOrPcWindow() const { return false; }
+    
+    /**
+     * @brief Get target api version.
+     *
+     * @return API version.
+     */
+    virtual uint32_t GetTargetAPIVersion() const { return API_VERSION_INVALID; }
 
     /**
      * @brief Is pc window or pad free multi-window.
@@ -3582,6 +3611,15 @@ public:
      * @return custom density.
      */
     virtual float GetCustomDensity() const { return UNDEFINED_DENSITY; }
+
+    /**
+     * @brief UIExtension window call to set custom density, once called this method to set custom density,
+     * UIExtension window will dinore FOLLOW_HOST_DPI and use specified density.
+     *
+     * @param density the custom density of UIExtension window.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetUIExtCustomDensity(const float density) { return WMError::WM_OK; }
 
     /**
      * @brief Get the window density of current window.
@@ -4839,6 +4877,29 @@ public:
     }
 
     /**
+     * @brief Set whether the window receive drag event.
+     *
+     * @param enalbed - whether the window receive drag event.
+     *        True: - means default state, the window can receive drag event.
+     *        False: - means the window can't receive drag event.
+     * @return Returns the status code of the execution.
+     */
+    virtual WMError SetReceiveDragEventEnabled(bool enabled)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief  whether the window receive drag event.
+     *
+     * @return - The value true means the window can receive drag event, and false means the opposite.
+     */
+    virtual bool IsReceiveDragEventEnabled()
+    {
+        return true;
+    }
+
+    /**
      * @brief Lock the mouse cursor restricting it to a specified window area, and also control whether the cursor
      *        follows movement. Only supported by the focus window; the lock is automatically released when the
      *        window loses focus.
@@ -4951,6 +5012,14 @@ public:
     {
         return WMError::WM_OK;
     }
+
+    /**
+     * @brief Set status bar color for uiExtension.
+     *
+     * @param color Color numeric to set.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetStatusBarColorForExtension(uint32_t color) { return WMError::WM_OK; }
 };
 }
 }
