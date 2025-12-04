@@ -847,6 +847,32 @@ HWTEST_F(SceneSessionDirtyManagerTest2, UpdateWindowFlagsForLockCursorInDrag, Te
     manager_->UpdateWindowFlagsForLockCursor(session, windowInfo);
     EXPECT_EQ(windowInfo.flags, 0);
 }
+
+/**
+ * @tc.name: UpdateWindowFlagsForReceiveDragEventEnabled
+ * @tc.desc: UpdateWindowFlagsForReceiveDragEventEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest2, UpdateWindowFlagsForReceiveDragEventEnabled, TestSize.Level2)
+{
+    MMI::WindowInfo windowInfo;
+    manager_->UpdateWindowFlagsForReceiveDragEventEnabled(nullptr, windowInfo);
+    EXPECT_EQ(windowInfo.flags, 0);
+
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->persistentId_ = 5;
+    session->SetSessionInfoAdvancedFeatureFlag(100, false);
+    session->GetSessionInfoAdvancedFeatureFlag(100);
+    session->SetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_RECEIVE_DRAG_EVENT, false);
+    manager_->UpdateWindowFlagsForReceiveDragEventEnabled(session, windowInfo);
+    EXPECT_EQ(windowInfo.flags, 0);
+
+    windowInfo.flags = 0;
+    session->SetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_RECEIVE_DRAG_EVENT, true);
+    manager_->UpdateWindowFlagsForReceiveDragEventEnabled(session, windowInfo);
+    EXPECT_NE(windowInfo.flags, 0);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

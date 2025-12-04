@@ -1032,29 +1032,6 @@ HWTEST_F(ScreenSessionTest, SetScreenColorSpace, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetPrivateSessionForeground
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionTest, SetPrivateSessionForeground, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "SetPrivateSessionForeground start";
-    ScreenSessionConfig config = {
-        .screenId = 100,
-        .rsId = 101,
-        .name = "OpenHarmony",
-    };
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
-        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
-    EXPECT_NE(nullptr, screenSession);
-    bool hasPrivate = true;
-    screenSession->SetPrivateSessionForeground(hasPrivate);
-    auto res = screenSession->HasPrivateSessionForeground();
-    ASSERT_EQ(res, hasPrivate);
-    GTEST_LOG_(INFO) << "SetPrivateSessionForeground end";
-}
-
-/**
  * @tc.name: GetScreenCombination
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -1795,7 +1772,7 @@ HWTEST_F(ScreenSessionTest, UpdatePropertyByActiveMode, TestSize.Level1)
     auto screenBounds = originalProperty.GetBounds();
     session->UpdatePropertyByActiveMode();
     ScreenProperty updatedProperty = session->GetScreenProperty();
-    auto screenBounds1 = originalProperty.GetBounds();
+    auto screenBounds1 = updatedProperty.GetBounds();
     ASSERT_EQ(screenBounds, screenBounds1);
     GTEST_LOG_(INFO) << "ScreenSessionTest: UpdatePropertyByActiveMode end";
 }
@@ -2114,20 +2091,6 @@ HWTEST_F(ScreenSessionTest, screen_session_test007, TestSize.Level1)
 }
 
 /**
- * @tc.name: screen_session_test008
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionTest, screen_session_test008, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test008 start";
-    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
-    bool res = session->HasPrivateSessionForeground();
-    ASSERT_EQ(res, false);
-    GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test008 end";
-}
-
-/**
  * @tc.name: screen_session_test009
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -2283,6 +2246,62 @@ HWTEST_F(ScreenSessionTest, CalcRotation, TestSize.Level1)
     session->SetScreenProperty(property);
     res = session->CalcRotation(orientation, foldDisplayMode);
     EXPECT_EQ(Rotation::ROTATION_0, res);
+}
+
+/**
+ * @tc.name: CalcBoundsInRotationZero
+ * @tc.desc: normal CalcBoundsInRotationZero
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CalcBoundsInRotationZero, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ScreenProperty property;
+    RRect bounds;
+    bounds.rect_.width_ = 1344;
+    bounds.rect_.height_ = 2772;
+    property.SetBounds(bounds);
+    property.UpdateDeviceRotation(Rotation::ROTATION_0);
+    session->SetScreenProperty(property);
+    auto res = session->CalcBoundsInRotationZero();
+    EXPECT_EQ(res.rect_.width_, 1344);
+
+    property.UpdateDeviceRotation(Rotation::ROTATION_90);
+    session->SetScreenProperty(property);
+    res = session->CalcBoundsInRotationZero();
+    EXPECT_EQ(res.rect_.width_, 2772);
+}
+
+/**
+ * @tc.name: CalcBoundsByRotation
+ * @tc.desc: normal CalcBoundsByRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CalcBoundsByRotation, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ScreenProperty property;
+    RRect bounds;
+    bounds.rect_.width_ = 1344;
+    bounds.rect_.height_ = 2772;
+    property.SetBounds(bounds);
+    property.UpdateDeviceRotation(Rotation::ROTATION_0);
+    session->SetScreenProperty(property);
+    Rotation rotation = Rotation::ROTATION_0;
+    auto res = session->CalcBoundsByRotation(rotation);
+    EXPECT_EQ(res.rect_.width_, 1344);
+    rotation = Rotation::ROTATION_90;
+    res = session->CalcBoundsByRotation(rotation);
+    EXPECT_EQ(res.rect_.width_, 2772);
+
+    property.UpdateDeviceRotation(Rotation::ROTATION_90);
+    session->SetScreenProperty(property);
+    rotation = Rotation::ROTATION_0;
+    res = session->CalcBoundsByRotation(rotation);
+    EXPECT_EQ(res.rect_.width_, 2772);
+    rotation = Rotation::ROTATION_90;
+    res = session->CalcBoundsByRotation(rotation);
+    EXPECT_EQ(res.rect_.width_, 1344);
 }
 
 /**

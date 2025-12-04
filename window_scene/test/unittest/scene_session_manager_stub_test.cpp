@@ -2910,6 +2910,23 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetScreenPrivacyWindowTagSwitch02, F
 }
 
 /**
+ * @tc.name: HandleNotifyBrightnessModeChange
+ * @tc.desc: test HandleNotifyBrightnessModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleNotifyBrightnessModeChange, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    std::string brightnessMode = "test";
+    data.WriteString(brightnessMode);
+
+    int res = stub_->HandleNotifyBrightnessModeChange(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleAddSessionBlackList01
  * @tc.desc: test HandleAddSessionBlackList
  * @tc.type: FUNC
@@ -3049,6 +3066,31 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetSpecificWindowZIndex, Function | 
     data.WriteUint64(2106);
     ret = stub_->HandleSetSpecificWindowZIndex(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
+
+    data.WriteInt32(20);
+    ret = stub_->HandleSetSpecificWindowZIndex(data, reply);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: ResetSpecificWindowZIndex
+ * @tc.desc: ResetSpecificWindowZIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, ResetSpecificWindowZIndex, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_RESET_SPECIFIC_WINDOW_ZINDEX);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    int ret = stub_->HandleResetSpecificWindowZIndex(data, reply);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
 
     data.WriteInt32(20);
     ret = stub_->HandleSetSpecificWindowZIndex(data, reply);

@@ -675,6 +675,9 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
     if (!ConvertFromJsValueProperty(env, jsObject, "windowMode", sessionInfo.windowMode)) {
         return false;
     }
+    if (!ConvertFromJsValueProperty(env, jsObject, "compatibleModePage", sessionInfo.compatibleModePage)) {
+        return false;
+    }
     return true;
 }
 
@@ -1697,6 +1700,8 @@ napi_value CreateJsSessionRecoverInfo(
     napi_set_named_property(env, objValue, "currentRotation", CreateJsValue(env, sessionInfo.currentRotation_));
     napi_set_named_property(env, objValue, "supportWindowModes",
         CreateSupportWindowModes(env, sessionInfo.supportedWindowModes));
+    napi_set_named_property(env, objValue,
+        "pageCompatibleMode", CreateJsValue(env, property->GetPageCompatibleMode()));
 
     napi_value jsTransitionAnimationMapValue = nullptr;
     napi_create_object(env, &jsTransitionAnimationMapValue);
@@ -2771,6 +2776,8 @@ napi_value CreateCompatibleStyleMode(napi_env env)
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to create object");
         return NapiGetUndefined(env);
     }
+    napi_set_named_property(env, objValue, "INVALID_VALUE",
+        CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::INVALID_VALUE)));
     napi_set_named_property(env, objValue, "LANDSCAPE_DEFAULT",
         CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_DEFAULT)));
     napi_set_named_property(env, objValue, "LANDSCAPE_18_9",
@@ -2779,6 +2786,8 @@ napi_value CreateCompatibleStyleMode(napi_env env)
         CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_1_1)));
     napi_set_named_property(env, objValue, "LANDSCAPE_2_3",
         CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_2_3)));
+    napi_set_named_property(env, objValue, "LANDSCAPE_SPLIT",
+        CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_SPLIT)));
     return objValue;
 }
  

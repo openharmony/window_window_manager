@@ -255,12 +255,13 @@ napi_value OnGetDefaultDisplay(napi_env env, napi_callback_info info)
 napi_value OnGetPrimaryDisplaySync(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::DMS, "called");
+    std::string functionName = "getPrimaryDisplaySync";
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Sync:OnGetPrimaryDisplaySync");
     sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetPrimaryDisplaySync();
     if (display == nullptr) {
         TLOGE(WmsLogTag::DMS, "[NAPI]Display info is nullptr, js error will be happen");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN),
-            "invalid screen id"));
+        napi_throw(env, JsErrUtils::CreateJsError(env, DmErrorCode::DM_ERROR_INVALID_SCREEN,
+            GetFormatMsg(functionName, "invalid display id")));
         return NapiGetUndefined(env);
     }
     return CreateJsDisplayObject(env, display);
@@ -269,11 +270,13 @@ napi_value OnGetPrimaryDisplaySync(napi_env env, napi_callback_info info)
 napi_value OnGetDefaultDisplaySync(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::DMS, "called");
+    std::string functionName = "getDefaultDisplaySync";
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Sync:GetDefaultDisplay");
     sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplaySync(true);
     if (display == nullptr) {
         TLOGE(WmsLogTag::DMS, "[NAPI]Display info is nullptr, js error will be happen");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN)));
+        napi_throw(env, JsErrUtils::CreateJsError(env, DmErrorCode::DM_ERROR_INVALID_SCREEN,
+            GetFormatMsg(functionName, "display is not created or destroyed")));
         return NapiGetUndefined(env);
     }
     return CreateJsDisplayObject(env, display);
@@ -283,24 +286,28 @@ napi_value OnGetDisplayByIdSync(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::DMS, "called");
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Sync:OnGetDisplayByIdSync");
+    std::string functionName = "getDisplayByIdSync";
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
         std::string errMsg = "Invalid args count, need one arg";
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
+        napi_throw(env, JsErrUtils::CreateJsError(env, DmErrorCode::DM_ERROR_INVALID_PARAM,
+            GetFormatMsg(functionName, errMsg)));
         return NapiGetUndefined(env);
     }
     int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
     if (!ConvertFromJsValue(env, argv[0], displayId)) {
         TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to displayId");
         std::string errMsg = "Failed to convert parameter to displayId";
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
+        napi_throw(env, JsErrUtils::CreateJsError(env, DmErrorCode::DM_ERROR_INVALID_PARAM,
+            GetFormatMsg(functionName, errMsg)));
         return NapiGetUndefined(env);
     }
     if (displayId < 0) {
         std::string errMsg = "displayid is invalid, less than 0";
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
+        napi_throw(env, JsErrUtils::CreateJsError(env, DmErrorCode::DM_ERROR_INVALID_PARAM,
+            GetFormatMsg(functionName, errMsg)));
         return NapiGetUndefined(env);
     }
     sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<DisplayId>(displayId));
@@ -308,19 +315,31 @@ napi_value OnGetDisplayByIdSync(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::DMS, "[NAPI]Display info is nullptr, js error will be happen");
         std::ostringstream oss;
         oss << "[display][getDisplayByIdSync]message: display is null, ";
-        oss << "possible causes: display id " << displayId << " ";
+        oss << "display id " << displayId << " ";
         oss << "corresponding display does not exist.";
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL), oss.str()));
+        napi_throw(env, JsErrUtils::CreateJsError(env, DmErrorCode::DM_ERROR_SYSTEM_INNORMAL, oss.str()));
         return NapiGetUndefined(env);
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Sync:OnGetDisplayByIdSync end");
     return CreateJsDisplayObject(env, display);
 }
 
+std::string GetFormatMsg(std::string functionName, std::string errMsg = "", std::string cbType = "")
+{
+    if (!cbType.empty()) {
+        functionName = functionName + "(" + cbType + ")";
+    }
+    if (errMsg.empty()) {
+        return "[display][" + functionName + "]";
+    }
+    return "[display][" + functionName + "]msg: " + errMsg;
+}
+
 napi_value OnGetBrightnessInfoChange(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::DMS, "called");
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "OnGetBrightnessInfoChange");
+    std::string functionName = "getBrightnessInfo";
     size_t argc = ARGS_MAX;
     napi_value argv[ARGS_MAX] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -339,7 +358,7 @@ napi_value OnGetBrightnessInfoChange(napi_env env, napi_callback_info info)
     ScreenBrightnessInfo brightnessInfo;
     auto errCode = SingletonContainer::Get<DisplayManager>().GetBrightnessInfo(displayId, brightnessInfo);
     if (errCode != DMError::DM_OK) {
-        return NapiThrowError(env, static_cast<DmErrorCode>(errCode), "Failed to get brightness info");
+        return NapiThrowError(env, static_cast<DmErrorCode>(errCode), "Failed to get brightness info", functionName);
     }
 
     return CreateJsBrightnessInfo(env, brightnessInfo);
@@ -434,6 +453,7 @@ napi_value OnGetAllDisplayPhysicalResolution(napi_env env, napi_callback_info in
 {
     TLOGD(WmsLogTag::DMS, "called");
     DMError errCode = DMError::DM_OK;
+    std::string functionName = "getAllDisplayPhysicalResolution";
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -448,10 +468,10 @@ napi_value OnGetAllDisplayPhysicalResolution(napi_env env, napi_callback_info in
     }
     napi_value result = nullptr;
     std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [this, env, errCode, task = napiAsyncTask.get()] {
+    auto asyncTask = [this, env, errCode, task = napiAsyncTask.get(), functionName] {
         if (errCode != DMError::DM_OK) {
-            task->Reject(env, CreateJsError(env,
-                static_cast<int32_t>(errCode), "JsDisplayManager::OnGetAllDisplayPhysicalResolution failed."));
+            task->Reject(env, JsErrUtils::CreateJsError(env, errCode,
+                GetFormatMsg(functionName, "paramter is invalid")));
             delete task;
             return;
         }
@@ -461,8 +481,8 @@ napi_value OnGetAllDisplayPhysicalResolution(napi_env env, napi_callback_info in
             task->Resolve(env, CreateJsDisplayPhysicalArrayObject(env, displayPhysicalArray));
             TLOGNI(WmsLogTag::DMS, "OnGetAllDisplayPhysicalResolution success");
         } else {
-            task->Reject(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL),
-                "JsDisplayManager::OnGetAllDisplayPhysicalResolution failed."));
+            task->Reject(env, JsErrUtils::CreateJsError(env, DmErrorCode::DM_ERROR_SYSTEM_INNORMAL,
+                GetFormatMsg(functionName)));
         }
         delete task;
     };
@@ -473,6 +493,7 @@ napi_value OnGetAllDisplayPhysicalResolution(napi_env env, napi_callback_info in
 napi_value OnGetAllDisplays(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::DMS, "called");
+    std::string functionName = "getAllDisplays";
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -483,7 +504,7 @@ napi_value OnGetAllDisplays(napi_env env, napi_callback_info info)
     }
     napi_value result = nullptr;
     std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [this, env, task = napiAsyncTask.get()] {
+    auto asyncTask = [this, env, task = napiAsyncTask.get(), functionName] {
         std::vector<sptr<Display>> displays = SingletonContainer::Get<DisplayManager>().GetAllDisplays();
         if (!displays.empty()) {
             task->Resolve(env, CreateJsDisplayArrayObject(env, displays));
@@ -495,9 +516,8 @@ napi_value OnGetAllDisplays(napi_env env, napi_callback_info info)
                 napi_value exception = nullptr;
                 napi_get_and_clear_last_exception(env, &exception);
             }
-            task->Reject(env, CreateJsError(env,
-                static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN),
-                "JsDisplayManager::OnGetAllDisplays failed."));
+            task->Reject(env, JsErrUtils::CreateJsError(env, DmErrorCode::DM_ERROR_INVALID_SCREEN,
+                GetFormatMsg(functionName)));
         }
         delete task;
     };
@@ -700,33 +720,34 @@ std::string GetBrightnessInfoErrorMsg(DmErrorCode errCode)
 napi_value OnRegisterDisplayManagerCallback(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::DMS, "OnRegisterDisplayManagerCallback is called");
+    std::string functionName = "on";
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_TWO) {
         TLOGE(WmsLogTag::DMS, "JsDisplayManager Params not match: %{public}zu", argc);
-        std::string errMsg = "Invalid args count, need 2 args";
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
+        napi_throw(env, JsErrUtils::CreateJsError(env, DmErrorCode::DM_ERROR_INVALID_PARAM,
+            GetFormatMsg(functionName, "Invalid args count, need 2 args")));
         return NapiGetUndefined(env);
     }
     std::string cbType;
     if (!ConvertFromJsValue(env, argv[0], cbType)) {
-        std::string errMsg = "Failed to convert parameter to callbackType";
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
+        napi_throw(env, JsErrUtils::CreateJsError(env, DmErrorCode::DM_ERROR_INVALID_PARAM,
+            GetFormatMsg(functionName, "Failed to convert parameter to callbackType", cbType)));
         TLOGE(WmsLogTag::DMS, "Failed to convert parameter to callbackType");
         return NapiGetUndefined(env);
     }
     napi_value value = argv[INDEX_ONE];
     if (value == nullptr) {
         TLOGI(WmsLogTag::DMS, "OnRegisterDisplayManagerCallback info->argv[1] is nullptr");
-        std::string errMsg = "OnRegisterDisplayManagerCallback is nullptr";
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
+        napi_throw(env, JsErrUtils::CreateJsError(env, DmErrorCode::DM_ERROR_INVALID_PARAM,
+            GetFormatMsg(functionName, "OnRegisterDisplayManagerCallback is nullptr", cbType)));
         return NapiGetUndefined(env);
     }
     if (!NapiIsCallable(env, value)) {
         TLOGI(WmsLogTag::DMS, "OnRegisterDisplayManagerCallback info->argv[1] is not callable");
-        std::string errMsg = "OnRegisterDisplayManagerCallback is not callable";
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
+        napi_throw(env, JsErrUtils::CreateJsError(env, DmErrorCode::DM_ERROR_INVALID_PARAM,
+            GetFormatMsg(functionName, "OnRegisterDisplayManagerCallback is not callable", cbType)));
         return NapiGetUndefined(env);
     }
     std::lock_guard<std::mutex> lock(mtx_);
@@ -741,7 +762,7 @@ napi_value OnRegisterDisplayManagerCallback(napi_env env, napi_callback_info inf
             errMsg = GetBrightnessInfoErrorMsg(errCode);
         }
         TLOGE(WmsLogTag::DMS, "Failed to register display listener with type");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(errCode), errMsg));
+        napi_throw(env, JsErrUtils::CreateJsError(env, errCode, GetFormatMsg(functionName, "", cbType)));
         return NapiGetUndefined(env);
     }
     return NapiGetUndefined(env);
@@ -750,20 +771,23 @@ napi_value OnRegisterDisplayManagerCallback(napi_env env, napi_callback_info inf
 napi_value OnUnregisterDisplayManagerCallback(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::DMS, "called");
+    std::string functionName = "off";
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
         TLOGE(WmsLogTag::DMS, "JsDisplayManager Params not match %{public}zu", argc);
         std::string errMsg = "Invalid args count, need one arg at least!";
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
+        napi_throw(env, JsErrUtils::CreateJsError(env, DmErrorCode::DM_ERROR_INVALID_PARAM,
+            GetFormatMsg(functionName, errMsg)));
         return NapiGetUndefined(env);
     }
     std::string cbType;
     if (!ConvertFromJsValue(env, argv[0], cbType)) {
         TLOGE(WmsLogTag::DMS, "Failed to convert parameter to callbackType");
         std::string errMsg = "Failed to convert parameter to string";
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
+        napi_throw(env, JsErrUtils::CreateJsError(env, DmErrorCode::DM_ERROR_INVALID_PARAM,
+            GetFormatMsg(functionName, errMsg, cbType)));
         return NapiGetUndefined(env);
     }
     std::lock_guard<std::mutex> lock(mtx_);
@@ -785,7 +809,7 @@ napi_value OnUnregisterDisplayManagerCallback(napi_env env, napi_callback_info i
         }
         TLOGW(WmsLogTag::DMS, "failed to unregister display listener with type");
         std::string errMsg = "failed to unregister display listener with type";
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(errCode), errMsg));
+        napi_throw(env, JsErrUtils::CreateJsError(env, errCode, GetFormatMsg(functionName, "", cbType)));
         return NapiGetUndefined(env);
     }
     return NapiGetUndefined(env);
@@ -848,11 +872,13 @@ napi_value CreateJsDisplayArrayObject(napi_env env, std::vector<sptr<Display>>& 
 
 napi_value OnIsFoldable(napi_env env, napi_callback_info info)
 {
+    std::string functionName = "isFoldable";
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc >= ARGC_ONE) {
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        napi_throw(env, JsErrUtils::CreateJsError(env, DmErrorCode::DM_ERROR_INVALID_PARAM,
+            GetFormatMsg(functionName, "Input parameter invalid")));
         return NapiGetUndefined(env);
     }
     bool foldable = SingletonContainer::Get<DisplayManager>().IsFoldable();
@@ -864,11 +890,13 @@ napi_value OnIsFoldable(napi_env env, napi_callback_info info)
 
 napi_value OnIsCaptured(napi_env env, napi_callback_info info)
 {
+    std::string functionName = "isCaptured";
     size_t argc = 4;  // default arg length
     napi_value argv[4] = { nullptr };  // default arg length
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc >= ARGC_ONE) {
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        napi_throw(env, JsErrUtils::CreateJsError(env, DmErrorCode::DM_ERROR_INVALID_PARAM,
+            GetFormatMsg(functionName, "Input parameter invalid")));
         return NapiGetUndefined(env);
     }
     bool isCapture = SingletonContainer::Get<DisplayManager>().IsCaptured();
@@ -880,11 +908,13 @@ napi_value OnIsCaptured(napi_env env, napi_callback_info info)
 
 napi_value OnGetFoldStatus(napi_env env, napi_callback_info info)
 {
+    std::string functionName = "getFoldStatus";
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc >= ARGC_ONE) {
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        napi_throw(env, JsErrUtils::CreateJsError(env, DmErrorCode::DM_ERROR_INVALID_PARAM,
+            GetFormatMsg(functionName, "Input parameter invalid")));
         return NapiGetUndefined(env);
     }
     FoldStatus status = SingletonContainer::Get<DisplayManager>().GetFoldStatus();
@@ -894,11 +924,13 @@ napi_value OnGetFoldStatus(napi_env env, napi_callback_info info)
 
 napi_value OnGetFoldDisplayMode(napi_env env, napi_callback_info info)
 {
+    std::string functionName = "getFoldDisplayMode";
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc >= ARGC_ONE) {
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        napi_throw(env, JsErrUtils::CreateJsError(env, DmErrorCode::DM_ERROR_INVALID_PARAM,
+            GetFormatMsg(functionName, "Input parameter invalid")));
         return NapiGetUndefined(env);
     }
     FoldDisplayMode mode = SingletonContainer::Get<DisplayManager>().GetFoldDisplayModeForExternal();
@@ -978,11 +1010,13 @@ napi_value OnSetFoldStatusLocked(napi_env env, napi_callback_info info)
 
 napi_value OnGetCurrentFoldCreaseRegion(napi_env env, napi_callback_info info)
 {
+    std::string functionName = "getCurrentFoldCreaseRegion";
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc >= ARGC_ONE) {
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        napi_throw(env, JsErrUtils::CreateJsError(env, DmErrorCode::DM_ERROR_INVALID_PARAM,
+            GetFormatMsg(functionName, "Input parameter invalid")));
         return NapiGetUndefined(env);
     }
     sptr<FoldCreaseRegion> region = SingletonContainer::Get<DisplayManager>().GetCurrentFoldCreaseRegion();
@@ -1042,7 +1076,7 @@ napi_value OnCreateVirtualScreen(napi_env env, napi_callback_info info)
         }
     }
     if (errCode == DmErrorCode::DM_ERROR_INVALID_PARAM) {
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg, "createVirtualScreen");
     }
     napi_value lastParam = nullptr;
     if (argc >= ARGC_TWO && argv[ARGC_TWO - 1] != nullptr &&
@@ -1063,7 +1097,7 @@ napi_value OnCreateVirtualScreen(napi_env env, napi_callback_info info)
             } else if (screenId == ERROR_ID_NO_PERMISSION) {
                 ret =  DmErrorCode::DM_ERROR_NO_PERMISSION;
             }
-            task->Reject(env, CreateJsError(env, static_cast<int32_t>(ret), "CreateVirtualScreen failed."));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "[display][createVirtualScreen]"));
             TLOGNE(WmsLogTag::DMS, "JsDisplayManager::CreateVirtualScreen failed.");
         } else {
             task->Resolve(env, CreateJsValue(env, static_cast<int64_t>(screenId)));
@@ -1078,6 +1112,7 @@ napi_value OnCreateVirtualScreen(napi_env env, napi_callback_info info)
 napi_value OnMakeUnique(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::DMS, "called");
+    std::string functionName = "makeUnique";
     size_t argc = 4;
     int64_t screenId = -1LL;
     DmErrorCode errCode = DmErrorCode::DM_OK;
@@ -1097,14 +1132,14 @@ napi_value OnMakeUnique(napi_env env, napi_callback_info info)
     }
     if (errCode == DmErrorCode::DM_ERROR_INVALID_PARAM || screenId == -1LL) {
         TLOGE(WmsLogTag::DMS, "JsDisplayManager::OnMakeUnique failed, Invalidate params.");
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg, functionName);
     }
     std::vector<ScreenId> screenIds;
     screenIds.emplace_back(static_cast<ScreenId>(screenId));
     napi_value lastParam = nullptr;
     napi_value result = nullptr;
     std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [this, screenIds, env, task = napiAsyncTask.get()]() {
+    auto asyncTask = [this, screenIds, env, task = napiAsyncTask.get(), functionName]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayManager::OnMakeUnique");
         std::vector<DisplayId> displayIds;
         DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(
@@ -1115,7 +1150,7 @@ napi_value OnMakeUnique(napi_env env, napi_callback_info info)
             TLOGNI(WmsLogTag::DMS, "makeUnique success");
         } else {
             task->Reject(env,
-                CreateJsError(env, static_cast<int32_t>(ret), "JsDisplayManager::OnMakeUnique failed."));
+                JsErrUtils::CreateJsError(env, ret, GetFormatMsg(functionName)));
         }
         delete task;
     };
@@ -1145,7 +1180,7 @@ napi_value OnDestroyVirtualScreen(napi_env env, napi_callback_info info)
     }
     if (errCode == DmErrorCode::DM_ERROR_INVALID_PARAM || screenId == -1LL) {
         TLOGE(WmsLogTag::DMS, "Invalidate params.");
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg, "destroyVirtualScreen");
     }
     napi_value lastParam = nullptr;
     if (argc >= ARGC_TWO && argv[ARGC_TWO - 1] != nullptr &&
@@ -1160,8 +1195,7 @@ napi_value OnDestroyVirtualScreen(napi_env env, napi_callback_info info)
             SingletonContainer::Get<ScreenManager>().DestroyVirtualScreen(screenId));
         res = (res == DmErrorCode::DM_ERROR_NOT_SYSTEM_APP) ? DmErrorCode::DM_ERROR_NO_PERMISSION : res;
         if (res != DmErrorCode::DM_OK) {
-            task->Reject(env, CreateJsError(env, static_cast<int32_t>(res),
-                "JsDisplayManager::DestroyVirtualScreen failed."));
+            task->Reject(env, JsErrUtils::CreateJsError(env, res, "[display][destroyVirtualScreen]"));
             TLOGNE(WmsLogTag::DMS, "JsDisplayManager::DestroyVirtualScreen failed.");
             delete task;
             return;
@@ -1199,7 +1233,7 @@ napi_value OnSetVirtualScreenSurface(napi_env env, napi_callback_info info)
         }
     }
     if (errCode == DmErrorCode::DM_ERROR_INVALID_PARAM || surface == nullptr) {
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg, "setVirtualScreenSurface");
     }
     napi_value lastParam = nullptr;
     if (argc >= ARGC_THREE && argv[ARGC_THREE - 1] != nullptr &&
@@ -1214,8 +1248,7 @@ napi_value OnSetVirtualScreenSurface(napi_env env, napi_callback_info info)
             SingletonContainer::Get<ScreenManager>().SetVirtualScreenSurface(screenId, surface));
         res = (res == DmErrorCode::DM_ERROR_NOT_SYSTEM_APP) ? DmErrorCode::DM_ERROR_NO_PERMISSION : res;
         if (res != DmErrorCode::DM_OK) {
-            task->Reject(env, CreateJsError(env, static_cast<int32_t>(res),
-                "JsDisplayManager::SetVirtualScreenSurface failed."));
+            task->Reject(env, JsErrUtils::CreateJsError(env, res, "[display][setVirtualScreenSurface]"));
             TLOGNE(WmsLogTag::DMS, "JsDisplayManager::SetVirtualScreenSurface failed.");
         } else {
             task->Resolve(env, NapiGetUndefined(env));
@@ -1229,20 +1262,21 @@ napi_value OnSetVirtualScreenSurface(napi_env env, napi_callback_info info)
 napi_value OnAddVirtualScreenBlockList(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::DMS, "in");
+    std::string functionName = "addVirtualScreenBlockList";
     size_t argc = ARGC_THREE;
     napi_value argv[ARGC_THREE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
         TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
         return NapiThrowError(
-            env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid parameter count");
+            env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid parameter count", functionName);
     }
     napi_value nativeArray = argv[0];
     uint32_t size = 0;
     if (GetType(env, nativeArray) != napi_object ||
         napi_get_array_length(env, nativeArray, &size) == napi_invalid_arg) {
-            return NapiThrowError(
-                env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to black list array");
+            return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM,
+                "Failed to convert parameter to black list array", functionName);
     }
     std::vector<int32_t> persistentIds;
     for (uint32_t i = 0; i < size; i++) {
@@ -1250,8 +1284,8 @@ napi_value OnAddVirtualScreenBlockList(napi_env env, napi_callback_info info)
         napi_value element = nullptr;
         napi_get_element(env, nativeArray, i, &element);
         if (!ConvertFromJsValue(env, element, persistentId)) {
-            return NapiThrowError(
-                env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to persistent id");
+            return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM,
+                "Failed to convert parameter to persistent id", functionName);
         }
         persistentIds.push_back(persistentId);
     }
@@ -1280,20 +1314,20 @@ napi_value OnAddVirtualScreenBlockList(napi_env env, napi_callback_info info)
 napi_value OnRemoveVirtualScreenBlockList(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::DMS, "in");
+    std::string functionName = "removeVirtualScreenBlockList";
     size_t argc = ARGC_THREE;
     napi_value argv[ARGC_THREE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
         TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
-        return NapiThrowError(
-            env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid parameter count");
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid parameter count", functionName);
     }
     napi_value nativeArray = argv[0];
     uint32_t size = 0;
     if (GetType(env, nativeArray) != napi_object ||
         napi_get_array_length(env, nativeArray, &size) == napi_invalid_arg) {
-            return NapiThrowError(
-                env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to black list array");
+            return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM,
+                "Failed to convert parameter to black list array", functionName);
     }
     std::vector<int32_t> persistentIds;
     for (uint32_t i = 0; i < size; i++) {
@@ -1301,8 +1335,8 @@ napi_value OnRemoveVirtualScreenBlockList(napi_env env, napi_callback_info info)
         napi_value element = nullptr;
         napi_get_element(env, nativeArray, i, &element);
         if (!ConvertFromJsValue(env, element, persistentId)) {
-            return NapiThrowError(
-                env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to persistent id");
+            return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM,
+                "Failed to convert parameter to persistent id", functionName);
         }
         persistentIds.push_back(persistentId);
     }
@@ -1333,29 +1367,31 @@ napi_value OnConvertGlobalCoordinateToRelative(napi_env env, napi_callback_info 
     TLOGD(WmsLogTag::DMS, "in");
     Position globalPosition;
     int64_t displayIdTemp = 0;
+    std::string functionName = "convertGlobalToRelativeCoordinate";
     size_t argc = ARGC_TWO;
     napi_value argv[ARGC_TWO] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "Invalid args count, need one arg at least!");
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM,
+            "Invalid args count, need one arg at least!", functionName);
     }
     if (argv[0] == nullptr) {
         return NapiThrowError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM,
-            "Failed to get globalPosition, globalPosition is nullptr");
+            "Failed to get globalPosition, globalPosition is nullptr", functionName);
     }
     if (argc == ARGC_TWO) {
         if (!ConvertFromJsValue(env, argv[1], displayIdTemp)) {
             return NapiThrowError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM,
-                "Failed to convert displayIdObject to displayId.");
+                "Failed to convert displayIdObject to displayId.", functionName);
         }
         if (displayIdTemp < 0) {
-            return NapiThrowError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "displayId less than 0.");
+            return NapiThrowError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "displayId less than 0.", functionName);
         }
     }
     DmErrorCode errCode = DmErrorCode::DM_OK;
     errCode = GetPositionFromJs(env, argv[0], globalPosition);
     if (errCode != DmErrorCode::DM_OK) {
-        return NapiThrowError(env, errCode, "Get position from js failed.");
+        return NapiThrowError(env, errCode, "Get position from js failed.", functionName);
     }
     RelativePosition relativePosition;
     if (argc == ARGC_TWO) {
@@ -1368,7 +1404,7 @@ napi_value OnConvertGlobalCoordinateToRelative(napi_env env, napi_callback_info 
                 relativePosition));
     }
     if (errCode != DmErrorCode::DM_OK) {
-        return NapiThrowError(env, errCode, "Convert global coordinate to relative failed");
+        return NapiThrowError(env, errCode, "", functionName);
     }
     return CreateJsRelativePositionObject(env, relativePosition);
 }
@@ -1394,23 +1430,25 @@ napi_value OnConvertRelativeCoordinateToGlobal(napi_env env, napi_callback_info 
     TLOGD(WmsLogTag::DMS, "in");
     DmErrorCode errCode = DmErrorCode::DM_OK;
     RelativePosition relativePosition;
+    std::string functionName = "convertRelativeToGlobalCoordinate";
     std::string errMsg;
     size_t argc = ARGC_ONE;
     napi_value argv[ARGC_ONE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "Invalid args count, need one arg at least!");
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM,
+            "Invalid args count, need one arg at least!", functionName);
     }
 
     errCode = GetRelativePositionFromJs(env, argv[0], relativePosition);
     if (errCode != DmErrorCode::DM_OK) {
-        return NapiThrowError(env, errCode, "Failed to get relativePosition!");
+        return NapiThrowError(env, errCode, "Failed to get relativePosition!", functionName);
     }
     Position globalPosition;
     errCode = DM_JS_TO_ERROR_CODE_MAP.at(
         SingletonContainer::Get<DisplayManager>().ConvertRelativeCoordinateToGlobal(relativePosition, globalPosition));
     if (errCode != DmErrorCode::DM_OK) {
-        return NapiThrowError(env, errCode, "Convert relative coordinate to global failed");
+        return NapiThrowError(env, errCode, "", functionName);
     }
     return CreateJsGlobalPositionObject(env, globalPosition);
 }
@@ -1556,9 +1594,9 @@ bool GetSurfaceFromJs(napi_env env, napi_value surfaceIdNapiValue, sptr<Surface>
     return true;
 }
 
-napi_value NapiThrowError(napi_env env, DmErrorCode errCode, std::string msg = "")
+napi_value NapiThrowError(napi_env env, DmErrorCode errCode, std::string msg = "", std::string functionName = "")
 {
-    napi_throw(env, CreateJsError(env, static_cast<int32_t>(errCode), msg));
+    napi_throw(env, JsErrUtils::CreateJsError(env, errCode, GetFormatMsg(functionName, msg)));
     return NapiGetUndefined(env);
 }
 };

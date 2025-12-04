@@ -81,6 +81,10 @@ void SecondaryFoldSensorManagerTest::SetUp()
 
 void SecondaryFoldSensorManagerTest::TearDown()
 {
+    OHOS::Rosen::FoldScreenSensorManager::GetInstance().UnSubscribeSensorCallback(
+        SENSOR_TYPE_ID_POSTURE);
+    OHOS::Rosen::FoldScreenSensorManager::GetInstance().UnSubscribeSensorCallback(
+        SENSOR_TYPE_ID_HALL_EXT);
 }
 
 namespace {
@@ -189,8 +193,8 @@ HWTEST_F(SecondaryFoldSensorManagerTest, UnRegisterPostureCallback03, TestSize.L
     if (!(ssm_->IsFoldable())) {
         GTEST_SKIP();
     }
-    EXPECT_TRUE(g_logMsg.find("UnRegisterPostureCallback failed with ret:") != std::string::npos);
-    EXPECT_TRUE(g_logMsg.find("success.") == std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("UnRegisterPostureCallback failed with ret:") == std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("success.") != std::string::npos);
 
     g_logMsg.clear();
     LOG_SetCallback(nullptr);
@@ -237,8 +241,8 @@ HWTEST_F(SecondaryFoldSensorManagerTest, UnRegisterHallCallback04, TestSize.Leve
     if (!(ssm_->IsFoldable())) {
         GTEST_SKIP();
     }
-    EXPECT_TRUE(g_logMsg.find("UnRegisterHallCallback failed with ret:") != std::string::npos);
-    EXPECT_TRUE(g_logMsg.find("success.") == std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("UnRegisterHallCallback failed with ret:") == std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("success.") != std::string::npos);
 
     g_logMsg.clear();
     LOG_SetCallback(nullptr);

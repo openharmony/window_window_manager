@@ -139,6 +139,7 @@ public:
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits, bool waitDetach) override;
     WSError NotifyDensityFollowHost(bool isFollowHost, float densityValue) override;
+    WMError SetUIExtCustomDensity(const float density) override;
     float GetVirtualPixelRatio(const sptr<DisplayInfo>& displayInfo) override;
     float GetDefaultDensity(const sptr<DisplayInfo>& displayInfo);
     WMError HideNonSecureWindows(bool shouldHide) override;
@@ -185,6 +186,11 @@ public:
     WMError UseImplicitAnimation(bool useImplicit) override;
 
     /*
+     * Window Immersive
+     */
+    void UpdateDefaultStatusBarColor() override;
+
+    /*
      * Window Property
      */
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
@@ -205,6 +211,8 @@ public:
     WMError HandleUnregisterHostRectChangeInGlobalDisplayListener(uint32_t code, int32_t persistentId,
         const AAFwk::Want& data) override;
     uint32_t GetHostStatusBarContentColor() const override;
+    WMError SetStatusBarColorForExtension(uint32_t color) override;
+    WMError SetStatusBarColorForExtensionInner(uint32_t color);
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
@@ -267,9 +275,12 @@ private:
     ExtensionWindowFlags extensionWindowFlags_ { 0 };
     bool modalUIExtensionMayBeCovered_ { false };
     bool modalUIExtensionSelfLoadContent_ { false };
+    bool isDensityCustomized_ { false };
+    float customizedDensity_ { 0.0f };
     float lastDensity_ { 0.0f };
     int32_t lastOrientation_ { 0 };
     uint64_t lastDisplayId_ { 0 };
+    uint32_t lastTransform_ { 0 };
     AAFwk::WantParams extensionConfig_ {};
     bool hostGestureBackEnabled_ { true };
     bool immersiveModeEnabled_ { false };

@@ -261,6 +261,7 @@ public:
     WSError SetFullScreenWaterfallMode(bool isWaterfallMode) override;
     WSError SetSupportEnterWaterfallMode(bool isSupportEnter) override;
     WMError OnContainerModalEvent(const std::string& eventName, const std::string& value) override;
+    void ReportHoverMaximizeMenu(const std::string& bundleName, const std::string& hoverType);
 
     /*
      * Window Property
@@ -353,6 +354,8 @@ public:
      */
     WMError LockCursor(int32_t windowId, bool isCursorFollowMovement) override;
     WMError UnlockCursor(int32_t windowId) override;
+    WMError SetReceiveDragEventEnabled(bool enabled) override;
+    bool IsReceiveDragEventEnabled() override;
 
 protected:
     WMError CreateAndConnectSpecificSession();
@@ -476,7 +479,7 @@ private:
     /*
      * Window Immersive
      */
-    void UpdateDefaultStatusBarColor();
+    void UpdateDefaultStatusBarColor() override;
     bool userLimitsSet_ = false;
     bool forceLimits_ = false;
     uint32_t setSameSystembarPropertyCnt_ = 0;
@@ -524,7 +527,6 @@ private:
     float GetMainWindowCustomDensity();
     float customDensity_ = UNDEFINED_DENSITY;
     bool isEnableDefaultDensityWhenCreate_ = false;
-    std::string specifiedColorMode_;
     WMError SetPcAppInpadSpecificSystemBarInvisible();
     WMError SetPcAppInpadOrientationLandscape();
 
@@ -602,6 +604,11 @@ private:
      * Window Transition Animation For PC
      */
     std::mutex transitionAnimationConfigMutex_;
+
+    /*
+     * Window Event
+     */
+    bool isReceiveDragEventEnable_ = true;
 
     /*
      * Window Decor

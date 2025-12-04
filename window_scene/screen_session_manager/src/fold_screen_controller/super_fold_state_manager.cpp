@@ -249,7 +249,8 @@ SuperFoldStateManager::SuperFoldStateManager()
     InitSuperFoldStateManagerMap();
     InitSuperFoldCreaseRegionParams();
     ScreenSessionManager::GetInstance().SetPropertyChangedCallback(
-        std::bind(&SuperFoldStateManager::HandleSuperFoldDisplayCallback, this, std::placeholders::_1));
+        std::bind(&SuperFoldStateManager::HandleSuperFoldDisplayCallback, this,
+            std::placeholders::_1, std::placeholders::_2));
 }
 
 SuperFoldStateManager::~SuperFoldStateManager()
@@ -547,8 +548,7 @@ void SuperFoldStateManager::GetAllCreaseRegion()
 void SuperFoldStateManager::HandleDisplayNotify(SuperFoldStatusChangeEvents changeEvent)
 {
     TLOGI(WmsLogTag::DMS, "changeEvent: %{public}d", static_cast<uint32_t>(changeEvent));
-    sptr<ScreenSession> screenSession =
-        ScreenSessionManager::GetInstance().GetDefaultScreenSession();
+    sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "screen session is null");
         return;
@@ -561,14 +561,21 @@ void SuperFoldStateManager::HandleDisplayNotify(SuperFoldStatusChangeEvents chan
     if (!ScreenSessionManager::GetInstance().GetClientProxy()) {
         HandleSuperFoldDisplayInServer(screenSession, changeEvent);
     } else {
-    screenSession->UpdateSuperFoldStatusChangeEvent(changeEvent);
-    screenSession->SetIsPreFakeInUse(screenSession->GetScreenProperty().GetIsFakeInUse());
-    int32_t currentValidHeight = GetCurrentValidHeight(screenSession);
-    screenSession->SetCurrentValidHeight(currentValidHeight);
-    screenSession->SetIsKeyboardOn(isKeyboardOn_);
-    TLOGI(WmsLogTag::DMS, "validHeight:  %{public}d, isKeyboardOn: %{public}d", currentValidHeight, isKeyboardOn_);
-    screenSession->NotifyClientPropertyChange(screenSession->GetScreenProperty(),
-        ScreenPropertyChangeReason::SUPER_FOLD_STATUS_CHANGE);
+        ScreenProperty property = screenSession->GetScreenProperty();
+        // changeEvent only forward to client by property, not save in session property
+        property.SetSuperFoldStatusChangeEvent(changeEvent);
+        property.SetFoldStatus(ScreenSessionManager::GetInstance().GetSuperFoldStatus());
+        property.SetCurrentValidHeight(GetCurrentValidHeight(screenSession));
+        property.SetIsKeyboardOn(isKeyboardOn_);
+
+        TLOGI(WmsLogTag::DMS,
+              "GetIsFakeInUse: %{public}d, GetCurrentValidHeight: %{public}d  isKeyboardOn: %{public}d",
+              property.GetIsFakeInUse(),
+              property.GetCurrentValidHeight(),
+              isKeyboardOn_);
+
+        screenSession->NotifyFoldPropertyChange(
+            property, ScreenPropertyChangeReason::SUPER_FOLD_STATUS_CHANGE, FoldDisplayMode::UNKNOWN);
     }
 }
 
@@ -608,12 +615,13 @@ void SuperFoldStateManager::HandleSuperFoldDisplayInServer(sptr<ScreenSession>& 
         }
         default:
             TLOGE(WmsLogTag::DMS, "nothing to handle changeEvent:%{public}d", changeEvent);
+            break;
     }
 }
 
-void SuperFoldStateManager::HandleSuperFoldDisplayCallback(sptr<ScreenSession>& screenSession)
+void SuperFoldStateManager::HandleSuperFoldDisplayCallback(sptr<ScreenSession>& screenSession,
+    SuperFoldStatusChangeEvents changeEvent)
 {
-    SuperFoldStatusChangeEvents changeEvent = screenSession->GetSuperFoldStatusChangeEvent();
     switch (changeEvent) {
         case SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED: {
             HandleExtendToHalfFoldDisplayNotify(screenSession);
@@ -707,7 +715,8 @@ void SuperFoldStateManager::HandleKeyboardOnDisplayNotifyInServer(sptr<ScreenSes
         return;
     }
     DisplayId fakeDisplayId = fakeDisplayInfo->GetDisplayId();
-    if (currFakeInUse) {
+    bool isDestroy = screenSession->GetIsDestroyDisplay();
+    if (isDestroy) {
         ScreenSessionManager::GetInstance().NotifyDisplayDestroy(fakeDisplayId);
     }
     screenSession->PropertyChange(screenSession->GetScreenProperty(),
@@ -894,8 +903,6 @@ void SuperFoldStateManager::HandleHalfFoldToExtendDisplayNotify(sptr<ScreenSessi
 void SuperFoldStateManager::HandleKeyboardOnDisplayNotify(sptr<ScreenSession>& screenSession)
 {
     TLOGI(WmsLogTag::DMS, "SuperFoldStateManager HandleKeyboardOnDisplayNotify");
-    bool currFakeInUse = screenSession->GetScreenProperty().GetIsPreFakeInUse();
-    screenSession->SetIsPreFakeInUse(screenSession->GetScreenProperty().GetIsFakeInUse());
     screenSession->SetIsBScreenHalf(true);
     sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
     sptr<DisplayInfo> fakeDisplayInfo = fakeScreenSession->ConvertToDisplayInfo();
@@ -904,7 +911,8 @@ void SuperFoldStateManager::HandleKeyboardOnDisplayNotify(sptr<ScreenSession>& s
         return;
     }
     DisplayId fakeDisplayId = fakeDisplayInfo->GetDisplayId();
-    if (currFakeInUse) {
+    bool isDestroy = screenSession->GetIsDestroyDisplay();
+    if (isDestroy) {
         ScreenSessionManager::GetInstance().NotifyDisplayDestroy(fakeDisplayId);
     }
 }

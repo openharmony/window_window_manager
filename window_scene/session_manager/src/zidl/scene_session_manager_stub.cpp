@@ -218,6 +218,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleRemoveSkipSelfWhenShowOnVirtualScreenList(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_TAG_SWITCH):
             return HandleSetScreenPrivacyWindowTagSwitch(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_NOTIFY_BRIGHTNESS_MODE_CHANGE):
+            return HandleNotifyBrightnessModeChange(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_PC_WINDOW):
             return HandleIsPcWindow(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_FREE_MULTI_WINDOW):
@@ -282,6 +284,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleSetSpecificWindowZIndex(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SUPPORT_ROTATION_REGISTERED):
             return HandleNotifySupportRotationRegistered(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RESET_SPECIFIC_WINDOW_ZINDEX):
+            return HandleResetSpecificWindowZIndex(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1271,7 +1275,7 @@ int SceneSessionManagerStub::HandleGetTopWindowId(MessageParcel& data, MessagePa
         TLOGE(WmsLogTag::WMS_HIERARCHY, "read mainWinId failed");
         return ERR_INVALID_DATA;
     }
-    uint32_t topWinId;
+    uint32_t topWinId = 0;
     WMError ret = GetTopWindowId(mainWinId, topWinId);
     reply.WriteUint32(topWinId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
@@ -2057,6 +2061,22 @@ int SceneSessionManagerStub::HandleSetScreenPrivacyWindowTagSwitch(MessageParcel
     return ERR_NONE;
 }
 
+int SceneSessionManagerStub::HandleNotifyBrightnessModeChange(MessageParcel& data, MessageParcel& reply)
+{
+    std::string brightnessMode = "";
+    if (!data.ReadString(brightnessMode)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read brightnessMode failed.");
+        return ERR_INVALID_DATA;
+    }
+
+    WMError errCode = NotifyBrightnessModeChange(brightnessMode);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SceneSessionManagerStub::HandleIsPcWindow(MessageParcel& data, MessageParcel& reply)
 {
     bool isPcWindow = false;
@@ -2413,7 +2433,12 @@ int SceneSessionManagerStub::HandleMinimizeAllAppWindows(MessageParcel& data, Me
         TLOGE(WmsLogTag::WMS_LIFE, "Read displayId failed.");
         return ERR_INVALID_DATA;
     }
-    WMError errCode = MinimizeAllAppWindows(displayId);
+    int32_t excludeWindowId = 0;
+    if (!data.ReadInt32(excludeWindowId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read excludeWindowId failed.");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = MinimizeAllAppWindows(displayId, excludeWindowId);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write errCode failed.");
         return ERR_INVALID_DATA;
@@ -2700,6 +2725,22 @@ int SceneSessionManagerStub::HandleSetSpecificWindowZIndex(MessageParcel& data, 
         return ERR_INVALID_DATA;
     }
     WSError ret = SetSpecificWindowZIndex(windowType, zIndex);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write errCode fail");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleResetSpecificWindowZIndex(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGI(WmsLogTag::WMS_FOCUS, "in");
+    int32_t pid = 0;
+    if (!data.ReadInt32(pid)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Read pid fail");
+        return ERR_INVALID_DATA;
+    }
+    WSError ret = ResetSpecificWindowZIndex(pid);
     if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Write errCode fail");
         return ERR_INVALID_DATA;

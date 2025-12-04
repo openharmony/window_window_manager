@@ -110,6 +110,31 @@ constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 10;
 }
 
 /**
+ * @brief Enumerates type of window manager agent.
+ */
+enum class WindowManagerAgentType : uint32_t {
+    WINDOW_MANAGER_AGENT_TYPE_FOCUS,
+    WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR,
+    WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE,
+    WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY,
+    WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE,
+    WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT,
+    WINDOW_MANAGER_AGENT_TYPE_WATER_MARK_FLAG,
+    WINDOW_MANAGER_AGENT_TYPE_VISIBLE_WINDOW_NUM = 7,
+    WINDOW_MANAGER_AGENT_TYPE_GESTURE_NAVIGATION_ENABLED,
+    WINDOW_MANAGER_AGENT_TYPE_CAMERA_WINDOW,
+    WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE,
+    WINDOW_MANAGER_AGENT_TYPE_WINDOW_STYLE,
+    WINDOW_MANAGER_AGENT_TYPE_WINDOW_PID_VISIBILITY,
+    WINDOW_MANAGER_AGENT_TYPE_PIP,
+    WINDOW_MANAGER_AGENT_TYPE_CALLING_DISPLAY,
+    WINDOW_MANAGER_AGENT_TYPE_PROPERTY,
+    WINDOW_MANAGER_AGENT_STATUS_BAR_PROPERTY,
+    WINDOW_MANAGER_AGENT_SUPPORT_ROTATION,
+    WINDOW_MANAGER_AGENT_TYPE_END,
+};
+
+/**
  * @brief Enumerates type of window.
  */
 enum class WindowType : uint32_t {
@@ -3435,6 +3460,7 @@ enum class WaterfallResidentState : uint32_t {
  * @brief Controls the compatible aspect ratio modes for window display.
  */
 enum class CompatibleStyleMode : uint32_t {
+    INVALID_VALUE = -1,
     // Default aspect ratio
     LANDSCAPE_DEFAULT = 0,
     // 18:9 aspect ratio
@@ -3442,7 +3468,9 @@ enum class CompatibleStyleMode : uint32_t {
     // 1:1 aspect ratio
     LANDSCAPE_1_1 = 3,
     // 2:3 aspect ratio
-    LANDSCAPE_2_3 = 4
+    LANDSCAPE_2_3 = 4,
+    // split aspect ratio
+    LANDSCAPE_SPLIT = 5,
 };
 }
 }

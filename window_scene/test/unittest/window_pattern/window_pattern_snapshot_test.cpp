@@ -1112,36 +1112,72 @@ HWTEST_F(WindowPatternSnapshotTest, UpdateAppLockSnapshot, TestSize.Level1)
 {
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    ASSERT_NE(session_, nullptr);
+    SessionInfo info;
+    info.screenId_ = 0;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ControlAppType type = ControlAppType::CONTROL_APP_TYPE_BEGIN;
     ControlInfo controlInfo = { .isNeedControl = false, .isControlRecentOnly = false };
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    session_->UpdateAppLockSnapshot(type, controlInfo);
+    sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sceneSession->UpdateAppLockSnapshot(type, controlInfo);
     EXPECT_TRUE(g_logMsg.find("UpdateAppLockSnapshot") == std::string::npos);
 
-    session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    session_->UpdateAppLockSnapshot(type, controlInfo);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->UpdateAppLockSnapshot(type, controlInfo);
     EXPECT_TRUE(g_logMsg.find("UpdateAppLockSnapshot") == std::string::npos);
 
     type = ControlAppType::APP_LOCK;
-    session_->isSnapshotBlur_.store(false);
-    session_->UpdateAppLockSnapshot(type, controlInfo);
+    sceneSession->isSnapshotBlur_.store(false);
+    sceneSession->UpdateAppLockSnapshot(type, controlInfo);
     EXPECT_TRUE(g_logMsg.find("UpdateAppLockSnapshot") != std::string::npos);
 
-    session_->state_ = SessionState::STATE_ACTIVE;
+    sceneSession->state_ = SessionState::STATE_ACTIVE;
     controlInfo.isNeedControl = true;
-    session_->UpdateAppLockSnapshot(type, controlInfo);
-    EXPECT_EQ(session_->isAppLockControl_.load(), true);
+    sceneSession->UpdateAppLockSnapshot(type, controlInfo);
+    EXPECT_EQ(sceneSession->isAppLockControl_.load(), true);
 
     controlInfo.isNeedControl = false;
-    session_->isSnapshotBlur_.store(true);
-    session_->UpdateAppLockSnapshot(type, controlInfo);
-    EXPECT_EQ(session_->isAppLockControl_.load(), false);
+    sceneSession->isSnapshotBlur_.store(true);
+    sceneSession->UpdateAppLockSnapshot(type, controlInfo);
+    EXPECT_EQ(sceneSession->isAppLockControl_.load(), false);
 
+    sceneSession->state_ = SessionState::STATE_BACKGROUND;
+    sceneSession->isPrivacyMode_ = true;
+    sceneSession->snapshotPrivacyMode_.store(true);
+    sceneSession->UpdateAppLockSnapshot(type, controlInfo);
+    EXPECT_EQ(sceneSession->isAppLockControl_.load(), false);
+
+    sceneSession->isPrivacyMode_ = true;
+    sceneSession->snapshotPrivacyMode_.store(false);
+    sceneSession->UpdateAppLockSnapshot(type, controlInfo);
+    EXPECT_EQ(sceneSession->isAppLockControl_.load(), false);
+
+    sceneSession->isPrivacyMode_ = false;
+    sceneSession->snapshotPrivacyMode_.store(true);
+    sceneSession->UpdateAppLockSnapshot(type, controlInfo);
+    EXPECT_EQ(sceneSession->isAppLockControl_.load(), false);
+
+    sceneSession->isPrivacyMode_ = false;
+    sceneSession->snapshotPrivacyMode_.store(false);
+    sceneSession->UpdateAppLockSnapshot(type, controlInfo);
+    EXPECT_EQ(sceneSession->isAppLockControl_.load(), false);
+}
+
+/**
+ * @tc.name: GetSnapshotPrivacyMode
+ * @tc.desc: GetSnapshotPrivacyMode Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternSnapshotTest, GetSnapshotPrivacyMode, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+
+    session_->snapshotPrivacyMode_.store(true);
     session_->state_ = SessionState::STATE_BACKGROUND;
-    session_->UpdateAppLockSnapshot(type, controlInfo);
-    EXPECT_EQ(session_->isAppLockControl_.load(), false);
+    EXPECT_EQ(session_->GetSnapshotPrivacyMode(), true);
+
+    session_->state_ = SessionState::STATE_ACTIVE;
+    EXPECT_EQ(session_->GetSnapshotPrivacyMode(), false);
 }
 
 /**

@@ -23,6 +23,7 @@
 #include "configuration.h"
 #include <hitrace_meter.h>
 #include "hitrace/hitracechain.h"
+#include "hisysevent.h"
 #include <type_traits>
 #ifdef IMF_ENABLE
 #include <input_method_controller.h>
@@ -92,9 +93,13 @@ constexpr int32_t MULTI_WINDOW_TITLE_BAR_DEFAULT_HEIGHT_VP = 32;
 constexpr int32_t MAX_FLOAT_TITLE_BAR_HEIGHT_VP = 40;
 constexpr uint32_t ROTATION_DEGREE = 90;
 constexpr int32_t HALF_VALUE = 2;
+constexpr char SCENE_BOARD_UE_DOMAIN[] = "SCENE_BOARD_UE";
+constexpr char DRAG_RESIZE_WINDOW[] = "PC_DRAG_RESIZE_WINDOW";
 const int32_t ROTATE_POLICY_WINDOW = 0;
 const int32_t ROTATE_POLICY_SCREEN = 1;
 const int32_t SCREEN_LOCK_Z_ORDER = 2000;
+constexpr int32_t MIN_ROTATION_VALUE = 0;
+constexpr int32_t MAX_ROTATION_VALUE = 3;
 const std::string OPTIONAL_SHOW = "OPTIONAL_SHOW"; // startWindowType can be changed by startAbility option.
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
@@ -169,6 +174,7 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
             property->SetAppInstanceKey(session->GetAppInstanceKey());
             property->SetUseControlState(session->isAppUseControl_);
             property->SetAncoRealBundleName(session->IsAnco() ? session->GetSessionInfo().bundleName_ : "");
+            property->SetCompatibleModePage(session->GetSessionInfo().compatibleModePage);
             if (session->GetSessionInfo().processOptions != nullptr) {
                 MissionInfo missionInfo;
                 missionInfo.startupInvisibility_ = session->GetSessionInfo().processOptions->startupVisibility ==
@@ -556,6 +562,7 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot, LifeCycleChangeR
         if (ret != WSError::WS_OK) {
             return ret;
         }
+        session->SetSnapshotPrivacyMode(session->GetIsPrivacyMode());
         if (WindowHelper::IsMainWindow(session->GetWindowType()) && isSaveSnapshot && needSaveSnapshot) {
             session->SetFreeMultiWindow();
             session->SaveSnapshot(true, true, nullptr, false, reason);
@@ -693,6 +700,7 @@ WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
             session->SetSessionState(SessionState::STATE_DISCONNECT);
             return WSError::WS_OK;
         }
+        session->SetSnapshotPrivacyMode(session->GetIsPrivacyMode());
         auto state = session->GetSessionState();
         if ((session->needSnapshot_ || (state == SessionState::STATE_ACTIVE && isMainWindow)) &&
             isSaveSnapshot && needSaveSnapshot) {
@@ -1104,7 +1112,7 @@ WSError SceneSession::StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY
         session->moveDragController_->InitMoveDragProperty();
         MoveDragController::MoveCoordinateProperty property = { offsetX, offsetY, pointerPosX,
             pointerY, displayId, winRect };
-        session->moveDragController_->HandleStartMovingWithCoordinate(property);
+        session->moveDragController_->HandleStartMovingWithCoordinate(property, session->IsMovable());
         session->moveDragController_->SetSpecifyMoveStartDisplay(displayId);
         session->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
         return WSError::WS_OK;
@@ -1616,6 +1624,9 @@ WSError SceneSession::NotifyClientToUpdateRectTask(const std::string& updateReas
     if (reason != SizeChangeReason::DRAG_MOVE) {
         UpdateCrossAxisOfLayout(winRect);
     }
+    if (reason != SizeChangeReason::DRAG_MOVE && reason != SizeChangeReason::DRAG) {
+        UpdatePrivateStateOfLayout(winRect);
+    }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "SceneSession::NotifyClientToUpdateRect%d [%d, %d, %u, %u] reason:%u",
         GetPersistentId(), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_, reason);
@@ -2076,6 +2087,52 @@ void SceneSession::HandleCrossMoveTo(WSRect& globalRect)
     SetSurfaceBounds(globalRect, true, true);
 }
 
+CrossPlaneState SceneSession::UpdateCrossPlaneState(const WSRect &rect)
+{
+    if (!PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId()) ||
+        PcFoldScreenManager::GetInstance().HasSystemKeyboard()) {
+        return CrossPlaneState::CROSS_DEFAULT_PLANE;
+    }
+    const auto &[defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
+        PcFoldScreenManager::GetInstance().GetDisplayRects();
+    if (rect.IsOverlap(defaultDisplayRect) && rect.IsOverlap(foldCreaseRect) && rect.IsOverlap(virtualDisplayRect)) {
+        return CrossPlaneState::CROSS_ALL_PLANE;
+    }
+    if (rect.IsOverlap(defaultDisplayRect) && rect.IsOverlap(foldCreaseRect)) {
+        return CrossPlaneState::CROSS_DEFAULT_CREASE_PLANE;
+    }
+    if (rect.IsOverlap(foldCreaseRect) && rect.IsOverlap(virtualDisplayRect)) {
+        return CrossPlaneState::CROSS_VIRTUAL_CREASE_PLANE;
+    }
+    if (rect.IsOverlap(defaultDisplayRect)) {
+        return CrossPlaneState::CROSS_DEFAULT_PLANE;
+    }
+    if (rect.IsOverlap(virtualDisplayRect)) {
+        return CrossPlaneState::CROSS_VIRTUAL_PLANE;
+    }
+    if (rect.IsOverlap(foldCreaseRect)) {
+        return CrossPlaneState::CROSS_CREASE_PLANE;
+    }
+    return CrossPlaneState::CROSS_DEFAULT_PLANE;
+}
+
+void SceneSession::UpdatePrivateStateOfLayout(const WSRect &rect)
+{
+    bool notifyPrivacy = false;
+    CrossPlaneState crossPlaneState = UpdateCrossPlaneState(rect);
+    notifyPrivacy = crossPlaneState_ != static_cast<uint32_t>(crossPlaneState);
+    crossPlaneState_ = static_cast<uint32_t>(crossPlaneState);
+
+    TLOGD(WmsLogTag::WMS_LAYOUT, "notifyPrivacy: %{public}u, winId: %{public}d, rect: %{public}s"
+        ", crossPlaneState: %{public}u", notifyPrivacy, GetPersistentId(), rect.ToString().c_str(), crossPlaneState);
+    
+    if (notifyPrivacy && updatePrivateStateAndNotifyFunc_) {
+        updatePrivateStateAndNotifyFunc_(GetPersistentId());
+    } else if (updatePrivateStateAndNotifyFunc_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "updatePrivateStateAndNotifyFunc_ is null, id: %{public}d", GetPersistentId() );
+    }
+}
+
 void SceneSession::UpdateCrossAxisOfLayout(const WSRect& rect)
 {
     const int FOLD_CREASE_TYPE = 2;
@@ -2281,8 +2338,9 @@ SessionInfo SceneSession::GetSessionInfoByWant(const std::shared_ptr<AAFwk::Want
     const sptr<SceneSession>& session)
 {
     SessionInfo info;
-    if (session->sessionInfo_.moduleName_ == want->GetElement().GetModuleName() &&
-        session->sessionInfo_.abilityName_ == want->GetElement().GetAbilityName()) {
+    if ((session->sessionInfo_.moduleName_ == want->GetElement().GetModuleName() &&
+        session->sessionInfo_.abilityName_ == want->GetElement().GetAbilityName()) ||
+        session->sessionInfo_.isAtomicService_) {
         session->sessionInfo_.want = want;
         session->sessionInfo_.isRestartApp_ = true;
         session->sessionInfo_.restartCallerPersistentId_ = INVALID_SESSION_ID;
@@ -3481,6 +3539,9 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
             moveDragController_->ConsumeDragEvent(pointerEvent, GetGlobalOrWinRect(), property, systemConfig_)) {
             auto surfaceNode = GetSurfaceNode();
             moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
+            if (isPointDown) {
+                ReportDragEndDirection(GetSessionInfo().bundleName_, moveDragController_->GetAreaType());
+            }
             PresentFocusIfNeed(pointerEvent->GetPointerAction());
             pointerEvent->MarkProcessed();
             return WSError::WS_OK;
@@ -3498,6 +3559,14 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
         }
     }
     return Session::TransferPointerEvent(pointerEvent, needNotifyClient, isExecuteDelayRaise);
+}
+
+void SceneSession::ReportDragEndDirection(const std::string& bundleName, AreaType dragType)
+{
+    HiSysEventWrite(SCENE_BOARD_UE_DOMAIN, DRAG_RESIZE_WINDOW,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "BUNDLENAME", bundleName,
+        "DRAGDIRECTION", static_cast<int32_t>(dragType));
 }
 
 void SceneSession::NotifyUpdateGravity()
@@ -5765,8 +5834,7 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
                 abilitySessionInfo->supportWindowModes.end());
         }
     }
-    if (info.isAtomicService_ && info.want != nullptr &&
-        (info.want->GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) == AAFwk::Want::FLAG_INSTALL_ON_DEMAND) {
+    if (info.isAtomicService_) {
         SetAtomicServiceInfo(info);
     }
     if (info.want != nullptr) {
@@ -9132,6 +9200,138 @@ WSError SceneSession::GetTargetOrientationConfigInfo(Orientation targetOrientati
     return WSError::WS_OK;
 }
 
+WSError SceneSession::ConvertOrientationAndRotation(const RotationInfoType from, const RotationInfoType to,
+        const int32_t value, int32_t& convertedValue)
+{
+    WSError ret = WSError::WS_ERROR_INVALID_PARAM;
+    if (value < MIN_ROTATION_VALUE || value > MAX_ROTATION_VALUE) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "the value to be converted is invalid");
+        return ret;
+    }
+    if (from == to) {
+        convertedValue = value;
+        return WSError::WS_OK;
+    }
+    if (from == RotationInfoType::DISPLAY_ORIENTATION && to == RotationInfoType::WINDOW_ORIENTATION) {
+        ret = ConvertDisplayOrientationToWindowOrientation(value, convertedValue);
+        return ret;
+    }
+    if (from == RotationInfoType::WINDOW_ORIENTATION && to == RotationInfoType::DISPLAY_ORIENTATION) {
+        ret = ConvertWindowOrientationToDisplayOrientation(value, convertedValue);
+        return ret;
+    }
+    if (from == RotationInfoType::DISPLAY_ROTATION && to == RotationInfoType::DISPLAY_ORIENTATION) {
+        ret = ConvertDisplayRotationToDisplayOrientation(value, convertedValue);
+        return ret;
+    }
+    if (from == RotationInfoType::DISPLAY_ORIENTATION && to == RotationInfoType::DISPLAY_ROTATION) {
+        ret = ConvertDisplayOrientationToDisplayRotation(value, convertedValue);
+        return ret;
+    }
+    if (from == RotationInfoType::DISPLAY_ROTATION && to == RotationInfoType::WINDOW_ORIENTATION) {
+        ret = ConvertDisplayRotationToWindowOrientation(value, convertedValue);
+        return ret;
+    }
+    if (from == RotationInfoType::WINDOW_ORIENTATION && to == RotationInfoType::DISPLAY_ROTATION) {
+        ret = ConvertWindowOrientationToDisplayRotation(value, convertedValue);
+        return ret;
+    }
+    return ret;
+}
+
+WSError SceneSession::ConvertDisplayOrientationToWindowOrientation(const int32_t value, int32_t& convertedValue)
+{
+    DisplayOrientation displayOrientation = static_cast<DisplayOrientation>(value);
+    if (displayOrientation == DisplayOrientation::UNKNOWN) {
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    auto it = DISPLAY_TO_WINDOW_MAP.find(displayOrientation);
+    if (it != DISPLAY_TO_WINDOW_MAP.end()) {
+        convertedValue = static_cast<int32_t>(it->second);
+        return WSError::WS_OK;
+    }
+    return WSError::WS_ERROR_INVALID_PARAM;
+}
+
+WSError SceneSession::ConvertWindowOrientationToDisplayOrientation(const int32_t value, int32_t& convertedValue)
+{
+    WindowOrientation windowOrientation = static_cast<WindowOrientation>(value);
+    auto it = WINDOW_TO_DISPLAY_MAP.find(windowOrientation);
+    if (it != WINDOW_TO_DISPLAY_MAP.end()) {
+        convertedValue = static_cast<int32_t>(it->second);
+        return WSError::WS_OK;
+    }
+    return WSError::WS_ERROR_INVALID_PARAM;
+}
+
+WSError SceneSession::ConvertDisplayRotationToDisplayOrientation(const int32_t rotation, int32_t& orientation)
+{
+    sptr<ScreenSession> screenSession =
+        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(GetSessionProperty()->GetDisplayId());
+    if (screenSession == nullptr) {
+        TLOGW(WmsLogTag::WMS_ROTATION, "Screen session is null");
+        return WSError::WS_ERROR_INVALID_DISPLAY;
+    }
+    FoldDisplayMode foldDisplayMode = ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
+    Rotation targetRotation = static_cast<Rotation>(rotation);
+    RRect bounds = screenSession->CalcBoundsByRotation(targetRotation);
+    DisplayOrientation displayOrientation =
+        screenSession->CalcDeviceOrientationWithBounds(targetRotation, foldDisplayMode, bounds);
+    orientation = static_cast<int32_t>(displayOrientation);
+    TLOGI(WmsLogTag::WMS_ROTATION,
+        "rotation: %{public}d, width: %{public}f, height: %{public}f, orientation: %{public}d",
+        rotation, bounds.rect_.width_, bounds.rect_.height_, orientation);
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::ConvertDisplayOrientationToDisplayRotation(const int32_t orientation, int32_t& rotation)
+{
+    sptr<ScreenSession> screenSession =
+        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(GetSessionProperty()->GetDisplayId());
+    if (screenSession == nullptr) {
+        TLOGW(WmsLogTag::WMS_ROTATION, "Screen session is null");
+        return WSError::WS_ERROR_INVALID_DISPLAY;
+    }
+    FoldDisplayMode foldDisplayMode = ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
+    DisplayOrientation displayOrientation = static_cast<DisplayOrientation>(orientation);
+    RRect bounds = screenSession->CalcBoundsInRotationZero();
+    Rotation targetRotation =
+        screenSession->CalcRotationByDeviceOrientation(displayOrientation, foldDisplayMode, bounds);
+    rotation = static_cast<int32_t>(targetRotation);
+    TLOGI(WmsLogTag::WMS_ROTATION,
+        "rotation: %{public}d, width: %{public}f, height: %{public}f, orientation: %{public}d",
+        rotation, bounds.rect_.width_, bounds.rect_.height_, orientation);
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::ConvertDisplayRotationToWindowOrientation(const int32_t value, int32_t& convertedValue)
+{
+    // convert displayRotation to displayorientation
+    int32_t displayOrientation;
+    WSError ret = ConvertDisplayRotationToDisplayOrientation(value, displayOrientation);
+    if (ret != WSError::WS_OK) {
+        TLOGNE(WmsLogTag::WMS_ROTATION, "failed to convert DisplayRotation to DisplayOrientation");
+        return ret;
+    }
+    // convert displayorientation to windowOrientation
+    ret = ConvertDisplayOrientationToWindowOrientation(displayOrientation, convertedValue);
+    return ret;
+}
+
+WSError SceneSession::ConvertWindowOrientationToDisplayRotation(const int32_t value, int32_t& convertedValue)
+{
+    // convert windowOrientation to displayorientation
+    int32_t displayOrientation;
+    WSError ret = ConvertWindowOrientationToDisplayOrientation(value, displayOrientation);
+    if (ret != WSError::WS_OK) {
+        TLOGNE(WmsLogTag::WMS_ROTATION, "failed to convert WindowOrientation to DisplayOrientation");
+        return ret;
+    }
+    // convert displayorientation to displayRotation
+    ret = ConvertDisplayOrientationToDisplayRotation(displayOrientation, convertedValue);
+    return ret;
+}
+
 WSError SceneSession::NotifyRotationProperty(uint32_t rotation, uint32_t width, uint32_t height)
 {
     PostTask(
@@ -10066,6 +10266,18 @@ WMError SceneSession::UnlockCursor(const std::vector<int32_t>& parameters)
         return WMError::WM_ERROR_INVALID_SESSION;
     }
     SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_LOCK_CURSOR, false);
+    NotifySessionInfoChange();
+    return WMError::WM_OK;
+}
+
+WMError SceneSession::SetReceiveDragEventEnabled(const std::vector<int32_t>& parameters)
+{
+    if (!CheckParameters(parameters, SET_RECEIVE_DRAG_EVENT_LENGTH)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "The param is illegal");
+        return WMError::WM_ERROR_ILLEGAL_PARAM;
+    }
+    bool enalbed = static_cast<bool>(parameters[1]);
+    SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_RECEIVE_DRAG_EVENT, !enalbed);
     NotifySessionInfoChange();
     return WMError::WM_OK;
 }

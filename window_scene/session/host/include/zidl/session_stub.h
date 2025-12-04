@@ -57,6 +57,7 @@ private:
     int HandleGetAvoidAreaByTypeIgnoringVisibility(MessageParcel& data, MessageParcel& reply);
     int HandleGetAllAvoidAreas(MessageParcel& data, MessageParcel& reply);
     int HandleGetTargetOrientationConfigInfo(MessageParcel& data, MessageParcel& reply);
+    int HandleConvertOrientationAndRotation(MessageParcel& data, MessageParcel& reply);
     int HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply);
     int HandleSetContentAspectRatio(MessageParcel& data, MessageParcel& reply);
     int HandleSetWindowAnimationFlag(MessageParcel& data, MessageParcel& reply);
@@ -184,6 +185,7 @@ private:
 
     // Compatible Mode
     int HandleNotifyIsFullScreenInForceSplitMode(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyCompatibleModeChange(MessageParcel& data, MessageParcel& reply);
     
     int HandleRestartApp(MessageParcel& data, MessageParcel& reply);
 

@@ -173,6 +173,7 @@ public:
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) { return false; }
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId) { return ScreenPowerState::INVALID_STATE; }
     virtual ScreenPowerState GetScreenPower() { return ScreenPowerState::INVALID_STATE; }
+    virtual void SyncScreenPowerState(ScreenPowerState state) { }
     virtual bool SetDisplayState(DisplayState state) { return false; }
     virtual DisplayState GetDisplayState(DisplayId displayId) {return DisplayState::UNKNOWN; }
     virtual bool TryToCancelScreenOff() { return false; }
@@ -298,7 +299,7 @@ public:
     virtual ScreenProperty GetPhyScreenProperty(ScreenId screenId) { return ScreenProperty(); }
     virtual void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) {}
     virtual void SetScreenPrivacyState(bool hasPrivate) {}
-    virtual void SetPrivacyStateByDisplayId(DisplayId id, bool hasPrivate) {}
+    virtual void SetPrivacyStateByDisplayId(std::unordered_map<DisplayId, bool>& privacyBundleDisplayId) {}
     virtual void SetScreenPrivacyWindowList(DisplayId id, std::vector<std::string> privacyWindowList) {}
     virtual DMError GetAvailableArea(DisplayId displayId, DMRect& area) { return DMError::DM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual DMError GetExpandAvailableArea(DisplayId displayId, DMRect& area)
