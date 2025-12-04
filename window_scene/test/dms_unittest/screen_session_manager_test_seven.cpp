@@ -25,6 +25,7 @@
 #include "fold_screen_state_internel.h"
 #include "common_test_utils.h"
 #include "iremote_object_mocker.h"
+#include "os_account_manager.h"
 #include "screen_session_manager_client.h"
 #include "../mock/mock_accesstoken_kit.h"
 #include "test_client.h"
@@ -1139,6 +1140,7 @@ HWTEST_F(ScreenSessionManagerTest, GetIsCurrentInUseById01, Function | SmallTest
 {
     ScreenSessionManager* ssm = new ScreenSessionManager();
     ASSERT_NE(ssm, nullptr);
+    
     ScreenId screenId = 50;
     auto res = ssm->GetIsCurrentInUseById(screenId);
     ASSERT_EQ(false, res);
