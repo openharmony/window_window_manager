@@ -564,6 +564,7 @@ public:
     void SetDisplayConcurrentUserMap(DisplayId displayId, int32_t userId, bool isForeground, int32_t pid);
     void RemoveUserByPid(int32_t pid);
     bool CheckPidInDeathPidVector(int32_t pid) const;
+    void NotifyRSCoordination(bool isEnterCoordination);
 
     static bool GetScreenSessionMngSystemAbility();
 
