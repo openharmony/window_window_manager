@@ -888,8 +888,8 @@ protected:
      */
     std::shared_ptr<RSSurfaceNode> GetShadowSurfaceNode() const;
     std::shared_ptr<RSSurfaceNode> GetLeashWinShadowSurfaceNode() const;
-    std::shared_ptr<RSUIContext> GetRSShadowContext() const;
-    std::shared_ptr<RSUIContext> GetRSLeashWinShadowContext() const;
+    std::shared_ptr<RSUIContext> GetRSShadowContext();
+    std::shared_ptr<RSUIContext> GetRSLeashWinShadowContext();
 
     static std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     int32_t persistentId_ = INVALID_SESSION_ID;
