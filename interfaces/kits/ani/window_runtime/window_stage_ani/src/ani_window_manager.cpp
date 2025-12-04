@@ -99,6 +99,8 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace wi
             reinterpret_cast<void *>(AniWindowManager::GetWindowsByCoordinate)},
         ani_native_function {"toggleShownStateForAllAppWindowsSync", "l:",
             reinterpret_cast<void *>(AniWindowManager::ToggleShownStateForAllAppWindows)},
+        ani_native_function {"setSpecificSystemWindowZIndexSync", "JL@ohos/window/window/WindowType;I:V",
+            reinterpret_cast<void *>(AniWindowManager::SetSpecificSystemWindowZIndex)},
     };
     for (auto method : functions) {
         if ((ret = env->Namespace_BindNativeFunctions(ns, &method, 1u)) != ANI_OK) {
@@ -1003,5 +1005,43 @@ void AniWindowManager::ToggleShownStateForAllAppWindows(ani_env* env, ani_long n
     }
 }
 
+void AniWindowManager::SetSpecificSystemWindowZIndex(ani_env* env, ani_long nativeObj,
+    ani_enum_item apiWindowType, ani_int zIndex)
+{
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    if (aniWindowManager != nullptr) {
+        aniWindowManager->OnSetSpecificSystemWindowZIndex(env, apiWindowType, zIndex);
+    } else {
+        TLOGE(WmsLogTag::WMS_FOCUS, "[ANI] aniWindowManager is nullptr");
+    }
+}
+
+void AniWindowManager::OnSetSpecificSystemWindowZIndex(ani_env* env, ani_enum_item apiWindowType, ani_int zIndex)
+{
+    ani_int enumValue;
+    env->EnumItem_GetValue_Int(apiWindowType, &enumValue);
+    uint32_t apiWindowTypeValue = static_cast<uint32_t>(enumValue);
+    WindowType windowType;
+    if (apiWindowTypeValue >= static_cast<uint32_t>(ApiWindowType::TYPE_BASE) &&
+        apiWindowTypeValue < static_cast<uint32_t>(ApiWindowType::TYPE_END)) {
+        windowType = JS_TO_NATIVE_WINDOW_TYPE_MAP.at(static_cast<ApiWindowType>(apiWindowTypeValue));
+    } else {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] invalid windowType");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setSpecificSystemWindowZIndex]msg:failed to convert paramter to windowType");
+        return;
+    }
+    if (!WindowHelper::IsSupportSetZIndexWindow(windowType)) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] windowType not support %{public}d", windowType);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
+            "[window][setSpecificSystemWindowZIndex]msg:windowType not support");
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().
+        SetSpecificSystemWindowZIndex(windowType, zIndex));
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret, "[window][setSpecificSystemWindowZIndex]msg:set failed");
+    }
+}
 }  // namespace Rosen
 }  // namespace OHOS

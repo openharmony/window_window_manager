@@ -3190,6 +3190,8 @@ export class WindowInternal implements Window {
     private native raiseAboveTargetSync(nativeObj: long, windowId: int): void;
     private native raiseToAppTopSync(nativeObj: long): void;
     private native setTopmostSync(nativeObj: long, isTopmost: boolean): void;
+    private native setReceiveDragEventEnabled(nativeObj: long, enabled: boolean): void;
+    private native isReceiveDragEventEnabled(nativeObj: long): boolean;
     private native requestFocusSync(nativeObj: long, isFocused: boolean): void;
     private native setSubWindowModal(nativeObj: long, isModal: boolean): void;
     private native setSubWindowModalType(nativeObj: long, isModal: boolean, modalityType: int): void;
@@ -4376,6 +4378,22 @@ export class WindowInternal implements Window {
       });
     }
 
+    public setReceiveDragEventEnabled(enabled: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setReceiveDragEventEnabled(this.nativeObj, enabled);
+        }).then((ret: NullishType): void => {
+          resolve(undefined);
+        }).catch((err: NullishType): void => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public isReceiveDragEventEnabled(): boolean{
+      return this.isReceiveDragEventEnabled(this.nativeObj);
+    }
+
     public requestFocus(isFocused: boolean): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
@@ -5380,6 +5398,8 @@ export interface Window {
     raiseToAppTop(callback: AsyncCallback<void>): void;
     raiseToAppTop(): Promise<void>;
     setTopmost(isTopmost: boolean): Promise<void>;
+    setReceiveDragEventEnabled(enabled: boolean): Promise<void>;
+    isReceiveDragEventEnabled(): boolean;
     requestFocus(isFocused: boolean): Promise<void>;
     setSubWindowModal(isModal: boolean): Promise<void>;
     setSubWindowModal(isModal: boolean, modalityType: ModalityType): Promise<void>;
@@ -5550,6 +5570,7 @@ native function setStartWindowBackgroundColorSync(nativeObj: long, moduleName: s
   color: long): void;
 native function notifyScreenshotEventSync(nativeObj: long, eventType: ScreenshotEventType): void;
 native function toggleShownStateForAllAppWindowsSync(nativeObj: long): void;
+native function setSpecificSystemWindowZIndexSync(nativeObj: long, windowType: WindowType, zIndex: int): void;
 
 export function toggleShownStateForAllAppWindows(callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
@@ -5847,6 +5868,18 @@ export function shiftAppWindowPointerEvent(sourceWindowId: int, targetWindowId: 
     }).catch((err: NullishType) => {
       reject(err as BusinessError);
     });
+  });
+}
+
+export function setSpecificSystemWindowZIndex(windowType: WindowType, zIndex: int): Promise<void> {
+  return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+      taskpool.execute((): void => {
+          return setSpecificSystemWindowZIndexSync(nativeObj, windowType, zIndex);
+      }).then((ret: NullishType) => {
+          resolve(undefined);
+      }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+      });
   });
 }
 

@@ -31,6 +31,7 @@
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
 
+#include "application_context.h"
 #include "color_parser.h"
 #include "common/include/fold_screen_state_internel.h"
 #include "common/include/fold_screen_common.h"
@@ -356,6 +357,13 @@ bool WindowSessionImpl::IsPcWindow() const
 bool WindowSessionImpl::IsPadWindow() const
 {
     return windowSystemConfig_.IsPadWindow();
+}
+
+bool WindowSessionImpl::IsPhonePadOrPcWindow() const
+{
+    return windowSystemConfig_.IsPhoneWindow() ||
+        windowSystemConfig_.IsPadWindow() ||
+        windowSystemConfig_.IsPcWindow();
 }
 
 bool WindowSessionImpl::IsPcOrFreeMultiWindowCapabilityEnabled() const
@@ -7430,6 +7438,50 @@ WMError WindowSessionImpl::SetSpecificBarProperty(WindowType type, const SystemB
     return WMError::WM_OK;
 }
 
+WMError WindowSessionImpl::UpdateStatusBarColorByColorMode(uint32_t& contentColor)
+{
+    SystemBarProperty statusBarProp = property_->GetSystemBarProperty().at(WindowType::WINDOW_TYPE_STATUS_BAR);
+    if (static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(statusBarProp.settingFlag_) &
+        static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING)) == SystemBarSettingFlag::COLOR_SETTING) {
+        TLOGD(WmsLogTag::WMS_IMMS, "user has set color");
+        return WMError::WM_DO_NOTHING;
+    }
+    constexpr uint32_t BLACK = 0xFF000000;
+    constexpr uint32_t WHITE = 0xFFFFFFFF;
+    bool isColorModeSetByApp = !specifiedColorMode_.empty();
+    std::string colorMode = specifiedColorMode_;
+    if (isColorModeSetByApp) {
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type %{public}u colorMode %{public}s",
+            GetPersistentId(), GetType(), colorMode.c_str());
+        contentColor = colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT ? BLACK : WHITE;
+    } else {
+        auto appContext = AbilityRuntime::Context::GetApplicationContext();
+        if (appContext == nullptr) {
+            TLOGE(WmsLogTag::WMS_IMMS, "app context is nullptr");
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
+        if (config == nullptr) {
+            TLOGE(WmsLogTag::WMS_IMMS, "config is null, winId: %{public}d", GetPersistentId());
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+        isColorModeSetByApp = !config->GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP).empty();
+        if (isColorModeSetByApp) {
+            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "win=%{public}u, appColor=%{public}s", GetWindowId(), colorMode.c_str());
+            contentColor = colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT ? BLACK : WHITE;
+        } else {
+            bool hasDarkRes = false;
+            appContext->AppHasDarkRes(hasDarkRes);
+            TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type %{public}u hasDarkRes %{public}u colorMode %{public}s",
+                GetPersistentId(), GetType(), hasDarkRes, colorMode.c_str());
+            contentColor = colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT ? BLACK :
+                (hasDarkRes ? WHITE : BLACK);
+        }
+    }
+    return WMError::WM_OK;
+}
+
 void WindowSessionImpl::NotifyOccupiedAreaChangeInfoInner(sptr<OccupiedAreaChangeInfo> info)
 {
     std::lock_guard<std::recursive_mutex> lockListener(occupiedAreaChangeListenerMutex_);
@@ -8952,13 +9004,14 @@ void WindowSessionImpl::RegisterNavigateCallbackForPageCompatibleModeIfNeed()
         return;
     }
     uiContent_->RegisterNavigateChangeCallback(
-        [weakThis = wptr(this), where = __func__](const std::string& fromPage, const std::string& toPage) {
+        [weakThis = wptr(this), where = __func__](const OHOS::Ace::NavigateChangeInfo& fromPage,
+            const OHOS::Ace::NavigateChangeInfo& toPage) {
         auto window = weakThis.promote();
         if (!window) {
             TLOGNE(WmsLogTag::WMS_COMPAT, "%{public}s window is null", where);
             return;
         }
-        window->HandleNavigateCallbackForPageCompatibleMode(fromPage, toPage);
+        window->HandleNavigateCallbackForPageCompatibleMode(fromPage.name, toPage.name);
     });
 }
 

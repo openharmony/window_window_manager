@@ -590,6 +590,7 @@ protected:
     mutable std::recursive_mutex phyScreenPropMapMutex_;
     mutable std::recursive_mutex screenSessionMapMutex_;
     ScreenId GetPhyScreenId(ScreenId screenId);
+    ScreenId GenerateSmsScreenId(ScreenId rsScreenId);
     EventTracker screenEventTracker_;
     sptr<ScreenSession> GetInternalScreenSession();
     sptr<ScreenSession> GetScreenSessionInner(ScreenId screenId, ScreenProperty property);
@@ -761,7 +762,6 @@ private:
      */
     bool ActiveUser(int32_t newUserId, int32_t& oldUserId, int32_t newScbPid);
     DisplayId GetUserDisplayId(int32_t targetUserId) const;
-    ScreenId GenerateSmsScreenId(ScreenId rsScreenId);
 
     void HandleSuperFoldDisplayInfoWhenKeyboardOn(const sptr<ScreenSession>& screenSession,
         sptr<DisplayInfo>& displayInfo);
