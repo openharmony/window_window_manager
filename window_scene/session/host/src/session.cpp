@@ -5124,12 +5124,12 @@ WindowMetaInfo Session::GetWindowMetaInfoForWindowInfo() const
     }
     auto property = GetSessionProperty();
     windowMetaInfo.isPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
-    auto displayId = GetSessionProperty()->GetDisplayId();
+    auto displayId = property->GetDisplayId();
     auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
     if (screenSession != nullptr) {
-        if (!screenSession->IsTouchEnabled() || !sceneSession->GetSystemTouchable() ||
-            !sceneSession->GetForegroundInteractiveStatus()) {
-            windowInfo.isTouchable = false;
+        if (!screenSession->IsTouchEnabled() || !GetSystemTouchable() ||
+            !GetForegroundInteractiveStatus()) {
+            windowMetaInfo.isTouchable = false;
         }
     }
     TLOGD(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", windowMetaInfo.windowId,
