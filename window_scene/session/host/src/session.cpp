@@ -218,7 +218,7 @@ std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode(bool isUpdateContextBefor
 std::shared_ptr<RSSurfaceNode> Session::GetShadowSurfaceNode() const
 {
     std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
-    return leashWinShadowSurfaceNode_ == nullptr ? GetSurfaceNode() : shadowSurfaceNode_;
+    return RSAdapterUtil::IsClientMultiInstanceEnabled() ? shadowSurfaceNode_ : surfaceNode_;
 }
 
 std::optional<NodeId> Session::GetSurfaceNodeId() const
@@ -260,7 +260,7 @@ std::shared_ptr<RSSurfaceNode> Session::GetLeashWinSurfaceNode() const
 std::shared_ptr<RSSurfaceNode> Session::GetLeashWinShadowSurfaceNode() const
 {
     std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
-    return leashWinShadowSurfaceNode_ == nullptr ? GetLeashWinSurfaceNode() : leashWinShadowSurfaceNode_;
+    return RSAdapterUtil::IsClientMultiInstanceEnabled() ? leashWinShadowSurfaceNode_ : leashWinSurfaceNode_;
 }
 
 std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNodeForMoveDrag() const
@@ -5322,7 +5322,7 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
 std::shared_ptr<RSUIContext> Session::GetRSShadowContext() const
 {
     std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
-    auto shadowSurfaceNode = GetShadowSurfaceNode();
+    auto shadowSurfaceNode = RSAdapterUtil::IsClientMultiInstanceEnabled() ? shadowSurfaceNode_ : surfaceNode_;
     if (!shadowSurfaceNode) {
         TLOGE(WmsLogTag::WMS_SCB, "Shadow surface node is nullptr, id: %{public}d.", GetPersistentId());
         return nullptr;
@@ -5333,7 +5333,8 @@ std::shared_ptr<RSUIContext> Session::GetRSShadowContext() const
 std::shared_ptr<RSUIContext> Session::GetRSLeashWinShadowContext() const
 {
     std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
-    auto leashWinShadowSurfaceNode = GetLeashWinShadowSurfaceNode();
+    auto leashWinShadowSurfaceNode = RSAdapterUtil::IsClientMultiInstanceEnabled() ?
+        leashWinShadowSurfaceNode_ : leashWinSurfaceNode_;
     if (!leashWinShadowSurfaceNode) {
         TLOGE(WmsLogTag::WMS_SCB, "Leash win shadow surface node is nullptr, id: %{public}d.", GetPersistentId());
         return nullptr;
