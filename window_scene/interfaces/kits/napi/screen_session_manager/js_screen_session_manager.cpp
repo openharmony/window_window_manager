@@ -494,7 +494,7 @@ void JsScreenSessionManager::OnTentModeChange(const TentMode tentMode)
         return;
     }
     TLOGD(WmsLogTag::DMS, "[NAPI]begin");
-    for (auto callback : tentModeChangeCallback) {
+    for (auto& callback : tentModeChangeCallback) {
         TLOGD(WmsLogTag::DMS, "native call, change tent mode to");
         auto asyncTask = [this, callback, tentMode, env = env_]() {
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenSessionManager::OnTentModeChange");
@@ -658,17 +658,16 @@ napi_value JsScreenSessionManager::OnUnRegisterShutdownCallback(napi_env env, co
 napi_value JsScreenSessionManager::OnRegisterCallback(napi_env env, const napi_callback_info info)
 {
     std::string callbackType;
-    napi_value argv[4] = {nullptr};
-    if (!CheckAndObtainCallBackType(env, info, callbackType, argv)) {
+    napi_ref callbackRef;
+    if (!ObtainCallBackInfo(env, info, callbackType, callbackRef)) {
         TLOGE(WmsLogTag::DMS, "[NAPI] param check fail");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
-
     if (callbackType == ON_SCREEN_CONNECTION_CHANGE_CALLBACK) {
-        RegisterScreenConnectionCallback(env, callbackType, argv);
+        RegisterScreenConnectionCallback(env, callbackType, callbackRef);
     } else if (callbackType == ON_TENT_MODE_CHANGE_CALLBACK) {
-        RegisterTentModeCallback(env, callbackType, argv);
+        RegisterTentModeCallback(env, callbackType, callbackRef);
     } else {
         TLOGE(WmsLogTag::DMS, "Unsupported callback type: %{public}s.", callbackType.c_str());
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
@@ -677,42 +676,22 @@ napi_value JsScreenSessionManager::OnRegisterCallback(napi_env env, const napi_c
 }
 
 void JsScreenSessionManager::RegisterScreenConnectionCallback(napi_env env,
-    const std::string& callbackType, napi_value* argv)
+    const std::string& callbackType, napi_ref& callback)
 {
     TLOGI(WmsLogTag::DMS, "[NAPI] begin");
     if (screenConnectionCallback_ != nullptr) {
         return;
     }
-    napi_value value = argv[1];
-    if (!NapiIsCallable(env, value)) {
-        TLOGE(WmsLogTag::DMS, "Failed to register callback, callback is not callable!");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
-        return;
-    }
-
-    napi_ref result = nullptr;
-    napi_create_reference(env, value, 1, &result);
-    TLOGI(WmsLogTag::DMS, "regis callbackType = %{public}s", callbackType.c_str());
-    std::shared_ptr<NativeReference> callbackRef(reinterpret_cast<NativeReference*>(result));       
+    std::shared_ptr<NativeReference> callbackRef(reinterpret_cast<NativeReference*>(callback));
     screenConnectionCallback_ = callbackRef;
     ScreenSessionManagerClient::GetInstance().RegisterScreenConnectionListener(this);
 }
 
 void JsScreenSessionManager::RegisterTentModeCallback(napi_env env,
-    const std::string& callbackType, napi_value* argv)
+    const std::string& callbackType, napi_ref& callback)
 {
     TLOGI(WmsLogTag::DMS, "[NAPI] begin");
-    napi_value value = argv[1];
-    if (!NapiIsCallable(env, value)) {
-        TLOGE(WmsLogTag::DMS, "Failed to register callback, callback is not callable!");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
-        return;
-    }
-
-    napi_ref result = nullptr;
-    napi_create_reference(env, value, 1, &result);
-    TLOGI(WmsLogTag::DMS, "regis callbackType = %{public}s", callbackType.c_str());
-    std::shared_ptr<NativeReference> callbackRef(reinterpret_cast<NativeReference*>(result));
+    std::shared_ptr<NativeReference> callbackRef(reinterpret_cast<NativeReference*>(callback));
     {
         std::unique_lock<std::shared_mutex> lock(tentModeChangeCallbackMutex_);
         tentModeChangeCallback_.emplace_back(callbackRef);
@@ -720,22 +699,28 @@ void JsScreenSessionManager::RegisterTentModeCallback(napi_env env,
     ScreenSessionManagerClient::GetInstance().RegisterTentModeChangeListener(this);
 }
 
-bool JsScreenSessionManager::CheckAndObtainCallBackType(napi_env env, const napi_callback_info info,
-    std::string& callbackType, napi_value* argv)
+bool JsScreenSessionManager::ObtainCallBackInfo(napi_env env, const napi_callback_info info,
+    std::string& callbackType, napi_ref& callbackRef)
 {
     TLOGI(WmsLogTag::DMS, "[NAPI] begin");
     size_t argc = 4;
+    napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 2) { // 2: params num
         TLOGE(WmsLogTag::DMS, "Argc is invalid: %{public}zu", argc);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
         return false;
     }
     if (!ConvertFromJsValue(env, argv[0], callbackType)) {
         TLOGE(WmsLogTag::DMS, "Failed to convert parameter to callback type.");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
         return false;
     }
+    napi_value value = argv[1];
+    if (!NapiIsCallable(env, value)) {
+        TLOGE(WmsLogTag::DMS, "Failed to register callback, callback is not callable!");
+        return false;
+    }
+
+    napi_create_reference(env, value, 1, &callbackRef);
     return true;
 }
 
