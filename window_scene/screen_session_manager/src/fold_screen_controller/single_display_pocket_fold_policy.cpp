@@ -647,7 +647,7 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToCoordination()
         return;
     }
     TLOGI(WmsLogTag::DMS, "change displaymode to coordination current mode=%{public}d", currentDisplayMode_);
-    
+    ScreenSessionManager::GetInstance().NotifyRSCoordination(true);
     ScreenSessionManager::GetInstance().SetCoordinationFlag(true);
     ScreenSessionManager::GetInstance().OnScreenChange(SCREEN_ID_MAIN, ScreenEvent::CONNECTED);
 
@@ -670,7 +670,7 @@ void SingleDisplayPocketFoldPolicy::CloseCoordinationScreen()
         return;
     }
     TLOGI(WmsLogTag::DMS, "Close Coordination Screen current mode=%{public}d", currentDisplayMode_);
-    
+    ScreenSessionManager::GetInstance().NotifyRSCoordination(false);
     // on main screen
     auto taskScreenOnMainOFF = [=] {
         TLOGNI(WmsLogTag::DMS, "CloseCoordinationScreen: screenIdMain OFF.");
@@ -710,6 +710,7 @@ void SingleDisplayPocketFoldPolicy::ExitCoordination()
         TLOGW(WmsLogTag::DMS, "change displaymode to coordination skipped, current coordination flag is false");
         return;
     }
+    ScreenSessionManager::GetInstance().NotifyRSCoordination(false);
     ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
     ScreenSessionManager::GetInstance().SetRSScreenPowerStatusExt(SCREEN_ID_MAIN,
         ScreenPowerStatus::POWER_STATUS_OFF);
