@@ -5319,7 +5319,7 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
     return rsUIContext_;
 }
 
-std::shared_ptr<RSUIContext> Session::GetRSShadowContext() const
+std::shared_ptr<RSUIContext> Session::GetRSShadowContext()
 {
     std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
     if (RSAdapterUtil::IsClientMultiInstanceEnabled()) {
@@ -5332,7 +5332,7 @@ std::shared_ptr<RSUIContext> Session::GetRSShadowContext() const
     return GetRSUIContext();
 }
 
-std::shared_ptr<RSUIContext> Session::GetRSLeashWinShadowContext() const
+std::shared_ptr<RSUIContext> Session::GetRSLeashWinShadowContext()
 {
     std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
     if (RSAdapterUtil::IsClientMultiInstanceEnabled()) {
