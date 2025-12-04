@@ -460,7 +460,7 @@ HWTEST_F(WindowManagerServiceDumpTest, GetSCBDebugDumpInfo01, TestSize.Level1)
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     sptr<SceneSession> sceneSession = ssm_->RequestSceneSession(sessionInfo, windowSessionProperty);
     ASSERT_EQ(nullptr, sceneSession);
-    std::vector<std::string> infos;
+    std::string infos;
     WSError result = ssm_->GetSCBDebugDumpInfo("SCBScenePanel getContainerSession 0", infos);
     ASSERT_EQ(WSError::WS_OK, result);
     ASSERT_FALSE(infos.empty());
@@ -479,7 +479,7 @@ HWTEST_F(WindowManagerServiceDumpTest, GetSCBDebugDumpInfo02, TestSize.Level1)
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     sptr<SceneSession> sceneSession = ssm_->RequestSceneSession(sessionInfo, windowSessionProperty);
     ASSERT_EQ(nullptr, sceneSession);
-    std::vector<std::string> infos;
+    std::string infos;
     WSError result = ssm_->GetSCBDebugDumpInfo("SCBScenePanel getContainerSession -f", infos);
     ASSERT_EQ(WSError::WS_OK, result);
     ASSERT_FALSE(infos.empty());
