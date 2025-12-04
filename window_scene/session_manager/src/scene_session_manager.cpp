@@ -26,6 +26,7 @@
 #include <hisysevent.h>
 #include <parameters.h>
 #include <hitrace_meter.h>
+#include "ffrt_inner.h"
 #include "hitrace/hitracechain.h"
 #include "parameter.h"
 #include "resource_manager.h"
