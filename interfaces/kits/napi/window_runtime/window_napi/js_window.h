@@ -258,6 +258,12 @@ public:
     static napi_value SetFollowParentWindowLayoutEnabled(napi_env env, napi_callback_info info);
     static napi_value SetWindowShadowEnabled(napi_env env, napi_callback_info info);
 
+    /*
+     * Window Event
+     */
+    static napi_value SetReceiveDragEventEnabled(napi_env env, napi_callback_info info);
+    static napi_value IsReceiveDragEventEnabled(napi_env env, napi_callback_info info);
+
 private:
     const std::string& GetWindowName() const;
     static bool ParseScaleOption(napi_env env, napi_value jsObject, Transform& trans);
@@ -493,6 +499,12 @@ private:
     napi_value OnSetFollowParentWindowLayoutEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetRelativePositionToParentWindowEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetWindowShadowEnabled(napi_env env, napi_callback_info info);
+
+    /*
+     * Window Event
+     */
+    napi_value OnSetReceiveDragEventEnabled(napi_env env, napi_callback_info info);
+    napi_value OnIsReceiveDragEventEnabled(napi_env env, napi_callback_info info);
 };
 }  // namespace Rosen
 }  // namespace OHOS

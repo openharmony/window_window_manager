@@ -4877,6 +4877,29 @@ public:
     }
 
     /**
+     * @brief Set whether the window receive drag event.
+     *
+     * @param enalbed - whether the window receive drag event.
+     *        True: - means default state, the window can receive drag event.
+     *        False: - means the window can't receive drag event.
+     * @return Returns the status code of the execution.
+     */
+    virtual WMError SetReceiveDragEventEnabled(bool enabled)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief  whether the window receive drag event.
+     *
+     * @return - The value true means the window can receive drag event, and false means the opposite.
+     */
+    virtual bool IsReceiveDragEventEnabled()
+    {
+        return true;
+    }
+
+    /**
      * @brief Lock the mouse cursor restricting it to a specified window area, and also control whether the cursor
      *        follows movement. Only supported by the focus window; the lock is automatically released when the
      *        window loses focus.
