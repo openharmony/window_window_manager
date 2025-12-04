@@ -4407,7 +4407,7 @@ WSError SceneSession::UpdateKeyFrameCloneNode(std::shared_ptr<RSWindowKeyFrameNo
     }
     keyFrameCloneNode_ = rsKeyFrameNode;
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "change key frame node to %{public}" PRIu64 "", keyFrameCloneNode_->GetId());
-    sessionStage_->LinkKeyFrameNode(keyFrameCloneNode_);
+    sessionStage_->LinkKeyFrameNode();
     if (rsTransaction != nullptr) {
         rsTransaction->Commit();
         TLOGD(WmsLogTag::WMS_LAYOUT_PC, "commit rsTransaction");

@@ -504,7 +504,7 @@ public:
     float GetVirtualPixelRatio() override;
     CrossAxisState GetCrossAxisState() override;
     void RegisterKeyFrameCallback();
-    WSError LinkKeyFrameNode(std::shared_ptr<RSWindowKeyFrameNode>& rsKeyFrameNode) override;
+    WSError LinkKeyFrameNode() override;
     WSError SetStageKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) override;
     WMError SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) override;
     WMError RegisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener) override;
