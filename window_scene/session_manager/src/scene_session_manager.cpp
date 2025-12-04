@@ -7982,8 +7982,58 @@ bool SceneSessionManager::CheckClickFocusIsDownThroughFullScreen(const sptr<Scen
         TLOGD(WmsLogTag::WMS_FOCUS, "click on the different screen");
         return false;
     }
-    if (focusedSession->IsBlockingFocusWindowType()) {
+    if (IsBlockingFocusWindowType(focusedSession)) {
         return sceneSession->GetZOrder() < focusedSession->GetZOrder();
+    }
+    return false;
+}
+
+bool SceneSessionManager::IsBlockingFocusWindowType(const sptr<SceneSession>& sceneSession) const
+{
+    if (!(systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow())) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "device type unmatched");
+        return false;
+    }
+    bool blockingFocus = sceneSession->GetBlockingFocus();
+    WindowType windowType = sceneSession->GetWindowType();
+    bool isBlockingSystemWindowType =
+        blockingFocus && (windowType == WindowType::WINDOW_TYPE_PANEL ||
+        windowType == WindowType::WINDOW_TYPE_GLOBAL_SEARCH ||
+        windowType == WindowType::WINDOW_TYPE_NEGATIVE_SCREEN);
+    if (!isBlockingSystemWindowType && !WindowHelper::IsMainWindow(windowType)) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "not blocking focus window type");
+        return false;
+    }
+    //Get height and width of current screen
+    uint64_t displayId = sceneSession->GetDisplayId();
+    auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "get display object failed of display: %{public}" PRIu64, displayId);
+        return false;
+    }
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "get display info failed of display: %{public}" PRIu64, displayId);
+        return false;
+    }
+    std::vector<MMI::Rect> touchHotAreas;
+    std::vector<MMI::Rect> pointerHotAreas;
+    SceneInputManaer::GetInstance().UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
+    auto posX = sceneSession->GetSessionRect().posX_;
+    auto posY = sceneSession->GetSessionRect().posY_;
+    if (touchHotAreas.empty()) {
+        TLOGI(WmsLogTag::WMS_FOCUS, "touchHotAreas is empty");
+        return false;
+    } else {
+        for (const auto& area : touchHotAreas) {
+            if (posX + area.x <= 0 && posX + area.weight >= displayInfo->GetWidth() && posY + area.y <= 0 &&
+                poxY + area.height >= displayInfo->GetHeight()) {
+                TLOGI(WmsLogTag::WMS_FOCUS, "current session is full-screen, screen w: %{public}d, h: %{public}d, "
+                    "window x: %{public}d, y: %{public}d, w: %{public}d, h: %{public}d", displayInfo->GetWidth(),
+                    displayInfo->GetHeight(), area.x, area.y, area.weight, area.height);
+                return true;
+            }
+        }
     }
     return false;
 }
