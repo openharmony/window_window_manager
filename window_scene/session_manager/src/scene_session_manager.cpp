@@ -8018,7 +8018,7 @@ bool SceneSessionManager::IsBlockingFocusWindowType(const sptr<SceneSession>& sc
     }
     std::vector<MMI::Rect> touchHotAreas;
     std::vector<MMI::Rect> pointerHotAreas;
-    SceneInputManaer::GetInstance().UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
+    SceneInputManager::GetInstance().UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
     auto posX = sceneSession->GetSessionRect().posX_;
     auto posY = sceneSession->GetSessionRect().posY_;
     if (touchHotAreas.empty()) {
@@ -8026,11 +8026,11 @@ bool SceneSessionManager::IsBlockingFocusWindowType(const sptr<SceneSession>& sc
         return false;
     } else {
         for (const auto& area : touchHotAreas) {
-            if (posX + area.x <= 0 && posX + area.weight >= displayInfo->GetWidth() && posY + area.y <= 0 &&
-                poxY + area.height >= displayInfo->GetHeight()) {
+            if (posX + area.x <= 0 && posX + area.width >= displayInfo->GetWidth() && posY + area.y <= 0 &&
+                posY + area.height >= displayInfo->GetHeight()) {
                 TLOGI(WmsLogTag::WMS_FOCUS, "current session is full-screen, screen w: %{public}d, h: %{public}d, "
                     "window x: %{public}d, y: %{public}d, w: %{public}d, h: %{public}d", displayInfo->GetWidth(),
-                    displayInfo->GetHeight(), area.x, area.y, area.weight, area.height);
+                    displayInfo->GetHeight(), area.x, area.y, area.width, area.height);
                 return true;
             }
         }
