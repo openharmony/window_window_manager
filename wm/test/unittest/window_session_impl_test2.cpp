@@ -1850,11 +1850,6 @@ HWTEST_F(WindowSessionImplTest2, SetDragKeyFramePolicy, TestSize.Level1)
     window->property_->SetPersistentId(1);
     window->state_ = WindowState::STATE_SHOWN;
     ASSERT_FALSE(window->IsWindowSessionInvalid());
-    // subWindow
-    window->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    EXPECT_EQ(window->SetDragKeyFramePolicy(keyFramePolicy), WMError::WM_ERROR_INVALID_CALLING);
-    // mainWindow
-    window->property_->type_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 
     // api 20
     window->SetTargetAPIVersion(20);
@@ -1870,15 +1865,20 @@ HWTEST_F(WindowSessionImplTest2, SetDragKeyFramePolicy, TestSize.Level1)
 
     // api23
     window->SetTargetAPIVersion(23);
+    // other
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
+    EXPECT_EQ(window->SetDragKeyFramePolicy(keyFramePolicy), WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
     // phone
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    // subWindow
+    window->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    EXPECT_EQ(window->SetDragKeyFramePolicy(keyFramePolicy), WMError::WM_ERROR_INVALID_CALLING);
+    // mainWindow
+    window->property_->type_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
     EXPECT_EQ(window->SetDragKeyFramePolicy(keyFramePolicy), WMError::WM_OK);
     // pad
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     EXPECT_EQ(window->SetDragKeyFramePolicy(keyFramePolicy), WMError::WM_OK);
-    // other
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
-    EXPECT_EQ(window->SetDragKeyFramePolicy(keyFramePolicy), WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
     // pc
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     // pass
