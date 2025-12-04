@@ -258,7 +258,7 @@ public:
         return WSError::WS_OK;
     }
 
-    virtual WSError LinkKeyFrameNode(std::shared_ptr<RSWindowKeyFrameNode>& rsKeyFrameNode) = 0;
+    virtual WSError LinkKeyFrameNode() = 0;
     virtual WSError SetStageKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) = 0;
 
     virtual WSError SetSplitButtonVisible(bool isVisible) = 0;
