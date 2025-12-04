@@ -108,21 +108,21 @@ HWTEST_F(WindowSessionPropertyTest, GetRealTimeSwitchInfo, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsAdaptToGestureBack
- * @tc.desc: IsAdaptToGestureBack
+ * @tc.name: IsAdaptToCompatibleDevice
+ * @tc.desc: IsAdaptToCompatibleDevice
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionPropertyTest, IsAdaptToGestureBack, TestSize.Level1)
+HWTEST_F(WindowSessionPropertyTest, IsAdaptToCompatibleDevice, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
     property->compatibleModeProperty_ = nullptr;
-    EXPECT_EQ(property->IsAdaptToGestureBack(), false);
+    EXPECT_EQ(property->IsAdaptToCompatibleDevice(), false);
     property->compatibleModeProperty_ = sptr<CompatibleModeProperty>::MakeSptr();
-    EXPECT_EQ(property->IsAdaptToGestureBack(), false);
-    property->compatibleModeProperty_->SetIsAdaptToGestureBack(true);
-    EXPECT_EQ(property->compatibleModeProperty_->IsAdaptToGestureBack(), true);
-    EXPECT_EQ(property->IsAdaptToGestureBack(), true);
+    EXPECT_EQ(property->IsAdaptToCompatibleDevice(), false);
+    property->compatibleModeProperty_->SetIsAdaptToCompatibleDevice(true);
+    EXPECT_EQ(property->compatibleModeProperty_->IsAdaptToCompatibleDevice(), true);
+    EXPECT_EQ(property->IsAdaptToCompatibleDevice(), true);
 }
 
 /**
@@ -528,13 +528,13 @@ HWTEST_F(WindowSessionPropertyTest, Unmarshalling, TestSize.Level1)
     EXPECT_EQ(property2->GetWindowName(), winName);
 
     property->compatibleModeProperty_ = sptr<CompatibleModeProperty>::MakeSptr();
-    property->compatibleModeProperty_->SetIsAdaptToGestureBack(true);
-    EXPECT_EQ(property->IsAdaptToGestureBack(), true);
+    property->compatibleModeProperty_->SetIsAdaptToCompatibleDevice(true);
+    EXPECT_EQ(property->IsAdaptToCompatibleDevice(), true);
     Parcel parcel2 = Parcel();
     property->compatibleModeProperty_->Marshalling(parcel2);
     sptr<CompatibleModeProperty> compatibleModeProperty = property->compatibleModeProperty_->Unmarshalling(parcel2);
     ASSERT_NE(compatibleModeProperty, nullptr);
-    EXPECT_EQ(compatibleModeProperty->IsAdaptToGestureBack(), true);
+    EXPECT_EQ(compatibleModeProperty->IsAdaptToCompatibleDevice(), true);
 }
 
 /**

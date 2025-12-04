@@ -7202,7 +7202,7 @@ bool WindowSceneSessionImpl::GetIsUIExtAnySubWindow() const
 WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)
 {
     if (windowSystemConfig_.IsPcWindow()) {
-        if (property_->IsAdaptToGestureBack()) {
+        if (property_->IsAdaptToCompatibleDevice()) {
             TLOGI(WmsLogTag::WMS_ATTRIBUTE, "phone app in pc compatible mode, enable=%{public}d", enable);
             return WMError::WM_OK;
         }
@@ -7226,7 +7226,7 @@ WMError WindowSceneSessionImpl::GetGestureBackEnabled(bool& enable) const
 {
     if (windowSystemConfig_.IsPcWindow()) {
         enable = false;
-        if (property_->IsAdaptToGestureBack()) {
+        if (property_->IsAdaptToCompatibleDevice()) {
             TLOGI(WmsLogTag::WMS_ATTRIBUTE, "phone app in pc compatible mode, enable=%{public}d", enable);
             return WMError::WM_OK;
         }

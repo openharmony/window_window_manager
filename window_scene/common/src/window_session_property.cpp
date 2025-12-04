@@ -2466,9 +2466,9 @@ bool WindowSessionProperty::IsAdaptToSimulationScale() const
     return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToSimulationScale();
 }
 
-bool WindowSessionProperty::IsAdaptToGestureBack() const
+bool WindowSessionProperty::IsAdaptToCompatibleDevice() const
 {
-    return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToGestureBack();
+    return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToCompatibleDevice();
 }
 
 RealTimeSwitchInfo WindowSessionProperty::GetRealTimeSwitchInfo() const
@@ -2712,15 +2712,15 @@ bool CompatibleModeProperty::IsAdaptToSimulationScale() const
     return isAdaptToSimulationScale_;
 }
 
-void CompatibleModeProperty::SetIsAdaptToGestureBack(bool enable)
+void CompatibleModeProperty::SetIsAdaptToCompatibleDevice(bool enable)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "enable=%{public}d", enable);
-    isAdaptToGestureBack_ = enable;
+    isAdaptToCompatibleDevice_ = enable;
 }
 
-bool CompatibleModeProperty::IsAdaptToGestureBack() const
+bool CompatibleModeProperty::IsAdaptToCompatibleDevice() const
 {
-    return isAdaptToGestureBack_;
+    return isAdaptToCompatibleDevice_;
 }
 
 void CompatibleModeProperty::SetRealTimeSwitchInfo(const RealTimeSwitchInfo& switchInfo)
@@ -2751,7 +2751,7 @@ bool CompatibleModeProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isSupportRotateFullScreen_) &&
         parcel.WriteBool(isAdaptToSubWindow_) &&
         parcel.WriteBool(isAdaptToSimulationScale_) &&
-        parcel.WriteBool(isAdaptToGestureBack_) &&
+        parcel.WriteBool(isAdaptToCompatibleDevice_) &&
         parcel.WriteBool(realTimeSwitchInfo_.isNeedChange_) &&
         parcel.WriteUint32(realTimeSwitchInfo_.showTypes_);
 }
@@ -2777,7 +2777,7 @@ CompatibleModeProperty* CompatibleModeProperty::Unmarshalling(Parcel& parcel)
     property->isSupportRotateFullScreen_ = parcel.ReadBool();
     property->isAdaptToSubWindow_ = parcel.ReadBool();
     property->isAdaptToSimulationScale_ = parcel.ReadBool();
-    property->isAdaptToGestureBack_ = parcel.ReadBool();
+    property->isAdaptToCompatibleDevice_ = parcel.ReadBool();
     property->realTimeSwitchInfo_.isNeedChange_ = parcel.ReadBool();
     property->realTimeSwitchInfo_.showTypes_ = parcel.ReadUint32();
     return property;
