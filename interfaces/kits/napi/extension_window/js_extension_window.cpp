@@ -1335,9 +1335,8 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
     option->SetFollowCreatorLifecycle(followCreatorLifecycle);
     option->SetParentId(hostWindowId_);
     const char* const where = __func__;
-    napi_value lastParam = (argv[2] != nullptr && GetType(env, argv[2]) == napi_function) ? argv[2] : nullptr;
     napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask = [where, extensionWindow = extensionWindow_, windowName = std::move(windowName),
         windowOption = option, env, task = napiAsyncTask]() mutable {
         auto extWindow = extensionWindow->GetWindow();
