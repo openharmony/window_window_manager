@@ -545,6 +545,7 @@ public:
     // mirror screen
     bool HandleResolutionEffectChange();
     bool HandleCastVirtualScreenMirrorRegion();
+    bool RecoveryResolutionEffect();
     bool GetStoredPidFromUid(int32_t uid, int32_t& agentPid) const;
     bool IsFreezed(const int32_t& agentPid, const DisplayManagerAgentType& agentType);
     bool isScreenShot_ = false;
@@ -1043,7 +1044,6 @@ private:
 
     // mirror screen
     bool SetResolutionEffect(ScreenId screenId,  uint32_t width, uint32_t height);
-    bool RecoveryResolutionEffect();
     void RegisterSettingResolutionEffectObserver();
     void SetResolutionEffectFromSettingData();
     void SetInternalScreenResolutionEffect(const sptr<ScreenSession>& internalSession, DMRect& toRect);
