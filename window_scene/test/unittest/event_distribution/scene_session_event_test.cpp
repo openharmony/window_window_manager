@@ -206,6 +206,52 @@ HWTEST_F(SceneSessionEventTest, SetReceiveDragEventEnabled, TestSize.Level1)
     ret = sceneSession->SetReceiveDragEventEnabled(parameters);
     EXPECT_EQ(ret, WMError::WM_OK);
 }
+
+/**
+ * @tc.name: SetSeparationTouchEnabled
+ * @tc.desc: SetSeparationTouchEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionEventTest, SetSeparationTouchEnabled, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSeparationTouchEnabled";
+    info.bundleName_ = "SetSeparationTouchEnabled";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    std::vector<int32_t> parameters;
+
+    // Test CheckParameters: The format is incorrect(size<1).
+    MockAccesstokenKit::MockAccessTokenKitRet(0);
+    auto ret = sceneSession->SetSeparationTouchEnabled(parameters);
+    EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
+    
+    // Test CheckParameters: The format is incorrect(length error).
+    parameters.emplace_back(WINDOW_SEPARATION_TOUCH_ENABLED_LENGTH + 1);
+    ret = sceneSession->SetSeparationTouchEnabled(parameters);
+    EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
+
+    // Test CheckParameters: The format is incorrect(size error).
+    parameters.clear();
+    parameters.emplace_back(WINDOW_SEPARATION_TOUCH_ENABLED_LENGTH);
+    ret = sceneSession->SetSeparationTouchEnabled(parameters);
+    EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
+
+    // test normal process
+    parameters.clear();
+    parameters.emplace_back(WINDOW_SEPARATION_TOUCH_ENABLED_LENGTH);
+    parameters.emplace_back(1);
+    sceneSession->persistentId_ = 1;
+    ret = sceneSession->SetSeparationTouchEnabled(parameters);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    // test normal process
+    parameters.clear();
+    parameters.emplace_back(WINDOW_SEPARATION_TOUCH_ENABLED_LENGTH);
+    parameters.emplace_back(0);
+    sceneSession->persistentId_ = 1;
+    ret = sceneSession->SetSeparationTouchEnabled(parameters);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
