@@ -131,15 +131,15 @@ public:
 };
 
 /**
- * @class IAllGroupInfoChangedListener
+ * @class IAllDisplayGroupInfoChangedListener
  * 
  * @brief Listener to observe display added and removed.
  */
-class IAllGroupInfoChangedListener : virtual public RefBase {
+class IAllDisplayGroupInfoChangedListener : virtual public RefBase {
 public:
     /**
      * @brief Notify caller when a display is connected or disconnected.
-     * 
+     *
      * @param displayGroupId display group id of the changed display.
      * @param displayId display id.
      * @param isAdd true means a new display is added in the current display group, false means the opposite.

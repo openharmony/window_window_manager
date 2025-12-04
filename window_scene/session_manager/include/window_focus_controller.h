@@ -84,10 +84,10 @@ private:
     sptr<FocusGroup> GetFocusGroupInner(DisplayId displayId);
 
     std::unordered_map<DisplayGroupId, sptr<FocusGroup>> focusGroupMap_;
-    std::unordered_map<DisplayId, DisplayGroupId> displayId2GroupIdMap_;
+    std::unordered_map<DisplayId, DisplayGroupId> displayIdToGroupIdMap_;
     std::unordered_map<DisplayId, DisplayGroupId> deletedDisplayId2GroupIdMap_;
     mutable std::mutex focusGroupMapMutex_;
-    mutable std::mutex displayId2GroupIdMapMutex_;
+    mutable std::mutex displayIdToGroupIdMapMutex_;
 };
 }
 }

@@ -87,8 +87,8 @@ public:
     sptr<WindowManagerAgentLite> pipStateChangedListenerAgent_;
     std::vector<sptr<IKeyboardCallingWindowDisplayChangedListener>> callingDisplayChangedListeners_;
     sptr<WindowManagerAgentLite> callingDisplayListenerAgent_;
-    std::vector<sptr<IAllGroupInfoChangedListener>> allGroupInfoChangedListeners_;
-    sptr<WindowManagerAgentLite> allGroupInfoChangedListenerAgent_;
+    std::vector<sptr<IAllDisplayGroupInfoChangedListener>> allDisplayGroupInfoChangedListeners_;
+    sptr<WindowManagerAgentLite> allDisplayGroupInfoChangedListenerAgent_;
 };
 
 void WindowManagerLite::Impl::NotifyWMSConnected(int32_t userId, int32_t screenId)
@@ -166,14 +166,14 @@ void WindowManagerLite::Impl::NotifyUnfocused(const sptr<FocusChangeInfo>& focus
 void WindowManagerLite::Impl::NotifyDisplayGroupInfoChanged(DisplayGroupId displayGroupId, DisplayId displayId,
                                                             bool isAdd)
 {
-    std::vector<sptr<IAllGroupInfoChangedListener>> allGroupInfoChangedListeners;
+    std::vector<sptr<IAllDisplayGroupInfoChangedListener>> allDisplayGroupInfoChangedListeners;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
-        allGroupInfoChangedListeners = allGroupInfoChangedListeners_;
+        allDisplayGroupInfoChangedListeners = allDisplayGroupInfoChangedListeners_;
     }
     TLOGD(WmsLogTag::WMS_FOCUS, "listeners num: %{public}zu",
-          allGroupInfoChangedListeners.size());
-    for (auto& listener: allGroupInfoChangedListeners) {
+          allDisplayGroupInfoChangedListeners.size());
+    for (auto& listener: allDisplayGroupInfoChangedListeners) {
         if (listener == nullptr) {
             continue;
         }
@@ -476,7 +476,8 @@ WMError WindowManagerLite::UnregisterFocusChangedListener(const sptr<IFocusChang
     return ret;
 }
 
-WMError WindowManagerLite::RegisterAllGroupInfoChangedListener(const sptr<IAllGroupInfoChangedListener>& listener)
+WMError WindowManagerLite::RegisterAllDisplayGroupInfoChangedListener(
+    const sptr<IAllDisplayGroupInfoChangedListener>& listener)
 {
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "listener is null");
@@ -484,49 +485,52 @@ WMError WindowManagerLite::RegisterAllGroupInfoChangedListener(const sptr<IAllGr
     }
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     WMError ret = WMError::WM_OK;
-    if (pImpl_->allGroupInfoChangedListenerAgent_ == nullptr) {
-        pImpl_->allGroupInfoChangedListenerAgent_ = new (std::nothrow) WindowManagerAgentLite();
+    if (pImpl_->allDisplayGroupInfoChangedListenerAgent_ == nullptr) {
+        pImpl_->allDisplayGroupInfoChangedListenerAgent_ = new (std::nothrow) WindowManagerAgentLite();
         ret = WindowAdapterLite::GetInstance(userId_).RegisterWindowManagerAgent(
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_DISPLAYGROUP_INFO,
-            pImpl_->allGroupInfoChangedListenerAgent_);
+            pImpl_->allDisplayGroupInfoChangedListenerAgent_);
     }
     if (ret != WMError::WM_OK) {
         TLOGW(WmsLogTag::WMS_FOCUS, "register WindowManagerAgent failed");
-        pImpl_->allGroupInfoChangedListenerAgent_ = nullptr;
+        pImpl_->allDisplayGroupInfoChangedListenerAgent_ = nullptr;
     } else {
-        auto iter = std::find(pImpl_->allGroupInfoChangedListeners_.begin(),
-                              pImpl_->allGroupInfoChangedListeners_.end(), listener);
-        if (iter != pImpl_->allGroupInfoChangedListeners_.end()) {
+        auto iter = std::find(pImpl_->allDisplayGroupInfoChangedListeners_.begin(),
+                              pImpl_->allDisplayGroupInfoChangedListeners_.end(), listener);
+        if (iter != pImpl_->allDisplayGroupInfoChangedListeners_.end()) {
             TLOGW(WmsLogTag::WMS_FOCUS, "listener is already registered");
             return WMError::WM_OK;
         }
-        pImpl_->allGroupInfoChangedListeners_.emplace_back(listener);
+        pImpl_->allDisplayGroupInfoChangedListeners_.emplace_back(listener);
         TLOGI(WmsLogTag::WMS_FOCUS, "success");
     }
     return ret;
 }
 
-WMError WindowManagerLite::UnregisterAllGroupInfoChangedListener(const sptr<IAllGroupInfoChangedListener>& listener)
+WMError WindowManagerLite::UnregisterAllDisplayGroupInfoChangedListener(
+    const sptr<IAllDisplayGroupInfoChangedListener>& listener)
 {
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
-    auto iter = std::find(pImpl_->allGroupInfoChangedListeners_.begin(), pImpl_->allGroupInfoChangedListeners_.end(),
+    auto iter = std::find(pImpl_->allDisplayGroupInfoChangedListeners_.begin(),
+                          pImpl_->allDisplayGroupInfoChangedListeners_.end(),
                           listener);
-    if (iter == pImpl_->allGroupInfoChangedListeners_.end()) {
+    if (iter == pImpl_->allDisplayGroupInfoChangedListeners_.end()) {
         TLOGE(WmsLogTag::WMS_FOCUS, "could not find this listener");
         return WMError::WM_OK;
     }
-    pImpl_->allGroupInfoChangedListeners_.erase(iter);
+    pImpl_->allDisplayGroupInfoChangedListeners_.erase(iter);
     WMError ret = WMError::WM_OK;
-    if (pImpl_->allGroupInfoChangedListeners_.empty() && pImpl_->allGroupInfoChangedListenerAgent_ != nullptr) {
+    if (pImpl_->allDisplayGroupInfoChangedListeners_.empty() &&
+        pImpl_->allDisplayGroupInfoChangedListenerAgent_ != nullptr) {
         ret = WindowAdapterLite::GetInstance(userId_).UnregisterWindowManagerAgent(
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_DISPLAYGROUP_INFO,
-            pImpl_->allGroupInfoChangedListenerAgent_);
+            pImpl_->allDisplayGroupInfoChangedListenerAgent_);
         if (ret == WMError::WM_OK) {
-            pImpl_->allGroupInfoChangedListenerAgent_ = nullptr;
+            pImpl_->allDisplayGroupInfoChangedListenerAgent_ = nullptr;
             TLOGI(WmsLogTag::WMS_FOCUS, "success");
         }
     }
@@ -645,11 +649,11 @@ void WindowManagerLite::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId
     WindowAdapterLite::GetInstance(userId_).GetFocusWindowInfo(focusInfo, displayId);
 }
 
-void WindowManagerLite::GetAllGroupInfo(std::unordered_map<DisplayId, DisplayGroupId>& displayId2GroupIdMap,
+void WindowManagerLite::GetAllDisplayGroupInfo(std::unordered_map<DisplayId, DisplayGroupId>& displayIdToGroupIdMap,
                                         std::vector<sptr<FocusChangeInfo>>& allFocusInfoList)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "In");
-    WindowAdapterLite::GetInstance(userId_).GetAllGroupInfo(displayId2GroupIdMap, allFocusInfoList);
+    WindowAdapterLite::GetInstance(userId_).GetAllDisplayGroupInfo(displayIdToGroupIdMap, allFocusInfoList);
 }
 
 void WindowManagerLite::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) const

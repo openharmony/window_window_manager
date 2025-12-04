@@ -42,8 +42,8 @@ public:
 
     using WMSConnectionChangedCallbackFunc = std::function<void(int32_t, int32_t, bool)>;
     virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID);
-    virtual void GetAllGroupInfo(std::unordered_map<DisplayId, DisplayGroupId>& displayId2GroupIdMap,
-                                 std::vector<sptr<FocusChangeInfo>>& allFocusInfoList);
+    virtual void GetAllDisplayGroupInfo(std::unordered_map<DisplayId, DisplayGroupId>& displayIdToGroupIdMap,
+                                        std::vector<sptr<FocusChangeInfo>>& allFocusInfoList);
     virtual WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
     virtual WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,

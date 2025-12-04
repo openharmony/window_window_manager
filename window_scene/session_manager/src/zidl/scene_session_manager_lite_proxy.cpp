@@ -997,8 +997,9 @@ void SceneSessionManagerLiteProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo
     }
 }
 
-void SceneSessionManagerLiteProxy::GetAllGroupInfo(std::unordered_map<DisplayId, DisplayGroupId>& displayId2GroupIdMap,
-                                                   std::vector<sptr<FocusChangeInfo>>& allFocusInfoList)
+void SceneSessionManagerLiteProxy::GetAllDisplayGroupInfo(
+    std::unordered_map<DisplayId, DisplayGroupId>& displayIdToGroupIdMap,
+    std::vector<sptr<FocusChangeInfo>>& allFocusInfoList)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "request on lite proxy");
     MessageParcel data;
@@ -1013,7 +1014,7 @@ void SceneSessionManagerLiteProxy::GetAllGroupInfo(std::unordered_map<DisplayId,
         TLOGE(WmsLogTag::WMS_FOCUS, "remote is null");
         return;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_ALL_GROUP_INFO),
+    if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_ALL_DISPLAY_GROUP_INFO),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_FOCUS, "SendRequest failed");
         return;
@@ -1038,9 +1039,9 @@ void SceneSessionManagerLiteProxy::GetAllGroupInfo(std::unordered_map<DisplayId,
             TLOGE(WmsLogTag::WMS_FOCUS, "Failed to read displayGroupId");
             return;
         }
-        displayId2GroupIdMap[displayId] = displayGroupId;
+        displayIdToGroupIdMap[displayId] = displayGroupId;
     }
-    if (displayId2GroupIdMap.empty() || allFocusInfoList.empty()) {
+    if (displayIdToGroupIdMap.empty() || allFocusInfoList.empty()) {
         TLOGE(WmsLogTag::WMS_FOCUS, "ipc reply is empty");
         return;
     }

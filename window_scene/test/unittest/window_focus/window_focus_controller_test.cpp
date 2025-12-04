@@ -160,12 +160,12 @@ HWTEST_F(WindowFocusControllerTest, GetFocusGroupInner, TestSize.Level1)
     sptr<FocusGroup> res = wfc->GetFocusGroupInner(DEFAULT_DISPLAY_ID);
     EXPECT_EQ(wfc->focusGroupMap_[DEFAULT_DISPLAY_ID], res);
 
-    wfc->displayId2GroupIdMap_.insert({ 1001, 1001 });
+    wfc->displayIdToGroupIdMap_.insert({ 1001, 1001 });
     res = wfc->GetFocusGroupInner(1001);
     EXPECT_TRUE(g_logMsg.find("Not found focus group") != std::string::npos);
 
     wfc->AddFocusGroup(100, 100);
-    wfc->displayId2GroupIdMap_.insert({ 100, 100 });
+    wfc->displayIdToGroupIdMap_.insert({ 100, 100 });
     res = wfc->GetFocusGroupInner(100);
     EXPECT_EQ(wfc->focusGroupMap_.at(100), res);
 
@@ -236,7 +236,7 @@ HWTEST_F(WindowFocusControllerTest, GetDisplayGroupId, TestSize.Level1)
     DisplayId res = ssm_->windowFocusController_->GetDisplayGroupId(DEFAULT_DISPLAY_ID);
     EXPECT_EQ(DEFAULT_DISPLAY_ID, res);
 
-    ssm_->windowFocusController_->displayId2GroupIdMap_.clear();
+    ssm_->windowFocusController_->displayIdToGroupIdMap_.clear();
     res = ssm_->windowFocusController_->GetDisplayGroupId(1);
     EXPECT_EQ(DEFAULT_DISPLAY_ID, res);
 
@@ -245,7 +245,7 @@ HWTEST_F(WindowFocusControllerTest, GetDisplayGroupId, TestSize.Level1)
     EXPECT_EQ(DISPLAY_ID_INVALID, res);
     ssm_->windowFocusController_->deletedDisplayId2GroupIdMap_.clear();
     
-    ssm_->windowFocusController_->displayId2GroupIdMap_.insert({ 1, 1 });
+    ssm_->windowFocusController_->displayIdToGroupIdMap_.insert({ 1, 1 });
     res = ssm_->windowFocusController_->GetDisplayGroupId(1);
     EXPECT_EQ(1, res);
     GTEST_LOG_(INFO) << "WindowFocusControllerTest::GetDisplayGroupId end";
