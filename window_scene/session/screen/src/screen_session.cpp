@@ -3234,9 +3234,6 @@ void ScreenSession::ProcPropertyChange(ScreenProperty& screenProperty, const Scr
         screenProperty.SetDeviceOrientation(deviceOrientation);
         screenProperty.SetScreenAreaOffsetY(eventPara.GetScreenAreaOffsetY());
         screenProperty.SetScreenAreaHeight(eventPara.GetScreenAreaHeight());
-        if (eventPara.GetDisplayMode() == FoldDisplayMode::MAIN) {
-            screenProperty.SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
-        }
         TLOGI(WmsLogTag::DMS, "ProcPropertyChange : Orientation= %{public}u", deviceOrientation);
     }
     screenProperty.SetPhysicalTouchBounds(GetRotationCorrection(eventPara.GetDisplayMode()));
