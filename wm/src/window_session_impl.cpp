@@ -301,7 +301,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option,
     property_->SetWindowType(optionWindowType);
     InitPropertyFromOption(option);
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
-    isFollowCreatorLifecycle_ = option->IsFollowCreatorLifecycle();
+    followCreatorLifecycle_ = option->FollowCreatorLifecycle();
 
     RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true, rsUIContext);
     if (WindowHelper::IsSubWindow(GetType())) {
@@ -924,7 +924,7 @@ void WindowSessionImpl::UpdateSubWindowStateWithOptions(const StateChangeOption&
             if (subwindow == nullptr || subwindow->GetWindowState() != WindowState::STATE_SHOWN) {
                 continue;
             }
-            if (subwindow->isFollowCreatorLifecycle_) {
+            if (subwindow->followCreatorLifecycle_) {
                 TLOGI(WmsLogTag::WMS_SUB, "subwindow hide follow uec, id: %{public}d", subwindow->GetPersistentId());
                 subwindow->Hide(option.reason_, option.withAnimation_, option.isFromInnerkits_, option.waitDetach_);
                 subwindow->isHiddenFollowingUIExtension_ = true;
@@ -940,7 +940,7 @@ void WindowSessionImpl::UpdateSubWindowStateWithOptions(const StateChangeOption&
             if (subwindow == nullptr || subwindow->GetWindowState() != WindowState::STATE_HIDDEN) {
                 continue;
             }
-            if (subwindow->isFollowCreatorLifecycle_ && subwindow->isHiddenFollowingUIExtension_) {
+            if (subwindow->followCreatorLifecycle_ && subwindow->isHiddenFollowingUIExtension_) {
                 TLOGI(WmsLogTag::WMS_SUB, "subwindow show follow uec, id: %{public}d", subwindow->GetPersistentId());
                 subwindow->Show(option.reason_, option.withAnimation_, option.withFocus_, option.waitAttach_);
                 subwindow->isHiddenFollowingUIExtension_ = false;

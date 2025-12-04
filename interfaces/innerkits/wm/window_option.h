@@ -650,16 +650,16 @@ public:
     /**
      * @brief Set whether the lifecycle of the subwindow follows creator of subwindow.
      *
-     * @param isFollowCreatorLifecycle True means the lifecycle of the subwindow follows creator of subwindow.
+     * @param followCreatorLifecycle True means the lifecycle of the subwindow follows creator of subwindow.
      */
-    void SetIsFollowCreatorLifecycle(bool isFollowCreatorLifecycle);
+    void SetFollowCreatorLifecycle(bool followCreatorLifecycle);
 
     /**
      * @brief Get whether the lifecycle of the subwindow follows creator of subwindow.
      *
      * @return The lifecycle of the subwindow follows creator of subwindow if true or not if false.
      */
-    bool IsFollowCreatorLifecycle() const;
+    bool FollowCreatorLifecycle() const;
 
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
@@ -711,7 +711,7 @@ private:
     bool isDensityFollowHost_ = false;
     bool isConstrainedModal_ = false;
     int64_t startModalExtensionTimeStamp_ = -1;
-    bool isFollowCreatorLifecycle_ = false;
+    bool followCreatorLifecycle_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS

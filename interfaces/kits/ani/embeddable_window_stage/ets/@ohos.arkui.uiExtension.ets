@@ -98,7 +98,7 @@ namespace uiExtension {
     public native getWindowAvoidArea(nativeObj: long, type: int, area: object): int;
     public native setWaterMarkFlag(nativeObj: long, enable: boolean): int;
     public native createSubWindowWithOptions(nativeObj: long, name: string,
-        subWindowOptions: window.SubWindowOptions, isFollowCreatorLifecycle: boolean): window.Window;
+        subWindowOptions: window.SubWindowOptions, followCreatorLifecycle: boolean): window.Window;
     public native occupyEvents(nativeObj: long, eventFlags: int): void;
     public native hideNonSecureWindows(nativeObj: long, shouldHide: boolean): int;
     public native onSync(nativeObj: long, type: string, callback: object): void;
@@ -203,10 +203,10 @@ namespace uiExtension {
     }
 
     public createSubWindowWithOptions(name: string, subWindowConfig: window.SubWindowOptions,
-      isFollowCreatorLifecycle: boolean): Promise<window.Window> {
+      followCreatorLifecycle: boolean): Promise<window.Window> {
       return new Promise<window.Window>((resolve: (value: window.Window) => void, reject: (error: BusinessError) => void) => {
         taskpool.execute((): window.Window => {
-          return this.createSubWindowWithOptions(this.nativeObj, name, subWindowConfig, isFollowCreatorLifecycle);
+          return this.createSubWindowWithOptions(this.nativeObj, name, subWindowConfig, followCreatorLifecycle);
         }).then((ret: NullishType) => {
             resolve(ret as window.Window);
         }).catch((err: NullishType) => {
@@ -347,7 +347,7 @@ namespace uiExtension {
     hideNonSecureWindows(shouldHide: boolean): Promise<void>;
     createSubWindowWithOptions(name: string, subWindowOptions: window.SubWindowOptions): Promise<window.Window>;
     createSubWindowWithOptions(name: string, subWindowConfig: window.SubWindowOptions,
-      isFollowCreatorLifecycle: boolean): Promise<window.Window>;
+      followCreatorLifecycle: boolean): Promise<window.Window>;
     occupyEvents(eventFlags: int): Promise<void>;
     on<T>(type: string, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;
