@@ -732,7 +732,7 @@ public:
             container.push_back(inputStr.substr(start, end - start));
             start = end + delimiter.length();
         }
-        if (start < inputStr.lenth()) {
+        if (start < inputStr.length()) {
             container.push_back(inputStr.substr(start));
         }
     }
