@@ -979,11 +979,11 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdateForDisplayInfos, TestSize.Level1)
 }
 
 /**
- * @tc.name: SceneInputManagerTest
- * @tc.desc: SceneInputManagerTest
+ * @tc.name: UpdateHotAreas
+ * @tc.desc: UpdateHotAreas
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, SceneInputManagerTest, TestSize.Level1)
+HWTEST_F(SceneInputManagerTest, UpdateHotAreas, TestSize.Level1)
 {
     std::vector<MMI::Rect> touchHotAreas(0);
     std::vector<MMI::Rect> pointerHotAreas(0);
