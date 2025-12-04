@@ -3080,9 +3080,6 @@ void ScreenSessionManager::HandleResolutionEffectChangeWhenRotate()
     }
     if (!IsVertical(internalSession->GetRotation())) {
         HandleResolutionEffectChange();
-    } else {
-        RecoveryResolutionEffect();
-        SuperFoldStateManager::GetInstance().RefreshExternalRegion();
     }
 #endif
 }
@@ -3205,6 +3202,10 @@ bool ScreenSessionManager::RecoveryResolutionEffect()
         TLOGE(WmsLogTag::DMS, "internalSession null");
         return false;
     }
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && IsVertical(internalSession->GetRotation())) {
+        TLOGI(WmsLogTag::DMS, "SuperFoldDisplayDevice Vertical");
+        return false;
+    }
     auto internalProperty = internalSession->GetScreenProperty();
     DMRect realResolutionRect = { 0, 0, internalProperty.GetScreenRealWidth(),
         internalProperty.GetScreenRealHeight()};
@@ -3292,9 +3293,7 @@ bool ScreenSessionManager::HandleCastVirtualScreenMirrorRegion()
         TLOGE(WmsLogTag::DMS, "ScreenSession Null");
         return false;
     }
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
-        (internalSession->GetRotation() == Rotation::ROTATION_0 ||
-        internalSession->GetRotation() == Rotation::ROTATION_180)) {
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && IsVertical(internalSession->GetRotation())) {
         TLOGI(WmsLogTag::DMS, "SuperFoldDisplayDevice Vertical");
         return false;
     }
