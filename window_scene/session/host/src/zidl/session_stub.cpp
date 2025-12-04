@@ -2641,6 +2641,9 @@ int SessionStub::HandleSendCommonEvent(MessageParcel& data, MessageParcel& reply
         case static_cast<uint32_t>(CommonEventCommand::SET_RECEIVE_DRAG_EVENT):
             ret = SetReceiveDragEventEnabled(parameters);
             break;
+        case static_cast<uint32_t>(CommonEventCommand::SET_WINDOW_SEPARATION_TOUCH_ENABLED):
+            ret = SetSeparationTouchEnabled(parameters);
+            break;
         default:
             ret = WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
             break;
