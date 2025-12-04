@@ -2299,24 +2299,27 @@ WSError WindowSessionImpl::SetStageKeyFramePolicy(const KeyFramePolicy& keyFrame
 WMError WindowSessionImpl::SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "in");
+    if (!windowSystemConfig_.IsPcWindow()) {
+        // isolate on api 23
+        if (GetTargetAPIVersion() < API_VERSION_23 ||
+            (GetTargetAPIVersion() >= API_VERSION_23 && !IsPhonePadOrPcWindow())) {
+            return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+        }
+    }
     if (!WindowHelper::IsMainWindow(GetType())) {
         TLOGI(WmsLogTag::WMS_LAYOUT_PC, "only main window is valid");
         return WMError::WM_ERROR_INVALID_CALLING;
-    }
-    if (!windowSystemConfig_.IsPcWindow()) {
-        // isolate on api 23
-        if (GetTargetAPIVersion() >= API_VERSION_23 && IsPhonePadOrPcWindow()) {
-            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ignore phone or pad window type");
-            return WMError::WM_OK;
-        } else {
-            return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-        }
     }
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+
+    if (GetTargetAPIVersion() >= API_VERSION_23 && IsPhonePadOrPcWindow()) {
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ignore phone or pad window type");
+        return WMError::WM_OK;
+    }
     WSError errorCode = hostSession->SetDragKeyFramePolicy(keyFramePolicy);
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "Id: %{public}d, keyFramePolicy: %{public}s, errorCode: %{public}d",
         GetPersistentId(), keyFramePolicy.ToString().c_str(), static_cast<int32_t>(errorCode));
