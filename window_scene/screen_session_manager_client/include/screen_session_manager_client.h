@@ -47,6 +47,11 @@ public:
     virtual void OnScreenDisconnected(const sptr<ScreenSession>& screenSession) = 0;
 };
 
+class ITentModeListener {
+public:
+    virtual void OnTentModeChange(const TentMode tentMode) = 0;
+};
+
 class ScreenSessionManagerClient : public ScreenSessionManagerClientStub {
 WM_DECLARE_SINGLE_INSTANCE_BASE(ScreenSessionManagerClient)
 
@@ -129,6 +134,7 @@ public:
     void NotifySwitchUserAnimationFinishByWindow();
     void RegisterSwitchUserAnimationNotification(const std::string& description);
     void OnAnimationFinish() override;
+    void OnTentModeChange(TentMode tentMode) override;
     void SetInternalClipToBounds(ScreenId screenId, bool clipToBounds) override;
     DMError SetPrimaryDisplaySystemDpi(float dpi);
     void FreezeScreen(ScreenId screenId, bool isFreeze);
@@ -137,6 +143,7 @@ public:
     void OnScreenPropertyChanged(ScreenId screenId, float rotation, RRect bounds);
     bool OnFoldPropertyChange(ScreenId screenId, const ScreenProperty& property,
         ScreenPropertyChangeReason reason, FoldDisplayMode displayMode, ScreenProperty& midProperty) override;
+    void RegisterTentModeChangeListener(ITentModeListener* listener);
 
     /*
      * RS Client Multi Instance
@@ -196,6 +203,8 @@ private:
     std::shared_ptr<FfrtQueueHelper> ffrtQueueHelper_ = std::make_shared<FfrtQueueHelper>();
 
     IScreenConnectionListener* screenConnectionListener_;
+    ITentModeListener* tentModeListener_;
+    std::atomic<TentMode> tentMode_ = TentMode::UNKNOWN;
     sptr<IScreenConnectionChangeListener> screenConnectionChangeListener_;
     sptr<IDisplayChangeListener> displayChangeListener_;
     FoldDisplayMode displayMode_ = FoldDisplayMode::UNKNOWN;

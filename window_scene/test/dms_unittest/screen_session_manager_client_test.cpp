@@ -74,6 +74,14 @@ public:
     virtual void OnScreenshot(DisplayId displayId) { return; }
 };
 
+class TentModeListenerMock : public ITentModeListener {
+public:
+    void OnTentModeChange(const TentMode tentMode) override
+    {
+        WLOGFI("OnTentModeChange has triggered");
+    };
+};
+
 class ScreenSessionManagerClientTest : public testing::Test {
 public:
     void SetUp() override;
@@ -101,6 +109,45 @@ HWTEST_F(ScreenSessionManagerClientTest, RegisterScreenConnectionListener, TestS
     IScreenConnectionListener* listener = nullptr;
     screenSessionManagerClient_->RegisterScreenConnectionListener(listener);
     EXPECT_EQ(screenSessionManagerClient_->screenConnectionListener_, nullptr);
+}
+
+/**
+ * @tc.name: RegisterTentModeChangeListener
+ * @tc.desc: RegisterTentModeChangeListener test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, RegisterTentModeChangeListener, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ITentModeListener* listener = nullptr;
+    screenSessionManagerClient_->RegisterTentModeChangeListener(listener);
+    EXPECT_TRUE(logMsg.find("Failed to register tent mode listener, listener is null") != std::string::npos);
+    logMsg.clear();
+    listener = new TentModeListenerMock();
+    screenSessionManagerClient_->RegisterTentModeChangeListener(listener);
+    EXPECT_TRUE(logMsg.find("Failed to register tent mode listener, listener is null") == std::string::npos);
+    logMsg.clear();
+}
+
+/**
+ * @tc.name: OnTentModeChange
+ * @tc.desc: OnTentModeChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, OnTentModeChange, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ITentModeListener* listener = nullptr;
+    screenSessionManagerClient_->RegisterTentModeChangeListener(listener);
+    screenSessionManagerClient_->OnTentModeChange(TentMode::UNKNOWN);
+    EXPECT_EQ(screenSessionManagerClient_->tentModeListener_, nullptr);
+    listener = new TentModeListenerMock();
+    screenSessionManagerClient_->RegisterTentModeChangeListener(listener);
+    screenSessionManagerClient_->OnTentModeChange(TentMode::UNKNOWN);
+    EXPECT_TRUE(logMsg.find("OnTentModeChange has triggered") != std::string::npos);
+    logMsg.clear();
 }
 
 /**
