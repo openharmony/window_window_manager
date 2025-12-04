@@ -1976,7 +1976,7 @@ HWTEST_F(SceneSessionManagerTest3, NotifySessionTouchOutside02, TestSize.Level1)
     property->SetDisplayId(DEFAULT_DISPLAY_ID);
     sceneSession->SetSessionProperty(property);
     ssm->sceneSessionMap_.insert({1, sceneSession});
-    ssm->windowFocusController_->displayId2GroupIdMap_[20] = 20;
+    ssm->windowFocusController_->displayIdToGroupIdMap_[20] = 20;
 
     SessionInfo info02;
     info02.abilityName_ = "test1";

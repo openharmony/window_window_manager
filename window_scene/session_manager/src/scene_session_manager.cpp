@@ -6823,20 +6823,20 @@ void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo, Display
     }, __func__);
 }
 
-void SceneSessionManager::GetAllGroupInfo(std::unordered_map<DisplayId, DisplayGroupId>& displayId2GroupIdMap,
-                                          std::vector<sptr<FocusChangeInfo>>& allFocusInfoList)
+void SceneSessionManager::GetAllDisplayGroupInfo(std::unordered_map<DisplayId, DisplayGroupId>& displayIdToGroupIdMap,
+                                                 std::vector<sptr<FocusChangeInfo>>& allFocusInfoList)
 {
     if (!SessionPermission::IsSACalling()) {
         TLOGE(WmsLogTag::WMS_FOCUS, "non-SA calling, permission denied!");
         return;
     }
-    taskScheduler_->PostSyncTask([this, &displayId2GroupIdMap, &allFocusInfoList, where = __func__] {
+    taskScheduler_->PostSyncTask([this, &displayIdToGroupIdMap, &allFocusInfoList, where = __func__] {
         std::unordered_map<DisplayId, DisplayGroupId> groupInfoMap = windowFocusController_->GetDisplayId2GroupIdMap();
         if (groupInfoMap.empty()) {
-            TLOGNE(WmsLogTag::WMS_FOCUS, "displayId2GroupIdMap is empty");
+            TLOGNE(WmsLogTag::WMS_FOCUS, "displayIdToGroupIdMap is empty");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        displayId2GroupIdMap = groupInfoMap;
+        displayIdToGroupIdMap = groupInfoMap;
         std::unordered_map<DisplayGroupId, sptr<FocusGroup>> allFocusGroupMap;
         windowFocusController_->GetAllFocusGroup(allFocusGroupMap);
         for (const auto& elem : allFocusGroupMap) {

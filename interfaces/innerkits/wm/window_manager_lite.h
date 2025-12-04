@@ -63,18 +63,18 @@ public:
     /**
      * @brief Register all display group info changed listener.
      * 
-     * @param listener IAllGroupInfoChangedListener.
+     * @param listener IAllDisplayGroupInfoChangedListener.
      * @return WM_OK means register success, others mean register failure.
      */
-    WMError RegisterAllGroupInfoChangedListener(const sptr<IAllGroupInfoChangedListener>& listener);
+    WMError RegisterAllDisplayGroupInfoChangedListener(const sptr<IAllDisplayGroupInfoChangedListener>& listener);
 
     /**
      * @brief Unregister all display group info changed listener.
-     * 
-     * @param listener IAllGroupInfoChangedListener.
+     *
+     * @param listener IAllDisplayGroupInfoChangedListener.
      * @return WM_OK means unregister success, others mean unregister failure.
      */
-    WMError UnregisterAllGroupInfoChangedListener(const sptr<IAllGroupInfoChangedListener>& listener);
+    WMError UnregisterAllDisplayGroupInfoChangedListener(const sptr<IAllDisplayGroupInfoChangedListener>& listener);
 
     /**
      * @brief Register visibility changed listener.
@@ -120,12 +120,12 @@ public:
     /**
      * @brief Get all group infomation.
      *
-     * @param displayId2GroupIdMap display id to display group id map.
+     * @param displayIdToGroupIdMap display id to display group id map.
      * @param allFocusInfoList focus infomation in every display group.
      * @return void.
      */
-    void GetAllGroupInfo(std::unordered_map<DisplayId, DisplayGroupId>& displayId2GroupIdMap,
-                         std::vector<sptr<FocusChangeInfo>>& allFocusInfoList);
+    void GetAllDisplayGroupInfo(std::unordered_map<DisplayId, DisplayGroupId>& displayIdToGroupIdMap,
+                                std::vector<sptr<FocusChangeInfo>>& allFocusInfoList);
 
     /**
      * @brief Register drawingcontent changed listener.
