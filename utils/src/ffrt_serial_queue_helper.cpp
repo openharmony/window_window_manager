@@ -34,7 +34,7 @@ FfrtSerialQueueHelper& FfrtSerialQueueHelper::GetInstance()
     return instance;
 }
 
-void FfrtSerialQueueHelper::SubmitTask(std::function<void()>& task)
+void FfrtSerialQueueHelper::SubmitTask(std::function<void()>&& task)
 {
     ffrtQueue_->submit(task);
 }
