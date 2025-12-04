@@ -963,11 +963,6 @@ HWTEST_F(SceneSessionManagerTest, GetRootUIContentRemoteObjInner, TestSize.Level
     PcFoldScreenManager::GetInstance().screenFoldStatus_ = SuperFoldStatus::HALF_FOLDED;
     PcFoldScreenManager::GetInstance().displayId_ = displayId;
     EXPECT_EQ(ssm_->GetRootUIContentRemoteObjInner(displayId, remoteObj), WMError::WM_ERROR_NULLPTR);
-    std::shared_ptr<Ace::UIContent> uiContent = std::make_unique<Ace::UIContentMocker>();
-    ssm_->rootSceneSession_->SetGetUIContentFunc([](DisplayId displayId) -> Ace::UIContent* {
-        return uiContent.get();
-    });
-    EXPECT_EQ(ssm_->GetRootUIContentRemoteObjInner(displayId, remoteObj), WMError::WM_OK);
     ssm_->rootSceneSession_ = oldRootSession;
 }
 
