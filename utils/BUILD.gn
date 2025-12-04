@@ -225,7 +225,6 @@ ohos_shared_library("libwmutil") {
     "src/window_property.cpp",
     "src/window_transition_info.cpp",
     "src/ffrt_queue_helper.cpp",
-    "src/ffrt_serial_queue_helper.cpp",
   ]
 
   configs = [
