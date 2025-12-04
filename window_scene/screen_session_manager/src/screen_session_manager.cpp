@@ -3060,6 +3060,11 @@ DMError ScreenSessionManager::SetResolution(ScreenId screenId, uint32_t width, u
     return DMError::DM_OK;
 }
 
+static inline bool IsVertical(Rotation rotation)
+{
+    return rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180;
+}
+
 void ScreenSessionManager::HandleResolutionEffectChangeWhenRotate()
 {
     TLOGI(WmsLogTag::DMS, "start");
@@ -3073,8 +3078,7 @@ void ScreenSessionManager::HandleResolutionEffectChangeWhenRotate()
         TLOGE(WmsLogTag::DMS, "Internal Session null");
         return;
     }
-    if (internalSession->GetRotation() == Rotation::ROTATION_90 ||
-        internalSession->GetRotation() == Rotation::ROTATION_270) {
+    if (!IsVertical(internalSession->GetRotation())) {
         HandleResolutionEffectChange();
     } else {
         RecoveryResolutionEffect();
@@ -3099,9 +3103,7 @@ bool ScreenSessionManager::HandleResolutionEffectChange()
         RecoveryResolutionEffect();
         return false;
     }
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
-        (internalSession->GetRotation() == Rotation::ROTATION_0 ||
-        internalSession->GetRotation() == Rotation::ROTATION_180)) {
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && IsVertical(internalSession->GetRotation())) {
         TLOGI(WmsLogTag::DMS, "SuperFoldDisplayDevice Vertical");
         return false;
     }
@@ -3124,8 +3126,7 @@ void ScreenSessionManager::CalculateTargetResolution(const sptr<ScreenSession>& 
     uint32_t innerHeight = internalSession->GetScreenProperty().GetScreenRealHeight();
     uint32_t externalWidth = externalSession->GetScreenProperty().GetScreenRealWidth();
     uint32_t externalHeight = externalSession->GetScreenProperty().GetScreenRealHeight();
-    if (internalSession->GetRotation() == Rotation::ROTATION_90 ||
-        internalSession->GetRotation() == Rotation::ROTATION_270) {
+    if (IsVertical(internalSession->GetRotation()) != IsVertical(externalSession->GetRotation())) {
         std::swap(externalWidth, externalHeight);
     }
     targetWidth = innerWidth;
@@ -3231,12 +3232,11 @@ void ScreenSessionManager::SetInternalScreenResolutionEffect(const sptr<ScreenSe
     // Setting the display area of the internal screen
     auto oldProperty = internalSession->GetScreenProperty();
     internalSession->UpdatePropertyByResolution(targetRect);
-    auto newProperty = internalSession->GetScreenProperty();
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        newProperty.SetFoldStatus(GetSuperFoldStatus());
+        auto newProperty = internalSession->GetScreenProperty();
+        newProperty.SetPropertyChangeReason("resolutionEffectChange");
         newProperty.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::RESOLUITION_EFFECT_CHANGE);
-        internalSession->NotifyFoldPropertyChange(newProperty, ScreenPropertyChangeReason::CHANGE_MODE,
-            FoldDisplayMode::UNKNOWN);
+        internalSession->PropertyChange(newProperty, ScreenPropertyChangeReason::CHANGE_MODE);
     } else {
         internalSession->PropertyChange(internalSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
     }
