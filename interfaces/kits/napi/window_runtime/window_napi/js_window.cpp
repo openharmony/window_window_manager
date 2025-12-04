@@ -7523,37 +7523,37 @@ napi_value CreateJsWindowArrayObject(napi_env env, const std::vector<sptr<Window
 bool JsWindow::ParseWindowLimits(napi_env env, napi_value jsObject, WindowLimits& windowLimits)
 {
     uint32_t data = 0;
-    if (ParseJsValue(jsObject, env, "maxWidth", data)) {
-        windowLimits.maxWidth_ = data;
-    } else {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to maxWidth");
-        return false;
-    }
-    if (ParseJsValue(jsObject, env, "minWidth", data)) {
-        windowLimits.minWidth_ = data;
-    } else {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to minWidth");
-        return false;
-    }
-    if (ParseJsValue(jsObject, env, "maxHeight", data)) {
-        windowLimits.maxHeight_ = data;
-    } else {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to maxHeight");
-        return false;
-    }
-    if (ParseJsValue(jsObject, env, "minHeight", data)) {
-        windowLimits.minHeight_ = data;
-    } else {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to minHeight");
-        return false;
-    }
+    uint32_t defaultValue = 0;
     PixelUnit pixelUnit = PixelUnit::PX;
-    if (ParseJsValueOrGetDefault(jsObject, env, "pixelUnit", pixelUnit, PixelUnit::PX)) {
-        windowLimits.pixelUnit_ = pixelUnit;
-    } else {
+    if (GetType(env, jsObject) != napi_object) {
+        return false;
+    }
+    auto parseField = [&](const char* fieldName, auto& field, auto& defValue) -> bool {
+        if (!ParseJsValueOrGetDefault(jsObject, env, fieldName, data, defValue)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to %{public}s", fieldName);
+            return false;
+        }
+        field = data;
+        return true;
+    };
+
+    if (!parseField("maxWidth", windowLimits.maxWidth_, defaultValue)) {
+        return false;
+    }
+    if (!parseField("maxWidth", windowLimits.maxWidth_, defaultValue)) {
+        return false;
+    }
+    if (!parseField("maxWidth", windowLimits.maxWidth_, defaultValue)) {
+        return false;
+    }
+    if (!parseField("maxWidth", windowLimits.maxWidth_, defaultValue)) {
+        return false;
+    }
+    if (!ParseJsValueOrGetDefault(jsObject, env, "pixelUnit", pixelUnit, PixelUnit::PX)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to pixelUnit");
         return false;
     }
+    windowLimits.pixelUnit_ = pixelUnit;
     return true;
 }
 

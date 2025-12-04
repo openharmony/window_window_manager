@@ -2189,7 +2189,15 @@ bool AniWindowUtils::ParseWindowLimits(ani_env* env, ani_object aniWindowLimits,
 {
     auto getAndAssign = [&, where = __func__](const char* name, uint32_t& field) -> ani_status {
         int value;
-        ani_status ret = AniWindowUtils::GetPropertyIntObject(env, name, aniWindowLimits, value);
+        ani_ref intValueObject;
+        ani_boolean isUndefined;
+        ani_status ret = env->Object_GetPropertyByName_Ref(aniWindowLimits, name, &intValueObject);
+        env->Reference_IsUndefined(intValueObject, &isUndefined);
+        if (isUndefined) {
+            field = 0;
+            return ANI_OK;
+        }
+        ret = AniWindowUtils::GetPropertyIntObject(env, name, aniWindowLimits, value);
         if (ret == ANI_OK) {
             if (value >= 0) {
                 field = static_cast<uint32_t>(value);
@@ -2209,7 +2217,7 @@ bool AniWindowUtils::ParseWindowLimits(ani_env* env, ani_object aniWindowLimits,
         env->Reference_IsUndefined(unitValueObject, &isUndefined);
         if (isUndefined) {
             field = PixelUnit::PX;
-            return ret;
+            return ANI_OK;
         }
         ret = AniWindowUtils::GetEnumValue(env, static_cast<ani_enum_item>(unitValueObject), unitValue);
         if (ret == ANI_OK) {
