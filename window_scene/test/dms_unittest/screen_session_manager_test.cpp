@@ -160,6 +160,26 @@ HWTEST_F(ScreenSessionManagerTest, CanEnterCoordinationRecording, TestSize.Level
     ssm_->DestroyVirtualScreen(screenId)
 }
 
+/**
+ * @tc.name: NotifyTentModeChange
+ * @tc.desc: NotifyTentModeChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, NotifyTentModeChange, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    LOG_SetCallback(MyLogCallback);
+    g_errLog.clear();
+    ssm_->clientProxy_ = nullptr;
+    ssm_->NotifyTentModeChange(TentMode::HOVER);
+    EXPECT_TRUE(g_errLog.find("clientProxy null") != std::string::npos);
+    g_errLog.clear();
+    ssm_->clientProxy_ = sptr<ScreenSessionManagerClientTest>::MakeSptr();
+    ssm_->NotifyTentModeChange(TentMode::HOVER);
+    EXPECT_TRUE(g_errLog.find("clientProxy null") == std::string::npos);
+    g_errLog.clear();
+    LOG_SetCallback(nullptr);
+}
 
 /**
  * @tc.name: WakeupBegin
