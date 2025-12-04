@@ -2154,7 +2154,7 @@ bool AniWindowUtils::GetSpecificBarStatus(ani_env* env,
     }
     if (!isUndefined) {
         ani_boolean bool_value;
-        if (env->Object_CallMethodByName_Boolean(aniAnimation, "unboxed", "z", &bool_value) != ANI_OK) {
+        if (env->Object_CallMethodByName_Boolean(aniAnimation, "unboxed", ":z", &bool_value) != ANI_OK) {
             TLOGE(WmsLogTag::WMS_IMMS, "[ANI] Object_CallMethodByName_Boolean failed");
             return false;
         }

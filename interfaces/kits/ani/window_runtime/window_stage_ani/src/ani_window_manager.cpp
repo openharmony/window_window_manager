@@ -86,7 +86,7 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace wi
             reinterpret_cast<void *>(AniWindowManager::NotifyScreenshotEvent)},
         ani_native_function {"getAllWindowLayoutInfo", "ll:C{escompat.Array}",
             reinterpret_cast<void *>(AniWindowManager::GetAllWindowLayoutInfo)},
-        ani_native_function {"getSnapshot", "ld:C{@ohos.multimedia.image.image.PixelMap}",
+        ani_native_function {"getSnapshot", "li:C{@ohos.multimedia.image.image.PixelMap}",
             reinterpret_cast<void *>(AniWindowManager::GetSnapshot)},
         ani_native_function {"getVisibleWindowInfo", "l:C{escompat.Array}",
             reinterpret_cast<void *>(AniWindowManager::GetVisibleWindowInfo)},
@@ -808,14 +808,14 @@ ani_object AniWindowManager::OnGetAllWindowLayoutInfo(ani_env* env, ani_long dis
     return AniWindowUtils::CreateAniWindowLayoutInfoArray(env, infos);
 }
 
-ani_object AniWindowManager::GetSnapshot(ani_env* env, ani_long nativeObj, ani_double windowId)
+ani_object AniWindowManager::GetSnapshot(ani_env* env, ani_long nativeObj, ani_int windowId)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
     return aniWindowManager != nullptr ? aniWindowManager->OnGetSnapshot(env, windowId) : nullptr;
 }
 
-ani_object AniWindowManager::OnGetSnapshot(ani_env* env, ani_double windowId)
+ani_object AniWindowManager::OnGetSnapshot(ani_env* env, ani_int windowId)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
