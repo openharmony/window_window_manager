@@ -5322,24 +5322,27 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
 std::shared_ptr<RSUIContext> Session::GetRSShadowContext() const
 {
     std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
-    auto shadowSurfaceNode = RSAdapterUtil::IsClientMultiInstanceEnabled() ? shadowSurfaceNode_ : surfaceNode_;
-    if (!shadowSurfaceNode) {
-        TLOGE(WmsLogTag::WMS_SCB, "Shadow surface node is nullptr, id: %{public}d.", GetPersistentId());
-        return nullptr;
+    if (RSAdapterUtil::IsClientMultiInstanceEnabled()) {
+        if (!shadowSurfaceNode_) {
+            TLOGE(WmsLogTag::WMS_SCB, "Shadow surface node is nullptr, id: %{public}d.", GetPersistentId());
+            return nullptr;
+        }
+        return shadowSurfaceNode_->GetRSUIContext();
     }
-    return shadowSurfaceNode->GetRSUIContext();
+    return GetRSUIContext();
 }
 
 std::shared_ptr<RSUIContext> Session::GetRSLeashWinShadowContext() const
 {
     std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
-    auto leashWinShadowSurfaceNode = RSAdapterUtil::IsClientMultiInstanceEnabled() ?
-        leashWinShadowSurfaceNode_ : leashWinSurfaceNode_;
-    if (!leashWinShadowSurfaceNode) {
-        TLOGE(WmsLogTag::WMS_SCB, "Leash win shadow surface node is nullptr, id: %{public}d.", GetPersistentId());
-        return nullptr;
+    if (RSAdapterUtil::IsClientMultiInstanceEnabled()) {
+        if (!leashWinShadowSurfaceNode_) {
+            TLOGE(WmsLogTag::WMS_SCB, "Leash win shadow surface node is nullptr, id: %{public}d.", GetPersistentId());
+            return nullptr;
+        }
+        return leashWinShadowSurfaceNode_->GetRSUIContext();
     }
-    return leashWinShadowSurfaceNode->GetRSUIContext();
+    return GetRSUIContext();
 }
 
 WSError Session::SetIsShowDecorInFreeMultiWindow(bool isShow)
