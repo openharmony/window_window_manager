@@ -45,8 +45,8 @@ class ExtensionWindow {
     return this.__extension_window__.hideNonSecureWindows(type, callback);
   }
 
-  createSubWindowWithOptions(type, callback) {
-    return this.__extension_window__.createSubWindowWithOptions(type, callback);
+  createSubWindowWithOptions(type, callback, followCreatorLifecycle) {
+    return this.__extension_window__.createSubWindowWithOptions(type, callback, followCreatorLifecycle);
   }
 
   setWaterMarkFlag(type, callback) {
