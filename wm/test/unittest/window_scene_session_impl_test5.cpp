@@ -2304,6 +2304,12 @@ HWTEST_F(WindowSceneSessionImplTest5, GetConfigurationFromAbilityInfo, TestSize.
 }
 
 /**
+ * @tc.name: GetConfigurationFromAbilityInfo02
+ * @tc.desc: GetConfigurationFromAbilityInfo02
+ * @tc.type: FUNC
+ */
+
+/**
  * @tc.name: TestMoveWindowToGlobalDisplay
  * @tc.desc: Test MoveWindowToGlobalDisplay under multiple conditions
  * @tc.type: FUNC
