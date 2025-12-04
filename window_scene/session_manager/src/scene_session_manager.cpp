@@ -7365,12 +7365,21 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
 
 WSError SceneSessionManager::GetSCBDebugDumpInfo(std::string&& cmd, std::string& dumpInfo)
 {
-    std::string filePath;
+    const std::string writeFileCmd = "-f";
+    size_t pos = cmd.find(writeFileCmd);
+    std::vector<std::string> args;
+    std::string filePath = "";
+    WindowHelper::SplitStringByDelimiter(cmd, " ", args);
     {
         auto rootContext = rootSceneContextWeak_.lock();
-        filePath = rootContext != nullptr ? rootContext->GetFilesDir() + "/wms.dump" : "";
+        if (args.back() == writeFileCmd && rootContext != nullptr) {
+            auto dumpTimeStamp = std::chrono::time_point_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now()).time_since_epoch().count()
+            filePath = rootContext->GetFilesDir() + "/wms_" + std::to_string(dumpTimeStamp) + ".dump";
+        }
     }
     // publish data
+    TLOGD(WmsLogTag::DEFAULT, "filePath: %{public}s, cmd: %{public}s", filePath.c_str(), cmd.c_str());
     bool ret = eventHandler_->PostSyncTask(
         [this, filePath = std::move(filePath), cmd = std::move(cmd)] {
             return scbDumpSubscriber_->Publish(cmd, filePath);
