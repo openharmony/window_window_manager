@@ -16,31 +16,32 @@
 #ifndef RATE_LIMITED_LOGGER_H
 #define RATE_LIMITED_LOGGER_H
 
+#include <chrono>
+#include <functional>
+#include <mutex>
+#include <parameters.h>
+#include <sstream>
 #include <string>
 #include <unordered_map>
-#include <chrono>
-#include <mutex>
-#include <sstream>
-#include <functional>
 #include "window_manager_hilog.h"
 
 class RateLimitedLogger {
 private:
     struct FunctionRecord {
-        int count;  // Current count in time window
+        int count = 0;                                    // Current count in time window
         std::chrono::steady_clock::time_point startTime;  // Time window start
     };
 
-    // Singleton instance
-    static RateLimitedLogger* instance_;
-    static std::mutex instanceMutex_;
-
     std::unordered_map<std::string, FunctionRecord> functionRecords_;
-    std::mutex mutex_;
+    std::mutex functionRecordsMutex_;
     bool enabled_;
 
     // Private constructor for singleton
-    RateLimitedLogger() : enabled_(true) {}
+    RateLimitedLogger()
+    {
+        std::string parameterStr = OHOS::system::GetParameter("persist.window.windowLogLimit", "1");
+        enabled_ = (parameterStr == "1");
+    }
     
 public:
     // Delete copy constructor and assignment operator
@@ -80,14 +81,14 @@ public:
 };
 
 
-#define TLOGI_LIMIT(timeWindowMs, maxCount, tag, fmt, ...)                                        \
+#define TLOGI_LMT(timeWindowMs, maxCount, tag, fmt, ...)                                        \
     do {                                                                                          \
         if (RateLimitedLogger::getInstance().logFunction(__FUNCTION__, timeWindowMs, maxCount)) { \
             TLOGI(tag, fmt, ##__VA_ARGS__);                                                       \
         }                                                                                         \
     } while (0)
 
-#define TLOGI_CUSTOMKEY_LIMIT(timeWindowMs, maxCount, customKey, tag, fmt, ...)                   \
+#define TLOGI_LMTKEY(timeWindowMs, maxCount, customKey, tag, fmt, ...)                   \
     do {                                                                                          \
         if (RateLimitedLogger::getInstance().logFunction(customKey, timeWindowMs, maxCount)) {    \
             TLOGI(tag, fmt, ##__VA_ARGS__);                                                       \
