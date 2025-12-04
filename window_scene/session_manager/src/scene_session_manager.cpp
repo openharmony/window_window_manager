@@ -55,7 +55,6 @@
 #include "distributed_client.h"
 #endif
 #include "dms_reporter.h"
-#include "ffrt_serial_queue_helper.h"
 #include "hidump_controller.h"
 #include "image_source.h"
 #include "perform_reporter.h"
@@ -6143,7 +6142,9 @@ void SceneSessionManager::OnBundleUpdated(const std::string& bundleName, int use
             TLOGNI(WmsLogTag::WMS_PATTERN, "res:%{public}d, insert num:%{public}" PRId64, batchInsertRes, outInsertNum);
         }
     };
-    static FfrtSerialQueueHelper ffrtSerialHelper;
+    static ffrt::queue ffrtSerialHelper(
+        ffrt::queue_serial, "OnBundleUpdatedQueue",
+        ffrt::queue_attr().qos(ffrt_qos_user_interactive));
     ffrtSerialHelper.SubmitTask(task);
     taskScheduler_->PostAsyncTask([this, bundleName]() {
         std::unique_lock<std::shared_mutex> lock(startingWindowMapMutex_);
