@@ -1171,6 +1171,7 @@ private:
     bool IsNeedUpdateBrightness(int32_t persistentId, float brightness);
     void RegisterSessionPropertyChangeNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
     void NotifySessionPropertyChangeFromSession(int32_t persistentId, WindowInfoKey windowInfoKey);
+    WMError GetRootUIContentRemoteObjInner(DisplayId displayId, sptr<IRemoteObject>& uiContentRemoteObj);
 
     /*
      * Window Rotate Animation

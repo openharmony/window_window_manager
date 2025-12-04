@@ -2034,7 +2034,7 @@ WMError WindowManager::GetRootUIContentRemoteObj(DisplayId displayId, sptr<IRemo
 {
     WMError ret = WindowAdapter::GetInstance(userId_).GetRootUIContentRemoteObj(displayId, uiContentRemoteObj);
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "userId: %{public}d, retCode: %{public}d, displayId: %{public}" PRIu64,
-        userId_ static_cast<int32_t>(ret), displayId);
+        userId_, static_cast<int32_t>(ret), displayId);
     return ret;
 }
 

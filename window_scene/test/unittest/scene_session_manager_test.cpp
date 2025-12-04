@@ -934,6 +934,44 @@ HWTEST_F(SceneSessionManagerTest, GetUIContentRemoteObj, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetRootUIContentRemoteObj
+ * @tc.desc: get remote object of root UIContent 
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, GetRootUIContentRemoteObj, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IRemoteObject> remoteObj;
+    EXPECT_EQ(ssm_->GetRootUIContentRemoteObj(0, remoteObj), WMError::WM_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: GetRootUIContentRemoteObjInner
+ * @tc.desc: get remote object of root UIContent 
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, GetRootUIContentRemoteObjInner, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    auto oldRootSession = ssm_->rootSceneSession_;
+    DisplayId displayId = 0;
+    sptr<IRemoteObject> remoteObj;
+    ssm_->rootSceneSession_ = nullptr;
+    EXPECT_EQ(ssm_->GetRootUIContentRemoteObjInner(displayId, remoteObj), WMError::WM_ERROR_INVALID_WINDOW);
+    auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr(specificCb);
+    PcFoldScreenManager::GetInstance().screenFoldStatus_ = SuperFoldStatus::HALF_FOLDED;
+    PcFoldScreenManager::GetInstance().displayId_ = displayId;
+    EXPECT_EQ(ssm_->GetRootUIContentRemoteObjInner(displayId, remoteObj), WMError::WM_ERROR_NULLPTR);
+    std::shared_ptr<Ace::UIContent> uiContent = std::make_unique<Ace::UIContentMocker>();
+    ssm_->rootSceneSession_->SetGetUIContentFunc([](DisplayId displayId) -> Ace::UIContent* {
+        return uiContent.get();
+    });
+    EXPECT_EQ(ssm_->GetRootUIContentRemoteObjInner(displayId, remoteObj), WMError::WM_OK);
+    ssm_->rootSceneSession_ = oldRootSession;
+}
+
+/**
  * @tc.name: CalculateCombinedExtWindowFlags
  * @tc.desc: SceneSesionManager calculate combined extension window flags
  * @tc.type: FUNC

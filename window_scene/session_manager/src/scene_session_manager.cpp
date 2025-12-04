@@ -10623,9 +10623,19 @@ WMError SceneSessionManager::GetRootUIContentRemoteObj(DisplayId displayId, sptr
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied, displayId: %{public}" PRIu64, displayId);
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
+    return GetRootUIContentRemoteObjInner(displayId, uiContentRemoteObj);
+}
+
+WMError SceneSessionManager::GetRootUIContentRemoteObjInner(DisplayId displayId,
+    sptr<IRemoteObject>& uiContentRemoteObj)
+{
     if (rootSceneSession_ == nullptr) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "root scene is null, displayId: %{public}" PRIu64, displayId);
         return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (PcFoldScreenManager::GetInstance().IsHalfFolded(displayId)) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "change fold screen displayId: %{public}" PRIu64, displayId);
+        displayId = DEFAULT_DISPLAY_ID;
     }
     auto uiContent = rootSceneSession_->GetUIContent(displayId);
     if (uiContent == nullptr) {
