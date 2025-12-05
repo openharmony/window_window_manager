@@ -38,7 +38,7 @@ public:
     void SetLoadContentFunc(const LoadContentFunc& loadContentFunc);
     void LoadContent(
         const std::string& contentUrl, napi_env env, napi_value storage, AbilityRuntime::Context* context);
-    void SetGetUIContentFunc(const GetUIContentFunc& getUIContentFunc);
+    void SetGetUIContentFunc(GetUIContentFunc&& getUIContentFunc);
     Ace::UIContent* GetUIContent(DisplayId displayId);
 
     /*
