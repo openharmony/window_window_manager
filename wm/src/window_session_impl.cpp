@@ -4519,8 +4519,12 @@ void WindowSessionImpl::RecoverSessionListener()
 template<typename T>
 EnableIfSame<T, IWindowLifeCycle, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::GetListeners()
 {
+    auto iter = lifecycleListeners_.find(GetPersistentId());
+    if (iter == lifecycleListeners_.end()){
+        return std::vector<sptr<IWindowLifeCycle>>();
+    }
     std::vector<sptr<IWindowLifeCycle>> lifecycleListeners;
-    for (auto& listener : lifecycleListeners_[GetPersistentId()]) {
+    for (auto& listener : iter->second) {
         lifecycleListeners.push_back(listener);
     }
     return lifecycleListeners;
