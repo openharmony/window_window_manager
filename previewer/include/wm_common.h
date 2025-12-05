@@ -1951,6 +1951,9 @@ struct StateChangeOption {
     bool isFromInnerkits_;
     bool waitDetach_;
 
+    StateChangeOption(int32_t parentPersistentId, WindowState newState)
+            : parentPersistentId_(parentPersistentId), newState_(newState) {}
+
     StateChangeOption(int32_t parentPersistentId, WindowState newState, uint32_t reason, bool withAnimation,
         bool withFocus, bool waitAttach, bool isFromInnerkits, bool waitDetach)
             : parentPersistentId_(parentPersistentId), newState_(newState), reason_(reason),
