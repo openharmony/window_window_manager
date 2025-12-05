@@ -249,7 +249,7 @@ public:
         return rotation;
     }
 
-    int32_t ShiftDecimalDigit(int32_t value, int32_t shift)
+    static int32_t ShiftDecimalDigit(int32_t value, int32_t shift)
     {
         if (value < 0 || value >= DECIMAL_BASE || shift < 0 || shift >= std::numeric_limits<int32_t>::digits10) {
             return 0; //Returns 0 if an overflow occurs.
