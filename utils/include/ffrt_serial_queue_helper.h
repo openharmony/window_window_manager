@@ -36,4 +36,4 @@ private:
 };
 } // namespace OHOS::Rosen
 
-#endif // OHOS_ROSEN_WINDOW_SCENE_FFRT_QUEUE_HELPER_H
+#endif // OHOS_ROSEN_WINDOW_SCENE_SERIAL_FFRT_QUEUE_HELPER_H
