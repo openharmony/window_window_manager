@@ -18,7 +18,6 @@
 #include "ffrt_inner.h"
 
 namespace OHOS::Rosen {
-constexpr int32_t FFRT_USER_INTERACTIVE_MAX_THREAD_NUM = 5;
 
 FfrtSerialQueueHelper::FfrtSerialQueueHelper()
 {
