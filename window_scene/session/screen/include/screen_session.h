@@ -306,6 +306,7 @@ public:
         SuperFoldStatus currentStatus, bool isKeyboardOn, int32_t validHeight);
     void HandleSystemKeyboardOffPropertyChange(ScreenProperty& screenProperty,
         SuperFoldStatus currentStatus, bool isKeyboardOn);
+    void HandleResolutionEffectPropertyChange(ScreenProperty& screenProperty, const ScreenProperty& eventPara);
     void ProcPropertyChange(ScreenProperty& screenProperty, const ScreenProperty& eventPara);
     void ProcPropertyChangedForSuperFold(ScreenProperty& screenProperty, const ScreenProperty& eventPara);
     void NotifyListenerPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason);
@@ -442,6 +443,7 @@ private:
     bool IsVertical(Rotation rotation) const;
     Orientation CalcDisplayOrientationToOrientation(DisplayOrientation displayOrientation) const;
     std::vector<IScreenChangeListener*> GetScreenChangeListenerList() const;
+    void UpdateScbScreenPropertyForSuperFlod(const ScreenProperty& screenProperty);
 
     ScreenProperty property_;
     mutable std::mutex propertyMutex_; // above guarded by clientProxyMutex_
