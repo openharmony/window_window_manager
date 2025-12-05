@@ -193,6 +193,12 @@ void SceneSessionManagerLite::GetFocusWindowInfo(FocusChangeInfo& focusInfo, Dis
     return SceneSessionManager::GetInstance().GetFocusWindowInfo(focusInfo, displayId);
 }
 
+void SceneSessionManagerLite::GetAllGroupInfo(std::unordered_map<DisplayId, DisplayGroupId>& displayId2GroupIdMap,
+                                              std::vector<sptr<FocusChangeInfo>>& allFocusInfoList)
+{
+    SceneSessionManager::GetInstance().GetAllGroupInfo(displayId2GroupIdMap, allFocusInfoList);
+}
+
 WMError SceneSessionManagerLite::RegisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {

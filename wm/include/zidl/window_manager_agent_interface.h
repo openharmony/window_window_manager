@@ -45,9 +45,11 @@ public:
         TRANS_ID_NOTIFY_WINDOW_PROPERTY_CHANGE,
         TRANS_ID_NOTIFY_WINDOW_SYSTEM_BAR_PROPERTY_CHANGE,
         TRANS_ID_NOTIFY_WINDOW_SUPPORT_ROTATION_CHANGE,
+        TRANS_ID_NOTIFY_DISPLAY_GROUP_INFO_CHANGE,
     };
 
     virtual void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) = 0;
+    virtual void UpdateDisplayGroupInfo(DisplayGroupId displayGroupId, DisplayId displayId, bool isAdd) = 0;
     virtual void UpdateWindowModeTypeInfo(WindowModeType type) = 0;
     virtual void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints) = 0;
     virtual void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,

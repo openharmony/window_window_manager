@@ -171,6 +171,8 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         return WMError::WM_OK;
     }
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId) override {}
+    void GetAllGroupInfo(std::unordered_map<DisplayId, DisplayGroupId>& displayId2GroupIdMap,
+                         std::vector<sptr<FocusChangeInfo>>& allFocusInfoList) override {}
     WMError CheckWindowId(int32_t windowId, int32_t& pid) override
     {
         return WMError::WM_OK;

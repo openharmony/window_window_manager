@@ -37,6 +37,7 @@ public:
 
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused);
+    void UpdateDisplayGroupInfo(DisplayGroupId displayGroupId, DisplayId displayId, bool isAdd);
     void UpdateWindowModeTypeInfo(WindowModeType type);
     void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
         WindowUpdateType type);

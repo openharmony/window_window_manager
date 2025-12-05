@@ -111,7 +111,7 @@ public:
     void AddWindowFlag(WindowFlag flag);
 
     /**
-     * @brief Remove winodw flag.
+     * @brief Remove window flag.
      *
      * @param flag The flag value removed.
      */
