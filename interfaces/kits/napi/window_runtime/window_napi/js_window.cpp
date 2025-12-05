@@ -9473,17 +9473,14 @@ static void SetDragKeyFramePolicyTask(NapiAsyncTask::ExecuteCallback& execute,
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        if (!window->IsPcWindow()) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s device not support", where);
-            *errCodePtr = WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
-            return;
+        auto result = window->SetDragKeyFramePolicy(keyFramePolicy);
+        auto iter = WM_JS_TO_ERROR_CODE_MAP.find(result);
+        if (iter == WM_JS_TO_ERROR_CODE_MAP.end()) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s convert to WmErrorCode failed: %{public}d", where, result);
+            *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        } else {
+            *errCodePtr = iter->second;
         }
-        if (!WindowHelper::IsMainWindow(window->GetType())) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s only main window is valid", where);
-            *errCodePtr = WmErrorCode::WM_ERROR_INVALID_CALLING;
-            return;
-        }
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetDragKeyFramePolicy(keyFramePolicy));
     };
     complete = [keyFramePolicy, errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (errCodePtr == nullptr) {
