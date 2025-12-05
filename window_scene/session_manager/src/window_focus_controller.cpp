@@ -178,7 +178,7 @@ std::vector<std::pair<DisplayId, int32_t>> WindowFocusController::GetAllFocusedS
     return allFocusGroup;
 }
 
-std::unordered_map<DisplayId, DisplayGroupId> WindowFocusController::GetDisplayId2GroupIdMap()
+std::unordered_map<DisplayId, DisplayGroupId> WindowFocusController::GetDisplayIdToGroupIdMap()
 {
     std::lock_guard<std::mutex> lock(displayIdToGroupIdMapMutex_);
     return displayIdToGroupIdMap_;

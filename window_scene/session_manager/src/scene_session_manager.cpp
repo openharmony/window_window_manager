@@ -6831,7 +6831,7 @@ void SceneSessionManager::GetAllDisplayGroupInfo(std::unordered_map<DisplayId, D
         return;
     }
     taskScheduler_->PostSyncTask([this, &displayIdToGroupIdMap, &allFocusInfoList, where = __func__] {
-        std::unordered_map<DisplayId, DisplayGroupId> groupInfoMap = windowFocusController_->GetDisplayId2GroupIdMap();
+        std::unordered_map<DisplayId, DisplayGroupId> groupInfoMap = windowFocusController_->GetDisplayIdToGroupIdMap();
         if (groupInfoMap.empty()) {
             TLOGNE(WmsLogTag::WMS_FOCUS, "displayIdToGroupIdMap is empty");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
@@ -6852,8 +6852,8 @@ void SceneSessionManager::GetAllDisplayGroupInfo(std::unordered_map<DisplayId, D
                 continue;
             }
             auto focusInfo = sptr<FocusChangeInfo>::MakeSptr(
-                focusedSession->GetWindowId(), curFocusGroup->GetDisplayGroupId() == DEFAULT_DISPLAY_ID
-                ? DEFAULT_DISPLAY_ID : focusedSession->GetDisplayId(), focusedSession->GetDisplayId(),
+                focusedSession->GetWindowId(), curFocusGroup->GetDisplayGroupId() == DEFAULT_DISPLAY_ID ?
+                DEFAULT_DISPLAY_ID : focusedSession->GetDisplayId(), focusedSession->GetDisplayId(),
                 curFocusGroup->GetDisplayGroupId(), focusedSession->GetCallingPid(), focusedSession->GetCallingUid(),
                 focusedSession->GetWindowType(), focusedSession->GetAbilityToken());
             allFocusInfoList.emplace_back(focusInfo);
