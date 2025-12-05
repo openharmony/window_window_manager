@@ -104,23 +104,6 @@ WSRect AdjustRectByAspectRatio(const WSRect& rect,
                                const WindowDecoration& decoration,
                                float aspectRatio,
                                int tolerancePx = 2);
-
-/**
- * @brief Move a decimal digit to a specified position in base-10 format.
- *
- * This function places the given digit `value` at the (position + 1)-th
- * decimal place by multiplying it with 10 raised to the specified position.
- * The operation is purely positional and does not modify other digits.
- *
- * @param value        The decimal digit to be placed (0–9).
- * @param position     The zero-based decimal position; the digit will be
- *                     placed at 10^(position). For example, value=4 and
- *                     position=2 will produce 400.
- *
- * @return The resulting integer after shifting `value` to the specified
- *         decimal position.
- */
-int32_t ShiftDecimalDigit(int32_t value, int32_t shift);
 } // namespace SessionUtils
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_UTILS_H
