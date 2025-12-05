@@ -3027,6 +3027,7 @@ DMError ScreenSessionManager::SetResolution(ScreenId screenId, uint32_t width, u
         TLOGE(WmsLogTag::DMS, "Get ScreenSession failed");
         return DMError::DM_ERROR_NULLPTR;
     }
+    screenSession->FreezeScreen(true);
     if (rsInterface_.SetRogScreenResolution(screenId, width, height) != 0) {
         TLOGE(WmsLogTag::DMS, "Failed to SetRogScreenResolution");
         screenSession->FreezeScreen(false);
