@@ -6852,8 +6852,8 @@ void SceneSessionManager::GetAllGroupInfo(std::unordered_map<DisplayId, DisplayG
                 continue;
             }
             auto focusInfo = sptr<FocusChangeInfo>::MakeSptr(
-                focusedSession->GetWindowId(), curFocusGroup->GetDisplayGroupId() == DEFAULT_DISPLAY_ID
-                ? DEFAULT_DISPLAY_ID : focusedSession->GetDisplayId(), focusedSession->GetDisplayId(),
+                focusedSession->GetWindowId(), curFocusGroup->GetDisplayGroupId() == DEFAULT_DISPLAY_ID ?
+                DEFAULT_DISPLAY_ID : focusedSession->GetDisplayId(), focusedSession->GetDisplayId(),
                 curFocusGroup->GetDisplayGroupId(), focusedSession->GetCallingPid(), focusedSession->GetCallingUid(),
                 focusedSession->GetWindowType(), focusedSession->GetAbilityToken());
             allFocusInfoList.emplace_back(focusInfo);

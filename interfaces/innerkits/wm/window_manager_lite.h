@@ -62,7 +62,7 @@ public:
 
     /**
      * @brief Register all display group info changed listener.
-     * 
+     *
      * @param listener IAllGroupInfoChangedListener.
      * @return WM_OK means register success, others mean register failure.
      */
@@ -70,7 +70,7 @@ public:
 
     /**
      * @brief Unregister all display group info changed listener.
-     * 
+     *
      * @param listener IAllGroupInfoChangedListener.
      * @return WM_OK means unregister success, others mean unregister failure.
      */
