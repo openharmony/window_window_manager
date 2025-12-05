@@ -2064,10 +2064,13 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
             SceneSessionManager::GetInstance().UpdateAllStartingWindowRdb();
         });
     rootSceneSession->SetGetUIContentFunc([rootScene = rootScene_](DisplayId displayId) -> Ace::UIContent* {
-        const auto& uiContent = rootScene->GetUIContentByDisplayId(displayId).first;
-        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "isNullUiContent=%{public}d, displayId: %{public}" PRIu64,
-            uiContent == nullptr, displayId);
-        return uiContent;
+        const auto& uiContentPair = rootScene->GetUIContentByDisplayId(displayId);
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "found=%{public}d, displayId: %{public}" PRIu64,
+            uiContentPair.second, displayId);
+        if (uiContentPair.second) {
+            return uiContentPair.first;
+        }
+        return nullptr;
     });
     RegisterRootSceneCallbacksOnSSManager();
     RegisterSSManagerCallbacksOnRootScene();
