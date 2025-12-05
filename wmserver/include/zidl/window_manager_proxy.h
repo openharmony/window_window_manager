@@ -81,8 +81,8 @@ public:
     void SetMaximizeMode(MaximizeMode maximizeMode) override;
     MaximizeMode GetMaximizeMode() override;
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
-    void GetAllDisplayGroupInfo(std::unordered_map<DisplayId, DisplayGroupId>& displayIdToGroupIdMap,
-                                std::vector<sptr<FocusChangeInfo>>& allFocusInfoList) override {};
+    void GetAllGroupInfo(std::unordered_map<DisplayId, DisplayGroupId>& displayId2GroupIdMap,
+                         std::vector<sptr<FocusChangeInfo>>& allFocusInfoList) override {};
 private:
     static inline BrokerDelegator<WindowManagerProxy> delegator_;
 };

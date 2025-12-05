@@ -6823,20 +6823,20 @@ void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo, Display
     }, __func__);
 }
 
-void SceneSessionManager::GetAllDisplayGroupInfo(std::unordered_map<DisplayId, DisplayGroupId>& displayIdToGroupIdMap,
-                                                 std::vector<sptr<FocusChangeInfo>>& allFocusInfoList)
+void SceneSessionManager::GetAllGroupInfo(std::unordered_map<DisplayId, DisplayGroupId>& displayId2GroupIdMap,
+                                          std::vector<sptr<FocusChangeInfo>>& allFocusInfoList)
 {
     if (!SessionPermission::IsSACalling()) {
         TLOGE(WmsLogTag::WMS_FOCUS, "non-SA calling, permission denied!");
         return;
     }
-    taskScheduler_->PostSyncTask([this, &displayIdToGroupIdMap, &allFocusInfoList, where = __func__] {
-        std::unordered_map<DisplayId, DisplayGroupId> groupInfoMap = windowFocusController_->GetDisplayIdToGroupIdMap();
+    taskScheduler_->PostSyncTask([this, &displayId2GroupIdMap, &allFocusInfoList, where = __func__] {
+        std::unordered_map<DisplayId, DisplayGroupId> groupInfoMap = windowFocusController_->GetDisplayId2GroupIdMap();
         if (groupInfoMap.empty()) {
-            TLOGNE(WmsLogTag::WMS_FOCUS, "displayIdToGroupIdMap is empty");
+            TLOGNE(WmsLogTag::WMS_FOCUS, "displayId2GroupIdMap is empty");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        displayIdToGroupIdMap = groupInfoMap;
+        displayId2GroupIdMap = groupInfoMap;
         std::unordered_map<DisplayGroupId, sptr<FocusGroup>> allFocusGroupMap;
         windowFocusController_->GetAllFocusGroup(allFocusGroupMap);
         for (const auto& elem : allFocusGroupMap) {
@@ -6852,8 +6852,8 @@ void SceneSessionManager::GetAllDisplayGroupInfo(std::unordered_map<DisplayId, D
                 continue;
             }
             auto focusInfo = sptr<FocusChangeInfo>::MakeSptr(
-                focusedSession->GetWindowId(), curFocusGroup->GetDisplayGroupId() == DEFAULT_DISPLAY_ID ?
-                DEFAULT_DISPLAY_ID : focusedSession->GetDisplayId(), focusedSession->GetDisplayId(),
+                focusedSession->GetWindowId(), curFocusGroup->GetDisplayGroupId() == DEFAULT_DISPLAY_ID
+                ? DEFAULT_DISPLAY_ID : focusedSession->GetDisplayId(), focusedSession->GetDisplayId(),
                 curFocusGroup->GetDisplayGroupId(), focusedSession->GetCallingPid(), focusedSession->GetCallingUid(),
                 focusedSession->GetWindowType(), focusedSession->GetAbilityToken());
             allFocusInfoList.emplace_back(focusInfo);

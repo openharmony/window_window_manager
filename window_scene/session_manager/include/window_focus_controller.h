@@ -77,17 +77,17 @@ public:
     WSError UpdateFocusedSessionId(DisplayId displayId, int32_t persistentId);
     WSError UpdateFocusedAppSessionId(DisplayId displayId, int32_t persistentId);
     void LogDisplayIds();
-    std::unordered_map<DisplayId, DisplayGroupId> GetDisplayIdToGroupIdMap();
+    std::unordered_map<DisplayId, DisplayGroupId> GetDisplayId2GroupIdMap();
     void GetAllFocusGroup(std::unordered_map<DisplayGroupId, sptr<FocusGroup>>& focusGroupMap);
 
 private:
     sptr<FocusGroup> GetFocusGroupInner(DisplayId displayId);
 
     std::unordered_map<DisplayGroupId, sptr<FocusGroup>> focusGroupMap_;
-    std::unordered_map<DisplayId, DisplayGroupId> displayIdToGroupIdMap_;
+    std::unordered_map<DisplayId, DisplayGroupId> displayId2GroupIdMap_;
     std::unordered_map<DisplayId, DisplayGroupId> deletedDisplayId2GroupIdMap_;
     mutable std::mutex focusGroupMapMutex_;
-    mutable std::mutex displayIdToGroupIdMapMutex_;
+    mutable std::mutex displayId2GroupIdMapMutex_;
 };
 }
 }
