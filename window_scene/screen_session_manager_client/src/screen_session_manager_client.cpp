@@ -170,6 +170,29 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(SessionOption option,
     }
 }
 
+void ScreenSessionManagerClient::RegisterTentModeChangeListener(ITentModeListener* listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Failed to register tent mode listener, listener is null");
+        return;
+    }
+
+    tentModeListener_ = listener;
+    ConnectToServer();
+
+    OnTentModeChange(tentMode_);
+    TLOGI(WmsLogTag::DMS, "Success to register tent mode connection listener");
+}
+
+void ScreenSessionManagerClient::OnTentModeChange(TentMode tentMode)
+{
+    TLOGD(WmsLogTag::DMS, "tentMode callback trigger");
+    tentMode_ = tentMode;
+    if (tentModeListener_) {
+        tentModeListener_->OnTentModeChange(tentMode);
+    }
+}
+
 void ScreenSessionManagerClient::HandleScreenDisconnectEvent(SessionOption option, ScreenEvent screenEvent)
 {
     if (HandleScreenDisconnection(option)) {
