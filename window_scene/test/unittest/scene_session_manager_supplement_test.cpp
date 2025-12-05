@@ -291,6 +291,43 @@ HWTEST_F(SceneSessionManagerSupplementTest, RequestSceneSessionActivationInnerTe
 }
 
 /**
+ * @tc.name: RequestSceneSessionActivationInnerTest03
+ * @tc.desc: SceneSessionManagerSupplementTest RequestSceneSessionActivationInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, RequestSceneSessionActivationInnerTest_03, TestSize.Level1)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "accessibilityNotifyTesterBundleName";
+    sessionInfo.abilityName_ = "accessibilityNotifyTesterAbilityName";
+    sessionInfo.ancoSceneState = AncoSceneState::NOTIFY_FOREGROUND;
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->SetFocusOnShow(true);
+    sceneSession->SetScbCoreEnabled(false);
+    auto ret = ssm_->RequestSceneSessionActivationInner(sceneSession, true);
+    ASSERT_EQ(ret, WSError::WS_OK);
+
+    sceneSession->SetScbCoreEnabled(true);
+    sceneSession->isVisible_ = true;
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    sceneSession->SetRestartApp(false);
+    ret = ssm_->RequestSceneSessionActivationInner(sceneSession, false);
+    ASSERT_EQ(ret, WSError::WS_OK);
+
+    sceneSession->SetRestartApp(true);
+    ret = ssm_->RequestSceneSessionActivationInner(sceneSession, false);
+    ASSERT_EQ(ret, WSError::WS_OK);
+    
+    sceneSession->isVisible_ = false;
+    ret = ssm_->RequestSceneSessionActivationInner(sceneSession, false);
+    ASSERT_EQ(ret, WSError::WS_OK);
+}
+
+/**
  * @tc.name: NotifyCollaboratorAfterStart
  * @tc.desc: SceneSessionManagerSupplementTest NotifyCollaboratorAfterStart
  * @tc.type: FUNC
