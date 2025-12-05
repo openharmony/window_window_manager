@@ -18,6 +18,7 @@
 
 #include <pointer_event.h>
 
+#include <limits>
 #include <string>
 #include "ws_common.h"
 #include "ws_common_inner.h"
@@ -249,6 +250,10 @@ public:
     }
 
     int32_t ShiftDecimalDigit(int32_t value, int32_t shift) {
+
+        if (value < 0 || value >= DECIMAL_BASE || shift < 0 || shift >= std::numeric_limits<int32_t>::digits10) {
+            return -1;
+        }
         return value * std::pow(DECIMAL_BASE, shift);
     }
 };
