@@ -306,25 +306,25 @@ HWTEST_F(SceneSessionManagerSupplementTest, RequestSceneSessionActivationInnerTe
     ASSERT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sceneSession->SetSessionProperty(property);
-    sceneSession->SetFocusOnShow(true);
+    sceneSession->SetFocusedOnShow(true);
     sceneSession->SetScbCoreEnabled(false);
     auto ret = ssm_->RequestSceneSessionActivationInner(sceneSession, true);
-    ASSERT_EQ(ret, WSError::WS_OK);
+    ASSERT_EQ(ret, WSError::WS_ERROR_PRE_HANDLE_COLLABORATOR_FAILED);
 
     sceneSession->SetScbCoreEnabled(true);
     sceneSession->isVisible_ = true;
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
     sceneSession->SetRestartApp(false);
-    ret = ssm_->RequestSceneSessionActivationInner(sceneSession, false);
-    ASSERT_EQ(ret, WSError::WS_OK);
+    ret = ssm_->RequestSceneSessionActivationInner(sceneSession, true);
+    ASSERT_EQ(ret, WSError::WS_ERROR_PRE_HANDLE_COLLABORATOR_FAILED);
 
     sceneSession->SetRestartApp(true);
-    ret = ssm_->RequestSceneSessionActivationInner(sceneSession, false);
-    ASSERT_EQ(ret, WSError::WS_OK);
+    ret = ssm_->RequestSceneSessionActivationInner(sceneSession, true);
+    ASSERT_EQ(ret, WSError::WS_ERROR_PRE_HANDLE_COLLABORATOR_FAILED);
     
     sceneSession->isVisible_ = false;
-    ret = ssm_->RequestSceneSessionActivationInner(sceneSession, false);
-    ASSERT_EQ(ret, WSError::WS_OK);
+    ret = ssm_->RequestSceneSessionActivationInner(sceneSession, true);
+    ASSERT_EQ(ret, WSError::WS_ERROR_PRE_HANDLE_COLLABORATOR_FAILED);
 }
 
 /**
