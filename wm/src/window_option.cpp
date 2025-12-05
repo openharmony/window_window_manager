@@ -468,7 +468,7 @@ void WindowOption::SetFollowCreatorLifecycle(bool followCreatorLifecycle)
     followCreatorLifecycle_ = followCreatorLifecycle;
 }
 
-bool WindowOption::FollowCreatorLifecycle() const
+bool WindowOption::IsFollowCreatorLifecycle() const
 {
     return followCreatorLifecycle_;
 }

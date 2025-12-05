@@ -659,7 +659,7 @@ public:
      *
      * @return The lifecycle of the subwindow follows creator of subwindow if true or not if false.
      */
-    bool FollowCreatorLifecycle() const;
+    bool IsFollowCreatorLifecycle() const;
 
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
