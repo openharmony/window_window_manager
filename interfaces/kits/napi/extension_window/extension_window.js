@@ -45,6 +45,10 @@ class ExtensionWindow {
     return this.__extension_window__.hideNonSecureWindows(type, callback);
   }
 
+  createSubWindowWithOptions(type, callback) {	
+    return this.__extension_window__.createSubWindowWithOptions(type, callback);	
+  }
+
   createSubWindowWithOptions(name, subWindowOptions, followCreatorLifecycle) {
     return this.__extension_window__.createSubWindowWithOptions(name, subWindowOptions, followCreatorLifecycle);
   }
