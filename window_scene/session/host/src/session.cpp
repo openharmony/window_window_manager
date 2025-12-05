@@ -3069,17 +3069,18 @@ int32_t Session::EncodeSnapShotRecoverValue(DisplayOrientation rotate)
 {
     int32_t snapShotRecoverValue = 0;
     snapShotRecoverValue +=
-        ShiftDecimalDigit(static_cast<int32_t>(rotate), static_cast<int32_t>(SnapShotRecoverType::ROTATE));
+        SessionHelper::ShiftDecimalDigit(static_cast<int32_t>(rotate),
+            static_cast<int32_t>(SnapShotRecoverType::ROTATE));
     snapShotRecoverValue +=
-        ShiftDecimalDigit(static_cast<int32_t>(IsExitSplitOnBackgroundRecover()),
+        SessionHelper::ShiftDecimalDigit(static_cast<int32_t>(IsExitSplitOnBackgroundRecover()),
             static_cast<int32_t>(SnapShotRecoverType::EXIT_SPLIT_ON_BACKGROUND));
     return snapShotRecoverValue;
 }
 
 int32_t Session::DecodeSnapShotRecoverValue(int32_t snapShotRecoverValue, SnapShotRecoverType snapShotRecoverType)
 {
-    return (snapShotRecoverValue / static_cast<int32_t>(std::pow(SNAP_SHOT_RECOVER_KEY,
-        static_cast<int32_t>(snapShotRecoverType)))) % SNAP_SHOT_RECOVER_KEY;
+    return (snapShotRecoverValue / static_cast<int32_t>(std::pow(DECIMAL_BASE,
+        static_cast<int32_t>(snapShotRecoverType)))) % DECIMAL_BASE;
 }
 
 bool Session::IsExitSplitOnBackgroundRecover()

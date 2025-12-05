@@ -80,6 +80,16 @@ HWTEST_F(SessionHelperTest, GetAreaTypeForScaleResize, TestSize.Level1)
     // LEFT_TOP
     EXPECT_EQ(SessionHelper::GetAreaTypeForScaleResize(pointWinX, pointWinY, outside, rect4), AreaType::LEFT_TOP);
 }
+
+/**
+ * @tc.name: ShiftDecimalDigit
+ * @tc.desc: Verify ShiftDecimalDigit
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionUtilsTest, ShiftDecimalDigit, TestSize.Level1)
+{
+    EXPECT_EQ(ShiftDecimalDigit(4, 2), 400);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

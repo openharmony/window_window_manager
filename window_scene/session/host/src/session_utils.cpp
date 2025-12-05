@@ -140,10 +140,5 @@ WSRect AdjustRectByAspectRatio(const WSRect& rect,
     }
     return adjustedRect;
 }
-
-int32_t ShiftDecimalDigit(int32_t value, int32_t shift) {
-    constexpr int32_t DECIMAL_BASE = 10;
-    return value * std::pow(DECIMAL_BASE, shift);
-}
 } // namespace SessionUtils
 } // namespace OHOS::Rosen

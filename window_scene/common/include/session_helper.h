@@ -247,6 +247,10 @@ public:
         }
         return rotation;
     }
+
+    int32_t ShiftDecimalDigit(int32_t value, int32_t shift) {
+        return value * std::pow(DECIMAL_BASE, shift);
+    }
 };
 } // Rosen
 } // OHOS

@@ -208,16 +208,6 @@ HWTEST_F(SessionUtilsTest, TestAdjustRectByAspectRatio, TestSize.Level1)
         EXPECT_EQ(adjusted.height_, 150);
     }
 }
-
-/**
- * @tc.name: ShiftDecimalDigit
- * @tc.desc: Verify ShiftDecimalDigit
- * @tc.type: FUNC
- */
-HWTEST_F(SessionUtilsTest, ShiftDecimalDigit, TestSize.Level1)
-{
-    EXPECT_EQ(ShiftDecimalDigit(4, 2), 400);
-}
 } // namespace SessionUtils
 } // namespace Rosen
 } // namespace OHOS
