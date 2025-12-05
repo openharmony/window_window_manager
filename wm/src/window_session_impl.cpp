@@ -4520,7 +4520,7 @@ template<typename T>
 EnableIfSame<T, IWindowLifeCycle, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::GetListeners()
 {
     auto iter = lifecycleListeners_.find(GetPersistentId());
-    if (iter == lifecycleListeners_.end()){
+    if (iter == lifecycleListeners_.end()) {
         return std::vector<sptr<IWindowLifeCycle>>();
     }
     std::vector<sptr<IWindowLifeCycle>> lifecycleListeners;
