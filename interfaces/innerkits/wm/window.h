@@ -2340,12 +2340,6 @@ public:
     {
         return WMError::WM_OK;
     }
-    virtual WMError NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
-        BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
-        AppExecFwk::Ability* ability = nullptr)
-    {
-        return WMError::WM_OK;
-    }
     virtual WMError AniSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
         BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
         AppExecFwk::Ability* ability = nullptr)
