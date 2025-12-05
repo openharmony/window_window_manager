@@ -157,7 +157,6 @@ public:
     WMError RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
     WMError SetScreenPrivacyWindowTagSwitch(
         uint64_t screenId, const std::vector<std::string>& privacyWindowTags, bool enable) override;
-    WMError NotifyBrightnessModeChange(const std::string& brightnessMode) override;
     WMError IsPcWindow(bool& isPcWindow) override;
     WMError IsFreeMultiWindow(bool& isPcWindow) override;
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;

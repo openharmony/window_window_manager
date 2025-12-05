@@ -5119,7 +5119,6 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
         }
         that.RegisterSettingRotationObserver();
         that.RegisterSettingResolutionEffectObserver();
-        that.RegisterSettingBrightnessObserver();
         if (that.defaultDpi) {
             auto ret = ScreenSettingHelper::SetSettingDefaultDpi(that.defaultDpi, SET_SETTING_DPI_KEY);
             if (!ret) {
@@ -5190,29 +5189,6 @@ void ScreenSessionManager::RegisterSettingDpiObserver()
     TLOGI(WmsLogTag::DMS, "Register Setting Dpi Observer");
     SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetDpiFromSettingData(); };
     ScreenSettingHelper::RegisterSettingDpiObserver(DmUtils::wrap_callback(updateFunc));
-}
-
-void ScreenSessionManager::RegisterSettingBrightnessObserver()
-{
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Register setting brightness observer");
-    SettingObserver::UpdateFunc updateFunc = [this](const std::string& key) { NotifyBrightnessModeChange(); };
-    ScreenSettingHelper::RegisterSettingBrightnessObserver(DmUtils::wrap_callback(updateFunc));
-}
-
-void ScreenSessionManager::NotifyBrightnessModeChange()
-{
-    std::string brightnessMode;
-    bool ret = ScreenSettingHelper::GetSettingBrightnessMode(brightnessMode);
-    if (!ret) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "get brightness mode failed");
-        return;
-    }
-    if (brightnessMode_ == brightnessMode) {
-        return;
-    }
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Notify success, brightnessMode: %{public}s", brightnessMode.c_str());
-    MockSessionManagerService::GetInstance().NotifyBrightnessModeChange(brightnessMode);
-    brightnessMode_ = brightnessMode;
 }
 
 void ScreenSessionManager::SetDpiFromSettingData()

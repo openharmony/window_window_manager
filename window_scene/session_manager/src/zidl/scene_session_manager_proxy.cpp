@@ -3415,40 +3415,6 @@ WMError SceneSessionManagerProxy::SetScreenPrivacyWindowTagSwitch(
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerProxy::NotifyBrightnessModeChange(const std::string& brightnessMode)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write token failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteString(brightnessMode)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write brightnessMode failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Remote is null");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (remote->SendRequest(
-        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_NOTIFY_BRIGHTNESS_MODE_CHANGE),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-
-    int32_t ret = 0;
-    if (!reply.ReadInt32(ret)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read ret failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    return static_cast<WMError>(ret);
-}
-
 WMError SceneSessionManagerProxy::IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode)
 {
     MessageParcel data;
