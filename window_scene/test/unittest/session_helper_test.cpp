@@ -88,7 +88,7 @@ HWTEST_F(SessionHelperTest, GetAreaTypeForScaleResize, TestSize.Level1)
  */
 HWTEST_F(SessionHelperTest, ShiftDecimalDigit, TestSize.Level1)
 {
-    EXPECT_EQ(ShiftDecimalDigit(4, 2), 400);
+    EXPECT_EQ(SessionHelper::ShiftDecimalDigit(4, 2), 400);
 }
 } // namespace
 } // namespace Rosen
