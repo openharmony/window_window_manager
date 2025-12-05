@@ -77,7 +77,7 @@ public:
     WSError UpdateFocusedSessionId(DisplayId displayId, int32_t persistentId);
     WSError UpdateFocusedAppSessionId(DisplayId displayId, int32_t persistentId);
     void LogDisplayIds();
-    std::unordered_map<DisplayId, DisplayGroupId> GetDisplayId2GroupIdMap();
+    std::unordered_map<DisplayId, DisplayGroupId> GetDisplayIdToGroupIdMap();
     void GetAllFocusGroup(std::unordered_map<DisplayGroupId, sptr<FocusGroup>>& focusGroupMap);
 
 private:
