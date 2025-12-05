@@ -1099,6 +1099,29 @@ HWTEST_F(MainSessionTest, RestoreAspectRatioTest, TestSize.Level1)
         EXPECT_FLOAT_EQ(session->GetAspectRatio(), ratio);
     }
 }
+
+/**
+ * @tc.name: IsExitSplitOnBackgroundRecover
+ * @tc.desc: Verify IsExitSplitOnBackgroundRecover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, IsExitSplitOnBackgroundRecover, TestSize.Level1)
+{
+    SessionInfo info;
+    sptr<MainSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
+
+    ASSERT_NE(session, nullptr);
+    int32_t snapShotRecoverValue = 0;
+    session->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    EXPECT_EQ(session->IsExitSplitOnBackgroundRecover(), false);
+    session->UpdateWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    EXPECT_EQ(session->IsExitSplitOnBackgroundRecover(), true);
+    session->UpdateWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    EXPECT_EQ(session->IsExitSplitOnBackgroundRecover(), true);
+    session->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    session->isExitSplitOnBackground_ = true;
+    EXPECT_EQ(session->IsExitSplitOnBackgroundRecover(), true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
