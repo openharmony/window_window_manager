@@ -63,6 +63,8 @@ constexpr uint32_t ADVANCED_FEATURE_BIT_MAX = 32;
 constexpr uint32_t ADVANCED_FEATURE_BIT_LOCK_CURSOR = 0x00;
 constexpr uint32_t ADVANCED_FEATURE_BIT_CURSOR_FOLLOW_MOVEMENT = 0x01;
 
+constexpr int32_t DECIMAL_BASE = 10;
+
 enum class WSError : int32_t {
     WS_OK = 0,
     WS_DO_NOTHING,
