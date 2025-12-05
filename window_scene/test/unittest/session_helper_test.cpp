@@ -86,7 +86,7 @@ HWTEST_F(SessionHelperTest, GetAreaTypeForScaleResize, TestSize.Level1)
  * @tc.desc: Verify ShiftDecimalDigit
  * @tc.type: FUNC
  */
-HWTEST_F(SessionUtilsTest, ShiftDecimalDigit, TestSize.Level1)
+HWTEST_F(SessionHelperTest, ShiftDecimalDigit, TestSize.Level1)
 {
     EXPECT_EQ(ShiftDecimalDigit(4, 2), 400);
 }
