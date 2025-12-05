@@ -3192,6 +3192,8 @@ export class WindowInternal implements Window {
     private native setTopmostSync(nativeObj: long, isTopmost: boolean): void;
     private native setReceiveDragEventEnabled(nativeObj: long, enabled: boolean): void;
     private native isReceiveDragEventEnabled(nativeObj: long): boolean;
+    private native setSeparationTouchEnabled(nativeObj: long, enabled: boolean): void;
+    private native isSeparationTouchEnabled(nativeObj: long): boolean;
     private native requestFocusSync(nativeObj: long, isFocused: boolean): void;
     private native setSubWindowModal(nativeObj: long, isModal: boolean): void;
     private native setSubWindowModalType(nativeObj: long, isModal: boolean, modalityType: int): void;
@@ -4394,6 +4396,22 @@ export class WindowInternal implements Window {
       return this.isReceiveDragEventEnabled(this.nativeObj);
     }
 
+    public setSeparationTouchEnabled(enabled: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setSeparationTouchEnabled(this.nativeObj, enabled);
+        }).then((ret: NullishType): void => {
+          resolve(undefined);
+        }).catch((err: NullishType): void => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public isSeparationTouchEnabled(): boolean{
+      return this.isSeparationTouchEnabled(this.nativeObj);
+    }
+
     public requestFocus(isFocused: boolean): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
@@ -5400,6 +5418,8 @@ export interface Window {
     setTopmost(isTopmost: boolean): Promise<void>;
     setReceiveDragEventEnabled(enabled: boolean): Promise<void>;
     isReceiveDragEventEnabled(): boolean;
+    setSeparationTouchEnabled(enabled: boolean): Promise<void>;
+    isSeparationTouchEnabled(): boolean;
     requestFocus(isFocused: boolean): Promise<void>;
     setSubWindowModal(isModal: boolean): Promise<void>;
     setSubWindowModal(isModal: boolean, modalityType: ModalityType): Promise<void>;

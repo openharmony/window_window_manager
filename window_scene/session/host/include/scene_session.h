@@ -485,6 +485,7 @@ public:
      */
     bool CheckParameters(const std::vector<int32_t>& parameters, const int32_t length);
     WMError SetReceiveDragEventEnabled(const std::vector<int32_t>& parameters) override;
+    WMError SetSeparationTouchEnabled(const std::vector<int32_t>& parameters) override;
     WMError LockCursor(const std::vector<int32_t>& parameters) override;
     WMError UnlockCursor(const std::vector<int32_t>& parameters) override;
 

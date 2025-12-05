@@ -37,11 +37,13 @@ enum class CommonEventCommand : int32_t {
     LOCK_CURSOR = 0,
     UNLOCK_CURSOR,
     SET_RECEIVE_DRAG_EVENT,
+    SET_WINDOW_SEPARATION_TOUCH_ENABLED,
 };
 constexpr int32_t COMMON_EVENT_COMMAND_MAX_LENGTH = 5;
 constexpr int32_t LOCK_CURSOR_LENGTH = 2;
 constexpr int32_t UNLOCK_CURSOR_LENGTH = 1;
 constexpr int32_t SET_RECEIVE_DRAG_EVENT_LENGTH = 1;
+constexpr int32_t WINDOW_SEPARATION_TOUCH_ENABLED_LENGTH = 1;
 
 class ISession : public IRemoteBroker {
 public:
@@ -684,6 +686,10 @@ public:
         return WMError::WM_OK;
     }
     virtual WMError SetReceiveDragEventEnabled(const std::vector<int32_t>& parameters)
+    {
+        return WMError::WM_OK;
+    }
+    virtual WMError SetSeparationTouchEnabled(const std::vector<int32_t>& parameters)
     {
         return WMError::WM_OK;
     }
