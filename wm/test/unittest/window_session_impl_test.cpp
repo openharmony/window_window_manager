@@ -136,28 +136,28 @@ HWTEST_F(WindowSessionImplTest, UpdateDefaultStatusBarColor, TestSize.Level1)
     context->applicationContext_->contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
     context->applicationContext_->contextImpl_->config_ = std::make_shared<AppExecFwk::Configuration>();
     ASSERT_EQ(WMError::WM_OK, window->Create(context, nullptr));
-    EXPECT_EQ(window->UpdateStatusBarColorByColorMode(contentColor), WMError::WM_ERROR_NULLPTR);
+    EXPECT_EQ(window->UpdateStatusBarColorByColorMode(contentColor), WMError::WM_OK);
 
     std::string key = AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE;
     std::string value = AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT;
     context->applicationContext_->contextImpl_->config_->configParameter_[key] = value;
-    EXPECT_EQ(window->UpdateStatusBarColorByColorMode(contentColor), WMError::WM_ERROR_NULLPTR);
+    EXPECT_EQ(window->UpdateStatusBarColorByColorMode(contentColor), WMError::WM_OK);
 
     value = AppExecFwk::ConfigurationInner::COLOR_MODE_DARK;
     context->applicationContext_->contextImpl_->config_->configParameter_[key] = value;
-    EXPECT_EQ(window->UpdateStatusBarColorByColorMode(contentColor), WMError::WM_ERROR_NULLPTR);
+    EXPECT_EQ(window->UpdateStatusBarColorByColorMode(contentColor), WMError::WM_OK);
 
     key = AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP;
     value = AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT;
     context->applicationContext_->contextImpl_->config_->configParameter_[key] = value;
-    EXPECT_EQ(window->UpdateStatusBarColorByColorMode(contentColor), WMError::WM_ERROR_NULLPTR);
+    EXPECT_EQ(window->UpdateStatusBarColorByColorMode(contentColor), WMError::WM_OK);
 
     value = AppExecFwk::ConfigurationInner::COLOR_MODE_DARK;
     context->applicationContext_->contextImpl_->config_->configParameter_[key] = value;
-    EXPECT_EQ(window->UpdateStatusBarColorByColorMode(contentColor), WMError::WM_ERROR_NULLPTR);
+    EXPECT_EQ(window->UpdateStatusBarColorByColorMode(contentColor), WMError::WM_OK);
 
     window->specifiedColorMode_ = "light";
-    EXPECT_EQ(window->UpdateStatusBarColorByColorMode(contentColor), WMError::WM_ERROR_NULLPTR);
+    EXPECT_EQ(window->UpdateStatusBarColorByColorMode(contentColor), WMError::WM_OK);
 }
 
 /**
