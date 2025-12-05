@@ -1327,7 +1327,8 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
         return NapiGetUndefined(env);
     }
     bool followCreatorLifecycle = false;
-    if (argc >= ARG_COUNT_THREE && !ConvertFromJsValue(env, argv[INDEX_TWO], followCreatorLifecycle)) {
+    if (argc >= ARG_COUNT_THREE && GetType(env, argv[INDEX_TWO]) != napi_undefined &&
+        !ConvertFromJsValue(env, argv[INDEX_TWO], followCreatorLifecycle)) {
         TLOGE(WmsLogTag::WMS_SUB, "Failed to convert followCreatorLifecycle parameter to bool");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
