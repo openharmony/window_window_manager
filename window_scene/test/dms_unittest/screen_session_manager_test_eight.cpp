@@ -1210,6 +1210,25 @@ HWTEST_F(ScreenSessionManagerTest, GetSupportedHDRFormats, TestSize.Level1)
     EXPECT_EQ(ssm_->GetSupportedHDRFormats(id, hdrFormats), screenSession->GetSupportedHDRFormats(hdrFormats));
 #endif
 }
+
+/**
+ * @tc.name: NotifyRSCoordination
+ * @tc.desc: NotifyRSCoordination
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, NotifyRSCoordination, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr) << "ScreenSessionManager instance is null";
+    ssm_->NotifyRSCoordination(true);
+    EXPECT_TRUE(g_logMsg.find("isEnterCoordination:1") != std::string::npos);
+    g_logMsg.clear();
+    ssm_->NotifyRSCoordination(false);
+    EXPECT_TRUE(g_logMsg.find("isEnterCoordination:0") != std::string::npos);
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
