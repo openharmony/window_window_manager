@@ -31,9 +31,9 @@ void RootSceneSession::LoadContent(
     }
 }
 
-void RootSceneSession::SetGetUIContentFunc(const GetUIContentFunc& getUIContentFunc)
+void RootSceneSession::SetGetUIContentFunc(GetUIContentFunc&& getUIContentFunc)
 {
-    getUIContentFunc_ = getUIContentFunc;
+    getUIContentFunc_ = std::move(getUIContentFunc);
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "isNullGetUIContentFunc=%{public}d", getUIContentFunc_ == nullptr);
 }
 
