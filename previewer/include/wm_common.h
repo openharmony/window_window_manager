@@ -1952,10 +1952,10 @@ struct StateChangeOption {
     bool waitDetach_;
 
     StateChangeOption(int32_t parentPersistentId, WindowState newState, uint32_t reason, bool withAnimation,
-        bool withFocus, bool waitAttach, bool isFromInnerkits, bool waitDetach) :
-            parentPersistentId_(parentPersistentId), newState_(newState), reason_(reason),
-            withAnimation_(withAnimation), withFocus_(withFocus), waitAttach_(waitAttach),
-            isFromInnerkits_(isFromInnerkits), waitDetach_(waitDetach) {}
+        bool withFocus, bool waitAttach, bool isFromInnerkits, bool waitDetach)
+            : parentPersistentId_(parentPersistentId), newState_(newState), reason_(reason),
+              withAnimation_(withAnimation), withFocus_(withFocus), waitAttach_(waitAttach),
+              isFromInnerkits_(isFromInnerkits), waitDetach_(waitDetach) {}
 };
 }
 }
