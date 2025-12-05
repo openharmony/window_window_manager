@@ -3033,12 +3033,12 @@ DMError ScreenSessionManager::SetResolution(ScreenId screenId, uint32_t width, u
         rsInterface_.ForceRefreshOneFrameWithNextVSync();
         return DMError::DM_ERROR_IPC_FAILED;
     }
-    screenSession->SetDensityInCurResolution(virtualPixelRatio);
-    screenSession->SetDefaultDensity(virtualPixelRatio);
     uint32_t defaultResolutionDpi = virtualPixelRatio * BASELINE_DENSITY;
     (void)ScreenSettingHelper::SetSettingDefaultDpi(defaultResolutionDpi, SET_SETTING_DPI_KEY);
     float vprScaleRatio = virtualPixelRatio / densityDpi_;
     screenSession->SetVprScaleRatio(vprScaleRatio);
+    screenSession->SetDensityInCurResolution(virtualPixelRatio);
+    screenSession->SetDefaultDensity(virtualPixelRatio);
     screenSession->SetVirtualPixelRatio(virtualPixelRatio);
 
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetResolution(%" PRIu64", %u, %u, %f)",
@@ -3046,11 +3046,11 @@ DMError ScreenSessionManager::SetResolution(ScreenId screenId, uint32_t width, u
     screenSession->UpdatePropertyByResolution(width, height);
     std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
     auto displayInfo = screenSession->ConvertToDisplayInfo();
-    NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
+    auto screenInfo = screenSession->ConvertToScreenInfo();
     NotifyDisplayChanged(displayInfo, DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
+    NotifyScreenChanged(screenInfo, ScreenChangeEvent::CHANGE_MODE);
     NotifyDisplayStateChange(screenId, displayInfo, emptyMap, DisplayStateChangeType::RESOLUTION_CHANGE);
     screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
-
     WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), BootFinishedUnfreezeCallback, this);
     AddScreenUnfreezeTask(screenSession, 0);
     return DMError::DM_OK;
@@ -13231,6 +13231,7 @@ void ScreenSessionManager::BootFinishedUnfreezeCallback(const char *key, const c
             TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
             return;
         }
+        screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
         screenSession->FreezeScreen(false);
         that.rsInterface_.ForceRefreshOneFrameWithNextVSync();
     }
