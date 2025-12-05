@@ -1140,6 +1140,7 @@ HWTEST_F(ScreenSessionManagerTest, GetIsCurrentInUseById01, Function | SmallTest
 {
     ScreenSessionManager* ssm = new ScreenSessionManager();
     ASSERT_NE(ssm, nullptr);
+    
     ScreenId screenId = 50;
     auto res = ssm->GetIsCurrentInUseById(screenId);
     ASSERT_EQ(false, res);
