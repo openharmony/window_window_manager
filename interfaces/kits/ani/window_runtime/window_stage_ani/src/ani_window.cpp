@@ -1352,6 +1352,58 @@ bool AniWindow::OnIsReceiveDragEventEnabled(ani_env* env)
     return windowToken_->IsReceiveDragEventEnabled();
 }
 
+void AniWindow::SetSeparationTouchEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enabled)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow != nullptr) {
+        aniWindow->OnSetSeparationTouchEnabled(env, enabled);
+    } else {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI] aniWindow is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+}
+
+void AniWindow::OnSetSeparationTouchEnabled(ani_env* env, ani_boolean enabled)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "[ANI]");
+    auto window = GetWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI] window is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSeparationTouchEnabled(enabled));
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret, "SetSeparationTouchEnabled failed.");
+    }
+}
+
+ani_boolean AniWindow::IsSeparationTouchEnabled(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI] aniWindow is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return static_cast<ani_boolean>(true);
+    }
+    return static_cast<ani_boolean>(aniWindow->OnIsSeparationTouchEnabled(env));
+}
+
+bool AniWindow::OnIsSeparationTouchEnabled(ani_env* env)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "[ANI]");
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI] window is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return true;
+    }
+
+    return windowToken_->IsSeparationTouchEnabled();
+}
+
 void AniWindow::RaiseMainWindowAboveTarget(ani_env* env, ani_object obj, ani_long nativeObj, ani_int windowId)
 {
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
@@ -6094,6 +6146,10 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::SetReceiveDragEventEnabled)},
         ani_native_function {"isReceiveDragEventEnabled", "J:Z",
             reinterpret_cast<void *>(AniWindow::IsReceiveDragEventEnabled)},
+        ani_native_function {"setSeparationTouchEnabled", "lz:",
+            reinterpret_cast<void *>(AniWindow::SetSeparationTouchEnabled)},
+        ani_native_function {"isSeparationTouchEnabled", "J:Z",
+            reinterpret_cast<void *>(AniWindow::IsSeparationTouchEnabled)},
         ani_native_function {"requestFocusSync", "lz:",
             reinterpret_cast<void *>(AniWindow::RequestFocus)},
         ani_native_function {"setSubWindowModal", "lz:",

@@ -356,6 +356,8 @@ public:
     WMError UnlockCursor(int32_t windowId) override;
     WMError SetReceiveDragEventEnabled(bool enabled) override;
     bool IsReceiveDragEventEnabled() override;
+    WMError SetSeparationTouchEnabled(bool enabled) override;
+    bool IsSeparationTouchEnabled() override;
 
 protected:
     WMError CreateAndConnectSpecificSession();
@@ -609,6 +611,7 @@ private:
      * Window Event
      */
     bool isReceiveDragEventEnable_ = true;
+    bool isSeparationTouchEnabled_ = true;
 
     /*
      * Window Decor

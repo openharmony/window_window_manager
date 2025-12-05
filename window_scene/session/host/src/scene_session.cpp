@@ -10282,6 +10282,18 @@ WMError SceneSession::SetReceiveDragEventEnabled(const std::vector<int32_t>& par
     return WMError::WM_OK;
 }
 
+WMError SceneSession::SetSeparationTouchEnabled(const std::vector<int32_t>& parameters)
+{
+    if (!CheckParameters(parameters, WINDOW_SEPARATION_TOUCH_ENABLED_LENGTH)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "The param is illegal");
+        return WMError::WM_ERROR_ILLEGAL_PARAM;
+    }
+    bool enalbed = static_cast<bool>(parameters[1]);
+    SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_WINDOW_SEPARATION_TOUCH_ENABLED, !enalbed);
+    NotifySessionInfoChange();
+    return WMError::WM_OK;
+}
+
 void SceneSession::RegisterIsAppBoundSystemTrayCallback(
     const std::function<bool(int32_t callingPid, uint32_t callingToken, const std::string &instanceKey)>& callback)
 {
