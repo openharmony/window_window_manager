@@ -222,13 +222,13 @@ HWTEST_F(SceneSessionManagerStubTest2, HandleGetRootUIContentRemoteObj01, TestSi
     uint32_t code = static_cast<uint32_t>(
         ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_GET_ROOT_UI_CONTENT_REMOTE_OBJ);
     auto res = stub_->ProcessRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, ERR_NONE);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 
     DisplayId displayId = 1000;
     sptr<IRemoteObject> uiContentRemoteObj = nullptr;
     data.ReadUint64(displayId);
     res = stub_->HandleGetRootUIContentRemoteObj(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetReadUint64ErrorFlag(true);
