@@ -899,6 +899,18 @@ void ScreenSessionManager::RegisterRefreshRateChangeListener()
     // LCOV_EXCL_STOP
 }
 
+void ScreenSessionManager::NotifyTentModeChange(TentMode tentMode)
+{
+    auto clientProxy = GetClientProxy();
+    if (!clientProxy) {
+        TLOGW(WmsLogTag::DMS, "clientProxy null");
+        return;
+    }
+    tentMode_ = tentMode;
+    TLOGD(WmsLogTag::DMS, "change tentMode to: %{public}" PRIu32, static_cast<uint32_t>(tentMode));
+    clientProxy->OnTentModeChange(tentMode);
+}
+
 void ScreenSessionManager::OnVirtualScreenChange(ScreenId screenId, ScreenEvent screenEvent,
     const UniqueScreenRotationOptions& rotationOptions)
 {

@@ -258,6 +258,15 @@ enum class AodOP {
 };
 
 /**
+ * @brief Enumerates TentMode.
+ */
+enum class TentMode : uint32_t {
+    UNKNOWN,
+    TENT_MODE,
+    HOVER,
+};
+
+/**
  * @brief Constructs the mapping of the DM errors to the DM error codes.
  */
 const std::map<DMError, DmErrorCode> DM_JS_TO_ERROR_CODE_MAP {

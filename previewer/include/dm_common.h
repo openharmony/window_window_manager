@@ -344,6 +344,15 @@ enum class FoldDisplayMode: uint32_t {
 };
 
 /**
+ * @brief Enumerates TentMode.
+ */
+enum class TentMode : uint32_t {
+    UNKNOWN,
+    TENT_MODE,
+    HOVER,
+};
+
+/**
  * @brief displayRect
  */
 struct DMRect {
