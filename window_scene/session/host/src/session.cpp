@@ -4294,11 +4294,11 @@ bool Session::CheckEmptyKeyboardAvoidAreaIfNeeded() const
     bool isPhoneNotFreeMultiWindow = systemConfig_.IsPhoneWindow() && !systemConfig_.IsFreeMultiWindowMode();
     bool isPadNotFreeMultiWindow = systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode();
     bool isPhoneOrPadNotFreeMultiWindow = isPhoneNotFreeMultiWindow || isPadNotFreeMultiWindow;
-    TLOGI(WmsLogTag::WMS_LIFE, "check keyboard avoid area, isPhoneNotFreeMultiWindow: %{public}d, "
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "check keyboard avoid area, isPhoneNotFreeMultiWindow: %{public}d, "
         "isPadNotFreeMultiWindow: %{public}d", isPhoneNotFreeMultiWindow, isPadNotFreeMultiWindow);
     auto screen = ScreenManager::GetInstance().GetScreenById(property_->GetDisplayId());
     if (screen != nullptr && screen->GetName() == APP_CAST_SCREEN_NAME) {
-        TLOGI(WmsLogTag::WMS_LIFE, "app cast screen");
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "app cast screen");
         return true;
     }
     return (isMainFloating || isParentFloating) && !isMidScene && isPhoneOrPadNotFreeMultiWindow;
