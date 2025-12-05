@@ -805,8 +805,8 @@ HWTEST_F(SceneSessionManagerTest11, GetTopNearestBlockingFocusSession_branch02, 
     sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
     sceneSession->GetSessionProperty()->SetDisplayId(100);
-    ssm_->windowFocusController_->displayIdToGroupIdMap_[100] = 20;
-    ssm_->windowFocusController_->displayIdToGroupIdMap_[20] = 20;
+    ssm_->windowFocusController_->displayId2GroupIdMap_[100] = 20;
+    ssm_->windowFocusController_->displayId2GroupIdMap_[20] = 20;
     ssm_->sceneSessionMap_.insert({ 1, sceneSession });
     ASSERT_EQ(nullptr, ssm_->GetTopNearestBlockingFocusSession(displayId, zOrder, includingAppSession));
     ssm_->sceneSessionMap_.clear();

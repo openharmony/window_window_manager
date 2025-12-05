@@ -5341,7 +5341,7 @@ static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool keepKeyboa
     if (!isNeedKeyboard && !keepKeyboardFlag) {
 #ifdef IMF_ENABLE
         auto callingUid = IPCSkeleton::GetCallingUid();
-        bool isBrokerCall = callingUid == ANCO_SERVICE_BROKER_UID;
+        bool isBrokerCall = callingUid == BROKER_UID;
         auto pid = IPCSkeleton::GetCallingRealPid();
         AppExecFwk::RunningProcessInfo info;
         DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->GetRunningProcessInfoByPid(pid, info);

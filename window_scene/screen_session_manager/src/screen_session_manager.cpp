@@ -196,7 +196,9 @@ const bool IS_SUPPORT_PC_MODE = system::GetBoolParameter("const.window.support_w
 const ScreenId SCREEN_GROUP_ID_DEFAULT = 1;
 const std::string SCREEN_NAME_EXTEND = "ExtendedDisplay";
 const std::string SCREEN_NAME_CAST = "CastEngine";
-const std::set<std::string> INDIVIDUAL_SCREEN_GROUP_SET = {"CeliaView", "DevEcoViewer", "Cooperation-multi", "HwCast_AppModeDisplay"};
+const std::set<std::string> INDIVIDUAL_SCREEN_GROUP_SET = {
+    "CeliaView", "DevEcoViewer", "Cooperation-multi", "HwCast_AppModeDisplay", "HiCar", "SuperLauncher"
+};
 constexpr int32_t MAIN_STATUS_WIDTH_INDEX = 0;
 constexpr int32_t FULL_STATUS_WIDTH_INDEX = 1;
 constexpr int32_t GLOBAL_FULL_STATUS_WIDTH_INDEX = 2;
