@@ -173,11 +173,11 @@ public:
     void MoveWindowTo(ani_env* env, ani_int x, ani_int y);
     ani_object GetGlobalRect(ani_env* env);
 
-    ani_double GetWindowDecorHeight(ani_env* env);
+    ani_int GetWindowDecorHeight(ani_env* env);
     ani_object SetWindowBackgroundColor(ani_env* env, const std::string& color);
     ani_object SetImmersiveModeEnabledState(ani_env* env, bool enable);
     ani_object SetWindowDecorVisible(ani_env* env, bool isVisible);
-    ani_object SetWindowDecorHeight(ani_env* env, ani_double height);
+    ani_object SetWindowDecorHeight(ani_env* env, ani_int height);
     ani_object GetWindowPropertiesSync(ani_env* env);
     ani_boolean IsWindowSupportWideGamut(ani_env* env);
     ani_object SetWindowLayoutFullScreen(ani_env* env, ani_boolean isLayoutFullScreen);
