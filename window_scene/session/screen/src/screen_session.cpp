@@ -3264,7 +3264,7 @@ void ScreenSession::UpdateScbScreenPropertyForSuperFlod(const ScreenProperty& sc
     }
     TLOGI(WmsLogTag::DMS,"Property back to server : ValidWidth= %{public}d, ValidHeight= %{public}d, "
         "ScreenAreaHeight= %{public}d, PointerActiveWidth= %{public}d, PointerActiveHeight= %{public}d",
-        property_.GetValidHeight(), property_.GetValidWidth(), property_.GetScreenAreaHeight(),
+        property_.GetValidWidth(), property_.GetValidHeight(), property_.GetScreenAreaHeight(),
         property_.GetPointerActiveWidth(), property_.GetPointerActiveHeight());
 }
 
