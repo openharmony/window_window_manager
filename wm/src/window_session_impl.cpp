@@ -2553,7 +2553,7 @@ void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
             bool decorVisible = mode == WindowMode::WINDOW_MODE_FLOATING ||
                 mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
                 (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !property_->IsLayoutFullScreen() && !(IsAnco() &&
-            windowSystemConfig_.IsPcWindow()));
+                IsPcOrPadFreeMultiWindowMode()));
             if (windowSystemConfig_.freeMultiWindowSupport_) {
                 auto isSubWindow = WindowHelper::IsSubWindow(GetType());
                 decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||

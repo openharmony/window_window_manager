@@ -2304,6 +2304,62 @@ HWTEST_F(WindowSceneSessionImplTest5, GetConfigurationFromAbilityInfo, TestSize.
 }
 
 /**
+ * @tc.name: GetConfigurationFromAbilityInfo02
+ * @tc.desc: GetConfigurationFromAbilityInfo02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, GetConfigurationFromAbilityInfo02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetConfigurationFromAbilityInfo02");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    std::shared_ptr<AbilityRuntime::AbilityContextImpl> context =
+        std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
+    context->SetAbilityInfo(info);
+    window->context_ = context;
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToDragScale(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->enableImmersiveMode_ = false;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    window->property_->SetCollaboratorType(static_cast<int32_t>(CollaboratorType::RESERVE_TYPE));
+    window->GetConfigurationFromAbilityInfo();
+    EXPECT_EQ(window->enableImmersiveMode_, false);
+}
+
+/**
+ * @tc.name: UpdateDecorEnable
+ * @tc.desc: UpdateDecorEnable test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, UpdateDecorEnable, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSceneSessionImpl: UpdateDecorEnable start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateDecorEnable");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    window->property_->SetCollaboratorType(static_cast<int32_t>(CollaboratorType::RESERVE_TYPE));
+    window->UpdateDecorEnable(true, mode);
+    ASSERT_TRUE(window->IsDecorEnable());
+
+    window->UpdateDecorEnable(true, mode);
+    window->property_->windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
+    ASSERT_TRUE(window->IsDecorEnable());
+}
+
+/**
  * @tc.name: TestMoveWindowToGlobalDisplay
  * @tc.desc: Test MoveWindowToGlobalDisplay under multiple conditions
  * @tc.type: FUNC
