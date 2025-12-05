@@ -1311,7 +1311,7 @@ HWTEST_F(SceneSessionManagerTest9, CheckClickFocusIsDownThroughFullScreen, TestS
 
     focusedSession->property_->SetDisplayId(DISPLAY_ID_FAKE);
     sceneSession->property_->SetDisplayId(DEFAULT_DISPLAY_ID);
-    bool ret = ssm_->CheckClickFocusIsDownThroughFullScreen(focusedSession, sceneSession, reason);
+    ret = ssm_->CheckClickFocusIsDownThroughFullScreen(focusedSession, sceneSession, reason);
     EXPECT_EQ(ret, false);
 
     focusedSession->property_->SetDisplayId(DEFAULT_DISPLAY_ID);
@@ -1349,10 +1349,10 @@ HWTEST_F(SceneSessionManagerTest9, CheckClickFocusIsDownThroughFullScreen_FullSc
     auto height = displayInfo->GetHeight();
     focusedSession->SetSessionRect({ 0, 0, width, height });
     std::vector<OHOS::Rosen::Rect> touchHotAreasInSceneSession(0);
-    area = { 0, 0, width, height };
+    OHOS::Rosen::Rect area = { 0, 0, width, height };
     touchHotAreasInSceneSession.emplace_back(area);
     focusedSession->GetSessionProperty()->SetTouchHotAreas(touchHotAreasInSceneSession);
-    bool ret = ssm_->CheckClickFocusIsDownThroughFullScreen(focusedSession, sceneSession, reason);
+    bool ret = ssm_->CheckClickFocusIsDownThroughFullScreen(focusedSession, sceneSession, FocusChangeReason::CLICK);
     EXPECT_EQ(ret, true);
 }
 

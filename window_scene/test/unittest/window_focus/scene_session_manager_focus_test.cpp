@@ -186,7 +186,7 @@ HWTEST_F(SceneSessionManagerFocusTest, IsBlockingFocusWindowType_HotAreasCheck, 
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sceneSession->GetSessionProperty()->SetDisplayId(10001);
     EXPECT_EQ(false, ssm_->IsBlockingFocusWindowType(sceneSession));
-    
+
     sceneSession->GetSessionProperty()->SetDisplayId(DEFAULT_DISPLAY_ID);
     auto display = DisplayManager::GetInstance().GetDisplayById(DEFAULT_DISPLAY_ID);
     ASSERT_NE(nullptr, display);
@@ -196,7 +196,6 @@ HWTEST_F(SceneSessionManagerFocusTest, IsBlockingFocusWindowType_HotAreasCheck, 
     auto height = displayInfo->GetHeight();
     sceneSession->SetSessionRect({ 0, 0, width, height });
     std::vector<OHOS::Rosen::Rect> touchHotAreasInSceneSession(0);
-    sceneSession->GetSessionProperty()->SetTouchHotAreas(touchHotAreasInSceneSession);
     EXPECT_EQ(false, ssm_->IsBlockingFocusWindowType(sceneSession));
 
     OHOS::Rosen::Rect area = { 0, 0, width -1, height };
