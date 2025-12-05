@@ -935,7 +935,7 @@ HWTEST_F(SceneSessionManagerTest, GetUIContentRemoteObj, TestSize.Level1)
 
 /**
  * @tc.name: GetRootUIContentRemoteObj
- * @tc.desc: get remote object of root UIContent 
+ * @tc.desc: get remote object of root UIContent
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest, GetRootUIContentRemoteObj, TestSize.Level1)
