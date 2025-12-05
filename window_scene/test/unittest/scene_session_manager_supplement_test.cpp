@@ -291,16 +291,16 @@ HWTEST_F(SceneSessionManagerSupplementTest, RequestSceneSessionActivationInnerTe
 }
 
 /**
- * @tc.name: RequestSceneSessionActivationInnerTest03
+ * @tc.name: RequestSceneSessionActivationInnerTest_03
  * @tc.desc: SceneSessionManagerSupplementTest RequestSceneSessionActivationInner
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerSupplementTest, RequestSceneSessionActivationInnerTest_03, TestSize.Level1)
 {
     SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "accessibilityNotifyTesterBundleName";
-    sessionInfo.abilityName_ = "accessibilityNotifyTesterAbilityName";
-    sessionInfo.ancoSceneState = AncoSceneState::NOTIFY_FOREGROUND;
+    sessionInfo.bundleName_ = "testBundleName";
+    sessionInfo.abilityName_ = "testAbilityName";
+    sessionInfo.ancoSceneState = AncoSceneState::NOTIFY_START_FAILED;
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(sessionInfo, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
