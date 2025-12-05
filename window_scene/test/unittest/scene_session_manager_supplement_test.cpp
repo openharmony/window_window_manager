@@ -321,7 +321,7 @@ HWTEST_F(SceneSessionManagerSupplementTest, RequestSceneSessionActivationInnerTe
     sceneSession->SetRestartApp(true);
     ret = ssm_->RequestSceneSessionActivationInner(sceneSession, true);
     ASSERT_EQ(ret, WSError::WS_ERROR_PRE_HANDLE_COLLABORATOR_FAILED);
-    
+
     sceneSession->isVisible_ = false;
     ret = ssm_->RequestSceneSessionActivationInner(sceneSession, true);
     ASSERT_EQ(ret, WSError::WS_ERROR_PRE_HANDLE_COLLABORATOR_FAILED);
