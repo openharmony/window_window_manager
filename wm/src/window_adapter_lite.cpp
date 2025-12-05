@@ -265,6 +265,16 @@ void WindowAdapterLite::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId
     }
 }
 
+void WindowAdapterLite::GetAllGroupInfo(std::unordered_map<DisplayId, DisplayGroupId>& displayId2GroupIdMap,
+                                        std::vector<sptr<FocusChangeInfo>>& allFocusInfoList)
+{
+    INIT_PROXY_CHECK_RETURN();
+    TLOGD(WmsLogTag::WMS_FOCUS, "request on adapter lite");
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_IF_NULL(wmsProxy);
+    wmsProxy->GetAllGroupInfo(displayId2GroupIdMap, allFocusInfoList);
+}
+
 WMError WindowAdapterLite::GetWindowModeType(WindowModeType& windowModeType)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);

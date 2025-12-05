@@ -91,6 +91,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleMoveSessionsToBackground(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_FOCUS_SESSION_INFO):
             return HandleGetFocusSessionInfo(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_ALL_GROUP_INFO):
+            return HandleGetAllGroupInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT):
             return HandleRegisterWindowManagerAgent(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT):
@@ -690,6 +692,34 @@ int SceneSessionManagerLiteStub::HandleGetFocusSessionInfo(MessageParcel& data, 
     GetFocusWindowInfo(focusInfo, displayId);
     TLOGI(WmsLogTag::WMS_FOCUS, "start reply");
     reply.WriteParcelable(&focusInfo);
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetAllGroupInfo(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "in lite stub");
+    std::unordered_map<DisplayId, DisplayGroupId> displayId2GroupIdMap;
+    std::vector<sptr<FocusChangeInfo>> allFocusInfoList;
+    GetAllGroupInfo(displayId2GroupIdMap, allFocusInfoList);
+    TLOGI(WmsLogTag::WMS_FOCUS, "start reply");
+    if (!MarshallingHelper::MarshallingVectorParcelableObj<FocusChangeInfo>(reply, allFocusInfoList)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Failed to write window info");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(displayId2GroupIdMap.size()))) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "write displayId2GroupIdMap size failed");
+        return ERR_INVALID_DATA;
+    }
+    for (auto it = displayId2GroupIdMap.begin(); it != displayId2GroupIdMap.end(); ++it) {
+        if (!reply.WriteUint64(it->first)) {
+            TLOGE(WmsLogTag::WMS_FOCUS, "write displayId failed");
+            return ERR_INVALID_DATA;
+        }
+        if (!reply.WriteUint64(it->second)) {
+            TLOGE(WmsLogTag::WMS_FOCUS, "write displayGroupId failed");
+            return ERR_INVALID_DATA;
+        }
+    }
     return ERR_NONE;
 }
 

@@ -2204,7 +2204,7 @@ HWTEST_F(WindowSceneSessionImplTest2, Maximize02, TestSize.Level1)
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
-    // not support subWinodw call
+    // not support subWindow call
     ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->Maximize(presentation));
 
     // window not support fullscreen

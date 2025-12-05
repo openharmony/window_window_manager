@@ -18,6 +18,7 @@
 
 #include <ability_manager_client.h>
 #include <algorithm>
+#include <app_mgr_client.h>
 #include <atomic>
 #include <climits>
 #include "configuration.h"
@@ -35,6 +36,7 @@
 #include <transaction/rs_sync_transaction_controller.h>
 #include <transaction/rs_transaction.h>
 #include <ui/rs_surface_node.h>
+#include <ui_extension_utils.h>
 #include <feature/window_keyframe/rs_window_keyframe_node.h>
 
 #include "proxy/include/window_info.h"
@@ -7562,11 +7564,19 @@ void SceneSession::RequestHideKeyboard(bool isAppColdStart)
                 "%{public}s Session is null, notify inputMethod framework hide keyboard failed!", where);
             return;
         }
+        auto callingUid = IPCSkeleton::GetCallingUid();
+        bool isBrokerCall = callingUid == ANCO_SERVICE_BROKER_UID;
+        auto pid = IPCSkeleton::GetCallingRealPid();
+        AppExecFwk::RunningProcessInfo info;
+        DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->GetRunningProcessInfoByPid(pid, info);
+        bool isUIEProc = AAFwk::UIExtensionUtils::IsUIExtension(info.extensionType_);
         TLOGNI(WmsLogTag::WMS_KEYBOARD, "%{public}s Notify inputMethod framework hide keyboard start, id: %{public}d,"
-            "isAppColdStart: %{public}d", where, session->GetPersistentId(), isAppColdStart);
-        if (MiscServices::InputMethodController::GetInstance()) {
-            MiscServices::InputMethodController::GetInstance()->RequestHideInput();
-            TLOGNI(WmsLogTag::WMS_KEYBOARD, "%{public}s Notify InputMethod framework hide keyboard end. id: %{public}d",
+            "isAppColdStart: %{public}d, isBrokerCall: %{public}d, isUIEProc: %{public}d", where,
+            session->GetPersistentId(), isAppColdStart, isBrokerCall, isUIEProc);
+        if (MiscServices::InputMethodController::GetInstance() && !isBrokerCall && !isUIEProc) {
+            MiscServices::InputMethodController::GetInstance()->RequestHideInput(
+                static_cast<uint32_t>(session->GetPersistentId()));
+            TLOGNI(WmsLogTag::WMS_KEYBOARD, "%{public}s Notify inputMethod framework hide keyboard end. id: %{public}d",
                 where, session->GetPersistentId());
         }
     }, __func__);

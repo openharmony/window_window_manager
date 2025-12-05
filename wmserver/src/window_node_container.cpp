@@ -1005,7 +1005,8 @@ void WindowNodeContainer::UpdateFocusStatus(uint32_t id, bool focused)
         WLOGW("AbilityToken is null, window : %{public}d", id);
     }
     sptr<FocusChangeInfo> focusChangeInfo = new FocusChangeInfo(node->GetWindowId(), node->GetDisplayId(),
-        node->GetCallingPid(), node->GetCallingUid(), node->GetWindowType(), node->abilityToken_);
+        node->GetDisplayId(), DISPLAY_GROUP_ID_DEFAULT, node->GetCallingPid(), node->GetCallingUid(),
+        node->GetWindowType(), node->abilityToken_);
     WindowManagerAgentController::GetInstance().UpdateFocusChangeInfo(
         focusChangeInfo, focused);
 }
