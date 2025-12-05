@@ -880,35 +880,8 @@ void WindowSessionImpl::GetSubWindows(int32_t parentPersistentId, std::vector<sp
 
 void WindowSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState newState)
 {
-    std::vector<sptr<WindowSessionImpl>> subWindows;
-    GetSubWindows(parentPersistentId, subWindows);
-    if (subWindows.empty()) {
-        TLOGD(WmsLogTag::WMS_SUB, "parent window: %{public}d, its subWindowMap is empty", parentPersistentId);
-        return;
-    }
-
-    // when parent window hide and subwindow whose state is shown should hide and notify user
-    if (newState == WindowState::STATE_HIDDEN) {
-        for (auto subwindow : subWindows) {
-            if (subwindow != nullptr && subwindow->GetWindowState() == WindowState::STATE_SHOWN) {
-                subwindow->state_ = WindowState::STATE_HIDDEN;
-                subwindow->NotifyAfterBackground();
-                TLOGD(WmsLogTag::WMS_SUB, "Notify subWindow background, id:%{public}d", subwindow->GetPersistentId());
-                UpdateSubWindowStateAndNotify(subwindow->GetPersistentId(), newState);
-            }
-        }
-    // when parent window show and subwindow whose state is shown should show and notify user
-    } else if (newState == WindowState::STATE_SHOWN) {
-        for (auto subwindow : subWindows) {
-            if (subwindow != nullptr && subwindow->GetWindowState() == WindowState::STATE_HIDDEN &&
-                subwindow->GetRequestWindowState() == WindowState::STATE_SHOWN) {
-                subwindow->state_ = WindowState::STATE_SHOWN;
-                subwindow->NotifyAfterForeground();
-                TLOGD(WmsLogTag::WMS_SUB, "Notify subWindow foreground, id:%{public}d", subwindow->GetPersistentId());
-                UpdateSubWindowStateAndNotify(subwindow->GetPersistentId(), newState);
-            }
-        }
-    }
+    StateChangeOption option(parentPersistentId, newState);
+    UpdateSubWindowStateWithOptions(option);
 }
 
 void WindowSessionImpl::UpdateSubWindowStateWithOptions(const StateChangeOption& option)
@@ -919,11 +892,13 @@ void WindowSessionImpl::UpdateSubWindowStateWithOptions(const StateChangeOption&
         TLOGD(WmsLogTag::WMS_SUB, "parent window: %{public}d, its subWindowMap is empty", option.parentPersistentId_);
         return;
     }
+    // when parent window hide and subwindow whose state is shown should hide and notify user
     if (option.newState_ == WindowState::STATE_HIDDEN) {
         for (auto subwindow : subWindows) {
             if (subwindow == nullptr || subwindow->GetWindowState() != WindowState::STATE_SHOWN) {
                 continue;
             }
+            // If the subwindow of uiextension follows the uiextension lifecycle, the subWindow will hide
             if (subwindow->followCreatorLifecycle_) {
                 TLOGI(WmsLogTag::WMS_SUB, "subwindow hide follow uec, id: %{public}d", subwindow->GetPersistentId());
                 subwindow->Hide(option.reason_, option.withAnimation_, option.isFromInnerkits_, option.waitDetach_);
@@ -935,11 +910,13 @@ void WindowSessionImpl::UpdateSubWindowStateWithOptions(const StateChangeOption&
                 UpdateSubWindowStateAndNotify(subwindow->GetPersistentId(), option.newState_);
             }
         }
+    // when parent window show and subwindow whose state is shown should show and notify user
     } else if (option.newState_ == WindowState::STATE_SHOWN) {
         for (auto subwindow : subWindows) {
             if (subwindow == nullptr || subwindow->GetWindowState() != WindowState::STATE_HIDDEN) {
                 continue;
             }
+            // If the subwindow has been hidden due to uiextension hiding, The subWindow will show
             if (subwindow->followCreatorLifecycle_ && subwindow->isHiddenFollowingUIExtension_) {
                 TLOGI(WmsLogTag::WMS_SUB, "subwindow show follow uec, id: %{public}d", subwindow->GetPersistentId());
                 subwindow->Show(option.reason_, option.withAnimation_, option.withFocus_, option.waitAttach_);
