@@ -2658,7 +2658,9 @@ HWTEST_F(ScreenSessionManagerTest, CalculateTargetResolution1, TestSize.Level1)
 HWTEST_F(ScreenSessionManagerTest, HandleResolutionEffectChange, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-
+    if (!g_isPcDevice) {
+        GTEST_SKIP();
+    }
     sptr<ScreenSession> screenSession1 = new ScreenSession(51, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession1);
     screenSession1->SetIsCurrentInUse(true);
@@ -2704,7 +2706,9 @@ HWTEST_F(ScreenSessionManagerTest, HandleResolutionEffectChange, TestSize.Level1
 HWTEST_F(ScreenSessionManagerTest, SetResolutionEffect, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-
+    if (!g_isPcDevice) {
+        GTEST_SKIP();
+    }
     sptr<ScreenSession> screenSession1 = new ScreenSession(51, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession1);
     screenSession1->SetIsCurrentInUse(true);
@@ -2751,7 +2755,9 @@ HWTEST_F(ScreenSessionManagerTest, SetResolutionEffect, TestSize.Level1)
 HWTEST_F(ScreenSessionManagerTest, RecoveryResolutionEffect, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-
+    if (!g_isPcDevice) {
+        GTEST_SKIP();
+    }
     sptr<ScreenSession> screenSession1 = new ScreenSession(51, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession1);
     screenSession1->SetIsCurrentInUse(true);
@@ -2856,7 +2862,9 @@ HWTEST_F(ScreenSessionManagerTest, SetExternalScreenResolutionEffect, TestSize.L
 HWTEST_F(ScreenSessionManagerTest, HandleCastVirtualScreenMirrorRegion, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-
+    if (!g_isPcDevice) {
+        GTEST_SKIP();
+    }
     sptr<ScreenSession> virtualSession = new ScreenSession(51, ScreenProperty(), 0);
     ASSERT_NE(nullptr, virtualSession);
     virtualSession->SetVirtualScreenFlag(VirtualScreenFlag::CAST);
@@ -2868,12 +2876,21 @@ HWTEST_F(ScreenSessionManagerTest, HandleCastVirtualScreenMirrorRegion, TestSize
     internalSession->isInternal_ = true;
     RRect Bounds = RRect({ 0, 0, 100, 100}, 0.0f, 0.0f);
     internalSession->SetBounds(Bounds);
-
+    internalSession->SetScreenAreaWidth(100);
+    internalSession->SetScreenAreaHeight(100);
     bool ret = ssm_->HandleCastVirtualScreenMirrorRegion();
     EXPECT_FALSE(ret);
 
     ssm_->screenSessionMap_[51] = virtualSession;
     ssm_->screenSessionMap_[52] = internalSession;
+    ret = ssm_->HandleCastVirtualScreenMirrorRegion();
+    EXPECT_FALSE(ret);
+
+    internalSession->SetRotation(Rotation::ROTATION_180);
+    ret = ssm_->HandleCastVirtualScreenMirrorRegion();
+    EXPECT_FALSE(ret);
+
+    internalSession->SetRotation(Rotation::ROTATION_270);
     ret = ssm_->HandleCastVirtualScreenMirrorRegion();
     EXPECT_TRUE(ret);
     DMRect expectedRect1 = {0, 0, 0, 0};

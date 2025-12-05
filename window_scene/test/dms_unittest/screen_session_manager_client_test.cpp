@@ -2267,6 +2267,12 @@ HWTEST_F(ScreenSessionManagerClientTest, OnScreenPropertyChanged, TestSize.Level
     EXPECT_NE(screenSessionManagerClient_->screenSessionManager_, nullptr);
     screenSessionManagerClient_->screenSessionManager_ = sptr::MakeSptr();
     screenSessionManagerClient_->OnScreenPropertyChanged(50, rotation, bounds);
+
+    screenSessionManagerClient_->currentstate_ = SuperFoldStatus::KEYBOARD;
+    screenSessionManagerClient_->OnScreenPropertyChanged(50, rotation, bounds);
+    EXPECT_EQ(screenSession1->GetValidWidth(), 1344);
+    EXPECT_EQ(screenSession1->GetValidWidth(), 2772);
+    screenSessionManagerClient_->currentstate_ = SuperFoldStatus::UNKNOWN;
 }
 
 /**
