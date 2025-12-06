@@ -3300,7 +3300,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     }
     if (WindowHelper::IsMainWindow(sceneSession->GetWindowType()) && sceneSession->IsFocusedOnShow()) {
         if (Session::IsScbCoreEnabled()) {
-            if (sceneSession->IsVisibleForeground()) {
+            if (sceneSession->IsVisibleForeground() && !sceneSession->GetSessionInfo().isRestartApp_) {
                 RequestSessionFocusImmediately(persistentId);
             } else {
                 PostProcessFocusState state = { true, true, true, FocusChangeReason::SCB_START_APP };
