@@ -2182,6 +2182,7 @@ struct WindowMetaInfo : public Parcelable {
     WindowMode windowMode = WindowMode::WINDOW_MODE_UNDEFINED;
     bool isMidScene = false;
     bool isFocused = false;
+    bool isTouchable = true;
 
     bool Marshalling(Parcel& parcel) const override
     {
@@ -2190,7 +2191,8 @@ struct WindowMetaInfo : public Parcelable {
                parcel.WriteUint32(static_cast<uint32_t>(windowType)) && parcel.WriteUint32(parentWindowId) &&
                parcel.WriteUint64(surfaceNodeId) && parcel.WriteUint64(leashWinSurfaceNodeId) &&
                parcel.WriteBool(isPrivacyMode) && parcel.WriteBool(isMidScene) &&
-               parcel.WriteBool(isFocused) && parcel.WriteUint32(static_cast<uint32_t>(windowMode));
+               parcel.WriteBool(isFocused) && parcel.WriteUint32(static_cast<uint32_t>(windowMode)) &&
+               parcel.WriteBool(isTouchable);
     }
 
     static WindowMetaInfo* Unmarshalling(Parcel& parcel)
@@ -2205,7 +2207,8 @@ struct WindowMetaInfo : public Parcelable {
             !parcel.ReadUint64(windowMetaInfo->surfaceNodeId) ||
             !parcel.ReadUint64(windowMetaInfo->leashWinSurfaceNodeId) ||
             !parcel.ReadBool(windowMetaInfo->isPrivacyMode) || !parcel.ReadBool(windowMetaInfo->isMidScene) ||
-            !parcel.ReadBool(windowMetaInfo->isFocused) || !parcel.ReadUint32(windowModeValue)) {
+            !parcel.ReadBool(windowMetaInfo->isFocused) || !parcel.ReadUint32(windowModeValue) ||
+            !parcel.ReadBool(windowMetaInfo->isTouchable)) {
             delete windowMetaInfo;
             return nullptr;
         }
