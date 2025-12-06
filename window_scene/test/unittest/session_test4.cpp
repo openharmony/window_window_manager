@@ -1193,15 +1193,12 @@ HWTEST_F(WindowSessionTest4, GetWindowMetaInfoForWindowInfo02, TestSize.Level1)
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
     windowMetaInfo = sceneSession->GetWindowMetaInfoForWindowInfo();
     ASSERT_EQ(windowMetaInfo.isTouchable, false);
-    screenSession->SetTouchEnabledFromJs(true);
     sceneSession->SetSystemTouchable(true);
     sceneSession->SetForegroundInteractiveStatus(false);
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
     windowMetaInfo = sceneSession->GetWindowMetaInfoForWindowInfo();
     ASSERT_EQ(windowMetaInfo.isTouchable, false);
-    screenSession->SetTouchEnabledFromJs(true);
-    sceneSession->SetSystemTouchable(true);
     sceneSession->SetForegroundInteractiveStatus(true);
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
