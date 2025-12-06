@@ -64,6 +64,7 @@ static void SensorHallDataCallback(SensorEvent *event)
 
 void SuperFoldSensorManager::RegisterPostureCallback()
 {
+    curInterval_ = POSTURE_INTERVAL;
     OHOS::Rosen::FoldScreenSensorManager::GetInstance().SubscribeSensorCallback(
         SENSOR_TYPE_ID_POSTURE, POSTURE_INTERVAL, SensorPostureDataCallback);
 }
