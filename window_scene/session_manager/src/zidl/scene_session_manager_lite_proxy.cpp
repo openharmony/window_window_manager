@@ -2324,8 +2324,8 @@ WMError SceneSessionManagerLiteProxy::ListWindowInfo(const WindowInfoOption& win
     return static_cast<WMError>(errCode);
 }
 
-WMError SceneSessionManagerLiteProxy::RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
-    const sptr<IWindowManagerAgent>& windowManagerAgent)
+WMError SceneSessionManagerLiteProxy::RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
+    uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
     MessageOption option;
     MessageParcel reply;
