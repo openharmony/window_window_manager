@@ -2990,6 +2990,31 @@ HWTEST_F(ScreenSessionManagerTest, GetBrightnessInfo, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetSupportsInput
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetSupportsInput, TestSize.Level1)
+{
+    bool supportInput;
+    auto ret = ssm_->GetSupportsInput(0, supportInput);
+    EXPECT_EQ(ret, DMError::DM_ERROR_ILLEGAL_PARAM);
+}
+
+/**
+ * @tc.name: SetSupportsInput
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetSupportsInput, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SetSupportsInput start";
+    bool supportInput = false;
+    auto ret = ssm_->SetSupportsInput(0, supportInput);
+    EXPECT_EQ(ret, DMError::DM_ERROR_ILLEGAL_PARAM);
+}
+
+/**
  * @tc.name: MockFoldDisplayModeAfterRotation
  * @tc.desc: test get and set foldDisplayModeAfterRotation
  * @tc.type: FUNC
