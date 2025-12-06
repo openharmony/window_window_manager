@@ -46,6 +46,8 @@ public:
     void NotifyWindowVisibilityStateChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
     void NotifyMidSceneStatusChange(
         const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
+    bool IsNeedToSkipForInterestWindowIds(sptr<IWindowInfoChangedListener> listener,
+        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
     void PackWindowChangeInfo(const std::unordered_set<WindowInfoKey>& interestInfo,
         const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos,
         std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowChangeInfos);
@@ -228,7 +230,7 @@ void WindowManagerLite::Impl::NotifyMidSceneStatusChange(
 {
     std::vector<sptr<IWindowInfoChangedListener>> midSceneStatusChangeListeners;
     {
-        std::unique_lock<std::shared_mutex> lock(listenerMutex_);
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
         midSceneStatusChangeListeners = midSceneStatusChangeListeners_;
     }
     for (auto& listener : midSceneStatusChangeListeners) {
