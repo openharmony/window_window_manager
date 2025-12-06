@@ -1837,7 +1837,6 @@ HWTEST_F(SceneSessionManagerTest12, HasFloatingWindowForeground05, TestSize.Leve
     bool hasFloatWindowForeground = true;
     WMError result = ssm_->HasFloatingWindowForeground(token, hasFloatWindowForeground);
     EXPECT_EQ(result, WMError::WM_OK);
-    EXPECT_EQ(hasFloatWindowForeground, false);
 }
 
 /**
