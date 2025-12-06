@@ -92,6 +92,7 @@ const std::string DEFAULT_DENSITY_ENABLED_CB = "defaultDensityEnabled";
 const std::string WINDOW_SHADOW_ENABLE_CHANGE_CB = "windowShadowEnableChange";
 const std::string TITLE_DOCK_HOVER_SHOW_CB = "titleAndDockHoverShowChange";
 const std::string RESTORE_MAIN_WINDOW_CB = "restoreMainWindow";
+const std::string RESTORE_FLOAT_MAIN_WINDOW_CB = "restoreFloatMainWindow";
 const std::string NEXT_FRAME_LAYOUT_FINISH_CB = "nextFrameLayoutFinish";
 const std::string MAIN_WINDOW_TOP_MOST_CHANGE_CB = "mainWindowTopmostChange";
 const std::string SET_WINDOW_RECT_AUTO_SAVE_CB = "setWindowRectAutoSave";
@@ -197,6 +198,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {NEXT_FRAME_LAYOUT_FINISH_CB,           ListenerFuncType::NEXT_FRAME_LAYOUT_FINISH_CB},
     {PRIVACY_MODE_CHANGE_CB,                ListenerFuncType::PRIVACY_MODE_CHANGE_CB},
     {RESTORE_MAIN_WINDOW_CB,                ListenerFuncType::RESTORE_MAIN_WINDOW_CB},
+    {RESTORE_FLOAT_MAIN_WINDOW_CB,          ListenerFuncType::RESTORE_FLOAT_MAIN_WINDOW_CB},
     {MAIN_WINDOW_TOP_MOST_CHANGE_CB,        ListenerFuncType::MAIN_WINDOW_TOP_MOST_CHANGE_CB},
     {SET_WINDOW_RECT_AUTO_SAVE_CB,          ListenerFuncType::SET_WINDOW_RECT_AUTO_SAVE_CB},
     {UPDATE_APP_USE_CONTROL_CB,             ListenerFuncType::UPDATE_APP_USE_CONTROL_CB},
@@ -1127,6 +1129,47 @@ void JsSceneSession::RestoreMainWindow(bool isAppSupportPhoneInPc, int32_t calli
         napi_value jsCallingPid = CreateJsValue(env, callingPid);
         napi_value jsCallingToken = CreateJsValue(env, callingToken);
         napi_value argv[] = {jsIsAppSupportPhoneInPc, jsCallingPid, jsCallingToken};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, funcName);
+}
+
+void JsSceneSession::ProcessRestoreFloatMainWindowRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    const char* const funcName = __func__;
+    session->SetRestoreFloatMainWindowCallback([weakThis = wptr(this), funcName] 
+        (const AAFwk::WantParams& wantParameters) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", funcName);
+        }
+        jsSceneSession->RestoreFloatMainWindow(wantParameters);
+    });
+    TLOGD(WmsLogTag::WMS_LIFE, "success");
+}
+
+void JsSceneSession::RestoreFloatMainWindow(const AAFwk::WantParams& wantParameters)
+{
+    const char* const funcName = __func__;
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, env = env_, wantParameters, funcName] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession id:%{public}d has been destroyed",
+                funcName, persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(RESTORE_FLOAT_MAIN_WINDOW_CB);
+        if (!jsCallBack) {
+            TLOGE(WmsLogTag::WMS_LIFE, "%{public}s jsCallBack is nullptr", funcName);
+            return;
+        }
+        napi_value jsWantParams = OHOS::AppExecFwk::WrapWantParams(env, wantParameters);
+        napi_value argv[] = {jsWantParams};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, funcName);
@@ -3066,6 +3109,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::RESTORE_MAIN_WINDOW_CB):
             ProcessRestoreMainWindowRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::RESTORE_FLOAT_MAIN_WINDOW_CB):
+            ProcessRestoreFloatMainWindowRegister();
             break;
         case static_cast<uint32_t>(ListenerFuncType::CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR):
             ProcessChangeSessionVisibilityWithStatusBarRegister();

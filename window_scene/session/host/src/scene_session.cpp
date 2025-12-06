@@ -112,6 +112,7 @@ const int32_t SCREEN_LOCK_Z_ORDER = 2000;
 constexpr int32_t MIN_ROTATION_VALUE = 0;
 constexpr int32_t MAX_ROTATION_VALUE = 3;
 const std::string OPTIONAL_SHOW = "OPTIONAL_SHOW"; // startWindowType can be changed by startAbility option.
+constexpr uint8_t MAX_DOWN_TIMES = 100;
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
 {
@@ -3612,6 +3613,10 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
 
     bool isPointDown = (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+
+    if (isPointDown && floatWindowDownEventCnt_.load() < MAX_DOWN_TIMES) {
+        ++floatWindowDownEventCnt_;
+    }
 
     auto property = GetSessionProperty();
     if (property == nullptr) {

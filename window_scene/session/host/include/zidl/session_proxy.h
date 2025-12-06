@@ -55,6 +55,7 @@ public:
     WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
         bool isDockHoverShown = true) override;
     WSError OnRestoreMainWindow() override;
+    WMError RestoreFloatMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParams) override;
     WSError OnSetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag) override;
     WSError RaiseToAppTop() override;
     WSError UpdateSessionRect(const WSRect& rect, SizeChangeReason reason, bool isGlobal = false,
