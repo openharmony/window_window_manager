@@ -7786,6 +7786,32 @@ WMError WindowSceneSessionImpl::SetSubWindowSource(SubWindowSource source)
     return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
 }
 
+WMError WindowSceneSessionImpl::RestoreMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParams)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "restore float main window id: %{public}d", GetPersistentId());
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    if (state_ != WindowState::STATE_SHOWN) {
+        TLOGE(WmsLogTag::WMS_LIFE, "window is not foreground showing");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    
+    auto hostSession = GetHostSession();
+    if (!hostSession) {
+        TLOGI(WmsLogTag::WMS_LIFE, "session is nullptr");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    WMError ret = hostSession->RestoreFloatMainWindow(wantParams);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "RestoreFloatMainWindow result is: %{public}d", static_cast<int32_t>(ret));
+        return ret;
+    }
+    return WMError::WM_OK;
+}
+
 WSError WindowSceneSessionImpl::CloseSpecificScene()
 {
     if (!property_->IsDecorEnable()) {

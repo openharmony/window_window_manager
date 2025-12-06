@@ -34,6 +34,7 @@
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
 #include "napi_remote_object.h"
+#include "napi_common_want.h"
 #include "permission.h"
 #include "request_info.h"
 #include "ui_content.h"
@@ -1390,6 +1391,12 @@ napi_value JsWindow::SetWindowShadowEnabled(napi_env env, napi_callback_info inf
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowShadowEnabled(env, info) : nullptr;
+}
+
+napi_value JsWindow::RestoreMainWindow(napi_env env, napi_callback_info info)
+{
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnRestoreMainWindow(env, info) : nullptr;
 }
 
 WMError UpdateStatusBarProperty(const sptr<Window>& window, const uint32_t contentColor)
@@ -9796,6 +9803,52 @@ napi_value JsWindow::OnSetWindowShadowEnabled(napi_env env, napi_callback_info i
     return result;
 }
 
+napi_value JsWindow::OnRestoreMainWindow(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARG_COUNT_ZERO;
+    napi_value argv[ONE_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    if (windowToken_->GetType() != WindowType::WINDOW_TYPE_FLOAT) {
+        TLOGE(WmsLogTag::WMS_LIFE, "only TYPE_FLOAT can use interface, type:%{public}u", windowToken_->GetType());
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING, "Unauthorized operation.");
+    }
+
+    AAFwk::WantParams wantParams;
+    if (argc > ARG_COUNT_ZERO) {
+        napi_value wantValue = argv[INDEX_ZERO];
+        if (wantValue != nullptr && !AppExecFwk::UnwrapWantParams(env, wantValue, wantParams)) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameters to wantParameters");
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,
+                "This window manager service works abnormally.");
+        }
+    }
+
+    const char* const where = __func__;
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    std::shared_ptr<AAFwk::WantParams> parameters = std::make_shared<AAFwk::WantParams>(wantParams);
+    auto asyncTask = [windowToken = wptr<Window>(windowToken_), env, task = napiAsyncTask, where, parameters] {
+        auto window = windowToken.promote();
+        if (window == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "%{public}s window is nullptr", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
+        }
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RestoreMainWindow(parameters));
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Window restore failed"));
+        }
+    };
+    if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnRestoreMainWindow") != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
+    return result;
+}
+
 napi_value JsWindow::SetRotationLocked(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_ROTATION, "[NAPI]");
@@ -9896,6 +9949,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "hideWithAnimation", moduleName, JsWindow::HideWithAnimation);
     BindNativeFunction(env, object, "recover", moduleName, JsWindow::Recover);
     BindNativeFunction(env, object, "restore", moduleName, JsWindow::Restore);
+    BindNativeFunction(env, object, "restoreMainWindow", moduleName, JsWindow::RestoreMainWindow);
     BindNativeFunction(env, object, "moveTo", moduleName, JsWindow::MoveTo);
     BindNativeFunction(env, object, "moveWindowTo", moduleName, JsWindow::MoveWindowTo);
     BindNativeFunction(env, object, "moveWindowToAsync", moduleName, JsWindow::MoveWindowToAsync);
