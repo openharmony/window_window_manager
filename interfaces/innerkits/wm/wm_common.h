@@ -3446,14 +3446,14 @@ enum class CompatibleStyleMode : uint32_t {
 };
 
 struct StateChangeOption {
-    int32_t parentPersistentId_;
-    WindowState newState_;
-    uint32_t reason_;
-    bool withAnimation_;
-    bool withFocus_;
-    bool waitAttach_;
-    bool isFromInnerkits_;
-    bool waitDetach_;
+    int32_t parentPersistentId_ = 0;
+    WindowState newState_ = WindowState::STATE_INITIAL;
+    uint32_t reason_ = 0;
+    bool withAnimation_ = false;
+    bool withFocus_ = false;
+    bool waitAttach_ = false;
+    bool isFromInnerkits_ = false;
+    bool waitDetach_ = false;
 
     StateChangeOption(int32_t parentPersistentId, WindowState newState)
         : parentPersistentId_(parentPersistentId), newState_(newState) {}
