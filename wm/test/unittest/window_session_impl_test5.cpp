@@ -1530,7 +1530,8 @@ HWTEST_F(WindowSessionImplTest5, SetUIContentInner, Function | SmallTest | Level
     std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
     window->iconCache_ = pixelMap;
 
-    window->SetUIContentInner("info", nullptr, nullptr, WindowSetUIContentType::DEFAULT, BackupAndRestoreType::NONE, nullptr);
+    window->SetUIContentInner("info", nullptr, nullptr,
+        WindowSetUIContentType::DEFAULT, BackupAndRestoreType::NONE, nullptr);
     EXPECT_TRUE(g_errLog.find("Use iconCache to set WindowIcon") != std::string::npos);
     LOG_SetCallback(nullptr);
 }
