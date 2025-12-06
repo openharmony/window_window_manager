@@ -2412,6 +2412,10 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, voi
         return initUIContentRet;
     }
     if (auto uiContent = GetUIContentSharedPtr()) {
+        if (iconCache_ != nullptr) {
+            TLOGI(WmsLogTag::WMS_LIFE, "Use iconCache to set windowIcon");
+            uiContent->SetAppWindowIcon(std::move(iconCache_));
+        }
         TLOGI(WmsLogTag::WMS_LAYOUT, "single hand, id:%{public}d, posX:%{public}d, posY:%{public}d, "
               "scaleX:%{public}f, scaleY:%{public}f", GetPersistentId(),
               singleHandTransform_.posX, singleHandTransform_.posY,
@@ -3385,8 +3389,10 @@ WMError WindowSessionImpl::SetAPPWindowIcon(const std::shared_ptr<Media::PixelMa
     }
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
-        TLOGE(WmsLogTag::WMS_DECOR, "uicontent is empty");
-        return WMError::WM_ERROR_NULLPTR;
+        TLOGE(WmsLogTag::WMS_DECOR, "uicontent is empty, cache icon");
+        // The next time setUIContent is called, use iconCache to set windowIcon
+        iconCache_ = icon;
+        return WMError::WM_OK;
     }
     uiContent->SetAppWindowIcon(icon);
     TLOGD(WmsLogTag::WMS_DECOR, "end");

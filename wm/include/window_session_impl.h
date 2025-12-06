@@ -1202,6 +1202,7 @@ private:
      * PC Window
      */
     uint32_t targetAPIVersion_ = 0;
+    std::shared_ptr<Media::PixelMap> iconCache_;
 
     /*
      * Window Input Event
