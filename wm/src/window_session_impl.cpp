@@ -902,7 +902,7 @@ void WindowSessionImpl::UpdateSubWindowStateWithOptions(const StateChangeOption&
             if (subwindow->followCreatorLifecycle_) {
                 TLOGI(WmsLogTag::WMS_SUB, "subwindow hide follow uec, id: %{public}d", subwindow->GetPersistentId());
                 subwindow->Hide(option.reason_, option.withAnimation_, option.isFromInnerkits_, option.waitDetach_);
-                subwindow->isHiddenFollowingUIExtension_ = true;
+                subwindow->SetIsHiddenFollowingUIExtension(true);
             } else {
                 subwindow->state_ = WindowState::STATE_HIDDEN;
                 subwindow->NotifyAfterBackground();
@@ -917,10 +917,10 @@ void WindowSessionImpl::UpdateSubWindowStateWithOptions(const StateChangeOption&
                 continue;
             }
             // If the subwindow has been hidden due to uiextension hiding, The subWindow will show
-            if (subwindow->followCreatorLifecycle_ && subwindow->isHiddenFollowingUIExtension_) {
+            if (subwindow->followCreatorLifecycle_ && subwindow->IsHiddenFollowingUIExtension()) {
                 TLOGI(WmsLogTag::WMS_SUB, "subwindow show follow uec, id: %{public}d", subwindow->GetPersistentId());
                 subwindow->Show(option.reason_, option.withAnimation_, option.withFocus_, option.waitAttach_);
-                subwindow->isHiddenFollowingUIExtension_ = false;
+                subwindow->SetIsHiddenFollowingUIExtension(false);
             } else if (subwindow->GetRequestWindowState() == WindowState::STATE_SHOWN) {
                 subwindow->state_ = WindowState::STATE_SHOWN;
                 subwindow->NotifyAfterForeground();
