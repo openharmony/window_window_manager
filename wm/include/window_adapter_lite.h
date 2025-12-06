@@ -48,6 +48,10 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent);
     virtual WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
+    virtual WMError RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
+        const sptr<IWindowManagerAgent>& windowManagerAgent);
+    virtual WMError UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
+        const sptr<IWindowManagerAgent>& windowManagerAgent);
     virtual WMError CheckWindowId(int32_t windowId, int32_t& pid);
     virtual WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos);
     virtual WMError UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease);
@@ -86,6 +90,13 @@ private:
 
     static inline SingletonDelegator<WindowAdapterLite> delegator;
     bool InitSSMProxy();
+
+    /*
+     * Window Recover
+     */
+    uint32_t observedFlags_;
+    uint32_t interestedFlags_;
+    WMError RecoverWindowPropertyChangeFlag();
 
     /*
      * Multi user and multi screen
