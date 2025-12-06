@@ -1007,7 +1007,7 @@ struct DeviceScreenConfig {
 
 struct SceneAnimationConfig : public Parcelable {
     std::shared_ptr<RSTransaction> rsTransaction_ = nullptr;
-    int32_t animationDuration_ = ROTATE_ANIMATION_DURATION;
+    uint32_t animationDuration_ = ROTATE_ANIMATION_DURATION;
     uint32_t animationDelay_ = 0;
     WindowAnimationCurve animationCurve_ = WindowAnimationCurve::LINEAR;
     std::array<float, ANIMATION_PARAM_SIZE> animationParam_ = {0.0f, 0.0f, 0.0f, 0.0f};
@@ -1016,7 +1016,7 @@ struct SceneAnimationConfig : public Parcelable {
 
     SceneAnimationConfig(
         std::shared_ptr<RSTransaction> rsTransaction,
-        int32_t animationDuration,
+        uint32_t animationDuration,
         uint32_t animationDelay,
         WindowAnimationCurve animationCurve,
         const std::array<float, ANIMATION_PARAM_SIZE>& animationParam)
@@ -1032,7 +1032,7 @@ struct SceneAnimationConfig : public Parcelable {
         if (!parcel.WriteBool(hasTransaction)) {
             return false;
         }
-        if (!parcel.WriteInt32(animationDuration_)) {
+        if (!parcel.WriteUint32(animationDuration_)) {
             return false;
         }
         if (!parcel.WriteUint32(animationDelay_)) {
@@ -1053,12 +1053,12 @@ struct SceneAnimationConfig : public Parcelable {
     {
         auto config = new SceneAnimationConfig();
         bool hasTransaction = false;
-        int32_t animationDuration;
+        uint32_t animationDuration;
         uint32_t animationDelay;
         uint32_t animationCurveValue;
         std::array<float, ANIMATION_PARAM_SIZE> animationParam;
         if (!parcel.ReadBool(hasTransaction) ||
-            !parcel.ReadInt32(animationDuration) ||
+            !parcel.ReadUint32(animationDuration) ||
             !parcel.ReadUint32(animationDelay) ||
             !parcel.ReadUint32(animationCurveValue)) {
             delete config;
@@ -1070,8 +1070,8 @@ struct SceneAnimationConfig : public Parcelable {
                 return nullptr;
             }
         }
-        config->animationDuration_ = animationDuration;
-        config->animationDelay_ = animationDelay;
+        config->animationDuration_ = static_cast<uint32_t>(animationDuration);
+        config->animationDelay_ = static_cast<uint32_t>(animationDelay);
         config->animationCurve_ = static_cast<WindowAnimationCurve>(animationCurveValue);
         config->animationParam_ = animationParam;
         return config;
