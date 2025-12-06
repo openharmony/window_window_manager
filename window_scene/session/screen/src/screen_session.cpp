@@ -3278,8 +3278,8 @@ void ScreenSession::UpdateScbScreenPropertyForSuperFlod(const ScreenProperty& sc
     property_.SetIsDestroyDisplay(screenProperty.GetIsDestroyDisplay());
     if (changeEvent == SuperFoldStatusChangeEvents::KEYBOARD_ON ||
         changeEvent == SuperFoldStatusChangeEvents::KEYBOARD_OFF) {
-        property_.SetValidHeight(screenProperty.GetBounds().rect_.GetHeight());
-        property_.SetValidWidth(screenProperty.GetBounds().rect_.GetWidth());
+        property_.SetValidHeight(screenProperty.GetValidHeight());
+        property_.SetValidWidth(screenProperty.GetValidWidth());
         property_.SetScreenAreaHeight(screenProperty.GetScreenAreaHeight());
         TLOGI(WmsLogTag::DMS, "handle keyboard on and keyboard succ");
     } else if (changeEvent == SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_ON ||

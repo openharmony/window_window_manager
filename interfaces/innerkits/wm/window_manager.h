@@ -1084,6 +1084,15 @@ public:
     WMError GetUIContentRemoteObj(int32_t windowId, sptr<IRemoteObject>& uiContentRemoteObj);
 
     /**
+     * @brief Get uiContent remote object for root scene
+     *
+     * @param displayId display id
+     * @param uiContentRemoteObj remote uiContent object
+     * @return WM_OK means set success, others means set failed.
+     */
+    WMError GetRootUIContentRemoteObj(DisplayId displayId, sptr<IRemoteObject>& uiContentRemoteObj);
+
+    /**
      * @brief raise window to top by windowId
      *
      * @param persistentId this window to raise
