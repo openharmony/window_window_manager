@@ -16,6 +16,7 @@
 #include "session_manager/include/scene_session_manager.h"
 
 #include <regex>
+#include <string>
 #include <sys/stat.h>
 
 #include <ability_context.h>
@@ -15371,6 +15372,50 @@ void SceneSessionManager::CacVisibleWindowNum()
 
 void SceneSessionManager::ReportWindowProfileInfos()
 {
+    if (IsScreenLocked()) {
+        return;
+    }
+    std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        sceneSessionMapCopy = sceneSessionMap_;
+    }
+
+    WindowProfileSum windowProfileSum;
+    int windowCount = 0;
+    int visibleWindowCount = 0;
+    int invisibleWindowCount = 0;
+    int minimizeWindowCount = 0;
+    for (const auto& [_, currSession] : sceneSessionMapCopy) {
+        if (currSession == nullptr || currSession->GetSessionInfo().isSystem_ ||
+            currSession->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
+            currSession->GetVisibilityState() == WINDOW_LAYER_STATE_MAX) {
+            continue;
+        }
+        if (currSession->GetSessionState() == SessionState::STATE_BACKGROUND) {
+            minimizeWindowCount += 1;
+        } else if (currSession->GetVisibilityState() == WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
+            invisibleWindowCount += 1;
+        } else {
+            visibleWindowCount += 1;
+        }
+        std::string windowInfo = "";
+        auto focusWindowId = GetFocusedSessionId();
+        windowInfo = FillWindowProfileInfo(currSession, focusWindowId);
+        if (static_cast<size_t>(windowCount) < windowProfileSum.windowInfo.size()) {
+            windowProfileSum.windowInfo[windowCount] = windowInfo;
+        }
+        windowCount += 1;
+    }
+    windowProfileSum.totalWindowCount = windowCount;
+    windowProfileSum.visibleWindowCount = visibleWindowCount;
+    windowProfileSum.invisibleWindowCount = invisibleWindowCount;
+    windowProfileSum.minimizeWindowCount = minimizeWindowCount;
+    WindowInfoReporter::GetInstance().ReportWindowProfileInfo(windowProfileSum);
+}
+
+std::string SceneSessionManager::FillWindowProfileInfo(const OHOS::sptr<OHOS::Rosen::SceneSession>& currSession, int32_t focusWindowId)
+{
     enum class WindowVisibleState : int32_t {
         FOCUSBLE = 0,
         FULLY_VISIBLE,
@@ -15378,46 +15423,35 @@ void SceneSessionManager::ReportWindowProfileInfos()
         TOTALLY_OCCLUSION,
         PARTLY_OCCLUSION
     };
-    std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
-    {
-        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        sceneSessionMapCopy = sceneSessionMap_;
+    WindowProfileInfo windowProfileInfo;
+    WSRect rect = currSession->GetSessionRect();
+    std::stringstream rectStr;
+    rectStr << "[" << rect.posX_ << " " << rect.posY_ << " " << rect.width_ << " " << rect.height_ << "]";
+    windowProfileInfo.rect = rectStr.str();
+    windowProfileInfo.zorder = static_cast<int32_t>(currSession->GetZOrder());
+    windowProfileInfo.bundleName = currSession->GetSessionInfo().bundleName_;
+    windowProfileInfo.windowLocatedScreen = static_cast<int32_t>(
+        currSession->GetSessionProperty()->GetDisplayId());
+    windowProfileInfo.windowSceneMode = static_cast<int32_t>(currSession->GetWindowMode());
+    if (focusWindowId == static_cast<int32_t>(currSession->GetWindowId())) {
+        windowProfileInfo.windowVisibleState = static_cast<int32_t>(WindowVisibleState::FOCUSBLE);
+    } else if (currSession->GetSessionState() == SessionState::STATE_BACKGROUND) {
+        windowProfileInfo.windowVisibleState = static_cast<int32_t>(WindowVisibleState::MINIMIZED);
+    } else if (currSession->GetVisibilityState() == WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
+        windowProfileInfo.windowVisibleState = static_cast<int32_t>(WindowVisibleState::TOTALLY_OCCLUSION);
+    } else if (currSession->GetVisibilityState() == WINDOW_VISIBILITY_STATE_NO_OCCLUSION) {
+        windowProfileInfo.windowVisibleState = static_cast<int32_t>(WindowVisibleState::FULLY_VISIBLE);
+    } else {
+        windowProfileInfo.windowVisibleState = static_cast<int32_t>(WindowVisibleState::PARTLY_OCCLUSION);
     }
-    auto focusWindowId = GetFocusedSessionId();
-    for (const auto& [_, currSession] : sceneSessionMapCopy) {
-        if (currSession == nullptr || currSession->GetSessionInfo().isSystem_ ||
-            currSession->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
-            continue;
-        }
-        WindowProfileInfo windowProfileInfo;
-        WSRect rect = currSession->GetSessionRect();
-        std::stringstream rectStr;
-        rectStr << "[" << rect.posX_ << " " << rect.posY_ << " " << rect.width_ << " " << rect.height_ << "]";
-        windowProfileInfo.rect = rectStr.str();
-        windowProfileInfo.zorder = static_cast<int32_t>(currSession->GetZOrder());
-        windowProfileInfo.bundleName = currSession->GetSessionInfo().bundleName_;
-        windowProfileInfo.windowLocatedScreen = static_cast<int32_t>(
-            currSession->GetSessionProperty()->GetDisplayId());
-        windowProfileInfo.windowSceneMode = static_cast<int32_t>(currSession->GetWindowMode());
-        if (focusWindowId == static_cast<int32_t>(currSession->GetWindowId())) {
-            windowProfileInfo.windowVisibleState = static_cast<int32_t>(WindowVisibleState::FOCUSBLE);
-        } else if (currSession->GetSessionState() == SessionState::STATE_BACKGROUND) {
-            windowProfileInfo.windowVisibleState = static_cast<int32_t>(WindowVisibleState::MINIMIZED);
-        } else if (currSession->GetVisibilityState() == WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
-            windowProfileInfo.windowVisibleState = static_cast<int32_t>(WindowVisibleState::TOTALLY_OCCLUSION);
-        } else if (currSession->GetVisibilityState() == WINDOW_VISIBILITY_STATE_NO_OCCLUSION) {
-            windowProfileInfo.windowVisibleState = static_cast<int32_t>(WindowVisibleState::FULLY_VISIBLE);
-        } else {
-            windowProfileInfo.windowVisibleState = static_cast<int32_t>(WindowVisibleState::PARTLY_OCCLUSION);
-        }
-        WindowInfoReporter::GetInstance().ReportWindowProfileInfo(windowProfileInfo);
-        TLOGD(WmsLogTag::DEFAULT,
-              "bundleName:%{public}s, windowVisibleState:%{public}d, windowLocatedScreen:%{public}d, "
-              "windowSceneMode:%{public}d, windowZorder:%{public}d, windowRect:%{public}s",
-              windowProfileInfo.bundleName.c_str(), windowProfileInfo.windowVisibleState,
-              windowProfileInfo.windowLocatedScreen, windowProfileInfo.windowSceneMode,
-              windowProfileInfo.zorder, windowProfileInfo.rect.c_str());
-    }
+    std::stringstream windowInfoStr;
+    windowInfoStr << windowProfileInfo.bundleName << ", " <<
+        std::to_string(windowProfileInfo.windowVisibleState) << ", "<<
+        std::to_string(windowProfileInfo.windowLocatedScreen) << ", " <<
+        std::to_string(windowProfileInfo.windowSceneMode) << ", " <<
+        std::to_string(windowProfileInfo.zorder) << ", " <<
+        windowProfileInfo.rect << "; ";
+    return windowInfoStr.str();
 }
 
 int32_t SceneSessionManager::GetCustomDecorHeight(int32_t persistentId)
