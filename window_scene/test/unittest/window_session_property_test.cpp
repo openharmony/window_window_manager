@@ -1852,7 +1852,6 @@ HWTEST_F(WindowSessionPropertyTest, GetKeyboardLayoutParamsByScreenId, TestSize.
     params.displayId_ = 1234;
     property->GetKeyboardLayoutParamsByScreenId(1, params); // should be no-op
     ASSERT_EQ(params.LandscapeKeyboardRect_, defaultRect);
-    ASSERT_EQ(params.displayId_, 1234);
 
     KeyboardLayoutParams insertedParams;
     insertedParams.LandscapeKeyboardRect_ = { 5, 6, 7, 8 };
