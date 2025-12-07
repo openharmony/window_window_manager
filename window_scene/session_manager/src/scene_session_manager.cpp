@@ -5465,7 +5465,7 @@ void SceneSessionManager::ProcessUIAbilityOnUserSwitch(bool isUserActive)
 FlushWindowInfoTask SceneSessionManager::CreateDelayedFlushWindowInfoToMMITask() {
     FlushWindowInfoTask task = [this]() {
         bool startTask = true;
-        int32_4 count;
+        int32_t count;
         {
             std::lock_guard<std::mutex> lock(delayedFlushWindowInfoMutex_);
             flushWindowInfoCount_++;
