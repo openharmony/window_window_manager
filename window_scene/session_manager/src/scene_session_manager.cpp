@@ -5486,7 +5486,7 @@ FlushWindowInfoTask SceneSessionManager::CreateDelayedFlushWindowInfoToMMITask()
         if (startTask) {
             TLOGNI(WmsLogTag::WMS_EVENT, "DelayedFlushWindowInfoToMMI add Tasl");
             auto nextTask = CreateDelayedFlushWindowInfoToMMITask();
-            PostFlushWindowInfoTask(nextTask, FLUSH_WINDOW_INFO_TASK_NAME, FLUSH_WINDOW_INFO_DELAY_INTERVAL);
+            PostFlushWindowInfoTask(std::move(nextTask), FLUSH_WINDOW_INFO_TASK_NAME, FLUSH_WINDOW_INFO_DELAY_INTERVAL);
         }
     };
     return task;
@@ -5502,7 +5502,7 @@ void SceneSessionManager::StartDelayedFlushWindowInfoToMMITask() {
         isDelayFlushWindowInfoMode_ = true;
     }
     auto task = CreateDelayedFlushWindowInfoToMMITask();
-    PostFlushWindowInfoTask(task, FLUSH_WINDOW_INFO_TASK_NAME, FLUSH_WINDOW_INFO_DELAY_INTERVAL);
+    PostFlushWindowInfoTask(std::move(task), FLUSH_WINDOW_INFO_TASK_NAME, FLUSH_WINDOW_INFO_DELAY_INTERVAL);
 }
 
 void SceneSessionManager::StopDelayedFlushWindowInfoToMMITask() {
