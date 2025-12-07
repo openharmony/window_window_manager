@@ -526,7 +526,6 @@ HWTEST_F(WindowSessionTest, ConsumeMoveEvent02, TestSize.Level1)
     sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
-    sceneSession->GetSessionProperty()->SetWindowRect({ 100, 100, 1000, 1000 });
     sceneSession->moveDragController_->isStartMove_ = true;
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_TRUE(pointerEvent);
@@ -580,7 +579,9 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent01, TestSize.Level1)
     sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
-    sceneSession->GetSessionProperty()->SetWindowRect({ 100, 100, 1000, 1000 });
+    WSRect originalRect = { 100, 100, 1000, 1000 };
+    sceneSession->SetSessionRect(originalRect);
+    sceneSession->SetSessionGlobalRect(originalRect);
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
     auto result = sceneSession->moveDragController_->ConsumeDragEvent(pointerEvent);
@@ -618,7 +619,9 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent02, TestSize.Level1)
     sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
-    sceneSession->GetSessionProperty()->SetWindowRect({ 100, 100, 1000, 1000 });
+    WSRect originalRect = { 100, 100, 1000, 1000 };
+    sceneSession->SetSessionRect(originalRect);
+    sceneSession->SetSessionGlobalRect(originalRect);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     pointerEvent->SetAgentWindowId(1);
     pointerEvent->SetPointerId(0);
@@ -675,7 +678,9 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent03, TestSize.Level1)
     sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
-    sceneSession->GetSessionProperty()->SetWindowRect({ 100, 100, 1000, 1000 });
+    WSRect originalRect = { 100, 100, 1000, 1000 };
+    sceneSession->SetSessionRect(originalRect);
+    sceneSession->SetSessionGlobalRect(originalRect);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     pointerEvent->SetAgentWindowId(1);
     pointerEvent->SetPointerId(0);
@@ -729,7 +734,9 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent04, TestSize.Level1)
     sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
-    sceneSession->GetSessionProperty()->SetWindowRect({ 100, 100, 1000, 1000 });
+    WSRect originalRect = { 100, 100, 1000, 1000 };
+    sceneSession->SetSessionRect(originalRect);
+    sceneSession->SetSessionGlobalRect(originalRect);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     pointerEvent->SetAgentWindowId(1);
     pointerEvent->SetPointerId(0);

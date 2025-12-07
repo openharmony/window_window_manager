@@ -233,13 +233,13 @@ std::pair<double, double> MoveResampler::InterpolateLinear(int64_t targetTimeUs)
     }
 
     // Smooth prev using LinearFitAt
-    size_t prevStart = std::max(static_cast<size_t>(0), idx - 4); // 4: using up to last 4 points
+    size_t prevStart = (idx > 4) ? (idx - 4) : 0; // 4: using up to last 4 points
     size_t prevEnd = idx - 1;
 
     auto [prevSmoothX, prevSmoothY] = LinearFitAt(prevStart, prevEnd, prev.timeUs);
 
     // Smooth next using LinearFitAt
-    size_t nextStart = std::max(static_cast<size_t>(0), idx - 3); // 3: using up to last 3 points
+    size_t nextStart = (idx > 3) ? (idx - 3) : 0; // 3: using up to last 3 points
     size_t nextEnd = idx;
 
     auto [nextSmoothX, nextSmoothY] = LinearFitAt(nextStart, nextEnd, next.timeUs);
@@ -257,7 +257,7 @@ std::pair<double, double> MoveResampler::ExtrapolateFit(int64_t targetTimeUs) co
         return { 0.0, 0.0 };
     }
     size_t nEvents = events_.size();
-    size_t startIdx = std::max(static_cast<size_t>(0), nEvents - 5); // 5: using up to last 5 points
+    size_t startIdx = (nEvents > 5) ? (nEvents - 5) : 0; // 5: using up to last 5 points
     size_t endIdx = nEvents - 1;
     return LinearFitAt(startIdx, endIdx, targetTimeUs);
 }

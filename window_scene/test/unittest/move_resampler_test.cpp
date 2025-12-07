@@ -296,11 +296,11 @@ HWTEST_F(MoveResamplerTest, TestMoveResamplerExtrapolateFitFallback, TestSize.Le
 
     moveResampler_.PushEvent(1000, 10, 10);
     moveResampler_.PushEvent(1000, 20, 20);
-    moveResampler_.PushEvent(1000, 30, 30); // timestamps identical → fallback
+    moveResampler_.PushEvent(1000, 30, 30); // timestamps identical → fallback to mean
 
     auto e2 = moveResampler_.ExtrapolateFit(2000);
-    EXPECT_EQ(e2.first, 30);
-    EXPECT_EQ(e2.second, 30);
+    EXPECT_EQ(e2.first, 20);
+    EXPECT_EQ(e2.second, 20);
 }
 
 /**
