@@ -454,9 +454,9 @@ HWTEST_F(WindowManagerServiceDumpTest, SceneSessionDumpSessionElementInfo, TestS
  */
 HWTEST_F(WindowManagerServiceDumpTest, GetSCBDebugDumpInfo01, TestSize.Level1)
 {
-    SessionInfo info;
-    info.abilityName_ = "Background01";
-    info.bundleName_ = "GetSCBDebugDumpInfo01";
+    SessionInfo sessionInfo;
+    sessionInfo.abilityName_ = "Background01";
+    sessionInfo.bundleName_ = "GetSCBDebugDumpInfo01";
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     sptr<SceneSession> sceneSession = ssm_->RequestSceneSession(sessionInfo, windowSessionProperty);
     ASSERT_EQ(nullptr, sceneSession);
@@ -473,9 +473,9 @@ HWTEST_F(WindowManagerServiceDumpTest, GetSCBDebugDumpInfo01, TestSize.Level1)
  */
 HWTEST_F(WindowManagerServiceDumpTest, GetSCBDebugDumpInfo02, TestSize.Level1)
 {
-    SessionInfo info;
-    info.abilityName_ = "Background01";
-    info.bundleName_ = "GetSCBDebugDumpInfo02";
+    SessionInfo sessionInfo;
+    sessionInfo.abilityName_ = "Background01";
+    sessionInfo.bundleName_ = "GetSCBDebugDumpInfo02";
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     sptr<SceneSession> sceneSession = ssm_->RequestSceneSession(sessionInfo, windowSessionProperty);
     ASSERT_EQ(nullptr, sceneSession);
