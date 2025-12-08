@@ -95,6 +95,7 @@ public:
         TRANS_ID_GET_TOP_WINDOW_ID,
         TRANS_ID_GET_PARENT_MAIN_WINDOW_ID,
         TRANS_ID_GET_UI_CONTENT_REMOTE_OBJ,
+        TRANS_ID_GET_ROOT_UI_CONTENT_REMOTE_OBJ,
         TRANS_ID_UPDATE_WINDOW_VISIBILITY_LISTENER,
         TRANS_ID_UPDATE_SESSION_OCCLUSION_STATE_LISTENER,
         TRANS_ID_SHIFT_APP_WINDOW_FOCUS,
@@ -344,6 +345,8 @@ public:
     void SetMaximizeMode(MaximizeMode maximizeMode) override {}
     MaximizeMode GetMaximizeMode() override { return MaximizeMode::MODE_AVOID_SYSTEM_BAR; }
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) override {}
+    void GetAllGroupInfo(std::unordered_map<DisplayId, DisplayGroupId>& displayId2GroupIdMap,
+                         std::vector<sptr<FocusChangeInfo>>& allFocusInfoList) override {}
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override { return WMError::WM_OK; }
     WMError SetForegroundWindowNum(uint32_t windowNum) override { return WMError::WM_OK; }
 

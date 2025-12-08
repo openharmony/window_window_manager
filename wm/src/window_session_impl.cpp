@@ -17,6 +17,8 @@
 
 #include <cstdlib>
 
+#include <ability_manager_client.h>
+#include <app_mgr_client.h>
 #include <common/rs_common_def.h>
 #include <filesystem>
 #include <float_wrapper.h>
@@ -28,8 +30,10 @@
 #ifdef IMF_ENABLE
 #include <input_method_controller.h>
 #endif // IMF_ENABLE
+#include <singleton.h>
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
+#include <ui_extension_utils.h>
 
 #include "application_context.h"
 #include "color_parser.h"
@@ -72,6 +76,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowS
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 constexpr int32_t NAV_FORCE_SPLIT_MODE = 6;
 constexpr int32_t API_VERSION_18 = 18;
+constexpr int32_t API_VERSION_23 = 23;
 constexpr uint32_t API_VERSION_MOD = 1000;
 constexpr int32_t  WINDOW_ROTATION_CHANGE = 50;
 constexpr uint32_t INVALID_TARGET_API_VERSION = 0;
@@ -1960,6 +1965,13 @@ int32_t WindowSessionImpl::GetFloatingWindowParentId()
             return winPair.second.second->GetProperty()->GetPersistentId();
         }
     }
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(GetContext());
+    if (abilityContext != nullptr) {
+        int32_t parentId = INVALID_SESSION_ID;
+        abilityContext->GetMissionId(parentId);
+        TLOGI(WmsLogTag::WMS_LIFE, "parentId: %{public}d", parentId);
+        return parentId;
+    }
     return INVALID_SESSION_ID;
 }
 
@@ -2044,19 +2056,6 @@ void WindowSessionImpl::HideTitleButton(bool& hideSplitButton, bool& hideMaximiz
     bool fullScreenStart = property_->IsFullScreenStart() &&
         (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
     uiContent->OnContainerModalEvent(SCB_COMPATIBLE_MAXIMIZE_BTN_RES, fullScreenStart ? "true" : "false");
-}
-
-WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
-    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
-{
-    WindowSetUIContentType setUIContentType;
-    if (!navDestinationInfo_.empty()) {
-        setUIContentType = WindowSetUIContentType::BY_SHARED;
-    } else {
-        setUIContentType =
-            type == BackupAndRestoreType::NONE ? WindowSetUIContentType::DEFAULT : WindowSetUIContentType::RESTORE;
-    }
-    return SetUIContentInner(contentInfo, env, storage, setUIContentType, type, ability, 1u);
 }
 
 WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
@@ -2307,14 +2306,30 @@ WSError WindowSessionImpl::SetStageKeyFramePolicy(const KeyFramePolicy& keyFrame
 
 WMError WindowSessionImpl::SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "in");
+    if (!windowSystemConfig_.IsPcWindow()) {
+        // isolate on api 23
+        if (GetTargetAPIVersion() < API_VERSION_23 ||
+            (GetTargetAPIVersion() >= API_VERSION_23 && !IsPhonePadOrPcWindow())) {
+            return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+        }
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "only main window is valid");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+
+    if (GetTargetAPIVersion() >= API_VERSION_23 && IsPhonePadOrPcWindow()) {
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ignore phone or pad window type");
+        return WMError::WM_OK;
+    }
     WSError errorCode = hostSession->SetDragKeyFramePolicy(keyFramePolicy);
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id: %{public}d, keyFramePolicy: %{public}s, errorCode: %{public}d",
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "Id: %{public}d, keyFramePolicy: %{public}s, errorCode: %{public}d",
         GetPersistentId(), keyFramePolicy.ToString().c_str(), static_cast<int32_t>(errorCode));
     return static_cast<WMError>(errorCode);
 }
@@ -2397,6 +2412,10 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, voi
         return initUIContentRet;
     }
     if (auto uiContent = GetUIContentSharedPtr()) {
+        if (iconCache_ != nullptr) {
+            TLOGI(WmsLogTag::WMS_LIFE, "Use iconCache to set windowIcon");
+            uiContent->SetAppWindowIcon(std::move(iconCache_));
+        }
         TLOGI(WmsLogTag::WMS_LAYOUT, "single hand, id:%{public}d, posX:%{public}d, posY:%{public}d, "
               "scaleX:%{public}f, scaleY:%{public}f", GetPersistentId(),
               singleHandTransform_.posX, singleHandTransform_.posY,
@@ -2542,7 +2561,7 @@ void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
             bool decorVisible = mode == WindowMode::WINDOW_MODE_FLOATING ||
                 mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
                 (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !property_->IsLayoutFullScreen() && !(IsAnco() &&
-            windowSystemConfig_.IsPcWindow()));
+                IsPcOrPadFreeMultiWindowMode()));
             if (windowSystemConfig_.freeMultiWindowSupport_) {
                 auto isSubWindow = WindowHelper::IsSubWindow(GetType());
                 decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
@@ -3370,8 +3389,10 @@ WMError WindowSessionImpl::SetAPPWindowIcon(const std::shared_ptr<Media::PixelMa
     }
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
-        TLOGE(WmsLogTag::WMS_DECOR, "uicontent is empty");
-        return WMError::WM_ERROR_NULLPTR;
+        TLOGE(WmsLogTag::WMS_DECOR, "uicontent is empty, cache icon");
+        // The next time setUIContent is called, use iconCache to set windowIcon
+        iconCache_ = icon;
+        return WMError::WM_OK;
     }
     uiContent->SetAppWindowIcon(icon);
     TLOGD(WmsLogTag::WMS_DECOR, "end");
@@ -4519,8 +4540,12 @@ void WindowSessionImpl::RecoverSessionListener()
 template<typename T>
 EnableIfSame<T, IWindowLifeCycle, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::GetListeners()
 {
+    auto iter = lifecycleListeners_.find(GetPersistentId());
+    if (iter == lifecycleListeners_.end()) {
+        return std::vector<sptr<IWindowLifeCycle>>();
+    }
     std::vector<sptr<IWindowLifeCycle>> lifecycleListeners;
-    for (auto& listener : lifecycleListeners_[GetPersistentId()]) {
+    for (auto& listener : iter->second) {
         lifecycleListeners.push_back(listener);
     }
     return lifecycleListeners;
@@ -5325,13 +5350,20 @@ void WindowSessionImpl::NotifyAfterDidBackground(uint32_t reason)
     }, where, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
-static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool keepKeyboardFlag)
+static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool keepKeyboardFlag, int32_t windowId)
 {
     if (!isNeedKeyboard && !keepKeyboardFlag) {
 #ifdef IMF_ENABLE
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify InputMethod framework close keyboard start.");
-        if (MiscServices::InputMethodController::GetInstance()) {
-            MiscServices::InputMethodController::GetInstance()->RequestHideInput();
+        auto callingUid = IPCSkeleton::GetCallingUid();
+        bool isBrokerCall = callingUid == ANCO_SERVICE_BROKER_UID;
+        auto pid = IPCSkeleton::GetCallingRealPid();
+        AppExecFwk::RunningProcessInfo info;
+        DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->GetRunningProcessInfoByPid(pid, info);
+        bool isUIEProc = AAFwk::UIExtensionUtils::IsUIExtension(info.extensionType_);
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify InputMethod framework close keyboard start. id: %{public}d, "
+              "isBrokerCall: %{public}d, isUIEProc: %{public}d", windowId, isBrokerCall, isUIEProc);
+        if (MiscServices::InputMethodController::GetInstance() && !isBrokerCall && !isUIEProc) {
+            MiscServices::InputMethodController::GetInstance()->RequestHideInput(static_cast<uint32_t>(windowId));
             TLOGD(WmsLogTag::WMS_KEYBOARD, "Notify InputMethod framework close keyboard end.");
         }
 #endif
@@ -5357,9 +5389,10 @@ void WindowSessionImpl::NotifyUIContentFocusStatus()
         }
         // whether keep the keyboard created by other windows, support system window and app subwindow.
         bool keepKeyboardFlag = window->property_->GetKeepKeyboardFlag();
+        int32_t windowId = window->GetPersistentId();
         TLOGNI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, isNeedKeyboard: %{public}d, keepKeyboardFlag: %{public}d",
-            window->GetPersistentId(), isNeedKeyboard, keepKeyboardFlag);
-        RequestInputMethodCloseKeyboard(isNeedKeyboard, keepKeyboardFlag);
+            windowId, isNeedKeyboard, keepKeyboardFlag);
+        RequestInputMethodCloseKeyboard(isNeedKeyboard, keepKeyboardFlag, windowId);
     };
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->SetOnWindowFocused(task);

@@ -191,7 +191,8 @@ void Session::SetSurfaceNode(const std::shared_ptr<RSSurfaceNode>& surfaceNode)
     RSAdapterUtil::SetRSUIContext(surfaceNode, GetRSUIContext(), true);
     std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
     surfaceNode_ = surfaceNode;
-    shadowSurfaceNode_ = surfaceNode_ ? surfaceNode_->CreateShadowSurfaceNode() : nullptr;
+    shadowSurfaceNode_ = RSAdapterUtil::IsClientMultiInstanceEnabled() && surfaceNode_ ?
+        surfaceNode_->CreateShadowSurfaceNode() : nullptr;
 }
 
 std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode() const
@@ -217,7 +218,7 @@ std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode(bool isUpdateContextBefor
 std::shared_ptr<RSSurfaceNode> Session::GetShadowSurfaceNode() const
 {
     std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
-    return shadowSurfaceNode_;
+    return RSAdapterUtil::IsClientMultiInstanceEnabled() ? shadowSurfaceNode_ : surfaceNode_;
 }
 
 std::optional<NodeId> Session::GetSurfaceNodeId() const
@@ -241,7 +242,8 @@ void Session::SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurf
     }
     std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
     leashWinSurfaceNode_ = leashWinSurfaceNode;
-    leashWinShadowSurfaceNode_ = leashWinSurfaceNode_ ? leashWinSurfaceNode_->CreateShadowSurfaceNode() : nullptr;
+    leashWinShadowSurfaceNode_ = RSAdapterUtil::IsClientMultiInstanceEnabled() && leashWinSurfaceNode_ ?
+        leashWinSurfaceNode_->CreateShadowSurfaceNode() : nullptr;
 }
 
 void Session::SetFrameLayoutFinishListener(const NotifyFrameLayoutFinishFunc& func)
@@ -258,7 +260,7 @@ std::shared_ptr<RSSurfaceNode> Session::GetLeashWinSurfaceNode() const
 std::shared_ptr<RSSurfaceNode> Session::GetLeashWinShadowSurfaceNode() const
 {
     std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
-    return leashWinShadowSurfaceNode_;
+    return RSAdapterUtil::IsClientMultiInstanceEnabled() ? leashWinShadowSurfaceNode_ : leashWinSurfaceNode_;
 }
 
 std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNodeForMoveDrag() const
@@ -3071,13 +3073,38 @@ void Session::SetHasSnapshot(SnapshotStatus key, DisplayOrientation rotate)
     }
     if (freeMultiWindow_.load()) {
         scenePersistence_->SetHasSnapshotFreeMultiWindow(true);
-        ScenePersistentStorage::Insert(GetSnapshotPersistentKey(), static_cast<int32_t>(GetWindowMode()),
+        ScenePersistentStorage::Insert(GetSnapshotPersistentKey(), EncodeSnapShotRecoverValue(rotate),
             ScenePersistentStorageType::MAXIMIZE_STATE);
     } else {
         scenePersistence_->SetHasSnapshot(true, key);
         ScenePersistentStorage::Insert(GetSnapshotPersistentKey(key),
-            static_cast<int32_t>(rotate), ScenePersistentStorageType::MAXIMIZE_STATE);
+            EncodeSnapShotRecoverValue(rotate), ScenePersistentStorageType::MAXIMIZE_STATE);
     }
+}
+
+int32_t Session::EncodeSnapShotRecoverValue(DisplayOrientation rotate)
+{
+    int32_t snapShotRecoverValue = 0;
+    snapShotRecoverValue +=
+        SessionHelper::ShiftDecimalDigit(static_cast<int32_t>(rotate),
+            static_cast<int32_t>(SnapShotRecoverType::ROTATE));
+    snapShotRecoverValue +=
+        SessionHelper::ShiftDecimalDigit(static_cast<int32_t>(IsExitSplitOnBackgroundRecover()),
+            static_cast<int32_t>(SnapShotRecoverType::EXIT_SPLIT_ON_BACKGROUND));
+    return snapShotRecoverValue;
+}
+
+int32_t Session::DecodeSnapShotRecoverValue(int32_t snapShotRecoverValue, SnapShotRecoverType snapShotRecoverType)
+{
+    return (snapShotRecoverValue / static_cast<int32_t>(std::pow(DECIMAL_BASE,
+        static_cast<int32_t>(snapShotRecoverType)))) % DECIMAL_BASE;
+}
+
+bool Session::IsExitSplitOnBackgroundRecover()
+{
+    return GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+           GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
+           IsExitSplitOnBackground();
 }
 
 void Session::ResetLockedCacheSnapshot()
@@ -3141,11 +3168,15 @@ bool Session::HasSnapshot(SnapshotStatus key)
         "_" + std::to_string(persistentId_) + "_" + std::to_string(key), ScenePersistentStorageType::MAXIMIZE_STATE);
     if (hasSnapshot && scenePersistence_) {
         scenePersistence_->SetHasSnapshot(true, key);
-        int32_t rotate = 0;
+        int32_t snapShotRecoverValue = 0;
         ScenePersistentStorage::Get("Snapshot_" + sessionInfo_.bundleName_ +
             "_" + std::to_string(persistentId_) + "_" + std::to_string(key),
-            rotate, ScenePersistentStorageType::MAXIMIZE_STATE);
-        scenePersistence_->rotate_[key] = static_cast<DisplayOrientation>(rotate);
+            snapShotRecoverValue, ScenePersistentStorageType::MAXIMIZE_STATE);
+        scenePersistence_->rotate_[key] = static_cast<DisplayOrientation>(DecodeSnapShotRecoverValue(
+            snapShotRecoverValue, SnapShotRecoverType::ROTATE));
+        bool isExitSplitOnBackgroundRecover = static_cast<bool>(DecodeSnapShotRecoverValue(
+            snapShotRecoverValue, SnapShotRecoverType::EXIT_SPLIT_ON_BACKGROUND));
+        SetExitSplitOnBackground(isExitSplitOnBackgroundRecover);
     }
     return hasSnapshot;
 }
@@ -3157,13 +3188,12 @@ bool Session::HasSnapshotFreeMultiWindow()
     if (hasSnapshotFreeMultiWindow && scenePersistence_) {
         freeMultiWindow_.store(true);
         scenePersistence_->SetHasSnapshotFreeMultiWindow(true);
-        int32_t windowMode = 0;
+        int32_t snapShotRecoverValue = 0;
         ScenePersistentStorage::Get("Snapshot_" + sessionInfo_.bundleName_ +
-            "_" + std::to_string(persistentId_), windowMode, ScenePersistentStorageType::MAXIMIZE_STATE);
-        if (static_cast<WindowMode>(windowMode) == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-            static_cast<WindowMode>(windowMode) == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-            SetExitSplitOnBackground(true);
-        }
+            "_" + std::to_string(persistentId_), snapShotRecoverValue, ScenePersistentStorageType::MAXIMIZE_STATE);
+        bool isExitSplitOnBackgroundRecover = static_cast<bool>(DecodeSnapShotRecoverValue(
+            snapShotRecoverValue, SnapShotRecoverType::EXIT_SPLIT_ON_BACKGROUND));
+        SetExitSplitOnBackground(isExitSplitOnBackgroundRecover);
     }
     return hasSnapshotFreeMultiWindow;
 }
@@ -4292,11 +4322,11 @@ bool Session::CheckEmptyKeyboardAvoidAreaIfNeeded() const
     bool isPhoneNotFreeMultiWindow = systemConfig_.IsPhoneWindow() && !systemConfig_.IsFreeMultiWindowMode();
     bool isPadNotFreeMultiWindow = systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode();
     bool isPhoneOrPadNotFreeMultiWindow = isPhoneNotFreeMultiWindow || isPadNotFreeMultiWindow;
-    TLOGI(WmsLogTag::WMS_LIFE, "check keyboard avoid area, isPhoneNotFreeMultiWindow: %{public}d, "
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "check keyboard avoid area, isPhoneNotFreeMultiWindow: %{public}d, "
         "isPadNotFreeMultiWindow: %{public}d", isPhoneNotFreeMultiWindow, isPadNotFreeMultiWindow);
     auto screen = ScreenManager::GetInstance().GetScreenById(property_->GetDisplayId());
     if (screen != nullptr && screen->GetName() == APP_CAST_SCREEN_NAME) {
-        TLOGI(WmsLogTag::WMS_LIFE, "app cast screen");
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "app cast screen");
         return true;
     }
     return (isMainFloating || isParentFloating) && !isMidScene && isPhoneOrPadNotFreeMultiWindow;
@@ -5124,6 +5154,16 @@ WindowMetaInfo Session::GetWindowMetaInfoForWindowInfo() const
     }
     auto property = GetSessionProperty();
     windowMetaInfo.isPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
+    auto displayId = property->GetDisplayId();
+    auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
+    if (screenSession != nullptr) {
+        if (!screenSession->IsTouchEnabled() || !GetSystemTouchable() ||
+            !GetForegroundInteractiveStatus()) {
+            windowMetaInfo.isTouchable = false;
+        }
+    }
+    TLOGD(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", windowMetaInfo.windowId,
+        windowMetaInfo.isTouchable);
     return windowMetaInfo;
 }
 
@@ -5317,24 +5357,30 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
     return rsUIContext_;
 }
 
-std::shared_ptr<RSUIContext> Session::GetRSShadowContext() const
+std::shared_ptr<RSUIContext> Session::GetRSShadowContext()
 {
     std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
-    if (!shadowSurfaceNode_) {
-        TLOGE(WmsLogTag::WMS_SCB, "Shadow surface node is nullptr, id: %{public}d.", GetPersistentId());
-        return nullptr;
+    if (RSAdapterUtil::IsClientMultiInstanceEnabled()) {
+        if (!shadowSurfaceNode_) {
+            TLOGE(WmsLogTag::WMS_SCB, "Shadow surface node is nullptr, id: %{public}d.", GetPersistentId());
+            return nullptr;
+        }
+        return shadowSurfaceNode_->GetRSUIContext();
     }
-    return shadowSurfaceNode_->GetRSUIContext();
+    return GetRSUIContext();
 }
 
-std::shared_ptr<RSUIContext> Session::GetRSLeashWinShadowContext() const
+std::shared_ptr<RSUIContext> Session::GetRSLeashWinShadowContext()
 {
     std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
-    if (!leashWinShadowSurfaceNode_) {
-        TLOGE(WmsLogTag::WMS_SCB, "Leash win shadow surface node is nullptr, id: %{public}d.", GetPersistentId());
-        return nullptr;
+    if (RSAdapterUtil::IsClientMultiInstanceEnabled()) {
+        if (!leashWinShadowSurfaceNode_) {
+            TLOGE(WmsLogTag::WMS_SCB, "Leash win shadow surface node is nullptr, id: %{public}d.", GetPersistentId());
+            return nullptr;
+        }
+        return leashWinShadowSurfaceNode_->GetRSUIContext();
     }
-    return leashWinShadowSurfaceNode_->GetRSUIContext();
+    return GetRSUIContext();
 }
 
 WSError Session::SetIsShowDecorInFreeMultiWindow(bool isShow)

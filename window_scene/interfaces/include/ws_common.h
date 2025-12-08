@@ -62,7 +62,10 @@ constexpr uint32_t ICON_MAX_SIZE = 128 * 1024 * 1024;
 constexpr uint32_t ADVANCED_FEATURE_BIT_MAX = 32;
 constexpr uint32_t ADVANCED_FEATURE_BIT_LOCK_CURSOR = 0x00;
 constexpr uint32_t ADVANCED_FEATURE_BIT_CURSOR_FOLLOW_MOVEMENT = 0x01;
+constexpr uint32_t ADVANCED_FEATURE_BIT_WINDOW_SEPARATION_TOUCH_ENABLED = 0x02;
 constexpr uint32_t ADVANCED_FEATURE_BIT_RECEIVE_DRAG_EVENT = 0x03;
+
+constexpr int32_t DECIMAL_BASE = 10;
 
 enum class WSError : int32_t {
     WS_OK = 0,
@@ -1228,6 +1231,11 @@ enum class SnapshotNodeType : uint32_t {
     DEFAULT_NODE = 0,
     LEASH_NODE,
     APP_NODE,
+};
+
+enum class SnapShotRecoverType : uint32_t {
+    ROTATE = 0,
+    EXIT_SPLIT_ON_BACKGROUND,
 };
 
 enum class LifeCycleChangeReason {

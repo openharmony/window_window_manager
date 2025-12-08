@@ -64,6 +64,7 @@ static void SensorHallDataCallback(SensorEvent *event)
 
 void SuperFoldSensorManager::RegisterPostureCallback()
 {
+    curInterval_ = POSTURE_INTERVAL;
     OHOS::Rosen::FoldScreenSensorManager::GetInstance().SubscribeSensorCallback(
         SENSOR_TYPE_ID_POSTURE, POSTURE_INTERVAL, SensorPostureDataCallback);
 }
@@ -75,7 +76,7 @@ void SuperFoldSensorManager::UnregisterPostureCallback()
     if (ret == SENSOR_SUCCESS) {
         TLOGI(WmsLogTag::DMS, "success.");
     } else {
-        TLOGE(WmsLogTag::DMS, "UnregisterPostureCallback failed with ret: %d", ret);
+        TLOGE(WmsLogTag::DMS, "UnregisterPostureCallback failed with ret: %{public}d", ret);
     }
 }
 
@@ -92,7 +93,7 @@ void SuperFoldSensorManager::UnregisterHallCallback()
     if (ret == SENSOR_SUCCESS) {
         TLOGI(WmsLogTag::DMS, "success.");
     } else {
-        TLOGE(WmsLogTag::DMS, "UnRegisterHallCallback failed with ret: %d", ret);
+        TLOGE(WmsLogTag::DMS, "UnRegisterHallCallback failed with ret: %{public}d", ret);
     }
 }
 

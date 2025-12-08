@@ -1053,7 +1053,7 @@ void AniWindow::OnSetUIContent(ani_env* env, ani_string path)
     }
     std::string contentPath;
     AniWindowUtils::GetStdString(env, path, contentPath);
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->NapiSetUIContent(contentPath, env, nullptr));
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->AniSetUIContent(contentPath, env, nullptr));
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret, "Window load content failed");
     }
@@ -1352,6 +1352,58 @@ bool AniWindow::OnIsReceiveDragEventEnabled(ani_env* env)
     return windowToken_->IsReceiveDragEventEnabled();
 }
 
+void AniWindow::SetSeparationTouchEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enabled)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow != nullptr) {
+        aniWindow->OnSetSeparationTouchEnabled(env, enabled);
+    } else {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI] aniWindow is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+}
+
+void AniWindow::OnSetSeparationTouchEnabled(ani_env* env, ani_boolean enabled)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "[ANI]");
+    auto window = GetWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI] window is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSeparationTouchEnabled(enabled));
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret, "SetSeparationTouchEnabled failed.");
+    }
+}
+
+ani_boolean AniWindow::IsSeparationTouchEnabled(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI] aniWindow is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return static_cast<ani_boolean>(true);
+    }
+    return static_cast<ani_boolean>(aniWindow->OnIsSeparationTouchEnabled(env));
+}
+
+bool AniWindow::OnIsSeparationTouchEnabled(ani_env* env)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "[ANI]");
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI] window is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return true;
+    }
+
+    return windowToken_->IsSeparationTouchEnabled();
+}
+
 void AniWindow::RaiseMainWindowAboveTarget(ani_env* env, ani_object obj, ani_long nativeObj, ani_int windowId)
 {
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
@@ -1600,7 +1652,7 @@ void AniWindow::OnLoadContent(ani_env* env, ani_string path, ani_object storage,
     if (isLoadByName) {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->AniSetUIContentByName(contentPath, env, storage));
     } else {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->NapiSetUIContent(contentPath, env, storage));
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->AniSetUIContent(contentPath, env, storage));
     }
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret, "Window load content failed");
@@ -2124,7 +2176,7 @@ ani_object AniWindow::GetGlobalRect(ani_env* env)
     return AniWindowUtils::CreateAniRect(env, globalScaledRect);
 }
 
-ani_double AniWindow::GetWindowDecorHeight(ani_env* env)
+ani_int AniWindow::GetWindowDecorHeight(ani_env* env)
 {
     int32_t height { 0 };
     wptr<Window> weakToken(windowToken_);
@@ -3101,7 +3153,7 @@ ani_object AniWindow::SetWindowDecorVisible(ani_env* env, bool isVisible)
     return AniWindowUtils::CreateAniUndefined(env);
 }
 
-ani_object AniWindow::SetWindowDecorHeight(ani_env* env, ani_double height)
+ani_object AniWindow::SetWindowDecorHeight(ani_env* env, ani_int height)
 {
     if (height < MIN_DECOR_HEIGHT || height > MAX_DECOR_HEIGHT) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] height should greater than 37 or smaller than 112");
@@ -3285,14 +3337,6 @@ ani_object AniWindow::SetDragKeyFramePolicy(ani_env* env, ani_object aniKeyFrame
     if (!AniWindowUtils::ParseKeyFramePolicy(env, aniKeyFramePolicy, keyFramePolicy)) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed to convert parameter to keyFramePolicy");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
-    }
-    if (!windowToken_->IsPcWindow()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] device not support");
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
-    }
-    if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] only main window is valid");
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
 
     const WMError ret = windowToken_->SetDragKeyFramePolicy(keyFramePolicy);
@@ -5331,7 +5375,7 @@ static ani_int WindowSetWindowDecorVisible(ani_env* env, ani_object obj, ani_lon
     return ANI_OK;
 }
 
-static ani_int WindowSetWindowDecorHeight(ani_env* env, ani_object obj, ani_long nativeObj, ani_double height)
+static ani_int WindowSetWindowDecorHeight(ani_env* env, ani_object obj, ani_long nativeObj, ani_int height)
 {
     using namespace OHOS::Rosen;
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
@@ -6005,7 +6049,7 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(WindowMoveWindowTo)},
         ani_native_function {"getGlobalRect", "J:L@ohos/window/window/Rect;",
             reinterpret_cast<void *>(WindowGetGlobalRect)},
-        ani_native_function {"getWindowDecorHeight", "J:D",
+        ani_native_function {"getWindowDecorHeight", "J:I",
             reinterpret_cast<void *>(WindowGetWindowDecorHeight)},
         ani_native_function {"setWindowBackgroundColor", "JLstd/core/String;:I",
             reinterpret_cast<void *>(WindowSetWindowBackgroundColor)},
@@ -6013,7 +6057,7 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(WindowSetImmersiveModeEnabledState)},
         ani_native_function {"setWindowDecorVisible", "JZ:I",
             reinterpret_cast<void *>(WindowSetWindowDecorVisible)},
-        ani_native_function {"setWindowDecorHeight", "JD:I",
+        ani_native_function {"setWindowDecorHeight", "JI:I",
             reinterpret_cast<void *>(WindowSetWindowDecorHeight)},
         ani_native_function {"getWindowProperties", "J:L@ohos/window/window/WindowProperties;",
             reinterpret_cast<void *>(WindowGetWindowProperties)},
@@ -6102,6 +6146,10 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::SetReceiveDragEventEnabled)},
         ani_native_function {"isReceiveDragEventEnabled", "J:Z",
             reinterpret_cast<void *>(AniWindow::IsReceiveDragEventEnabled)},
+        ani_native_function {"setSeparationTouchEnabled", "lz:",
+            reinterpret_cast<void *>(AniWindow::SetSeparationTouchEnabled)},
+        ani_native_function {"isSeparationTouchEnabled", "J:Z",
+            reinterpret_cast<void *>(AniWindow::IsSeparationTouchEnabled)},
         ani_native_function {"requestFocusSync", "lz:",
             reinterpret_cast<void *>(AniWindow::RequestFocus)},
         ani_native_function {"setSubWindowModal", "lz:",

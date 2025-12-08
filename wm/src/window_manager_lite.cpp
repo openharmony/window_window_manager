@@ -40,6 +40,7 @@ public:
     void NotifyUnfocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
         WindowType windowType, DisplayId displayId);
     void NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo);
+    void NotifyDisplayGroupInfoChanged(DisplayGroupId displayGroupId, DisplayId displayId, bool isAdd);
     void NotifyUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo);
     void NotifyWindowVisibilityInfoChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
     void NotifyWindowVisibilityStateChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
@@ -86,6 +87,8 @@ public:
     sptr<WindowManagerAgentLite> pipStateChangedListenerAgent_;
     std::vector<sptr<IKeyboardCallingWindowDisplayChangedListener>> callingDisplayChangedListeners_;
     sptr<WindowManagerAgentLite> callingDisplayListenerAgent_;
+    std::vector<sptr<IAllGroupInfoChangedListener>> allGroupInfoChangedListeners_;
+    sptr<WindowManagerAgentLite> allGroupInfoChangedListenerAgent_;
 };
 
 void WindowManagerLite::Impl::NotifyWMSConnected(int32_t userId, int32_t screenId)
@@ -157,6 +160,24 @@ void WindowManagerLite::Impl::NotifyUnfocused(const sptr<FocusChangeInfo>& focus
             continue;
         }
         listener->OnUnfocused(focusChangeInfo);
+    }
+}
+
+void WindowManagerLite::Impl::NotifyDisplayGroupInfoChanged(DisplayGroupId displayGroupId, DisplayId displayId,
+                                                            bool isAdd)
+{
+    std::vector<sptr<IAllGroupInfoChangedListener>> allGroupInfoChangedListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        allGroupInfoChangedListeners = allGroupInfoChangedListeners_;
+    }
+    TLOGD(WmsLogTag::WMS_FOCUS, "listeners num: %{public}zu",
+          allGroupInfoChangedListeners.size());
+    for (auto& listener: allGroupInfoChangedListeners) {
+        if (listener == nullptr) {
+            continue;
+        }
+        listener->OnDisplayGroupInfoChange(displayGroupId, displayId, isAdd);
     }
 }
 
@@ -455,6 +476,63 @@ WMError WindowManagerLite::UnregisterFocusChangedListener(const sptr<IFocusChang
     return ret;
 }
 
+WMError WindowManagerLite::RegisterAllGroupInfoChangedListener(const sptr<IAllGroupInfoChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->allGroupInfoChangedListenerAgent_ == nullptr) {
+        pImpl_->allGroupInfoChangedListenerAgent_ = new (std::nothrow) WindowManagerAgentLite();
+        ret = WindowAdapterLite::GetInstance(userId_).RegisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_DISPLAYGROUP_INFO,
+            pImpl_->allGroupInfoChangedListenerAgent_);
+    }
+    if (ret != WMError::WM_OK) {
+        TLOGW(WmsLogTag::WMS_FOCUS, "register WindowManagerAgent failed");
+        pImpl_->allGroupInfoChangedListenerAgent_ = nullptr;
+    } else {
+        auto iter = std::find(pImpl_->allGroupInfoChangedListeners_.begin(),
+                              pImpl_->allGroupInfoChangedListeners_.end(), listener);
+        if (iter != pImpl_->allGroupInfoChangedListeners_.end()) {
+            TLOGW(WmsLogTag::WMS_FOCUS, "listener is already registered");
+            return WMError::WM_OK;
+        }
+        pImpl_->allGroupInfoChangedListeners_.emplace_back(listener);
+        TLOGI(WmsLogTag::WMS_FOCUS, "success");
+    }
+    return ret;
+}
+
+WMError WindowManagerLite::UnregisterAllGroupInfoChangedListener(const sptr<IAllGroupInfoChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    auto iter = std::find(pImpl_->allGroupInfoChangedListeners_.begin(), pImpl_->allGroupInfoChangedListeners_.end(),
+                          listener);
+    if (iter == pImpl_->allGroupInfoChangedListeners_.end()) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "could not find this listener");
+        return WMError::WM_OK;
+    }
+    pImpl_->allGroupInfoChangedListeners_.erase(iter);
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->allGroupInfoChangedListeners_.empty() && pImpl_->allGroupInfoChangedListenerAgent_ != nullptr) {
+        ret = WindowAdapterLite::GetInstance(userId_).UnregisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_DISPLAYGROUP_INFO,
+            pImpl_->allGroupInfoChangedListenerAgent_);
+        if (ret == WMError::WM_OK) {
+            pImpl_->allGroupInfoChangedListenerAgent_ = nullptr;
+            TLOGI(WmsLogTag::WMS_FOCUS, "success");
+        }
+    }
+    return ret;
+}
+
 WMError WindowManagerLite::RegisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener)
 {
     if (listener == nullptr) {
@@ -567,6 +645,13 @@ void WindowManagerLite::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId
     WindowAdapterLite::GetInstance(userId_).GetFocusWindowInfo(focusInfo, displayId);
 }
 
+void WindowManagerLite::GetAllGroupInfo(std::unordered_map<DisplayId, DisplayGroupId>& displayId2GroupIdMap,
+                                        std::vector<sptr<FocusChangeInfo>>& allFocusInfoList)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "In");
+    WindowAdapterLite::GetInstance(userId_).GetAllGroupInfo(displayId2GroupIdMap, allFocusInfoList);
+}
+
 void WindowManagerLite::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) const
 {
     if (focusChangeInfo == nullptr) {
@@ -579,6 +664,15 @@ void WindowManagerLite::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focus
     } else {
         pImpl_->NotifyUnfocused(focusChangeInfo);
     }
+}
+
+void WindowManagerLite::UpdateDisplayGroupInfo(DisplayGroupId displayGroupId, DisplayId displayId, bool isAdd) const
+{
+    if (displayGroupId == DISPLAY_GROUP_ID_INVALID || displayId == DISPLAY_ID_INVALID) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "displayGroupId or displayId is invalid");
+        return;
+    }
+    pImpl_->NotifyDisplayGroupInfoChanged(displayGroupId, displayId, isAdd);
 }
 
 void WindowManagerLite::UpdateWindowVisibilityInfo(

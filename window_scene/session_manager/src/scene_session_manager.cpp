@@ -28,6 +28,7 @@
 #include <parameters.h>
 #include <ui/rs_node.h>
 #include "hitrace/hitracechain.h"
+#include "ffrt_serial_queue_helper.h"
 #include "parameter.h"
 #include "publish/scb_dump_subscriber.h"
 #include "resource_manager.h"
@@ -3299,7 +3300,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     }
     if (WindowHelper::IsMainWindow(sceneSession->GetWindowType()) && sceneSession->IsFocusedOnShow()) {
         if (Session::IsScbCoreEnabled()) {
-            if (sceneSession->IsVisibleForeground()) {
+            if (sceneSession->IsVisibleForeground() && !sceneSession->GetSessionInfo().isRestartApp_) {
                 RequestSessionFocusImmediately(persistentId);
             } else {
                 PostProcessFocusState state = { true, true, true, FocusChangeReason::SCB_START_APP };
@@ -6139,8 +6140,11 @@ void SceneSessionManager::ClearStartWindowColorFollowApp(const std::string& bund
 
 void SceneSessionManager::OnBundleUpdated(const std::string& bundleName, int userId)
 {
-    taskScheduler_->PostAsyncTask([this, bundleName, where = __func__]() {
+    taskScheduler_->PostAsyncTask([this, bundleName]() {
         ClearStartWindowColorFollowApp(bundleName);
+    }, __func__);
+    auto task = [this, bundleName, where = __func__] {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:OnBundleUpdated [%s]", bundleName.c_str());
         if (startingWindowRdbMgr_ == nullptr || bundleMgr_ == nullptr) {
             TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s: rdb or bms is nullptr", where);
             return;
@@ -6160,7 +6164,8 @@ void SceneSessionManager::OnBundleUpdated(const std::string& bundleName, int use
             auto batchInsertRes = startingWindowRdbMgr_->BatchInsert(outInsertNum, inputValues);
             TLOGNI(WmsLogTag::WMS_PATTERN, "res:%{public}d, insert num:%{public}" PRId64, batchInsertRes, outInsertNum);
         }
-    }, __func__);
+    };
+    FfrtSerialQueueHelper::GetInstance().SubmitTask(task);
     taskScheduler_->PostAsyncTask([this, bundleName]() {
         std::unique_lock<std::shared_mutex> lock(startingWindowMapMutex_);
         if (auto iter = startingWindowMap_.find(bundleName); iter != startingWindowMap_.end()) {
@@ -6820,6 +6825,50 @@ void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo, Display
             return WSError::WS_OK;
         }
         return WSError::WS_ERROR_DESTROYED_OBJECT;
+    }, __func__);
+}
+
+void SceneSessionManager::GetAllGroupInfo(std::unordered_map<DisplayId, DisplayGroupId>& displayId2GroupIdMap,
+                                          std::vector<sptr<FocusChangeInfo>>& allFocusInfoList)
+{
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "non-SA calling, permission denied!");
+        return;
+    }
+    taskScheduler_->PostSyncTask([this, &displayId2GroupIdMap, &allFocusInfoList, where = __func__] {
+        std::unordered_map<DisplayId, DisplayGroupId> groupInfoMap = windowFocusController_->GetDisplayId2GroupIdMap();
+        if (groupInfoMap.empty()) {
+            TLOGNE(WmsLogTag::WMS_FOCUS, "displayId2GroupIdMap is empty");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        displayId2GroupIdMap = groupInfoMap;
+        std::unordered_map<DisplayGroupId, sptr<FocusGroup>> allFocusGroupMap;
+        windowFocusController_->GetAllFocusGroup(allFocusGroupMap);
+        for (const auto& elem : allFocusGroupMap) {
+            auto curFocusGroup = elem.second;
+            if (curFocusGroup == nullptr) {
+                TLOGNE(WmsLogTag::WMS_FOCUS, "%{public}s focus group is null", where);
+                continue;
+            }
+            auto focusedSession = GetSceneSession(curFocusGroup->GetFocusedSessionId());
+            if (focusedSession == nullptr) {
+                TLOGNE(WmsLogTag::WMS_FOCUS, "%{public}s focused session is null, id: %{public}d", where,
+                    curFocusGroup->GetFocusedSessionId());
+                continue;
+            }
+            auto focusInfo = sptr<FocusChangeInfo>::MakeSptr(
+                focusedSession->GetWindowId(), curFocusGroup->GetDisplayGroupId() == DEFAULT_DISPLAY_ID ?
+                DEFAULT_DISPLAY_ID : focusedSession->GetDisplayId(), focusedSession->GetDisplayId(),
+                curFocusGroup->GetDisplayGroupId(), focusedSession->GetCallingPid(), focusedSession->GetCallingUid(),
+                focusedSession->GetWindowType(), focusedSession->GetAbilityToken());
+            allFocusInfoList.emplace_back(focusInfo);
+        }
+        if (allFocusInfoList.empty()) {
+            TLOGNE(WmsLogTag::WMS_FOCUS, "allFocusInfoList is empty");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        TLOGNI(WmsLogTag::WMS_FOCUS, "%{public}s success", where);
+        return WSError::WS_OK;
     }, __func__);
 }
 
@@ -8638,6 +8687,8 @@ void SceneSessionManager::NotifyFocusStatus(const sptr<SceneSession>& sceneSessi
     sptr<FocusChangeInfo> focusChangeInfo = sptr<FocusChangeInfo>::MakeSptr(
         sceneSession->GetWindowId(),
         focusGroupId,
+        sceneSession->GetDisplayId(),
+        focusGroup->GetDisplayGroupId(),
         sceneSession->GetCallingPid(),
         sceneSession->GetCallingUid(),
         sceneSession->GetWindowType(),
@@ -9502,7 +9553,7 @@ void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneS
 
 WSError SceneSessionManager::ProcessModalTopmostRequestFocusImmediately(const sptr<SceneSession>& sceneSession)
 {
-    // focus must on modal topmost subwindow when APP_MAIN_WINDOW or sub winodw request focus
+    // focus must on modal topmost subwindow when APP_MAIN_WINDOW or sub window request focus
     sptr<SceneSession> mainSession = nullptr;
     if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         mainSession = sceneSession;
@@ -9581,7 +9632,7 @@ WSError SceneSessionManager::ProcessSubWindowRequestFocusImmediately(const sptr<
 
 WSError SceneSessionManager::ProcessDialogRequestFocusImmediately(const sptr<SceneSession>& sceneSession)
 {
-    // focus must on dialog when APP_MAIN_WINDOW or sub winodw request focus
+    // focus must on dialog when APP_MAIN_WINDOW or sub window request focus
     sptr<SceneSession> mainSession = nullptr;
     if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         mainSession = sceneSession;
@@ -10617,6 +10668,37 @@ WSError SceneSessionManager::GetUIContentRemoteObj(int32_t persistentId, sptr<IR
     return sceneSession->GetUIContentRemoteObj(uiContentRemoteObj);
 }
 
+WMError SceneSessionManager::GetRootUIContentRemoteObj(DisplayId displayId, sptr<IRemoteObject>& uiContentRemoteObj)
+{
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied, displayId: %{public}" PRIu64, displayId);
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    return GetRootUIContentRemoteObjInner(displayId, uiContentRemoteObj);
+}
+
+WMError SceneSessionManager::GetRootUIContentRemoteObjInner(DisplayId displayId,
+    sptr<IRemoteObject>& uiContentRemoteObj)
+{
+    if (rootSceneSession_ == nullptr) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "root scene is null, displayId: %{public}" PRIu64, displayId);
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (PcFoldScreenManager::GetInstance().IsHalfFolded(displayId)) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "change fold screen displayId: %{public}" PRIu64, displayId);
+        displayId = DEFAULT_DISPLAY_ID;
+    }
+    auto uiContent = rootSceneSession_->GetUIContent(displayId);
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "uiContent is nullptr, displayId: %{public}" PRIu64, displayId);
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    uiContentRemoteObj = uiContent->GetRemoteObj();
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "isNullUiContentObj=%{public}d, displayId: %{public}" PRIu64,
+        uiContentRemoteObj == nullptr, displayId);
+    return WMError::WM_OK;
+}
+
 #ifdef WINDOW_MANAGER_FEATURE_SUPPORT_DMSFWK
 int SceneSessionManager::GetRemoteSessionSnapshotInfo(const std::string& deviceId, int32_t sessionId,
                                                       AAFwk::MissionSnapshot& sessionSnapshot)
@@ -11326,6 +11408,7 @@ WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType t
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_VISIBLE_WINDOW_NUM ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS ||
+        type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_DISPLAYGROUP_INFO ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_PID_VISIBILITY ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY) {
@@ -11362,6 +11445,7 @@ WMError SceneSessionManager::UnregisterWindowManagerAgent(WindowManagerAgentType
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_VISIBLE_WINDOW_NUM ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS ||
+        type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_DISPLAYGROUP_INFO ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY) {
         if (!SessionPermission::IsSACalling()) {
@@ -17404,7 +17488,7 @@ std::shared_ptr<Media::PixelMap> SceneSessionManager::GetPixelMap(uint32_t resou
     return std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
 }
 
-void SceneSessionManager::GetCropInfoByDisplaySize(const Media::ImageInfo& imageinfo, Media::DecodeOptions& decodeOpts)
+void SceneSessionManager::GetCropInfoByDisplaySize(const Media::ImageInfo& imageInfo, Media::DecodeOptions& decodeOpts)
 {
     int32_t displayWidth = 0;
     int32_t displayHeight = 0;
@@ -17414,13 +17498,14 @@ void SceneSessionManager::GetCropInfoByDisplaySize(const Media::ImageInfo& image
         return;
     }
     int32_t cropSize = std::max(displayWidth, displayHeight);
-    if (imageinfo.size.width > cropSize || imageinfo.size.height > cropSize) {
+    if (imageInfo.size.width > cropSize || imageInfo.size.height > cropSize) {
         decodeOpts.CropRect = {
-            .left = std::max(0, (imageinfo.size.width - cropSize) / 2),
-            .top = std::max(0, (imageinfo.size.height - cropSize) / 2),
-            .width = std::min(imageinfo.size.width, cropSize),
-            .height = std::min(imageinfo.size.height, cropSize),
+            .left = std::max(0, (imageInfo.size.width - cropSize) / 2),
+            .top = std::max(0, (imageInfo.size.height - cropSize) / 2),
+            .width = std::min(imageInfo.size.width, cropSize),
+            .height = std::min(imageInfo.size.height, cropSize),
         };
+        decodeOpts.cropAndScaleStrategy = Media::CropAndScaleStrategy::CROP_FIRST;
         TLOGI(WmsLogTag::WMS_PATTERN, "crop: %{public}d, %{public}d, %{public}d, %{public}d",
             decodeOpts.CropRect.left, decodeOpts.CropRect.top, decodeOpts.CropRect.width, decodeOpts.CropRect.height);
     }

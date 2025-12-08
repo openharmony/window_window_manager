@@ -26,6 +26,11 @@ void WindowManagerAgentLite::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& 
     SingletonContainer::Get<WindowManagerLite>().UpdateFocusChangeInfo(focusChangeInfo, focused);
 }
 
+void WindowManagerAgentLite::UpdateDisplayGroupInfo(DisplayGroupId displayGroupId, DisplayId displayId, bool isAdd)
+{
+    SingletonContainer::Get<WindowManagerLite>().UpdateDisplayGroupInfo(displayGroupId, displayId, isAdd);
+}
+
 void WindowManagerAgentLite::UpdateWindowVisibilityInfo(const std::vector<sptr<WindowVisibilityInfo>>& visibilityInfos)
 {
     SingletonContainer::Get<WindowManagerLite>().UpdateWindowVisibilityInfo(visibilityInfos);
