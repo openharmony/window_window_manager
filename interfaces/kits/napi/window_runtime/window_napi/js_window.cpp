@@ -7423,7 +7423,7 @@ std::optional<WaterfallResidentState> ParseWaterfallResidentState(napi_env env, 
         return std::nullopt;
     }
     if (napiAcrossDisplay == nullptr || GetType(env, napiAcrossDisplay) == napi_undefined) {
-        return WaterfallResidentState::CANCEL;
+        return WaterfallResidentState::UNCHANGED;
     }
     bool acrossDisplay = false;
     if (!ConvertFromJsValue(env, napiAcrossDisplay, acrossDisplay)) {
