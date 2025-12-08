@@ -7373,8 +7373,8 @@ WSError SceneSessionManager::GetSCBDebugDumpInfo(std::string&& cmd, std::string&
     {
         auto rootContext = rootSceneContextWeak_.lock();
         if (args.back() == writeFileCmd && rootContext != nullptr) {
-            auto dumpTimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(
-                std::chrono::system_clock::now().time_since_epoch()).count()
+            auto dumpTimeStamp = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch()).count();
             filePath = rootContext->GetFilesDir() + "/wms_" + std::to_string(dumpTimeStamp) + ".dump";
             cmd.erase(pos, writeFileCmd.length());
         }
