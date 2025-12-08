@@ -28,7 +28,11 @@
 #include "parameters.h"
 #include "scene_board_judgement.h"
 #include "window_helper.h"
+#define private public
+#define protected public
 #include "window_session_impl.h"
+#undef private
+#undef protected
 #include "wm_common.h"
 #include "window_manager_hilog.h"
 #include <transaction/rs_transaction.h>
@@ -1489,11 +1493,47 @@ HWTEST_F(WindowSessionImplTest5, NapiSetUIContent01, Function | SmallTest | Leve
     sptr<IRemoteObject> token;
     window->state_ = WindowState::STATE_SHOWN;
 
+    window->AniSetUIContent("info", (ani_env*)nullptr, nullptr, BackupAndRestoreType::NONE, nullptr, nullptr);
+
     std::string navInfo = "testInfo";
     window->SetNavDestinationInfo(navInfo);
 
     window->NapiSetUIContent("info", (napi_env)nullptr, nullptr, BackupAndRestoreType::NONE, nullptr, nullptr);
+
+    window->SetNavDestinationInfo(navInfo);
+
+    window->AniSetUIContent("info", (ani_env*)nullptr, nullptr, BackupAndRestoreType::NONE, nullptr, nullptr);
     EXPECT_EQ(window->navDestinationInfo_, "");
+}
+
+/**
+ * @tc.name: SetUIContentInner
+ * @tc.desc: SetUIContentInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, SetUIContentInner, Function | SmallTest | Level2)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetUIContentInner");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    SessionInfo sessionInfo = {"SetUIContentInner", "SetUIContentInner", "SetUIContentInner"};
+    auto hostSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetPersistentId(2);
+    window->property_ = property;
+    window->hostSession_ = hostSession;
+    sptr<IRemoteObject> token;
+    window->state_ = WindowState::STATE_SHOWN;
+    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    window->iconCache_ = pixelMap;
+
+    window->SetUIContentInner("info", nullptr, nullptr,
+        WindowSetUIContentType::DEFAULT, BackupAndRestoreType::NONE, nullptr);
+    EXPECT_TRUE(g_errLog.find("Use iconCache to set WindowIcon") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**

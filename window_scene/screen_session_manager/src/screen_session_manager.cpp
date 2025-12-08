@@ -899,6 +899,18 @@ void ScreenSessionManager::RegisterRefreshRateChangeListener()
     // LCOV_EXCL_STOP
 }
 
+void ScreenSessionManager::NotifyTentModeChange(TentMode tentMode)
+{
+    auto clientProxy = GetClientProxy();
+    if (!clientProxy) {
+        TLOGW(WmsLogTag::DMS, "clientProxy null");
+        return;
+    }
+    tentMode_ = tentMode;
+    TLOGD(WmsLogTag::DMS, "change tentMode to: %{public}" PRIu32, static_cast<uint32_t>(tentMode));
+    clientProxy->OnTentModeChange(tentMode);
+}
+
 void ScreenSessionManager::OnVirtualScreenChange(ScreenId screenId, ScreenEvent screenEvent,
     const UniqueScreenRotationOptions& rotationOptions)
 {
@@ -2732,10 +2744,10 @@ void ScreenSessionManager::UpdateSessionByActiveModeChange(sptr<ScreenSession> s
         screenSession->SetStartPosition(startXcopy, startYcopy);
         screenSession->SetXYPosition(retxCopy, retyCopy);
         screenSession->SetScreenOffScreenRendering();
-        HandleResolutionEffectChange();
         if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
             SuperFoldStateManager::GetInstance().RefreshExternalRegion();
         }
+        HandleResolutionEffectChange();
     }
     TLOGI(WmsLogTag::DMS, "end");
 }
@@ -3071,6 +3083,11 @@ DMError ScreenSessionManager::SetResolution(ScreenId screenId, uint32_t width, u
     return DMError::DM_OK;
 }
 
+static inline bool IsVertical(Rotation rotation)
+{
+    return rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180;
+}
+
 void ScreenSessionManager::HandleResolutionEffectChangeWhenRotate()
 {
     TLOGI(WmsLogTag::DMS, "start");
@@ -3084,12 +3101,8 @@ void ScreenSessionManager::HandleResolutionEffectChangeWhenRotate()
         TLOGE(WmsLogTag::DMS, "Internal Session null");
         return;
     }
-    if (internalSession->GetRotation() == Rotation::ROTATION_90 ||
-        internalSession->GetRotation() == Rotation::ROTATION_270) {
+    if (!IsVertical(internalSession->GetRotation())) {
         HandleResolutionEffectChange();
-    } else {
-        RecoveryResolutionEffect();
-        SuperFoldStateManager::GetInstance().RefreshExternalRegion();
     }
 #endif
 }
@@ -3110,9 +3123,7 @@ bool ScreenSessionManager::HandleResolutionEffectChange()
         RecoveryResolutionEffect();
         return false;
     }
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
-        (internalSession->GetRotation() == Rotation::ROTATION_0 ||
-        internalSession->GetRotation() == Rotation::ROTATION_180)) {
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && IsVertical(internalSession->GetRotation())) {
         TLOGI(WmsLogTag::DMS, "SuperFoldDisplayDevice Vertical");
         return false;
     }
@@ -3135,8 +3146,7 @@ void ScreenSessionManager::CalculateTargetResolution(const sptr<ScreenSession>& 
     uint32_t innerHeight = internalSession->GetScreenProperty().GetScreenRealHeight();
     uint32_t externalWidth = externalSession->GetScreenProperty().GetScreenRealWidth();
     uint32_t externalHeight = externalSession->GetScreenProperty().GetScreenRealHeight();
-    if (internalSession->GetRotation() == Rotation::ROTATION_90 ||
-        internalSession->GetRotation() == Rotation::ROTATION_270) {
+    if (IsVertical(internalSession->GetRotation()) != IsVertical(externalSession->GetRotation())) {
         std::swap(externalWidth, externalHeight);
     }
     targetWidth = innerWidth;
@@ -3215,6 +3225,10 @@ bool ScreenSessionManager::RecoveryResolutionEffect()
         TLOGE(WmsLogTag::DMS, "internalSession null");
         return false;
     }
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && IsVertical(internalSession->GetRotation())) {
+        TLOGI(WmsLogTag::DMS, "SuperFoldDisplayDevice Vertical");
+        return false;
+    }
     auto internalProperty = internalSession->GetScreenProperty();
     DMRect realResolutionRect = { 0, 0, internalProperty.GetScreenRealWidth(),
         internalProperty.GetScreenRealHeight()};
@@ -3242,7 +3256,14 @@ void ScreenSessionManager::SetInternalScreenResolutionEffect(const sptr<ScreenSe
     // Setting the display area of the internal screen
     auto oldProperty = internalSession->GetScreenProperty();
     internalSession->UpdatePropertyByResolution(targetRect);
-    internalSession->PropertyChange(internalSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        auto newProperty = internalSession->GetScreenProperty();
+        newProperty.SetPropertyChangeReason("resolutionEffectChange");
+        newProperty.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::RESOLUITION_EFFECT_CHANGE);
+        internalSession->PropertyChange(newProperty, ScreenPropertyChangeReason::CHANGE_MODE);
+    } else {
+        internalSession->PropertyChange(internalSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
+    }
     if (oldProperty.GetScreenAreaWidth() != targetRect.width_ ||
         oldProperty.GetScreenAreaHeight() != targetRect.height_) {
         NotifyScreenChanged(internalSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
@@ -3295,11 +3316,17 @@ bool ScreenSessionManager::HandleCastVirtualScreenMirrorRegion()
         TLOGE(WmsLogTag::DMS, "ScreenSession Null");
         return false;
     }
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && IsVertical(internalSession->GetRotation())) {
+        TLOGI(WmsLogTag::DMS, "SuperFoldDisplayDevice Vertical");
+        return false;
+    }
     //all zero, means full screen mirror.
     DMRect mirrorRegion = DMRect::NONE();
     if (curResolutionEffectEnable_.load()) {
-        auto bounds = internalSession->GetScreenProperty().GetBounds();
-        mirrorRegion = DMRect{bounds.rect_.left_, bounds.rect_.top_, bounds.rect_.width_, bounds.rect_.height_};
+        auto property = internalSession->GetScreenProperty();
+        auto bounds = property.GetBounds();
+        mirrorRegion = DMRect{bounds.rect_.left_, bounds.rect_.top_,
+            property.GetScreenAreaWidth(), property.GetScreenAreaHeight()};
     }
     virtualSession->SetMirrorScreenRegion(virtualSession->GetScreenId(), mirrorRegion);
     virtualSession->EnableMirrorScreenRegion();

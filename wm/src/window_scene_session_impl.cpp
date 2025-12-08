@@ -1434,10 +1434,7 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
             (windowModeSupportType == WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) :
             (WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FULLSCREEN) &&
             !WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FLOATING));
-        auto mainWindow = FindMainWindowWithContext();
-        bool isAnco = mainWindow != nullptr && mainWindow->IsAnco();
-        bool onlySupportFullScreen = (isWindowModeSupportFullscreen || (isAnco && !windowSystemConfig_.IsPcWindow())) &&
-            ((!windowSystemConfig_.IsPhoneWindow() && !windowSystemConfig_.IsPadWindow()) || IsFreeMultiWindowMode());
+        bool onlySupportFullScreen = isWindowModeSupportFullscreen && IsPcOrPadFreeMultiWindowMode();
         bool compatibleDisableFullScreen = property_->IsFullScreenDisabled();
         if ((onlySupportFullScreen || property_->GetFullScreenStart()) && !compatibleDisableFullScreen) {
             TLOGI(WmsLogTag::WMS_LAYOUT_PC, "onlySupportFullScreen:%{public}d fullScreenStart:%{public}d",
@@ -3312,12 +3309,10 @@ bool WindowSceneSessionImpl::IsLayoutFullScreen() const
     }
     WindowType winType = property_->GetWindowType();
     if (WindowHelper::IsMainWindow(winType)) {
-        return (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-            (IsPcOrPadFreeMultiWindowMode() ? enableImmersiveMode_.load() : isIgnoreSafeArea_));
+        return (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN && isIgnoreSafeArea_);
     }
     if (WindowHelper::IsSubWindow(winType)) {
-        return IsPcOrPadFreeMultiWindowMode() ? enableImmersiveMode_.load() :
-            (isIgnoreSafeAreaNeedNotify_ && isIgnoreSafeArea_);
+        return isIgnoreSafeAreaNeedNotify_ && isIgnoreSafeArea_;
     }
     return false;
 }
@@ -3863,6 +3858,7 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation, Wate
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
     hostSession->OnTitleAndDockHoverShowChange(titleHoverShowEnabled_, dockHoverShowEnabled_);
+    SetLayoutFullScreenByApiVersion(enableImmersiveMode_);
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "present: %{public}d, enableImmersiveMode_:%{public}d!",
         presentation, enableImmersiveMode_.load());
     SessionEventParam param;
@@ -7171,6 +7167,10 @@ bool WindowSceneSessionImpl::GetIsUIExtAnySubWindow() const
 WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)
 {
     if (windowSystemConfig_.IsPcWindow()) {
+        if (property_->IsAdaptToCompatibleDevice()) {
+            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "phone app in pc compatible mode, enable=%{public}d", enable);
+            return WMError::WM_OK;
+        }
         TLOGI(WmsLogTag::WMS_IMMS, "device is not support");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -7190,6 +7190,11 @@ WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)
 WMError WindowSceneSessionImpl::GetGestureBackEnabled(bool& enable) const
 {
     if (windowSystemConfig_.IsPcWindow()) {
+        enable = false;
+        if (property_->IsAdaptToCompatibleDevice()) {
+            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "phone app in pc compatible mode, enable=%{public}d", enable);
+            return WMError::WM_OK;
+        }
         TLOGI(WmsLogTag::WMS_IMMS, "device not support");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -7793,6 +7798,30 @@ WMError WindowSceneSessionImpl::SetReceiveDragEventEnabled(bool enabled)
 bool WindowSceneSessionImpl::IsReceiveDragEventEnabled()
 {
     return isReceiveDragEventEnable_;
+}
+
+WMError WindowSceneSessionImpl::SetSeparationTouchEnabled(bool enabled)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_EVENT, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    std::vector<int32_t> parameters;
+    parameters.emplace_back(WINDOW_SEPARATION_TOUCH_ENABLED_LENGTH);
+    parameters.emplace_back(static_cast<int32_t>(enabled));
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    auto result = hostSession->SendCommonEvent(
+        static_cast<int32_t>(CommonEventCommand::SET_WINDOW_SEPARATION_TOUCH_ENABLED), parameters);
+    if (result == WMError::WM_OK) {
+        isSeparationTouchEnabled_ = enabled;
+    }
+    return result;
+}
+
+bool WindowSceneSessionImpl::IsSeparationTouchEnabled()
+{
+    return isSeparationTouchEnabled_;
 }
 
 bool WindowSceneSessionImpl::IsHitHotAreas(std::shared_ptr<MMI::PointerEvent>& pointerEvent)

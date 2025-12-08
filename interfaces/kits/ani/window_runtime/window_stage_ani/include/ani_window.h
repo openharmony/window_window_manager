@@ -67,6 +67,8 @@ public:
     static void SetTopmost(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isTopmost);
     static void SetReceiveDragEventEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enabled);
     static ani_boolean IsReceiveDragEventEnabled(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void SetSeparationTouchEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enabled);
+    static ani_boolean IsSeparationTouchEnabled(ani_env* env, ani_object obj, ani_long nativeObj);
     static void RequestFocus(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isFocused);
     static void SetSubWindowModal(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isModal);
     static void SetSubWindowModalType(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isModal,
@@ -171,11 +173,11 @@ public:
     void MoveWindowTo(ani_env* env, ani_int x, ani_int y);
     ani_object GetGlobalRect(ani_env* env);
 
-    ani_double GetWindowDecorHeight(ani_env* env);
+    ani_int GetWindowDecorHeight(ani_env* env);
     ani_object SetWindowBackgroundColor(ani_env* env, const std::string& color);
     ani_object SetImmersiveModeEnabledState(ani_env* env, bool enable);
     ani_object SetWindowDecorVisible(ani_env* env, bool isVisible);
-    ani_object SetWindowDecorHeight(ani_env* env, ani_double height);
+    ani_object SetWindowDecorHeight(ani_env* env, ani_int height);
     ani_object GetWindowPropertiesSync(ani_env* env);
     ani_boolean IsWindowSupportWideGamut(ani_env* env);
     ani_object SetWindowLayoutFullScreen(ani_env* env, ani_boolean isLayoutFullScreen);
@@ -251,6 +253,8 @@ private:
     void OnSetTopmost(ani_env* env, ani_boolean isTopmost);
     void OnSetReceiveDragEventEnabled(ani_env* env, ani_boolean enabled);
     bool OnIsReceiveDragEventEnabled(ani_env* env);
+    void OnSetSeparationTouchEnabled(ani_env* env, ani_boolean enabled);
+    bool OnIsSeparationTouchEnabled(ani_env* env);
     void OnRequestFocus(ani_env* env, ani_boolean isFocused);
     void OnSetSubWindowModal(ani_env* env, ani_boolean isModal);
     void OnSetSubWindowModalType(ani_env* env, ani_boolean isModal, ani_int modalityType);

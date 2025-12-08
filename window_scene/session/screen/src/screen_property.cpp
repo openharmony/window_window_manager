@@ -680,10 +680,10 @@ static inline bool IsWidthHeightMatch(float width, float height, float targetWid
 
 void ScreenProperty::SetInputOffsetY()
 {
-    inputOffsetX_ = 0;
     if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         return;
     }
+    inputOffsetX_ = 0;
     if (IsWidthHeightMatch(bounds_.rect_.GetWidth(), bounds_.rect_.GetHeight(), FULL_STATUS_WIDTH, SCREEN_HEIGHT)) {
         inputOffsetX_ = SECONDARY_FULL_OFFSETY;
     }

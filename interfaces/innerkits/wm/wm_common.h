@@ -47,6 +47,7 @@ constexpr int32_t MIN_COLOR_MODE = -1;
 constexpr int32_t MAX_COLOR_MODE = 1;
 constexpr int32_t LIGHT_COLOR_MODE = 0;
 constexpr int32_t DARK_COLOR_MODE = 1;
+constexpr int32_t ANCO_SERVICE_BROKER_UID = 5557;
 constexpr uint32_t MIN_SPACING_BETWEEN_BUTTONS = 8;
 constexpr uint32_t MAX_SPACING_BETWEEN_BUTTONS = 24;
 constexpr uint32_t MIN_BUTTON_BACKGROUND_SIZE = 20;
@@ -131,6 +132,7 @@ enum class WindowManagerAgentType : uint32_t {
     WINDOW_MANAGER_AGENT_TYPE_PROPERTY,
     WINDOW_MANAGER_AGENT_STATUS_BAR_PROPERTY,
     WINDOW_MANAGER_AGENT_SUPPORT_ROTATION,
+    WINDOW_MANAGER_AGENT_TYPE_DISPLAYGROUP_INFO,
     WINDOW_MANAGER_AGENT_TYPE_END,
 };
 
@@ -2180,6 +2182,7 @@ struct WindowMetaInfo : public Parcelable {
     WindowMode windowMode = WindowMode::WINDOW_MODE_UNDEFINED;
     bool isMidScene = false;
     bool isFocused = false;
+    bool isTouchable = true;
 
     bool Marshalling(Parcel& parcel) const override
     {
@@ -2188,7 +2191,8 @@ struct WindowMetaInfo : public Parcelable {
                parcel.WriteUint32(static_cast<uint32_t>(windowType)) && parcel.WriteUint32(parentWindowId) &&
                parcel.WriteUint64(surfaceNodeId) && parcel.WriteUint64(leashWinSurfaceNodeId) &&
                parcel.WriteBool(isPrivacyMode) && parcel.WriteBool(isMidScene) &&
-               parcel.WriteBool(isFocused) && parcel.WriteUint32(static_cast<uint32_t>(windowMode));
+               parcel.WriteBool(isFocused) && parcel.WriteUint32(static_cast<uint32_t>(windowMode)) &&
+               parcel.WriteBool(isTouchable);
     }
 
     static WindowMetaInfo* Unmarshalling(Parcel& parcel)
@@ -2203,7 +2207,8 @@ struct WindowMetaInfo : public Parcelable {
             !parcel.ReadUint64(windowMetaInfo->surfaceNodeId) ||
             !parcel.ReadUint64(windowMetaInfo->leashWinSurfaceNodeId) ||
             !parcel.ReadBool(windowMetaInfo->isPrivacyMode) || !parcel.ReadBool(windowMetaInfo->isMidScene) ||
-            !parcel.ReadBool(windowMetaInfo->isFocused) || !parcel.ReadUint32(windowModeValue)) {
+            !parcel.ReadBool(windowMetaInfo->isFocused) || !parcel.ReadUint32(windowModeValue) ||
+            !parcel.ReadBool(windowMetaInfo->isTouchable)) {
             delete windowMetaInfo;
             return nullptr;
         }

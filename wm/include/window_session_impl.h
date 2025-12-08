@@ -106,8 +106,6 @@ public:
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits, bool waitDetach) override;
     WMError Destroy(uint32_t reason = 0) override;
     virtual WMError Destroy(bool needNotifyServer, bool needClearListener = true, uint32_t reason = 0);
-    WMError NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
-        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
         BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     WMError AniSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
@@ -1204,6 +1202,7 @@ private:
      * PC Window
      */
     uint32_t targetAPIVersion_ = 0;
+    std::shared_ptr<Media::PixelMap> iconCache_;
 
     /*
      * Window Input Event
