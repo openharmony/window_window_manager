@@ -4799,6 +4799,10 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool need
         GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, GetSizeChangeReason());
     TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d, rect: %{public}s isGlobal: %{public}d needFlush: %{public}d",
         GetPersistentId(), rect.ToString().c_str(), isGlobal, needFlush);
+    if (getRsCmdBlockingCountFunc_ != nullptr && getRsCmdBlockingCountFunc_() > 0) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "creating node, stop commit");
+        return;
+    }
     AutoRSTransaction trans(GetRSUIContext(), needFlush);
     auto surfaceNode = GetSurfaceNode();
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();

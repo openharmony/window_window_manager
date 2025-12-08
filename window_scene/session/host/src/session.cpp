@@ -3348,6 +3348,11 @@ bool Session::UpdateWindowModeSupportType(const std::shared_ptr<AppExecFwk::Abil
     return false;
 }
 
+void Session::SetGetRsCmdBlockingCountFunc(const GetRsCmdBlockingCountFunc& func)
+{
+    getRsCmdBlockingCountFunc_ = func;
+}
+
 void Session::SetAcquireRotateAnimationConfigFunc(const AcquireRotateAnimationConfigFunc& func)
 {
     if (func == nullptr) {
