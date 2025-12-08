@@ -546,7 +546,7 @@ napi_value OnSetMultiScreenMode(napi_env env, napi_callback_info info)
     if (!ConvertFromJsValue(env, argv[INDEX_ONE], secondaryScreenId)) {
         return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to int");
     }
-    if(mainScreenId < 0 || secondaryScreenId < 0) {
+    if (mainScreenId < 0 || secondaryScreenId < 0) {
         return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "ScreenId cannot be a negative number");
     }
     MultiScreenMode screenMode;
