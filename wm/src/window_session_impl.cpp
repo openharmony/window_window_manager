@@ -2368,7 +2368,7 @@ WMError WindowSessionImpl::NotifyWatchFocusActiveChange(bool isActive)
     return SingletonContainer::Get<WindowAdapter>().NotifyWatchFocusActiveChange(isActive);
 }
 
-void WindowSessionImpl::SetForceSplitEnable(bool enableForceSplit)
+void WindowSessionImpl::SetForceSplitConfigEnable(bool enableForceSplit)
 {
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
