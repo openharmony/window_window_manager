@@ -336,6 +336,9 @@ public:
     void CallRsSetScreenPowerStatusSync(ScreenId screenId, ScreenPowerStatus status);
     void CallRsSetScreenPowerStatusSyncForFold(ScreenPowerStatus status);
     void TryToRecoverFoldDisplayMode(ScreenPowerStatus status);
+    bool GetScreenLcdStatus(ScreenId screenId, PanelPowerStatus& status);
+    bool WaitAodOpNotify();
+    void CheckAnotherScreenStatus(ScreenId screenId, ScreenPowerStatus status, bool& isNeedToCancelSetScreenStatus);
 
     void SetKeyguardDrawnDoneFlag(bool flag);
 
@@ -518,7 +521,7 @@ public:
     std::string DumperClientScreenSessions();
     void SetMultiScreenModeChangeTracker(std::string changeProc);
     void SetRSScreenPowerStatus(ScreenId screenId, ScreenPowerStatus status, ScreenPowerEvent event);
-    void SetRSScreenPowerStatusExt(ScreenId screenId, ScreenPowerStatus status);
+    bool SetRSScreenPowerStatusExt(ScreenId screenId, ScreenPowerStatus status);
     void NotifyScreenMaskAppear() override;
     bool IsSystemSleep();
     void SwitchSubscriberInit();
@@ -1031,6 +1034,9 @@ private:
     std::condition_variable switchUserDisplayNodeCV_;
     std::mutex switchUserDisplayNodeMutex_;
     bool animateFinishAllNotified_ = false;
+    bool isInAodOperation_ = false;
+    std::mutex aodOpCompleteMutex_;
+    std::condition_variable aodOpCompleteCV_;
 
     void CheckPidAndClearModifiers(int32_t userId, std::shared_ptr<RSDisplayNode>& displayNode);
     void AddOrUpdateUserDisplayNode(int32_t userId, ScreenId screenId, std::shared_ptr<RSDisplayNode>& displayNode);

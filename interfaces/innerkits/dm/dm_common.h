@@ -252,8 +252,10 @@ enum class DmErrorCode : int32_t {
  * @brief Enumerates the aod operation
  */
 enum class AodOP {
-    ENTER,
-    EXIT,
+    ENTER_START,
+    ENTER_FINISH,
+    EXIT_START,
+    EXIT_FINISH,
     AOD_OP_MAX
 };
 
