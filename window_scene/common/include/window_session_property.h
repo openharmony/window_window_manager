@@ -806,23 +806,38 @@ struct FreeMultiWindowConfig : public Parcelable {
 
 struct AppForceLandscapeConfig : public Parcelable {
     int32_t mode_ = 0;
-    std::string homePage_ = "";
     int32_t supportSplit_ = -1;
-    std::string arkUIOptions_ = "";
     bool ignoreOrientation_ = false;
-
+    std::string sysConfigJsonStr_ = "";
+    std::string appConfigJsonStr_ = "";
+    std::string sysHomePage_ = "";
+    bool isSysRouter_ = false;
+    bool isAppRouter_ = false;
+    bool containsSysConfig_ = false;
+    bool containsAppConfig_ = false;
+    bool hasChanged_ = true;
+    bool configEnable_ = false;
     AppForceLandscapeConfig() {}
-    AppForceLandscapeConfig(int32_t mode, const std::string& homePage, int32_t supportSplit,
-        const std::string& arkUIOptions, bool isIgnoreOrientation) : mode_(mode), homePage_(homePage),
-        supportSplit_(supportSplit), arkUIOptions_(arkUIOptions), ignoreOrientation_(isIgnoreOrientation) {}
+    AppForceLandscapeConfig(int32_t mode, int32_t supportSplit, bool ignoreOrientation, std::string sysConfigJsonStr,
+        std::string appConfigJsonStr, std::string sysHomePage, bool isSysRouter, bool isAppRouter,
+        bool containsSysConfig, bool containsAppConfig)
+        : mode_(mode), supportSplit_(supportSplit), ignoreOrientation_(ignoreOrientation), 
+        sysConfigJsonStr_(sysConfigJsonStr), appConfigJsonStr_(appConfigJsonStr), sysHomePage_(sysHomePage), 
+        isSysRouter_(isSysRouter), isAppRouter_(isAppRouter), containsSysConfig_(containsSysConfig),
+        containsAppConfig_(containsAppConfig) {}
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteInt32(mode_) ||
-            !parcel.WriteString(homePage_) ||
             !parcel.WriteInt32(supportSplit_) ||
-            !parcel.WriteString(arkUIOptions_) ||
-            !parcel.WriteBool(ignoreOrientation_)) {
+            !parcel.WriteBool(ignoreOrientation_) ||
+            !parcel.WriteString(sysConfigJsonStr_) ||
+            !parcel.WriteString(appConfigJsonStr_) ||
+            !parcel.WriteString(sysHomePage_) ||
+            !parcel.WriteBool(isSysRouter_) ||
+            !parcel.WriteBool(isAppRouter_) ||
+            !parcel.WriteBool(containsSysConfig_) ||
+            !parcel.WriteBool(containsAppConfig_)) {
             return false;
         }
         return true;
@@ -835,10 +850,15 @@ struct AppForceLandscapeConfig : public Parcelable {
             return nullptr;
         }
         if (!parcel.ReadInt32(config->mode_) ||
-            !parcel.ReadString(config->homePage_) ||
             !parcel.ReadInt32(config->supportSplit_) ||
-            !parcel.ReadString(config->arkUIOptions_) ||
-            !parcel.ReadBool(config->ignoreOrientation_)) {
+            !parcel.ReadBool(config->ignoreOrientation_) ||
+            !parcel.ReadString(config->sysConfigJsonStr_) ||
+            !parcel.ReadString(config->appConfigJsonStr_) ||
+            !parcel.ReadString(config->sysHomePage_) ||
+            !parcel.ReadBool(config->isSysRouter_) ||
+            !parcel.ReadBool(config->isAppRouter_) ||
+            !parcel.ReadBool(config->containsSysConfig_) ||
+            !parcel.ReadBool(config->containsAppConfig_)) {
             return nullptr;
         }
         return config.release();

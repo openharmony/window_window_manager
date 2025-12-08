@@ -241,6 +241,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleTitleAndDockHoverShowChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG):
             return HandleGetAppForceLandscapeConfig(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG_ENABLE):
+            return HandleGetAppForceLandscapeConfigEnable(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_HOOK_WINDOW_INFO):
             return HandleGetAppHookWindowInfoFromServer(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DIALOG_SESSION_BACKGESTURE_ENABLE):
@@ -1909,6 +1911,16 @@ int SessionStub::HandleGetAppForceLandscapeConfig(MessageParcel& data, MessagePa
     AppForceLandscapeConfig config;
     WMError ret = GetAppForceLandscapeConfig(config);
     reply.WriteParcelable(&config);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleGetAppForceLandscapeConfigEnable(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::DEFAULT, "called");
+    bool enableForceSplit = false;
+    WMError ret = GetAppForceLandscapeConfigEnable(enableForceSplit);
+    reply.WriteBool(enableForceSplit);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }

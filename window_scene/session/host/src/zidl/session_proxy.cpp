@@ -2736,6 +2736,31 @@ WMError SessionProxy::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config
     return static_cast<WMError>(ret);
 }
 
+WMError SessionProxy::GetAppForceLandscapeConfigEnable(bool& enableForceSplit)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DEFAULT, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG_ENABLE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    enableForceSplit = reply.ReadBool();
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WMError>(ret);
+}
+
 WMError SessionProxy::GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo)
 {
     MessageParcel data;
