@@ -2534,7 +2534,7 @@ export class ExtensionWindowConfigInternal implements ExtensionWindowConfig {
     return this.getWindowRect(this.nativeObj);
   }
 
-  set subWindowOptions(value?: SubWindowOptions) {
+  set subWindowOptions(value: SubWindowOptions | undefined) {
     this.setSubWindowOptions(this.nativeObj, value);
   }
 
@@ -2542,7 +2542,7 @@ export class ExtensionWindowConfigInternal implements ExtensionWindowConfig {
     return this.getSubWindowOptions(this.nativeObj);
   }
 
-  set systemWindowOptions(value?: SystemWindowOptions) {
+  set systemWindowOptions(value: SystemWindowOptions | undefined) {
     this.setSystemWindowOptions(this.nativeObj, value);
   }
 
@@ -2644,7 +2644,7 @@ export class ExtConfigSubWindowOptions implements SubWindowOptions {
     return this.getDecorEnabled(this.nativeObj);
   }
 
-  set isModal(value?: boolean) {
+  set isModal(value: boolean | undefined) {
     this.setIsModal(this.nativeObj, value ?? false);
   }
 
@@ -2652,7 +2652,7 @@ export class ExtConfigSubWindowOptions implements SubWindowOptions {
     return this.getIsModal(this.nativeObj);
   }
 
-  set isTopmost(value?: boolean) {
+  set isTopmost(value: boolean | undefined) {
     this.setIsTopmost(this.nativeObj, value ?? false);
   }
 
