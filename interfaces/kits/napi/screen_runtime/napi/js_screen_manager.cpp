@@ -863,7 +863,7 @@ static int32_t GetMultiScreenPositionOptionsFromJs(napi_env env, napi_value opti
         TLOGE(WmsLogTag::DMS, "Failed to convert screedIdValue to callbackType");
         return -1;
     }
-    if(screenId < 0) {
+    if (screenId < 0) {
         TLOGE(WmsLogTag::DMS, "Failed to convert,screenIdValue must be non-negative number");
         return -1;
     }
