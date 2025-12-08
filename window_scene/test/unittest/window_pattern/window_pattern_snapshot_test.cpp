@@ -265,10 +265,6 @@ HWTEST_F(WindowPatternSnapshotTest, IsSavingSnapshot, TestSize.Level1)
     ASSERT_NE(nullptr, scenePersistence);
     bool result = scenePersistence->IsSavingSnapshot();
     EXPECT_EQ(result, false);
-
-    auto key = defaultStatus;
-    result = scenePersistence->IsSavingSnapshot(key, true);
-    EXPECT_EQ(result, false);
 }
 
 /**
@@ -391,8 +387,7 @@ HWTEST_F(WindowPatternSnapshotTest, ResetSnapshotCache, TestSize.Level1)
     int32_t persistentId = 1423;
     sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
     scenePersistence->ResetSnapshotCache();
-    auto key = defaultStatus;
-    ASSERT_EQ(scenePersistence->isSavingSnapshot_[key], false);
+    ASSERT_EQ(scenePersistence->isSavingSnapshot_, false);
 }
 
 /**
@@ -626,8 +621,7 @@ HWTEST_F(WindowPatternSnapshotTest, GetSnapshotPixelMap, TestSize.Level1)
     session_->scenePersistence_ = nullptr;
     ASSERT_EQ(nullptr, session_->GetSnapshotPixelMap(6.6f, 8.8f));
     session_->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("GetSnapshotPixelMap", 2024);
-    auto key = defaultStatus;
-    session_->scenePersistence_->isSavingSnapshot_[key].store(true);
+    session_->scenePersistence_->isSavingSnapshot_.store(true);
     session_->snapshot_ = nullptr;
     ASSERT_EQ(nullptr, session_->GetSnapshotPixelMap(6.6f, 8.8f));
 }
@@ -872,12 +866,8 @@ HWTEST_F(WindowPatternSnapshotTest, ConfigSupportSnapshotAllSessionStatus, TestS
 HWTEST_F(WindowPatternSnapshotTest, SetIsSavingSnapshot, TestSize.Level1)
 {
     ASSERT_NE(scenePersistence, nullptr);
-    auto key = defaultStatus;
-    scenePersistence->SetIsSavingSnapshot(key, true, true);
-    EXPECT_EQ(scenePersistence->isSavingSnapshotFreeMultiWindow_, true);
-    
-    scenePersistence->SetIsSavingSnapshot(key, false, true);
-    EXPECT_EQ(scenePersistence->isSavingSnapshot_[key], true);
+    scenePersistence->SetIsSavingSnapshot(true);
+    EXPECT_EQ(scenePersistence->IsSavingSnapshot(), true);
 }
 
 /**

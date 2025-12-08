@@ -3034,7 +3034,6 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
             session->NotifyUpdateSnapshotWindow();
         }
         session->SetHasSnapshot(key, rotate);
-        session->scenePersistence_->ResetSnapshotCache();
         Task saveSnapshotCallback = []() {};
         if (!needCacheSnapshot) {
             std::lock_guard lock(session->saveSnapshotCallbackMutex_);
@@ -4947,7 +4946,7 @@ std::shared_ptr<Media::PixelMap> Session::GetSnapshotPixelMap(const float oriSca
         return nullptr;
     }
     auto key = GetScreenSnapshotStatus();
-    return scenePersistence_->IsSavingSnapshot(key, freeMultiWindow_.load()) ? GetSnapshot() :
+    return scenePersistence_->IsSavingSnapshot() ? GetSnapshot() :
         scenePersistence_->GetLocalSnapshotPixelMap(oriScale, newScale, key, freeMultiWindow_.load());
 }
 
