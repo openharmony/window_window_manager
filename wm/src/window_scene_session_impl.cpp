@@ -7789,11 +7789,15 @@ WMError WindowSceneSessionImpl::SetSubWindowSource(SubWindowSource source)
 WMError WindowSceneSessionImpl::RestoreMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParams)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "restore float main window id: %{public}d", GetPersistentId());
+    auto parentWindow = FindWindowById(property_->GetParentPersistentId());
+    if (parentWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "parentWindow is invalid");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LIFE, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-
     if (state_ != WindowState::STATE_SHOWN) {
         TLOGE(WmsLogTag::WMS_LIFE, "window is not foreground showing");
         return WMError::WM_ERROR_INVALID_CALLING;

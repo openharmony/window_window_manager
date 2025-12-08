@@ -693,7 +693,11 @@ WMError SystemSession::RestoreFloatMainWindow(const std::shared_ptr<AAFwk::WantP
             TLOGE(WmsLogTag::WMS_SYSTEM, "%{public}s window state is not at foreground or active", where);
             return WMError::WM_ERROR_INVALID_CALLING;
         }
-        if (!session->getSCBEnterRecentFunc_ || !session->getSCBEnterRecentFunc_()) {
+        if (!session->getSCBEnterRecentFunc_) {
+            TLOGE(WmsLogTag::WMS_SYSTEM, "cannot get recent func");
+            return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
+        }
+        if (session->getSCBEnterRecentFunc_()) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "current window is at recent state");
             return WMError::WM_ERROR_START_ABILITY_FAILED;
         }

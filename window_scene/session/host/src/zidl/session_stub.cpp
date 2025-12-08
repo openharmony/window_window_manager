@@ -708,10 +708,14 @@ int SessionStub::HandleRestoreFloatMainWindow(MessageParcel& data, MessageParcel
     TLOGD(WmsLogTag::WMS_LIFE, "HandleRestoreFloatMainWindow In");
     std::shared_ptr<AAFwk::WantParams> wantParams(data.ReadParcelable<AAFwk::WantParams>());
     if (wantParams == nullptr) {
-        WLOGFE("wantParams is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "wantParams is nullptr");
         return ERR_INVALID_VALUE;
     }
-    RestoreFloatMainWindow(wantParams);
+    WMError ret = RestoreFloatMainWindow(wantParams);
+    if (!reply.WriteUint32(static_cast<uint32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 

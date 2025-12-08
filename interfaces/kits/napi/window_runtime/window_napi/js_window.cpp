@@ -9805,7 +9805,7 @@ napi_value JsWindow::OnSetWindowShadowEnabled(napi_env env, napi_callback_info i
 
 napi_value JsWindow::OnRestoreMainWindow(napi_env env, napi_callback_info info)
 {
-    size_t argc = ARG_COUNT_ZERO;
+    size_t argc = ARG_COUNT_ONE;
     napi_value argv[ONE_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
 
@@ -9823,6 +9823,8 @@ napi_value JsWindow::OnRestoreMainWindow(napi_env env, napi_callback_info info)
                 "This window manager service works abnormally.");
         }
     }
+
+    TLOGI(WmsLogTag::WMS_LIFE, "wantParameters=%{public}s", wantParams.ToString().c_str());
 
     const char* const where = __func__;
     napi_value result = nullptr;
