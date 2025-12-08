@@ -683,11 +683,6 @@ void SingleDisplaySuperFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> 
 void SingleDisplaySuperFoldPolicy::ChangeScreenDisplayModeToMainOnBootAnimation(sptr<ScreenSession> screenSession)
 {
     TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToMainOnBootAnimation");
-    {
-        std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
-        screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(SCREEN_ID_MAIN);
-    }
-
     screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(SCREEN_ID_MAIN);
     screenSession->UpdatePropertyByFoldControl(screenProperty_);
     screenSession->SetValidWidth(screenProperty_.GetBounds().rect_.width_);
@@ -703,11 +698,6 @@ void SingleDisplaySuperFoldPolicy::ChangeScreenDisplayModeToMainOnBootAnimation(
 void SingleDisplaySuperFoldPolicy::ChangeScreenDisplayModeToFullOnBootAnimation(sptr<ScreenSession> screenSession)
 {
     TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToFullOnBootAnimation");
-    {
-        std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
-        screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(SCREEN_ID_MAIN);
-    }
-
     screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(SCREEN_ID_FULL);
     screenSession->UpdatePropertyByFoldControl(screenProperty_);
     screenSession->SetValidWidth(screenProperty_.GetBounds().rect_.width_);
