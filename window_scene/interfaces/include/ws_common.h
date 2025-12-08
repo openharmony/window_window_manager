@@ -1070,8 +1070,8 @@ struct SceneAnimationConfig : public Parcelable {
                 return nullptr;
             }
         }
-        config->animationDuration_ = static_cast<uint32_t>(animationDuration);
-        config->animationDelay_ = static_cast<uint32_t>(animationDelay);
+        config->animationDuration_ = animationDuration;
+        config->animationDelay_ = animationDelay;
         config->animationCurve_ = static_cast<WindowAnimationCurve>(animationCurveValue);
         config->animationParam_ = animationParam;
         return config;
