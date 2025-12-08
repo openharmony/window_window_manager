@@ -2545,6 +2545,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->RegisterForceSplitListener([this](const std::string& bundleName) {
             return this->GetAppForceLandscapeConfig(bundleName);
         });
+        sceneSession->RegisterForceSplitEnableListener([this](const std::string& bundleName) {
+            return this->GetAppForceLandscapeConfigEnable(bundleName);
+        });
         sceneSession->RegisterAppHookWindowInfoFunc([this](const std::string& bundleName) {
             return this->GetAppHookWindowInfo(bundleName);
         });
@@ -16692,8 +16695,37 @@ void SceneSessionManager::RegisterConstrainedModalUIExtInfoListener()
     }
 }
 
+bool SceneSessionManager::IsSameForceSplitConfig(const AppForceLandscapeConfig& config1,
+    const AppForceLandscapeConfig& config2)
+{
+    if (&config1 == &config2) {
+        return true;
+    }
+    if (config1.mode_ != config2.mode_ ||
+        config1.supportSplit_ != config2.supportSplit_ ||
+        config1.ignoreOrientation_ != config2.ignoreOrientation_ ||
+        config1.containsSysConfig_ != config2.containsSysConfig_ ||
+        config1.containsAppConfig_ != config2.containsAppConfig_ ) {
+        return false;
+    }
+    if (config1.containsSysConfig_) {
+        if (config1.isSysRouter_ != config2.isSysRouter_ ||
+            config1.sysHomePage_ != config2.sysHomePage_ ||
+            config1.sysConfigJsonStr_ != config2.sysConfigJsonStr_) {
+            return false;
+        }
+    }
+    if (config1.containsAppConfig_) {
+        if (config1.isAppRouter_ != config2.isAppRouter_ ||
+            config1.appConfigJsonStr_ != config2.appConfigJsonStr_) {
+            return false;
+        }
+    }
+    return true;
+}
+
 WSError SceneSessionManager::SetAppForceLandscapeConfig(const std::string& bundleName,
-    const AppForceLandscapeConfig& config)
+    AppForceLandscapeConfig& config)
 {
     if (bundleName.empty()) {
         TLOGE(WmsLogTag::DEFAULT, "bundle name is empty");
@@ -16707,12 +16739,25 @@ WSError SceneSessionManager::SetAppForceLandscapeConfig(const std::string& bundl
         } else {
             preConfig = {};
         }
+        config.hasChanged_ = !IsSameForceSplitConfig(preConfig, config);
         appForceLandscapeMap_[bundleName] = config;
     }
-    TLOGI(WmsLogTag::DEFAULT, "app: %{public}s, mode: %{public}d, homePage: %{public}s, supportSplit: %{public}d, "
-        "arkUIOptions: %{public}s", bundleName.c_str(), config.mode_, config.homePage_.c_str(), config.supportSplit_,
-        config.arkUIOptions_.c_str());
 
+    TLOGI(WmsLogTag::DEFAULT,
+        "bundleName:%{public}s, config:[mode_%{public}d, supportSplit_%{public}d, ignoreOrientation_%{public}d, "
+        "containsSysConfig_%{public}d, isSysRouter_%{public}d, sysHomePage_%{public}s, sysConfigJsonStr_%{public}s, "
+        "containsAppConfig_%{public}d, isAppRouter_%{public}d, appConfigJsonStr_%{public}s]",
+        bundleName.c_str(),
+        config.mode_,
+        config.supportSplit_,
+        config.ignoreOrientation_,
+        config.containsSysConfig_,
+        config.isSysRouter_,
+        config.sysHomePage_.c_str(),
+        config.sysConfigJsonStr_.c_str(),
+        config.containsAppConfig_,
+        config.isAppRouter_,
+        config.appConfigJsonStr_.c_str());
     if (preConfig.mode_ == FORCE_SPLIT_MODE || config.mode_ == FORCE_SPLIT_MODE ||
         preConfig.mode_ == NAV_FORCE_SPLIT_MODE || config.mode_ == NAV_FORCE_SPLIT_MODE) {
         //Notify the client of the mode change
@@ -16724,6 +16769,36 @@ WSError SceneSessionManager::SetAppForceLandscapeConfig(const std::string& bundl
             }
         }
     }
+    return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::SetAppForceLandscapeConfigEnable(const std::string& bundleName,
+    const bool enableForceSplit)
+{
+    if (bundleName.empty()) {
+        TLOGE(WmsLogTag::DEFAULT, "bundle name is empty");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    AppForceLandscapeConfig config;
+    {
+        std::unique_lock<std::shared_mutex> lock(appForceLandscapeMutex_);
+        if (appForceLandscapeMap_.count(bundleName)) {
+            config = appForceLandscapeMap_[bundleName];
+        } else {
+            TLOGE(WmsLogTag::DEFAULT, "app: %{public}s, config not find", bundleName.c_str());
+            return WSError::WS_ERROR_INVALID_PARAM;
+        }
+        config.configEnable_ = enableForceSplit;
+        appForceLandscapeMap_[bundleName] = config;
+    }
+    std::unique_lock<std::shared_mutex> lock(appForceLandscapeMutex_);
+        for (const auto& iter : sceneSessionMap_) {
+            auto& session = iter.second;
+            if (session && session->GetSessionInfo().bundleName_ == bundleName) {
+                session->NotifyAppForceLandscapeConfigUpdated();
+            }
+        }
+    TLOGI(WmsLogTag::DEFAULT, "bundleName:%{public}s, enable:%{public}d", bundleName.c_str(), enableForceSplit);
     return WSError::WS_OK;
 }
 
@@ -16739,6 +16814,22 @@ AppForceLandscapeConfig SceneSessionManager::GetAppForceLandscapeConfig(const st
         return {};
     }
     return appForceLandscapeMap_[bundleName];
+}
+
+bool SceneSessionManager::GetAppForceLandscapeConfigEnable(const std::string& bundleName)
+{
+    if (bundleName.empty()) {
+        return false;
+    }
+    std::shared_lock<std::shared_mutex> lock(appForceLandscapeMutex_);
+    if (appForceLandscapeMap_.empty() ||
+        appForceLandscapeMap_.find(bundleName) == appForceLandscapeMap_.end()) {
+        TLOGD(WmsLogTag::DEFAULT, "app: %{public}s, config not find", bundleName.c_str());
+        return false;
+    }
+    TLOGI(WmsLogTag::DEFAULT, "bundleName:%{public}s, enable:%{public}d",
+        bundleName.c_str(), appForceLandscapeMap_[bundleName].configEnable_);
+    return appForceLandscapeMap_[bundleName].configEnable_;
 }
 
 WMError SceneSessionManager::TerminateSessionByPersistentId(int32_t persistentId)
@@ -19008,6 +19099,43 @@ WMError SceneSessionManager::NotifySupportRotationRegistered()
         supportRotationRegisteredListener_();
     } else {
         TLOGE(WmsLogTag::WMS_ROTATION, "supportRotationRegisteredListener_ is null");
+    }
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::GetAllJsonProfile(AppExecFwk::ProfileType profileType, int32_t userId,
+    std::vector<AppExecFwk::JsonProfileInfo>& jsonProfileInfos)
+{
+    if (!bundleMgr_) {
+        TLOGE(WmsLogTag::WMS_LIFE, "bundleMgr is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    TLOGE(WmsLogTag::WMS_PATTERN, "GetAllJsonProfile start %{public}d , %{public}d",
+        static_cast<int8_t>(profileType), userId);
+    bool ret = bundleMgr_->GetAllJsonProfile(profileType, userId, jsonProfileInfos);
+    TLOGE(WmsLogTag::WMS_PATTERN, "GetAllJsonProfile end size:%{public}d ",
+        static_cast<int>(jsonProfileInfos.size()));
+    if (ret) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "GetAllJsonProfile failed");
+        return WMError::WM_ERROR_NO_MEM;
+    }
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::GetJsonProfile(AppExecFwk::ProfileType profileType, const std::string& bundleName,
+    const std::string& moduleName,  int32_t userId, std::string& profileInfo)
+{
+    if (!bundleMgr_) {
+        TLOGE(WmsLogTag::WMS_LIFE, "bundleMgr is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    TLOGE(WmsLogTag::WMS_PATTERN, "GetJsonProfile start %{public}d , %{public}d , %{public}s",
+        static_cast<int8_t>(profileType), userId, bundleName.c_str());
+    bool ret = bundleMgr_->GetJsonProfile(profileType, bundleName, moduleName, profileInfo, userId);
+    TLOGE(WmsLogTag::WMS_PATTERN, "GetJsonProfile end");
+    if (ret) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "GetJsonProfile failed");
+        return WMError::WM_ERROR_NO_MEM;
     }
     return WMError::WM_OK;
 }

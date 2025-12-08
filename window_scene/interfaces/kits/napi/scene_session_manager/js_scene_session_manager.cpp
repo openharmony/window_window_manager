@@ -274,6 +274,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::InitScheduleUtils);
     BindNativeFunction(env, exportObj, "setAppForceLandscapeConfig", moduleName,
         JsSceneSessionManager::SetAppForceLandscapeConfig);
+    BindNativeFunction(env, exportObj, "setAppForceLandscapeConfigEnable", moduleName,
+        JsSceneSessionManager::SetAppForceLandscapeConfigEnable);
     BindNativeFunction(env, exportObj, "isScbCoreEnabled", moduleName,
         JsSceneSessionManager::IsScbCoreEnabled);
     BindNativeFunction(env, exportObj, "updateAppHookDisplayInfo", moduleName,
@@ -346,6 +348,10 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::GetPipDeviceCollaborationPolicy);
     BindNativeFunction(env, exportObj, "notifySupportRotationChange", moduleName,
         JsSceneSessionManager::NotifySupportRotationChange);
+    BindNativeFunction(env, exportObj, "getAllJsonProfile", moduleName,
+        JsSceneSessionManager::GetAllJsonProfile);
+    BindNativeFunction(env, exportObj, "getJsonProfile", moduleName,
+        JsSceneSessionManager::GetJsonProfile);
     return NapiGetUndefined(env);
 }
 
@@ -4395,6 +4401,79 @@ napi_value JsSceneSessionManager::SetAppForceLandscapeConfig(napi_env env, napi_
 
 napi_value JsSceneSessionManager::OnSetAppForceLandscapeConfig(napi_env env, napi_callback_info info)
 {
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != OHOS::Rosen::ARGC_FOUR) {
+        TLOGE(WmsLogTag::DEFAULT, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    std::string bundleName;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], bundleName)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to bundleName");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    AppForceLandscapeConfig config;
+    napi_value jsMode = nullptr;
+    napi_get_named_property(env, argv[ARG_INDEX_ONE], "mode", &jsMode);
+    RETURN_IF_CONVERT_FAIL(env, jsMode, config.mode_, "mode", WmsLogTag::DEFAULT);
+    napi_value jsSupportSplit = nullptr;
+    napi_get_named_property(env, argv[ARG_INDEX_ONE], "supportSplit", &jsSupportSplit);
+    RETURN_IF_CONVERT_FAIL(env, jsSupportSplit, config.supportSplit_, "supportSplit", WmsLogTag::DEFAULT);
+    napi_value jsIgnoreOrient = nullptr;
+    napi_get_named_property(env, argv[ARG_INDEX_ONE], "ignoreOrientation", &jsIgnoreOrient);
+    RETURN_IF_CONVERT_FAIL(env, jsIgnoreOrient, config.ignoreOrientation_, "ignoreOrientation",
+        WmsLogTag::DEFAULT);
+    napi_value jsContainsSysConfig = nullptr;
+    napi_get_named_property(env, argv[ARG_INDEX_ONE], "containsSysConfig", &jsContainsSysConfig);
+    RETURN_IF_CONVERT_FAIL(env, jsContainsSysConfig, config.containsSysConfig_, "containsSysConfig",
+        WmsLogTag::DEFAULT);
+    napi_value jsContainsAppConfig = nullptr;
+    napi_get_named_property(env, argv[ARG_INDEX_ONE], "containsAppConfig", &jsContainsAppConfig);
+    RETURN_IF_CONVERT_FAIL(env, jsContainsAppConfig, config.containsAppConfig_, "containsAppConfig",
+        WmsLogTag::DEFAULT);
+    napi_value jsIsSysRouter = nullptr;
+    napi_get_named_property(env, argv[ARG_INDEX_TWO], "isRouter", &jsIsSysRouter);
+    ConvertFromJsValue(env, jsIsSysRouter, config.isSysRouter_);
+    napi_value jsSysConfigJsonStr = nullptr;
+    napi_get_named_property(env, argv[ARG_INDEX_TWO], "configJsonStr", &jsSysConfigJsonStr);
+    ConvertFromJsValue(env, jsSysConfigJsonStr, config.sysConfigJsonStr_);
+    napi_value jsSysHomePage = nullptr;
+    napi_get_named_property(env, argv[ARG_INDEX_TWO], "homePage", &jsSysHomePage);
+    ConvertFromJsValue(env, jsSysHomePage, config.sysHomePage_);
+    napi_value jsIsAppRouter = nullptr;
+    napi_get_named_property(env, argv[ARG_INDEX_THREE], "isRouter", &jsIsAppRouter);
+    ConvertFromJsValue(env, jsIsAppRouter, config.isAppRouter_);
+    napi_value jsAppConfigJsonStr = nullptr;
+    napi_get_named_property(env, argv[ARG_INDEX_THREE], "configJsonStr", &jsAppConfigJsonStr);
+    ConvertFromJsValue(env, jsAppConfigJsonStr, config.appConfigJsonStr_);
+
+    TLOGI(WmsLogTag::DEFAULT, "SetAppForceLandscapeConfig bundleName: %{public}s, mode: %{public}d, "
+        "supportSplit: %{public}d, ignoreOrientation: %{public}d, containsSysConfig: %{public}d, "
+        "containsAppConfig: %{public}d, isSysRouter: %{public}d, sysConfigJsonStr: %{public}s,"
+        "sysHomePage: %{public}s, isAppRouter: %{public}d, appConfigJsonStr: %{public}s",
+        bundleName.c_str(), config.mode_, config.supportSplit_, config.ignoreOrientation_,
+        config.containsSysConfig_, config.containsAppConfig_, config.isSysRouter_,
+        config.sysConfigJsonStr_.c_str(), config.sysHomePage_.c_str(), config.isAppRouter_,
+        config.appConfigJsonStr_.c_str());
+    SceneSessionManager::GetInstance().SetAppForceLandscapeConfig(bundleName, config);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::SetAppForceLandscapeConfigEnable(napi_env env, napi_callback_info info)
+{
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSetAppForceLandscapeConfigEnable(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::OnSetAppForceLandscapeConfigEnable(napi_env env, napi_callback_info info)
+{
     size_t argc = ARGC_TWO;
     napi_value argv[ARGC_TWO] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -4406,41 +4485,24 @@ napi_value JsSceneSessionManager::OnSetAppForceLandscapeConfig(napi_env env, nap
     }
 
     std::string bundleName;
-    if (!ConvertFromJsValue(env, argv[0], bundleName)) {
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], bundleName)) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to bundleName");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
 
-    AppForceLandscapeConfig config;
-    napi_value jsMode = nullptr;
-    napi_get_named_property(env, argv[1], "mode", &jsMode);
-    RETURN_IF_CONVERT_FAIL(env, jsMode, config.mode_, "mode", WmsLogTag::DEFAULT);
+    bool enableForceSplit = false;
+    if (GetType(env, argv[ARG_INDEX_ONE]) != napi_boolean) {
+        RETURN_IF_CONVERT_FAIL(env, argv[ARG_INDEX_ONE], enableForceSplit, "enableForceSplit", WmsLogTag::DEFAULT);
+    }
 
-    napi_value jsHomePage = nullptr;
-    napi_get_named_property(env, argv[1], "homePage", &jsHomePage);
-    RETURN_IF_CONVERT_FAIL(env, jsHomePage, config.homePage_, "homePage", WmsLogTag::DEFAULT);
+    TLOGI(WmsLogTag::DEFAULT, "SetAppForceLandscapeConfigEnable bundleName: %{public}s, enable: %{public}d",
+        bundleName.c_str(), enableForceSplit);
 
-    napi_value jsSupportSplit = nullptr;
-    napi_get_named_property(env, argv[1], "supportSplit", &jsSupportSplit);
-    RETURN_IF_CONVERT_FAIL(env, jsSupportSplit, config.supportSplit_, "supportSplit", WmsLogTag::DEFAULT);
-
-    napi_value jsArkUIOptions = nullptr;
-    napi_get_named_property(env, argv[1], "arkUIOptions", &jsArkUIOptions);
-    RETURN_IF_CONVERT_FAIL(env, jsArkUIOptions, config.arkUIOptions_, "arkUIOptions", WmsLogTag::DEFAULT);
-
-    napi_value jsIgnoreOrient = nullptr;
-    napi_get_named_property(env, argv[1], "ignoreOrientation", &jsIgnoreOrient);
-    RETURN_IF_CONVERT_FAIL(env, jsIgnoreOrient, config.ignoreOrientation_, "ignoreOrientation", WmsLogTag::DEFAULT);
-
-    TLOGI(WmsLogTag::DEFAULT, "app: %{public}s, mode: %{public}d, homePage: %{public}s, supportSplit: %{public}d, "
-        "arkUIOptions: %{public}s, ignoreOrientation: %{public}d", bundleName.c_str(), config.mode_,
-        config.homePage_.c_str(), config.supportSplit_, config.arkUIOptions_.c_str(), config.ignoreOrientation_);
-    SceneSessionManager::GetInstance().SetAppForceLandscapeConfig(bundleName, config);
+    SceneSessionManager::GetInstance().SetAppForceLandscapeConfigEnable(bundleName, enableForceSplit);
     return NapiGetUndefined(env);
 }
-
 napi_value JsSceneSessionManager::OnIsScbCoreEnabled(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -5645,5 +5707,131 @@ napi_value JsSceneSessionManager::OnNotifySupportRotationChange(napi_env env, na
         supportRotationInfo.sceneSupportRotation_.size());
     SceneSessionManager::GetInstance().NotifySupportRotationChange(supportRotationInfo);
     return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::GetAllJsonProfile(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetAllJsonProfile(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::GetJsonProfile(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetJsonProfile(env, info) : nullptr;
+}
+
+namespace {
+    napi_value JsonProfileInfoToNapiValue(napi_env env, const AppExecFwk::JsonProfileInfo& profileInfo)
+    {
+        napi_value objValue = nullptr;
+        napi_create_object(env, &objValue);
+        if (objValue == nullptr) {
+            TLOGE(WmsLogTag::WMS_SCB, "Object is null!");
+            return objValue;
+        }
+        napi_set_named_property(env, objValue, "profileType", CreateJsValue(env, profileInfo.profileType));
+        napi_set_named_property(env, objValue, "bundleName", CreateJsValue(env, profileInfo.bundleName));
+        napi_set_named_property(env, objValue, "moduleName", CreateJsValue(env, profileInfo.moduleName));
+        napi_set_named_property(env, objValue, "profile", CreateJsValue(env, profileInfo.profile));
+        return objValue;
+}
+}
+
+napi_value JsSceneSessionManager::OnGetAllJsonProfile(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_TWO;
+    napi_value argv[ARGC_TWO] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_TWO) {
+        TLOGE(WmsLogTag::WMS_SCB, "Argc count is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t profileTypeId;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], profileTypeId) 
+    || profileTypeId > std::numeric_limits<uint8_t>::max()
+    || profileTypeId < std::numeric_limits<int8_t>::min()) {
+        TLOGE(WmsLogTag::WMS_SCB, "Failed to convert parameter to profileTypeId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    } else {
+        profileType = static_cast<AppExecFwk::ProfileType>(static_cast<int8_t>(profileTypeId));
+    }
+    int32_t userId;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], userId)) {
+        TLOGE(WmsLogTag::WMS_SCB, "Failed to convert parameter to userId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    std::vector<AppExecFwk::JsonProfileInfo> profileInfos = {};
+    SceneSessionManager::GetInstance().GetAllJsonProfile(profileType, userId, profileInfos);
+
+    napi_value jsProfileInfoArray = nullptr;
+    napi_create_array(env, &jsProfileInfoArray);
+    for (size_t i = 0; i < profileInfos.size(); ++i) {
+        napi_value jsProfileInfo = JsonProfileInfoToNapiValue(env, profileInfos[i]);
+        napi_set_element(env, jsProfileInfoArray, i, jsProfileInfo);
+    }
+    return jsProfileInfoArray;
+}
+napi_value JsSceneSessionManager::OnGetJsonProfile(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_FOUR) {
+        TLOGE(WmsLogTag::WMS_SCB, "Argc count is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t profileTypeId;
+    AppExecFwk::ProfileType profileType;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], profileTypeId) ||
+        profileTypeId > std::numeric_limits<uint8_t>::max() ||
+        profileTypeId < std::numeric_limits<int8_t>::min()) {
+        TLOGE(WmsLogTag::WMS_SCB, "Failed to convert parameter to profileTypeId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    } else {
+        profileType = static_cast<AppExecFwk::ProfileType>(static_cast<int8_t>(profileTypeId));
+    }
+
+    std::string bundleName;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], bundleName)) {
+        WLOGFE("Failed to convert parameter to bundleName");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    std::string moduleName;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_TWO], moduleName)) {
+        WLOGFE("Failed to convert parameter to moduleName");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    int32_t userId;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_THREE], userId)) {
+        TLOGE(WmsLogTag::WMS_SCB, "Failed to convert parameter to userId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    std::string profileInfo;
+    SceneSessionManager::GetInstance().GetJsonProfile(profileType, bundleName, moduleName, userId, profileInfo);
+    napi_value result = nullptr;
+    napi_create_string_utf8(env, profileInfo.c_str(), profileInfo.length(), &result);
+    return result;
 }
 } // namespace OHOS::Rosen

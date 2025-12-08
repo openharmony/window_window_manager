@@ -138,6 +138,9 @@ public:
     static napi_value SupportCreateFloatWindow(napi_env env, napi_callback_info info);
     static napi_value ApplyFeatureConfig(napi_env env, napi_callback_info info);
     static napi_value NotifySupportRotationChange(napi_env env, napi_callback_info info);
+    static napi_value GetAllJsonProfile(napi_env env, napi_callback_info info);
+    static napi_value GetJsonProfile(napi_env env, napi_callback_info info);
+    static napi_value SetAppForceLandscapeConfigEnable(napi_env env, napi_callback_info info);
 
     /*
      * PC Window
@@ -266,6 +269,9 @@ private:
     napi_value OnUpdateRecentMainSessionInfos(napi_env env, napi_callback_info info);
     napi_value OnApplyFeatureConfig(napi_env env, napi_callback_info info);
     napi_value OnNotifySupportRotationChange(napi_env env, napi_callback_info info);
+    napi_value OnGetAllJsonProfile(napi_env env, napi_callback_info info);
+    napi_value OnGetJsonProfile(napi_env env, napi_callback_info info);
+    napi_value OnSetAppForceLandscapeConfigEnable(napi_env env, napi_callback_info info);
     
     /*
      * PC Window

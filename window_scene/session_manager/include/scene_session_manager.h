@@ -71,6 +71,7 @@ class IBundleMgr;
 struct AbilityInfo;
 struct BundleInfo;
 class LauncherService;
+struct JsonProfileInfo;
 } // namespace OHOS::AppExecFwk
 
 namespace OHOS::Global::Resource {
@@ -254,6 +255,12 @@ public:
     void SetFindScenePanelRsNodeByZOrderFunc(FindScenePanelRsNodeByZOrderFunc&& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
     void ApplyFeatureConfig(const std::unordered_map<std::string, std::string>& configMap);
+    WMError GetAllJsonProfile(AppExecFwk::ProfileType profileType, int32_t userId,
+        std::vector<AppExecFwk::JsonProfileInfo>& jsonProfileInfos);
+    WMError GetJsonProfile(AppExecFwk::ProfileType profileType, const std::string& bundleName,
+        const std::string& moduleName, int32_t userId, std::string& profileInfo);
+    bool IsSameForceSplitConfig(const AppForceLandscapeConfig& config1,
+    const AppForceLandscapeConfig& config2);
 
     /*
      * Window Recover
@@ -667,8 +674,10 @@ public:
     void SetBehindWindowFilterEnabled(bool enabled);
     void UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userId);
     void UpdateConstrainedModalUIExtInfo(std::shared_ptr<RSUIExtensionData> constrainedModalUIExtData, uint64_t userId);
-    WSError SetAppForceLandscapeConfig(const std::string& bundleName, const AppForceLandscapeConfig& config);
+    WSError SetAppForceLandscapeConfig(const std::string& bundleName, AppForceLandscapeConfig& config);
+    WSError SetAppForceLandscapeConfigEnable(const std::string& bundleName, bool enableForceLandscape);
     AppForceLandscapeConfig GetAppForceLandscapeConfig(const std::string& bundleName);
+    bool GetAppForceLandscapeConfigEnable(const std::string& bundleName);
     WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;
     WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
         const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) override;
