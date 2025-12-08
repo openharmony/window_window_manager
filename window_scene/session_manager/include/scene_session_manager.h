@@ -624,6 +624,10 @@ public:
     WMError UpdateAppHookWindowInfo(const std::string& bundleName, const HookWindowInfo& hookWindowInfo);
     HookWindowInfo GetAppHookWindowInfo(const std::string& bundleName);
     void UpdateAppHookWindowInfoWhenSwitchFreeMultiWindow(bool isOpenFreeMultiWindow);
+    void UpdateRsCmdBlockingCount(bool enable);
+    int32_t GetOrResetRsCmdBlockingCount();
+    void RegisterGetRsCmdBlockingCountFunc(const sptr<SceneSession>& sceneSession);
+    void RunAfterNVsyncs(uint32_t vsyncCount, OnCallback&& callback);
 
     /*
      * Window Property
@@ -1551,6 +1555,11 @@ private:
     /*
      * Window Layout
      */
+    struct RsCmdBlockingFlag {
+        int32_t count = 0;
+        int64_t startTime = 0;
+    };
+    RsCmdBlockingFlag rsCmdBlockingFlag_; 
     std::shared_ptr<VsyncCallback> vsyncCallback_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
     SingleHandTransform singleHandTransform_;

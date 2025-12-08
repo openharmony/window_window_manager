@@ -381,9 +381,14 @@ HWTEST_F(SceneSessionTest5, SetSurfaceBounds01, TestSize.Level1)
     session->surfaceNode_ = nullptr;
     WSRect preRect = { 20, 20, 800, 800 };
     WSRect rect = { 30, 30, 900, 900 };
+    session->SetGetRsCmdBlockingCountFunc([] {
+        return 1;
+    });
     session->SetSessionRect(preRect);
     session->SetSurfaceBounds(rect, false);
-
+    session->SetGetRsCmdBlockingCountFunc([] {
+        return 0;
+    });
     session->surfaceNode_ = surfaceNode;
     session->SetSurfaceBounds(rect, false);
     EXPECT_EQ(preRect, session->GetSessionRect());
