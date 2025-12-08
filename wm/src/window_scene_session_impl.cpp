@@ -3788,13 +3788,13 @@ WMError WindowSceneSessionImpl::Maximize()
 
 WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
 {
-    return Maximize(presentation, WaterfallResidentState::CANCEL);
+    return Maximize(presentation, WaterfallResidentState::UNCHANGED);
 }
 
 bool WindowSceneSessionImpl::CheckWaterfallResidentState(WaterfallResidentState state) const
 {
     if (WindowHelper::IsSubWindow(GetType())) {
-        return state == WaterfallResidentState::UNCHANGED || state == WaterfallResidentState::CANCEL;
+        return state == WaterfallResidentState::UNCHANGED;
     }
     return true;
 }

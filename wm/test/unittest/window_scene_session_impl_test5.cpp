@@ -176,12 +176,10 @@ HWTEST_F(WindowSceneSessionImplTest5, TestCheckWaterfallResidentState, TestSize.
     EXPECT_TRUE(window->CheckWaterfallResidentState(WaterfallResidentState::UNCHANGED));
     EXPECT_TRUE(window->CheckWaterfallResidentState(WaterfallResidentState::OPEN));
     EXPECT_TRUE(window->CheckWaterfallResidentState(WaterfallResidentState::CLOSE));
-    EXPECT_TRUE(window->CheckWaterfallResidentState(WaterfallResidentState::CANCEL));
 
-    // Case 2: Sub window, only UNCHANGED or CANCEL should return true
+    // Case 2: Sub window, only UNCHANGED should return true
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     EXPECT_TRUE(window->CheckWaterfallResidentState(WaterfallResidentState::UNCHANGED));
-    EXPECT_TRUE(window->CheckWaterfallResidentState(WaterfallResidentState::CANCEL));
     EXPECT_FALSE(window->CheckWaterfallResidentState(WaterfallResidentState::OPEN));
     EXPECT_FALSE(window->CheckWaterfallResidentState(WaterfallResidentState::CLOSE));
 }
