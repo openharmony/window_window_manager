@@ -438,6 +438,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         }
         auto parentSession = FindParentSessionByParentId(property_->GetParentPersistentId());
         if (parentSession != nullptr) {
+            SetTargetAPIVersion(parentSession->GetTargetAPIVersion());
             property_->SetIsPcAppInPad(parentSession->GetProperty()->GetIsPcAppInPad());
         }
         PreProcessCreate();
