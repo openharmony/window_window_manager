@@ -10940,6 +10940,9 @@ DMError ScreenSessionManager::GetDisplayCapability(std::string& capabilitInfo)
     if ((g_isPcDevice && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) || isTvDevice) {
         orientation = {"1", "0", "3", "2"};
     }
+    if (FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice() && !CORRECTION_ENABLE) {
+        orientation = {"3", "0", "1", "2"};
+    }
     nlohmann::ordered_json jsonDisplayCapabilityList;
     jsonDisplayCapabilityList["capability"] = nlohmann::json::array();
     nlohmann::ordered_json capabilityInfo = GetCapabilityJson(FoldStatus::UNKNOWN, FoldDisplayMode::UNKNOWN,
