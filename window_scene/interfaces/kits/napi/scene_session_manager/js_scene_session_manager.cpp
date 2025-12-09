@@ -5752,6 +5752,7 @@ napi_value JsSceneSessionManager::OnGetAllJsonProfile(napi_env env, napi_callbac
         return NapiGetUndefined(env);
     }
     int32_t profileTypeId;
+    AppExecFwk::ProfileType profileType;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], profileTypeId) 
     || profileTypeId > std::numeric_limits<uint8_t>::max()
     || profileTypeId < std::numeric_limits<int8_t>::min()) {
