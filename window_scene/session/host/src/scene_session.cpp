@@ -46,6 +46,7 @@
 #include "interfaces/include/ws_common.h"
 #include "pixel_map.h"
 #include "process_options.h"
+#include "rate_limited_logger.h"
 #include "rs_adapter.h"
 #include "session_coordinate_helper.h"
 #include "session/screen/include/screen_session.h"
@@ -1575,7 +1576,8 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
         }
         session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
         session->AddPropertyDirtyFlags(static_cast<uint32_t>(SessionPropertyFlag::WINDOW_RECT));
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}d, reason:%{public}d %{public}s rect:win=%{public}s "
+        TLOGI_LMTBYID(TEN_SECONDS, RECORD_100_TIMES, session->GetPersistentId(), WmsLogTag::WMS_LAYOUT,
+            "%{public}s: id:%{public}d, reason:%{public}d %{public}s rect:win=%{public}s "
             "client=%{public}s", where, session->GetPersistentId(), session->GetSizeChangeReason(),
             updateReason.c_str(), rect.ToString().c_str(), session->GetClientRect().ToString().c_str());
     }, __func__ + GetRectInfo(rect));
@@ -1946,7 +1948,8 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason r
         }
         NotifySessionRectChange(rect, reason);
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d->%{public}d cfg:%{public}s rects:in=%{public}s "
+    TLOGI_LMTBYID(TEN_SECONDS, RECORD_100_TIMES, GetPersistentId(), WmsLogTag::WMS_LAYOUT,
+        "Id:%{public}d reason:%{public}d->%{public}d cfg:%{public}s rects:in=%{public}s "
         "newReq=%{public}s newWin=%{public}s", GetPersistentId(), reason, newReason,
         moveConfiguration.ToString().c_str(), rect.ToString().c_str(), newRequestRect.ToString().c_str(),
         newWinRect.ToString().c_str());
@@ -8522,9 +8525,10 @@ bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeC
             GetPersistentId(), rect.ToString().c_str(), globalRect.ToString().c_str());
         return false;
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, rect:%{public}s->%{public}s global=%{public}s client=%{public}s",
-        GetPersistentId(), GetSessionRect().ToString().c_str(), rect.ToString().c_str(), globalRect.ToString().c_str(),
-        GetClientRect().ToString().c_str());
+    TLOGI_LMTBYID(TEN_SECONDS, RECORD_100_TIMES, GetPersistentId(), WmsLogTag::WMS_LAYOUT,
+        "id:%{public}d, rect:%{public}s->%{public}s global=%{public}s client=%{public}s",
+        GetPersistentId(), GetSessionRect().ToString().c_str(), rect.ToString().c_str(),
+        globalRect.ToString().c_str(), GetClientRect().ToString().c_str());
     layoutController_->SetSessionRect(rect);
     RectCheckProcess();
     return true;

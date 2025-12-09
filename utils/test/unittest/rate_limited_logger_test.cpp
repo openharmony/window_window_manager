@@ -28,13 +28,15 @@ public:
     static void SetUpTestCase();
     static void TearDownTestCase();
 
-    void SetUp() override {
+    void SetUp() override
+    {
         // Clear log records before each test
         RateLimitedLogger::getInstance().clear();
         RateLimitedLogger::getInstance().setEnabled(true);
     }
 
-    void TearDown() override {
+    void TearDown() override
+    {
         // Clear log records after each test
         RateLimitedLogger::getInstance().clear();
     }
@@ -54,8 +56,8 @@ HWTEST_F(RateLimitedLoggerTest, ShouldHandleLargeTimeWindow, TestSize.Level1)
 {
     // Given - Very large time window (1 hour)
     std::string functionName = "testFunction";
-    int timeWindowMs = 60 * 60 * 1000; // 1 hour in milliseconds
-    int maxCount = 3;
+    int32_t timeWindowMs = 60 * 60 * 1000; // 1 hour in milliseconds
+    int32_t maxCount = 3;
     
     // When - Log multiple times within the large window
     bool result1 = RateLimitedLogger::getInstance().logFunction(functionName, timeWindowMs, maxCount);
@@ -79,8 +81,8 @@ HWTEST_F(RateLimitedLoggerTest, ShouldHandleSmallTimeWindow, TestSize.Level1)
 {
     // Given - Very small time window (1ms)
     std::string functionName = "testFunction";
-    int timeWindowMs = 1; // 1 millisecond
-    int maxCount = 1;
+    int32_t timeWindowMs = 1; // 1 millisecond
+    int32_t maxCount = 1;
     
     // When - Log once
     bool result1 = RateLimitedLogger::getInstance().logFunction(functionName, timeWindowMs, maxCount);
@@ -111,8 +113,8 @@ HWTEST_F(RateLimitedLoggerTest, ShouldHandleLargeMaxCount, TestSize.Level1)
 {
     // Given - Very large maxCount
     std::string functionName = "testFunction";
-    int timeWindowMs = 1000;
-    int maxCount = INT_MAX; // Maximum integer value
+    int32_t timeWindowMs = 1000;
+    int32_t maxCount = INT_MAX; // Maximum integer value
     
     // When - Log once (should always succeed with such a high limit)
     bool result = RateLimitedLogger::getInstance().logFunction(functionName, timeWindowMs, maxCount);
@@ -134,8 +136,8 @@ HWTEST_F(RateLimitedLoggerTest, ShouldHandleSpecialCharactersInFunctionName, Tes
     std::string functionName2 = "function_with_underscores";
     std::string functionName3 = "FunctionWithCamelCase";
     std::string functionName4 = "function-with-dashes";
-    int timeWindowMs = 1000;
-    int maxCount = 1;
+    int32_t timeWindowMs = 1000;
+    int32_t maxCount = 1;
     
     // When - Log with each special function name
     bool result1 = RateLimitedLogger::getInstance().logFunction(functionName1, timeWindowMs, maxCount);
@@ -164,8 +166,8 @@ HWTEST_F(RateLimitedLoggerTest, ShouldHandleEmptyFunctionName, TestSize.Level1)
 {
     // Given - Empty function name
     std::string functionName = "";
-    int timeWindowMs = 1000;
-    int maxCount = 2;
+    int32_t timeWindowMs = 1000;
+    int32_t maxCount = 2;
     
     // When - Log multiple times with empty function name
     bool result1 = RateLimitedLogger::getInstance().logFunction(functionName, timeWindowMs, maxCount);
@@ -211,12 +213,12 @@ HWTEST_F(RateLimitedLoggerTest, ShouldHandleRapidConsecutiveCalls, TestSize.Leve
 {
     // Given - Short time window and low max count
     std::string functionName = "testFunction";
-    int timeWindowMs = 100; // 100ms window
-    int maxCount = 3;
+    int32_t timeWindowMs = 100; // 100ms window
+    int32_t maxCount = 3;
     
     // When - Make rapid consecutive calls
     bool results[5];
-    for (int i = 0; i < 5; ++i) {
+    for (int32_t i = 0; i < 5; ++i) {
         results[i] = RateLimitedLogger::getInstance().logFunction(functionName, timeWindowMs, maxCount);
     }
     
@@ -238,8 +240,8 @@ HWTEST_F(RateLimitedLoggerTest, ShouldResetAfterClear, TestSize.Level1)
 {
     // Given - Function that has reached its limit
     std::string functionName = "testFunction";
-    int timeWindowMs = 1000;
-    int maxCount = 2;
+    int32_t timeWindowMs = 1000;
+    int32_t maxCount = 2;
     
     // When - Reach the limit
     bool result1 = RateLimitedLogger::getInstance().logFunction(functionName, timeWindowMs, maxCount);
@@ -274,7 +276,7 @@ HWTEST_F(RateLimitedLoggerTest, ShouldHandleMultipleFunctionsWithRapidCalls, Tes
     
     // When - Make rapid calls to all functions
     std::vector<bool> results1, results2, results3;
-    for (int i = 0; i < 5; ++i) {
+    for (int32_t i = 0; i < 5; ++i) {
         results1.push_back(RateLimitedLogger::getInstance().logFunction(function1, 1000, 2));
         results2.push_back(RateLimitedLogger::getInstance().logFunction(function2, 1000, 3));
         results3.push_back(RateLimitedLogger::getInstance().logFunction(function3, 1000, 1));
@@ -297,9 +299,10 @@ HWTEST_F(RateLimitedLoggerTest, ShouldHandleMultipleFunctionsWithRapidCalls, Tes
 HWTEST_F(RateLimitedLoggerTest, ShouldHandleLongFunctionNames, TestSize.Level1)
 {
     // Given - Very long function name
-    std::string longFunctionName = "VeryLongFunctionNameWithMultipleComponentsAndSpecialCharacters_1234567890_ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    int timeWindowMs = 1000;
-    int maxCount = 2;
+    std::string longFunctionName = "VeryLongFunctionNameWithMultipleComponentsAnd"
+        "SpecialCharacters_1234567890_ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    int32_t timeWindowMs = 1000;
+    int32_t maxCount = 2;
     
     // When - Log with long function name
     bool result1 = RateLimitedLogger::getInstance().logFunction(longFunctionName, timeWindowMs, maxCount);
@@ -314,16 +317,16 @@ HWTEST_F(RateLimitedLoggerTest, ShouldHandleLongFunctionNames, TestSize.Level1)
 }
 
 /**
- * @tc.name: DisableRetrunTrue
- * @tc.desc: disable return true
+ * @tc.name: TurnOffLogRateLimitingSwitchTest
+ * @tc.desc: Turn off the log rate limiting switch test
  * @tc.type: FUNC
  */
-HWTEST_F(RateLimitedLoggerTest, DisableRetrunTrue, TestSize.Level1)
+HWTEST_F(RateLimitedLoggerTest, TurnOffLogRateLimitingSwitchTest, TestSize.Level1)
 {
     // Given - Turn off the log rate limiting switch
     std::string longFunctionName = "testFunction";
-    int timeWindowMs = 1000;
-    int maxCount = 1;
+    int32_t timeWindowMs = 1000;
+    int32_t maxCount = 1;
     RateLimitedLogger::getInstance().setEnabled(false);
     
     // When - Print multiple logs in a short period of time
@@ -335,6 +338,44 @@ HWTEST_F(RateLimitedLoggerTest, DisableRetrunTrue, TestSize.Level1)
     EXPECT_TRUE(result1);
     EXPECT_TRUE(result2);
     EXPECT_TRUE(result3);
+}
+
+/**
+ * @tc.name: AbnormalTimeWindowMsParameter
+ * @tc.desc: Abnormal timeWindowMs Parameter test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RateLimitedLoggerTest, AbnormalTimeWindowMsParameter, TestSize.Level1)
+{
+    // Given - Invalid timeWindowMs parameter
+    std::string longFunctionName = "testFunction";
+    int32_t timeWindowMs = 0;
+    int32_t maxCount = 1;
+    
+    // When - Log once
+    bool result = RateLimitedLogger::getInstance().logFunction(longFunctionName, timeWindowMs, maxCount);
+
+    // Then - The log should be printed fail
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AbnormalMaxCountParameter
+ * @tc.desc: Abnormal maxCount Parameter test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RateLimitedLoggerTest, AbnormalMaxCountParameter, TestSize.Level1)
+{
+    // Given - Invalid timeWindowMs parameter
+    std::string longFunctionName = "testFunction";
+    int32_t timeWindowMs = 1000;
+    int32_t maxCount = 0;
+    
+    // When - Log once
+    bool result = RateLimitedLogger::getInstance().logFunction(longFunctionName, timeWindowMs, maxCount);
+
+    // Then - The log should be printed fail
+    EXPECT_FALSE(result);
 }
 } // namespace
 } // Rosen

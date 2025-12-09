@@ -29,6 +29,7 @@
 #include "key_event.h"
 #include "pointer_event.h"
 #include "process_options.h"
+#include "rate_limited_logger.h"
 #include "session/host/include/zidl/session_ipc_interface_code.h"
 #include "window_manager_hilog.h"
 namespace OHOS::Rosen {
@@ -1054,7 +1055,8 @@ WSError SessionProxy::UpdateSessionRect(const WSRect& rect, SizeChangeReason rea
     bool isGlobal, bool isFromMoveToGlobal, const MoveConfiguration& moveConfiguration,
     const RectAnimationConfig& rectAnimationConfig)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Rect:%{public}s global:%{public}d isFromMoveToGlobal:%{public}d cfg:%{public}s",
+    TLOGI_LMT(TEN_SECONDS, RECORD_100_TIMES, WmsLogTag::WMS_LAYOUT,
+        "Rect:%{public}s global:%{public}d isFromMoveToGlobal:%{public}d cfg:%{public}s",
         rect.ToString().c_str(), isGlobal, isFromMoveToGlobal, moveConfiguration.ToString().c_str());
     MessageParcel data;
     MessageParcel reply;

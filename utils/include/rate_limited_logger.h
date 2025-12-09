@@ -25,10 +25,23 @@
 #include <unordered_map>
 #include "window_manager_hilog.h"
 
+namespace OHOS {
+namespace Rosen {
+namespace {
+constexpr uint32_t TEN_SECONDS = 10 * 1000;
+constexpr uint32_t ONE_MINUTE  = 60 * 1000;
+constexpr uint32_t ONE_HOUR    = 60 * 60 * 1000;
+
+constexpr uint32_t RECORD_ONCE      = 1;
+constexpr uint32_t RECORD_10_TIMES  = 10;
+constexpr uint32_t RECORD_100_TIMES = 100;
+constexpr uint32_t RECORD_200_TIMES = 200;
+}
+
 class RateLimitedLogger {
 private:
     struct FunctionRecord {
-        int count = 0;                                    // Current count in time window
+        int32_t count = 0;                                // Current count in time window
         std::chrono::steady_clock::time_point startTime;  // Time window start
     };
 
@@ -59,7 +72,7 @@ public:
      * @param message The log message content
      * @return true if message was logged, false if rate limited
      */
-    bool logFunction(const std::string& functionName, int timeWindowMs, int maxCount);
+    bool logFunction(const std::string& functionName, int32_t timeWindowMs, int32_t maxCount);
 
     /**
      * Enable or disable all logging
@@ -77,23 +90,31 @@ public:
      * @param functionName Name of the function
      * @return Current log count
      */
-    int getCurrentCount(const std::string& functionName);
+    int32_t getCurrentCount(const std::string& functionName);
 };
 
-
-#define TLOGI_LMT(timeWindowMs, maxCount, tag, fmt, ...)                                        \
+#define TLOGI_LMT(timeWindowMs, maxCount, tag, fmt, ...)                                          \
     do {                                                                                          \
         if (RateLimitedLogger::getInstance().logFunction(__FUNCTION__, timeWindowMs, maxCount)) { \
             TLOGI(tag, fmt, ##__VA_ARGS__);                                                       \
         }                                                                                         \
     } while (0)
 
-#define TLOGI_LMTKEY(timeWindowMs, maxCount, customKey, tag, fmt, ...)                   \
+#define TLOGI_LMTKEY(timeWindowMs, maxCount, customKey, tag, fmt, ...)                            \
     do {                                                                                          \
         if (RateLimitedLogger::getInstance().logFunction(customKey, timeWindowMs, maxCount)) {    \
             TLOGI(tag, fmt, ##__VA_ARGS__);                                                       \
         }                                                                                         \
     } while (0)
 
+#define TLOGI_LMTBYID(timeWindowMs, maxCount, wid, tag, fmt, ...)                                 \
+    do {                                                                                          \
+        if (RateLimitedLogger::getInstance().logFunction(__FUNCTION__ + std::to_string(wid),      \
+            timeWindowMs, maxCount)) {                                                            \
+            TLOGI(tag, fmt, ##__VA_ARGS__);                                                       \
+        }                                                                                         \
+    } while (0)
 
+} // namespace Rosen
+} // namespace OHOS
 #endif // RATE_LIMITED_LOGGER_H

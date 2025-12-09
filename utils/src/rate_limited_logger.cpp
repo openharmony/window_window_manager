@@ -17,14 +17,22 @@
 #include <sstream>
 #include <thread>
 #include "rate_limited_logger.h"
-
-RateLimitedLogger& RateLimitedLogger::getInstance() {
+namespace OHOS {
+namespace Rosen {
+RateLimitedLogger& RateLimitedLogger::getInstance()
+{
     static RateLimitedLogger instance_;
     return instance_;
 }
 
-bool RateLimitedLogger::logFunction(const std::string& functionName, int timeWindowMs, int maxCount) {
-    // 
+bool RateLimitedLogger::logFunction(const std::string& functionName, int32_t timeWindowMs, int32_t maxCount)
+{
+    // Parameter abnormality
+    if (timeWindowMs <= 0 || maxCount <= 0) {
+        return false;
+    }
+
+    // Disable log rate limiting, always print logs
     if (!enabled_) {
         return true;
     }
@@ -51,17 +59,22 @@ bool RateLimitedLogger::logFunction(const std::string& functionName, int timeWin
     return false;
 }
 
-void RateLimitedLogger::clear() {
+void RateLimitedLogger::clear()
+{
     std::lock_guard<std::mutex> lock(functionRecordsMutex_);
     functionRecords_.clear();
 }
 
-void RateLimitedLogger::setEnabled(bool enabled) {
+void RateLimitedLogger::setEnabled(bool enabled)
+{
     enabled_ = enabled;
 }
 
-int RateLimitedLogger::getCurrentCount(const std::string& functionName) {
+int32_t RateLimitedLogger::getCurrentCount(const std::string& functionName)
+{
     std::lock_guard<std::mutex> lock(functionRecordsMutex_);
     auto it = functionRecords_.find(functionName);
     return (it != functionRecords_.end()) ? it->second.count : 0;
 }
+} // namespace Rosen
+} // namespace OHOS
