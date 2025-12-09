@@ -74,8 +74,6 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
-// constexpr int32_t FORCE_SPLIT_MODE = 5;
-// constexpr int32_t NAV_FORCE_SPLIT_MODE = 6;
 constexpr int32_t API_VERSION_18 = 18;
 constexpr int32_t API_VERSION_23 = 23;
 constexpr uint32_t API_VERSION_MOD = 1000;

@@ -5754,8 +5754,8 @@ napi_value JsSceneSessionManager::OnGetAllJsonProfile(napi_env env, napi_callbac
     int32_t profileTypeId;
     AppExecFwk::ProfileType profileType;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], profileTypeId) 
-    || profileTypeId > std::numeric_limits<uint8_t>::max()
-    || profileTypeId < std::numeric_limits<int8_t>::min()) {
+        || profileTypeId > std::numeric_limits<uint8_t>::max()
+        || profileTypeId < std::numeric_limits<int8_t>::min()) {
         TLOGE(WmsLogTag::WMS_SCB, "Failed to convert parameter to profileTypeId");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
