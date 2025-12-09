@@ -639,6 +639,13 @@ bool PictureInPictureControllerBase::GetPiPSettingSwitchStatus()
     TLOGI(WmsLogTag::WMS_PIP, "switchStatus: %{public}d", switchStatus);
     return switchStatus;
 }
+
+bool PictureInPictureControllerBase::IsPiPActive()
+{
+    if (curState_ != PiPWindowState::STATE_STARTED) {
+        return false;
+    }
+}
 // LCOV_EXCL_STOP
 } // namespace Rosen
 } // namespace OHOS

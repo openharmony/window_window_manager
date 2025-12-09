@@ -223,6 +223,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdatePiPTemplateInfo(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_PIP_PARENT_WINDOWID):
             return HandleSetPipParentWindowId(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_IS_PIP_ACTIVE):
+            return HandleIsPiPActive(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLOATING_BALL):
             return HandleUpdateFloatingBall(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_FLOATING_BALL_PREPARE_CLOSE):
@@ -1694,6 +1696,22 @@ int SessionStub::HandleSetPipParentWindowId(MessageParcel& data, MessageParcel& 
     WSError errCode = SetPipParentWindowId(pipParentWindowId);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_PIP, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleIsPiPActive(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_PIP, "in");
+    bool status;
+    WSError errCode = IsPiPActive(status);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_PIP, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteBool(status)) {
+        TLOGE(WmsLogTag::WMS_PIP, "write status fail.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
