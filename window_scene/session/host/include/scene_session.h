@@ -938,7 +938,6 @@ public:
     */
     void NotifyWindowAttachStateListenerRegistered(bool registered) override;
     WMError NotifySnapshotUpdate() override;
-    bool GetIsPrivacyMode() const override { return isPrivacyMode_; };
     void SetAppControlInfo(ControlAppType type, ControlInfo controlInfo) override
     {
         std::lock_guard lock(appUseControlMapMutex_);
