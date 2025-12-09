@@ -770,6 +770,8 @@ private:
     void HandleRotationCorrectionExemption(sptr<DisplayInfo>& displayInfo);
     void GetRotationCorrectionExemptionListFromDatabase(bool isForce = false);
     void RegisterRotationCorrectionExemptionListObserver();
+    static void BootFinishedUnfreezeCallback(const char *key, const char *value, void *context);
+    void AddScreenUnfreezeTask(const sptr<ScreenSession>& screenSession, uint32_t freezeCount);
     DMError CheckSetResolutionIsValid(ScreenId screenId, uint32_t width, uint32_t height,
         float virtualPixelRatio);
     void AodLibInit();
