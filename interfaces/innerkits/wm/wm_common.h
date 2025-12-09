@@ -1974,6 +1974,14 @@ struct WindowLimits {
         };
     }
 
+    bool IsUninitialized() const
+    {
+        return (maxWidth_ == static_cast<uint32_t>(INT32_MAX) &&
+                maxHeight_ == static_cast<uint32_t>(INT32_MAX) &&
+                minWidth_ == 1 &&
+                minHeight_ == 1);
+    }
+
     std::string ToString() const
     {
         constexpr int precision = 6;
