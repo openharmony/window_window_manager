@@ -1419,12 +1419,6 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
             TLOGI(WmsLogTag::WMS_LAYOUT_PC, "winId: %{public}u, windowModeSupportType: %{public}u",
                 GetWindowId(), windowModeSupportType);
         }
-        RealTimeSwitchInfo switchInfo = property_->GetRealTimeSwitchInfo();
-        if (switchInfo.showTypes_ != 0) {
-            uint32_t compatibleModeWindowNeed = (WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN |
-                                     WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
-            windowModeSupportType |= compatibleModeWindowNeed;
-        }
         property_->SetWindowModeSupportType(windowModeSupportType);
         TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}u, windowModeSupportType: %{public}u",
             GetWindowId(), windowModeSupportType);

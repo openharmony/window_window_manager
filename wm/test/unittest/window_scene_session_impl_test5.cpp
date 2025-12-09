@@ -2280,25 +2280,8 @@ HWTEST_F(WindowSceneSessionImplTest5, GetConfigurationFromAbilityInfo, TestSize.
     window->property_->SetCompatibleModeProperty(compatibleModeProperty);
     window->GetConfigurationFromAbilityInfo();
     auto supportType = window->property_->GetWindowModeSupportType();
-    auto expceted = WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN |
-                    WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
+    auto expceted = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     EXPECT_EQ(supportType & expceted, expceted);
-
-    compatibleModeProperty->SetIsAdaptToDragScale(false);
-    RealTimeSwitchInfo SwitchInfo;
-    SwitchInfo.isNeedChange_ = true;
-    SwitchInfo.showTypes_ = 1;
-    window->property_->compatibleModeProperty_->SetRealTimeSwitchInfo(SwitchInfo);
-    window->GetConfigurationFromAbilityInfo();
-    supportType = window->property_->GetWindowModeSupportType();
-    expected = WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN |
-                    WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING |
-                    WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
-                    WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY;
-    EXPECT_EQ(supportType, expected);
-    SwitchInfo.showTypes_ = 0;
-    window->property_->compatibleModeProperty_->SetRealTimeSwitchInfo(SwitchInfo);
-    window->GetConfigurationFromAbilityInfo();
 }
 
 /**
