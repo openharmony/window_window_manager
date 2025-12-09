@@ -118,13 +118,13 @@ HWTEST_F(SceneSessionDirtyManagerTest2, StartDelayedFlushWindowInfoToMMITask, Te
     ssm_->HandleUserSwitching(true);
     EXPECT_NE(ssm_->isDelayFlushWindowInfoMode_ , true);
 
-    ssm->isUserBackground_ = true;
+    ssm_->isUserBackground_ = true;
     ssm_->isDelayFlushWindowInfoMode_ = false;
     ssm_->HandleUserSwitching(true);
     EXPECT_NE(ssm_->isDelayFlushWindowInfoMode_ , true);
     sleep(2);
 
-    ssm->isUserBackground_ = false;
+    ssm_->isUserBackground_ = false;
     ssm_->isDelayFlushWindowInfoMode_ = false;
     ssm_->HandleUserSwitching(true);
     EXPECT_NE(ssm_->isDelayFlushWindowInfoMode_ , true);
