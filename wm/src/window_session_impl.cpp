@@ -2393,7 +2393,7 @@ void WindowSessionImpl::SetForceSplitConfig(AppForceLandscapeConfig& config)
         if (config.containsAppConfig_) {
             appForceSplitConfig.isRouter = config.isAppRouter_;
             appForceSplitConfig.configJsonStr = config.appConfigJsonStr_;
-        } else if (config.containsSystemConfig_) {
+        } else if (config.containsSysConfig_) {
             systemForceSplitConfig.isRouter = config.isSysRouter_;
             systemForceSplitConfig.homePage = config.sysHomePage_;
             systemForceSplitConfig.configJsonStr = config.sysConfigJsonStr_;
