@@ -16795,7 +16795,7 @@ WSError SceneSessionManager::SetAppForceLandscapeConfigEnable(const std::string&
         for (const auto& iter : sceneSessionMap_) {
             auto& session = iter.second;
             if (session && session->GetSessionInfo().bundleName_ == bundleName) {
-                session->NotifyAppForceLandscapeConfigUpdated();
+                session->NotifyAppForceLandscapeConfigEnableUpdated();
             }
         }
     TLOGI(WmsLogTag::DEFAULT, "bundleName:%{public}s, enable:%{public}d", bundleName.c_str(), enableForceSplit);
