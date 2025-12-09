@@ -1919,6 +1919,12 @@ WSError SceneSession::SetPipParentWindowId(uint32_t windowId)
     return WSError::WS_OK;
 }
 
+WMError SceneSession::IsPiPActive(bool& status)
+{
+    status = pipActiveStatus_.load();
+    return WMError::WM_OK;
+}
+
 /** @note @window.layout */
 void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason,
     const MoveConfiguration& moveConfiguration, const RectAnimationConfig& rectAnimationConfig)
@@ -3385,6 +3391,7 @@ WSError SceneSession::NotifyPiPActiveStatusChange(bool status)
         TLOGE(WmsLogTag::WMS_PIP, "sessionStage is null");
         return WSError::WS_ERROR_NULLPTR;
     }
+    pipActiveStatus_.store(status);
     return sessionStage_->NotifyPiPActiveStatusChange(status);
 }
 

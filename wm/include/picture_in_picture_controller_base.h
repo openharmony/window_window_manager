@@ -106,6 +106,7 @@ public:
     bool GetPipSettingSwitchStatusEnabled();
     bool GetPiPSettingSwitchStatus();
     bool isWeb_ = false;
+    bool IsPiPActive();
 
     // diffrent between normal and web
     virtual WMError StartPictureInPicture(StartPipType startType) = 0;
