@@ -309,6 +309,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option,
     property_->SetWindowType(optionWindowType);
     InitPropertyFromOption(option);
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
+    followCreatorLifecycle_ = option->IsFollowCreatorLifecycle();
 
     RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true, rsUIContext);
     if (WindowHelper::IsSubWindow(GetType())) {
@@ -894,32 +895,52 @@ void WindowSessionImpl::GetSubWindows(int32_t parentPersistentId, std::vector<sp
 
 void WindowSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState newState)
 {
+    StateChangeOption option(parentPersistentId, newState);
+    UpdateSubWindowStateWithOptions(option);
+}
+
+void WindowSessionImpl::UpdateSubWindowStateWithOptions(const StateChangeOption& option)
+{
     std::vector<sptr<WindowSessionImpl>> subWindows;
-    GetSubWindows(parentPersistentId, subWindows);
+    GetSubWindows(option.parentPersistentId_, subWindows);
     if (subWindows.empty()) {
-        TLOGD(WmsLogTag::WMS_SUB, "parent window: %{public}d, its subWindowMap is empty", parentPersistentId);
+        TLOGD(WmsLogTag::WMS_SUB, "parent window: %{public}d, its subWindowMap is empty", option.parentPersistentId_);
         return;
     }
-
     // when parent window hide and subwindow whose state is shown should hide and notify user
-    if (newState == WindowState::STATE_HIDDEN) {
+    if (option.newState_ == WindowState::STATE_HIDDEN) {
         for (auto subwindow : subWindows) {
-            if (subwindow != nullptr && subwindow->GetWindowState() == WindowState::STATE_SHOWN) {
+            if (subwindow == nullptr || subwindow->GetWindowState() != WindowState::STATE_SHOWN) {
+                continue;
+            }
+            // If the subwindow of uiextension follows the uiextension lifecycle, the subWindow will hide
+            if (subwindow->followCreatorLifecycle_) {
+                TLOGI(WmsLogTag::WMS_SUB, "subwindow hide follow uec, id: %{public}d", subwindow->GetPersistentId());
+                subwindow->Hide(option.reason_, option.withAnimation_, option.isFromInnerkits_, option.waitDetach_);
+                subwindow->SetIsHiddenFollowingUIExtension(true);
+            } else {
                 subwindow->state_ = WindowState::STATE_HIDDEN;
                 subwindow->NotifyAfterBackground();
                 TLOGD(WmsLogTag::WMS_SUB, "Notify subWindow background, id:%{public}d", subwindow->GetPersistentId());
-                UpdateSubWindowStateAndNotify(subwindow->GetPersistentId(), newState);
+                UpdateSubWindowStateAndNotify(subwindow->GetPersistentId(), option.newState_);
             }
         }
     // when parent window show and subwindow whose state is shown should show and notify user
-    } else if (newState == WindowState::STATE_SHOWN) {
+    } else if (option.newState_ == WindowState::STATE_SHOWN) {
         for (auto subwindow : subWindows) {
-            if (subwindow != nullptr && subwindow->GetWindowState() == WindowState::STATE_HIDDEN &&
-                subwindow->GetRequestWindowState() == WindowState::STATE_SHOWN) {
+            if (subwindow == nullptr || subwindow->GetWindowState() != WindowState::STATE_HIDDEN) {
+                continue;
+            }
+            // If the subwindow has been hidden due to uiextension hiding, The subWindow will show
+            if (subwindow->followCreatorLifecycle_ && subwindow->IsHiddenFollowingUIExtension()) {
+                TLOGI(WmsLogTag::WMS_SUB, "subwindow show follow uec, id: %{public}d", subwindow->GetPersistentId());
+                subwindow->Show(option.reason_, option.withAnimation_, option.withFocus_, option.waitAttach_);
+                subwindow->SetIsHiddenFollowingUIExtension(false);
+            } else if (subwindow->GetRequestWindowState() == WindowState::STATE_SHOWN) {
                 subwindow->state_ = WindowState::STATE_SHOWN;
                 subwindow->NotifyAfterForeground();
                 TLOGD(WmsLogTag::WMS_SUB, "Notify subWindow foreground, id:%{public}d", subwindow->GetPersistentId());
-                UpdateSubWindowStateAndNotify(subwindow->GetPersistentId(), newState);
+                UpdateSubWindowStateAndNotify(subwindow->GetPersistentId(), option.newState_);
             }
         }
     }
@@ -951,7 +972,9 @@ WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation, bool withFo
     // delete after replace WSError with WMError
     WMError res = static_cast<WMError>(ret);
     if (res == WMError::WM_OK) {
-        UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_SHOWN);
+        StateChangeOption option(GetPersistentId(), WindowState::STATE_SHOWN, reason, withAnimation, withFocus,
+            waitAttach, false, false);
+        UpdateSubWindowStateWithOptions(option);
         state_ = WindowState::STATE_SHOWN;
         requestState_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground();
