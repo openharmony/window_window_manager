@@ -177,7 +177,7 @@ public:
     void NotifyClientWindowSize();
     bool IsFullScreenPcAppInPadMode() const;
     sptr<WindowSessionProperty> GetPropertyByContext() const;
-    std::vector<Rect> GetAncoWindowHotAreas();
+    std::vector<Rect> GetAncoWindowHotAreas() override;
 
     /*
      * Compatible Mode
