@@ -5472,7 +5472,7 @@ FlushWindowInfoTask SceneSessionManager::CreateDelayedFlushWindowInfoToMMITask()
             return;
         }
         flushWindowInfoCount_++;
-        TLOGNI(WmsLogTag::WMS_EVENT, "DelayedFlushWindowInfoToMMI count: %{public}d", flushWindowInfoCount_);
+        TLOGNI(WmsLogTag::WMS_EVENT, "DelayedFlushWindowInfoToMMI count: %{public}d", flushWindowInfoCount_.load());
         FlushWindowInfoToMMI(true);
 
         if (isDelayFlushWindowInfoMode_) {
