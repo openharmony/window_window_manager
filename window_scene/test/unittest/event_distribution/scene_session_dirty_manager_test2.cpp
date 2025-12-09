@@ -106,6 +106,11 @@ void InitSceneSession(sptr<SceneSession>& sceneSession, int32_t pid, int windowI
     sceneSession->SetCallingUid(uid);
 }
 
+/**
+ * @tc.name: StartDelayedFlushWindowInfoToMMITask
+ * @tc.desc: StartDelayedFlushWindowInfoToMMITask
+ * @tc.type: FUNC
+ */
 HWTEST_F(SceneSessionDirtyManagerTest2, StartDelayedFlushWindowInfoToMMITask, TestSize.Level1)
 {
 
@@ -129,7 +134,6 @@ HWTEST_F(SceneSessionDirtyManagerTest2, StartDelayedFlushWindowInfoToMMITask, Te
     ssm_->HandleUserSwitching(true);
     EXPECT_EQ(ssm_->isDelayFlushWindowInfoMode_ , true);
 }
-
 
 /**
  * @tc.name: GetWindowInfoWithoutParentWindowAndStateActive
