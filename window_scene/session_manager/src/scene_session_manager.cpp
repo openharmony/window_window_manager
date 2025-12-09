@@ -5471,7 +5471,7 @@ FlushWindowInfoTask SceneSessionManager::CreateDelayedFlushWindowInfoToMMITask()
             TLOGNI(WmsLogTag::WMS_EVENT, "DelayedFlushWindowInfoToMMI interrupt");
             return;
         }
-        flushWindowInfoCount_++;
+        flushWindowInfoCount_.fetch_add(1, std::memory_order_relaxed);
         TLOGNI(WmsLogTag::WMS_EVENT, "DelayedFlushWindowInfoToMMI count: %{public}d", flushWindowInfoCount_.load());
         FlushWindowInfoToMMI(true);
 
