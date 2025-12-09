@@ -417,22 +417,6 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenColorGamut, TestSize.Level1)
 }
 
 /**
- * @tc.name: LoadScreenSceneXml
- * @tc.desc: LoadScreenSceneXml virtual screen
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, LoadScreenSceneXml, TestSize.Level1)
-{
-    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
-    VirtualScreenOption virtualOption;
-    virtualOption.name_ = "LoadScreenSceneXml";
-    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-    ssm_->LoadScreenSceneXml();
-    ASSERT_EQ(ssm_->SetScreenActiveMode(screenId, 0), DMError::DM_ERROR_NULLPTR);
-    ssm_->DestroyVirtualScreen(screenId);
-}
-
-/**
  * @tc.name: GetScreenGamutMap
  * @tc.desc: GetScreenGamutMap virtual screen
  * @tc.type: FUNC

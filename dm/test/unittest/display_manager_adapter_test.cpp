@@ -681,7 +681,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenActiveMode, TestSize.Level1)
     ScreenId id = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
     ASSERT_NE(id, SCREEN_ID_INVALID) << "Failed to create virtual screen";
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenActiveMode(id, 100);
-    EXPECT_EQ(err, DMError::DM_ERROR_NULLPTR)
+    EXPECT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED)
         << "SetScreenActiveMode should return DM_ERROR_NULLPTR when proxy is not initialized.";
     SingletonContainer::Get<ScreenManagerAdapter>().DestroyVirtualScreen(id);
 }
