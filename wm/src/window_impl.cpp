@@ -2020,6 +2020,7 @@ void WindowImpl::CustomHideAnimation()
 {
     uint32_t animationFlag = property_->GetAnimationFlag();
     if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        TLOGD(WmsLogTag::WMS_ANIMATION, "Animate for Hidden");
         std::vector<sptr<IAnimationTransitionController>> animationTransitionControllers;
         {
             std::lock_guard<std::mutex> lockListener(transitionControllerMutex_);
