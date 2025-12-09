@@ -4434,7 +4434,7 @@ WSError SceneSession::SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "set keyframe policy from outside: %{public}s", keyFramePolicy.ToString().c_str());
     auto currentKeyFramePolicy = GetKeyFramePolicy();
     bool running = currentKeyFramePolicy.running_;
-    if (!running && keyFramePolicy.enable() &&
+    if (!running && keyFramePolicy.enabled() &&
         moveDragController_ != nullptr && moveDragController_->GetStartDragFlag() &&
         GetAppDragResizeType() != DragResizeType::RESIZE_WHEN_DRAG_END) {
         TLOGD(WmsLogTag::WMS_LAYOUT_PC, "key frame policy is enabled during resize");
