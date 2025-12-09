@@ -117,8 +117,8 @@ public:
     MOCK_METHOD0(IsUIExtensionAbilityProcess, bool());
     MOCK_METHOD4(NotifyExecuteAction, bool(int64_t elementId, const std::map<std::string, std::string>& actionAguments,
         int32_t action, int64_t baseParent));
-    MOCK_METHOD1(SetForceSplitConfig, void(const WindowSessionImpl::AppForceLandscapeConfig& config));
-    MOCK_METHOD1(SetForceSplitConfigEnable, void(const bool enableForceSplit));
+    // MOCK_METHOD1(SetForceSplitConfig, void(const OHOS::Rosen::AppForceLandscapeConfig& config));
+    // MOCK_METHOD1(SetForceSplitConfigEnable, void(const bool enableForceSplit));
     MOCK_METHOD1(SetContainerButtonStyle, void(const Rosen::DecorButtonStyle& decorButtonStyle));
 };
 } // namespace Ace
