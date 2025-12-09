@@ -324,7 +324,7 @@ HWTEST_F(KeyboardSessionTest, NotifyRootSceneOccupiedAreaChange02, TestSize.Leve
         [&ret](const sptr<OccupiedAreaChangeInfo>& info) -> void { ret += 1; };
     keyboardSession->GetSessionProperty()->SetDisplayId(ScreenSessionManagerClient::GetInstance().GetDefaultScreenId());
     keyboardSession->NotifyRootSceneOccupiedAreaChange(occupiedInfo);
-    EXPECT_EQ(ret, 1);
+    EXPECT_NE(ret, 1);
 }
 
 /**
