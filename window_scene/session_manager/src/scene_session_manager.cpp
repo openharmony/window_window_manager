@@ -5465,61 +5465,42 @@ void SceneSessionManager::ProcessUIAbilityOnUserSwitch(bool isUserActive)
 
 FlushWindowInfoTask SceneSessionManager::CreateDelayedFlushWindowInfoToMMITask() {
     FlushWindowInfoTask task = [this]() {
-        bool startTask = true;
-        bool isEnd = false;
-        int32_t count;
-        {
-            std::lock_guard<std::mutex> lock(delayedFlushWindowInfoMutex_);
-            flushWindowInfoCount_++;
-            count = flushWindowInfoCount_;
-            if (isDelayFlushWindowInfoMode_) {
-                if (flushWindowInfoCount_ >= FLUSH_WINDOW_INFO_MAX_COUNT) {
-                    isDelayFlushWindowInfoMode_ = false;
-                    flushWindowInfoCount_ = 0;
-                    startTask = false;
-                }
-                if (isUserBackground_) {
-                    isEnd = true;
-                }
-            } else {
-                isEnd = true;
-            }
-            if (isEnd) {
-                isDelayFlushWindowInfoMode_ = false;
-                flushWindowInfoCount_ = 0;
-            }
-        }
-        if (isEnd) {
-            TLOGNI(WmsLogTag::WMS_EVENT, "DelayedFlushWindowInfoToMMI end");
+        if (isUserBackground_) {
+            isDelayFlushWindowInfoMode_ = false;
+            flushWindowInfoCount_ = 0;
+            TLOGNI(WmsLogTag::WMS_EVENT, "DelayedFlushWindowInfoToMMI interrupt");
             return;
         }
-        TLOGNI(WmsLogTag::WMS_EVENT, "DelayedFlushWindowInfoToMMI count: %{public}d", count);
+        flushWindowInfoCount_++;
+        TLOGNI(WmsLogTag::WMS_EVENT, "DelayedFlushWindowInfoToMMI count: %{public}d", flushWindowInfoCount_);
         FlushWindowInfoToMMI(true);
-        if (startTask) {
-            TLOGNI(WmsLogTag::WMS_EVENT, "DelayedFlushWindowInfoToMMI add task");
-            auto nextTask = CreateDelayedFlushWindowInfoToMMITask();
-            PostFlushWindowInfoTask(std::move(nextTask), FLUSH_WINDOW_INFO_TASK_NAME, FLUSH_WINDOW_INFO_DELAY_INTERVAL);
+
+        if (isDelayFlushWindowInfoMode_) {
+            if (flushWindowInfoCount_ >= FLUSH_WINDOW_INFO_MAX_COUNT) {
+                isDelayFlushWindowInfoMode_ = false;
+                flushWindowInfoCount_ = 0;
+                return;
+            }
         }
+        TLOGNI(WmsLogTag::WMS_EVENT, "DelayedFlushWindowInfoToMMI add task");
+        auto nextTask = CreateDelayedFlushWindowInfoToMMITask();
+        PostFlushWindowInfoTask(std::move(nextTask), FLUSH_WINDOW_INFO_TASK_NAME, FLUSH_WINDOW_INFO_DELAY_INTERVAL);
     };
     return task;
 }
 
 void SceneSessionManager::StartDelayedFlushWindowInfoToMMITask() {
-    {
-        std::lock_guard<std::mutex> lock(delayedFlushWindowInfoMutex_);
-        flushWindowInfoCount_ = 0;
-        if (isDelayFlushWindowInfoMode_) {
-            return;
-        }
-        isDelayFlushWindowInfoMode_ = true;
+    flushWindowInfoCount_ = 0;
+    if (isDelayFlushWindowInfoMode_) {
+        return;
     }
+    isDelayFlushWindowInfoMode_ = true;
     auto task = CreateDelayedFlushWindowInfoToMMITask();
     PostFlushWindowInfoTask(std::move(task), FLUSH_WINDOW_INFO_TASK_NAME, FLUSH_WINDOW_INFO_START_DELAY_INTERVAL);
-    TLOGI(WmsLogTag::WMS_EVENT, "DelayedFlushWindowInfoToMMI start task");
+    TLOGNI(WmsLogTag::WMS_EVENT, "DelayedFlushWindowInfoToMMI start task");
 }
 
 void SceneSessionManager::StopDelayedFlushWindowInfoToMMITask() {
-    std::lock_guard<std::mutex> lock(delayedFlushWindowInfoMutex_);
     flushWindowInfoCount_ = 0;
     isDelayFlushWindowInfoMode_ = false;
 }

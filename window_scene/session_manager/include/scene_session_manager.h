@@ -1385,11 +1385,10 @@ private:
      */
     static constexpr int32_t DEFAULT_USERID = -1;
     std::atomic<int32_t> currentUserId_ { DEFAULT_USERID };
-    bool isUserBackground_ = false; // Only accessed on SSM thread
+    std::atomic<bool> isUserBackground_ { false };
 
-    int32_t flushWindowInfoCount_ = 0;
-    bool isDelayFlushWindowInfoMode_ = false;
-    std::mutex delayedFlushWindowInfoMutex_;
+    std::atomic<int32_t> flushWindowInfoCount_ { 0 };
+    std::atomic<bool> isDelayFlushWindowInfoMode_ { false };
 
     // displayRegionMap_ stores the screen display area for AccessibilityNotification,
     // the read and write operations must be performed in the same thread, current is in task thread.
