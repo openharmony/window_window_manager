@@ -6854,6 +6854,53 @@ void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo, Display
     }, __func__);
 }
 
+void SceneSessionManager::GetFocusWindowInfoByAbilityToken(FocusChangeInfo& focusInfo,
+    const sptr<IRemoteObject>& abilityToken)
+{
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied!");
+        return;
+    }
+    const char* const where = __func__;
+    taskScheduler_->PostSyncTask([this, &focusInfo, abilityToken, where] {
+        sptr<SceneSession> currSceneSession = nullptr;
+        {
+            std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+            for (const auto& [_, sceneSession] : sceneSessionMap_) {
+                if (sceneSession == nullptr) {
+                    continue;
+                }
+                if (sceneSession->GetAbilityToken() == abilityToken) {
+                    currSceneSession = sceneSession;
+                }
+            }
+        }
+        if (currSceneSession == nullptr) {
+            TLOGNE(WmsLogTag::WMS_FOCUS, "%{public}s not found scene session by ability token", where);
+            return;
+        }
+        int32_t focusedSessionId = GetFocusedSessionId(sceneSession->GetDisplayId());
+        if (focusedSessionId != currSceneSession->GetPersistentId()) {
+            currSceneSession = GetSceneSession(focusedSessionId);
+        }
+        if (currSceneSession == nullptr) {
+            TLOGNE(WmsLogTag::WMS_FOCUS, "%{public}s scene session is nullptr, id: %{public}d", where,
+                focusedSessionId);
+            return;
+        }
+        focusInfo.windowId_ = sceneSession->GetWindowId();
+        focusInfo.displayId_ = focusGroup->GetDisplayGroupId() == DEFAULT_DISPLAY_ID
+                                    ? DEFAULT_DISPLAY_ID
+                                    : sceneSession->GetDisplayId();
+        focusInfo.pid_ = sceneSession->GetCallingPid();
+        focusInfo.uid_ = sceneSession->GetCallingUid();
+        focusInfo.windowType_ = sceneSession->GetWindowType();
+        focusInfo.abilityToken_ = sceneSession->GetAbilityToken();
+        TLOGND(WmsLogTag::WMS_FOCUS, "%{public}s get focus session info by ability token success, id: %{public}d ",
+            where, focusedSessionId);
+    }, where);
+}
+
 void SceneSessionManager::GetAllGroupInfo(std::unordered_map<DisplayId, DisplayGroupId>& displayId2GroupIdMap,
                                           std::vector<sptr<FocusChangeInfo>>& allFocusInfoList)
 {

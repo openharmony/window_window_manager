@@ -170,6 +170,7 @@ public:
         TRANS_ID_SUPPORT_ROTATION_REGISTERED,
         TRANS_ID_RESET_SPECIFIC_WINDOW_ZINDEX,
         TRANS_ID_NOTIFY_BRIGHTNESS_MODE_CHANGE,
+        TRANS_ID_GET_FOCUS_SESSION_INFO_BY_ABILITY_TOKEN,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -345,6 +346,8 @@ public:
     void SetMaximizeMode(MaximizeMode maximizeMode) override {}
     MaximizeMode GetMaximizeMode() override { return MaximizeMode::MODE_AVOID_SYSTEM_BAR; }
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) override {}
+    void GetFocusWindowInfoByAbilityToken(FocusChangeInfo& focusInfo,
+        const sptr<IRemoteObject>& abilityToken) override {};
     void GetAllGroupInfo(std::unordered_map<DisplayId, DisplayGroupId>& displayId2GroupIdMap,
                          std::vector<sptr<FocusChangeInfo>>& allFocusInfoList) override {}
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override { return WMError::WM_OK; }
