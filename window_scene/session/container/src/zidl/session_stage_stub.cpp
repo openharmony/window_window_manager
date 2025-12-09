@@ -226,7 +226,7 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetCurrentRotation(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_APP_FORCE_LANDSCAPE_CONFIG_UPDATED):
             return HandleNotifyAppForceLandscapeConfigUpdated(data, reply);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_APP_FORCE_LANDSCAPE_CONFIG_ENABLE_UPDATED):
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_APP_FORCE_LANDSCAPE_ENABLE_UPDATED):
             return HandleNotifyAppForceLandscapeConfigEnableUpdated(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_APP_HOOK_WINDOW_INFO_UPDATED):
             return HandleNotifyAppHookWindowInfoUpdated(data, reply);

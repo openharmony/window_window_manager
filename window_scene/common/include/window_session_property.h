@@ -820,11 +820,10 @@ struct AppForceLandscapeConfig : public Parcelable {
     AppForceLandscapeConfig() {}
     AppForceLandscapeConfig(int32_t mode, int32_t supportSplit, bool ignoreOrientation, std::string sysConfigJsonStr,
         std::string appConfigJsonStr, std::string sysHomePage, bool isSysRouter, bool isAppRouter,
-        bool containsSysConfig, bool containsAppConfig)
-        : mode_(mode), supportSplit_(supportSplit), ignoreOrientation_(ignoreOrientation), 
-        sysConfigJsonStr_(sysConfigJsonStr), appConfigJsonStr_(appConfigJsonStr), sysHomePage_(sysHomePage), 
-        isSysRouter_(isSysRouter), isAppRouter_(isAppRouter), containsSysConfig_(containsSysConfig),
-        containsAppConfig_(containsAppConfig) {}
+        bool containsSysConfig, bool containsAppConfig) : mode_(mode), supportSplit_(supportSplit),
+        ignoreOrientation_(ignoreOrientation), sysConfigJsonStr_(sysConfigJsonStr),
+        appConfigJsonStr_(appConfigJsonStr), sysHomePage_(sysHomePage), isSysRouter_(isSysRouter),
+        isAppRouter_(isAppRouter), containsSysConfig_(containsSysConfig), containsAppConfig_(containsAppConfig) {}
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
