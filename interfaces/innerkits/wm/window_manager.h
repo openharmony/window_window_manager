@@ -1059,6 +1059,15 @@ public:
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID);
 
     /**
+     * @brief Get focus window.
+     *
+     * @param focusInfo Focus window info.
+     * @param abilityToken Ability token.
+     * @return FocusChangeInfo object about focus window.
+     */
+    void GetFocusWindowInfoByAbilityToken(FocusChangeInfo& focusInfo, const sptr<IRemoteObject>& abilityToken);
+
+    /**
      * @brief Dump all session info
      *
      * @param infos session infos

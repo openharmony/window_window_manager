@@ -67,6 +67,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleUnregisterWindowPropertyChangeAgent(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_INFO):
             return HandleGetFocusSessionInfo(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_INFO_BY_ABILITY_TOKEN):
+            return HandleGetFocusWindowInfoByAbilityToken(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SESSION_LABEL):
             return HandleSetSessionLabel(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SESSION_ICON):
@@ -635,6 +637,20 @@ int SceneSessionManagerStub::HandleGetFocusSessionInfo(MessageParcel& data, Mess
         return ERR_INVALID_DATA;
     }
     GetFocusWindowInfo(focusInfo, displayId);
+    reply.WriteParcelable(&focusInfo);
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetFocusWindowInfoByAbilityToken(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "Run");
+    sptr<IRemoteObject> abilityToken = data.ReadRemoteObject();
+    if (!abilityToken) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "AbilityToken is null.");
+        return ERR_INVALID_DATA;
+    }
+    FocusChangeInfo focusInfo;
+    GetFocusWindowInfoByAbilityToken(focusInfo, abilityToken);
     reply.WriteParcelable(&focusInfo);
     return ERR_NONE;
 }
