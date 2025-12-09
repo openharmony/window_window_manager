@@ -523,10 +523,10 @@ HWTEST_F(WindowPatternSnapshotTest, Snapshot02, TestSize.Level1)
     ASSERT_EQ(nullptr, sceneSession->Snapshot(false, 0.0f));
 
     sceneSession->surfaceNode_->bufferAvailable_ = true;
-    sceneSession->isPrivacyMode_ = false;
+    sceneSession->property_->SetPrivacyMode(false);
     ASSERT_EQ(nullptr, sceneSession->Snapshot(false, 0.0f));
 
-    sceneSession->isPrivacyMode_ = true;
+    sceneSession->property_->SetPrivacyMode(true);
     ASSERT_EQ(nullptr, sceneSession->Snapshot(false, 0.0f));
 
     sceneSession->surfaceNode_ = nullptr;
@@ -1092,12 +1092,12 @@ HWTEST_F(WindowPatternSnapshotTest, GetNeedUseBlurSnapshot, TestSize.Level1)
     info.screenId_ = 0;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
-    sceneSession->isPrivacyMode_ = false;
+    sceneSession->property_->SetPrivacyMode(false);
     ControlInfo controlInfo = { .isNeedControl = false, .isControlRecentOnly = false };
     sceneSession->appUseControlMap_[ControlAppType::APP_LOCK] = controlInfo;
     EXPECT_EQ(sceneSession->GetNeedUseBlurSnapshot(), false);
 
-    sceneSession->isPrivacyMode_ = true;
+    sceneSession->property_->SetPrivacyMode(true);
     controlInfo.isNeedControl = true;
     sceneSession->appUseControlMap_[ControlAppType::APP_LOCK] = controlInfo;
     EXPECT_EQ(sceneSession->GetNeedUseBlurSnapshot(), true);
@@ -1142,22 +1142,22 @@ HWTEST_F(WindowPatternSnapshotTest, UpdateAppLockSnapshot, TestSize.Level1)
     EXPECT_EQ(sceneSession->isAppLockControl_.load(), false);
 
     sceneSession->state_ = SessionState::STATE_BACKGROUND;
-    sceneSession->isPrivacyMode_ = true;
+    sceneSession->property_->SetPrivacyMode(true);
     sceneSession->snapshotPrivacyMode_.store(true);
     sceneSession->UpdateAppLockSnapshot(type, controlInfo);
     EXPECT_EQ(sceneSession->isAppLockControl_.load(), false);
 
-    sceneSession->isPrivacyMode_ = true;
+    sceneSession->property_->SetPrivacyMode(true);
     sceneSession->snapshotPrivacyMode_.store(false);
     sceneSession->UpdateAppLockSnapshot(type, controlInfo);
     EXPECT_EQ(sceneSession->isAppLockControl_.load(), false);
 
-    sceneSession->isPrivacyMode_ = false;
+    sceneSession->property_->SetPrivacyMode(false);
     sceneSession->snapshotPrivacyMode_.store(true);
     sceneSession->UpdateAppLockSnapshot(type, controlInfo);
     EXPECT_EQ(sceneSession->isAppLockControl_.load(), false);
 
-    sceneSession->isPrivacyMode_ = false;
+    sceneSession->property_->SetPrivacyMode(false);
     sceneSession->snapshotPrivacyMode_.store(false);
     sceneSession->UpdateAppLockSnapshot(type, controlInfo);
     EXPECT_EQ(sceneSession->isAppLockControl_.load(), false);
