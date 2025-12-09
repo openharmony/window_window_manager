@@ -3474,6 +3474,26 @@ enum class CompatibleStyleMode : uint32_t {
     // split aspect ratio
     LANDSCAPE_SPLIT = 5,
 };
+
+struct StateChangeOption {
+    int32_t parentPersistentId_ = 0;
+    WindowState newState_ = WindowState::STATE_INITIAL;
+    uint32_t reason_ = 0;
+    bool withAnimation_ = false;
+    bool withFocus_ = false;
+    bool waitAttach_ = false;
+    bool isFromInnerkits_ = false;
+    bool waitDetach_ = false;
+
+    StateChangeOption(int32_t parentPersistentId, WindowState newState)
+        : parentPersistentId_(parentPersistentId), newState_(newState) {}
+
+    StateChangeOption(int32_t parentPersistentId, WindowState newState, uint32_t reason, bool withAnimation,
+        bool withFocus, bool waitAttach, bool isFromInnerkits, bool waitDetach)
+        : parentPersistentId_(parentPersistentId), newState_(newState), reason_(reason),
+          withAnimation_(withAnimation), withFocus_(withFocus), waitAttach_(waitAttach),
+          isFromInnerkits_(isFromInnerkits), waitDetach_(waitDetach) {}
+};
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_H

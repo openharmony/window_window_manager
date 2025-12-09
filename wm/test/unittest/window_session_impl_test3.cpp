@@ -1594,6 +1594,55 @@ HWTEST_F(WindowSessionImplTest3, NotifyUIExtHostRectChangeInGlobalDisplayListene
     ASSERT_TRUE(window->rectChangeInGlobalDisplayUIExtListenerIds_.empty());
     window->NotifyUIExtHostRectChangeInGlobalDisplayListeners(rect, reason);
 }
+
+/**
+ * @tc.name: UpdateSubWindowStateWithOptions
+ * @tc.desc: UpdateSubWindowStateWithOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, UpdateSubWindowStateWithOptions, Function | SmallTest | Level1)
+{
+    window_ = GetTestWindowImpl("MainWindow");
+    ASSERT_NE(window_, nullptr);
+    window_->property_->SetPersistentId(100);
+    StateChangeOption option(window_->GetPersistentId(), WindowState::STATE_HIDDEN, 0, false, false, false, false,
+        false);
+    window_->UpdateSubWindowStateWithOptions(option);
+
+    sptr<WindowSessionImpl> subwindow1 = nullptr;
+    sptr<WindowSessionImpl> subwindow2 = GetTestWindowImpl("SubWindow2");
+    ASSERT_NE(subwindow2, nullptr);
+    subwindow2->state_ = WindowState::STATE_SHOWN;
+    subwindow2->property_->SetPersistentId(2);
+    sptr<WindowSessionImpl> subwindow3 = GetTestWindowImpl("SubWindow3");
+    ASSERT_NE(subwindow3, nullptr);
+    subwindow3->state_ = WindowState::STATE_HIDDEN;
+    subwindow2->property_->SetPersistentId(3);
+    sptr<WindowSessionImpl> subwindow4 = GetTestWindowImpl("SubWindow4");
+    ASSERT_NE(subwindow4, nullptr);
+    subwindow3->state_ = WindowState::STATE_INITIAL;
+    window_->subWindowSessionMap_[window_->GetPersistentId()].push_back(subwindow1);
+    window_->subWindowSessionMap_[window_->GetPersistentId()].push_back(subwindow2);
+    window_->subWindowSessionMap_[window_->GetPersistentId()].push_back(subwindow3);
+    window_->subWindowSessionMap_[window_->GetPersistentId()].push_back(subwindow4);
+    // Hide branch
+    window_->UpdateSubWindowStateWithOptions(option);
+    subwindow2->followCreatorLifecycle_ = true;
+    subwindow2->state_ = WindowState::STATE_SHOWN;
+    window_->UpdateSubWindowStateWithOptions(option);
+    ASSERT_EQ(subwindow2->state_, WindowState::STATE_HIDDEN);
+
+    // Show branch
+    option.newState_ = WindowState::STATE_SHOWN;
+    window_->UpdateSubWindowStateWithOptions(option);
+    subwindow3->requestState_ = WindowState::STATE_SHOWN;
+    subwindow3->state_ = WindowState::STATE_HIDDEN;
+    window_->UpdateSubWindowStateWithOptions(option);
+    subwindow3->followCreatorLifecycle_ = true;
+    subwindow3->state_ = WindowState::STATE_HIDDEN;
+    window_->UpdateSubWindowStateWithOptions(option);
+    ASSERT_EQ(subwindow3->state_, WindowState::STATE_SHOWN);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
