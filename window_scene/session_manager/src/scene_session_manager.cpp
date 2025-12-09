@@ -7990,6 +7990,10 @@ bool SceneSessionManager::CheckClickFocusIsDownThroughFullScreen(const sptr<Scen
 
 bool SceneSessionManager::IsBlockingFocusWindowType(const sptr<SceneSession>& sceneSession) const
 {
+    if (sceneSession == nullptr) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "session is nullptr");
+        return false;
+    }
     if (!(systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow())) {
         TLOGD(WmsLogTag::WMS_FOCUS, "device type unmatched");
         return false;
@@ -8021,18 +8025,13 @@ bool SceneSessionManager::IsBlockingFocusWindowType(const sptr<SceneSession>& sc
     SceneInputManager::GetInstance().UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
     auto posX = sceneSession->GetSessionRect().posX_;
     auto posY = sceneSession->GetSessionRect().posY_;
-    if (touchHotAreas.empty()) {
-        TLOGI(WmsLogTag::WMS_FOCUS, "touchHotAreas is empty");
-        return false;
-    } else {
-        for (const auto& area : touchHotAreas) {
-            if (posX + area.x <= 0 && posX + area.width >= displayInfo->GetWidth() && posY + area.y <= 0 &&
-                posY + area.height >= displayInfo->GetHeight()) {
-                TLOGI(WmsLogTag::WMS_FOCUS, "current session is full-screen, screen w: %{public}d, h: %{public}d, "
-                    "window x: %{public}d, y: %{public}d, w: %{public}d, h: %{public}d", displayInfo->GetWidth(),
-                    displayInfo->GetHeight(), area.x, area.y, area.width, area.height);
-                return true;
-            }
+    for (const auto& area : touchHotAreas) {
+        if (posX + area.x <= 0 && posX + area.width >= displayInfo->GetWidth() && posY + area.y <= 0 &&
+            posY + area.height >= displayInfo->GetHeight()) {
+            TLOGI(WmsLogTag::WMS_FOCUS, "current session is full-screen, screen w: %{public}d, h: %{public}d, "
+                "window x: %{public}d, y: %{public}d, w: %{public}d, h: %{public}d", displayInfo->GetWidth(),
+                displayInfo->GetHeight(), area.x, area.y, area.width, area.height);
+            return true;
         }
     }
     return false;
