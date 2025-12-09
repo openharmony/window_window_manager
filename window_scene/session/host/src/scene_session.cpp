@@ -4432,12 +4432,25 @@ void SceneSession::UpdateKeyFramePolicy(bool running, bool stopping)
 WSError SceneSession::SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "set keyframe policy from outside: %{public}s", keyFramePolicy.ToString().c_str());
-    std::lock_guard<std::mutex> lock(keyFrameMutex_);
-    bool running = keyFramePolicy_.running_;
-    bool stopping = keyFramePolicy_.stopping_;
-    keyFramePolicy_ = keyFramePolicy;
-    keyFramePolicy_.running_ = running;
-    keyFramePolicy_.stopping_ = stopping;
+    auto currentKeyFramePolicy = GetKeyFramePolicy();
+    bool running = currentKeyFramePolicy.running_;
+    if (!running && keyFramePolicy.enable() &&
+        moveDragController_ != nullptr && moveDragController_->GetStartDragFlag() &&
+        GetAppDragResizeType() != DragResizeType::RESIZE_WHEN_DRAG_END) {
+        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "key frame policy is enabled during resize");
+        {
+            std::lock_guard<std::mutex> lock(keyFrameMutex_);
+            keyFramePolicy_ = keyFramePolicy;
+        }
+        InitKeyFrameState(GetSessionRect());
+        NotifyClientToUpdateRect("OnMoveDragCallback", nullptr);
+    } else {
+        bool stopping = currentKeyFramePolicy.stopping_;
+        std::lock_guard<std::mutex> lock(keyFrameMutex_);
+        keyFramePolicy_ = keyFramePolicy;
+        keyFramePolicy_.running_ = running;
+        keyFramePolicy_.stopping_ = stopping;
+    }
     return WSError::WS_OK;
 }
 
@@ -4560,8 +4573,8 @@ bool SceneSession::KeyFrameNotifyFilter(const WSRect& rect, SizeChangeReason rea
     if (reason != SizeChangeReason::DRAG) {
         return false;
     }
-    if (keyFrameAnimating_) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "filter for animating");
+    if (keyFrameAnimating_ || keyFrameCloneNode_ == nullptr) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "filter for animating or keyframe node not ready");
         return true;
     }
     bool isToFilter = true;
