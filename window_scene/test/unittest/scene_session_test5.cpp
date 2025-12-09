@@ -893,6 +893,48 @@ HWTEST_F(SceneSessionTest5, UpdateKeyFrameCloneNode, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: SetDragKeyFramePolicy
+ * @tc.desc: SetDragKeyFramePolicy function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetDragKeyFramePolicy, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "keyframe";
+    info.bundleName_ = "keyframe";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    auto moveDragController = sptr<MoveDragController>::MakeSptr(wptr(session));
+    EXPECT_NE(nullptr, moveDragController);
+    KeyFramePolicy keyFramePolicy;
+    session->keyFramePolicy_.stopping_ = true;
+    // no running
+    session->keyFramePolicy_.running_ = false;
+    session->keyFramePolicy_.dragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    session->moveDragController_ = nullptr;
+    session->moveDragController_->isStartDrag_ = false;
+    session->SetAppDragResizeType(DragResizeType::RESIZE_WHEN_DRAG_END);
+    session->SetDragKeyFramePolicy(keyFramePolicy);
+    EXPECT_EQ(session->GetKeyFramePolicy().stopping_, true);
+    // enable during resize
+    session->keyFramePolicy_.running_ = true;
+    session->SetDragKeyFramePolicy(keyFramePolicy);
+    EXPECT_EQ(session->GetKeyFramePolicy().stopping_, true);
+    session->keyFramePolicy_.dragResizeType_ = DragResizeType::RESIZE_KEY_FRAME;
+    session->SetDragKeyFramePolicy(keyFramePolicy);
+    EXPECT_EQ(session->GetKeyFramePolicy().stopping_, true);
+    session->moveDragController_ = moveDragController;
+    session->SetDragKeyFramePolicy(keyFramePolicy);
+    EXPECT_EQ(session->GetKeyFramePolicy().stopping_, true);
+    session->moveDragController_->isStartDrag_ = true;
+    session->SetDragKeyFramePolicy(keyFramePolicy);
+    EXPECT_EQ(session->GetKeyFramePolicy().stopping_, true);
+    session->moveDragController_->isStartDrag_ = true;
+    session->SetAppDragResizeType(DragResizeType::RESIZE_TYPE_UNDEFINED);
+    EXPECT_EQ(session->GetKeyFramePolicy().stopping_, false);
+}
+
+/**
  * @tc.name: UpdateKeyFrameState
  * @tc.desc: UpdateKeyFrameState function01
  * @tc.type: FUNC
@@ -1037,6 +1079,10 @@ HWTEST_F(SceneSessionTest5, KeyFrameNotifyFilter, Function | SmallTest | Level2)
     EXPECT_EQ(session->KeyFrameNotifyFilter(rectNew, SizeChangeReason::DRAG_END), false);
     session->keyFrameAnimating_ = true;
     EXPECT_EQ(session->KeyFrameNotifyFilter(rectNew, reason), true);
+    session->keyFrameAnimating_ = false;
+    session->keyFrameCloneNode_ = nullptr;
+    EXPECT_EQ(session->KeyFrameNotifyFilter(rectNew, reason), true);
+    session->keyFrameCloneNode_ = RSWindowKeyFrameNode::Create();;
     // for same rect
     session->keyFrameAnimating_ = false;
     session->lastKeyFrameRect_ = rect;
