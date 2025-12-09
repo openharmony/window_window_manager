@@ -1011,7 +1011,14 @@ ohos_unittest("ws_window_event_channel_test") {
 ohos_unittest("ws_move_drag_controller_test") {
   module_out_path = module_out_path
 
-  sources = [ "move_drag_controller_test.cpp" ]
+  include_dirs = [
+    "${window_base_path}/window_scene/session/host/include",
+  ]
+
+  sources = [
+    "move_drag_controller_test.cpp",
+    "move_resampler_test.cpp"
+  ]
 
   deps = [
     ":ws_unittest_common",

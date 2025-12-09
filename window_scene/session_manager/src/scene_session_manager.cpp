@@ -758,6 +758,7 @@ void SceneSessionManager::ConfigWindowSceneXml()
     ConfigAppsWithDeduplicatedWindowStatus();
     ConfigSnapshotScale();
     ConfigWindowSceneXml(config);
+    ConfigWindowLayout(config["windowLayout"]);
 }
 
 void SceneSessionManager::ConfigWindowSceneXml(const WindowSceneConfig::ConfigItem& config)
@@ -1501,6 +1502,31 @@ void SceneSessionManager::SetWindowStatusDeduplicationBySystemConfig(const Sessi
         deduplicationEnabled = true;
     }
     systemConfig.skipRedundantWindowStatusNotifications_ = deduplicationEnabled;
+}
+
+bool SceneSessionManager::ConfigWindowLayout(const WindowSceneConfig::ConfigItem& windowLayoutConfig)
+{
+    if (!windowLayoutConfig.IsMap()) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "The windowLayoutConfig is invalid.");
+        return false;
+    }
+    ConfigMoveDrag(windowLayoutConfig["moveDrag"]);
+    return true;
+}
+
+bool SceneSessionManager::ConfigMoveDrag(const WindowSceneConfig::ConfigItem& moveDragConfig)
+{
+    if (!moveDragConfig.IsMap()) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "The moveDragConfig is invalid.");
+        return false;
+    }
+    const auto& enableMoveResampleProp = moveDragConfig["moveResample"].GetProp("enable");
+    if (enableMoveResampleProp.IsBool()) {
+        SessionUtils::SetMoveResampleEnabled(enableMoveResampleProp.boolValue_);
+    } else {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "The moveResampleConfig or its enableProp is invalid.");
+    }
+    return true;
 }
 
 void SceneSessionManager::ConfigWindowSizeLimits()
