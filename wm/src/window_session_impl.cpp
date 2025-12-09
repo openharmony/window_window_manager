@@ -8938,7 +8938,7 @@ WMError WindowSessionImpl::IsPiPActive(bool& status)
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
     auto ret = hostSession->IsPiPActive(status);
-    if (ret != WSError::WS_OK) {
+    if (ret != WMError::WM_OK) {
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
     return WMError::WM_OK;

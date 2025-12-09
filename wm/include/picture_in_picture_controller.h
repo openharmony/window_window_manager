@@ -38,7 +38,6 @@ public:
     napi_ref GetCustomNodeController() override;
     napi_ref GetTypeNode() const override;
     bool IsTypeNodeEnabled() const override;
-    bool IsPiPActive() const override;
     bool IsPullPiPAndHandleNavigation();
     std::string GetPiPNavigationId();
 

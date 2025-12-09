@@ -640,11 +640,23 @@ bool PictureInPictureControllerBase::GetPiPSettingSwitchStatus()
     return switchStatus;
 }
 
-bool PictureInPictureControllerBase::IsPiPActive()
+WMError PictureInPictureControllerBase::IsPiPActive(bool& status)
 {
     if (curState_ != PiPWindowState::STATE_STARTED) {
-        return false;
+        return WMError::WM_OK;
     }
+    sptr<WindowSessionImpl> windowSessionImpl = WindowSessionImpl::GetWindowWithId(mainWindowId_);
+    if (windowSessionImpl == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "windowId not found.");
+        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
+    }
+    WMError ret = windowSessionImpl->IsPiPActive(status);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_PIP, "get switch error.");
+        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
+    }
+    TLOGI(WmsLogTag::WMS_PIP, "active status: %{public}d", status);
+    return WMError::WM_OK;
 }
 // LCOV_EXCL_STOP
 } // namespace Rosen

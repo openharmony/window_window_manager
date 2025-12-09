@@ -1704,8 +1704,8 @@ int SessionStub::HandleSetPipParentWindowId(MessageParcel& data, MessageParcel& 
 int SessionStub::HandleIsPiPActive(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_PIP, "in");
-    bool status;
-    WSError errCode = IsPiPActive(status);
+    bool status = false;
+    WMError errCode = IsPiPActive(status);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_PIP, "write errCode fail.");
         return ERR_INVALID_DATA;
