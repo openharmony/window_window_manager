@@ -5388,48 +5388,6 @@ bool SceneSession::IsAppOrLowerSystemSession() const
 }
 
 /** @note @window.focus */
-bool SceneSession::IsBlockingFocusWindowType() const
-{
-    if (!(systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow())) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "device type unmatched");
-        return false;
-    }
-    bool blockingFocus = GetBlockingFocus();
-    WindowType windowType = GetWindowType();
-    bool isBlockingSystemWindowType =
-        blockingFocus && (windowType == WindowType::WINDOW_TYPE_PANEL ||
-        windowType == WindowType::WINDOW_TYPE_GLOBAL_SEARCH ||
-        windowType == WindowType::WINDOW_TYPE_NEGATIVE_SCREEN);
-    if (!isBlockingSystemWindowType && !WindowHelper::IsMainWindow(windowType)) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "not blocking focus window type");
-        return false;
-    }
-    //Get height and width of current screen
-    uint64_t displayId = GetSessionProperty()->GetDisplayId();
-    auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
-    if (display == nullptr) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "get display object failed of display: %{public}" PRIu64, displayId);
-        return false;
-    }
-    auto displayInfo = display->GetDisplayInfo();
-    if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "get display info failed of display: %{public}" PRIu64, displayId);
-        return false;
-    }
-    if (std::abs(GetSessionRect().height_ - displayInfo->GetHeight()) <= 1 &&
-        std::abs(GetSessionRect().width_ - displayInfo->GetWidth()) <= 1) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "current session is full-screen, "
-            "screen w: %{public}d, h: %{public}d, window w: %{public}d, h: %{public}d",
-            displayInfo->GetWidth(), displayInfo->GetHeight(), GetSessionRect().width_, GetSessionRect().height_);
-        return true;
-    }
-    TLOGD(WmsLogTag::WMS_FOCUS, "current session is not full-screen, "
-        "screen w: %{public}d, h: %{public}d, window w: %{public}d, h: %{public}d",
-        displayInfo->GetWidth(), displayInfo->GetHeight(), GetSessionRect().width_, GetSessionRect().height_);
-    return false;
-}
-
-/** @note @window.focus */
 bool SceneSession::IsSystemSessionAboveApp() const
 {
     WindowType windowType = GetWindowType();
