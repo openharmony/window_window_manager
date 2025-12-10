@@ -209,7 +209,7 @@ ani_object ScreenshotAniUtils::CreateArrayPixelMap(
 {
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
     ani_class cls;
-    if (env->FindClass("L@ohos/multimedia/image/image/PixelMap;", &cls) != ANI_OK) {
+    if (env->FindClass("@ohos.multimedia.image.image.PixelMap", &cls) != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] class not found");
         return nullptr;
     }
@@ -217,8 +217,8 @@ ani_object ScreenshotAniUtils::CreateArrayPixelMap(
     if (imageVec[HDR_PIXMAP] != nullptr) {
         arrayLength = static_cast<ani_size>(PIXMAP_VECTOR_SIZE);
     }
-    ani_array_ref pixelMapArray = nullptr;
-    if (env->Array_New_Ref(cls, arrayLength, ScreenshotAniUtils::CreateAniUndefined(env), &pixelMapArray) != ANI_OK) {
+    ani_array pixelMapArray = nullptr;
+    if (env->Array_New(arrayLength, ScreenshotAniUtils::CreateAniUndefined(env), &pixelMapArray) != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] create array failed");
         return nullptr;
     }
@@ -228,7 +228,7 @@ ani_object ScreenshotAniUtils::CreateArrayPixelMap(
             TLOGE(WmsLogTag::DMS, "[ANI] Create native pixelmap is nullptr!");
             return nullptr;
         }
-        if (env->Array_Set_Ref(pixelMapArray, i, nativePixelMap) != ANI_OK) {
+        if (env->Array_Set(pixelMapArray, i, nativePixelMap) != ANI_OK) {
             TLOGE(WmsLogTag::DMS, "[ANI] create pixelMapArray failed!");
             return nullptr;
         }

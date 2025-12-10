@@ -422,7 +422,7 @@ void DisplayAniListener::OnAvailableAreaChanged(DMRect area)
                     return;
                 }
                 DisplayAniUtils::ConvertRect(area, rectObj, env);
-                DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "availableAreaChangedCallback",
+                DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "availableAreaChangedCallback",
                     nullptr, oneAniCallback, rectObj);
             };
             if (!eventHandler_) {
@@ -483,7 +483,7 @@ void DisplayAniListener::OnBrightnessInfoChanged(DisplayId id, const ScreenBrigh
         auto task = [env = env_, oneAniCallback, id, screenBrightness = brightnessInfo] () {
             ani_object obj = DisplayAniUtils::CreateBrightnessInfoObject(env);
             DisplayAniUtils::CvtBrightnessInfo(env, obj, screenBrightness);
-            DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "brightnessInfoChangeCallback",
+            DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "brightnessInfoChangeCallback",
                 nullptr, oneAniCallback, id, obj);
         };
         if (!eventHandler_) {

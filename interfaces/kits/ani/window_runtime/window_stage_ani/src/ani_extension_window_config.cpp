@@ -27,7 +27,7 @@ static std::map<ani_ref, AniExtensionWindowConfig*> localObjs;
 ani_enum_item GetAniModalityType(ani_env* env, ModalityType enumObj)
 {
     ani_enum enumType;
-    if (ANI_OK != env->FindEnum("L@ohos/window/window/ModalityType;", &enumType)) {
+    if (ANI_OK != env->FindEnum("@ohos.window.window.ModalityType", &enumType)) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] ModalityType not found");
         return nullptr;
     }
@@ -45,7 +45,7 @@ ani_object CreatAniSubWindowOptions(ani_env* env, const std::shared_ptr<Extensio
     }
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     ani_class aniClass;
-    ani_status ret = env->FindClass("L@ohos/window/window/ExtConfigSubWindowOptions;", &aniClass);
+    ani_status ret = env->FindClass("@ohos.window.window.ExtConfigSubWindowOptions", &aniClass);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
         return AniWindowUtils::CreateAniUndefined(env);
@@ -63,7 +63,7 @@ ani_object CreatAniSubWindowOptions(ani_env* env, const std::shared_ptr<Extensio
         return AniWindowUtils::CreateAniUndefined(env);
     }
     ani_method setObjFunc = nullptr;
-    if ((ret = env->Class_FindMethod(aniClass, "setNativeObj", "J:V", &setObjFunc)) != ANI_OK) {
+    if ((ret = env->Class_FindMethod(aniClass, "setNativeObj", "l:", &setObjFunc)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Find method failed, ret: %{public}u", ret);
         return AniWindowUtils::CreateAniUndefined(env);
     }
@@ -106,7 +106,7 @@ ani_enum_item GetAniWindowType(ani_env* env, int32_t apiType)
     }
 
     ani_enum enumType;
-    if (ANI_OK != env->FindEnum("L@ohos/window/window/WindowType;", &enumType)) {
+    if (ANI_OK != env->FindEnum("@ohos.window.window.WindowType;", &enumType)) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] WindowType not found");
         return nullptr;
     }
@@ -125,7 +125,7 @@ ani_object CreatAniSystemWindowOptions(ani_env* env,
     }
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     ani_class aniClass;
-    ani_status ret = env->FindClass("L@ohos/window/window/ExtConfigSystemWindowOptions;", &aniClass);
+    ani_status ret = env->FindClass("@ohos.window.window.ExtConfigSystemWindowOptions", &aniClass);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
         return AniWindowUtils::CreateAniUndefined(env);
@@ -143,7 +143,7 @@ ani_object CreatAniSystemWindowOptions(ani_env* env,
         return AniWindowUtils::CreateAniUndefined(env);
     }
     ani_method setObjFunc = nullptr;
-    if ((ret = env->Class_FindMethod(aniClass, "setNativeObj", "J:V", &setObjFunc)) != ANI_OK) {
+    if ((ret = env->Class_FindMethod(aniClass, "setNativeObj", "l:", &setObjFunc)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Find method failed, ret: %{public}u", ret);
         return AniWindowUtils::CreateAniUndefined(env);
     }
@@ -164,7 +164,7 @@ ani_object CreatAniSystemWindowOptions(ani_env* env,
 ani_enum_item GetAniExtensionWindowAttribute(ani_env* env, ExtensionWindowAttribute enumObj)
 {
     ani_enum enumType;
-    if (ANI_OK != env->FindEnum("L@ohos/window/window/ExtensionWindowAttribute;", &enumType)) {
+    if (ANI_OK != env->FindEnum("@ohos.window.window.ExtensionWindowAttribute", &enumType)) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] ExtensionWindowAttribute not found");
         return nullptr;
     }
@@ -182,13 +182,13 @@ ani_object CreatAniRect(ani_env* env, const std::shared_ptr<ExtensionWindowConfi
     }
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     ani_class aniClass;
-    ani_status ret = env->FindClass("L@ohos/window/window/ExtConfigRect;", &aniClass);
+    ani_status ret = env->FindClass("@ohos.window.window.ExtConfigRect", &aniClass);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
         return AniWindowUtils::CreateAniUndefined(env);
     }
     ani_method aniCtor;
-    ret = env->Class_FindMethod(aniClass, "<ctor>", ":V", &aniCtor);
+    ret = env->Class_FindMethod(aniClass, "<ctor>", ":", &aniCtor);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
         return AniWindowUtils::CreateAniUndefined(env);
@@ -200,7 +200,7 @@ ani_object CreatAniRect(ani_env* env, const std::shared_ptr<ExtensionWindowConfi
         return AniWindowUtils::CreateAniUndefined(env);
     }
     ani_method setObjFunc = nullptr;
-    if ((ret = env->Class_FindMethod(aniClass, "setNativeObj", "J:V", &setObjFunc)) != ANI_OK) {
+    if ((ret = env->Class_FindMethod(aniClass, "setNativeObj", "l:", &setObjFunc)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Find method failed, ret: %{public}u", ret);
         return AniWindowUtils::CreateAniUndefined(env);
     }
@@ -223,7 +223,7 @@ ani_object CreateAniExtensionWindowConfig(ani_env* env,
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     ani_class aniClass;
-    ani_status ret = env->FindClass("L@ohos/window/window/ExtensionWindowConfigInternal;", &aniClass);
+    ani_status ret = env->FindClass("@ohos.window.window.ExtensionWindowConfigInternal", &aniClass);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
         return AniWindowUtils::CreateAniUndefined(env);
@@ -243,7 +243,7 @@ ani_object CreateAniExtensionWindowConfig(ani_env* env,
     std::unique_ptr<AniExtensionWindowConfig> config =
         std::make_unique<AniExtensionWindowConfig>(extensionWindowConfig);
     ani_method setObjFunc = nullptr;
-    if ((ret = env->Class_FindMethod(aniClass, "setNativeObj", "J:V", &setObjFunc)) != ANI_OK) {
+    if ((ret = env->Class_FindMethod(aniClass, "setNativeObj", "l:", &setObjFunc)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Find method failed, ret: %{public}u", ret);
         return AniWindowUtils::CreateAniUndefined(env);
     }
@@ -844,50 +844,50 @@ static void SetSystemWindowOptionsWindowType(ani_env* env, ani_object obj, ani_l
 extern "C" {
 using namespace OHOS::Rosen;
 std::array extensionWindowConfigNativeMethods = {
-    ani_native_function {"getWindowName", "J:Lstd/core/String;", reinterpret_cast<void *>(GetWindowName)},
-    ani_native_function {"getWindowAttribute", "J:L@ohos/window/window/ExtensionWindowAttribute;",
+    ani_native_function {"getWindowName", "l:std.core.String", reinterpret_cast<void *>(GetWindowName)},
+    ani_native_function {"getWindowAttribute", "l:@ohos.window.window.ExtensionWindowAttribute",
         reinterpret_cast<void *>(GetWindowAttribute)},
-    ani_native_function {"getWindowRect", "J:L@ohos/window/window/Rect;", reinterpret_cast<void *>(GetWindowRect)},
-    ani_native_function {"getSubWindowOptions", "J:L@ohos/window/window/SubWindowOptions;",
+    ani_native_function {"getWindowRect", "l:@ohos.window.window.Rect", reinterpret_cast<void *>(GetWindowRect)},
+    ani_native_function {"getSubWindowOptions", "l:@ohos.window.window.SubWindowOptions",
         reinterpret_cast<void *>(GetSubWindowOptions)},
-    ani_native_function {"getSystemWindowOptions", "J:L@ohos/window/window/SystemWindowOptions;",
+    ani_native_function {"getSystemWindowOptions", "l:@ohos.window.window.SystemWindowOptions",
         reinterpret_cast<void *>(GetSystemWindowOptions)},
-    ani_native_function {"setWindowName", "JLstd/core/String;:V", reinterpret_cast<void *>(SetWindowName)},
-    ani_native_function {"setWindowAttribute", "JL@ohos/window/window/ExtensionWindowAttribute;:V",
+    ani_native_function {"setWindowName", "lC{std.core.String}:", reinterpret_cast<void *>(SetWindowName)},
+    ani_native_function {"setWindowAttribute", "lC{@ohos.window.window.ExtensionWindowAttribute}:",
         reinterpret_cast<void *>(SetWindowAttribute)},
-    ani_native_function {"setWindowRect", "JL@ohos/window/window/Rect;:V", reinterpret_cast<void *>(SetWindowRect)},
-    ani_native_function {"setSubWindowOptions", "JL@ohos/window/window/SubWindowOptions;:V",
+    ani_native_function {"setWindowRect", "lC{@ohos.window.window.Rect}:", reinterpret_cast<void *>(SetWindowRect)},
+    ani_native_function {"setSubWindowOptions", "lC{@ohos.window.window.SubWindowOptions}:",
         reinterpret_cast<void *>(SetSubWindowOptions)},
-    ani_native_function {"setSystemWindowOptions", "JL@ohos/window/window/SystemWindowOptions;:V",
+    ani_native_function {"setSystemWindowOptions", "lC{@ohos.window.window.SystemWindowOptions}:",
         reinterpret_cast<void *>(SetSystemWindowOptions)},
     };
 
 std::array extConfigRectMethods = {
-    ani_native_function {"getLeft", "J:I", reinterpret_cast<void *>(GetWindowRectLeft)},
-    ani_native_function {"getTop", "J:I", reinterpret_cast<void *>(GetWindowRectTop)},
-    ani_native_function {"getWidth", "J:I", reinterpret_cast<void *>(GetWindowRectWidth)},
-    ani_native_function {"getHeight", "J:I", reinterpret_cast<void *>(GetWindowRectHeight)},
-    ani_native_function {"setLeft", "JI:V", reinterpret_cast<void *>(SetWindowRectLeft)},
-    ani_native_function {"setTop", "JI:V", reinterpret_cast<void *>(SetWindowRectTop)},
-    ani_native_function {"setWidth", "JI:V", reinterpret_cast<void *>(SetWindowRectWidth)},
-    ani_native_function {"setHeight", "JI:V", reinterpret_cast<void *>(SetWindowRectHeight)},
+    ani_native_function {"getLeft", "l:i", reinterpret_cast<void *>(GetWindowRectLeft)},
+    ani_native_function {"getTop", "l:i", reinterpret_cast<void *>(GetWindowRectTop)},
+    ani_native_function {"getWidth", "l:i", reinterpret_cast<void *>(GetWindowRectWidth)},
+    ani_native_function {"getHeight", "l:i", reinterpret_cast<void *>(GetWindowRectHeight)},
+    ani_native_function {"setLeft", "li:", reinterpret_cast<void *>(SetWindowRectLeft)},
+    ani_native_function {"setTop", "li:", reinterpret_cast<void *>(SetWindowRectTop)},
+    ani_native_function {"setWidth", "li:", reinterpret_cast<void *>(SetWindowRectWidth)},
+    ani_native_function {"setHeight", "li:", reinterpret_cast<void *>(SetWindowRectHeight)},
     };
 
 std::array extConfigSubWindowOptionsMethods = {
-    ani_native_function {"getTitle", "J:Lstd/core/String;", reinterpret_cast<void *>(GetSubWindowOptionsTitle)},
-    ani_native_function {"getDecorEnabled", "J:Z", reinterpret_cast<void *>(GetSubWindowOptionsDecorEnabled)},
-    ani_native_function {"getIsModal", "J:Z", reinterpret_cast<void *>(GetSubWindowOptionsIsModal)},
-    ani_native_function {"getIsTopmost", "J:Z", reinterpret_cast<void *>(GetSubWindowOptionsIsTopmost)},
-    ani_native_function {"setTitle", "JLstd/core/String;:V", reinterpret_cast<void *>(SetSubWindowOptionsTitle)},
-    ani_native_function {"setDecorEnabled", "JZ:V", reinterpret_cast<void *>(SetSubWindowOptionsDecorEnabled)},
-    ani_native_function {"setIsModal", "JZ:V", reinterpret_cast<void *>(SetSubWindowOptionsIsModal)},
-    ani_native_function {"setIsTopmost", "JZ:V", reinterpret_cast<void *>(SetSubWindowOptionsIsTopmost)},
+    ani_native_function {"getTitle", "l:std.core.String", reinterpret_cast<void *>(GetSubWindowOptionsTitle)},
+    ani_native_function {"getDecorEnabled", "l:z", reinterpret_cast<void *>(GetSubWindowOptionsDecorEnabled)},
+    ani_native_function {"getIsModal", "l:z", reinterpret_cast<void *>(GetSubWindowOptionsIsModal)},
+    ani_native_function {"getIsTopmost", "l:z", reinterpret_cast<void *>(GetSubWindowOptionsIsTopmost)},
+    ani_native_function {"setTitle", "lC{std.core.String}:", reinterpret_cast<void *>(SetSubWindowOptionsTitle)},
+    ani_native_function {"setDecorEnabled", "lz:", reinterpret_cast<void *>(SetSubWindowOptionsDecorEnabled)},
+    ani_native_function {"setIsModal", "lz:", reinterpret_cast<void *>(SetSubWindowOptionsIsModal)},
+    ani_native_function {"setIsTopmost", "lz:", reinterpret_cast<void *>(SetSubWindowOptionsIsTopmost)},
     };
 
 std::array extConfigSystemWindowOptionsMethods = {
-    ani_native_function {"getWindowType", "J:L@ohos/window/window/WindowType;",
+    ani_native_function {"getWindowType", "l:@ohos.window.window.WindowType;",
         reinterpret_cast<void *>(GetSystemWindowOptionsWindowType)},
-    ani_native_function {"setWindowType", "JL@ohos/window/window/WindowType;:V",
+    ani_native_function {"setWindowType", "lC{@ohos.window.window.WindowType}:",
         reinterpret_cast<void *>(SetSystemWindowOptionsWindowType)},
     };
 
@@ -903,7 +903,7 @@ ani_status ExtConfig_Rect_ANI_Constructor(ani_vm *vm, uint32_t* result)
     }
 
     ani_class cls = nullptr;
-    if ((ret = env->FindClass("L@ohos/window/window/ExtConfigRect;", &cls)) != ANI_OK) {
+    if ((ret = env->FindClass("@ohos.window.window.ExtConfigRect", &cls)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Find class failed, ret: %{public}u", ret);
         return ANI_NOT_FOUND;
     }
@@ -931,7 +931,7 @@ ani_status ExtConfig_SubWindowOptions_ANI_Constructor(ani_vm *vm, uint32_t* resu
     }
 
     ani_class cls = nullptr;
-    if ((ret = env->FindClass("L@ohos/window/window/ExtConfigSubWindowOptions;", &cls)) != ANI_OK) {
+    if ((ret = env->FindClass("@ohos.window.window.ExtConfigSubWindowOptions", &cls)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Find class failed, ret: %{public}u", ret);
         return ANI_NOT_FOUND;
     }
@@ -959,7 +959,7 @@ ani_status ExtConfig_SystemWindowOptions_ANI_Constructor(ani_vm *vm, uint32_t* r
     }
 
     ani_class cls = nullptr;
-    if ((ret = env->FindClass("L@ohos/window/window/ExtConfigSystemWindowOptions;", &cls)) != ANI_OK) {
+    if ((ret = env->FindClass("@ohos.window.window.ExtConfigSystemWindowOptions", &cls)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Find class failed, ret: %{public}u", ret);
         return ANI_NOT_FOUND;
     }
@@ -987,7 +987,7 @@ ANI_EXPORT ani_status ExtensionWindowConfig_ANI_Constructor(ani_vm *vm, uint32_t
     }
 
     ani_class cls = nullptr;
-    if ((ret = env->FindClass("L@ohos/window/window/ExtensionWindowConfigInternal;", &cls)) != ANI_OK) {
+    if ((ret = env->FindClass("@ohos.window.window.ExtensionWindowConfigInternal", &cls)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Find class failed, ret: %{public}u", ret);
         return ANI_NOT_FOUND;
     }

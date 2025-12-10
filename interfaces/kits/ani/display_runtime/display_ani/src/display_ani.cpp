@@ -69,7 +69,7 @@ void DisplayAni::GetCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutIn
     for (int i = 0; i < std::min(int(length), static_cast<int>(rects.size())); i++) {
         ani_ref currentCutoutInfo;
         if (ANI_OK != env->Object_CallMethodByName_Ref(static_cast<ani_object>(boundingRects), "$_get",
-            "I:Lstd/core/Object;", &currentCutoutInfo, (ani_int)i)) {
+            "i:C{std.core.Object}", &currentCutoutInfo, (ani_int)i)) {
             TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail", (ani_int)i);
         }
         TLOGI(WmsLogTag::DMS, "current i: %{public}d", i);

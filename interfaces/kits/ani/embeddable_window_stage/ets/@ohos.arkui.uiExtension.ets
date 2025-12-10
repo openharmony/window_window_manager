@@ -47,7 +47,8 @@ namespace uiExtension {
 
   function avoidAreaChangeCallback(cb: object, area: object, type: int): void {
     const func = cb as (data: AvoidAreaInfo) => void;
-    func({type: type as window.AvoidAreaType, area: area as window.AvoidArea});
+    let v: AvoidAreaInfo = {type: type as window.AvoidAreaType, area: area as window.AvoidArea}
+    func(v);
   }
 
   class UIEProperties implements WindowProxyProperties {
