@@ -401,7 +401,7 @@ HWTEST_F(DisplayChangeTest, CheckWaterfallCompression01, TestSize.Level1)
     uint32_t testSizeInVp = 24;
     DisplayCutoutController::SetWaterfallAreaCompressionSizeWhenHorizontal(testSizeInVp);
 
-    ASSERT_TRUE(true, DisplayCutoutController::IsWaterfallAreaCompressionEnableWhenHorizontal());
+    ASSERT_TRUE(DisplayCutoutController::IsWaterfallAreaCompressionEnableWhenHorizontal());
     ASSERT_EQ(testSizeInVp, DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal());
 
     DisplayCutoutController::SetWaterfallAreaCompressionEnableWhenHorzontal(originStatus);
