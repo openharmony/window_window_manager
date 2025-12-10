@@ -84,6 +84,8 @@ public:
     bool IsFullScreenInForceSplit() override;
     void RegisterCompatibleModeChangeCallback(CompatibleModeChangeCallback&& callback) override;
     WSError NotifyCompatibleModeChange(CompatibleStyleMode mode) override;
+    WMError GetAppForceLandscapeConfigEnable(bool& enableForceSplit) override;
+    WSError NotifyAppForceLandscapeConfigEnableUpdated() override;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;

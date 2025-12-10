@@ -818,8 +818,8 @@ struct AppForceLandscapeConfig : public Parcelable {
     bool hasChanged_ = true;
     bool configEnable_ = false;
     AppForceLandscapeConfig() {}
-    AppForceLandscapeConfig(int32_t mode, int32_t supportSplit, bool ignoreOrientation, std::string sysConfigJsonStr,
-        std::string appConfigJsonStr, std::string sysHomePage, bool isSysRouter, bool isAppRouter,
+    AppForceLandscapeConfig(int32_t mode, int32_t supportSplit, bool ignoreOrientation, const string& sysConfigJsonStr,
+        const string& appConfigJsonStr, const string& sysHomePage, bool isSysRouter, bool isAppRouter,
         bool containsSysConfig, bool containsAppConfig) : mode_(mode), supportSplit_(supportSplit),
         ignoreOrientation_(ignoreOrientation), sysConfigJsonStr_(sysConfigJsonStr),
         appConfigJsonStr_(appConfigJsonStr), sysHomePage_(sysHomePage), isSysRouter_(isSysRouter),

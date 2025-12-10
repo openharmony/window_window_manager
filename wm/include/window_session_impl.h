@@ -227,7 +227,7 @@ public:
     WMError SetIntentParam(const std::string& intentParam, const std::function<void()>& loadPageCallback,
         bool isColdStart) override;
     void SetForceSplitConfigEnable(bool enableForceSplit);
-    void SetForceSplitConfig(AppForceLandscapeConfig& config);
+    void SetForceSplitConfig(const AppForceLandscapeConfig& config);
 
     /*
      * inherits from session stage

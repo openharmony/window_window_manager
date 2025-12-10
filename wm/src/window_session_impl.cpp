@@ -2378,7 +2378,7 @@ void WindowSessionImpl::SetForceSplitConfigEnable(bool enableForceSplit)
     uiContent->SetForceSplitEnable(enableForceSplit);
 }
 
-void WindowSessionImpl::SetForceSplitConfig(AppForceLandscapeConfig& config)
+void WindowSessionImpl::SetForceSplitConfig(const AppForceLandscapeConfig& config)
 {
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
