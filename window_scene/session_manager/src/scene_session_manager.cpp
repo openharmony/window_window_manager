@@ -7368,6 +7368,7 @@ WSError SceneSessionManager::GetSCBDebugDumpInfo(std::string&& cmd, std::string&
     const std::string writeFileCmd = "-f";
     bool isWriteFile = false;
     std::string filePath = "";
+    // 2: writeFileCmd length
     if (cmd.size() >= 2 && (cmd.substr(cmd.size() - 2, 2) == writeFileCmd)) {
         isWriteFile = true;
     }
