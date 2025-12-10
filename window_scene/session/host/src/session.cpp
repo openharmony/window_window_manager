@@ -929,6 +929,19 @@ bool Session::GetSystemTouchable() const
     return forceTouchable_ && systemTouchable_ && GetTouchable();
 }
 
+bool Session::GetWindowTouchableForMMI(DisplayId displayId) const
+{
+    bool isTouchable = true;
+    auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
+    if (screenSession != nullptr) {
+        if (!screenSession->IsTouchEnabled() || !GetSystemTouchable() ||
+            !GetForegroundInteractiveStatus()) {
+            isTouchable = false;
+        }
+    }
+    return isTouchable;
+}
+
 bool Session::IsSystemActive() const
 {
     return isSystemActive_;
@@ -5125,13 +5138,7 @@ WindowMetaInfo Session::GetWindowMetaInfoForWindowInfo() const
     auto property = GetSessionProperty();
     windowMetaInfo.isPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
     auto displayId = property->GetDisplayId();
-    auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
-    if (screenSession != nullptr) {
-        if (!screenSession->IsTouchEnabled() || !GetSystemTouchable() ||
-            !GetForegroundInteractiveStatus()) {
-            windowMetaInfo.isTouchable = false;
-        }
-    }
+    windowMetaInfo.isTouchable = GetWindowTouchableForMMI(displayId);
     TLOGD(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", windowMetaInfo.windowId,
         windowMetaInfo.isTouchable);
     return windowMetaInfo;
