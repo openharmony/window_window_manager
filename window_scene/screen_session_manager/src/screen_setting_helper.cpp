@@ -28,7 +28,6 @@
 namespace OHOS {
 namespace Rosen {
 sptr<SettingObserver> ScreenSettingHelper::dpiObserver_;
-sptr<SettingObserver> ScreenSettingHelper::brightnessObserver_;
 sptr<SettingObserver> ScreenSettingHelper::castObserver_;
 sptr<SettingObserver> ScreenSettingHelper::rotationObserver_;
 sptr<SettingObserver> ScreenSettingHelper::wireCastObserver_;
@@ -102,12 +101,6 @@ void ScreenSettingHelper::UnregisterSettingDpiObserver()
 bool ScreenSettingHelper::GetSettingDpi(uint32_t& dpi, const std::string& key)
 {
     return GetSettingValue(dpi, key);
-}
-
-bool ScreenSettingHelper::GetSettingBrightnessMode(
-    std::string& brightnessMode, const std::string& key)
-{
-    return GetSettingValue(key, brightnessMode);
 }
 
 bool ScreenSettingHelper::GetSettingValue(uint32_t& value, const std::string& key)
