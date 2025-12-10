@@ -965,6 +965,7 @@ HWTEST_F(WindowSceneSessionImplTest4, updateSystemBarproperty, Function | SmallT
     option->SetWindowName("updateSystemBarproperty");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    SystemBarProperty prop = SystemBarProperty();
     window->updateSystemBarproperty(WindowType::WINDOW_TYPE_STATUS_BAR, prop);
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
@@ -972,7 +973,6 @@ HWTEST_F(WindowSceneSessionImplTest4, updateSystemBarproperty, Function | SmallT
     property->SetPersistentId(1);
     window->property_ = property;
     window->state_ = WindowState::STATE_SHOWN;
-    SystemBarProperty prop = SystemBarProperty();
     EXPECT_EQ(WMError::WM_OK, window->updateSystemBarproperty(WindowType::WINDOW_TYPE_STATUS_BAR, prop));
     std::optional<uint32_t> colo1 = { 0x00FFFFFF };
     EXPECT_EQ(WMError::WM_OK, window->updateSystemBarproperty(colo1));
