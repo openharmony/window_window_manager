@@ -1103,7 +1103,7 @@ HWTEST_F(SceneSessionTest5, KeyFrameAnimateEnd, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: SetDragKeyFramePolicy
+ * @tc.name: No
  * @tc.desc: SetDragKeyFramePolicy function01
  * @tc.type: FUNC
  */
@@ -1146,6 +1146,23 @@ HWTEST_F(SceneSessionTest5, SetDragKeyFramePolicy, Function | SmallTest | Level2
     session->SetAppDragResizeType(DragResizeType::RESIZE_TYPE_UNDEFINED);
     session->SetDragKeyFramePolicy(keyFramePolicy);
     EXPECT_EQ(session->GetKeyFramePolicy().stopping_, false);
+}
+
+/**
+ * @tc.name: NotifyServerToUpdateRect_KeyFrame
+ * @tc.desc: NotifyServerToUpdateRect_KeyFrame test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, NotifyServerToUpdateRect_KeyFrame, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "keyframe";
+    info.bundleName_ = "keyframe";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->foregroundInteractiveStatus_.store(true);
+    SessionUIParam uiParam;
+    session->keyFramePolicy_.running_ = true;
+    EXPECT_EQ(session->NotifyServerToUpdateRect(uiParam, SizeChangeReason::UNDEFINED), false);
 }
 
 /**
@@ -1967,7 +1984,7 @@ HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceBounds, TestSize.Level1)
     session->SetSessionRect(preRect);
     EXPECT_EQ(preRect, session->GetSessionRect());
     session->keyFramePolicy_.running_ = true;
-    session->keyFrameCloneNode_ = RSWindowKeyFrameNode->Create();
+    session->keyFrameCloneNode_ = RSWindowKeyFrameNode::Create();
     session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG_MOVE);
     EXPECT_EQ(preRect, session->GetSessionRect());
     session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG);
