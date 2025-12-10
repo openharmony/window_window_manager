@@ -3158,8 +3158,8 @@ export class WindowInternal implements Window {
     private native setWindowShadowRadius(nativeObj: long, radius: double): void;
     private native setWindowColorSpaceSync(nativeObj: long, colorSpace: int): void;
     private native setPreferredOrientationSync(nativeObj: long, orientation: int): void;
-    private native convertOrientationAndRotation(nativeObj: long, from: int, to: int, value: int): int;
     private native getPreferredOrientation(nativeObj: long): int;
+    private native convertOrientationAndRotation(nativeObj: long, from: int, to: int, value: int): int;
     private native setWindowPrivacyModeSync(nativeObj: long, isPrivacyMode: boolean): void;
     private native recoverSync(nativeObj: long): void;
     private native setUIContentSync(nativeObj: long, path: string): void;

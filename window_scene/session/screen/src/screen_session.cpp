@@ -1708,7 +1708,7 @@ Rotation ScreenSession::CalcRotationByDeviceOrientation(DisplayOrientation displ
 }
 
 DisplayOrientation ScreenSession::GetTargetOrientationWithBounds(
-        DisplayOrientation displayOrientation, const RRect& boundsInRotationZero, uint32_t rotationOffset)
+        DisplayOrientation displayRotation, const RRect& boundsInRotationZero, uint32_t rotationOffset)
 {
     bool isLandscapeScreen = boundsInRotationZero.rect_.GetWidth() > boundsInRotationZero.rect_.GetHeight();
     if (isLandscapeScreen) {
