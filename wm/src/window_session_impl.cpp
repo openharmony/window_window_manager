@@ -8035,8 +8035,11 @@ WMError WindowSessionImpl::UnregisterPreferredOrientationChangeListener(
 void WindowSessionImpl::NotifyPreferredOrientationChange(Orientation orientation)
 {
     TLOGD(WmsLogTag::WMS_ROTATION, "in");
-    std::lock_guard<std::mutex> lockListener(preferredOrientationChangeListenerMutex_);
-    auto preferredOrientationChangeListener = GetListeners<IPreferredOrientationChangeListener>();
+    sptr<IPreferredOrientationChangeListener> preferredOrientationChangeListener;
+    {
+        std::lock_guard<std::mutex> lockListener(preferredOrientationChangeListenerMutex_);
+        preferredOrientationChangeListener = GetListeners<IPreferredOrientationChangeListener>();
+    }
     if (preferredOrientationChangeListener != nullptr) {
         preferredOrientationChangeListener->OnPreferredOrientationChange(orientation);
         TLOGI(WmsLogTag::WMS_ROTATION, "OnPreferredOrientationChange is success.");
@@ -8046,8 +8049,11 @@ void WindowSessionImpl::NotifyPreferredOrientationChange(Orientation orientation
 void WindowSessionImpl::NotifyClientOrientationChange()
 {
     TLOGD(WmsLogTag::WMS_ROTATION, "in");
-    std::lock_guard<std::mutex> lockListener(windowOrientationChangeListenerMutex_);
-    auto windowOrientationChangeListener = GetListeners<IWindowOrientationChangeListener>();
+    sptr<IWindowOrientationChangeListener> windowOrientationChangeListener;
+    {
+        std::lock_guard<std::mutex> lockListener(windowOrientationChangeListenerMutex_);
+        windowOrientationChangeListener = GetListeners<IWindowOrientationChangeListener>();
+    }
     if (windowOrientationChangeListener != nullptr) {
         windowOrientationChangeListener->OnOrientationChange();
         TLOGI(WmsLogTag::WMS_ROTATION, "OnOrientationChange is success.");
