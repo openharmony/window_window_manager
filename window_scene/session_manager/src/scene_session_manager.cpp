@@ -7441,12 +7441,25 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
 
 WSError SceneSessionManager::GetSCBDebugDumpInfo(std::string&& cmd, std::string& dumpInfo)
 {
-    std::string filePath;
+    const std::string writeFileCmd = "-f";
+    bool isWriteFile = false;
+    std::string filePath = "";
+    // 2: writeFileCmd length
+    if (cmd.size() >= 2 && (cmd.substr(cmd.size() - 2, 2) == writeFileCmd)) {
+        isWriteFile = true;
+    }
     {
         auto rootContext = rootSceneContextWeak_.lock();
-        filePath = rootContext != nullptr ? rootContext->GetFilesDir() + "/wms.dump" : "";
+        if (isWriteFile && rootContext != nullptr) {
+            auto dumpTimeStamp = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch()).count();
+            filePath = rootContext->GetFilesDir() + "/wms_" + std::to_string(dumpTimeStamp) + ".dump";
+            size_t pos = cmd.find(writeFileCmd);
+            cmd.erase(pos, writeFileCmd.length());
+        }
     }
     // publish data
+    TLOGD(WmsLogTag::DEFAULT, "filePath: %{public}s, cmd: %{public}s", filePath.c_str(), cmd.c_str());
     bool ret = eventHandler_->PostSyncTask(
         [this, filePath = std::move(filePath), cmd = std::move(cmd)] {
             return scbDumpSubscriber_->Publish(cmd, filePath);
@@ -8079,8 +8092,57 @@ bool SceneSessionManager::CheckClickFocusIsDownThroughFullScreen(const sptr<Scen
         TLOGD(WmsLogTag::WMS_FOCUS, "click on the different screen");
         return false;
     }
-    if (focusedSession->IsBlockingFocusWindowType()) {
+    if (IsBlockingFocusWindowType(focusedSession)) {
         return sceneSession->GetZOrder() < focusedSession->GetZOrder();
+    }
+    return false;
+}
+
+bool SceneSessionManager::IsBlockingFocusWindowType(const sptr<SceneSession>& sceneSession) const
+{
+    if (sceneSession == nullptr) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "session is nullptr");
+        return false;
+    }
+    if (!(systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow())) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "device type unmatched");
+        return false;
+    }
+    bool blockingFocus = sceneSession->GetBlockingFocus();
+    WindowType windowType = sceneSession->GetWindowType();
+    bool isBlockingSystemWindowType =
+        blockingFocus && (windowType == WindowType::WINDOW_TYPE_PANEL ||
+        windowType == WindowType::WINDOW_TYPE_GLOBAL_SEARCH ||
+        windowType == WindowType::WINDOW_TYPE_NEGATIVE_SCREEN);
+    if (!isBlockingSystemWindowType && !WindowHelper::IsMainWindow(windowType)) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "not blocking focus window type");
+        return false;
+    }
+    //Get height and width of current screen
+    uint64_t displayId = sceneSession->GetDisplayId();
+    auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "get display object failed of display: %{public}" PRIu64, displayId);
+        return false;
+    }
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "get display info failed of display: %{public}" PRIu64, displayId);
+        return false;
+    }
+    std::vector<MMI::Rect> touchHotAreas;
+    std::vector<MMI::Rect> pointerHotAreas;
+    SceneInputManager::GetInstance().UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
+    auto posX = sceneSession->GetSessionRect().posX_;
+    auto posY = sceneSession->GetSessionRect().posY_;
+    for (const auto& area : touchHotAreas) {
+        if (posX + area.x <= 0 && posX + area.width >= displayInfo->GetWidth() && posY + area.y <= 0 &&
+            posY + area.height >= displayInfo->GetHeight()) {
+            TLOGI(WmsLogTag::WMS_FOCUS, "current session is full-screen, screen w: %{public}d, h: %{public}d, "
+                "window x: %{public}d, y: %{public}d, w: %{public}d, h: %{public}d", displayInfo->GetWidth(),
+                displayInfo->GetHeight(), area.x, area.y, area.width, area.height);
+            return true;
+        }
     }
     return false;
 }
