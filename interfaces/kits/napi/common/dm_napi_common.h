@@ -24,6 +24,7 @@
 
 #include "js_native_api.h"
 #include "js_native_api_types.h"
+#include "window_manager_hilog.h"
 #include "dm_common.h"
 #include "napi/native_api.h"
 
