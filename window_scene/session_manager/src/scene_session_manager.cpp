@@ -5492,6 +5492,7 @@ FlushWindowInfoTask SceneSessionManager::CreateDelayedFlushWindowInfoToMMITask()
 void SceneSessionManager::StartDelayedFlushWindowInfoToMMITask() {
     flushWindowInfoCount_ = 0;
     if (isDelayFlushWindowInfoMode_) {
+        TLOGNI(WmsLogTag::WMS_EVENT, "DelayedFlushWindowInfoToMMI duplicate task");
         return;
     }
     isDelayFlushWindowInfoMode_ = true;
@@ -5503,6 +5504,7 @@ void SceneSessionManager::StartDelayedFlushWindowInfoToMMITask() {
 void SceneSessionManager::StopDelayedFlushWindowInfoToMMITask() {
     flushWindowInfoCount_ = 0;
     isDelayFlushWindowInfoMode_ = false;
+    TLOGNI(WmsLogTag::WMS_EVENT, "DelayedFlushWindowInfoToMMI stop task");
 }
 
 void SceneSessionManager::HandleUserSwitching(bool isUserActive)
