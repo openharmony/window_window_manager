@@ -172,7 +172,7 @@ public:
     RRect CalcBoundsInRotationZero();
     RRect CalcBoundsByRotation(Rotation rotation);
     DisplayOrientation GetTargetOrientationWithBounds(
-        DisplayOrientation displayOrientation, const RRect& boundsInRotationZero, uint32_t rotationOffset);
+        DisplayOrientation displayRotation, const RRect& boundsInRotationZero, uint32_t rotationOffset);
     void FillScreenInfo(sptr<ScreenInfo> info) const;
     void SetDisplayNodeSecurity();
     void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint, bool isExtend = false,
