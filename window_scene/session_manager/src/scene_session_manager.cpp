@@ -7366,16 +7366,18 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
 WSError SceneSessionManager::GetSCBDebugDumpInfo(std::string&& cmd, std::string& dumpInfo)
 {
     const std::string writeFileCmd = "-f";
-    size_t pos = cmd.find(writeFileCmd);
-    std::vector<std::string> args;
+    bool isWriteFile = false;
     std::string filePath = "";
-    WindowHelper::SplitStringByDelimiter(cmd, " ", args);
+    if (cmd.size() >= 2 && (cmd.substr(cmd.size() - 2, 2) == writeFileCmd)) {
+        isWriteFile = true;
+    }
     {
         auto rootContext = rootSceneContextWeak_.lock();
-        if (args.back() == writeFileCmd && rootContext != nullptr) {
+        if (isWriteFile && rootContext != nullptr) {
             auto dumpTimeStamp = std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now().time_since_epoch()).count();
             filePath = rootContext->GetFilesDir() + "/wms_" + std::to_string(dumpTimeStamp) + ".dump";
+            size_t pos = cmd.find(writeFileCmd);
             cmd.erase(pos, writeFileCmd.length());
         }
     }
