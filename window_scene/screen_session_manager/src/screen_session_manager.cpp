@@ -5030,8 +5030,28 @@ void ScreenSessionManager::CallRsSetScreenPowerStatusSync(ScreenId screenId, Scr
     if (g_isPcDevice && status == ScreenPowerStatus::POWER_STATUS_ON && IsDefaultMirrorMode(screenId)) {
         TLOGI(WmsLogTag::DMS, "set screen active mode, rsScreenId:%{public}" PRId64, screenId);
         RecoverScreenActiveMode(screenId);
+        RecoverMultiScreenRelativePosition(screenId);
     }
 #endif
+}
+
+void ScreenSessionManager::RecoverMultiScreenRelativePosition(ScreenId screenId)
+{
+    sptr<ScreenSession> screenSession = GetScreenSessionByRsId(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenSession is nullptr!");
+        return;
+    }
+    std::map<std::string, MultiScreenInfo> multiScreenInfoMap = ScreenSettingHelper::GetMultiScreenInfo();
+    std::string serialNumber = screenSession->GetSerialNumber();
+    if (!CheckMultiScreenInfoMap(multiScreenInfoMap, serialNumber)) {
+        return;
+    }
+    auto info = multiScreenInfoMap[serialNumber];
+    auto ret = SetMultiScreenRelativePosition(info.mainScreenOption, info.secondaryScreenOption);
+    if (ret != DMError::DM_OK) {
+        SetMultiScreenDefaultRelativePosition();
+    }
 }
 
 void ScreenSessionManager::CallRsSetScreenPowerStatusSyncForFold(ScreenPowerStatus status)
