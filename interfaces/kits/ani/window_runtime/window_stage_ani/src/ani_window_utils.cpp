@@ -211,7 +211,7 @@ ani_status AniWindowUtils::GetStdStringVector(ani_env* env, ani_object ary, std:
     }
     for (int32_t i = 0; i< static_cast<int32_t>(length); i++) {
         ani_ref stringRef;
-        ret = env->Object_CallMethodByName_Ref(ary, "$_get", "I:Lstd/core/Object;", &stringRef, ani_int(i));
+        ret = env->Object_CallMethodByName_Ref(ary, "$_get", "i:std.core.Object;", &stringRef, ani_int(i));
         if (ret != ANI_OK) {
             return ret;
         }
@@ -509,7 +509,22 @@ ani_status AniWindowUtils::GetIntVector(ani_env* env, ani_object ary, std::vecto
         return ANI_INVALID_ARGS;
     }
     std::unique_ptr<ani_double[]> native_buffer = std::make_unique<ani_double[]>(size);
-    env->Array_GetRegion_Double(reinterpret_cast<ani_array_double>(ary), 0, size, native_buffer.get());
+
+    for (unsigned int i = 0; i < size; ++i) {
+        ani_ref doubleRef {};
+        ani_double doubleValue {};
+        status = env->Array_Get(reinterpret_cast<ani_array>(ary), i, &doubleRef);
+        if (status != ANI_OK) {
+            TLOGI(WmsLogTag::WMS_LIFE, "Array_Get failed, status: %{public}d", status);
+            return status;
+        }
+        status = unbox(env, static_cast<ani_object>(doubleRef), &doubleValue);
+        if (status != ANI_OK) {
+            TLOGI(WmsLogTag::WMS_LIFE, "Unbox failed, status: %{public}d", status);
+            return status;
+        }
+        native_buffer[i] = doubleValue;
+    }
 
     ani_size idx;
     for (idx = 0; idx < size; idx++) {
@@ -717,18 +732,13 @@ ani_object AniWindowUtils::CreateAniWindowLayoutInfo(ani_env* env, const WindowL
 ani_object AniWindowUtils::CreateAniWindowLayoutInfoArray(ani_env* env,
     const std::vector<sptr<WindowLayoutInfo>>& infos)
 {
-    ani_class cls;
-    if (env->FindClass("@ohos.window.window.WindowLayoutInfoInternal", &cls) != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] class not found");
-        return AniWindowUtils::CreateAniUndefined(env);
-    }
-    ani_array_ref windowLayoutInfoArray = nullptr;
-    if (env->Array_New_Ref(cls, infos.size(), CreateAniUndefined(env), &windowLayoutInfoArray) != ANI_OK) {
+    ani_array windowLayoutInfoArray = nullptr;
+    if (env->Array_New(infos.size(), CreateAniUndefined(env), &windowLayoutInfoArray) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] create array failed");
         return AniWindowUtils::CreateAniUndefined(env);
     }
     for (size_t i = 0; i < infos.size(); i++) {
-        if (env->Array_Set_Ref(windowLayoutInfoArray, i, CreateAniWindowLayoutInfo(env, *infos[i])) != ANI_OK) {
+        if (env->Array_Set(windowLayoutInfoArray, i, CreateAniWindowLayoutInfo(env, *infos[i])) != ANI_OK) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] create windowLayoutInfoArray failed");
             return AniWindowUtils::CreateAniUndefined(env);
         }
@@ -777,18 +787,13 @@ ani_object AniWindowUtils::CreateAniWindowInfo(ani_env* env, const WindowVisibil
 ani_object AniWindowUtils::CreateAniWindowInfoArray(ani_env* env,
     const std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
-    ani_class cls;
-    if (env->FindClass("@ohos.window.window.WindowInfoInternal", &cls) != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] class not found");
-        return AniWindowUtils::CreateAniUndefined(env);
-    }
-    ani_array_ref windowInfoArray = nullptr;
-    if (env->Array_New_Ref(cls, infos.size(), CreateAniUndefined(env), &windowInfoArray) != ANI_OK) {
+    ani_array windowInfoArray = nullptr;
+    if (env->Array_New(infos.size(), CreateAniUndefined(env), &windowInfoArray) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] create array failed");
         return AniWindowUtils::CreateAniUndefined(env);
     }
     for (size_t i = 0; i < infos.size(); i++) {
-        if (env->Array_Set_Ref(windowInfoArray, i, CreateAniWindowInfo(env, *infos[i])) != ANI_OK) {
+        if (env->Array_Set(windowInfoArray, i, CreateAniWindowInfo(env, *infos[i])) != ANI_OK) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] CreateAniWindowInfo failed");
             return AniWindowUtils::CreateAniUndefined(env);
         }
@@ -799,18 +804,14 @@ ani_object AniWindowUtils::CreateAniWindowInfoArray(ani_env* env,
 ani_object AniWindowUtils::CreateAniWindowArray(ani_env* env, std::vector<ani_ref>& windows)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    ani_array_ref windowArray = nullptr;
-    ani_class windowCls;
-    if (env->FindClass("@ohos.window.window.WindowInternal", &windowCls) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
-        return AniWindowUtils::CreateAniUndefined(env);
-    }
-    if (env->Array_New_Ref(windowCls, windows.size(), CreateAniUndefined(env), &windowArray) != ANI_OK) {
+    ani_array windowArray = nullptr;
+
+    if (env->Array_New(windows.size(), CreateAniUndefined(env), &windowArray) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] create array fail");
         return AniWindowUtils::CreateAniUndefined(env);
     }
     for (size_t i = 0; i < windows.size(); i++) {
-        if (env->Array_Set_Ref(windowArray, i, windows[i]) != ANI_OK) {
+        if (env->Array_Set(windowArray, i, windows[i]) != ANI_OK) {
             TLOGE(WmsLogTag::DEFAULT, "[ANI] set window array failed");
             return AniWindowUtils::CreateAniUndefined(env);
         }
@@ -870,7 +871,7 @@ ani_object AniWindowUtils::CreateAniWindowLimits(ani_env* env, const WindowLimit
         return AniWindowUtils::CreateAniUndefined(env);
     }
     ani_enum pixelUnit;
-    ret = env->FindEnum("L@ohos/window/window/PixelUnit;", &pixelUnit);
+    ret = env->FindEnum("@ohos.window.window.PixelUnit", &pixelUnit);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to FindEnum");
         return AniWindowUtils::CreateAniUndefined(env);
@@ -902,7 +903,7 @@ ani_object AniWindowUtils::CreateAniAvoidArea(ani_env* env, const AvoidArea& avo
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     ani_class aniClass;
-    ani_status ret = env->FindClass("L@ohos/window/window/AvoidAreaInternal;", &aniClass);
+    ani_status ret = env->FindClass("@ohos.window.window.AvoidAreaInternal", &aniClass);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
         return AniWindowUtils::CreateAniUndefined(env);
@@ -1104,7 +1105,7 @@ ani_object AniWindowUtils::CreateAniSystemBarTintState(ani_env* env, DisplayId d
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     ani_class aniClass;
-    if (env->FindClass("L@ohos/window/window/SystemBarTintStateInternal;", &aniClass) != ANI_OK) {
+    if (env->FindClass("@ohos.window.window.SystemBarTintStateInternal", &aniClass) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
         return AniWindowUtils::CreateAniUndefined(env);
     }
@@ -1119,18 +1120,18 @@ ani_object AniWindowUtils::CreateAniSystemBarTintState(ani_env* env, DisplayId d
         return AniWindowUtils::CreateAniUndefined(env);
     }
     CallAniMethodVoid(env, state, aniClass, "<set>displayId", nullptr, static_cast<ani_long>(displayId));
-    ani_array_ref regionTintArray = nullptr;
+    ani_array regionTintArray = nullptr;
     ani_class regionTintCls;
-    if (env->FindClass("L@ohos/window/window/SystemBarRegionTintInternal;", &regionTintCls) != ANI_OK) {
+    if (env->FindClass("@ohos.window.window.SystemBarRegionTintInternal", &regionTintCls) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
         return AniWindowUtils::CreateAniUndefined(env);
     }
-    if (env->Array_New_Ref(regionTintCls, tints.size(), CreateAniUndefined(env), &regionTintArray) != ANI_OK) {
+    if (env->Array_New(tints.size(), CreateAniUndefined(env), &regionTintArray) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] create array failed");
         return AniWindowUtils::CreateAniUndefined(env);
     }
     for (size_t i = 0; i < tints.size(); i++) {
-        if (env->Array_Set_Ref(regionTintArray, i, CreateAniSystemBarRegionTint(env, tints[i])) != ANI_OK) {
+        if (env->Array_Set(regionTintArray, i, CreateAniSystemBarRegionTint(env, tints[i])) != ANI_OK) {
             TLOGE(WmsLogTag::DEFAULT, "[ANI] create region tint failed");
             return AniWindowUtils::CreateAniUndefined(env);
         }
@@ -1142,7 +1143,7 @@ ani_object AniWindowUtils::CreateAniSystemBarTintState(ani_env* env, DisplayId d
 ani_object AniWindowUtils::CreateAniSystemBarRegionTint(ani_env* env, const SystemBarRegionTint& tint)
 {
     ani_class regionTintCls;
-    if (env->FindClass("L@ohos/window/window/SystemBarRegionTintInternal;", &regionTintCls) != ANI_OK) {
+    if (env->FindClass("@ohos.window.window.SystemBarRegionTintInternal", &regionTintCls) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
         return AniWindowUtils::CreateAniUndefined(env);
     }
@@ -1183,7 +1184,7 @@ ani_object AniWindowUtils::CreateAniFrameMetrics(ani_env* env, const FrameMetric
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     ani_class aniClass;
-    ani_status ret = env->FindClass("L@ohos/window/window/FrameMetricsInternal;", &aniClass);
+    ani_status ret = env->FindClass("@ohos.window.window.FrameMetricsInternal", &aniClass);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] class not found");
         return AniWindowUtils::CreateAniUndefined(env);
@@ -1231,7 +1232,7 @@ ani_object AniWindowUtils::CreateAniRotationChangeInfo(ani_env* env, const Rotat
 {
     TLOGI(WmsLogTag::WMS_ROTATION, "[ANI]");
     ani_class aniClass;
-    ani_status ret = env->FindClass("L@ohos/window/window/RotationChangeInfoInternal;", &aniClass);
+    ani_status ret = env->FindClass("@ohos.window.window.RotationChangeInfoInternal", &aniClass);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] class not found");
         return AniWindowUtils::CreateAniUndefined(env);
@@ -1249,7 +1250,7 @@ ani_object AniWindowUtils::CreateAniRotationChangeInfo(ani_env* env, const Rotat
         return AniWindowUtils::CreateAniUndefined(env);
     }
     ani_enum rotationChangeType;
-    ret = env->FindEnum("L@ohos/window/window/RotationChangeType;", &rotationChangeType);
+    ret = env->FindEnum("@ohos.window.window.RotationChangeType", &rotationChangeType);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] failed to FindEnum");
         return AniWindowUtils::CreateAniUndefined(env);
@@ -1312,7 +1313,7 @@ ani_object AniWindowUtils::CreateAniKeyboardInfo(ani_env* env, const KeyboardPan
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "[ANI]");
     ani_class aniClass;
-    ani_status ret = env->FindClass("L@ohos/window/window/KeyboardInfoInternal;", &aniClass);
+    ani_status ret = env->FindClass("@ohos.window.window.KeyboardInfoInternal", &aniClass);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] class not found");
         return AniWindowUtils::CreateAniUndefined(env);
@@ -1348,7 +1349,7 @@ ani_object AniWindowUtils::CreateAniAnimationConfig(ani_env* env, const Keyboard
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "[ANI]");
     ani_class aniClass;
-    ani_status ret = env->FindClass("L@ohos/window/window/WindowAnimationConfigInternal;", &aniClass);
+    ani_status ret = env->FindClass("@ohos.window.window.WindowAnimationConfigInternal", &aniClass);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] class not found");
         return AniWindowUtils::CreateAniUndefined(env);
@@ -1396,14 +1397,14 @@ ani_object AniWindowUtils::CreateAniAnimationConfig(ani_env* env, const Keyboard
 
     auto paramSize = curve.curveParams_.size();
     if (paramSize == ANIMATION_FOUR_PARAMS_SIZE) {
-        ani_array_ref params = nullptr;
-        if (env->Array_New_Ref(aniClass, ANIMATION_PARAM_SIZE, static_cast<ani_ref>(CreateAniUndefined(env)),
+        ani_array params = nullptr;
+        if (env->Array_New(ANIMATION_PARAM_SIZE, static_cast<ani_ref>(CreateAniUndefined(env)),
             &params) != ANI_OK) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] create array failed");
             return AniWindowUtils::CreateAniUndefined(env);
         }
         for (uint32_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
-            if (env->Array_Set_Ref(params, i, CreateDouble(env, curve.curveParams_[i])) != ANI_OK) {
+            if (env->Array_Set(params, i, CreateDouble(env, curve.curveParams_[i])) != ANI_OK) {
                 TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] set params failed at %{public}d", i);
                 return AniWindowUtils::CreateAniUndefined(env);
             }
@@ -1422,7 +1423,7 @@ ani_object AniWindowUtils::CreateAniAnimationInfo(ani_env* env, const KeyboardAn
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "[ANI]");
     ani_class aniClass;
-    ani_status ret = env->FindClass("L@ohos/window/window/KeyboardInfoInternal;", &aniClass);
+    ani_status ret = env->FindClass("@ohos.window.window.KeyboardInfoInternal", &aniClass);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] class not found");
         return AniWindowUtils::CreateAniUndefined(env);
@@ -1566,7 +1567,7 @@ ani_status AniWindowUtils::GetAniString(ani_env* env, const std::string& str, an
 
 ani_object AniWindowUtils::CreateAniRectObject(ani_env* env, const Rect& rect)
 {
-    return InitAniObjectByCreator(env, "L@ohos/window/window/RectInternal;", "iiii:",
+    return InitAniObjectByCreator(env, "@ohos.window.window.RectInternal", "iiii:",
         ani_int(rect.posX_), ani_int(rect.posY_),
         ani_int(rect.width_), ani_int(rect.height_));
 }
@@ -1583,8 +1584,8 @@ ani_object AniWindowUtils::CreateWindowsProperties(ani_env* env, const WindowPro
     }
     ani_string aniWindowName;
     GetAniString(env, windowPropertyInfo.name, &aniWindowName);
-    ani_object aniWindowsProperties = InitAniObjectByCreator(env, "L@ohos/window/window/WindowPropertiesInternal;",
-        "L@ohos/window/window/Rect;L@ohos/window/window/Rect;ZZZZDDZZZZIIJLstd/core/String;:V",
+    ani_object aniWindowsProperties = InitAniObjectByCreator(env, "@ohos.window.window.WindowPropertiesInternal",
+        "C{@ohos.window.window.Rect}C{@ohos.window.window.Rect}zzzzddzzzziilC{std.core.String}:",
         aniRect, aniDrawableRect, ani_boolean(windowPropertyInfo.isFullScreen),
         ani_boolean(windowPropertyInfo.isLayoutFullScreen), ani_boolean(windowPropertyInfo.isFocusable),
         ani_boolean(windowPropertyInfo.isTouchable), ani_float(windowPropertyInfo.brightness), ani_float(0),
@@ -1676,18 +1677,18 @@ ani_object AniWindowUtils::CreateAniPixelMapArray(ani_env* env,
     const std::vector<std::shared_ptr<Media::PixelMap>>& pixelMaps)
 {
     ani_class cls;
-    if (env->FindClass("L@ohos/multimedia/image/image/PixelMap;", &cls) != ANI_OK) {
+    if (env->FindClass("@ohos.multimedia.image.image.PixelMap", &cls) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_LIFE, "[ANI] class not found");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
     }
-    ani_array_ref pixelMapArray = nullptr;
-    if (env->Array_New_Ref(cls, pixelMaps.size(), CreateAniUndefined(env), &pixelMapArray) != ANI_OK) {
+    ani_array pixelMapArray = nullptr;
+    if (env->Array_New(pixelMaps.size(), CreateAniUndefined(env), &pixelMapArray) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_LIFE, "[ANI] create array failed");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
     }
     for (size_t i = 0; i < pixelMaps.size(); i++) {
         if (pixelMaps[i] == nullptr) {
-            auto status = env->Array_Set_Ref(pixelMapArray, i, AniWindowUtils::CreateAniUndefined(env));
+            auto status = env->Array_Set(pixelMapArray, i, AniWindowUtils::CreateAniUndefined(env));
             if (status != ANI_OK) {
                 TLOGW(WmsLogTag::WMS_LIFE, "[ANI] pixelMap is nullptr, status: %{public}d", status);
             }
@@ -1695,12 +1696,12 @@ ani_object AniWindowUtils::CreateAniPixelMapArray(ani_env* env,
         }
         auto nativePixelMap = OHOS::Media::PixelMapTaiheAni::CreateEtsPixelMap(env, pixelMaps[i]);
         if (nativePixelMap == nullptr) {
-            auto status = env->Array_Set_Ref(pixelMapArray, i, AniWindowUtils::CreateAniUndefined(env));
+            auto status = env->Array_Set(pixelMapArray, i, AniWindowUtils::CreateAniUndefined(env));
             if (status != ANI_OK) {
                 TLOGW(WmsLogTag::WMS_LIFE, "[ANI] nativePixelMap is nullptr, status: %{public}d", status);
             }
         } else {
-            auto status = env->Array_Set_Ref(pixelMapArray, i, nativePixelMap);
+            auto status = env->Array_Set(pixelMapArray, i, nativePixelMap);
             if (status != ANI_OK) {
                 TLOGE(WmsLogTag::WMS_LIFE, "[ANI] set nativePixelMap failed: %{public}d", status);
             }
@@ -1717,8 +1718,8 @@ ani_object AniWindowUtils::CreateAniMainWindowInfoArray(ani_env* env,
         TLOGE(WmsLogTag::WMS_LIFE, "[ANI] class not found");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
     }
-    ani_array_ref mainWindowInfoArray = nullptr;
-    if (env->Array_New_Ref(aniClass, infos.size(), CreateAniUndefined(env), &mainWindowInfoArray) != ANI_OK) {
+    ani_array mainWindowInfoArray = nullptr;
+    if (env->Array_New(infos.size(), CreateAniUndefined(env), &mainWindowInfoArray) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_LIFE, "[ANI] create array failed");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
     }
@@ -1727,7 +1728,7 @@ ani_object AniWindowUtils::CreateAniMainWindowInfoArray(ani_env* env,
             TLOGE(WmsLogTag::WMS_LIFE, "[ANI] infos[i] is nullptr at index %{public}d", static_cast<int32_t>(i));
             return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
         }
-        if (env->Array_Set_Ref(mainWindowInfoArray, i, CreateAniMainWindowInfo(env, *infos[i])) != ANI_OK) {
+        if (env->Array_Set(mainWindowInfoArray, i, CreateAniMainWindowInfo(env, *infos[i])) != ANI_OK) {
             TLOGE(WmsLogTag::WMS_LIFE, "[ANI] create mainWindowInfoArray failed");
             return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
         }
@@ -2166,7 +2167,7 @@ void* AniWindowUtils::GetAbilityContext(ani_env *env, ani_object aniObj)
     ani_class cls = nullptr;
     ani_field contextField = nullptr;
     ani_status status = ANI_ERROR;
-    if ((status = env->FindClass("Lapplication/UIAbilityContext/UIAbilityContext;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("application.UIAbilityContext.UIAbilityContext", &cls)) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT,  "[ANI] find class fail, status : %{public}d", status);
         return nullptr;
     }
