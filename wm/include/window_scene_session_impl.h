@@ -325,7 +325,7 @@ public:
     WMError SetFullScreen(bool status) override;
     WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
         const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
-    WMError SetStatusBarColorForPage(std::optional<uint32_t> color) override;
+    WMError SetStatusBarColorForPage(const std::optional<uint32_t> color) override;
     bool isAtomicServiceUseColor_ = false;
 
     /*
@@ -499,7 +499,7 @@ private:
         const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag) override;
     WMError updateSystemBarproperty(WindowType type, const SystemBarProperty& systemBarProperty);
     std::mutex nowsystemBarPropertyMapMutex_;
-    std::unordered_map<WindowType, std::optional<SystemBarProperty>> nowsystemBarPropertyMap_;
+    std::unordered_map<WindowType, SystemBarProperty> nowsystemBarPropertyMap_;
 
     /*
      * Window Animation

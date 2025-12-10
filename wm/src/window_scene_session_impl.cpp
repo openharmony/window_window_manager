@@ -3552,7 +3552,7 @@ WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(WindowType type, std
             nowsystemBarPropertyMap_[type].enable_ = newProperty.enable_;
             auto flag = (static_cast<uint32_t>(nowsystemBarPropertyMap_[type].settingFlag_) &
                 ~static_cast<uint32_t>(SystemBarSettingFlag::ENABLE_SETTING)) |
-                static_cast<uint32_t>(newProperty..settingFlag_);
+                static_cast<uint32_t>(newProperty.settingFlag_);
             nowsystemBarPropertyMap_[type].settingFlag_ = static_cast<SystemBarSettingFlag>(flag);
         } else {
             nowsystemBarPropertyMap_[type].enable_ = property.value().enable_;
@@ -3563,17 +3563,17 @@ WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(WindowType type, std
     return updateSystemBarproperty(type, newProperty);
 }
 
-WMError WindowSceneSessionImpl::SetStatusBarColorForPage(std::optional<uint32_t> color)
+WMError WindowSceneSessionImpl::SetStatusBarColorForPage(const std::optional<uint32_t> color)
 {
-    auto newProperty = GetSystemBarPropertyByType(type);
     auto type = WindowType::WINDOW_TYPE_STATUS_BAR;
+    auto newProperty = GetSystemBarPropertyByType(type);
     std::lock_guard<std::mutex> lock(nowsystemBarPropertyMapMutex_);
     {
         if (color == std::nullopt) {
             nowsystemBarPropertyMap_[type].contentColor_ = newProperty.contentColor_;
             auto flag = (static_cast<uint32_t>(nowsystemBarPropertyMap_[type].settingFlag_) &
                 ~static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING)) |
-                static_cast<uint32_t>(newProperty..settingFlag_);
+                static_cast<uint32_t>(newProperty.settingFlag_);
             nowsystemBarPropertyMap_[type].settingFlag_ = static_cast<SystemBarSettingFlag>(flag);
         } else {
             nowsystemBarPropertyMap_[type].contentColor_ = color.value();
@@ -3584,7 +3584,7 @@ WMError WindowSceneSessionImpl::SetStatusBarColorForPage(std::optional<uint32_t>
     return updateSystemBarproperty(type, newProperty);
 }
 
-WMError updateSystemBarproperty(WindowType type, const SystemBarProperty& systemBarProperty)
+WMError WindowSceneSessionImpl::updateSystemBarproperty(WindowType type, const SystemBarProperty& systemBarProperty)
 {
     auto winProperty = GetSystemBarPropertyByType(type);
     property_->SetSystemBarProperty(type, systemBarProperty);

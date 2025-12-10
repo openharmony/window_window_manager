@@ -925,6 +925,57 @@ HWTEST_F(WindowSceneSessionImplTest4, SetSystemBarPropertyForPage, Function | Sm
     windowSceneSessionImpl->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ret = windowSceneSessionImpl->SetSystemBarPropertyForPage(WindowType::WINDOW_TYPE_STATUS_BAR, prop);
     EXPECT_EQ(WMError::WM_OK, ret);
+    std::optional<SystemBarProperty> prop1 = SystemBarProperty();
+    ret = windowSceneSessionImpl->SetSystemBarPropertyForPage(WindowType::WINDOW_TYPE_STATUS_BAR, prop1);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+
+/**
+ * @tc.name: SetStatusBarColorForPage
+ * @tc.desc: SetStatusBarColorForPage
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, SetStatusBarColorForPage, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetStatusBarColorForPage");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetPersistentId(1);
+    window->property_ = property;
+    window->state_ = WindowState::STATE_SHOWN;
+    std::optional<uint32_t> color;
+    EXPECT_EQ(WMError::WM_OK, window->SetStatusBarColorForPage(color));
+    std::optional<uint32_t> colo1 = { 0x00FFFFFF };
+    EXPECT_EQ(WMError::WM_OK, window->SetStatusBarColorForPage(colo1));
+}
+
+/**
+ * @tc.name: updateSystemBarproperty
+ * @tc.desc: updateSystemBarproperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, updateSystemBarproperty, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("updateSystemBarproperty");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    window->updateSystemBarproperty(WindowType::WINDOW_TYPE_STATUS_BAR, prop);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetPersistentId(1);
+    window->property_ = property;
+    window->state_ = WindowState::STATE_SHOWN;
+    SystemBarProperty prop = SystemBarProperty();
+    EXPECT_EQ(WMError::WM_OK, window->updateSystemBarproperty(WindowType::WINDOW_TYPE_STATUS_BAR, prop));
+    std::optional<uint32_t> colo1 = { 0x00FFFFFF };
+    EXPECT_EQ(WMError::WM_OK, window->updateSystemBarproperty(colo1));
 }
 
 /**
