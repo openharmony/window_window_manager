@@ -3340,6 +3340,16 @@ void ScreenSession::UpdateScbScreenPropertyToServer(const ScreenProperty& screen
           property_.GetBounds().rect_.height_);
 }
 
+ScreenId ScreenSession::GetPhyScreenId()
+{
+    return phyScreenId_;
+}
+
+void ScreenSession::SetPhyScreenId(ScreenId screenId)
+{
+    phyScreenId_ = screenId;
+}
+
 bool ScreenSession::GetSupportsFocus() const
 {
     return supportsFocus_.load();
