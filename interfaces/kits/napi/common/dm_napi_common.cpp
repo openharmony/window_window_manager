@@ -21,6 +21,7 @@
 #include "accesstoken_kit.h"
 #include "bundle_constants.h"
 #include "ipc_skeleton.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 napi_status SetMemberInt32(napi_env env, napi_value result, const char *key, int32_t value)
@@ -29,12 +30,12 @@ napi_status SetMemberInt32(napi_env env, napi_value result, const char *key, int
     napi_status ret = napi_ok;
     ret = napi_create_int32(env, value, &num);
     if (ret != napi_ok) {
-        GNAPI_LOG("napi_create_int32 error, code is %{public}d", ret);
+        TLOGI(WmsLogTag::DMS, "napi_create_int32 error, code is %{public}d", ret);
         return ret;
     }
     ret = napi_set_named_property(env, result, key, num);
     if (ret != napi_ok) {
-        GNAPI_LOG("napi_set_named_property error, code is %{public}d", ret);
+        TLOGI(WmsLogTag::DMS, "napi_set_named_property error, code is %{public}d", ret);
         return ret;
     }
     return ret;
@@ -46,12 +47,12 @@ napi_status SetMemberUint32(napi_env env, napi_value result, const char *key, ui
     napi_status ret = napi_ok;
     ret = napi_create_uint32(env, value, &num);
     if (ret != napi_ok) {
-        GNAPI_LOG("napi_create_uint32 error, code is %{public}d", ret);
+        TLOGI(WmsLogTag::DMS, "napi_create_uint32 error, code is %{public}d", ret);
         return ret;
     }
     ret = napi_set_named_property(env, result, key, num);
     if (ret != napi_ok) {
-        GNAPI_LOG("napi_set_named_property error, code is %{public}d", ret);
+        TLOGI(WmsLogTag::DMS, "napi_set_named_property error, code is %{public}d", ret);
         return ret;
     }
     return ret;
@@ -63,12 +64,12 @@ napi_status SetMemberUndefined(napi_env env, napi_value result, const char *key)
     napi_status ret = napi_ok;
     ret = napi_get_undefined(env, &undefined);
     if (ret != napi_ok) {
-        GNAPI_LOG("napi_get_undefined error, code is %{public}d", ret);
+        TLOGI(WmsLogTag::DMS, "napi_get_undefined error, code is %{public}d", ret);
         return ret;
     }
     ret = napi_set_named_property(env, result, key, undefined);
     if (ret != napi_ok) {
-        GNAPI_LOG("napi_set_named_property error, code is %{public}d", ret);
+        TLOGI(WmsLogTag::DMS, "napi_set_named_property error, code is %{public}d", ret);
         return ret;
     }
     return ret;
@@ -90,7 +91,7 @@ bool CheckCallingPermission(const std::string &permission)
 void SetErrorInfo(napi_env env, Rosen::DmErrorCode wret, const std::string& errMessage, napi_value result[], int count)
 {
     if (count != 2 || result == nullptr) { // input param number is 2
-        GNAPI_LOG("Error, input param number must be 2");
+        TLOGI(WmsLogTag::DMS, "Error, input param number must be 2");
         return;
     }
     napi_value code = nullptr;
@@ -104,15 +105,15 @@ void SetErrorInfo(napi_env env, Rosen::DmErrorCode wret, const std::string& errM
 void ProcessPromise(napi_env env, Rosen::DmErrorCode wret, napi_deferred deferred, napi_value result[], int count)
 {
     if (count != 2 || result == nullptr) { // input param number is 2
-        GNAPI_LOG("Error, input param number must be 2");
+        TLOGI(WmsLogTag::DMS, "Error, input param number must be 2");
         return;
     }
-    GNAPI_LOG("AsyncProcess: Promise");
+    TLOGI(WmsLogTag::DMS, "AsyncProcess: Promise");
     if (wret == Rosen::DmErrorCode::DM_OK) {
-        GNAPI_LOG("AsyncProcess: Promise resolve");
+        TLOGI(WmsLogTag::DMS, "AsyncProcess: Promise resolve");
         napi_resolve_deferred(env, deferred, result[1]);
     } else {
-        GNAPI_LOG("AsyncProcess: Promise reject");
+        TLOGI(WmsLogTag::DMS, "AsyncProcess: Promise reject");
         napi_reject_deferred(env, deferred, result[0]);
     }
 }
@@ -120,10 +121,10 @@ void ProcessPromise(napi_env env, Rosen::DmErrorCode wret, napi_deferred deferre
 void ProcessCallback(napi_env env, napi_ref ref, napi_value result[], int count)
 {
     if (count != 2 || result == nullptr) { // input param number is 2
-        GNAPI_LOG("Error, input param number must be 2");
+        TLOGI(WmsLogTag::DMS, "Error, input param number must be 2");
         return;
     }
-    GNAPI_LOG("AsyncProcess Callback");
+    TLOGI(WmsLogTag::DMS, "AsyncProcess Callback");
     napi_value callback = nullptr;
     napi_get_reference_value(env, ref, &callback);
     napi_call_function(env, nullptr, callback, 2, result, nullptr); // 2: callback func input number
