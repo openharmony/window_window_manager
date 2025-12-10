@@ -8119,15 +8119,6 @@ WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config
     return WMError::WM_OK;
 }
 
-WMError SceneSession::GetAppForceLandscapeConfigEnable(bool& enableForceSplit)
-{
-    if (forceSplitEnableFunc_ == nullptr) {
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    enableForceSplit = forceSplitEnableFunc_(sessionInfo_.bundleName_);
-    return WMError::WM_OK;
-}
-
 WMError SceneSession::GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo)
 {
     return PostSyncTask([weakThis = wptr(this), &hookWindowInfo, where = __func__]() -> WMError {

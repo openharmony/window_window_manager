@@ -16695,29 +16695,26 @@ void SceneSessionManager::RegisterConstrainedModalUIExtInfoListener()
     }
 }
 
-bool SceneSessionManager::IsSameForceSplitConfig(const AppForceLandscapeConfig& config1,
-    const AppForceLandscapeConfig& config2)
+const bool SceneSessionManager::IsSameForceSplitConfig(const AppForceLandscapeConfig& preconfig,
+    const AppForceLandscapeConfig& config)
 {
-    if (&config1 == &config2) {
-        return true;
-    }
-    if (config1.mode_ != config2.mode_ ||
-        config1.supportSplit_ != config2.supportSplit_ ||
-        config1.ignoreOrientation_ != config2.ignoreOrientation_ ||
-        config1.containsSysConfig_ != config2.containsSysConfig_ ||
-        config1.containsAppConfig_ != config2.containsAppConfig_ ) {
+    if (preconfig.mode_ != config.mode_ ||
+        preconfig.supportSplit_ != config.supportSplit_ ||
+        preconfig.ignoreOrientation_ != config.ignoreOrientation_ ||
+        preconfig.containsSysConfig_ != config.containsSysConfig_ ||
+        preconfig.containsAppConfig_ != config.containsAppConfig_ ) {
         return false;
     }
-    if (config1.containsSysConfig_) {
-        if (config1.isSysRouter_ != config2.isSysRouter_ ||
-            config1.sysHomePage_ != config2.sysHomePage_ ||
-            config1.sysConfigJsonStr_ != config2.sysConfigJsonStr_) {
+    if (config.containsSysConfig_) {
+        if (preconfig.isSysRouter_ != config.isSysRouter_ ||
+            preconfig.sysHomePage_ != config.sysHomePage_ ||
+            preconfig.sysConfigJsonStr_ != config.sysConfigJsonStr_) {
             return false;
         }
     }
-    if (config1.containsAppConfig_) {
-        if (config1.isAppRouter_ != config2.isAppRouter_ ||
-            config1.appConfigJsonStr_ != config2.appConfigJsonStr_) {
+    if (config.containsAppConfig_) {
+        if (preconfig.isAppRouter_ != config.isAppRouter_ ||
+            preconfig.appConfigJsonStr_ != config.appConfigJsonStr_) {
             return false;
         }
     }
@@ -16779,25 +16776,24 @@ WSError SceneSessionManager::SetAppForceLandscapeConfigEnable(const std::string&
         TLOGE(WmsLogTag::DEFAULT, "bundle name is empty");
         return WSError::WS_ERROR_NULLPTR;
     }
-    AppForceLandscapeConfig config;
-    {
-        std::unique_lock<std::shared_mutex> lock(appForceLandscapeMutex_);
-        if (appForceLandscapeMap_.count(bundleName)) {
-            config = appForceLandscapeMap_[bundleName];
-        } else {
-            TLOGE(WmsLogTag::DEFAULT, "app: %{public}s, config not find", bundleName.c_str());
-            return WSError::WS_ERROR_INVALID_PARAM;
-        }
-        config.configEnable_ = enableForceSplit;
-        appForceLandscapeMap_[bundleName] = config;
-    }
     std::unique_lock<std::shared_mutex> lock(appForceLandscapeMutex_);
-        for (const auto& iter : sceneSessionMap_) {
-            auto& session = iter.second;
-            if (session && session->GetSessionInfo().bundleName_ == bundleName) {
-                session->NotifyAppForceLandscapeConfigEnableUpdated();
-            }
+
+    AppForceLandscapeConfig config;
+    if (appForceLandscapeMap_.count(bundleName)) {
+        config = appForceLandscapeMap_[bundleName];
+    } else {
+        TLOGE(WmsLogTag::DEFAULT, "app: %{public}s, config not find", bundleName.c_str());
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    config.configEnable_ = enableForceSplit;
+    appForceLandscapeMap_[bundleName] = config;
+
+    for (const auto& iter : sceneSessionMap_) {
+        auto& session = iter.second;
+        if (session && session->GetSessionInfo().bundleName_ == bundleName) {
+            session->NotifyAppForceLandscapeConfigEnableUpdated();
         }
+    }
     TLOGI(WmsLogTag::DEFAULT, "bundleName:%{public}s, enable:%{public}d", bundleName.c_str(), enableForceSplit);
     return WSError::WS_OK;
 }
@@ -19107,17 +19103,16 @@ WMError SceneSessionManager::GetAllJsonProfile(AppExecFwk::ProfileType profileTy
     std::vector<AppExecFwk::JsonProfileInfo>& jsonProfileInfos)
 {
     if (!bundleMgr_) {
-        TLOGE(WmsLogTag::WMS_LIFE, "bundleMgr is nullptr");
+        TLOGE(WmsLogTag::WMS_COMPAT, "bundleMgr is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    TLOGE(WmsLogTag::WMS_PATTERN, "GetAllJsonProfile start %{public}d , %{public}d",
+    TLOGI(WmsLogTag::WMS_COMPAT, "GetAllJsonProfile start %{public}d , %{public}d",
         static_cast<int8_t>(profileType), userId);
     bool ret = bundleMgr_->GetAllJsonProfile(profileType, userId, jsonProfileInfos);
-    TLOGE(WmsLogTag::WMS_PATTERN, "GetAllJsonProfile end size:%{public}d ",
-        static_cast<int>(jsonProfileInfos.size()));
+    TLOGI(WmsLogTag::WMS_COMPAT, "GetAllJsonProfile end ret:%{public}d size:%{public}d ",
+        ret, static_cast<int>(jsonProfileInfos.size()));
     if (ret) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "GetAllJsonProfile failed");
-        return WMError::WM_ERROR_NO_MEM;
+        return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
     }
     return WMError::WM_OK;
 }
@@ -19126,16 +19121,15 @@ WMError SceneSessionManager::GetJsonProfile(AppExecFwk::ProfileType profileType,
     const std::string& moduleName,  int32_t userId, std::string& profileInfo)
 {
     if (!bundleMgr_) {
-        TLOGE(WmsLogTag::WMS_LIFE, "bundleMgr is nullptr");
+        TLOGI(WmsLogTag::WMS_COMPAT, "bundleMgr is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    TLOGE(WmsLogTag::WMS_PATTERN, "GetJsonProfile start %{public}d , %{public}d , %{public}s",
+    TLOGI(WmsLogTag::WMS_COMPAT, "GetJsonProfile start %{public}d , %{public}d , %{public}s",
         static_cast<int8_t>(profileType), userId, bundleName.c_str());
     bool ret = bundleMgr_->GetJsonProfile(profileType, bundleName, moduleName, profileInfo, userId);
-    TLOGE(WmsLogTag::WMS_PATTERN, "GetJsonProfile end");
+    TLOGI(WmsLogTag::WMS_COMPAT, "GetJsonProfile end ret:%{public}d", ret);
     if (ret) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "GetJsonProfile failed");
-        return WMError::WM_ERROR_NO_MEM;
+        return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
     }
     return WMError::WM_OK;
 }

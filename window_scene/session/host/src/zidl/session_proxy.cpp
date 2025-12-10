@@ -2756,7 +2756,10 @@ WMError SessionProxy::GetAppForceLandscapeConfigEnable(bool& enableForceSplit)
         TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    enableForceSplit = reply.ReadBool();
+    if (!reply.ReadBool(enableForceSplit)) {
+        TLOGE(WmsLogTag::DEFAULT, "Read enableForceSplit failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
     int32_t ret = reply.ReadInt32();
     return static_cast<WMError>(ret);
 }

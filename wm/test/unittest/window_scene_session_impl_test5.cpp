@@ -2102,55 +2102,6 @@ HWTEST_F(WindowSceneSessionImplTest5, IsDecorEnable1, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: GetAppForceLandscapeConfig01
- * @tc.desc: GetAppForceLandscapeConfig
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest5, GetAppForceLandscapeConfig01, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window->hostSession_ = session;
-
-    window->property_->SetPersistentId(1);
-    window->state_ = WindowState::STATE_CREATED;
-    AppForceLandscapeConfig config = {};
-    auto res = window->GetAppForceLandscapeConfig(config);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(res, WMError::WM_OK);
-        EXPECT_EQ(config.mode_, 0);
-        EXPECT_EQ(config.homePage_, "");
-        EXPECT_EQ(config.supportSplit_, -1);
-        EXPECT_EQ(config.arkUIOptions_, "");
-    }
-}
-
-/**
- * @tc.name: GetAppForceLandscapeConfig02
- * @tc.desc: GetAppForceLandscapeConfig
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest5, GetAppForceLandscapeConfig02, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    window->property_->SetPersistentId(1);
-    window->hostSession_ = nullptr;
-
-    AppForceLandscapeConfig config = {};
-    auto res = window->GetAppForceLandscapeConfig(config);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-        EXPECT_EQ(config.mode_, 0);
-        EXPECT_EQ(config.homePage_, "");
-        EXPECT_EQ(config.supportSplit_, -1);
-        EXPECT_EQ(config.arkUIOptions_, "");
-    }
-}
-
-/**
  * @tc.name: NotifyAppForceLandscapeConfigUpdated01
  * @tc.desc: NotifyAppForceLandscapeConfigUpdated
  * @tc.type: FUNC

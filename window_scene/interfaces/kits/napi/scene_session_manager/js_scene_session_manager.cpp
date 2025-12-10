@@ -4493,7 +4493,7 @@ napi_value JsSceneSessionManager::OnSetAppForceLandscapeConfigEnable(napi_env en
     }
 
     bool enableForceSplit = false;
-    if (GetType(env, argv[ARG_INDEX_ONE]) != napi_boolean) {
+    if (GetType(env, argv[ARG_INDEX_ONE]) == napi_boolean) {
         RETURN_IF_CONVERT_FAIL(env, argv[ARG_INDEX_ONE], enableForceSplit, "enableForceSplit", WmsLogTag::DEFAULT);
     }
 
@@ -5737,7 +5737,7 @@ namespace {
         napi_set_named_property(env, objValue, "moduleName", CreateJsValue(env, profileInfo.moduleName));
         napi_set_named_property(env, objValue, "profile", CreateJsValue(env, profileInfo.profile));
         return objValue;
-}
+    }
 }
 
 napi_value JsSceneSessionManager::OnGetAllJsonProfile(napi_env env, napi_callback_info info)
@@ -5751,11 +5751,10 @@ napi_value JsSceneSessionManager::OnGetAllJsonProfile(napi_env env, napi_callbac
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    int32_t profileTypeId;
+    int32_t profileTypeId = -1;
     AppExecFwk::ProfileType profileType;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], profileTypeId) || 
-        profileTypeId > std::numeric_limits<uint8_t>::max() || 
-        profileTypeId < std::numeric_limits<int8_t>::min()) {
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], profileTypeId) ||
+        profileTypeId > std::numeric_limits<uint8_t>::max() || profileTypeId < std::numeric_limits<int8_t>::min()) {
         TLOGE(WmsLogTag::WMS_SCB, "Failed to convert parameter to profileTypeId");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -5763,7 +5762,7 @@ napi_value JsSceneSessionManager::OnGetAllJsonProfile(napi_env env, napi_callbac
     } else {
         profileType = static_cast<AppExecFwk::ProfileType>(static_cast<int8_t>(profileTypeId));
     }
-    int32_t userId;
+    int32_t userId = -1;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], userId)) {
         TLOGE(WmsLogTag::WMS_SCB, "Failed to convert parameter to userId");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
@@ -5792,7 +5791,7 @@ napi_value JsSceneSessionManager::OnGetJsonProfile(napi_env env, napi_callback_i
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    int32_t profileTypeId;
+    int32_t profileTypeId = -1;
     AppExecFwk::ProfileType profileType;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], profileTypeId) ||
         profileTypeId > std::numeric_limits<uint8_t>::max() ||
@@ -5805,23 +5804,23 @@ napi_value JsSceneSessionManager::OnGetJsonProfile(napi_env env, napi_callback_i
         profileType = static_cast<AppExecFwk::ProfileType>(static_cast<int8_t>(profileTypeId));
     }
 
-    std::string bundleName;
+    std::string bundleName = "";
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], bundleName)) {
-        WLOGFE("Failed to convert parameter to bundleName");
+        TLOGE(WmsLogTag::WMS_SCB, "Failed to convert parameter to bundleName");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
 
-    std::string moduleName;
+    std::string moduleName = "";
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_TWO], moduleName)) {
-        WLOGFE("Failed to convert parameter to moduleName");
+        TLOGE(WmsLogTag::WMS_SCB, "Failed to convert parameter to moduleName");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
 
-    int32_t userId;
+    int32_t userId = -1;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_THREE], userId)) {
         TLOGE(WmsLogTag::WMS_SCB, "Failed to convert parameter to userId");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
@@ -5829,7 +5828,7 @@ napi_value JsSceneSessionManager::OnGetJsonProfile(napi_env env, napi_callback_i
         return NapiGetUndefined(env);
     }
 
-    std::string profileInfo;
+    std::string profileInfo = "";
     SceneSessionManager::GetInstance().GetJsonProfile(profileType, bundleName, moduleName, userId, profileInfo);
     napi_value result = nullptr;
     napi_create_string_utf8(env, profileInfo.c_str(), profileInfo.length(), &result);
