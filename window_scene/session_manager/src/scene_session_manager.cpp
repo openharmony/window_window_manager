@@ -479,9 +479,6 @@ void SceneSessionManager::Init()
 
     InitSnapshotCache();
     WSSnapshotHelper::GetInstance()->SetWindowScreenStatus(DisplayManager::GetInstance().GetFoldStatus());
-
-    // Brightness Observer
-    DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RegisterBrightnessObserver(brightnessObserver_);    
 }
 
 void SceneSessionManager::RegisterSessionRecoverStateChangeListener()
