@@ -716,27 +716,6 @@ public:
         container.insert(inputStr.substr(start));
     }
 
-    static void SplitStringByDelimiter(
-        const std::string& inputStr, const std::string& delimiter, std::vector<std::string>& container)
-    {
-        if (inputStr.empty()) {
-            return;
-        }
-        if (delimiter.empty()) {
-            container.push_back(inputStr);
-            return;
-        }
-        std::string::size_type start = 0;
-        std::string::size_type end = 0;
-        while ((end = inputStr.find(delimiter, start)) != std::string::npos) {
-            container.push_back(inputStr.substr(start, end - start));
-            start = end + delimiter.length();
-        }
-        if (start < inputStr.length()) {
-            container.push_back(inputStr.substr(start));
-        }
-    }
-
     /**
      * @brief Check whether the window has scaling applied.
      *
