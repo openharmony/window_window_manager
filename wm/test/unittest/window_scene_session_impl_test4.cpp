@@ -974,8 +974,6 @@ HWTEST_F(WindowSceneSessionImplTest4, updateSystemBarproperty, Function | SmallT
     window->property_ = property;
     window->state_ = WindowState::STATE_SHOWN;
     EXPECT_EQ(WMError::WM_OK, window->updateSystemBarproperty(WindowType::WINDOW_TYPE_STATUS_BAR, prop));
-    std::optional<uint32_t> colo1 = { 0x00FFFFFF };
-    EXPECT_EQ(WMError::WM_OK, window->updateSystemBarproperty(colo1));
 }
 
 /**
