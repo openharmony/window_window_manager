@@ -6141,6 +6141,8 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::SetPreferredOrientation)},
         ani_native_function {"getPreferredOrientation", "l:i",
             reinterpret_cast<void *>(AniWindow::GetPreferredOrientation)},
+        ani_native_function {"convertOrientationAndRotation", "liii:i",
+            reinterpret_cast<void *>(AniWindow::ConvertOrientationAndRotation)},
         ani_native_function {"setWindowPrivacyModeSync", "JZ:V",
             reinterpret_cast<void *>(AniWindow::SetWindowPrivacyMode)},
         ani_native_function {"recoverSync", "J:V",
