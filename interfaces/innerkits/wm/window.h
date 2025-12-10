@@ -3375,7 +3375,7 @@ public:
      * @param color Status Bar Color
      * @return WMError
      */
-    virtual WMError SetStatusBarColorForPage(std::optional<uint32_t> color)
+    virtual WMError SetStatusBarColorForPage(const std::optional<uint32_t> color)
     {
         return WMError::WM_OK;
     }
