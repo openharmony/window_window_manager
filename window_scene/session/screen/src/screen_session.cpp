@@ -1676,10 +1676,10 @@ Rotation ScreenSession::CalcRotationByDeviceOrientation(DisplayOrientation displ
         displayRotation = static_cast<DisplayOrientation>(temp);
     } else if (foldDisplayMode == FoldDisplayMode::UNKNOWN) {
         displayRotation =
-            GetTargetOrientationWithBounds(displayRotation, boundsInRotationZero, static_cast<unit32_t>(ROTATION_90));
+            GetTargetOrientationWithBounds(displayRotation, boundsInRotationZero, static_cast<uint32_t>(ROTATION_90));
     } else if (FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice() && foldDisplayMode == FoldDisplayMode::FULL) {
         displayRotation =
-            GetTargetOrientationWithBounds(displayRotation, boundsInRotationZero, static_cast<unit32_t>(ROTATION_270));
+            GetTargetOrientationWithBounds(displayRotation, boundsInRotationZero, static_cast<uint32_t>(ROTATION_270));
     }
     Rotation rotation = Rotation::ROTATION_0;
     switch (displayRotation) {
@@ -1708,7 +1708,7 @@ Rotation ScreenSession::CalcRotationByDeviceOrientation(DisplayOrientation displ
 }
 
 DisplayOrientation ScreenSession::GetTargetOrientationWithBounds(
-        DisplayOrientation displayRotation, const RRect& boundsInRotationZero, uint32_t rotationOffset)
+    DisplayOrientation displayRotation, const RRect& boundsInRotationZero, uint32_t rotationOffset)
 {
     bool isLandscapeScreen = boundsInRotationZero.rect_.GetWidth() > boundsInRotationZero.rect_.GetHeight();
     if (isLandscapeScreen) {
