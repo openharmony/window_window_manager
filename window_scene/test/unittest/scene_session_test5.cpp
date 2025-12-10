@@ -1040,7 +1040,7 @@ HWTEST_F(SceneSessionTest5, KeyFrameNotifyFilter, Function | SmallTest | Level2)
     session->keyFrameAnimating_ = false;
     session->keyFrameCloneNode_ = nullptr;
     EXPECT_EQ(session->KeyFrameNotifyFilter(rectNew, reason), true);
-    session->keyFrameCloneNode_ = RSWindowKeyFrameNode::Create();;
+    session->keyFrameCloneNode_ = RSWindowKeyFrameNode::Create();
     // for same rect
     session->keyFrameAnimating_ = false;
     session->lastKeyFrameRect_ = rect;
@@ -1127,7 +1127,7 @@ HWTEST_F(SceneSessionTest5, SetDragKeyFramePolicy, Function | SmallTest | Level2
     EXPECT_EQ(session->GetKeyFramePolicy().dragResizeType_, keyFramePolicy.dragResizeType_);
     EXPECT_EQ(session->GetKeyFramePolicy().interval_, keyFramePolicy.interval_);
     EXPECT_EQ(session->GetKeyFramePolicy().distance_, keyFramePolicy.distance_);
-    EXPECT_EQ(session->GetKeyFramePolicy().animationDuration_ keyFramePolicy.animationDuration_);
+    EXPECT_EQ(session->GetKeyFramePolicy().animationDuration_, keyFramePolicy.animationDuration_);
     EXPECT_EQ(session->GetKeyFramePolicy().animationDelay_, keyFramePolicy.animationDelay_);
     // enable during resize
     session->keyFramePolicy_.running_ = false;
@@ -1967,6 +1967,7 @@ HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceBounds, TestSize.Level1)
     session->SetSessionRect(preRect);
     EXPECT_EQ(preRect, session->GetSessionRect());
     session->keyFramePolicy_.running_ = true;
+    session->keyFrameCloneNode_ = RSWindowKeyFrameNode->Create();
     session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG_MOVE);
     EXPECT_EQ(preRect, session->GetSessionRect());
     session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG);
