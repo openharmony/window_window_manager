@@ -113,22 +113,18 @@ void InitSceneSession(sptr<SceneSession>& sceneSession, int32_t pid, int windowI
  */
 HWTEST_F(SceneSessionDirtyManagerTest2, StartDelayedFlushWindowInfoToMMITask, TestSize.Level1)
 {
-
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ssm_->isDelayFlushWindowInfoMode_ = true;
     ssm_->HandleUserSwitching(false);
     EXPECT_EQ(ssm_->isDelayFlushWindowInfoMode_ , false);
-
     ssm_->isDelayFlushWindowInfoMode_ = true;
     ssm_->HandleUserSwitching(true);
     EXPECT_EQ(ssm_->isDelayFlushWindowInfoMode_ , true);
-
     ssm_->isUserBackground_ = true;
     ssm_->isDelayFlushWindowInfoMode_ = false;
     ssm_->HandleUserSwitching(true);
     EXPECT_EQ(ssm_->isDelayFlushWindowInfoMode_ , true);
     sleep(2);
-
     ssm_->isUserBackground_ = false;
     ssm_->isDelayFlushWindowInfoMode_ = false;
     ssm_->HandleUserSwitching(true);
