@@ -49,6 +49,7 @@
 #include "interfaces/include/ws_common.h"
 #include "pixel_map.h"
 #include "process_options.h"
+#include "rate_limited_logger.h"
 #include "rs_adapter.h"
 #include "session_coordinate_helper.h"
 #include "session/screen/include/screen_session.h"
@@ -1606,7 +1607,8 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
         }
         session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
         session->AddPropertyDirtyFlags(static_cast<uint32_t>(SessionPropertyFlag::WINDOW_RECT));
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}d, reason:%{public}d %{public}s rect:win=%{public}s "
+        TLOGI_LMTBYID(TEN_SECONDS, RECORD_100_TIMES, session->GetPersistentId(), WmsLogTag::WMS_LAYOUT,
+            "%{public}s: id:%{public}d, reason:%{public}d %{public}s rect:win=%{public}s "
             "client=%{public}s", where, session->GetPersistentId(), session->GetSizeChangeReason(),
             updateReason.c_str(), rect.ToString().c_str(), session->GetClientRect().ToString().c_str());
     }, __func__ + GetRectInfo(rect));
@@ -1980,7 +1982,8 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason r
         }
         NotifySessionRectChange(rect, reason);
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d->%{public}d cfg:%{public}s rects:in=%{public}s "
+    TLOGI_LMTBYID(TEN_SECONDS, RECORD_100_TIMES, GetPersistentId(), WmsLogTag::WMS_LAYOUT,
+        "Id:%{public}d reason:%{public}d->%{public}d cfg:%{public}s rects:in=%{public}s "
         "newReq=%{public}s newWin=%{public}s", GetPersistentId(), reason, newReason,
         moveConfiguration.ToString().c_str(), rect.ToString().c_str(), newRequestRect.ToString().c_str(),
         newWinRect.ToString().c_str());
@@ -5388,48 +5391,6 @@ bool SceneSession::IsAppOrLowerSystemSession() const
 }
 
 /** @note @window.focus */
-bool SceneSession::IsBlockingFocusWindowType() const
-{
-    if (!(systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow())) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "device type unmatched");
-        return false;
-    }
-    bool blockingFocus = GetBlockingFocus();
-    WindowType windowType = GetWindowType();
-    bool isBlockingSystemWindowType =
-        blockingFocus && (windowType == WindowType::WINDOW_TYPE_PANEL ||
-        windowType == WindowType::WINDOW_TYPE_GLOBAL_SEARCH ||
-        windowType == WindowType::WINDOW_TYPE_NEGATIVE_SCREEN);
-    if (!isBlockingSystemWindowType && !WindowHelper::IsMainWindow(windowType)) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "not blocking focus window type");
-        return false;
-    }
-    //Get height and width of current screen
-    uint64_t displayId = GetSessionProperty()->GetDisplayId();
-    auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
-    if (display == nullptr) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "get display object failed of display: %{public}" PRIu64, displayId);
-        return false;
-    }
-    auto displayInfo = display->GetDisplayInfo();
-    if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "get display info failed of display: %{public}" PRIu64, displayId);
-        return false;
-    }
-    if (std::abs(GetSessionRect().height_ - displayInfo->GetHeight()) <= 1 &&
-        std::abs(GetSessionRect().width_ - displayInfo->GetWidth()) <= 1) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "current session is full-screen, "
-            "screen w: %{public}d, h: %{public}d, window w: %{public}d, h: %{public}d",
-            displayInfo->GetWidth(), displayInfo->GetHeight(), GetSessionRect().width_, GetSessionRect().height_);
-        return true;
-    }
-    TLOGD(WmsLogTag::WMS_FOCUS, "current session is not full-screen, "
-        "screen w: %{public}d, h: %{public}d, window w: %{public}d, h: %{public}d",
-        displayInfo->GetWidth(), displayInfo->GetHeight(), GetSessionRect().width_, GetSessionRect().height_);
-    return false;
-}
-
-/** @note @window.focus */
 bool SceneSession::IsSystemSessionAboveApp() const
 {
     WindowType windowType = GetWindowType();
@@ -8677,9 +8638,10 @@ bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeC
             GetPersistentId(), rect.ToString().c_str(), globalRect.ToString().c_str());
         return false;
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, rect:%{public}s->%{public}s global=%{public}s client=%{public}s",
-        GetPersistentId(), GetSessionRect().ToString().c_str(), rect.ToString().c_str(), globalRect.ToString().c_str(),
-        GetClientRect().ToString().c_str());
+    TLOGI_LMTBYID(TEN_SECONDS, RECORD_100_TIMES, GetPersistentId(), WmsLogTag::WMS_LAYOUT,
+        "id:%{public}d, rect:%{public}s->%{public}s global=%{public}s client=%{public}s",
+        GetPersistentId(), GetSessionRect().ToString().c_str(), rect.ToString().c_str(),
+        globalRect.ToString().c_str(), GetClientRect().ToString().c_str());
     layoutController_->SetSessionRect(rect);
     RectCheckProcess();
     return true;

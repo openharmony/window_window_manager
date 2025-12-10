@@ -1990,11 +1990,11 @@ HWTEST_F(WindowSessionImplTest, SetMainWindowRaiseByClickEnabled, TestSize.Level
     EXPECT_EQ(retCode, WMError::WM_DO_NOTHING);
 
     window->state_ = WindowState::STATE_SHOWN;
-    window->property_->SetParentPersistentId(0);
+    window->property_->SetPersistentId(0);
     retCode = window->SetMainWindowRaiseByClickEnabled(true);
     EXPECT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
 
-    window->property_->SetParentPersistentId(1);
+    window->property_->SetPersistentId(1);
     SessionInfo sessionInfo;
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;

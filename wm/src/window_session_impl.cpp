@@ -43,6 +43,7 @@
 #include "display_manager.h"
 #include "extension/extension_business_info.h"
 #include "hitrace_meter.h"
+#include "rate_limited_logger.h"
 #include "rs_adapter.h"
 #include "scene_board_judgement.h"
 #include "session_helper.h"
@@ -1153,9 +1154,10 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     property_->SetWindowRect(wmRect);
     property_->SetRequestRect(wmRect);
 
-    TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d name:%{public}s rect:%{public}s->%{public}s reason:%{public}u "
-        "displayId:%{public}" PRIu64, GetPersistentId(), GetWindowName().c_str(), preRect.ToString().c_str(),
-        rect.ToString().c_str(), wmReason, property_->GetDisplayId());
+    TLOGI_LMT(TEN_SECONDS, RECORD_100_TIMES, WmsLogTag::WMS_LAYOUT,
+        "id:%{public}d name:%{public}s rect:%{public}s->%{public}s reason:%{public}u displayId:%{public}"
+        PRIu64, GetPersistentId(), GetWindowName().c_str(), preRect.ToString().c_str(), rect.ToString().c_str(),
+        wmReason, property_->GetDisplayId());
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "WindowSessionImpl::UpdateRect id: %d [%d, %d, %u, %u] reason: %u hasRSTransaction: %u", GetPersistentId(),
         wmRect.posX_, wmRect.posY_, wmRect.width_, wmRect.height_, wmReason, config.rsTransaction_ != nullptr);
@@ -1966,10 +1968,10 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
             "%{public}f]", GetPersistentId(), reason, rect.ToString().c_str(), orientation,
             rotation, deviceRotation, transformHint, virtualPixelRatio_);
     } else {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "Id: %{public}d, reason: %{public}d, windowRect: %{public}s, "
-            "displayOrientation: %{public}d, config[%{public}u, %{public}u, %{public}u, "
-            "%{public}f]", GetPersistentId(), reason, rect.ToString().c_str(), orientation,
-            rotation, deviceRotation, transformHint, virtualPixelRatio_);
+        TLOGI_LMT(TEN_SECONDS, RECORD_100_TIMES, WmsLogTag::WMS_LAYOUT,
+            "Id: %{public}d, reason: %{public}d, windowRect: %{public}s, displayOrientation: %{public}d, "
+            "config[%{public}u, %{public}u, %{public}u, %{public}f]", GetPersistentId(), reason,
+            rect.ToString().c_str(), orientation, rotation, deviceRotation, transformHint, virtualPixelRatio_);
     }
 }
 
@@ -8035,8 +8037,11 @@ WMError WindowSessionImpl::UnregisterPreferredOrientationChangeListener(
 void WindowSessionImpl::NotifyPreferredOrientationChange(Orientation orientation)
 {
     TLOGD(WmsLogTag::WMS_ROTATION, "in");
-    std::lock_guard<std::mutex> lockListener(preferredOrientationChangeListenerMutex_);
-    auto preferredOrientationChangeListener = GetListeners<IPreferredOrientationChangeListener>();
+    sptr<IPreferredOrientationChangeListener> preferredOrientationChangeListener;
+    {
+        std::lock_guard<std::mutex> lockListener(preferredOrientationChangeListenerMutex_);
+        preferredOrientationChangeListener = GetListeners<IPreferredOrientationChangeListener>();
+    }
     if (preferredOrientationChangeListener != nullptr) {
         preferredOrientationChangeListener->OnPreferredOrientationChange(orientation);
         TLOGI(WmsLogTag::WMS_ROTATION, "OnPreferredOrientationChange is success.");
@@ -8046,8 +8051,11 @@ void WindowSessionImpl::NotifyPreferredOrientationChange(Orientation orientation
 void WindowSessionImpl::NotifyClientOrientationChange()
 {
     TLOGD(WmsLogTag::WMS_ROTATION, "in");
-    std::lock_guard<std::mutex> lockListener(windowOrientationChangeListenerMutex_);
-    auto windowOrientationChangeListener = GetListeners<IWindowOrientationChangeListener>();
+    sptr<IWindowOrientationChangeListener> windowOrientationChangeListener;
+    {
+        std::lock_guard<std::mutex> lockListener(windowOrientationChangeListenerMutex_);
+        windowOrientationChangeListener = GetListeners<IWindowOrientationChangeListener>();
+    }
     if (windowOrientationChangeListener != nullptr) {
         windowOrientationChangeListener->OnOrientationChange();
         TLOGI(WmsLogTag::WMS_ROTATION, "OnOrientationChange is success.");

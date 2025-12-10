@@ -2855,12 +2855,12 @@ bool convertAnimConfigFromJs(napi_env env, napi_value jsObject, SceneAnimationCo
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to delay");
         return false;
     }
-    config.animationDelay_ = delay > 0 ? delay : 0;
+    config.animationDelay_ = static_cast<uint32_t>(delay > 0 ? delay : 0);
     if (GetType(env, jsDuration) != napi_undefined && !ConvertFromJsValue(env, jsDuration, duration)) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to duration");
         return false;
     }
-    config.animationDuration_ = duration > 0 ? duration : 0;
+    config.animationDuration_ = static_cast<uint32_t>(duration > 0 ? duration : 0);
     if (GetType(env, jsAnimationCurve) != napi_undefined && !ConvertFromJsValue(env, jsAnimationCurve, curve)) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to curve");
         return false;

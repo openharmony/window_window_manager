@@ -807,6 +807,12 @@ export enum Orientation {
     FOLLOW_DESKTOP = 17
 }
 
+export enum  RotationInfoType {
+    WINDOW_ORIENTATION = 0,
+    DISPLAY_ORIENTATION = 1,
+    DISPLAY_ROTATION = 2,
+}
+
 export enum WindowEventType {
     WINDOW_SHOWN = 1,
     WINDOW_ACTIVE = 2,
@@ -3153,6 +3159,7 @@ export class WindowInternal implements Window {
     private native setWindowColorSpaceSync(nativeObj: long, colorSpace: int): void;
     private native setPreferredOrientationSync(nativeObj: long, orientation: int): void;
     private native getPreferredOrientation(nativeObj: long): int;
+    private native convertOrientationAndRotation(nativeObj: long, from: int, to: int, value: int): int;
     private native setWindowPrivacyModeSync(nativeObj: long, isPrivacyMode: boolean): void;
     private native recoverSync(nativeObj: long): void;
     private native setUIContentSync(nativeObj: long, path: string): void;
@@ -3836,6 +3843,10 @@ export class WindowInternal implements Window {
 
     public getPreferredOrientation(): Orientation {
       return this.getPreferredOrientation(this.nativeObj) as Orientation;
+    }
+
+    public convertOrientationAndRotation(from: RotationInfoType, to: RotationInfoType, value: int): int {
+      return this.convertOrientationAndRotation(this.nativeObj, from as int, to as int, value);
     }
 
     public setWindowPrivacyMode(isPrivacyMode: boolean): Promise<void> {
@@ -5350,6 +5361,7 @@ export interface Window {
     setPreferredOrientation(orientation: Orientation): Promise<void>;
     setPreferredOrientation(orientation: Orientation, callback: AsyncCallback<void>): void;
     getPreferredOrientation(): Orientation;
+    convertOrientationAndRotation(from: RotationInfoType, to: RotationInfoType, value: int): int;
     setWindowPrivacyMode(isPrivacyMode: boolean): Promise<void>;
     setWindowPrivacyMode(isPrivacyMode: boolean, callback: AsyncCallback<void>): void;
     recover(): Promise<void>;
