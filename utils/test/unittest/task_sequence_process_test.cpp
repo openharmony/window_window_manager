@@ -46,7 +46,7 @@ namespace {
  */
 HWTEST_F(TaskSequenceProcessTest, ATC_Notify01, TestSize.Level0)
 {
-    TaskSequenceProcess process(10);
+    TaskSequenceProcess process = TaskSequenceProcess(10);
     process.SetTaskRunningFlag(false);
     TaskSequencEventInfo task;
     process.Push(task);
@@ -61,7 +61,7 @@ HWTEST_F(TaskSequenceProcessTest, ATC_Notify01, TestSize.Level0)
  */
 HWTEST_F(TaskSequenceProcessTest, ATC_Notify02, TestSize.Level0)
 {
-    TaskSequenceProcess process(10);
+    TaskSequenceProcess process = TaskSequenceProcess(10);
     process.SetTaskRunningFlag(false);
     process.Notify();
     EXPECT_FALSE(process.taskRunningFlag_.load());
@@ -74,7 +74,7 @@ HWTEST_F(TaskSequenceProcessTest, ATC_Notify02, TestSize.Level0)
  */
 HWTEST_F(TaskSequenceProcessTest, ATC_Notify03, TestSize.Level0)
 {
-    TaskSequenceProcess process(10);
+    TaskSequenceProcess process = TaskSequenceProcess(10);
     process.SetTaskRunningFlag(true);
     TaskSequencEventInfo task;
     process.Push(task);
@@ -89,7 +89,7 @@ HWTEST_F(TaskSequenceProcessTest, ATC_Notify03, TestSize.Level0)
  */
 HWTEST_F(TaskSequenceProcessTest, ATC_TaskSequenceProcess01, TestSize.Level0)
 {
-    TaskSequenceProcess process(0);
+    TaskSequenceProcess process = TaskSequenceProcess(0);
     EXPECT_EQ(process.maxQueueSize_, 1);
 }
 
@@ -100,7 +100,7 @@ HWTEST_F(TaskSequenceProcessTest, ATC_TaskSequenceProcess01, TestSize.Level0)
  */
 HWTEST_F(TaskSequenceProcessTest, ATC_TaskSequenceProcess02, TestSize.Level0)
 {
-    TaskSequenceProcess process(10);
+    TaskSequenceProcess process = TaskSequenceProcess(10);
     EXPECT_EQ(process.maxQueueSize_, 10);
     EXPECT_FALSE(process.taskRunningFlag_.load());
 }
@@ -112,7 +112,7 @@ HWTEST_F(TaskSequenceProcessTest, ATC_TaskSequenceProcess02, TestSize.Level0)
  */
 HWTEST_F(TaskSequenceProcessTest, ATC_Exec01, TestSize.Level0)
 {
-    TaskSequenceProcess process(1);
+    TaskSequenceProcess process = TaskSequenceProcess(1);
     TaskSequencEventInfo task;
     bool taskInfoCalled = false;
     task.taskInfo = [&taskInfoCalled]() {
@@ -130,7 +130,7 @@ HWTEST_F(TaskSequenceProcessTest, ATC_Exec01, TestSize.Level0)
  */
 HWTEST_F(TaskSequenceProcessTest, ATC_SetTaskRunningFlag01, TestSize.Level0)
 {
-    TaskSequenceProcess process(1);
+    TaskSequenceProcess process = TaskSequenceProcess(1);
     bool flag = true;
     process.SetTaskRunningFlag(flag);
     EXPECT_EQ(process.taskRunningFlag_.load(), flag);
@@ -143,7 +143,7 @@ HWTEST_F(TaskSequenceProcessTest, ATC_SetTaskRunningFlag01, TestSize.Level0)
  */
 HWTEST_F(TaskSequenceProcessTest, ATC_Push01, TestSize.Level0)
 {
-    TaskSequenceProcess process(1);
+    TaskSequenceProcess process = TaskSequenceProcess(1);
     TaskSequencEventInfo eventInfo1;
     TaskSequencEventInfo eventInfo2;
     process.Push(eventInfo1);
@@ -158,7 +158,7 @@ HWTEST_F(TaskSequenceProcessTest, ATC_Push01, TestSize.Level0)
  */
 HWTEST_F(TaskSequenceProcessTest, ATC_Push02, TestSize.Level0)
 {
-    TaskSequenceProcess process(3);
+    TaskSequenceProcess process = TaskSequenceProcess(3);
     TaskSequencEventInfo eventInfo1;
     TaskSequencEventInfo eventInfo2;
     process.Push(eventInfo1);
