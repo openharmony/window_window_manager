@@ -5780,6 +5780,7 @@ napi_value JsSceneSessionManager::OnGetAllJsonProfile(napi_env env, napi_callbac
     }
     return jsProfileInfoArray;
 }
+
 napi_value JsSceneSessionManager::OnGetJsonProfile(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_FOUR;
