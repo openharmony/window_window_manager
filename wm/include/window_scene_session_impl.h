@@ -325,6 +325,9 @@ public:
     WMError SetFullScreen(bool status) override;
     WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
         const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
+    WMError SetStatusBarColorForPage(const std::optional<uint32_t> color) override;
+    bool isAtomicServiceUseColor_ = false;
+
     /*
      * Window Pattern
      */
@@ -494,8 +497,9 @@ private:
     void MobileAppInPadLayoutFullScreenChange(bool statusBarEnable, bool navigationEnable);
     WMError UpdateSystemBarPropertyForPage(WindowType type,
         const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag) override;
-    std::mutex systemBarPropertyForPageMapMutex_;
-    std::unordered_map<WindowType, std::optional<SystemBarProperty>> systemBarPropertyForPageMap_;
+    WMError updateSystemBarproperty(WindowType type, const SystemBarProperty& systemBarProperty);
+    std::mutex nowsystemBarPropertyMapMutex_;
+    std::unordered_map<WindowType, SystemBarProperty> nowsystemBarPropertyMap_;
 
     /*
      * Window Animation

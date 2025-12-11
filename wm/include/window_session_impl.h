@@ -857,6 +857,7 @@ protected:
     std::map<AvoidAreaType, AvoidArea> lastAvoidAreaMap_;
     uint32_t GetStatusBarHeight() const override;
     WindowType rootHostWindowType_ = WindowType::APP_MAIN_WINDOW_BASE;
+    SystemBarSettingFlag systemBarSettingFlag_ = SystemBarSettingFlag::DEFAULT_SETTING;
 
     /*
      * PC Fold Screen

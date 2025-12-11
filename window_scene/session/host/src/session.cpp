@@ -4963,7 +4963,13 @@ void Session::SetIsMidScene(bool isMidScene)
 
 bool Session::GetIsMidScene() const
 {
-    return isMidScene_;
+    if (isMidScene_) {
+        return true;
+    }
+    if (GetParentSession() == nullptr) {
+        return false;
+    }
+    return GetParentSession()->GetIsMidScene();
 }
 
 void Session::SetTouchHotAreas(const std::vector<Rect>& touchHotAreas)
