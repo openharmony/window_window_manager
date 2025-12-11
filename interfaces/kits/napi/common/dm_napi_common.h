@@ -28,12 +28,18 @@
 #include "dm_common.h"
 #include "napi/native_api.h"
 
+constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, OHOS::Rosen::HILOG_DOMAIN_WINDOW,
+                                                "NapiWindowManagerCommonLayer" };
+
 const int PARAM_NUMBER = 2; // 2: callback func input number, also reused by Promise
+
+#define GNAPI_LOG(fmt, ...) HILOG_IMPL(LABEL.type, LOG_INFO, LABEL.domain, LABEL.tag, \
+    "%{public}s: " fmt, __func__, ##__VA_ARGS__)
 
 #define GNAPI_ASSERT(env, assertion, fmt, ...)  \
     do {                                        \
         if (assertion) {                        \
-            TLOGI(Rosen::WmsLogTag::DMS, fmt, ##__VA_ARGS__); \
+            GNAPI_LOG(fmt, ##__VA_ARGS__);      \
             return nullptr;                     \
         }                                       \
     } while (0)
