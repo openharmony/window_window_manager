@@ -38,8 +38,8 @@ void TaskSequenceProcess::Notify()
         taskRunningFlag_.store(true);
         Exec(task);
         taskRunningFlag_.store(false);
-    }
-    else{
+    } else
+    {
         TLOGI(WmsLogTag::DMS, "TaskSequenceProcess notify task but full");
     }
 }
