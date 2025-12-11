@@ -1005,11 +1005,8 @@ protected:
     NotifyUpdateFloatingBallFunc updateFloatingBallFunc_;
     NotifyStopFloatingBallFunc stopFloatingBallFunc_;
     NotifyRestoreFloatingBallMainWindowFunc restoreFloatingBallMainWindowFunc_;
-<<<<<<< HEAD
     GetRsCmdBlockingCountFunc getRsCmdBlockingCountFunc_;
-=======
     NotifyRestoreFloatMainWindowFunc restoreFloatMainWindowFunc_;
->>>>>>> e2b3df9b01 (feature: float window support restore main window)
     sptr<LayoutController> layoutController_ = nullptr;
     void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY);
     std::atomic<uint32_t> crossPlaneState_ = 0;

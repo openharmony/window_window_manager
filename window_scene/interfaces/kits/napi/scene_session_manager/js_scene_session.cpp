@@ -1147,6 +1147,7 @@ void JsSceneSession::ProcessRestoreFloatMainWindowRegister()
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", funcName);
+            return;
         }
         jsSceneSession->RestoreFloatMainWindow(wantParameters);
     });
