@@ -1082,7 +1082,7 @@ HWTEST_F(WindowSceneSessionImplTest5, UpdateSystemBarPropertyForPage, TestSize.L
  * @tc.desc: SetSystemBarPropertyForPage
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest4, SetSystemBarPropertyForPage, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest5, SetSystemBarPropertyForPage, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetSystemBarPropertyForPage");
@@ -1115,7 +1115,7 @@ HWTEST_F(WindowSceneSessionImplTest4, SetSystemBarPropertyForPage, Function | Sm
  * @tc.desc: SetStatusBarColorForPage
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest4, SetStatusBarColorForPage, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest5, SetStatusBarColorForPage, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetStatusBarColorForPage");
@@ -1138,7 +1138,7 @@ HWTEST_F(WindowSceneSessionImplTest4, SetStatusBarColorForPage, Function | Small
  * @tc.desc: updateSystemBarproperty
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest4, updateSystemBarproperty, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest5, updateSystemBarproperty, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("updateSystemBarproperty");
