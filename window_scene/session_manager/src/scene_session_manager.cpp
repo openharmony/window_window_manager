@@ -167,6 +167,7 @@ constexpr int32_t FORCE_SPLIT_MODE = 5;
 constexpr int32_t NAV_FORCE_SPLIT_MODE = 6;
 const std::string FB_PANEL_NAME = "Fb_panel";
 constexpr std::size_t MAX_APP_BOUND_TRAY_MAP_SIZE = 50;
+constexpr int32_t RS_CMD_BLOCKING_TIMEOUT_MS = 50;
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
@@ -3023,6 +3024,7 @@ void SceneSessionManager::PerformRegisterInRequestSceneSession(sptr<SceneSession
     RegisterSceneSessionDestructNotifyManagerFunc(sceneSession);
     RegisterSessionPropertyChangeNotifyManagerFunc(sceneSession);
     RegisterClientDisplayIdChangeNotifyManagerFunc(sceneSession);
+    RegisterGetRsCmdBlockingCountFunc(sceneSession);
 }
 
 void SceneSessionManager::UpdateSceneSessionWant(const SessionInfo& sessionInfo)
@@ -13921,6 +13923,18 @@ void SceneSessionManager::RegisterClientDisplayIdChangeNotifyManagerFunc(const s
     });
 }
 
+void SceneSessionManager::RegisterGetRsCmdBlockingCountFunc(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr");
+        return;
+    }
+    sceneSession->SetGetRsCmdBlockingCountFunc([this]() {
+        return GetOrResetRsCmdBlockingCount();
+    });
+    TLOGD(WmsLogTag::WMS_LAYOUT, "success");
+}
+
 WSError SceneSessionManager::NotifyStackEmpty(int32_t persistentId)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "persistentId %{public}d", persistentId);
@@ -14055,6 +14069,37 @@ void SceneSessionManager::SetRequestVsyncByRootSceneWhenModeChangeFunc(
         return;
     }
     requestVsyncByRootSceneWhenModeChangeFunc_ = std::move(func);
+}
+
+void SceneSessionManager::RunAfterNVsyncs(uint32_t vsyncCount, OnCallback&& callback)
+{
+    if (!vsyncStation_) {
+        TLOGE(WmsLogTag::DEFAULT, "could not request next vsync");
+        return;
+    }
+    auto counter = std::make_shared<std::atomic<uint32_t>>(0);
+    auto vsyncCallback = std::make_shared<VsyncCallback>();
+
+    vsyncCallback->onCallback = [weakStation = std::weak_ptr<VsyncStation>(vsyncStation_),
+                                 weakVsyncCallback = std::weak_ptr<VsyncCallback>(vsyncCallback),
+                                 counter,
+                                 vsyncCount,
+                                 callback = std::move(callback),
+                                 where =  __func__](int64_t timestamp, int64_t frameCount) mutable {
+        if (++(*counter) >= vsyncCount) {
+            callback(timestamp, frameCount);
+            return;
+        }
+        auto vsyncStation = weakStation.lock();
+        if (!vsyncStation) {
+            TLOGE(WmsLogTag::DEFAULT, "Could not request next vsync");
+            return;
+        }
+        if (auto nextCallback = weakVsyncCallback.lock()) {
+            vsyncStation->RequestVsync(nextCallback);
+        }
+    };
+    vsyncStation_->RequestVsync(vsyncCallback);
 }
 
 WMError SceneSessionManager::UpdateWindowModeByIdForUITest(int32_t windowId, int32_t updateMode)
@@ -16510,6 +16555,49 @@ void SceneSessionManager::UpdateAppHookWindowInfoWhenSwitchFreeMultiWindow(bool 
             }
         }
     }
+}
+
+void SceneSessionManager::UpdateRsCmdBlockingCount(bool enable)
+{
+    taskScheduler_->PostAsyncTask([this, enable, where = __func__]() {
+        if (enable) {     
+            rsCmdBlockingFlag_.count++;
+            rsCmdBlockingFlag_.startTime = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch()).count());
+        } else {
+            rsCmdBlockingFlag_.count--;
+        }
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s, enable: %{public}d, count: %{public}d",
+            where, enable, rsCmdBlockingFlag_.count);
+    }, __func__);  
+
+    if (enable) {
+        // blocking 2 vsyncs to wait creating node cmd flushed
+        constexpr uint32_t rsCmdDelayVsyncs = 2; 
+        RunAfterNVsyncs(rsCmdDelayVsyncs, [this] (int64_t, int64_t) {
+            taskScheduler_->PostAsyncTask([this]() {
+                TLOGNI(WmsLogTag::WMS_LAYOUT, "update rsCmdBlockingCount after vsyncs");
+                rsCmdBlockingFlag_.count--;
+            }, __func__);
+        });
+    }
+}
+
+int32_t SceneSessionManager::GetOrResetRsCmdBlockingCount()
+{
+    return taskScheduler_->PostSyncTask([this]() {
+        if (rsCmdBlockingFlag_.count == 0) {
+            return rsCmdBlockingFlag_.count;
+        }
+        auto endTime = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count());
+        auto validTime = endTime - rsCmdBlockingFlag_.startTime;
+        if (validTime > RS_CMD_BLOCKING_TIMEOUT_MS || rsCmdBlockingFlag_.count < 0) {
+            rsCmdBlockingFlag_.count = 0;
+            rsCmdBlockingFlag_.startTime = 0;
+        }
+        return rsCmdBlockingFlag_.count;
+    }, __func__);
 }
 
 WMError SceneSessionManager::NotifyHookOrientationChange(int32_t persistentId)

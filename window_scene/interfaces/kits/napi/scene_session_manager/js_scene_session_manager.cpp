@@ -318,6 +318,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::SupportFollowParentWindowLayout);
     BindNativeFunction(env, exportObj, "supportFollowRelativePositionToParent", moduleName,
         JsSceneSessionManager::SupportFollowRelativePositionToParent);
+    BindNativeFunction(env, exportObj, "updateRsCmdBlockingCount", moduleName,
+        JsSceneSessionManager::UpdateRsCmdBlockingCount);
     BindNativeFunction(env, exportObj, "supportZLevel", moduleName,
         JsSceneSessionManager::SupportZLevel);
     BindNativeFunction(env, exportObj, "setSupportFunctionType", moduleName,
@@ -1582,6 +1584,13 @@ napi_value JsSceneSessionManager::SupportFollowRelativePositionToParent(napi_env
     TLOGI(WmsLogTag::WMS_ROTATION, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnSupportFollowRelativePositionToParent(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::UpdateRsCmdBlockingCount(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnUpdateRsCmdBlockingCount(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::OnRegisterCallback(napi_env env, napi_callback_info info)
@@ -5424,6 +5433,29 @@ napi_value JsSceneSessionManager::OnUpdateAppBoundSystemTrayStatus(napi_env env,
 napi_value JsSceneSessionManager::OnSupportFollowParentWindowLayout(napi_env env, napi_callback_info info)
 {
     SceneSessionManager::GetInstance().ConfigSupportFollowParentWindowLayout();
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnUpdateRsCmdBlockingCount(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+        "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool enable = false;
+    if (!ConvertFromJsValue(env, argv[0], enable)) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Faile to convert parameter");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is invalid."));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().UpdateRsCmdBlockingCount(enable);
     return NapiGetUndefined(env);
 }
 
