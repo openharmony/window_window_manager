@@ -333,8 +333,8 @@ ani_object ScreenAniUtils::CreateAniArray(ani_env* env, size_t size)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] start");
     ani_class arrayCls;
-    if (env->FindClass("escompat.Array", &arrayCls) != ANI_OK) {
-        TLOGE(WmsLogTag::DMS, "Failed to find class escompat.Array");
+    if (env->FindClass("std.core.Array", &arrayCls) != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to find class std.core.Array");
         return CreateAniUndefined(env);
     }
     ani_method arrayCtor;
