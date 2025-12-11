@@ -2610,7 +2610,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
 
 void SceneSessionManager::SetBufferAvailable(sptr<SceneSession>& sceneSession)
 {
-    if (sceneSession == nullptr) {
+    if (!sceneSession) {
         TLOGE(WmsLogTag::WMS_SCB, "scene session is nullptr");
         return;
     }
@@ -2620,10 +2620,12 @@ void SceneSessionManager::SetBufferAvailable(sptr<SceneSession>& sceneSession)
         type == WindowType::WINDOW_TYPE_WALLPAPER) {
         TLOGI(WmsLogTag::WMS_SCB, "enter buffer available callback");
         auto surfaceNode = sceneSession->GetSurfaceNode();
-        if (surfaceNode == nullptr) {
+        
+        if (!surfaceNode) {
             TLOGE(WmsLogTag::WMS_SCB, "surface node is nullptr");
             return;
         }
+        TLOGI(WmsLogTag::WMS_SCB, "config surface node");
         surfaceNode->SetBufferAvailableCallback([where = __func__]() {
             TLOGNE(WmsLogTag::WMS_SCB, "%{public}s BufferAvailableCallback called", where);
             ScreenSessionManagerClient::GetInstance().NotifySwitchUserAnimationFinishByWindow();

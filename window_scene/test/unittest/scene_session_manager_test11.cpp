@@ -134,6 +134,14 @@ sptr<SceneSession> SceneSessionManagerTest11::CreateSceneSession(const std::stri
 }
 
 namespace {
+
+std::string g_logMsg;
+void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+    const char* msg)
+{
+    g_logMsg += msg;
+}
+
 /**
  * @tc.name: GetMainWindowStatesByPid
  * @tc.desc: SceneSesionManager get main window states by pid
@@ -1772,6 +1780,90 @@ HWTEST_F(SceneSessionManagerTest11, SetSpecificWindowZIndex, TestSize.Level1)
     EXPECT_EQ(ret, WSError::WS_OK);
     EXPECT_EQ(value, 20);
     ssm_->SetSpecificWindowZIndexListener(nullptr);
+}
+
+/**
+ * @tc.name: SetBufferAvailable
+ * @tc.desc: test function : SetBufferAvailable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, SetBufferAvailable1, Function | SmallTest | Level2)
+{
+    sptr<SceneSession> sceneSession = nullptr;
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ssm_->SetBufferAvailable(sceneSession);
+    EXPECT_TRUE(g_logMsg.find("scene session is nullptr") != std::string::npos) << "Check sceneSession is null.";
+
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: SetBufferAvailable
+ * @tc.desc: test function : SetBufferAvailable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, SetBufferAvailable2, Function | SmallTest | Level2)
+{
+    SessionInfo sessionInfo;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::BELOW_APP_SYSTEM_WINDOW_END);
+
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ssm_->SetBufferAvailable(sceneSession);
+    EXPECT_TRUE(
+        g_logMsg.find("enter buffer available callback") == std::string::npos) << "Check WindowType is invalid.";
+
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: SetBufferAvailable
+ * @tc.desc: test function : SetBufferAvailable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, SetBufferAvailable3, Function | SmallTest | Level2)
+{
+    SessionInfo sessionInfo;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->surfaceNode_ = surfaceNode;
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_DESKTOP);
+
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ssm_->SetBufferAvailable(sceneSession);
+    EXPECT_TRUE(g_logMsg.find("surface node is nullptr") != std::string::npos) << "Check surfaceNode is null.";
+
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: SetBufferAvailable
+ * @tc.desc: test function : SetBufferAvailable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, SetBufferAvailable4, Function | SmallTest | Level2)
+{
+    SessionInfo sessionInfo;
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->surfaceNode_ = surfaceNode;
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_KEYGUARD);
+
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ssm_->SetBufferAvailable(sceneSession);
+    EXPECT_TRUE(g_logMsg.find("config surface node") != std::string::npos);
+
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
 }
 } // namespace
 } // namespace Rosen
