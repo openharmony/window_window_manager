@@ -56,7 +56,7 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
         TLOGD(WmsLogTag::DMS, "fold state doesn't change, foldState = %{public}d.", mState_);
         return;
     }
-    auto task = [=]{
+    auto task = [=] {
         TLOGI(WmsLogTag::DMS, "current state: %{public}d, next state: %{public}d.", mState_, nextState);
         ReportNotifyFoldStatusChange(static_cast<int32_t>(mState_), static_cast<int32_t>(nextState), angle);
         PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
