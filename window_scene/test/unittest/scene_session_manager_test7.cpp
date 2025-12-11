@@ -1381,6 +1381,86 @@ HWTEST_F(SceneSessionManagerTest7, TestReportIncompleteScreenFoldStatusChangeEve
 }
 
 /**
+ * @tc.name: SetAppForceLandscapeConfig
+ * @tc.desc: SceneSesionManager SetAppForceLandscapeConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, SetAppForceLandscapeConfig, TestSize.Level1)
+{
+    std::string bundleName = "SetAppForceLandscapeConfig";
+    AppForceLandscapeConfig config = { 0, false, false, {}, {}, {}, false, false, false, false };
+    WSError result = ssm_->SetAppForceLandscapeConfig(bundleName, config);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: SetAppForceLandscapeConfig01
+ * @tc.desc: SetAppForceLandscapeConfig_ShouldReturnNullptrError_WhenBundleNameIsEmpty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, SetAppForceLandscapeConfig01, TestSize.Level1)
+{
+    std::string bundleName = "";
+    AppForceLandscapeConfig config;
+    WSError result = ssm_->SetAppForceLandscapeConfig(bundleName, config);
+    EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: SetAppForceLandscapeConfig02
+ * @tc.desc: SetAppForceLandscapeConfig_ShouldUpdateConfig_WhenBundleNameIsValid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, SetAppForceLandscapeConfig02, TestSize.Level1)
+{
+    std::string bundleName = "com.example.app";
+    AppForceLandscapeConfig config;
+    config.mode_ = 5; // 5: FORCE_SPLIT_MODE
+    config.supportSplit_ = 5;
+
+    WSError result = ssm_->SetAppForceLandscapeConfig(bundleName, config);
+    EXPECT_EQ(result, WSError::WS_OK);
+    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].mode_, 5);
+    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].supportSplit_, 5);
+}
+
+/**
+ * @tc.name: SetAppForceLandscapeConfig03
+ * @tc.desc: SetAppForceLandscapeConfig_ShouldUpdateConfig_WhenBundleNameIsValid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, SetAppForceLandscapeConfig03, TestSize.Level1)
+{
+    std::string bundleName = "com.example.app";
+    AppForceLandscapeConfig preConfig;
+    preConfig.mode_ = 0;
+    preConfig.supportSplit_ = -1;
+    ssm_->appForceLandscapeMap_[bundleName] = preConfig;
+
+    AppForceLandscapeConfig config;
+    config.mode_ = 5; // 5: FORCE_SPLIT_MODE
+    config.supportSplit_ = 5;
+
+    WSError result = ssm_->SetAppForceLandscapeConfig(bundleName, config);
+    EXPECT_EQ(result, WSError::WS_OK);
+    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].mode_, 5);
+    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].supportSplit_, 5);
+}
+
+/**
+ * @tc.name: GetAppForceLandscapeConfig
+ * @tc.desc: SceneSesionManager GetAppForceLandscapeConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, GetAppForceLandscapeConfig, TestSize.Level1)
+{
+    std::string bundleName = "GetAppForceLandscapeConfig";
+    AppForceLandscapeConfig config = ssm_->GetAppForceLandscapeConfig(bundleName);
+    EXPECT_EQ(config.mode_, 0);
+    EXPECT_EQ(config.supportSplit_, -1);
+}
+
+/**
  * @tc.name: SetSessionWatermarkForAppProcess
  * @tc.desc: SceneSesionManager SetSessionWatermarkForAppProcess
  * @tc.type: FUNC

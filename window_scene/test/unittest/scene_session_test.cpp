@@ -2166,6 +2166,26 @@ HWTEST_F(SceneSessionTest, GetDockHeight, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetAppForceLandscapeConfig
+ * @tc.desc: GetAppForceLandscapeConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, GetAppForceLandscapeConfig, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetAppForceLandscapeConfig";
+    info.bundleName_ = "GetAppForceLandscapeConfig";
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(specificCallback, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    AppForceLandscapeConfig config = {};
+    auto result = sceneSession->GetAppForceLandscapeConfig(config);
+    ASSERT_EQ(result, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
  * @tc.name: SetDefaultDisplayIdIfNeed
  * @tc.desc: SetDefaultDisplayIdIfNeed
  * @tc.type: FUNC

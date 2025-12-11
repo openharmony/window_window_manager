@@ -162,6 +162,60 @@ HWTEST_F(WindowSessionImplTest3, RegisterWindowNoInteractionListener01, TestSize
     GTEST_LOG_(INFO) << "WindowSessionImplTest3: RegisterWindowNoInteractionListener01 end";
 }
 
+/**
+ * @tc.name: SetForceSplitConfig
+ * @tc.desc: SetForceSplitConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetForceSplitConfig, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetForceSplitConfig start";
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    window_ = GetTestWindowImpl("SetForceSplitConfig");
+    ASSERT_NE(window_, nullptr);
+
+    int32_t FORCE_SPLIT_MODE = 5;
+    int32_t NAV_FORCE_SPLIT_MODE = 6;
+    AppForceLandscapeConfig config = { FORCE_SPLIT_MODE, true, false, {}, {}, {}, false, false, false, false };
+    window_->SetForceSplitConfig(config);
+
+    config = { FORCE_SPLIT_MODE, false, false, {}, {}, {}, false, false, false, false };
+    window_->SetForceSplitConfig(config);
+
+    config = { NAV_FORCE_SPLIT_MODE, true, false, {}, {}, {}, false, false, false, false };
+    window_->SetForceSplitConfig(config);
+
+    config = { NAV_FORCE_SPLIT_MODE, false, false, {}, {}, {}, false, false, false, false };
+    window_->SetForceSplitConfig(config);
+    EXPECT_TRUE(logMsg.find("uiContent is null!") != std::string::npos);
+    LOG_SetCallback(nullptr);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetForceSplitConfig end";
+}
+
+/**
+ * @tc.name: GetAppForceLandscapeConfig
+ * @tc.desc: GetAppForceLandscapeConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig start";
+    window_ = GetTestWindowImpl("GetAppForceLandscapeConfig");
+    ASSERT_NE(window_, nullptr);
+
+    AppForceLandscapeConfig config = {};
+    window_->hostSession_ = nullptr;
+    auto res = window_->GetAppForceLandscapeConfig(config);
+    ASSERT_EQ(res, WMError::WM_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig end";
+}
+
+/**
+ * @tc.name: IsSceneBoardEnabled
+ * @tc.desc: IsSceneBoardEnabled
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowSessionImplTest3, IsSceneBoardEnabled, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: IsSceneBoardEnabled start";
