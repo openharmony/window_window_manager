@@ -455,6 +455,7 @@ public:
     void ClearDialogVector();
     WSError NotifyDestroy();
     WSError NotifyAppForceLandscapeConfigUpdated();
+    WSError NotifyAppForceLandscapeConfigEnableUpdated();
     WSError NotifyCloseExistPipWindow();
 
     void SetSessionFocusableChangeListener(const NotifySessionFocusableChangeFunc& func);
