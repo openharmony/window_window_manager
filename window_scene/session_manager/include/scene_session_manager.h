@@ -1559,7 +1559,7 @@ private:
         int32_t count = 0;
         int64_t startTime = 0;
     };
-    RsCmdBlockingFlag rsCmdBlockingFlag_; 
+    RsCmdBlockingFlag rsCmdBlockingFlag_;
     std::shared_ptr<VsyncCallback> vsyncCallback_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
     SingleHandTransform singleHandTransform_;
