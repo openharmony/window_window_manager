@@ -7688,6 +7688,17 @@ WMError WindowSceneSessionImpl::GetAppForceLandscapeConfig(AppForceLandscapeConf
     return hostSession->GetAppForceLandscapeConfig(config);
 }
 
+WMError WindowSceneSessionImpl::GetAppForceLandscapeConfigEnable(bool& enableForceSplit)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "HostSession is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    return hostSession->GetAppForceLandscapeConfigEnable(enableForceSplit);
+}
+
 WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigUpdated()
 {
     TLOGI(WmsLogTag::DEFAULT, "in");
@@ -7695,7 +7706,18 @@ WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigUpdated()
     AppForceLandscapeConfig config = {};
     if (WindowHelper::IsMainWindow(winType) && GetAppForceLandscapeConfig(config) == WMError::WM_OK &&
         config.supportSplit_ > 0) {
-        SetForceSplitEnable(config);
+        SetForceSplitConfig(config);
+        return WSError::WS_OK;
+    }
+    return WSError::WS_DO_NOTHING;
+}
+
+WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigEnableUpdated()
+{
+    TLOGI(WmsLogTag::DEFAULT, "in");
+    bool enableForceSplit = false;
+    if (GetAppForceLandscapeConfigEnable(enableForceSplit) == WMError::WM_OK) {
+        SetForceSplitConfigEnable(enableForceSplit);
         return WSError::WS_OK;
     }
     return WSError::WS_DO_NOTHING;
