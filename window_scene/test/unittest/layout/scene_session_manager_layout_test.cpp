@@ -525,8 +525,7 @@ HWTEST_F(SceneSessionManagerLayoutTest, TestRunAfterNVsyncs, TestSize.Level1)
         callbackExecuted = true;
     });
     ssm_->vsyncStation_->VsyncCallbackInner(0, 0);
-    EXPECT_TRUE(callbackExecuted);    
-
+    EXPECT_TRUE(callbackExecuted);
 }
 
 /**
