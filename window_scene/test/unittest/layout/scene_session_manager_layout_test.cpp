@@ -466,7 +466,7 @@ HWTEST_F(SceneSessionManagerLayoutTest, UpdateRsCmdBlockingCount, TestSize.Level
     ssm_->rsCmdBlockingFlag_.count = 0;
     ssm_->rsCmdBlockingFlag_.startTime = 0;
 
-    bool enable = true;   
+    bool enable = true;
     ssm_->UpdateRsCmdBlockingCount(enable);
     EXPECT_EQ(ssm_->GetOrResetRsCmdBlockingCount(), 1);
 
