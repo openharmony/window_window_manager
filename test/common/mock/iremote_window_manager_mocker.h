@@ -69,7 +69,7 @@ public:
     MOCK_METHOD(void, SetMaximizeMode, (MaximizeMode maximizeMode), (override));
     MOCK_METHOD(MaximizeMode, GetMaximizeMode, (), (override));
     MOCK_METHOD(void, GetFocusWindowInfo, (FocusChangeInfo&, DisplayId), (override));
-    MOCK_METHOD(void, GetFocusWindowInfoByAbilityToken, (FocusChangeInfo&, DisplayId), (override));
+    MOCK_METHOD(void, GetFocusWindowInfoByAbilityToken, (FocusChangeInfo&, const sptr<IRemoteObject>&), (override));
     MOCK_METHOD(void, MinimizeWindowsByLauncher, (std::vector<uint32_t> windowIds, bool isAnimated,
         sptr<RSIWindowAnimationFinishedCallback>& finishCallback), (override));
     MOCK_METHOD(void, SetAnchorAndScale, (int32_t x, int32_t y, float scale), (override));
