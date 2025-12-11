@@ -18,7 +18,8 @@
 
 namespace OHOS::Rosen {
 TaskSequenceProcess::TaskSequenceProcess(uint32_t maxQueueSize)
-    : maxQueueSize_(maxQueueSize) {
+    : maxQueueSize_(maxQueueSize)
+    {
         if (maxQueueSize_ <= 0){
             maxQueueSize_ = 1;
         }
@@ -38,10 +39,7 @@ void TaskSequenceProcess::Notify()
         taskRunningFlag_.store(true);
         Exec(task);
         taskRunningFlag_.store(false);
-    } else
-    {
-        TLOGI(WmsLogTag::DMS, "TaskSequenceProcess notify task but full");
-    }
+    } else TLOGI(WmsLogTag::DMS, "TaskSequenceProcess notify task but full");
 }
 
 void TaskSequenceProcess::Push(const TaskSequencEventInfo& eventInfo)
