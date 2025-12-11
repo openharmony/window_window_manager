@@ -527,6 +527,8 @@ public:
     DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea) override;
     DMError GetBrightnessInfo(DisplayId displayId, ScreenBrightnessInfo& brightnessInfo) override;
+    DMError GetSupportsInput(DisplayId displayId, bool& supportsInput) override;
+    DMError SetSupportsInput(DisplayId displayId, bool supportsInput) override;
     DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) override;
     bool SetScreenOffset(ScreenId screenId, float offsetX, float offsetY);
     bool SynchronizePowerStatus(ScreenPowerState state) override;

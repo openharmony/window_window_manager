@@ -4050,7 +4050,6 @@ void ScreenSessionManager::SetColorSpaces(ScreenId screenId, sptr<ScreenSession>
 DMError ScreenSessionManager::GetBrightnessInfo(DisplayId displayId, ScreenBrightnessInfo& brightnessInfo)
 {
     TLOGI(WmsLogTag::DMS, "start");
-    ScreenId screenId = 0;
     sptr<ScreenSession> screenSession = GetScreenSession(displayId);
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "GetScreenSession failed");
@@ -4067,6 +4066,30 @@ DMError ScreenSessionManager::GetBrightnessInfo(DisplayId displayId, ScreenBrigh
     brightnessInfo.currentHeadroom = rsBrightnessInfo.currentHeadroom;
     brightnessInfo.maxHeadroom = rsBrightnessInfo.maxHeadroom;
     brightnessInfo.sdrNits = rsBrightnessInfo.sdrNits;
+    return DMError::DM_OK;
+}
+
+DMError ScreenSessionManager::GetSupportsInput(DisplayId displayId, bool& supportsInput)
+{
+    TLOGI(WmsLogTag::DMS, "start");
+    sptr<ScreenSession> screenSession = GetScreenSession(displayId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "GetScreenSession failed");
+        return DMError::DM_ERROR_ILLEGAL_PARAM;
+    }
+    supportsInput = screenSession->GetSupportsInput();
+    return DMError::DM_OK;
+}
+
+DMError ScreenSessionManager::SetSupportsInput(DisplayId displayId, bool supportsInput)
+{
+    TLOGI(WmsLogTag::DMS, "start");
+    sptr<ScreenSession> screenSession = GetScreenSession(displayId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "GetScreenSession failed");
+        return DMError::DM_ERROR_ILLEGAL_PARAM;
+    }
+    screenSession->SetSupportsInput(supportsInput);
     return DMError::DM_OK;
 }
 
