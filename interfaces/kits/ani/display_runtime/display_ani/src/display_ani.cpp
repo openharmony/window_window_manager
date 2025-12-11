@@ -478,7 +478,7 @@ ani_status DisplayAni::NspBindNativeFunctions(ani_env* env, ani_namespace nsp)
             reinterpret_cast<void *>(DisplayManagerAni::GetDefaultDisplaySyncAni)},
         ani_native_function {"getBrightnessInfoNative", nullptr,
             reinterpret_cast<void *>(DisplayManagerAni::GetBrightnessInfoAni)},
-        ani_native_function {"getAllDisplaysSyncNative", "C{escompat.Array}:",
+        ani_native_function {"getAllDisplaysSyncNative", "C{std.core.Array}:",
             reinterpret_cast<void *>(DisplayManagerAni::GetAllDisplaysAni)},
         ani_native_function {"syncOn", nullptr,
             reinterpret_cast<void *>(DisplayManagerAni::RegisterCallback)},

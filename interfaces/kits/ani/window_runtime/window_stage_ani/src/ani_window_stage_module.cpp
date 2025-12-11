@@ -87,7 +87,7 @@ std::array g_methods = {
         reinterpret_cast<void *>(WindowGetMainWindow)},
     ani_native_function {"createSubWindowSync", "lC{std.core.String}:C{@ohos.window.window.Window}",
         reinterpret_cast<void *>(CreateSubWindow)},
-    ani_native_function {"getSubWindowSync", "l:C{escompat.Array}",
+    ani_native_function {"getSubWindowSync", "l:C{std.core.Array}",
         reinterpret_cast<void *>(AniWindowStage::GetSubWindow)},
     ani_native_function {"createSubWindowWithOptionsSync",
         "lC{std.core.String}C{@ohos.window.window.SubWindowOptions}:C{@ohos.window.window.Window}",
@@ -110,9 +110,9 @@ std::array g_methods = {
         reinterpret_cast<void *>(AniWindowStage::SetDefaultDensityEnabled)},
     ani_native_function {"removeStartingWindowSync", "l:",
         reinterpret_cast<void *>(AniWindowStage::RemoveStartingWindow)},
-    ani_native_function {"setSupportedWindowModes", "lC{escompat.Array}:",
+    ani_native_function {"setSupportedWindowModes", "lC{std.core.Array}:",
         reinterpret_cast<void *>(AniWindowStage::SetSupportedWindowModes)},
-    ani_native_function {"setSupportedWindowModes", "lC{escompat.Array}z:",
+    ani_native_function {"setSupportedWindowModes", "lC{std.core.Array}z:",
         reinterpret_cast<void *>(AniWindowStage::SetSupportedWindowModesWithGrayOutMaximizeButton)},
 };
 

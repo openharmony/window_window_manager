@@ -2457,8 +2457,8 @@ std::vector<ani_ref> AniWindowUtils::ExtractArrayElements(ani_env* env, ani_obje
     RETURN_IF_NULL(env, result);
     RETURN_IF_NULL(arrayObj, result);
 
-    if (!IsInstanceOf(env, arrayObj, "escompat.Array")) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] The arrayObj is not instance of escompat.Array");
+    if (!IsInstanceOf(env, arrayObj, "std.core.Array")) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] The arrayObj is not instance of std.core.Array");
         return result;
     }
 
