@@ -20,7 +20,7 @@ namespace OHOS::Rosen {
 TaskSequenceProcess::TaskSequenceProcess(uint32_t maxQueueSize)
     : maxQueueSize_(maxQueueSize)
     {
-        if (maxQueueSize_ <= 0){
+        if (maxQueueSize_ <= 0) {
             maxQueueSize_ = 1;
         }
         taskRunningFlag_.store(false);
@@ -52,7 +52,8 @@ void TaskSequenceProcess::Push(const TaskSequencEventInfo& eventInfo)
     taskQueue_.push(eventInfo);
 }
 
-void TaskSequenceProcess::SetTaskRunningFlag(bool flag) {
+void TaskSequenceProcess::SetTaskRunningFlag(bool flag)
+{
     taskRunningFlag_.store(flag);
 }
 
