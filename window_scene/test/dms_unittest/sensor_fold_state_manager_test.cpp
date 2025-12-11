@@ -220,6 +220,21 @@ HWTEST_F(SensorFoldStateManagerTest, SetTentMode, TestSize.Level1)
     bool ret = mgr.IsTentMode();
     ASSERT_EQ(ret, false);
 }
+
+/**
+ * @tc.name: NotifyRunTaskSequence
+ * @tc.desc: NotifyRunTaskSequence
+ * @tc.type: FUNC
+ */
+HWTEST_F(SensorFoldStateManagerTest, NotifyRunTaskSequence01, TestSize.Level0)
+{
+    SensorFoldStateManager mgr = SensorFoldStateManager();
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    mgr.NotifyRunTaskSequence();
+    EXPECT_TRUE(g_errLog.find("TaskSequenceProcess") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

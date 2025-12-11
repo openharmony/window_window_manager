@@ -1210,6 +1210,20 @@ HWTEST_F(ScreenSessionManagerTest, GetSupportedHDRFormats, TestSize.Level1)
     EXPECT_EQ(ssm_->GetSupportedHDRFormats(id, hdrFormats), screenSession->GetSupportedHDRFormats(hdrFormats));
 #endif
 }
+
+/**
+ * @tc.name: TestNotifyRunSensorFoldStateManager
+ * @tc.desc: TestNotifyRunSensorFoldStateManager
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, TestNotifyRunSensorFoldStateManager, TestSize.Level0)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ssm_->foldScreenController_->NotifyRunSensorFoldStateManager();
+    EXPECT_TRUE(g_logMsg.find("NotifyRunSensorFoldStateManager") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

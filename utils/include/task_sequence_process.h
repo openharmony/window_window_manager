@@ -15,32 +15,28 @@
 
 #ifndef TASKSEQUENCEPROCESS_H
 #define TASKSEQUENCEPROCESS_H
-
-#include <queue>
 #include <mutex>
+#include <queue>
 #include <atomic>
 
-struct EventInfo {
-    int taskId; // 示例任务ID，可添加其他字段
+namespace OHOS::Rosen {
+struct TaskSequencEventInfo {
+    std::function<void()> taskInfo;
 };
 
 class TaskSequenceProcess {
-private:
-    std::atomic<bool> taskRunningFlag;
-    size_t maxQueueSize;
-    std::queue<EventInfo> taskQueue;
-    std::mutex queueMutex;
-
-    // 任务执行完成后的回调处理
-    void taskCallback(const EventInfo& node);
-
 public:
-    TaskSequenceProcess(size_t maxSize = 1);
-    void push(const EventInfo& eventInfo);
-    void notify();
-    void exec(const EventInfo& eventInfo);
-    size_t getQueueSize() const;
-    size_t getMaxQueueSize() const;
-    void setMaxQueueSize(size_t newSize);
+    explicit TaskSequenceProcess(uint32_t maxQueueSize);
+    ~TaskSequenceProcess();
+    void Notify();
+    void Push(const TaskSequencEventInfo& eventInfo);
+    void SetTaskRunningFlag(bool flag);
+private:
+    uint32_t maxQueueSize_ {1};
+    std::atomic<bool> taskRunningFlag_ {false};
+    std::queue<TaskSequencEventInfo> taskQueue_;
+    std::mutex queueMutex_;
+    void Exec(const TaskSequencEventInfo& task);
 };
-#endif // TASKSEQUENCEPROCESS_H
+}//namespace OHOS::Rosen
+#endif

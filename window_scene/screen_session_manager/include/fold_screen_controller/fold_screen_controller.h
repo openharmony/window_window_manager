@@ -72,6 +72,7 @@ public:
     void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command);
     void SetIsClearingBootAnimation(bool isClearingBootAnimation);
     nlohmann::ordered_json GetFoldCreaseRegionJson();
+    void NotifyRunSensorFoldStateManager();
 private:
     sptr<FoldScreenPolicy> GetFoldScreenPolicy(DisplayDeviceType productType);
     sptr<FoldScreenPolicy> foldScreenPolicy_;

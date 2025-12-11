@@ -28,7 +28,7 @@
 
 namespace OHOS::Rosen {
 
-SensorFoldStateManager::SensorFoldStateManager() = default;
+SensorFoldStateManager::SensorFoldStateManager() : taskProcessor_(1) {};
 SensorFoldStateManager::~SensorFoldStateManager() = default;
 
 void SensorFoldStateManager::HandleAngleChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy) {}
@@ -44,6 +44,10 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
     std::lock_guard<std::recursive_mutex> lock(mStateMutex_);
+    if (foldScreenPolicy == nullptr) {
+        TLOGE(WmsLogTag::DMS, "foldScreenPolicy is nullptr");
+        return;
+    }
     if (nextState == FoldStatus::UNKNOWN) {
         TLOGW(WmsLogTag::DMS, "fold state is UNKNOWN");
         return;
@@ -52,20 +56,24 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
         TLOGD(WmsLogTag::DMS, "fold state doesn't change, foldState = %{public}d.", mState_);
         return;
     }
-    TLOGI(WmsLogTag::DMS, "current state: %{public}d, next state: %{public}d.", mState_, nextState);
-    ReportNotifyFoldStatusChange(static_cast<int32_t>(mState_), static_cast<int32_t>(nextState), angle);
-    PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
-
-    NotifyReportFoldStatusToScb(mState_, nextState, angle);
-
-    mState_ = nextState;
-    if (foldScreenPolicy != nullptr) {
-        foldScreenPolicy->SetFoldStatus(mState_);
-    }
-    ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(mState_);
-    if (foldScreenPolicy != nullptr && foldScreenPolicy->lockDisplayStatus_ != true) {
-        foldScreenPolicy->SendSensorResult(mState_);
-    }
+    auto task = [=]{
+        TLOGI(WmsLogTag::DMS, "current state: %{public}d, next state: %{public}d.", mState_, nextState);
+        ReportNotifyFoldStatusChange(static_cast<int32_t>(mState_), static_cast<int32_t>(nextState), angle);
+        PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
+        NotifyReportFoldStatusToScb(mState_, nextState, angle);
+        mState_ = nextState;
+        if (foldScreenPolicy != nullptr) {
+            foldScreenPolicy->SetFoldStatus(mState_);
+        }
+        ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(mState_);
+        if (foldScreenPolicy != nullptr && foldScreenPolicy->lockDisplayStatus_ != true) {
+            foldScreenPolicy->SendSensorResult(mState_);
+        }
+    };
+    TaskSequencEventInfo eventInfo = TaskSequencEventInfo{
+        .taskInfo = task};
+    taskProcessor_.Push(eventInfo);
+    taskProcessor_.Notify();
 }
 
 void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std::vector<float> &angles,
@@ -121,10 +129,22 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std:
         }
         manager->ProcessNotifyFoldStatusChange(currentState, newState, angles, policy);
     };
-    auto ffrtQueueHelper = ScreenSessionManager::GetInstance().GetFfrtQueueHelper();
-    if (ffrtQueueHelper != nullptr) {
-        ffrtQueueHelper->SubmitTask(task);
-    }
+    auto event = [=] {
+        auto ffrtQueueHelper = ScreenSessionManager::GetInstance().GetFfrtQueueHelper();
+        if (ffrtQueueHelper != nullptr) {
+            ffrtQueueHelper->SubmitTask(task);
+        }
+    };
+    TaskSequencEventInfo eventInfo = TaskSequencEventInfo{
+        .taskInfo = event};
+    taskProcessor_.Push(eventInfo);
+    taskProcessor_.Notify();
+}
+
+void SensorFoldStateManager::NotifyRunTaskSequence()
+{
+    TLOGI(WmsLogTag::DMS, "TaskSequenceProcess SensorFoldStateManager::NotifyRunTaskSequence");
+    taskProcessor_.Notify();
 }
 
 void SensorFoldStateManager::ProcessNotifyFoldStatusChange(FoldStatus currentStatus, FoldStatus nextStatus,

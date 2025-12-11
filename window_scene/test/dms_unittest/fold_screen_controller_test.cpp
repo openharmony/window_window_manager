@@ -794,6 +794,22 @@ namespace {
         fsc_->SetIsClearingBootAnimation(true);
         EXPECT_TRUE(fsc_->foldScreenPolicy_->isClearingBootAnimation_);
     }
+
+    /**
+     * @tc.name: NotifyRunSensorFoldStateManager
+     * @tc.desc: test function :NotifyRunSensorFoldStateManager
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, NotifyRunSensorFoldStateManager, TestSize.Level1)
+    {
+        std::recursive_mutex mutex;
+        FoldScreenController fsc_(mutex, std::shared_ptr<TaskScheduler>());
+        g_errLog.clear();
+        LOG_SetCallback(MyLogCallback);
+        fsc_.NotifyRunSensorFoldStateManager();
+        EXPECT_TRUE(g_errLog.find("NotifyRunSensorFoldStateManager") != std::string::npos);
+        LOG_SetCallback(nullptr);
+    }
 }
 } // namespace Rosen
 } // namespace OHOS
