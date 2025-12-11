@@ -148,7 +148,6 @@ HWTEST_F(TaskSequenceProcessTest, ATC_Push01, TestSize.Level0)
     TaskSequencEventInfo eventInfo2;
     process.Push(eventInfo1);
     process.Push(eventInfo2);
-    process.SetTaskRunningFlag(flag);
     EXPECT_EQ(process.taskQueue_.size(), 1);
 }
 
@@ -164,7 +163,6 @@ HWTEST_F(TaskSequenceProcessTest, ATC_Push02, TestSize.Level0)
     TaskSequencEventInfo eventInfo2;
     process.Push(eventInfo1);
     process.Push(eventInfo2);
-    process.SetTaskRunningFlag(flag);
     EXPECT_EQ(process.taskQueue_.size(), 2);
 }
 } // namespace
