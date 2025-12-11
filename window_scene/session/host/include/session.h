@@ -297,7 +297,7 @@ public:
     bool CheckSurfaceNodeForSnapshot(std::shared_ptr<RSSurfaceNode> surfaceNode) const;
     bool GetNeedUseBlurSnapshot() const;
     void UpdateAppLockSnapshot(ControlAppType type, ControlInfo controlInfo);
-    virtual bool GetIsPrivacyMode() const { return false; };
+    bool GetIsPrivacyMode() const { return property_->GetPrivacyMode(); };
     void SetSnapshotPrivacyMode(bool privacyMode) { snapshotPrivacyMode_.store(privacyMode); };
     bool GetSnapshotPrivacyMode() const;
     std::atomic<bool> snapshotPrivacyMode_ { false };
