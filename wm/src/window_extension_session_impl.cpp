@@ -1760,9 +1760,7 @@ WMError WindowExtensionSessionImpl::SetStatusBarColorForExtension(uint32_t color
     TLOGI(WmsLogTag::WMS_UIEXT, "id=%{public}d", GetPersistentId());
     WMError ret = SetStatusBarColorForExtensionInner(color);
     if (ret == WMError::WM_OK) {
-        SystemBarProperty statusBarProp = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
-        statusBarProp.settingFlag_ |= SystemBarSettingFlag::COLOR_SETTING;
-        property_->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProp);
+        systemBarSettingFlag_ = SystemBarSettingFlag::COLOR_SETTING;
     }
     return ret;
 }

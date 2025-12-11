@@ -7500,7 +7500,8 @@ WMError WindowSessionImpl::UpdateStatusBarColorByColorMode(uint32_t& contentColo
 {
     SystemBarProperty statusBarProp = property_->GetSystemBarProperty().at(WindowType::WINDOW_TYPE_STATUS_BAR);
     if (static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(statusBarProp.settingFlag_) &
-        static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING)) == SystemBarSettingFlag::COLOR_SETTING) {
+        static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING)) == SystemBarSettingFlag::COLOR_SETTING ||
+        systemBarSettingFlag_ == SystemBarSettingFlag::COLOR_SETTING) {
         TLOGD(WmsLogTag::WMS_IMMS, "user has set color");
         return WMError::WM_DO_NOTHING;
     }
