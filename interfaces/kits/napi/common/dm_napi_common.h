@@ -33,7 +33,7 @@ const int PARAM_NUMBER = 2; // 2: callback func input number, also reused by Pro
 #define GNAPI_ASSERT(env, assertion, fmt, ...)  \
     do {                                        \
         if (assertion) {                        \
-            TLOGI(WmsLogTag::DMS, fmt, ##__VA_ARGS__); \
+            TLOGI(Rosen::WmsLogTag::DMS, fmt, ##__VA_ARGS__); \
             return nullptr;                     \
         }                                       \
     } while (0)
