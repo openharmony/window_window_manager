@@ -27,7 +27,8 @@ TaskSequenceProcess::TaskSequenceProcess(uint32_t maxQueueSize)
     }
 TaskSequenceProcess::~TaskSequenceProcess() = default;
 
-void TaskSequenceProcess::Notify() {
+void TaskSequenceProcess::Notify()
+{
     std::lock_guard<std::mutex> lock(queueMutex_);
     TLOGI(WmsLogTag::DMS, "TaskSequenceProcess taskRunningFlag_: %{public}d, taskQueue.empty(): %{public}d",
         taskRunningFlag_.load(), taskQueue_.empty());
@@ -43,7 +44,8 @@ void TaskSequenceProcess::Notify() {
     }
 }
 
-void TaskSequenceProcess::Push(const TaskSequencEventInfo& eventInfo) {
+void TaskSequenceProcess::Push(const TaskSequencEventInfo& eventInfo)
+{
     std::lock_guard<std::mutex> lock(queueMutex_);
     TLOGI(WmsLogTag::DMS, "TaskSequenceProcess push");
     if (taskQueue_.size() >= maxQueueSize_) {
@@ -56,7 +58,8 @@ void TaskSequenceProcess::SetTaskRunningFlag(bool flag) {
     taskRunningFlag_.store(flag);
 }
 
-void TaskSequenceProcess::Exec(const TaskSequencEventInfo& task) {
+void TaskSequenceProcess::Exec(const TaskSequencEventInfo& task)
+{
     if (task.taskInfo) {
         task.taskInfo();
     }
