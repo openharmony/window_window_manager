@@ -122,6 +122,7 @@ using NotifyClearSubSessionFunc = std::function<void(const int32_t subPersistent
 using OutlineParamsChangeCallbackFunc = std::function<void(bool enabled, const OutlineStyleParams& outlineStyleParams)>;
 using NotifyRestartAppFunc = std::function<void(const SessionInfo& info, int32_t callingPid)>;
 using ProcessCallingSessionIdChangeFunc = std::function<void(uint32_t callingSessionId)>;
+using GetRsCmdBlockingCountFunc = std::function<int32_t()>;
 class ILifecycleListener {
 public:
     virtual void OnActivation() {}
@@ -751,6 +752,7 @@ public:
     WSError NotifyClientToUpdateGlobalDisplayRect(const WSRect& rect, SizeChangeReason reason);
     const sptr<LayoutController>& GetLayoutController() const { return layoutController_; }
     WSError NotifyAppHookWindowInfoUpdated();
+    void SetGetRsCmdBlockingCountFunc(const GetRsCmdBlockingCountFunc& func);
 
     /*
      * Screen Lock
@@ -990,6 +992,7 @@ protected:
     NotifyUpdateFloatingBallFunc updateFloatingBallFunc_;
     NotifyStopFloatingBallFunc stopFloatingBallFunc_;
     NotifyRestoreFloatingBallMainWindowFunc restoreFloatingBallMainWindowFunc_;
+    GetRsCmdBlockingCountFunc getRsCmdBlockingCountFunc_;
     sptr<LayoutController> layoutController_ = nullptr;
     void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY);
     std::atomic<uint32_t> crossPlaneState_ = 0;
