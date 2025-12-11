@@ -3216,7 +3216,7 @@ export class WindowInternal implements Window {
     private native getParentWindow(nativeObj: long): Window;
     private native setParentWindow(nativeObj: long, windowId: int): void;
     private native setContentAspectRatio(
-      nativeObj: long, ratio: number, isPersistent: boolean, needUpdateRect: boolean): void;
+      nativeObj: long, ratio: double, isPersistent: boolean, needUpdateRect: boolean): void;
     private native onSync(nativeObj: long, type: string, callback: object): void;
     private native onNoInteractionDetected(nativeObj: long, type: string, timeout: long, callback: Object): void;
     private native offSync(nativeObj: long, type: string, callback?: object): void;
@@ -4459,7 +4459,7 @@ export class WindowInternal implements Window {
         });
     }
 
-    public setContentAspectRatio(ratio: number, isPersistent?: boolean, needUpdateRect?: boolean): Promise<void> {
+    public setContentAspectRatio(ratio: double, isPersistent?: boolean, needUpdateRect?: boolean): Promise<void> {
       return new Promise<void>(
         (resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
           taskpool.execute((): void => {
@@ -5454,7 +5454,7 @@ export interface Window {
     bindDialogTarget(requestInfo: dialogRequest.RequestInfo, deathCallback: Callback<void>): Promise<void>;
     bindDialogTarget(requestInfo: dialogRequest.RequestInfo, deathCallback: Callback<void>,
       callback: AsyncCallback<void>): void;
-    setContentAspectRatio(ratio: number, isPersistent?: boolean, needUpdateRect?: boolean): Promise<void>;
+    setContentAspectRatio(ratio: double, isPersistent?: boolean, needUpdateRect?: boolean): Promise<void>;
     opacity(opacity: double): void;
     scale(scaleOptions: ScaleOptions): void;
     translate(translateOptions: TranslateOptions): void;
