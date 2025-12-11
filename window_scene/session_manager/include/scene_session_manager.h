@@ -259,7 +259,7 @@ public:
         std::vector<AppExecFwk::JsonProfileInfo>& jsonProfileInfos);
     WMError GetJsonProfile(AppExecFwk::ProfileType profileType, const std::string& bundleName,
         const std::string& moduleName, int32_t userId, std::string& profileInfo);
-    const bool IsSameForceSplitConfig(const AppForceLandscapeConfig& preconfig, const AppForceLandscapeConfig& config);
+    bool IsSameForceSplitConfig(const AppForceLandscapeConfig& preconfig, const AppForceLandscapeConfig& config) const;
 
     /*
      * Window Recover

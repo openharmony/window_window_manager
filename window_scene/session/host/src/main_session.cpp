@@ -637,24 +637,6 @@ WSError MainSession::NotifyCompatibleModeChange(CompatibleStyleMode mode)
     return WSError::WS_OK;
 }
 
-WMError MainSession::GetAppForceLandscapeConfigEnable(bool& enableForceSplit)
-{
-    if (forceSplitEnableFunc_ == nullptr) {
-        TLOGNE(WmsLogTag::WMS_LAYOUT, "forceSplitEnableFunc_ is null");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    enableForceSplit = forceSplitEnableFunc_(sessionInfo_.bundleName_);
-    return WMError::WM_OK;
-}
-
-WSError MainSession::NotifyAppForceLandscapeConfigEnableUpdated()
-{
-    if (!sessionStage_) {
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    return sessionStage_->NotifyAppForceLandscapeConfigEnableUpdated();
-}
-
 bool MainSession::RestoreAspectRatio(float ratio)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, ratio: %{public}f", GetPersistentId(), ratio);
