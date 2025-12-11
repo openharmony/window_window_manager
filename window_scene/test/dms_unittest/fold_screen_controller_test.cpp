@@ -804,6 +804,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         FoldScreenController fsc_(mutex, std::shared_ptr<TaskScheduler>());
+        fsc_.sensorFoldStateManager_ = new SensorFoldStateManager();
         g_errLog.clear();
         LOG_SetCallback(MyLogCallback);
         fsc_.NotifyRunSensorFoldStateManager();
