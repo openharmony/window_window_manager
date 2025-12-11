@@ -38,5 +38,5 @@ private:
     std::mutex queueMutex_;
     void Exec(const TaskSequencEventInfo& task);
 };
-}//namespace OHOS::Rosen
+} //namespace OHOS::Rosen
 #endif
