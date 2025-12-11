@@ -981,6 +981,20 @@ HWTEST_F(SessionStubTest, HandleSyncSessionEvent, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleRestoreFloatMainWindow
+ * @tc.desc: sessionStub HandleRestoreFloatMainWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleRestoreFloatMainWindow, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleRestoreFloatMainWindow(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
  * @tc.name: HandlePendingSessionActivation
  * @tc.desc: sessionStub HandlePendingSessionActivation
  * @tc.type: FUNC

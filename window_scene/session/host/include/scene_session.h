@@ -161,7 +161,7 @@ using ForceSplitFullScreenChangeCallback = std::function<void(uint32_t uid, bool
 using CompatibleModeChangeCallback = std::function<void(CompatibleStyleMode mode)>;
 using NotifyRotationLockChangeFunc = std::function<void(bool locked)>;
 using NotifySnapshotSkipChangeFunc = std::function<void(bool isSkip)>;
-using GetSCBEnterRecentFunc =  std::function<bool()>;
+using GetSCBEnterRecentFunc = std::function<bool()>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };

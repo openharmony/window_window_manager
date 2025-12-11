@@ -26,6 +26,7 @@
 #include "ani_transition_controller.h"
 #include "ani_window_utils.h"
 #include "ani_window_animation_utils.h"
+#include "ani_common_want.h"
 #include "ets_request_info.h"
 #include "interop_js/arkts_esvalue.h"
 #include "interop_js/arkts_interop_js_api.h"
@@ -5263,6 +5264,51 @@ void AniWindow::Restore(ani_env* env)
     }
 }
 
+void AniWindow::RestoreMainWindow(ani_env* env, ani_object obj, ani_long nativeObj, ani_object wantParameters)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (!aniWindow) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] aniWindow is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    aniWindow->OnRestoreMainWindow(env, wantParameters);
+}
+
+void AniWindow::OnRestoreMainWindow(ani_env* env, ani_object wantParameters)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] Window is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    if (windowToken_->GetType() != WindowType::WINDOW_TYPE_FLOAT) {
+        TLOGE(WmsLogTag::WMS_LIFE, "only TYPE_FLOAT can use interface, type:%{public}u", windowToken_->GetType());
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+        return;
+    }
+
+    AAFwk::AWantParams wantParams;
+    if (wantParameters != nullptr) {
+        ani_boolean isUndefined = false;
+        ani_boolean isNull = false;
+        env->Reference_IsUndefined(wantParameters, &isUndefined);
+        env->Reference_IsNull(wantParameters, &isNull);
+        if (!isUndefined && !isNull && !AppExecFwk::UnwrapWantParams(env, wantParameters, wantParams)) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameters to wantParameters");
+            AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+            return;
+        }
+    }
+
+    std::shared_ptr<AAFwk::WantParams> parameters = std::make_shared<AAFwk::WantParams>(wantParams);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RestoreMainWindow(parameters));
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret);
+    }
+    return;
+}
 }  // namespace Rosen
 }  // namespace OHOS
 
@@ -6398,6 +6444,8 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::Hide)},
         ani_native_function {"restore", "l:",
             reinterpret_cast<void *>(Restore)},
+        ani_native_function {"restoreMainWindow", nullptr,
+            reinterpret_cast<void *>(AniWindow::RestoreMainWindow)},
     };
     for (auto method : methods) {
         if ((ret = env->Class_BindNativeMethods(cls, &method, 1u)) != ANI_OK) {

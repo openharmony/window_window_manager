@@ -27,6 +27,7 @@
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "pointer_event.h"
+#include "string_wrapper.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1098,6 +1099,91 @@ HWTEST_F(SystemSessionTest, SendFbActionEvent, Function | SmallTest | Level2)
 
     ret = systemSession_->SendFbActionEvent("on");
     ASSERT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: NotifyRestoreFloatMainWindowCallback
+ * @tc.desc: NotifyRestoreFloatMainWindowCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, NotifyRestoreFloatMainWindowCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SystemSession> systemSession = sptr<SystemSession>::MakeSptr(info, specificCallback);
+
+    AAFwk::WantParams wantParams;
+    wantParams.SetParam("NotifyRestoreFloatMainWindowCallback", OHOS::AAFwk::String::Box("100"));
+    
+    systemSession->SetRestoreFloatMainWindowCallback(nullptr);
+    EXPECT_EQ(systemSession->restoreFloatMainWindowFunc_, nullptr);
+    systemSession->NotifyRestoreFloatMainWindow(wantParams);
+
+    string res;
+    auto func_ = [&res] (const AAFwk::WantParams& wantParams) {
+        res = wantParams.ToString();
+    };
+    systemSession->SetRestoreFloatMainWindowCallback(func_);
+    systemSession->NotifyRestoreFloatMainWindow(wantParams);
+    EXPECT_EQ(res, "{\"NotifyRestoreFloatMainWindowCallback\":\"100\"}");
+}
+
+/**
+ * @tc.name: RestoreFloatMainWindow
+ * @tc.desc: RestoreFloatMainWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, RestoreFloatMainWindow, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SystemSession> systemSession = sptr<SystemSession>::MakeSptr(info, specificCallback);
+
+    std::shared_ptr<AAFwk::WantParams> wantParams = std::make_shared<AAFwk::WantParams>();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(property, nullptr);
+
+    LOCK_GUARD_EXPR(SCENE_GUARD, systemSession->SetCallingPid(IPCSkeleton::GetCallingPid() + 1));
+    EXPECT_EQ(systemSession->RestoreFloatMainWindow(wantParams), WMError::WM_ERROR_INVALID_CALLING);
+    LOCK_GUARD_EXPR(SCENE_GUARD, systemSession->SetCallingPid(IPCSkeleton::GetCallingPid()));
+
+    EXPECT_EQ(systemSession->RestoreFloatMainWindow(wantParams), WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+    systemSession->RegisterGetSCBEnterRecentFunc([]() {
+        return true;
+    });
+    EXPECT_EQ(systemSession->RestoreFloatMainWindow(wantParams), WMError::WM_ERROR_START_ABILITY_FAILED);
+    systemSession->RegisterGetSCBEnterRecentFunc([]() {
+        return false;
+    });
+
+    systemSession->floatWindowDownEventCnt_.store(0);
+    EXPECT_EQ(systemSession->RestoreFloatMainWindow(wantParams), WMError::WM_ERROR_INVALID_CALLING);
+    systemSession->floatWindowDownEventCnt_.store(2);
+    EXPECT_EQ(systemSession->RestoreFloatMainWindow(wantParams), WMError::WM_OK);
+    EXPECT_EQ(systemSession->floatWindowDownEventCnt_.load(), 0);
+}
+
+/**
+ * @tc.name: GetIsAtRecent
+ * @tc.desc: GetIsAtRecent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, GetIsAtRecent, TestSize.Level1)
+{
+    SessionInfo info;
+
+    sptr<SystemSession> systemSession = sptr<SystemSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(systemSession, nullptr);
+
+    EXPECT_EQ(systemSession->getSCBEnterRecentFunc_, nullptr);
+
+    auto func = []() {
+        return true;
+    };
+    systemSession->RegisterGetSCBEnterRecentFunc(func);
+    EXPECT_EQ(systemSession->getSCBEnterRecentFunc_(), true);
 }
 } // namespace
 } // namespace Rosen

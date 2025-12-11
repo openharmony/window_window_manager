@@ -160,6 +160,7 @@ public:
     static ani_object CreateSubWindowWithOptions(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_string name, ani_object options);
     static void Hide(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void RestoreMainWindow(ani_env* env, ani_object obj, ani_long nativeObj, ani_object wantParameters);
 
     ani_ref GetParentWindow(ani_env* env);
     void SetParentWindow(ani_env* env, ani_int windowId);
@@ -325,6 +326,7 @@ private:
     void OnSetWindowShadowEnabled(ani_env* env, ani_boolean enable);
     bool OnIsImmersiveLayout(ani_env* env);
     void OnKeepKeyboardOnFocus(ani_env* env, ani_boolean keepKeyboardFlag);
+    void OnRestoreMainWindow(ani_env* env, ani_object wantParameters);
 
     /*
      * Window Layout

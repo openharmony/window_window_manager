@@ -707,6 +707,7 @@ WMError SystemSession::RestoreFloatMainWindow(const std::shared_ptr<AAFwk::WantP
         }
         TLOGI(WmsLogTag::WMS_SYSTEM, "%{public}s restore float main window", where);
         session->NotifyRestoreFloatMainWindow(*wantParameters);
+        session->floatWindowDownEventCnt_.store(0);
         return WMError::WM_OK;
     });
 }
