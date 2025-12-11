@@ -3683,8 +3683,8 @@ export class WindowInternal implements Window {
     }
 
     public setDragKeyFramePolicy(keyFramePolicy: KeyFramePolicy): Promise<KeyFramePolicy> {
-      if (keyFramePolicy.interval <= 0 || keyFramePolicy.distance < 0 ||
-          keyFramePolicy.animationDelay < 0 || keyFramePolicy.animationDuration < 0) {
+      if ((keyFramePolicy.interval ?? 1) <= 0 || (keyFramePolicy.distance ?? 1) < 0 ||
+          (keyFramePolicy.animationDelay ?? 1) < 0 || (keyFramePolicy.animationDuration ?? 1) < 0) {
         throw new BusinessError(WM_ERROR_ILLEGAL_PARAM, new Error('Static invalid param!'));
       }
       return new Promise<KeyFramePolicy>((resolve: (value: KeyFramePolicy) => void, reject: (error: BusinessError) => void) => {
