@@ -22,8 +22,8 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-class TaskSequenceProcessTest : public ::testing::Test {
-protected:
+class TaskSequenceProcessTest : public testing::Test {
+public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
