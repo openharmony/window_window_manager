@@ -16695,8 +16695,8 @@ void SceneSessionManager::RegisterConstrainedModalUIExtInfoListener()
     }
 }
 
-const bool SceneSessionManager::IsSameForceSplitConfig(const AppForceLandscapeConfig& preconfig,
-    const AppForceLandscapeConfig& config)
+bool SceneSessionManager::IsSameForceSplitConfig(const AppForceLandscapeConfig& preconfig,
+    const AppForceLandscapeConfig& config) const
 {
     if (preconfig.mode_ != config.mode_ ||
         preconfig.supportSplit_ != config.supportSplit_ ||
