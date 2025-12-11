@@ -1112,29 +1112,6 @@ HWTEST_F(SceneSessionManagerTest5, GetTopNearestBlockingFocusSession, TestSize.L
 }
 
 /**
- * @tc.name: PreloadInLakeApp、UpdateSessionAvoidAreaListener
- * @tc.desc: PreloadInLakeApp、UpdateSessionAvoidAreaListener
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest5, PreloadInLakeApp, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test2";
-    int32_t persistentId = 0;
-
-    ssm_->PreloadInLakeApp("");
-    sptr<SceneSession> sceneSession = nullptr;
-
-    ssm_->UpdateSessionAvoidAreaListener(persistentId, true);
-    sceneSession = ssm_->CreateSceneSession(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
-    ssm_->UpdateSessionAvoidAreaListener(persistentId, true);
-}
-
-/**
  * @tc.name: NotifyMMIWindowPidChange
  * @tc.desc: NotifyMMIWindowPidChange
  * @tc.type: FUNC

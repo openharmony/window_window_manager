@@ -1927,30 +1927,6 @@ HWTEST_F(SceneSessionManagerTest2, GetIsLayoutFullScreen, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateSessionAvoidAreaListener
- * @tc.desc: Test if pip window can be created;
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest2, UpdateSessionAvoidAreaListener, TestSize.Level1)
-{
-    ASSERT_NE(nullptr, ssm_);
-    {
-        std::unique_lock<std::shared_mutex> lock(ssm_->sceneSessionMapMutex_);
-        ssm_->sceneSessionMap_.clear();
-    }
-    int32_t persistentId = 100;
-    ssm_->UpdateSessionAvoidAreaListener(persistentId, true);
-
-    SessionInfo info;
-    info.abilityName_ = "BackgroundTask02";
-    info.bundleName_ = "BackgroundTask02";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ssm_->sceneSessionMap_.insert({ 100, sceneSession });
-    ssm_->UpdateSessionAvoidAreaListener(persistentId, true);
-    ssm_->UpdateSessionAvoidAreaListener(persistentId, false);
-}
-
-/**
  * @tc.name: UpdateSessionTouchOutsideListener
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC

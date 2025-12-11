@@ -93,6 +93,7 @@ group("unittest") {
     "window_focus:unittest",
     "window_pattern:window_pattern_starting_window_rdb_test",
     "window_recover:ws_window_recover_session_test",
+    "window_immersive:window_immersive_avoid_area_test",
   ]
 
   defines = []
@@ -1484,6 +1485,7 @@ ohos_static_library("ws_unittest_common") {
     "window_keyboard:*",
     "window_pattern:*",
     "window_recover:*",
+    "window_immersive:*",
   ]
   testonly = true
 
