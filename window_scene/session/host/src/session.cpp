@@ -2403,6 +2403,14 @@ WSError Session::NotifyAppForceLandscapeConfigUpdated()
     return sessionStage_->NotifyAppForceLandscapeConfigUpdated();
 }
 
+WSError Session::NotifyAppForceLandscapeConfigEnableUpdated()
+{
+    if (!sessionStage_) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyAppForceLandscapeConfigEnableUpdated();
+}
+
 WSError Session::NotifyAppHookWindowInfoUpdated()
 {
     if (!sessionStage_) {
