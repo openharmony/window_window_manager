@@ -5909,8 +5909,10 @@ WSError WindowSceneSessionImpl::NotifyLayoutFinishAfterWindowModeChange(WindowMo
 
 bool WindowSceneSessionImpl::ShouldSkipSupportWindowModeCheck(uint32_t windowModeSupportType, WindowMode mode)
 {
+    bool isFreeMultiWindowMode = IsFreeMultiWindowMode();
+
     bool onlySupportSplitInFreeMultiWindow =
-        IsFreeMultiWindowMode() && mode == WindowMode::WINDOW_MODE_FLOATING &&
+        isFreeMultiWindowMode && mode == WindowMode::WINDOW_MODE_FLOATING &&
         (WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_SPLIT_PRIMARY) ||
          WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_SPLIT_SECONDARY)) &&
         !WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FULLSCREEN);
@@ -5921,7 +5923,7 @@ bool WindowSceneSessionImpl::ShouldSkipSupportWindowModeCheck(uint32_t windowMod
                              mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
                              mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
     bool isAvailableDevice =
-        (windowSystemConfig_.IsPhoneWindow() || windowSystemConfig_.IsPadWindow()) && !IsFreeMultiWindowMode();
+        (windowSystemConfig_.IsPhoneWindow() || windowSystemConfig_.IsPadWindow()) && !isFreeMultiWindowMode;
     if (isAvailableDevice && isMultiWindowMode) {
         return true;
     }
@@ -5930,7 +5932,14 @@ bool WindowSceneSessionImpl::ShouldSkipSupportWindowModeCheck(uint32_t windowMod
     bool isCompatibleWindow = mode == WindowMode::WINDOW_MODE_FLOATING ||
                               mode == WindowMode::WINDOW_MODE_FULLSCREEN;
     bool isDragScale = property_->IsAdaptToDragScale();
-    if (IsFreeMultiWindowMode() && isCompatibleWindow && isDragScale) {
+    if (isFreeMultiWindowMode && isCompatibleWindow && isDragScale) {
+        return true;
+    }
+
+    // the full screen mode must be supported in not pc window and not free multi window mode.
+    bool isSupportedFullScreen = !windowSystemConfig_.IsPcWindow() && !isFreeMultiWindowMode &&
+                                 mode == WindowMode::WINDOW_MODE_FULLSCREEN;
+    if (isSupportedFullScreen) {
         return true;
     }
     return false;
