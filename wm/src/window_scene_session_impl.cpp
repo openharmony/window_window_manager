@@ -37,6 +37,7 @@
 #include "fold_screen_controller/super_fold_state_manager.h"
 #include "input_transfer_station.h"
 #include "perform_reporter.h"
+#include "rate_limited_logger.h"
 #include "rs_adapter.h"
 #include "session_helper.h"
 #include "session_permission.h"
@@ -439,6 +440,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         }
         auto parentSession = FindParentSessionByParentId(property_->GetParentPersistentId());
         if (parentSession != nullptr) {
+            SetTargetAPIVersion(parentSession->GetTargetAPIVersion());
             property_->SetIsPcAppInPad(parentSession->GetProperty()->GetIsPcAppInPad());
         }
         PreProcessCreate();
@@ -1000,7 +1002,10 @@ void WindowSceneSessionImpl::UpdateDefaultStatusBarColor()
         static_cast<uint32_t>(statusBarProp.settingFlag_) |
         static_cast<uint32_t>(SystemBarSettingFlag::FOLLOW_SETTING));
     SystemBarPropertyFlag systemBarPropertyFlag = { false, false, true, false };
-    UpdateSystemBarPropertyForPage(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProp, systemBarPropertyFlag);
+    property_->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProp);
+    if (!isAtomicServiceUseColor_) {
+        UpdateSystemBarPropertyForPage(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProp, systemBarPropertyFlag);
+    }
 }
 
 void WindowSceneSessionImpl::InitSubSessionDragEnable()
@@ -1418,12 +1423,6 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
         } else {
             TLOGI(WmsLogTag::WMS_LAYOUT_PC, "winId: %{public}u, windowModeSupportType: %{public}u",
                 GetWindowId(), windowModeSupportType);
-        }
-        RealTimeSwitchInfo switchInfo = property_->GetRealTimeSwitchInfo();
-        if (switchInfo.showTypes_ != 0) {
-            uint32_t compatibleModeWindowNeed = (WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN |
-                                     WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
-            windowModeSupportType |= compatibleModeWindowNeed;
         }
         property_->SetWindowModeSupportType(windowModeSupportType);
         TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}u, windowModeSupportType: %{public}u",
@@ -2330,7 +2329,8 @@ void WindowSceneSessionImpl::CheckMoveConfiguration(MoveConfiguration& moveConfi
 /** @note @window.layout */
 WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal, MoveConfiguration moveConfiguration)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d MoveTo:(%{public}d %{public}d) global:%{public}d cfg:%{public}s",
+    TLOGI_LMT(TEN_SECONDS, RECORD_200_TIMES, WmsLogTag::WMS_LAYOUT,
+        "Id:%{public}d MoveTo:(%{public}d %{public}d) global:%{public}d cfg:%{public}s",
         property_->GetPersistentId(), x, y, isMoveToGlobal, moveConfiguration.ToString().c_str());
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -2352,7 +2352,8 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal
         }
     }
     Rect newRect = { x, y, requestRect.width_, requestRect.height_ }; // must keep x/y
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d state:%{public}d type:%{public}d mode:%{public}d rect:"
+    TLOGI_LMT(TEN_SECONDS, RECORD_200_TIMES, WmsLogTag::WMS_LAYOUT,
+        "Id:%{public}d state:%{public}d type:%{public}d mode:%{public}d rect:"
         "%{public}s->%{public}s req=%{public}s", property_->GetPersistentId(), state_, GetType(), GetWindowMode(),
         windowRect.ToString().c_str(), newRect.ToString().c_str(), requestRect.ToString().c_str());
     property_->SetRequestRect(newRect);
@@ -3464,25 +3465,23 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
 WMError WindowSceneSessionImpl::UpdateSystemBarPropertyForPage(WindowType type,
     const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag)
 {
-    bool isUsedPageEnabled = false;
+    std::lock_guard<std::mutex> lock(nowsystemBarPropertyMapMutex_);
     {
-        std::lock_guard<std::mutex> lock(systemBarPropertyForPageMapMutex_);
-        auto iter = systemBarPropertyForPageMap_.find(type);
-        if (iter != systemBarPropertyForPageMap_.end() && iter->second.has_value()) {
-            auto& prop = *iter->second;
-            prop.enable_ =  systemBarPropertyFlag.enableFlag ? systemBarProperty.enable_ : prop.enable_;
-            prop.backgroundColor_ =  systemBarPropertyFlag.backgroundColorFlag ?
-                systemBarProperty.backgroundColor_ : prop.backgroundColor_;
-            prop.contentColor_ =  systemBarPropertyFlag.contentColorFlag ?
-                systemBarProperty.contentColor_ : prop.contentColor_;
-            prop.enableAnimation_ =  systemBarPropertyFlag.enableAnimationFlag ?
-                systemBarProperty.enableAnimation_ : prop.enableAnimation_;
-            prop.settingFlag_ |=  systemBarProperty.settingFlag_;
-            isUsedPageEnabled = true;
+        auto iter = nowsystemBarPropertyMap_.find(type);
+        if (iter != nowsystemBarPropertyMap_.end()) {
+            iter->second.enable_ = systemBarPropertyFlag.enableFlag ? systemBarProperty.enable_ : iter->second.enable_;
+            iter->second.backgroundColor_ = systemBarPropertyFlag.backgroundColorFlag ?
+                systemBarProperty.backgroundColor_ : iter->second.backgroundColor_;
+            iter->second.contentColor_ = systemBarPropertyFlag.contentColorFlag ?
+                systemBarProperty.contentColor_ : iter->second.contentColor_;
+            iter->second.enableAnimation_ = systemBarPropertyFlag.enableAnimationFlag ?
+                systemBarProperty.enableAnimation_ : iter->second.enableAnimation_;
+            iter->second.settingFlag_ |= systemBarProperty.settingFlag_;
+        } else {
+            nowsystemBarPropertyMap_[type] = systemBarProperty;
         }
     }
-    auto ret = SetSystemBarProperty(type,
-        isUsedPageEnabled ? systemBarPropertyForPageMap_[type].value() : systemBarProperty);
+    auto ret = SetSystemBarProperty(type, nowsystemBarPropertyMap_[type]);
     if (ret == WMError::WM_OK) {
         property_->SetSystemBarProperty(type, systemBarProperty);
     }
@@ -3546,29 +3545,53 @@ WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(WindowType type, std
         TLOGI(WmsLogTag::WMS_IMMS, "only main window support, win %{public}u", GetWindowId());
         return WMError::WM_DO_NOTHING;
     }
-    if (property == std::nullopt) {
-        {
-            std::lock_guard<std::mutex> lock(systemBarPropertyForPageMapMutex_);
-            systemBarPropertyForPageMap_[type] = std::nullopt;
-        }
-        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u property is nullptr use main window prop", GetWindowId());
-        return NotifySpecificWindowSessionProperty(type, GetSystemBarPropertyByType(type));
-    }
-    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}u "
-        "%{public}u %{public}x %{public}x %{public}u %{public}u",
-        GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type),
-        property->enable_, property->backgroundColor_,
-        property->contentColor_, property->enableAnimation_, property->settingFlag_);
+    auto newProperty = GetSystemBarPropertyByType(type);
+    std::lock_guard<std::mutex> lock(nowsystemBarPropertyMapMutex_);
     {
-        std::lock_guard<std::mutex> lock(systemBarPropertyForPageMapMutex_);
-        systemBarPropertyForPageMap_[type] = property;
+        if (property == std::nullopt) {
+            nowsystemBarPropertyMap_[type].enable_ = newProperty.enable_;
+            auto flag = (static_cast<uint32_t>(nowsystemBarPropertyMap_[type].settingFlag_) &
+                ~static_cast<uint32_t>(SystemBarSettingFlag::ENABLE_SETTING)) |
+                static_cast<uint32_t>(newProperty.settingFlag_);
+            nowsystemBarPropertyMap_[type].settingFlag_ = static_cast<SystemBarSettingFlag>(flag);
+        } else {
+            nowsystemBarPropertyMap_[type].enable_ = property.value().enable_;
+            nowsystemBarPropertyMap_[type].settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
+        }
+        newProperty = nowsystemBarPropertyMap_[type];
     }
-    auto lastProperty = GetSystemBarPropertyByType(type);
-    property_->SetSystemBarProperty(type, property.value());
-    auto ret = NotifySpecificWindowSessionProperty(type, property.value());
-    property_->SetSystemBarProperty(type, lastProperty);
+    return updateSystemBarproperty(type, newProperty);
+}
+
+WMError WindowSceneSessionImpl::SetStatusBarColorForPage(const std::optional<uint32_t> color)
+{
+    auto type = WindowType::WINDOW_TYPE_STATUS_BAR;
+    auto newProperty = GetSystemBarPropertyByType(type);
+    std::lock_guard<std::mutex> lock(nowsystemBarPropertyMapMutex_);
+    {
+        if (color == std::nullopt) {
+            nowsystemBarPropertyMap_[type].contentColor_ = newProperty.contentColor_;
+            auto flag = (static_cast<uint32_t>(nowsystemBarPropertyMap_[type].settingFlag_) &
+                ~static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING)) |
+                static_cast<uint32_t>(newProperty.settingFlag_);
+            nowsystemBarPropertyMap_[type].settingFlag_ = static_cast<SystemBarSettingFlag>(flag);
+        } else {
+            nowsystemBarPropertyMap_[type].contentColor_ = color.value();
+            nowsystemBarPropertyMap_[type].settingFlag_ |= SystemBarSettingFlag::COLOR_SETTING;
+        }
+        newProperty = nowsystemBarPropertyMap_[type];
+    }
+    return updateSystemBarproperty(type, newProperty);
+}
+
+WMError WindowSceneSessionImpl::updateSystemBarproperty(WindowType type, const SystemBarProperty& systemBarProperty)
+{
+    auto winProperty = GetSystemBarPropertyByType(type);
+    property_->SetSystemBarProperty(type, systemBarProperty);
+    auto ret = NotifySpecificWindowSessionProperty(type, systemBarProperty);
+    property_->SetSystemBarProperty(type, winProperty);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_IMMS, "set prop fail, ret %{public}u", ret);
+        TLOGE(WmsLogTag::WMS_IMMS, "update prop fail, ret %{public}u", ret);
         return ret;
     }
     return WMError::WM_OK;
@@ -3788,13 +3811,13 @@ WMError WindowSceneSessionImpl::Maximize()
 
 WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
 {
-    return Maximize(presentation, WaterfallResidentState::CANCEL);
+    return Maximize(presentation, WaterfallResidentState::UNCHANGED);
 }
 
 bool WindowSceneSessionImpl::CheckWaterfallResidentState(WaterfallResidentState state) const
 {
     if (WindowHelper::IsSubWindow(GetType())) {
-        return state == WaterfallResidentState::UNCHANGED || state == WaterfallResidentState::CANCEL;
+        return state == WaterfallResidentState::UNCHANGED;
     }
     return true;
 }
@@ -7665,6 +7688,17 @@ WMError WindowSceneSessionImpl::GetAppForceLandscapeConfig(AppForceLandscapeConf
     return hostSession->GetAppForceLandscapeConfig(config);
 }
 
+WMError WindowSceneSessionImpl::GetAppForceLandscapeConfigEnable(bool& enableForceSplit)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "HostSession is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    return hostSession->GetAppForceLandscapeConfigEnable(enableForceSplit);
+}
+
 WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigUpdated()
 {
     TLOGI(WmsLogTag::DEFAULT, "in");
@@ -7672,7 +7706,18 @@ WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigUpdated()
     AppForceLandscapeConfig config = {};
     if (WindowHelper::IsMainWindow(winType) && GetAppForceLandscapeConfig(config) == WMError::WM_OK &&
         config.supportSplit_ > 0) {
-        SetForceSplitEnable(config);
+        SetForceSplitConfig(config);
+        return WSError::WS_OK;
+    }
+    return WSError::WS_DO_NOTHING;
+}
+
+WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigEnableUpdated()
+{
+    TLOGI(WmsLogTag::DEFAULT, "in");
+    bool enableForceSplit = false;
+    if (GetAppForceLandscapeConfigEnable(enableForceSplit) == WMError::WM_OK) {
+        SetForceSplitConfigEnable(enableForceSplit);
         return WSError::WS_OK;
     }
     return WSError::WS_DO_NOTHING;

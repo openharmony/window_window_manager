@@ -919,7 +919,7 @@ HWTEST_F(WindowSessionImplTest5, ConvertOrientationAndRotation, Function | Small
         window->ConvertOrientationAndRotation(from, to, value, convertedValue));
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     value = -1;
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM,
         window->ConvertOrientationAndRotation(from, to, value, convertedValue));
     value = 8;
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->ConvertOrientationAndRotation(from, to, value, convertedValue));

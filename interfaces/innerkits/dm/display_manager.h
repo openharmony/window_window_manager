@@ -991,6 +991,24 @@ public:
      */
     DMError ConvertGlobalCoordinateToRelativeWithDisplayId(const Position& globalPosition, DisplayId displayId,
         RelativePosition& relativePosition);
+    
+    /**
+     * @brief Get supportsInput of display
+     *
+     * @param DisplayId displayId.
+     * @param bool supportsInput.
+     * @return DM_OK means the get operation succeeds.
+     */
+    DMError GetSupportsInput(DisplayId displayId, bool& supportsInput);
+
+    /**
+     * @brief Set supportsInput of display
+     *
+     * @param DisplayId displayId.
+     * @param bool supportsInput.
+     * @return DM_OK means the set operation succeeds.
+     */
+    DMError SetSupportsInput(DisplayId displayId, bool supportsInput);
 
 private:
     DisplayManager();
