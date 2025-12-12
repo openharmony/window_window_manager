@@ -129,6 +129,7 @@ static const int32_t ROTATION_90 = 1;
 #ifdef FOLD_ABILITY_ENABLE
 static const int32_t ROTATION_270 = 3;
 constexpr int32_t REMOVE_DISPLAY_MODE = 0;
+const uint32_t SCREEN_STATE_AOD_OP_TIMEOUT_MS = 300;
 #endif
 const unsigned int XCOLLIE_TIMEOUT_10S = 10;
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
@@ -12476,8 +12477,17 @@ void ScreenSessionManager::SetRSScreenPowerStatus(ScreenId screenId, ScreenPower
     ScreenStateMachine::GetInstance().HandlePowerStateChange(event, type);
 }
 
-void ScreenSessionManager::SetRSScreenPowerStatusExt(ScreenId screenId, ScreenPowerStatus status)
+bool ScreenSessionManager::SetRSScreenPowerStatusExt(ScreenId screenId, ScreenPowerStatus status)
 {
+#ifdef FOLD_ABILITY_ENABLE
+    bool isNeedToCancelSetScreenStatus = false;
+    CheckAnotherScreenStatus(screenId, status, isNeedToCancelSetScreenStatus);
+    if (isNeedToCancelSetScreenStatus) {
+        TLOGW(WmsLogTag::DMS, "Cancel set screen:%{public}" PRIu64 "status:%{public}u", screenId,
+            static_cast<uint32_t>(status));
+        return false;
+    }
+#endif
     ScreenId rsScreenId = screenId;
     if (IsConcurrentUser()) {
         if (!screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId)) {
@@ -12493,7 +12503,43 @@ void ScreenSessionManager::SetRSScreenPowerStatusExt(ScreenId screenId, ScreenPo
             screenId, static_cast<uint32_t>(status), ret);
 #endif
     }
+    return true;
 }
+
+#ifdef FOLD_ABILITY_ENABLE
+void ScreenSessionManager::CheckAnotherScreenStatus(ScreenId screenId, ScreenPowerStatus status,
+    bool& isNeedToCancelSetScreenStatus) {
+    if (!isCoordinationFlag_ && status == ScreenPowerStatus::POWER_STATUS_ON) {
+        WaitAodOpNotify();
+        ScreenId secondScreenId = screenId == SCREEN_ID_MAIN ? SCREEN_ID_FULL : SCREEN_ID_MAIN;
+        PanelPowerStatus secondScreenStatus = PanelPowerStatus::INVALID_PANEL_POWER_STATUS;
+        GetScreenLcdStatus(secondScreenId, secondScreenStatus);
+        if (secondScreenStatus == PANEL_POWER_STATUS_ON) {
+            TLOGI(WmsLogTag::DMS, "Another screen is on while set screen: %{public}" PRIu64 " on, do on and off",
+                screenId);
+            rsInterface_.SetScreenPowerStatus(secondScreenId, ScreenPowerStatus::POWER_STATUS_ON);
+            rsInterface_.SetScreenPowerStatus(secondScreenId, ScreenPowerStatus::POWER_STATUS_OFF);
+        } else {
+            TLOGI(WmsLogTag::DMS, "Another screen status is not on while set screen: %{public}" PRIu64 " on,"
+                " set screen power status directly", screenId);
+        }
+    } else if (!isCoordinationFlag_ && status == ScreenPowerStatus::POWER_STATUS_ON_ADVANCED) {
+        WaitAodOpNotify();
+        ScreenId secondScreenId = screenId == SCREEN_ID_MAIN ? SCREEN_ID_FULL : SCREEN_ID_MAIN;
+        PanelPowerStatus secondScreenStatus = PanelPowerStatus::INVALID_PANEL_POWER_STATUS;
+        GetScreenLcdStatus(secondScreenId, secondScreenStatus);
+        if (secondScreenStatus == PANEL_POWER_STATUS_ON) {
+            TLOGI(WmsLogTag::DMS, "Another screen is on while set screen: %{public}" PRIu64 " on advance, cancel",
+                screenId);
+            isNeedToCancelSetScreenStatus = true;
+            return;
+        } else {
+            TLOGI(WmsLogTag::DMS, "Another screen status is not on while set screen: %{public}" PRIu64 " on advance,"
+                " set screen power status directly", screenId);
+        }
+    }
+}
+#endif
 
 void ScreenSessionManager::OnScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent)
 {
@@ -13310,15 +13356,41 @@ void ScreenSessionManager::NotifyAodOpCompletion(AodOP operation, int32_t result
 {
     TLOGI(WmsLogTag::DMS, "AOD operation completed, operation: %{public}d, result: %{public}d", operation, result);
     ScreenPowerInfoType params;
-    if (operation == AodOP::ENTER) {
+    if (operation == AodOP::ENTER_FINISH) {
+        isInAodOperation_ = false;
+        aodOpCompleteCV_.notify_all();
         if (ScreenStateMachine::GetInstance().GetTransitionState() == ScreenTransitionState::WAIT_LOCK_SCREEN_IND) {
             aodNotifyFlag_ = (result == 0) ? AodStatus::SUCCESS : AodStatus::FAILURE;
         } else {
             ScreenStateMachine::GetInstance().HandlePowerStateChange(result == 0 ?
                 ScreenPowerEvent::AOD_ENTER_SUCCESS : ScreenPowerEvent::AOD_ENTER_FAIL, params);
         }
+    } else if (operation == AodOP::ENTER_START) {
+        isInAodOperation_ = true;
+    } else if (operation == AodOP::EXIT_START) {
+        isInAodOperation_ = true;
+    } else if (operation == AodOP::EXIT_FINISH) {
+        isInAodOperation_ = false;
+        aodOpCompleteCV_.notify_all();
     }
 }
+
+#ifdef FOLD_ABILITY_ENABLE
+bool ScreenSessionManager::WaitAodOpNotify()
+{
+    if (isInAodOperation_) {
+        TLOGI(WmsLogTag::DMS, "Start wait aod op notify");
+        std::unique_lock<std::mutex> lock(aodOpCompleteMutex_);
+        if (DmUtils::safe_wait_for(aodOpCompleteCV_, lock,
+            std::chrono::milliseconds(SCREEN_STATE_AOD_OP_TIMEOUT_MS)) == std::cv_status::timeout) {
+            TLOGW(WmsLogTag::DMS, "AOD operation timeout");
+            isInAodOperation_ = false;
+            return false;
+        }
+    }
+    return true;
+}
+#endif
 
 void ScreenSessionManager::DoAodExitAndSetPower(ScreenId screenId, ScreenPowerStatus status)
 {
@@ -13449,6 +13521,18 @@ DMError ScreenSessionManager::CheckSetResolutionIsValid(ScreenId screenId, uint3
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     return DMError::DM_OK;
+}
+
+bool ScreenSessionManager::GetScreenLcdStatus(ScreenId screenId, PanelPowerStatus& status)
+{
+    TLOGI(WmsLogTag::DMS, "Enter, screenId: %{public}" PRIu64, screenId);
+    ScreenId rsScreenId = INVALID_SCREEN_ID;
+    if (!screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId)) {
+        TLOGE(WmsLogTag::DMS, "No corresponding rsId");
+        return false;
+    }
+    status = rsInterface_.GetPanelPowerStatus(rsScreenId);
+    return true;
 }
 // LCOV_EXCL_STOP
 } // namespace OHOS::Rosen
