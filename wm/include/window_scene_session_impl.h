@@ -180,7 +180,9 @@ public:
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams params) override;
     WMError CheckAndModifyWindowRect(uint32_t& width, uint32_t& height) override;
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
+    WMError GetAppForceLandscapeConfigEnable(bool& enableForceSplit) override;
     WSError NotifyAppForceLandscapeConfigUpdated() override;
+    WSError NotifyAppForceLandscapeConfigEnableUpdated() override;
 
     /*
      * Sub Window
@@ -325,6 +327,9 @@ public:
     WMError SetFullScreen(bool status) override;
     WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
         const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
+    WMError SetStatusBarColorForPage(const std::optional<uint32_t> color) override;
+    bool isAtomicServiceUseColor_ = false;
+
     /*
      * Window Pattern
      */
@@ -494,8 +499,9 @@ private:
     void MobileAppInPadLayoutFullScreenChange(bool statusBarEnable, bool navigationEnable);
     WMError UpdateSystemBarPropertyForPage(WindowType type,
         const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag) override;
-    std::mutex systemBarPropertyForPageMapMutex_;
-    std::unordered_map<WindowType, std::optional<SystemBarProperty>> systemBarPropertyForPageMap_;
+    WMError updateSystemBarproperty(WindowType type, const SystemBarProperty& systemBarProperty);
+    std::mutex nowsystemBarPropertyMapMutex_;
+    std::unordered_map<WindowType, SystemBarProperty> nowsystemBarPropertyMap_;
 
     /*
      * Window Animation

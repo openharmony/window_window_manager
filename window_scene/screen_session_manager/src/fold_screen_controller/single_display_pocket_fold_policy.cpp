@@ -527,7 +527,7 @@ void SingleDisplayPocketFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession>
 {
     std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
     screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenId);
-    screenSession->SetRSScreenId(screenId);
+    screenSession->SetPhyScreenId(screenId);
     if (!ScreenSessionManager::GetInstance().GetClientProxy()) {
         ScreenProperty property = screenSession->UpdatePropertyByFoldControl(screenProperty_);
         ScreenSessionManager::GetInstance().OnBeforeScreenPropertyChange(currentFoldStatus_);

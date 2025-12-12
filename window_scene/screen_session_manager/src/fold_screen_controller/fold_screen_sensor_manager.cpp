@@ -93,7 +93,7 @@ void FoldScreenSensorManager::UnRegisterPostureCallback()
         registerPosture_ = false;
         TLOGI(WmsLogTag::DMS, "success.");
     } else {
-        TLOGE(WmsLogTag::DMS, "UnRegisterPostureCallback failed with ret: %d", ret);
+        TLOGE(WmsLogTag::DMS, "UnRegisterPostureCallback failed with ret: %{public}d", ret);
     }
 }
 
@@ -118,7 +118,7 @@ void FoldScreenSensorManager::UnRegisterHallCallback()
         registerHall_ = false;
         TLOGI(WmsLogTag::DMS, "success.");
     } else {
-        TLOGE(WmsLogTag::DMS, "UnRegisterHallCallback failed with ret: %d", ret);
+        TLOGE(WmsLogTag::DMS, "UnRegisterHallCallback failed with ret: %{public}d", ret);
     }
 }
 
