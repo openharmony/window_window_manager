@@ -6493,7 +6493,7 @@ DMError ScreenSessionManager::MakeMirrorForRecord(const std::vector<ScreenId>& m
         TLOGI(WmsLogTag::DMS, "mainScreenRect: %{public}s", oss.str().c_str());
         auto makeResult = DoMakeMirror(realScreenId, mirrorScreenIds, mainScreenRect, screenGroupId);
         if (makeResult == DMError::DM_OK) {
-            SuperFoldStateManager::GetInstance().AddMirrorVirtualScreenIds(mirrorScreenIds);
+            SuperFoldStateManager::GetInstance().AddMirrorVirtualScreenIds(mirrorScreenIds, mainScreenRect);
         }
         return makeResult;
     }
@@ -9359,6 +9359,19 @@ void ScreenSessionManager::NotifyBrightnessInfoChanged(ScreenId rsId, const Brig
         if (!IsFreezed(agentPid, DisplayManagerAgentType::BRIGHTNESS_INFO_CHANGED_LISTENER) && agent != nullptr) {
             agent->NotifyBrightnessInfoChanged(logicalScreenId, screenBrightnessInfo);
         }
+    }
+}
+
+void ScreenSessionManager::NotifyRecordingDisplayChanged(const std::vector<DisplayId>& displayIds)
+{
+    auto agents = ScreenSessionManagerAdapter::GetInstance().
+        dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
+    if (agents.empty()) {
+        TLOGI(WmsLogTag::DMS, "Agent is empty");
+        return;
+    }
+    for (auto& agent : agents) {
+        agent->NotifyRecordingDisplayChanged(displayIds);
     }
 }
 
