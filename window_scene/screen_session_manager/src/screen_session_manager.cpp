@@ -6752,12 +6752,10 @@ DMError ScreenSessionManager::VirtualScreenUniqueSwitch(const std::vector<Screen
 
 int32_t ScreenSessionManager::GetDeviceOrientationAPI14(sptr<ScreenSession> screenSession, Rotation rotation)
 {
-    ScreenProperty property = screenSession->GetScreenProperty();
-    RRect bounds = property.GetBounds();
-    int32_t rotationInt = static_cast<int32_t>(rotation);
-    screenSession->UpdateRotationOrientation(rotationInt, GetFoldDisplayMode(), bounds);
-    DisplayOrientation displayOrientation = property.GetDeviceOrientation();
-    return static_cast<int32_t>(displayOrientation);
+    RRect bounds = screenSession->GetScreenProperty().GetBounds();
+    DisplayOrientation deviceOrientation =
+        screenSession->CalcDeviceOrientationWithBounds(rotation, GetFoldDisplayMode(), bounds);
+    return static_cast<int32_t>(deviceOrientation);
 }
 
 DMError ScreenSessionManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
