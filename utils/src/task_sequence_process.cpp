@@ -37,11 +37,11 @@ void TaskSequenceProcess::Notify()
         TaskSequenceEventInfo task = taskQueue_.front();
         taskQueue_.pop();
         taskRunningFlag_.store(true);
-        try{
+        try {
             Exec(task);
-        } catch (const std::exception& e){
-            TLOGE(WmsLogTag::DMS, "TaskSequenceProcess exec failded:%{public}s",e.what());
-        } catch (...){
+        } catch (const std::exception& e) {
+            TLOGE(WmsLogTag::DMS, "TaskSequenceProcess exec failded:%{public}s", e.what());
+        } catch (...) {
             TLOGE(WmsLogTag::DMS, "TaskSequenceProcess exec failded with unknown exception");
         }
         taskRunningFlag_.store(false);
