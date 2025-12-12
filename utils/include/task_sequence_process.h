@@ -20,7 +20,7 @@
 #include <atomic>
 
 namespace OHOS::Rosen {
-struct TaskSequencEventInfo {
+struct TaskSequenceEventInfo {
     std::function<void()> taskInfo;
 };
 
@@ -29,14 +29,14 @@ public:
     explicit TaskSequenceProcess(uint32_t maxQueueSize);
     ~TaskSequenceProcess();
     void Notify();
-    void Push(const TaskSequencEventInfo& eventInfo);
+    void Push(const TaskSequenceEventInfo& eventInfo);
     void SetTaskRunningFlag(bool flag);
 private:
     uint32_t maxQueueSize_ {1};
     std::atomic<bool> taskRunningFlag_ {false};
-    std::queue<TaskSequencEventInfo> taskQueue_;
+    std::queue<TaskSequenceEventInfo> taskQueue_;
     std::mutex queueMutex_;
-    void Exec(const TaskSequencEventInfo& task);
+    void Exec(const TaskSequenceEventInfo& task);
 };
 } //namespace OHOS::Rosen
 #endif
