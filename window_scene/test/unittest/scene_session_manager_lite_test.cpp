@@ -89,7 +89,7 @@ HWTEST_F(SceneSessionManagerLiteTest, RegisterWindowPropertyChangeAgent, TestSiz
 {
     WindowInfoKey windowInfoKey = WindowInfoKey::MID_SCENE;
     uint32_t interestInfo = 0;
-    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgentLite>::MakeSptr();
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<IWindowManagerAgent>::MakeSptr();
     auto expectRet = SceneSessionManager::GetInstance().RegisterWindowPropertyChangeAgent(windowInfoKey, interestInfo,
         windowManagerAgent);
     auto ret = SceneSessionManagerLite::GetInstance().RegisterWindowPropertyChangeAgent(windowInfoKey, interestInfo,
