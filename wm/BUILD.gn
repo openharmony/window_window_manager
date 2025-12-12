@@ -163,8 +163,8 @@ ohos_static_library("libwm_static") {
   }
 
   if (defined(global_parts_info)) {
-    if (defined(global_parts_info.resourceschedule_resource_frame_aware_sched) ||
-      defined(global_parts_info.hmosresourceschedule_frame_aware_ched_override)) {
+    if (defined(global_parts_info.resourceschedule_frame_aware_sched) ||
+      defined(global_parts_info.hmosresourceschedule_frame_aware_sched_override)) {
       external_deps += [ "frame_aware_sched:frame_trace_intf" ]
       defines += [ "FRAME_TRACE_ENABLE" ]
     }
@@ -325,8 +325,8 @@ ohos_shared_library("libwm") {
   }
 
   if (defined(global_parts_info)) {
-    if (defined(global_parts_info.resourceschedule_resource_frame_aware_sched) ||
-      defined(global_parts_info.hmosresourceschedule_frame_aware_ched_override)) {
+    if (defined(global_parts_info.resourceschedule_frame_aware_sched) ||
+      defined(global_parts_info.hmosresourceschedule_frame_aware_sched_override)) {
       external_deps += [ "frame_aware_sched:frame_trace_intf" ]
       defines += [ "FRAME_TRACE_ENABLE" ]
     }
@@ -415,8 +415,8 @@ ohos_shared_library("libwm_lite") {
   ]
 
   if (defined(global_parts_info)) {
-    if (defined(global_parts_info.resourceschedule_resource_frame_aware_sched) ||
-      defined(global_parts_info.hmosresourceschedule_frame_aware_ched_override)) {
+    if (defined(global_parts_info.resourceschedule_frame_aware_sched) ||
+      defined(global_parts_info.hmosresourceschedule_frame_aware_sched_override)) {
       external_deps += [ "frame_aware_sched:frame_trace_intf" ]
       defines += [ "FRAME_TRACE_ENABLE" ]
     }
