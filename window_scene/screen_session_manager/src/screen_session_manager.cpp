@@ -11668,6 +11668,16 @@ bool ScreenSessionManager::GetCoordinationFlag(void)
     return isCoordinationFlag_;
 }
 
+void ScreenSessionManager::NotifyRSCoordination(bool isEnterCoordination) const
+{
+    TLOGI(WmsLogTag::DMS, "isEnterCoordination:%{public}d", isEnterCoordination);
+    auto ret = rsInterface_.SetDualScreenState(SCREEN_ID_FULL, isEnterCoordination ?
+        DualScreenStatus::DUAL_SCREEN_ENTER : DualScreenStatus::DUAL_SCREEN_EXIT);
+    if (ret != 0) {
+        TLOGE(WmsLogTag::DMS, "rsInterface failed! ret:%{public}d", ret);
+    }
+}
+
 DMError ScreenSessionManager::SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
     uint32_t& actualRefreshRate)
 {
