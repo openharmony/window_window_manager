@@ -106,7 +106,7 @@ HWTEST_F(SceneSessionManagerLiteTest, UnregisterWindowPropertyChangeAgent, TestS
 {
     WindowInfoKey windowInfoKey = WindowInfoKey::MID_SCENE;
     uint32_t interestInfo = 0;
-    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgentLite>::MakeSptr();
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<IWindowManagerAgent>::MakeSptr();
     auto expectRet = SceneSessionManager::GetInstance().UnregisterWindowPropertyChangeAgent(windowInfoKey,
         interestInfo, windowManagerAgent);
     auto ret = SceneSessionManagerLite::GetInstance().UnregisterWindowPropertyChangeAgent(windowInfoKey, interestInfo,
@@ -121,13 +121,8 @@ HWTEST_F(SceneSessionManagerLiteTest, UnregisterWindowPropertyChangeAgent, TestS
  */
 HWTEST_F(SceneSessionManagerLiteTest, RecoverWindowPropertyChangeFlag, TestSize.Level1)
 {
-    WindowInfoKey windowInfoKey = WindowInfoKey::MID_SCENE;
-    uint32_t interestInfo = 0;
-    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgentLite>::MakeSptr();
-    auto expectRet = SceneSessionManager::GetInstance().RecoverWindowPropertyChangeFlag(windowInfoKey, interestInfo,
-        windowManagerAgent);
-    auto ret = SceneSessionManagerLite::GetInstance().RecoverWindowPropertyChangeFlag(windowInfoKey, interestInfo,
-        windowManagerAgent);
+    auto expectRet = SceneSessionManager::GetInstance().RecoverWindowPropertyChangeFlag(0, 0);
+    auto ret = SceneSessionManagerLite::GetInstance().RecoverWindowPropertyChangeFlag(0, 0);
     EXPECT_EQ(ret, expectRet);
 }
 
