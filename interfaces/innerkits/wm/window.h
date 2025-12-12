@@ -4977,7 +4977,11 @@ public:
      *
      * @param rects Hot areas of anco window.
      */
-    static std::vector<Rect> GetAncoWindowHotAreas();
+    virtual std::vector<Rect> GetAncoWindowHotAreas()
+    {
+        std::vector<Rect> rectAreas;
+        return rectAreas;
+    }
 
     /**
      * @brief Check if the current device is in free window mode.
