@@ -162,7 +162,7 @@ ohos_static_library("libwm_static") {
     external_deps += [ "accessibility:accessibility_common" ]
   }
 
-  defines += [ "FRAME_TRACE_ENABLE" ]	
+  defines += [ "FRAME_TRACE_ENABLE" ]
   external_deps += [ "frame_aware_sched:frame_trace_intf" ]
 
   if (defined(global_parts_info) &&
@@ -409,7 +409,7 @@ ohos_shared_library("libwm_lite") {
     "samgr:samgr_proxy",
   ]
 
-  defines += [ "FRAME_TRACE_ENABLE" ]	
+  defines += [ "FRAME_TRACE_ENABLE" ]
   external_deps += [ "frame_aware_sched:frame_trace_intf" ]
 
   if (defined(global_parts_info) &&
