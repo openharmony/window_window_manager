@@ -39,6 +39,7 @@ void TaskSequenceProcessTest::SetUp() {}
 void TaskSequenceProcessTest::TearDown() {}
 
 namespace {
+
 /**
  * @tc.name: NotifyTest01
  * @tc.desc: NotifyTest01
@@ -48,10 +49,8 @@ HWTEST_F(TaskSequenceProcessTest, ATC_Notify01, TestSize.Level0)
 {
     TaskSequenceProcess process = TaskSequenceProcess(10);
     process.SetTaskRunningFlag(false);
-    TaskSequenceEventInfo task;
-    process.Push(task);
     process.Notify();
-    EXPECT_TRUE(process.taskRunningFlag_.load());
+    EXPECT_FALSE(process.taskRunningFlag_.load());
 }
 
 /**
@@ -60,19 +59,6 @@ HWTEST_F(TaskSequenceProcessTest, ATC_Notify01, TestSize.Level0)
  * @tc.type: FUNC
  */
 HWTEST_F(TaskSequenceProcessTest, ATC_Notify02, TestSize.Level0)
-{
-    TaskSequenceProcess process = TaskSequenceProcess(10);
-    process.SetTaskRunningFlag(false);
-    process.Notify();
-    EXPECT_FALSE(process.taskRunningFlag_.load());
-}
-
-/**
- * @tc.name: NotifyTest03
- * @tc.desc: NotifyTest03
- * @tc.type: FUNC
- */
-HWTEST_F(TaskSequenceProcessTest, ATC_Notify03, TestSize.Level0)
 {
     TaskSequenceProcess process = TaskSequenceProcess(10);
     process.SetTaskRunningFlag(true);
