@@ -8099,9 +8099,12 @@ void ScreenSessionManager::SetPrivacyStateByDisplayId(std::unordered_map<Display
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return;
     }
-    for (const auto& [displayId, hasPrivate] : privacyBundleDisplayId) {
-        TLOGD(WmsLogTag::DMS, "displayId: %{public}" PRIu64 ", hasPrivate: %{public}d", displayId, hasPrivate);
+    std::ostringstream oss; 
+    for (const auto& [displayId, isPrivate] : privacyBundleDisplayId) {
+        oss << "[displayId: " << displayId
+            << ", private: " << (isPrivate ? "true" : "false") << "] ";
     }
+    TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
     const std::vector<DisplayId> displayIds = GetAllDisplayIds();
     // all display use or to calculate private state
     if (CheckNeedNotify(displayIds, privacyBundleDisplayId)) {
@@ -8121,6 +8124,7 @@ bool ScreenSessionManager::CheckNeedNotify(const std::vector<DisplayId>& display
     bool isNeedNotify = false;
     std::lock_guard<std::mutex> lock(hasPrivateWindowForegroundMutex_);
     if (privacyBundleDisplayId.empty()) {
+        TLOGE(WmsLogTag::DMS, "privacyBundleDisplayId is empty.");
         return isNeedNotify;
     }
     // determine whether the hasPrivate value corresponding to displayId in hasPrivateWindowForeground_
@@ -8143,9 +8147,9 @@ bool ScreenSessionManager::CheckNeedNotify(const std::vector<DisplayId>& display
         }
         ++it;
     }
-    // clear hasPrivateWindowForeground_ not include id that not in privacyBundleDisplayId
+    // clear hasPrivateWindowForeground_ not include id that not in displayIds
     for (auto iter = hasPrivateWindowForeground_.begin(); iter != hasPrivateWindowForeground_.end();) {
-        if (privacyBundleDisplayId.find(iter->first) == privacyBundleDisplayId.end()) {
+        if (std::find(displayIds.begin(), displayIds.end(), iter->first) == displayIds.end()) {
             iter = hasPrivateWindowForeground_.erase(iter);
         } else {
             ++iter;
