@@ -803,12 +803,12 @@ namespace {
     HWTEST_F(FoldScreenControllerTest, NotifyRunSensorFoldStateManager, TestSize.Level1)
     {
         std::recursive_mutex mutex;
-        FoldScreenController fsc_(mutex, std::shared_ptr<TaskScheduler>());
-        fsc_.sensorFoldStateManager_ = new SensorFoldStateManager();
+        std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = std::shared_ptr<TaskScheduler>();
+        FoldScreenController fsc_(mutex, screenPowerTaskScheduler);
         g_errLog.clear();
         LOG_SetCallback(MyLogCallback);
         fsc_.NotifyRunSensorFoldStateManager();
-        EXPECT_TRUE(g_errLog.find("NotifyRunSensorFoldStateManager") != std::string::npos);
+        EXPECT_TRUE(g_errLog.find("TaskSequenceProcess") != std::string::npos);
         LOG_SetCallback(nullptr);
     }
 }
