@@ -1784,6 +1784,38 @@ HWTEST_F(WindowSessionTest4, PrelaunchCheck, TestSize.Level1)
     bool result = session_->IsPrelaunch();
     EXPECT_EQ(result, false);
 }
+
+/**
+ * @tc.name: GetIsMidScene_SubSession
+ * @tc.desc: GetIsMidScene_SubSession Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, GetIsMidScene_SubSession, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetIsMidScene";
+    info.moduleName_ = "GetIsMidScene";
+    info.bundleName_ = "GetIsMidScene";
+    sptr<Session> subSession = sptr<Session>::MakeSptr(info);
+    ASSERT_NE(subSession, nullptr);
+    subSession->SetIsMidScene(false);
+    ASSERT_NE(session_, nullptr);
+    subSession->SetParentSession(session_);
+
+    session_->SetIsMidScene(false);
+    sleep(1);
+    bool isMidScene = false;
+    auto result = subSession->GetIsMidScene(isMidScene);
+    EXPECT_EQ(result, WSError::WS_OK);
+    EXPECT_EQ(isMidScene, false);
+
+    session_->SetIsMidScene(true);
+    sleep(1);
+    isMidScene = false;
+    result = subSession->GetIsMidScene(isMidScene);
+    EXPECT_EQ(result, WSError::WS_OK);
+    EXPECT_EQ(isMidScene, true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
