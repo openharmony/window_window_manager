@@ -48,7 +48,7 @@ HWTEST_F(TaskSequenceProcessTest, ATC_Notify01, TestSize.Level0)
 {
     TaskSequenceProcess process = TaskSequenceProcess(10);
     process.SetTaskRunningFlag(false);
-    TaskSequencEventInfo task;
+    TaskSequenceEventInfo task;
     process.Push(task);
     process.Notify();
     EXPECT_TRUE(process.taskRunningFlag_.load());
@@ -76,7 +76,7 @@ HWTEST_F(TaskSequenceProcessTest, ATC_Notify03, TestSize.Level0)
 {
     TaskSequenceProcess process = TaskSequenceProcess(10);
     process.SetTaskRunningFlag(true);
-    TaskSequencEventInfo task;
+    TaskSequenceEventInfo task;
     process.Push(task);
     process.Notify();
     EXPECT_TRUE(process.taskQueue_.size()==1);
@@ -113,7 +113,7 @@ HWTEST_F(TaskSequenceProcessTest, ATC_TaskSequenceProcess02, TestSize.Level0)
 HWTEST_F(TaskSequenceProcessTest, ATC_Exec01, TestSize.Level0)
 {
     TaskSequenceProcess process = TaskSequenceProcess(1);
-    TaskSequencEventInfo task;
+    TaskSequenceEventInfo task;
     bool taskInfoCalled = false;
     task.taskInfo = [&taskInfoCalled]() {
         taskInfoCalled =true;
@@ -144,8 +144,8 @@ HWTEST_F(TaskSequenceProcessTest, ATC_SetTaskRunningFlag01, TestSize.Level0)
 HWTEST_F(TaskSequenceProcessTest, ATC_Push01, TestSize.Level0)
 {
     TaskSequenceProcess process = TaskSequenceProcess(1);
-    TaskSequencEventInfo eventInfo1;
-    TaskSequencEventInfo eventInfo2;
+    TaskSequenceEventInfo eventInfo1;
+    TaskSequenceEventInfo eventInfo2;
     process.Push(eventInfo1);
     process.Push(eventInfo2);
     EXPECT_EQ(process.taskQueue_.size(), 1);
@@ -159,8 +159,8 @@ HWTEST_F(TaskSequenceProcessTest, ATC_Push01, TestSize.Level0)
 HWTEST_F(TaskSequenceProcessTest, ATC_Push02, TestSize.Level0)
 {
     TaskSequenceProcess process = TaskSequenceProcess(3);
-    TaskSequencEventInfo eventInfo1;
-    TaskSequencEventInfo eventInfo2;
+    TaskSequenceEventInfo eventInfo1;
+    TaskSequenceEventInfo eventInfo2;
     process.Push(eventInfo1);
     process.Push(eventInfo2);
     EXPECT_EQ(process.taskQueue_.size(), 2);
