@@ -491,7 +491,6 @@ public:
     virtual bool IsPadWindow() const { return false; }
     virtual bool IsPcOrFreeMultiWindowCapabilityEnabled() const { return false; }
     virtual bool IsPhonePadOrPcWindow() const { return false; }
-    virtual uint32_t GetTargetAPIVersion() const { return API_VERSION_INVALID; }
     virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
     virtual bool IsPadAndNotFreeMultiWindowCompatibleMode() const { return false; }
     virtual bool IsSceneBoardEnabled() const { return false; }
