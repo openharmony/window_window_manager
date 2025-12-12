@@ -34,7 +34,7 @@ void TaskSequenceProcess::Notify()
     TLOGI(WmsLogTag::DMS, "TaskSequenceProcess taskRunningFlag_: %{public}d, taskQueue.empty(): %{public}d",
         taskRunningFlag_.load(), taskQueue_.empty());
     if (!taskRunningFlag_.load() && !taskQueue_.empty()) {
-        TaskSequencEventInfo task = taskQueue_.front();
+        TaskSequenceEventInfo task = taskQueue_.front();
         taskQueue_.pop();
         taskRunningFlag_.store(true);
         Exec(task);
@@ -42,7 +42,7 @@ void TaskSequenceProcess::Notify()
     } else TLOGI(WmsLogTag::DMS, "TaskSequenceProcess notify task but full");
 }
 
-void TaskSequenceProcess::Push(const TaskSequencEventInfo& eventInfo)
+void TaskSequenceProcess::Push(const TaskSequenceEventInfo& eventInfo)
 {
     std::lock_guard<std::mutex> lock(queueMutex_);
     TLOGI(WmsLogTag::DMS, "TaskSequenceProcess push");
@@ -57,7 +57,7 @@ void TaskSequenceProcess::SetTaskRunningFlag(bool flag)
     taskRunningFlag_.store(flag);
 }
 
-void TaskSequenceProcess::Exec(const TaskSequencEventInfo& task)
+void TaskSequenceProcess::Exec(const TaskSequenceEventInfo& task)
 {
     if (task.taskInfo) {
         task.taskInfo();
