@@ -2306,7 +2306,7 @@ void WindowSessionImpl::RegisterKeyFrameCallback()
     });
 }
 
-WSError WindowSessionImpl::LinkKeyFrameNode(std::shared_ptr<RSWindowKeyFrameNode>& rsKeyFrameNode)
+WSError WindowSessionImpl::LinkKeyFrameNode()
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     auto uiContent = GetUIContentSharedPtr();
@@ -2315,8 +2315,7 @@ WSError WindowSessionImpl::LinkKeyFrameNode(std::shared_ptr<RSWindowKeyFrameNode
         TLOGE(WmsLogTag::WMS_EVENT, "uiContent or session is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    RSAdapterUtil::SetRSUIContext(rsKeyFrameNode, GetRSUIContext(), true);
-    uiContent->LinkKeyFrameNode(rsKeyFrameNode);
+    uiContent->LinkKeyFrameNode();
     return WSError::WS_OK;
 }
 

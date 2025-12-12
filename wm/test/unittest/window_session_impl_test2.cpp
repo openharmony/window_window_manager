@@ -509,17 +509,16 @@ HWTEST_F(WindowSessionImplTest2, LinkKeyFrameNode, TestSize.Level1)
     ASSERT_NE(window, nullptr);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     auto hostSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    auto rsKeyFrameNode = RSWindowKeyFrameNode::Create();
     window->uiContent_ = nullptr;
     window->hostSession_ = nullptr;
-    ASSERT_EQ(window->LinkKeyFrameNode(rsKeyFrameNode), WSError::WS_ERROR_NULLPTR);
+    ASSERT_EQ(window->LinkKeyFrameNode(), WSError::WS_ERROR_NULLPTR);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    ASSERT_EQ(window->LinkKeyFrameNode(rsKeyFrameNode), WSError::WS_ERROR_NULLPTR);
+    ASSERT_EQ(window->LinkKeyFrameNode(), WSError::WS_ERROR_NULLPTR);
     window->uiContent_ = nullptr;
     window->hostSession_ = hostSession;
-    ASSERT_EQ(window->LinkKeyFrameNode(rsKeyFrameNode), WSError::WS_ERROR_NULLPTR);
+    ASSERT_EQ(window->LinkKeyFrameNode(), WSError::WS_ERROR_NULLPTR);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    ASSERT_EQ(window->LinkKeyFrameNode(rsKeyFrameNode), WSError::WS_OK);
+    ASSERT_EQ(window->LinkKeyFrameNode(), WSError::WS_OK);
     window->Destroy();
 }
 
