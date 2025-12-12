@@ -2409,7 +2409,7 @@ void AniWindow::OnShowWindowWithOptions(ani_env* env, ani_object aniShowWindowOp
     if (!isFocusOnShowUndefined) {
         ani_boolean isFocusOnShow;
         env->Object_CallMethodByName_Boolean(static_cast<ani_object>(aniFocusOnShow),
-            "unboxed", ":z", &isFocusOnShow);
+            "toBoolean", ":z", &isFocusOnShow);
         focusOnShow = static_cast<bool>(isFocusOnShow);
     }
 
@@ -4119,7 +4119,7 @@ ani_object AniWindow::SetWindowLimits(ani_env* env, ani_object inWindowLimits, a
             return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
         }
         ani_boolean aniIsForcible;
-        ani_status aniRet = env->Object_CallMethodByName_Boolean(forcible, "unboxed", ":Z", &aniIsForcible);
+        ani_status aniRet = env->Object_CallMethodByName_Boolean(forcible, "toBoolean", ":Z", &aniIsForcible);
         if (aniRet != ANI_OK) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] failed to convert parameter to isForcible");
             return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
@@ -4395,7 +4395,7 @@ std::optional<WaterfallResidentState> ParseWaterfallResidentState(ani_env* env, 
         return WaterfallResidentState::UNCHANGED;
     }
     ani_boolean acrossDisplay = ANI_FALSE;
-    ani_status ret = env->Object_CallMethodByName_Boolean(aniAcrossDisplay, "unboxed", ":z", &acrossDisplay);
+    ani_status ret = env->Object_CallMethodByName_Boolean(aniAcrossDisplay, "toBoolean", ":z", &acrossDisplay);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Invalid acrossDisplay param, ret: %{public}d", ret);
         return std::nullopt;

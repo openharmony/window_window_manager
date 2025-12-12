@@ -557,7 +557,7 @@ void AniWindowStage::OnSetImageForRecent(ani_env* env, ani_object imageResource,
     ani_long imageResourceId;
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     if (isLong) {
-        env->Object_CallMethodByName_Long(imageResource, "unboxed", ":l", &imageResourceId);
+        env->Object_CallMethodByName_Long(imageResource, "toLong", ":l", &imageResourceId);
         if (imageResourceId < MIN_RESOURCE_ID || imageResourceId > MAX_RESOURCE_ID) {
             TLOGE(WmsLogTag::WMS_PATTERN, "imageResourceId invalid: %{public}d", static_cast<int32_t>(imageResourceId));
             AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
