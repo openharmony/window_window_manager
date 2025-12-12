@@ -2803,6 +2803,12 @@ sptr<SceneSession> SceneSessionManager::GetSceneSessionBySessionInfo(const Sessi
         }
     }
 
+    if (WindowHelper::IsMainWindow(static_cast<WindowType>(sessionInfo.windowType_)) &&
+        (sessionInfo.isAncoApplication_ || CheckCollaboratorType(sessionInfo.collaboratorType_))) {
+        TLOGI(WmsLogTag::WMS_LIFE, "ancoApplication not reuse session by sceneInfo defaultly.");
+        return nullptr;
+    }
+
     if (WindowHelper::IsMainWindow(static_cast<WindowType>(sessionInfo.windowType_))) {
         TLOGI(WmsLogTag::WMS_LIFE, "mainWindow bundleName: %{public}s, moduleName: %{public}s, "
             "abilityName: %{public}s, appIndex: %{public}d, appInstanceKey:%{public}s, isAtomicService:%{public}d",

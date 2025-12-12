@@ -468,6 +468,8 @@ struct SessionInfo {
     std::string label_ = "";
     StartWindowType startWindowType_ = StartWindowType::DEFAULT;
     bool isSetStartWindowType_ = false;
+    // only init when requestSceneSession from SCB
+    bool isAncoApplication_ = false;
     int32_t scenarios = 0;
     bool isPrelaunch_ = false;
 

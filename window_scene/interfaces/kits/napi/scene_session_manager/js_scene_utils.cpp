@@ -498,6 +498,19 @@ static bool IsJsIsAbilityHookUndefind(napi_env env, napi_value jsIsAbilityHook, 
     return true;
 }
 
+static bool IsJsIsAncoApplicationUndefind(napi_env env, napi_value jsIsAncoApplication, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsIsAncoApplication) != napi_undefined) {
+        bool isAncoApplication = false;
+        if (!ConvertFromJsValue(env, jsIsAncoApplication, isAncoApplication)) {
+            TLOGI(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isAncoApplication");
+            return false;
+        }
+        sessionInfo.isAncoApplication_ = isAncoApplication;
+    }
+    return true;
+}
+
 static napi_value CreateJsValueFromStringArray(napi_env env, const std::vector<std::string>& stringArray)
 {
     napi_value arrayValue = nullptr;
@@ -571,6 +584,8 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     napi_get_named_property(env, jsObject, "isAbilityHook", &jsIsAbilityHook);
     napi_value jsRequestId = nullptr;
     napi_get_named_property(env, jsObject, "requestId", &jsRequestId);
+    napi_value jsIsAncoApplication = nullptr;
+    napi_get_named_property(env, jsObject, "isAncoApplication", &jsIsAncoApplication);
     if (!IsJsBundleNameUndefind(env, jsBundleName, sessionInfo)) {
         return false;
     }
@@ -590,7 +605,8 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
         !IsJsInstanceKeyUndefined(env, jsInstanceKey, sessionInfo) ||
         !IsJsWindowInputTypeUndefind(env, jsWindowInputType, sessionInfo) ||
         !IsJsIsAbilityHookUndefind(env, jsIsAbilityHook, sessionInfo) ||
-        !IsJsRequestIdUndefind(env, jsRequestId, sessionInfo)) {
+        !IsJsRequestIdUndefind(env, jsRequestId, sessionInfo) ||
+        !IsJsIsAncoApplicationUndefind(env, jsIsAncoApplication, sessionInfo)) {
         return false;
     }
     return true;
