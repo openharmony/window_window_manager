@@ -70,7 +70,7 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
             foldScreenPolicy->SendSensorResult(mState_);
         }
     };
-    TaskSequencEventInfo eventInfo = TaskSequencEventInfo{
+    TaskSequenceEventInfo eventInfo = TaskSequenceEventInfo{
         .taskInfo = task};
     taskProcessor_.Push(eventInfo);
     taskProcessor_.Notify();
@@ -135,7 +135,7 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std:
             ffrtQueueHelper->SubmitTask(task);
         }
     };
-    TaskSequencEventInfo eventInfo = TaskSequencEventInfo{
+    TaskSequenceEventInfo eventInfo = TaskSequenceEventInfo{
         .taskInfo = event};
     taskProcessor_.Push(eventInfo);
     taskProcessor_.Notify();
