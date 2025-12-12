@@ -19,6 +19,7 @@
 #include "interfaces/include/ws_common.h"
 #include "iremote_object_mocker.h"
 #include "mock/mock_scene_session.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/host/include/scene_session.h"
 #include "session_info.h"
 #include "session_manager.h"
@@ -38,6 +39,7 @@ public:
     void TearDown() override;
 
     static sptr<SceneSessionManager> ssm_;
+    ScreenSessionManagerClient* screenSessionManagerClient_;
 
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
@@ -72,10 +74,14 @@ void SceneSessionManagerTest9::TearDownTestCase()
     ssm_ = nullptr;
 }
 
-void SceneSessionManagerTest9::SetUp() {}
+void SceneSessionManagerTest9::SetUp()
+{
+    screenSessionManagerClient_ = &ScreenSessionManagerClient::GetInstance();
+}
 
 void SceneSessionManagerTest9::TearDown()
 {
+    screenSessionManagerClient_ = nullptr;
     usleep(WAIT_SYNC_IN_NS);
 }
 
@@ -614,6 +620,12 @@ HWTEST_F(SceneSessionManagerTest9, TestRequestSessionFocus_14, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest9, RequestSessionUnfocus02, TestSize.Level0)
 {
+    ASSERT_NE(screenSessionManagerClient_, nullptr);
+    screenSessionManagerClient_->screenSessionMap_.clear();
+    ScreenId screenId = 0;
+    sptr<ScreenSession> screenSession = new ScreenSession(screenId, ScreenProperty(), 0);
+    screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
+
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
     WSError ret = ssm_->RequestSessionUnfocus(0, FocusChangeReason::DEFAULT);
@@ -659,6 +671,7 @@ HWTEST_F(SceneSessionManagerTest9, RequestSessionUnfocus02, TestSize.Level0)
     ret = ssm_->RequestSessionUnfocus(1, FocusChangeReason::DEFAULT);
     EXPECT_EQ(ret, WSError::WS_OK);
     EXPECT_EQ(focusGroup->GetFocusedSessionId(), 4);
+    screenSessionManagerClient_->screenSessionMap_.clear();
 }
 
 /**
@@ -1073,6 +1086,12 @@ HWTEST_F(SceneSessionManagerTest9, ProcessSubWindowRequestFocusImmediately4, Tes
  */
 HWTEST_F(SceneSessionManagerTest9, ProcessSubWindowRequestFocusImmediately5, TestSize.Level1)
 {
+    ASSERT_NE(screenSessionManagerClient_, nullptr);
+    screenSessionManagerClient_->screenSessionMap_.clear();
+    ScreenId screenId = 0;
+    sptr<ScreenSession> screenSession = new ScreenSession(screenId, ScreenProperty(), 0);
+    screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
+
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
     SessionInfo sessionInfo;
@@ -1100,6 +1119,7 @@ HWTEST_F(SceneSessionManagerTest9, ProcessSubWindowRequestFocusImmediately5, Tes
     WSError ret = ssm_->ProcessSubWindowRequestFocusImmediately(sceneSession);
     EXPECT_EQ(ret, WSError::WS_OK);
     ssm_->sceneSessionMap_.clear();
+    screenSessionManagerClient_->screenSessionMap_.clear();
 }
 
 /**
