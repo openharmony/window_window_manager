@@ -86,7 +86,7 @@ public:
     MOCK_METHOD3(NotifyPipWindowSizeChange, WSError(double width, double height, double scale));
     MOCK_METHOD1(NotifyPiPActiveStatusChange, WSError(bool status));
     MOCK_METHOD1(NotifyWindowCrossAxisChange, void(CrossAxisState state));
-    MOCK_METHOD1(LinkKeyFrameNode, WSError(std::shared_ptr<RSWindowKeyFrameNode>& rsKeyFrameNode));
+    MOCK_METHOD0(LinkKeyFrameNode, WSError(void));
     MOCK_METHOD1(SetStageKeyFramePolicy, WSError(const KeyFramePolicy& keyFramePolicy));
     MOCK_METHOD1(SetCurrentRotation, WSError(int32_t currentRotation));
     MOCK_METHOD0(NotifyLifecyclePausedStatus, void(void));

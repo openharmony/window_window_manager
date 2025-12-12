@@ -4475,7 +4475,7 @@ WSError SceneSession::UpdateKeyFrameCloneNode(std::shared_ptr<RSWindowKeyFrameNo
     }
     keyFrameCloneNode_ = rsKeyFrameNode;
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "change key frame node to %{public}" PRIu64 "", keyFrameCloneNode_->GetId());
-    sessionStage_->LinkKeyFrameNode(keyFrameCloneNode_);
+    sessionStage_->LinkKeyFrameNode();
     if (rsTransaction != nullptr) {
         rsTransaction->Commit();
         TLOGD(WmsLogTag::WMS_LAYOUT_PC, "commit rsTransaction");
@@ -4500,12 +4500,25 @@ void SceneSession::UpdateKeyFramePolicy(bool running, bool stopping)
 WSError SceneSession::SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "set keyframe policy from outside: %{public}s", keyFramePolicy.ToString().c_str());
-    std::lock_guard<std::mutex> lock(keyFrameMutex_);
-    bool running = keyFramePolicy_.running_;
-    bool stopping = keyFramePolicy_.stopping_;
-    keyFramePolicy_ = keyFramePolicy;
-    keyFramePolicy_.running_ = running;
-    keyFramePolicy_.stopping_ = stopping;
+    auto currentKeyFramePolicy = GetKeyFramePolicy();
+    bool running = currentKeyFramePolicy.running_;
+    if (!running && keyFramePolicy.enabled() &&
+        moveDragController_ != nullptr && moveDragController_->GetStartDragFlag() &&
+        GetAppDragResizeType() != DragResizeType::RESIZE_WHEN_DRAG_END) {
+        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "key frame policy is enabled during resize");
+        {
+            std::lock_guard<std::mutex> lock(keyFrameMutex_);
+            keyFramePolicy_ = keyFramePolicy;
+        }
+        InitKeyFrameState(GetSessionRect());
+        NotifyClientToUpdateRect("OnMoveDragCallback", nullptr);
+    } else {
+        bool stopping = currentKeyFramePolicy.stopping_;
+        std::lock_guard<std::mutex> lock(keyFrameMutex_);
+        keyFramePolicy_ = keyFramePolicy;
+        keyFramePolicy_.running_ = running;
+        keyFramePolicy_.stopping_ = stopping;
+    }
     return WSError::WS_OK;
 }
 
@@ -4618,7 +4631,7 @@ bool SceneSession::KeyFrameNotifyFilter(const WSRect& rect, SizeChangeReason rea
 {
     KeyFramePolicy keyFramePolicy = GetKeyFramePolicy();
     if (!keyFramePolicy.running_) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "skip filter for not running");
+        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "skip filter for not running");
         return false;
     }
     if (reason == SizeChangeReason::DRAG_START) {
@@ -4628,8 +4641,8 @@ bool SceneSession::KeyFrameNotifyFilter(const WSRect& rect, SizeChangeReason rea
     if (reason != SizeChangeReason::DRAG) {
         return false;
     }
-    if (keyFrameAnimating_) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "filter for animating");
+    if (keyFrameAnimating_ || keyFrameCloneNode_ == nullptr) {
+        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "filter for animating or keyframe node not ready");
         return true;
     }
     bool isToFilter = true;
@@ -4644,7 +4657,7 @@ bool SceneSession::KeyFrameNotifyFilter(const WSRect& rect, SizeChangeReason rea
                         pow(rect.height_ - lastKeyFrameRect_.height_, POW_DOUBLE));
         distanceCheckPass = distance >= keyFramePolicy.distance_;
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "key frame checking: %{public}" PRIu64 "[%{public}d], %{public}f[%{public}d]",
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "key frame checking: %{public}" PRIu64 "[%{public}d], %{public}f[%{public}d]",
         interval, intervalCheckPass, distance, distanceCheckPass);
     if (intervalCheckPass || distanceCheckPass) {
         isToFilter = false;
