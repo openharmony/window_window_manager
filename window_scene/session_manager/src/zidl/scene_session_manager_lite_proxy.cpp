@@ -2347,7 +2347,7 @@ WMError SceneSessionManagerLiteProxy::RegisterWindowPropertyChangeAgent(WindowIn
 
     if (!windowManagerAgent) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowManagerAgent is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
 
     if (!data.WriteRemoteObject(windowManagerAgent->AsObject())) {
@@ -2393,7 +2393,7 @@ WMError SceneSessionManagerLiteProxy::UnregisterWindowPropertyChangeAgent(Window
 
     if (!windowManagerAgent) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowManagerAgent is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
 
     if (!data.WriteRemoteObject(windowManagerAgent->AsObject())) {

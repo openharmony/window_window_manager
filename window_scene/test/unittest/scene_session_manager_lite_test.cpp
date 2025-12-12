@@ -81,6 +81,57 @@ HWTEST_F(SceneSessionManagerLiteTest, SendPointerEventForHover, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RegisterWindowPropertyChangeAgent
+ * @tc.desc: test function : RegisterWindowPropertyChangeAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteTest, RegisterWindowPropertyChangeAgent, TestSize.Level1)
+{
+    WindowInfoKey windowInfoKey = WindowInfoKey::MID_SCENE;
+    uint32_t interestInfo = 0;
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgentLite>::MakeSptr();
+    auto expectRet = SceneSessionManager::GetInstance().RegisterWindowPropertyChangeAgent(windowInfoKey, interestInfo,
+        windowManagerAgent);
+    auto ret = SceneSessionManagerLite::GetInstance().RegisterWindowPropertyChangeAgent(windowInfoKey, interestInfo,
+        windowManagerAgent);
+    EXPECT_EQ(ret, expectRet);
+}
+
+/**
+ * @tc.name: UnregisterWindowPropertyChangeAgent
+ * @tc.desc: test function : UnregisterWindowPropertyChangeAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteTest, UnregisterWindowPropertyChangeAgent, TestSize.Level1)
+{
+    WindowInfoKey windowInfoKey = WindowInfoKey::MID_SCENE;
+    uint32_t interestInfo = 0;
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgentLite>::MakeSptr();
+    auto expectRet = SceneSessionManager::GetInstance().UnregisterWindowPropertyChangeAgent(windowInfoKey,
+        interestInfo, windowManagerAgent);
+    auto ret = SceneSessionManagerLite::GetInstance().UnregisterWindowPropertyChangeAgent(windowInfoKey, interestInfo,
+        windowManagerAgent);
+    EXPECT_EQ(ret, expectRet);
+}
+
+/**
+ * @tc.name: RecoverWindowPropertyChangeFlag
+ * @tc.desc: test function : RecoverWindowPropertyChangeFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteTest, RecoverWindowPropertyChangeFlag, TestSize.Level1)
+{
+    WindowInfoKey windowInfoKey = WindowInfoKey::MID_SCENE;
+    uint32_t interestInfo = 0;
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgentLite>::MakeSptr();
+    auto expectRet = SceneSessionManager::GetInstance().RecoverWindowPropertyChangeFlag(windowInfoKey, interestInfo,
+        windowManagerAgent);
+    auto ret = SceneSessionManagerLite::GetInstance().RecoverWindowPropertyChangeFlag(windowInfoKey, interestInfo,
+        windowManagerAgent);
+    EXPECT_EQ(ret, expectRet);
+}
+
+/**
  * @tc.name: IsFocusWindowParent
  * @tc.desc: test function : IsFocusWindowParent
  * @tc.type: FUNC
