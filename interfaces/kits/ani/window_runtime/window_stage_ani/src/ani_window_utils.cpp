@@ -312,7 +312,7 @@ ani_status AniWindowUtils::GetPropertyBoolObject(ani_env* env, const char* prope
     }
 
     ani_boolean bool_value;
-    ret = env->Object_CallMethodByName_Boolean(static_cast<ani_object>(bool_ref), "unboxed", ":Z", &bool_value);
+    ret = env->Object_CallMethodByName_Boolean(static_cast<ani_object>(bool_ref), "toBoolean", ":Z", &bool_value);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
         return ret;
@@ -345,7 +345,7 @@ ani_status AniWindowUtils::GetPropertyLongObject(ani_env* env, const char* prope
         return ANI_ERROR;
     }
     ani_long long_value;
-    ret = env->Object_CallMethodByName_Long(static_cast<ani_object>(long_ref), "unboxed", ":J", &long_value);
+    ret = env->Object_CallMethodByName_Long(static_cast<ani_object>(long_ref), "toLong", ":J", &long_value);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_CallMethodByName_Long %{public}s failed, ret : %{public}d",
             propertyName, static_cast<int32_t>(ret));
@@ -1884,7 +1884,7 @@ void AniWindowUtils::GetWindowSnapshotConfiguration(ani_env* env, ani_object con
         return;
     }
     ani_boolean value = 0;
-    env->Object_CallMethodByName_Boolean(static_cast<ani_object>(nativeObj), "unboxed", ":z", &value);
+    env->Object_CallMethodByName_Boolean(static_cast<ani_object>(nativeObj), "toBoolean", ":z", &value);
     windowSnapshotConfiguration.useCache = static_cast<bool>(value);
 }
 
@@ -1955,7 +1955,7 @@ bool AniWindowUtils::SetWindowStatusBarContentColor(ani_env* env,
             aniObject);
     } else if (!isIconUndefined) {
         ani_boolean isStatusIcon;
-        env->Object_CallMethodByName_Boolean(static_cast<ani_object>(aniStatusIcon), "unboxed", ":z", &isStatusIcon);
+        env->Object_CallMethodByName_Boolean(static_cast<ani_object>(aniStatusIcon), "toBoolean", ":z", &isStatusIcon);
         if (static_cast<bool>(aniStatusIcon)) {
             properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ = SYSTEM_COLOR_WHITE;
         } else {
@@ -1994,7 +1994,7 @@ bool AniWindowUtils::SetWindowNavigationBarContentColor(ani_env* env,
     } else if (!isIconUndefined) {
         ani_boolean isNavigationIcon;
         env->Object_CallMethodByName_Boolean(static_cast<ani_object>(aniNavigationIcon),
-            "unboxed", ":z", &isNavigationIcon);
+            "toBoolean", ":z", &isNavigationIcon);
         if (static_cast<bool>(isNavigationIcon)) {
             properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ = SYSTEM_COLOR_WHITE;
         } else {
@@ -2049,7 +2049,7 @@ bool AniWindowUtils::SetSystemBarPropertiesFromAni(ani_env* env,
     if (!isStatusAnimationUndefined) {
         ani_boolean isStatusAnimation;
         env->Object_CallMethodByName_Boolean(static_cast<ani_object>(aniEnableStatusBarAnimation),
-            "unboxed", "z", &isStatusAnimation);
+            "toBoolean", "z", &isStatusAnimation);
         windowBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_ =
             static_cast<bool>(isStatusAnimation);
         windowPropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimationFlag = true;
@@ -2063,7 +2063,7 @@ bool AniWindowUtils::SetSystemBarPropertiesFromAni(ani_env* env,
     if (!isNavigationAnimationUndefined) {
         ani_boolean isNavigationAnimation;
         env->Object_CallMethodByName_Boolean(static_cast<ani_object>(aniEnableNavigationBarAnimation),
-            "unboxed", "z", &isNavigationAnimation);
+            "toBoolean", "z", &isNavigationAnimation);
         windowBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableAnimation_ =
             static_cast<bool>(isNavigationAnimation);
         windowPropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableAnimationFlag = true;
@@ -2151,7 +2151,7 @@ bool AniWindowUtils::GetSpecificBarStatus(ani_env* env,
     }
     if (!isUndefined) {
         ani_boolean bool_value;
-        if (env->Object_CallMethodByName_Boolean(aniAnimation, "unboxed", ":z", &bool_value) != ANI_OK) {
+        if (env->Object_CallMethodByName_Boolean(aniAnimation, "toBoolean", ":z", &bool_value) != ANI_OK) {
             TLOGE(WmsLogTag::WMS_IMMS, "[ANI] Object_CallMethodByName_Boolean failed");
             return false;
         }

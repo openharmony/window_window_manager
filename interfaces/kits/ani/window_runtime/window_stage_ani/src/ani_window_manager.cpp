@@ -327,7 +327,7 @@ ani_int AniWindowManager::OnGetGlobalWindowMode(ani_env* env, ani_object nativeD
     env->Reference_IsUndefined(nativeDisplayId, &isUndefined);
     if (!isUndefined) {
         ani_long aniDisplayId;
-        env->Object_CallMethodByName_Long(nativeDisplayId, "unboxed", ":l", &aniDisplayId);
+        env->Object_CallMethodByName_Long(nativeDisplayId, "toLong", ":l", &aniDisplayId);
         if (aniDisplayId < 0) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid displayId value: %{public}" PRId64,
                 static_cast<int64_t>(aniDisplayId));

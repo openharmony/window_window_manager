@@ -147,9 +147,9 @@ bool ParseDurationValue(ani_env* env, ani_object aniObject, ani_long& aniDuratio
         TLOGW(WmsLogTag::WMS_ANIMATION, "[ANI] Duration is undefined.");
         return false;
     }
-    ret = env->Object_CallMethodByName_Long(static_cast<ani_object>(durationRef), "unboxed", ":l", &aniDuration);
+    ret = env->Object_CallMethodByName_Long(static_cast<ani_object>(durationRef), "toLong", ":l", &aniDuration);
     if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] Unboxed duration value failed. %{public}d", ret);
+        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] toLong duration value failed. %{public}d", ret);
         return false;
     }
     return true;
@@ -495,10 +495,10 @@ bool ConvertTransitionAnimationFromAniValue(ani_env* env, ani_object aniObject,
     }
 
     ani_double aniOpacityValue = 0;
-    ret = env->Object_CallMethodByName_Double(static_cast<ani_object>(aniOpacityObj), "unboxed", ":d",
+    ret = env->Object_CallMethodByName_Double(static_cast<ani_object>(aniOpacityObj), "toDouble", ":d",
         &aniOpacityValue);
     if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] Opacity unboxed failed. ret: %{public}d", ret);
+        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] Opacity toDouble failed. ret: %{public}d", ret);
         result = WmErrorCode::WM_ERROR_INVALID_PARAM;
         return false;
     }
@@ -711,7 +711,7 @@ bool ConvertWindowAnimationOptionFromAniValue(ani_env* env, ani_object aniAnimat
                     return false;
                 }
                 ani_double value = 0;
-                ret = env->Object_CallMethodByName_Double(static_cast<ani_object>(element), "unboxed", ":d", &value);
+                ret = env->Object_CallMethodByName_Double(static_cast<ani_object>(element), "toDouble", ":d", &value);
                 if (ret != ANI_OK) {
                     result = WmErrorCode::WM_ERROR_INVALID_PARAM;
                     return false;

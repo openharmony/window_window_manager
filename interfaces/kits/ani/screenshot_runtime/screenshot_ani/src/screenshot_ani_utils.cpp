@@ -360,7 +360,7 @@ ani_status ScreenshotAniUtils::ReadOptionalLongField(ani_env* env, ani_object ob
     ani_ref ref = nullptr;
     ani_status result = ReadOptionalField(env, obj, fieldName, ref);
     if (result == ANI_OK && ref != nullptr) {
-        result = env->Object_CallMethodByName_Long(reinterpret_cast<ani_object>(ref), "unboxed", ":l", &value);
+        result = env->Object_CallMethodByName_Long(reinterpret_cast<ani_object>(ref), "toLong", ":l", &value);
     }
     return result;
 }
@@ -371,7 +371,7 @@ ani_status ScreenshotAniUtils::ReadOptionalIntField(ani_env* env, ani_object obj
     ani_ref ref = nullptr;
     ani_status result = ReadOptionalField(env, obj, fieldName, ref);
     if (result == ANI_OK && ref != nullptr) {
-        result = env->Object_CallMethodByName_Int(reinterpret_cast<ani_object>(ref), "unboxed", ":i", &value);
+        result = env->Object_CallMethodByName_Int(reinterpret_cast<ani_object>(ref), "toInt", ":i", &value);
     }
     return result;
 }
@@ -382,7 +382,7 @@ ani_status ScreenshotAniUtils::ReadOptionalBoolField(ani_env* env, ani_object ob
     ani_status result = ReadOptionalField(env, obj, fieldName, ref);
     if (result == ANI_OK && ref != nullptr) {
         ani_boolean aniBool;
-        result = env->Object_CallMethodByName_Boolean(reinterpret_cast<ani_object>(ref), "unboxed", ":z", &aniBool);
+        result = env->Object_CallMethodByName_Boolean(reinterpret_cast<ani_object>(ref), "toBoolean", ":z", &aniBool);
         if (result == ANI_OK) {
             value = static_cast<bool>(aniBool);
         }

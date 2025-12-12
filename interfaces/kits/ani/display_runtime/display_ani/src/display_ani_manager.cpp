@@ -616,7 +616,7 @@ void DisplayManagerAni::OnConvertGlobalToRelativeCoordinate(
             SingletonContainer::Get<DisplayManager>().ConvertGlobalCoordinateToRelative(
                 globalPosition, relativePosition));
     } else {
-        env->Object_CallMethodByName_Long(displayId, "unboxed", ":l", &displayIdTmp);
+        env->Object_CallMethodByName_Long(displayId, "toLong", ":l", &displayIdTmp);
         if (displayIdTmp < 0) {
             AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "displayID less than 0");
             return;
