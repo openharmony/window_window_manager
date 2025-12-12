@@ -412,14 +412,14 @@ WMError SceneSessionManagerLite::ListWindowInfo(const WindowInfoOption& windowIn
 }
 
 WMError SceneSessionManagerLite::RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
-        uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent)
+    uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
     return SceneSessionManager::GetInstance().RegisterWindowPropertyChangeAgent(windowInfoKey, interestInfo,
         windowManagerAgent);
 }
 
 WMError SceneSessionManagerLite::UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
-        uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) 
+    uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
     return SceneSessionManager::GetInstance().UnregisterWindowPropertyChangeAgent(windowInfoKey, interestInfo,
         windowManagerAgent);
