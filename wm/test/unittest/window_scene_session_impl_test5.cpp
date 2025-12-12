@@ -176,12 +176,10 @@ HWTEST_F(WindowSceneSessionImplTest5, TestCheckWaterfallResidentState, TestSize.
     EXPECT_TRUE(window->CheckWaterfallResidentState(WaterfallResidentState::UNCHANGED));
     EXPECT_TRUE(window->CheckWaterfallResidentState(WaterfallResidentState::OPEN));
     EXPECT_TRUE(window->CheckWaterfallResidentState(WaterfallResidentState::CLOSE));
-    EXPECT_TRUE(window->CheckWaterfallResidentState(WaterfallResidentState::CANCEL));
 
-    // Case 2: Sub window, only UNCHANGED or CANCEL should return true
+    // Case 2: Sub window, only UNCHANGED should return true
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     EXPECT_TRUE(window->CheckWaterfallResidentState(WaterfallResidentState::UNCHANGED));
-    EXPECT_TRUE(window->CheckWaterfallResidentState(WaterfallResidentState::CANCEL));
     EXPECT_FALSE(window->CheckWaterfallResidentState(WaterfallResidentState::OPEN));
     EXPECT_FALSE(window->CheckWaterfallResidentState(WaterfallResidentState::CLOSE));
 }
@@ -1067,9 +1065,7 @@ HWTEST_F(WindowSceneSessionImplTest5, UpdateSystemBarPropertyForPage, TestSize.L
         window->UpdateSystemBarPropertyForPage(type, systemBarProperty, systemBarPropertyFlag));
     window->state_ = WindowState::STATE_SHOWN;
     EXPECT_EQ(WMError::WM_OK, window->UpdateSystemBarPropertyForPage(type, systemBarProperty, systemBarPropertyFlag));
-    window->systemBarPropertyForPageMap_[type] = std::nullopt;
-    EXPECT_EQ(WMError::WM_OK, window->UpdateSystemBarPropertyForPage(type, systemBarProperty, systemBarPropertyFlag));
-    window->systemBarPropertyForPageMap_[type] = systemBarProperty;
+    window->nowsystemBarPropertyMap_[type] = systemBarProperty;
     EXPECT_EQ(WMError::WM_OK, window->UpdateSystemBarPropertyForPage(type, systemBarProperty, systemBarPropertyFlag));
     systemBarPropertyFlag = { true, false, false, false };
     EXPECT_EQ(WMError::WM_OK, window->UpdateSystemBarPropertyForPage(type, systemBarProperty, systemBarPropertyFlag));
@@ -1079,6 +1075,84 @@ HWTEST_F(WindowSceneSessionImplTest5, UpdateSystemBarPropertyForPage, TestSize.L
     EXPECT_EQ(WMError::WM_OK, window->UpdateSystemBarPropertyForPage(type, systemBarProperty, systemBarPropertyFlag));
     systemBarPropertyFlag = { true, true, true, true };
     EXPECT_EQ(WMError::WM_OK, window->UpdateSystemBarPropertyForPage(type, systemBarProperty, systemBarPropertyFlag));
+}
+
+/**
+ * @tc.name: SetSystemBarPropertyForPage
+ * @tc.desc: SetSystemBarPropertyForPage
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, SetSystemBarPropertyForPage, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetSystemBarPropertyForPage");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->hostSession_ = session;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetPersistentId(1);
+    windowSceneSessionImpl->property_ = property;
+    std::optional<SystemBarProperty> prop;
+    windowSceneSessionImpl->state_ = WindowState::STATE_DESTROYED;
+    auto ret = windowSceneSessionImpl->SetSystemBarPropertyForPage(WindowType::WINDOW_TYPE_STATUS_BAR, prop);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    windowSceneSessionImpl->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    ret = windowSceneSessionImpl->SetSystemBarPropertyForPage(WindowType::WINDOW_TYPE_STATUS_BAR, prop);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+    windowSceneSessionImpl->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ret = windowSceneSessionImpl->SetSystemBarPropertyForPage(WindowType::WINDOW_TYPE_STATUS_BAR, prop);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    std::optional<SystemBarProperty> prop1 = SystemBarProperty();
+    ret = windowSceneSessionImpl->SetSystemBarPropertyForPage(WindowType::WINDOW_TYPE_STATUS_BAR, prop1);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+
+/**
+ * @tc.name: SetStatusBarColorForPage
+ * @tc.desc: SetStatusBarColorForPage
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, SetStatusBarColorForPage, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetStatusBarColorForPage");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetPersistentId(1);
+    window->property_ = property;
+    window->state_ = WindowState::STATE_SHOWN;
+    std::optional<uint32_t> color;
+    EXPECT_EQ(WMError::WM_OK, window->SetStatusBarColorForPage(color));
+    std::optional<uint32_t> colo1 = { 0x00FFFFFF };
+    EXPECT_EQ(WMError::WM_OK, window->SetStatusBarColorForPage(colo1));
+}
+
+/**
+ * @tc.name: updateSystemBarproperty
+ * @tc.desc: updateSystemBarproperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, updateSystemBarproperty, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("updateSystemBarproperty");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    SystemBarProperty prop = SystemBarProperty();
+    window->updateSystemBarproperty(WindowType::WINDOW_TYPE_STATUS_BAR, prop);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetPersistentId(1);
+    window->property_ = property;
+    window->state_ = WindowState::STATE_SHOWN;
+    EXPECT_EQ(WMError::WM_OK, window->updateSystemBarproperty(WindowType::WINDOW_TYPE_STATUS_BAR, prop));
 }
 
 /**
@@ -2123,9 +2197,7 @@ HWTEST_F(WindowSceneSessionImplTest5, GetAppForceLandscapeConfig01, TestSize.Lev
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(res, WMError::WM_OK);
         EXPECT_EQ(config.mode_, 0);
-        EXPECT_EQ(config.homePage_, "");
         EXPECT_EQ(config.supportSplit_, -1);
-        EXPECT_EQ(config.arkUIOptions_, "");
     }
 }
 
@@ -2146,9 +2218,7 @@ HWTEST_F(WindowSceneSessionImplTest5, GetAppForceLandscapeConfig02, TestSize.Lev
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
         EXPECT_EQ(config.mode_, 0);
-        EXPECT_EQ(config.homePage_, "");
         EXPECT_EQ(config.supportSplit_, -1);
-        EXPECT_EQ(config.arkUIOptions_, "");
     }
 }
 
@@ -2282,25 +2352,8 @@ HWTEST_F(WindowSceneSessionImplTest5, GetConfigurationFromAbilityInfo, TestSize.
     window->property_->SetCompatibleModeProperty(compatibleModeProperty);
     window->GetConfigurationFromAbilityInfo();
     auto supportType = window->property_->GetWindowModeSupportType();
-    auto expceted = WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN |
-                    WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
+    auto expceted = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     EXPECT_EQ(supportType & expceted, expceted);
-
-    compatibleModeProperty->SetIsAdaptToDragScale(false);
-    RealTimeSwitchInfo SwitchInfo;
-    SwitchInfo.isNeedChange_ = true;
-    SwitchInfo.showTypes_ = 1;
-    window->property_->compatibleModeProperty_->SetRealTimeSwitchInfo(SwitchInfo);
-    window->GetConfigurationFromAbilityInfo();
-    supportType = window->property_->GetWindowModeSupportType();
-    expected = WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN |
-                    WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING |
-                    WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
-                    WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY;
-    EXPECT_EQ(supportType, expected);
-    SwitchInfo.showTypes_ = 0;
-    window->property_->compatibleModeProperty_->SetRealTimeSwitchInfo(SwitchInfo);
-    window->GetConfigurationFromAbilityInfo();
 }
 
 /**

@@ -71,6 +71,7 @@ class IBundleMgr;
 struct AbilityInfo;
 struct BundleInfo;
 class LauncherService;
+struct JsonProfileInfo;
 } // namespace OHOS::AppExecFwk
 
 namespace OHOS::Global::Resource {
@@ -254,6 +255,11 @@ public:
     void SetFindScenePanelRsNodeByZOrderFunc(FindScenePanelRsNodeByZOrderFunc&& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
     void ApplyFeatureConfig(const std::unordered_map<std::string, std::string>& configMap);
+    WMError GetAllJsonProfile(AppExecFwk::ProfileType profileType, int32_t userId,
+        std::vector<AppExecFwk::JsonProfileInfo>& jsonProfileInfos);
+    WMError GetJsonProfile(AppExecFwk::ProfileType profileType, const std::string& bundleName,
+        const std::string& moduleName, int32_t userId, std::string& profileInfo);
+    bool IsSameForceSplitConfig(const AppForceLandscapeConfig& preconfig, const AppForceLandscapeConfig& config) const;
 
     /*
      * Window Recover
@@ -624,6 +630,10 @@ public:
     WMError UpdateAppHookWindowInfo(const std::string& bundleName, const HookWindowInfo& hookWindowInfo);
     HookWindowInfo GetAppHookWindowInfo(const std::string& bundleName);
     void UpdateAppHookWindowInfoWhenSwitchFreeMultiWindow(bool isOpenFreeMultiWindow);
+    void UpdateRsCmdBlockingCount(bool enable);
+    int32_t GetOrResetRsCmdBlockingCount();
+    void RegisterGetRsCmdBlockingCountFunc(const sptr<SceneSession>& sceneSession);
+    void RunAfterNVsyncs(uint32_t vsyncCount, OnCallback&& callback);
 
     /*
      * Window Property
@@ -667,8 +677,10 @@ public:
     void SetBehindWindowFilterEnabled(bool enabled);
     void UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userId);
     void UpdateConstrainedModalUIExtInfo(std::shared_ptr<RSUIExtensionData> constrainedModalUIExtData, uint64_t userId);
-    WSError SetAppForceLandscapeConfig(const std::string& bundleName, const AppForceLandscapeConfig& config);
+    WSError SetAppForceLandscapeConfig(const std::string& bundleName, AppForceLandscapeConfig& config);
+    WSError SetAppForceLandscapeConfigEnable(const std::string& bundleName, bool enableForceLandscape);
     AppForceLandscapeConfig GetAppForceLandscapeConfig(const std::string& bundleName);
+    bool GetAppForceLandscapeConfigEnable(const std::string& bundleName);
     WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;
     WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
         const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) override;
@@ -911,6 +923,8 @@ private:
     void ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig, bool mainConfig = true);
     void ConfigWindowAnimation(const WindowSceneConfig::ConfigItem& windowAnimationConfig);
     void ConfigStartingWindowAnimation(const WindowSceneConfig::ConfigItem& startingWindowConfig);
+    bool ConfigWindowLayout(const WindowSceneConfig::ConfigItem& windowLayoutConfig);
+    bool ConfigMoveDrag(const WindowSceneConfig::ConfigItem& moveDragConfig);
     void ConfigWindowSizeLimits();
     void ConfigMainWindowSizeLimits(const WindowSceneConfig::ConfigItem& mainWindowSizeConifg);
     void ConfigSubWindowSizeLimits(const WindowSceneConfig::ConfigItem& subWindowSizeConifg);
@@ -1027,6 +1041,7 @@ private:
         const sptr<SceneSession>& focusedSession, bool includingAppSession);
     bool CheckClickFocusIsDownThroughFullScreen(const sptr<SceneSession>& focusedSession,
         const sptr<SceneSession>& sceneSession, FocusChangeReason reason);
+    bool IsBlockingFocusWindowType(const sptr<SceneSession>& sceneSession) const;
     bool IsParentSessionVisible(const sptr<SceneSession>& session);
     sptr<SceneSession> GetNextFocusableSession(DisplayId displayId, int32_t persistentId);
     sptr<SceneSession> GetTopFloatingSession(DisplayId displayGroupId, int32_t persistentId);
@@ -1551,6 +1566,11 @@ private:
     /*
      * Window Layout
      */
+    struct RsCmdBlockingFlag {
+        int32_t count = 0;
+        int64_t startTime = 0;
+    };
+    RsCmdBlockingFlag rsCmdBlockingFlag_;
     std::shared_ptr<VsyncCallback> vsyncCallback_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
     SingleHandTransform singleHandTransform_;

@@ -286,6 +286,7 @@ public:
     }
     virtual WSError SetCurrentRotation(int32_t currentRotation) = 0;
     virtual WSError NotifyAppForceLandscapeConfigUpdated() = 0;
+    virtual WSError NotifyAppForceLandscapeConfigEnableUpdated() = 0;
     virtual WSError NotifyAppHookWindowInfoUpdated() = 0;
     virtual WSError CloseSpecificScene() { return WSError::WS_DO_NOTHING; }
 
