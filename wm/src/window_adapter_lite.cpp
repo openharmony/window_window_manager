@@ -193,9 +193,7 @@ WMError WindowAdapterLite::RecoverWindowPropertyChangeFlag()
         return WMError::WM_ERROR_NULLPTR;
     }
     auto ret = windowManagerServiceProxy_->RecoverWindowPropertyChangeFlag(observedFlags_, interestedFlags_);
-    if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_RECOVER, "failed, ret=%{public}d", static_cast<int32_t>(ret));
-    }
+    TLOGI(WmsLogTag::WMS_RECOVER, "ret=%{public}d", static_cast<int32_t>(ret));
     return ret;
 }
 

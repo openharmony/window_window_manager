@@ -1127,6 +1127,35 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleListWindowInfo, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleRegisterWindowPropertyChangeAgent
+ * @tc.desc: test function : HandleRegisterWindowPropertyChangeAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleRegisterWindowPropertyChangeAgent, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    ASSERT_NE(sceneSessionManagerLiteStub_, nullptr);
+
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_WINDOW_PROPERTY_CHANGE_AGENT);
+    auto res = sceneSessionManagerLiteStub_->ProcessRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    WindowInfoKey windowInfoKey = WindowInfoKey::DISPLAY_ID;
+    uint32_t interestInfo = 0;
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
+    data.WriteInt32(static_cast<int32_t>(windowInfoKey));
+    data.WriteUint32(interestInfo);
+    data.WriteRemoteObject(windowManagerAgent->AsObject());
+
+    res = sceneSessionManagerLiteStub_->HandleRegisterWindowPropertyChangeAgent(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleGetVisibilityWindowInfo
  * @tc.desc: test function : HandleGetVisibilityWindowInfo
  * @tc.type: FUNC
