@@ -1457,13 +1457,11 @@ HWTEST_F(SceneSessionTest6, TestSetContentAspectRatio, TestSize.Level1)
     result = session->SetContentAspectRatio(0.5f, true, true);
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 
-    // Case 3: aspect ratio is valid, moveDragController is null
-    session->moveDragController_ = nullptr;
+    // Case 3: aspect ratio is valid, isPersistent and needUpdateRect are false
     result = session->SetContentAspectRatio(2.0f, false, false);
     EXPECT_EQ(result, WSError::WS_OK);
 
-    // Case 4: aspect ratio is valid, moveDragController is not null
-    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(session));
+    // Case 4: aspect ratio is valid, isPersistent and needUpdateRect are true
     result = session->SetContentAspectRatio(2.0f, true, true);
     EXPECT_EQ(result, WSError::WS_OK);
 }
@@ -1518,7 +1516,7 @@ HWTEST_F(SceneSessionTest6, TestRunAfterNVsyncs, TestSize.Level1)
     session->requestNextVsyncFunc_ = [](const std::shared_ptr<VsyncCallback>& cb) {
         cb->onCallback(0, 0);
     };
-    session->RunAfterNVsyncs(1, [&] { taskExecuted = true; });
+    session->RunAfterNVsyncs(1, [&](int64_t, int64_t) { taskExecuted = true; });
     EXPECT_TRUE(taskExecuted);
 
     // Case 2: vsyncCount = 3
@@ -1527,13 +1525,13 @@ HWTEST_F(SceneSessionTest6, TestRunAfterNVsyncs, TestSize.Level1)
         static int times = 0;
         if (++times <= 3) cb->onCallback(0, 0);
     };
-    session->RunAfterNVsyncs(3, [&] { taskExecuted = true; });
+    session->RunAfterNVsyncs(3, [&](int64_t, int64_t) { taskExecuted = true; });
     EXPECT_TRUE(taskExecuted);
 
     // Case 3: requestNextVsyncFunc_ = nullptr
     taskExecuted = false;
     session->requestNextVsyncFunc_ = nullptr;
-    session->RunAfterNVsyncs(1, [&] { taskExecuted = true; });
+    session->RunAfterNVsyncs(1, [&](int64_t, int64_t) { taskExecuted = true; });
     EXPECT_FALSE(taskExecuted);
 
     // Case 4: RestoreGravityWhenDragEnd will not crash
@@ -2003,6 +2001,47 @@ HWTEST_F(SceneSessionTest6, TestIsCrossDisplayDragSupported, TestSize.Level1)
     // Case 5: Input Windows are supported
     session->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     EXPECT_TRUE(session->IsCrossDisplayDragSupported());
+}
+
+/**
+ * @tc.name: TestRequestMoveResampleOnNextVsync
+ * @tc.desc: Covers all branches of RequestMoveResampleOnNextVsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, TestRequestMoveResampleOnNextVsync, TestSize.Level1)
+{
+    SessionInfo info;
+    auto session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(session));
+
+    // Force PostTask to execute immediately
+    session->handler_ = nullptr;
+
+    bool called = false;
+    session->requestNextVsyncFunc_ = [&](auto cb) {
+        cb->onCallback(100000, 0);
+        called = true;
+    };
+
+    // Case 1: Normal call → should run callback
+    session->canRequestMoveResampleVsync_ = true;
+    session->moveDragController_->isStartMove_ = false;
+    session->RequestMoveResampleOnNextVsync(true, true);
+    EXPECT_TRUE(called);
+
+    called = false;
+    session->canRequestMoveResampleVsync_ = true;
+    session->moveDragController_->isStartMove_ = true;
+    session->RequestMoveResampleOnNextVsync(true, true);
+    EXPECT_TRUE(called);
+
+    // Case 2: Multiple requests before next vsync → ignored
+    called = false;
+    session->canRequestMoveResampleVsync_ = true;
+    session->requestNextVsyncFunc_ = [&](auto cb) {};
+    session->RequestMoveResampleOnNextVsync(false, false);
+    session->RequestMoveResampleOnNextVsync(false, false);
+    EXPECT_FALSE(called);
 }
 } // namespace
 } // namespace Rosen

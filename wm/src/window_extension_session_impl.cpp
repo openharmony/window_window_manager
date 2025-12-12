@@ -1398,7 +1398,9 @@ WMError WindowExtensionSessionImpl::Hide(uint32_t reason, bool withAnimation, bo
     WSError ret = hostSession->Background();
     WMError res = static_cast<WMError>(ret);
     if (res == WMError::WM_OK) {
-        UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_HIDDEN);
+        StateChangeOption option(GetPersistentId(), WindowState::STATE_HIDDEN, reason, withAnimation, false, false,
+            isFromInnerkits, waitDetach);
+        UpdateSubWindowStateWithOptions(option);
         state_ = WindowState::STATE_HIDDEN;
         requestState_ = WindowState::STATE_HIDDEN;
         NotifyAfterBackground();
@@ -1758,9 +1760,7 @@ WMError WindowExtensionSessionImpl::SetStatusBarColorForExtension(uint32_t color
     TLOGI(WmsLogTag::WMS_UIEXT, "id=%{public}d", GetPersistentId());
     WMError ret = SetStatusBarColorForExtensionInner(color);
     if (ret == WMError::WM_OK) {
-        SystemBarProperty statusBarProp = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
-        statusBarProp.settingFlag_ |= SystemBarSettingFlag::COLOR_SETTING;
-        property_->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProp);
+        systemBarSettingFlag_ = SystemBarSettingFlag::COLOR_SETTING;
     }
     return ret;
 }

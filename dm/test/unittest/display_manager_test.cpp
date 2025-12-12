@@ -2871,6 +2871,34 @@ HWTEST_F(DisplayManagerTest, GetBrightnessInfo, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetSupportsInput
+ * @tc.desc: Test GetSupportsInput
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetSupportsInput, TestSize.Level1)
+{
+    uint64_t screenId = 0;
+    bool supportInput;
+    DMError res = SingletonContainer::Get<DisplayManager>().GetSupportsInput(screenId, supportInput);
+    EXPECT_EQ(res, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: SetSupportsInput
+ * @tc.desc: Test SetSupportsInput
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, SetSupportsInput, TestSize.Level1)
+{
+    uint64_t screenId = 0;
+    bool supportInput = false;
+    DMError res = SingletonContainer::Get<DisplayManager>().SetSupportsInput(screenId, supportInput);
+    EXPECT_EQ(res, DMError::DM_OK);
+    res = SingletonContainer::Get<DisplayManager>().GetSupportsInput(screenId, supportInput);
+    EXPECT_EQ(supportInput, false);
+}
+
+/**
  * @tc.name: NotifyAvailableAreaChanged
  * @tc.desc: Test NotifyAvailableAreaChanged
  * @tc.type: FUNC

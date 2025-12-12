@@ -52,6 +52,8 @@ public:
     static void SetWindowColorSpace(ani_env* env, ani_object obj, ani_long nativeObj, ani_int colorSpace);
     static void SetPreferredOrientation(ani_env* env, ani_object obj, ani_long nativeObj, ani_int orientation);
     static ani_int GetPreferredOrientation(ani_env* env, ani_object obj, ani_long nativeObj);
+    static ani_int ConvertOrientationAndRotation(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_int from, ani_int to, ani_int value);
     static void SetWindowPrivacyMode(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isPrivacyMode);
     static void Recover(ani_env* env, ani_object obj, ani_long nativeObj);
     static void SetUIContent(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path);
@@ -237,6 +239,7 @@ private:
     void OnSetWindowColorSpace(ani_env* env, ani_int colorSpace);
     void OnSetPreferredOrientation(ani_env* env, ani_int orientation);
     ani_int OnGetPreferredOrientation(ani_env* env);
+    ani_int OnConvertOrientationAndRotation(ani_env* env, ani_int from, ani_int to, ani_int value);
     void OnSetWindowPrivacyMode(ani_env* env, ani_boolean isPrivacyMode);
     void OnRecover(ani_env* env);
     void OnSetUIContent(ani_env* env, ani_string path);
