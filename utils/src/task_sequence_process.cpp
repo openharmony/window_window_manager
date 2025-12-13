@@ -37,13 +37,7 @@ void TaskSequenceProcess::Notify()
         TaskSequenceEventInfo task = taskQueue_.front();
         taskQueue_.pop();
         taskRunningFlag_.store(true);
-        try {
-            Exec(task);
-        } catch (const std::exception& e) {
-            TLOGE(WmsLogTag::DMS, "TaskSequenceProcess exec failded:%{public}s", e.what());
-        } catch (...) {
-            TLOGE(WmsLogTag::DMS, "TaskSequenceProcess exec failded with unknown exception");
-        }
+        Exec(task);
         taskRunningFlag_.store(false);
     } else if (taskRunningFlag_.load()) {
     TLOGI(WmsLogTag::DMS, "TaskSequenceProcess notify task but full");
