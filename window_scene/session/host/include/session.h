@@ -811,6 +811,8 @@ public:
     void DeleteHasSnapshotFreeMultiWindow();
     void SetFreeMultiWindow();
     void SetBufferNameForPixelMap(const char* functionName, const std::shared_ptr<Media::PixelMap>& pixelMap);
+    void SetPreloadingStartingWindow(bool preloading);
+    bool GetPreloadingStartingWindow();
     std::atomic<bool> freeMultiWindow_ { false };
 
     /*
@@ -1229,6 +1231,7 @@ private:
      */
     std::atomic<bool> isSnapshotBlur_ { false };
     std::atomic<bool> isAppLockControl_ { false };
+    std::atomic<bool> preloadingStartingWindow_ { false };
     bool borderUnoccupied_ = false;
     uint32_t GetBackgroundColor() const;
 

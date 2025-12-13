@@ -61,6 +61,7 @@
 #include "hidump_controller.h"
 #include "image_source.h"
 #include "perform_reporter.h"
+#include "rdb/scope_guard.h"
 #include "rdb/starting_window_rdb_manager.h"
 #include "res_sched_client.h"
 #include "rs_adapter.h"
@@ -6113,12 +6114,15 @@ void SceneSessionManager::PreLoadStartingWindow(sptr<SceneSession> sceneSession)
             TLOGND(WmsLogTag::WMS_PATTERN, "%{public}s check no need preLoad", where);
             return;
         }
-        if (sessionInfo.abilityInfo == nullptr) {
+        auto abilityInfo = sceneSession->GetSessionInfoAbilityInfo();
+        if (abilityInfo == nullptr) {
             TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s id: %{public}d abilityInfo is nullptr",
                 where, sceneSession->GetPersistentId());
             return;
         }
-        auto pixelMap = GetPixelMap(resId, sessionInfo.abilityInfo, true);
+        sceneSession->SetPreloadingStartingWindow(true);
+        ScopeGuard stateGuard([&] { sceneSession->SetPreloadingStartingWindow(false); });
+        auto pixelMap = GetPixelMap(resId, abilityInfo, true);
         if (pixelMap == nullptr) {
             TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s pixelMap is nullptr", where);
             return;
