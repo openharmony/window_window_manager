@@ -146,7 +146,7 @@ ani_status ScreenAniUtils::ConvertScreens(ani_env *env, std::vector<sptr<Screen>
     TLOGI(WmsLogTag::DMS, "[ANI] screens size %{public}u", static_cast<uint32_t>(screens.size()));
     for (uint32_t i = 0; i < screens.size(); i++) {
         ani_ref currentScreenAni;
-        if (ANI_OK != env->Object_CallMethodByName_Ref(screensAni, "$_get", "I:Lstd/core/Object;",
+        if (ANI_OK != env->Object_CallMethodByName_Ref(screensAni, "$_get", "i:C{std.core.Object}",
             &currentScreenAni, (ani_int)i)) {
             TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail", (ani_int)i);
             return ANI_ERROR;
@@ -400,7 +400,7 @@ ani_status ScreenAniUtils::GetScreenIdArrayFromAni(ani_env* env, ani_object mirr
     TLOGI(WmsLogTag::DMS, "[ANI] length %{public}d", (ani_int)length);
     for (int32_t i = 0; i < length; i++) {
         ani_ref screenIdRef;
-        ret = env->Object_CallMethodByName_Ref(mirrorScreen, "$_get", "i:std.core.Object",
+        ret = env->Object_CallMethodByName_Ref(mirrorScreen, "$_get", "i:C{std.core.Object}",
             &screenIdRef, (ani_int)i);
         if (ret != ANI_OK) {
             TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u failed, ret: %{public}u", (ani_int)i, ret);
