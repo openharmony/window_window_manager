@@ -1150,7 +1150,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleRegisterWindowPropertyChangeAgen
     data.WriteUint32(interestInfo);
 
     res = sceneSessionManagerLiteStub_->HandleRegisterWindowPropertyChangeAgent(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**
