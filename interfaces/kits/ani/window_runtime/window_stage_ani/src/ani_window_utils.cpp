@@ -117,7 +117,7 @@ ani_status unbox<ani_int>(ani_env* env, ani_object obj, ani_int* result)
 {
     if (g_intCls == nullptr) {
         ani_class intCls {};
-        auto status = env->FindClass("std.core.Integer", &intCls);
+        auto status = env->FindClass("std.core.Int", &intCls);
         if (status != ANI_OK) {
             return status;
         }
@@ -211,7 +211,7 @@ ani_status AniWindowUtils::GetStdStringVector(ani_env* env, ani_object ary, std:
     }
     for (int32_t i = 0; i< static_cast<int32_t>(length); i++) {
         ani_ref stringRef;
-        ret = env->Object_CallMethodByName_Ref(ary, "$_get", "i:std.core.Object;", &stringRef, ani_int(i));
+        ret = env->Object_CallMethodByName_Ref(ary, "$_get", "i:C{std.core.Object}", &stringRef, ani_int(i));
         if (ret != ANI_OK) {
             return ret;
         }
@@ -312,7 +312,7 @@ ani_status AniWindowUtils::GetPropertyBoolObject(ani_env* env, const char* prope
     }
 
     ani_boolean bool_value;
-    ret = env->Object_CallMethodByName_Boolean(static_cast<ani_object>(bool_ref), "toBoolean", ":Z", &bool_value);
+    ret = env->Object_CallMethodByName_Boolean(static_cast<ani_object>(bool_ref), "toBoolean", ":z", &bool_value);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
         return ret;
@@ -345,7 +345,7 @@ ani_status AniWindowUtils::GetPropertyLongObject(ani_env* env, const char* prope
         return ANI_ERROR;
     }
     ani_long long_value;
-    ret = env->Object_CallMethodByName_Long(static_cast<ani_object>(long_ref), "toLong", ":J", &long_value);
+    ret = env->Object_CallMethodByName_Long(static_cast<ani_object>(long_ref), "toLong", ":l", &long_value);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_CallMethodByName_Long %{public}s failed, ret : %{public}d",
             propertyName, static_cast<int32_t>(ret));
@@ -829,7 +829,7 @@ ani_object AniWindowUtils::CreateAniRect(ani_env* env, const Rect& rect)
         return AniWindowUtils::CreateAniUndefined(env);
     }
     ani_method aniCtor;
-    ret = env->Class_FindMethod(aniClass, "<ctor>", ":V", &aniCtor);
+    ret = env->Class_FindMethod(aniClass, "<ctor>", ":", &aniCtor);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
         return AniWindowUtils::CreateAniUndefined(env);

@@ -94,7 +94,7 @@ ani_object AniExtensionWindow::CreateAniExtensionWindow(ani_env* env, sptr<Rosen
     }
 
     ani_method initFunc = nullptr;
-    if ((ret = env->Class_FindMethod(cls, "<ctor>", ":V", &initFunc)) != ANI_OK) {
+    if ((ret = env->Class_FindMethod(cls, "<ctor>", ":", &initFunc)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Find ctor method failed, ret: %{public}u", ret);
         return nullptr;
     }
@@ -104,7 +104,7 @@ ani_object AniExtensionWindow::CreateAniExtensionWindow(ani_env* env, sptr<Rosen
         return nullptr;
     }
     ani_method setObjFunc = nullptr;
-    if ((ret = env->Class_FindMethod(cls, "setNativeObj", "J:V", &setObjFunc)) != ANI_OK) {
+    if ((ret = env->Class_FindMethod(cls, "setNativeObj", "l:", &setObjFunc)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Find method failed, ret: %{public}u", ret);
         return nullptr;
     }
@@ -566,7 +566,7 @@ std::array extensionWindowNativeMethods = {
         reinterpret_cast<void *>(ExtWindowSetWaterMarkFlag)},
     ani_native_function {"hideNonSecureWindows", "lz:i", reinterpret_cast<void *>(ExtWindowHideNonSecureWindows)},
     ani_native_function {"createSubWindowWithOptions",
-        "lP{std.core.String}C{@ohos.window.window.SubWindowOptions}z:@ohos.window.window.Window",
+        "lC{std.core.String}C{@ohos.window.window.SubWindowOptions}z:@ohos.window.window.Window",
         reinterpret_cast<void *>(ExtWindowCreateSubWindowWithOptions)},
     ani_native_function {"occupyEvents", "li:", reinterpret_cast<void *>(ExtWindowOccupyEvents)},
     ani_native_function {"onSync", "lC{std.core.String}C{std.core.Object}:",

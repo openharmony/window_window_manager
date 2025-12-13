@@ -228,7 +228,7 @@ ani_long ScreenManagerAni::MakeMirror(ani_env* env, ani_long mainScreen, ani_obj
     TLOGI(WmsLogTag::DMS, "[ANI] length %{public}d", (ani_int)length);
     for (int32_t i = 0; i < length; i++) {
         ani_ref screenIdRef;
-        auto ret = env->Object_CallMethodByName_Ref(mirrorScreen, "$_get", "I:Lstd/core/Object;",
+        auto ret = env->Object_CallMethodByName_Ref(mirrorScreen, "$_get", "i:C{std.core.Object}",
             &screenIdRef, (ani_int)i);
         if (ANI_OK != ret) {
             TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail, ret: %{public}u", (ani_int)i, ret);
@@ -605,7 +605,7 @@ ani_long ScreenManagerAni::MakeExpand(ani_env* env, ani_object expandOptionsAni)
     TLOGI(WmsLogTag::DMS, "[ANI] length %{public}d", (ani_int)length);
     for (int32_t i = 0; i < length; i++) {
         ani_ref optionRef;
-        auto ret = env->Object_CallMethodByName_Ref(expandOptionsAni, "$_get", "I:Lstd/core/Object;",
+        auto ret = env->Object_CallMethodByName_Ref(expandOptionsAni, "$_get", "i:C{std.core.Object}",
             &optionRef, (ani_int)i);
         if (ret != ANI_OK) {
             TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail, ret: %{public}u", (ani_int)i, ret);

@@ -57,7 +57,7 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace wi
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     ani_namespace ns;
     ani_status ret;
-    if ((ret = env->FindNamespace("L@ohos/window/window;", &ns)) != ANI_OK) {
+    if ((ret = env->FindNamespace("@ohos.window.window", &ns)) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] find ns %{public}u", ret);
         return ANI_NOT_FOUND;
     }
@@ -66,7 +66,7 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace wi
             reinterpret_cast<void *>(AniWindowManager::RegisterWindowManagerCallback)},
         ani_native_function {"offSync", nullptr,
             reinterpret_cast<void *>(AniWindowManager::UnregisterWindowManagerCallback)},
-        ani_native_function {"setWindowLayoutMode", "JL@ohos/window/window/WindowLayoutMode;:V",
+        ani_native_function {"setWindowLayoutMode", "lC{@ohos.window.window.WindowLayoutMode}:",
             reinterpret_cast<void *>(AniWindowManager::SetWindowLayoutMode)},
         ani_native_function {"shiftAppWindowPointerEventSync", "lii:",
             reinterpret_cast<void *>(AniWindowManager::ShiftAppWindowPointerEvent)},
@@ -99,7 +99,7 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace wi
             reinterpret_cast<void *>(AniWindowManager::GetWindowsByCoordinate)},
         ani_native_function {"toggleShownStateForAllAppWindowsSync", "l:",
             reinterpret_cast<void *>(AniWindowManager::ToggleShownStateForAllAppWindows)},
-        ani_native_function {"setSpecificSystemWindowZIndexSync", "JL@ohos/window/window/WindowType;I:V",
+        ani_native_function {"setSpecificSystemWindowZIndexSync", "lC{@ohos.window.window.WindowType}i:",
             reinterpret_cast<void *>(AniWindowManager::SetSpecificSystemWindowZIndex)},
     };
     for (auto method : functions) {
@@ -111,7 +111,7 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace wi
     }
 
     ani_function setObjFunc = nullptr;
-    ret = env->Namespace_FindFunction(windowNameSpace, "setNativeObj", "J:V", &setObjFunc);
+    ret = env->Namespace_FindFunction(windowNameSpace, "setNativeObj", "l:", &setObjFunc);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] find setNativeObj func fail %{public}u", ret);
         return ret;

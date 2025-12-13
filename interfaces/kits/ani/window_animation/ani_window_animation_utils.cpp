@@ -206,11 +206,11 @@ template<typename T>
 const char* GetClassName()
 {
     if (std::is_same<T, int>::value) {
-        return "Lstd/core/Int;";
+        return "std.core.Int";
     } else if (std::is_same<T, double>::value) {
-        return "Lstd/core/Double;";
+        return "std.core.Double";
     } else if (std::is_same<T, long>::value) {
-        return "Lstd/core/Long;";
+        return "std.core.Long";
     } else {
         return nullptr;
     }
@@ -220,11 +220,11 @@ template<typename T>
 const char* GetCtorSignature()
 {
     if (std::is_same<T, int>::value) {
-        return "I:V";
+        return "i:";
     } else if (std::is_same<T, double>::value) {
-        return "D:V";
+        return "d:";
     } else if (std::is_same<T, long>::value) {
-        return "J:V";
+        return "l:";
     } else {
         return nullptr;
     }

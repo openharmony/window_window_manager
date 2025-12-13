@@ -106,7 +106,7 @@ ani_enum_item GetAniWindowType(ani_env* env, int32_t apiType)
     }
 
     ani_enum enumType;
-    if (ANI_OK != env->FindEnum("@ohos.window.window.WindowType;", &enumType)) {
+    if (ANI_OK != env->FindEnum("@ohos.window.window.WindowType", &enumType)) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] WindowType not found");
         return nullptr;
     }
@@ -844,13 +844,13 @@ static void SetSystemWindowOptionsWindowType(ani_env* env, ani_object obj, ani_l
 extern "C" {
 using namespace OHOS::Rosen;
 std::array extensionWindowConfigNativeMethods = {
-    ani_native_function {"getWindowName", "l:std.core.String", reinterpret_cast<void *>(GetWindowName)},
-    ani_native_function {"getWindowAttribute", "l:@ohos.window.window.ExtensionWindowAttribute",
+    ani_native_function {"getWindowName", "l:C{std.core.String}", reinterpret_cast<void *>(GetWindowName)},
+    ani_native_function {"getWindowAttribute", "l:C{@ohos.window.window.ExtensionWindowAttribute}",
         reinterpret_cast<void *>(GetWindowAttribute)},
-    ani_native_function {"getWindowRect", "l:@ohos.window.window.Rect", reinterpret_cast<void *>(GetWindowRect)},
-    ani_native_function {"getSubWindowOptions", "l:@ohos.window.window.SubWindowOptions",
+    ani_native_function {"getWindowRect", "l:C{@ohos.window.window.Rect}", reinterpret_cast<void *>(GetWindowRect)},
+    ani_native_function {"getSubWindowOptions", "l:C{@ohos.window.window.SubWindowOptions}",
         reinterpret_cast<void *>(GetSubWindowOptions)},
-    ani_native_function {"getSystemWindowOptions", "l:@ohos.window.window.SystemWindowOptions",
+    ani_native_function {"getSystemWindowOptions", "l:C{@ohos.window.window.SystemWindowOptions}",
         reinterpret_cast<void *>(GetSystemWindowOptions)},
     ani_native_function {"setWindowName", "lC{std.core.String}:", reinterpret_cast<void *>(SetWindowName)},
     ani_native_function {"setWindowAttribute", "lC{@ohos.window.window.ExtensionWindowAttribute}:",
@@ -874,7 +874,7 @@ std::array extConfigRectMethods = {
     };
 
 std::array extConfigSubWindowOptionsMethods = {
-    ani_native_function {"getTitle", "l:std.core.String", reinterpret_cast<void *>(GetSubWindowOptionsTitle)},
+    ani_native_function {"getTitle", "l:C{std.core.String}", reinterpret_cast<void *>(GetSubWindowOptionsTitle)},
     ani_native_function {"getDecorEnabled", "l:z", reinterpret_cast<void *>(GetSubWindowOptionsDecorEnabled)},
     ani_native_function {"getIsModal", "l:z", reinterpret_cast<void *>(GetSubWindowOptionsIsModal)},
     ani_native_function {"getIsTopmost", "l:z", reinterpret_cast<void *>(GetSubWindowOptionsIsTopmost)},
@@ -885,7 +885,7 @@ std::array extConfigSubWindowOptionsMethods = {
     };
 
 std::array extConfigSystemWindowOptionsMethods = {
-    ani_native_function {"getWindowType", "l:@ohos.window.window.WindowType;",
+    ani_native_function {"getWindowType", "l:C{@ohos.window.window.WindowType}",
         reinterpret_cast<void *>(GetSystemWindowOptionsWindowType)},
     ani_native_function {"setWindowType", "lC{@ohos.window.window.WindowType}:",
         reinterpret_cast<void *>(SetSystemWindowOptionsWindowType)},
