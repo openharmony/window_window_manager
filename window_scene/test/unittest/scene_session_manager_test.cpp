@@ -172,6 +172,7 @@ HWTEST_F(SceneSessionManagerTest, GerPrivacyBundleListTwoWindow, TestSize.Level1
 
     std::unordered_map<DisplayId, std::unordered_set<std::string>> privacyBundleList;
     ssm_->GetSceneSessionPrivacyModeBundles(0, privacyBundleList);
+    EXPECT_EQ(privacyBundleList.size(), 1);
     EXPECT_EQ(privacyBundleList[0].size(), 2);
 
     sceneSessionSecond->GetSessionProperty()->displayId_ = 1;
