@@ -130,9 +130,9 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std:
         manager->ProcessNotifyFoldStatusChange(currentState, newState, angles, policy);
     };
     auto event = [=] {
-        auto ffrtQueueHelper = ScreenSessionManager::GetInstance().GetFfrtQueueHelper();
-        if (ffrtQueueHelper != nullptr) {
-            ffrtQueueHelper->SubmitTask(task);
+        std::shared_ptr<TaskScheduler> taskScheduler = ScreenSessionManager::GetInstance().GetPowerTaskScheduler();
+        if (taskScheduler != nullptr){
+            taskScheduler->PostAsyncTask(task, "secondaryFoldStatusChange");
         }
     };
     TaskSequenceEventInfo eventInfo = TaskSequenceEventInfo{
@@ -151,7 +151,13 @@ void SensorFoldStateManager::ProcessNotifyFoldStatusChange(FoldStatus currentSta
     const std::vector<float>& angles, sptr<FoldScreenPolicy> foldScreenPolicy)
 {
     ReportNotifyFoldStatusChange(static_cast<int32_t>(currentStatus), static_cast<int32_t>(nextStatus), angles);
-    PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
+    auto task = [] {
+        PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
+    };
+    auto ffrtQueueHelper = ScreenSessionManager::GetInstance().GetFfrtQueueHelper();
+    if (ffrtQueueHelper != nullptr) {
+        ffrtQueueHelper->SubmitTask(task);
+    }
     NotifyReportFoldStatusToScb(currentStatus, nextStatus, angles);
     if (foldScreenPolicy != nullptr) {
         foldScreenPolicy->SetFoldStatus(nextStatus);
