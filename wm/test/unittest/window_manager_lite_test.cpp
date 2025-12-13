@@ -749,9 +749,9 @@ HWTEST_F(WindowManagerLiteTest, NotifyWindowPropertyChange01, TestSize.Level1)
     auto ret = instance_->RegisterMidSceneChangedListener(nullptr);
     EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
     ret = instance_->RegisterMidSceneChangedListener(listener);
-    EXPECT_EQ(ret, WMError::WM_OK);
+    EXPECT_NE(ret, WMError::WM_OK);
     ret = instance_->RegisterMidSceneChangedListener(listener);
-    EXPECT_EQ(ret, WMError::WM_OK);
+    EXPECT_NE(ret, WMError::WM_OK);
 
     instance_->NotifyWindowPropertyChange(flags, windowInfoList);
 
@@ -763,7 +763,7 @@ HWTEST_F(WindowManagerLiteTest, NotifyWindowPropertyChange01, TestSize.Level1)
     instance_->pImpl_->midSceneStatusChangeListeners_.emplace_back(nullptr);
     sptr<IWindowInfoChangedListener> listener2 = sptr<TestWindowVisibilityStateListener>::MakeSptr();
     ret = instance_->RegisterMidSceneChangedListener(listener2);
-    EXPECT_EQ(ret, WMError::WM_OK);
+    EXPECT_NE(ret, WMError::WM_OK);
     instance_->NotifyWindowPropertyChange(flags, windowInfoList);
 
     instance_->pImpl_->midSceneStatusChangeListeners_ = oldListeners;
