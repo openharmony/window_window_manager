@@ -1146,10 +1146,8 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleRegisterWindowPropertyChangeAgen
 
     WindowInfoKey windowInfoKey = WindowInfoKey::DISPLAY_ID;
     uint32_t interestInfo = 0;
-    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     data.WriteInt32(static_cast<int32_t>(windowInfoKey));
     data.WriteUint32(interestInfo);
-    data.WriteRemoteObject(windowManagerAgent->AsObject());
 
     res = sceneSessionManagerLiteStub_->HandleRegisterWindowPropertyChangeAgent(data, reply);
     EXPECT_EQ(res, ERR_NONE);

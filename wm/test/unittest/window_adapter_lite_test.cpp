@@ -291,7 +291,7 @@ HWTEST_F(WindowAdapterLiteTest, RecoverWindowPropertyChangeFlag01, TestSize.Leve
 
     auto oldProxy = instance_->windowManagerServiceProxy_;
     instance_->windowManagerServiceProxy_ = nullptr;
-    auto ret = instance_->RecoverWindowPropertyChangeFlag();
+    ret = instance_->RecoverWindowPropertyChangeFlag();
     EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
     instance_->windowManagerServiceProxy_ = oldProxy;
 }
