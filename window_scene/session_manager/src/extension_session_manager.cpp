@@ -87,10 +87,10 @@ sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const Se
         if (!newSessionInfo.config_.isDensityFollowHost_) {
             newSessionInfo.config_.density_ = GetSystemDensity(newSessionInfo.config_.displayId_);
         }
-        if (newSessionInfo.want && newSessionInfo.want->HasParameter(OHOS::AAFwk::SCREEN_MODE_KEY)) {
-            int32_t screenMode = newSessionInfo.want->GetIntParam(OHOS::AAFwk::SCREEN_MODE_KEY, 0);
-            newSessionInfo.isAtomicService_ = (screenMode == OHOS::AAFwk::ScreenMode::EMBEDDED_FULL_SCREEN_MODE) ||
-                (screenMode == OHOS::AAFwk::ScreenMode::EMBEDDED_HALF_SCREEN_MODE);
+        if (newSessionInfo.want && newSessionInfo.want->HasParameter(AAFwk::SCREEN_MODE_KEY)) {
+            int32_t screenMode = newSessionInfo.want->GetIntParam(AAFwk::SCREEN_MODE_KEY, 0);
+            newSessionInfo.isAtomicService_ = (screenMode == AAFwk::ScreenMode::EMBEDDED_FULL_SCREEN_MODE) ||
+                (screenMode == AAFwk::ScreenMode::EMBEDDED_HALF_SCREEN_MODE);
         }
         sptr<ExtensionSession> extensionSession = sptr<ExtensionSession>::MakeSptr(newSessionInfo);
         extensionSession->SetEventHandler(taskScheduler_->GetEventHandler(), nullptr);

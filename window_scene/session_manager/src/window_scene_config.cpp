@@ -107,6 +107,11 @@ const std::map<std::string, WindowSceneConfig::ValueType> WindowSceneConfig::con
     { "supportTypeFloatWindow",                       WindowSceneConfig::ValueType::STRING },
     { "maxMidSceneNum",                               WindowSceneConfig::ValueType::INTS },
     { "defaultDragResizeType",                        WindowSceneConfig::ValueType::INTS },
+    // ========================= Window Layout Config =========================
+    { "windowLayout",                                 WindowSceneConfig::ValueType::MAP },
+    { "moveDrag",                                     WindowSceneConfig::ValueType::MAP },
+    { "moveResample",                                 WindowSceneConfig::ValueType::UNDIFINED },
+    // ========================================================================
 };
 
 std::vector<std::string> WindowSceneConfig::SplitNodeContent(const xmlNodePtr& node, const std::string& pattern)

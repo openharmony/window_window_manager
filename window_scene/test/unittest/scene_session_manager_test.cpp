@@ -172,7 +172,7 @@ HWTEST_F(SceneSessionManagerTest, GerPrivacyBundleListTwoWindow, TestSize.Level1
 
     std::unordered_map<DisplayId, std::unordered_set<std::string>> privacyBundleList;
     ssm_->GetSceneSessionPrivacyModeBundles(0, privacyBundleList);
-    EXPECT_EQ(privacyBundleList.size(), 1);
+    EXPECT_EQ(privacyBundleList[0].size(), 2);
 
     sceneSessionSecond->GetSessionProperty()->displayId_ = 1;
     privacyBundleList.clear();
@@ -2217,11 +2217,7 @@ HWTEST_F(SceneSessionManagerTest, UpdateAppBoundSystemTrayStatus001, TestSize.Le
     EXPECT_TRUE(g_logMsg.find("App bound tray map size exceeds") != std::string::npos);
 
     ssm_->appsWithBoundSystemTrayMap_.erase("2049-app_instance_0");
-    ssm_->UpdateAppBoundSystemTrayStatus("2048-app_instance_0", 1048, true);
-    EXPECT_TRUE(g_logMsg.find("appsWithBoundSystemTrayMap_ has pid") != std::string::npos);
-
     ssm_->UpdateAppBoundSystemTrayStatus("2049-app_instance_0", 1049, false);
-    EXPECT_TRUE(g_logMsg.find("appsWithBoundSystemTrayMap_ does not have pid") != std::string::npos);
     ssm_->appsWithBoundSystemTrayMap_.clear();
 
     ssm_->appsWithBoundSystemTrayMap_["2000-app_instance_0"].insert(1000);

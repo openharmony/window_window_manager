@@ -1083,6 +1083,35 @@ HWTEST_F(ScreenSessionDumperTest, DumpMultiUserInfo, TestSize.Level1)
     dumper->DumpMultiUserInfo(oldScbPids, userId, scbPid);
     ASSERT_NE(dumper->dumpInfo_, std::string());
 }
+
+/**
+ * @tc.name: ShowCurrentStatus
+ * @tc.desc: test function : ShowCurrentStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, ShowCurrentStatus, TestSize.Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-lcd"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->dumpInfo_ = "";
+    dumper->ExecuteDumpCmd();
+ 
+    dumper->dumpInfo_ = "";
+    ScreenSessionManager::GetInstance().SetRSScreenPowerStatusExt(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON);
+    dumper->ShowCurrentStatus(SCREEN_ID_FULL);
+    ASSERT_TRUE(dumper->dumpInfo_.find("PANEL_POWER_STATUS_ON") == std::string::npos);
+ 
+    dumper->dumpInfo_ = "";
+    ScreenSessionManager::GetInstance().SetRSScreenPowerStatusExt(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
+    dumper->ShowCurrentStatus(SCREEN_ID_FULL);
+    ASSERT_TRUE(dumper->dumpInfo_.find("PANEL_POWER_STATUS_OFF") == std::string::npos);
+ 
+    dumper->dumpInfo_ = "";
+    dumper->ShowCurrentStatus(12478);
+    ASSERT_TRUE(dumper->dumpInfo_.find("status failed") == std::string::npos);
+}
+
 #ifdef FOLD_ABILITY_ENABLE
 /**
  * @tc.name: DumpFoldCreaseRegion

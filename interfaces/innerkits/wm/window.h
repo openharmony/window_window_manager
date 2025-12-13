@@ -3369,6 +3369,17 @@ public:
         return WMError::WM_OK;
     }
 
+    /*
+     * @brief Set Status Bar Color For Page
+     *
+     * @param color Status Bar Color
+     * @return WMError
+     */
+    virtual WMError SetStatusBarColorForPage(const std::optional<uint32_t> color)
+    {
+        return WMError::WM_OK;
+    }
+
     /**
      * @brief Set Specific System Bar(include status bar and nav bar) Property
      *
@@ -4966,7 +4977,11 @@ public:
      *
      * @param rects Hot areas of anco window.
      */
-    static std::vector<Rect> GetAncoWindowHotAreas();
+    virtual std::vector<Rect> GetAncoWindowHotAreas()
+    {
+        std::vector<Rect> rectAreas;
+        return rectAreas;
+    }
 
     /**
      * @brief Check if the current device is in free window mode.
