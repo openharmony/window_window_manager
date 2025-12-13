@@ -2013,6 +2013,99 @@ HWTEST_F(SceneSessionManagerTest3, NotifySessionTouchOutside02, TestSize.Level1)
     ssm->sceneSessionMap_.erase(1);
     ssm->sceneSessionMap_.erase(2);
 }
+
+/**
+ * @tc.name: SchedulePcAppInPadLifecycle
+ * @tc.desc: call SchedulePcAppInPadLifecycle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, SchedulePcAppInPadLifecycle, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->GetSessionProperty()->SetIsPcAppInPad(true);
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    SessionInfo info1;
+    info1.abilityName_ = "test3";
+    info1.bundleName_ = "test4";
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info1, nullptr);
+    sceneSession2->GetSessionProperty()->SetIsPcAppInPad(false);
+    sceneSession2->SetSessionState(SessionState::STATE_FOREGROUND);
+    SessionInfo info2;
+    info2.abilityName_ = "test5";
+    info2.bundleName_ = "test6";
+    sptr<SceneSession> sceneSession3 = sptr<SceneSession>::MakeSptr(info2, nullptr);
+    sceneSession3->GetSessionProperty()->SetIsPcAppInPad(true);
+    sceneSession3->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession3->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    auto trayAppListOld = ssm_->trayAppList_;
+    ssm_->SchedulePcAppInPadLifecycle(true);
+    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    ssm_->sceneSessionMap_.insert({2, sceneSession2});
+    ssm_->sceneSessionMap_.insert({3, sceneSession3});
+    ssm_->sceneSessionMap_.insert({4, nullptr});
+    std::vector<std::string> trayAppList;
+    trayAppList.push_back("test2");
+    ssm_->SetTrayAppList(std::move(trayAppList));
+    ssm_->SchedulePcAppInPadLifecycle(true);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(SessionState::STATE_FOREGROUND, sceneSession->GetSessionState());
+    EXPECT_EQ(SessionState::STATE_FOREGROUND, sceneSession2->GetSessionState());
+    ssm_->SchedulePcAppInPadLifecycle(false);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(SessionState::STATE_FOREGROUND, sceneSession->GetSessionState());
+    EXPECT_EQ(SessionState::STATE_FOREGROUND, sceneSession2->GetSessionState());
+    ssm_->sceneSessionMap_.erase(1);
+    ssm_->sceneSessionMap_.erase(2);
+    ssm_->sceneSessionMap_.erase(3);
+    ssm_->sceneSessionMap_.erase(4);
+    ssm_->SetTrayAppList(std::move(trayAppListOld));
+}
+ 
+/**
+ * @tc.name: StartOrMinimizePcAppInPadUIAbilityBySCB
+ * @tc.desc: call StartOrMinimizePcAppInPadUIAbilityBySCB
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, StartOrMinimizePcAppInPadUIAbilityBySCB, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->GetSessionProperty()->SetIsPcAppInPad(true);
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+
+    SessionInfo info1;
+    info1.abilityName_ = "test3";
+    info1.bundleName_ = "test4";
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info1, nullptr);
+    ASSERT_NE(sceneSession2, nullptr);
+    sceneSession2->GetSessionProperty()->SetIsPcAppInPad(true);
+    sceneSession2->SetSessionState(SessionState::STATE_DISCONNECT);
+    SessionInfo info2;
+    info2.abilityName_ = "test5";
+    info2.bundleName_ = "test6";
+    sptr<SceneSession> sceneSession3 = sptr<SceneSession>::MakeSptr(info2, nullptr);
+    ASSERT_NE(sceneSession3, nullptr);
+    sceneSession3->GetSessionProperty()->SetIsPcAppInPad(true);
+    sceneSession3->SetSessionState(SessionState::STATE_FOREGROUND);
+
+    auto trayAppListOld = ssm_->trayAppList_;
+    std::vector<std::string> trayAppList;
+    trayAppList.push_back("test2");
+    ssm_->SetTrayAppList(std::move(trayAppList));
+    EXPECT_EQ(WSError::WS_DO_NOTHING, ssm_->StartOrMinimizePcAppInPadUIAbilityBySCB(sceneSession, true));
+    EXPECT_EQ(WSError::WS_DO_NOTHING, ssm_->StartOrMinimizePcAppInPadUIAbilityBySCB(sceneSession, false));
+    EXPECT_EQ(WSError::WS_DO_NOTHING, ssm_->StartOrMinimizePcAppInPadUIAbilityBySCB(sceneSession2, true));
+    EXPECT_EQ(WSError::WS_DO_NOTHING, ssm_->StartOrMinimizePcAppInPadUIAbilityBySCB(sceneSession2, false));
+    EXPECT_EQ(WSError::WS_OK, ssm_->StartOrMinimizePcAppInPadUIAbilityBySCB(sceneSession3, true));
+    EXPECT_EQ(WSError::WS_OK, ssm_->StartOrMinimizePcAppInPadUIAbilityBySCB(sceneSession3, false));
+    ssm_->SetTrayAppList(std::move(trayAppListOld));
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
