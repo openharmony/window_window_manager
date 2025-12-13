@@ -2280,6 +2280,80 @@ void SceneSessionManager::ConfigDockAutoHide(bool isDockAutoHide) {
     return taskScheduler_->PostAsyncTask(task, "ConfigDockAutoHide");
 }
 
+  void SceneSessionManager::SchedulePcAppInPadLifecycle(bool isBackground)
+{
+    auto task = [this, isBackground] {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [_, sceneSession] : sceneSessionMap_) {
+            if (sceneSession == nullptr) {
+                TLOGE(WmsLogTag::WMS_LIFE, "session is null");
+                continue;
+            }
+            if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+                continue;
+            }
+            bool isPcAppInPad = sceneSession->GetSessionProperty()->GetIsPcAppInPad();
+            if (!isPcAppInPad) {
+                continue;
+            }
+            StartOrMinimizePcAppInPadUIAbilityBySCB(sceneSession, isBackground);
+        }
+    };
+    return taskScheduler_->PostAsyncTask(task, "SchedulePcAppInPadLifecycle");
+}
+
+WSError SceneSessionManager::StartOrMinimizePcAppInPadUIAbilityBySCB(const sptr<SceneSession>& sceneSession, bool isBackground)
+{
+    auto sessionState = sceneSession->GetSessionState();
+    auto isInvalidMainSession = sessionState == SessionState::STATE_DISCONNECT ||
+                                sessionState == SessionState::STATE_END;
+    if (isInvalidMainSession) {
+        return WSError::WS_DO_NOTHING;
+    }
+    bool isTrayApp = !trayAppList_.empty() && 
+                     std::find(trayAppList_.begin(), trayAppList_.end(), sceneSession->GetSessionInfo().bundleName_) !=
+                     trayAppList_.end();
+    if (isTrayApp) {
+        return WSError::WS_DO_NOTHING;
+    }
+    auto persistentId = sceneSession->GetPersistentId();
+    auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
+    if (isBackground) {
+        TLOGI(WmsLogTag::WMS_LIFE,
+            "MinimizePcAppInPadUIAbilityBySCB with persistentId: %{public}d, type: %{public}d, state: %{public}d", persistentId,
+            sceneSession->GetWindowType(), sceneSession->GetSessionState());
+        sceneSession->UpdateLifecyclePausedInner();
+        int32_t errCode = AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(abilitySessionInfo);
+        if (errCode != ERR_OK) {
+            TLOGE(WmsLogTag::WMS_LIFE, "minimize failed! errCode: %{public}d", errCode);
+        }
+    } else {
+        TLOGI(WmsLogTag::WMS_LIFE,
+            "StartPcAppInPadUIAbilityBySCB with persistentId: %{public}d, type: %{public}d, state: %{public}d", persistentId,
+            sceneSession->GetWindowType(), sceneSession->GetSessionState());
+        bool isColdStart = false;
+        abilitySessionInfo->isNewWant = false;
+        int32_t errCode = StartUIAbilityBySCBTimeoutCheck(sceneSession,
+            abilitySessionInfo, static_cast<uint32_t>(WindowStateChangeReason::NORMAL), isColdStart);
+        if (errCode != ERR_OK) {
+            TLOGE(WmsLogTag::WMS_LIFE, "start failed! errCode: %{public}d", errCode);
+            ExceptionInfo exceptionInfo;
+            exceptionInfo.needRemoveSession = true;
+            sceneSession->NotifySessionExceptionInner(abilitySessionInfo, exceptionInfo, false, true);
+            if (startUIAbilityErrorFunc_ && static_cast<WSError>(errCode) == WSError::WS_ERROR_EDM_CONTROLLED) {
+                startUIAbilityErrorFunc_(
+                    static_cast<uint32_t>(WS_JS_TO_ERROR_CODE_MAP.at(WSError::WS_ERROR_EDM_CONTROLLED)));
+            }
+        }
+    }
+    return WSError::WS_OK;
+}
+
+void SceneSessionManager::SetTrayAppList(std::vector<std::string>&& trayAppList)
+{
+    trayAppList_ = std::move(trayAppList);
+}
+
 uint32_t SceneSessionManager::GetLockScreenZOrder()
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -3545,8 +3619,17 @@ bool SceneSessionManager::IsPcSceneSessionLifecycle(const sptr<SceneSession>& sc
 {
     bool isPcAppInLargeScreenDevice = sceneSession->GetSessionProperty()->GetIsPcAppInPad();
     bool isAppSupportPhoneInPc = sceneSession->GetSessionProperty()->GetIsAppSupportPhoneInPc();
-    return (systemConfig_.backgroundswitch && !isAppSupportPhoneInPc) ||
-             (isPcAppInLargeScreenDevice && !IsScreenLocked() && !systemConfig_.IsPhoneWindow());
+    bool isScreenLock = IsScreenLocked();
+    if ((systemConfig_.backgroundswitch && !isAppSupportPhoneInPc) ||
+        (isPcAppInPad && !isScreenLock && !systemConfig_.IsPhoneWindow())) {
+        return true;
+    }
+    bool trayAppForeground = system::GetParameter("persist.window.tray_foreground", "") == "true";
+    if (trayAppForeground && isPcAppInPad) {
+        TLOGI(WmsLogTag::WMS_PC, "isPcAppInPad check trayApp success");
+        return true;
+    }
+    return false;
 }
 
 void SceneSessionManager::InitSnapshotCache()
@@ -9024,6 +9107,10 @@ void SceneSessionManager::SetScreenLocked(const bool isScreenLocked)
         NotifyPiPWindowVisibleChange(isScreenLocked);
     }, __func__);
     NotifySessionScreenLockedChange(isScreenLocked);
+    bool trayAppForeground = system::GetParameter("persist.window.tray_foreground", "") == "true";
+    if (trayAppForeground) {
+        SchedulePcAppInPadLifecycle(isScreenLocked);
+    }
 }
 
 void SceneSessionManager::SetUserAuthPassed(bool isUserAuthPassed)
