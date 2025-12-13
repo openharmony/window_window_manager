@@ -1457,6 +1457,30 @@ HWTEST_F(WindowSessionImplTest2, UpdateDecorEnableToAce, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateDecorEnableToAce02
+ * @tc.desc: UpdateDecorEnableToAce02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, UpdateDecorEnableToAce02, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImpl: UpdateDecorEnableToAce02 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateDecorEnableToAce02");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    window->property_->SetCollaboratorType(static_cast<int32_t>(CollaboratorType::RESERVE_TYPE));
+
+    window->UpdateDecorEnableToAce(true);
+    ASSERT_FALSE(window->IsDecorEnable());
+}
+
+/**
  * @tc.name: UpdateDecorEnable
  * @tc.desc: UpdateDecorEnable
  * @tc.type: FUNC
