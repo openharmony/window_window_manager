@@ -726,18 +726,18 @@ HWTEST_F(WindowManagerLiteTest, UpdateScreenLockStatusForApp, TestSize.Level1)
 HWTEST_F(WindowManagerLiteTest, NotifyWindowPropertyChange01, TestSize.Level1)
 {
     ASSERT_NE(instance_, nullptr);
-    uint32_t flags = WindowInfoKey::MID_SCENE;
+    uint32_t flags = static_cast<int32_t>(WindowInfoKey::MID_SCENE);
     std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
     windowInfoList.push_back({{WindowInfoKey::MID_SCENE, true}, {WindowInfoKey::WINDOW_ID, 0}});
 
     auto oldInfoKeyMap = instance_->interestInfoMap_;
-    auto oldListeners = instance_->pImpl->midSceneStatusChangeListeners_;
+    auto oldListeners = instance_->pImpl_->midSceneStatusChangeListeners_;
     instance_->interestInfoMap_.clear();
-    instance_->pImpl->midSceneStatusChangeListeners_.clear();
+    instance_->pImpl_->midSceneStatusChangeListeners_.clear();
 
     instance_->interestInfoMap_[WindowInfoKey::MID_SCENE] = 0;
     instance_->interestInfoMap_[WindowInfoKey::VISIBILITY_STATE] = 3;
-    sptr<IWindowInfoChangedListener> listener = sptr<IWindowInfoChangedListener>::MakeSptr();
+    sptr<IWindowInfoChangedListener> listener = sptr<TestWindowVisibilityStateListener>::MakeSptr();
     std::unordered_set<WindowInfoKey> interestInfo;
     interestInfo.insert(WindowInfoKey::MID_SCENE);
     interestInfo.insert(WindowInfoKey::VISIBILITY_STATE);
@@ -760,13 +760,13 @@ HWTEST_F(WindowManagerLiteTest, NotifyWindowPropertyChange01, TestSize.Level1)
     ret = instance_->UnregisterMidSceneChangedListener(listener);
     EXPECT_EQ(ret, WMError::WM_OK);
 
-    instance_->pImpl->midSceneStatusChangeListeners_.emplace_back(nullptr);
-    sptr<IWindowInfoChangedListener> listener2 = sptr<IWindowInfoChangedListener>::MakeSptr();
+    instance_->pImpl_->midSceneStatusChangeListeners_.emplace_back(nullptr);
+    sptr<IWindowInfoChangedListener> listener2 = sptr<TestWindowVisibilityStateListener>::MakeSptr();
     ret = instance_->RegisterMidSceneChangedListener(listener2);
     EXPECT_EQ(ret, WMError::WM_OK);
     instance_->NotifyWindowPropertyChange(flags, windowInfoList);
 
-    instance_->pImpl->midSceneStatusChangeListeners_ = oldListeners;
+    instance_->pImpl_->midSceneStatusChangeListeners_ = oldListeners;
     instance_->interestInfoMap_ = oldInfoKeyMap;
 }
 
