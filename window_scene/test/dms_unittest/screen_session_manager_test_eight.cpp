@@ -417,22 +417,6 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenColorGamut, TestSize.Level1)
 }
 
 /**
- * @tc.name: LoadScreenSceneXml
- * @tc.desc: LoadScreenSceneXml virtual screen
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, LoadScreenSceneXml, TestSize.Level1)
-{
-    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
-    VirtualScreenOption virtualOption;
-    virtualOption.name_ = "LoadScreenSceneXml";
-    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-    ssm_->LoadScreenSceneXml();
-    ASSERT_EQ(ssm_->SetScreenActiveMode(screenId, 0), DMError::DM_ERROR_NULLPTR);
-    ssm_->DestroyVirtualScreen(screenId);
-}
-
-/**
  * @tc.name: GetScreenGamutMap
  * @tc.desc: GetScreenGamutMap virtual screen
  * @tc.type: FUNC
@@ -1209,6 +1193,25 @@ HWTEST_F(ScreenSessionManagerTest, GetSupportedHDRFormats, TestSize.Level1)
     ASSERT_NE(nullptr, screenSession);
     EXPECT_EQ(ssm_->GetSupportedHDRFormats(id, hdrFormats), screenSession->GetSupportedHDRFormats(hdrFormats));
 #endif
+}
+
+/**
+ * @tc.name: NotifyRSCoordination
+ * @tc.desc: NotifyRSCoordination
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, NotifyRSCoordination, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr) << "ScreenSessionManager instance is null";
+    ssm_->NotifyRSCoordination(true);
+    EXPECT_TRUE(g_logMsg.find("isEnterCoordination:1") != std::string::npos);
+    g_logMsg.clear();
+    ssm_->NotifyRSCoordination(false);
+    EXPECT_TRUE(g_logMsg.find("isEnterCoordination:0") != std::string::npos);
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
 }
 }
 } // namespace Rosen

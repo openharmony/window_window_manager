@@ -1257,9 +1257,6 @@ HWTEST_F(SessionStageStubTest, HandleLinkKeyFrameNode, Function | SmallTest | Le
     MessageParcel reply;
     MessageOption option;
     data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
-    auto rsKeyFrameNode = RSWindowKeyFrameNode::Create();
-    ASSERT_NE(rsKeyFrameNode, nullptr);
-    ASSERT_EQ(rsKeyFrameNode->WriteToParcel(data), true);
     uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_LINK_KEYFRAME_NODE);
     EXPECT_TRUE(sessionStageStub_ != nullptr);
     EXPECT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));

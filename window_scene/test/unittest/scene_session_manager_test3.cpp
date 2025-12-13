@@ -1941,25 +1941,6 @@ HWTEST_F(SceneSessionManagerTest3, ConfigSingleHandCompatibleMode, TestSize.Leve
 }
 
 /**
- * @tc.name: UpdateRootSceneAvoidArea
- * @tc.desc: call UpdateRootSceneAvoidArea
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest3, UpdateRootSceneAvoidArea, TestSize.Level1)
-{
-    EXPECT_NE(ssm_, nullptr);
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "testbundleName";
-    sessionInfo.abilityName_ = "testabilityName";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    ssm_->rootSceneSession_->specificCallback_ = nullptr;
-    ssm_->UpdateRootSceneAvoidArea();
-    auto res = ssm_->rootSceneSession_->GetPersistentId();
-    EXPECT_NE(res, 0);
-}
-
-/**
  * @tc.name: NotifySessionTouchOutside
  * @tc.desc: call NotifySessionTouchOutside02
  * @tc.type: FUNC

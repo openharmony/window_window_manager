@@ -265,10 +265,6 @@ HWTEST_F(WindowPatternSnapshotTest, IsSavingSnapshot, TestSize.Level1)
     ASSERT_NE(nullptr, scenePersistence);
     bool result = scenePersistence->IsSavingSnapshot();
     EXPECT_EQ(result, false);
-
-    auto key = defaultStatus;
-    result = scenePersistence->IsSavingSnapshot(key, true);
-    EXPECT_EQ(result, false);
 }
 
 /**
@@ -391,8 +387,7 @@ HWTEST_F(WindowPatternSnapshotTest, ResetSnapshotCache, TestSize.Level1)
     int32_t persistentId = 1423;
     sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
     scenePersistence->ResetSnapshotCache();
-    auto key = defaultStatus;
-    ASSERT_EQ(scenePersistence->isSavingSnapshot_[key], false);
+    ASSERT_EQ(scenePersistence->isSavingSnapshot_, false);
 }
 
 /**
@@ -523,10 +518,10 @@ HWTEST_F(WindowPatternSnapshotTest, Snapshot02, TestSize.Level1)
     ASSERT_EQ(nullptr, sceneSession->Snapshot(false, 0.0f));
 
     sceneSession->surfaceNode_->bufferAvailable_ = true;
-    sceneSession->isPrivacyMode_ = false;
+    sceneSession->property_->SetPrivacyMode(false);
     ASSERT_EQ(nullptr, sceneSession->Snapshot(false, 0.0f));
 
-    sceneSession->isPrivacyMode_ = true;
+    sceneSession->property_->SetPrivacyMode(true);
     ASSERT_EQ(nullptr, sceneSession->Snapshot(false, 0.0f));
 
     sceneSession->surfaceNode_ = nullptr;
@@ -626,8 +621,7 @@ HWTEST_F(WindowPatternSnapshotTest, GetSnapshotPixelMap, TestSize.Level1)
     session_->scenePersistence_ = nullptr;
     ASSERT_EQ(nullptr, session_->GetSnapshotPixelMap(6.6f, 8.8f));
     session_->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("GetSnapshotPixelMap", 2024);
-    auto key = defaultStatus;
-    session_->scenePersistence_->isSavingSnapshot_[key].store(true);
+    session_->scenePersistence_->isSavingSnapshot_.store(true);
     session_->snapshot_ = nullptr;
     ASSERT_EQ(nullptr, session_->GetSnapshotPixelMap(6.6f, 8.8f));
 }
@@ -872,12 +866,8 @@ HWTEST_F(WindowPatternSnapshotTest, ConfigSupportSnapshotAllSessionStatus, TestS
 HWTEST_F(WindowPatternSnapshotTest, SetIsSavingSnapshot, TestSize.Level1)
 {
     ASSERT_NE(scenePersistence, nullptr);
-    auto key = defaultStatus;
-    scenePersistence->SetIsSavingSnapshot(key, true, true);
-    EXPECT_EQ(scenePersistence->isSavingSnapshotFreeMultiWindow_, true);
-    
-    scenePersistence->SetIsSavingSnapshot(key, false, true);
-    EXPECT_EQ(scenePersistence->isSavingSnapshot_[key], true);
+    scenePersistence->SetIsSavingSnapshot(true);
+    EXPECT_EQ(scenePersistence->IsSavingSnapshot(), true);
 }
 
 /**
@@ -1092,12 +1082,12 @@ HWTEST_F(WindowPatternSnapshotTest, GetNeedUseBlurSnapshot, TestSize.Level1)
     info.screenId_ = 0;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
-    sceneSession->isPrivacyMode_ = false;
+    sceneSession->property_->SetPrivacyMode(false);
     ControlInfo controlInfo = { .isNeedControl = false, .isControlRecentOnly = false };
     sceneSession->appUseControlMap_[ControlAppType::APP_LOCK] = controlInfo;
     EXPECT_EQ(sceneSession->GetNeedUseBlurSnapshot(), false);
 
-    sceneSession->isPrivacyMode_ = true;
+    sceneSession->property_->SetPrivacyMode(true);
     controlInfo.isNeedControl = true;
     sceneSession->appUseControlMap_[ControlAppType::APP_LOCK] = controlInfo;
     EXPECT_EQ(sceneSession->GetNeedUseBlurSnapshot(), true);
@@ -1142,22 +1132,22 @@ HWTEST_F(WindowPatternSnapshotTest, UpdateAppLockSnapshot, TestSize.Level1)
     EXPECT_EQ(sceneSession->isAppLockControl_.load(), false);
 
     sceneSession->state_ = SessionState::STATE_BACKGROUND;
-    sceneSession->isPrivacyMode_ = true;
+    sceneSession->property_->SetPrivacyMode(true);
     sceneSession->snapshotPrivacyMode_.store(true);
     sceneSession->UpdateAppLockSnapshot(type, controlInfo);
     EXPECT_EQ(sceneSession->isAppLockControl_.load(), false);
 
-    sceneSession->isPrivacyMode_ = true;
+    sceneSession->property_->SetPrivacyMode(true);
     sceneSession->snapshotPrivacyMode_.store(false);
     sceneSession->UpdateAppLockSnapshot(type, controlInfo);
     EXPECT_EQ(sceneSession->isAppLockControl_.load(), false);
 
-    sceneSession->isPrivacyMode_ = false;
+    sceneSession->property_->SetPrivacyMode(false);
     sceneSession->snapshotPrivacyMode_.store(true);
     sceneSession->UpdateAppLockSnapshot(type, controlInfo);
     EXPECT_EQ(sceneSession->isAppLockControl_.load(), false);
 
-    sceneSession->isPrivacyMode_ = false;
+    sceneSession->property_->SetPrivacyMode(false);
     sceneSession->snapshotPrivacyMode_.store(false);
     sceneSession->UpdateAppLockSnapshot(type, controlInfo);
     EXPECT_EQ(sceneSession->isAppLockControl_.load(), false);

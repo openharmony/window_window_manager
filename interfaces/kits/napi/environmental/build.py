@@ -110,6 +110,14 @@ def main(argv):
         print("windowenv: No available build output file found")
         sys.exit(1)
 
+    # clean the tmp directory
+    for dir_path in [engine_path, node_modules_path]:
+        try:
+            shutil.rmtree(dir_path)
+            print(f"delete directory success: {dir_path}")
+        except Exception as e:
+            print(f"delete directory failed {dir_path}: {str(e)}")
+
 if __name__ == '__main__':
     start_time = time.time()
     main(sys.argv)

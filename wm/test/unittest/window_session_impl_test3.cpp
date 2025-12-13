@@ -163,34 +163,34 @@ HWTEST_F(WindowSessionImplTest3, RegisterWindowNoInteractionListener01, TestSize
 }
 
 /**
- * @tc.name: SetForceSplitEnable
- * @tc.desc: SetForceSplitEnable
+ * @tc.name: SetForceSplitConfig
+ * @tc.desc: SetForceSplitConfig
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, SetForceSplitEnable, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest3, SetForceSplitConfig, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetForceSplitEnable start";
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetForceSplitConfig start";
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    window_ = GetTestWindowImpl("SetForceSplitEnable");
+    window_ = GetTestWindowImpl("SetForceSplitConfig");
     ASSERT_NE(window_, nullptr);
 
     int32_t FORCE_SPLIT_MODE = 5;
     int32_t NAV_FORCE_SPLIT_MODE = 6;
-    AppForceLandscapeConfig config = { FORCE_SPLIT_MODE, "MainPage", true, "ArkuiOptions", false };
-    window_->SetForceSplitEnable(config);
+    AppForceLandscapeConfig config = { FORCE_SPLIT_MODE, true, false, {}, {}, {}, false, false, false, false };
+    window_->SetForceSplitConfig(config);
 
-    config = { FORCE_SPLIT_MODE, "MainPage", false, "ArkuiOptions", false };
-    window_->SetForceSplitEnable(config);
+    config = { FORCE_SPLIT_MODE, false, false, {}, {}, {}, false, false, false, false };
+    window_->SetForceSplitConfig(config);
 
-    config = { NAV_FORCE_SPLIT_MODE, "MainPage", true, "ArkuiOptions", false };
-    window_->SetForceSplitEnable(config);
+    config = { NAV_FORCE_SPLIT_MODE, true, false, {}, {}, {}, false, false, false, false };
+    window_->SetForceSplitConfig(config);
 
-    config = { NAV_FORCE_SPLIT_MODE, "MainPage", false, "ArkuiOptions", false };
-    window_->SetForceSplitEnable(config);
+    config = { NAV_FORCE_SPLIT_MODE, false, false, {}, {}, {}, false, false, false, false };
+    window_->SetForceSplitConfig(config);
     EXPECT_TRUE(logMsg.find("uiContent is null!") != std::string::npos);
     LOG_SetCallback(nullptr);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetForceSplitEnable end";
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetForceSplitConfig end";
 }
 
 /**
@@ -1593,6 +1593,55 @@ HWTEST_F(WindowSessionImplTest3, NotifyUIExtHostRectChangeInGlobalDisplayListene
     window->rectChangeInGlobalDisplayUIExtListenerIds_.clear();
     ASSERT_TRUE(window->rectChangeInGlobalDisplayUIExtListenerIds_.empty());
     window->NotifyUIExtHostRectChangeInGlobalDisplayListeners(rect, reason);
+}
+
+/**
+ * @tc.name: UpdateSubWindowStateWithOptions
+ * @tc.desc: UpdateSubWindowStateWithOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, UpdateSubWindowStateWithOptions, Function | SmallTest | Level1)
+{
+    window_ = GetTestWindowImpl("MainWindow");
+    ASSERT_NE(window_, nullptr);
+    window_->property_->SetPersistentId(100);
+    StateChangeOption option(window_->GetPersistentId(), WindowState::STATE_HIDDEN, 0, false, false, false, false,
+        false);
+    window_->UpdateSubWindowStateWithOptions(option);
+
+    sptr<WindowSessionImpl> subwindow1 = nullptr;
+    sptr<WindowSessionImpl> subwindow2 = GetTestWindowImpl("SubWindow2");
+    ASSERT_NE(subwindow2, nullptr);
+    subwindow2->state_ = WindowState::STATE_SHOWN;
+    subwindow2->property_->SetPersistentId(2);
+    sptr<WindowSessionImpl> subwindow3 = GetTestWindowImpl("SubWindow3");
+    ASSERT_NE(subwindow3, nullptr);
+    subwindow3->state_ = WindowState::STATE_HIDDEN;
+    subwindow2->property_->SetPersistentId(3);
+    sptr<WindowSessionImpl> subwindow4 = GetTestWindowImpl("SubWindow4");
+    ASSERT_NE(subwindow4, nullptr);
+    subwindow3->state_ = WindowState::STATE_INITIAL;
+    window_->subWindowSessionMap_[window_->GetPersistentId()].push_back(subwindow1);
+    window_->subWindowSessionMap_[window_->GetPersistentId()].push_back(subwindow2);
+    window_->subWindowSessionMap_[window_->GetPersistentId()].push_back(subwindow3);
+    window_->subWindowSessionMap_[window_->GetPersistentId()].push_back(subwindow4);
+    // Hide branch
+    window_->UpdateSubWindowStateWithOptions(option);
+    subwindow2->followCreatorLifecycle_ = true;
+    subwindow2->state_ = WindowState::STATE_SHOWN;
+    window_->UpdateSubWindowStateWithOptions(option);
+    ASSERT_EQ(subwindow2->state_, WindowState::STATE_HIDDEN);
+
+    // Show branch
+    option.newState_ = WindowState::STATE_SHOWN;
+    window_->UpdateSubWindowStateWithOptions(option);
+    subwindow3->requestState_ = WindowState::STATE_SHOWN;
+    subwindow3->state_ = WindowState::STATE_HIDDEN;
+    window_->UpdateSubWindowStateWithOptions(option);
+    subwindow3->followCreatorLifecycle_ = true;
+    subwindow3->state_ = WindowState::STATE_HIDDEN;
+    window_->UpdateSubWindowStateWithOptions(option);
+    ASSERT_EQ(subwindow3->state_, WindowState::STATE_SHOWN);
 }
 } // namespace
 } // namespace Rosen

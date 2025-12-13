@@ -839,12 +839,9 @@ void SceneSessionDirtyManager::UpdateWindowFlags(DisplayId displayId, const sptr
     MMI::WindowInfo& windowInfo) const
 {
     windowInfo.flags = 0;
-    auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
-    if (screenSession != nullptr) {
-        if (!screenSession->IsTouchEnabled() || !sceneSession->GetSystemTouchable() ||
-            !sceneSession->GetForegroundInteractiveStatus()) {
-            windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_UNTOUCHABLE;
-        }
+    bool isTouchable = sceneSession->GetWindowTouchableForMMI(displayId);
+    if (!isTouchable) {
+        windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_UNTOUCHABLE;
     }
 }
 

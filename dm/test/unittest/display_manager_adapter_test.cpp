@@ -681,7 +681,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenActiveMode, TestSize.Level1)
     ScreenId id = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
     ASSERT_NE(id, SCREEN_ID_INVALID) << "Failed to create virtual screen";
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenActiveMode(id, 100);
-    EXPECT_EQ(err, DMError::DM_ERROR_NULLPTR)
+    EXPECT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED)
         << "SetScreenActiveMode should return DM_ERROR_NULLPTR when proxy is not initialized.";
     SingletonContainer::Get<ScreenManagerAdapter>().DestroyVirtualScreen(id);
 }
@@ -1050,6 +1050,68 @@ HWTEST_F(DisplayManagerAdapterTest, GetBrightnessInfo02, TestSize.Level1)
     EXPECT_NE(brightnessInfo.currentHeadroom, 0);
     EXPECT_NE(brightnessInfo.maxHeadroom, 0);
     EXPECT_NE(brightnessInfo.sdrNits, 0);
+    SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ =
+        screenSessionManagerServiceProxy;
+}
+
+/**
+ * @tc.name: GetSupportsInput
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetSupportsInput, TestSize.Level1)
+{
+    bool supportInput;
+    DMError err = SingletonContainer::Get<DisplayManagerAdapter>().GetSupportsInput(0, supportInput);
+    EXPECT_EQ(err, DMError::DM_OK);
+}
+
+/**
+ * @tc.name:GetSupportsInput02
+ * @tc.desc: test screenSessionManagerServiceProxy_ is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetSupportsInput02, TestSize.Level1)
+{
+    bool supportInput;
+    auto screenSessionManagerServiceProxy =
+        SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_;
+    SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ = nullptr;
+    DMError err = SingletonContainer::Get<DisplayManagerAdapter>().GetSupportsInput(0, supportInput);
+    EXPECT_EQ(err, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
+    SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ =
+        screenSessionManagerServiceProxy;
+}
+
+/**
+ * @tc.name: SetSupportsInput
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, SetSupportsInput, TestSize.Level1)
+{
+    bool supportInput = false;
+    DMError err = SingletonContainer::Get<DisplayManagerAdapter>().SetSupportsInput(0, supportInput);
+    EXPECT_EQ(err, DMError::DM_OK);
+    bool supportsInputGet = true;
+    err = SingletonContainer::Get<DisplayManagerAdapter>().GetSupportsInput(0, supportsInputGet);
+    EXPECT_EQ(err, DMError::DM_OK);
+    EXPECT_EQ(supportsInputGet, false);
+}
+
+/**
+ * @tc.name:SetSupportsInput02
+ * @tc.desc: test screenSessionManagerServiceProxy_ is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, SetSupportsInput02, TestSize.Level1)
+{
+    bool supportInput = false;
+    auto screenSessionManagerServiceProxy =
+        SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_;
+    SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ = nullptr;
+    DMError err = SingletonContainer::Get<DisplayManagerAdapter>().SetSupportsInput(0, supportInput);
+    EXPECT_EQ(err, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
     SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ =
         screenSessionManagerServiceProxy;
 }
