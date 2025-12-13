@@ -2999,6 +2999,16 @@ void Session::SetBufferNameForPixelMap(const char* functionName, const std::shar
     pixelMap->SetMemoryName(functionNameStr + '_' + std::to_string(GetPersistentId()));
 }
 
+void Session::SetPreloadingStartingWindow(bool preloading)
+{
+    preloadingStartingWindow_.store(preloading);
+}
+
+bool Session::GetPreloadingStartingWindow()
+{
+    return preloadingStartingWindow_.load();
+}
+
 void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media::PixelMap> persistentPixelMap,
     bool updateSnapshot, LifeCycleChangeReason reason)
 {

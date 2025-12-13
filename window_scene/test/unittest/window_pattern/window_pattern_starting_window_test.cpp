@@ -532,8 +532,10 @@ HWTEST_F(WindowPatternStartingWindowTest, PreLoadStartingWindow, TestSize.Level1
     sptr<SceneSession> sceneSession = nullptr;
     ssm_->systemConfig_.supportPreloadStartingWindow_ = false;
     ssm_->PreLoadStartingWindow(sceneSession);
+    usleep(WAIT_SLEEP_TIME);
     ssm_->systemConfig_.supportPreloadStartingWindow_ = true;
     ssm_->PreLoadStartingWindow(sceneSession);
+    usleep(WAIT_SLEEP_TIME);
     SessionInfo info;
     info.bundleName_ = "bundleName_";
     info.moduleName_ = "moduleName_";
@@ -545,20 +547,31 @@ HWTEST_F(WindowPatternStartingWindowTest, PreLoadStartingWindow, TestSize.Level1
     property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
     sceneSession->SetSessionProperty(property);
     ssm_->PreLoadStartingWindow(sceneSession);
+    usleep(WAIT_SLEEP_TIME);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sceneSession->SetSessionProperty(property);
     ssm_->PreLoadStartingWindow(sceneSession);
+    usleep(WAIT_SLEEP_TIME);
     sceneSession->state_ = SessionState::STATE_CONNECT;
     ssm_->PreLoadStartingWindow(sceneSession);
+    usleep(WAIT_SLEEP_TIME);
     sceneSession->state_ = SessionState::STATE_DISCONNECT;
     ssm_->PreLoadStartingWindow(sceneSession);
+    usleep(WAIT_SLEEP_TIME);
 
     StartingWindowInfo startingWindowInfo;
     startingWindowInfo.configFileEnabled_ = false;
     startingWindowInfo.iconPathEarlyVersion_ = "resource:///12345678.png";
     std::string keyForCached = info.moduleName_ + info.abilityName_ + std::to_string(true);
     ssm_->startingWindowMap_[info.bundleName_][keyForCached] = startingWindowInfo;
+    sceneSession->sessionInfo_.abilityInfo = nullptr;
     ssm_->PreLoadStartingWindow(sceneSession);
+    usleep(WAIT_SLEEP_TIME);
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    ASSERT_NE(nullptr, abilityInfo);
+    sceneSession->sessionInfo_.abilityInfo = abilityInfo;
+    ssm_->PreLoadStartingWindow(sceneSession);
+    usleep(WAIT_SLEEP_TIME);
     ASSERT_NE(nullptr, sceneSession);
 }
 
@@ -763,6 +776,26 @@ HWTEST_F(WindowPatternStartingWindowTest, UpdateCachedColorToAppSet, TestSize.Le
     ssm_->startingWindowMap_.clear();
     ssm_->UpdateCachedColorToAppSet(bundleName, moduleName, abilityName, tempInfo);
     EXPECT_EQ(0, ssm_->startingWindowMap_.size());
+}
+
+/**
+ * @tc.name: SetPreloadingStartingWindow
+ * @tc.desc: SetPreloadingStartingWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternStartingWindowTest, SetPreloadingStartingWindow, TestSize.Level1)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.moduleName_ = "moduleName";
+    sessionInfo.abilityName_ = "abilityName";
+    sessionInfo.bundleName_ = "bundleName";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->preloadingStartingWindow_ = false;
+    sceneSession->SetPreloadingStartingWindow(true);
+    EXPECT_EQ(sceneSession->GetPreloadingStartingWindow(), true);
+    sceneSession->SetPreloadingStartingWindow(false);
+    EXPECT_EQ(sceneSession->GetPreloadingStartingWindow(), false);
 }
 } // namespace
 } // namespace Rosen
