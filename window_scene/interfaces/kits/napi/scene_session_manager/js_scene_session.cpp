@@ -498,6 +498,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "setShowRecent", moduleName, JsSceneSession::SetShowRecent);
     BindNativeFunction(env, objValue, "setZOrder", moduleName, JsSceneSession::SetZOrder);
     BindNativeFunction(env, objValue, "getZOrder", moduleName, JsSceneSession::GetZOrder);
+    BindNativeFunction(env, objValue, "getUid", moduleName, JsSceneSession::GetUid);
     BindNativeFunction(env, objValue, "setTouchable", moduleName, JsSceneSession::SetTouchable);
     BindNativeFunction(env, objValue, "setWindowInputType", moduleName, JsSceneSession::SetWindowInputType);
     BindNativeFunction(env, objValue, "setExpandInputFlag", moduleName, JsSceneSession::SetExpandInputFlag);
@@ -2552,6 +2553,13 @@ napi_value JsSceneSession::GetZOrder(napi_env env, napi_callback_info info)
     TLOGD(WmsLogTag::WMS_PC, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnGetZOrder(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::GetUid(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnGetUid(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetTouchable(napi_env env, napi_callback_info info)
@@ -5620,6 +5628,17 @@ napi_value JsSceneSession::OnGetZOrder(napi_env env, napi_callback_info info)
     }
     uint32_t sessionZOrder = session->GetZOrder();
     return CreateJsValue(env, sessionZOrder);
+}
+
+napi_value JsSceneSession::OnGetUid(napi_env env, napi_callback_info info)
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    int32_t sessionUid = session->GetCallingUid();
+    return CreateJsValue(env, sessionUid);
 }
 
 napi_value JsSceneSession::OnSetFloatingScale(napi_env env, napi_callback_info info)
