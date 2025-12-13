@@ -24,6 +24,7 @@
 #include "iremote_object_mocker.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_info.h"
 #include "session_manager.h"
 #include "session_manager/include/scene_session_manager.h"
@@ -60,6 +61,7 @@ public:
 
     static ProcessGestureNavigationEnabledChangeFunc callbackFunc_;
     static sptr<SceneSessionManager> ssm_;
+    ScreenSessionManagerClient* screenSessionManagerClient_;
 
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
@@ -84,11 +86,13 @@ void SceneSessionManagerTest4::TearDownTestCase()
 void SceneSessionManagerTest4::SetUp()
 {
     ssm_->sceneSessionMap_.clear();
+    screenSessionManagerClient_ = &ScreenSessionManagerClient::GetInstance();
 }
 
 void SceneSessionManagerTest4::TearDown()
 {
     ssm_->sceneSessionMap_.clear();
+    screenSessionManagerClient_ = nullptr;
     usleep(WAIT_SYNC_IN_NS);
 }
 
@@ -1629,6 +1633,12 @@ HWTEST_F(SceneSessionManagerTest4, GetTopFocusableNonAppSession01, TestSize.Leve
  */
 HWTEST_F(SceneSessionManagerTest4, GetNextFocusableSession, TestSize.Level0)
 {
+    ASSERT_NE(screenSessionManagerClient_, nullptr);
+    screenSessionManagerClient_->screenSessionMap_.clear();
+    ScreenId screenId = 0;
+    sptr<ScreenSession> screenSession = new ScreenSession(screenId, ScreenProperty(), 0);
+    screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
+
     ASSERT_NE(ssm_, nullptr);
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "bundleName";
@@ -1669,6 +1679,7 @@ HWTEST_F(SceneSessionManagerTest4, GetNextFocusableSession, TestSize.Level0)
     ssm_->sceneSessionMap_.insert(std::make_pair(5, sceneSession05));
     sptr<SceneSession> result = ssm_->GetNextFocusableSession(DEFAULT_DISPLAY_ID, 1);
     EXPECT_EQ(result, sceneSession);
+    screenSessionManagerClient_->screenSessionMap_.clear();
 }
 
 /**
@@ -1817,6 +1828,12 @@ HWTEST_F(SceneSessionManagerTest4, CheckBlockingFocus, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest4, RequestFocusSpecificCheck, TestSize.Level0)
 {
+    ASSERT_NE(screenSessionManagerClient_, nullptr);
+    screenSessionManagerClient_->screenSessionMap_.clear();
+    ScreenId screenId = 0;
+    sptr<ScreenSession> screenSession = new ScreenSession(screenId, ScreenProperty(), 0);
+    screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
+
     ASSERT_NE(ssm_, nullptr);
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "bundleName";
@@ -1835,6 +1852,7 @@ HWTEST_F(SceneSessionManagerTest4, RequestFocusSpecificCheck, TestSize.Level0)
     sceneSession01->parentSession_ = sceneSession;
     result = ssm_->RequestFocusSpecificCheck(DEFAULT_DISPLAY_ID, sceneSession, byForeground, reason);
     EXPECT_EQ(result, WSError::WS_OK);
+    screenSessionManagerClient_->screenSessionMap_.clear();
 }
 
 /**
