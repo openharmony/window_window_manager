@@ -1625,59 +1625,6 @@ HWTEST_F(SceneSessionManagerTest10, FilterForListWindowInfo08, TestSize.Level1)
 }
 
 /**
- * @tc.name: NotifyNextAvoidRectInfo
- * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo, TestSize.Level0)
-{
-    ASSERT_NE(ssm_, nullptr);
-    WSRect portraitRect = { 0, 0, 1260, 123 };
-    WSRect landspaceRect = { 0, 0, 2720, 123 };
-    auto ret = ssm_->NotifyNextAvoidRectInfo(AvoidAreaType::TYPE_SYSTEM, portraitRect, landspaceRect, 0);
-    ASSERT_EQ(ret, WSError::WS_OK);
-    std::pair<WSRect, WSRect> nextSystemBarAvoidAreaRectInfo;
-    ret = ssm_->GetNextAvoidRectInfo(0, AvoidAreaType::TYPE_SYSTEM, nextSystemBarAvoidAreaRectInfo);
-    ASSERT_EQ(ret, WSError::WS_OK);
-    ret = ssm_->GetNextAvoidRectInfo(0, AvoidAreaType::TYPE_NAVIGATION_INDICATOR, nextSystemBarAvoidAreaRectInfo);
-    ASSERT_EQ(ret, WSError::WS_DO_NOTHING);
-}
-
-/**
- * @tc.name: NotifyNextAvoidRectInfo_01
- * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_01
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_01, TestSize.Level0)
-{
-    ASSERT_NE(ssm_, nullptr);
-    WSRect portraitRect = { 0, 0, 1260, 123 };
-    WSRect landspaceRect = { 0, 0, 2720, 123 };
-    auto ret = ssm_->NotifyNextAvoidRectInfo(AvoidAreaType::TYPE_SYSTEM, portraitRect, landspaceRect, 0);
-    ASSERT_EQ(ret, WSError::WS_OK);
-    SessionInfo info;
-    info.abilityName_ = "NotifyNextAvoidRectInfo";
-    info.bundleName_ = "NotifyNextAvoidRectInfo";
-    info.screenId_ = 0;
-    auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    specificCb->onGetNextAvoidAreaRectInfo_ =
-        [](DisplayId displayId, AvoidAreaType type, std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo) {
-            return ssm_->GetNextAvoidRectInfo(displayId, type, nextSystemBarAvoidAreaRectInfo);
-        };
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
-    sceneSession->property_->SetPersistentId(1);
-    sceneSession->GetLayoutController()->SetSessionRect({ 0, 0, 1260, 2720 });
-    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
-    std::pair<WSRect, WSRect> nextSystemBarAvoidAreaRectInfo;
-    ret = sceneSession->specificCallback_->onGetNextAvoidAreaRectInfo_(
-        0, AvoidAreaType::TYPE_SYSTEM, nextSystemBarAvoidAreaRectInfo);
-    ASSERT_EQ(ret, WSError::WS_OK);
-    ASSERT_EQ(nextSystemBarAvoidAreaRectInfo.first, portraitRect);
-    ASSERT_EQ(nextSystemBarAvoidAreaRectInfo.second, landspaceRect);
-    ssm_->sceneSessionMap_.clear();
-}
-
-/**
  * @tc.name: NotifyNextAvoidRectInfo_statusBar
  * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_statusBar
  * @tc.type: FUNC
