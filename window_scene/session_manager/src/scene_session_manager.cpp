@@ -3621,11 +3621,11 @@ bool SceneSessionManager::IsPcSceneSessionLifecycle(const sptr<SceneSession>& sc
     bool isAppSupportPhoneInPc = sceneSession->GetSessionProperty()->GetIsAppSupportPhoneInPc();
     bool isScreenLock = IsScreenLocked();
     if ((systemConfig_.backgroundswitch && !isAppSupportPhoneInPc) ||
-        (isPcAppInPad && !isScreenLock && !systemConfig_.IsPhoneWindow())) {
+        (isPcAppInLargeScreenDevice && !isScreenLock && !systemConfig_.IsPhoneWindow())) {
         return true;
     }
     bool trayAppForeground = system::GetParameter("persist.window.tray_foreground", "") == "true";
-    if (trayAppForeground && isPcAppInPad) {
+    if (trayAppForeground && isPcAppInLargeScreenDevice) {
         TLOGI(WmsLogTag::WMS_PC, "isPcAppInPad check trayApp success");
         return true;
     }
