@@ -1013,8 +1013,11 @@ int SceneSessionManagerLiteStub::HandleRegisterWindowPropertyChangeAgent(Message
 
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY;
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
-    sptr<IWindowManagerAgent> windowManagerAgentProxy =
-        iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
+    if (windowManagerAgentObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read remote object failed");
+        return ERR_INVALID_DATA;
+    }
+    sptr<IWindowManagerAgent> windowManagerAgentProxy = iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
     WMError errCode = RegisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgentProxy);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
