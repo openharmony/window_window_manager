@@ -217,7 +217,6 @@ HWTEST_F(WindowSessionTest, UpdateBrightness, TestSize.Level1)
     EXPECT_EQ(WSError::WS_OK, session_->UpdateBrightness(brightness));
 
     session_->sessionStage_ = nullptr;
-    float brightness = 0.5f;
     EXPECT_EQ(WSError::WS_OK, session_->UpdateBrightness(brightness));
 }
 
