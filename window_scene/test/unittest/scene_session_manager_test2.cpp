@@ -1604,6 +1604,20 @@ HWTEST_F(SceneSessionManagerTest2, RegisterBrightnessDataChangeListener, TestSiz
 }
 
 /**
+ * @tc.name: UnregisterBrightnessDataChangeListener
+ * @tc.desc: SceneSessionManager UnregisterBrightnessDataChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, UnregisterBrightnessDataChangeListener, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ssm_->UnregisterBrightnessDataChangeListener();
+    EXPECT_TRUE(g_logMsg.find("UnregisterBrightnessDataChangeListener") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
  * @tc.name: SubscribePowerManagerServiceSa
  * @tc.desc: SceneSessionManager SubscribePowerManagerServiceSa
  * @tc.type: FUNC
