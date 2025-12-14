@@ -493,7 +493,7 @@ void SceneSessionManager::Init()
 
     //Subscribe power manager service
     #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
-        auto task = []() {
+        auto task = [this]() {
             SCBThreadInfo threadInfo {};
             SubscribeSystemAbility(POWER_MANAGER_SERVICE_ID, threadInfo);
         };
@@ -507,6 +507,27 @@ void SceneSessionManager::RegisterBrightnessDataChangeListener()
         auto ret = DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RegisterDataChangeListener(
             new OverrideChangeListener, DisplayPowerMgr::DisplayDataChangeListenerType::FORCE_EXIT_OVERRIDDEN_MODE);
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "ret: %{public}d", static_cast<int32_t>(ret));
+    #endif
+}
+
+void SceneSessionManager::SubscribePowerManagerServiceSa()
+{
+    #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
+        auto task = [this, where = __func__]() {
+            SCBThreadInfo threadInfo {};
+            sptr<ISystemAbilityManager> systemAbilityManager =
+                SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+            if (!systemAbilityManager) {
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, failed to get system ability manager client", where);
+                return;
+            }
+            auto statusChangeListener = sptr<SceneSystemAbilityListener>::MakeSptr(threadInfo);
+            int32_t ret = systemAbilityManager->SubscribeSystemAbility(POWER_MANAGER_SERVICE_ID, statusChangeListener);
+            if (ret != ERR_OK) {
+                TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, failed to subscribe system ability manager", where);
+            }
+        };
+        taskScheduler_->PostAsyncTask(task, "SubscribePowerMrgTask");
     #endif
 }
 
@@ -639,21 +660,6 @@ void SceneSessionManager::InitScheduleUtils()
     };
     taskScheduler_->PostAsyncTask(task, "changeQosTask");
 #endif
-}
-
-void SceneSessionManager::SubscribeSystemAbility(int32_t systemAbilityId, SCBThreadInfo threadInfo)
-{
-    sptr<ISystemAbilityManager> systemAbilityManager =
-        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (!systemAbilityManager) {
-        TLOGNE(WmsLogTag::WMS_MAIN, "failed to get system ability manager client");
-        return;
-    }
-    auto statusChangeListener = sptr<SceneSystemAbilityListener>::MakeSptr(threadInfo);
-    int32_t ret = systemAbilityManager->SubscribeSystemAbility(systemAbilityId, statusChangeListener);
-    if (ret != ERR_OK) {
-        TLOGNI(WmsLogTag::WMS_MAIN, "failed to subscribe system ability manager");
-    }
 }
 
 void SceneSessionManager::UpdateSessionWithFoldStateChange(DisplayId displayId, SuperFoldStatus status,
