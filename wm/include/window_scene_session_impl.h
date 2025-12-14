@@ -169,6 +169,7 @@ public:
     bool GetDefaultDensityEnabled() override;
     WMError HideNonSecureWindows(bool shouldHide) override;
     void UpdateDensity() override;
+    WSError UpdateBrightness(float brightness) override;
     WSError UpdateOrientation() override;
     WMError GetTargetOrientationConfigInfo(Orientation targetOrientation,
         const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& targetProperties,

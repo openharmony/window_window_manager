@@ -239,6 +239,7 @@ public:
             WindowAnimationCurve::LINEAR, {0.0f, 0.0f, 0.0f, 0.0f} },
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {}) override;
     void UpdateDensity() override;
+    WSError UpdateBrightness(float brightness) override { return WSError::WS_OK; }
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override;
     void UpdateAnimationSpeed(float speed) override;
     void UpdateAllWindowSpeed(float speed);
