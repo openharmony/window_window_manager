@@ -1097,6 +1097,35 @@ sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfo(DisplayId displayId, int32
     return cutoutInfo;
 }
 
+void PushRoundedCorner(std::vector<RoundedCorner>& roundedCorner, int32_t width, int32_t height, int radius)
+{
+    RoundedCorner topLeftCorner {CornerType::TOP_LEFT, {radius, radius}, radius};
+    RoundedCorner topRightCorner {CornerType::TOP_RIGHT, {width - radius, radius}, radius};
+    RoundedCorner bottomRightCorner {CornerType::BOTTOM_RIGHT, {width - radius, height - radius}, radius};
+    RoundedCorner bottomLeftCorner {CornerType::BOTTOM_LEFT, {radius, height - radius}, radius};
+    roundedCorner.push_back(topLeftCorner);
+    roundedCorner.push_back(topRightCorner);
+    roundedCorner.push_back(bottomRightCorner);
+    roundedCorner.push_back(bottomLeftCorner);
+}
+
+DMError DisplayManagerAdapter::GetRoundedCorner(std::vector<RoundedCorner>& roundedCorner,
+    DisplayId displayId, int32_t width, int32_t height)
+{
+    TLOGD(WmsLogTag::DMS, "enter");
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    if (screenSessionManagerServiceProxy_) {
+        int radius = 0;
+        auto ret = screenSessionManagerServiceProxy_->GetRoundedCorner(displayId, radius);
+        if ((ret != DMError::DM_OK) || (radius == 0)) {
+            return ret;
+        }
+        PushRoundedCorner(roundedCorner, width, height, radius);
+        return DMError::DM_OK;
+    }
+    return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+}
+
 DMError DisplayManagerAdapter::AddSurfaceNodeToDisplay(DisplayId displayId,
     std::shared_ptr<class RSSurfaceNode>& surfaceNode)
 {

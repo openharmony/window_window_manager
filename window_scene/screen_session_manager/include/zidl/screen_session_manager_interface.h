@@ -402,6 +402,7 @@ public:
     {
         return DMError::DM_OK;
     }
+    virtual DMError GetRoundedCorner(DisplayId displayId, int& radius) { return DMError::DM_OK; }
 };
 } // namespace Rosen
 } // namespace OHOS
