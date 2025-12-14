@@ -780,6 +780,7 @@ public:
     void SetPropertyDirtyFlags(uint32_t dirtyFlags) { propertyDirtyFlags_ = dirtyFlags; }
     void AddPropertyDirtyFlags(uint32_t dirtyFlags) { propertyDirtyFlags_ |= dirtyFlags; }
     WSError NotifyScreenshotAppEvent(ScreenshotEventType type);
+    WSError UpdateBrightness(float brightness);
 
     /*
      * Window Pattern
@@ -1074,8 +1075,6 @@ protected:
     /*
      * Window Property
      */
-    WSError UpdateBrightness(float brightness);
-
     uint32_t propertyDirtyFlags_ = 0;
 
 private:
