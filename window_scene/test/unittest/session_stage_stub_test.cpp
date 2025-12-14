@@ -1560,6 +1560,21 @@ HWTEST_F(SessionStageStubTest, HandleUpdateIsShowDecorInFreeMultiWindow02, TestS
     ASSERT_TRUE(sessionStageStub_ != nullptr);
     EXPECT_EQ(ERR_NONE, sessionStageStub_->HandleUpdateIsShowDecorInFreeMultiWindow(data, reply));
 }
+
+/**
+ * @tc.name: HandleUpdateBrightness
+ * @tc.desc: test function : HandleUpdateBrightness
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateBrightness, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    bool isShow = true;
+    data.WriteFloat(1.0f);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->HandleUpdateBrightness(data, reply));
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
