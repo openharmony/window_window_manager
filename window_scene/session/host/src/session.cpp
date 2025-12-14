@@ -1019,6 +1019,14 @@ sptr<IRemoteObject> Session::GetAbilityToken() const
     return abilityToken_;
 }
 
+WSError Session::UpdateBrightness(float brightness)
+{
+    if (sessionStage_) {
+        sessionStage_->UpdateBrightness(brightness);
+    }
+    return WSError::WS_OK;
+}
+
 WSError Session::SetBrightness(float brightness)
 {
     GetSessionProperty()->SetBrightness(brightness);

@@ -105,6 +105,8 @@ enum class SessionStageInterfaceCode {
     TRANS_ID_UPDATE_ANIMATION_SPEED,
     // Pip active status
     TRANS_ID_ACTIVE_STATUS_CHANGE,
+    // Brightness
+    TRANS_ID_UPDATE_BRIGHTNESS,
 };
 }   // namespace Rosen
 }   // namespace OHOS

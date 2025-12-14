@@ -246,6 +246,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdateIsShowDecorInFreeMultiWindow(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_ANIMATION_SPEED):
             return HandleUpdateAnimationSpeed(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_BRIGHTNESS):
+            return HandleUpdateBrightness(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1357,6 +1359,22 @@ int SessionStageStub::HandleUpdateIsShowDecorInFreeMultiWindow(MessageParcel& da
     WSError errCode = UpdateIsShowDecorInFreeMultiWindow(isShow);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleUpdateBrightness(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
+    float brightness;
+    if (!data.ReadFloat(brightness)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read brightness failed");
+        return ERR_INVALID_VALUE;
+    }
+    WSError errCode = UpdateBrightness(brightness);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write errCode failed");
+        return ERR_TRANSACTION_FAILED;
     }
     return ERR_NONE;
 }

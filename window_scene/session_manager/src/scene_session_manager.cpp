@@ -2147,6 +2147,7 @@ WMError SceneSessionManager::NotifyBrightnessModeChange(const std::string& brigh
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Restore brightness, wid: %{public}d", brightnessSession->GetWindowId());
         PostBrightnessTask(UNDEFINED_BRIGHTNESS);
         brightnessSession->SetBrightness(UNDEFINED_BRIGHTNESS);
+        brightnessSession->UpdateBrightness(UNDEFINED_BRIGHTNESS);
         return WMError::WM_OK;
     }
     return WMError::WM_DO_NOTHING;
