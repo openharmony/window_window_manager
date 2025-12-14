@@ -493,11 +493,7 @@ void SceneSessionManager::Init()
 
     //Subscribe power manager service
     #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
-        auto task = [this]() {
-            SCBThreadInfo threadInfo {};
-            SubscribeSystemAbility(POWER_MANAGER_SERVICE_ID, threadInfo);
-        };
-        taskScheduler_->PostAsyncTask(task, "SubscribePowerMrgTask");
+        SubscribePowerManagerServiceSa();
     #endif
 }
 
@@ -655,7 +651,7 @@ void SceneSessionManager::InitScheduleUtils()
         auto statusChangeListener = sptr<SceneSystemAbilityListener>::MakeSptr(threadInfo);
         int32_t ret = systemAbilityManager->SubscribeSystemAbility(RES_SCHED_SYS_ABILITY_ID, statusChangeListener);
         if (ret != ERR_OK) {
-            TLOGNI(WmsLogTag::WMS_MAIN, "failed to subscribe system ability manager");
+            TLOGNE(WmsLogTag::WMS_MAIN, "failed to subscribe system ability manager");
         }
     };
     taskScheduler_->PostAsyncTask(task, "changeQosTask");
