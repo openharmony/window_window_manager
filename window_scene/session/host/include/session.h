@@ -1074,6 +1074,8 @@ protected:
     /*
      * Window Property
      */
+    WSError UpdateBrightness(float brightness);
+
     uint32_t propertyDirtyFlags_ = 0;
 
 private:
