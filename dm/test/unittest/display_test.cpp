@@ -303,6 +303,18 @@ HWTEST_F(DisplayTest, GetLiveCreaseRegion, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetRoundedCorner
+ * @tc.desc: test GetRoundedCorner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayTest, GetRoundedCorner, TestSize.Level1)
+{
+    std::vector<RoundedCorner> roundedCorner;
+    auto ret = defaultDisplay_->GetRoundedCorner(roundedCorner);
+    EXPECT_EQ(ret, DMError::DM_OK);
+}
+
+/**
  * @tc.name: GetOriginRotation
  * @tc.desc: test GetOriginRotation
  * @tc.type: FUNC

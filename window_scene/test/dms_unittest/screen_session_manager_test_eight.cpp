@@ -1178,6 +1178,24 @@ HWTEST_F(ScreenSessionManagerTest, SetPixelFormat, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetRoundedCorner
+ * @tc.desc: GetRoundedCorner test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetRoundedCorner, TestSize.Level1)
+{
+    std::vector<RoundedCorner> roundedCorner;
+    int radius = 0;
+    EXPECT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->GetRoundedCorner(0, radius));
+    ScreenId id = 0;
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
+    ssm_->screenSessionMap_[id] = screenSession;
+    ASSERT_NE(nullptr, screenSession);
+    auto ret = ssm_->GetRoundedCorner(0, radius);
+    EXPECT_EQ(DMError::DM_OK, ret);
+}
+
+/**
  * @tc.name: GetSupportedHDRFormats
  * @tc.desc: GetSupportedHDRFormats test
  * @tc.type: FUNC
