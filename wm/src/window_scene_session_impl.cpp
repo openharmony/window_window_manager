@@ -6634,6 +6634,13 @@ WMError WindowSceneSessionImpl::UseImplicitAnimation(bool useImplicit)
     return static_cast<WMError>(hostSession->UseImplicitAnimation(useImplicit));
 }
 
+WSError WindowSceneSessionImpl::UpdateBrightness(float brightness)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Wid: %{public}d, brightness: %{public}f", GetWindowId(), brightness);
+    property_->SetBrightness(brightness);
+    return WSError::WS_OK;
+}
+
 void WindowSceneSessionImpl::UpdateDensity()
 {
     UpdateDensityInner(nullptr);
