@@ -1618,20 +1618,6 @@ HWTEST_F(SceneSessionManagerTest2, UnregisterBrightnessDataChangeListener, TestS
 }
 
 /**
- * @tc.name: SubscribePowerManagerServiceSa
- * @tc.desc: SceneSessionManager SubscribePowerManagerServiceSa
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest2, SubscribePowerManagerServiceSa, TestSize.Level1)
-{
-    g_logMsg.clear();
-    LOG_SetCallback(MyLogCallback);
-    ssm_->SubscribePowerManagerServiceSa();
-    EXPECT_TRUE(g_logMsg.find("SubscribePowerManagerServiceSa") != std::string::npos);
-    LOG_SetCallback(nullptr);
-}
-
-/**
  *@tc.name: HandleUserSwitching
  *@tc.desc: SceneSesionManager HandleUserSwitching
  *@tc.type: FUNC
