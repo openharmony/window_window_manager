@@ -649,7 +649,7 @@ public:
         const std::unordered_set<std::string>& privacyWindowTags) override;
     void UpdateSessionPrivacyForSuperFold(const sptr<SceneSession>& sceneSession, DisplayId displayId,
         std::unordered_map<DisplayId, std::unordered_set<std::string>>& privacyBundles);
-    void RegisterDataChangeListener();
+    void RegisterBrightnessDataChangeListener();
 
     /*
      * Multi Window

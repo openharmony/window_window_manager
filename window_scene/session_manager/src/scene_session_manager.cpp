@@ -347,7 +347,7 @@ public:
         {
             SceneSessionManager::GetInstance().NotifyBrightnessModeChange(params);
         }
-    }
+    };
 #endif
 
 bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& avoidArea, int32_t sessionBottom)
@@ -496,7 +496,7 @@ void SceneSessionManager::Init()
         auto task = []() {
             SCBThreadInfo threadInfo {};
             SubscribeSystemAbility(POWER_MANAGER_SERVICE_ID, threadInfo);
-        }
+        };
         taskScheduler_->PostAsyncTask(task, "SubscribePowerMrgTask");
     #endif
 }
