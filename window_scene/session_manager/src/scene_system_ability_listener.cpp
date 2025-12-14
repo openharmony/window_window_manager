@@ -63,6 +63,15 @@ void SceneSystemAbilityListener::OnAddSystemAbility(int32_t systemAbilityId, con
     }
 #endif
 }
+
+void SceneSystemAbilityListener::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
+{
+#ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
+    if (systemAbilityId == POWER_MANAGER_SERVICE_ID) {
+        SceneSessionManager::GetInstance().UnregisterBrightnessDataChangeListener();
+    }
+#endif
+}
 } // namespace Rosen
 } // namespace OHOS
 
