@@ -65,6 +65,11 @@ HWTEST_F(SceneSystemAbilityListenerTest, OnAddSystemAbilityTest, TestSize.Level1
 #else
     EXPECT_EQ(listener.info_, threadInfo);
 #endif
+
+#ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
+    listener.OnAddSystemAbility(POWER_MANAGER_SERVICE_ID, "");
+    EXPECT_EQ(listener.info_, threadInfo);
+#endif
 }
 } // namespace Rosen
 } // namespace OHOS

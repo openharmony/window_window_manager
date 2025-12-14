@@ -98,6 +98,16 @@ HWTEST_F(WindowSceneSessionImplTest3, UpdateOrientation, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateBrightness
+ * @tc.desc: UpdateBrightness
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, UpdateBrightness, TestSize.Level1)
+{
+    EXPECT_EQ(WSError::WS_OK, windowSceneSessionImpl->UpdateBrightness(1.0f));
+}
+
+/**
  * @tc.name: SetWindowMask
  * @tc.desc: SetWindowMask
  * @tc.type: FUNC

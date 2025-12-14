@@ -520,7 +520,7 @@ void SceneSessionManager::SubscribePowerManagerServiceSa()
             auto statusChangeListener = sptr<SceneSystemAbilityListener>::MakeSptr(threadInfo);
             int32_t ret = systemAbilityManager->SubscribeSystemAbility(POWER_MANAGER_SERVICE_ID, statusChangeListener);
             if (ret != ERR_OK) {
-                TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, failed to subscribe system ability manager", where);
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, failed to subscribe system ability manager", where);
             }
         };
         taskScheduler_->PostAsyncTask(task, "SubscribePowerMrgTask");
@@ -651,7 +651,7 @@ void SceneSessionManager::InitScheduleUtils()
         auto statusChangeListener = sptr<SceneSystemAbilityListener>::MakeSptr(threadInfo);
         int32_t ret = systemAbilityManager->SubscribeSystemAbility(RES_SCHED_SYS_ABILITY_ID, statusChangeListener);
         if (ret != ERR_OK) {
-            TLOGNE(WmsLogTag::WMS_MAIN, "failed to subscribe system ability manager");
+            TLOGNI(WmsLogTag::WMS_MAIN, "failed to subscribe system ability manager");
         }
     };
     taskScheduler_->PostAsyncTask(task, "changeQosTask");
