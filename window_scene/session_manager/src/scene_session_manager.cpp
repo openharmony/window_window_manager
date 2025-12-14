@@ -36,6 +36,7 @@
 
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
 #include <display_power_mgr_client.h>
+#include <display_brightness_listener_stub.h>
 #endif
 
 #ifdef POWER_MANAGER_ENABLE
@@ -339,6 +340,16 @@ public:
     }
 };
 
+#ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
+    class OverrideChangeListener : public DisplayPowerMgr::DisplayBrightnessListenerStub {
+    public:
+        void OnDataChanged(const std::string& params) override
+        {
+            SceneSession::GetInstance().NotifyBrightnessModeChange(params);
+        }
+    }
+#endif
+
 bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& avoidArea, int32_t sessionBottom)
 {
     if (!avoidArea.topRect_.IsUninitializedRect() || !avoidArea.leftRect_.IsUninitializedRect() ||
@@ -479,6 +490,24 @@ void SceneSessionManager::Init()
 
     InitSnapshotCache();
     WSSnapshotHelper::GetInstance()->SetWindowScreenStatus(DisplayManager::GetInstance().GetFoldStatus());
+
+    //Subscribe power manager service
+    #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
+        auto task = []() {
+            SCBThreadInfo threadInfo {};
+            SubscribeSystemAbility(POWER_MANAGER_SERVICE_ID, threadInfo);
+        }
+        taskScheduler_->PostAsyncTask(task, "SubscribePowerMrgTask");
+    #endif
+}
+
+void SceneSessionManager::RegisterBrightnessDataChangeListener()
+{
+    #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
+        auto ret = DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RegisterDataChangeListener(
+            new OverrideChangeListener, DisplayPowerMgr::DisplayDataChangeListenerType::FORCE_EXIT_OVERRIDDEN_MODE);
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "ret: %{public}d", static_cast<int32_t>(ret));
+    #endif
 }
 
 void SceneSessionManager::RegisterSessionRecoverStateChangeListener()
@@ -610,6 +639,21 @@ void SceneSessionManager::InitScheduleUtils()
     };
     taskScheduler_->PostAsyncTask(task, "changeQosTask");
 #endif
+}
+
+void SceneSessionManager::SubscribeSystemAbility(int32_t systemAbilityId, SCBThreadInfo threadInfo)
+{
+    sptr<ISystemAbilityManager> systemAbilityManager =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!systemAbilityManager) {
+        TLOGNE(WmsLogTag::WMS_MAIN, "failed to get system ability manager client");
+        return;
+    }
+    auto statusChangeListener = sptr<SceneSystemAbilityListener>::MakeSptr(threadInfo);
+    int32_t ret = systemAbilityManager->SubscribeSystemAbility(systemAbilityId, statusChangeListener);
+    if (ret != ERR_OK) {
+        TLOGNI(WmsLogTag::WMS_MAIN, "failed to subscribe system ability manager");
+    }
 }
 
 void SceneSessionManager::UpdateSessionWithFoldStateChange(DisplayId displayId, SuperFoldStatus status,
@@ -2147,6 +2191,7 @@ WMError SceneSessionManager::NotifyBrightnessModeChange(const std::string& brigh
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Restore brightness, wid: %{public}d", brightnessSession->GetWindowId());
         PostBrightnessTask(UNDEFINED_BRIGHTNESS);
         brightnessSession->SetBrightness(UNDEFINED_BRIGHTNESS);
+        brightnessSession->UpdateBrightness(UNDEFINED_BRIGHTNESS);
         return WMError::WM_OK;
     }
     return WMError::WM_DO_NOTHING;
