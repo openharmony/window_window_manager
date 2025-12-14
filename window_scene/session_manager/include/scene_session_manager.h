@@ -650,6 +650,7 @@ public:
     void UpdateSessionPrivacyForSuperFold(const sptr<SceneSession>& sceneSession, DisplayId displayId,
         std::unordered_map<DisplayId, std::unordered_set<std::string>>& privacyBundles);
     void RegisterBrightnessDataChangeListener();
+    void SubscribeSystemAbility(int32_t systemAbilityId, SCBThreadInfo threadInfo);
 
     /*
      * Multi Window
