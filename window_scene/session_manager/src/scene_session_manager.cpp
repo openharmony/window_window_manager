@@ -345,7 +345,7 @@ public:
     public:
         void OnDataChanged(const std::string& params) override
         {
-            SceneSession::GetInstance().NotifyBrightnessModeChange(params);
+            SceneSessionManager::GetInstance().NotifyBrightnessModeChange(params);
         }
     }
 #endif
