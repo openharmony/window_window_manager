@@ -23,6 +23,8 @@ namespace {
 static void *g_handle = nullptr;
 using IsInAodFunc = bool (*)();
 using StopAodFunc = bool (*)(int32_t);
+IsInAodFunc g_isInAodFunc = nullptr;
+StopAodFunc g_stopAodFunc = nullptr;
 
 bool LoadAodLib(void)
 {
@@ -53,6 +55,8 @@ void UnloadAodLib(void)
         dlclose(g_handle);
         g_handle = nullptr;
     }
+    g_isInAodFunc = nullptr;
+    g_stopAodFunc = nullptr;
 }
 
 __attribute__((no_sanitize("cfi"))) bool IsInAod()
@@ -61,13 +65,21 @@ __attribute__((no_sanitize("cfi"))) bool IsInAod()
         TLOGE(WmsLogTag::DMS, "g_handle is nullptr");
         return false;
     }
-    IsInAodFunc func = (IsInAodFunc)(dlsym(g_handle, "IsInAod"));
-    const char* dlsymError = dlerror();
-    if  (dlsymError) {
-        TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
-        return false;
-    }
-    return func();
+    int32_t cnt = 0;
+    int32_t retryTimes = 3;
+    const char* dlsymError = nullptr;
+    do {
+        cnt++;
+        g_isInAodFunc = reinterpret_cast<IsInAodFunc>(dlsym(g_handle, "IsInAod"));
+        dlsymError = dlerror();
+        if (dlsymError) {
+            TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
+            return false;
+        }
+        TLOGI(WmsLogTag::DMS, "dlsym %{public}s, retry cnt: %{public}d", PLUGIN_AOD_SO_PATH.c_str(), cnt);
+        usleep(SLEEP_TIME_US);
+    } while (!g_isInAodFunc && cnt < retryTimes);
+    return g_isInAodFunc();
 }
 
 __attribute__((no_sanitize("cfi"))) bool StopAod(int32_t status)
@@ -76,13 +88,21 @@ __attribute__((no_sanitize("cfi"))) bool StopAod(int32_t status)
         TLOGE(WmsLogTag::DMS, "g_handle is nullptr");
         return false;
     }
-    StopAodFunc func = reinterpret_cast<StopAodFunc>(dlsym(g_handle, "Stop"));
-    const char* dlsymError = dlerror();
-    if  (dlsymError) {
-        TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
-        return false;
-    }
-    return func(status);
+    int32_t cnt = 0;
+    int32_t retryTimes = 3;
+    const char* dlsymError = nullptr;
+    do {
+        cnt++;
+        g_stopAodFunc = reinterpret_cast<StopAodFunc>(dlsym(g_handle, "IsInAod"));
+        dlsymError = dlerror();
+        if (dlsymError) {
+            TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
+            return false;
+        }
+        TLOGI(WmsLogTag::DMS, "dlsym %{public}s, retry cnt: %{public}d", PLUGIN_AOD_SO_PATH.c_str(), cnt);
+        usleep(SLEEP_TIME_US);
+    } while (!g_stopAodFunc && cnt < retryTimes);
+    return g_stopAodFunc();
 }
 }
 }
