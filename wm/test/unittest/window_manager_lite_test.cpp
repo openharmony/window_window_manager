@@ -340,6 +340,11 @@ HWTEST_F(WindowManagerLiteTest, Test01, TestSize.Level1)
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, res9);
     WMError res10 = instance_->UnregisterWMSConnectionChangedListener();
     ASSERT_EQ(WMError::WM_OK, res10);
+    sptr<IAllGroupInfoChangedListener> listener5 = nullptr;
+    WMError res11 = instance_->RegisterAllGroupInfoChangedListener(listener5);
+    WMError res12 = instance_->UnregisterAllGroupInfoChangedListener(listener5);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, res11);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, res12);
 }
 
 /**
