@@ -1346,7 +1346,7 @@ napi_value JsSceneSessionManager::SetIsDockAutoHide(napi_env env, napi_callback_
 napi_value JsSceneSessionManager::SetTrayAppListInfo(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
-    JsSceneSessionManager* me = CheckParamsAndGetThis(env, info);
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnHandleTrayAppChange(env, info) : nullptr;
 }
 
