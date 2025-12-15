@@ -874,6 +874,7 @@ public:
     void ConfigSupportCacheLockedSessionSnapshot();
     void ConfigSupportPreloadStartingWindow();
     void PreLoadStartingWindow(sptr<SceneSession> sceneSession);
+    bool IsSyncLoadStartingWindow() { return syncLoadStartingWindow_; };
 
     /*
      * Window Animation
@@ -1212,6 +1213,7 @@ private:
     void ClosePipWindowIfExist(WindowType type);
     void NotifySessionAINavigationBarChange(int32_t persistentId);
     void ReportWindowProfileInfos();
+    std::string FillWindowProfileInfo(const OHOS::sptr<OHOS::Rosen::SceneSession>& currSession, int32_t focusWindowId);
     void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing);
     void GetAllSceneSessionForAccessibility(std::vector<sptr<SceneSession>>& sceneSessionList);
     void FillAccessibilityInfo(std::vector<sptr<SceneSession>>& sceneSessionList,
@@ -1804,6 +1806,9 @@ private:
     std::unordered_map<std::string, std::unordered_set<std::string>> startingWindowFollowAppMap_;
     std::unordered_set<std::string> emptyStartupResource_;
     std::atomic<bool> delayRemoveSnapshot_ = false;
+    bool syncLoadStartingWindow_ = false;
+    void InitWindowPattern();
+    void InitStartingWindow();
     void InitStartingWindowRdb(const std::string& rdbPath);
     bool GetStartingWindowInfoFromCache(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo,
         bool isDark);

@@ -764,6 +764,36 @@ HWTEST_F(WindowPatternStartingWindowTest, UpdateCachedColorToAppSet, TestSize.Le
     ssm_->UpdateCachedColorToAppSet(bundleName, moduleName, abilityName, tempInfo);
     EXPECT_EQ(0, ssm_->startingWindowMap_.size());
 }
+
+/**
+ * @tc.name: InitStartingWindow
+ * @tc.desc: InitStartingWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternStartingWindowTest, InitStartingWindow, TestSize.Level0)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(RdbLogCallback);
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->syncLoadStartingWindow_ = false;
+    EXPECT_EQ(ssm_->IsSyncLoadStartingWindow(), false);
+    ssm_->InitStartingWindow();
+    EXPECT_TRUE(g_logMsg.find("Sync Load StartingWindow:") != std::string::npos);
+}
+
+/**
+ * @tc.name: IsSyncLoadStartingWindow
+ * @tc.desc: IsSyncLoadStartingWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternStartingWindowTest, IsSyncLoadStartingWindow, TestSize.Level0)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->syncLoadStartingWindow_ = false;
+    EXPECT_EQ(ssm_->IsSyncLoadStartingWindow(), false);
+    ssm_->syncLoadStartingWindow_ = true;
+    EXPECT_EQ(ssm_->IsSyncLoadStartingWindow(), true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

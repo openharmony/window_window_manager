@@ -81,7 +81,7 @@ def main(argv):
                 subprocess.check_call([
                     "npm", "install",
                     "--prefix", install_dir,
-                    "--registry", secondary_registry,
+                    "--registry", secondary_npm_registry,
                     "--loglevel=verbose"
                 ])
             except subprocess.CalledProcessError as e2:
