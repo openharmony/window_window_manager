@@ -839,12 +839,33 @@ void SceneSessionDirtyManager::UpdateWindowFlags(DisplayId displayId, const sptr
     MMI::WindowInfo& windowInfo) const
 {
     windowInfo.flags = 0;
-    auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
-    if (screenSession != nullptr) {
-        if (!screenSession->IsTouchEnabled() || !sceneSession->GetSystemTouchable() ||
-            !sceneSession->GetForegroundInteractiveStatus()) {
-            windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_UNTOUCHABLE;
-        }
+    bool isTouchable = sceneSession->GetWindowTouchableForMMI(displayId);
+    if (!isTouchable) {
+        windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_UNTOUCHABLE;
+    }
+}
+
+void SceneSessionDirtyManager::UpdateWindowFlagsForReceiveDragEventEnabled(const sptr<SceneSession>& sceneSession,
+    MMI::WindowInfo& windowInfo) const
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is null");
+        return;
+    }
+    if (sceneSession->GetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_RECEIVE_DRAG_EVENT)) {
+        windowInfo.flags |= MMI::WindowInputPolicy::FLAG_DRAG_DISABLED;
+    }
+}
+
+void SceneSessionDirtyManager::UpdateWindowFlagsForWindowSeparation(const sptr<SceneSession>& sceneSession,
+    MMI::WindowInfo& windowInfo) const
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is null");
+        return;
+    }
+    if (sceneSession->GetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_WINDOW_SEPARATION_TOUCH_ENABLED)) {
+        windowInfo.flags |= MMI::WindowInputPolicy::FLAG_FIRST_TOUCH_HIT;
     }
 }
 
@@ -963,6 +984,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     if (expandInputFlag & static_cast<uint32_t>(ExpandInputFlag::WINDOW_DISABLE_USER_ACTION)) {
         windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_DISABLE_USER_ACTION;
     }
+    UpdateWindowFlagsForReceiveDragEventEnabled(sceneSession, windowInfo);
     UpdateWindowFlagsForLockCursor(sceneSession, windowInfo);
     UpdatePrivacyMode(sceneSession, windowInfo);
     windowInfo.uiExtentionWindowInfo = GetSecSurfaceWindowinfoList(sceneSession, windowInfo, transform);

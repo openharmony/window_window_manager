@@ -79,6 +79,7 @@ private:
     int HandleGetSessionSnapshot(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionSnapshotById(MessageParcel& data, MessageParcel& reply);
     int HandleGetUIContentRemoteObj(MessageParcel& data, MessageParcel& reply);
+    int HandleGetRootUIContentRemoteObj(MessageParcel& data, MessageParcel& reply);
     int HandleBindDialogTarget(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyDumpInfoResult(MessageParcel& data, MessageParcel& reply);
     int HandleClearSession(MessageParcel& data, MessageParcel& reply);
@@ -159,6 +160,7 @@ private:
     int HandleMinimizeAllAppWindows(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateOutline(MessageParcel& data, MessageParcel& reply);
     int HandleSetSpecificWindowZIndex(MessageParcel& data, MessageParcel& reply);
+    int HandleResetSpecificWindowZIndex(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySupportRotationRegistered(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen

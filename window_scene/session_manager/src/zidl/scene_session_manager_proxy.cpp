@@ -1666,6 +1666,45 @@ WSError SceneSessionManagerProxy::GetUIContentRemoteObj(int32_t persistentId, sp
     return static_cast<WSError>(reply.ReadUint32());
 }
 
+WMError SceneSessionManagerProxy::GetRootUIContentRemoteObj(DisplayId displayId,
+    sptr<IRemoteObject>& uiContentRemoteObj)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write displayId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    auto reqErrCode = remote->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_GET_ROOT_UI_CONTENT_REMOTE_OBJ), data, reply, option);
+    if (reqErrCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "send request failed, errCode: %{public}d", reqErrCode);
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remoteObj = reply.ReadRemoteObject();
+    if (remoteObj == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read remote object failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    uiContentRemoteObj = remoteObj;
+    int32_t errCode = 0;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read errcode failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(errCode);
+}
+
 WSError SceneSessionManagerProxy::SetSessionContinueState(const sptr<IRemoteObject>& token,
     const ContinueState& continueState)
 {
@@ -2528,19 +2567,51 @@ WSError SceneSessionManagerProxy::SetSpecificWindowZIndex(WindowType windowType,
     }
     if (!data.WriteUint32(static_cast<uint32_t>(windowType))) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Write windowType failed");
-        return WSError::WS_ERROR_INVALID_PARAM;
+        return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteInt32(zIndex)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Write zIndex failed");
-        return WSError::WS_ERROR_INVALID_PARAM;
+        return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Remote is null");
-        return WSError::WS_ERROR_NULLPTR;
+        return WSError::WS_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
         SceneSessionManagerMessage::TRANS_ID_SET_SPECIFIC_WINDOW_ZINDEX),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t result = 0;
+    if (!reply.ReadInt32(result)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Failed to read result");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(result);
+}
+
+WSError SceneSessionManagerProxy::ResetSpecificWindowZIndex(int32_t pid)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write interfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(pid)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write pid failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_RESET_SPECIFIC_WINDOW_ZINDEX),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_FOCUS, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -3017,7 +3088,7 @@ WMError SceneSessionManagerProxy::GetWindowModeType(WindowModeType& windowModeTy
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerProxy::MinimizeAllAppWindows(DisplayId displayId)
+WMError SceneSessionManagerProxy::MinimizeAllAppWindows(DisplayId displayId, int32_t excludeWindowId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -3028,6 +3099,10 @@ WMError SceneSessionManagerProxy::MinimizeAllAppWindows(DisplayId displayId)
     }
     if (!data.WriteUint64(displayId)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write displayId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(excludeWindowId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write excludeWindowId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();

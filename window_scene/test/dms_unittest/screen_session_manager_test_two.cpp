@@ -514,7 +514,7 @@ HWTEST_F(ScreenSessionManagerTest, UpdateSessionByActiveModeChange001, TestSize.
     MockAccesstokenKit::MockIsSystemApp(true);
     MockSessionPermission::MockIsStarByHdcd(true);
     sptr<ScreenSession> screenSession = nullptr;
-    ssm_->UpdateSessionByActiveModeChange(screenSession, screenSession, 0);
+    ssm_->UpdateSessionByActiveModeChange(screenSession, 0);
     EXPECT_FALSE(g_errLog.find("screenSession is nullptr") != std::string::npos);
     g_errLog.clear();
 }
@@ -531,7 +531,7 @@ HWTEST_F(ScreenSessionManagerTest, UpdateSessionByActiveModeChange002, TestSize.
     MockAccesstokenKit::MockIsSystemApp(true);
     MockSessionPermission::MockIsStarByHdcd(true);
     sptr<ScreenSession> screenSession = ssm_->GetOrCreateScreenSession(1050);
-    ssm_->UpdateSessionByActiveModeChange(screenSession, screenSession, 0);
+    ssm_->UpdateSessionByActiveModeChange(screenSession, 0);
     EXPECT_TRUE(g_errLog.find("end") != std::string::npos);
     g_errLog.clear();
 }
@@ -1163,7 +1163,6 @@ HWTEST_F(ScreenSessionManagerTest, CalculateRotatedDisplay1, Function | SmallTes
     displayArea = {20, 10, 30, 40};
     ssm_->CalculateRotatedDisplay(rotation, screenRegion, displayRegion, displayArea);
     EXPECT_TRUE(g_errLog.find("failed") == std::string::npos);
-    g_logMsg.clear();
     LOG_SetCallback(nullptr);
     expectedRect = {50, 150, 30, 40};
     EXPECT_EQ(displayArea, expectedRect);
@@ -1200,7 +1199,6 @@ HWTEST_F(ScreenSessionManagerTest, CalculateRotatedDisplay2, Function | SmallTes
     ssm_->CalculateRotatedDisplay(rotation, screenRegion, displayRegion, displayArea);
     DMRect expectedRect = {0, 0, 200, 100};
     EXPECT_TRUE(g_errLog.find("failed") == std::string::npos);
-    g_logMsg.clear();
 
     rotation = Rotation::ROTATION_180;
     displayRegion = {0, 0, 200, 100};
@@ -1216,7 +1214,6 @@ HWTEST_F(ScreenSessionManagerTest, CalculateRotatedDisplay2, Function | SmallTes
     displayArea = {20, 10, 30, 40};
     ssm_->CalculateRotatedDisplay(rotation, screenRegion, displayRegion, displayArea);
     EXPECT_TRUE(g_errLog.find("failed") == std::string::npos);
-    g_logMsg.clear();
     LOG_SetCallback(nullptr);
 
     expectedRect = {50, 150, 30, 40};
@@ -2038,6 +2035,58 @@ HWTEST_F(ScreenSessionManagerTest, DoAodExitAndSetPowerTest, TestSize.level1)
 }
 
 /**
+ * @tc.name: AddScreenUnfreezeTask
+ * @tc.desc: AddScreenUnfreezeTask test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, AddScreenUnfreezeTask, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenSession> screenSession = nullptr;
+    g_errLog.clear();
+    ssm_->AddScreenUnfreezeTask(screenSession, 0);
+    EXPECT_TRUE(g_errLog.find("screenSession is nullptr") != std::string::npos);
+    g_errLog.clear();
+    ScreenId scrrenId = 111;
+    screenSession = sptr<ScreenSession>::MakeSptr(scrrenId, ScreenProperty(), 0);
+    ssm_->AddScreenUnfreezeTask(screenSession, 1000);
+    EXPECT_TRUE(g_errLog.find("boot error and freeze screen over 5 minutes") != std::string::npos);
+    g_errLog.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: CheckSetResolutionIsValid
+ * @tc.desc: CheckSetResolutionIsValid test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CheckSetResolutionIsValid, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenId screenId = -1;
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->CheckSetResolutionIsValid(screenId, 100, 100, 0.5));
+    screenId = 111;
+    sptr<ScreenSession> screenSession = nullptr;
+    ssm_->screenSessionMap_.erase(screenId);
+    ssm_->screenSessionMap_.insert(std::make_pair(screenId, screenSession));
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->CheckSetResolutionIsValid(screenId, 100, 100, 0.5));
+    screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
+    ssm_->screenSessionMap_.erase(screenId);
+    ssm_->screenSessionMap_.insert(std::make_pair(screenId, screenSession));
+    sptr<SupportedScreenModes> mode = nullptr;
+    screenSession->modes_ = {mode};
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->CheckSetResolutionIsValid(screenId, 100, 100, 0.5));
+    mode = new SupportedScreenModes();
+    mode->width_ = 1;
+    mode->height_ = 1;
+    screenSession->modes_ = {mode};
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->CheckSetResolutionIsValid(screenId, 100, 100, 0.5));
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->CheckSetResolutionIsValid(screenId, 0, 0, 10.5));
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->CheckSetResolutionIsValid(screenId, 1, 1, 10.5));
+}
+
+/**
  * @tc.name: UpdateDuringCallState
  * @tc.desc: UpdateDuringCallState
  * @tc.type: FUNC
@@ -2661,7 +2710,9 @@ HWTEST_F(ScreenSessionManagerTest, CalculateTargetResolution1, TestSize.Level1)
 HWTEST_F(ScreenSessionManagerTest, HandleResolutionEffectChange, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-
+    if (!g_isPcDevice) {
+        GTEST_SKIP();
+    }
     sptr<ScreenSession> screenSession1 = new ScreenSession(51, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession1);
     screenSession1->SetIsCurrentInUse(true);
@@ -2707,7 +2758,9 @@ HWTEST_F(ScreenSessionManagerTest, HandleResolutionEffectChange, TestSize.Level1
 HWTEST_F(ScreenSessionManagerTest, SetResolutionEffect, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-
+    if (!g_isPcDevice) {
+        GTEST_SKIP();
+    }
     sptr<ScreenSession> screenSession1 = new ScreenSession(51, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession1);
     screenSession1->SetIsCurrentInUse(true);
@@ -2754,7 +2807,9 @@ HWTEST_F(ScreenSessionManagerTest, SetResolutionEffect, TestSize.Level1)
 HWTEST_F(ScreenSessionManagerTest, RecoveryResolutionEffect, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-
+    if (!g_isPcDevice) {
+        GTEST_SKIP();
+    }
     sptr<ScreenSession> screenSession1 = new ScreenSession(51, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession1);
     screenSession1->SetIsCurrentInUse(true);
@@ -2859,7 +2914,9 @@ HWTEST_F(ScreenSessionManagerTest, SetExternalScreenResolutionEffect, TestSize.L
 HWTEST_F(ScreenSessionManagerTest, HandleCastVirtualScreenMirrorRegion, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-
+    if (!g_isPcDevice) {
+        GTEST_SKIP();
+    }
     sptr<ScreenSession> virtualSession = new ScreenSession(51, ScreenProperty(), 0);
     ASSERT_NE(nullptr, virtualSession);
     virtualSession->SetVirtualScreenFlag(VirtualScreenFlag::CAST);
@@ -2871,12 +2928,21 @@ HWTEST_F(ScreenSessionManagerTest, HandleCastVirtualScreenMirrorRegion, TestSize
     internalSession->isInternal_ = true;
     RRect Bounds = RRect({ 0, 0, 100, 100}, 0.0f, 0.0f);
     internalSession->SetBounds(Bounds);
-
+    internalSession->SetScreenAreaWidth(100);
+    internalSession->SetScreenAreaHeight(100);
     bool ret = ssm_->HandleCastVirtualScreenMirrorRegion();
     EXPECT_FALSE(ret);
 
     ssm_->screenSessionMap_[51] = virtualSession;
     ssm_->screenSessionMap_[52] = internalSession;
+    ret = ssm_->HandleCastVirtualScreenMirrorRegion();
+    EXPECT_FALSE(ret);
+
+    internalSession->SetRotation(Rotation::ROTATION_180);
+    ret = ssm_->HandleCastVirtualScreenMirrorRegion();
+    EXPECT_FALSE(ret);
+
+    internalSession->SetRotation(Rotation::ROTATION_270);
     ret = ssm_->HandleCastVirtualScreenMirrorRegion();
     EXPECT_TRUE(ret);
     DMRect expectedRect1 = {0, 0, 0, 0};
@@ -2976,6 +3042,31 @@ HWTEST_F(ScreenSessionManagerTest, GetBrightnessInfo, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetSupportsInput
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetSupportsInput, TestSize.Level1)
+{
+    bool supportInput;
+    auto ret = ssm_->GetSupportsInput(0, supportInput);
+    EXPECT_EQ(ret, DMError::DM_ERROR_ILLEGAL_PARAM);
+}
+
+/**
+ * @tc.name: SetSupportsInput
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetSupportsInput, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SetSupportsInput start";
+    bool supportInput = false;
+    auto ret = ssm_->SetSupportsInput(0, supportInput);
+    EXPECT_EQ(ret, DMError::DM_ERROR_ILLEGAL_PARAM);
+}
+
+/**
  * @tc.name: MockFoldDisplayModeAfterRotation
  * @tc.desc: test get and set foldDisplayModeAfterRotation
  * @tc.type: FUNC
@@ -3061,6 +3152,75 @@ HWTEST_F(ScreenSessionManagerTest, HandleDefaultMultiScreenModeTest3, TestSize.L
         EXPECT_TRUE(g_errLog.find("default mode extend") != std::string::npos);
     }
     g_errLog.clear();
+}
+
+/**
+ * @tc.name: SetScreenPowerForAll
+ * @tc.desc: SetScreenPowerForAll test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForAll, TestSize.Level1)
+{
+    ScreenTransitionState temp = ScreenStateMachine::GetInstance().GetTransitionState();
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::WAIT_SCREEN_ADVANCED_ON_READY);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS;
+    ScreenPowerState state = ScreenPowerState::POWER_SUSPEND;
+    EXPECT_FALSE(ssm_->SetScreenPowerForAll(state, reason));
+
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::WAIT_SCREEN_ADVANCED_ON_READY);
+    reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON;
+    EXPECT_FALSE(ssm_->SetScreenPowerForAll(state, reason));
+
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::WAIT_SCREEN_ADVANCED_ON_READY);
+    reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
+    EXPECT_FALSE(ssm_->SetScreenPowerForAll(state, reason));
+    ScreenStateMachine::GetInstance().SetTransitionState(temp);
+}
+
+/**
+ * @tc.name: WakeupBegin
+ * @tc.desc: WakeupBegin test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, WakeUpBegin01, TestSize.Level1)
+{
+    ScreenTransitionState temp = ScreenStateMachine::GetInstance().GetTransitionState();
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_ADVANCED_ON);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS;
+    EXPECT_FALSE(ssm_->WakeUpBegin(reason));
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_ADVANCED_ON);
+    reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
+    EXPECT_FALSE(ssm_->WakeUpBegin(reason));
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_ADVANCED_ON);
+    reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
+    EXPECT_FALSE(ssm_->WakeUpBegin(reason));
+    ScreenStateMachine::GetInstance().SetTransitionState(temp);
+}
+
+/*
+ * @tc.name: CheckNeedNotifyTest
+ * @tc.desc: Test CheckNeedNotifyTest check notify
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CheckNeedNotifyTest, TestSize.Level1)
+{
+    std::vector<DisplayId> displayIds = {1, 2, 3};
+    std::unordered_map<DisplayId, bool> privacyBundleDisplayId;
+    
+    bool result = ssm_->CheckNeedNotify(dispalyIds, privacyBundleDisplayId);
+    EXPECT_FALSE(result);
+
+    privacyBundleDisplayId = {{4, true}, {5, false}};
+    result = ssm_->CheckNeedNotify(dispalyIds, privacyBundleDisplayId);
+    EXPECT_FALSE(result);
+
+    privacyBundleDisplayId = {{1, true}, {2, false}};
+    result = ssm_->CheckNeedNotify(dispalyIds, privacyBundleDisplayId);
+    EXPECT_TRUE(result);
+
+    privacyBundleDisplayId = {{1, true}, {2, true}};
+    result = ssm_->CheckNeedNotify(dispalyIds, privacyBundleDisplayId);
+    EXPECT_TRUE(result);
 }
 }
 }

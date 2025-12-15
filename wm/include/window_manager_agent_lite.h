@@ -27,6 +27,7 @@ public:
     ~WindowManagerAgentLite() = default;
 
     void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) override;
+    void UpdateDisplayGroupInfo(DisplayGroupId displayGroupId, DisplayId displayId, bool isAdd) override;
     void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& props) override {};
     void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
         WindowUpdateType type) override;
@@ -45,7 +46,7 @@ public:
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info) override {};
     void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground) override;
     void NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
-        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList) override {};
+        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList) override;
     void NotifySupportRotationChange(const SupportRotationInfo& supportRotationInfo) override {};
 };
 } // namespace Rosen

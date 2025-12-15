@@ -27,6 +27,7 @@ public:
     ~WindowManagerAgent() = default;
 
     void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) override;
+    void UpdateDisplayGroupInfo(DisplayGroupId displayGroupId, DisplayId displayId, bool isAdd) override {};
     void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& props) override;
     void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
         WindowUpdateType type) override;

@@ -105,14 +105,14 @@ bool ScreenProperty::GetIsFakeInUse() const
     return isFakeInUse_;
 }
 
-void ScreenProperty::SetIsPreFakeInUse(bool isPreFakeInUse)
+void ScreenProperty::SetIsDestroyDisplay(bool isPreFakeInUse)
 {
-    isPreFakeInUse_ = isPreFakeInUse;
+    isDestroyDisplay_ = isPreFakeInUse;
 }
 
-bool ScreenProperty::GetIsPreFakeInUse() const
+bool ScreenProperty::GetIsDestroyDisplay() const
 {
-    return isPreFakeInUse_;
+    return isDestroyDisplay_;
 }
 
 void ScreenProperty::SetScaleX(float scaleX)
@@ -630,7 +630,7 @@ void ScreenProperty::SetXYPosition(int32_t x, int32_t y)
     y_ = y;
 }
 
-RRect ScreenProperty::GetPhysicalTouchBounds()
+RRect ScreenProperty::GetPhysicalTouchBounds() const
 {
     return physicalTouchBounds_;
 }
@@ -655,12 +655,20 @@ void ScreenProperty::SetPhysicalTouchBounds(Rotation rotationOffset)
     }
 }
 
-int32_t ScreenProperty::GetInputOffsetX()
+void ScreenProperty::SetPhysicalTouchBoundsDirectly(RRect physicalTouchBounds)
+{
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
+    physicalTouchBounds_ = physicalTouchBounds;
+}
+
+int32_t ScreenProperty::GetInputOffsetX() const
 {
     return inputOffsetX_;
 }
 
-int32_t ScreenProperty::GetInputOffsetY()
+int32_t ScreenProperty::GetInputOffsetY() const
 {
     return inputOffsetY_;
 }
@@ -672,10 +680,10 @@ static inline bool IsWidthHeightMatch(float width, float height, float targetWid
 
 void ScreenProperty::SetInputOffsetY()
 {
-    inputOffsetX_ = 0;
     if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         return;
     }
+    inputOffsetX_ = 0;
     if (IsWidthHeightMatch(bounds_.rect_.GetWidth(), bounds_.rect_.GetHeight(), FULL_STATUS_WIDTH, SCREEN_HEIGHT)) {
         inputOffsetX_ = SECONDARY_FULL_OFFSETY;
     }
@@ -712,7 +720,7 @@ void ScreenProperty::SetPointerActiveWidth(uint32_t pointerActiveWidth)
     pointerActiveWidth_ = pointerActiveWidth;
 }
 
-uint32_t ScreenProperty::GetPointerActiveWidth()
+uint32_t ScreenProperty::GetPointerActiveWidth() const
 {
     return pointerActiveWidth_;
 }
@@ -722,8 +730,19 @@ void ScreenProperty::SetPointerActiveHeight(uint32_t pointerActiveHeight)
     pointerActiveHeight_ = pointerActiveHeight;
 }
 
-uint32_t ScreenProperty::GetPointerActiveHeight()
+uint32_t ScreenProperty::GetPointerActiveHeight() const
 {
     return pointerActiveHeight_;
 }
+
+FoldDisplayMode ScreenProperty::GetDisplayMode() const
+{
+    return displayMode_;
+}
+
+void ScreenProperty::SetDisplayMode(FoldDisplayMode mode)
+{
+    displayMode_ = mode;
+}
+
 } // namespace OHOS::Rosen

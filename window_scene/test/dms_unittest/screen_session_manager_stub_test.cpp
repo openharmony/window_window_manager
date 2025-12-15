@@ -3322,6 +3322,44 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest155, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnRemoteRequest155_1
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest155_1, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    data.WriteUint64(0);
+    uint32_t code = static_cast<uint32_t>(
+        DisplayManagerMessage::TRANS_ID_SCREEN_GET_SUPPORTS_INPUT);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: OnRemoteRequest155_2
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest155_3, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    data.WriteUint64(0);
+    uint32_t code = static_cast<uint32_t>(
+        DisplayManagerMessage::TRANS_ID_SCREEN_SET_SUPPORTS_INPUT);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
+
+/**
  * @tc.name: ProcSetPrimaryDisplaySystemDpi
  * @tc.desc: normal function, TRANS_ID_SET_PRIMARY_DISPLAY_SYSTEM_DPI test
  * @tc.type: FUNC
@@ -3419,6 +3457,33 @@ HWTEST_F(ScreenSessionManagerStubTest, NotifyIsFullScreenInForceSplitMode, TestS
         data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
         data.WriteInt32(0);
         data.WriteBool(true);
+        int res = stub_->OnRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(res, ERR_NONE);
+    }
+}
+
+/**
+ * @tc.name: SyncScreenPowerState
+ * @tc.desc: normal function, TRANS_ID_SYNC_SCREEN_POWER_STATE test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, SyncScreenPowerState, TestSize.Level3)
+{
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        MessageOption option;
+        uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SYNC_SCREEN_POWER_STATE);
+        int res = stub_->OnRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(res, ERR_TRANSACTION_FAILED);
+    }
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        MessageOption option;
+        uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SYNC_SCREEN_POWER_STATE);
+        data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+        data.WriteUint32(0);
         int res = stub_->OnRemoteRequest(code, data, reply, option);
         EXPECT_EQ(res, ERR_NONE);
     }

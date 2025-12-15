@@ -31,6 +31,7 @@ const static int32_t MAX_BUFF_SIZE = 100;
 const static float INVALID_DEFAULT_DENSITY = 1.0f;
 const static uint32_t PIXMAP_VECTOR_SIZE = 2;
 constexpr uint32_t  MAX_CREASE_REGION_SIZE = 20;
+constexpr uint32_t MAP_SIZE_MAX_NUM = 100;
 }
 
 int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
@@ -260,6 +261,31 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             if (!reply.WriteFloat(brightnessInfo.sdrNits)) {
                 TLOGE(WmsLogTag::DMS, "write sdrNits failed!");
                 break;
+            }
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_GET_SUPPORTS_INPUT: {
+            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+            bool supportsInput;
+            DMError ret = GetSupportsInput(displayId, supportsInput);
+            if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+                TLOGE(WmsLogTag::DMS, "write ret failed!");
+                break;
+            }
+            if (ret != DMError::DM_OK) {
+                break;
+            }
+            if (!reply.WriteFloat(supportsInput)) {
+                TLOGE(WmsLogTag::DMS, "write supportsInput failed!");
+            }
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_SET_SUPPORTS_INPUT: {
+            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+            bool supportsInput = data.ReadBool();
+            DMError ret = SetSupportsInput(displayId, supportsInput);
+            if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+                TLOGE(WmsLogTag::DMS, "write ret failed!");
             }
             break;
         }
@@ -1062,9 +1088,18 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SET_SCREENID_PRIVACY_STATE: {
-            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
-            auto hasPrivate = data.ReadBool();
-            SetPrivacyStateByDisplayId(displayId, hasPrivate);
+            std::unordered_map<DisplayId, bool> privacyBundleDisplayId;
+            uint32_t mapSize = 0;
+            if (!data.ReadUint32(mapSize) || mapSize > MAP_SIZE_MAX_NUM) {
+                TLOGE(WmsLogTag::DMS, "Failed to read mapSize");
+                return ERR_INVALID_DATA;
+            }
+            for (uint32_t i = 0; i < mapSize; i++) {
+                DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+                auto hasPrivate = data.ReadBool();
+                privacyBundleDisplayId[displayId] = hasPrivate;
+            }
+            SetPrivacyStateByDisplayId(privacyBundleDisplayId);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_LIST: {
@@ -1461,6 +1496,16 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
                 TLOGE(WmsLogTag::DMS, "write result failed");
                 return ERR_INVALID_DATA;
             }
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SYNC_SCREEN_POWER_STATE: {
+            uint32_t ret = 0;
+            if (!data.ReadUint32(ret)) {
+                TLOGE(WmsLogTag::DMS, "Read power state failed");
+                return ERR_INVALID_DATA;
+            }
+            ScreenPowerState state = static_cast<ScreenPowerState>(ret);
+            SyncScreenPowerState(state);
             break;
         }
         default:

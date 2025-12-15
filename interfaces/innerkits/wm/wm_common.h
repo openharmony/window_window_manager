@@ -47,6 +47,7 @@ constexpr int32_t MIN_COLOR_MODE = -1;
 constexpr int32_t MAX_COLOR_MODE = 1;
 constexpr int32_t LIGHT_COLOR_MODE = 0;
 constexpr int32_t DARK_COLOR_MODE = 1;
+constexpr int32_t ANCO_SERVICE_BROKER_UID = 5557;
 constexpr uint32_t MIN_SPACING_BETWEEN_BUTTONS = 8;
 constexpr uint32_t MAX_SPACING_BETWEEN_BUTTONS = 24;
 constexpr uint32_t MIN_BUTTON_BACKGROUND_SIZE = 20;
@@ -108,6 +109,32 @@ constexpr uint32_t OUTLINE_COLOR_OPAQUE = 0xff; // Color opaque byte.
  */
 constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 10;
 }
+
+/**
+ * @brief Enumerates type of window manager agent.
+ */
+enum class WindowManagerAgentType : uint32_t {
+    WINDOW_MANAGER_AGENT_TYPE_FOCUS,
+    WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR,
+    WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE,
+    WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY,
+    WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE,
+    WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT,
+    WINDOW_MANAGER_AGENT_TYPE_WATER_MARK_FLAG,
+    WINDOW_MANAGER_AGENT_TYPE_VISIBLE_WINDOW_NUM = 7,
+    WINDOW_MANAGER_AGENT_TYPE_GESTURE_NAVIGATION_ENABLED,
+    WINDOW_MANAGER_AGENT_TYPE_CAMERA_WINDOW,
+    WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE,
+    WINDOW_MANAGER_AGENT_TYPE_WINDOW_STYLE,
+    WINDOW_MANAGER_AGENT_TYPE_WINDOW_PID_VISIBILITY,
+    WINDOW_MANAGER_AGENT_TYPE_PIP,
+    WINDOW_MANAGER_AGENT_TYPE_CALLING_DISPLAY,
+    WINDOW_MANAGER_AGENT_TYPE_PROPERTY,
+    WINDOW_MANAGER_AGENT_STATUS_BAR_PROPERTY,
+    WINDOW_MANAGER_AGENT_SUPPORT_ROTATION,
+    WINDOW_MANAGER_AGENT_TYPE_DISPLAYGROUP_INFO,
+    WINDOW_MANAGER_AGENT_TYPE_END,
+};
 
 /**
  * @brief Enumerates type of window.
@@ -1947,6 +1974,14 @@ struct WindowLimits {
         };
     }
 
+    bool IsUninitialized() const
+    {
+        return (maxWidth_ == static_cast<uint32_t>(INT32_MAX) &&
+                maxHeight_ == static_cast<uint32_t>(INT32_MAX) &&
+                minWidth_ == 1 &&
+                minHeight_ == 1);
+    }
+
     std::string ToString() const
     {
         constexpr int precision = 6;
@@ -2155,6 +2190,7 @@ struct WindowMetaInfo : public Parcelable {
     WindowMode windowMode = WindowMode::WINDOW_MODE_UNDEFINED;
     bool isMidScene = false;
     bool isFocused = false;
+    bool isTouchable = true;
 
     bool Marshalling(Parcel& parcel) const override
     {
@@ -2163,7 +2199,8 @@ struct WindowMetaInfo : public Parcelable {
                parcel.WriteUint32(static_cast<uint32_t>(windowType)) && parcel.WriteUint32(parentWindowId) &&
                parcel.WriteUint64(surfaceNodeId) && parcel.WriteUint64(leashWinSurfaceNodeId) &&
                parcel.WriteBool(isPrivacyMode) && parcel.WriteBool(isMidScene) &&
-               parcel.WriteBool(isFocused) && parcel.WriteUint32(static_cast<uint32_t>(windowMode));
+               parcel.WriteBool(isFocused) && parcel.WriteUint32(static_cast<uint32_t>(windowMode)) &&
+               parcel.WriteBool(isTouchable);
     }
 
     static WindowMetaInfo* Unmarshalling(Parcel& parcel)
@@ -2178,7 +2215,8 @@ struct WindowMetaInfo : public Parcelable {
             !parcel.ReadUint64(windowMetaInfo->surfaceNodeId) ||
             !parcel.ReadUint64(windowMetaInfo->leashWinSurfaceNodeId) ||
             !parcel.ReadBool(windowMetaInfo->isPrivacyMode) || !parcel.ReadBool(windowMetaInfo->isMidScene) ||
-            !parcel.ReadBool(windowMetaInfo->isFocused) || !parcel.ReadUint32(windowModeValue)) {
+            !parcel.ReadBool(windowMetaInfo->isFocused) || !parcel.ReadUint32(windowModeValue) ||
+            !parcel.ReadBool(windowMetaInfo->isTouchable)) {
             delete windowMetaInfo;
             return nullptr;
         }
@@ -3425,9 +3463,6 @@ enum class WaterfallResidentState : uint32_t {
 
     /** Disable the resident state and exit the waterfall layout. */
     CLOSE = 2,
-
-    /** Disable the resident state but keep the current waterfall layout state unchanged. */
-    CANCEL = 3,
 };
 
 /**
@@ -3435,6 +3470,7 @@ enum class WaterfallResidentState : uint32_t {
  * @brief Controls the compatible aspect ratio modes for window display.
  */
 enum class CompatibleStyleMode : uint32_t {
+    INVALID_VALUE = -1,
     // Default aspect ratio
     LANDSCAPE_DEFAULT = 0,
     // 18:9 aspect ratio
@@ -3442,7 +3478,29 @@ enum class CompatibleStyleMode : uint32_t {
     // 1:1 aspect ratio
     LANDSCAPE_1_1 = 3,
     // 2:3 aspect ratio
-    LANDSCAPE_2_3 = 4
+    LANDSCAPE_2_3 = 4,
+    // split aspect ratio
+    LANDSCAPE_SPLIT = 5,
+};
+
+struct StateChangeOption {
+    int32_t parentPersistentId_ = 0;
+    WindowState newState_ = WindowState::STATE_INITIAL;
+    uint32_t reason_ = 0;
+    bool withAnimation_ = false;
+    bool withFocus_ = false;
+    bool waitAttach_ = false;
+    bool isFromInnerkits_ = false;
+    bool waitDetach_ = false;
+
+    StateChangeOption(int32_t parentPersistentId, WindowState newState)
+        : parentPersistentId_(parentPersistentId), newState_(newState) {}
+
+    StateChangeOption(int32_t parentPersistentId, WindowState newState, uint32_t reason, bool withAnimation,
+        bool withFocus, bool waitAttach, bool isFromInnerkits, bool waitDetach)
+        : parentPersistentId_(parentPersistentId), newState_(newState), reason_(reason),
+          withAnimation_(withAnimation), withFocus_(withFocus), waitAttach_(waitAttach),
+          isFromInnerkits_(isFromInnerkits), waitDetach_(waitDetach) {}
 };
 }
 }

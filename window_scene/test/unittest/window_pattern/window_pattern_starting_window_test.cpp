@@ -552,7 +552,58 @@ HWTEST_F(WindowPatternStartingWindowTest, PreLoadStartingWindow, TestSize.Level1
     ssm_->PreLoadStartingWindow(sceneSession);
     sceneSession->state_ = SessionState::STATE_DISCONNECT;
     ssm_->PreLoadStartingWindow(sceneSession);
+
+    StartingWindowInfo startingWindowInfo;
+    startingWindowInfo.configFileEnabled_ = false;
+    startingWindowInfo.iconPathEarlyVersion_ = "resource:///12345678.png";
+    std::string keyForCached = info.moduleName_ + info.abilityName_ + std::to_string(true);
+    ssm_->startingWindowMap_[info.bundleName_][keyForCached] = startingWindowInfo;
+    ssm_->PreLoadStartingWindow(sceneSession);
     ASSERT_NE(nullptr, sceneSession);
+}
+
+/**
+ * @tc.name: GetCropInfoByDisplaySize
+ * @tc.desc: GetCropInfoByDisplaySize
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternStartingWindowTest, GetCropInfoByDisplaySize, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    Media::ImageInfo imageInfo;
+    imageInfo.size.width = 2200;
+    imageInfo.size.height = 3200;
+    Media::DecodeOptions decodeOpts;
+    ssm_->GetCropInfoByDisplaySize(imageInfo, decodeOpts);
+    EXPECT_EQ(decodeOpts.CropRect.top, 0);
+
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+    ASSERT_NE(displayInfo, nullptr);
+    ScreenId defaultScreenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
+    displayInfo->SetDisplayId(defaultScreenId);
+    displayInfo->SetWidth(5000);
+    displayInfo->SetHeight(5000);
+    ssm_->UpdateDisplayRegion(displayInfo);
+    ssm_->GetCropInfoByDisplaySize(imageInfo, decodeOpts);
+    EXPECT_EQ(decodeOpts.CropRect.top, 0);
+
+    displayInfo->SetWidth(3000);
+    displayInfo->SetHeight(3000);
+    ssm_->UpdateDisplayRegion(displayInfo);
+    ssm_->GetCropInfoByDisplaySize(imageInfo, decodeOpts);
+    EXPECT_EQ(decodeOpts.CropRect.top, 100);
+
+    imageInfo.size.width = 3200;
+    imageInfo.size.height = 2200;
+    ssm_->UpdateDisplayRegion(displayInfo);
+    ssm_->GetCropInfoByDisplaySize(imageInfo, decodeOpts);
+    EXPECT_EQ(decodeOpts.CropRect.left, 100);
+
+    displayInfo->SetWidth(2000);
+    displayInfo->SetHeight(2000);
+    ssm_->UpdateDisplayRegion(displayInfo);
+    ssm_->GetCropInfoByDisplaySize(imageInfo, decodeOpts);
+    EXPECT_EQ(decodeOpts.CropRect.left, 600);
 }
 
 /**
@@ -712,6 +763,36 @@ HWTEST_F(WindowPatternStartingWindowTest, UpdateCachedColorToAppSet, TestSize.Le
     ssm_->startingWindowMap_.clear();
     ssm_->UpdateCachedColorToAppSet(bundleName, moduleName, abilityName, tempInfo);
     EXPECT_EQ(0, ssm_->startingWindowMap_.size());
+}
+
+/**
+ * @tc.name: InitStartingWindow
+ * @tc.desc: InitStartingWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternStartingWindowTest, InitStartingWindow, TestSize.Level0)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(RdbLogCallback);
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->syncLoadStartingWindow_ = false;
+    EXPECT_EQ(ssm_->IsSyncLoadStartingWindow(), false);
+    ssm_->InitStartingWindow();
+    EXPECT_TRUE(g_logMsg.find("Sync Load StartingWindow:") != std::string::npos);
+}
+
+/**
+ * @tc.name: IsSyncLoadStartingWindow
+ * @tc.desc: IsSyncLoadStartingWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternStartingWindowTest, IsSyncLoadStartingWindow, TestSize.Level0)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->syncLoadStartingWindow_ = false;
+    EXPECT_EQ(ssm_->IsSyncLoadStartingWindow(), false);
+    ssm_->syncLoadStartingWindow_ = true;
+    EXPECT_EQ(ssm_->IsSyncLoadStartingWindow(), true);
 }
 } // namespace
 } // namespace Rosen

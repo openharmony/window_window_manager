@@ -807,6 +807,12 @@ export enum Orientation {
     FOLLOW_DESKTOP = 17
 }
 
+export enum  RotationInfoType {
+    WINDOW_ORIENTATION = 0,
+    DISPLAY_ORIENTATION = 1,
+    DISPLAY_ROTATION = 2,
+}
+
 export enum WindowEventType {
     WINDOW_SHOWN = 1,
     WINDOW_ACTIVE = 2,
@@ -2534,7 +2540,7 @@ export class ExtensionWindowConfigInternal implements ExtensionWindowConfig {
     return this.getWindowRect(this.nativeObj);
   }
 
-  set subWindowOptions(value?: SubWindowOptions) {
+  set subWindowOptions(value: SubWindowOptions | undefined) {
     this.setSubWindowOptions(this.nativeObj, value);
   }
 
@@ -2542,7 +2548,7 @@ export class ExtensionWindowConfigInternal implements ExtensionWindowConfig {
     return this.getSubWindowOptions(this.nativeObj);
   }
 
-  set systemWindowOptions(value?: SystemWindowOptions) {
+  set systemWindowOptions(value: SystemWindowOptions | undefined) {
     this.setSystemWindowOptions(this.nativeObj, value);
   }
 
@@ -2644,7 +2650,7 @@ export class ExtConfigSubWindowOptions implements SubWindowOptions {
     return this.getDecorEnabled(this.nativeObj);
   }
 
-  set isModal(value?: boolean) {
+  set isModal(value: boolean | undefined) {
     this.setIsModal(this.nativeObj, value ?? false);
   }
 
@@ -2652,7 +2658,7 @@ export class ExtConfigSubWindowOptions implements SubWindowOptions {
     return this.getIsModal(this.nativeObj);
   }
 
-  set isTopmost(value?: boolean) {
+  set isTopmost(value: boolean | undefined) {
     this.setIsTopmost(this.nativeObj, value ?? false);
   }
 
@@ -3117,11 +3123,11 @@ export class WindowInternal implements Window {
       isDockHoverShown?: boolean): void;
     private native setHandwritingFlag(nativeObj: long, enable: boolean): void;
     private native getWindowDecorVisible(nativeObj: long): boolean;
-    private native getWindowDecorHeight(nativeObj:long): double;
+    private native getWindowDecorHeight(nativeObj:long): int;
     private native setWindowBackgroundColor(nativeObj: long, color: string): int;
     private native setImmersiveModeEnabledState(nativeObj: long, enable: boolean): int;
     private native setWindowDecorVisible(nativeObj: long, isVisible: boolean): int;
-    private native setWindowDecorHeight(nativeObj: long, height: double): int;
+    private native setWindowDecorHeight(nativeObj: long, height: int): int;
     private native getWindowProperties(nativeObj: long): WindowProperties;
     private native getProperties(nativeObj: long): WindowProperties;
     private native isWindowSupportWideGamut(nativeObj: long): boolean;
@@ -3153,6 +3159,7 @@ export class WindowInternal implements Window {
     private native setWindowColorSpaceSync(nativeObj: long, colorSpace: int): void;
     private native setPreferredOrientationSync(nativeObj: long, orientation: int): void;
     private native getPreferredOrientation(nativeObj: long): int;
+    private native convertOrientationAndRotation(nativeObj: long, from: int, to: int, value: int): int;
     private native setWindowPrivacyModeSync(nativeObj: long, isPrivacyMode: boolean): void;
     private native recoverSync(nativeObj: long): void;
     private native setUIContentSync(nativeObj: long, path: string): void;
@@ -3190,6 +3197,10 @@ export class WindowInternal implements Window {
     private native raiseAboveTargetSync(nativeObj: long, windowId: int): void;
     private native raiseToAppTopSync(nativeObj: long): void;
     private native setTopmostSync(nativeObj: long, isTopmost: boolean): void;
+    private native setReceiveDragEventEnabled(nativeObj: long, enabled: boolean): void;
+    private native isReceiveDragEventEnabled(nativeObj: long): boolean;
+    private native setSeparationTouchEnabled(nativeObj: long, enabled: boolean): void;
+    private native isSeparationTouchEnabled(nativeObj: long): boolean;
     private native requestFocusSync(nativeObj: long, isFocused: boolean): void;
     private native setSubWindowModal(nativeObj: long, isModal: boolean): void;
     private native setSubWindowModalType(nativeObj: long, isModal: boolean, modalityType: int): void;
@@ -3205,7 +3216,7 @@ export class WindowInternal implements Window {
     private native getParentWindow(nativeObj: long): Window;
     private native setParentWindow(nativeObj: long, windowId: int): void;
     private native setContentAspectRatio(
-      nativeObj: long, ratio: number, isPersistent: boolean, needUpdateRect: boolean): void;
+      nativeObj: long, ratio: double, isPersistent: boolean, needUpdateRect: boolean): void;
     private native onSync(nativeObj: long, type: string, callback: object): void;
     private native onNoInteractionDetected(nativeObj: long, type: string, timeout: long, callback: Object): void;
     private native offSync(nativeObj: long, type: string, callback?: object): void;
@@ -3220,6 +3231,7 @@ export class WindowInternal implements Window {
     private native setAspectRatio(nativeObj: long, ratio: double): void;
     private native resetAspectRatio(nativeObj: long): void;
     private native getWindowStatus(nativeObj: long): int;
+    private native minimize(nativeObj: long): void;
     private native maximize(nativeObj: long, presentation?: MaximizePresentation, acrossDisplay?: boolean): void;
     private native startMoving(nativeObj: long): void;
     private native startMoveWindowWithCoordinate(nativeObj: long, offsetX: int, offsetY: int): void;
@@ -3464,7 +3476,7 @@ export class WindowInternal implements Window {
       this.offSync(this.nativeObj, 'windowTitleButtonRectChange', callback);
     }
 
-    public getWindowDecorHeight(): number {
+    public getWindowDecorHeight(): int {
        let ret = this.getWindowDecorHeight(this.nativeObj);
        return ret;
     }
@@ -3521,7 +3533,7 @@ export class WindowInternal implements Window {
         this.setWindowDecorVisible(this.nativeObj, isVisible);
     }
 
-    public setWindowDecorHeight(height: number): void {
+    public setWindowDecorHeight(height: int): void {
         this.setWindowDecorHeight(this.nativeObj, height);
     }
 
@@ -3831,6 +3843,10 @@ export class WindowInternal implements Window {
 
     public getPreferredOrientation(): Orientation {
       return this.getPreferredOrientation(this.nativeObj) as Orientation;
+    }
+
+    public convertOrientationAndRotation(from: RotationInfoType, to: RotationInfoType, value: int): int {
+      return this.convertOrientationAndRotation(this.nativeObj, from as int, to as int, value);
     }
 
     public setWindowPrivacyMode(isPrivacyMode: boolean): Promise<void> {
@@ -4375,6 +4391,38 @@ export class WindowInternal implements Window {
       });
     }
 
+    public setReceiveDragEventEnabled(enabled: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setReceiveDragEventEnabled(this.nativeObj, enabled);
+        }).then((ret: NullishType): void => {
+          resolve(undefined);
+        }).catch((err: NullishType): void => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public isReceiveDragEventEnabled(): boolean{
+      return this.isReceiveDragEventEnabled(this.nativeObj);
+    }
+
+    public setSeparationTouchEnabled(enabled: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setSeparationTouchEnabled(this.nativeObj, enabled);
+        }).then((ret: NullishType): void => {
+          resolve(undefined);
+        }).catch((err: NullishType): void => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public isSeparationTouchEnabled(): boolean{
+      return this.isSeparationTouchEnabled(this.nativeObj);
+    }
+
     public requestFocus(isFocused: boolean): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
@@ -4411,7 +4459,7 @@ export class WindowInternal implements Window {
         });
     }
 
-    public setContentAspectRatio(ratio: number, isPersistent?: boolean, needUpdateRect?: boolean): Promise<void> {
+    public setContentAspectRatio(ratio: double, isPersistent?: boolean, needUpdateRect?: boolean): Promise<void> {
       return new Promise<void>(
         (resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
           taskpool.execute((): void => {
@@ -4908,6 +4956,32 @@ export class WindowInternal implements Window {
       return this.getWindowStatus(this.nativeObj) as WindowStatusType;
     }
 
+    public minimize(): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
+        taskpool.execute((): void => {
+          this.minimize(this.nativeObj);
+        }).then((ret: Any): void => {
+            resolve(undefined);
+        }).catch((err: Any): void => {
+            reject(err as BusinessError);
+        });
+      });
+    }
+
+    public minimize(callback: AsyncCallback<void>): void {
+      taskpool.execute((): void => {
+          this.minimize(this.nativeObj);
+      }).then((ret: Any) => {
+          callback(new BusinessError(), undefined);
+      }).catch((err: Any) => {
+          callback(err as BusinessError, undefined);
+      });
+    }
+
+    public maximize(presentation?: MaximizePresentation): Promise<void> {
+      return this.maximize(presentation, undefined);
+    }
+
     public maximize(presentation?: MaximizePresentation, acrossDisplay?: boolean): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute(() => {
@@ -5256,13 +5330,13 @@ export interface Window {
     offWindowWillClose(callback?: WindowWillCloseCallback<void, Promise<boolean>>): void;
     onWindowTitleButtonRectChange(callback: Callback<TitleButtonRect>): void;
     offWindowTitleButtonRectChange(callback?: Callback<TitleButtonRect>): void;
-    getWindowDecorHeight(): double;
+    getWindowDecorHeight(): int;
     setWindowBackgroundColor(color: string | ColorMetrics): void;
     setBackgroundColor(color: string): Promise<void>;
     setBackgroundColor(color: string, callback: AsyncCallback<void>): void;
     setImmersiveModeEnabledState(enable: boolean): void;
     setWindowDecorVisible(isVisible: boolean): void;
-    setWindowDecorHeight(height: number): void;
+    setWindowDecorHeight(height: int): void;
     getWindowProperties(): WindowProperties;
     getProperties(): Promise<WindowProperties>;
     getProperties(callback: AsyncCallback<WindowProperties>): void;
@@ -5287,6 +5361,7 @@ export interface Window {
     setPreferredOrientation(orientation: Orientation): Promise<void>;
     setPreferredOrientation(orientation: Orientation, callback: AsyncCallback<void>): void;
     getPreferredOrientation(): Orientation;
+    convertOrientationAndRotation(from: RotationInfoType, to: RotationInfoType, value: int): int;
     setWindowPrivacyMode(isPrivacyMode: boolean): Promise<void>;
     setWindowPrivacyMode(isPrivacyMode: boolean, callback: AsyncCallback<void>): void;
     recover(): Promise<void>;
@@ -5353,6 +5428,10 @@ export interface Window {
     raiseToAppTop(callback: AsyncCallback<void>): void;
     raiseToAppTop(): Promise<void>;
     setTopmost(isTopmost: boolean): Promise<void>;
+    setReceiveDragEventEnabled(enabled: boolean): Promise<void>;
+    isReceiveDragEventEnabled(): boolean;
+    setSeparationTouchEnabled(enabled: boolean): Promise<void>;
+    isSeparationTouchEnabled(): boolean;
     requestFocus(isFocused: boolean): Promise<void>;
     setSubWindowModal(isModal: boolean): Promise<void>;
     setSubWindowModal(isModal: boolean, modalityType: ModalityType): Promise<void>;
@@ -5375,7 +5454,7 @@ export interface Window {
     bindDialogTarget(requestInfo: dialogRequest.RequestInfo, deathCallback: Callback<void>): Promise<void>;
     bindDialogTarget(requestInfo: dialogRequest.RequestInfo, deathCallback: Callback<void>,
       callback: AsyncCallback<void>): void;
-    setContentAspectRatio(ratio: number, isPersistent?: boolean, needUpdateRect?: boolean): Promise<void>;
+    setContentAspectRatio(ratio: double, isPersistent?: boolean, needUpdateRect?: boolean): Promise<void>;
     opacity(opacity: double): void;
     scale(scaleOptions: ScaleOptions): void;
     translate(translateOptions: TranslateOptions): void;
@@ -5440,6 +5519,9 @@ export interface Window {
     resetAspectRatio(callback: AsyncCallback<void>): void;
     resetAspectRatio(): Promise<void>;
     getWindowStatus(): WindowStatusType;
+    minimize(callback: AsyncCallback<void>): void;
+    minimize(): Promise<void>;
+    maximize(presentation?: MaximizePresentation): Promise<void>;
     maximize(presentation?: MaximizePresentation, acrossDisplay?: boolean): Promise<void>;
     startMoving(): Promise<void>;
     startMoving(offsetX: int, offsetY: int): Promise<void>;
@@ -5503,7 +5585,7 @@ native function onSync(nativeObj: long, type: string, callback: object): void;
 native function offSync(nativeObj: long, type: string, callback?: object): void;
 native function createWindowSync(nativeObj: long, config: Configuration): Window;
 native function getAllWindowLayoutInfo(nativeObj: long, displayId: long): Array<WindowLayoutInfo>;
-native function getSnapshot(nativeObj: long, windowId: number): image.PixelMap;
+native function getSnapshot(nativeObj: long, windowId: int): image.PixelMap;
 native function getVisibleWindowInfo(nativeObj: long): Array<WindowInfoInternal>;
 native function setGestureNavigationEnabled(nativeObj: long, enabled: boolean): void;
 native function setWaterMarkImage(nativeObj: long, pixelMap: image.PixelMap, enabled: boolean): void;
@@ -5520,6 +5602,7 @@ native function setStartWindowBackgroundColorSync(nativeObj: long, moduleName: s
   color: long): void;
 native function notifyScreenshotEventSync(nativeObj: long, eventType: ScreenshotEventType): void;
 native function toggleShownStateForAllAppWindowsSync(nativeObj: long): void;
+native function setSpecificSystemWindowZIndexSync(nativeObj: long, windowType: WindowType, zIndex: int): void;
 
 export function toggleShownStateForAllAppWindows(callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
@@ -5685,7 +5768,7 @@ export function getAllWindowLayoutInfo(displayId: long): Promise<Array<WindowLay
   });
 }
 
-export function getSnapshot(windowId: number): Promise<image.PixelMap> {
+export function getSnapshot(windowId: int): Promise<image.PixelMap> {
   return new Promise<image.PixelMap>((
     resolve: (value: image.PixelMap) => void, reject: (error: BusinessError) => void): void => {
       taskpool.execute(() => {
@@ -5817,6 +5900,18 @@ export function shiftAppWindowPointerEvent(sourceWindowId: int, targetWindowId: 
     }).catch((err: NullishType) => {
       reject(err as BusinessError);
     });
+  });
+}
+
+export function setSpecificSystemWindowZIndex(windowType: WindowType, zIndex: int): Promise<void> {
+  return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+      taskpool.execute((): void => {
+          return setSpecificSystemWindowZIndexSync(nativeObj, windowType, zIndex);
+      }).then((ret: NullishType) => {
+          resolve(undefined);
+      }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+      });
   });
 }
 

@@ -29,6 +29,7 @@
 #include "key_event.h"
 #include "pointer_event.h"
 #include "process_options.h"
+#include "rate_limited_logger.h"
 #include "session/host/include/zidl/session_ipc_interface_code.h"
 #include "window_manager_hilog.h"
 namespace OHOS::Rosen {
@@ -346,6 +347,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         }
         property->SetMissionInfo(*missionInfo);
         property->SetIsShowDecorInFreeMultiWindow(reply.ReadBool());
+        property->SetCompatibleModePage(reply.ReadString());
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
@@ -1059,7 +1061,8 @@ WSError SessionProxy::UpdateSessionRect(const WSRect& rect, SizeChangeReason rea
     bool isGlobal, bool isFromMoveToGlobal, const MoveConfiguration& moveConfiguration,
     const RectAnimationConfig& rectAnimationConfig)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Rect:%{public}s global:%{public}d isFromMoveToGlobal:%{public}d cfg:%{public}s",
+    TLOGI_LMT(TEN_SECONDS, RECORD_100_TIMES, WmsLogTag::WMS_LAYOUT,
+        "Rect:%{public}s global:%{public}d isFromMoveToGlobal:%{public}d cfg:%{public}s",
         rect.ToString().c_str(), isGlobal, isFromMoveToGlobal, moveConfiguration.ToString().c_str());
     MessageParcel data;
     MessageParcel reply;
@@ -1608,6 +1611,50 @@ WSError SessionProxy::GetTargetOrientationConfigInfo(Orientation targetOrientati
         return WSError::WS_ERROR_IPC_FAILED;
     }
     uint32_t ret = reply.ReadUint32();
+    return static_cast<WSError>(ret);
+}
+
+WSError SessionProxy::ConvertOrientationAndRotation(const RotationInfoType from, const RotationInfoType to,
+    const int32_t value, int32_t& convertedValue)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(from))) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "write from type error");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(to))) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "write to type error");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(static_cast<int32_t>(value))) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "write the value to be converted error");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONVERT_ORIENTATION_AND_ROTATION),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!reply.ReadInt32(convertedValue)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read ret failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     return static_cast<WSError>(ret);
 }
 
@@ -2684,6 +2731,34 @@ WMError SessionProxy::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config
     sptr<AppForceLandscapeConfig> replyConfig = reply.ReadParcelable<AppForceLandscapeConfig>();
     if (replyConfig) {
         config = *replyConfig;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WMError>(ret);
+}
+
+WMError SessionProxy::GetAppForceLandscapeConfigEnable(bool& enableForceSplit)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DEFAULT, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG_ENABLE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!reply.ReadBool(enableForceSplit)) {
+        TLOGE(WmsLogTag::DEFAULT, "Read enableForceSplit failed");
+        return WMError::WM_ERROR_IPC_FAILED;
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WMError>(ret);
@@ -4028,6 +4103,37 @@ WSError SessionProxy::NotifyIsFullScreenInForceSplitMode(bool isFullScreen)
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_IS_FULL_SCREEN_IN_FORCE_SPLIT),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "read ret failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(ret);
+}
+
+WSError SessionProxy::NotifyCompatibleModeChange(CompatibleStyleMode mode)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(static_cast<int32_t>(mode))) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "write mode failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    auto remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_COMPATIBLE_MODE_CHANGE),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_COMPAT, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;

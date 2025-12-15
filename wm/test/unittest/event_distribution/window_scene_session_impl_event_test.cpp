@@ -92,6 +92,114 @@ HWTEST_F(WindowSceneSessionImplEventTest, UnlockCursor, TestSize.Level0)
     ret = window->UnlockCursor(1);
     EXPECT_EQ(ret, WMError::WM_OK);
 }
+
+/**
+ * @tc.name: SetReceiveDragEventEnabled
+ * @tc.desc: SetReceiveDragEventEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplEventTest, SetReceiveDragEventEnabled, TestSize.Level0)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetReceiveDragEventEnabled");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->hostSession_ = nullptr;
+    auto ret = window->SetReceiveDragEventEnabled(true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    window->property_->persistentId_ = 11;
+    window->state_ = WindowState::STATE_SHOWN;
+    sptr<SessionStubMocker> session = sptr<SessionStubMocker>::MakeSptr();
+    window->hostSession_ = session;
+    ret = window->SetReceiveDragEventEnabled(true);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: IsReceiveDragEventEnabled
+ * @tc.desc: IsReceiveDragEventEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplEventTest, IsReceiveDragEventEnabled, TestSize.Level0)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsReceiveDragEventEnabled");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->hostSession_ = nullptr;
+    auto ret = window->SetReceiveDragEventEnabled(true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    auto isRet =  window->IsReceiveDragEventEnabled();
+    EXPECT_EQ(isRet, true);
+
+    window->property_->persistentId_ = 11;
+    window->state_ = WindowState::STATE_SHOWN;
+    sptr<SessionStubMocker> session = sptr<SessionStubMocker>::MakeSptr();
+    window->hostSession_ = session;
+
+    ret = window->SetReceiveDragEventEnabled(false);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    isRet =  window->IsReceiveDragEventEnabled();
+    EXPECT_EQ(isRet, false);
+}
+
+/**
+ * @tc.name: SetSeparationTouchEnabled
+ * @tc.desc: SetSeparationTouchEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplEventTest, SetSeparationTouchEnabled, TestSize.Level0)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetSeparationTouchEnabled");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->hostSession_ = nullptr;
+    auto ret = window->SetSeparationTouchEnabled(true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    window->property_->persistentId_ = 11;
+    window->state_ = WindowState::STATE_SHOWN;
+    sptr<SessionStubMocker> session = sptr<SessionStubMocker>::MakeSptr();
+    window->hostSession_ = session;
+    ret = window->SetSeparationTouchEnabled(true);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    window->property_->persistentId_ = 12;
+    window->state_ = WindowState::STATE_SHOWN;
+    window->hostSession_ = session;
+    ret = window->SetSeparationTouchEnabled(false);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: IsSeparationTouchEnabled
+ * @tc.desc: IsSeparationTouchEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplEventTest, IsSeparationTouchEnabled, TestSize.Level0)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsSeparationTouchEnabled");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->hostSession_ = nullptr;
+    auto ret = window->SetSeparationTouchEnabled(true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    auto isRet =  window->IsSeparationTouchEnabled();
+    EXPECT_EQ(isRet, true);
+
+    window->property_->persistentId_ = 11;
+    window->state_ = WindowState::STATE_SHOWN;
+    sptr<SessionStubMocker> session = sptr<SessionStubMocker>::MakeSptr();
+    window->hostSession_ = session;
+
+    ret = window->SetSeparationTouchEnabled(false);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    isRet =  window->IsSeparationTouchEnabled();
+    EXPECT_EQ(isRet, false);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

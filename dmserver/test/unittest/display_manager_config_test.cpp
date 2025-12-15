@@ -190,7 +190,7 @@ HWTEST_F(DisplayManagerConfigTest, ReadStringConfigInfo, TestSize.Level1)
     auto configFilePath = DisplayManagerConfig::GetConfigPath("etc/window/resources/display_manager_config.xml");
     xmlDocPtr docPtr = xmlReadFile(configFilePath.c_str(), nullptr, XML_PARSE_NOBLANKS);
     if (docPtr == nullptr) {
-        return;
+        GTEST_SKIP();
     }
 
     xmlNodePtr rootPtr = xmlDocGetRootElement(docPtr);

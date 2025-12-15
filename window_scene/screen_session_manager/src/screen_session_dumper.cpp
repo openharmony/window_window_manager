@@ -44,10 +44,12 @@ constexpr int MAX_DUMPER_PARAM_NUMBER = 10;
 const std::string ARG_DUMP_HELP = "-h";
 const std::string ARG_DUMP_ALL = "-a";
 const std::string ARG_DUMP_FOLD_STATUS = "-f";
+const std::string ARG_DUMP_LCD_STATUS = "-lcd";
 
 constexpr int MOTION_SENSOR_PARAM_SIZE = 2;
 const std::string STATUS_FOLD_HALF = "-z";
 const std::string STATUS_EXPAND = "-y";
+const std::string STATUS_EXPAND_WITH_SECOND_EXPAND = "-yy";
 const std::string STATUS_FOLD = "-p";
 const std::string ARG_SET_ROTATION_SENSOR = "-motion"; // rotation event inject
 const std::string ARG_SET_ROTATION_LOCK = "-rotationlock";
@@ -72,6 +74,8 @@ const std::string ANGLE_STR = "angle";
 const std::string HALL_STR = "hall";
 const std::string ARG_SET_LANDSCAPE_LOCK = "-landscapelock";
 const std::string ARG_SET_DURINGCALL_STATE = "-duringcallstate";
+const ScreenId SCREEN_ID_FULL = 0;
+const ScreenId SCREEN_ID_MAIN = 5;
 #ifdef FOLD_ABILITY_ENABLE
 constexpr int SUPER_FOLD_STATUS_MAX = 2;
 const char SECONDARY_DUMPER_VALUE_BOUNDARY[] = "mfg";
@@ -170,9 +174,40 @@ void ScreenSessionDumper::ExecuteDumpCmd()
         AppendSectionLine();
     } else if (params_[0] == ARG_DUMP_FOLD_STATUS) {
         DumpFoldStatus();
+    } else if (params_[0] == ARG_DUMP_LCD_STATUS) {
+        ShowCurrentLcdStatus(SCREEN_ID_FULL);
+        ShowCurrentLcdStatus(SCREEN_ID_MAIN);
     }
     ExecuteInjectCmd();
     OutputDumpInfo();
+}
+
+void ScreenSessionDumper::ShowCurrentLcdStatus(ScreenId screenId)
+{
+    std::ostringstream oss;
+    PanelPowerStatus powerStatus = PanelPowerStatus::INVALID_PANEL_POWER_STATUS;
+    if (!ScreenSessionManager::GetInstance().GetScreenLcdStatus(screenId, powerStatus)) {
+        oss << std::left << std::setw(LINE_WIDTH) << "Get screen " << screenId << " status failed" << std::endl;
+        dumpInfo_.append(oss.str());
+        return;
+    }
+    std::string status = "";
+    switch (powerStatus) {
+        case PanelPowerStatus::PANEL_POWER_STATUS_ON: {
+            status = "PANEL_POWER_STATUS_ON";
+            break;
+        }
+        case PanelPowerStatus::PANEL_POWER_STATUS_OFF: {
+            status = "PANEL_POWER_STATUS_OFF";
+            break;
+        }
+        default: {
+            status = "UNKNOWN";
+            break;
+        }
+    }
+    oss << std::left << std::setw(LINE_WIDTH) << "LCD " << screenId << " status: " << status << std::endl;
+    dumpInfo_.append(oss.str());
 }
 
 void ScreenSessionDumper::ExecuteInjectCmd()
@@ -229,7 +264,8 @@ bool ScreenSessionDumper::IsDeveloperModeCommand()
         if (SetFoldDisplayMode() != 0) {
             ShowIllegalArgsInfo();
         }
-    } else if (params_[0] == STATUS_FOLD_HALF || params_[0] == STATUS_EXPAND || params_[0] == STATUS_FOLD) {
+    } else if (params_[0] == STATUS_FOLD_HALF || params_[0] == STATUS_EXPAND || params_[0] == STATUS_FOLD ||
+        params_[0] == STATUS_EXPAND_WITH_SECOND_EXPAND) {
         ShowNotifyFoldStatusChangedInfo();
     } else if (params_[0].find(ARG_SET_ROTATION_SENSOR) != std::string::npos) {
         SetMotionSensorValue(params_[0]);
@@ -311,6 +347,8 @@ void ScreenSessionDumper::ShowHelpInfo()
         .append("|switch to fold half status\n")
         .append(" -y                             ")
         .append("|switch to expand status\n")
+        .append(" -yy                            ")
+        .append("|switch to both first and second axes expand status\n")
         .append(" -p                             ")
         .append("|switch to fold status\n")
         .append(" -f                             ")

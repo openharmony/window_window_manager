@@ -72,6 +72,8 @@ public:
     WSError GetTargetOrientationConfigInfo(Orientation targetOrientation,
         const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& targetProperties,
         const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& currentProperties) override;
+    WSError ConvertOrientationAndRotation(const RotationInfoType from, const RotationInfoType to,
+        const int32_t value, int32_t& convertedValue) override;
     WSError RequestSessionBack(bool needMoveToBackground) override;
     WSError MarkProcessed(int32_t eventId) override;
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
@@ -135,6 +137,7 @@ public:
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) override;
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
+    WMError GetAppForceLandscapeConfigEnable(bool& enableForceSplit) override;
     WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect) override;
     WMError NotifySnapshotUpdate() override;
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
@@ -227,6 +230,7 @@ public:
      * Compatible Mode
      */
     WSError NotifyIsFullScreenInForceSplitMode(bool isFullScreen) override;
+    WSError NotifyCompatibleModeChange(CompatibleStyleMode mode) override;
 
     /**
      * Restart app

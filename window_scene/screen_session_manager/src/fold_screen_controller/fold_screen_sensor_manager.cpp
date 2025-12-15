@@ -93,7 +93,7 @@ void FoldScreenSensorManager::UnRegisterPostureCallback()
         registerPosture_ = false;
         TLOGI(WmsLogTag::DMS, "success.");
     } else {
-        TLOGE(WmsLogTag::DMS, "UnRegisterPostureCallback failed with ret: %d", ret);
+        TLOGE(WmsLogTag::DMS, "UnRegisterPostureCallback failed with ret: %{public}d", ret);
     }
 }
 
@@ -118,7 +118,7 @@ void FoldScreenSensorManager::UnRegisterHallCallback()
         registerHall_ = false;
         TLOGI(WmsLogTag::DMS, "success.");
     } else {
-        TLOGE(WmsLogTag::DMS, "UnRegisterHallCallback failed with ret: %d", ret);
+        TLOGE(WmsLogTag::DMS, "UnRegisterHallCallback failed with ret: %{public}d", ret);
     }
 }
 
@@ -290,8 +290,7 @@ void FoldScreenSensorManager::HandleHallData(const SensorEvent* const event)
 
 bool FoldScreenSensorManager::HandleAbnormalAngle()
 {
-    if (FoldScreenStateInternel::FloatEqualAbs(globalAngle, DUAL_INVALID_ANGLE_VALUE)
-        && globalHall == 0 && !registerPosture_) {
+    if (FoldScreenStateInternel::FloatEqualAbs(globalAngle, DUAL_INVALID_ANGLE_VALUE)) {
         globalAngle = ANGLE_MIN_VAL;
         TLOGI(WmsLogTag::DMS, "hall value is: %{public}u, let angle value is: %{public}f, continue",
             globalHall, globalAngle);

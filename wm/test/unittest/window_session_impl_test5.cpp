@@ -28,7 +28,11 @@
 #include "parameters.h"
 #include "scene_board_judgement.h"
 #include "window_helper.h"
+#define private public
+#define protected public
 #include "window_session_impl.h"
+#undef private
+#undef protected
 #include "wm_common.h"
 #include "window_manager_hilog.h"
 #include <transaction/rs_transaction.h>
@@ -888,6 +892,45 @@ HWTEST_F(WindowSessionImplTest5, NotifyPageRotationIsIgnored, Function | SmallTe
 }
 
 /**
+ * @tc.name: ConvertOrientationAndRotation()
+ * @tc.desc: ConvertOrientationAndRotation()
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, ConvertOrientationAndRotation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: ConvertOrientationAndRotation start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetDisplayId(0);
+    option->SetWindowName("ConvertOrientationAndRotation");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(INVALID_SESSION_ID);
+    RotationInfoType from = RotationInfoType::DISPLAY_ORIENTATION;
+    RotationInfoType to = RotationInfoType::DISPLAY_ORIENTATION;
+    int32_t value = -1;
+    int32_t convertedValue = 0;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
+        window->ConvertOrientationAndRotation(from, to, value, convertedValue));
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_CREATED;
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT,
+        window->ConvertOrientationAndRotation(from, to, value, convertedValue));
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    value = -1;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM,
+        window->ConvertOrientationAndRotation(from, to, value, convertedValue));
+    value = 8;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->ConvertOrientationAndRotation(from, to, value, convertedValue));
+    value = 0;
+    ASSERT_EQ(WMError::WM_OK, window->ConvertOrientationAndRotation(from, to, value, convertedValue));
+    to = RotationInfoType::DISPLAY_ROTATION;
+    ASSERT_EQ(WMError::WM_OK, window->ConvertOrientationAndRotation(from, to, value, convertedValue));
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: ConvertOrientationAndRotation end";
+}
+
+/**
  * @tc.name: BeginRSTransaction()
  * @tc.desc: BeginRSTransaction()
  * @tc.type: FUNC
@@ -1450,11 +1493,47 @@ HWTEST_F(WindowSessionImplTest5, NapiSetUIContent01, Function | SmallTest | Leve
     sptr<IRemoteObject> token;
     window->state_ = WindowState::STATE_SHOWN;
 
+    window->AniSetUIContent("info", (ani_env*)nullptr, nullptr, BackupAndRestoreType::NONE, nullptr, nullptr);
+
     std::string navInfo = "testInfo";
     window->SetNavDestinationInfo(navInfo);
 
     window->NapiSetUIContent("info", (napi_env)nullptr, nullptr, BackupAndRestoreType::NONE, nullptr, nullptr);
+
+    window->SetNavDestinationInfo(navInfo);
+
+    window->AniSetUIContent("info", (ani_env*)nullptr, nullptr, BackupAndRestoreType::NONE, nullptr, nullptr);
     EXPECT_EQ(window->navDestinationInfo_, "");
+}
+
+/**
+ * @tc.name: SetUIContentInner
+ * @tc.desc: SetUIContentInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, SetUIContentInner, Function | SmallTest | Level2)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetUIContentInner");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    SessionInfo sessionInfo = {"SetUIContentInner", "SetUIContentInner", "SetUIContentInner"};
+    auto hostSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetPersistentId(2);
+    window->property_ = property;
+    window->hostSession_ = hostSession;
+    sptr<IRemoteObject> token;
+    window->state_ = WindowState::STATE_SHOWN;
+    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    window->iconCache_ = pixelMap;
+
+    window->SetUIContentInner("info", nullptr, nullptr,
+        WindowSetUIContentType::DEFAULT, BackupAndRestoreType::NONE, nullptr);
+    EXPECT_TRUE(g_errLog.find("Use iconCache to set WindowIcon") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**

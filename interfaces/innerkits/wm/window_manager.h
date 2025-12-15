@@ -131,6 +131,23 @@ public:
 };
 
 /**
+ * @class IAllGroupInfoChangedListener
+ *
+ * @brief Listener to observe display added and removed.
+ */
+class IAllGroupInfoChangedListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when a display is connected or disconnected.
+     *
+     * @param displayGroupId display group id of the changed display.
+     * @param displayId display id.
+     * @param isAdd true means a new display is added in the current display group, false means the opposite.
+     */
+    virtual void OnDisplayGroupInfoChange(DisplayGroupId displayGroupId, DisplayId displayId, bool isAdd) = 0;
+};
+
+/**
  * @class IWindowModeChangedListener
  *
  * @brief Listener to observe window mode change.
@@ -626,6 +643,8 @@ public:
     virtual void OnSupportRotationChange(const SupportRotationInfo& supportRotationInfo) = 0;
 };
 
+class WindowManagerAgent;
+
 /**
  * @class WindowManager
  *
@@ -663,11 +682,9 @@ public:
      * @brief Register focus changed listener.
      *
      * @param listener IFocusChangedListener.
-     * @param recoverableOnFault Indicates whether to forcibly register a listener.
      * @return WM_OK means register success, others means register failed.
      */
-    WMError RegisterFocusChangedListener(const sptr<IFocusChangedListener>& listener,
-        bool recoverableOnFault = false);
+    WMError RegisterFocusChangedListener(const sptr<IFocusChangedListener>& listener);
 
     /**
      * @brief Unregister focus changed listener.
@@ -907,9 +924,10 @@ public:
      * @brief Minimize all app window.
      *
      * @param displayId Display id.
+     * @param excludeWindowId Exclude window id.
      * @return WM_OK means minimize success, others means minimize failed.
      */
-    WMError MinimizeAllAppWindows(DisplayId displayId);
+    WMError MinimizeAllAppWindows(DisplayId displayId, int32_t excludeWindowId = 0);
 
     /**
      * @brief Toggle all app windows to the foreground.
@@ -1064,6 +1082,15 @@ public:
      * @return WM_OK if successfully retrieved uiContentRemoteObj
      */
     WMError GetUIContentRemoteObj(int32_t windowId, sptr<IRemoteObject>& uiContentRemoteObj);
+
+    /**
+     * @brief Get uiContent remote object for root scene
+     *
+     * @param displayId display id
+     * @param uiContentRemoteObj remote uiContent object
+     * @return WM_OK means set success, others means set failed.
+     */
+    WMError GetRootUIContentRemoteObj(DisplayId displayId, sptr<IRemoteObject>& uiContentRemoteObj);
 
     /**
      * @brief raise window to top by windowId
@@ -1514,6 +1541,10 @@ private:
     WMError UnregisterMidSceneChangedListener(const sptr<IWindowInfoChangedListener>& listener);
     void SetIsModuleHookOffToSet(const std::string& moduleName);
     bool GetIsModuleHookOffFromSet(const std::string& moduleName);
+
+    // For fault agent re-register.
+    void ActiveFaultAgentReregister(const WindowManagerAgentType type,
+        const sptr<WindowManagerAgent>& agent, WMError& ret);
 };
 } // namespace Rosen
 } // namespace OHOS
