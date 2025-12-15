@@ -961,7 +961,7 @@ bool ConvertPointerItemFromJs(napi_env env, napi_value touchObject, MMI::Pointer
     pointerItem.SetDisplayYPos(displayY * vpr);
     double pressure;
     if (!ConvertFromJsValue(env, jsPressure, pressure)) {
-        WLOGFE("Failed to convert parameter to pressure");
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to convert parameter to pressure");
         return false;
     }
     pointerItem.SetPressure(pressure);
