@@ -6877,21 +6877,21 @@ void SceneSessionManager::GetFocusWindowInfoByAbilityToken(FocusChangeInfo& focu
         }
         if (currSceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_FOCUS, "%{public}s not found scene session by ability token", where);
-            return WS_ERROR_DESTROYED_OBJECT;
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         auto focusGroup = windowFocusController_->GetFocusGroup(currSceneSession->GetDisplayId());
         if (focusGroup == nullptr) {
             TLOGNE(WmsLogTag::WMS_FOCUS, "focus group is nullptr: %{public}" PRIu64, currSceneSession->GetDisplayId());
-            return WS_ERROR_DESTROYED_OBJECT;
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        int32_t focusedSessionId = focusGroup->GetFocusSessionId();
+        int32_t focusedSessionId = focusGroup->GetFocusedSessionId();
         if (focusedSessionId != currSceneSession->GetPersistentId()) {
             currSceneSession = GetSceneSession(focusedSessionId);
         }
         if (currSceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_FOCUS, "%{public}s scene session is nullptr, id: %{public}d", where,
                 focusedSessionId);
-            return WS_ERROR_DESTROYED_OBJECT;
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         focusInfo.windowId_ = currSceneSession->GetWindowId();
         focusInfo.displayId_ = focusGroup->GetDisplayGroupId() == DEFAULT_DISPLAY_ID
@@ -6903,7 +6903,7 @@ void SceneSessionManager::GetFocusWindowInfoByAbilityToken(FocusChangeInfo& focu
         focusInfo.abilityToken_ = currSceneSession->GetAbilityToken();
         TLOGND(WmsLogTag::WMS_FOCUS, "%{public}s get focus session info by ability token success, id: %{public}d ",
             where, focusedSessionId);
-        return WS_OK;
+        return WSError::WS_OK;
     }, where);
 }
 
