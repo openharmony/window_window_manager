@@ -1762,17 +1762,13 @@ WSError SessionStageProxy::SendExtensionData(MessageParcel& data, MessageParcel&
     return WSError::WS_OK;
 }
 
-WSError SessionStageProxy::LinkKeyFrameNode(std::shared_ptr<RSWindowKeyFrameNode>& rsKeyFrameNode)
+WSError SessionStageProxy::LinkKeyFrameNode()
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!rsKeyFrameNode || !rsKeyFrameNode->WriteToParcel(data)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Write rsKeyFrameNode failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
