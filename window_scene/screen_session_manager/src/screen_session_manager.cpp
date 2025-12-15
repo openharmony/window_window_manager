@@ -2270,9 +2270,12 @@ void ScreenSessionManager::HandleRotationCorrectionExemption(sptr<DisplayInfo>& 
         return;
     }
     std::vector<std::string> rotationCorrectionExemptionList;
-    GetRotationCorrectionExemptionListFromDatabase();
     {
         std::shared_lock<std::shared_mutex> lock(rotationCorrectionExemptionMutex_);
+        if (rotationCorrectionExemptionList_.empty()) {
+            TLOGI(WmsLogTag::DMS, "rotationCorrectionExemptionList empty, return");
+            return;
+        }
         rotationCorrectionExemptionList = rotationCorrectionExemptionList_;
     }
     std::string bundleName = SysCapUtil::GetBundleName();
@@ -13277,6 +13280,10 @@ void ScreenSessionManager::SetFirstSCBConnect(bool firstSCBConnect)
 
 DMError ScreenSessionManager::SyncScreenPropertyChangedToServer(ScreenId screenId, const ScreenProperty& screenProperty)
 {
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::DMS, "SetResolution permission denied! calling pid: %{public}d", IPCSkeleton::GetCallingPid());
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
     auto bounds = screenProperty.GetBounds();
     TLOGI(WmsLogTag::DMS, "SyncScreenPropertyChangedToServer screenId: %{public}" PRIu64
         ", rotation:%{public}f, width:%{public}f, height:%{public}f", screenId,
