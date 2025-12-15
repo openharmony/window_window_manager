@@ -502,7 +502,7 @@ void SceneSessionManager::RegisterBrightnessDataChangeListener()
 {
     #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
         auto ret = DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RegisterDataChangeListener(
-            new OverrideChangeListener, DisplayPowerMgr::DisplayDataChangeListenerType::FORCE_EXIT_OVERRIDDEN_MODE);
+            new OverrideChangeListener(), DisplayPowerMgr::DisplayDataChangeListenerType::FORCE_EXIT_OVERRIDDEN_MODE);
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "ret: %{public}d", static_cast<int32_t>(ret));
     #endif
 }
@@ -2203,7 +2203,6 @@ WMError SceneSessionManager::NotifyBrightnessModeChange(const std::string& brigh
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Restore brightness, wid: %{public}d", brightnessSession->GetWindowId());
         PostBrightnessTask(UNDEFINED_BRIGHTNESS);
         brightnessSession->SetBrightness(UNDEFINED_BRIGHTNESS);
-        brightnessSession->UpdateBrightness(UNDEFINED_BRIGHTNESS);
         return WMError::WM_OK;
     }
     return WMError::WM_DO_NOTHING;
