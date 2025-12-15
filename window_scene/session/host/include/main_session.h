@@ -85,6 +85,12 @@ public:
     void RegisterCompatibleModeChangeCallback(CompatibleModeChangeCallback&& callback) override;
     WSError NotifyCompatibleModeChange(CompatibleStyleMode mode) override;
 
+    /*
+     * Window Pattern
+     */
+    void RecoverSnapshotPersistence(const SessionInfo& info) override;
+    void ClearSnapshotPersistence() override;
+
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
     bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;
