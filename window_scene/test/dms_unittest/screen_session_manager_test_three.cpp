@@ -964,7 +964,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenOffsetFeatureTest, Function | SmallT
 HWTEST_F(ScreenSessionManagerTest, InitSecondaryDisplayPhysicalParams, TestSize.Level1)
 {
     if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
-        return;
+        GTEST_SKIP();
     }
     ASSERT_NE(ssm_, nullptr);
     ssm_->InitSecondaryDisplayPhysicalParams();
