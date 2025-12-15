@@ -2857,7 +2857,7 @@ export class WindowInternal implements Window {
     private native hideSync(nativeObj: long): void;
     private native createSubWindowWithOptionsSync(nativeObj: long, name: string, options: SubWindowOptions): Window;
     private native restore(nativeObj: long): void;
-    private native restoreMainWindow(nativeObj: LockGrantedCallback, wantParameters?: object): void;
+    private native restoreMainWindow(nativeObj: long, wantParameters?: object): void;
 
     private static native nativeTransferStatic(input: ESValue): Object;
     private static native nativeTransferDynamic(nativeObj: long): ESValue;

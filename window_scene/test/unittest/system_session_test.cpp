@@ -1149,6 +1149,8 @@ HWTEST_F(SystemSessionTest, RestoreFloatMainWindow, Function | SmallTest | Level
     EXPECT_EQ(systemSession->RestoreFloatMainWindow(wantParams), WMError::WM_ERROR_INVALID_CALLING);
     LOCK_GUARD_EXPR(SCENE_GUARD, systemSession->SetCallingPid(IPCSkeleton::GetCallingPid()));
 
+    EXPECT_EQ(systemSession->RestoreFloatMainWindow(wantParams), WMError::WM_ERROR_INVALID_CALLING);
+    systemSession->state_.store(SessionState::STATE_FOREGROUND);
     EXPECT_EQ(systemSession->RestoreFloatMainWindow(wantParams), WMError::WM_ERROR_SYSTEM_ABNORMALLY);
     systemSession->RegisterGetSCBEnterRecentFunc([]() {
         return true;
@@ -1166,11 +1168,11 @@ HWTEST_F(SystemSessionTest, RestoreFloatMainWindow, Function | SmallTest | Level
 }
 
 /**
- * @tc.name: GetIsAtRecent
- * @tc.desc: GetIsAtRecent Test
+ * @tc.name: RestoreFloatMainWindowGetIsAtRecent
+ * @tc.desc: RestoreFloatMainWindowGetIsAtRecent Test
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, GetIsAtRecent, TestSize.Level1)
+HWTEST_F(SystemSessionTest, RestoreFloatMainWindowGetIsAtRecent, TestSize.Level1)
 {
     SessionInfo info;
 

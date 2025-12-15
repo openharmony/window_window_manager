@@ -7789,6 +7789,10 @@ WMError WindowSceneSessionImpl::SetSubWindowSource(SubWindowSource source)
 WMError WindowSceneSessionImpl::RestoreMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParams)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "restore float main window id: %{public}d", GetPersistentId());
+    if (GetType() != WindowType::WINDOW_TYPE_FLOAT) {
+        TLOGE(WmsLogTag::WMS_LIFE, "only TYPE_FLOAT can use interface, type:%{public}u", GetType());
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
     auto parentWindow = FindWindowById(property_->GetParentPersistentId());
     if (parentWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "parentWindow is invalid");
