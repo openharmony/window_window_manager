@@ -1143,7 +1143,7 @@ void JsSceneSession::ProcessRestoreFloatMainWindowRegister()
     }
     const char* const funcName = __func__;
     session->SetRestoreFloatMainWindowCallback([weakThis = wptr(this), funcName] 
-        (const AAFwk::WantParams& wantParameters) {
+        (const std::shared_ptr<AAFwk::WantParams>& wantParameters) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", funcName);
@@ -1154,7 +1154,7 @@ void JsSceneSession::ProcessRestoreFloatMainWindowRegister()
     TLOGD(WmsLogTag::WMS_LIFE, "success");
 }
 
-void JsSceneSession::RestoreFloatMainWindow(const AAFwk::WantParams& wantParameters)
+void JsSceneSession::RestoreFloatMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParameters)
 {
     const char* const funcName = __func__;
     auto task = [weakThis = wptr(this), persistentId = persistentId_, env = env_, wantParameters, funcName] {
@@ -1170,8 +1170,8 @@ void JsSceneSession::RestoreFloatMainWindow(const AAFwk::WantParams& wantParamet
             return;
         }
         TLOGI(WmsLogTag::WMS_LIFE,
-            "restore send params: %{public}s", wantParameters.ToString().c_str());
-        napi_value jsWantParams = OHOS::AppExecFwk::WrapWantParams(env, wantParameters);
+            "restore send params: %{public}s", wantParameters->ToString().c_str());
+        napi_value jsWantParams = OHOS::AppExecFwk::WrapWantParams(env, *wantParameters);
         napi_value argv[] = {jsWantParams};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };

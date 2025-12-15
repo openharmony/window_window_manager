@@ -80,7 +80,7 @@ protected:
     /*
      * Float Window
      */
-    void NotifyRestoreFloatMainWindow(const AAFwk::WantParams& wantParameters);
+    void NotifyRestoreFloatMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParameters);
 private:
     void UpdateCameraWindowStatus(bool isShowing);
     bool NeedSystemPermission(WindowType type);

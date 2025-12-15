@@ -115,7 +115,6 @@ if (!ispreview) {
     sources = [
       "${ability_runtime_path}/frameworks/simulator/ability_simulator/src/js_runtime_utils.cpp",
       "../interfaces/kits/napi/window_animation/js_window_animation_utils.cpp",
-      "../interfaces/kits/napi/window_runtime/window_napi/js_window.cpp",
       "../interfaces/kits/napi/window_runtime/window_napi/js_window_utils.cpp",
       "../interfaces/kits/napi/window_runtime/window_stage_napi/js_window_stage.cpp",
       "../utils/src/window_manager_hilog.cpp",
@@ -124,6 +123,7 @@ if (!ispreview) {
       "mock/js_transition_controller.cpp",
       "mock/js_window_listener.cpp",
       "mock/js_window_register_manager.cpp",
+      "mock/js_window.cpp",
       "mock/permission.cpp",
       "mock/pixel_map_napi.cpp",
       "mock/window_manager_napi/js_window_manager.cpp",

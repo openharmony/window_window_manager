@@ -679,6 +679,10 @@ void SystemSession::SetRestoreFloatMainWindowCallback(NotifyRestoreFloatMainWind
 WMError SystemSession::RestoreFloatMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParameters)
 {
     int32_t callingPid = IPCSkeleton::GetCallingPid();
+    // if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_FLOATING_BALL)) {
+    //     TLOGNE(WmsLogTag::WMS_SYSTEM, "Check floating ball permission failed");
+    //     return WMError::WM_ERROR_INVALID_PERMISSION;
+    // }
     return PostSyncTask([weakThis = wptr(this), callingPid, wantParameters, where = __func__, state = state_.load()]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -712,7 +716,7 @@ WMError SystemSession::RestoreFloatMainWindow(const std::shared_ptr<AAFwk::WantP
     });
 }
 
-void SystemSession::NotifyRestoreFloatMainWindow(const AAFwk::WantParams& wantParameters)
+void SystemSession::NotifyRestoreFloatMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParameters)
 {
     TLOGI(WmsLogTag::WMS_SYSTEM, "Notify RestoreFloatingBallMainwindow");
     PostTask([weakThis = wptr(this), wantParameters, where = __func__] {

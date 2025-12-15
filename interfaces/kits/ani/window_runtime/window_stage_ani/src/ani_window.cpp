@@ -5289,7 +5289,7 @@ void AniWindow::OnRestoreMainWindow(ani_env* env, ani_object wantParameters)
         return;
     }
 
-    AAFwk::AWantParams wantParams;
+    AAFwk::WantParams wantParams;
     if (wantParameters != nullptr) {
         ani_boolean isUndefined = false;
         ani_boolean isNull = false;
@@ -5303,7 +5303,7 @@ void AniWindow::OnRestoreMainWindow(ani_env* env, ani_object wantParameters)
     }
 
     std::shared_ptr<AAFwk::WantParams> parameters = std::make_shared<AAFwk::WantParams>(wantParams);
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RestoreMainWindow(parameters));
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->RestoreMainWindow(parameters));
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret);
     }

@@ -61,7 +61,6 @@ const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
     {WMError::WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED,  WmErrorCode::WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED  },
     {WMError::WM_ERROR_UI_EFFECT_ERROR,                WmErrorCode::WM_ERROR_UI_EFFECT_ERROR          },
     {WMError::WM_ERROR_INVALID_WINDOW_TYPE,            WmErrorCode::WM_ERROR_INVALID_WINDOW_TYPE      },
-    {WMError::WM_ERROR_INVALID_CALLING,                WmErrorCode::WM_ERROR_INVALID_CALLING          },
 };
 
 WmErrorCode ConvertErrorToCode(WMError error, WmErrorCode defaultCode)
