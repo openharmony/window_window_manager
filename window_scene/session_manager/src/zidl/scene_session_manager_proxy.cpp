@@ -965,7 +965,7 @@ void SceneSessionManagerProxy::GetFocusWindowInfoByAbilityToken(FocusChangeInfo&
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_INFO_BY_ABILITY_TOKEN),data, reply, option) !=
+        SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_INFO_BY_ABILITY_TOKEN), data, reply, option) !=
         ERR_NONE) {
         TLOGE(WmsLogTag::WMS_FOCUS, "SendRequest failed");
         return;
