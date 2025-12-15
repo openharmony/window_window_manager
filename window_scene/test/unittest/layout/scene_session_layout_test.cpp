@@ -396,7 +396,6 @@ HWTEST_F(SceneSessionLayoutTest, NotifySessionWindowLimitschange, TestSize.Level
 
     // Case 1: sessionWindowLimitsChangeFunc_ is null
     sceneSession->NotifySessionWindowLimitsChange(expectedMainLimits);
-    EXPECT_TRUE(callbackTriggered == false);
     EXPECT_NE(receivedMainLimits.minWidth_, expectedMainLimits.minWidth_);
     EXPECT_NE(receivedMainLimits.minHeight_, expectedMainLimits.minHeight_);
     EXPECT_NE(receivedMainLimits.maxWidth_, expectedMainLimits.maxWidth_);

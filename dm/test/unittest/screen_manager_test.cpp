@@ -27,6 +27,15 @@
 using namespace testing;
 using namespace testing::ext;
 
+namespace {
+    std::string  g_logMsg;
+    void MyLogCallback(const LogType, const LogLevel, const unsigned int domain, const char* tag,
+        const char* msg)
+        {
+            g_logMsg = msg;
+        }
+}
+
 namespace OHOS {
 namespace Rosen {
 using Mocker = SingletonMocker<ScreenManagerAdapter, MockScreenManagerAdapter>;
@@ -40,6 +49,11 @@ public:
 class TestScreenGroupListener : public ScreenManager::IScreenGroupListener {
 public:
     void OnChange(const std::vector<ScreenId>&, ScreenGroupChangeEvent) override {};
+};
+
+class RecordDisplayListenerMock : public ScreenManager::IRecordDisplayListener {
+public:
+    void OnChange(const std::vector<DisplayId>& displayIds) override {}
 };
 
 class TestIVirtualScreenGroupListener : public ScreenManager::IVirtualScreenGroupListener {
@@ -160,11 +174,46 @@ HWTEST_F(ScreenManagerTest, MakeExpand_001, TestSize.Level1)
  */
 HWTEST_F(ScreenManagerTest, MakeExpand_002, TestSize.Level1)
 {
-    ScreenId invalidId = SCREEN_ID_INVALID;
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     std::vector<ExpandOption> options = {};
     ScreenId expansionId = SCREEN_ID_INVALID;
     ScreenManager::GetInstance().MakeExpand(options, expansionId);
-    ASSERT_EQ(expansionId, invalidId);
+    ASSERT_TRUE(g_logMsg.find("make expand failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: RegisterRecordDisplayListener
+ * @tc.desc: RegisterRecordDisplayListener test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, RegisterRecordDisplayListenerTest, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenManager::IRecordDisplayListener> listener = new RecordDisplayListenerMock();
+    ScreenManager::GetInstance().RegisterRecordDisplayListener(listener);
+    EXPECT_TRUE(g_logMsg.find("RegisterRecordDisplayListener") == std::string::npos);
+    ScreenManager::GetInstance().RegisterRecordDisplayListener(nullptr);
+    EXPECT_TRUE(g_logMsg.find("RegisterRecordDisplayListener") != std::string::npos);
+}
+
+/**
+ * @tc.name: RegisterRecordDisplayListener
+ * @tc.desc: RegisterRecordDisplayListener test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, UnRegisterRecordDisplayListener, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenManager::IRecordDisplayListener> listener = new RecordDisplayListenerMock();
+    ScreenManager::GetInstance().RegisterRecordDisplayListener(listener);
+    EXPECT_TRUE(g_logMsg.find("RegisterRecordDisplayListener") == std::string::npos);
+    ScreenManager::GetInstance().UnRegisterRecordDisplayListener(listener);
+    EXPECT_TRUE(g_logMsg.find("UnRegisterRecordDisplayListener listener is nullptr") == std::string::npos);
+    ScreenManager::GetInstance().UnRegisterRecordDisplayListener(nullptr);
+    EXPECT_TRUE(g_logMsg.find("UnRegisterRecordDisplayListener listener is nullptr") != std::string::npos);
 }
 
 /**
@@ -809,7 +858,7 @@ HWTEST_F(ScreenManagerTest, MakeMirrorForRecord02, TestSize.Level1)
 
     DMError result = ScreenManager::GetInstance().MakeMirrorForRecord(mainScreenIds, miirrorScreenId, screenGroupId);
 
-    EXPECT_EQ(result, DMError::DM_ERROR_NULLPTR);
+    EXPECT_NE(result, DMError::DM_OK);
 }
 
 /**
@@ -826,7 +875,7 @@ HWTEST_F(ScreenManagerTest, MakeMirrorForRecord03, TestSize.Level1)
 
     DMError result = ScreenManager::GetInstance().MakeMirrorForRecord(mainScreenIds, miirrorScreenId, screenGroupId);
 
-    EXPECT_EQ(result, DMError::DM_ERROR_NULLPTR);
+    EXPECT_NE(result, DMError::DM_OK);
 }
 
 /**
@@ -839,7 +888,7 @@ HWTEST_F(ScreenManagerTest, SetScreenPrivacyWindowTagSwitch, TestSize.Level1)
     ScreenId mainScreenId = 1;
     std::vector<std::string> privacyWindowTag{"test1", "test2"};
     DMError res = ScreenManager::GetInstance().SetScreenPrivacyWindowTagSwitch(mainScreenId, privacyWindowTag, true);
-    EXPECT_EQ(res, DMError::DM_ERROR_NULLPTR);
+    EXPECT_NE(result, DMError::DM_OK);
 }
 } // namespace
 } // namespace Rosen

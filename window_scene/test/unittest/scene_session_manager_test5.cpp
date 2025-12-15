@@ -54,6 +54,7 @@ public:
 
     static ProcessGestureNavigationEnabledChangeFunc callbackFunc_;
     static sptr<SceneSessionManager> ssm_;
+    ScreenSessionManagerClient* screenSessionManagerClient_;
 
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
@@ -79,12 +80,14 @@ void SceneSessionManagerTest5::TearDownTestCase()
 void SceneSessionManagerTest5::SetUp()
 {
     ssm_->sceneSessionMap_.clear();
+    screenSessionManagerClient_ = &ScreenSessionManagerClient::GetInstance();
 }
 
 void SceneSessionManagerTest5::TearDown()
 {
     ssm_->sceneSessionMap_.clear();
     usleep(WAIT_SYNC_IN_NS);
+    screenSessionManagerClient_ = nullptr;
 }
 
 namespace {
@@ -145,14 +148,14 @@ HWTEST_F(SceneSessionManagerTest5, OnBundleUpdated, TestSize.Level1)
     StartingWindowInfo startingWindowInfo;
     std::map<std::string, StartingWindowInfo> startingWindowInfoMap{ { key, startingWindowInfo } };
     ssm_->startingWindowMap_.insert({ sessionInfo.bundleName_, startingWindowInfoMap });
-    ASSERT_NE(ssm_->startingWindowMap_.size(), 0);
+    EXPECT_NE(ssm_->startingWindowMap_.size(), 0);
 
     /**
      * @tc.steps: step2. On bundle updated and check map.
      */
     ssm_->OnBundleUpdated(sessionInfo.bundleName_, 0);
     usleep(WAIT_SYNC_IN_NS);
-    ASSERT_EQ(ssm_->startingWindowMap_.size(), 0);
+    EXPECT_EQ(ssm_->startingWindowMap_.size(), 0);
 }
 
 /**
@@ -175,7 +178,7 @@ HWTEST_F(SceneSessionManagerTest5, OnConfigurationUpdated, TestSize.Level1)
     StartingWindowInfo startingWindowInfo;
     std::map<std::string, StartingWindowInfo> startingWindowInfoMap{ { key, startingWindowInfo } };
     ssm_->startingWindowMap_.insert({ sessionInfo.bundleName_, startingWindowInfoMap });
-    ASSERT_NE(ssm_->startingWindowMap_.size(), 0);
+    EXPECT_NE(ssm_->startingWindowMap_.size(), 0);
 
     /**
      * @tc.steps: step2. On configuration updated and check map.
@@ -183,7 +186,7 @@ HWTEST_F(SceneSessionManagerTest5, OnConfigurationUpdated, TestSize.Level1)
     auto configuration = std::make_shared<AppExecFwk::Configuration>();
     ssm_->OnConfigurationUpdated(configuration);
     usleep(WAIT_SYNC_IN_NS);
-    ASSERT_EQ(ssm_->startingWindowMap_.size(), 0);
+    EXPECT_EQ(ssm_->startingWindowMap_.size(), 0);
 }
 
 /**
@@ -197,7 +200,7 @@ HWTEST_F(SceneSessionManagerTest5, PrepareTerminate, TestSize.Level1)
     bool isPrepareTerminate = true;
     SceneSessionManager* sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
     ASSERT_NE(sceneSessionManager, nullptr);
-    ASSERT_EQ(WSError::WS_OK, sceneSessionManager->PrepareTerminate(persistentId, isPrepareTerminate));
+    EXPECT_EQ(WSError::WS_OK, sceneSessionManager->PrepareTerminate(persistentId, isPrepareTerminate));
 }
 
 /**
@@ -385,9 +388,9 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionFocus, TestSize.Level0)
 {
     FocusChangeReason reason = FocusChangeReason::DEFAULT;
     WSError ret = ssm_->RequestSessionFocus(0, true, reason);
-    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
     ret = ssm_->RequestSessionFocus(100, true, reason);
-    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
 
     SessionInfo info;
     info.abilityName_ = "test1";
@@ -411,8 +414,8 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionFocus, TestSize.Level0)
     focusGroup->SetFocusedSessionId(2);
     ssm_->sceneSessionMap_.insert({ sceneSession1->GetPersistentId(), sceneSession1 });
     ret = ssm_->RequestSessionFocus(1, true, reason);
-    ASSERT_EQ(ret, WSError::WS_OK);
-    ASSERT_EQ(focusGroup->GetFocusedSessionId(), 1);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(focusGroup->GetFocusedSessionId(), 1);
     ssm_->sceneSessionMap_.clear();
 }
 
@@ -423,6 +426,12 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionFocus, TestSize.Level0)
  */
 HWTEST_F(SceneSessionManagerTest5, RequestFocusClient, TestSize.Level0)
 {
+    ASSERT_NE(screenSessionManagerClient_, nullptr);
+    screenSessionManagerClient_->screenSessionMap_.clear();
+    ScreenId screenId = 0;
+    sptr<ScreenSession> screenSession = new ScreenSession(screenId, ScreenProperty(), 0);
+    screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
+
     SessionInfo info;
     info.abilityName_ = "RequestFocusTest1";
     info.bundleName_ = "RequestFocusTest1";
@@ -468,6 +477,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusClient, TestSize.Level0)
     ssm_->RequestSessionUnfocus(1, reason);
     ASSERT_EQ(focusGroup->GetFocusedSessionId(), 0);
     ssm_->sceneSessionMap_.clear();
+    screenSessionManagerClient_->screenSessionMap_.clear();
 }
 
 /**
@@ -477,6 +487,12 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusClient, TestSize.Level0)
  */
 HWTEST_F(SceneSessionManagerTest5, RequestFocusClient01, TestSize.Level1)
 {
+    ASSERT_NE(screenSessionManagerClient_, nullptr);
+    screenSessionManagerClient_->screenSessionMap_.clear();
+    ScreenId screenId = 0;
+    sptr<ScreenSession> screenSession = new ScreenSession(screenId, ScreenProperty(), 0);
+    screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
+
     SessionInfo info;
     info.abilityName_ = "RequestFocusTest1";
     info.bundleName_ = "RequestFocusTest1";
@@ -542,6 +558,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusClient01, TestSize.Level1)
     ssm_->RequestSessionUnfocus(2, reason);
     ASSERT_EQ(focusGroup->GetFocusedSessionId(), 1);
     ssm_->sceneSessionMap_.clear();
+    screenSessionManagerClient_->screenSessionMap_.clear();
 }
 
 /**
@@ -1109,29 +1126,6 @@ HWTEST_F(SceneSessionManagerTest5, GetTopNearestBlockingFocusSession, TestSize.L
     session_ = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(session_, nullptr);
     ssm_->GetTopNearestBlockingFocusSession(DEFAULT_DISPLAY_ID, 0, true);
-}
-
-/**
- * @tc.name: PreloadInLakeApp、UpdateSessionAvoidAreaListener
- * @tc.desc: PreloadInLakeApp、UpdateSessionAvoidAreaListener
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest5, PreloadInLakeApp, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test2";
-    int32_t persistentId = 0;
-
-    ssm_->PreloadInLakeApp("");
-    sptr<SceneSession> sceneSession = nullptr;
-
-    ssm_->UpdateSessionAvoidAreaListener(persistentId, true);
-    sceneSession = ssm_->CreateSceneSession(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
-    ssm_->UpdateSessionAvoidAreaListener(persistentId, true);
 }
 
 /**
@@ -1715,6 +1709,12 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusStatusBySCB, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest5, RequestFocusStatusBySCB01, TestSize.Level1)
 {
+    ASSERT_NE(screenSessionManagerClient_, nullptr);
+    screenSessionManagerClient_->screenSessionMap_.clear();
+    ScreenId screenId = 0;
+    sptr<ScreenSession> screenSession = new ScreenSession(screenId, ScreenProperty(), 0);
+    screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
+
     ssm_->sceneSessionMap_.clear();
     SessionInfo info;
     info.abilityName_ = "RequestFocusTest";
@@ -1756,6 +1756,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusStatusBySCB01, TestSize.Level1)
     ssm_->RequestFocusStatusBySCB(1, true, false, reason);
     usleep(WAIT_SYNC_IN_NS);
     ASSERT_EQ(focusGroup->GetFocusedSessionId(), 1);
+    screenSessionManagerClient_->screenSessionMap_.clear();
 }
 
 /**
@@ -1765,6 +1766,12 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusStatusBySCB01, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus01, TestSize.Level1)
 {
+    ASSERT_NE(screenSessionManagerClient_, nullptr);
+    screenSessionManagerClient_->screenSessionMap_.clear();
+    ScreenId screenId = 0;
+    sptr<ScreenSession> screenSession = new ScreenSession(screenId, ScreenProperty(), 0);
+    screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
+
     ssm_->sceneSessionMap_.clear();
     SessionInfo info;
     info.abilityName_ = "RequestSessionUnfocus01";
@@ -1790,6 +1797,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus01, TestSize.Level1)
     auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
     ASSERT_EQ(focusGroup->GetFocusedSessionId(), 1);
     ASSERT_EQ(focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground(), true);
+    screenSessionManagerClient_->screenSessionMap_.clear();
 }
 
 /**
@@ -1799,6 +1807,12 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus01, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus02, TestSize.Level1)
 {
+    ASSERT_NE(screenSessionManagerClient_, nullptr);
+    screenSessionManagerClient_->screenSessionMap_.clear();
+    ScreenId screenId = 0;
+    sptr<ScreenSession> screenSession = new ScreenSession(screenId, ScreenProperty(), 0);
+    screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
+
     ssm_->sceneSessionMap_.clear();
     SessionInfo info;
     info.abilityName_ = "RequestSessionUnfocus02";
@@ -1824,6 +1838,8 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus02, TestSize.Level1)
     auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
     ASSERT_EQ(focusGroup->GetFocusedSessionId(), 1);
     ASSERT_EQ(focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground(), false);
+    screenSessionManagerClient_->screenSessionMap_.clear();
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -1845,6 +1861,7 @@ HWTEST_F(SceneSessionManagerTest5, RegisterSaveSnapshotFunc, TestSize.Level1)
 
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ASSERT_EQ(WSError::WS_OK, ssm_->RegisterSaveSnapshotFunc(sceneSession));
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -1913,6 +1930,12 @@ HWTEST_F(SceneSessionManagerTest5, GetTopFloatingSession, TestSize.Level3)
  */
 HWTEST_F(SceneSessionManagerTest5, GetNextFocusableSessionWhenFloatWindowExist, TestSize.Level3)
 {
+    ASSERT_NE(screenSessionManagerClient_, nullptr);
+    screenSessionManagerClient_->screenSessionMap_.clear();
+    ScreenId screenId = 0;
+    sptr<ScreenSession> screenSession = new ScreenSession(screenId, ScreenProperty(), 0);
+    screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
+
     ssm_->sceneSessionMap_.clear();
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -1954,6 +1977,7 @@ HWTEST_F(SceneSessionManagerTest5, GetNextFocusableSessionWhenFloatWindowExist, 
     result = ssm_->GetNextFocusableSessionWhenFloatWindowExist(DEFAULT_DISPLAY_ID, sceneSession->GetPersistentId());
     ASSERT_NE(result, nullptr);
     EXPECT_EQ(result->GetPersistentId(), sceneSession1->GetPersistentId());
+    screenSessionManagerClient_->screenSessionMap_.clear();
 }
 
 } // namespace

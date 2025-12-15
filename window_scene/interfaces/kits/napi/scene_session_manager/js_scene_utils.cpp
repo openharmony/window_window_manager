@@ -675,6 +675,9 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
     if (!ConvertFromJsValueProperty(env, jsObject, "windowMode", sessionInfo.windowMode)) {
         return false;
     }
+    if (!ConvertFromJsValueProperty(env, jsObject, "compatibleModePage", sessionInfo.compatibleModePage)) {
+        return false;
+    }
     return true;
 }
 
@@ -1409,6 +1412,7 @@ bool ConvertCompatibleModePropertyFromJs(napi_env env, napi_value value, Compati
         {"isSupportRotateFullScreen", &CompatibleModeProperty::SetIsSupportRotateFullScreen},
         {"isAdaptToSubWindow", &CompatibleModeProperty::SetIsAdaptToSubWindow},
         {"isAdaptToSimulationScale", &CompatibleModeProperty::SetIsAdaptToSimulationScale},
+        {"isAdaptToCompatibleDevice", &CompatibleModeProperty::SetIsAdaptToCompatibleDevice},
     };
     bool atLeastOneParam = false;
     std::map<std::string, void (CompatibleModeProperty::*)(bool)>::iterator iter;
@@ -1697,6 +1701,8 @@ napi_value CreateJsSessionRecoverInfo(
     napi_set_named_property(env, objValue, "currentRotation", CreateJsValue(env, sessionInfo.currentRotation_));
     napi_set_named_property(env, objValue, "supportWindowModes",
         CreateSupportWindowModes(env, sessionInfo.supportedWindowModes));
+    napi_set_named_property(env, objValue,
+        "pageCompatibleMode", CreateJsValue(env, property->GetPageCompatibleMode()));
 
     napi_value jsTransitionAnimationMapValue = nullptr;
     napi_create_object(env, &jsTransitionAnimationMapValue);
@@ -2754,8 +2760,6 @@ napi_value CreateWaterfallResidentState(napi_env env)
         CreateJsValue(env, static_cast<uint32_t>(WaterfallResidentState::OPEN)));
     napi_set_named_property(env, objValue, "CLOSE",
         CreateJsValue(env, static_cast<uint32_t>(WaterfallResidentState::CLOSE)));
-    napi_set_named_property(env, objValue, "CANCEL",
-        CreateJsValue(env, static_cast<uint32_t>(WaterfallResidentState::CANCEL)));
     return objValue;
 }
 
@@ -2771,6 +2775,8 @@ napi_value CreateCompatibleStyleMode(napi_env env)
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to create object");
         return NapiGetUndefined(env);
     }
+    napi_set_named_property(env, objValue, "INVALID_VALUE",
+        CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::INVALID_VALUE)));
     napi_set_named_property(env, objValue, "LANDSCAPE_DEFAULT",
         CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_DEFAULT)));
     napi_set_named_property(env, objValue, "LANDSCAPE_18_9",
@@ -2779,6 +2785,8 @@ napi_value CreateCompatibleStyleMode(napi_env env)
         CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_1_1)));
     napi_set_named_property(env, objValue, "LANDSCAPE_2_3",
         CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_2_3)));
+    napi_set_named_property(env, objValue, "LANDSCAPE_SPLIT",
+        CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_SPLIT)));
     return objValue;
 }
  
@@ -2847,12 +2855,12 @@ bool convertAnimConfigFromJs(napi_env env, napi_value jsObject, SceneAnimationCo
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to delay");
         return false;
     }
-    config.animationDelay_ = delay > 0 ? delay : 0;
+    config.animationDelay_ = static_cast<uint32_t>(delay > 0 ? delay : 0);
     if (GetType(env, jsDuration) != napi_undefined && !ConvertFromJsValue(env, jsDuration, duration)) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to duration");
         return false;
     }
-    config.animationDuration_ = duration > 0 ? duration : 0;
+    config.animationDuration_ = static_cast<uint32_t>(duration > 0 ? duration : 0);
     if (GetType(env, jsAnimationCurve) != napi_undefined && !ConvertFromJsValue(env, jsAnimationCurve, curve)) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to curve");
         return false;

@@ -107,6 +107,62 @@ HWTEST_F(SceneSessionTest3, NotifyClientToUpdateRectTask, TestSize.Level1)
 
     std::shared_ptr<RSTransaction> rs;
     EXPECT_EQ(WSError::WS_OK, sceneSession->NotifyClientToUpdateRectTask("SceneSessionTest3", rs));
+
+    sceneSession->UpdateSizeChangeReason(SizeChangeReason::DRAG_MOVE);
+    EXPECT_EQ(WSError::WS_OK, sceneSession->NotifyClientToUpdateRectTask("SceneSessionTest3", rs));
+
+    sceneSession->UpdateSizeChangeReason(SizeChangeReason::DRAG);
+    EXPECT_EQ(WSError::WS_OK, sceneSession->NotifyClientToUpdateRectTask("SceneSessionTest3", rs));
+
+    sceneSession->UpdateSizeChangeReason(SizeChangeReason::ROTATION);
+    EXPECT_EQ(WSError::WS_OK, sceneSession->NotifyClientToUpdateRectTask("SceneSessionTest3", rs));
+}
+
+/**
+ * @tc.name: UpdateCrossPlaneState
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, UpdateCrossPlaneState, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateCrossPlaneState";
+    info.bundleName_ = "UpdateCrossPlaneState";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    WSRect rect = { 0, 0, 800, 800 };
+    sceneSession->SetScreenId(0);
+
+    PcFoldScreenManager::GetInstance().displayId_ = 0;
+    PcFoldScreenManager::GetInstance().screenFoldStatus_ = SuperFoldStatus::FOLDED;
+    PcFoldScreenManager::GetInstance().hasSystemKeyboard_ = false;
+    EXPECT_EQ(CrossPlaneState::CROSS_DEFAULT_PLANE, sceneSession->UpdateCrossPlaneState(rect));
+
+    PcFoldScreenManager::GetInstance().screenFoldStatus_ = SuperFoldStatus::HALF_FOLDED;
+    PcFoldScreenManager::GetInstance().hasSystemKeyboard_ = true;
+    EXPECT_EQ(CrossPlaneState::CROSS_DEFAULT_PLANE, sceneSession->UpdateCrossPlaneState(rect));
+
+    PcFoldScreenManager::GetInstance().SetDisplayRects(
+        { 0, 0, 2472, 1739 }, { 0, 1791, 2472, 1648 }, { 0, 1740, 2472, 50 });
+    PcFoldScreenManager::GetInstance().hasSystemKeyboard_ = false;
+
+    rect = { 0, 1630, 100, 500 };
+    EXPECT_EQ(CrossPlaneState::CROSS_ALL_PLANE, sceneSession->UpdateCrossPlaneState(rect));
+
+    rect = { 0, 0, 100, 100 };
+    EXPECT_EQ(CrossPlaneState::CROSS_DEFAULT_PLANE, sceneSession->UpdateCrossPlaneState(rect));
+
+    rect = { 0, 1800, 100, 100 };
+    EXPECT_EQ(CrossPlaneState::CROSS_VIRTUAL_PLANE, sceneSession->UpdateCrossPlaneState(rect));
+
+    rect = { 0, 1750, 10, 100 };
+    EXPECT_EQ(CrossPlaneState::CROSS_VIRTUAL_CREASE_PLANE, sceneSession->UpdateCrossPlaneState(rect));
+
+    rect = { 0, 1730, 20, 30 };
+    EXPECT_EQ(CrossPlaneState::CROSS_DEFAULT_CREASE_PLANE, sceneSession->UpdateCrossPlaneState(rect));
+
+    rect = { 0, 1741, 1, 1 };
+    EXPECT_EQ(CrossPlaneState::CROSS_CREASE_PLANE, sceneSession->UpdateCrossPlaneState(rect));
 }
 
 /**

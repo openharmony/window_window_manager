@@ -432,6 +432,25 @@ HWTEST_F(SessionLayoutTest, OnVsyncReceivedAfterModeChanged, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetGetRsCmdBlockingCountFunc
+ * @tc.desc: SetGetRsCmdBlockingCountFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionLayoutTest, SetGetRsCmdBlockingCountFunc, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetGetRsCmdBlockingCountFunc";
+    info.bundleName_ = "SetGetRsCmdBlockingCountFunc";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    session->SetGetRsCmdBlockingCountFunc(nullptr);
+    ASSERT_EQ(nullptr, session->getRsCmdBlockingCountFunc_);
+    session->SetGetRsCmdBlockingCountFunc([]() {
+        return 0;
+    });
+    ASSERT_NE(nullptr, session->getRsCmdBlockingCountFunc_);
+}
+
+/**
  * @tc.name: NotifyAppHookWindowInfoUpdated
  * @tc.desc: NotifyAppHookWindowInfoUpdated
  * @tc.type: FUNC

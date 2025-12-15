@@ -82,6 +82,8 @@ public:
     WSError NotifyIsFullScreenInForceSplitMode(bool isFullScreen) override;
     void RegisterForceSplitFullScreenChangeCallback(ForceSplitFullScreenChangeCallback&& callback) override;
     bool IsFullScreenInForceSplit() override;
+    void RegisterCompatibleModeChangeCallback(CompatibleModeChangeCallback&& callback) override;
+    WSError NotifyCompatibleModeChange(CompatibleStyleMode mode) override;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
@@ -112,6 +114,7 @@ private:
      */
     ForceSplitFullScreenChangeCallback forceSplitFullScreenChangeCallback_;
     std::atomic_bool isFullScreenInForceSplit_ { false };
+    CompatibleModeChangeCallback compatibleModeChangeCallback_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MAIN_SESSION_H

@@ -258,7 +258,7 @@ public:
         return WSError::WS_OK;
     }
 
-    virtual WSError LinkKeyFrameNode(std::shared_ptr<RSWindowKeyFrameNode>& rsKeyFrameNode) = 0;
+    virtual WSError LinkKeyFrameNode() = 0;
     virtual WSError SetStageKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) = 0;
 
     virtual WSError SetSplitButtonVisible(bool isVisible) = 0;
@@ -286,8 +286,10 @@ public:
     }
     virtual WSError SetCurrentRotation(int32_t currentRotation) = 0;
     virtual WSError NotifyAppForceLandscapeConfigUpdated() = 0;
+    virtual WSError NotifyAppForceLandscapeConfigEnableUpdated() = 0;
     virtual WSError NotifyAppHookWindowInfoUpdated() = 0;
     virtual WSError CloseSpecificScene() { return WSError::WS_DO_NOTHING; }
+    virtual WSError UpdateBrightness(float brightness) = 0;
 
     /**
      * @brief Send fb event to client.
