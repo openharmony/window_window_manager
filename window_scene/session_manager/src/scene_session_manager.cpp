@@ -38,6 +38,7 @@
 
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
 #include <display_power_mgr_client.h>
+#include <display_brightness_listener_stub.h>
 #endif
 
 #ifdef POWER_MANAGER_ENABLE
@@ -342,6 +343,16 @@ public:
     }
 };
 
+#ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
+    class OverrideChangeListener : public DisplayPowerMgr::DisplayBrightnessListenerStub {
+    public:
+        void OnDataChanged(const std::string& params) override
+        {
+            SceneSessionManager::GetInstance().NotifyBrightnessModeChange(params);
+        }
+    };
+#endif
+
 bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& avoidArea, int32_t sessionBottom)
 {
     if (!avoidArea.topRect_.IsUninitializedRect() || !avoidArea.leftRect_.IsUninitializedRect() ||
@@ -409,6 +420,7 @@ SceneSessionManager::~SceneSessionManager()
         auto ret = appMgrClient_->UnregisterApplicationStateObserver(appStateObserver_);
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "unregister app observer result=%{public}d", ret);
     }
+    UnregisterBrightnessDataChangeListener();
 }
 
 void SceneSessionManager::Init()
@@ -482,6 +494,50 @@ void SceneSessionManager::Init()
 
     InitWindowPattern();
     WSSnapshotHelper::GetInstance()->SetWindowScreenStatus(DisplayManager::GetInstance().GetFoldStatus());
+
+    //Subscribe power manager service
+    #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
+        SubscribePowerManagerServiceSa();
+    #endif
+}
+
+void SceneSessionManager::RegisterBrightnessDataChangeListener()
+{
+    #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
+        auto ret = DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RegisterDataChangeListener(
+            new OverrideChangeListener(), DisplayPowerMgr::DisplayDataChangeListenerType::FORCE_EXIT_OVERRIDDEN_MODE);
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "ret: %{public}d", static_cast<int32_t>(ret));
+    #endif
+}
+
+void SceneSessionManager::UnregisterBrightnessDataChangeListener()
+{
+    #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
+        auto ret = DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().UnregisterDataChangeListener(
+            DisplayPowerMgr::DisplayDataChangeListenerType::FORCE_EXIT_OVERRIDDEN_MODE);
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "ret: %{public}d", static_cast<int32_t>(ret));
+    #endif
+}
+
+void SceneSessionManager::SubscribePowerManagerServiceSa()
+{
+    #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
+        auto task = [this, where = __func__]() {
+            SCBThreadInfo threadInfo {};
+            sptr<ISystemAbilityManager> systemAbilityManager =
+                SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+            if (!systemAbilityManager) {
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, failed to get system ability manager client", where);
+                return;
+            }
+            auto statusChangeListener = sptr<SceneSystemAbilityListener>::MakeSptr(threadInfo);
+            int32_t ret = systemAbilityManager->SubscribeSystemAbility(POWER_MANAGER_SERVICE_ID, statusChangeListener);
+            if (ret != ERR_OK) {
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, failed to subscribe system ability manager", where);
+            }
+        };
+        taskScheduler_->PostAsyncTask(task, "SubscribePowerMrgTask");
+    #endif
 }
 
 void SceneSessionManager::InitWindowPattern()

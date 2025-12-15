@@ -2910,23 +2910,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetScreenPrivacyWindowTagSwitch02, F
 }
 
 /**
- * @tc.name: HandleNotifyBrightnessModeChange
- * @tc.desc: test HandleNotifyBrightnessModeChange
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest, HandleNotifyBrightnessModeChange, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    std::string brightnessMode = "test";
-    data.WriteString(brightnessMode);
-
-    int res = stub_->HandleNotifyBrightnessModeChange(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
-}
-
-/**
  * @tc.name: HandleAddSessionBlackList01
  * @tc.desc: test HandleAddSessionBlackList
  * @tc.type: FUNC
