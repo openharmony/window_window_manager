@@ -94,8 +94,8 @@ private:
     /*
      * Window Recover
      */
-    uint32_t observedFlags_;
-    uint32_t interestedFlags_;
+    uint32_t observedFlags_ = 0;
+    uint32_t interestedFlags_ = 0;
     WMError RecoverWindowPropertyChangeFlag();
 
     /*
