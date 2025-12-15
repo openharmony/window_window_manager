@@ -292,6 +292,10 @@ void ScreenSessionManagerClient::OnScreenPropertyChanged(ScreenId screenId, floa
         return;
     }
     screenSession->ModifyScreenPropertyWithLock(rotation, bounds);
+    if (currentstate_ != SuperFoldStatus::KEYBOARD) {
+        screenSession->SetValidHeight(bounds.rect_.GetHeight());
+        screenSession->SetValidWidth(bounds.rect_.GetWidth());
+    }
     if (!screenSessionManager_) {
         TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return;
@@ -325,6 +329,12 @@ bool ScreenSessionManagerClient::OnFoldPropertyChange(ScreenId screenId, const S
         screenProperty.SetValidHeight(screenProperty.GetBounds().rect_.GetHeight());
         screenProperty.SetValidWidth(screenProperty.GetBounds().rect_.GetWidth());
     }
+
+    Rotation rotation = Rotation::ROTATION_0;
+    screenSession->AddRotationCorrection(rotation, displayMode);
+    screenProperty.SetRotationAndScreenRotationOnly(rotation);
+    TLOGI(WmsLogTag::DMS, "init rotation= %{public}u", rotation);
+
     screenSession->PropertyChange(screenProperty, reason);
     return true;
 }

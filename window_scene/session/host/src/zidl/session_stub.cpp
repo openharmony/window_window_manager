@@ -241,6 +241,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleTitleAndDockHoverShowChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG):
             return HandleGetAppForceLandscapeConfig(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG_ENABLE):
+            return HandleGetAppForceLandscapeConfigEnable(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_HOOK_WINDOW_INFO):
             return HandleGetAppHookWindowInfoFromServer(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DIALOG_SESSION_BACKGESTURE_ENABLE):
@@ -1908,8 +1910,31 @@ int SessionStub::HandleGetAppForceLandscapeConfig(MessageParcel& data, MessagePa
     TLOGD(WmsLogTag::DEFAULT, "called");
     AppForceLandscapeConfig config;
     WMError ret = GetAppForceLandscapeConfig(config);
-    reply.WriteParcelable(&config);
+    if (!reply.WriteParcelable(&config)) {
+        TLOGE(WmsLogTag::DEFAULT, "write config failed");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::DEFAULT, "write ret failed");
+        return ERR_INVALID_DATA;
+    }
     reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleGetAppForceLandscapeConfigEnable(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::DEFAULT, "called");
+    bool enableForceSplit = false;
+    WMError ret = GetAppForceLandscapeConfigEnable(enableForceSplit);
+    if (!reply.WriteBool(enableForceSplit)) {
+        TLOGE(WmsLogTag::DEFAULT, "write enableForceSplit failed");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::DEFAULT, "write ret failed");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
@@ -2640,6 +2665,9 @@ int SessionStub::HandleSendCommonEvent(MessageParcel& data, MessageParcel& reply
             break;
         case static_cast<uint32_t>(CommonEventCommand::SET_RECEIVE_DRAG_EVENT):
             ret = SetReceiveDragEventEnabled(parameters);
+            break;
+        case static_cast<uint32_t>(CommonEventCommand::SET_WINDOW_SEPARATION_TOUCH_ENABLED):
+            ret = SetSeparationTouchEnabled(parameters);
             break;
         default:
             ret = WMError::WM_ERROR_DEVICE_NOT_SUPPORT;

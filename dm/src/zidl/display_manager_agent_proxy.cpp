@@ -617,6 +617,30 @@ void DisplayManagerAgentProxy::NotifyAbnormalScreenConnectChange(ScreenId screen
         TLOGE(WmsLogTag::DMS, "SendRequest failed");
     }
 }
+
+void DisplayManagerAgentProxy::NotifyRecordingDisplayChanged(const std::vector<DisplayId>& displayIds)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUInt64Vector(displayIds)) {
+        TLOGE(WmsLogTag::DMS, "Write displayId failed");
+        return;
+    }
+    if (remote->SendRequest(TRANS_ID_ON_RECORDING_DISPLAY_CHANGED, data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+    }
+}
+
 } // namespace Rosen
 } // namespace OHOS
 

@@ -58,6 +58,7 @@ void SuperFoldStateManager::DoAngleChangeFolded(SuperFoldStatusChangeEvents even
 void SuperFoldStateManager::DoAngleChangeHalfFolded(SuperFoldStatusChangeEvents event)
 {
     TLOGI(WmsLogTag::DMS, "enter %{public}d", event);
+    ScreenSessionManager::GetInstance().RecoveryResolutionEffect();
 }
 
 void SuperFoldStateManager::DoAngleChangeExpanded(SuperFoldStatusChangeEvents event)
@@ -364,24 +365,18 @@ void SuperFoldStateManager::ModifyMirrorScreenVisibleRect(SuperFoldStatus preSta
     if (curState == SuperFoldStatus::EXPANDED ||
         (preState == SuperFoldStatus::EXPANDED && curState == SuperFoldStatus::HALF_FOLDED)) {
         rsRect = FULL_SCREEN_RECORD_RECT;
+        TLOGI(WmsLogTag::DMS, "full screen record");
     } else if ((preState == SuperFoldStatus::HALF_FOLDED && curState == SuperFoldStatus::KEYBOARD) ||
         (preState == SuperFoldStatus::KEYBOARD && curState == SuperFoldStatus::HALF_FOLDED)) {
         rsRect = HALF_FOLD_B_SCREEN_RECORD_RECT;
+        TLOGI(WmsLogTag::DMS, "B half record");
     } else {
-        TLOGI(WmsLogTag::DMS, "not update record rect");
+        TLOGE(WmsLogTag::DMS, "not update record rect");
         return;
     }
-    std::vector<ScreenId> mirrorScreenIds;
-    {
-        std::unique_lock<std::mutex> lock(mirrorScreenIdsMutex_);
-        mirrorScreenIds = mirrorScreenIds_;
-    }
-    for (auto screenId : mirrorScreenIds) {
-        ScreenId rsId = SCREEN_ID_INVALID;
-        ScreenSessionManager::GetInstance().ConvertScreenIdToRsScreenId(screenId, rsId);
-        TLOGI(WmsLogTag::DMS, "handle mirror ScreenId: %{public}" PRIu64 ", rsId:  %{public}" PRIu64, screenId, rsId);
-        RSInterfaces::GetInstance().SetMirrorScreenVisibleRect(rsId, rsRect);
-    }
+    std::vector<DisplayId> displayIds;
+    ModifyMirrorScreenVisibleRectInner(rsRect, displayIds);
+    ScreenSessionManager::GetInstance().NotifyRecordingDisplayChanged(displayIds);
 }
 
 void SuperFoldStateManager::ModifyMirrorScreenVisibleRect(bool isTpKeyboardOn)
@@ -390,32 +385,57 @@ void SuperFoldStateManager::ModifyMirrorScreenVisibleRect(bool isTpKeyboardOn)
     OHOS::Rect rsRect;
     SuperFoldStatus curStatus = GetCurrentStatus();
     if (isTpKeyboardOn || (!isTpKeyboardOn && curStatus == SuperFoldStatus::HALF_FOLDED)) {
+        TLOGI(WmsLogTag::DMS, "B half record");
         rsRect = HALF_FOLD_B_SCREEN_RECORD_RECT;
     } else {
         TLOGI(WmsLogTag::DMS, "caused by foldstatus change, return");
         return;
     }
+    std::vector<DisplayId> displayIds;
+    ModifyMirrorScreenVisibleRectInner(rsRect, displayIds);
+    ScreenSessionManager::GetInstance().NotifyRecordingDisplayChanged(displayIds);
+}
 
-    std::vector<ScreenId> mirrorScreenIds;
+void SuperFoldStateManager::ModifyMirrorScreenVisibleRectInner(const OHOS::Rect& rsRect,
+    std::vector<DisplayId>& displayIds)
+{
+    std::map<ScreenId, OHOS::Rect> mirrorScreenVisibleRectMap;
     {
         std::unique_lock<std::mutex> lock(mirrorScreenIdsMutex_);
-        mirrorScreenIds = mirrorScreenIds_;
+        mirrorScreenVisibleRectMap = mirrorScreenVisibleRectMap_;
     }
-    for (auto screenId : mirrorScreenIds) {
+    for (auto& [screenId, curRect]: mirrorScreenVisibleRectMap) {
         ScreenId rsId = SCREEN_ID_INVALID;
         ScreenSessionManager::GetInstance().ConvertScreenIdToRsScreenId(screenId, rsId);
         TLOGI(WmsLogTag::DMS, "handle mirror ScreenId: %{public}" PRIu64 ", rsId:  %{public}" PRIu64, screenId, rsId);
+        displayIds = CalculateReCordingDisplayIds(rsRect);
         RSInterfaces::GetInstance().SetMirrorScreenVisibleRect(rsId, rsRect);
+        curRect = rsRect;
     }
 }
 
-void SuperFoldStateManager::AddMirrorVirtualScreenIds(const std::vector<ScreenId>& screenIds)
+std::vector<DisplayId> SuperFoldStateManager::CalculateReCordingDisplayIds(const OHOS::Rect& nextRect)
+{
+    std::vector<DisplayId> displayIds = {MAIN_SCREEN_ID_DEFAULT};
+    if (nextRect == FULL_SCREEN_RECORD_RECT && curState_ == SuperFoldStatus::HALF_FOLDED) {
+        displayIds.emplace_back(DISPLAY_ID_FAKE);
+    }
+    return displayIds;
+}
+
+void SuperFoldStateManager::AddMirrorVirtualScreenIds(const std::vector<ScreenId>& screenIds, const DMRect& rect)
 {
     std::unique_lock<std::mutex> lock(mirrorScreenIdsMutex_);
+    OHOS::Rect rsRect{
+        .x = rect.posX_,
+        .y = rect.posY_,
+        .w = rect.width_,
+        .h = rect.height_,
+    };
     for (const auto& screenId : screenIds) {
-        auto it = std::find(mirrorScreenIds_.begin(), mirrorScreenIds_.end(), screenId);
-        if (it == mirrorScreenIds_.end()) {
-            mirrorScreenIds_.emplace_back(screenId);
+        auto it = mirrorScreenVisibleRectMap_.find(screenId);
+        if (it == mirrorScreenVisibleRectMap_.end()) {
+            mirrorScreenVisibleRectMap_[screenId] = rsRect;
         }
     }
 }
@@ -424,9 +444,9 @@ void SuperFoldStateManager::ClearMirrorVirtualScreenIds(const std::vector<Screen
 {
     std::unique_lock<std::mutex> lock(mirrorScreenIdsMutex_);
     for (const auto& screenId : screenIds) {
-        auto it = std::find(mirrorScreenIds_.begin(), mirrorScreenIds_.end(), screenId);
-        if (it != mirrorScreenIds_.end()) {
-            mirrorScreenIds_.erase(it);
+        auto it = mirrorScreenVisibleRectMap_.find(screenId);
+        if (it != mirrorScreenVisibleRectMap_.end()) {
+            mirrorScreenVisibleRectMap_.erase(it);
         }
     }
 }

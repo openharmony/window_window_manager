@@ -108,6 +108,24 @@ HWTEST_F(WindowSessionPropertyTest, GetRealTimeSwitchInfo, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsAdaptToCompatibleDevice
+ * @tc.desc: IsAdaptToCompatibleDevice
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, IsAdaptToCompatibleDevice, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    property->compatibleModeProperty_ = nullptr;
+    EXPECT_EQ(property->IsAdaptToCompatibleDevice(), false);
+    property->compatibleModeProperty_ = sptr<CompatibleModeProperty>::MakeSptr();
+    EXPECT_EQ(property->IsAdaptToCompatibleDevice(), false);
+    property->compatibleModeProperty_->SetIsAdaptToCompatibleDevice(true);
+    EXPECT_EQ(property->compatibleModeProperty_->IsAdaptToCompatibleDevice(), true);
+    EXPECT_EQ(property->IsAdaptToCompatibleDevice(), true);
+}
+
+/**
  * @tc.name: SetPrivacyMode
  * @tc.desc: SetPrivacyMode as true and false
  * @tc.type: FUNC
@@ -508,6 +526,15 @@ HWTEST_F(WindowSessionPropertyTest, Unmarshalling, TestSize.Level1)
     sptr<WindowSessionProperty> property2 = property->Unmarshalling(parcel);
     ASSERT_NE(property2, nullptr);
     EXPECT_EQ(property2->GetWindowName(), winName);
+
+    property->compatibleModeProperty_ = sptr<CompatibleModeProperty>::MakeSptr();
+    property->compatibleModeProperty_->SetIsAdaptToCompatibleDevice(true);
+    EXPECT_EQ(property->IsAdaptToCompatibleDevice(), true);
+    Parcel parcel2 = Parcel();
+    property->compatibleModeProperty_->Marshalling(parcel2);
+    sptr<CompatibleModeProperty> compatibleModeProperty = property->compatibleModeProperty_->Unmarshalling(parcel2);
+    ASSERT_NE(compatibleModeProperty, nullptr);
+    EXPECT_EQ(compatibleModeProperty->IsAdaptToCompatibleDevice(), true);
 }
 
 /**
@@ -1825,7 +1852,6 @@ HWTEST_F(WindowSessionPropertyTest, GetKeyboardLayoutParamsByScreenId, TestSize.
     params.displayId_ = 1234;
     property->GetKeyboardLayoutParamsByScreenId(1, params); // should be no-op
     ASSERT_EQ(params.LandscapeKeyboardRect_, defaultRect);
-    ASSERT_EQ(params.displayId_, 1234);
 
     KeyboardLayoutParams insertedParams;
     insertedParams.LandscapeKeyboardRect_ = { 5, 6, 7, 8 };

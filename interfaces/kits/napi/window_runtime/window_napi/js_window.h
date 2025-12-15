@@ -263,6 +263,8 @@ public:
      */
     static napi_value SetReceiveDragEventEnabled(napi_env env, napi_callback_info info);
     static napi_value IsReceiveDragEventEnabled(napi_env env, napi_callback_info info);
+    static napi_value SetSeparationTouchEnabled(napi_env env, napi_callback_info info);
+    static napi_value IsSeparationTouchEnabled(napi_env env, napi_callback_info info);
 
 private:
     const std::string& GetWindowName() const;
@@ -505,6 +507,8 @@ private:
      */
     napi_value OnSetReceiveDragEventEnabled(napi_env env, napi_callback_info info);
     napi_value OnIsReceiveDragEventEnabled(napi_env env, napi_callback_info info);
+    napi_value OnSetSeparationTouchEnabled(napi_env env, napi_callback_info info);
+    napi_value OnIsSeparationTouchEnabled(napi_env env, napi_callback_info info);
 };
 }  // namespace Rosen
 }  // namespace OHOS

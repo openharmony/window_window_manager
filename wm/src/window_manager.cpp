@@ -2030,6 +2030,14 @@ WMError WindowManager::GetUIContentRemoteObj(int32_t windowId, sptr<IRemoteObjec
     return ret;
 }
 
+WMError WindowManager::GetRootUIContentRemoteObj(DisplayId displayId, sptr<IRemoteObject>& uiContentRemoteObj)
+{
+    WMError ret = WindowAdapter::GetInstance(userId_).GetRootUIContentRemoteObj(displayId, uiContentRemoteObj);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "userId: %{public}d, retCode: %{public}d, displayId: %{public}" PRIu64,
+        userId_, static_cast<int32_t>(ret), displayId);
+    return ret;
+}
+
 WMError WindowManager::SetGestureNavigationEnabled(bool enable) const
 {
     WMError ret = WindowAdapter::GetInstance(userId_).SetGestureNavigationEnabled(enable);

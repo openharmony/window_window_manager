@@ -81,7 +81,7 @@ def main(argv):
                 subprocess.check_call([
                     "npm", "install",
                     "--prefix", install_dir,
-                    "--registry", secondary_registry,
+                    "--registry", secondary_npm_registry,
                     "--loglevel=verbose"
                 ])
             except subprocess.CalledProcessError as e2:
@@ -109,6 +109,14 @@ def main(argv):
     if not copy_all_js_files(engine_path, js_output_path):
         print("windowenv: No available build output file found")
         sys.exit(1)
+
+    # clean the tmp directory
+    for dir_path in [engine_path, node_modules_path]:
+        try:
+            shutil.rmtree(dir_path)
+            print(f"delete directory success: {dir_path}")
+        except Exception as e:
+            print(f"delete directory failed {dir_path}: {str(e)}")
 
 if __name__ == '__main__':
     start_time = time.time()

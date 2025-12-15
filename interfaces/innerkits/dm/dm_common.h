@@ -252,8 +252,10 @@ enum class DmErrorCode : int32_t {
  * @brief Enumerates the aod operation
  */
 enum class AodOP {
-    ENTER,
-    EXIT,
+    ENTER_START,
+    ENTER_FINISH,
+    EXIT_START,
+    EXIT_FINISH,
     AOD_OP_MAX
 };
 
@@ -542,6 +544,7 @@ enum class SuperFoldStatusChangeEvents : uint32_t {
     KEYBOARD_OFF,
     SYSTEM_KEYBOARD_ON,
     SYSTEM_KEYBOARD_OFF,
+    RESOLUITION_EFFECT_CHANGE,
     INVALID,
 };
 

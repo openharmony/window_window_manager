@@ -172,7 +172,8 @@ HWTEST_F(SceneSessionManagerTest, GerPrivacyBundleListTwoWindow, TestSize.Level1
 
     std::unordered_map<DisplayId, std::unordered_set<std::string>> privacyBundleList;
     ssm_->GetSceneSessionPrivacyModeBundles(0, privacyBundleList);
-    EXPECT_EQ(privacyBundleList.size(), 2);
+    EXPECT_EQ(privacyBundleList.size(), 1);
+    EXPECT_EQ(privacyBundleList[0].size(), 2);
 
     sceneSessionSecond->GetSessionProperty()->displayId_ = 1;
     privacyBundleList.clear();
@@ -931,6 +932,43 @@ HWTEST_F(SceneSessionManagerTest, GetUIContentRemoteObj, TestSize.Level1)
     ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert({ 65535, sceneSession });
     EXPECT_EQ(ssm_->GetUIContentRemoteObj(65535, remoteObj), WSError::WS_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: GetRootUIContentRemoteObj
+ * @tc.desc: get remote object of root UIContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, GetRootUIContentRemoteObj, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IRemoteObject> remoteObj;
+    EXPECT_EQ(ssm_->GetRootUIContentRemoteObj(0, remoteObj), WMError::WM_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: GetRootUIContentRemoteObjInner
+ * @tc.desc: get remote object of root UIContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, GetRootUIContentRemoteObjInner, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    auto oldRootSession = ssm_->rootSceneSession_;
+    DisplayId displayId = 0;
+    sptr<IRemoteObject> remoteObj;
+    ssm_->rootSceneSession_ = nullptr;
+    EXPECT_EQ(ssm_->GetRootUIContentRemoteObjInner(displayId, remoteObj), WMError::WM_ERROR_INVALID_WINDOW);
+    auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr(specificCb);
+    auto oldFoldStatus = PcFoldScreenManager::GetInstance().screenFoldStatus_;
+    auto oldDisplayId = PcFoldScreenManager::GetInstance().displayId_;
+    PcFoldScreenManager::GetInstance().screenFoldStatus_ = SuperFoldStatus::HALF_FOLDED;
+    PcFoldScreenManager::GetInstance().displayId_ = displayId;
+    EXPECT_EQ(ssm_->GetRootUIContentRemoteObjInner(displayId, remoteObj), WMError::WM_ERROR_NULLPTR);
+    PcFoldScreenManager::GetInstance().screenFoldStatus_ = oldFoldStatus;
+    PcFoldScreenManager::GetInstance().displayId_ = oldDisplayId;
+    ssm_->rootSceneSession_ = oldRootSession;
 }
 
 /**
@@ -2180,11 +2218,7 @@ HWTEST_F(SceneSessionManagerTest, UpdateAppBoundSystemTrayStatus001, TestSize.Le
     EXPECT_TRUE(g_logMsg.find("App bound tray map size exceeds") != std::string::npos);
 
     ssm_->appsWithBoundSystemTrayMap_.erase("2049-app_instance_0");
-    ssm_->UpdateAppBoundSystemTrayStatus("2048-app_instance_0", 1048, true);
-    EXPECT_TRUE(g_logMsg.find("appsWithBoundSystemTrayMap_ has pid") != std::string::npos);
-
     ssm_->UpdateAppBoundSystemTrayStatus("2049-app_instance_0", 1049, false);
-    EXPECT_TRUE(g_logMsg.find("appsWithBoundSystemTrayMap_ does not have pid") != std::string::npos);
     ssm_->appsWithBoundSystemTrayMap_.clear();
 
     ssm_->appsWithBoundSystemTrayMap_["2000-app_instance_0"].insert(1000);

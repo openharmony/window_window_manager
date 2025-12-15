@@ -62,6 +62,7 @@ constexpr uint32_t ICON_MAX_SIZE = 128 * 1024 * 1024;
 constexpr uint32_t ADVANCED_FEATURE_BIT_MAX = 32;
 constexpr uint32_t ADVANCED_FEATURE_BIT_LOCK_CURSOR = 0x00;
 constexpr uint32_t ADVANCED_FEATURE_BIT_CURSOR_FOLLOW_MOVEMENT = 0x01;
+constexpr uint32_t ADVANCED_FEATURE_BIT_WINDOW_SEPARATION_TOUCH_ENABLED = 0x02;
 constexpr uint32_t ADVANCED_FEATURE_BIT_RECEIVE_DRAG_EVENT = 0x03;
 
 constexpr int32_t DECIMAL_BASE = 10;
@@ -725,6 +726,18 @@ struct WSRectT {
     }
 
     /**
+     * @brief Create a new rectangle offset by (dx, dy).
+     *
+     * @param dx The offset in the x direction.
+     * @param dy The offset in the y direction.
+     * @return A new WSRectT<T> instance with updated position.
+     */
+    WSRectT<T> WithOffset(T dx, T dy) const
+    {
+        return { posX_ + dx, posY_ + dy, width_, height_ };
+    }
+
+    /**
      * @brief Compute the intersection area with another rectangle.
      *
      * @tparam F The result type for intersection area calculation.
@@ -1006,7 +1019,7 @@ struct DeviceScreenConfig {
 
 struct SceneAnimationConfig : public Parcelable {
     std::shared_ptr<RSTransaction> rsTransaction_ = nullptr;
-    int32_t animationDuration_ = ROTATE_ANIMATION_DURATION;
+    uint32_t animationDuration_ = ROTATE_ANIMATION_DURATION;
     uint32_t animationDelay_ = 0;
     WindowAnimationCurve animationCurve_ = WindowAnimationCurve::LINEAR;
     std::array<float, ANIMATION_PARAM_SIZE> animationParam_ = {0.0f, 0.0f, 0.0f, 0.0f};
@@ -1015,7 +1028,7 @@ struct SceneAnimationConfig : public Parcelable {
 
     SceneAnimationConfig(
         std::shared_ptr<RSTransaction> rsTransaction,
-        int32_t animationDuration,
+        uint32_t animationDuration,
         uint32_t animationDelay,
         WindowAnimationCurve animationCurve,
         const std::array<float, ANIMATION_PARAM_SIZE>& animationParam)
@@ -1031,7 +1044,7 @@ struct SceneAnimationConfig : public Parcelable {
         if (!parcel.WriteBool(hasTransaction)) {
             return false;
         }
-        if (!parcel.WriteInt32(animationDuration_)) {
+        if (!parcel.WriteUint32(animationDuration_)) {
             return false;
         }
         if (!parcel.WriteUint32(animationDelay_)) {
@@ -1052,12 +1065,12 @@ struct SceneAnimationConfig : public Parcelable {
     {
         auto config = new SceneAnimationConfig();
         bool hasTransaction = false;
-        int32_t animationDuration;
+        uint32_t animationDuration;
         uint32_t animationDelay;
         uint32_t animationCurveValue;
         std::array<float, ANIMATION_PARAM_SIZE> animationParam;
         if (!parcel.ReadBool(hasTransaction) ||
-            !parcel.ReadInt32(animationDuration) ||
+            !parcel.ReadUint32(animationDuration) ||
             !parcel.ReadUint32(animationDelay) ||
             !parcel.ReadUint32(animationCurveValue)) {
             delete config;
@@ -1310,6 +1323,11 @@ enum class CrossPlaneState : uint32_t {
     CROSS_VIRTUAL_CREASE_PLANE,
     CROSS_VIRTUAL_PLANE,
     CROSS_ALL_PLANE,
+};
+
+enum class SendTouchAction : uint32_t {
+    ACTION_NORMAL = 0,
+    ACTION_NOT_RECEIVE_PULL_CANCEL = 1,
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H

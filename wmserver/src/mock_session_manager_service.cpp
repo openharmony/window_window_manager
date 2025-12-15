@@ -76,9 +76,6 @@ public:
     {
         TLOGW(WmsLogTag::WMS_RECOVER, "Client died, pid = %{public}d, isLite = %{public}d", pid_, isLite_);
         MockSessionManagerService::GetInstance().UnregisterSMSRecoverListenerInner(userId_, displayId_, pid_, isLite_);
-        if (!isLite_) {
-            MockSessionManagerService::GetInstance().ResetSpecificWindowZIndex(userId_, pid_);
-        }
     }
 
 private:

@@ -117,6 +117,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetSessionSnapshotById(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_UI_CONTENT_REMOTE_OBJ):
             return HandleGetUIContentRemoteObj(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_ROOT_UI_CONTENT_REMOTE_OBJ):
+            return HandleGetRootUIContentRemoteObj(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_BIND_DIALOG_TARGET):
             return HandleBindDialogTarget(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_NOTIFY_DUMP_INFO_RESULT):
@@ -1064,6 +1066,30 @@ int SceneSessionManagerStub::HandleGetUIContentRemoteObj(MessageParcel& data, Me
     WSError ret = GetUIContentRemoteObj(persistentId, uiContentRemoteObj);
     reply.WriteRemoteObject(uiContentRemoteObj);
     reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetRootUIContentRemoteObj(MessageParcel& data, MessageParcel& reply)
+{
+    DisplayId displayId = 0;
+    if (!data.ReadUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read displayId failed");
+        return ERR_INVALID_DATA;
+    }
+    sptr<IRemoteObject> uiContentRemoteObj;
+    auto errCode = GetRootUIContentRemoteObj(displayId, uiContentRemoteObj);
+    if (errCode != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "get uiContent failed");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteRemoteObject(uiContentRemoteObj)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write remote object failed");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 

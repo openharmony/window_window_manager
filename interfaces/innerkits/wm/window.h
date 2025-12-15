@@ -2340,12 +2340,6 @@ public:
     {
         return WMError::WM_OK;
     }
-    virtual WMError NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
-        BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
-        AppExecFwk::Ability* ability = nullptr)
-    {
-        return WMError::WM_OK;
-    }
     virtual WMError AniSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
         BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
         AppExecFwk::Ability* ability = nullptr)
@@ -3371,6 +3365,17 @@ public:
      * @return WMError
      */
     virtual WMError SetSystemBarPropertyForPage(WindowType type, std::optional<SystemBarProperty> property)
+    {
+        return WMError::WM_OK;
+    }
+
+    /*
+     * @brief Set Status Bar Color For Page
+     *
+     * @param color Status Bar Color
+     * @return WMError
+     */
+    virtual WMError SetStatusBarColorForPage(const std::optional<uint32_t> color)
     {
         return WMError::WM_OK;
     }
@@ -4900,6 +4905,34 @@ public:
     }
 
     /**
+     * @brief Set whether the window supports event separation capability.
+     *        When the window doesn't support event separation capability:
+     *        After the first finger touch the window,
+     *        subsequent fingers' events will be sent to that window regardless of whether they click on it.
+     *        If the first finger does not touch the window,
+     *        the system will discard the events when subsequent fingers touch the window.
+     *
+     * @param enalbed - Whether the window supports event separation capability.
+     *        True: - means default state, the event will be sent to the window that the finger taps.
+     *        False: - means the window doesn't support event separation capability.
+     * @return - Promise that returns no value.
+     */
+    virtual WMError SetSeparationTouchEnabled(bool enabled)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief   Get whether the window supports event separation status.
+     *
+     * @return - The value true means the window supports event separation, and false means the opposite.
+     */
+    virtual bool IsSeparationTouchEnabled()
+    {
+        return true;
+    }
+
+    /**
      * @brief Lock the mouse cursor restricting it to a specified window area, and also control whether the cursor
      *        follows movement. Only supported by the focus window; the lock is automatically released when the
      *        window loses focus.
@@ -4944,7 +4977,11 @@ public:
      *
      * @param rects Hot areas of anco window.
      */
-    static std::vector<Rect> GetAncoWindowHotAreas();
+    virtual std::vector<Rect> GetAncoWindowHotAreas()
+    {
+        std::vector<Rect> rectAreas;
+        return rectAreas;
+    }
 
     /**
      * @brief Check if the current device is in free window mode.

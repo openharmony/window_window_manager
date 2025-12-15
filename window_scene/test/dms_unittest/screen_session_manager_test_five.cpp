@@ -1033,6 +1033,26 @@ HWTEST_F(ScreenSessionManagerTest, SetMultiScreenRelativePosition04, TestSize.Le
 }
 
 /**
+ * @tc.name: NotifyRecordingDisplayChanged
+ * @tc.desc: NotifyRecordingDisplayChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, NotifyRecordingDisplayChanged, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    std::vector<DisplayId> displayIds{};
+    ssm_->NotifyRecordingDisplayChanged(displayIds);
+    EXPECT_TRUE(g_logMsg.find("Agent is empty") != std::string::npos);
+    g_logMsg.clear();
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    ssm_->RegisterDisplayManagerAgent(displayManagerAgent, DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
+    ssm_->NotifyRecordingDisplayChanged(displayIds);
+    EXPECT_TRUE(g_logMsg.find("Agent is empty") == std::string::npos);
+}
+
+/**
  * @tc.name: SetMultiScreenRelativePosition
  * @tc.desc: INVALID_PARAM
  * @tc.type: FUNC

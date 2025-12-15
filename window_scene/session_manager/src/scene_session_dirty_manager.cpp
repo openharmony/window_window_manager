@@ -38,7 +38,6 @@ constexpr unsigned int TRANSFORM_DATA_LEN = 9;
 constexpr int UPDATE_TASK_DURATION = 10;
 constexpr uint32_t MMI_FLAG_BIT_LOCK_CURSOR_NOT_FOLLOW_MOVEMENT = 0x08;
 constexpr uint32_t MMI_FLAG_BIT_LOCK_CURSOR_FOLLOW_MOVEMENT = 0x10;
-constexpr uint32_t MMI_FLAG_BIT_LOCK_RECEIVE_DRAG_EVENT = 0x800;
 const std::string UPDATE_WINDOW_INFO_TASK = "UpdateWindowInfoTask";
 static int32_t g_screenRotationOffset = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 constexpr float ZORDER_UIEXTENSION_INDEX = 0.1;
@@ -840,12 +839,9 @@ void SceneSessionDirtyManager::UpdateWindowFlags(DisplayId displayId, const sptr
     MMI::WindowInfo& windowInfo) const
 {
     windowInfo.flags = 0;
-    auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
-    if (screenSession != nullptr) {
-        if (!screenSession->IsTouchEnabled() || !sceneSession->GetSystemTouchable() ||
-            !sceneSession->GetForegroundInteractiveStatus()) {
-            windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_UNTOUCHABLE;
-        }
+    bool isTouchable = sceneSession->GetWindowTouchableForMMI(displayId);
+    if (!isTouchable) {
+        windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_UNTOUCHABLE;
     }
 }
 
@@ -858,6 +854,18 @@ void SceneSessionDirtyManager::UpdateWindowFlagsForReceiveDragEventEnabled(const
     }
     if (sceneSession->GetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_RECEIVE_DRAG_EVENT)) {
         windowInfo.flags |= MMI::WindowInputPolicy::FLAG_DRAG_DISABLED;
+    }
+}
+
+void SceneSessionDirtyManager::UpdateWindowFlagsForWindowSeparation(const sptr<SceneSession>& sceneSession,
+    MMI::WindowInfo& windowInfo) const
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is null");
+        return;
+    }
+    if (sceneSession->GetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_WINDOW_SEPARATION_TOUCH_ENABLED)) {
+        windowInfo.flags |= MMI::WindowInputPolicy::FLAG_FIRST_TOUCH_HIT;
     }
 }
 
