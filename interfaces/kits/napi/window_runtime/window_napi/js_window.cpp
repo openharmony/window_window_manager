@@ -1372,6 +1372,20 @@ napi_value JsWindow::IsReceiveDragEventEnabled(napi_env env, napi_callback_info 
     return (me != nullptr) ? me->OnIsReceiveDragEventEnabled(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetSeparationTouchEnabled(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetSeparationTouchEnabled(env, info) : nullptr;
+}
+
+napi_value JsWindow::IsSeparationTouchEnabled(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnIsSeparationTouchEnabled(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetWindowShadowEnabled(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
@@ -7409,7 +7423,7 @@ std::optional<WaterfallResidentState> ParseWaterfallResidentState(napi_env env, 
         return std::nullopt;
     }
     if (napiAcrossDisplay == nullptr || GetType(env, napiAcrossDisplay) == napi_undefined) {
-        return WaterfallResidentState::CANCEL;
+        return WaterfallResidentState::UNCHANGED;
     }
     bool acrossDisplay = false;
     if (!ConvertFromJsValue(env, napiAcrossDisplay, acrossDisplay)) {
@@ -7538,37 +7552,37 @@ napi_value CreateJsWindowArrayObject(napi_env env, const std::vector<sptr<Window
 bool JsWindow::ParseWindowLimits(napi_env env, napi_value jsObject, WindowLimits& windowLimits)
 {
     uint32_t data = 0;
-    if (ParseJsValue(jsObject, env, "maxWidth", data)) {
-        windowLimits.maxWidth_ = data;
-    } else {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to maxWidth");
-        return false;
-    }
-    if (ParseJsValue(jsObject, env, "minWidth", data)) {
-        windowLimits.minWidth_ = data;
-    } else {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to minWidth");
-        return false;
-    }
-    if (ParseJsValue(jsObject, env, "maxHeight", data)) {
-        windowLimits.maxHeight_ = data;
-    } else {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to maxHeight");
-        return false;
-    }
-    if (ParseJsValue(jsObject, env, "minHeight", data)) {
-        windowLimits.minHeight_ = data;
-    } else {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to minHeight");
-        return false;
-    }
+    uint32_t defaultValue = 0;
     PixelUnit pixelUnit = PixelUnit::PX;
-    if (ParseJsValueOrGetDefault(jsObject, env, "pixelUnit", pixelUnit, PixelUnit::PX)) {
-        windowLimits.pixelUnit_ = pixelUnit;
-    } else {
+    if (GetType(env, jsObject) != napi_object) {
+        return false;
+    }
+    auto parseField = [&](const char* fieldName, auto& field, auto& defValue) -> bool {
+        if (!ParseJsValueOrGetDefault(jsObject, env, fieldName, data, defValue)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to %{public}s", fieldName);
+            return false;
+        }
+        field = data;
+        return true;
+    };
+
+    if (!parseField("maxWidth", windowLimits.maxWidth_, defaultValue)) {
+        return false;
+    }
+    if (!parseField("maxWidth", windowLimits.maxWidth_, defaultValue)) {
+        return false;
+    }
+    if (!parseField("maxWidth", windowLimits.maxWidth_, defaultValue)) {
+        return false;
+    }
+    if (!parseField("maxWidth", windowLimits.maxWidth_, defaultValue)) {
+        return false;
+    }
+    if (!ParseJsValueOrGetDefault(jsObject, env, "pixelUnit", pixelUnit, PixelUnit::PX)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to pixelUnit");
         return false;
     }
+    windowLimits.pixelUnit_ = pixelUnit;
     return true;
 }
 
@@ -9703,6 +9717,62 @@ napi_value JsWindow::OnIsReceiveDragEventEnabled(napi_env env, napi_callback_inf
     return CreateJsValue(env, isReceiveDragEventEnabled);
 }
 
+napi_value JsWindow::OnSetSeparationTouchEnabled(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != INDEX_ONE) {
+        TLOGE(WmsLogTag::WMS_EVENT, "argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool enabled = true;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], enabled)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to convert parameter to enable");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    const char* const where = __func__;
+    auto execute = [weakToken = wptr<Window>(windowToken_), errCodePtr, enabled, where] {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s window is null", where);
+            *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            return;
+        }
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSeparationTouchEnabled(enabled));
+        TLOGNI(WmsLogTag::WMS_EVENT, "%{public}s winId: %{public}u, set enable: %{public}u",
+            where, window->GetWindowId(), enabled);
+    };
+    auto complete = [errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (*errCodePtr == WmErrorCode::WM_OK) {
+            task.Resolve(env, NapiGetUndefined(env));
+        } else {
+            TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s set failed, result: %{public}d", where, *errCodePtr);
+            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr,
+                "[window][setSeparationTouchEnabled]msg: set window receive drag failed"));
+        }
+    };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnSetSeparationTouchEnabled",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
+napi_value JsWindow::OnIsSeparationTouchEnabled(napi_env env, napi_callback_info info)
+{
+    if (windowToken_ == nullptr){
+        TLOGE(WmsLogTag::WMS_EVENT, "IsSeparationTouchEnabled");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, 
+            "[window][isSeparationTouchEnabled]msg: isSeparationTouchEnabled");
+    }
+
+    bool isSeparationTouchEnabled = windowToken_->IsSeparationTouchEnabled();
+    TLOGD(WmsLogTag::WMS_EVENT, "Id=%{public}u, state=%{public}u", windowToken_->GetWindowId(),
+        isSeparationTouchEnabled);
+    return CreateJsValue(env, isSeparationTouchEnabled);
+}
+
 napi_value JsWindow::OnSetWindowShadowEnabled(napi_env env, napi_callback_info info)
 {
     size_t argc = FOUR_PARAMS_SIZE;
@@ -10018,6 +10088,8 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
         JsWindow::SetFollowParentWindowLayoutEnabled);
     BindNativeFunction(env, object, "setReceiveDragEventEnabled", moduleName, JsWindow::SetReceiveDragEventEnabled);
     BindNativeFunction(env, object, "isReceiveDragEventEnabled", moduleName, JsWindow::IsReceiveDragEventEnabled);
+    BindNativeFunction(env, object, "setSeparationTouchEnabled", moduleName, JsWindow::SetSeparationTouchEnabled);
+    BindNativeFunction(env, object, "isSeparationTouchEnabled", moduleName, JsWindow::IsSeparationTouchEnabled);
     BindNativeFunction(env, object, "setWindowShadowEnabled", moduleName, JsWindow::SetWindowShadowEnabled);
     BindNativeFunction(env, object, "isImmersiveLayout", moduleName, JsWindow::IsImmersiveLayout);
     BindNativeFunction(env, object, "isInFreeWindowMode", moduleName, JsWindow::IsInFreeWindowMode);

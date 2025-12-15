@@ -99,6 +99,27 @@ HWTEST_F(RootSceneSessionTest, LoadContent, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetUIContent
+ * @tc.desc: get UIContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneSessionTest, GetUIContent, TestSize.Level1)
+{
+    RootSceneSession rootSceneSession;
+    std::string strTest("GetUIContentTest");
+    napi_env nativeEnv_ = nullptr;
+    napi_value nativeValue_ = nullptr;
+    int isCalled = false;
+    rootSceneSession.SetGetUIContentFunc([&isCalled](DisplayId displayId) -> Ace::UIContent* {
+        isCalled = true;
+        return nullptr;
+    });
+    auto uiContent = rootSceneSession.GetUIContent(1);
+    EXPECT_EQ(uiContent, nullptr);
+    EXPECT_TRUE(isCalled);
+}
+
+/**
  * @tc.name: GetSystemAvoidAreaForRoot
  * @tc.desc: test function : GetSystemAvoidAreaForRoot
  * @tc.type: FUNC

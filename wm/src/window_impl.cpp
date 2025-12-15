@@ -609,14 +609,6 @@ void WindowImpl::OnNewWant(const AAFwk::Want& want)
     }
 }
 
-WMError WindowImpl::NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
-        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
-{
-    return SetUIContentInner(contentInfo, env, storage,
-        type == BackupAndRestoreType::NONE ? WindowSetUIContentType::DEFAULT : WindowSetUIContentType::RESTORE,
-        type, ability, 1);
-}
-
 WMError WindowImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
     BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
@@ -2020,6 +2012,7 @@ void WindowImpl::CustomHideAnimation()
 {
     uint32_t animationFlag = property_->GetAnimationFlag();
     if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        TLOGD(WmsLogTag::WMS_ANIMATION, "Animate for Hidden");
         std::vector<sptr<IAnimationTransitionController>> animationTransitionControllers;
         {
             std::lock_guard<std::mutex> lockListener(transitionControllerMutex_);

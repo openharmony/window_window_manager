@@ -4981,31 +4981,91 @@ HWTEST_F(ScreenSessionTest, SetAndGetCurrentRotationCorrection, TestSize.Level1)
 }
 
 /**
- * @tc.name  : UpdatePropertyByResolution2
- * @tc.desc  : test UpdatePropertyByResolution Different rotation
+ * @tc.name  : HandleResolutionEffectPropertyChange
+ * @tc.desc  : test HandleResolutionEffectPropertyChange Different rsid
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, UpdatePropertyByResolution2, TestSize.Level1)
+HWTEST_F(ScreenSessionTest, HandleResolutionEffectPropertyChange1, TestSize.Level1)
 {
     if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         GTEST_SKIP();
     }
-    ScreenId screenId = 10000;
-    ScreenProperty screenProperty;
-    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
-    DMRect rect = {0, 0, 1, 2};
-    session->property_.UpdateScreenRotation(Rotation::ROTATION_0);
-    session->UpdatePropertyByResolution(rect);
-    EXPECT_EQ(session->GetScreenProperty().GetValidWidth(), 1);
-    EXPECT_EQ(session->GetScreenProperty().GetValidHeight(), 2);
-    session->property_.UpdateScreenRotation(Rotation::ROTATION_90);
-    session->UpdatePropertyByResolution(rect);
-    EXPECT_EQ(session->GetScreenProperty().GetValidWidth(), 2);
-    EXPECT_EQ(session->GetScreenProperty().GetValidHeight(), 1);
-    session->property_.UpdateScreenRotation(Rotation::ROTATION_270);
-    session->UpdatePropertyByResolution(rect);
-    EXPECT_EQ(session->GetScreenProperty().GetValidWidth(), 2);
-    EXPECT_EQ(session->GetScreenProperty().GetValidHeight(), 1);
+    LOG_SetCallback(MyLogCallback);
+    g_errLog.clear();
+    ScreenProperty property1, property2;
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(0, property1, 0);
+    property1.SetRsId(1);
+    session->HandleResolutionEffectPropertyChange(property1, property2);
+    EXPECT_TRUE(g_errLog.find("no need handle") != std::string::npos);
+    g_errLog.clear();
+
+    property1.SetRsId(0);
+    session->HandleResolutionEffectPropertyChange(property1, property2);
+    EXPECT_FALSE(g_errLog.find("no need handle") != std::string::npos);
+
+    LOG_SetCallback(nullptr);
+    g_errLog.clear();
+}
+
+/**
+ * @tc.name  : HandleResolutionEffectPropertyChange
+ * @tc.desc  : test HandleResolutionEffectPropertyChange Different rotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, HandleResolutionEffectPropertyChange2, TestSize.Level1)
+{
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        GTEST_SKIP();
+    }
+    ScreenProperty property1, property2;
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(0, property1, 0);
+    property1.SetRsId(0);
+    property1.SetScreenRotation(Rotation::ROTATION_0);
+    auto bounds = property2.GetBounds();
+    bounds.rect_.width_ = 1;
+    bounds.rect_.height_ = 2;
+    property2.SetBounds(bounds);
+    session->HandleResolutionEffectPropertyChange(property1, property2);
+    EXPECT_EQ(property1.GetBounds().rect_.width_, 1);
+    EXPECT_EQ(property1.GetBounds().rect_.height_, 2);
+}
+
+
+/**
+ * @tc.name  : UpdateScbScreenPropertyForSuperFlod
+ * @tc.desc  : test UpdateScbScreenPropertyForSuperFlod
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdateScbScreenPropertyForSuperFlod, TestSize.Level1)
+{
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        GTEST_SKIP();
+    }
+    LOG_SetCallback(MyLogCallback);
+    g_errLog.clear();
+    ScreenProperty property;
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(0, property, 0);
+
+    property.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::KEYBOARD_ON);
+    session->UpdateScbScreenPropertyForSuperFlod(property);
+    EXPECT_TRUE(g_errLog.find("handle keyboard on and keyboard succ") != std::string::npos);
+    g_errLog.clear();
+
+    property.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::KEYBOARD_OFF);
+    session->UpdateScbScreenPropertyForSuperFlod(property);
+    EXPECT_TRUE(g_errLog.find("handle keyboard on and keyboard succ") != std::string::npos);
+    g_errLog.clear();
+
+    property.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_ON);
+    session->UpdateScbScreenPropertyForSuperFlod(property);
+    EXPECT_TRUE(g_errLog.find("handle system keyboard on and system keyboard succ") != std::string::npos);
+    g_errLog.clear();
+
+    property.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_OFF);
+    session->UpdateScbScreenPropertyForSuperFlod(property);
+    EXPECT_TRUE(g_errLog.find("handle system keyboard on and system keyboard succ") != std::string::npos);
+    g_errLog.clear();
+    LOG_SetCallback(nullptr);
 }
 } // namespace
 } // namespace Rosen
