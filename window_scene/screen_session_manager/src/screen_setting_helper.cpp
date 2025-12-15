@@ -28,7 +28,6 @@
 namespace OHOS {
 namespace Rosen {
 sptr<SettingObserver> ScreenSettingHelper::dpiObserver_;
-sptr<SettingObserver> ScreenSettingHelper::brightnessObserver_;
 sptr<SettingObserver> ScreenSettingHelper::castObserver_;
 sptr<SettingObserver> ScreenSettingHelper::rotationObserver_;
 sptr<SettingObserver> ScreenSettingHelper::wireCastObserver_;
@@ -102,46 +101,6 @@ void ScreenSettingHelper::UnregisterSettingDpiObserver()
 bool ScreenSettingHelper::GetSettingDpi(uint32_t& dpi, const std::string& key)
 {
     return GetSettingValue(dpi, key);
-}
-
-void ScreenSettingHelper::RegisterSettingBrightnessObserver(SettingObserver::UpdateFunc func)
-{
-    if (brightnessObserver_) {
-        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "setting Brightness observer is registered");
-        return;
-    }
-    SettingProvider& provider = SettingProvider::GetInstance(WINDOW_MANAGER_SERVICE_ID);
-    brightnessObserver_ = provider.CreateObserver(SETTING_BRIGHTNESS_KEY, func);
-    if (brightnessObserver_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "create observer failed");
-        return;
-    }
-    ErrCode ret = provider.RegisterObserver(brightnessObserver_);
-    if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed, ret=%{public}d", ret);
-        brightnessObserver_ = nullptr;
-    }
-}
-
-void ScreenSettingHelper::UnregisterSettingBrightnessObserver()
-{
-    if (brightnessObserver_ == nullptr) {
-        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "brightnessObserver_ is nullptr");
-        return;
-    }
-    SettingProvider& provider = SettingProvider::GetInstance(WINDOW_MANAGER_SERVICE_ID);
-    ErrCode ret = provider.UnregisterObserver(brightnessObserver_);
-    if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed, ret=%{public}d", ret);
-        return;
-    }
-    brightnessObserver_ = nullptr;
-}
-
-bool ScreenSettingHelper::GetSettingBrightnessMode(
-    std::string& brightnessMode, const std::string& key)
-{
-    return GetSettingValue(key, brightnessMode);
 }
 
 bool ScreenSettingHelper::GetSettingValue(uint32_t& value, const std::string& key)

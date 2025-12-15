@@ -1609,7 +1609,7 @@ HWTEST_F(SceneSessionManagerTest3, UpdatePrivateStateAndNotify, TestSize.Level1)
     auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
     std::unordered_map<DisplayId, std::unordered_set<std::string>> privacyBundleList;
     ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundleList);
-    EXPECT_EQ(privacyBundleList.size(), 1);
+    EXPECT_EQ(privacyBundleList[displayId].size(), 0);
 }
 
 /**
@@ -1628,7 +1628,7 @@ HWTEST_F(SceneSessionManagerTest3, UpdatePrivateStateAndNotifyForAllScreens, Tes
     auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
     std::unordered_map<DisplayId, std::unordered_set<std::string>> privacyBundleList;
     ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundleList);
-    EXPECT_EQ(privacyBundleList.size(), 1);
+    EXPECT_EQ(privacyBundleList[displayId].size(), 0);
 }
 
 /**
@@ -1653,23 +1653,23 @@ HWTEST_F(SceneSessionManagerTest3, GerPrivacyBundleListOneWindow, TestSize.Level
     sceneSession->GetSessionProperty()->isPrivacyMode_ = false;
     privacyBundleList.clear();
     ssm_->GetSceneSessionPrivacyModeBundles(0, privacyBundleList);
-    EXPECT_EQ(privacyBundleList.size(), 1);
+    EXPECT_EQ(privacyBundleList[0].size(), 0);
 
     sceneSession->GetSessionProperty()->isPrivacyMode_ = true;
     sceneSession->state_ = SessionState::STATE_BACKGROUND;
     privacyBundleList.clear();
     ssm_->GetSceneSessionPrivacyModeBundles(0, privacyBundleList);
-    EXPECT_EQ(privacyBundleList.size(), 1);
+    EXPECT_EQ(privacyBundleList[0].size(), 0);
 
     sceneSession->GetSessionProperty()->isPrivacyMode_ = true;
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
     privacyBundleList.clear();
     ssm_->GetSceneSessionPrivacyModeBundles(0, privacyBundleList);
-    EXPECT_EQ(privacyBundleList.size(), 1);
+    EXPECT_EQ(privacyBundleList[0].size(), 1);
 
     privacyBundleList.clear();
     ssm_->GetSceneSessionPrivacyModeBundles(1, privacyBundleList);
-    EXPECT_EQ(privacyBundleList.size(), 1);
+    EXPECT_EQ(privacyBundleList[1].size(), 0);
 }
 
 /**
