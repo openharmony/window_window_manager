@@ -252,8 +252,10 @@ enum class DmErrorCode : int32_t {
  * @brief Enumerates the aod operation
  */
 enum class AodOP {
-    ENTER,
-    EXIT,
+    ENTER_START,
+    ENTER_FINISH,
+    EXIT_START,
+    EXIT_FINISH,
     AOD_OP_MAX
 };
 
@@ -887,6 +889,32 @@ struct RelativePosition {
 struct RotationOption {
     Rotation rotation_ = Rotation::ROTATION_0;
     bool needSetRotation_ = false;
+};
+
+/**
+ * @brief Corner type
+ */
+enum class CornerType : int32_t {
+    TOP_LEFT = 0,
+    TOP_RIGHT = 1,
+    BOTTOM_RIGHT = 2,
+    BOTTOM_LEFT = 3
+};
+
+/**
+ * @brief Rounded corner
+ */
+struct RoundedCorner {
+    CornerType type;
+    Position position;
+    int radius;
+};
+
+enum class DisplayModeChangeReason : uint32_t {
+    DEFAULT = 0,
+    RECOVER,
+    INVALID,
+    SETMODE,
 };
 }
 #endif // OHOS_ROSEN_DM_COMMON_H

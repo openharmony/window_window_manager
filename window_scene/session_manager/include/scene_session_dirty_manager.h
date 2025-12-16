@@ -70,6 +70,8 @@ public:
         std::vector<SecSurfaceInfo>>& constrainedModalUIExtInfoMap);
     bool GetLastConstrainedModalUIExtInfo(const sptr<SceneSession>& sceneSession,
         SecSurfaceInfo& constrainedModalUIExtInfo);
+    void UpdateHotAreas(const sptr<SceneSession>& sceneSession, std::vector<MMI::Rect>& touchHotAreas,
+        std::vector<MMI::Rect>& pointerHotAreas) const;
 
 private:
     std::vector<MMI::WindowInfo> FullSceneSessionInfoUpdate() const;
@@ -87,8 +89,6 @@ private:
         MMI::WindowInfo& windowInfo) const;
     std::map<int32_t, sptr<SceneSession>> GetDialogSessionMap(
         const std::map<int32_t, sptr<SceneSession>>& sessionMap) const;
-    void UpdateHotAreas(const sptr<SceneSession>& sceneSession, std::vector<MMI::Rect>& touchHotAreas,
-        std::vector<MMI::Rect>& pointerHotAreas) const;
     void UpdateDefaultHotAreas(sptr<SceneSession> sceneSession, std::vector<MMI::Rect>& touchHotAreas,
         std::vector<MMI::Rect>& pointerHotAreas) const;
     void UpdatePointerAreas(sptr<SceneSession> sceneSession, std::vector<int32_t>& pointerChangeAreas) const;

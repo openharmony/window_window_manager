@@ -433,8 +433,6 @@ public:
     virtual WMError SetScreenPrivacyWindowTagSwitch(
         uint64_t screenId, const std::vector<std::string>& privacyWindowTags, bool enable) { return WMError::WM_OK; }
 
-    virtual WMError NotifyBrightnessModeChange(const std::string& brightnessMode) { return WMError::WM_OK; }
-
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override { return WMError::WM_OK; }
 
     WMError IsWindowRectAutoSave(const std::string& key, bool& enabled,

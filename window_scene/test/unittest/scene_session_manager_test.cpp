@@ -172,7 +172,8 @@ HWTEST_F(SceneSessionManagerTest, GerPrivacyBundleListTwoWindow, TestSize.Level1
 
     std::unordered_map<DisplayId, std::unordered_set<std::string>> privacyBundleList;
     ssm_->GetSceneSessionPrivacyModeBundles(0, privacyBundleList);
-    EXPECT_EQ(privacyBundleList.size(), 2);
+    EXPECT_EQ(privacyBundleList.size(), 1);
+    EXPECT_EQ(privacyBundleList[0].size(), 2);
 
     sceneSessionSecond->GetSessionProperty()->displayId_ = 1;
     privacyBundleList.clear();
@@ -960,9 +961,13 @@ HWTEST_F(SceneSessionManagerTest, GetRootUIContentRemoteObjInner, TestSize.Level
     EXPECT_EQ(ssm_->GetRootUIContentRemoteObjInner(displayId, remoteObj), WMError::WM_ERROR_INVALID_WINDOW);
     auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr(specificCb);
+    auto oldFoldStatus = PcFoldScreenManager::GetInstance().screenFoldStatus_;
+    auto oldDisplayId = PcFoldScreenManager::GetInstance().displayId_;
     PcFoldScreenManager::GetInstance().screenFoldStatus_ = SuperFoldStatus::HALF_FOLDED;
     PcFoldScreenManager::GetInstance().displayId_ = displayId;
     EXPECT_EQ(ssm_->GetRootUIContentRemoteObjInner(displayId, remoteObj), WMError::WM_ERROR_NULLPTR);
+    PcFoldScreenManager::GetInstance().screenFoldStatus_ = oldFoldStatus;
+    PcFoldScreenManager::GetInstance().displayId_ = oldDisplayId;
     ssm_->rootSceneSession_ = oldRootSession;
 }
 

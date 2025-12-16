@@ -273,8 +273,8 @@ private:
     void WindowManagerAndSessionRecover();
     void RecoverSpecificZIndexSetByApp();
     WMError RecoverWindowPropertyChangeFlag();
-    uint32_t observedFlags_;
-    uint32_t interestedFlags_;
+    uint32_t observedFlags_ = 0;
+    uint32_t interestedFlags_ = 0;
     std::string appWatermarkName_;
     std::unordered_map<WindowType, int32_t> specificZIndexMap_;
 
