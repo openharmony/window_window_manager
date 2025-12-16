@@ -222,6 +222,75 @@ ani_status AniWindowUtils::GetStdStringVector(ani_env* env, ani_object ary, std:
     return ANI_OK;
 }
 
+ani_status AniWindowUtils::GetOptionalIntProperty(ani_env* env, const char* propertyName,
+    ani_object object, std::optional<int32_t>& optIntProp)
+{
+    optIntProp.reset();
+    ani_ref int_ref;
+    ani_status ret = env->Object_GetPropertyByName_Ref(object, propertyName, &int_ref);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed, ret : %{public}u",
+            propertyName, static_cast<int32_t>(ret));
+        return ret;
+    }
+
+    ani_boolean isUndefined;
+    ret = env->Reference_IsUndefined(int_ref, &isUndefined);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
+        return ret;
+    }
+    if (isUndefined) {
+        TLOGI(WmsLogTag::DEFAULT, "[ANI] %{public}s is Undefined Now", propertyName);
+        return ANI_OK;
+    }
+
+    ani_int int_value;
+    ret = env->Object_CallMethodByName_Int(static_cast<ani_object>(int_ref), "intValue", nullptr, &int_value);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
+        return ret;
+    }
+    optIntProp = static_cast<int32_t>(int_value);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] %{public}s is: %{public}u", propertyName, *optIntProp);
+    return ret;
+}
+
+ani_status AniWindowUtils::GetOptionalEnumProperty(ani_env* env, const char* propertyName,
+    ani_object object, std::optional<uint32_t>& optEnumProp)
+{
+    optEnumProp.reset();
+    ani_ref enum_ref;
+    ani_status ret = env->Object_GetPropertyByName_Ref(object, propertyName, &enum_ref);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed, ret : %{public}u",
+            propertyName, static_cast<int32_t>(ret));
+        return ret;
+    }
+
+    ani_boolean isUndefined;
+    ret = env->Reference_IsUndefined(enum_ref, &isUndefined);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
+        return ret;
+    }
+    if (isUndefined) {
+        TLOGI(WmsLogTag::DEFAULT, "[ANI] %{public}s is Undefined Now", propertyName);
+        return ANI_OK;
+    }
+
+    uint32_t enumValue;
+    ret = AniWindowUtils::GetEnumValue(env, static_cast<ani_enum_item>(enum_ref), enumValue);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
+        return ret;
+    }
+
+    optEnumProp = enumValue;
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] %{public}s is: %{public}u", propertyName, *optEnumProp);
+    return ret;
+}
+
 ani_status AniWindowUtils::GetPropertyIntObject(ani_env* env, const char* propertyName,
     ani_object object, int32_t& result)
 {
@@ -2184,60 +2253,41 @@ void* AniWindowUtils::GetAbilityContext(ani_env *env, ani_object aniObj)
 bool AniWindowUtils::ParseWindowLimits(ani_env* env, ani_object aniWindowLimits, WindowLimits& windowLimits)
 {
     auto getAndAssign = [&, where = __func__](const char* name, uint32_t& field) -> ani_status {
-        int value;
-        ani_ref intValueObject;
-        ani_boolean isUndefined;
-        ani_status ret = env->Object_GetPropertyByName_Ref(aniWindowLimits, name, &intValueObject);
+        std::optional<int32_t> optValue;
+        ani_status ret = AniWindowUtils::GetOptionalIntProperty(env, name, aniWindowLimits, optValue);
         if (ret != ANI_OK) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Object_GetPropertyByName_Ref failed for %{public}s", name);
+            TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] GetOptionalIntProperty failed for %{public}s", name);
             return ret;
         }
-        ret = env->Reference_IsUndefined(intValueObject, &isUndefined);
-        if (ret != ANI_OK) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Reference_IsUndefined failed for %{public}s", name);
-            return ret;
-        }
-        if (isUndefined) {
-            field = 0;
-            return ANI_OK;
-        }
-        ret = AniWindowUtils::GetPropertyIntObject(env, name, aniWindowLimits, value);
-        if (ret == ANI_OK) {
-            if (value >= 0) {
-                field = static_cast<uint32_t>(value);
+
+        if (optValue.has_value()) {
+            if (*optValue >= 0) {
+                field = static_cast<uint32_t>(*optValue);
             } else {
                 field = 0;
-                TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: [ANI] Invalid %{public}s: %{public}d", where, name, value);
+                TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: [ANI] Invalid %{public}s: %{public}d", where,
+                    name, *optValue);
             }
+        } else {
+            field = 0;
         }
-        return ret;
+        return ANI_OK;
     };
 
-    auto getAndAssignUnit = [&, where = __func__](const char* name, PixelUnit& field) -> ani_status {
-        uint32_t unitValue;
-        ani_ref unitValueObject;
-        ani_boolean isUndefined;
-        ani_status ret = env->Object_GetPropertyByName_Ref(aniWindowLimits, name, &unitValueObject);
+    auto getAndAssignUnit = [&](const char* name, PixelUnit& field) -> ani_status {
+        std::optional<uint32_t> optEnumValue;
+        ani_status ret = AniWindowUtils::GetOptionalEnumProperty(env, name, aniWindowLimits, optEnumValue);
         if (ret != ANI_OK) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Object_GetPropertyByName_Ref failed for %{public}s", name);
+            TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] GetOptionalEnumProperty failed for %{public}s", name);
             return ret;
         }
-        ret = env->Reference_IsUndefined(unitValueObject, &isUndefined);
-        if (ret != ANI_OK) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Reference_IsUndefined failed for %{public}s", name);
-            return ret;
-        }
-        if (isUndefined) {
-            field = PixelUnit::PX;
-            return ANI_OK;
-        }
-        ret = AniWindowUtils::GetEnumValue(env, static_cast<ani_enum_item>(unitValueObject), unitValue);
-        if (ret == ANI_OK) {
-            field = static_cast<PixelUnit>(unitValue);
+
+        if (optEnumValue.has_value()) {
+            field = static_cast<PixelUnit>(*optEnumValue);
         } else {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s: [ANI] GetEnumValue failed, invalid %{public}s", where, name);
+            field = PixelUnit::PX;
         }
-        return ret;
+        return ANI_OK;
     };
     if (getAndAssign("maxWidth", windowLimits.maxWidth_) != ANI_OK ||
         getAndAssign("maxHeight", windowLimits.maxHeight_) != ANI_OK ||
