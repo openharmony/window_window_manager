@@ -5743,14 +5743,14 @@ napi_value JsSceneSessionManager::OnNotifySupportRotationChange(napi_env env, na
 
 napi_value JsSceneSessionManager::GetAllJsonProfile(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_COMPAT, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetAllJsonProfile(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::GetJsonProfile(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_COMPAT, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetJsonProfile(env, info) : nullptr;
 }
@@ -5761,7 +5761,7 @@ napi_value JsSceneSessionManager::OnGetAllJsonProfile(napi_env env, napi_callbac
     napi_value argv[ARGC_TWO] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARGC_TWO) {
-        TLOGE(WmsLogTag::WMS_SCB, "Argc count is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_COMPAT, "Argc count is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -5770,7 +5770,7 @@ napi_value JsSceneSessionManager::OnGetAllJsonProfile(napi_env env, napi_callbac
     AppExecFwk::ProfileType profileType;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], profileTypeId) ||
         profileTypeId > std::numeric_limits<uint8_t>::max() || profileTypeId < std::numeric_limits<int8_t>::min()) {
-        TLOGE(WmsLogTag::WMS_SCB, "Failed to convert parameter to profileTypeId");
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to profileTypeId");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -5779,7 +5779,7 @@ napi_value JsSceneSessionManager::OnGetAllJsonProfile(napi_env env, napi_callbac
     }
     int32_t userId = -1;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], userId)) {
-        TLOGE(WmsLogTag::WMS_SCB, "Failed to convert parameter to userId");
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to userId");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -5793,7 +5793,7 @@ napi_value JsSceneSessionManager::OnGetAllJsonProfile(napi_env env, napi_callbac
         napi_value jsProfileInfo = nullptr;
         napi_create_object(env, &jsProfileInfo);
         if (jsProfileInfo == nullptr) {
-            TLOGE(WmsLogTag::WMS_SCB, "Object is null!");
+            TLOGE(WmsLogTag::WMS_COMPAT, "Object is null!");
             return NapiGetUndefined(env);
         }
         napi_set_named_property(env, jsProfileInfo, "profileType", CreateJsValue(env, profileInfos[i].profileType));
@@ -5811,7 +5811,7 @@ napi_value JsSceneSessionManager::OnGetJsonProfile(napi_env env, napi_callback_i
     napi_value argv[ARGC_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARGC_FOUR) {
-        TLOGE(WmsLogTag::WMS_SCB, "Argc count is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_COMPAT, "Argc count is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -5821,7 +5821,7 @@ napi_value JsSceneSessionManager::OnGetJsonProfile(napi_env env, napi_callback_i
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], profileTypeId) ||
         profileTypeId > std::numeric_limits<uint8_t>::max() ||
         profileTypeId < std::numeric_limits<int8_t>::min()) {
-        TLOGE(WmsLogTag::WMS_SCB, "Failed to convert parameter to profileTypeId");
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to profileTypeId");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -5831,7 +5831,7 @@ napi_value JsSceneSessionManager::OnGetJsonProfile(napi_env env, napi_callback_i
 
     std::string bundleName = "";
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], bundleName)) {
-        TLOGE(WmsLogTag::WMS_SCB, "Failed to convert parameter to bundleName");
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to bundleName");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -5839,7 +5839,7 @@ napi_value JsSceneSessionManager::OnGetJsonProfile(napi_env env, napi_callback_i
 
     std::string moduleName = "";
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_TWO], moduleName)) {
-        TLOGE(WmsLogTag::WMS_SCB, "Failed to convert parameter to moduleName");
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to moduleName");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -5847,7 +5847,7 @@ napi_value JsSceneSessionManager::OnGetJsonProfile(napi_env env, napi_callback_i
 
     int32_t userId = -1;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_THREE], userId)) {
-        TLOGE(WmsLogTag::WMS_SCB, "Failed to convert parameter to userId");
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to userId");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);

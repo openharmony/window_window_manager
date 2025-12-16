@@ -653,6 +653,7 @@ bool MainSession::RestoreAspectRatio(float ratio)
 WMError MainSession::GetAppForceLandscapeConfigEnable(bool& enableForceSplit)
 {
     if (forceSplitEnableFunc_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "forceSplitEnableFunc_ is null");
         return WMError::WM_ERROR_NULLPTR;
     }
     enableForceSplit = forceSplitEnableFunc_(sessionInfo_.bundleName_);
@@ -662,6 +663,7 @@ WMError MainSession::GetAppForceLandscapeConfigEnable(bool& enableForceSplit)
 WSError MainSession::NotifyAppForceLandscapeConfigEnableUpdated()
 {
     if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "sessionStage_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->NotifyAppForceLandscapeConfigEnableUpdated();
