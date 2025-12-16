@@ -474,6 +474,7 @@ private:
     void ApplyCustomRatioConstraints(const WindowLimits& customizedLimits, double& maxRatio, double& minRatio);
     void RecalculateSizeLimitsWithRatios(WindowLimits& limits, WindowLimits& limitsVP, double maxRatio,
         double minRatio, PixelUnit pixelUnit);
+    void NotifyWindowStatusDidChangeAfterShowWindow();
 
     /*
      * PC Window Layout

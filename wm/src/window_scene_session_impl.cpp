@@ -1868,9 +1868,16 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
             static_cast<int32_t>(ret), property_->GetWindowName().c_str(), GetPersistentId());
     }
     NotifyWindowStatusChange(GetWindowMode());
-    NotifyWindowStatusDidChange(GetWindowMode());
+    NotifyWindowStatusDidChangeAfterShowWindow();
     NotifyDisplayInfoChange(displayInfo);
     return ret;
+}
+
+void WindowSceneSessionImpl::NotifyWindowStatusDidChangeAfterShowWindow()
+{
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
+    hostSession->NotifyWindowStatusDidChangeAfterShowWindow();
 }
 
 sptr<DisplayInfo> WindowSceneSessionImpl::GetDisplayInfo() const

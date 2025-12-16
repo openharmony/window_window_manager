@@ -89,6 +89,7 @@ private:
     int HandleGetAppForceLandscapeConfig(MessageParcel& data, MessageParcel& reply);
     int HandleGetAppForceLandscapeConfigEnable(MessageParcel& data, MessageParcel& reply);
     int HandleGetAppHookWindowInfoFromServer(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyWindowStatusDidChangeAfterShowWindow(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyFrameLayoutFinish(MessageParcel& data, MessageParcel& reply);
     int HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, MessageParcel& reply);
     int HandleGetStatusBarHeight(MessageParcel& data, MessageParcel& reply);
