@@ -5755,23 +5755,6 @@ napi_value JsSceneSessionManager::GetJsonProfile(napi_env env, napi_callback_inf
     return (me != nullptr) ? me->OnGetJsonProfile(env, info) : nullptr;
 }
 
-namespace {
-    napi_value JsonProfileInfoToNapiValue(napi_env env, const AppExecFwk::JsonProfileInfo& profileInfo)
-    {
-        napi_value objValue = nullptr;
-        napi_create_object(env, &objValue);
-        if (objValue == nullptr) {
-            TLOGE(WmsLogTag::WMS_SCB, "Object is null!");
-            return objValue;
-        }
-        napi_set_named_property(env, objValue, "profileType", CreateJsValue(env, profileInfo.profileType));
-        napi_set_named_property(env, objValue, "bundleName", CreateJsValue(env, profileInfo.bundleName));
-        napi_set_named_property(env, objValue, "moduleName", CreateJsValue(env, profileInfo.moduleName));
-        napi_set_named_property(env, objValue, "profile", CreateJsValue(env, profileInfo.profile));
-        return objValue;
-    }
-}
-
 napi_value JsSceneSessionManager::OnGetAllJsonProfile(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_TWO;
@@ -5807,7 +5790,16 @@ napi_value JsSceneSessionManager::OnGetAllJsonProfile(napi_env env, napi_callbac
     napi_value jsProfileInfoArray = nullptr;
     napi_create_array(env, &jsProfileInfoArray);
     for (size_t i = 0; i < profileInfos.size(); ++i) {
-        napi_value jsProfileInfo = JsonProfileInfoToNapiValue(env, profileInfos[i]);
+        napi_value jsProfileInfo = nullptr;
+        napi_create_object(env, &jsProfileInfo);
+        if (jsProfileInfo == nullptr) {
+            TLOGE(WmsLogTag::WMS_SCB, "Object is null!");
+            return NapiGetUndefined(env);
+        }
+        napi_set_named_property(env, jsProfileInfo, "profileType", CreateJsValue(env, profileInfos[i].profileType));
+        napi_set_named_property(env, jsProfileInfo, "bundleName", CreateJsValue(env, profileInfos[i].bundleName));
+        napi_set_named_property(env, jsProfileInfo, "moduleName", CreateJsValue(env, profileInfos[i].moduleName));
+        napi_set_named_property(env, jsProfileInfo, "profile", CreateJsValue(env, profileInfos[i].profile));
         napi_set_element(env, jsProfileInfoArray, i, jsProfileInfo);
     }
     return jsProfileInfoArray;

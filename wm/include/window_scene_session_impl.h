@@ -235,6 +235,7 @@ public:
     void HookDecorButtonStyleInCompatibleMode(uint32_t contentColor);
     WSError PcAppInPadNormalClose() override;
     void NotifyIsFullScreenInForceSplitMode(bool isFullScreen) override;
+    void SetForceSplitConfigEnable(bool enableForceSplit) override;
 
     /*
      * Free Multi Window

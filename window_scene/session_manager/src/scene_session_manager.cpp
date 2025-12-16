@@ -2615,9 +2615,6 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->RegisterForceSplitListener([this](const std::string& bundleName) {
             return this->GetAppForceLandscapeConfig(bundleName);
         });
-        sceneSession->RegisterForceSplitEnableListener([this](const std::string& bundleName) {
-            return this->GetAppForceLandscapeConfigEnable(bundleName);
-        });
         sceneSession->RegisterAppHookWindowInfoFunc([this](const std::string& bundleName) {
             return this->GetAppHookWindowInfo(bundleName);
         });
@@ -2666,6 +2663,15 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->RegisterForceSplitFullScreenChangeCallback([this](uint32_t uid, bool isFullScreen) {
             this->NotifyIsFullScreenInForceSplitMode(uid, isFullScreen);
         });
+        if (SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
+            MainSession* mainSessionPtr = static_cast<MainSession*>(sceneSession.GetRefPtr());
+            if (mainSessionPtr != nullptr) {
+                sptr<MainSession> mainSession = mainSessionPtr;
+                mainSession->RegisterForceSplitEnableListener([this](const std::string& bundleName) {
+                    return this->GetAppForceLandscapeConfigEnable(bundleName);
+                });
+            }
+        }
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
         GetAppDragResizeType(sessionInfo.bundleName_, dragResizeType);
         sceneSession->SetAppDragResizeType(dragResizeType);
@@ -16898,7 +16904,7 @@ void SceneSessionManager::RegisterConstrainedModalUIExtInfoListener()
 }
 
 bool SceneSessionManager::IsSameForceSplitConfig(const AppForceLandscapeConfig& preconfig,
-    const AppForceLandscapeConfig& config) const
+    const AppForceLandscapeConfig& config)
 {
     if (preconfig.mode_ != config.mode_ ||
         preconfig.supportSplit_ != config.supportSplit_ ||
@@ -16938,7 +16944,7 @@ WSError SceneSessionManager::SetAppForceLandscapeConfig(const std::string& bundl
         } else {
             preConfig = {};
         }
-        config.hasChanged_ = !IsSameForceSplitConfig(preConfig, config);
+        config.hasChanged_ = !SceneSessionManager::IsSameForceSplitConfig(preConfig, config);
         appForceLandscapeMap_[bundleName] = config;
     }
 
@@ -16978,21 +16984,28 @@ WSError SceneSessionManager::SetAppForceLandscapeConfigEnable(const std::string&
         TLOGE(WmsLogTag::DEFAULT, "bundle name is empty");
         return WSError::WS_ERROR_NULLPTR;
     }
-    std::unique_lock<std::shared_mutex> lock(appForceLandscapeMutex_);
 
     AppForceLandscapeConfig config;
-    if (appForceLandscapeMap_.count(bundleName)) {
-        config = appForceLandscapeMap_[bundleName];
-    } else {
-        TLOGE(WmsLogTag::DEFAULT, "app: %{public}s, config not find", bundleName.c_str());
-        return WSError::WS_ERROR_INVALID_PARAM;
+    {   
+        std::unique_lock<std::shared_mutex> lock(appForceLandscapeMutex_);
+        if (appForceLandscapeMap_.count(bundleName)) {
+            config = appForceLandscapeMap_[bundleName];
+        } else {
+            TLOGE(WmsLogTag::DEFAULT, "app: %{public}s, config not find", bundleName.c_str());
+            config = {};
+        }
+        config.configEnable_ = enableForceSplit;
+        appForceLandscapeMap_[bundleName] = config;
     }
-    config.configEnable_ = enableForceSplit;
-    appForceLandscapeMap_[bundleName] = config;
-
-    for (const auto& iter : sceneSessionMap_) {
+    std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        sceneSessionMapCopy = sceneSessionMap_;
+    }
+    for (const auto& iter : sceneSessionMapCopy) {
         auto& session = iter.second;
-        if (session && session->GetSessionInfo().bundleName_ == bundleName) {
+        if (session && session->GetSessionInfo().bundleName_ == bundleName &&
+            SessionHelper::IsMainWindow(session->GetWindowType())) {
             session->NotifyAppForceLandscapeConfigEnableUpdated();
         }
     }

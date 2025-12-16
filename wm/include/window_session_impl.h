@@ -226,7 +226,7 @@ public:
     bool OnPointDown(int32_t eventId, int32_t posX, int32_t posY) override;
     WMError SetIntentParam(const std::string& intentParam, const std::function<void()>& loadPageCallback,
         bool isColdStart) override;
-    void SetForceSplitConfigEnable(bool enableForceSplit);
+    virtual void SetForceSplitConfigEnable(bool enableForceSplit) {};
     void SetForceSplitConfig(const AppForceLandscapeConfig& config);
 
     /*

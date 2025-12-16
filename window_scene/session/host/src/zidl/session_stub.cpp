@@ -2619,6 +2619,13 @@ int SessionStub::HandleNotifyCompatibleModeChange(MessageParcel& data, MessagePa
     return ERR_NONE;
 }
 
+int SessionStub::HandleNotifyAppForceLandscapeConfigEnableUpdated(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::DEFAULT, "in");
+    NotifyAppForceLandscapeConfigEnableUpdated();
+    return ERR_NONE;
+}
+
 int SessionStub::HandleRestartApp(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "in");
