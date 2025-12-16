@@ -33,6 +33,8 @@ public:
     void NotifyForegroundInteractiveStatus(bool interactive) override;
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
+    WMError GetAppForceLandscapeConfigEnable(bool& enableForceSplit) override;
+    WSError NotifyAppForceLandscapeConfigEnableUpdated() override;
 
     /*
      * Window Hierarchy
@@ -84,6 +86,7 @@ public:
     bool IsFullScreenInForceSplit() override;
     void RegisterCompatibleModeChangeCallback(CompatibleModeChangeCallback&& callback) override;
     WSError NotifyCompatibleModeChange(CompatibleStyleMode mode) override;
+    void RegisterForceSplitEnableListener(NotifyForceSplitEnableFunc&& func);
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
@@ -115,6 +118,7 @@ private:
     ForceSplitFullScreenChangeCallback forceSplitFullScreenChangeCallback_;
     std::atomic_bool isFullScreenInForceSplit_ { false };
     CompatibleModeChangeCallback compatibleModeChangeCallback_;
+    NotifyForceSplitEnableFunc forceSplitEnableFunc_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MAIN_SESSION_H
