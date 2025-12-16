@@ -3016,6 +3016,81 @@ HWTEST_F(WindowSceneSessionImplTest5, ShouldSkipSupportWindowModeCheck06, TestSi
     result = window->ShouldSkipSupportWindowModeCheck(windowModeSupportType, WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
     EXPECT_EQ(result, false);
 }
+
+/**
+ * @tc.name: SetForceSplitConfigEnable01
+ * @tc.desc: Test SetForceSplitConfigEnable when window type is not main window
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, SetForceSplitConfigEnable01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetForceSplitConfigEnable01");
+    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    
+    // Should return early when window type is not main window
+    window->SetForceSplitConfigEnable(true);
+    // No crash means the function returned early as expected
+}
+
+/**
+ * @tc.name: SetForceSplitConfigEnable02
+ * @tc.desc: Test SetForceSplitConfigEnable when uiContent is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, SetForceSplitConfigEnable02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetForceSplitConfigEnable02");
+    option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    
+    // uiContent should be null by default
+    window->SetForceSplitConfigEnable(true);
+    // No crash means the function handled null uiContent correctly
+}
+
+/**
+ * @tc.name: NotifyAppForceLandscapeConfigEnableUpdated01
+ * @tc.desc: Test NotifyAppForceLandscapeConfigEnableUpdated when window type is not main window
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, NotifyAppForceLandscapeConfigEnableUpdated01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyAppForceLandscapeConfigEnableUpdated01");
+    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    
+    WSError res = window->NotifyAppForceLandscapeConfigEnableUpdated();
+    EXPECT_EQ(res, WSError::WS_DO_NOTHING);
+}
+
+/**
+ * @tc.name: NotifyAppForceLandscapeConfigEnableUpdated02
+ * @tc.desc: Test NotifyAppForceLandscapeConfigEnableUpdated when GetAppForceLandscapeConfigEnable fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, NotifyAppForceLandscapeConfigEnableUpdated02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyAppForceLandscapeConfigEnableUpdated02");
+    option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    
+    // GetAppForceLandscapeConfigEnable will fail if listener is not registered
+    WSError res = window->NotifyAppForceLandscapeConfigEnableUpdated();
+    EXPECT_EQ(res, WSError::WS_DO_NOTHING);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
