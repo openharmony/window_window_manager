@@ -42,7 +42,7 @@ constexpr float ACCURACY_ERROR_FOR_ALTA = 0.0001F;
 ScreenSensorMgr& ScreenSensorMgr::GetInstance()
 {
     static std::mutex singletonMutex_;
-    static ScreenSensorMgr* instance_;
+    static ScreenSensorMgr* instance_ = nullptr;
     if (instance_ == nullptr) {
         std::lock_guard<std::mutex> lock(singletonMutex_);
         if (instance_ == nullptr) {
@@ -110,7 +110,7 @@ void ScreenSensorMgr::UnRegisterHallCallback()
         registerHall_ = false;
         TLOGI(WmsLogTag::DMS, "success.");
     } else {
-        TLOGE(WmsLogTag::DMS, "UnRegisterHallCallback failed with ret: %{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "unRegister hall sensor failed with ret: %{public}d", ret);
     }
 }
 
