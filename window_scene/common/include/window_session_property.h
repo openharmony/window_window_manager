@@ -870,7 +870,7 @@ struct AppForceLandscapeConfig : public Parcelable {
             preconfig.supportSplit_ != config.supportSplit_ ||
             preconfig.ignoreOrientation_ != config.ignoreOrientation_ ||
             preconfig.containsSysConfig_ != config.containsSysConfig_ ||
-            preconfig.containsAppConfig_ != config.containsAppConfig_ ) {
+            preconfig.containsAppConfig_ != config.containsAppConfig_) {
             return false;
         }
         if (config.containsSysConfig_) {
