@@ -128,6 +128,8 @@ std::array g_functions = {
         "JLstd/core/String;:L@ohos/window/window/Window;",
         reinterpret_cast<void *>(AniWindowManager::FindWindow)},
     ani_native_function {"minimizeAllSync", "JJ:V", reinterpret_cast<void *>(AniWindowManager::MinimizeAll)},
+    ani_native_function {"minimizeAllWithExclusionSync", "JJI:V",
+        reinterpret_cast<void *>(AniWindowManager::MinimizeAllWithExclusion)},
     ani_native_function {"destroyAniExtConfig", nullptr, reinterpret_cast<void *>(AniExtensionWindowConfig::Finalizer)},
 };
 
