@@ -129,6 +129,7 @@ public:
     Rotation GetRotation() const;
     void SetRotation(Rotation rotation);
     void SetRotationAndScreenRotationOnly(Rotation rotation);
+    void SetOrientationMatchRotation(Rotation rotation, FoldDisplayMode displayMode);
     void SetScreenRequestedOrientation(Orientation orientation);
     Orientation GetScreenRequestedOrientation() const;
     void SetUpdateToInputManagerCallback(std::function<void(float)> updateToInputManagerCallback);

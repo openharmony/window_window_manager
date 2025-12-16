@@ -5556,6 +5556,13 @@ void ScreenSessionManager::UpdateScreenDirectionInfo(ScreenId screenId, const Sc
     float screenComponentRotation = directionInfo.screenRotation_;
     float rotation = directionInfo.rotation_;
     float phyRotation = directionInfo.phyRotation_;
+
+    // Rotation update flow: server → client → server, involving two state changes:
+    // 1st change: triggered on server when displayMode is modified;
+    // 2nd change: triggered by client after completing the displayMode transition;
+    // Due to unkown reason, the response to the 1st change may arrive after the 2nd,
+    // causing rotation state inconsistency. A locking mechanism is introduced here to enforce sequential updates.
+    std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
     screenSession->SetPhysicalRotation(phyRotation);
     screenSession->SetScreenComponentRotation(screenComponentRotation);
     screenSession->UpdateRotationOrientation(rotation, GetFoldDisplayMode(), bounds);
@@ -9427,6 +9434,16 @@ void ScreenSessionManager::OnFoldPropertyChange(ScreenId screenId, const ScreenP
         return;
     }
     screenSession->UpdateScbScreenPropertyToServer(midProperty);
+
+    // Temporarily set screen property for app while property change is in progress
+    // SuperFoldDisplayDevice notify app when property is ready,so no need to modify
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        Rotation rotation = Rotation::ROTATION_0;
+        screenSession->AddRotationCorrection(rotation, displayMode);
+        screenSession->SetRotationAndScreenRotationOnly(rotation);
+        screenSession->SetOrientationMatchRotation(rotation, displayMode);
+        TLOGD(WmsLogTag::DMS, "init rotation= %{public}u", rotation);
+    }
 }
 
 void ScreenSessionManager::OnPowerStatusChange(DisplayPowerEvent event, EventStatus status,
