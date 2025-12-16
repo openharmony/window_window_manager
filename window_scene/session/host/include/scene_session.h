@@ -434,7 +434,6 @@ public:
     virtual void RegisterCompatibleModeChangeCallback(CompatibleModeChangeCallback&& callback) {}
     virtual void RegisterForceSplitEnableListener(NotifyForceSplitEnableFunc&& func) {}
 
-
     /*
      * PC Window
      */
