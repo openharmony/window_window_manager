@@ -5145,6 +5145,7 @@ export function setNativeObj(nativeObject: long):void {
 
 native function getLastWindowSync(nativeObj: long, ctx: BaseContext): Window;
 native function minimizeAllSync(nativeObj: long, id: long): void;
+native function minimizeAllWithExclusionSync(nativeObj: long, displayId: long, excludeWindowId: int): void;
 native function findWindowSync(nativeObj: long, name: string): Window;
 native function onSync(nativeObj: long, type: string, callback: object): void;
 native function offSync(nativeObj: long, type: string, callback?: object): void;
@@ -5317,6 +5318,18 @@ export function minimizeAll(id: long, callback: AsyncCallback<void>): void {
     }).catch((err: NullishType) => {
         callback(err as BusinessError, undefined);
     });
+}
+
+export function minimizeAllWithExclusion(displayId: long, excludeWindowId: int): Promise<void> {
+  return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+      taskpool.execute((): void => {
+          minimizeAllWithExclusionSync(nativeObj, displayId, excludeWindowId);
+      }).then((ret: NullishType) => {
+          resolve(undefined);
+      }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+      });
+  });
 }
 
 export function getAllWindowLayoutInfo(displayId: long): Promise<Array<WindowLayoutInfo>> {
