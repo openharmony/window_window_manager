@@ -432,6 +432,8 @@ public:
     virtual void RegisterForceSplitFullScreenChangeCallback(ForceSplitFullScreenChangeCallback&& callback) {}
     virtual bool IsFullScreenInForceSplit() { return false; }
     virtual void RegisterCompatibleModeChangeCallback(CompatibleModeChangeCallback&& callback) {}
+    virtual void RegisterForceSplitEnableListener(NotifyForceSplitEnableFunc&& func) {}
+
 
     /*
      * PC Window
